@@ -62,7 +62,7 @@ import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}
 
 {{#program:filtered_structs}}
 {{! direct replacement for ._cpp_obj }}
-cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_convert_to_cpp(object inst) except*:
+cdef shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}] {{struct:name}}_convert_to_cpp(object inst) except*:
 {{^program:gen_py3_cython?}}
     {{#program:inplace_migrate?}}{{^program:auto_migrate?}}
     try:
@@ -71,14 +71,14 @@ cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_conve
         pass
 
     {{/program:auto_migrate?}}{{/program:inplace_migrate?}}
-    return make_shared[_fbthrift_cbindings.{{> types/c_struct }}](
+    return make_shared[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}](
         _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
         }}{{struct:name}}_convert_to_cpp(inst)
     )
 {{/program:gen_py3_cython?}}
 {{#program:gen_py3_cython?}}
     {{^struct:cpp_noncopyable?}}
-    return make_shared[_fbthrift_cbindings.{{> types/c_struct}}](deref(
+    return make_shared[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}](deref(
         (<_fbthrift_ctypes.{{struct:name}}?>inst).{{> types/cpp_obj}}
     ))
     {{/struct:cpp_noncopyable?}}{{#struct:cpp_noncopyable?}}
@@ -88,14 +88,14 @@ cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_conve
             Protocol.BINARY,
         )
     )
-    cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] _fbthrift__out = make_shared[_fbthrift_cbindings.{{> types/c_struct }}]()
+    cdef shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}] _fbthrift__out = make_shared[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}]()
     __cdeserialize(_fbthrift__iobuf.get(), _fbthrift__out.get(), Protocol.BINARY)
     return cmove(_fbthrift__out)
     {{/struct:cpp_noncopyable?}}
 
 {{/program:gen_py3_cython?}}
 {{! direct replacement for ._fbthrift_create }}
-cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}]& c_struct):
+cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct:self}}]& c_struct):
 {{^program:gen_py3_cython?}}
     _py_struct = _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
             }}{{struct:name}}_from_cpp(deref(const_pointer_cast(c_struct)))

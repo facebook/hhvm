@@ -41,3 +41,10 @@ in the client or server source rather than the type definition source.
 {{#if ttype.need_module_path?}}{{ttype.modulePath}}.{{/if}}{{ttype.name}}
   {{/if type.bool?}}
 {{/let partial}}
+
+
+{{! This is a template for getting the c binding name for an AST node }}
+{{#let export partial c_binding |node|}}
+{{#pragma ignore-newlines}}
+c{{node.name}}
+{{/let partial}}

@@ -28,7 +28,7 @@ cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::th
 cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_types.h"{{!
 }} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
 {{/first?}}
-    cdef cppclass {{> types/c_enum }} "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{enum:cpp_name}}":
+    cdef cppclass {{#partial types.c_binding node=enum:self}} "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{enum:cpp_name}}":
         pass
 
 {{/program:enums}}

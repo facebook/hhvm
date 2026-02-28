@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
 {{^program:inplace_migrate?}}
@@ -54,11 +55,11 @@ cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name
 ctypedef void (*__{{struct:name}}_FieldsSetterFunc)(__{{struct:name}}_FieldsSetter, object) except *
 
 cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
-    cdef {{> types/current_module_cbindings}}.{{> types/c_struct }}* _struct_cpp_obj
+    cdef {{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}* _struct_cpp_obj
     cdef cumap[__cstring_view, __{{struct:name}}_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __{{struct:name}}_FieldsSetter _fbthrift_create({{> types/current_module_cbindings}}.{{> types/c_struct }}* struct_cpp_obj)
+    cdef __{{struct:name}}_FieldsSetter _fbthrift_create({{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}* struct_cpp_obj)
     {{#struct:py3_fields}}
     {{#field:type}}
     cdef void _set_field_{{field:index}}(self, _fbthrift_value) except *

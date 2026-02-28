@@ -35,7 +35,7 @@ file.
 }}{{#value:structured?}}{{!
     }}{{#value:type.true_type}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
-        }}{{> types/current_module_cbindings}}.{{> types/c_constant }}())){{!
+        }}{{> types/current_module_cbindings}}.{{#partial types.c_binding node=constant:self}}())){{!
     }}{{/value:type.true_type}}{{!
 }}{{/value:structured?}}{{!
 }}{{#value:string?}}{{!
@@ -43,12 +43,12 @@ file.
 }}{{/value:string?}}{{!
 }}{{#value:map?}}{{!
     }}{{#value:type.true_type}}{{!
-    }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}()){{!
+    }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{#partial types.c_binding node=constant:self}}()){{!
     }}{{/value:type.true_type}}{{!
 }}{{/value:map?}}{{!
 }}{{#value:list?}}{{!
     }}{{#value:type.true_type}}{{!
-    }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}()){{!
+    }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{#partial types.c_binding node=constant:self}}()){{!
     }}{{/value:type.true_type}}{{!
 }}{{/value:list?}}{{!
 }}{{#value:enum?}}{{!

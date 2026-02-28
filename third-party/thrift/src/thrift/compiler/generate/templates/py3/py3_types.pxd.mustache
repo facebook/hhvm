@@ -66,7 +66,7 @@ cdef extern from "{{program:include_prefix}}gen-python-capi/{{program:name}}/thr
 
 
 cdef class {{struct:name}}({{> types/python_struct_class}}):
-    cdef shared_ptr[{{> types/current_module_cbindings}}.{{> types/c_struct }}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     {{^struct:union?}}
     cdef _fbthrift_types_fields.__{{struct:name}}_FieldsSetter _fields_setter
     {{#struct:py3_fields}}
@@ -95,8 +95,8 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{#struct:union?}}
 
     @staticmethod
-    cdef unique_ptr[{{> types/current_module_cbindings}}.{{> types/c_struct }}] _make_instance(
-        {{> types/current_module_cbindings}}.{{> types/c_struct }}* base_instance{{^struct:union?}},
+    cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] _make_instance(
+        {{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}* base_instance{{^struct:union?}},
         bint* __isNOTSET{{/struct:union?}}{{#struct:py3_fields}},
         {{#field:type}}{{!
             }}{{#type:cythonTypeNoneable?}}{{!
@@ -111,7 +111,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{/struct:union?}}
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{> types/c_struct }}])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}])
 
 {{/program:filtered_structs}}
 

@@ -40,7 +40,7 @@ annotation).
 }}{{#type:binary?}}string{{/type:binary?}}{{!
 }}{{#type:structured}}{{!
   }}{{#type:need_cbinding_path?}}{{type:cbinding_path}}.{{/type:need_cbinding_path?}}{{!
-  }}{{> types/c_struct }}{{!
+  }}{{#partial types.c_binding node=struct:self}}{{!
 }}{{/type:structured}}{{!
 }}{{#type:container?}}{{^type:defaultTemplate?}}{{!
   }}{{#type:need_cbinding_path?}}{{type:cbinding_path}}.{{/type:need_cbinding_path?}}{{!
@@ -57,6 +57,6 @@ annotation).
 }}]{{/type:map?}}{{!
 }}{{#type:enum}}{{!
   }}{{#type:need_cbinding_path?}}{{type:cbinding_path}}.{{/type:need_cbinding_path?}}{{!
-  }}{{> types/c_enum }}{{!
+  }}{{#partial types.c_binding node=enum:self}}{{!
 }}{{/type:enum}}{{!
 }}{{#type:void?}}cFollyUnit{{/type:void?}}

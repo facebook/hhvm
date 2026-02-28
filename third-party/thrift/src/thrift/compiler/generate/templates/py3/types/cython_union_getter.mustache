@@ -30,7 +30,7 @@ else:
 }}{{^type:container?}}{{!
   }}{{! Use an aliasing constructor since the object we're returning is still
         managed by the top-level object, possible via a unique_ptr }}
-    self.py_value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
+    self.py_value = {{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
       }}deref(deref(self.{{#partial types.cpp_obj}}).get_{{field:py_name}}()), self.{{#partial types.cpp_obj}})){{!
 }}{{/type:container?}}{{!
 }}{{/field:reference?}}{{!
@@ -74,7 +74,7 @@ else:
     }}<int>deref(self.{{#partial types.cpp_obj}}).get_{{field:py_name}}()){{!
 }}{{/type:enum}}{{!
 }}{{#type:structured?}}{{!
-}}self.py_value = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+}}self.py_value = {{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}deref(self.{{#partial types.cpp_obj}}).get_{{field:py_name}}())){{!
 }}{{/type:structured?}}{{!

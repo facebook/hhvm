@@ -34,7 +34,7 @@ file.
 }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
 }}{{#value:structured?}}{{!
     }}{{#value:type.true_type}}{{!
-    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
+    }}{{#partial types.cython_python_type type=value:type.true_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
         }}{{> types/current_module_cbindings}}.{{#partial types.c_binding node=constant:self}}())){{!
     }}{{/value:type.true_type}}{{!
 }}{{/value:structured?}}{{!

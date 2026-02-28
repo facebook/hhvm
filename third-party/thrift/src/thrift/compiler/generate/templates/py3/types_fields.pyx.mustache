@@ -103,7 +103,7 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
             {{/type:structured?}}
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
-        _fbthrift_value = <{{> types/cython_python_type}}> _fbthrift_value
+        _fbthrift_value = <{{#partial types.cython_python_type type=type:self}}> _fbthrift_value
         {{/type:integer?}}
         {{/type:enum?}}
         {{/type:container?}}

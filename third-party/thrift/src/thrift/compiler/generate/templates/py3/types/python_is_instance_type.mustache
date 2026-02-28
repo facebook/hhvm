@@ -34,7 +34,7 @@ This is for python types, suitable for isinstance check_types
 }}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
-  }}{{> types/cython_python_type}}{{!
+  }}{{#partial types.cython_python_type type=type:self}}{{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}object{{/type:void?}}{{!
 }}{{#type:enum}}{{!

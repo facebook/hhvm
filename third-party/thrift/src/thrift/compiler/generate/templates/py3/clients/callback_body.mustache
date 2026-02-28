@@ -21,7 +21,7 @@ if {{#function:exceptions}}{{!
     {{#field:type}}
     try:
         exc = {{^program:inplace_migrate?}}{{!
-}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+}}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
             }}try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception()))
 {{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{#type:structured}}{{!
         }}{{#partial types.python_type type=type:self}}.from_python({{!

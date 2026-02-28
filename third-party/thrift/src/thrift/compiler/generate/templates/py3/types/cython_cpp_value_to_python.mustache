@@ -38,7 +38,7 @@ to be converted from unicode to binary representation.
 }}{{#type:binary?}}{{field:py_name}}{{/type:binary?}}{{!
 }}{{#type:structured}}{{!
   }}{{^program:inplace_migrate?}}{{!
-    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+    }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
     }}make_shared[{{> types/cython_cpp_type}}]({{field:py_name}})){{!
   }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
     }}{{#partial types.python_type type=type:self}}.from_python({{!

@@ -50,7 +50,7 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
             raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
-        item = <{{> types/cython_python_type}}> item
+        item = <{{#partial types.cython_python_type type=type:self}}> item
         {{/type:integer?}}
         {{/type:container?}}
         c_inst.push_back({{> types/cython_python_to_cpp_item}})
@@ -68,7 +68,7 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
             raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
-        c_item = <{{> types/cython_python_type}}> item
+        c_item = <{{#partial types.cython_python_type type=type:self}}> item
         {{/type:integer?}}
         {{/type:container?}}
         {{^type:integer?}}
@@ -91,7 +91,7 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
             raise TypeError(f"{key!r} is not of type {{> types/pep484_type}}")
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
-        c_key = <{{> types/cython_python_type}}> key
+        c_key = <{{#partial types.cython_python_type type=type:self}}> key
         {{/type:integer?}}
         {{/type:container?}}
         {{^type:integer?}}
@@ -110,7 +110,7 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
             raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
         {{#type:integer?}}{{!
         }}{{! inject cython int overflow checks }}
-        item = <{{> types/cython_python_type}}> item
+        item = <{{#partial types.cython_python_type type=type:self}}> item
         {{/type:integer?}}
         {{/type:container?}}
         {{/type:value_type}}

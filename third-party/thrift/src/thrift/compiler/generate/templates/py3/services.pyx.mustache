@@ -129,7 +129,7 @@ cdef class ServerPublisher_{{> types/cython_cpp_type_ident}}(ServerPublisher):
 
     # Calling this send instead of the wrapped method name of next because next is
     # a python keyword and makes the linter complain
-    def send(ServerPublisher self, {{> types/cython_python_type}} item):
+    def send(ServerPublisher self, {{#partial types.cython_python_type type=type:self}} item):
         deref(self.cPublisher).next(<{{> types/cython_cpp_type}}?>{{> types/cython_python_to_cpp_item}})
 
     @staticmethod
@@ -175,7 +175,7 @@ async def runGenerator_{{service:name}}_{{function:name}}(object generator, Prom
         }}{{#program:inplace_migrate?}}{{#type:structured}}{{!
           }}{{type:capi_converter_path}}.{{struct:name}}_convert_to_cpp(ex._to_python()){{!
         }}{{/type:structured}}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
-          }}deref((<{{> types/cython_python_type}}> ex).{{#partial types.cpp_obj}}){{!
+          }}deref((<{{#partial types.cython_python_type type=type:self}}> ex).{{#partial types.cpp_obj}}){{!
         }}{{/program:inplace_migrate?}})
     {{/field:type}}
     {{/function:stream_exceptions}}

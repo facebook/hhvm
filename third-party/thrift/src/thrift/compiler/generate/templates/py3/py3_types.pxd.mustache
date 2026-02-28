@@ -75,9 +75,9 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{!Memoized Python wrappers of struct fields, created lazily}}
     {{#struct:py3_fields}}
     {{#field:type}}{{#type:structured}}
-    cdef {{> types/cython_python_type}} __fbthrift_cached_{{field:py_name}}
+    cdef {{#partial types.cython_python_type type=type:self}} __fbthrift_cached_{{field:py_name}}
     {{/type:structured}}{{#type:container?}}
-    cdef {{> types/cython_python_type}} __fbthrift_cached_{{field:py_name}}
+    cdef {{#partial types.cython_python_type type=type:self}} __fbthrift_cached_{{field:py_name}}
     {{/type:container?}}{{#type:enum?}}
     cdef object __fbthrift_cached_{{field:py_name}}
     {{/type:enum?}}{{#type:iobuf?}}
@@ -100,7 +100,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
         bint* __isNOTSET{{/struct:union?}}{{#struct:py3_fields}},
         {{#field:type}}{{!
             }}{{#type:cythonTypeNoneable?}}{{!
-                }}{{> types/cython_python_type}} {{!
+                }}{{#partial types.cython_python_type type=type:self}} {{!
             }}{{/type:cythonTypeNoneable?}}{{!
             }}{{^type:cythonTypeNoneable?}}{{!
                 }}object {{!
@@ -148,7 +148,7 @@ cdef class ServerStream__{{type:flat_name}}(ServerStream):
 
 cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(ResponseAndClientBufferedStream):
     cdef ClientBufferedStream__{{#function:stream_elem_type}}{{type:flat_name}}{{/function:stream_elem_type}} _stream
-    cdef {{#function:stream_first_response_type}}{{> types/cython_python_type}}{{/function:stream_first_response_type}} _response
+    cdef {{#function:stream_first_response_type}}{{#partial types.cython_python_type type=type:self}}{{/function:stream_first_response_type}} _response
 
     @staticmethod
     cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!

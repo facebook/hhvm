@@ -43,7 +43,7 @@ Used to convert C++ `cval` to python object.
     }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
     }}__deref_const[{{> types/cython_cpp_type }}](cval))){{!
   }}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
-    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval)){{!
+    }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval)){{!
   }}{{/program:inplace_migrate?}}{{!
 }}{{/type:structured}}{{!
 }}{{#type:container?}}{{#partial types.container_from_cpp type=type:self}}(cval){{/type:container?}}{{!

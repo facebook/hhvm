@@ -40,7 +40,7 @@ to a python type.
 }}{{#type:string?}}result.value().data().decode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}result.value(){{/type:binary?}}{{!
 }}{{#type:structured}}{{^program:inplace_migrate?}}{{!
-  }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+  }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}cmove(result.value()))){{!
 }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!

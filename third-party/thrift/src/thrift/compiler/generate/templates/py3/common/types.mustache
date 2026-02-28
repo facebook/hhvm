@@ -73,3 +73,34 @@ __from_cpp
 {{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.flat_name}}
 __make_instance
 {{/let partial}}
+
+{{!
+This is used to declare a cython type that is referring to a Python value (ie,
+something that will be returned to external Python code or just used in Cython).
+
+Structs and enums will be namespaced appropriately if they are either defined
+in a different thrift file, or defined in the same thrift file but this is
+in the client or server source rather than the type definition source.
+}}
+{{#let export partial cython_python_type |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.iobufWrapper?}}_fbthrift_iobuf.IOBuf
+{{#else if type.bool?}}pbool
+{{#else if type.byte?}}cint8_t
+{{#else if type.i16?}}cint16_t
+{{#else if type.i32?}}cint32_t
+{{#else if type.i64?}}cint64_t
+{{#else if type.double?}}double
+{{#else if type.float?}}float
+{{#else if type.string?}}str
+{{#else if type.binary?}}bytes
+{{#else if (or type.container? type.void? type.enum?)}}object
+{{#else if type.structured?}}
+  {{#let ttype=type.true_type}}
+  {{#if ttype.program.inplace_migrate?}}
+object
+  {{#else}}
+{{#if ttype.need_module_path?}}{{ttype.modulePath}}.{{/if}}{{ttype.name}}
+  {{/if ttype.program.inplace_migrate?}}
+{{/if type.iobufWrapper?}}
+{{/let partial}}

@@ -154,7 +154,7 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
     def {{function:name}}(
             {{service:name}} self{{#function:args}},
             {{#field:type}}{{!
-                }}{{#type:hasCythonType?}}{{^type:integer?}}{{> types/cython_python_type}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
+                }}{{#type:hasCythonType?}}{{^type:integer?}}{{#partial types.cython_python_type type=type:self}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
                 }}{{field:py_name}}{{#type:integer?}} not None{{/type:integer?}}{{^type:number?}} not None{{/type:number?}}{{!
             }}{{/field:type}}{{/function:args}},
             *,
@@ -173,7 +173,7 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
             raise TypeError(f'{{field:py_name}} is not a {int !r}.')
         else:
             {{! inject cython int Overflow checks }}
-            {{field:py_name}} = <{{> types/cython_python_type}}> {{field:py_name}}
+            {{field:py_name}} = <{{#partial types.cython_python_type type=type:self}}> {{field:py_name}}
         {{/type:integer?}}
         {{/field:type}}
         {{/function:args}}
@@ -235,7 +235,7 @@ cdef class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#servi
     def {{function:name}}(
             {{parent_service_name}}_{{service:name}} self{{#function:args}},
             {{#field:type}}{{!
-                }}{{#type:hasCythonType?}}{{^type:integer?}}{{> types/cython_python_type}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
+                }}{{#type:hasCythonType?}}{{^type:integer?}}{{#partial types.cython_python_type type=type:self}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
                 }}{{field:py_name}}{{#type:integer?}} not None{{/type:integer?}}{{^type:number?}} not None{{/type:number?}}{{!
             }}{{/field:type}}{{/function:args}},
             *,
@@ -254,7 +254,7 @@ cdef class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#servi
             raise TypeError(f'{{field:py_name}} is not a {int !r}.')
         else:
             {{! inject cython int Overflow checks }}
-            {{field:py_name}} = <{{> types/cython_python_type}}> {{field:py_name}}
+            {{field:py_name}} = <{{#partial types.cython_python_type type=type:self}}> {{field:py_name}}
         {{/type:integer?}}
         {{/field:type}}
         {{/function:args}}

@@ -29,13 +29,13 @@ on a union.
   }}{{#field:unique_ref?}}{{!
     For unique references, we just make a copy of the target object - it's not
     especially efficient but there isn't much else we can do from a shared ptr
-    }}{{> types/cython_cpp_type}}(deref((<{{> types/cython_python_type}}?>{{field:py_name}}).{{#partial types.cpp_obj}})){{!
+    }}{{> types/cython_cpp_type}}(deref((<{{#partial types.cython_python_type type=type:self}}?>{{field:py_name}}).{{#partial types.cpp_obj}})){{!
   }}{{/field:unique_ref?}}{{!
   }}{{#field:shared_ref?}}{{!
-    }}deref((<{{> types/cython_python_type}}?>{{field:py_name}}).{{#partial types.cpp_obj}}){{!
+    }}deref((<{{#partial types.cython_python_type type=type:self}}?>{{field:py_name}}).{{#partial types.cpp_obj}}){{!
   }}{{/field:shared_ref?}}{{!
   }}{{#field:shared_const_ref?}}{{!
-    }}deref((<{{> types/cython_python_type}}?>{{field:py_name}}).{{#partial types.cpp_obj}}){{!
+    }}deref((<{{#partial types.cython_python_type type=type:self}}?>{{field:py_name}}).{{#partial types.cpp_obj}}){{!
   }}{{/field:shared_const_ref?}}{{!
   }}){{!
 }}{{/type:container?}}{{!
@@ -78,7 +78,7 @@ on a union.
 }}{{/type:enum?}}{{!
 }}{{#type:structured?}}{{!
   }}deref(c_inst).set_{{field:py_name}}({{!
-    }}deref((<{{> types/cython_python_type }}?> {{field:py_name}}).{{#partial types.cpp_obj}})){{!
+    }}deref((<{{#partial types.cython_python_type type=type:self}}?> {{field:py_name}}).{{#partial types.cpp_obj}})){{!
 }}{{/type:structured?}}{{!
 }}{{#type:container?}}{{!
   }}deref(c_inst).set_{{field:py_name}}({{!

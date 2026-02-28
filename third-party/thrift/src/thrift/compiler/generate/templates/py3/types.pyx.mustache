@@ -271,7 +271,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         self, *{{#struct:py3_fields}},
         {{#field:type}}{{^type:structured?}}{{!
             }}{{#type:cythonTypeNoneable?}}{{!
-                }}{{> types/cython_python_type}} {{!
+                }}{{#partial types.cython_python_type type=type:self}} {{!
             }}{{/type:cythonTypeNoneable?}}{{!
         }}{{/type:structured?}}{{/field:type}}{{!
             }}{{field:py_name}}=None{{!
@@ -290,7 +290,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         {{/type:cythonTypeNoneable?}}
         {{#type:integer?}}
             {{! inject cython int overflow checks }}
-            {{field:py_name}} = <{{> types/cython_python_type}}> {{field:py_name}}
+            {{field:py_name}} = <{{#partial types.cython_python_type type=type:self}}> {{field:py_name}}
 
         {{/type:integer?}}
         {{#type:structured?}}
@@ -323,14 +323,14 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
                 try:
                     {{#type:integer?}}
                     {{! Cython does OverflowError checking for us }}
-                    <{{> types/cython_python_type}}> value
+                    <{{#partial types.cython_python_type type=type:self}}> value
                     {{/type:integer?}}
                     {{#type:float?}}
                     {{! This will probably fail most of the time
                         if it does then when we try again to use floating point
                         below it will just accept the loss of precision,
                         or just maybe there is a double field comming up }}
-                    if <{{> types/cython_python_type}}>value != value:
+                    if <{{#partial types.cython_python_type type=type:self}}>value != value:
                         raise OverflowError
                     {{/type:float?}}
                     return {{struct:name}}({{field:py_name}}=value)
@@ -347,7 +347,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         {{#type:floating_point?}}
         if isinstance(value, {{> types/python_is_instance_type}}):
             try:
-                <{{> types/cython_python_type}}> value
+                <{{#partial types.cython_python_type type=type:self}}> value
                 return {{struct:name}}({{field:py_name}}=value)
             except OverflowError:
                 pass
@@ -361,7 +361,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         {{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}* base_instance{{#struct:py3_fields}},
         {{#field:type}}{{!
             }}{{#type:cythonTypeNoneable?}}{{!
-                }}{{> types/cython_python_type}} {{!
+                }}{{#partial types.cython_python_type type=type:self}} {{!
             }}{{/type:cythonTypeNoneable?}}{{!
             }}{{^type:cythonTypeNoneable?}}{{!
                 }}object {{!
@@ -591,7 +591,7 @@ cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
                 }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
                 }}thrift.py3.exceptions.unwrap_exception[{{> types/cython_cpp_type}}](result.exception()))){{!
             }}{{/type:structured}}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
-                }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+                }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
                 }}thrift.py3.exceptions.try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception())){{!
             }}{{/program:inplace_migrate?}}{{!
             }})

@@ -52,7 +52,7 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
         }}deref(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}_ref())){{!
       }}{{/type:container?}}{{!
       }}{{^type:container?}}{{!
-      }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
+      }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
         }}deref(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}_ref()), self.{{#partial types.cpp_obj}})){{!
       }}{{/type:container?}}
 return self.__fbthrift_cached_{{field:py_name}}{{!
@@ -76,7 +76,7 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
         }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_ref}}){{!
       }}{{/type:container?}}{{!
       }}{{^type:enum?}}{{^type:container?}}{{!
-        }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
+        }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
       }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_ref}}, {{!
       }}self.{{#partial types.cpp_obj}}{{!
       }})){{/type:container?}}{{/type:enum?}}

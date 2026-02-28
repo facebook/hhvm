@@ -154,7 +154,7 @@ bail:
 void create_state_dir(const char* state_dir, std::error_code& ec) {
   ec.clear();
   // folly::fs::create_directories errors in the case where the state_dir is a
-  // symlink, so explictly check for the existence first and gate the creation
+  // symlink, so explicitly check for the existence first and gate the creation
   // on this check.
   auto exists = folly::fs::exists(state_dir, ec);
   if (ec) {
@@ -181,6 +181,31 @@ void create_state_dir(const char* state_dir, std::error_code& ec) {
 
   // Verify the permissions on both pre-existing and newly created directories
   verify_dir_ownership(state_dir);
+}
+
+void create_log_dir(const char* log_dir, std::error_code& ec) {
+  ec.clear();
+  // Handle symlinks: check existence first, same pattern as create_state_dir
+  // (folly::fs::create_directories errors on symlinks)
+  auto exists = folly::fs::exists(log_dir, ec);
+  if (ec) {
+    return;
+  }
+
+  if (!exists) {
+    // Only create the leaf directory — the parent (log_dir config value)
+    // must already exist (e.g. set up by the container runtime or system).
+    // Using create_directory (not create_directories) so that a misconfigured
+    // log_dir path fails clearly instead of silently creating a deep tree.
+    folly::fs::create_directory(log_dir, ec);
+    if (ec) {
+      return;
+    }
+
+#ifndef _WIN32
+    chmod(log_dir, 0755);
+#endif
+  }
 }
 
 void compute_file_name(

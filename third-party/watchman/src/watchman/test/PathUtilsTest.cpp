@@ -229,6 +229,101 @@ TEST_F(PathUtilsTest, computeFileNameRelativePathNoRequireAbsolute) {
   EXPECT_EQ(result, "relative/path");
 }
 
+// create_log_dir tests — exercises the log-specific directory creation
+// that skips verify_dir_ownership (unlike create_state_dir)
+
+TEST_F(PathUtilsTest, createLogDirCreatesNewDirectory) {
+  // Parent must exist (e.g. set up by container runtime); only leaf is created
+  auto parent = getTempPath() + "/watchman_logs";
+  folly::fs::create_directories(parent);
+  auto log_dir = parent + "/testuser";
+  EXPECT_FALSE(folly::fs::exists(log_dir));
+
+  std::error_code ec;
+  create_log_dir(log_dir.c_str(), ec);
+
+  EXPECT_FALSE(ec) << "create_log_dir should succeed: " << ec.message();
+  EXPECT_TRUE(folly::fs::exists(log_dir));
+  EXPECT_TRUE(folly::fs::is_directory(log_dir));
+
+#ifndef _WIN32
+  struct stat st{};
+  ASSERT_EQ(stat(log_dir.c_str(), &st), 0);
+  // Log dirs get 0755, not 0700 like state dirs
+  mode_t perms = st.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);
+  EXPECT_EQ(perms, static_cast<mode_t>(0755))
+      << fmt::format("Expected 0755 but got 0{:o}", perms);
+#endif
+}
+
+TEST_F(PathUtilsTest, createLogDirFailsWhenParentMissing) {
+  // Parent directory must exist — create_log_dir only creates the leaf.
+  // A missing parent indicates a misconfigured log_dir and should fail
+  // clearly rather than silently creating a deep tree.
+  auto log_dir = getTempPath() + "/nonexistent_parent/watchman_logs";
+  EXPECT_FALSE(folly::fs::exists(getTempPath() + "/nonexistent_parent"));
+
+  std::error_code ec;
+  create_log_dir(log_dir.c_str(), ec);
+
+  EXPECT_TRUE(ec) << "create_log_dir should fail when parent doesn't exist";
+  EXPECT_FALSE(folly::fs::exists(log_dir));
+}
+
+TEST_F(PathUtilsTest, createLogDirHandlesExistingDirectory) {
+  // Pre-existing directory (e.g. container runtime pre-created it)
+  auto log_dir = getTempPath() + "/watchman_logs";
+  folly::fs::create_directories(log_dir);
+  ASSERT_TRUE(folly::fs::exists(log_dir));
+
+  std::error_code ec;
+  create_log_dir(log_dir.c_str(), ec);
+
+  // Should succeed without error even though dir already exists
+  EXPECT_FALSE(ec) << "create_log_dir should handle existing dir: "
+                   << ec.message();
+  EXPECT_TRUE(folly::fs::exists(log_dir));
+}
+
+#ifndef _WIN32
+TEST_F(PathUtilsTest, createLogDirHandlesSymlinkToExistingDirectory) {
+  // Symlink to an existing directory should not cause errors
+  auto actual_dir = getTempPath() + "/watchman_logs_actual";
+  folly::fs::create_directories(actual_dir);
+  ASSERT_TRUE(folly::fs::exists(actual_dir));
+
+  auto log_dir = getTempPath() + "/watchman_logs";
+  folly::fs::create_symlink(actual_dir, log_dir);
+  ASSERT_TRUE(folly::fs::is_symlink(log_dir));
+
+  std::error_code ec;
+  create_log_dir(log_dir.c_str(), ec);
+
+  EXPECT_FALSE(ec) << "create_log_dir should handle symlinks: " << ec.message();
+  EXPECT_TRUE(folly::fs::exists(log_dir));
+}
+
+TEST_F(PathUtilsTest, createLogDirDoesNotExitOnDifferentOwnership) {
+  // Key difference from create_state_dir: create_log_dir must not call
+  // exit(1) when the directory has different ownership or permissions.
+  // In containers, the parent may be owned by root.
+  // We verify this by creating a dir with permissive mode (which would
+  // fail verify_dir_ownership's 0022 check) and confirming create_log_dir
+  // succeeds.
+  auto log_dir = getTempPath() + "/watchman_logs_permissive";
+  folly::fs::create_directories(log_dir);
+  chmod(log_dir.c_str(), 0777);
+
+  std::error_code ec;
+  create_log_dir(log_dir.c_str(), ec);
+
+  // create_log_dir should not exit or error — it doesn't check ownership
+  EXPECT_FALSE(ec) << "create_log_dir should not fail on permissive dir: "
+                   << ec.message();
+  EXPECT_TRUE(folly::fs::exists(log_dir));
+}
+#endif
+
 TEST_F(PathUtilsTest, computeFileNameDifferentSuffixes) {
   auto state_dir = getTempPath() + "/watchman_state";
   setWatchmanStateDir(state_dir);

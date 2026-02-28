@@ -8,6 +8,7 @@
 #pragma once
 
 #include <string>
+#include <system_error>
 
 namespace watchman {
 
@@ -30,4 +31,12 @@ void compute_file_name(
     const char* suffix,
     const char* what,
     bool require_absolute = true);
+
+/**
+ * Creates the given log directory. The parent directory must already exist;
+ * only the leaf directory is created. Unlike create_state_dir, this does not
+ * verify ownership or apply socket-specific permissions, making it suitable
+ * for log directories that may be pre-created by container runtimes.
+ */
+void create_log_dir(const char* log_dir, std::error_code& ec);
 } // namespace watchman

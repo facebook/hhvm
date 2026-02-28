@@ -698,6 +698,43 @@ static void setup_sock_name() {
 
   watchman::compute_file_name(
       flags.watchman_state_file, user, "state", "statefile");
+
+  // Log file precedence (highest to lowest):
+  // 1. --logfile CLI flag (log_name already set before this function)
+  // 2. "log_dir" config key -> <log_dir>/<user>/log
+  // 3. Default: <state_dir>/log (handled by compute_file_name below)
+  if (logging::log_name.empty()) {
+    const char* log_dir = cfg_get_string("log_dir", nullptr);
+    if (log_dir) {
+      if (log_dir[0] != '/'
+#ifdef _WIN32
+          && !(log_dir[0] && log_dir[1] == ':')
+#endif
+      ) {
+        log(ERR,
+            "log_dir must be an absolute path but '",
+            log_dir,
+            "' was provided.\n");
+        exit(1);
+      }
+      auto log_directory = fmt::format("{}/{}", log_dir, user);
+      std::error_code ec;
+      watchman::create_log_dir(log_directory.c_str(), ec);
+      if (ec) {
+        logf(
+            ERR,
+            "failed to create log directory {}: {}\n",
+            log_directory,
+            ec.message());
+        exit(1);
+      }
+      logging::log_name = fmt::format("{}/log", log_directory);
+    }
+  }
+
+  // If log_name is still empty, compute_file_name populates it with
+  // <state_dir>/log. If already set (by --logfile or log_dir above),
+  // it just validates the path is absolute.
   watchman::compute_file_name(
       logging::log_name,
       user,

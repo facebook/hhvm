@@ -1252,7 +1252,9 @@ void Vgen::emit(const trap& i) {
     env.meta.trapFixups.emplace_back(a->frontier(), i.fix);
     env.record_inline_stack(a->frontier());
   }
-  a->Brk(1);
+  // UDF #1 — permanently undefined instruction that raises SIGILL, matching
+  // x86_64's ud2 behavior. TODO: switch to a->udf(1) once vixl is updated.
+  a->dc32(1);
 }
 
 void Vgen::emit(const unpcklpd& i) {

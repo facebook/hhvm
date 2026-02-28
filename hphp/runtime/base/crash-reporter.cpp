@@ -45,9 +45,7 @@
 
 #include <fcntl.h>
 #include <signal.h>
-#ifdef __x86_64__
 #include <ucontext.h>
-#endif
 
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Stdio.h>
@@ -147,8 +145,12 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
 #ifdef __x86_64__
   static uintptr_t sig_rbp = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RBP];
   static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RIP];
+#elif defined(__aarch64__)
+  static uintptr_t sig_rbp = ((ucontext_t*) args)->uc_mcontext.regs[29];
+  static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.pc;
 #else
   static uintptr_t sig_rbp = 0;
+  static uintptr_t sig_rip = 0;
 #endif
 
   switch (s_crash_report_stage) {
@@ -322,11 +324,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
           auto const frame = BTFrame::regular(ar, kInvalidOffset);
           auto const addr = [&] () -> jit::CTCA {
             if (sig != SIGILL && sig != SIGSEGV) return (jit::CTCA) sig_addr;
-#if defined(__x86_64__)
             return (jit::CTCA) sig_rip;
-#else
-            return (jit::CTCA) 0;
-#endif
           }();
           auto const trace = createCrashBacktrace(frame, (jit::CTCA) addr);
 

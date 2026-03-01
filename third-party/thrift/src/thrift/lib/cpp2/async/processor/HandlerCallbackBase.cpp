@@ -186,23 +186,29 @@ void HandlerCallbackBase::sendReply(
   stream.setInteraction(std::move(interaction_));
   stream.setContextStack(std::move(this->ctx_));
 
-  // Create and set interceptor context if service interceptors are enabled
-  if (shouldProcessServiceInterceptorsOnRequest()) {
-    const auto* server =
-        reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
-    if (server && !server->getServiceInterceptors().empty()) {
-      auto interceptorContext =
-          std::make_shared<detail::StreamInterceptorContext>(
-              detail::generateStreamId(),
-              server->getServiceInterceptors(),
-              server->getInterceptorMetricCallback(),
-              std::string(methodNameInfo_.serviceName),
-              std::string(methodNameInfo_.methodName));
-      // Move request storage into interceptor context before request is
-      // destroyed. This ensures the storage remains valid for async stream
-      // interceptor callbacks.
-      interceptorContext->moveRequestStorage(reqCtx_);
-      stream.setInterceptorContext(std::move(interceptorContext));
+  // Create and set interceptor context if any interceptor supports streams.
+  // We inline the null-pointer chain (instead of calling
+  // shouldProcessServiceInterceptorsOnRequest + re-traversing) to avoid
+  // walking reqCtx_ -> connCtx -> workerCtx -> server twice.
+  if (reqCtx_ != nullptr) {
+    if (auto* connCtx = reqCtx_->getConnectionContext()) {
+      if (auto* workerCtx = connCtx->getWorkerContext()) {
+        if (auto* server = workerCtx->getServerContext();
+            server && server->hasStreamInterceptors()) {
+          auto interceptorContext =
+              std::make_shared<detail::StreamInterceptorContext>(
+                  detail::generateStreamId(),
+                  server->getServiceInterceptors(),
+                  server->getInterceptorMetricCallback(),
+                  std::string(methodNameInfo_.serviceName),
+                  std::string(methodNameInfo_.methodName));
+          // Move request storage into interceptor context before request is
+          // destroyed. This ensures the storage remains valid for async stream
+          // interceptor callbacks.
+          interceptorContext->moveRequestStorage(reqCtx_);
+          stream.setInterceptorContext(std::move(interceptorContext));
+        }
+      }
     }
   }
 

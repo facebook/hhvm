@@ -234,6 +234,15 @@ class ServiceInterceptorBase {
     uint64_t totalPayloads = 0;
   };
 
+  /**
+   * Returns true if this interceptor overrides any streaming methods
+   * (onStreamBegin, onStreamPayload, onStreamEnd). Interceptors that
+   * override streaming methods must also override this to return true.
+   * This enables an optimization to skip StreamInterceptorContext
+   * creation when no interceptors need stream interception.
+   */
+  virtual bool supportsStreamInterception() const { return false; }
+
   // ============ Streaming Interceptor Methods ============
   // These methods have default no-op implementations for backward
   // compatibility with existing interceptors that don't need streaming.

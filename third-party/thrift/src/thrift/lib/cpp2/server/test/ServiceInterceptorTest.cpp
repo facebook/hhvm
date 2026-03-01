@@ -1444,6 +1444,8 @@ CO_TEST_P(ServiceInterceptorTestP, StreamingInterceptorLifecycle) {
 
     std::string getName() const override { return name_; }
 
+    bool supportsStreamInterception() const override { return true; }
+
     folly::coro::Task<std::optional<RequestState>> onRequest(
         ConnectionState*, RequestInfo) override {
       // Initialize state that will be accessible during streaming
@@ -1567,6 +1569,8 @@ CO_TEST_P(
 
     std::string getName() const override { return name_; }
 
+    bool supportsStreamInterception() const override { return true; }
+
     folly::coro::Task<void> onStreamBegin(RequestState*, StreamInfo) override {
       callOrder.push_back(name_ + ":begin");
       co_return;
@@ -1666,13 +1670,12 @@ CO_TEST_P(ServiceInterceptorTestP, StreamingInterceptorMetrics) {
             interceptorMetricCallback);
       });
 
-  // Expect stream metrics to be called
-  EXPECT_CALL(*interceptorMetricCallback, onStreamBeginComplete(_, _))
-      .Times(testing::AtLeast(1));
+  // Stream metrics should NOT be called because SimpleStreamInterceptor
+  // does not override supportsStreamInterception() to return true
+  EXPECT_CALL(*interceptorMetricCallback, onStreamBeginComplete(_, _)).Times(0);
   EXPECT_CALL(*interceptorMetricCallback, onStreamPayloadComplete(_, _))
-      .Times(testing::AtLeast(1));
-  EXPECT_CALL(*interceptorMetricCallback, onStreamEndComplete(_, _))
-      .Times(testing::AtLeast(1));
+      .Times(0);
+  EXPECT_CALL(*interceptorMetricCallback, onStreamEndComplete(_, _)).Times(0);
 
   // Also expect request/response metrics
   EXPECT_CALL(*interceptorMetricCallback, onRequestComplete(_, _))
@@ -1694,11 +1697,10 @@ CO_TEST_P(ServiceInterceptorTestP, StreamingInterceptorMetrics) {
   EXPECT_CALL(*interceptorMetricCallback, onResponseTotalComplete(_))
       .Times(testing::AtLeast(1));
   EXPECT_CALL(*interceptorMetricCallback, onStreamBeginTotalComplete(_))
-      .Times(testing::AtLeast(1));
+      .Times(0);
   EXPECT_CALL(*interceptorMetricCallback, onStreamPayloadTotalComplete(_))
-      .Times(testing::AtLeast(1));
-  EXPECT_CALL(*interceptorMetricCallback, onStreamEndTotalComplete(_))
-      .Times(testing::AtLeast(1));
+      .Times(0);
+  EXPECT_CALL(*interceptorMetricCallback, onStreamEndTotalComplete(_)).Times(0);
   EXPECT_CALL(*interceptorMetricCallback, onConnectionAttemptedTotalComplete(_))
       .Times(testing::AnyNumber());
   EXPECT_CALL(*interceptorMetricCallback, onConnectionTotalComplete(_))

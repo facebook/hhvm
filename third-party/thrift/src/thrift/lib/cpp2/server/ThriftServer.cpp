@@ -16,6 +16,8 @@
 
 #include <signal.h>
 
+#include <algorithm>
+
 #include <folly/io/async/AsyncServerSocket.h>
 #include <thrift/lib/cpp2/server/IOUringUtil.h>
 
@@ -2698,6 +2700,10 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
   }
   result.coalescedServiceInterceptors =
       std::move(serviceInterceptorsCollector).coalesce();
+  result.hasStreamInterceptors = std::any_of(
+      result.coalescedServiceInterceptors.begin(),
+      result.coalescedServiceInterceptors.end(),
+      [](const auto& i) { return i->supportsStreamInterception(); });
 
   return result;
 }

@@ -250,6 +250,13 @@ class ServerConfigs {
     return *kEmpty;
   }
 
+  /**
+   * Returns true if any registered service interceptor supports stream
+   * interception. Used to skip StreamInterceptorContext creation when
+   * no interceptors need it.
+   */
+  virtual bool hasStreamInterceptors() const { return false; }
+
   virtual InterceptorMetricCallback& getInterceptorMetricCallback() const = 0;
 
   virtual server::DecoratorDataPerRequestBlueprint&

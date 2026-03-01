@@ -2184,6 +2184,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         coalescedLegacyServerEventHandlers;
     std::vector<std::shared_ptr<ServiceInterceptorBase>>
         coalescedServiceInterceptors;
+    bool hasStreamInterceptors = false;
   };
   static ProcessedModuleSet processModulesSpecification(ModulesSpecification&&);
 
@@ -2998,6 +2999,13 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         std::vector<std::shared_ptr<ServiceInterceptorBase>>>
         kEmpty;
     return kEmpty;
+  }
+
+  bool hasStreamInterceptors() const override {
+    if (auto* description = processedServiceDescription_.get()) {
+      return description->modules.hasStreamInterceptors;
+    }
+    return false;
   }
 
   /**

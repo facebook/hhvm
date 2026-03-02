@@ -62,6 +62,7 @@ DebugInfo::DebugInfo() {
     // indirectly through ROAR.
     if (!use_roar) {
       m_perfMap = fopen(m_perfMapName.c_str(), "w");
+      m_perfMapEnabled = m_perfMap != nullptr;
     }
   }
   if (Cfg::Eval::PerfJitDump) {
@@ -173,7 +174,7 @@ int __roar_api_write_pid_map(uint64_t address, uint64_t size, const char* name);
 void DebugInfo::writeToPidMap(uint64_t start, uint64_t size, const char* name) {
   if (use_roar) {
     __roar_api_write_pid_map(start, size, name);
-  } else {
+  } else if (m_perfMapEnabled) {
     fprintf(m_perfMap, "%lx %lx %s\n", start, size, name);
     fflush(m_perfMap);
   }

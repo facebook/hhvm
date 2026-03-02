@@ -682,12 +682,3 @@ func init() {
     thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/EmptyStruct", premadeCodecTypeSpec_module_EmptyStruct)
     thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/TestStruct", premadeCodecTypeSpec_module_TestStruct)
 }
-
-// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
-func RegisterTypes(registry interface {
-  RegisterType(name string, initializer func() any)
-}) {
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/EmptyStruct", func() any { return NewEmptyStruct() })
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values_rectification_after/TestStruct", func() any { return NewTestStruct() })
-
-}

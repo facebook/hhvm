@@ -634,4 +634,3 @@ func (x *respMyServiceHasArgDocs) setDefaults() *respMyServiceHasArgDocs {
 
 func init() {
 }
-

@@ -973,19 +973,3 @@ func init() {
     thrift.InternalRegisterType("test.dev/fixtures/enums/MyBitmaskEnum1", premadeCodecTypeSpec_module_MyBitmaskEnum1)
     thrift.InternalRegisterType("test.dev/fixtures/enums/MyBitmaskEnum2", premadeCodecTypeSpec_module_MyBitmaskEnum2)
 }
-
-// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
-func RegisterTypes(registry interface {
-  RegisterType(name string, initializer func() any)
-}) {
-    registry.RegisterType("test.dev/fixtures/enums/SomeStruct", func() any { return NewSomeStruct() })
-    registry.RegisterType("test.dev/fixtures/enums/MyStruct", func() any { return NewMyStruct() })
-
-    registry.RegisterType("test.dev/fixtures/enums/Metasyntactic", func() any { return Metasyntactic(0) })
-    registry.RegisterType("test.dev/fixtures/enums/MyEnum1", func() any { return MyEnum1(0) })
-    registry.RegisterType("test.dev/fixtures/enums/MyEnum2", func() any { return MyEnum2(0) })
-    registry.RegisterType("test.dev/fixtures/enums/MyEnum3", func() any { return MyEnum3(0) })
-    registry.RegisterType("test.dev/fixtures/enums/MyEnum4", func() any { return MyEnum4(0) })
-    registry.RegisterType("test.dev/fixtures/enums/MyBitmaskEnum1", func() any { return MyBitmaskEnum1(0) })
-    registry.RegisterType("test.dev/fixtures/enums/MyBitmaskEnum2", func() any { return MyBitmaskEnum2(0) })
-}

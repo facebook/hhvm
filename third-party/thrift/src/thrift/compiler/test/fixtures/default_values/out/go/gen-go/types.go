@@ -1927,15 +1927,3 @@ func init() {
     thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCustomDefaultValues", premadeCodecTypeSpec_module_StructWithCustomDefaultValues)
     thrift.InternalRegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCollectionDefaultValues", premadeCodecTypeSpec_module_StructWithCollectionDefaultValues)
 }
-
-// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
-func RegisterTypes(registry interface {
-  RegisterType(name string, initializer func() any)
-}) {
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/TrivialStruct", func() any { return NewTrivialStruct() })
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/TrivialStructWithDefault", func() any { return NewTrivialStructWithDefault() })
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithNoCustomDefaultValues", func() any { return NewStructWithNoCustomDefaultValues() })
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCustomDefaultValues", func() any { return NewStructWithCustomDefaultValues() })
-    registry.RegisterType("facebook.com/thrift/compiler/test/fixtures/default_values/StructWithCollectionDefaultValues", func() any { return NewStructWithCollectionDefaultValues() })
-
-}

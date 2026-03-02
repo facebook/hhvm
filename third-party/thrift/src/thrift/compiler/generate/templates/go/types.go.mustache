@@ -85,22 +85,3 @@ func init() {
     {{/if enum.uri}}
     {{/each}}
 }
-
-{{#if root_program.structs?}}
-// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
-func RegisterTypes(registry interface {
-  RegisterType(name string, initializer func() any)
-}) {
-    {{#each root_program.structured_definitions as |struct|}}
-    {{#if struct.uri}}
-    registry.RegisterType("{{struct.uri}}", func() any { return {{struct.go_qualified_new_func}}() })
-    {{/if struct.uri}}
-    {{/each}}
-
-    {{#each root_program.enums as |enum|}}
-    {{#if enum.uri}}
-    registry.RegisterType("{{enum.uri}}", func() any { return {{enum.go_name}}(0) })
-    {{/if enum.uri}}
-    {{/each}}
-}
-{{/if root_program.structs?}}

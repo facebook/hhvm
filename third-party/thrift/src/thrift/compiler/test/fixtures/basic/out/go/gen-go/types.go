@@ -5574,20 +5574,3 @@ func init() {
     thrift.InternalRegisterType("test.dev/fixtures/basic/MyEnum", premadeCodecTypeSpec_module_MyEnum)
     thrift.InternalRegisterType("test.dev/fixtures/basic/HackEnum", premadeCodecTypeSpec_module_HackEnum)
 }
-
-// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
-func RegisterTypes(registry interface {
-  RegisterType(name string, initializer func() any)
-}) {
-    registry.RegisterType("test.dev/fixtures/basic/MyStruct", func() any { return NewMyStruct() })
-    registry.RegisterType("test.dev/fixtures/basic/Containers", func() any { return NewContainers() })
-    registry.RegisterType("test.dev/fixtures/basic/MyDataItem", func() any { return NewMyDataItem() })
-    registry.RegisterType("test.dev/fixtures/basic/MyUnion", func() any { return NewMyUnion() })
-    registry.RegisterType("test.dev/fixtures/basic/MyException", func() any { return NewMyException() })
-    registry.RegisterType("test.dev/fixtures/basic/MyExceptionWithMessage", func() any { return NewMyExceptionWithMessage() })
-    registry.RegisterType("test.dev/fixtures/basic/ReservedKeyword", func() any { return NewReservedKeyword() })
-    registry.RegisterType("test.dev/fixtures/basic/UnionToBeRenamed", func() any { return NewUnionToBeRenamed() })
-
-    registry.RegisterType("test.dev/fixtures/basic/MyEnum", func() any { return MyEnum(0) })
-    registry.RegisterType("test.dev/fixtures/basic/HackEnum", func() any { return HackEnum(0) })
-}

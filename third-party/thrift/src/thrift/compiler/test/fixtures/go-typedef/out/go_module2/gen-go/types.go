@@ -60,4 +60,3 @@ func EnumFromString(s string) (Enum, error) {
 
 func init() {
 }
-

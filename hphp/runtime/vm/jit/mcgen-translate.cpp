@@ -42,6 +42,8 @@
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 
+#include "hphp/util/abi-cxx.h"
+#include "hphp/util/arch.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
@@ -52,9 +54,15 @@
 #include "hphp/util/roar.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/vixl/a64/instructions-a64.h"
+
 #include "hphp/zend/zend-strtod.h"
 
 #include <folly/system/ThreadName.h>
+
+#include <algorithm>
+#include <iomanip>
+#include <sstream>
 
 TRACE_SET_MOD(mcg)
 
@@ -372,6 +380,327 @@ void scheduleSerializeOptProf() {
   }
 }
 
+/*
+ * Per-function runtime call density info, computed by scanning the generated
+ * machine code for runtime (non-JIT) call sites and weighing them by profile
+ * block execution counts.
+ *
+ * density = weighted_runtime_calls / hot_bytes
+ * where weighted_runtime_calls = sum over all call sites of max(blockWeight, 0)
+ */
+struct FuncRuntimeCallDensity {
+  size_t hotBytes{0};
+  int64_t weightedCalls{0};   // sum of block weights for runtime call sites
+  size_t numCalls{0};         // total number of runtime call sites
+  double density() const {
+    return hotBytes > 0 ? (double)weightedCalls / (double)hotBytes : 0.0;
+  }
+};
+
+struct RuntimeCallSiteInfo {
+  TCA callAddr;         // fake TC address of the movz instruction
+  uint64_t target;      // absolute address being called
+  std::string symbol;   // resolved symbol name
+  int64_t blockWeight;  // profile count of enclosing block
+  SrcKey blockSk;       // SrcKey of enclosing block
+};
+
+/*
+ * Scan a single FuncMetaInfo for runtime (non-JIT) call sites.
+ * Returns per-call-site details and aggregate density info.
+ */
+std::pair<std::vector<RuntimeCallSiteInfo>, FuncRuntimeCallDensity>
+scanRuntimeCalls(tc::FuncMetaInfo& info, const ProfData* pd) {
+  using namespace vixl;
+
+  std::vector<RuntimeCallSiteInfo> runtimeCalls;
+  FuncRuntimeCallDensity density;
+
+  auto const func = info.func;
+  if (!func) return {runtimeCalls, density};
+
+  auto view = info.tcBuf.view();
+  if (!view) return {runtimeCalls, density};
+
+  for (auto const& translator : info.translators) {
+    if (!translator->translateSuccess()) continue;
+
+    auto const range = translator->range();
+    auto const mainBegin = range.main.begin();
+    auto const mainEnd   = range.main.end();
+    if (!mainBegin || !mainEnd || mainBegin >= mainEnd) {
+      continue;
+    }
+
+    density.hotBytes += (mainEnd - mainBegin);
+
+    // Get the region for block weight lookup.
+    auto* rt = dynamic_cast<tc::RegionTranslator*>(translator.get());
+    auto const& meta = translator->meta();
+
+    // Scan addressImmediates entries within this translation's main range
+    // for movz/movk/blr sequences targeting runtime (non-JIT) addresses.
+    for (auto aiAddr : meta.addressImmediates) {
+      // Skip entries outside this translation's main range.
+      if (aiAddr < mainBegin || aiAddr >= mainEnd) continue;
+
+      // Convert fake TC address to real (readable) memory.
+      auto const realAddr = view->main().toDestAddress(aiAddr);
+      auto const realEnd  = view->main().toDestAddress(mainEnd);
+      auto const inst = Instruction::Cast(realAddr);
+      auto const instEnd = Instruction::Cast(realEnd);
+
+      uint64_t target = 0;
+      uint32_t rd = 0;
+      auto const seqLen = [&]() -> size_t {
+        // Inline decode of movz/movk sequence (same logic as
+        // decodePossibleMovSequence in relocation-arm.cpp).
+        if (inst->IsMovz()) {
+          target = (uint64_t)inst->ImmMoveWide()
+                   << (16 * inst->ShiftMoveWide());
+        } else if (inst->IsMovn()) {
+          target = ~((uint64_t)inst->ImmMoveWide()
+                     << (16 * inst->ShiftMoveWide()));
+          if (!inst->SixtyFourBits()) {
+            target &= (1UL << 32) - 1;
+          }
+        } else if (inst->IsLogicalImmediate() &&
+                   inst->Rn() == kZeroRegCode) {
+          target = inst->ImmLogical();
+        } else {
+          return 0;
+        }
+        size_t length = 1;
+        rd = inst->Rd();
+        auto next = inst->NextInstruction();
+        while ((next < instEnd && next->IsMovk() && next->Rd() == rd) ||
+               (next < instEnd && next->IsNop())) {
+          if (next->IsMovk()) {
+            auto const shift = 16 * next->ShiftMoveWide();
+            auto const mask = 0xffffLL << shift;
+            target &= ~mask;
+            target |= (uint64_t)next->ImmMoveWide() << shift;
+          }
+          length++;
+          next = next->NextInstruction();
+        }
+        return length;
+      }();
+
+      if (seqLen == 0) continue;
+
+      // Check if the instruction after the mov sequence is BLR with
+      // the same register.
+      auto const afterSeq = inst + seqLen * kInstructionSize;
+      if (afterSeq >= instEnd) continue;
+      if (!afterSeq->IsUncondBranchReg()) continue;
+      if (afterSeq->Rn() != rd) continue;
+      // Only count BLR (calls), not BR (jumps).
+      if (afterSeq->Mask(UnconditionalBranchToRegisterMask) != BLR)
+        continue;
+
+      // Check if target is a runtime call (not JIT code).
+      if (tc::isValidCodeAddress(reinterpret_cast<TCA>(target))) continue;
+
+      // Resolve the symbol name.
+      auto symbol = getNativeFunctionName(
+          reinterpret_cast<void*>(target));
+      if (symbol.empty()) {
+        std::ostringstream tmp;
+        tmp << "0x" << std::hex << target;
+        symbol = tmp.str();
+      }
+
+      // Look up block weight via bcMap.
+      int64_t blockWeight = -1;
+      SrcKey blockSk;
+      if (rt && rt->region) {
+        // Find the bcMap entry covering this TCA.
+        auto const& bcMap = meta.bcMap;
+        for (size_t i = 0; i < bcMap.size(); ++i) {
+          auto const entryStart = bcMap[i].aStart;
+          auto const entryEnd = (i + 1 < bcMap.size())
+            ? bcMap[i + 1].aStart : mainEnd;
+          if (aiAddr >= entryStart && aiAddr < entryEnd) {
+            blockSk = bcMap[i].sk;
+            // Find the region block matching this SrcKey and get its
+            // profile execution count.
+            for (auto const& block : rt->region->blocks()) {
+              if (block->start() == blockSk ||
+                  (!blockSk.prologue() && !blockSk.funcEntry() &&
+                   block->start().func() == blockSk.func() &&
+                   block->start().offset() <= blockSk.offset() &&
+                   blockSk.offset() <= block->last().offset())) {
+                auto const bid = block->profTransID();
+                if (pd && bid != kInvalidTransID) {
+                  blockWeight = pd->transCounter(bid);
+                }
+                break;
+              }
+            }
+            break;
+          }
+        }
+      }
+
+      runtimeCalls.push_back(
+        RuntimeCallSiteInfo{aiAddr, target, std::move(symbol),
+                            blockWeight, blockSk});
+
+      // Accumulate weighted count (use 0 for unknown weights).
+      density.numCalls++;
+      if (blockWeight > 0) {
+        density.weightedCalls += blockWeight;
+      }
+    }
+  }
+
+  return {std::move(runtimeCalls), density};
+}
+
+/*
+ * Dump per-function runtime call info for all functions in jobs.
+ * For each function, scan the machine code for movz/movk/blr sequences
+ * (non-smashable calls emitted by vasm `call` on ARM) and report:
+ *   - function name, hot bytes size, runtime call density
+ *   - for each runtime call: the call-site TCA, target address + symbol name,
+ *     and the weight (profile execution count) of the enclosing block.
+ *
+ * Gated by FTRACE level 6.
+ */
+void dumpRuntimeCallInfo(std::vector<tc::FuncMetaInfo>& jobs) {
+  auto const pd = globalProfData();
+
+  std::ostringstream os;
+  os << "=== Runtime Call Info (pre-relocation) ===\n";
+
+  int funcIdx = 0;
+  for (auto& info : jobs) {
+    auto const func = info.func;
+    if (!func) { funcIdx++; continue; }
+
+    auto [runtimeCalls, densityInfo] = scanRuntimeCalls(info, pd);
+
+    // Only print functions that have runtime calls.
+    if (runtimeCalls.empty()) { funcIdx++; continue; }
+
+    auto const funcName = func->fullName()->data();
+    os << "\n  func[" << funcIdx << "] " << funcName
+       << "  hot_bytes=" << densityInfo.hotBytes
+       << "  runtime_calls=" << runtimeCalls.size()
+       << "  runtime_call_density="
+       << std::fixed << std::setprecision(3) << densityInfo.density()
+       << " (" << densityInfo.weightedCalls
+       << " / " << densityInfo.hotBytes << ")\n";
+
+    for (auto const& ci : runtimeCalls) {
+      os << "    call @ " << (void*)ci.callAddr
+         << " -> " << ci.symbol
+         << "  weight=" << ci.blockWeight;
+      if (ci.blockSk.valid()) {
+        os << "  block=" << showShort(ci.blockSk);
+      }
+      os << "\n";
+    }
+
+    funcIdx++;
+  }
+
+  os << "\n=== End Runtime Call Info ===\n";
+  FTRACE(6, "{}", os.str());
+}
+
+/*
+ * Reorder functions in `jobs` by runtime call density so that functions with
+ * the highest density (weighted_runtime_calls / hot_bytes) are placed first.
+ *
+ * The greedy algorithm sorts functions by density in descending order and
+ * promotes them to the front of the jobs vector until the cumulative hot bytes
+ * of promoted functions reaches a configurable limit.
+ *
+ * The limit is controlled by the Cfg::Jit::RuntimeCallReorderLimitMB
+ * config option (default: 64 MB).
+ *
+ * Functions that have no runtime calls or zero density retain their original
+ * relative order after the promoted functions.
+ */
+void reorderByRuntimeCallDensity(std::vector<tc::FuncMetaInfo>& jobs) {
+  // Wait for all worker threads to finish translating.
+  if (auto const disp = s_dispatcher.load(std::memory_order_acquire)) {
+    disp->waitEmpty(false);
+  }
+
+  auto const limitMB = Cfg::Jit::RuntimeCallReorderLimitMB;
+  auto const limitBytes = static_cast<size_t>(limitMB) * 1024UL * 1024UL;
+
+  auto const pd = globalProfData();
+  auto const n = jobs.size();
+
+  // Compute density for each function.
+  struct IndexedDensity {
+    size_t idx;
+    FuncRuntimeCallDensity info;
+  };
+  std::vector<IndexedDensity> densities;
+  densities.reserve(n);
+  for (size_t i = 0; i < n; ++i) {
+    auto [_, densityInfo] = scanRuntimeCalls(jobs[i], pd);
+    densities.push_back(IndexedDensity{i, densityInfo});
+  }
+
+  // Separate functions with positive density from the rest.
+  std::vector<size_t> promoted;
+  std::vector<size_t> remaining;
+
+  // Sort candidates by density descending.
+  std::vector<size_t> candidates;
+  for (size_t i = 0; i < n; ++i) {
+    if (densities[i].info.density() > 0.0) {
+      candidates.push_back(i);
+    }
+  }
+  std::sort(candidates.begin(), candidates.end(),
+            [&](size_t a, size_t b) {
+              return densities[a].info.density() >
+                     densities[b].info.density();
+            });
+
+  // Greedily select functions until we reach the size limit.
+  size_t cumulativeBytes = 0;
+  hphp_fast_set<size_t> promotedSet;
+  for (auto idx : candidates) {
+    auto const hotBytes = densities[idx].info.hotBytes;
+    if (cumulativeBytes + hotBytes > limitBytes && !promoted.empty()) {
+      break;
+    }
+    promoted.push_back(idx);
+    promotedSet.insert(idx);
+    cumulativeBytes += hotBytes;
+  }
+
+  // Collect remaining indices in original order.
+  for (size_t i = 0; i < n; ++i) {
+    if (promotedSet.count(i) == 0) {
+      remaining.push_back(i);
+    }
+  }
+
+  // Build the reordered jobs vector.
+  std::vector<tc::FuncMetaInfo> reordered;
+  reordered.reserve(n);
+  for (auto idx : promoted) {
+    reordered.push_back(std::move(jobs[idx]));
+  }
+  for (auto idx : remaining) {
+    reordered.push_back(std::move(jobs[idx]));
+  }
+  jobs = std::move(reordered);
+
+  FTRACE(4, "reorderByRuntimeCallDensity: promoted {} functions "
+            "({} bytes) to the front (limit {} MB)\n",
+            promoted.size(), cumulativeBytes, limitMB);
+}
+
 // GCC GCOV API
 extern "C" void __gcov_reset() __attribute__((__weak__));
 // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
@@ -504,6 +833,13 @@ void retranslateAll(bool skipSerialize) {
     }
 
     // 6) Relocate the machine code into code.hot in the desired order
+    if (arch() == Arch::ARM && Cfg::Jit::RuntimeCallReorder) {
+      reorderByRuntimeCallDensity(jobs);
+      if (Trace::moduleEnabled(Trace::mcg, 6)) {
+        dumpRuntimeCallInfo(jobs);
+      }
+    }
+
     tc::relocatePublishSortedOptFuncs(std::move(jobs));
 
     if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {

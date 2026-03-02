@@ -1805,6 +1805,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t Jit.RetranslateAllRequest, UNKNOWN
 - uint32_t Jit.RetranslateAllSeconds, UNKNOWN
 - bool Jit.RerunRetranslateAll = false, UNKNOWN
+- bool Jit.RuntimeCallReorder = true, UNKNOWN
+- uint32_t Jit.RuntimeCallReorderLimitMB = 64, UNKNOWN
 - bool Jit.BuildOutliningHashes = false, UNKNOWN
 - bool Jit.PGOLayoutSplitHotCold = true, UNKNOWN
 - bool Jit.PGOLayoutResplitFrozen = true, UNKNOWN

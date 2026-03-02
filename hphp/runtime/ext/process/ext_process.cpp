@@ -39,6 +39,7 @@
 #include "hphp/runtime/ext/xreqsync/ext_xreqsync.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/hugetlb.h"
@@ -134,15 +135,26 @@ void postfork(pid_t pid) {
 
 }
 
-void HHVM_FUNCTION(pcntl_exec,
-                   const String& path,
-                   const Array& args /* = null_array */,
-                   const Array& envs /* = null_array */) {
+// Keep in sync with checkExecAllowed in ext_std_process.cpp.
+static void checkExecAllowed() {
   if (!Cfg::Server::AllowExec) {
     SystemLib::throwRuntimeExceptionObject(
       "Process execution is disabled by the Server.AllowExec configuration"
     );
   }
+  if (!Cfg::Eval::AllowUngatedExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Ungated process execution is disabled by the "
+      "Eval.AllowUngatedExec configuration"
+    );
+  }
+}
+
+void HHVM_FUNCTION(pcntl_exec,
+                   const String& path,
+                   const Array& args /* = null_array */,
+                   const Array& envs /* = null_array */) {
+  checkExecAllowed();
   if (cantPrefork()) {
     raise_error("execing is disallowed in multi-threaded mode");
     return;

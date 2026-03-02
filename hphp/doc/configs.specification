@@ -460,6 +460,20 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 # Eval
 
+- bool Eval.AllowUngatedExec = true, flameeyes
+
+  When set to false, shell_exec, exec, passthru, and system will throw a
+  RuntimeException. proc_open will also throw unless the caller is listed in
+  Eval.ProcOpenGatedApprovedCallers. This is checked in addition to
+  Server.AllowExec.
+
+- std::set<std::string> Eval.ProcOpenGatedApprovedCallers = {}, flameeyes
+
+  Set of approved callers for proc_open when Eval.AllowUngatedExec is false,
+  in the format ClassName::FunctionName (for methods) or FunctionName (for
+  free functions). The caller is identified via stack inspection and checked
+  against this list using exact matching.
+
 - bool Eval.EnableXHP = true, UNKNOWN, unitcacheflag|compileroption(EnableXHP)
 
 - bool Eval.TimeoutsUseWallTime = true, UNKNOWN

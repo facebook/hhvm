@@ -1,0 +1,1 @@
+RuntimeException: Process execution by caller 'test_ungated_exec_disabled' is not in the Eval.ProcOpenGatedApprovedCallers allowlist.

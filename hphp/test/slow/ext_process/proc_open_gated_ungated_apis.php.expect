@@ -1,0 +1,5 @@
+shell_exec: RuntimeException: Ungated process execution is disabled by the Eval.AllowUngatedExec configuration
+exec: RuntimeException: Ungated process execution is disabled by the Eval.AllowUngatedExec configuration
+passthru: RuntimeException: Ungated process execution is disabled by the Eval.AllowUngatedExec configuration
+system: RuntimeException: Ungated process execution is disabled by the Eval.AllowUngatedExec configuration
+proc_open: gated_ok, exit=0

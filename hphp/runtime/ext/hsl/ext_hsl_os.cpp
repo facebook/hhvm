@@ -25,6 +25,7 @@
 #include "hphp/runtime/server/cli-server-ext.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/light-process.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
 
 #include <folly/functional/Invoke.h>
@@ -941,17 +942,28 @@ const StaticString
   s_setpgid("setpgid"),
   s_execvpe("execvpe");
 
+// Keep in sync with checkExecAllowed in ext_std_process.cpp.
+void checkExecAllowed() {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
+  if (!Cfg::Eval::AllowUngatedExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Ungated process execution is disabled by the "
+      "Eval.AllowUngatedExec configuration"
+    );
+  }
+}
+
 int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
                       const String& path,
                       const Array& argv,
                       const Array& envp,
                       const Array& fds,
                       const Array& options) {
-  if (!Cfg::Server::AllowExec) {
-    SystemLib::throwRuntimeExceptionObject(
-      "Process execution is disabled by the Server.AllowExec configuration"
-    );
-  }
+  checkExecAllowed();
   std::string cwd;
   int flags = Process::FORK_AND_EXECVE_FLAG_NONE;
   int pgid = 0;

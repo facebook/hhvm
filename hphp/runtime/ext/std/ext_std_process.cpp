@@ -38,10 +38,12 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/system/systemlib.h"
 
@@ -127,15 +129,59 @@ private:
   FILE *m_proc{nullptr};
 };
 
-}
-
-Variant HHVM_FUNCTION(shell_exec,
-                      const String& cmd) {
+/**
+ * Check that process execution is permitted.
+ *
+ * Always checks Cfg::Server::AllowExec first. When allowGated is true
+ * (proc_open), callers listed in Cfg::Eval::ProcOpenGatedApprovedCallers
+ * are permitted even when Cfg::Eval::AllowUngatedExec is false. When
+ * allowGated is false (shell_exec, exec, passthru, system), ungated
+ * execution is unconditionally denied.
+ *
+ * Keep the non-gated path in sync with checkExecAllowed in
+ * ext_hsl_os.cpp and ext_process.cpp.
+ */
+void checkExecAllowed(bool allowGated) {
   if (!Cfg::Server::AllowExec) {
     SystemLib::throwRuntimeExceptionObject(
       "Process execution is disabled by the Server.AllowExec configuration"
     );
   }
+  if (Cfg::Eval::AllowUngatedExec) return;
+
+  if (allowGated) {
+    auto const caller = fromCaller(
+      [] (const BTFrame& frm) { return frm.func(); }
+    );
+
+    if (caller) {
+      std::string callerName(caller->fullName()->slice());
+      if (Cfg::Eval::ProcOpenGatedApprovedCallers.count(callerName)) {
+        return;
+      }
+      SystemLib::throwRuntimeExceptionObject(
+        folly::sformat(
+          "Process execution by caller '{}' is not in the "
+          "Eval.ProcOpenGatedApprovedCallers allowlist.", callerName)
+      );
+    }
+
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution denied: unable to determine caller"
+    );
+  }
+
+  SystemLib::throwRuntimeExceptionObject(
+    "Ungated process execution is disabled by the "
+    "Eval.AllowUngatedExec configuration"
+  );
+}
+
+} // anonymous namespace
+
+Variant HHVM_FUNCTION(shell_exec,
+                      const String& cmd) {
+  checkExecAllowed(false);
   ShellExecContext ctx;
   FILE *fp = ctx.exec(cmd);
   if (!fp) return init_null();
@@ -148,11 +194,7 @@ String HHVM_FUNCTION(exec,
                      const String& command,
                      Array& output,
                      int64_t& return_var) {
-  if (!Cfg::Server::AllowExec) {
-    SystemLib::throwRuntimeExceptionObject(
-      "Process execution is disabled by the Server.AllowExec configuration"
-    );
-  }
+  checkExecAllowed(false);
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
@@ -184,11 +226,7 @@ String HHVM_FUNCTION(exec,
 void HHVM_FUNCTION(passthru,
                    const String& command,
                    int64_t& return_var) {
-  if (!Cfg::Server::AllowExec) {
-    SystemLib::throwRuntimeExceptionObject(
-      "Process execution is disabled by the Server.AllowExec configuration"
-    );
-  }
+  checkExecAllowed(false);
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return;
@@ -209,11 +247,7 @@ void HHVM_FUNCTION(passthru,
 String HHVM_FUNCTION(system,
                      const String& command,
                      int64_t& return_var) {
-  if (!Cfg::Server::AllowExec) {
-    SystemLib::throwRuntimeExceptionObject(
-      "Process execution is disabled by the Server.AllowExec configuration"
-    );
-  }
+  checkExecAllowed(false);
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
@@ -523,11 +557,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
               Array& pipes, const Variant& cwd /* = uninit_variant */,
               const Variant& env /* = uninit_variant */,
               const Variant& /*other_options*/ /* = uninit_variant */) {
-  if (!Cfg::Server::AllowExec) {
-    SystemLib::throwRuntimeExceptionObject(
-      "Process execution is disabled by the Server.AllowExec configuration"
-    );
-  }
+  checkExecAllowed(true);
   if (cmd.size() != strlen(cmd.c_str())) {
     raise_warning("NULL byte detected. Possible attack");
     return false;

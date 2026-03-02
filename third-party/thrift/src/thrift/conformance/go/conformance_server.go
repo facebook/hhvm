@@ -18,7 +18,6 @@ package main
 
 import (
 	"context"
-	"crypto/sha256"
 	"errors"
 	"fmt"
 	"net"
@@ -26,94 +25,29 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/golang/glog"
-
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	thrift_any "thrift/conformance/any"
 	"thrift/conformance/conformance"
 	"thrift/conformance/patch_data"
 	"thrift/conformance/protocol"
 	"thrift/conformance/serialization"
+	thriftany "thrift/lib/thrift/any"
+	thriftanyrep "thrift/lib/thrift/any_rep"
+	thriftstandard "thrift/lib/thrift/standard"
+	thrifttyperep "thrift/lib/thrift/type_rep"
+
 	"thrift/lib/thrift/protocol_detail"
 	"thrift/test/testset"
 	enum "thrift/test/testset/Enum"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/format"
+	"github.com/golang/glog"
 )
 
-// Registry initializer func type
-type registryInitializerFuncType = func() any
-
-// typeRegistry is a registry from thrift_uri or its hash Thrift initializer function.
-// typeRegistry is used to serialize and deserialize thrift.Any.
-type typeRegistry struct {
-	names  map[string]registryInitializerFuncType
-	hash32 map[[32]byte]registryInitializerFuncType
-	hash16 map[[16]byte]registryInitializerFuncType
-	hash8  map[[8]byte]registryInitializerFuncType
-}
-
-func newTypeRegistry() *typeRegistry {
-	return &typeRegistry{
-		names:  make(map[string]registryInitializerFuncType),
-		hash32: make(map[[32]byte]registryInitializerFuncType),
-		hash16: make(map[[16]byte]registryInitializerFuncType),
-		hash8:  make(map[[8]byte]registryInitializerFuncType),
-	}
-}
-
-const thriftURIPrefix = "fbthrift://"
-
-// RegisterType is called by the generated RegisterTypes function in thrift packages.
-// Only types with a thrift_uri is registered.
-func (r *typeRegistry) RegisterType(name string, initializer registryInitializerFuncType) {
-	r.names[name] = initializer
-	h := sha256.New()
-	h.Write([]byte(thriftURIPrefix + name))
-	hash := h.Sum(nil)
-	hash32 := *(*[32]byte)(hash[0:32])
-	hash16 := *(*[16]byte)(hash[0:16])
-	hash8 := *(*[8]byte)(hash[0:8])
-	r.hash32[hash32] = initializer
-	r.hash16[hash16] = initializer
-	r.hash8[hash8] = initializer
-}
-
-// LoadInitializerWithName loads initializer from the type registry for deserialization given the thrift_uri name.
-func (r *typeRegistry) LoadInitializerWithName(name string) (registryInitializerFuncType, error) {
-	initializer, ok := r.names[name]
-	if !ok {
-		return nil, fmt.Errorf("load from registry error: %s is not registered", name)
-	}
-	return initializer, nil
-}
-
-// LoadInitializerWithHash loads initializer from the type registry for deserialization given the hashed thrift_uri name.
-// The hashed thrift_uri can either be of length 8, 16 or 32.
-func (r *typeRegistry) LoadInitializerWithHash(hash []byte) (registryInitializerFuncType, error) {
-	var initializer registryInitializerFuncType
-	var ok bool
-	if len(hash) == 8 {
-		hash8 := *(*[8]byte)(hash[0:8])
-		initializer, ok = r.hash8[hash8]
-		if !ok {
-			return nil, fmt.Errorf("load from hash8 registry error: %s is not registered", string(hash))
-		}
-	}
-	if len(hash) == 16 {
-		hash16 := *(*[16]byte)(hash[0:16])
-		initializer, ok = r.hash16[hash16]
-		if !ok {
-			return nil, fmt.Errorf("load from hash16 registry error: %s is not registered", string(hash))
-		}
-	}
-	if len(hash) == 32 {
-		hash32 := *(*[32]byte)(hash[0:32])
-		initializer, ok = r.hash32[hash32]
-		if !ok {
-			return nil, fmt.Errorf("load from hash32 registry error: %s is not registered", string(hash))
-		}
-	}
-	return initializer, nil
-}
+// Ensure that the types below are registered (so that Any serdes works!)
+var _ = protocol_detail.GoUnusedProtection__
+var _ = testset.GoUnusedProtection__
+var _ = enum.GoUnusedProtection__
 
 func main() {
 	// Catch SIGTERM/SIGKILL
@@ -123,14 +57,8 @@ func main() {
 		syscall.SIGINT,
 	)
 
-	// Register all types from the testset
-	registry := newTypeRegistry()
-	testset.RegisterTypes(registry)
-	enum.RegisterTypes(registry)
-	protocol_detail.RegisterTypes(registry)
-
 	// Startup thrift server
-	handler := &dataConformanceServiceHandler{registry}
+	handler := &dataConformanceServiceHandler{}
 	proc := conformance.NewConformanceServiceProcessor(handler)
 
 	listener, err := net.Listen("tcp", "[::]:0")
@@ -153,21 +81,30 @@ func main() {
 	os.Exit(0)
 }
 
-type dataConformanceServiceHandler struct {
-	registry *typeRegistry
-}
+type dataConformanceServiceHandler struct{}
 
 func (h *dataConformanceServiceHandler) RoundTrip(ctx context.Context, roundTripRequest *serialization.RoundTripRequest) (*serialization.RoundTripResponse, error) {
 	requestValue := roundTripRequest.GetValue()
 	if requestValue == nil {
 		return nil, errors.New("unsupported RoundTrip roundTripRequest.Value = nil")
 	}
-	obj, err := deserialize(h.registry, requestValue)
+
+	libAny, err := conformanceAnyToLibAny(requestValue)
 	if err != nil {
 		return nil, err
 	}
+
+	obj, err := format.DecodeAny(libAny)
+	if err != nil {
+		return nil, err
+	}
+	objAsStruct, ok := obj.(thrift.Struct)
+	if !ok {
+		return nil, errors.New("unsupported RoundTrip request value type")
+	}
+
 	target := getTargetProtocol(roundTripRequest)
-	data, err := serialize(obj, target)
+	data, err := serialize(objAsStruct, target)
 	if err != nil {
 		return nil, err
 	}
@@ -180,6 +117,10 @@ func (h *dataConformanceServiceHandler) RoundTrip(ctx context.Context, roundTrip
 		SetTypeHashPrefixSha2_256(requestValue.TypeHashPrefixSha2_256)
 	return serialization.NewRoundTripResponse().
 		SetValue(respAny), nil
+}
+
+func (h *dataConformanceServiceHandler) Patch(ctx context.Context, request *patch_data.PatchOpRequest) (_r *patch_data.PatchOpResponse, err error) {
+	return nil, errors.New("patch is not supported")
 }
 
 // serialize serializes a thrift.Struct with a target protocol to be stored inside a thrift.Any.
@@ -196,64 +137,55 @@ func serialize(obj thrift.Struct, protoc *protocol.ProtocolStruct) ([]byte, erro
 	case protocol.StandardProtocol_SimpleJson:
 		return thrift.EncodeSimpleJSON(obj)
 	default:
-		// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
+		// Default to Compact as per thrift spec
 		return thrift.EncodeCompact(obj)
 	}
 }
 
-// loadStruct loads a thrift.Struct from the typeRegistry for a given thrift.Any.
-// Any specifies the thrift.Struct to load either with a thrift_uri stored in the Type field
-// Or with a hashed version of thrift_uri stored in TypeHashPrefixSha2_256.
-func loadStruct(registry *typeRegistry, value *thrift_any.Any) (thrift.Struct, error) {
-	var initializer registryInitializerFuncType
-	var err error
-	if value.IsSetType() {
-		typ := value.GetType()
-		initializer, err = registry.LoadInitializerWithName(typ)
-		if err != nil {
-			return nil, err
-		}
-	} else if value.IsSetTypeHashPrefixSha2_256() {
-		hash := value.GetTypeHashPrefixSha2_256()
-		initializer, err = registry.LoadInitializerWithHash(hash)
-		if err != nil {
-			return nil, err
-		}
-	}
-	anyObj := initializer()
-	structObj, ok := anyObj.(thrift.Struct)
-	if !ok {
-		return nil, fmt.Errorf("deserialize currently only supports thrift.Struct and not %T", anyObj)
-	}
-	return structObj, nil
-}
+// conformanceAnyToLibAny converts from thrift/conformance/any.Any to thrift/lib/thrift/any.Any.
+// The conformance Any has a simpler structure with type (string URI) or typeHashPrefixSha2_256,
+// while the lib Any uses TypeStruct and ProtocolUnion.
+func conformanceAnyToLibAny(conformanceAny *thrift_any.Any) (*thriftany.Any, error) {
+	typeURI := thriftstandard.NewTypeUri()
+	typeName := thriftstandard.NewTypeName().
+		SetStructType(typeURI)
+	typeStruct := thrifttyperep.NewTypeStruct().
+		SetName(typeName)
+	protocolUnion := thrifttyperep.NewProtocolUnion()
+	anyStruct := thriftanyrep.NewAnyStruct().
+		SetType(typeStruct).
+		SetProtocol(protocolUnion).
+		SetData(conformanceAny.GetData())
 
-// deserialize deserializes the data stored inside a thrift.Any value.
-func deserialize(registry *typeRegistry, value *thrift_any.Any) (thrift.Struct, error) {
-	obj, err := loadStruct(registry, value)
-	if err != nil {
-		return nil, err
+	if conformanceAny.IsSetType() && conformanceAny.GetType() != "" {
+		typeURI.SetUri(thrift.Pointerize(conformanceAny.GetType()))
+	} else if conformanceAny.TypeHashPrefixSha2_256 != nil {
+		typeURI.SetTypeHashPrefixSha2_256(conformanceAny.TypeHashPrefixSha2_256)
+	} else {
+		return nil, errors.New("conformanceAnyToLibAny: type or typeHashPrefixSha2_256 must be set")
 	}
-	protoc := getProtocol(value)
-	switch protoc.GetStandard() {
-	case protocol.StandardProtocol_Custom:
-		err = thrift.DecodeCompact(value.GetData(), obj)
-	case protocol.StandardProtocol_Binary:
-		err = thrift.DecodeBinary(value.GetData(), obj)
-	case protocol.StandardProtocol_Compact:
-		err = thrift.DecodeCompact(value.GetData(), obj)
-	case protocol.StandardProtocol_Json:
-		err = thrift.DecodeCompactJSON(value.GetData(), obj)
-	case protocol.StandardProtocol_SimpleJson:
-		err = thrift.DecodeSimpleJSON(value.GetData(), obj)
-	default:
-		// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
-		err = thrift.DecodeCompact(value.GetData(), obj)
+
+	// Default to Compact as per thrift spec
+	protocolUnion.SetStandard(thrift.Pointerize(thriftstandard.StandardProtocol_Compact))
+	if conformanceAny.Protocol != nil {
+		// Map conformance StandardProtocol to lib StandardProtocol
+		switch *conformanceAny.Protocol {
+		case protocol.StandardProtocol_Binary:
+			protocolUnion.SetStandard(thrift.Pointerize(thriftstandard.StandardProtocol_Binary))
+		case protocol.StandardProtocol_Compact:
+			protocolUnion.SetStandard(thrift.Pointerize(thriftstandard.StandardProtocol_Compact))
+		case protocol.StandardProtocol_Json:
+			protocolUnion.SetStandard(thrift.Pointerize(thriftstandard.StandardProtocol_Json))
+		case protocol.StandardProtocol_SimpleJson:
+			protocolUnion.SetStandard(thrift.Pointerize(thriftstandard.StandardProtocol_SimpleJson))
+		case protocol.StandardProtocol_Custom:
+			if conformanceAny.IsSetCustomProtocol() {
+				protocolUnion.SetCustom(thrift.Pointerize(conformanceAny.GetCustomProtocol()))
+			}
+		}
 	}
-	if err != nil {
-		return nil, err
-	}
-	return obj, nil
+
+	return anyStruct, nil
 }
 
 // getTargetProtocol returns a consistent target protocol in the ProtocolStruct, whether the target protocol was set or not.
@@ -272,17 +204,8 @@ func getTargetProtocol(request *serialization.RoundTripRequest) *protocol.Protoc
 		}
 	}
 	value := request.GetValue()
-	return getProtocol(value)
-}
-
-// getProtocol creates a ProtocolStruct from the values stored inside thrift.Any.
-func getProtocol(value *thrift_any.Any) *protocol.ProtocolStruct {
 	return &protocol.ProtocolStruct{
 		Standard: value.GetProtocol(),
 		Custom:   value.CustomProtocol,
 	}
-}
-
-func (h *dataConformanceServiceHandler) Patch(ctx context.Context, request *patch_data.PatchOpRequest) (_r *patch_data.PatchOpResponse, err error) {
-	return nil, errors.New("patch is not supported")
 }

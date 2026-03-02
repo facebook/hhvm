@@ -21,6 +21,7 @@ incompatible with thrift-python and a few extern cpp bindings not used by
 thrift-py3 cython users.
 
 }}
+{{#import "common/types" as types}}
 
 {{> types/cimport_std }}
 {{> types/cimport_thrift }}
@@ -116,10 +117,10 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
 {{/program:filtered_structs}}
 
 {{#program:containerTypes}}
-cdef {{> types/cython_cpp_type}}{{!
+cdef {{#partial types.cython_cpp_type type=type:self}}{{!
 }} {{type:flat_name}}__make_instance(object items) except *
 {{^program:auto_migrate?}}
-cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}&) except *
+cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}&) except *
 {{/program:auto_migrate?}}
 
 {{/program:containerTypes}}
@@ -129,14 +130,14 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}&) exc
 
 {{#program:stream_types}}
 cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
-    cdef unique_ptr[cClientBufferedStreamWrapper[{{> types/cython_cpp_type}}]] _gen
+    cdef unique_ptr[cClientBufferedStreamWrapper[{{#partial types.cython_cpp_type type=type:self}}]] _gen
 
     @staticmethod
-    cdef _fbthrift_create(cClientBufferedStream[{{> types/cython_cpp_type}}]& c_obj, __RpcOptions rpc_options)
+    cdef _fbthrift_create(cClientBufferedStream[{{#partial types.cython_cpp_type type=type:self}}]& c_obj, __RpcOptions rpc_options)
 
     @staticmethod
     cdef void callback(
-        cFollyTry[__cOptional[{{> types/cython_cpp_type}}]]&& res,
+        cFollyTry[__cOptional[{{#partial types.cython_cpp_type type=type:self}}]]&& res,
         PyObject* userdata,
     ) noexcept
 
@@ -152,8 +153,8 @@ cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffi
 
     @staticmethod
     cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
-        }}{{#function:stream_first_response_type}}{{> types/cython_cpp_type}}{{/function:stream_first_response_type}}, {{!
-        }}{{#function:stream_elem_type}}{{> types/cython_cpp_type}}{{/function:stream_elem_type}}]& c_obj, __RpcOptions rpc_options)
+        }}{{#function:stream_first_response_type}}{{#partial types.cython_cpp_type type=type:self}}{{/function:stream_first_response_type}}, {{!
+        }}{{#function:stream_elem_type}}{{#partial types.cython_cpp_type type=type:self}}{{/function:stream_elem_type}}]& c_obj, __RpcOptions rpc_options)
 
 
 cdef class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(ResponseAndServerStream):
@@ -163,8 +164,8 @@ cdef class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(Resp
 {{/program:has_stream?}}
 {{#program:inplace_migrate?}}{{#program:needs_container_converters?}}
 {{#program:containerTypes}}
-cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *
-cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}&) except *
+cdef {{#partial types.cython_cpp_type type=type:self}} {{type:flat_name}}__make_instance(object items) except *
+cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}&) except *
 
 {{/program:containerTypes}}
 {{/program:needs_container_converters?}}{{/program:inplace_migrate?}}

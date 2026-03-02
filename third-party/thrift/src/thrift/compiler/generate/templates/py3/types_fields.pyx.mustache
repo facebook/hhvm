@@ -117,7 +117,7 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
         assign_{{#field:unique_ref?}}unique{{/field:unique_ref?}}{{!
            }}{{#field:shared_ref?}}shared{{/field:shared_ref?}}{{!
            }}{{#field:shared_const_ref?}}shared_const{{/field:shared_const_ref?}}{{!
-           }}_ptr[{{> types/cython_cpp_type}}](deref(self._struct_cpp_obj).{{field:py_name}}_ref(), {{> types/cython_field_value_for_assignment}})
+           }}_ptr[{{#partial types.cython_cpp_type type=type:self}}](deref(self._struct_cpp_obj).{{field:py_name}}_ref(), {{> types/cython_field_value_for_assignment}})
         {{/field:has_ref_accessor?}}
     {{/field:type}}
     {{/struct:py3_fields}}

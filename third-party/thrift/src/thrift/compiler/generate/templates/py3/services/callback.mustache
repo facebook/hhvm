@@ -39,10 +39,11 @@ cdef api void call_cy_{{service:name}}_{{function:name}}(
             }}{{> services/cython_return_type_cpp_type}}{{!
         }}{{/function:return_type}}]{{!
     }} cPromise{{#function:args}},
-    {{#field:type}}{{!
-            }}{{^function:stack_arguments?}}{{> services/cython_field_type}}{{/function:stack_arguments?}}{{!
-            }}{{#function:stack_arguments?}}{{> types/cython_cpp_type}}{{/function:stack_arguments?}}{{!
-        }}{{/field:type}} {{field:py_name}}{{/function:args}}
+    {{#if function:stack_arguments?}}{{!
+        }}{{#partial types.cython_cpp_type type=field:self.type}}{{!
+    }}{{#else}}{{!
+        }}{{#field:type}}{{> services/cython_field_type}}{{/field:type}}{{!
+    }}{{/if function:stack_arguments?}} {{field:py_name}}{{/function:args}}
 ) noexcept:{{! Gets called from a python Executor }}
     {{#function:return_type}}
     cdef {{> services/promise_name}} __promise = {{> services/promise_name}}._fbthrift_create(cmove(cPromise))
@@ -107,7 +108,7 @@ async def {{service:name}}_{{function:name}}_coro(
             result = await result
         if isinstance(result, AsyncIterator):
             {{#function:stream_elem_type}}
-            result = ServerStream_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[{{> types/cython_cpp_type}}](result, get_executor(), &getNextGenerator_{{service:name}}_{{function:name}})))
+            result = ServerStream_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[{{#partial types.cython_cpp_type type=type:self}}](result, get_executor(), &getNextGenerator_{{service:name}}_{{function:name}})))
             {{/function:stream_elem_type}}
         {{/function:stream?}}
         {{/function:return_type}}

@@ -25,7 +25,7 @@ wrappers.
 }}{{#field:unique_ref?}}unique_ptr[{{/field:unique_ref?}}{{!
 }}{{#field:shared_ref?}}shared_ptr[{{/field:shared_ref?}}{{!
 }}{{#field:shared_const_ref?}}shared_ptr[const {{/field:shared_const_ref?}}{{!
-}}{{> types/cython_cpp_type}}{{!
+}}{{#partial types.cython_cpp_type type=type:self}}{{!
 }}{{#field:unique_ref?}}]{{/field:unique_ref?}}{{!
 }}{{#field:shared_ref?}}]{{/field:shared_ref?}}{{!
 }}{{#field:shared_const_ref?}}]{{/field:shared_const_ref?}}

@@ -18,4 +18,10 @@
 
 non-simple types live in shared_ptr in containers.
 
-}}{{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}}
+}}
+{{#pragma ignore-newlines}}
+  {{#if type:simple?}}
+{{#partial types.cython_cpp_type type=type:self}}
+  {{#else}}
+shared_ptr[{{#partial types.cython_cpp_type type=type:self}}]
+  {{/if type:simple?}}

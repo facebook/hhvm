@@ -42,6 +42,6 @@ cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{#par
 {{/program:filtered_structs}}
 {{#program:gen_legacy_container_converters?}}
 {{#program:containerTypes}}
-cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *
+cdef {{#partial types.cython_cpp_type type=type:self}} {{type:flat_name}}__make_instance(object items) except *
 {{/program:containerTypes}}
 {{/program:gen_legacy_container_converters?}}

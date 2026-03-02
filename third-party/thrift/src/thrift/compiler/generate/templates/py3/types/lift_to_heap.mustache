@@ -21,11 +21,11 @@ branch has the same number of parentheses, compared to:
     `make_shared(const_pointer_cast(...))`
 
 }}{{#field:unique_ref?}}{{!
-  }}make_unique[{{> types/cython_cpp_type}}]{{!
+  }}make_unique[{{#partial types.cython_cpp_type type=type:self}}]{{!
 }}{{/field:unique_ref?}}{{!
 }}{{#field:shared_ref?}}{{!
-  }}make_shared[{{> types/cython_cpp_type}}]{{!
+  }}make_shared[{{#partial types.cython_cpp_type type=type:self}}]{{!
 }}{{/field:shared_ref?}}{{!
 }}{{#field:shared_const_ref?}}{{!
-  }}make_const_shared[{{> types/cython_cpp_type}}]{{!
+  }}make_const_shared[{{#partial types.cython_cpp_type type=type:self}}]{{!
 }}{{/field:shared_const_ref?}}

@@ -21,12 +21,12 @@ referenced from types.pyx main file, field_setter, or container converter.
 
 }}
 {{! container to cpp converter }}
-cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *:
+cdef {{#partial types.cython_cpp_type type=type:self}} {{type:flat_name}}__make_instance(object items) except *:
 {{> types/make_instance }}
 
 
 {{#type:list?}}
-cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_vec) except *:
+cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
     {{#type:list_elem_type}}
@@ -36,9 +36,9 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_ve
     return {{type:flat_name}}(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 {{/type:list?}}
 {{#type:set?}}
-cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_set) except *:
+cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}& c_set) except *:
     cdef list py_items = []
-    cdef __set_iter[{{> types/cython_cpp_type}}] iter = __set_iter[{{> types/cython_cpp_type}}](c_set)
+    cdef __set_iter[{{#partial types.cython_cpp_type type=type:self}}] iter = __set_iter[{{#partial types.cython_cpp_type type=type:self}}](c_set)
     {{#type:set_elem_type}}
     cdef {{> types/cython_cpp_container_item_type}} citem{{> types/type_default_value}}
     for i in range(c_set.size()):
@@ -48,9 +48,9 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_se
     return {{type:flat_name}}(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 {{/type:set?}}
 {{#type:map?}}
-cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_map) except *:
+cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}& c_map) except *:
     cdef dict py_items = {}
-    cdef __map_iter[{{> types/cython_cpp_type}}] iter = __map_iter[{{> types/cython_cpp_type}}](c_map)
+    cdef __map_iter[{{#partial types.cython_cpp_type type=type:self}}] iter = __map_iter[{{#partial types.cython_cpp_type type=type:self}}](c_map)
     {{#type:key_type}}
     cdef {{> types/cython_cpp_container_item_type}} ckey{{> types/type_default_value}}
     {{/type:key_type}}

@@ -30,11 +30,11 @@ to the client.
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:iobufRef?}}{{!
 }}{{#type:flexibleBinary?}}{{!
-  }}{{#function:stack_arguments?}}{{> types/cython_cpp_type}}({{/function:stack_arguments?}}{{!
-  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
-  }}cmove(<string>result)){{!
+  }}{{#if function:stack_arguments?}}{{#partial types.cython_cpp_type type=type:self}}{{!
+  }}{{#else}}make_unique[{{#partial types.cython_cpp_type type=type:self}}]{{/if function:stack_arguments?}}{{!
+  }}(cmove(<string>result)){{!
 }}{{/type:flexibleBinary?}}{{!
-}}{{^function:stream?}}{{!
+}}{{#if (not function:stream?)}}{{!
 }}{{^type:customBinaryType?}}{{!
 }}{{#type:bool?}}<cbool> result{{/type:bool?}}{{!
 }}{{#type:byte?}}<cint8_t> result{{/type:byte?}}{{!
@@ -44,17 +44,17 @@ to the client.
 }}{{#type:double?}}<double> result{{/type:double?}}{{!
 }}{{#type:float?}}<float> result{{/type:float?}}{{!
 }}{{#type:string?}}{{!
-  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+  }}{{^function:stack_arguments?}}make_unique[{{#partial types.cython_cpp_type type=type:self}}]({{/function:stack_arguments?}}{{!
     }}<string?> result.encode('UTF-8'){{!
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:string?}}{{!
 }}{{#type:binary?}}{{!
-  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+  }}{{^function:stack_arguments?}}make_unique[{{#partial types.cython_cpp_type type=type:self}}]({{/function:stack_arguments?}}{{!
     }}<string?> result{{!
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:binary?}}{{!
 }}{{#type:structured}}{{!
-  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+  }}{{^function:stack_arguments?}}make_unique[{{#partial types.cython_cpp_type type=type:self}}]({{/function:stack_arguments?}}{{!
   }}{{^program:inplace_migrate?}}{{!
     }}deref((<{{#partial types.cython_python_type type=type:self}}?> result).{{#partial types.cpp_obj}}){{!
   }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
@@ -63,20 +63,19 @@ to the client.
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
-  }}{{^function:stack_arguments?}}make_unique[{{> types/cython_cpp_type}}]({{/function:stack_arguments?}}{{!
+  }}{{^function:stack_arguments?}}make_unique[{{#partial types.cython_cpp_type type=type:self}}]({{/function:stack_arguments?}}{{!
     }}{{#partial types.container_to_cpp type=type:self}}(result){{!
   }}{{^function:stack_arguments?}}){{/function:stack_arguments?}}{{!
 }}{{/type:container?}}{{!
 }}{{#type:void?}}c_unit{{/type:void?}}{{!
-}}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>result{{/type:enum?}}{{!
+}}{{#type:enum?}}<{{#partial types.cython_cpp_type type=type:self}}><int>result{{/type:enum?}}{{!
 }}{{/type:customBinaryType?}}{{!
-}}{{/function:stream?}}{{!
-}}{{#function:stream?}}{{!
-  }}{{#function:stream_has_first_response?}}createResponseAndServerStream[{{!
-  }}{{#function:stream_first_response_type}}{{> types/cython_cpp_type}}{{/function:stream_first_response_type}},{{!
-  }}{{#function:stream_elem_type}}{{> types/cython_cpp_type}}{{/function:stream_elem_type}}]({{!
-  }}{{#function:stream_first_response_type}}(<{{> types/cython_cpp_type}}?> {{> types/cython_python_to_cpp_item}}){{/function:stream_first_response_type}}, {{!
-  }}{{/function:stream_has_first_response?}}{{!
+}}{{#else}}{{!
+  }}{{#if function:stream_has_first_response?}}createResponseAndServerStream[{{!
+  }}{{#partial types.cython_cpp_type type=function:self.return_type}},{{!
+  }}{{#partial types.cython_cpp_type type=function:stream.elem_type}}]({{!
+  }}{{#function:stream_first_response_type}}(<{{#partial types.cython_cpp_type type=type:self}}?> {{> types/cython_python_to_cpp_item}}){{/function:stream_first_response_type}}, {{!
+  }}{{/if function:stream_has_first_response?}}{{!
   }}cmove(deref((<ServerStream_{{#function:stream_elem_type}}{{> types/cython_cpp_type_ident }}{{/function:stream_elem_type}}?>result).cStream)){{!
-  }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
-}}{{/function:stream?}}
+  }}{{#if function:stream_has_first_response?}}){{/if}}{{!
+}}{{/if (not function:stream?)}}

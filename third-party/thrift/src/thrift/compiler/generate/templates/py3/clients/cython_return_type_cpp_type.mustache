@@ -14,16 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-Cython type for return_type in services
-}}{{#function:stream?}}{{!
-  }}{{#function:stream_has_first_response?}}cResponseAndClientBufferedStream[{{!
-  }}{{#function:stream_first_response_type}}{{> types/cython_cpp_type}}{{/function:stream_first_response_type}},{{!
-  }}{{/function:stream_has_first_response?}}{{!
-  }}{{^function:stream_has_first_response?}}cClientBufferedStream[{{!
-  }}{{/function:stream_has_first_response?}}{{!
-  }}{{#function:stream_elem_type}}{{> types/cython_cpp_type}}{{/function:stream_elem_type}}]{{!
-}}{{/function:stream?}}{{!
-}}{{^function:stream?}}{{!
-}}{{> types/cython_cpp_type}}{{!
-}}{{/function:stream?}}
+}}
+{{! Cython type for return_type in services }}
+{{#pragma ignore-newlines}}
+  {{#if function:stream?}}
+    {{#if function:stream_has_first_response?}}
+cResponseAndClientBufferedStream[{{#partial types.cython_cpp_type type=function:self.return_type}},
+    {{#else}}
+cClientBufferedStream[
+    {{/if function:stream_has_first_response?}}
+{{#partial types.cython_cpp_type type=function:stream.elem_type}}]
+  {{#else}}
+{{#partial types.cython_cpp_type type=type:self}}
+  {{/if function:stream?}}

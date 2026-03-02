@@ -25,7 +25,7 @@ return types in Cython code.
 }}{{#type:binary?}}unique_ptr[{{/type:binary?}}{{!
 }}{{#type:structured?}}unique_ptr[{{/type:structured?}}{{!
 }}{{#type:container?}}unique_ptr[{{/type:container?}}{{!
-}}{{> types/cython_cpp_type}}{{!
+}}{{#partial types.cython_cpp_type type=type:self}}{{!
 }}{{#type:string?}}]{{/type:string?}}{{!
 }}{{#type:binary?}}]{{/type:binary?}}{{!
 }}{{#type:structured?}}]{{/type:structured?}}{{!

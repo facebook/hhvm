@@ -25,7 +25,7 @@ cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:n
 }} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
 {{/first?}}
     {{#constant:type}}
-    cdef {{^type:string?}}{{> types/cython_cpp_type}}{{/type:string?}}{{#type:string?}}const char*{{/type:string?}} {{!
+    cdef {{^type:string?}}{{#partial types.cython_cpp_type type=type:self}}{{/type:string?}}{{#type:string?}}const char*{{/type:string?}} {{!
     }}{{#partial types.c_binding node=constant:self}} "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{program:name}}_constants::{{constant:name}}"{{!
-    }}{{#type:structured?}}(){{/type:structured?}}{{#type:string?}}(){{/type:string?}}{{#type:binary?}}(){{/type:binary?}}{{#type:container?}}(){{/type:container?}}{{#type:enum?}}(){{/type:enum?}}
+    }}{{#if (or type:structured? type:string? type:binary? type:container? type:enum?)}}(){{/if}}
 {{/constant:type}}{{/program:constants}}

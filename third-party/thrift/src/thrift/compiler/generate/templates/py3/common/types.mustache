@@ -74,6 +74,63 @@ __from_cpp
 __make_instance
 {{/let partial}}
 
+
+{{!
+This is used to declare a cython type that is referring to or wrapping a
+c++ object. This combined partial handles both the custom type override
+(from the cpp.type annotation) and the basic type resolution.
+
+When enable_custom_type_overrides is true, custom types are checked first.
+When enable_custom_type_overrides is false, custom type overrides are skipped.
+`enable_custom_type_overrides=false` only applies to the top-level type, and will
+not apply recursively to nested types (e.g. container element types).
+}}
+{{#let export partial cython_cpp_type_resolved |type enable_custom_type_overrides| captures |c_binding|}}
+{{#pragma ignore-newlines}}
+  {{#if (and enable_custom_type_overrides type.customCppType?)}}
+    {{#if type.iobuf?}}
+_fbthrift_iobuf.cIOBuf
+    {{#else if type.iobufRef?}}
+unique_ptr[_fbthrift_iobuf.cIOBuf]
+    {{#else}}
+{{#if type.need_cbinding_path?}}{{type.cbinding_path}}.{{/if}}{{type.cythonCustomType}}
+    {{/if type.iobuf?}}
+{{#else if type.void?}}cFollyUnit
+{{#else if type.bool?}}cbool
+{{#else if type.byte?}}cint8_t
+{{#else if type.i16?}}cint16_t
+{{#else if type.i32?}}cint32_t
+{{#else if type.i64?}}cint64_t
+{{#else if type.double?}}double
+{{#else if type.float?}}float
+{{#else if type.string_or_binary?}}string
+
+  {{#else if (or type.enum? type.structured?)}}
+    {{#let ttype = type.true_type}}
+{{#if ttype.need_cbinding_path?}}{{ttype.cbinding_path}}.{{/if}}
+{{#partial c_binding node=ttype}}
+
+  {{#else if type.container?}}
+{{#if (and (not type.defaultTemplate?) type.need_cbinding_path?)}}{{type.cbinding_path}}.{{/if}}
+    {{#let ttype = type.true_type}}
+    {{#if type.map?}}
+{{type.cythonTemplate}}[
+{{#partial cython_cpp_type_resolved type=ttype.key_type enable_custom_type_overrides=true}},
+{{#partial cython_cpp_type_resolved type=ttype.val_type enable_custom_type_overrides=true}}
+]
+    {{#else}}
+{{type.cythonTemplate}}[{{#partial cython_cpp_type_resolved type=ttype.elem_type enable_custom_type_overrides=true}}]
+    {{/if type.map?}}
+  {{/if (and enable_custom_type_overrides type.customCppType?)}}
+{{/let partial}}
+
+{{! Exported partial for full cython cpp type (with custom type override) }}
+{{#let export partial cython_cpp_type |type| captures |cython_cpp_type_resolved|}}
+{{#pragma ignore-newlines}}
+{{#partial cython_cpp_type_resolved type=type enable_custom_type_overrides=true}}
+{{/let partial}}
+
+
 {{!
 This is used to declare a cython type that is referring to a Python value (ie,
 something that will be returned to external Python code or just used in Cython).

@@ -30,12 +30,12 @@ executing.
 @cython.auto_pickle(False)
 cdef class Promise_{{> types/cython_cpp_return_type_ident}}_Stream:
     cdef cFollyPromise[optional[{{!
-            }}{{> types/cython_cpp_type}}{{!
+            }}{{#partial types.cython_cpp_type type=type:self}}{{!
         }}]] cPromise
 
     @staticmethod
     cdef _fbthrift_create(cFollyPromise[optional[{{!
-            }}{{> types/cython_cpp_type}}{{!
+            }}{{#partial types.cython_cpp_type type=type:self}}{{!
         }}]] cPromise):
         cdef Promise_{{> types/cython_cpp_return_type_ident}}_Stream inst = Promise_{{> types/cython_cpp_return_type_ident}}_Stream.__new__({{!
         }}Promise_{{> types/cython_cpp_return_type_ident}}_Stream)

@@ -17,16 +17,16 @@
 }}
 client, pyfuture, options = <object> userdata  {{! so client lives on until we exit }}
 if {{#function:exceptions}}{{!
-}}result.hasException[{{#field:type}}{{> types/cython_cpp_type}}{{/field:type}}]():
+}}result.hasException[{{#partial types.cython_cpp_type type=field:self.type}}]():
     {{#field:type}}
     try:
         exc = {{^program:inplace_migrate?}}{{!
 }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-            }}try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception()))
+            }}try_make_shared_exception[{{#partial types.cython_cpp_type type=type:self}}](result.exception()))
 {{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{#type:structured}}{{!
         }}{{#partial types.python_type type=type:self}}.from_python({{!
         }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp(
-            unwrap_exception[{{> types/cython_cpp_type}}](result.exception())
+            unwrap_exception[{{#partial types.cython_cpp_type type=type:self}}](result.exception())
         ))
 {{/type:structured}}{{/program:inplace_migrate?}}
     except Exception as ex:

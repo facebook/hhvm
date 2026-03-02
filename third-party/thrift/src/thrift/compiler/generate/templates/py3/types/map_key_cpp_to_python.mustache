@@ -41,7 +41,7 @@ Used to convert C++ `ckey` to python object.
   }}{{#program:inplace_migrate?}}{{!
     }}{{#partial types.python_type type=type:self}}.from_python({{!
     }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
-    }}__deref_const[{{> types/cython_cpp_type }}](ckey))){{!
+    }}__deref_const[{{#partial types.cython_cpp_type type=type:self}}](ckey))){{!
   }}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
     }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(ckey)){{!
   }}{{/program:inplace_migrate?}}{{!

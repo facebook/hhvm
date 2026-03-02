@@ -41,12 +41,12 @@ to a python type.
 }}{{#type:binary?}}result.value(){{/type:binary?}}{{!
 }}{{#type:structured}}{{^program:inplace_migrate?}}{{!
   }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-  }}make_shared[{{> types/cython_cpp_type}}]({{!
+  }}make_shared[{{#partial types.cython_cpp_type type=type:self}}]({{!
   }}cmove(result.value()))){{!
 }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
   }}{{#partial types.python_type type=type:self}}.from_python({{!
   }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
-  }}__deref_const[{{> types/cython_cpp_type }}](result.value()))){{!
+  }}__deref_const[{{#partial types.cython_cpp_type type=type:self}}](result.value()))){{!
 }}{{/program:inplace_migrate?}}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{#partial types.container_from_cpp type=type:self}}(cmove(result.value())){{!

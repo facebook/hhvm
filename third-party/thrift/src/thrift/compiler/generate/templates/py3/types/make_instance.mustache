@@ -21,13 +21,12 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
 
 
 }}
-    cdef {{> types/cython_cpp_type}} c_inst
-    {{#type:set?}}{{#type:set_elem_type}}
-    cdef {{> types/cython_cpp_type}} c_item
-    {{/type:set_elem_type}}{{/type:set?}}
-    {{#type:map?}}{{#type:key_type}}
-    cdef {{> types/cython_cpp_type}} c_key
-    {{/type:key_type}}{{/type:map?}}
+    cdef {{#partial types.cython_cpp_type type=type:self}} c_inst
+  {{#if type:set?}}
+    cdef {{#partial types.cython_cpp_type type=type:true_type.elem_type}} c_item
+  {{#else if type:map?}}
+    cdef {{#partial types.cython_cpp_type type=type:true_type.key_type}} c_key
+  {{/if type:set?}}
     if items is None:
         return cmove(c_inst)
 {{^type:map?}}

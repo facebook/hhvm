@@ -75,7 +75,7 @@ else:
 }}{{/type:enum}}{{!
 }}{{#type:structured?}}{{!
 }}self.py_value = {{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-  }}make_shared[{{> types/cython_cpp_type}}]({{!
+  }}make_shared[{{#partial types.cython_cpp_type type=type:self}}]({{!
   }}deref(self.{{#partial types.cpp_obj}}).get_{{field:py_name}}())){{!
 }}{{/type:structured?}}{{!
 }}{{#type:container?}}{{!

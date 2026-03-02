@@ -38,11 +38,11 @@ to be converted from unicode to binary representation.
 }}{{#type:binary?}}(deref({{field:py_name}})){{/type:binary?}}{{!
 }}{{#type:structured}}{{^program:inplace_migrate?}}{{!
 }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-  }}shared_ptr[{{> types/cython_cpp_type}}]({{field:py_name}}.release())){{!
+  }}shared_ptr[{{#partial types.cython_cpp_type type=type:self}}]({{field:py_name}}.release())){{!
 }}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
   }}{{#partial types.python_type type=type:self}}.from_python({{!
   }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
-  }}__deref_const[{{> types/cython_cpp_type }}](cmove({{field:py_name}})))){{!
+  }}__deref_const[{{#partial types.cython_cpp_type type=type:self}}](cmove({{field:py_name}})))){{!
 }}{{/program:inplace_migrate?}}{{/type:structured}}{{!
 }}{{#type:container?}}{{!
   }}{{#partial types.container_from_cpp type=type:self}}(deref({{field:py_name}})){{!

@@ -88,7 +88,7 @@ cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:n
         {{#field:type}}const {{> types/cython_cpp_struct_field_type}}& get_{{field:py_name}} "get_{{field:cpp_name}}" () const{{/field:type}}
         {{! Note that the set methods don't take in a shared/unique_ptr, they just take in an object ref,
             but they return the appropriate ptr }}
-        {{#field:type}}{{> types/cython_cpp_struct_field_type}}& set_{{field:py_name}} "set_{{field:cpp_name}}" (const {{> types/cython_cpp_type}}&){{/field:type}}
+        {{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}& set_{{field:py_name}} "set_{{field:cpp_name}}" (const {{#partial types.cython_cpp_type type=field:self.type}}&)
     {{/struct:py3_fields}}{{/struct:union?}}
 
 {{/program:filtered_structs}}

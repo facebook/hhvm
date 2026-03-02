@@ -26,7 +26,7 @@ This template assumes that the Python object is in a variable named <field>.
 }}{{#type:iobuf?}}deref((<_fbthrift_iobuf.IOBuf>{{field:py_name}}).c_clone()){{/type:iobuf?}}{{!
 }}{{#type:iobufRef?}}((<_fbthrift_iobuf.IOBuf>{{field:py_name}}).c_clone()){{/type:iobufRef?}}{{!
 }}{{#type:flexibleBinary?}}{{!
-  }}{{> types/cython_cpp_type}}(cmove(<string>{{field:py_name}})){{!
+  }}{{#partial types.cython_cpp_type type=type:self}}(cmove(<string>{{field:py_name}})){{!
 }}{{/type:flexibleBinary?}}{{!
 }}{{^type:customBinaryType?}}{{!
 }}{{#type:bool?}}{{field:py_name}}{{/type:bool?}}{{!
@@ -46,5 +46,5 @@ This template assumes that the Python object is in a variable named <field>.
 }}{{#type:container?}}{{!
   }}{{#partial types.container_to_cpp type=type:self}}({{field:py_name}}){{!
 }}{{/type:container?}}{{!
-}}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>{{field:py_name}}{{/type:enum?}}{{!
+}}{{#type:enum?}}<{{#partial types.cython_cpp_type type=type:self}}><int>{{field:py_name}}{{/type:enum?}}{{!
 }}{{/type:customBinaryType?}}

@@ -112,7 +112,7 @@ cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{#par
 
 {{#program:gen_legacy_container_converters?}}
 {{#program:containerTypes}}
-cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *:
+cdef {{#partial types.cython_cpp_type type=type:self}} {{type:flat_name}}__make_instance(object items) except *:
 {{#program:gen_py3_cython?}}
     return _fbthrift_ctypes.{{type:flat_name}}__make_instance(items)
 {{/program:gen_py3_cython?}}

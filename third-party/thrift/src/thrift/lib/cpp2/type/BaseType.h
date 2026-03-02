@@ -130,8 +130,8 @@ constexpr protocol::TType toTType(BaseType type) {
     case BaseType::Exception:
       return TType::T_STRUCT;
     default:
-      folly::throw_exception<std::invalid_argument>(
-          "Unsupported conversion from: " + std::to_string((int)type));
+      folly::throw_exception_fmt_format<std::invalid_argument>(
+          "Unsupported conversion from: {}", static_cast<int>(type));
   }
 }
 
@@ -172,8 +172,8 @@ constexpr BaseType toBaseType(protocol::TType type) {
     case TType::T_UTF16:
     case TType::T_STREAM:
     default:
-      folly::throw_exception<std::invalid_argument>(
-          "Unsupported conversion from: " + std::to_string(type));
+      folly::throw_exception_fmt_format<std::invalid_argument>(
+          "Unsupported conversion from: {}", static_cast<int>(type));
   }
 }
 

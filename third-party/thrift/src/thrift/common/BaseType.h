@@ -16,9 +16,12 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace apache::thrift::type {
 
-enum class BaseType {
+// Values are 1:1 with TypeName union field IDs.
+enum class BaseType : int16_t {
   Void = 0,
 
   // Integer types.
@@ -50,4 +53,4 @@ enum class BaseType {
   Map = 16
 };
 
-}
+} // namespace apache::thrift::type

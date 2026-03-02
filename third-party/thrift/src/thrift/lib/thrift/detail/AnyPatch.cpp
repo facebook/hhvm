@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/container/small_vector.h>
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>

@@ -426,7 +426,13 @@ let handle :
   | ServerCommandTypes.FIND_MY_TESTS (max_distance, max_test_files, actions) ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let result =
-      ServerFindMyTests.go ~ctx ~genv ~env ~max_distance ~max_test_files actions
+      FindMyTestsStaging.go
+        ~ctx
+        ~genv
+        ~env
+        ~max_distance
+        ~max_test_files
+        actions
     in
     (env, result)
   | ServerCommandTypes.PACKAGE_LINT file ->

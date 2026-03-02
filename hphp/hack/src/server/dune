@@ -61,7 +61,6 @@
  (modules
   fullFidelityParseService
   serverCheckUtils
-  serverFindMyTests
   serverIdle
   serverTastHolesBatch
   serverInvalidateUnits
@@ -83,6 +82,7 @@
   direct_decl_service
   dfind
   fileutils
+  findmytests_stubs
   format_helpers
   hg
   hhi
@@ -152,6 +152,7 @@
     decl_fold_options
     decl_parser_options
     direct_decl_service
+    findmytests_stubs
     folly_stubs
     hh_server_provider_backend_stubs
     ide_highlight_refs

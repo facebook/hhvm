@@ -363,12 +363,40 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
               set_mode
                 ~validate:false
                 (match !mode with
-                | None -> MODE_FIND_MY_TESTS [symbol]
-                | Some (MODE_FIND_MY_TESTS symbols) ->
-                  MODE_FIND_MY_TESTS (symbol :: symbols)
+                | None -> MODE_FIND_MY_TESTS_V1 [symbol]
+                | Some (MODE_FIND_MY_TESTS_V1 symbols) ->
+                  MODE_FIND_MY_TESTS_V1 (symbol :: symbols)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (deprecated, use --find-my-tests-v1) return test files that reference the given methods [C::m list]"
+      );
+      ( "--find-my-tests-v1",
+        Arg.Rest
+          begin
+            fun symbol ->
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_FIND_MY_TESTS_V1 [symbol]
+                | Some (MODE_FIND_MY_TESTS_V1 symbols) ->
+                  MODE_FIND_MY_TESTS_V1 (symbol :: symbols)
                 | _ -> raise (Arg.Bad "only a single mode should be specified"))
           end,
         " (mode) return test files that reference the given methods [C::m list]"
+      );
+      ( "--find-my-tests-staging",
+        Arg.Rest
+          begin
+            fun symbol ->
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_FIND_MY_TESTS_STAGING [symbol]
+                | Some (MODE_FIND_MY_TESTS_STAGING symbols) ->
+                  MODE_FIND_MY_TESTS_STAGING (symbol :: symbols)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (mode) return test files that reference the given methods, using the staging implementation [C::m list]"
       );
       ( "--find-my-tests-max-distance",
         Arg.Int (fun max_distance -> find_my_tests_max_distance := max_distance),

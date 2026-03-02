@@ -185,6 +185,6 @@
 (library
  (name findmytests_stubs)
  (wrapped false)
- (modules findMyTestsStaging)
+ (modules findMyTestsStaging findMyTestsV1)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

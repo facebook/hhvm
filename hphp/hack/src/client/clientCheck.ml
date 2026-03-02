@@ -1015,7 +1015,7 @@ let main_internal
     in
     List.iter results ~f:(fun s -> print_refs s ~json:true);
     Lwt.return (Exit_status.No_error, Telemetry.create ())
-  | ClientEnv.MODE_FIND_MY_TESTS symbols ->
+  | ClientEnv.MODE_FIND_MY_TESTS_V1 symbols ->
     let open ServerCommandTypes.Find_my_tests in
     let parse_symbol symbol =
       let pieces = Str.split (Str.regexp "|") symbol in
@@ -1051,7 +1051,55 @@ let main_internal
 
     let%lwt (result, telemtry) =
       rpc args
-      @@ ServerCommandTypes.FIND_MY_TESTS
+      @@ ServerCommandTypes.FIND_MY_TESTS_V1
+           ( args.find_my_tests_max_distance,
+             args.find_my_tests_max_test_files,
+             actions )
+    in
+    (match result with
+    | Ok fmt_result ->
+      print_find_my_tests_result fmt_result ~json:args.output_json;
+      Lwt.return (Exit_status.No_error, telemtry)
+    | Error error ->
+      Printf.eprintf "%s\n" error;
+      Lwt.return (Exit_status.Input_error, telemtry))
+  | ClientEnv.MODE_FIND_MY_TESTS_STAGING symbols ->
+    let open ServerCommandTypes.Find_my_tests in
+    let parse_symbol symbol =
+      let pieces = Str.split (Str.regexp "|") symbol in
+      let (kind, name) =
+        match pieces with
+        | [name] -> (None, name)
+        | [kind; name] -> (Some kind, name)
+        | _ ->
+          Printf.eprintf "Invalid input\n";
+          raise Exit_status.(Exit_with Input_error)
+      in
+      let action =
+        parse_name_or_member_id
+          ~name_and_member_action:(fun class_name member_name ->
+            match kind with
+            | Some "Method"
+            | None ->
+              Method { class_name; member_name }
+            | Some "Typeconst" -> Typeconst { class_name; member_name }
+            | Some _ -> raise Exit_status.(Exit_with Input_error))
+          ~name_only_action:(fun name ->
+            match kind with
+            | Some "Class" -> Class { class_name = name }
+            | Some "Typedef" -> Typedef { name }
+            | Some _
+            | None ->
+              raise Exit_status.(Exit_with Input_error))
+          name
+      in
+      action
+    in
+    let actions = List.map ~f:parse_symbol symbols in
+
+    let%lwt (result, telemtry) =
+      rpc args
+      @@ ServerCommandTypes.FIND_MY_TESTS_STAGING
            ( args.find_my_tests_max_distance,
              args.find_my_tests_max_test_files,
              actions )

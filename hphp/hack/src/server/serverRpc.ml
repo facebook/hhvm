@@ -423,7 +423,15 @@ let handle :
   | ServerCommandTypes.DEPS_IN_BATCH positions ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerDepsInBatch.go ~ctx ~genv ~env positions)
-  | ServerCommandTypes.FIND_MY_TESTS (max_distance, max_test_files, actions) ->
+  | ServerCommandTypes.FIND_MY_TESTS_V1 (max_distance, max_test_files, actions)
+    ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let result =
+      FindMyTestsV1.go ~ctx ~genv ~env ~max_distance ~max_test_files actions
+    in
+    (env, result)
+  | ServerCommandTypes.FIND_MY_TESTS_STAGING
+      (max_distance, max_test_files, actions) ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let result =
       FindMyTestsStaging.go

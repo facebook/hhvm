@@ -439,7 +439,10 @@ type _ t =
   | DEPS_IN_BATCH :
       (string * int * int) list
       -> Find_refs.result_or_retry list t
-  | FIND_MY_TESTS :
+  | FIND_MY_TESTS_V1 :
+      (int * int option * Find_my_tests.action list)
+      -> Find_my_tests.result t
+  | FIND_MY_TESTS_STAGING :
       (int * int option * Find_my_tests.action list)
       -> Find_my_tests.result t
   | PACKAGE_LINT : string -> Package_lint.fast_result t
@@ -500,7 +503,8 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IDE_FIND_REFS_BY_SYMBOL _ -> true
   | IDE_GO_TO_IMPL_BY_SYMBOL _ -> true
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
-  | FIND_MY_TESTS _ -> true
+  | FIND_MY_TESTS_V1 _ -> true
+  | FIND_MY_TESTS_STAGING _ -> true
   | SAVE_NAMING _ -> false
   (* Codebase-wide rename, uses find references *)
   | RENAME _ -> true

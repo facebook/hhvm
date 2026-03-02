@@ -410,13 +410,13 @@ class DateInterval {
   public int $i;
   public int $s;
   public int $invert;
-  public mixed $days;
+  public int $days;
 
   public function __construct(string $interval_spec);
   static public function createFromDateString(
     string $time,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function format(string $format): HH\FIXME\MISSING_RETURN_TYPE;
+  ): DateInterval;
+  public function format(string $format): string;
 }
 
 class DatePeriod implements Iterator<DateTime> {

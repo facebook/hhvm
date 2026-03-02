@@ -334,7 +334,7 @@ enum FbCompactSerializeCode {
   FB_CS_STOP       = 12,
   FB_CS_SKIP       = 13,
   FB_CS_VECTOR     = 14,
-  FB_CS_OBJ        = 15,
+  FB_CS_EXT        = 15,
   FB_CS_MAX_CODE   = 16,
 };
 

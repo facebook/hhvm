@@ -137,3 +137,7 @@ HPHP::jit::(anonymous namespace)::tl_dataStorePtr
 HPHP::(anonymous namespace)::c_hsl_locale
 
 HPHP::s_thriftWorker
+
+# Thread-local 64-bit RNG for faster folly::Random::oneIn() calls (D94603647)
+HPHP::threadLocalRng64()::tl_rng
+guard variable for HPHP::threadLocalRng64()::tl_rng

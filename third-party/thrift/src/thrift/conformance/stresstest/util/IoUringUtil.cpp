@@ -41,6 +41,10 @@ DEFINE_int32(io_zcrx_num_pages, 16384, "");
 DEFINE_int32(io_zcrx_refill_entries, 16384, "");
 DEFINE_string(io_zcrx_ifname, "eth0", "");
 DEFINE_int32(io_zcrx_queue_id, 0, "");
+DEFINE_int32(
+    io_zcrx_hw_queues,
+    0,
+    "Number of HW queues for ZC Rx. If 0, assumes nr of io_threads == HW queues and skips buffer pool import/export.");
 #if FOLLY_HAS_LIBURING
 
 namespace apache::thrift::stress {
@@ -122,13 +126,21 @@ folly::IoUringBackend::Options getIoUringOptions() {
 
   static std::atomic<int32_t> currQueueId{FLAGS_io_zcrx_queue_id};
   if (FLAGS_io_zcrx) {
-    options.setZeroCopyRx(true)
-        .setZeroCopyRxInterface(FLAGS_io_zcrx_ifname)
-        .setZeroCopyRxQueue(currQueueId.fetch_add(1))
-        .setZeroCopyRxNumPages(FLAGS_io_zcrx_num_pages)
-        .setZeroCopyRxRefillEntries(FLAGS_io_zcrx_refill_entries)
-        .setResolveNapiCallback(resolve_napi_callback)
-        .setZcrxSrcPortCallback(src_port_callback);
+    int32_t queueId = currQueueId.fetch_add(1);
+    int32_t threadIdx = queueId - FLAGS_io_zcrx_queue_id;
+    bool isOwner =
+        FLAGS_io_zcrx_hw_queues <= 0 || threadIdx < FLAGS_io_zcrx_hw_queues;
+
+    if (isOwner) {
+      options.setZeroCopyRx(true)
+          .setZeroCopyRxInterface(FLAGS_io_zcrx_ifname)
+          .setZeroCopyRxQueue(queueId)
+          .setZeroCopyRxNumPages(FLAGS_io_zcrx_num_pages)
+          .setZeroCopyRxRefillEntries(FLAGS_io_zcrx_refill_entries)
+          .setResolveNapiCallback(resolve_napi_callback)
+          .setZcrxSrcPortCallback(src_port_callback);
+    }
+    // else: non-owner thread gets plain io_uring without zcrx
   }
 
   if (FLAGS_io_zctx && folly::IoUringArena::initialized()) {

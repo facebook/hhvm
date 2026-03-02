@@ -38,6 +38,7 @@ DECLARE_int32(io_zcrx_num_pages);
 DECLARE_int32(io_zcrx_refill_entries);
 DECLARE_string(io_zcrx_ifname);
 DECLARE_int32(io_zcrx_queue_id);
+DECLARE_int32(io_zcrx_hw_queues);
 
 #if FOLLY_HAS_LIBURING
 

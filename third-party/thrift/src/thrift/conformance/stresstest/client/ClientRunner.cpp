@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 
 #include <folly/io/async/IoUringBackend.h>
+#include <folly/io/async/IoUringBufferPoolSharing.h>
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 
@@ -255,6 +256,18 @@ ClientRunner::ClientRunner(const ClientConfig& config)
     clientThreads_.emplace_back(
         std::make_unique<ClientThread>(
             configCopy, i, *loadGenerator_[i], config.useLoadGenerator));
+  }
+
+  if (config.connConfig.ioUringZcrx && FLAGS_io_zcrx_hw_queues > 0) {
+    std::vector<folly::EventBase*> evbs;
+    evbs.reserve(clientThreads_.size());
+    for (auto& ct : clientThreads_) {
+      evbs.push_back(ct->getEventBase());
+    }
+    if (!folly::setupIoUringBufferPoolSharing(
+            evbs, FLAGS_io_zcrx_hw_queues, FLAGS_io_zcrx_queue_id)) {
+      LOG(FATAL) << "Failed to set up buffer pool sharing";
+    }
   }
 }
 

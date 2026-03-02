@@ -396,8 +396,8 @@ class VerifiedSizeCursorWriter : public BaseCursorWriter<ProtocolWriter> {
     this->state_ = State::Done;
 
     if (actualSize != expectedSize_) {
-      folly::throw_exception<std::runtime_error>(fmt::format(
-          "Expected {} elements but wrote {}", expectedSize_, actualSize));
+      folly::throw_exception_fmt_format<std::runtime_error>(
+          "Expected {} elements but wrote {}", expectedSize_, actualSize);
     }
   }
 };

@@ -49,10 +49,10 @@ void ensureTypesCompatible(protocol::TType nextTType) {
     requestedType = type::BaseType::Binary;
   }
   if (nextType != requestedType) {
-    folly::throw_exception<std::runtime_error>(fmt::format(
+    folly::throw_exception_fmt_format<std::runtime_error>(
         "Expected type {} but got {}",
         type::getBaseTypeName(requestedType),
-        type::getBaseTypeName(nextType)));
+        type::getBaseTypeName(nextType));
   }
 }
 
@@ -694,8 +694,8 @@ class StructuredDynamicCursorWriter : detail::BaseCursorWriter<ProtocolWriter> {
       auto fieldHandle =
           structuredNode_->fieldHandleFor(type::FieldId{fieldId});
       if (!fieldHandle.valid()) {
-        folly::throw_exception<std::runtime_error>(
-            fmt::format("Unknown field id: {}", fieldId));
+        folly::throw_exception_fmt_format<std::runtime_error>(
+            "Unknown field id: {}", fieldId);
       }
       const auto& fieldName =
           structuredNode_->at(fieldHandle).identity().name();

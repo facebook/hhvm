@@ -75,26 +75,15 @@ mstch_factories::mstch_factories() {
 
 mstch::node mstch_type::get_structured() {
   if (const t_structured* structured = resolved_type_->try_as<t_structured>()) {
-    std::string id = program_cache_id(
-        type_->program(), get_type_namespace(type_->program()));
-    return make_mstch_array_cached(
-        std::vector<const t_structured*>{structured},
-        *context_.struct_factory,
-        context_.struct_cache,
-        id);
+    return context_.struct_factory->make_mstch_object(
+        structured, context_, pos_);
   }
   return mstch::node();
 }
 
 mstch::node mstch_type::get_enum() {
   if (const t_enum* enum_ = resolved_type_->try_as<t_enum>()) {
-    std::string id = program_cache_id(
-        type_->program(), get_type_namespace(type_->program()));
-    return make_mstch_array_cached(
-        std::vector<const t_enum*>{enum_},
-        *context_.enum_factory,
-        context_.enum_cache,
-        id);
+    return context_.enum_factory->make_mstch_object(enum_, context_, pos_);
   }
   return mstch::node();
 }

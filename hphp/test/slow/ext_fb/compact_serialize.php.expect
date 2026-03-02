@@ -1,3 +1,5 @@
+
+
 ====
 x = NULL
 
@@ -22156,3 +22158,103 @@ vec(3) {
 bool(false)
 bool(false)
 int(3)
+====
+==== testing compact keyset serialization
+
+keyset = keyset [
+]
+legacy hex: 
+FB FC 
+compact hex: 
+FF 00 FC 
+legacy size: 2, compact size: 3
+round-trip success: true
+round-trip result === original: true
+result is keyset: true
+
+keyset = keyset [
+  1,
+]
+legacy hex: 
+FB 01 01 FC 
+compact hex: 
+FF 00 01 FC 
+legacy size: 4, compact size: 4
+round-trip success: true
+round-trip result === original: true
+result is keyset: true
+
+keyset = keyset [
+  'a',
+]
+legacy hex: 
+FB F8 61 F8 61 FC 
+compact hex: 
+FF 00 F8 61 FC 
+legacy size: 6, compact size: 5
+round-trip success: true
+round-trip result === original: true
+result is keyset: true
+
+keyset = keyset [
+  1,
+  2,
+  3,
+]
+legacy hex: 
+FB 01 01 02 02 03 03 FC  
+compact hex: 
+FF 00 01 02 03 FC 
+legacy size: 8, compact size: 6
+round-trip success: true
+round-trip result === original: true
+result is keyset: true
+
+keyset = keyset [
+  'a',
+  'b',
+  'c',
+]
+legacy hex: 
+FB F8 61 F8 61 F8 62 F8  62 F8 63 F8 63 FC 
+compact hex: 
+FF 00 F8 61 F8 62 F8 63  FC 
+legacy size: 14, compact size: 9
+round-trip success: true
+round-trip result === original: true
+result is keyset: true
+
+keyset = keyset [
+  1,
+  'a',
+  2,
+  'b',
+]
+legacy hex: 
+FB 01 01 F8 61 F8 61 02  02 F8 62 F8 62 FC 
+compact hex: 
+FF 00 01 F8 61 02 F8 62  FC 
+legacy size: 14, compact size: 9
+round-trip success: true
+round-trip result === original: true
+result is keyset: true
+
+==== testing compact keyset deserialization from raw bytes
+raw keyset [1,2,3]: keyset [
+  1,
+  2,
+  3,
+]
+is keyset: true
+success: true
+raw empty keyset: keyset [
+]
+is keyset: true
+success: true
+raw keyset ['x','y']: keyset [
+  'x',
+  'y',
+]
+is keyset: true
+success: true
+unknown ext sub-type: success=false, errcode=3

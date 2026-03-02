@@ -66,6 +66,7 @@ const int64_t k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION = 1<<4;
 
 // fb_compact_serialize options
 const int64_t FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS = 1 << 0;
+const int64_t FB_COMPACT_SERIALIZE_KEYSETS = 1 << 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -306,6 +307,11 @@ Variant fb_unserialize(const char* str,
  *  14 (VECTOR): followed by n serialized values until STOP is seen.
  *      Represents a vector of n values.
  *
+ *  15 (EXT): extension code. Followed by a 1-byte sub-type, then sub-type
+ *      specific data. Sub-types:
+ *        0 (EXT_KEYSET): followed by serialized values (int or string) until
+ *          STOP is seen. Represents a keyset.
+ *
  *  In addition, if <c> & 0xf0 != 0xf0, most significant bits of <c> mean:
  *
  *  - 0....... 7-bit unsigned int
@@ -336,6 +342,11 @@ enum FbCompactSerializeCode {
   FB_CS_VECTOR     = 14,
   FB_CS_EXT        = 15,
   FB_CS_MAX_CODE   = 16,
+};
+
+// Extension sub-type codes (used with FB_CS_EXT / 0xFF prefix)
+enum FbCompactSerializeExtCode : uint8_t {
+  FB_CS_EXT_KEYSET = 0,
 };
 
 // 1 byte: 0<7 bits>
@@ -369,6 +380,12 @@ static void fb_compact_serialize_code(StringBuffer& sb,
   assertx(code == (code & kCodeMask));
   uint8_t v = (kCodePrefix | code);
   sb.append(reinterpret_cast<char*>(&v), 1);
+}
+
+static void fb_compact_serialize_ext_code(StringBuffer& sb,
+                                          FbCompactSerializeExtCode ext) {
+  fb_compact_serialize_code(sb, FB_CS_EXT);
+  sb.append(reinterpret_cast<const char*>(&ext), 1);
 }
 
 static void fb_compact_serialize_int64(StringBuffer& sb, int64_t val) {
@@ -501,22 +518,40 @@ static void fb_compact_serialize_array_as_map(
 }
 
 static void fb_compact_serialize_keyset(
-    StringBuffer& sb, const Array& arr) {
-  fb_compact_serialize_code(sb, FB_CS_MAP);
-  IterateV(
-    arr.get(),
-    [&](TypedValue v) {
-      if (isStringType(v.m_type)) {
-        fb_compact_serialize_string(sb, StrNR{v.m_data.pstr});
-        fb_compact_serialize_string(sb, StrNR{v.m_data.pstr});
-      } else {
-        assertx(v.m_type == KindOfInt64);
-        fb_compact_serialize_int64(sb, v.m_data.num);
-        fb_compact_serialize_int64(sb, v.m_data.num);
+    StringBuffer& sb, const Array& arr, int64_t options) {
+  if (options & FB_COMPACT_SERIALIZE_KEYSETS) {
+    // Compact encoding: EXT_KEYSET, values..., STOP
+    fb_compact_serialize_ext_code(sb, FB_CS_EXT_KEYSET);
+    IterateV(
+      arr.get(),
+      [&](TypedValue v) {
+        if (isStringType(v.m_type)) {
+          fb_compact_serialize_string(sb, StrNR{v.m_data.pstr});
+        } else {
+          assertx(v.m_type == KindOfInt64);
+          fb_compact_serialize_int64(sb, v.m_data.num);
+        }
       }
-    }
-  );
-  fb_compact_serialize_code(sb, FB_CS_STOP);
+    );
+    fb_compact_serialize_code(sb, FB_CS_STOP);
+  } else {
+    // Legacy encoding: MAP with key=key pairs
+    fb_compact_serialize_code(sb, FB_CS_MAP);
+    IterateV(
+      arr.get(),
+      [&](TypedValue v) {
+        if (isStringType(v.m_type)) {
+          fb_compact_serialize_string(sb, StrNR{v.m_data.pstr});
+          fb_compact_serialize_string(sb, StrNR{v.m_data.pstr});
+        } else {
+          assertx(v.m_type == KindOfInt64);
+          fb_compact_serialize_int64(sb, v.m_data.num);
+          fb_compact_serialize_int64(sb, v.m_data.num);
+        }
+      }
+    );
+    fb_compact_serialize_code(sb, FB_CS_STOP);
+  }
 }
 
 static int fb_compact_serialize_variant(
@@ -568,7 +603,7 @@ static int fb_compact_serialize_variant(
     case KindOfKeyset: {
       Array arr = var.toArray();
       assertx(arr->isKeysetType());
-      fb_compact_serialize_keyset(sb, std::move(arr));
+      fb_compact_serialize_keyset(sb, std::move(arr), options);
       return 0;
     }
 
@@ -893,6 +928,41 @@ int fb_compact_unserialize_from_buffer(
       p += 1;
 
       out = arr;
+      break;
+    }
+
+    case FB_CS_EXT:
+    {
+      CHECK_ENOUGH(1, p, n);
+      uint8_t ext_code = (unsigned char)buf[p];
+      p += 1;
+      switch (ext_code) {
+        case FB_CS_EXT_KEYSET: {
+          Array arr = Array::CreateKeyset();
+          while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
+            Variant value;
+            int err =
+              fb_compact_unserialize_from_buffer(value, buf, n, p, depth + 1);
+            if (err) {
+              return err;
+            }
+            if (value.getType() == KindOfInt64 ||
+                value.getType() == KindOfString ||
+                value.getType() == KindOfPersistentString) {
+              arr.append(value);
+            } else {
+              return FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
+            }
+          }
+          // Consume STOP
+          CHECK_ENOUGH(1, p, n);
+          p += 1;
+          out = arr;
+          break;
+        }
+        default:
+          return FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
+      }
       break;
     }
 
@@ -1525,6 +1595,7 @@ struct FBExtension : Extension {
                 k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION);
 
     HHVM_RC_INT_SAME(FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS);
+    HHVM_RC_INT_SAME(FB_COMPACT_SERIALIZE_KEYSETS);
 
     HHVM_FE(fb_serialize);
     HHVM_FE(fb_unserialize);

@@ -231,4 +231,82 @@ function fb_cs_entrypoint(): void {
   var_dump(fb_compact_unserialize($s, inout $ret, inout $err));
   var_dump($ret);
   var_dump($err);
+
+  echo "====\n";
+  echo "==== testing compact keyset serialization\n";
+
+  // Test compact keyset encoding with FB_COMPACT_SERIALIZE_KEYSETS option
+  $keysets = vec[
+    keyset[],
+    keyset[1],
+    keyset['a'],
+    keyset[1, 2, 3],
+    keyset['a', 'b', 'c'],
+    keyset[1, 'a', 2, 'b'],
+  ];
+
+  foreach ($keysets as $ks) {
+    echo "\n";
+    printf("keyset = %s\n", var_export($ks, true));
+
+    // Legacy encoding (no flag): MAP with key=key pairs
+    $legacy = fb_compact_serialize($ks);
+    printf("legacy hex: %s\n", hexdump($legacy));
+
+    // Compact encoding (with flag): EXT_KEYSET with values only
+    $compact = fb_compact_serialize($ks, FB_COMPACT_SERIALIZE_KEYSETS);
+    printf("compact hex: %s\n", hexdump($compact));
+
+    // Size comparison
+    $legacy_len = strlen($legacy as string);
+    $compact_len = strlen($compact as string);
+    printf("legacy size: %d, compact size: %d\n", $legacy_len, $compact_len);
+
+    // Round-trip the compact encoding
+    $ret = null;
+    $err = null;
+    $result = fb_compact_unserialize($compact, inout $ret, inout $err);
+    printf("round-trip success: %s\n", var_export($ret === true, true));
+    printf("round-trip result === original: %s\n",
+      var_export($result === $ks, true));
+    printf("result is keyset: %s\n", var_export($result is keyset<_>, true));
+  }
+
+  echo "\n==== testing compact keyset deserialization from raw bytes\n";
+
+  // Hand-crafted EXT_KEYSET: 0xFF 0x00 <values...> 0xFC
+  // EXT=0xFF, EXT_KEYSET=0x00, 1, 2, 3, STOP=0xFC
+  $s = "\xff\x00\x01\x02\x03\xfc";
+  $ret = null;
+  $err = null;
+  $result = fb_compact_unserialize($s, inout $ret, inout $err);
+  printf("raw keyset [1,2,3]: %s\n", var_export($result, true));
+  printf("is keyset: %s\n", var_export($result is keyset<_>, true));
+  printf("success: %s\n", var_export($ret === true, true));
+
+  // Empty keyset: 0xFF 0x00 0xFC
+  $s = "\xff\x00\xfc";
+  $ret = null;
+  $err = null;
+  $result = fb_compact_unserialize($s, inout $ret, inout $err);
+  printf("raw empty keyset: %s\n", var_export($result, true));
+  printf("is keyset: %s\n", var_export($result is keyset<_>, true));
+  printf("success: %s\n", var_export($ret === true, true));
+
+  // String keyset: 0xFF 0x00 STRING_1 'x' STRING_1 'y' STOP
+  $s = "\xff\x00\xf8x\xf8y\xfc";
+  $ret = null;
+  $err = null;
+  $result = fb_compact_unserialize($s, inout $ret, inout $err);
+  printf("raw keyset ['x','y']: %s\n", var_export($result, true));
+  printf("is keyset: %s\n", var_export($result is keyset<_>, true));
+  printf("success: %s\n", var_export($ret === true, true));
+
+  // Unknown extension sub-type should fail
+  $s = "\xff\x01\xfc";  // EXT, sub-type 1 (unknown), STOP
+  $ret = null;
+  $err = null;
+  $result = fb_compact_unserialize($s, inout $ret, inout $err);
+  printf("unknown ext sub-type: success=%s, errcode=%s\n",
+    var_export($ret, true), var_export($err, true));
 }

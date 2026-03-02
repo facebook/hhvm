@@ -53,6 +53,10 @@ function fb_unserialize(mixed $thing,
  *    for vecs and dicts, matching varrays and darrays. This format is always
  *    more compact than the Hack array format, and produces the same darray
  *    results on deserialization, so we want to make it the new default.
+ *  - FB_COMPACT_SERIALIZE_KEYSETS: use a compact encoding for keysets that
+ *    stores each element once instead of duplicating it as both key and value.
+ *    Deserialization produces a keyset. Without this flag, keysets are encoded
+ *    as dicts with key=value pairs (legacy behavior).
  * @return mixed - Serialized data.
  */
 <<__Native>>

@@ -12,6 +12,7 @@
 
 #include "mcrouter/McrouterInstance.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
+#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/lib/test/RouteHandleTestUtil.h"
 #include "mcrouter/lib/test/TestRouteHandle.h"
 #include "mcrouter/routes/SlowWarmUpRoute.h"
@@ -19,6 +20,7 @@
 using namespace facebook::memcache;
 using namespace facebook::memcache::mcrouter;
 
+using TestRouterInfo = MemcacheRouterInfo;
 using TestHandle = TestHandleImpl<TestRouteHandleIf>;
 
 namespace {

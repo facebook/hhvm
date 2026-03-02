@@ -29,6 +29,8 @@
 using namespace facebook::memcache;
 using namespace facebook::memcache::mcrouter;
 
+using TestRouterInfo = MemcacheRouterInfo;
+
 using std::make_shared;
 using std::make_unique;
 using std::string;

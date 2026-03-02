@@ -10,11 +10,12 @@
 
 #include <gtest/gtest.h>
 
+#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/lib/test/TestRouteHandle.h"
 #include "mcrouter/routes/LoggingRoute.h"
 #include "mcrouter/routes/test/RouteHandleTestUtil.h"
 
-using TestRouterInfo = facebook::memcache::TestRouterInfo;
+using TestRouterInfo = facebook::memcache::MemcacheRouterInfo;
 using TestHandle =
     facebook::memcache::TestHandleImpl<facebook::memcache::TestRouteHandleIf>;
 using LoggingRoute = facebook::memcache::mcrouter::LoggingRoute<TestRouterInfo>;
@@ -28,7 +29,7 @@ TEST(LoggingRouteTest, basic) {
   facebook::memcache::McGetRequest req("key");
   req.setSourceIpAddr(folly::IPAddress("1.2.3.4"));
 
-  facebook::memcache::TestFiberManager<facebook::memcache::TestRouterInfo> fm;
+  facebook::memcache::TestFiberManager<TestRouterInfo> fm;
   fm.run([&]() {
     facebook::memcache::mcrouter::mockFiberContext();
     facebook::memcache::mcrouter::getTestRouter()->setPostprocessCallback(

@@ -13,6 +13,7 @@
 #include <gtest/gtest.h>
 
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
+#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/lib/test/RouteHandleTestUtil.h"
 #include "mcrouter/lib/test/TestRouteHandle.h"
 #include "mcrouter/routes/WarmUpRoute.h"
@@ -20,6 +21,7 @@
 using namespace facebook::memcache;
 using namespace facebook::memcache::mcrouter;
 
+using TestRouterInfo = MemcacheRouterInfo;
 using std::make_shared;
 using std::string;
 using std::vector;

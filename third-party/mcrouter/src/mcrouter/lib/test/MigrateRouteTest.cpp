@@ -14,12 +14,14 @@
 
 #include "mcrouter/lib/RouteHandleTraverser.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
+#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/lib/routes/MigrateRoute.h"
 #include "mcrouter/lib/test/RouteHandleTestUtil.h"
 #include "mcrouter/lib/test/TestRouteHandle.h"
 
 using namespace facebook::memcache;
 
+using TestRouterInfo = MemcacheRouterInfo;
 using std::make_shared;
 using std::string;
 using std::vector;

@@ -26,6 +26,8 @@
 using namespace facebook::memcache;
 using namespace facebook::memcache::mcrouter;
 
+using TestRouterInfo = MemcacheRouterInfo;
+
 namespace {
 
 template <class Reply>

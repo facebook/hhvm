@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouterInfo.h"
+#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/lib/test/RouteHandleTestUtil.h"
 #include "mcrouter/lib/test/TestRouteHandle.h"
 #include "mcrouter/routes/ErrorRoute.h"
@@ -16,6 +17,8 @@
 using namespace hellogoodbye;
 using namespace facebook::memcache;
 using namespace facebook::memcache::mcrouter;
+
+using TestRouterInfo = MemcacheRouterInfo;
 
 constexpr folly::StringPiece kErrorRouteConfigWithBusyReply = R"(
 {

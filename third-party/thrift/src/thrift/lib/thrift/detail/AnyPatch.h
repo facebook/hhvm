@@ -223,7 +223,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   void patchIfTypeIs(const VPatch& patch) {
     static_assert(op::is_patch_v<VPatch>);
     tryPatchable<VPatch>();
-    patchIfTypeIsImpl(patch, ensures<op::patched_type_tag_t<VPatch>>());
+    patchIfTypeIsImpl(patch, ensures<typename VPatch::value_type_tag>());
   }
 
   /// Ensures the given value type is set in Thrift Any, and patches the value
@@ -231,7 +231,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   template <typename VPatch>
   void ensureAndPatch(const VPatch& patch) {
     static_assert(op::is_patch_v<VPatch>);
-    using VTag = op::patched_type_tag_t<VPatch>;
+    using VTag = typename VPatch::value_type_tag;
     ensureAnyWithoutValidation(type::AnyData::toAny<VTag>({}).toThrift());
     patchIfTypeIsImpl(patch, true);
   }
@@ -303,7 +303,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   /// is unspecified since type changes cannot be expressed through VPatch.
   template <typename VPatch>
   VPatch extractPatchAsIf() const {
-    using VTag = op::patched_type_tag_t<VPatch>;
+    using VTag = typename VPatch::value_type_tag;
     using VPatchTag = type::infer_tag<VPatch>;
     struct AnyPatchExtractionVisitor {
       void assign(const type::AnyStruct& any) {
@@ -386,7 +386,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   // by making it to 'clear' + 'ensureAny' operation.
   template <typename VPatch>
   void tryPatchable() {
-    using VTag = patched_type_tag_t<VPatch>;
+    using VTag = typename VPatch::value_type_tag;
     tryPatchable(type::Type::get<VTag>());
   }
   void tryPatchable(const type::Type& type) {
@@ -418,7 +418,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   template <typename VPatch>
   void patchIfTypeIsImpl(const VPatch& patch, bool after) {
-    auto type = type::Type::get<op::patched_type_tag_t<VPatch>>();
+    auto type = type::Type::get<typename VPatch::value_type_tag>();
     patchIfTypeIsImpl(
         type, protocol::DynamicPatch::fromStaticPatch(patch), after);
   }

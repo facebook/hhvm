@@ -31,7 +31,8 @@
 namespace apache::thrift {
 namespace ident {
 struct patch;
-}
+struct assign;
+} // namespace ident
 namespace op {
 
 class bad_patch_access : public std::runtime_error {
@@ -51,6 +52,7 @@ class BasePatch
   using Base = type::detail::EqWrap<Derived, Patch>;
 
  public:
+  using value_type_tag = op::get_type_tag<Patch, ident::assign>;
   using Base::Base;
 
   BasePatch(const BasePatch&) = default;

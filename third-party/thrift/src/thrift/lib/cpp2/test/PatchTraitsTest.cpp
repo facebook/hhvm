@@ -41,18 +41,16 @@ TEST(PatchTraitsTest, IsPatch) {
 }
 
 TEST(PatchTraitsTest, PatchedTypeTagPrimitives) {
-  static_assert(std::is_same_v<patched_type_tag_t<BoolPatch>, type::bool_t>);
-  static_assert(std::is_same_v<patched_type_tag_t<BytePatch>, type::byte_t>);
-  static_assert(std::is_same_v<patched_type_tag_t<I16Patch>, type::i16_t>);
-  static_assert(std::is_same_v<patched_type_tag_t<I32Patch>, type::i32_t>);
-  static_assert(std::is_same_v<patched_type_tag_t<I64Patch>, type::i64_t>);
-  static_assert(std::is_same_v<patched_type_tag_t<FloatPatch>, type::float_t>);
-  static_assert(
-      std::is_same_v<patched_type_tag_t<DoublePatch>, type::double_t>);
-  static_assert(
-      std::is_same_v<patched_type_tag_t<StringPatch>, type::string_t>);
+  static_assert(std::is_same_v<BoolPatch::value_type_tag, type::bool_t>);
+  static_assert(std::is_same_v<BytePatch::value_type_tag, type::byte_t>);
+  static_assert(std::is_same_v<I16Patch::value_type_tag, type::i16_t>);
+  static_assert(std::is_same_v<I32Patch::value_type_tag, type::i32_t>);
+  static_assert(std::is_same_v<I64Patch::value_type_tag, type::i64_t>);
+  static_assert(std::is_same_v<FloatPatch::value_type_tag, type::float_t>);
+  static_assert(std::is_same_v<DoublePatch::value_type_tag, type::double_t>);
+  static_assert(std::is_same_v<StringPatch::value_type_tag, type::string_t>);
   static_assert(std::is_same_v<
-                patched_type_tag_t<BinaryPatch>,
+                BinaryPatch::value_type_tag,
                 apache::thrift::type::
                     cpp_type<folly::IOBuf, apache::thrift::type::binary_t>>);
 }

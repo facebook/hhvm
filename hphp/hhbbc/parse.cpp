@@ -1088,7 +1088,12 @@ find_closure_context(const ParseUnitState& puState,
       if (cls->closureDeclFunc) {
         return std::make_pair(cls->closureDeclFunc, false);
       }
-      always_assert(false);
+      always_assert_flog(
+        false,
+        "Closure {} defined in unit {} lacks an enclosing context",
+        cls->name,
+        cls->unit
+      );
     }
     return std::make_pair(cls->name, true);
   }

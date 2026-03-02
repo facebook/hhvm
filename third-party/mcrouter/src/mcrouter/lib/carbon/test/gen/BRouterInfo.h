@@ -14,6 +14,8 @@
  */
 #pragma once
 
+#include "mcrouter/lib/carbon/test/gen/BRouterInfoFwd.h"
+
 #include <chrono>
 #include <functional>
 #include <unordered_map>
@@ -56,21 +58,6 @@ class ProxyBase;
 namespace carbon {
 namespace test {
 namespace B {
-
-namespace detail {
-
-using BRoutableRequests = carbon::List<
-    TestBRequest>;
-using BRoutableReplies = carbon::List<
-    TestBReply>;
-using BAllRequests = carbon::List<
-    TestBRequest,
-    facebook::memcache::McExecRequest,
-    facebook::memcache::McQuitRequest,
-    facebook::memcache::McShutdownRequest,
-    facebook::memcache::McStatsRequest,
-    facebook::memcache::McVersionRequest>;
-} // namespace detail
 
 struct BRouterInfo {
   using RouteHandleIf = BRouteHandleIf;

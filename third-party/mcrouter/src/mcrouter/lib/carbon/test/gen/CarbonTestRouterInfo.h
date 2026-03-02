@@ -14,6 +14,8 @@
  */
 #pragma once
 
+#include "mcrouter/lib/carbon/test/gen/CarbonTestRouterInfoFwd.h"
+
 #include <chrono>
 #include <functional>
 #include <unordered_map>
@@ -53,24 +55,6 @@ class ProxyBase;
 
 namespace carbon {
 namespace test {
-
-namespace detail {
-
-using CarbonTestRoutableRequests = carbon::List<
-    TestRequest,
-    TestRequestStringKey>;
-using CarbonTestRoutableReplies = carbon::List<
-    TestReply,
-    TestReplyStringKey>;
-using CarbonTestAllRequests = carbon::List<
-    TestRequest,
-    TestRequestStringKey,
-    facebook::memcache::McExecRequest,
-    facebook::memcache::McQuitRequest,
-    facebook::memcache::McShutdownRequest,
-    facebook::memcache::McStatsRequest,
-    facebook::memcache::McVersionRequest>;
-} // namespace detail
 
 struct CarbonTestRouterInfo {
   using RouteHandleIf = CarbonTestRouteHandleIf;

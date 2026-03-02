@@ -14,6 +14,8 @@
  */
 #pragma once
 
+#include "mcrouter/lib/network/gen/MemcacheRouterInfoFwd.h"
+
 #include <chrono>
 #include <functional>
 #include <unordered_map>
@@ -61,75 +63,6 @@ class AdditionalProxyRequestLogger;
 
 namespace facebook {
 namespace memcache {
-
-namespace detail {
-
-using MemcacheRoutableRequests = carbon::List<
-    McAddRequest,
-    McAppendRequest,
-    McCasRequest,
-    McDecrRequest,
-    McDeleteRequest,
-    McFlushAllRequest,
-    McFlushReRequest,
-    McGatRequest,
-    McGatsRequest,
-    McGetRequest,
-    McGetsRequest,
-    McIncrRequest,
-    McLeaseGetRequest,
-    McLeaseSetRequest,
-    McMetagetRequest,
-    McPrependRequest,
-    McReplaceRequest,
-    McSetRequest,
-    McTouchRequest>;
-using MemcacheRoutableReplies = carbon::List<
-    McAddReply,
-    McAppendReply,
-    McCasReply,
-    McDecrReply,
-    McDeleteReply,
-    McFlushAllReply,
-    McFlushReReply,
-    McGatReply,
-    McGatsReply,
-    McGetReply,
-    McGetsReply,
-    McIncrReply,
-    McLeaseGetReply,
-    McLeaseSetReply,
-    McMetagetReply,
-    McPrependReply,
-    McReplaceReply,
-    McSetReply,
-    McTouchReply>;
-using MemcacheAllRequests = carbon::List<
-    McAddRequest,
-    McAppendRequest,
-    McCasRequest,
-    McDecrRequest,
-    McDeleteRequest,
-    McExecRequest,
-    McFlushAllRequest,
-    McFlushReRequest,
-    McGatRequest,
-    McGatsRequest,
-    McGetRequest,
-    McGetsRequest,
-    McIncrRequest,
-    McLeaseGetRequest,
-    McLeaseSetRequest,
-    McMetagetRequest,
-    McPrependRequest,
-    McQuitRequest,
-    McReplaceRequest,
-    McSetRequest,
-    McShutdownRequest,
-    McStatsRequest,
-    McTouchRequest,
-    McVersionRequest>;
-} // namespace detail
 
 struct MemcacheRouterInfo {
   using RouteHandleIf = MemcacheRouteHandleIf;

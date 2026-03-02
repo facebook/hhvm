@@ -14,6 +14,8 @@
  */
 #pragma once
 
+#include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouterInfoFwd.h"
+
 #include <chrono>
 #include <functional>
 #include <unordered_map>
@@ -50,24 +52,6 @@ class ProxyBase;
 } // namespace facebook
 
 namespace hellogoodbye {
-
-namespace detail {
-
-using HelloGoodbyeRoutableRequests = carbon::List<
-    GoodbyeRequest,
-    HelloRequest>;
-using HelloGoodbyeRoutableReplies = carbon::List<
-    GoodbyeReply,
-    HelloReply>;
-using HelloGoodbyeAllRequests = carbon::List<
-    GoodbyeRequest,
-    HelloRequest,
-    facebook::memcache::McExecRequest,
-    facebook::memcache::McQuitRequest,
-    facebook::memcache::McShutdownRequest,
-    facebook::memcache::McStatsRequest,
-    facebook::memcache::McVersionRequest>;
-} // namespace detail
 
 struct HelloGoodbyeRouterInfo {
   using RouteHandleIf = HelloGoodbyeRouteHandleIf;

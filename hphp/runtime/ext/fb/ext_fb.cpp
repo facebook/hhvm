@@ -53,6 +53,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/fb/VariantController.h"
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/vm/lazy-class.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/zend/zend-string.h"
 
@@ -67,6 +68,7 @@ const int64_t k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION = 1<<4;
 // fb_compact_serialize options
 const int64_t FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS = 1 << 0;
 const int64_t FB_COMPACT_SERIALIZE_KEYSETS = 1 << 1;
+const int64_t FB_COMPACT_SERIALIZE_KEEP_CLASSES = 1 << 2;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -311,6 +313,8 @@ Variant fb_unserialize(const char* str,
  *      specific data. Sub-types:
  *        0 (EXT_KEYSET): followed by serialized values (int or string) until
  *          STOP is seen. Represents a keyset.
+ *        1 (EXT_CLASS): followed by a serialized string (the class name).
+ *          Represents a class pointer (deserialized as a lazy class).
  *
  *  In addition, if <c> & 0xf0 != 0xf0, most significant bits of <c> mean:
  *
@@ -347,6 +351,7 @@ enum FbCompactSerializeCode {
 // Extension sub-type codes (used with FB_CS_EXT / 0xFF prefix)
 enum FbCompactSerializeExtCode : uint8_t {
   FB_CS_EXT_KEYSET = 0,
+  FB_CS_EXT_CLASS  = 1,
 };
 
 // 1 byte: 0<7 bits>
@@ -594,9 +599,17 @@ static int fb_compact_serialize_variant(
       [[fallthrough]];
     case KindOfPersistentString:
     case KindOfString:
+      fb_compact_serialize_string(sb, var.toString());
+      return 0;
+
     case KindOfClass:
     case KindOfLazyClass:
-      fb_compact_serialize_string(sb, var.toString());
+      if (options & FB_COMPACT_SERIALIZE_KEEP_CLASSES) {
+        fb_compact_serialize_ext_code(sb, FB_CS_EXT_CLASS);
+        fb_compact_serialize_string(sb, var.toString());
+      } else {
+        fb_compact_serialize_string(sb, var.toString());
+      }
       return 0;
 
     case KindOfPersistentKeyset:
@@ -958,6 +971,20 @@ int fb_compact_unserialize_from_buffer(
           CHECK_ENOUGH(1, p, n);
           p += 1;
           out = arr;
+          break;
+        }
+        case FB_CS_EXT_CLASS: {
+          Variant name;
+          int err =
+            fb_compact_unserialize_from_buffer(name, buf, n, p, depth + 1);
+          if (err) {
+            return err;
+          }
+          if (!name.isString()) {
+            return FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
+          }
+          auto const sname = makeStaticString(name.asCStrRef().get());
+          out = Variant{LazyClassData::create(sname)};
           break;
         }
         default:
@@ -1596,6 +1623,7 @@ struct FBExtension : Extension {
 
     HHVM_RC_INT_SAME(FB_COMPACT_SERIALIZE_FORCE_PHP_ARRAYS);
     HHVM_RC_INT_SAME(FB_COMPACT_SERIALIZE_KEYSETS);
+    HHVM_RC_INT_SAME(FB_COMPACT_SERIALIZE_KEEP_CLASSES);
 
     HHVM_FE(fb_serialize);
     HHVM_FE(fb_unserialize);

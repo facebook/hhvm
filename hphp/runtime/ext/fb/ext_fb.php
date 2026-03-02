@@ -57,6 +57,9 @@ function fb_unserialize(mixed $thing,
  *    stores each element once instead of duplicating it as both key and value.
  *    Deserialization produces a keyset. Without this flag, keysets are encoded
  *    as dicts with key=value pairs (legacy behavior).
+ *  - FB_COMPACT_SERIALIZE_KEEP_CLASSES: preserve class/lazy class types
+ *    instead of converting them to strings. Deserialization produces a lazy
+ *    class. Without this flag, class values are serialized as plain strings.
  * @return mixed - Serialized data.
  */
 <<__Native>>

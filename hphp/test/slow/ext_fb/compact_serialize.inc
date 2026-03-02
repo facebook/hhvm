@@ -303,10 +303,122 @@ function fb_cs_entrypoint(): void {
   printf("success: %s\n", var_export($ret === true, true));
 
   // Unknown extension sub-type should fail
-  $s = "\xff\x01\xfc";  // EXT, sub-type 1 (unknown), STOP
+  $s = "\xff\x02\xfc";  // EXT, sub-type 2 (unknown), STOP
   $ret = null;
   $err = null;
   $result = fb_compact_unserialize($s, inout $ret, inout $err);
   printf("unknown ext sub-type: success=%s, errcode=%s\n",
     var_export($ret, true), var_export($err, true));
+
+  // Test keyset nested inside vec/dict with the flag
+  echo "\n==== testing nested keysets\n";
+  $nested = vec[keyset[1, 2], dict['k' => keyset['a']]];
+  $s = fb_compact_serialize($nested, FB_COMPACT_SERIALIZE_KEYSETS);
+  $ret = null;
+  $err = null;
+  $result = fb_compact_unserialize($s, inout $ret, inout $err);
+  printf("nested round-trip success: %s\n", var_export($ret === true, true));
+  printf("result[0] is keyset: %s\n",
+    var_export($result[0] is keyset<_>, true));
+  printf("result[0]: %s\n", var_export($result[0], true));
+  printf("result[1]['k'] is keyset: %s\n",
+    var_export($result[1]['k'] is keyset<_>, true));
+  printf("result[1]['k']: %s\n", var_export($result[1]['k'], true));
+
+  // ===== keepClasses tests (FB_COMPACT_SERIALIZE_KEEP_CLASSES) =====
+
+  echo "\n====\n";
+  echo "==== testing compact keepClasses serialization\n";
+
+  // Test keepClasses with FB_COMPACT_SERIALIZE_KEEP_CLASSES option
+  $classes = vec[
+    HH\classname_from_string_unsafe('MyClass'),
+    HH\classname_from_string_unsafe('Some\Namespaced\Class'),
+    HH\classname_from_string_unsafe('A'),
+  ];
+
+  foreach ($classes as $cls) {
+    echo "\n";
+    printf("class = %s\n", $cls as string);
+
+    // Without flag: serialized as plain string
+    $plain = fb_compact_serialize($cls);
+    printf("plain hex: %s\n", hexdump($plain));
+
+    // With flag: serialized with EXT_CLASS prefix
+    $kept = fb_compact_serialize($cls, FB_COMPACT_SERIALIZE_KEEP_CLASSES);
+    printf("kept hex: %s\n", hexdump($kept));
+
+    // Round-trip the keepClasses encoding
+    $ret = null;
+    $err = null;
+    $result = fb_compact_unserialize($kept, inout $ret, inout $err);
+    printf("round-trip success: %s\n", var_export($ret === true, true));
+    printf("result is class: %s\n", var_export($result is classname<mixed>, true));
+    printf("result as string: %s\n", $result as string);
+  }
+
+  // Test keepClasses inside a container
+  echo "\n";
+  $container = dict[
+    'cls' => HH\classname_from_string_unsafe('Foo'),
+    'val' => 42,
+  ];
+  $opts = FB_COMPACT_SERIALIZE_KEEP_CLASSES;
+  $s = fb_compact_serialize($container, $opts);
+  printf("container hex: %s\n", hexdump($s));
+  $ret = null;
+  $err = null;
+  $result = fb_compact_unserialize($s, inout $ret, inout $err);
+  printf("container round-trip success: %s\n", var_export($ret === true, true));
+  printf("cls is class: %s\n",
+    var_export($result['cls'] is classname<mixed>, true));
+  printf("cls value: %s\n", $result['cls'] as string);
+  printf("val value: %d\n", $result['val']);
+
+  // Test keepClasses without the flag produces a plain string on unserialize
+  echo "\n";
+  $cls = HH\classname_from_string_unsafe('Bar');
+  $plain = fb_compact_serialize($cls);
+  $ret = null;
+  $err = null;
+  $result = fb_compact_unserialize($plain, inout $ret, inout $err);
+  printf("without flag, result is string: %s\n",
+    var_export($result is string, true));
+  printf("without flag, result is class: %s\n",
+    var_export($result is classname<mixed>, true));
+  printf("without flag, value: %s\n", $result as string);
+
+  // Test deserialization of hand-crafted EXT_CLASS bytes
+  echo "\n==== testing keepClasses deserialization from raw bytes\n";
+  $s = "\xff\x01\xf8X";  // EXT, EXT_CLASS, STRING_1, 'X'
+  $ret = null;
+  $err = null;
+  $result = fb_compact_unserialize($s, inout $ret, inout $err);
+  printf("raw class 'X': %s\n", $result as string);
+  printf("is class: %s\n", var_export($result is classname<mixed>, true));
+  printf("success: %s\n", var_export($ret === true, true));
+
+  // Test combined flags: KEYSETS | KEEP_CLASSES
+  echo "\n==== testing combined flags\n";
+  $combined_opts = FB_COMPACT_SERIALIZE_KEYSETS
+    | FB_COMPACT_SERIALIZE_KEEP_CLASSES;
+  $mixed_container = dict[
+    'ks' => keyset['x', 'y'],
+    'cls' => HH\classname_from_string_unsafe('Baz'),
+    'num' => 7,
+  ];
+  $s = fb_compact_serialize($mixed_container, $combined_opts);
+  printf("combined hex: %s\n", hexdump($s));
+  $ret = null;
+  $err = null;
+  $result = fb_compact_unserialize($s, inout $ret, inout $err);
+  printf("combined round-trip success: %s\n", var_export($ret === true, true));
+  printf("ks is keyset: %s\n",
+    var_export($result['ks'] is keyset<_>, true));
+  printf("ks value: %s\n", var_export($result['ks'], true));
+  printf("cls is class: %s\n",
+    var_export($result['cls'] is classname<mixed>, true));
+  printf("cls value: %s\n", $result['cls'] as string);
+  printf("num value: %d\n", $result['num']);
 }

@@ -22258,3 +22258,78 @@ raw keyset ['x','y']: keyset [
 is keyset: true
 success: true
 unknown ext sub-type: success=false, errcode=3
+
+==== testing nested keysets
+nested round-trip success: true
+result[0] is keyset: true
+result[0]: keyset [
+  1,
+  2,
+]
+result[1]['k'] is keyset: true
+result[1]['k']: keyset [
+  'a',
+]
+
+====
+==== testing compact keepClasses serialization
+
+class = MyClass
+plain hex: 
+F9 07 4D 79 43 6C 61 73  73 
+kept hex: 
+FF 01 F9 07 4D 79 43 6C  61 73 73 
+round-trip success: true
+result is class: true
+result as string: MyClass
+
+class = Some\Namespaced\Class
+plain hex: 
+F9 15 53 6F 6D 65 5C 4E  61 6D 65 73 70 61 63 65
+64 5C 43 6C 61 73 73 
+kept hex: 
+FF 01 F9 15 53 6F 6D 65  5C 4E 61 6D 65 73 70 61
+63 65 64 5C 43 6C 61 73  73 
+round-trip success: true
+result is class: true
+result as string: Some\Namespaced\Class
+
+class = A
+plain hex: 
+F8 41 
+kept hex: 
+FF 01 F8 41 
+round-trip success: true
+result is class: true
+result as string: A
+
+container hex: 
+FB F9 03 63 6C 73 FF 01  F9 03 46 6F 6F F9 03 76
+61 6C 2A FC 
+container round-trip success: true
+cls is class: true
+cls value: Foo
+val value: 42
+
+without flag, result is string: true
+without flag, result is class: true
+without flag, value: Bar
+
+==== testing keepClasses deserialization from raw bytes
+raw class 'X': X
+is class: true
+success: true
+
+==== testing combined flags
+combined hex: 
+FB F9 02 6B 73 FF 00 F8  78 F8 79 FC F9 03 63 6C
+73 FF 01 F9 03 42 61 7A  F9 03 6E 75 6D 07 FC 
+combined round-trip success: true
+ks is keyset: true
+ks value: keyset [
+  'x',
+  'y',
+]
+cls is class: true
+cls value: Baz
+num value: 7

@@ -34,11 +34,11 @@ import itertools
 {{#program:has_stream?}}
 import thrift.py3.stream
 {{/program:has_stream?}}
-{{#program:includeNamespaces}}
-{{#hasTypes?}}
-import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
-{{/hasTypes?}}
-{{/program:includeNamespaces}}
+{{#each program:includeNamespaces as |include|}}
+  {{#if include.has_types?}}
+import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
+  {{/if include.has_types?}}
+{{/each}}
 import {{> common/thrift_types_module_path}}
 
 

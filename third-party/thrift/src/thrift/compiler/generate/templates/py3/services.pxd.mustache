@@ -30,11 +30,11 @@ file exposes Python wrappers of the services to the end user.
 
 from thrift.py3.server cimport ServiceInterface
 
-{{#program:includeNamespaces}}
-{{#hasServices?}}
-cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}services as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}services
-{{/hasServices?}}
-{{/program:includeNamespaces}}
+{{#each program:includeNamespaces as |include|}}
+  {{#if include.import_services?}}
+cimport {{include.modulePathPeriodSeparated}}.services as _{{include.modulePathUnderscoreSeparated}}_services
+  {{/if include.import_services?}}
+{{/each}}
 
 {{#program:services}}
 cdef class {{service:name}}Interface({{#service:extends}}{{#service:externalProgram?}}{{!

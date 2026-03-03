@@ -21,15 +21,11 @@
 #ifdef __linux__
 #include <common/network/NapiId.h>
 #endif
-#include <thrift/conformance/stresstest/util/IoUringUtil.h>
 
 #include <thrift/conformance/stresstest/client/TestRunner.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 
 namespace apache::thrift::stress {
-namespace {
-constexpr size_t kIoUringArenaSize = 256 * 1024 * 1024;
-}
 
 using namespace apache::thrift::rocket;
 
@@ -85,8 +81,9 @@ int main(int argc, char* argv[]) {
 
   // create a test runner instance
   auto clientCfg = ClientConfig::createFromFlags();
-  if (FLAGS_io_zctx) {
-    if (!folly::IoUringArena::init(kIoUringArenaSize)) {
+  if (clientCfg.connConfig.ioUringZctx &&
+      clientCfg.connConfig.ioUringZctxArenaSize > 0) {
+    if (!folly::IoUringArena::init(clientCfg.connConfig.ioUringZctxArenaSize)) {
       LOG(WARNING) << "Failed to initialize IoUringArena";
     }
   }

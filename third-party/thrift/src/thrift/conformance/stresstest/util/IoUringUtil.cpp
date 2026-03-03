@@ -37,6 +37,7 @@ DEFINE_bool(
     false,
     "Enable src port calculation and binding prior to connection. Default is false. (true, false)");
 DEFINE_bool(io_zctx, false, "");
+DEFINE_int32(io_zctx_arena_mb, 0, "");
 DEFINE_int32(io_zcrx_num_pages, 16384, "");
 DEFINE_int32(io_zcrx_refill_entries, 16384, "");
 DEFINE_string(io_zcrx_ifname, "eth0", "");

@@ -34,6 +34,7 @@ DECLARE_int32(io_prov_buffs);
 DECLARE_bool(io_zcrx);
 DECLARE_bool(io_zcrx_socket_bind);
 DECLARE_bool(io_zctx);
+DECLARE_int32(io_zctx_arena_mb);
 DECLARE_int32(io_zcrx_num_pages);
 DECLARE_int32(io_zcrx_refill_entries);
 DECLARE_string(io_zcrx_ifname);

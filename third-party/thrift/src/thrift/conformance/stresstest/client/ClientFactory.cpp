@@ -294,9 +294,10 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
 }
 
 #if FOLLY_HAS_LIBURING
-folly::AsyncIoUringSocket::Options getIoUringSocketOptions() {
+folly::AsyncIoUringSocket::Options getIoUringSocketOptions(
+    const ClientConnectionConfig& cfg) {
   folly::AsyncIoUringSocket::Options opts;
-  if (FLAGS_io_zctx) {
+  if (cfg.ioUringZctx) {
     opts.zeroCopyEnable = [](auto&&) { return true; };
   }
   return opts;
@@ -304,7 +305,7 @@ folly::AsyncIoUringSocket::Options getIoUringSocketOptions() {
 
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
-  auto ring = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions());
+  auto ring = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions(cfg));
   folly::NetworkSocket boundFd;
   if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {
     boundFd = folly::AsyncIoUringSocketFactory::createBoundSocketForZcRx(
@@ -324,8 +325,8 @@ folly::AsyncTransport::UniquePtr createIOUring(
 folly::AsyncTransport::UniquePtr createIOUringTLS(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
-  auto ring =
-      new folly::AsyncIoUringSocket(std::move(sock), getIoUringSocketOptions());
+  auto ring = new folly::AsyncIoUringSocket(
+      std::move(sock), getIoUringSocketOptions(cfg));
   folly::NetworkSocket boundFd;
   if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {
     boundFd = folly::AsyncIoUringSocketFactory::createBoundSocketForZcRx(
@@ -344,7 +345,7 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
 
 folly::AsyncTransport::UniquePtr createIOUringFizz(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
-  auto sock = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions());
+  auto sock = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions(cfg));
   if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {
     // TODO: Fizz connect() does not support a boundFd parameter, so ZC-RX
     // source port binding is not supported for the Fizz transport yet.

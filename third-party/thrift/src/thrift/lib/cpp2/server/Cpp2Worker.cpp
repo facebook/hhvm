@@ -164,6 +164,9 @@ void Cpp2Worker::onNewConnectionThatMayThrow(
           folly::AsyncIoUringSocketFactory::supports(sock->getEventBase())) {
         sock = folly::AsyncIoUringSocketFactory::create<
             folly::AsyncTransport::UniquePtr>(std::move(sock));
+        if (func) {
+          sock->setZeroCopyEnableFunc(func);
+        }
       }
       // Need an AsyncSocketTransport so we can reset the bytes the
       // TransportPeekingManager might peek at

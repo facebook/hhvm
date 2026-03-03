@@ -873,7 +873,7 @@ func TestProcessorScenarios(t *testing.T) {
 		require.NoError(t, err)
 		require.EqualValues(t, 20, res)
 
-		err = client.Close()
+		err = summerChannel.Close()
 		require.NoError(t, err)
 	})
 }

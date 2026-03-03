@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 #include <optional>
 #include <type_traits>
@@ -245,6 +246,10 @@ struct get_ordinal_impl<type::field<TypeTag, FieldContext<Struct, Id>>, Tag>
 template <size_t... I, typename F>
 constexpr void for_each_ordinal_impl(F&& f, std::index_sequence<I...>);
 
+template <typename T, typename F, size_t... I>
+constexpr void for_each_field_id_ascending_impl(
+    F&& f, std::integer_sequence<size_t, I...>);
+
 template <typename F, size_t I = 0>
 using ord_result_t =
     decltype(std::declval<F>()(type::detail::pos_to_ordinal<I>{}));
@@ -370,6 +375,14 @@ constexpr void for_each_field_id(F&& f) {
   for_each_ordinal<T>([&](auto ord) { f(get_field_id<T, decltype(ord)>{}); });
 }
 
+/// Calls the given function with each field_id<{id}> in a Thrift struct,
+/// in ascending order of field id values.
+template <typename T, typename F>
+constexpr void for_each_field_id_ascending(F&& f) {
+  detail::for_each_field_id_ascending_impl<T>(
+      std::forward<F>(f), std::make_integer_sequence<size_t, num_fields<T>>{});
+}
+
 /// Calls the given function with with each field_id<{id}>, returning the
 /// first 'true' result produced.
 template <typename T, typename F>
@@ -474,6 +487,20 @@ constexpr void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
   // C++14 environment as well.
   int unused[] = {0, (f(type::detail::pos_to_ordinal<I>{}), 0)...};
   static_cast<void>(unused);
+}
+
+template <typename T, typename F, size_t... I>
+constexpr void for_each_field_id_ascending_impl(
+    F&& f, std::integer_sequence<size_t, I...>) {
+  constexpr auto sortedFieldIds = std::invoke([] {
+    constexpr size_t N = sizeof...(I);
+    std::array<int16_t, N> fieldIds{};
+    std::copy_n(pa::field_ids<T>() + 1, N, fieldIds.begin());
+    std::sort(fieldIds.begin(), fieldIds.end());
+    return fieldIds;
+  });
+
+  (f(field_id<sortedFieldIds[I]>{}), ...);
 }
 
 template <size_t... I, typename F>

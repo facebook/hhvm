@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <type_traits>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
@@ -29,6 +30,7 @@ namespace {
 // TODO(afuller): Use shared test structs instead, e.g. testset
 using test::FieldRefNotOptionalStruct;
 using test::FieldRefOptionalStruct;
+using test::OutOfOrderFieldIdStruct;
 using test::SmartPointerStruct;
 using test::UnionStruct;
 using type::DecodedUri;
@@ -146,6 +148,42 @@ TEST(GetValueOrNullTest, Union) {
 
 TEST(FindByOrdinal, Empty) {
   EXPECT_FALSE(find_by_ordinal<test::Empty>([](auto) { return true; }));
+}
+
+TEST(ForEachFieldIdAscendingTest, OutOfOrderFields) {
+  // OutOfOrderFieldIdStruct: field_c=3 (ordinal 1), field_a=1 (ordinal 2),
+  // field_b=2 (ordinal 3)
+  std::vector<FieldId> ordinalOrderIds;
+  for_each_field_id<OutOfOrderFieldIdStruct>(
+      [&](auto id) { ordinalOrderIds.push_back(id()); });
+  EXPECT_EQ(ordinalOrderIds, (std::vector{FieldId{3}, FieldId{1}, FieldId{2}}));
+
+  std::vector<FieldId> ascendingOrderIds;
+  for_each_field_id_ascending<OutOfOrderFieldIdStruct>(
+      [&](auto id) { ascendingOrderIds.push_back(id()); });
+  EXPECT_EQ(
+      ascendingOrderIds, (std::vector{FieldId{1}, FieldId{2}, FieldId{3}}));
+
+  EXPECT_NE(ordinalOrderIds, ascendingOrderIds);
+}
+
+TEST(ForEachFieldIdAscendingTest, AlreadyOrdered) {
+  std::vector<FieldId> ordinalOrderIds;
+  for_each_field_id<FieldRefNotOptionalStruct>(
+      [&](auto id) { ordinalOrderIds.push_back(id()); });
+
+  std::vector<FieldId> ascendingOrderIds;
+  for_each_field_id_ascending<FieldRefNotOptionalStruct>(
+      [&](auto id) { ascendingOrderIds.push_back(id()); });
+
+  EXPECT_EQ(ordinalOrderIds, ascendingOrderIds);
+}
+
+TEST(ForEachFieldIdAscendingTest, EmptyStruct) {
+  std::vector<FieldId> ids;
+  for_each_field_id_ascending<test::Empty>(
+      [&](auto id) { ids.push_back(id()); });
+  EXPECT_TRUE(ids.empty());
 }
 
 TEST(VisitUnionTest, Basic) {

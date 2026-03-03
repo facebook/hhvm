@@ -57,3 +57,10 @@ struct UnionStruct {
 }
 
 struct Empty {}
+
+// Struct with field IDs defined out of order for testing for_each_field_id_ascending
+struct OutOfOrderFieldIdStruct {
+  3: i32 field_c;
+  1: i32 field_a;
+  2: i32 field_b;
+}

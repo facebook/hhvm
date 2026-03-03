@@ -374,8 +374,6 @@ type t = {
   use_distc_crawl_dircache: bool;  (** use_distc_crawl_dircache config key *)
   distc_avoid_unnecessary_saved_state_work: bool;
       (** distc_avoid_unnecessary_saved_state_work config key *)
-  distc_write_trace_during_save_state_creation_only: bool;
-      (** distc_write_trace_during_save_state_creation_only config key *)
   gc_minor_heap_size: int;  (** gc_minor_heap_size config key *)
   gc_space_overhead: int;  (** gc_space_overhead config key *)
   ide_fall_back_to_full_index: bool;

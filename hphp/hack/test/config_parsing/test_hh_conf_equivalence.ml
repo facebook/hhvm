@@ -70,9 +70,6 @@ let build_ocaml_hh_config contents =
       local_config.ServerLocalConfig.use_distc_crawl_dircache;
     distc_avoid_unnecessary_saved_state_work =
       local_config.ServerLocalConfig.distc_avoid_unnecessary_saved_state_work;
-    distc_write_trace_during_save_state_creation_only =
-      local_config
-        .ServerLocalConfig.distc_write_trace_during_save_state_creation_only;
   }
 
 (* Test: OCaml and Rust produce equivalent full HhConfig from hh.conf *)

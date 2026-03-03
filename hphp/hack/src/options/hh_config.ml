@@ -30,6 +30,5 @@ type t = {
   eden_fetch_parallelism: int;
   use_distc_crawl_dircache: bool;
   distc_avoid_unnecessary_saved_state_work: bool;
-  distc_write_trace_during_save_state_creation_only: bool;
 }
 [@@deriving eq, show]

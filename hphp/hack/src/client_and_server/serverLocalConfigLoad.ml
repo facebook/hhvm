@@ -120,7 +120,6 @@ let default =
     eden_fetch_parallelism = 0;
     use_distc_crawl_dircache = false;
     distc_avoid_unnecessary_saved_state_work = false;
-    distc_write_trace_during_save_state_creation_only = false;
     gc_minor_heap_size = 0;
     gc_space_overhead = 0;
     ide_fall_back_to_full_index = false;
@@ -934,12 +933,6 @@ let load_
       ~default:default.distc_avoid_unnecessary_saved_state_work
       config
   in
-  let distc_write_trace_during_save_state_creation_only =
-    bool_
-      "distc_write_trace_during_save_state_creation_only"
-      ~default:default.distc_write_trace_during_save_state_creation_only
-      config
-  in
   let gc_minor_heap_size =
     int_ "gc_minor_heap_size" ~default:default.gc_minor_heap_size config
   in
@@ -1100,7 +1093,6 @@ let load_
     eden_fetch_parallelism;
     use_distc_crawl_dircache;
     distc_avoid_unnecessary_saved_state_work;
-    distc_write_trace_during_save_state_creation_only;
     gc_minor_heap_size;
     gc_space_overhead;
     ide_fall_back_to_full_index;

@@ -61,6 +61,13 @@ MysqlConnection* MysqlOperationImpl::getMysqlConnection() {
 void MysqlOperationImpl::waitForActionable() {
   DCHECK(isInEventBaseThread());
 
+  // Check if timeout manager is still valid (EventBase not shutting down)
+  // This can happen if an operation is scheduled during client shutdown
+  if (!getTimeoutManager()) {
+    completeOperation(OperationResult::Failed);
+    return;
+  }
+
   auto event_mask = getMysqlConnection()->getReadWriteState();
 
   if (hasOpElapsed(getTimeout())) {

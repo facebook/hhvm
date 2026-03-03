@@ -22,6 +22,7 @@
 #include <folly/init/Init.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/IoUringBackend.h>
+#include <folly/memory/IoUringArena.h>
 
 #include <gflags/gflags.h>
 #include <wangle/ssl/SSLContextConfig.h>
@@ -217,6 +218,16 @@ std::shared_ptr<ThriftServer> createStressTestServer(
       getIOThreadPool("thrift_eventbase", FLAGS_io_threads));
   server->setNumCPUWorkerThreads(numCpuWorkerThreads);
   server->addModule(std::make_unique<StressTestServerModule>());
+  if (FLAGS_io_zctx) {
+    server->setZeroCopyEnableFunc(
+        [](const std::unique_ptr<folly::IOBuf>&) { return true; });
+    if (FLAGS_io_zctx_arena_mb > 0) {
+      if (!folly::IoUringArena::init(
+              static_cast<size_t>(FLAGS_io_zctx_arena_mb) * 1024 * 1024)) {
+        LOG(WARNING) << "Failed to initialize IoUringArena";
+      }
+    }
+  }
   facebook::services::TLSConfig tlsConfig;
   tlsConfig.applyToThriftServer(server);
 

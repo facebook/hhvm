@@ -14,7 +14,21 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
+}}
+{{#let partial cython_cpp_struct_field_type |field| captures |types|}}
+{{!
+This is used to declare a cython type that is referring to or wrapping a
+c++ object specifically in the context of a field on a struct, which means
+it has to cope with the fields being annotated as cpp.ref or similar. Most
+of this is done in cython_cpp_type; this partial just handles references and other
+wrappers.
+}}
+{{#pragma ignore-newlines}}
+{{#if field.unique_ref?}}unique_ptr[{{#else if field.shared_ref?}}shared_ptr[{{#else if field.shared_const_ref?}}shared_ptr[const {{/if}}
+{{#partial types.cython_cpp_type type=field.type}}
+{{#if (or field.unique_ref? field.shared_ref? field.shared_const_ref?)}}]{{/if}}
+{{/let partial}}
+{{!
 
 This is a template for exposing cpp structs and unions in .pxd
 
@@ -55,40 +69,34 @@ cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:n
         bint operator>=({{#partial types.c_binding node=struct:self}}&)
         {{/if struct:is_struct_orderable?}}
       {{/if (not struct:cpp_noncomparable?)}}
-    {{^struct:union?}}
+    {{#if (not struct:union?)}}
     {{#struct:py3_fields}}
-        {{#field:has_ref_accessor?}}
-        {{#field:optional?}}
-        __optional_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
+          {{#if field:has_ref_accessor?}}
+            {{#if field:optional?}}
+        __optional_field_ref[{{#partial cython_cpp_struct_field_type field=field:self}}] {{!
             }}{{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-        {{/field:optional?}}
-        {{#field:required?}}
-        __required_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
+            {{#else if field:required?}}
+        __required_field_ref[{{#partial cython_cpp_struct_field_type field=field:self}}] {{!
             }}{{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-        {{/field:required?}}
-        {{#field:unqualified?}}
-        __field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
+            {{#else if field:unqualified?}}
+        __field_ref[{{#partial cython_cpp_struct_field_type field=field:self}}] {{!
             }}{{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-        {{/field:unqualified?}}
-        {{#field:terse?}}
-        __terse_field_ref[{{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}] {{!
+            {{#else if field:terse?}}
+        __terse_field_ref[{{#partial cython_cpp_struct_field_type field=field:self}}] {{!
             }}{{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-        {{/field:terse?}}
-        {{/field:has_ref_accessor?}}
-        {{^field:has_ref_accessor?}}
-        {{#field:reference?}}
-        {{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}} {{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-        {{/field:reference?}}
-        {{/field:has_ref_accessor?}}
+            {{/if field:optional?}}
+          {{#else if field:reference?}}
+        {{#partial cython_cpp_struct_field_type field=field:self}} {{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
+          {{/if field:has_ref_accessor?}}
     {{/struct:py3_fields}}
-    {{/struct:union?}}
-    {{#struct:union?}}
+    {{#else}}
         {{#partial types.c_binding node=struct:self}}__type getType() const
     {{#struct:py3_fields}}
-        {{#field:type}}const {{> types/cython_cpp_struct_field_type}}& get_{{field:py_name}} "get_{{field:cpp_name}}" () const{{/field:type}}
+        const {{#partial cython_cpp_struct_field_type field=field:self}}& get_{{field:py_name}} "get_{{field:cpp_name}}" () const
         {{! Note that the set methods don't take in a shared/unique_ptr, they just take in an object ref,
             but they return the appropriate ptr }}
-        {{#field:type}}{{> types/cython_cpp_struct_field_type}}{{/field:type}}& set_{{field:py_name}} "set_{{field:cpp_name}}" (const {{#partial types.cython_cpp_type type=field:self.type}}&)
-    {{/struct:py3_fields}}{{/struct:union?}}
+        {{#partial cython_cpp_struct_field_type field=field:self}}& set_{{field:py_name}} "set_{{field:cpp_name}}" (const {{#partial types.cython_cpp_type type=field:self.type}}&)
+    {{/struct:py3_fields}}
+    {{/if (not struct:union?)}}
 
 {{/program:filtered_structs}}

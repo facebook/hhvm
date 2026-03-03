@@ -23,6 +23,7 @@
 #include <fmt/format.h>
 
 namespace apache::thrift {
+namespace {
 /**
  * Trivial wrapper type around a `char`, to allow safe formatting of
  * non-printable characters (as their hexadecimal literal representation, eg.
@@ -33,6 +34,7 @@ struct printable_char final {
 
   char c;
 };
+} // namespace
 } // namespace apache::thrift
 
 /**

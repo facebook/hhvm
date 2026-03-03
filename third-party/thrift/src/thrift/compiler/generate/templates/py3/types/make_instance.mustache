@@ -38,38 +38,36 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
 {{/type:map?}}
 {{#type:list?}}
         {{#type:list_elem_type}}
-        {{#type:container?}}
+          {{#if type:container?}}
         if item is None:
             raise TypeError("None is not of the type {{> types/pep484_type}}")
         if not isinstance(item, {{#partial types.python_type type=type:self}}):
             item = {{#partial types.python_type type=type:self}}(item)
-        {{/type:container?}}
-        {{^type:container?}}
-        if not isinstance(item, {{> types/python_is_instance_type}}):
+          {{#else}}
+        if not isinstance(item, {{#partial types.python_is_instance_type type=type:self}}):
             raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
         item = <{{#partial types.cython_python_type type=type:self}}> item
         {{/type:integer?}}
-        {{/type:container?}}
+          {{/if type:container?}}
         c_inst.push_back({{> types/cython_python_to_cpp_item}})
         {{/type:list_elem_type}}
 {{/type:list?}}{{#type:set?}}
         {{#type:set_elem_type}}
-        {{#type:container?}}
+          {{#if type:container?}}
         if item is None:
             raise TypeError("None is not of type {{> types/pep484_type}}")
         if not isinstance(item, {{#partial types.python_type type=type:self}}):
             item = {{#partial types.python_type type=type:self}}(item)
-        {{/type:container?}}
-        {{^type:container?}}
-        if not isinstance(item, {{> types/python_is_instance_type}}):
+          {{#else}}
+        if not isinstance(item, {{#partial types.python_is_instance_type type=type:self}}):
             raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
         c_item = <{{#partial types.cython_python_type type=type:self}}> item
         {{/type:integer?}}
-        {{/type:container?}}
+          {{/if type:container?}}
         {{^type:integer?}}
         c_item = {{> types/cython_python_to_cpp_item}}
         {{/type:integer?}}
@@ -79,39 +77,37 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
 {{#type:map?}}
     for key, item in items.items():
         {{#type:key_type}}
-        {{#type:container?}}
+          {{#if type:container?}}
         if key is None:
             raise TypeError("None is not of type {{> types/pep484_type}}")
         if not isinstance(key, {{#partial types.python_type type=type:self}}):
             key = {{#partial types.python_type type=type:self}}(key)
-        {{/type:container?}}
-        {{^type:container?}}
-        if not isinstance(key, {{> types/python_is_instance_type}}):
+          {{#else}}
+        if not isinstance(key, {{#partial types.python_is_instance_type type=type:self}}):
             raise TypeError(f"{key!r} is not of type {{> types/pep484_type}}")
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
         c_key = <{{#partial types.cython_python_type type=type:self}}> key
         {{/type:integer?}}
-        {{/type:container?}}
+          {{/if type:container?}}
         {{^type:integer?}}
         c_key = {{> types/cython_python_to_cpp_key}}
         {{/type:integer?}}
         {{/type:key_type}}
         {{#type:value_type}}
-        {{#type:container?}}
+          {{#if type:container?}}
         if item is None:
             raise TypeError("None is not of type {{> types/pep484_type}}")
         if not isinstance(item, {{#partial types.python_type type=type:self}}):
             item = {{#partial types.python_type type=type:self}}(item)
-        {{/type:container?}}
-        {{^type:container?}}
-        if not isinstance(item, {{> types/python_is_instance_type}}):
+          {{#else}}
+        if not isinstance(item, {{#partial types.python_is_instance_type type=type:self}}):
             raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
         {{#type:integer?}}{{!
         }}{{! inject cython int overflow checks }}
         item = <{{#partial types.cython_python_type type=type:self}}> item
         {{/type:integer?}}
-        {{/type:container?}}
+          {{/if type:container?}}
         {{/type:value_type}}
 
         c_inst[c_key] = {{#type:value_type}}{{!

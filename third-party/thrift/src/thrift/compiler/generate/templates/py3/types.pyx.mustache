@@ -279,25 +279,23 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     ):
         {{#struct:py3_fields}}
         {{#field:type}}
-        {{^type:container?}}
-        {{^type:cythonTypeNoneable?}}
-        {{^type:structured?}}
+          {{#if (not type:container?)}}
+            {{#if (and (not type:cythonTypeNoneable?) (not type:structured?))}}
         if {{field:py_name}} is not None:
-            if not isinstance({{field:py_name}}, {{> types/python_is_instance_type}}):
+            if not isinstance({{field:py_name}}, {{#partial types.python_is_instance_type type=type:self}}):
                 raise TypeError(f'{{field:py_name}} is not a { {{#partial types.python_type type=field:self.type}} !r}.')
 
-        {{/type:structured?}}
-        {{/type:cythonTypeNoneable?}}
+            {{/if (and (not type:cythonTypeNoneable?) (not type:structured?))}}
         {{#type:integer?}}
             {{! inject cython int overflow checks }}
             {{field:py_name}} = <{{#partial types.cython_python_type type=type:self}}> {{field:py_name}}
 
         {{/type:integer?}}
-        {{#type:structured?}}
-        {{field:py_name}} = _ensure_py3_or_raise({{field:py_name}}, "{{field:py_name}}", {{> types/python_is_instance_type}})
+            {{#if type:structured?}}
+        {{field:py_name}} = _ensure_py3_or_raise({{field:py_name}}, "{{field:py_name}}", {{#partial types.python_is_instance_type type=type:self}})
 
-        {{/type:structured?}}
-        {{/type:container?}}
+            {{/if type:structured?}}
+          {{/if (not type:container?)}}
         {{#type:is_container_of_struct?}}
         {{field:py_name}} = _ensure_py3_container_or_raise({{field:py_name}}, {{type:flat_name}})
 
@@ -345,7 +343,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         {{#struct:py3_fields}}
         {{#field:type}}
         {{#type:floating_point?}}
-        if isinstance(value, {{> types/python_is_instance_type}}):
+        if isinstance(value, {{#partial types.python_is_instance_type type=type:self}}):
             try:
                 <{{#partial types.cython_python_type type=type:self}}> value
                 return {{struct:name}}({{field:py_name}}=value)

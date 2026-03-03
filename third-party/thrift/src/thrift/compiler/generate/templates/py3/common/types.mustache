@@ -161,3 +161,68 @@ object
   {{/if ttype.program.inplace_migrate?}}
 {{/if type.iobufWrapper?}}
 {{/let partial}}
+
+
+{{! This is for python types, suitable for isinstance check_types }}
+{{#let export partial python_is_instance_type |type| captures |cython_python_type|}}
+{{#pragma ignore-newlines}}
+{{#if type.bool?}}bool
+{{#else if type.void?}}object
+{{#else if type.integer?}}int
+{{#else if type.floating_point?}}(float, int)
+{{#else if type.string?}}str
+{{#else if type.binary?}}{{#if type.iobufWrapper?}}_fbthrift_iobuf.IOBuf{{#else}}bytes{{/if}}
+{{#else if type.container?}}{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{#partial cython_python_type type=type}}
+{{#else if (or type.structured? type.enum?)}}{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.true_type.name}}
+{{/if type.bool?}}
+{{/let partial}}
+
+
+{{! Called specifically from types.pyx when initializing the individual attributes on a struct. }}
+{{#let export partial cython_field_value_for_assignment |field| captures |cython_cpp_type cython_python_type container_to_cpp cpp_obj|}}
+{{#pragma ignore-newlines}}
+  {{#let type=field.type}}
+  {{! Cast a field to its Cython Python Type if not a container, otherwise create a container type with constructor. }}
+  {{#let partial cython_cast_or_create_python_type captures |cython_python_type type|}}
+    {{#pragma ignore-newlines}}
+    {{#if type.container?}}
+{{#partial cython_python_type type=type}}(_fbthrift_value)
+    {{#else}}
+(<{{#partial cython_python_type type=type}}?>_fbthrift_value)
+    {{/if type.container?}}
+  {{/let partial}}
+
+  {{#if type.iobuf?}}
+deref((<_fbthrift_iobuf.IOBuf?>_fbthrift_value).c_clone())
+  {{#else if type.iobufRef?}}
+(<_fbthrift_iobuf.IOBuf?>_fbthrift_value).c_clone()
+  {{#else if type.flexibleBinary?}}
+{{#partial cython_cpp_type type=type}}(cmove(<string>_fbthrift_value))
+  {{#else if type.customBinaryType?}}
+{{! BY DESIGN: No output for customBinaryType - this avoids an unnecessary nesting level for (not customBinaryType?) }}
+  {{#else if (and field.reference? type.container? field.unique_ref?)}}
+make_unique[{{#partial cython_cpp_type type=type}}]({{#partial container_to_cpp type=type}}(_fbthrift_value))
+  {{#else if (and field.reference? type.container? field.shared_ref?)}}
+make_shared[{{#partial cython_cpp_type type=type}}]({{#partial container_to_cpp type=type}}(_fbthrift_value))
+  {{#else if (and field.reference? type.container? field.shared_const_ref?)}}
+make_const_shared[{{#partial cython_cpp_type type=type}}]({{#partial container_to_cpp type=type}}(_fbthrift_value))
+  {{#else if (and field.reference? field.unique_ref?)}}
+make_unique[{{#partial cython_cpp_type type=type}}](deref({{#partial cython_cast_or_create_python_type}}.{{#partial cpp_obj}}))
+  {{#else if (and field.reference? field.shared_ref?)}}
+{{#partial cython_cast_or_create_python_type}}.{{#partial cpp_obj}}
+  {{#else if (and field.reference? field.shared_const_ref?)}}
+const_pointer_cast({{#partial cython_cast_or_create_python_type}}.{{#partial cpp_obj}})
+  {{#else if type.string?}}
+cmove(bytes_to_string(_fbthrift_value.encode('utf-8')))
+  {{#else if type.binary?}}
+cmove(bytes_to_string(_fbthrift_value))
+  {{#else if type.enum?}}
+<{{#partial cython_cpp_type type=type}}><int>_fbthrift_value
+  {{#else if type.structured?}}
+deref((<{{#partial cython_python_type type=type}}?> _fbthrift_value).{{#partial cpp_obj}})
+  {{#else if type.container?}}
+{{#partial container_to_cpp type=type}}(_fbthrift_value)
+  {{#else}}
+_fbthrift_value
+  {{/if type.iobuf?}}
+{{/let partial}}

@@ -215,13 +215,40 @@ class py3_generator_context {
     return included_programs_;
   }
 
-  void add_typedef_namespace(const t_type* type) {
-    const t_program* prog = type->program();
-    if (prog != nullptr && prog != root_program_ &&
-        !included_programs_.contains(prog->path())) {
-      included_programs_[prog->path()] =
-          py3_included_program{.program = prog, .importServices = false};
-    }
+  const std::vector<const t_type*>& container_types(
+      const t_program& program) const {
+    check_root_program(program);
+    return container_types_;
+  }
+
+  const std::vector<const t_type*>& custom_templates(
+      const t_program& program) const {
+    check_root_program(program);
+    return custom_templates_;
+  }
+
+  const std::vector<const t_type*>& custom_cpp_types(
+      const t_program& program) const {
+    check_root_program(program);
+    return custom_cpp_types_;
+  }
+
+  const std::unordered_set<std::string>& seen_type_names(
+      const t_program& program) const {
+    check_root_program(program);
+    return seen_type_names_;
+  }
+
+  // TODO(T256504508): Temporary step until all usages are migrated into
+  // `py3_generator_context`, at which point this should be private
+  std::string visit_type(const t_type* orig_type, bool fromTypeDef);
+
+  // TODO(T256504508): Temporary step until implementation of
+  // `visit_type_single_service` is migrated into `py3_generator_context`, at
+  // which point this can be removed
+  std::pair<std::unordered_set<std::string>::iterator, bool> add_seen_type_name(
+      const std::string& name) {
+    return seen_type_names_.insert(name);
   }
 
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
@@ -293,6 +320,11 @@ class py3_generator_context {
       structured_contexts_;
   std::unordered_map<const t_field*, field_cpp_kind> field_cpp_kinds_;
 
+  std::vector<const t_type*> container_types_;
+  std::vector<const t_type*> custom_templates_;
+  std::vector<const t_type*> custom_cpp_types_;
+  std::unordered_set<std::string> seen_type_names_;
+
   // These properties are mutable as they are (or contain) caches which must be
   // accessed from a const method context
   mutable cpp_name_resolver name_resolver_;
@@ -303,6 +335,15 @@ class py3_generator_context {
     if (&program != root_program_) {
       throw whisker::eval_error(
           "This property is only implemented for the root program");
+    }
+  }
+
+  void add_typedef_namespace(const t_type* type) {
+    const t_program* prog = type->program();
+    if (prog != nullptr && prog != root_program_ &&
+        !included_programs_.contains(prog->path())) {
+      included_programs_[prog->path()] =
+          py3_included_program{.program = prog, .importServices = false};
     }
   }
 };
@@ -344,16 +385,22 @@ class py3_mstch_program : public mstch_program {
 
     for (const t_function* func : lifecycleFunctions()) {
       add_function_by_unique_return_type(
-          func, visit_type(func->return_type().get_type()));
+          func,
+          generator_context_.visit_type(
+              func->return_type().get_type(), /*fromTypeDef=*/false));
     }
   }
 
-  mstch::node getContainerTypes() { return make_mstch_types(containers_); }
+  mstch::node getContainerTypes() {
+    return make_mstch_types(generator_context_.container_types(*program_));
+  }
 
-  mstch::node hasContainerTypes() { return !containers_.empty(); }
+  mstch::node hasContainerTypes() {
+    return !generator_context_.container_types(*program_).empty();
+  }
 
   mstch::node needs_container_converters() {
-    return !containers_.empty() &&
+    return !generator_context_.container_types(*program_).empty() &&
         (!program_->services().empty() ||
          has_option("gen_legacy_container_converters"));
   }
@@ -371,10 +418,12 @@ class py3_mstch_program : public mstch_program {
   }
 
   mstch::node getCustomTemplates() {
-    return make_mstch_types(customTemplates_);
+    return make_mstch_types(generator_context_.custom_templates(*program_));
   }
 
-  mstch::node getCustomTypes() { return make_mstch_types(customTypes_); }
+  mstch::node getCustomTypes() {
+    return make_mstch_types(generator_context_.custom_cpp_types(*program_));
+  }
 
   mstch::node response_and_stream_functions() {
     return make_mstch_functions(response_and_stream_functions_);
@@ -431,14 +480,15 @@ class py3_mstch_program : public mstch_program {
         if (is_hidden(field)) {
           continue;
         }
-        visit_type(field.type().get_type());
+        generator_context_.visit_type(
+            field.type().get_type(), /*fromTypeDef=*/false);
       }
     }
   }
 
   void visit_types_for_constants() {
     for (const auto& constant : program_->consts()) {
-      visit_type(constant->type());
+      generator_context_.visit_type(constant->type(), /*fromTypeDef=*/false);
     }
   }
 
@@ -447,14 +497,8 @@ class py3_mstch_program : public mstch_program {
       if (is_hidden(*typedef_def) || is_hidden(*typedef_def->get_true_type())) {
         continue;
       }
-      visit_type(typedef_def);
+      generator_context_.visit_type(typedef_def, /*fromTypeDef=*/true);
     }
-  }
-
-  std::string visit_type_impl(const t_type* orig_type, bool fromTypeDef);
-
-  std::string visit_type(const t_type* orig_type) {
-    return visit_type_impl(orig_type, orig_type->is<t_typedef>());
   }
 
   mstch::node filtered_objects() {
@@ -473,7 +517,7 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node filtered_typedefs() {
     std::vector<const t_typedef*> visible;
-    visible.reserve(program_->structured_definitions().size());
+    visible.reserve(program_->typedefs().size());
     for (const t_typedef* t : program_->typedefs()) {
       if (!is_hidden(*t) && !is_hidden(*t->get_true_type())) {
         visible.emplace_back(t);
@@ -483,10 +527,6 @@ class py3_mstch_program : public mstch_program {
   }
 
   py3_generator_context& generator_context_;
-  std::vector<const t_type*> containers_;
-  std::vector<const t_type*> customTemplates_;
-  std::vector<const t_type*> customTypes_;
-  std::unordered_set<std::string> seenTypeNames_;
   std::map<std::tuple<std::string, bool>, const t_function*>
       uniqueFunctionsByReturnType_;
   std::map<std::string, const t_type*> streamTypes_;
@@ -595,13 +635,13 @@ class py3_mstch_struct : public mstch_struct {
   const py3_generator_context& context_;
 };
 
-std::string py3_mstch_program::visit_type_impl(
+std::string py3_generator_context::visit_type(
     const t_type* orig_type, bool fromTypeDef) {
   bool hasPy3EnableCppAdapterAnnot =
       orig_type->has_structured_annotation(kPythonPy3EnableCppAdapterUri);
   auto trueType = orig_type->get_true_type();
   py3_generator_context::cached_type_properties& props =
-      generator_context_.get_cached_type_props(orig_type);
+      get_cached_type_props(orig_type);
   const std::string& flatName = props.flat_name();
   // Import all types either beneath a typedef, even if the current type is
   // not directly a typedef
@@ -609,39 +649,37 @@ std::string py3_mstch_program::visit_type_impl(
   if (flatName.empty()) {
     std::string extra;
     if (const t_list* list = trueType->try_as<t_list>()) {
-      extra =
-          "List__" + visit_type_impl(list->elem_type().get_type(), fromTypeDef);
+      extra = "List__" + visit_type(list->elem_type().get_type(), fromTypeDef);
     } else if (const t_set* set = trueType->try_as<t_set>()) {
-      extra =
-          "Set__" + visit_type_impl(set->elem_type().get_type(), fromTypeDef);
+      extra = "Set__" + visit_type(set->elem_type().get_type(), fromTypeDef);
     } else if (const t_map* map = trueType->try_as<t_map>()) {
-      extra = "Map__" +
-          visit_type_impl(map->key_type().get_type(), fromTypeDef) + "_" +
-          visit_type_impl(map->val_type().get_type(), fromTypeDef);
+      extra = "Map__" + visit_type(map->key_type().get_type(), fromTypeDef) +
+          "_" + visit_type(map->val_type().get_type(), fromTypeDef);
     } else if (trueType->is_binary()) {
       extra = "binary";
     } else {
       extra = trueType->name();
     }
-    props.set_flat_name(generator_context_.program(), trueType, extra);
+    props.set_flat_name(root_program_, trueType, extra);
   }
   assert(!flatName.empty());
   // If this type or a parent of this type is a typedef,
   // then add the namespace of the *resolved* type:
   // (parent matters if you have eg. typedef list<list<type>>)
   if (fromTypeDef) {
-    generator_context_.add_typedef_namespace(trueType);
+    add_typedef_namespace(trueType);
   }
-  bool inserted = seenTypeNames_.insert(flatName).second;
+  bool inserted = seen_type_names_.insert(flatName).second;
   if (inserted) {
     if (trueType->is<t_container>()) {
-      containers_.push_back(hasPy3EnableCppAdapterAnnot ? orig_type : trueType);
+      container_types_.push_back(
+          hasPy3EnableCppAdapterAnnot ? orig_type : trueType);
     }
     if (!props.is_default_template(trueType)) {
-      customTemplates_.push_back(trueType);
+      custom_templates_.push_back(trueType);
     }
     if (!props.cpp_type().empty()) {
-      customTypes_.push_back(
+      custom_cpp_types_.push_back(
           hasPy3EnableCppAdapterAnnot ? orig_type : trueType);
     }
   }
@@ -729,17 +767,22 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
     }
 
     for (const auto& field : function.params().fields()) {
-      visit_type(field.type().get_type());
+      generator_context_.visit_type(
+          field.type().get_type(), /*fromTypeDef=*/false);
     }
     const t_stream* stream = function.stream();
     if (const t_throws* exceptions = stream ? stream->exceptions() : nullptr) {
       for (const t_field& field : exceptions->fields()) {
         const t_type* exType = field.type().get_type();
-        streamExceptions_.emplace(visit_type(field.type().get_type()), exType);
+        streamExceptions_.emplace(
+            generator_context_.visit_type(
+                field.type().get_type(), /*fromTypeDef=*/false),
+            exType);
       }
     }
     for (const t_field& field : get_elems(function.exceptions())) {
-      visit_type(field.type().get_type());
+      generator_context_.visit_type(
+          field.type().get_type(), /*fromTypeDef=*/false);
     }
 
     std::string return_type_name;
@@ -748,12 +791,16 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
       const t_type* elem_type = stream->elem_type().get_type();
       if (!function.has_void_initial_response()) {
         return_type_name = "ResponseAndStream__" +
-            visit_type(function.return_type().get_type()) + "_";
+            generator_context_.visit_type(
+                function.return_type().get_type(), /*fromTypeDef=*/false) +
+            "_";
       }
-      std::string elem_type_name = visit_type(elem_type);
+      std::string elem_type_name =
+          generator_context_.visit_type(elem_type, /*fromTypeDef=*/false);
       return_type_name += elem_type_name;
       streamTypes_.emplace(elem_type_name, elem_type);
-      bool inserted = seenTypeNames_.insert(return_type_name).second;
+      bool inserted =
+          generator_context_.add_seen_type_name(return_type_name).second;
       if (inserted && !function.has_void_initial_response()) {
         response_and_stream_functions_.push_back(&function);
       }
@@ -761,7 +808,8 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
       const auto type = function.is_interaction_constructor()
           ? function.interaction()
           : function.return_type();
-      return_type_name = visit_type(type.get_type());
+      return_type_name =
+          generator_context_.visit_type(type.get_type(), /*fromTypeDef=*/false);
     }
     add_function_by_unique_return_type(&function, std::move(return_type_name));
   }

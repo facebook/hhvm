@@ -81,6 +81,7 @@ class Fiery extends \TException implements \IThriftSyncStruct, \IThriftException
         'message' => shape(
           'field' => dict[
             '\facebook\thrift\annotation\ExceptionMessage' => \facebook\thrift\annotation\ExceptionMessage::withDefaultValues(),
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
           ],
           'type' => dict[],
         ),

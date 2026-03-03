@@ -14,13 +14,13 @@ namespace test::fixtures::python_capi {
 namespace serialized_dep_constants {
 
 
-::std::string_view _fbthrift_schema_b748ca241bc21635() {
+::std::string_view _fbthrift_schema_54caba11ffb78daa() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_b748ca241bc21635_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_54caba11ffb78daa_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_b748ca241bc21635_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_54caba11ffb78daa_uris() {
   return {};
 }
 

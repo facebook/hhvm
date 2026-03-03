@@ -63,6 +63,7 @@ typedef Company MyCompany
 const MyCompany my_company = FACEBOOK;
 
 struct Internship {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 weeks;
   2: string title;
   3: optional Company employer;
@@ -96,7 +97,9 @@ const CompanyLocationsMap company_locations = {
 };
 
 struct Range {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 min;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 max;
 }
 

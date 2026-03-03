@@ -191,7 +191,9 @@ struct TypeRemapped {
 exception emptyXcep {}
 
 exception reqXcep {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string message;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 errorCode;
 }
 

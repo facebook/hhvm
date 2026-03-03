@@ -14,9 +14,9 @@ namespace extra::svc {
 /** Glean {"file": "thrift/compiler/test/fixtures/mcpp2-compare/src/extra_services.thrift"} */
 namespace extra_services_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_61420f57c526760a();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_61420f57c526760a_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_61420f57c526760a_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_2dacd8c4e3df59ee();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_2dacd8c4e3df59ee_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_2dacd8c4e3df59ee_uris();
 
 } // namespace extra_services_constants
 } // namespace extra::svc

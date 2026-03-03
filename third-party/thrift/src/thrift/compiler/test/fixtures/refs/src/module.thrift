@@ -51,6 +51,7 @@ struct MyField {
   2: i64 value;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required i64 req_value;
 
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -60,6 +61,7 @@ struct MyField {
   5: MyEnum enum_value;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   6: required MyEnum req_enum_value;
 
   @cpp.Ref{type = cpp.RefType.Unique}
@@ -69,6 +71,7 @@ struct MyField {
   8: string str_value;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   9: required string req_str_value;
 }
 
@@ -80,6 +83,7 @@ struct MyStruct {
   2: MyField ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required MyField req_ref;
 }
 
@@ -127,6 +131,7 @@ struct StructWithSharedConst {
   2: MyField shared_const;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required MyField req_shared_const;
 }
 
@@ -146,6 +151,7 @@ struct StructWithRef {
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required Empty req_field;
 }
 
@@ -210,6 +216,7 @@ struct StructWithRefTypeUnique {
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required Empty req_field;
 }
 
@@ -227,6 +234,7 @@ struct StructWithRefTypeShared {
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required Empty req_field;
 }
 
@@ -244,6 +252,7 @@ struct StructWithRefTypeSharedConst {
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required Empty req_field;
 }
 

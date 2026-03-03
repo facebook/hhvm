@@ -284,6 +284,12 @@ class Internship implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'weeks' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -390,6 +396,18 @@ class Range implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'min' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
+        'max' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

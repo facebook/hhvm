@@ -408,6 +408,18 @@ class StructWithNoCustomDefaultValues implements \IThriftSyncStruct, \IThriftStr
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'required_integer' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
+        'required_struct' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -708,9 +720,21 @@ class StructWithCustomDefaultValues implements \IThriftSyncStruct, \IThriftStruc
           ],
           'type' => dict[],
         ),
+        'required_integer' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
         'optional_struct' => shape(
           'field' => dict[
             '\facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue' => \facebook\thrift\annotation\AllowUnsafeOptionalCustomDefaultValue::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
+        'required_struct' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
           ],
           'type' => dict[],
         ),

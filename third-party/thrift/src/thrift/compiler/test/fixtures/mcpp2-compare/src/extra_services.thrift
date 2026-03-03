@@ -25,17 +25,21 @@ namespace cpp2 extra.svc
 
 struct containerStruct2 {
   1: bool fieldA;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   101: required bool req_fieldA;
   201: optional bool opt_fieldA;
   2: map<string, bool> fieldB;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   102: required map<string, bool> req_fieldB;
   202: optional map<string, bool> opt_fieldB;
   3: set<i32> fieldC = [1, 2, 3, 4];
+  @thrift.AllowUnsafeRequiredFieldQualifier
   103: required set<i32> req_fieldC = [1, 2, 3, 4];
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   203: optional set<i32> opt_fieldC = [1, 2, 3, 4];
   4: string fieldD;
   5: string fieldE = "somestring";
+  @thrift.AllowUnsafeRequiredFieldQualifier
   105: required string req_fieldE = "somestring";
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   205: optional string opt_fieldE = "somestring";

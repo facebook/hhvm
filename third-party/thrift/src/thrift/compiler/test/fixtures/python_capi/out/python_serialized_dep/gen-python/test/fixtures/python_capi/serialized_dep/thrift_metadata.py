@@ -28,6 +28,7 @@ def _fbthrift_gen_metadata_struct_SerializedStruct(metadata_struct: _fbthrift_me
         _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="os", is_optional=True, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=4, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="rs", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.AllowUnsafeRequiredFieldQualifier"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)
@@ -88,6 +89,7 @@ def _fbthrift_gen_metadata_exception_SerializedError(metadata_struct: _fbthrift_
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="os", is_optional=True, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="rs", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.AllowUnsafeRequiredFieldQualifier"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.exceptions)
@@ -120,6 +122,7 @@ def _fbthrift_gen_metadata_struct_MarshalStruct(metadata_struct: _fbthrift_metad
         _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="os", is_optional=True, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=4, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="rs", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.AllowUnsafeRequiredFieldQualifier"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)
@@ -180,6 +183,7 @@ def _fbthrift_gen_metadata_exception_MarshalError(metadata_struct: _fbthrift_met
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="os", is_optional=True, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="rs", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.AllowUnsafeRequiredFieldQualifier"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.exceptions)

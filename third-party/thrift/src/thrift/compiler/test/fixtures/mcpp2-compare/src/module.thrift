@@ -105,6 +105,7 @@ struct MyStruct {
   4: string MyStringField2;
   5: binary MyBinaryField;
   6: optional binary MyBinaryField2;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   7: required binary MyBinaryField3;
   8: list<binary> MyBinaryListField4;
   9: map<MyEnumA, string> MyMapEnumAndInt = {
@@ -167,13 +168,16 @@ union ComplexUnion {
 
 exception AnException {
   1: i32 code;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   101: required i32 req_code;
   @thrift.ExceptionMessage
   2: string message2;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   102: required string req_message;
   3: list<i32> exception_list = [1, 2, 3];
   4: set<i64> exception_set;
   5: map<string, i32> exception_map;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   105: required map<string, i32> req_exception_map;
   6: MyEnumA enum_field;
   7: list<MyEnumA> enum_container;
@@ -189,6 +193,7 @@ exception AnException {
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.virtual": "1"}}
 exception AnotherException {
   1: i32 code;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   101: required i32 req_code;
   2: string message;
 }
@@ -196,17 +201,21 @@ exception AnotherException {
 @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.noncopyable": "1"}}
 struct ContainerStruct {
   1: bool fieldA;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   101: required bool req_fieldA;
   201: optional bool opt_fieldA;
   2: map<string, bool> fieldB;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   102: required map<string, bool> req_fieldB;
   202: optional map<string, bool> opt_fieldB;
   3: set<i32> fieldC = [1, 2, 3, 4];
+  @thrift.AllowUnsafeRequiredFieldQualifier
   103: required set<i32> req_fieldC = [1, 2, 3, 4];
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   203: optional set<i32> opt_fieldC = [1, 2, 3, 4];
   4: string fieldD;
   5: string fieldE = "somestring";
+  @thrift.AllowUnsafeRequiredFieldQualifier
   105: required string req_fieldE = "somestring";
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   205: optional string opt_fieldE = "somestring";
@@ -226,6 +235,7 @@ struct ContainerStruct {
   16: list<mostComplexTypeDef> fieldP;
   17: MyEnumA fieldQ;
   18: MyEnumA fieldR = MyEnumA.fieldB;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   118: required MyEnumA req_fieldR = MyEnumA.fieldB;
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   218: optional MyEnumA opt_fieldR = MyEnumA.fieldB;
@@ -233,10 +243,12 @@ struct ContainerStruct {
   21: list<MyEnumA> fieldT;
   22: list<MyEnumA> fieldU = [MyEnumA.fieldC, MyEnumA.fieldB, MyEnumA.fieldA];
   23: MyStruct fieldV;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   123: required MyStruct req_fieldV;
   223: optional MyStruct opt_fieldV;
   24: set<MyStruct> fieldW;
   25: ComplexUnion fieldX;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   125: required ComplexUnion req_fieldX;
   225: optional ComplexUnion opt_fieldX;
   26: list<ComplexUnion> fieldY;
@@ -261,6 +273,7 @@ struct MyIncludedStruct {
   @cpp.AllowLegacyNonOptionalRef
   @cpp.AllowLegacyDeprecatedTerseWritesRef
   3: AStruct ARefField;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required AStruct ARequiredField;
 }
 
@@ -307,12 +320,15 @@ struct AnnotatedStruct {
   4: map<i32, list<string>> container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required ContainerStruct req_cpp_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   6: required ContainerStruct req_cpp2_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   7: required list<string> req_container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   8: optional ContainerStruct opt_cpp_unique_ref;
@@ -332,12 +348,15 @@ struct AnnotatedStruct {
   13: map<i32, list<string>> ref_type_const;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   14: required ContainerStruct req_ref_type_shared;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   15: required ContainerStruct req_ref_type_const;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   16: required list<string> req_ref_type_unique;
   @cpp.Ref{type = cpp.RefType.Shared}
   17: optional ContainerStruct opt_ref_type_const;
@@ -514,5 +533,6 @@ union FloatUnion {
 }
 
 struct AllRequiredNoExceptMoveCtrStruct {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i64 intField;
 }

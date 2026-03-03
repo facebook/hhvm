@@ -31,6 +31,7 @@ exception MyException1 {
 
 exception MyException2 {
   1: string message;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required MyEnum code;
 }
 

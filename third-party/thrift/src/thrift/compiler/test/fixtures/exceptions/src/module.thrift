@@ -24,6 +24,7 @@ package;
 
 transient server exception Fiery {
   @thrift.ExceptionMessage
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string message;
 }
 

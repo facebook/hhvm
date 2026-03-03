@@ -58,7 +58,9 @@ typedef list<SimpleStruct> ListOfSimpleStructs
   },
 }
 struct SimpleStruct {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required bool is_on;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required byte tiny_int = 5;
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   3: optional i16 small_int = 10;
@@ -77,6 +79,7 @@ struct SimpleStruct {
 }
 
 struct ComplexStruct {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required SimpleStruct structOne;
   2: optional SimpleStruct structTwo;
   3: i32 an_integer;

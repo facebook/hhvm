@@ -1966,6 +1966,36 @@ class MinPadding implements \IThriftSyncStruct, \IThriftStructMetadata {
         '\facebook\thrift\annotation\cpp\MinimizePadding' => \facebook\thrift\annotation\cpp\MinimizePadding::withDefaultValues(),
       ],
       'fields' => dict[
+        'small' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
+        'big' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
+        'medium' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
+        'biggish' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
+        'tiny' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

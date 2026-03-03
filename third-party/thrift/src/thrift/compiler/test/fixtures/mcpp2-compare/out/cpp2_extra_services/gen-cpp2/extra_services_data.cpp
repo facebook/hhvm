@@ -82,8 +82,8 @@ namespace detail {
 
 template <> struct TSchemaAssociation<::extra::svc::ExtraService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 7008180839786116618;
-  static constexpr ::std::string_view definitionKey = {"\x7a\x70\xd7\x20\x65\x9c\x4c\x9e\x97\x2e\x1d\x07\x7b\xc6\x70\xc2", 16};
+  static constexpr int64_t programId = 3291243767849245166;
+  static constexpr ::std::string_view definitionKey = {"\xfb\xb0\xa8\x4a\x2c\x39\x4d\xaa\x67\xcd\x1b\x6f\xe7\x83\xba\xd0", 16};
 };
 } // namespace detail
 } // namespace apache::thrift

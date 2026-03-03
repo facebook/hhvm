@@ -106,10 +106,15 @@ struct ComplexNestedWithDefault {
 
 @cpp.MinimizePadding
 struct MinPadding {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required byte small;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i64 big;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required i16 medium;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required i32 biggish;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required byte tiny;
 }
 

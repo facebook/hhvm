@@ -20,5 +20,6 @@ include "thrift/annotation/thrift.thrift"
 package;
 
 struct Foo {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 field;
 }

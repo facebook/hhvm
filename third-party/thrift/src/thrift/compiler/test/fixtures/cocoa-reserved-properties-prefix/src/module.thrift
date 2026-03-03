@@ -22,6 +22,8 @@ package;
 namespace cocoa example
 
 struct Example {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string name;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required string description (cocoa.name = "xyz_description");
 }

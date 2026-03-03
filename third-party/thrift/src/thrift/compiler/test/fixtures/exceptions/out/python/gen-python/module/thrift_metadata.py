@@ -23,6 +23,7 @@ def _fbthrift_gen_metadata_exception_Fiery(metadata_struct: _fbthrift_metadata.T
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="message", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.ExceptionMessage"), fields= {  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.AllowUnsafeRequiredFieldQualifier"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.exceptions)

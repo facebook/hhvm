@@ -52,6 +52,7 @@ const map<Company, i32> const_enum_map = {
 };
 
 struct Internship {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 weeks;
   2: string title;
   3: optional Company employer;
@@ -64,7 +65,9 @@ const Internship instagram = {
 };
 
 struct Range {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 min;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 max;
 }
 

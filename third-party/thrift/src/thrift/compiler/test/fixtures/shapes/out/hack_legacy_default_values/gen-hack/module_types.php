@@ -2053,6 +2053,12 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'required_enum_with_default' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

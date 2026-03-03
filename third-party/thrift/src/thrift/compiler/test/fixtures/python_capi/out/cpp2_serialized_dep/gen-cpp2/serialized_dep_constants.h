@@ -14,9 +14,9 @@ namespace test::fixtures::python_capi {
 /** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift"} */
 namespace serialized_dep_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_b748ca241bc21635();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_b748ca241bc21635_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_b748ca241bc21635_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_54caba11ffb78daa();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_54caba11ffb78daa_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_54caba11ffb78daa_uris();
 
 } // namespace serialized_dep_constants
 } // namespace test::fixtures::python_capi

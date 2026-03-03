@@ -14,9 +14,9 @@ namespace facebook::thrift::compiler::test {
 /** Glean {"file": "thrift/compiler/test/fixtures/use_op_encode/src/module.thrift"} */
 namespace module_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_1e046bdc4067735a();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1e046bdc4067735a_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_1e046bdc4067735a_uris();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_bad599ed570b9240();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_bad599ed570b9240_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_bad599ed570b9240_uris();
 
 } // namespace module_constants
 } // namespace facebook::thrift::compiler::test

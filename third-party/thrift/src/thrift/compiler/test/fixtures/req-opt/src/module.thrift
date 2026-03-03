@@ -23,8 +23,10 @@ namespace java.swift test.fixtures.req_opt
 namespace cocoa example
 
 struct Foo {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 myInteger;
   2: optional string myString;
   3: list<bool> myBools;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required list<i32> myNumbers;
 }

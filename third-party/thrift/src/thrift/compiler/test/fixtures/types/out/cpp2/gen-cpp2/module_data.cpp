@@ -659,8 +659,8 @@ namespace detail {
 
 template <> struct TSchemaAssociation<::apache::thrift::fixtures::types::SomeService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 7104950197475503333;
-  static constexpr ::std::string_view definitionKey = {"\xb7\xa3\xc6\x01\x74\x50\x57\x4a\x92\x90\xb3\x66\x0a\x78\xe3\xa2", 16};
+  static constexpr int64_t programId = -2148507137256071331;
+  static constexpr ::std::string_view definitionKey = {"\x01\x8d\x12\xd5\xc6\xc8\x5a\x3d\x6e\x78\xb0\x3a\x26\xc3\xad\xae", 16};
 };
 } // namespace detail
 } // namespace apache::thrift

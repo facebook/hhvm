@@ -319,6 +319,12 @@ class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThrif
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'weeks' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
         'compensation' => shape(
           'field' => dict[
             'AnnotationStruct' => AnnotationStruct::withDefaultValues(),

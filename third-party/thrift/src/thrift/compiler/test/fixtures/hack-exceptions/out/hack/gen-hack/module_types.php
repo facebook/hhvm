@@ -266,6 +266,12 @@ class MyException2 extends \TException implements \IThriftSyncStruct, \IThriftEx
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'code' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier' => \facebook\thrift\annotation\AllowUnsafeRequiredFieldQualifier::withDefaultValues(),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }

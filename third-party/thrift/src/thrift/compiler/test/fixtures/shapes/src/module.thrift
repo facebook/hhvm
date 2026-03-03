@@ -64,6 +64,7 @@ struct B {
   59: optional map<string, set<i32>> optional_map_of_string_to_set_of_i32;
   60: optional Enum optional_enum;
 
+  @thrift.AllowUnsafeRequiredFieldQualifier
   70: required Enum required_enum_with_default = ENUM;
 
   80: string string_with_default_value = "de_fault_in_our_stars";

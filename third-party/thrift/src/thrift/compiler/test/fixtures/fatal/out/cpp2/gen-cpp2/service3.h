@@ -151,8 +151,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service3> : public apache::thr
 namespace detail {
 template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service3, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = -6425881405479101494;
-  static constexpr ::std::string_view definitionKey = {"\xfe\xcc\x8c\x47\xbd\x60\xf7\xdc\x34\xd5\xa1\x69\x78\xd8\xdd\x3b", 16};
+  static constexpr int64_t programId = -8583136656675199408;
+  static constexpr ::std::string_view definitionKey = {"\x47\x1b\x51\x14\x9f\x68\x7f\x50\xfa\xb2\xe6\xbe\x78\x76\x71\x98", 16};
 };
 }
 } // namespace apache::thrift

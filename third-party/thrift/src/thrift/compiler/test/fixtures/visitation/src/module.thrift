@@ -140,9 +140,11 @@ struct structC {
 }
 
 struct struct1 {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 field0;
   2: optional string field1;
   3: enum1 field2;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required enum2 field3;
   5: optional union1 field4;
   6: union2 field5;
@@ -180,6 +182,7 @@ struct struct3 {
 }
 
 struct struct4 {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 field0;
   2: optional string field1;
   3: enum1 field2;
@@ -189,6 +192,7 @@ struct struct4 {
 }
 
 struct struct5 {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 field0;
   2: optional string field1;
   3: enum1 field2;

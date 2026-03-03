@@ -15,13 +15,13 @@ namespace extra::svc {
 namespace extra_services_constants {
 
 
-::std::string_view _fbthrift_schema_61420f57c526760a() {
+::std::string_view _fbthrift_schema_2dacd8c4e3df59ee() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_61420f57c526760a_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_2dacd8c4e3df59ee_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_61420f57c526760a_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_2dacd8c4e3df59ee_uris() {
   return {};
 }
 

@@ -22,6 +22,7 @@ def _fbthrift_gen_metadata_struct_Internship(metadata_struct: _fbthrift_metadata
         return metadata_struct
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="weeks", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.AllowUnsafeRequiredFieldQualifier"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="title", is_optional=False, structured_annotations=[
         ]),
@@ -58,8 +59,10 @@ def _fbthrift_gen_metadata_struct_Range(metadata_struct: _fbthrift_metadata.Thri
         return metadata_struct
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="min", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.AllowUnsafeRequiredFieldQualifier"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="max", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.AllowUnsafeRequiredFieldQualifier"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)

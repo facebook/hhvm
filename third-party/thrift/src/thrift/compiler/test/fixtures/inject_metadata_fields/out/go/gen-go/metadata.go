@@ -24,7 +24,7 @@ var (
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_module_Fields =
         &metadata.ThriftType{
@@ -98,7 +98,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "type":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("Fields"),
+                                CvString: new("Fields"),
                             },
                     },
                 },
@@ -130,7 +130,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "type":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("Fields"),
+                                CvString: new("Fields"),
                             },
                     },
                 },
@@ -174,7 +174,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "type":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("foo.Fields"),
+                                CvString: new("foo.Fields"),
                             },
                     },
                 },
@@ -206,7 +206,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "type":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("foo.FieldsWithIncludedStruct"),
+                                CvString: new("foo.FieldsWithIncludedStruct"),
                             },
                     },
                 },

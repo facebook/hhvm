@@ -36,12 +36,12 @@ var (
     premadeThriftType_i64 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_module_MyDataItem =
         &metadata.ThriftType{
@@ -70,12 +70,12 @@ var (
     premadeThriftType_bool =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
         }
     premadeThriftType_float =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
         }
     premadeThriftType_set_float =
         &metadata.ThriftType{
@@ -94,7 +94,7 @@ var (
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_list_i32 =
         &metadata.ThriftType{
@@ -180,12 +180,12 @@ var (
     premadeThriftType_void =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         }
     premadeThriftType_binary =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
         }
 )
 
@@ -395,7 +395,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("MyRenamedStruct"),
+                                CvString: new("MyRenamedStruct"),
                             },
                     },
                 },
@@ -421,7 +421,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("MyRenamedUnion"),
+                                CvString: new("MyRenamedUnion"),
                             },
                     },
                 },
@@ -497,7 +497,7 @@ var enumMetadatas = func() []*metadata.ThriftEnum {
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("RenamedEnum"),
+                                CvString: new("RenamedEnum"),
                             },
                     },
                 },
@@ -527,7 +527,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("RenamedService"),
+                                CvString: new("RenamedService"),
                             },
                     },
                 },
@@ -558,7 +558,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("renamed_rpc"),
+                                        CvString: new("renamed_rpc"),
                                     },
                             },
                         },
@@ -683,7 +683,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "reason":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("Invalid key type"),
+                                        CvString: new("Invalid key type"),
                                     },
                             },
                         },
@@ -701,7 +701,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "reason":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("Skip function deprecation"),
+                                        CvString: new("Skip function deprecation"),
                                     },
                             },
                         },

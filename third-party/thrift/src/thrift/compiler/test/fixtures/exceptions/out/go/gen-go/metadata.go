@@ -22,7 +22,7 @@ var (
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_module_Fiery =
         &metadata.ThriftType{
@@ -55,7 +55,7 @@ var (
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_module_ExceptionWithPrimitiveField =
         &metadata.ThriftType{
@@ -81,7 +81,7 @@ var (
     premadeThriftType_void =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         }
 )
 

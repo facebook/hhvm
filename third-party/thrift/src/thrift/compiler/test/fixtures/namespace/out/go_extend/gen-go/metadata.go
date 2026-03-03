@@ -24,7 +24,7 @@ var (
     premadeThriftType_bool =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
         }
 )
 
@@ -58,7 +58,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults = append(fbthriftResults,
         &metadata.ThriftService{
             Name:      "extend.ExtendTestService",
-            Parent:    thrift.Pointerize("hsmodule.HsTestService"),
+            Parent:    new("hsmodule.HsTestService"),
             Functions: []*metadata.ThriftFunction{
                 &metadata.ThriftFunction{
                     Name:       "check",

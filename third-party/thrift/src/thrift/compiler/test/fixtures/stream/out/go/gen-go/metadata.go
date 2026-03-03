@@ -43,12 +43,12 @@ var (
     premadeThriftType_void =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         }
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
 )
 

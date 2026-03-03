@@ -79,13 +79,13 @@
 {{! Main const value content }}
 &{{root_program.metadata_qualifier}}ThriftConstValue{
   {{#if value.bool?}}
-    CvBool: thrift.Pointerize({{value.bool_value}}),
+    CvBool: new({{value.bool_value}}),
   {{#else if value.integer?}}
-    CvInteger: thrift.Pointerize(int64({{value.integer_value}})),
+    CvInteger: new(int64({{value.integer_value}})),
   {{#else if value.double?}}
-    CvDouble: thrift.Pointerize(float64({{value.double_value}})),
+    CvDouble: new(float64({{value.double_value}})),
   {{#else if value.string?}}
-    CvString: thrift.Pointerize({{value.go_quoted_value}}),
+    CvString: new({{value.go_quoted_value}}),
   {{#else if value.map?}}
     CvMap: []*{{root_program.metadata_qualifier}}ThriftConstValuePair{
     {{#each value.map_elements as |elem|}}
@@ -143,7 +143,7 @@
 {{#partial thrift_type_instance type=type.resolved}}
 {{/if type.defined_kind?}}
 {{#else if type.metadata_primitive?}}
-thrift.Pointerize({{root_program.metadata_qualifier}}ThriftPrimitiveType_{{#partial thrift_primitive_type type=type}}),
+new({{root_program.metadata_qualifier}}ThriftPrimitiveType_{{#partial thrift_primitive_type type=type}}),
 {{#else if type.enum?}}
 &{{root_program.metadata_qualifier}}ThriftEnumType{
     Name: "{{type.scoped_name}}",
@@ -279,7 +279,7 @@ thrift.Pointerize({{root_program.metadata_qualifier}}ThriftPrimitiveType_{{#part
 &{{root_program.metadata_qualifier}}ThriftService{
     Name:      "{{service.scoped_name}}",
     {{#if (object.notnull? service.extends)}}
-    Parent:    thrift.Pointerize("{{service.extends.scoped_name}}"),
+    Parent:    new("{{service.extends.scoped_name}}"),
     {{/if (object.notnull? service.extends)}}
     Functions: []*{{root_program.metadata_qualifier}}ThriftFunction{
         {{#each service.functions as |function|}}

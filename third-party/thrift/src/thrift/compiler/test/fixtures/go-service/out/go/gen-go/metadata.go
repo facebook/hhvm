@@ -22,7 +22,7 @@ var (
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_module_GetEntityRequest =
         &metadata.ThriftType{
@@ -55,7 +55,7 @@ var (
     premadeThriftType_i64 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
     premadeThriftType_map_module_NonComparableStruct_i64 =
         &metadata.ThriftType{
@@ -68,32 +68,32 @@ var (
     premadeThriftType_bool =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
         }
     premadeThriftType_byte =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
         }
     premadeThriftType_i16 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
         }
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_double =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
         }
     premadeThriftType_binary =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
         }
     premadeThriftType_map_string_string =
         &metadata.ThriftType{
@@ -113,7 +113,7 @@ var (
     premadeThriftType_void =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         }
 )
 

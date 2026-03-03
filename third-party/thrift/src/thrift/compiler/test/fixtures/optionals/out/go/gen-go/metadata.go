@@ -29,7 +29,7 @@ var (
     premadeThriftType_double =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
         }
     premadeThriftType_module_Color =
         &metadata.ThriftType{
@@ -41,12 +41,12 @@ var (
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_bool =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
         }
     premadeThriftType_module_Vehicle =
         &metadata.ThriftType{
@@ -58,7 +58,7 @@ var (
     premadeThriftType_i64 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
     premadeThriftType_module_PersonID =
         &metadata.ThriftType{
@@ -71,7 +71,7 @@ var (
     premadeThriftType_i16 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
         }
     premadeThriftType_set_module_PersonID =
         &metadata.ThriftType{

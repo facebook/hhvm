@@ -22,12 +22,12 @@ var (
     premadeThriftType_i64 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_module_User =
         &metadata.ThriftType{
@@ -39,12 +39,12 @@ var (
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_double =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
         }
     premadeThriftType_module_ExampleUnion =
         &metadata.ThriftType{

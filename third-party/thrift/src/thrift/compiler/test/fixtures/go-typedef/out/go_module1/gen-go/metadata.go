@@ -26,7 +26,7 @@ var (
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_module1_Plate =
         &metadata.ThriftType{
@@ -39,7 +39,7 @@ var (
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_module1_Year =
         &metadata.ThriftType{
@@ -93,7 +93,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("CarPartName"),
+                                        CvString: new("CarPartName"),
                                     },
                             },
                         },
@@ -118,7 +118,7 @@ var (
     premadeThriftType_i64 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
     premadeThriftType_module1_MapKey =
         &metadata.ThriftType{

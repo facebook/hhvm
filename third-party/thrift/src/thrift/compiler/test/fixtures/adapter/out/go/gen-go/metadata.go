@@ -36,7 +36,7 @@ var (
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_module_MyAnnotation =
         &metadata.ThriftType{
@@ -48,7 +48,7 @@ var (
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_module_i32_5137 =
         &metadata.ThriftType{
@@ -95,7 +95,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("\\Adapter2"),
+                                        CvString: new("\\Adapter2"),
                                     },
                             },
                         },
@@ -106,7 +106,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter2"),
+                                        CvString: new("::my::Adapter2"),
                                     },
                             },
                         },
@@ -117,7 +117,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter2"),
+                                        CvString: new("::my::Adapter2"),
                                     },
                             },
                         },
@@ -128,11 +128,11 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "adapterClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter2"),
+                                        CvString: new("com.facebook.thrift.my.Adapter2"),
                                     },
                                 "typeClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedSet_2"),
+                                        CvString: new("com.facebook.thrift.my.AdaptedSet_2"),
                                     },
                             },
                         },
@@ -160,7 +160,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("\\Adapter1"),
+                                        CvString: new("\\Adapter1"),
                                     },
                             },
                         },
@@ -171,7 +171,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter1"),
+                                        CvString: new("::my::Adapter1"),
                                     },
                             },
                         },
@@ -182,7 +182,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter1"),
+                                        CvString: new("::my::Adapter1"),
                                     },
                             },
                         },
@@ -193,11 +193,11 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "adapterClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter1"),
+                                        CvString: new("com.facebook.thrift.my.Adapter1"),
                                     },
                                 "typeClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedString_1"),
+                                        CvString: new("com.facebook.thrift.my.AdaptedString_1"),
                                     },
                             },
                         },
@@ -249,7 +249,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("\\Adapter2"),
+                                        CvString: new("\\Adapter2"),
                                     },
                             },
                         },
@@ -260,7 +260,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter2"),
+                                        CvString: new("::my::Adapter2"),
                                     },
                             },
                         },
@@ -271,7 +271,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter2"),
+                                        CvString: new("::my::Adapter2"),
                                     },
                             },
                         },
@@ -282,11 +282,11 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "adapterClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter2"),
+                                        CvString: new("com.facebook.thrift.my.Adapter2"),
                                     },
                                 "typeClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedList_2"),
+                                        CvString: new("com.facebook.thrift.my.AdaptedList_2"),
                                     },
                             },
                         },
@@ -338,7 +338,7 @@ var (
     premadeThriftType_binary =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
         }
     premadeThriftType_module_binary_5673 =
         &metadata.ThriftType{
@@ -360,7 +360,7 @@ var (
     premadeThriftType_i64 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
     premadeThriftType_module_MyI64 =
         &metadata.ThriftType{
@@ -383,7 +383,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter1"),
+                                        CvString: new("::my::Adapter1"),
                                     },
                             },
                         },
@@ -394,7 +394,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter1"),
+                                        CvString: new("::my::Adapter1"),
                                     },
                             },
                         },
@@ -405,11 +405,11 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "adapterClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter1"),
+                                        CvString: new("com.facebook.thrift.my.Adapter1"),
                                     },
                                 "typeClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedI64_1"),
+                                        CvString: new("com.facebook.thrift.my.AdaptedI64_1"),
                                     },
                             },
                         },
@@ -420,7 +420,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "signature":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("MyI64"),
+                                        CvString: new("MyI64"),
                                     },
                                 "color":
                                     &metadata.ThriftConstValue{
@@ -560,7 +560,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("\\Adapter1"),
+                                        CvString: new("\\Adapter1"),
                                     },
                             },
                         },
@@ -571,7 +571,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter1"),
+                                        CvString: new("::my::Adapter1"),
                                     },
                             },
                         },
@@ -582,7 +582,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter1"),
+                                        CvString: new("::my::Adapter1"),
                                     },
                             },
                         },
@@ -593,11 +593,11 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "adapterClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter1"),
+                                        CvString: new("com.facebook.thrift.my.Adapter1"),
                                     },
                                 "typeClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedFoo_1"),
+                                        CvString: new("com.facebook.thrift.my.AdaptedFoo_1"),
                                     },
                             },
                         },
@@ -723,7 +723,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter"),
+                                        CvString: new("::my::Adapter"),
                                     },
                             },
                         },
@@ -772,7 +772,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::AdaptTestMsAdapter"),
+                                        CvString: new("::apache::thrift::test::AdaptTestMsAdapter"),
                                     },
                             },
                         },
@@ -800,7 +800,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::folly::IOBuf"),
+                                        CvString: new("::folly::IOBuf"),
                                     },
                             },
                         },
@@ -828,7 +828,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::CustomProtocolAdapter"),
+                                        CvString: new("::apache::thrift::test::CustomProtocolAdapter"),
                                     },
                             },
                         },
@@ -856,7 +856,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>"),
+                                        CvString: new("::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>"),
                                     },
                             },
                         },
@@ -866,7 +866,7 @@ var (
     premadeThriftType_bool =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
         }
     premadeThriftType_module_AdaptedBool =
         &metadata.ThriftType{
@@ -889,7 +889,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                        CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                                     },
                             },
                         },
@@ -917,7 +917,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                        CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                                     },
                             },
                         },
@@ -934,7 +934,7 @@ var (
     premadeThriftType_byte =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
         }
     premadeThriftType_module_AdaptedByte =
         &metadata.ThriftType{
@@ -957,7 +957,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                        CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                                     },
                             },
                         },
@@ -967,7 +967,7 @@ var (
     premadeThriftType_i16 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
         }
     premadeThriftType_module_AdaptedShort =
         &metadata.ThriftType{
@@ -990,7 +990,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                        CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                                     },
                             },
                         },
@@ -1018,7 +1018,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                        CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                                     },
                             },
                         },
@@ -1028,7 +1028,7 @@ var (
     premadeThriftType_double =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
         }
     premadeThriftType_module_AdaptedDouble =
         &metadata.ThriftType{
@@ -1051,7 +1051,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                        CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                                     },
                             },
                         },
@@ -1079,7 +1079,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                        CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                                     },
                             },
                         },
@@ -1129,7 +1129,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>"),
+                                        CvString: new("::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>"),
                                     },
                             },
                         },
@@ -1209,7 +1209,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                        CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                                     },
                             },
                         },
@@ -1275,11 +1275,11 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::MemberAccessAdapter"),
+                                        CvString: new("::apache::thrift::test::MemberAccessAdapter"),
                                     },
                                 "adaptedType":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::TaggedWrapper<CircularAdaptee, CircularStruct>"),
+                                        CvString: new("::apache::thrift::test::TaggedWrapper<CircularAdaptee, CircularStruct>"),
                                     },
                             },
                         },
@@ -1370,7 +1370,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::apache::thrift::test::CountingAdapter<true, int>"),
+                                        CvString: new("::apache::thrift::test::CountingAdapter<true, int>"),
                                     },
                             },
                         },
@@ -1426,7 +1426,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("\\Adapter1"),
+                                        CvString: new("\\Adapter1"),
                                     },
                             },
                         },
@@ -1437,7 +1437,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter1"),
+                                        CvString: new("::my::Adapter1"),
                                     },
                             },
                         },
@@ -1448,7 +1448,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter1"),
+                                        CvString: new("::my::Adapter1"),
                                     },
                             },
                         },
@@ -1459,11 +1459,11 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "adapterClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.Adapter1"),
+                                        CvString: new("com.facebook.thrift.my.Adapter1"),
                                     },
                                 "typeClassName":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("com.facebook.thrift.my.AdaptedI32_1"),
+                                        CvString: new("com.facebook.thrift.my.AdaptedI32_1"),
                                     },
                             },
                         },
@@ -1491,7 +1491,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("\\Adapter2"),
+                                        CvString: new("\\Adapter2"),
                                     },
                             },
                         },
@@ -1502,7 +1502,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter2"),
+                                        CvString: new("::my::Adapter2"),
                                     },
                             },
                         },
@@ -1530,7 +1530,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("\\Adapter2"),
+                                        CvString: new("\\Adapter2"),
                                     },
                             },
                         },
@@ -1541,7 +1541,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter2"),
+                                        CvString: new("::my::Adapter2"),
                                     },
                             },
                         },
@@ -1569,7 +1569,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("::my::Adapter2"),
+                                        CvString: new("::my::Adapter2"),
                                     },
                             },
                         },
@@ -1640,11 +1640,11 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("my.module.Adapter2"),
+                                CvString: new("my.module.Adapter2"),
                             },
                         "typeHint":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("my.another.module.AdaptedType2[]"),
+                                CvString: new("my.another.module.AdaptedType2[]"),
                             },
                     },
                 },
@@ -1884,7 +1884,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::my::Adapter"),
+                                CvString: new("::my::Adapter"),
                             },
                     },
                 },
@@ -1895,11 +1895,11 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("my.module.Adapter"),
+                                CvString: new("my.module.Adapter"),
                             },
                         "typeHint":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("my.another.module.AdaptedType"),
+                                CvString: new("my.another.module.AdaptedType"),
                             },
                     },
                 },
@@ -1925,11 +1925,11 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::my::Adapter"),
+                                CvString: new("::my::Adapter"),
                             },
                         "adaptedType":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::my::Type"),
+                                CvString: new("::my::Type"),
                             },
                     },
                 },
@@ -2031,7 +2031,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("MyVarAdapter"),
+                                CvString: new("MyVarAdapter"),
                             },
                     },
                 },
@@ -2042,11 +2042,11 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("my.ConfigAdapter"),
+                                CvString: new("my.ConfigAdapter"),
                             },
                         "typeHint":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("my.ConfiguredVar[]"),
+                                CvString: new("my.ConfiguredVar[]"),
                             },
                     },
                 },
@@ -2339,7 +2339,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "value":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("ThriftAdaptTestUnion"),
+                                CvString: new("ThriftAdaptTestUnion"),
                             },
                     },
                 },
@@ -2365,7 +2365,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "value":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("ThriftAdaptedStruct"),
+                                CvString: new("ThriftAdaptedStruct"),
                             },
                     },
                 },
@@ -2391,7 +2391,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                             },
                     },
                 },
@@ -2481,7 +2481,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>"),
+                                CvString: new("::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>"),
                             },
                     },
                 },
@@ -2507,11 +2507,11 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                             },
                         "underlyingName":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("UnderlyingRenamedStruct"),
+                                CvString: new("UnderlyingRenamedStruct"),
                             },
                     },
                 },
@@ -2537,15 +2537,15 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                             },
                         "underlyingName":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("UnderlyingSameNamespaceStruct"),
+                                CvString: new("UnderlyingSameNamespaceStruct"),
                             },
                         "extraNamespace":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize(""),
+                                CvString: new(""),
                             },
                     },
                 },
@@ -2565,11 +2565,11 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::apache::thrift::test::MoveOnlyAdapter"),
+                                CvString: new("::apache::thrift::test::MoveOnlyAdapter"),
                             },
                         "moveOnly":
                             &metadata.ThriftConstValue{
-                                CvBool: thrift.Pointerize(true),
+                                CvBool: new(true),
                             },
                     },
                 },
@@ -2615,7 +2615,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::apache::thrift::test::TemplatedTestAdapter"),
+                                CvString: new("::apache::thrift::test::TemplatedTestAdapter"),
                             },
                     },
                 },
@@ -2689,7 +2689,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::apache::thrift::test::VariableAdapter"),
+                                CvString: new("::apache::thrift::test::VariableAdapter"),
                             },
                     },
                 },
@@ -2735,11 +2735,11 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("::apache::thrift::test::StructAdapter"),
+                                CvString: new("::apache::thrift::test::StructAdapter"),
                             },
                         "underlyingName":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("Renamed"),
+                                CvString: new("Renamed"),
                             },
                     },
                 },

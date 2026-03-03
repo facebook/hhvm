@@ -52,7 +52,7 @@ var (
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_module_decorated_struct =
         &metadata.ThriftType{
@@ -64,7 +64,7 @@ var (
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_list_i32 =
         &metadata.ThriftType{
@@ -101,7 +101,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "template":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("folly::sorted_vector_set"),
+                                        CvString: new("folly::sorted_vector_set"),
                                     },
                             },
                         },
@@ -112,7 +112,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("sorted_vector_map::SortedVectorSet"),
+                                        CvString: new("sorted_vector_map::SortedVectorSet"),
                                     },
                             },
                         },
@@ -148,7 +148,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("sorted_vector_map::SortedVectorMap"),
+                                        CvString: new("sorted_vector_map::SortedVectorMap"),
                                     },
                             },
                         },
@@ -172,7 +172,7 @@ var (
     premadeThriftType_i64 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
     premadeThriftType_module_VirtualStruct =
         &metadata.ThriftType{
@@ -191,7 +191,7 @@ var (
     premadeThriftType_bool =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
         }
     premadeThriftType_module_TrivialNumeric =
         &metadata.ThriftType{
@@ -232,12 +232,12 @@ var (
     premadeThriftType_byte =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BYTE_TYPE),
         }
     premadeThriftType_i16 =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
         }
     premadeThriftType_module_MinPadding =
         &metadata.ThriftType{
@@ -277,7 +277,7 @@ var (
     premadeThriftType_binary =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
         }
     premadeThriftType_module_TBinary =
         &metadata.ThriftType{
@@ -631,7 +631,7 @@ var (
                             Fields: map[string]*metadata.ThriftConstValue{
                                 "name":
                                     &metadata.ThriftConstValue{
-                                        CvString: thrift.Pointerize("std::uint32_t"),
+                                        CvString: new("std::uint32_t"),
                                     },
                             },
                         },
@@ -1040,7 +1040,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "value":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("Renamed"),
+                                CvString: new("Renamed"),
                             },
                     },
                 },
@@ -1241,11 +1241,11 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("IdentityAdapter<detail::AdaptedListDep>"),
+                                CvString: new("IdentityAdapter<detail::AdaptedListDep>"),
                             },
                         "adaptedType":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("detail::AdaptedListDep"),
+                                CvString: new("detail::AdaptedListDep"),
                             },
                     },
                 },
@@ -1284,7 +1284,7 @@ var (
                     Fields: map[string]*metadata.ThriftConstValue{
                         "name":
                             &metadata.ThriftConstValue{
-                                CvString: thrift.Pointerize("IdentityAdapter<detail::DependentAdaptedListDep>"),
+                                CvString: new("IdentityAdapter<detail::DependentAdaptedListDep>"),
                             },
                     },
                 },

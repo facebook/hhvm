@@ -22,7 +22,7 @@ var (
     premadeThriftType_void =
         &metadata.ThriftType{
             TPrimitive:
-                thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         }
 )
 
@@ -68,7 +68,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults = append(fbthriftResults,
         &metadata.ThriftService{
             Name:      "module.MyNode",
-            Parent:    thrift.Pointerize("module.MyRoot"),
+            Parent:    new("module.MyRoot"),
             Functions: []*metadata.ThriftFunction{
                 &metadata.ThriftFunction{
                     Name:       "do_mid",
@@ -81,7 +81,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
     fbthriftResults = append(fbthriftResults,
         &metadata.ThriftService{
             Name:      "module.MyLeaf",
-            Parent:    thrift.Pointerize("module.MyNode"),
+            Parent:    new("module.MyNode"),
             Functions: []*metadata.ThriftFunction{
                 &metadata.ThriftFunction{
                     Name:       "do_leaf",

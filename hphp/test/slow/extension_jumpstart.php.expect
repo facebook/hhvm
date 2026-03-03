@@ -1,4 +1,0 @@
-vec(2) {
-  string(10) "prefix:foo"
-  string(10) "prefix:bar"
-}

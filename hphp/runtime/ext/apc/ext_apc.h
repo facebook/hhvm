@@ -56,7 +56,8 @@ struct apcExtension final : Extension {
 
   void requestShutdown() override;
 
-  void serialize(BlobEncoder& sd) override;
+  std::string serialize() override;
+  void deserialize(std::string data) override;
 
   static void purgeDeferred(req::vector<StringData*>&&);
 };

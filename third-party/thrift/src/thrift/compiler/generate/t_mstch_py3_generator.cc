@@ -15,6 +15,7 @@
  */
 
 #include <filesystem>
+#include <memory>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -200,13 +201,13 @@ class py3_generator_context {
   using cached_type_properties =
       apache::thrift::compiler::python::cached_properties;
 
-  py3_generator_context(const t_program* program) : program_(program) {}
+  py3_generator_context(const t_program* program) : root_program_(program) {}
 
   cached_type_properties& get_cached_type_props(const t_type* type) const;
 
   field_cpp_kind get_field_cpp_kind(const t_field& field) const {
-    assert(find_cpp_kinds_.contains(&field));
-    return find_cpp_kinds_.at(&field);
+    assert(field_cpp_kinds_.contains(&field));
+    return field_cpp_kinds_.at(&field);
   }
 
   const Py3StructuredContext& get_structured_context(
@@ -215,12 +216,15 @@ class py3_generator_context {
     return structured_contexts_.at(&structured);
   }
 
-  const t_program* program() const { return program_; }
+  const t_program* program() const { return root_program_; }
 
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
     using context = t_whisker_generator::whisker_generator_visitor_context;
     visitor.add_structured_definition_visitor(
-        [this](const context&, const t_structured& node) {
+        [this](const context& ctx, const t_structured& node) {
+          if (&ctx.program() != root_program_ || is_hidden(node)) {
+            return;
+          }
           Py3StructuredContext& node_ctx = structured_contexts_[&node];
           node_ctx.nonHiddenFields.reserve(node.fields().size());
           for (const t_field& field : node.fields()) {
@@ -236,25 +240,25 @@ class py3_generator_context {
     visitor.add_field_visitor([this](const context&, const t_field& field) {
       switch (gen::cpp::find_ref_type(field)) {
         case gen::cpp::reference_type::unique: {
-          find_cpp_kinds_[&field] = field_cpp_kind::unique_ptr;
+          field_cpp_kinds_[&field] = field_cpp_kind::unique_ptr;
           return;
         }
         case gen::cpp::reference_type::shared_const: {
-          find_cpp_kinds_[&field] = field_cpp_kind::shared_ptr_const;
+          field_cpp_kinds_[&field] = field_cpp_kind::shared_ptr_const;
           return;
         }
         case gen::cpp::reference_type::shared_mutable: {
-          find_cpp_kinds_[&field] = field_cpp_kind::shared_ptr_mutable;
+          field_cpp_kinds_[&field] = field_cpp_kind::shared_ptr_mutable;
           return;
         }
         case gen::cpp::reference_type::boxed_intern:
         case gen::cpp::reference_type::boxed: {
-          find_cpp_kinds_[&field] = field_cpp_kind::value;
+          field_cpp_kinds_[&field] = field_cpp_kind::value;
           return;
         }
         case gen::cpp::reference_type::none: {
           const t_type* resolved_type = field.type()->get_true_type();
-          find_cpp_kinds_[&field] =
+          field_cpp_kinds_[&field] =
               cpp2::get_type(resolved_type) == "std::unique_ptr<folly::IOBuf>"
               ? field_cpp_kind::iobuf
               : field_cpp_kind::value;
@@ -267,11 +271,12 @@ class py3_generator_context {
   }
 
  private:
-  const t_program* program_;
+  const t_program* root_program_;
 
+  // Computed properties for the root program
   std::unordered_map<const t_structured*, Py3StructuredContext>
       structured_contexts_;
-  std::unordered_map<const t_field*, field_cpp_kind> find_cpp_kinds_;
+  std::unordered_map<const t_field*, field_cpp_kind> field_cpp_kinds_;
 
   // These properties are mutable as they are (or contain) caches which must be
   // accessed from a const method context
@@ -300,7 +305,6 @@ class py3_mstch_program : public mstch_program {
             {"program:containerTypes", &py3_mstch_program::getContainerTypes},
             {"program:hasContainerTypes",
              &py3_mstch_program::hasContainerTypes},
-            {"program:hasUnionTypes", &py3_mstch_program::hasUnionTypes},
             {"program:customTemplates", &py3_mstch_program::getCustomTemplates},
             {"program:customTypes", &py3_mstch_program::getCustomTypes},
             {"program:has_stream?", &py3_mstch_program::hasStream},
@@ -333,15 +337,6 @@ class py3_mstch_program : public mstch_program {
     return !containers_.empty() &&
         (!program_->services().empty() ||
          has_option("gen_legacy_container_converters"));
-  }
-
-  mstch::node hasUnionTypes() {
-    for (const auto* ttype : objects_) {
-      if (ttype->is<t_union>()) {
-        return true;
-      }
-    }
-    return false;
   }
 
   mstch::node unique_functions_by_return_type() {
@@ -827,10 +822,11 @@ class t_mstch_py3_generator : public t_mstch_generator {
 
   std::filesystem::path generateRootPath_;
   FileType file_type_ = FileType::NotTypesFile;
-  py3_generator_context context_{program_};
+  std::unique_ptr<py3_generator_context> context_;
 
   void initialize_context(t_whisker_generator::context_visitor& visitor) final {
-    context_.register_visitors(visitor);
+    context_ = std::make_unique<py3_generator_context>(program_);
+    context_->register_visitors(visitor);
   }
 
   whisker::map::raw globals(prototype_database& proto) const override {
@@ -887,39 +883,39 @@ class t_mstch_py3_generator : public t_mstch_generator {
         whisker::dsl::prototype_builder<h_field>::extends(std::move(base));
 
     def.property("reference?", [this](const t_field& self) {
-      return context_.get_field_cpp_kind(self) != field_cpp_kind::value;
+      return context_->get_field_cpp_kind(self) != field_cpp_kind::value;
     });
     def.property("unique_ref?", [this](const t_field& self) {
-      return context_.get_field_cpp_kind(self) == field_cpp_kind::unique_ptr;
+      return context_->get_field_cpp_kind(self) == field_cpp_kind::unique_ptr;
     });
     def.property("shared_ref?", [this](const t_field& self) {
-      return context_.get_field_cpp_kind(self) ==
+      return context_->get_field_cpp_kind(self) ==
           field_cpp_kind::shared_ptr_mutable;
     });
     def.property("shared_const_ref?", [this](const t_field& self) {
-      return context_.get_field_cpp_kind(self) ==
+      return context_->get_field_cpp_kind(self) ==
           field_cpp_kind::shared_ptr_const;
     });
     def.property("iobuf_ref?", [this](const t_field& self) {
-      return context_.get_field_cpp_kind(self) == field_cpp_kind::iobuf;
+      return context_->get_field_cpp_kind(self) == field_cpp_kind::iobuf;
     });
     def.property("has_ref_accessor?", [this](const t_field& self) {
-      const field_cpp_kind cpp_kind = context_.get_field_cpp_kind(self);
+      const field_cpp_kind cpp_kind = context_->get_field_cpp_kind(self);
       return cpp_kind == field_cpp_kind::value ||
           cpp_kind == field_cpp_kind::iobuf;
     });
     def.property("hasDefaultValue?", [this](const t_field& self) {
-      return field_has_default_value(self, context_.get_field_cpp_kind(self));
+      return field_has_default_value(self, context_->get_field_cpp_kind(self));
     });
     def.property("optional_default?", [](const t_field& self) {
       return self.qualifier() == t_field_qualifier::optional &&
           self.default_value() != nullptr;
     });
     def.property("PEP484Optional?", [this](const t_field& self) {
-      return !field_has_default_value(self, context_.get_field_cpp_kind(self));
+      return !field_has_default_value(self, context_->get_field_cpp_kind(self));
     });
     def.property("isset?", [this](const t_field& self) {
-      const field_cpp_kind cpp_kind = context_.get_field_cpp_kind(self);
+      const field_cpp_kind cpp_kind = context_->get_field_cpp_kind(self);
       return (cpp_kind == field_cpp_kind::value ||
               cpp_kind == field_cpp_kind::iobuf) &&
           self.qualifier() != t_field_qualifier::required;
@@ -990,6 +986,14 @@ class t_mstch_py3_generator : public t_mstch_generator {
     });
     def.property(
         "has_types?", [](const t_program& self) { return has_types(&self); });
+    def.property("has_visible_union_types?", [](const t_program& self) {
+      return std::any_of(
+          self.structured_definitions().begin(),
+          self.structured_definitions().end(),
+          [](const t_structured* s) {
+            return !is_hidden(*s) && s->is<t_union>();
+          });
+    });
     def.property("py_deprecated_module_path", [](const t_program& self) {
       const std::string& module_path = self.get_namespace("py");
       return module_path.empty() ? self.name() : module_path;
@@ -1073,10 +1077,10 @@ class t_mstch_py3_generator : public t_mstch_generator {
           cpp2::OrderableTypeUtils::is_orderable(self);
     });
     def.property("has_hidden_fields?", [this](const t_structured& self) {
-      return context_.get_structured_context(self).hasHiddenFields;
+      return context_->get_structured_context(self).hasHiddenFields;
     });
     def.property("has_defaulted_fields?", [this](const t_structured& self) {
-      return context_.get_structured_context(self).hasDefaultedFields &&
+      return context_->get_structured_context(self).hasDefaultedFields &&
           !self.is<t_union>();
     });
 
@@ -1127,12 +1131,12 @@ class t_mstch_py3_generator : public t_mstch_generator {
     });
     def.property("iobufWrapper?", [this](const t_type& self) {
       const py3_generator_context::cached_type_properties& cached_props =
-          context_.get_cached_type_props(&self);
+          context_->get_cached_type_props(&self);
       return cached_props.cpp_type() == "folly::IOBuf" ||
           cached_props.cpp_type() == "std::unique_ptr<folly::IOBuf>";
     });
     def.property("flat_name", [this](const t_type& self) {
-      return context_.get_cached_type_props(&self).flat_name();
+      return context_->get_cached_type_props(&self).flat_name();
     });
     def.property("need_cbinding_path?", [this](const t_type& self) {
       // Need import if in a different declaration file, or type originated in a
@@ -1159,23 +1163,23 @@ class t_mstch_py3_generator : public t_mstch_generator {
               get_py3_namespace_with_name(get_true_type_program(self)), "_"));
     });
     def.property("cppTemplate", [this](const t_type& self) {
-      return context_.get_cached_type_props(&self).cpp_template();
+      return context_->get_cached_type_props(&self).cpp_template();
     });
     def.property("cythonTemplate", [this](const t_type& self) {
-      return context_.get_cached_type_props(&self).to_cython_template();
+      return context_->get_cached_type_props(&self).to_cython_template();
     });
     def.property("defaultTemplate?", [this](const t_type& self) {
-      return context_.get_cached_type_props(&self).is_default_template(
+      return context_->get_cached_type_props(&self).is_default_template(
           self.get_true_type());
     });
     def.property("customCppType", [this](const t_type& self) {
-      return context_.get_cached_type_props(&self).cpp_type();
+      return context_->get_cached_type_props(&self).cpp_type();
     });
     def.property("cythonCustomType", [this](const t_type& self) {
-      return context_.get_cached_type_props(&self).to_cython_type();
+      return context_->get_cached_type_props(&self).to_cython_type();
     });
     def.property("customCppType?", [this](const t_type& self) {
-      return !context_.get_cached_type_props(&self).cpp_type().empty();
+      return !context_->get_cached_type_props(&self).cpp_type().empty();
     });
     def.property("number?", [](const t_type& self) {
       return is_number(*self.get_true_type());
@@ -1205,20 +1209,20 @@ class t_mstch_py3_generator : public t_mstch_generator {
           : !resolved.is<t_container>();
     });
     def.property("iobuf?", [this](const t_type& self) {
-      return is_iobuf(context_.get_cached_type_props(&self).cpp_type());
+      return is_iobuf(context_->get_cached_type_props(&self).cpp_type());
     });
     def.property("iobufRef?", [this](const t_type& self) {
-      return is_iobuf_ref(context_.get_cached_type_props(&self).cpp_type());
+      return is_iobuf_ref(context_->get_cached_type_props(&self).cpp_type());
     });
     def.property("flexibleBinary?", [this](const t_type& self) {
       return is_flexible_binary(
           *self.get_true_type(),
-          context_.get_cached_type_props(&self).cpp_type());
+          context_->get_cached_type_props(&self).cpp_type());
     });
     def.property("customBinaryType?", [this](const t_type& self) {
       return is_custom_binary_type(
           *self.get_true_type(),
-          context_.get_cached_type_props(&self).cpp_type());
+          context_->get_cached_type_props(&self).cpp_type());
     });
     // types that don't have an underlying C++ type
     // i.e., structs, unions, exceptions all enclose a C++ type
@@ -1227,7 +1231,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
       return (resolved.is<t_primitive_type>() || resolved.is<t_enum>() ||
               resolved.is<t_container>()) &&
           !is_custom_binary_type(
-                 resolved, context_.get_cached_type_props(&self).cpp_type());
+                 resolved, context_->get_cached_type_props(&self).cpp_type());
     });
     // types that need conversion to py3 if accessed from thrift-python struct
     // fields
@@ -1299,9 +1303,9 @@ py3_generator_context::get_cached_type_props(const t_type* type) const {
 }
 
 void t_mstch_py3_generator::set_mstch_factories() {
-  mstch_context_.add<py3_mstch_program>(&context_);
+  mstch_context_.add<py3_mstch_program>(context_.get());
   mstch_context_.add<py3_mstch_service>(program_);
-  mstch_context_.add<py3_mstch_struct>(&context_);
+  mstch_context_.add<py3_mstch_struct>(context_.get());
 }
 
 void t_mstch_py3_generator::generate_init_files() {

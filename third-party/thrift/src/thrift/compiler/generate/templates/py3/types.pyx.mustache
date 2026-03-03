@@ -116,13 +116,13 @@ from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.
 {{/program:enums}}
 )
   {{/if program:enums?}}
-{{#program:hasUnionTypes}}
+  {{#if program:has_visible_union_types?}}
 from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
 {{#program:filtered_structs}}{{#struct:union?}}
     __{{struct:name}}Type,
 {{/struct:union?}}{{/program:filtered_structs}}
 )
-{{/program:hasUnionTypes}}
+  {{/if program:has_visible_union_types?}}
 
 {{#program:hasContainerTypes}}
 from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (

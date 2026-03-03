@@ -1504,6 +1504,13 @@ class HTTPTransaction
   }
 
   /**
+   * Override callback cancellation to no-op. This will trigger on destruction
+   * of the timer.
+   */
+  void callbackCanceled() noexcept override {
+  }
+
+  /**
    * Write a description of the transaction to a stream
    */
   void describe(std::ostream& os) const;

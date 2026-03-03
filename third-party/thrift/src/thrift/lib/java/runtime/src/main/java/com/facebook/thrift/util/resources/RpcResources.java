@@ -55,6 +55,10 @@ public final class RpcResources {
     return ResourceConfiguration.enableOperatorFusion;
   }
 
+  public static boolean enableIoUring() {
+    return ResourceConfiguration.enableIoUring;
+  }
+
   public static HashedWheelTimer getHashedWheelTimer() {
     return INSTANCE.doGet().getTimer();
   }

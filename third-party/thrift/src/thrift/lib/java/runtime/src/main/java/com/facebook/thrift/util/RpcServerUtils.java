@@ -27,23 +27,24 @@ import com.facebook.thrift.rsocket.server.RSocketServerTransportFactory;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.server.ServerTransport;
 import com.facebook.thrift.server.ServerTransportFactory;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerDomainSocketChannel;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.kqueue.KQueue;
-import io.netty.channel.kqueue.KQueueEventLoopGroup;
 import io.netty.channel.kqueue.KQueueServerDomainSocketChannel;
 import io.netty.channel.kqueue.KQueueServerSocketChannel;
+import io.netty.channel.socket.nio.NioServerDomainSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.unix.DomainSocketAddress;
+import io.netty.channel.uring.IoUringServerDomainSocketChannel;
+import io.netty.channel.uring.IoUringServerSocketChannel;
 import io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.SslProvider;
+import io.netty.util.internal.PlatformDependent;
 import java.io.FileInputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -67,57 +68,65 @@ public final class RpcServerUtils {
    * Returns ServerChannel Class from eventLoopGroup and socketAddress. Throws
    * UnsupportedOperationException if the combination is invalid.
    *
-   * @param group
    * @param socketAddress
    * @return Channel class
    */
-  public static Class<? extends ServerChannel> getChannelClass(
-      EventLoopGroup group, SocketAddress socketAddress) {
+  public static Class<? extends ServerChannel> getChannelClass(SocketAddress socketAddress) {
     if (socketAddress instanceof InetSocketAddress) {
-      if (group instanceof EpollEventLoopGroup) {
-        return EpollServerSocketChannel.class;
+      switch (NettyUtil.getTransportType()) {
+        case IO_URING:
+          return IoUringServerSocketChannel.class;
+        case EPOLL:
+          return EpollServerSocketChannel.class;
+        case KQUEUE:
+          return KQueueServerSocketChannel.class;
+        case NIO:
+        default:
+          return NioServerSocketChannel.class;
       }
-      if (group instanceof KQueueEventLoopGroup) {
-        return KQueueServerSocketChannel.class;
-      }
-      return NioServerSocketChannel.class;
     }
     if (socketAddress instanceof DomainSocketAddress) {
-      if (group instanceof EpollEventLoopGroup) {
-        return EpollServerDomainSocketChannel.class;
-      } else if (getOS() == PlatformUtils.OS.LINUX) {
-        Throwable unavailabilityCause = Epoll.unavailabilityCause();
-        String errorMsg =
-            unavailabilityCause == null
-                ? "unavailabilityCause is null"
-                : unavailabilityCause.getMessage();
-        throw new UnsupportedOperationException(
-            String.format(
-                "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely due to"
-                    + " system support for Epoll unavailable due to {%s}.",
-                group.getClass(), socketAddress.getClass(), errorMsg),
-            unavailabilityCause);
-      }
-      if (group instanceof KQueueEventLoopGroup) {
-        return KQueueServerDomainSocketChannel.class;
-      } else if (getOS() == PlatformUtils.OS.MAC) {
-        Throwable unavailabilityCause = KQueue.unavailabilityCause();
-        String errorMsg =
-            unavailabilityCause == null
-                ? "unavailabilityCause is null"
-                : unavailabilityCause.getMessage();
-        throw new UnsupportedOperationException(
-            String.format(
-                "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely due to"
-                    + " system support for Kqueue unavailable due to {%s}.",
-                group.getClass(), socketAddress.getClass(), errorMsg),
-            unavailabilityCause);
+      switch (NettyUtil.getTransportType()) {
+        case IO_URING:
+          return IoUringServerDomainSocketChannel.class;
+        case EPOLL:
+          return EpollServerDomainSocketChannel.class;
+        case KQUEUE:
+          return KQueueServerDomainSocketChannel.class;
+        default:
+          if (PlatformDependent.javaVersion() >= 16) {
+            return NioServerDomainSocketChannel.class;
+          } else if (getOS() == PlatformUtils.OS.LINUX) {
+            Throwable unavailabilityCause = Epoll.unavailabilityCause();
+            String errorMsg =
+                unavailabilityCause == null
+                    ? "unavailabilityCause is null"
+                    : unavailabilityCause.getMessage();
+            throw new UnsupportedOperationException(
+                String.format(
+                    "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely"
+                        + " due to system support for Epoll unavailable due to {%s}.",
+                    NettyUtil.getTransportType(), socketAddress.getClass(), errorMsg),
+                unavailabilityCause);
+          } else if (getOS() == PlatformUtils.OS.MAC) {
+            Throwable unavailabilityCause = KQueue.unavailabilityCause();
+            String errorMsg =
+                unavailabilityCause == null
+                    ? "unavailabilityCause is null"
+                    : unavailabilityCause.getMessage();
+            throw new UnsupportedOperationException(
+                String.format(
+                    "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely"
+                        + " due to system support for Kqueue unavailable due to {%s}.",
+                    NettyUtil.getTransportType(), socketAddress.getClass(), errorMsg),
+                unavailabilityCause);
+          }
       }
     }
     throw new UnsupportedOperationException(
         String.format(
             "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}",
-            group.getClass(), socketAddress.getClass()));
+            NettyUtil.getTransportType(), socketAddress.getClass()));
   }
 
   /**

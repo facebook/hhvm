@@ -30,8 +30,6 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.ServerChannel;
 import io.netty.handler.ssl.SslContext;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -85,14 +83,10 @@ public class LegacyServerTransport implements ServerTransport {
                   serverMetrics,
                   config.getConnectionLimit());
 
-          EventLoopGroup group = RpcResources.getEventLoopGroup();
-
-          Class<? extends ServerChannel> channelClass = getChannelClass(group, bindAddress);
-
           ServerBootstrap bootstrap =
               new ServerBootstrap()
-                  .group(group)
-                  .channel(channelClass)
+                  .group(RpcResources.getEventLoopGroup())
+                  .channel(getChannelClass(bindAddress))
                   .childHandler(serverInitializer)
                   .option(ChannelOption.SO_BACKLOG, config.getAcceptBacklog())
                   .validate();

@@ -18,16 +18,21 @@ package com.facebook.thrift.util;
 
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.rsocket.transport.reactor.server.RSocketProtocolDetector;
+import com.facebook.thrift.util.resources.RpcResources;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.IoHandlerFactory;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollIoHandler;
 import io.netty.channel.kqueue.KQueue;
-import io.netty.channel.kqueue.KQueueEventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.kqueue.KQueueIoHandler;
+import io.netty.channel.nio.NioIoHandler;
+import io.netty.channel.uring.IoUring;
+import io.netty.channel.uring.IoUringIoHandler;
 import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.util.concurrent.FastThreadLocalThread;
 import io.netty.util.concurrent.Future;
@@ -43,6 +48,13 @@ import reactor.core.scheduler.NonBlocking;
 import reactor.netty.Connection;
 
 public final class NettyUtil {
+  public enum TransportType {
+    NIO,
+    EPOLL,
+    KQUEUE,
+    IO_URING
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(NettyUtil.class);
 
   public static RSocketProtocolDetector getRSocketProtocolDetector(Connection connection) {
@@ -114,20 +126,41 @@ public final class NettyUtil {
     }
   }
 
+  public static TransportType getTransportType() {
+    if (RpcResources.enableIoUring() && IoUring.isAvailable()) {
+      return TransportType.IO_URING;
+    } else if (Epoll.isAvailable()) {
+      return TransportType.EPOLL;
+    } else if (KQueue.isAvailable()) {
+      return TransportType.KQUEUE;
+    } else {
+      return TransportType.NIO;
+    }
+  }
+
   public static EventLoopGroup createEventLoopGroup(
       int numThreadsForEventLoop, String threadPrefix) {
-    EventLoopGroup eventLoop;
-    if (Epoll.isAvailable()) {
-      eventLoop =
-          new EpollEventLoopGroup(numThreadsForEventLoop, daemonThreadFactory(threadPrefix));
-    } else if (KQueue.isAvailable()) {
-      eventLoop =
-          new KQueueEventLoopGroup(numThreadsForEventLoop, daemonThreadFactory(threadPrefix));
-    } else {
-      eventLoop = new NioEventLoopGroup(numThreadsForEventLoop, daemonThreadFactory(threadPrefix));
+    IoHandlerFactory ioHandlerFactory;
+    switch (getTransportType()) {
+      case EPOLL:
+        ioHandlerFactory = EpollIoHandler.newFactory();
+        break;
+      case KQUEUE:
+        ioHandlerFactory = KQueueIoHandler.newFactory();
+        break;
+      case IO_URING:
+        ioHandlerFactory = IoUringIoHandler.newFactory();
+        break;
+      case NIO:
+      default:
+        ioHandlerFactory = NioIoHandler.newFactory();
+        break;
     }
-    LOGGER.info("Using '{}' with '{}' threads.", eventLoop.getClass(), numThreadsForEventLoop);
-    return eventLoop;
+
+    LOGGER.info(
+        "Using '{}' with '{}' threads.", ioHandlerFactory.getClass(), numThreadsForEventLoop);
+    return new MultiThreadIoEventLoopGroup(
+        numThreadsForEventLoop, daemonThreadFactory(threadPrefix), ioHandlerFactory);
   }
 
   private static ThreadFactory daemonThreadFactory(String threadPrefix) {

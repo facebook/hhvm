@@ -119,4 +119,8 @@ final class ResourceConfiguration {
 
   static final boolean separateOffLoopScheduler =
       System.getProperty("thrift.separate-offloop-scheduler", "false").equalsIgnoreCase("true");
+
+  // TODO: @jbahr 12/23/25 Remove once rollout and testing is complete
+  static final boolean enableIoUring =
+      System.getProperty("thrift.enable-iouring", "false").equalsIgnoreCase("true");
 }

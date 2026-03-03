@@ -447,7 +447,7 @@ fn unescape_bytes_to_gb(
             output.push(c)
         } else {
             idx += 1;
-            if !idx < len {
+            if idx >= len {
                 return Err("string ended early".into());
             }
             let c = s[idx];
@@ -604,6 +604,7 @@ mod tests {
     #[test]
     fn unescape_single_or_nowdoc() {
         assert_eq!(unescape_single("").unwrap(), "");
+        assert!(unescape_single("\\").is_err());
         assert_eq!(unescape_nowdoc("").unwrap(), "");
         assert_eq!(unescape_long_string("").unwrap(), "");
         assert_eq!(unescape_double("").unwrap(), "");

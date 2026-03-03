@@ -528,6 +528,8 @@ scanRuntimeCalls(tc::FuncMetaInfo& info, const ProfData* pd) {
             for (auto const& block : rt->region->blocks()) {
               if (block->start() == blockSk ||
                   (!blockSk.prologue() && !blockSk.funcEntry() &&
+                   !block->start().prologue() && !block->start().funcEntry() &&
+                   !block->last().prologue() && !block->last().funcEntry() &&
                    block->start().func() == blockSk.func() &&
                    block->start().offset() <= blockSk.offset() &&
                    blockSk.offset() <= block->last().offset())) {

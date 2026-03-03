@@ -433,7 +433,6 @@ class py3_mstch_program : public mstch_program {
         }
         visit_type(field.type().get_type());
       }
-      objects_.push_back(object);
     }
   }
 
@@ -449,7 +448,6 @@ class py3_mstch_program : public mstch_program {
         continue;
       }
       visit_type(typedef_def);
-      typedefs_.push_back(typedef_def);
     }
   }
 
@@ -460,13 +458,29 @@ class py3_mstch_program : public mstch_program {
   }
 
   mstch::node filtered_objects() {
+    std::vector<const t_structured*> visible;
+    visible.reserve(program_->structured_definitions().size());
+    for (const t_structured* s : program_->structured_definitions()) {
+      if (!is_hidden(*s)) {
+        visible.emplace_back(s);
+      }
+    }
     std::string id =
         program_cache_id(program_, get_program_namespace(program_));
     return make_mstch_array_cached(
-        objects_, *context_.struct_factory, context_.struct_cache, id);
+        visible, *context_.struct_factory, context_.struct_cache, id);
   }
 
-  mstch::node filtered_typedefs() { return make_mstch_typedefs(typedefs_); }
+  mstch::node filtered_typedefs() {
+    std::vector<const t_typedef*> visible;
+    visible.reserve(program_->structured_definitions().size());
+    for (const t_typedef* t : program_->typedefs()) {
+      if (!is_hidden(*t) && !is_hidden(*t->get_true_type())) {
+        visible.emplace_back(t);
+      }
+    }
+    return make_mstch_typedefs(visible);
+  }
 
   py3_generator_context& generator_context_;
   std::vector<const t_type*> containers_;
@@ -477,8 +491,6 @@ class py3_mstch_program : public mstch_program {
       uniqueFunctionsByReturnType_;
   std::map<std::string, const t_type*> streamTypes_;
   std::map<std::string, const t_type*> streamExceptions_;
-  std::vector<const t_structured*> objects_;
-  std::vector<const t_typedef*> typedefs_;
 
   // Functions with a stream and an initial response.
   std::vector<const t_function*> response_and_stream_functions_;
@@ -968,6 +980,27 @@ class t_mstch_py3_generator : public t_mstch_generator {
       return whisker::make::array(std::move(consts));
     });
     def.property(
+        "py3_visible_structured_definitions", [&proto](const t_program& self) {
+          whisker::array::raw visible;
+          visible.reserve(self.structured_definitions().size());
+          for (const t_structured* s : self.structured_definitions()) {
+            if (!is_hidden(*s)) {
+              visible.emplace_back(proto.create<t_structured>(*s));
+            }
+          }
+          return whisker::make::array(std::move(visible));
+        });
+    def.property("py3_visible_typedefs", [&proto](const t_program& self) {
+      whisker::array::raw visible;
+      visible.reserve(self.typedefs().size());
+      for (const t_typedef* t : self.typedefs()) {
+        if (!is_hidden(*t) && !is_hidden(*t->get_true_type())) {
+          visible.emplace_back(proto.create<t_typedef>(*t));
+        }
+      }
+      return whisker::make::array(std::move(visible));
+    });
+    def.property(
         "has_types?", [](const t_program& self) { return has_types(&self); });
     def.property("has_visible_union_types?", [](const t_program& self) {
       return std::any_of(
@@ -1102,6 +1135,11 @@ class t_mstch_py3_generator : public t_mstch_generator {
     def.property("has_defaulted_fields?", [this](const t_structured& self) {
       return context_->get_structured_context(self).hasDefaultedFields &&
           !self.is<t_union>();
+    });
+    def.property("py3_fields", [&](const t_structured& self) {
+      return to_array(
+          context_->get_structured_context(self).nonHiddenFields,
+          proto.of<t_field>());
     });
 
     return std::move(def).make();

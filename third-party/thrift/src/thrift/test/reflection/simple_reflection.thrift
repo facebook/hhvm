@@ -47,22 +47,29 @@ struct smallstruct {
 }
 
 struct struct1 {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 field0;
   2: optional string field1;
   3: optional enum1 field2;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required list<list<i32>> field3;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required set<i32> field4;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   6: required map<i32, string> field5;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   7: required nested1 field6;
   8: i64 field7; # generate writer req/reader opt field
   9: string field8; # default requiredness type field
   # this generates an invalid thrift definition, so it won't be tested
   // 10: string field9 (cpp.ref = "true", cpp2.ref = "true")
 
+  @thrift.AllowUnsafeRequiredFieldQualifier
   11: required list<bool> field10;
 }
 
 struct struct2 {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string req_string;
   2: optional string opt_string;
   3: string def_string;
@@ -93,6 +100,7 @@ struct struct3 {
   2: smallstruct def_nested;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required smallstruct req_nested;
   @thrift.Box
   4: optional smallstruct box_nested1;
@@ -137,6 +145,7 @@ struct struct6 {
   2: optional smallstruct opt_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required smallstruct req_field;
 }
 
@@ -159,6 +168,7 @@ struct struct7 {
   13: optional smallstruct field13;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   14: required smallstruct field14;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -176,6 +186,7 @@ struct struct8 {
   2: optional smallstruct opt_field;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required smallstruct req_field;
 }
 

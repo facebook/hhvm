@@ -50,93 +50,139 @@ enum unsigned_int_enum {
 
 @cpp.MinimizePadding
 struct nonoptimal {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i16 a;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required bool b;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required i32 c;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required byte d;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required i64 e;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   6: required test_enum f;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   7: required double g;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   8: required float h;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   9: required string i;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   10: required byte j;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   11: required list<byte> k;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   12: required byte l;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   13: required set<byte> m;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   14: required byte n;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   15: required map<byte, byte> o;
 
   // Add extra fields to make the size of this struct a multiple of 8 (assuming
   // containers' alignment is 8) and reducing the room for reordering error.
+  @thrift.AllowUnsafeRequiredFieldQualifier
   16: required byte p;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   17: required i32 q;
 }
 
 struct small_align {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required byte a;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required byte b;
 }
 
 struct big_align {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required byte a;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 b;
 }
 
 @cpp.MinimizePadding
 struct nonoptimal_struct {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required byte small;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required big_align big;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required small_align medium;
 }
 
 @cpp.MinimizePadding
 struct nonoptimal_struct_with_structured_annotation {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required byte small;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required big_align big;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required small_align medium;
 }
 
 @cpp.MinimizePadding
 struct nonoptimal_struct_with_custom_type {
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required byte small;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required big_align big;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required small_align medium;
 }
 
 @cpp.MinimizePadding
 struct same_sizes {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 a;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 b;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required i32 c;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required i32 d;
 }
 
 @cpp.MinimizePadding
 struct ref_type {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required byte a;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required byte b;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required byte c;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required byte d;
 }
 
 @cpp.MinimizePadding
 struct nonoptimal_struct_noexcept_move {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required byte small;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required big_align big;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required small_align medium;
 }
 
 @cpp.MinimizePadding
 struct nonoptimal_large_struct_noexcept_move {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required byte small;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required big_align big;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required small_align medium;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required string mystring;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required i32 a;
 }
 

@@ -29,16 +29,24 @@ package;
   items = {"no_default_comparators": "true"},
 }
 struct Inner {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 i;
 }
 
 struct MyArgs {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string s;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required Inner i;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required list<i32> l;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required map<string, i32> m;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required list<Inner> li;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   6: required map<i32, Inner> mi;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   7: required map<Inner, i32> complex_key;
 }
 

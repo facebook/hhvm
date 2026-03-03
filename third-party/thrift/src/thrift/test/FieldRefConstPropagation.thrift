@@ -29,6 +29,7 @@ struct Optional {
 }
 
 struct Required {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string msg;
 }
 

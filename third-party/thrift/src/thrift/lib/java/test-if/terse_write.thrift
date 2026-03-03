@@ -31,6 +31,7 @@ enum MyEnum {
 struct MyStruct {
   1: i32 int_field;
   2: optional i64 long_field;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required bool bool_field;
   4: SingleFieldStruct struct_field;
 }

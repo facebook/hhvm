@@ -27,45 +27,58 @@ enum HasOptionalsTestEnum {
 
 struct HasOptionalsExtra {
   1: i64 extraInt64Def;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i64 extraInt64Req;
   3: optional i64 extraInt64Opt;
   4: string extraStringDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required string extraStringReq;
   6: optional string extraStringOpt;
   7: set<i64> extraSetDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   8: required set<i64> extraSetReq;
   9: optional set<i64> extraSetOpt;
   10: list<i64> extraListDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   11: required list<i64> extraListReq;
   12: optional list<i64> extraListOpt;
   13: map<i64, i64> extraMapDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   14: required map<i64, i64> extraMapReq;
   15: optional map<i64, i64> extraMapOpt;
   16: HasOptionalsTestEnum extraEnumDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   17: required HasOptionalsTestEnum extraEnumReq;
   18: optional HasOptionalsTestEnum extraEnumOpt;
 }
 
 struct HasOptionals {
   1: i64 int64Def;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i64 int64Req;
   3: optional i64 int64Opt;
   4: string stringDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required string stringReq;
   6: optional string stringOpt;
   7: set<i64> setDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   8: required set<i64> setReq;
   9: optional set<i64> setOpt;
   10: list<i64> listDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   11: required list<i64> listReq;
   12: optional list<i64> listOpt;
   13: map<i64, i64> mapDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   14: required map<i64, i64> mapReq;
   15: optional map<i64, i64> mapOpt;
   16: HasOptionalsTestEnum enumDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   17: required HasOptionalsTestEnum enumReq;
   18: optional HasOptionalsTestEnum enumOpt;
   19: HasOptionalsExtra structDef;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   20: required HasOptionalsExtra structReq;
   21: optional HasOptionalsExtra structOpt;
 }

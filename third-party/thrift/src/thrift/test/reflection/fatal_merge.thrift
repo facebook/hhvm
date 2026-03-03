@@ -33,6 +33,7 @@ package;
 struct Basic {
   1: string b;
   2: optional string b_opt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required string b_req;
 }
 

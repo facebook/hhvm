@@ -29,7 +29,9 @@ struct Pod {
 }
 
 struct Person {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string name;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i64 id;
   4: set<i32> nums;
   3: optional double dob;

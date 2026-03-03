@@ -25,6 +25,7 @@ namespace py thrift.test.child
 
 exception ChildError {
   @thrift.ExceptionMessage
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string message;
   2: optional i32 errorCode;
 }

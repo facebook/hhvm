@@ -71,6 +71,7 @@ struct StructWithOptionals {
 }
 
 struct BTreeBranch {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required BTree child;
   2: i16 cost;
 }
@@ -79,6 +80,7 @@ struct BTree {
   1: i32 min;
   2: i32 max;
   3: string data;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required list<BTreeBranch> children;
 }
 

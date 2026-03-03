@@ -55,29 +55,36 @@ struct A_atomic_bitpack {
 
 struct Extra_unbitpack {
   1: i32 extraInt32Def;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 extraInt32Req;
   3: optional i32 extraInt32Opt;
 }
 @cpp.PackIsset
 struct Extra_bitpack {
   1: i32 extraInt32Def;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 extraInt32Req;
   3: optional i32 extraInt32Opt;
 }
 @cpp.PackIsset{atomic = true}
 struct AtomicExtra_bitpack {
   1: i32 extraInt32Def;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 extraInt32Req;
   3: optional i32 extraInt32Opt;
 }
 
 struct Unbitpack {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 int32Req;
   2: optional i32 int32Opt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required string stringReq;
   4: optional string stringOpt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required set<i32> setReq;
   6: optional set<i32> setOpt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   7: required list<i32> listReq;
   8: optional list<i32> listOpt;
   9: optional Extra_unbitpack structOpt;
@@ -86,12 +93,16 @@ struct Unbitpack {
 }
 @cpp.PackIsset
 struct Bitpack {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 int32Req;
   2: optional i32 int32Opt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required string stringReq;
   4: optional string stringOpt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required set<i32> setReq;
   6: optional set<i32> setOpt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   7: required list<i32> listReq;
   8: optional list<i32> listOpt;
   9: optional Extra_unbitpack structOpt;
@@ -101,12 +112,16 @@ struct Bitpack {
 
 @cpp.PackIsset{atomic = true}
 struct AtomicBitpack {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 int32Req;
   2: optional i32 int32Opt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required string stringReq;
   4: optional string stringOpt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   5: required set<i32> setReq;
   6: optional set<i32> setOpt;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   7: required list<i32> listReq;
   8: optional list<i32> listOpt;
   9: optional Extra_unbitpack structOpt;

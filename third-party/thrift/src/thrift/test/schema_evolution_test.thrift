@@ -34,16 +34,22 @@ struct Old {
   14: optional string optional_old;
   15: optional string optional_removed;
 
+  @thrift.AllowUnsafeRequiredFieldQualifier
   21: required string required_to_unqualified;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   22: required string required_to_optional;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   23: required string required_to_required;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   24: required string required_old;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   25: required string required_removed;
 }
 
 struct New {
   1: string unqualified_to_unqualified;
   2: optional string unqualified_to_optional;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required string unqualified_to_required;
   4: string unqualified_new;
   // 5: string unqualified_removed
@@ -51,6 +57,7 @@ struct New {
 
   11: string optional_to_unqualified;
   12: optional string optional_to_optional;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   13: required string optional_to_required;
   14: optional string optional_new;
   // 15: optional string optional_removed
@@ -58,9 +65,12 @@ struct New {
 
   21: string required_to_unqualified;
   22: optional string required_to_optional;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   23: required string required_to_required;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   24: required string required_new;
   // 25: required string required_removed
+  @thrift.AllowUnsafeRequiredFieldQualifier
   26: required string required_added;
 }
 

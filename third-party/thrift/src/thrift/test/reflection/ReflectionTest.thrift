@@ -23,6 +23,7 @@ package;
 
 struct ReflectionTestStruct1 {
   3: i32 c;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 a;
   2: optional i32 b;
   @thrift.DeprecatedUnvalidatedAnnotations{

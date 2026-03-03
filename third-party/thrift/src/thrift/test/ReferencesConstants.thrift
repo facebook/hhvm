@@ -32,6 +32,7 @@ struct StructWithRef {
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required Empty req_field;
 }
 
@@ -49,6 +50,7 @@ struct StructWithRefTypeUnique {
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required Empty req_field;
 }
 
@@ -66,6 +68,7 @@ struct StructWithRefTypeShared {
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required Empty req_field;
 }
 
@@ -83,6 +86,7 @@ struct StructWithRefTypeSharedConst {
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required Empty req_field;
 }
 

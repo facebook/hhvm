@@ -26,17 +26,20 @@ cpp_include "thrift/test/StructsExtra.h"
 
 struct Basic {
   1: i32 def_field;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 req_field;
   3: optional i32 opt_field;
 }
 
 struct BasicBinaries {
   1: binary def_field;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required binary req_field;
   3: optional binary opt_field;
 }
 
 struct HasInt {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 field;
 }
 

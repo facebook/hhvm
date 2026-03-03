@@ -32,6 +32,7 @@ struct SubStruct {
   // @lint-ignore THRIFTCHECKS
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string optDef = "IAMUSELESSOPTWITHDEF";
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required string req_def = "IAMREQ";
   // @lint-ignore THRIFTCHECKS
   3: optional map<Small, i32> key_map;
@@ -57,6 +58,7 @@ enum En {
 struct MainStruct {
   1: string foo = "i am foo";
   2: map<string, i32> m;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required string bar;
   4: SubStruct s;
   5: list<Small> l;
@@ -69,6 +71,7 @@ struct MainStruct {
 struct MainStructNoBinary {
   1: string foo = "i am foo";
   2: map<string, i32> m;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required string bar;
   5: list<Small> l;
   6: Un u;

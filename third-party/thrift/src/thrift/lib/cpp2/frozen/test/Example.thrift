@@ -65,6 +65,7 @@ struct Person2 {
 }
 
 struct Tiny {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string a;
   2: string b;
   3: string c;
@@ -173,6 +174,7 @@ struct User {
 }
 
 struct TriviallyCopyableStruct {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 field;
 }
 

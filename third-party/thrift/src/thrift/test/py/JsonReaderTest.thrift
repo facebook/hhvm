@@ -26,6 +26,7 @@ struct StructContainingOptionalList {
 }
 
 struct StructContainingRequiredList {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required list<i32> data;
 }
 

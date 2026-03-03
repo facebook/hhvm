@@ -22,6 +22,7 @@ include "thrift/annotation/thrift.thrift"
 package;
 
 struct AStruct {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string aString;
   2: i32 anInteger;
 }
@@ -43,6 +44,7 @@ struct OneOfEach {
 }
 
 struct Required {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 anInteger;
   2: AStruct aStruct;
 }

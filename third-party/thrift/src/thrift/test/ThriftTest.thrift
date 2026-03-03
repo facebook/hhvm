@@ -78,6 +78,7 @@ struct Insanity {
 struct CrazyNesting {
   1: string string_field;
   2: optional set<Insanity> set_field;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required list<
     map<set<i32>, map<i32, set<list<map<Insanity, string>>>>>
   > list_field;

@@ -28,6 +28,7 @@ package;
 struct OneOfEach {
   // make at least one field of a struct contained in a union required
   // to test exception handling in union code
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required bool im_true;
   2: bool im_false;
   3: byte a_bite = 100;

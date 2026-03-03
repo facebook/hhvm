@@ -151,9 +151,11 @@ struct compat_structC {
 }
 
 struct compat_struct1 {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 field0;
   2: optional string field1;
   3: compat_enum1 field2;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required compat_enum2 field3;
   5: optional compat_union1 field4;
   6: compat_union2 field5;

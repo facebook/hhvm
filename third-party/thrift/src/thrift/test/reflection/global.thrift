@@ -138,9 +138,11 @@ struct global_structC {
 }
 
 struct global_struct1 {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required i32 field0;
   2: optional string field1;
   3: global_enum1 field2;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required global_enum2 field3;
   5: optional global_union1 field4;
   6: global_union2 field5;

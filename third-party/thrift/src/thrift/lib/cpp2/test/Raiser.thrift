@@ -23,6 +23,7 @@ namespace cpp2 apache.thrift.test
 
 exception Banal {}
 exception Fiery {
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string message;
 }
 

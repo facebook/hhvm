@@ -24,7 +24,9 @@ namespace py3 thrift.test
 struct DefaultValues {
   1: i32 def_reg;
   2: i32 def_val = 12;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required i32 req_reg;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required i32 req_val = 34;
   5: optional i32 opt_reg;
   @thrift.AllowUnsafeOptionalCustomDefaultValue

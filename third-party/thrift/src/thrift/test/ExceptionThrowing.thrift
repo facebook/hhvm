@@ -24,6 +24,7 @@ package;
 
 exception SimpleException {
   @thrift.ExceptionMessage
+  @thrift.AllowUnsafeRequiredFieldQualifier
   1: required string message;
 }
 

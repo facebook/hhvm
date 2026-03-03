@@ -25,6 +25,7 @@ cpp_include "thrift/test/AdapterTest.h"
 
 struct FieldRefNotOptionalStruct {
   1: i32 field_i32;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   2: required i32 required_i32;
   @thrift.Experimental
   @thrift.TerseWrite

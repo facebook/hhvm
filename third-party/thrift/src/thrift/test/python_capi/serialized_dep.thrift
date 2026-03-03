@@ -17,12 +17,14 @@
 package "thrift.org/test/python_capi"
 
 include "thrift/annotation/python.thrift"
+include "thrift/annotation/thrift.thrift"
 
 @python.UseCAPI{serialize = true}
 struct SerializedStruct {
   1: string s;
   2: i32 i;
   3: optional string os;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required string rs;
 }
 
@@ -37,6 +39,7 @@ union SerializedUnion {
 safe exception SerializedError {
   1: string msg;
   2: optional string os;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required string rs;
 }
 
@@ -45,6 +48,7 @@ struct MarshalStruct {
   1: string s;
   2: i32 i;
   3: optional string os;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   4: required string rs;
 }
 
@@ -58,5 +62,6 @@ union MarshalUnion {
 safe exception MarshalError {
   1: string msg;
   2: optional string os;
+  @thrift.AllowUnsafeRequiredFieldQualifier
   3: required string rs;
 }

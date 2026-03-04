@@ -1266,6 +1266,26 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 sequentialise_stmt(&pos, elem, stmt_, vec![], vec![], vec![]);
                 Ok(())
             }
+            Stmt_::Using(using_stmt) if using_stmt.exprs.1.len() > 1 => {
+                let is_block_scoped = using_stmt.is_block_scoped;
+                let has_await = using_stmt.has_await;
+                let exprs = std::mem::take(&mut using_stmt.exprs.1);
+                let block = std::mem::replace(&mut using_stmt.block, Block(vec![]));
+                let nested_block = exprs.into_iter().rev().fold(block, |block, expr| {
+                    let expr_pos = expr.1.clone();
+                    Block(vec![Stmt(
+                        expr_pos.clone(),
+                        Stmt_::Using(Box::new(nast::UsingStmt {
+                            is_block_scoped,
+                            has_await,
+                            exprs: (expr_pos, vec![expr]),
+                            block,
+                        })),
+                    )])
+                });
+                *elem = Stmt(pos, Stmt_::Block(Box::new((None, nested_block))));
+                elem.recurse(env, self.object())
+            }
             Stmt_::Using(box nast::UsingStmt {
                 is_block_scoped: _,
                 has_await: _,

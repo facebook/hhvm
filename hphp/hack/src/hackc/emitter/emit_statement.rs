@@ -481,8 +481,8 @@ fn emit_using<'a>(e: &mut Emitter, env: &mut Env<'a>, using: &ast::UsingStmt) ->
         e.local_scope(|e| {
             let (local, preamble) = match &(using.exprs.1[0].2) {
                 ast::Expr_::Assign(box (lhs, bop, _)) => match (bop, lhs.2.as_lvar()) {
-                    (None, Some(ast::Lid(_, id))) => (
-                        e.named_local(local_id::get_name(id)),
+                    (None, Some(ast::Lid(pos, id))) => (
+                        emit_expr::get_local(e, env, pos, &id.1)?,
                         InstrSeq::gather(vec![
                             emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                             emit_pos(&block_pos),
@@ -501,8 +501,8 @@ fn emit_using<'a>(e: &mut Emitter, env: &mut Env<'a>, using: &ast::UsingStmt) ->
                         )
                     }
                 },
-                ast::Expr_::Lvar(lid) => (
-                    e.named_local(local_id::get_name(&lid.1)),
+                ast::Expr_::Lvar(box ast::Lid(pos, id)) => (
+                    emit_expr::get_local(e, env, pos, &id.1)?,
                     InstrSeq::gather(vec![
                         emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
                         emit_pos(&block_pos),

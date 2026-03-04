@@ -450,7 +450,7 @@ union Sha1OrError {
  * 2. Directories: POSIX_ERROR, EISDIR
  * 3. Non-source-control file types (FIFO, socket, char, block, whiteout, etc.): POSIX_ERROR, EINVAL
  * 4. Non-existent files: POSIX_ERROR, ENOENT
- * 5. Files that that lack blake3 hashes: ATTRIBUTES_UNAVAILABLE, ENOENT
+ * 5. Files that lack blake3 hashes: ATTRIBUTES_UNAVAILABLE, ENOENT
  */
 union Blake3OrError {
   1: BinaryHash blake3;
@@ -504,7 +504,7 @@ union ObjectIdOrError {
  * 1. Symlinks: POSIX_ERROR, EINVAL
  * 2. Non-source-control file types (FIFO, socket, char, block, whiteout, etc.): POSIX_ERROR, EINVAL
  * 3. Non-existent files: POSIX_ERROR, ENOENT
- * 4. Files that that lack digest sizes: ATTRIBUTES_UNAVAILABLE, ENOENT
+ * 4. Files that lack digest sizes: ATTRIBUTES_UNAVAILABLE, ENOENT
  * 5. Materialized (locally modified) directories: ATTRIBUTES_UNAVAILABLE, ENOENT
  */
 union DigestSizeOrError {
@@ -518,7 +518,7 @@ union DigestSizeOrError {
  * 1. Symlinks: POSIX_ERROR, EINVAL
  * 2. Non-source-control file types (FIFO, socket, char, block, whiteout, etc.): POSIX_ERROR, EINVAL
  * 3. Non-existent files: POSIX_ERROR, ENOENT
- * 4. Files/dirs that that lack digest hashes: ATTRIBUTES_UNAVAILABLE, ENOENT
+ * 4. Files/dirs that lack digest hashes: ATTRIBUTES_UNAVAILABLE, ENOENT
  * 5. Materialized (locally modified) directories: ATTRIBUTES_UNAVAILABLE, ENOENT
  */
 union DigestHashOrError {

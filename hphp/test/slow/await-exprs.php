@@ -351,4 +351,27 @@ async function main() {
   // These are parse errors:
   //var_dump($v[await g(2)]--);
   //var_dump(++$v[await g(3)][await g(1)]);
+
+  concurrent {
+    $x = await g(await g(10)) + await g(await g(20));
+    $y = (await g(1) === await g(2)) || (await f(1) === await g(2));
+    $z = await g(100) === 100 ? await f(await id(null) ?? await g(500)) : await g(600);
+    $t = await g(1000);
+  }
+
+  var_dump($x, $y, $z, $t);
+
+  $d = dict['a' => vec[1, 2, 3], 12 => vec[4, 5, 6]];
+  $v = vec[1, 2, vec[3, 4]];
+  $o = new A(vec[1, 2, 3]);
+
+
+  concurrent {
+    $d[await g(12)][await g(1) + await g(1)] = await g(1000);
+    $v[await f(0) + await f(0)][$d[await id('a')][await f(-1)]] = $d[await f(11)][await g(1)] + $v[await g(0) + await g(0)];
+    (await id($o))->a[await f(1)] = await g(42);
+    (await id(await id($o)))->a[await g(1)] = (await id($o))->a[await g(0)];
+  }
+
+  var_dump($d, $v, $o);
 }

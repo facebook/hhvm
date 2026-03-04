@@ -1,0 +1,2 @@
+
+Fatal error: Conditional assignment cannot be used in concurrent block in %s/await-exprs-bad-concurrent.php on line 15

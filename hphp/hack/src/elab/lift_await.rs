@@ -1354,30 +1354,95 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                 *elem = Stmt(pos, stmt_);
                 Ok(())
             }
+            Stmt_::Concurrent(Block(stmts))
+                if env
+                    .active_experimental_features
+                    .contains(&FeatureName::AllowExtendedAwaitSyntax)
+                    && self.for_codegen =>
+            {
+                let mut exprs = vec![];
+                for stmt in stmts.iter_mut() {
+                    let sval = std::mem::replace(stmt, Stmt(Pos::NONE, Stmt_::Noop));
+                    if let Stmt(_, Stmt_::DeclareLocal(box (Lid(_, id), _, Some(expr)))) = sval {
+                        *stmt = hack_stmt!(pos = pos.clone(), "#{lvar(id)} = #expr;");
+                    } else {
+                        *stmt = sval;
+                    }
+                    match stmt {
+                        Stmt(
+                            _,
+                            Stmt_::Expr(box Expr(_, pos, Expr_::Assign(box (lhs, bop, rhs)))),
+                        ) => {
+                            if matches!(bop, Some(Bop::QuestionQuestion)) {
+                                env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
+                                    pos: pos.clone(),
+                                    msg:
+                                        "Conditional assignment cannot be used in concurrent block"
+                                        .to_string(),
+                                        quickfixes: vec![],
+                                }))
+                            }
+                            lhs.accept(env, self.object())?;
+                            rhs.accept(env, self.object())?;
+                            exprs.append(&mut extract_subexprs(lhs));
+                            exprs.push(rhs);
+                        }
+                        Stmt(_, Stmt_::Expr(box expr)) => {
+                            expr.accept(env, self.object())?;
+                            exprs.push(expr);
+                        }
+                        Stmt(_, Stmt_::DeclareLocal(box (_, _, None))) => {}
+                        _ => panic!(
+                            "Concurrent block contains a statement that is not an expression-statement."
+                        ),
+                    }
+                }
+
+                self.concurrentise(&pos, exprs, &mut con, &mut seq, &mut tmps);
+                seq.append(stmts);
+                tmps.extend(con.iter().map(|(lid, _)| lid.clone()));
+
+                let stmt = Stmt::new(pos.clone(), Stmt_::mk_block(None, Block(seq)));
+                let awaitall_stmt =
+                    Stmt::new(pos.clone(), Stmt_::mk_awaitall(con, Block(vec![stmt])));
+                *elem = Stmt::new(pos, Stmt_::mk_block(Some(tmps), Block(vec![awaitall_stmt])));
+                Ok(())
+            }
             Stmt_::Concurrent(Block(stmts)) => {
                 for stmt in stmts.iter_mut() {
                     match stmt {
+                        Stmt(
+                            _,
+                            Stmt_::Expr(box Expr(
+                                _,
+                                pos,
+                                Expr_::Assign(box (_, Some(Bop::QuestionQuestion), _)),
+                            )),
+                        ) => {
+                            env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
+                                pos: pos.clone(),
+                                msg: "Conditional assignment cannot be used in concurrent block"
+                                    .to_string(),
+                                quickfixes: vec![],
+                            }))
+                        }
                         Stmt(_, Stmt_::Expr(box expr))
                         | Stmt(_, Stmt_::DeclareLocal(box (_, _, Some(expr)))) => {
                             expr.accept(env, self.object())?;
                             let is_await = expr.2.is_await();
                             match check_await_usage(expr) {
-                                AwaitUsage::Sequential | AwaitUsage::Error(None) =>
-                                    env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
-                                        pos: expr.1.clone(),
-                                        msg:
-                                            "Nested or piped `await` expressions cannot be used in concurrent block"
-                                                .to_string(),
-                                        quickfixes: vec![],
-                                    })),
-                                AwaitUsage::Error(Some(pos)) =>
-                                    env.emit_error(NamingPhaseError::Parsing(ParsingError::ParsingError {
-                                        pos: pos.clone(),
-                                        msg:
-                                            "Nested or piped `await` expressions cannot be used in concurrent block"
-                                                .to_string(),
-                                        quickfixes: vec![],
-                                    })),
+                                AwaitUsage::Sequential | AwaitUsage::Error(None) => {
+                                    check_can_use_feature(
+                                        env,
+                                        &expr.1,
+                                        &FeatureName::AllowExtendedAwaitSyntax,
+                                    )
+                                }
+                                AwaitUsage::Error(Some(pos)) => check_can_use_feature(
+                                    env,
+                                    &pos,
+                                    &FeatureName::AllowExtendedAwaitSyntax,
+                                ),
                                 _ => {}
                             };
                             if self.for_codegen {

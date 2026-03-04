@@ -265,7 +265,7 @@ class t_program : public t_named {
    * `namespaces()`.
    *
    * The returned nodes are guaranteed to be in source order (i.e. the order
-   * in which the `namespace` directives appear in the IDL file). 
+   * in which the `namespace` directives appear in the IDL file).
    *
    * As of February 2026, work is ongoing to forbid duplicate namespaces from
    * Thrift IDL, so eventually the distinction above should become irrelevant.

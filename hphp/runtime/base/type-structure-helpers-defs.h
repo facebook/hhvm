@@ -49,6 +49,11 @@ extern const StaticString s_typevar_types;
 extern const StaticString s_union_types;
 extern const StaticString s_hh_this;
 extern const StaticString s_type_structure_non_existant_class;
+extern const StaticString s_with_refinements;
+extern const StaticString s_equals;
+extern const StaticString s_as;
+extern const StaticString s_super;
+extern const StaticString s_is_ctx;
 
 // Fixed error messages
 extern const StaticString s_reified_type_must_be_ts;
@@ -183,6 +188,14 @@ ALWAYS_INLINE const ArrayData* get_ts_union_types(const ArrayData* ts) {
 
 ALWAYS_INLINE const ArrayData* get_ts_union_types_opt(const ArrayData* ts) {
   return detail::get_ts_varray_opt(ts, s_union_types);
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_refinement_types(const ArrayData* ts) {
+  return detail::get_ts_darray(ts, s_with_refinements);
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_refinement_types_opt(const ArrayData* ts) {
+  return detail::get_ts_darray_opt(ts, s_with_refinements);
 }
 
 ALWAYS_INLINE const StringData* get_ts_classname(const ArrayData* ts) {

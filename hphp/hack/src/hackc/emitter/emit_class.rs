@@ -190,7 +190,7 @@ fn from_type_constant<'a>(
                 &[],
                 &BTreeMap::new(),
                 init,
-                TypeRefinementInHint::Disallowed,
+                TypeRefinementInHint::Allowed,
             )?)
         }
     };

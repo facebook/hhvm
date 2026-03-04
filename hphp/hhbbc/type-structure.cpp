@@ -800,6 +800,52 @@ Resolution resolve_type_access(ResolveCtx& ctx, SArray ts) {
    .finish();
 }
 
+Resolution resolve_refinement_types(ResolveCtx& ctx, SArray ts) {
+  auto const refinements = get_ts_refinement_types_opt(ts);
+  if (!refinements) return Resolution{ TBottom, false };
+  assertx(refinements->isStatic());
+  assertx(refinements->isDictType());
+  auto const size = refinements->size();
+  auto membersBuilder = Builder::dict();
+  for (size_t i = 0; i < size; ++i) {
+    auto const k = refinements->nvGetKey(i);
+    auto const v = refinements->nvGetVal(i);
+    assertx(tvIsString(k));
+    assertx(tvIsDict(v));
+    auto const memberArr = val(v).parr;
+    auto memberBuilder = Builder::dict();
+
+    auto const isCtx = memberArr->get(s_is_ctx.get());
+    if (isCtx.is_init()) {
+      memberBuilder.set(s_is_ctx, isCtx);
+    }
+
+    auto const exact = memberArr->get(s_equals.get());
+    if (exact.is_init()) {
+      assertx(tvIsDict(exact));
+      auto exactRes = resolve_bespoke(ctx, val(exact).parr);
+      memberBuilder.set(s_equals, exactRes);
+    }
+
+    auto const upper = memberArr->get(s_as.get());
+    if (upper.is_init()) {
+      assertx(tvIsVec(upper));
+      auto upperRes = resolve_list(ctx, val(upper).parr);
+      memberBuilder.set(s_as, upperRes);
+    }
+
+    auto const lower = memberArr->get(s_super.get());
+    if (lower.is_init()) {
+      assertx(tvIsVec(lower));
+      auto lowerRes = resolve_list(ctx, val(lower).parr);
+      memberBuilder.set(s_super, lowerRes);
+    }
+
+    membersBuilder.set(sval(val(k).pstr), memberBuilder.finish());
+  }
+  return membersBuilder.finish();
+}
+
 Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
   auto b = Builder::copy(ts, TS::Kind::T_unresolved);
 
@@ -829,9 +875,14 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
 
     auto b = setKindAndName(kind, name);
     if (setExact) b.set(s_exact, make_tv<KindOfBoolean>(true));
+    b.resolve(s_generic_types, get_ts_generic_types_opt(ts),
+              ctx, resolve_list);
+    auto refinementRes = resolve_refinement_types(ctx, ts);
+    if (!refinementRes.type.is(BBottom)) {
+      b.set(s_with_refinements, refinementRes);
+    }
     return
-      b.resolve(s_generic_types, get_ts_generic_types_opt(ts),
-                ctx, resolve_list)
+      std::move(b)
         .optCopy(s_typevars, ts)
         .optCopy(s_alias, ts)
         .optCopy(s_case_type, ts)
@@ -1247,6 +1298,32 @@ void type_structure_references(SArray ts, SStringSet& names) {
     }
   };
 
+  auto const onRefinements = [&names, &onList] (SArray ts) {
+    auto const refinements = get_ts_refinement_types_opt(ts);
+    if (!refinements) return;
+    auto const size = refinements->size();
+    for (size_t i = 0; i < size; ++i) {
+      auto const v = refinements->nvGetVal(i);
+      assertx(tvIsDict(v));
+      auto const memberArr = val(v).parr;
+      auto const exact = memberArr->get(s_equals.get());
+      if (exact.is_init()) {
+        assertx(tvIsDict(exact));
+        type_structure_references(val(exact).parr, names);
+      }
+      auto const upper = memberArr->get(s_as.get());
+      if (upper.is_init()) {
+        assertx(tvIsVec(upper));
+        onList(val(upper).parr);
+      }
+      auto const lower = memberArr->get(s_super.get());
+      if (lower.is_init()) {
+        assertx(tvIsVec(lower));
+        onList(val(lower).parr);
+      }
+    }
+  };
+
   switch (get_ts_kind(ts)) {
     case TS::Kind::T_enum:
     case TS::Kind::T_trait:
@@ -1256,6 +1333,7 @@ void type_structure_references(SArray ts, SStringSet& names) {
     case TS::Kind::T_xhp:
       names.emplace(get_ts_classname(ts));
       onList(get_ts_generic_types_opt(ts));
+      onRefinements(ts);
       break;
     case TS::Kind::T_fun:
       type_structure_references(get_ts_return_type(ts), names);

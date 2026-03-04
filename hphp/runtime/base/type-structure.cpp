@@ -148,7 +148,12 @@ const StaticString
   s_id("id"),
   s_soft("soft"),
   s_opaque("opaque"),
-  s_union_types("union_types")
+  s_union_types("union_types"),
+  s_with_refinements("with_refinements"),
+  s_equals("equals"),
+  s_as("as"),
+  s_super("super"),
+  s_is_ctx("is_ctx")
 ;
 
 const std::string
@@ -181,6 +186,8 @@ const std::string
 ;
 
 std::string fullName(const Array& arr, TypeStructure::TSDisplayType type);
+void refinementTypeName(const Array& arr, std::string& name,
+                        TypeStructure::TSDisplayType type);
 
 void functionTypeName(const Array& arr, std::string& name,
                       TypeStructure::TSDisplayType type) {
@@ -510,6 +517,9 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
       assertx(arr.exists(s_classname));
       name += arr[s_classname].asCStrRef().toCppString();
       genericTypeName(arr, name, type);
+      if (arr.exists(s_with_refinements)) {
+        refinementTypeName(arr, name, type);
+      }
       break;
     case TypeStructure::Kind::T_class_ptr:
       name += s_hh_class;
@@ -520,6 +530,52 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
   }
 
   return name;
+}
+
+void refinementTypeName(const Array& arr, std::string& name,
+                        TypeStructure::TSDisplayType type) {
+  name += " with { ";
+
+  assertx(arr.exists(s_with_refinements));
+  auto const refinements = arr[s_with_refinements].asCArrRef();
+  auto sep = "";
+  IterateKV(refinements.get(), [&](TypedValue k, TypedValue v) {
+    assertx(tvIsString(k));
+    assertx(tvIsDict(v));
+    auto const memberName = k.m_data.pstr->toCppString();
+    auto const memberArr = Array(v.m_data.parr);
+
+    auto const isCtx = memberArr.lookup(s_is_ctx);
+    bool ctx = isCtx.is_init() && isCtx.val().num;
+
+    folly::toAppend(sep, ctx ? "ctx " : "type ", memberName, &name);
+
+    auto const exact = memberArr.lookup(s_equals);
+    if (exact.is_init()) {
+      assertx(tvIsDict(exact));
+      folly::toAppend(" = ", fullName(Array(exact.val().parr), type), &name);
+    } else {
+      auto const upper = memberArr.lookup(s_as);
+      if (upper.is_init()) {
+        assertx(tvIsVec(upper));
+        auto const upperArr = Array(upper.val().parr);
+        IterateV(upperArr.get(), [&](TypedValue bound) {
+          folly::toAppend(" as ", fullName(Array(bound.m_data.parr), type), &name);
+        });
+      }
+      auto const lower = memberArr.lookup(s_super);
+      if (lower.is_init()) {
+        assertx(tvIsVec(lower));
+        auto const lowerArr = Array(lower.val().parr);
+        IterateV(lowerArr.get(), [&](TypedValue bound) {
+          folly::toAppend(" super ", fullName(Array(bound.m_data.parr), type), &name);
+        });
+      }
+    }
+
+    sep = "; ";
+  });
+  name += " }";
 }
 
 Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr,
@@ -546,6 +602,49 @@ Array resolveList(TSEnv& env, const TSCtx& ctx, const Array& arr) {
   }
 
   return newarr.toArray();
+}
+
+void resolveRefinementTypes(TSEnv& env, const TSCtx& ctx,
+                            const Array& arr, Array& newarr) {
+  if (!arr.exists(s_with_refinements)) return;
+  auto const refinements = arr[s_with_refinements].asCArrRef();
+  auto resolvedRefinements = Array::CreateDict();
+  IterateKV(refinements.get(), [&](TypedValue k, TypedValue v) {
+    assertx(tvIsString(k));
+    assertx(tvIsDict(v));
+    auto const memberArr = Array(v.m_data.parr);
+    auto resolvedMember = Array::CreateDict();
+
+    auto const isCtx = memberArr.lookup(s_is_ctx);
+    if (isCtx.is_init()) {
+      resolvedMember.set(s_is_ctx, isCtx);
+    }
+
+    auto const exact = memberArr.lookup(s_equals);
+    if (exact.is_init()) {
+      assertx(tvIsDict(exact));
+      resolvedMember.set(s_equals,
+        Variant(resolveTS(env, ctx, Array(exact.val().parr), nullptr)));
+    }
+
+    auto const upper = memberArr.lookup(s_as);
+    if (upper.is_init()) {
+      assertx(tvIsVec(upper));
+      resolvedMember.set(s_as,
+        Variant(resolveList(env, ctx, Array(upper.val().parr))));
+    }
+
+    auto const lower = memberArr.lookup(s_super);
+    if (lower.is_init()) {
+      assertx(tvIsVec(lower));
+      resolvedMember.set(s_super,
+        Variant(resolveList(env, ctx, Array(lower.val().parr))));
+    }
+
+    resolvedRefinements.set(
+      String(k.m_data.pstr), Variant(resolvedMember));
+  });
+  newarr.set(s_with_refinements, Variant(resolvedRefinements));
 }
 
 std::string resolveContextMsg(const TSCtx& ctx) {
@@ -944,6 +1043,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       if (arr.exists(s_generic_types)) {
         newarr.set(s_generic_types, Variant(resolveGenerics(env, ctx, arr)));
       }
+      resolveRefinementTypes(env, ctx, arr, newarr);
       break;
     }
     case TypeStructure::Kind::T_typeaccess: {
@@ -1310,8 +1410,33 @@ bool coerceToTypeStructure(Array& arr) {
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_enum: {
-      return tvIsString(arr.lookup(s_classname)) &&
-             coerceOptTSListField(arr, s_generic_types);
+      if (!tvIsString(arr.lookup(s_classname)) ||
+          !coerceOptTSListField(arr, s_generic_types)) {
+        return false;
+      }
+      auto const refinements = arr.lookup(s_with_refinements);
+      if (!refinements.is_init()) return true;
+      if (!tvIsDict(refinements)) return false;
+      auto valid = true;
+      IterateKV(val(refinements).parr, [&](TypedValue k, TypedValue v) {
+        if (!tvIsString(k) || !tvIsDict(v)) { valid = false; return true; }
+        auto memberArr = ArrNR(val(v).parr).asArray();
+        auto const exact = memberArr.lookup(s_equals);
+        if (exact.is_init()) {
+          if (!tvIsDict(exact) ||
+              !coerceToTypeStructure(ArrNR(val(exact).parr).asArray())) {
+            valid = false;
+            return true;
+          }
+        }
+        if (!coerceOptTSListField(memberArr, s_as) ||
+            !coerceOptTSListField(memberArr, s_super)) {
+          valid = false;
+          return true;
+        }
+        return false;
+      });
+      return valid;
     }
     case TypeStructure::Kind::T_union: {
       return coerceTSListField(arr, s_union_types, /*shape=*/false);

@@ -1,0 +1,29 @@
+=== Type alias with exact refinement ===
+int(16)
+string(3) "Box"
+int(1)
+bool(false)
+
+=== Type alias with bounded refinement ===
+int(16)
+bool(true)
+int(7)
+
+=== Type alias with lower bounded refinement ===
+int(16)
+bool(true)
+int(1)
+
+=== Type alias with exact ctx refinement ===
+int(15)
+bool(true)
+bool(true)
+
+=== Type alias with bounded ctx refinement ===
+int(15)
+bool(true)
+bool(true)
+
+=== Type constant with exact refinement ===
+int(16)
+int(4)

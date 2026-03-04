@@ -15,13 +15,16 @@ use naming_special_names_rust::classes;
 use naming_special_names_rust::typehints;
 use options::Options;
 use oxidized::aast;
+use oxidized::aast_defs::CtxRefinement;
 use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
 use oxidized::aast_defs::NastShapeInfo;
+use oxidized::aast_defs::Refinement;
 use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::aast_defs::TupleExtra;
 use oxidized::aast_defs::TupleExtraInfo;
 use oxidized::aast_defs::TupleInfo;
+use oxidized::aast_defs::TypeRefinement;
 use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::ast_defs::ShapeFieldName;
@@ -259,6 +262,110 @@ fn get_typevars(tparams: &[&str]) -> Vec<DictEntry> {
     }
 }
 
+fn refinement_to_entry(
+    opts: &Options,
+    tparams: &[&str],
+    targ_map: &BTreeMap<&str, i64>,
+    refinement: &Refinement,
+) -> Result<DictEntry> {
+    match refinement {
+        Refinement::Rtype(ast_defs::Id(_, name), tr) => {
+            let mut member = vec![];
+            member.push(encode_entry("is_ctx", TypedValue::Bool(false)));
+
+            match tr {
+                TypeRefinement::TRexact(hint) => {
+                    member.push(encode_entry(
+                        "equals",
+                        hint_to_type_constant(
+                            opts,
+                            tparams,
+                            targ_map,
+                            hint,
+                            TypeRefinementInHint::Allowed,
+                        )?,
+                    ));
+                }
+                TypeRefinement::TRloose(bounds) => {
+                    if !bounds.upper.is_empty() {
+                        member.push(encode_entry(
+                            "as",
+                            hints_to_type_constant(
+                                opts,
+                                tparams,
+                                targ_map,
+                                TypeRefinementInHint::Allowed,
+                                &bounds.upper,
+                            )?,
+                        ));
+                    }
+                    if !bounds.lower.is_empty() {
+                        member.push(encode_entry(
+                            "super",
+                            hints_to_type_constant(
+                                opts,
+                                tparams,
+                                targ_map,
+                                TypeRefinementInHint::Allowed,
+                                &bounds.lower,
+                            )?,
+                        ));
+                    }
+                }
+            }
+
+            Ok(encode_entry(name, TypedValue::dict(member)))
+        }
+        Refinement::Rctx(ast_defs::Id(_, name), cr) => {
+            let mut member = vec![];
+            member.push(encode_entry("is_ctx", TypedValue::Bool(true)));
+
+            match cr {
+                CtxRefinement::CRexact(hint) => {
+                    member.push(encode_entry(
+                        "equals",
+                        hint_to_type_constant(
+                            opts,
+                            tparams,
+                            targ_map,
+                            hint,
+                            TypeRefinementInHint::Allowed,
+                        )?,
+                    ));
+                }
+                CtxRefinement::CRloose(bounds) => {
+                    if let Some(upper) = &bounds.upper {
+                        member.push(encode_entry(
+                            "as",
+                            hints_to_type_constant(
+                                opts,
+                                tparams,
+                                targ_map,
+                                TypeRefinementInHint::Allowed,
+                                &[upper.clone()],
+                            )?,
+                        ));
+                    }
+                    if let Some(lower) = &bounds.lower {
+                        member.push(encode_entry(
+                            "super",
+                            hints_to_type_constant(
+                                opts,
+                                tparams,
+                                targ_map,
+                                TypeRefinementInHint::Allowed,
+                                &[lower.clone()],
+                            )?,
+                        ));
+                    }
+                }
+            }
+
+            Ok(encode_entry(name, TypedValue::dict(member)))
+        }
+    }
+}
+
 fn hint_to_type_constant_list(
     opts: &Options,
     tparams: &[&str],
@@ -469,24 +576,32 @@ fn hint_to_type_constant_list(
             )?);
             r
         }
-        Hint_::Hrefinement(h, _) => {
-            match type_refinement_in_hint {
-                TypeRefinementInHint::Disallowed => {
-                    let aast::Hint(pos, _) = h;
-                    return Err(Error::fatal_parse(pos, "Refinement in type structure"));
-                }
-                TypeRefinementInHint::Allowed => {
-                    // check recursively (e.g.: Class<T1, T2> with { ... })
-                    hint_to_type_constant_list(
-                        opts,
-                        tparams,
-                        targ_map,
-                        TypeRefinementInHint::Allowed,
-                        h,
-                    )?
-                }
+        Hint_::Hrefinement(h, refinements) => match type_refinement_in_hint {
+            TypeRefinementInHint::Disallowed => {
+                let aast::Hint(pos, _) = h;
+                return Err(Error::fatal_parse(pos, "Refinement in type structure"));
             }
-        }
+            TypeRefinementInHint::Allowed => {
+                let mut r = hint_to_type_constant_list(
+                    opts,
+                    tparams,
+                    targ_map,
+                    TypeRefinementInHint::Allowed,
+                    h,
+                )?;
+
+                let refinement_entries = refinements
+                    .iter()
+                    .map(|refinement| refinement_to_entry(opts, tparams, targ_map, refinement))
+                    .collect::<Result<Vec<_>>>()?;
+                r.push(encode_entry(
+                    "with_refinements",
+                    TypedValue::dict(refinement_entries),
+                ));
+
+                r
+            }
+        },
         Hint_::Habstr(_)
         | Hint_::Hdynamic
         | Hint_::HfunContext(_)
@@ -524,7 +639,7 @@ pub(crate) fn typedef_to_type_structure(
         opts,
         tparams,
         &BTreeMap::new(),
-        TypeRefinementInHint::Disallowed, // Note: only called by `emit_typedef
+        TypeRefinementInHint::Allowed, // Refinements are allowed in type aliases
         kind,
     )?;
     tconsts.append(&mut get_typevars(tparams));

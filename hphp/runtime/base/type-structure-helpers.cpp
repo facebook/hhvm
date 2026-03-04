@@ -71,6 +71,11 @@ const StaticString s_union_types("union_types");
 const StaticString s_hh_this(annotTypeName(AnnotType::This));
 const StaticString s_type_structure_non_existant_class(
   "HH\\__internal\\type_structure_non_existant_class");
+const StaticString s_with_refinements("with_refinements");
+const StaticString s_equals("equals");
+const StaticString s_as("as");
+const StaticString s_super("super");
+const StaticString s_is_ctx("is_ctx");
 
 // Fixed error messages
 const StaticString s_reified_type_must_be_ts(
@@ -1064,6 +1069,9 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface: {
+      if (ts.exists(s_with_refinements)) {
+        return err("a type with refinements");
+      }
       auto tv = ts.lookup(s_generic_types);
       return tv.is_init() ?
         errorOnIsAsExpressionInvalidTypesList(tv.val().parr, dryrun, true) :

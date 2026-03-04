@@ -3523,6 +3523,24 @@ end = struct
 
 end
 
+and NamedKind: sig
+  type t =
+    | Named
+
+  [@@deriving ord]
+
+  val to_json : t -> json
+end = struct
+  type t =
+    | Named
+
+  [@@deriving ord]
+
+  let rec to_json  = function
+     | Named -> JSON_Number (string_of_int 0)
+
+end
+
 and ContainerDeclaration: sig
   type t =
      | Class_ of ClassDeclaration.t
@@ -3606,6 +3624,7 @@ and Parameter: sig
     attributes: UserAttribute.t list;
     type_info: TypeInfo.t option;
     readonly: ReadonlyKind.t option;
+    named: NamedKind.t option;
   }
   [@@deriving ord]
 
@@ -3620,10 +3639,11 @@ end = struct
     attributes: UserAttribute.t list;
     type_info: TypeInfo.t option;
     readonly: ReadonlyKind.t option;
+    named: NamedKind.t option;
   }
   [@@deriving ord]
 
-  let rec to_json {name; type_; is_inout; is_variadic; default_value; attributes; type_info; readonly} =
+  let rec to_json {name; type_; is_inout; is_variadic; default_value; attributes; type_info; readonly; named} =
     let fields = [
       ("name", Name.to_json name);
       ("isInout", JSON_Bool is_inout);
@@ -3646,6 +3666,10 @@ end = struct
       match readonly with
       | None -> fields
       | Some readonly -> ("readonly", ReadonlyKind.to_json readonly) :: fields in
+    let fields =
+      match named with
+      | None -> fields
+      | Some named -> ("named", NamedKind.to_json named) :: fields in
     JSON_Object fields
 
 end

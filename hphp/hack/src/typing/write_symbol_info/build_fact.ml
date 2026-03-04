@@ -67,6 +67,7 @@ let signature
         type_info = type_xref;
         readonly =
           Option.map ~f:(fun _ -> ReadonlyKind.Readonly) p.param_readonly;
+        named = Option.map ~f:(fun _ -> NamedKind.Named) p.param_named;
       }
   in
   let parameters = List.map params ~f:param in

@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <atomic>
 #include <cstdint>
 #include <limits>
 #include <memory>
@@ -63,6 +62,19 @@ class RoundRobinRequestPile : public RequestPileBase {
 
     // Function to route requests to priority/bucket
     PileSelectionFunction pileSelectionFunction;
+
+    // Pre-enqueue filter for custom rejection logic.
+    // Called after priority is determined, before enqueue.
+    // Return rejection to reject the request, nullopt to allow.
+    using PreEnqueueFilter =
+        std::function<std::optional<ServerRequestRejection>(
+            const ServerRequest& request)>;
+
+    PreEnqueueFilter preEnqueueFilter;
+
+    void setPreEnqueueFilter(PreEnqueueFilter fn) {
+      preEnqueueFilter = std::move(fn);
+    }
 
     Options() {
       numBucketsPerPriority.reserve(kDefaultNumPriorities);
@@ -181,12 +193,17 @@ class RoundRobinRequestPile : public RequestPileBase {
   using SingleBucketRequestQueue =
       server::WeightedRequestPileQueue<ServerRequest>;
 
+  using BucketEventLoggingFunction = std::function<void(Priority, Bucket)>;
+  using DequeueObserver = std::function<void(const ServerRequest& request)>;
+
   // the consumer class used by the AtomicNotificationQueue
   class Consumer {
    public:
     explicit Consumer(
-        RequestExpirationDelegate* requestExpirationDelegate = nullptr)
-        : requestExpirationDelegate_(requestExpirationDelegate) {}
+        RequestExpirationDelegate* requestExpirationDelegate = nullptr,
+        DequeueObserver* dequeueObserver = nullptr)
+        : requestExpirationDelegate_(requestExpirationDelegate),
+          dequeueObserver_(dequeueObserver) {}
 
     // this operation simply put the retrieved item into the temporary
     // carrier for the caller to extract
@@ -195,6 +212,7 @@ class RoundRobinRequestPile : public RequestPileBase {
         ServerRequest&& req, std::shared_ptr<folly::RequestContext>&&);
 
     RequestExpirationDelegate* requestExpirationDelegate_{nullptr};
+    DequeueObserver* dequeueObserver_{nullptr};
     std::optional<ServerRequest> carrier_{std::nullopt};
   };
 
@@ -215,10 +233,9 @@ class RoundRobinRequestPile : public RequestPileBase {
 
   RequestExpirationDelegate* requestExpirationDelegate_{nullptr};
 
-  using BucketEventLoggingFunction = std::function<void(Priority, Bucket)>;
-
   BucketEventLoggingFunction onRequestAcceptedFunction_;
   BucketEventLoggingFunction onRequestRejectedFunction_;
+  DequeueObserver dequeueObserver_;
 
  public:
   void setOnRequestAcceptedFunction(BucketEventLoggingFunction fn) {
@@ -227,6 +244,10 @@ class RoundRobinRequestPile : public RequestPileBase {
 
   void setOnRequestRejectedFunction(BucketEventLoggingFunction fn) {
     onRequestRejectedFunction_ = std::move(fn);
+  }
+
+  void setDequeueObserver(DequeueObserver fn) {
+    dequeueObserver_ = std::move(fn);
   }
 };
 

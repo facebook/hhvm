@@ -249,6 +249,130 @@ TEST_F(
   EXPECT_EQ(pile.requestCount(), 5);
 }
 
+TEST_F(RoundRobinRequestPileTest, testPreEnqueueFilter) {
+  RoundRobinRequestPile::Options opts({1, 1}, makePileSelectionFunction());
+  // Reject all P1 requests
+  opts.setPreEnqueueFilter(
+      [](const ServerRequest& request)
+          -> std::optional<ServerRequestRejection> {
+        auto [priority, bucket] = *request.requestData().bucket;
+        if (priority == 1) {
+          return std::make_optional<ServerRequestRejection>(
+              TApplicationException("P1 rejected"));
+        }
+        return std::nullopt;
+      });
+  RoundRobinRequestPile pile(opts);
+
+  // P0 should be accepted
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(0, 0)));
+  // P1 should be rejected
+  EXPECT_TRUE(pile.enqueue(makeServerRequestForBucket(1, 0)));
+  // P0 should still be accepted
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(0, 0)));
+
+  EXPECT_EQ(pile.requestCount(), 2);
+}
+
+TEST_F(RoundRobinRequestPileTest, testPreEnqueueFilterWithRequestBytes) {
+  RoundRobinRequestPile::Options opts({1}, makePileSelectionFunction());
+  std::atomic<uint64_t> totalQueuedBytes{0};
+  // Reject when totalQueuedBytes exceeds 200
+  opts.setPreEnqueueFilter(
+      [&totalQueuedBytes](const ServerRequest& request)
+          -> std::optional<ServerRequestRejection> {
+        auto bytes = request.requestContext()
+            ? request.requestContext()->getWiredRequestBytes()
+            : 0;
+        auto current = totalQueuedBytes.load(std::memory_order_relaxed);
+        if (current > 200) {
+          return std::make_optional<ServerRequestRejection>(
+              TApplicationException("too many bytes"));
+        }
+        totalQueuedBytes.fetch_add(bytes, std::memory_order_relaxed);
+        return std::nullopt;
+      });
+  RoundRobinRequestPile pile(opts);
+  pile.setDequeueObserver([&totalQueuedBytes](const ServerRequest& request) {
+    auto bytes = request.requestContext()
+        ? request.requestContext()->getWiredRequestBytes()
+        : 0;
+    totalQueuedBytes.fetch_sub(bytes, std::memory_order_relaxed);
+  });
+
+  // Enqueue requests with 100 bytes each
+  auto req1 = makeServerRequestForBucket(0, 0);
+  req1.requestContext()->setWiredRequestBytes(100);
+  EXPECT_FALSE(pile.enqueue(std::move(req1))); // totalQueuedBytes=0, accepted
+  EXPECT_EQ(totalQueuedBytes.load(), 100);
+
+  auto req2 = makeServerRequestForBucket(0, 0);
+  req2.requestContext()->setWiredRequestBytes(100);
+  EXPECT_FALSE(pile.enqueue(std::move(req2))); // totalQueuedBytes=100, accepted
+  EXPECT_EQ(totalQueuedBytes.load(), 200);
+
+  auto req3 = makeServerRequestForBucket(0, 0);
+  req3.requestContext()->setWiredRequestBytes(100);
+  // totalQueuedBytes=200, not > 200, so accepted
+  EXPECT_FALSE(pile.enqueue(std::move(req3)));
+  EXPECT_EQ(totalQueuedBytes.load(), 300);
+
+  auto req4 = makeServerRequestForBucket(0, 0);
+  req4.requestContext()->setWiredRequestBytes(100);
+  // totalQueuedBytes=300 > 200, so rejected
+  EXPECT_TRUE(pile.enqueue(std::move(req4)));
+  EXPECT_EQ(totalQueuedBytes.load(), 300);
+
+  // Dequeue and verify bytes decrease
+  pile.dequeue();
+  EXPECT_EQ(totalQueuedBytes.load(), 200);
+
+  pile.dequeue();
+  EXPECT_EQ(totalQueuedBytes.load(), 100);
+
+  pile.dequeue();
+  EXPECT_EQ(totalQueuedBytes.load(), 0);
+}
+
+TEST_F(RoundRobinRequestPileTest, testDequeueObserver) {
+  RoundRobinRequestPile::Options opts({1, 1}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  std::vector<uint64_t> observedBytes;
+  pile.setDequeueObserver([&](const ServerRequest& request) {
+    auto bytes = request.requestContext()
+        ? request.requestContext()->getWiredRequestBytes()
+        : 0;
+    observedBytes.push_back(bytes);
+  });
+
+  auto req1 = makeServerRequestForBucket(0, 0);
+  req1.requestContext()->setWiredRequestBytes(100);
+  pile.enqueue(std::move(req1));
+
+  auto req2 = makeServerRequestForBucket(1, 0);
+  req2.requestContext()->setWiredRequestBytes(200);
+  pile.enqueue(std::move(req2));
+
+  // Dequeue P0 first (higher priority)
+  auto d1 = pile.dequeue();
+  ASSERT_TRUE(d1.has_value());
+  expectRequestToBelongToBucket(*d1, 0, 0);
+  ASSERT_EQ(observedBytes.size(), 1);
+  EXPECT_EQ(observedBytes[0], 100);
+
+  // Dequeue P1
+  auto d2 = pile.dequeue();
+  ASSERT_TRUE(d2.has_value());
+  expectRequestToBelongToBucket(*d2, 1, 0);
+  ASSERT_EQ(observedBytes.size(), 2);
+  EXPECT_EQ(observedBytes[1], 200);
+
+  // No more requests
+  EXPECT_FALSE(pile.dequeue().has_value());
+  EXPECT_EQ(observedBytes.size(), 2); // observer not called for empty dequeue
+}
+
 TEST(RoundRobinRequestPileMiscTest, getDbgInfo) {
   RoundRobinRequestPile::Options opts(
       {11, 12, 13, 14, 15},

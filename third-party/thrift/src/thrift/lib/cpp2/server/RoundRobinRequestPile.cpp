@@ -79,6 +79,9 @@ RoundRobinRequestPile::Consumer::operator()(
     // NOTE that if request()->isActive() returns false we know *for sure* that
     // request has expired, but if it returns true then request MIGHT be
     // expired or not.
+    if (dequeueObserver_) {
+      (*dequeueObserver_)(request);
+    }
     requestExpirationDelegate_->processExpiredRequest(std::move(request));
     return folly::AtomicNotificationQueueTaskStatus::DISCARD;
   }
@@ -141,7 +144,9 @@ RoundRobinRequestPile::RoundRobinRequestPile(Options opts)
 
 std::optional<ServerRequest> RoundRobinRequestPile::dequeueImpl(
     unsigned pri, unsigned bucket) {
-  Consumer consumer(requestExpirationDelegate_);
+  Consumer consumer(
+      requestExpirationDelegate_,
+      dequeueObserver_ ? &dequeueObserver_ : nullptr);
   auto& queue = requestQueues_[pri][bucket];
   queue.drive(consumer);
 
@@ -154,6 +159,9 @@ std::optional<ServerRequest> RoundRobinRequestPile::dequeueImpl(
 
   if (consumer.carrier_) {
     RequestPileBase::onDequeued(*consumer.carrier_);
+    if (dequeueObserver_) {
+      dequeueObserver_(*consumer.carrier_);
+    }
     return std::move(*consumer.carrier_);
   } else {
     return std::nullopt;
@@ -174,6 +182,16 @@ std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(
   DCHECK_LT(bucket, opts_.numBucketsPerPriority[pri]);
   request.requestData().bucket = {pri, bucket};
   RequestPileBase::onEnqueued(request);
+
+  // Check pre-enqueue filter before actual enqueue
+  if (opts_.preEnqueueFilter) {
+    if (auto rejection = opts_.preEnqueueFilter(request)) {
+      if (onRequestRejectedFunction_) {
+        onRequestRejectedFunction_(pri, bucket);
+      }
+      return rejection;
+    }
+  }
 
   // TODO(yichengfb): enforcing limit on single bucket queue
   // We temporarily disable limit for single bucket queue
@@ -230,11 +248,15 @@ std::optional<ServerRequest> RoundRobinRequestPile::dequeue() {
   for (unsigned i = 0; i < opts_.numBucketsPerPriority.size(); ++i) {
     if (!retrievalIndexQueues_[i]) {
       if (auto req = singleBucketRequestQueues_[i]->tryDequeue()) {
+        if (dequeueObserver_) {
+          dequeueObserver_(*req);
+        }
         return std::move(*req);
       }
     } else {
       if (auto bucket = retrievalIndexQueues_[i]->try_dequeue()) {
-        return dequeueImpl(i, *bucket);
+        auto result = dequeueImpl(i, *bucket);
+        return result;
       }
     }
   }

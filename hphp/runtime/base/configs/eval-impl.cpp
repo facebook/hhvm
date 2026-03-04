@@ -25,6 +25,7 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/process-cpu.h"
 #include "hphp/util/ptr.h"
+#include "hphp/util/roar.h"
 
 namespace HPHP::Cfg {
 
@@ -149,6 +150,12 @@ std::string EvalLoader::PackagesTomlFileNameDefault() {
 
 int EvalLoader::AsyncJitWorkerThreadsDefault() {
   return std::max(4, Process::GetCPUCount() / 2);
+}
+
+bool EvalLoader::EnableAsyncJITProfileDefault() {
+  // Disabled with ROAR for now (T258073496).
+  if (use_roar) return false;
+  return true;
 }
 
 }

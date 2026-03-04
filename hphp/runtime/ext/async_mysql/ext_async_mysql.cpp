@@ -326,9 +326,11 @@ static String HHLibSQLQuery__toString__FOR_DEBUGGING_ONLY(
     val(this_->propRvalAtOffset(s_query_format_idx).tv()).pstr;
   const auto args = val(this_->propRvalAtOffset(s_query_args_idx).tv()).parr;
   const auto query = amquery_from_queryf(format, args);
-  auto mysql = Native::data<AsyncMysqlConnection>(conn)
-    ->m_conn
-    ->mysql_for_testing_only();
+
+  auto* data = Native::data<AsyncMysqlConnection>(conn);
+  data->verifyValidConnection();
+
+  auto mysql = data->m_conn->mysql_for_testing_only();
   const auto str = query.render(mysql);
   return String(str.data(), str.length(), CopyString);
 }
@@ -1286,6 +1288,8 @@ static void HHVM_METHOD(AsyncMysqlConnection, close) {
 
 static String HHVM_METHOD(AsyncMysqlConnection, getSslCertCn) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
+  data->verifyValidConnection();
+
   const auto* context = data->m_conn->getConnectionContext();
   if (context && context->sslCertCn.hasValue()) {
     return context->sslCertCn.value();
@@ -1296,6 +1300,8 @@ static String HHVM_METHOD(AsyncMysqlConnection, getSslCertCn) {
 
 static Object HHVM_METHOD(AsyncMysqlConnection, getSslCertSan) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
+  data->verifyValidConnection();
+
   auto ret = req::make<c_Vector>();
   const auto* context = data->m_conn->getConnectionContext();
   if (context && context->sslCertSan.hasValue()) {
@@ -1308,6 +1314,8 @@ static Object HHVM_METHOD(AsyncMysqlConnection, getSslCertSan) {
 
 static Object HHVM_METHOD(AsyncMysqlConnection, getSslCertExtensions) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
+  data->verifyValidConnection();
+
   auto ret = req::make<c_Vector>();
   const auto* context = data->m_conn->getConnectionContext();
   if (context && context->sslCertIdentities.hasValue()) {
@@ -1320,6 +1328,8 @@ static Object HHVM_METHOD(AsyncMysqlConnection, getSslCertExtensions) {
 
 static bool HHVM_METHOD(AsyncMysqlConnection, isSslCertValidationEnforced) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
+  data->verifyValidConnection();
+
   const auto* context = data->m_conn->getConnectionContext();
   return context && context->isServerCertValidated;
 }

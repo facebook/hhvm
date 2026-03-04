@@ -23,8 +23,8 @@
 #include <fizz/client/MultiClientExtensions.h>
 #include <folly/FileUtil.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
-#include <folly/experimental/io/AsyncIoUringSocket.h>
-#include <folly/experimental/io/AsyncIoUringSocketFactory.h>
+#include <folly/io/async/AsyncIoUringSocket.h>
+#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/IoUringBackend.h>

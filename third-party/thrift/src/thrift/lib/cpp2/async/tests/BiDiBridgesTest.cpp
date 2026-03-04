@@ -304,4 +304,29 @@ TEST_F(BiDiBridgesTest, HandoffInput) {
   backgroundScope.cleanup().wait();
 }
 
+TEST_F(BiDiBridgesTest, ClientCancelsStreamWhileTransformBlocksOnInput) {
+  test(
+      [](auto done) {
+        auto client = new BiDiFiniteClient(0, 1, done);
+        client->setSinkLimitAction(
+            BiDiFiniteClient::SinkLimitAction::HOLD_OPEN);
+        client->setStreamLimitAction(
+            BiDiFiniteClient::StreamLimitAction::CANCEL_STREAM);
+        return client;
+      },
+      []() -> StreamTransformation<StreamPayload, StreamPayload> {
+        return StreamTransformation<StreamPayload, StreamPayload>(
+            [](folly::coro::AsyncGenerator<StreamPayload&&> gen)
+                -> folly::coro::AsyncGenerator<StreamPayload&&> {
+              // Yield one item so the client receives it and cancels
+              co_yield StreamPayload(makeResponse("trigger-cancel"), {});
+              // Block on gen.next() - no sink data will ever arrive.
+              // Without cancellation support, this hangs forever.
+              while (auto item = co_await gen.next()) {
+                co_yield std::move(*item);
+              }
+            });
+      });
+}
+
 } // namespace apache::thrift

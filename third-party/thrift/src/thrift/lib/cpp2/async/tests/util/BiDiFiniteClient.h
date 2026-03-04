@@ -171,6 +171,9 @@ class BiDiFiniteClient : public BiDiClientCallback, public SimpleStateBase {
           }
           break;
         }
+        case SinkLimitAction::HOLD_OPEN:
+          LOG(INFO) << "    Client will HOLD the sink OPEN";
+          break;
       }
     }
 
@@ -210,6 +213,7 @@ class BiDiFiniteClient : public BiDiClientCallback, public SimpleStateBase {
               // server OR by achieving the stream limit
     ERROR, // error the sink and wait for terminal state produced by the server
            // OR by achieving the stream limit
+    HOLD_OPEN, // don't complete or error, keep sink open
   };
 
   // What to do when we received all the chunks we could

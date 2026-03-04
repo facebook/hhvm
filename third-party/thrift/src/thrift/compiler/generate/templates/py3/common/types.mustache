@@ -226,3 +226,48 @@ deref((<{{#partial cython_python_type type=type}}?> _fbthrift_value).{{#partial 
 _fbthrift_value
   {{/if type.iobuf?}}
 {{/let partial}}
+
+
+{{!
+Converts a Python object named 'item' to its C++ representation based on the type.
+Used for sets, lists, map values, and stream first response items.
+For map keys, use cython_python_to_cpp_key instead.
+}}
+{{#let export partial cython_python_to_cpp_item |type| captures |cython_cpp_type cython_python_type container_to_cpp cpp_obj|}}
+{{#pragma ignore-newlines}}
+{{#if type.iobuf?}}deref((<_fbthrift_iobuf.IOBuf?>item).c_clone())
+{{#else if type.iobufRef?}}(<_fbthrift_iobuf.IOBuf?>item).c_clone()
+{{#else if type.flexibleBinary?}}{{#partial cython_cpp_type type=type}}(cmove(<string>item))
+{{#else if type.customBinaryType?}}{{! By design: no output for customBinaryType }}
+{{#else if type.bool?}}item
+{{#else if type.byte?}}item
+{{#else if type.i16?}}item
+{{#else if type.i32?}}item
+{{#else if type.i64?}}item
+{{#else if type.double?}}item
+{{#else if type.float?}}item
+{{#else if type.string?}}item.encode('UTF-8')
+{{#else if type.binary?}}item
+{{#else if type.enum?}}<{{#partial cython_cpp_type type=type}}><int>item
+
+  {{#else if type.structured?}}
+    {{#let ttype = type.true_type}}
+    {{#if ttype.program.auto_migrate?}}
+__deref_const[{{#partial cython_cpp_type type=type}}](
+{{#if type.need_module_path?}}{{type.capi_converter_path}}.{{/if}}
+{{ttype.name}}_convert_to_cpp(item))
+    {{#else if root_program.inplace_migrate?}}
+__deref_const[{{#partial cython_cpp_type type=type}}](
+{{type.capi_converter_path}}.{{ttype.name}}_convert_to_cpp(item._to_python()))
+    {{#else}}
+deref((<{{#partial cython_python_type type=type}}>item).{{#partial cpp_obj}})
+    {{/if ttype.program.auto_migrate?}}
+
+  {{#else if type.container?}}
+    {{#if (not root_program.auto_migrate?)}}
+{{#partial container_to_cpp type=type}}(item)
+    {{#else}}
+{{type.flat_name}}__make_instance(item)
+    {{/if (not root_program.auto_migrate?)}}
+  {{/if type.iobuf?}}
+{{/let partial}}

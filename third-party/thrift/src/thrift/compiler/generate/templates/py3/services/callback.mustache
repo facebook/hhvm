@@ -107,9 +107,7 @@ async def {{service:name}}_{{function:name}}_coro(
         if not isinstance(result, (ServerStream, AsyncIterator)):
             result = await result
         if isinstance(result, AsyncIterator):
-            {{#function:stream_elem_type}}
-            result = ServerStream_{{> types/cython_cpp_type_ident}}._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[{{#partial types.cython_cpp_type type=type:self}}](result, get_executor(), &getNextGenerator_{{service:name}}_{{function:name}})))
-            {{/function:stream_elem_type}}
+            result = ServerStream_{{#partial services.cython_cpp_type_ident type=function:stream.elem_type}}._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[{{#partial types.cython_cpp_type type=function:stream.elem_type}}](result, get_executor(), &getNextGenerator_{{service:name}}_{{function:name}})))
         {{/function:stream?}}
         {{/function:return_type}}
     {{#function:exceptions}}
@@ -143,7 +141,7 @@ async def {{service:name}}_{{function:name}}_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue({{#function:return_type}}{{> services/cython_return_value}}{{/function:return_type}})
+        promise.cPromise.setValue({{#partial services.cython_return_value function=function:self}})
 
 {{/service:supportedFunctionsWithLifecycle}}
 {{/program:services}}

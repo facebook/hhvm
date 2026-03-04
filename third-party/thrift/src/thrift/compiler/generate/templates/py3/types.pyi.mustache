@@ -20,6 +20,7 @@ This template should always mirror types.pyx but for mypy typing
 
 }}
 {{#import "common/types" as types}}
+{{#import "common/services" as services}}
 {{> common/auto_generated_py}}
 
 import enum as _python_std_enum
@@ -171,7 +172,7 @@ class ClientBufferedStream__{{type:flat_name}}(thrift.py3.stream.ClientBufferedS
 class ServerStream__{{type:flat_name}}(thrift.py3.stream.ServerStream[{{> types/pep484_type}}]):
     pass
 
-class ServerPublisher_{{> types/cython_cpp_return_type_ident}}(thrift.py3.stream.ServerPublisher):
+class ServerPublisher_{{#partial services.cython_cpp_type_ident type=type:self}}(thrift.py3.stream.ServerPublisher):
     def complete(self) -> None: ...
     def send(self, item: {{> types/pep484_type}}) -> None: ...
 

@@ -51,7 +51,7 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         item = <{{#partial types.cython_python_type type=type:self}}> item
         {{/type:integer?}}
           {{/if type:container?}}
-        c_inst.push_back({{> types/cython_python_to_cpp_item}})
+        c_inst.push_back({{#partial types.cython_python_to_cpp_item type=type:self}})
         {{/type:list_elem_type}}
 {{/type:list?}}{{#type:set?}}
         {{#type:set_elem_type}}
@@ -69,7 +69,7 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{/type:integer?}}
           {{/if type:container?}}
         {{^type:integer?}}
-        c_item = {{> types/cython_python_to_cpp_item}}
+        c_item = {{#partial types.cython_python_to_cpp_item type=type:self}}
         {{/type:integer?}}
         c_inst.insert(c_item)
         {{/type:set_elem_type}}
@@ -111,6 +111,6 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{/type:value_type}}
 
         c_inst[c_key] = {{#type:value_type}}{{!
-            }}{{> types/cython_python_to_cpp_item}}{{/type:value_type}}
+            }}{{#partial types.cython_python_to_cpp_item type=type:self}}{{/type:value_type}}
 {{/type:map?}}
     return cmove(c_inst)

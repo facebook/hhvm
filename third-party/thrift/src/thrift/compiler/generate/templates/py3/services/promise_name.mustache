@@ -20,4 +20,4 @@ Included from Promises.mustache and Callbacks.mustache. Defines the Promise
 class name for a return type.
 
 }}{{!
-}}Promise{{#function:stack_arguments?}}__sa{{/function:stack_arguments?}}_{{> types/cython_cpp_return_type_ident}}
+}}Promise{{#if function:stack_arguments?}}__sa{{/if}}_{{#partial services.cython_cpp_return_type_ident function=function:self}}

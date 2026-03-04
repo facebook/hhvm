@@ -35,7 +35,7 @@ namespace apache::thrift::compiler {
 
 namespace {
 
-std::vector<t_function*> lifecycleFunctions() {
+std::vector<const t_function*> lifecycleFunctions() {
   static t_function onStartServing_{
       nullptr, t_primitive_type::t_void(), "onStartServing"};
   static t_function onStopRequested_{
@@ -258,6 +258,14 @@ class py3_generator_context {
     return response_and_stream_functions_;
   }
 
+  const std::vector<const t_interaction*>& supported_interactions(
+      const t_service& service) const {
+    static const std::vector<const t_interaction*> kEmpty;
+    check_root_program(*service.program());
+    const auto& it = supported_interactions_by_service_.find(&service);
+    return it == supported_interactions_by_service_.end() ? kEmpty : it->second;
+  }
+
   void visit_function(const t_function& func);
 
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
@@ -324,8 +332,18 @@ class py3_generator_context {
     });
     visitor.add_function_visitor(
         [this](const context& ctx, const t_function& func) {
-          if (&ctx.program() == root_program_ && !is_hidden(func)) {
-            visit_function(func);
+          if (&ctx.program() != root_program_ || is_hidden(func)) {
+            return;
+          }
+          // Visit for populating program-level type information
+          visit_function(func);
+          // Collect supported interactions
+          if (func.is_interaction_constructor()) {
+            if (const auto* service =
+                    dynamic_cast<const t_service*>(ctx.parent())) {
+              supported_interactions_by_service_[service].emplace_back(
+                  &func.interaction()->as<t_interaction>());
+            }
           }
         });
     visitor.add_const_visitor(
@@ -363,6 +381,9 @@ class py3_generator_context {
   std::map<std::string, const t_type*> stream_exceptions_;
   // Functions with a stream and an initial response.
   std::vector<const t_function*> response_and_stream_functions_;
+
+  std::unordered_map<const t_service*, std::vector<const t_interaction*>>
+      supported_interactions_by_service_;
 
   // These properties are mutable as they are (or contain) caches which must be
   // accessed from a const method context
@@ -538,9 +559,10 @@ class py3_mstch_service : public mstch_service {
       const t_service* service,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_program* prog,
+      const py3_generator_context* generator_context,
       const t_service* containing_service = nullptr)
-      : mstch_service(service, ctx, pos, containing_service), prog_{prog} {
+      : mstch_service(service, ctx, pos, containing_service),
+        generator_context_{*generator_context} {
     register_methods(
         this,
         {
@@ -553,14 +575,6 @@ class py3_mstch_service : public mstch_service {
             {"service:supportedInteractions",
              &py3_mstch_service::get_supported_interactions},
         });
-
-    // Collect supported interactions
-    for (const auto& function : service_->functions()) {
-      if (function.is_interaction_constructor()) {
-        supported_interactions_.insert(
-            &function.interaction()->as<t_interaction>());
-      }
-    }
   }
 
   std::vector<const t_function*> supportedFunctions() {
@@ -591,12 +605,12 @@ class py3_mstch_service : public mstch_service {
   }
 
   mstch::node get_supported_interactions() {
-    return make_mstch_interactions(supported_interactions_, service_);
+    return make_mstch_interactions(
+        generator_context_.supported_interactions(*service_), service_);
   }
 
- protected:
-  const t_program* prog_;
-  std::set<const t_interaction*, interaction_name_less> supported_interactions_;
+ private:
+  const py3_generator_context& generator_context_;
 };
 
 class py3_mstch_struct : public mstch_struct {
@@ -1127,6 +1141,26 @@ class t_mstch_py3_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_interface>::ptr make_prototype_for_interface(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_interface(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_interface>::extends(std::move(base));
+
+    def.property("supportedFunctions", [&](const t_interface& self) {
+      whisker::array::raw functions;
+      bool no_stream = has_compiler_option("no_stream");
+      for (const t_function& func : self.functions()) {
+        if (is_func_supported(no_stream, &func)) {
+          functions.emplace_back(proto.create<t_function>(func));
+        }
+      }
+      return whisker::make::array(std::move(functions));
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_service>::ptr make_prototype_for_service(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_service(proto);
@@ -1135,6 +1169,13 @@ class t_mstch_py3_generator : public t_mstch_generator {
 
     def.property("externalProgram?", [this](const t_service& self) {
       return self.program() != program_;
+    });
+    def.property("lifecycleFunctions", [&proto](const t_service&) {
+      return to_array(lifecycleFunctions(), proto.of<t_function>());
+    });
+    def.property("supportedInteractions", [&](const t_service& self) {
+      return to_array(
+          context_->supported_interactions(self), proto.of<t_interaction>());
     });
 
     return std::move(def).make();
@@ -1395,7 +1436,7 @@ py3_generator_context::get_cached_type_props(const t_type* type) const {
 
 void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_program>(context_.get());
-  mstch_context_.add<py3_mstch_service>(program_);
+  mstch_context_.add<py3_mstch_service>(context_.get());
   mstch_context_.add<py3_mstch_struct>(context_.get());
 }
 

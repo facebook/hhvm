@@ -47,11 +47,11 @@ from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.
     {{/program:typedefs}}
 )
 {{/program:has_types?}}
-{{#program:hasContainerTypes}}
+  {{#if program:has_container_types?}}
 from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_auto_FBTHRIFT_ONLY_DO_NOT_USE import (
 {{#program:containerTypes}}{{#type:container?}}
     {{type:flat_name}},
 {{/type:container?}}{{/program:containerTypes}}
 )
-{{/program:hasContainerTypes}}
+  {{/if program:has_container_types?}}
 {{/program:auto_migrate?}}

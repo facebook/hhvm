@@ -51,13 +51,13 @@ import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnder
 {{/each}}
 
 import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
-{{#program:hasContainerTypes}}
+  {{#if program:has_container_types?}}
 from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 {{#program:containerTypes}}
     {{type:flat_name}},
 {{/program:containerTypes}}
 )
-{{/program:hasContainerTypes}}
+  {{/if program:has_container_types?}}
 
 {{#program:filtered_structs}}
 {{^struct:union?}}

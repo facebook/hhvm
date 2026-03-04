@@ -431,14 +431,9 @@ class py3_mstch_program : public mstch_program {
         {
             {"program:unique_functions_by_return_type",
              &py3_mstch_program::unique_functions_by_return_type},
-            {"program:needs_container_converters?",
-             &py3_mstch_program::needs_container_converters},
             {"program:containerTypes", &py3_mstch_program::getContainerTypes},
-            {"program:hasContainerTypes",
-             &py3_mstch_program::hasContainerTypes},
             {"program:customTemplates", &py3_mstch_program::getCustomTemplates},
             {"program:customTypes", &py3_mstch_program::getCustomTypes},
-            {"program:has_stream?", &py3_mstch_program::hasStream},
             {"program:stream_types", &py3_mstch_program::getStreamTypes},
             {"program:response_and_stream_functions",
              &py3_mstch_program::response_and_stream_functions},
@@ -452,16 +447,6 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node getContainerTypes() {
     return make_mstch_types(generator_context_.container_types(*program_));
-  }
-
-  mstch::node hasContainerTypes() {
-    return !generator_context_.container_types(*program_).empty();
-  }
-
-  mstch::node needs_container_converters() {
-    return !generator_context_.container_types(*program_).empty() &&
-        (!program_->services().empty() ||
-         has_option("gen_legacy_container_converters"));
   }
 
   mstch::node unique_functions_by_return_type() {
@@ -511,11 +496,6 @@ class py3_mstch_program : public mstch_program {
       }
     }
     return make_mstch_types(types);
-  }
-
-  mstch::node hasStream() {
-    return !has_option("no_stream") &&
-        !generator_context_.stream_types(*program_).empty();
   }
 
  protected:
@@ -1106,6 +1086,18 @@ class t_mstch_py3_generator : public t_mstch_generator {
         includes.emplace_back(proto.create<py3_included_program>(include));
       }
       return whisker::make::array(std::move(includes));
+    });
+    def.property("has_container_types?", [this](const t_program& self) {
+      return !context_->container_types(self).empty();
+    });
+    def.property("needs_container_converters?", [this](const t_program& self) {
+      return !context_->container_types(self).empty() &&
+          (!self.services().empty() ||
+           has_compiler_option("gen_legacy_container_converters"));
+    });
+    def.property("has_stream?", [this](const t_program& self) {
+      return !has_compiler_option("no_stream") &&
+          !context_->stream_types(self).empty();
     });
 
     return std::move(def).make();

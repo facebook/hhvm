@@ -122,13 +122,13 @@ from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.
 )
   {{/if program:has_visible_union_types?}}
 
-{{#program:hasContainerTypes}}
+  {{#if program:has_container_types?}}
 from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 {{#program:containerTypes}}
     {{type:flat_name}},
 {{/program:containerTypes}}
 )
-{{/program:hasContainerTypes}}
+  {{/if program:has_container_types?}}
 {{/program:inplace_migrate?}}
 {{#program:inplace_migrate?}}
 

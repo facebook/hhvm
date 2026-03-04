@@ -2057,12 +2057,15 @@ INSTANTIATE_TEST_CASE_P(
     HeaderOrRocket,
     testing::Values(TransportType::Header, TransportType::Rocket));
 
-// DO_BEFORE(aristidis,20250716): Test is flaky. Find owner or remove.
-TEST_P(OverloadTest, DISABLED_Test) {
+TEST_P(OverloadTest, Test) {
   class BlockInterface : public apache::thrift::ServiceHandler<TestService> {
    public:
     folly::Baton<> block;
-    void voidResponse() override { block.wait(); }
+    folly::Baton<> entered;
+    void voidResponse() override {
+      entered.post();
+      block.wait();
+    }
 
     void async_eb_eventBaseAsync(
         HandlerCallbackPtr<std::unique_ptr<::std::string>> callback) override {
@@ -2070,7 +2073,8 @@ TEST_P(OverloadTest, DISABLED_Test) {
     }
   };
 
-  ScopedServerInterfaceThread runner(std::make_shared<BlockInterface>());
+  auto handler = std::make_shared<BlockInterface>();
+  ScopedServerInterfaceThread runner(handler);
   folly::EventBase base;
   auto client = makeClient(runner, &base);
 
@@ -2094,20 +2098,15 @@ TEST_P(OverloadTest, DISABLED_Test) {
     return {};
   });
 
-  // force overloaded
   folly::Function<void()> onExit = [] {};
   auto guard = folly::makeGuard([&] { onExit(); });
   if (errorType == ErrorType::Overload) {
-    // Thrift is overloaded on max requests
     runner.getThriftServer().setMaxRequests(1);
-    runner.getThriftServer().setQueueTimeout(10ms);
-    auto handler = dynamic_cast<BlockInterface*>(
-        runner.getThriftServer().getProcessorFactory().get());
+    runner.getThriftServer().setQueueTimeout(1s);
     client->semifuture_voidResponse();
-    while (runner.getThriftServer().getActiveRequests() < 1) {
-      std::this_thread::yield();
-    }
-    onExit = [handler] { handler->block.post(); };
+    ASSERT_TRUE(handler->entered.try_wait_for(5s))
+        << "Timed out waiting for blocking request to enter handler";
+    onExit = [&handler] { handler->block.post(); };
   }
 
   RpcOptions rpcOptions;

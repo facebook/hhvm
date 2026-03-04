@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <folly/coro/Collect.h>
 #include <folly/coro/GtestHelpers.h>
+#include <folly/coro/Sleep.h>
 #include <thrift/lib/cpp2/async/tests/util/gen-cpp2/TestBiDiService.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
@@ -25,6 +26,8 @@ using namespace ::testing;
 namespace apache::thrift {
 
 namespace {
+
+constexpr std::chrono::hours kEffectivelyWaitForever{24};
 
 class BiDiServiceE2ETest : public Test {
   using MakeChannelFunc = ScopedServerInterfaceThread::MakeChannelFunc;
@@ -488,6 +491,162 @@ CO_TEST_F(BiDiServiceE2ETest, ConsumeInputNoOutput) {
   co_await folly::coro::collectAll(
       stream.sink.sink(std::move(sinkGen)), std::move(streamTask));
   EXPECT_EQ(handler->counter, kTestLimit);
+}
+
+CO_TEST_F(BiDiServiceE2ETest, ClientDropsStreamWhileServerBlocksOnInput) {
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<std::string, std::string>> co_echo()
+        override {
+      co_return StreamTransformation<std::string, std::string>{
+          [](folly::coro::AsyncGenerator<std::string&&> input)
+              -> folly::coro::AsyncGenerator<std::string&&> {
+            while (auto item = co_await input.next()) {
+              co_yield std::move(*item);
+            }
+          }};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>()});
+  auto client = makeClient<detail::test::TestBiDiService>();
+  auto bidi = co_await client->co_echo();
+
+  // Sink: send one item, then hold open without sending more
+  auto sinkGen = folly::coro::co_invoke(
+      []() -> folly::coro::AsyncGenerator<std::string&&> {
+        co_yield std::string("hello");
+        co_await folly::coro::sleep(kEffectivelyWaitForever);
+      });
+
+  auto sinkTask = folly::coro::co_invoke(
+      [clientSink = std::move(bidi.sink),
+       sinkGen = std::move(sinkGen)]() mutable -> folly::coro::Task<void> {
+        try {
+          co_await std::move(clientSink).sink(std::move(sinkGen));
+        } catch (...) {
+          // Expected when server cancels the sink
+        }
+      });
+
+  auto streamTask = folly::coro::co_invoke(
+      [streamGen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+          -> folly::coro::Task<void> {
+        // Read the echoed item
+        auto first = co_await streamGen.next();
+        EXPECT_TRUE(first.has_value());
+        EXPECT_EQ(*first, "hello");
+        // streamGen destroyed on return -> cancels the stream
+        // Server is blocked on input.next() waiting for more sink data
+        // With cancellation support, this unblocks the server
+      });
+
+  co_await folly::coro::collectAll(std::move(sinkTask), std::move(streamTask));
+}
+
+CO_TEST_F(BiDiServiceE2ETest, ServerStopsOutputWhileClientBlocksOnStream) {
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<std::string, std::string>> co_echo()
+        override {
+      co_return StreamTransformation<std::string, std::string>{
+          [](folly::coro::AsyncGenerator<std::string&&> input)
+              -> folly::coro::AsyncGenerator<std::string&&> {
+            // Read one item, echo it, then stop producing output
+            if (auto item = co_await input.next()) {
+              co_yield std::move(*item);
+            }
+            // Returning here destroys the input generator via RAII,
+            // which should cancel the client's sink
+          }};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>()});
+  auto client = makeClient<detail::test::TestBiDiService>();
+  auto bidi = co_await client->co_echo();
+
+  // Sink: send one item, then hold open without sending more
+  auto sinkGen = folly::coro::co_invoke(
+      []() -> folly::coro::AsyncGenerator<std::string&&> {
+        co_yield std::string("hello");
+        co_await folly::coro::sleep(kEffectivelyWaitForever);
+      });
+
+  auto sinkTask = folly::coro::co_invoke(
+      [clientSink = std::move(bidi.sink),
+       sinkGen = std::move(sinkGen)]() mutable -> folly::coro::Task<void> {
+        try {
+          co_await std::move(clientSink).sink(std::move(sinkGen));
+        } catch (...) {
+          // Expected when server cancels the sink
+        }
+      });
+
+  auto streamTask = folly::coro::co_invoke(
+      [streamGen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+          -> folly::coro::Task<void> {
+        // Read the echoed item
+        auto first = co_await streamGen.next();
+        EXPECT_TRUE(first.has_value());
+        EXPECT_EQ(*first, "hello");
+        // Server stopped producing, so the stream should complete
+        auto end = co_await streamGen.next();
+        EXPECT_FALSE(end.has_value());
+      });
+
+  co_await folly::coro::collectAll(std::move(sinkTask), std::move(streamTask));
+}
+
+CO_TEST_F(
+    BiDiServiceE2ETest, ClientDropsStreamWhileServerProducesIndefinitely) {
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<std::string, std::string>> co_echo()
+        override {
+      co_return StreamTransformation<std::string, std::string>{
+          [](folly::coro::AsyncGenerator<std::string&&> /*input*/)
+              -> folly::coro::AsyncGenerator<std::string&&> {
+            // Ignore input, produce output forever until cancelled
+            int i = 0;
+            while (true) {
+              co_yield std::to_string(i++);
+              co_await folly::coro::co_safe_point;
+            }
+          }};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>()});
+  auto client = makeClient<detail::test::TestBiDiService>();
+  auto bidi = co_await client->co_echo();
+
+  // Sink: hold open without sending anything
+  auto sinkTask = folly::coro::co_invoke(
+      [clientSink = std::move(bidi.sink)]() mutable -> folly::coro::Task<void> {
+        try {
+          auto emptyGen = folly::coro::co_invoke(
+              []() -> folly::coro::AsyncGenerator<std::string&&> {
+                co_await folly::coro::sleep(kEffectivelyWaitForever);
+              });
+          co_await std::move(clientSink).sink(std::move(emptyGen));
+        } catch (...) {
+          // Expected when server cancels the sink
+        }
+      });
+
+  auto streamTask = folly::coro::co_invoke(
+      [streamGen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+          -> folly::coro::Task<void> {
+        // Read a few items to confirm the server is producing
+        auto first = co_await streamGen.next();
+        EXPECT_TRUE(first.has_value());
+        EXPECT_EQ(*first, "0");
+        auto second = co_await streamGen.next();
+        EXPECT_TRUE(second.has_value());
+        EXPECT_EQ(*second, "1");
+        // streamGen destroyed on return -> cancels the stream
+        // Server's co_safe_point should observe cancellation and stop
+      });
+
+  co_await folly::coro::collectAll(std::move(sinkTask), std::move(streamTask));
 }
 
 } // namespace apache::thrift

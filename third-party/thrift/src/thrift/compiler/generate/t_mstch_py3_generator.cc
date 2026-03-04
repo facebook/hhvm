@@ -824,7 +824,11 @@ class t_mstch_py3_generator : public t_mstch_generator {
  private:
   void set_mstch_factories();
   void generate_init_files();
-  void generate_file(
+  void generate_mstch_file(
+      const std::string& template_name,
+      FileType file_type,
+      const std::filesystem::path& base);
+  void generate_whisker_file(
       const std::string& template_name,
       FileType file_type,
       const std::filesystem::path& base);
@@ -1098,6 +1102,12 @@ class t_mstch_py3_generator : public t_mstch_generator {
     def.property("has_stream?", [this](const t_program& self) {
       return !has_compiler_option("no_stream") &&
           !context_->stream_types(self).empty();
+    });
+    def.property("custom_templates", [&](const t_program& self) {
+      return to_array(context_->custom_templates(self), proto.of<t_type>());
+    });
+    def.property("custom_cpp_types", [&](const t_program& self) {
+      return to_array(context_->custom_cpp_types(self), proto.of<t_type>());
     });
 
     return std::move(def).make();
@@ -1451,7 +1461,7 @@ std::filesystem::path t_mstch_py3_generator::package_to_path() {
   return path;
 }
 
-void t_mstch_py3_generator::generate_file(
+void t_mstch_py3_generator::generate_mstch_file(
     const std::string& template_name,
     FileType file_type,
     const std::filesystem::path& base = {}) {
@@ -1466,6 +1476,22 @@ void t_mstch_py3_generator::generate_file(
       template_name,
       base / program_name / template_name // (output) path
   );
+}
+
+void t_mstch_py3_generator::generate_whisker_file(
+    const std::string& template_name,
+    FileType file_type,
+    const std::filesystem::path& base = {}) {
+  file_type_ = file_type;
+  whisker::object context = whisker::make::map({
+      {"program",
+       whisker::make::native_handle(
+           render_state().prototypes->create<t_program>(*program_))},
+  });
+  t_whisker_generator::render_to_file(
+      /*output_file=*/base / program_->name() / template_name,
+      /*template_file=*/template_name,
+      /*context=*/context);
 }
 
 void t_mstch_py3_generator::generate_types() {
@@ -1514,39 +1540,41 @@ void t_mstch_py3_generator::generate_types() {
       "metadata.cpp",
   };
 
-  generate_file("cbindings.pxd", FileType::CBindingsFile, generateRootPath_);
+  generate_whisker_file(
+      "cbindings.pxd", FileType::CBindingsFile, generateRootPath_);
 
   if (has_option("enable_container_pickling_DO_NOT_USE")) {
-    generate_file("__init__.py", FileType::TypesFile, generateRootPath_);
+    generate_whisker_file(
+        "__init__.py", FileType::TypesFile, generateRootPath_);
   }
   if (has_option("inplace_migrate")) {
-    generate_file(
+    generate_mstch_file(
         "types_inplace_FBTHRIFT_ONLY_DO_NOT_USE.py",
         FileType::TypesFile,
         generateRootPath_);
   }
   for (const auto& file : converterFiles) {
-    generate_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   // - if auto_migrate is present, generate types.pxd, and types.py
   // - else, just generate normal cython files
   for (const auto& file : autoMigrateFilesWithTypeContext) {
-    generate_file(file, FileType::TypesFile, generateRootPath_);
+    generate_mstch_file(file, FileType::TypesFile, generateRootPath_);
   }
   for (const auto& file : autoMigrateFilesNoTypeContext) {
-    generate_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   for (const auto& file : cythonFilesWithTypeContext) {
-    generate_file(file, FileType::TypesFile, generateRootPath_);
+    generate_mstch_file(file, FileType::TypesFile, generateRootPath_);
   }
   for (const auto& file : cppFilesWithTypeContext) {
-    generate_file(file, FileType::TypesFile);
+    generate_mstch_file(file, FileType::TypesFile);
   }
   for (const auto& file : cythonFilesNoTypeContext) {
-    generate_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   for (const auto& file : cppFilesWithNoTypeContext) {
-    generate_file(file, FileType::NotTypesFile);
+    generate_mstch_file(file, FileType::NotTypesFile);
   }
 }
 
@@ -1592,16 +1620,16 @@ void t_mstch_py3_generator::generate_services() {
   // - if auto_migrate isn't present, just generate all the normal files
 
   for (const auto& file : pythonFiles) {
-    generate_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   for (const auto& file : normalCythonFiles) {
-    generate_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   for (const auto& file : cppFiles) {
-    generate_file(file, FileType::NotTypesFile);
+    generate_mstch_file(file, FileType::NotTypesFile);
   }
   for (const auto& file : cythonFiles) {
-    generate_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
   }
 }
 

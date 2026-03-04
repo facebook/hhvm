@@ -19,16 +19,16 @@
 This is a template for exposing cpp enums in .pxd
 
 }}
-{{#program:enums}}
-{{#first?}}
+{{#each (array.enumerate program.enums with_first=true) as |i enum first?|}}
+  {{#if first?}}
 cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_types.h"{{!
-}} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
-{{/first?}}
-    cdef cppclass {{#partial types.c_binding node=enum:self}} "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{enum:cpp_name}}":
+cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_types.h"{{!
+}} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
+  {{/if first?}}
+    cdef cppclass {{#partial types.c_binding node=enum}} "::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{enum.cpp_name}}":
         pass
 
-{{/program:enums}}
+{{/each}}

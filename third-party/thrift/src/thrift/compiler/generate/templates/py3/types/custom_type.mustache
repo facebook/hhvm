@@ -22,21 +22,21 @@ file may get used when the type is not a container, in which case it just
 provides a typedef instead of a full class definition.
 
 }}
-{{#if (or type:list? type:set?)}}
+{{#if (or type.list? type.set?)}}
 cdef extern from * nogil:
-    cdef cppclass {{type:cythonCustomType}} "{{type:customCppType}}":
-        ctypedef {{#partial types.cython_cpp_type type=type:true_type.elem_type}} value_type
+    cdef cppclass {{type.cythonCustomType}} "{{type.customCppType}}":
+        ctypedef {{#partial types.cython_cpp_type type=type.true_type.elem_type}} value_type
         {{! see comment in https://github.com/cython/cython/blob/master/Cython/Includes/libcpp/vector.pxd
            for context on why this is size_t }}
         ctypedef size_t size_type
 
         cppclass iterator:
-            {{#partial types.cython_cpp_type type=type:true_type.elem_type}}& operator*()
+            {{#partial types.cython_cpp_type type=type.true_type.elem_type}}& operator*()
             iterator operator++()
             bint operator==(iterator)
             bint operator!=(iterator)
         cppclass reverse_iterator:
-            {{#partial types.cython_cpp_type type=type:true_type.elem_type}}& operator*()
+            {{#partial types.cython_cpp_type type=type.true_type.elem_type}}& operator*()
             iterator operator++()
             bint operator==(reverse_iterator)
             bint operator!=(reverse_iterator)
@@ -45,12 +45,12 @@ cdef extern from * nogil:
         cppclass const_reverse_iterator(reverse_iterator):
             pass
 
-        {{type:cythonCustomType}}() except +
-        {{type:cythonCustomType}}({{type:cythonCustomType}}&) except +
+        {{type.cythonCustomType}}() except +
+        {{type.cythonCustomType}}({{type.cythonCustomType}}&) except +
 
-    {{#if type:list?}}
-        {{#partial types.cython_cpp_type type=type:true_type.elem_type}}& operator[](size_type)
-        void push_back({{#partial types.cython_cpp_type type=type:true_type.elem_type}}&) except +
+    {{#if type.list?}}
+        {{#partial types.cython_cpp_type type=type.true_type.elem_type}}& operator[](size_type)
+        void push_back({{#partial types.cython_cpp_type type=type.true_type.elem_type}}&) except +
         size_type size()
         iterator begin()
         const_iterator const_begin "begin"()
@@ -63,9 +63,9 @@ cdef extern from * nogil:
         void clear()
         bint empty()
     {{#else}}
-        cpair[iterator, bint] insert(const {{#partial types.cython_cpp_type type=type:true_type.elem_type}}&) except +
+        cpair[iterator, bint] insert(const {{#partial types.cython_cpp_type type=type.true_type.elem_type}}&) except +
         size_type size()
-        size_type count(const {{#partial types.cython_cpp_type type=type:true_type.elem_type}}&)
+        size_type count(const {{#partial types.cython_cpp_type type=type.true_type.elem_type}}&)
         iterator begin()
         const_iterator const_begin "begin"()
         iterator end()
@@ -76,24 +76,24 @@ cdef extern from * nogil:
         const_reverse_iterator const_rend "rend"()
         void clear()
         bint empty()
-    {{/if type:list?}}
+    {{/if type.list?}}
 
-{{#else if type:map?}}
+{{#else if type.map?}}
 cdef extern from * nogil:
-    cdef cppclass {{type:cythonCustomType}} "{{type:customCppType}}":
-        ctypedef {{#partial types.cython_cpp_type type=type:true_type.key_type}} key_type
-        ctypedef {{#partial types.cython_cpp_type type=type:true_type.val_type}} mapped_type
+    cdef cppclass {{type.cythonCustomType}} "{{type.customCppType}}":
+        ctypedef {{#partial types.cython_cpp_type type=type.true_type.key_type}} key_type
+        ctypedef {{#partial types.cython_cpp_type type=type.true_type.val_type}} mapped_type
         {{! see comment in https://github.com/cython/cython/blob/master/Cython/Includes/libcpp/vector.pxd
            for context on why this is size_t }}
         ctypedef size_t size_type
 
         cppclass iterator:
-            cpair[{{#partial types.cython_cpp_type type=type:true_type.key_type}}, {{#partial types.cython_cpp_type type=type:true_type.val_type}}]& operator*()
+            cpair[{{#partial types.cython_cpp_type type=type.true_type.key_type}}, {{#partial types.cython_cpp_type type=type.true_type.val_type}}]& operator*()
             iterator operator++()
             bint operator==(iterator)
             bint operator!=(iterator)
         cppclass reverse_iterator:
-            cpair[{{#partial types.cython_cpp_type type=type:true_type.key_type}}, {{#partial types.cython_cpp_type type=type:true_type.val_type}}]& operator*()
+            cpair[{{#partial types.cython_cpp_type type=type.true_type.key_type}}, {{#partial types.cython_cpp_type type=type.true_type.val_type}}]& operator*()
             iterator operator++()
             bint operator==(reverse_iterator)
             bint operator!=(reverse_iterator)
@@ -102,13 +102,13 @@ cdef extern from * nogil:
         cppclass const_reverse_iterator(reverse_iterator):
             pass
 
-        {{type:cythonCustomType}}() except +
-        {{type:cythonCustomType}}({{type:cythonCustomType}}&) except +
+        {{type.cythonCustomType}}() except +
+        {{type.cythonCustomType}}({{type.cythonCustomType}}&) except +
 
-        {{#partial types.cython_cpp_type type=type:true_type.val_type}}& operator[]({{#partial types.cython_cpp_type type=type:true_type.key_type}}&)
-        iterator find(const {{#partial types.cython_cpp_type type=type:true_type.key_type}}&)
-        const_iterator const_find "find"(const {{#partial types.cython_cpp_type type=type:true_type.key_type}}&)
-        size_type count(const {{#partial types.cython_cpp_type type=type:true_type.key_type}}&)
+        {{#partial types.cython_cpp_type type=type.true_type.val_type}}& operator[]({{#partial types.cython_cpp_type type=type.true_type.key_type}}&)
+        iterator find(const {{#partial types.cython_cpp_type type=type.true_type.key_type}}&)
+        const_iterator const_find "find"(const {{#partial types.cython_cpp_type type=type.true_type.key_type}}&)
+        size_type count(const {{#partial types.cython_cpp_type type=type.true_type.key_type}}&)
         size_type size()
         iterator begin()
         const_iterator const_begin "begin"()
@@ -121,9 +121,9 @@ cdef extern from * nogil:
         void clear()
         bint empty()
 
-{{#else if (not type:iobufWrapper?)}}
+{{#else if (not type.iobufWrapper?)}}
 cdef extern from *:
     ctypedef {{!
-    }}{{#if type:flexibleBinary?}}bstring{{#else}}{{#partial types.cython_cpp_type_resolved type=type:self enable_custom_type_overrides=false}}{{/if}}{{!
-    }} {{type:cythonCustomType}} "{{type:customCppType}}"
-{{/if (or type:list? type:set?)}}
+    }}{{#if type.flexibleBinary?}}bstring{{#else}}{{#partial types.cython_cpp_type_resolved type=type enable_custom_type_overrides=false}}{{/if}}{{!
+    }} {{type.cythonCustomType}} "{{type.customCppType}}"
+{{/if (or type.list? type.set?)}}

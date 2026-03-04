@@ -19,13 +19,12 @@
 This is a template for exposing cpp constants in .pxd
 
 }}
-{{#program:constants}}
-{{#first?}}
-cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_constants.h"{{!
-}} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
-{{/first?}}
-    {{#constant:type}}
-    cdef {{^type:string?}}{{#partial types.cython_cpp_type type=type:self}}{{/type:string?}}{{#type:string?}}const char*{{/type:string?}} {{!
-    }}{{#partial types.c_binding node=constant:self}} "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{program:name}}_constants::{{constant:name}}"{{!
-    }}{{#if (or type:structured? type:string? type:binary? type:container? type:enum?)}}(){{/if}}
-{{/constant:type}}{{/program:constants}}
+{{#each (array.enumerate program.consts with_first=true) as |i constant first?|}}
+  {{#if first?}}
+cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_constants.h"{{!
+}} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
+  {{/if first?}}
+    cdef {{#if constant.type.string?}}const char*{{#else}}{{#partial types.cython_cpp_type type=constant.type}}{{/if}} {{!
+    }}{{#partial types.c_binding node=constant}} "::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{program.name}}_constants::{{constant.name}}"{{!
+    }}{{#if (or constant.type.structured? constant.type.string? constant.type.binary? constant.type.container? constant.type.enum?)}}(){{/if}}
+{{/each}}

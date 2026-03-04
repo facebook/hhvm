@@ -20,91 +20,9 @@ Appropriate extern defs for cpp.template alternate implementations of the
 various container types, used in the appropriate .pxd file.
 
 }}
-{{#type:list?}}
+  {{#if type.map?}}
 cdef extern from * nogil:
-    cdef cppclass {{type:cythonTemplate}} "{{type:cppTemplate}}"[T]:
-        ctypedef T value_type
-        {{! see comment in https://github.com/cython/cython/blob/master/Cython/Includes/libcpp/vector.pxd
-           for context on why this is size_t }}
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        {{type:cythonTemplate}}() except +
-        {{type:cythonTemplate}}({{type:cythonTemplate}}&) except +
-
-        T& operator[](size_type)
-        void push_back(T&) except +
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-{{/type:list?}}
-{{#type:set?}}
-cdef extern from * nogil:
-    cdef cppclass {{type:cythonTemplate}} "{{type:cppTemplate}}"[T]:
-        ctypedef T value_type
-        {{! see comment in https://github.com/cython/cython/blob/master/Cython/Includes/libcpp/vector.pxd
-           for context on why this is size_t }}
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        {{type:cythonTemplate}}() except +
-        {{type:cythonTemplate}}({{type:cythonTemplate}}&) except +
-
-        cpair[iterator, bint] insert(const T&) except +
-        size_type size()
-        size_type count(const T&)
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
-{{/type:set?}}
-{{#type:map?}}
-cdef extern from * nogil:
-    cdef cppclass {{type:cythonTemplate}} "{{type:cppTemplate}}"[T, U]:
+    cdef cppclass {{type.cythonTemplate}} "{{type.cppTemplate}}"[T, U]:
         ctypedef T key_type
         ctypedef U mapped_type
         {{! see comment in https://github.com/cython/cython/blob/master/Cython/Includes/libcpp/vector.pxd
@@ -126,8 +44,8 @@ cdef extern from * nogil:
         cppclass const_reverse_iterator(reverse_iterator):
             pass
 
-        {{type:cythonTemplate}}() except +
-        {{type:cythonTemplate}}({{type:cythonTemplate}}&) except +
+        {{type.cythonTemplate}}() except +
+        {{type.cythonTemplate}}({{type.cythonTemplate}}&) except +
 
         U& operator[](T&)
         iterator find(const T&)
@@ -145,4 +63,60 @@ cdef extern from * nogil:
         void clear()
         bint empty()
 
-{{/type:map?}}
+  {{#else if (or type.list? type.set?)}}
+cdef extern from * nogil:
+    cdef cppclass {{type.cythonTemplate}} "{{type.cppTemplate}}"[T]:
+        ctypedef T value_type
+        {{! see comment in https://github.com/cython/cython/blob/master/Cython/Includes/libcpp/vector.pxd
+           for context on why this is size_t }}
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            T& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            T& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        {{type.cythonTemplate}}() except +
+        {{type.cythonTemplate}}({{type.cythonTemplate}}&) except +
+
+    {{#if type.list?}}
+        T& operator[](size_type)
+        void push_back(T&) except +
+        size_type size()
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+    {{#else}}
+        cpair[iterator, bint] insert(const T&) except +
+        size_type size()
+        size_type count(const T&)
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+    {{/if type.list?}}
+
+  {{/if type.map?}}

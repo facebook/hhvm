@@ -33,8 +33,8 @@ wrappers.
 This is a template for exposing cpp structs and unions in .pxd
 
 }}
-{{#program:filtered_structs}}
-{{#first?}}
+{{#each (array.enumerate program.py3_visible_structured_definitions with_first=true) as |i struct first?|}}
+  {{#if first?}}
 cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
@@ -43,60 +43,60 @@ cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::th
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_types_custom_protocol.h"{{!
-}} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
-{{/first?}}
-    {{#struct:union?}}
-    cdef enum class {{#partial types.c_binding node=struct:self}}__type "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{struct:name}}::Type":
+cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_types_custom_protocol.h"{{!
+}} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
+  {{/if first?}}
+    {{#if struct.union?}}
+    cdef enum class {{#partial types.c_binding node=struct}}__type "::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{struct.name}}::Type":
         __EMPTY__,
-    {{#struct:py3_fields}}
-        {{field:py_name}},
-    {{/struct:py3_fields}}
-    {{/struct:union?}}
+      {{#each struct.py3_fields as |field|}}
+        {{field.py_name}},
+      {{/each}}
+    {{/if struct.union?}}
 
-    cdef cppclass {{#partial types.c_binding node=struct:self}} "::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{struct:name}}"{{#struct:exception?}}(cTException){{/struct:exception?}}:
-        {{#partial types.c_binding node=struct:self}}() except +
-      {{#if (not struct:cpp_noncopyable?)}}
-        {{#partial types.c_binding node=struct:self}}(const {{#partial types.c_binding node=struct:self}}&) except +
-      {{/if (not struct:cpp_noncopyable?)}}
-      {{#if (not struct:cpp_noncomparable?)}}
-        bint operator==({{#partial types.c_binding node=struct:self}}&)
-        bint operator!=({{#partial types.c_binding node=struct:self}}&)
-        {{#if struct:is_struct_orderable?}}
-        bint operator<({{#partial types.c_binding node=struct:self}}&)
-        bint operator>({{#partial types.c_binding node=struct:self}}&)
-        bint operator<=({{#partial types.c_binding node=struct:self}}&)
-        bint operator>=({{#partial types.c_binding node=struct:self}}&)
-        {{/if struct:is_struct_orderable?}}
-      {{/if (not struct:cpp_noncomparable?)}}
-    {{#if (not struct:union?)}}
-    {{#struct:py3_fields}}
-          {{#if field:has_ref_accessor?}}
-            {{#if field:optional?}}
-        __optional_field_ref[{{#partial cython_cpp_struct_field_type field=field:self}}] {{!
-            }}{{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-            {{#else if field:required?}}
-        __required_field_ref[{{#partial cython_cpp_struct_field_type field=field:self}}] {{!
-            }}{{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-            {{#else if field:unqualified?}}
-        __field_ref[{{#partial cython_cpp_struct_field_type field=field:self}}] {{!
-            }}{{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-            {{#else if field:terse?}}
-        __terse_field_ref[{{#partial cython_cpp_struct_field_type field=field:self}}] {{!
-            }}{{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-            {{/if field:optional?}}
-          {{#else if field:reference?}}
-        {{#partial cython_cpp_struct_field_type field=field:self}} {{field:py_name}}_ref "{{field:cpp_name}}_ref" ()
-          {{/if field:has_ref_accessor?}}
-    {{/struct:py3_fields}}
+    cdef cppclass {{#partial types.c_binding node=struct}} "::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{struct.name}}"{{#if struct.exception?}}(cTException){{/if}}:
+        {{#partial types.c_binding node=struct}}() except +
+      {{#if (not struct.cpp_noncopyable?)}}
+        {{#partial types.c_binding node=struct}}(const {{#partial types.c_binding node=struct}}&) except +
+      {{/if (not struct.cpp_noncopyable?)}}
+      {{#if (not struct.cpp_noncomparable?)}}
+        bint operator==({{#partial types.c_binding node=struct}}&)
+        bint operator!=({{#partial types.c_binding node=struct}}&)
+        {{#if struct.is_struct_orderable?}}
+        bint operator<({{#partial types.c_binding node=struct}}&)
+        bint operator>({{#partial types.c_binding node=struct}}&)
+        bint operator<=({{#partial types.c_binding node=struct}}&)
+        bint operator>=({{#partial types.c_binding node=struct}}&)
+        {{/if struct.is_struct_orderable?}}
+      {{/if (not struct.cpp_noncomparable?)}}
+    {{#if (not struct.union?)}}
+      {{#each struct.py3_fields as |field|}}
+          {{#if field.has_ref_accessor?}}
+            {{#if field.optional?}}
+        __optional_field_ref[{{#partial cython_cpp_struct_field_type field=field}}] {{!
+            }}{{field.py_name}}_ref "{{field.cpp_name}}_ref" ()
+            {{#else if field.required?}}
+        __required_field_ref[{{#partial cython_cpp_struct_field_type field=field}}] {{!
+            }}{{field.py_name}}_ref "{{field.cpp_name}}_ref" ()
+            {{#else if field.unqualified?}}
+        __field_ref[{{#partial cython_cpp_struct_field_type field=field}}] {{!
+            }}{{field.py_name}}_ref "{{field.cpp_name}}_ref" ()
+            {{#else if field.terse?}}
+        __terse_field_ref[{{#partial cython_cpp_struct_field_type field=field}}] {{!
+            }}{{field.py_name}}_ref "{{field.cpp_name}}_ref" ()
+            {{/if field.optional?}}
+          {{#else if field.reference?}}
+        {{#partial cython_cpp_struct_field_type field=field}} {{field.py_name}}_ref "{{field.cpp_name}}_ref" ()
+          {{/if field.has_ref_accessor?}}
+      {{/each}}
     {{#else}}
-        {{#partial types.c_binding node=struct:self}}__type getType() const
-    {{#struct:py3_fields}}
-        const {{#partial cython_cpp_struct_field_type field=field:self}}& get_{{field:py_name}} "get_{{field:cpp_name}}" () const
+        {{#partial types.c_binding node=struct}}__type getType() const
+      {{#each struct.py3_fields as |field|}}
+        const {{#partial cython_cpp_struct_field_type field=field}}& get_{{field.py_name}} "get_{{field.cpp_name}}" () const
         {{! Note that the set methods don't take in a shared/unique_ptr, they just take in an object ref,
             but they return the appropriate ptr }}
-        {{#partial cython_cpp_struct_field_type field=field:self}}& set_{{field:py_name}} "set_{{field:cpp_name}}" (const {{#partial types.cython_cpp_type type=field:self.type}}&)
-    {{/struct:py3_fields}}
-    {{/if (not struct:union?)}}
+        {{#partial cython_cpp_struct_field_type field=field}}& set_{{field.py_name}} "set_{{field.cpp_name}}" (const {{#partial types.cython_cpp_type type=field.type}}&)
+      {{/each}}
+    {{/if (not struct.union?)}}
 
-{{/program:filtered_structs}}
+{{/each}}

@@ -17,20 +17,26 @@
 }}
 {{#import "common/types" as types}}
 {{> common/auto_generated_py}}
-{{> types/cimport_extern }}
+{{> types/cimport_std }}
+{{> types/cimport_thrift }}
 
-{{#each program:cppIncludes as |include|}}
+{{#each program.includeNamespaces as |include|}}
+  {{#if include.has_types?}}
+cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
+  {{/if include.has_types?}}
+{{/each}}
+
+{{#each program.cppIncludes as |include|}}
 cdef extern from "{{include}}":
   pass
 {{/each}}{{!
-}}{{#program:customTemplates}}
+}}{{#each program.custom_templates as |type|}}
 {{> types/custom_template}}
-{{/program:customTemplates}}{{!
-}}{{#program:customTypes}}
+{{/each}}{{!
+}}{{#each program.custom_cpp_types as |type|}}
 {{> types/custom_type}}
-{{/program:customTypes}}
+{{/each}}
 
 {{> types/enum_extern }}
 {{> types/struct_extern }}
 {{> types/constant_extern }}
-

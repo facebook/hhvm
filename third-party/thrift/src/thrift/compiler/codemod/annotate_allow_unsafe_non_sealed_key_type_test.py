@@ -325,3 +325,82 @@ class AnnotateAllowUnsafeNonSealedKeyTypeTest(unittest.TestCase):
                 }
                 """,
         )
+
+    def test_function_param_same_line(self):
+        self._check(
+            before="""\
+                include "thrift/annotation/thrift.thrift"
+
+                struct NonSealedStruct {}
+
+                service MyService {
+                  void myFunc(1: set<NonSealedStruct> param);
+                }
+                """,
+            after="""\
+                include "thrift/annotation/thrift.thrift"
+
+                struct NonSealedStruct {}
+
+                service MyService {
+                  void myFunc(
+                    @thrift.AllowUnsafeNonSealedKeyType
+                    1: set<NonSealedStruct> param);
+                }
+                """,
+        )
+
+    def test_function_param_same_line_multiple_params(self):
+        self._check(
+            before="""\
+                include "thrift/annotation/thrift.thrift"
+
+                struct NonSealedStruct {}
+
+                service MyService {
+                  void myFunc(1: i32 x, 2: set<NonSealedStruct> param);
+                }
+                """,
+            after="""\
+                include "thrift/annotation/thrift.thrift"
+
+                struct NonSealedStruct {}
+
+                service MyService {
+                  void myFunc(1: i32 x,
+                    @thrift.AllowUnsafeNonSealedKeyType
+                    2: set<NonSealedStruct> param);
+                }
+                """,
+        )
+
+    def test_function_param_same_line_multiple_non_sealed_params(self):
+        self._check(
+            before="""\
+                include "thrift/annotation/thrift.thrift"
+
+                struct NonSealedStruct {}
+
+                service MyService {
+                  void myFunc(1: set<NonSealedStruct> p1,
+                    2: set<NonSealedStruct> p2, 3: map<NonSealedStruct, i32> p3
+                  );
+                }
+                """,
+            after="""\
+                include "thrift/annotation/thrift.thrift"
+
+                struct NonSealedStruct {}
+
+                service MyService {
+                  void myFunc(
+                    @thrift.AllowUnsafeNonSealedKeyType
+                    1: set<NonSealedStruct> p1,
+                    @thrift.AllowUnsafeNonSealedKeyType
+                    2: set<NonSealedStruct> p2,
+                    @thrift.AllowUnsafeNonSealedKeyType
+                    3: map<NonSealedStruct, i32> p3
+                  );
+                }
+                """,
+        )

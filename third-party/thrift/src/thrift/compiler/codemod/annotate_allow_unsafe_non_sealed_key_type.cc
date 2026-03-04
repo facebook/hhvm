@@ -87,7 +87,7 @@ class AnnotateAllowUnsafeNonSealedKeyType final {
       for (const t_field& param : func.params().fields()) {
         const t_type& type = param.type().deref();
         if (needs_annotation(type, param)) {
-          annotate_node(param.type().src_range().begin);
+          annotate_function_param(param, func);
           any_annotated = true;
         }
       }
@@ -137,6 +137,58 @@ class AnnotateAllowUnsafeNonSealedKeyType final {
              "{}{}\n",
              source_manager_.get_text_range(line_leading_whitespace),
              kAnnotation)});
+  }
+
+  /**
+   * Adds the `@thrift.AllowUnsafeNonSealedKeyType` annotation before a
+   * function parameter.
+   *
+   * If the parameter is on its own line, delegates to `annotate_node`.
+   * If the parameter shares a line with the function signature (or other
+   * parameters), breaks the line after the preceding `(` or `,` and inserts
+   * the annotation on a new line before the parameter. The indentation is
+   * computed from the function's line (+ 2 spaces) so that all parameters
+   * align consistently.
+   */
+  void annotate_function_param(const t_field& param, const t_function& func) {
+    source_location param_loc = param.src_range().begin;
+    source_range line_ws = file_manager_.get_line_leading_whitespace(param_loc);
+
+    size_t param_offset = file_manager_.to_offset(param_loc);
+    size_t ws_end_offset = file_manager_.to_offset(line_ws.end);
+
+    // If param is on its own line, the existing logic works.
+    if (ws_end_offset >= param_offset) {
+      annotate_node(param_loc);
+      return;
+    }
+
+    maybe_add_include();
+
+    // Compute indent from the function's line so all params align at the
+    // same level, regardless of which line the param originally appeared on.
+    source_range func_line_ws =
+        file_manager_.get_line_leading_whitespace(func.src_range().begin);
+    std::string func_indent(source_manager_.get_text_range(func_line_ws));
+    std::string param_indent = func_indent + "  ";
+
+    // Scan backwards from param_loc over horizontal whitespace to find
+    // where the preceding '(' or ',' ends.
+    std::string_view old_content = file_manager_.old_content();
+    size_t scan_back = param_offset;
+    while (scan_back > 0 &&
+           (old_content[scan_back - 1] == ' ' ||
+            old_content[scan_back - 1] == '\t')) {
+      --scan_back;
+    }
+
+    // Replace whitespace between separator and param with
+    // line break + annotation + line break + indent.
+    file_manager_.add(
+        {.begin_pos = scan_back,
+         .end_pos = param_offset,
+         .new_content = fmt::format(
+             "\n{}{}\n{}", param_indent, kAnnotation, param_indent)});
   }
 };
 

@@ -54,7 +54,7 @@ class {{type:flat_name}}(thrift.py3.types.List):
         else:
             {{#type:containerOfString?}}
             if isinstance(items, str):
-                raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
+                raise TypeError("If you really want to pass a string into a {{#partial pep484.type_name type=type:self}} field, explicitly convert it first.")
             {{/type:containerOfString?}}
             check_method = {{type:flat_name}}._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
@@ -66,7 +66,7 @@ class {{type:flat_name}}(thrift.py3.types.List):
     {{#type:list_elem_type}}
       {{#if type:container?}}
         if item is None:
-            raise TypeError("None is not of the type {{> types/pep484_type}}")
+            raise TypeError("None is not of the type {{#partial pep484.type_name type=type:self}}")
         if not isinstance(item, {{#partial types.python_type type=type:self}}):
             item = {{#partial types.python_type type=type:self}}(item)
       {{#else}}
@@ -74,7 +74,7 @@ class {{type:flat_name}}(thrift.py3.types.List):
             isinstance(item, {{#partial types.python_is_instance_type type=type:self}}){{#type:enum?}} or
             isinstance(item, thrift.py3.types.BadEnum){{/type:enum?}}
         ):
-            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=type:self}}")
       {{/if type:container?}}
     {{/type:list_elem_type}}
         return item
@@ -164,7 +164,7 @@ class {{type:flat_name}}(thrift.py3.types.Set):
         else:
             {{#type:containerOfString?}}
             if isinstance(items, str):
-                raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
+                raise TypeError("If you really want to pass a string into a {{#partial pep484.type_name type=type:self}} field, explicitly convert it first.")
             {{/type:containerOfString?}}
             check_method = {{type:flat_name}}._check_item_type_or_raise
             _py_obj = frozenset(check_method(item) for item in items)
@@ -176,7 +176,7 @@ class {{type:flat_name}}(thrift.py3.types.Set):
     {{#type:set_elem_type}}
       {{#if type:container?}}
         if item is None:
-            raise TypeError("None is not of the type {{> types/pep484_type}}")
+            raise TypeError("None is not of the type {{#partial pep484.type_name type=type:self}}")
         if not isinstance(item, {{#partial types.python_type type=type:self}}):
             item = {{#partial types.python_type type=type:self}}(item)
       {{#else}}
@@ -184,7 +184,7 @@ class {{type:flat_name}}(thrift.py3.types.Set):
             isinstance(item, {{#partial types.python_is_instance_type type=type:self}}){{#type:enum?}} or
             isinstance(item, thrift.py3.types.BadEnum){{/type:enum?}}
         ):
-            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=type:self}}")
       {{/if type:container?}}
     {{/type:set_elem_type}}
         return item
@@ -287,7 +287,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{#type:key_type}}
       {{#if type:container?}}
         if key is None:
-            raise TypeError("None is not of the type {{> types/pep484_type}}")
+            raise TypeError("None is not of the type {{#partial pep484.type_name type=type:self}}")
         if not isinstance(key, {{#partial types.python_type type=type:self}}):
             key = {{#partial types.python_type type=type:self}}(key)
       {{#else}}
@@ -295,7 +295,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
             isinstance(key, {{#partial types.python_is_instance_type type=type:self}}){{#type:enum?}} or
             isinstance(key, thrift.py3.types.BadEnum){{/type:enum?}}
         ):
-            raise TypeError(f"{key!r} is not of type {{> types/pep484_type}}")
+            raise TypeError(f"{key!r} is not of type {{#partial pep484.type_name type=type:self}}")
       {{/if type:container?}}
     {{/type:key_type}}
         return key
@@ -321,7 +321,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     {{#type:value_type}}
       {{#if type:container?}}
         if item is None:
-            raise TypeError("None is not of the type {{> types/pep484_type}}")
+            raise TypeError("None is not of the type {{#partial pep484.type_name type=type:self}}")
         if not isinstance(item, {{#partial types.python_type type=type:self}}):
             item = {{#partial types.python_type type=type:self}}(item)
       {{#else}}
@@ -329,7 +329,7 @@ class {{type:flat_name}}(thrift.py3.types.Map):
             isinstance(item, {{#partial types.python_is_instance_type type=type:self}}){{#type:enum?}} or
             isinstance(item, thrift.py3.types.BadEnum){{/type:enum?}}
         ):
-            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=type:self}}")
       {{/if type:container?}}
     {{/type:value_type}}
         return item

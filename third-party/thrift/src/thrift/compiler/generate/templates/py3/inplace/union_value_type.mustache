@@ -20,6 +20,6 @@ The field's thrift-py3 python type, for type annotation purposes only
 
 
 }}{{#struct:py3_fields}}{{#field:type}}{{!
-        }}{{> inplace/field_type}} | {{!
+        }}{{#partial pep484.field_type field=field:self}} | {{!
 }}{{/field:type}}{{/struct:py3_fields}}{{!
         }}None

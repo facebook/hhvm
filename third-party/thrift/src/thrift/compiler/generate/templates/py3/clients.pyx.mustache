@@ -22,6 +22,7 @@ The generated file is pretty big, but the bulk of the generation is done inside
 the clients/callback partial.
 
 }}
+{{#import "common/pep484" as pep484}}
 {{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
@@ -145,9 +146,8 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
 {{#service:supportedFunctions}}
     {{! horrific workaround to expose python annotations on thrift py3 service functions}}
     _fbthrift_annotations_DO_NOT_USE_{{function:name}} = {
-        'return': '{{#function:return_type}}{{!
-        }}{{> types/pep484_type_period_separated}}{{/function:return_type}}',
-        {{#function:args}}'{{field:py_name}}': '{{#field:type}}{{> types/pep484_type_period_separated}}{{/field:type}}', {{/function:args}}
+        'return': '{{#if function:sink_or_stream?}}None{{#else}}{{#partial pep484.type_period_separated type=function:self.return_type}}{{/if}}',
+        {{#function:args}}'{{field:py_name}}': '{{#partial pep484.type_period_separated type=field:self.type}}', {{/function:args}}
     }
 
     @cython.always_allow_keywords(True)

@@ -32,7 +32,7 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
 {{^type:map?}}
     {{#type:containerOfString?}}
     if isinstance(items, str):
-        raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
+        raise TypeError("If you really want to pass a string into a {{#partial pep484.type_name type=type:self}} field, explicitly convert it first.")
     {{/type:containerOfString?}}
     for item in items:
 {{/type:map?}}
@@ -40,12 +40,12 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{#type:list_elem_type}}
           {{#if type:container?}}
         if item is None:
-            raise TypeError("None is not of the type {{> types/pep484_type}}")
+            raise TypeError("None is not of the type {{#partial pep484.type_name type=type:self}}")
         if not isinstance(item, {{#partial types.python_type type=type:self}}):
             item = {{#partial types.python_type type=type:self}}(item)
           {{#else}}
         if not isinstance(item, {{#partial types.python_is_instance_type type=type:self}}):
-            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=type:self}}")
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
         item = <{{#partial types.cython_python_type type=type:self}}> item
@@ -57,12 +57,12 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{#type:set_elem_type}}
           {{#if type:container?}}
         if item is None:
-            raise TypeError("None is not of type {{> types/pep484_type}}")
+            raise TypeError("None is not of type {{#partial pep484.type_name type=type:self}}")
         if not isinstance(item, {{#partial types.python_type type=type:self}}):
             item = {{#partial types.python_type type=type:self}}(item)
           {{#else}}
         if not isinstance(item, {{#partial types.python_is_instance_type type=type:self}}):
-            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=type:self}}")
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
         c_item = <{{#partial types.cython_python_type type=type:self}}> item
@@ -79,12 +79,12 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{#type:key_type}}
           {{#if type:container?}}
         if key is None:
-            raise TypeError("None is not of type {{> types/pep484_type}}")
+            raise TypeError("None is not of type {{#partial pep484.type_name type=type:self}}")
         if not isinstance(key, {{#partial types.python_type type=type:self}}):
             key = {{#partial types.python_type type=type:self}}(key)
           {{#else}}
         if not isinstance(key, {{#partial types.python_is_instance_type type=type:self}}):
-            raise TypeError(f"{key!r} is not of type {{> types/pep484_type}}")
+            raise TypeError(f"{key!r} is not of type {{#partial pep484.type_name type=type:self}}")
         {{#type:integer?}}
         {{! inject cython int overflow checks }}
         c_key = <{{#partial types.cython_python_type type=type:self}}> key
@@ -97,12 +97,12 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
         {{#type:value_type}}
           {{#if type:container?}}
         if item is None:
-            raise TypeError("None is not of type {{> types/pep484_type}}")
+            raise TypeError("None is not of type {{#partial pep484.type_name type=type:self}}")
         if not isinstance(item, {{#partial types.python_type type=type:self}}):
             item = {{#partial types.python_type type=type:self}}(item)
           {{#else}}
         if not isinstance(item, {{#partial types.python_is_instance_type type=type:self}}):
-            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=type:self}}")
         {{#type:integer?}}{{!
         }}{{! inject cython int overflow checks }}
         item = <{{#partial types.cython_python_type type=type:self}}> item

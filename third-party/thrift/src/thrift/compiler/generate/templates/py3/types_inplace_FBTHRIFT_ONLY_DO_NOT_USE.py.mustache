@@ -21,6 +21,7 @@ are re-exported via types.pyx
 
 }}
 {{#import "common/constants" as constants}}
+{{#import "common/pep484" as pep484}}
 {{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 {{#program:inplace_migrate?}}
@@ -135,7 +136,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
     _fbthrift__inner : _fbthrift_python_types.{{struct:name}}
     {{#struct:py3_fields}}
     {{#field:type}}{{#type:needs_convert?}}
-    _fbthrift_inner__{{field:py_name}} : {{> inplace/field_type}} | None
+    _fbthrift_inner__{{field:py_name}} : {{#partial pep484.field_type field=field:self}} | None
     {{/type:needs_convert?}}{{/field:type}}
     {{/struct:py3_fields}}
     {{#struct:union?}}
@@ -220,7 +221,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
 
     {{#struct:py3_fields}}
     @_python__property
-    def {{field:py_name}}(self) -> {{> inplace/field_type}}:
+    def {{field:py_name}}(self) -> {{#partial pep484.field_type field=field:self}}:
 {{#field:type}}{{#type:needs_convert?}}
         if self._fbthrift_inner__{{field:py_name}} is None:
             __python_val = self._fbthrift__inner.{{field:py_name}}

@@ -19,6 +19,7 @@
 Struct builder class implementation.
 
 }}
+{{#import "common/pep484" as pep484}}
 {{> common/auto_generated_py}}
 import typing as _typing
 
@@ -49,7 +50,7 @@ class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
         }}{{#type:integer?}}_typing.Optional[int]{{/type:integer?}}{{!
         }}{{#type:floating_point?}}_typing.Optional[float]{{/type:floating_point?}}{{!
         }}{{#type:cythonTypeNoneable?}}{{^type:structured?}}{{!
-            }}_typing.Optional[{{> types/pep484_type}}]{{!
+            }}_typing.Optional[{{#partial pep484.type_name type=type:self}}]{{!
         }}{{/type:structured?}}{{/type:cythonTypeNoneable?}}{{!
         }}{{#type:structured?}}_typing.Any{{/type:structured?}}{{!
         }}{{/f.field:type}} = None

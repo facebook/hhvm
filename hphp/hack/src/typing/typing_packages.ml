@@ -129,9 +129,12 @@ let can_access_by_package_rules
           Some (Aast_defs.PackageOverride _) )
         when package_includes current_pkg target_pkg ->
         let target_package_before_override =
+          let tcopt = Env.get_tcopt env in
           Option.map
             (Package_info.get_package_for_file
-               (Env.get_tcopt env |> TypecheckerOptions.package_info)
+               ~support_multifile_tests:
+                 (TypecheckerOptions.package_support_multifile_tests tcopt)
+               (TypecheckerOptions.package_info tcopt)
                (Relative_path.suffix target_file))
             ~f:Package.get_package_name
         in

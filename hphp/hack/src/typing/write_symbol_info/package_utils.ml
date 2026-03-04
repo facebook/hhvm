@@ -24,6 +24,9 @@ let get_package ctx path text =
     let package_name =
       match
         Package_info.get_package_for_file
+          ~support_multifile_tests:
+            (Provider_context.get_tcopt ctx
+            |> TypecheckerOptions.package_support_multifile_tests)
           (Provider_context.get_package_info ctx)
           path
       with

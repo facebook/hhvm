@@ -17,4 +17,5 @@ val get_package : t -> string -> Package.t option
 
 val package_exists : t -> string -> bool
 
-val get_package_for_file : t -> string -> Package.t option
+val get_package_for_file :
+  support_multifile_tests:bool -> t -> string -> Package.t option

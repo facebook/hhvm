@@ -57,7 +57,15 @@ let from_packages (packages : Package.t list) : t =
   in
   { existing_packages; include_path_to_package_map }
 
-let get_package_for_file (info : t) (path : string) : Package.t option =
+let get_package_for_file ~support_multifile_tests (info : t) (path : string) :
+    Package.t option =
+  let path =
+    if support_multifile_tests then
+      let re = Str.regexp "[^/]*--" in
+      Str.replace_first re "" path
+    else
+      path
+  in
   Option.map
     ~f:snd
     (List.find

@@ -136,7 +136,9 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
           : bridge{std::move(bridge)} {}
       ~Cleanup() {
         if (bridge != nullptr) {
-          bridge->serverClose();
+          if (!bridge->isServerClosed()) {
+            bridge->serverClose();
+          }
           // If the client is already closed, then the ClientCallback must
           // already be aware that the server sink side is complete so we
           // don't need to do anything. Otherwise, we need to close the client
@@ -166,8 +168,12 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
           while (true) {
             CoroConsumer c;
             if (bridge->serverWait(&c)) {
+              folly::CancellationCallback cb{
+                  co_await folly::coro::co_current_cancellation_token,
+                  [&]() { bridge->serverClose(); }};
               co_await c.wait();
             }
+            co_await folly::coro::co_safe_point;
 
             for (auto messages = bridge->serverGetMessages(); !messages.empty();
                  messages.pop()) {

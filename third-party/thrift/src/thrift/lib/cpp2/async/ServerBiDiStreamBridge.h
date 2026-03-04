@@ -18,11 +18,14 @@
 
 #include <variant>
 
+#include <folly/CancellationToken.h>
+#include <folly/OperationCancelled.h>
 #include <folly/Overload.h>
 #include <folly/Portability.h>
 #include <folly/Try.h>
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/Task.h>
+#include <folly/coro/WithCancellation.h>
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/StreamMessage.h>
@@ -64,6 +67,7 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
   }
 
   void onStreamCancel() override {
+    cancelSource_.requestCancellation();
     clientPush(StreamMessage::Cancel{});
     clientClose();
   }
@@ -130,8 +134,16 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
         continue;
       }
 
-      auto next = co_await folly::coro::co_awaitTry(input.next());
+      auto next = co_await folly::coro::co_awaitTry(
+          folly::coro::co_withCancellation(
+              bridge->cancelSource_.getToken(), input.next()));
       if (next.hasException()) {
+        // If the client cancelled the stream, onStreamCancel() already
+        // closed the client side — just exit without pushing an error.
+        if (next.exception()
+                .template is_compatible_with<folly::OperationCancelled>()) {
+          co_return;
+        }
         handleBiDiStreamError(bridge->contextStack_.get(), next.exception());
         bridge->serverPush(
             StreamMessage::PayloadOrError{
@@ -223,6 +235,7 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
   StreamClientCallback* clientCb_{nullptr};
   folly::EventBase* evb_{nullptr};
   std::shared_ptr<ContextStack> contextStack_;
+  folly::CancellationSource cancelSource_;
 };
 
 } // namespace apache::thrift::detail

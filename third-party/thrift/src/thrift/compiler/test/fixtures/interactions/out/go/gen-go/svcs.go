@@ -357,8 +357,55 @@ func (p *procFuncMyInteractionEncode) RunContext(ctx context.Context, reqStruct 
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncMyInteractionEncode) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncMyInteractionEncode) NewSinkElem() thrift.ReadableResult {
+    return newSinkMyInteractionEncode()
+}
+
+func (p *procFuncMyInteractionEncode) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespMyInteractionEncode()
+    retval, elemConsumerFunc, initialErr := p.handler.Encode(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Encode: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        return
+    }
+
+    firstResponse.Success = retval
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func(string, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield("", err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkMyInteractionEncode)
+            if !yield(*sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinalMyInteractionEncode()
+    if finalErr != nil {
+        internalErr := fmt.Errorf("Internal sink handler error Encode: %w", finalErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFinalResponse(x)
+        return
+    }
+
+    finalResponse.Success = finalResult
+    onFinalResponse(finalResponse)
 }
 
 func (p *MyInteractionProcessor) OnTermination() {
@@ -688,8 +735,55 @@ func (p *procFuncMyInteractionFastEncode) RunContext(ctx context.Context, reqStr
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncMyInteractionFastEncode) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncMyInteractionFastEncode) NewSinkElem() thrift.ReadableResult {
+    return newSinkMyInteractionFastEncode()
+}
+
+func (p *procFuncMyInteractionFastEncode) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespMyInteractionFastEncode()
+    retval, elemConsumerFunc, initialErr := p.handler.Encode(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Encode: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        return
+    }
+
+    firstResponse.Success = retval
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func(string, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield("", err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkMyInteractionFastEncode)
+            if !yield(*sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinalMyInteractionFastEncode()
+    if finalErr != nil {
+        internalErr := fmt.Errorf("Internal sink handler error Encode: %w", finalErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFinalResponse(x)
+        return
+    }
+
+    finalResponse.Success = finalResult
+    onFinalResponse(finalResponse)
 }
 
 func (p *MyInteractionFastProcessor) OnTermination() {

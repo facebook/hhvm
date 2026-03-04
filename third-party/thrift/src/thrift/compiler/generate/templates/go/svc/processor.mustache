@@ -166,9 +166,101 @@
 }{{!
 }}{{/let partial}}
 
-{{#let export partial server_func_sink |func svc|}}{{!
-}}func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+{{#let export partial server_func_sink |func svc| captures |types|}}
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) NewSinkElem() thrift.ReadableResult {
+    return newSink{{svc.go_name}}{{func.go_name}}()
+}
+
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    {{#if func.params.fields?}}
+    args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
+    {{/if func.params.fields?}}
+    firstResponse := newResp{{svc.go_name}}{{func.go_name}}()
+    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if func.sink_has_first_response?}}retval, {{/if func.sink_has_first_response?}}elemConsumerFunc, initialErr := p.handler.{{func.go_name}}({{!
+        }}ctx{{#if func.params.fields?}}, {{/if}}{{!
+        }}{{#each (array.enumerate func.params.fields with_last=true) as |index field last?|}}{{!
+          }}args.{{field.go_name}}{{!
+          }}{{#if (not last?)}}, {{/if (not last?)}}{{!
+        }}{{/each}})
+    if initialErr != nil {
+        {{#if func.exceptions?}}
+        switch v := initialErr.(type) {
+        {{#each func.exceptions as |ex|}}
+        case *{{#partial types.go_type type=ex.type}}:
+            firstResponse.{{ex.go_name}} = v
+            onFirstResponse(firstResponse)
+        {{/each}}
+        default:
+            internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        {{/if func.exceptions?}}
+        {{#if (not func.exceptions?)}}
+        internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        {{/if (not func.exceptions?)}}
+        return
+    }
+
+    {{#if func.creates_interaction?}}
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    {{/if func.creates_interaction?}}
+    {{#if func.sink_has_first_response?}}
+    firstResponse.{{func.retval_field_name}} = {{#if (not func.return_type.nilable?)}}&{{/if (not func.return_type.nilable?)}}retval
+    {{/if func.sink_has_first_response?}}
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func({{#if func.sink.elem_type.structured?}}*{{/if func.sink.elem_type.structured?}}{{#partial types.go_type type=func.sink.elem_type}}, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield({{#if func.sink.elem_type.structured?}}nil{{#else}}{{#partial types.go_zero_value type=func.sink.elem_type}}{{/if func.sink.elem_type.structured?}}, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sink{{svc.go_name}}{{func.go_name}})
+            if !yield({{#if (not func.sink.elem_type.nilable?)}}*{{/if (not func.sink.elem_type.nilable?)}}sinkWrapStruct.{{func.retval_field_name}}, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinal{{svc.go_name}}{{func.go_name}}()
+    if finalErr != nil {
+        {{#if func.sink_final_response_exceptions?}}
+        switch v := finalErr.(type) {
+        {{#each func.sink.final_response_exceptions as |ex|}}
+        case *{{#partial types.go_type type=ex.type}}:
+            finalResponse.{{ex.go_name}} = v
+            onFinalResponse(finalResponse)
+        {{/each}}
+        default:
+            internalErr := fmt.Errorf("Internal sink handler error {{func.go_name}}: %w", finalErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFinalResponse(x)
+        }
+        {{/if func.sink_final_response_exceptions?}}
+        {{#if (not func.sink_final_response_exceptions?)}}
+        internalErr := fmt.Errorf("Internal sink handler error {{func.go_name}}: %w", finalErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFinalResponse(x)
+        {{/if (not func.sink_final_response_exceptions?)}}
+        return
+    }
+
+    {{#if func.sink.final_response_type}}
+    finalResponse.{{func.retval_field_name}} = {{#if (not func.sink.final_response_type.nilable?)}}&{{/if (not func.sink.final_response_type.nilable?)}}finalResult
+    {{/if func.sink.final_response_type}}
+    onFinalResponse(finalResponse)
 }{{!
 }}{{/let partial}}
 

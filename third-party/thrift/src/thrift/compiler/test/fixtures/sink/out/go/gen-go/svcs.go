@@ -470,8 +470,54 @@ func (p *procFuncSinkServiceMethod) RunContext(ctx context.Context, reqStruct th
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncSinkServiceMethod) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncSinkServiceMethod) NewSinkElem() thrift.ReadableResult {
+    return newSinkSinkServiceMethod()
+}
+
+func (p *procFuncSinkServiceMethod) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespSinkServiceMethod()
+    elemConsumerFunc, initialErr := p.handler.Method(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Method: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(nil, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkSinkServiceMethod)
+            if !yield(sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinalSinkServiceMethod()
+    if finalErr != nil {
+        internalErr := fmt.Errorf("Internal sink handler error Method: %w", finalErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFinalResponse(x)
+        return
+    }
+
+    finalResponse.Success = finalResult
+    onFinalResponse(finalResponse)
 }
 
 type procFuncSinkServiceMethodAndReponse struct {
@@ -488,8 +534,55 @@ func (p *procFuncSinkServiceMethodAndReponse) RunContext(ctx context.Context, re
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncSinkServiceMethodAndReponse) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncSinkServiceMethodAndReponse) NewSinkElem() thrift.ReadableResult {
+    return newSinkSinkServiceMethodAndReponse()
+}
+
+func (p *procFuncSinkServiceMethodAndReponse) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespSinkServiceMethodAndReponse()
+    retval, elemConsumerFunc, initialErr := p.handler.MethodAndReponse(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing MethodAndReponse: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        return
+    }
+
+    firstResponse.Success = retval
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(nil, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkSinkServiceMethodAndReponse)
+            if !yield(sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinalSinkServiceMethodAndReponse()
+    if finalErr != nil {
+        internalErr := fmt.Errorf("Internal sink handler error MethodAndReponse: %w", finalErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFinalResponse(x)
+        return
+    }
+
+    finalResponse.Success = finalResult
+    onFinalResponse(finalResponse)
 }
 
 type procFuncSinkServiceMethodThrow struct {
@@ -506,8 +599,60 @@ func (p *procFuncSinkServiceMethodThrow) RunContext(ctx context.Context, reqStru
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncSinkServiceMethodThrow) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncSinkServiceMethodThrow) NewSinkElem() thrift.ReadableResult {
+    return newSinkSinkServiceMethodThrow()
+}
+
+func (p *procFuncSinkServiceMethodThrow) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespSinkServiceMethodThrow()
+    elemConsumerFunc, initialErr := p.handler.MethodThrow(ctx)
+    if initialErr != nil {
+        switch v := initialErr.(type) {
+        case *InitialException:
+            firstResponse.Ex = v
+            onFirstResponse(firstResponse)
+        default:
+            internalErr := fmt.Errorf("Internal error processing MethodThrow: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(nil, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkSinkServiceMethodThrow)
+            if !yield(sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinalSinkServiceMethodThrow()
+    if finalErr != nil {
+        internalErr := fmt.Errorf("Internal sink handler error MethodThrow: %w", finalErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFinalResponse(x)
+        return
+    }
+
+    finalResponse.Success = finalResult
+    onFinalResponse(finalResponse)
 }
 
 type procFuncSinkServiceMethodSinkThrow struct {
@@ -524,8 +669,54 @@ func (p *procFuncSinkServiceMethodSinkThrow) RunContext(ctx context.Context, req
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncSinkServiceMethodSinkThrow) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncSinkServiceMethodSinkThrow) NewSinkElem() thrift.ReadableResult {
+    return newSinkSinkServiceMethodSinkThrow()
+}
+
+func (p *procFuncSinkServiceMethodSinkThrow) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespSinkServiceMethodSinkThrow()
+    elemConsumerFunc, initialErr := p.handler.MethodSinkThrow(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing MethodSinkThrow: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(nil, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkSinkServiceMethodSinkThrow)
+            if !yield(sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinalSinkServiceMethodSinkThrow()
+    if finalErr != nil {
+        internalErr := fmt.Errorf("Internal sink handler error MethodSinkThrow: %w", finalErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFinalResponse(x)
+        return
+    }
+
+    finalResponse.Success = finalResult
+    onFinalResponse(finalResponse)
 }
 
 type procFuncSinkServiceMethodFinalThrow struct {
@@ -542,8 +733,60 @@ func (p *procFuncSinkServiceMethodFinalThrow) RunContext(ctx context.Context, re
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncSinkServiceMethodFinalThrow) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncSinkServiceMethodFinalThrow) NewSinkElem() thrift.ReadableResult {
+    return newSinkSinkServiceMethodFinalThrow()
+}
+
+func (p *procFuncSinkServiceMethodFinalThrow) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespSinkServiceMethodFinalThrow()
+    elemConsumerFunc, initialErr := p.handler.MethodFinalThrow(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing MethodFinalThrow: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(nil, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkSinkServiceMethodFinalThrow)
+            if !yield(sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinalSinkServiceMethodFinalThrow()
+    if finalErr != nil {
+        switch v := finalErr.(type) {
+        case *SinkException2:
+            finalResponse.Ex = v
+            onFinalResponse(finalResponse)
+        default:
+            internalErr := fmt.Errorf("Internal sink handler error MethodFinalThrow: %w", finalErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFinalResponse(x)
+        }
+        return
+    }
+
+    finalResponse.Success = finalResult
+    onFinalResponse(finalResponse)
 }
 
 type procFuncSinkServiceMethodBothThrow struct {
@@ -560,8 +803,60 @@ func (p *procFuncSinkServiceMethodBothThrow) RunContext(ctx context.Context, req
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncSinkServiceMethodBothThrow) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncSinkServiceMethodBothThrow) NewSinkElem() thrift.ReadableResult {
+    return newSinkSinkServiceMethodBothThrow()
+}
+
+func (p *procFuncSinkServiceMethodBothThrow) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespSinkServiceMethodBothThrow()
+    elemConsumerFunc, initialErr := p.handler.MethodBothThrow(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing MethodBothThrow: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(nil, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkSinkServiceMethodBothThrow)
+            if !yield(sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinalSinkServiceMethodBothThrow()
+    if finalErr != nil {
+        switch v := finalErr.(type) {
+        case *SinkException2:
+            finalResponse.Ex = v
+            onFinalResponse(finalResponse)
+        default:
+            internalErr := fmt.Errorf("Internal sink handler error MethodBothThrow: %w", finalErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFinalResponse(x)
+        }
+        return
+    }
+
+    finalResponse.Success = finalResult
+    onFinalResponse(finalResponse)
 }
 
 type procFuncSinkServiceMethodFast struct {
@@ -578,7 +873,53 @@ func (p *procFuncSinkServiceMethodFast) RunContext(ctx context.Context, reqStruc
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncSinkServiceMethodFast) RunStreamContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncSinkServiceMethodFast) NewSinkElem() thrift.ReadableResult {
+    return newSinkSinkServiceMethodFast()
+}
+
+func (p *procFuncSinkServiceMethodFast) RunSinkContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onFinalResponse func(thrift.WritableStruct),
+    onSinkError func(error),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespSinkServiceMethodFast()
+    elemConsumerFunc, initialErr := p.handler.MethodFast(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing MethodFast: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSeq := func(yield func(*SinkPayload, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(nil, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkSinkServiceMethodFast)
+            if !yield(sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    finalResult, finalErr := elemConsumerFunc(ctx, fbthriftTypedSeq)
+
+    finalResponse := newRespFinalSinkServiceMethodFast()
+    if finalErr != nil {
+        internalErr := fmt.Errorf("Internal sink handler error MethodFast: %w", finalErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFinalResponse(x)
+        return
+    }
+
+    finalResponse.Success = finalResult
+    onFinalResponse(finalResponse)
 }
 

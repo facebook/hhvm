@@ -876,6 +876,103 @@ func TestProcessorScenarios(t *testing.T) {
 		err = summerChannel.Close()
 		require.NoError(t, err)
 	})
+	t.Run("sink_only", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		sinkCtx, sinkCancel := context.WithCancel(context.Background())
+		defer sinkCancel()
+		sinkCallback, err := client.SinkOnly(sinkCtx)
+		require.NoError(t, err)
+
+		sinkSeq := func(yield func(int32, error) bool) {
+			for i := int32(1); i <= 5; i++ {
+				if !yield(i, nil) {
+					return
+				}
+			}
+		}
+		finalResponse, err := sinkCallback(sinkSeq)
+		require.NoError(t, err)
+		require.EqualValues(t, 15, finalResponse) // 1+2+3+4+5 = 15
+	})
+	t.Run("response_and_sink", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		sinkCtx, sinkCancel := context.WithCancel(context.Background())
+		defer sinkCancel()
+		firstResponse, sinkCallback, err := client.ResponseAndSink(sinkCtx)
+		require.NoError(t, err)
+		require.EqualValues(t, 123245, firstResponse)
+
+		sinkSeq := func(yield func(int32, error) bool) {
+			for i := int32(1); i <= 5; i++ {
+				if !yield(i, nil) {
+					return
+				}
+			}
+		}
+		finalResponse, err := sinkCallback(sinkSeq)
+		require.NoError(t, err)
+		require.EqualValues(t, 15, finalResponse) // 1+2+3+4+5 = 15
+	})
+	t.Run("response_and_sink_with_declared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		sinkCtx, sinkCancel := context.WithCancel(context.Background())
+		defer sinkCancel()
+		_, _, err := client.ResponseAndSinkWithDeclaredException(sinkCtx)
+		require.Error(t, err)
+		var dummyEx *dummyif.DummyException
+		require.ErrorAs(t, err, &dummyEx)
+	})
+	t.Run("response_and_sink_with_undeclared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		sinkCtx, sinkCancel := context.WithCancel(context.Background())
+		defer sinkCancel()
+		_, _, err := client.ResponseAndSinkWithUndeclaredException(sinkCtx)
+		require.Error(t, err)
+		require.ErrorContains(t, err, "undeclared exception")
+	})
+	t.Run("sink_with_declared_final_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		sinkCtx, sinkCancel := context.WithCancel(context.Background())
+		defer sinkCancel()
+		sinkCallback, err := client.SinkWithDeclaredFinalException(sinkCtx)
+		require.NoError(t, err)
+
+		sinkSeq := func(yield func(int32, error) bool) {
+			for i := int32(1); i <= 3; i++ {
+				if !yield(i, nil) {
+					return
+				}
+			}
+		}
+		_, err = sinkCallback(sinkSeq)
+		require.Error(t, err)
+		var dummyEx *dummyif.DummyException
+		require.ErrorAs(t, err, &dummyEx)
+	})
+	t.Run("sink_with_undeclared_final_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+
+		sinkCtx, sinkCancel := context.WithCancel(context.Background())
+		defer sinkCancel()
+		sinkCallback, err := client.SinkWithUndeclaredFinalException(sinkCtx)
+		require.NoError(t, err)
+
+		sinkSeq := func(yield func(int32, error) bool) {
+			for i := int32(1); i <= 3; i++ {
+				if !yield(i, nil) {
+					return
+				}
+			}
+		}
+		_, err = sinkCallback(sinkSeq)
+		require.Error(t, err)
+		require.ErrorContains(t, err, "undeclared exception")
+	})
 }
 
 // TestRocketServerFallbackToHeader tests that when a Rocket server receives a header

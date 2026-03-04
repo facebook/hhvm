@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"fmt"
+	"iter"
 	"math"
 	"net"
 	"runtime"
@@ -163,6 +164,7 @@ func (s *rocketServer) acceptor(_ context.Context, setup payload.SetupPayload, s
 		rsocket.RequestResponse(socket.requestResponse),
 		rsocket.FireAndForget(socket.fireAndForget),
 		rsocket.RequestStream(socket.requestStream),
+		rsocket.RequestChannel(socket.requestChannel),
 	), nil
 }
 
@@ -633,6 +635,261 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 			pfuncStream.RunStreamContext(ctx, argStruct, onFirstResponse, onStreamNext, onStreamComplete)
 		},
 	)
+}
+
+func (s *rocketServerSocket) requestChannel(request payload.Payload, requests flux.Flux) flux.Flux {
+	// TODO: this clone helps prevent a race-condition where the payload gets
+	// released by the underlying rsocket layer before we are done with it.
+	request = payload.Clone(request)
+
+	type ProcessorFunctionSink interface {
+		RunSinkContext(
+			ctx context.Context,
+			reqStruct ReadableStruct,
+			onFirstResponse func(WritableStruct),
+			onFinalResponse func(WritableStruct),
+			onSinkError func(error),
+			sinkSeq iter.Seq2[ReadableStruct, error],
+		)
+		NewSinkElem() ReadableResult
+	}
+
+	// Decode initial request metadata
+	metadata := rpcmetadata.NewRequestRpcMetadata()
+	if err := rocket.DecodePayloadMetadata(request, metadata); err != nil {
+		s.observer.ConnDropped()
+		s.observer.TaskKilled()
+		return flux.Error(err)
+	}
+
+	rpcFuncName := metadata.GetName()
+	protoID := types.ProtocolID(metadata.GetProtocol())
+	responseCompressionAlgo := rocket.CompressionAlgorithmFromCompressionConfig(metadata.GetCompressionConfig())
+
+	protocol, err := newProtocolBufferFromRequest(request.Data(), metadata, s.observer)
+	if err != nil {
+		s.observer.ConnDropped()
+		s.observer.TaskKilled()
+		return flux.Error(err)
+	}
+
+	s.observer.ReceivedRequest()
+	s.observer.ReceivedRequestForFunction(rpcFuncName)
+
+	pfunc, exists := s.proc.ProcessorFunctionMap()[rpcFuncName]
+	if !exists {
+		return flux.Error(fmt.Errorf("no such function: %q", rpcFuncName))
+	}
+
+	pfuncSink, ok := pfunc.(ProcessorFunctionSink)
+	if !ok {
+		return flux.Error(fmt.Errorf("not a sink function: %q", rpcFuncName))
+	}
+
+	argStruct := pfunc.NewReqArgs()
+	if err := argStruct.Read(protocol); err != nil {
+		return flux.Error(err)
+	}
+	if err := protocol.ReadMessageEnd(); err != nil {
+		return flux.Error(err)
+	}
+
+	sinkElemChan := make(chan ReadableStruct, types.DefaultStreamBufferSize)
+	sinkErrChan := make(chan error, 1)
+
+	sinkSeq := func(yield func(ReadableStruct, error) bool) {
+		for {
+			select {
+			case elem, ok := <-sinkElemChan:
+				if !ok {
+					return
+				}
+				if !yield(elem, nil) {
+					return
+				}
+			case err := <-sinkErrChan:
+				yield(nil, err)
+				return
+			}
+		}
+	}
+
+	return flux.Create(func(ctx context.Context, sink flux.Sink) {
+		firstResponseQueued := make(chan struct{})
+
+		makePayload := func(respStruct WritableStruct, isFirstResponse bool) (payload.Payload, error) {
+			respProtocol, err := newProtocolBuffer(protoID, nil)
+			if err != nil {
+				return nil, err
+			}
+			if err := sendWritableStruct(respProtocol, rpcFuncName, types.REPLY, 0, respStruct); err != nil {
+				return nil, err
+			}
+			dataBytes := respProtocol.Bytes()
+			headers := respProtocol.getRequestHeaders()
+
+			// Build exception metadata if applicable
+			var exceptionMetadata *rpcmetadata.PayloadExceptionMetadataBase
+			if appEx, ok := respStruct.(*types.ApplicationException); ok {
+				exceptionMetadata = rocket.NewPayloadExceptionMetadataBase(
+					"ApplicationException",
+					appEx.Error(),
+					rocket.RocketExceptionAppUnknown,
+					rpcmetadata.ErrorKind_UNSPECIFIED,
+					rpcmetadata.ErrorBlame_UNSPECIFIED,
+					rpcmetadata.ErrorSafety_UNSPECIFIED,
+				)
+				dataBytes = nil
+			} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
+				declaredErr := streamResult.Exception()
+				exceptionMetadata = rocket.NewPayloadExceptionMetadataBase(
+					declaredErr.TypeName(),
+					declaredErr.Error(),
+					rocket.RocketExceptionDeclared,
+					rpcmetadata.ErrorKind_UNSPECIFIED,
+					rpcmetadata.ErrorBlame_UNSPECIFIED,
+					rpcmetadata.ErrorSafety_UNSPECIFIED,
+				)
+			}
+
+			if isFirstResponse {
+				loadMetricPtr := (*int64)(nil)
+				if metadata.IsSetLoadMetric() {
+					loadMetricPtr = Pointerize(int64(s.loadFn()))
+				}
+				if appException, ok := respStruct.(*types.ApplicationException); ok {
+					return rocket.EncodeResponseApplicationErrorPayload(
+						appException,
+						headers,
+						responseCompressionAlgo,
+						loadMetricPtr,
+					)
+				}
+				return rocket.EncodeResponsePayload(
+					headers,
+					responseCompressionAlgo,
+					loadMetricPtr,
+					dataBytes,
+				)
+			}
+
+			// Final response encoding
+			payloadMetadata := rpcmetadata.NewPayloadMetadata()
+			if exceptionMetadata != nil {
+				payloadMetadata.SetExceptionMetadata(exceptionMetadata)
+			} else {
+				payloadMetadata.SetResponseMetadata(rpcmetadata.NewPayloadResponseMetadata())
+			}
+
+			streamMetadata := rpcmetadata.NewStreamPayloadMetadata().
+				SetOtherMetadata(headers).
+				SetCompression(&responseCompressionAlgo).
+				SetPayloadMetadata(payloadMetadata)
+
+			return rocket.EncodePayloadMetadataAndData(streamMetadata, dataBytes, responseCompressionAlgo)
+		}
+
+		onFirstResponse := func(respStruct WritableStruct) {
+			respPayload, err := makePayload(respStruct, true)
+			if err != nil {
+				s.log("rocketServer requestChannel makePayload error: %v", err)
+				return
+			}
+			sink.Next(respPayload)
+			close(firstResponseQueued)
+		}
+
+		onFinalResponse := func(respStruct WritableStruct) {
+			finalPayload, err := makePayload(respStruct, false)
+			if err != nil {
+				s.log("rocketServer requestChannel makePayload error: %v", err)
+				return
+			}
+			sink.Next(rsocket.NewFinalPayload(finalPayload))
+			sink.Complete()
+		}
+
+		onSinkError := sink.Error
+
+		// Start the sink processor in a goroutine.
+		// It will call onFirstResponse which queues FirstResponse to the sink.
+		// Then start the requests subscription after FirstResponse is queued.
+		go pfuncSink.RunSinkContext(ctx, argStruct, onFirstResponse, onFinalResponse, onSinkError, sinkSeq)
+
+		// Start a separate goroutine that waits for FirstResponse to be queued,
+		// then subscribes to requests (triggers RequestN to client).
+		// This matches the C++ implementation where bridge.start() is scheduled
+		// AFTER onFirstResponse is called synchronously.
+
+		// Wait for FirstResponse to be queued to the sink
+		<-firstResponseQueued
+
+		// Now subscribe to sink elements from the requests flux.
+		// This triggers RequestN to the client for more payloads.
+		requests.
+			DoOnNext(func(msg payload.Payload) error {
+				msg = payload.Clone(msg)
+
+				// All items from requests flux are sink elements
+				sinkPayloadMetadata := rpcmetadata.NewStreamPayloadMetadata()
+				if err := rocket.DecodePayloadMetadata(msg, sinkPayloadMetadata); err != nil {
+					s.log("rocketServer requestChannel decode sink element metadata error: %v", err)
+					return nil
+				}
+
+				if sinkPayloadMetadata.IsSetPayloadMetadata() {
+					if sinkPayloadMetadata.PayloadMetadata.IsSetExceptionMetadata() {
+						exceptionMetadata := sinkPayloadMetadata.PayloadMetadata.ExceptionMetadata
+						if exceptionMetadata.IsSetMetadata() {
+							if exceptionMetadata.Metadata.IsSetAppUnknownException() {
+								appEx := types.NewApplicationException(
+									types.UNKNOWN_APPLICATION_EXCEPTION,
+									exceptionMetadata.GetWhatUTF8(),
+								)
+								sinkErrChan <- appEx
+								return nil
+							}
+						}
+					}
+				}
+
+				compression := rpcmetadata.CompressionAlgorithm_NONE
+				if sinkPayloadMetadata.Compression != nil {
+					compression = *sinkPayloadMetadata.Compression
+				}
+				dataBytes, err := rocket.MaybeDecompress(msg.Data(), compression)
+				if err != nil {
+					s.log("rocketServer requestChannel decompress sink element error: %v", err)
+					return nil
+				}
+
+				elemProtocol, err := newProtocolBuffer(protoID, dataBytes)
+				if err != nil {
+					s.log("rocketServer requestChannel newProtocolBuffer error: %v", err)
+					return nil
+				}
+
+				sinkElemStruct := pfuncSink.NewSinkElem()
+				if err := sinkElemStruct.Read(elemProtocol); err != nil {
+					s.log("rocketServer requestChannel read sink element error: %v", err)
+					return nil
+				} else if sinkEx := sinkElemStruct.Exception(); sinkEx != nil {
+					sinkErrChan <- sinkEx
+					return nil
+				}
+
+				sinkElemChan <- sinkElemStruct
+				return nil
+			}).
+			DoOnError(func(err error) {
+				sinkErrChan <- err
+				close(sinkElemChan)
+			}).
+			DoOnComplete(func() {
+				close(sinkElemChan)
+			}).
+			Subscribe(ctx)
+	})
 }
 
 func newProtocolBufferFromRequest(payloadDataBytes []byte, metadata *rpcmetadata.RequestRpcMetadata, observer ServerObserver) (*protocolBuffer, error) {

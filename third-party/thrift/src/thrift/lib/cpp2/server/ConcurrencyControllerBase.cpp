@@ -16,7 +16,6 @@
 
 #include <folly/Indestructible.h>
 #include <folly/Synchronized.h>
-#include <folly/synchronization/CallOnce.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerBase.h>
 
 namespace apache::thrift {

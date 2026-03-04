@@ -193,21 +193,29 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
         parse ~is_ctx:false hint;
         append "...")
   and parse_fun hf_param_tys hf_param_info variadic =
-    (* TODO check if other modifiers are needed *)
-    let hf_param_kinds =
+    let hf_param_modifiers =
       List.map hf_param_info ~f:(fun i ->
-          Option.bind i ~f:(fun i ->
-              match i.Aast.hfparam_kind with
-              | Ast_defs.Pnormal -> None
-              | Ast_defs.Pinout p -> Some (Ast_defs.Pinout p)))
+          Option.value_map i ~default:(None, false, false, false) ~f:(fun i ->
+              let inout =
+                match i.Aast.hfparam_kind with
+                | Ast_defs.Pnormal -> None
+                | Ast_defs.Pinout p -> Some (Ast_defs.Pinout p)
+              in
+              let readonly = Option.is_some i.Aast.hfparam_readonlyness in
+              let named = Option.is_some i.Aast.hfparam_named in
+              let optional = Option.is_some i.Aast.hfparam_optional in
+              (inout, readonly, named, optional)))
     in
-    match List.zip_exn hf_param_kinds hf_param_tys with
+    match List.zip_exn hf_param_modifiers hf_param_tys with
     | [] -> parse_variadic ~first:true variadic
     | ats ->
       parse_gen_seq ~sep:", " ~f:parse_annotated_hint ats;
       parse_variadic ~first:false variadic
-  and parse_annotated_hint (a, hint) =
-    Option.iter a ~f:(fun _ -> append "inout ");
+  and parse_annotated_hint ((inout, readonly, named, optional), hint) =
+    if named then append "named ";
+    if optional then append "optional ";
+    Option.iter inout ~f:(fun _ -> append "inout ");
+    if readonly then append "readonly ";
     parse ~is_ctx:false hint
   in
   parse ~is_ctx hint;

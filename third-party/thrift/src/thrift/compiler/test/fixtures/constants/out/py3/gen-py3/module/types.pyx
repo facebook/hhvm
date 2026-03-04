@@ -64,12 +64,12 @@ from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i32,
-    Map__string_i32,
-    List__Map__string_i32,
     Map__string_string,
-    List__Company,
     List__City,
     Map__Company_List__City,
+    Map__string_i32,
+    List__Map__string_i32,
+    List__Company,
     List__Range,
     List__Internship,
     List__string,
@@ -1313,6 +1313,75 @@ cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
         py_list.append(c_vec[idx])
     return List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
+cdef cmap[string,string] Map__string_string__make_instance(object items) except *:
+    cdef cmap[string,string] c_inst
+    cdef string c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, str):
+            raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+
+        c_inst[c_key] = item.encode('UTF-8')
+    return cmove(c_inst)
+
+cdef object Map__string_string__from_cpp(const cmap[string,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,string]] iter = __map_iter[cmap[string,string]](c_map)
+    cdef string ckey
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = __init_unicode_from_cpp(cval)
+    return Map__string_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef vector[_module_cbindings.cCity] List__City__make_instance(object items) except *:
+    cdef vector[_module_cbindings.cCity] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, City):
+            raise TypeError(f"{item!r} is not of type City")
+        c_inst.push_back(<_module_cbindings.cCity><int>item)
+    return cmove(c_inst)
+
+cdef object List__City__from_cpp(const vector[_module_cbindings.cCity]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(translate_cpp_enum_to_python(City, <int> c_vec[idx]))
+    return List__City(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]] Map__Company_List__City__make_instance(object items) except *:
+    cdef cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]] c_inst
+    cdef _module_cbindings.cCompany c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, Company):
+            raise TypeError(f"{key!r} is not of type Company")
+        c_key = <_module_cbindings.cCompany><int>key
+        if item is None:
+            raise TypeError("None is not of type _typing.Sequence[City]")
+        if not isinstance(item, List__City):
+            item = List__City(item)
+
+        c_inst[c_key] = List__City__make_instance(item)
+    return cmove(c_inst)
+
+cdef object Map__Company_List__City__from_cpp(const cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]] iter = __map_iter[cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]](c_map)
+    cdef _module_cbindings.cCompany ckey
+    cdef vector[_module_cbindings.cCity] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[translate_cpp_enum_to_python(Company, <int> ckey)] = List__City__from_cpp(cval)
+    return Map__Company_List__City(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
 cdef cmap[string,cint32_t] Map__string_i32__make_instance(object items) except *:
     cdef cmap[string,cint32_t] c_inst
     cdef string c_key
@@ -1358,31 +1427,6 @@ cdef object List__Map__string_i32__from_cpp(const vector[cmap[string,cint32_t]]&
         py_list.append(Map__string_i32__from_cpp(c_vec[idx]))
     return List__Map__string_i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
-cdef cmap[string,string] Map__string_string__make_instance(object items) except *:
-    cdef cmap[string,string] c_inst
-    cdef string c_key
-    if items is None:
-        return cmove(c_inst)
-    for key, item in items.items():
-        if not isinstance(key, str):
-            raise TypeError(f"{key!r} is not of type str")
-        c_key = key.encode('UTF-8')
-        if not isinstance(item, str):
-            raise TypeError(f"{item!r} is not of type str")
-
-        c_inst[c_key] = item.encode('UTF-8')
-    return cmove(c_inst)
-
-cdef object Map__string_string__from_cpp(const cmap[string,string]& c_map) except *:
-    cdef dict py_items = {}
-    cdef __map_iter[cmap[string,string]] iter = __map_iter[cmap[string,string]](c_map)
-    cdef string ckey
-    cdef string cval
-    for i in range(c_map.size()):
-        iter.genNextKeyVal(ckey, cval)
-        py_items[__init_unicode_from_cpp(ckey)] = __init_unicode_from_cpp(cval)
-    return Map__string_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
-
 cdef vector[_module_cbindings.cCompany] List__Company__make_instance(object items) except *:
     cdef vector[_module_cbindings.cCompany] c_inst
     if items is None:
@@ -1399,50 +1443,6 @@ cdef object List__Company__from_cpp(const vector[_module_cbindings.cCompany]& c_
     for idx in range(c_vec.size()):
         py_list.append(translate_cpp_enum_to_python(Company, <int> c_vec[idx]))
     return List__Company(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
-cdef vector[_module_cbindings.cCity] List__City__make_instance(object items) except *:
-    cdef vector[_module_cbindings.cCity] c_inst
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if not isinstance(item, City):
-            raise TypeError(f"{item!r} is not of type City")
-        c_inst.push_back(<_module_cbindings.cCity><int>item)
-    return cmove(c_inst)
-
-cdef object List__City__from_cpp(const vector[_module_cbindings.cCity]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(translate_cpp_enum_to_python(City, <int> c_vec[idx]))
-    return List__City(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
-cdef cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]] Map__Company_List__City__make_instance(object items) except *:
-    cdef cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]] c_inst
-    cdef _module_cbindings.cCompany c_key
-    if items is None:
-        return cmove(c_inst)
-    for key, item in items.items():
-        if not isinstance(key, Company):
-            raise TypeError(f"{key!r} is not of type Company")
-        c_key = <_module_cbindings.cCompany><int>key
-        if item is None:
-            raise TypeError("None is not of type _typing.Sequence[City]")
-        if not isinstance(item, List__City):
-            item = List__City(item)
-
-        c_inst[c_key] = List__City__make_instance(item)
-    return cmove(c_inst)
-
-cdef object Map__Company_List__City__from_cpp(const cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]& c_map) except *:
-    cdef dict py_items = {}
-    cdef __map_iter[cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]] iter = __map_iter[cmap[_module_cbindings.cCompany,vector[_module_cbindings.cCity]]](c_map)
-    cdef _module_cbindings.cCompany ckey
-    cdef vector[_module_cbindings.cCity] cval
-    for i in range(c_map.size()):
-        iter.genNextKeyVal(ckey, cval)
-        py_items[translate_cpp_enum_to_python(Company, <int> ckey)] = List__City__from_cpp(cval)
-    return Map__Company_List__City(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 cdef vector[_module_cbindings.cRange] List__Range__make_instance(object items) except *:
     cdef vector[_module_cbindings.cRange] c_inst

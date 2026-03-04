@@ -6,12 +6,12 @@
 #
 from module.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i32,
-    Map__string_i32,
-    List__Map__string_i32,
     Map__string_string,
-    List__Company,
     List__City,
     Map__Company_List__City,
+    Map__string_i32,
+    List__Map__string_i32,
+    List__Company,
     List__Range,
     List__Internship,
     List__string,

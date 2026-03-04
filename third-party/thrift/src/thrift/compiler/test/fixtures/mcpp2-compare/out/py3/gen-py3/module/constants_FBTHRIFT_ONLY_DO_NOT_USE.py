@@ -59,11 +59,11 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__Set__Set__bool,
     Map__string_folly_IOBuf__binary,
     Map__string_std_unique_ptr_folly_IOBuf__binary,
-    Map__i32_string,
-    List__Map__string_i32,
     Map__i16_string,
     List__Map__i16_string,
     List__MyStruct,
+    Map__i32_string,
+    List__Map__string_i32,
 )
 
 aBool = True

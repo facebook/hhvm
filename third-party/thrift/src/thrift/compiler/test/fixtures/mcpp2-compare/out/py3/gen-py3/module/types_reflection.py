@@ -2509,20 +2509,6 @@ def get_reflection__Map__string_std_unique_ptr_folly_IOBuf__binary() -> __MapSpe
         value_kind=__NumberType.NOT_A_NUMBER,
     )
 
-def get_reflection__Map__i32_string() -> __MapSpec:
-    return __MapSpec._fbthrift_create(
-        key=int,
-        key_kind=__NumberType.I32,
-        value=str,
-        value_kind=__NumberType.NOT_A_NUMBER,
-    )
-
-def get_reflection__List__Map__string_i32() -> __ListSpec :
-    return __ListSpec._fbthrift_create(
-        value=_module_types.Map__string_i32,
-        kind=__NumberType.NOT_A_NUMBER,
-    )
-
 def get_reflection__Map__i16_string() -> __MapSpec:
     return __MapSpec._fbthrift_create(
         key=int,
@@ -2540,6 +2526,20 @@ def get_reflection__List__Map__i16_string() -> __ListSpec :
 def get_reflection__List__MyStruct() -> __ListSpec :
     return __ListSpec._fbthrift_create(
         value=_module_types.MyStruct,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Map__i32_string() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=str,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__List__Map__string_i32() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.Map__string_i32,
         kind=__NumberType.NOT_A_NUMBER,
     )
 

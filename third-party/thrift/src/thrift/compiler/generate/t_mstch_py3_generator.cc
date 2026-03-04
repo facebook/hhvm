@@ -234,12 +234,6 @@ class py3_generator_context {
     return custom_cpp_types_;
   }
 
-  const std::unordered_set<std::string>& seen_type_names(
-      const t_program& program) const {
-    check_root_program(program);
-    return seen_type_names_;
-  }
-
   const std::map<std::tuple<std::string, bool>, const t_function*>&
   unique_functions_by_return_type(const t_program& program) const {
     check_root_program(program);
@@ -263,10 +257,6 @@ class py3_generator_context {
     check_root_program(program);
     return response_and_stream_functions_;
   }
-
-  // TODO(T256504508): Temporary step until all usages are migrated into
-  // `py3_generator_context`, at which point this should be private
-  std::string visit_type(const t_type* orig_type, bool fromTypeDef);
 
   void visit_function(const t_function& func);
 
@@ -296,7 +286,12 @@ class py3_generator_context {
             }
           }
         });
-    visitor.add_field_visitor([this](const context&, const t_field& field) {
+    visitor.add_field_visitor([this](const context& ctx, const t_field& field) {
+      if (&ctx.program() != root_program_ || is_hidden(field) ||
+          is_hidden(static_cast<const t_structured&>(*ctx.parent()))) {
+        return;
+      }
+      visit_type(&field.type().deref(), /*fromTypeDef=*/false);
       switch (gen::cpp::find_ref_type(field)) {
         case gen::cpp::reference_type::unique: {
           field_cpp_kinds_[&field] = field_cpp_kind::unique_ptr;
@@ -331,6 +326,19 @@ class py3_generator_context {
         [this](const context& ctx, const t_function& func) {
           if (&ctx.program() == root_program_ && !is_hidden(func)) {
             visit_function(func);
+          }
+        });
+    visitor.add_const_visitor(
+        [this](const context& ctx, const t_const& constant) {
+          if (&ctx.program() == root_program_) {
+            visit_type(&constant.type_ref().deref(), /*fromTypeDef=*/false);
+          }
+        });
+    visitor.add_typedef_visitor(
+        [this](const context& ctx, const t_typedef& td) {
+          if (&ctx.program() == root_program_ && !is_hidden(td) &&
+              !is_hidden(*td.get_true_type())) {
+            visit_type(&td, /*fromTypeDef=*/true);
           }
         });
   }
@@ -368,6 +376,8 @@ class py3_generator_context {
           "This property is only implemented for the root program");
     }
   }
+
+  std::string visit_type(const t_type* orig_type, bool fromTypeDef);
 
   void add_typedef_namespace(const t_type* type) {
     const t_program* prog = type->program();
@@ -417,9 +427,6 @@ class py3_mstch_program : public mstch_program {
             {"program:filtered_typedefs",
              &py3_mstch_program::filtered_typedefs},
         });
-    visit_types_for_objects();
-    visit_types_for_constants();
-    visit_types_for_typedefs();
   }
 
   mstch::node getContainerTypes() {
@@ -491,36 +498,6 @@ class py3_mstch_program : public mstch_program {
   }
 
  protected:
-  void visit_types_for_objects() {
-    for (t_structured* object : program_->structured_definitions()) {
-      if (is_hidden(*object)) {
-        continue;
-      }
-      for (const auto& field : object->fields()) {
-        if (is_hidden(field)) {
-          continue;
-        }
-        generator_context_.visit_type(
-            field.type().get_type(), /*fromTypeDef=*/false);
-      }
-    }
-  }
-
-  void visit_types_for_constants() {
-    for (const auto& constant : program_->consts()) {
-      generator_context_.visit_type(constant->type(), /*fromTypeDef=*/false);
-    }
-  }
-
-  void visit_types_for_typedefs() {
-    for (const auto* typedef_def : program_->typedefs()) {
-      if (is_hidden(*typedef_def) || is_hidden(*typedef_def->get_true_type())) {
-        continue;
-      }
-      generator_context_.visit_type(typedef_def, /*fromTypeDef=*/true);
-    }
-  }
-
   mstch::node filtered_objects() {
     std::vector<const t_structured*> visible;
     visible.reserve(program_->structured_definitions().size());
@@ -662,12 +639,16 @@ std::string py3_generator_context::visit_type(
   if (flatName.empty()) {
     std::string extra;
     if (const t_list* list = trueType->try_as<t_list>()) {
-      extra = "List__" + visit_type(list->elem_type().get_type(), fromTypeDef);
+      extra = fmt::format(
+          "List__{}", visit_type(&list->elem_type().deref(), fromTypeDef));
     } else if (const t_set* set = trueType->try_as<t_set>()) {
-      extra = "Set__" + visit_type(set->elem_type().get_type(), fromTypeDef);
+      extra = fmt::format(
+          "Set__{}", visit_type(&set->elem_type().deref(), fromTypeDef));
     } else if (const t_map* map = trueType->try_as<t_map>()) {
-      extra = "Map__" + visit_type(map->key_type().get_type(), fromTypeDef) +
-          "_" + visit_type(map->val_type().get_type(), fromTypeDef);
+      extra = fmt::format(
+          "Map__{}_{}",
+          visit_type(&map->key_type().deref(), fromTypeDef),
+          visit_type(&map->val_type().deref(), fromTypeDef));
     } else if (trueType->is_binary()) {
       extra = "binary";
     } else {
@@ -682,8 +663,7 @@ std::string py3_generator_context::visit_type(
   if (fromTypeDef) {
     add_typedef_namespace(trueType);
   }
-  bool inserted = seen_type_names_.insert(flatName).second;
-  if (inserted) {
+  if (seen_type_names_.insert(flatName).second) {
     if (trueType->is<t_container>()) {
       container_types_.push_back(
           hasPy3EnableCppAdapterAnnot ? orig_type : trueType);

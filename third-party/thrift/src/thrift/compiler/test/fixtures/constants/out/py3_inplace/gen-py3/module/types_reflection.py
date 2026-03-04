@@ -423,32 +423,12 @@ def get_reflection__List__i32() -> __ListSpec :
         kind=__NumberType.I32,
     )
 
-def get_reflection__Map__string_i32() -> __MapSpec:
-    return __MapSpec._fbthrift_create(
-        key=str,
-        key_kind=__NumberType.NOT_A_NUMBER,
-        value=int,
-        value_kind=__NumberType.I32,
-    )
-
-def get_reflection__List__Map__string_i32() -> __ListSpec :
-    return __ListSpec._fbthrift_create(
-        value=_module_types.Map__string_i32,
-        kind=__NumberType.NOT_A_NUMBER,
-    )
-
 def get_reflection__Map__string_string() -> __MapSpec:
     return __MapSpec._fbthrift_create(
         key=str,
         key_kind=__NumberType.NOT_A_NUMBER,
         value=str,
         value_kind=__NumberType.NOT_A_NUMBER,
-    )
-
-def get_reflection__List__Company() -> __ListSpec :
-    return __ListSpec._fbthrift_create(
-        value=_module_types.Company,
-        kind=__NumberType.NOT_A_NUMBER,
     )
 
 def get_reflection__List__City() -> __ListSpec :
@@ -463,6 +443,26 @@ def get_reflection__Map__Company_List__City() -> __MapSpec:
         key_kind=__NumberType.NOT_A_NUMBER,
         value=_module_types.List__City,
         value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Map__string_i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=int,
+        value_kind=__NumberType.I32,
+    )
+
+def get_reflection__List__Map__string_i32() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.Map__string_i32,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__List__Company() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.Company,
+        kind=__NumberType.NOT_A_NUMBER,
     )
 
 def get_reflection__List__Range() -> __ListSpec :

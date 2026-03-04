@@ -607,12 +607,6 @@ cdef object Map__string_folly_IOBuf__binary__from_cpp(const cmap[string,_fbthrif
 cdef cmap[string,unique_ptr[_fbthrift_iobuf.cIOBuf]] Map__string_std_unique_ptr_folly_IOBuf__binary__make_instance(object items) except *
 cdef object Map__string_std_unique_ptr_folly_IOBuf__binary__from_cpp(const cmap[string,unique_ptr[_fbthrift_iobuf.cIOBuf]]&) except *
 
-cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *
-cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]&) except *
-
-cdef vector[cmap[string,cint32_t]] List__Map__string_i32__make_instance(object items) except *
-cdef object List__Map__string_i32__from_cpp(const vector[cmap[string,cint32_t]]&) except *
-
 cdef cmap[cint16_t,string] Map__i16_string__make_instance(object items) except *
 cdef object Map__i16_string__from_cpp(const cmap[cint16_t,string]&) except *
 
@@ -621,5 +615,11 @@ cdef object List__Map__i16_string__from_cpp(const vector[cmap[cint16_t,string]]&
 
 cdef vector[_module_cbindings.cMyStruct] List__MyStruct__make_instance(object items) except *
 cdef object List__MyStruct__from_cpp(const vector[_module_cbindings.cMyStruct]&) except *
+
+cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *
+cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]&) except *
+
+cdef vector[cmap[string,cint32_t]] List__Map__string_i32__make_instance(object items) except *
+cdef object List__Map__string_i32__from_cpp(const vector[cmap[string,cint32_t]]&) except *
 
 

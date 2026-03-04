@@ -116,11 +116,11 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__Set__Set__bool,
     Map__string_folly_IOBuf__binary,
     Map__string_std_unique_ptr_folly_IOBuf__binary,
-    Map__i32_string,
-    List__Map__string_i32,
     Map__i16_string,
     List__Map__i16_string,
     List__MyStruct,
+    Map__i32_string,
+    List__Map__string_i32,
 )
 
 _fbthrift__module_name__ = "module.types"
@@ -4711,50 +4711,6 @@ cdef object Map__string_std_unique_ptr_folly_IOBuf__binary__from_cpp(const cmap[
         py_items[__init_unicode_from_cpp(ckey)] = _fbthrift_iobuf.IOBuf.create(cval.get().get(), self)
     return Map__string_std_unique_ptr_folly_IOBuf__binary(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
-cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *:
-    cdef cmap[cint32_t,string] c_inst
-    cdef cint32_t c_key
-    if items is None:
-        return cmove(c_inst)
-    for key, item in items.items():
-        if not isinstance(key, int):
-            raise TypeError(f"{key!r} is not of type int")
-        c_key = <cint32_t> key
-        if not isinstance(item, str):
-            raise TypeError(f"{item!r} is not of type str")
-
-        c_inst[c_key] = item.encode('UTF-8')
-    return cmove(c_inst)
-
-cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]& c_map) except *:
-    cdef dict py_items = {}
-    cdef __map_iter[cmap[cint32_t,string]] iter = __map_iter[cmap[cint32_t,string]](c_map)
-    cdef cint32_t ckey = 0
-    cdef string cval
-    for i in range(c_map.size()):
-        iter.genNextKeyVal(ckey, cval)
-        py_items[ckey] = __init_unicode_from_cpp(cval)
-    return Map__i32_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
-
-cdef vector[cmap[string,cint32_t]] List__Map__string_i32__make_instance(object items) except *:
-    cdef vector[cmap[string,cint32_t]] c_inst
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[str, int]")
-        if not isinstance(item, Map__string_i32):
-            item = Map__string_i32(item)
-        c_inst.push_back(Map__string_i32__make_instance(item))
-    return cmove(c_inst)
-
-cdef object List__Map__string_i32__from_cpp(const vector[cmap[string,cint32_t]]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(Map__string_i32__from_cpp(c_vec[idx]))
-    return List__Map__string_i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
 cdef cmap[cint16_t,string] Map__i16_string__make_instance(object items) except *:
     cdef cmap[cint16_t,string] c_inst
     cdef cint16_t c_key
@@ -4815,6 +4771,50 @@ cdef object List__MyStruct__from_cpp(const vector[_module_cbindings.cMyStruct]& 
     for idx in range(c_vec.size()):
         py_list.append(MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cMyStruct](c_vec[idx])))
     return List__MyStruct(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *:
+    cdef cmap[cint32_t,string] c_inst
+    cdef cint32_t c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        c_key = <cint32_t> key
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+
+        c_inst[c_key] = item.encode('UTF-8')
+    return cmove(c_inst)
+
+cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,string]] iter = __map_iter[cmap[cint32_t,string]](c_map)
+    cdef cint32_t ckey = 0
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = __init_unicode_from_cpp(cval)
+    return Map__i32_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef vector[cmap[string,cint32_t]] List__Map__string_i32__make_instance(object items) except *:
+    cdef vector[cmap[string,cint32_t]] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if item is None:
+            raise TypeError("None is not of the type _typing.Mapping[str, int]")
+        if not isinstance(item, Map__string_i32):
+            item = Map__string_i32(item)
+        c_inst.push_back(Map__string_i32__make_instance(item))
+    return cmove(c_inst)
+
+cdef object List__Map__string_i32__from_cpp(const vector[cmap[string,cint32_t]]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(Map__string_i32__from_cpp(c_vec[idx]))
+    return List__Map__string_i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 
 aBool = True

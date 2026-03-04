@@ -2450,104 +2450,6 @@ Mapping.register(Map__string_std_unique_ptr_folly_IOBuf__binary)
 __all__.append('Map__string_std_unique_ptr_folly_IOBuf__binary')
 
 
-class Map__i32_string(thrift.py3.types.Map):
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    _FBTHRIFT_USE_SORTED_REPR = True
-
-    def __init__(self, items=None, private_ctor_token=None) -> None:
-        if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
-            _py_obj = items
-        elif isinstance(items, Map__i32_string):
-            _py_obj = dict(items)
-        elif items is None:
-            _py_obj = dict()
-        else:
-            check_key = Map__i32_string._check_key_type_or_raise
-            check_val = Map__i32_string._check_val_type_or_raise
-            _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
-
-        super().__init__(_py_obj, Map__i32_string)
-
-    @staticmethod
-    def _check_key_type_or_raise(key):
-        if not (
-            isinstance(key, int)
-        ):
-            raise TypeError(f"{key!r} is not of type int")
-        return key
-
-    @staticmethod
-    def _check_key_type_or_none(key):
-        if key is None:
-            return None
-        if isinstance(key, int):
-            return key
-
-    @staticmethod
-    def _check_val_type_or_raise(item):
-        if not (
-            isinstance(item, str)
-        ):
-            raise TypeError(f"{item!r} is not of type str")
-        return item
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__Map__i32_string()
-
-
-Mapping.register(Map__i32_string)
-__all__.append('Map__i32_string')
-
-
-class List__Map__string_i32(thrift.py3.types.List):
-    __module__ = _fbthrift__module_name__
-    __slots__ = ()
-
-    def __init__(self, items=None, private_ctor_token=None) -> None:
-        if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
-            _py_obj = items
-        elif isinstance(items, List__Map__string_i32):
-            _py_obj = list(items)
-        elif items is None:
-            _py_obj = []
-        else:
-            check_method = List__Map__string_i32._check_item_type_or_raise
-            _py_obj = [check_method(item) for item in items]
-
-        super().__init__(_py_obj, List__Map__string_i32)
-
-    @staticmethod
-    def _check_item_type_or_raise(item):
-        if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[str, int]")
-        if not isinstance(item, _module_types.Map__string_i32):
-            item = _module_types.Map__string_i32(item)
-        return item
-
-    @staticmethod
-    def _check_item_type_or_none(item):
-        if item is None:
-            return None
-        if isinstance(item, _module_types.Map__string_i32):
-            return item
-        try:
-            return _module_types.Map__string_i32(item)
-        except:
-            pass
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__List__Map__string_i32()
-
-
-Sequence.register(List__Map__string_i32)
-
-__all__.append('List__Map__string_i32')
-
-
 class Map__i16_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -2696,5 +2598,103 @@ class List__MyStruct(thrift.py3.types.List):
 Sequence.register(List__MyStruct)
 
 __all__.append('List__MyStruct')
+
+
+class Map__i32_string(thrift.py3.types.Map):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    _FBTHRIFT_USE_SORTED_REPR = True
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Map__i32_string):
+            _py_obj = dict(items)
+        elif items is None:
+            _py_obj = dict()
+        else:
+            check_key = Map__i32_string._check_key_type_or_raise
+            check_val = Map__i32_string._check_val_type_or_raise
+            _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
+
+        super().__init__(_py_obj, Map__i32_string)
+
+    @staticmethod
+    def _check_key_type_or_raise(key):
+        if not (
+            isinstance(key, int)
+        ):
+            raise TypeError(f"{key!r} is not of type int")
+        return key
+
+    @staticmethod
+    def _check_key_type_or_none(key):
+        if key is None:
+            return None
+        if isinstance(key, int):
+            return key
+
+    @staticmethod
+    def _check_val_type_or_raise(item):
+        if not (
+            isinstance(item, str)
+        ):
+            raise TypeError(f"{item!r} is not of type str")
+        return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__i32_string()
+
+
+Mapping.register(Map__i32_string)
+__all__.append('Map__i32_string')
+
+
+class List__Map__string_i32(thrift.py3.types.List):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
+            _py_obj = items
+        elif isinstance(items, List__Map__string_i32):
+            _py_obj = list(items)
+        elif items is None:
+            _py_obj = []
+        else:
+            check_method = List__Map__string_i32._check_item_type_or_raise
+            _py_obj = [check_method(item) for item in items]
+
+        super().__init__(_py_obj, List__Map__string_i32)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if item is None:
+            raise TypeError("None is not of the type _typing.Mapping[str, int]")
+        if not isinstance(item, _module_types.Map__string_i32):
+            item = _module_types.Map__string_i32(item)
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.Map__string_i32):
+            return item
+        try:
+            return _module_types.Map__string_i32(item)
+        except:
+            pass
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__Map__string_i32()
+
+
+Sequence.register(List__Map__string_i32)
+
+__all__.append('List__Map__string_i32')
 
 

@@ -542,19 +542,28 @@ impl LiftAwait {
     }
 
     fn extract_iter(&mut self, env: &mut Env, pos: &Pos, iter: &mut LoopIter) {
-        let mut con = vec![];
         let mut seq = vec![];
-        let mut tmps = vec![];
 
         let LoopIter(iter_tmps, iter_block, exprs) = iter;
 
         for expr in exprs {
+            let mut expr_con = vec![];
+            let mut expr_seq = vec![];
+            let mut expr_tmps = vec![];
             self.leave_await = true;
-            self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
+            self.check_and_extract_await(env, expr, &mut expr_con, &mut expr_seq, &mut expr_tmps);
             self.leave_await = false;
+            let expr_val = std::mem::replace(expr, Expr((), Pos::NONE, Expr_::Null));
+            expr_seq.push(Stmt(pos.clone(), Stmt_::Expr(Box::new(expr_val))));
+            seq.append(&mut sequentialise(
+                pos.clone(),
+                expr_con,
+                expr_seq,
+                expr_tmps,
+            ));
         }
 
-        (*iter_tmps, *iter_block) = create_lifted_block(pos, con, seq, tmps);
+        (*iter_tmps, *iter_block) = create_lifted_block(pos, vec![], seq, vec![]);
     }
 
     fn concurrentise(
@@ -1313,7 +1322,26 @@ impl<'a> VisitorMut<'a> for LiftAwait {
             Stmt_::For(box (init_exprs, test, update, block)) => {
                 for expr in init_exprs {
                     expr.accept(env, self.object())?;
-                    self.check_and_extract_await(env, expr, &mut con, &mut seq, &mut tmps);
+                    let mut init_con = vec![];
+                    let mut init_seq = vec![];
+                    let mut init_tmps = vec![];
+                    self.leave_await = true;
+                    self.check_and_extract_await(
+                        env,
+                        expr,
+                        &mut init_con,
+                        &mut init_seq,
+                        &mut init_tmps,
+                    );
+                    self.leave_await = false;
+                    let expr_val = std::mem::replace(expr, Expr((), Pos::NONE, Expr_::Null));
+                    init_seq.push(Stmt(pos.clone(), Stmt_::Expr(Box::new(expr_val))));
+                    seq.append(&mut sequentialise(
+                        pos.clone(),
+                        init_con,
+                        init_seq,
+                        init_tmps,
+                    ));
                 }
 
                 test.accept(env, self.object())?;

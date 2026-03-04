@@ -20,6 +20,7 @@ Header file for ServicesWrapper.Cpp. It's a subclass of the service interface
 created by the thrift compiler for generated cpp2 code.
 
 }}
+{{#import "common/types" as types}}
 {{> common/auto_generated_c}}
 {{^program:auto_migrate?}}
 
@@ -58,10 +59,9 @@ class {{service:name}}Wrapper : {{!
     explicit {{service:name}}Wrapper(PyObject *if_object, folly::Executor *exc);
 {{#service:supportedFunctions}}
     void async_{{#if function:eb?}}eb{{#else}}tm{{/if}}_{{function:cpp_name}}({{> services/cpp_handler_callback_type}} callback{{#function:args}}
-        , {{#field:type}}{{!
-                }}{{^function:stack_arguments?}}{{> types/cpp_arg_type}}{{/function:stack_arguments?}}{{!
-                }}{{#function:stack_arguments?}}{{> types/cpp_stack_arg_type}}{{/function:stack_arguments?}}{{!
-            }}{{/field:type}} {{field:cpp_name}}{{#last?}}
+        , {{#if function:stack_arguments?}}{{#partial types.cpp_stack_arg_type type=field:self.type}}{{!
+            }}{{#else}}{{#partial types.cpp_arg_type type=field:self.type}}{{/if function:stack_arguments?}}{{!
+            }} {{field:cpp_name}}{{#last?}}
     {{/last?}}{{/function:args}}) override;
 {{/service:supportedFunctions}}
 {{#service:supportedInteractions}}

@@ -121,8 +121,7 @@ cdef {{#partial types.cython_cpp_type type=type:self}} {{type:flat_name}}__make_
     return {{> types/current_module_types}}.{{type:flat_name}}__make_instance(items)
 {{/program:inplace_migrate?}}{{/program:auto_migrate?}}
 {{#program:auto_migrate?}}
-    {{> types/make_instance}}
-
+    {{#partial types.make_instance type=type:self}}
 {{/program:auto_migrate?}}
 
 {{/program:containerTypes}}

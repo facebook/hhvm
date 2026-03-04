@@ -53,7 +53,7 @@ import {{> common/thrift_types_module_path}}
 _{{struct:name}}ValueType = _typing.Union[None, {{#struct:py3_fields}}{{^first?}}, {{/first?}}{{#partial pep484.type_name type=field:self.type}}{{/struct:py3_fields}}]
 
 {{/struct:union?}}
-class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable):
+class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}}, _typing.Hashable):
     class __fbthrift_IsSet:
     {{#struct:py3_fields}}
         {{#field:has_ref_accessor?}}

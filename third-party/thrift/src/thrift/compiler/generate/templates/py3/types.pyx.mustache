@@ -166,7 +166,7 @@ cdef object get_types_reflection():
 {{^struct:allow_inheritance?}}
 @__cython.final
 {{/struct:allow_inheritance?}}
-cdef class {{struct:name}}({{> types/python_struct_class}}):
+cdef class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}}):
     __module__ = _fbthrift__module_name__
 
     def __init__({{struct:name}} self,{{#struct:exception?}} *args,{{/struct:exception?}} **kwargs):

@@ -110,7 +110,7 @@ __all__.append("{{type:flat_name}}")
 
 ### Structured Types ###
 {{#program:filtered_structs}}
-class {{struct:name}}({{> types/python_struct_class }}):
+class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}}):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",

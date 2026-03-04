@@ -20,10 +20,24 @@ This is used to resolve container converter prefix. The prefix used depends whet
 referenced from types.pyx main file, field_setter, or container converter.
 
 }}
-{{! container to cpp converter }}
-cdef {{#partial types.cython_cpp_type type=type:self}} {{type:flat_name}}__make_instance(object items) except *:
-{{> types/make_instance }}
+{{! Non-simple types live in shared_ptr in containers }}
+{{#let partial cython_cpp_container_item_type |type| captures |types|}}
+{{#pragma ignore-newlines}}
+  {{#if type.simple?}}
+{{#partial types.cython_cpp_type type=type}}
+  {{#else}}
+shared_ptr[{{#partial types.cython_cpp_type type=type}}]
+  {{/if type.simple?}}
+{{/let partial}}
+{{! Default value for number and bool types }}
+{{#let partial type_default_value |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.number?}} = 0{{#else if type.bool?}} = False{{/if}}
+{{/let partial}}{{!
 
+container to cpp converter }}
+cdef {{#partial types.cython_cpp_type type=type:self}} {{type:flat_name}}__make_instance(object items) except *:
+{{#partial types.make_instance type=type:self}}
 
 {{#type:list?}}
 cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}& c_vec) except *:
@@ -40,7 +54,7 @@ cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type 
     cdef list py_items = []
     cdef __set_iter[{{#partial types.cython_cpp_type type=type:self}}] iter = __set_iter[{{#partial types.cython_cpp_type type=type:self}}](c_set)
     {{#type:set_elem_type}}
-    cdef {{> types/cython_cpp_container_item_type}} citem{{> types/type_default_value}}
+    cdef {{#partial cython_cpp_container_item_type type=type:self}} citem{{#partial type_default_value type=type:self}}
     for i in range(c_set.size()):
         iter.genNextItem(citem)
         py_items.append({{> types/set_cpp_to_python }})
@@ -52,10 +66,10 @@ cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type 
     cdef dict py_items = {}
     cdef __map_iter[{{#partial types.cython_cpp_type type=type:self}}] iter = __map_iter[{{#partial types.cython_cpp_type type=type:self}}](c_map)
     {{#type:key_type}}
-    cdef {{> types/cython_cpp_container_item_type}} ckey{{> types/type_default_value}}
+    cdef {{#partial cython_cpp_container_item_type type=type:self}} ckey{{#partial type_default_value type=type:self}}
     {{/type:key_type}}
     {{#type:value_type}}
-    cdef {{> types/cython_cpp_container_item_type}} cval{{> types/type_default_value}}
+    cdef {{#partial cython_cpp_container_item_type type=type:self}} cval{{#partial type_default_value type=type:self}}
     {{/type:value_type}}
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)

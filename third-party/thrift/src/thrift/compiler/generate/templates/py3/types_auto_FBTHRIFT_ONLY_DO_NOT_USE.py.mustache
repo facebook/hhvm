@@ -32,6 +32,13 @@ container types, so we'll need to define factories for them based on what they
 want to include.
 
 }}
+{{! Base class name for py3 auto-migrate flat-name containers }}
+{{#let partial container_base |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.list?}}List{{#else if type.set?}}Set{{#else if type.map?}}Map{{/if}}
+{{/let partial}}{{!
+
+}}
 {{> common/auto_generated_py}}
 {{#program:auto_migrate?}}
 {{! Note this is needed even if IDL defines no types, in the case where service has arguments that are container<primitive>}}
@@ -89,11 +96,11 @@ class {{type:flat_name}}__Meta(type):
 
     def __instancecheck__(cls, instance):
         return (
-            isinstance(instance, _fbthrift_python_types.{{> types/container_base}}) and
+            isinstance(instance, _fbthrift_python_types.{{#partial container_base type=type:self}}) and
             instance._fbthrift_same_type(*cls._fbthrift_type_info())
         )
 
-class {{type:flat_name}}(_fbthrift_python_types.{{> types/container_base}}, metaclass={{type:flat_name}}__Meta):
+class {{type:flat_name}}(_fbthrift_python_types.{{#partial container_base type=type:self}}, metaclass={{type:flat_name}}__Meta):
     __module__ = _fbthrift__py3_module_name
     __slots__ = ()
 

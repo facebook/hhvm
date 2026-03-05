@@ -186,11 +186,14 @@ ssize_t H3DatagramAsyncSocket::recvmsg(struct msghdr* msg, int /*flags*/) {
   if (!pendingDelivery_) {
     return 0;
   }
+  if (msg->msg_iovlen <= 0 || !msg->msg_iov || !msg->msg_iov[0].iov_base) {
+    return -1;
+  }
   // This isn't ideal because we are doing double copies, but it is a
   // limitation of the interface for now.
-  memcpy(msg->msg_iov[0].iov_base,
-         pendingDelivery_->data(),
-         pendingDelivery_->length());
+  size_t copyLen =
+      std::min(pendingDelivery_->length(), msg->msg_iov[0].iov_len);
+  memcpy(msg->msg_iov[0].iov_base, pendingDelivery_->data(), copyLen);
   ssize_t ret = pendingDelivery_->length();
   pendingDelivery_ = nullptr;
   return ret;

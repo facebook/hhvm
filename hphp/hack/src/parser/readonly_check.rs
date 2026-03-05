@@ -243,6 +243,10 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             let expr = &**expr;
             rty_expr(context, expr)
         }
+        Delay(expr) => {
+            let expr = &**expr;
+            rty_expr(context, expr)
+        }
         // Primitive types are mutable
         Null | True | False | Omitted => Rty::Mutable,
         Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) | Nameof(_) => Rty::Mutable,

@@ -603,6 +603,7 @@ and expr_ env acc p e =
     acc
   | Yield e -> afield acc e
   | Await e -> expr acc e
+  | Delay e -> expr acc e
   | Tuple el -> List.fold_left ~f:expr ~init:acc el
   | List _ ->
     (* List is always an lvalue *)

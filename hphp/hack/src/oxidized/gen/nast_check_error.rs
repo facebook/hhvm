@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<66b597028816448e23941b4407e36a65>>
+// @generated SignedSource<<670b988d2c4b1105058910be383abb1e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -128,6 +128,7 @@ pub enum NastCheckError {
     AwaitInSyncFunction {
         pos: pos::Pos,
         func_pos: Option<pos::Pos>,
+        keyword: String,
     },
     #[rust_to_ocaml(name = "Interface_uses_trait")]
     InterfaceUsesTrait(pos::Pos),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1c57c4553e5e6cfaedc126e89808c964>>
+// @generated SignedSource<<104bf4d9407204285e7d2817c0afee2f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -967,6 +967,11 @@ pub enum Expr_<Ex, En> {
     ///
     ///     await $foo
     Await(Box<Expr<Ex, En>>),
+    /// Delay expression. Runtime no-op that signals intent not to immediately
+    /// await an awaitable.
+    ///
+    ///     delay $foo
+    Delay(Box<Expr<Ex, En>>),
     /// Readonly expression.
     ///
     ///     readonly $foo

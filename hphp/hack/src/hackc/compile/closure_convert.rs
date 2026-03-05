@@ -1120,6 +1120,10 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
                     x.recurse(scope, self)?;
                     Expr_::Await(x)
                 }
+                Expr_::Delay(mut x) => {
+                    x.recurse(scope, self)?;
+                    Expr_::Delay(x)
+                }
                 Expr_::ReadonlyExpr(mut x) => {
                     x.recurse(scope, self)?;
                     Expr_::ReadonlyExpr(x)

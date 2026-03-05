@@ -1,0 +1,6 @@
+ERROR: File "delay_dynamic.php", line 5, characters 8-17:
+`delay` can only operate on an `Awaitable` (Typing[4110])
+  File "delay_dynamic.php", line 5, characters 8-17:
+  Expected `Awaitable<mixed>`
+  File "delay_dynamic.php", line 5, characters 14-17:
+  But got `dynamic`, the result of calling a `dynamic` type as a function

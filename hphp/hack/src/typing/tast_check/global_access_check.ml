@@ -711,6 +711,7 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
       obj_data_srcs
   | Class_const _ -> DataSourceSet.singleton NonSensitive
   | Await e -> get_data_srcs_from_expr env ctx e
+  | Delay e -> get_data_srcs_from_expr env ctx e
   | ReadonlyExpr e -> get_data_srcs_from_expr env ctx e
   | Tuple el
   | List el ->

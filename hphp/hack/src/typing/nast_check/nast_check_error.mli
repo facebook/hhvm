@@ -57,6 +57,7 @@ type t =
   | Await_in_sync_function of {
       pos: Pos.t;
       func_pos: Pos.t option;
+      keyword: string;
     }
   | Interface_uses_trait of Pos.t
   | Static_memoized_function of Pos.t

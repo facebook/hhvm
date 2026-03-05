@@ -1,0 +1,6 @@
+ERROR: File "delay_in_sync_lambda.php", line 10, characters 5-15:
+`delay` can only be used inside `async` functions (NastCheck[3003])
+ERROR: File "delay_in_sync_lambda.php", line 10, characters 5-15:
+This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
+  File "delay_in_sync_lambda.php", line 4, characters 23-36:
+  This is why I think it is `Awaitable`

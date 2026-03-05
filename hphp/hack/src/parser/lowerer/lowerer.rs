@@ -2197,6 +2197,7 @@ fn p_pre_post_unary_decorated_expr<'a>(node: S<'a>, env: &mut Env<'a>, pos: Pos)
                 env.found_await = true;
                 Ok(Expr_::mk_await(expr))
             }
+            Some(TK::Delay) => Ok(Expr_::mk_delay(expr)),
             Some(TK::Readonly) => Ok(process_readonly_expr(expr)),
             Some(TK::Clone) => Ok(Expr_::mk_clone(expr)),
             Some(TK::Print) => Ok(Expr_::mk_call(ast::CallExpr {

@@ -132,8 +132,8 @@ let on_expr_top_down
     end
     (* -- Always invalid ---------------------------------------------------- *)
     | Aast.(
-        ( This | Lvar _ | Lplaceholder _ | Array_get _ | Await _ | Cast _
-        | Class_get _ | Clone _ | Dollardollar _ | ET_Splice _ | Efun _
+        ( This | Lvar _ | Lplaceholder _ | Array_get _ | Await _ | Delay _
+        | Cast _ | Class_get _ | Clone _ | Dollardollar _ | ET_Splice _ | Efun _
         | EnumClassLabel _ | ExpressionTree _ | Is _ | Lfun _ | List _
         | Method_caller _ | New _ | Obj_get _ | Pair _ | Pipe _ | ReadonlyExpr _
         | String2 _ | Yield _ | Xml _ )) ->

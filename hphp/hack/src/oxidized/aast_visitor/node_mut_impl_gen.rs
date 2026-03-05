@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<25e9caf3764fc939ac2f1162f37ff865>>
+// @generated SignedSource<<bbf4a633297574846b0996833ffed33d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1094,6 +1094,7 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
             Expr_::PrefixedString(a) => helper7(a, c, v),
             Expr_::Yield(a0) => a0.accept(c, v),
             Expr_::Await(a0) => a0.accept(c, v),
+            Expr_::Delay(a0) => a0.accept(c, v),
             Expr_::ReadonlyExpr(a0) => a0.accept(c, v),
             Expr_::Tuple(a0) => a0.accept(c, v),
             Expr_::List(a0) => a0.accept(c, v),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b59f42b95d33a89c53c99ef03c945894>>
+// @generated SignedSource<<ec6c91fe7cd166016ae0462965a64e1a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -583,6 +583,7 @@ pub enum Ureason {
     URkey(String),
     URvalue(String),
     URawait,
+    URdelay,
     URyield,
     /// Name of XHP class, Name of XHP attribute
     URxhp(String, String),

@@ -128,6 +128,7 @@ type ureason =
   | URkey of string
   | URvalue of string
   | URawait
+  | URdelay
   | URyield
   | URxhp of string * string  (** Name of XHP class, Name of XHP attribute *)
   | URxhp_spread

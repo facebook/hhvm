@@ -796,6 +796,7 @@ let expr tenv ((), _p, e) =
   | PrefixedString _
   | Yield _
   | Await _
+  | Delay _
   | ReadonlyExpr _
   | Tuple _
   | List _

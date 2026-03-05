@@ -588,6 +588,11 @@ and ('ex, 'en) expr_ =
       (** Await expression.
        *
        *     await $foo *)
+  | Delay of ('ex, 'en) expr
+      (** Delay expression. Runtime no-op that signals intent not to immediately
+       * await an awaitable.
+       *
+       *     delay $foo *)
   | ReadonlyExpr of ('ex, 'en) expr
       (** Readonly expression.
        *

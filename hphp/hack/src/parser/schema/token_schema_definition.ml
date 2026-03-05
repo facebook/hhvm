@@ -101,6 +101,7 @@ let given_text_tokens =
     make_token_node "Ctx" "ctx" ();
     make_token_node "Darray" "darray" ~allowed_as_identifier:true ();
     make_token_node "Default" "default" ();
+    make_token_node "Delay" "delay" ();
     make_token_node "Dict" "dict" ~allowed_as_identifier:true ();
     make_token_node "Do" "do" ();
     make_token_node "Double" "double" ~allowed_as_identifier:true ();

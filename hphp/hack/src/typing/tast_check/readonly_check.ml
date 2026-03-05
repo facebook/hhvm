@@ -665,6 +665,7 @@ let check =
       | (_, _, Array_get (_, _))
       | (_, _, Yield _)
       | (_, _, Await _)
+      | (_, _, Delay _)
       | (_, _, Tuple _)
       | (_, _, List _)
       | (_, _, Cast (_, _))

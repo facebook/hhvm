@@ -1848,6 +1848,11 @@ impl RewriteState {
                     .push((pos, "`await` is not supported in expression trees.".into()));
                 unchanged_result
             }
+            Delay(_) => {
+                self.errors
+                    .push((pos, "`delay` is not supported in expression trees.".into()));
+                unchanged_result
+            }
             ReadonlyExpr(_) => {
                 self.errors.push((
                     pos,

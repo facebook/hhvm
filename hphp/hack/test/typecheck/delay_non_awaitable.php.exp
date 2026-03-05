@@ -1,0 +1,6 @@
+ERROR: File "delay_non_awaitable.php", line 5, characters 3-10:
+`delay` can only operate on an `Awaitable` (Typing[4110])
+  File "delay_non_awaitable.php", line 5, characters 3-10:
+  Expected `Awaitable<mixed>`
+  File "delay_non_awaitable.php", line 5, characters 9-10:
+  But got `int`

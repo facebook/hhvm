@@ -183,6 +183,7 @@ impl Pass for ElabConstExprPass {
                 | Expr_::Lplaceholder(..)
                 | Expr_::ArrayGet(..)
                 | Expr_::Await(..)
+                | Expr_::Delay(..)
                 | Expr_::Cast(..)
                 | Expr_::ClassGet(..)
                 | Expr_::Clone(..)

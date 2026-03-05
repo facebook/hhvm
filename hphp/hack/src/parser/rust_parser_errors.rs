@@ -5293,6 +5293,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             DecoratedExpression(x) => match token_kind(&x.decorator) {
                 Some(TokenKind::Clone) => err(self, errors::not_allowed_in_write("`clone`")),
                 Some(TokenKind::Await) => err(self, errors::not_allowed_in_write("`await`")),
+                Some(TokenKind::Delay) => err(self, errors::not_allowed_in_write("`delay`")),
                 Some(TokenKind::QuestionQuestion) => {
                     err(self, errors::not_allowed_in_write("`??` operator"))
                 }

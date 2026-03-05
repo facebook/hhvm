@@ -507,6 +507,7 @@ pub fn emit_expr<'a>(
             Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
             Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
             Expr_::Await(e) => emit_await(emitter, env, pos, e),
+            Expr_::Delay(e) => emit_expr(emitter, env, e),
             Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
             Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
             Expr_::Efun(e) => Ok(emit_pos_then(
@@ -6148,6 +6149,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | Expr_::As(_)
         | Expr_::Upcast(_)
         | Expr_::Await(_)
+        | Expr_::Delay(_)
         | Expr_::ReadonlyExpr(_)
         | Expr_::ClassConst(_) => true,
         Expr_::Pipe(p) => can_use_as_rhs_in_list_assignment(&(p.2).2)?,

@@ -372,6 +372,7 @@ and pp_expr_ ppf = function
   | Aast.Yield afield ->
     Fmt.(prefix (const string "yield") pp_afield) ppf afield
   | Aast.Await expr -> Fmt.(prefix (const string "await") pp_expr) ppf expr
+  | Aast.Delay expr -> Fmt.(prefix (const string "delay") pp_expr) ppf expr
   | Aast.ReadonlyExpr expr ->
     Fmt.(prefix (const string "readonly") pp_expr) ppf expr
   | Aast.List exprs ->

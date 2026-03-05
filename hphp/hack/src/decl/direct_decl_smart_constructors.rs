@@ -1472,14 +1472,15 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                         Unop(box (_, expr)) => expr_to_ty(expr),
                         Hole(box (expr, _, _, _)) => expr_to_ty(expr),
 
-                        ArrayGet(_) | As(_) | Await(_) | Binop(_) | Assign(_) | Call(_)
-                        | Cast(_) | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_)
-                        | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_) | ETSplice(_)
-                        | ExpressionTree(_) | FunctionPointer(_) | Id(_) | Import(_) | Is(_)
-                        | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_)
-                        | MethodCaller(_) | New(_) | ObjGet(_) | Omitted | Pair(_) | Pipe(_)
-                        | ReadonlyExpr(_) | Shape(_) | Tuple(_) | Upcast(_) | ValCollection(_)
-                        | Xml(_) | Yield(_) | Invalid(_) | Package(_) | Nameof(_) => None,
+                        ArrayGet(_) | As(_) | Await(_) | Delay(_) | Binop(_) | Assign(_)
+                        | Call(_) | Cast(_) | ClassConst(_) | ClassGet(_) | Clone(_)
+                        | Collection(_) | Dollardollar(_) | Efun(_) | Eif(_)
+                        | EnumClassLabel(_) | ETSplice(_) | ExpressionTree(_)
+                        | FunctionPointer(_) | Id(_) | Import(_) | Is(_) | KeyValCollection(_)
+                        | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_) | MethodCaller(_)
+                        | New(_) | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_)
+                        | Shape(_) | Tuple(_) | Upcast(_) | ValCollection(_) | Xml(_)
+                        | Yield(_) | Invalid(_) | Package(_) | Nameof(_) => None,
                     }
                 }
                 Some(Ty(
@@ -3034,6 +3035,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             | TokenKind::Concurrent
             | TokenKind::Continue
             | TokenKind::Default
+            | TokenKind::Delay
             | TokenKind::Do
             | TokenKind::Echo
             | TokenKind::Else

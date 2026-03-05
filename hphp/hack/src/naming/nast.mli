@@ -192,6 +192,8 @@ module Visitor_DEPRECATED : sig
 
       method on_await : 'a -> expr -> 'a
 
+      method on_delay : 'a -> expr -> 'a
+
       method on_awaitall : 'a -> (id * expr) list -> block -> 'a
 
       method on_binop : 'a -> Ast_defs.bop -> expr -> expr -> 'a

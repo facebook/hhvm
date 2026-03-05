@@ -46,6 +46,7 @@ type t =
   | Ctx
   | Darray
   | Default
+  | Delay
   | Dict
   | Do
   | Double
@@ -261,6 +262,7 @@ let from_string keyword ~only_reserved =
   | "ctx" -> Some Ctx
   | "darray" when not only_reserved -> Some Darray
   | "default" -> Some Default
+  | "delay" -> Some Delay
   | "dict" when not only_reserved -> Some Dict
   | "do" -> Some Do
   | "double" when not only_reserved -> Some Double
@@ -451,6 +453,7 @@ let to_string kind =
   | Ctx -> "ctx"
   | Darray -> "darray"
   | Default -> "default"
+  | Delay -> "delay"
   | Dict -> "dict"
   | Do -> "do"
   | Double -> "double"

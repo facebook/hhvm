@@ -626,6 +626,10 @@ fn print_expr(
             w.write_all(b"await ")?;
             print_expr(ctx, w, env, e)
         }
+        Expr_::Delay(e) => {
+            w.write_all(b"delay ")?;
+            print_expr(ctx, w, env, e)
+        }
         Expr_::Import(i) => {
             print_import_flavor(w, &i.0)?;
             w.write_all(b" ")?;

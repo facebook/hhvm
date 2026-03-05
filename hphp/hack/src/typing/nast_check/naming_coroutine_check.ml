@@ -38,7 +38,18 @@ let handler =
         in
         Diagnostics.add_diagnostic
           Nast_check_error.(
-            to_user_diagnostic @@ Await_in_sync_function { pos = p; func_pos })
+            to_user_diagnostic
+            @@ Await_in_sync_function { pos = p; func_pos; keyword = "await" })
+      | Delay _ when is_sync env ->
+        let func_pos =
+          match env.function_name with
+          | None -> None
+          | Some sid -> Some (fst sid)
+        in
+        Diagnostics.add_diagnostic
+          Nast_check_error.(
+            to_user_diagnostic
+            @@ Await_in_sync_function { pos = p; func_pos; keyword = "delay" })
       | _ -> ()
 
     method! at_stmt env =
@@ -48,14 +59,16 @@ let handler =
         Diagnostics.add_diagnostic
           Nast_check_error.(
             to_user_diagnostic
-            @@ Await_in_sync_function { pos = fst us_exprs; func_pos = None })
+            @@ Await_in_sync_function
+                 { pos = fst us_exprs; func_pos = None; keyword = "await" })
       | (_, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _))
       | (p, Awaitall _)
         when is_sync env ->
         Diagnostics.add_diagnostic
           Nast_check_error.(
             to_user_diagnostic
-            @@ Await_in_sync_function { pos = p; func_pos = None })
+            @@ Await_in_sync_function
+                 { pos = p; func_pos = None; keyword = "await" })
       | (p, Return (Some _)) when is_generator env ->
         Diagnostics.add_diagnostic
           Nast_check_error.(to_user_diagnostic @@ Return_in_gen p)

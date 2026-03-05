@@ -171,6 +171,7 @@ and check_await_usage expr =
       | ConcurrentAwait ->
         Sequential
       | Error p -> Error p)
+    | Delay _ -> NoAwait
     | Pipe (_, expr1, expr2, _) ->
       (match check_await_usage expr2 with
       | Error p -> Error p

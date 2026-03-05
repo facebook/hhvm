@@ -58,6 +58,7 @@ type t =
   | Await_in_sync_function of {
       pos: Pos.t;
       func_pos: Pos.t option;
+      keyword: string;
     }
   | Interface_uses_trait of Pos.t
   | Static_memoized_function of Pos.t
@@ -399,7 +400,7 @@ let continue_in_switch pos =
       ^ " Hack does not support this; use `break` if that is what you meant." )
     []
 
-let await_in_sync_function pos func_pos =
+let await_in_sync_function pos func_pos keyword =
   let quickfixes =
     match func_pos with
     | None -> []
@@ -417,7 +418,8 @@ let await_in_sync_function pos func_pos =
   User_diagnostic.make_err
     Error_code.(to_enum AwaitInSyncFunction)
     ~quickfixes
-    (pos, "`await` can only be used inside `async` functions")
+    ( pos,
+      Printf.sprintf "`%s` can only be used inside `async` functions" keyword )
     []
 
 let interface_uses_trait pos =
@@ -975,8 +977,8 @@ let to_user_diagnostic t =
     | Toplevel_break pos -> toplevel_break pos
     | Toplevel_continue pos -> toplevel_continue pos
     | Continue_in_switch pos -> continue_in_switch pos
-    | Await_in_sync_function { pos; func_pos } ->
-      await_in_sync_function pos func_pos
+    | Await_in_sync_function { pos; func_pos; keyword } ->
+      await_in_sync_function pos func_pos keyword
     | Interface_uses_trait pos -> interface_uses_trait pos
     | Static_memoized_function pos -> static_memoized_function pos
     | Magic { pos; meth_name } -> magic pos meth_name

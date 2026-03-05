@@ -4603,6 +4603,35 @@ end = struct
       in
       let (env, ty) = Async.overload_extract_from_awaitable env ~p rty in
       make_result env p (Aast.Await te) ty
+    | Delay e ->
+      let (env, te, rty) =
+        expr
+          ~expected:None
+          ~ctxt:
+            Context.
+              {
+                default with
+                is_attribute_param = ctxt.is_attribute_param;
+                accept_using_var = false;
+                check_defined = ctxt.check_defined;
+              }
+          env
+          e
+      in
+      let r = Reason.witness p in
+      let mixed = MakeType.mixed r in
+      let expected_type = MakeType.awaitable r mixed in
+      let (env, ty_err_opt) =
+        Type.sub_type
+          p
+          Reason.URdelay
+          env
+          rty
+          expected_type
+          Typing_error.Callback.unify_error
+      in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+      make_result env p (Aast.Delay te) rty
     | ReadonlyExpr e ->
       let env = Env.set_readonly env true in
       let (env, te, rty) =

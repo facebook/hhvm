@@ -81,6 +81,7 @@ impl Operator {
             PostfixIncrementOperator
             | PostfixDecrementOperator
             | AwaitOperator
+            | DelayOperator
             | ReadonlyOperator => 23,
             CloneOperator | NameofOperator => 24,
             // value 25 is reserved for assignment that appear in expressions
@@ -135,13 +136,14 @@ impl Operator {
             | RemainderAssignmentOperator | AndAssignmentOperator
             | OrAssignmentOperator | ExclusiveOrAssignmentOperator
             | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-            | PrintOperator | AwaitOperator | NameofOperator | ReadonlyOperator | PackageOperator => Assoc::RightAssociative,
+            | PrintOperator | AwaitOperator | DelayOperator | NameofOperator | ReadonlyOperator | PackageOperator => Assoc::RightAssociative,
         }
     }
 
     pub fn prefix_unary_from_token(token: TokenKind) -> Operator {
         match token {
             TokenKind::Await => AwaitOperator,
+            TokenKind::Delay => DelayOperator,
             TokenKind::Nameof => NameofOperator,
             TokenKind::Exclamation => LogicalNotOperator,
             TokenKind::Tilde => NotOperator,

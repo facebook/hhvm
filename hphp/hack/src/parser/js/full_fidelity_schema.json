@@ -71,6 +71,8 @@
       "token_text" : "darray" },
     { "token_kind" : "Default",
       "token_text" : "default" },
+    { "token_kind" : "Delay",
+      "token_text" : "delay" },
     { "token_kind" : "Dict",
       "token_text" : "dict" },
     { "token_kind" : "Do",

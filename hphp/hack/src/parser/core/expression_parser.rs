@@ -424,6 +424,7 @@ where
             | TokenKind::Minus
             | TokenKind::Plus
             | TokenKind::Await
+            | TokenKind::Delay
             | TokenKind::Readonly
             | TokenKind::Clone
             | TokenKind::Print => self.parse_prefix_unary_expression(),

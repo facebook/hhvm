@@ -61,6 +61,7 @@ impl Pass for ValidateCoroutinePass {
                 env.emit_error(NastCheckError::AwaitInSyncFunction {
                     pos: exprs.0.clone(),
                     func_pos: None,
+                    keyword: "await".into(),
                 })
             }
             Stmt_::Foreach(box (_, AsExpr::AwaitAsV(pos, _) | AsExpr::AwaitAsKv(pos, _, _), _))
@@ -69,12 +70,14 @@ impl Pass for ValidateCoroutinePass {
                 env.emit_error(NastCheckError::AwaitInSyncFunction {
                     pos: pos.clone(),
                     func_pos: None,
+                    keyword: "await".into(),
                 })
             }
             Stmt_::Awaitall(..) if self.is_sync() => {
                 env.emit_error(NastCheckError::AwaitInSyncFunction {
                     pos: elem.0.clone(),
                     func_pos: None,
+                    keyword: "await".into(),
                 })
             }
             Stmt_::Return(box Some(_)) if self.is_generator() => {
@@ -91,6 +94,14 @@ impl Pass for ValidateCoroutinePass {
                 env.emit_error(NastCheckError::AwaitInSyncFunction {
                     pos: elem.1.clone(),
                     func_pos: self.func_pos.clone(),
+                    keyword: "await".into(),
+                })
+            }
+            Expr_::Delay(..) if self.is_sync() => {
+                env.emit_error(NastCheckError::AwaitInSyncFunction {
+                    pos: elem.1.clone(),
+                    func_pos: self.func_pos.clone(),
+                    keyword: "delay".into(),
                 })
             }
             _ => (),

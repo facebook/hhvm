@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<025b1d8e377255344caf6a4eb3584dad>>
+// @generated SignedSource<<9bf0fd63ae6ce7d846018264a93cb872>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -748,6 +748,7 @@ impl Transform for Expr_ {
             }
             Expr_::Yield(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Expr_::Await(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
+            Expr_::Delay(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Expr_::ReadonlyExpr(ref mut __binding_0) => {
                 __binding_0.transform(env, &mut pass.clone())
             }

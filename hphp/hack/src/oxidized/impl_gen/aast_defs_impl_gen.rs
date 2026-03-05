@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d02991a88bad87eae666c4a92fb1b9b7>>
+// @generated SignedSource<<e0e1f66bab46feac1c5ecb60c9722742>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1034,6 +1034,9 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_await(p0: Expr<Ex, En>) -> Self {
         Expr_::Await(Box::new(p0))
     }
+    pub fn mk_delay(p0: Expr<Ex, En>) -> Self {
+        Expr_::Delay(Box::new(p0))
+    }
     pub fn mk_readonly_expr(p0: Expr<Ex, En>) -> Self {
         Expr_::ReadonlyExpr(Box::new(p0))
     }
@@ -1278,6 +1281,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn is_await(&self) -> bool {
         match self {
             Expr_::Await(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_delay(&self) -> bool {
+        match self {
+            Expr_::Delay(..) => true,
             _ => false,
         }
     }
@@ -1587,6 +1596,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_await(&self) -> Option<&Expr<Ex, En>> {
         match self {
             Expr_::Await(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_delay(&self) -> Option<&Expr<Ex, En>> {
+        match self {
+            Expr_::Delay(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -1916,6 +1931,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_await_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
         match self {
             Expr_::Await(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
+    pub fn as_delay_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
+        match self {
+            Expr_::Delay(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
@@ -2263,6 +2284,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_await_into(self) -> Option<Expr<Ex, En>> {
         match self {
             Expr_::Await(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_delay_into(self) -> Option<Expr<Ex, En>> {
+        match self {
+            Expr_::Delay(p0) => Some(*p0),
             _ => None,
         }
     }

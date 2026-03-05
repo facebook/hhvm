@@ -89,6 +89,7 @@ let operators =
     make_operator "Include";
     make_operator "IncludeOnce";
     make_operator "Await";
+    make_operator "Delay";
     make_operator "Readonly";
     make_operator "EnumClassLabel";
     make_operator "Package";

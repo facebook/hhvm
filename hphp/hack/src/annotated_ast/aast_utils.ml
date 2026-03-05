@@ -46,6 +46,7 @@ let rec can_be_captured = function
   | Yield _
   | Clone _
   | Await _
+  | Delay _
   | ReadonlyExpr _
   | Cast _
   | Unop _
@@ -166,6 +167,7 @@ let rec is_const_expr (_, _, expr_) =
   | Call _
   | New _
   | Await _
+  | Delay _
   | Assign _
   | ExpressionTree _
   | ET_Splice _

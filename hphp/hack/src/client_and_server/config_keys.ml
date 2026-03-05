@@ -55,6 +55,8 @@ let union_intersection_type_hints = key "union_intersection_type_hints"
 
 let disallow_silence = key "disallow_silence"
 
+let disallow_bool_cast = key "disallow_bool_cast"
+
 let allowed_decl_fixme_codes = key "allowed_decl_fixme_codes"
 
 let disable_hh_ignore_error = key "disable_hh_ignore_error"

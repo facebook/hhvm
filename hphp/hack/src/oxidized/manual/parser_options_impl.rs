@@ -35,6 +35,7 @@ impl Default for ParserOptions {
             union_intersection_type_hints: false,
             unwrap_concurrent: false,
             disallow_silence: false,
+            disallow_bool_cast: false,
             no_parser_readonly_check: false,
             disable_hh_ignore_error: 0,
             allowed_decl_fixme_codes: i_set::ISet::new(),

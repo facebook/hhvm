@@ -371,6 +371,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         disallow_silence =
           bool_opt Config_keys.disallow_silence config
           >?? po_opt.disallow_silence;
+        disallow_bool_cast =
+          bool_opt Config_keys.disallow_bool_cast config
+          >?? po_opt.disallow_bool_cast;
         allowed_decl_fixme_codes =
           prepare_allowed_decl_fixme_codes config
           >?? po_opt.allowed_decl_fixme_codes;

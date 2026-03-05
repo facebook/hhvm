@@ -573,6 +573,7 @@ pub const no_const_late_init_props: Error =
 pub const no_const_abstract_final_class: Error =
     Cow::Borrowed("Cannot apply `__Const` attribute to an abstract final class");
 pub const no_silence: Error = Cow::Borrowed("The error suppression operator `@` is not allowed");
+pub const no_bool_cast: Error = Cow::Borrowed("(bool) casts are not allowed");
 pub const const_mutation: Error = Cow::Borrowed("Cannot mutate a class constant");
 pub const no_attributes_on_variadic_parameter: Error =
     Cow::Borrowed("Attributes on variadic parameters are not allowed");

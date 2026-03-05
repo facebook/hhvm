@@ -34,6 +34,7 @@ type t = {
   union_intersection_type_hints: bool;
   unwrap_concurrent: bool;
   disallow_silence: bool;
+  disallow_bool_cast: bool;
   no_parser_readonly_check: bool;
   disable_hh_ignore_error: int;
   allowed_decl_fixme_codes: ISet.t;
@@ -77,6 +78,7 @@ let default =
     union_intersection_type_hints = false;
     unwrap_concurrent = false;
     disallow_silence = false;
+    disallow_bool_cast = false;
     no_parser_readonly_check = false;
     disable_hh_ignore_error = 0;
     allowed_decl_fixme_codes = ISet.empty;
@@ -117,6 +119,7 @@ type ffi_t =
   * bool
   * bool
   * bool
+  * bool
 
 let to_rust_ffi_t po =
   ( po.hhvm_compat_mode,
@@ -141,4 +144,5 @@ let to_rust_ffi_t po =
     po.consider_unspecified_experimental_features_released,
     po.enable_class_pointer_hint,
     po.ignore_string_methods,
-    po.enable_intrinsics_extension )
+    po.enable_intrinsics_extension,
+    po.disallow_bool_cast )

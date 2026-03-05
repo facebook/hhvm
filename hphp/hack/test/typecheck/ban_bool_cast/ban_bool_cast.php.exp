@@ -1,0 +1,2 @@
+ERROR: File "ban_bool_cast.php", line 4, characters 9-12:
+(bool) casts are not allowed (Parsing[1002])

@@ -276,6 +276,8 @@ impl HhConfig {
                 default.const_default_lambda_args,
             )?,
             disallow_silence: hhconfig.get_bool_or("disallow_silence", default.disallow_silence)?,
+            disallow_bool_cast: hhconfig
+                .get_bool_or("disallow_bool_cast", default.disallow_bool_cast)?,
             abstract_static_props: default.abstract_static_props,
             disallow_func_ptrs_in_constants: hhconfig.get_bool_or(
                 "disallow_func_ptrs_in_constants",

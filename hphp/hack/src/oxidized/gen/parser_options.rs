@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<be8627f7695d4c0127dbe3ec602ba76c>>
+// @generated SignedSource<<e4296266052a270dedbeb12189ca67bc>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -87,6 +87,8 @@ pub struct ParserOptions {
     pub unwrap_concurrent: bool,
     /// Flag to disable the error suppression operator
     pub disallow_silence: bool,
+    /// Flag to ban (bool) casts
+    pub disallow_bool_cast: bool,
     /// Disable parser-based readonly checking
     pub no_parser_readonly_check: bool,
     /// Disable HH_IGNORE_ERROR comments, either raising an error if 1 or treating them as normal comments if 2.
@@ -157,6 +159,7 @@ pub struct FfiT(
     pub bool,
     pub bool,
     pub s_map::SMap<experimental_features::FeatureStatus>,
+    pub bool,
     pub bool,
     pub bool,
     pub bool,

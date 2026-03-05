@@ -1,0 +1,1 @@
+--config disallow_bool_cast=true

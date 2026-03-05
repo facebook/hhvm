@@ -2356,6 +2356,12 @@ fn p_cast_expr<'a>(
     c: &'a CastExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
+    if env.is_typechecker()
+        && env.parser_options.disallow_bool_cast
+        && token_kind(&c.type_) == Some(TK::Bool)
+    {
+        raise_parsing_error(&c.type_, env, &syntax_error::no_bool_cast);
+    }
     Ok(Expr_::mk_cast(
         p_hint(&c.type_, env)?,
         p_expr(&c.operand, env)?,

@@ -57,6 +57,8 @@ val union_intersection_type_hints : string
 
 val disallow_silence : string
 
+val disallow_bool_cast : string
+
 val allowed_decl_fixme_codes : string
 
 val disable_hh_ignore_error : string

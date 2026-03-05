@@ -54,6 +54,7 @@ struct MyNestedStruct {
   5: optional i64WithAdapter optional_adapted_and_wrapped_type;
   @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   @hack.SkipCodegen{reason = "invalid map key"}
+  @thrift.AllowUnsafeNonSealedKeyType
   6: optional map<MyStruct, string> invalid_key_map;
   @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   7: i64WithWrapper wrapped_type_int;

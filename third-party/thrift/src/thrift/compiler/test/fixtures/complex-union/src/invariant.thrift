@@ -31,6 +31,8 @@ struct UnionForInvariantTypes {
 }
 
 union InvariantTypes {
+  @thrift.AllowUnsafeNonSealedKeyType
   1: map<StructForInvariantTypes, i64> struct_map;
+  @thrift.AllowUnsafeNonSealedKeyType
   2: map<UnionForInvariantTypes, i64> union_map;
 }

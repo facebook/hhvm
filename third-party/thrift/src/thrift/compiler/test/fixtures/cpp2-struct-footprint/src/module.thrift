@@ -55,6 +55,7 @@ typedef i32 MyInt
 typedef SimpleStruct MyStruct
 typedef list<SimpleStruct> StructList
 typedef map<string, SimpleStruct> StructMap
+@thrift.AllowUnsafeNonSealedKeyType
 typedef set<SimpleStruct> StructSet
 
 // Interaction for testing interaction constructors

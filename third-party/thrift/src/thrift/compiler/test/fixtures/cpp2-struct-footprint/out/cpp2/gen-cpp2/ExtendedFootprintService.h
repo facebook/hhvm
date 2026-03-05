@@ -105,8 +105,8 @@ class ServiceHandler<::cpp2_struct_footprint::ExtendedFootprintService> : virtua
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2_struct_footprint::ExtendedFootprintService, false> {
   static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
-  static constexpr int64_t programId = 3605227841707939287;
-  static constexpr ::std::string_view definitionKey = {"\x31\x09\x0f\xe8\xb3\x08\x74\x37\x2e\x6b\x2f\x64\xcd\x4e\x7d\xd5", 16};
+  static constexpr int64_t programId = -394159017805180364;
+  static constexpr ::std::string_view definitionKey = {"\x39\x4c\x02\x7d\x55\xb5\xcb\x06\x6c\xb9\x1e\x8f\x42\xbc\xd3\x75", 16};
 };
 }
 } // namespace apache::thrift

@@ -53,7 +53,9 @@ struct OpEncodeStruct {
   @cpp.Ref{type = cpp.RefType.Shared}
   6: optional list<AdaptedFoo> list_shared_ptr_field;
   7: list<AdaptedFoo> list_cpp_type_field;
+  @thrift.AllowUnsafeNonSealedKeyType
   8: set<AdaptedFoo> set_field;
+  @thrift.AllowUnsafeNonSealedKeyType
   9: map<AdaptedFoo, AdaptedFoo> map_field;
   10: map<i32, list<AdaptedFoo>> nested_field;
   11: Bar bar_field;

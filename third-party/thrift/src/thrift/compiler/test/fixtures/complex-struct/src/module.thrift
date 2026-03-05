@@ -73,6 +73,7 @@ struct MyStruct {
   21: map<i32, i32> mIntegerInteger;
   22: map<i32, bool> mIntegerBool;
   23: set<i16> sShort;
+  @thrift.AllowUnsafeNonSealedKeyType
   24: set<MyStruct> sMyStruct;
   25: set<i64> sLong;
   26: set<string> sString;
@@ -165,6 +166,7 @@ struct ComplexNestedStruct {
   4: set<list<list<i64>>> setOfListOfListOfLong;
   5: set<set<set<i64>>> setOfSetOfsetOfLong;
   6: map<i32, list<list<MyStruct>>> mapStructListOfListOfLong;
+  @thrift.AllowUnsafeNonSealedKeyType
   7: map<MyStruct, i32> mKeyStructValInt;
   8: list<map<i32, i32>> listOfMapKeyIntValInt;
   9: list<map<string, list<MyStruct>>> listOfMapKeyStrValList;
@@ -226,11 +228,15 @@ struct Containers {
   2: list<MyUnion> union_list;
   3: list<MyEnum> enum_list;
 
+  @thrift.AllowUnsafeNonSealedKeyType
   4: set<MyStruct> struct_set;
+  @thrift.AllowUnsafeNonSealedKeyType
   5: set<MyUnion> union_set;
   6: set<MyEnum> enum_set;
 
+  @thrift.AllowUnsafeNonSealedKeyType
   7: map<MyStruct, i64> struct_map;
+  @thrift.AllowUnsafeNonSealedKeyType
   8: map<MyUnion, i64> union_map;
   9: map<MyEnum, i64> enum_map;
 
@@ -256,11 +262,15 @@ struct Containers {
   25: list<map<MyStruct, i32>> list_map_struct_i32;
 
   26: set<list<i32>> set_list_i32;
+  @thrift.AllowUnsafeNonSealedKeyType
   27: set<list<MyStruct>> set_list_struct;
   28: set<set<i32>> set_set_i32;
+  @thrift.AllowUnsafeNonSealedKeyType
   29: set<set<MyStruct>> set_set_struct;
   30: set<map<i32, i32>> set_map_i32_i32;
+  @thrift.AllowUnsafeNonSealedKeyType
   31: set<map<i32, MyStruct>> set_map_i32_struct;
+  @thrift.AllowUnsafeNonSealedKeyType
   32: set<map<MyStruct, i32>> set_map_struct_i32;
 
   33: map<i32, map<i32, i32>> map_i32_map_i32_i32;

@@ -149,6 +149,7 @@ union T11 {
   @rust.Name{name = "string"}
   1: string str;
   2: i32 integer;
+  @thrift.AllowUnsafeNonSealedKeyType
   3: set<T11> btreeset;
 }
 

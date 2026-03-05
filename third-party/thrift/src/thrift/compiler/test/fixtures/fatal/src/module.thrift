@@ -124,6 +124,7 @@ struct structC {
   14: set<i32> k;
   15: set<i32> k1;
   16: set<enum2> k2;
+  @thrift.AllowUnsafeNonSealedKeyType
   17: set<structB> k3;
   18: map<i32, i32> l;
   19: map<i32, i32> l1;
@@ -135,8 +136,11 @@ struct structC {
   25: map<string, i32> n1;
   26: map<string, enum1> n2;
   27: map<string, structB> n3;
+  @thrift.AllowUnsafeNonSealedKeyType
   28: map<structA, i32> o1;
+  @thrift.AllowUnsafeNonSealedKeyType
   29: map<structA, enum1> o2;
+  @thrift.AllowUnsafeNonSealedKeyType
   30: map<structA, structB> o3;
 }
 
@@ -179,6 +183,7 @@ struct struct3 {
   13: set<i32> fieldM;
   14: set<string> fieldN;
   15: set<string> fieldO;
+  @thrift.AllowUnsafeNonSealedKeyType
   16: set<structB> fieldP;
   17: map<string, structA> fieldQ;
   18: map<string, structB> fieldR;

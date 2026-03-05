@@ -4737,7 +4737,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 .for_each(|x| self_.check_constant_expression(x, static_allowed))
         };
         match &node.children {
-            Missing | QualifiedName(_) | LiteralExpression(_) => {}
+            Missing | QualifiedName(_) => {}
+            LiteralExpression(y) => {
+                if let SyntaxList(_) = &y.expression.children {
+                    default(self)
+                }
+            }
             Token(token) => {
                 if !is_namey(self, token) {
                     default(self)
@@ -4799,20 +4804,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.check_constant_expression(&x.consequence, static_allowed);
                 self.check_constant_expression(&x.alternative, static_allowed);
             }
-            SimpleInitializer(x) => {
-                if let LiteralExpression(y) = &x.value.children {
-                    if let SyntaxList(_) = &y.expression.children {
-                        self.errors.push(make_error_from_node(
-                            node,
-                            errors::invalid_constant_initializer,
-                        ))
-                    }
-                    self.check_constant_expression(&x.value, static_allowed)
-                } else {
-                    self.check_constant_expression(&x.value, static_allowed)
-                }
-            }
-
+            SimpleInitializer(x) => self.check_constant_expression(&x.value, static_allowed),
             ParenthesizedExpression(x) => {
                 self.check_constant_expression(&x.expression, static_allowed)
             }

@@ -56,5 +56,5 @@ to a python type.
 }}{{/type:customBinaryType?}}{{!
 }}{{/function:stream?}}{{!
 }}{{#function:stream?}}{{!
-  }}{{> clients/stream_response_class_name}}._fbthrift_create(result.value(), options){{!
+  }}{{#partial clients.stream_response_class_name function=function:self}}._fbthrift_create(result.value(), options){{!
 }}{{/function:stream?}}

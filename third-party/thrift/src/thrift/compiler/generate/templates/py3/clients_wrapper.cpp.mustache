@@ -21,6 +21,7 @@ interface. Each client method adds a callback to run in the C++ EventBase IO
 thread that will pass data to the cython callback.
 
 }}
+{{#import "common/clients" as clients}}
 {{#import "common/types" as types}}
 {{> common/auto_generated_c}}
 {{^program:auto_migrate?}}
@@ -33,7 +34,7 @@ thread that will pass data to the cython callback.
 
 {{#program:services}}
 {{#service:supportedFunctions}}
-folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>
+folly::Future<{{#partial clients.cpp_return_type function=function:self}}>
 {{service:name}}ClientWrapper::{{function:cpp_name}}(
     apache::thrift::RpcOptions& rpcOptions{{#function:args}},
     {{#partial types.cpp_value_type type=field:self.type}} arg_{{field:py_name}}{{/function:args}}) {
@@ -61,7 +62,7 @@ folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
 {{/service:supportedInteractions}}
 {{#service:supportedInteractions}}
 {{#service:supportedFunctions}}
-folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>
+folly::Future<{{#partial clients.cpp_return_type function=function:self}}>
 {{parent_service_name}}ClientWrapper::{{service:name}}InteractionWrapper::{{function:cpp_name}}(
     apache::thrift::RpcOptions& rpcOptions{{#function:args}},
     {{#partial types.cpp_value_type type=field:self.type}} arg_{{field:py_name}}{{/function:args}}) {

@@ -22,6 +22,7 @@ thrift-py3 cython users.
 
 }}
 {{#import "common/types" as types}}
+{{#import "common/stream" as stream}}
 
 {{> types/cimport_std }}
 {{> types/cimport_thrift }}
@@ -147,7 +148,7 @@ cdef class ServerStream__{{type:flat_name}}(ServerStream):
 {{/program:stream_types}}
 {{#program:response_and_stream_functions}}{{#function:return_type}}
 
-cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(ResponseAndClientBufferedStream):
+cdef class ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function:self}}(ResponseAndClientBufferedStream):
     cdef ClientBufferedStream__{{#function:stream_elem_type}}{{type:flat_name}}{{/function:stream_elem_type}} _stream
     cdef {{#partial types.cython_python_type type=function:self.return_type}} _response
 
@@ -157,7 +158,7 @@ cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffi
         }}{{#partial types.cython_cpp_type type=function:stream.elem_type}}]& c_obj, __RpcOptions rpc_options)
 
 
-cdef class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(ResponseAndServerStream):
+cdef class ResponseAndServerStream__{{#partial stream.response_class_name_suffix function=function:self}}(ResponseAndServerStream):
     pass
 
 {{/function:return_type}}{{/program:response_and_stream_functions}}

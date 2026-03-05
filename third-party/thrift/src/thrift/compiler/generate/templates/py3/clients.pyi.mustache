@@ -19,6 +19,7 @@
 This template should always mirror clients.pyx but for mypy typing
 
 }}
+{{#import "common/clients" as clients}}
 {{#import "common/pep484" as pep484}}
 {{> common/auto_generated_py}}
 
@@ -55,7 +56,7 @@ class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
         {{field:py_name}}: {{#partial pep484.type_name type=field:self.type}}{{/function:args}},
         *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> {{#if function:stream?}}{{#function:return_type}}{{> clients/stream_response_class_name}}{{/function:return_type}}{{!
+    ) -> {{#if function:stream?}}{{#partial clients.stream_response_class_name function=function:self}}{{!
         }}{{#else}}{{#partial pep484.type_name type=function:self.return_type}}{{/if function:stream?}}: ...
 
 {{/service:supportedFunctions}}
@@ -85,7 +86,7 @@ class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:ex
         {{field:py_name}}: {{#partial pep484.type_name type=field:self.type}}{{/function:args}},
         *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> {{#if function:stream?}}{{#function:return_type}}{{> clients/stream_response_class_name}}{{/function:return_type}}{{!
+    ) -> {{#if function:stream?}}{{#partial clients.stream_response_class_name function=function:self}}{{!
         }}{{#else}}{{#partial pep484.type_name type=function:self.return_type}}{{/if function:stream?}}: ...
 
 {{/service:supportedFunctions}}

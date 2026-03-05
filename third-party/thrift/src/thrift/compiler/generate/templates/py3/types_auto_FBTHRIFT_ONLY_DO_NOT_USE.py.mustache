@@ -32,6 +32,7 @@ container types, so we'll need to define factories for them based on what they
 want to include.
 
 }}
+{{#import "common/types" as types}}
 {{! Base class name for py3 auto-migrate flat-name containers }}
 {{#let partial container_base |type|}}
 {{#pragma ignore-newlines}}
@@ -82,16 +83,12 @@ def get_types_reflection():
 class {{type:flat_name}}__Meta(type):
     def _fbthrift_type_info(cls):
         return (
-        {{#type:list?}}
-            {{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}},
-        {{/type:list?}}
-        {{#type:set?}}
-            {{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}},
-        {{/type:set?}}
-        {{#type:map?}}
-            {{#type:key_type}}{{> types/typeinfo }}{{/type:key_type}},
-            {{#type:value_type}}{{> types/typeinfo }}{{/type:value_type}},
-        {{/type:map?}}
+      {{#if (or type:list? type:set?)}}
+            {{#partial types.typeinfo type=type:self.true_type.elem_type}},
+      {{#else if type:map?}}
+            {{#partial types.typeinfo type=type:self.true_type.key_type}},
+            {{#partial types.typeinfo type=type:self.true_type.val_type}},
+      {{/if (or type:list? type:set?)}}
         )
 
     def __instancecheck__(cls, instance):
@@ -106,7 +103,7 @@ class {{type:flat_name}}(_fbthrift_python_types.{{#partial container_base type=t
 
     def __init__(self, *args, **kwargs):
         if not args and not kwargs:
-            args = {{#type:map?}}({},){{/type:map?}}{{^type:map?}}((),){{/type:map?}}
+            args = {{#if type:map?}}({},){{#else}}((),){{/if}}
         super().__init__(
             *{{type:flat_name}}._fbthrift_type_info(),
             *args,

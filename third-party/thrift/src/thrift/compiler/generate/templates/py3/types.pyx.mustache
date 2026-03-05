@@ -34,6 +34,7 @@ want to include.
 }}
 {{#import "common/pep484" as pep484}}
 {{#import "common/types" as types}}
+{{#import "common/stream" as stream}}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
 cimport cython as __cython
@@ -627,13 +628,13 @@ cdef class ServerStream__{{type:flat_name}}(ServerStream):
 
 {{/program:stream_types}}
 {{#program:response_and_stream_functions}}{{#function:return_type}}
-cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(ResponseAndClientBufferedStream):
+cdef class ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function:self}}(ResponseAndClientBufferedStream):
 
     @staticmethod
     cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
             }}{{#partial types.cython_cpp_type type=function:self.return_type}}, {{!
             }}{{#partial types.cython_cpp_type type=function:stream.elem_type}}]& c_obj, __RpcOptions rpc_options):
-        __fbthrift_inst = ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}()
+        __fbthrift_inst = ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function:self}}()
         __fbthrift_inst._stream = ClientBufferedStream__{{function:stream.elem_type.flat_name}}._fbthrift_create(
             c_obj.stream, rpc_options,
         )
@@ -647,7 +648,7 @@ cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffi
         yield self._response
         yield self._stream
 
-cdef class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(ResponseAndServerStream):
+cdef class ResponseAndServerStream__{{#partial stream.response_class_name_suffix function=function:self}}(ResponseAndServerStream):
     pass
 
 {{/function:return_type}}{{/program:response_and_stream_functions}}

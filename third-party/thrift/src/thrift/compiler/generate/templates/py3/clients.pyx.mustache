@@ -22,8 +22,10 @@ The generated file is pretty big, but the bulk of the generation is done inside
 the clients/callback partial.
 
 }}
+{{#import "common/clients" as clients}}
 {{#import "common/pep484" as pep484}}
 {{#import "common/types" as types}}
+{{#import "common/common" as common}}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
 from libc.stdint cimport (
@@ -122,8 +124,8 @@ from {{#each service:program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{service:pr
 
 {{#program:services}}
 cdef object _{{service:name}}_annotations = _py_types.MappingProxyType({
-{{#each service:unstructured_annotations as |annotation|}}
-    {{> common/annotation}}
+{{#each service:unstructured_annotations as |annot|}}
+    {{#partial common.annotation annot=annot}}
 {{/each}}
 })
 
@@ -181,7 +183,7 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
         __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}](
+        bridgeFutureWith[{{#partial clients.cython_return_type_cpp_type function=function:self}}](
             self._executor,
             down_cast_ptr[c{{service:name}}ClientWrapper, cClientWrapper](self._client.get()).{{function:cpp_name}}(rpc_options._cpp_obj, {{#function:args}}
                 {{#field:type}}{{> clients/cython_python_to_cpp_arg}}{{/field:type}},{{/function:args}}
@@ -262,7 +264,7 @@ cdef class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#servi
         __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}](
+        bridgeFutureWith[{{#partial clients.cython_return_type_cpp_type function=function:self}}](
             self._executor,
             down_cast_ptr[c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper, {{!
             }}cClientWrapper](self._client.get()).{{function:cpp_name}}(rpc_options._cpp_obj, {{#function:args}}

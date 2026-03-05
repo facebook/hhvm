@@ -146,3 +146,48 @@ deref((<{{#partial types.cython_python_type type=type}}?> result).{{#partial typ
 
   {{/if type.iobuf?}}
 {{/let partial}}
+
+
+{{! Promise class name for a return type }}
+{{#let export partial promise_name |function| captures |cython_cpp_return_type_ident|}}
+{{#pragma ignore-newlines}}
+Promise{{#if function.stack_arguments?}}__sa{{/if}}_{{#partial cython_cpp_return_type_ident function=function}}
+{{/let partial}}
+
+
+{{! Cpp type for return_type in services }}
+{{#let export partial cpp_return_type |function| captures |types|}}
+{{#pragma ignore-newlines}}
+  {{#if function.stream?}}
+    {{#if function.stream_has_first_response?}}
+apache::thrift::ResponseAndServerStream<{{#partial types.cpp_value_type type=function.return_type}},
+    {{#else}}
+apache::thrift::ServerStream<
+    {{/if function.stream_has_first_response?}}
+{{#partial types.cpp_value_type type=function.stream.elem_type}}>
+  {{#else if function.stack_arguments?}}
+{{#partial types.cpp_value_type type=function.return_type}}
+  {{#else}}
+{{#partial types.cpp_arg_type type=function.return_type}}
+  {{/if function.stream?}}
+{{/let partial}}
+
+
+{{! Cython type for return_type in services }}
+{{#let export partial cython_return_type_cpp_type |function| captures |types|}}
+{{#pragma ignore-newlines}}
+  {{#if function.stream?}}
+    {{#if function.stream_has_first_response?}}
+cResponseAndServerStream[{{#partial types.cython_cpp_type type=function.return_type}},
+    {{#else}}
+cServerStream[
+    {{/if function.stream_has_first_response?}}
+{{#partial types.cython_cpp_type type=function.stream.elem_type}}]
+  {{#else if function.stack_arguments?}}
+{{#partial types.cython_cpp_type type=function.return_type}}
+  {{#else}}
+    {{#let type=function.return_type}}
+    {{#let wrap=(or type.string_or_binary? type.structured? type.container?)}}
+{{#if wrap}}unique_ptr[{{/if}}{{#partial types.cython_cpp_type type=type}}{{#if wrap}}]{{/if}}
+  {{/if function.stream?}}
+{{/let partial}}

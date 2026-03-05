@@ -6,7 +6,7 @@
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,17 +15,13 @@
   limitations under the License.
 
 }}
-{{! Cython type for return_type in services }}
+
+{{!
+Used to construct stream response class name as a suffix as a unique
+identification. Takes a function and produces
+"{first_response_flat_name}_{elem_flat_name}".
+}}
+{{#let export partial response_class_name_suffix |function|}}
 {{#pragma ignore-newlines}}
-  {{#if function:stream?}}
-    {{#if function:stream_has_first_response?}}
-cResponseAndServerStream[{{#partial types.cython_cpp_type type=function:self.return_type}},
-    {{#else}}
-cServerStream[
-    {{/if function:stream_has_first_response?}}
-{{#partial types.cython_cpp_type type=function:stream.elem_type}}]
-  {{#else if function:stack_arguments?}}
-{{#partial types.cython_cpp_type type=type:self}}
-  {{#else}}
-{{> services/cython_field_type}}
-  {{/if function:stream?}}
+{{function.return_type.flat_name}}_{{function.stream.elem_type.flat_name}}
+{{/let partial}}

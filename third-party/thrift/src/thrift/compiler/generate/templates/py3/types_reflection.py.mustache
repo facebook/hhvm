@@ -33,6 +33,7 @@ want to include.
 
 }}
 {{#import "common/types" as types}}
+{{#import "common/common" as common}}
 {{! Additional information for number types }}
 {{#let partial thrift_number_type |type|}}
 {{#pragma ignore-newlines}}
@@ -88,8 +89,8 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
             }}{{#else if struct:union?}}UNION{{!
             }}{{#else}}STRUCT{{/if struct:exception?}},
         annotations={
-            {{#each struct:unstructured_annotations as |annotation|}}
-            {{> common/annotation }}
+            {{#each struct:unstructured_annotations as |annot|}}
+            {{#partial common.annotation annot=annot}}
             {{/each}}
         },
     )
@@ -116,8 +117,8 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
             }}{{/struct:union?}}{{!
             }}{{#struct:union?}}None{{/struct:union?}},
             annotations={
-                {{#each field:unstructured_annotations as |annotation|}}
-                {{> common/annotation }}
+                {{#each field:unstructured_annotations as |annot|}}
+                {{#partial common.annotation annot=annot}}
                 {{/each}}
             },
         ),
@@ -126,21 +127,19 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
     return spec
 {{/program:filtered_structs}}
 {{#program:containerTypes}}
-{{#type:list?}}
+{{#if type:list?}}
 def get_reflection__{{type:flat_name}}() -> __ListSpec :
     return __ListSpec._fbthrift_create(
         value={{#partial types.python_type type=type:self.true_type.elem_type}},
         kind={{#partial thrift_number_type type=type:self.true_type.elem_type}},
     )
-{{/type:list?}}
-{{#type:set?}}
+{{#else if type:set?}}
 def get_reflection__{{type:flat_name}}() -> __SetSpec:
     return __SetSpec._fbthrift_create(
         value={{#partial types.python_type type=type:self.true_type.elem_type}},
         kind={{#partial thrift_number_type type=type:self.true_type.elem_type}},
      )
-{{/type:set?}}
-{{#type:map?}}
+{{#else if type:map?}}
 def get_reflection__{{type:flat_name}}() -> __MapSpec:
     return __MapSpec._fbthrift_create(
         key={{#partial types.python_type type=type:self.true_type.key_type}},
@@ -148,6 +147,6 @@ def get_reflection__{{type:flat_name}}() -> __MapSpec:
         value={{#partial types.python_type type=type:self.true_type.val_type}},
         value_kind={{#partial thrift_number_type type=type:self.true_type.val_type}},
     )
-{{/type:map?}}
+{{/if type:list?}}
 
 {{/program:containerTypes}}

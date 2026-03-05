@@ -1,0 +1,60 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+{{#import "common/stream" as stream}}
+
+{{! The C++ type of return_type for stream types in clients. }}
+{{#let export partial cpp_return_type |function| captures |types|}}
+{{#pragma ignore-newlines}}
+  {{#if function.stream?}}
+    {{#if function.stream_has_first_response?}}
+apache::thrift::ResponseAndClientBufferedStream<{{#partial types.cpp_value_type type=function.return_type}},
+    {{#else}}
+apache::thrift::ClientBufferedStream<
+    {{/if function.stream_has_first_response?}}
+{{#partial types.cpp_value_type type=function.stream.elem_type}}>
+  {{#else}}
+{{#partial types.cpp_value_type type=function.return_type}}
+  {{/if function.stream?}}
+{{/let partial}}
+
+{{! Cython type for return_type in clients }}
+{{#let export partial cython_return_type_cpp_type |function| captures |types|}}
+{{#pragma ignore-newlines}}
+  {{#if function.stream?}}
+    {{#if function.stream_has_first_response?}}
+cResponseAndClientBufferedStream[{{#partial types.cython_cpp_type type=function.return_type}},
+    {{#else}}
+cClientBufferedStream[
+    {{/if function.stream_has_first_response?}}
+{{#partial types.cython_cpp_type type=function.stream.elem_type}}]
+  {{#else}}
+{{#partial types.cython_cpp_type type=function.return_type}}
+  {{/if function.stream?}}
+{{/let partial}}
+
+{{! Stream response class name for clients }}
+{{#let export partial stream_response_class_name |function| captures |stream|}}
+{{#pragma ignore-newlines}}
+{{function.modulePath}}.
+  {{#if function.stream_has_first_response?}}
+ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function}}
+  {{#else}}
+ClientBufferedStream__{{function.stream.elem_type.flat_name}}
+  {{/if function.stream_has_first_response?}}
+{{/let partial}}

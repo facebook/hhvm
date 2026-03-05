@@ -15,11 +15,11 @@
   limitations under the License.
 
 }}
-using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>;
+using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<{{#partial clients.cpp_return_type function=function:self}}>;
 folly::Promise<CallbackHelper::PromiseResult> _promise;
 auto _future = _promise.getFuture();
 {{^function:oneway?}}
-auto callback = std::make_unique<::thrift::py3::FutureCallback<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>>(
+auto callback = std::make_unique<::thrift::py3::FutureCallback<{{#partial clients.cpp_return_type function=function:self}}>>(
   std::move(_promise), rpcOptions, client->recv_wrapped_{{function:cpp_name}}, channel_);
 {{/function:oneway?}}
 {{#function:oneway?}}
@@ -34,7 +34,7 @@ try {
     arg_{{field:py_name}}{{/function:args}}
   );
 } catch (...) {
-  return folly::makeFuture<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>(folly::exception_wrapper(
+  return folly::makeFuture<{{#partial clients.cpp_return_type function=function:self}}>(folly::exception_wrapper(
     std::current_exception()
   ));
 }

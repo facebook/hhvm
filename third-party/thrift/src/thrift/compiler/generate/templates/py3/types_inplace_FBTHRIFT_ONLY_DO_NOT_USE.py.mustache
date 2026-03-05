@@ -23,6 +23,14 @@ are re-exported via types.pyx
 {{#import "common/constants" as constants}}
 {{#import "common/pep484" as pep484}}
 {{#import "common/types" as types}}
+{{! The type annotation for a union's .value property: Field1Type | Field2Type | ... | None }}
+{{#let partial union_value_type |struct| captures |pep484|}}
+{{#pragma ignore-newlines}}
+{{#each struct.py3_fields as |field|}}
+{{#partial pep484.field_type field=field}} | {{!}}
+{{/each}}
+None
+{{/let partial}}
 {{> common/auto_generated_py}}
 {{#program:inplace_migrate?}}
 
@@ -141,7 +149,7 @@ class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}})
     {{/struct:py3_fields}}
     {{#struct:union?}}
     _fbthrift_inner__type: Type
-    _fbthrift_inner__value: {{> inplace/union_value_type }}
+    _fbthrift_inner__value: {{#partial union_value_type struct=struct:self}}
     {{/struct:union?}}
 
 
@@ -259,7 +267,7 @@ class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}})
         return self._fbthrift_inner__type
 
     @_python__property
-    def value(self) -> {{> inplace/union_value_type }}:
+    def value(self) -> {{#partial union_value_type struct=struct:self}}:
         match self._fbthrift__inner.type:
 {{#struct:py3_fields}}{{#field:type}}{{#type:needs_convert?}}
             case _fbthrift_python_types.{{struct:name}}.Type.{{field:py_name}}:

@@ -26,6 +26,7 @@ the services/promise and services/callback partials.
 {{#import "common/pep484" as pep484}}
 {{#import "common/services" as services}}
 {{#import "common/types" as types}}
+{{#import "common/common" as common}}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
 
@@ -221,8 +222,8 @@ cdef void getNextGenerator_{{service:name}}_{{function:name}}(object generator, 
 
 {{#program:services}}
 cdef object _{{service:name}}_annotations = _py_types.MappingProxyType({
-{{#each service:unstructured_annotations as |annotation|}}
-    {{> common/annotation}}
+{{#each service:unstructured_annotations as |annot|}}
+    {{#partial common.annotation annot=annot}}
 {{/each}}
 })
 

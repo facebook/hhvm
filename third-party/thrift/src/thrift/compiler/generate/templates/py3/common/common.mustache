@@ -6,7 +6,7 @@
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
+}}
 
-Stream response class name.
-}}{{type:modulePath}}.{{!
-}}{{#function:stream_has_first_response?}}{{!
-}}ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}{{!
-}}{{/function:stream_has_first_response?}}{{!
-}}{{^function:stream_has_first_response?}}{{!
-}}ClientBufferedStream__{{#function:stream_elem_type}}{{type:flat_name}}{{/function:stream_elem_type}}{{!
-}}{{/function:stream_has_first_response?}}
+{{!
+A single annotation, written out for python consumption in a dict.
+Annotations may start/end with quotes hence we take extra care.
+An annotation without an explicitly provided value is implicitly assigned
+the default value "1".
+}}
+{{#let export partial annotation |annot|}}
+{{(py_string_literal annot.key)}}: {{#if (string.empty? annot.value)}}"1"{{#else}}{{(py_string_literal annot.value)}}{{/if}},
+{{/let partial}}

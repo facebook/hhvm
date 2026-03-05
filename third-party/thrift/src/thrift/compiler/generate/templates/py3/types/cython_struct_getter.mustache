@@ -22,38 +22,67 @@ by Cython. Complex objects need to be wrapped or decoded appropriately. Structs
 are special because we try to memoize their wrappers on the parent handler
 if they have been previously retrieved.
 
-}}{{#type:iobuf?}}{{!
+}}{{!
+For the Thrift field foo, this generates the C++ accessor expression to obtain
+the field value: plain name if no ref accessor, or the appropriate
+_ref().value() / _ref().value_unchecked() variant.
+}}
+{{#let partial cython_field_value_ref |field|}}
+{{#pragma ignore-newlines}}
+  {{#if (not field.has_ref_accessor?)}}
+{{field.py_name}}
+  {{#else if (and field.optional? (not field.boxed_ref?))}}
+{{field.py_name}}_ref().value_unchecked()
+  {{#else}}
+{{field.py_name}}_ref().value()
+  {{/if (not field.has_ref_accessor?)}}
+{{/let partial}}
+{{!
+Same as cython_field_value_ref but returns a reference (.ref() / .ref_unchecked())
+instead of a value. Used when we need to take an address.
+}}
+{{#let partial cython_field_ref |field|}}
+{{#pragma ignore-newlines}}
+  {{#if (not field.has_ref_accessor?)}}
+{{field.py_name}}
+  {{#else if (and field.optional? (not field.boxed_ref?))}}
+{{field.py_name}}_ref().ref_unchecked()
+  {{#else}}
+{{field.py_name}}_ref().ref()
+  {{/if (not field.has_ref_accessor?)}}
+{{/let partial}}
+{{#type:iobuf?}}{{!
 }}if self.__fbthrift_cached_{{field:py_name}} is None:
-    self.__fbthrift_cached_{{field:py_name}} = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_ref}}), self)
+    self.__fbthrift_cached_{{field:py_name}} = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_ref field=field:self}}), self)
 return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{/type:iobuf?}}{{!
 }}{{#type:iobufRef?}}{{!
 }}if self.__fbthrift_cached_{{field:py_name}} is None:
-    if not deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}:
+    if not deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_value_ref field=field:self}}:
         return None
-    self.__fbthrift_cached_{{field:py_name}} = _fbthrift_iobuf.IOBuf.create(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}.get(), self)
+    self.__fbthrift_cached_{{field:py_name}} = _fbthrift_iobuf.IOBuf.create(deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_value_ref field=field:self}}.get(), self)
 return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{/type:iobufRef?}}{{!
 }}{{#type:flexibleBinary?}}{{!
-  }}return (<const char*>deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}{{!
-    }}.data())[:deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}{{!
+  }}return (<const char*>deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_value_ref field=field:self}}{{!
+    }}.data())[:deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_value_ref field=field:self}}{{!
     }}.size()]{{!
 }}{{/type:flexibleBinary?}}{{!
 }}{{^type:customBinaryType?}}{{!
 }}{{#field:reference?}}{{!
 }}if self.__fbthrift_cached_{{field:py_name}} is None:
-    if not deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}_ref():
+    if not deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_value_ref field=field:self}}_ref():
         return None
     {{! Use an aliasing constructor since the object we're returning is still
         managed by the top-level object, possible via a unique_ptr }}
     self.__fbthrift_cached_{{field:py_name}} = {{!
       }}{{#type:container?}}{{!
       }}{{#partial types.container_from_cpp type=type:self}}({{!
-        }}deref(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}_ref())){{!
+        }}deref(deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_value_ref field=field:self}}_ref())){{!
       }}{{/type:container?}}{{!
       }}{{^type:container?}}{{!
       }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
-        }}deref(deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}_ref()), self.{{#partial types.cpp_obj}})){{!
+        }}deref(deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_value_ref field=field:self}}_ref()), self.{{#partial types.cpp_obj}})){{!
       }}{{/type:container?}}
 return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{/field:reference?}}{{!
@@ -62,7 +91,7 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
   }}return {{!
     }}{{#type:bool?}}<pbool> {{/type:bool?}}{{!
     }}{{#type:string?}}(<bytes>{{/type:string?}}{{!
-    }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}{{!
+    }}deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_value_ref field=field:self}}{{!
     }}{{#type:string?}}).decode('UTF-8'){{/type:string?}}{{!
 }}{{/type:primitive?}}{{!
 }}{{^type:primitive?}}{{!
@@ -70,14 +99,14 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
     self.__fbthrift_cached_{{field:py_name}} = {{!
       }}{{#type:enum}}translate_cpp_enum_to_python({{!
         }}{{#partial types.python_type type=type:self}}, <int>({{!
-        }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_value_ref}}{{!
+        }}deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_value_ref field=field:self}}{{!
       }})){{/type:enum}}{{!
       }}{{#type:container?}}{{#partial types.container_from_cpp type=type:self}}({{!
-        }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_ref}}){{!
+        }}deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_ref field=field:self}}){{!
       }}{{/type:container?}}{{!
       }}{{^type:enum?}}{{^type:container?}}{{!
         }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
-      }}deref(self.{{#partial types.cpp_obj}}).{{> types/cython_field_ref}}, {{!
+      }}deref(self.{{#partial types.cpp_obj}}).{{#partial cython_field_ref field=field:self}}, {{!
       }}self.{{#partial types.cpp_obj}}{{!
       }})){{/type:container?}}{{/type:enum?}}
 return self.__fbthrift_cached_{{field:py_name}}{{!

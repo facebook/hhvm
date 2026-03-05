@@ -35,9 +35,7 @@ sets the converted value on that promise.
 cdef api void call_cy_{{service:name}}_{{function:name}}(
     object self,
     Cpp2RequestContext* ctx,
-    cFollyPromise[{{#function:return_type}}{{!
-            }}{{> services/cython_return_type_cpp_type}}{{!
-        }}{{/function:return_type}}]{{!
+    cFollyPromise[{{#partial services.cython_return_type_cpp_type function=function:self}}]{{!
     }} cPromise{{#function:args}},
     {{#if function:stack_arguments?}}{{!
         }}{{#partial types.cython_cpp_type type=field:self.type}}{{!
@@ -45,9 +43,7 @@ cdef api void call_cy_{{service:name}}_{{function:name}}(
         }}{{#field:type}}{{> services/cython_field_type}}{{/field:type}}{{!
     }}{{/if function:stack_arguments?}} {{field:py_name}}{{/function:args}}
 ) noexcept:{{! Gets called from a python Executor }}
-    {{#function:return_type}}
-    cdef {{> services/promise_name}} __promise = {{> services/promise_name}}._fbthrift_create(cmove(cPromise))
-    {{/function:return_type}}
+    cdef {{#partial services.promise_name function=function:self}} __promise = {{#partial services.promise_name function=function:self}}._fbthrift_create(cmove(cPromise))
     {{#function:args}}
     arg_{{field:py_name}} = {{#field:type}}{{!
             }}{{^function:stack_arguments?}}{{> services/cython_cpp_to_python}}{{/function:stack_arguments?}}{{!
@@ -70,14 +66,10 @@ cdef api void call_cy_{{service:name}}_{{function:name}}(
 {{#service:lifecycleFunctions}}
 cdef api void call_cy_{{service:name}}_{{function:name}}(
     object self,
-    cFollyPromise[{{#function:return_type}}{{!
-            }}{{> services/cython_return_type_cpp_type}}{{!
-        }}{{/function:return_type}}]{{!
+    cFollyPromise[{{#partial services.cython_return_type_cpp_type function=function:self}}]{{!
     }} cPromise
 ) noexcept:
-    {{#function:return_type}}
-    cdef {{> services/promise_name}} __promise = {{> services/promise_name}}._fbthrift_create(cmove(cPromise))
-    {{/function:return_type}}
+    cdef {{#partial services.promise_name function=function:self}} __promise = {{#partial services.promise_name function=function:self}}._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
         {{service:name}}_{{function:name}}_coro(
             self,
@@ -88,7 +80,7 @@ cdef api void call_cy_{{service:name}}_{{function:name}}(
 {{#service:supportedFunctionsWithLifecycle}}
 async def {{service:name}}_{{function:name}}_coro(
     object self,
-    {{#function:return_type}}{{> services/promise_name}}{{/function:return_type}}{{!
+    {{#partial services.promise_name function=function:self}}{{!
     }} promise{{#function:args}},
     {{field:py_name}}{{/function:args}}
 ):

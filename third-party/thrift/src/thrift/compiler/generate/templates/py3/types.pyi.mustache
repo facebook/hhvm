@@ -22,6 +22,7 @@ This template should always mirror types.pyx but for mypy typing
 {{#import "common/pep484" as pep484}}
 {{#import "common/services" as services}}
 {{#import "common/types" as types}}
+{{#import "common/stream" as stream}}
 {{> common/auto_generated_py}}
 
 import enum as _python_std_enum
@@ -179,13 +180,13 @@ class ServerPublisher_{{#partial services.cython_cpp_type_ident type=type:self}}
 
 {{/program:stream_types}}
 {{#program:response_and_stream_functions}}{{#function:return_type}}{{!
-}}class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(thrift.py3.stream.ResponseAndClientBufferedStream[{{#partial pep484.type_name type=function:self.return_type}}, {{#partial pep484.type_name type=function:stream.elem_type}}]):
+}}class ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function:self}}(thrift.py3.stream.ResponseAndClientBufferedStream[{{#partial pep484.type_name type=function:self.return_type}}, {{#partial pep484.type_name type=function:stream.elem_type}}]):
     def __iter__(self) -> _typing.Tuple[
         {{#partial pep484.type_name type=function:self.return_type}},
         {{#function:stream_elem_type}}ClientBufferedStream__{{type:flat_name}}{{/function:stream_elem_type}},
     ]: ...
 
-class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(thrift.py3.stream.ResponseAndServerStream[{{#partial pep484.type_name type=function:self.return_type}}, {{#partial pep484.type_name type=function:stream.elem_type}}]):
+class ResponseAndServerStream__{{#partial stream.response_class_name_suffix function=function:self}}(thrift.py3.stream.ResponseAndServerStream[{{#partial pep484.type_name type=function:self.return_type}}, {{#partial pep484.type_name type=function:stream.elem_type}}]):
     pass
 
 {{/function:return_type}}{{/program:response_and_stream_functions}}

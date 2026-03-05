@@ -19,6 +19,7 @@
 Pxd file to expose the interface defined in ClientsWrapper.h to CythonClients.pyx classes.
 
 }}
+{{#import "common/clients" as clients}}
 {{#import "common/types" as types}}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
@@ -102,7 +103,7 @@ cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wra
     {{/service:extends?}}
 
     {{#service:supportedFunctions}}
-    cFollyFuture[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}] {{function:cpp_name}}(cRpcOptions, {{#function:args}}
+    cFollyFuture[{{#partial clients.cython_return_type_cpp_type function=function:self}}] {{function:cpp_name}}(cRpcOptions, {{#function:args}}
       {{#partial types.cython_cpp_type type=field:self.type}} arg_{{field:py_name}},{{/function:args}})
     {{/service:supportedFunctions}}
     {{!
@@ -130,7 +131,7 @@ cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wra
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
     {{#service:supportedFunctions}}
-    cFollyFuture[{{#function:return_type}}{{> clients/cython_return_type_cpp_type}}{{/function:return_type}}] {{function:cpp_name}}(cRpcOptions, {{#function:args}}
+    cFollyFuture[{{#partial clients.cython_return_type_cpp_type function=function:self}}] {{function:cpp_name}}(cRpcOptions, {{#function:args}}
       {{#partial types.cython_cpp_type type=field:self.type}} arg_{{field:py_name}},{{/function:args}})
     {{/service:supportedFunctions}}
     {{!

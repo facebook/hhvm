@@ -476,3 +476,29 @@ Used when passing by value (non-stack_arguments mode).
 {{#partial cpp_value_type type=type}}
 {{#if const_ref}}&{{/if}}
 {{/let partial}}
+
+
+{{!
+Used in py3 auto-migrate to generate type info aliases for container flat names.
+Recursive for container element types.
+}}
+{{#let export partial typeinfo |type|}}
+{{#pragma ignore-newlines}}
+{{#if type.bool?}}_fbthrift_python_types.typeinfo_bool
+{{#else if type.byte?}}_fbthrift_python_types.typeinfo_byte
+{{#else if type.i16?}}_fbthrift_python_types.typeinfo_i16
+{{#else if type.i32?}}_fbthrift_python_types.typeinfo_i32
+{{#else if type.i64?}}_fbthrift_python_types.typeinfo_i64
+{{#else if type.double?}}_fbthrift_python_types.typeinfo_double
+{{#else if type.float?}}_fbthrift_python_types.typeinfo_float
+{{#else if type.string?}}_fbthrift_python_types.typeinfo_string
+{{#else if type.binary?}}{{#if type.iobuf?}}_fbthrift_python_types.typeinfo_iobuf{{#else}}_fbthrift_python_types.typeinfo_binary{{/if}}
+{{#else if type.enum?}}_fbthrift_python_types.EnumTypeInfo({{type.module_auto_migrate_path}}.{{type.true_type.name}})
+{{#else if type.structured?}}_fbthrift_python_types.StructTypeInfo({{type.module_auto_migrate_path}}.{{type.true_type.name}})
+{{#else if type.list?}}_fbthrift_python_types.ListTypeInfo({{#partial typeinfo type=type.true_type.elem_type}})
+{{#else if type.set?}}_fbthrift_python_types.SetTypeInfo({{#partial typeinfo type=type.true_type.elem_type}})
+  {{#else if type.map?}}
+    {{#let ttype=type.true_type}}
+_fbthrift_python_types.MapTypeInfo({{#partial typeinfo type=ttype.key_type}}, {{#partial typeinfo type=ttype.val_type}})
+  {{/if type.bool?}}
+{{/let partial}}

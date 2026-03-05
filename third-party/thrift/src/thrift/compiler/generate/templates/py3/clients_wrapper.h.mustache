@@ -19,6 +19,7 @@
 Header file for ClientsWrapper.cpp for cython to import in CythonClients.pxd.
 
 }}
+{{#import "common/clients" as clients}}
 {{#import "common/types" as types}}
 {{> common/auto_generated_c}}
 {{^program:auto_migrate?}}
@@ -65,7 +66,7 @@ class {{service:name}}ClientWrapper : {{!
     }}{{^service:extends?}}::thrift::py3::ClientWrapper::ClientWrapper{{/service:extends?}};
 
 {{#service:supportedFunctions}}
-    folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}> {{function:cpp_name}}(
+    folly::Future<{{#partial clients.cpp_return_type function=function:self}}> {{function:cpp_name}}(
       apache::thrift::RpcOptions& rpcOptions{{#function:args}},
       {{#partial types.cpp_value_type type=field:self.type}} arg_{{field:py_name}}{{/function:args}});
 {{/service:supportedFunctions}}
@@ -80,7 +81,7 @@ class {{service:name}}ClientWrapper : {{!
            : ClientWrapper(std::move(async_client), channel) {}
 
         {{#service:supportedFunctions}}
-        folly::Future<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}> {{function:cpp_name}}(
+        folly::Future<{{#partial clients.cpp_return_type function=function:self}}> {{function:cpp_name}}(
           apache::thrift::RpcOptions& rpcOptions{{#function:args}},
           {{#partial types.cpp_value_type type=field:self.type}} arg_{{field:py_name}}{{/function:args}});
         {{/service:supportedFunctions}}

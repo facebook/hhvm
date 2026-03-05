@@ -108,18 +108,18 @@ TEST(InteractionTest, PrioritizedInteractionRequest) {
   // test.
   FLAGS_thrift_experimental_use_resource_pools = true;
   struct BlockingCalculatorHandler : public SemiCalculatorHandler {
-    folly::Baton<> blockInteraction, blockNormal, startedInteraction;
-
-    TileAndResponse<AdditionIf, int> initializedAddition(int x) override {
-      startedInteraction.post();
-      EXPECT_TRUE(blockInteraction.try_wait_for(std::chrono::seconds(5)));
-      return SemiCalculatorHandler::initializedAddition(x);
-    }
+    folly::Baton<> blockBlocker, blockNormal, startedBlocker;
 
     folly::SemiFuture<int32_t> semifuture_addPrimitive(
         int32_t a, int32_t b) override {
-      EXPECT_TRUE(blockNormal.try_wait_for(std::chrono::seconds(5)));
-      blockNormal.reset();
+      if (a == 0 && b == 0) {
+        // This is the "blocker" call used to occupy the worker thread.
+        startedBlocker.post();
+        EXPECT_TRUE(blockBlocker.try_wait_for(std::chrono::seconds(5)));
+      } else {
+        EXPECT_TRUE(blockNormal.try_wait_for(std::chrono::seconds(5)));
+        blockNormal.reset();
+      }
       return a + b;
     }
   };
@@ -134,18 +134,26 @@ TEST(InteractionTest, PrioritizedInteractionRequest) {
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
 
+  // Create the interaction and let the factory method complete. This ensures
+  // the tile is fully registered, avoiding a race where TilePromise::fulfill()
+  // runs asynchronously on the EventBase thread after the concurrency
+  // controller has already released the worker to dequeue the next request.
   RpcOptions opts;
   auto [adder, sf1] = client->eager_semifuture_initializedAddition(opts, 42);
+  EXPECT_EQ(std::move(sf1).get(), 42);
+
+  // Block the sole worker thread with a normal request.
+  auto blocker = client->semifuture_addPrimitive(0, 0);
+  handler->startedBlocker.wait();
+
+  // While the worker is blocked, send both an interaction request (MID_PRI)
+  // and a normal request (LO_PRI). Both enter the resource pool's RequestPile.
   auto sf2 = adder.semifuture_getPrimitive();
-
-  // Wait for the interaction requests to reach the server
-  handler->startedInteraction.wait();
-
   auto normal = client->semifuture_addPrimitive(1, 2);
 
-  // Wait for the normal requests to reach the server
+  // Wait for both requests to be queued in the resource pool.
   auto start = std::chrono::steady_clock::now();
-  while (runner.getThriftServer().resourcePoolSet().numQueued() != 1) {
+  while (runner.getThriftServer().resourcePoolSet().numQueued() != 2) {
     /* sleep override */
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     if (std::chrono::steady_clock::now() - start > std::chrono::seconds(5)) {
@@ -154,14 +162,15 @@ TEST(InteractionTest, PrioritizedInteractionRequest) {
     }
   }
 
-  // Unblock the interaction request and wait for it to finish
-  handler->blockInteraction.post();
-  EXPECT_EQ(std::move(sf1).get(), 42);
+  // Unblock the blocker so the worker can process queued requests.
+  handler->blockBlocker.post();
+  EXPECT_EQ(std::move(blocker).get(), 0);
 
-  // Make sure interaction request is executed before normal request.
+  // The interaction request (MID_PRI) should be dequeued before the normal
+  // request (LO_PRI).
   EXPECT_EQ(std::move(sf2).get(), 42);
 
-  // Unblock the normal request and wait for it to finish
+  // Unblock the normal request and wait for it to finish.
   handler->blockNormal.post();
   EXPECT_EQ(std::move(normal).get(), 3);
 }

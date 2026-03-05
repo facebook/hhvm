@@ -243,17 +243,17 @@ CO_TEST(ServiceHealthPoller, DynamicLiveness) {
   EXPECT_EQ(co_await result->co_next(), ServiceHealth::ERROR);
 
   handler.set(ServiceHealth::OK);
-  co_await folly::coro::sleep(50ms);
-  EXPECT_EQ(result->get(), ServiceHealth::OK);
+  // Use event-driven wait instead of sleep to avoid flakiness under load
+  EXPECT_EQ(co_await result->co_next(), ServiceHealth::OK);
 
-  liveness.setValue(200ms);
+  liveness.setValue(500ms);
   folly::observer_detail::ObserverManager::waitForAllUpdates();
   // wait for any existing polling to be done
   co_await result->co_next();
 
   handler.set(ServiceHealth::ERROR);
   co_await folly::coro::sleep(50ms);
-  // unchanged because liveness is large
+  // unchanged because liveness is large (500ms >> 50ms)
   EXPECT_EQ(result->get(), ServiceHealth::OK);
 
   EXPECT_EQ(co_await result->co_next(), ServiceHealth::ERROR);

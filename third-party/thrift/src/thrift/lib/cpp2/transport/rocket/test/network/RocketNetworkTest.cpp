@@ -106,8 +106,10 @@ class RocketNetworkTest : public testing::Test {
   void unsetExpectedSetupMetadata() { server_->setExpectedSetupMetadata({}); }
 
   // Returns the server connection once it is established.
+  // After reconnect(), the old server-side connection may linger briefly while
+  // the new one is already created, so we retry until exactly 1 remains.
   RocketServerConnection* getServerConnection() {
-    for (int i = 0, numTries = 10; i < numTries; ++i) {
+    for (int i = 0, numTries = 50; i < numTries; ++i) {
       auto connCount = 0;
       RocketServerConnection* conn = nullptr;
       this->server_->getEventBase().runInEventBaseThreadAndWait([&] {

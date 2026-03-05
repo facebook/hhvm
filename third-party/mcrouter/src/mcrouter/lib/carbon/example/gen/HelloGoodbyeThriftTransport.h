@@ -194,7 +194,7 @@ class ThriftTransport<hellogoodbye::HelloGoodbyeRouterInfo> : public ThriftTrans
               connectionOptions_.thriftCompressionThreshold;
         }
         compressionConfig.codecConfig_ref() = std::move(codec);
-        auto* channel = static_cast<apache::thrift::RocketClientChannel*>(thriftClient_->getChannel());
+        auto* channel = static_cast<apache::thrift::RocketClientChannelBase*>(thriftClient_->getChannel());
         channel->setDesiredCompressionConfig(std::move(compressionConfig));
       }
 
@@ -221,7 +221,7 @@ class ThriftTransport<hellogoodbye::HelloGoodbyeRouterInfo> : public ThriftTrans
       if (connectionOptions_.thriftCompression) {
         // Disable compression for this request type
         apache::thrift::CompressionConfig compressionConfig;
-        auto* channel = static_cast<apache::thrift::RocketClientChannel*>(thriftClient_->getChannel());
+        auto* channel = static_cast<apache::thrift::RocketClientChannelBase*>(thriftClient_->getChannel());
         channel->setDesiredCompressionConfig(std::move(compressionConfig));
       }
 

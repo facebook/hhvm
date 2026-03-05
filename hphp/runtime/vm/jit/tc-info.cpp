@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -28,6 +29,8 @@
 #include "hphp/util/build-info.h"
 
 #include <folly/Format.h>
+#include <folly/json/dynamic.h>
+#include <folly/json/json.h>
 
 #include <algorithm>
 #include <string>
@@ -258,6 +261,59 @@ std::vector<TCMemInfo> getTCMemoryUsage() {
     }
   );
   return ret;
+}
+
+std::string getRDSUsageJSON() {
+  auto const normalCap = Cfg::Eval::RDSSize * 3 / 4;
+  auto const localCap = normalCap;
+  auto const persistentCap = Cfg::Eval::RDSSize / 4;
+
+  folly::dynamic summary = folly::dynamic::object
+    ("normal", folly::dynamic::object
+      ("used", rds::usedBytes())
+      ("capacity", normalCap))
+    ("local", folly::dynamic::object
+      ("used", rds::usedLocalBytes())
+      ("capacity", localCap))
+    ("persistent", folly::dynamic::object
+      ("used", rds::usedPersistentBytes())
+      ("capacity", persistentCap));
+
+  auto const categories = rds::usageByCategory();
+  folly::dynamic catArray = folly::dynamic::array;
+  for (auto const& cat : categories) {
+    auto const modeName = [&] {
+      switch (cat.mode) {
+        case rds::Mode::Normal:     return "Normal";
+        case rds::Mode::Local:      return "Local";
+        case rds::Mode::Persistent: return "Persistent";
+        default:                    return "Unknown";
+      }
+    }();
+
+    size_t regionUsed = 0;
+    switch (cat.mode) {
+      case rds::Mode::Normal:     regionUsed = rds::usedBytes(); break;
+      case rds::Mode::Local:      regionUsed = rds::usedLocalBytes(); break;
+      case rds::Mode::Persistent: regionUsed = rds::usedPersistentBytes(); break;
+      default: break;
+    }
+    double pct = regionUsed > 0
+      ? 100.0 * cat.bytes / regionUsed
+      : 0.0;
+
+    catArray.push_back(folly::dynamic::object
+      ("category", cat.category)
+      ("mode", modeName)
+      ("bytes", cat.bytes)
+      ("count", cat.count)
+      ("pct_of_region", pct));
+  }
+
+  folly::dynamic result = folly::dynamic::object
+    ("summary", std::move(summary))
+    ("categories", std::move(catArray));
+  return folly::toJson(result);
 }
 
 }

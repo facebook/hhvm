@@ -451,6 +451,11 @@ std::vector<UsageInfo> getUsageInfo();
 std::string getTCSpace();
 
 /*
+ * Return RDS usage breakdown as a JSON string, categorized by symbol type.
+ */
+std::string getRDSUsageJSON();
+
+/*
  * Return a string containing the names and start addresses of all TC code
  * sections.
  */

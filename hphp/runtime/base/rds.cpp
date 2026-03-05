@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/rds.h"
 
+#include <algorithm>
 #include <atomic>
 #include <cassert>
 #include <cstdio>
@@ -153,9 +154,28 @@ std::string profilingKeyForSymbol(const Symbol& s) {
   return symbol_kind(s) + "->" + symbol_rep(s);
 }
 
+/*
+ * Cache of per-category ServiceData counters to avoid repeated lookups.
+ */
+folly_concurrent_hash_map_simd<std::string, ServiceData::ExportedCounter*>
+  s_categoryCounters;
+
+ServiceData::ExportedCounter* getCategoryCounter(const std::string& kind) {
+  auto it = s_categoryCounters.find(kind);
+  if (it != s_categoryCounters.end()) return it->second;
+  auto counter = ServiceData::createCounter("admin.rds_usage." + kind);
+  s_categoryCounters.insert(kind, counter);
+  return counter;
+}
+
+static auto s_anonymousCounter =
+  ServiceData::createCounter("admin.rds_usage.Anonymous");
+
 }
 
 //////////////////////////////////////////////////////////////////////
+
+namespace { void logRDSUsageBreakdown(); }
 
 namespace detail {
 
@@ -348,6 +368,9 @@ Handle alloc(Mode mode, size_t numBytes,
             s_normal_frontier - oldFrontier
           );
         }
+        if (UNLIKELY(s_normal_frontier >= s_local_frontier)) {
+          if (Cfg::Eval::LogRDSOnOOM) logRDSUsageBreakdown();
+        }
         always_assert_flog(
           s_normal_frontier < s_local_frontier,
           "Ran out of RDS space (mode=Normal)"
@@ -397,6 +420,7 @@ Handle alloc(Mode mode, size_t numBytes,
       // We reserved plenty of space in s_persistent_free_lists in the beginning
       // of the process, but maybe it is time to increase the size in the
       // config.
+      if (Cfg::Eval::LogRDSOnOOM) logRDSUsageBreakdown();
       always_assert_flog(
         false,
         "Ran out of RDS space (mode=Persistent)"
@@ -416,6 +440,9 @@ Handle alloc(Mode mode, size_t numBytes,
         frontier -= numBytes;
         frontier &= ~(align - 1);
 
+        if (UNLIKELY(frontier < s_normal_frontier)) {
+          if (Cfg::Eval::LogRDSOnOOM) logRDSUsageBreakdown();
+        }
         always_assert_flog(
           frontier >= s_normal_frontier,
           "Ran out of RDS space (mode=Local)"
@@ -443,7 +470,11 @@ Handle allocUnlocked(Mode mode, size_t numBytes,
                      size_t align, type_scan::Index tyIndex,
                      const Symbol* symbol) {
   Guard g(s_allocMutex);
-  return alloc(mode, numBytes, align, tyIndex, symbol);
+  auto const handle = alloc(mode, numBytes, align, tyIndex, symbol);
+  if (!symbol) {
+    s_anonymousCounter->addValue(numBytes);
+  }
+  return handle;
 }
 
 Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
@@ -456,6 +487,7 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
 
   auto const handle = alloc(mode, sizeBytes, align, tyIndex, &key);
   recordRds(handle, sizeBytes, key);
+  getCategoryCounter(symbol_kind(key))->addValue(sizeBytes);
 
   if (shouldProfileAccesses() && !std::visit(IsProfile(), key)) {
     // Allocate an integer in the local section to profile this
@@ -504,6 +536,7 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
     // we flipped it from kUninitHandle, so we get to fill in the value.
     auto const h = allocUnlocked(mode, size, align, tsi, &sym);
     recordRds(h, size, sym);
+    getCategoryCounter(symbol_kind(sym))->addValue(size);
 
     if (shouldProfileAccesses() && !std::visit(IsProfile(), sym)) {
       // Allocate an integer in the local section to profile this
@@ -731,6 +764,98 @@ size_t usedLocalBytes() {
 
 size_t usedPersistentBytes() {
   return s_persistent_usage;
+}
+
+namespace {
+
+std::vector<CategoryUsage> usageByCategoryLocked() {
+  struct Agg {
+    size_t bytes{0};
+    size_t count{0};
+  };
+  using Key = std::pair<std::string, Mode>;
+  std::map<Key, Agg> catMap;
+
+  size_t normalAttributed = 0;
+  size_t localAttributed = 0;
+  size_t persistentAttributed = 0;
+
+  s_linkTable.rehash();
+  for (auto const& entry : s_linkTable) {
+    auto const& sym = entry.first;
+    auto const h = entry.second.handle;
+    auto const sz = entry.second.size;
+    auto const kind = symbol_kind(sym);
+
+    Mode mode;
+    if (isPersistentHandle(h)) {
+      mode = Mode::Persistent;
+      persistentAttributed += sz;
+    } else if (isNormalHandle(h)) {
+      mode = Mode::Normal;
+      normalAttributed += sz;
+    } else {
+      mode = Mode::Local;
+      localAttributed += sz;
+    }
+
+    auto& agg = catMap[{kind, mode}];
+    agg.bytes += sz;
+    agg.count++;
+  }
+
+  auto const normalTotal = usedBytes();
+  auto const localTotal = usedLocalBytes();
+  auto const persistentTotal = usedPersistentBytes();
+
+  if (normalTotal > normalAttributed) {
+    catMap[{"Anonymous", Mode::Normal}].bytes += normalTotal - normalAttributed;
+  }
+  if (localTotal > localAttributed) {
+    catMap[{"Anonymous", Mode::Local}].bytes += localTotal - localAttributed;
+  }
+  if (persistentTotal > persistentAttributed) {
+    catMap[{"Anonymous", Mode::Persistent}].bytes +=
+      persistentTotal - persistentAttributed;
+  }
+
+  std::vector<CategoryUsage> result;
+  result.reserve(catMap.size());
+  for (auto& [key, agg] : catMap) {
+    result.push_back({key.first, agg.bytes, agg.count, key.second});
+  }
+  std::sort(result.begin(), result.end(),
+            [](const CategoryUsage& a, const CategoryUsage& b) {
+              return a.bytes > b.bytes;
+            });
+  return result;
+}
+
+void logRDSUsageBreakdown() {
+  auto const usage = usageByCategoryLocked();
+  Logger::FError("RDS usage breakdown:");
+  Logger::FError("  Normal:     {} bytes used", usedBytes());
+  Logger::FError("  Local:      {} bytes used", usedLocalBytes());
+  Logger::FError("  Persistent: {} bytes used", usedPersistentBytes());
+  for (auto const& cat : usage) {
+    auto const modeName = [&] {
+      switch (cat.mode) {
+        case Mode::Normal:     return "Normal";
+        case Mode::Local:      return "Local";
+        case Mode::Persistent: return "Persistent";
+        default:               return "Unknown";
+      }
+    }();
+    Logger::FError("  {:>30s} ({:10s}): {:>10} bytes, {:>6} entries",
+                   cat.category, modeName, cat.bytes, cat.count);
+  }
+}
+
+} // namespace
+
+std::vector<CategoryUsage> usageByCategory() {
+  Guard g(s_allocMutex);
+  return usageByCategoryLocked();
 }
 
 folly::Range<const char*> normalSection() {

@@ -431,6 +431,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #endif
         "/vm-tcspace:      show space used by translator caches\n"
         "/vm-tcaddr:       show addresses of translation cache sections\n"
+        "/vm-rds-usage:    show RDS usage breakdown by category (JSON)\n"
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
         "/vm-namedentities:show combined size of the NamedType and\n"
@@ -519,6 +520,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
           (strncmp(cmd.c_str(), "static-strings", 14) == 0) ||
           cmd == "hugepage" || cmd == "pcre-cache-size" ||
           cmd == "vm-tcspace" || cmd == "vm-tcaddr" ||
+          cmd == "vm-rds-usage" ||
           cmd == "vm-namedentities" || cmd == "jemalloc-stats") {
         needs_password = false;
       }
@@ -1465,6 +1467,11 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
                                           Transport *transport) {
   if (cmd == "vm-tcspace") {
     transport->sendString(jit::tc::getTCSpace());
+    return true;
+  }
+  if (cmd == "vm-rds-usage") {
+    transport->replaceHeader("Content-Type", "application/json");
+    transport->sendString(jit::tc::getRDSUsageJSON());
     return true;
   }
   if (cmd == "vm-tcaddr") {

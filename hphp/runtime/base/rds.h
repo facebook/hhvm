@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #ifndef RDS_FIXED_PERSISTENT_BASE
 // If RDS_FIXED_PERSISTENT_BASE is defined from compiler command line, don't
@@ -191,6 +192,17 @@ template<Mode RHS> constexpr bool in(Mode LHS) {
 constexpr bool pure(Mode mask) {
   return !(static_cast<ModeU>(mask) & (static_cast<ModeU>(mask) - 1));
 }
+
+/*
+ * Per-category RDS usage breakdown.
+ */
+struct CategoryUsage {
+  std::string category;
+  size_t bytes;
+  size_t count;
+  Mode mode;
+};
+std::vector<CategoryUsage> usageByCategory();
 
 /*
  * Handles into Request Data Segment.

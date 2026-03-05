@@ -910,6 +910,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - double Eval.RDSReorderThreshold = 0.0005, UNKNOWN
 
+- bool Eval.LogRDSOnOOM = false, nzthomas
+
+  When enabled, log a per-category RDS usage breakdown before crashing on RDS
+  OOM. Iterates the RDS symbol table under lock, so should not be enabled in
+  production unless actively debugging RDS exhaustion.
+
 - uint32_t Eval.ProfileGlobalsLimit = 200, UNKNOWN
 
 - double Eval.ProfileGlobalsSlowExitThreshold = 0.98, UNKNOWN

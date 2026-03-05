@@ -80,7 +80,6 @@ wangle_add_library(wangle_ssl
     Folly::folly_shared_mutex
     Folly::folly_ssl_openssl_ticket_handler
     Folly::folly_synchronized
-    ${GLOG_LIBRARIES}
 )
 
 wangle_add_library(wangle_ssl_client_hello_ext_stats

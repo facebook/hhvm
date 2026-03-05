@@ -32,7 +32,6 @@ wangle_add_library(wangle_client_persistence
     Folly::folly_synchronization_lock
     Folly::folly_synchronization_saturating_semaphore
     Folly::folly_system_thread_name
-    ${GLOG_LIBRARIES}
 )
 
 wangle_add_library(wangle_client_persistence_file

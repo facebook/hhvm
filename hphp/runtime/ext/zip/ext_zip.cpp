@@ -1435,7 +1435,7 @@ static Variant HHVM_FUNCTION(zip_read, const OptResource& zip) {
 //////////////////////////////////////////////////////////////////////////////
 
 struct zipExtension final : Extension {
-  zipExtension() : Extension("zip", "1.12.4-dev", NO_ONCALL_YET) {}
+  zipExtension() : Extension("zip", "1.12.4-dev", "hphp_hphpi") {}
   void moduleRegisterNative() override {
     HHVM_ME(ZipArchive, addEmptyDir);
     HHVM_ME(ZipArchive, addFile);

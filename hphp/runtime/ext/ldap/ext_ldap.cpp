@@ -52,7 +52,7 @@ static const StaticString
   s_LDAP_MODIFY_BATCH_VALUES(LDAP_MODIFY_BATCH_VALUES);
 
 static struct LdapExtension final : Extension {
-  LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
   void requestInit() override;
   void requestShutdown() override;
   void moduleInit() override;

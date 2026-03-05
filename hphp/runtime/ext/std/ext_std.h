@@ -6,7 +6,7 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
 struct StandardExtension final : Extension {
-  StandardExtension() : Extension("standard", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  StandardExtension() : Extension("standard", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
 
   void moduleRegisterNative() override {
     registerNativeStandard();

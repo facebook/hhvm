@@ -76,7 +76,7 @@ const int64_t k_FILTER_FLAG_NO_PRIV_RANGE = 8388608;
 
 
 static struct FilterExtension final : Extension {
-  FilterExtension() : Extension("filter", "0.12.1", NO_ONCALL_YET) {}
+  FilterExtension() : Extension("filter", "0.12.1", "hphp_hphpi") {}
 
   void moduleRegisterNative() override;
 

@@ -375,7 +375,7 @@ String HHVM_FUNCTION(sql_regcase, const String& str) {
 extern RDS_LOCAL(PCREglobals, tl_pcre_globals);
 
 struct PcreExtension final : Extension {
-  PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
 
   void moduleRegisterNative() override {
     HHVM_RC_STR(PCRE_VERSION, pcre_version());

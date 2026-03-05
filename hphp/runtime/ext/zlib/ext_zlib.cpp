@@ -601,7 +601,7 @@ int64_t HHVM_METHOD(ChunkedGunzipper, getUndecompressedByteCount) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ZlibExtension final : Extension {
-  ZlibExtension() : Extension("zlib", "2.0", NO_ONCALL_YET) {}
+  ZlibExtension() : Extension("zlib", "2.0", "hphp_hphpi") {}
   void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/) override {
     s_zlib_stream_wrapper.registerAs("compress.zlib");
   }

@@ -43,7 +43,7 @@ enum php_xml_option {
 };
 
 static struct XMLExtension final : Extension {
-  XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
   void moduleRegisterNative() override;
 } s_xml_extension;
 

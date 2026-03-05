@@ -637,7 +637,7 @@ Variant HHVM_METHOD(XMLReader, expand,
 
 const StaticString s_XMLReader("XMLReader");
 static struct XMLReaderExtension final : Extension {
-  XMLReaderExtension() : Extension("xmlreader", "0.1", NO_ONCALL_YET) {}
+  XMLReaderExtension() : Extension("xmlreader", "0.1", "hphp_hphpi") {}
   void moduleRegisterNative() override {
     HHVM_RCC_INT(XMLReader, NONE, XML_READER_TYPE_NONE);
     HHVM_RCC_INT(XMLReader, ELEMENT, XML_READER_TYPE_ELEMENT);

@@ -55,7 +55,7 @@ static
 req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context);
 
 static struct StreamExtension final : Extension {
-  StreamExtension() : Extension("stream", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  StreamExtension() : Extension("stream", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
   void moduleRegisterNative() override;
 } s_stream_extension;
 

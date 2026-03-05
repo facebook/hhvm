@@ -2297,7 +2297,7 @@ String HHVM_FUNCTION(sodium_crypto_scalarmult_ed25519_base,
 }
 
 struct SodiumExtension final : Extension {
-  SodiumExtension() : Extension("sodium", "7.2-hhvm1", NO_ONCALL_YET) {}
+  SodiumExtension() : Extension("sodium", "7.2-hhvm1", "hphp_hphpi") {}
 
   void moduleInit() override {
     if (sodium_init() == -1) {

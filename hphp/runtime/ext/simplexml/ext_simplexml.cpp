@@ -1820,7 +1820,7 @@ static bool HHVM_METHOD(SimpleXMLIterator, hasChildren) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct SimpleXMLExtension : Extension {
-  SimpleXMLExtension(): Extension("simplexml", "1.0", NO_ONCALL_YET) {}
+  SimpleXMLExtension(): Extension("simplexml", "1.0", "hphp_hphpi") {}
 
   void moduleRegisterNative() override {
     HHVM_FE(simplexml_import_dom);

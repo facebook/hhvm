@@ -2369,7 +2369,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
 
 ///////////////////////////////////////////////////////////////////////////////
 struct ReflectionExtension final : Extension {
-  ReflectionExtension() : Extension("reflection", "$Id$", NO_ONCALL_YET) { }
+  ReflectionExtension() : Extension("reflection", "$Id$", "hphp_hphpi") { }
   void moduleRegisterNative() override {
     HHVM_FE(hphp_create_object);
     HHVM_FE(hphp_create_object_without_constructor);

@@ -53,7 +53,7 @@
 namespace HPHP {
 
 static struct HashExtension final : Extension {
-  HashExtension() : Extension("hash", "1.0", NO_ONCALL_YET) { }
+  HashExtension() : Extension("hash", "1.0", "hphp_hphpi") { }
   void moduleRegisterNative() override;
 } s_hash_extension;
 

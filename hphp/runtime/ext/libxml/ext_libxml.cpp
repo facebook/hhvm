@@ -729,7 +729,7 @@ void HHVM_FUNCTION(libxml_set_streams_context, const OptResource & context) {
 // Extension
 
 struct LibXMLExtension final : Extension {
-    LibXMLExtension() : Extension("libxml", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+    LibXMLExtension() : Extension("libxml", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
 
     void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
 

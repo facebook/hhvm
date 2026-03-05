@@ -3276,7 +3276,7 @@ static Variant HHVM_METHOD(PDOStatement, __sleep) {
 
 
 static struct PDOExtension final : Extension {
-  PDOExtension() : Extension("pdo", " 1.0.4dev", NO_ONCALL_YET) {}
+  PDOExtension() : Extension("pdo", " 1.0.4dev", "hphp_hphpi") {}
 
 #ifdef ENABLE_EXTENSION_PDO_MYSQL
   std::string mysql_default_socket;

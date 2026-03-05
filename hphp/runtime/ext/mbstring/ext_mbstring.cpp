@@ -4534,7 +4534,7 @@ bool HHVM_FUNCTION(mb_send_mail,
 }
 
 static struct mbstringExtension final : Extension {
-  mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
 
   void moduleInit() override {
     IniSetting::Bind(this, IniSetting::Mode::Request,

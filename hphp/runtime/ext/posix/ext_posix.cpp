@@ -45,7 +45,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct POSIXExtension final : Extension {
-  POSIXExtension() : Extension("posix", "1.0", NO_ONCALL_YET) {}
+  POSIXExtension() : Extension("posix", "1.0", "hphp_hphpi") {}
   void moduleRegisterNative() override;
 } s_posix_extension;
 

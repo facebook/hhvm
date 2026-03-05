@@ -223,3 +223,32 @@ function server_uptime(): int;
 function server_process_start_time(): int;
 
 }
+
+namespace HH\Experimental {
+
+/**
+ * Hint to the kernel scheduler that the current thread is doing
+ * latency-critical work (pre-first-flush). Call disable_first_flush()
+ * when the critical section ends.
+ *
+ * Only effective when Server.ScxThreadHintFirstFlushOverride is enabled.
+ * No-op otherwise.
+ *
+ * EXPERIMENTAL: This API is subject to change or removal.
+ */
+<<__Native>>
+function enable_first_flush(): void;
+
+/**
+ * Remove the first-flush scheduling hint, returning the thread to
+ * normal processing priority.
+ *
+ * Only effective when Server.ScxThreadHintFirstFlushOverride is enabled.
+ * No-op otherwise.
+ *
+ * EXPERIMENTAL: This API is subject to change or removal.
+ */
+<<__Native>>
+function disable_first_flush(): void;
+
+} // namespace HH\Experimental

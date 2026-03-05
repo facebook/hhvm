@@ -21,6 +21,7 @@
 #include "hphp/runtime/server/thread-hint.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/configs/debug.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/service-data.h"
 
@@ -80,7 +81,9 @@ protected:
 
   virtual void doJobImpl(JobPtr job, bool abort) {
     ThreadHint::getInstance().updateThreadHint(
-      ThreadHint::Priority::FirstFlush);
+      Cfg::Server::ScxThreadHintFirstFlushOverride
+        ? ThreadHint::Priority::Processing
+        : ThreadHint::Priority::FirstFlush);
     SCOPE_EXIT {
       ThreadHint::getInstance().updateThreadHint(
           ThreadHint::Priority::Idling);

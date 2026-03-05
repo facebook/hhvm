@@ -23,7 +23,9 @@
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/server/thread-hint.h"
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/configs/server.h"
 
 namespace HPHP {
 
@@ -217,6 +219,18 @@ int64_t HHVM_FUNCTION(server_process_start_time) {
   return BootStats::startTimestamp();
 }
 
+void HHVM_FUNCTION(enable_first_flush) {
+  if (!Cfg::Server::ScxThreadHintFirstFlushOverride) return;
+  ThreadHint::getInstance().updateThreadHint(
+    ThreadHint::Priority::FirstFlush);
+}
+
+void HHVM_FUNCTION(disable_first_flush) {
+  if (!Cfg::Server::ScxThreadHintFirstFlushOverride) return;
+  ThreadHint::getInstance().updateThreadHint(
+    ThreadHint::Priority::Processing);
+}
+
 void ServerExtension::moduleRegisterNative() {
   HHVM_RC_INT_SAME(PAGELET_NOT_READY);
   HHVM_RC_INT_SAME(PAGELET_READY);
@@ -240,6 +254,8 @@ void ServerExtension::moduleRegisterNative() {
   HHVM_FALIAS(HH\\server_health_level, server_health_level);
   HHVM_FALIAS(HH\\server_uptime, server_uptime);
   HHVM_FALIAS(HH\\server_process_start_time, server_process_start_time);
+  HHVM_FALIAS(HH\\Experimental\\enable_first_flush, enable_first_flush);
+  HHVM_FALIAS(HH\\Experimental\\disable_first_flush, disable_first_flush);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

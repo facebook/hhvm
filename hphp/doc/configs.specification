@@ -330,6 +330,13 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint16_t Server.ScxThreadHintProcessing = 1024, jtwarren
 - uint16_t Server.ScxThreadHintPostProcessing = 1024, jtwarren
 
+  When enabled, the FirstFlush thread hint is no longer automatically set at
+  request start. Instead, Hack code must call HH\Experimental\enable_first_flush()
+  to opt in to the FirstFlush priority. This allows application code to control
+  exactly when latency-critical scheduling priority is applied.
+
+- bool Server.ScxThreadHintFirstFlushOverride = false, jtwarren
+
 # Autoload
 
 - std::string Autoload.DB.Path = "", UNKNOWN

@@ -77,6 +77,7 @@ struct Insanity {
 
 struct CrazyNesting {
   1: string string_field;
+  @thrift.AllowUnsafeNonSealedKeyType
   2: optional set<Insanity> set_field;
   @thrift.AllowUnsafeRequiredFieldQualifier
   3: required list<

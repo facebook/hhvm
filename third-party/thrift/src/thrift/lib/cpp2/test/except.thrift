@@ -47,6 +47,7 @@ struct MyArgs {
   @thrift.AllowUnsafeRequiredFieldQualifier
   6: required map<i32, Inner> mi;
   @thrift.AllowUnsafeRequiredFieldQualifier
+  @thrift.AllowUnsafeNonSealedKeyType
   7: required map<Inner, i32> complex_key;
 }
 
@@ -70,6 +71,7 @@ struct MyArgs2 {
   4: optional map<string, i32> m;
   5: optional list<Inner2> li;
   6: optional map<i32, Inner2> mi;
+  @thrift.AllowUnsafeNonSealedKeyType
   7: optional map<Inner2, i32> complex_key;
 }
 

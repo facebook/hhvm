@@ -47,7 +47,9 @@ struct Container {
   5: list<SpecializedUnion> myUnionList;
   6: map<i32, SpecializedStruct> myStructMap;
   7: map<i32, SpecializedUnion> myUnionMap;
+  @thrift.AllowUnsafeNonSealedKeyType
   8: map<SpecializedStruct, string> myRevStructMap;
+  @thrift.AllowUnsafeNonSealedKeyType
   9: map<SpecializedUnion, string> myRevUnionMap;
 }
 

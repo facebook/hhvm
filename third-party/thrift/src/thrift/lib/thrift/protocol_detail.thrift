@@ -110,6 +110,7 @@ union Value {
     reason = "Set can only have integer/string/binary/enum values",
   }
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeNonSealedKeyType
   15: set<Value> setValue;
 
   // TODO(dokwon): Migrate to @thrift.Box after resolving incomplete type.
@@ -117,5 +118,6 @@ union Value {
   @cpp.Type{template = "::folly::F14FastMap"}
   @hack.SkipCodegen{reason = "Map keys can only be integer/string/binary/enum"}
   @cpp.AllowLegacyNonOptionalRef
+  @thrift.AllowUnsafeNonSealedKeyType
   16: map<Value, Value> mapValue;
 }

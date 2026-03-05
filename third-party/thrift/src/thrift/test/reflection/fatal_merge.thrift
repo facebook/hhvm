@@ -77,6 +77,7 @@ const BasicListExample kBasicListExample = {
 };
 
 struct BasicSet {
+  @thrift.AllowUnsafeNonSealedKeyType
   1: set<Basic> l;
 }
 

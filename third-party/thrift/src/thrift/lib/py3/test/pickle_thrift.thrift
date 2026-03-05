@@ -43,8 +43,10 @@ exception nested_pickle_exception {
 struct struct_container {
   1: list<easy_pickle> list_easy;
   # @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   2: set<easy_pickle> set_easy;
   # @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   3: map<easy_pickle, easy_pickle> map_easy_easy;
   4: list<list<easy_pickle>> list_list_easy;
   # @lint-ignore THRIFTCHECKS
@@ -61,15 +63,19 @@ struct struct_container {
 union union_container {
   1: list<easy_pickle> list_easy;
   # @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   2: set<easy_pickle> set_easy;
   # @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   3: map<easy_pickle, easy_pickle> map_easy_easy;
 }
 
 exception exception_container {
   1: list<easy_pickle> list_easy;
   # @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   2: set<easy_pickle> set_easy;
   # @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   3: map<easy_pickle, easy_pickle> map_easy_easy;
 }

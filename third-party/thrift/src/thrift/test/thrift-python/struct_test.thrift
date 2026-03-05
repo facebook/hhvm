@@ -315,6 +315,7 @@ exception TestExceptionCopy {
 struct TestStructWithInvariantField {
   1: i32 unqualified_i32;
   2: string unqualified_string;
+  @thrift.AllowUnsafeNonSealedKeyType
   3: map<TestStruct, i32> unqualified_map_struct_i32;
 }
 

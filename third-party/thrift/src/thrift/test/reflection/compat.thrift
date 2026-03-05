@@ -134,6 +134,7 @@ struct compat_structC {
   14: set<i32> k;
   15: set<i32> k1;
   16: set<compat_enum2> k2;
+  @thrift.AllowUnsafeNonSealedKeyType
   17: set<compat_structB> k3;
   18: map<i32, i32> l;
   19: map<i32, i32> l1;
@@ -145,8 +146,11 @@ struct compat_structC {
   25: map<string, i32> n1;
   26: map<string, compat_enum1> n2;
   27: map<string, compat_structB> n3;
+  @thrift.AllowUnsafeNonSealedKeyType
   28: map<compat_structA, i32> o1;
+  @thrift.AllowUnsafeNonSealedKeyType
   29: map<compat_structA, compat_enum1> o2;
+  @thrift.AllowUnsafeNonSealedKeyType
   30: map<compat_structA, compat_structB> o3;
 }
 
@@ -187,6 +191,7 @@ struct compat_struct3 {
   13: set<i32> fieldM;
   14: set<string> fieldN;
   15: set<string> fieldO;
+  @thrift.AllowUnsafeNonSealedKeyType
   16: set<compat_structB> fieldP;
   17: map<string, compat_structA> fieldQ;
   18: map<string, compat_structB> fieldR;

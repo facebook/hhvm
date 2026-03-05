@@ -81,6 +81,7 @@ struct Sets {
   97: set<binary> binarySet;
   93: set<IOBuf> iobufSet;
   # @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   2: set<Foo> structSet;
   47: set<Color> colorSet;
 }
@@ -103,6 +104,7 @@ struct Maps {
   97: map<binary, binary> binaryMap;
   93: map<IOBuf, IOBuf> iobufMap;
   # @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   2: map<Foo, Foo> structMap;
   47: map<Color, Color> colorMap;
 }

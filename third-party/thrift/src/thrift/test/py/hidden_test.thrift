@@ -32,5 +32,6 @@ struct S1 {
   1: i32 normalField;
 
   @python.PyDeprecatedHidden{reason = "Structured keys not supported"}
+  @thrift.AllowUnsafeNonSealedKeyType
   2: map<StructuredKey, i32> mapField;
 }

@@ -104,6 +104,7 @@ typedef float Float
 typedef double Double
 @thrift.AllowLegacyTypedefUri
 typedef list<easy> EasyList
+@thrift.AllowUnsafeNonSealedKeyType
 @thrift.AllowLegacyTypedefUri
 typedef set<easy> EasySet
 @thrift.AllowLegacyTypedefUri
@@ -487,6 +488,7 @@ union ReservedUnion {
 }
 
 struct EdgeCaseStruct {
+  @thrift.AllowUnsafeNonSealedKeyType
   1: map<Reserved, list<i64>> reservedValues;
 }
 
@@ -522,6 +524,7 @@ struct SortedSets {
   2: set<string> strings;
   // @lint-ignore THRIFTCHECKS
   @python.DeprecatedSortSetOnSerialize
+  @thrift.AllowUnsafeNonSealedKeyType
   3: set<easy> easies;
   @python.DeprecatedSortSetOnSerialize
   4: set<Color> colors;
@@ -534,6 +537,7 @@ struct SortedMaps {
   2: map<string, string> strings;
   // @lint-ignore THRIFTCHECKS
   @python.DeprecatedKeySortMapOnSerialize
+  @thrift.AllowUnsafeNonSealedKeyType
   3: map<easy, easy> easies;
   @python.DeprecatedSortSetOnSerialize
   4: map<Color, Color> colors;
@@ -550,6 +554,7 @@ struct ComplexRef {
   @cpp.Ref{type = cpp.RefType.Unique}
   5: optional set<i16> set_basetype_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.AllowUnsafeNonSealedKeyType
   6: optional set<ComplexRef> set_recursive_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   7: optional map<i16, i16> map_basetype_ref;
@@ -558,6 +563,7 @@ struct ComplexRef {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   9: optional list<ComplexRef> list_shared_ref;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @thrift.AllowUnsafeNonSealedKeyType
   10: optional set<ComplexRef> set_const_shared_ref;
   @thrift.Box
   11: optional ComplexRef recursive;
@@ -575,6 +581,7 @@ struct Complex {
   8: ComplexUnion val_union;
   9: list<i64> val_list;
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   10: optional set<easy> val_set;
   11: map<string, binary> val_map;
   // @lint-ignore THRIFTCHECKS

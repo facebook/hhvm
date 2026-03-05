@@ -43,7 +43,9 @@ struct BoolList {
 struct MyStruct {
   1: optional Foo foo;
   2: optional list<Foo> foo_vector;
+  @thrift.AllowUnsafeNonSealedKeyType
   3: optional set<Foo> foo_set;
+  @thrift.AllowUnsafeNonSealedKeyType
   4: optional map<Foo, i32> foo_key_map;
   5: optional map<i32, Foo> foo_value_map;
   6: optional AdaptedFoo foo_adapted;

@@ -35,6 +35,7 @@ struct SubStruct {
   @thrift.AllowUnsafeRequiredFieldQualifier
   2: required string req_def = "IAMREQ";
   // @lint-ignore THRIFTCHECKS
+  @thrift.AllowUnsafeNonSealedKeyType
   3: optional map<Small, i32> key_map;
   4: binary bin;
 }

@@ -29,6 +29,7 @@ namespace py3 python_test
 typedef string AtoIValue
 
 typedef list<i32> I32List
+@thrift.AllowUnsafeNonSealedKeyType
 typedef set<easy> EasySet
 typedef set<i32> SetI32
 typedef set<AtoIValue> SetAtoIValue

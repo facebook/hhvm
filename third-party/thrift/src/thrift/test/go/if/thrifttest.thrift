@@ -100,6 +100,7 @@ struct Insanity {
 
 struct CrazyNesting {
   1: string string_field;
+  @thrift.AllowUnsafeNonSealedKeyType
   2: optional set<Insanity> set_field;
 }
 
@@ -221,6 +222,7 @@ struct Maps {
   2: map<string, list<string>> str2list;
   3: map<string, map<string, string>> str2map;
   4: map<string, Insanity> str2struct;
+  @thrift.AllowUnsafeNonSealedKeyType
   5: map<MapKey, string> struct2str;
 }
 
@@ -357,6 +359,7 @@ struct VariousFieldsStruct {
   // Containers
   30: set<string> field30;
   31: list<string> field31;
+  @thrift.AllowUnsafeNonSealedKeyType
   32: set<ComparableStruct> field32;
   33: list<ComparableStruct> field33;
   34: map<string, string> field34;
@@ -365,7 +368,9 @@ struct VariousFieldsStruct {
   42: optional list<string> field42;
   43: optional map<string, string> field43;
   // Map edge cases
+  @thrift.AllowUnsafeNonSealedKeyType
   51: map<ComparableStruct, string> field51;
+  @thrift.AllowUnsafeNonSealedKeyType
   52: map<NonComparableStruct, string> field52;
   53: map<list<string>, string> field53;
 

@@ -85,6 +85,7 @@ struct SharedPtr {
 }
 
 typedef list<MyDef> MyDefList
+@thrift.AllowUnsafeNonSealedKeyType
 typedef set<MyDef> MyDefSet
 typedef map<i32, MyDef> MyDefMap
 

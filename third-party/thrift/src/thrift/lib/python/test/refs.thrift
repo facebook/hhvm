@@ -27,10 +27,12 @@ struct ComplexRef {
   3: optional list<i16> list_basetype_ref;
   4: optional list<ComplexRef> list_recursive_ref;
   5: optional set<i16> set_basetype_ref;
+  @thrift.AllowUnsafeNonSealedKeyType
   6: optional set<ComplexRef> set_recursive_ref;
   7: optional map<i16, i16> map_basetype_ref;
   8: optional map<i16, ComplexRef> map_recursive_ref;
   9: optional list<ComplexRef> list_shared_ref;
+  @thrift.AllowUnsafeNonSealedKeyType
   10: optional set<ComplexRef> set_const_shared_ref;
   11: optional ComplexRef recursive;
 }

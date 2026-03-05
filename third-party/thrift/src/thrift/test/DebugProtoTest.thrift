@@ -189,6 +189,7 @@ struct CompactProtoTestStruct {
   25: set<string> string_set;
   26: set<binary> binary_set;
   27: set<bool> boolean_set;
+  @thrift.AllowUnsafeNonSealedKeyType
   28: set<Empty> struct_set;
   60: set_byte_5505 byte_hash_set;
   61: set_i16_4545 i16_hash_set;

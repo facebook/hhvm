@@ -1350,11 +1350,12 @@ end = struct
         name
     in
     List.iter access_linter_errors ~f:(fun (pos, w) ->
-        Lints_diagnostics.package_into_override
+        Lints_diagnostics.crosspackage_linter
           pos
           w.current_package
           w.target_package
-          w.target_package_before_override);
+          w.target_package_before_override
+          w.classptr_reference_warning);
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
       (Typing_error.multiple_opt (other_errs @ access_errs))
@@ -3644,13 +3645,13 @@ end = struct
         | TVis.Package_access_error err ->
           Typing_error_utils.add_typing_error ~env err
         | TVis.Package_access_linter_error (pos, w) ->
-          Lints_diagnostics.package_into_override
+          Lints_diagnostics.crosspackage_linter
             pos
             w.current_package
             w.target_package
             w.target_package_before_override
+            w.classptr_reference_warning
         | TVis.Package_access_ok -> ());
-
         let ((env, ty_err_opt), ty) =
           Phase.localize_no_subst env ~ignore_errors:true const.cd_type
         in
@@ -5116,11 +5117,12 @@ end = struct
             | TVis.Package_access_error err ->
               Typing_error_utils.add_typing_error ~env err
             | TVis.Package_access_linter_error (pos, w) ->
-              Lints_diagnostics.package_into_override
+              Lints_diagnostics.crosspackage_linter
                 pos
                 w.current_package
                 w.target_package
                 w.target_package_before_override
+                w.classptr_reference_warning
             | TVis.Package_access_ok -> ())
           | Decl_entry.DoesNotExist
           | Decl_entry.NotYetAvailable ->
@@ -11717,7 +11719,7 @@ end = struct
                 `No
               else if is_const then begin
                 if Env.package_allow_classconst_violations env then
-                  `No
+                  `ClassPtrLinterOnly
                 else
                   `Yes Typing_error.Primary.Package.Class
               end else
@@ -11736,11 +11738,12 @@ end = struct
                 id
             in
             List.iter access_linter_errs ~f:(fun (pos, w) ->
-                Lints_diagnostics.package_into_override
+                Lints_diagnostics.crosspackage_linter
                   pos
                   w.current_package
                   w.target_package
-                  w.target_package_before_override);
+                  w.target_package_before_override
+                  w.classptr_reference_warning);
             List.iter ~f:(Typing_error_utils.add_typing_error ~env) access_errs
           );
 

@@ -8,6 +8,11 @@ include_paths=[
     "//warning_01.php",
     "//warning_02.php",
     "//warning_03b.php",
+    "//warning_cc_01.php",
+    "//warning_cc_01b.php",
+    "//warning_cc_02.php",
+    "//warning_cc_02b.php",
+    "//warning_cc_04.php",
 ]
 includes = ["pkg1"]
 

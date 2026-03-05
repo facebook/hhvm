@@ -10,6 +10,7 @@ type package_warning_info = {
   current_package: Package.pos_id option;
   target_package: Package.pos_id option;
   target_package_before_override: string option;
+  classptr_reference_warning: bool;
 }
 
 type package_error_info = {
@@ -22,8 +23,22 @@ type package_error_info = {
 
 type check_reason =
   [ `Yes of Typing_error.Primary.Package.target_symbol_spec
+  | `ClassPtrLinterOnly
   | `No
   ]
+
+val get_package_profile :
+  Typing_env_types.env ->
+  Aast_defs.package_membership option ->
+  Package.t option * Package.pos_id option * string
+
+val can_access_ignoring_package_override :
+  env:Typing_env_types.env ->
+  current_package:Package.pos_id option ->
+  target_package:Package.pos_id option ->
+  target_file:Relative_path.t ->
+  classptr_reference_warning:bool ->
+  [ `Yes | `YesWarning of package_warning_info ]
 
 (** Calculate the packages of the current and target symbols using their filenames.
   * The target symbol can be accessed if:

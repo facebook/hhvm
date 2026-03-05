@@ -382,3 +382,47 @@ let package_into_override
     ^ ") or gate this reference via a `package` check "
     ^ "(if this portion of the function is meant to be gated by an environment check)."
     )
+
+let crosspackage_classptr_reference
+    pos current_package target_package_before_override =
+  let current_package_name =
+    Option.value_map current_package ~default:"<none>" ~f:snd
+  in
+  let target_package_before_override_name =
+    Option.value target_package_before_override ~default:"<none>"
+  in
+  Lints.add
+    Codes.crosspackage_classptr_reference
+    Lint_error
+    pos
+    ("This is a potential cross-boundary edge from package "
+    ^ current_package_name
+    ^ " into package "
+    ^ target_package_before_override_name
+    ^ ". If this value isn't used to load the class "
+    ^ "via new $cls(), $cls::meth(), etc, please change this to a `nameof` expression. "
+    ^ "Otherwise, move the callee into the caller's package via hg mv, "
+    ^ "use `__RequirePackage` (if the whole function should only be invoked from "
+    ^ target_package_before_override_name
+    ^ ") or gate this reference via a `package` check "
+    ^ "(if this portion of the function is meant to be gated by an environment check)."
+    )
+
+(* wrapper around crosspackage_classconst_reference and package_into_override *)
+let crosspackage_linter
+    pos
+    current_package
+    target_package
+    target_package_before_override
+    classptr_reference_warning =
+  if classptr_reference_warning then
+    crosspackage_classptr_reference
+      pos
+      current_package
+      target_package_before_override
+  else
+    package_into_override
+      pos
+      current_package
+      target_package
+      target_package_before_override

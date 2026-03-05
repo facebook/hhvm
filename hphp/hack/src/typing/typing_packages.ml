@@ -36,6 +36,7 @@ type package_warning_info = {
   current_package: Package.pos_id option;
   target_package: Package.pos_id option;
   target_package_before_override: string option;
+  classptr_reference_warning: bool;
 }
 
 type package_error_info = {
@@ -48,6 +49,7 @@ type package_error_info = {
 
 type check_reason =
   [ `Yes of Typing_error.Primary.Package.target_symbol_spec
+  | `ClassPtrLinterOnly
   | `No
   ]
 
@@ -91,6 +93,73 @@ let package_includes current_pkg target_pkg =
       false)
   | _ -> false
 
+(* triggers a linter error if the edge introduces a new dependency from a file in a package
+ * due to another file, ingoring package rules to a file with a packageoverride; used *)
+let can_access_ignoring_package_override
+    ~(env : Typing_env_types.env)
+    ~(current_package : Package.pos_id option)
+    ~(target_package : Package.pos_id option)
+    ~(target_file : Relative_path.t)
+    ~(classptr_reference_warning : bool) =
+  let tcopt = Env.get_tcopt env in
+  let target_package_before_override =
+    Option.map
+      (Package_info.get_package_for_file
+         ~support_multifile_tests:
+           (TypecheckerOptions.package_support_multifile_tests tcopt)
+         (TypecheckerOptions.package_info tcopt)
+         (Relative_path.suffix target_file))
+      ~f:Package.get_package_name
+  in
+  let is_target_package_before_override_included =
+    match (current_package, target_package_before_override) with
+    | (Some (_, current_package_name), Some target_package_before_override_name)
+      ->
+      let target_package_before_override =
+        Env.get_package_by_name env target_package_before_override_name
+      in
+      package_includes
+        (Env.get_package_by_name env current_package_name)
+        target_package_before_override
+    | _ -> true
+  in
+  let is_target_package_before_override_loaded =
+    match target_package_before_override with
+    | Some pkg_name -> Env.is_package_loaded env pkg_name
+    | None -> true
+  in
+  let is_target_package_before_override_soft_required =
+    match
+      (Env.get_soft_package_requirement env, target_package_before_override)
+    with
+    | (Some soft_required_package_name, Some pkg_name) ->
+      let soft_required_package =
+        Env.get_package_by_name env (snd soft_required_package_name)
+      in
+      let target_package_before_override =
+        Env.get_package_by_name env pkg_name
+      in
+      package_includes soft_required_package target_package_before_override
+    | (Some _, None) -> true
+    | _ -> false
+  in
+  if
+    is_target_package_before_override_included
+    || is_target_package_before_override_loaded
+    || is_target_package_before_override_soft_required
+  then
+    `Yes
+  else
+    let warn_info =
+      {
+        current_package;
+        target_package;
+        target_package_before_override;
+        classptr_reference_warning;
+      }
+    in
+    `YesWarning warn_info
+
 let can_access_by_package_rules
     ~(env : Typing_env_types.env)
     ~(target_package_membership : Aast_defs.package_membership option)
@@ -122,55 +191,18 @@ let can_access_by_package_rules
     in
     match get_package_violation env current_pkg target_pkg with
     | None ->
-      (* There are no package errrors, but emit a warning if the edge introduces a new
-       * dependency a file in a package due to package rules and a file with a packageoverride *)
+      (* There are no package errrors, but emit a warning if the edge introduces a new dependency
+       * from a file in a package due to package rules to a file with a packageoverride *)
       (match (current_package_membership, target_package_membership) with
       | ( Some (Aast_defs.PackageConfigAssignment _),
           Some (Aast_defs.PackageOverride _) )
         when package_includes current_pkg target_pkg ->
-        let target_package_before_override =
-          let tcopt = Env.get_tcopt env in
-          Option.map
-            (Package_info.get_package_for_file
-               ~support_multifile_tests:
-                 (TypecheckerOptions.package_support_multifile_tests tcopt)
-               (TypecheckerOptions.package_info tcopt)
-               (Relative_path.suffix target_file))
-            ~f:Package.get_package_name
-        in
-        let is_target_package_before_override_loaded =
-          match target_package_before_override with
-          | Some pkg_name -> Env.is_package_loaded env pkg_name
-          | None -> true
-        in
-        let is_target_package_before_override_soft_required =
-          match
-            ( Env.get_soft_package_requirement env,
-              target_package_before_override )
-          with
-          | (Some soft_required_package_name, Some pkg_name) ->
-            let soft_required_package =
-              Env.get_package_by_name env (snd soft_required_package_name)
-            in
-            let target_package_before_override =
-              Env.get_package_by_name env pkg_name
-            in
-            package_includes
-              soft_required_package
-              target_package_before_override
-          | (Some _, None) -> true
-          | _ -> false
-        in
-        if
-          is_target_package_before_override_loaded
-          || is_target_package_before_override_soft_required
-        then
-          `Yes
-        else
-          let warn_info =
-            { current_package; target_package; target_package_before_override }
-          in
-          `YesWarning warn_info
+        can_access_ignoring_package_override
+          ~env
+          ~current_package
+          ~target_package
+          ~target_file
+          ~classptr_reference_warning:false
       | _ -> `Yes)
     | Some pkg_relationship ->
       let err_info =

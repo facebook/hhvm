@@ -122,4 +122,6 @@ module Codes = struct
   (* let deprecated_nullsafe_on_null = 5654 *)
 
   let package_into_override = 5655
+
+  let crosspackage_classptr_reference = 5656
 end

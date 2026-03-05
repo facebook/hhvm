@@ -288,11 +288,12 @@ and check_type_integrity
            cid
        in
        List.iter linter_errs ~f:(fun (pos, w) ->
-           Lints_diagnostics.package_into_override
+           Lints_diagnostics.crosspackage_linter
              pos
              w.current_package
              w.target_package
-             w.target_package_before_override);
+             w.target_package_before_override
+             w.classptr_reference_warning);
        List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
       let tparams = Cls.tparams class_info in
       check_targs_integrity ~in_signature (Cls.pos class_info) argl tparams
@@ -310,11 +311,12 @@ and check_type_integrity
            cid
        in
        List.iter linter_errs ~f:(fun (pos, w) ->
-           Lints_diagnostics.package_into_override
+           Lints_diagnostics.crosspackage_linter
              pos
              w.current_package
              w.target_package
-             w.target_package_before_override);
+             w.target_package_before_override
+             w.classptr_reference_warning);
        List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
       check_targs_integrity ~in_signature typedef.td_pos argl typedef.td_tparams
     | Decl_entry.DoesNotExist

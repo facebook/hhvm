@@ -237,7 +237,7 @@ namespace HH\Experimental {
  * EXPERIMENTAL: This API is subject to change or removal.
  */
 <<__Native>>
-function enable_first_flush(): void;
+function enable_first_flush(int $hint = 0): void;
 
 /**
  * Remove the first-flush scheduling hint, returning the thread to
@@ -249,6 +249,6 @@ function enable_first_flush(): void;
  * EXPERIMENTAL: This API is subject to change or removal.
  */
 <<__Native>>
-function disable_first_flush(): void;
+function disable_first_flush(int $hint = 0): void;
 
 } // namespace HH\Experimental

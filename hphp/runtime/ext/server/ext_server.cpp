@@ -219,13 +219,13 @@ int64_t HHVM_FUNCTION(server_process_start_time) {
   return BootStats::startTimestamp();
 }
 
-void HHVM_FUNCTION(enable_first_flush) {
+void HHVM_FUNCTION(enable_first_flush, int64_t hint) {
   if (!Cfg::Server::ScxThreadHintFirstFlushOverride) return;
   ThreadHint::getInstance().updateThreadHint(
     ThreadHint::Priority::FirstFlush);
 }
 
-void HHVM_FUNCTION(disable_first_flush) {
+void HHVM_FUNCTION(disable_first_flush, int64_t hint) {
   if (!Cfg::Server::ScxThreadHintFirstFlushOverride) return;
   ThreadHint::getInstance().updateThreadHint(
     ThreadHint::Priority::Processing);

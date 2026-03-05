@@ -1160,7 +1160,7 @@ HHVM_METHOD(FileDecls, getAttribute, const String& kls, const String& name) {
 // Extension
 
 struct DeclExtension final : Extension {
-  DeclExtension() : Extension("decl", "0.1", NO_ONCALL_YET) {}
+  DeclExtension() : Extension("decl", "0.1", "sandbox_infra") {}
 
   const DependencySet getDeps() const override {
     // ensure ext_facts initializes and loads first.

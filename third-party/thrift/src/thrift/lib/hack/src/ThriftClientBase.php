@@ -38,7 +38,7 @@ abstract class ThriftClientBase implements IThriftClient {
   protected int $seqid_ = 0;
   abstract const string THRIFT_SVC_NAME;
 
-  <<__NeedsConcrete>>
+  <<__NeedsConcrete, __DynamicallyCallable>>
   public static function factory()[]: ThriftClientFactory<this> {
     return tuple(
       static::class,

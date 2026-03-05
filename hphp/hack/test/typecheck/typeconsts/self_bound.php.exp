@@ -1,0 +1,84 @@
+ERROR: File "self_bound.php", line 6, characters 5-22:
+hh_expect type mismatch (Typing[4453])
+  File "self_bound.php", line 6, characters 15-17:
+  Expected `int`
+  File "self_bound.php", line 5, characters 24-33:
+  But got `Foo::TFoo super this::TFoo`
+ERROR: File "self_bound.php", line 6, characters 5-22:
+hh_expect type mismatch (Typing[4453])
+  File "self_bound.php", line 6, characters 15-17:
+  Expected `int`
+  File "self_bound.php", line 5, characters 24-33:
+  But got `mixed`
+ERROR: File "self_bound.php", line 6, characters 5-22:
+hh_expect type mismatch (Typing[4453])
+  File "self_bound.php", line 6, characters 15-17:
+  Expected `int`
+  File "self_bound.php", line 5, characters 24-33:
+  But got `this::TFoo as Foo::TFoo`
+ERROR: File "self_bound.php", line 6, characters 20-21:
+Invalid argument (Typing[4110])
+  File "self_bound.php", line 6, characters 15-17:
+  Expected `int`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "self_bound.php", line 5, characters 24-33:
+  But got `Foo::TFoo super this::TFoo`
+ERROR: File "self_bound.php", line 6, characters 20-21:
+Invalid argument (Typing[4110])
+  File "self_bound.php", line 6, characters 15-17:
+  Expected `int`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "self_bound.php", line 5, characters 24-33:
+  But got `mixed`
+ERROR: File "self_bound.php", line 6, characters 20-21:
+Invalid argument (Typing[4110])
+  File "self_bound.php", line 6, characters 15-17:
+  Expected `int`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "self_bound.php", line 5, characters 24-33:
+  But got `this::TFoo as Foo::TFoo`
+ERROR: File "self_bound.php", line 14, characters 5-22:
+hh_expect type mismatch (Typing[4453])
+  File "self_bound.php", line 14, characters 15-17:
+  Expected `int`
+  File "self_bound.php", line 13, characters 24-34:
+  But got `Bar::TBar1 super this::TBar1`
+ERROR: File "self_bound.php", line 14, characters 5-22:
+hh_expect type mismatch (Typing[4453])
+  File "self_bound.php", line 14, characters 15-17:
+  Expected `int`
+  File "self_bound.php", line 13, characters 24-34:
+  But got `mixed`
+ERROR: File "self_bound.php", line 14, characters 5-22:
+hh_expect type mismatch (Typing[4453])
+  File "self_bound.php", line 14, characters 15-17:
+  Expected `int`
+  File "self_bound.php", line 13, characters 24-34:
+  But got `this::TBar1 as Bar::TBar1`
+ERROR: File "self_bound.php", line 14, characters 20-21:
+Invalid argument (Typing[4110])
+  File "self_bound.php", line 14, characters 15-17:
+  Expected `int`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "self_bound.php", line 13, characters 24-34:
+  But got `Bar::TBar1 super this::TBar1`
+ERROR: File "self_bound.php", line 14, characters 20-21:
+Invalid argument (Typing[4110])
+  File "self_bound.php", line 14, characters 15-17:
+  Expected `int`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "self_bound.php", line 13, characters 24-34:
+  But got `mixed`
+ERROR: File "self_bound.php", line 14, characters 20-21:
+Invalid argument (Typing[4110])
+  File "self_bound.php", line 14, characters 15-17:
+  Expected `int`
+  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
+    via this generic `T`
+  File "self_bound.php", line 13, characters 24-34:
+  But got `this::TBar1 as Bar::TBar1`

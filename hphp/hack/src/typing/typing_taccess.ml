@@ -260,7 +260,21 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         let to_tys env : decl_ty option -> _ * TySet.t = function
           | Some ty ->
             let ((env, err, cycles), ty) = Phase.localize_rec ~ety_env env ty in
-            ((env, err, cycles), TySet.singleton ty)
+            (* When a cycle is detected (e.g. `abstract const type T as this::T`),
+               the localized type is Tany which is unsound. Drop the bound instead,
+               effectively treating the constraint as absent; this function is
+               used for both upper and lower bound but the interpretation of
+               the empty set is correct:
+               - upper bound = /\ {} = mixed
+               - lower bound = \/ {} = nothing
+            *)
+            let bounds =
+              if (not (List.is_empty cycles)) && Typing_defs.is_any ty then
+                TySet.empty
+              else
+                TySet.singleton ty
+            in
+            ((env, err, cycles), bounds)
           | None -> ((env, None, []), TySet.empty)
         in
         let ((env, e1, cycles_lower), lower_bounds) = to_tys env lower in

@@ -78,7 +78,7 @@ async def main():
     for signal in [SIGINT, SIGTERM]:
         loop.add_signal_handler(signal, server.stop)
     addr = await server.get_address()
-    print(f"{addr.port}\n", flush=True)
+    print(addr.port, flush=True)
     await serve_task
 
 

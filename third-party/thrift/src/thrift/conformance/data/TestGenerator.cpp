@@ -77,14 +77,22 @@ Test createRoundTripTest(
     // Test case #3: Optional field
     addStruct(mod_set<FieldModifier::Optional>{}, "Optional.");
 
-    addTestCase(
+    // Test case #4: Terse field
+    addStruct(mod_set<FieldModifier::Terse>{}, "Terse.");
+  }
+
+  // Test case: Optional field with empty value (generated once, not per value)
+  {
+    RoundTripTestCase roundTrip;
+    roundTrip.request()->value() = registry.store(
         typename struct_ByFieldType<
             ElementTag,
             mod_set<FieldModifier::Optional>>::type{},
-        fmt::format("testset.Optional.{}/empty_optional", typeName));
-
-    // Test case #4: Terse field
-    addStruct(mod_set<FieldModifier::Terse>{}, "Terse.");
+        protocol);
+    auto& emptyOptTestCase = test.testCases()->emplace_back();
+    emptyOptTestCase.name() =
+        fmt::format("testset.Optional.{}/empty_optional", typeName);
+    emptyOptTestCase.test()->roundTrip() = roundTrip;
   }
 
   return test;

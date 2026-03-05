@@ -51,7 +51,6 @@ async def main():
     serve_task = asyncio.create_task(server.serve())
     addr = await server.get_address()
     print(addr.port, flush=True)
-    print("\n", flush=True)
     try:
         await serve_task
     finally:

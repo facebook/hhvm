@@ -156,7 +156,6 @@ service StreamingEdenService extends eden.EdenService {
    * never calls changesSinceV2 or getCurrentJournalPosition in
    * response to a notification on this stream, future notifications may not
    * arrive.
-
    */
   stream<eden.JournalPosition> streamJournalChanged(
     1: eden.PathString mountPoint,

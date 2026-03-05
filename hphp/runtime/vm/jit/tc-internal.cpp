@@ -216,9 +216,8 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
                       kind == TransKind::LivePrologue;
   auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
-  
   auto const hasLiveTransBytesLimit = Cfg::Jit::FuncLiveTranslationByteLimit != std::numeric_limits<uint32_t>::max();
-  if (isLive && hasLiveTransBytesLimit && 
+  if (isLive && hasLiveTransBytesLimit &&
       g_funcLiveTransBytes[func->getFuncId()] > Cfg::Jit::FuncLiveTranslationByteLimit) {
     return TranslationResult::Scope::Process;
   }
@@ -424,7 +423,7 @@ bool shouldProfileNewFuncs() {
   if (profData() == nullptr) return false;
 
   // We have one knob to control the number of functions we're allowed to
-  // profile:Eval.JitProfileBCSize. We profile new functions this limit is exceeded.
+  // profile:Eval.JitProfileBCSize. We profile new functions till this limit is exceeded.
   int64_t limit = Cfg::Jit::EnableProfileBCSizeMultiplier
                   ? Cfg::Jit::ProfileBCSizeMultiplier * Cfg::Jit::ProfileBCSize
                   : Cfg::Jit::ProfileBCSize;

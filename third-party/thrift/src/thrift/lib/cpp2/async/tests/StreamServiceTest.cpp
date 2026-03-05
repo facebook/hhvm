@@ -143,8 +143,18 @@ TYPED_TEST(StreamServiceTest, DuplicateStreamIdThrows) {
       [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         // dummy request to send setup frame
         co_await client.co_test();
-        // sink request frame will now be sent twice with the same stream id
-        EXPECT_THROW(co_await client.co_range(0, 100), TTransportException);
+        // stream request frame will now be sent twice with the same stream id.
+        // The server detects the duplicate and closes the connection, but due
+        // to a race the initial response may arrive before the connection-level
+        // error. In either case the connection should be broken afterwards.
+        try {
+          co_await client.co_range(0, 100);
+        } catch (const TTransportException&) {
+          co_return;
+        }
+        // Initial response arrived before connection error; verify the
+        // connection is now broken.
+        EXPECT_THROW(co_await client.co_test(), TTransportException);
       });
 }
 

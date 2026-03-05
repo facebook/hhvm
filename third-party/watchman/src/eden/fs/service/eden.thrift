@@ -2041,6 +2041,14 @@ struct ChangesSinceV2Result {
   2: list<ChangeNotification> changes;
 }
 
+struct PeekCurrentJournalPositionRequest {
+  1: MountId mountId;
+}
+
+struct PeekCurrentJournalPositionResponse {
+  1: JournalPosition position;
+}
+
 /**
  * Argument to changesSinceV2 API
  *
@@ -2447,6 +2455,14 @@ service EdenService extends fb303_core.BaseService {
   JournalPosition getCurrentJournalPosition(1: PathString mountPoint) throws (
     1: EdenError ex,
   );
+
+  /** Like getCurrentJournalPosition but does not mark the journal as observed.
+   * Use this when you only need the current position and don't want to
+   * affect subscriber notification coalescing.
+   */
+  PeekCurrentJournalPositionResponse peekCurrentJournalPosition(
+    1: PeekCurrentJournalPositionRequest params,
+  ) throws (1: EdenError ex);
 
   /** Returns the set of files (and dirs) that changed since a prior point.
    * If fromPosition.mountGeneration is mismatched with the current

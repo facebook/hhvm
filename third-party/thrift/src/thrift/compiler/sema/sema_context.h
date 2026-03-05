@@ -189,6 +189,10 @@ struct sema_params {
   // Action to take when a namespace is declared more than once for the same
   // language within a single file. If not `error`, the first namespace wins.
   validation_level duplicate_namespace = validation_level::none;
+
+  // If true, ignore @thrift.AllowLegacyMissingUris opt-out when checking for
+  // missing URIs. Requires missing_uris to be set to error.
+  bool ignore_missing_uri_opt_out = false;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

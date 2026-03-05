@@ -4107,3 +4107,61 @@ TEST(CompilerTest, duplicate_namespaces) {
   )",
       {"--extra-validation", "duplicate_namespace=error"});
 }
+
+/**
+ * Tests ignore_missing_uri_opt_out on a single file with types missing URIs.
+ * AllowLegacyMissingUris does not suppress errors.
+ */
+TEST(CompilerTest, ignore_missing_uri_opt_out_basic) {
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    package;
+    # expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+
+    // Valid: struct with URI
+    @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
+    struct ValidStruct { }
+
+    // Error: struct without URI
+    struct MissingUriStruct { }
+    # expected-error@-1: Definition `MissingUriStruct` requires a URI: add a non-empty package to the file, or annotate the type with @thrift.Uri. For more details, see https://fburl.com/thrift-uri-add-package
+
+    // Error: AllowLegacyMissingUris does NOT suppress when opt-out is ignored
+    @thrift.AllowLegacyMissingUris
+    struct LegacyAnnotatedStruct { }
+    # expected-error@-2: Definition `LegacyAnnotatedStruct` requires a URI: add a non-empty package to the file, or annotate the type with @thrift.Uri. For more details, see https://fburl.com/thrift-uri-add-package
+
+    // Error: enum without URI
+    enum MissingUriEnum { }
+    # expected-error@-1: Definition `MissingUriEnum` requires a URI: add a non-empty package to the file, or annotate the type with @thrift.Uri. For more details, see https://fburl.com/thrift-uri-add-package
+  )",
+      {"--extra-validation", "ignore_missing_uri_opt_out,missing_uris=error"});
+}
+
+/**
+ * Tests that @thrift.AllowLegacyMissingUris at both package and node level
+ * is ignored when ignore_missing_uri_opt_out is set.
+ */
+TEST(CompilerTest, ignore_missing_uri_opt_out_with_allow_legacy) {
+  check_compile(
+      R"(
+    include "thrift/annotation/thrift.thrift"
+
+    @thrift.AllowLegacyMissingUris
+    package;
+    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+
+    // Error: package-level AllowLegacyMissingUris does not suppress
+    struct PkgAnnotatedStruct { }
+    # expected-error@-1: Definition `PkgAnnotatedStruct` requires a URI: add a non-empty package to the file, or annotate the type with @thrift.Uri. For more details, see https://fburl.com/thrift-uri-add-package
+
+    // Error: both package and node level AllowLegacyMissingUris do not suppress
+    @thrift.AllowLegacyMissingUris
+    struct BothAnnotatedStruct { }
+    # expected-error@-2: Unnecessary use of @thrift.AllowLegacyMissingUris on `BothAnnotatedStruct`: the annotation is already applied at the package (i.e., file) level.
+    # expected-error@-3: Definition `BothAnnotatedStruct` requires a URI: add a non-empty package to the file, or annotate the type with @thrift.Uri. For more details, see https://fburl.com/thrift-uri-add-package
+  )",
+      {"--extra-validation", "ignore_missing_uri_opt_out,missing_uris=error"});
+}

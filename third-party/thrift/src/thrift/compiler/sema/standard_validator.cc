@@ -1040,8 +1040,9 @@ void validate_missing_uris(sema_context& ctx, const t_program& program) {
       }
     }
 
+    const bool ignoreOptOut = ctx.sema_parameters().ignore_missing_uri_opt_out;
     const bool shouldReportMissingUri =
-        !packageHasAnnotation && !nodeHasAnnotation;
+        ignoreOptOut || (!packageHasAnnotation && !nodeHasAnnotation);
     if (shouldReportMissingUri) {
       ctx.report(
           node,

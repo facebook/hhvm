@@ -200,6 +200,10 @@ Options:
                   the first namespace wins.
                   Default: none
 
+                ignore_missing_uri_opt_out
+                  Ignore @thrift.AllowLegacyMissingUris when checking for
+                  missing URIs. Requires missing_uris=error.
+
                 warn_on_redundant_custom_default_values
                   DEPRECATED, prefer: redundant_custom_default_values=warn
 
@@ -1020,6 +1024,11 @@ std::string parse_args(
             continue;
           }
 
+          if (validator == "ignore_missing_uri_opt_out") {
+            sparams.ignore_missing_uri_opt_out = true;
+            continue;
+          }
+
         } catch (const std::exception& e) {
           fmt::print(
               stderr,
@@ -1208,6 +1217,9 @@ void record_invocation_params(
       fmt::format(
           "duplicate_namespace={}",
           fmt::underlying(sparams.duplicate_namespace)));
+  sema_params_metric.add(
+      fmt::format(
+          "ignore_missing_uri_opt_out={}", sparams.ignore_missing_uri_opt_out));
   sema_params_metric.add(
       "warn_on_redundant_custom_default_values=" +
       std::to_string(

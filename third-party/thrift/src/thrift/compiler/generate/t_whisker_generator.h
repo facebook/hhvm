@@ -460,13 +460,16 @@ class t_whisker_generator : public t_generator {
    */
   template <typename T>
   static auto to_array(node_list_view<const T> nodes, prototype_ptr<T> proto) {
+    static_assert(
+        !std::is_same_v<t_type, std::remove_cv_t<T>>,
+        "Use `to_type_array` for lists of `t_type`, to avoid bugs with incorrect derived prototype resolution");
     whisker::array::raw refs;
     refs.reserve(nodes.size());
     for (const T& ref : nodes) {
       refs.emplace_back(
           whisker::make::native_handle(whisker::manage_as_static(ref), proto));
     }
-    return whisker::make::array(refs);
+    return whisker::make::array(std::move(refs));
   }
 
   /**
@@ -475,13 +478,31 @@ class t_whisker_generator : public t_generator {
   template <typename T>
   static auto to_array(
       const std::vector<T*>& nodes, prototype_ptr<std::remove_cv_t<T>> proto) {
+    static_assert(
+        !std::is_same_v<t_type, std::remove_cv_t<T>>,
+        "Use `to_type_array` for lists of `t_type`, to avoid bugs with incorrect derived prototype resolution");
     whisker::array::raw refs;
     refs.reserve(nodes.size());
     for (const T* ref : nodes) {
       refs.emplace_back(
           whisker::make::native_handle(whisker::manage_as_static(*ref), proto));
     }
-    return whisker::make::array(refs);
+    return whisker::make::array(std::move(refs));
+  }
+
+  /**
+   * Converts a container of `t_type` instances to a Whisker array, resolving
+   * the most derived prototype for each element.
+   */
+  template <typename T>
+  static auto to_type_array(
+      const std::vector<T*>& nodes, const prototype_database& proto) {
+    whisker::array::raw refs;
+    refs.reserve(nodes.size());
+    for (const T* ref : nodes) {
+      refs.emplace_back(resolve_derived_t_type(proto, *ref));
+    }
+    return whisker::make::array(std::move(refs));
   }
 
   /**

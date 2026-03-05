@@ -149,12 +149,7 @@ class t_mstch_go_generator : public t_whisker_generator {
       return to_array(data_.req_resp_structs, proto.of<t_struct>());
     });
     def.property("thrift_metadata_types", [this, &proto](const t_program&) {
-      whisker::array::raw result;
-      result.reserve(data_.thrift_metadata_types.size());
-      for (const t_type* type : data_.thrift_metadata_types) {
-        result.emplace_back(resolve_derived_t_type(proto, *type));
-      }
-      return whisker::array::of(std::move(result));
+      return to_type_array(data_.thrift_metadata_types, proto);
     });
 
     return std::move(def).make();

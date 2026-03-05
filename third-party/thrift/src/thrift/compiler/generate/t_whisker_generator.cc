@@ -607,12 +607,7 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
       });
 
   def.property("structured_definitions", [&](const t_program& self) {
-    array::raw result;
-    result.reserve(self.structured_definitions().size());
-    for (const t_structured* structured : self.structured_definitions()) {
-      result.emplace_back(resolve_derived_t_type(proto, *structured));
-    }
-    return array::of(std::move(result));
+    return to_type_array(self.structured_definitions(), proto);
   });
   def.property("services", mem_fn(&t_program::services, proto.of<t_service>()));
   def.property(
@@ -736,8 +731,7 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
   def.property("stream", mem_fn(&t_function::stream, proto.of<t_stream>()));
 
   def.property("return_type", [&](const t_function& function) {
-    const t_type* type = function.return_type().get_type();
-    return resolve_derived_t_type(proto, *type);
+    return resolve_derived_t_type(proto, function.return_type().deref());
   });
 
   def.property("oneway?", [](const t_function& self) {

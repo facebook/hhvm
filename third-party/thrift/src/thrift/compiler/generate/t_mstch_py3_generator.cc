@@ -1016,7 +1016,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
           visible.reserve(self.structured_definitions().size());
           for (const t_structured* s : self.structured_definitions()) {
             if (!is_hidden(*s)) {
-              visible.emplace_back(proto.create<t_structured>(*s));
+              visible.emplace_back(resolve_derived_t_type(proto, *s));
             }
           }
           return whisker::make::array(std::move(visible));
@@ -1104,10 +1104,10 @@ class t_mstch_py3_generator : public t_mstch_generator {
           !context_->stream_types(self).empty();
     });
     def.property("custom_templates", [&](const t_program& self) {
-      return to_array(context_->custom_templates(self), proto.of<t_type>());
+      return to_type_array(context_->custom_templates(self), proto);
     });
     def.property("custom_cpp_types", [&](const t_program& self) {
-      return to_array(context_->custom_cpp_types(self), proto.of<t_type>());
+      return to_type_array(context_->custom_cpp_types(self), proto);
     });
 
     return std::move(def).make();

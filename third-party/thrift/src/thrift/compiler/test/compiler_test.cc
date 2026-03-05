@@ -2230,6 +2230,111 @@ TEST(CompilerTest, required_key_specified_in_structured_annotation) {
   )");
 }
 
+TEST(CompilerTest, enum_type_value_range_validation) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/cpp.thrift"
+
+    // Out-of-range cases (far from boundary)
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.U8}
+      # expected-error@-1: Enum `BadU8Enum` has values out of range for `@cpp.EnumType{type = cpp.EnumUnderlyingType.U8}` (valid range: 0 to 255): `TOO_BIG` = 300. Consider using `@cpp.EnumType{type = cpp.EnumUnderlyingType.U16}` to accommodate all values.
+    enum BadU8Enum {
+      OK = 0,
+      TOO_BIG = 300,
+    }
+
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+      # expected-error@-1: Enum `BadI8Enum` has values out of range for `@cpp.EnumType{type = cpp.EnumUnderlyingType.I8}` (valid range: -128 to 127): `TOO_LOW` = -200. Consider using `@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}` to accommodate all values.
+    enum BadI8Enum {
+      OK = 0,
+      TOO_LOW = -200,
+    }
+
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
+      # expected-error@-1: Enum `BadU16Enum` has values out of range for `@cpp.EnumType{type = cpp.EnumUnderlyingType.U16}` (valid range: 0 to 65535): `NEGATIVE` = -1. Consider using `@cpp.EnumType{type = cpp.EnumUnderlyingType.I8}` to accommodate all values.
+    enum BadU16Enum {
+      OK = 0,
+      NEGATIVE = -1,
+    }
+
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
+      # expected-error@-1: Enum `BadI16Enum` has values out of range for `@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}` (valid range: -32768 to 32767): `TOO_BIG` = 40000. Consider using `@cpp.EnumType{type = cpp.EnumUnderlyingType.U16}` to accommodate all values.
+    enum BadI16Enum {
+      OK = 0,
+      TOO_BIG = 40000,
+    }
+
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
+      # expected-error@-1: Enum `BadU32Enum` has values out of range for `@cpp.EnumType{type = cpp.EnumUnderlyingType.U32}` (valid range: 0 to 2147483647): `NEGATIVE` = -1. Consider using `@cpp.EnumType{type = cpp.EnumUnderlyingType.I8}` to accommodate all values.
+    enum BadU32Enum {
+      OK = 0,
+      NEGATIVE = -1,
+    }
+
+    // Off-by-one cases (one past the boundary)
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.U8}
+      # expected-error@-1: Enum `OffByOneU8` has values out of range for `@cpp.EnumType{type = cpp.EnumUnderlyingType.U8}` (valid range: 0 to 255): `JUST_OVER` = 256. Consider using `@cpp.EnumType{type = cpp.EnumUnderlyingType.U16}` to accommodate all values.
+    enum OffByOneU8 {
+      JUST_OVER = 256,
+    }
+
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+      # expected-error@-1: Enum `OffByOneI8` has values out of range for `@cpp.EnumType{type = cpp.EnumUnderlyingType.I8}` (valid range: -128 to 127): `JUST_OVER` = 128, `JUST_UNDER` = -129. Consider using `@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}` to accommodate all values.
+    enum OffByOneI8 {
+      JUST_OVER = 128,
+      JUST_UNDER = -129,
+    }
+
+    // Multiple out-of-range values in a single enum (single consolidated error)
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+      # expected-error@-1: Enum `MultiErrorEnum` has values out of range for `@cpp.EnumType{type = cpp.EnumUnderlyingType.I8}` (valid range: -128 to 127): `TOO_LOW` = -200, `TOO_HIGH` = 200. Consider using `@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}` to accommodate all values.
+    enum MultiErrorEnum {
+      OK = 0,
+      TOO_LOW = -200,
+      TOO_HIGH = 200,
+    }
+
+    // Suggest removing annotation when only default int32_t fits
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.U8}
+      # expected-error@-1: Enum `NeedsDefaultEnum` has values out of range for `@cpp.EnumType{type = cpp.EnumUnderlyingType.U8}` (valid range: 0 to 255): `BIG` = 100000, `NEG` = -100000. Consider removing `@cpp.EnumType` to use the default `int32_t`.
+    enum NeedsDefaultEnum {
+      BIG = 100000,
+      NEG = -100000,
+    }
+
+    // Boundary values (should not error)
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.U8}
+    enum GoodU8Enum {
+      ZERO = 0,
+      MAX = 255,
+    }
+
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+    enum GoodI8Enum {
+      MIN = -128,
+      MAX = 127,
+    }
+
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
+    enum GoodU16Enum {
+      ZERO = 0,
+      MAX = 65535,
+    }
+
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
+    enum GoodI16Enum {
+      MIN = -32768,
+      MAX = 32767,
+    }
+
+    @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
+    enum GoodU32Enum {
+      ZERO = 0,
+      MAX = 2147483647,
+    }
+  )");
+}
+
 TEST(CompilerTest, nonexist_type_in_variable) {
   check_compile(R"(
     package "facebook.com/thrift/test"

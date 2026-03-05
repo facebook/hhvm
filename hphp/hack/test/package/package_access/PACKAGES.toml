@@ -25,3 +25,10 @@ include_paths=["//pkg5/"]
 [packages.pkg6]
 include_paths=["//pkg6/"]
 includes = ["pkg1"]
+
+[packages.pkg7]
+includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
+
+[packages.pkg8]
+includes = ["pkg3", "pkg2", "pkg2_soft", "pkg1"]
+

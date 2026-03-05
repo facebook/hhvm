@@ -16,6 +16,41 @@ let lookup_package env p =
   in
   Package_info.get_package info p
 
+(** Get the current package information from the environment.
+    Returns (package option, package_name, package_pos, assignment_kind) *)
+let get_current_package_info env current_pkg_membership =
+  match current_pkg_membership with
+  | Aast_defs.PackageConfigAssignment pkg_name ->
+    let pkg = lookup_package env pkg_name in
+    let pos =
+      match pkg with
+      | Some p -> Package.get_package_pos p
+      | None -> Pos.none
+    in
+    (pkg, pkg_name, pos, "package config assignment")
+  | Aast_defs.PackageOverride (pkg_pos, pkg_name) ->
+    let pkg = lookup_package env pkg_name in
+    (pkg, pkg_name, pkg_pos, "package override")
+
+(** Check package strict inclusion and emit diagnostics.
+    [~emit_error] is called with (soft_included, def_pos) when an error should be emitted *)
+let check_package_strict_inclusion
+    ~required_package ~current_package ~emit_error =
+  (* Check if required_package strictly includes current_package *)
+  (match Package.relationship required_package current_package with
+  | Package.Includes -> ()
+  | Package.Equal
+  | Package.Unrelated
+  | Package.Soft_includes ->
+    let def_pos = Package.get_package_pos required_package in
+    emit_error ~soft_included:false ~def_pos);
+  (* Check the opposite direction for soft-includes *)
+  match Package.relationship current_package required_package with
+  | Package.Soft_includes ->
+    let def_pos = Package.get_package_pos current_package in
+    emit_error ~soft_included:true ~def_pos
+  | _ -> ()
+
 let require_package_strict_inclusion env attr =
   match
     Naming_attributes.find2
@@ -50,62 +85,62 @@ let require_package_strict_inclusion env attr =
             current_pkg_name,
             current_pkg_pos,
             current_package_assignment_kind ) =
-        match current_pkg_membership with
-        | Aast_defs.PackageConfigAssignment pkg_name ->
-          let pkg = lookup_package env pkg_name in
-          let pos =
-            match pkg with
-            | Some p -> Package.get_package_pos p
-            | None -> Pos.none
-          in
-          (pkg, pkg_name, pos, "package config assignment")
-        | Aast_defs.PackageOverride (pkg_pos, pkg_name) ->
-          let pkg = lookup_package env pkg_name in
-          (pkg, pkg_name, pkg_pos, "package override")
+        get_current_package_info env current_pkg_membership
       in
       (match current_pkg with
       | Some current_package ->
-        (match Package.relationship required_package current_package with
-        | Package.Includes -> ()
-        | Package.Equal
-        | Package.Unrelated
-        | Package.Soft_includes ->
-          let required_pos = Package.get_package_pos required_package in
-          Diagnostics.add_diagnostic
-            Nast_check_error.(
-              to_user_diagnostic
-              @@ Require_package_strict_inclusion
-                   {
-                     required_pos = name_pos;
-                     required = required_pkg_name;
-                     def_pos = Pos_or_decl.of_raw_pos required_pos;
-                     current = current_pkg_name;
-                     current_pos = current_pkg_pos;
-                     attribute_name = name;
-                     soft_included = false;
-                     current_package_assignment_kind;
-                   }));
-        (* Check the opposite direction *)
-        (match Package.relationship current_package required_package with
-        | Package.Soft_includes ->
-          let required_pos = Package.get_package_pos current_package in
-          Diagnostics.add_diagnostic
-            Nast_check_error.(
-              to_user_diagnostic
-              @@ Require_package_strict_inclusion
-                   {
-                     required_pos = name_pos;
-                     required = required_pkg_name;
-                     def_pos = Pos_or_decl.of_raw_pos required_pos;
-                     current = current_pkg_name;
-                     current_pos = current_pkg_pos;
-                     attribute_name = name;
-                     soft_included = true;
-                     current_package_assignment_kind;
-                   })
-        | _ -> ())
+        check_package_strict_inclusion
+          ~required_package
+          ~current_package
+          ~emit_error:(fun ~soft_included ~def_pos ->
+            Diagnostics.add_diagnostic
+              Nast_check_error.(
+                to_user_diagnostic
+                @@ Require_package_strict_inclusion
+                     {
+                       required_pos = name_pos;
+                       required = required_pkg_name;
+                       def_pos = Pos_or_decl.of_raw_pos def_pos;
+                       current = current_pkg_name;
+                       current_pos = current_pkg_pos;
+                       attribute_name = name;
+                       soft_included;
+                       current_package_assignment_kind;
+                     }))
       | None -> ())
     | _ -> ())
+  | _ -> ()
+
+let package_expression_strict_inclusion env (pkg_pos, pkg_name) =
+  let required_pkg = lookup_package env pkg_name in
+  match (required_pkg, env.Nast_check_env.package) with
+  | (Some required_package, Some current_pkg_membership) ->
+    let ( current_pkg,
+          current_pkg_name,
+          current_pkg_pos,
+          current_package_assignment_kind ) =
+      get_current_package_info env current_pkg_membership
+    in
+    (match current_pkg with
+    | Some current_package ->
+      check_package_strict_inclusion
+        ~required_package
+        ~current_package
+        ~emit_error:(fun ~soft_included ~def_pos ->
+          Diagnostics.add_diagnostic
+            Nast_check_error.(
+              to_user_diagnostic
+              @@ Package_expression_strict_inclusion
+                   {
+                     pkg_pos;
+                     pkg = pkg_name;
+                     def_pos = Pos_or_decl.of_raw_pos def_pos;
+                     current = current_pkg_name;
+                     current_pos = current_pkg_pos;
+                     soft_included;
+                     current_package_assignment_kind;
+                   }))
+    | None -> ())
   | _ -> ()
 
 let handler =
@@ -117,4 +152,9 @@ let handler =
 
     method! at_method_ env m =
       require_package_strict_inclusion env m.m_user_attributes
+
+    method! at_expr env (_, _, e) =
+      match e with
+      | Package id -> package_expression_strict_inclusion env id
+      | _ -> ()
   end

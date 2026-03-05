@@ -1,27 +1,27 @@
-//// pkg5.php
+//// pkg8.php
 <?hh
-<<file: __PackageOverride('pkg5')>>
-function pkg5_call(): void {}
+<<file: __PackageOverride('pkg8')>>
+function pkg8_call(): void {}
 
-//// pkg4.php
+//// pkg7.php
 <?hh
-<<file: __PackageOverride('pkg4')>>
-function pkg4_call(): void {}
+<<file: __PackageOverride('pkg7')>>
+function pkg7_call(): void {}
 
 //// pkg3.php
 <?hh
 <<file: __PackageOverride('pkg3')>>
 function test(): void {
-  if (package pkg4 || package pkg5) {
+  if (package pkg7 || package pkg8) {
     // neither is allowed as we cannot be sure
-    pkg5_call();
-    pkg4_call();
+    pkg8_call();
+    pkg7_call();
   } else {
     // similarly here, both are rejected
-    pkg5_call();
-    pkg4_call();
+    pkg8_call();
+    pkg7_call();
   }
   // and here, both are rejected
-  pkg5_call();
-  pkg4_call();
+  pkg8_call();
+  pkg7_call();
 }

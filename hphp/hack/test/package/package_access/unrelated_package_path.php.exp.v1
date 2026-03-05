@@ -54,5 +54,7 @@ PACKAGES.toml:22:11
 [4] 25 | [packages.pkg6]
     26 | include_paths=["//pkg6/"]
 [5] 27 | includes = ["pkg1"]
+    28 | 
+    29 | [packages.pkg7]
 
 2 errors found

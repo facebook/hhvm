@@ -1,0 +1,63 @@
+error: NastCheck[3109] Invalid package expression [1]
+-> This code is in package pkg2 by package override [2]
+-> The checked package pkg1 must strictly include (i.e. cannot equal) pkg2 [3]
+
+package_expression_strict_inclusion.php--a.php:7:15
+    1 | <?hh
+    2 | // package pkg2
+[2] 3 | <<file: __PackageOverride('pkg2')>>
+    4 | 
+    5 | function test_in_pkg2(): void {
+    6 |   // Error: pkg1 does not strictly include pkg2 (pkg2 includes pkg1, not vice versa)
+[1] 7 |   if (package pkg1) {
+    8 |     // ...
+    9 |   }
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[3] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+error: NastCheck[3109] Invalid package expression [1]
+-> This code is in package pkg1 by package config assignment [2]
+-> The checked package pkg1 must strictly include (i.e. cannot equal) pkg1 [2]
+
+package_expression_strict_inclusion.php--b.php:6:15
+    4 | function test_in_pkg1(): void {
+    5 |   // Error: pkg1 equals pkg1 (same package)
+[1] 6 |   if (package pkg1) {
+    7 |     // ...
+    8 |   }
+
+PACKAGES.toml:3:11
+    1 | [packages]
+    2 | 
+[2] 3 | [packages.pkg1]
+    4 | include_paths=["//"]
+    5 | 
+
+error: NastCheck[3109] Invalid package expression [1]
+-> This code is in package pkg2 by package override [2]
+-> pkg2 soft-includes the checked package pkg2_soft, so this check is not allowed [3]
+
+package_expression_strict_inclusion.php--c.php:7:15
+    1 | <?hh
+    2 | // package pkg2
+[2] 3 | <<file: __PackageOverride('pkg2')>>
+    4 | 
+    5 | function test_soft_includes(): void {
+    6 |   // Error: pkg2 soft-includes pkg2_soft
+[1] 7 |   if (package pkg2_soft) {
+    8 |     // ...
+    9 |   }
+
+PACKAGES.toml:6:11
+    4 | include_paths=["//"]
+    5 | 
+[3] 6 | [packages.pkg2]
+    7 | include_paths=[
+    8 |     "//cross_package_access_internal1_foo.php",
+
+3 errors found

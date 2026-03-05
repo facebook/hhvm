@@ -209,6 +209,20 @@ type t =
       soft_included: bool;
       current_package_assignment_kind: string;
     }
+  | Package_expression_strict_inclusion of {
+      pkg_pos: Pos.t;
+      pkg: string;
+      def_pos: Pos_or_decl.t;
+      current: string;
+      current_pos: Pos.t;
+      soft_included: bool;
+      current_package_assignment_kind: string;
+    }
+
+(** Context for package strict inclusion errors *)
+type package_strict_inclusion_context =
+  | Ctx_require_package of string (* attribute name *)
+  | Ctx_package_expression
 
 let repeated_record_field_name pos name prev_pos =
   User_diagnostic.make_err
@@ -873,40 +887,62 @@ let class_sealed_with_trait pos class_name trait_name =
           (Markdown_lite.md_codify @@ Render.strip_ns trait_name) );
     ]
 
-let require_package_strict_inclusion
-    required_pos
-    required
-    def_pos
-    current
-    current_pos
-    attribute_name
-    soft_included
-    current_package_assignment_kind =
+(** Unified function for package strict inclusion errors.
+    [ctx] determines whether this is a __RequirePackage attribute or a package expression check. *)
+let package_strict_inclusion
+    ~pos
+    ~pkg
+    ~def_pos
+    ~current
+    ~current_pos
+    ~soft_included
+    ~current_package_assignment_kind
+    ~(ctx : package_strict_inclusion_context) =
+  let (error_code, primary_msg, location_msg) =
+    match ctx with
+    | Ctx_require_package attribute_name ->
+      ( Error_code.(to_enum RequirePackageStrictInclusion),
+        Printf.sprintf "Invalid %s" attribute_name,
+        Printf.sprintf
+          "This function is defined in package `%s` by this %s"
+          current
+          current_package_assignment_kind )
+    | Ctx_package_expression ->
+      ( Error_code.(to_enum PackageExpressionStrictInclusion),
+        "Invalid package expression",
+        Printf.sprintf
+          "This code is in package `%s` by %s"
+          current
+          current_package_assignment_kind )
+  in
+  let (pkg_label, soft_includes_label) =
+    match ctx with
+    | Ctx_require_package _ -> ("required", "required")
+    | Ctx_package_expression -> ("checked", "checked")
+  in
   let last_reason =
     if soft_included then
       ( def_pos,
         Printf.sprintf
-          "`%s` soft-includes the required package `%s`, so this requirement is not allowed"
+          "`%s` soft-includes the %s package `%s`, so this %s is not allowed"
           current
-          required )
+          pkg_label
+          pkg
+          (match ctx with
+          | Ctx_require_package _ -> "requirement"
+          | Ctx_package_expression -> "check") )
     else
       ( def_pos,
         Printf.sprintf
-          "The required package `%s` must strictly include (i.e. cannot equal) `%s`"
-          required
+          "The %s package `%s` must strictly include (i.e. cannot equal) `%s`"
+          soft_includes_label
+          pkg
           current )
   in
   User_diagnostic.make_err
-    Error_code.(to_enum RequirePackageStrictInclusion)
-    (required_pos, Printf.sprintf "Invalid %s" attribute_name)
-    [
-      ( Pos_or_decl.of_raw_pos current_pos,
-        Printf.sprintf
-          "This function is defined in package `%s` by this %s"
-          current
-          current_package_assignment_kind );
-      last_reason;
-    ]
+    error_code
+    (pos, primary_msg)
+    [(Pos_or_decl.of_raw_pos current_pos, location_msg); last_reason]
 
 (* --------------------------------------------- *)
 let to_user_diagnostic t =
@@ -1025,14 +1061,33 @@ let to_user_diagnostic t =
           soft_included;
           current_package_assignment_kind;
         } ->
-      require_package_strict_inclusion
-        required_pos
-        required
-        def_pos
-        current
-        current_pos
-        attribute_name
-        soft_included
-        current_package_assignment_kind
+      package_strict_inclusion
+        ~pos:required_pos
+        ~pkg:required
+        ~def_pos
+        ~current
+        ~current_pos
+        ~soft_included
+        ~current_package_assignment_kind
+        ~ctx:(Ctx_require_package attribute_name)
+    | Package_expression_strict_inclusion
+        {
+          pkg_pos;
+          pkg;
+          def_pos;
+          current;
+          current_pos;
+          soft_included;
+          current_package_assignment_kind;
+        } ->
+      package_strict_inclusion
+        ~pos:pkg_pos
+        ~pkg
+        ~def_pos
+        ~current
+        ~current_pos
+        ~soft_included
+        ~current_package_assignment_kind
+        ~ctx:Ctx_package_expression
   in
   f Explanation.empty

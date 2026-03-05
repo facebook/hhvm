@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<88a1d0face0230950853fb28a36ecce6>>
+// @generated SignedSource<<66b597028816448e23941b4407e36a65>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -330,4 +330,38 @@ pub enum NastCheckError {
         soft_included: bool,
         current_package_assignment_kind: String,
     },
+    #[rust_to_ocaml(name = "Package_expression_strict_inclusion")]
+    PackageExpressionStrictInclusion {
+        pkg_pos: pos::Pos,
+        pkg: String,
+        def_pos: pos_or_decl::PosOrDecl,
+        current: String,
+        current_pos: pos::Pos,
+        soft_included: bool,
+        current_package_assignment_kind: String,
+    },
+}
+
+/// Context for package strict inclusion errors
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C, u8)]
+pub enum PackageStrictInclusionContext {
+    #[rust_to_ocaml(name = "Ctx_require_package")]
+    CtxRequirePackage(String),
+    #[rust_to_ocaml(name = "Ctx_package_expression")]
+    CtxPackageExpression,
 }

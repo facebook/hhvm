@@ -1,17 +1,17 @@
-//// pkg4.php
+//// pkg7.php
 <?hh
-<<file: __PackageOverride('pkg4')>>
-function pkg4_call(): void {}
+<<file: __PackageOverride('pkg7')>>
+function pkg7_call(): void {}
 
 //// pkg3.php
 <?hh
 <<file: __PackageOverride('pkg3')>>
 function test(): void {
-  if (!(package pkg4)) {
-    pkg4_call();   // error; pkg4 is not loaded
+  if (!(package pkg7)) {
+    pkg7_call();   // error; pkg7 is not loaded
     return;
   } else {
-    pkg4_call();  // ok
+    pkg7_call();  // ok
   }
-  pkg4_call(); // ok, !(package pkg4) exited early
+  pkg7_call(); // ok, !(package pkg7) exited early
 }

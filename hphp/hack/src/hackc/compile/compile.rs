@@ -564,6 +564,7 @@ fn emit_fatal_nast_check_error(err: &NastCheckError) -> Result<Unit, Error> {
         NastCheckError::AttributeImplementedByRestriction { .. } => todo!(),
         NastCheckError::RequirePackageStrictInclusion { .. } => todo!(),
         NastCheckError::ClassSealedWithTrait { .. } => todo!(),
+        NastCheckError::PackageExpressionStrictInclusion { .. } => todo!(),
     }
 }
 

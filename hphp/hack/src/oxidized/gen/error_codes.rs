@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e8f3018ac482cee215fbdf70aca4ce8e>>
+// @generated SignedSource<<afdd1e05969146f6f213408ba49a6645>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -226,6 +226,7 @@ pub enum NastCheck {
     NamedInTransformedPseudofunction = 3106,
     RequirePackageStrictInclusion = 3107,
     ClassSealedWithTrait = 3108,
+    PackageExpressionStrictInclusion = 3109,
 }
 impl TrivialDrop for NastCheck {}
 arena_deserializer::impl_deserialize_in_arena!(NastCheck);

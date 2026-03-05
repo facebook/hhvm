@@ -1,8 +1,8 @@
 //// foo.php
 <?hh
 
-// package pkg4 (disjoint from pkg1)
-<<file: __PackageOverride('pkg4')>>
+// package pkg7 (includes pkg1)
+<<file: __PackageOverride('pkg7')>>
 
 function foo(): void {}
 
@@ -12,7 +12,7 @@ function foo(): void {}
 
 function bar(bool $x): void {
   if ($x) {
-    invariant(package pkg4, "pkg4 not loaded");
+    invariant(package pkg7, "pkg7 not loaded");
     foo();  // allowed by invariant
   }
   foo();  // error here, out of the scope of invariant

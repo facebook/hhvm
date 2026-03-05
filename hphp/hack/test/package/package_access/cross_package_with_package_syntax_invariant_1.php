@@ -1,8 +1,8 @@
 //// foo.php
 <?hh
 
-// package pkg4 (disjoint from pkg1)
-<<file: __PackageOverride('pkg4')>>
+// package pkg7 (includes pkg1)
+<<file: __PackageOverride('pkg7')>>
 
 function foo(): void {}
 
@@ -11,6 +11,6 @@ function foo(): void {}
 // package pkg1
 
 function bar(): void {
-  invariant(package pkg4, "pkg4 not loaded");
+  invariant(package pkg7, "pkg7 not loaded");
   foo();  // allowed by invariant
 }

@@ -1,7 +1,7 @@
-//// pkg4.php
+//// pkg7.php
 <?hh
-<<file: __PackageOverride('pkg4')>>
-function pkg4_call(): void {}
+<<file: __PackageOverride('pkg7')>>
+function pkg7_call(): void {}
 
 //// pkg2.php
 <?hh
@@ -15,18 +15,18 @@ function pkg3_call(): void {}
 
 function test_do_while() : void {
   do {
-    if (package pkg4) {
-      pkg4_call();
+    if (package pkg7) {
+      pkg7_call();
     } else {
       pkg3_call();
     }
-  } while (package pkg4);
+  } while (package pkg7);
 }
 
 function test_while() : void {
-    while (!(package pkg4)) {
+    while (!(package pkg7)) {
     pkg2_call(); // ok; pkg3 includes pkg2
   };
 
-  pkg4_call(); // error; package info doesn't transfer after while statement
+  pkg7_call(); // error; package info doesn't transfer after while statement
 }

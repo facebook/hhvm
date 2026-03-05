@@ -1,6 +1,6 @@
-error: Typing[4472] Cannot access function pkg4_call defined in package pkg4 which may not be available [1]
--> pkg4_call is defined in cross_package_with_package_syntax_if_conjunction.php--pkg4.php [2]
--> pkg4_call belongs to package pkg4 by this package override [3]
+error: Typing[4472] Cannot access function pkg7_call defined in package pkg7 which may not be available [1]
+-> pkg7_call is defined in cross_package_with_package_syntax_if_conjunction.php--pkg7.php [2]
+-> pkg7_call belongs to package pkg7 by this package override [3]
 -> package pkg3 is available because the current file belongs to it by this package override [4]
 -> pkg3 includes pkg2 via its definition [5]
 -> pkg3 includes pkg2_soft via its definition [6]
@@ -10,18 +10,18 @@ cross_package_with_package_syntax_if_conjunction.php--pkg3.php(allpackagesaredis
          1 | <?hh
 [4]      2 | <<file: __PackageOverride('pkg3')>>
          3 | function test(): void {
-         4 |   if (package pkg4 && package pkg5) {
+         4 |   if (package pkg7 && package pkg8) {
            :
          8 |   } else {
          9 |     // both are rejected
-[1]     10 |     pkg4_call();
-        11 |     pkg5_call();
+[1]     10 |     pkg7_call();
+        11 |     pkg8_call();
         12 |   }
 
-cross_package_with_package_syntax_if_conjunction.php--pkg4.php:3:10
+cross_package_with_package_syntax_if_conjunction.php--pkg7.php:3:10
          1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg4')>>
-[2]      3 | function pkg4_call(): void {}
+[3]      2 | <<file: __PackageOverride('pkg7')>>
+[2]      3 | function pkg7_call(): void {}
 
 PACKAGES.toml:18:13
         16 | 
@@ -30,9 +30,9 @@ PACKAGES.toml:18:13
         19 | 
         20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access function pkg5_call defined in package pkg5 which may not be available [1]
--> pkg5_call is defined in cross_package_with_package_syntax_if_conjunction.php--pkg5.php [2]
--> pkg5_call belongs to package pkg5 by this package override [3]
+error: Typing[4472] Cannot access function pkg8_call defined in package pkg8 which may not be available [1]
+-> pkg8_call is defined in cross_package_with_package_syntax_if_conjunction.php--pkg8.php [2]
+-> pkg8_call belongs to package pkg8 by this package override [3]
 -> package pkg3 is available because the current file belongs to it by this package override [4]
 -> pkg3 includes pkg2 via its definition [5]
 -> pkg3 includes pkg2_soft via its definition [6]
@@ -42,18 +42,18 @@ cross_package_with_package_syntax_if_conjunction.php--pkg3.php(allpackagesaredis
          1 | <?hh
 [4]      2 | <<file: __PackageOverride('pkg3')>>
          3 | function test(): void {
-         4 |   if (package pkg4 && package pkg5) {
+         4 |   if (package pkg7 && package pkg8) {
            :
          9 |     // both are rejected
-        10 |     pkg4_call();
-[1]     11 |     pkg5_call();
+        10 |     pkg7_call();
+[1]     11 |     pkg8_call();
         12 |   }
         13 |   // both are rejected too
 
-cross_package_with_package_syntax_if_conjunction.php--pkg5.php:3:10
+cross_package_with_package_syntax_if_conjunction.php--pkg8.php:3:10
          1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg5')>>
-[2]      3 | function pkg5_call(): void {}
+[3]      2 | <<file: __PackageOverride('pkg8')>>
+[2]      3 | function pkg8_call(): void {}
 
 PACKAGES.toml:18:13
         16 | 
@@ -62,9 +62,9 @@ PACKAGES.toml:18:13
         19 | 
         20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access function pkg4_call defined in package pkg4 which may not be available [1]
--> pkg4_call is defined in cross_package_with_package_syntax_if_conjunction.php--pkg4.php [2]
--> pkg4_call belongs to package pkg4 by this package override [3]
+error: Typing[4472] Cannot access function pkg7_call defined in package pkg7 which may not be available [1]
+-> pkg7_call is defined in cross_package_with_package_syntax_if_conjunction.php--pkg7.php [2]
+-> pkg7_call belongs to package pkg7 by this package override [3]
 -> package pkg3 is available because the current file belongs to it by this package override [4]
 -> pkg3 includes pkg2 via its definition [5]
 -> pkg3 includes pkg2_soft via its definition [6]
@@ -74,18 +74,18 @@ cross_package_with_package_syntax_if_conjunction.php--pkg3.php(allpackagesaredis
          1 | <?hh
 [4]      2 | <<file: __PackageOverride('pkg3')>>
          3 | function test(): void {
-         4 |   if (package pkg4 && package pkg5) {
+         4 |   if (package pkg7 && package pkg8) {
            :
         12 |   }
         13 |   // both are rejected too
-[1]     14 |   pkg4_call();
-        15 |   pkg5_call();
+[1]     14 |   pkg7_call();
+        15 |   pkg8_call();
         16 | }
 
-cross_package_with_package_syntax_if_conjunction.php--pkg4.php:3:10
+cross_package_with_package_syntax_if_conjunction.php--pkg7.php:3:10
          1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg4')>>
-[2]      3 | function pkg4_call(): void {}
+[3]      2 | <<file: __PackageOverride('pkg7')>>
+[2]      3 | function pkg7_call(): void {}
 
 PACKAGES.toml:18:13
         16 | 
@@ -94,9 +94,9 @@ PACKAGES.toml:18:13
         19 | 
         20 | [packages.pkg4]
 
-error: Typing[4472] Cannot access function pkg5_call defined in package pkg5 which may not be available [1]
--> pkg5_call is defined in cross_package_with_package_syntax_if_conjunction.php--pkg5.php [2]
--> pkg5_call belongs to package pkg5 by this package override [3]
+error: Typing[4472] Cannot access function pkg8_call defined in package pkg8 which may not be available [1]
+-> pkg8_call is defined in cross_package_with_package_syntax_if_conjunction.php--pkg8.php [2]
+-> pkg8_call belongs to package pkg8 by this package override [3]
 -> package pkg3 is available because the current file belongs to it by this package override [4]
 -> pkg3 includes pkg2 via its definition [5]
 -> pkg3 includes pkg2_soft via its definition [6]
@@ -106,17 +106,17 @@ cross_package_with_package_syntax_if_conjunction.php--pkg3.php(allpackagesaredis
          1 | <?hh
 [4]      2 | <<file: __PackageOverride('pkg3')>>
          3 | function test(): void {
-         4 |   if (package pkg4 && package pkg5) {
+         4 |   if (package pkg7 && package pkg8) {
            :
         13 |   // both are rejected too
-        14 |   pkg4_call();
-[1]     15 |   pkg5_call();
+        14 |   pkg7_call();
+[1]     15 |   pkg8_call();
         16 | }
 
-cross_package_with_package_syntax_if_conjunction.php--pkg5.php:3:10
+cross_package_with_package_syntax_if_conjunction.php--pkg8.php:3:10
          1 | <?hh
-[3]      2 | <<file: __PackageOverride('pkg5')>>
-[2]      3 | function pkg5_call(): void {}
+[3]      2 | <<file: __PackageOverride('pkg8')>>
+[2]      3 | function pkg8_call(): void {}
 
 PACKAGES.toml:18:13
         16 | 

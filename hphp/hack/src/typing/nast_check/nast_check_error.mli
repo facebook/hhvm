@@ -208,5 +208,14 @@ type t =
       soft_included: bool;
       current_package_assignment_kind: string;
     }
+  | Package_expression_strict_inclusion of {
+      pkg_pos: Pos.t;
+      pkg: string;
+      def_pos: Pos_or_decl.t;
+      current: string;
+      current_pos: Pos.t;
+      soft_included: bool;
+      current_package_assignment_kind: string;
+    }
 
 val to_user_diagnostic : t -> (Pos.t, Pos_or_decl.t) User_diagnostic.t

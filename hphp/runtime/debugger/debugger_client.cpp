@@ -761,6 +761,9 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
     m_options.user = Process::GetCurrentUser();
   }
 
+  auto* logger = Debugger::GetUsageLogger();
+  if (logger) logger->setFrom(options.from);
+
   usageLogEvent("init");
 
   loadConfig();

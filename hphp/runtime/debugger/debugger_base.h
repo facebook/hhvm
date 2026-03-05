@@ -39,6 +39,7 @@ struct DebuggerClientOptions {
   std::string user;
   std::string configFName;
   std::string fileName;
+  std::string from;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -234,6 +235,7 @@ struct DebuggerUsageLogger {
   virtual void clearClientInfo() {}
   virtual void setClientInfo(const std::string& /*username*/, uid_t /*uid*/,
                              pid_t /*clientPid*/) {}
+  virtual void setFrom(const std::string& /*from*/) {}
   virtual void
   log(const std::string& /*clientId*/, const std::string& /*mode*/,
       const std::string& /*sandboxId*/, const std::string& /*cmd*/,

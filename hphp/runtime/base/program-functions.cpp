@@ -1615,6 +1615,8 @@ static int execute_program_impl(int argc, char** argv) {
     ("debug-sandbox",
      value<std::string>(&po.debugger_options.sandbox)->default_value("default"),
      "initial sandbox to attach to when debugger is started")
+    ("from", value<std::string>(&po.debugger_options.from),
+     "caller identifier for debugger usage logging")
     ("user,u", value<std::string>(&po.user),
      "run server under this user account")
     ("file,f", value<std::string>(&po.file),

@@ -1984,52 +1984,52 @@ template <> struct TEnumTraits<::test::fixtures::basic_structured_annotations::M
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::runtime_annotation, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\x80\xab\x88\x82\x9d\x87\xf2\x40\xa3\x2b\x52\x9a\xff\xdb\xf0\x0e", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_inline, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\x82\x6a\x3f\xc6\xe1\xcb\x16\xa9\xa8\x9a\x3c\xee\x46\x20\x99\x6e", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_with_default, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\x00\x98\xf3\xcd\x98\x0d\x2f\x9a\x3a\xf9\xc5\x94\x09\x48\x31\x93", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_recursive, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\xbb\x08\xf6\xfd\x9a\x1f\xff\xcb\xe2\x79\x80\x45\xe9\xc2\x82\x5a", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_forward, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\xa3\x33\x70\xce\x1c\x10\x6f\xfb\x9b\xab\xbd\xcc\xaa\x7a\xe6\x04", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::structured_annotation_nested, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\x79\x8d\xeb\x79\x05\xde\x02\x6e\xb2\xd0\x2c\x0e\x74\x9c\x70\x53", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\xe2\xf8\x27\xa0\x91\x73\x03\xb5\x9a\xe9\x41\x39\xea\x24\x73\x3a", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyException, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\xba\x1d\x7b\xf4\xf8\x39\xd5\xfe\x63\x4a\x8e\x3d\x56\x8d\x19\x56", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyUnion, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\xe5\xd8\x24\xa7\xe0\xf0\x13\x59\x31\xa6\x58\xa1\x15\xec\xf5\xf3", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::basic_structured_annotations::MyEnum, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 2227752972862751796;
   static constexpr ::std::string_view definitionKey = {"\xd2\xce\x51\x73\x76\xc2\x92\xfd\xd7\x3c\x39\x24\xd6\xdf\x7f\x20", 16};
 };

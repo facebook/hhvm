@@ -79,11 +79,17 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 13> TStructDataStorage<
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::extra::svc::containerStruct2, false>::bundle() {
+    return ::extra::svc::extra_services_constants::_fbthrift_schema_2dacd8c4e3df59ee_includes();
+}
 
 template <> struct TSchemaAssociation<::extra::svc::ExtraService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3291243767849245166;
   static constexpr ::std::string_view definitionKey = {"\xfb\xb0\xa8\x4a\x2c\x39\x4d\xaa\x67\xcd\x1b\x6f\xe7\x83\xba\xd0", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::extra::svc::ExtraService, false>::bundle() {
+    return ::extra::svc::extra_services_constants::_fbthrift_schema_2dacd8c4e3df59ee_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

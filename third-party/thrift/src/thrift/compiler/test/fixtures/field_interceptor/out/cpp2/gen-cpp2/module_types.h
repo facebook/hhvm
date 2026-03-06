@@ -460,7 +460,7 @@ unsigned long InterceptedFields::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::field_interceptor::InterceptedFields, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 8125577055159619761;
   static constexpr ::std::string_view definitionKey = {"\xeb\xd5\xb5\x4d\xc6\x09\x4c\x74\x82\xa4\x4f\xb0\xbe\x4f\x05\x9a", 16};
 };

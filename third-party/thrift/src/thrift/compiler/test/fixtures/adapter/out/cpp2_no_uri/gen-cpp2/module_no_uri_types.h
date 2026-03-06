@@ -298,7 +298,7 @@ template <> struct TEnumTraits<::cpp2::RefUnion::Type> {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::RefUnion, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -3239053065902120233;
   static constexpr ::std::string_view definitionKey = {"\x02\x27\x75\x18\xb6\xb3\x94\x9e\x2c\xe4\x38\x25\x76\x52\x0c\x6d", 16};
 };

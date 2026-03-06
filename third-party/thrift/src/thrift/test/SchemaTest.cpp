@@ -185,9 +185,13 @@ TEST_F(SchemaTest, schema_data_traits) {
       TSchemaAssociation<facebook::thrift::test::schema::Enum>::bundle().size(),
       0);
 
-  EXPECT_EQ(
+  EXPECT_NE(
       TSchemaAssociation<facebook::thrift::annotation::Experimental>::bundle,
       nullptr);
+  EXPECT_EQ(
+      TSchemaAssociation<facebook::thrift::annotation::Experimental>::bundle()
+          .size(),
+      0);
 
   EXPECT_EQ(
       TSchemaAssociation<

@@ -343,12 +343,12 @@ unsigned long EchoResponse::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::EchoRequest, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -2343470203340770696;
   static constexpr ::std::string_view definitionKey = {"\xcd\x2f\x0f\xb4\x51\xe7\x03\xfa\x58\x6b\xbc\x71\xf5\xec\x8f\x8b", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::EchoResponse, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -2343470203340770696;
   static constexpr ::std::string_view definitionKey = {"\x2d\x18\xec\x72\x39\x66\xde\x18\x3e\x6b\xfe\xf4\x4e\xcc\xad\xcd", 16};
 };

@@ -32,6 +32,9 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Included, false>::bundle() {
+    return ::cpp2::includes_constants::_fbthrift_schema_eba45c6d4c6de0d_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

@@ -793,39 +793,105 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::Empty, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ASimpleStruct, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ASimpleStructNoexcept, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::MyStruct, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::SimpleUnion, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ComplexUnion, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnException, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnotherException, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ContainerStruct, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::MyIncludedStruct, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnnotatedStruct, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ComplexContainerStruct, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::FloatStruct, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::FloatUnion, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::MyEnumA, true>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnnotatedEnum, true>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::AnnotatedEnum2, true>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::MyEnumB, true>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 
 template <> struct TSchemaAssociation<::some::valid::ns::EmptyService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -8569778003692923315;
   static constexpr ::std::string_view definitionKey = {"\x27\xae\x4a\x76\x07\x8f\x17\x0d\x98\xfe\x4a\x86\x8a\x74\x56\x9e", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::EmptyService, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 template <> struct TSchemaAssociation<::some::valid::ns::ReturnService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -8569778003692923315;
   static constexpr ::std::string_view definitionKey = {"\xb6\x8e\xc2\xbe\x9d\x1f\x00\x4f\x45\x0c\xba\x85\x8b\xd8\x3e\x46", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ReturnService, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 template <> struct TSchemaAssociation<::some::valid::ns::ParamService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -8569778003692923315;
   static constexpr ::std::string_view definitionKey = {"\x79\x03\xbc\x35\xca\x5b\x81\x1b\xea\x28\x6b\x73\x5c\xe7\x18\xbe", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::valid::ns::ParamService, false>::bundle() {
+    return ::some::valid::ns::module_constants::_fbthrift_schema_c3ce7c68ed1b6c88_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

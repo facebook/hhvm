@@ -266,12 +266,12 @@ template <> struct TEnumTraits<::cpp2::Nada::Type> {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::Empty, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -8539712257059710742;
   static constexpr ::std::string_view definitionKey = {"\x86\x1a\x91\xc6\x4c\x83\xb3\xdf\x19\x2a\x54\x42\x0c\xf7\x0c\x41", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Nada, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -8539712257059710742;
   static constexpr ::std::string_view definitionKey = {"\x33\x97\xb4\xb5\x58\x44\x9b\xfa\x36\xed\x49\xaa\xb3\x83\x72\x99", 16};
 };

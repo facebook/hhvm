@@ -32,10 +32,25 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enumstrict::MyStruct, false>::bundle() {
+    return ::test::fixtures::enumstrict::module_constants::_fbthrift_schema_dc0496c24a31a50f_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enumstrict::EmptyEnum, true>::bundle() {
+    return ::test::fixtures::enumstrict::module_constants::_fbthrift_schema_dc0496c24a31a50f_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enumstrict::MyEnum, true>::bundle() {
+    return ::test::fixtures::enumstrict::module_constants::_fbthrift_schema_dc0496c24a31a50f_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enumstrict::MyUseIntrinsicDefaultEnum, true>::bundle() {
+    return ::test::fixtures::enumstrict::module_constants::_fbthrift_schema_dc0496c24a31a50f_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enumstrict::MyBigEnum, true>::bundle() {
+    return ::test::fixtures::enumstrict::module_constants::_fbthrift_schema_dc0496c24a31a50f_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

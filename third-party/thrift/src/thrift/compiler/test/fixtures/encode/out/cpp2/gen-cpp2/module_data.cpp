@@ -118,10 +118,25 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 12> TStructDataStorage<
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::encode::Foo, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::encode::module_constants::_fbthrift_schema_92716d7e74c7f344_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::encode::Bar, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::encode::module_constants::_fbthrift_schema_92716d7e74c7f344_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::encode::Baz, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::encode::module_constants::_fbthrift_schema_92716d7e74c7f344_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::encode::OpEncodeStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::encode::module_constants::_fbthrift_schema_92716d7e74c7f344_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::encode::Enum, true>::bundle() {
+    return ::facebook::thrift::test::fixtures::encode::module_constants::_fbthrift_schema_92716d7e74c7f344_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

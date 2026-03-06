@@ -35,11 +35,17 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::thrift::shared_interactions::DoSomethingResult, false>::bundle() {
+    return ::thrift::shared_interactions::shared_constants::_fbthrift_schema_7c84d31b4cbc05a6_includes();
+}
 
 template <> struct TSchemaAssociation<::thrift::shared_interactions::InteractLocally, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 8972528471833839014;
   static constexpr ::std::string_view definitionKey = {"\x54\xd5\xf3\x36\x95\x5c\x5d\x2c\x54\x3a\xcb\xcf\x06\x02\xf7\x6c", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::thrift::shared_interactions::InteractLocally, false>::bundle() {
+    return ::thrift::shared_interactions::shared_constants::_fbthrift_schema_7c84d31b4cbc05a6_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

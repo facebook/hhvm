@@ -110,10 +110,25 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 5> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::ns::ModuleA, false>::bundle() {
+    return ::some::ns::module_constants::_fbthrift_schema_12d7a2f34d05ca7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::ns::ModuleB, false>::bundle() {
+    return ::some::ns::module_constants::_fbthrift_schema_12d7a2f34d05ca7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::ns::detail::DirectlyAdapted, false>::bundle() {
+    return ::some::ns::module_constants::_fbthrift_schema_12d7a2f34d05ca7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::ns::CppRef, false>::bundle() {
+    return ::some::ns::module_constants::_fbthrift_schema_12d7a2f34d05ca7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::some::ns::EnumB, true>::bundle() {
+    return ::some::ns::module_constants::_fbthrift_schema_12d7a2f34d05ca7_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

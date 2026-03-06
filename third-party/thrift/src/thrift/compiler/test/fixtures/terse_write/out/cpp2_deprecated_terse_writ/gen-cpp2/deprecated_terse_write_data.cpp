@@ -376,13 +376,37 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 13> TStructDataStorage<
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::MyStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::deprecated::deprecated_terse_write_constants::_fbthrift_schema_f5a4a1c289e19280_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::MyUnion, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::deprecated::deprecated_terse_write_constants::_fbthrift_schema_f5a4a1c289e19280_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::StructLevelTerseStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::deprecated::deprecated_terse_write_constants::_fbthrift_schema_f5a4a1c289e19280_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::FieldLevelTerseStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::deprecated::deprecated_terse_write_constants::_fbthrift_schema_f5a4a1c289e19280_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::CppRefStructFields, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::deprecated::deprecated_terse_write_constants::_fbthrift_schema_f5a4a1c289e19280_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::deprecated::deprecated_terse_write_constants::_fbthrift_schema_f5a4a1c289e19280_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::deprecated::deprecated_terse_write_constants::_fbthrift_schema_f5a4a1c289e19280_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::deprecated::MyEnum, true>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::deprecated::deprecated_terse_write_constants::_fbthrift_schema_f5a4a1c289e19280_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

@@ -160,7 +160,7 @@ class ServiceHandler<::py3::simple::DerivedService> : virtual public ::py3::simp
 
 namespace detail {
 template <> struct TSchemaAssociation<::py3::simple::DerivedService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -4259380151706122153;
   static constexpr ::std::string_view definitionKey = {"\xb0\xf5\x5f\x9b\x1d\xeb\x64\xc0\xac\x8f\x0b\x7f\xd2\x78\xe7\x8a", 16};
 };

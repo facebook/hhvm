@@ -911,12 +911,12 @@ unsigned long StructWithDefaultStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::apache::thrift::test::StructWithDefaultStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 8660519371718090783;
   static constexpr ::std::string_view definitionKey = {"\x0e\x55\x61\x3f\xe9\xc5\xbf\x6c\xc7\xa1\x68\x98\x43\xdc\x41\x9a", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::MyEnum, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 8660519371718090783;
   static constexpr ::std::string_view definitionKey = {"\x81\xc9\x17\x20\xdf\xc7\x5a\x18\xd0\xaa\x20\x3a\x0d\x79\x48\xfa", 16};
 };

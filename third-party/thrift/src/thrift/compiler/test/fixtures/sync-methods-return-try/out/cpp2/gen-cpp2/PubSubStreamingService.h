@@ -178,7 +178,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::PubSubStreamingService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 8502104499211313678;
   static constexpr ::std::string_view definitionKey = {"\x6f\xc1\x4c\xb0\x6c\xb1\xbc\x9c\xf7\x21\xd2\x8a\x14\x91\x59\xb8", 16};
 };

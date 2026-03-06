@@ -245,7 +245,7 @@ unsigned long DoSomethingResult::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::thrift::shared_interactions::DoSomethingResult, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 8972528471833839014;
   static constexpr ::std::string_view definitionKey = {"\x7b\xe8\xe8\x12\x68\xf3\xf9\xfe\x2a\x2d\x5b\x42\x9f\x2b\xda\x33", 16};
 };

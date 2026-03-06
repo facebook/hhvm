@@ -1403,22 +1403,22 @@ template <> struct TEnumTraits<::test::fixtures::tablebased::ExampleUnion::Type>
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::test::fixtures::tablebased::TrivialTypesStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -1195599505543138521;
   static constexpr ::std::string_view definitionKey = {"\x16\xaf\xa7\xb8\xe7\x3e\x1f\x88\xe2\x4d\x3b\x6c\x4e\x56\x20\x98", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::tablebased::ContainerStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -1195599505543138521;
   static constexpr ::std::string_view definitionKey = {"\xbe\xbb\x6e\x2e\x85\xa6\xef\xd1\x42\x3a\x7f\x2d\x47\x7c\x8a\x7e", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::tablebased::ExampleUnion, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -1195599505543138521;
   static constexpr ::std::string_view definitionKey = {"\x62\x5f\x08\x6c\x30\x4c\xfe\x54\x26\x39\x8c\x43\x73\x73\x2f\x9d", 16};
 };
 template <> struct TSchemaAssociation<::test::fixtures::tablebased::ExampleEnum, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -1195599505543138521;
   static constexpr ::std::string_view definitionKey = {"\x76\x38\xf5\xf8\xfd\x87\xd4\x1b\xbd\x76\x20\x5f\x48\xf6\x6d\x31", 16};
 };

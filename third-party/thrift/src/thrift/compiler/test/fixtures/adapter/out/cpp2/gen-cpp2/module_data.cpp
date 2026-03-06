@@ -748,51 +748,165 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::MyAnnotation, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Foo, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Baz, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Bar, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdapted, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::detail::IndependentDirectlyAdapted, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::StructWithFieldAdapter, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::TerseAdaptedFields, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::B, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::A, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Config, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::MyStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::AdaptTestStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedTestStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::AdaptTemplatedNestedTestStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::ThriftAdaptTestUnion, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::detail::DirectlyAdaptedStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::StructFieldAdaptedStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::CircularAdaptee, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::CircularStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::ReorderedStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::detail::DeclaredAfterStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::UnderlyingRenamedStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::UnderlyingSameNamespaceStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::detail::HeapAllocated, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::MoveOnly, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::AlsoMoveOnly, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::ApplyAdapter, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::detail::TransitiveAdapted, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::CountingStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Person, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Person2, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Renamed, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Color, true>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::ThriftAdaptedEnum, true>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Service, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 4183034140653051010;
   static constexpr ::std::string_view definitionKey = {"\xcf\x3b\x50\x01\xc3\xa0\xc2\xe3\x2d\x66\x26\xce\xfc\x29\xde\x4c", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::Service, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::AdapterService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 4183034140653051010;
   static constexpr ::std::string_view definitionKey = {"\x21\x8f\x52\x30\x9d\x84\x9a\x2e\x5a\x46\x98\x53\x49\x5d\xec\x3c", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::adapter::AdapterService, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::adapter::module_constants::_fbthrift_schema_3a0d1f6364f4dc82_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

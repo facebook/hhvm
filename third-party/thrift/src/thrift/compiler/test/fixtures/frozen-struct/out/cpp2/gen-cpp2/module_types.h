@@ -1200,27 +1200,27 @@ unsigned long CppRef::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::some::ns::ModuleA, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 84858311158029479;
   static constexpr ::std::string_view definitionKey = {"\xa3\x0d\x5e\xa6\x71\x92\xf4\x69\x45\x3f\x43\xbe\x10\xca\x5e\x66", 16};
 };
 template <> struct TSchemaAssociation<::some::ns::ModuleB, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 84858311158029479;
   static constexpr ::std::string_view definitionKey = {"\xcf\xa5\x6f\x63\xcd\x0f\x75\xee\x37\xf6\x78\x9b\xba\xde\x01\x0f", 16};
 };
 template <> struct TSchemaAssociation<::some::ns::detail::DirectlyAdapted, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 84858311158029479;
   static constexpr ::std::string_view definitionKey = {"\xe8\xa0\x47\x0b\x4c\x49\x77\xd3\xfa\xbf\xbd\x8c\x9a\x16\x24\xae", 16};
 };
 template <> struct TSchemaAssociation<::some::ns::CppRef, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 84858311158029479;
   static constexpr ::std::string_view definitionKey = {"\xc1\x5a\xd6\xba\x52\x9d\x97\x04\x5f\xe1\x9a\x3a\x69\xe3\x2b\xfb", 16};
 };
 template <> struct TSchemaAssociation<::some::ns::EnumB, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 84858311158029479;
   static constexpr ::std::string_view definitionKey = {"\x06\x6b\xb0\xb0\x72\xd3\xe0\xf7\xad\x41\x7e\xfe\xbb\x5b\xe2\xee", 16};
 };

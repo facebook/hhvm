@@ -87,7 +87,7 @@ class ServiceHandler<::cpp2::HeaderClientMethodsAnnotationOnFunction> : public a
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnFunction, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -2343470203340770696;
   static constexpr ::std::string_view definitionKey = {"\x17\x37\xce\x25\xe5\x1e\x08\x5e\x92\xcf\x7d\x8a\x14\xae\xe4\x62", 16};
 };

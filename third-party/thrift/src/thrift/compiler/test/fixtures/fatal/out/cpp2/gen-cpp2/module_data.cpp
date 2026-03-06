@@ -854,49 +854,133 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::union1, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::union2, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::union3, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::structA, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::unionA, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::structB, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::structC, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::struct1, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::struct2, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::struct3, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::struct4, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::struct5, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::struct_binary, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::dep_A_struct, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::dep_B_struct, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::annotated, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::union_with_special_names, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::struct_with_special_names, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::StructWithFieldAdapter, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::enum1, true>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::enum2, true>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::enum3, true>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::enum_with_special_names, true>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 
 template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service1, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -6836301137182471787;
   static constexpr ::std::string_view definitionKey = {"\xaf\xc2\x4b\x90\x2c\x21\x4b\x37\x95\x68\xb6\xf4\xbe\xfe\xf3\xda", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::service1, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service2, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -6836301137182471787;
   static constexpr ::std::string_view definitionKey = {"\x85\xb7\x3f\xb7\x08\x23\xc9\x83\xe4\x0b\x9f\x4c\xa9\x99\x55\xa8", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::service2, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service3, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -6836301137182471787;
   static constexpr ::std::string_view definitionKey = {"\xc3\xf7\x54\x40\xf8\x7a\x40\xe9\x8a\xe2\x5c\xd2\x23\xb6\x16\xbd", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::service3, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 template <> struct TSchemaAssociation<::test_cpp2::cpp_reflection::service_with_special_names, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -6836301137182471787;
   static constexpr ::std::string_view definitionKey = {"\xa5\x2a\xa6\xda\x54\xf3\xcb\xf2\xc4\xf9\x36\x5f\xb8\x32\x79\x1b", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test_cpp2::cpp_reflection::service_with_special_names, false>::bundle() {
+    return ::test_cpp2::cpp_reflection::module_constants::_fbthrift_schema_88e292afa83da650_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

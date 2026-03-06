@@ -1482,22 +1482,22 @@ unsigned long Person::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::Color, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -3375206293393954462;
   static constexpr ::std::string_view definitionKey = {"\x78\x67\x15\x6c\x55\x73\x58\xce\x0e\x4b\x77\xa8\x25\xf5\x7d\x7a", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Vehicle, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -3375206293393954462;
   static constexpr ::std::string_view definitionKey = {"\xb2\x67\xab\x05\x26\x12\x8d\xb5\x06\x48\x39\x79\x70\x08\x55\x4b", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Person, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -3375206293393954462;
   static constexpr ::std::string_view definitionKey = {"\x28\x7a\x82\x1a\x70\xe2\x07\x22\xbb\x8c\xbc\xda\xa5\xd0\xa8\x7f", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Animal, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -3375206293393954462;
   static constexpr ::std::string_view definitionKey = {"\xdc\xd8\x5c\xf3\x93\x28\xc2\x2c\x1d\xc4\x57\x4c\x24\xbe\x45\xb8", 16};
 };

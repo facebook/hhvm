@@ -1347,27 +1347,27 @@ unsigned long OpEncodeStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::encode::Foo, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 698659706587734954;
   static constexpr ::std::string_view definitionKey = {"\x14\xac\xce\x46\x80\xd5\x9e\xf3\x99\x07\xfc\xe1\xa2\x93\xfa\xea", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::encode::Bar, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 698659706587734954;
   static constexpr ::std::string_view definitionKey = {"\x4b\xe4\x5e\xe4\x22\xbd\x86\x33\xc4\xdd\x53\xde\x5e\xf6\x9b\x10", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::encode::Baz, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 698659706587734954;
   static constexpr ::std::string_view definitionKey = {"\xdd\x3e\xc7\xe3\xa7\x0e\x84\x58\xee\x5a\x99\xda\x3e\x95\xc6\x8b", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::encode::OpEncodeStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 698659706587734954;
   static constexpr ::std::string_view definitionKey = {"\xc4\xa5\x37\xc5\xe4\x50\xa3\xa0\xb5\x11\x68\x6d\x1a\x95\xac\xa3", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::encode::Enum, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 698659706587734954;
   static constexpr ::std::string_view definitionKey = {"\x58\xfa\x22\xb1\xc6\x3a\x7a\x8c\xdd\x91\xd3\xfa\x05\xab\x60\x01", 16};
 };

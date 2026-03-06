@@ -446,12 +446,12 @@ unsigned long BigStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::module2::Struct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1524621263173389650;
   static constexpr ::std::string_view definitionKey = {"\x06\x4e\x64\xa4\xe5\x4f\xb9\xb6\x69\x78\x8e\x53\x6b\xb4\x48\x17", 16};
 };
 template <> struct TSchemaAssociation<::module2::BigStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1524621263173389650;
   static constexpr ::std::string_view definitionKey = {"\x52\xa9\xaf\xb3\x3a\x10\xf0\x7d\xdc\x76\x1b\x41\x57\x71\xb8\x13", 16};
 };

@@ -683,12 +683,12 @@ unsigned long TestStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::EmptyStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -7327174818490624525;
   static constexpr ::std::string_view definitionKey = {"\x37\x7b\x7d\xc2\x96\x35\x3f\x8a\xa6\x07\x63\x4d\x3f\x87\x60\xaa", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values_rectification_after::TestStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -7327174818490624525;
   static constexpr ::std::string_view definitionKey = {"\x80\x56\x7d\x4e\x02\x72\xe5\xb2\x31\xb2\x46\x8a\x0d\x4a\xdf\x8d", 16};
 };

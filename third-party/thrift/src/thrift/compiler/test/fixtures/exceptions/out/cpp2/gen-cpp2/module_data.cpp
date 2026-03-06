@@ -127,17 +127,41 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Fiery, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_363307ea55ee2c0e_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Serious, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_363307ea55ee2c0e_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::ComplexFieldNames, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_363307ea55ee2c0e_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::CustomFieldNames, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_363307ea55ee2c0e_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::ExceptionWithPrimitiveField, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_363307ea55ee2c0e_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::ExceptionWithStructuredAnnotation, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_363307ea55ee2c0e_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Banal, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_363307ea55ee2c0e_includes();
+}
 
 template <> struct TSchemaAssociation<::cpp2::Raiser, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3905474004905765902;
   static constexpr ::std::string_view definitionKey = {"\xc0\xde\x56\xc4\x34\x17\x73\x05\xdf\x4a\xd7\xde\xea\x7e\x87\xca", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Raiser, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_363307ea55ee2c0e_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

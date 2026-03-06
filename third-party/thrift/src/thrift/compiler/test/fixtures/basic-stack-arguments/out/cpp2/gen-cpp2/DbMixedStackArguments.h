@@ -87,7 +87,7 @@ class ServiceHandler<::cpp2::DbMixedStackArguments> : public apache::thrift::Ser
 
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::DbMixedStackArguments, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 7854021842567864891;
   static constexpr ::std::string_view definitionKey = {"\x64\xa8\xf7\x89\x97\x11\x52\x12\x9e\x68\x71\x2e\x12\x87\x0f\x55", 16};
 };

@@ -1444,17 +1444,17 @@ unsigned long containerStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::SmallStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 6752935880448152916;
   static constexpr ::std::string_view definitionKey = {"\x81\x8e\xbd\xc9\x46\x70\x98\xe9\xa2\xbd\x88\x72\x42\xba\x52\xe9", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::containerStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 6752935880448152916;
   static constexpr ::std::string_view definitionKey = {"\xd9\x4f\xcf\x00\xd7\x5a\xcf\x5b\xfc\x3d\x59\xa6\xc2\xe6\x43\xa2", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::MyEnumA, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 6752935880448152916;
   static constexpr ::std::string_view definitionKey = {"\xdc\xa2\x97\x9f\x57\x9f\x68\xb6\xd1\x70\x72\x6c\xa0\x11\xf7\x71", 16};
 };

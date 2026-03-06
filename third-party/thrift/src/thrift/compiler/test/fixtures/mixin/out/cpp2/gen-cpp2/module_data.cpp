@@ -82,9 +82,21 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 3> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Mixin1, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_34b88590e7574738_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Mixin2, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_34b88590e7574738_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Mixin3Base, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_34b88590e7574738_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Foo, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_34b88590e7574738_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

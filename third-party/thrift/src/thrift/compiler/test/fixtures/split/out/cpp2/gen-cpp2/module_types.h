@@ -1077,22 +1077,22 @@ template <> struct TEnumTraits<::cpp2::MyUnion::Type> {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::MyStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1120661119160092802;
   static constexpr ::std::string_view definitionKey = {"\xfb\x80\x31\x2a\xdc\x79\xb3\x39\xe5\x6c\xf7\xdd\x92\xfb\xa8\x13", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::MyDataItem, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1120661119160092802;
   static constexpr ::std::string_view definitionKey = {"\xbc\x76\x8d\xfb\x2b\x62\x64\xda\xcd\x50\x24\xb2\xce\x9b\x6d\x75", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::MyUnion, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1120661119160092802;
   static constexpr ::std::string_view definitionKey = {"\x0d\x4f\x90\x38\xe7\xee\x23\x2a\xa7\x9a\x55\x32\x50\x75\x0d\x35", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::MyEnum, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1120661119160092802;
   static constexpr ::std::string_view definitionKey = {"\x46\x9b\x50\x7c\xe9\x3c\xcc\x58\x7c\xe0\x69\x8d\x64\x0b\x44\x7c", 16};
 };

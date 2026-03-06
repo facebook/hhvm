@@ -434,7 +434,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void fill_validator_visitors(ast_validator&) const override;
   static std::string get_cpp2_namespace(const t_program* program);
   static mstch::array cpp_includes(const t_program* program);
-  static mstch::node include_prefix(
+  static std::string include_prefix(
       const t_program* program, const compiler_options_map& options);
 
  private:
@@ -503,6 +503,38 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
           return cpp_context_->field_default_const_ref_programs().contains(
               &program);
         });
+    def.property("frozen_packed?", [this](const t_program&) {
+      return get_compiler_option("frozen") == "packed";
+    });
+    def.property("cpp_declare_hash?", [](const t_program& self) {
+      bool cpp_declare_in_structs = std::any_of(
+          self.structs_and_unions().begin(),
+          self.structs_and_unions().end(),
+          [](const t_structured* strct) {
+            return strct->has_unstructured_annotation(
+                       {"cpp.declare_hash", "cpp2.declare_hash"}) ||
+                strct->has_structured_annotation(kCppDeclareHashSpecialization);
+          });
+      bool cpp_declare_in_typedefs = std::any_of(
+          self.typedefs().begin(),
+          self.typedefs().end(),
+          [](const auto* typedf) {
+            return typedf->type()->has_unstructured_annotation(
+                       {"cpp.declare_hash", "cpp2.declare_hash"}) ||
+                typedf->type()->has_structured_annotation(
+                    kCppDeclareHashSpecialization);
+          });
+      return cpp_declare_in_structs || cpp_declare_in_typedefs;
+    });
+    def.property("include_prefix", [this](const t_program& self) {
+      return include_prefix(&self, compiler_options());
+    });
+    def.property("has_schema?", [this](const t_program& self) {
+      return ::apache::thrift::compiler::has_schema(source_mgr_, self);
+    });
+    def.property("schema_name", [this](const t_program& self) {
+      return schematizer::name_schema(source_mgr_, self);
+    });
     return std::move(def).make();
   }
 
@@ -829,14 +861,11 @@ class cpp_mstch_program : public mstch_program {
     register_methods(
         this,
         {{"program:cpp_includes", &cpp_mstch_program::cpp_includes},
-         {"program:include_prefix", &cpp_mstch_program::include_prefix},
-         {"program:cpp_declare_hash?", &cpp_mstch_program::cpp_declare_hash},
          {"program:thrift_includes", &cpp_mstch_program::thrift_includes},
          {"program:transitive_schema_initializers",
           &cpp_mstch_program::transitive_schema_initializers},
          {"program:num_transitive_thrift_includes",
           &cpp_mstch_program::num_transitive_thrift_includes},
-         {"program:frozen_packed?", &cpp_mstch_program::frozen_packed},
          {"program:fatal_languages", &cpp_mstch_program::fatal_languages},
          {"program:fatal_enums", &cpp_mstch_program::fatal_enums},
          {"program:fatal_unions", &cpp_mstch_program::fatal_unions},
@@ -846,8 +875,6 @@ class cpp_mstch_program : public mstch_program {
          {"program:fatal_identifiers", &cpp_mstch_program::fatal_identifiers},
          {"program:split_structs", &cpp_mstch_program::split_structs},
          {"program:split_enums", &cpp_mstch_program::split_enums},
-         {"program:has_schema?", &cpp_mstch_program::has_schema},
-         {"program:schema_name", &cpp_mstch_program::schema_name},
          {"program:schema_includes_const?",
           &cpp_mstch_program::schema_includes_const},
          {"program:structs_and_typedefs",
@@ -950,29 +977,6 @@ class cpp_mstch_program : public mstch_program {
     }
     return includes;
   }
-  mstch::node include_prefix() {
-    return t_mstch_cpp2_generator::include_prefix(program_, *context_.options);
-  }
-  mstch::node cpp_declare_hash() {
-    bool cpp_declare_in_structs = std::any_of(
-        program_->structs_and_unions().begin(),
-        program_->structs_and_unions().end(),
-        [](const t_structured* strct) {
-          return strct->has_unstructured_annotation(
-                     {"cpp.declare_hash", "cpp2.declare_hash"}) ||
-              strct->has_structured_annotation(kCppDeclareHashSpecialization);
-        });
-    bool cpp_declare_in_typedefs = std::any_of(
-        program_->typedefs().begin(),
-        program_->typedefs().end(),
-        [](const auto* typedf) {
-          return typedf->type()->has_unstructured_annotation(
-                     {"cpp.declare_hash", "cpp2.declare_hash"}) ||
-              typedf->type()->has_structured_annotation(
-                  kCppDeclareHashSpecialization);
-        });
-    return cpp_declare_in_structs || cpp_declare_in_typedefs;
-  }
   mstch::node thrift_includes() {
     mstch::array a;
     for (const auto* program : program_->get_includes_for_codegen()) {
@@ -1044,7 +1048,6 @@ class cpp_mstch_program : public mstch_program {
     // Codegen includes the root program but transitive_include_map does not.
     return includes.size() + 1;
   }
-  mstch::node frozen_packed() { return get_option("frozen") == "packed"; }
   mstch::node fatal_languages() {
     mstch::array a;
     for (const auto& pair : program_->namespaces()) {
@@ -1216,12 +1219,6 @@ class cpp_mstch_program : public mstch_program {
         context_.enum_cache,
         id);
   }
-
-  mstch::node has_schema() {
-    return ::apache::thrift::compiler::has_schema(sm_, *program_);
-  }
-
-  mstch::node schema_name() { return schematizer::name_schema(sm_, *program_); }
 
   mstch::node schema_includes_const() {
     return supports_schema_includes(program_);
@@ -2747,9 +2744,9 @@ mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {
   return a;
 }
 
-mstch::node t_mstch_cpp2_generator::include_prefix(
+std::string t_mstch_cpp2_generator::include_prefix(
     const t_program* program, const compiler_options_map& options) {
-  auto prefix = program->include_prefix();
+  const std::string& prefix = program->include_prefix();
   std::string include_prefix;
   if (const auto& it = options.find("include_prefix"); it != options.end()) {
     include_prefix = it->second;

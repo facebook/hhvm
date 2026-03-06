@@ -18,9 +18,12 @@ namespace apache::thrift {
 namespace detail {
 
 template <> struct TSchemaAssociation<::cpp2::MyService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -3909934904338841385;
   static constexpr ::std::string_view definitionKey = {"\x17\x54\x9d\x5d\x8e\x2b\xc4\x59\x71\x23\x01\xf0\x0c\xf5\xe7\x00", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyService, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_c9bd1eeb93fb80d7_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

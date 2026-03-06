@@ -340,13 +340,37 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::MyStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::terse_write_constants::_fbthrift_schema_340b53b42d4cb6a7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::MyUnion, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::terse_write_constants::_fbthrift_schema_340b53b42d4cb6a7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::terse_write_constants::_fbthrift_schema_340b53b42d4cb6a7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::terse_write_constants::_fbthrift_schema_340b53b42d4cb6a7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::terse_write_constants::_fbthrift_schema_340b53b42d4cb6a7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::AdaptedFields, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::terse_write_constants::_fbthrift_schema_340b53b42d4cb6a7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::TerseException, false>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::terse_write_constants::_fbthrift_schema_340b53b42d4cb6a7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::MyEnum, true>::bundle() {
+    return ::facebook::thrift::test::fixtures::terse_write::terse_write_constants::_fbthrift_schema_340b53b42d4cb6a7_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

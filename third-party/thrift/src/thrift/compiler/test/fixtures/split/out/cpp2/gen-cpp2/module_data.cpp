@@ -90,19 +90,37 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 3> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyStruct, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_f8d6359b1210882_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyDataItem, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_f8d6359b1210882_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyUnion, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_f8d6359b1210882_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyEnum, true>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_f8d6359b1210882_includes();
+}
 
 template <> struct TSchemaAssociation<::cpp2::MyService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1120661119160092802;
   static constexpr ::std::string_view definitionKey = {"\xd4\x55\x57\x29\x07\xaa\x56\x1d\xad\xba\x59\xd4\xff\x46\xf3\xc9", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyService, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_f8d6359b1210882_includes();
+}
 template <> struct TSchemaAssociation<::cpp2::DbMixedStackArguments, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1120661119160092802;
   static constexpr ::std::string_view definitionKey = {"\x8b\x49\xc9\x5f\x44\xf6\x51\x55\x94\x91\xdb\x74\x2a\x99\x84\xd6", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::DbMixedStackArguments, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_f8d6359b1210882_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

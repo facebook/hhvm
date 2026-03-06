@@ -245,7 +245,7 @@ unsigned long IncludedB::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::some::ns::IncludedB, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 950416581276799362;
   static constexpr ::std::string_view definitionKey = {"\x34\x5d\xc9\x98\xcd\xe4\xfd\xf0\x47\x04\xaf\x2b\xaa\xd5\x5e\x09", 16};
 };

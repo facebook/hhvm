@@ -869,12 +869,12 @@ template <> struct TEnumTraits<::apache::thrift::test::ExampleUnion::Type> {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::apache::thrift::test::User, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1375025822410227455;
   static constexpr ::std::string_view definitionKey = {"\x8f\xe0\x5d\xb9\x85\x9e\xae\xfb\xa5\xcf\xd8\xe7\x5b\xb0\x26\x31", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::ExampleUnion, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 1375025822410227455;
   static constexpr ::std::string_view definitionKey = {"\xc1\xc2\xde\xcf\x11\x76\xfb\xef\xde\x4e\x7c\x4b\x09\x17\x76\x30", 16};
 };

@@ -2750,27 +2750,27 @@ unsigned long NotEmptiableStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::apache::thrift::test::MyStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 5950249399056504002;
   static constexpr ::std::string_view definitionKey = {"\xd6\x92\x6b\x1a\x4c\x93\xec\x6e\x57\xcf\xb1\x39\x84\x76\x98\x2f", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::EmptiableStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 5950249399056504002;
   static constexpr ::std::string_view definitionKey = {"\x3f\xf8\xca\x9c\x42\x2f\xa4\xd0\xff\x3f\x08\xd8\x68\x48\x0d\x70", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::EmptiableTerseStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 5950249399056504002;
   static constexpr ::std::string_view definitionKey = {"\xb6\x32\x71\x49\x7b\x6b\x1c\x02\x04\xff\x1e\xcc\xd9\xb6\xa4\x99", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::NotEmptiableStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 5950249399056504002;
   static constexpr ::std::string_view definitionKey = {"\xb9\xb5\x6a\xfd\x05\x99\xa3\x94\xb4\xfa\x74\x39\x58\x72\xe8\x23", 16};
 };
 template <> struct TSchemaAssociation<::apache::thrift::test::MyEnum, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 5950249399056504002;
   static constexpr ::std::string_view definitionKey = {"\xa8\xda\xfc\xb5\xf8\x7b\xf4\xd0\x13\x0d\xe7\x21\x82\x3b\x38\xcc", 16};
 };

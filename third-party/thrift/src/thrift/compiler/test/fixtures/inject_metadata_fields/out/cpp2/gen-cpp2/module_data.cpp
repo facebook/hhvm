@@ -104,10 +104,25 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 2> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Fields, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_62f83fb0478b676_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::FieldsInjectedToEmptyStruct, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_62f83fb0478b676_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::FieldsInjectedToStruct, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_62f83fb0478b676_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::FieldsInjectedWithIncludedStruct, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_62f83fb0478b676_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::FieldsInjectedWithFieldsWithIncludedStruct, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_62f83fb0478b676_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

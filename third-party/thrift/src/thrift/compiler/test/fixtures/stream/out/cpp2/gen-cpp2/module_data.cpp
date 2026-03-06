@@ -47,13 +47,25 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::FooStreamEx, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_a844ae02a230da64_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::FooEx, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_a844ae02a230da64_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::FooEx2, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_a844ae02a230da64_includes();
+}
 
 template <> struct TSchemaAssociation<::cpp2::PubSubStreamingService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -6321736650587055516;
   static constexpr ::std::string_view definitionKey = {"\xab\x3e\x36\x4b\x2e\x35\xdf\x6b\x01\xa6\x9d\xdc\x03\x1b\x54\x13", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::PubSubStreamingService, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_a844ae02a230da64_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

@@ -194,16 +194,49 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Internship, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Range, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::struct1, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::struct2, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::struct3, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::struct4, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::union1, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::union2, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::EmptyEnum, true>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::City, true>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Company, true>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e1bb5b11caac6d65_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

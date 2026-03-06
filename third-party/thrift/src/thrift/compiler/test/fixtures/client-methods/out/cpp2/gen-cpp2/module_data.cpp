@@ -48,17 +48,29 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::EchoRequest, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_df7a52442c293278_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::EchoResponse, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_df7a52442c293278_includes();
+}
 
 template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnService, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -2343470203340770696;
   static constexpr ::std::string_view definitionKey = {"\xe9\x8f\xa7\x97\xb7\x9c\x2b\xfb\x8b\x8d\x8b\xfd\xd1\x95\x38\xe3", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnService, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_df7a52442c293278_includes();
+}
 template <> struct TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnFunction, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -2343470203340770696;
   static constexpr ::std::string_view definitionKey = {"\x17\x37\xce\x25\xe5\x1e\x08\x5e\x92\xcf\x7d\x8a\x14\xae\xe4\x62", 16};
 };
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::HeaderClientMethodsAnnotationOnFunction, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_df7a52442c293278_includes();
+}
 } // namespace detail
 } // namespace apache::thrift

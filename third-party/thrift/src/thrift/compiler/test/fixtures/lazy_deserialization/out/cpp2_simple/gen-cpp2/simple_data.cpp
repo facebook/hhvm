@@ -248,14 +248,41 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 0> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::Foo, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_98203f6e4f0a59d2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::LazyFoo, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_98203f6e4f0a59d2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::OptionalFoo, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_98203f6e4f0a59d2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::OptionalLazyFoo, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_98203f6e4f0a59d2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::OptionalBoxedLazyFoo, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_98203f6e4f0a59d2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::LazyCppRef, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_98203f6e4f0a59d2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::IndexedFoo, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_98203f6e4f0a59d2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::OptionalIndexedFoo, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_98203f6e4f0a59d2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::Empty, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_98203f6e4f0a59d2_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

@@ -66,14 +66,41 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 4> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enums::SomeStruct, false>::bundle() {
+    return ::test::fixtures::enums::module_constants::_fbthrift_schema_a91c4c5d2179f7bb_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enums::MyStruct, false>::bundle() {
+    return ::test::fixtures::enums::module_constants::_fbthrift_schema_a91c4c5d2179f7bb_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enums::Metasyntactic, true>::bundle() {
+    return ::test::fixtures::enums::module_constants::_fbthrift_schema_a91c4c5d2179f7bb_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enums::MyEnum1, true>::bundle() {
+    return ::test::fixtures::enums::module_constants::_fbthrift_schema_a91c4c5d2179f7bb_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enums::MyEnum2, true>::bundle() {
+    return ::test::fixtures::enums::module_constants::_fbthrift_schema_a91c4c5d2179f7bb_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enums::MyEnum3, true>::bundle() {
+    return ::test::fixtures::enums::module_constants::_fbthrift_schema_a91c4c5d2179f7bb_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enums::MyEnum4, true>::bundle() {
+    return ::test::fixtures::enums::module_constants::_fbthrift_schema_a91c4c5d2179f7bb_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enums::MyBitmaskEnum1, true>::bundle() {
+    return ::test::fixtures::enums::module_constants::_fbthrift_schema_a91c4c5d2179f7bb_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::enums::MyBitmaskEnum2, true>::bundle() {
+    return ::test::fixtures::enums::module_constants::_fbthrift_schema_a91c4c5d2179f7bb_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

@@ -4465,42 +4465,42 @@ template <> struct TEnumTraits<::facebook::thrift::test::fixtures::terse_write::
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::MyStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3750183148035290791;
   static constexpr ::std::string_view definitionKey = {"\x2b\xc9\x4c\xc7\x6d\xc9\x1f\xe7\xa6\xda\xcb\xd8\xce\x65\x7c\x0a", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::MyUnion, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3750183148035290791;
   static constexpr ::std::string_view definitionKey = {"\xfd\x2e\x7e\x59\x43\x30\xc0\xe6\xdf\xc2\x0d\x93\x44\xcc\x79\xc1", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3750183148035290791;
   static constexpr ::std::string_view definitionKey = {"\xdc\xfb\x8c\x35\x64\xfd\x19\x2a\xa6\x00\x55\x94\x57\x26\x47\x49", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3750183148035290791;
   static constexpr ::std::string_view definitionKey = {"\xa0\x67\xcd\x44\x5a\x65\xef\x3e\x0c\xf1\x24\x22\xfa\xd8\xa7\x14", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3750183148035290791;
   static constexpr ::std::string_view definitionKey = {"\xb8\x6c\x53\x2e\x96\xf1\x12\xec\x60\x70\x23\x18\xef\x4a\x44\x4c", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::AdaptedFields, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3750183148035290791;
   static constexpr ::std::string_view definitionKey = {"\xcb\x05\xc1\x52\x74\x06\x34\x94\x8b\x8e\xbe\x1f\x36\x04\x0d\x79", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::TerseException, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3750183148035290791;
   static constexpr ::std::string_view definitionKey = {"\x14\x72\x39\x31\xe2\x2a\x78\x3b\x33\x3e\x8c\x71\xda\x61\xdd\x9f", 16};
 };
 template <> struct TSchemaAssociation<::facebook::thrift::test::fixtures::terse_write::MyEnum, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 3750183148035290791;
   static constexpr ::std::string_view definitionKey = {"\x77\x31\xb8\x25\x3e\xe2\xd6\x18\x92\xc2\x3d\x33\x5e\x43\xd2\x57", 16};
 };

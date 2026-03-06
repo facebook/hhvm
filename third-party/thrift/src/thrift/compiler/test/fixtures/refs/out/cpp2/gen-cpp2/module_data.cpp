@@ -442,27 +442,93 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 5> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyUnion, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::NonTriviallyDestructibleUnion, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyField, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyStruct, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithUnion, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::RecursiveStruct, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithContainers, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithSharedConst, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Empty, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithRef, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithBox, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithInternBox, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithTerseInternBox, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::AdaptedStructWithInternBox, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::AdaptedStructWithTerseInternBox, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithRefTypeUnique, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithRefTypeShared, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithRefTypeSharedConst, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::StructWithString, false>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyEnum, true>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::TypedEnum, true>::bundle() {
+    return ::cpp2::module_constants::_fbthrift_schema_e47beb0f6367ade7_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

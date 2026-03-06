@@ -156,9 +156,21 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 14> TStructDataStorage<
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::MyStruct, false>::bundle() {
+    return ::apache::thrift::test::simple_deprecated_terse_writes_constants::_fbthrift_schema_974321ce74c90d75_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::EmptiableStruct, false>::bundle() {
+    return ::apache::thrift::test::simple_deprecated_terse_writes_constants::_fbthrift_schema_974321ce74c90d75_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::NotEmptiableStruct, false>::bundle() {
+    return ::apache::thrift::test::simple_deprecated_terse_writes_constants::_fbthrift_schema_974321ce74c90d75_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::MyEnum, true>::bundle() {
+    return ::apache::thrift::test::simple_deprecated_terse_writes_constants::_fbthrift_schema_974321ce74c90d75_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

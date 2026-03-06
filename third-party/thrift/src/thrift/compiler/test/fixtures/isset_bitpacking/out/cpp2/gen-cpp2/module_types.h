@@ -1345,22 +1345,22 @@ unsigned long AtomicFoo::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::Default, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -5504416271504804924;
   static constexpr ::std::string_view definitionKey = {"\x07\xa0\x14\xaa\x24\x60\xc2\x4a\x3a\xeb\x6c\xd5\x6e\x29\xe2\x6e", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::NonAtomic, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -5504416271504804924;
   static constexpr ::std::string_view definitionKey = {"\xf9\xa8\x6a\x36\xc5\xff\xeb\xbc\x8d\xc9\xfb\x32\x91\xe4\x84\xa1", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::Atomic, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -5504416271504804924;
   static constexpr ::std::string_view definitionKey = {"\xa5\xb9\x59\x5c\xd1\x41\x01\x74\x05\xd0\xff\x03\xa7\x99\xfa\xa3", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::AtomicFoo, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = -5504416271504804924;
   static constexpr ::std::string_view definitionKey = {"\x36\xac\xcb\x7b\x6c\x14\x4e\x71\xc9\x37\x39\xa1\x95\x94\x6d\x4a", 16};
 };

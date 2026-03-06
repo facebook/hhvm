@@ -378,32 +378,32 @@ unsigned long SomeStruct::read(Protocol_* iprot) {
 
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::facebook::ns::qwerty::SomeStruct, false> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 4586456996656601781;
   static constexpr ::std::string_view definitionKey = {"\xea\x39\x78\xb3\xd5\xc1\x9c\x5e\x13\x9c\x15\xc7\x90\x46\x76\x07", 16};
 };
 template <> struct TSchemaAssociation<::facebook::ns::qwerty::AnEnumA, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 4586456996656601781;
   static constexpr ::std::string_view definitionKey = {"\xdc\x84\xe3\xc7\xf0\x94\x15\x39\x7f\x64\xc5\x79\x92\x55\xd4\x51", 16};
 };
 template <> struct TSchemaAssociation<::facebook::ns::qwerty::AnEnumB, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 4586456996656601781;
   static constexpr ::std::string_view definitionKey = {"\x88\xfe\x11\x81\xb8\xf5\x34\xb3\x1a\xb0\xfc\x96\x71\x5f\x29\x39", 16};
 };
 template <> struct TSchemaAssociation<::facebook::ns::qwerty::AnEnumC, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 4586456996656601781;
   static constexpr ::std::string_view definitionKey = {"\xfd\x97\xac\x8f\x3c\x99\x02\x61\x7f\x22\x8d\x7a\x2d\x33\x8f\x41", 16};
 };
 template <> struct TSchemaAssociation<::facebook::ns::qwerty::AnEnumD, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 4586456996656601781;
   static constexpr ::std::string_view definitionKey = {"\x8a\x84\x11\xcd\xa3\x3b\xaf\x27\xeb\x1e\xf6\x6e\x20\xdf\xbe\x80", 16};
 };
 template <> struct TSchemaAssociation<::facebook::ns::qwerty::AnEnumE, true> {
-  static constexpr ::folly::Range<const ::std::string_view*>(*bundle)() = nullptr;
+  static ::folly::Range<const ::std::string_view*> bundle();
   static constexpr int64_t programId = 4586456996656601781;
   static constexpr ::std::string_view definitionKey = {"\x8d\x5c\x7e\x2a\x5b\x77\x0c\x73\x36\x90\x73\x50\xac\x01\x61\x4f", 16};
 };

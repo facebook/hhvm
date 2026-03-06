@@ -156,10 +156,25 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 6> TStructDataStorage<:
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct, false>::bundle() {
+    return ::facebook::thrift::compiler::test::fixtures::default_values::module_constants::_fbthrift_schema_2217d0870a233362_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStructWithDefault, false>::bundle() {
+    return ::facebook::thrift::compiler::test::fixtures::default_values::module_constants::_fbthrift_schema_2217d0870a233362_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::StructWithNoCustomDefaultValues, false>::bundle() {
+    return ::facebook::thrift::compiler::test::fixtures::default_values::module_constants::_fbthrift_schema_2217d0870a233362_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCustomDefaultValues, false>::bundle() {
+    return ::facebook::thrift::compiler::test::fixtures::default_values::module_constants::_fbthrift_schema_2217d0870a233362_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::facebook::thrift::compiler::test::fixtures::default_values::StructWithCollectionDefaultValues, false>::bundle() {
+    return ::facebook::thrift::compiler::test::fixtures::default_values::module_constants::_fbthrift_schema_2217d0870a233362_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

@@ -222,10 +222,25 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 14> TStructDataStorage<
 
 namespace detail {
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::MyStruct, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_5293884d7bbe94c2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::EmptiableStruct, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_5293884d7bbe94c2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::EmptiableTerseStruct, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_5293884d7bbe94c2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::NotEmptiableStruct, false>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_5293884d7bbe94c2_includes();
+}
 
+::folly::Range<const ::std::string_view*> TSchemaAssociation<::apache::thrift::test::MyEnum, true>::bundle() {
+    return ::apache::thrift::test::simple_constants::_fbthrift_schema_5293884d7bbe94c2_includes();
+}
 
 } // namespace detail
 } // namespace apache::thrift

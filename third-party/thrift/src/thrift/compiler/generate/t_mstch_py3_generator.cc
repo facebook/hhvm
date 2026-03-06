@@ -1539,7 +1539,7 @@ void t_mstch_py3_generator::generate_types() {
   };
 
   std::vector<std::pair<std::string, bool>> cythonFilesNoTypeContext{
-      {"builders.py", false},
+      {"builders.py", true},
       {"constants_FBTHRIFT_ONLY_DO_NOT_USE.py", false},
       {"containers_FBTHRIFT_ONLY_DO_NOT_USE.py", true},
       {"metadata.pxd", true},

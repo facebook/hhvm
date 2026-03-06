@@ -433,6 +433,16 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     return customVisit(Visitor{val});
   }
 
+  // Patching keys/values in batch
+  // KVPatch is a `Map<Key, ValuePatch>` data structure that contains key to the
+  // corresponding ValuePatch.
+  template <class KVPatch>
+  void patchIfSet(KVPatch&& patches) {
+    for (auto&& ep : patches) {
+      patchByKey(ep.first).merge(folly::forward_like<KVPatch>(ep.second));
+    }
+  }
+
  private:
   template <typename K = typename T::key_type>
   bool isKeyModified(K&& key) {
@@ -446,13 +456,6 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       if (it != val.end()) {
         p.second.apply(it->second);
       }
-    }
-  }
-
-  // Needed for merge(...). We can consider making this a public API.
-  void patchIfSet(const P& patches) {
-    for (auto&& ep : patches) {
-      patchByKey(ep.first).merge(ep.second);
     }
   }
 

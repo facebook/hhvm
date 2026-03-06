@@ -12,11 +12,13 @@ Subcommands:
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 
 from hphp.tools.ssa_inspector import data_fetcher
 from hphp.tools.ssa_inspector.formatter import format_translation
 from hphp.tools.ssa_inspector.ir_parser import parse_json_blob
+from hphp.tools.ssa_inspector.xenon_fetcher import fetch_gcpu_for_functions
 
 
 def cmd_list_runs(args: argparse.Namespace) -> None:
@@ -42,14 +44,26 @@ def cmd_top(args: argparse.Namespace) -> None:
         print("No translations found.")
         return
 
+    # Fetch xenon gCPU data if requested
+    gcpu_map: dict[str, float] = {}
+    if args.xenon_hours > 0:
+        func_names = list({r.get("func_name", "") for r in rows if r.get("func_name")})
+        gcpu_map = fetch_gcpu_for_functions(func_names, args.xenon_hours)
+
     print(f"Top {len(rows)} translations by profCount:\n")
     for i, r in enumerate(rows, 1):
         pc = r.get("prof_count", 0)
+        func_name = r.get("func_name", "?")
+        gcpu_str = ""
+        if args.xenon_hours > 0:
+            gcpu_pct = gcpu_map.get(func_name)
+            gcpu_str = f"  gCPU={gcpu_pct:>5.2f}%" if gcpu_pct else "  gCPU=    -"
         print(
             f"  {i:3d}. trans_id={r['trans_id']:<8}"
             f"  profCount={pc:>12,}"
+            f"{gcpu_str}"
             f"  kind={r.get('kind', '?'):<18}"
-            f"  {r.get('func_name', '?')}"
+            f"  {func_name}"
         )
 
     if args.format != "list":
@@ -63,6 +77,20 @@ def cmd_top(args: argparse.Namespace) -> None:
                 )
             )
             print()
+
+
+def _extract_func_names(rows: list[dict]) -> list[str]:
+    """Extract function names from translation data rows."""
+    func_names: list[str] = []
+    for r in rows:
+        try:
+            data = json.loads(r["data"])
+            name = data.get("translation", {}).get("funcName", "")
+            if name:
+                func_names.append(name)
+        except (json.JSONDecodeError, KeyError):
+            pass
+    return func_names
 
 
 def cmd_inspect(args: argparse.Namespace) -> None:
@@ -101,7 +129,28 @@ def cmd_inspect(args: argparse.Namespace) -> None:
         print("No translations found.")
         return
 
-    print(f"Found {len(rows)} translation(s).\n")
+    # Extract function names for xenon lookup
+    func_names = _extract_func_names(rows)
+
+    # Fetch xenon gCPU data if requested
+    gcpu_map: dict[str, float] = {}
+    if args.xenon_hours > 0 and func_names:
+        gcpu_map = fetch_gcpu_for_functions(list(set(func_names)), args.xenon_hours)
+
+    print(f"Found {len(rows)} translation(s).")
+
+    if args.xenon_hours > 0 and func_names:
+        # Show gCPU for the primary function
+        gcpu_pct = gcpu_map.get(func_names[0])
+        if gcpu_pct is not None:
+            print(
+                f"Xenon gCPU: {gcpu_pct:.2f}% of total CPU "
+                f"(last {args.xenon_hours}h, exclusive)"
+            )
+        else:
+            print(f"Xenon gCPU: not in top 500 functions (last {args.xenon_hours}h)")
+
+    print()
     for r in rows:
         translation = parse_json_blob(r["data"])
         print(format_translation(translation, fmt=args.format, show_disasm=args.disasm))
@@ -142,6 +191,12 @@ def main() -> None:
         action="store_true",
         help="Include machine code disassembly",
     )
+    p_top.add_argument(
+        "--xenon-hours",
+        type=int,
+        default=4,
+        help="Xenon lookback window in hours for gCPU %% (0 to skip, default: 4)",
+    )
     p_top.set_defaults(func=cmd_top)
 
     # inspect
@@ -168,6 +223,12 @@ def main() -> None:
         "--disasm",
         action="store_true",
         help="Include machine code disassembly",
+    )
+    p_inspect.add_argument(
+        "--xenon-hours",
+        type=int,
+        default=4,
+        help="Xenon lookback window in hours for gCPU %% (0 to skip, default: 4)",
     )
     p_inspect.set_defaults(func=cmd_inspect)
 

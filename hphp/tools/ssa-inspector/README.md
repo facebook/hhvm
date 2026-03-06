@@ -17,26 +17,31 @@ decisions, machine code ranges with disassembly, and profile execution counts.
 # 1. List available runs (find recent data)
 buck run fbcode//hphp/tools/ssa-inspector:main -- list-runs --days 7
 
-# 2. Find the hottest translations in a run
+# 2. Find the hottest translations in a run (includes Xenon gCPU %)
 buck run fbcode//hphp/tools/ssa-inspector:main -- \
-  top --date 2026-02-24 --run-uuid "2026-02-24.prod.web.cln.0-1" --top-n 10
+  top --date 2026-02-25 --run-uuid "2026-02-25.prod.web.cln.0-1" --top-n 10
 
-# 3. Inspect a specific translation in detail
+# 2b. Skip Xenon lookup (faster, no Scuba query)
 buck run fbcode//hphp/tools/ssa-inspector:main -- \
-  inspect --trans-id 90516 \
-  --date 2026-02-24 --run-uuid "2026-02-24.prod.web.cln.0-1" \
+  top --date 2026-02-25 --run-uuid "2026-02-25.prod.web.cln.0-1" --top-n 10 \
+  --xenon-hours 0
+
+# 3. Inspect a specific translation in detail (shows gCPU % in header)
+buck run fbcode//hphp/tools/ssa-inspector:main -- \
+  inspect --trans-id 58753 \
+  --date 2026-02-25 --run-uuid "2026-02-25.prod.web.cln.0-1" \
   --format detail
 
 # 4. Search by function name
 buck run fbcode//hphp/tools/ssa-inspector:main -- \
   inspect --function "contains_key" \
-  --date 2026-02-24 --run-uuid "2026-02-24.prod.web.cln.0-1" \
+  --date 2026-02-25 --run-uuid "2026-02-25.prod.web.cln.0-1" \
   --format summary
 
 # 5. Include machine code disassembly
 buck run fbcode//hphp/tools/ssa-inspector:main -- \
-  inspect --trans-id 90544 \
-  --date 2026-02-24 --run-uuid "2026-02-24.prod.web.cln.0-1" \
+  inspect --trans-id 58753 \
+  --date 2026-02-25 --run-uuid "2026-02-25.prod.web.cln.0-1" \
   --format detail --disasm
 
 # 6. Load from a local trace file (no Hive needed)
@@ -54,6 +59,19 @@ sequence:
 Run `top` to identify the hottest translations by execution count (profCount).
 Focus on `TransOptimize` translations — these are the fully optimized JIT output
 and represent the code that actually runs in production.
+
+By default, the `top` and `inspect` commands also query the **Xenon** Scuba
+dataset (`xenon`) to show each function's **exclusive gCPU %** — what fraction
+of total CPU the function itself consumes (leaf cost, not including callees).
+This answers "is optimizing this function worth it?" since a high profCount
+doesn't necessarily mean high CPU cost.
+
+- `gCPU=0.18%` means the function is 0.18% of total fleet CPU (last 4 hours).
+- `gCPU=    -` means the function isn't in xenon's top 500 — it likely consumes
+  negligible CPU at the leaf level (common for builtins like `ord`, `strlen`
+  whose actual cost is attributed to native code).
+- Use `--xenon-hours N` to change the lookback window (default: 4 hours).
+- Use `--xenon-hours 0` to skip the Xenon query entirely.
 
 ### Step 2: Inspect in Summary Mode
 
@@ -164,4 +182,5 @@ Key opcodes and their meanings:
 | `data_fetcher.py` | Presto/Hive queries + local file loading |
 | `ir_parser.py` | JSON blob → dataclass parsing |
 | `formatter.py` | Summary and detail output formatting |
+| `xenon_fetcher.py` | Xenon Scuba queries for gCPU % (exclusive/leaf cost) |
 | `main.py` | CLI entry point (argparse) |

@@ -759,71 +759,71 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 37> TStructDataStorage<
 namespace detail {
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyStructFloatFieldThrowExp, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyStructMapFloatThrowExp, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyStruct, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::SimpleStruct, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::defaultStruct, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyStructTypeDef, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyDataItem, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyUnion, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyUnionFloatFieldThrowExp, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::ComplexNestedStruct, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::TypeRemapped, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::emptyXcep, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::reqXcep, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::optXcep, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::complexException, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::Containers, false>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::cpp2::MyEnum, true>::bundle() {
-    return ::cpp2::module_constants::_fbthrift_schema_1df5cd128411d3a6_includes();
+    return ::cpp2::module_constants::_fbthrift_schema_7ed9aa9cd69f5bff_includes();
 }
 
 } // namespace detail

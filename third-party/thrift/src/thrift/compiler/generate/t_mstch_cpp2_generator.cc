@@ -837,7 +837,6 @@ class cpp_mstch_program : public mstch_program {
          {"program:num_transitive_thrift_includes",
           &cpp_mstch_program::num_transitive_thrift_includes},
          {"program:frozen_packed?", &cpp_mstch_program::frozen_packed},
-         {"program:legacy_api?", &cpp_mstch_program::legacy_api},
          {"program:fatal_languages", &cpp_mstch_program::fatal_languages},
          {"program:fatal_enums", &cpp_mstch_program::fatal_enums},
          {"program:fatal_unions", &cpp_mstch_program::fatal_unions},
@@ -845,7 +844,6 @@ class cpp_mstch_program : public mstch_program {
          {"program:fatal_constants", &cpp_mstch_program::fatal_constants},
          {"program:fatal_services", &cpp_mstch_program::fatal_services},
          {"program:fatal_identifiers", &cpp_mstch_program::fatal_identifiers},
-         {"program:fatal_data_member", &cpp_mstch_program::fatal_data_member},
          {"program:split_structs", &cpp_mstch_program::split_structs},
          {"program:split_enums", &cpp_mstch_program::split_enums},
          {"program:has_schema?", &cpp_mstch_program::has_schema},
@@ -1047,7 +1045,6 @@ class cpp_mstch_program : public mstch_program {
     return includes.size() + 1;
   }
   mstch::node frozen_packed() { return get_option("frozen") == "packed"; }
-  mstch::node legacy_api() { return true; }
   mstch::node fatal_languages() {
     mstch::array a;
     for (const auto& pair : program_->namespaces()) {
@@ -1141,26 +1138,6 @@ class cpp_mstch_program : public mstch_program {
               {"identifier:name", name.first},
               {"identifier:fatal_string", render_fatal_string(name.second)},
           });
-    }
-    return a;
-  }
-  mstch::node fatal_data_member() {
-    std::unordered_set<std::string> fields;
-    std::vector<const std::string*> ordered_fields;
-    for (const t_structured* s : program_->structured_definitions()) {
-      if (s->is<t_union>()) {
-        continue;
-      }
-      for (const t_field& f : s->fields()) {
-        auto result = fields.insert(cpp2::get_name(&f));
-        if (result.second) {
-          ordered_fields.push_back(&*result.first);
-        }
-      }
-    }
-    mstch::array a;
-    for (const auto& f : ordered_fields) {
-      a.emplace_back(*f);
     }
     return a;
   }
@@ -1284,12 +1261,8 @@ class cpp_mstch_service : public mstch_service {
     register_methods(
         this,
         {
-            {"service:program_qualified_name",
-             &cpp_mstch_service::program_qualified_name},
             {"service:include_prefix", &cpp_mstch_service::include_prefix},
             {"service:thrift_includes", &cpp_mstch_service::thrift_includes},
-            {"service:oneway_functions", &cpp_mstch_service::oneway_functions},
-            {"service:oneways?", &cpp_mstch_service::has_oneway},
             {"service:cpp_includes", &cpp_mstch_service::cpp_includes},
             {"service:metadata_name", &cpp_mstch_service::metadata_name},
             {"service:parent_service_cpp_name",
@@ -1311,10 +1284,6 @@ class cpp_mstch_service : public mstch_service {
   std::string get_service_namespace(const t_program* program) override {
     return t_mstch_cpp2_generator::get_cpp2_namespace(program);
   }
-  mstch::node program_qualified_name() {
-    return get_service_namespace(service_->program()) +
-        "::" + service_->program()->name();
-  }
   mstch::node cpp_includes() {
     return t_mstch_cpp2_generator::cpp_includes(service_->program());
   }
@@ -1329,23 +1298,6 @@ class cpp_mstch_service : public mstch_service {
       a.emplace_back(make_mstch_program_cached(program, context_));
     }
     return a;
-  }
-  mstch::node oneway_functions() {
-    std::vector<const t_function*> oneway_functions;
-    for (const auto* function : get_functions()) {
-      if (function->qualifier() == t_function_qualifier::oneway) {
-        oneway_functions.push_back(function);
-      }
-    }
-    return make_mstch_functions(oneway_functions);
-  }
-  mstch::node has_oneway() {
-    for (const auto* function : get_functions()) {
-      if (function->qualifier() == t_function_qualifier::oneway) {
-        return true;
-      }
-    }
-    return false;
   }
   mstch::node metadata_name() {
     return service_->program()->name() + "_" + service_->name();
@@ -1504,8 +1456,6 @@ class cpp_mstch_type : public mstch_type {
         this,
         {
             {"type:resolves_to_base?", &cpp_mstch_type::resolves_to_base},
-            {"type:resolves_to_integral?",
-             &cpp_mstch_type::resolves_to_integral},
             {"type:resolves_to_base_or_enum?",
              &cpp_mstch_type::resolves_to_base_or_enum},
             {"type:resolves_to_container?",
@@ -1516,7 +1466,6 @@ class cpp_mstch_type : public mstch_type {
              &cpp_mstch_type::resolves_to_container_or_enum},
             {"type:resolves_to_fixed_size?",
              &cpp_mstch_type::resolves_to_fixed_size},
-            {"type:resolves_to_enum?", &cpp_mstch_type::resolves_to_enum},
             {"type:transitively_refers_to_struct?",
              &cpp_mstch_type::transitively_refers_to_struct},
             {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
@@ -1532,9 +1481,6 @@ class cpp_mstch_type : public mstch_type {
   }
   mstch::node resolves_to_base() {
     return resolved_type_->is<t_primitive_type>();
-  }
-  mstch::node resolves_to_integral() {
-    return resolved_type_->is_byte() || resolved_type_->is_any_int();
   }
   mstch::node resolves_to_base_or_enum() {
     return resolved_type_->is<t_primitive_type>() ||
@@ -1555,7 +1501,6 @@ class cpp_mstch_type : public mstch_type {
         resolved_type_->is_any_int() || resolved_type_->is<t_enum>() ||
         resolved_type_->is_floating_point();
   }
-  mstch::node resolves_to_enum() { return resolved_type_->is<t_enum>(); }
   mstch::node transitively_refers_to_struct() {
     // fast path is unnecessary but may avoid allocations
     if (resolved_type_->is<t_struct>() || resolved_type_->is<t_union>()) {
@@ -1662,7 +1607,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::write_lazy_field_checksum},
             {"struct:is_large?", &cpp_mstch_struct::is_large},
             {"struct:legacy_api?", &cpp_mstch_struct::legacy_api},
-            {"struct:metadata_name", &cpp_mstch_struct::metadata_name},
             {"struct:mixin_fields", &cpp_mstch_struct::mixin_fields},
             {"struct:num_union_members",
              &cpp_mstch_struct::get_num_union_members},
@@ -1682,7 +1626,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::fields_with_runtime_annotation},
             {"struct:any?", &cpp_mstch_struct::any},
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
-            {"struct:type_tag", &cpp_mstch_struct::type_tag},
             {"struct:is_trivially_destructible?",
              &cpp_mstch_struct::is_trivially_destructible},
         });
@@ -1938,9 +1881,6 @@ class cpp_mstch_struct : public mstch_struct {
     return false;
   }
   mstch::node legacy_api() { return true; }
-  mstch::node metadata_name() {
-    return struct_->program()->name() + "_" + struct_->name();
-  }
 
   mstch::node get_num_union_members() {
     if (!struct_->is<t_union>()) {
@@ -2020,10 +1960,6 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node extra_namespace() {
     auto* extra = cpp_context_->resolver().get_extra_namespace(*struct_);
     return extra ? *extra : mstch::node{};
-  }
-
-  mstch::node type_tag() {
-    return cpp_context_->resolver().get_type_tag(*struct_);
   }
 
  protected:
@@ -2201,8 +2137,6 @@ class cpp_mstch_field : public mstch_field {
         this,
         {
             {"field:name_hash", &cpp_mstch_field::name_hash},
-            {"field:index_plus_one", &cpp_mstch_field::index_plus_one},
-            {"field:ordinal", &cpp_mstch_field::ordinal},
             {"field:has_isset?", &cpp_mstch_field::has_isset},
             {"field:isset_index", &cpp_mstch_field::isset_index},
             {"field:cpp_type", &cpp_mstch_field::cpp_type},
@@ -2223,8 +2157,6 @@ class cpp_mstch_field : public mstch_field {
             {"field:cpp_ref?", &cpp_mstch_field::cpp_ref},
             {"field:cpp_ref_unique?", &cpp_mstch_field::cpp_ref_unique},
             {"field:cpp_ref_shared?", &cpp_mstch_field::cpp_ref_shared},
-            {"field:cpp_ref_shared_const?",
-             &cpp_mstch_field::cpp_ref_shared_const},
             {"field:cpp_ref_not_boxed?", &cpp_mstch_field::cpp_ref_not_boxed},
             {"field:cpp_exactly_one_adapter?",
              &cpp_mstch_field::cpp_exactly_one_adapter},
@@ -2239,8 +2171,6 @@ class cpp_mstch_field : public mstch_field {
             {"field:deprecated_terse_writes_with_non_redundant_custom_default?",
              &cpp_mstch_field::
                  deprecated_terse_writes_with_non_redundant_custom_default},
-            {"field:fatal_required_qualifier",
-             &cpp_mstch_field::fatal_required_qualifier},
             {"field:visibility", &cpp_mstch_field::visibility},
             {"field:metadata_name", &cpp_mstch_field::metadata_name},
             {"field:lazy?", &cpp_mstch_field::lazy},
@@ -2256,7 +2186,6 @@ class cpp_mstch_field : public mstch_field {
             {"field:type_tag", &cpp_mstch_field::type_tag},
             {"field:tablebased_qualifier",
              &cpp_mstch_field::tablebased_qualifier},
-            {"field:raw_binary?", &cpp_mstch_field::raw_binary},
             {"field:raw_string_or_binary?",
              &cpp_mstch_field::raw_string_or_binary},
             {"field:use_op_encode?", &cpp_mstch_field::use_op_encode},
@@ -2266,8 +2195,6 @@ class cpp_mstch_field : public mstch_field {
   mstch::node name_hash() {
     return "__fbthrift_hash_" + cpp2::sha256_hex(field_->name());
   }
-  mstch::node index_plus_one() { return pos_.index + 1; }
-  mstch::node ordinal() { return index_plus_one(); }
   mstch::node isset_index() {
     const cpp2_field_generator_context* field_context =
         cpp_context_->get_field_context(field_);
@@ -2364,10 +2291,6 @@ class cpp_mstch_field : public mstch_field {
     return gen::cpp::find_ref_type(*field_) ==
         gen::cpp::reference_type::shared_mutable;
   }
-  mstch::node cpp_ref_shared_const() {
-    return gen::cpp::find_ref_type(*field_) ==
-        gen::cpp::reference_type::shared_const;
-  }
   mstch::node cpp_ref_not_boxed() {
     auto ref_type = gen::cpp::find_ref_type(*field_);
     return ref_type != gen::cpp::reference_type::none &&
@@ -2443,19 +2366,6 @@ class cpp_mstch_field : public mstch_field {
     return zero_copy_arg_impl(*field_->type()) ? "true" : "false";
   }
   mstch::node has_isset() { return cpp2::field_has_isset(field_); }
-  mstch::node fatal_required_qualifier() {
-    switch (field_->qualifier()) {
-      case t_field_qualifier::required:
-        return "required";
-      case t_field_qualifier::optional:
-        return "optional";
-      case t_field_qualifier::none:
-        return "required_of_writer";
-      case t_field_qualifier::terse:
-        return "terse";
-    }
-    throw std::runtime_error("unknown required qualifier");
-  }
 
   mstch::node visibility() { return is_private() ? "private" : "public"; }
 
@@ -2469,11 +2379,6 @@ class cpp_mstch_field : public mstch_field {
     const t_structured* parent = whisker_context().get_field_parent(field_);
     assert(parent != nullptr);
     return cpp_context_->resolver().get_type_tag(*field_, *parent);
-  }
-
-  mstch::node raw_binary() {
-    return field_->type()->get_true_type()->is_binary() &&
-        !cpp_name_resolver::find_first_adapter(*field_);
   }
 
   mstch::node raw_string_or_binary() {

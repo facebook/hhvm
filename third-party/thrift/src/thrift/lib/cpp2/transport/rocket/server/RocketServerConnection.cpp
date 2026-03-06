@@ -315,18 +315,6 @@ RocketServerConnection::~RocketServerConnection() {
   }
 }
 
-namespace {
-StreamRpcError getStreamConnectionClosingError() {
-  StreamRpcError streamRpcError;
-  streamRpcError.code() = StreamRpcErrorCode::SERVER_CLOSING_CONNECTION;
-  streamRpcError.name_utf8() =
-      apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
-          StreamRpcErrorCode::SERVER_CLOSING_CONNECTION);
-  streamRpcError.what_utf8() = "Server closing connection, cancelling stream";
-  return streamRpcError;
-}
-} // namespace
-
 void RocketServerConnection::closeIfNeeded() {
   if (state_ == ConnectionState::DRAINING && inflightRequests_ == 0 &&
       inflightSinkFinalResponses_ == 0) {
@@ -377,12 +365,6 @@ void RocketServerConnection::closeIfNeeded() {
     folly::variant_match(
         callback,
         [&](const std::unique_ptr<RocketStreamClientCallback>& callback) {
-          sendErrorAfterDrain(
-              callback->streamId(),
-              RocketException(
-                  ErrorCode::CANCELED,
-                  getPayloadSerializer()->packCompact(
-                      getStreamConnectionClosingError())));
           callback->handleConnectionClose();
         },
         [](const std::unique_ptr<RocketSinkClientCallback>& callback) {

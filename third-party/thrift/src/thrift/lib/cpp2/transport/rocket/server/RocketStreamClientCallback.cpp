@@ -18,6 +18,8 @@
 
 #include <fmt/core.h>
 
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
+
 THRIFT_FLAG_DEFINE_bool(rocket_server_disable_send_callback, false);
 
 namespace apache::thrift::rocket {
@@ -207,7 +209,25 @@ void RocketStreamClientCallback::handle(ExtFrame extFrame) {
   }
 }
 
+namespace {
+StreamRpcError getStreamConnectionClosingError() {
+  StreamRpcError streamRpcError;
+  streamRpcError.code() = StreamRpcErrorCode::SERVER_CLOSING_CONNECTION;
+  streamRpcError.name_utf8() =
+      apache::thrift::TEnumTraits<StreamRpcErrorCode>::findName(
+          StreamRpcErrorCode::SERVER_CLOSING_CONNECTION);
+  streamRpcError.what_utf8() = "Server closing connection, cancelling stream";
+  return streamRpcError;
+}
+} // namespace
+
 void RocketStreamClientCallback::handleConnectionClose() {
+  connection_.sendErrorAfterDrain(
+      streamId_,
+      RocketException(
+          ErrorCode::CANCELED,
+          connection_.getPayloadSerializer()->packCompact(
+              getStreamConnectionClosingError())));
   if (!serverCallbackReady()) {
     return;
   }
@@ -215,6 +235,58 @@ void RocketStreamClientCallback::handleConnectionClose() {
   if (contextStack_) {
     contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
   }
+}
+
+void RocketStreamClientCallback::handleFrame(RequestNFrame&& frame) {
+  if (!serverCallbackReady()) {
+    connection_.close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "Received unexpected early frame, stream id ({}) type ({})",
+                static_cast<uint32_t>(streamId_),
+                static_cast<uint8_t>(FrameType::REQUEST_N))));
+    return;
+  }
+  handle(std::move(frame));
+}
+
+void RocketStreamClientCallback::handleFrame(CancelFrame&& frame) {
+  handle(std::move(frame));
+}
+
+void RocketStreamClientCallback::handleFrame(PayloadFrame&&) {
+  connection_.close(
+      folly::make_exception_wrapper<RocketException>(
+          ErrorCode::INVALID,
+          fmt::format(
+              "Received unhandleable frame type ({}) for stream (id {})",
+              static_cast<uint8_t>(FrameType::PAYLOAD),
+              static_cast<uint32_t>(streamId_))));
+}
+
+void RocketStreamClientCallback::handleFrame(ErrorFrame&&) {
+  connection_.close(
+      folly::make_exception_wrapper<RocketException>(
+          ErrorCode::INVALID,
+          fmt::format(
+              "Received unhandleable frame type ({}) for stream (id {})",
+              static_cast<uint8_t>(FrameType::ERROR),
+              static_cast<uint32_t>(streamId_))));
+}
+
+void RocketStreamClientCallback::handleFrame(ExtFrame&& frame) {
+  if (!serverCallbackReady()) {
+    connection_.close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "Received unexpected early frame, stream id ({}) type ({})",
+                static_cast<uint32_t>(streamId_),
+                static_cast<uint8_t>(FrameType::EXT))));
+    return;
+  }
+  handle(std::move(frame));
 }
 
 void RocketStreamClientCallback::timeoutExpired() noexcept {

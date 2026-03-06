@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IConnectionStreamHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
 THRIFT_FLAG_DECLARE(rocket_server_disable_send_callback, bool);
@@ -33,7 +34,8 @@ namespace apache::thrift::rocket {
 
 class RocketServerConnection;
 
-class RocketStreamClientCallback final : public StreamClientCallback {
+class RocketStreamClientCallback final : public StreamClientCallback,
+                                         public IConnectionStreamHandler {
  public:
   RocketStreamClientCallback(
       StreamId streamId,
@@ -57,10 +59,18 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   bool handle(RequestNFrame requestNFrame);
   void handle(CancelFrame cancelFrame);
   void handle(ExtFrame extFrame);
-  void handleStreamHeadersPush(HeadersPayload&& payload);
-  void handleConnectionClose();
-  void handlePausedByConnection();
-  void handleResumedByConnection();
+
+  // IConnectionStreamHandler overrides
+  void handleFrame(RequestNFrame&&) override;
+  void handleFrame(CancelFrame&&) override;
+  void handleFrame(PayloadFrame&&) override;
+  void handleFrame(ErrorFrame&&) override;
+  void handleFrame(ExtFrame&&) override;
+
+  void handleStreamHeadersPush(HeadersPayload&& payload) override;
+  void handleConnectionClose() override;
+  void handlePausedByConnection() override;
+  void handleResumedByConnection() override;
 
   StreamServerCallback& getStreamServerCallback();
   void timeoutExpired() noexcept;
@@ -79,7 +89,7 @@ class RocketStreamClientCallback final : public StreamClientCallback {
     contextStack_ = std::move(contextStack);
   }
 
-  StreamId streamId() const { return streamId_; }
+  StreamId streamId() const override { return streamId_; }
 
  private:
   StreamServerCallback* serverCallback() const {

@@ -390,3 +390,403 @@ TEST(RoundRobinRequestPileMiscTest, getDbgInfo) {
   EXPECT_EQ((*result.bucketsPerPriority())[3], 14);
   EXPECT_EQ((*result.bucketsPerPriority())[4], 15);
 }
+
+TEST_F(RoundRobinRequestPileTest, dequeueFromEmptyPile) {
+  // Single-bucket
+  {
+    RoundRobinRequestPile::Options opts({1}, makePileSelectionFunction());
+    RoundRobinRequestPile pile(opts);
+    EXPECT_EQ(pile.dequeue(), std::nullopt);
+    EXPECT_EQ(pile.requestCount(), 0);
+  }
+  // Multi-bucket
+  {
+    RoundRobinRequestPile::Options opts({5, 3}, makePileSelectionFunction());
+    RoundRobinRequestPile pile(opts);
+    EXPECT_EQ(pile.dequeue(), std::nullopt);
+    EXPECT_EQ(pile.requestCount(), 0);
+  }
+}
+
+TEST_F(RoundRobinRequestPileTest, defaultOptionsNoPileSelectionFunction) {
+  RoundRobinRequestPile::Options opts;
+  RoundRobinRequestPile pile(opts);
+
+  // Without PileSelectionFunction, all requests route to (0, 0)
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+
+  EXPECT_EQ(pile.requestCount(), 3);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  EXPECT_EQ(pile.dequeue(), std::nullopt);
+}
+
+TEST_F(RoundRobinRequestPileTest, mixedShapeSingleAndMultiBucket) {
+  // P0: 1 bucket (single-bucket path), P1: 3 buckets (multi-bucket path),
+  // P2: 1 bucket (single-bucket path)
+  RoundRobinRequestPile::Options opts({1, 3, 1}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  // Enqueue across all priorities and buckets
+  pile.enqueue(makeServerRequestForBucket(1, 0));
+  pile.enqueue(makeServerRequestForBucket(1, 1));
+  pile.enqueue(makeServerRequestForBucket(1, 2));
+  pile.enqueue(makeServerRequestForBucket(1, 0));
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(2, 0));
+
+  // P0 first (single-bucket)
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  // P1 round-robin across buckets
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 1);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 2);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 0);
+  // P2 last (single-bucket)
+  expectRequestToBelongToBucket(pile.dequeue().value(), 2, 0);
+  EXPECT_EQ(pile.dequeue(), std::nullopt);
+}
+
+TEST_F(RoundRobinRequestPileTest, strictPriorityOrderingSingleBucket) {
+  RoundRobinRequestPile::Options opts({1, 1, 1}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  // Enqueue in reverse priority order
+  pile.enqueue(makeServerRequestForBucket(2, 0));
+  pile.enqueue(makeServerRequestForBucket(1, 0));
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(2, 0));
+  pile.enqueue(makeServerRequestForBucket(1, 0));
+
+  // Dequeue respects strict priority ordering
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 2, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 2, 0);
+  EXPECT_EQ(pile.dequeue(), std::nullopt);
+}
+
+TEST_F(RoundRobinRequestPileTest, requestCountTracking) {
+  // Mixed shape: P0 single-bucket, P1 multi-bucket
+  RoundRobinRequestPile::Options opts({1, 3}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  EXPECT_EQ(pile.requestCount(), 0);
+
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  EXPECT_EQ(pile.requestCount(), 1);
+
+  pile.enqueue(makeServerRequestForBucket(1, 0));
+  pile.enqueue(makeServerRequestForBucket(1, 1));
+  EXPECT_EQ(pile.requestCount(), 3);
+
+  pile.dequeue();
+  EXPECT_EQ(pile.requestCount(), 2);
+
+  pile.dequeue();
+  pile.dequeue();
+  EXPECT_EQ(pile.requestCount(), 0);
+
+  // Dequeue from empty doesn't cause issues
+  pile.dequeue();
+  EXPECT_EQ(pile.requestCount(), 0);
+}
+
+TEST_F(RoundRobinRequestPileTest, getRequestCountsForSingleBucket) {
+  RoundRobinRequestPile::Options opts({1, 1, 1}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(2, 0));
+
+  auto counts = pile.getRequestCounts();
+  EXPECT_EQ(
+      counts, (std::vector<std::vector<uint64_t>>{{2}, {0}, {1}}));
+
+  pile.dequeue();
+  counts = pile.getRequestCounts();
+  EXPECT_EQ(
+      counts, (std::vector<std::vector<uint64_t>>{{1}, {0}, {1}}));
+
+  pile.dequeue();
+  pile.dequeue();
+  counts = pile.getRequestCounts();
+  EXPECT_EQ(
+      counts, (std::vector<std::vector<uint64_t>>{{0}, {0}, {0}}));
+}
+
+TEST_F(RoundRobinRequestPileTest, getDbgInfoWithLimitsAndQueuedRequests) {
+  RoundRobinRequestPile::Options opts({2, 3}, makePileSelectionFunction());
+  opts.numMaxRequests = 42;
+  RoundRobinRequestPile pile(opts);
+
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(1, 1));
+  pile.enqueue(makeServerRequestForBucket(1, 2));
+
+  auto info = pile.getDbgInfo();
+  EXPECT_EQ(info.perBucketRequestLimit().value(), 42);
+  EXPECT_EQ(info.queuedRequestsCount().value(), 3);
+  EXPECT_EQ(info.prioritiesCount().value(), 2);
+}
+
+TEST_F(RoundRobinRequestPileTest, acceptRejectCallbacksMultiBucket) {
+  RoundRobinRequestPile::Options opts({3}, makePileSelectionFunction());
+  opts.numMaxRequests = 1;
+  RoundRobinRequestPile pile(opts);
+
+  std::vector<std::pair<uint32_t, uint32_t>> accepted;
+  std::vector<std::pair<uint32_t, uint32_t>> rejected;
+  pile.setOnRequestAcceptedFunction(
+      [&](uint32_t pri, uint32_t bucket) {
+        accepted.emplace_back(pri, bucket);
+      });
+  pile.setOnRequestRejectedFunction(
+      [&](uint32_t pri, uint32_t bucket) {
+        rejected.emplace_back(pri, bucket);
+      });
+
+  // Accept to bucket 0
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  ASSERT_EQ(accepted.size(), 1);
+  EXPECT_EQ(accepted[0].first, 0u);
+  EXPECT_EQ(accepted[0].second, 0u);
+
+  // Reject bucket 0 (limit reached)
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  ASSERT_EQ(rejected.size(), 1);
+  EXPECT_EQ(rejected[0].first, 0u);
+  EXPECT_EQ(rejected[0].second, 0u);
+  EXPECT_EQ(accepted.size(), 1);
+
+  // Accept to bucket 1 (different bucket has its own limit)
+  pile.enqueue(makeServerRequestForBucket(0, 1));
+  ASSERT_EQ(accepted.size(), 2);
+  EXPECT_EQ(accepted[1].first, 0u);
+  EXPECT_EQ(accepted[1].second, 1u);
+}
+
+TEST_F(RoundRobinRequestPileTest, acceptRejectCallbacksSingleBucket) {
+  RoundRobinRequestPile::Options opts({1}, makePileSelectionFunction());
+  opts.numMaxRequests = 1;
+  RoundRobinRequestPile pile(opts);
+
+  std::vector<std::pair<uint32_t, uint32_t>> accepted;
+  std::vector<std::pair<uint32_t, uint32_t>> rejected;
+  pile.setOnRequestAcceptedFunction(
+      [&](uint32_t pri, uint32_t bucket) {
+        accepted.emplace_back(pri, bucket);
+      });
+  pile.setOnRequestRejectedFunction(
+      [&](uint32_t pri, uint32_t bucket) {
+        rejected.emplace_back(pri, bucket);
+      });
+
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  ASSERT_EQ(accepted.size(), 1);
+  EXPECT_EQ(accepted[0].first, 0u);
+  EXPECT_EQ(accepted[0].second, 0u);
+
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  ASSERT_EQ(rejected.size(), 1);
+  EXPECT_EQ(rejected[0].first, 0u);
+  EXPECT_EQ(rejected[0].second, 0u);
+}
+
+TEST_F(RoundRobinRequestPileTest, preEnqueueFilterRejectTriggersCallback) {
+  RoundRobinRequestPile::Options opts({3}, makePileSelectionFunction());
+  opts.setPreEnqueueFilter(
+      [](const ServerRequest& request)
+          -> std::optional<ServerRequestRejection> {
+        auto [priority, bucket] = *request.requestData().bucket;
+        if (bucket == 1) {
+          return std::make_optional<ServerRequestRejection>(
+              TApplicationException("rejected"));
+        }
+        return std::nullopt;
+      });
+  RoundRobinRequestPile pile(opts);
+
+  std::vector<std::pair<uint32_t, uint32_t>> accepted;
+  std::vector<std::pair<uint32_t, uint32_t>> rejected;
+  pile.setOnRequestAcceptedFunction(
+      [&](uint32_t pri, uint32_t bucket) {
+        accepted.emplace_back(pri, bucket);
+      });
+  pile.setOnRequestRejectedFunction(
+      [&](uint32_t pri, uint32_t bucket) {
+        rejected.emplace_back(pri, bucket);
+      });
+
+  pile.enqueue(makeServerRequestForBucket(0, 0)); // accepted
+  pile.enqueue(makeServerRequestForBucket(0, 1)); // rejected by filter
+
+  ASSERT_EQ(accepted.size(), 1);
+  EXPECT_EQ(accepted[0].first, 0u);
+  EXPECT_EQ(accepted[0].second, 0u);
+
+  ASSERT_EQ(rejected.size(), 1);
+  EXPECT_EQ(rejected[0].first, 0u);
+  EXPECT_EQ(rejected[0].second, 1u);
+}
+
+TEST_F(RoundRobinRequestPileTest, preEnqueueFilterMultiBucket) {
+  RoundRobinRequestPile::Options opts({3, 3}, makePileSelectionFunction());
+  // Reject requests to bucket 2 at any priority
+  opts.setPreEnqueueFilter(
+      [](const ServerRequest& request)
+          -> std::optional<ServerRequestRejection> {
+        auto [priority, bucket] = *request.requestData().bucket;
+        if (bucket == 2) {
+          return std::make_optional<ServerRequestRejection>(
+              TApplicationException("bucket 2 rejected"));
+        }
+        return std::nullopt;
+      });
+  RoundRobinRequestPile pile(opts);
+
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(0, 0)));
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(0, 1)));
+  EXPECT_TRUE(pile.enqueue(makeServerRequestForBucket(0, 2)));
+  EXPECT_FALSE(pile.enqueue(makeServerRequestForBucket(1, 0)));
+  EXPECT_TRUE(pile.enqueue(makeServerRequestForBucket(1, 2)));
+
+  EXPECT_EQ(pile.requestCount(), 3);
+
+  // Verify only non-rejected requests are dequeued
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 1);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 0);
+  EXPECT_EQ(pile.dequeue(), std::nullopt);
+}
+
+TEST_F(RoundRobinRequestPileTest, dequeueObserverMultiBucket) {
+  RoundRobinRequestPile::Options opts({3}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  std::vector<std::pair<uint32_t, uint32_t>> observed;
+  pile.setDequeueObserver([&](const ServerRequest& request) {
+    observed.push_back(extractRequestBucketFromRequestData(request));
+  });
+
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(0, 1));
+  pile.enqueue(makeServerRequestForBucket(0, 2));
+
+  pile.dequeue();
+  pile.dequeue();
+  pile.dequeue();
+
+  ASSERT_EQ(observed.size(), 3);
+  // Round-robin order
+  EXPECT_EQ(observed[0].first, 0u);
+  EXPECT_EQ(observed[0].second, 0u);
+  EXPECT_EQ(observed[1].first, 0u);
+  EXPECT_EQ(observed[1].second, 1u);
+  EXPECT_EQ(observed[2].first, 0u);
+  EXPECT_EQ(observed[2].second, 2u);
+
+  // Observer not called for empty dequeue
+  pile.dequeue();
+  EXPECT_EQ(observed.size(), 3);
+}
+
+TEST_F(RoundRobinRequestPileTest, reEnqueueAfterDrainMultiBucket) {
+  RoundRobinRequestPile::Options opts({3}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  // First round
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(0, 1));
+  pile.dequeue();
+  pile.dequeue();
+  EXPECT_EQ(pile.dequeue(), std::nullopt);
+  EXPECT_EQ(pile.requestCount(), 0);
+
+  // Re-enqueue after complete drain
+  pile.enqueue(makeServerRequestForBucket(0, 2));
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  EXPECT_EQ(pile.requestCount(), 2);
+
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 2);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  EXPECT_EQ(pile.dequeue(), std::nullopt);
+}
+
+TEST_F(RoundRobinRequestPileTest, reEnqueueAfterDrainSingleBucket) {
+  RoundRobinRequestPile::Options opts({1, 1}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+  pile.enqueue(makeServerRequestForBucket(1, 0));
+  pile.dequeue();
+  pile.dequeue();
+  EXPECT_EQ(pile.dequeue(), std::nullopt);
+
+  // Re-enqueue after complete drain
+  pile.enqueue(makeServerRequestForBucket(1, 0));
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+
+  // Priority ordering still holds
+  expectRequestToBelongToBucket(pile.dequeue().value(), 0, 0);
+  expectRequestToBelongToBucket(pile.dequeue().value(), 1, 0);
+  EXPECT_EQ(pile.dequeue(), std::nullopt);
+}
+
+TEST(RoundRobinRequestPileMiscTest, describe) {
+  RoundRobinRequestPile::Options opts(
+      {2, 3},
+      [](auto&) -> std::pair<uint32_t, uint32_t> { return {0, 0}; });
+  RoundRobinRequestPile pile(opts);
+
+  EXPECT_EQ(
+      pile.describe(),
+      "RoundRobinRequestPile priorities:2 Pri:0 Buckets:2 Pri:1 Buckets:3");
+}
+
+TEST(RoundRobinRequestPileMiscTest, optionsDescribe) {
+  RoundRobinRequestPile::Options opts;
+  opts.setName("test_pile");
+  opts.setShape({2, 3});
+  opts.numMaxRequests = 5;
+
+  EXPECT_EQ(
+      opts.describe(),
+      "{Options name=test_pile numBucketsPerPriority={2,3} numMaxRequests=5 numMaxRequestsPerPriority={}}");
+
+  opts.setNumMaxRequestsPerPriority({10, 20});
+  EXPECT_EQ(
+      opts.describe(),
+      "{Options name=test_pile numBucketsPerPriority={2,3} numMaxRequests=5 numMaxRequestsPerPriority={10,20}}");
+}
+
+TEST(RoundRobinRequestPileMiscTest, optionsBuilderMethods) {
+  RoundRobinRequestPile::Options opts;
+  // Default: 1 priority with 1 bucket
+  EXPECT_EQ(opts.numBucketsPerPriority, std::vector<uint32_t>{1});
+
+  opts.setNumPriorities(3);
+  EXPECT_EQ(opts.numBucketsPerPriority, (std::vector<uint32_t>{1, 1, 1}));
+
+  opts.setNumBucketsPerPriority(1, 5);
+  EXPECT_EQ(opts.numBucketsPerPriority, (std::vector<uint32_t>{1, 5, 1}));
+
+  opts.setShape({2, 3, 4});
+  EXPECT_EQ(opts.numBucketsPerPriority, (std::vector<uint32_t>{2, 3, 4}));
+
+  // getNumMaxRequestsForPriority falls back to numMaxRequests
+  opts.numMaxRequests = 10;
+  EXPECT_EQ(opts.getNumMaxRequestsForPriority(0), 10);
+  EXPECT_EQ(opts.getNumMaxRequestsForPriority(2), 10);
+
+  // Per-priority limits override the global limit
+  opts.setNumMaxRequestsPerPriority({0, 5, 20});
+  EXPECT_EQ(opts.getNumMaxRequestsForPriority(0), 0);
+  EXPECT_EQ(opts.getNumMaxRequestsForPriority(1), 5);
+  EXPECT_EQ(opts.getNumMaxRequestsForPriority(2), 20);
+}

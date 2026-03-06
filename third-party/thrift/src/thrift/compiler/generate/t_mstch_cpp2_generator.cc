@@ -1439,46 +1439,16 @@ class cpp_mstch_type : public mstch_type {
     register_methods(
         this,
         {
-            {"type:resolves_to_base?", &cpp_mstch_type::resolves_to_base},
-            {"type:resolves_to_base_or_enum?",
-             &cpp_mstch_type::resolves_to_base_or_enum},
-            {"type:resolves_to_container?",
-             &cpp_mstch_type::resolves_to_container},
-            {"type:resolves_to_container_or_struct?",
-             &cpp_mstch_type::resolves_to_container_or_struct},
-            {"type:resolves_to_container_or_enum?",
-             &cpp_mstch_type::resolves_to_container_or_enum},
             {"type:resolves_to_fixed_size?",
              &cpp_mstch_type::resolves_to_fixed_size},
             {"type:transitively_refers_to_struct?",
              &cpp_mstch_type::transitively_refers_to_struct},
-            {"type:string_or_binary?", &cpp_mstch_type::is_string_or_binary},
             {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
             {"type:type_class", &cpp_mstch_type::type_class},
             {"type:type_tag", &cpp_mstch_type::type_tag},
             {"type:cpp_use_allocator?", &cpp_mstch_type::cpp_use_allocator},
             {"type:use_op_encode?", &cpp_mstch_type::use_op_encode},
         });
-  }
-  std::string get_type_namespace(const t_program* program) override {
-    return cpp2::get_gen_namespace(*program);
-  }
-  mstch::node resolves_to_base() {
-    return resolved_type_->is<t_primitive_type>();
-  }
-  mstch::node resolves_to_base_or_enum() {
-    return resolved_type_->is<t_primitive_type>() ||
-        resolved_type_->is<t_enum>();
-  }
-  mstch::node resolves_to_container() {
-    return resolved_type_->is<t_container>();
-  }
-  mstch::node resolves_to_container_or_struct() {
-    return ::apache::thrift::compiler::resolves_to_container_or_struct(
-        resolved_type_);
-  }
-  mstch::node resolves_to_container_or_enum() {
-    return resolved_type_->is<t_container>() || resolved_type_->is<t_enum>();
   }
   mstch::node resolves_to_fixed_size() {
     return resolved_type_->is_bool() || resolved_type_->is_byte() ||
@@ -1517,9 +1487,6 @@ class cpp_mstch_type : public mstch_type {
       }
     }
     return false;
-  }
-  mstch::node is_string_or_binary() {
-    return resolved_type_->is_string_or_binary();
   }
   mstch::node cpp_use_allocator() {
     return !!t_typedef::get_first_unstructured_annotation_or_null(

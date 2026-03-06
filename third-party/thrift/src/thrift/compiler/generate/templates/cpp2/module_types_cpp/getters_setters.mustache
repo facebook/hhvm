@@ -31,7 +31,7 @@ const {{field:cpp_storage_type}}* {{struct:cpp_underlying_name}}::get_{{field:cp
   return {{field:cpp_storage_name}};
 }
 {{#else}}
-{{#if type:resolves_to_container_or_struct?}}
+{{#if (or type:container? type:structured?)}}
 
 const {{field:cpp_storage_type}}& {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() const& {
   return {{field:cpp_storage_name}};
@@ -40,7 +40,7 @@ const {{field:cpp_storage_type}}& {{struct:cpp_underlying_name}}::get_{{field:cp
 {{field:cpp_storage_type}} {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() && {
   return static_cast<{{field:cpp_storage_type}}&&>({{field:cpp_storage_name}});
 }
-{{/if type:resolves_to_container_or_struct?}}
+{{/if (or type:container? type:structured?)}}
 {{/if type:resolves_to_fixed_size?}}
 {{/if field:optional?}}
 {{#if type:resolves_to_fixed_size?}}

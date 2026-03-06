@@ -21,12 +21,12 @@ intrinsic default values. For a terse struct fields, only nested terse fields
 are cleared to their instrinic default values.
 
 }}{{#field:type}}
-{{#type:resolves_to_base_or_enum?}}
+{{#if (or type:primitive? type:enum?)}}
 {{> module_types_cpp/clear_fields}}
-{{/type:resolves_to_base_or_enum?}}
-{{#type:resolves_to_container?}}
+{{/if (or type:primitive? type:enum?)}}
+{{#type:container?}}
 {{> module_types_cpp/clear_fields}}
-{{/type:resolves_to_container?}}
+{{/type:container?}}
 {{#type:non_empty_struct?}}
 {{^field:cpp_ref?}}
 {{#field:cpp_first_adapter}}

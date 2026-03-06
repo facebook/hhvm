@@ -45,11 +45,11 @@
 {{^field:use_op_encode?}}
       xfer += {{> module_types_custom_protocol_h/pm}}::write(*prot_, {{> module_types_custom_protocol_h/pm_value}});
 {{/field:use_op_encode?}}
-{{#type:resolves_to_container_or_enum?}}
+{{#if (or type:container? type:enum?)}}
     } else {
       xfer += prot_->write{{> module_types_custom_protocol_h/struct_field_type}}Begin({{> module_types_custom_protocol_h/container_struct_type}}, 0);
       xfer += prot_->write{{> module_types_custom_protocol_h/struct_field_type}}End();
-{{/type:resolves_to_container_or_enum?}}
+{{/if (or type:container? type:enum?)}}
 {{#type:structured?}}
     } else {
       xfer += prot_->writeStructBegin("{{type:name}}");

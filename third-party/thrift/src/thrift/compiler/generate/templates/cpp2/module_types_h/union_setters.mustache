@@ -21,7 +21,7 @@
 {{^field:boxed_ref?}}{{^struct:legacy_api?}}
  private:
 {{/struct:legacy_api?}}{{/field:boxed_ref?}}
-  {{#type:resolves_to_base_or_enum?}}
+  {{#if (or type:primitive? type:enum?)}}
 
   {{^type:string_or_binary?}}
   {{> common/field_docblock}}
@@ -97,8 +97,8 @@
     return value_.{{field:cpp_name}};
   }
 {{/field:cpp_ref?}}
-  {{/type:resolves_to_base_or_enum?}}
-  {{#type:resolves_to_container_or_struct?}}
+  {{/if (or type:primitive? type:enum?)}}
+  {{#if (or type:container? type:structured?)}}
   {{^field:cpp_ref?}}
 
   {{^field:cpp_noncopyable?}}
@@ -150,7 +150,7 @@
     return value_.{{field:cpp_name}};
   }
   {{/field:cpp_ref?}}
-  {{/type:resolves_to_container_or_struct?}}
+  {{/if (or type:container? type:structured?)}}
 {{#field:boxed_ref?}}
  public:
 {{/field:boxed_ref?}}

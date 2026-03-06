@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#field:type}}{{#type:resolves_to_base_or_enum?}}{{!
+}}{{#field:type}}{{#if (or type:primitive? type:enum?)}}{{!
   }}{{^field:cpp_ref?}}{{!
     }}{{#field:cpp_first_adapter}}{{!
       }}  ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:id}}>({{field:cpp_storage_name}}, *this);{{!
@@ -45,8 +45,8 @@
       }}  {{> field/member}}.reset();{{!
     }}{{/field:optional?}}{{!
   }}{{/field:cpp_ref?}}
-{{/type:resolves_to_base_or_enum?}}
-{{#type:resolves_to_container?}}
+{{/if (or type:primitive? type:enum?)}}
+{{#type:container?}}
 {{#field:cpp_first_adapter}}
   ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:id}}>({{field:cpp_storage_name}}, *this);
 {{/field:cpp_first_adapter}}
@@ -76,7 +76,7 @@
   {{> field/member}}.clear();
 {{/field:cpp_ref?}}
 {{/field:cpp_first_adapter}}
-{{/type:resolves_to_container?}}
+{{/type:container?}}
 {{#type:non_empty_struct?}}
 {{^field:cpp_ref?}}
 {{#field:cpp_first_adapter}}

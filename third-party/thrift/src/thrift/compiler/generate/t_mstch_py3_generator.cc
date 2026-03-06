@@ -1547,7 +1547,7 @@ void t_mstch_py3_generator::generate_types() {
       {"metadata.pyx", true},
       {"types_auto_migrated.py", true},
       {"types_empty.pyx", true},
-      {"types_fields.pxd", false},
+      {"types_fields.pxd", true},
       {"types_fields.pyx", false},
       {"types_impl_FBTHRIFT_ONLY_DO_NOT_USE.py", true},
       {"types_reflection.py", true},

@@ -94,7 +94,9 @@ class TilePtr;
 
 class Tile {
  public:
-  Tile() : interactionCreationTime_(std::chrono::steady_clock::now()) {}
+  Tile()
+      : interactionCreationTime_(std::chrono::steady_clock::now()),
+        lastActivityTime_(interactionCreationTime_) {}
   virtual ~Tile();
 
 #if FOLLY_HAS_COROUTINES
@@ -110,6 +112,10 @@ class Tile {
     return interactionCreationTime_;
   }
 
+  std::chrono::steady_clock::time_point getLastActivityTime() const {
+    return lastActivityTime_;
+  }
+
  private:
   // Only moves in arg when it returns true
   virtual bool maybeEnqueue(
@@ -122,6 +128,7 @@ class Tile {
 
   void incRef(folly::EventBase& eb) {
     eb.dcheckIsInEventBaseThread();
+    lastActivityTime_ = std::chrono::steady_clock::now();
     ++refCount_;
   }
   void decRef(folly::EventBase& eb, InteractionReleaseEvent event);
@@ -143,6 +150,7 @@ class Tile {
   folly::Function<void()> onDestroy_;
   std::unique_ptr<InteractionOverloadPolicy> overloadPolicy_{nullptr};
   std::chrono::steady_clock::time_point interactionCreationTime_;
+  std::chrono::steady_clock::time_point lastActivityTime_;
   friend class TilePromise;
   friend class TilePtr;
   friend class TileStreamGuard;
@@ -160,6 +168,10 @@ class TileInternalAPI {
   }
 
   size_t getRefCount() const { return tile_.refCount_; }
+
+  std::chrono::steady_clock::time_point getLastActivityTime() const {
+    return tile_.lastActivityTime_;
+  }
 
  private:
   Tile& tile_;

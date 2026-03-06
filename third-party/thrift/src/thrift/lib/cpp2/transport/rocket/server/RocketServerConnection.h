@@ -212,6 +212,8 @@ class RocketServerConnection final : public IRocketServerConnection {
 
   std::vector<InteractionInfo> getInteractionSnapshots() const override;
 
+  void terminateInteraction(int64_t id) override;
+
  private:
   void startDrain(std::optional<DrainCompleteCode> drainCompleteCode);
 

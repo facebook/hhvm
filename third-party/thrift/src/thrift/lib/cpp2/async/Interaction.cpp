@@ -62,13 +62,16 @@ void Tile::decRef(folly::EventBase& eb, InteractionReleaseEvent event) {
     }
   }
 
-  if (event != InteractionReleaseEvent::STREAM_TRANSFER && --refCount_ == 0) {
-    if (executor_) {
-      executor_->add([ptr = std::unique_ptr<Tile>(this)]() {});
-    } else if (tm_) {
-      std::move(tm_).add([ptr = std::unique_ptr<Tile>(this)](auto&&) {});
-    } else {
-      delete this;
+  if (event != InteractionReleaseEvent::STREAM_TRANSFER) {
+    lastActivityTime_ = std::chrono::steady_clock::now();
+    if (--refCount_ == 0) {
+      if (executor_) {
+        executor_->add([ptr = std::unique_ptr<Tile>(this)]() {});
+      } else if (tm_) {
+        std::move(tm_).add([ptr = std::unique_ptr<Tile>(this)](auto&&) {});
+      } else {
+        delete this;
+      }
     }
   }
 }

@@ -32,6 +32,7 @@ namespace apache::thrift {
 struct InteractionInfo {
   int64_t interactionId{0};
   std::chrono::steady_clock::time_point creationTime{};
+  std::chrono::steady_clock::time_point lastActivityTime{};
   size_t refCount{0};
 };
 
@@ -53,6 +54,14 @@ class ManagedConnectionIf : public wangle::ManagedConnection {
   virtual std::vector<InteractionInfo> getInteractionSnapshots() const {
     return {};
   }
+
+  /**
+   * Terminates a specific interaction on this connection by ID.
+   * Safe to call from any thread — the implementation will schedule
+   * onto the connection's event base if needed.
+   * Default implementation is a no-op for non-Rocket connections.
+   */
+  virtual void terminateInteraction(int64_t /*id*/) {}
 
   ~ManagedConnectionIf() override = default;
 };

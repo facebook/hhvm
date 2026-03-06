@@ -1404,10 +1404,24 @@ std::vector<InteractionInfo> RocketServerConnection::getInteractionSnapshots()
       apache::thrift::detail::TileInternalAPI tileApi(tile);
       result.push_back(
           InteractionInfo{
-              id, tile.getInteractionCreationTime(), tileApi.getRefCount()});
+              id,
+              tile.getInteractionCreationTime(),
+              tileApi.getLastActivityTime(),
+              tileApi.getRefCount()});
     });
   }
   return result;
+}
+
+void RocketServerConnection::terminateInteraction(int64_t id) {
+  if (evb_.isInEventBaseThread()) {
+    frameHandler_->terminateInteraction(id);
+  } else {
+    evb_.runInEventBaseThread(
+        [this, dg = folly::DelayedDestruction::DestructorGuard(this), id] {
+          frameHandler_->terminateInteraction(id);
+        });
+  }
 }
 
 } // namespace apache::thrift::rocket

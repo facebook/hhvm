@@ -77,7 +77,9 @@ class ClientCallbackStapler : public BiDiClientCallback,
 
   bool onStreamNext(StreamPayload&& payload) override {
     DeletionGuard guard(this);
-    std::ignore = stream_->onStreamNext(std::move(payload));
+    if (stream_) {
+      std::ignore = stream_->onStreamNext(std::move(payload));
+    }
     return stream_ || sink_;
   }
 
@@ -95,7 +97,9 @@ class ClientCallbackStapler : public BiDiClientCallback,
 
   bool onSinkRequestN(int32_t tokens) override {
     DeletionGuard guard(this);
-    std::ignore = sink_->onSinkRequestN(tokens);
+    if (sink_) {
+      std::ignore = sink_->onSinkRequestN(tokens);
+    }
     return stream_ || sink_;
   }
 

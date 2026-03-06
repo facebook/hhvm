@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <folly/coro/Collect.h>
 #include <folly/coro/GtestHelpers.h>
 #include <folly/coro/Sleep.h>
-#include <thrift/lib/cpp2/async/tests/util/gen-cpp2/TestBiDiService.h>
-#include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
+#include <thrift/lib/cpp2/test/e2e/E2ETestFixture.h>
+#include <thrift/lib/cpp2/test/e2e/gen-cpp2/TestBiDiService.h>
 
 using namespace ::testing;
 
@@ -29,37 +28,7 @@ namespace {
 
 constexpr std::chrono::hours kEffectivelyWaitForever{24};
 
-class BiDiServiceE2ETest : public Test {
-  using MakeChannelFunc = ScopedServerInterfaceThread::MakeChannelFunc;
-
- public:
-  struct TestConfig {
-    std::shared_ptr<AsyncProcessorFactory> handler;
-    MakeChannelFunc channelFunc =
-        [](folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
-      return RocketClientChannel::newChannel(std::move(socket));
-    };
-  };
-
-  void testConfig(TestConfig&& config) {
-    server_ = std::make_unique<ScopedServerInterfaceThread>(
-        std::move(config.handler));
-    channelFunc_ = std::move(config.channelFunc);
-  }
-
-  template <typename ServiceTag>
-  std::unique_ptr<Client<ServiceTag>> makeClient() {
-    return server_->newClient<Client<ServiceTag>>(
-        /* callbackExecutor */ nullptr,
-        [&](folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
-          return channelFunc_(std::move(socket));
-        });
-  }
-
- private:
-  std::unique_ptr<ScopedServerInterfaceThread> server_;
-  MakeChannelFunc channelFunc_;
-};
+class BiDiServiceE2ETest : public test::E2ETestFixture {};
 
 } // namespace
 

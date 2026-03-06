@@ -288,4 +288,24 @@ class TypeSystemBuilder {
   void tryEmplace(Uri, DefinitionEntry&&);
 };
 
+/**
+ * Builds a standalone TypeSystem from a SerializableTypeSystem.
+ *
+ * This is a convenience function that constructs a fully-resolved TypeSystem
+ * from the serializable (Thrift-generated) representation. It is equivalent to:
+ *
+ *     TypeSystemBuilder builder;
+ *     builder.addTypes(std::move(serializable));
+ *     return std::move(builder).build();
+ *
+ * The resulting TypeSystem is self-contained and owns all of its type
+ * definitions.
+ *
+ * Throws:
+ *   - InvalidTypeError if the SerializableTypeSystem contains invalid or
+ *     inconsistent definitions (e.g. duplicate URIs, unresolvable TypeIds,
+ *     non-optional union fields, duplicate field IDs or names, etc.).
+ */
+std::unique_ptr<TypeSystem> fromSerializable(SerializableTypeSystem);
+
 } // namespace apache::thrift::type_system

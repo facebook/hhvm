@@ -1618,4 +1618,155 @@ TEST(TypeSystemTest, MatchKind) {
   }
 }
 
+namespace {
+
+// Helper to construct a SerializableTypeSystem with a single
+// SerializableTypeDefinitionEntry from a struct definition.
+SerializableTypeSystem makeSerializableWithStruct(
+    Uri uri, SerializableStructDefinition structDef) {
+  SerializableTypeDefinitionEntry entry;
+  entry.definition()->set_structDef(std::move(structDef));
+
+  SerializableTypeSystem sts;
+  sts.types()[std::move(uri)] = std::move(entry);
+  return sts;
+}
+
+} // namespace
+
+TEST(FromSerializableTest, Empty) {
+  SerializableTypeSystem sts;
+  auto typeSystem = fromSerializable(std::move(sts));
+  EXPECT_TRUE(typeSystem->getKnownUris()->empty());
+}
+
+TEST(FromSerializableTest, SimpleStruct) {
+  auto sts = makeSerializableWithStruct(
+      "meta.com/test/MyStruct",
+      def::Struct({
+          def::Field(def::Identity(1, "field1"), def::Optional, TypeIds::I32),
+          def::Field(
+              def::Identity(2, "field2"), def::AlwaysPresent, TypeIds::String),
+      }));
+
+  auto typeSystem = fromSerializable(std::move(sts));
+
+  auto defRef =
+      typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/test/MyStruct"));
+  EXPECT_TRUE(defRef.isStruct());
+
+  const auto& fields = defRef.asStruct().fields();
+  EXPECT_EQ(fields.size(), 2);
+  EXPECT_EQ(fields[0].identity().name(), "field1");
+  EXPECT_TRUE(fields[0].type().isI32());
+  EXPECT_EQ(fields[1].identity().name(), "field2");
+  EXPECT_TRUE(fields[1].type().isString());
+}
+
+TEST(FromSerializableTest, MultipleTypesWithReferences) {
+  SerializableTypeDefinitionEntry structEntry;
+  structEntry.definition()->set_structDef(
+      def::Struct({
+          def::Field(
+              def::Identity(1, "inner"),
+              def::Optional,
+              TypeIds::uri("meta.com/test/InnerUnion")),
+      }));
+
+  SerializableTypeDefinitionEntry unionEntry;
+  unionEntry.definition()->set_unionDef(
+      def::Union({
+          def::Field(def::Identity(1, "x"), def::Optional, TypeIds::I64),
+      }));
+
+  SerializableTypeSystem sts;
+  sts.types()["meta.com/test/OuterStruct"] = std::move(structEntry);
+  sts.types()["meta.com/test/InnerUnion"] = std::move(unionEntry);
+
+  auto typeSystem = fromSerializable(std::move(sts));
+
+  auto outerRef =
+      typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/test/OuterStruct"));
+  EXPECT_TRUE(outerRef.isStruct());
+  EXPECT_EQ(outerRef.asStruct().fields().size(), 1);
+
+  const auto& innerFieldType = outerRef.asStruct().fields()[0].type();
+  EXPECT_TRUE(innerFieldType.isUnion());
+
+  auto innerRef =
+      typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/test/InnerUnion"));
+  EXPECT_TRUE(innerRef.isUnion());
+  EXPECT_EQ(innerRef.asUnion().fields().size(), 1);
+  EXPECT_TRUE(innerRef.asUnion().fields()[0].type().isI64());
+}
+
+TEST(FromSerializableTest, EnumType) {
+  SerializableTypeDefinitionEntry entry;
+  entry.definition()->set_enumDef(
+      def::Enum({{"FOO", 0}, {"BAR", 1}, {"BAZ", 2}}));
+
+  SerializableTypeSystem sts;
+  sts.types()["meta.com/test/MyEnum"] = std::move(entry);
+
+  auto typeSystem = fromSerializable(std::move(sts));
+
+  auto defRef =
+      typeSystem->getUserDefinedTypeOrThrow(Uri("meta.com/test/MyEnum"));
+  EXPECT_TRUE(defRef.isEnum());
+  EXPECT_EQ(defRef.asEnum().values().size(), 3);
+  EXPECT_EQ(defRef.asEnum().values()[0].name, "FOO");
+  EXPECT_EQ(defRef.asEnum().values()[1].i32, 1);
+}
+
+TEST(FromSerializableTest, EquivalentToBuilderPath) {
+  // Build via TypeSystemBuilder directly
+  TypeSystemBuilder builder;
+  builder.addType(
+      "meta.com/test/S",
+      def::Struct({
+          def::Field(def::Identity(1, "f"), def::Optional, TypeIds::Bool),
+      }));
+  auto fromBuilder = std::move(builder).build();
+
+  // Build via fromSerializable
+  auto sts = makeSerializableWithStruct(
+      "meta.com/test/S",
+      def::Struct({
+          def::Field(def::Identity(1, "f"), def::Optional, TypeIds::Bool),
+      }));
+  auto fromHelper = fromSerializable(std::move(sts));
+
+  // Both should produce equivalent TypeSystems
+  auto refBuilder =
+      fromBuilder->getUserDefinedTypeOrThrow(Uri("meta.com/test/S"));
+  auto refHelper =
+      fromHelper->getUserDefinedTypeOrThrow(Uri("meta.com/test/S"));
+
+  EXPECT_EQ(refBuilder.asStruct().fields().size(), 1);
+  EXPECT_EQ(refHelper.asStruct().fields().size(), 1);
+  EXPECT_EQ(
+      refBuilder.asStruct().fields()[0].identity().name(),
+      refHelper.asStruct().fields()[0].identity().name());
+  EXPECT_EQ(
+      refBuilder.asStruct().fields()[0].type().kind(),
+      refHelper.asStruct().fields()[0].type().kind());
+}
+
+TEST(FromSerializableTest, ThrowsOnDuplicateFieldIds) {
+  // Constructing a SerializableTypeSystem with a map means URIs are inherently
+  // unique in the map itself, but we can verify the builder still validates
+  // definitions correctly (e.g. duplicate field IDs within a struct).
+  SerializableTypeSystem sts;
+
+  SerializableTypeDefinitionEntry entry;
+  entry.definition()->set_structDef(
+      def::Struct({
+          def::Field(def::Identity(1, "a"), def::Optional, TypeIds::I32),
+          def::Field(def::Identity(1, "b"), def::Optional, TypeIds::I64),
+      }));
+  sts.types()["meta.com/test/BadStruct"] = std::move(entry);
+
+  EXPECT_THROW(fromSerializable(std::move(sts)), InvalidTypeError);
+}
+
 } // namespace apache::thrift::type_system

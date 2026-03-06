@@ -743,6 +743,13 @@ void TypeSystemBuilder::addTypes(SerializableTypeSystem typeSystemDef) {
   }
 }
 
+std::unique_ptr<TypeSystem> fromSerializable(
+    SerializableTypeSystem typeSystemDef) {
+  TypeSystemBuilder builder;
+  builder.addTypes(std::move(typeSystemDef));
+  return std::move(builder).build();
+}
+
 void TypeSystemBuilder::tryEmplace(Uri uri, DefinitionEntry&& def) {
   auto [_, inserted] = definitions_.try_emplace(std::move(uri), std::move(def));
   if (!inserted) {

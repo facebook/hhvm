@@ -32,6 +32,10 @@ class ValidatingTypeMap {
 #if FOLLY_F14_VECTOR_INTRINSICS_AVAILABLE
   using map_type = folly::F14VectorMap<type::Type, Mask>;
   void reserve(std::size_t n) { map_.reserve(n); }
+  template <typename V>
+  void visitAllocationClasses(V&& visitor) const {
+    return map_.visitAllocationClasses(std::forward<V>(visitor));
+  }
 #else
   // f14 map is not available in some platforms. Default to std::map which is
   // able to handle incomplete types

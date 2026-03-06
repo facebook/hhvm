@@ -250,7 +250,9 @@ void writeVarint(folly::IOBufQueue& buf,
     return;
   }
   folly::io::QueueAppender appender(&buf, kDefaultBufferGrowth);
-  auto appenderOp = [&](auto val) mutable { appender.writeBE(val); };
+  auto appenderOp = [&](auto val) mutable {
+    appender.writeBE(folly::tag<decltype(val)>, val);
+  };
   auto res = quic::encodeQuicInteger(value, appenderOp);
   if (res.hasError()) {
     error = true;

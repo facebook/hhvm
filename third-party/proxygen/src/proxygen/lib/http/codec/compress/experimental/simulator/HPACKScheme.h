@@ -48,7 +48,7 @@ class HPACKScheme : public CompressionScheme {
     auto block = client_.encode(allHeaders);
     block->prepend(sizeof(uint16_t));
     folly::io::RWPrivateCursor c(block.get());
-    c.writeBE<uint16_t>(index++);
+    c.writeBE<uint16_t>(static_cast<uint16_t>(index++));
     stats.uncompressed += client_.getEncodedSize().uncompressed;
     stats.compressed += client_.getEncodedSize().compressed;
     // OOO is allowed with 0 table size

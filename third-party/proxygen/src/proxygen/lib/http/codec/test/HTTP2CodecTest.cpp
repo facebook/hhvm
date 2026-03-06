@@ -1267,7 +1267,7 @@ TEST_F(HTTP2CodecTest, ZeroWindow) {
   upstreamCodec_.generateWindowUpdate(output_, streamID, 1);
   output_.trimEnd(http2::kFrameWindowUpdateSize);
   QueueAppender appender(&output_, http2::kFrameWindowUpdateSize);
-  appender.writeBE<uint32_t>(0);
+  appender.writeBE<uint32_t>(static_cast<uint32_t>(0));
 
   parse();
   // This test doesn't ensure that RST_STREAM is generated
@@ -1677,7 +1677,7 @@ TEST_F(HTTP2CodecTest, BadRFC9218Priority) {
   EXPECT_TRUE(parse([&](IOBuf* ingress) {
     folly::io::RWPrivateCursor c(ingress);
     c.skip(http2::kFrameHeaderSize + sizeof(uint32_t));
-    c.writeBE<uint32_t>(1);
+    c.writeBE<uint32_t>(static_cast<uint32_t>(1));
   }));
 
   // ill-formatted priority, so returns default priority

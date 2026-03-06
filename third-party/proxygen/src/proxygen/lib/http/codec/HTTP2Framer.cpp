@@ -822,9 +822,9 @@ size_t writeAltSvc(IOBufQueue& queue,
   QueueAppender appender(&queue, frameLen);
   appender.writeBE<uint32_t>(maxAge);
   appender.writeBE<uint16_t>(port);
-  appender.writeBE<uint8_t>(protoLen);
+  appender.writeBE<uint8_t>(static_cast<uint8_t>(protoLen));
   appender.push(reinterpret_cast<const uint8_t*>(protocol.data()), protoLen);
-  appender.writeBE<uint8_t>(hostLen);
+  appender.writeBE<uint8_t>(static_cast<uint8_t>(hostLen));
   appender.push(reinterpret_cast<const uint8_t*>(host.data()), hostLen);
   appender.push(reinterpret_cast<const uint8_t*>(origin.data()), originLen);
   return kFrameHeaderSize + frameLen;

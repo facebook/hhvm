@@ -17,7 +17,9 @@ namespace {
 std::unique_ptr<folly::IOBuf> makeBatonMessage(uint64_t padLen, uint8_t baton) {
   auto buf = folly::IOBuf::create(padLen + 9);
   folly::io::Appender cursor(buf.get(), 1);
-  (void)quic::encodeQuicInteger(padLen, [&](auto val) { cursor.writeBE(val); });
+  (void)quic::encodeQuicInteger(padLen, [&](auto val) {
+    cursor.writeBE(folly::tag<decltype(val)>, val);
+  });
   memset(buf->writableTail(), 'a', padLen);
   buf->append(padLen);
   buf->writableTail()[0] = baton;

@@ -260,7 +260,7 @@ TEST_F(HTTP2FramerTest, GoawayDoubleRead) {
       queue_, kFrameGoawaySize, static_cast<uint8_t>(FrameType::GOAWAY), 0, 0);
 
   QueueAppender appender(&queue_, kFrameGoawaySize);
-  appender.writeBE<uint32_t>(0);
+  appender.writeBE<uint32_t>(static_cast<uint32_t>(0));
   // Here's the invalid value:
   appender.writeBE<uint32_t>(static_cast<uint32_t>(0xffffffff));
 
@@ -413,7 +413,7 @@ TEST_F(HTTP2FramerTest, ShortCertificateRequest) {
   writeFrameHeaderManual(
       queue_, 1, static_cast<uint8_t>(FrameType::CERTIFICATE_REQUEST), 0, 0);
   QueueAppender appender(&queue_, 1);
-  appender.writeBE<uint8_t>(1);
+  appender.writeBE<uint8_t>(static_cast<uint8_t>(1));
 
   Cursor cursor(queue_.front());
   FrameHeader header;
@@ -430,7 +430,7 @@ TEST_F(HTTP2FramerTest, CertificateRequestOnNonzeroStream) {
   writeFrameHeaderManual(
       queue_, 2, static_cast<uint8_t>(FrameType::CERTIFICATE_REQUEST), 0, 1);
   QueueAppender appender(&queue_, 1);
-  appender.writeBE<uint16_t>(1);
+  appender.writeBE<uint16_t>(static_cast<uint16_t>(1));
 
   Cursor cursor(queue_.front());
   FrameHeader header;
@@ -509,7 +509,7 @@ TEST_F(HTTP2FramerTest, ShortCertificate) {
   writeFrameHeaderManual(
       queue_, 1, static_cast<uint8_t>(FrameType::CERTIFICATE), 0, 0);
   QueueAppender appender(&queue_, 1);
-  appender.writeBE<uint8_t>(1);
+  appender.writeBE<uint8_t>(static_cast<uint8_t>(1));
 
   Cursor cursor(queue_.front());
   FrameHeader header;
@@ -525,7 +525,7 @@ TEST_F(HTTP2FramerTest, CertificateOnNonzeroStream) {
   writeFrameHeaderManual(
       queue_, 2, static_cast<uint8_t>(FrameType::CERTIFICATE), 0, 1);
   QueueAppender appender(&queue_, 1);
-  appender.writeBE<uint16_t>(1);
+  appender.writeBE<uint16_t>(static_cast<uint16_t>(1));
 
   Cursor cursor(queue_.front());
   FrameHeader header;

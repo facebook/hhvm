@@ -214,7 +214,7 @@ TEST_F(HttpBinaryUpstreamCodecTest, testParseResponseControlDataSuccess) {
   folly::IOBufQueue controlDataIOBuf;
   folly::io::QueueAppender appender(&controlDataIOBuf, 0);
   auto parsedBytes = quic::encodeQuicInteger(200, [&appender](auto val) {
-                       appender.writeBE(val);
+                       appender.writeBE(folly::tag<decltype(val)>, val);
                      }).value();
   folly::io::Cursor cursor(controlDataIOBuf.front());
 
@@ -231,7 +231,7 @@ TEST_F(HttpBinaryUpstreamCodecTest, testParseResponseControlDataFailure) {
   folly::IOBufQueue controlInvalidDataIOBuf;
   folly::io::QueueAppender appender(&controlInvalidDataIOBuf, 0);
   auto parsedBytes = quic::encodeQuicInteger(600, [&appender](auto val) {
-                       appender.writeBE(val);
+                       appender.writeBE(folly::tag<decltype(val)>, val);
                      }).value();
   folly::io::Cursor cursor(controlInvalidDataIOBuf.front());
 
@@ -245,7 +245,7 @@ TEST_F(HttpBinaryUpstreamCodecTest, testParseResponseControlDataFailure) {
   appender = folly::io::QueueAppender(
       &controlInvalidDataInformationalResponseIOBuf, 0);
   parsedBytes = quic::encodeQuicInteger(101, [&appender](auto val) {
-                  appender.writeBE(val);
+                  appender.writeBE(folly::tag<decltype(val)>, val);
                 }).value();
   cursor =
       folly::io::Cursor(controlInvalidDataInformationalResponseIOBuf.front());

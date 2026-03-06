@@ -98,12 +98,12 @@ class QPACKScheme : public CompressionScheme {
       // Don't count the framing against the compression ratio, for now
       // stats.compressed += 3 * sizeof(uint16_t);
     } else {
-      cursor.writeBE<uint16_t>(0);
+      cursor.writeBE<uint16_t>(static_cast<uint16_t>(0));
     }
     if (result.stream) {
       len = result.stream->computeChainDataLength();
     }
-    cursor.writeBE<uint16_t>(index);
+    cursor.writeBE<uint16_t>(static_cast<uint16_t>(index));
     cursor.writeBE<uint16_t>(len);
     cursor.insert(std::move(result.stream));
     stats.uncompressed += client_.getEncodedSize().uncompressed;

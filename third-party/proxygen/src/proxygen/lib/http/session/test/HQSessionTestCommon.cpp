@@ -36,21 +36,21 @@ size_t encodeQuicIntegerWithAtLeast(uint64_t value,
   CHECK(numBytes == 1 || numBytes == 2 || numBytes == 4 || numBytes == 8);
   if (numBytes == 1) {
     auto modified = static_cast<uint8_t>(value);
-    appender.writeBE(modified);
+    appender.writeBE<uint8_t>(modified);
     return sizeof(modified);
   } else if (numBytes == 2) {
     auto reduced = static_cast<uint16_t>(value);
     uint16_t modified = reduced | 0x4000;
-    appender.writeBE(modified);
+    appender.writeBE<uint16_t>(modified);
     return sizeof(modified);
   } else if (numBytes == 4) {
     auto reduced = static_cast<uint32_t>(value);
     uint32_t modified = reduced | 0x80000000;
-    appender.writeBE(modified);
+    appender.writeBE<uint32_t>(modified);
     return sizeof(modified);
   } else if (numBytes == 8) {
     uint64_t modified = value | 0xC000000000000000;
-    appender.writeBE(modified);
+    appender.writeBE<uint64_t>(modified);
     return sizeof(modified);
   }
   CHECK(false);

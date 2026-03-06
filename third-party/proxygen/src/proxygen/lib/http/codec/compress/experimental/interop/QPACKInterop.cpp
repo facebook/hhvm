@@ -37,7 +37,8 @@ void writeFrame(folly::io::QueueAppender& appender,
                 uint64_t streamId,
                 std::unique_ptr<folly::IOBuf> buf) {
   appender.writeBE<uint64_t>(streamId);
-  appender.writeBE<uint32_t>(buf->computeChainDataLength());
+  appender.writeBE<uint32_t>(
+      static_cast<uint32_t>(buf->computeChainDataLength()));
   appender.insert(std::move(buf));
 }
 

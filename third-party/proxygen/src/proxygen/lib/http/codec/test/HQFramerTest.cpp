@@ -262,7 +262,8 @@ TEST_P(HQFramerTestIdOnlyFrames, TestIdOnlyFrame) {
     RWPrivateCursor wcursor(buf.get());
     // 2 bytes frame header (payload length is just 1)
     wcursor.skip(2);
-    wcursor.writeBE<uint8_t>(0x42); // this varint requires two bytes
+    wcursor.writeBE<uint8_t>( // this varint requires two bytes
+        static_cast<uint8_t>(0x42));
     queue_.append(std::move(buf));
 
     FrameHeader header;

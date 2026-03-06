@@ -2847,7 +2847,7 @@ TEST_F(HTTP2DownstreamSessionTest, ZeroDeltaWindowUpdate) {
   clientCodec_->generateWindowUpdate(requests_, streamID, 1);
   requests_.trimEnd(http2::kFrameWindowUpdateSize);
   folly::io::QueueAppender appender(&requests_, http2::kFrameWindowUpdateSize);
-  appender.writeBE<uint32_t>(0);
+  appender.writeBE<uint32_t>(static_cast<uint32_t>(0));
 
   auto handler = addSimpleStrictHandler();
 

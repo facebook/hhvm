@@ -1528,7 +1528,7 @@ void t_mstch_py3_generator::generate_types() {
 
   // {template_name, use_whisker}
   std::vector<std::pair<std::string, bool>> converterFiles{
-      {"converter.pxd", false},
+      {"converter.pxd", true},
       {"converter.pyx", false},
   };
 

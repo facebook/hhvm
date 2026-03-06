@@ -21,6 +21,8 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/async/ResponseChannel.h>
+#include <thrift/lib/cpp2/server/RequestExpirationDelegate.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/test/RequestPileTestUtils.h>
@@ -30,9 +32,92 @@ using namespace apache::thrift::test;
 using namespace apache::thrift::transport;
 using namespace apache::thrift::concurrency;
 
+namespace {
+
+class MockResponseChannelRequest : public ResponseChannelRequest {
+ public:
+  explicit MockResponseChannelRequest(bool active) : active_(active) {}
+  bool isActive() const override { return active_; }
+  bool isOneway() const override { return false; }
+  bool includeEnvelope() const override { return false; }
+  void sendReply(
+      ResponsePayload&&,
+      MessageChannel::SendCallback*,
+      folly::Optional<uint32_t>) override {}
+  void sendErrorWrapped(folly::exception_wrapper, std::string) override {}
+  bool tryStartProcessing() override { return true; }
+
+ private:
+  bool active_;
+};
+
+class MockRequestExpirationDelegate : public RequestExpirationDelegate {
+ public:
+  void processExpiredRequest(ServerRequest&&) override { ++expiredCount; }
+  int expiredCount{0};
+};
+
+} // namespace
+
 class RoundRobinRequestPileTest : public testing::Test,
                                   public RequestPileTestState,
-                                  public RequestPileTestUtils {};
+                                  public RequestPileTestUtils {
+ protected:
+  // Create a ServerRequest with a MockResponseChannelRequest that reports
+  // the given active state. For use in testing RequestExpirationDelegate.
+  ServerRequest makeServerRequestWithActiveState(
+      Priority priority, Bucket bucket, bool active) {
+    auto* header = new THeader;
+    extraHeaders_.emplace_back(header);
+
+    auto* ctx = new Cpp2RequestContext(nullptr, header);
+    extraContexts_.emplace_back(ctx);
+
+    header->setReadHeaders(
+        {{"PRIORITY", folly::to<std::string>(priority)},
+         {"BUCKET", folly::to<std::string>(bucket)}});
+
+    ResponseChannelRequest::UniquePtr reqPtr(
+        new MockResponseChannelRequest(active));
+
+    return ServerRequest(
+        std::move(reqPtr),
+        SerializedCompressedRequest(std::unique_ptr<folly::IOBuf>{}),
+        ctx,
+        static_cast<protocol::PROTOCOL_TYPES>(0),
+        nullptr,
+        nullptr,
+        nullptr);
+  }
+
+  // Create a ServerRequest with a specific call priority set on THeader,
+  // and optionally with a MethodMetadata pointer.
+  ServerRequest makeServerRequestWithCallPriority(
+      std::optional<concurrency::PRIORITY> callPriority = std::nullopt,
+      const AsyncProcessor::MethodMetadata* metadata = nullptr) {
+    auto* header = new THeader;
+    extraHeaders_.emplace_back(header);
+
+    if (callPriority.has_value()) {
+      header->setCallPriority(*callPriority);
+    }
+
+    auto* ctx = new Cpp2RequestContext(nullptr, header);
+    extraContexts_.emplace_back(ctx);
+
+    return ServerRequest(
+        nullptr,
+        SerializedCompressedRequest(std::unique_ptr<folly::IOBuf>{}),
+        ctx,
+        static_cast<protocol::PROTOCOL_TYPES>(0),
+        nullptr,
+        nullptr,
+        metadata);
+  }
+
+  std::vector<std::unique_ptr<THeader>> extraHeaders_;
+  std::vector<std::unique_ptr<Cpp2RequestContext>> extraContexts_;
+};
 
 TEST_F(RoundRobinRequestPileTest, testRoundRobinDequeueForManyBuckets) {
   RoundRobinRequestPile::Options opts(
@@ -789,4 +874,173 @@ TEST(RoundRobinRequestPileMiscTest, optionsBuilderMethods) {
   EXPECT_EQ(opts.getNumMaxRequestsForPriority(0), 0);
   EXPECT_EQ(opts.getNumMaxRequestsForPriority(1), 5);
   EXPECT_EQ(opts.getNumMaxRequestsForPriority(2), 20);
+}
+
+// --- Tests for RequestExpirationDelegate / Consumer paths ---
+
+TEST_F(RoundRobinRequestPileTest, expiredRequestDiscardedWithDelegate) {
+  // Multi-bucket pile with delegate set: expired requests should be discarded
+  // and processExpiredRequest should be called on the delegate.
+  RoundRobinRequestPile::Options opts({3}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  MockRequestExpirationDelegate delegate;
+  pile.setRequestExpirationDelegate(&delegate);
+
+  // Enqueue an expired request (isActive=false)
+  pile.enqueue(makeServerRequestWithActiveState(0, 0, /*active=*/false));
+  EXPECT_EQ(pile.requestCount(), 1);
+
+  // Dequeue should return nullopt because the request is expired
+  auto result = pile.dequeue();
+  EXPECT_EQ(result, std::nullopt);
+  EXPECT_EQ(delegate.expiredCount, 1);
+}
+
+TEST_F(RoundRobinRequestPileTest, activeRequestReturnedWithDelegate) {
+  // Multi-bucket pile with delegate set: active requests should be
+  // returned normally.
+  RoundRobinRequestPile::Options opts({3}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  MockRequestExpirationDelegate delegate;
+  pile.setRequestExpirationDelegate(&delegate);
+
+  // Enqueue an active request (isActive=true)
+  pile.enqueue(makeServerRequestWithActiveState(0, 0, /*active=*/true));
+
+  auto result = pile.dequeue();
+  ASSERT_TRUE(result.has_value());
+  expectRequestToBelongToBucket(*result, 0, 0);
+  EXPECT_EQ(delegate.expiredCount, 0);
+}
+
+TEST_F(RoundRobinRequestPileTest, dequeueObserverCalledOnExpiredRequest) {
+  // When a request is expired and delegate is set, the dequeue observer
+  // should be called once (inside Consumer, NOT dequeueImpl) for the
+  // expired request.
+  RoundRobinRequestPile::Options opts({3}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  MockRequestExpirationDelegate delegate;
+  pile.setRequestExpirationDelegate(&delegate);
+
+  int observerCount = 0;
+  pile.setDequeueObserver(
+      [&](const ServerRequest&) { ++observerCount; });
+
+  pile.enqueue(makeServerRequestWithActiveState(0, 0, /*active=*/false));
+  auto result = pile.dequeue();
+  EXPECT_EQ(result, std::nullopt);
+  // Observer is called inside Consumer for the expired request
+  EXPECT_EQ(observerCount, 1);
+  EXPECT_EQ(delegate.expiredCount, 1);
+}
+
+TEST_F(RoundRobinRequestPileTest, nullRequestWithDelegateConsumed) {
+  // When request() is nullptr (no ResponseChannelRequest) but delegate is set,
+  // the Consumer should still consume the request (the isActive check
+  // short-circuits because request.request() == nullptr).
+  RoundRobinRequestPile::Options opts({3}, makePileSelectionFunction());
+  RoundRobinRequestPile pile(opts);
+
+  MockRequestExpirationDelegate delegate;
+  pile.setRequestExpirationDelegate(&delegate);
+
+  // makeServerRequestForBucket creates requests with null ResponseChannelRequest
+  pile.enqueue(makeServerRequestForBucket(0, 0));
+
+  auto result = pile.dequeue();
+  ASSERT_TRUE(result.has_value());
+  expectRequestToBelongToBucket(*result, 0, 0);
+  // Delegate should NOT be called since request() is null
+  EXPECT_EQ(delegate.expiredCount, 0);
+}
+
+// --- Tests for getDefaultPileSelectionFunc ---
+
+TEST_F(RoundRobinRequestPileTest, getDefaultPileSelectionFunc) {
+  // Shape: 5 priorities (matching HIGH_IMPORTANT..BEST_EFFORT)
+  RoundRobinRequestPile::Options opts;
+  opts.setShape({1, 1, 1, 1, 1});
+
+  // Get the default selection function with NORMAL as default priority
+  auto func = opts.getDefaultPileSelectionFunc(
+      static_cast<unsigned>(concurrency::NORMAL));
+
+  // Case 1: callPriority is in range (HIGH = 1 <= priorityLimit = 4)
+  // Should use the callPriority directly.
+  {
+    auto req = makeServerRequestWithCallPriority(concurrency::HIGH);
+    auto [pri, bucket] = func(req);
+    EXPECT_EQ(pri, static_cast<unsigned>(concurrency::HIGH));
+    EXPECT_EQ(bucket, 0u);
+  }
+
+  // Case 2: callPriority is N_PRIORITIES (not set / out of range)
+  // and methodMetadata is null -> should use defaultPriority (NORMAL=3)
+  {
+    auto req = makeServerRequestWithCallPriority(std::nullopt, nullptr);
+    auto [pri, bucket] = func(req);
+    EXPECT_EQ(pri, static_cast<unsigned>(concurrency::NORMAL));
+    EXPECT_EQ(bucket, 0u);
+  }
+
+  // Case 3: callPriority is N_PRIORITIES (out of range)
+  // and methodMetadata has a priority set -> should use metadata's priority.
+  {
+    AsyncProcessor::MethodMetadata metadata(
+        AsyncProcessor::MethodMetadata::ExecutorType::ANY,
+        AsyncProcessor::MethodMetadata::InteractionType::NONE,
+        RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        concurrency::BEST_EFFORT,
+        std::nullopt,
+        false);
+    auto req = makeServerRequestWithCallPriority(std::nullopt, &metadata);
+    auto [pri, bucket] = func(req);
+    EXPECT_EQ(pri, static_cast<unsigned>(concurrency::BEST_EFFORT));
+    EXPECT_EQ(bucket, 0u);
+  }
+
+  // Case 4: callPriority is N_PRIORITIES (out of range)
+  // and methodMetadata exists but has no priority set (nullopt)
+  // -> should use defaultPriority.
+  {
+    AsyncProcessor::MethodMetadata metadata;
+    auto req = makeServerRequestWithCallPriority(std::nullopt, &metadata);
+    auto [pri, bucket] = func(req);
+    EXPECT_EQ(pri, static_cast<unsigned>(concurrency::NORMAL));
+    EXPECT_EQ(bucket, 0u);
+  }
+
+  // Case 5: Using a different defaultPriority
+  {
+    auto func2 = opts.getDefaultPileSelectionFunc(
+        static_cast<unsigned>(concurrency::HIGH_IMPORTANT));
+    auto req = makeServerRequestWithCallPriority(std::nullopt, nullptr);
+    auto [pri, bucket] = func2(req);
+    EXPECT_EQ(pri, static_cast<unsigned>(concurrency::HIGH_IMPORTANT));
+    EXPECT_EQ(bucket, 0u);
+  }
+}
+
+// --- Test for addInternalPriorities per-priority limits doubling ---
+
+TEST(RoundRobinRequestPileMiscTest, addInternalPrioritiesDoublesPerPriorityLimits) {
+  RoundRobinRequestPile::Options opts;
+  opts.setShape({2, 3});
+  opts.setNumMaxRequestsPerPriority({10, 20});
+
+  auto newOpts = RoundRobinRequestPile::addInternalPriorities(opts);
+
+  // Shape should be doubled: {2, 2, 3, 3}
+  EXPECT_EQ(
+      newOpts.numBucketsPerPriority,
+      (std::vector<uint32_t>{2, 2, 3, 3}));
+
+  // Per-priority limits should be doubled: {10, 10, 20, 20}
+  ASSERT_EQ(newOpts.numMaxRequestsPerPriority.size(), 4);
+  EXPECT_EQ(
+      newOpts.numMaxRequestsPerPriority,
+      (std::vector<uint32_t>{10, 10, 20, 20}));
 }

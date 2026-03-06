@@ -738,6 +738,22 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_interface>::ptr make_prototype_for_interface(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_interface(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_interface>::extends(std::move(base));
+    def.property("has_service_schema", [this](const t_interface& self) {
+      return ::apache::thrift::compiler::has_schema(
+          source_mgr_, *self.program());
+    });
+    def.property("reduced_client?", &generate_reduced_client);
+    def.property("metadata_name", [](const t_interface& self) {
+      return fmt::format("{}_{}", self.program()->name(), self.name());
+    });
+    return std::move(def).make();
+  }
+
   prototype<t_service>::ptr make_prototype_for_service(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_service(proto);
@@ -1261,16 +1277,12 @@ class cpp_mstch_service : public mstch_service {
             {"service:include_prefix", &cpp_mstch_service::include_prefix},
             {"service:thrift_includes", &cpp_mstch_service::thrift_includes},
             {"service:cpp_includes", &cpp_mstch_service::cpp_includes},
-            {"service:metadata_name", &cpp_mstch_service::metadata_name},
             {"service:parent_service_cpp_name",
              &cpp_mstch_service::parent_service_cpp_name},
             {"service:parent_service_qualified_name",
              &cpp_mstch_service::parent_service_qualified_name},
             {"service:thrift_uri_or_service_name",
              &cpp_mstch_service::thrift_uri_or_service_name},
-            {"service:has_service_schema",
-             &cpp_mstch_service::has_service_schema},
-            {"service:reduced_client?", &cpp_mstch_service::reduced_client},
         });
 
     const auto all_functions = mstch_service::get_functions();
@@ -1296,21 +1308,14 @@ class cpp_mstch_service : public mstch_service {
     }
     return a;
   }
-  mstch::node metadata_name() {
-    return service_->program()->name() + "_" + service_->name();
-  }
   mstch::node parent_service_cpp_name() {
     return cpp2::get_name(parent_service());
   }
   mstch::node parent_service_qualified_name() {
     return cpp2::get_service_qualified_name(*parent_service());
   }
-  mstch::node reduced_client() { return generate_reduced_client(*service_); }
   mstch::node thrift_uri_or_service_name() {
     return service_->uri().empty() ? parent_service_name() : service_->uri();
-  }
-  mstch::node has_service_schema() {
-    return has_schema(sm_, *service_->program());
   }
 
  private:

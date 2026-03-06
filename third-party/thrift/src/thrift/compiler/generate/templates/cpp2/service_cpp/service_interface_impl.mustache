@@ -27,7 +27,7 @@
 //
 // Method '{{function:name}}'
 //
-{{^function:eb}}
+{{#if (not function:event_based?)}}
 
 {{> service_common/sync_function_return_type_server}} {{> service_common/service_class_name}}::{{function:cpp_name}}({{> service_common/sync_function_return_param_server}}{{> service_common/function_param_list_server_commented_out}}) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("{{function:name}}");
@@ -229,8 +229,7 @@ determineInvocationType:
     callback->exception(std::current_exception());
   }
 }
-{{/function:eb}}
-{{#function:eb}}{{!Event base codegen}}
+{{#else}}
 {{#function:oneway?}}
 
 void {{> service_common/service_class_name}}::async_eb_{{function:cpp_name}}(
@@ -246,7 +245,7 @@ void {{> service_common/service_class_name}}::async_eb_{{function:cpp_name}}(
       apache::thrift::detail::si::create_app_exn_unimplemented("{{function:name}}"));
 }
 {{/function:oneway?}}
-{{/function:eb}}
+{{/if (not function:event_based?)}}
 //
 // End of Method '{{function:name}}'
 //

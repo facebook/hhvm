@@ -49,7 +49,7 @@ apache::thrift::ServiceRequestInfoMap {{service:cpp_name}}ServiceInfoHolder::sta
   apache::thrift::ServiceRequestInfoMap requestInfoMap = {
     {{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
   {"{{function:name}}",
-    { {{#function:eb}}true{{/function:eb}}{{^function:eb}}false{{/function:eb}},
+    { {{#if function:event_based?}}true{{#else}}false{{/if}},
      {{> types/function_kind}},
      "{{service:parent_service_name}}.{{> common/function_name}}",
      std::nullopt,
@@ -59,7 +59,7 @@ apache::thrift::ServiceRequestInfoMap {{service:cpp_name}}ServiceInfoHolder::sta
 {{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}
 {{#service:interactions}}{{#service:functions}}{{#function:return_type}}
   {"{{service:name}}.{{function:name}}",
-    { {{#function:eb}}true{{/function:eb}}{{^function:eb}}false{{/function:eb}},
+    { {{#if function:event_based?}}true{{#else}}false{{/if}},
      {{> types/function_kind}},
      "{{service:parent_service_name}}.{{> common/function_name}}",
      "{{service:name}}",

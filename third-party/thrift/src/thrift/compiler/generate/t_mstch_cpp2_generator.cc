@@ -735,6 +735,57 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       return cpp2::is_stack_arguments(compiler_options(), function);
     });
 
+    def.property("event_based?", [this](const t_function& f) {
+      const t_interface* parent = context().get_function_parent(&f);
+      assert(parent != nullptr);
+      return f.get_unstructured_annotation("thread") == "eb" ||
+          f.has_structured_annotation(kCppProcessInEbThreadUri) ||
+          parent->has_unstructured_annotation("process_in_event_base") ||
+          parent->has_structured_annotation(kCppProcessInEbThreadUri);
+    });
+
+    def.property("sync_returns_by_outparam?", [](const t_function& f) {
+      return is_complex_return(f.return_type()->get_true_type()) &&
+          !f.interaction() && !f.sink_or_stream();
+    });
+
+    def.property("prefixed_name", [this](const t_function& f) {
+      const t_interface* parent = context().get_function_parent(&f);
+      assert(parent != nullptr);
+      const std::string& name = cpp2::get_name(&f);
+      return parent->is<t_interaction>()
+          ? fmt::format("{}_{}", parent->name(), name)
+          : name;
+    });
+
+    def.property(
+        "has_deprecated_header_client_methods", [this](const t_function& f) {
+          const t_interface* parent = context().get_function_parent(&f);
+          assert(parent != nullptr);
+          return f.has_structured_annotation(
+                     kCppGenerateDeprecatedHeaderClientMethodsUri) ||
+              f.has_unstructured_annotation(
+                  "cpp.generate_deprecated_header_client_methods") ||
+              parent->has_structured_annotation(
+                  kCppGenerateDeprecatedHeaderClientMethodsUri) ||
+              parent->has_unstructured_annotation(
+                  "cpp.generate_deprecated_header_client_methods");
+        });
+
+    def.property("virtual_client_methods?", [this](const t_function& f) {
+      const t_interface* parent = context().get_function_parent(&f);
+      assert(parent != nullptr);
+      return !generate_reduced_client(*parent) && !f.interaction() &&
+          !f.is_bidirectional_stream();
+    });
+
+    def.property("legacy_client_methods?", [this](const t_function& f) {
+      const t_interface* parent = context().get_function_parent(&f);
+      assert(parent != nullptr);
+      return !generate_reduced_client(*parent) && !f.interaction() &&
+          !f.is_bidirectional_stream();
+    });
+
     return std::move(def).make();
   }
 
@@ -1266,11 +1317,10 @@ class cpp_mstch_service : public mstch_service {
       const t_service* service,
       mstch_context& ctx,
       mstch_element_position pos,
-      source_manager& sm,
       const t_service* containing_service = nullptr,
       int32_t split_id = 0,
       int32_t split_count = 1)
-      : mstch_service(service, ctx, pos, containing_service), sm_(sm) {
+      : mstch_service(service, ctx, pos, containing_service) {
     register_methods(
         this,
         {
@@ -1324,7 +1374,6 @@ class cpp_mstch_service : public mstch_service {
   }
 
   std::vector<const t_function*> split_functions_;
-  source_manager& sm_;
 };
 
 class cpp_mstch_interaction : public cpp_mstch_service {
@@ -1335,75 +1384,8 @@ class cpp_mstch_interaction : public cpp_mstch_service {
       const t_interaction* interaction,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_service* containing_service,
-      source_manager& sm)
-      : cpp_mstch_service(interaction, ctx, pos, sm, containing_service) {}
-};
-
-class cpp_mstch_function : public mstch_function {
- public:
-  cpp_mstch_function(
-      const t_function* function,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      std::shared_ptr<cpp2_generator_context> cpp_ctx)
-      : mstch_function(function, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
-        this,
-        {
-            {"function:eb", &cpp_mstch_function::event_based},
-            {"function:sync_returns_by_outparam?",
-             &cpp_mstch_function::sync_returns_by_outparam},
-            {"function:prefixed_name", &cpp_mstch_function::prefixed_name},
-            {"function:has_deprecated_header_client_methods",
-             &cpp_mstch_function::has_deprecated_header_client_methods},
-            {"function:virtual_client_methods?",
-             &cpp_mstch_function::virtual_client_methods},
-            {"function:legacy_client_methods?",
-             &cpp_mstch_function::legacy_client_methods},
-        });
-  }
-  mstch::node event_based() {
-    return function_->get_unstructured_annotation("thread") == "eb" ||
-        function_->has_structured_annotation(kCppProcessInEbThreadUri) ||
-        interface().has_unstructured_annotation("process_in_event_base") ||
-        interface().has_structured_annotation(kCppProcessInEbThreadUri);
-  }
-  mstch::node sync_returns_by_outparam() {
-    return is_complex_return(function_->return_type()->get_true_type()) &&
-        !function_->interaction() && !function_->sink_or_stream();
-  }
-
-  mstch::node prefixed_name() {
-    const std::string& name = cpp2::get_name(function_);
-    return interface().is<t_interaction>()
-        ? fmt::format("{}_{}", interface().name(), name)
-        : name;
-  }
-
-  mstch::node has_deprecated_header_client_methods() {
-    return function_->has_structured_annotation(
-               kCppGenerateDeprecatedHeaderClientMethodsUri) ||
-        function_->has_unstructured_annotation(
-            "cpp.generate_deprecated_header_client_methods") ||
-        interface().has_structured_annotation(
-            kCppGenerateDeprecatedHeaderClientMethodsUri) ||
-        interface().has_unstructured_annotation(
-            "cpp.generate_deprecated_header_client_methods");
-  }
-
-  mstch::node virtual_client_methods() {
-    return !generate_reduced_client(interface()) && !function_->interaction() &&
-        !function_->is_bidirectional_stream();
-  }
-
-  mstch::node legacy_client_methods() {
-    return !generate_reduced_client(interface()) && !function_->interaction() &&
-        !function_->is_bidirectional_stream();
-  }
-
- private:
-  std::shared_ptr<cpp2_generator_context> cpp_context_;
+      const t_service* containing_service)
+      : cpp_mstch_service(interaction, ctx, pos, containing_service) {}
 };
 
 bool needs_op_encode(const t_type& type);
@@ -2471,9 +2453,8 @@ void t_mstch_cpp2_generator::generate_program() {
 
 void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_program>(std::ref(source_mgr_));
-  mstch_context_.add<cpp_mstch_service>(std::ref(source_mgr_));
-  mstch_context_.add<cpp_mstch_interaction>(std::ref(source_mgr_));
-  mstch_context_.add<cpp_mstch_function>(cpp_context_);
+  mstch_context_.add<cpp_mstch_service>();
+  mstch_context_.add<cpp_mstch_interaction>();
   mstch_context_.add<cpp_mstch_type>(cpp_context_);
   mstch_context_.add<cpp_mstch_struct>(cpp_context_);
   mstch_context_.add<cpp_mstch_field>(cpp_context_);
@@ -2637,7 +2618,6 @@ void t_mstch_cpp2_generator::generate_out_of_line_service(
           service,
           mstch_context_,
           mstch_element_position(),
-          source_mgr_,
           nullptr,
           split_id,
           split_count);

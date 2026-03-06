@@ -1,0 +1,47 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{! Renders a C# type name for a given Thrift type.
+    Uses short/keyword type names (e.g. "int", "string", "bool").
+    Container types recurse to build generic syntax. }}
+{{#let export partial csharp_type |type|}}
+  {{#pragma ignore-newlines}}
+{{#if type.typedef?}}{{type.csharp_qualified_name}}
+{{#else if type.void?}}void
+{{#else if type.bool?}}bool
+{{#else if type.byte?}}sbyte
+{{#else if type.i16?}}short
+{{#else if type.i32?}}int
+{{#else if type.i64?}}long
+{{#else if type.float?}}float
+{{#else if type.double?}}double
+{{#else if type.string?}}string
+{{#else if type.binary?}}byte[]
+{{#else if type.enum?}}{{type.true_type.csharp_qualified_name}}
+{{#else if type.structured?}}{{type.true_type.csharp_qualified_name}}
+{{#else if type.list?}}
+{{#let elem_type = type.true_type.elem_type}}
+List<{{#partial csharp_type type=elem_type}}>
+{{#else if type.set?}}
+{{#let elem_type = type.true_type.elem_type}}
+HashSet<{{#partial csharp_type type=elem_type}}>
+{{#else if type.map?}}
+{{#let map = type.true_type}}
+Dictionary<{{#partial csharp_type type=map.key_type}}, {{#partial csharp_type type=map.val_type}}>
+{{/if type.typedef?}}
+{{/let partial}}

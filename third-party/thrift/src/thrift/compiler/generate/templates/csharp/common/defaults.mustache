@@ -1,0 +1,44 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+
+{{! Renders the C# default value for a given Thrift type.
+    These are the "intrinsic" default values used when no explicit default is provided:
+    - Primitives: false, 0, 0.0f, 0.0, string.Empty
+    - Binary: Array.Empty<byte>()
+    - Containers: new List/HashSet/Dictionary()
+    - Enums: 0 (cast to enum type)
+    - Structs: new StructType() }}
+{{#let export partial csharp_default_value |type| captures |types|}}
+  {{#pragma ignore-newlines}}
+{{#if type.void?}}{{! no default for void }}
+{{#else if type.bool?}}false
+{{#else if type.byte?}}0
+{{#else if type.i16?}}0
+{{#else if type.i32?}}0
+{{#else if type.i64?}}0
+{{#else if type.float?}}0.0f
+{{#else if type.double?}}0.0
+{{#else if type.string?}}string.Empty
+{{#else if type.binary?}}Array.Empty<byte>()
+{{#else if type.enum?}}0
+{{#else if type.container?}}new {{#partial types.csharp_type type=type}}()
+{{#else if type.structured?}}new {{#partial types.csharp_type type=type}}()
+{{#else}}default
+{{/if type.void?}}
+{{/let partial}}

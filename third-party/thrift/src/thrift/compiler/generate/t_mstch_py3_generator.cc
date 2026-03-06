@@ -1610,7 +1610,7 @@ void t_mstch_py3_generator::generate_services() {
 
   // {template_name, use_whisker}
   std::vector<std::pair<std::string, bool>> normalCythonFiles{
-      {"clients.pxd", false},
+      {"clients.pxd", true},
       {"clients.pyx", false},
       {"clients.pyi", false},
       {"services.pxd", true},

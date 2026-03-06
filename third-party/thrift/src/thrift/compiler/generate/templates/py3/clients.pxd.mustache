@@ -25,28 +25,36 @@ This is a top-level file that gets imported by the CythonClients.pyx file. That
 file exposes Python wrappers of the services client to the end user.
 
 }}
+{{#let partial client_base |service|}}
+{{#pragma ignore-newlines}}
+  {{#if (object.notnull? service.extends)}}
+    {{#if service.extends.externalProgram?}}
+_{{#each service.extends.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}
+{{service.extends.program.name}}_clients.
+    {{/if service.extends.externalProgram?}}
+{{service.extends.name}}
+  {{#else}}
+thrift.py3.client.Client
+  {{/if (object.notnull? service.extends)}}
+{{/let partial}}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 cimport thrift.py3.client
 
-{{#each program:includeNamespaces as |include|}}
+{{#each program.includeNamespaces as |include|}}
   {{#if include.import_services?}}
 cimport {{include.modulePathPeriodSeparated}}.clients as _{{include.modulePathUnderscoreSeparated}}_clients
   {{/if include.import_services?}}
 {{/each}}
 
-{{#program:services}}
-cdef class {{service:name}}{{#service:extends}}({{#service:externalProgram?}}{{!
-    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
-  }}){{/service:extends}}{{^service:extends?}}(thrift.py3.client.Client){{/service:extends?}}:
+{{#each program.services as |service|}}
+cdef class {{service.name}}({{#partial client_base service=service}}):
     pass
 
-  {{#let parent_service_name=service:name}}
-{{#service:supportedInteractions}}
-cdef class {{parent_service_name}}_{{service:name}}(thrift.py3.client.Client):
+  {{#each service.supportedInteractions as |interaction|}}
+cdef class {{service.name}}_{{interaction.name}}(thrift.py3.client.Client):
     pass
 
-{{/service:supportedInteractions}}
-{{/program:services}}
-{{/program:auto_migrate?}}
+  {{/each}}
+{{/each}}
+{{/if (not program.auto_migrate?)}}

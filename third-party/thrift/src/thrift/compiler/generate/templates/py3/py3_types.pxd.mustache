@@ -34,7 +34,7 @@ from thrift.python.common cimport (
     MetadataBox as __MetadataBox,
 )
 from folly.optional cimport cOptional as __cOptional
-{{#program:has_stream?}}
+{{#if program.has_stream?}}
 from folly cimport cFollyTry
 from cpython.ref cimport PyObject
 from thrift.py3.stream cimport (
@@ -42,131 +42,120 @@ from thrift.py3.stream cimport (
     ResponseAndClientBufferedStream, cResponseAndClientBufferedStream,
     ServerStream, cServerStream, ResponseAndServerStream
 )
-{{/program:has_stream?}}
+{{/if program.has_stream?}}
 
-{{#each program:includeNamespaces as |include|}}
+{{#each program.includeNamespaces as |include|}}
   {{#if include.has_types?}}
 cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
 cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
   {{/if include.has_types?}}
 {{/each}}
 
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _fbthrift_types
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_fields as _fbthrift_types_fields
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as {{> types/current_module_cbindings}}
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _fbthrift_types
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_fields as _fbthrift_types_fields
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as {{> types/current_module_cbindings}}
 
-cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/types.h":
+cdef extern from "{{program.include_prefix}}gen-py3/{{program.name}}/types.h":
   pass
-{{#program:python_capi_converter?}}
-cdef extern from "{{program:include_prefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
-    cppclass _fbthrift__NamespaceTag "{{program:capi_module_prefix}}::NamespaceTag"
+{{#if program.python_capi_converter?}}
+cdef extern from "{{program.include_prefix}}gen-python-capi/{{program.name}}/thrift_types_capi.h":
+    cppclass _fbthrift__NamespaceTag "{{program.capi_module_prefix}}::NamespaceTag"
 
-{{/program:python_capi_converter?}}
+{{/if program.python_capi_converter?}}
 
-{{^program:inplace_migrate?}}
-{{#program:filtered_structs}}
+{{#if (not program.inplace_migrate?)}}
+{{#each program.py3_visible_structured_definitions as |struct|}}
 
 
-cdef class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}}):
-    cdef shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    {{^struct:union?}}
-    cdef _fbthrift_types_fields.__{{struct:name}}_FieldsSetter _fields_setter
-    {{#struct:py3_fields}}
-    cdef inline object {{field:py_name}}_impl(self)
-    {{/struct:py3_fields}}
+cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}}):
+    cdef shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+  {{#if (not struct.union?)}}
+    cdef _fbthrift_types_fields.__{{struct.name}}_FieldsSetter _fields_setter
+  {{#each struct.py3_fields as |field|}}
+    cdef inline object {{field.py_name}}_impl(self)
+  {{/each}}
     {{!Memoized Python wrappers of struct fields, created lazily}}
-    {{#struct:py3_fields}}
-    {{#field:type}}{{#type:structured}}
-    cdef {{#partial types.cython_python_type type=type:self}} __fbthrift_cached_{{field:py_name}}
-    {{/type:structured}}{{#type:container?}}
-    cdef {{#partial types.cython_python_type type=type:self}} __fbthrift_cached_{{field:py_name}}
-    {{/type:container?}}{{#type:enum?}}
-    cdef object __fbthrift_cached_{{field:py_name}}
-    {{/type:enum?}}{{#type:iobuf?}}
-    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_{{field:py_name}}
-    {{/type:iobuf?}}{{#type:iobufRef?}}
-    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_{{field:py_name}}
-    {{/type:iobufRef?}}{{/field:type}}
-    {{/struct:py3_fields}}{{/struct:union?}}
-    {{#struct:union?}}
+  {{#each struct.py3_fields as |field|}}
+    {{#if (or field.type.structured? field.type.container?)}}
+    cdef {{#partial types.cython_python_type type=field.type}} __fbthrift_cached_{{field.py_name}}
+    {{#else if field.type.enum?}}
+    cdef object __fbthrift_cached_{{field.py_name}}
+    {{#else if (or field.type.iobuf? field.type.iobufRef?)}}
+    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_{{field.py_name}}
+    {{/if (or field.type.structured? field.type.container?)}}
+  {{/each}}
+  {{/if (not struct.union?)}}
+  {{#if struct.union?}}
     cdef int64_t type_int
     cdef object py_type
     cdef object py_value
-    cdef _initialize_py({{struct:name}} self)
-    {{/struct:union?}}
-    {{#struct:union?}}
+    cdef _initialize_py({{struct.name}} self)
 
     @staticmethod
-    cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] _make_instance(
-        {{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}* base_instance{{^struct:union?}},
-        bint* __isNOTSET{{/struct:union?}}{{#struct:py3_fields}},
-        {{#field:type}}{{!
-            }}{{#type:cythonTypeNoneable?}}{{!
-                }}{{#partial types.cython_python_type type=type:self}} {{!
-            }}{{/type:cythonTypeNoneable?}}{{!
-            }}{{^type:cythonTypeNoneable?}}{{!
-                }}object {{!
-            }}{{/type:cythonTypeNoneable?}}{{!
-            }}{{field:py_name}}{{!
-        }}{{/field:type}}{{/struct:py3_fields}}
+    cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] _make_instance(
+        {{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}* base_instance{{#if (not struct.union?)}},
+        bint* __isNOTSET{{/if (not struct.union?)}}{{#each struct.py3_fields as |field|}},
+        {{#if field.type.cythonTypeNoneable?}}{{#partial types.cython_python_type type=field.type}} {{#else}}object {{/if}}{{field.py_name}}{{/each}}
     ) except *
-    {{/struct:union?}}
+  {{/if struct.union?}}
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}])
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}])
 
-{{/program:filtered_structs}}
+{{/each}}
 
-{{#program:containerTypes}}
-cdef {{#partial types.cython_cpp_type type=type:self}}{{!
-}} {{type:flat_name}}__make_instance(object items) except *
-{{^program:auto_migrate?}}
-cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}&) except *
-{{/program:auto_migrate?}}
+{{#each program.container_types as |type|}}
+cdef {{#partial types.cython_cpp_type type=type}}{{!
+}} {{type.flat_name}}__make_instance(object items) except *
+  {{#if (not program.auto_migrate?)}}
+cdef object {{type.flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type}}&) except *
+  {{/if (not program.auto_migrate?)}}
 
-{{/program:containerTypes}}
-{{/program:inplace_migrate?}}
+{{/each}}
+{{/if (not program.inplace_migrate?)}}
 
-{{#program:has_stream?}}{{! check if it's a stream case and if not short-circuit it to save get stream_types calls }}
+{{#if program.has_stream?}}{{! check if it's a stream case and if not short-circuit it to save get stream_types calls }}
 
-{{#program:stream_types}}
-cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
-    cdef unique_ptr[cClientBufferedStreamWrapper[{{#partial types.cython_cpp_type type=type:self}}]] _gen
+{{#each program.stream_types as |type|}}
+cdef class ClientBufferedStream__{{type.flat_name}}(ClientBufferedStream):
+    cdef unique_ptr[cClientBufferedStreamWrapper[{{#partial types.cython_cpp_type type=type}}]] _gen
 
     @staticmethod
-    cdef _fbthrift_create(cClientBufferedStream[{{#partial types.cython_cpp_type type=type:self}}]& c_obj, __RpcOptions rpc_options)
+    cdef _fbthrift_create(cClientBufferedStream[{{#partial types.cython_cpp_type type=type}}]& c_obj, __RpcOptions rpc_options)
 
     @staticmethod
     cdef void callback(
-        cFollyTry[__cOptional[{{#partial types.cython_cpp_type type=type:self}}]]&& res,
+        cFollyTry[__cOptional[{{#partial types.cython_cpp_type type=type}}]]&& res,
         PyObject* userdata,
     ) noexcept
 
-cdef class ServerStream__{{type:flat_name}}(ServerStream):
+cdef class ServerStream__{{type.flat_name}}(ServerStream):
     pass
 
-{{/program:stream_types}}
-{{#program:response_and_stream_functions}}{{#function:return_type}}
+{{/each}}
+{{#each program.response_and_stream_functions as |function|}}
 
-cdef class ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function:self}}(ResponseAndClientBufferedStream):
-    cdef ClientBufferedStream__{{#function:stream_elem_type}}{{type:flat_name}}{{/function:stream_elem_type}} _stream
-    cdef {{#partial types.cython_python_type type=function:self.return_type}} _response
+cdef class ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function}}(ResponseAndClientBufferedStream):
+    cdef ClientBufferedStream__{{function.stream.elem_type.flat_name}} _stream
+    cdef {{#partial types.cython_python_type type=function.return_type}} _response
 
     @staticmethod
     cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
-        }}{{#partial types.cython_cpp_type type=function:self.return_type}}, {{!
-        }}{{#partial types.cython_cpp_type type=function:stream.elem_type}}]& c_obj, __RpcOptions rpc_options)
+        }}{{#partial types.cython_cpp_type type=function.return_type}}, {{!
+        }}{{#partial types.cython_cpp_type type=function.stream.elem_type}}]& c_obj, __RpcOptions rpc_options)
 
 
-cdef class ResponseAndServerStream__{{#partial stream.response_class_name_suffix function=function:self}}(ResponseAndServerStream):
+cdef class ResponseAndServerStream__{{#partial stream.response_class_name_suffix function=function}}(ResponseAndServerStream):
     pass
 
-{{/function:return_type}}{{/program:response_and_stream_functions}}
-{{/program:has_stream?}}
-{{#program:inplace_migrate?}}{{#program:needs_container_converters?}}
-{{#program:containerTypes}}
-cdef {{#partial types.cython_cpp_type type=type:self}} {{type:flat_name}}__make_instance(object items) except *
-cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}&) except *
+{{/each}}
+{{/if program.has_stream?}}
+{{#if program.inplace_migrate?}}
+  {{#if program.needs_container_converters?}}
+    {{#each program.container_types as |type|}}
+cdef {{#partial types.cython_cpp_type type=type}} {{type.flat_name}}__make_instance(object items) except *
+cdef object {{type.flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type}}&) except *
 
-{{/program:containerTypes}}
-{{/program:needs_container_converters?}}{{/program:inplace_migrate?}}
+    {{/each}}
+  {{/if program.needs_container_converters?}}
+{{/if program.inplace_migrate?}}

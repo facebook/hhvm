@@ -30,8 +30,8 @@ import thrift.py3.common
 import typing as _typing
 from types import TracebackType
 
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
-{{#each program:includeNamespaces as |include|}}
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+{{#each program.includeNamespaces as |include|}}
   {{#if include.has_types?}}
 import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
   {{/if include.has_types?}}
@@ -39,59 +39,53 @@ import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnder
 import {{include.modulePathPeriodSeparated}}.clients as _{{include.modulePathUnderscoreSeparated}}_clients
   {{/if include.import_services?}}
 {{/each}}
-{{#program:services}}
+{{#each program.services as |service|}}
 
 
-_{{service:name}}T = _typing.TypeVar('_{{service:name}}T', bound='{{service:name}}')
+_{{service.name}}T = _typing.TypeVar('_{{service.name}}T', bound='{{service.name}}')
 
 
-class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
-    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
-  }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
+class {{service.name}}({{#let parent = service.extends}}{{#if (object.notnull? parent)}}{{#if parent.externalProgram?}}{{!
+    }}_{{#each parent.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+    }}{{parent.program.name}}_clients.{{/if parent.externalProgram?}}{{parent.name}}{{!
+  }}{{#else}}thrift.py3.client.Client{{/if (object.notnull? parent)}}):
 
-{{#service:supportedFunctions}}
-    async def {{function:name}}(
-        self{{#function:args}},
-        {{field:py_name}}: {{#partial pep484.type_name type=field:self.type}}{{/function:args}},
+  {{#each service.supportedFunctions as |function|}}
+    async def {{function.name}}(
+        self{{#each function.params.fields as |field|}},
+        {{field.py_name}}: {{#partial pep484.type_name type=field.type}}{{/each}},
         *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> {{#if function:stream?}}{{#partial clients.stream_response_class_name function=function:self}}{{!
-        }}{{#else}}{{#partial pep484.type_name type=function:self.return_type}}{{/if function:stream?}}: ...
+    ) -> {{#if function.stream?}}{{#partial clients.stream_response_class_name function=function}}{{!
+        }}{{#else}}{{#partial pep484.type_name type=function.return_type}}{{/if function.stream?}}: ...
 
-{{/service:supportedFunctions}}
-  {{#let parent_service_name=service:name}}
-{{#service:supportedInteractions}}
-    def create{{service:name}}(self) -> {{parent_service_name}}_{{service:name}}: ...
-    def async_create{{service:name}}(self) -> {{parent_service_name}}_{{service:name}}: ...
-{{/service:supportedInteractions}}
-{{^service:supportedInteractions}}
-{{^service:supportedFunctions}}
+  {{/each}}
+  {{#each service.supportedInteractions as |interaction|}}
+    def create{{interaction.name}}(self) -> {{service.name}}_{{interaction.name}}: ...
+    def async_create{{interaction.name}}(self) -> {{service.name}}_{{interaction.name}}: ...
+  {{/each}}
+  {{#if (and (array.empty? service.supportedInteractions) (array.empty? service.supportedFunctions))}}
     pass
-{{/service:supportedFunctions}}
-{{/service:supportedInteractions}}
-{{#service:supportedInteractions}}
+  {{/if (and (array.empty? service.supportedInteractions) (array.empty? service.supportedFunctions))}}
+  {{#each service.supportedInteractions as |interaction|}}
 
-_{{parent_service_name}}_{{service:name}} = _typing.TypeVar('_{{parent_service_name}}_{{service:name}}', bound='{{parent_service_name}}_{{service:name}}')
+_{{service.name}}_{{interaction.name}} = _typing.TypeVar('_{{service.name}}_{{interaction.name}}', bound='{{service.name}}_{{interaction.name}}')
 
 
-class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
-    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
-  }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
+class {{service.name}}_{{interaction.name}}(thrift.py3.client.Client):
 
-{{#service:supportedFunctions}}
-    async def {{function:name}}(
-        self{{#function:args}},
-        {{field:py_name}}: {{#partial pep484.type_name type=field:self.type}}{{/function:args}},
+    {{#each interaction.supportedFunctions as |function|}}
+    async def {{function.name}}(
+        self{{#each function.params.fields as |field|}},
+        {{field.py_name}}: {{#partial pep484.type_name type=field.type}}{{/each}},
         *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
-    ) -> {{#if function:stream?}}{{#partial clients.stream_response_class_name function=function:self}}{{!
-        }}{{#else}}{{#partial pep484.type_name type=function:self.return_type}}{{/if function:stream?}}: ...
+    ) -> {{#if function.stream?}}{{#partial clients.stream_response_class_name function=function}}{{!
+        }}{{#else}}{{#partial pep484.type_name type=function.return_type}}{{/if function.stream?}}: ...
 
-{{/service:supportedFunctions}}
-{{^service:supportedFunctions}}
+    {{/each}}
+    {{#if (array.empty? interaction.supportedFunctions)}}
     pass
-{{/service:supportedFunctions}}
-{{/service:supportedInteractions}}
-{{/program:services}}
+    {{/if (array.empty? interaction.supportedFunctions)}}
+  {{/each}}
+{{/each}}

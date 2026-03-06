@@ -29,8 +29,8 @@ import typing as _typing
 from thrift.py3.server import RequestContext, ServiceInterface
 from abc import abstractmethod, ABCMeta
 
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
-{{#each program:includeNamespaces as |include|}}
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+{{#each program.includeNamespaces as |include|}}
   {{#if include.import_services?}}
 import {{include.modulePathPeriodSeparated}}.services as _{{include.modulePathUnderscoreSeparated}}_services
   {{/if include.import_services?}}
@@ -39,40 +39,37 @@ import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnder
   {{/if include.has_types?}}
 {{/each}}
 
-{{#program:services}}
-_{{service:name}}InterfaceT = _typing.TypeVar('_{{service:name}}InterfaceT', bound='{{service:name}}Interface')
+{{#each program.services as |service|}}
+_{{service.name}}InterfaceT = _typing.TypeVar('_{{service.name}}InterfaceT', bound='{{service.name}}Interface')
 
 
-class {{service:name}}Interface(
-    {{#service:extends}}{{#service:externalProgram?}}
-    _{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-        }}{{service:program.name}}_services.{{/service:externalProgram?}}{{service:name}}Interface,
-    {{/service:extends}}
-    {{^service:extends?}}
+class {{service.name}}Interface(
+    {{#let parent = service.extends}}{{#if (object.notnull? parent)}}{{#if parent.externalProgram?}}
+    _{{#each parent.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+        }}{{parent.program.name}}_services.{{/if parent.externalProgram?}}{{parent.name}}Interface,
+    {{#else}}
     ServiceInterface,
-    {{/service:extends?}}
+    {{/if (object.notnull? parent)}}
     metaclass=ABCMeta,
 ):
-    {{#service:supportedFunctions}}
+  {{#each service.supportedFunctions as |function|}}
 
-    {{#function:return_type}}
-    {{#function:stream?}}
+    {{#if function.stream?}}
     @staticmethod
-    def createPublisher_{{function:name}}(callback=None) -> _typing.Tuple[
-        _typing.AsyncGenerator[{{#partial pep484.type_name type=function:stream.elem_type}}, None],
-        _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types.ServerPublisher_{{#partial services.cython_cpp_type_ident type=function:stream.elem_type}}
+    def createPublisher_{{function.name}}(callback=None) -> _typing.Tuple[
+        _typing.AsyncGenerator[{{#partial pep484.type_name type=function.stream.elem_type}}, None],
+        _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types.ServerPublisher_{{#partial services.cython_cpp_type_ident type=function.stream.elem_type}}
     ]: ...
 
-    {{/function:stream?}}
-    {{/function:return_type}}
+    {{/if function.stream?}}
 
     @abstractmethod
-    {{#function:return_type}}{{^function:stream?}}async {{/function:stream?}}{{#function:stream_has_first_response?}}async {{/function:stream_has_first_response?}}{{/function:return_type}}def {{function:name}}(
-        self{{#function:args}},
-        {{field:py_name}}: {{#partial pep484.type_name type=field:self.type}}{{/function:args}}
-    ) -> {{#partial pep484.return_type function=function:self}}: ...
-    {{/service:supportedFunctions}}
+    {{#if (not function.stream?)}}async {{/if}}{{#if function.stream_has_first_response?}}async {{/if}}def {{function.name}}(
+        self{{#each function.params.fields as |field|}},
+        {{field.py_name}}: {{#partial pep484.type_name type=field.type}}{{/each}}
+    ) -> {{#partial pep484.return_type function=function}}: ...
+  {{/each}}
     pass
 
 
-{{/program:services}}
+{{/each}}

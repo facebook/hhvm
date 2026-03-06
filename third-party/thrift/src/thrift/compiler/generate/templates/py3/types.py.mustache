@@ -33,25 +33,25 @@ want to include.
 
 }}
 {{> common/auto_generated_py}}
-{{#program:auto_migrate?}}
-{{#program:has_types?}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import (
-    {{#program:structs}}
-    {{struct:name}},
-    {{/program:structs}}{{#program:enums}}
-    {{enum:name}},
-    {{/program:enums}}{{#program:constants}}{{#constant:type}}
-    {{constant:name}},
-    {{/constant:type}}{{/program:constants}}{{#program:typedefs}}
-    {{typedef:name}},
-    {{/program:typedefs}}
+{{#if program.auto_migrate?}}
+  {{#if program.has_types?}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types import (
+    {{#each program.structured_definitions as |struct|}}
+    {{struct.name}},
+    {{/each}}{{#each program.enums as |enum|}}
+    {{enum.name}},
+    {{/each}}{{#each program.consts as |constant|}}
+    {{constant.name}},
+    {{/each}}{{#each program.typedefs as |typedef|}}
+    {{typedef.name}},
+    {{/each}}
 )
-{{/program:has_types?}}
-  {{#if program:has_container_types?}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_auto_FBTHRIFT_ONLY_DO_NOT_USE import (
-{{#program:containerTypes}}{{#type:container?}}
-    {{type:flat_name}},
-{{/type:container?}}{{/program:containerTypes}}
+  {{/if program.has_types?}}
+  {{#if program.has_container_types?}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_auto_FBTHRIFT_ONLY_DO_NOT_USE import (
+    {{#each program.container_types as |type|}}
+    {{type.flat_name}},
+    {{/each}}
 )
-  {{/if program:has_container_types?}}
-{{/program:auto_migrate?}}
+  {{/if program.has_container_types?}}
+{{/if program.auto_migrate?}}

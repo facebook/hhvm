@@ -17,6 +17,6 @@
 }}
 {{#import "common/types" as types}}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 {{> py3_types.pxd }}
-{{/program:auto_migrate?}}
+{{/if (not program.auto_migrate?)}}

@@ -21,11 +21,13 @@
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/server/BidirectionalStreamState.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IConnectionStreamHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
 namespace apache::thrift::rocket {
 
-class RocketBiDiClientCallback final : public BiDiClientCallback {
+class RocketBiDiClientCallback final : public BiDiClientCallback,
+                                       public IConnectionStreamHandler {
  private:
   using EncodedFirstResponseError =
       ::apache::thrift::detail::EncodedFirstResponseError;
@@ -89,13 +91,21 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
   // end of Incoming methods
   //
 
-  StreamId streamId() const { return streamId_; }
+  StreamId streamId() const override { return streamId_; }
+
+  // IConnectionStreamHandler overrides
+  void handleFrame(RequestNFrame&&) override;
+  void handleFrame(CancelFrame&&) override;
+  void handleFrame(PayloadFrame&&) override;
+  void handleFrame(ErrorFrame&&) override;
+  void handleFrame(ExtFrame&&) override;
+  void handleConnectionClose() override;
 
   void setCompressionConfig(CompressionConfig compressionConfig) {
     compressionConfig_ = compressionConfig;
   }
 
-  bool serverCallbackReady() { return serverCallback_ != nullptr; }
+  bool serverCallbackReady() const { return serverCallback_ != nullptr; }
 
   void cancelEarly() {
     DCHECK(!serverCallbackReady());
@@ -116,6 +126,7 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
   int32_t initialTokens_{0};
 
   std::optional<CompressionConfig> compressionConfig_;
+  folly::Optional<Payload> bufferedFragment_;
 
   template <typename Payload>
   void sendPayload(Payload&& payload, bool next = false, bool complete = false);
@@ -126,6 +137,13 @@ class RocketBiDiClientCallback final : public BiDiClientCallback {
   void sendEmptyPayload(bool complete = true);
 
   void applyCompressionConfigIfNeeded(StreamPayload& payload);
+
+  /**
+   * Buffers payload frame fragments until the final fragment arrives.
+   * Returns the fully assembled payload when all fragments are received,
+   * or folly::none if still buffering intermediate fragments.
+   */
+  folly::Optional<Payload> bufferOrGetFullPayload(PayloadFrame&& payloadFrame);
 
   [[nodiscard]] bool freeStreamAndReturn(bool returnValue) {
     DCHECK(returnValue == false) << "Must return false when freeing the stream";

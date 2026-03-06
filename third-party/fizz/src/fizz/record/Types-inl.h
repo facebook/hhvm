@@ -82,7 +82,7 @@ struct Writer {
           std::is_enum<T>::value && std::is_same<U, T>::value,
           T>::type& in,
       folly::io::Appender& appender) {
-    using UT = typename std::underlying_type<U>::type;
+    using UT = std::underlying_type_t<U>;
     static_assert(
         std::is_unsigned<UT>::value,
         "enums meant to be serialized should be unsigned");
@@ -233,9 +233,8 @@ inline Status write<Extension>(
     Error& err,
     const Extension& extension,
     folly::io::Appender& out) {
-  out.writeBE(
-      static_cast<typename std::underlying_type<ExtensionType>::type>(
-          extension.extension_type));
+  using UT = std::underlying_type_t<ExtensionType>;
+  out.writeBE(static_cast<UT>(extension.extension_type));
   FIZZ_RETURN_ON_ERROR(writeBuf<uint16_t>(err, extension.extension_data, out));
   return Status::Success;
 }

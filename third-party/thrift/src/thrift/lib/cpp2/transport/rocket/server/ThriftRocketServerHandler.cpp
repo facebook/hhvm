@@ -563,6 +563,12 @@ void ThriftRocketServerHandler::connectionClosing() {
   }
 }
 
+void ThriftRocketServerHandler::onIdleTimeout() {
+  if (auto* observer = worker_->getServer()->getObserver()) {
+    observer->connClosedByIdleTimeout();
+  }
+}
+
 template <class F>
 void ThriftRocketServerHandler::handleRequestCommon(
     Payload&& payload,

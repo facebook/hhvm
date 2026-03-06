@@ -83,6 +83,7 @@
 #include <thrift/lib/cpp2/test/server/ThriftServerTestUtils.h>
 #include <thrift/lib/cpp2/test/util/TestHandler.h>
 #include <thrift/lib/cpp2/test/util/TestThriftServerFactory.h>
+#include <thrift/lib/cpp2/transport/core/testutil/FakeServerObserver.h>
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 #include <thrift/lib/cpp2/util/ScopedServerThread.h>
@@ -2315,7 +2316,11 @@ TEST(ThriftServer, ConnectionIdleTimeoutTest) {
   TestThriftServerFactory<TestHandler> factory;
   auto server = factory.create();
   server->setIdleTimeout(std::chrono::milliseconds(20));
+  auto observer = std::make_shared<FakeServerObserver>();
+  server->setObserver(observer);
   apache::thrift::util::ScopedServerThread st(server);
+
+  EXPECT_EQ(observer->connClosedByIdleTimeout_, 0);
 
   folly::EventBase base;
   auto socket = folly::AsyncSocket::newSocket(&base, *st.getAddress());
@@ -2327,6 +2332,11 @@ TEST(ThriftServer, ConnectionIdleTimeoutTest) {
   client.sync_sendResponse(response, 200);
   EXPECT_EQ(response, "test200");
   base.loop();
+
+  // Wait for idle timeout to fire and close the connection
+  /* sleep override */
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+  EXPECT_EQ(observer->connClosedByIdleTimeout_, 1);
 }
 
 TEST(ThriftServer, BadSendTest) {

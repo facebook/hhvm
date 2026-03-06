@@ -159,6 +159,8 @@ class TServerObserver {
 
   virtual void connClosed(const ConnectionInfo&) {}
 
+  virtual void connClosedByIdleTimeout() {}
+
   virtual void activeConnections(int32_t /*numConnections*/) {}
 
   virtual void tlsError() {}

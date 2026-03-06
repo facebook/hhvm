@@ -988,6 +988,7 @@ void RocketServerConnection::timeoutExpired() noexcept {
   DestructorGuard dg(this);
 
   if (!isBusy()) {
+    frameHandler_->onIdleTimeout();
     closeWhenIdle();
   }
 }

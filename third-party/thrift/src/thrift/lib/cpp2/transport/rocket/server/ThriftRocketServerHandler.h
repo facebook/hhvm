@@ -95,6 +95,7 @@ class ThriftRocketServerHandler : public RocketServerHandler {
       RocketServerFrameContext&& context,
       ChannelRequestCallbackFactory clientCallback) final;
   void connectionClosing() final;
+  void onIdleTimeout() final;
 
   apache::thrift::server::TServerObserver::SamplingStatus shouldSample(
       const transport::THeader& header);

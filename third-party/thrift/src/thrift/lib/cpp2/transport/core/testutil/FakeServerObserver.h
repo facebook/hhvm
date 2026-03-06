@@ -29,6 +29,7 @@ class FakeServerObserver : public apache::thrift::server::TServerObserver {
   std::atomic<size_t> connClosed_{0};
   std::atomic<size_t> connDropped_{0};
   std::atomic<size_t> connRejected_{0};
+  std::atomic<size_t> connClosedByIdleTimeout_{0};
   std::atomic<size_t> activeConns_{0};
   std::atomic<size_t> taskKilled_{0};
   std::atomic<size_t> taskTimeout_{0};
@@ -62,6 +63,8 @@ class FakeServerObserver : public apache::thrift::server::TServerObserver {
   void connDropped() override { ++connDropped_; }
 
   void connRejected() override { ++connRejected_; }
+
+  void connClosedByIdleTimeout() override { ++connClosedByIdleTimeout_; }
 
   void activeConnections(int32_t numConnections) override {
     activeConns_ = numConnections;

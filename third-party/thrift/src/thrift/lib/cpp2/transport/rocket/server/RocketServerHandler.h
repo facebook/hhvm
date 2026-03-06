@@ -66,6 +66,8 @@ class RocketServerHandler {
 
   virtual void connectionClosing() = 0;
 
+  virtual void onIdleTimeout() {}
+
   virtual Cpp2ConnContext* getCpp2ConnContext() { return nullptr; }
 
   virtual void onBeforeHandleFrame() {}

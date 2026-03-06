@@ -332,11 +332,11 @@ TEST(FrameSerialization, MetadataPushSanity) {
     buf->append(6);
     folly::io::RWPrivateCursor wcursor(buf.get());
     // write StreamId
-    wcursor.writeBE<uint32_t>(0);
+    wcursor.writeBE<uint32_t>(static_cast<uint32_t>(0));
     // write frameType and flags
-    wcursor.writeBE<uint16_t>(
+    wcursor.writeBE<uint16_t>(static_cast<uint16_t>(
         static_cast<uint8_t>(FrameType::METADATA_PUSH) << Flags::kBits |
-        static_cast<uint16_t>(1 << 8));
+        static_cast<uint16_t>(1 << 8)));
 
     wcursor.insert(folly::IOBuf::copyBuffer(kMeta));
     buf->coalesce();

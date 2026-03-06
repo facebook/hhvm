@@ -269,7 +269,7 @@ inline uint32_t CompactProtocolWriter::writeBool(bool value) {
 }
 
 inline uint32_t CompactProtocolWriter::writeByte(int8_t byte) {
-  out_.write(byte);
+  out_.write<int8_t>(byte);
   return 1;
 }
 
@@ -295,7 +295,7 @@ inline uint32_t CompactProtocolWriter::writeDouble(double dub) {
   static_assert(std::numeric_limits<double>::is_iec559);
 
   uint64_t bits = folly::bit_cast<uint64_t>(dub);
-  out_.writeBE(bits);
+  out_.writeBE<uint64_t>(bits);
   return sizeof(bits);
 }
 
@@ -304,7 +304,7 @@ inline uint32_t CompactProtocolWriter::writeFloat(float flt) {
   static_assert(std::numeric_limits<float>::is_iec559);
 
   uint32_t bits = folly::bit_cast<uint32_t>(flt);
-  out_.writeBE(bits);
+  out_.writeBE<uint32_t>(bits);
   return sizeof(bits);
 }
 
@@ -370,7 +370,7 @@ uint32_t CompactProtocolWriter::writeBinaryImpl(const folly::IOBuf& str) {
 
 inline void CompactProtocolWriter::rewriteDouble(double dub, int64_t offset) {
   auto cursor = out_.tail<folly::io::CursorAccess::PRIVATE>(offset);
-  cursor.writeBE(folly::bit_cast<uint64_t>(dub));
+  cursor.writeBE<uint64_t>(folly::bit_cast<uint64_t>(dub));
 }
 
 inline folly::io::Cursor CompactProtocolWriter::tail(size_t n) {

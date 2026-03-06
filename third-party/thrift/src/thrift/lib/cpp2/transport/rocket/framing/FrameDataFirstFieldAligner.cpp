@@ -215,10 +215,10 @@ void FrameDataFirstFieldAligner<Frame>::trimPadding() {
   folly::io::RWPrivateCursor writeCursor(payloadBuf_.get());
   writeCursor.skip(offsetOfFieldToAlignInPayload_);
   // Update the data size field.
-  writeCursor.writeBE<int32_t>(updatedDataSize_);
+  writeCursor.writeBE<int32_t>(static_cast<int32_t>(updatedDataSize_));
   // Update the padding size field.
   writeCursor.skip(sizeof(protocol::PaddedBinaryData::kMagic));
-  writeCursor.writeBE<int32_t>(updatedPadding_);
+  writeCursor.writeBE<int32_t>(static_cast<int32_t>(updatedPadding_));
   // Trim the padding.
   paddingIOBuf_->trimEnd(paddingToTrim_);
 

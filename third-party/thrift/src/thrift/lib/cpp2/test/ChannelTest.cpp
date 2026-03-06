@@ -149,7 +149,8 @@ class TestFramingHandler : public FramingHandler {
       framing->appendChain(std::move(buf));
     }
     folly::io::RWPrivateCursor c(framing.get());
-    c.writeBE<uint32_t>(framing->computeChainDataLength() - 4);
+    c.writeBE<uint32_t>(
+        static_cast<uint32_t>(framing->computeChainDataLength() - 4));
 
     return framing;
   }

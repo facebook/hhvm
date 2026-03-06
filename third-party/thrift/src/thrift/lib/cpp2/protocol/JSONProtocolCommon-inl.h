@@ -242,10 +242,10 @@ inline uint32_t JSONProtocolWriterCommon::beginContext(ContextType type) {
   context.push_back({type, 0});
   switch (type) {
     case ContextType::MAP:
-      out_.write(apache::thrift::detail::json::kJSONObjectStart);
+      out_.write<uint8_t>(apache::thrift::detail::json::kJSONObjectStart);
       return 1;
     case ContextType::ARRAY:
-      out_.write(apache::thrift::detail::json::kJSONArrayStart);
+      out_.write<uint8_t>(apache::thrift::detail::json::kJSONArrayStart);
       return 1;
     default:
       CHECK(false);
@@ -258,10 +258,10 @@ inline uint32_t JSONProtocolWriterCommon::endContext() {
   DCHECK(!context.empty());
   switch (context.back().type) {
     case ContextType::MAP:
-      out_.write(apache::thrift::detail::json::kJSONObjectEnd);
+      out_.write<uint8_t>(apache::thrift::detail::json::kJSONObjectEnd);
       break;
     case ContextType::ARRAY:
-      out_.write(apache::thrift::detail::json::kJSONArrayEnd);
+      out_.write<uint8_t>(apache::thrift::detail::json::kJSONArrayEnd);
       break;
     default:
       break;
@@ -281,14 +281,14 @@ inline uint32_t JSONProtocolWriterCommon::writeContext() {
       if (meta == 0) {
         return 0;
       } else if (meta % 2 == 0) {
-        out_.write(apache::thrift::detail::json::kJSONElemSeparator);
+        out_.write<uint8_t>(apache::thrift::detail::json::kJSONElemSeparator);
       } else {
-        out_.write(apache::thrift::detail::json::kJSONPairSeparator);
+        out_.write<uint8_t>(apache::thrift::detail::json::kJSONPairSeparator);
       }
       return 1;
     case ContextType::ARRAY:
       if (meta != 0) {
-        out_.write(apache::thrift::detail::json::kJSONElemSeparator);
+        out_.write<uint8_t>(apache::thrift::detail::json::kJSONElemSeparator);
         return 1;
       }
       return 0;
@@ -358,7 +358,7 @@ inline uint32_t JSONProtocolWriterCommon::writeJSONStringSmall(
 // Writes a string requiring an allocation bigger than the growth strategy
 inline uint32_t JSONProtocolWriterCommon::writeJSONStringLarge(
     folly::StringPiece str) {
-  out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
+  out_.write<uint8_t>(apache::thrift::detail::json::kJSONStringDelimiter);
   size_t totalBytesWritten = 2; // Two delimiters
   size_t i = 0;
   size_t bytesDesired = str.size() * 2;
@@ -386,7 +386,7 @@ inline uint32_t JSONProtocolWriterCommon::writeJSONStringLarge(
     out_.append(bytesWrittenOnAlloc);
     totalBytesWritten += bytesWrittenOnAlloc;
   } while (i < str.size());
-  out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
+  out_.write<uint8_t>(apache::thrift::detail::json::kJSONStringDelimiter);
   return static_cast<uint32_t>(totalBytesWritten);
 }
 
@@ -405,7 +405,7 @@ inline uint32_t JSONProtocolWriterCommon::writeJSONString(
 inline uint32_t JSONProtocolWriterCommon::writeJSONBase64(folly::ByteRange v) {
   uint32_t ret = 2;
 
-  out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
+  out_.write<uint8_t>(apache::thrift::detail::json::kJSONStringDelimiter);
   auto bytes = v.data();
   uint32_t len = folly::to_narrow(v.size());
   uint8_t b[4];
@@ -413,7 +413,7 @@ inline uint32_t JSONProtocolWriterCommon::writeJSONBase64(folly::ByteRange v) {
     // Encode 3 bytes at a time
     base64_encode(bytes, 3, b);
     for (int i = 0; i < 4; i++) {
-      out_.write(b[i]);
+      out_.write<uint8_t>(b[i]);
     }
     ret += 4;
     bytes += 3;
@@ -423,11 +423,11 @@ inline uint32_t JSONProtocolWriterCommon::writeJSONBase64(folly::ByteRange v) {
     DCHECK_LE(len, folly::to_unsigned(std::numeric_limits<int>::max()));
     base64_encode(bytes, folly::to_narrow(len), b);
     for (uint32_t i = 0; i < len + 1; i++) {
-      out_.write(b[i]);
+      out_.write<uint8_t>(b[i]);
     }
     ret += len + 1;
   }
-  out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
+  out_.write<uint8_t>(apache::thrift::detail::json::kJSONStringDelimiter);
 
   return ret;
 }

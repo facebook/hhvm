@@ -45,13 +45,13 @@ inline uint32_t CompactV1ProtocolWriter::writeDouble(double dub) {
   static_assert(std::numeric_limits<double>::is_iec559);
 
   uint64_t bits = folly::bit_cast<uint64_t>(dub);
-  out_.writeLE(bits);
+  out_.writeLE<uint64_t>(bits);
   return sizeof(bits);
 }
 
 inline void CompactV1ProtocolWriter::rewriteDouble(double dub, int64_t offset) {
   auto cursor = out_.tail<folly::io::CursorAccess::PRIVATE>(offset);
-  cursor.writeLE(folly::bit_cast<uint64_t>(dub));
+  cursor.writeLE<uint64_t>(folly::bit_cast<uint64_t>(dub));
 }
 
 inline void CompactV1ProtocolReader::readMessageBegin(

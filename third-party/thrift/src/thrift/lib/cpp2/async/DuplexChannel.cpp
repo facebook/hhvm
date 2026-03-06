@@ -126,7 +126,7 @@ std::unique_ptr<folly::IOBuf> DuplexChannel::DuplexFramingHandler::addFrame(
       flags |= HEADER_FLAG_DUPLEX_REVERSE;
       RWPrivateCursor wc(buf.get());
       wc.skip(6); // position at start of flags
-      wc.writeBE(flags);
+      wc.writeBE<uint16_t>(flags);
     }
   }
 

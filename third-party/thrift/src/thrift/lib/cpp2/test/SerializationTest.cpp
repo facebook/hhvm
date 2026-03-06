@@ -105,9 +105,9 @@ TEST(SerializationTest, DeserializeReturningObjGivenCursorToMiddleOfBuffer) {
   // Copy the serialized data into an IOBuf, with 4 extra bytes on either end.
   IOBuf buf{IOBuf::CREATE, str.size() + (sizeof(uint32_t) * 2)};
   folly::io::Appender appender(&buf, 0);
-  appender.writeBE<uint32_t>(12);
+  appender.writeBE<uint32_t>(static_cast<uint32_t>(12));
   appender(str);
-  appender.writeBE<uint32_t>(34);
+  appender.writeBE<uint32_t>(static_cast<uint32_t>(34));
 
   // Create a Cursor pointing to the location of the serialized data
   // in the buffer.

@@ -114,27 +114,27 @@ inline uint32_t BinaryProtocolWriter::writeSetEnd() {
 }
 
 inline uint32_t BinaryProtocolWriter::writeBool(bool value) {
-  out_.write(apache::thrift::detail::validate_bool(value));
+  out_.write<bool>(apache::thrift::detail::validate_bool(value));
   return sizeof(value);
 }
 
 inline uint32_t BinaryProtocolWriter::writeByte(int8_t byte) {
-  out_.write(byte);
+  out_.write<int8_t>(byte);
   return sizeof(byte);
 }
 
 inline uint32_t BinaryProtocolWriter::writeI16(int16_t i16) {
-  out_.writeBE(i16);
+  out_.writeBE<int16_t>(i16);
   return sizeof(i16);
 }
 
 inline uint32_t BinaryProtocolWriter::writeI32(int32_t i32) {
-  out_.writeBE(i32);
+  out_.writeBE<int32_t>(i32);
   return sizeof(i32);
 }
 
 inline uint32_t BinaryProtocolWriter::writeI64(int64_t i64) {
-  out_.writeBE(i64);
+  out_.writeBE<int64_t>(i64);
   return sizeof(i64);
 }
 
@@ -143,7 +143,7 @@ inline uint32_t BinaryProtocolWriter::writeDouble(double dub) {
   static_assert(std::numeric_limits<double>::is_iec559);
 
   uint64_t bits = folly::bit_cast<uint64_t>(dub);
-  out_.writeBE(bits);
+  out_.writeBE<uint64_t>(bits);
   return sizeof(bits);
 }
 
@@ -152,7 +152,7 @@ inline uint32_t BinaryProtocolWriter::writeFloat(float flt) {
   static_assert(std::numeric_limits<float>::is_iec559);
 
   uint32_t bits = folly::bit_cast<uint32_t>(flt);
-  out_.writeBE(bits);
+  out_.writeBE<uint32_t>(bits);
   return sizeof(bits);
 }
 
@@ -219,7 +219,7 @@ inline uint32_t BinaryProtocolWriter::writeBinaryImpl(
 
 inline void BinaryProtocolWriter::rewriteDouble(double dub, int64_t offset) {
   auto cursor = out_.tail<folly::io::CursorAccess::PRIVATE>(offset);
-  cursor.writeBE(folly::bit_cast<uint64_t>(dub));
+  cursor.writeBE<uint64_t>(folly::bit_cast<uint64_t>(dub));
 }
 
 inline folly::io::Cursor BinaryProtocolWriter::tail(size_t n) {

@@ -1550,7 +1550,7 @@ void t_mstch_py3_generator::generate_types() {
       {"types_fields.pxd", false},
       {"types_fields.pyx", false},
       {"types_impl_FBTHRIFT_ONLY_DO_NOT_USE.py", true},
-      {"types_reflection.py", false},
+      {"types_reflection.py", true},
   };
 
   std::vector<std::pair<std::string, bool>> cppFilesWithTypeContext{

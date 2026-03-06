@@ -64,7 +64,7 @@ from thrift.py3.reflection import (
     FieldSpec as __FieldSpec,
 )
 
-{{#each program:includeNamespaces as |include|}}
+{{#each program.includeNamespaces as |include|}}
   {{#if include.has_types?}}
 try:
     import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
@@ -74,79 +74,76 @@ except ModuleNotFoundError:
 {{/each}}
 
 try:
-    import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
+    import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
 except ModuleNotFoundError:
-    import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
+    import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
 
 
 
-{{#program:filtered_structs}}
-def get_reflection__{{struct:name}}() -> __StructSpec:
+{{#each program.py3_visible_structured_definitions as |struct|}}
+def get_reflection__{{struct.name}}() -> __StructSpec:
     spec: __StructSpec = __StructSpec._fbthrift_create(
-        name="{{struct:name}}",
+        name="{{struct.name}}",
         kind=__StructType.{{!
-            }}{{#if struct:exception?}}EXCEPTION{{!
-            }}{{#else if struct:union?}}UNION{{!
-            }}{{#else}}STRUCT{{/if struct:exception?}},
+            }}{{#if struct.exception?}}EXCEPTION{{!
+            }}{{#else if struct.union?}}UNION{{!
+            }}{{#else}}STRUCT{{/if struct.exception?}},
         annotations={
-            {{#each struct:unstructured_annotations as |annot|}}
+            {{#each struct.unstructured_annotations as |annot|}}
             {{#partial common.annotation annot=annot}}
             {{/each}}
         },
     )
-{{#struct:py3_fields}}
-  {{#if (and first? struct:has_defaulted_fields?)}}
-    defaults = _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types.{{struct:name}}()
-  {{/if (and first? struct:has_defaulted_fields?)}}
+  {{#each (array.enumerate struct.py3_fields with_first=true) as |i field is_first_field?|}}
+    {{#if (and is_first_field? struct.has_defaulted_fields?)}}
+    defaults = _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types.{{struct.name}}()
+    {{/if (and is_first_field? struct.has_defaulted_fields?)}}
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id={{field:id}},
-            name="{{field:name}}",
-            py_name="{{field:py_name}}",
-            type={{#partial types.python_type type=field:self.type}},
-            kind={{#partial thrift_number_type type=field:self.type}},
+            id={{field.id}},
+            name="{{field.name}}",
+            py_name="{{field.py_name}}",
+            type={{#partial types.python_type type=field.type}},
+            kind={{#partial thrift_number_type type=field.type}},
             qualifier=__Qualifier.{{!
-                }}{{#field:required?}}REQUIRED{{/field:required?}}{{!
-                }}{{^field:required?}}{{!
-                }}{{#field:optional?}}OPTIONAL{{/field:optional?}}{{!
-                }}{{^field:optional?}}UNQUALIFIED{{/field:optional?}}{{!
-                }}{{/field:required?}},
+                }}{{#if field.required?}}REQUIRED{{!
+                }}{{#else if field.optional?}}OPTIONAL{{!
+                }}{{#else}}UNQUALIFIED{{/if field.required?}},
             default={{!
-            }}{{^struct:union?}}{{!
-                }}{{#if (object.notnull? field:default_value)}}defaults.{{field:name}}{{#else}}None{{/if}}{{!
-            }}{{/struct:union?}}{{!
-            }}{{#struct:union?}}None{{/struct:union?}},
+            }}{{#if struct.union?}}None{{!
+            }}{{#else if (object.notnull? field.default_value)}}defaults.{{field.name}}{{!
+            }}{{#else}}None{{/if struct.union?}},
             annotations={
-                {{#each field:unstructured_annotations as |annot|}}
+                {{#each field.unstructured_annotations as |annot|}}
                 {{#partial common.annotation annot=annot}}
                 {{/each}}
             },
         ),
     )
-{{/struct:py3_fields}}
+  {{/each}}
     return spec
-{{/program:filtered_structs}}
-{{#program:containerTypes}}
-{{#if type:list?}}
-def get_reflection__{{type:flat_name}}() -> __ListSpec :
+{{/each}}
+{{#each program.container_types as |type|}}
+  {{#if type.list?}}
+def get_reflection__{{type.flat_name}}() -> __ListSpec :
     return __ListSpec._fbthrift_create(
-        value={{#partial types.python_type type=type:self.true_type.elem_type}},
-        kind={{#partial thrift_number_type type=type:self.true_type.elem_type}},
+        value={{#partial types.python_type type=type.true_type.elem_type}},
+        kind={{#partial thrift_number_type type=type.true_type.elem_type}},
     )
-{{#else if type:set?}}
-def get_reflection__{{type:flat_name}}() -> __SetSpec:
+  {{#else if type.set?}}
+def get_reflection__{{type.flat_name}}() -> __SetSpec:
     return __SetSpec._fbthrift_create(
-        value={{#partial types.python_type type=type:self.true_type.elem_type}},
-        kind={{#partial thrift_number_type type=type:self.true_type.elem_type}},
+        value={{#partial types.python_type type=type.true_type.elem_type}},
+        kind={{#partial thrift_number_type type=type.true_type.elem_type}},
      )
-{{#else if type:map?}}
-def get_reflection__{{type:flat_name}}() -> __MapSpec:
+  {{#else if type.map?}}
+def get_reflection__{{type.flat_name}}() -> __MapSpec:
     return __MapSpec._fbthrift_create(
-        key={{#partial types.python_type type=type:self.true_type.key_type}},
-        key_kind={{#partial thrift_number_type type=type:self.true_type.key_type}},
-        value={{#partial types.python_type type=type:self.true_type.val_type}},
-        value_kind={{#partial thrift_number_type type=type:self.true_type.val_type}},
+        key={{#partial types.python_type type=type.true_type.key_type}},
+        key_kind={{#partial thrift_number_type type=type.true_type.key_type}},
+        value={{#partial types.python_type type=type.true_type.val_type}},
+        value_kind={{#partial thrift_number_type type=type.true_type.val_type}},
     )
-{{/if type:list?}}
+  {{/if type.list?}}
 
-{{/program:containerTypes}}
+{{/each}}

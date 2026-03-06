@@ -21,35 +21,35 @@
 ::{{service.cpp_name}}
 {{/let partial}}
 {{> common/auto_generated_c}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
-#include "{{program:include_prefix}}gen-py3/{{program:name}}/metadata.h"
+#include "{{program.include_prefix}}gen-py3/{{program.name}}/metadata.h"
 
-#include "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_handlers.h"
+#include "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_handlers.h"
 
-{{#program:cppNamespaces}}namespace {{.}} {
-{{/program:cppNamespaces}}
-::apache::thrift::metadata::ThriftMetadata {{program:name}}_getThriftModuleMetadata() {
+  {{#each program.cppNamespaces as |ns|}}
+namespace {{ns}} {
+  {{/each}}
+::apache::thrift::metadata::ThriftMetadata {{program.name}}_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
-{{#program:enums}}
-  ::apache::thrift::detail::md::EnumMetadata<{{enum:cpp_name}}>::gen(metadata);
-{{/program:enums}}
-{{#program:filtered_structs}}
-{{#struct:exception?}}
-  ::apache::thrift::detail::md::ExceptionMetadata<{{struct:name}}>::gen(metadata);
-{{/struct:exception?}}
-{{^struct:exception?}}
-  ::apache::thrift::detail::md::StructMetadata<{{struct:name}}>::gen(metadata);
-{{/struct:exception?}}
-{{/program:filtered_structs}}
-{{#program:services}}
+  {{#each program.enums as |enum|}}
+  ::apache::thrift::detail::md::EnumMetadata<{{enum.cpp_name}}>::gen(metadata);
+  {{/each}}
+  {{#each program.py3_visible_structured_definitions as |struct|}}
+    {{#if struct.exception?}}
+  ::apache::thrift::detail::md::ExceptionMetadata<{{struct.name}}>::gen(metadata);
+    {{#else}}
+  ::apache::thrift::detail::md::StructMetadata<{{struct.name}}>::gen(metadata);
+    {{/if struct.exception?}}
+  {{/each}}
+  {{#each program.services as |service|}}
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<{{!
-    }}{{#partial service_qualified_name service=service:self}}>>::gen(response);
-{{/program:services}}
+    }}{{#partial service_qualified_name service=service}}>>::gen(response);
+  {{/each}}
   return metadata;
 }
-{{#program:cppNamespaces}}
-} // namespace {{.}}
-{{/program:cppNamespaces}}
-{{/program:auto_migrate?}}
+  {{#each program.cppNamespaces as |ns|}}
+} // namespace {{ns}}
+  {{/each}}
+{{/if (not program.auto_migrate?)}}

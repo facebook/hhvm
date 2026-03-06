@@ -1559,7 +1559,7 @@ void t_mstch_py3_generator::generate_types() {
 
   std::vector<std::pair<std::string, bool>> cppFilesWithNoTypeContext{
       {"metadata.h", true},
-      {"metadata.cpp", false},
+      {"metadata.cpp", true},
   };
 
   generate_whisker_file(

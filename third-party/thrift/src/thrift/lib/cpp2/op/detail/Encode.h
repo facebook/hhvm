@@ -44,14 +44,6 @@ class SimpleJSONProtocolWriter;
 
 namespace op::detail {
 
-template <class Protocol>
-FieldOrder getFieldOrder(const Protocol& prot) {
-  if constexpr (requires { prot.fieldOrder(); }) {
-    return prot.fieldOrder();
-  }
-  return FieldOrder::Serialization;
-}
-
 template <typename T, typename Tag>
 inline constexpr bool kIsStrongType =
     std::is_enum_v<folly::remove_cvref_t<T>> &&
@@ -557,8 +549,13 @@ struct StructEncode {
   uint32_t operator()(Protocol& prot, const T& t) const {
     uint32_t s = 0;
     s += prot.writeStructBegin(op::get_class_name_v<T>.data());
-    auto writeField = [&]<class Id>(Id) {
-      static_assert(type::is_field_id_v<Id>);
+    op::for_each_ordinal<T>([&](auto id) {
+      // To respect the SerializeInFieldIdOrder annotation, we perform a custom
+      // mapping to FieldId that may switch the current ordinal being visited.
+      // This new field id is the source of truth, and the old ordinal value
+      // should not be used in this function.
+      using Id = type::field_id<detail::pa::field_ids_in_serialization_order<
+          T>()[static_cast<size_t>(decltype(id)::value)]>;
       using TypeTag = op::get_type_tag<T, Id>;
       using FieldTag = op::get_field_tag<T, Id>;
       auto&& field = op::get<Id>(t);
@@ -572,20 +569,7 @@ struct StructEncode {
           folly::to_underlying(Id::value));
       s += Encode<TypeTag>{}(prot, *field);
       s += prot.writeFieldEnd();
-    };
-    if (getFieldOrder(prot) == FieldOrder::Serialization) {
-      op::for_each_ordinal<T>([&](auto id) {
-        // To respect the SerializeInFieldIdOrder annotation, we perform a
-        // custom mapping to FieldId that may switch the current ordinal being
-        // visited. This new field id is the source of truth, and the old
-        // ordinal value should not be used in this function.
-        using Id = type::field_id<detail::pa::field_ids_in_serialization_order<
-            T>()[static_cast<size_t>(decltype(id)::value)]>;
-        writeField(Id{});
-      });
-    } else {
-      op::for_each_field_id_ascending<T>(writeField);
-    }
+    });
     s += prot.writeFieldStop();
     s += prot.writeStructEnd();
     return s;

@@ -55,6 +55,31 @@ let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
     (* Should not hit this because TypeStructure should always be defined *)
     (env, MakeType.dynamic r)
 
+(* Does this type contain only enum or object instances?
+ * These are the types that can be represented using classname
+ *)
+let rec is_enum_or_classish env ty =
+  match get_node ty with
+  | Tnewtype (cid, _, _) when Env.is_enum env cid -> true
+  | Tintersection tys -> List.exists tys ~f:(is_enum_or_classish env)
+  | Tunion tys -> List.for_all tys ~f:(is_enum_or_classish env)
+  | Tclass ((_, x), _, _)
+    when not
+           (String.equal x SN.Collections.cVec
+           || String.equal x SN.Collections.cDict
+           || String.equal x SN.Collections.cKeyset) ->
+    true
+  | Tgeneric _ ->
+    let (_env, tyl) =
+      TUtils.get_concrete_supertypes
+        ~expand_supportdyn:true
+        ~abstract_enum:false
+        env
+        ty
+    in
+    List.exists tyl ~f:(is_enum_or_classish env)
+  | _ -> false
+
 let rec transform_shapemap ?(nullable = false) env pos ty shape =
   let ((env, ty_err_opt), ty) =
     Typing_solver.expand_type_and_solve
@@ -96,28 +121,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
     (* Does this type contain only enum or object instances?
      * These are the types that can be represented using classname
      *)
-    let rec is_enum_or_classish ty =
-      match get_node ty with
-      | Tnewtype (cid, _, _) when Env.is_enum env cid -> true
-      | Tintersection tys -> List.exists tys ~f:is_enum_or_classish
-      | Tunion tys -> List.for_all tys ~f:is_enum_or_classish
-      | Tclass ((_, x), _, _)
-        when not
-               (String.equal x SN.Collections.cVec
-               || String.equal x SN.Collections.cDict
-               || String.equal x SN.Collections.cKeyset) ->
-        true
-      | Tgeneric _ ->
-        let (_env, tyl) =
-          TUtils.get_concrete_supertypes
-            ~expand_supportdyn:true
-            ~abstract_enum:false
-            env
-            ty
-        in
-        List.exists tyl ~f:is_enum_or_classish
-      | _ -> false
-    in
+    let is_enum_or_classish ty = is_enum_or_classish env ty in
     let supportdyn = supportdyn || supportdyn_bound in
     let transform_shape_field field { sft_ty; sft_optional } (env, shape) =
       (* Accumulates the provided type for this iteration of the fold, adding

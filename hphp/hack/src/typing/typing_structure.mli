@@ -6,6 +6,8 @@
  *
  *)
 
+val is_enum_or_classish : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
 val transform_shapemap :
   ?nullable:bool ->
   Typing_env_types.env ->

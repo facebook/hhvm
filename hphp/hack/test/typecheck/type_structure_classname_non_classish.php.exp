@@ -1,0 +1,5 @@
+ERROR: File "type_structure_classname_non_classish.php", line 8, characters 3-29:
+The two arguments to `HH\type_structure_classname()` must be:
+ - first: `ValidClassname::class` or an object of that class
+ - second: a single-quoted string literal containing the name of a type constant of that class
+The type constant does not resolve to a classish type (Typing[4150])

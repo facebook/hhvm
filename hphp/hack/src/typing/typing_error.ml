@@ -857,6 +857,7 @@ module Primary = struct
     | Illegal_type_structure of {
         pos: Pos.t;
         msg: string;
+        fn: string;
       }
     | Illegal_typeconst_direct_access of Pos.t
     | Wrong_expression_kind_attribute of {

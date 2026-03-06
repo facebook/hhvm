@@ -1095,6 +1095,8 @@ module StdlibFunctions = struct
 
   let type_structure = "\\HH\\type_structure"
 
+  let type_structure_classname = "\\HH\\type_structure_classname"
+
   let array_mark_legacy = "\\HH\\array_mark_legacy"
 
   let array_unmark_legacy = "\\HH\\array_unmark_legacy"
@@ -1112,6 +1114,7 @@ module StdlibFunctions = struct
         PseudoFunctions.isset;
         PseudoFunctions.unset;
         type_structure;
+        type_structure_classname;
         PseudoFunctions.unsafe_cast;
         PseudoFunctions.unsafe_nonnull_cast;
       ]

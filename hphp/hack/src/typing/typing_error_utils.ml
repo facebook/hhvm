@@ -2949,11 +2949,13 @@ end = struct
     let claim = lazy (p, "Not a valid class name") in
     create ~code:Error_code.InvalidClassname ~claim ()
 
-  let illegal_type_structure pos msg =
+  let illegal_type_structure pos msg fn =
     let claim =
       lazy
         (let msg =
-           "The two arguments to `type_structure()` must be:"
+           "The two arguments to `"
+           ^ Utils.strip_ns fn
+           ^ "()` must be:"
            ^ "\n - first: `ValidClassname::class` or an object of that class"
            ^ "\n - second: a single-quoted string literal containing the name"
            ^ " of a type constant of that class\n"
@@ -4989,7 +4991,8 @@ end = struct
     | Cannot_declare_constant { pos; class_pos; class_name } ->
       cannot_declare_constant pos (class_pos, class_name)
     | Invalid_classname pos -> invalid_classname pos
-    | Illegal_type_structure { pos; msg } -> illegal_type_structure pos msg
+    | Illegal_type_structure { pos; msg; fn } ->
+      illegal_type_structure pos msg fn
     | Illegal_typeconst_direct_access pos -> illegal_typeconst_direct_access pos
     | Wrong_expression_kind_attribute
         {

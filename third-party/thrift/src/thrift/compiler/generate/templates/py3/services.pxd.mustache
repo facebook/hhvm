@@ -25,30 +25,38 @@ This is a top-level file that gets imported by the CythonServices.pyx file. That
 file exposes Python wrappers of the services to the end user.
 
 }}
+{{#let partial service_base |service|}}
+{{#pragma ignore-newlines}}
+  {{#if (object.notnull? service.extends)}}
+    {{#if service.extends.externalProgram?}}
+_{{#each service.extends.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}
+{{service.extends.program.name}}_services.
+    {{/if service.extends.externalProgram?}}
+{{service.extends.name}}Interface
+  {{#else}}
+ServiceInterface
+  {{/if (object.notnull? service.extends)}}
+{{/let partial}}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
 from thrift.py3.server cimport ServiceInterface
 
-{{#each program:includeNamespaces as |include|}}
+{{#each program.includeNamespaces as |include|}}
   {{#if include.import_services?}}
 cimport {{include.modulePathPeriodSeparated}}.services as _{{include.modulePathUnderscoreSeparated}}_services
   {{/if include.import_services?}}
 {{/each}}
 
-{{#program:services}}
-cdef class {{service:name}}Interface({{#service:extends}}{{#service:externalProgram?}}{{!
-  }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-    }}{{service:program.name}}_services.{{/service:externalProgram?}}{{service:name}}Interface{{!
-  }}{{/service:extends}}{{!
-  }}{{^service:extends?}}ServiceInterface{{/service:extends?}}):
-    {{#service:functions?}}
+  {{#each program.services as |service|}}
+cdef class {{service.name}}Interface({{#partial service_base service=service}}):
+    {{#if (not (array.empty? service.functions))}}
     # these are to avoid weird Cython multiple inheritance issue
-    {{/service:functions?}}
-    {{#service:supportedFunctions}}
-    cdef bint _for_cython_{{function:name }}
-    {{/service:supportedFunctions}}
+    {{/if (not (array.empty? service.functions))}}
+    {{#each service.supportedFunctions as |function|}}
+    cdef bint _for_cython_{{function.name}}
+    {{/each}}
     pass
 
-{{/program:services}}
-{{/program:auto_migrate?}}
+  {{/each}}
+{{/if (not program.auto_migrate?)}}

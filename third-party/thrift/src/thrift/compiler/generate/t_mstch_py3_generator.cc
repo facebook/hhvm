@@ -832,6 +832,23 @@ class t_mstch_py3_generator : public t_mstch_generator {
       const std::string& template_name,
       FileType file_type,
       const std::filesystem::path& base);
+  /**
+   * Generate a list of templates, with a mix of mstch/whisker
+   * TODO(T256504508): Remove once all templates render with Whisker.
+   */
+  void generate_mixed_template_list(
+      const std::vector<
+          std::pair<std::string /*template*/, bool /*use_whisker*/>>& templates,
+      FileType file_type,
+      const std::filesystem::path& base = {}) {
+    for (const auto& [template_name, use_whisker] : templates) {
+      if (use_whisker) {
+        generate_whisker_file(template_name, file_type, base);
+      } else {
+        generate_mstch_file(template_name, file_type, base);
+      }
+    }
+  }
   void generate_types();
   void generate_services();
   std::filesystem::path package_to_path();
@@ -1495,49 +1512,51 @@ void t_mstch_py3_generator::generate_whisker_file(
 }
 
 void t_mstch_py3_generator::generate_types() {
-  std::vector<std::string> autoMigrateFilesWithTypeContext{
-      "types.py",
-      "types_auto_FBTHRIFT_ONLY_DO_NOT_USE.py",
-      "types_auto_migrated.py",
+  // {template_name, use_whisker}
+  std::vector<std::pair<std::string, bool>> autoMigrateFilesWithTypeContext{
+      {"types.py", false},
+      {"types_auto_FBTHRIFT_ONLY_DO_NOT_USE.py", false},
+      {"types_auto_migrated.py", true},
   };
 
   std::vector<std::string> autoMigrateFilesNoTypeContext{
       "metadata.py",
   };
 
-  std::vector<std::string> converterFiles{
-      "converter.pxd",
-      "converter.pyx",
+  // {template_name, use_whisker}
+  std::vector<std::pair<std::string, bool>> converterFiles{
+      {"converter.pxd", false},
+      {"converter.pyx", false},
   };
 
-  std::vector<std::string> cythonFilesWithTypeContext{
-      "types.pyx",
-      "types.pxd",
-      "types.pyi",
+  std::vector<std::pair<std::string, bool>> cythonFilesWithTypeContext{
+      {"types.pyx", false},
+      {"types.pxd", false},
+      {"types.pyi", false},
   };
 
-  std::vector<std::string> cythonFilesNoTypeContext{
-      "builders.py",
-      "constants_FBTHRIFT_ONLY_DO_NOT_USE.py",
-      "containers_FBTHRIFT_ONLY_DO_NOT_USE.py",
-      "metadata.pxd",
-      "metadata.pyi",
-      "metadata.pyx",
-      "types_auto_migrated.py",
-      "types_empty.pyx",
-      "types_fields.pxd",
-      "types_fields.pyx",
-      "types_impl_FBTHRIFT_ONLY_DO_NOT_USE.py",
-      "types_reflection.py",
+  std::vector<std::pair<std::string, bool>> cythonFilesNoTypeContext{
+      {"builders.py", false},
+      {"constants_FBTHRIFT_ONLY_DO_NOT_USE.py", false},
+      {"containers_FBTHRIFT_ONLY_DO_NOT_USE.py", false},
+      {"metadata.pxd", true},
+      {"metadata.pyi", true},
+      {"metadata.pyx", true},
+      {"types_auto_migrated.py", true},
+      {"types_empty.pyx", true},
+      {"types_fields.pxd", false},
+      {"types_fields.pyx", false},
+      {"types_impl_FBTHRIFT_ONLY_DO_NOT_USE.py", false},
+      {"types_reflection.py", false},
   };
 
-  std::vector<std::string> cppFilesWithTypeContext{
-      "types.h",
+  std::vector<std::pair<std::string, bool>> cppFilesWithTypeContext{
+      {"types.h", false},
   };
 
-  std::vector<std::string> cppFilesWithNoTypeContext{
-      "metadata.h",
-      "metadata.cpp",
+  std::vector<std::pair<std::string, bool>> cppFilesWithNoTypeContext{
+      {"metadata.h", true},
+      {"metadata.cpp", false},
   };
 
   generate_whisker_file(
@@ -1553,29 +1572,22 @@ void t_mstch_py3_generator::generate_types() {
         FileType::TypesFile,
         generateRootPath_);
   }
-  for (const auto& file : converterFiles) {
-    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
-  }
+  generate_mixed_template_list(
+      converterFiles, FileType::NotTypesFile, generateRootPath_);
   // - if auto_migrate is present, generate types.pxd, and types.py
   // - else, just generate normal cython files
-  for (const auto& file : autoMigrateFilesWithTypeContext) {
-    generate_mstch_file(file, FileType::TypesFile, generateRootPath_);
-  }
+  generate_mixed_template_list(
+      autoMigrateFilesWithTypeContext, FileType::TypesFile, generateRootPath_);
   for (const auto& file : autoMigrateFilesNoTypeContext) {
-    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
   }
-  for (const auto& file : cythonFilesWithTypeContext) {
-    generate_mstch_file(file, FileType::TypesFile, generateRootPath_);
-  }
-  for (const auto& file : cppFilesWithTypeContext) {
-    generate_mstch_file(file, FileType::TypesFile);
-  }
-  for (const auto& file : cythonFilesNoTypeContext) {
-    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
-  }
-  for (const auto& file : cppFilesWithNoTypeContext) {
-    generate_mstch_file(file, FileType::NotTypesFile);
-  }
+  generate_mixed_template_list(
+      cythonFilesWithTypeContext, FileType::TypesFile, generateRootPath_);
+  generate_mixed_template_list(cppFilesWithTypeContext, FileType::TypesFile);
+  generate_mixed_template_list(
+      cythonFilesNoTypeContext, FileType::NotTypesFile, generateRootPath_);
+  generate_mixed_template_list(
+      cppFilesWithNoTypeContext, FileType::NotTypesFile);
 }
 
 void t_mstch_py3_generator::generate_services() {
@@ -1592,26 +1604,27 @@ void t_mstch_py3_generator::generate_services() {
       "services.py",
   };
 
-  std::vector<std::string> normalCythonFiles{
-      "clients.pxd",
-      "clients.pyx",
-      "clients.pyi",
-      "services.pxd",
-      "services.pyx",
-      "services.pyi",
+  // {template_name, use_whisker}
+  std::vector<std::pair<std::string, bool>> normalCythonFiles{
+      {"clients.pxd", false},
+      {"clients.pyx", false},
+      {"clients.pyi", false},
+      {"services.pxd", true},
+      {"services.pyx", false},
+      {"services.pyi", false},
   };
 
-  std::vector<std::string> cythonFiles{
-      "clients_wrapper.pxd",
-      "services_wrapper.pxd",
-      "services_interface.pxd",
+  std::vector<std::pair<std::string, bool>> cythonFiles{
+      {"clients_wrapper.pxd", false},
+      {"services_wrapper.pxd", true},
+      {"services_interface.pxd", true},
   };
 
-  std::vector<std::string> cppFiles{
-      "clients_wrapper.h",
-      "clients_wrapper.cpp",
-      "services_wrapper.h",
-      "services_wrapper.cpp",
+  std::vector<std::pair<std::string, bool>> cppFiles{
+      {"clients_wrapper.h", false},
+      {"clients_wrapper.cpp", false},
+      {"services_wrapper.h", false},
+      {"services_wrapper.cpp", false},
   };
 
   // TODO this logic is a complete mess and I intend to clean it up later
@@ -1620,17 +1633,13 @@ void t_mstch_py3_generator::generate_services() {
   // - if auto_migrate isn't present, just generate all the normal files
 
   for (const auto& file : pythonFiles) {
-    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
+    generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
   }
-  for (const auto& file : normalCythonFiles) {
-    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
-  }
-  for (const auto& file : cppFiles) {
-    generate_mstch_file(file, FileType::NotTypesFile);
-  }
-  for (const auto& file : cythonFiles) {
-    generate_mstch_file(file, FileType::NotTypesFile, generateRootPath_);
-  }
+  generate_mixed_template_list(
+      normalCythonFiles, FileType::NotTypesFile, generateRootPath_);
+  generate_mixed_template_list(cppFiles, FileType::NotTypesFile);
+  generate_mixed_template_list(
+      cythonFiles, FileType::NotTypesFile, generateRootPath_);
 }
 
 } // namespace

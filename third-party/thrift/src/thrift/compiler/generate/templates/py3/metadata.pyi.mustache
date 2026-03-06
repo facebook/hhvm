@@ -16,9 +16,9 @@
 
 }}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
 from apache.thrift.metadata.types import ThriftMetadata
 
 def getThriftModuleMetadata() -> ThriftMetadata: ...
-{{/program:auto_migrate?}}
+{{/if (not program.auto_migrate?)}}

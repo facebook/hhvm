@@ -16,14 +16,14 @@
 
 }}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
 from apache.thrift.metadata.cbindings cimport cThriftMetadata
 from thrift.python.common cimport (
     cThriftMetadata as __fbthrift_cThriftMetadata,
 )
 
-cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/metadata.h"{{!
+cdef extern from "{{program.include_prefix}}gen-py3/{{program.name}}/metadata.h"{{!
 }} :
-    cdef cThriftMetadata cGetThriftModuleMetadata "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}::{{program:name}}_getThriftModuleMetadata"()
-{{/program:auto_migrate?}}
+    cdef cThriftMetadata cGetThriftModuleMetadata "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}::{{program.name}}_getThriftModuleMetadata"()
+{{/if (not program.auto_migrate?)}}

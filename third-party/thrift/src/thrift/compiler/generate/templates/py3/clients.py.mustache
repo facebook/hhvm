@@ -33,6 +33,6 @@ want to include.
 
 }}
 {{> common/auto_generated_py}}
-{{#program:auto_migrate?}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_clients import *
-{{/program:auto_migrate?}}
+{{#if program.auto_migrate?}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_clients import *
+{{/if program.auto_migrate?}}

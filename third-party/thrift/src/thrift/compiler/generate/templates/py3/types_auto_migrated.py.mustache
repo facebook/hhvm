@@ -24,6 +24,4 @@ Low node count that prevents eviction may cause linker relocation overflow error
 }}
 {{> common/auto_generated_py}}
 
-_fbthrift__is_py3_auto_migrated: bool = {{!
-    }}{{^program:auto_migrate?}}False{{/program:auto_migrate?}}{{!
-    }}{{#program:auto_migrate?}}True{{/program:auto_migrate?}}
+_fbthrift__is_py3_auto_migrated: bool = {{#if program.auto_migrate?}}True{{#else}}False{{/if}}

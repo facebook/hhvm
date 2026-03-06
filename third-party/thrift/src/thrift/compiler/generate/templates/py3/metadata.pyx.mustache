@@ -16,7 +16,7 @@
 
 }}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
 from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.utility cimport move as cmove
@@ -28,10 +28,10 @@ from apache.thrift.metadata.converter cimport (
     ThriftMetadata_from_cpp
 )
 
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.metadata cimport cGetThriftModuleMetadata
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.metadata cimport cGetThriftModuleMetadata
 
 def getThriftModuleMetadata():
     cdef shared_ptr[cThriftMetadata] metadata
     metadata = make_shared[cThriftMetadata](cGetThriftModuleMetadata())
     return ThriftMetadata_from_cpp(cmove(metadata))
-{{/program:auto_migrate?}}
+{{/if (not program.auto_migrate?)}}

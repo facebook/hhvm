@@ -637,10 +637,10 @@ class TSimpleJSONProtocol extends TProtocol {
     }
     $str = $this->buffer->readAll($count);
     if (
-      !PHP\fb\preg_match_simple(
+      !HH\legacy_is_truthy(PHP\fb\preg_match_simple(
         '/^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/',
         $str,
-      )
+      ))
     ) {
       throw new TProtocolException(
         'TSimpleJSONProtocol: Invalid json number '.$str,

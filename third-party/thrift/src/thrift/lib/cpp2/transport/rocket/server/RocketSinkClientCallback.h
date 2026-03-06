@@ -25,11 +25,13 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IConnectionStreamHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 
 namespace apache::thrift::rocket {
 
-class RocketSinkClientCallback final : public SinkClientCallback {
+class RocketSinkClientCallback final : public SinkClientCallback,
+                                       public IConnectionStreamHandler {
  public:
   explicit RocketSinkClientCallback(
       StreamId streamId,
@@ -48,6 +50,15 @@ class RocketSinkClientCallback final : public SinkClientCallback {
   bool onSinkNext(StreamPayload&&);
   bool onSinkError(folly::exception_wrapper);
   bool onSinkComplete();
+
+  // IConnectionStreamHandler overrides
+  StreamId streamId() const override { return streamId_; }
+  void handleFrame(RequestNFrame&&) override;
+  void handleFrame(CancelFrame&&) override;
+  void handleFrame(PayloadFrame&&) override;
+  void handleFrame(ErrorFrame&&) override;
+  void handleFrame(ExtFrame&&) override;
+  void handleConnectionClose() override;
 
   void setChunkTimeout(std::chrono::milliseconds timeout);
   void timeoutExpired() noexcept;
@@ -92,6 +103,13 @@ class RocketSinkClientCallback final : public SinkClientCallback {
   void scheduleTimeout(std::chrono::milliseconds chunkTimeout);
   void cancelTimeout();
 
+  /**
+   * Buffers payload frame fragments until the final fragment arrives.
+   * Returns the fully assembled payload when all fragments are received,
+   * or folly::none if still buffering intermediate fragments.
+   */
+  folly::Optional<Payload> bufferOrGetFullPayload(PayloadFrame&& payloadFrame);
+
   enum class State { BothOpen, StreamOpen };
   State state_{State::BothOpen};
   const StreamId streamId_;
@@ -101,6 +119,7 @@ class RocketSinkClientCallback final : public SinkClientCallback {
   std::unique_ptr<TimeoutCallback> timeout_;
   protocol::PROTOCOL_TYPES protoId_;
   std::unique_ptr<CompressionConfig> compressionConfig_;
+  folly::Optional<Payload> bufferedFragment_;
 };
 
 } // namespace apache::thrift::rocket

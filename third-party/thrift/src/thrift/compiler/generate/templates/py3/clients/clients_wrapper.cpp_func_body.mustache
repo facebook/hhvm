@@ -15,26 +15,25 @@
   limitations under the License.
 
 }}
-using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<{{#partial clients.cpp_return_type function=function:self}}>;
+using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<{{#partial clients.cpp_return_type function=function}}>;
 folly::Promise<CallbackHelper::PromiseResult> _promise;
 auto _future = _promise.getFuture();
-{{^function:oneway?}}
-auto callback = std::make_unique<::thrift::py3::FutureCallback<{{#partial clients.cpp_return_type function=function:self}}>>(
-  std::move(_promise), rpcOptions, client->recv_wrapped_{{function:cpp_name}}, channel_);
-{{/function:oneway?}}
-{{#function:oneway?}}
+{{#if function.oneway?}}
 {{! oneway functions have no recv they are special cased}}
 auto callback = std::make_unique<::apache::thrift::OneWayFutureCallback>(
   std::move(_promise), channel_);
-{{/function:oneway?}}
+{{#else}}
+auto callback = std::make_unique<::thrift::py3::FutureCallback<{{#partial clients.cpp_return_type function=function}}>>(
+  std::move(_promise), rpcOptions, client->recv_wrapped_{{function.cpp_name}}, channel_);
+{{/if function.oneway?}}
 try {
-  client->{{function:cpp_name}}(
+  client->{{function.cpp_name}}(
     rpcOptions,
-    std::move(callback){{#function:args}},
-    arg_{{field:py_name}}{{/function:args}}
+    std::move(callback){{#each function.params.fields as |field|}},
+    arg_{{field.py_name}}{{/each}}
   );
 } catch (...) {
-  return folly::makeFuture<{{#partial clients.cpp_return_type function=function:self}}>(folly::exception_wrapper(
+  return folly::makeFuture<{{#partial clients.cpp_return_type function=function}}>(folly::exception_wrapper(
     std::current_exception()
   ));
 }

@@ -28,88 +28,87 @@ defined in ServicesCallbacks, along with appropriate arguments.
 {{#import "common/types" as types}}
 {{#import "common/services" as services}}
 {{> common/auto_generated_c}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
-#include <{{program:include_prefix}}gen-py3/{{program:name}}/services_wrapper.h>
-#include <{{program:include_prefix}}gen-py3/{{program:name}}/services_api.h>
+#include <{{program.include_prefix}}gen-py3/{{program.name}}/services_wrapper.h>
+#include <{{program.include_prefix}}gen-py3/{{program.name}}/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-{{#program:cppNamespaces}}namespace {{.}} {
-{{/program:cppNamespaces}}
-{{#program:services}}
+{{#each program.cppNamespaces as |ns|}}namespace {{ns}} {
+{{/each}}
+{{#each (array.enumerate program.services with_last=true) as |i service is_last_service?|}}
 
-{{^service:extends?}}
-{{service:name}}Wrapper::{{service:name}}Wrapper(PyObject *obj, folly::Executor* exc)
+{{#if (object.notnull? service.extends)}}
+{{service.name}}Wrapper::{{service.name}}Wrapper(PyObject *obj, folly::Executor* exc)
+  : ::{{#each service.extends.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.extends.name}}Wrapper(obj, exc)
+  {
+    import_{{#each program.py3Namespaces as |ns|}}{{ns}}__{{/each}}{{program.name}}__services();
+  }
+{{#else}}
+{{service.name}}Wrapper::{{service.name}}Wrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
   {
-    import_{{#program:py3Namespaces}}{{.}}__{{/program:py3Namespaces}}{{program:name}}__services();
+    import_{{#each program.py3Namespaces as |ns|}}{{ns}}__{{/each}}{{program.name}}__services();
   }
 
-{{/service:extends?}}
-{{#service:extends?}}
-{{service:name}}Wrapper::{{service:name}}Wrapper(PyObject *obj, folly::Executor* exc)
-  : {{#service:extends}}::{{#each service:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service:name}}Wrapper(obj, exc){{/service:extends}}
-  {
-    import_{{#program:py3Namespaces}}{{.}}__{{/program:py3Namespaces}}{{program:name}}__services();
-  }
-{{/service:extends?}}
+{{/if (object.notnull? service.extends)}}
 
-{{#service:supportedFunctions}}
-void {{service:name}}Wrapper::async_{{#if function:eb?}}eb{{#else}}tm{{/if}}_{{function:cpp_name}}(
-  {{> services/cpp_handler_callback_type}} callback{{#function:args}}
-    , {{#if function:stack_arguments?}}{{#partial types.cpp_stack_arg_type type=field:self.type}}{{!
-        }}{{#else}}{{#partial types.cpp_arg_type type=field:self.type}}{{/if function:stack_arguments?}}{{!
-        }} {{field:cpp_name}}{{#last?}}
-{{/last?}}{{/function:args}}) {
+{{#each service.supportedFunctions as |function|}}
+void {{service.name}}Wrapper::async_{{#if function.eb?}}eb{{#else}}tm{{/if}}_{{function.cpp_name}}(
+  {{> services/cpp_handler_callback_type}} callback{{#each (array.enumerate function.params.fields with_last=true) as |fi field is_last_field?|}}
+    , {{#if function.stack_arguments?}}{{#partial types.cpp_stack_arg_type type=field.type}}{{!
+        }}{{#else}}{{#partial types.cpp_arg_type type=field.type}}{{/if function.stack_arguments?}}{{!
+        }} {{field.cpp_name}}{{#if is_last_field?}}
+{{/if is_last_field?}}{{/each}}) {
   auto ctx = callback->getRequestContext();
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback){{#function:args}},
-     {{#field:type}}{{> services/cpp_field_capture}}{{/field:type}}{{/function:args}}
+     callback = std::move(callback){{!
+     }}{{#each function.params.fields as |field|}},
+     {{> services/cpp_field_capture}}{{/each}}
+
     ]() mutable {
         auto [promise, future] = folly::makePromiseContract<{{!
-            }}{{#partial services.cpp_return_type function=function:self}}>();
-        call_cy_{{service:name}}_{{function:name}}(
+            }}{{#partial services.cpp_return_type function=function}}>();
+        call_cy_{{service.name}}_{{function.name}}(
             this->if_object,
             ctx,
-            std::move(promise){{#function:args}}{{#field:type}},
+            std::move(promise){{#each function.params.fields as |field|}},
             {{> services/cpp_pass_field}}
-{{/field:type}}{{/function:args}}
+{{/each}}
         );
         std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<{{!
-            }}{{#partial services.cpp_return_type function=function:self}}>&& t) {
+            }}{{#partial services.cpp_return_type function=function}}>&& t) {
           (void)t;
-          {{^function:oneway?}}callback->complete(std::move(t));{{/function:oneway?}}
+          {{#if (not function.oneway?)}}callback->complete(std::move(t));{{/if}}
         });
     });
 }
-{{/service:supportedFunctions}}
-  {{#let parent_service_name=service:name}}
-  {{#let parent_service_cpp_name=service:cpp_name}}
-{{#service:supportedInteractions}}
-std::unique_ptr<{{parent_service_cpp_name}}SvIf::{{service:name}}If> {{parent_service_name}}Wrapper::create{{service:name}}() {
+{{/each}}
+  {{#each service.supportedInteractions as |interaction|}}
+std::unique_ptr<{{service.cpp_name}}SvIf::{{interaction.name}}If> {{service.name}}Wrapper::create{{interaction.name}}() {
   throw std::runtime_error("Py3 server doesn't support interactions.");
 }
-{{/service:supportedInteractions}}
-std::shared_ptr<apache::thrift::ServerInterface> {{service:name}}Interface(PyObject *if_object, folly::Executor *exc) {
-  return std::make_shared<{{service:name}}Wrapper>(if_object, exc);
+  {{/each}}
+std::shared_ptr<apache::thrift::ServerInterface> {{service.name}}Interface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<{{service.name}}Wrapper>(if_object, exc);
 }
-{{#service:lifecycleFunctions}}
-folly::SemiFuture<folly::Unit> {{service:name}}Wrapper::semifuture_{{function:cpp_name}}() {
+  {{#each service.lifecycleFunctions as |function|}}
+folly::SemiFuture<folly::Unit> {{service.name}}Wrapper::semifuture_{{function.cpp_name}}() {
   auto [promise, future] = folly::makePromiseContract<folly::Unit>();
-  call_cy_{{service:name}}_{{function:cpp_name}}(
+  call_cy_{{service.name}}_{{function.cpp_name}}(
       this->if_object,
       std::move(promise)
   );
   return std::move(future);
 }
-{{/service:lifecycleFunctions}}
-{{^last?}}
+  {{/each}}
+  {{#if (not is_last_service?)}}
 
-{{/last?}}
-{{/program:services}}{{!
-}}{{#program:cppNamespaces}}
-} // namespace {{.}}
-{{/program:cppNamespaces}}
-{{/program:auto_migrate?}}
+  {{/if (not is_last_service?)}}
+{{/each}}{{!
+}}{{#each program.cppNamespaces as |ns|}}
+} // namespace {{ns}}
+{{/each}}
+{{/if (not program.auto_migrate?)}}

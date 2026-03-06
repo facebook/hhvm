@@ -135,10 +135,6 @@ cdef extern from "{{program.include_prefix}}gen-py3/{{program.name}}/clients_wra
     cFollyFuture[{{#partial clients.cython_return_type_cpp_type function=function}}] {{function.cpp_name}}(cRpcOptions, {{#each function.params.fields as |field|}}
       {{#partial types.cython_cpp_type type=field.type}} arg_{{field.py_name}},{{/each}})
     {{/each}}
-    {{!
-      Interactions never extend, so this block is a no-op.
-      Kept as a comment for parity with the service version above.
-    }}
 
   {{/each}}
 {{/each}}

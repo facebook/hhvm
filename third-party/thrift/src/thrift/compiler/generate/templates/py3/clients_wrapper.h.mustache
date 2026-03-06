@@ -22,21 +22,21 @@ Header file for ClientsWrapper.cpp for cython to import in CythonClients.pxd.
 {{#import "common/clients" as clients}}
 {{#import "common/types" as types}}
 {{> common/auto_generated_c}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
 #pragma once
-{{#program:services}}
-#if __has_include(<{{program:include_prefix}}{{program:cpp_gen_path}}/{{service:name}}.h>)
-#include <{{program:include_prefix}}{{program:cpp_gen_path}}/{{service:name}}.h>
+{{#each program.services as |service|}}
+#if __has_include(<{{program.include_prefix}}{{program.cpp_gen_path}}/{{service.name}}.h>)
+#include <{{program.include_prefix}}{{program.cpp_gen_path}}/{{service.name}}.h>
 #else
-#include <{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h>
+#include <{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_clients.h>
 #endif
-{{#service:extends}}
-{{#service:externalProgram?}}
-#include <{{service:program.include_prefix}}gen-py3/{{service:program.name}}/clients_wrapper.h>
-{{/service:externalProgram?}}
-{{/service:extends}}
-{{/program:services}}
+  {{#if (object.notnull? service.extends)}}
+    {{#if service.extends.externalProgram?}}
+#include <{{service.extends.program.include_prefix}}gen-py3/{{service.extends.program.name}}/clients_wrapper.h>
+    {{/if service.extends.externalProgram?}}
+  {{/if (object.notnull? service.extends)}}
+{{/each}}
 
 #include <folly/futures/Future.h>
 #include <folly/futures/Promise.h>
@@ -51,50 +51,46 @@ Header file for ClientsWrapper.cpp for cython to import in CythonClients.pxd.
 #include <set>
 #include <vector>
 
-{{#program:cppNamespaces}}namespace {{.}} {
-{{/program:cppNamespaces}}
+{{#each program.cppNamespaces as |ns|}}namespace {{ns}} {
+{{/each}}
 
-{{#program:services}}
-class {{service:name}}ClientWrapper : {{!
-}}{{#service:extends?}}{{#service:extends}}public ::{{#each service:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service:name}}ClientWrapper{{/service:extends}}{{/service:extends?}}{{!
-}}{{^service:extends?}}public ::thrift::py3::ClientWrapper{{/service:extends?}}{{!
-}} {
+{{#each program.services as |service|}}
+class {{service.name}}ClientWrapper : {{!
+}}{{#if (object.notnull? service.extends)}}public ::{{#each service.extends.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.extends.name}}ClientWrapper{{#else}}public ::thrift::py3::ClientWrapper{{/if}} {
   public:
-    using {{#service:extends?}}{{#service:extends}}{{!
-    }}::{{#each service:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service:name}}ClientWrapper::{{service:name}}ClientWrapper{{!
-    }}{{/service:extends}}{{/service:extends?}}{{!
-    }}{{^service:extends?}}::thrift::py3::ClientWrapper::ClientWrapper{{/service:extends?}};
+    using {{#if (object.notnull? service.extends)}}{{!
+    }}::{{#each service.extends.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.extends.name}}ClientWrapper::{{service.extends.name}}ClientWrapper{{!
+    }}{{#else}}::thrift::py3::ClientWrapper::ClientWrapper{{/if (object.notnull? service.extends)}};
 
-{{#service:supportedFunctions}}
-    folly::Future<{{#partial clients.cpp_return_type function=function:self}}> {{function:cpp_name}}(
-      apache::thrift::RpcOptions& rpcOptions{{#function:args}},
-      {{#partial types.cpp_value_type type=field:self.type}} arg_{{field:py_name}}{{/function:args}});
-{{/service:supportedFunctions}}
-{{#service:supportedInteractions}}
+{{#each service.supportedFunctions as |function|}}
+    folly::Future<{{#partial clients.cpp_return_type function=function}}> {{function.cpp_name}}(
+      apache::thrift::RpcOptions& rpcOptions{{#each function.params.fields as |field|}},
+      {{#partial types.cpp_value_type type=field.type}} arg_{{field.py_name}}{{/each}});
+{{/each}}
+{{#each service.supportedInteractions as |interaction|}}
 
-    class {{service:name}}InteractionWrapper : public {{!
-    }}{{#service:extends}}{{service:name}}{{/service:extends}}ClientWrapper {
+    class {{interaction.name}}InteractionWrapper : public ClientWrapper {
       public:
-        {{service:name}}InteractionWrapper(
+        {{interaction.name}}InteractionWrapper(
           std::unique_ptr<apache::thrift::GeneratedAsyncClient> async_client,
            std::shared_ptr<apache::thrift::RequestChannel> channel)
            : ClientWrapper(std::move(async_client), channel) {}
 
-        {{#service:supportedFunctions}}
-        folly::Future<{{#partial clients.cpp_return_type function=function:self}}> {{function:cpp_name}}(
-          apache::thrift::RpcOptions& rpcOptions{{#function:args}},
-          {{#partial types.cpp_value_type type=field:self.type}} arg_{{field:py_name}}{{/function:args}});
-        {{/service:supportedFunctions}}
+        {{#each interaction.supportedFunctions as |function|}}
+        folly::Future<{{#partial clients.cpp_return_type function=function}}> {{function.cpp_name}}(
+          apache::thrift::RpcOptions& rpcOptions{{#each function.params.fields as |field|}},
+          {{#partial types.cpp_value_type type=field.type}} arg_{{field.py_name}}{{/each}});
+        {{/each}}
     };
-{{/service:supportedInteractions}}
-{{#service:supportedInteractions}}
-    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> create{{service:name}}();
-{{/service:supportedInteractions}}
+{{/each}}
+{{#each service.supportedInteractions as |interaction|}}
+    folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> create{{interaction.name}}();
+{{/each}}
 };
 
 
-{{/program:services}}{{!
-}}{{#program:cppNamespaces}}
-} // namespace {{.}}
-{{/program:cppNamespaces}}
-{{/program:auto_migrate?}}
+{{/each}}{{!
+}}{{#each program.cppNamespaces as |ns|}}
+} // namespace {{ns}}
+{{/each}}
+{{/if (not program.auto_migrate?)}}

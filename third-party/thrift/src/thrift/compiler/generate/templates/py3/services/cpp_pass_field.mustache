@@ -22,15 +22,10 @@ a, b, and c would be written using this file. Most variables can be passed
 as themselves by value, but the complex types are unique_ptr values and
 need to be moved to the called function.
 
-}}{{#type:bool?}}{{field:cpp_name}}{{/type:bool?}}{{!
-}}{{#type:byte?}}{{field:cpp_name}}{{/type:byte?}}{{!
-}}{{#type:i16?}}{{field:cpp_name}}{{/type:i16?}}{{!
-}}{{#type:i32?}}{{field:cpp_name}}{{/type:i32?}}{{!
-}}{{#type:i64?}}{{field:cpp_name}}{{/type:i64?}}{{!
-}}{{#type:double?}}{{field:cpp_name}}{{/type:double?}}{{!
-}}{{#type:float?}}{{field:cpp_name}}{{/type:float?}}{{!
-}}{{#type:string?}}std::move({{field:cpp_name}}){{/type:string?}}{{!
-}}{{#type:binary?}}std::move({{field:cpp_name}}){{/type:binary?}}{{!
-}}{{#type:structured?}}std::move({{field:cpp_name}}){{/type:structured?}}{{!
-}}{{#type:container?}}std::move({{field:cpp_name}}){{/type:container?}}{{!
-}}{{#type:enum?}}{{field:cpp_name}}{{/type:enum?}}
+}}
+{{#pragma ignore-newlines}}
+  {{#if (or field.type.bool? field.type.byte? field.type.i16? field.type.i32? field.type.i64? field.type.double? field.type.float? field.type.enum?)}}
+{{field.cpp_name}}
+  {{#else if (or field.type.string? field.type.binary? field.type.structured? field.type.container?)}}
+std::move({{field.cpp_name}})
+  {{/if (or field.type.bool? field.type.byte? field.type.i16? field.type.i32? field.type.i64? field.type.double? field.type.float? field.type.enum?)}}

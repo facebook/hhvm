@@ -23,63 +23,62 @@ created by the thrift compiler for generated cpp2 code.
 {{#import "common/types" as types}}
 {{#import "common/services" as services}}
 {{> common/auto_generated_c}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
 #pragma once
-{{#program:services}}
-#if __has_include(<{{program:include_prefix}}{{program:cpp_gen_path}}/{{service:name}}.h>)
-#include <{{program:include_prefix}}{{program:cpp_gen_path}}/{{service:name}}.h>
+{{#each program.services as |service|}}
+#if __has_include(<{{program.include_prefix}}{{program.cpp_gen_path}}/{{service.name}}.h>)
+#include <{{program.include_prefix}}{{program.cpp_gen_path}}/{{service.name}}.h>
 #else
-#include <{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_handlers.h>
+#include <{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_handlers.h>
 #endif
-{{#service:extends}}
-{{#service:externalProgram?}}
-#include <{{service:program.include_prefix}}gen-py3/{{service:program.name}}/services_wrapper.h>
-{{/service:externalProgram?}}
-{{/service:extends}}
-{{/program:services}}
+  {{#if (object.notnull? service.extends)}}
+    {{#if service.extends.externalProgram?}}
+#include <{{service.extends.program.include_prefix}}gen-py3/{{service.extends.program.name}}/services_wrapper.h>
+    {{/if service.extends.externalProgram?}}
+  {{/if (object.notnull? service.extends)}}
+{{/each}}
 #include <folly/python/futures.h>
 #include <Python.h>
 
 #include <memory>
 
-{{#program:cppNamespaces}}namespace {{.}} {
-{{/program:cppNamespaces}}
+{{#each program.cppNamespaces as |ns|}}namespace {{ns}} {
+{{/each}}
 
-{{#program:services}}
-class {{service:name}}Wrapper : {{!
-  }}{{#service:extends}}public ::{{#each service:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service:name}}Wrapper, {{/service:extends}}{{!
-  }}virtual public {{service:cpp_name}}SvIf{{!
-}} {
-{{^service:extends?}}
+{{#each (array.enumerate program.services with_last=true) as |i service is_last_service?|}}
+class {{service.name}}Wrapper : {{!
+  }}{{#let parent = service.extends}}{{#if (object.notnull? parent)}}public ::{{#each parent.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{parent.name}}Wrapper, {{/if}}{{!
+  }}virtual public {{service.cpp_name}}SvIf {
+{{#if (object.eq? null service.extends)}}
   protected:
     PyObject *if_object;
     folly::Executor *executor;
-{{/service:extends?}}
+{{/if (object.eq? null service.extends)}}
   public:
-    explicit {{service:name}}Wrapper(PyObject *if_object, folly::Executor *exc);
-{{#service:supportedFunctions}}
-    void async_{{#if function:eb?}}eb{{#else}}tm{{/if}}_{{function:cpp_name}}({{> services/cpp_handler_callback_type}} callback{{#function:args}}
-        , {{#if function:stack_arguments?}}{{#partial types.cpp_stack_arg_type type=field:self.type}}{{!
-            }}{{#else}}{{#partial types.cpp_arg_type type=field:self.type}}{{/if function:stack_arguments?}}{{!
-            }} {{field:cpp_name}}{{#last?}}
-    {{/last?}}{{/function:args}}) override;
-{{/service:supportedFunctions}}
-{{#service:supportedInteractions}}
-    std::unique_ptr<{{service:name}}If> create{{service:name}}() override;
-{{/service:supportedInteractions}}
-{{#service:lifecycleFunctions}}
-folly::SemiFuture<folly::Unit> semifuture_{{function:cpp_name}}() override;
-{{/service:lifecycleFunctions}}
+    explicit {{service.name}}Wrapper(PyObject *if_object, folly::Executor *exc);
+  {{#each service.supportedFunctions as |function|}}
+    void async_{{#if function.eb?}}eb{{#else}}tm{{/if}}_{{function.cpp_name}}({{> services/cpp_handler_callback_type}} callback{{#each (array.enumerate function.params.fields with_last=true) as |fi field is_last_field?|}}
+        , {{#if function.stack_arguments?}}{{#partial types.cpp_stack_arg_type type=field.type}}{{!
+            }}{{#else}}{{#partial types.cpp_arg_type type=field.type}}{{/if function.stack_arguments?}}{{!
+            }} {{field.cpp_name}}{{#if is_last_field?}}
+    {{/if is_last_field?}}{{/each}}) override;
+  {{/each}}
+  {{#each service.supportedInteractions as |interaction|}}
+    std::unique_ptr<{{interaction.name}}If> create{{interaction.name}}() override;
+  {{/each}}
+  {{#each service.lifecycleFunctions as |function|}}
+folly::SemiFuture<folly::Unit> semifuture_{{function.cpp_name}}() override;
+  {{/each}}
 };
 
-std::shared_ptr<apache::thrift::ServerInterface> {{service:name}}Interface(PyObject *if_object, folly::Executor *exc);
-{{^last?}}
+std::shared_ptr<apache::thrift::ServerInterface> {{service.name}}Interface(PyObject *if_object, folly::Executor *exc);
+  {{#if (not is_last_service?)}}
 
 
-{{/last?}}
-{{/program:services}}{{!
-}}{{#program:cppNamespaces}}
-} // namespace {{.}}
-{{/program:cppNamespaces}}
-{{/program:auto_migrate?}}
+  {{/if (not is_last_service?)}}
+{{/each}}{{!
+}}{{#each program.cppNamespaces as |ns|}}
+} // namespace {{ns}}
+{{/each}}
+{{/if (not program.auto_migrate?)}}

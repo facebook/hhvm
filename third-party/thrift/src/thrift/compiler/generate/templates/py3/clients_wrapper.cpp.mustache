@@ -24,56 +24,54 @@ thread that will pass data to the cython callback.
 {{#import "common/clients" as clients}}
 {{#import "common/types" as types}}
 {{> common/auto_generated_c}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
-#include <{{program:include_prefix}}gen-py3/{{program:name}}/clients_wrapper.h>
+#include <{{program.include_prefix}}gen-py3/{{program.name}}/clients_wrapper.h>
 
-{{#program:cppNamespaces}}namespace {{.}} {
-{{/program:cppNamespaces}}
+{{#each program.cppNamespaces as |ns|}}namespace {{ns}} {
+{{/each}}
 
 
-{{#program:services}}
-{{#service:supportedFunctions}}
-folly::Future<{{#partial clients.cpp_return_type function=function:self}}>
-{{service:name}}ClientWrapper::{{function:cpp_name}}(
-    apache::thrift::RpcOptions& rpcOptions{{#function:args}},
-    {{#partial types.cpp_value_type type=field:self.type}} arg_{{field:py_name}}{{/function:args}}) {
-  auto* client = static_cast<::{{#each service:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service:cpp_name}}AsyncClient*>(async_client_.get());
+{{#each program.services as |service|}}
+  {{#each service.supportedFunctions as |function|}}
+folly::Future<{{#partial clients.cpp_return_type function=function}}>
+{{service.name}}ClientWrapper::{{function.cpp_name}}(
+    apache::thrift::RpcOptions& rpcOptions{{#each function.params.fields as |field|}},
+    {{#partial types.cpp_value_type type=field.type}} arg_{{field.py_name}}{{/each}}) {
+  auto* client = static_cast<::{{#each service.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.cpp_name}}AsyncClient*>(async_client_.get());
   {{> clients/clients_wrapper.cpp_func_body}}
 
 }
 
-{{/service:supportedFunctions}}
-  {{#let parent_service_cpp_name=service:cpp_name}}
-  {{#let parent_service_name=service:name}}
-{{#service:supportedInteractions}}
+  {{/each}}
+  {{#each service.supportedInteractions as |interaction|}}
 
 folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>>
-{{parent_service_name}}ClientWrapper::create{{service:name}}() {
+{{service.name}}ClientWrapper::create{{interaction.name}}() {
   return folly::via(
       channel_->getEventBase(),
       [=, this]() -> std::unique_ptr<::thrift::py3::ClientWrapper> {
-        auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<{{parent_service_cpp_name}}AsyncClient::{{service:name}}>((({{parent_service_cpp_name}}AsyncClient*)async_client_.get())->create{{service:name}}()));
-        return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<{{service:name}}InteractionWrapper>(std::move(interaction_client), channel_));
+        auto interaction_client = static_cast<std::unique_ptr<apache::thrift::GeneratedAsyncClient>>(std::make_unique<{{service.cpp_name}}AsyncClient::{{interaction.name}}>((({{service.cpp_name}}AsyncClient*)async_client_.get())->create{{interaction.name}}()));
+        return static_cast<std::unique_ptr<::thrift::py3::ClientWrapper>>(std::make_unique<{{interaction.name}}InteractionWrapper>(std::move(interaction_client), channel_));
       }
   );
 }
 
-{{/service:supportedInteractions}}
-{{#service:supportedInteractions}}
-{{#service:supportedFunctions}}
-folly::Future<{{#partial clients.cpp_return_type function=function:self}}>
-{{parent_service_name}}ClientWrapper::{{service:name}}InteractionWrapper::{{function:cpp_name}}(
-    apache::thrift::RpcOptions& rpcOptions{{#function:args}},
-    {{#partial types.cpp_value_type type=field:self.type}} arg_{{field:py_name}}{{/function:args}}) {
-  auto* client = static_cast<::{{#each service:program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{parent_service_cpp_name}}AsyncClient::{{service:name}}*>(async_client_.get());
+  {{/each}}
+  {{#each service.supportedInteractions as |interaction|}}
+    {{#each interaction.supportedFunctions as |function|}}
+folly::Future<{{#partial clients.cpp_return_type function=function}}>
+{{service.name}}ClientWrapper::{{interaction.name}}InteractionWrapper::{{function.cpp_name}}(
+    apache::thrift::RpcOptions& rpcOptions{{#each function.params.fields as |field|}},
+    {{#partial types.cpp_value_type type=field.type}} arg_{{field.py_name}}{{/each}}) {
+  auto* client = static_cast<::{{#each interaction.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.cpp_name}}AsyncClient::{{interaction.name}}*>(async_client_.get());
   {{> clients/clients_wrapper.cpp_func_body}}
 
 }
 
-{{/service:supportedFunctions}}
-{{/service:supportedInteractions}}
-{{/program:services}}{{!
-}}{{#program:cppNamespaces}}} // namespace {{.}}
-{{/program:cppNamespaces}}
-{{/program:auto_migrate?}}
+    {{/each}}
+  {{/each}}
+{{/each}}{{!
+}}{{#each program.cppNamespaces as |ns|}}} // namespace {{ns}}
+{{/each}}
+{{/if (not program.auto_migrate?)}}

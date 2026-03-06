@@ -1624,11 +1624,11 @@ void t_mstch_py3_generator::generate_services() {
       {"services_interface.pxd", true},
   };
 
-  std::vector<std::pair<std::string, bool>> cppFiles{
-      {"clients_wrapper.h", false},
-      {"clients_wrapper.cpp", false},
-      {"services_wrapper.h", false},
-      {"services_wrapper.cpp", false},
+  std::vector<std::string> cppFiles{
+      "clients_wrapper.h",
+      "clients_wrapper.cpp",
+      "services_wrapper.h",
+      "services_wrapper.cpp",
   };
 
   // TODO this logic is a complete mess and I intend to clean it up later
@@ -1641,7 +1641,9 @@ void t_mstch_py3_generator::generate_services() {
   }
   generate_mixed_template_list(
       normalCythonFiles, FileType::NotTypesFile, generateRootPath_);
-  generate_mixed_template_list(cppFiles, FileType::NotTypesFile);
+  for (const auto& file : cppFiles) {
+    generate_whisker_file(file, FileType::NotTypesFile);
+  }
   generate_mixed_template_list(
       cythonFiles, FileType::NotTypesFile, generateRootPath_);
 }

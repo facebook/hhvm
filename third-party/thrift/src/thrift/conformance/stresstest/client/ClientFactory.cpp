@@ -344,10 +344,11 @@ folly::AsyncTransport::UniquePtr createIOUringTLS(
 folly::AsyncTransport::UniquePtr createIOUringFizz(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto sock = new folly::AsyncIoUringSocket(evb, getIoUringSocketOptions(cfg));
+  folly::AsyncSocketTransport::BindOptions bindOptions =
+      folly::AsyncSocket::anyAddress();
   if (cfg.ioUringZcrx && cfg.ioUringZcrxSocketBind) {
-    // TODO: Fizz connect() does not support a boundFd parameter, so ZC-RX
-    // source port binding is not supported for the Fizz transport yet.
-    LOG(WARNING) << "io_zcrx_socket_bind is not supported with Fizz transport";
+    bindOptions = folly::AsyncIoUringSocketFactory::createBoundSocketForZcRx(
+        evb, cfg.serverHost.getIPAddress(), cfg.serverHost.getPort());
   }
   auto fizzClient = fizz::client::AsyncFizzClient::UniquePtr(
       new fizz::client::AsyncFizzClient(
@@ -360,7 +361,8 @@ folly::AsyncTransport::UniquePtr createIOUringFizz(
       {},
       std::chrono::milliseconds(0),
       std::chrono::milliseconds(0),
-      getSocketOptions(cfg));
+      getSocketOptions(cfg),
+      bindOptions);
   return fizzClient;
 }
 #endif

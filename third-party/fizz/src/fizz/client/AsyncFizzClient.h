@@ -87,7 +87,8 @@ class AsyncFizzClientT : public AsyncFizzBase,
       std::chrono::milliseconds totalTimeout = std::chrono::milliseconds(0),
       std::chrono::milliseconds socketTimeout = std::chrono::milliseconds(0),
       const folly::SocketOptionMap& options = folly::emptySocketOptionMap,
-      const folly::SocketAddress& bindAddr = folly::AsyncSocket::anyAddress());
+      const folly::AsyncSocketTransport::BindOptions& bindOptions =
+          folly::AsyncSocketTransport::anyAddress());
 
   /**
    * Variant of the TLS handshake connect() API above that uses the default

@@ -117,7 +117,7 @@ void AsyncFizzClientT<SM>::connect(
     std::chrono::milliseconds totalTimeout,
     std::chrono::milliseconds socketTimeout,
     const folly::SocketOptionMap& options,
-    const folly::SocketAddress& bindAddr) {
+    const folly::AsyncSocketTransport::BindOptions& bindOptions) {
   DelayedDestruction::DestructorGuard dg(this);
 
   // shouldn't attempt to connect a second time
@@ -141,8 +141,11 @@ void AsyncFizzClientT<SM>::connect(
         connectAddr,
         static_cast<int>(socketTimeout.count()),
         options,
-        bindAddr);
+        bindOptions);
   } else {
+    if (auto* fd = std::get_if<folly::NetworkSocket>(&bindOptions)) {
+      folly::netops::close(*fd);
+    }
     folly::AsyncSocketException ase(
         folly::AsyncSocketException::BAD_ARGS,
         "could not find underlying socket");

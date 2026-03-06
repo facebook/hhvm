@@ -17,6 +17,7 @@
 // WARNING: This code is highly experimental.
 // DO NOT USE for any production code.
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/type_id.thrift"
 include "thrift/lib/thrift/record.thrift"
@@ -28,6 +29,8 @@ cpp_include "folly/container/F14Map.h"
 package "facebook.com/thrift/type_system"
 
 namespace cpp2 apache.thrift.type_system
+namespace go thrift.lib.thrift.type_system
+namespace py apache.thrift.type_system
 namespace py3 apache.thrift.type_system
 
 @thrift.AllowLegacyTypedefUri
@@ -40,6 +43,7 @@ typedef string FieldName
  *
  * Both name and ID must be unique in a set of fields for a given type.
  */
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "FieldIdentityStruct",
   name = "::apache::thrift::type_system::detail::FieldIdentityAdapter",
@@ -62,6 +66,7 @@ enum PresenceQualifier {
 /**
  * A field that is part of a structured type (struct or union).
  */
+@python.Py3Hidden
 @cpp.EnableCustomTypeOrdering
 struct SerializableFieldDefinition {
   1: FieldIdentity identity;
@@ -86,6 +91,7 @@ struct SerializableFieldDefinition {
  *
  * Both the names and IDs of each field must be unique for a struct.
  */
+@python.Py3Hidden
 @cpp.EnableCustomTypeOrdering
 struct SerializableStructDefinition {
   2: list<SerializableFieldDefinition> fields;
@@ -108,6 +114,7 @@ struct SerializableStructDefinition {
  *
  * All fields must have optional presence qualifiers.
  */
+@python.Py3Hidden
 @cpp.EnableCustomTypeOrdering
 struct SerializableUnionDefinition {
   2: list<SerializableFieldDefinition> fields;
@@ -124,6 +131,7 @@ struct SerializableUnionDefinition {
   4: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
+@python.Py3Hidden
 @cpp.EnableCustomTypeOrdering
 struct SerializableEnumValueDefinition {
   1: string name;
@@ -136,6 +144,7 @@ struct SerializableEnumValueDefinition {
   3: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
+@python.Py3Hidden
 @cpp.EnableCustomTypeOrdering
 struct SerializableEnumDefinition {
   2: list<SerializableEnumValueDefinition> values;
@@ -151,6 +160,7 @@ struct SerializableEnumDefinition {
  * A user-defined type which allows associating a URI with the datums of
  * another type.
  */
+@python.Py3Hidden
 @cpp.EnableCustomTypeOrdering
 struct SerializableOpaqueAliasDefinition {
   /**
@@ -166,6 +176,7 @@ struct SerializableOpaqueAliasDefinition {
   3: map<type_id.Uri, record.SerializableRecord> annotations;
 }
 
+@python.Py3Hidden
 union SerializableTypeDefinition {
   1: SerializableStructDefinition structDef;
   2: SerializableUnionDefinition unionDef;
@@ -173,6 +184,7 @@ union SerializableTypeDefinition {
   4: SerializableOpaqueAliasDefinition opaqueAliasDef;
 }
 
+@python.Py3Hidden
 struct SerializableThriftSourceInfo {
   /**
    * A URI of the resource (typically a file) containing the source Thrift IDL
@@ -190,6 +202,7 @@ struct SerializableThriftSourceInfo {
   3: string name;
 }
 
+@python.Py3Hidden
 struct SerializableTypeDefinitionEntry {
   1: SerializableTypeDefinition definition;
   /**
@@ -203,6 +216,7 @@ struct SerializableTypeDefinitionEntry {
  * A type system is a collection of types where each type (and all types it
  * refers to) are fully defined within the same type system.
  */
+@python.Py3Hidden
 struct SerializableTypeSystem {
   1: map<type_id.Uri, SerializableTypeDefinitionEntry> types;
 }

@@ -20,12 +20,16 @@ package "facebook.com/thrift/type_system"
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 
 cpp_include "thrift/lib/thrift/detail/TypeIdAdapter.h"
 
 namespace cpp2 apache.thrift.type_system
+namespace go thrift.lib.thrift.type_id
+namespace py apache.thrift.type_system
 namespace py3 apache.thrift.type_system
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "ListTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::ListTypeId",
@@ -36,6 +40,7 @@ struct ListTypeId {
   1: optional TypeId elementType;
 }
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "SetTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::SetTypeId",
@@ -46,6 +51,7 @@ struct SetTypeId {
   1: optional TypeId elementType;
 }
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "MapTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::MapTypeId",
@@ -64,6 +70,7 @@ typedef string Uri
 // These adapters are necessary because the other adapted types (e.g. TypeId)
 // are much easier to implement with complete types in C++. Since the adapters
 // are in a cpp_include'd file, the Thrift-generated structs are not available.
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "BoolTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::BoolTypeId",
@@ -71,6 +78,7 @@ typedef string Uri
 }
 struct BoolTypeId {}
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "ByteTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::ByteTypeId",
@@ -78,6 +86,7 @@ struct BoolTypeId {}
 }
 struct ByteTypeId {}
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "I16TypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::I16TypeId",
@@ -85,6 +94,7 @@ struct ByteTypeId {}
 }
 struct I16TypeId {}
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "I32TypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::I32TypeId",
@@ -92,6 +102,7 @@ struct I16TypeId {}
 }
 struct I32TypeId {}
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "I64TypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::I64TypeId",
@@ -99,6 +110,7 @@ struct I32TypeId {}
 }
 struct I64TypeId {}
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "FloatTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::FloatTypeId",
@@ -106,6 +118,7 @@ struct I64TypeId {}
 }
 struct FloatTypeId {}
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "DoubleTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::DoubleTypeId",
@@ -113,6 +126,7 @@ struct FloatTypeId {}
 }
 struct DoubleTypeId {}
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "StringTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::StringTypeId",
@@ -120,6 +134,7 @@ struct DoubleTypeId {}
 }
 struct StringTypeId {}
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "BinaryTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::BinaryTypeId",
@@ -127,6 +142,7 @@ struct StringTypeId {}
 }
 struct BinaryTypeId {}
 
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "AnyTypeIdStruct",
   adaptedType = "::apache::thrift::type_system::detail::AnyTypeId",
@@ -146,6 +162,7 @@ struct AnyTypeId {}
  *
  * Container types are composed of other type identities.
  */
+@python.Py3Hidden
 @cpp.Adapter{
   underlyingName = "TypeIdUnion",
   adaptedType = "::apache::thrift::type_system::detail::TypeId",

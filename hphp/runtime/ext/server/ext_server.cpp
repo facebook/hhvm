@@ -219,13 +219,13 @@ int64_t HHVM_FUNCTION(server_process_start_time) {
   return BootStats::startTimestamp();
 }
 
-void HHVM_FUNCTION(enable_first_flush, int64_t hint) {
+void HHVM_FUNCTION(enable_thread_hint, int64_t hint) {
   if (!Cfg::Server::ScxThreadHintFirstFlushOverride) return;
   ThreadHint::getInstance().updateThreadHint(
     ThreadHint::Priority::FirstFlush);
 }
 
-void HHVM_FUNCTION(disable_first_flush, int64_t hint) {
+void HHVM_FUNCTION(disable_thread_hint, int64_t hint) {
   if (!Cfg::Server::ScxThreadHintFirstFlushOverride) return;
   ThreadHint::getInstance().updateThreadHint(
     ThreadHint::Priority::Processing);
@@ -254,8 +254,8 @@ void ServerExtension::moduleRegisterNative() {
   HHVM_FALIAS(HH\\server_health_level, server_health_level);
   HHVM_FALIAS(HH\\server_uptime, server_uptime);
   HHVM_FALIAS(HH\\server_process_start_time, server_process_start_time);
-  HHVM_FALIAS(HH\\Experimental\\enable_first_flush, enable_first_flush);
-  HHVM_FALIAS(HH\\Experimental\\disable_first_flush, disable_first_flush);
+  HHVM_FALIAS(HH\\Experimental\\enable_thread_hint, enable_thread_hint);
+  HHVM_FALIAS(HH\\Experimental\\disable_thread_hint, disable_thread_hint);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

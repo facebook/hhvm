@@ -21,8 +21,19 @@ Pxd file to expose the interface defined in ClientsWrapper.h to CythonClients.py
 }}
 {{#import "common/clients" as clients}}
 {{#import "common/types" as types}}
+{{#let partial client_wrapper_parent |service|}}
+{{#pragma ignore-newlines}}
+  {{#if (object.notnull? service.extends)}}
+(
+    {{#if service.extends.externalProgram?}}
+_{{#each service.extends.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}
+{{service.extends.program.name}}_clients_wrapper.
+    {{/if service.extends.externalProgram?}}
+c{{service.extends.name}}ClientWrapper)
+  {{/if (object.notnull? service.extends)}}
+{{/let partial}}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
 from cpython.ref cimport PyObject
 from libc.stdint cimport (
@@ -43,13 +54,13 @@ cimport folly.iobuf as _fbthrift_iobuf
 from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_cbindings
-{{#program:has_stream?}}
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_cbindings
+{{#if program.has_stream?}}
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
-{{/program:has_stream?}}
+{{/if program.has_stream?}}
 
-{{#each program:includeNamespaces as |include|}}
+{{#each program.includeNamespaces as |include|}}
   {{#if include.has_types?}}
 cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
 cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
@@ -59,92 +70,76 @@ cimport {{include.modulePathPeriodSeparated}}.clients_wrapper as _{{include.modu
   {{/if include.import_services?}}
 {{/each}}
 
-{{#program:services}}
-cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
-    }} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
-  cdef cppclass c{{service:name}}AsyncClient {{!
-    }}"::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{!
-    }}{{service:cpp_name}}AsyncClient":
+{{#each program.services as |service|}}
+cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_clients.h"{{!
+    }} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
+  cdef cppclass c{{service.name}}AsyncClient {{!
+    }}"::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{!
+    }}{{service.cpp_name}}AsyncClient":
       pass
 
-  {{#let parent_service_name=service:name}}
-{{#service:supportedInteractions}}
-cdef extern from "{{program:include_prefix}}{{program:cpp_gen_path}}/{{program:name}}_clients.h"{{!
-    }} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":
-  cdef cppclass c{{parent_service_name}}AsyncClient_{{service:name}} {{!
-    }}"::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{!
-    }}{{parent_service_name}}AsyncClient::{{service:name}}":
+  {{#let parent_service_name = service.name}}
+  {{#each service.supportedInteractions as |interaction|}}
+cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_clients.h"{{!
+    }} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
+  cdef cppclass c{{parent_service_name}}AsyncClient_{{interaction.name}} {{!
+    }}"::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{!
+    }}{{parent_service_name}}AsyncClient::{{interaction.name}}":
       pass
 
-{{/service:supportedInteractions}}
+  {{/each}}
 cdef extern from "<utility>" namespace "std":
-  cdef unique_ptr[c{{service:name}}ClientWrapper] move(unique_ptr[c{{service:name}}ClientWrapper])
+  cdef unique_ptr[c{{service.name}}ClientWrapper] move(unique_ptr[c{{service.name}}ClientWrapper])
 
-{{/program:services}}
+{{/each}}
 cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::thrift":
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "{{program:include_prefix}}gen-py3/{{program:name}}/clients_wrapper.h"{{!
-    }} namespace "{{#program:cppNamespaces}}::{{.}}{{/program:cppNamespaces}}":{{!
-    }}{{^program:services}}
-  pass{{/program:services}}{{#program:services}}
-  cdef cppclass c{{service:name}}ClientWrapper "{{!
-  }}::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{service:name}}ClientWrapper"{{!
-  }}{{#service:extends}}({{!
-    }}{{#service:externalProgram?}}{{!
-    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-    }}{{service:program.name}}_clients_wrapper.{{!
-    }}{{/service:externalProgram?}}c{{service:name}}ClientWrapper{{!
-  }}){{/service:extends}}:
-    {{^service:extends?}}
+cdef extern from "{{program.include_prefix}}gen-py3/{{program.name}}/clients_wrapper.h"{{!
+    }} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":{{!
+    }}{{#if (array.empty? program.services)}}
+  pass{{/if (array.empty? program.services)}}{{#each program.services as |service|}}
+  cdef cppclass c{{service.name}}ClientWrapper "{{!
+  }}::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.name}}ClientWrapper"{{#partial client_wrapper_parent service=service}}:
+  {{#if (not (object.notnull? service.extends))}}
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
-    {{/service:extends?}}
+  {{/if (not (object.notnull? service.extends))}}
 
-    {{#service:supportedFunctions}}
-    cFollyFuture[{{#partial clients.cython_return_type_cpp_type function=function:self}}] {{function:cpp_name}}(cRpcOptions, {{#function:args}}
-      {{#partial types.cython_cpp_type type=field:self.type}} arg_{{field:py_name}},{{/function:args}})
-    {{/service:supportedFunctions}}
+  {{#each service.supportedFunctions as |function|}}
+    cFollyFuture[{{#partial clients.cython_return_type_cpp_type function=function}}] {{function.cpp_name}}(cRpcOptions, {{#each function.params.fields as |field|}}
+      {{#partial types.cython_cpp_type type=field.type}} arg_{{field.py_name}},{{/each}})
+  {{/each}}
     {{!
       If this is an empty service definition that extends another service with no interactions
       Then we need to put pass, otherwise cython will complain about the
       empty cppclass body
     }}
-    {{^service:supportedFunctions}}
-    {{^service:supportedInteractions}}
-    {{#service:extends?}}
+  {{#if (and (array.empty? service.supportedFunctions) (array.empty? service.supportedInteractions) (object.notnull? service.extends))}}
     pass
-    {{/service:extends?}}
-    {{/service:supportedInteractions}}
-    {{/service:supportedFunctions}}
-    {{#service:supportedInteractions}}
-    cFollyFuture[unique_ptr[cClientWrapper]]& create{{service:name}}()
-    {{/service:supportedInteractions}}
+  {{/if (and (array.empty? service.supportedFunctions) (array.empty? service.supportedInteractions) (object.notnull? service.extends))}}
+  {{#each service.supportedInteractions as |interaction|}}
+    cFollyFuture[unique_ptr[cClientWrapper]]& create{{interaction.name}}()
+  {{/each}}
 
-  {{#let parent_service_name=service:name}}
-  {{#service:supportedInteractions}}
-  cdef cppclass c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper "{{!
-  }}::{{#program:cppNamespaces}}{{.}}::{{/program:cppNamespaces}}{{parent_service_name}}ClientWrapper{{!
-  }}::{{service:name}}InteractionWrapper"(cClientWrapper):
+  {{#let parent_service_name = service.name}}
+  {{#each service.supportedInteractions as |interaction|}}
+  cdef cppclass c{{parent_service_name}}ClientWrapper_{{interaction.name}}InteractionWrapper "{{!
+  }}::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{parent_service_name}}ClientWrapper{{!
+  }}::{{interaction.name}}InteractionWrapper"(cClientWrapper):
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
 
-    {{#service:supportedFunctions}}
-    cFollyFuture[{{#partial clients.cython_return_type_cpp_type function=function:self}}] {{function:cpp_name}}(cRpcOptions, {{#function:args}}
-      {{#partial types.cython_cpp_type type=field:self.type}} arg_{{field:py_name}},{{/function:args}})
-    {{/service:supportedFunctions}}
+    {{#each interaction.supportedFunctions as |function|}}
+    cFollyFuture[{{#partial clients.cython_return_type_cpp_type function=function}}] {{function.cpp_name}}(cRpcOptions, {{#each function.params.fields as |field|}}
+      {{#partial types.cython_cpp_type type=field.type}} arg_{{field.py_name}},{{/each}})
+    {{/each}}
     {{!
-      If this is an empty service definition that extends another service
-      Then we need to put pass, otherwise cython will complain about the
-      empty cppclass body
+      Interactions never extend, so this block is a no-op.
+      Kept as a comment for parity with the service version above.
     }}
-    {{^service:supportedFunctions}}
-    {{#service:extends?}}
-    pass
-    {{/service:extends?}}
-    {{/service:supportedFunctions}}
 
-  {{/service:supportedInteractions}}
-{{/program:services}}
-{{/program:auto_migrate?}}
+  {{/each}}
+{{/each}}
+{{/if (not program.auto_migrate?)}}

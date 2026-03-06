@@ -1619,7 +1619,7 @@ void t_mstch_py3_generator::generate_services() {
   };
 
   std::vector<std::pair<std::string, bool>> cythonFiles{
-      {"clients_wrapper.pxd", false},
+      {"clients_wrapper.pxd", true},
       {"services_wrapper.pxd", true},
       {"services_interface.pxd", true},
   };

@@ -336,6 +336,7 @@ This gives the following default namespaces:
 | Language    | Target(s)       | Namespace               |
 | ----------- | --------------- | ----------------------- |
 | C++         | `cpp2`          | `meta.search.query`     |
+| C#          | `csharp`        | `Meta.Search.Query` |
 | Python      | `python`, `py3` | `meta.search`           |
 | Hack        | `hack`          | `meta.search.query`     |
 | Java        | `java.swift`    | `com.meta.search.query` |
@@ -349,6 +350,7 @@ package "meta.com/search"
 | Language    | Target(s)       | Namespace         |
 | ----------- | --------------- | ----------------- |
 | C++         | `cpp2`          | `meta.search`     |
+| C#          | `csharp`        | `Meta.Search` |
 | Python      | `python`, `py3` | `meta.search`     |
 | Hack        | `hack`          | `meta.search`     |
 | Java        | `java.swift`    | `com.meta.search` |
@@ -404,6 +406,10 @@ Namespaces control the top-level structure of the generated code in a language-s
 // Directs the compiler to generate C++ code inside the namespace
 // `facebook::peoplesearch`.
 namespace cpp2 facebook.peoplesearch
+
+// Directs the compiler to generate C# code inside the namespace
+// `Meta.PeopleSearch`.
+namespace csharp Meta.PeopleSearch
 
 // Directs the compiler to generate Java code inside the package
 // `com.facebook.peoplesearch`.

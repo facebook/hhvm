@@ -473,13 +473,22 @@ struct protocol_methods<type_class::binary, Type> {
  * Enum Specialization
  */
 
-template <typename Type, typename int_type = std::underlying_type_t<Type>>
+template <
+    typename TypeClass,
+    typename Type,
+    typename int_type = std::underlying_type_t<Type>>
 struct enum_protocol_methods {
   static_assert(std::is_enum_v<Type>, "must be enum");
   using int_methods = protocol_methods<type_class::integral, int_type>;
 
   template <typename Protocol>
   static void read(Protocol& protocol, Type& out) {
+    if constexpr (
+        std::is_same_v<TypeClass, type_class::enumeration> &&
+        requires { protocol.readEnum(out); }) {
+      protocol.readEnum(out);
+      return;
+    }
     int_type tmp;
     int_methods::read(protocol, tmp);
     out = static_cast<Type>(tmp);
@@ -487,6 +496,12 @@ struct enum_protocol_methods {
 
   template <typename Protocol, typename Context>
   static void readWithContext(Protocol& protocol, Type& out, Context& ctx) {
+    if constexpr (
+        std::is_same_v<TypeClass, type_class::enumeration> &&
+        requires { protocol.readEnumWithContext(out, ctx); }) {
+      protocol.readEnumWithContext(out, ctx);
+      return;
+    }
     int_type tmp;
     int_methods::readWithContext(protocol, tmp, ctx);
     out = static_cast<Type>(tmp);
@@ -508,14 +523,15 @@ struct enum_protocol_methods {
 // Thrift enums are always read as int32_t
 template <typename Type>
 struct protocol_methods<type_class::enumeration, Type>
-    : enum_protocol_methods<Type, std::int32_t> {};
+    : enum_protocol_methods<type_class::enumeration, Type, std::int32_t> {};
 
 // Strong integral types keep their precision.
 template <typename Type>
 struct protocol_methods<
     type_class::integral,
     Type,
-    std::enable_if_t<std::is_enum_v<Type>>> : enum_protocol_methods<Type> {};
+    std::enable_if_t<std::is_enum_v<Type>>>
+    : enum_protocol_methods<type_class::integral, Type> {};
 
 template <typename Protocol, typename = void>
 struct supports_arithmetic_vectors : std::false_type {};

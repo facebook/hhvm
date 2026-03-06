@@ -943,6 +943,10 @@ template <typename T>
 struct Decode<type::enum_t<T>> {
   template <typename Protocol>
   void operator()(Protocol& prot, T& t) const {
+    if constexpr (requires { prot.readEnum(t); }) {
+      prot.readEnum(t);
+      return;
+    }
     int32_t i;
     prot.readI32(i);
     t = static_cast<T>(i);

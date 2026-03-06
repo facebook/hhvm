@@ -1120,6 +1120,9 @@ class t_mstch_py3_generator : public t_mstch_generator {
       return !has_compiler_option("no_stream") &&
           !context_->stream_types(self).empty();
     });
+    def.property("container_types", [&](const t_program& self) {
+      return to_type_array(context_->container_types(self), proto);
+    });
     def.property("custom_templates", [&](const t_program& self) {
       return to_type_array(context_->custom_templates(self), proto);
     });
@@ -1538,7 +1541,7 @@ void t_mstch_py3_generator::generate_types() {
   std::vector<std::pair<std::string, bool>> cythonFilesNoTypeContext{
       {"builders.py", false},
       {"constants_FBTHRIFT_ONLY_DO_NOT_USE.py", false},
-      {"containers_FBTHRIFT_ONLY_DO_NOT_USE.py", false},
+      {"containers_FBTHRIFT_ONLY_DO_NOT_USE.py", true},
       {"metadata.pxd", true},
       {"metadata.pyi", true},
       {"metadata.pyx", true},
@@ -1546,7 +1549,7 @@ void t_mstch_py3_generator::generate_types() {
       {"types_empty.pyx", true},
       {"types_fields.pxd", false},
       {"types_fields.pyx", false},
-      {"types_impl_FBTHRIFT_ONLY_DO_NOT_USE.py", false},
+      {"types_impl_FBTHRIFT_ONLY_DO_NOT_USE.py", true},
       {"types_reflection.py", false},
   };
 
@@ -1567,7 +1570,7 @@ void t_mstch_py3_generator::generate_types() {
         "__init__.py", FileType::TypesFile, generateRootPath_);
   }
   if (has_option("inplace_migrate")) {
-    generate_mstch_file(
+    generate_whisker_file(
         "types_inplace_FBTHRIFT_ONLY_DO_NOT_USE.py",
         FileType::TypesFile,
         generateRootPath_);

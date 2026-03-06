@@ -32,8 +32,8 @@ container types, so we'll need to define factories for them based on what they
 want to include.
 
 }}
-{{#type:list?}}
-class {{type:flat_name}}(thrift.py3.types.List):
+{{#if type.list?}}
+class {{type.flat_name}}(thrift.py3.types.List):
     {{! make the type appear to originate from .types module }}
     __module__ = _fbthrift__module_name__
     {{! __slots__ prevents accidental treatment as py-deprecated }}
@@ -47,36 +47,35 @@ class {{type:flat_name}}(thrift.py3.types.List):
                 Do not use with user-exposed `list` to avoid accidental mutability.
             }}
             _py_obj = items
-        elif isinstance(items, {{type:flat_name}}):
+        elif isinstance(items, {{type.flat_name}}):
             _py_obj = list(items)
         elif items is None:
             _py_obj = []
         else:
-            {{#type:containerOfString?}}
+  {{#if type.containerOfString?}}
             if isinstance(items, str):
-                raise TypeError("If you really want to pass a string into a {{#partial pep484.type_name type=type:self}} field, explicitly convert it first.")
-            {{/type:containerOfString?}}
-            check_method = {{type:flat_name}}._check_item_type_or_raise
+                raise TypeError("If you really want to pass a string into a {{#partial pep484.type_name type=type}} field, explicitly convert it first.")
+  {{/if type.containerOfString?}}
+            check_method = {{type.flat_name}}._check_item_type_or_raise
             _py_obj = [check_method(item) for item in items]
 
-        super().__init__(_py_obj, {{type:flat_name}})
+        super().__init__(_py_obj, {{type.flat_name}})
 
     @staticmethod
     def _check_item_type_or_raise(item):
-    {{#type:list_elem_type}}
-      {{#if type:container?}}
+  {{#let elem_type=type.true_type.elem_type}}
+  {{#if elem_type.container?}}
         if item is None:
-            raise TypeError("None is not of the type {{#partial pep484.type_name type=type:self}}")
-        if not isinstance(item, {{#partial types.python_type type=type:self}}):
-            item = {{#partial types.python_type type=type:self}}(item)
-      {{#else}}
+            raise TypeError("None is not of the type {{#partial pep484.type_name type=elem_type}}")
+        if not isinstance(item, {{#partial types.python_type type=elem_type}}):
+            item = {{#partial types.python_type type=elem_type}}(item)
+  {{#else}}
         if not (
-            isinstance(item, {{#partial types.python_is_instance_type type=type:self}}){{#type:enum?}} or
-            isinstance(item, thrift.py3.types.BadEnum){{/type:enum?}}
+            isinstance(item, {{#partial types.python_is_instance_type type=elem_type}}){{#if elem_type.enum?}} or
+            isinstance(item, thrift.py3.types.BadEnum){{/if elem_type.enum?}}
         ):
-            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=type:self}}")
-      {{/if type:container?}}
-    {{/type:list_elem_type}}
+            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=elem_type}}")
+  {{/if elem_type.container?}}
         return item
 
     {{! the __contains__, index, and count APIs don't raise TypeError}}
@@ -84,66 +83,56 @@ class {{type:flat_name}}(thrift.py3.types.List):
     def _check_item_type_or_none(item):
         if item is None:
             return None
-        {{#type:list_elem_type}}
-        if isinstance(item, {{#partial types.python_type type=type:self}}):
+        if isinstance(item, {{#partial types.python_type type=elem_type}}):
             return item
-        {{#type:container?}}
+  {{#if elem_type.container?}}
         try:
-            return {{#partial types.python_type type=type:self}}(item)
+            return {{#partial types.python_type type=elem_type}}(item)
         except:
             pass
-        {{/type:container?}}
-        {{/type:list_elem_type}}
+  {{/if elem_type.container?}}
 
     @staticmethod
     def __get_reflection__():
-        return get_types_reflection().get_reflection__{{type:flat_name}}()
+        return get_types_reflection().get_reflection__{{type.flat_name}}()
 
-{{#program:inplace_migrate?}}
+  {{#if program.inplace_migrate?}}
     @staticmethod
-    def from_python(python_list: thrift.python.types.List) -> {{type:flat_name}}:
-    {{#type:list_elem_type}}
-    {{^type:needs_convert?}}
+    def from_python(python_list: thrift.python.types.List) -> {{type.flat_name}}:
+    {{#if (not elem_type.needs_convert?)}}
         _items = list(python_list)
-    {{/type:needs_convert?}}
-    {{#type:needs_convert?}}
+    {{#else}}
         _items = [
-            {{#partial types.python_type type=type:self}}.from_python(item)
+            {{#partial types.python_type type=elem_type}}.from_python(item)
             for item in python_list
         ]
-    {{/type:needs_convert?}}
-    {{/type:list_elem_type}}
-        return {{type:flat_name}}(
+    {{/if (not elem_type.needs_convert?)}}
+        return {{type.flat_name}}(
             items=_items,
             private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
         )
 
-{{/program:inplace_migrate?}}
-{{^program:inplace_migrate?}}
-{{#type:is_container_of_struct?}}
+  {{#else if type.is_container_of_struct?}}
     @staticmethod
-    def from_python(python_list: thrift.python.types.List) -> "{{type:flat_name}}":
-    {{#type:list_elem_type}}
+    def from_python(python_list: thrift.python.types.List) -> "{{type.flat_name}}":
         _items = [
-          {{#if type:is_container_of_struct?}}
-            {{#partial types.python_type type=type:self}}.from_python(item)
-          {{#else}}
-            _ensure_py3_or_raise(item, "item", {{#partial types.python_is_instance_type type=type:self}})
-          {{/if type:is_container_of_struct?}}
+    {{#if elem_type.is_container_of_struct?}}
+            {{#partial types.python_type type=elem_type}}.from_python(item)
+    {{#else}}
+            _ensure_py3_or_raise(item, "item", {{#partial types.python_is_instance_type type=elem_type}})
+    {{/if elem_type.is_container_of_struct?}}
             for item in python_list
         ]
-    {{/type:list_elem_type}}
-        return {{type:flat_name}}(
+        return {{type.flat_name}}(
             items=_items,
             private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
         )
-{{/type:is_container_of_struct?}}
-{{/program:inplace_migrate?}}
+  {{/if program.inplace_migrate?}}
 
-Sequence.register({{type:flat_name}})
+Sequence.register({{type.flat_name}})
 
-{{/type:list?}}{{#type:set?}}
-class {{type:flat_name}}(thrift.py3.types.Set):
+{{#else if type.set?}}
+class {{type.flat_name}}(thrift.py3.types.Set):
     {{! make the type appear to originate from .types module }}
     __module__ = _fbthrift__module_name__
     {{! __slots__ prevents accidental treatment as py-deprecated }}
@@ -157,36 +146,35 @@ class {{type:flat_name}}(thrift.py3.types.Set):
                 Do not use with user-exposed `set` to avoid accidental mutability.
             }}
             _py_obj = items
-        elif isinstance(items, {{type:flat_name}}):
+        elif isinstance(items, {{type.flat_name}}):
             _py_obj = frozenset(items)
         elif items is None:
             _py_obj = frozenset()
         else:
-            {{#type:containerOfString?}}
+  {{#if type.containerOfString?}}
             if isinstance(items, str):
-                raise TypeError("If you really want to pass a string into a {{#partial pep484.type_name type=type:self}} field, explicitly convert it first.")
-            {{/type:containerOfString?}}
-            check_method = {{type:flat_name}}._check_item_type_or_raise
+                raise TypeError("If you really want to pass a string into a {{#partial pep484.type_name type=type}} field, explicitly convert it first.")
+  {{/if type.containerOfString?}}
+            check_method = {{type.flat_name}}._check_item_type_or_raise
             _py_obj = frozenset(check_method(item) for item in items)
 
-        super().__init__(_py_obj, {{type:flat_name}})
+        super().__init__(_py_obj, {{type.flat_name}})
 
     @staticmethod
     def _check_item_type_or_raise(item):
-    {{#type:set_elem_type}}
-      {{#if type:container?}}
+  {{#let elem_type=type.true_type.elem_type}}
+  {{#if elem_type.container?}}
         if item is None:
-            raise TypeError("None is not of the type {{#partial pep484.type_name type=type:self}}")
-        if not isinstance(item, {{#partial types.python_type type=type:self}}):
-            item = {{#partial types.python_type type=type:self}}(item)
-      {{#else}}
+            raise TypeError("None is not of the type {{#partial pep484.type_name type=elem_type}}")
+        if not isinstance(item, {{#partial types.python_type type=elem_type}}):
+            item = {{#partial types.python_type type=elem_type}}(item)
+  {{#else}}
         if not (
-            isinstance(item, {{#partial types.python_is_instance_type type=type:self}}){{#type:enum?}} or
-            isinstance(item, thrift.py3.types.BadEnum){{/type:enum?}}
+            isinstance(item, {{#partial types.python_is_instance_type type=elem_type}}){{#if elem_type.enum?}} or
+            isinstance(item, thrift.py3.types.BadEnum){{/if elem_type.enum?}}
         ):
-            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=type:self}}")
-      {{/if type:container?}}
-    {{/type:set_elem_type}}
+            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=elem_type}}")
+  {{/if elem_type.container?}}
         return item
 
     {{! __contains__ doesn't raise TypeError}}
@@ -194,74 +182,63 @@ class {{type:flat_name}}(thrift.py3.types.Set):
     def _check_item_type_or_none(item):
         if item is None:
             return None
-        {{#type:set_elem_type}}
-        if isinstance(item, {{#partial types.python_type type=type:self}}):
+        if isinstance(item, {{#partial types.python_type type=elem_type}}):
             return item
-        {{#type:container?}}
+  {{#if elem_type.container?}}
         try:
-            return {{#partial types.python_type type=type:self}}(item)
+            return {{#partial types.python_type type=elem_type}}(item)
         except:
             return None
-        {{/type:container?}}
-        {{/type:set_elem_type}}
+  {{/if elem_type.container?}}
 
     @staticmethod
     def __get_reflection__():
-        return get_types_reflection().get_reflection__{{type:flat_name}}()
+        return get_types_reflection().get_reflection__{{type.flat_name}}()
 
-{{#program:inplace_migrate?}}
+  {{#if program.inplace_migrate?}}
     @staticmethod
-    def from_python(python_set: thrift.python.types.Set) -> {{type:flat_name}}:
-    {{#type:set_elem_type}}
-    {{^type:needs_convert?}}
+    def from_python(python_set: thrift.python.types.Set) -> {{type.flat_name}}:
+    {{#if (not elem_type.needs_convert?)}}
         _items = frozenset(python_set)
-    {{/type:needs_convert?}}
-    {{#type:needs_convert?}}
+    {{#else}}
         _items = frozenset(
-            {{#partial types.python_type type=type:self}}.from_python(item)
+            {{#partial types.python_type type=elem_type}}.from_python(item)
             for item in python_set
         )
-    {{/type:needs_convert?}}
-    {{/type:set_elem_type}}
-        return {{type:flat_name}}(
+    {{/if (not elem_type.needs_convert?)}}
+        return {{type.flat_name}}(
             items=_items,
             private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
         )
 
-{{/program:inplace_migrate?}}
-{{^program:inplace_migrate?}}
-{{#type:is_container_of_struct?}}
+  {{#else if type.is_container_of_struct?}}
     @staticmethod
-    def from_python(python_set: thrift.python.types.Set) -> "{{type:flat_name}}":
-    {{#type:set_elem_type}}
+    def from_python(python_set: thrift.python.types.Set) -> "{{type.flat_name}}":
         _items = frozenset(
-          {{#if type:is_container_of_struct?}}
-            {{#partial types.python_type type=type:self}}.from_python(item)
-          {{#else}}
-            _ensure_py3_or_raise(item, "item", {{#partial types.python_is_instance_type type=type:self}})
-          {{/if type:is_container_of_struct?}}
+    {{#if elem_type.is_container_of_struct?}}
+            {{#partial types.python_type type=elem_type}}.from_python(item)
+    {{#else}}
+            _ensure_py3_or_raise(item, "item", {{#partial types.python_is_instance_type type=elem_type}})
+    {{/if elem_type.is_container_of_struct?}}
             for item in python_set
         )
-    {{/type:set_elem_type}}
-        return {{type:flat_name}}(
+        return {{type.flat_name}}(
             items=_items,
             private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
         )
-{{/type:is_container_of_struct?}}
-{{/program:inplace_migrate?}}
+  {{/if program.inplace_migrate?}}
 
-Set.register({{type:flat_name}})
+Set.register({{type.flat_name}})
 
-{{/type:set?}}{{#type:map?}}
-class {{type:flat_name}}(thrift.py3.types.Map):
+{{#else if type.map?}}
+class {{type.flat_name}}(thrift.py3.types.Map):
     {{! make the type appear to originate from .types module }}
     __module__ = _fbthrift__module_name__
     {{! __slots__ prevents accidental treatment as py-deprecated }}
     __slots__ = ()
 
     _FBTHRIFT_USE_SORTED_REPR = {{!
-        }}{{#type:defaultTemplate?}}True{{/type:defaultTemplate?}}{{!
-        }}{{^type:defaultTemplate?}}False{{/type:defaultTemplate?}}
+        }}{{#if type.defaultTemplate?}}True{{#else}}False{{/if}}
 
     def __init__(self, items=None, private_ctor_token=None) -> None:
         if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
@@ -271,33 +248,32 @@ class {{type:flat_name}}(thrift.py3.types.Map):
                 Do not use with user-exposed `dict` to avoid accidental mutability.
             }}
             _py_obj = items
-        elif isinstance(items, {{type:flat_name}}):
+        elif isinstance(items, {{type.flat_name}}):
             _py_obj = dict(items)
         elif items is None:
             _py_obj = dict()
         else:
-            check_key = {{type:flat_name}}._check_key_type_or_raise
-            check_val = {{type:flat_name}}._check_val_type_or_raise
+            check_key = {{type.flat_name}}._check_key_type_or_raise
+            check_val = {{type.flat_name}}._check_val_type_or_raise
             _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
 
-        super().__init__(_py_obj, {{type:flat_name}})
+        super().__init__(_py_obj, {{type.flat_name}})
 
     @staticmethod
     def _check_key_type_or_raise(key):
-    {{#type:key_type}}
-      {{#if type:container?}}
+  {{#let key_type=type.true_type.key_type}}
+  {{#if key_type.container?}}
         if key is None:
-            raise TypeError("None is not of the type {{#partial pep484.type_name type=type:self}}")
-        if not isinstance(key, {{#partial types.python_type type=type:self}}):
-            key = {{#partial types.python_type type=type:self}}(key)
-      {{#else}}
+            raise TypeError("None is not of the type {{#partial pep484.type_name type=key_type}}")
+        if not isinstance(key, {{#partial types.python_type type=key_type}}):
+            key = {{#partial types.python_type type=key_type}}(key)
+  {{#else}}
         if not (
-            isinstance(key, {{#partial types.python_is_instance_type type=type:self}}){{#type:enum?}} or
-            isinstance(key, thrift.py3.types.BadEnum){{/type:enum?}}
+            isinstance(key, {{#partial types.python_is_instance_type type=key_type}}){{#if key_type.enum?}} or
+            isinstance(key, thrift.py3.types.BadEnum){{/if key_type.enum?}}
         ):
-            raise TypeError(f"{key!r} is not of type {{#partial pep484.type_name type=type:self}}")
-      {{/if type:container?}}
-    {{/type:key_type}}
+            raise TypeError(f"{key!r} is not of type {{#partial pep484.type_name type=key_type}}")
+  {{/if key_type.container?}}
         return key
 
     {{! __contains__ doesn't raise TypeError; __getitem__ uses KeyError }}
@@ -305,110 +281,94 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     def _check_key_type_or_none(key):
         if key is None:
             return None
-        {{#type:key_type}}
-        if isinstance(key, {{#partial types.python_type type=type:self}}):
+        if isinstance(key, {{#partial types.python_type type=key_type}}):
             return key
-        {{#type:container?}}
+  {{#if key_type.container?}}
         try:
-            return {{#partial types.python_type type=type:self}}(key)
+            return {{#partial types.python_type type=key_type}}(key)
         except:
             return None
-        {{/type:container?}}
-        {{/type:key_type}}
+  {{/if key_type.container?}}
 
     @staticmethod
     def _check_val_type_or_raise(item):
-    {{#type:value_type}}
-      {{#if type:container?}}
+  {{#let val_type=type.true_type.val_type}}
+  {{#if val_type.container?}}
         if item is None:
-            raise TypeError("None is not of the type {{#partial pep484.type_name type=type:self}}")
-        if not isinstance(item, {{#partial types.python_type type=type:self}}):
-            item = {{#partial types.python_type type=type:self}}(item)
-      {{#else}}
+            raise TypeError("None is not of the type {{#partial pep484.type_name type=val_type}}")
+        if not isinstance(item, {{#partial types.python_type type=val_type}}):
+            item = {{#partial types.python_type type=val_type}}(item)
+  {{#else}}
         if not (
-            isinstance(item, {{#partial types.python_is_instance_type type=type:self}}){{#type:enum?}} or
-            isinstance(item, thrift.py3.types.BadEnum){{/type:enum?}}
+            isinstance(item, {{#partial types.python_is_instance_type type=val_type}}){{#if val_type.enum?}} or
+            isinstance(item, thrift.py3.types.BadEnum){{/if val_type.enum?}}
         ):
-            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=type:self}}")
-      {{/if type:container?}}
-    {{/type:value_type}}
+            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=val_type}}")
+  {{/if val_type.container?}}
         return item
 
     @staticmethod
     def __get_reflection__():
-        return get_types_reflection().get_reflection__{{type:flat_name}}()
+        return get_types_reflection().get_reflection__{{type.flat_name}}()
 
-{{#program:inplace_migrate?}}
+  {{#if program.inplace_migrate?}}
     @staticmethod
-    def from_python(python_map: thrift.python.types.Map) -> {{type:flat_name}}:
-    {{#type:key_type}}
-    {{^type:needs_convert?}}
+    def from_python(python_map: thrift.python.types.Map) -> {{type.flat_name}}:
+    {{#if (not key_type.needs_convert?)}}
         _keys = python_map.keys()
-    {{/type:needs_convert?}}
-    {{#type:needs_convert?}}
+    {{#else}}
         _keys = (
-            {{#partial types.python_type type=type:self}}.from_python(key)
+            {{#partial types.python_type type=key_type}}.from_python(key)
             for key in python_map.keys()
         )
-    {{/type:needs_convert?}}
-    {{/type:key_type}}
-    {{#type:value_type}}
-    {{^type:needs_convert?}}
+    {{/if (not key_type.needs_convert?)}}
+    {{#if (not val_type.needs_convert?)}}
         _values = python_map.values()
-    {{/type:needs_convert?}}
-    {{#type:needs_convert?}}
+    {{#else}}
         _values = (
-            {{#partial types.python_type type=type:self}}.from_python(item)
+            {{#partial types.python_type type=val_type}}.from_python(item)
             for item in python_map.values()
         )
-    {{/type:needs_convert?}}
-    {{/type:value_type}}
-        return {{type:flat_name}}(
+    {{/if (not val_type.needs_convert?)}}
+        return {{type.flat_name}}(
             items=dict(zip(_keys, _values)),
             private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
         )
 
-{{/program:inplace_migrate?}}
-{{^program:inplace_migrate?}}
-{{#type:is_container_of_struct?}}
+  {{#else if type.is_container_of_struct?}}
     @staticmethod
-    def from_python(python_map: thrift.python.types.Map) -> "{{type:flat_name}}":
-    {{#type:key_type}}
-      {{#if type:is_container_of_struct?}}
+    def from_python(python_map: thrift.python.types.Map) -> "{{type.flat_name}}":
+    {{#if key_type.is_container_of_struct?}}
         _keys = (
-            {{#partial types.python_type type=type:self}}.from_python(key)
+            {{#partial types.python_type type=key_type}}.from_python(key)
             for key in python_map.keys()
         )
-      {{#else if type:structured?}}
+    {{#else if key_type.structured?}}
         _keys = (
-            _ensure_py3_or_raise(key, "key", {{#partial types.python_is_instance_type type=type:self}})
+            _ensure_py3_or_raise(key, "key", {{#partial types.python_is_instance_type type=key_type}})
             for key in python_map.keys()
         )
-      {{#else}}
+    {{#else}}
         _keys = python_map.keys()
-      {{/if type:is_container_of_struct?}}
-    {{/type:key_type}}
-    {{#type:value_type}}
-      {{#if type:is_container_of_struct?}}
+    {{/if key_type.is_container_of_struct?}}
+    {{#if val_type.is_container_of_struct?}}
         _values = (
-            {{#partial types.python_type type=type:self}}.from_python(value)
+            {{#partial types.python_type type=val_type}}.from_python(value)
             for value in python_map.values()
         )
-      {{#else if type:structured?}}
+    {{#else if val_type.structured?}}
         _values = (
-            _ensure_py3_or_raise(value, "value", {{#partial types.python_is_instance_type type=type:self}})
+            _ensure_py3_or_raise(value, "value", {{#partial types.python_is_instance_type type=val_type}})
             for value in python_map.values()
         )
-      {{#else}}
+    {{#else}}
         _values = python_map.values()
-      {{/if type:is_container_of_struct?}}
-    {{/type:value_type}}
-        return {{type:flat_name}}(
+    {{/if val_type.is_container_of_struct?}}
+        return {{type.flat_name}}(
             items=dict(zip(_keys, _values)),
             private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
         )
-{{/type:is_container_of_struct?}}
-{{/program:inplace_migrate?}}
+  {{/if program.inplace_migrate?}}
 
-Mapping.register({{type:flat_name}})
-{{/type:map?}}
+Mapping.register({{type.flat_name}})
+{{/if type.list?}}

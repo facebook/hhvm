@@ -19,10 +19,10 @@
 This is a template for creating compiled Enum and Flag pyx information
 
 }}
-class __{{struct:name}}Type(enum.Enum):
-    {{#struct:fields}}
-    {{field:py_name}} = {{field:id}}
-    {{/struct:fields}}
+class __{{struct.name}}Type(enum.Enum):
+    {{#each struct.fields as |field|}}
+    {{field.py_name}} = {{field.id}}
+    {{/each}}
     {{! put EMPTY = 0 arm last to overwrite any other arms}}
     EMPTY = 0
 

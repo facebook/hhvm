@@ -35,7 +35,7 @@ want to include.
 {{#import "common/pep484" as pep484}}
 {{#import "common/types" as types}}
 {{> common/auto_generated_py}}
-{{#program:gen_py3_cython?}}
+{{#if program.gen_py3_cython?}}
 
 import thrift.py3.types
 import importlib
@@ -48,10 +48,10 @@ from collections.abc import Mapping, Sequence, Set
     If you `import` them directly from here, you will get nasty import errors.
 """
 
-_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types"
+_fbthrift__module_name__ = "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types"
 
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
-{{#each program:includeNamespaces as |include|}}
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as {{> types/current_module_types}}
+{{#each program.includeNamespaces as |include|}}
   {{#if include.has_types?}}
 import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
   {{/if include.has_types?}}
@@ -60,30 +60,27 @@ from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(
-        "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_reflection"
     )
 
 __all__ = []
 
-{{#program:containerTypes}}
+{{#each program.container_types as |type|}}
 {{> inplace/container }}
-__all__.append('{{type:flat_name}}')
+__all__.append('{{type.flat_name}}')
 
 
-{{/program:containerTypes}}
-{{/program:gen_py3_cython?}}
-{{^program:gen_py3_cython?}}
-  {{#if program:has_container_types?}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.{{!
-}}{{#program:auto_migrate?}}{{!
+{{/each}}
+{{#else if program.has_container_types?}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.{{!
+}}{{#if program.auto_migrate?}}{{!
     }}types_auto_FBTHRIFT_ONLY_DO_NOT_USE{{!
-}}{{/program:auto_migrate?}}{{^program:auto_migrate?}}{{#program:inplace_migrate?}}{{!
+}}{{#else if program.inplace_migrate?}}{{!
     }}types_inplace_FBTHRIFT_ONLY_DO_NOT_USE{{!
-}}{{/program:inplace_migrate?}}{{/program:auto_migrate?}}{{!
+}}{{/if program.auto_migrate?}}{{!
     }} import (
-{{#program:containerTypes}}
-    {{type:flat_name}},
-{{/program:containerTypes}}
+{{#each program.container_types as |type|}}
+    {{type.flat_name}},
+{{/each}}
 )
-  {{/if program:has_container_types?}}
-{{/program:gen_py3_cython?}}
+{{/if program.gen_py3_cython?}}

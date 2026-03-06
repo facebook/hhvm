@@ -32,7 +32,7 @@ are re-exported via types.pyx
 None
 {{/let partial}}
 {{> common/auto_generated_py}}
-{{#program:inplace_migrate?}}
+{{#if program.inplace_migrate?}}
 
 from __future__ import annotations
 
@@ -51,235 +51,239 @@ from thrift.py3.types import (
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types as _fbthrift_python_types
 {{! must import thrift_types before thrift_enums due to enum dependence on metadata.thrift_types}}
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_enums as _fbthrift_python_enums
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_enums as _fbthrift_python_enums
 
 
-{{#each program:includeNamespaces as |include|}}
+{{#each program.includeNamespaces as |include|}}
   {{#if include.has_types?}}
 import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-    {{#if (not (array.empty? program:self.consts))}}
+    {{#if (not (array.empty? program.consts))}}
 import {{include.modulePathPeriodSeparated}}.types
-    {{/if (not (array.empty? program:self.consts))}}
+    {{/if (not (array.empty? program.consts))}}
   {{/if include.has_types?}}
 {{/each}}
 
 def get_types_reflection():
     return importlib.import_module(
-        "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_reflection"
     )
 
 def _get_py_deprecated_module():
     import thrift.util.converter # needed by _to_py_deprecated() call
-    return importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
+    return importlib.import_module("{{program.py_deprecated_module_path}}.ttypes")
 
-_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types"
+_fbthrift__module_name__ = "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types"
 
 __all__ = []
 
 ### Enums ###
-{{#program:enums}}
+{{#each program.enums as |enum|}}
 
-{{enum:name}} = _fbthrift_python_enums.{{enum:name}}
+{{enum.name}} = _fbthrift_python_enums.{{enum.name}}
 
-{{#program:inplace_migrate?}}
-__all__.append("{{enum:name}}")
+  {{#if program.inplace_migrate?}}
+__all__.append("{{enum.name}}")
 
-{{/program:inplace_migrate?}}
-{{/program:enums}}
+  {{/if program.inplace_migrate?}}
+{{/each}}
 
 ### Union Enums ###
-{{#program:filtered_structs}}
-{{#struct:union?}}
+{{#each program.py3_visible_structured_definitions as |struct|}}
+  {{#if struct.union?}}
 
 {{> inplace/union_enum_py }}
 
 
 {{! this is a dumb hack due to dunder class mangling rules}}
-_fbthrift__{{struct:name}}Type = __{{struct:name}}Type
+_fbthrift__{{struct.name}}Type = __{{struct.name}}Type
 
-{{#program:inplace_migrate?}}
-__all__.append("__{{struct:name}}Type")
+    {{#if program.inplace_migrate?}}
+__all__.append("__{{struct.name}}Type")
 
-{{/program:inplace_migrate?}}
-{{/struct:union?}}
-{{/program:filtered_structs}}
+    {{/if program.inplace_migrate?}}
+  {{/if struct.union?}}
+{{/each}}
 
 ### Containers ###
-{{#program:containerTypes}}
+{{#each program.container_types as |type|}}
 {{> inplace/container }}
 
-{{#program:inplace_migrate?}}
-__all__.append("{{type:flat_name}}")
+  {{#if program.inplace_migrate?}}
+__all__.append("{{type.flat_name}}")
 
-{{/program:inplace_migrate?}}
-{{/program:containerTypes}}
+  {{/if program.inplace_migrate?}}
+{{/each}}
 
 ### Structured Types ###
-{{#program:filtered_structs}}
-class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}}):
+{{#each program.py3_visible_structured_definitions as |struct|}}
+class {{struct.name}}({{#partial types.python_struct_class struct=struct}}):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
-    {{#struct:py3_fields}}{{#field:type}}{{#type:needs_convert?}}
-        "_fbthrift_inner__{{field:py_name}}",
-    {{/type:needs_convert?}}{{/field:type}}{{/struct:py3_fields}}{{#struct:union?}}
+    {{#each struct.py3_fields as |field|}}
+      {{#if field.type.needs_convert?}}
+        "_fbthrift_inner__{{field.py_name}}",
+      {{/if field.type.needs_convert?}}
+    {{/each}}
+    {{#if struct.union?}}
         "_fbthrift_inner__type",
         "_fbthrift_inner__value",
-    {{/struct:union?}}
+    {{/if struct.union?}}
     )
-    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.{{struct:name}}
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.{{struct.name}}
     _FBTHRIFT__FIELD_NAMES = (
-        {{#struct:py3_fields}}
-        "{{field:py_name}}",
-        {{/struct:py3_fields}}
+        {{#each struct.py3_fields as |field|}}
+        "{{field.py_name}}",
+        {{/each}}
     )
-    {{#struct:allow_inheritance?}}
+    {{#if struct.allow_inheritance?}}
     _fbthrift_allow_inheritance_DO_NOT_USE = True
-    {{/struct:allow_inheritance?}}
-    {{#struct:union?}}
-    Type = _fbthrift__{{struct:name}}Type
-    {{/struct:union?}}
-    _fbthrift__inner : _fbthrift_python_types.{{struct:name}}
-    {{#struct:py3_fields}}
-    {{#field:type}}{{#type:needs_convert?}}
-    _fbthrift_inner__{{field:py_name}} : {{#partial pep484.field_type field=field:self}} | None
-    {{/type:needs_convert?}}{{/field:type}}
-    {{/struct:py3_fields}}
-    {{#struct:union?}}
+    {{/if struct.allow_inheritance?}}
+    {{#if struct.union?}}
+    Type = _fbthrift__{{struct.name}}Type
+    {{/if struct.union?}}
+    _fbthrift__inner : _fbthrift_python_types.{{struct.name}}
+    {{#each struct.py3_fields as |field|}}
+      {{#if field.type.needs_convert?}}
+    _fbthrift_inner__{{field.py_name}} : {{#partial pep484.field_type field=field}} | None
+      {{/if field.type.needs_convert?}}
+    {{/each}}
+    {{#if struct.union?}}
     _fbthrift_inner__type: Type
-    _fbthrift_inner__value: {{#partial union_value_type struct=struct:self}}
-    {{/struct:union?}}
+    _fbthrift_inner__value: {{#partial union_value_type struct=struct}}
+    {{/if struct.union?}}
 
 
     def __init__(self, *args, **kwargs) -> None:
-        {{#struct:fields}}
-        {{#field:type}}{{#type:string?}}
+        {{#each struct.fields as |field|}}
+          {{#if field.type.string?}}
         {{! This fixes formatting change affecting MyEnum(str, enum.Enum)}}
-        _fbthrift__maybe_str_enum = kwargs.get("{{field:py_name}}", None)
+        _fbthrift__maybe_str_enum = kwargs.get("{{field.py_name}}", None)
         if isinstance(_fbthrift__maybe_str_enum, enum.Enum):
-            kwargs["{{field:py_name}}"] = _fbthrift__maybe_str_enum.value
-        {{/type:string?}}{{/field:type}}
-        {{/struct:fields}}
+            kwargs["{{field.py_name}}"] = _fbthrift__maybe_str_enum.value
+          {{/if field.type.string?}}
+        {{/each}}
         try:
-            self._fbthrift__inner = _fbthrift_python_types.{{struct:name}}(*args, **kwargs)
+            self._fbthrift__inner = _fbthrift_python_types.{{struct.name}}(*args, **kwargs)
         except TypeError:
         {{! TODO(T222259754): thrift-py3 skips validation of None fields; thrift-python does not}}
             kwargs = _fbthrift__filter_kwargs(kwargs, self._FBTHRIFT__FIELD_NAMES)
-            self._fbthrift__inner = _fbthrift_python_types.{{struct:name}}(*args, **kwargs)
+            self._fbthrift__inner = _fbthrift_python_types.{{struct.name}}(*args, **kwargs)
 
         {{! we deliberately omit __init__ of Struct/GeneratedError, which tries to init cpp2 object}}
-        {{#struct:exception?}}
+        {{#if struct.exception?}}
         super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
-        {{/struct:exception?}}
+        {{/if struct.exception?}}
         {{! There's an optimization opportunity here if convertible objects are already correct type}}
 
-    def __new__(_fbthrift__cls, *args, **kwargs) -> {{struct:name}}:
+    def __new__(_fbthrift__cls, *args, **kwargs) -> {{struct.name}}:
         instance = super().__new__(_fbthrift__cls)
-        {{#struct:py3_fields}}
-        {{#field:type}}{{#type:needs_convert?}}
-        instance._fbthrift_inner__{{field:py_name}} = None
-        {{/type:needs_convert?}}{{/field:type}}
-        {{/struct:py3_fields}}
-        {{#struct:union?}}
+        {{#each struct.py3_fields as |field|}}
+          {{#if field.type.needs_convert?}}
+        instance._fbthrift_inner__{{field.py_name}} = None
+          {{/if field.type.needs_convert?}}
+        {{/each}}
+        {{#if struct.union?}}
         instance._fbthrift_inner__type = None
         instance._fbthrift_inner__value = None
-        {{/struct:union?}}
+        {{/if struct.union?}}
         return instance
 
-    {{^struct:exception?}}{{^struct:union?}}{{^struct:cpp_noncopyable?}}
-    def __call__(self, **kwargs) -> {{struct:name}}:
-        return {{struct:name}}.from_python(self._fbthrift__inner(**kwargs))
+    {{#if (and struct.struct? (not struct.cpp_noncopyable?))}}
+    def __call__(self, **kwargs) -> {{struct.name}}:
+        return {{struct.name}}.from_python(self._fbthrift__inner(**kwargs))
 
-    {{/struct:cpp_noncopyable?}}{{/struct:union?}}{{/struct:exception?}}
+    {{/if (and struct.struct? (not struct.cpp_noncopyable?))}}
     @staticmethod
-    def from_python(thrift_python_inner: _fbthrift_python_types.{{struct:name}}) -> {{struct:name}}:
-        inst = {{struct:name}}.__new__({{struct:name}})
+    def from_python(thrift_python_inner: _fbthrift_python_types.{{struct.name}}) -> {{struct.name}}:
+        inst = {{struct.name}}.__new__({{struct.name}})
         inst._fbthrift__inner = thrift_python_inner
-        {{#struct:exception?}}
+        {{#if struct.exception?}}
         super(thrift.python.exceptions.Error, inst).__init__(*(val for _, val in inst))
-        {{/struct:exception?}}
+        {{/if struct.exception?}}
         return inst
 
-    def _to_py3(self) -> {{struct:name}}:
+    def _to_py3(self) -> {{struct.name}}:
         return self
 
-    def _to_python(self) -> _fbthrift_python_types.{{struct:name}}:
+    def _to_python(self) -> _fbthrift_python_types.{{struct.name}}:
         return self._fbthrift__inner
 
     def _to_py_deprecated(self):
         py_deprecated_types = _get_py_deprecated_module()
-        return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct:name}}, self)
+        return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct.name}}, self)
 
     def _fbthrift__isset(self) -> dict[str, bool]:
         return thrift.python.types.isset(self._fbthrift__inner)
 
     @staticmethod
     def __get_reflection__():
-        return get_types_reflection().get_reflection__{{struct:name}}()
+        return get_types_reflection().get_reflection__{{struct.name}}()
 
     @staticmethod
     def __get_metadata__():
-        return {{struct:name}}._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+        return {{struct.name}}._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
 
     @staticmethod
     def __get_thrift_name__():
-        return "{{program:name}}.{{struct:name}}"
+        return "{{program.name}}.{{struct.name}}"
 
-    {{#struct:py3_fields}}
+    {{#each struct.py3_fields as |field|}}
     @_python__property
-    def {{field:py_name}}(self) -> {{#partial pep484.field_type field=field:self}}:
-{{#field:type}}{{#type:needs_convert?}}
-        if self._fbthrift_inner__{{field:py_name}} is None:
-            __python_val = self._fbthrift__inner.{{field:py_name}}
-            {{#field:optional?}}
+    def {{field.py_name}}(self) -> {{#partial pep484.field_type field=field}}:
+      {{#if field.type.needs_convert?}}
+        if self._fbthrift_inner__{{field.py_name}} is None:
+            __python_val = self._fbthrift__inner.{{field.py_name}}
+            {{#if field.optional?}}
             if __python_val is None:
-            {{^field:optional_default?}}
+              {{#if (not field.optional_default?)}}
                 return None
-            {{/field:optional_default?}}
-            {{#field:optional_default?}}
-                __python_val = {{#partial constants.inplace_const_value value=field:self.default_value }}
-            {{/field:optional_default?}}
-            {{/field:optional?}}{{^field:optional?}}{{#struct:union?}}
+              {{#else}}
+                __python_val = {{#partial constants.inplace_const_value value=field.default_value }}
+              {{/if (not field.optional_default?)}}
+            {{#else if struct.union?}}
             if __python_val is None:
                 return None
-            {{/struct:union?}}{{/field:optional?}}
-            self._fbthrift_inner__{{field:py_name}} = {{!
-                }}{{#partial types.python_type type=field:self.type}}.from_python(__python_val)
+            {{/if field.optional?}}
+            self._fbthrift_inner__{{field.py_name}} = {{!
+                }}{{#partial types.python_type type=field.type}}.from_python(__python_val)
 
-        return self._fbthrift_inner__{{field:py_name}}
-{{/type:needs_convert?}}{{^type:needs_convert?}}{{^field:optional_default?}}
-        return self._fbthrift__inner.{{field:py_name}}
-{{/field:optional_default?}}{{#field:optional_default?}}
-        __python_val = self._fbthrift__inner.{{field:py_name}}
+        return self._fbthrift_inner__{{field.py_name}}
+      {{#else if (not field.optional_default?)}}
+        return self._fbthrift__inner.{{field.py_name}}
+      {{#else}}
+        __python_val = self._fbthrift__inner.{{field.py_name}}
         if __python_val is None:
-            return {{#partial constants.inplace_const_value value=field:self.default_value }}
+            return {{#partial constants.inplace_const_value value=field.default_value }}
         return __python_val
-{{/field:optional_default?}}{{/type:needs_convert?}}{{/field:type}}
+      {{/if field.type.needs_convert?}}
 
-    {{/struct:py3_fields}}
-    {{#struct:union?}}
+    {{/each}}
+    {{#if struct.union?}}
     @_python__property
-    def type(self) -> _fbthrift_python_types.{{struct:name}}.Type:
+    def type(self) -> _fbthrift_python_types.{{struct.name}}.Type:
         if self._fbthrift_inner__type is None:
             self._fbthrift_inner__type = self.Type(self._fbthrift__inner.type.value)
         return self._fbthrift_inner__type
 
     @_python__property
-    def value(self) -> {{#partial union_value_type struct=struct:self}}:
+    def value(self) -> {{#partial union_value_type struct=struct}}:
         match self._fbthrift__inner.type:
-{{#struct:py3_fields}}{{#field:type}}{{#type:needs_convert?}}
-            case _fbthrift_python_types.{{struct:name}}.Type.{{field:py_name}}:
-                return self.{{field:py_name}}
-{{/type:needs_convert?}}{{/field:type}}{{/struct:py3_fields}}
+      {{#each struct.py3_fields as |field|}}
+        {{#if field.type.needs_convert?}}
+            case _fbthrift_python_types.{{struct.name}}.Type.{{field.py_name}}:
+                return self.{{field.py_name}}
+        {{/if field.type.needs_convert?}}
+      {{/each}}
             case _:
                 return self._fbthrift__inner.value
 
 
     {{> inplace/union_from_value}}
 
-    {{/struct:union?}}
+    {{/if struct.union?}}
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -287,7 +291,7 @@ class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}})
 
     @classmethod
     def _fbthrift_get_struct_size(cls) -> int:
-        return {{(array.len struct:py3_fields)}}
+        return {{(array.len struct.py3_fields)}}
 
     def __eq__(self, other):
     {{! when in-place migration complete, we can start ignoring cpp.noncomparable attribute }}
@@ -298,40 +302,40 @@ class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}})
         if type(other) is self._FBTHRIFT__PYTHON_CLASS:
             return self._fbthrift__inner == other
 
-        {{#struct:allow_inheritance?}}
-        if isinstance(other, {{struct:name}}):
+        {{#if struct.allow_inheritance?}}
+        if isinstance(other, {{struct.name}}):
             return self._fbthrift__inner == other._fbthrift__inner
 
-        {{/struct:allow_inheritance?}}
+        {{/if struct.allow_inheritance?}}
         return False
 
 
-    {{#struct:is_struct_orderable?}}
+    {{#if struct.is_struct_orderable?}}
     def __lt__(self, other):
-        if not isinstance(other, {{struct:name}}):
+        if not isinstance(other, {{struct.name}}):
             return NotImplemented
         return self._fbthrift__inner < other._fbthrift__inner
 
     def __le__(self, other):
-        if not isinstance(other, {{struct:name}}):
+        if not isinstance(other, {{struct.name}}):
             return NotImplemented
         return self._fbthrift__inner <= other._fbthrift__inner
 
-    {{/struct:is_struct_orderable?}}
+    {{/if struct.is_struct_orderable?}}
 
-    {{#if struct:exception?}}
+    {{#if struct.exception?}}
     def __str__(self):
-      {{#if (object.notnull? exception:message_field)}}
-        field = self.{{exception:message_field.py_name}}
+      {{#if (object.notnull? struct.message_field)}}
+        field = self.{{struct.message_field.py_name}}
         if field is None:
             {{! optional field, stringify }}
             return str(field)
         return field
       {{#else}}
         return super().__str__()
-      {{/if (object.notnull? exception:message_field)}}
+      {{/if (object.notnull? struct.message_field)}}
 
-    {{/if struct:exception?}}
+    {{/if struct.exception?}}
     def __hash__(self):
         return super().__hash__()
 
@@ -339,14 +343,14 @@ class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}})
         return self{{! thrift-py3 / thrift-python is immutable}}
 
 
-{{#program:inplace_migrate?}}
-__all__.append("{{struct:name}}")
+  {{#if program.inplace_migrate?}}
+__all__.append("{{struct.name}}")
 
-{{/program:inplace_migrate?}}
-{{/program:filtered_structs}}
+  {{/if program.inplace_migrate?}}
+{{/each}}
 
 ### Constants
-{{#program:constants}}
-{{constant:name}} = {{#partial constants.inplace_const_value value=constant:self.value }}
-{{/program:constants}}
-{{/program:inplace_migrate?}}
+{{#each program.consts as |constant|}}
+{{constant.name}} = {{#partial constants.inplace_const_value value=constant.value }}
+{{/each}}
+{{/if program.inplace_migrate?}}

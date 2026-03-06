@@ -118,6 +118,7 @@ struct SkipNoopString {
   void append(const char*, size_t) {}
   void clear() {}
   void reserve(size_t) {}
+  void operator=(std::string_view) {}
 };
 
 // Checks if bool hold a valid value (true or false) and throws exception

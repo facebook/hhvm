@@ -30,7 +30,8 @@ namespace HPHP {
 
 enum class APCHandleLevel {
   Outer, // directly referenced by the apc store
-  Inner // referenced by some other Inner or Outer handle
+  Inner, // referenced by some other Inner or Outer handle
+  OuterAcyclic // Caller guarantees no cycles, otherwise the same as Outer
 };
 
 // handle kind, instead of overloading DataType

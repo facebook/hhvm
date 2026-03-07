@@ -790,16 +790,18 @@ bool ConcurrentTableSharedStore::add(const String& key,
                                      const Variant& val,
                                      int64_t max_ttl,
                                      int64_t bump_ttl,
+                                     APCHandleLevel level,
                                      bool pure) {
-  return storeImpl(key, val, max_ttl, bump_ttl, false, pure);
+  return storeImpl(key, val, max_ttl, bump_ttl, false, level, pure);
 }
 
 void ConcurrentTableSharedStore::set(const String& key,
                                      const Variant& val,
                                      int64_t max_ttl,
                                      int64_t bump_ttl,
+                                     APCHandleLevel level,
                                      bool pure) {
-  storeImpl(key, val, max_ttl, bump_ttl, true, pure);
+  storeImpl(key, val, max_ttl, bump_ttl, true, level, pure);
 }
 
 bool ConcurrentTableSharedStore::storeImpl(const String& key,
@@ -807,6 +809,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
                                            int64_t max_ttl,
                                            int64_t bump_ttl,
                                            bool overwrite,
+                                           APCHandleLevel level,
                                            bool pure) {
   StoreValue *sval;
   auto keyLen = key.size();
@@ -814,7 +817,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
   // We need to do this before we acquire any locks. Serializing objects can
   // reenter the VM (__sleep) and certain operations may cause us to throw for
   // types that cannot be serialized to APC.
-  auto svar = APCHandle::Create(value, APCHandleLevel::Outer, false, pure);
+  auto svar = APCHandle::Create(value, level, false, pure);
 
   char* const kcp = strdup(key.data());
 

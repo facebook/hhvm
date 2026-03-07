@@ -207,7 +207,8 @@ struct ConcurrentTableSharedStore {
    * Returns: true if the value was added, including if we've replaced an
    * expired value.
    */
-  bool add(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl, bool pure = false);
+  bool add(const String& key, const Variant& val, int64_t max_ttl, 
+           int64_t bump_ttl, APCHandleLevel level, bool pure = false);
 
   /*
    * Set the value for `key' to `val'.  If there was an existing value, it is
@@ -215,7 +216,8 @@ struct ConcurrentTableSharedStore {
    *
    * The requested ttl is limited by the ApcTTLLimit.
    */
-  void set(const String& key, const Variant& val, int64_t max_ttl, int64_t bump_ttl, bool pure = false);
+  void set(const String& key, const Variant& val, int64_t max_ttl,
+           int64_t bump_ttl, APCHandleLevel level, bool pure = false);
 
   /*
    * Increment the value for the key `key' by step, iff it is present,
@@ -401,7 +403,7 @@ public:
 private:
   bool checkExpire(const String& keyStr, Map::const_accessor& acc);
   bool eraseImpl(const char*, bool, ExpSet::accessor* expAcc);
-  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool, bool);
+  bool storeImpl(const String&, const Variant&, int64_t, int64_t, bool, APCHandleLevel, bool);
   bool handlePromoteObj(const String&, APCHandle*, const Variant&, bool);
   void dumpKeyAndValue(std::ostream&);
   static EntryInfo makeEntryInfo(const char*, StoreValue*, int64_t curr_time);

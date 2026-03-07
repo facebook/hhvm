@@ -68,7 +68,8 @@ Variant HHVM_FUNCTION(apc_store,
                       const Variant& key_or_array,
                       const Variant& var = uninit_variant,
                       int64_t ttl = 0,
-                      int64_t bump_ttl = 0);
+                      int64_t bump_ttl = 0,
+                      bool guaranteed_acyclic = false);
 TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success);
 
 ///////////////////////////////////////////////////////////////////////////////

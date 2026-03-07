@@ -47,13 +47,15 @@ const int APC_LIST_DELETED = 2;
 function apc_add(mixed $key_or_array,
                  mixed $var = null,
                  int $ttl = 0,
-                 int $bump_ttl = 0)[defaults]: mixed;
+                 int $bump_ttl = 0,
+                 bool $guaranteed_acyclic = false)[defaults]: mixed;
 
 <<__Native>>
 function apc_add_with_pure_sleep(mixed $key_or_array,
                  mixed $var = null,
                  int $ttl = 0,
-                 int $bump_ttl = 0)[globals]: mixed;
+                 int $bump_ttl = 0,
+                 bool $guaranteed_acyclic = false)[globals]: mixed;
 
 /**
  * Cache a variable in the data store. Unlike many other mechanisms in PHP,
@@ -80,7 +82,8 @@ function apc_add_with_pure_sleep(mixed $key_or_array,
 function apc_store(mixed $key_or_array,
                    mixed $var = null,
                    int $ttl = 0,
-                   int $bump_ttl = 0)[defaults]: mixed;
+                   int $bump_ttl = 0,
+                   bool $guaranteed_acyclic = false)[defaults]: mixed;
 
 /**
  * Similar to apc_store but requires that any serialized objects' __sleep
@@ -90,7 +93,8 @@ function apc_store(mixed $key_or_array,
 function apc_store_with_pure_sleep(mixed $key_or_array,
                                    mixed $var = null,
                                    int $ttl = 0,
-                                   int $bump_ttl = 0)[globals]: mixed;
+                                   int $bump_ttl = 0,
+                                   bool $guaranteed_acyclic = false)[globals]: mixed;
 
 /**
  * Fetches a stored variable from the cache.

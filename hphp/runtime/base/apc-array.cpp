@@ -48,17 +48,19 @@ ALWAYS_INLINE
 APCHandle::Pair
 APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
                          A shared, B serialized, bool pure) {
-  if (level == APCHandleLevel::Outer) {
+  if (level == APCHandleLevel::Outer || level == APCHandleLevel::OuterAcyclic) {
     auto const seenArrays = apcExtension::ShareUncounted ?
       req::make_unique<MakeUncountedEnv::ArrayMap>() : nullptr;
 
-    // We only need to call traverseData() on the top-level array.
-    DataWalker walker(DataWalker::LookupFeature::DetectNonPersistable);
-    DataWalker::DataFeature features =
-      walker.traverseData(arr, seenArrays.get());
-    if (features.isCircular) {
-      auto const s = apc_serialize(Variant{arr}, pure);
-      return serialized(s.get());
+    DataWalker::DataFeature features {};
+    if (level == APCHandleLevel::Outer) {
+      // We only need to call traverseData() on the top-level array.
+      DataWalker walker(DataWalker::LookupFeature::DetectNonPersistable);
+      features = walker.traverseData(arr, seenArrays.get());
+      if (features.isCircular) {
+        auto const s = apc_serialize(Variant{arr}, pure);
+        return serialized(s.get());
+      }
     }
 
     if (apcExtension::UseUncounted && !features.hasNonPersistable) {

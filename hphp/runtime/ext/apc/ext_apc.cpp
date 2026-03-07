@@ -131,7 +131,7 @@ std::string apcExtension::serialize() {
 void apcExtension::deserialize(std::string data) {
   auto sd = StringData::MakeUncounted(data);
   data.clear();
-  apc_store().set(s_internal_preload, Variant{sd}, 0, 0, false);
+  apc_store().set(s_internal_preload, Variant{sd}, 0, 0, APCHandleLevel::Outer, false);
   DecRefUncountedString(sd); // APC did an uncounted inc-ref
 }
 
@@ -165,9 +165,11 @@ Variant apc_store_impl(const Variant& key_or_array,
                        const Variant& var,
                        int64_t ttl,
                        int64_t bump_ttl,
+                       bool guaranteed_acyclic,
                        bool pure) {
   if (!apcExtension::Enable) return Variant(false);
-
+  auto level = guaranteed_acyclic ? APCHandleLevel::OuterAcyclic
+                                  : APCHandleLevel::Outer;
   if (key_or_array.isArray()) {
     Array valuesArr = key_or_array.toArray();
 
@@ -188,7 +190,7 @@ Variant apc_store_impl(const Variant& key_or_array,
         raise_invalid_argument_warning("apc key: (contains invalid characters)");
         return Variant(false);
       }
-      apc_store().set(strKey, v, ttl, bump_ttl, pure);
+      apc_store().set(strKey, v, ttl, bump_ttl, level, pure);
       if (Cfg::Stats::APC) {
         ServerStats::Log("apc.write", 1);
       }
@@ -210,7 +212,7 @@ Variant apc_store_impl(const Variant& key_or_array,
     raise_invalid_argument_warning("apc key: (contains invalid characters)");
     return Variant(false);
   }
-  apc_store().set(strKey, var, ttl, bump_ttl, pure);
+  apc_store().set(strKey, var, ttl, bump_ttl, level, pure);
   if (Cfg::Stats::APC) {
     ServerStats::Log("apc.write", 1);
   }
@@ -221,25 +223,29 @@ Variant HHVM_FUNCTION(apc_store,
                       const Variant& key_or_array,
                       const Variant& var /* = null */,
                       int64_t ttl /* = 0 */,
-                      int64_t bump_ttl /* = 0 */) {
-  return apc_store_impl(key_or_array, var, ttl, bump_ttl, false);
+                      int64_t bump_ttl /* = 0 */,
+                      bool guaranteed_acyclic /* = false */) {
+  return apc_store_impl(key_or_array, var, ttl, bump_ttl, guaranteed_acyclic, false);
 }
 
 Variant HHVM_FUNCTION(apc_store_with_pure_sleep,
                       const Variant& key_or_array,
                       const Variant& var /* = null */,
                       int64_t ttl /* = 0 */,
-                      int64_t bump_ttl /* = 0 */) {
-  return apc_store_impl(key_or_array, var, ttl, bump_ttl, true);
+                      int64_t bump_ttl /* = 0 */,
+                      bool guaranteed_acyclic /* = false */) {
+  return apc_store_impl(key_or_array, var, ttl, bump_ttl, guaranteed_acyclic, true);
 }
 
 Variant apc_add_impl(const Variant& key_or_array,
                      const Variant& var,
                      int64_t ttl,
                      int64_t bump_ttl,
+                     bool guaranteed_acyclic,
                      bool pure) {
   if (!apcExtension::Enable) return false;
-
+  auto level = guaranteed_acyclic ? APCHandleLevel::OuterAcyclic
+                                  : APCHandleLevel::Outer;
   if (key_or_array.isArray()) {
     auto valuesArr = key_or_array.asCArrRef();
 
@@ -264,7 +270,7 @@ Variant apc_add_impl(const Variant& key_or_array,
         return false;
       }
 
-      if (!apc_store().add(strKey, v, ttl, bump_ttl, pure)) {
+      if (!apc_store().add(strKey, v, ttl, bump_ttl, level, pure)) {
         errors.set(strKey, -1);
       }
     }
@@ -287,23 +293,25 @@ Variant apc_add_impl(const Variant& key_or_array,
   if (Cfg::Stats::APC) {
     ServerStats::Log("apc.write", 1);
   }
-  return apc_store().add(strKey, var, ttl, bump_ttl, pure);
+  return apc_store().add(strKey, var, ttl, bump_ttl, level, pure);
 }
 
 Variant HHVM_FUNCTION(apc_add,
                       const Variant& key_or_array,
                       const Variant& var /* = null */,
                       int64_t ttl /* = 0 */,
-                      int64_t bump_ttl /* = 0 */) {
-  return apc_add_impl(key_or_array, var, ttl, bump_ttl, false);
+                      int64_t bump_ttl /* = 0 */,
+                      bool guaranteed_acyclic /* = false */) {
+  return apc_add_impl(key_or_array, var, ttl, bump_ttl, guaranteed_acyclic, false);
 }
 
 Variant HHVM_FUNCTION(apc_add_with_pure_sleep,
                       const Variant& key_or_array,
                       const Variant& var /* = null */,
                       int64_t ttl /* = 0 */,
-                      int64_t bump_ttl /* = 0 */) {
-  return apc_add_impl(key_or_array, var, ttl, bump_ttl, true);
+                      int64_t bump_ttl, /* = 0 */
+                      bool guaranteed_acyclic/* = false */) {
+  return apc_add_impl(key_or_array, var, ttl, bump_ttl, guaranteed_acyclic, true);
 }
 
 bool HHVM_FUNCTION(apc_extend_ttl, const String& key, int64_t new_ttl) {

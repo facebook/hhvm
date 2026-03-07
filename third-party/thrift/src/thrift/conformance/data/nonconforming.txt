@@ -2717,6 +2717,8 @@ hack/CompatibilityTest/testset.i64/ChangeOptionalFieldCustomDefault.Compact
 hack/CompatibilityTest/testset.i64/ChangeOptionalFieldCustomDefault.Binary
 hack/CompatibilityTest/testset.i64/AddOptionalFieldWithCustomDefault.Binary
 hack/CompatibilityTest/testset.i64/AddOptionalFieldWithCustomDefault.Compact
+# Hack RPC client tests: fragmentation and factory function interactions
+# are not yet supported by the Hack client
 hack/ThriftRPCClientTest/StreamFragmentation/Success.StreamFragmentationTest
 hack/ThriftRPCClientTest/SinkFragmentation/Success.SinkFragmentationTest
 hack/ThriftRPCClientTest/RequestResponseFragmentation/Success.RequestResponseFragmentationTest

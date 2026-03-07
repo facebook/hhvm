@@ -87,7 +87,7 @@ struct object_print_options {
    * object being printed:
    *   - For whisker::map, the property names are printed but values are
    *     truncated.
-   *   - For whisker::array, the array indices are printed by elements are
+   *   - For whisker::array, the array indices are printed but elements are
    *     truncated.
    *
    * For all other whisker::object types, no truncation occurs because they do
@@ -139,7 +139,7 @@ class map {
   virtual ~map() = default;
   /**
    * Searches for a property on an object whose name matches the provided
-   * identifier, returning a non-null pointer if present.
+   * identifier, returning a non-empty optional if present.
    *
    * Preconditions:
    *   - The provided string is a valid Whisker identifier
@@ -147,7 +147,7 @@ class map {
    * Throws:
    *   - `eval_error` if the property lookup fails in an irrecoverable way.
    *     Failing to find a property matching the identifier is not a fatal
-   *     error. In that case, this function returns nullptr.
+   *     error. In that case, this function returns std::nullopt.
    *     This function should only throw if the identifier is recognized but
    *     evaluating its value failed.
    */
@@ -162,7 +162,7 @@ class map {
    * this returns the empty optional.
    *
    * For each name returned in this set, lookup_property must not return
-   * nullptr.
+   * std::nullopt.
    */
   virtual std::optional<std::set<std::string>> keys() const {
     return std::nullopt;
@@ -219,7 +219,7 @@ class array {
   using ptr = managed_ptr<array>;
   using raw = std::vector<object>;
   /**
-   * Creates a map from a raw C++ map.
+   * Creates an array from a raw C++ vector.
    */
   static ptr of(raw);
 
@@ -368,7 +368,7 @@ class native_handle;
  * forms a "chain of prototypes", which can be used to emulate an inheritance
  * hierarchy.
  *
- * Strictly speaking, a prototype is should be a whisker::object because the
+ * Strictly speaking, a prototype should be a whisker::object because the
  * definition of prototype-based programming requires "reusing existing
  * objects".
  * The implementation here *could* be changed to use whisker::object, but we
@@ -856,6 +856,7 @@ class native_function::context {
     return named_args_;
   }
 
+ private:
   source_range loc_;
   std::reference_wrapper<diagnostics_engine> diags_;
   object self_;
@@ -927,8 +928,8 @@ class prototype<void> {
 
   using descriptors_map = std::map<std::string, descriptor, std::less<>>;
   /**
-   * Creates a prototype from the provided map of descriptors and
-   * (optionally) a parent.
+   * Creates a prototype from the provided map of descriptors,
+   * (optionally) a parent, and (optionally) a name.
    */
   static ptr from(
       descriptors_map, ptr parent = nullptr, const std::string_view& name = "");
@@ -1098,7 +1099,7 @@ inline object boolean(boolean value) {
  */
 inline const object true_value{whisker::boolean(true)};
 /**
- * A whisker::object that represents the boolean `true`.
+ * A whisker::object that represents the boolean `false`.
  * This constant is useful for functions that return references.
  */
 inline const object false_value{whisker::boolean(false)};
@@ -1204,7 +1205,7 @@ inline object array(array::raw value = {}) {
 }
 
 /**
- * Creates a map::ptr of a concrete type with the given arguments.
+ * Creates an array::ptr of a concrete type with the given arguments.
  *
  * Postconditions:
  *   object::is_array() == true
@@ -1258,7 +1259,7 @@ object native_handle(whisker::native_handle<T> handle) {
 } // namespace make
 
 /**
- * The prototype database stores and caches prototype indexed by typeid.
+ * The prototype database stores and caches prototypes indexed by typeid.
  *
  * This allows reusing prototypes when dealing with recursive native types such
  * as AST classes.
@@ -1331,8 +1332,8 @@ class prototype_database {
 
   /**
    * A "lazy" prototype is one whose definition can be deferred until first
-   * use. This allows prototypes to refer to each other in cycles that have
-   * cyclic references.
+   * use. This allows prototypes to refer to each other when there are cyclic
+   * type references.
    *
    * Note that cyclical prototypes chains are still disallowed.
    */

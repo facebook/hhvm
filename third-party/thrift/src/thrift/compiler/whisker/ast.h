@@ -179,8 +179,8 @@ struct variable_component {
       identifier property);
 
   /**
-   * Determines if two identifiers are syntactically equivalent, excluding
-   * their location in source code.
+   * Determines if two variable components are syntactically equivalent,
+   * excluding their location in source code.
    */
   friend bool operator==(
       const variable_component& lhs, const variable_component& rhs) {
@@ -446,7 +446,7 @@ struct pragma_statement {
 };
 
 /**
- * A Whisker constructor for importing objects exported from other templates.
+ * A Whisker construct for importing objects exported from other templates.
  *
  * {{#import "<path>" as <name>}}
  */
@@ -560,7 +560,7 @@ struct partial_block {
 struct partial_statement {
   source_range loc;
   /**
-   * An expression that evaluates to an (implemented-defintion) partial block
+   * An expression that evaluates to an (implementation-defined) partial block
    * instance.
    */
   expression partial;
@@ -580,7 +580,7 @@ struct partial_statement {
   std::optional<ast::text::whitespace> standalone_indentation_within_line;
 };
 
-/*
+/**
  * A valid Whisker path component for macro application. See whisker::lexer
  * for its definition.
  */
@@ -618,7 +618,5 @@ struct macro {
 
   std::string path_string() const;
 };
-
-#undef WHISKER_DEFINE_OPERATOR_INEQUALITY
 
 } // namespace whisker::ast

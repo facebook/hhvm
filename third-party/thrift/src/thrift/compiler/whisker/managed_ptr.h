@@ -58,11 +58,9 @@ managed_ptr<T> manage_owned(Args&&... args) {
 }
 
 /**
- * Returns a pointer where the lifetime of `value` depends on one or more other
- * objects. This means that `from` must outlive `value`.
- *
- * The caller must guarantee that the provided object is kept alive as long as
- * the returned pointer is used.
+ * Returns a pointer where the lifetime of `value` is tied to `from` via the
+ * aliasing constructor of shared_ptr. The returned pointer shares ownership
+ * with `from`, so `value` must remain valid for as long as `from` is alive.
  */
 template <typename T, typename U>
 managed_ptr<T> manage_derived_ref(const managed_ptr<U>& from, const T& value) {
@@ -78,8 +76,8 @@ managed_ptr<T> manage_derived_ref(
 }
 
 /**
- * Returns a pointer where the lifetime of `value` depends on one or more other
- * objects. This means that `from` must outlive `value`.
+ * Returns a pointer where the lifetime of `value_ptr` is bundled together with
+ * `from`. Both `from` and `value_ptr` are kept alive by the returned pointer.
  */
 template <typename T, typename U>
 managed_ptr<T> manage_derived(

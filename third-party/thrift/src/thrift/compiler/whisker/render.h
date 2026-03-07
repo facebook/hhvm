@@ -169,10 +169,11 @@ struct render_options {
   diagnostic_level show_source_backtrace_on_failure = diagnostic_level::error;
 
   /**
-   * An object that can be used to resolve macros within Whisker templates, like
-   * "{{> path/to/macro }}".
+   * An object that can be used to resolve macros ("{{> path/to/macro }}")
+   * and imports ("{{#import ...}}") within Whisker templates.
    *
-   * If this is not set, then all macro applications will fail.
+   * If this is not set, then all macro applications and import statements
+   * will fail.
    */
   std::shared_ptr<source_resolver> src_resolver = nullptr;
 

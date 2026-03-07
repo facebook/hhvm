@@ -57,7 +57,7 @@ struct fixed_string {
 
 /**
  * A polymorphic native_handle is intended to be used with polymorphic types to
- * extract native_handle arguments from an inheritence chain.
+ * extract native_handle arguments from an inheritance chain.
  *
  * Since a native_handle uses type erasure, dynamic_cast-based traversal of
  * polymorphic types cannot be performed.
@@ -83,6 +83,7 @@ struct fixed_string {
  *     dsl::make_function(
  *         "describe", [](dsl::function::context ctx) -> string {
  *       using base_handle = dsl::polymorphic_native_handle<
+ *           "",
  *           Base,
  *           Derived1,
  *           Derived2,
@@ -134,8 +135,14 @@ struct polymorphic_native_handle {
   }
 };
 
+/**
+ * A native_handle wrapper for a non-polymorphic type with a qualifier.
+ *
+ * Unlike `polymorphic_native_handle`, this does not perform type hierarchy
+ * matching. It is used when a `native_handle<T>` needs a qualifier for
+ * prototype naming without polymorphic dispatch.
+ */
 template <fixed_string Qualifier, typename T>
-// Native handle for a non-polymorphic type with a qualifier
 struct named_native_handle {
   using element_type = T;
 
@@ -449,7 +456,7 @@ class function : public native_function {
             describe_argument(),
             arg.describe_type());
       } else if constexpr (detail::is_polymorphic_native_handle<T>) {
-        // polymorpic_native_handle<T, ...> (class hierarchy match)
+        // polymorphic_native_handle<T, ...> (class hierarchy match)
         using element_type = typename T::element_type;
         const auto abort = [&] {
           return make_error(
@@ -588,10 +595,12 @@ function::ptr make_function(std::string name, F&& function) {
 
 /**
  * An overload of make_function that allows the function to return any whisker
- * object.
+ * object type (not just whisker::object).
  *
- * The returned object is wrapped via manage_owned<object>(...) for all types
- * except boolean and null (which are manage_static(...)).
+ * The returned value is converted to whisker::object as follows:
+ *   - boolean: uses whisker::make::true_value or whisker::make::false_value
+ *   - null: uses whisker::make::null
+ *   - all other types: direct whisker::object construction
  *
  * Example:
  *
@@ -627,7 +636,7 @@ function::ptr make_function(std::string name, F&& function) {
 }
 
 /**
- * Creates an function object without a name for debugging. It will be seen as
+ * Creates a function object without a name for debugging. It will be seen as
  * anonymous when debug printing. Omitting the name does not affect how the
  * function behaves, nor how name lookup works in Whisker.
  */
@@ -639,9 +648,10 @@ function::ptr make_function(F&& function) {
 /**
  * A class that provides an ergonomic way to build prototype objects.
  *
- * The provided handle type must be either:
- *   - native_handle<S>, or
- *   - polymorphic_native_handle<S, ...>
+ * The provided handle type must be one of:
+ *   - native_handle<S>
+ *   - polymorphic_native_handle<Q, S, ...>
+ *   - named_native_handle<Q, S>
  *
  * The handle's element type (S) is called the "self type" of the prototype. The
  * prototype is designed to operate as members of the self type only.
@@ -777,7 +787,7 @@ class prototype_builder {
  * A helper function for `prototype_builder<Handle>` where the creation of the
  * builder object and materializing an instance are hidden from the user.
  *
- * The user provided a function will be called with a
+ * The user-provided function will be called with a
  * `prototype_builder<Handle>`.
  *
  * The primary benefit of this function is to avoid the creation (and thus

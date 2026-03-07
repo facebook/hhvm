@@ -245,7 +245,8 @@ using array = std::vector<node>;
 namespace whisker {
 
 /**
- * A mstch::object is analogous to whisker::map.
+ * A mstch::object is a subclass-based property bag with virtual method
+ * dispatch, analogous to whisker::map.
  */
 using mstch_object = apache::thrift::mstch::object;
 /**

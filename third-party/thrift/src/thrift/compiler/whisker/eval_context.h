@@ -270,10 +270,10 @@ class eval_context {
    * returned. That is, the "{{.}}" object. This is infallible.
    *
    * This function returns the object at the provided path as well as its
-   * precedessor.
+   * predecessor.
    *
    * Preconditions:
-   *   - The provided path is a series of valid Whisker identifier
+   *   - The provided path is a series of valid Whisker identifiers
    *
    * Errors:
    *   - eval_scope_lookup_error if the first identifier of the path is not
@@ -329,7 +329,7 @@ class eval_context {
     const object& this_ref() const { return this_ref_; }
 
     /**
-     * Looks up a properties in the following order:
+     * Looks up a property in the following order:
      *   1. Locals
      *   2. Backing object (this_ref())
      *

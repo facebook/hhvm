@@ -18,6 +18,7 @@
 
 #include <thrift/common/tree_printer.h>
 
+// This file is a shim of a part of the Thrift compiler infrastructure.
 namespace whisker {
 namespace tree_printer = apache::thrift::tree_printer;
 } // namespace whisker

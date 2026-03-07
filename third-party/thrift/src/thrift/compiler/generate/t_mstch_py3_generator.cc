@@ -1547,7 +1547,7 @@ void t_mstch_py3_generator::generate_types() {
   std::vector<std::pair<std::string, bool>> cythonFilesWithTypeContext{
       {"types.pyx", false},
       {"types.pxd", true},
-      {"types.pyi", false},
+      {"types.pyi", true},
   };
 
   std::vector<std::string> cythonFilesNoTypeContext{

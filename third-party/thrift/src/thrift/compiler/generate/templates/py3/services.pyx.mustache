@@ -28,7 +28,7 @@ the services/promise and services/callback partials.
 {{#import "common/types" as types}}
 {{#import "common/common" as common}}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 
 cimport cython
 from typing import AsyncIterator
@@ -85,17 +85,17 @@ import folly.iobuf as _fbthrift_iobuf
 from folly.iobuf cimport move as move_iobuf
 from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
-{{#program:has_stream?}}
+{{#if program.has_stream?}}
 from libcpp.optional cimport optional
 from thrift.py3.stream cimport cServerStream, cServerStreamPublisher, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, pythonFuncToCppFunc, ServerStream, ServerPublisher
-{{/program:has_stream?}}
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_cbindings
-{{#program:inplace_migrate?}}
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
-{{/program:inplace_migrate?}}
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
-{{#each program:includeNamespaces as |include|}}
+{{/if program.has_stream?}}
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_cbindings
+{{#if program.inplace_migrate?}}
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_converter as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter
+{{/if program.inplace_migrate?}}
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+{{#each program.includeNamespaces as |include|}}
   {{#if include.import_services?}}
 cimport {{include.modulePathPeriodSeparated}}.services as _{{include.modulePathUnderscoreSeparated}}_services
 import {{include.modulePathPeriodSeparated}}.services as _{{include.modulePathUnderscoreSeparated}}_services
@@ -104,13 +104,13 @@ import {{include.modulePathPeriodSeparated}}.services as _{{include.modulePathUn
 import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
 cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
 cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
-    {{#if program:inplace_migrate?}}
+    {{#if program.inplace_migrate?}}
 cimport {{include.modulePathPeriodSeparated}}.thrift_converter as _{{include.modulePathUnderscoreSeparated}}_thrift_converter
-    {{/if program:inplace_migrate?}}
+    {{/if program.inplace_migrate?}}
   {{/if include.has_types?}}
 {{/each}}
 
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.services_interface as _fbthrift_services_interface
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.services_interface as _fbthrift_services_interface
 
 import asyncio
 import functools
@@ -118,13 +118,13 @@ import sys
 import traceback
 import types as _py_types
 
-{{#program:services}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.services_wrapper cimport c{{service:name}}Interface
-{{/program:services}}
-{{#program:stream_types}}
-cdef class ServerPublisher_{{#partial services.cython_cpp_type_ident type=type:self}}(ServerPublisher):
+{{#each program.services as |service|}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.services_wrapper cimport c{{service.name}}Interface
+{{/each}}
+{{#each program.stream_types as |type|}}
+cdef class ServerPublisher_{{#partial services.cython_cpp_type_ident type=type}}(ServerPublisher):
     cdef unique_ptr[cServerStreamPublisher[{{!
-            }}{{#partial types.cython_cpp_type type=type:self}}{{!
+            }}{{#partial types.cython_cpp_type type=type}}{{!
         }}]] cPublisher
 
     def complete(ServerPublisher self):
@@ -132,56 +132,52 @@ cdef class ServerPublisher_{{#partial services.cython_cpp_type_ident type=type:s
 
     # Calling this send instead of the wrapped method name of next because next is
     # a python keyword and makes the linter complain
-    def send(ServerPublisher self, {{#partial types.cython_python_type type=type:self}} item):
-        deref(self.cPublisher).next(<{{#partial types.cython_cpp_type type=type:self}}?>{{#partial types.cython_python_to_cpp_item type=type:self}})
+    def send(ServerPublisher self, {{#partial types.cython_python_type type=type}} item):
+        deref(self.cPublisher).next(<{{#partial types.cython_cpp_type type=type}}?>{{#partial types.cython_python_to_cpp_item type=type}})
 
     @staticmethod
     cdef _fbthrift_create(cServerStreamPublisher[{{!
-            }}{{#partial types.cython_cpp_type type=type:self}}{{!
+            }}{{#partial types.cython_cpp_type type=type}}{{!
         }}] cPublisher):
-        cdef ServerPublisher_{{#partial services.cython_cpp_type_ident type=type:self}} inst = ServerPublisher_{{#partial services.cython_cpp_type_ident type=type:self}}.__new__(ServerPublisher_{{#partial services.cython_cpp_type_ident type=type:self}})
+        cdef ServerPublisher_{{#partial services.cython_cpp_type_ident type=type}} inst = ServerPublisher_{{#partial services.cython_cpp_type_ident type=type}}.__new__(ServerPublisher_{{#partial services.cython_cpp_type_ident type=type}})
         inst.cPublisher = make_unique[cServerStreamPublisher[{{!
-            }}{{#partial types.cython_cpp_type type=type:self}}{{!
+            }}{{#partial types.cython_cpp_type type=type}}{{!
         }}]](cmove(cPublisher))
         return inst
 
-cdef class ServerStream_{{#partial services.cython_cpp_type_ident type=type:self}}(ServerStream):
+cdef class ServerStream_{{#partial services.cython_cpp_type_ident type=type}}(ServerStream):
     cdef unique_ptr[cServerStream[{{!
-            }}{{#partial types.cython_cpp_type type=type:self}}{{!
+            }}{{#partial types.cython_cpp_type type=type}}{{!
         }}]] cStream
 
     @staticmethod
     cdef _fbthrift_create(cServerStream[{{!
-            }}{{#partial types.cython_cpp_type type=type:self}}{{!
+            }}{{#partial types.cython_cpp_type type=type}}{{!
         }}] cStream):
-        cdef ServerStream_{{#partial services.cython_cpp_type_ident type=type:self}} inst = ServerStream_{{#partial services.cython_cpp_type_ident type=type:self}}.__new__(ServerStream_{{#partial services.cython_cpp_type_ident type=type:self}})
+        cdef ServerStream_{{#partial services.cython_cpp_type_ident type=type}} inst = ServerStream_{{#partial services.cython_cpp_type_ident type=type}}.__new__(ServerStream_{{#partial services.cython_cpp_type_ident type=type}})
         inst.cStream = make_unique[cServerStream[{{!
-            }}{{#partial types.cython_cpp_type type=type:self}}{{!
+            }}{{#partial types.cython_cpp_type type=type}}{{!
         }}]](cmove(cStream))
         return inst
-{{/program:stream_types}}
+{{/each}}
 
-{{#program:services}}
-{{#service:supportedFunctions}}
-{{#function:return_type}}
-{{#function:stream?}}
-{{#function:stream_elem_type}}
-async def runGenerator_{{service:name}}_{{function:name}}(object generator, Promise_{{#partial services.cython_cpp_type_ident type=type:self}}_Stream promise):
+{{#each program.services as |service|}}
+{{#each service.supportedFunctions as |function|}}
+{{#if function.stream?}}
+async def runGenerator_{{service.name}}_{{function.name}}(object generator, Promise_{{#partial services.cython_cpp_type_ident type=function.stream.elem_type}}_Stream promise):
     try:
         item = await generator.asend(None)
     except StopAsyncIteration:
-        promise.cPromise.setValue(optional[{{#partial types.cython_cpp_type type=type:self}}]())
-    {{#function:stream_exceptions}}
-    {{#field:type}}
-    except {{#partial types.python_type type=field:self.type}} as ex:
+        promise.cPromise.setValue(optional[{{#partial types.cython_cpp_type type=function.stream.elem_type}}]())
+    {{#each function.stream.exceptions as |field|}}
+    except {{#partial types.python_type type=field.type}} as ex:
         promise.cPromise.setException({{!
-        }}{{#program:inplace_migrate?}}{{#type:structured}}{{!
-          }}{{type:capi_converter_path}}.{{struct:name}}_convert_to_cpp(ex._to_python()){{!
-        }}{{/type:structured}}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
-          }}deref((<{{#partial types.cython_python_type type=type:self}}> ex).{{#partial types.cpp_obj}}){{!
-        }}{{/program:inplace_migrate?}})
-    {{/field:type}}
-    {{/function:stream_exceptions}}
+        }}{{#if (not program.inplace_migrate?)}}{{!
+          }}deref((<{{#partial types.cython_python_type type=field.type}}> ex).{{#partial types.cpp_obj}}){{!
+        }}{{#else if field.type.structured?}}{{!
+          }}{{field.type.capi_converter_path}}.{{field.type.true_type.name}}_convert_to_cpp(ex._to_python()){{!
+        }}{{/if (not program.inplace_migrate?)}})
+    {{/each}}
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -189,104 +185,99 @@ async def runGenerator_{{service:name}}_{{function:name}}(object generator, Prom
         ))
     except Exception as ex:
         print(
-            "Unexpected error in {{service:name}}.{{function:name}}:",
+            "Unexpected error in {{service.name}}.{{function.name}}:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler {{service:name}}.{{function:name}}:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler {{service.name}}.{{function.name}}:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(optional[{{#partial types.cython_cpp_type type=type:self}}](<{{#partial types.cython_cpp_type type=type:self}}?>{{#partial types.cython_python_to_cpp_item type=type:self}}))
+        promise.cPromise.setValue(optional[{{#partial types.cython_cpp_type type=function.stream.elem_type}}](<{{#partial types.cython_cpp_type type=function.stream.elem_type}}?>{{#partial types.cython_python_to_cpp_item type=function.stream.elem_type}}))
 
-cdef void getNextGenerator_{{service:name}}_{{function:name}}(object generator, cFollyPromise[optional[{{#partial types.cython_cpp_type type=type:self}}]] cPromise) noexcept:
-    cdef Promise_{{#partial services.cython_cpp_type_ident type=type:self}}_Stream __promise = Promise_{{#partial services.cython_cpp_type_ident type=type:self}}_Stream._fbthrift_create(cmove(cPromise))
+cdef void getNextGenerator_{{service.name}}_{{function.name}}(object generator, cFollyPromise[optional[{{#partial types.cython_cpp_type type=function.stream.elem_type}}]] cPromise) noexcept:
+    cdef Promise_{{#partial services.cython_cpp_type_ident type=function.stream.elem_type}}_Stream __promise = Promise_{{#partial services.cython_cpp_type_ident type=function.stream.elem_type}}_Stream._fbthrift_create(cmove(cPromise))
     asyncio.get_event_loop().create_task(
-        runGenerator_{{service:name}}_{{function:name}}(
+        runGenerator_{{service.name}}_{{function.name}}(
             generator,
             __promise
         )
     )
-{{/function:stream_elem_type}}
-{{/function:stream?}}
-{{/function:return_type}}
-{{/service:supportedFunctions}}
-{{/program:services}}
+{{/if function.stream?}}
+{{/each}}
+{{/each}}
 {{> services/promise}}
 {{> stream/stream_promises}}
 
-{{#program:services}}
-cdef object _{{service:name}}_annotations = _py_types.MappingProxyType({
-{{#each service:unstructured_annotations as |annot|}}
+{{#each program.services as |service|}}
+cdef object _{{service.name}}_annotations = _py_types.MappingProxyType({
+{{#each service.unstructured_annotations as |annot|}}
     {{#partial common.annotation annot=annot}}
 {{/each}}
 })
 
 
 @cython.auto_pickle(False)
-cdef class {{service:name}}Interface(
-    {{#service:extends}}{{#service:externalProgram?}}
-    _{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-        }}{{service:program.name}}_services.{{/service:externalProgram?}}{{service:name}}Interface
-    {{/service:extends}}
-    {{^service:extends?}}
+cdef class {{service.name}}Interface(
+    {{#let parent = service.extends}}
+    {{#if (object.notnull? parent)}}
+      {{#if parent.externalProgram?}}
+    _{{#each parent.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
+        }}{{parent.program.name}}_services.{{/if parent.externalProgram?}}{{parent.name}}Interface
+    {{#else}}
     ServiceInterface
-    {{/service:extends?}}
+    {{/if (object.notnull? parent)}}
 ):
-    annotations = _{{service:name}}_annotations
+    annotations = _{{service.name}}_annotations
 
     def __cinit__(self):
-        self._cpp_obj = c{{service:name}}Interface(
+        self._cpp_obj = c{{service.name}}Interface(
             <PyObject *> self,
             get_executor()
         )
-{{#service:supportedFunctions}}
+{{#each service.supportedFunctions as |function|}}
 
     {{! horrific workaround to expose python annotations on thrift py3 service functions}}
-    _fbthrift_annotations_DO_NOT_USE_{{function:name}} = {
-        'return': '{{#if function:sink_or_stream?}}None{{#else}}{{#partial pep484.type_period_separated type=function:self.return_type}}{{/if}}',
-        {{#function:args}}'{{field:py_name}}': '{{#partial pep484.type_period_separated type=field:self.type}}', {{/function:args}}
+    _fbthrift_annotations_DO_NOT_USE_{{function.name}} = {
+        'return': '{{#if function.sink_or_stream?}}None{{#else}}{{#partial pep484.type_period_separated type=function.return_type}}{{/if}}',
+        {{#each function.params.fields as |param|}}'{{param.py_name}}': '{{#partial pep484.type_period_separated type=param.type}}', {{/each}}
     }
 
-    async def {{function:name}}(
-            self{{#function:args}},
-            {{field:py_name}}{{/function:args}}):
-        raise NotImplementedError("async def {{function:name}} is not implemented")
-    {{#function:return_type}}
-    {{#function:stream?}}
+    async def {{function.name}}(
+            self{{#each function.params.fields as |param|}},
+            {{param.py_name}}{{/each}}):
+        raise NotImplementedError("async def {{function.name}} is not implemented")
+    {{#if function.stream?}}
 
     @staticmethod
-    def createPublisher_{{function:name}}(callback=None):
-        {{#function:stream_elem_type}}
-        cdef unique_ptr[pair[cServerStream[{{#partial types.cython_cpp_type type=type:self}}], {{!
-        }}cServerStreamPublisher[{{#partial types.cython_cpp_type type=type:self}}]]] streams = {{!
-        }}make_unique[pair[cServerStream[{{#partial types.cython_cpp_type type=type:self}}], {{!
-        }}cServerStreamPublisher[{{#partial types.cython_cpp_type type=type:self}}]]]({{!
-        }}cServerStream[{{#partial types.cython_cpp_type type=type:self}}].createPublisher(pythonFuncToCppFunc(callback)))
+    def createPublisher_{{function.name}}(callback=None):
+        cdef unique_ptr[pair[cServerStream[{{#partial types.cython_cpp_type type=function.stream.elem_type}}], {{!
+        }}cServerStreamPublisher[{{#partial types.cython_cpp_type type=function.stream.elem_type}}]]] streams = {{!
+        }}make_unique[pair[cServerStream[{{#partial types.cython_cpp_type type=function.stream.elem_type}}], {{!
+        }}cServerStreamPublisher[{{#partial types.cython_cpp_type type=function.stream.elem_type}}]]]({{!
+        }}cServerStream[{{#partial types.cython_cpp_type type=function.stream.elem_type}}].createPublisher(pythonFuncToCppFunc(callback)))
 
-        return (ServerStream_{{#partial services.cython_cpp_type_ident type=type:self}}._fbthrift_create(cmove(deref(streams).first)), {{!
-        }}ServerPublisher_{{#partial services.cython_cpp_type_ident type=type:self}}._fbthrift_create(cmove(deref(streams).second)))
-        {{/function:stream_elem_type}}
-    {{/function:stream?}}
-    {{/function:return_type}}
-{{/service:supportedFunctions}}
+        return (ServerStream_{{#partial services.cython_cpp_type_ident type=function.stream.elem_type}}._fbthrift_create(cmove(deref(streams).first)), {{!
+        }}ServerPublisher_{{#partial services.cython_cpp_type_ident type=function.stream.elem_type}}._fbthrift_create(cmove(deref(streams).second)))
+    {{/if function.stream?}}
+{{/each}}
 
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.c{{service:cpp_name}}SvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.c{{service.cpp_name}}SvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
-        return "{{program:name}}.{{service:name}}"
+        return "{{program.name}}.{{service.name}}"
 
-{{/program:services}}
+{{/each}}
 
 {{> services/callback}}
-{{/program:auto_migrate?}}
+{{/if (not program.auto_migrate?)}}

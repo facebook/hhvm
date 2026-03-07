@@ -29,90 +29,81 @@ from the Python wrapper of that promise that was passed into the coroutine and
 sets the converted value on that promise.
 
 }}
-
-{{#program:services}}
-{{#service:supportedFunctions}}
-cdef api void call_cy_{{service:name}}_{{function:name}}(
+  {{#let partial cython_field_type |param| captures |types|}}
+{{#pragma ignore-newlines}}
+{{#if (or param.type.string? param.type.binary? param.type.structured? param.type.container?)}}
+unique_ptr[{{#partial types.cython_cpp_type type=param.type}}]
+{{#else}}
+{{#partial types.cython_cpp_type type=param.type}}
+{{/if (or param.type.string? param.type.binary? param.type.structured? param.type.container?)}}
+  {{/let partial}}
+  {{#let partial cython_cpp_to_python |param| captures |types program|}}
+{{#pragma ignore-newlines}}
+{{#if param.type.iobuf?}}_fbthrift_iobuf.from_unique_ptr(move_iobuf({{param.py_name}}))
+{{#else if param.type.iobufRef?}}_fbthrift_iobuf.from_unique_ptr(move_iobuf(deref({{param.py_name}})))
+{{#else if param.type.flexibleBinary?}}(<const char*>deref({{param.py_name}}).data())[:deref({{param.py_name}}).size()]
+{{#else if param.type.string?}}(deref({{param.py_name}})).data().decode('UTF-8')
+{{#else if param.type.binary?}}(deref({{param.py_name}}))
+{{#else if param.type.primitive?}}{{param.py_name}}
+{{#else if param.type.container?}}{{#partial types.container_from_cpp type=param.type}}(deref({{param.py_name}}))
+{{#else if param.type.enum?}}{{#partial types.python_type type=param.type}}(<int> {{param.py_name}})
+{{#else if param.type.structured?}}
+  {{#if (not program.inplace_migrate?)}}
+{{#partial types.cython_python_type type=param.type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{#partial types.cython_cpp_type type=param.type}}]({{param.py_name}}.release()))
+  {{#else}}
+{{#partial types.python_type type=param.type}}.from_python({{param.type.capi_converter_path}}.{{param.type.true_type.name}}_from_cpp(__deref_const[{{#partial types.cython_cpp_type type=param.type}}](cmove({{param.py_name}}))))
+  {{/if (not program.inplace_migrate?)}}
+{{/if param.type.iobuf?}}
+  {{/let partial}}
+  {{#let partial cython_cpp_value_to_python |param| captures |types program|}}
+{{#pragma ignore-newlines}}
+{{#if param.type.iobuf?}}_fbthrift_iobuf.from_unique_ptr({{param.py_name}}.clone())
+{{#else if param.type.iobufRef?}}_fbthrift_iobuf.from_unique_ptr(move_iobuf({{param.py_name}}))
+{{#else if param.type.flexibleBinary?}}(<const char*>{{param.py_name}}.data())[:{{param.py_name}}.size()]
+{{#else if param.type.string?}}{{param.py_name}}.data().decode('UTF-8')
+{{#else if param.type.primitive?}}{{param.py_name}}
+{{#else if param.type.container?}}{{#partial types.container_from_cpp type=param.type}}({{param.py_name}})
+{{#else if param.type.enum?}}{{#partial types.python_type type=param.type}}(<int> {{param.py_name}})
+{{#else if param.type.structured?}}
+  {{#if (not program.inplace_migrate?)}}
+{{#partial types.cython_python_type type=param.type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[{{#partial types.cython_cpp_type type=param.type}}]({{param.py_name}}))
+  {{#else}}
+{{#partial types.python_type type=param.type}}.from_python({{param.type.capi_converter_path}}.{{param.type.true_type.name}}_from_cpp(__deref_const[{{#partial types.cython_cpp_type type=param.type}}]({{param.py_name}})))
+  {{/if (not program.inplace_migrate?)}}
+{{/if param.type.iobuf?}}
+  {{/let partial}}
+  {{#let partial function_coro |service function| captures |services types program|}}
+async def {{service.name}}_{{function.name}}_coro(
     object self,
-    Cpp2RequestContext* ctx,
-    cFollyPromise[{{#partial services.cython_return_type_cpp_type function=function:self}}]{{!
-    }} cPromise{{#function:args}},
-    {{#if function:stack_arguments?}}{{!
-        }}{{#partial types.cython_cpp_type type=field:self.type}}{{!
-    }}{{#else}}{{!
-        }}{{#field:type}}{{> services/cython_field_type}}{{/field:type}}{{!
-    }}{{/if function:stack_arguments?}} {{field:py_name}}{{/function:args}}
-) noexcept:{{! Gets called from a python Executor }}
-    cdef {{#partial services.promise_name function=function:self}} __promise = {{#partial services.promise_name function=function:self}}._fbthrift_create(cmove(cPromise))
-    {{#function:args}}
-    arg_{{field:py_name}} = {{#field:type}}{{!
-            }}{{^function:stack_arguments?}}{{> services/cython_cpp_to_python}}{{/function:stack_arguments?}}{{!
-            }}{{#function:stack_arguments?}}{{> types/cython_cpp_value_to_python}}{{/function:stack_arguments?}}{{!
-        }}{{/field:type}}
-    {{/function:args}}
-    __context = RequestContext._fbthrift_create(ctx)
-    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
-    try:
-      asyncio.get_event_loop().create_task(
-          {{service:name}}_{{function:name}}_coro(
-              self,
-              __promise{{#function:args}},
-              arg_{{field:py_name}}{{/function:args}}
-          )
-      )
-    finally:
-      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
-{{/service:supportedFunctions}}
-{{#service:lifecycleFunctions}}
-cdef api void call_cy_{{service:name}}_{{function:name}}(
-    object self,
-    cFollyPromise[{{#partial services.cython_return_type_cpp_type function=function:self}}]{{!
-    }} cPromise
-) noexcept:
-    cdef {{#partial services.promise_name function=function:self}} __promise = {{#partial services.promise_name function=function:self}}._fbthrift_create(cmove(cPromise))
-    asyncio.get_event_loop().create_task(
-        {{service:name}}_{{function:name}}_coro(
-            self,
-            __promise
-        )
-    )
-{{/service:lifecycleFunctions}}
-{{#service:supportedFunctionsWithLifecycle}}
-async def {{service:name}}_{{function:name}}_coro(
-    object self,
-    {{#partial services.promise_name function=function:self}}{{!
-    }} promise{{#function:args}},
-    {{field:py_name}}{{/function:args}}
+    {{#partial services.promise_name function=function}}{{!
+    }} promise{{#each function.params.fields as |param|}},
+    {{param.py_name}}{{/each}}
 ):
     try:
-        result = {{#function:return_type}}{{^function:stream?}}await {{/function:stream?}}{{/function:return_type}}self.{{function:name}}({{#function:args}}
-                    {{field:py_name}}{{^last?}},{{/last?}}{{/function:args}})
-        {{#function:return_type}}
-        {{#if function:self.return_type.container?}}
-        result = {{#partial types.python_type type=function:self.return_type}}(result)
-        {{/if function:self.return_type.container?}}
-        {{#function:stream?}}
-        {{#function:stream_has_first_response?}}
+        result = {{#if (not function.stream?)}}await {{/if}}self.{{function.name}}({{#each (array.enumerate function.params.fields with_last=true) as |fi param is_last_param?|}}
+                    {{param.py_name}}{{#if (not is_last_param?)}},{{/if}}{{/each}})
+        {{#if function.return_type.container?}}
+        result = {{#partial types.python_type type=function.return_type}}(result)
+        {{/if function.return_type.container?}}
+        {{#if function.stream?}}
+        {{#if function.stream_has_first_response?}}
         result = await result
         item, result = result
-        {{/function:stream_has_first_response?}}
+        {{/if function.stream_has_first_response?}}
         if not isinstance(result, (ServerStream, AsyncIterator)):
             result = await result
         if isinstance(result, AsyncIterator):
-            result = ServerStream_{{#partial services.cython_cpp_type_ident type=function:stream.elem_type}}._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[{{#partial types.cython_cpp_type type=function:stream.elem_type}}](result, get_executor(), &getNextGenerator_{{service:name}}_{{function:name}})))
-        {{/function:stream?}}
-        {{/function:return_type}}
-    {{#function:exceptions}}
-    {{#field:type}}
-    except {{#partial types.python_type type=field:self.type}} as ex:
+            result = ServerStream_{{#partial services.cython_cpp_type_ident type=function.stream.elem_type}}._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[{{#partial types.cython_cpp_type type=function.stream.elem_type}}](result, get_executor(), &getNextGenerator_{{service.name}}_{{function.name}})))
+        {{/if function.stream?}}
+    {{#each function.exceptions as |field|}}
+    except {{#partial types.python_type type=field.type}} as ex:
         promise.cPromise.setException{{!
-}}{{^program:inplace_migrate?}}{{!
-          }}(deref((<{{#partial types.cython_python_type type=type:self}}> ex).{{#partial types.cpp_obj}})){{!
-}}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{#type:structured}}{{!
-          }}({{type:capi_converter_path}}.{{struct:name}}_convert_to_cpp(ex._to_python())){{!
-}}{{/type:structured}}{{/program:inplace_migrate?}}{{!
-    }}{{/field:type}}
-    {{/function:exceptions}}
+        }}{{#if (not program.inplace_migrate?)}}{{!
+          }}(deref((<{{#partial types.cython_python_type type=field.type}}> ex).{{#partial types.cpp_obj}})){{!
+        }}{{#else if field.type.structured?}}{{!
+          }}({{field.type.capi_converter_path}}.{{field.type.true_type.name}}_convert_to_cpp(ex._to_python())){{!
+        }}{{/if (not program.inplace_migrate?)}}
+    {{/each}}
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -120,20 +111,67 @@ async def {{service:name}}_{{function:name}}_coro(
         ))
     except Exception as ex:
         print(
-            "Unexpected error in service handler {{service:name}}.{{function:name}}:",
+            "Unexpected error in service handler {{service.name}}.{{function.name}}:",
             file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
         ))
     except asyncio.CancelledError as ex:
-        print("Coroutine was cancelled in service handler {{service:name}}.{{function:name}}:", file=sys.stderr)
+        print("Coroutine was cancelled in service handler {{service.name}}.{{function.name}}:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue({{#partial services.cython_return_value function=function:self}})
+        promise.cPromise.setValue({{#partial services.cython_return_value function=function}})
 
-{{/service:supportedFunctionsWithLifecycle}}
-{{/program:services}}
+  {{/let partial}}
+
+  {{#each program.services as |service|}}
+    {{#each service.supportedFunctions as |function|}}
+cdef api void call_cy_{{service.name}}_{{function.name}}(
+    object self,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[{{#partial services.cython_return_type_cpp_type function=function}}]{{!
+    }} cPromise{{#each function.params.fields as |param|}},
+    {{#if function.stack_arguments?}}{{#partial types.cython_cpp_type type=param.type}}{{#else}}{{#partial cython_field_type param=param}}{{/if}} {{param.py_name}}{{/each}}
+) noexcept:{{! Gets called from a python Executor }}
+    cdef {{#partial services.promise_name function=function}} __promise = {{#partial services.promise_name function=function}}._fbthrift_create(cmove(cPromise))
+      {{#each function.params.fields as |param|}}
+    arg_{{param.py_name}} = {{#if function.stack_arguments?}}{{#partial cython_cpp_value_to_python param=param}}{{#else}}{{#partial cython_cpp_to_python param=param}}{{/if}}
+      {{/each}}
+    __context = RequestContext._fbthrift_create(ctx)
+    __prev_context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    try:
+      asyncio.get_event_loop().create_task(
+          {{service.name}}_{{function.name}}_coro(
+              self,
+              __promise{{#each function.params.fields as |param|}},
+              arg_{{param.py_name}}{{/each}}
+          )
+      )
+    finally:
+      __THRIFT_REQUEST_CONTEXT.reset(__prev_context_token)
+    {{/each}}
+    {{#each service.lifecycleFunctions as |function|}}
+cdef api void call_cy_{{service.name}}_{{function.name}}(
+    object self,
+    cFollyPromise[{{#partial services.cython_return_type_cpp_type function=function}}]{{!
+    }} cPromise
+) noexcept:
+    cdef {{#partial services.promise_name function=function}} __promise = {{#partial services.promise_name function=function}}._fbthrift_create(cmove(cPromise))
+    asyncio.get_event_loop().create_task(
+        {{service.name}}_{{function.name}}_coro(
+            self,
+            __promise
+        )
+    )
+    {{/each}}
+    {{#each service.supportedFunctions as |function|}}
+{{#partial function_coro service=service function=function}}
+    {{/each}}
+    {{#each service.lifecycleFunctions as |function|}}
+{{#partial function_coro service=service function=function}}
+    {{/each}}
+  {{/each}}

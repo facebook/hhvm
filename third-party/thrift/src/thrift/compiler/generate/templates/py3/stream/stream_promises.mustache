@@ -25,20 +25,20 @@ promise can have it's value set after the handler coroutine has finished
 executing.
 
 }}
-{{#program:stream_types}}
+{{#each program.stream_types as |type|}}
 
 @cython.auto_pickle(False)
-cdef class Promise_{{#partial services.cython_cpp_type_ident type=type:self}}_Stream:
+cdef class Promise_{{#partial services.cython_cpp_type_ident type=type}}_Stream:
     cdef cFollyPromise[optional[{{!
-            }}{{#partial types.cython_cpp_type type=type:self}}{{!
+            }}{{#partial types.cython_cpp_type type=type}}{{!
         }}]] cPromise
 
     @staticmethod
     cdef _fbthrift_create(cFollyPromise[optional[{{!
-            }}{{#partial types.cython_cpp_type type=type:self}}{{!
+            }}{{#partial types.cython_cpp_type type=type}}{{!
         }}]] cPromise):
-        cdef Promise_{{#partial services.cython_cpp_type_ident type=type:self}}_Stream inst = Promise_{{#partial services.cython_cpp_type_ident type=type:self}}_Stream.__new__({{!
-        }}Promise_{{#partial services.cython_cpp_type_ident type=type:self}}_Stream)
+        cdef Promise_{{#partial services.cython_cpp_type_ident type=type}}_Stream inst = Promise_{{#partial services.cython_cpp_type_ident type=type}}_Stream.__new__({{!
+        }}Promise_{{#partial services.cython_cpp_type_ident type=type}}_Stream)
         inst.cPromise = cmove(cPromise)
         return inst
-{{/program:stream_types}}
+{{/each}}

@@ -429,8 +429,6 @@ class py3_mstch_program : public mstch_program {
     register_methods(
         this,
         {
-            {"program:unique_functions_by_return_type",
-             &py3_mstch_program::unique_functions_by_return_type},
             {"program:containerTypes", &py3_mstch_program::getContainerTypes},
             {"program:customTemplates", &py3_mstch_program::getCustomTemplates},
             {"program:customTypes", &py3_mstch_program::getCustomTypes},
@@ -447,19 +445,6 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node getContainerTypes() {
     return make_mstch_types(generator_context_.container_types(*program_));
-  }
-
-  mstch::node unique_functions_by_return_type() {
-    std::vector<const t_function*> functions;
-    bool no_stream = has_option("no_stream");
-    for (const auto& kvp :
-         generator_context_.unique_functions_by_return_type(*program_)) {
-      if (is_func_supported(no_stream, kvp.second)) {
-        functions.push_back(kvp.second);
-      }
-    }
-
-    return make_mstch_functions(functions);
   }
 
   mstch::node getCustomTemplates() {
@@ -550,8 +535,6 @@ class py3_mstch_service : public mstch_service {
              &py3_mstch_service::get_supported_functions},
             {"service:lifecycleFunctions",
              &py3_mstch_service::get_lifecycle_functions},
-            {"service:supportedFunctionsWithLifecycle",
-             &py3_mstch_service::get_supported_functions_with_lifecycle},
             {"service:supportedInteractions",
              &py3_mstch_service::get_supported_interactions},
         });
@@ -574,14 +557,6 @@ class py3_mstch_service : public mstch_service {
 
   mstch::node get_supported_functions() {
     return make_mstch_functions(supportedFunctions());
-  }
-
-  mstch::node get_supported_functions_with_lifecycle() {
-    auto funcs = supportedFunctions();
-    for (auto* func : lifecycleFunctions()) {
-      funcs.push_back(func);
-    }
-    return make_mstch_functions(funcs);
   }
 
   mstch::node get_supported_interactions() {
@@ -1137,6 +1112,17 @@ class t_mstch_py3_generator : public t_mstch_generator {
           context_->response_and_stream_functions(self),
           proto.of<t_function>());
     });
+    def.property("unique_functions_by_return_type", [&](const t_program& self) {
+      std::vector<const t_function*> functions;
+      bool no_stream = has_compiler_option("no_stream");
+      for (const auto& [_, func] :
+           context_->unique_functions_by_return_type(self)) {
+        if (is_func_supported(no_stream, func)) {
+          functions.emplace_back(func);
+        }
+      }
+      return to_array(functions, proto.of<t_function>());
+    });
     def.property("custom_templates", [&](const t_program& self) {
       return to_type_array(context_->custom_templates(self), proto);
     });
@@ -1625,14 +1611,13 @@ void t_mstch_py3_generator::generate_services() {
       "services.py",
   };
 
-  // {template_name, use_whisker}
-  std::vector<std::pair<std::string, bool>> normalCythonFiles{
-      {"clients.pxd", true},
-      {"clients.pyx", true},
-      {"clients.pyi", true},
-      {"services.pxd", true},
-      {"services.pyx", false},
-      {"services.pyi", true},
+  std::vector<std::string> normalCythonFiles{
+      "clients.pxd",
+      "clients.pyx",
+      "clients.pyi",
+      "services.pxd",
+      "services.pyx",
+      "services.pyi",
   };
 
   std::vector<std::string> cythonFiles{
@@ -1656,8 +1641,9 @@ void t_mstch_py3_generator::generate_services() {
   for (const auto& file : pythonFiles) {
     generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
   }
-  generate_mixed_template_list(
-      normalCythonFiles, FileType::NotTypesFile, generateRootPath_);
+  for (const auto& file : normalCythonFiles) {
+    generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
+  }
   for (const auto& file : cppFiles) {
     generate_whisker_file(file, FileType::NotTypesFile);
   }

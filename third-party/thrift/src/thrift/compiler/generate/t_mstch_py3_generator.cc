@@ -1532,7 +1532,7 @@ void t_mstch_py3_generator::generate_types() {
   // {template_name, use_whisker}
   std::vector<std::pair<std::string, bool>> autoMigrateFilesWithTypeContext{
       {"types.py", true},
-      {"types_auto_FBTHRIFT_ONLY_DO_NOT_USE.py", false},
+      {"types_auto_FBTHRIFT_ONLY_DO_NOT_USE.py", true},
       {"types_auto_migrated.py", true},
   };
 

@@ -41,79 +41,83 @@ want to include.
 
 }}
 {{> common/auto_generated_py}}
-{{#program:auto_migrate?}}
+{{#if program.auto_migrate?}}
 {{! Note this is needed even if IDL defines no types, in the case where service has arguments that are container<primitive>}}
-_fbthrift__py3_module_name = "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types"
-{{#program:has_types?}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import (
-    {{#program:structs}}
-    {{struct:name}},
-    {{/program:structs}}{{#program:enums}}
-    {{enum:name}},
-    {{/program:enums}}{{#program:constants}}{{#constant:type}}
-    {{constant:name}},
-    {{/constant:type}}{{/program:constants}}{{#program:typedefs}}
-    {{typedef:name}},
-    {{/program:typedefs}}
+_fbthrift__py3_module_name = "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types"
+  {{#if program.has_types?}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types import (
+    {{#each program.structured_definitions as |struct|}}
+    {{struct.name}},
+    {{/each}}
+    {{#each program.enums as |enum|}}
+    {{enum.name}},
+    {{/each}}
+    {{#each program.consts as |constant|}}
+    {{constant.name}},
+    {{/each}}
+    {{#each program.typedefs as |typedef|}}
+    {{typedef.name}},
+    {{/each}}
 )
-{{/program:has_types?}}
-  {{#if program:has_container_types?}}
+  {{/if program.has_types?}}
+  {{#if program.has_container_types?}}
 import importlib
 import thrift.python.types as _fbthrift_python_types
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as {{!
-}}_{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_types
-{{#each program:includeNamespaces as |include|}}
-  {{#if include.has_types?}}
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types as {{!
+}}_{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_types
+    {{#each program.includeNamespaces as |include|}}
+      {{#if include.has_types?}}
 import {{include.modulePathPeriodSeparated}}.thrift_types as _{{include.modulePathUnderscoreSeparated}}_thrift_types
-  {{/if include.has_types?}}
-{{/each}}
-  {{/if program:has_container_types?}}{{!
+      {{/if include.has_types?}}
+    {{/each}}
+  {{/if program.has_container_types?}}
+{{!
 
 py3-container "flat name" name aliases for backwards-compatibility
 
 }}
-  {{#if program:has_container_types?}}
+  {{#if program.has_container_types?}}
 def get_types_reflection():
     return importlib.import_module(
-        "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_reflection"
     )
-  {{/if program:has_container_types?}}
-{{#program:containerTypes}}
-{{#type:container?}}
-class {{type:flat_name}}__Meta(type):
+  {{/if program.has_container_types?}}
+  {{#each program.container_types as |type|}}
+    {{#if type.container?}}
+class {{type.flat_name}}__Meta(type):
     def _fbthrift_type_info(cls):
         return (
-      {{#if (or type:list? type:set?)}}
-            {{#partial types.typeinfo type=type:self.true_type.elem_type}},
-      {{#else if type:map?}}
-            {{#partial types.typeinfo type=type:self.true_type.key_type}},
-            {{#partial types.typeinfo type=type:self.true_type.val_type}},
-      {{/if (or type:list? type:set?)}}
+          {{#if (or type.list? type.set?)}}
+            {{#partial types.typeinfo type=type.true_type.elem_type}},
+          {{#else if type.map?}}
+            {{#partial types.typeinfo type=type.true_type.key_type}},
+            {{#partial types.typeinfo type=type.true_type.val_type}},
+          {{/if (or type.list? type.set?)}}
         )
 
     def __instancecheck__(cls, instance):
         return (
-            isinstance(instance, _fbthrift_python_types.{{#partial container_base type=type:self}}) and
+            isinstance(instance, _fbthrift_python_types.{{#partial container_base type=type}}) and
             instance._fbthrift_same_type(*cls._fbthrift_type_info())
         )
 
-class {{type:flat_name}}(_fbthrift_python_types.{{#partial container_base type=type:self}}, metaclass={{type:flat_name}}__Meta):
+class {{type.flat_name}}(_fbthrift_python_types.{{#partial container_base type=type}}, metaclass={{type.flat_name}}__Meta):
     __module__ = _fbthrift__py3_module_name
     __slots__ = ()
 
     def __init__(self, *args, **kwargs):
         if not args and not kwargs:
-            args = {{#if type:map?}}({},){{#else}}((),){{/if}}
+            args = {{#if type.map?}}({},){{#else}}((),){{/if}}
         super().__init__(
-            *{{type:flat_name}}._fbthrift_type_info(),
+            *{{type.flat_name}}._fbthrift_type_info(),
             *args,
             **kwargs,
         )
 
     @staticmethod
     def __get_reflection__():
-        return get_types_reflection().get_reflection__{{type:flat_name}}()
+        return get_types_reflection().get_reflection__{{type.flat_name}}()
 
-{{/type:container?}}
-{{/program:containerTypes}}
-{{/program:auto_migrate?}}
+    {{/if type.container?}}
+  {{/each}}
+{{/if program.auto_migrate?}}

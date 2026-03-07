@@ -11,6 +11,12 @@ Facebook Thrift
 [![Windows Build Status](
   https://github.com/facebook/fbthrift/actions/workflows/getdeps_windows.yml/badge.svg)](
   https://github.com/facebook/fbthrift/actions/workflows/getdeps_windows.yml)
+[![Python Build Status](
+  https://github.com/facebook/fbthrift/actions/workflows/getdeps_python_linux_container.yml/badge.svg)](
+  https://github.com/facebook/fbthrift/actions/workflows/getdeps_python_linux_container.yml)
+[![Python Build Status (no container)](
+  https://github.com/facebook/fbthrift/actions/workflows/getdeps_python_linux.yml/badge.svg)](
+  https://github.com/facebook/fbthrift/actions/workflows/getdeps_python_linux.yml)
 <img src="thrift/doc/logo.svg"
      alt="Facebook Thrift Logo" align="right" width="20%"/>
 

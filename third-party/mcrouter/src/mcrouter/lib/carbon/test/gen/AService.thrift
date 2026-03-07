@@ -24,8 +24,10 @@ namespace cpp2 carbon.test.A.thrift
 namespace py3 carbon.test.A.thrift
 
 service A extends fb303.FacebookService {
-  A_TestAReply testA(1: A_TestARequest request) (thread = "eb")
-  Common_McVersionReply mcVersion(1: Common_McVersionRequest request) (thread = "eb")
+  @cpp.ProcessInEbThreadUnsafe
+  A_TestAReply testA(1: A_TestARequest request)
+  @cpp.ProcessInEbThreadUnsafe
+  Common_McVersionReply mcVersion(1: Common_McVersionRequest request)
 }
 
 @cpp.Type{name = "carbon::test::A::TestAReply"}

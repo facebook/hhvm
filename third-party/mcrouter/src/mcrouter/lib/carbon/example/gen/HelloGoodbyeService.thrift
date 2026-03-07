@@ -24,9 +24,12 @@ namespace cpp2 hellogoodbye.thrift
 namespace py3 hellogoodbye.thrift
 
 service HelloGoodbye extends fb303.FacebookService {
-  HelloGoodbye_GoodbyeReply goodbye(1: HelloGoodbye_GoodbyeRequest request) (thread = "eb")
-  HelloGoodbye_HelloReply hello(1: HelloGoodbye_HelloRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Common_McVersionReply mcVersion(1: Common_McVersionRequest request) (thread = "eb")
+  @cpp.ProcessInEbThreadUnsafe
+  HelloGoodbye_GoodbyeReply goodbye(1: HelloGoodbye_GoodbyeRequest request)
+  @cpp.ProcessInEbThreadUnsafe
+  HelloGoodbye_HelloReply hello(1: HelloGoodbye_HelloRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Common_McVersionReply mcVersion(1: Common_McVersionRequest request)
 }
 
 @cpp.Type{name = "hellogoodbye::GoodbyeReply"}

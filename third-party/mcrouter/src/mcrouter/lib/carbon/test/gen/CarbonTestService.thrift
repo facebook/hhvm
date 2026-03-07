@@ -24,9 +24,12 @@ namespace cpp2 carbon.test.thrift
 namespace py3 carbon.test.thrift
 
 service CarbonTest extends fb303.FacebookService {
-  CarbonTest_TestReply test(1: CarbonTest_TestRequest request) (thread = "eb")
-  CarbonTest_TestReplyStringKey testStringKey(1: CarbonTest_TestRequestStringKey request) (thread = "eb")
-  Common_McVersionReply mcVersion(1: Common_McVersionRequest request) (thread = "eb")
+  @cpp.ProcessInEbThreadUnsafe
+  CarbonTest_TestReply test(1: CarbonTest_TestRequest request)
+  @cpp.ProcessInEbThreadUnsafe
+  CarbonTest_TestReplyStringKey testStringKey(1: CarbonTest_TestRequestStringKey request)
+  @cpp.ProcessInEbThreadUnsafe
+  Common_McVersionReply mcVersion(1: Common_McVersionRequest request)
 }
 
 @cpp.Type{name = "carbon::test::TestReply"}

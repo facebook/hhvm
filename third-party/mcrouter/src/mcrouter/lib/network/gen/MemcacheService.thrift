@@ -22,26 +22,46 @@ namespace cpp2 facebook.memcache.thrift
 namespace py3 facebook.memcache.thrift
 
 service Memcache {
-  Memcache_McAddReply mcAdd(1: Memcache_McAddRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McAppendReply mcAppend(1: Memcache_McAppendRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McCasReply mcCas(1: Memcache_McCasRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McDecrReply mcDecr(1: Memcache_McDecrRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McDeleteReply mcDelete(1: Memcache_McDeleteRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McFlushAllReply mcFlushAll(1: Memcache_McFlushAllRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McFlushReReply mcFlushRe(1: Memcache_McFlushReRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McGatReply mcGat(1: Memcache_McGatRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McGatsReply mcGats(1: Memcache_McGatsRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McGetReply mcGet(1: Memcache_McGetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McGetsReply mcGets(1: Memcache_McGetsRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McIncrReply mcIncr(1: Memcache_McIncrRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McLeaseGetReply mcLeaseGet(1: Memcache_McLeaseGetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McLeaseSetReply mcLeaseSet(1: Memcache_McLeaseSetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McMetagetReply mcMetaget(1: Memcache_McMetagetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McPrependReply mcPrepend(1: Memcache_McPrependRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McReplaceReply mcReplace(1: Memcache_McReplaceRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McSetReply mcSet(1: Memcache_McSetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Memcache_McTouchReply mcTouch(1: Memcache_McTouchRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError) (thread = "eb")
-  Common_McVersionReply mcVersion(1: Common_McVersionRequest request) (thread = "eb")
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McAddReply mcAdd(1: Memcache_McAddRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McAppendReply mcAppend(1: Memcache_McAppendRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McCasReply mcCas(1: Memcache_McCasRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McDecrReply mcDecr(1: Memcache_McDecrRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McDeleteReply mcDelete(1: Memcache_McDeleteRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McFlushAllReply mcFlushAll(1: Memcache_McFlushAllRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McFlushReReply mcFlushRe(1: Memcache_McFlushReRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McGatReply mcGat(1: Memcache_McGatRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McGatsReply mcGats(1: Memcache_McGatsRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McGetReply mcGet(1: Memcache_McGetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McGetsReply mcGets(1: Memcache_McGetsRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McIncrReply mcIncr(1: Memcache_McIncrRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McLeaseGetReply mcLeaseGet(1: Memcache_McLeaseGetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McLeaseSetReply mcLeaseSet(1: Memcache_McLeaseSetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McMetagetReply mcMetaget(1: Memcache_McMetagetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McPrependReply mcPrepend(1: Memcache_McPrependRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McReplaceReply mcReplace(1: Memcache_McReplaceRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McSetReply mcSet(1: Memcache_McSetRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Memcache_McTouchReply mcTouch(1: Memcache_McTouchRequest request) throws (1: Common.CarbonResultBusy carbonResultBusy, 2: Common.CarbonResultRemoteError carbonResultRemoteError)
+  @cpp.ProcessInEbThreadUnsafe
+  Common_McVersionReply mcVersion(1: Common_McVersionRequest request)
 }
 
 @cpp.Type{name = "facebook::memcache::McAddReply"}

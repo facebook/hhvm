@@ -16,31 +16,29 @@
 
 }}
 client, pyfuture, options = <object> userdata  {{! so client lives on until we exit }}
-if {{#function:exceptions}}{{!
-}}result.hasException[{{#partial types.cython_cpp_type type=field:self.type}}]():
-    {{#field:type}}
+if {{#each function.exceptions as |exc|}}{{!
+}}result.hasException[{{#partial types.cython_cpp_type type=exc.type}}]():
     try:
-        exc = {{^program:inplace_migrate?}}{{!
-}}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-            }}try_make_shared_exception[{{#partial types.cython_cpp_type type=type:self}}](result.exception()))
-{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{#type:structured}}{{!
-        }}{{#partial types.python_type type=type:self}}.from_python({{!
-        }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp(
-            unwrap_exception[{{#partial types.cython_cpp_type type=type:self}}](result.exception())
+        exc = {{#if root_program.inplace_migrate?}}{{!
+        }}{{#partial types.python_type type=exc.type}}.from_python({{!
+        }}{{exc.type.capi_converter_path}}.{{exc.type.true_type.name}}_from_cpp(
+            unwrap_exception[{{#partial types.cython_cpp_type type=exc.type}}](result.exception())
         ))
-{{/type:structured}}{{/program:inplace_migrate?}}
+        {{#else}}
+{{#partial types.cython_python_type type=exc.type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+            }}try_make_shared_exception[{{#partial types.cython_cpp_type type=exc.type}}](result.exception()))
+        {{/if root_program.inplace_migrate?}}
     except Exception as ex:
         {{! This is probably a UnicodeDecodeError }}
         pyfuture.set_exception(ex.with_traceback(None))
     else:
         pyfuture.set_exception(exc)
-    {{/field:type}}
-elif {{/function:exceptions}}{{!
+elif {{/each}}{{!
 }}result.hasException():
     pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
 else:
     try:
-        pyfuture.set_result({{#function:return_type}}{{> clients/cython_cpp_value_to_return_value}}{{/function:return_type}})
+        pyfuture.set_result({{> clients/cython_cpp_value_to_return_value}})
     except Exception as ex:
         {{! Most likely this is only ever unicode decode errors }}
         pyfuture.set_exception(ex.with_traceback(None))

@@ -1127,7 +1127,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
       std::vector<const t_type*> types;
       if (!has_compiler_option("no_stream")) {
         for (const auto& [_, type] : context_->stream_types(self)) {
-          types.push_back(type);
+          types.emplace_back(type);
         }
       }
       return to_type_array(types, proto);
@@ -1627,7 +1627,7 @@ void t_mstch_py3_generator::generate_services() {
   // {template_name, use_whisker}
   std::vector<std::pair<std::string, bool>> normalCythonFiles{
       {"clients.pxd", true},
-      {"clients.pyx", false},
+      {"clients.pyx", true},
       {"clients.pyi", true},
       {"services.pxd", true},
       {"services.pyx", false},

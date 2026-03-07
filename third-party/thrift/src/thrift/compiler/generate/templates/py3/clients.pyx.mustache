@@ -27,7 +27,7 @@ the clients/callback partial.
 {{#import "common/types" as types}}
 {{#import "common/common" as common}}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 from libc.stdint cimport (
     int8_t as cint8_t,
     int16_t as cint16_t,
@@ -45,12 +45,7 @@ from libcpp.utility cimport move as cmove
 from cython.operator cimport dereference as deref, typeid
 from cpython.ref cimport PyObject
 from thrift.py3.client cimport cRequestChannel_ptr, makeClientWrapper, cClientWrapper
-from thrift.py3.exceptions cimport {{!
-}}{{^program:inplace_migrate?}}{{!
-    }}try_make_shared_exception
-{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
-    }}unwrap_exception
-{{/program:inplace_migrate?}}
+from thrift.py3.exceptions cimport {{#if program.inplace_migrate?}}unwrap_exception{{#else}}try_make_shared_exception{{/if}}
 from thrift.python.exceptions cimport create_py_exception
 from folly cimport cFollyTry, cFollyUnit, c_unit
 from folly.cast cimport down_cast_ptr
@@ -81,22 +76,22 @@ import sys
 import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_cbindings
-{{#program:inplace_migrate?}}
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
-{{/program:inplace_migrate?}}
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_types
-{{#program:has_stream?}}
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_cbindings
+{{#if program.inplace_migrate?}}
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_converter as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter
+{{/if program.inplace_migrate?}}
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+{{#if program.has_stream?}}
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
-{{/program:has_stream?}}
-{{#each program:includeNamespaces as |include|}}
+{{/if program.has_stream?}}
+{{#each program.includeNamespaces as |include|}}
   {{#if include.has_types?}}
 cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
 cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
-    {{#if program:inplace_migrate?}}
+    {{#if program.inplace_migrate?}}
 cimport {{include.modulePathPeriodSeparated}}.thrift_converter as _{{include.modulePathUnderscoreSeparated}}_thrift_converter
-    {{/if program:inplace_migrate?}}
+    {{/if program.inplace_migrate?}}
 import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
   {{/if include.has_types?}}
   {{#if include.import_services?}}
@@ -105,180 +100,160 @@ import {{include.modulePathPeriodSeparated}}.clients as _{{include.modulePathUnd
   {{/if include.import_services?}}
 {{/each}}
 
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.services_interface as _fbthrift_services_interface
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.services_interface as _fbthrift_services_interface
 
-{{#program:services}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{service:name}}AsyncClient, c{{service:name}}ClientWrapper
-  {{#let parent_service_name=service:name}}
-{{#service:supportedInteractions}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.clients_wrapper cimport c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper
-{{/service:supportedInteractions}}
-{{#service:extends}}
-{{#service:externalProgram?}}
-from {{#each service:program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{service:program.name}}.clients_wrapper cimport c{{service:name}}ClientWrapper
-{{/service:externalProgram?}}
-{{/service:extends}}
-{{/program:services}}
+{{#each program.services as |service|}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.clients_wrapper cimport c{{service.name}}AsyncClient, c{{service.name}}ClientWrapper
+  {{#each service.supportedInteractions as |interaction|}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.clients_wrapper cimport c{{service.name}}ClientWrapper_{{interaction.name}}InteractionWrapper
+  {{/each}}
+  {{#let parent = service.extends}}
+  {{#if (and (object.notnull? parent) parent.externalProgram?)}}
+from {{#each parent.program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{parent.program.name}}.clients_wrapper cimport c{{parent.name}}ClientWrapper
+  {{/if (and (object.notnull? parent) parent.externalProgram?)}}
+{{/each}}
 
 {{> clients/callback}}
 
-{{#program:services}}
-cdef object _{{service:name}}_annotations = _py_types.MappingProxyType({
-{{#each service:unstructured_annotations as |annot|}}
+{{#each program.services as |service|}}
+cdef object _{{service.name}}_annotations = _py_types.MappingProxyType({
+  {{#each service.unstructured_annotations as |annot|}}
     {{#partial common.annotation annot=annot}}
-{{/each}}
+  {{/each}}
 })
 
 
 @cython.auto_pickle(False)
-cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
-    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
-  }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
-    annotations = _{{service:name}}_annotations
+cdef class {{service.name}}({{#partial clients.client_base_type service=service}}):
+    annotations = _{{service.name}}_annotations
 
-    cdef const type_info* _typeid({{service:name}} self):
-        return &typeid(c{{service:name}}AsyncClient)
+    cdef const type_info* _typeid({{service.name}} self):
+        return &typeid(c{{service.name}}AsyncClient)
 
-    cdef bind_client({{service:name}} self, cRequestChannel_ptr&& channel):
-        self._client = makeClientWrapper[c{{service:name}}AsyncClient, c{{service:name}}ClientWrapper](
+    cdef bind_client({{service.name}} self, cRequestChannel_ptr&& channel):
+        self._client = makeClientWrapper[c{{service.name}}AsyncClient, c{{service.name}}ClientWrapper](
             cmove(channel)
         )
 
-{{#service:supportedFunctions}}
+  {{#each service.supportedFunctions as |function|}}
     {{! horrific workaround to expose python annotations on thrift py3 service functions}}
-    _fbthrift_annotations_DO_NOT_USE_{{function:name}} = {
-        'return': '{{#if function:sink_or_stream?}}None{{#else}}{{#partial pep484.type_period_separated type=function:self.return_type}}{{/if}}',
-        {{#function:args}}'{{field:py_name}}': '{{#partial pep484.type_period_separated type=field:self.type}}', {{/function:args}}
+    _fbthrift_annotations_DO_NOT_USE_{{function.name}} = {
+        'return': '{{#if function.sink_or_stream?}}None{{#else}}{{#partial pep484.type_period_separated type=function.return_type}}{{/if}}',
+        {{#each function.params.fields as |param|}}'{{param.py_name}}': '{{#partial pep484.type_period_separated type=param.type}}', {{/each}}
     }
 
     @cython.always_allow_keywords(True)
-    def {{function:name}}(
-            {{service:name}} self{{#function:args}},
-            {{#field:type}}{{!
-                }}{{#type:hasCythonType?}}{{^type:integer?}}{{#partial types.cython_python_type type=type:self}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
-                }}{{field:py_name}}{{#type:integer?}} not None{{/type:integer?}}{{^type:number?}} not None{{/type:number?}}{{!
-            }}{{/field:type}}{{/function:args}},
+    def {{function.name}}(
+            {{service.name}} self{{#each function.params.fields as |param|}},
+            {{#if (and param.type.hasCythonType? (not param.type.integer?))}}{{#partial types.cython_python_type type=param.type}} {{/if}}{{!
+            }}{{param.py_name}}{{#if (or param.type.integer? (not param.type.number?))}} not None{{/if}}{{/each}},
             *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
-        {{#function:args}}
-        {{#field:type}}
-        {{#type:container?}}
-        if not isinstance({{field:py_name}}, {{#partial types.python_type type=field:self.type}}):
-            {{field:py_name}} = {{#partial types.python_type type=field:self.type}}({{field:py_name}})
-        {{/type:container?}}
-        {{#type:integer?}}
-        if not isinstance({{field:py_name}}, int):
-            raise TypeError(f'{{field:py_name}} is not a {int !r}.')
+        {{#each function.params.fields as |param|}}
+          {{#if param.type.container?}}
+        if not isinstance({{param.py_name}}, {{#partial types.python_type type=param.type}}):
+            {{param.py_name}} = {{#partial types.python_type type=param.type}}({{param.py_name}})
+          {{#else if param.type.integer?}}
+        if not isinstance({{param.py_name}}, int):
+            raise TypeError(f'{{param.py_name}} is not a {int !r}.')
         else:
             {{! inject cython int Overflow checks }}
-            {{field:py_name}} = <{{#partial types.cython_python_type type=type:self}}> {{field:py_name}}
-        {{/type:integer?}}
-        {{/field:type}}
-        {{/function:args}}
+            {{param.py_name}} = <{{#partial types.cython_python_type type=param.type}}> {{param.py_name}}
+          {{/if param.type.container?}}
+        {{/each}}
         self._check_connect_future()
         __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[{{#partial clients.cython_return_type_cpp_type function=function:self}}](
+        bridgeFutureWith[{{#partial clients.cython_return_type_cpp_type function=function}}](
             self._executor,
-            down_cast_ptr[c{{service:name}}ClientWrapper, cClientWrapper](self._client.get()).{{function:cpp_name}}(rpc_options._cpp_obj, {{#function:args}}
-                {{#field:type}}{{> clients/cython_python_to_cpp_arg}}{{/field:type}},{{/function:args}}
+            down_cast_ptr[c{{service.name}}ClientWrapper, cClientWrapper](self._client.get()).{{function.cpp_name}}(rpc_options._cpp_obj, {{#each function.params.fields as |param|}}
+                {{> clients/cython_python_to_cpp_arg}},{{/each}}
             ),
-            {{service:name}}_{{function:name}}_callback,
+            {{service.name}}_{{function.name}}_callback,
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
 
-{{/service:supportedFunctions}}
+  {{/each}}
 
-  {{#let parent_service_name=service:name}}
-{{#service:supportedInteractions}}
-    def create{{service:name}}(
-            {{parent_service_name}} self
+  {{#each service.supportedInteractions as |interaction|}}
+    def create{{interaction.name}}(
+            {{service.name}} self
     ):
-        interaction = {{parent_service_name}}_{{service:name}}()
+        interaction = {{service.name}}_{{interaction.name}}()
         bridgeFutureWith[unique_ptr[cClientWrapper]](
             interaction._executor,
-            down_cast_ptr[c{{parent_service_name}}ClientWrapper, cClientWrapper](self._client.get()).create{{service:name}}(),
+            down_cast_ptr[c{{service.name}}ClientWrapper, cClientWrapper](self._client.get()).create{{interaction.name}}(),
             thrift.py3.client.interactions_callback,
             <PyObject *> interaction
         )
         return interaction
 
-    async def async_create{{service:name}}(
-            {{parent_service_name}} self
+    async def async_create{{interaction.name}}(
+            {{service.name}} self
     ):
-        return self.create{{service:name}}()
+        return self.create{{interaction.name}}()
 
-{{/service:supportedInteractions}}
+  {{/each}}
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.c{{service:cpp_name}}SvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.c{{service.cpp_name}}SvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata())))
 
     @staticmethod
     def __get_thrift_name__():
-        return "{{program:name}}.{{service:name}}"
+        return "{{program.name}}.{{service.name}}"
 
-{{#service:supportedInteractions}}
+  {{#each service.supportedInteractions as |interaction|}}
 @cython.auto_pickle(False)
-cdef class {{parent_service_name}}_{{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
-    }}_{{#each service:program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-    }}{{service:program.name}}_clients.{{/service:externalProgram?}}{{service:name}}{{!
-  }}{{/service:extends}}{{^service:extends?}}thrift.py3.client.Client{{/service:extends?}}):
+cdef class {{service.name}}_{{interaction.name}}(thrift.py3.client.Client):
 
-{{#service:supportedFunctions}}
+    {{#each interaction.supportedFunctions as |function|}}
     @cython.always_allow_keywords(True)
-    def {{function:name}}(
-            {{parent_service_name}}_{{service:name}} self{{#function:args}},
-            {{#field:type}}{{!
-                }}{{#type:hasCythonType?}}{{^type:integer?}}{{#partial types.cython_python_type type=type:self}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
-                }}{{field:py_name}}{{#type:integer?}} not None{{/type:integer?}}{{^type:number?}} not None{{/type:number?}}{{!
-            }}{{/field:type}}{{/function:args}},
+    def {{function.name}}(
+            {{service.name}}_{{interaction.name}} self{{#each function.params.fields as |param|}},
+            {{#if (and param.type.hasCythonType? (not param.type.integer?))}}{{#partial types.cython_python_type type=param.type}} {{/if}}{{!
+            }}{{param.py_name}}{{#if (or param.type.integer? (not param.type.number?))}} not None{{/if}}{{/each}},
             *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
             rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
-        {{#function:args}}
-        {{#field:type}}
-        {{#type:container?}}
-        if not isinstance({{field:py_name}}, {{#partial types.python_type type=field:self.type}}):
-            {{field:py_name}} = {{#partial types.python_type type=field:self.type}}({{field:py_name}})
-        {{/type:container?}}
-        {{#type:integer?}}
-        if not isinstance({{field:py_name}}, int):
-            raise TypeError(f'{{field:py_name}} is not a {int !r}.')
+        {{#each function.params.fields as |param|}}
+          {{#if param.type.container?}}
+        if not isinstance({{param.py_name}}, {{#partial types.python_type type=param.type}}):
+            {{param.py_name}} = {{#partial types.python_type type=param.type}}({{param.py_name}})
+          {{#else if param.type.integer?}}
+        if not isinstance({{param.py_name}}, int):
+            raise TypeError(f'{{param.py_name}} is not a {int !r}.')
         else:
             {{! inject cython int Overflow checks }}
-            {{field:py_name}} = <{{#partial types.cython_python_type type=type:self}}> {{field:py_name}}
-        {{/type:integer?}}
-        {{/field:type}}
-        {{/function:args}}
+            {{param.py_name}} = <{{#partial types.cython_python_type type=param.type}}> {{param.py_name}}
+          {{/if param.type.container?}}
+        {{/each}}
         self._check_connect_future()
         __loop = self._loop
         __future = __loop.create_future()
         __userdata = (self, __future, rpc_options)
-        bridgeFutureWith[{{#partial clients.cython_return_type_cpp_type function=function:self}}](
+        bridgeFutureWith[{{#partial clients.cython_return_type_cpp_type function=function}}](
             self._executor,
-            down_cast_ptr[c{{parent_service_name}}ClientWrapper_{{service:name}}InteractionWrapper, {{!
-            }}cClientWrapper](self._client.get()).{{function:cpp_name}}(rpc_options._cpp_obj, {{#function:args}}
-                {{#field:type}}{{> clients/cython_python_to_cpp_arg}}{{/field:type}},{{/function:args}}
+            down_cast_ptr[c{{service.name}}ClientWrapper_{{interaction.name}}InteractionWrapper, {{!
+            }}cClientWrapper](self._client.get()).{{function.cpp_name}}(rpc_options._cpp_obj, {{#each function.params.fields as |param|}}
+                {{> clients/cython_python_to_cpp_arg}},{{/each}}
             ),
-            {{parent_service_name}}_{{service:name}}_{{function:name}}_callback,
+            {{service.name}}_{{interaction.name}}_{{function.name}}_callback,
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
 
-{{/service:supportedFunctions}}
-{{^service:supportedFunctions}}
+    {{#else}}
     pass
-{{/service:supportedFunctions}}
-{{/service:supportedInteractions}}
-{{/program:services}}
-{{/program:auto_migrate?}}
+    {{/each}}
+  {{/each}}
+{{/each}}
+{{/if (not program.auto_migrate?)}}

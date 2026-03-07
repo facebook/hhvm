@@ -25,26 +25,25 @@ executed in the asyncio loop.
 
 }}
 
-{{#program:services}}
-{{#service:supportedFunctions}}
-cdef void {{service:name}}_{{function:name}}_callback(
-    cFollyTry[{{#partial clients.cython_return_type_cpp_type function=function:self}}]&& result,
+{{#each program.services as |service|}}
+  {{#each service.supportedFunctions as |function|}}
+cdef void {{service.name}}_{{function.name}}_callback(
+    cFollyTry[{{#partial clients.cython_return_type_cpp_type function=function}}]&& result,
     PyObject* userdata
 ) noexcept:
     {{> clients/callback_body}}
 
 
-{{/service:supportedFunctions}}
-  {{#let parent_service_name=service:name}}
-{{#service:interactions}}
-{{#service:supportedFunctions}}
-cdef void {{parent_service_name}}_{{service:name}}_{{function:name}}_callback(
-    cFollyTry[{{#partial clients.cython_return_type_cpp_type function=function:self}}]&& result,
+  {{/each}}
+  {{#each service.interactions as |interaction|}}
+    {{#each interaction.supportedFunctions as |function|}}
+cdef void {{service.name}}_{{interaction.name}}_{{function.name}}_callback(
+    cFollyTry[{{#partial clients.cython_return_type_cpp_type function=function}}]&& result,
     PyObject* userdata
 ) noexcept:
     {{> clients/callback_body}}
 
 
-{{/service:supportedFunctions}}
-{{/service:interactions}}
-{{/program:services}}
+    {{/each}}
+  {{/each}}
+{{/each}}

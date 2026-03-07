@@ -78,13 +78,12 @@ cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.n
     }}{{service.cpp_name}}AsyncClient":
       pass
 
-  {{#let parent_service_name = service.name}}
   {{#each service.supportedInteractions as |interaction|}}
 cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_clients.h"{{!
     }} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
-  cdef cppclass c{{parent_service_name}}AsyncClient_{{interaction.name}} {{!
+  cdef cppclass c{{service.name}}AsyncClient_{{interaction.name}} {{!
     }}"::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{!
-    }}{{parent_service_name}}AsyncClient::{{interaction.name}}":
+    }}{{service.name}}AsyncClient::{{interaction.name}}":
       pass
 
   {{/each}}
@@ -102,10 +101,10 @@ cdef extern from "{{program.include_prefix}}gen-py3/{{program.name}}/clients_wra
   pass{{/if (array.empty? program.services)}}{{#each program.services as |service|}}
   cdef cppclass c{{service.name}}ClientWrapper "{{!
   }}::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.name}}ClientWrapper"{{#partial client_wrapper_parent service=service}}:
-  {{#if (not (object.notnull? service.extends))}}
+  {{#if (object.eq? null service.extends)}}
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
-  {{/if (not (object.notnull? service.extends))}}
+  {{/if (object.eq? null service.extends)}}
 
   {{#each service.supportedFunctions as |function|}}
     cFollyFuture[{{#partial clients.cython_return_type_cpp_type function=function}}] {{function.cpp_name}}(cRpcOptions, {{#each function.params.fields as |field|}}
@@ -123,10 +122,9 @@ cdef extern from "{{program.include_prefix}}gen-py3/{{program.name}}/clients_wra
     cFollyFuture[unique_ptr[cClientWrapper]]& create{{interaction.name}}()
   {{/each}}
 
-  {{#let parent_service_name = service.name}}
   {{#each service.supportedInteractions as |interaction|}}
-  cdef cppclass c{{parent_service_name}}ClientWrapper_{{interaction.name}}InteractionWrapper "{{!
-  }}::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{parent_service_name}}ClientWrapper{{!
+  cdef cppclass c{{service.name}}ClientWrapper_{{interaction.name}}InteractionWrapper "{{!
+  }}::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.name}}ClientWrapper{{!
   }}::{{interaction.name}}InteractionWrapper"(cClientWrapper):
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

@@ -23,28 +23,20 @@ structures, some work is required.
 
 This template assumes that the Python object is in a variable named <field>.
 
-}}{{#type:iobuf?}}deref((<_fbthrift_iobuf.IOBuf>{{field:py_name}}).c_clone()){{/type:iobuf?}}{{!
-}}{{#type:iobufRef?}}((<_fbthrift_iobuf.IOBuf>{{field:py_name}}).c_clone()){{/type:iobufRef?}}{{!
-}}{{#type:flexibleBinary?}}{{!
-  }}{{#partial types.cython_cpp_type type=type:self}}(cmove(<string>{{field:py_name}})){{!
-}}{{/type:flexibleBinary?}}{{!
-}}{{^type:customBinaryType?}}{{!
-}}{{#type:bool?}}{{field:py_name}}{{/type:bool?}}{{!
-}}{{#type:byte?}}{{field:py_name}}{{/type:byte?}}{{!
-}}{{#type:i16?}}{{field:py_name}}{{/type:i16?}}{{!
-}}{{#type:i32?}}{{field:py_name}}{{/type:i32?}}{{!
-}}{{#type:i64?}}{{field:py_name}}{{/type:i64?}}{{!
-}}{{#type:double?}}{{field:py_name}}{{/type:double?}}{{!
-}}{{#type:float?}}{{field:py_name}}{{/type:float?}}{{!
-}}{{#type:string?}}{{field:py_name}}.encode('UTF-8'){{/type:string?}}{{!
-}}{{#type:binary?}}{{field:py_name}}{{/type:binary?}}{{!
-}}{{#type:structured}}{{^program:inplace_migrate?}}{{!
-  }}deref((<{{#partial types.cython_python_type type=type:self}}>{{field:py_name}}).{{#partial types.cpp_obj}}){{!
-}}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
-  }}{{type:capi_converter_path}}.{{struct:name}}_convert_to_cpp({{field:py_name}}._to_python()){{!
-}}{{/program:inplace_migrate?}}{{/type:structured}}{{!
-}}{{#type:container?}}{{!
-  }}{{#partial types.container_to_cpp type=type:self}}({{field:py_name}}){{!
-}}{{/type:container?}}{{!
-}}{{#type:enum?}}<{{#partial types.cython_cpp_type type=type:self}}><int>{{field:py_name}}{{/type:enum?}}{{!
-}}{{/type:customBinaryType?}}
+}}
+{{#pragma ignore-newlines}}
+{{#if param.type.iobuf?}}deref((<_fbthrift_iobuf.IOBuf>{{param.py_name}}).c_clone())
+{{#else if param.type.iobufRef?}}((<_fbthrift_iobuf.IOBuf>{{param.py_name}}).c_clone())
+{{#else if param.type.flexibleBinary?}}{{#partial types.cython_cpp_type type=param.type}}(cmove(<string>{{param.py_name}}))
+{{#else if param.type.customBinaryType?}}{{! no output for custom binary types that are iobuf/iobufRef/flexibleBinary }}
+{{#else if param.type.string?}}{{param.py_name}}.encode('UTF-8')
+{{#else if param.type.primitive?}}{{param.py_name}}
+{{#else if param.type.container?}}{{#partial types.container_to_cpp type=param.type}}({{param.py_name}})
+{{#else if param.type.enum?}}<{{#partial types.cython_cpp_type type=param.type}}><int>{{param.py_name}}
+  {{#else if (and param.type.structured? program.inplace_migrate?)}}
+{{param.type.capi_converter_path}}.{{param.type.true_type.name}}_convert_to_cpp({{param.py_name}}._to_python())
+
+  {{#else if param.type.structured?}}
+deref((<{{#partial types.cython_python_type type=param.type}}>{{param.py_name}}).{{#partial types.cpp_obj}})
+
+{{/if param.type.iobuf?}}

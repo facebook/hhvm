@@ -58,3 +58,17 @@ ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix fu
 ClientBufferedStream__{{function.stream.elem_type.flat_name}}
   {{/if function.stream_has_first_response?}}
 {{/let partial}}
+
+{{#let export partial client_base_type |service|}}
+{{#pragma ignore-newlines}}
+{{#let parent = service.extends}}
+  {{#if (object.notnull? parent)}}
+    {{#if parent.externalProgram?}}
+_{{#each parent.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}
+{{parent.program.name}}_clients.
+    {{/if parent.externalProgram?}}
+{{parent.name}}
+  {{#else}}
+thrift.py3.client.Client
+  {{/if (object.notnull? parent)}}
+{{/let partial}}

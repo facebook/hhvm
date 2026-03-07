@@ -19,42 +19,28 @@
 Used in cython client callbacks to convert the returned cpp value type
 to a python type.
 
-}}{{#type:iobuf?}}{{!
-  }}_fbthrift_iobuf.from_unique_ptr(result.value().clone()){{!
-}}{{/type:iobuf?}}{{!
-}}{{#type:iobufRef?}}{{!
-  }}_fbthrift_iobuf.from_unique_ptr(move_iobuf(result.value())){{!
-}}{{/type:iobufRef?}}{{!
-}}{{#type:flexibleBinary?}}{{!
-  }}(<const char*>result.value().data())[:result.value().size()]{{!
-}}{{/type:flexibleBinary?}}{{!
-}}{{^function:stream?}}{{!
-}}{{^type:customBinaryType?}}{{!
-}}{{#type:bool?}}<bint>result.value(){{/type:bool?}}{{!
-}}{{#type:byte?}}result.value(){{/type:byte?}}{{!
-}}{{#type:i16?}}result.value(){{/type:i16?}}{{!
-}}{{#type:i32?}}result.value(){{/type:i32?}}{{!
-}}{{#type:i64?}}result.value(){{/type:i64?}}{{!
-}}{{#type:double?}}result.value(){{/type:double?}}{{!
-}}{{#type:float?}}result.value(){{/type:float?}}{{!
-}}{{#type:string?}}result.value().data().decode('UTF-8'){{/type:string?}}{{!
-}}{{#type:binary?}}result.value(){{/type:binary?}}{{!
-}}{{#type:structured}}{{^program:inplace_migrate?}}{{!
-  }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-  }}make_shared[{{#partial types.cython_cpp_type type=type:self}}]({{!
-  }}cmove(result.value()))){{!
-}}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
-  }}{{#partial types.python_type type=type:self}}.from_python({{!
-  }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
-  }}__deref_const[{{#partial types.cython_cpp_type type=type:self}}](result.value()))){{!
-}}{{/program:inplace_migrate?}}{{/type:structured}}{{!
-}}{{#type:container?}}{{!
-  }}{{#partial types.container_from_cpp type=type:self}}(cmove(result.value())){{!
-}}{{/type:container?}}{{!
-}}{{#type:void?}}None{{/type:void?}}{{!
-}}{{#type:enum}}{{#partial types.python_type type=type:self}}(<int> result.value()){{/type:enum}}{{!
-}}{{/type:customBinaryType?}}{{!
-}}{{/function:stream?}}{{!
-}}{{#function:stream?}}{{!
-  }}{{#partial clients.stream_response_class_name function=function:self}}._fbthrift_create(result.value(), options){{!
-}}{{/function:stream?}}
+}}
+{{#pragma ignore-newlines}}
+{{#if function.return_type.iobuf?}}_fbthrift_iobuf.from_unique_ptr(result.value().clone())
+{{#else if function.return_type.iobufRef?}}_fbthrift_iobuf.from_unique_ptr(move_iobuf(result.value()))
+{{#else if function.return_type.flexibleBinary?}}(<const char*>result.value().data())[:result.value().size()]
+{{#else if function.stream?}}{{#partial clients.stream_response_class_name function=function}}._fbthrift_create(result.value(), options)
+{{#else if function.return_type.customBinaryType?}}{{! no output for custom binary types that are iobuf/iobufRef/flexibleBinary }}
+{{#else if function.return_type.bool?}}<bint>result.value()
+{{#else if function.return_type.void?}}None
+{{#else if function.return_type.string?}}result.value().data().decode('UTF-8')
+{{#else if function.return_type.primitive?}}result.value()
+{{#else if function.return_type.container?}}{{#partial types.container_from_cpp type=function.return_type}}(cmove(result.value()))
+{{#else if function.return_type.enum?}}{{#partial types.python_type type=function.return_type}}(<int> result.value())
+
+  {{#else if (and function.return_type.structured? program.inplace_migrate?)}}
+{{#partial types.python_type type=function.return_type}}.from_python(
+{{function.return_type.capi_converter_path}}.{{function.return_type.true_type.name}}_from_cpp(
+__deref_const[{{#partial types.cython_cpp_type type=function.return_type}}](result.value())))
+
+  {{#else if function.return_type.structured?}}
+{{#partial types.cython_python_type type=function.return_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(
+make_shared[{{#partial types.cython_cpp_type type=function.return_type}}](
+cmove(result.value())))
+
+{{/if function.return_type.iobuf?}}

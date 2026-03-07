@@ -384,8 +384,8 @@ template <typename RefT, typename Derived>
 class BaseIter : public BaseDerived<Derived> {
  public:
   using value_type = RefT;
-  using reference_type = RefT;
-  using pointer_type = RefT*;
+  using reference = RefT;
+  using pointer = RefT*;
   using difference_type = std::ptrdiff_t;
   using iterator_category = std::forward_iterator_tag;
 
@@ -397,8 +397,8 @@ class BaseIter : public BaseDerived<Derived> {
   explicit BaseIter(BaseIter<MutT, D>&& other) noexcept
       : cur_(std::move(other.cur_)), next_(other.next_) {}
 
-  pointer_type operator->() const { return &next_; }
-  reference_type operator*() const { return next_; }
+  pointer operator->() const { return &next_; }
+  reference operator*() const { return next_; }
   Derived& operator++() { return (next_.reset(cur_.next()), derived()); }
   Derived operator++(int) {
     Derived result = derived();
@@ -447,8 +447,8 @@ class BaseMapIter : public BaseDerived<Derived> {
 
  public:
   using value_type = std::pair<ConstT, RefT>;
-  using reference_type = value_type&;
-  using pointer_type = value_type*;
+  using reference = value_type&;
+  using pointer = value_type*;
   using difference_type = std::ptrdiff_t;
   using iterator_category = std::forward_iterator_tag;
 
@@ -462,8 +462,8 @@ class BaseMapIter : public BaseDerived<Derived> {
   explicit BaseMapIter(BaseMapIter<ConstT, MutT, D>&& other) noexcept
       : cur_(std::move(other.cur_)), next_(other.next_) {}
 
-  pointer_type operator->() const { return &next_; }
-  reference_type operator*() const { return next_; }
+  pointer operator->() const { return &next_; }
+  reference operator*() const { return next_; }
   BaseMapIter& operator++() {
     next_.first.reset(cur_.next());
     if (next_.first.has_value()) { // TODO(afuller): Use a single call.

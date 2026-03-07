@@ -147,7 +147,7 @@ std::string_view {{struct:cpp_underlying_name}}::__fbthrift_get_class_name() {
 
 {{#if (has_compiler_option? "tablebased")}}
 {{#struct:union?}}
-constexpr ::apache::thrift::detail::UnionExtN<{{struct:num_fields}}> {{struct:cpp_underlying_name}}_unionExt = {
+constexpr ::apache::thrift::detail::UnionExtN<{{(array.len struct:fields)}}> {{struct:cpp_underlying_name}}_unionExt = {
   /* .clear */ ::apache::thrift::detail::clearUnion<{{struct:cpp_fullname}}>,
   /* .unionTypeOffset */ ::apache::thrift::detail::unionTypeOffset<{{struct:cpp_fullname}}>(),
   /* .getActiveId */ nullptr,
@@ -157,8 +157,8 @@ constexpr ::apache::thrift::detail::UnionExtN<{{struct:num_fields}}> {{struct:cp
 }}{{/field:type}}{{/struct:fields_in_key_order}}},
 };
 {{/struct:union?}}
-constexpr ::apache::thrift::detail::StructInfoN<{{struct:num_fields}}> __fbthrift_struct_info_{{struct:cpp_underlying_name}} = {
-  /* .numFields */ {{struct:num_fields}},
+constexpr ::apache::thrift::detail::StructInfoN<{{(array.len struct:fields)}}> __fbthrift_struct_info_{{struct:cpp_underlying_name}} = {
+  /* .numFields */ {{(array.len struct:fields)}},
   /* .name */ "{{struct:name}}",{{!
   }}{{#struct:union?}}
   /* .unionExt */ &{{struct:name}}_unionExt,{{!

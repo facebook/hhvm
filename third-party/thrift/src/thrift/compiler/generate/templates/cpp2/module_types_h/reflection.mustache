@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-  static constexpr std::size_t __fbthrift_num_fields = {{struct:num_fields}};
+  static constexpr std::size_t __fbthrift_num_fields = {{(array.len struct:fields)}};
 
   static constexpr const int16_t __fbthrift_reflection_field_ids[] = {0{{#struct:fields}},{{field:id}}{{/struct:fields}}};
   {{#if struct:has_serialize_in_field_id_order_annotation?}}

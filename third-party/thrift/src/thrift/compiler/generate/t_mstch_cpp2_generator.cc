@@ -609,6 +609,226 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("cpp_fullname", [this](const t_structured& strct) {
       return cpp_context_->resolver().get_underlying_namespaced_name(strct);
     });
+    def.property("is_struct_orderable?", [this](const t_structured& strct) {
+      return cpp_context_->is_orderable(strct) &&
+          !strct.has_unstructured_annotation("no_default_comparators");
+    });
+    def.property(
+        "nondefault_copy_ctor_and_assignment?", [](const t_structured& strct) {
+          if (strct.has_unstructured_annotation("cpp.allocator")) {
+            return true;
+          }
+          for (const auto& f : strct.fields()) {
+            if (cpp2::field_transitively_refers_to_unique(&f) ||
+                cpp2::is_lazy(&f) || cpp_name_resolver::find_first_adapter(f)) {
+              return true;
+            }
+          }
+          return false;
+        });
+    def.property(
+        "cpp_underlying_name", &cpp_name_resolver::get_underlying_name);
+    def.property("cpp_underlying_type", [this](const t_structured& strct) {
+      return cpp_context_->resolver().get_underlying_type_name(strct);
+    });
+    def.property("is_directly_adapted?", [this](const t_structured& strct) {
+      return cpp_context_->resolver().is_directly_adapted(strct);
+    });
+    def.property(
+        "dependent_direct_adapter?", [this](const t_structured& strct) {
+          auto adapter =
+              cpp_context_->resolver().find_nontransitive_adapter(strct);
+          return adapter &&
+              !adapter->get_value_from_structured_annotation_or_null(
+                  "adaptedType");
+        });
+    def.property("cpp_methods", [](const t_structured& strct) {
+      return strct.get_unstructured_annotation({"cpp.methods"});
+    });
+    def.property("cpp_declare_hash", [](const t_structured& strct) {
+      return strct.has_unstructured_annotation(
+                 {"cpp.declare_hash", "cpp2.declare_hash"}) ||
+          strct.has_structured_annotation(kCppDeclareHashSpecialization);
+    });
+    def.property("cpp_declare_equal_to", [](const t_structured& strct) {
+      return strct.has_unstructured_annotation(
+                 {"cpp.declare_equal_to", "cpp2.declare_equal_to"}) ||
+          strct.has_structured_annotation(kCppDeclareEqualToSpecialization);
+    });
+    def.property("cpp_noncopyable", [](const t_structured& strct) {
+      if (strct.has_unstructured_annotation(
+              {"cpp.noncopyable", "cpp2.noncopyable"})) {
+        return true;
+      }
+      bool result = false;
+      cpp2::for_each_transitive_field(&strct, [&result](const t_field* field) {
+        if (!field->type().get_type()->has_unstructured_annotation(
+                {"cpp.noncopyable", "cpp2.noncopyable"})) {
+          return true;
+        }
+        switch (gen::cpp::find_ref_type(*field)) {
+          case gen::cpp::reference_type::shared_const:
+          case gen::cpp::reference_type::shared_mutable: {
+            return true;
+          }
+          case gen::cpp::reference_type::boxed_intern:
+          case gen::cpp::reference_type::boxed:
+          case gen::cpp::reference_type::none:
+          case gen::cpp::reference_type::unique:
+            break;
+        }
+        result = true;
+        return false;
+      });
+      return result;
+    });
+    def.property("cpp_noncomparable", [](const t_structured& strct) {
+      return strct.has_unstructured_annotation(
+          {"cpp.noncomparable", "cpp2.noncomparable"});
+    });
+    def.property("cpp_nonorderable?", [](const t_structured& strct) {
+      return strct.has_structured_annotation(kCppNonOrderable);
+    });
+    def.property(
+        "is_eligible_for_constexpr?", [this](const t_structured& strct) {
+          return is_eligible_for_constexpr_(&strct) ||
+              strct.has_unstructured_annotation("cpp.methods");
+        });
+    def.property("virtual", [](const t_structured& strct) {
+      return strct.has_unstructured_annotation({"cpp.virtual", "cpp2.virtual"});
+    });
+    def.property("cpp_allocator", [](const t_structured& strct) {
+      return strct.get_unstructured_annotation("cpp.allocator");
+    });
+    def.property("cpp_frozen2_exclude?", [this](const t_structured& strct) {
+      // TODO(dokwon): Fix frozen2 compatibility with adapter.
+      return strct.has_unstructured_annotation("cpp.frozen2_exclude") ||
+          strct.has_structured_annotation(kCppFrozen2ExcludeUri) ||
+          cpp_context_->resolver().is_directly_adapted(strct);
+    });
+    def.property("cpp_allocator_via", [](const t_structured& strct) {
+      if (const std::string* name =
+              strct.find_unstructured_annotation_or_null("cpp.allocator_via")) {
+        for (const auto& field : strct.fields()) {
+          if (cpp2::get_name(&field) == *name) {
+            return mangle_field_name(*name);
+          }
+        }
+        throw std::runtime_error(
+            fmt::format("No cpp.allocator_via field \"{}\"", *name));
+      }
+      return whisker::string("");
+    });
+    def.property("lazy_fields?", [](const t_structured& strct) {
+      for (const auto& field : strct.fields()) {
+        if (cpp2::is_lazy(&field)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    def.property("indexing?", [](const t_structured& strct) {
+      for (const auto& field : strct.fields()) {
+        if (cpp2::is_lazy(&field)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    def.property("write_lazy_field_checksum?", [](const t_structured& strct) {
+      return !strct.has_structured_annotation(kCppDisableLazyChecksumUri);
+    });
+    def.property("isset_fields?", [](const t_structured& strct) {
+      for (const auto& field : strct.fields()) {
+        if (cpp2::field_has_isset(&field)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    def.property("isset_fields_size", [](const t_structured& strct) {
+      int64_t size = 0;
+      for (const auto& field : strct.fields()) {
+        if (cpp2::field_has_isset(&field)) {
+          size++;
+        }
+      }
+      return size;
+    });
+    def.property("isset_bitset_option", [](const t_structured& strct) {
+      static const std::string kPrefix =
+          "apache::thrift::detail::IssetBitsetOption::";
+      if (const t_const* anno = cpp2::packed_isset(strct)) {
+        for (const auto& [key, val] : anno->value()->get_map()) {
+          if (key->get_string() == "atomic" && !val->get_bool()) {
+            return fmt::format("{}Packed", kPrefix);
+          }
+        }
+        return fmt::format("{}PackedWithAtomic", kPrefix);
+      }
+      return fmt::format("{}Unpacked", kPrefix);
+    });
+    def.property("is_large?", [](const t_structured& strct) {
+      // Outline constructors and destructors if the struct has at least one
+      // member with a non-trivial destructor (involving at least a branch and a
+      // likely deallocation).
+      // TODO(ott): Support unions.
+      if (strct.is<t_exception>()) {
+        return true;
+      }
+      for (const auto& field : strct.fields()) {
+        const auto* resolved_typedef = field.type()->get_true_type();
+        if (cpp2::is_ref(&field) || resolved_typedef->is_string_or_binary() ||
+            resolved_typedef->is<t_container>()) {
+          return true;
+        }
+      }
+      return false;
+    });
+    def.property("legacy_api?", [](const t_structured&) { return true; });
+    def.property(
+        "has_non_optional_and_non_terse_field?",
+        [this](const t_structured& strct) {
+          const auto& fields = strct.fields();
+          return std::any_of(
+              fields.begin(),
+              fields.end(),
+              [enabled_terse_write = has_compiler_option(
+                   "deprecated_terse_writes")](auto& field) {
+                return (!enabled_terse_write ||
+                        !cpp2::deprecated_terse_writes(&field)) &&
+                    !field.has_structured_annotation(
+                        kCppDeprecatedTerseWriteUri) &&
+                    field.qualifier() != t_field_qualifier::optional &&
+                    field.qualifier() != t_field_qualifier::terse;
+              });
+        });
+    def.property(
+        "fields_with_runtime_annotation?", [](const t_structured& strct) {
+          const auto& fields = strct.fields();
+          return std::any_of(
+              fields.begin(), fields.end(), has_runtime_annotation);
+        });
+    def.property(
+        "extra_namespace",
+        [this](const t_structured& strct) -> whisker::object {
+          auto* extra = cpp_context_->resolver().get_extra_namespace(strct);
+          return extra ? whisker::make::string(*extra) : whisker::make::null;
+        });
+    def.property("any?", [](const t_structured& strct) {
+      return strct.uri() != "" &&
+          !strct.has_unstructured_annotation("cpp.detail.no_any");
+    });
+    def.property("is_trivially_destructible?", [](const t_structured& strct) {
+      for (const auto& field : strct.fields()) {
+        const t_type* type = field.type()->get_true_type();
+        if (cpp2::is_ref(&field) || cpp2::is_custom_type(field) ||
+            !is_scalar(*type)) {
+          return false;
+        }
+      }
+      return true;
+    });
 
     return std::move(def).make();
   }
@@ -978,6 +1198,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   std::shared_ptr<cpp2_generator_context> cpp_context_;
   std::unordered_map<std::string, int32_t> client_name_to_split_count_;
   bool cpp_enable_same_program_const_referencing_ = true;
+  mutable cpp2::is_eligible_for_constexpr is_eligible_for_constexpr_;
 };
 
 class cpp_mstch_program : public mstch_program {
@@ -1514,47 +1735,14 @@ class cpp_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:num_fields", &cpp_mstch_struct::num_fields},
             {"struct:explicitly_constructed_fields",
              &cpp_mstch_struct::explicitly_constructed_fields},
             {"struct:fields_in_key_order",
              &cpp_mstch_struct::fields_in_key_order},
             {"struct:fields_in_layout_order",
              &cpp_mstch_struct::fields_in_layout_order},
-            {"struct:is_struct_orderable?",
-             &cpp_mstch_struct::is_struct_orderable},
-            {"struct:nondefault_copy_ctor_and_assignment?",
-             &cpp_mstch_struct::nondefault_copy_ctor_and_assignment},
-            {"struct:cpp_underlying_name",
-             &cpp_mstch_struct::cpp_underlying_name},
-            {"struct:cpp_underlying_type",
-             &cpp_mstch_struct::cpp_underlying_type},
-            {"struct:is_directly_adapted?",
-             &cpp_mstch_struct::is_directly_adapted},
-            {"struct:dependent_direct_adapter?",
-             &cpp_mstch_struct::dependent_direct_adapter},
-            {"struct:cpp_methods", &cpp_mstch_struct::cpp_methods},
-            {"struct:cpp_declare_hash", &cpp_mstch_struct::cpp_declare_hash},
-            {"struct:cpp_declare_equal_to",
-             &cpp_mstch_struct::cpp_declare_equal_to},
-            {"struct:cpp_noncopyable", &cpp_mstch_struct::cpp_noncopyable},
-            {"struct:cpp_noncomparable", &cpp_mstch_struct::cpp_noncomparable},
-            {"struct:cpp_nonorderable?", &cpp_mstch_struct::cpp_nonorderable},
-            {"struct:is_eligible_for_constexpr?",
-             &cpp_mstch_struct::is_eligible_for_constexpr},
-            {"struct:virtual", &cpp_mstch_struct::cpp_virtual},
             {"struct:message", &cpp_mstch_struct::message},
-            {"struct:isset_fields?", &cpp_mstch_struct::has_isset_fields},
             {"struct:isset_fields", &cpp_mstch_struct::isset_fields},
-            {"struct:isset_fields_size", &cpp_mstch_struct::isset_fields_size},
-            {"struct:isset_bitset_option",
-             &cpp_mstch_struct::isset_bitset_option},
-            {"struct:lazy_fields?", &cpp_mstch_struct::has_lazy_fields},
-            {"struct:indexing?", &cpp_mstch_struct::indexing},
-            {"struct:write_lazy_field_checksum",
-             &cpp_mstch_struct::write_lazy_field_checksum},
-            {"struct:is_large?", &cpp_mstch_struct::is_large},
-            {"struct:legacy_api?", &cpp_mstch_struct::legacy_api},
             {"struct:mixin_fields", &cpp_mstch_struct::mixin_fields},
             {"struct:num_union_members",
              &cpp_mstch_struct::get_num_union_members},
@@ -1562,23 +1750,10 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::get_min_union_member},
             {"struct:max_union_member",
              &cpp_mstch_struct::get_max_union_member},
-            {"struct:cpp_allocator", &cpp_mstch_struct::cpp_allocator},
-            {"struct:cpp_allocator_via", &cpp_mstch_struct::cpp_allocator_via},
-            {"struct:cpp_frozen2_exclude?",
-             &cpp_mstch_struct::cpp_frozen2_exclude},
-            {"struct:has_non_optional_and_non_terse_field?",
-             &cpp_mstch_struct::has_non_optional_and_non_terse_field},
-            {"struct:fields_with_runtime_annotation?",
-             &cpp_mstch_struct::has_fields_with_runtime_annotation},
             {"struct:fields_with_runtime_annotation",
              &cpp_mstch_struct::fields_with_runtime_annotation},
-            {"struct:any?", &cpp_mstch_struct::any},
-            {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
-            {"struct:is_trivially_destructible?",
-             &cpp_mstch_struct::is_trivially_destructible},
         });
   }
-  mstch::node num_fields() { return struct_->fields().size(); }
   mstch::node explicitly_constructed_fields() {
     // Filter fields according to the following criteria:
     // Get all enums
@@ -1627,96 +1802,6 @@ class cpp_mstch_struct : public mstch_struct {
     return fields;
   }
 
-  mstch::node is_struct_orderable() {
-    return cpp_context_->is_orderable(*struct_) &&
-        !struct_->has_unstructured_annotation("no_default_comparators");
-  }
-  mstch::node nondefault_copy_ctor_and_assignment() {
-    if (struct_->has_unstructured_annotation("cpp.allocator")) {
-      return true;
-    }
-    for (const auto& f : struct_->fields()) {
-      if (cpp2::field_transitively_refers_to_unique(&f) || cpp2::is_lazy(&f) ||
-          cpp_name_resolver::find_first_adapter(f)) {
-        return true;
-      }
-    }
-    return false;
-  }
-  mstch::node cpp_underlying_name() {
-    return cpp_name_resolver::get_underlying_name(*struct_);
-  }
-  mstch::node cpp_underlying_type() {
-    return cpp_context_->resolver().get_underlying_type_name(*struct_);
-  }
-  mstch::node is_directly_adapted() {
-    return cpp_context_->resolver().is_directly_adapted(*struct_);
-  }
-  mstch::node dependent_direct_adapter() {
-    auto adapter =
-        cpp_context_->resolver().find_nontransitive_adapter(*struct_);
-    return adapter &&
-        !adapter->get_value_from_structured_annotation_or_null("adaptedType");
-  }
-
-  mstch::node cpp_methods() {
-    return struct_->get_unstructured_annotation({"cpp.methods"});
-  }
-  mstch::node cpp_declare_hash() {
-    return struct_->has_unstructured_annotation(
-               {"cpp.declare_hash", "cpp2.declare_hash"}) ||
-        struct_->has_structured_annotation(kCppDeclareHashSpecialization);
-  }
-  mstch::node cpp_declare_equal_to() {
-    return struct_->has_unstructured_annotation(
-               {"cpp.declare_equal_to", "cpp2.declare_equal_to"}) ||
-        struct_->has_structured_annotation(kCppDeclareEqualToSpecialization);
-  }
-  mstch::node cpp_noncopyable() {
-    if (struct_->has_unstructured_annotation(
-            {"cpp.noncopyable", "cpp2.noncopyable"})) {
-      return true;
-    }
-
-    bool result = false;
-    cpp2::for_each_transitive_field(struct_, [&result](const t_field* field) {
-      if (!field->type().get_type()->has_unstructured_annotation(
-              {"cpp.noncopyable", "cpp2.noncopyable"})) {
-        return true;
-      }
-      switch (gen::cpp::find_ref_type(*field)) {
-        case gen::cpp::reference_type::shared_const:
-        case gen::cpp::reference_type::shared_mutable: {
-          return true;
-        }
-        case gen::cpp::reference_type::boxed_intern:
-        case gen::cpp::reference_type::boxed:
-        case gen::cpp::reference_type::none:
-        case gen::cpp::reference_type::unique:
-          break;
-      }
-      result = true;
-      return false;
-    });
-    return result;
-  }
-  mstch::node cpp_noncomparable() {
-    return struct_->has_unstructured_annotation(
-        {"cpp.noncomparable", "cpp2.noncomparable"});
-  }
-
-  mstch::node cpp_nonorderable() {
-    return struct_->has_structured_annotation(kCppNonOrderable);
-  }
-
-  mstch::node is_eligible_for_constexpr() {
-    return is_eligible_for_constexpr_(struct_) ||
-        struct_->has_unstructured_annotation("cpp.methods");
-  }
-  mstch::node cpp_virtual() {
-    return struct_->has_unstructured_annotation(
-        {"cpp.virtual", "cpp2.virtual"});
-  }
   mstch::node message() {
     const t_exception* exception = struct_->try_as<t_exception>();
     const t_field* message_field =
@@ -1728,51 +1813,6 @@ class cpp_mstch_struct : public mstch_struct {
       return message_field->name();
     }
     return mangle_field_name(message_field->name());
-  }
-  mstch::node cpp_allocator() {
-    return struct_->get_unstructured_annotation("cpp.allocator");
-  }
-  mstch::node cpp_frozen2_exclude() {
-    // TODO(dokwon): Fix frozen2 compatibility with adapter.
-    return struct_->has_unstructured_annotation("cpp.frozen2_exclude") ||
-        struct_->has_structured_annotation(kCppFrozen2ExcludeUri) ||
-        cpp_context_->resolver().is_directly_adapted(*struct_);
-  }
-  mstch::node cpp_allocator_via() {
-    if (const auto* name = struct_->find_unstructured_annotation_or_null(
-            "cpp.allocator_via")) {
-      for (const auto& field : struct_->fields()) {
-        if (cpp2::get_name(&field) == *name) {
-          return mangle_field_name(*name);
-        }
-      }
-      throw std::runtime_error("No cpp.allocator_via field \"" + *name + "\"");
-    }
-    return "";
-  }
-  mstch::node has_lazy_fields() {
-    for (const auto& field : struct_->fields()) {
-      if (cpp2::is_lazy(&field)) {
-        return true;
-      }
-    }
-    return false;
-  }
-  mstch::node indexing() { return has_lazy_fields(); }
-  mstch::node write_lazy_field_checksum() {
-    if (struct_->has_structured_annotation(kCppDisableLazyChecksumUri)) {
-      return "false";
-    }
-
-    return "true";
-  }
-  mstch::node has_isset_fields() {
-    for (const auto& field : struct_->fields()) {
-      if (cpp2::field_has_isset(&field)) {
-        return true;
-      }
-    }
-    return false;
   }
   mstch::node isset_fields() {
     std::vector<const t_field*> fields;
@@ -1786,49 +1826,6 @@ class cpp_mstch_struct : public mstch_struct {
     }
     return make_mstch_fields(fields);
   }
-  mstch::node isset_fields_size() {
-    std::size_t size = 0;
-    for (const auto& field : struct_->fields()) {
-      if (cpp2::field_has_isset(&field)) {
-        size++;
-      }
-    }
-    return size;
-  }
-  mstch::node isset_bitset_option() {
-    static const std::string kPrefix =
-        "apache::thrift::detail::IssetBitsetOption::";
-    if (const auto* anno = cpp2::packed_isset(*struct_)) {
-      for (const auto& kv : anno->value()->get_map()) {
-        if (kv.first->get_string() == "atomic") {
-          if (!kv.second->get_bool()) {
-            return kPrefix + "Packed";
-          }
-        }
-      }
-      return kPrefix + "PackedWithAtomic";
-    }
-    return kPrefix + "Unpacked";
-  }
-
-  mstch::node is_large() {
-    // Outline constructors and destructors if the struct has at least one
-    // member with a non-trivial destructor (involving at least a branch and a
-    // likely deallocation).
-    // TODO(ott): Support unions.
-    if (struct_->is<t_exception>()) {
-      return true;
-    }
-    for (const auto& field : struct_->fields()) {
-      const auto* resolved_typedef = field.type()->get_true_type();
-      if (cpp2::is_ref(&field) || resolved_typedef->is_string_or_binary() ||
-          resolved_typedef->is<t_container>()) {
-        return true;
-      }
-    }
-    return false;
-  }
-  mstch::node legacy_api() { return true; }
 
   mstch::node get_num_union_members() {
     if (!struct_->is<t_union>()) {
@@ -1863,25 +1860,6 @@ class cpp_mstch_struct : public mstch_struct {
     return get_extremal_union_member(std::greater<>{});
   }
 
-  mstch::node has_non_optional_and_non_terse_field() {
-    const auto& fields = struct_->fields();
-    return std::any_of(
-        fields.begin(),
-        fields.end(),
-        [enabled_terse_write =
-             has_option("deprecated_terse_writes")](auto& field) {
-          return (!enabled_terse_write ||
-                  !cpp2::deprecated_terse_writes(&field)) &&
-              !field.has_structured_annotation(kCppDeprecatedTerseWriteUri) &&
-              field.qualifier() != t_field_qualifier::optional &&
-              field.qualifier() != t_field_qualifier::terse;
-        });
-  }
-  mstch::node has_fields_with_runtime_annotation() {
-    const auto& fields = struct_->fields();
-    return std::any_of(fields.begin(), fields.end(), has_runtime_annotation);
-  }
-
   mstch::node fields_with_runtime_annotation() {
     return make_mstch_fields(get_fields_with_runtime_annotation());
   }
@@ -1903,11 +1881,6 @@ class cpp_mstch_struct : public mstch_struct {
     }
 
     return cache.emplace(struct_, std::move(result)).first->second;
-  }
-
-  mstch::node extra_namespace() {
-    auto* extra = cpp_context_->resolver().get_extra_namespace(*struct_);
-    return extra ? *extra : mstch::node{};
   }
 
  protected:
@@ -2051,26 +2024,9 @@ class cpp_mstch_struct : public mstch_struct {
     return make_mstch_fields(struct_->fields_id_order());
   }
 
-  mstch::node any() {
-    return struct_->uri() != "" &&
-        !struct_->has_unstructured_annotation("cpp.detail.no_any");
-  }
-
-  mstch::node is_trivially_destructible() {
-    for (const auto& field : struct_->fields()) {
-      const t_type* type = field.type()->get_true_type();
-      if (cpp2::is_ref(&field) || cpp2::is_custom_type(field) ||
-          !is_scalar(*type)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   std::shared_ptr<cpp2_generator_context> cpp_context_;
 
   std::vector<const t_field*> fields_in_layout_order_;
-  cpp2::is_eligible_for_constexpr is_eligible_for_constexpr_;
 };
 
 class cpp_mstch_field : public mstch_field {

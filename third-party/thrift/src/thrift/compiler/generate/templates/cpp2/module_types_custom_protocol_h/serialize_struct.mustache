@@ -42,7 +42,7 @@ uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("{{struct:name}}");
 {{#struct:indexing?}}
-  ::apache::thrift::detail::IndexWriter<Protocol_> indexWriter(prot_, xfer, {{struct:write_lazy_field_checksum}});
+  ::apache::thrift::detail::IndexWriter<Protocol_> indexWriter(prot_, xfer, {{#if struct:write_lazy_field_checksum?}}true{{#else}}false{{/if}});
 {{/struct:indexing?}}
 {{#struct:fields?}}
   bool previousFieldHasValue = true;

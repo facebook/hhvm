@@ -694,10 +694,17 @@ struct MapEncode {
   template <typename Protocol, typename T>
   uint32_t operator()(Protocol& prot, const T& map) const {
     uint32_t xfer = 0;
-    xfer += prot.writeMapBegin(
-        typeTagToTType<Key>,
-        typeTagToTType<Value>,
-        checked_container_size(map.size()));
+    if constexpr (requires {
+                    prot.template writeMapBegin<Key, Value>(std::int32_t{});
+                  }) {
+      xfer += prot.template writeMapBegin<Key, Value>(
+          checked_container_size(map.size()));
+    } else {
+      xfer += prot.writeMapBegin(
+          typeTagToTType<Key>,
+          typeTagToTType<Value>,
+          checked_container_size(map.size()));
+    }
 
     if constexpr (
         !folly::is_detected_v<

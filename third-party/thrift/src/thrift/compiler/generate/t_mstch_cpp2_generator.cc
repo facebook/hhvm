@@ -499,6 +499,39 @@ bool type_transitively_refers_to_struct(const t_type& type) {
   return false;
 }
 
+std::vector<const t_typedef*> get_aliases_to_struct(const t_program& program) {
+  std::vector<const t_typedef*> result;
+  for (const t_typedef* i : program.typedefs()) {
+    const t_type* alias = &i->type().deref();
+    if (alias->is<t_typedef>() &&
+        alias->has_unstructured_annotation("cpp.type")) {
+      const t_type* ttype = i->type()->get_true_type();
+      if (ttype->is<t_structured>() &&
+          !cpp_name_resolver::find_first_adapter(*ttype)) {
+        result.push_back(i);
+      }
+    }
+  }
+  return result;
+}
+
+template <typename Node>
+void collect_fatal_string_annotated(
+    whisker::map::raw& fatal_strings, const Node* node) {
+  fatal_strings.emplace(
+      get_fatal_string_short_id(node), render_fatal_string(node->name()));
+  auto hash = cpp2::sha256_hex(node->name());
+  fatal_strings.emplace(
+      fmt::format("__fbthrift_hash_{}", hash),
+      render_fatal_string(node->name()));
+  for (const auto& a : node->unstructured_annotations()) {
+    if (!is_annotation_blacklisted_in_fatal(a.first)) {
+      fatal_strings.emplace(
+          get_fatal_string_short_id(a.first), render_fatal_string(a.first));
+    }
+  }
+}
+
 class t_mstch_cpp2_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -616,6 +649,122 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     });
     def.property("schema_name", [this](const t_program& self) {
       return schematizer::name_schema(source_mgr_, self);
+    });
+    def.property("fatal_enums", [](const t_program& program) {
+      whisker::array::raw result;
+      for (const auto* enm : program.enums()) {
+        result.emplace_back(get_fatal_string_short_id(enm));
+      }
+      return whisker::make::array(std::move(result));
+    });
+    def.property("fatal_unions", [](const t_program& program) {
+      whisker::array::raw result;
+      for (const t_structured* obj : program.structured_definitions()) {
+        if (obj->is<t_union>()) {
+          result.emplace_back(get_fatal_string_short_id(obj));
+        }
+      }
+      return whisker::make::array(std::move(result));
+    });
+    def.property("fatal_structs", [](const t_program& program) {
+      whisker::array::raw result;
+      for (const t_structured* obj : program.structured_definitions()) {
+        if (!obj->is<t_union>() &&
+            !cpp_name_resolver::find_first_adapter(*obj)) {
+          result.emplace_back(get_fatal_string_short_id(obj));
+        }
+      }
+      // typedefs resolve to struct
+      for (const t_typedef* i : get_aliases_to_struct(program)) {
+        result.emplace_back(get_fatal_string_short_id(i));
+      }
+      return whisker::make::array(std::move(result));
+    });
+    def.property("fatal_constants", [](const t_program& program) {
+      whisker::array::raw result;
+      for (const auto* cnst : program.consts()) {
+        result.emplace_back(get_fatal_string_short_id(cnst));
+      }
+      return whisker::make::array(std::move(result));
+    });
+    def.property("fatal_services", [](const t_program& program) {
+      whisker::array::raw result;
+      for (const auto* service : program.services()) {
+        result.emplace_back(get_fatal_string_short_id(service));
+      }
+      return whisker::make::array(std::move(result));
+    });
+    def.property("fatal_languages", [](const t_program& program) {
+      whisker::array::raw result;
+      for (const auto& pair : program.namespaces()) {
+        if (!pair.second->ns().empty()) {
+          result.emplace_back(
+              whisker::make::string(get_fatal_string_short_id(pair.first)));
+        }
+      }
+      return whisker::make::array(std::move(result));
+    });
+    def.property("fatal_identifiers", [](const t_program& program) {
+      whisker::map::raw unique_names;
+      unique_names.emplace(
+          get_fatal_string_short_id(&program),
+          render_fatal_string(program.name()));
+      // languages and namespaces
+      for (const auto& pair : program.namespaces()) {
+        if (!pair.second->ns().empty()) {
+          unique_names.emplace(
+              get_fatal_string_short_id(pair.first),
+              render_fatal_string(pair.first));
+          unique_names.emplace(
+              get_fatal_namespace_name_short_id(pair.first, pair.second->ns()),
+              render_fatal_string(
+                  get_fatal_namespace(pair.first, pair.second->ns())));
+        }
+      }
+      // enums
+      for (const auto* enm : program.enums()) {
+        collect_fatal_string_annotated(unique_names, enm);
+        unique_names.emplace(
+            get_fatal_string_short_id(enm), render_fatal_string(enm->name()));
+        for (const auto& i : enm->values()) {
+          collect_fatal_string_annotated(unique_names, &i);
+        }
+      }
+      // structs, unions and exceptions
+      for (const t_structured* obj : program.structured_definitions()) {
+        if (obj->is<t_union>()) {
+          unique_names.emplace("Type", render_fatal_string("Type"));
+        }
+        collect_fatal_string_annotated(unique_names, obj);
+        for (const auto& m : obj->fields()) {
+          collect_fatal_string_annotated(unique_names, &m);
+        }
+      }
+      // consts
+      for (const auto* cnst : program.consts()) {
+        unique_names.emplace(
+            get_fatal_string_short_id(cnst), render_fatal_string(cnst->name()));
+      }
+      // services
+      for (const auto* service : program.services()) {
+        unique_names.emplace(
+            get_fatal_string_short_id(service),
+            render_fatal_string(service->name()));
+        for (const auto& f : service->functions()) {
+          unique_names.emplace(
+              get_fatal_string_short_id(&f), render_fatal_string(f.name()));
+          for (const auto& p : f.params().fields()) {
+            unique_names.emplace(
+                get_fatal_string_short_id(&p), render_fatal_string(p.name()));
+          }
+        }
+      }
+      // typedefs resolve to struct
+      for (const t_typedef* i : get_aliases_to_struct(program)) {
+        unique_names.emplace(
+            get_fatal_string_short_id(i), render_fatal_string(i->name()));
+      }
+      return whisker::make::map(std::move(unique_names));
     });
     return std::move(def).make();
   }
@@ -1490,13 +1639,6 @@ class cpp_mstch_program : public mstch_program {
           &cpp_mstch_program::transitive_schema_initializers},
          {"program:num_transitive_thrift_includes",
           &cpp_mstch_program::num_transitive_thrift_includes},
-         {"program:fatal_languages", &cpp_mstch_program::fatal_languages},
-         {"program:fatal_enums", &cpp_mstch_program::fatal_enums},
-         {"program:fatal_unions", &cpp_mstch_program::fatal_unions},
-         {"program:fatal_structs", &cpp_mstch_program::fatal_structs},
-         {"program:fatal_constants", &cpp_mstch_program::fatal_constants},
-         {"program:fatal_services", &cpp_mstch_program::fatal_services},
-         {"program:fatal_identifiers", &cpp_mstch_program::fatal_identifiers},
          {"program:split_structs", &cpp_mstch_program::split_structs},
          {"program:split_enums", &cpp_mstch_program::split_enums},
          {"program:schema_includes_const?",
@@ -1508,87 +1650,6 @@ class cpp_mstch_program : public mstch_program {
     return t_mstch_cpp2_generator::get_cpp2_namespace(program);
   }
 
-  std::vector<const t_typedef*> alias_to_struct() {
-    std::vector<const t_typedef*> result;
-    for (const t_typedef* i : program_->typedefs()) {
-      const t_type* alias = &i->type().deref();
-      if (alias->is<t_typedef>() &&
-          alias->has_unstructured_annotation("cpp.type")) {
-        const t_type* ttype = i->type()->get_true_type();
-        if ((ttype->is<t_structured>()) &&
-            !cpp_name_resolver::find_first_adapter(*ttype)) {
-          result.push_back(i);
-        }
-      }
-    }
-    return result;
-  }
-  template <typename Node>
-  void collect_fatal_string_annotated(
-      std::map<std::string, std::string>& fatal_strings, const Node* node) {
-    fatal_strings.emplace(get_fatal_string_short_id(node), node->name());
-    auto hash = cpp2::sha256_hex(node->name());
-    fatal_strings.emplace("__fbthrift_hash_" + hash, node->name());
-    for (const auto& a : node->unstructured_annotations()) {
-      if (!is_annotation_blacklisted_in_fatal(a.first)) {
-        fatal_strings.emplace(get_fatal_string_short_id(a.first), a.first);
-      }
-    }
-  }
-  std::vector<std::string> get_fatal_enum_names() {
-    std::vector<std::string> result;
-    for (const auto* enm : program_->enums()) {
-      result.push_back(get_fatal_string_short_id(enm));
-    }
-    return result;
-  }
-  std::vector<std::string> get_fatal_union_names() {
-    std::vector<std::string> result;
-    for (const t_structured* obj : program_->structured_definitions()) {
-      if (obj->is<t_union>()) {
-        result.push_back(get_fatal_string_short_id(obj));
-      }
-    }
-    return result;
-  }
-  std::vector<std::string> get_fatal_struct_names() {
-    std::vector<std::string> result;
-    for (const t_structured* obj : program_->structured_definitions()) {
-      if (!obj->is<t_union>() && !cpp_name_resolver::find_first_adapter(*obj)) {
-        result.push_back(get_fatal_string_short_id(obj));
-      }
-    }
-    // typedefs resolve to struct
-    for (const t_typedef* i : alias_to_struct()) {
-      result.push_back(get_fatal_string_short_id(i));
-    }
-    return result;
-  }
-  std::vector<std::string> get_fatal_constant_names() {
-    std::vector<std::string> result;
-    for (const auto* cnst : program_->consts()) {
-      result.push_back(get_fatal_string_short_id(cnst));
-    }
-    return result;
-  }
-  std::vector<std::string> get_fatal_service_names() {
-    std::vector<std::string> result;
-    for (const auto* service : program_->services()) {
-      result.push_back(get_fatal_string_short_id(service));
-    }
-    return result;
-  }
-  mstch::node to_fatal_string_array(const std::vector<std::string>&& vec) {
-    mstch::array a;
-    for (size_t i = 0; i < vec.size(); i++) {
-      a.emplace_back(
-          mstch::map{
-              {"fatal_string:name", vec.at(i)},
-              {"last?", i == vec.size() - 1},
-          });
-    }
-    return mstch::map{{"fatal_strings:items", a}};
-  }
   mstch::node cpp_includes() {
     mstch::array includes = t_mstch_cpp2_generator::cpp_includes(program_);
     if (auto it = context_.options->find("includes");
@@ -1671,102 +1732,6 @@ class cpp_mstch_program : public mstch_program {
         *program_, [&] { return gen_transitive_include_map(program_); });
     // Codegen includes the root program but transitive_include_map does not.
     return includes.size() + 1;
-  }
-  mstch::node fatal_languages() {
-    mstch::array a;
-    for (const auto& pair : program_->namespaces()) {
-      if (!pair.second->ns().empty()) {
-        a.emplace_back(
-            mstch::map{
-                {"language:safe_name", get_fatal_string_short_id(pair.first)},
-                {"language:safe_namespace",
-                 get_fatal_namespace_name_short_id(
-                     pair.first, pair.second->ns())},
-                {"last?", false},
-            });
-      }
-    }
-    if (!a.empty()) {
-      std::get<mstch::map>(a.back())["last?"] = true;
-    }
-    return mstch::map{{"fatal_languages:items", a}};
-  }
-  mstch::node fatal_enums() {
-    return to_fatal_string_array(get_fatal_enum_names());
-  }
-  mstch::node fatal_unions() {
-    return to_fatal_string_array(get_fatal_union_names());
-  }
-  mstch::node fatal_structs() {
-    return to_fatal_string_array(get_fatal_struct_names());
-  }
-  mstch::node fatal_constants() {
-    return to_fatal_string_array(get_fatal_constant_names());
-  }
-  mstch::node fatal_services() {
-    return to_fatal_string_array(get_fatal_service_names());
-  }
-  mstch::node fatal_identifiers() {
-    std::map<std::string, std::string> unique_names;
-    unique_names.emplace(get_fatal_string_short_id(program_), program_->name());
-    // languages and namespaces
-    for (const auto& pair : program_->namespaces()) {
-      if (!pair.second->ns().empty()) {
-        unique_names.emplace(get_fatal_string_short_id(pair.first), pair.first);
-        unique_names.emplace(
-            get_fatal_namespace_name_short_id(pair.first, pair.second->ns()),
-            get_fatal_namespace(pair.first, pair.second->ns()));
-      }
-    }
-    // enums
-    for (const auto* enm : program_->enums()) {
-      collect_fatal_string_annotated(unique_names, enm);
-      unique_names.emplace(get_fatal_string_short_id(enm), enm->name());
-      for (const auto& i : enm->values()) {
-        collect_fatal_string_annotated(unique_names, &i);
-      }
-    }
-    // structs, unions and exceptions
-    for (const t_structured* obj : program_->structured_definitions()) {
-      if (obj->is<t_union>()) {
-        // When generating <program_name>_fatal_union.h, we will generate
-        // <union_name>_Type_enum_traits
-        unique_names.emplace("Type", "Type");
-      }
-      collect_fatal_string_annotated(unique_names, obj);
-      for (const auto& m : obj->fields()) {
-        collect_fatal_string_annotated(unique_names, &m);
-      }
-    }
-    // consts
-    for (const auto* cnst : program_->consts()) {
-      unique_names.emplace(get_fatal_string_short_id(cnst), cnst->name());
-    }
-    // services
-    for (const auto* service : program_->services()) {
-      // function annotations are not currently included.
-      unique_names.emplace(get_fatal_string_short_id(service), service->name());
-      for (const auto& f : service->functions()) {
-        unique_names.emplace(get_fatal_string_short_id(&f), f.name());
-        for (const auto& p : f.params().fields()) {
-          unique_names.emplace(get_fatal_string_short_id(&p), p.name());
-        }
-      }
-    }
-    // typedefs resolve to struct
-    for (const t_typedef* i : alias_to_struct()) {
-      unique_names.emplace(get_fatal_string_short_id(i), i->name());
-    }
-
-    mstch::array a;
-    for (const auto& name : unique_names) {
-      a.emplace_back(
-          mstch::map{
-              {"identifier:name", name.first},
-              {"identifier:fatal_string", render_fatal_string(name.second)},
-          });
-    }
-    return a;
   }
   mstch::node structs_and_typedefs() {
     // We combine these because the adapter trait used in typedefs requires the

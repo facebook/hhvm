@@ -417,6 +417,43 @@ int get_split_count(const t_mstch_generator::compiler_options_map& options) {
       iter->second, "Invalid types_cpp_splits value: `" + iter->second + "`");
 }
 
+bool needs_op_encode(const t_type& type);
+
+bool type_transitively_refers_to_struct(const t_type& type) {
+  const t_type* resolved = type.get_true_type();
+  // fast path is unnecessary but may avoid allocations
+  if (resolved->is<t_struct>() || resolved->is<t_union>()) {
+    return true;
+  }
+  if (!resolved->is<t_container>()) {
+    return false;
+  }
+  // type is a container: traverse (breadthwise, but could be depthwise)
+  std::queue<const t_type*> queue;
+  queue.push(resolved);
+  while (!queue.empty()) {
+    auto next = queue.front();
+    queue.pop();
+    if (next->is<t_struct>() || next->is<t_union>()) {
+      return true;
+    }
+    if (!next->is<t_container>()) {
+      continue;
+    }
+    if (const t_list* list = next->try_as<t_list>()) {
+      queue.push(&list->elem_type().deref());
+    } else if (const t_set* set = next->try_as<t_set>()) {
+      queue.push(&set->elem_type().deref());
+    } else if (const t_map* map = next->try_as<t_map>()) {
+      queue.push(&map->key_type().deref());
+      queue.push(&map->val_type().deref());
+    } else {
+      assert(false);
+    }
+  }
+  return false;
+}
+
 class t_mstch_cpp2_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -611,6 +648,46 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       return adapter == nullptr ? whisker::make::null
                                 : whisker::make::string(*adapter);
     });
+
+    def.property("resolves_to_fixed_size?", [](const t_type& type) {
+      const t_type* resolved = type.get_true_type();
+      if (const auto* primitive = resolved->try_as<t_primitive_type>()) {
+        switch (primitive->primitive_type()) {
+          case t_primitive_type::type::t_bool:
+          case t_primitive_type::type::t_byte:
+          case t_primitive_type::type::t_i16:
+          case t_primitive_type::type::t_i32:
+          case t_primitive_type::type::t_i64:
+          case t_primitive_type::type::t_float:
+          case t_primitive_type::type::t_double:
+            return true;
+          default:
+            return false;
+        }
+      }
+      return resolved->is<t_enum>();
+    });
+
+    def.property("non_empty_struct?", [](const t_type& type) {
+      const auto* as_struct = type.get_true_type()->try_as<t_structured>();
+      return as_struct != nullptr && as_struct->has_fields();
+    });
+
+    def.property("type_class", [](const t_type& type) {
+      return cpp2::get_gen_type_class(*type.get_true_type());
+    });
+
+    def.property("type_tag", [this](const t_type& type) {
+      return cpp_context_->resolver().get_type_tag(type);
+    });
+
+    def.property("cpp_use_allocator?", [](const t_type& type) {
+      return !!t_typedef::get_first_unstructured_annotation_or_null(
+          &type, {"cpp.use_allocator"});
+    });
+    def.property("use_op_encode?", &needs_op_encode);
+    def.property(
+        "transitively_refers_to_struct?", &type_transitively_refers_to_struct);
 
     return std::move(def).make();
   }
@@ -1388,8 +1465,6 @@ class cpp_mstch_interaction : public cpp_mstch_service {
       : cpp_mstch_service(interaction, ctx, pos, containing_service) {}
 };
 
-bool needs_op_encode(const t_type& type);
-
 bool check_container_needs_op_encode(const t_type& type) {
   const auto* true_type = type.get_true_type();
   if (auto list_container = true_type->try_as<t_list>()) {
@@ -1427,84 +1502,6 @@ bool needs_op_encode(const t_field& field, const t_structured& strct) {
       cpp_name_resolver::find_first_adapter(field) ||
       check_container_needs_op_encode(*field.type());
 }
-
-class cpp_mstch_type : public mstch_type {
- public:
-  cpp_mstch_type(
-      const t_type* type,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      std::shared_ptr<cpp2_generator_context> cpp_ctx)
-      : mstch_type(type, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
-        this,
-        {
-            {"type:resolves_to_fixed_size?",
-             &cpp_mstch_type::resolves_to_fixed_size},
-            {"type:transitively_refers_to_struct?",
-             &cpp_mstch_type::transitively_refers_to_struct},
-            {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
-            {"type:type_class", &cpp_mstch_type::type_class},
-            {"type:type_tag", &cpp_mstch_type::type_tag},
-            {"type:cpp_use_allocator?", &cpp_mstch_type::cpp_use_allocator},
-            {"type:use_op_encode?", &cpp_mstch_type::use_op_encode},
-        });
-  }
-  mstch::node resolves_to_fixed_size() {
-    return resolved_type_->is_bool() || resolved_type_->is_byte() ||
-        resolved_type_->is_any_int() || resolved_type_->is<t_enum>() ||
-        resolved_type_->is_floating_point();
-  }
-  mstch::node transitively_refers_to_struct() {
-    // fast path is unnecessary but may avoid allocations
-    if (resolved_type_->is<t_struct>() || resolved_type_->is<t_union>()) {
-      return true;
-    }
-    if (!resolved_type_->is<t_container>()) {
-      return false;
-    }
-    // type is a container: traverse (breadthwise, but could be depthwise)
-    std::queue<const t_type*> queue;
-    queue.push(resolved_type_);
-    while (!queue.empty()) {
-      auto next = queue.front();
-      queue.pop();
-      if (next->is<t_struct>() || next->is<t_union>()) {
-        return true;
-      }
-      if (!next->is<t_container>()) {
-        continue;
-      }
-      if (const t_list* list = next->try_as<t_list>()) {
-        queue.push(list->elem_type().get_type());
-      } else if (const t_set* set = next->try_as<t_set>()) {
-        queue.push(set->elem_type().get_type());
-      } else if (const t_map* map = next->try_as<t_map>()) {
-        queue.push(&map->key_type().deref());
-        queue.push(&map->val_type().deref());
-      } else {
-        assert(false);
-      }
-    }
-    return false;
-  }
-  mstch::node cpp_use_allocator() {
-    return !!t_typedef::get_first_unstructured_annotation_or_null(
-        type_, {"cpp.use_allocator"});
-  }
-  mstch::node is_non_empty_struct() {
-    auto as_struct = resolved_type_->try_as<t_structured>();
-    return as_struct && as_struct->has_fields();
-  }
-  mstch::node type_class() { return cpp2::get_gen_type_class(*resolved_type_); }
-  mstch::node type_tag() {
-    return cpp_context_->resolver().get_type_tag(*type_);
-  }
-  mstch::node use_op_encode() { return needs_op_encode(*type_); }
-
- private:
-  std::shared_ptr<cpp2_generator_context> cpp_context_;
-};
 
 class cpp_mstch_struct : public mstch_struct {
  public:
@@ -2422,7 +2419,6 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_program>(std::ref(source_mgr_));
   mstch_context_.add<cpp_mstch_service>();
   mstch_context_.add<cpp_mstch_interaction>();
-  mstch_context_.add<cpp_mstch_type>(cpp_context_);
   mstch_context_.add<cpp_mstch_struct>(cpp_context_);
   mstch_context_.add<cpp_mstch_field>(cpp_context_);
 }

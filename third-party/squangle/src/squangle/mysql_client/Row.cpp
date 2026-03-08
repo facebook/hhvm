@@ -119,6 +119,10 @@ folly::StringPiece Row::operator[](folly::StringPiece field) const {
   return row_block_->getField<folly::StringPiece>(row_number_, field);
 }
 
+std::optional<size_t> Row::fieldIndexOpt(folly::StringPiece field) const {
+  return row_block_->fieldIndexOpt(field);
+}
+
 bool Row::isNull(size_t col) const {
   return row_block_->isNull(row_number_, col);
 }

@@ -76,6 +76,9 @@ class Row {
   folly::StringPiece operator[](size_t col) const;
   folly::StringPiece operator[](folly::StringPiece field) const;
 
+  // Return the field index if the row contains a field with the given name.
+  std::optional<size_t> fieldIndexOpt(folly::StringPiece field) const;
+
   // Is the field nullable?
   bool isNull(size_t col) const;
   bool isNull(folly::StringPiece field) const;

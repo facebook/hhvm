@@ -500,7 +500,11 @@ constexpr void for_each_field_id_ascending_impl(
     return fieldIds;
   });
 
-  (f(field_id<sortedFieldIds[I]>{}), ...);
+  // Use array-based expansion instead of fold expression to avoid exceeding
+  // compiler's expression nesting limit for structs with >256 fields.
+  std::array<int, sizeof...(I) + 1> unused{
+      {0, (f(field_id<sortedFieldIds[I]>{}), 0)...}};
+  static_cast<void>(unused);
 }
 
 template <size_t... I, typename F>

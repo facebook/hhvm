@@ -460,6 +460,15 @@ constexpr bool usesFieldNames() {
   }
 }
 
+/// Specifies the order in which struct fields are serialized.
+enum class FieldOrder {
+  /// Field declaration order in IDL, unless SerializeInFieldIdOrder annotation
+  /// is present, in which case field id ascending order.
+  Serialization,
+  /// Field id ascending order (1, 2, 3, ...).
+  IdAscending,
+};
+
 } // namespace apache::thrift
 
 #endif

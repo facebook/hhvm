@@ -261,6 +261,31 @@ class PyDeprecatedToPythonConverterTest(unittest.TestCase):
         self.assertEqual(simple_union.type, python_types.Union.Type.intField)
         self.assertEqual(simple_union.value, 42)
 
+    def test_union_non_first_field_preserved(self) -> None:
+        """Ensure union conversion picks the correct active field, not just the first."""
+        # strField is field ID 2 (not the first field)
+        union = py_deprecated_types.Union(strField="test_value")._to_python()
+        self.assertEqual(union.type, python_types.Union.Type.strField)
+        self.assertEqual(union.value, "test_value")
+
+    def test_union_struct_field_not_corrupted(self) -> None:
+        """Verify struct union fields aren't incorrectly matched to the first field."""
+        simple = py_deprecated_types.Simple(intField=99, strField="nested")
+        union = py_deprecated_types.Union(simpleField=simple)._to_python()
+        self.assertEqual(union.type, python_types.Union.Type.simple_)
+        self.assertEqual(union.simple_.intField, 99)
+
+    def test_union_last_field_not_confused_with_earlier_same_type(self) -> None:
+        """name (field 5, string) must not be confused with strField (field 2, string).
+
+        In -OO mode, both are strings so strField's get_*() would succeed first,
+        silently assigning the value to the wrong field.
+        """
+        union = py_deprecated_types.Union(name="myname")._to_python()
+        self.assertEqual(union.type, python_types.Union.Type.name_)
+        self.assertNotEqual(union.type, python_types.Union.Type.strField)
+        self.assertEqual(union.value, "myname")
+
     def test_union_with_py3_name_annotation(self) -> None:
         simple_union = py_deprecated_types.Union(name="myname")._to_python()
         self.assertEqual(simple_union.type, python_types.Union.Type.name_)
@@ -441,6 +466,43 @@ class PyDeprecatedToMutablePythonConverterTest(unittest.TestCase):
             python_mutable_types.Union.FbThriftUnionFieldEnum.intField,
         )
         self.assertEqual(simple_union.fbthrift_current_value, 42)
+
+    def test_union_non_first_field_preserved(self) -> None:
+        """Ensure union conversion picks the correct active field, not just the first."""
+        # strField is field ID 2 (not the first field)
+        union = py_deprecated_types.Union(strField="test_value")._to_mutable_python()
+        self.assertEqual(
+            union.fbthrift_current_field,
+            python_mutable_types.Union.FbThriftUnionFieldEnum.strField,
+        )
+        self.assertEqual(union.fbthrift_current_value, "test_value")
+
+    def test_union_struct_field_not_corrupted(self) -> None:
+        """Verify struct union fields aren't incorrectly matched to the first field."""
+        simple = py_deprecated_types.Simple(intField=99, strField="nested")
+        union = py_deprecated_types.Union(simpleField=simple)._to_mutable_python()
+        self.assertEqual(
+            union.fbthrift_current_field,
+            python_mutable_types.Union.FbThriftUnionFieldEnum.simple_,
+        )
+        self.assertEqual(union.simple_.intField, 99)
+
+    def test_union_last_field_not_confused_with_earlier_same_type(self) -> None:
+        """name (field 5, string) must not be confused with strField (field 2, string).
+
+        In -OO mode, both are strings so strField's get_*() would succeed first,
+        silently assigning the value to the wrong field.
+        """
+        union = py_deprecated_types.Union(name="myname")._to_mutable_python()
+        self.assertEqual(
+            union.fbthrift_current_field,
+            python_mutable_types.Union.FbThriftUnionFieldEnum.name_,
+        )
+        self.assertNotEqual(
+            union.fbthrift_current_field,
+            python_mutable_types.Union.FbThriftUnionFieldEnum.strField,
+        )
+        self.assertEqual(union.fbthrift_current_value, "myname")
 
     def test_union_with_py3_name_annotation(self) -> None:
         simple_union = py_deprecated_types.Union(name="myname")._to_mutable_python()

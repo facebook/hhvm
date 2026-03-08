@@ -2823,6 +2823,9 @@ bool src_cmp(const Vunit& unit, Vtuple t1, Vtuple t2) {
 bool src_cmp(const Vunit& unit, VcallArgsId a1, VcallArgsId a2) {
   return unit.vcallArgs[a1] == unit.vcallArgs[a2];
 }
+bool src_cmp(const Vunit& unit, VregShiftExtend s1, VregShiftExtend s2) {
+  return s1 == s2;
+}
 
 }
 
@@ -3757,7 +3760,8 @@ struct VptrVisitor {
     std::is_same<Vreg64,T>::value ||
     std::is_same<Vreg128,T>::value ||
     std::is_same<VregSF,T>::value ||
-    std::is_same<VregDbl,T>::value
+    std::is_same<VregDbl,T>::value ||
+    std::is_same<VregShiftExtend,T>::value
   >::type use(T) {}
   void use(RegSet) {}
   void use(VcallArgsId) {}
@@ -4434,6 +4438,7 @@ struct FoldRematWithUseVisit {
   void use(Vtuple t) { for (auto const r : unit.tuples[t]) onUse(r); }
   void use(Vptr& ptr) { onVptr(ptr); }
   void use(Vreg r) { onUse(r); }
+  void use(VregShiftExtend& se) { onUse(se.reg); }
 
   OnUse onUse;
   OnVptr onVptr;

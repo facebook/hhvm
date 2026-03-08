@@ -50,6 +50,7 @@ wangle_add_library(wangle_acceptor
     Folly::folly_conv
     Folly::folly_glog
     Folly::folly_io_async_async_base
+    Folly::folly_io_async_fdsock_async_fd_socket
     Folly::folly_portability_gflags
     Folly::folly_portability_openssl
     Folly::folly_portability_sockets

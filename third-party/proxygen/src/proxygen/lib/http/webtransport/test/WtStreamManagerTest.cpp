@@ -248,6 +248,27 @@ TEST(WtStreamManager, EnqueueIngressData) {
 
   // next createBidiHandle should succeed
   auto one = streamManager.createBidiHandle();
+  CHECK(one.readHandle && one.writeHandle);
+  constexpr std::string_view kData = "abcdefghijklmnopqrstuvwxyz";
+  for (auto c : kData) {
+    EXPECT_TRUE(streamManager.enqueue(
+        *one.readHandle, {folly::IOBuf::fromString(std::string{c}), false}));
+  }
+  auto oneFut = one.readHandle->readStreamData();
+  EXPECT_TRUE(oneFut.isReady() && oneFut.value().data);
+  EXPECT_EQ(oneFut.value().data->toString(), kData);
+}
+
+TEST(WtStreamManager, EnqueueIngressDataRwnd) {
+  WtConfig config{.peerMaxStreamsBidi = 2};
+  WtSmEgressCb egressCb;
+  WtSmIngressCb ingressCb;
+  auto priorityQueue = std::make_unique<quic::HTTPPriorityQueue>();
+  WtStreamManager streamManager{
+      detail::WtDir::Client, config, egressCb, ingressCb, *priorityQueue};
+
+  // next createBidiHandle should succeed
+  auto one = streamManager.createBidiHandle();
   auto two = streamManager.createBidiHandle();
   CHECK(one.readHandle && one.writeHandle && two.readHandle && two.writeHandle);
 

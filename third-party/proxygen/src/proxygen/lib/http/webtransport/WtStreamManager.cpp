@@ -777,7 +777,7 @@ Result ReadHandle::enqueue(StreamData&& data) noexcept {
     return Result::Fail; // error
   }
   if (len > 0) {
-    ingress_.chain.appendChain(std::move(data.data));
+    ingress_.chain.appendToChain(std::move(data.data));
   }
   ingress_.fin = data.fin;
   XLOG(DBG6) << __func__ << "; len=" << len << "; fin=" << data.fin

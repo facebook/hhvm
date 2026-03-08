@@ -163,13 +163,9 @@ cdef object _get_src_union_field_value(object src_union, FieldInfo field):
         return getattr(src_union, field.py_name)
 
     # thrift-py-deprecated
-    # Use getType() to check the active field instead of calling get_*() accessors,
-    # which rely on assert guards that are stripped in -OO mode.
-    try:
-        if src_union.getType() == field.id:
-            return src_union.value
-    except AttributeError:
-        pass
+    for spec in src_union.thrift_spec:
+        if spec and spec[0] == field.id:
+            return getattr(src_union, f"get_{spec[2]}")()
 
     raise AttributeError(
         f"{src_union} doesn't have field with id {field.id} or name {field.py_name}"

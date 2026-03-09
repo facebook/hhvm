@@ -54,7 +54,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/detail/OutgoingFrameHandler.h>
 
 THRIFT_FLAG_DECLARE_bool(enable_rocket_connection_observers);
-THRIFT_FLAG_DEFINE_bool(rocket_use_outgoing_frame_handler, true);
+THRIFT_FLAG_DEFINE_bool(rocket_use_outgoing_frame_handler, false);
 
 namespace apache::thrift::rocket {
 
@@ -732,14 +732,7 @@ bool RefactoredRocketServerConnection::isBusy() const {
 
 // Helper method to check if OutgoingFrameHandler has pending frames
 bool RefactoredRocketServerConnection::isOutgoingFrameHandlerBusy() const {
-  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler)) {
-    // Note: We can't call get() on const EventBaseLocal, so we use a
-    // conservative approach for now
-    // TODO: Enhance OutgoingFrameHandler to expose busy state in future phases
-    // For now, assume not busy since we can't check the actual state
-    return false; // Conservative approach - assume not busy for now
-  }
-  return false;
+  return connectionAdapter_.pendingOutgoingFrames() > 0;
 }
 
 // On graceful shutdown, ConnectionManager will first fire the
@@ -847,7 +840,9 @@ void RefactoredRocketServerConnection::sendPayload(
     Payload&& payload,
     Flags flags,
     apache::thrift::MessageChannel::SendCallbackPtr cb) {
-  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler)) {
+  // FD-bearing payloads must bypass OutgoingFrameHandler because
+  // FrameContainer::serialize() only produces an IOBuf and drops FDs.
+  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler) && payload.fds.empty()) {
     // New path: Use OutgoingFrameHandler for frame-level batching
     evb_.dcheckIsInEventBaseThread();
     if (state_ != ConnectionState::ALIVE &&
@@ -864,10 +859,12 @@ void RefactoredRocketServerConnection::sendPayload(
     }
 
     handler->handle(
-        PayloadFrame(streamId, std::move(payload), flags), connectionAdapter_);
+        PayloadFrame(streamId, std::move(payload), flags),
+        connectionAdapter_,
+        std::move(cb));
 
   } else {
-    // Existing path: Use WriteBatcher directly
+    // Direct path: WriteBatcher (also used for FD-bearing payloads)
     auto fds = std::move(payload.fds);
     send(
         PayloadFrame(streamId, std::move(payload), flags).serialize(),
@@ -881,8 +878,12 @@ void RefactoredRocketServerConnection::sendError(
     StreamId streamId,
     RocketException&& rex,
     apache::thrift::MessageChannel::SendCallbackPtr cb) {
-  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler)) {
-    // New path: Use OutgoingFrameHandler for frame-level batching
+  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler) &&
+      streamId != StreamId{0}) {
+    // New path: Use OutgoingFrameHandler for frame-level batching.
+    // Connection-level errors (StreamId 0) bypass OutgoingFrameHandler and go
+    // through WriteBatcher directly, so that dropConnection() can properly
+    // flush them before closing the socket.
     evb_.dcheckIsInEventBaseThread();
     if (state_ != ConnectionState::ALIVE &&
         state_ != ConnectionState::DRAINING) {
@@ -964,31 +965,11 @@ void RefactoredRocketServerConnection::sendCancel(StreamId streamId) {
 
 void RefactoredRocketServerConnection::sendMetadataPush(
     std::unique_ptr<folly::IOBuf> metadata) {
-  if (THRIFT_FLAG(rocket_use_outgoing_frame_handler)) {
-    // New path: Use OutgoingFrameHandler for frame-level batching
-    evb_.dcheckIsInEventBaseThread();
-    if (state_ != ConnectionState::ALIVE &&
-        state_ != ConnectionState::DRAINING) {
-      return;
-    }
-
-    // Get or create OutgoingFrameHandler for this EventBase
-    auto* handler = outgoingFrameHandler_.get(evb_);
-    if (FOLLY_UNLIKELY(handler == nullptr)) {
-      outgoingFrameHandler_.emplace(
-          evb_, evb_, cfg_.getOutgoingFrameHandlerBatchLogSize());
-      handler = outgoingFrameHandler_.get(evb_);
-    }
-
-    // Use OutgoingFrameHandler for non-FD frames (MetadataPushFrame has no FDs)
-    handler->handle(
-        MetadataPushFrame::makeFromMetadata(std::move(metadata)),
-        connectionAdapter_,
-        nullptr);
-  } else {
-    // Existing path: Use WriteBatcher directly
-    send(MetadataPushFrame::makeFromMetadata(std::move(metadata)).serialize());
-  }
+  // MetadataPush bypasses OutgoingFrameHandler and goes directly through
+  // WriteBatcher. This ensures MetadataPush frames (e.g. setup response) are
+  // batched together with other frames in the same event loop iteration,
+  // matching the behavior of the non-refactored connection.
+  send(MetadataPushFrame::makeFromMetadata(std::move(metadata)).serialize());
 }
 
 void RefactoredRocketServerConnection::freeStream(

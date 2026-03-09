@@ -57,6 +57,8 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
         batchingSize_(batchingSize),
         batchingByteSize_(batchingByteSize) {}
 
+  ~WriteBatcher() override = default;
+
   void enqueueWrite(
       std::unique_ptr<folly::IOBuf> data,
       apache::thrift::MessageChannel::SendCallbackPtr cb,
@@ -173,7 +175,7 @@ class WriteBatcher : private folly::EventBase::LoopCallback,
   size_t batchingByteSize_;
   // PERFORMANCE: Use IOBufQueue for O(1) append operations instead of O(n)
   // chain manipulation
-  folly::IOBufQueue bufferedWritesQueue_;
+  folly::IOBufQueue bufferedWritesQueue_{folly::IOBufQueue::cacheChainLength()};
   size_t bufferedWritesCount_{0};
   size_t totalBytesBuffered_{0};
   bool earlyFlushRequested_{false};

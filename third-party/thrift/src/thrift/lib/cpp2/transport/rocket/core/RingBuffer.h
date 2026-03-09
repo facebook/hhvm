@@ -61,7 +61,7 @@ class RingBuffer {
           }
           return 1 << log_size;
         }()),
-        data_(new T[capacity_]) {}
+        data_(static_cast<T*>(::operator new(sizeof(T) * capacity_))) {}
 
   RingBuffer(RingBuffer&& other) = delete;
   RingBuffer(const RingBuffer&) = delete;
@@ -69,10 +69,10 @@ class RingBuffer {
   RingBuffer& operator=(const RingBuffer&) = delete;
 
   ~RingBuffer() {
-    if constexpr (!std::is_trivially_destructible_v<T>) {
-      consume([](T& obj) { obj.~T(); }, size());
+    while (!empty()) {
+      pop_front();
     }
-    delete[] data_;
+    ::operator delete(data_);
   }
 
   template <typename... Args>

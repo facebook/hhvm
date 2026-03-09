@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <sys/socket.h>
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <compare>
 #include <cstddef>
@@ -32,7 +33,6 @@
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
-#include <folly/observer/Observer.h>
 #include <folly/portability/GFlags.h>
 #include <folly/testing/TestUtil.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
@@ -107,7 +107,7 @@ class RocketClientTest : public testing::Test {
       return bufsize;
     }
 
-    int hit{0};
+    std::atomic<int> hit{0};
   };
 };
 

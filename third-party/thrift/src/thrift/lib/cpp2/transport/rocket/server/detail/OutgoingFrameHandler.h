@@ -44,11 +44,11 @@ struct SerializationEvent {
       Connection* connection,
       folly::DelayedDestruction::DestructorGuard&& guard,
       apache::thrift::MessageChannel::SendCallbackPtr sendCallback = nullptr)
-      : container(std::forward<Frame>(frame)),
+      : streamId(frame.streamId()),
+        container(std::forward<Frame>(frame)),
         connection(connection),
         guard(std::move(guard)),
-        sendCallback(std::move(sendCallback)),
-        streamId(frame.streamId()) {}
+        sendCallback(std::move(sendCallback)) {}
 
   SerializationEvent(SerializationEvent&& other) = delete;
   SerializationEvent& operator=(SerializationEvent&& other) = delete;
@@ -56,11 +56,13 @@ struct SerializationEvent {
   SerializationEvent& operator=(const SerializationEvent& other) = delete;
   ~SerializationEvent() noexcept = default;
 
+  // streamId must be declared before container so it is initialized
+  // from frame.streamId() before the frame is moved into container.
+  StreamId streamId;
   FrameContainer container;
   Connection* connection;
   std::optional<folly::DelayedDestruction::DestructorGuard> guard;
   apache::thrift::MessageChannel::SendCallbackPtr sendCallback;
-  StreamId streamId;
 };
 
 struct WriteBatch {
@@ -115,6 +117,7 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
   template <typename T>
   FOLLY_ALWAYS_INLINE void handle(T&& t, Connection& connection) {
     evb_.dcheckIsInEventBaseThread();
+    connection.incrementPendingOutgoingFrames();
     bool ret = queue_.emplace_back(
         std::move(t),
         &connection,
@@ -130,6 +133,7 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
       Connection& connection,
       apache::thrift::MessageChannel::SendCallbackPtr sendCallback) {
     evb_.dcheckIsInEventBaseThread();
+    connection.incrementPendingOutgoingFrames();
     bool ret = queue_.emplace_back(
         std::forward<T>(t),
         &connection,
@@ -163,10 +167,11 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
   }
 
   void processPendingConnections() {
-    for (auto& connection : pendingConnections_) {
+    while (!pendingConnections_.empty()) {
+      auto& connection = pendingConnections_.front();
+      pendingConnections_.pop_front();
       connection.flushPendingWrites();
     }
-    pendingConnections_.clear();
   }
 
   void consumeSerializedEvent(SerializationEvent& event) {
@@ -174,31 +179,16 @@ class OutgoingFrameHandler : public folly::EventBase::LoopCallback {
     Connection* connection = event.connection;
     auto serialized = event.container.serialize();
 
-    const bool wasEmpty = !connection->hasPendingWrites();
-
-    // Add the serialized frame to the connection's pending writes
-    connection->addPendingWrite(
+    // Route through send() → WriteBatcher for proper batching and lifecycle
+    connection->handleSerializedFrame(
         std::move(serialized), std::move(event.sendCallback), event.streamId);
-
-    // If the connection didn't have any pending writes before we added a write
-    // this means the connection was not scheduled for draining so add it to the
-    // pending connections list.
-    if (wasEmpty) {
-      pendingConnections_.push_back(*connection);
-    }
-    pendingConnections_.clear();
   }
 
   template <bool Forced>
   void drain() {
-    size_t processed = queue_.consume(
+    queue_.consume(
         [this](SerializationEvent& event) { consumeSerializedEvent(event); },
         batchSize_);
-
-    // Process all connections with pending writes
-    if (processed > 0) {
-      processPendingConnections();
-    }
 
     auto p = pending();
     if (Forced && p == 0 && isLoopCallbackScheduled()) {

@@ -304,10 +304,23 @@ class ConnectionAdapter {
     handler->handle(std::forward<Frame>(frame), *this);
   }
 
-  // Method for OutgoingFrameHandler to send serialized frame data
-  void handleSerializedFrame(std::unique_ptr<folly::IOBuf> serializedFrame) {
-    connection_->send(std::move(serializedFrame));
+  // Method for OutgoingFrameHandler to send serialized frame data.
+  // Routes through send() → WriteBatcher for proper batching and lifecycle.
+  void handleSerializedFrame(
+      std::unique_ptr<folly::IOBuf> serializedFrame,
+      apache::thrift::MessageChannel::SendCallbackPtr sendCallback = nullptr,
+      StreamId streamId = StreamId{0}) {
+    DCHECK(pendingOutgoingFrames_ > 0);
+    --pendingOutgoingFrames_;
+    connection_->send(
+        std::move(serializedFrame), std::move(sendCallback), streamId);
+    if (pendingOutgoingFrames_ == 0) {
+      connection_->closeIfNeeded();
+    }
   }
+
+  void incrementPendingOutgoingFrames() { ++pendingOutgoingFrames_; }
+  size_t pendingOutgoingFrames() const { return pendingOutgoingFrames_; }
 
   /**
    * Add a pending write to this connection's buffer list.
@@ -334,7 +347,12 @@ class ConnectionAdapter {
   void resetPendingWritesState() noexcept {
     hasPendingWrites_ = false;
     totalBytesBuffered_ = 0;
-    guard_.reset();
+    // Move guard to a local before destroying. If this is the last
+    // DestructorGuard, its destructor triggers onDelayedDestroy which
+    // destroys the connection and runs ~ConnectionAdapter. By using
+    // std::exchange, guard_ is already nullopt when ~ConnectionAdapter
+    // runs, preventing double-destruction of the DestructorGuard.
+    auto localGuard = std::exchange(guard_, std::nullopt);
   }
 
   // Safe intrusive list hook for pending connections list - automatically
@@ -343,6 +361,7 @@ class ConnectionAdapter {
 
  private:
   AdaptedConnectionT* connection_;
+  size_t pendingOutgoingFrames_{0};
   bool hasPendingWrites_{false};
   folly::IOBufQueue pendingWrites_;
   std::vector<apache::thrift::MessageChannel::SendCallbackPtr>

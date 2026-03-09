@@ -213,6 +213,19 @@ enum BadMembers {
   value = 2,
 }
 
+// Enum that shows BadEnum behavior when used as unqualified field
+// due to lacking an arm with value 0.
+enum NoSaneDefault {
+  ONE = 1,
+  TWO = 2,
+  THREE = 3,
+}
+
+struct StructWithEnumFields {
+  1: NoSaneDefault default_bad_enum;
+  2: Color color;
+}
+
 enum EmptyEnum {
 }
 

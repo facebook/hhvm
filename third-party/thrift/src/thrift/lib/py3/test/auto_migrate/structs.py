@@ -36,6 +36,7 @@ from testing.types import (
     Nested2,
     Nested3,
     NonCopyable,
+    NoSaneDefault,
     numerical,
     OptionalFile,
     Optionals,
@@ -44,6 +45,7 @@ from testing.types import (
     Runtime,
     SlowCompare,
     StringBucket,
+    StructWithEnumFields,
     UnusedError,
 )
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
@@ -53,6 +55,7 @@ from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize, serialize
 from thrift.py3.types import Struct
+from thrift.python.types import BadEnum
 
 try:
     from enum import Enum, StrEnum
@@ -392,6 +395,29 @@ class StructTests(unittest.TestCase):
     def test_to_py3(self) -> None:
         e = easy()
         self.assertEqual(e, e._to_py3())
+
+    def test_deserialize_unset_enums(self) -> None:
+        # Deserialize a struct where the NoSaneDefault enum field has not been
+        # set. Since NoSaneDefault defines no arm with value 0, the default
+        # field value (0) does not correspond to any named enum member.
+        s = deserialize(StructWithEnumFields, serialize(StructWithEnumFields()))
+        self.assertIsNotNone(s)
+        self.assertEqual(s.default_bad_enum.value, 0)
+        self.assertIsInstance(s.default_bad_enum, BadEnum)
+        self.assertEqual(s.color, Color(0))
+        # pyre-ignore[6]: typing is weird because it has to work for py3 and python
+        field_isset = Struct.isset_DEPRECATED(s)
+        # field is considered set even though it's bad enum
+        self.assertTrue(field_isset.default_bad_enum)
+        self.assertTrue(field_isset.color)
+
+        # NOTE: if the protocol is JSON, the isset behavior deviates
+        buf = b"{}"
+        s = deserialize(StructWithEnumFields, buf, protocol=Protocol.JSON)
+        # pyre-ignore[6]: typing is weird because it has to work for py3 and python
+        field_isset = Struct.isset_DEPRECATED(s)
+        self.assertFalse(field_isset.default_bad_enum)
+        self.assertFalse(field_isset.color)
 
 
 class NumericalConversionsTests(unittest.TestCase):

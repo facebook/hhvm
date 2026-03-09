@@ -19,10 +19,14 @@
 package "facebook.com/thrift/type_system"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/python.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/standard.thrift"
 
 namespace cpp2 apache.thrift.type_system
+namespace go thrift.lib.thrift.record
+namespace py apache.thrift.record
+namespace py.asyncio apache.thrift.record
 namespace py3 apache.thrift.type_system
 
 /**
@@ -42,6 +46,7 @@ namespace py3 apache.thrift.type_system
  * used for data manipulation and converted to/from SerializableRecord when
  * persisting/transmitting.
  */
+@python.Py3Hidden
 @cpp.Name{value = "SerializableRecordUnion"}
 union SerializableRecord {
   1: bool boolDatum;
@@ -93,6 +98,7 @@ union SerializableRecord {
   // 15: ??? anyDatum;
 }
 
+@python.Py3Hidden
 struct SerializableRecordMapEntry {
   1: SerializableRecord key;
   2: SerializableRecord value;

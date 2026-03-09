@@ -10,4 +10,4 @@ license = "MIT"
 [dependencies]
 anyhow = "1.0.102"
 clap = { version = "4.5.42", features = ["derive", "env", "string", "unicode", "wrap_help"] }
-pulldown-cmark = "0.13.0"
+pulldown-cmark = "0.13.1"

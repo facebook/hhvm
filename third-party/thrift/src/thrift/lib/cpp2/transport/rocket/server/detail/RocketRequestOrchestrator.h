@@ -32,8 +32,8 @@
 #include <thrift/lib/cpp2/server/PreprocessParams.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/InteractionOverload.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RocketContextUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RocketErrorHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RocketRequestProcessor.h>
@@ -60,9 +60,7 @@ class TServerObserver;
 
 namespace rocket {
 
-class IRocketServerConnection;
 class Payload;
-class RocketServerConnection;
 
 struct ParsedPayloadData {
   RequestRpcMetadata metadata;
@@ -121,7 +119,7 @@ class RocketRequestOrchestrator {
   std::optional<ExtractedPayloadData> parsePayloadAndExtractFds(
       Payload&& payload,
       F&& makeRequest,
-      RocketServerConnection& connection,
+      IRocketServerConnection& connection,
       rocket::Payload& debugPayload);
 
   template <class F>
@@ -129,7 +127,7 @@ class RocketRequestOrchestrator {
       ExtractedPayloadData&& extractedData,
       F&& makeRequest,
       RpcKind& expectedKind,
-      RocketServerConnection& connection,
+      IRocketServerConnection& connection,
       rocket::Payload& debugPayload);
 
   template <class F>
@@ -137,7 +135,7 @@ class RocketRequestOrchestrator {
       Payload&& payload,
       F&& makeRequest,
       RpcKind& expectedKind,
-      RocketServerConnection& connection,
+      IRocketServerConnection& connection,
       rocket::Payload& debugPayload);
 
   template <class F>
@@ -163,7 +161,7 @@ class RocketRequestOrchestrator {
       RequestType&& request,
       ParsedPayloadData parsedData,
       const ContextInfo& contextInfo,
-      RocketServerConnection& connection,
+      IRocketServerConnection& connection,
       ShouldSampleFunc&& shouldSample,
       RpcKind expectedKind,
       size_t wiredPayloadSize,
@@ -190,7 +188,7 @@ std::optional<ExtractedPayloadData>
 RocketRequestOrchestrator::parsePayloadAndExtractFds(
     Payload&& payload,
     F&& makeRequest,
-    RocketServerConnection& connection,
+    IRocketServerConnection& connection,
     rocket::Payload& debugPayload) {
   RocketRequestProcessor requestProcessor(transport_);
   auto requestPayloadTry =
@@ -242,7 +240,7 @@ RocketRequestOrchestrator::validateAndProcessPayload(
     ExtractedPayloadData&& extractedData,
     F&& makeRequest,
     RpcKind& expectedKind,
-    RocketServerConnection& connection,
+    IRocketServerConnection& connection,
     rocket::Payload& debugPayload) {
   RocketRequestProcessor requestProcessor(transport_);
 
@@ -307,7 +305,7 @@ RocketRequestOrchestrator::parseAndValidatePayload(
     Payload&& payload,
     F&& makeRequest,
     RpcKind& expectedKind,
-    RocketServerConnection& connection,
+    IRocketServerConnection& connection,
     rocket::Payload& debugPayload) {
   auto extractedData = parsePayloadAndExtractFds(
       std::move(payload), makeRequest, connection, debugPayload);
@@ -415,7 +413,7 @@ void RocketRequestOrchestrator::finalizeAndDispatchRequest(
     RequestType&& request,
     ParsedPayloadData parsedData,
     const ContextInfo& contextInfo,
-    RocketServerConnection& connection,
+    IRocketServerConnection& connection,
     ShouldSampleFunc&& shouldSample,
     RpcKind expectedKind,
     size_t wiredPayloadSize,
@@ -473,7 +471,7 @@ void RocketRequestOrchestrator::handleRequestCommon(
     IRocketServerConnection& icontext,
     ShouldSampleFunc&& shouldSample,
     std::optional<RocketErrorHandler::InjectedFault> injectedFault) {
-  auto& connection = static_cast<RocketServerConnection&>(icontext);
+  auto& connection = icontext;
   auto readEnd = std::chrono::steady_clock::now();
   auto wiredPayloadSize = payload.metadataAndDataSize();
   rocket::Payload debugPayload = payload.clone();

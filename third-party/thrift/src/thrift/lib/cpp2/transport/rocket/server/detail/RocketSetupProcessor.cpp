@@ -38,7 +38,7 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/SetupFrameInterceptor.h>
 #include <thrift/lib/cpp2/transport/rocket/server/detail/RocketErrorHandler.h>
@@ -76,7 +76,7 @@ RocketSetupProcessor::RocketSetupProcessor(
 
 std::unique_ptr<RocketRequestHandler> RocketSetupProcessor::handleSetupFrame(
     SetupFrame&& frame,
-    RocketServerConnection& connection,
+    IRocketServerConnection& connection,
     const std::function<void()>& onConnectionAttempted,
     bool* isCustomHandlerOut) {
   if (!validateSetupFrameBasics(frame, connection)) {
@@ -148,7 +148,7 @@ std::unique_ptr<RocketRequestHandler> RocketSetupProcessor::handleSetupFrame(
 }
 
 bool RocketSetupProcessor::validateSetupFrameBasics(
-    const SetupFrame& frame, RocketServerConnection& connection) {
+    const SetupFrame& frame, IRocketServerConnection& connection) {
   if (!frame.payload().hasNonemptyMetadata()) {
     connection.close(
         folly::make_exception_wrapper<RocketException>(
@@ -162,7 +162,7 @@ bool RocketSetupProcessor::validateSetupFrameBasics(
 bool RocketSetupProcessor::validateProtocolKey(
     folly::io::Cursor& cursor,
     const SetupFrame& frame,
-    RocketServerConnection& connection) {
+    IRocketServerConnection& connection) {
   uint32_t protocolKey;
   const bool success = cursor.tryReadBE<uint32_t>(protocolKey);
   constexpr uint32_t kLegacyRocketProtocolKey = 1;
@@ -188,7 +188,7 @@ bool RocketSetupProcessor::deserializeSetupMetadata(
     RequestSetupMetadata& meta,
     folly::io::Cursor& cursor,
     const SetupFrame& frame,
-    RocketServerConnection& connection) {
+    IRocketServerConnection& connection) {
   if (PayloadSerializer::getInstance()->unpack(
           meta, cursor, frame.encodeMetadataUsingBinary()) !=
       frame.payload().metadataSize()) {
@@ -203,7 +203,7 @@ bool RocketSetupProcessor::deserializeSetupMetadata(
 }
 
 bool RocketSetupProcessor::negotiateProtocolVersion(
-    const RequestSetupMetadata& meta, RocketServerConnection& connection) {
+    const RequestSetupMetadata& meta, IRocketServerConnection& connection) {
   auto minVersion = meta.minVersion().value_or(0);
   auto maxVersion = meta.maxVersion().value_or(0);
 
@@ -231,7 +231,7 @@ bool RocketSetupProcessor::negotiateProtocolVersion(
 }
 
 bool RocketSetupProcessor::validateMimeTypes(
-    const SetupFrame& frame, RocketServerConnection& connection) {
+    const SetupFrame& frame, IRocketServerConnection& connection) {
   if (version_ >= 9 && !frame.rocketMimeTypes()) {
     connection.close(
         folly::make_exception_wrapper<RocketException>(
@@ -242,7 +242,7 @@ bool RocketSetupProcessor::validateMimeTypes(
 }
 
 bool RocketSetupProcessor::runSetupInterceptors(
-    const RequestSetupMetadata& meta, RocketServerConnection& connection) {
+    const RequestSetupMetadata& meta, IRocketServerConnection& connection) {
   for (const auto& i : setupFrameInterceptors_) {
     auto frameAccepted = i->acceptSetup(meta, connContext_);
     if (frameAccepted.hasError()) {
@@ -257,7 +257,7 @@ bool RocketSetupProcessor::runSetupInterceptors(
 
 std::unique_ptr<RocketRequestHandler> RocketSetupProcessor::setupProcessor(
     const RequestSetupMetadata& meta,
-    RocketServerConnection& connection,
+    IRocketServerConnection& connection,
     bool& isCustomHandler) {
   for (const auto& h : setupFrameHandlers_) {
     auto processorInfo = h->tryHandle(meta);
@@ -276,7 +276,7 @@ std::unique_ptr<RocketRequestHandler> RocketSetupProcessor::setupProcessor(
 std::unique_ptr<RocketRequestHandler>
 RocketSetupProcessor::setupCustomProcessor(
     const std::shared_ptr<ProcessorInfo>& processorInfo,
-    RocketServerConnection& connection) {
+    IRocketServerConnection& connection) {
   AsyncProcessorFactory* processorFactory =
       std::addressof(processorInfo->processorFactory_);
   Cpp2Worker::PerServiceMetadata* serviceMetadata =
@@ -379,7 +379,7 @@ RocketSetupProcessor::setupDefaultProcessor() {
 }
 
 void RocketSetupProcessor::configureConnectionSettings(
-    const RequestSetupMetadata& meta, RocketServerConnection& connection) {
+    const RequestSetupMetadata& meta, IRocketServerConnection& connection) {
   ServerPushMetadata serverMeta;
   serverMeta.set_setupResponse();
   serverMeta.setupResponse()->version() = version_;
@@ -411,7 +411,7 @@ void RocketSetupProcessor::configureConnectionSettings(
 folly::Expected<std::optional<CustomCompressionSetupResponse>, std::string>
 RocketSetupProcessor::handleSetupFrameCustomCompression(
     const CompressionSetupRequest& setupRequest,
-    RocketServerConnection& connection) {
+    IRocketServerConnection& connection) {
   if (!setupRequest.custom()) {
     return folly::makeUnexpected(
         "Cannot setup compression on server due to unrecognized request type");

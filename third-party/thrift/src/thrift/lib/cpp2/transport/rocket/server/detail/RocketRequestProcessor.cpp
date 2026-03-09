@@ -26,7 +26,7 @@
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/util/Checksum.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -36,13 +36,13 @@ RocketRequestProcessor::RocketRequestProcessor(folly::AsyncTransport* transport)
     : transport_(transport) {}
 
 folly::Try<RequestPayload> RocketRequestProcessor::parseRequestPayload(
-    Payload&& payload, RocketServerConnection& connection) {
+    Payload&& payload, IRocketServerConnection& connection) {
   return connection.getPayloadSerializer()->unpackAsCompressed<RequestPayload>(
       std::move(payload), connection.isDecodingMetadataUsingBinaryProtocol());
 }
 
 ChecksumAlgorithm RocketRequestProcessor::setupChecksumHandling(
-    RequestRpcMetadata& metadata, RocketServerConnection& connection) {
+    RequestRpcMetadata& metadata, IRocketServerConnection& connection) {
   ChecksumAlgorithm checksumAlgorithm = ChecksumAlgorithm::NONE;
   if (connection.getPayloadSerializer()->supportsChecksum()) {
     if (auto checksum = metadata.checksum()) {
@@ -89,7 +89,7 @@ bool RocketRequestProcessor::validateRequestMetadata(
 std::string RocketRequestProcessor::processPayloadCompression(
     std::unique_ptr<folly::IOBuf>& data,
     const RequestRpcMetadata& metadata,
-    RocketServerConnection& connection) {
+    IRocketServerConnection& connection) {
   if (!metadata.crc32c()) {
     return std::string();
   }

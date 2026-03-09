@@ -33,7 +33,7 @@ class SocketFds;
 namespace apache::thrift::rocket {
 
 class Payload;
-class RocketServerConnection;
+class IRocketServerConnection;
 
 /**
  * Result of payload parsing containing parsed metadata and data.
@@ -56,13 +56,13 @@ class RocketRequestProcessor {
    * Parse a request payload into metadata and data buffer.
    */
   folly::Try<RequestPayload> parseRequestPayload(
-      Payload&& payload, RocketServerConnection& connection);
+      Payload&& payload, IRocketServerConnection& connection);
 
   /**
    * Setup checksum handling for the request metadata.
    */
   ChecksumAlgorithm setupChecksumHandling(
-      RequestRpcMetadata& metadata, RocketServerConnection& connection);
+      RequestRpcMetadata& metadata, IRocketServerConnection& connection);
 
   /**
    * Extract file descriptors from socket if present in metadata.
@@ -83,7 +83,7 @@ class RocketRequestProcessor {
   std::string processPayloadCompression(
       std::unique_ptr<folly::IOBuf>& data,
       const RequestRpcMetadata& metadata,
-      RocketServerConnection& connection);
+      IRocketServerConnection& connection);
 
   /**
    * Validate payload checksum if present in metadata.

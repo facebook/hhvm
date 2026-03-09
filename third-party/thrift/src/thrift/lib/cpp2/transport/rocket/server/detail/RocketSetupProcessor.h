@@ -51,7 +51,7 @@ namespace rocket {
 
 class RocketErrorHandler;
 class RocketRequestHandler;
-class RocketServerConnection;
+class IRocketServerConnection;
 class SetupFrame;
 class SetupFrameHandler;
 class SetupFrameInterceptor;
@@ -85,52 +85,52 @@ class RocketSetupProcessor {
    */
   std::unique_ptr<RocketRequestHandler> handleSetupFrame(
       SetupFrame&& frame,
-      RocketServerConnection& connection,
+      IRocketServerConnection& connection,
       const std::function<void()>& onConnectionAttempted = nullptr,
       bool* isCustomHandler = nullptr);
 
  private:
   bool validateSetupFrameBasics(
-      const SetupFrame& frame, RocketServerConnection& connection);
+      const SetupFrame& frame, IRocketServerConnection& connection);
 
   bool validateProtocolKey(
       folly::io::Cursor& cursor,
       const SetupFrame& frame,
-      RocketServerConnection& connection);
+      IRocketServerConnection& connection);
 
   bool deserializeSetupMetadata(
       RequestSetupMetadata& meta,
       folly::io::Cursor& cursor,
       const SetupFrame& frame,
-      RocketServerConnection& connection);
+      IRocketServerConnection& connection);
 
   bool negotiateProtocolVersion(
-      const RequestSetupMetadata& meta, RocketServerConnection& connection);
+      const RequestSetupMetadata& meta, IRocketServerConnection& connection);
 
   bool validateMimeTypes(
-      const SetupFrame& frame, RocketServerConnection& connection);
+      const SetupFrame& frame, IRocketServerConnection& connection);
 
   bool runSetupInterceptors(
-      const RequestSetupMetadata& meta, RocketServerConnection& connection);
+      const RequestSetupMetadata& meta, IRocketServerConnection& connection);
 
   std::unique_ptr<RocketRequestHandler> setupProcessor(
       const RequestSetupMetadata& meta,
-      RocketServerConnection& connection,
+      IRocketServerConnection& connection,
       bool& isCustomHandler);
 
   std::unique_ptr<RocketRequestHandler> setupCustomProcessor(
       const std::shared_ptr<ProcessorInfo>& processorInfo,
-      RocketServerConnection& connection);
+      IRocketServerConnection& connection);
 
   std::unique_ptr<RocketRequestHandler> setupDefaultProcessor();
 
   void configureConnectionSettings(
-      const RequestSetupMetadata& meta, RocketServerConnection& connection);
+      const RequestSetupMetadata& meta, IRocketServerConnection& connection);
 
   folly::Expected<std::optional<CustomCompressionSetupResponse>, std::string>
   handleSetupFrameCustomCompression(
       const CompressionSetupRequest& setupRequest,
-      RocketServerConnection& connection);
+      IRocketServerConnection& connection);
 
   Cpp2Worker& worker_;
   Cpp2ConnContext& connContext_;

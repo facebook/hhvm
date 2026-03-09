@@ -33,7 +33,7 @@
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
+#include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketStreamClientCallback.h>
@@ -125,8 +125,6 @@ RefactoredThriftRocketServerHandler::~RefactoredThriftRocketServerHandler() {
 
 void RefactoredThriftRocketServerHandler::handleSetupFrame(
     SetupFrame&& frame, IRocketServerConnection& icontext) {
-  auto& connection = static_cast<RocketServerConnection&>(icontext);
-
   // Delegate setup processing - RocketSetupProcessor creates and returns
   // RocketRequestHandler directly
   RocketSetupProcessor setupProcessor(
@@ -143,9 +141,9 @@ void RefactoredThriftRocketServerHandler::handleSetupFrame(
   bool isCustomHandler = false;
   requestHandler_ = setupProcessor.handleSetupFrame(
       std::move(frame),
-      connection,
-      [this, &connection]() {
-        invokeServiceInterceptorsOnConnectionAttempted(connection);
+      icontext,
+      [this, &icontext]() {
+        invokeServiceInterceptorsOnConnectionAttempted(icontext);
       },
       &isCustomHandler);
 
@@ -154,7 +152,7 @@ void RefactoredThriftRocketServerHandler::handleSetupFrame(
     return;
   }
 
-  invokeServiceInterceptorsOnConnectionEstablished(connection);
+  invokeServiceInterceptorsOnConnectionEstablished(icontext);
 
   // For custom handlers, coalesce happens AFTER ConnectionEstablished
   if (isCustomHandler) {

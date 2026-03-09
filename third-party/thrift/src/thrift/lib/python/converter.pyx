@@ -153,9 +153,25 @@ cdef object _get_src_union_field_value(object src_union, FieldInfo field):
         return getattr(src_union, field.py_name)
 
     # thrift-py-deprecated
-    for spec in src_union.thrift_spec:
-        if spec and spec[0] == field.id:
-            return getattr(src_union, f"get_{spec[2]}")()
+    # Use getType() to check the active field instead of calling get_*() accessors,
+    # which rely on assert guards that are stripped in -OO mode.
+    try:
+        if src_union.getType() == field.id:
+            return src_union.value
+    except AttributeError:
+        pass
+
+    # Fallback: iterate thrift_spec and call get_*() accessor for backwards
+    # compatibility. This preserves the pre-getType() behavior for callers that
+    # relied on it (e.g., in -OO mode where stripped assert guards would cause
+    # the accessor to return self.value for any field, effectively short-circuiting
+    # deep recursive conversions).
+    try:
+        for spec in src_union.thrift_spec:
+            if spec and spec[0] == field.id:
+                return getattr(src_union, f"get_{spec[2]}")()
+    except AttributeError:
+        pass
 
     raise AttributeError(
         f"{src_union} doesn't have field with id {field.id} or name {field.py_name}"

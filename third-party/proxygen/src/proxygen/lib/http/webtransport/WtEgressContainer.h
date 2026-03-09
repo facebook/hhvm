@@ -106,6 +106,7 @@ class WtBufferedStreamData {
     std::unique_ptr<folly::IOBuf> data;
     bool fin{false};
     WebTransport::ByteEventCallback* deliveryCallback{nullptr};
+    uint64_t lastByteStreamOffset{0};
   };
 
   /**

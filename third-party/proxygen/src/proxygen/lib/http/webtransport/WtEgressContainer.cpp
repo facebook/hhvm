@@ -76,6 +76,8 @@ WtBufferedStreamData::DequeueResult WtBufferedStreamData::dequeue(
   }
 
   window_.commit(resQueue.chainLength());
+  res.lastByteStreamOffset =
+      std::max<uint64_t>(window_.getCurrentOffset(), 1) - 1;
   res.data = resQueue.move();
   return res;
 }

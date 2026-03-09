@@ -11,4 +11,4 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-bumpalo = { version = "3.19.1", features = ["allocator_api", "collections"] }
+bumpalo = { version = "3.20.2", features = ["allocator_api", "collections"] }

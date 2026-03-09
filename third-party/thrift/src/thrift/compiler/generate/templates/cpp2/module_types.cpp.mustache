@@ -37,21 +37,20 @@ FOLLY_GNU_DISABLE_WARNING("-Winvalid-offsetof")
 template<>
 constexpr ptrdiff_t fieldOffset<{{struct:cpp_fullname}}>(std::int16_t fieldIndex) {
   constexpr ptrdiff_t offsets[] = {
-    {{#struct:fields_in_key_order}}
-    offsetof({{struct:cpp_fullname}}, {{field:cpp_storage_name}}){{!
-    }}{{> common/comma_newline}}{{/struct:fields_in_key_order}}};
+    {{#each (array.enumerate struct:fields_id_order with_last=true) as |i field last?|}}
+    offsetof({{struct:cpp_fullname}}, {{field.cpp_storage_name}}){{!
+    }}{{> common/comma_newline}}{{/each}}};
   return offsets[fieldIndex];
 }
 
 template<>
 constexpr ptrdiff_t issetOffset<{{struct:cpp_fullname}}>(std::int16_t fieldIndex) {
   constexpr ptrdiff_t offsets[] = {
-    {{#struct:fields_in_key_order}}
-    {{#field:has_isset?}}{{!
-    }}offsetof({{struct:cpp_fullname}}, __isset) + isset_bitset<{{struct:isset_fields_size}}>::get_offset() + {{field:isset_index}}{{!
-    }}{{/field:has_isset?}}{{!
-    }}{{^field:has_isset?}}{{!
-    }}0{{/field:has_isset?}}{{> common/comma_newline}}{{/struct:fields_in_key_order}}};
+    {{#each (array.enumerate struct:fields_id_order with_last=true) as |i field last?|}}
+    {{#if field.has_isset?}}{{!
+    }}offsetof({{struct:cpp_fullname}}, __isset) + isset_bitset<{{struct:isset_fields_size}}>::get_offset() + {{field.isset_index}}{{!
+    }}{{#else}}0{{/if field.has_isset?}}{{!
+    }}{{> common/comma_newline}}{{/each}}};
   return offsets[fieldIndex];
 }
 {{/struct:union?}}
@@ -153,8 +152,8 @@ constexpr ::apache::thrift::detail::UnionExtN<{{(array.len struct:fields)}}> {{s
   /* .getActiveId */ nullptr,
   /* .setActiveId */ nullptr,
   /* .initMember */ {
-  {{#struct:fields_in_key_order}}{{#field:type}}::apache::thrift::detail::placementNewUnionValue<{{field:cpp_storage_type}}>{{> common/comma_newline}}{{!
-}}{{/field:type}}{{/struct:fields_in_key_order}}},
+  {{#each (array.enumerate struct:fields_id_order with_last=true) as |i field last?|}}::apache::thrift::detail::placementNewUnionValue<{{field.cpp_storage_type}}>{{!
+}}{{> common/comma_newline}}{{/each}}},
 };
 {{/struct:union?}}
 constexpr ::apache::thrift::detail::StructInfoN<{{(array.len struct:fields)}}> __fbthrift_struct_info_{{struct:cpp_underlying_name}} = {
@@ -171,24 +170,15 @@ constexpr ::apache::thrift::detail::StructInfoN<{{(array.len struct:fields)}}> _
   /* .getFieldValuesBasePtr */ nullptr,
   /* .customExt */ nullptr,
   /* .fieldInfos */ {
-{{#struct:fields_in_key_order}}
+  {{#each (array.enumerate struct:fields_id_order with_last=true) as |field_index field last?|}}
   {
-    /* .id */ {{field:id}},
-    /* .qualifier */ {{field:tablebased_qualifier}},
-    /* .name */ "{{field:name}}",
-    /* .memberOffset */ {{!
-    }}{{#struct:union?}}0{{/struct:union?}}{{!
-    }}{{^struct:union?}}::apache::thrift::detail::fieldOffset<{{struct:cpp_fullname}}>({{field:index}}){{/struct:union?}},{{!
-    }}{{^struct:union?}}
-    /* .issetOffset */ ::apache::thrift::detail::issetOffset<{{struct:cpp_fullname}}>({{field:index}}),{{!
-    }}{{/struct:union?}}{{!
-    }}{{#struct:union?}}
-    /* .issetOffset */ 0,{{!
-    }}{{/struct:union?}}{{#field:type}}
-    /* .typeInfo */ &::apache::thrift::detail::TypeToInfo<{{type:type_class}}, {{field:cpp_storage_type}}>::typeInfo,{{!
-    }}{{/field:type}}
-  }{{> common/comma_newline}}{{!
-  }}{{/struct:fields_in_key_order}}}
+    /* .id */ {{field.id}},
+    /* .qualifier */ {{field.tablebased_qualifier}},
+    /* .name */ "{{field.name}}",
+    /* .memberOffset */ {{#if struct:union?}}0{{#else}}::apache::thrift::detail::fieldOffset<{{struct:cpp_fullname}}>({{field_index}}){{/if}},
+    /* .issetOffset */ {{#if struct:union?}}0{{#else}}::apache::thrift::detail::issetOffset<{{struct:cpp_fullname}}>({{field_index}}){{/if}},
+    /* .typeInfo */ &::apache::thrift::detail::TypeToInfo<{{field.type.type_class}}, {{field.cpp_storage_type}}>::typeInfo,
+  }{{> common/comma_newline}}{{/each}}}
 };
 {{/if (has_compiler_option? "tablebased")}}
 {{! Enforce that if this thrift file is generated with extern template instances

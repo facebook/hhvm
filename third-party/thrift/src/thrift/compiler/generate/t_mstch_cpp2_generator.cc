@@ -1054,6 +1054,35 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       }
       return true;
     });
+    def.property("isset_fields", [&proto](const t_structured& strct) {
+      whisker::array::raw fields;
+      for (const auto& field : strct.fields()) {
+        if (cpp2::field_has_isset(&field)) {
+          fields.emplace_back(proto.create<t_field>(field));
+        }
+      }
+      return whisker::make::array(std::move(fields));
+    });
+    def.property("mixin_fields", [](const t_structured& strct) {
+      whisker::array::raw mixins;
+      for (cpp2::mixin_member m : cpp2::get_mixins_and_members(strct)) {
+        mixins.emplace_back(
+            whisker::make::map(
+                {{"mixin_name", whisker::make::string(m.mixin->name())},
+                 {"field_name", whisker::make::string(m.member->name())}}));
+      }
+      return whisker::make::array(std::move(mixins));
+    });
+    def.property(
+        "fields_with_runtime_annotation", [&proto](const t_structured& strct) {
+          whisker::array::raw fields;
+          for (const auto& field : strct.fields()) {
+            if (has_runtime_annotation(field)) {
+              fields.emplace_back(proto.create<t_field>(field));
+            }
+          }
+          return whisker::make::array(std::move(fields));
+        });
 
     return std::move(def).make();
   }
@@ -1982,24 +2011,15 @@ bool field_needs_op_encode(const t_field& field, const t_structured& strct) {
 class cpp_mstch_struct : public mstch_struct {
  public:
   cpp_mstch_struct(
-      const t_structured* s,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      std::shared_ptr<cpp2_generator_context> cpp_ctx)
-      : mstch_struct(s, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
+      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
+      : mstch_struct(s, ctx, pos) {
     register_methods(
         this,
         {
             {"struct:explicitly_constructed_fields",
              &cpp_mstch_struct::explicitly_constructed_fields},
-            {"struct:fields_in_key_order",
-             &cpp_mstch_struct::fields_in_key_order},
             {"struct:fields_in_layout_order",
              &cpp_mstch_struct::fields_in_layout_order},
-            {"struct:isset_fields", &cpp_mstch_struct::isset_fields},
-            {"struct:mixin_fields", &cpp_mstch_struct::mixin_fields},
-            {"struct:fields_with_runtime_annotation",
-             &cpp_mstch_struct::fields_with_runtime_annotation},
         });
   }
   mstch::node explicitly_constructed_fields() {
@@ -2035,55 +2055,6 @@ class cpp_mstch_struct : public mstch_struct {
       }
     }
     return make_mstch_fields(filtered_fields);
-  }
-
-  mstch::node mixin_fields() {
-    mstch::array fields;
-    for (auto i : cpp2::get_mixins_and_members(*struct_)) {
-      const auto suffix = "_ref";
-      fields.emplace_back(
-          mstch::map{
-              {"mixin:name", i.mixin->name()},
-              {"mixin:field_name", i.member->name()},
-              {"mixin:accessor", i.member->name() + suffix}});
-    }
-    return fields;
-  }
-
-  mstch::node isset_fields() {
-    std::vector<const t_field*> fields;
-    for (const auto& field : struct_->fields()) {
-      if (cpp2::field_has_isset(&field)) {
-        fields.push_back(&field);
-      }
-    }
-    if (fields.empty()) {
-      return mstch::node();
-    }
-    return make_mstch_fields(fields);
-  }
-
-  mstch::node fields_with_runtime_annotation() {
-    return make_mstch_fields(get_fields_with_runtime_annotation());
-  }
-
-  const std::vector<const t_field*>& get_fields_with_runtime_annotation() {
-    static std::unordered_map<const t_structured*, std::vector<const t_field*>>
-        cache;
-
-    auto it = cache.find(struct_);
-    if (it != cache.end()) {
-      return it->second;
-    }
-
-    std::vector<const t_field*> result;
-    for (const auto& field : struct_->fields()) {
-      if (has_runtime_annotation(field)) {
-        result.push_back(&field);
-      }
-    }
-
-    return cache.emplace(struct_, std::move(result)).first->second;
   }
 
  protected:
@@ -2223,12 +2194,6 @@ class cpp_mstch_struct : public mstch_struct {
     return make_mstch_fields(get_members_in_layout_order());
   }
 
-  mstch::node fields_in_key_order() {
-    return make_mstch_fields(struct_->fields_id_order());
-  }
-
-  std::shared_ptr<cpp2_generator_context> cpp_context_;
-
   std::vector<const t_field*> fields_in_layout_order_;
 };
 
@@ -2255,7 +2220,7 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_program>(std::ref(source_mgr_));
   mstch_context_.add<cpp_mstch_service>();
   mstch_context_.add<cpp_mstch_interaction>();
-  mstch_context_.add<cpp_mstch_struct>(cpp_context_);
+  mstch_context_.add<cpp_mstch_struct>();
 }
 
 void t_mstch_cpp2_generator::generate_constants(const t_program* program) {

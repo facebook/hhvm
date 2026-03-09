@@ -144,22 +144,22 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   {{/each}}
   >;
 {{/struct:has_runtime_annotation?}}
-{{#struct:fields_with_runtime_annotation?}}
+  {{#if struct:fields_with_runtime_annotation?}}
   using __fbthrift_list_of_field_with_annotation = folly::tag_t<
-{{#struct:fields_with_runtime_annotation}}
-    ::apache::thrift::type::field_id<{{field:id}}>{{^last?}}, {{/last?}}
-{{/struct:fields_with_runtime_annotation}}
+    {{#each (array.enumerate struct:fields_with_runtime_annotation with_last=true) as |i field last?|}}
+    ::apache::thrift::type::field_id<{{field.id}}>{{#if (not last?)}}, {{/if}}
+    {{/each}}
   >;
   using __fbthrift_annotations_on_fields = folly::tag_t<
-{{#struct:fields_with_runtime_annotation}}
+    {{#each (array.enumerate struct:fields_with_runtime_annotation with_last=true) as |i field last?|}}
     folly::tag_t<
-  {{#each (array.enumerate field:structured_runtime_annotations with_last=true) as |i annot last_annot?|}}
+      {{#each (array.enumerate field.structured_runtime_annotations with_last=true) as |i annot last_annot?|}}
       {{annot.type.cpp_fullname}}{{#if (not last_annot?)}},{{/if}}
-  {{/each}}
-    >{{^last?}},{{/last?}}
-{{/struct:fields_with_runtime_annotation}}
+      {{/each}}
+    >{{#if (not last?)}},{{/if}}
+    {{/each}}
   >;
-{{/struct:fields_with_runtime_annotation?}}
+  {{/if struct:fields_with_runtime_annotation?}}
 {{> module_types_h/reflection}}
 
   void __fbthrift_clear();

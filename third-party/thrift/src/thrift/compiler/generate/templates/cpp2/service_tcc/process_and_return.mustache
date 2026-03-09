@@ -119,19 +119,13 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
 {{/field:type}}{{/function:args}}
     {{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs pargs() {
       {{service:parent_service_cpp_name}}_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}_pargs args;
-{{#function:args}}{{#field:type}}
-      {{^type:resolves_to_complex_return?}}
-      args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
-      {{/type:resolves_to_complex_return?}}
-      {{#type:resolves_to_complex_return?}}
-      {{#function:stack_arguments?}}
-      args.get<{{field:index}}>().value = &uarg_{{field:cpp_name}};
-      {{/function:stack_arguments?}}
-      {{^function:stack_arguments?}}
-      args.get<{{field:index}}>().value = uarg_{{field:cpp_name}}.get();
-      {{/function:stack_arguments?}}
-      {{/type:resolves_to_complex_return?}}
-{{/field:type}}{{/function:args}}
+  {{#each (array.enumerate function:params.fields) as |param_index param|}}
+    {{#if (and (not function:stack_arguments?) param.type.resolves_to_complex_return?)}}
+      args.get<{{param_index}}>().value = uarg_{{param.cpp_name}}.get();
+    {{#else}}
+      args.get<{{param_index}}>().value = &uarg_{{param.cpp_name}};
+    {{/if (and (not function:stack_arguments?) param.type.resolves_to_complex_return?)}}
+  {{/each}}
       return args;
     }
 

@@ -41,15 +41,9 @@ apache::thrift::SerializedRequest {{> service_common/client_class_name}}::fbthri
   return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
     ::{{service:cpp_qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_pargs args;
-{{#function:args}}{{#field:type}}
-{{^type:resolves_to_complex_return?}}
-    args.get<{{field:index}}>().value = &p_{{field:cpp_name}};
-{{/type:resolves_to_complex_return?}}
-{{#type:resolves_to_complex_return?}}
-    args.get<{{field:index}}>().value = const_cast<{{type:cpp_type}}*>(&p_{{field:cpp_name}});
-{{/type:resolves_to_complex_return?}}
-{{/field:type}}{{/function:args}}{{!
-}}
+  {{#each (array.enumerate function:params.fields) as |param_index param|}}
+    args.get<{{param_index}}>().value = {{#if param.type.resolves_to_complex_return?}}const_cast<{{param.type.cpp_type}}*>(&p_{{param.cpp_name}}){{#else}}&p_{{param.cpp_name}}{{/if}};
+  {{/each}}
     const auto sizer = [&](ProtocolWriter* p) { return args.serializedSizeZC(p); };
     const auto writer = [&](ProtocolWriter* p) { args.write(p); };
     return apache::thrift::preprocessSendT<ProtocolWriter>(

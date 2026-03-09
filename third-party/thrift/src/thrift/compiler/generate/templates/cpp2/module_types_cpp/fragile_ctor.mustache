@@ -27,8 +27,8 @@
   {{#field:opt_cpp_ref?}}if ({{field:cpp_storage_name}}) {{/field:opt_cpp_ref?}}::apache::thrift::adapt_detail::construct<{{field:cpp_first_adapter}}, {{field:id}}>({{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{field:cpp_storage_name}}, *this);
 {{/field:cpp_first_adapter}}
 {{/struct:fields}}
-{{#struct:isset_fields}}
-  __isset.set(folly::index_constant<{{field:index}}>(), true);
-{{/struct:isset_fields}}
+{{#each (array.enumerate struct:isset_fields) as |field_index field|}}
+  __isset.set(folly::index_constant<{{field_index}}>(), true);
+{{/each}}
 }
 {{/struct:fields?}}

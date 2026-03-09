@@ -399,11 +399,13 @@ void DeviousBatonHandler::readHandler(
 
   VLOG(4) << "read data id=" << id;
 
-  auto cancelToken = readHandle->getCancelToken();
   devious_->onStreamData(
       id, streams_[id], std::move(streamData->data), streamData->fin);
-  bool done = streamData->fin || cancelToken.isCancellationRequested();
-  if (!done) {
+  if (!readHandle) {
+    // terminal event (fin or exception), handle is no longer valid
+    return;
+  }
+  if (!readHandle->getCancelToken().isCancellationRequested()) {
     readHandle->awaitNextRead(
         evb_, [this](auto readHandle, auto id, auto streamData) {
           readHandler(readHandle, id, std::move(streamData));

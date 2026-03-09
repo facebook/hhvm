@@ -88,6 +88,9 @@ func WithNumWorkers(num int) ServerOption {
 // that specifies a function that modifies the context passed to procedures per connection.
 func WithConnContext(connContext ConnContextFunc) ServerOption {
 	return func(config *serverConfig) {
+		if connContext == nil {
+			return
+		}
 		config.connContext = func(ctx context.Context, conn net.Conn) context.Context {
 			ctx = WithConnInfo(ctx, conn)
 			return connContext(ctx, conn)

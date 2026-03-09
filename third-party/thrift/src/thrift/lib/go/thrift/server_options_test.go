@@ -61,6 +61,10 @@ func TestWithConnContext(t *testing.T) {
 	require.NotNil(t, defaultConfig.connContext)
 	defaultConfig.connContext(context.TODO(), dummyConn)
 
+	nilConfig := newServerConfig(WithConnContext(nil))
+	require.NotNil(t, nilConfig.connContext)
+	nilConfig.connContext(context.TODO(), dummyConn)
+
 	invoked := false
 	customConnContextFn := func(ctx context.Context, conn net.Conn) context.Context { invoked = true; return ctx }
 	customConfig := newServerConfig(WithConnContext(customConnContextFn))

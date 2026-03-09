@@ -277,26 +277,35 @@ void MacroAssembler::Mov(const Register& rd, uint64_t imm) {
     Register temp = rd.IsSP() ? AppropriateTempFor(rd) : rd;
 
     assert((reg_size % 16) == 0);
-    bool first_mov_done = false;
-    for (unsigned i = 0; i < (reg_size / 16); i++) {
-      uint64_t imm16 = (imm >> (16 * i)) & 0xffffL;
-      if (imm16 != 0) {
-        if (!first_mov_done) {
-          // Move the first non-zero 16-bit chunk into the destination register.
-          movz(temp, imm16, 16 * i);
-          first_mov_done = true;
-        } else {
-          // Construct a wider constant.
-          movk(temp, imm16, 16 * i);
+
+    if (meta() == nullptr) {
+      bool first_mov_done = false;
+      for (unsigned i = 0; i < (reg_size / 16); i++) {
+        uint64_t imm16 = (imm >> (16 * i)) & 0xffffL;
+        if (imm16 != 0) {
+          if (!first_mov_done) {
+            // Move the first non-zero 16-bit chunk into the destination register.
+            movz(temp, imm16, 16 * i);
+            first_mov_done = true;
+          } else {
+            // Construct a wider constant.
+            movk(temp, imm16, 16 * i);
+          }
         }
       }
+      assert(first_mov_done);
+      __builtin_debugtrap();
+    } else {
+      Label data;
+      meta()->addressImmediates.insert(code().frontier());
+      poolLiteral(code(), *meta(), imm, 64, false);
+      bind(&data);
+      Ldr(rd, &data);
     }
 
     if (rd.IsSP()) {
       mov(rd, temp);
     }
-
-    assert(first_mov_done);
   }
 }
 

@@ -29,6 +29,7 @@
 
 #include "hphp/util/data-block.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
@@ -631,7 +632,7 @@ class Literal {
 // Assembler.
 class Assembler {
  public:
-  explicit Assembler(HPHP::CodeBlock& cb);
+  explicit Assembler(HPHP::CodeBlock& cb, HPHP::jit::CGMeta* meta = nullptr);
 
   // The destructor asserts that one of the following is true:
   //  * The Assembler object has not been used.
@@ -662,6 +663,8 @@ class Assembler {
   }
 
   HPHP::CodeBlock& code() const { return cb_; }
+
+  HPHP::jit::CGMeta* meta() const { return meta_; }
 
   HPHP::jit::TCA base() const { return cb_.base(); }
 
@@ -1706,7 +1709,7 @@ class Assembler {
   }
 
   void CheckLiteralPool(LiteralPoolEmitOption option = JumpRequired);
-  void EmitLiteralPool(LiteralPoolEmitOption option = NoJumpRequired);
+  void EmitLiteralPool(LiteralPoolEmitOption option = JumpRequired);
   size_t LiteralPoolSize();
 
   static bool IsImmLogical(uint64_t value, unsigned width) {
@@ -1898,7 +1901,7 @@ class Assembler {
 
   // The buffer into which code and relocation info are generated.
   HPHP::CodeBlock& cb_;
-
+  HPHP::jit::CGMeta* meta_;
   std::list<Literal*> literals_;
   HPHP::CodeAddress next_literal_pool_check_;
   unsigned literal_pool_monitor_;

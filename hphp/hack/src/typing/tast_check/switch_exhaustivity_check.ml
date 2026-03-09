@@ -362,6 +362,11 @@ module AlternativeSet = struct
       (* An enum E is exhaustively switched if there is a case for all of its
          declared values (including inherited ones). *)
       of_enum_name ~is_enum_class_label:false ~bound:None env enum_name
+    | T.Tnewtype (_, _, bound) ->
+      (* For newtypes with an upper bound (e.g., `newtype T as E = E`),
+         check exhaustivity against the bound type. This enables exhaustive
+         switching on newtypes whose upper bound is an enum. *)
+      of_ty env bound
     | T.Ttuple T.{ t_required; t_optional = []; t_extra = Tvariadic t_variadic }
       when is_nothing env t_variadic ->
       (* We only consider closed tuples for exhaustivity. *)

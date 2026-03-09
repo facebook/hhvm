@@ -1,0 +1,4 @@
+ERROR: File "newtype_enum_bound.bad.php--test.php", line 4, characters 3-54:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `MyEnum2::B` (Typing[4019])
+  File "newtype_enum_bound.bad.php--test.php", line 4, characters 11-12:
+  The scrutinee has type `MyEnumWrapper2`.

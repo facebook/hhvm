@@ -17,7 +17,7 @@
 }}
 {{#field:type}}
 {{> module_types_custom_protocol_h/if_should_write}}
-    constexpr int16_t kPrevFieldId = {{#first?}}{{#struct:indexing?}}::apache::thrift::detail::kSizeField.id{{/struct:indexing?}}{{^struct:indexing?}}0{{/struct:indexing?}}{{/first?}}{{^first?}}{{field:serialization_prev_field_key}}{{/first?}};
+    constexpr int16_t kPrevFieldId = {{#if (and first? struct:indexing?)}}::apache::thrift::detail::kSizeField.id{{#else if first?}}0{{#else}}{{field:serialization_prev_field.id}}{{/if}};
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::{{> common/struct_type}}, {{field:id}}, kPrevFieldId>(*prot_, "{{field:name}}", {{^struct:union?}}previousFieldHasValue{{/struct:union?}}{{#struct:union?}}false{{/struct:union?}});
 {{^struct:union?}}
     previousFieldHasValue = true;

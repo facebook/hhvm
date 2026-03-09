@@ -1405,17 +1405,17 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       assert(parent != nullptr);
       return field_needs_op_encode(field, *parent);
     });
-    def.property("serialization_prev_field_key", [this](const t_field& field) {
+    def.property("serialization_prev_field", [&](const t_field& field) {
       const cpp2_field_generator_context* field_context =
           cpp_context_->get_field_context(&field);
-      assert(field_context && field_context->serialization_prev);
-      return whisker::make::i64(field_context->serialization_prev->id());
+      assert(field_context);
+      return proto.create_nullable<t_field>(field_context->serialization_prev);
     });
-    def.property("serialization_next_field_key", [this](const t_field& field) {
+    def.property("serialization_next_field", [&](const t_field& field) {
       const cpp2_field_generator_context* field_context =
           cpp_context_->get_field_context(&field);
-      assert(field_context && field_context->serialization_next);
-      return whisker::make::i64(field_context->serialization_next->id());
+      assert(field_context != nullptr);
+      return proto.create_nullable<t_field>(field_context->serialization_next);
     });
     def.property("deprecated_terse_writes?", [this](const t_field& field) {
       return field.has_structured_annotation(kCppDeprecatedTerseWriteUri) ||
@@ -2224,36 +2224,6 @@ class cpp_mstch_struct : public mstch_struct {
   std::vector<const t_field*> fields_in_layout_order_;
 };
 
-class cpp_mstch_field : public mstch_field {
- public:
-  cpp_mstch_field(
-      const t_field* f,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      std::shared_ptr<cpp2_generator_context> cpp_ctx)
-      : mstch_field(f, ctx, pos), cpp_context_(std::move(cpp_ctx)) {
-    register_methods(
-        this,
-        {
-            {"field:serialization_next_field_type",
-             &cpp_mstch_field::serialization_next_field_type},
-        });
-  }
-  mstch::node serialization_next_field_type() {
-    const cpp2_field_generator_context* field_context =
-        cpp_context_->get_field_context(field_);
-    assert(field_context && field_context->serialization_next);
-    return field_context->serialization_next
-        ? context_.type_factory->make_mstch_object(
-              field_context->serialization_next->type().get_type(),
-              context_,
-              pos_)
-        : mstch::node("");
-  }
-
-  std::shared_ptr<cpp2_generator_context> cpp_context_;
-};
-
 void t_mstch_cpp2_generator::generate_program() {
   const auto* program = get_program();
   set_mstch_factories();
@@ -2278,7 +2248,6 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_service>();
   mstch_context_.add<cpp_mstch_interaction>();
   mstch_context_.add<cpp_mstch_struct>(cpp_context_);
-  mstch_context_.add<cpp_mstch_field>(cpp_context_);
 }
 
 void t_mstch_cpp2_generator::generate_constants(const t_program* program) {

@@ -82,18 +82,7 @@ _readField_{{field:cpp_name}}:
  this->__isset.set({{field:isset_index}}, true);
 {{/field:has_isset?}}
 
-{{^last?}}
-{{#field:serialization_next_field_type}}
-  if (UNLIKELY(!_readState.advanceToNextField(
-          iprot,
-          {{field:id}},
-          {{field:serialization_next_field_key}},
-          apache::thrift::protocol::{{> common/struct_type}}))) {
-    goto _advance_failure;
-  }
-{{/field:serialization_next_field_type}}
-{{/last?}}
-{{#last?}}
+  {{#if last?}}
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           {{field:id}},
@@ -101,7 +90,15 @@ _readField_{{field:cpp_name}}:
           apache::thrift::protocol::T_STOP))) {
     goto _advance_failure;
   }
-{{/last?}}
+  {{#else if (object.notnull? field:serialization_next_field)}}
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          {{field:id}},
+          {{field:serialization_next_field.id}},
+          apache::thrift::protocol::{{#field:serialization_next_field.type}}{{> common/struct_type}}{{/field:serialization_next_field.type}}))) {
+    goto _advance_failure;
+  }
+  {{/if last?}}
 {{/field:type}}
 {{/struct:fields_in_serialization_order}}
 {{/struct:fields?}}

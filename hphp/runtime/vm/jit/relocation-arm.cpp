@@ -140,7 +140,8 @@ struct Env {
 size_t decodePossibleMovSequence(Instruction* instr,
                                  Instruction* end,
                                  uint64_t& target,
-                                 uint32_t& rd) {
+                                 uint32_t& rd,
+                                 uint32_t& regSize) {
   if (instr->IsMovz()) {  // 64
     target = (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
   } else if (instr->IsMovn()) {  // 32 or 64
@@ -157,6 +158,7 @@ size_t decodePossibleMovSequence(Instruction* instr,
   }
   size_t length = 1;  // We already decoded the first instruction above.
   rd = instr->Rd();
+  regSize = instr->SixtyFourBits() ? 64 : 32;
   auto next = instr->NextInstruction();
   while ((next < end && next->IsMovk() && (next->Rd() == rd)) ||
          (next < end && next->IsNop())) {
@@ -177,7 +179,7 @@ size_t decodePossibleMovSequence(Instruction* instr,
  * Returns false if the new sequence does not fit into `length` instructions.
  */
 bool writeMovSequence(CodeBlock& cb, TCA destAddr, int length, TCA target,
-                      uint32_t reg) {
+                      uint32_t reg, uint32_t regSize) {
   bool ok = true;
   // Save the frontier for restoration below.
   auto savedFrontier = cb.frontier();
@@ -185,8 +187,15 @@ bool writeMovSequence(CodeBlock& cb, TCA destAddr, int length, TCA target,
 
   // Write the new mov/movk sequence.
   vixl::MacroAssembler a { cb };
-  auto const dst = vixl::Register(reg, 64);
-  a.Mov(dst, target);
+  auto const dst = vixl::Register(reg, regSize);
+  auto targetVal = reinterpret_cast<uint64_t>(target);
+  if (regSize == 32) {
+    always_assert_flog(
+      !(targetVal >> 32),
+      "writeMovSequence: relocated address 0x{:x} exceeds 32 bits "
+      "for a 32-bit register sequence\n", targetVal);
+  }
+  a.Mov(dst, targetVal);
 
   // If the new sequence is longer than the original, then we must
   // gracefully fail.
@@ -755,9 +764,15 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
   // the relocator.
   if (!env.meta.addressImmediates.contains(srcAddr)) return false;
 
+  // Don't optimize veneers.  Other instructions have been patched to jump to
+  // veneer addresses, so shrinking them would shift subsequent code and can
+  // push branch offsets beyond the ±128 MB limit during adjustForRelocation.
+  if (env.meta.veneerAddrs.contains(srcAddr)) return false;
+
   uint64_t target;
   uint32_t rd;
-  auto const length = decodePossibleMovSequence(src, end, target, rd);
+  uint32_t regSize;
+  auto const length = decodePossibleMovSequence(src, end, target, rd, regSize);
   if (!length) return false;
   auto next = src + length * kInstructionSize;
 
@@ -1015,8 +1030,9 @@ size_t relocateImpl(Env& env) {
         } else {
           uint32_t rd;
           uint64_t target;
+          uint32_t regSize;
           if (decodePossibleMovSequence(src, Instruction::Cast(env.end),
-                                        target, rd)) {
+                                        target, rd, regSize)) {
             updateInternalRefsCheck(target);
           }
         }
@@ -1109,10 +1125,11 @@ size_t relocateImpl(Env& env) {
         }
         uint64_t target;
         uint32_t rd;
+        uint32_t regSize;
         auto const destEnd = Instruction::Cast(env.destBlock.frontier());
-        if (int length = decodePossibleMovSequence(dest, destEnd, target, rd)) {
+        if (int length = decodePossibleMovSequence(dest, destEnd, target, rd, regSize)) {
           if (!writeMovSequence(env.destBlock, pl.destAddr, length, adjusted,
-                                rd)) {
+                                rd, regSize)) {
             env.far.insert(src);
             ok = false;
           }
@@ -1236,16 +1253,17 @@ size_t relocateImpl(Env& env) {
           }
           uint64_t target;
           uint32_t rd;
+          uint32_t regSize;
           if (int length = decodePossibleMovSequence(src,
                                                      Instruction::Cast(env.end),
-                                                     target, rd)) {
+                                                     target, rd, regSize)) {
             // Adjust the mov/movk sequence if necessary
             auto adjusted = env.rel.adjustedAddressAfter(
               reinterpret_cast<TCA>(target)
             );
             if (adjusted && env.meta.addressImmediates.count(srcAddr)) {
               if (!writeMovSequence(env.destBlock, destAddr, length, adjusted,
-                                    rd)) {
+                                    rd, regSize)) {
                 ok = false;
                 env.far.insert(src);
               }
@@ -1353,12 +1371,21 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
   }
   uint64_t target;
   uint32_t rd;
-  if (size_t length = decodePossibleMovSequence(instr, end, target, rd)) {
+  uint32_t regSize;
+  if (size_t length = decodePossibleMovSequence(instr, end, target, rd, regSize)) {
     auto adjusted = (uint64_t)rel.adjustedAddressAfter(
       reinterpret_cast<TCA>(target)
     );
     if (adjusted && rel.isAddressImmediate(reinterpret_cast<TCA>(instr))) {
       always_assert_flog(!live, "Can't adjust MOV/MOVK for a live region.\n");
+
+      // Truncate to 32 bits if the original sequence used a 32-bit register.
+      if (regSize == 32) {
+        always_assert_flog(
+          !(adjusted >> 32),
+          "adjustInstruction: relocated address 0x{:x} exceeds 32 bits "
+          "for a 32-bit register sequence\n", adjusted);
+      }
 
       // Create a temporary CodeBlock over the mov/movk sequence
       CodeBlock movBlock;
@@ -1367,7 +1394,7 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
 
       // Write the new mov/movk sequence
       vixl::MacroAssembler a { movBlock };
-      auto const dst = vixl::Register(rd, 64);
+      auto const dst = vixl::Register(rd, regSize);
       a.Mov(dst, adjusted);
 
       // If the sequence is shorter, then pad with nops

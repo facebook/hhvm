@@ -70,7 +70,7 @@ TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target) {
   meta.smashableLocations.insert(the_start);
 
   assertx((makeTarget32(target) & 3) == 0);
-  addVeneer(meta, the_start, target);
+  addSmashableVeneer(meta, the_start, target);
   vixl::Label veneer_addr;
   a.bind(&veneer_addr);
   a.bl(&veneer_addr);
@@ -88,7 +88,7 @@ TCA emitSmashableJmp(CodeBlock& cb, CGMeta& meta, TCA target) {
   meta.smashableLocations.insert(the_start);
 
   assertx((makeTarget32(target) & 3) == 0);
-  addVeneer(meta, the_start, target);
+  addSmashableVeneer(meta, the_start, target);
   vixl::Label veneer_addr;
   a.bind(&veneer_addr);
   a.b(&veneer_addr);
@@ -107,7 +107,7 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,
   meta.smashableLocations.insert(the_start);
 
   assertx((makeTarget32(target) & 3) == 0);
-  addVeneer(meta, the_start, target);
+  addSmashableVeneer(meta, the_start, target);
   vixl::Label veneer_addr;
   a.bind(&veneer_addr);
   a.b(&veneer_addr, arm::convertCC(cc));
@@ -141,7 +141,7 @@ bool possiblySmashableMovq(TCA inst) {
           ldr->Mask(LoadLiteralMask) == LDR_x_lit);
 }
 
-bool isVeneer(vixl::Instruction* ldr) {
+bool isSmashableVeneer(vixl::Instruction* ldr) {
   using namespace vixl;
 
   auto const br = ldr->NextInstruction();
@@ -159,7 +159,7 @@ bool possiblySmashableCall(TCA inst) {
   auto const bl = Instruction::Cast(inst);
 
   return (bl->Mask(UnconditionalBranchMask) == BL &&
-          isVeneer(bl->ImmPCOffsetTarget()));
+          isSmashableVeneer(bl->ImmPCOffsetTarget()));
 }
 
 bool possiblySmashableJmp(TCA inst) {
@@ -168,7 +168,7 @@ bool possiblySmashableJmp(TCA inst) {
   auto const b = Instruction::Cast(inst);
 
   return (b->Mask(UnconditionalBranchMask) == B &&
-          isVeneer(b->ImmPCOffsetTarget()));
+          isSmashableVeneer(b->ImmPCOffsetTarget()));
 }
 
 bool possiblySmashableJcc(TCA inst) {
@@ -176,7 +176,7 @@ bool possiblySmashableJcc(TCA inst) {
 
   auto const b = Instruction::Cast(inst);
 
-  return b->IsCondBranchImm() && isVeneer(b->ImmPCOffsetTarget());
+  return b->IsCondBranchImm() && isSmashableVeneer(b->ImmPCOffsetTarget());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -340,7 +340,7 @@ static TCA smashableTarget(TCA inst) {
 
   auto const b = Instruction::Cast(inst);
   auto const ldr = b->ImmPCOffsetTarget();
-  assertx(isVeneer(ldr));
+  assertx(isSmashableVeneer(ldr));
   auto const target32 = *reinterpret_cast<uint32_t*>(ldr->LiteralAddress());
   assertx((target32 & 3) == 0);
   return reinterpret_cast<TCA>(target32);

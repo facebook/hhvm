@@ -176,9 +176,15 @@ void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
   );
 }
 
-void addVeneer(CGMeta& meta, TCA source, TCA target) {
-  FTRACE(5, "addVeneer: source = {}, target = {}\n", source, target);
-  meta.veneers.emplace_back(CGMeta::VeneerData{source, target});
+void addSmashableVeneer(CGMeta& meta, TCA source, TCA target) {
+  FTRACE(5, "addSmashableVeneer: source = {}, target = {}\n", source, target);
+  meta.veneers.emplace_back(CGMeta::VeneerData{source, target, true});
+}
+
+void addNonSmashableVeneer(CGMeta& meta, TCA source, TCA target) {
+  FTRACE(5, "addNonSmashableVeneer: source = {}, target = {}\n",
+         source, target);
+  meta.veneers.emplace_back(CGMeta::VeneerData{source, target, false});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

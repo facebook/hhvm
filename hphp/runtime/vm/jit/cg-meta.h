@@ -99,6 +99,7 @@ struct CGMeta {
   struct VeneerData {
     TCA source; // address of instruction that jumps/calls the veneer
     TCA target; // address that the veneer jumps to
+    bool smashable; // whether the veneer target can be patched at runtime
   };
   std::vector<VeneerData> veneers;
 
@@ -227,7 +228,8 @@ Reason* getTrapReason(CTCA addr);
 void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
                  bool smashable);
 
-void addVeneer(CGMeta& meta, TCA source, TCA target);
+void addSmashableVeneer(CGMeta& meta, TCA source, TCA target);
+void addNonSmashableVeneer(CGMeta& meta, TCA source, TCA target);
 
 Optional<IStack> inlineStackAt(CTCA addr);
 IFrame getInlineFrame(IFrameID id);

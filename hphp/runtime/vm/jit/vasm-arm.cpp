@@ -67,6 +67,8 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
+#include <algorithm>
+
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -512,6 +514,13 @@ void Vgen::emitVeneers(Venv& env) {
   auto& meta = env.meta;
   decltype(env.meta.veneers) notEmitted;
 
+  // Emit non-smashable veneers first so they are placed closer to the code
+  // they originate from, then smashable veneers.
+  std::stable_sort(meta.veneers.begin(), meta.veneers.end(),
+                   [](const CGMeta::VeneerData& a, const CGMeta::VeneerData& b) {
+                     return !a.smashable && b.smashable;
+                   });
+
   for (auto const& veneer : meta.veneers) {
     auto cb = getBlock(env, veneer.source);
     if (!cb) {
@@ -522,18 +531,36 @@ void Vgen::emitVeneers(Venv& env) {
     }
     auto const vaddr = cb->frontier();
 
-    FTRACE(1, "emitVeneers: source = {}, target = {}, veneer at {}\n",
-           veneer.source, veneer.target, vaddr);
+    FTRACE(1, "emitVeneers: source = {}, target = {}, veneer at {}"
+           " (smashable={})\n",
+           veneer.source, veneer.target, vaddr, veneer.smashable);
 
-    // Emit the veneer code: LDR + BR.
     meta.veneerAddrs.insert(vaddr);
     MacroAssembler av{*cb};
-    vixl::Label target_data;
     meta.addressImmediates.insert(vaddr);
-    poolLiteral(*cb, meta, (uint64_t)makeTarget32(veneer.target), 32, true);
-    av.bind(&target_data);
-    av.Ldr(rAsm_w, &target_data);
-    av.Br(rAsm);
+
+    int64_t veneerSize;
+    if (veneer.smashable) {
+      // Emit the veneer code: LDR + BR.
+      // Use LDR from literal pool so the target can be atomically patched.
+      vixl::Label target_data;
+      poolLiteral(*cb, meta, (uint64_t)makeTarget32(veneer.target), 32, true);
+      av.bind(&target_data);
+      av.Ldr(rAsm_w, &target_data);
+      av.Br(rAsm);
+      veneerSize = 2 * kInstructionSize;
+    } else {
+      // Emit the veneer code: MOVZ/MOVK + BR.
+      // Always emit exactly 2 mov instructions so the relocator has a
+      // fixed-size sequence to rewrite.
+      auto const target32 = makeTarget32(veneer.target);
+      av.movz(rAsm_w, target32 & 0xFFFF, 0);
+      av.movk(rAsm_w, (target32 >> 16) & 0xFFFF, 16);
+      av.Br(rAsm);
+      veneerSize = 3 * kInstructionSize;
+    }
+    auto const veneerInstrCount =
+        static_cast<int64_t>(veneerSize / kInstructionSize);
 
     // Update the veneer source instruction to jump/call the veneer.
     auto const realSource = env.text.toDestAddress(veneer.source);
@@ -559,12 +586,12 @@ void Vgen::emitVeneers(Venv& env) {
         // The offset doesn't fit in a conditional jump. Hopefully it still fits
         // in an unconditional jump, in which case we add an appendix to the
         // veneer.
-        offset += 2 * kInstructionSize;
+        offset += veneerSize;
         always_assert(is_int28(offset));
         // Add an appendix to the veneer, and jump to it instead.  The full
         // veneer in this case looks like:
         //   VENEER:
-        //      LDR RX, LITERAL_ADDR
+        //      LDR/MOV RX, target
         //      BR  RX
         //   APPENDIX:
         //      B.CC VENEER
@@ -579,9 +606,9 @@ void Vgen::emitVeneers(Venv& env) {
 
         // Emit appendix.
         auto const appendix = cb->frontier();
-        av.b(-2 /* veneer starts 2 instructions before the appendix */, cond);
+        av.b(-veneerInstrCount, cond);
         const int64_t nextOffset = (veneer.source + kInstructionSize) - // NEXT
-          (vaddr + 3 * kInstructionSize); // addr of "B NEXT"
+          (vaddr + veneerSize + kInstructionSize); // addr of "B NEXT"
         always_assert(is_int28(nextOffset));
         av.b(nextOffset >> kInstructionSizeLog2);
 
@@ -677,7 +704,7 @@ void Vgen::processVveneers(Venv& env) {
   for (auto& vv : env.vveneers) {
     FTRACE(3, "processVveneers: source: {}  target: {} ({})\n",
            vv.instr, env.addrs[vv.target], vv.target);
-    addVeneer(env.meta, vv.instr, env.addrs[vv.target]);
+    addNonSmashableVeneer(env.meta, vv.instr, env.addrs[vv.target]);
   }
 }
 

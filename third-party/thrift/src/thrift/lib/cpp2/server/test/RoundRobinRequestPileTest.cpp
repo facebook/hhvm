@@ -590,19 +590,16 @@ TEST_F(RoundRobinRequestPileTest, getRequestCountsForSingleBucket) {
   pile.enqueue(makeServerRequestForBucket(2, 0));
 
   auto counts = pile.getRequestCounts();
-  EXPECT_EQ(
-      counts, (std::vector<std::vector<uint64_t>>{{2}, {0}, {1}}));
+  EXPECT_EQ(counts, (std::vector<std::vector<uint64_t>>{{2}, {0}, {1}}));
 
   pile.dequeue();
   counts = pile.getRequestCounts();
-  EXPECT_EQ(
-      counts, (std::vector<std::vector<uint64_t>>{{1}, {0}, {1}}));
+  EXPECT_EQ(counts, (std::vector<std::vector<uint64_t>>{{1}, {0}, {1}}));
 
   pile.dequeue();
   pile.dequeue();
   counts = pile.getRequestCounts();
-  EXPECT_EQ(
-      counts, (std::vector<std::vector<uint64_t>>{{0}, {0}, {0}}));
+  EXPECT_EQ(counts, (std::vector<std::vector<uint64_t>>{{0}, {0}, {0}}));
 }
 
 TEST_F(RoundRobinRequestPileTest, getDbgInfoWithLimitsAndQueuedRequests) {
@@ -627,14 +624,12 @@ TEST_F(RoundRobinRequestPileTest, acceptRejectCallbacksMultiBucket) {
 
   std::vector<std::pair<uint32_t, uint32_t>> accepted;
   std::vector<std::pair<uint32_t, uint32_t>> rejected;
-  pile.setOnRequestAcceptedFunction(
-      [&](uint32_t pri, uint32_t bucket) {
-        accepted.emplace_back(pri, bucket);
-      });
-  pile.setOnRequestRejectedFunction(
-      [&](uint32_t pri, uint32_t bucket) {
-        rejected.emplace_back(pri, bucket);
-      });
+  pile.setOnRequestAcceptedFunction([&](uint32_t pri, uint32_t bucket) {
+    accepted.emplace_back(pri, bucket);
+  });
+  pile.setOnRequestRejectedFunction([&](uint32_t pri, uint32_t bucket) {
+    rejected.emplace_back(pri, bucket);
+  });
 
   // Accept to bucket 0
   pile.enqueue(makeServerRequestForBucket(0, 0));
@@ -663,14 +658,12 @@ TEST_F(RoundRobinRequestPileTest, acceptRejectCallbacksSingleBucket) {
 
   std::vector<std::pair<uint32_t, uint32_t>> accepted;
   std::vector<std::pair<uint32_t, uint32_t>> rejected;
-  pile.setOnRequestAcceptedFunction(
-      [&](uint32_t pri, uint32_t bucket) {
-        accepted.emplace_back(pri, bucket);
-      });
-  pile.setOnRequestRejectedFunction(
-      [&](uint32_t pri, uint32_t bucket) {
-        rejected.emplace_back(pri, bucket);
-      });
+  pile.setOnRequestAcceptedFunction([&](uint32_t pri, uint32_t bucket) {
+    accepted.emplace_back(pri, bucket);
+  });
+  pile.setOnRequestRejectedFunction([&](uint32_t pri, uint32_t bucket) {
+    rejected.emplace_back(pri, bucket);
+  });
 
   pile.enqueue(makeServerRequestForBucket(0, 0));
   ASSERT_EQ(accepted.size(), 1);
@@ -699,14 +692,12 @@ TEST_F(RoundRobinRequestPileTest, preEnqueueFilterRejectTriggersCallback) {
 
   std::vector<std::pair<uint32_t, uint32_t>> accepted;
   std::vector<std::pair<uint32_t, uint32_t>> rejected;
-  pile.setOnRequestAcceptedFunction(
-      [&](uint32_t pri, uint32_t bucket) {
-        accepted.emplace_back(pri, bucket);
-      });
-  pile.setOnRequestRejectedFunction(
-      [&](uint32_t pri, uint32_t bucket) {
-        rejected.emplace_back(pri, bucket);
-      });
+  pile.setOnRequestAcceptedFunction([&](uint32_t pri, uint32_t bucket) {
+    accepted.emplace_back(pri, bucket);
+  });
+  pile.setOnRequestRejectedFunction([&](uint32_t pri, uint32_t bucket) {
+    rejected.emplace_back(pri, bucket);
+  });
 
   pile.enqueue(makeServerRequestForBucket(0, 0)); // accepted
   pile.enqueue(makeServerRequestForBucket(0, 1)); // rejected by filter
@@ -825,8 +816,7 @@ TEST_F(RoundRobinRequestPileTest, reEnqueueAfterDrainSingleBucket) {
 
 TEST(RoundRobinRequestPileMiscTest, describe) {
   RoundRobinRequestPile::Options opts(
-      {2, 3},
-      [](auto&) -> std::pair<uint32_t, uint32_t> { return {0, 0}; });
+      {2, 3}, [](auto&) -> std::pair<uint32_t, uint32_t> { return {0, 0}; });
   RoundRobinRequestPile pile(opts);
 
   EXPECT_EQ(
@@ -926,8 +916,7 @@ TEST_F(RoundRobinRequestPileTest, dequeueObserverCalledOnExpiredRequest) {
   pile.setRequestExpirationDelegate(&delegate);
 
   int observerCount = 0;
-  pile.setDequeueObserver(
-      [&](const ServerRequest&) { ++observerCount; });
+  pile.setDequeueObserver([&](const ServerRequest&) { ++observerCount; });
 
   pile.enqueue(makeServerRequestWithActiveState(0, 0, /*active=*/false));
   auto result = pile.dequeue();
@@ -947,7 +936,8 @@ TEST_F(RoundRobinRequestPileTest, nullRequestWithDelegateConsumed) {
   MockRequestExpirationDelegate delegate;
   pile.setRequestExpirationDelegate(&delegate);
 
-  // makeServerRequestForBucket creates requests with null ResponseChannelRequest
+  // makeServerRequestForBucket creates requests with null
+  // ResponseChannelRequest
   pile.enqueue(makeServerRequestForBucket(0, 0));
 
   auto result = pile.dequeue();
@@ -1026,7 +1016,9 @@ TEST_F(RoundRobinRequestPileTest, getDefaultPileSelectionFunc) {
 
 // --- Test for addInternalPriorities per-priority limits doubling ---
 
-TEST(RoundRobinRequestPileMiscTest, addInternalPrioritiesDoublesPerPriorityLimits) {
+TEST(
+    RoundRobinRequestPileMiscTest,
+    addInternalPrioritiesDoublesPerPriorityLimits) {
   RoundRobinRequestPile::Options opts;
   opts.setShape({2, 3});
   opts.setNumMaxRequestsPerPriority({10, 20});
@@ -1034,9 +1026,7 @@ TEST(RoundRobinRequestPileMiscTest, addInternalPrioritiesDoublesPerPriorityLimit
   auto newOpts = RoundRobinRequestPile::addInternalPriorities(opts);
 
   // Shape should be doubled: {2, 2, 3, 3}
-  EXPECT_EQ(
-      newOpts.numBucketsPerPriority,
-      (std::vector<uint32_t>{2, 2, 3, 3}));
+  EXPECT_EQ(newOpts.numBucketsPerPriority, (std::vector<uint32_t>{2, 2, 3, 3}));
 
   // Per-priority limits should be doubled: {10, 10, 20, 20}
   ASSERT_EQ(newOpts.numMaxRequestsPerPriority.size(), 4);

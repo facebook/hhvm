@@ -24,7 +24,6 @@
 #include <folly/Range.h>
 #include <folly/Utility.h>
 #include <folly/container/Reserve.h>
-#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/FieldRef.h>
@@ -573,16 +572,10 @@ struct StructEncode {
       s += Encode<TypeTag>{}(prot, *field);
       s += prot.writeFieldEnd();
     };
-    if (getFieldOrder(prot) == FieldOrder::Serialization) {
-      op::for_each_ordinal<T>([&](auto id) {
-        // To respect the SerializeInFieldIdOrder annotation, we perform a
-        // custom mapping to FieldId that may switch the current ordinal being
-        // visited. This new field id is the source of truth, and the old
-        // ordinal value should not be used in this function.
-        using Id = type::field_id<detail::pa::field_ids_in_serialization_order<
-            T>()[static_cast<size_t>(decltype(id)::value)]>;
-        writeField(Id{});
-      });
+    if (getFieldOrder(prot) == FieldOrder::Serialization &&
+        !apache::thrift::detail::st::private_access::
+            has_serialize_in_field_id_order<T>) {
+      op::for_each_field_id<T>(writeField);
     } else {
       op::for_each_field_id_ascending<T>(writeField);
     }

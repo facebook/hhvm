@@ -894,11 +894,13 @@ TEST(EncodeTest, kSortKeys) {
 }
 
 TEST(EncodeTest, SerializeInFieldIdOrder) {
+  static_assert(::apache::thrift::detail::st::private_access::
+                    has_serialize_in_field_id_order<test::Foo>);
   test::Foo foo;
   folly::IOBufQueue queue;
   CompactProtocolWriter writer;
   writer.setOutput(&queue);
-  op::encode<type::struct_t<test::Foo>>(writer, foo);
+  StructEncode<test::Foo>{}(writer, foo);
   auto serialized = queue.move();
   CompactProtocolReader reader;
   reader.setInput(serialized.get());

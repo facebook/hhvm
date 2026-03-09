@@ -403,9 +403,9 @@ std::unique_ptr<folly::IOBuf> encodeTLV(const SA& sa) {
 
   appender.writeBE<uint32_t>(sa.spi);
   appender.write<uint8_t>(sa.psp_version);
-  appender.write<uint8_t>(0);
-  appender.write<uint8_t>(0);
-  appender.write<uint8_t>(0);
+  appender.write<uint8_t>(uint8_t{0});
+  appender.write<uint8_t>(uint8_t{0});
+  appender.write<uint8_t>(uint8_t{0});
 
   std::array<uint8_t, kPSPV0KeyMaxSize> key{};
   FIZZ_CHECK_LE(sa.key.size(), kPSPV0KeyMaxSize);

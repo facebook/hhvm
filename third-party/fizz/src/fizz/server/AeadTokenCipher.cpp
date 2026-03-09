@@ -74,7 +74,7 @@ folly::Optional<Buf> Aead128GCMTokenCipher::encrypt(
   auto token = folly::IOBuf::create(kTokenHeaderLength);
   folly::io::Appender appender(token.get(), kTokenHeaderLength);
   appender.push(folly::range(salt));
-  appender.writeBE(seqNum);
+  appender.writeBE<SeqNum>(seqNum);
   token->prependChain(
       aead->encrypt(std::move(plaintext), associatedData, seqNum));
 

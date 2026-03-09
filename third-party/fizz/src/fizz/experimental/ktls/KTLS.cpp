@@ -177,7 +177,7 @@ Buf KTLSCryptoParams::toSockoptFormat() const {
   cursor.push(folly::ByteRange(realIV.data(), kLegacyFixedIVSize));
 
   // Finally, the record sequence number in network byte order.
-  cursor.writeBE(recordSeq);
+  cursor.writeBE<uint64_t>(recordSeq);
 
   return buf;
 }

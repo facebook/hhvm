@@ -200,7 +200,7 @@ Status EncryptedWriteRecordLayer::write(
         dataBuf->prev()->tailroom() >= sizeof(ContentType) + paddingSize) {
       // extend it and add padding and footer
       folly::io::Appender appender(dataBuf.get(), 0);
-      appender.writeBE(static_cast<ContentTypeType>(msg.type));
+      appender.writeBE<ContentTypeType>(static_cast<ContentTypeType>(msg.type));
       memset(appender.writableData(), 0, paddingSize);
       appender.append(paddingSize);
     } else {
@@ -208,7 +208,7 @@ Status EncryptedWriteRecordLayer::write(
       auto encryptedFooter = folly::IOBuf::create(
           sizeof(ContentType) + paddingSize + aead_->getCipherOverhead());
       folly::io::Appender appender(encryptedFooter.get(), 0);
-      appender.writeBE(static_cast<ContentTypeType>(msg.type));
+      appender.writeBE<ContentTypeType>(static_cast<ContentTypeType>(msg.type));
       memset(appender.writableData(), 0, paddingSize);
       appender.append(paddingSize);
       dataBuf->prependChain(std::move(encryptedFooter));
@@ -223,13 +223,13 @@ Status EncryptedWriteRecordLayer::write(
     // it for additional data
     header.clear();
     folly::io::Appender appender(&header, 0);
-    appender.writeBE(
+    appender.writeBE<ContentTypeType>(
         static_cast<ContentTypeType>(ContentType::application_data));
-    appender.writeBE(
+    appender.writeBE<ProtocolVersionType>(
         static_cast<ProtocolVersionType>(ProtocolVersion::tls_1_2));
     auto ciphertextLength =
         dataBuf->computeChainDataLength() + aead_->getCipherOverhead();
-    appender.writeBE<uint16_t>(ciphertextLength);
+    appender.writeBE<uint16_t>(static_cast<uint16_t>(ciphertextLength));
 
     auto cipherText = aead_->encrypt(
         std::move(dataBuf),

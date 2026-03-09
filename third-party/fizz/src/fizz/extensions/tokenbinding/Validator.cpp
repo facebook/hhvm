@@ -167,7 +167,8 @@ EcKeyUniquePtr Validator::constructEcKeyFromBuf(const Buf& key) {
   // https://tlswg.github.io/tls13-spec/draft-ietf-tls-tls13.html#ecdhe-param
   Buf combinedKey = folly::IOBuf::create(TokenBindingUtils::kP256EcKeySize + 1);
   Appender keyAppender(combinedKey.get(), 20);
-  keyAppender.writeBE<uint8_t>(POINT_CONVERSION_UNCOMPRESSED);
+  keyAppender.writeBE<uint8_t>(
+      static_cast<uint8_t>(POINT_CONVERSION_UNCOMPRESSED));
 
   // Key string from the token binding message has key size as the first byte,
   // so we need to retrieve the key without the size byte,

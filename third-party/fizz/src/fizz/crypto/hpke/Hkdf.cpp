@@ -62,7 +62,7 @@ std::unique_ptr<folly::IOBuf> Hkdf::labeledExpand(
   if (L > (1 << 16) - 1) {
     throw std::runtime_error("This is greater than the maximum length allowed");
   }
-  appender.writeBE<uint16_t>(L);
+  appender.writeBE<uint16_t>(static_cast<uint16_t>(L));
   appender.push(prefix_);
   writeBufWithoutLength(suiteId, appender);
   writeBufWithoutLength(folly::IOBuf::wrapBuffer(label), appender);

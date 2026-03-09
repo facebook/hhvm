@@ -234,7 +234,7 @@ inline Status write<Extension>(
     const Extension& extension,
     folly::io::Appender& out) {
   using UT = std::underlying_type_t<ExtensionType>;
-  out.writeBE(static_cast<UT>(extension.extension_type));
+  out.writeBE<UT>(static_cast<UT>(extension.extension_type));
   FIZZ_RETURN_ON_ERROR(writeBuf<uint16_t>(err, extension.extension_data, out));
   return Status::Success;
 }

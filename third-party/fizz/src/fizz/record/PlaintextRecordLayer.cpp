@@ -143,9 +143,10 @@ Status PlaintextWriteRecordLayer::write(
 
     auto header = folly::IOBuf::create(kPlaintextHeaderSize);
     folly::io::Appender appender(header.get(), kPlaintextHeaderSize);
-    appender.writeBE(static_cast<ContentTypeType>(msg.type));
-    appender.writeBE(static_cast<ProtocolVersionType>(recordVersion));
-    appender.writeBE<uint16_t>(len);
+    appender.writeBE<ContentTypeType>(static_cast<ContentTypeType>(msg.type));
+    appender.writeBE<ProtocolVersionType>(
+        static_cast<ProtocolVersionType>(recordVersion));
+    appender.writeBE<uint16_t>(static_cast<uint16_t>(len));
 
     if (!data) {
       data = std::move(header);

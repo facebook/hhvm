@@ -14,17 +14,19 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#program:unions?}}
+}}
+{{#if program:unions?}}
 
 namespace apache::thrift {
-{{#program:structs}}{{#struct:union?}}
+  {{#each program:structured_definitions as |def|}}
+    {{#if def.union?}}
 
-template <> struct TEnumDataStorage<{{struct:cpp_fullname}}::Type>;
+template <> struct TEnumDataStorage<{{def.cpp_fullname}}::Type>;
 
-template <> struct TEnumTraits<{{struct:cpp_fullname}}::Type> {
-  using type = {{struct:cpp_fullname}}::Type;
+template <> struct TEnumTraits<{{def.cpp_fullname}}::Type> {
+  using type = {{def.cpp_fullname}}::Type;
 
-  static constexpr std::size_t const size = {{struct:num_union_members}};
+  static constexpr std::size_t const size = {{(array.len def.fields)}};
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 
@@ -37,11 +39,12 @@ template <> struct TEnumTraits<{{struct:cpp_fullname}}::Type> {
     return ret.data();
   }
 
-  {{#if (int.gt? struct:num_union_members 0)}}
-  static constexpr type min() { return type::{{struct:min_union_member}}; }
-  static constexpr type max() { return type::{{struct:max_union_member}}; }
-  {{/if (int.gt? struct:num_union_members 0)}}
+  {{#if def.fields?}}
+  static constexpr type min() { return type::{{def.min_union_member}}; }
+  static constexpr type max() { return type::{{def.max_union_member}}; }
+  {{/if def.fields?}}
 };
-{{/struct:union?}}{{/program:structs}}
+    {{/if def.union?}}
+  {{/each}}
 } // namespace apache::thrift
-{{/program:unions?}}
+{{/if program:unions?}}

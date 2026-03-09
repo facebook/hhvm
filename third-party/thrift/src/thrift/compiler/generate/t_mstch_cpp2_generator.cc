@@ -201,6 +201,21 @@ bool generate_reduced_client(const t_interface& i) {
   return i.is<t_interaction>();
 }
 
+template <class Comp>
+const std::string& get_extremal_union_member(const t_union& u) {
+  Comp comp;
+  auto iter = std::min_element(
+      u.fields().cbegin(),
+      u.fields().cend(),
+      [&comp](const t_field& a, const t_field& b) {
+        return comp(a.id(), b.id());
+      });
+  if (iter == u.fields().cend()) {
+    throw std::runtime_error("empty union struct");
+  }
+  return cpp2::get_name(&*iter);
+}
+
 // Compute the set of types that appear anywhere in the service
 // definition as input or output types. This presents maps, lists etc as seen
 // in declarations, but unpacks the payloads of sinks and streams.
@@ -1024,6 +1039,17 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       return true;
     });
 
+    return std::move(def).make();
+  }
+
+  prototype<t_union>::ptr make_prototype_for_union(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_union(proto);
+    auto def =
+        whisker::dsl::prototype_builder<h_union>::extends(std::move(base));
+    def.property("min_union_member", &get_extremal_union_member<std::less<>>);
+    def.property(
+        "max_union_member", &get_extremal_union_member<std::greater<>>);
     return std::move(def).make();
   }
 
@@ -1862,9 +1888,6 @@ class cpp_mstch_service : public mstch_service {
       split_functions_.push_back(all_functions[id]);
     }
   }
-  std::string get_service_namespace(const t_program* program) override {
-    return t_mstch_cpp2_generator::get_cpp2_namespace(program);
-  }
   mstch::node cpp_includes() {
     return t_mstch_cpp2_generator::cpp_includes(service_->program());
   }
@@ -1965,15 +1988,8 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::fields_in_key_order},
             {"struct:fields_in_layout_order",
              &cpp_mstch_struct::fields_in_layout_order},
-            {"struct:message", &cpp_mstch_struct::message},
             {"struct:isset_fields", &cpp_mstch_struct::isset_fields},
             {"struct:mixin_fields", &cpp_mstch_struct::mixin_fields},
-            {"struct:num_union_members",
-             &cpp_mstch_struct::get_num_union_members},
-            {"struct:min_union_member",
-             &cpp_mstch_struct::get_min_union_member},
-            {"struct:max_union_member",
-             &cpp_mstch_struct::get_max_union_member},
             {"struct:fields_with_runtime_annotation",
              &cpp_mstch_struct::fields_with_runtime_annotation},
         });
@@ -2026,18 +2042,6 @@ class cpp_mstch_struct : public mstch_struct {
     return fields;
   }
 
-  mstch::node message() {
-    const t_exception* exception = struct_->try_as<t_exception>();
-    const t_field* message_field =
-        exception == nullptr ? nullptr : exception->get_message_field();
-    if (!message_field) {
-      return {};
-    }
-    if (!should_mangle_field_storage_name_in_struct(*struct_)) {
-      return message_field->name();
-    }
-    return mangle_field_name(message_field->name());
-  }
   mstch::node isset_fields() {
     std::vector<const t_field*> fields;
     for (const auto& field : struct_->fields()) {
@@ -2049,39 +2053,6 @@ class cpp_mstch_struct : public mstch_struct {
       return mstch::node();
     }
     return make_mstch_fields(fields);
-  }
-
-  mstch::node get_num_union_members() {
-    if (!struct_->is<t_union>()) {
-      throw std::runtime_error("not a union struct");
-    }
-    return struct_->fields().size();
-  }
-
-  template <class Comp>
-  mstch::node get_extremal_union_member(Comp comp) {
-    if (!struct_->is<t_union>()) {
-      throw std::runtime_error("not a union struct");
-    }
-    auto iter = std::min_element(
-        struct_->fields().cbegin(),
-        struct_->fields().cend(),
-        [&comp](const t_field& a, const t_field& b) {
-          return comp(a.id(), b.id());
-        });
-    if (iter == struct_->fields().cend()) {
-      throw std::runtime_error("empty union struct");
-    }
-
-    return cpp2::get_name(&*iter);
-  }
-
-  mstch::node get_min_union_member() {
-    return get_extremal_union_member(std::less<>{});
-  }
-
-  mstch::node get_max_union_member() {
-    return get_extremal_union_member(std::greater<>{});
   }
 
   mstch::node fields_with_runtime_annotation() {

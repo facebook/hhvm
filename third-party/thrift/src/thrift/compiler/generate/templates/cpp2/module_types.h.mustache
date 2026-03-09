@@ -248,9 +248,9 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 
 {{#struct:is_large?}}
   {{struct:cpp_underlying_name}}();
-  {{#struct:message}}
+  {{#if (and struct:exception? (object.notnull? exception:message_field))}}
   explicit {{struct:cpp_underlying_name}}(std::string __message);
-  {{/struct:message}}
+  {{/if (and struct:exception? (object.notnull? exception:message_field))}}
 {{/struct:is_large?}}
 {{^struct:is_large?}}
   {{> module_types_h/base_ctor}}
@@ -353,12 +353,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 {{#struct:exception?}}
 
   const char* what() const noexcept override {
-{{#struct:message}}
-    return {{struct:message}}.c_str();
-{{/struct:message}}
-{{^struct:message}}
-    return "{{struct:cpp_fullname}}";
-{{/struct:message}}
+    return {{#if (object.notnull? exception:message_field)}}{{exception:message_field.cpp_storage_name}}.c_str(){{#else}}"{{struct:cpp_fullname}}"{{/if}};
   }
 {{/struct:exception?}}
 {{/struct:union?}}

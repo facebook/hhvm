@@ -40,25 +40,25 @@ template <> struct TEnumDataStorage<::{{program:cpp_qualified_namespace}}::{{enu
   }};
 };
 {{/program:enums}}
-{{#program:structs}}
-{{#struct:union?}}
+  {{#each program:structured_definitions as |def|}}
+    {{#if def.union?}}
 
-template <> struct TEnumDataStorage<{{struct:cpp_fullname}}::Type> {
-  using type = {{struct:cpp_fullname}}::Type;
-  static constexpr const std::size_t size = {{struct:num_union_members}};
+template <> struct TEnumDataStorage<{{def.cpp_fullname}}::Type> {
+  using type = {{def.cpp_fullname}}::Type;
+  static constexpr const std::size_t size = {{(array.len def.fields)}};
   static constexpr std::array<type, size> values = { {
-{{#struct:fields}}{{!
-}}      type::{{field:cpp_name}},
-{{/struct:fields}}
+{{#each def.fields as |field|}}{{!
+}}      type::{{field.cpp_name}},
+{{/each}}
   }};
   static constexpr std::array<std::string_view, size> names = { {
-{{#struct:fields}}{{!
-}}      "{{field:name}}"sv,
-{{/struct:fields}}
+{{#each def.fields as |field|}}{{!
+}}      "{{field.name}}"sv,
+{{/each}}
   }};
 };
-{{/struct:union?}}
-{{/program:structs}}
+    {{/if def.union?}}
+  {{/each}}
 {{#program:structs}}
 
 template <> struct TStructDataStorage<{{struct:cpp_fullname}}> {

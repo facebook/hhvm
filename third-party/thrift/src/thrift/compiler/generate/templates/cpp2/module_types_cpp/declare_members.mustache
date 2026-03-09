@@ -16,12 +16,12 @@
 
 }}{{#struct:is_large?}}
 {{struct:cpp_underlying_name}}::{{> module_types_h/base_ctor}}
-{{#struct:message}}
+  {{#if (and struct:exception? (object.notnull? exception:message_field))}}
 
 {{struct:cpp_underlying_name}}::{{struct:cpp_underlying_name}}(std::string __message) : {{struct:cpp_underlying_name}}() {
-  {{struct:message}} = std::move(__message);
+  {{exception:message_field.cpp_storage_name}} = std::move(__message);
 }
-{{/struct:message}}
+  {{/if (and struct:exception? (object.notnull? exception:message_field))}}
 
 
 {{struct:cpp_underlying_name}}::~{{struct:cpp_underlying_name}}() {}

@@ -1,3 +1,4 @@
 --implicit-pess
 --map-reduce
 --hh-log-level truthiness_collector 1
+--config disallow_bool_cast=false

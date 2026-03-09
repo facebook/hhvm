@@ -14,6 +14,6 @@ class C {
     // This is rejected by legacy type checker if we remove the non_null hack
     // from the checking of idx
     $this->title = idx($m, 'title');
-    $this->whatever = (bool) idx($m, 'whatever', false);
+    $this->whatever = idx($m, 'whatever', false) !== false;
   }
 }

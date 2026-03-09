@@ -24,5 +24,5 @@ function demo(): bool {
 
   $val1 = special_array_map($fun1, $array);
 
-  return (bool)$val1;
+  return $val1 !== dict[];
 }

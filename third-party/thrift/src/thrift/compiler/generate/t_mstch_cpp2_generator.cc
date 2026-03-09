@@ -580,7 +580,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   }
 
   void generate_sinit(const t_program* program);
-  void generate_reflection(const t_program* program);
   void generate_visitation();
   void generate_constants(const t_program* program);
   void generate_metadata(const t_program* program);
@@ -2202,9 +2201,6 @@ void t_mstch_cpp2_generator::generate_program() {
   set_mstch_factories();
 
   generate_sinit(program);
-  if (has_option("reflection")) {
-    generate_reflection(program);
-  }
   generate_structs(program);
   generate_constants(program);
   if (has_option("single_file_service")) {
@@ -2246,23 +2242,6 @@ void t_mstch_cpp2_generator::generate_sinit(const t_program* program) {
   const auto& prog = cached_program(program);
 
   render_to_file(prog, "module_sinit.cpp", name + "_sinit.cpp");
-}
-
-void t_mstch_cpp2_generator::generate_reflection(const t_program* program) {
-  const auto& name = program->name();
-  const auto& prog = cached_program(program);
-
-  // Combo include: all
-  render_to_file(prog, "module_fatal_all.h", name + "_fatal_all.h");
-  // Combo include: types
-  render_to_file(prog, "module_fatal_types.h", name + "_fatal_types.h");
-  // Unique Compile-time Strings, Metadata tags and Metadata registration
-  render_to_file(prog, "module_fatal.h", name + "_fatal.h");
-
-  render_to_file(prog, "module_fatal_union.h", name + "_fatal_union.h");
-  render_to_file(prog, "module_fatal_struct.h", name + "_fatal_struct.h");
-  render_to_file(prog, "module_fatal_constant.h", name + "_fatal_constant.h");
-  render_to_file(prog, "module_fatal_service.h", name + "_fatal_service.h");
 }
 
 void t_mstch_cpp2_generator::generate_visitation() {

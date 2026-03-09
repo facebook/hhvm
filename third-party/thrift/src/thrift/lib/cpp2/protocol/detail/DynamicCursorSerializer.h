@@ -127,6 +127,14 @@ class StructuredDynamicCursorReader : detail::BaseCursorReader<ProtocolReader> {
     return ret;
   }
 
+  folly::io::Cursor readStringCursor() {
+    beforeReadField();
+    ensureTypesCompatible<type::string_t>(readState_.fieldType);
+    auto ret = detail::readStringCursor(*protocol_);
+    afterReadField();
+    return ret;
+  }
+
   folly::io::Cursor readRawCursor() {
     beforeReadField();
     requireRawReadSupport();

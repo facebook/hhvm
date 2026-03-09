@@ -176,6 +176,15 @@ TEST(DynamicCursorSerializer, UnschematizedRead) {
   reader.endRead(std::move(list_of_set_of_stringish_reader));
   wrapper.endRead(std::move(reader));
 
+  // String cursor read
+  reader = wrapper.beginRead();
+  auto stringCursor = reader.readStringCursor();
+  std::string stringFromCursor;
+  stringFromCursor.resize(stringCursor.totalLength());
+  stringCursor.pull(stringFromCursor.data(), stringFromCursor.size());
+  EXPECT_EQ(stringFromCursor, "hello");
+  wrapper.endRead(std::move(reader));
+
   // Raw read
   reader = wrapper.beginRead();
   auto str = reader.readRaw();

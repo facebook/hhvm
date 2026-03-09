@@ -19,28 +19,28 @@
 #pragma once
 
 #include <thrift/lib/cpp2/visitation/visit_by_thrift_field_metadata.h>
-#include "{{program:include_prefix}}{{program:name}}_metadata.h"
+#include "{{program.include_prefix}}{{program.name}}_metadata.h"
 
 namespace apache {
 namespace thrift {
 namespace detail {
-{{#program:structs}}
+  {{#each program.structured_definitions as |def|}}
 
 template <>
-struct VisitByFieldId<{{struct:cpp_fullname}}> {
+struct VisitByFieldId<{{def.cpp_fullname}}> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
     switch (fieldId) {
-    {{#struct:fields}}
-    case {{field:id}}:
-      return f({{field:index}}, static_cast<T&&>(t).{{field:cpp_name}}_ref());
-    {{/struct:fields}}
+    {{#each (array.enumerate def.fields) as |field_index field|}}
+    case {{field.id}}:
+      return f({{field_index}}, static_cast<T&&>(t).{{field.cpp_name}}_ref());
+    {{/each}}
     default:
-      throwInvalidThriftId(fieldId, "{{struct:cpp_fullname}}");
+      throwInvalidThriftId(fieldId, "{{def.cpp_fullname}}");
     }
   }
 };
-{{/program:structs}}
+  {{/each}}
 } // namespace detail
 } // namespace thrift
 } // namespace apache

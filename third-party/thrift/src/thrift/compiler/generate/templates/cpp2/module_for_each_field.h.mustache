@@ -18,24 +18,24 @@
 {{> Autogen}}
 #pragma once
 
-#include "{{program:include_prefix}}{{program:name}}_metadata.h"
+#include "{{program.include_prefix}}{{program.name}}_metadata.h"
 #include <thrift/lib/cpp2/visitation/for_each.h>
 
 namespace apache {
 namespace thrift {
 namespace detail {
-{{#program:structs}}
+  {{#each program.structured_definitions as |def|}}
 
 template <>
-struct ForEachField<{{struct:cpp_fullname}}> {
+struct ForEachField<{{def.cpp_fullname}}> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
-    {{#struct:fields}}
-    f({{field:index}}, static_cast<T&&>(t).{{field:cpp_name}}_ref()...);
-    {{/struct:fields}}
+    {{#each (array.enumerate def.fields) as |field_index field|}}
+    f({{field_index}}, static_cast<T&&>(t).{{field.cpp_name}}_ref()...);
+    {{/each}}
   }
 };
-{{/program:structs}}
+  {{/each}}
 } // namespace detail
 } // namespace thrift
 } // namespace apache

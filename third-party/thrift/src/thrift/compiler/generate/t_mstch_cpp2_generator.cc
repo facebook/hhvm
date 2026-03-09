@@ -569,9 +569,19 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
  private:
   void set_mstch_factories();
+  void render_whisker_file(
+      std::string_view template_name, const std::filesystem::path& output) {
+    whisker::object context = whisker::make::map({
+        {"program",
+         whisker::make::native_handle(
+             render_state().prototypes->create<t_program>(*program_))},
+    });
+    t_whisker_generator::render_to_file(output, template_name, context);
+  }
+
   void generate_sinit(const t_program* program);
   void generate_reflection(const t_program* program);
-  void generate_visitation(const t_program* program);
+  void generate_visitation();
   void generate_constants(const t_program* program);
   void generate_metadata(const t_program* program);
   void generate_structs(const t_program* program);
@@ -780,6 +790,12 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
             get_fatal_string_short_id(i), render_fatal_string(i->name()));
       }
       return whisker::make::map(std::move(unique_names));
+    });
+    def.property("thrift_includes", [&proto](const t_program& program) {
+      // TODO(T256504524): Migrate to `includes_for_codegen` property in
+      // `t_whisker_generator` in the future
+      return to_array(
+          program.get_includes_for_codegen(), proto.of<t_program>());
     });
     return std::move(def).make();
   }
@@ -1660,7 +1676,6 @@ class cpp_mstch_program : public mstch_program {
     register_methods(
         this,
         {{"program:cpp_includes", &cpp_mstch_program::cpp_includes},
-         {"program:thrift_includes", &cpp_mstch_program::thrift_includes},
          {"program:transitive_schema_initializers",
           &cpp_mstch_program::transitive_schema_initializers},
          {"program:num_transitive_thrift_includes",
@@ -1687,13 +1702,6 @@ class cpp_mstch_program : public mstch_program {
       }
     }
     return includes;
-  }
-  mstch::node thrift_includes() {
-    mstch::array a;
-    for (const auto* program : program_->get_includes_for_codegen()) {
-      a.emplace_back(make_mstch_program_cached(program, context_));
-    }
-    return a;
   }
   /**
    * To reduce build time, the generated constants code only includes the
@@ -2240,7 +2248,7 @@ void t_mstch_cpp2_generator::generate_program() {
     generate_out_of_line_services(program->services());
   }
   generate_metadata(program);
-  generate_visitation(program);
+  generate_visitation();
 }
 
 void t_mstch_cpp2_generator::set_mstch_factories() {
@@ -2292,15 +2300,12 @@ void t_mstch_cpp2_generator::generate_reflection(const t_program* program) {
   render_to_file(prog, "module_fatal_service.h", name + "_fatal_service.h");
 }
 
-void t_mstch_cpp2_generator::generate_visitation(const t_program* program) {
-  const auto& name = program->name();
-  const auto& prog = cached_program(program);
-
-  render_to_file(prog, "module_visitation.h", name + "_visitation.h");
-  render_to_file(prog, "module_for_each_field.h", name + "_for_each_field.h");
-  render_to_file(prog, "module_visit_union.h", name + "_visit_union.h");
-  render_to_file(
-      prog,
+void t_mstch_cpp2_generator::generate_visitation() {
+  const std::string& name = program_->name();
+  render_whisker_file("module_visitation.h", name + "_visitation.h");
+  render_whisker_file("module_for_each_field.h", name + "_for_each_field.h");
+  render_whisker_file("module_visit_union.h", name + "_visit_union.h");
+  render_whisker_file(
       "module_visit_by_thrift_field_metadata.h",
       name + "_visit_by_thrift_field_metadata.h");
 }

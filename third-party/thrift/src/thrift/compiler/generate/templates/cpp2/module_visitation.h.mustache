@@ -17,9 +17,9 @@
 }}
 {{> Autogen}}
 #pragma once
-{{#program:thrift_includes}}
-#include "{{program:include_prefix}}{{program:name}}_visitation.h"
-{{/program:thrift_includes}}
-#include "{{program:include_prefix}}{{program:name}}_for_each_field.h"
-#include "{{program:include_prefix}}{{program:name}}_visit_union.h"
-#include "{{program:include_prefix}}{{program:name}}_visit_by_thrift_field_metadata.h"
+  {{#each program.thrift_includes as |included|}}
+#include "{{included.include_prefix}}{{included.name}}_visitation.h"
+  {{/each}}
+#include "{{program.include_prefix}}{{program.name}}_for_each_field.h"
+#include "{{program.include_prefix}}{{program.name}}_visit_union.h"
+#include "{{program.include_prefix}}{{program.name}}_visit_by_thrift_field_metadata.h"

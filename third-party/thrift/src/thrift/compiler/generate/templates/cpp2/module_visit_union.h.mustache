@@ -18,34 +18,35 @@
 {{> Autogen}}
 #pragma once
 
-#include "{{program:include_prefix}}{{program:name}}_metadata.h"
+#include "{{program.include_prefix}}{{program.name}}_metadata.h"
 #include <thrift/lib/cpp2/visitation/visit_union.h>
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
-{{#program:structs}}
-{{#struct:union?}}
+  {{#each program.structured_definitions as |def|}}
+    {{#if def.union?}}
 template <>
-struct VisitUnion<{{struct:cpp_fullname}}> {
+struct VisitUnion<{{def.cpp_fullname}}> {
 
   template <typename F, typename T>
   decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
     using Union = std::remove_reference_t<T>;
     switch (t.getType()) {
-    {{#struct:fields}}
-    case Union::Type::{{field:cpp_name}}:
-      return f({{field:index}}, *static_cast<T&&>(t).{{field:cpp_name}}_ref());
-    {{/struct:fields}}
+    {{#each (array.enumerate def.fields) as |field_index field|}}
+    case Union::Type::{{field.cpp_name}}:
+      return f({{field_index}}, *static_cast<T&&>(t).{{field.cpp_name}}_ref());
+    {{/each}}
     case Union::Type::__EMPTY__:
-      {{#struct:fields}}{{#first?}}
-      return decltype(f({{field:index}}, *static_cast<T&&>(t).{{field:cpp_name}}_ref()))();
-      {{/first?}}{{/struct:fields}}
-      {{^struct:fields}}
+      {{#each (array.enumerate def.fields with_first=true) as |field_index field first?|}}
+        {{#if first?}}
+      return decltype(f({{field_index}}, *static_cast<T&&>(t).{{field.cpp_name}}_ref()))();
+        {{/if first?}}
+      {{#else}}
       (void)0;
       break;
-      {{/struct:fields}}
+      {{/each}}
     default:
       throw std::runtime_error{folly::to<std::string>(
           "Enum got invalid value ",
@@ -54,8 +55,8 @@ struct VisitUnion<{{struct:cpp_fullname}}> {
     }
   }
 };
-{{/struct:union?}}
-{{/program:structs}}
+    {{/if def.union?}}
+  {{/each}}
 } // namespace detail
 } // namespace thrift
 } // namespace apache

@@ -35,6 +35,7 @@ val find_references :
   action_internal ->
   bool ->
   Relative_path.t list ->
+  deadline:float option ->
   stream_file:Path.t option ->
   SearchTypes.Find_refs.t list
 

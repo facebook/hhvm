@@ -255,10 +255,18 @@ let fold_one_tast ctx target acc symbol =
   | (IGConst cst_name, SO.GConst) -> process_gconst_id cst_name (pos, name)
   | _ -> Pos.Map.empty
 
-let should_cancel ~stream_file =
-  match stream_file with
-  | None -> false
-  | Some stream_file -> not (Path.file_exists stream_file)
+let should_cancel ~stream_file ~deadline =
+  let streaming_file_gone =
+    match stream_file with
+    | None -> false
+    | Some stream_file -> not (Path.file_exists stream_file)
+  in
+  let past_deadline =
+    match deadline with
+    | None -> false
+    | Some d -> Float.(Unix.gettimeofday () >= d)
+  in
+  streaming_file_gone || past_deadline
 
 module Iter = struct
   exception Cancelled
@@ -285,10 +293,10 @@ module Iter = struct
     }
 
   (** We'll check a few times a second whether we should cancel. *)
-  let raise_if_should_cancel acc ~t_now ~stream_file =
+  let raise_if_should_cancel acc ~t_now ~stream_file ~deadline =
     let last_cancellation_check =
       if Float.(t_now > acc.last_cancellation_check +. 0.2) then begin
-        if should_cancel ~stream_file then raise Cancelled;
+        if should_cancel ~stream_file ~deadline then raise Cancelled;
         t_now
       end else
         acc.last_cancellation_check
@@ -347,6 +355,7 @@ let find_refs
     (files : Relative_path.t list)
     ~(omit_declaration : bool)
     ~(stream_file : Path.t option)
+    ~(deadline : float option)
     ~(t_start : float) : (SearchTypes.Find_refs.t list, unit) Result.t =
   (* The helper function 'results_from_tast' takes a tast, looks at all
      use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,
@@ -406,7 +415,9 @@ let find_refs
         let acc =
           List.fold files ~init:(Iter.init ()) ~f:(fun acc path ->
               let t_now = Unix.gettimeofday () in
-              let acc = Iter.raise_if_should_cancel ~stream_file ~t_now acc in
+              let acc =
+                Iter.raise_if_should_cancel ~stream_file ~deadline ~t_now acc
+              in
               let per_file = results_from_tast (tast_of_file path) in
               let acc = Iter.{ acc with results = per_file :: acc.results } in
               Iter.stream_file ~per_file ~stream_fd ~t_now ~t_start acc)
@@ -444,10 +455,12 @@ let parallel_find_refs
     ctx
     ~(omit_declaration : bool)
     ~(stream_file : Path.t option)
+    ~(deadline : float option)
     ~(t_start : float) =
   MultiWorker.call
     workers
-    ~job:(find_refs ctx target ~omit_declaration ~stream_file ~t_start)
+    ~job:
+      (find_refs ctx target ~omit_declaration ~stream_file ~deadline ~t_start)
     ~neutral:(Ok [])
     ~merge:(fun output acc ->
       match (output, acc) with
@@ -458,7 +471,7 @@ let parallel_find_refs
        (* We create the "next" function just once, now; it will dole
           out chunks of [files] each time it's asked, below. *)
        fun () ->
-         if should_cancel ~stream_file then
+         if should_cancel ~stream_file ~deadline then
            Bucket.Done
          else
            next ())
@@ -534,7 +547,8 @@ let get_definitions ctx action =
        later time *)
     []
 
-let find_references ctx workers target include_defs files ~stream_file =
+let find_references ctx workers target include_defs files ~deadline ~stream_file
+    =
   let len = List.length files in
   Hh_logger.debug "find_references: %d files" len;
   let t_start = Unix.gettimeofday () in
@@ -549,6 +563,7 @@ let find_references ctx workers target include_defs files ~stream_file =
         files
         ~omit_declaration:true
         ~stream_file
+        ~deadline
         ~t_start
     else
       parallel_find_refs
@@ -558,6 +573,7 @@ let find_references ctx workers target include_defs files ~stream_file =
         ctx
         ~omit_declaration:true
         ~stream_file
+        ~deadline
         ~t_start
   in
   match results with
@@ -588,6 +604,7 @@ let find_references_single_file ctx target file =
       [file]
       ~omit_declaration:false
       ~stream_file:None
+      ~deadline:None
       ~t_start:(Unix.gettimeofday ())
   in
   match results with

@@ -45,6 +45,7 @@ let search ctx target include_defs ~hints ~files ~stream_file genv =
       target
       include_defs
       files
+      ~deadline:None
       ~stream_file
   in
   strip_ns res

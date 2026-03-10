@@ -42,13 +42,24 @@ let print_refs (results : SearchTypes.Find_refs.absolute list) ~(json : bool) :
   else
     FindRefsWireFormat.CliHumanReadable.print_results results
 
-let print_find_my_tests_result result ~(json : bool) : unit =
+let print_find_my_tests_result_v1 result ~(json : bool) : unit =
   let module FMT = ServerCommandTypes.Find_my_tests in
   if json then
-    let result_json = `List (List.map result ~f:FMT.yojson_of_result_entry) in
+    let result_json =
+      `List (List.map result ~f:FMT.yojson_of_selected_test_file)
+    in
     print_endline (Yojson.Safe.pretty_to_string result_json)
   else
     List.iter result ~f:(fun file -> print_endline file.FMT.file_path)
+
+let print_find_my_tests_result result ~(json : bool) : unit =
+  let module FMT = ServerCommandTypes.Find_my_tests in
+  if json then
+    let result_json = FMT.yojson_of_result_data result in
+    print_endline (Yojson.Safe.pretty_to_string result_json)
+  else
+    List.iter result.FMT.selected_test_files ~f:(fun file ->
+        print_endline file.FMT.file_path)
 
 let parse_name_or_member_id ~name_only_action ~name_and_member_action name =
   let pieces = Str.split (Str.regexp "::") name in
@@ -1046,7 +1057,7 @@ let main_internal
     in
     (match result with
     | Ok fmt_result ->
-      print_find_my_tests_result fmt_result ~json:args.output_json;
+      print_find_my_tests_result_v1 fmt_result ~json:args.output_json;
       Lwt.return (Exit_status.No_error, telemtry)
     | Error error ->
       Printf.eprintf "%s\n" error;

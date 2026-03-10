@@ -170,26 +170,42 @@ module Find_my_tests = struct
 
   type provenance = { root_indices: int list } [@@deriving yojson]
 
-  type result_entry = {
+  type selected_test_file = {
     file_path: string;
     distance: int;
     provenance: provenance option;
   }
   [@@deriving yojson]
 
-  type result = (result_entry list, string) Result.t
+  (* Types only use by v1 *)
 
-  (* Types Used by staging only *)
+  type result_v1 = (selected_test_file list, string) Result.t
+
+  (* Types used by staging only *)
+
+  type result_data = {
+    selected_test_files: selected_test_file list;
+    out_of_time: bool;
+  }
+  [@@deriving yojson]
+
+  type result = (result_data, string) Result.t
 
   type config = {
     max_distance: int; [@default 1]
     max_test_files: int option; [@default None]
     root_provenance: bool; [@default false]
+    time_limit_secs: int option; [@default None]
   }
   [@@deriving yojson]
 
   let default_config =
-    { max_distance = 1; max_test_files = None; root_provenance = false }
+    {
+      max_distance = 1;
+      max_test_files = None;
+      root_provenance = false;
+      time_limit_secs = None;
+    }
 
   type json_input = {
     roots: string list;
@@ -467,7 +483,7 @@ type _ t =
       -> Find_refs.result_or_retry list t
   | FIND_MY_TESTS_V1 :
       (int * int option * Find_my_tests.action list)
-      -> Find_my_tests.result t
+      -> Find_my_tests.result_v1 t
   | FIND_MY_TESTS_STAGING :
       (Find_my_tests.config * Find_my_tests.action list)
       -> Find_my_tests.result t

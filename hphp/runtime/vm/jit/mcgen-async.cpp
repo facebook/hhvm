@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/tc-region.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/type-profile.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/build-info.h"
@@ -414,9 +415,9 @@ struct AsyncTranslationWorker
     SCOPE_EXIT {
       if (!Cfg::Repo::Authoritative) {
         assertx(Cfg::Eval::EnableAsyncJIT);
-        if (rctx.currNumTranslations != kIgnoreNumTrans) {
-          enqueuedSKs().dequeue(ctx.sk);
-        }
+        // Dequeue for both normal and jumpstart requests so the SrcKey can be
+        // re-enqueued if a future retranslation is needed.
+        enqueuedSKs().dequeue(ctx.sk);
       } else {
         assertx(Cfg::Eval::EnableAsyncJITLive ||
                 Cfg::Eval::EnableAsyncJITProfile);
@@ -633,10 +634,18 @@ void joinAsyncTranslationWorkerThreads() {
 }
 
 void enqueueAsyncTranslateRequestForJumpstart(RegionContext&& ctx) {
+  // Use the SrcKeySet to deduplicate jumpstart requests for the same SrcKey.
+  // The serialized SBProf data may contain multiple entries for the same
+  // SrcKey (e.g. with different live types).  Without dedup, multiple workers
+  // can concurrently translate and publish for the same SrcKey, pushing
+  // numTrans past MaxTranslations and violating the translation limit
+  // invariant.
+ if (detail::mayEnqueueAsyncTranslateRequest(ctx.sk)) {
   dispatcher().enqueue(AsyncRegionTranslationContext {
     TransKind::Live, std::move(ctx), kIgnoreNumTrans
   });
   FTRACE(2, "Enqueued sk {} for jitting in jumpstart\n", show(ctx.sk));
+ }
 }
 
 namespace {

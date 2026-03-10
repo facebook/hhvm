@@ -1163,6 +1163,11 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
 
   auto const& pds = getSBDeserProfData();
 
+  auto const opts = RepoOptions::forFile(root + '/');
+  g_context->onLoadWithOptions("", opts);
+  auto const map = AutoloadHandler::s_instance->getAutoloadMap();
+  always_assert(map);
+
   std::vector<VMWorker> workers;
   // numBatches is taken from merge_loaded_units. See the comment there.
   // TODO: tune numBatches.

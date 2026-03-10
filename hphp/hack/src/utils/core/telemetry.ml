@@ -198,6 +198,10 @@ let float_opt ~(key : string) ~(value : float option) (telemetry : t) : t =
   | None -> (key, Hh_json.JSON_Null) :: telemetry
   | Some value -> float_ telemetry ~key ~value
 
+let float_list ~(key : string) ~(value : float list) (telemetry : t) : t =
+  let value = List.map ~f:(fun f -> Hh_json.float_ f) value in
+  (key, Hh_json.JSON_Array value) :: telemetry
+
 let error ~(stack : string option) (e : string) : key_value_pair =
   let vals = [("message", Hh_json.JSON_String e)] in
   let vals =

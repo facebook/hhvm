@@ -316,6 +316,8 @@ let type_decl_end _ = ()
 
 let remote_old_decl_end _ _ = ()
 
+let findmytests_end _ _ = ()
+
 let first_redecl_end _ _ = ()
 
 let type_check_primary_position_bug ~current_file:_ ~message:_ ~stack:_ = ()

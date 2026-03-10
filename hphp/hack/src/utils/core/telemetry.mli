@@ -96,6 +96,8 @@ val float_ : key:string -> value:float -> t -> t
 
 val float_opt : key:string -> value:float option -> t -> t
 
+val float_list : key:string -> value:float list -> t -> t
+
 val error : e:string -> t -> t
 
 val error_with_stack : stack:string -> e:string -> t -> t

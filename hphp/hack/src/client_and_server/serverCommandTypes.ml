@@ -168,10 +168,14 @@ module Find_my_tests = struct
     | Typeconst of member
   [@@deriving show]
 
+  type provenance = { root_indices: int list } [@@deriving yojson]
+
   type result_entry = {
     file_path: string;
     distance: int;
+    provenance: provenance option;
   }
+  [@@deriving yojson]
 
   type result = (result_entry list, string) Result.t
 
@@ -180,10 +184,12 @@ module Find_my_tests = struct
   type config = {
     max_distance: int; [@default 1]
     max_test_files: int option; [@default None]
+    root_provenance: bool; [@default false]
   }
   [@@deriving yojson]
 
-  let default_config = { max_distance = 1; max_test_files = None }
+  let default_config =
+    { max_distance = 1; max_test_files = None; root_provenance = false }
 
   type json_input = {
     roots: string list;

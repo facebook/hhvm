@@ -45,17 +45,8 @@ let print_refs (results : SearchTypes.Find_refs.absolute list) ~(json : bool) :
 let print_find_my_tests_result result ~(json : bool) : unit =
   let module FMT = ServerCommandTypes.Find_my_tests in
   if json then
-    let result_obj =
-      Hh_json.(
-        JSON_Array
-          (List.map result ~f:(fun (entry : FMT.result_entry) ->
-               JSON_Object
-                 [
-                   ("file_path", JSON_String entry.FMT.file_path);
-                   ("distance", JSON_Number (Int.to_string entry.FMT.distance));
-                 ])))
-    in
-    print_endline (Hh_json.json_to_multiline result_obj)
+    let result_json = `List (List.map result ~f:FMT.yojson_of_result_entry) in
+    print_endline (Yojson.Safe.pretty_to_string result_json)
   else
     List.iter result ~f:(fun file -> print_endline file.FMT.file_path)
 

@@ -121,6 +121,7 @@ let magic_builtins =
       ^ "<<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}\n"
       ^ "<<__NoAutoDynamic>> function hh_force_solve()[]:void {}"
       ^ "<<__NoAutoDynamic>> function hh_time(string $command, string $tag = '_'):void {}\n"
+      ^ "<<__NoAutoDynamic>> function hh_sleep(int $seconds)[]:void {}\n"
       ^ "}\n" );
   |]
 

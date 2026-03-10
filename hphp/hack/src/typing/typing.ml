@@ -754,6 +754,7 @@ let typing_env_pseudofunctions =
         hh_log_level;
         hh_force_solve;
         hh_loop_forever;
+        hh_sleep;
         hh_time;
       ])
 
@@ -813,6 +814,11 @@ let loop_forever env =
   done;
   Utils.assert_false_log_backtrace
     (Some "hh_loop_forever was looping for more than 10 minutes")
+
+let do_hh_sleep args =
+  match List.map ~f:Aast_utils.arg_to_expr (List.take args 1) with
+  | [(_, _, Aast.Int seconds_str)] -> Unix.sleep (int_of_string seconds_str)
+  | _ -> ()
 
 let hh_time_start_times = ref SMap.empty
 
@@ -4063,7 +4069,10 @@ end = struct
         ) else if String.equal s SN.PseudoFunctions.hh_loop_forever then
           let _ = loop_forever env in
           env
-        else if String.equal s SN.PseudoFunctions.hh_time then begin
+        else if String.equal s SN.PseudoFunctions.hh_sleep then begin
+          do_hh_sleep args;
+          env
+        end else if String.equal s SN.PseudoFunctions.hh_time then begin
           do_hh_time args;
           env
         end else

@@ -541,6 +541,8 @@ pub mod pseudo_functions {
 
     pub const HH_LOOP_FOREVER: &str = "\\hh_loop_forever";
 
+    pub const HH_SLEEP: &str = "\\hh_sleep";
+
     pub const ECHO: &str = "\\echo";
 
     pub const ECHO_NO_NS: &str = "echo";
@@ -567,6 +569,7 @@ pub mod pseudo_functions {
         HH_LOG_LEVEL,
         HH_FORCE_SOLVE,
         HH_LOOP_FOREVER,
+        HH_SLEEP,
         ECHO,
         EMPTY,
         EXIT,

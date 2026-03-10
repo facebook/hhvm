@@ -410,6 +410,7 @@ pub mod pseudo_functions {
     pub static hh_log_level: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_LOG_LEVEL);
     pub static hh_force_solve: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_FORCE_SOLVE);
     pub static hh_loop_forever: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_LOOP_FOREVER);
+    pub static hh_sleep: Lazy<FunName> = lazy!(sn::pseudo_functions::HH_SLEEP);
     pub static echo: Lazy<FunName> = lazy!(sn::pseudo_functions::ECHO);
     pub static empty: Lazy<FunName> = lazy!(sn::pseudo_functions::EMPTY);
     pub static exit: Lazy<FunName> = lazy!(sn::pseudo_functions::EXIT);
@@ -429,6 +430,7 @@ pub mod pseudo_functions {
             *hh_log_level,
             *hh_force_solve,
             *hh_loop_forever,
+            *hh_sleep,
             *echo,
             *empty,
             *exit,

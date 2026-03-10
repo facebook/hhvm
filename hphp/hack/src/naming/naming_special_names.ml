@@ -1011,6 +1011,8 @@ module PseudoFunctions = struct
 
   let hh_time = "\\hh_time"
 
+  let hh_sleep = "\\hh_sleep"
+
   let echo = "\\echo"
 
   let empty = "\\empty"
@@ -1035,6 +1037,7 @@ module PseudoFunctions = struct
         hh_log_level;
         hh_force_solve;
         hh_loop_forever;
+        hh_sleep;
         echo;
         empty;
         exit;

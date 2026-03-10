@@ -37,7 +37,7 @@ want to include.
 {{#import "common/stream" as stream}}
 {{#import "common/types" as types}}
 {{> common/auto_generated_py}}
-{{^program:auto_migrate?}}
+{{#if (not program.auto_migrate?)}}
 cimport cython as __cython
 from cpython.object cimport PyTypeObject
 from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
@@ -63,10 +63,10 @@ from thrift.py3.types cimport (
     init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
-    {{#program:python_capi_converter?}}
+  {{#if program.python_capi_converter?}}
     py3_to_python as __py3_to_python,
     python_to_py3 as __python_to_py3,
-    {{/program:python_capi_converter?}}
+  {{/if program.python_capi_converter?}}
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,
@@ -74,9 +74,9 @@ from thrift.py3.types cimport (
     const_pointer_cast,
     make_const_shared,
     constant_shared_ptr,
-    {{#program:inplace_migrate?}}
+  {{#if program.inplace_migrate?}}
     deref_const as __deref_const,
-    {{/program:inplace_migrate?}}
+  {{/if program.inplace_migrate?}}
 )
 from thrift.py3.types cimport _ensure_py3_or_raise, _ensure_py3_container_or_raise
 cimport thrift.py3.serializer as serializer
@@ -91,277 +91,259 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 import importlib
-{{#program:has_stream?}}
+  {{#if program.has_stream?}}
 import asyncio
 from folly.coro cimport bridgeCoroTaskWith
-{{/program:has_stream?}}
-{{#program:inplace_migrate?}}{{#program:needs_container_converters?}}
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
-{{/program:needs_container_converters?}}{{/program:inplace_migrate?}}
-{{#each program:includeNamespaces as |include|}}
-  {{#if include.has_types?}}
+  {{/if program.has_stream?}}
+  {{#if (and program.inplace_migrate? program.needs_container_converters?)}}
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_converter as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter
+  {{/if (and program.inplace_migrate? program.needs_container_converters?)}}
+  {{#each program.includeNamespaces as |include|}}
+    {{#if include.has_types?}}
 cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
 import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-    {{#if (and program:inplace_migrate? (or program:needs_container_converters? program:has_stream?))}}
+      {{#if (and program.inplace_migrate? (or program.needs_container_converters? program.has_stream?))}}
 cimport {{include.modulePathPeriodSeparated}}.thrift_converter as _{{include.modulePathUnderscoreSeparated}}_thrift_converter
-    {{/if (and program:inplace_migrate? (or program:needs_container_converters? program:has_stream?))}}
-  {{/if include.has_types?}}
-{{/each}}
+      {{/if (and program.inplace_migrate? (or program.needs_container_converters? program.has_stream?))}}
+    {{/if include.has_types?}}
+  {{/each}}
 
-{{^program:inplace_migrate?}}
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
-  {{#if program:enums?}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_enums import (
-{{#program:enums}}
-    {{enum:name}},
-{{/program:enums}}
+  {{#if (not program.inplace_migrate?)}}
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types as _fbthrift_python_types
+    {{#if program.enums?}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_enums import (
+      {{#each program.enums as |enum|}}
+    {{enum.name}},
+      {{/each}}
 )
-  {{/if program:enums?}}
-  {{#if program:has_visible_union_types?}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
-{{#program:filtered_structs}}{{#struct:union?}}
-    __{{struct:name}}Type,
-{{/struct:union?}}{{/program:filtered_structs}}
+    {{/if program.enums?}}
+    {{#if program.has_visible_union_types?}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+      {{#each program.py3_visible_structured_definitions as |struct|}}
+        {{#if struct.union?}}
+    __{{struct.name}}Type,
+        {{/if struct.union?}}
+      {{/each}}
 )
-  {{/if program:has_visible_union_types?}}
+    {{/if program.has_visible_union_types?}}
 
-  {{#if program:has_container_types?}}
-from {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
-{{#program:containerTypes}}
-    {{type:flat_name}},
-{{/program:containerTypes}}
+    {{#if program.has_container_types?}}
+from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+      {{#each program.container_types as |type|}}
+    {{type.flat_name}},
+      {{/each}}
 )
-  {{/if program:has_container_types?}}
-{{/program:inplace_migrate?}}
-{{#program:inplace_migrate?}}
+    {{/if program.has_container_types?}}
+  {{#else}}
 
-{{#program:has_stream?}}
-cimport {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{.}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
-{{/program:has_stream?}}
+    {{#if program.has_stream?}}
+cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_converter as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter
+    {{/if program.has_stream?}}
 
-import {{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
-{{#program:filtered_structs}}
-{{struct:name}} = _fbthrift_types_inplace.{{struct:name}}
-{{/program:filtered_structs}}
-{{#program:enums}}
-{{enum:name}} = _fbthrift_types_inplace.{{enum:name}}
-{{/program:enums}}
-{{#program:containerTypes}}
-{{type:flat_name}} = _fbthrift_types_inplace.{{type:flat_name}}
-{{/program:containerTypes}}
-{{#program:constants}}{{#constant:value}}
-{{constant:name}} = _fbthrift_types_inplace.{{constant:name}}
-{{/constant:value}}{{/program:constants}}
-{{/program:inplace_migrate?}}
+import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
+    {{#each program.py3_visible_structured_definitions as |struct|}}
+{{struct.name}} = _fbthrift_types_inplace.{{struct.name}}
+    {{/each}}
+    {{#each program.enums as |enum|}}
+{{enum.name}} = _fbthrift_types_inplace.{{enum.name}}
+    {{/each}}
+    {{#each program.container_types as |type|}}
+{{type.flat_name}} = _fbthrift_types_inplace.{{type.flat_name}}
+    {{/each}}
+    {{#each program.consts as |constant|}}
+{{constant.name}} = _fbthrift_types_inplace.{{constant.name}}
+    {{/each}}
+  {{/if (not program.inplace_migrate?)}}
 
-{{^program:inplace_migrate?}}
-_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types"
+  {{#if (not program.inplace_migrate?)}}
+_fbthrift__module_name__ = "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
-        "{{#program:py3Namespaces}}{{.}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+        "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_reflection"
     )
 
-{{#program:filtered_structs}}
-{{^struct:union?}}
+    {{#each program.py3_visible_structured_definitions as |struct|}}
+      {{#if (not struct.union?)}}
 @__cython.auto_pickle(False)
-{{^struct:allow_inheritance?}}
+        {{#if (not struct.allow_inheritance?)}}
 @__cython.final
-{{/struct:allow_inheritance?}}
-cdef class {{struct:name}}({{#partial types.python_struct_class struct=struct:self}}):
+        {{/if (not struct.allow_inheritance?)}}
+cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}}):
     __module__ = _fbthrift__module_name__
 
-    def __init__({{struct:name}} self,{{#struct:exception?}} *args,{{/struct:exception?}} **kwargs):
-        self.{{#partial types.cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}]()
-        self._fields_setter = _fbthrift_types_fields.__{{struct:name}}_FieldsSetter._fbthrift_create(self.{{#partial types.cpp_obj}}.get())
-        super().__init__({{#struct:exception?}} *args, {{/struct:exception?}}**kwargs)
-    {{^struct:exception?}}
-    {{^struct:cpp_noncopyable?}}
+    def __init__({{struct.name}} self,{{#if struct.exception?}} *args,{{/if}} **kwargs):
+        self.{{#partial types.cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}]()
+        self._fields_setter = _fbthrift_types_fields.__{{struct.name}}_FieldsSetter._fbthrift_create(self.{{#partial types.cpp_obj}}.get())
+        super().__init__({{#if struct.exception?}} *args, {{/if}}**kwargs)
+        {{#if (and (not struct.exception?) (not struct.cpp_noncopyable?))}}
 
-    def __call__({{struct:name}} self, **kwargs):
-      {{#if (array.empty? struct:py3_fields)}}
+    def __call__({{struct.name}} self, **kwargs):
+          {{#if (array.empty? struct.py3_fields)}}
         return self
-      {{#else}}
+          {{#else}}
         if not kwargs:
             return self
-        cdef {{struct:name}} __fbthrift_inst = {{struct:name}}.__new__({{struct:name}})
-        __fbthrift_inst.{{#partial types.cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}](deref(self.{{#partial types.cpp_obj}}))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__{{struct:name}}_FieldsSetter._fbthrift_create(__fbthrift_inst.{{#partial types.cpp_obj}}.get())
+        cdef {{struct.name}} __fbthrift_inst = {{struct.name}}.__new__({{struct.name}})
+        __fbthrift_inst.{{#partial types.cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](deref(self.{{#partial types.cpp_obj}}))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__{{struct.name}}_FieldsSetter._fbthrift_create(__fbthrift_inst.{{#partial types.cpp_obj}}.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
-      {{/if (array.empty? struct:py3_fields)}}
-    {{/struct:cpp_noncopyable?}}
-    {{/struct:exception?}}
+          {{/if (array.empty? struct.py3_fields)}}
+        {{/if (and (not struct.exception?) (not struct.cpp_noncopyable?))}}
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return _fbthrift_IsSet("{{struct:name}}", {
-        {{#struct:py3_fields}}
-        {{#field:has_ref_accessor?}}
-        {{^field:terse?}}
-          "{{field:py_name}}": deref(self.{{#partial types.cpp_obj}}).{{field:py_name}}_ref().has_value(),
-        {{/field:terse?}}
-        {{/field:has_ref_accessor?}}
-        {{/struct:py3_fields}}
+        return _fbthrift_IsSet("{{struct.name}}", {
+        {{#each struct.py3_fields as |field|}}
+          {{#if (and field.has_ref_accessor? (not field.terse?))}}
+          "{{field.py_name}}": deref(self.{{#partial types.cpp_obj}}).{{field.py_name}}_ref().has_value(),
+          {{/if (and field.has_ref_accessor? (not field.terse?))}}
+        {{/each}}
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] cpp_obj):
-        __fbthrift_inst = <{{struct:name}}>{{struct:name}}.__new__({{struct:name}}{{#struct:exception?}}, (<bytes>deref(cpp_obj).what()).decode('utf-8'){{/struct:exception?}})
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] cpp_obj):
+        __fbthrift_inst = <{{struct.name}}>{{struct.name}}.__new__({{struct.name}}{{#if struct.exception?}}, (<bytes>deref(cpp_obj).what()).decode('utf-8'){{/if}})
         __fbthrift_inst.{{#partial types.cpp_obj}} = cmove(cpp_obj)
-        {{#struct:exception?}}
+        {{#if struct.exception?}}
         _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
-        {{/struct:exception?}}
+        {{/if struct.exception?}}
         return __fbthrift_inst
 
-    {{#each struct:self.py3_fields as |field|}}
+        {{#each struct.py3_fields as |field|}}
     cdef inline {{field.py_name}}_impl(self):
-        {{#if (and field.optional? (not field.hasDefaultValue?) field.has_ref_accessor? (not field.terse?))}}
+          {{#if (and field.optional? (not field.hasDefaultValue?) field.has_ref_accessor? (not field.terse?))}}
         if not deref(self.{{#partial types.cpp_obj}}).{{field.py_name}}_ref().has_value():
             return None
-        {{/if (and field.optional? (not field.hasDefaultValue?) field.has_ref_accessor? (not field.terse?))}}
+          {{/if (and field.optional? (not field.hasDefaultValue?) field.has_ref_accessor? (not field.terse?))}}
         {{#partial types.cython_struct_getter field=field}}
 
     @property
     def {{field.py_name}}(self):
         return self.{{field.py_name}}_impl()
 
-    {{/each}}
+        {{/each}}
 
-    def __hash__({{struct:name}} self):
+    def __hash__({{struct.name}} self):
         return super().__hash__()
 
-    def __repr__({{struct:name}} self):
+    def __repr__({{struct.name}} self):
         return super().__repr__()
 
-    def __str__({{struct:name}} self):
-      {{#if (and struct:exception? (object.notnull? exception:message_field))}}
-        field = self.{{exception:message_field.py_name}}
+    def __str__({{struct.name}} self):
+        {{#if (and struct.exception? (object.notnull? struct.message_field))}}
+        field = self.{{struct.message_field.py_name}}
         if field is None:
             {{! optional field, stringify }}
             return str(field)
         return field
-      {{#else}}
+        {{#else}}
         return super().__str__()
-      {{/if (and struct:exception? (object.notnull? exception:message_field))}}
+        {{/if (and struct.exception? (object.notnull? struct.message_field))}}
 
 
-{{/struct:union?}}{{!
-}}{{#struct:union?}}
+      {{#else}}
 
 
 @__cython.auto_pickle(False)
 @__cython.final
-cdef class {{struct:name}}(thrift.py3.types.Union):
+cdef class {{struct.name}}(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
-    Type = __{{struct:name}}Type
+    Type = __{{struct.name}}Type
 
     def __init__(
-        self, *{{#struct:py3_fields}},
-        {{#field:type}}{{^type:structured?}}{{!
-            }}{{#type:cythonTypeNoneable?}}{{!
-                }}{{#partial types.cython_python_type type=type:self}} {{!
-            }}{{/type:cythonTypeNoneable?}}{{!
-        }}{{/type:structured?}}{{/field:type}}{{!
-            }}{{field:py_name}}=None{{!
-        }}{{/struct:py3_fields}}
+        self, *{{#each struct.py3_fields as |field|}},
+        {{#if (not field.type.structured?)}}{{!
+            }}{{#if field.type.cythonTypeNoneable?}}{{!
+                }}{{#partial types.cython_python_type type=field.type}} {{!
+            }}{{/if field.type.cythonTypeNoneable?}}{{!
+        }}{{/if (not field.type.structured?)}}{{!
+            }}{{field.py_name}}=None{{!
+        }}{{/each}}
     ):
-        {{#struct:py3_fields}}
-        {{#field:type}}
-          {{#if (not type:container?)}}
-            {{#if (and (not type:cythonTypeNoneable?) (not type:structured?))}}
-        if {{field:py_name}} is not None:
-            if not isinstance({{field:py_name}}, {{#partial types.python_is_instance_type type=type:self}}):
-                raise TypeError(f'{{field:py_name}} is not a { {{#partial types.python_type type=field:self.type}} !r}.')
+        {{#each struct.py3_fields as |field|}}
+          {{#if (not field.type.container?)}}
+            {{#if (and (not field.type.cythonTypeNoneable?) (not field.type.structured?))}}
+        if {{field.py_name}} is not None:
+            if not isinstance({{field.py_name}}, {{#partial types.python_is_instance_type type=field.type}}):
+                raise TypeError(f'{{field.py_name}} is not a { {{#partial types.python_type type=field.type}} !r}.')
 
-            {{/if (and (not type:cythonTypeNoneable?) (not type:structured?))}}
-        {{#type:integer?}}
+            {{/if (and (not field.type.cythonTypeNoneable?) (not field.type.structured?))}}
+            {{#if field.type.integer?}}
             {{! inject cython int overflow checks }}
-            {{field:py_name}} = <{{#partial types.cython_python_type type=type:self}}> {{field:py_name}}
+            {{field.py_name}} = <{{#partial types.cython_python_type type=field.type}}> {{field.py_name}}
 
-        {{/type:integer?}}
-            {{#if type:structured?}}
-        {{field:py_name}} = _ensure_py3_or_raise({{field:py_name}}, "{{field:py_name}}", {{#partial types.python_is_instance_type type=type:self}})
+            {{/if field.type.integer?}}
+            {{#if field.type.structured?}}
+        {{field.py_name}} = _ensure_py3_or_raise({{field.py_name}}, "{{field.py_name}}", {{#partial types.python_is_instance_type type=field.type}})
 
-            {{/if type:structured?}}
-          {{/if (not type:container?)}}
-        {{#type:is_container_of_struct?}}
-        {{field:py_name}} = _ensure_py3_container_or_raise({{field:py_name}}, {{type:flat_name}})
+            {{/if field.type.structured?}}
+          {{/if (not field.type.container?)}}
+          {{#if field.type.is_container_of_struct?}}
+        {{field.py_name}} = _ensure_py3_container_or_raise({{field.py_name}}, {{field.type.flat_name}})
 
-        {{/type:is_container_of_struct?}}
-        {{/field:type}}
-        {{/struct:py3_fields}}
-        self.{{#partial types.cpp_obj}} = __to_shared_ptr(cmove({{struct:name}}._make_instance(
-          NULL,{{#struct:py3_fields}}
-          {{field:py_name}},{{/struct:py3_fields}}
+          {{/if field.type.is_container_of_struct?}}
+        {{/each}}
+        self.{{#partial types.cpp_obj}} = __to_shared_ptr(cmove({{struct.name}}._make_instance(
+          NULL,{{#each struct.py3_fields as |field|}}
+          {{field.py_name}},{{/each}}
         )))
         self._initialize_py()
 
     @staticmethod
     def fromValue(value):
         if value is None:
-            return {{struct:name}}()
+            return {{struct.name}}()
         {{! We do this with strict types first, then we will do int to float conversion}}
-        {{#struct:py3_fields}}
-        {{#field:type}}
-        if isinstance(value, {{#partial types.python_type type=field:self.type}}):
-            {{#type:number?}}
+        {{#each struct.py3_fields as |field|}}
+        if isinstance(value, {{#partial types.python_type type=field.type}}):
+          {{#if field.type.number?}}
             if not isinstance(value, pbool):
                 try:
-                    {{#type:integer?}}
+            {{#if field.type.integer?}}
                     {{! Cython does OverflowError checking for us }}
-                    <{{#partial types.cython_python_type type=type:self}}> value
-                    {{/type:integer?}}
-                    {{#type:float?}}
+                    <{{#partial types.cython_python_type type=field.type}}> value
+            {{/if field.type.integer?}}
+            {{#if field.type.float?}}
                     {{! This will probably fail most of the time
                         if it does then when we try again to use floating point
                         below it will just accept the loss of precision,
                         or just maybe there is a double field comming up }}
-                    if <{{#partial types.cython_python_type type=type:self}}>value != value:
+                    if <{{#partial types.cython_python_type type=field.type}}>value != value:
                         raise OverflowError
-                    {{/type:float?}}
-                    return {{struct:name}}({{field:py_name}}=value)
+            {{/if field.type.float?}}
+                    return {{struct.name}}({{field.py_name}}=value)
                 except OverflowError:
                     pass
-            {{/type:number?}}
-            {{^type:number?}}
-            return {{struct:name}}({{field:py_name}}=value)
-            {{/type:number?}}
-        {{/field:type}}
-        {{/struct:py3_fields}}
-        {{#struct:py3_fields}}
-        {{#field:type}}
-        {{#type:floating_point?}}
-        if isinstance(value, {{#partial types.python_is_instance_type type=type:self}}):
+          {{#else}}
+            return {{struct.name}}({{field.py_name}}=value)
+          {{/if field.type.number?}}
+        {{/each}}
+        {{#each struct.py3_fields as |field|}}
+          {{#if field.type.floating_point?}}
+        if isinstance(value, {{#partial types.python_is_instance_type type=field.type}}):
             try:
-                <{{#partial types.cython_python_type type=type:self}}> value
-                return {{struct:name}}({{field:py_name}}=value)
+                <{{#partial types.cython_python_type type=field.type}}> value
+                return {{struct.name}}({{field.py_name}}=value)
             except OverflowError:
                 pass
-        {{/type:floating_point?}}
-        {{/field:type}}
-        {{/struct:py3_fields}}
+          {{/if field.type.floating_point?}}
+        {{/each}}
         raise ValueError(f"Unable to derive correct union field for value: {value}")
 
     @staticmethod
-    cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] _make_instance(
-        {{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}* base_instance{{#struct:py3_fields}},
-        {{#field:type}}{{!
-            }}{{#type:cythonTypeNoneable?}}{{!
-                }}{{#partial types.cython_python_type type=type:self}} {{!
-            }}{{/type:cythonTypeNoneable?}}{{!
-            }}{{^type:cythonTypeNoneable?}}{{!
-                }}object {{!
-            }}{{/type:cythonTypeNoneable?}}{{!
-            }}{{field:py_name}}{{!
-        }}{{/field:type}}{{/struct:py3_fields}}
+    cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] _make_instance(
+        {{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}* base_instance{{#each struct.py3_fields as |field|}},
+        {{#if field.type.cythonTypeNoneable?}}{{#partial types.cython_python_type type=field.type}}{{#else}}object{{/if}} {{field.py_name}}{{!
+        }}{{/each}}
     ) except *:
-        cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] c_inst = make_unique[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}]()
+        cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] c_inst = make_unique[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}]()
         cdef bint any_set = False
-        {{#each struct:self.py3_fields as |field|}}
+        {{#each struct.py3_fields as |field|}}
         if {{field.py_name}} is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
@@ -374,125 +356,123 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         return cmove(c_inst)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] cpp_obj):
-        __fbthrift_inst = <{{struct:name}}>{{struct:name}}.__new__({{struct:name}})
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] cpp_obj):
+        __fbthrift_inst = <{{struct.name}}>{{struct.name}}.__new__({{struct.name}})
         __fbthrift_inst.{{#partial types.cpp_obj}} = cmove(cpp_obj)
         __fbthrift_inst._initialize_py()
         return __fbthrift_inst
 
-    {{#struct:py3_fields}}
+        {{#each struct.py3_fields as |field|}}
     @property
-    def {{field:py_name}}({{struct:name}} self not None):
-        if self.type_int != {{field:id}}:
+    def {{field.py_name}}({{struct.name}} self not None):
+        if self.type_int != {{field.id}}:
             {{! TODO: python 3.10 adds some more fields to AttributeError, those should be added here at some point }}
-            raise AttributeError(f'Union contains a value of type {self.type.name}, not {{field:py_name}}')
+            raise AttributeError(f'Union contains a value of type {self.type.name}, not {{field.py_name}}')
         return self.value
 
-    {{/struct:py3_fields}}
+        {{/each}}
 
-    def __hash__({{struct:name}} self):
+    def __hash__({{struct.name}} self):
         return  super().__hash__()
 
     @property
-    def type({{struct:name}} self not None):
+    def type({{struct.name}} self not None):
         if self.py_type is None:
-            self.py_type = {{struct:name}}.Type(self.type_int)
+            self.py_type = {{struct.name}}.Type(self.type_int)
         return self.py_type
 
     @property
-    def value({{struct:name}} self not None):
+    def value({{struct.name}} self not None):
         if self.py_value is not None or self.type_int == 0:
             return self.py_value
-        {{#each struct:self.py3_fields as |field|}}
+        {{#each struct.py3_fields as |field|}}
         elif self.type_int == {{field.id}}:
             {{#partial types.cython_union_getter field=field}}
         {{/each}}
         return self.py_value
 
     {{! initialize python cache}}
-    cdef _initialize_py({{struct:name}} self):
+    cdef _initialize_py({{struct.name}} self):
         self.py_type = None
         self.type_int = int(deref(self.{{#partial types.cpp_obj}}).getType())
         self.py_value = None
 
-{{/struct:union?}}
-    {{! Below are some things that are common to structs and unions: }}
-    def __copy__({{struct:name}} self):
+      {{/if (not struct.union?)}}
+      {{! Below are some things that are common to structs and unions: }}
+    def __copy__({{struct.name}} self):
         return self{{! Thrift-py3 has immutable semantics}}
-    {{#if struct:cpp_noncomparable?}}
+      {{#if struct.cpp_noncomparable?}}
 
-    def __eq__({{struct:name}} self, other):
-        return isinstance(other, {{struct:name}}) and self._fbthrift_noncomparable_eq(other)
-    {{/if struct:cpp_noncomparable?}}
-    {{#if (not struct:is_struct_orderable?)}}
+    def __eq__({{struct.name}} self, other):
+        return isinstance(other, {{struct.name}}) and self._fbthrift_noncomparable_eq(other)
+      {{/if struct.cpp_noncomparable?}}
+      {{#if (not struct.is_struct_orderable?)}}
 
-    def __eq__({{struct:name}} self, other):
-        if not isinstance(other, {{struct:name}}):
+    def __eq__({{struct.name}} self, other):
+        if not isinstance(other, {{struct.name}}):
             return False
-        return deref(self.{{#partial types.cpp_obj}}.get()) == deref((<{{struct:name}}>other).{{#partial types.cpp_obj}}.get())
+        return deref(self.{{#partial types.cpp_obj}}.get()) == deref((<{{struct.name}}>other).{{#partial types.cpp_obj}}.get())
 
-    def __ne__({{struct:name}} self, other):
-        if not isinstance(other, {{struct:name}}):
+    def __ne__({{struct.name}} self, other):
+        if not isinstance(other, {{struct.name}}):
             return True
-        return deref(self.{{#partial types.cpp_obj}}) != deref((<{{struct:name}}>other).{{#partial types.cpp_obj}})
-    {{#else if (not struct:cpp_noncomparable?)}}
+        return deref(self.{{#partial types.cpp_obj}}) != deref((<{{struct.name}}>other).{{#partial types.cpp_obj}})
+      {{#else if (not struct.cpp_noncomparable?)}}
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}](
+        return __richcmp[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](
             self.{{#partial types.cpp_obj}},
-            (<{{struct:name}}>other).{{#partial types.cpp_obj}},
+            (<{{struct.name}}>other).{{#partial types.cpp_obj}},
             op,
         ) if r is None else r
-    {{/if (not struct:is_struct_orderable?)}}
+      {{/if (not struct.is_struct_orderable?)}}
 
     @staticmethod
     def __get_reflection__():
-        return get_types_reflection().get_reflection__{{struct:name}}()
+        return get_types_reflection().get_reflection__{{struct.name}}()
 
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        {{#struct:exception?}}
-        {{> types/current_module_cbindings}}.ExceptionMetadata[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}].gen(meta)
-        {{/struct:exception?}}
-        {{^struct:exception?}}
-        {{> types/current_module_cbindings}}.StructMetadata[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}].gen(meta)
-        {{/struct:exception?}}
+      {{#if struct.exception?}}
+        {{> types/current_module_cbindings}}.ExceptionMetadata[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}].gen(meta)
+      {{#else}}
+        {{> types/current_module_cbindings}}.StructMetadata[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}].gen(meta)
+      {{/if struct.exception?}}
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
     def __get_thrift_name__():
-        return "{{program:name}}.{{struct:name}}"
+        return "{{program.name}}.{{struct.name}}"
 
-    {{#struct:has_hidden_fields?}}
+      {{#if struct.has_hidden_fields?}}
     __fbthrift_field_name_list = [
-        {{#struct:py3_fields}}
-        '{{field:py_name}}',
-        {{/struct:py3_fields}}
+        {{#each struct.py3_fields as |field|}}
+        '{{field.py_name}}',
+        {{/each}}
     ]
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
         return cls.__fbthrift_field_name_list[idx]
-    {{/struct:has_hidden_fields?}}
-    {{^struct:has_hidden_fields?}}
+      {{#else}}
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}](idx))
-    {{/struct:has_hidden_fields?}}
+        return __sv_to_str(__get_field_name_by_index[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](idx))
+      {{/if struct.has_hidden_fields?}}
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return {{(array.len struct:py3_fields)}}
+        return {{(array.len struct.py3_fields)}}
 
-    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize({{struct:name}} self, __Protocol proto):
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize({{struct.name}} self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}](self.{{#partial types.cpp_obj}}.get(), proto))
+            data = cmove(serializer.cserialize[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](self.{{#partial types.cpp_obj}}.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
-    cdef cuint32_t _fbthrift_deserialize({{struct:name}} self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+    cdef cuint32_t _fbthrift_deserialize({{struct.name}} self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
         {{!
             This is a special case, we need to construct an empty _cpp_obj because
@@ -501,88 +481,87 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
             thrift.py3.serializer.deserialize does not have enough type information
             to call the staticmethod ._create_FBTHRIFT_ONLY_DO_NOT_USE()
         }}
-        self.{{#partial types.cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}]()
+        self.{{#partial types.cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}]()
         with nogil:
-            needed = serializer.cdeserialize[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}](buf, self.{{#partial types.cpp_obj}}.get(), proto)
-        {{#struct:union?}}
+            needed = serializer.cdeserialize[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](buf, self.{{#partial types.cpp_obj}}.get(), proto)
+      {{#if struct.union?}}
         # clear cache reload since the underlying data's changed
         self._initialize_py()
-        {{/struct:union?}}
+      {{/if struct.union?}}
         return needed
 
-    {{#program:python_capi_converter?}}
+      {{#if program.python_capi_converter?}}
     @staticmethod
     def from_python(object obj):
-        cdef shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] cpp_obj = {{!
-            }}__python_to_py3[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}, _fbthrift__NamespaceTag](obj)
-        return {{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-    {{/program:python_capi_converter?}}
+        cdef shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] cpp_obj = {{!
+            }}__python_to_py3[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}, _fbthrift__NamespaceTag](obj)
+        return {{struct.name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+      {{/if program.python_capi_converter?}}
 
     def _to_python(self):
-    {{#program:python_capi_converter?}}
-        return __py3_to_python[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}, {{!
+      {{#if program.python_capi_converter?}}
+        return __py3_to_python[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}, {{!
             }}_fbthrift__NamespaceTag](self.{{#partial types.cpp_obj}})
-    {{/program:python_capi_converter?}}
-    {{^program:python_capi_converter?}}
+      {{#else}}
         return thrift.python.converter.to_python_struct(
-            _fbthrift_python_types.{{struct:name}},
+            _fbthrift_python_types.{{struct.name}},
             self,
         )
-    {{/program:python_capi_converter?}}
+      {{/if program.python_capi_converter?}}
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
         import thrift.util.converter
-        py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct:name}}, self)
+        py_deprecated_types = importlib.import_module("{{program.py_deprecated_module_path}}.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct.name}}, self)
 
-{{/program:filtered_structs}}
-{{#each program:container_types as |type|}}
+    {{/each}}
+    {{#each program.container_types as |type|}}
 {{> types/container_converter_impl }}
 
-{{/each}}
+    {{/each}}
 
-  {{#each program:consts as |constant|}}
+    {{#each program.consts as |constant|}}
 {{constant.name}} = {{#partial constants.constant_value constant=constant}}
+    {{/each}}
+  {{/if (not program.inplace_migrate?)}}
+  {{#each program.py3_visible_typedefs as |typedef|}}
+{{typedef.name}} = {{#partial types.python_type type=typedef}}
   {{/each}}
-{{/program:inplace_migrate?}}
-{{#program:filtered_typedefs}}
-{{typedef:name}} = {{#partial types.python_type type=typedef:self}}
-{{/program:filtered_typedefs}}
-{{#program:has_stream?}}
+  {{#if program.has_stream?}}
 
-{{#program:stream_types}}
-cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
+    {{#each program.stream_types as |type|}}
+cdef class ClientBufferedStream__{{type.flat_name}}(ClientBufferedStream):
 
     @staticmethod
-    cdef _fbthrift_create(cClientBufferedStream[{{#partial types.cython_cpp_type type=type:self}}]& c_obj, __RpcOptions rpc_options):
-        __fbthrift_inst = ClientBufferedStream__{{type:flat_name}}(rpc_options)
-        __fbthrift_inst._gen = make_unique[cClientBufferedStreamWrapper[{{#partial types.cython_cpp_type type=type:self}}]](c_obj)
+    cdef _fbthrift_create(cClientBufferedStream[{{#partial types.cython_cpp_type type=type}}]& c_obj, __RpcOptions rpc_options):
+        __fbthrift_inst = ClientBufferedStream__{{type.flat_name}}(rpc_options)
+        __fbthrift_inst._gen = make_unique[cClientBufferedStreamWrapper[{{#partial types.cython_cpp_type type=type}}]](c_obj)
         return __fbthrift_inst
 
     @staticmethod
     cdef void callback(
-        cFollyTry[__cOptional[{{#partial types.cython_cpp_type type=type:self}}]]&& result,
+        cFollyTry[__cOptional[{{#partial types.cython_cpp_type type=type}}]]&& result,
         PyObject* userdata,
     ) noexcept:
-        cdef __cOptional[{{#partial types.cython_cpp_type type=type:self}}] opt_val
-        cdef {{#partial types.cython_cpp_type type=type:self}} _value
+        cdef __cOptional[{{#partial types.cython_cpp_type type=type}}] opt_val
+        cdef {{#partial types.cython_cpp_type type=type}} _value
         stream, pyfuture, rpc_options = <object> userdata
-        if {{#program:stream_exceptions}}{{!
-        }}result.hasException[{{#partial types.cython_cpp_type type=type:self}}]():
+        if {{#each program.stream_exceptions as |type|}}{{!
+        }}result.hasException[{{#partial types.cython_cpp_type type=type}}]():
             pyfuture.set_exception({{!
-            }}{{#program:inplace_migrate?}}{{#type:structured}}{{!
-                }}{{#partial types.python_type type=type:self}}.from_python({{!
-                }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
-                }}thrift.py3.exceptions.unwrap_exception[{{#partial types.cython_cpp_type type=type:self}}](result.exception()))){{!
-            }}{{/type:structured}}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
-                }}{{#partial types.cython_python_type type=type:self}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-                }}thrift.py3.exceptions.try_make_shared_exception[{{#partial types.cython_cpp_type type=type:self}}](result.exception())){{!
-            }}{{/program:inplace_migrate?}}{{!
+            }}{{#if program.inplace_migrate?}}{{#if type.structured?}}{{!
+                }}{{#partial types.python_type type=type}}.from_python({{!
+                }}{{type.capi_converter_path}}.{{type.true_type.name}}_from_cpp({{!
+                }}thrift.py3.exceptions.unwrap_exception[{{#partial types.cython_cpp_type type=type}}](result.exception()))){{!
+            }}{{/if type.structured?}}{{#else}}{{!
+                }}{{#partial types.cython_python_type type=type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+                }}thrift.py3.exceptions.try_make_shared_exception[{{#partial types.cython_cpp_type type=type}}](result.exception())){{!
+            }}{{/if program.inplace_migrate?}}{{!
             }})
-        elif {{/program:stream_exceptions}}{{!
+        elif {{/each}}{{!
         }}result.hasException():
             pyfuture.set_exception(
                 thrift.python.exceptions.create_py_exception(result.exception(), <__RpcOptions>rpc_options)
@@ -592,7 +571,7 @@ cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
             if opt_val.has_value():
                 try:
                     _value = opt_val.value()
-                    pyfuture.set_result({{#partial stream.cython_cpp_value_to_python_value type=type:self}})
+                    pyfuture.set_result({{#partial stream.cython_cpp_value_to_python_value type=type}})
                 except Exception as ex:
                     pyfuture.set_exception(ex.with_traceback(None))
             else:
@@ -604,46 +583,46 @@ cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
         # to avoid "Future exception was never retrieved" error at SIGINT
         __future.add_done_callback(lambda x: x.exception())
         __userdata = (self, __future, self._rpc_options)
-        bridgeCoroTaskWith[__cOptional[{{#partial types.cython_cpp_type type=type:self}}]](
+        bridgeCoroTaskWith[__cOptional[{{#partial types.cython_cpp_type type=type}}]](
             self._executor,
             deref(self._gen).getNext(),
-            ClientBufferedStream__{{type:flat_name}}.callback,
+            ClientBufferedStream__{{type.flat_name}}.callback,
             <PyObject *>__userdata,
         )
         return asyncio.shield(__future)
 
-cdef class ServerStream__{{type:flat_name}}(ServerStream):
+cdef class ServerStream__{{type.flat_name}}(ServerStream):
     pass
 
-{{/program:stream_types}}
-{{#program:response_and_stream_functions}}{{#function:return_type}}
-cdef class ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function:self}}(ResponseAndClientBufferedStream):
+    {{/each}}
+    {{#each program.response_and_stream_functions as |function|}}
+cdef class ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function}}(ResponseAndClientBufferedStream):
 
     @staticmethod
     cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
-            }}{{#partial types.cython_cpp_type type=function:self.return_type}}, {{!
-            }}{{#partial types.cython_cpp_type type=function:stream.elem_type}}]& c_obj, __RpcOptions rpc_options):
-        __fbthrift_inst = ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function:self}}()
-        __fbthrift_inst._stream = ClientBufferedStream__{{function:stream.elem_type.flat_name}}._fbthrift_create(
+            }}{{#partial types.cython_cpp_type type=function.return_type}}, {{!
+            }}{{#partial types.cython_cpp_type type=function.stream.elem_type}}]& c_obj, __RpcOptions rpc_options):
+        __fbthrift_inst = ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function}}()
+        __fbthrift_inst._stream = ClientBufferedStream__{{function.stream.elem_type.flat_name}}._fbthrift_create(
             c_obj.stream, rpc_options,
         )
-        cdef {{#partial types.cython_cpp_type type=function:self.return_type}} _value = c_obj.response
-        __fbthrift_inst._response = {{#partial stream.cython_cpp_value_to_python_value type=function:self.return_type}}
+        cdef {{#partial types.cython_cpp_type type=function.return_type}} _value = c_obj.response
+        __fbthrift_inst._response = {{#partial stream.cython_cpp_value_to_python_value type=function.return_type}}
         return __fbthrift_inst
 
     def __iter__(self):
         yield self._response
         yield self._stream
 
-cdef class ResponseAndServerStream__{{#partial stream.response_class_name_suffix function=function:self}}(ResponseAndServerStream):
+cdef class ResponseAndServerStream__{{#partial stream.response_class_name_suffix function=function}}(ResponseAndServerStream):
     pass
 
-{{/function:return_type}}{{/program:response_and_stream_functions}}
-{{/program:has_stream?}}
-{{#program:inplace_migrate?}}{{#program:needs_container_converters?}}
-{{#each program:self.container_types as |type|}}
+    {{/each}}
+  {{/if program.has_stream?}}
+  {{#if (and program.inplace_migrate? program.needs_container_converters?)}}
+    {{#each program.container_types as |type|}}
 {{> types/container_converter_impl }}
 
-{{/each}}
-{{/program:needs_container_converters?}}{{/program:inplace_migrate?}}
-{{/program:auto_migrate?}}
+    {{/each}}
+  {{/if (and program.inplace_migrate? program.needs_container_converters?)}}
+{{/if (not program.auto_migrate?)}}

@@ -799,31 +799,10 @@ class t_mstch_py3_generator : public t_mstch_generator {
  private:
   void set_mstch_factories();
   void generate_init_files();
-  void generate_mstch_file(
-      const std::string& template_name,
-      FileType file_type,
-      const std::filesystem::path& base);
   void generate_whisker_file(
       const std::string& template_name,
       FileType file_type,
       const std::filesystem::path& base);
-  /**
-   * Generate a list of templates, with a mix of mstch/whisker
-   * TODO(T256504508): Remove once all templates render with Whisker.
-   */
-  void generate_mixed_template_list(
-      const std::vector<
-          std::pair<std::string /*template*/, bool /*use_whisker*/>>& templates,
-      FileType file_type,
-      const std::filesystem::path& base = {}) {
-    for (const auto& [template_name, use_whisker] : templates) {
-      if (use_whisker) {
-        generate_whisker_file(template_name, file_type, base);
-      } else {
-        generate_mstch_file(template_name, file_type, base);
-      }
-    }
-  }
   void generate_types();
   void generate_services();
   std::filesystem::path package_to_path();
@@ -1106,6 +1085,13 @@ class t_mstch_py3_generator : public t_mstch_generator {
         }
       }
       return to_type_array(types, proto);
+    });
+    def.property("stream_exceptions", [&](const t_program& self) {
+      std::vector<const t_type*> exceptions;
+      for (const auto& [_, type] : context_->stream_exceptions(self)) {
+        exceptions.emplace_back(type);
+      }
+      return to_type_array(exceptions, proto);
     });
     def.property("response_and_stream_functions", [&](const t_program& self) {
       return to_array(
@@ -1481,23 +1467,6 @@ std::filesystem::path t_mstch_py3_generator::package_to_path() {
   return path;
 }
 
-void t_mstch_py3_generator::generate_mstch_file(
-    const std::string& template_name,
-    FileType file_type,
-    const std::filesystem::path& base = {}) {
-  t_program* program = get_program();
-  const std::string& program_name = program->name();
-  file_type_ = file_type;
-
-  std::shared_ptr<mstch_base> mstch_program =
-      make_mstch_program_cached(program, mstch_context_);
-  render_to_file(
-      mstch_program,
-      template_name,
-      base / program_name / template_name // (output) path
-  );
-}
-
 void t_mstch_py3_generator::generate_whisker_file(
     const std::string& template_name,
     FileType file_type,
@@ -1530,10 +1499,10 @@ void t_mstch_py3_generator::generate_types() {
       "converter.pyx",
   };
 
-  std::vector<std::pair<std::string, bool>> cythonFilesWithTypeContext{
-      {"types.pyx", false},
-      {"types.pxd", true},
-      {"types.pyi", true},
+  std::vector<std::string> cythonFilesWithTypeContext{
+      "types.pyx",
+      "types.pxd",
+      "types.pyi",
   };
 
   std::vector<std::string> cythonFilesNoTypeContext{
@@ -1584,8 +1553,9 @@ void t_mstch_py3_generator::generate_types() {
   for (const auto& file : autoMigrateFilesNoTypeContext) {
     generate_whisker_file(file, FileType::NotTypesFile, generateRootPath_);
   }
-  generate_mixed_template_list(
-      cythonFilesWithTypeContext, FileType::TypesFile, generateRootPath_);
+  for (const auto& file : cythonFilesWithTypeContext) {
+    generate_whisker_file(file, FileType::TypesFile, generateRootPath_);
+  }
   for (const auto& file : cppFilesWithTypeContext) {
     generate_whisker_file(file, FileType::TypesFile);
   }

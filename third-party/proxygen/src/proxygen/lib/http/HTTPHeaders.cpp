@@ -14,6 +14,53 @@
 using std::bitset;
 using std::string;
 
+namespace {
+
+/**
+ * The initial capacity of the three vectors, reserved right after
+ * construction.
+ */
+static constexpr size_t kInitialVectorReserve = 16;
+static constexpr size_t kRecSize =
+    (sizeof(char) + sizeof(std::string*) + sizeof(std::string));
+
+// iterate over the positions (in vector) of all headers with given code
+#define ITERATE_OVER_CODES(Code, Block)                   \
+  {                                                       \
+    const HTTPHeaderCode* ptr = codes();                  \
+    while (ptr) {                                         \
+      ptr = (HTTPHeaderCode*)memchr(                      \
+          (void*)ptr, (Code), length_ - (ptr - codes())); \
+      if (ptr == nullptr)                                 \
+        break;                                            \
+      const size_t pos = ptr - codes();                   \
+      {Block} ptr++;                                      \
+    }                                                     \
+  }                                                       \
+  static_assert(true, "semicolon required")
+
+// iterate over the positions of all headers with given name
+#define ITERATE_OVER_STRINGS(String, Block)               \
+  ITERATE_OVER_CODES(HTTPHeaderCode::HTTP_HEADER_OTHER, { \
+    if (caseInsensitiveEqual((String), *names()[pos])) {  \
+      {                                                   \
+        Block                                             \
+      }                                                   \
+    }                                                     \
+  })
+
+// iterate over the positions of all headers with given name ignoring - and _
+#define ITERATE_OVER_STRINGS_ALL_VERSION(String, Block)            \
+  ITERATE_OVER_CODES(HTTP_HEADER_OTHER, {                          \
+    if (caseUnderscoreInsensitiveEqual((String), *names()[pos])) { \
+      {                                                            \
+        Block                                                      \
+      }                                                            \
+    }                                                              \
+  })
+
+} // namespace
+
 namespace proxygen {
 
 const string empty_string;
@@ -39,23 +86,25 @@ HTTPHeaders::HTTPHeaders() : deletedCount_(0) {
   resize(kInitialVectorReserve);
 }
 
-void HTTPHeaders::add(folly::StringPiece name, folly::StringPiece value) {
-  CHECK(name.size());
+void HTTPHeaders::add(folly::StringPiece name, std::string&& value) {
+  assert(name.size());
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
-  emplace_back(code,
-               ((code == HTTP_HEADER_OTHER)
-                    ? new std::string(name.data(), name.size())
-                    : (std::string*)HTTPCommonHeaders::getPointerToName(code)),
-               value);
+  auto namePtr =
+      ((code == HTTPHeaderCode::HTTP_HEADER_OTHER)
+           ? new std::string(name.data(), name.size())
+           : (std::string*)HTTPCommonHeaders::getPointerToName(code));
+  emplace_back(code, namePtr, std::move(value));
+}
+
+void HTTPHeaders::add(HTTPHeaderCode code, std::string&& value) {
+  auto namePtr = (std::string*)HTTPCommonHeaders::getPointerToName(code);
+  emplace_back(code, namePtr, std::move(value));
 }
 
 void HTTPHeaders::add(HTTPHeaders::headers_initializer_list l) {
   for (auto& p : l) {
-    if (p.first.type_ == HTTPHeaderName::CODE) {
-      add(p.first.code_, folly::StringPiece(p.second.data(), p.second.size()));
-    } else {
-      add(p.first.name_, folly::StringPiece(p.second.data(), p.second.size()));
-    }
+    p.first.type_ == HTTPHeaderName::CODE ? add(p.first.code_, p.second)
+                                          : add(p.first.name_, p.second);
   }
 }
 
@@ -67,10 +116,9 @@ bool HTTPHeaders::exists(folly::StringPiece name) const {
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
   if (code != HTTP_HEADER_OTHER) {
     return exists(code);
-  } else {
-    ITERATE_OVER_STRINGS(name, { return true; });
-    return false;
   }
+  ITERATE_OVER_STRINGS(name, { return true; });
+  return false;
 }
 
 bool HTTPHeaders::exists(HTTPHeaderCode code) const {
@@ -99,16 +147,15 @@ bool HTTPHeaders::remove(folly::StringPiece name) {
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
   if (code != HTTP_HEADER_OTHER) {
     return remove(code);
-  } else {
-    bool removed = false;
-    ITERATE_OVER_STRINGS(name, {
-      delete names()[pos];
-      codes()[pos] = HTTP_HEADER_NONE;
-      removed = true;
-      ++deletedCount_;
-    });
-    return removed;
   }
+  bool removed = false;
+  ITERATE_OVER_STRINGS(name, {
+    delete names()[pos];
+    codes()[pos] = HTTP_HEADER_NONE;
+    removed = true;
+    ++deletedCount_;
+  });
+  return removed;
 }
 
 bool HTTPHeaders::remove(HTTPHeaderCode code) {
@@ -247,10 +294,10 @@ void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders,
                                      const HTTPHeaders* customPerHopHeaders) {
   int len;
   forEachValueOfHeader(
-      HTTP_HEADER_CONNECTION, [&](const string& stdStr) -> bool {
+      HTTP_HEADER_CONNECTION, [&](const std::string& value) -> bool {
         // Remove all headers specified in Connection header
         // look for multiple values separated by commas
-        char const* str = stdStr.c_str();
+        char const* str = value.c_str();
 
         // skip leading whitespace
         while (isLWS(*str)) {
@@ -328,7 +375,7 @@ void HTTPHeaders::copyTo(HTTPHeaders& hdrs) const {
                         ((codes()[i] == HTTP_HEADER_OTHER)
                              ? new string(*names()[i])
                              : names()[i]),
-                        values()[i]);
+                        std::string(values()[i]));
     }
   }
 }
@@ -361,6 +408,153 @@ const std::string& HTTPHeaders::getSingleOrEmpty(HTTPHeaderCode code) const {
 const std::string& HTTPHeaders::getSingleOrEmpty(
     folly::StringPiece name) const {
   return *getSingleOrNullptr(name);
+}
+
+HTTPHeaderCode* HTTPHeaders::codes() const noexcept {
+  return codes(memory_.get(), capacity_);
+}
+
+HTTPHeaderCode* HTTPHeaders::codes(const uint8_t* memory,
+                                   size_t capacity) const noexcept {
+  return (HTTPHeaderCode*)(memory + capacity * (sizeof(std::string*) +
+                                                sizeof(std::string)));
+}
+
+std::string** HTTPHeaders::names() const noexcept {
+  return names(memory_.get(), capacity_);
+}
+
+std::string** HTTPHeaders::names(const uint8_t* memory,
+                                 size_t capacity) const noexcept {
+  return (std::string**)(memory + capacity * sizeof(std::string));
+}
+
+std::string* HTTPHeaders::values() const noexcept {
+  return values(memory_.get(), capacity_);
+}
+
+std::string* HTTPHeaders::values(const uint8_t* memory, size_t) const noexcept {
+  return (std::string*)(memory);
+}
+
+void HTTPHeaders::ensure(size_t minCapacity) {
+  if (capacity_ >= minCapacity) {
+    return;
+  }
+
+  static_assert(kInitialVectorReserve >= 1,
+                "This loop depends on a strictly-positive "
+                "kInitialVectorReserve to terminate");
+  size_t targetCapacity = std::max(capacity_, kInitialVectorReserve);
+  while (targetCapacity < minCapacity) {
+    // targetCapacity will never be zero, so it will always grow here.
+    targetCapacity += targetCapacity / 2;
+  }
+  resize(targetCapacity);
+}
+
+void HTTPHeaders::resize(size_t capacity) {
+  if (capacity <= capacity_) {
+    return;
+  }
+  auto newMemory = std::make_unique<uint8_t[]>(capacity * kRecSize);
+  if (length_ > 0) {
+    memcpy(codes(newMemory.get(), capacity), codes(), length_);
+    memcpy(names(newMemory.get(), capacity),
+           names(),
+           sizeof(std::string*) * length_);
+    auto vNew = values(newMemory.get(), capacity);
+    auto v = values();
+    for (size_t i = 0; i < length_; i++) {
+      new (vNew + i) std::string(std::move(v[i]));
+    }
+  }
+  memory_ = std::move(newMemory);
+  capacity_ = capacity;
+}
+
+void HTTPHeaders::emplace_back(HTTPHeaderCode code,
+                               std::string* name,
+                               std::string&& value) {
+  ensure(length_ + 1);
+  codes()[length_] = code;
+  names()[length_] = name;
+  std::string* p = values() + length_++;
+  auto trimmed = folly::trimWhitespace(value);
+  if (LIKELY(trimmed.size() == value.size())) { // elide copy
+    new (p) std::string(std::move(value));
+  } else {
+    new (p) std::string(trimmed);
+  }
+}
+
+void HTTPHeaders::forEach(const ForEachFnT& func) const {
+  auto c = codes();
+  auto n = names();
+  auto v = values();
+  for (size_t i = 0; i < length_; ++i) {
+    if (c[i] != HTTPHeaderCode::HTTP_HEADER_NONE) {
+      func(*n[i], v[i]);
+    }
+  }
+}
+
+void HTTPHeaders::forEachWithCode(const ForEachWithCodeFnT& func) const {
+  auto c = codes();
+  auto n = names();
+  auto v = values();
+  for (size_t i = 0; i < length_; ++i) {
+    if (c[i] != HTTPHeaderCode::HTTP_HEADER_NONE) {
+      func(c[i], *n[i], v[i]);
+    }
+  }
+}
+
+bool HTTPHeaders::forEachValueOfHeader(
+    folly::StringPiece name, const ForEachValueOfHeaderFnT& func) const {
+  const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
+  if (code != HTTPHeaderCode::HTTP_HEADER_OTHER) {
+    return forEachValueOfHeader(code, func);
+  }
+  ITERATE_OVER_STRINGS(name, {
+    if (func(values()[pos])) {
+      return true;
+    }
+  });
+  return false;
+}
+
+bool HTTPHeaders::forEachValueOfHeader(
+    HTTPHeaderCode code, const ForEachValueOfHeaderFnT& func) const {
+  ITERATE_OVER_CODES(code, {
+    if (func(values()[pos])) {
+      return true;
+    }
+  });
+  return false;
+}
+
+bool HTTPHeaders::removeByPredicate(const RemoveByPredFnT& func) {
+  bool removed = false;
+  auto c = codes();
+  auto n = names();
+  auto v = values();
+  for (size_t i = 0; i < length_; ++i) {
+    if (c[i] == HTTPHeaderCode::HTTP_HEADER_NONE || !func(c[i], *n[i], v[i])) {
+      continue;
+    }
+
+    if (c[i] == HTTPHeaderCode::HTTP_HEADER_OTHER) {
+      delete n[i];
+      n[i] = nullptr;
+    }
+
+    c[i] = HTTPHeaderCode::HTTP_HEADER_NONE;
+    ++deletedCount_;
+    removed = true;
+  }
+
+  return removed;
 }
 
 } // namespace proxygen

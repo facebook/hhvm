@@ -107,23 +107,30 @@ class HTTPHeaders {
    * Add the header 'name' with value 'value'; if other instances of this
    * header name exist, they will be retained.
    */
-  void add(folly::StringPiece name, folly::StringPiece value);
-  void add(folly::StringPiece name, char const* value) {
-    add(name, folly::StringPiece(value));
+  void add(folly::StringPiece name, std::string&& value);
+  void add(folly::StringPiece name, const std::string& value) {
+    add(name, std::string(value));
   }
-  void add(folly::StringPiece name, char* value) {
-    add(name, folly::StringPiece(value));
+  void add(folly::StringPiece name, folly::StringPiece value) {
+    add(name, std::string(value));
   }
-  template <typename T> // T = string
-  void add(folly::StringPiece name, T&& value);
-  void add(HTTPHeaderCode code, char const* value) {
-    add(code, folly::StringPiece(value));
+  // TODO(@damlaj): remove this fn & patch up all callsites
+  void add(folly::StringPiece name, const char* value) {
+    return add(name, std::string(value));
   }
-  void add(HTTPHeaderCode code, char* value) {
-    add(code, folly::StringPiece(value));
+
+  void add(HTTPHeaderCode code, std::string&& value);
+  void add(HTTPHeaderCode code, const std::string& value) {
+    add(code, std::string(value));
   }
-  template <typename T> // T = string
-  void add(HTTPHeaderCode code, T&& value);
+  void add(HTTPHeaderCode code, folly::StringPiece value) {
+    add(code, std::string(value));
+  }
+  // TODO(@damlaj): remove this fn & patch up all callsites
+  void add(HTTPHeaderCode code, const char* value) {
+    return add(code, std::string(value));
+  }
+
   void add(headers_initializer_list l);
   void rawAdd(const std::string& name, const std::string& value);
 
@@ -178,12 +185,13 @@ class HTTPHeaders {
    * for each header:value pair, the function/functor/lambda-expression
    * given as the second parameter will be executed. It should take two
    * const string & parameters and return void. Example use:
-   *     hdrs.forEach([&] (const string& header, const string& val) {
+   *     hdrs.forEach([&] (const string& header, const std::string& val) {
    *       std::cout << header << ": " << val;
    *     });
    */
-  template <typename LAMBDA> // (const string &, const string &) -> void
-  inline void forEach(LAMBDA func) const;
+  using ForEachFnT =
+      std::function<void(const std::string&, const std::string&)>;
+  void forEach(const ForEachFnT& func) const;
 
   /**
    * Process the list of all headers, in the order that they were seen:
@@ -193,12 +201,13 @@ class HTTPHeaders {
    * return void. Example use:
    *     hdrs.forEachWithCode([&] (HTTPHeaderCode code,
    *                               const string& header,
-   *                               const string& val) {
+   *                               const std::string& val) {
    *       std::cout << header << "(" << code << "): " << val;
    *     });
    */
-  template <typename LAMBDA>
-  inline void forEachWithCode(LAMBDA func) const;
+  using ForEachWithCodeFnT = std::function<void(
+      HTTPHeaderCode, const std::string&, const std::string&)>;
+  void forEachWithCode(const ForEachWithCodeFnT& func) const;
 
   /**
    * Process the list of all headers, in the order that they were seen:
@@ -214,8 +223,10 @@ class HTTPHeaders {
    *
    * return true only if one or more headers are removed.
    */
-  template <typename LAMBDA> // (const string &, const string &) -> bool
-  inline bool removeByPredicate(LAMBDA func);
+
+  using RemoveByPredFnT = std::function<bool(
+      HTTPHeaderCode, const std::string&, const std::string&)>;
+  bool removeByPredicate(const RemoveByPredFnT& func);
 
   /**
    * Returns the value of the header if it's found in the message and is the
@@ -270,17 +281,18 @@ class HTTPHeaders {
    * for each value, the function/functor/lambda-expression given as the second
    * parameter will be executed. It should take one const string & parameter
    * and return bool (false to keep processing, true to stop it). Example use:
-   *     hdrs.forEachValueOfHeader("someheader", [&] (const string& val) {
+   *     hdrs.forEachValueOfHeader("someheader", [&] (const std::string& val) {
    *       std::cout << val;
    *       return false;
    *     });
    * This method returns true if processing was stopped (by func returning
    * true), and false otherwise.
    */
-  template <typename LAMBDA> // const string & -> bool
-  inline bool forEachValueOfHeader(folly::StringPiece name, LAMBDA func) const;
-  template <typename LAMBDA> // const string & -> bool
-  inline bool forEachValueOfHeader(HTTPHeaderCode code, LAMBDA func) const;
+  using ForEachValueOfHeaderFnT = std::function<bool(const std::string&)>;
+  bool forEachValueOfHeader(folly::StringPiece name,
+                            const ForEachValueOfHeaderFnT& func) const;
+  bool forEachValueOfHeader(HTTPHeaderCode code,
+                            const ForEachValueOfHeaderFnT& func) const;
 
   /**
    * Remove all instances of the given header, returning true if anything was
@@ -340,38 +352,16 @@ class HTTPHeaders {
 
   void copyFrom(const HTTPHeaders& hdrs);
 
-  [[nodiscard]] HTTPHeaderCode* codes() const {
-    return codes(memory_.get(), capacity_);
-  }
+  [[nodiscard]] HTTPHeaderCode* codes() const noexcept;
+  [[nodiscard]] HTTPHeaderCode* codes(const uint8_t* memory,
+                                      size_t capacity) const noexcept;
+  [[nodiscard]] std::string** names() const noexcept;
 
-  HTTPHeaderCode* codes(const uint8_t* memory, size_t capacity) const {
-    return (HTTPHeaderCode*)(memory + capacity * (sizeof(std::string*) +
-                                                  sizeof(std::string)));
-  }
-
-  [[nodiscard]] std::string** names() const {
-    return names(memory_.get(), capacity_);
-  }
-
-  std::string** names(const uint8_t* memory, size_t capacity) const {
-    return (std::string**)(memory + capacity * sizeof(std::string));
-  }
-
-  [[nodiscard]] std::string* values() const {
-    return values(memory_.get(), capacity_);
-  }
-
-  std::string* values(const uint8_t* memory, size_t) const {
-    return (std::string*)(memory);
-  }
-
-  /**
-   * The initial capacity of the three vectors, reserved right after
-   * construction.
-   */
-  static constexpr size_t kInitialVectorReserve = 16;
-  static constexpr size_t kRecSize =
-      (sizeof(char) + sizeof(std::string*) + sizeof(std::string));
+  [[nodiscard]] std::string** names(const uint8_t* memory,
+                                    size_t capacity) const noexcept;
+  [[nodiscard]] std::string* values() const noexcept;
+  [[nodiscard]] std::string* values(const uint8_t* memory,
+                                    size_t) const noexcept;
 
   /**
    * Moves the named header and values from this group to the destination
@@ -385,177 +375,14 @@ class HTTPHeaders {
 
   void destroy();
 
-  void ensure(size_t minCapacity) {
-    if (capacity_ >= minCapacity) {
-      return;
-    }
+  void ensure(size_t minCapacity);
 
-    static_assert(kInitialVectorReserve >= 1,
-                  "This loop depends on a strictly-positive "
-                  "kInitialVectorReserve to terminate");
-    size_t targetCapacity = std::max(capacity_, kInitialVectorReserve);
-    while (targetCapacity < minCapacity) {
-      // targetCapacity will never be zero, so it will always grow here.
-      targetCapacity += targetCapacity / 2;
-    }
-    resize(targetCapacity);
-  }
+  void resize(size_t capacity);
 
-  void resize(size_t capacity) {
-    if (capacity <= capacity_) {
-      return;
-    }
-    auto newMemory = std::make_unique<uint8_t[]>(capacity * kRecSize);
-    if (length_ > 0) {
-      memcpy(codes(newMemory.get(), capacity), codes(), length_);
-      memcpy(names(newMemory.get(), capacity),
-             names(),
-             sizeof(std::string*) * length_);
-      auto vNew = values(newMemory.get(), capacity);
-      auto v = values();
-      for (size_t i = 0; i < length_; i++) {
-        new (vNew + i) std::string(std::move(v[i]));
-      }
-    }
-    memory_ = std::move(newMemory);
-    capacity_ = capacity;
-  }
-
-  template <typename T>
-  typename std::enable_if<std::is_same<T, const std::string&>::value ||
-                          std::is_same<T, std::string&&>::value>::type
-  emplace_back(HTTPHeaderCode code, std::string* name, T&& value) {
-    auto v = values();
-    void* valuePtr = (void*)&value;
-    if (length_ == capacity_ && valuePtr >= (void*)v &&
-        valuePtr < (void*)(v + length_)) {
-      std::string savedValue = std::forward<T>(value);
-      emplace_back_impl(code, name, std::move(savedValue));
-    } else {
-      emplace_back_impl(code, name, std::forward<T>(value));
-    }
-  }
-
-  template <typename T>
-  typename std::enable_if<!std::is_same<T, const std::string&>::value &&
-                          !std::is_same<T, std::string&&>::value>::type
-  emplace_back(HTTPHeaderCode code, std::string* name, T&& value) {
-    emplace_back_impl(code, name, std::forward<T>(value));
-  }
-
-  template <typename T>
-  void emplace_back_impl(HTTPHeaderCode code, std::string* name, T&& value) {
-    ensure(length_ + 1);
-    codes()[length_] = code;
-    names()[length_] = name;
-    std::string* p = values() + length_++;
-    new (p) std::string(folly::trimWhitespace(std::forward<T>(value)));
-  }
+  void emplace_back(HTTPHeaderCode code,
+                    std::string* name,
+                    std::string&& value);
 };
-
-// Implementation follows - it has to be in the .h because of the templates
-
-template <typename T> // T = string
-void HTTPHeaders::add(folly::StringPiece name, T&& value) {
-  assert(name.size());
-  const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
-  auto namePtr =
-      ((code == HTTPHeaderCode::HTTP_HEADER_OTHER)
-           ? new std::string(name.data(), name.size())
-           : (std::string*)HTTPCommonHeaders::getPointerToName(code));
-  emplace_back(code, namePtr, std::forward<T>(value));
-}
-
-template <typename T> // T = string
-void HTTPHeaders::add(HTTPHeaderCode code, T&& value) {
-  auto namePtr = (std::string*)HTTPCommonHeaders::getPointerToName(code);
-  emplace_back(code, namePtr, std::forward<T>(value));
-}
-
-// iterate over the positions (in vector) of all headers with given code
-#define ITERATE_OVER_CODES(Code, Block)                   \
-  {                                                       \
-    const HTTPHeaderCode* ptr = codes();                  \
-    while (ptr) {                                         \
-      ptr = (HTTPHeaderCode*)memchr(                      \
-          (void*)ptr, (Code), length_ - (ptr - codes())); \
-      if (ptr == nullptr)                                 \
-        break;                                            \
-      const size_t pos = ptr - codes();                   \
-      {Block} ptr++;                                      \
-    }                                                     \
-  }                                                       \
-  static_assert(true, "semicolon required")
-
-// iterate over the positions of all headers with given name
-#define ITERATE_OVER_STRINGS(String, Block)               \
-  ITERATE_OVER_CODES(HTTPHeaderCode::HTTP_HEADER_OTHER, { \
-    if (caseInsensitiveEqual((String), *names()[pos])) {  \
-      {                                                   \
-        Block                                             \
-      }                                                   \
-    }                                                     \
-  })
-
-// iterate over the positions of all headers with given name ignoring - and _
-#define ITERATE_OVER_STRINGS_ALL_VERSION(String, Block)            \
-  ITERATE_OVER_CODES(HTTP_HEADER_OTHER, {                          \
-    if (caseUnderscoreInsensitiveEqual((String), *names()[pos])) { \
-      {                                                            \
-        Block                                                      \
-      }                                                            \
-    }                                                              \
-  })
-
-template <typename LAMBDA> // (const string &, const string &) -> void
-void HTTPHeaders::forEach(LAMBDA func) const {
-  auto c = codes();
-  auto n = names();
-  auto v = values();
-  for (size_t i = 0; i < length_; ++i) {
-    if (c[i] != HTTPHeaderCode::HTTP_HEADER_NONE) {
-      func(*n[i], v[i]);
-    }
-  }
-}
-
-template <typename LAMBDA>
-void HTTPHeaders::forEachWithCode(LAMBDA func) const {
-  auto c = codes();
-  auto n = names();
-  auto v = values();
-  for (size_t i = 0; i < length_; ++i) {
-    if (c[i] != HTTPHeaderCode::HTTP_HEADER_NONE) {
-      func(c[i], *n[i], v[i]);
-    }
-  }
-}
-
-template <typename LAMBDA> // const string & -> bool
-bool HTTPHeaders::forEachValueOfHeader(folly::StringPiece name,
-                                       LAMBDA func) const {
-  const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
-  if (code != HTTPHeaderCode::HTTP_HEADER_OTHER) {
-    return forEachValueOfHeader(code, func);
-  } else {
-    ITERATE_OVER_STRINGS(name, {
-      if (func(values()[pos])) {
-        return true;
-      }
-    });
-    return false;
-  }
-}
-
-template <typename LAMBDA> // const string & -> bool
-bool HTTPHeaders::forEachValueOfHeader(HTTPHeaderCode code, LAMBDA func) const {
-  ITERATE_OVER_CODES(code, {
-    if (func(values()[pos])) {
-      return true;
-    }
-  });
-  return false;
-}
 
 template <typename T>
 std::string HTTPHeaders::combine(const T& header,
@@ -570,31 +397,6 @@ std::string HTTPHeaders::combine(const T& header,
     return false;
   });
   return combined;
-}
-
-// LAMBDA: (HTTPHeaderCode, const string&, const string&) -> bool
-template <typename LAMBDA>
-bool HTTPHeaders::removeByPredicate(LAMBDA func) {
-  bool removed = false;
-  auto c = codes();
-  auto n = names();
-  auto v = values();
-  for (size_t i = 0; i < length_; ++i) {
-    if (c[i] == HTTPHeaderCode::HTTP_HEADER_NONE || !func(c[i], *n[i], v[i])) {
-      continue;
-    }
-
-    if (c[i] == HTTPHeaderCode::HTTP_HEADER_OTHER) {
-      delete n[i];
-      n[i] = nullptr;
-    }
-
-    c[i] = HTTPHeaderCode::HTTP_HEADER_NONE;
-    ++deletedCount_;
-    removed = true;
-  }
-
-  return removed;
 }
 
 #ifndef PROXYGEN_HTTPHEADERS_IMPL

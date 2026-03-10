@@ -33,9 +33,10 @@ void EchoHandler::onRequest(std::unique_ptr<HTTPMessage> req) noexcept {
     builder.header("Request-Number",
                    folly::to<std::string>(stats_->getRequestCount()));
   }
-  req->getHeaders().forEach([&](std::string& name, std::string& value) {
-    builder.header(folly::to<std::string>("x-echo-", name), value);
-  });
+  req->getHeaders().forEach(
+      [&](const std::string& name, const std::string& value) {
+        builder.header(folly::to<std::string>("x-echo-", name), value);
+      });
   builder.send();
 }
 

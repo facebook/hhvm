@@ -361,14 +361,14 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     ) except *:
         cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}] c_inst = make_unique[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct:self}}]()
         cdef bint any_set = False
-        {{#struct:py3_fields}}{{#field:type}}
-        if {{field:py_name}} is not None:
+        {{#each struct:self.py3_fields as |field|}}
+        if {{field.py_name}} is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            {{> types/cython_union_assign_field}}
+            {{#partial types.cython_union_assign_field field=field}}
 
             any_set = True
-        {{/field:type}}{{/struct:py3_fields}}
+        {{/each}}
         # in C++ you don't have to call move(), but this doesn't translate
         # into a C++ return statement, so you do here
         return cmove(c_inst)
@@ -403,13 +403,10 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     def value({{struct:name}} self not None):
         if self.py_value is not None or self.type_int == 0:
             return self.py_value
-        {{#struct:py3_fields}}
-        elif self.type_int == {{field:id}}:
-            {{#field:type}}
-            {{> types/cython_union_getter}}
-
-            {{/field:type}}
-        {{/struct:py3_fields}}
+        {{#each struct:self.py3_fields as |field|}}
+        elif self.type_int == {{field.id}}:
+            {{#partial types.cython_union_getter field=field}}
+        {{/each}}
         return self.py_value
 
     {{! initialize python cache}}

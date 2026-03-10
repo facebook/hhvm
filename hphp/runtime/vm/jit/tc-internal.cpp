@@ -217,9 +217,11 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
   auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
   auto const hasLiveTransBytesLimit = Cfg::Jit::FuncLiveTranslationByteLimit != std::numeric_limits<uint32_t>::max();
-  if (isLive && hasLiveTransBytesLimit &&
-      g_funcLiveTransBytes[func->getFuncId()] > Cfg::Jit::FuncLiveTranslationByteLimit) {
-    return TranslationResult::Scope::Process;
+  if (isLive && hasLiveTransBytesLimit) {
+    auto const it = g_funcLiveTransBytes.find(func->getFuncId());
+    if (it != g_funcLiveTransBytes.cend() && it->second > Cfg::Jit::FuncLiveTranslationByteLimit) {
+      return TranslationResult::Scope::Process;
+    }
   }
 
   if (!noTheshold && (isLive || isProf)) {

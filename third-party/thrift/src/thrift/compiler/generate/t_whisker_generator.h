@@ -140,6 +140,19 @@ class t_whisker_generator : public t_generator {
           return whisker::make::boolean(
               has_compiler_option(ctx.argument<whisker::string>(0)));
         });
+    // By default, Whisker considers f64s to be unprintable in strict mode, as
+    // floats can have non-deterministic string results (e.g. fmt vs
+    // std::ostream). Generators MAY explicitly overwrite this in their
+    // `globals` overload (or define a different function) to override how that
+    // generator's floats should be rendered.
+    globals["float_to_string"] = whisker::dsl::make_function(
+        "float_to_string",
+        [](whisker::dsl::function::context ctx) -> whisker::object {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(1);
+          return whisker::make::string(
+              fmt::format("{}", ctx.argument<whisker::f64>(0)));
+        });
 
     return globals;
   }

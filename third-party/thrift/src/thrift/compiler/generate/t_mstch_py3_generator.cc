@@ -17,8 +17,8 @@
 #include <filesystem>
 #include <memory>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <fmt/format.h>
 
 #include <thrift/compiler/ast/t_service.h>
@@ -27,9 +27,10 @@
 #include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/generate/cpp/orderable_type_utils.h>
 #include <thrift/compiler/generate/cpp/reference_type.h>
-#include <thrift/compiler/generate/mstch_objects.h>
+#include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/generate/python/util.h>
-#include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
+#include <thrift/compiler/generate/templates.h>
 
 namespace apache::thrift::compiler {
 
@@ -418,182 +419,6 @@ class py3_generator_context {
   }
 };
 
-class py3_mstch_program : public mstch_program {
- public:
-  py3_mstch_program(
-      const t_program* p,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      py3_generator_context* context)
-      : mstch_program(p, ctx, pos), generator_context_(*context) {
-    register_methods(
-        this,
-        {
-            {"program:containerTypes", &py3_mstch_program::getContainerTypes},
-            {"program:customTemplates", &py3_mstch_program::getCustomTemplates},
-            {"program:customTypes", &py3_mstch_program::getCustomTypes},
-            {"program:stream_types", &py3_mstch_program::getStreamTypes},
-            {"program:response_and_stream_functions",
-             &py3_mstch_program::response_and_stream_functions},
-            {"program:stream_exceptions",
-             &py3_mstch_program::getStreamExceptions},
-            {"program:filtered_structs", &py3_mstch_program::filtered_objects},
-            {"program:filtered_typedefs",
-             &py3_mstch_program::filtered_typedefs},
-        });
-  }
-
-  mstch::node getContainerTypes() {
-    return make_mstch_types(generator_context_.container_types(*program_));
-  }
-
-  mstch::node getCustomTemplates() {
-    return make_mstch_types(generator_context_.custom_templates(*program_));
-  }
-
-  mstch::node getCustomTypes() {
-    return make_mstch_types(generator_context_.custom_cpp_types(*program_));
-  }
-
-  mstch::node response_and_stream_functions() {
-    return make_mstch_functions(
-        generator_context_.response_and_stream_functions(*program_));
-  }
-
-  mstch::node getStreamExceptions() {
-    std::vector<const t_type*> types;
-    const auto& stream_exceptions =
-        generator_context_.stream_exceptions(*program_);
-    types.reserve(stream_exceptions.size());
-    for (const auto& kvp : stream_exceptions) {
-      types.push_back(kvp.second);
-    }
-    return make_mstch_types(types);
-  }
-
-  mstch::node getStreamTypes() {
-    std::vector<const t_type*> types;
-    const auto& stream_types = generator_context_.stream_types(*program_);
-    types.reserve(stream_types.size());
-    if (!has_option("no_stream")) {
-      for (const auto& kvp : stream_types) {
-        types.push_back(kvp.second);
-      }
-    }
-    return make_mstch_types(types);
-  }
-
- protected:
-  mstch::node filtered_objects() {
-    std::vector<const t_structured*> visible;
-    visible.reserve(program_->structured_definitions().size());
-    for (const t_structured* s : program_->structured_definitions()) {
-      if (!is_hidden(*s)) {
-        visible.emplace_back(s);
-      }
-    }
-    std::string id =
-        program_cache_id(program_, get_program_namespace(program_));
-    return make_mstch_array_cached(
-        visible, *context_.struct_factory, context_.struct_cache, id);
-  }
-
-  mstch::node filtered_typedefs() {
-    std::vector<const t_typedef*> visible;
-    visible.reserve(program_->typedefs().size());
-    for (const t_typedef* t : program_->typedefs()) {
-      if (!is_hidden(*t) && !is_hidden(*t->get_true_type())) {
-        visible.emplace_back(t);
-      }
-    }
-    return make_mstch_typedefs(visible);
-  }
-
-  py3_generator_context& generator_context_;
-};
-
-struct interaction_name_less {
-  bool operator()(const t_interaction* lhs, const t_interaction* rhs) const {
-    return lhs->name() < rhs->name();
-  }
-};
-
-class py3_mstch_service : public mstch_service {
- public:
-  py3_mstch_service(
-      const t_service* service,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const py3_generator_context* generator_context,
-      const t_service* containing_service = nullptr)
-      : mstch_service(service, ctx, pos, containing_service),
-        generator_context_{*generator_context} {
-    register_methods(
-        this,
-        {
-            {"service:supportedFunctions",
-             &py3_mstch_service::get_supported_functions},
-            {"service:lifecycleFunctions",
-             &py3_mstch_service::get_lifecycle_functions},
-            {"service:supportedInteractions",
-             &py3_mstch_service::get_supported_interactions},
-        });
-  }
-
-  std::vector<const t_function*> supportedFunctions() {
-    std::vector<const t_function*> funcs;
-    bool no_stream = has_option("no_stream");
-    for (const auto& func : service_->functions()) {
-      if (is_func_supported(no_stream, &func)) {
-        funcs.push_back(&func);
-      }
-    }
-    return funcs;
-  }
-
-  mstch::node get_lifecycle_functions() {
-    return make_mstch_functions(lifecycleFunctions());
-  }
-
-  mstch::node get_supported_functions() {
-    return make_mstch_functions(supportedFunctions());
-  }
-
-  mstch::node get_supported_interactions() {
-    return make_mstch_interactions(
-        generator_context_.supported_interactions(*service_), service_);
-  }
-
- private:
-  const py3_generator_context& generator_context_;
-};
-
-class py3_mstch_struct : public mstch_struct {
- public:
-  py3_mstch_struct(
-      const t_structured* s,
-      mstch_context& ctx,
-      mstch_element_position pos,
-      const py3_generator_context* py3_context)
-      : mstch_struct(s, ctx, pos), context_{*py3_context} {
-    register_methods(
-        this,
-        {
-            {"struct:py3_fields", &py3_mstch_struct::py3_fields},
-        });
-  }
-
-  mstch::node py3_fields() {
-    // TODO(T256504508): Templates require properties from `mstch_field`, so
-    // those must be migrated to Whisker first
-    return make_mstch_fields(
-        context_.get_structured_context(*struct_).nonHiddenFields);
-  }
-
- private:
-  const py3_generator_context& context_;
-};
-
 std::string py3_generator_context::visit_type(
     const t_type* orig_type, bool fromTypeDef) {
   bool hasPy3EnableCppAdapterAnnot =
@@ -763,26 +588,18 @@ void py3_generator_context::visit_function(const t_function& function) {
   add_function_by_unique_return_type(function, std::move(return_type_name));
 }
 
-class t_mstch_py3_generator : public t_mstch_generator {
+class t_mstch_py3_generator : public t_whisker_generator {
  public:
-  using t_mstch_generator::t_mstch_generator;
-
-  whisker_options render_options() const override {
-    whisker_options opts;
-    opts.allowed_undefined_variables = {"function:stream?"};
-    return opts;
-  }
-
-  std::string template_prefix() const override { return "py3"; }
+  using t_whisker_generator::t_whisker_generator;
 
   void generate_program() override {
     generateRootPath_ = package_to_path();
     out_dir_base_ = "gen-py3";
-    auto include_prefix = get_option("include_prefix").value_or("");
-    if (!include_prefix.empty()) {
-      program_->set_include_prefix(std::move(include_prefix));
+    if (std::string_view include_prefix =
+            get_compiler_option("include_prefix").value_or("");
+        !include_prefix.empty()) {
+      program_->set_include_prefix(std::string(include_prefix));
     }
-    set_mstch_factories();
     generate_init_files();
     generate_types();
     generate_services();
@@ -797,7 +614,14 @@ class t_mstch_py3_generator : public t_mstch_generator {
   }
 
  private:
-  void set_mstch_factories();
+  std::string template_prefix() const final { return "py3"; }
+
+  whisker::source_manager template_source_manager() const final {
+    return whisker::source_manager{
+        std::make_unique<in_memory_source_manager_backend>(
+            create_templates_by_path())};
+  }
+
   void generate_init_files();
   void generate_whisker_file(
       const std::string& template_name,
@@ -823,7 +647,7 @@ class t_mstch_py3_generator : public t_mstch_generator {
   }
 
   whisker::map::raw globals(prototype_database& proto) const override {
-    whisker::map::raw globals = t_mstch_generator::globals(proto);
+    whisker::map::raw globals = t_whisker_generator::globals(proto);
     globals["py_string_literal"] = whisker::dsl::make_function(
         "py_string_literal",
         [](whisker::dsl::function::context ctx) -> whisker::object {
@@ -1442,18 +1266,13 @@ py3_generator_context::get_cached_type_props(const t_type* type) const {
   return it->second;
 }
 
-void t_mstch_py3_generator::set_mstch_factories() {
-  mstch_context_.add<py3_mstch_program>(context_.get());
-  mstch_context_.add<py3_mstch_service>(context_.get());
-  mstch_context_.add<py3_mstch_struct>(context_.get());
-}
-
 void t_mstch_py3_generator::generate_init_files() {
   std::filesystem::path p = generateRootPath_;
-  auto mstch_program = make_mstch_program_cached(get_program(), mstch_context_);
   while (!p.empty()) {
-    render_to_file(
-        mstch_program, "common/auto_generated_py", p / "__init__.py");
+    t_whisker_generator::render_to_file(
+        /*output_file=*/p / "__init__.py",
+        /*template_file=*/"common/auto_generated_py",
+        /*context=*/whisker::make::null);
     p = p.parent_path();
   }
 }
@@ -1532,11 +1351,11 @@ void t_mstch_py3_generator::generate_types() {
   generate_whisker_file(
       "cbindings.pxd", FileType::CBindingsFile, generateRootPath_);
 
-  if (has_option("enable_container_pickling_DO_NOT_USE")) {
+  if (has_compiler_option("enable_container_pickling_DO_NOT_USE")) {
     generate_whisker_file(
         "__init__.py", FileType::TypesFile, generateRootPath_);
   }
-  if (has_option("inplace_migrate")) {
+  if (has_compiler_option("inplace_migrate")) {
     generate_whisker_file(
         "types_inplace_FBTHRIFT_ONLY_DO_NOT_USE.py",
         FileType::TypesFile,
@@ -1568,7 +1387,8 @@ void t_mstch_py3_generator::generate_types() {
 }
 
 void t_mstch_py3_generator::generate_services() {
-  if (get_program()->services().empty() && !has_option("single_file_service")) {
+  if (get_program()->services().empty() &&
+      !has_compiler_option("single_file_service")) {
     // There is no need to generate empty / broken code for non existent
     // services. However, in single_file_service mode, the build system may
     // not know ahead of time if these files can exist - so we should always

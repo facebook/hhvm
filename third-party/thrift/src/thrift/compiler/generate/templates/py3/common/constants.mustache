@@ -27,7 +27,7 @@ file.
 {{#let ttype = value.type.true_type}}
 
   {{#if value.double?}}
-{{value.double_value}}
+{{(float_to_string value.double_value)}}
   {{#else if (or value.bool? (and value.integer? ttype.bool?))}}
 {{#if value.nonzero?}}True{{#else}}False{{/if}}
   {{#else if value.integer?}}
@@ -73,7 +73,7 @@ file.
 {{#pragma ignore-newlines}}
   {{#let value=constant.value}}
 {{#if value.bool?}}{{#if value.nonzero?}}True{{#else}}False{{/if}}
-{{#else if value.double?}}{{value.double_value}}
+{{#else if value.double?}}{{(float_to_string value.double_value)}}
   {{#else if value.integer?}}
     {{#if value.type.bool?}}
 {{#if value.nonzero?}}True{{#else}}False{{/if}}

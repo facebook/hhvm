@@ -502,3 +502,45 @@ Recursive for container element types.
 _fbthrift_python_types.MapTypeInfo({{#partial typeinfo type=ttype.key_type}}, {{#partial typeinfo type=ttype.val_type}})
   {{/if type.bool?}}
 {{/let partial}}
+
+
+{{! Used to convert C++ `ckey` to python object. }}
+{{#let export partial map_key_cpp_to_python |type| captures |container_from_cpp python_type cython_cpp_type cython_python_type|}}
+{{#pragma ignore-newlines}}
+{{#if type.iobuf?}}_fbthrift_iobuf.IOBuf.create(ckey.get(), self)
+{{#else if type.iobufRef?}}_fbthrift_iobuf.IOBuf.create(ckey.get().get(), self)
+{{#else if type.flexibleBinary?}}(<const char*>ckey.data())[:ckey.size()]
+{{#else if type.string?}}__init_unicode_from_cpp(ckey)
+{{#else if type.binary?}}bytes(<string>ckey)
+{{#else if type.primitive?}}ckey
+{{#else if type.container?}}{{#partial container_from_cpp type=type}}(ckey)
+{{#else if type.enum?}}translate_cpp_enum_to_python({{#partial python_type type=type}}, <int> ckey)
+{{#else if type.structured?}}
+  {{#if root_program.inplace_migrate?}}
+{{#partial python_type type=type}}.from_python({{type.capi_converter_path}}.{{type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=type}}](ckey)))
+  {{#else}}
+{{#partial cython_python_type type=type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(ckey))
+  {{/if root_program.inplace_migrate?}}
+{{/if type.iobuf?}}
+{{/let partial}}
+
+
+{{! Used to convert C++ `cval` to python object. }}
+{{#let export partial map_val_cpp_to_python |type| captures |container_from_cpp python_type cython_cpp_type cython_python_type|}}
+{{#pragma ignore-newlines}}
+{{#if type.iobuf?}}_fbthrift_iobuf.IOBuf.create(cval.get(), self)
+{{#else if type.iobufRef?}}_fbthrift_iobuf.IOBuf.create(cval.get().get(), self)
+{{#else if type.flexibleBinary?}}(<const char*>cval.data())[:cval.size()]
+{{#else if type.string?}}__init_unicode_from_cpp(cval)
+{{#else if type.binary?}}bytes(<string>cval)
+{{#else if type.primitive?}}cval
+{{#else if type.container?}}{{#partial container_from_cpp type=type}}(cval)
+{{#else if type.enum?}}translate_cpp_enum_to_python({{#partial python_type type=type}}, <int> cval)
+{{#else if type.structured?}}
+  {{#if root_program.inplace_migrate?}}
+{{#partial python_type type=type}}.from_python({{type.capi_converter_path}}.{{type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=type}}](cval)))
+  {{#else}}
+{{#partial cython_python_type type=type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+  {{/if root_program.inplace_migrate?}}
+{{/if type.iobuf?}}
+{{/let partial}}

@@ -62,21 +62,15 @@ cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type 
     return {{type:flat_name}}(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 {{/type:set?}}
 {{#type:map?}}
+{{#let key_type=type:true_type.key_type}}
+{{#let val_type=type:true_type.val_type}}
 cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}& c_map) except *:
     cdef dict py_items = {}
     cdef __map_iter[{{#partial types.cython_cpp_type type=type:self}}] iter = __map_iter[{{#partial types.cython_cpp_type type=type:self}}](c_map)
-    {{#type:key_type}}
-    cdef {{#partial cython_cpp_container_item_type type=type:self}} ckey{{#partial type_default_value type=type:self}}
-    {{/type:key_type}}
-    {{#type:value_type}}
-    cdef {{#partial cython_cpp_container_item_type type=type:self}} cval{{#partial type_default_value type=type:self}}
-    {{/type:value_type}}
+    cdef {{#partial cython_cpp_container_item_type type=key_type}} ckey{{#partial type_default_value type=key_type}}
+    cdef {{#partial cython_cpp_container_item_type type=val_type}} cval{{#partial type_default_value type=val_type}}
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
-        py_items[{{#type:key_type}}{{!
-            }}{{> types/map_key_cpp_to_python}}{{!
-        }}{{/type:key_type}}] = {{#type:value_type}}{{!
-            }}{{> types/map_val_cpp_to_python }}{{!
-        }}{{/type:value_type}}
+        py_items[{{#partial types.map_key_cpp_to_python type=key_type}}] = {{#partial types.map_val_cpp_to_python type=val_type}}
     return {{type:flat_name}}(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 {{/type:map?}}

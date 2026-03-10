@@ -49,7 +49,7 @@ int64_t HHVM_FUNCTION(HH_random_int, int64_t min, int64_t max) {
 namespace {
 
 struct RandomExtension final : Extension {
-  RandomExtension() : Extension("hsl_random", "1.0", NO_ONCALL_YET) {}
+  RandomExtension() : Extension("hsl_random", "1.0", "hphp_hphpi") {}
   void moduleRegisterNative() override {
     // Clang 15 doesn't like the HHVM_FALIAS macro with \\N
     HHVM_FALIAS_FE_STR(

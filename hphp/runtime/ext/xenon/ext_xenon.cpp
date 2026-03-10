@@ -383,7 +383,7 @@ void HHVM_FUNCTION(xenon_set_request_output_file, const String& path) {
 
 
 struct xenonExtension final : Extension {
-  xenonExtension() : Extension("xenon", "2.0", NO_ONCALL_YET) { }
+  xenonExtension() : Extension("xenon", "2.0", "hphp_hphpi") { }
 
   void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\xenon_get_data, xenon_get_data);

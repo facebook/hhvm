@@ -22,7 +22,7 @@ namespace {
 
   struct HslSystemlibExtension final : Extension {
 
-    HslSystemlibExtension() : Extension("hsl_systemlib", "1.0", NO_ONCALL_YET) {}
+    HslSystemlibExtension() : Extension("hsl_systemlib", "1.0", "hphp_hphpi") {}
 
     void moduleLoad(const IniSetting::Map& ini, const Hdf hdf) override {
       Config::Bind(s_enabled, ini, hdf, "Eval.HSLSystemlibEnabled", true);

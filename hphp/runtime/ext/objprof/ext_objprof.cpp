@@ -1475,7 +1475,7 @@ void HHVM_FUNCTION(set_mem_threshold_callback,
 }
 
 struct objprofExtension final : Extension {
-  objprofExtension() : Extension("objprof", "1.0", NO_ONCALL_YET) { }
+  objprofExtension() : Extension("objprof", "1.0", "hphp_hphpi") { }
 
   void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\objprof_get_data, objprof_get_data);

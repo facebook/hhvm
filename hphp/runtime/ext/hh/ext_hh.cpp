@@ -1627,7 +1627,7 @@ bool HHVM_FUNCTION(legacy_is_truthy, const Variant& v) {
 }
 
 static struct HHExtension final : Extension {
-  HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
+  HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET, "hphp_hphpi") { }
   void moduleRegisterNative() override {
 #define X(nm) HHVM_NAMED_FE(HH\\nm, HHVM_FN(nm))
     X(autoload_is_native);
@@ -1726,7 +1726,7 @@ static struct HHExtension final : Extension {
 } s_hh_extension;
 
 static struct XHPExtension final : Extension {
-  XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
+  XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET, "hphp_hphpi") { }
   bool moduleEnabled() const override { return Cfg::Eval::EnableXHP; }
 
   std::vector<std::string> hackFiles() const override {

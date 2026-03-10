@@ -354,7 +354,7 @@ void HHVM_METHOD(XReqSync, unlock) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct XReqSyncExtension final : Extension {
-  XReqSyncExtension() : Extension("xreqsync", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  XReqSyncExtension() : Extension("xreqsync", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
   void moduleRegisterNative() override {
     HHVM_STATIC_MALIAS(HH\\XReqSync, get, XReqSync, get);
     HHVM_MALIAS(HH\\XReqSync, genLock, XReqSync, genLock);

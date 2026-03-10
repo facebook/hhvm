@@ -500,7 +500,7 @@ static String HHVM_STATIC_METHOD(MCRouter, getResultName, int64_t res) {
 /////////////////////////////////////////////////////////////////////////////
 
 struct MCRouterExtension : Extension {
-  MCRouterExtension(): Extension("mcrouter", "1.0.0", NO_ONCALL_YET) {}
+  MCRouterExtension(): Extension("mcrouter", "1.0.0", "memcache") {}
 
   void moduleRegisterNative() override {
     HHVM_ME(MCRouter, __construct);

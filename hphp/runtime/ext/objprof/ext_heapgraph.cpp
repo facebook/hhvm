@@ -647,7 +647,7 @@ Array HHVM_FUNCTION(heapgraph_stats, const OptResource& resource) {
 }
 
 struct heapgraphExtension final : Extension {
-  heapgraphExtension() : Extension("heapgraph", "1.0", NO_ONCALL_YET) { }
+  heapgraphExtension() : Extension("heapgraph", "1.0", "hphp_hphpi") { }
 
   void moduleRegisterNative() override {
     HHVM_FALIAS(HH\\heapgraph_create, heapgraph_create);

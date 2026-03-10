@@ -350,7 +350,7 @@ void validateCredentialNotExpired(std::int64_t validUntilEpoch) {
 
 struct FunctionCredentialExtension final : Extension {
   FunctionCredentialExtension()
-      : Extension("functioncredential", "1.0", NO_ONCALL_YET) {}
+      : Extension("functioncredential", "1.0", "authz_scaled_solutions") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
     bool testMode =

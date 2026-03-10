@@ -159,7 +159,7 @@ std::unique_ptr<UnitEmitter> cache_hook(
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct UnitFileCacheExtension final : Extension {
-  UnitFileCacheExtension() : Extension("unitfilecache", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  UnitFileCacheExtension() : Extension("unitfilecache", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     static std::string filename;

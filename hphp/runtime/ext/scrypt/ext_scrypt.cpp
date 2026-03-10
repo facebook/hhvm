@@ -74,7 +74,7 @@ Variant HHVM_FUNCTION(scrypt_enc, const String& password, const String& salt,
 
 struct ScryptExtension : Extension {
   public:
-    ScryptExtension(): Extension("scrypt", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+    ScryptExtension(): Extension("scrypt", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
     void moduleRegisterNative() override {
       HHVM_FE(scrypt_enc);
     }

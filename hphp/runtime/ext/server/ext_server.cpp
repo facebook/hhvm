@@ -30,7 +30,7 @@
 namespace HPHP {
 
 static struct ServerExtension final : Extension {
-  ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
   void moduleRegisterNative() override;
 } s_server_extension;
 

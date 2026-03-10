@@ -437,7 +437,7 @@ String HHVM_FUNCTION(replace_every_nonrecursive_ci_l,
 }
 
 struct HSLStrExtension final : Extension {
-  HSLStrExtension() : Extension("hsl_str", "0.1", NO_ONCALL_YET) {}
+  HSLStrExtension() : Extension("hsl_str", "0.1", "hphp_hphpi") {}
 
   void moduleInit() override {
     s_byte_ops = new HSLLocaleByteOps();

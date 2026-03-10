@@ -341,7 +341,7 @@ Variant coeffects_call_helper(const Variant& function, const char* name,
 
 
 static struct HHImplicitContext final : Extension {
-  HHImplicitContext(): Extension("implicit_context", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
+  HHImplicitContext(): Extension("implicit_context", NO_EXTENSION_VERSION_YET, "hphp_hphpi") { }
   void moduleRegisterNative() override {
     Native::registerNativeDataInfo<ImplicitContext>(
       ImplicitContextLoader::className().get());

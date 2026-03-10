@@ -104,7 +104,7 @@ namespace {
   }
 
   struct RegexExtension final : Extension {
-    RegexExtension() : Extension("hsl_regex", "0.1", NO_ONCALL_YET) {}
+    RegexExtension() : Extension("hsl_regex", "0.1", "hphp_hphpi") {}
 
     void moduleRegisterNative() override {
       HHVM_FALIAS(

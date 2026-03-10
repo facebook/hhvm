@@ -451,7 +451,7 @@ int64_t HHVM_METHOD(ExtensibleNewableClassWithNativeData, getDumyValue) {
 }
 
 static struct IntrinsicsExtension final : Extension {
-  IntrinsicsExtension() : Extension("intrinsics", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) {}
+  IntrinsicsExtension() : Extension("intrinsics", NO_EXTENSION_VERSION_YET, "hphp_hphpi") {}
 
   bool moduleEnabled() const override {
     return Cfg::Eval::EnableIntrinsicsExtension;

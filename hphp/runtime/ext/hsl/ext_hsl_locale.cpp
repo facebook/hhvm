@@ -173,7 +173,7 @@ Object HHVM_FUNCTION(newlocale_all,
 
 struct LocaleExtension final : Extension {
 
-  LocaleExtension() : Extension("hsl_locale", "0.1", NO_ONCALL_YET) {}
+  LocaleExtension() : Extension("hsl_locale", "0.1", "hphp_hphpi") {}
 
   void moduleRegisterNative() override {
     // Remember to update the HHI :)

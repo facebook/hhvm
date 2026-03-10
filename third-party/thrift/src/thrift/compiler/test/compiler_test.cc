@@ -2624,22 +2624,37 @@ TEST(CompilerTest, alias_enum_in_external_const) {
   check_compile(name_contents_map, "baz.thrift");
 }
 
-TEST(CompilerTest, same_named_field) {
-  check_compile(R"(
+TEST(CompilerTest, same_named_field_error) {
+  check_compile(
+      R"(
     package "facebook.com/thrift/test"
     struct S {
       1: i32 S;
-      # expected-warning@-1: Field 'S' has the same name as the containing struct.
+      # expected-error@-1: Field 'S' has the same name as the containing struct.
     }
     union U {
       1: i32 U;
-      # expected-warning@-1: Field 'U' has the same name as the containing union.
+      # expected-error@-1: Field 'U' has the same name as the containing union.
     }
     exception E {
       1: i32 E;
-      # expected-warning@-1: Field 'E' has the same name as the containing exception.
+      # expected-error@-1: Field 'E' has the same name as the containing exception.
     }
-  )");
+  )",
+      {"--extra-validation", "field_name_matches_enclosing_type=error"});
+}
+
+TEST(CompilerTest, enum_value_name_matches_enclosing_type) {
+  check_compile(
+      R"(
+    package "facebook.com/thrift/test"
+    enum E {
+      E = 0,
+      # expected-warning@-1: Enum value `E` has the same name as the enclosing type `E`.
+      Other = 1,
+    }
+  )",
+      {"--extra-validation", "enum_value_name_matches_enclosing_type=warn"});
 }
 
 TEST(CompilerTest, cursor_serialization_adapter) {

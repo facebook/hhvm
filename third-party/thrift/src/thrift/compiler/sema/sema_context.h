@@ -198,6 +198,15 @@ struct sema_params {
   // If true, ignore @thrift.AllowLegacyMissingUris opt-out when checking for
   // missing URIs. Requires missing_uris to be set to error.
   bool ignore_missing_uri_opt_out = false;
+
+  // Action to take when a field in a structured type (struct, union, exception)
+  // has the same name as the enclosing type.
+  validation_level field_name_matches_enclosing_type = validation_level::warn;
+
+  // Action to take when an enum value has the same name as the enclosing enum
+  // type.
+  validation_level enum_value_name_matches_enclosing_type =
+      validation_level::none;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

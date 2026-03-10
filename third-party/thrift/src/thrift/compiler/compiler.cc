@@ -217,6 +217,16 @@ Options:
                   Ignore @thrift.AllowLegacyMissingUris when checking for
                   missing URIs. Requires missing_uris=error.
 
+                field_name_matches_enclosing_type=none|warn|error
+                  Action to take when a field in a structured type has the
+                  same name as the enclosing type.
+                  Default: warn
+
+                enum_value_name_matches_enclosing_type=none|warn|error
+                  Action to take when an enum value has the same name as the
+                  enclosing enum type.
+                  Default: none
+
                 warn_on_redundant_custom_default_values
                   DEPRECATED, prefer: redundant_custom_default_values=warn
 
@@ -1049,6 +1059,19 @@ std::string parse_args(
             continue;
           }
 
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"field_name_matches_enclosing_type",
+                  &sparams.field_name_matches_enclosing_type)) {
+            continue;
+          }
+
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"enum_value_name_matches_enclosing_type",
+                  &sparams.enum_value_name_matches_enclosing_type)) {
+            continue;
+          }
         } catch (const std::exception& e) {
           fmt::print(
               stderr,
@@ -1243,6 +1266,14 @@ void record_invocation_params(
   sema_params_metric.add(
       fmt::format(
           "ignore_missing_uri_opt_out={}", sparams.ignore_missing_uri_opt_out));
+  sema_params_metric.add(
+      fmt::format(
+          "field_name_matches_enclosing_type={}",
+          fmt::underlying(sparams.field_name_matches_enclosing_type)));
+  sema_params_metric.add(
+      fmt::format(
+          "enum_value_name_matches_enclosing_type={}",
+          fmt::underlying(sparams.enum_value_name_matches_enclosing_type)));
   sema_params_metric.add(
       "warn_on_redundant_custom_default_values=" +
       std::to_string(

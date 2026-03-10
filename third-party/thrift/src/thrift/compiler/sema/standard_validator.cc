@@ -808,6 +808,22 @@ void validate_enum_value_uniqueness(sema_context& ctx, const t_enum& node) {
   }
 }
 
+void validate_enum_value_name_not_enclosing_type(
+    sema_context& ctx, const t_enum& node) {
+  for (const t_enum_value& value : node.values()) {
+    if (value.name() == node.name()) {
+      ctx.report(
+          value,
+          validation_to_diagnostic_level(
+              ctx.sema_parameters().enum_value_name_matches_enclosing_type),
+          "Enum value `{}` has the same name as the enclosing type `{}`.",
+          value.name(),
+          node.name());
+      return;
+    }
+  }
+}
+
 void validate_enum_value(sema_context& ctx, const t_enum_value& node) {
   if (!node.has_value()) {
     ctx.error(
@@ -942,7 +958,10 @@ void validate_field_name(sema_context& ctx, const t_field& field) {
     } else {
       parent_structure = "struct";
     }
-    ctx.warning(
+    ctx.report(
+        field,
+        validation_to_diagnostic_level(
+            ctx.sema_parameters().field_name_matches_enclosing_type),
         "Field '{}' has the same name as the containing {}.",
         field.name(),
         parent_structure);
@@ -2292,6 +2311,7 @@ ast_validator standard_validator() {
 
   validator.add_enum_visitor(&validate_enum_value_name_uniqueness);
   validator.add_enum_visitor(&validate_enum_value_uniqueness);
+  validator.add_enum_visitor(&validate_enum_value_name_not_enclosing_type);
   validator.add_enum_visitor(&validate_reserved_ids_enum);
   validator.add_enum_value_visitor(&validate_enum_value);
 

@@ -225,8 +225,9 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
     this::TData $context,
     (function ()[_]: Awaitable<Tout>) $f,
   )[leak_safe, ctx $f]: Awaitable<Tout> {
-    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
-      self::createContext($context)
+    $prev = ImplicitContext\_Private\get_whole_implicit_context();
+    ImplicitContext\_Private\set_implicit_context_by_value(
+      self::createContext($prev, $context)
     );
     try {
       $result = $f();
@@ -242,8 +243,9 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
     this::TData $context,
     (function ()[_]: Tout) $f,
   )[leak_safe, ctx $f]: Tout {
-    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
-      self::createContext($context)
+    $prev = ImplicitContext\_Private\get_whole_implicit_context();
+    ImplicitContext\_Private\set_implicit_context_by_value(
+      self::createContext($prev, $context)
     );
     try {
       return $f();
@@ -262,10 +264,11 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
   }
 
   private static function createContext(
+    ImplicitContext\_Private\ImplicitContextData $ic,
     this::TData $context,
   )[leak_safe]: ImplicitContext\_Private\ImplicitContextData {
     return ImplicitContext\_Private\set_memo_agnostic(
-      ImplicitContext\_Private\get_whole_implicit_context(),
+      $ic,
       static::class,
       $context,
     );
@@ -279,8 +282,9 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
     this::TData $context,
     (function ()[_]: Awaitable<Tout>) $f,
   )[leak_safe, ctx $f]: Awaitable<Tout> {
-    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
-      self::createContext($context)
+    $prev = ImplicitContext\_Private\get_whole_implicit_context();
+    ImplicitContext\_Private\set_implicit_context_by_value(
+      self::createContext($prev, $context),
     );
     try {
       $result = $f();
@@ -296,8 +300,9 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
     this::TData $context,
     (function ()[_]: Tout) $f,
   )[leak_safe, ctx $f]: Tout {
-    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
-      self::createContext($context)
+    $prev = ImplicitContext\_Private\get_whole_implicit_context();
+    ImplicitContext\_Private\set_implicit_context_by_value(
+      self::createContext($prev, $context),
     );
     try {
       return $f();
@@ -316,10 +321,11 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
   }
 
   private static function createContext(
+    ImplicitContext\_Private\ImplicitContextData $ic,
     this::TData $context,
   )[leak_safe]: ImplicitContext\_Private\ImplicitContextData {
     return ImplicitContext\_Private\set_memo_sensitive(
-      ImplicitContext\_Private\get_whole_implicit_context(),
+      $ic,
       static::class,
       $context,
       $context->getInstanceKey(),
@@ -377,7 +383,8 @@ namespace HH\Coeffects {
   function backdoor<Tout>(
     (function()[defaults]: Tout) $fn
   )[/* 86backdoor */]: Tout {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
+    $prev = \HH\ImplicitContext\_Private\get_whole_implicit_context();
+    \HH\ImplicitContext\_Private\set_implicit_context_by_value(
       \HH\ImplicitContext\_Private\get_memo_agnostic_implicit_context(),
     );
     try {
@@ -394,7 +401,8 @@ namespace HH\Coeffects {
   async function backdoor_async<Tout>(
     (function()[defaults]: Awaitable<Tout>) $fn
   )[/* 86backdoor */]: Awaitable<Tout> {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
+    $prev = \HH\ImplicitContext\_Private\get_whole_implicit_context();
+    \HH\ImplicitContext\_Private\set_implicit_context_by_value(
       \HH\ImplicitContext\_Private\get_memo_agnostic_implicit_context()
     );
     try {

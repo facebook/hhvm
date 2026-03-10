@@ -343,6 +343,16 @@ struct ResourceData : public PeriodicStatsDataBase {
            pressureUdpMemLimit_ != 0 && minUdpMemLimit_ != 0;
   }
 
+  // Gets the NIC utilization ratio [0, 1.0]
+  [[nodiscard]] double getNicUtilRatio() const {
+    return nicUtilRatio_;
+  }
+
+  // Returns True if NIC utilization was successfully collected
+  [[nodiscard]] bool nicStatsCollected() const {
+    return nicUtilRatio_ > 0.0;
+  }
+
   void setCpuStats(CpuStats&& cpuStats) {
     cpuRatioUtil_ = cpuStats.cpuUsageRatio;
     cpuCoreUsageRatios_ = std::move(cpuStats.cpuCoreUsageRatios);
@@ -412,6 +422,13 @@ struct ResourceData : public PeriodicStatsDataBase {
     maxUdpMemLimit_ = maxThreshold;
   }
 
+  /**
+   * Sets the NIC utilization ratio [0, 1.0].
+   */
+  void setNicStats(double utilRatio) {
+    nicUtilRatio_ = utilRatio;
+  }
+
  protected:
   // Convert an absolute integer value and max limit to a float point ratio.
   [[nodiscard]] double calculateRatio(uint64_t value, uint64_t maxLimit) const {
@@ -438,6 +455,9 @@ struct ResourceData : public PeriodicStatsDataBase {
   uint64_t maxUdpMemLimit_{0};
   uint64_t pressureUdpMemLimit_{0};
   uint64_t minUdpMemLimit_{0};
+
+  // NIC utilization
+  double nicUtilRatio_{0.0};
 
   // Pressure metrics (experimental)
   double cpuPressureAvg10Pct_{0};

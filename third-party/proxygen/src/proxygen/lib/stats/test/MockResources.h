@@ -42,6 +42,7 @@ class MockResources : public proxygen::Resources {
     double memUtilRatio{0.5};
     double tcpMemUtilRatio{0.5};
     double udpMemUtilRatio{0.5};
+    double nicUtilRatio{0.0};
     std::chrono::milliseconds lastUpdateTime{-1};
   };
 
@@ -75,6 +76,10 @@ class MockResources : public proxygen::Resources {
         25,
         75,
         totalNetMemBytes);
+
+    if (params.nicUtilRatio > 0.0) {
+      data.setNicStats(params.nicUtilRatio);
+    }
 
     if (params.lastUpdateTime < std::chrono::milliseconds(0)) {
       data.refreshLastUpdateTime();

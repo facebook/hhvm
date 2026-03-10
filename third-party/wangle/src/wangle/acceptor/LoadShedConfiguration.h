@@ -243,6 +243,32 @@ class LoadShedConfiguration {
     return udpMemHardLimitRatio_;
   }
 
+  /**
+   * Set/get the NIC utilization soft limit ratio.
+   * Various shedding protections should engage when above this limit.
+   */
+  void setNicSoftLimitRatio(double limit) {
+    CHECK_GE(limit, 0.0);
+    CHECK_LE(limit, 1.0);
+    nicSoftLimitRatio_ = limit;
+  }
+  double getNicSoftLimitRatio() const {
+    return nicSoftLimitRatio_;
+  }
+
+  /**
+   * Set/get the NIC utilization hard limit ratio.
+   * More extreme shedding protections should engage when above this limit.
+   */
+  void setNicHardLimitRatio(double limit) {
+    CHECK_GE(limit, 0.0);
+    CHECK_LE(limit, 1.0);
+    nicHardLimitRatio_ = limit;
+  }
+  double getNicHardLimitRatio() const {
+    return nicHardLimitRatio_;
+  }
+
   void setLoadUpdatePeriod(std::chrono::milliseconds period) {
     period_ = period;
   }
@@ -295,6 +321,9 @@ class LoadShedConfiguration {
 
   double udpMemSoftLimitRatio_{1.0};
   double udpMemHardLimitRatio_{1.0};
+
+  double nicSoftLimitRatio_{1.0};
+  double nicHardLimitRatio_{1.0};
 
   std::chrono::milliseconds period_;
 

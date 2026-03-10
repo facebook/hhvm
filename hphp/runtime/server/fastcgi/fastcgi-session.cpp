@@ -622,10 +622,10 @@ void FastCGISession::writeCapability(const std::string& key) {
   auto appendLength = [&] (const std::string& lenStr) {
     if (lenStr.size() > 255) {
       len += sizeof(uint32_t);
-      cursor.writeBE<uint32_t>(lenStr.size() | (0x80 << 24));
+      cursor.writeBE<uint32_t>(static_cast<uint32_t>(lenStr.size() | (0x80 << 24)));
     } else {
       len += sizeof(uint8_t);
-      cursor.writeBE<uint8_t>(lenStr.size());
+      cursor.writeBE<uint8_t>(static_cast<uint8_t>(lenStr.size()));
     }
   };
 

@@ -44,6 +44,8 @@ type RequestContext struct {
 	PeerIdentities   []Identity
 	PeerCommonName   string
 
+	ConnInfo ConnInfo
+
 	// For sending and receiving headers.
 	contextHeaders
 }

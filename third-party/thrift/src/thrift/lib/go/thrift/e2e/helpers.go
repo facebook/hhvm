@@ -18,10 +18,8 @@ package e2e
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"testing"
-	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -33,7 +31,7 @@ import (
 )
 
 func startE2EServer(t *testing.T, serverTransport thrift.TransportID, options ...thrift.ServerOption) (net.Addr, func()) {
-	listener, err := net.Listen("unix", fmt.Sprintf("/tmp/thrift_e2e_test_%d.sock", time.Now().UnixNano()))
+	listener, err := net.Listen("tcp", "localhost:0")
 	require.NoError(t, err)
 	addr := listener.Addr()
 	t.Logf("Server listening on %v", addr)

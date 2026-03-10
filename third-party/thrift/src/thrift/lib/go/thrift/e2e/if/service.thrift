@@ -18,4 +18,5 @@ namespace go thrift.lib.go.thrift.e2e.service
 
 service E2E {
   map<string, string> EchoHeaders();
+  map<string, string> EchoConnInfo();
 }

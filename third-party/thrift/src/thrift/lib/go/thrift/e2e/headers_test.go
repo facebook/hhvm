@@ -64,7 +64,7 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 	channel, err := thrift.NewClient(
 		clientTransportOption,
 		thrift.WithDialer(func() (net.Conn, error) {
-			return net.DialTimeout("unix", addr.String(), 5*time.Second)
+			return net.DialTimeout("tcp", addr.String(), 5*time.Second)
 		}),
 		thrift.WithIoTimeout(5*time.Second),
 		thrift.WithPersistentHeader(persistentHeaderKey, persistentHeaderValue),
@@ -95,7 +95,7 @@ func TestHeadersUnderConcurrency(t *testing.T) {
 	channel, err := thrift.NewClient(
 		thrift.WithRocket(),
 		thrift.WithDialer(func() (net.Conn, error) {
-			return net.DialTimeout("unix", addr.String(), 5*time.Second)
+			return net.DialTimeout("tcp", addr.String(), 5*time.Second)
 		}),
 		thrift.WithIoTimeout(5*time.Second),
 		thrift.WithPersistentHeader(persistentHeaderKey, persistentHeaderValue),

@@ -35,3 +35,15 @@ func (h *E2EHandler) EchoHeaders(ctx context.Context) (map[string]string, error)
 	}
 	return reqCtx.GetReadHeaders(), nil
 }
+
+func (h *E2EHandler) EchoConnInfo(ctx context.Context) (map[string]string, error) {
+	result := make(map[string]string)
+	reqCtx := thrift.GetRequestContext(ctx)
+	if reqCtx == nil {
+		return result, nil
+	}
+	if reqCtx.ConnInfo.RemoteAddr != nil {
+		result["remote_address"] = reqCtx.ConnInfo.RemoteAddr.String()
+	}
+	return result, nil
+}

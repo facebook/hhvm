@@ -158,7 +158,6 @@ TEST(InteractionTest, PrioritizedInteractionRequest) {
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     if (std::chrono::steady_clock::now() - start > std::chrono::seconds(5)) {
       FAIL() << "Timed out waiting for requests to be queued";
-      return;
     }
   }
 

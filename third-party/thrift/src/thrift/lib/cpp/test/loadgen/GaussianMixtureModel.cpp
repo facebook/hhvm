@@ -74,7 +74,6 @@ double GaussianMixtureModel::getSample() {
   }
   LOG(FATAL)
       << "The weights vector or the uniform random real are probably wrong.";
-  return 0;
 }
 
 } // namespace apache::thrift::loadgen

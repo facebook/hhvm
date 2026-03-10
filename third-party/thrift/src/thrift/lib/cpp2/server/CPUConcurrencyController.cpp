@@ -355,7 +355,7 @@ uint32_t CPUConcurrencyController::getLimitUsage(
       return totalRequestSince * 1000L / milliSince;
     }
     default:
-      DCHECK(false);
+      LOG(DFATAL) << "unexpected CPUConcurrencyController method";
       return 0;
   }
 }

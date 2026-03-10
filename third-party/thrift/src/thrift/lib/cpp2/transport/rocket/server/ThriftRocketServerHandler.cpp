@@ -1077,7 +1077,7 @@ void ThriftRocketServerHandler::handleInjectedFault(
               << connContext_.getPeerAddress()->getAddressStr();
       return;
     case InjectedFault::DISCONNECT:
-      return request->closeConnection(
+      request->closeConnection(
           folly::make_exception_wrapper<TApplicationException>(
               TApplicationException::INJECTED_FAILURE, "injected failure"));
       return;

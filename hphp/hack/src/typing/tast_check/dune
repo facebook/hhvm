@@ -6,6 +6,7 @@
  (libraries
   ast
   core_kernel
+  analyze_list_logger_types
   nast
   remove_dead_unsafe_casts
   simplihack

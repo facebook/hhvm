@@ -1,0 +1,31 @@
+=== List Logger Summary ===
+Total entries: 4
+Total lvalue positions: 9
+
+Bucket counts:
+  Tuple                     2  ( 50.0%)
+  Dynamic                   1  ( 25.0%)
+  Union                     1  ( 25.0%)
+
+Complex lvalue: 1 entries ( 25.0%), 1 elements
+
+Complex lvalue breakdown by kind (of 9 total lvalue positions):
+  Array_get                 1  (11.11%)
+    example: $arr['key']  (complex.php:6)  lhs: list($x, $arr['key'], $z)
+
+=== Category: prod_nongenerated (4 entries, 9 lvalue positions) ===
+
+  Bucket counts:
+    Tuple                     2  ( 50.0%)
+    Dynamic                   1  ( 25.0%)
+    Union                     1  ( 25.0%)
+
+  Complex lvalue: 1 entries ( 25.0%), 1 elements
+
+  Complex lvalue breakdown by kind (of 9 lvalue positions):
+    Array_get                 1  (11.11%)
+      example: $arr['key']  (complex.php:6)  lhs: list($x, $arr['key'], $z)
+
+  Complex entry examples:
+    list($x, $arr['key'], $z) = <(int, string, bool)>  (complex.php:6)
+

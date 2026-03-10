@@ -1,0 +1,20 @@
+=== List Logger Summary ===
+Total entries: 3
+Total lvalue positions: 6
+
+Bucket counts:
+  Pair                      1  ( 33.3%)
+  Tuple                     1  ( 33.3%)
+  Vec                       1  ( 33.3%)
+
+Complex lvalue: 0 entries (  0.0%), 0 elements
+
+=== Category: prod_nongenerated (3 entries, 6 lvalue positions) ===
+
+  Bucket counts:
+    Pair                      1  ( 33.3%)
+    Tuple                     1  ( 33.3%)
+    Vec                       1  ( 33.3%)
+
+  Complex lvalue: 0 entries (  0.0%), 0 elements
+

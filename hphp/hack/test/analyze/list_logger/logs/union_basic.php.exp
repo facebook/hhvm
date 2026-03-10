@@ -1,0 +1,2 @@
+@list_logger:{"bucket":"Union","type_string":"((int, string) | vec<int>)","has_complex_lvalue":false,"pos":{"filename":"union_basic.php","line":5,"char_start":18,"char_end":19},"lhs_code":"list($a, $b)","total_lvalue_count":2,"is_generated":false}
+No errors

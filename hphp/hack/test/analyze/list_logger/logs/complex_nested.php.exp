@@ -1,0 +1,2 @@
+@list_logger:{"bucket":"Tuple","type_string":"((int, int), string)","has_complex_lvalue":true,"pos":{"filename":"complex_nested.php","line":7,"char_start":37,"char_end":38},"lhs_code":"list(list($arr['key'], $_), $b)","total_lvalue_count":3,"is_generated":false,"complex_lvalue_elements":[{"lvalue_kind":"Array_get","lvalue_pos":{"filename":"complex_nested.php","line":7,"char_start":13,"char_end":23},"lvalue_code":"$arr['key']","lvalue_involves_call":false}]}
+No errors

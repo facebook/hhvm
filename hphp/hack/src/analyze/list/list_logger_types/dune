@@ -1,0 +1,6 @@
+(library
+ (name analyze_list_logger_types)
+ (wrapped false)
+ (libraries utils_core)
+ (preprocess
+  (pps ppx_deriving.std ppx_yojson_conv)))

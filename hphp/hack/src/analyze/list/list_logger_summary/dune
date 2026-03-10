@@ -1,0 +1,3 @@
+(executable
+ (name analyze_list_logger_summary)
+ (libraries analyze_list_logger_types utils_core))

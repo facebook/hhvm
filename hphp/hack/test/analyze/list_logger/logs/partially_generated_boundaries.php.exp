@@ -1,0 +1,7 @@
+@list_logger:{"bucket":"Tuple","type_string":"(int, string)","has_complex_lvalue":false,"pos":{"filename":"partially_generated_boundaries.php","line":6,"char_start":18,"char_end":30},"lhs_code":"list($a, $b)","total_lvalue_count":2,"is_generated":true}
+@list_logger:{"bucket":"Tuple","type_string":"(int, string)","has_complex_lvalue":false,"pos":{"filename":"partially_generated_boundaries.php","line":10,"char_start":18,"char_end":30},"lhs_code":"list($c, $d)","total_lvalue_count":2,"is_generated":false}
+@list_logger:{"bucket":"Tuple","type_string":"(int, string)","has_complex_lvalue":false,"pos":{"filename":"partially_generated_boundaries.php","line":14,"char_start":18,"char_end":30},"lhs_code":"list($e, $f)","total_lvalue_count":2,"is_generated":false}
+@list_logger:{"bucket":"Tuple","type_string":"(int, string)","has_complex_lvalue":false,"pos":{"filename":"partially_generated_boundaries.php","line":18,"char_start":18,"char_end":30},"lhs_code":"list($g, $h)","total_lvalue_count":2,"is_generated":true}
+@list_logger:{"bucket":"Tuple","type_string":"(int, string)","has_complex_lvalue":false,"pos":{"filename":"partially_generated_boundaries.php","line":23,"char_start":18,"char_end":30},"lhs_code":"list($i, $j)","total_lvalue_count":2,"is_generated":false}
+@list_logger:{"bucket":"Tuple","type_string":"(int, string)","has_complex_lvalue":false,"pos":{"filename":"partially_generated_boundaries.php","line":28,"char_start":18,"char_end":30},"lhs_code":"list($k, $l)","total_lvalue_count":2,"is_generated":true}
+No errors

@@ -1,0 +1,2 @@
+@list_logger:{"bucket":"Tuple","type_string":"(int, string)","has_complex_lvalue":true,"pos":{"filename":"complex_array_get.php","line":6,"char_start":27,"char_end":28},"lhs_code":"list($arr['key'], $b)","total_lvalue_count":2,"is_generated":false,"complex_lvalue_elements":[{"lvalue_kind":"Array_get","lvalue_pos":{"filename":"complex_array_get.php","line":6,"char_start":8,"char_end":18},"lvalue_code":"$arr['key']","lvalue_involves_call":false}]}
+No errors

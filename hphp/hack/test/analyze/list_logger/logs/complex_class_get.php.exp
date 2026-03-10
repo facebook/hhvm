@@ -1,0 +1,2 @@
+@list_logger:{"bucket":"Tuple","type_string":"(int, string)","has_complex_lvalue":true,"pos":{"filename":"complex_class_get.php","line":9,"char_start":23,"char_end":24},"lhs_code":"list(Bar::$x, $b)","total_lvalue_count":2,"is_generated":false,"complex_lvalue_elements":[{"lvalue_kind":"Class_get","lvalue_pos":{"filename":"complex_class_get.php","line":9,"char_start":8,"char_end":14},"lvalue_code":"Bar::$x","lvalue_involves_call":false,"lvalue_receiver_kind":"Explicit"}]}
+No errors

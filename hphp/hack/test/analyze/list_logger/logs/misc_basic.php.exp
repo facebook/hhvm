@@ -1,0 +1,7 @@
+@list_logger:{"bucket":"Misc","type_string":"vec_or_dict<int, string>","has_complex_lvalue":false,"pos":{"filename":"misc_basic.php","line":4,"char_start":18,"char_end":19},"lhs_code":"list($a, $b)","total_lvalue_count":2,"is_generated":false,"ty_node_kind":"Tvec_or_dict"}
+ERROR: File "misc_basic.php", line 4, characters 3-19:
+Invalid assignment (Typing[4357])
+  File "misc_basic.php", line 4, characters 3-14:
+  This expression cannot be destructured with a `list(...)` expression
+  File "misc_basic.php", line 3, characters 20-43:
+  This is `vec_or_dict<int, string>`

@@ -1,0 +1,25 @@
+@list_logger:{"bucket":"Intersection","type_string":"(T & Container<mixed>)","has_complex_lvalue":false,"pos":{"filename":"intersection_basic.php","line":5,"char_start":20,"char_end":21},"lhs_code":"list($a, $b)","total_lvalue_count":2,"is_generated":false}
+ERROR: File "intersection_basic.php", line 5, characters 5-21:
+Invalid assignment (Typing[4110])
+  File "intersection_basic.php", line 5, characters 5-16:
+  Expected `list(nothing, nothing)` resulting from a list destructuring assignment or a splat
+  File "intersection_basic.php", line 3, characters 31-31:
+  But got `T`
+ERROR: File "intersection_basic.php", line 5, characters 5-21:
+Invalid assignment (Typing[4110])
+  File "intersection_basic.php", line 5, characters 5-16:
+  Expected `list(nothing, nothing)` resulting from a list destructuring assignment or a splat
+  File "intersection_basic.php", line 4, characters 13-24:
+  But got `(T & Container<mixed>)` from this `is` expression test
+ERROR: File "intersection_basic.php", line 5, characters 5-21:
+Invalid assignment (Typing[4357])
+  File "intersection_basic.php", line 5, characters 5-16:
+  This expression cannot be destructured with a `list(...)` expression
+  File "intersection_basic.php", line 3, characters 28-28:
+  This is `mixed`
+ERROR: File "intersection_basic.php", line 5, characters 5-21:
+Invalid assignment (Typing[4357])
+  File "intersection_basic.php", line 5, characters 5-16:
+  This expression cannot be destructured with a `list(...)` expression
+  File "intersection_basic.php", line 4, characters 13-24:
+  This is `Container<mixed>`

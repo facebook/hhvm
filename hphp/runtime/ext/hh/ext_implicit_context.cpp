@@ -55,16 +55,6 @@ using ICMemoKeyToIntMap = req::hash_map<StringData*, int64_t, string_data_hash, 
 
 RDS_LOCAL(ICMemoKeyToIntMap, rl_memoKeyToInt);
 
-InitFiniNode s_clear_IC_map([]{
-  rl_memoKeyToInt.destroy();
-}, InitFiniNode::When::RequestFini, "s_clear_IC_map");
-
-InitFiniNode s_init_IC_map([]{
-  rl_memoKeyToInt.create();
-  *(rl_nextMemoKey) = kAgnosticMemoKey;
-}, InitFiniNode::When::RequestStart, "s_init_IC_map");
-
-
 struct ImplicitContextLoader :
   SystemLib::ClassLoader<"HH\\ImplicitContext\\_Private\\ImplicitContextData"> {};
 
@@ -361,6 +351,15 @@ static struct HHImplicitContext final : Extension {
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_debug_info,
                   HHVM_FN(get_implicit_context_debug_info));
 
+  }
+
+  void requestInit() override {
+    rl_memoKeyToInt.create();
+    *(rl_nextMemoKey) = kAgnosticMemoKey;
+  }
+
+  void requestShutdown() override {
+    rl_memoKeyToInt.destroy();
   }
 } s_hh_implicit_context;
 

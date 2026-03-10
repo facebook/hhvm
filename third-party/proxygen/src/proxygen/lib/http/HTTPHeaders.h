@@ -72,7 +72,7 @@ class HTTPHeaders {
   struct HTTPHeaderName {
     enum Type { CODE, STRING };
     union {
-      folly::StringPiece name_;
+      std::string_view name_;
       HTTPHeaderCode code_;
     };
     Type type_;
@@ -82,13 +82,13 @@ class HTTPHeaders {
     /* implicit */ HTTPHeaderName(const char* name)
         : name_(name), type_(STRING) {
     }
-    /* implicit */ HTTPHeaderName(folly::StringPiece name)
+    /* implicit */ HTTPHeaderName(std::string_view name)
         : name_(name), type_(STRING) {
     }
   };
 
   using headers_initializer_list =
-      std::initializer_list<std::pair<HTTPHeaderName, folly::StringPiece>>;
+      std::initializer_list<std::pair<HTTPHeaderName, std::string_view>>;
 
   /*
    * separator used to concatenate multiple values of the same header
@@ -107,28 +107,20 @@ class HTTPHeaders {
    * Add the header 'name' with value 'value'; if other instances of this
    * header name exist, they will be retained.
    */
-  void add(folly::StringPiece name, std::string&& value);
-  void add(folly::StringPiece name, const std::string& value) {
+  void add(std::string_view name, std::string&& value);
+  void add(std::string_view name, std::string_view value) {
     add(name, std::string(value));
   }
-  void add(folly::StringPiece name, folly::StringPiece value) {
-    add(name, std::string(value));
-  }
-  // TODO(@damlaj): remove this fn & patch up all callsites
-  void add(folly::StringPiece name, const char* value) {
-    return add(name, std::string(value));
+  FOLLY_ALWAYS_INLINE void add(std::string_view name, const char* value) {
+    return add(name, std::string_view{value});
   }
 
   void add(HTTPHeaderCode code, std::string&& value);
-  void add(HTTPHeaderCode code, const std::string& value) {
+  void add(HTTPHeaderCode code, std::string_view value) {
     add(code, std::string(value));
   }
-  void add(HTTPHeaderCode code, folly::StringPiece value) {
-    add(code, std::string(value));
-  }
-  // TODO(@damlaj): remove this fn & patch up all callsites
-  void add(HTTPHeaderCode code, const char* value) {
-    return add(code, std::string(value));
+  FOLLY_ALWAYS_INLINE void add(HTTPHeaderCode code, const char* value) {
+    return add(code, std::string_view{value});
   }
 
   void add(headers_initializer_list l);
@@ -137,12 +129,12 @@ class HTTPHeaders {
    * For the header 'name', set its value to the single header 'value',
    * removing any other instances of this header.
    */
-  void set(folly::StringPiece name, const std::string& value) {
+  void set(std::string_view name, std::string_view value) {
     // this could be somewhat optimized but probably not an issue yet
     remove(name);
     add(name, value);
   }
-  void set(HTTPHeaderCode code, const std::string& value) {
+  void set(HTTPHeaderCode code, std::string_view value) {
     remove(code);
     add(code, value);
   }
@@ -153,9 +145,9 @@ class HTTPHeaders {
    * argument it will remove x-y_z, x_y-z and x_y_z too and then set the given
    * header name, value.
    */
-  void setOneVersion(folly::StringPiece name,
+  void setOneVersion(std::string_view name,
                      HTTPHeaderCode code,
-                     const std::string& value) {
+                     std::string_view value) {
     removeAllVersions(code, name);
     add(name, value);
   }
@@ -163,11 +155,8 @@ class HTTPHeaders {
   /**
    * Do we have an instance of the given header?
    */
-  [[nodiscard]] bool exists(folly::StringPiece name) const;
+  [[nodiscard]] bool exists(std::string_view name) const;
   [[nodiscard]] bool exists(HTTPHeaderCode code) const;
-  bool rawExists(std::string& name) const {
-    return exists(name);
-  }
 
   /**
    * combine all the value for this header into a string
@@ -253,7 +242,7 @@ class HTTPHeaders {
   [[nodiscard]] SingleOrNullptrResult getSingleOrNullptr(
       HTTPHeaderCode code) const noexcept;
   [[nodiscard]] SingleOrNullptrResult getSingleOrNullptr(
-      folly::StringPiece name) const noexcept;
+      std::string_view name) const noexcept;
 
   /**
    * Returns the value of the header if it's found in the message and is the
@@ -262,7 +251,7 @@ class HTTPHeaders {
    */
   [[nodiscard]] const std::string& getSingleOrEmpty(HTTPHeaderCode code) const;
   [[nodiscard]] const std::string& getSingleOrEmpty(
-      folly::StringPiece name) const;
+      std::string_view name) const;
   [[nodiscard]] const std::string rawGet(const std::string& header) const {
     return getSingleOrEmpty(header);
   }
@@ -271,7 +260,7 @@ class HTTPHeaders {
    * Get the number of values corresponding to a given header name.
    */
   [[nodiscard]] size_t getNumberOfValues(HTTPHeaderCode code) const;
-  [[nodiscard]] size_t getNumberOfValues(folly::StringPiece name) const;
+  [[nodiscard]] size_t getNumberOfValues(std::string_view name) const;
 
   /**
    * Process the ordered list of values for the given header name:
@@ -286,7 +275,7 @@ class HTTPHeaders {
    * true), and false otherwise.
    */
   using ForEachValueOfHeaderFnT = std::function<bool(const std::string&)>;
-  bool forEachValueOfHeader(folly::StringPiece name,
+  bool forEachValueOfHeader(std::string_view name,
                             const ForEachValueOfHeaderFnT& func) const;
   bool forEachValueOfHeader(HTTPHeaderCode code,
                             const ForEachValueOfHeaderFnT& func) const;
@@ -295,7 +284,7 @@ class HTTPHeaders {
    * Remove all instances of the given header, returning true if anything was
    * removed and false if this header didn't exist in our set.
    */
-  bool remove(folly::StringPiece name);
+  bool remove(std::string_view name);
   bool remove(HTTPHeaderCode code);
   void rawRemove(const std::string& name) {
     remove(name);
@@ -305,7 +294,7 @@ class HTTPHeaders {
    * Remove all possible versions of header eg. if x-y-z is the
    * argument it will remove x-y_z, x_y-z and x_y_z too.
    */
-  bool removeAllVersions(HTTPHeaderCode code, folly::StringPiece name);
+  bool removeAllVersions(HTTPHeaderCode code, std::string_view name);
 
   /**
    * Remove all headers.
@@ -365,7 +354,7 @@ class HTTPHeaders {
    * group.  No-op if the header doesn't exist.  Returns true if header(s) were
    * moved.
    */
-  bool transferHeaderIfPresent(folly::StringPiece name, HTTPHeaders& dest);
+  bool transferHeaderIfPresent(std::string_view name, HTTPHeaders& dest);
 
   // deletes the strings in headerNames_ that we own
   void disposeOfHeaderNames();

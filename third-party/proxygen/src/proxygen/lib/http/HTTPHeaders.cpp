@@ -86,7 +86,7 @@ HTTPHeaders::HTTPHeaders() : deletedCount_(0) {
   resize(kInitialVectorReserve);
 }
 
-void HTTPHeaders::add(folly::StringPiece name, std::string&& value) {
+void HTTPHeaders::add(std::string_view name, std::string&& value) {
   assert(name.size());
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
   auto namePtr =
@@ -108,7 +108,7 @@ void HTTPHeaders::add(HTTPHeaders::headers_initializer_list l) {
   }
 }
 
-bool HTTPHeaders::exists(folly::StringPiece name) const {
+bool HTTPHeaders::exists(std::string_view name) const {
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
   if (code != HTTP_HEADER_OTHER) {
     return exists(code);
@@ -130,16 +130,16 @@ size_t HTTPHeaders::getNumberOfValues(HTTPHeaderCode code) const {
   return count;
 }
 
-size_t HTTPHeaders::getNumberOfValues(folly::StringPiece name) const {
+size_t HTTPHeaders::getNumberOfValues(std::string_view name) const {
   size_t count = 0;
-  forEachValueOfHeader(name, [&](folly::StringPiece /*value*/) -> bool {
+  forEachValueOfHeader(name, [&](std::string_view) -> bool {
     ++count;
     return false;
   });
   return count;
 }
 
-bool HTTPHeaders::remove(folly::StringPiece name) {
+bool HTTPHeaders::remove(std::string_view name) {
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
   if (code != HTTP_HEADER_OTHER) {
     return remove(code);
@@ -165,7 +165,7 @@ bool HTTPHeaders::remove(HTTPHeaderCode code) {
 }
 
 bool HTTPHeaders::removeAllVersions(HTTPHeaderCode code,
-                                    folly::StringPiece name) {
+                                    std::string_view name) {
   bool removed = false;
   if (code != HTTP_HEADER_OTHER) {
     removed = remove(code);
@@ -261,7 +261,7 @@ size_t HTTPHeaders::size() const {
   return length_ - deletedCount_;
 }
 
-bool HTTPHeaders::transferHeaderIfPresent(folly::StringPiece name,
+bool HTTPHeaders::transferHeaderIfPresent(std::string_view name,
                                           HTTPHeaders& strippedHeaders) {
   bool transferred = false;
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
@@ -388,7 +388,7 @@ HTTPHeaders::SingleOrNullptrResult HTTPHeaders::getSingleOrNullptr(
 }
 
 HTTPHeaders::SingleOrNullptrResult HTTPHeaders::getSingleOrNullptr(
-    folly::StringPiece name) const noexcept {
+    std::string_view name) const noexcept {
   SingleOrNullptrResult res;
   forEachValueOfHeader(name, [&](const std::string& value) -> bool {
     res.value = (res.value == nullptr) ? &value : nullptr;
@@ -401,8 +401,7 @@ HTTPHeaders::SingleOrNullptrResult HTTPHeaders::getSingleOrNullptr(
 const std::string& HTTPHeaders::getSingleOrEmpty(HTTPHeaderCode code) const {
   return *getSingleOrNullptr(code);
 }
-const std::string& HTTPHeaders::getSingleOrEmpty(
-    folly::StringPiece name) const {
+const std::string& HTTPHeaders::getSingleOrEmpty(std::string_view name) const {
   return *getSingleOrNullptr(name);
 }
 
@@ -507,7 +506,7 @@ void HTTPHeaders::forEachWithCode(const ForEachWithCodeFnT& func) const {
 }
 
 bool HTTPHeaders::forEachValueOfHeader(
-    folly::StringPiece name, const ForEachValueOfHeaderFnT& func) const {
+    std::string_view name, const ForEachValueOfHeaderFnT& func) const {
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
   if (code != HTTPHeaderCode::HTTP_HEADER_OTHER) {
     return forEachValueOfHeader(code, func);

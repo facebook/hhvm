@@ -560,12 +560,12 @@ TEST(HTTPHeaders, InitializerList) {
   EXPECT_EQ("x", hdrs.getSingleOrEmpty(HTTP_HEADER_SERVER));
 }
 
-TEST(HTTPHeaders, InitializerListStringPiece) {
+TEST(HTTPHeaders, InitializerListStringView) {
   HTTPHeaders hdrs;
 
   const char* foo = "name:value";
   folly::StringPiece str(foo);
-  folly::StringPiece name = str.split_step(':');
+  std::string_view name = str.split_step(':');
   hdrs.add({{name, str}, {HTTP_HEADER_CONNECTION, str}});
 
   EXPECT_EQ("value", hdrs.getSingleOrEmpty("name"));

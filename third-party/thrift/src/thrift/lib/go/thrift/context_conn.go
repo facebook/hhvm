@@ -80,10 +80,8 @@ func withConnInfo(ctx context.Context, conn net.Conn) context.Context {
 	return ctx
 }
 
-// ConnInfoFromContext extracts and returns ConnInfo from context.
-//
-// Deprecated: Use GetRequestContext(ctx).ConnInfo instead.
-func ConnInfoFromContext(ctx context.Context) (ConnInfo, bool) {
+// connInfoFromContext extracts and returns ConnInfo from context.
+func connInfoFromContext(ctx context.Context) (ConnInfo, bool) {
 	v, ok := ctx.Value(connInfoKey).(ConnInfo)
 	return v, ok
 }

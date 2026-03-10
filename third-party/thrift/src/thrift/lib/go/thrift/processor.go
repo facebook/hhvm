@@ -123,7 +123,7 @@ func process(ctx context.Context, processor Processor, prot Protocol, processorS
 		}
 	}
 
-	connInfo, connInfoOk := ConnInfoFromContext(ctx)
+	connInfo, connInfoOk := connInfoFromContext(ctx)
 	// Step 1c: Use Protocol interface to retrieve headers.
 	requestHeaders := prot.getResponseHeaders()
 	reqCtx := RequestContext{

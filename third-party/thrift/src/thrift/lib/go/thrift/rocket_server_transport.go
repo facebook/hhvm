@@ -148,7 +148,7 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 	// Use Rocket protocol right away if the server is running
 	// in "UpgradeToRocket" mode and ALPN value is set to "rs".
 	if r.transportID == TransportIDUpgradeToRocket {
-		if connInfo, ok := ConnInfoFromContext(ctx); ok {
+		if connInfo, ok := connInfoFromContext(ctx); ok {
 			tlsConnState := connInfo.TLS()
 			if tlsConnState != nil && tlsConnState.NegotiatedProtocol == "rs" {
 				connTransport = TransportIDRocket

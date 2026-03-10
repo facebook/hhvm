@@ -217,28 +217,19 @@ cdef class {{struct:name}}({{#partial types.python_struct_class struct=struct:se
         {{/struct:exception?}}
         return __fbthrift_inst
 
-    {{#struct:py3_fields}}
-    cdef inline {{field:py_name}}_impl(self):
-        {{#field:optional?}}
-        {{^field:hasDefaultValue?}}
-        {{#field:has_ref_accessor?}}
-        {{^field:terse?}}
-        if not deref(self.{{#partial types.cpp_obj}}).{{field:py_name}}_ref().has_value():
+    {{#each struct:self.py3_fields as |field|}}
+    cdef inline {{field.py_name}}_impl(self):
+        {{#if (and field.optional? (not field.hasDefaultValue?) field.has_ref_accessor? (not field.terse?))}}
+        if not deref(self.{{#partial types.cpp_obj}}).{{field.py_name}}_ref().has_value():
             return None
-        {{/field:terse?}}
-        {{/field:has_ref_accessor?}}
-        {{/field:hasDefaultValue?}}
-        {{/field:optional?}}
-        {{#field:type}}
-        {{> types/cython_struct_getter}}
-
-        {{/field:type}}
+        {{/if (and field.optional? (not field.hasDefaultValue?) field.has_ref_accessor? (not field.terse?))}}
+        {{#partial types.cython_struct_getter field=field}}
 
     @property
-    def {{field:py_name}}(self):
-        return self.{{field:py_name}}_impl()
+    def {{field.py_name}}(self):
+        return self.{{field.py_name}}_impl()
 
-    {{/struct:py3_fields}}
+    {{/each}}
 
     def __hash__({{struct:name}} self):
         return super().__hash__()
@@ -604,7 +595,7 @@ cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
             if opt_val.has_value():
                 try:
                     _value = opt_val.value()
-                    pyfuture.set_result({{> stream/cython_cpp_value_to_python_value}})
+                    pyfuture.set_result({{#partial stream.cython_cpp_value_to_python_value type=type:self}})
                 except Exception as ex:
                     pyfuture.set_exception(ex.with_traceback(None))
             else:
@@ -640,9 +631,7 @@ cdef class ResponseAndClientBufferedStream__{{#partial stream.response_class_nam
             c_obj.stream, rpc_options,
         )
         cdef {{#partial types.cython_cpp_type type=function:self.return_type}} _value = c_obj.response
-{{#function:stream_first_response_type}}
-        __fbthrift_inst._response = {{> stream/cython_cpp_value_to_python_value}}
-{{/function:stream_first_response_type}}
+        __fbthrift_inst._response = {{#partial stream.cython_cpp_value_to_python_value type=function:self.return_type}}
         return __fbthrift_inst
 
     def __iter__(self):

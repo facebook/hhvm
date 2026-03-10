@@ -15,6 +15,7 @@
   limitations under the License.
 
 }}
+{{#import "common/types" as types}}
 
 {{!
 Used to construct stream response class name as a suffix as a unique
@@ -24,4 +25,28 @@ identification. Takes a function and produces
 {{#let export partial response_class_name_suffix |function|}}
 {{#pragma ignore-newlines}}
 {{function.return_type.flat_name}}_{{function.stream.elem_type.flat_name}}
+{{/let partial}}
+
+
+{{! Used in semistream object callbacks to convert the returned cpp
+    folly::optional value type to a python type. }}
+{{#let export partial cython_cpp_value_to_python_value |type| captures |types|}}
+{{#pragma ignore-newlines}}
+{{#if type.iobuf?}}_fbthrift_iobuf.from_unique_ptr(_value)
+{{#else if type.iobufRef?}}_fbthrift_iobuf.from_unique_ptr(move_iobuf(_value))
+{{#else if type.flexibleBinary?}}(<const char*>_value.data())[:_value.size()]
+{{#else if type.string?}}_value.data().decode('UTF-8')
+{{#else if type.binary?}}_value
+{{#else if type.bool?}}<bint>_value
+{{#else if type.void?}}None
+{{#else if type.primitive?}}_value
+{{#else if type.container?}}{{#partial types.container_from_cpp type=type}}(_value)
+{{#else if type.enum?}}{{#partial types.python_type type=type}}(<int> _value)
+{{#else if type.structured?}}
+  {{#if root_program.inplace_migrate?}}
+{{#partial types.python_type type=type}}.from_python({{type.capi_converter_path}}.{{type.true_type.name}}_from_cpp(__deref_const[{{#partial types.cython_cpp_type type=type}}](_value)))
+  {{#else}}
+{{#partial types.cython_python_type type=type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[{{#partial types.cython_cpp_type type=type}}](_value))
+  {{/if root_program.inplace_migrate?}}
+{{/if type.iobuf?}}
 {{/let partial}}

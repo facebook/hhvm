@@ -13,5 +13,5 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 
-from .ttypes import UTF8STRINGS, ConstraintLevel, Py3Hidden, PyDeprecatedHidden, Flags, Name, Adapter, UseCAPI, Py3EnableCppAdapter, MigrationBlockingAllowInheritance, DeprecatedSortSetOnSerialize, DeprecatedKeySortMapOnSerialize, DisableFieldCache, ConstrainedFloat32, EnableUnsafeIssetInspection
+from .ttypes import UTF8STRINGS, ConstraintLevel, Py3Hidden, PyDeprecatedHidden, Flags, EnumFormatAsInt, Name, Adapter, UseCAPI, Py3EnableCppAdapter, MigrationBlockingAllowInheritance, DeprecatedSortSetOnSerialize, DeprecatedKeySortMapOnSerialize, DisableFieldCache, ConstrainedFloat32, EnableUnsafeIssetInspection
 

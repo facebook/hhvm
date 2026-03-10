@@ -182,6 +182,8 @@ inline constexpr auto kPythonKeySortMapOnSerializeUri =
     "facebook.com/thrift/annotation/python/DeprecatedKeySortMapOnSerialize";
 inline constexpr auto kPythonConstrainedFloat32 =
     "facebook.com/thrift/annotation/python/ConstrainedFloat32";
+inline constexpr auto kPythonEnumFormatAsIntUri =
+    "facebook.com/thrift/annotation/python/EnumFormatAsInt";
 
 // Hack:
 inline constexpr auto kHackAdapterUri =

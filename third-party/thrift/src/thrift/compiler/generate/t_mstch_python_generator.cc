@@ -724,6 +724,9 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
       return self.has_unstructured_annotation("py3.flags") ||
           self.has_structured_annotation(kPythonFlagsUri);
     });
+    def.property("format_as_int?", [](const t_enum& self) {
+      return self.has_structured_annotation(kPythonEnumFormatAsIntUri);
+    });
 
     return std::move(def).make();
   }

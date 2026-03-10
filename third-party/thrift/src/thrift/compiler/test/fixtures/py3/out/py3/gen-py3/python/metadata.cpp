@@ -20,6 +20,7 @@ namespace python {
   ::apache::thrift::detail::md::StructMetadata<Py3Hidden>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<PyDeprecatedHidden>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Flags>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<EnumFormatAsInt>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Name>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<UseCAPI>::gen(metadata);

@@ -44,6 +44,8 @@ from python_test.enums.thrift_types import (
     OptionalColorGroups,
     OptionalFile,
     Perm,
+    TestEnumFormatAsInt,
+    TestFlagFormatAsInt,
 )
 from python_test.enums_typedef_only.thrift_abstract_types import ColorTypedef
 from thrift.python.mutable_types import (
@@ -295,6 +297,31 @@ class EnumTests(unittest.TestCase):
 
     def test_format(self) -> None:
         self.assertEqual(f"{self.Color.red}", "Color.red")
+
+    def test_enum_format_as_int(self) -> None:
+        self.assertEqual(str(TestEnumFormatAsInt.low), "0")
+        self.assertEqual(str(TestEnumFormatAsInt.normal), "1")
+        self.assertEqual(str(TestEnumFormatAsInt.high), "2")
+        self.assertEqual(f"{TestEnumFormatAsInt.normal}", "1")
+        self.assertEqual(f"{TestEnumFormatAsInt.high:d}", "2")
+
+    def test_flag_format_as_int(self) -> None:
+        # Single members format as int
+        self.assertEqual(str(TestFlagFormatAsInt.read), "4")
+        self.assertEqual(str(TestFlagFormatAsInt.write), "2")
+        self.assertEqual(str(TestFlagFormatAsInt.execute), "1")
+        self.assertEqual(f"{TestFlagFormatAsInt.read}", "4")
+        self.assertEqual(f"{TestFlagFormatAsInt.write:d}", "2")
+        # Combined flags also format as int
+        combined = TestFlagFormatAsInt(
+            TestFlagFormatAsInt.read | TestFlagFormatAsInt.write
+        )
+        self.assertEqual(str(combined), "6")
+        self.assertEqual(f"{combined}", "6")
+        # Contrast: regular Flags (without EnumFormatAsInt) format as names
+        self.assertEqual(str(Perm.read), "Perm.read")
+        combined_perm = Perm(Perm.read | Perm.write)
+        self.assertIn("Perm", str(combined_perm))
 
     def test_bool_of_class(self) -> None:
         self.assertTrue(bool(self.Color))

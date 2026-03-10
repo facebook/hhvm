@@ -3022,6 +3022,20 @@ class Enum(metaclass=EnumMeta):
         return _enum_eq_(self, other)
 
 
+class EnumFormatAsInt:
+    """Mixin where __str__ and __format__ return the int value.
+
+    Matches Python 3.11+ IntEnum behavior
+    https://docs.python.org/3/library/enum.html#enum.IntEnum
+    """
+
+    def __str__(self):
+        return str(self._fbthrift_value_)
+
+    def __format__(self, format_spec):
+        return format(self._fbthrift_value_, format_spec)
+
+
 class Flag(Enum):
     @classmethod
     def _fbthrift_missing_(cls, value):

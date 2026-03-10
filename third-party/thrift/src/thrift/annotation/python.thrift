@@ -44,6 +44,12 @@ struct PyDeprecatedHidden {
 @scope.Enum
 struct Flags {}
 
+/// When applied to an enum, __str__ and __format__ will return
+/// the integer value instead of the name (e.g. "1" instead of "Color.red").
+/// This matches Python 3.11+ IntEnum behavior: https://docs.python.org/3/library/enum.html#enum.IntEnum
+@scope.Enum
+struct EnumFormatAsInt {}
+
 @scope.Definition
 struct Name {
   1: string name;

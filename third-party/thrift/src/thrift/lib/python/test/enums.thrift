@@ -55,6 +55,21 @@ typedef dependency.Status StatusTypedef
 
 typedef dependency.ColourAlias ColourTypedefOfTypedef
 
+@python.EnumFormatAsInt{}
+enum TestEnumFormatAsInt {
+  low = 0,
+  normal = 1,
+  high = 2,
+}
+
+@python.EnumFormatAsInt{}
+@python.Flags{}
+enum TestFlagFormatAsInt {
+  read = 4,
+  write = 2,
+  execute = 1,
+}
+
 @python.Flags{}
 enum Perm {
   read = 4,

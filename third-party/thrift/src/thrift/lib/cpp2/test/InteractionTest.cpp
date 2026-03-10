@@ -16,6 +16,7 @@
 
 #include <chrono>
 #include <memory>
+#include <thread>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -26,11 +27,13 @@
 #include <folly/coro/Sleep.h>
 #include <folly/coro/Task.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Calculator.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Streamer.h>
+#include <thrift/lib/cpp2/transport/core/ManagedConnectionIf.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace ::testing;
@@ -1648,4 +1651,112 @@ TEST(InteractionTest, InteractionSnapshots) {
   }
   EXPECT_TRUE(foundInteraction)
       << "Expected to find at least one connection with an active interaction";
+}
+
+TEST(InteractionTest, InteractionSnapshotLastActivityTime) {
+  // Test that lastActivityTime is tracked and updated on each call
+  ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
+  auto* thriftServer = dynamic_cast<ThriftServer*>(&runner.getThriftServer());
+  ASSERT_NE(thriftServer, nullptr);
+
+  folly::EventBase eb;
+  Client<Calculator> client(
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(&eb, runner.getAddress()))));
+
+  // Create an interaction and make a call to establish it
+  auto adder = client.createAddition();
+  adder.semifuture_accumulatePrimitive(1).via(&eb).getVia(&eb);
+
+  // Get snapshot — lastActivityTime should be close to now
+  auto snapshot1 = thriftServer->getServerSnapshot().get();
+
+  std::chrono::steady_clock::time_point firstLastActivity{};
+  for (const auto& [addr, connSnapshot] : snapshot1.connections) {
+    if (!connSnapshot.interactions.empty()) {
+      const auto& interaction = connSnapshot.interactions[0];
+      firstLastActivity = interaction.lastActivityTime;
+      // lastActivityTime should be set (non-zero)
+      EXPECT_GT(firstLastActivity.time_since_epoch().count(), 0);
+      // lastActivityTime should be >= creationTime
+      EXPECT_GE(firstLastActivity, interaction.creationTime);
+    }
+  }
+
+  // Sleep briefly and make another call to update lastActivityTime
+  /* sleep override */
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  adder.semifuture_accumulatePrimitive(2).via(&eb).getVia(&eb);
+
+  // Get snapshot again — lastActivityTime should have advanced
+  auto snapshot2 = thriftServer->getServerSnapshot().get();
+  for (const auto& [addr, connSnapshot] : snapshot2.connections) {
+    if (!connSnapshot.interactions.empty()) {
+      const auto& interaction = connSnapshot.interactions[0];
+      EXPECT_GT(interaction.lastActivityTime, firstLastActivity)
+          << "lastActivityTime should advance after a new call";
+    }
+  }
+}
+
+TEST(InteractionTest, TerminateInteraction) {
+  // Test that terminateInteraction removes an interaction from snapshots
+  ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
+  auto* thriftServer = dynamic_cast<ThriftServer*>(&runner.getThriftServer());
+  ASSERT_NE(thriftServer, nullptr);
+
+  folly::EventBase eb;
+  Client<Calculator> client(
+      RocketClientChannel::newChannel(
+          folly::AsyncSocket::UniquePtr(
+              new folly::AsyncSocket(&eb, runner.getAddress()))));
+
+  // Create an interaction and make a call to establish it
+  auto adder = client.createAddition();
+  adder.semifuture_accumulatePrimitive(1).via(&eb).getVia(&eb);
+
+  // Get snapshot to find the interaction ID
+  auto snapshot1 = thriftServer->getServerSnapshot().get();
+  int64_t interactionId = 0;
+  for (const auto& [addr, connSnapshot] : snapshot1.connections) {
+    if (!connSnapshot.interactions.empty()) {
+      interactionId = connSnapshot.interactions[0].interactionId;
+      break;
+    }
+  }
+  ASSERT_GT(interactionId, 0) << "Expected to find an active interaction";
+
+  // Terminate the interaction via the connection's terminateInteraction API.
+  // This exercises the cross-thread scheduling path since forEachWorker
+  // runs on the calling thread, not the worker's event base.
+  bool terminated = false;
+  thriftServer->forEachWorker([&](wangle::Acceptor* acceptor) {
+    auto* worker = dynamic_cast<Cpp2Worker*>(acceptor);
+    if (!worker || terminated) {
+      return;
+    }
+    worker->getEventBase()->runInEventBaseThreadAndWait([&] {
+      if (auto* connectionManager = worker->getConnectionManager()) {
+        connectionManager->forEachConnection(
+            [&](wangle::ManagedConnection* wangleConn) {
+              if (auto* managedConn =
+                      dynamic_cast<ManagedConnectionIf*>(wangleConn)) {
+                managedConn->terminateInteraction(interactionId);
+                terminated = true;
+              }
+            });
+      }
+    });
+  });
+  ASSERT_TRUE(terminated) << "Failed to find connection to terminate on";
+
+  // Verify the interaction is gone from snapshots
+  auto snapshot2 = thriftServer->getServerSnapshot().get();
+  for (const auto& [addr, connSnapshot] : snapshot2.connections) {
+    for (const auto& interaction : connSnapshot.interactions) {
+      EXPECT_NE(interaction.interactionId, interactionId)
+          << "Interaction should have been terminated";
+    }
+  }
 }

@@ -69,7 +69,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
             ClientType,
             cProtocol,
             const string& endpoint,
-        )
+        ) except +
 
         cFollyFuture[cRequestChannel_ptr] createThriftChannelUnix(
             const string& path,
@@ -83,7 +83,7 @@ cdef extern from "thrift/lib/python/client/RequestChannel.h" namespace "::apache
             const uint32_t connect_timeout,
             ClientType,
             cProtocol,
-        )
+        ) except +
 
         cFollyFuture[cRequestChannel_ptr] createThriftChannelSSL(
             shared_ptr[cSSLContext]& ctx,

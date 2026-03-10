@@ -29,8 +29,8 @@ from watchman.integration.lib import WatchmanInstance
 
 
 # Test states used in deferral tests.
-TEST_STATE_0 = "hh-state-tracking-test-state0"
-TEST_STATE_1 = "hh-state-tracking-test-state1"
+TEST_STATE_0 = "hh.state-tracking-test-state0"
+TEST_STATE_1 = "hh.state-tracking-test-state1"
 
 
 @dataclass
@@ -1459,6 +1459,55 @@ function test_deprecated() : void {
         )
         wait_for_deassert()
         self.test_driver.check_cmd(["No errors!"])
+
+    def test_deferral12(self) -> None:
+        """Regression test: Deferral must work if state change events with . in name are received in get_changes_sync."""
+        config = self.test_driver.getConfig()
+        config.state_tracking = True
+        config.streaming_errors = False  # we want to trigger get_changes_sync
+        config.throttle_time_ms = 5000  # make it easier to trigger get_changes_sync
+        config.obey_deferral = True
+        config.write_hhconf(
+            self.test_driver.watchman_instance.getUnixSockPath(),
+            self.test_driver.repo_dir,
+        )
+
+        # We need a test state with . in the name
+        self.assertIn(".", TEST_STATE_0)
+
+        self.test_driver.start_hh_server()
+
+        # Create a file before asserting the state.
+        # The worker should pick this up immediately (throttle_time_ms only delays *after* the first change).
+        self.test_driver.createNonHackFile("pre_state.php")
+
+        wait_for, is_still_asserted, _ = self.test_driver.assertStateForSeconds(
+            TEST_STATE_0, 20
+        )
+
+        # Create a file while the state is asserted.
+        # The worker is now in its 5000ms throttle wait.
+        self.test_driver.createNonHackFile("during_state.php")
+
+        # This should trigger a get_changes_sync call, picking up
+        # 1. StateEntered("hh.state-tracking-test-state0")
+        # 2. File change for "during_state.php" (but this one is deferred!)
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}pre_state.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
+
+        self.assertTrue(is_still_asserted())
+        wait_for()
+
+        # All changes must be visible now.
+        self.test_driver.check_cmd(
+            [
+                "ERROR: {root}pre_state.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+                "ERROR: {root}during_state.php:1:1,1: A .php file must begin with `<?hh`. (Parsing[1002])",
+            ]
+        )
 
 
 class EdenfsWatcherNonMountPointRepoTests(EdenfsWatcherTests):

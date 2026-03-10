@@ -30,7 +30,7 @@
 #include <bitset>
 #include <ostream>
 
-#include "globals-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
 
 namespace vixl {
 

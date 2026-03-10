@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
-#include "hphp/vixl/a64/assembler-a64.h"
+#include "hphp/vixl/hphp-compat.h"
 
 namespace HPHP::jit::arm {
 

@@ -24,9 +24,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "instructions-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
 
-#include "assembler-aarch64.h"
+#include "hphp/vixl/aarch64/assembler-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {
@@ -930,6 +930,9 @@ const Instruction* Instruction::GetImmPCOffsetTarget() const {
     } else {
       VIXL_ASSERT(Mask(PCRelAddressingMask) == ADR);
     }
+  } else if (IsLoadLiteral()) {
+    // LDR (literal).
+    offset = (GetImmLLiteral() << kLiteralEntrySizeLog2);
   } else {
     // All PC-relative branches.
     VIXL_ASSERT(GetBranchType() != UnknownBranchType);
@@ -960,6 +963,8 @@ int Instruction::GetImmBranch() const {
 void Instruction::SetImmPCOffsetTarget(const Instruction* target) {
   if (IsPCRelAddressing()) {
     SetPCRelImmTarget(target);
+  } else if (IsLoadLiteral()) {
+    SetImmLLiteral(target);
   } else {
     SetBranchImmTarget(target);
   }
@@ -1446,6 +1451,80 @@ int64_t MinIntFromFormat(VectorFormat vform) {
 uint64_t MaxUintFromFormat(VectorFormat vform) {
   return GetUintMask(LaneSizeInBitsFromFormat(vform));
 }
+
+#ifdef HPHP_VIXL
+Instruction* Instruction::GetImmPCOffsetTarget(
+    const Instruction* from) const {
+  const Instruction* base = from;
+  ptrdiff_t offset;
+  if (IsPCRelAddressing()) {
+    offset = GetImmPCRel();
+    if (Mask(PCRelAddressingMask) == ADRP) {
+      base = AlignDown(base, kPageSize);
+      offset *= kPageSize;
+    } else {
+      VIXL_ASSERT(Mask(PCRelAddressingMask) == ADR);
+    }
+  } else if (IsLoadLiteral()) {
+    offset = (GetImmLLiteral() << kLiteralEntrySizeLog2);
+  } else {
+    VIXL_ASSERT(GetBranchType() != UnknownBranchType);
+    offset = GetImmBranch() * static_cast<int>(kInstructionSize);
+  }
+  return const_cast<Instruction*>(base) + offset;
+}
+
+
+void Instruction::SetImmPCOffsetTarget(const Instruction* target,
+                                       const Instruction* from) {
+  if (IsPCRelAddressing()) {
+    // Compute the offset relative to 'from' instead of 'this'.
+    ptrdiff_t imm21;
+    if (Mask(PCRelAddressingMask) == ADR) {
+      imm21 = target - from;
+    } else {
+      VIXL_ASSERT(Mask(PCRelAddressingMask) == ADRP);
+      uintptr_t from_page = reinterpret_cast<uintptr_t>(from) / kPageSize;
+      uintptr_t target_page = reinterpret_cast<uintptr_t>(target) / kPageSize;
+      imm21 = target_page - from_page;
+    }
+    Instr imm = Assembler::ImmPCRelAddress(static_cast<int32_t>(imm21));
+    SetInstructionBits(Mask(~ImmPCRel_mask) | imm);
+  } else if (IsLoadLiteral()) {
+    ptrdiff_t offset = (target - from) >> kLiteralEntrySizeLog2;
+    Instr imm = Assembler::ImmLLiteral(static_cast<int>(offset));
+    Instr mask = ImmLLiteral_mask;
+    SetInstructionBits(Mask(~mask) | imm);
+  } else {
+    // For branches, compute offset relative to 'from'.
+    VIXL_ASSERT(((target - from) & 3) == 0);
+    int offset = static_cast<int>((target - from) >> kInstructionSizeLog2);
+    Instr branch_imm = 0;
+    uint32_t imm_mask = 0;
+    switch (GetBranchType()) {
+      case CondBranchType:
+        branch_imm = Assembler::ImmCondBranch(offset);
+        imm_mask = ImmCondBranch_mask;
+        break;
+      case UncondBranchType:
+        branch_imm = Assembler::ImmUncondBranch(offset);
+        imm_mask = ImmUncondBranch_mask;
+        break;
+      case CompareBranchType:
+        branch_imm = Assembler::ImmCmpBranch(offset);
+        imm_mask = ImmCmpBranch_mask;
+        break;
+      case TestBranchType:
+        branch_imm = Assembler::ImmTestBranch(offset);
+        imm_mask = ImmTestBranch_mask;
+        break;
+      default:
+        VIXL_UNREACHABLE();
+    }
+    SetInstructionBits(Mask(~imm_mask) | branch_imm);
+  }
+}
+#endif  // HPHP_VIXL
 
 }  // namespace aarch64
 }  // namespace vixl

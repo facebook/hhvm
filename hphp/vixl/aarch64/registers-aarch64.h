@@ -29,7 +29,7 @@
 
 #include <string>
 
-#include "instructions-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {
@@ -109,6 +109,14 @@ class CPURegister {
 
   // TODO: Make this return 'int'.
   unsigned GetCode() const { return code_; }
+
+#ifdef HPHP_VIXL
+  // HPHP compat: old VIXL accessor names.
+  constexpr unsigned code() const { return code_; }
+  unsigned size() const { return GetSizeInBits(); }
+  RegisterType type() const { return GetType(); }
+  RegList Bit() const { return GetBit(); }
+#endif
 
   RegisterBank GetBank() const { return bank_; }
 

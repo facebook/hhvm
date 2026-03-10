@@ -25,16 +25,16 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "test-disasm-aarch64.h"
+#include "hphp/vixl/test/aarch64/test-disasm-aarch64.h"
 
 #include <cstdio>
 #include <cstring>
 #include <string>
 
-#include "test-runner.h"
+#include "hphp/vixl/test/test-runner.h"
 
-#include "aarch64/disasm-aarch64.h"
-#include "aarch64/macro-assembler-aarch64.h"
+#include "hphp/vixl/aarch64/disasm-aarch64.h"
+#include "hphp/vixl/aarch64/macro-assembler-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {

@@ -24,7 +24,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "test-assembler-aarch64.h"
+#include "hphp/vixl/test/aarch64/test-assembler-aarch64.h"
 
 #include <cfloat>
 #include <cmath>
@@ -33,14 +33,14 @@
 #include <cstring>
 #include <sys/mman.h>
 
-#include "test-runner.h"
-#include "test-utils.h"
+#include "hphp/vixl/test/test-runner.h"
+#include "hphp/vixl/test/test-utils.h"
 
-#include "aarch64/cpu-aarch64.h"
-#include "aarch64/disasm-aarch64.h"
-#include "aarch64/macro-assembler-aarch64.h"
-#include "aarch64/simulator-aarch64.h"
-#include "aarch64/test-utils-aarch64.h"
+#include "hphp/vixl/aarch64/cpu-aarch64.h"
+#include "hphp/vixl/aarch64/disasm-aarch64.h"
+#include "hphp/vixl/aarch64/macro-assembler-aarch64.h"
+#include "hphp/vixl/aarch64/simulator-aarch64.h"
+#include "hphp/vixl/test/aarch64/test-utils-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {
@@ -1631,6 +1631,15 @@ TEST(clz_cls) {
 TEST(pacia_pacib_autia_autib) {
   SETUP_WITH_FEATURES(CPUFeatures::kPAuth);
 
+  bool has_fpac = false;
+#ifndef VIXL_INCLUDE_SIMULATOR_AARCH64
+  {
+    CPUFeatures cpu = CPUFeatures::InferFromOS();
+    has_fpac = cpu.Has(CPUFeatures::kPAuthFPAC) ||
+               cpu.Has(CPUFeatures::kPAuthFPACCombined);
+  }
+#endif
+
   START();
 
   Register pointer = x24;
@@ -1661,19 +1670,23 @@ TEST(pacia_pacib_autia_autib) {
   __ Mov(x3, x1);
   __ Autib(x3, modifier);
 
-  // Attempt to authenticate incorrect pointers.
-  __ Mov(x4, x1);
-  __ Autia(x4, modifier);
+  if (!has_fpac) {
+    // Attempt to authenticate incorrect pointers.
+    __ Mov(x4, x1);
+    __ Autia(x4, modifier);
 
-  __ Mov(x5, x0);
-  __ Autib(x5, modifier);
+    __ Mov(x5, x0);
+    __ Autib(x5, modifier);
+  }
 
   // Retry on collisions.
   __ Cmp(x0, x1);
   __ Ccmp(pointer, x0, ZFlag, ne);
   __ Ccmp(pointer, x1, ZFlag, ne);
-  __ Ccmp(pointer, x4, ZFlag, ne);
-  __ Ccmp(pointer, x5, ZFlag, ne);
+  if (!has_fpac) {
+    __ Ccmp(pointer, x4, ZFlag, ne);
+    __ Ccmp(pointer, x5, ZFlag, ne);
+  }
   __ Ccmp(pointer, retry_limit, ZFlag, eq);
   __ Cinc(pointer, pointer, ne);
   __ B(ne, &retry);
@@ -1692,20 +1705,31 @@ TEST(pacia_pacib_autia_autib) {
     ASSERT_EQUAL_64(pointer, x2);
     ASSERT_EQUAL_64(pointer, x3);
 
-    // Pointers corrupted after failing to authenticate.
+    if (!has_fpac) {
+      // Pointers corrupted after failing to authenticate.
 #ifdef VIXL_INCLUDE_SIMULATOR_AARCH64
-    ASSERT_EQUAL_64(0x0020000012345678, x4);
-    ASSERT_EQUAL_64(0x0040000012345678, x5);
+      ASSERT_EQUAL_64(0x0020000012345678, x4);
+      ASSERT_EQUAL_64(0x0040000012345678, x5);
 #else
-    ASSERT_NOT_EQUAL_64(pointer, x4);
-    ASSERT_NOT_EQUAL_64(pointer, x5);
+      ASSERT_NOT_EQUAL_64(pointer, x4);
+      ASSERT_NOT_EQUAL_64(pointer, x5);
 #endif
+    }
   }
 }
 
 
 TEST(paciza_pacizb_autiza_autizb) {
   SETUP_WITH_FEATURES(CPUFeatures::kPAuth);
+
+  bool has_fpac = false;
+#ifndef VIXL_INCLUDE_SIMULATOR_AARCH64
+  {
+    CPUFeatures cpu = CPUFeatures::InferFromOS();
+    has_fpac = cpu.Has(CPUFeatures::kPAuthFPAC) ||
+               cpu.Has(CPUFeatures::kPAuthFPACCombined);
+  }
+#endif
 
   START();
 
@@ -1735,19 +1759,23 @@ TEST(paciza_pacizb_autiza_autizb) {
   __ Mov(x3, x1);
   __ Autizb(x3);
 
-  // Attempt to authenticate incorrect pointers.
-  __ Mov(x4, x1);
-  __ Autiza(x4);
+  if (!has_fpac) {
+    // Attempt to authenticate incorrect pointers.
+    __ Mov(x4, x1);
+    __ Autiza(x4);
 
-  __ Mov(x5, x0);
-  __ Autizb(x5);
+    __ Mov(x5, x0);
+    __ Autizb(x5);
+  }
 
   // Retry on collisions.
   __ Cmp(x0, x1);
   __ Ccmp(pointer, x0, ZFlag, ne);
   __ Ccmp(pointer, x1, ZFlag, ne);
-  __ Ccmp(pointer, x4, ZFlag, ne);
-  __ Ccmp(pointer, x5, ZFlag, ne);
+  if (!has_fpac) {
+    __ Ccmp(pointer, x4, ZFlag, ne);
+    __ Ccmp(pointer, x5, ZFlag, ne);
+  }
   __ Ccmp(pointer, retry_limit, ZFlag, eq);
   __ Cinc(pointer, pointer, ne);
   __ B(ne, &retry);
@@ -1766,20 +1794,31 @@ TEST(paciza_pacizb_autiza_autizb) {
     ASSERT_EQUAL_64(pointer, x2);
     ASSERT_EQUAL_64(pointer, x3);
 
-    // Pointers corrupted after failing to authenticate.
+    if (!has_fpac) {
+      // Pointers corrupted after failing to authenticate.
 #ifdef VIXL_INCLUDE_SIMULATOR_AARCH64
-    ASSERT_EQUAL_64(0x0020000012345678, x4);
-    ASSERT_EQUAL_64(0x0040000012345678, x5);
+      ASSERT_EQUAL_64(0x0020000012345678, x4);
+      ASSERT_EQUAL_64(0x0040000012345678, x5);
 #else
-    ASSERT_NOT_EQUAL_64(pointer, x4);
-    ASSERT_NOT_EQUAL_64(pointer, x5);
+      ASSERT_NOT_EQUAL_64(pointer, x4);
+      ASSERT_NOT_EQUAL_64(pointer, x5);
 #endif
+    }
   }
 }
 
 
 TEST(pacda_pacdb_autda_autdb) {
   SETUP_WITH_FEATURES(CPUFeatures::kPAuth);
+
+  bool has_fpac = false;
+#ifndef VIXL_INCLUDE_SIMULATOR_AARCH64
+  {
+    CPUFeatures cpu = CPUFeatures::InferFromOS();
+    has_fpac = cpu.Has(CPUFeatures::kPAuthFPAC) ||
+               cpu.Has(CPUFeatures::kPAuthFPACCombined);
+  }
+#endif
 
   START();
 
@@ -1811,19 +1850,23 @@ TEST(pacda_pacdb_autda_autdb) {
   __ Mov(x3, x1);
   __ Autdb(x3, modifier);
 
-  // Attempt to authenticate incorrect pointers.
-  __ Mov(x4, x1);
-  __ Autda(x4, modifier);
+  if (!has_fpac) {
+    // Attempt to authenticate incorrect pointers.
+    __ Mov(x4, x1);
+    __ Autda(x4, modifier);
 
-  __ Mov(x5, x0);
-  __ Autdb(x5, modifier);
+    __ Mov(x5, x0);
+    __ Autdb(x5, modifier);
+  }
 
   // Retry on collisions.
   __ Cmp(x0, x1);
   __ Ccmp(pointer, x0, ZFlag, ne);
   __ Ccmp(pointer, x1, ZFlag, ne);
-  __ Ccmp(pointer, x4, ZFlag, ne);
-  __ Ccmp(pointer, x5, ZFlag, ne);
+  if (!has_fpac) {
+    __ Ccmp(pointer, x4, ZFlag, ne);
+    __ Ccmp(pointer, x5, ZFlag, ne);
+  }
   __ Ccmp(pointer, retry_limit, ZFlag, eq);
   __ Cinc(pointer, pointer, ne);
   __ B(ne, &retry);
@@ -1842,20 +1885,31 @@ TEST(pacda_pacdb_autda_autdb) {
     ASSERT_EQUAL_64(pointer, x2);
     ASSERT_EQUAL_64(pointer, x3);
 
-    // Pointers corrupted after failing to authenticate.
+    if (!has_fpac) {
+      // Pointers corrupted after failing to authenticate.
 #ifdef VIXL_INCLUDE_SIMULATOR_AARCH64
-    ASSERT_EQUAL_64(0x0020000012345678, x4);
-    ASSERT_EQUAL_64(0x0040000012345678, x5);
+      ASSERT_EQUAL_64(0x0020000012345678, x4);
+      ASSERT_EQUAL_64(0x0040000012345678, x5);
 #else
-    ASSERT_NOT_EQUAL_64(pointer, x4);
-    ASSERT_NOT_EQUAL_64(pointer, x5);
+      ASSERT_NOT_EQUAL_64(pointer, x4);
+      ASSERT_NOT_EQUAL_64(pointer, x5);
 #endif
+    }
   }
 }
 
 
 TEST(pacdza_pacdzb_autdza_autdzb) {
   SETUP_WITH_FEATURES(CPUFeatures::kPAuth);
+
+  bool has_fpac = false;
+#ifndef VIXL_INCLUDE_SIMULATOR_AARCH64
+  {
+    CPUFeatures cpu = CPUFeatures::InferFromOS();
+    has_fpac = cpu.Has(CPUFeatures::kPAuthFPAC) ||
+               cpu.Has(CPUFeatures::kPAuthFPACCombined);
+  }
+#endif
 
   START();
 
@@ -1885,19 +1939,23 @@ TEST(pacdza_pacdzb_autdza_autdzb) {
   __ Mov(x3, x1);
   __ Autdzb(x3);
 
-  // Attempt to authenticate incorrect pointers.
-  __ Mov(x4, x1);
-  __ Autdza(x4);
+  if (!has_fpac) {
+    // Attempt to authenticate incorrect pointers.
+    __ Mov(x4, x1);
+    __ Autdza(x4);
 
-  __ Mov(x5, x0);
-  __ Autdzb(x5);
+    __ Mov(x5, x0);
+    __ Autdzb(x5);
+  }
 
   // Retry on collisions.
   __ Cmp(x0, x1);
   __ Ccmp(pointer, x0, ZFlag, ne);
   __ Ccmp(pointer, x1, ZFlag, ne);
-  __ Ccmp(pointer, x4, ZFlag, ne);
-  __ Ccmp(pointer, x5, ZFlag, ne);
+  if (!has_fpac) {
+    __ Ccmp(pointer, x4, ZFlag, ne);
+    __ Ccmp(pointer, x5, ZFlag, ne);
+  }
   __ Ccmp(pointer, retry_limit, ZFlag, eq);
   __ Cinc(pointer, pointer, ne);
   __ B(ne, &retry);
@@ -1916,14 +1974,16 @@ TEST(pacdza_pacdzb_autdza_autdzb) {
     ASSERT_EQUAL_64(pointer, x2);
     ASSERT_EQUAL_64(pointer, x3);
 
-    // Pointers corrupted after failing to authenticate.
+    if (!has_fpac) {
+      // Pointers corrupted after failing to authenticate.
 #ifdef VIXL_INCLUDE_SIMULATOR_AARCH64
-    ASSERT_EQUAL_64(0x0020000012345678, x4);
-    ASSERT_EQUAL_64(0x0040000012345678, x5);
+      ASSERT_EQUAL_64(0x0020000012345678, x4);
+      ASSERT_EQUAL_64(0x0040000012345678, x5);
 #else
-    ASSERT_NOT_EQUAL_64(pointer, x4);
-    ASSERT_NOT_EQUAL_64(pointer, x5);
+      ASSERT_NOT_EQUAL_64(pointer, x4);
+      ASSERT_NOT_EQUAL_64(pointer, x5);
 #endif
+    }
   }
 }
 
@@ -7318,6 +7378,16 @@ TEST(system_msr) {
 
 TEST(system_pauth_a) {
   SETUP_WITH_FEATURES(CPUFeatures::kPAuth);
+
+  bool has_fpac = false;
+#ifndef VIXL_INCLUDE_SIMULATOR_AARCH64
+  {
+    CPUFeatures cpu = CPUFeatures::InferFromOS();
+    has_fpac = cpu.Has(CPUFeatures::kPAuthFPAC) ||
+               cpu.Has(CPUFeatures::kPAuthFPACCombined);
+  }
+#endif
+
   START();
 
   // Exclude x16 and x17 from the scratch register list so we can use
@@ -7368,18 +7438,20 @@ TEST(system_pauth_a) {
   __ Autiasp();
   __ Mov(x5, lr);
 
-  // Attempt to authenticate incorrect pointers.
-  __ Mov(x17, x1);
-  __ Autia1716();
-  __ Mov(x6, x17);
+  if (!has_fpac) {
+    // Attempt to authenticate incorrect pointers.
+    __ Mov(x17, x1);
+    __ Autia1716();
+    __ Mov(x6, x17);
 
-  __ Mov(lr, x0);
-  __ Autiaz();
-  __ Mov(x7, lr);
+    __ Mov(lr, x0);
+    __ Autiaz();
+    __ Mov(x7, lr);
 
-  __ Mov(lr, x1);
-  __ Autiasp();
-  __ Mov(x8, lr);
+    __ Mov(lr, x1);
+    __ Autiasp();
+    __ Mov(x8, lr);
+  }
 
   // Strip the pac code from the pointer in x0.
   __ Mov(lr, x0);
@@ -7391,9 +7463,11 @@ TEST(system_pauth_a) {
   __ Ccmp(pointer, x0, ZFlag, ne);
   __ Ccmp(pointer, x1, ZFlag, ne);
   __ Ccmp(pointer, x2, ZFlag, ne);
-  __ Ccmp(pointer, x6, ZFlag, ne);
-  __ Ccmp(pointer, x7, ZFlag, ne);
-  __ Ccmp(pointer, x8, ZFlag, ne);
+  if (!has_fpac) {
+    __ Ccmp(pointer, x6, ZFlag, ne);
+    __ Ccmp(pointer, x7, ZFlag, ne);
+    __ Ccmp(pointer, x8, ZFlag, ne);
+  }
   __ Ccmp(pointer, retry_limit, ZFlag, eq);
   __ Cinc(pointer, pointer, ne);
   __ B(ne, &retry);
@@ -7418,16 +7492,18 @@ TEST(system_pauth_a) {
     ASSERT_EQUAL_64(pointer, x4);
     ASSERT_EQUAL_64(pointer, x5);
 
-    // Pointers corrupted after failing to authenticate.
+    if (!has_fpac) {
+      // Pointers corrupted after failing to authenticate.
 #ifdef VIXL_INCLUDE_SIMULATOR_AARCH64
-    ASSERT_EQUAL_64(0x0020000012345678, x6);
-    ASSERT_EQUAL_64(0x0020000012345678, x7);
-    ASSERT_EQUAL_64(0x0020000012345678, x8);
+      ASSERT_EQUAL_64(0x0020000012345678, x6);
+      ASSERT_EQUAL_64(0x0020000012345678, x7);
+      ASSERT_EQUAL_64(0x0020000012345678, x8);
 #else
-    ASSERT_NOT_EQUAL_64(pointer, x6);
-    ASSERT_NOT_EQUAL_64(pointer, x7);
-    ASSERT_NOT_EQUAL_64(pointer, x8);
+      ASSERT_NOT_EQUAL_64(pointer, x6);
+      ASSERT_NOT_EQUAL_64(pointer, x7);
+      ASSERT_NOT_EQUAL_64(pointer, x8);
 #endif
+    }
 
     // Pointer with code stripped.
     ASSERT_EQUAL_64(pointer, x9);
@@ -7437,6 +7513,16 @@ TEST(system_pauth_a) {
 
 TEST(system_pauth_b) {
   SETUP_WITH_FEATURES(CPUFeatures::kPAuth);
+
+  bool has_fpac = false;
+#ifndef VIXL_INCLUDE_SIMULATOR_AARCH64
+  {
+    CPUFeatures cpu = CPUFeatures::InferFromOS();
+    has_fpac = cpu.Has(CPUFeatures::kPAuthFPAC) ||
+               cpu.Has(CPUFeatures::kPAuthFPACCombined);
+  }
+#endif
+
   START();
 
   // Exclude x16 and x17 from the scratch register list so we can use
@@ -7487,18 +7573,20 @@ TEST(system_pauth_b) {
   __ Autibsp();
   __ Mov(x5, lr);
 
-  // Attempt to authenticate incorrect pointers.
-  __ Mov(x17, x1);
-  __ Autib1716();
-  __ Mov(x6, x17);
+  if (!has_fpac) {
+    // Attempt to authenticate incorrect pointers.
+    __ Mov(x17, x1);
+    __ Autib1716();
+    __ Mov(x6, x17);
 
-  __ Mov(lr, x0);
-  __ Autibz();
-  __ Mov(x7, lr);
+    __ Mov(lr, x0);
+    __ Autibz();
+    __ Mov(x7, lr);
 
-  __ Mov(lr, x1);
-  __ Autibsp();
-  __ Mov(x8, lr);
+    __ Mov(lr, x1);
+    __ Autibsp();
+    __ Mov(x8, lr);
+  }
 
   // Strip the pac code from the pointer in x0.
   __ Mov(lr, x0);
@@ -7510,9 +7598,11 @@ TEST(system_pauth_b) {
   __ Ccmp(pointer, x0, ZFlag, ne);
   __ Ccmp(pointer, x1, ZFlag, ne);
   __ Ccmp(pointer, x2, ZFlag, ne);
-  __ Ccmp(pointer, x6, ZFlag, ne);
-  __ Ccmp(pointer, x7, ZFlag, ne);
-  __ Ccmp(pointer, x8, ZFlag, ne);
+  if (!has_fpac) {
+    __ Ccmp(pointer, x6, ZFlag, ne);
+    __ Ccmp(pointer, x7, ZFlag, ne);
+    __ Ccmp(pointer, x8, ZFlag, ne);
+  }
   __ Ccmp(pointer, retry_limit, ZFlag, eq);
   __ Cinc(pointer, pointer, ne);
   __ B(ne, &retry);
@@ -7539,16 +7629,18 @@ TEST(system_pauth_b) {
     ASSERT_EQUAL_64(pointer, x4);
     ASSERT_EQUAL_64(pointer, x5);
 
-    // Pointers corrupted after failing to authenticate.
+    if (!has_fpac) {
+      // Pointers corrupted after failing to authenticate.
 #ifdef VIXL_INCLUDE_SIMULATOR_AARCH64
-    ASSERT_EQUAL_64(0x0040000012345678, x6);
-    ASSERT_EQUAL_64(0x0040000012345678, x7);
-    ASSERT_EQUAL_64(0x0040000012345678, x8);
+      ASSERT_EQUAL_64(0x0040000012345678, x6);
+      ASSERT_EQUAL_64(0x0040000012345678, x7);
+      ASSERT_EQUAL_64(0x0040000012345678, x8);
 #else
-    ASSERT_NOT_EQUAL_64(pointer, x6);
-    ASSERT_NOT_EQUAL_64(pointer, x7);
-    ASSERT_NOT_EQUAL_64(pointer, x8);
+      ASSERT_NOT_EQUAL_64(pointer, x6);
+      ASSERT_NOT_EQUAL_64(pointer, x7);
+      ASSERT_NOT_EQUAL_64(pointer, x8);
 #endif
+    }
 
     // Pointer with code stripped.
     ASSERT_EQUAL_64(pointer, x9);
@@ -15667,6 +15759,46 @@ TEST(scalar_movi) {
     ASSERT_EQUAL_64(0, x0);
   }
 }
+
+
+#ifdef HPHP_VIXL
+TEST(load_pc_relative) {
+  SETUP();
+
+  constexpr uint64_t beforeValue = 0xdeadbeeffeedface;
+  constexpr uint64_t afterValue  = 0xf00dcafebeadf00c;
+
+  START();
+  Label dataBefore;
+  Label dataAfter;
+  Label codeStart;
+  Label codeEnd;
+  __ B(&codeStart);
+  {
+    ExactAssemblyScope scope(&masm, sizeof(uint64_t), ExactAssemblyScope::kExactSize);
+    __ bind(&dataBefore);
+    __ dc64(beforeValue);
+  }
+  __ Bind(&codeStart);
+  __ Ldr(x0, &dataBefore);
+  __ Ldr(x1, &dataAfter);
+  __ B(&codeEnd);
+  {
+    ExactAssemblyScope scope(&masm, sizeof(uint64_t), ExactAssemblyScope::kExactSize);
+    __ bind(&dataAfter);
+    __ dc64(afterValue);
+  }
+  __ Bind(&codeEnd);
+  END();
+
+  if (CAN_RUN()) {
+    RUN();
+
+    ASSERT_EQUAL_64(beforeValue, x0);
+    ASSERT_EQUAL_64(afterValue, x1);
+  }
+}
+#endif
 
 }  // namespace aarch64
 }  // namespace vixl

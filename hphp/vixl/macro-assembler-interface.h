@@ -27,7 +27,7 @@
 #ifndef VIXL_MACRO_ASSEMBLER_INTERFACE_H
 #define VIXL_MACRO_ASSEMBLER_INTERFACE_H
 
-#include "assembler-base-vixl.h"
+#include "hphp/vixl/assembler-base-vixl.h"
 
 namespace vixl {
 

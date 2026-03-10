@@ -27,7 +27,10 @@
 #ifndef VIXL_ASSEMBLER_BASE_H
 #define VIXL_ASSEMBLER_BASE_H
 
-#include "code-buffer-vixl.h"
+#include "hphp/vixl/code-buffer-vixl.h"
+#ifdef HPHP_VIXL
+#include "hphp/util/data-block.h"
+#endif
 
 // Microsoft Visual C++ defines a `mvn` macro that conflicts with our own
 // definition.
@@ -49,11 +52,20 @@ class AssemblerBase {
   AssemblerBase(byte* buffer, size_t capacity)
       : buffer_(buffer, capacity), allow_assembler_(false) {}
 
+#ifdef HPHP_VIXL
+  explicit AssemblerBase(HPHP::CodeBlock& cb)
+      : buffer_(0), hphp_cb_(&cb), allow_assembler_(true) {}
+#endif
+
   virtual ~AssemblerBase() {}
 
   // Finalize a code buffer of generated instructions. This function must be
   // called before executing or copying code from the buffer.
+#ifdef HPHP_VIXL
+  void FinalizeCode() { /* empty in HPHP mode */ }
+#else
   void FinalizeCode() { GetBuffer()->SetClean(); }
+#endif
 
   ptrdiff_t GetCursorOffset() const { return GetBuffer().GetCursorOffset(); }
 
@@ -67,9 +79,19 @@ class AssemblerBase {
   size_t GetSizeOfCodeGenerated() const { return GetCursorOffset(); }
 
   // Accessors.
+#ifdef HPHP_VIXL
+  CodeBuffer* GetBuffer() { not_reached(); return &buffer_; }
+  const CodeBuffer& GetBuffer() const { not_reached(); return buffer_; }
+#else
   CodeBuffer* GetBuffer() { return &buffer_; }
   const CodeBuffer& GetBuffer() const { return buffer_; }
+#endif
+
   bool AllowAssembler() const { return allow_assembler_; }
+
+#ifdef HPHP_VIXL
+  HPHP::CodeBlock& code() const { return *hphp_cb_; }
+#endif
 
  protected:
   void SetAllowAssembler(bool allow) { allow_assembler_ = allow; }
@@ -77,8 +99,12 @@ class AssemblerBase {
   // CodeBufferCheckScope must be able to temporarily allow the assembler.
   friend class vixl::CodeBufferCheckScope;
 
-  // Buffer where the code is emitted.
+  // Buffer where the code is emitted. NOT USED by HHVM.
   CodeBuffer buffer_;
+
+#ifdef HPHP_VIXL
+  HPHP::CodeBlock* hphp_cb_ = nullptr;
+#endif
 
  private:
   bool allow_assembler_;

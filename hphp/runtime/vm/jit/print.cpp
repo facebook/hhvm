@@ -38,7 +38,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 
-#include "hphp/vixl/a64/disasm-a64.h"
+#include "hphp/vixl/hphp-compat.h"
 
 namespace HPHP::jit {
 
@@ -654,12 +654,21 @@ void disasmRange(std::ostream& os,
     }
 
     case Arch::ARM: {
+      auto const endClr = colorStr[0] ? color(ANSI_COLOR_END) : "";
       vixl::Decoder dec;
-      vixl::PrintDisassembler disasm(os, indent, printEncoding, colorStr);
-      disasm.setShouldDereferencePCRelativeLiterals(true);
+      vixl::Disassembler disasm;
+      disasm.MapCodeAddress(
+        (int64_t)((uint64_t)begin - adjust),
+        vixl::Instruction::Cast(begin));
       dec.AppendVisitor(&disasm);
       for (; begin < end; begin += vixl::kInstructionSize) {
         dec.Decode(vixl::Instruction::Cast(begin));
+        for (int i = 0; i < indent; ++i) os << ' ';
+        os << colorStr
+           << folly::format("{:#16x}", (uint64_t)begin - adjust)
+           << "  \t\t"
+           << disasm.GetOutput()
+           << endClr << "\n";
       }
       return;
     }

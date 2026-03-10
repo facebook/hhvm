@@ -31,10 +31,10 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "../cpu-features.h"
+#include "hphp/vixl/cpu-features.h"
 
-#include "decoder-aarch64.h"
-#include "decoder-visitor-map-aarch64.h"
+#include "hphp/vixl/aarch64/decoder-aarch64.h"
+#include "hphp/vixl/aarch64/decoder-visitor-map-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {

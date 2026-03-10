@@ -27,11 +27,11 @@
 #ifndef VIXL_CPU_AARCH64_H
 #define VIXL_CPU_AARCH64_H
 
-#include "../cpu-features.h"
-#include "../globals-vixl.h"
+#include "hphp/vixl/cpu-features.h"
+#include "hphp/vixl/globals-vixl.h"
 
-#include "instructions-aarch64.h"
-#include "simulator-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
+#include "hphp/vixl/aarch64/simulator-aarch64.h"
 
 #ifndef VIXL_INCLUDE_TARGET_AARCH64
 // The supporting .cc file is only compiled when the A64 target is selected.

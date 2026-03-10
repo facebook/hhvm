@@ -27,14 +27,19 @@
 #ifndef VIXL_AARCH64_ASSEMBLER_AARCH64_H_
 #define VIXL_AARCH64_ASSEMBLER_AARCH64_H_
 
-#include "../assembler-base-vixl.h"
-#include "../code-generation-scopes-vixl.h"
-#include "../cpu-features.h"
-#include "../globals-vixl.h"
-#include "../invalset-vixl.h"
-#include "../utils-vixl.h"
+#include "hphp/vixl/assembler-base-vixl.h"
+#include "hphp/vixl/code-generation-scopes-vixl.h"
+#include "hphp/vixl/cpu-features.h"
+#include "hphp/vixl/globals-vixl.h"
+#include "hphp/vixl/invalset-vixl.h"
+#include "hphp/vixl/utils-vixl.h"
 
-#include "operands-aarch64.h"
+#ifdef HPHP_VIXL
+#include "hphp/util/data-block.h"
+#include "hphp/runtime/vm/jit/types.h"
+#endif
+
+#include "hphp/vixl/aarch64/operands-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {
@@ -426,6 +431,30 @@ class Assembler : public vixl::internal::AssemblerBase {
   //  * Nothing has been emitted since the last FinalizeCode() call.
   ~Assembler() {}
 
+#ifdef HPHP_VIXL
+  // HPHP: Construct an assembler that emits into an HPHP::CodeBlock.
+  explicit Assembler(HPHP::CodeBlock& cb)
+      : AssemblerBase(cb),
+        pic_(PositionIndependentCode),
+        cpu_features_(CPUFeatures::AArch64LegacyBaseline()) {
+  }
+
+  HPHP::jit::TCA base() const { return code().base(); }
+  HPHP::jit::TCA frontier() const { return code().frontier(); }
+
+  void FinalizeCode() { /* empty */ }
+  ptrdiff_t GetCursorOffset() const { return code().GetCursorOffset(); }
+
+  // Return the address of the cursor.
+  template <typename T>
+  T GetCursorAddress() const {
+    VIXL_STATIC_ASSERT(sizeof(T) >= sizeof(uintptr_t));
+    return code().GetOffsetAddress<T>(GetCursorOffset());
+  }
+
+  size_t GetSizeOfCodeGenerated() const { return GetCursorOffset(); }
+#endif
+
   // System functions.
 
   // Start generating code from the beginning of the buffer, discarding any code
@@ -445,13 +474,21 @@ class Assembler : public vixl::internal::AssemblerBase {
     return GetCursorOffset();
   }
 
-  VIXL_DEPRECATED("GetBuffer().GetCapacity()",
+  VIXL_DEPRECATED("code().GetCapacity()",
                   ptrdiff_t GetBufferEndOffset() const) {
+#ifdef HPHP_VIXL
+    return static_cast<ptrdiff_t>(code().GetCapacity());
+#else
     return static_cast<ptrdiff_t>(GetBuffer().GetCapacity());
+#endif
   }
-  VIXL_DEPRECATED("GetBuffer().GetCapacity()",
+  VIXL_DEPRECATED("code().GetCapacity()",
                   ptrdiff_t BufferEndOffset() const) {
+#ifdef HPHP_VIXL
+    return code().GetCapacity();
+#else
     return GetBuffer().GetCapacity();
+#endif
   }
 
   // Return the address of a bound label.
@@ -459,11 +496,19 @@ class Assembler : public vixl::internal::AssemblerBase {
   T GetLabelAddress(const Label* label) const {
     VIXL_ASSERT(label->IsBound());
     VIXL_STATIC_ASSERT(sizeof(T) >= sizeof(uintptr_t));
+#ifdef HPHP_VIXL
+    return code().GetOffsetAddress<T>(label->GetLocation());
+#else
     return GetBuffer().GetOffsetAddress<T>(label->GetLocation());
+#endif
   }
 
   Instruction* GetInstructionAt(ptrdiff_t instruction_offset) {
+#ifdef HPHP_VIXL
+    return code().GetOffsetAddress<Instruction*>(instruction_offset);
+#else
     return GetBuffer()->GetOffsetAddress<Instruction*>(instruction_offset);
+#endif
   }
   VIXL_DEPRECATED("GetInstructionAt",
                   Instruction* InstructionAt(ptrdiff_t instruction_offset)) {
@@ -472,10 +517,17 @@ class Assembler : public vixl::internal::AssemblerBase {
 
   ptrdiff_t GetInstructionOffset(Instruction* instruction) {
     VIXL_STATIC_ASSERT(sizeof(*instruction) == 1);
+#ifdef HPHP_VIXL
+    ptrdiff_t offset =
+        instruction - code().GetStartAddress<Instruction*>();
+    VIXL_ASSERT((0 <= offset) &&
+                (offset < static_cast<ptrdiff_t>(code().GetCapacity())));
+#else
     ptrdiff_t offset =
         instruction - GetBuffer()->GetStartAddress<Instruction*>();
     VIXL_ASSERT((0 <= offset) &&
                 (offset < static_cast<ptrdiff_t>(GetBuffer()->GetCapacity())));
+#endif
     return offset;
   }
   VIXL_DEPRECATED("GetInstructionOffset",
@@ -7222,7 +7274,11 @@ class Assembler : public vixl::internal::AssemblerBase {
   template <typename T>
   void dc(T data) {
     VIXL_ASSERT(AllowAssembler());
+#ifdef HPHP_VIXL
+    code().Emit<T>(data);
+#else
     GetBuffer()->Emit<T>(data);
+#endif
   }
 
   // Copy a string into the instruction stream, including the terminating NULL
@@ -7232,8 +7288,13 @@ class Assembler : public vixl::internal::AssemblerBase {
     VIXL_ASSERT(string != NULL);
     VIXL_ASSERT(AllowAssembler());
 
+#ifdef HPHP_VIXL
+    code().EmitString(string);
+    code().alignFrontier(kInstructionSize);
+#else
     GetBuffer()->EmitString(string);
     GetBuffer()->Align();
+#endif
   }
 
   // Code generation helpers.
@@ -7903,28 +7964,48 @@ class Assembler : public vixl::internal::AssemblerBase {
   // Size of the code generated since label to the current position.
   size_t GetSizeOfCodeGeneratedSince(Label* label) const {
     VIXL_ASSERT(label->IsBound());
+#ifdef HPHP_VIXL
+    return code().GetOffsetFrom(label->GetLocation());
+#else
     return GetBuffer().GetOffsetFrom(label->GetLocation());
+#endif
   }
   VIXL_DEPRECATED("GetSizeOfCodeGeneratedSince",
                   size_t SizeOfCodeGeneratedSince(Label* label) const) {
     return GetSizeOfCodeGeneratedSince(label);
   }
 
-  VIXL_DEPRECATED("GetBuffer().GetCapacity()",
+  VIXL_DEPRECATED("code()..GetCapacity()",
                   size_t GetBufferCapacity() const) {
+#ifdef HPHP_VIXL
+    return code().GetCapacity();
+#else
     return GetBuffer().GetCapacity();
+#endif
   }
-  VIXL_DEPRECATED("GetBuffer().GetCapacity()", size_t BufferCapacity() const) {
+  VIXL_DEPRECATED("code()..GetCapacity()", size_t BufferCapacity() const) {
+#ifdef HPHP_VIXL
+    return code().GetCapacity();
+#else
     return GetBuffer().GetCapacity();
+#endif
   }
 
-  VIXL_DEPRECATED("GetBuffer().GetRemainingBytes()",
+  VIXL_DEPRECATED("code()..GetRemainingBytes()",
                   size_t GetRemainingBufferSpace() const) {
+#ifdef HPHP_VIXL
+    return code().GetRemainingBytes();
+#else
     return GetBuffer().GetRemainingBytes();
+#endif
   }
-  VIXL_DEPRECATED("GetBuffer().GetRemainingBytes()",
+  VIXL_DEPRECATED("code()..GetRemainingBytes()",
                   size_t RemainingBufferSpace() const) {
+#ifdef HPHP_VIXL
+    return code().GetRemainingBytes();
+#else
     return GetBuffer().GetRemainingBytes();
+#endif
   }
 
   PositionIndependentCodeOption GetPic() const { return pic_; }
@@ -7952,6 +8033,13 @@ class Assembler : public vixl::internal::AssemblerBase {
                  const MemOperand& addr,
                  LoadStoreOp op,
                  LoadStoreScalingOption option = PreferScaledOffset);
+
+  // Link the current (not-yet-emitted) instruction to the specified label, then
+  // return an offset to be encoded in the instruction. If the label is not yet
+  // bound, an offset of 0 is returned.
+  ptrdiff_t LinkAndGetByteOffsetTo(Label* label);
+  ptrdiff_t LinkAndGetInstructionOffsetTo(Label* label);
+  ptrdiff_t LinkAndGetPageOffsetTo(Label* label);
 
   void LoadStorePAC(const Register& xt,
                     const MemOperand& addr,
@@ -8406,13 +8494,6 @@ class Assembler : public vixl::internal::AssemblerBase {
                             unsigned access_size_in_bytes_log2,
                             LoadStoreScalingOption option);
 
-  // Link the current (not-yet-emitted) instruction to the specified label, then
-  // return an offset to be encoded in the instruction. If the label is not yet
-  // bound, an offset of 0 is returned.
-  ptrdiff_t LinkAndGetByteOffsetTo(Label* label);
-  ptrdiff_t LinkAndGetInstructionOffsetTo(Label* label);
-  ptrdiff_t LinkAndGetPageOffsetTo(Label* label);
-
   // A common implementation for the LinkAndGet<Type>OffsetTo helpers.
   template <int element_shift>
   ptrdiff_t LinkAndGetOffsetTo(Label* label);
@@ -8424,7 +8505,11 @@ class Assembler : public vixl::internal::AssemblerBase {
   void Emit(Instr instruction) {
     VIXL_STATIC_ASSERT(sizeof(instruction) == kInstructionSize);
     VIXL_ASSERT(AllowAssembler());
-    GetBuffer()->Emit32(instruction);
+#ifdef HPHP_VIXL
+    code().dword(instruction);
+#else
+    GetBuffer()->Emit(instruction);
+#endif
   }
 
   PositionIndependentCodeOption pic_;
@@ -8435,16 +8520,27 @@ class Assembler : public vixl::internal::AssemblerBase {
 
 template <typename T>
 void Literal<T>::UpdateValue(T new_value, const Assembler* assembler) {
+#ifdef HPHP_VIXL
+  return UpdateValue(new_value,
+                     assembler->code().GetStartAddress<uint8_t*>());
+#else
   return UpdateValue(new_value,
                      assembler->GetBuffer().GetStartAddress<uint8_t*>());
+#endif
 }
 
 
 template <typename T>
 void Literal<T>::UpdateValue(T high64, T low64, const Assembler* assembler) {
+#ifdef HPHP_VIXL
+  return UpdateValue(high64,
+                     low64,
+                     assembler->code().GetStartAddress<uint8_t*>());
+#else
   return UpdateValue(high64,
                      low64,
                      assembler->GetBuffer().GetStartAddress<uint8_t*>());
+#endif
 }
 
 

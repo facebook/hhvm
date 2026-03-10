@@ -24,15 +24,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "cpu-features.h"
+#include "hphp/vixl/cpu-features.h"
 
 #include <ostream>
 
-#include "globals-vixl.h"
-#include "utils-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
+#include "hphp/vixl/utils-vixl.h"
 
 #if defined(__aarch64__) && defined(VIXL_INCLUDE_TARGET_AARCH64)
-#include "aarch64/cpu-aarch64.h"
+#include "hphp/vixl/aarch64/cpu-aarch64.h"
 #define VIXL_USE_AARCH64_CPU_HELPERS
 #endif
 

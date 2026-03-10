@@ -33,8 +33,8 @@
 #include <type_traits>
 #include <vector>
 
-#include "compiler-intrinsics-vixl.h"
-#include "globals-vixl.h"
+#include "hphp/vixl/compiler-intrinsics-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
 
 namespace vixl {
 

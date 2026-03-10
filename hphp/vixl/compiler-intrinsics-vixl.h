@@ -30,7 +30,7 @@
 
 #include <limits.h>
 
-#include "globals-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
 
 namespace vixl {
 

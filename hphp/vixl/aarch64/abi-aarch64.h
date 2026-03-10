@@ -40,10 +40,10 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "../globals-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
 
-#include "instructions-aarch64.h"
-#include "operands-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
+#include "hphp/vixl/aarch64/operands-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {

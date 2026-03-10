@@ -37,8 +37,6 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/vixl/a64/instructions-a64.h"
-
 #include <condition_variable>
 
 /*

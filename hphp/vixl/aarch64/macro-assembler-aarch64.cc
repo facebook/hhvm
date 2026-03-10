@@ -24,7 +24,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "macro-assembler-aarch64.h"
+#include "hphp/vixl/aarch64/macro-assembler-aarch64.h"
 
 #include <cctype>
 
@@ -32,6 +32,7 @@ namespace vixl {
 namespace aarch64 {
 
 
+#ifndef HPHP_VIXL
 void Pool::Release() {
   if (--monitor_ == 0) {
     // Ensure the pool has not been blocked for too long.
@@ -310,8 +311,10 @@ void VeneerPool::Emit(EmitOption option, size_t amount) {
 
   masm_->bind(&end);
 }
+#endif  // !HPHP_VIXL
 
 
+#ifndef HPHP_VIXL
 MacroAssembler::MacroAssembler(PositionIndependentCodeOption pic)
     : Assembler(pic),
 #ifdef VIXL_DEBUG
@@ -373,23 +376,47 @@ MacroAssembler::MacroAssembler(byte* buffer,
       fp_nan_propagation_(NoFPMacroNaNPropagationSelected) {
   checkpoint_ = GetNextCheckPoint();
 }
+#endif  // !HPHP_VIXL
 
 
 MacroAssembler::~MacroAssembler() {}
 
 
+#ifdef HPHP_VIXL
+MacroAssembler::MacroAssembler(HPHP::CodeBlock& cb)
+    : Assembler(cb),
+#ifdef VIXL_DEBUG
+      allow_macro_instructions_(true),
+#endif
+      generate_simulator_code_(false),
+      sp_(sp),
+      tmp_list_(ip0, ip1),
+      v_tmp_list_(d31),
+      p_tmp_list_(CPURegList::Empty(CPURegister::kPRegister)),
+      current_scratch_scope_(NULL),
+      fp_nan_propagation_(NoFPMacroNaNPropagationSelected) {
+#ifndef VIXL_DEBUG
+  USE(allow_macro_instructions_);
+#endif
+}
+#endif  // HPHP_VIXL
+
+
 void MacroAssembler::Reset() {
   Assembler::Reset();
 
+#ifndef HPHP_VIXL
   VIXL_ASSERT(!literal_pool_.IsBlocked());
   literal_pool_.Reset();
   veneer_pool_.Reset();
 
   checkpoint_ = GetNextCheckPoint();
+#endif
 }
 
 
 void MacroAssembler::FinalizeCode(FinalizeOption option) {
+#ifndef HPHP_VIXL
   if (!literal_pool_.IsEmpty()) {
     // The user may decide to emit more code after Finalize, emit a branch if
     // that's the case.
@@ -397,11 +424,15 @@ void MacroAssembler::FinalizeCode(FinalizeOption option) {
                                               : Pool::kBranchRequired);
   }
   VIXL_ASSERT(veneer_pool_.IsEmpty());
+#else
+  USE(option);
+#endif
 
   Assembler::FinalizeCode();
 }
 
 
+#ifndef HPHP_VIXL
 void MacroAssembler::CheckEmitFor(size_t amount) {
   CheckEmitPoolsFor(amount);
   GetBuffer()->EnsureSpaceFor(amount);
@@ -413,6 +444,7 @@ void MacroAssembler::CheckEmitPoolsFor(size_t amount) {
   veneer_pool_.CheckEmitFor(amount);
   checkpoint_ = GetNextCheckPoint();
 }
+#endif  // !HPHP_VIXL
 
 
 int MacroAssembler::MoveImmediateHelper(MacroAssembler* masm,
@@ -568,9 +600,11 @@ void MacroAssembler::B(Label* label, Condition cond) {
     bind(&done);
   } else {
     if (!label->IsBound()) {
+#ifndef HPHP_VIXL
       veneer_pool_.RegisterUnresolvedBranch(GetCursorOffset(),
                                             label,
                                             CondBranchType);
+#endif
     }
     b(label, cond);
   }
@@ -594,9 +628,11 @@ void MacroAssembler::Cbnz(const Register& rt, Label* label) {
     bind(&done);
   } else {
     if (!label->IsBound()) {
+#ifndef HPHP_VIXL
       veneer_pool_.RegisterUnresolvedBranch(GetCursorOffset(),
                                             label,
                                             CompareBranchType);
+#endif
     }
     cbnz(rt, label);
   }
@@ -620,9 +656,11 @@ void MacroAssembler::Cbz(const Register& rt, Label* label) {
     bind(&done);
   } else {
     if (!label->IsBound()) {
+#ifndef HPHP_VIXL
       veneer_pool_.RegisterUnresolvedBranch(GetCursorOffset(),
                                             label,
                                             CompareBranchType);
+#endif
     }
     cbz(rt, label);
   }
@@ -630,10 +668,12 @@ void MacroAssembler::Cbz(const Register& rt, Label* label) {
 
 
 void MacroAssembler::Tbnz(const Register& rt, unsigned bit_pos, Label* label) {
+#ifndef HPHP_VIXL
   // This is to avoid a situation where emitting a veneer for a TBZ/TBNZ branch
   // can become impossible because we emit the literal pool first.
   literal_pool_.CheckEmitForBranch(
       Instruction::GetImmBranchForwardRange(TestBranchType));
+#endif
   VIXL_ASSERT(allow_macro_instructions_);
   VIXL_ASSERT(!rt.IsZero());
   EmissionCheckScope guard(this, 2 * kInstructionSize);
@@ -645,9 +685,11 @@ void MacroAssembler::Tbnz(const Register& rt, unsigned bit_pos, Label* label) {
     bind(&done);
   } else {
     if (!label->IsBound()) {
+#ifndef HPHP_VIXL
       veneer_pool_.RegisterUnresolvedBranch(GetCursorOffset(),
                                             label,
                                             TestBranchType);
+#endif
     }
     tbnz(rt, bit_pos, label);
   }
@@ -655,10 +697,12 @@ void MacroAssembler::Tbnz(const Register& rt, unsigned bit_pos, Label* label) {
 
 
 void MacroAssembler::Tbz(const Register& rt, unsigned bit_pos, Label* label) {
+#ifndef HPHP_VIXL
   // This is to avoid a situation where emitting a veneer for a TBZ/TBNZ branch
   // can become impossible because we emit the literal pool first.
   literal_pool_.CheckEmitForBranch(
       Instruction::GetImmBranchForwardRange(TestBranchType));
+#endif
   VIXL_ASSERT(allow_macro_instructions_);
   VIXL_ASSERT(!rt.IsZero());
   EmissionCheckScope guard(this, 2 * kInstructionSize);
@@ -670,9 +714,11 @@ void MacroAssembler::Tbz(const Register& rt, unsigned bit_pos, Label* label) {
     bind(&done);
   } else {
     if (!label->IsBound()) {
+#ifndef HPHP_VIXL
       veneer_pool_.RegisterUnresolvedBranch(GetCursorOffset(),
                                             label,
                                             TestBranchType);
+#endif
     }
     tbz(rt, bit_pos, label);
   }
@@ -680,7 +726,9 @@ void MacroAssembler::Tbz(const Register& rt, unsigned bit_pos, Label* label) {
 
 void MacroAssembler::Bind(Label* label, BranchTargetIdentifier id) {
   VIXL_ASSERT(allow_macro_instructions_);
+#ifndef HPHP_VIXL
   veneer_pool_.DeleteUnresolvedBranchInfoForLabel(label);
+#endif
   if (id == EmitBTI_none) {
     bind(label);
   } else {
@@ -701,7 +749,9 @@ void MacroAssembler::Bind(Label* label, BranchTargetIdentifier id) {
 // Bind a label to a specified offset from the start of the buffer.
 void MacroAssembler::BindToOffset(Label* label, ptrdiff_t offset) {
   VIXL_ASSERT(allow_macro_instructions_);
+#ifndef HPHP_VIXL
   veneer_pool_.DeleteUnresolvedBranchInfoForLabel(label);
+#endif
   Assembler::BindToOffset(label, offset);
 }
 
@@ -1567,11 +1617,13 @@ void MacroAssembler::Fmov(VRegister vd, double imm) {
   VIXL_ASSERT(vd.Is1D() || vd.Is2D());
   if (IsImmFP64(rawbits)) {
     fmov(vd, imm);
+#ifndef HPHP_VIXL
   } else if (vd.IsScalar()) {
     ldr(vd,
         new Literal<double>(imm,
                             &literal_pool_,
                             RawLiteral::kDeletedOnPlacementByPool));
+#endif
   } else {
     // TODO: consider NEON support for load literal.
     Movi(vd, rawbits);
@@ -1603,11 +1655,13 @@ void MacroAssembler::Fmov(VRegister vd, float imm) {
   VIXL_ASSERT(vd.Is1S() || vd.Is2S() || vd.Is4S());
   if (IsImmFP32(rawbits)) {
     fmov(vd, imm);
+#ifndef HPHP_VIXL
   } else if (vd.IsScalar()) {
     ldr(vd,
         new Literal<float>(imm,
                            &literal_pool_,
                            RawLiteral::kDeletedOnPlacementByPool));
+#endif
   } else {
     // TODO: consider NEON support for load literal.
     Movi(vd, rawbits);
@@ -2671,7 +2725,9 @@ void MacroAssembler::PrintfNoPreserve(const char* format,
 
   // Emit the format string directly in the instruction stream.
   {
+#ifndef HPHP_VIXL
     BlockPoolsScope scope(this);
+#endif
     // Data emitted:
     //   branch
     //   strlen(format) + 1 (includes null termination)

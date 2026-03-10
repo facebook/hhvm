@@ -30,8 +30,8 @@
 #include <sstream>
 #include <string>
 
-#include "instructions-aarch64.h"
-#include "registers-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
+#include "hphp/vixl/aarch64/registers-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {

@@ -242,7 +242,7 @@ struct DataBlock {
    * it must be used before writing or reading from any address returned by
    * DataBlock.
    */
-  Address toDestAddress(CodeAddress addr) {
+  Address toDestAddress(CodeAddress addr) const {
     assertx(m_base <= addr && addr <= (m_base + m_size));
     return Address(m_destBase + (addr - m_base));
   }
@@ -315,6 +315,48 @@ struct DataBlock {
     }
   }
 
+  // Below code is copied from code-buffer-vixl.h to adapt vixl to HHVM code blocks.
+  ptrdiff_t GetOffsetFrom(ptrdiff_t offset) const {
+    ptrdiff_t cursor_offset = frontier() - base();
+    return cursor_offset - offset;
+  }
+
+  ptrdiff_t GetCursorOffset() const { return GetOffsetFrom(0); }
+
+  template <typename T>
+  T GetOffsetAddress(ptrdiff_t offset) const {
+    return reinterpret_cast<T>(m_destBase + offset);
+  }
+
+  // Return the address of the start of the emitted code.
+  template <typename T>
+  T GetStartAddress() const {
+    return GetOffsetAddress<T>(0);
+  }
+
+  size_t GetRemainingBytes() const {
+    return (base() + capacity()) - frontier();
+  }
+
+  size_t GetCapacity() const {
+    return capacity();
+  }
+
+  void EmitString(const char* string) {
+    const auto len = strlen(string) + 1;
+    assertCanEmit(len);
+    memcpy(dest(), string, len);
+    setFrontier(frontier() + len);
+  }
+
+  template <typename T>
+  void Emit(T value) {
+    assertCanEmit(sizeof(value));
+    memcpy(dest(), &value, sizeof(value));
+    setFrontier(frontier() + sizeof(value));
+  }
+  /////////////////////////////////////////////////////////////////////////////
+
 private:
 
   using Offset = uint32_t;
@@ -379,4 +421,3 @@ struct CodeCursor : UndoMarker {
   ~CodeCursor() { undo(); }
 };
 }
-

@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 
 #include "hphp/util/data-block.h"
-#include "hphp/vixl/a64/macro-assembler-a64.h"
+#include "hphp/vixl/hphp-compat.h"
 
 #include <folly/Bits.h>
 

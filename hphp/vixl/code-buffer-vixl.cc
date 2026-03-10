@@ -30,8 +30,8 @@ extern "C" {
 }
 #endif
 
-#include "code-buffer-vixl.h"
-#include "utils-vixl.h"
+#include "hphp/vixl/code-buffer-vixl.h"
+#include "hphp/vixl/utils-vixl.h"
 
 namespace vixl {
 

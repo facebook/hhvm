@@ -18,7 +18,7 @@
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
-#include "hphp/vixl/a64/assembler-a64.h"
+#include "hphp/vixl/hphp-compat.h"
 
 #include <type_traits>
 
@@ -39,17 +39,26 @@ struct Vout;
 struct PhysReg {
 private:
   static constexpr auto kGPOffset = 0;
+
+#ifdef __aarch64__
+  // Arm64 VIXL uses number 63 to represent SP internally, so
+  // kNumGP must be >= 64 for Arm64.
+  static constexpr auto kNumGP = 64;
+  static constexpr auto kNumSIMD = 48;
+#else
+  // TODO: Eventually, we should move to arm64 kNumGP and kNumSIMD
+  // for platform parity.
   static constexpr auto kNumGP = 48;
+  static constexpr auto kNumSIMD = 64;
+#endif
 
   static constexpr auto kSIMDOffset = kNumGP;
-  static constexpr auto kNumSIMD = 64;
-
   static constexpr auto kSFOffset = kNumGP + kNumSIMD;
   static constexpr auto kNumSF = 1;
 
 public:
   /*
-   * 48 GP regs + 64 SIMD regs + 1 SF reg + 15 empty == 128 regs.
+   * 64 GP regs + 48 SIMD regs + 1 SF reg + 15 empty == 128 regs.
    *
    * We can toggle these values, but they need sum to 128 so that RegSet can
    * fit into two registers.
@@ -70,7 +79,7 @@ public:
   explicit constexpr PhysReg(Reg8 r) : n(int(r)) {}
 
   constexpr /* implicit */ PhysReg(vixl::Register r) : n(r.code()) {}
-  constexpr /* implicit */ PhysReg(vixl::FPRegister r)
+  constexpr /* implicit */ PhysReg(vixl::VRegister r)
     : n(r.code() + kSIMDOffset) {}
 
   /* implicit */ operator Reg64() const {
@@ -95,7 +104,7 @@ public:
                                  vixl::CPURegister::kRegister);
       } else if (isSIMD()) {
         return vixl::CPURegister(n - kSIMDOffset, vixl::kDRegSize,
-                                 vixl::CPURegister::kFPRegister);
+                                 vixl::CPURegister::kVRegister);
       } else {
         assertx(isSF());
         return vixl::NoCPUReg;
@@ -111,6 +120,10 @@ public:
   }
   bool isGP() const {
     static_assert(kGPOffset == 0, "kGPOffset is expected to be zero.");
+  #if defined(__aarch64__)
+    if (n == vixl::kSPRegInternalCode) return true;
+    if (n > vixl::kSpRegCode && n < vixl::kSPRegInternalCode) return false;
+  #endif
     return n < kGPOffset+numGP();
   }
   bool isSIMD() const { return n >= kSIMDOffset && n < kSIMDOffset+numSIMD(); }

@@ -18,10 +18,10 @@
 
 #include "hphp/runtime/vm/jit/abi-regs.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/asm-x64.h"
-#include "hphp/vixl/a64/assembler-a64.h"
-#include "hphp/vixl/a64/constants-a64.h"
+#include "hphp/vixl/hphp-compat.h"
 
 namespace HPHP::jit {
 
@@ -90,15 +90,17 @@ inline vixl::Register x2a(PhysReg x64reg) {
   return vixl::Register(vixl::CPURegister(x64reg));
 }
 
-inline vixl::FPRegister x2f(PhysReg x64reg) {
+inline vixl::VRegister x2f(PhysReg x64reg) {
   always_assert(x64reg.isSIMD());
-  return vixl::FPRegister(vixl::CPURegister(x64reg));
+  return vixl::VRegister(vixl::CPURegister(x64reg));
 }
 
 inline vixl::VRegister x2v(PhysReg x64reg) {
   always_assert(x64reg.isSIMD());
   auto const r = vixl::CPURegister(x64reg);
-  return vixl::VRegister(r.code(), 128);
+  // Use .16b (16 lanes of bytes) format for 128-bit vector operations.
+  // The new VIXL requires an explicit lane count for ld1/st1 encoding.
+  return vixl::VRegister(r.code(), 128, 16);
 }
 
 /*

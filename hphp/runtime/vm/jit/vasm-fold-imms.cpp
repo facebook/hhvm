@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-#include "hphp/vixl/a64/assembler-a64.h"
+#include "hphp/vixl/hphp-compat.h"
 
 TRACE_SET_MOD(hhir)
 
@@ -413,7 +413,7 @@ struct ImmFolder {
   bool arith_imm(Vreg r, int32_t& out) {
     if (!valid.test(r)) return false;
     auto imm64 = vals[r];
-    if (!vixl::Assembler::IsImmArithmetic(imm64)) return false;
+    if (!vixl::Assembler::IsImmAddSub(imm64)) return false;
     out = imm64;
     return true;
   }

@@ -21,8 +21,7 @@
 #include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/tc-print.h"
 
-#include "hphp/vixl/a64/disasm-a64.h"
-#include "hphp/vixl/a64/instructions-a64.h"
+#include "hphp/vixl/hphp-compat.h"
 
 #define MAX_INSTR_ASM_LEN 128
 
@@ -129,7 +128,7 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
         literalSize = sizeof(uint64_t);
       }
 
-      auto const literalAddr = frontier->LiteralAddress();
+      auto const literalAddr = frontier->GetLiteralAddress<const uint8_t*>();
       auto const codeBegin = reinterpret_cast<uint8_t*>(code);
       auto const codeEnd = codeBegin + codeLen;
       if (literalAddr >= codeBegin && literalAddr + literalSize < codeEnd) {
@@ -165,7 +164,7 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
       callAddr = callAddr + (int64_t)kInstructionSize;
 
     } else if (frontier->Mask(UnconditionalBranchMask) == BL) {
-      callAddr = int64_t(frontier->ImmPCOffsetTarget((Instruction*)ip));
+      callAddr = int64_t(frontier->GetImmPCOffsetTarget((const Instruction*)ip));
     }
 
     std::string callDest="";

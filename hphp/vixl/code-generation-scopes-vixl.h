@@ -29,8 +29,8 @@
 #define VIXL_CODE_GENERATION_SCOPES_H_
 
 
-#include "assembler-base-vixl.h"
-#include "macro-assembler-interface.h"
+#include "hphp/vixl/assembler-base-vixl.h"
+#include "hphp/vixl/macro-assembler-interface.h"
 
 
 namespace vixl {
@@ -187,6 +187,7 @@ class EmissionCheckScope : public CodeBufferCheckScope {
   }
 
   void Close() {
+#ifndef HPHP_VIXL
     if (!initialised_) {
       return;
     }
@@ -202,6 +203,7 @@ class EmissionCheckScope : public CodeBufferCheckScope {
       masm_->ReleasePools();
     }
     VIXL_ASSERT(!initialised_);
+#endif
   }
 
  protected:
@@ -209,6 +211,14 @@ class EmissionCheckScope : public CodeBufferCheckScope {
             size_t size,
             SizePolicy size_policy,
             PoolPolicy pool_policy) {
+#ifdef HPHP_VIXL
+    // HHVM does not use VIXL's pool management or buffer space checking,
+    // so EmissionCheckScope is a no-op to avoid per-instruction overhead.
+    USE(masm);
+    USE(size);
+    USE(size_policy);
+    USE(pool_policy);
+#else
     if (masm == NULL) {
       // Nothing to do.
       // We may reach this point in a context of conditional code generation.
@@ -230,6 +240,7 @@ class EmissionCheckScope : public CodeBufferCheckScope {
                                kReserveBufferSpace,
                                size_policy);
     VIXL_ASSERT(initialised_);
+#endif
   }
 
   // This constructor should only be used from code that is *currently

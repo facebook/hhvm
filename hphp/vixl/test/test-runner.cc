@@ -24,7 +24,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "test-runner.h"
+#include "hphp/vixl/test/test-runner.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -106,6 +106,13 @@ static void PrintHelpMessage() {
 }
 
 int main(int argc, char* argv[]) {
+#ifndef __aarch64__
+  // These tests only make sense on AArch64. Exit gracefully on other
+  // architectures so that cross-compiled builds don't report failures.
+  printf("SKIPPED: vixl tests require AArch64.\n");
+  return EXIT_SUCCESS;
+#endif
+
   // Parse the arguments. Option flags must appear first, followed by an
   // optional list of tests to run.
 
@@ -183,14 +190,19 @@ int main(int argc, char* argv[]) {
       c->run();
     }
 
-  } else {
-    // Run the specified tests.
-    if (test_specifiers == 0) {
-      printf("No tests specified.\n");
-      PrintHelpMessage();
-      return EXIT_FAILURE;
+  } else if (test_specifiers == 0) {
+    // No tests specified; default to running all tests so that the binary
+    // works with test executors (e.g. buck test) that invoke it without
+    // arguments. Skip fuzz tests (names containing "_FUZZ_") since they are
+    // slow and produce large output.
+    for (vixl::Test* c = vixl::Test::first(); c != NULL; c = c->next()) {
+      if (strstr(c->name(), "_FUZZ_") != NULL) continue;
+      printf("Running %s\n", c->name());
+      c->run();
     }
 
+  } else {
+    // Run the specified tests.
     for (int i = 1; i < argc; i++) {
       if (!IsOption(argv[i])) {
         vixl::Test* c;

@@ -27,7 +27,7 @@
 #ifndef VIXL_AARCH64_SIMULATOR_CONSTANTS_AARCH64_H_
 #define VIXL_AARCH64_SIMULATOR_CONSTANTS_AARCH64_H_
 
-#include "instructions-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {

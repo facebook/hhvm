@@ -27,12 +27,12 @@
 #ifndef VIXL_AARCH64_TEST_UTILS_AARCH64_H_
 #define VIXL_AARCH64_TEST_UTILS_AARCH64_H_
 
-#include "test-runner.h"
+#include "hphp/vixl/test/test-runner.h"
 
-#include "aarch64/cpu-aarch64.h"
-#include "aarch64/disasm-aarch64.h"
-#include "aarch64/macro-assembler-aarch64.h"
-#include "aarch64/simulator-aarch64.h"
+#include "hphp/vixl/aarch64/cpu-aarch64.h"
+#include "hphp/vixl/aarch64/disasm-aarch64.h"
+#include "hphp/vixl/aarch64/macro-assembler-aarch64.h"
+#include "hphp/vixl/aarch64/simulator-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {

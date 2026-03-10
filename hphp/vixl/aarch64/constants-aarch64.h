@@ -27,7 +27,7 @@
 #ifndef VIXL_AARCH64_CONSTANTS_AARCH64_H_
 #define VIXL_AARCH64_CONSTANTS_AARCH64_H_
 
-#include "../globals-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
 
 namespace vixl {
 namespace aarch64 {
@@ -502,7 +502,11 @@ enum SystemRegister {
   FPCR = SystemRegisterEncoder<3, 3, 4, 4, 0>::value,
   RNDR = SystemRegisterEncoder<3, 3, 2, 4, 0>::value,    // Random number.
   RNDRRS = SystemRegisterEncoder<3, 3, 2, 4, 1>::value,  // Reseeded random number.
-  DCZID_EL0 = SystemRegisterEncoder<3, 3, 0, 0, 7>::value
+  DCZID_EL0 = SystemRegisterEncoder<3, 3, 0, 0, 7>::value,
+#ifdef HPHP_VIXL
+  // HPHP: thread pointer register used for TLS access.
+  TPIDR_EL0 = SystemRegisterEncoder<3, 3, 13, 0, 2>::value,
+#endif
 };
 
 template<int op1, int crn, int crm, int op2>

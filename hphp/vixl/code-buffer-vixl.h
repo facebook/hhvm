@@ -29,14 +29,19 @@
 
 #include <cstring>
 
-#include "globals-vixl.h"
-#include "utils-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
+#include "hphp/vixl/utils-vixl.h"
 
 namespace vixl {
 
 class CodeBuffer {
  public:
+#ifdef HPHP_VIXL
+  // We use code blocks to manage the buffers instead of vixl buffers.
+  static const size_t kDefaultCapacity = 0;
+#else
   static const size_t kDefaultCapacity = 4 * KBytes;
+#endif
 
   explicit CodeBuffer(size_t capacity = kDefaultCapacity);
   CodeBuffer(byte* buffer, size_t capacity);

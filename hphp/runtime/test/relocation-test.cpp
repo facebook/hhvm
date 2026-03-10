@@ -18,7 +18,7 @@
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/data-block.h"
-#include "hphp/vixl/a64/macro-assembler-a64.h"
+#include "hphp/vixl/hphp-compat.h"
 
 #include <gtest/gtest.h>
 
@@ -89,7 +89,7 @@ TEST(Relocation, RelocateBccImm2MovzMovkBccReg) {
   // 3. Call relocate()
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
-  auto instr = Instruction::Cast(end);
+  const Instruction* instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
   // 4. Expect !b.cc, movz/movk X and br X where with imm in X
@@ -97,22 +97,22 @@ TEST(Relocation, RelocateBccImm2MovzMovkBccReg) {
   EXPECT_TRUE(bcc->IsCondBranchImm());
   EXPECT_EQ(bcc->ConditionBranch(), InvertCondition(cond));
 
-  auto movz = bcc->NextInstruction();
+  auto movz = bcc->GetNextInstruction();
   EXPECT_TRUE(movz->IsMovz());
   const auto rd = movz->Rd();
-  uint64_t target = movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->NextInstruction();
+  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
+  instr = movz->GetNextInstruction();
   while (instr->IsMovk()) {
     EXPECT_EQ(instr->Rd(), rd);
-    target |= instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->NextInstruction();
+    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
+    instr = instr->GetNextInstruction();
   }
   EXPECT_EQ(Instruction::Cast(target), bccOrig->ImmPCOffsetTarget());
 
   auto br = instr;
   EXPECT_TRUE(br->IsUncondBranchReg());
   EXPECT_EQ(br->Rn(), rd);
-  EXPECT_EQ(bcc->ImmPCOffsetTarget(), br->NextInstruction());
+  EXPECT_EQ(bcc->ImmPCOffsetTarget(), br->GetNextInstruction());
 }
 
 /*
@@ -153,7 +153,7 @@ TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
   // 3. Call relocate()
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
-  auto instr = Instruction::Cast(end);
+  const Instruction* instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
   // 4. Expect cbnz, movz/movk X and br X where with imm in X
@@ -162,22 +162,22 @@ TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
   const auto rt = cbnz->Rt();
   EXPECT_EQ(cbzOrig->Rt(), rt);
 
-  auto movz = cbnz->NextInstruction();
+  auto movz = cbnz->GetNextInstruction();
   EXPECT_TRUE(movz->IsMovz());
   const auto rd = movz->Rd();
-  uint64_t target = movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->NextInstruction();
+  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
+  instr = movz->GetNextInstruction();
   while (instr->IsMovk()) {
     EXPECT_EQ(instr->Rd(), rd);
-    target |= instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->NextInstruction();
+    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
+    instr = instr->GetNextInstruction();
   }
   EXPECT_EQ(Instruction::Cast(target), cbzOrig->ImmPCOffsetTarget());
 
   auto br = instr;
   EXPECT_TRUE(br->IsUncondBranchReg());
   EXPECT_EQ(br->Rn(), rd);
-  EXPECT_EQ(cbnz->ImmPCOffsetTarget(), br->NextInstruction());
+  EXPECT_EQ(cbnz->ImmPCOffsetTarget(), br->GetNextInstruction());
 }
 
 /*
@@ -218,7 +218,7 @@ TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
   // 3. Call relocate()
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
-  auto instr = Instruction::Cast(end);
+  const Instruction* instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
   // 4. Expect tbnz, movz/movk X and br X where with imm in X
@@ -229,22 +229,22 @@ TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
   const auto bit_pos = tbnz->ImmTestBranchBit40();
   EXPECT_EQ(bit_pos, 3);
 
-  auto movz = tbnz->NextInstruction();
+  auto movz = tbnz->GetNextInstruction();
   EXPECT_TRUE(movz->IsMovz());
   const auto rd = movz->Rd();
-  uint64_t target = movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->NextInstruction();
+  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
+  instr = movz->GetNextInstruction();
   while (instr->IsMovk()) {
     EXPECT_EQ(instr->Rd(), rd);
-    target |= instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->NextInstruction();
+    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
+    instr = instr->GetNextInstruction();
   }
   EXPECT_EQ(Instruction::Cast(target), tbzOrig->ImmPCOffsetTarget());
 
   auto br = instr;
   EXPECT_TRUE(br->IsUncondBranchReg());
   EXPECT_EQ(br->Rn(), rd);
-  EXPECT_EQ(tbnz->ImmPCOffsetTarget(), br->NextInstruction());
+  EXPECT_EQ(tbnz->ImmPCOffsetTarget(), br->GetNextInstruction());
 }
 
 /*
@@ -275,7 +275,7 @@ TEST(Relocation, RelocateMovzMovkLdr2LdrLiteral) {
   // with this test.
   a.dc64(0xdeadbeef);
   meta.addressImmediates.insert(main.frontier());
-  a.Mov(x17, start + 4);
+  a.Mov(x17, reinterpret_cast<uint64_t>(start + 4));
 
   a.Ldr(x0, MemOperand(x17, 0));
 
@@ -284,13 +284,13 @@ TEST(Relocation, RelocateMovzMovkLdr2LdrLiteral) {
   // 3. Call relocate()
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
-  auto instr = Instruction::Cast(end + 8);
+  const Instruction* instr = Instruction::Cast(end + 8);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
   // 4. Expect a Ldr Literal to $x0 from addr
   EXPECT_TRUE(instr->IsLoadLiteral());
   EXPECT_EQ(instr->Rd(), 0);
-  EXPECT_EQ(reinterpret_cast<TCA>(instr->LiteralAddress()), end);
+  EXPECT_EQ(reinterpret_cast<TCA>(instr->GetLiteralAddress<uint8_t*>()), end);
 }
 
 /*
@@ -317,26 +317,26 @@ TEST(Relocation, RelocateAdjustedMovzMovk) {
   main.setFrontier(start + (2 << 20) + 16);
   MacroAssembler a { main };
   meta.addressImmediates.insert(main.frontier());
-  a.Mov(x17, start + 8);
+  a.Mov(x17, reinterpret_cast<uint64_t>(start + 8));
 
   auto end = main.frontier();
 
   // 3. Call relocate()
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
-  auto instr = Instruction::Cast(end);
+  const Instruction* instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
   // 4. Expect movz/movk of new target
   auto movz = instr + (2 << 20) + 16;
   EXPECT_TRUE(movz->IsMovz());
   EXPECT_EQ(movz->Rd(), 17);
-  uint64_t target = movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->NextInstruction();
+  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
+  instr = movz->GetNextInstruction();
   while (instr->IsMovk()) {
     EXPECT_EQ(instr->Rd(), 17);
-    target |= instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->NextInstruction();
+    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
+    instr = instr->GetNextInstruction();
   }
   EXPECT_EQ(Instruction::Cast(target), Instruction::Cast(end + 8));
 }
@@ -367,7 +367,7 @@ TEST(Relocation, RelocateInternalAdjustedMovzMovk) {
 
   MacroAssembler a { main };
   meta.addressImmediates.insert(main.frontier());
-  a.Mov(x17, start + (2 << 20) + 16);
+  a.Mov(x17, reinterpret_cast<uint64_t>(start + (2 << 20) + 16));
   main.setFrontier(start + (4 << 20) + 32);
 
   auto end = main.frontier();
@@ -375,19 +375,19 @@ TEST(Relocation, RelocateInternalAdjustedMovzMovk) {
   // 3. Call relocate()
   RelocationInfo rel;
   AreaIndex ai = AreaIndex::Main;
-  auto instr = Instruction::Cast(end);
+  const Instruction* instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
   // 4. Expect movz/movk of new target
   auto movz = instr;
   EXPECT_TRUE(movz->IsMovz());
   EXPECT_EQ(movz->Rd(), 17);
-  uint64_t target = movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  instr = movz->NextInstruction();
+  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
+  instr = movz->GetNextInstruction();
   while (instr->IsMovk()) {
     EXPECT_EQ(instr->Rd(), 17);
-    target |= instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->NextInstruction();
+    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
+    instr = instr->GetNextInstruction();
   }
   EXPECT_EQ(Instruction::Cast(target), Instruction::Cast(end + (2 << 20) + 16));
 }
@@ -416,7 +416,7 @@ TEST(Relocation, AdjustMovzMovk) {
 
   MacroAssembler a { main };
   meta.addressImmediates.insert(main.frontier());
-  a.Mov(x17, orig + (2 << 20) + 16);
+  a.Mov(x17, reinterpret_cast<uint64_t>(orig + (2 << 20) + 16));
   main.setFrontier(orig + (2 << 20) + 16);
 
   auto start = main.frontier();
@@ -433,12 +433,12 @@ TEST(Relocation, AdjustMovzMovk) {
   auto movz = Instruction::Cast(orig);
   EXPECT_TRUE(movz->IsMovz());
   EXPECT_EQ(movz->Rd(), 17);
-  uint64_t target = movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
-  auto instr = movz->NextInstruction();
+  uint64_t target = (uint64_t)movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
+  auto instr = movz->GetNextInstruction();
   while (instr->IsMovk()) {
     EXPECT_EQ(instr->Rd(), 17);
-    target |= instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
-    instr = instr->NextInstruction();
+    target |= (uint64_t)instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
+    instr = instr->GetNextInstruction();
   }
   EXPECT_EQ(Instruction::Cast(target), Instruction::Cast(end));
 }

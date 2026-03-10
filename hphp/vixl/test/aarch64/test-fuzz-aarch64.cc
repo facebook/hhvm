@@ -27,10 +27,10 @@
 #include <cstdlib>
 #include <string>
 
-#include "test-runner.h"
+#include "hphp/vixl/test/test-runner.h"
 
-#include "aarch64/decoder-aarch64.h"
-#include "aarch64/disasm-aarch64.h"
+#include "hphp/vixl/aarch64/decoder-aarch64.h"
+#include "hphp/vixl/aarch64/disasm-aarch64.h"
 
 #define TEST(name) TEST_(AARCH64_FUZZ_##name)
 

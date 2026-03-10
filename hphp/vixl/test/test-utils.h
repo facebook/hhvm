@@ -27,7 +27,7 @@
 #ifndef TEST_UTILS_H_
 #define TEST_UTILS_H_
 
-#include "globals-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
 

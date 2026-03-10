@@ -25,11 +25,11 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "assembler-aarch64.h"
+#include "hphp/vixl/aarch64/assembler-aarch64.h"
 
 #include <cmath>
 
-#include "macro-assembler-aarch64.h"
+#include "hphp/vixl/aarch64/macro-assembler-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {
@@ -43,30 +43,37 @@ RawLiteral::RawLiteral(size_t size,
       high64_(0),
       literal_pool_(literal_pool),
       deletion_policy_(deletion_policy) {
+#ifndef HPHP_VIXL
   VIXL_ASSERT((deletion_policy == kManuallyDeleted) || (literal_pool_ != NULL));
   if (deletion_policy == kDeletedOnPoolDestruction) {
     literal_pool_->DeleteOnDestruction(this);
   }
+#endif
 }
 
 
-void Assembler::Reset() { GetBuffer()->Reset(); }
+void Assembler::Reset() {
+#ifdef HPHP_VIXL
+  code().clear();
+#else
+  GetBuffer()->Reset();
+#endif
+}
 
 
 void Assembler::bind(Label* label) {
-  BindToOffset(label, GetBuffer()->GetCursorOffset());
+  BindToOffset(label, GetCursorOffset());
 }
 
 
 void Assembler::BindToOffset(Label* label, ptrdiff_t offset) {
-  VIXL_ASSERT((offset >= 0) && (offset <= GetBuffer()->GetCursorOffset()));
+  VIXL_ASSERT((offset >= 0) && (offset <= GetCursorOffset()));
   VIXL_ASSERT(offset % kInstructionSize == 0);
 
   label->Bind(offset);
 
   for (Label::LabelLinksIterator it(label); !it.Done(); it.Advance()) {
-    Instruction* link =
-        GetBuffer()->GetOffsetAddress<Instruction*>(*it.Current());
+    Instruction* link = GetInstructionAt(*it.Current());
     link->SetImmPCOffsetTarget(GetLabelAddress<Instruction*>(label));
   }
   label->ClearAllLinks();
@@ -87,7 +94,7 @@ ptrdiff_t Assembler::LinkAndGetOffsetTo(Label* label) {
     uintptr_t label_offset = GetLabelAddress<uintptr_t>(label) >> element_shift;
     return label_offset - pc_offset;
   } else {
-    label->AddLink(GetBuffer()->GetCursorOffset());
+    label->AddLink(GetCursorOffset());
     return 0;
   }
 }
@@ -117,7 +124,7 @@ void Assembler::place(RawLiteral* literal) {
     ptrdiff_t offset = literal->GetLastUse();
     bool done;
     do {
-      Instruction* ldr = GetBuffer()->GetOffsetAddress<Instruction*>(offset);
+      Instruction* ldr = GetInstructionAt(offset);
       VIXL_ASSERT(ldr->IsLoadLiteral());
 
       ptrdiff_t imm19 = ldr->GetImmLLiteral();
@@ -170,7 +177,9 @@ ptrdiff_t Assembler::LinkAndGetWordOffsetTo(RawLiteral* literal) {
   literal->SetLastUse(GetCursorOffset());
 
   if (register_first_use) {
+#ifndef HPHP_VIXL
     literal->GetLiteralPool()->AddEntry(literal);
+#endif
   }
 
   return offset;
@@ -7178,6 +7187,9 @@ bool Assembler::CPUHas(SystemRegister sysreg) const {
     case FPCR:
     case NZCV:
     case DCZID_EL0:
+#ifdef HPHP_VIXL
+    case TPIDR_EL0:
+#endif
       break;
   }
   return true;

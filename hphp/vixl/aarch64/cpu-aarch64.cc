@@ -29,9 +29,9 @@
 #define VIXL_USE_LINUX_HWCAP 1
 #endif
 
-#include "../utils-vixl.h"
+#include "hphp/vixl/utils-vixl.h"
 
-#include "cpu-aarch64.h"
+#include "hphp/vixl/aarch64/cpu-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {

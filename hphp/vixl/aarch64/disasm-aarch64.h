@@ -31,14 +31,14 @@
 #include <unordered_map>
 #include <utility>
 
-#include "../globals-vixl.h"
-#include "../utils-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
+#include "hphp/vixl/utils-vixl.h"
 
-#include "cpu-features-auditor-aarch64.h"
-#include "decoder-aarch64.h"
-#include "decoder-visitor-map-aarch64.h"
-#include "instructions-aarch64.h"
-#include "operands-aarch64.h"
+#include "hphp/vixl/aarch64/cpu-features-auditor-aarch64.h"
+#include "hphp/vixl/aarch64/decoder-aarch64.h"
+#include "hphp/vixl/aarch64/decoder-visitor-map-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
+#include "hphp/vixl/aarch64/operands-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {

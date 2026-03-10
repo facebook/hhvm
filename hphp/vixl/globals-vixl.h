@@ -27,6 +27,10 @@
 #ifndef VIXL_GLOBALS_H
 #define VIXL_GLOBALS_H
 
+#ifdef HPHP_VIXL
+#include "hphp/util/assertions.h"
+#endif
+
 #if __cplusplus < 201703L
 #error VIXL requires C++17
 #endif
@@ -55,7 +59,7 @@ extern "C" {
 #include <cstdio>
 #include <cstdlib>
 
-#include "platform-vixl.h"
+#include "hphp/vixl/platform-vixl.h"
 
 #ifdef VIXL_NEGATIVE_TESTING
 #include <sstream>

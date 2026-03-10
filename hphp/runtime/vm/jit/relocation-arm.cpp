@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 
-#include "hphp/vixl/a64/macro-assembler-a64.h"
+#include "hphp/vixl/hphp-compat.h"
 
 namespace HPHP::jit::arm {
 
@@ -70,7 +70,7 @@ struct Patch {
   Instruction* src;
 };
 using PatchList = std::vector<Patch>;
-using InstrSet = jit::hash_set<Instruction*>;
+using InstrSet = jit::hash_set<const Instruction*>;
 struct JmpOutOfRange : std::exception {};
 
 /*
@@ -159,7 +159,7 @@ size_t decodePossibleMovSequence(Instruction* instr,
   size_t length = 1;  // We already decoded the first instruction above.
   rd = instr->Rd();
   regSize = instr->SixtyFourBits() ? 64 : 32;
-  auto next = instr->NextInstruction();
+  auto next = instr->GetNextInstruction();
   while ((next < end && next->IsMovk() && (next->Rd() == rd)) ||
          (next < end && next->IsNop())) {
     if (next->IsMovk()) {
@@ -169,7 +169,7 @@ size_t decodePossibleMovSequence(Instruction* instr,
       target |= (uint64_t)next->ImmMoveWide() << shift;
     }
     length++;
-    next = next->NextInstruction();
+    next = next->GetNextInstruction();
   }
   return length;
 }
@@ -265,20 +265,20 @@ bool writePCRelative(Instruction* instr, Instruction* target,
  */
 InstrSet findLiterals(Instruction* start, Instruction* end) {
   InstrSet literals;
-  for (auto instr = start; instr < end; instr = instr->NextInstruction()) {
+  for (const Instruction* instr = start; instr < end; instr = instr->GetNextInstruction()) {
     if (literals.contains(instr)) continue;
 
-    auto addLiteral = [&] (Instruction* lit) {
+    auto addLiteral = [&] (const Instruction* lit) {
       if (lit >= start && lit < end) {
         literals.insert(lit);
       }
     };
 
     if (instr->IsLoadLiteral()) {
-      auto const la = Instruction::Cast(instr->LiteralAddress());
+      auto const la = Instruction::Cast(instr->GetLiteralAddress<uint8_t*>());
       addLiteral(la);
       if (instr->Mask(LoadLiteralMask) == LDR_x_lit) {
-        addLiteral(la->NextInstruction());
+        addLiteral(la->GetNextInstruction());
       }
     }
   }
@@ -301,9 +301,9 @@ constexpr auto kFarJccLen = 3 * kInstructionSize;
 
 TCA farJccTarget(TCA inst) {
   auto const b = Instruction::Cast(inst);
-  auto const ldr = b->NextInstruction();
-  auto const br = ldr->NextInstruction();
-  auto const next = br->NextInstruction();
+  auto const ldr = b->GetNextInstruction();
+  auto const br = ldr->GetNextInstruction();
+  auto const next = br->GetNextInstruction();
 
   if (b->IsCondBranchImm() &&
       b->ImmPCOffsetTarget() == next &&
@@ -311,7 +311,7 @@ TCA farJccTarget(TCA inst) {
       ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
       br->Mask(UnconditionalBranchToRegisterMask) == BR &&
       br->Rn() == ldr->Rd()) {
-    auto const target32 = *reinterpret_cast<uint32_t*>(ldr->LiteralAddress());
+    auto const target32 = *reinterpret_cast<uint32_t*>(ldr->GetLiteralAddress<uint8_t*>());
     assertx((target32 & 3) == 0);
     return reinterpret_cast<TCA>(target32);
   }
@@ -388,7 +388,7 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
   }
 
   auto const litAddr =
-    src->NextInstruction()->ImmPCOffsetTarget(srcFrom->NextInstruction());
+    src->GetNextInstruction()->GetImmPCOffsetTarget(srcFrom->GetNextInstruction());
 
   if (TCA(litAddr) < env.start || TCA(litAddr) >= env.end) return false;
 
@@ -414,9 +414,9 @@ bool optimizeFarJcc(Env& env, TCA srcAddr, TCA destAddr,
 
   srcCount = kFarJccLen >> kInstructionSizeLog2;
 
-  for (auto i = src;
+  for (const Instruction* i = src;
        i < src + (srcCount << kInstructionSizeLog2);
-       i = i->NextInstruction()) {
+       i = i->GetNextInstruction()) {
     env.rewrites.insert(i);
   }
   env.updateInternalRefs = true;
@@ -436,13 +436,13 @@ constexpr auto kFarJmpLen = 2 * kInstructionSize;
 
 TCA farJmpTarget(TCA inst) {
   auto const ldr = Instruction::Cast(inst);
-  auto const br = ldr->NextInstruction();
+  auto const br = ldr->GetNextInstruction();
 
   if (ldr->IsLoadLiteral() &&
       ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
       br->Mask(UnconditionalBranchToRegisterMask) == BR &&
       br->Rn() == ldr->Rd()) {
-    auto const target32 = *reinterpret_cast<uint32_t*>(ldr->LiteralAddress());
+    auto const target32 = *reinterpret_cast<uint32_t*>(ldr->GetLiteralAddress<uint8_t*>());
     assertx((target32 & 3) == 0);
     return reinterpret_cast<TCA>(target32);
   }
@@ -483,7 +483,7 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
   assertx(((uint64_t)target & 3) == 0);
   assertx(src->Mask(LoadLiteralMask) == LDR_w_lit);
 
-  auto const litAddr = src->ImmPCOffsetTarget(srcFrom);
+  auto const litAddr = src->GetImmPCOffsetTarget(srcFrom);
 
   // If the apparent literal address is outside of the current code block, then
   // this cannot be a far jmp (the literal is emitted in the same block as the
@@ -520,7 +520,7 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
   } else {
     auto const tmp = rVixlScratch0;
     a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
-    a.Mov(tmp, adjusted);
+    a.Mov(tmp, reinterpret_cast<uint64_t>(adjusted));
     // Pad out to two instructions for adjustment later
     if ((env.destBlock.frontier() - destAddr) == kInstructionSize) {
       a.Nop();
@@ -531,9 +531,9 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
   }
 
   srcCount = kFarJmpLen >> kInstructionSizeLog2;
-  for (auto i = src;
+  for (const Instruction* i = src;
        i < src + (srcCount << kInstructionSizeLog2);
-       i = i->NextInstruction()) {
+       i = i->GetNextInstruction()) {
     env.rewrites.insert(i);
   }
   env.updateInternalRefs = true;
@@ -572,7 +572,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
 
   if (!isPCRelative(src)) return false;
 
-  auto target = reinterpret_cast<TCA>(src->ImmPCOffsetTarget(srcFrom));
+  auto target = reinterpret_cast<TCA>(src->GetImmPCOffsetTarget(srcFrom));
 
   // If the target is outside of the range of this relocation,
   // then update it.
@@ -586,7 +586,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
      *       scope is just a single macroassembler directive, whereas
      *       the scope of rAsm is an entire vasm instruction.
      */
-    auto imm = static_cast<int64_t>(src->ImmPCOffsetTarget(srcFrom) - destFrom);
+    auto imm = static_cast<int64_t>(src->GetImmPCOffsetTarget(srcFrom) - destFrom);
     bool isRelative = true;
     if (src->IsPCRelAddressing()) {
       if (!is_int21(imm) || env.far.count(src)) {
@@ -595,7 +595,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
 
         vixl::MacroAssembler a { env.destBlock };
         auto const dst = vixl::Register(src->Rd(), 64);
-        a.Mov(dst, src->ImmPCOffsetTarget(srcFrom));
+        a.Mov(dst, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
 
         destCount += (env.destBlock.frontier() - destAddr)
                      >> kInstructionSizeLog2;
@@ -612,7 +612,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         auto const dst = vixl::Register(src->Rd(), 64);
         auto const tmp = dst.Is(rVixlScratch0)
           ? rVixlScratch1 : rVixlScratch0;
-        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
+        a.Mov(tmp, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
         a.Ldr(dst, vixl::MemOperand(tmp));
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
 
@@ -632,7 +632,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         auto const tmp = rVixlScratch0;
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
         a.B(&end, vixl::InvertCondition(cond));
-        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
+        a.Mov(tmp, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
         a.Br(tmp);
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
@@ -651,7 +651,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         vixl::MacroAssembler a { env.destBlock };
         a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
         auto const tmp = rVixlScratch0;
-        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
+        a.Mov(tmp, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
         assertx(src->Mask(UnconditionalBranchMask) == B ||
                 src->Mask(UnconditionalBranchMask) == BL);
         if (src->Mask(UnconditionalBranchMask) == BL) a.Blr(tmp);
@@ -678,7 +678,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         } else {
           a.Cbz(rt, &end);
         }
-        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
+        a.Mov(tmp, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
         a.Br(tmp);
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
@@ -704,7 +704,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
         } else {
           a.Tbz(rt, bit_pos, &end);
         }
-        a.Mov(tmp, src->ImmPCOffsetTarget(srcFrom));
+        a.Mov(tmp, reinterpret_cast<uint64_t>(src->GetImmPCOffsetTarget(srcFrom)));
         a.Br(tmp);
         a.bind(&end);
         a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
@@ -717,7 +717,7 @@ bool relocatePCRelative(Env& env, TCA srcAddr, TCA destAddr,
 
     // Update offset if it was NOT converted from relative to absolute
     if (isRelative) {
-      dest->SetImmPCOffsetTarget(src->ImmPCOffsetTarget(srcFrom), destFrom);
+      dest->SetImmPCOffsetTarget(src->GetImmPCOffsetTarget(srcFrom), destFrom);
     } else {
       // Otherwise it was rewritten to absolute, and this
       // internal reference must be updated later.
@@ -816,9 +816,9 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
       isAbsolute = false;
 
       // Add range of source instructions to rewrites (MOV/MOVKs/LDR)
-      for (auto i = src;
-           i < next->NextInstruction();
-           i = i->NextInstruction()) {
+      for (const Instruction* i = src;
+           i < next->GetNextInstruction();
+           i = i->GetNextInstruction()) {
         env.rewrites.insert(i);
       }
     }
@@ -848,9 +848,9 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
         // Add range of source instructions to rewrites (MOV/MOVKs/B<L>)
         // Note: next points past the MOV/MOVK sequence to the B<L>. We're
         //       replacing all of them so iterate past next for the B<L>.
-        for (auto i = src;
-             i < next->NextInstruction();
-             i = i->NextInstruction()) {
+        for (const Instruction* i = src;
+             i < next->GetNextInstruction();
+             i = i->GetNextInstruction()) {
           env.rewrites.insert(i);
         }
       }
@@ -870,7 +870,7 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
       isAbsolute = false;
 
       // Add range of source instructions to rewrites (MOV/MOVKs)
-      for (auto i = src; i < next; i = i->NextInstruction()) {
+      for (const Instruction* i = src; i < next; i = i->GetNextInstruction()) {
         env.rewrites.insert(i);
       }
     }
@@ -884,14 +884,14 @@ bool relocateImmediate(Env& env, TCA srcAddr, TCA destAddr,
 
       vixl::MacroAssembler a { env.destBlock };
       auto const dst = vixl::Register(rd, 64);
-      a.Mov(dst, adjusted);
+      a.Mov(dst, reinterpret_cast<uint64_t>(adjusted));
 
       destCount += (env.destBlock.frontier() - destAddr)
                    >> kInstructionSizeLog2;
       srcCount = (next - src) >> kInstructionSizeLog2;
 
       // Add range of source instructions to rewrites (MOV/MOVKs)
-      for (auto i = src; i < next; i = i->NextInstruction()) {
+      for (const Instruction* i = src; i < next; i = i->GetNextInstruction()) {
         env.rewrites.insert(i);
       }
       // The mov sequence emitted above might be a different length than before.
@@ -1019,7 +1019,7 @@ size_t relocateImpl(Env& env) {
           }
         };
         if (src->IsLoadLiteral()) {
-          auto const addr = src->LiteralAddress();
+          auto const addr = src->GetLiteralAddress<uint8_t*>();
           assertx(env.srcBlock.toDestAddress(env.start) <= addr &&
                   addr < env.srcBlock.toDestAddress(env.end));
           if (src->Mask(LoadLiteralMask) == LDR_w_lit) {
@@ -1071,7 +1071,7 @@ size_t relocateImpl(Env& env) {
         auto const dest =
           Instruction::Cast(env.destBlock.toDestAddress(destAddr));
         assertx(dest->IsUncondBranchImm());
-        if (Instruction::Cast(destAddr)->NextInstruction() ==
+        if (Instruction::Cast(destAddr)->GetNextInstruction() ==
             Instruction::Cast(env.destBlock.frontier())) {
           // Remove the fallthru jmp and update mapping.  There are no literals
           // or veneers, so we do not need a jump to fallthru properly.
@@ -1167,7 +1167,7 @@ size_t relocateImpl(Env& env) {
            */
           if (isPCRelative(src)) {
             auto const old_target =
-              reinterpret_cast<TCA>(src->ImmPCOffsetTarget(srcFrom));
+              reinterpret_cast<TCA>(src->GetImmPCOffsetTarget(srcFrom));
             auto const adjusted_target =
               env.rel.adjustedAddressAfter(old_target);
             auto const new_target =
@@ -1198,7 +1198,7 @@ size_t relocateImpl(Env& env) {
            */
           if (src->IsLoadLiteral()) {
             assertx(dest->IsLoadLiteral());
-            auto const addr = dest->LiteralAddress();
+            auto const addr = dest->GetLiteralAddress<uint8_t*>();
             if (src->Mask(LoadLiteralMask) == LDR_w_lit) {
               auto target = *reinterpret_cast<uint32_t*>(addr);
               auto adjusted =
@@ -1309,7 +1309,8 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
    *   TB[N]Z
    */
   if (isPCRelative(instr)) {
-    auto const target = reinterpret_cast<TCA>(instr->ImmPCOffsetTarget());
+    const auto target =
+      reinterpret_cast<TCA>(const_cast<Instruction*>(instr->ImmPCOffsetTarget()));
     auto const adjusted = rel.adjustedAddressAfter(target);
     if (adjusted) {
       /*
@@ -1340,7 +1341,7 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
    */
   if (instr->IsLoadLiteral()) {
     if (instr->Mask(LoadLiteralMask) == LDR_w_lit) {
-      auto addr = reinterpret_cast<uint32_t*>(instr->LiteralAddress());
+      auto addr = reinterpret_cast<uint32_t*>(instr->GetLiteralAddress<uint8_t*>());
       auto target = *addr;
       auto adjusted = rel.adjustedAddressAfter(reinterpret_cast<TCA>(target));
       if (adjusted) {
@@ -1354,7 +1355,7 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
         }
       }
     } else {
-      auto addr = reinterpret_cast<TCA*>(instr->LiteralAddress());
+      auto addr = reinterpret_cast<TCA*>(instr->GetLiteralAddress<uint8_t*>());
       auto target = *addr;
       auto adjusted = rel.adjustedAddressAfter(target);
       if (adjusted) {
@@ -1395,7 +1396,7 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
       // Write the new mov/movk sequence
       vixl::MacroAssembler a { movBlock };
       auto const dst = vixl::Register(rd, regSize);
-      a.Mov(dst, adjusted);
+      a.Mov(dst, reinterpret_cast<uint64_t>(adjusted));
 
       // If the sequence is shorter, then pad with nops
       length -= (movBlock.frontier() - movStart) >> kInstructionSizeLog2;
@@ -1422,7 +1423,7 @@ void adjustInstructions(RelocationInfo& rel,
   InstrSet literals = findLiterals(start, end);
 
   // Adjust the instructions
-  for (auto instr = start; instr < end; instr = instr->NextInstruction()) {
+  for (auto instr = start; instr < end; instr = instr->GetNextInstruction()) {
     if (!literals.contains(instr)) {
       adjustInstruction(rel, instr, end, live);
     }

@@ -31,9 +31,9 @@
 #include <map>
 #include <string>
 
-#include "../globals-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
 
-#include "instructions-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
 
 // List macro containing all visitors needed by the decoder class.
 #define VISITOR_LIST_THAT_RETURN(V)                              \

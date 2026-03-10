@@ -30,7 +30,7 @@
 #include <cstring>
 #include <vector>
 
-#include "globals-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
 
 namespace vixl {
 

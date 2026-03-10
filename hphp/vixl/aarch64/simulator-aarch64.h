@@ -33,16 +33,16 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../cpu-features.h"
-#include "../globals-vixl.h"
-#include "../utils-vixl.h"
+#include "hphp/vixl/cpu-features.h"
+#include "hphp/vixl/globals-vixl.h"
+#include "hphp/vixl/utils-vixl.h"
 
-#include "abi-aarch64.h"
-#include "cpu-features-auditor-aarch64.h"
-#include "debugger-aarch64.h"
-#include "disasm-aarch64.h"
-#include "instructions-aarch64.h"
-#include "simulator-constants-aarch64.h"
+#include "hphp/vixl/aarch64/abi-aarch64.h"
+#include "hphp/vixl/aarch64/cpu-features-auditor-aarch64.h"
+#include "hphp/vixl/aarch64/debugger-aarch64.h"
+#include "hphp/vixl/aarch64/disasm-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
+#include "hphp/vixl/aarch64/simulator-constants-aarch64.h"
 
 #ifdef VIXL_INCLUDE_SIMULATOR_AARCH64
 

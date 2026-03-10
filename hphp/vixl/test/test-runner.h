@@ -27,9 +27,9 @@
 #ifndef TEST_TEST_H_
 #define TEST_TEST_H_
 
-#include "utils-vixl.h"
+#include "hphp/vixl/utils-vixl.h"
 
-#include "aarch64/instructions-aarch64.h"
+#include "hphp/vixl/aarch64/instructions-aarch64.h"
 
 namespace vixl {
 

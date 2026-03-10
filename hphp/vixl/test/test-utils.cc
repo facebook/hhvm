@@ -24,7 +24,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "test-utils.h"
+#include "hphp/vixl/test/test-utils.h"
 
 #include <string.h>
 
@@ -32,10 +32,10 @@ extern "C" {
 #include <sys/mman.h>
 }
 
-#include "globals-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
 
 #ifdef VIXL_INCLUDE_TARGET_AARCH64
-#include "aarch64/cpu-aarch64.h"
+#include "hphp/vixl/aarch64/cpu-aarch64.h"
 #endif
 
 namespace vixl {

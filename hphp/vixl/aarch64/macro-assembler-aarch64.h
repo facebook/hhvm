@@ -30,19 +30,19 @@
 #include <algorithm>
 #include <limits>
 
-#include "../code-generation-scopes-vixl.h"
-#include "../globals-vixl.h"
-#include "../macro-assembler-interface.h"
+#include "hphp/vixl/code-generation-scopes-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
+#include "hphp/vixl/macro-assembler-interface.h"
 
-#include "assembler-aarch64.h"
+#include "hphp/vixl/aarch64/assembler-aarch64.h"
 // Required for runtime call support.
 // TODO: Break this dependency. We should be able to separate out the necessary
 // parts so that we don't need to include the whole simulator header.
-#include "simulator-aarch64.h"
+#include "hphp/vixl/aarch64/simulator-aarch64.h"
 // Required in order to generate debugging instructions for the simulator. This
 // is needed regardless of whether the simulator is included or not, since
 // generating simulator specific instructions is controlled at runtime.
-#include "simulator-constants-aarch64.h"
+#include "hphp/vixl/aarch64/simulator-constants-aarch64.h"
 
 
 #define LS_MACRO_LIST(V)                                     \
@@ -69,6 +69,7 @@ namespace aarch64 {
 class MacroAssembler;
 class UseScratchRegisterScope;
 
+#ifndef HPHP_VIXL
 class Pool {
  public:
   explicit Pool(MacroAssembler* masm)
@@ -504,6 +505,7 @@ class VeneerPool : public Pool {
   // Information about unresolved (forward) branches.
   BranchInfoSet unresolved_branches_;
 };
+#endif  // !HPHP_VIXL
 
 
 // Helper for common Emission checks.
@@ -672,6 +674,11 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
                  size_t capacity,
                  PositionIndependentCodeOption pic = PositionIndependentCode);
   ~MacroAssembler();
+
+#ifdef HPHP_VIXL
+  // HPHP: Construct a MacroAssembler that emits into an HPHP::CodeBlock.
+  explicit MacroAssembler(HPHP::CodeBlock& cb);
+#endif
 
   enum FinalizeOption {
     kFallThrough,  // There may be more code to execute after calling Finalize.
@@ -1916,6 +1923,7 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
   // than relying on implicit C++ casts. This allows signalling NaNs to be
   // preserved when the immediate matches the format of fd. Most systems convert
   // signalling NaNs to quiet NaNs when converting between float and double.
+#ifndef HPHP_VIXL
   void Ldr(const VRegister& vt, double imm) {
     VIXL_ASSERT(allow_macro_instructions_);
     SingleEmissionCheckScope guard(this);
@@ -1988,11 +1996,22 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
     SingleEmissionCheckScope guard(this);
     ldr(rt, literal);
   }
+#endif  // !HPHP_VIXL
+#ifdef HPHP_VIXL
+  void Ldr(const Register& rt, Label* label) {
+    VIXL_ASSERT(allow_macro_instructions_);
+    SingleEmissionCheckScope guard(this);
+    int64_t offset = LinkAndGetInstructionOffsetTo(label);
+    ldr(rt, offset);
+  }
+#endif
+#ifndef HPHP_VIXL
   void Ldrsw(const Register& rt, RawLiteral* literal) {
     VIXL_ASSERT(allow_macro_instructions_);
     SingleEmissionCheckScope guard(this);
     ldrsw(rt, literal);
   }
+#endif  // !HPHP_VIXL
   void Ldxp(const Register& rt, const Register& rt2, const MemOperand& src) {
     VIXL_ASSERT(allow_macro_instructions_);
     VIXL_ASSERT(!rt.Aliases(rt2));
@@ -7880,6 +7899,7 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
   void Umax(const Register& rd, const Register& rn, const Operand& op);
   void Umin(const Register& rd, const Register& rn, const Operand& op);
 
+#ifndef HPHP_VIXL
   template <typename T>
   Literal<T>* CreateLiteralDestroyedWithPool(T value) {
     return new Literal<T>(value,
@@ -7894,6 +7914,7 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
                           &literal_pool_,
                           RawLiteral::kDeletedOnPoolDestruction);
   }
+#endif  // !HPHP_VIXL
 
   // Push the system stack pointer (sp) down to allow the same to be done to
   // the current stack pointer (according to StackPointer()). This must be
@@ -7915,7 +7936,11 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
   }
 
   virtual bool ArePoolsBlocked() const VIXL_OVERRIDE {
+#ifdef HPHP_VIXL
+    return true;
+#else
     return IsLiteralPoolBlocked() && IsVeneerPoolBlocked();
+#endif
   }
 
   void SetGenerateSimulatorCode(bool value) {
@@ -7924,6 +7949,7 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
 
   bool GenerateSimulatorCode() const { return generate_simulator_code_; }
 
+#ifndef HPHP_VIXL
   size_t GetLiteralPoolSize() const { return literal_pool_.GetSize(); }
   VIXL_DEPRECATED("GetLiteralPoolSize", size_t LiteralPoolSize() const) {
     return GetLiteralPoolSize();
@@ -7947,17 +7973,23 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
                   int NumberOfPotentialVeneers() const) {
     return GetNumberOfPotentialVeneers();
   }
+#endif  // !HPHP_VIXL
 
   ptrdiff_t GetNextCheckPoint() const {
+#ifdef HPHP_VIXL
+    return static_cast<ptrdiff_t>(code().GetCapacity());
+#else
     ptrdiff_t next_checkpoint_for_pools =
         std::min(literal_pool_.GetCheckpoint(), veneer_pool_.GetCheckpoint());
     return std::min(next_checkpoint_for_pools,
                     static_cast<ptrdiff_t>(GetBuffer().GetCapacity()));
+#endif
   }
   VIXL_DEPRECATED("GetNextCheckPoint", ptrdiff_t NextCheckPoint()) {
     return GetNextCheckPoint();
   }
 
+#ifndef HPHP_VIXL
   void EmitLiteralPool(LiteralPool::EmitOption option) {
     if (!literal_pool_.IsEmpty()) literal_pool_.Emit(option);
 
@@ -7966,6 +7998,12 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
   }
 
   void CheckEmitFor(size_t amount);
+#endif  // !HPHP_VIXL
+#ifdef HPHP_VIXL
+  void EnsureEmitFor(size_t amount) {
+    USE(amount);
+  }
+#else
   void EnsureEmitFor(size_t amount) {
     ptrdiff_t offset = amount;
     ptrdiff_t max_pools_size =
@@ -7976,8 +8014,16 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
       CheckEmitFor(amount);
     }
   }
+#endif
 
+#ifndef HPHP_VIXL
   void CheckEmitPoolsFor(size_t amount);
+#endif
+#ifdef HPHP_VIXL
+  virtual void EnsureEmitPoolsFor(size_t amount) VIXL_OVERRIDE {
+    USE(amount);
+  }
+#else
   virtual void EnsureEmitPoolsFor(size_t amount) VIXL_OVERRIDE {
     ptrdiff_t offset = amount;
     ptrdiff_t max_pools_size =
@@ -7988,6 +8034,7 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
       CheckEmitPoolsFor(amount);
     }
   }
+#endif
 
   // Set the current stack pointer, but don't generate any code.
   void SetStackPointer(const Register& stack_pointer) {
@@ -8009,6 +8056,61 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
   }
 
   CPURegList* GetScratchPRegisterList() { return &p_tmp_list_; }
+
+#ifdef HPHP_VIXL
+  // HPHP compatibility: scratch register management matching old VIXL API.
+  void SetScratchRegisters(const Register& tmp0, const Register& tmp1) {
+    tmp_list_ = CPURegList::Empty(CPURegister::kRegister, kXRegSize);
+    if (!tmp0.IsNone()) tmp_list_.Combine(tmp0);
+    if (!tmp1.IsNone()) tmp_list_.Combine(tmp1);
+  }
+
+  Register Tmp0() const {
+    RegList list = tmp_list_.GetList();
+    if (list == 0) return NoReg;
+    int code = __builtin_ctzll(list);
+    return Register(code, kXRegSize);
+  }
+
+  Register Tmp1() const {
+    RegList list = tmp_list_.GetList();
+    if (list == 0) return NoReg;
+    list &= list - 1;  // clear lowest set bit
+    if (list == 0) return NoReg;
+    int code = __builtin_ctzll(list);
+    return Register(code, kXRegSize);
+  }
+
+  void SetFPScratchRegister(const VRegister& fptmp0) {
+    v_tmp_list_ = CPURegList::Empty(CPURegister::kVRegister, kDRegSize);
+    if (!fptmp0.IsNone()) v_tmp_list_.Combine(fptmp0);
+  }
+
+  VRegister FPTmp0() const {
+    RegList list = v_tmp_list_.GetList();
+    if (list == 0) return NoVReg;
+    int code = __builtin_ctzll(list);
+    return VRegister(code, kDRegSize);
+  }
+
+  const Register AppropriateTempFor(
+      const Register& target,
+      const CPURegister& forbidden = NoCPUReg) const {
+    Register candidate = forbidden.Is(Tmp0()) ? Tmp1() : Tmp0();
+    VIXL_ASSERT(!candidate.Is(target));
+    return Register(candidate.GetCode(), target.GetSizeInBits());
+  }
+
+  const VRegister AppropriateTempFor(
+      const VRegister& target,
+      const CPURegister& forbidden = NoCPUReg) const {
+    USE(forbidden);
+    VRegister candidate = FPTmp0();
+    VIXL_ASSERT(!candidate.Is(forbidden));
+    VIXL_ASSERT(!candidate.Is(target));
+    return VRegister(candidate.GetCode(), target.GetSizeInBits());
+  }
+#endif  // HPHP_VIXL
 
   // Get or set the current (most-deeply-nested) UseScratchRegisterScope.
   void SetCurrentScratchRegisterScope(UseScratchRegisterScope* scope) {
@@ -8081,7 +8183,9 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
   void SaveSimulatorCPUFeatures();
   void RestoreSimulatorCPUFeatures();
 
+#ifndef HPHP_VIXL
   LiteralPool* GetLiteralPool() { return &literal_pool_; }
+#endif
 
 // Support for simulated runtime calls.
 
@@ -8107,22 +8211,32 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
 #endif  // #ifdef VIXL_HAS_MACROASSEMBLER_RUNTIME_CALL_SUPPORT
 
  protected:
+#ifndef HPHP_VIXL
   void BlockLiteralPool() { literal_pool_.Block(); }
   void ReleaseLiteralPool() { literal_pool_.Release(); }
   bool IsLiteralPoolBlocked() const { return literal_pool_.IsBlocked(); }
   void BlockVeneerPool() { veneer_pool_.Block(); }
   void ReleaseVeneerPool() { veneer_pool_.Release(); }
   bool IsVeneerPoolBlocked() const { return veneer_pool_.IsBlocked(); }
+#endif  // !HPHP_VIXL
 
+#ifdef HPHP_VIXL
+  virtual void BlockPools() VIXL_OVERRIDE {}
+#else
   virtual void BlockPools() VIXL_OVERRIDE {
     BlockLiteralPool();
     BlockVeneerPool();
   }
+#endif
 
+#ifdef HPHP_VIXL
+  virtual void ReleasePools() VIXL_OVERRIDE {}
+#else
   virtual void ReleasePools() VIXL_OVERRIDE {
     ReleaseLiteralPool();
     ReleaseVeneerPool();
   }
+#endif
 
   // The scopes below need to able to block and release a particular pool.
   // TODO: Consider removing those scopes or move them to
@@ -8484,19 +8598,24 @@ class MacroAssembler : public Assembler, public MacroAssemblerInterface {
 
   UseScratchRegisterScope* current_scratch_scope_;
 
+#ifndef HPHP_VIXL
   LiteralPool literal_pool_;
   VeneerPool veneer_pool_;
 
   ptrdiff_t checkpoint_;
   ptrdiff_t recommended_checkpoint_;
+#endif  // !HPHP_VIXL
 
   FPMacroNaNPropagationOption fp_nan_propagation_;
 
+#ifndef HPHP_VIXL
   friend class Pool;
   friend class LiteralPool;
+#endif
 };
 
 
+#ifndef HPHP_VIXL
 inline size_t VeneerPool::GetOtherPoolsMaxSize() const {
   return masm_->GetLiteralPoolMaxSize();
 }
@@ -8512,6 +8631,7 @@ inline void LiteralPool::SetNextRecommendedCheckpoint(ptrdiff_t offset) {
       std::min(masm_->recommended_checkpoint_, offset);
   recommended_checkpoint_ = offset;
 }
+#endif  // !HPHP_VIXL
 
 class InstructionAccurateScope : public ExactAssemblyScope {
  public:
@@ -8522,6 +8642,7 @@ class InstructionAccurateScope : public ExactAssemblyScope {
       : ExactAssemblyScope(masm, count * kInstructionSize, size_policy) {}
 };
 
+#ifndef HPHP_VIXL
 class BlockLiteralPoolScope {
  public:
   explicit BlockLiteralPoolScope(MacroAssembler* masm) : masm_(masm) {
@@ -8559,6 +8680,7 @@ class BlockPoolsScope {
  private:
   MacroAssembler* masm_;
 };
+#endif  // !HPHP_VIXL
 
 MovprfxHelperScope::MovprfxHelperScope(MacroAssembler* masm,
                                        const ZRegister& dst,
@@ -8878,6 +9000,7 @@ void MacroAssembler::CallRuntimeHelper(R (*function)(P...),
 // TODO: These template specialisations should not live in this file.  Move
 // VeneerPool out of the aarch64 namespace in order to share its implementation
 // later.
+#ifndef HPHP_VIXL
 template <>
 inline ptrdiff_t InvalSet<aarch64::VeneerPool::BranchInfo,
                           aarch64::VeneerPool::kNPreallocatedInfos,
@@ -8898,6 +9021,7 @@ inline void InvalSet<aarch64::VeneerPool::BranchInfo,
     SetKey(aarch64::VeneerPool::BranchInfo* branch_info, ptrdiff_t key) {
   branch_info->first_unreacheable_pc_ = key;
 }
+#endif  // !HPHP_VIXL
 
 }  // namespace vixl
 

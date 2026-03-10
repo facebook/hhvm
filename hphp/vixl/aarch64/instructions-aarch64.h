@@ -27,10 +27,10 @@
 #ifndef VIXL_AARCH64_INSTRUCTIONS_AARCH64_H_
 #define VIXL_AARCH64_INSTRUCTIONS_AARCH64_H_
 
-#include "../globals-vixl.h"
-#include "../utils-vixl.h"
+#include "hphp/vixl/globals-vixl.h"
+#include "hphp/vixl/utils-vixl.h"
 
-#include "constants-aarch64.h"
+#include "hphp/vixl/aarch64/constants-aarch64.h"
 
 namespace vixl {
 namespace aarch64 {
@@ -500,6 +500,29 @@ class Instruction {
            (Mask(MoveWideImmediateMask) == MOVN_w);
   }
 
+#ifdef HPHP_VIXL
+  // HPHP compat: classification methods used by relocation-arm.cpp.
+  bool IsMovz() const {
+    return (Mask(MoveWideImmediateMask) == MOVZ_x) ||
+           (Mask(MoveWideImmediateMask) == MOVZ_w);
+  }
+
+  bool IsMovk() const {
+    return (Mask(MoveWideImmediateMask) == MOVK_x) ||
+           (Mask(MoveWideImmediateMask) == MOVK_w);
+  }
+
+  bool IsNop() const {
+    return (Mask(SystemHintFMask) == SystemHintFixed) &&
+           (GetImmHint() == NOP);
+  }
+
+  bool IsUncondBranchReg() const {
+    return Mask(UnconditionalBranchToRegisterFMask) ==
+           UnconditionalBranchToRegisterFixed;
+  }
+#endif
+
   bool IsException() const { return Mask(ExceptionFMask) == ExceptionFixed; }
 
   bool IsPAuth() const { return Mask(SystemPAuthFMask) == SystemPAuthFixed; }
@@ -666,6 +689,15 @@ class Instruction {
   // Patch a PC-relative offset to refer to 'target'. 'this' may be a branch or
   // a PC-relative addressing instruction.
   void SetImmPCOffsetTarget(const Instruction* target);
+
+#ifdef HPHP_VIXL
+  // HPHP: Get/Set PC-relative targets using a different "from" address.
+  // Used for relocated code where the instruction's position in memory
+  // differs from its logical address.
+  Instruction* GetImmPCOffsetTarget(const Instruction* from) const;
+  void SetImmPCOffsetTarget(const Instruction* target,
+                            const Instruction* from);
+#endif
   // Patch a literal load instruction to load from 'source'.
   void SetImmLLiteral(const Instruction* source);
 

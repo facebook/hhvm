@@ -146,9 +146,7 @@ class HTTPHeaders {
     remove(code);
     add(code, value);
   }
-  void rawSet(const std::string& name, const std::string& value) {
-    set(name, value);
-  }
+
   /**
    * This method will set only one version of the header, it will first
    * Remove all possible versions of header eg. if x-y-z is the

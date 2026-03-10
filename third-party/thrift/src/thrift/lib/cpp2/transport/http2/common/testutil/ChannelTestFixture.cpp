@@ -59,7 +59,7 @@ void ChannelTestFixture::sendAndReceiveStream(
     auto msg = std::make_unique<HTTPMessage>();
     auto& headers = msg->getHeaders();
     for (auto it = inputHeaders.begin(); it != inputHeaders.end(); ++it) {
-      headers.rawSet(it->first, it->second);
+      headers.set(it->first, it->second);
     }
     channel->onH2StreamBegin(std::move(msg));
     const char* data = payload.data();

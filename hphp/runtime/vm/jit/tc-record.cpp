@@ -124,6 +124,8 @@ F(free_blocks)
 FOREACH_ALLOC_FREE_COUNTER
 #undef F
 
+static ServiceData::ExportedCounter* s_available_counter;
+
 static InitFiniNode initCodeSizeCounters([] {
   s_used_counters = buildCodeSizeCounters();
   CodeCache::forEachName([](const char* name) {
@@ -132,9 +134,11 @@ static InitFiniNode initCodeSizeCounters([] {
     FOREACH_ALLOC_FREE_COUNTER;
     #undef F
   });
+  s_available_counter =
+    ServiceData::createCounter("jit.code.all.available");
 }, InitFiniNode::When::PostRuntimeOptions);
 
-#undef FOREACH_SIZE_COUNTER
+#undef FOREACH_ALLOC_FREE_COUNTER
 
 static std::atomic<bool> s_warmedUp{false};
 
@@ -226,6 +230,8 @@ void updateCodeSizeCounters() {
   auto codeUsed = s_used_counters.at("data");
   codeUsed->addValue(code().dataSection().used() - codeUsed->getSum());
   UPDATE_ALLOC_FREE_COUNTERS("data", code().dataSection());
+
+  s_available_counter->setValue(code().totalUnassigned());
 }
 
 size_t getLiveMainUsage() {

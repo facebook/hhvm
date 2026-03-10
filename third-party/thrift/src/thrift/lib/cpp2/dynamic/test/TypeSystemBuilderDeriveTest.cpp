@@ -968,4 +968,75 @@ TEST(TypeSystemBuilderDeriveTest, DeepNestedContainers) {
   EXPECT_EQ(&setType.elementType().asStruct(), &baseStructRef->asStruct());
 }
 
+TEST(TypeSystemBuilderDeriveTest, BuildDerivedFrom_NamePreservedFromBase) {
+  auto base = makeSimpleTypeSystem();
+  TypeSystemBuilder builder;
+  builder.addType("test.com/overlay/OverlayStruct", def::Struct({}));
+  auto overlay = std::move(builder).buildDerivedFrom(base);
+
+  auto baseStructRef = overlay->getUserDefinedType("test.com/base/BaseStruct");
+  ASSERT_TRUE(baseStructRef.has_value());
+  EXPECT_EQ(baseStructRef->asStruct().debugName(), "BaseStruct");
+
+  auto baseEnumRef = overlay->getUserDefinedType("test.com/base/BaseEnum");
+  ASSERT_TRUE(baseEnumRef.has_value());
+  EXPECT_EQ(baseEnumRef->asEnum().debugName(), "BaseEnum");
+
+  auto baseUnionRef = overlay->getUserDefinedType("test.com/base/BaseUnion");
+  ASSERT_TRUE(baseUnionRef.has_value());
+  EXPECT_EQ(baseUnionRef->asUnion().debugName(), "BaseUnion");
+}
+
+TEST(TypeSystemBuilderDeriveTest, BuildDerivedFrom_NameSetOnOverlayTypes) {
+  auto base = makeSimpleTypeSystem();
+  TypeSystemBuilder builder;
+  builder.addType(
+      "test.com/overlay/OverlayStruct",
+      def::Struct({}),
+      def::SourceInfo("overlay.thrift", "OverlayStruct"));
+  builder.addType(
+      "test.com/overlay/OverlayEnum",
+      def::Enum({{"V", 0}}),
+      def::SourceInfo("overlay.thrift", "OverlayEnum"));
+  builder.addType(
+      "test.com/overlay/OverlayAlias",
+      def::OpaqueAlias(TypeIds::I32),
+      def::SourceInfo("overlay.thrift", "OverlayAlias"));
+
+  auto overlay = std::move(builder).buildDerivedFrom(base);
+
+  EXPECT_EQ(
+      overlay->getUserDefinedTypeOrThrow("test.com/overlay/OverlayStruct")
+          .asStruct()
+          .debugName(),
+      "OverlayStruct");
+  EXPECT_EQ(
+      overlay->getUserDefinedTypeOrThrow("test.com/overlay/OverlayEnum")
+          .asEnum()
+          .debugName(),
+      "OverlayEnum");
+  EXPECT_EQ(
+      overlay->getUserDefinedTypeOrThrow("test.com/overlay/OverlayAlias")
+          .asOpaqueAlias()
+          .debugName(),
+      "OverlayAlias");
+}
+
+TEST(TypeSystemBuilderDeriveTest, BuildDerivedFrom_SyntaxGraph_NamePreserved) {
+  auto base = makeSyntaxGraphTypeSystem();
+
+  auto structRef =
+      base->getUserDefinedType("meta.com/thrift_test/TestRecursiveStruct");
+  ASSERT_TRUE(structRef.has_value());
+  EXPECT_EQ(structRef->asStruct().debugName(), "TestRecursiveStruct");
+
+  auto unionRef = base->getUserDefinedType("meta.com/thrift_test/TestUnion");
+  ASSERT_TRUE(unionRef.has_value());
+  EXPECT_EQ(unionRef->asUnion().debugName(), "TestUnion");
+
+  auto enumRef = base->getUserDefinedType("meta.com/thrift_test/TestEnum");
+  ASSERT_TRUE(enumRef.has_value());
+  EXPECT_EQ(enumRef->asEnum().debugName(), "TestEnum");
+}
+
 } // namespace apache::thrift::type_system

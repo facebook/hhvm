@@ -1057,6 +1057,36 @@ TEST_F(ServiceSchemaTest, asTypeSystem) {
   EXPECT_EQ(exceptionStructNode.fields()[1].identity().id(), FieldId{2});
 }
 
+TEST_F(ServiceSchemaTest, asTypeSystem_NamePropagated) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  auto& typeSystem = syntaxGraph.asTypeSystem();
+
+  EXPECT_EQ(
+      typeSystem
+          .getUserDefinedTypeOrThrow("meta.com/thrift_test/TestRecursiveStruct")
+          .asStruct()
+          .debugName(),
+      "TestRecursiveStruct");
+
+  EXPECT_EQ(
+      typeSystem.getUserDefinedTypeOrThrow("meta.com/thrift_test/TestUnion")
+          .asUnion()
+          .debugName(),
+      "TestUnion");
+
+  EXPECT_EQ(
+      typeSystem.getUserDefinedTypeOrThrow("meta.com/thrift_test/TestEnum")
+          .asEnum()
+          .debugName(),
+      "TestEnum");
+
+  EXPECT_EQ(
+      typeSystem.getUserDefinedTypeOrThrow("meta.com/thrift_test/TestException")
+          .asStruct()
+          .debugName(),
+      "TestException");
+}
+
 TEST_F(ServiceSchemaTest, asTypeSystemTypeRef) {
   auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
   auto& mainProgram = syntaxGraph.findProgramByName("syntax_graph");

@@ -981,10 +981,22 @@ class DefinitionNode {
    */
   const Uri& uri() const;
 
+  /**
+   * Produces a non-unique human-readable name, if one is available.
+   * Otherwise, this is an empty string.
+   *
+   * This name MUST NOT be used to identify types. It should only be
+   * used for diagnostic messages or debugging. There is no validation
+   * or guarantees around the format of the returned string.
+   */
+  std::string_view debugName() const noexcept { return debugName_; }
+
  protected:
   Uri uri_;
+  std::string debugName_;
 
-  explicit DefinitionNode(Uri uri) noexcept : uri_(std::move(uri)) {}
+  explicit DefinitionNode(Uri uri, std::string debugName) noexcept
+      : uri_(std::move(uri)), debugName_(std::move(debugName)) {}
 };
 
 class StructuredNode : public DefinitionNode {
@@ -1074,7 +1086,8 @@ class StructuredNode : public DefinitionNode {
       Uri uri,
       std::vector<FieldDefinition> fields,
       bool isSealed,
-      AnnotationsMap annotations);
+      AnnotationsMap annotations,
+      std::string debugName);
 };
 
 class StructNode final : folly::MoveOnly, public StructuredNode {
@@ -1083,7 +1096,8 @@ class StructNode final : folly::MoveOnly, public StructuredNode {
       Uri,
       std::vector<FieldDefinition>,
       bool isSealed,
-      AnnotationsMap annotations);
+      AnnotationsMap annotations,
+      std::string debugName);
 
   TypeRef asRef() const noexcept { return TypeRef(*this); }
 };
@@ -1094,7 +1108,8 @@ class UnionNode final : folly::MoveOnly, public StructuredNode {
       Uri,
       std::vector<FieldDefinition>,
       bool isSealed,
-      AnnotationsMap annotations);
+      AnnotationsMap annotations,
+      std::string debugName);
 
   TypeRef asRef() const noexcept { return TypeRef(*this); }
 };
@@ -1129,8 +1144,11 @@ class EnumNode final : folly::MoveOnly, public DefinitionNode {
   }
 
   explicit EnumNode(
-      Uri uri, std::vector<Value> values, AnnotationsMap annotations)
-      : DefinitionNode(std::move(uri)),
+      Uri uri,
+      std::vector<Value> values,
+      AnnotationsMap annotations,
+      std::string debugName)
+      : DefinitionNode(std::move(uri), std::move(debugName)),
         values_(std::move(values)),
         annotations_(std::move(annotations)) {}
 
@@ -1153,8 +1171,11 @@ class OpaqueAliasNode final : folly::MoveOnly, public DefinitionNode {
   }
 
   explicit OpaqueAliasNode(
-      Uri uri, TypeRef targetType, AnnotationsMap annotations)
-      : DefinitionNode(std::move(uri)),
+      Uri uri,
+      TypeRef targetType,
+      AnnotationsMap annotations,
+      std::string debugName)
+      : DefinitionNode(std::move(uri), std::move(debugName)),
         targetType_(targetType),
         annotations_(std::move(annotations)) {}
 

@@ -1073,7 +1073,12 @@ class TypeSystemFacade final : public type_system::TypeSystem {
           [&](const StructNode& s) {
             auto [entry, _] = cache_.emplace(
                 sgDef,
-                type_system::StructNode{type_system::Uri(s.uri()), {}, {}, {}});
+                type_system::StructNode{
+                    type_system::Uri(s.uri()),
+                    {},
+                    {},
+                    {},
+                    std::string(s.definition().name())});
             reverseCache_.emplace(
                 &std::get<type_system::StructNode>(entry->second), sgDef);
             processStructuredType(s);
@@ -1081,7 +1086,12 @@ class TypeSystemFacade final : public type_system::TypeSystem {
           [&](const UnionNode& s) {
             auto [entry, _] = cache_.emplace(
                 sgDef,
-                type_system::UnionNode{type_system::Uri(s.uri()), {}, {}, {}});
+                type_system::UnionNode{
+                    type_system::Uri(s.uri()),
+                    {},
+                    {},
+                    {},
+                    std::string(s.definition().name())});
             reverseCache_.emplace(
                 &std::get<type_system::UnionNode>(entry->second), sgDef);
             processStructuredType(s);
@@ -1090,7 +1100,12 @@ class TypeSystemFacade final : public type_system::TypeSystem {
             // SyntaxGraph exceptions are converted into TypeSystem structs
             auto [entry, _] = cache_.emplace(
                 sgDef,
-                type_system::StructNode{type_system::Uri(e.uri()), {}, {}, {}});
+                type_system::StructNode{
+                    type_system::Uri(e.uri()),
+                    {},
+                    {},
+                    {},
+                    std::string(e.definition().name())});
             reverseCache_.emplace(
                 &std::get<type_system::StructNode>(entry->second), sgDef);
             processStructuredType(e);
@@ -1111,7 +1126,8 @@ class TypeSystemFacade final : public type_system::TypeSystem {
                 type_system::EnumNode{
                     type_system::Uri(e.uri()),
                     std::move(values),
-                    toTypeSystemAnnotations(e.definition().annotations())});
+                    toTypeSystemAnnotations(e.definition().annotations()),
+                    std::string(e.definition().name())});
             reverseCache_.emplace(
                 &std::get<type_system::EnumNode>(entry->second), sgDef);
           },
@@ -1156,14 +1172,16 @@ class TypeSystemFacade final : public type_system::TypeSystem {
                 type_system::Uri(s.uri()),
                 makeFields(s),
                 false,
-                toTypeSystemAnnotations(s.definition().annotations())};
+                toTypeSystemAnnotations(s.definition().annotations()),
+                std::string(s.definition().name())};
           },
           [&](const UnionNode& s) {
             std::get<type_system::UnionNode>(tsDef) = type_system::UnionNode{
                 type_system::Uri(s.uri()),
                 makeFields(s),
                 false,
-                toTypeSystemAnnotations(s.definition().annotations())};
+                toTypeSystemAnnotations(s.definition().annotations()),
+                std::string(s.definition().name())};
           },
           [&](const ExceptionNode& e) {
             // SyntaxGraph exceptions are converted into TypeSystem structs
@@ -1171,7 +1189,8 @@ class TypeSystemFacade final : public type_system::TypeSystem {
                 type_system::Uri(e.uri()),
                 makeFields(e),
                 false,
-                toTypeSystemAnnotations(e.definition().annotations())};
+                toTypeSystemAnnotations(e.definition().annotations()),
+                std::string(e.definition().name())};
           },
           [](const auto& n) {
             folly::throw_exception<std::logic_error>(fmt::format(

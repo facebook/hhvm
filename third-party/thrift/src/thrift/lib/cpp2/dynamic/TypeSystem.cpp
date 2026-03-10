@@ -91,8 +91,9 @@ StructuredNode::StructuredNode(
     Uri uri,
     std::vector<FieldDefinition> fields,
     bool isSealed,
-    AnnotationsMap annotations)
-    : DefinitionNode(std::move(uri)),
+    AnnotationsMap annotations,
+    std::string debugName)
+    : DefinitionNode(std::move(uri), std::move(debugName)),
       fields_(std::move(fields)),
       isSealed_(isSealed),
       annotations_(std::move(annotations)) {
@@ -127,18 +128,27 @@ StructNode::StructNode(
     Uri uri,
     std::vector<FieldDefinition> fields,
     bool isSealed,
-    AnnotationsMap annotations)
+    AnnotationsMap annotations,
+    std::string debugName)
     : StructuredNode(
-          std::move(uri), std::move(fields), isSealed, std::move(annotations)) {
-}
+          std::move(uri),
+          std::move(fields),
+          isSealed,
+          std::move(annotations),
+          std::move(debugName)) {}
 
 UnionNode::UnionNode(
     Uri uri,
     std::vector<FieldDefinition> fields,
     bool isSealed,
-    AnnotationsMap annotations)
+    AnnotationsMap annotations,
+    std::string debugName)
     : StructuredNode(
-          std::move(uri), std::move(fields), isSealed, std::move(annotations)) {
+          std::move(uri),
+          std::move(fields),
+          isSealed,
+          std::move(annotations),
+          std::move(debugName)) {
   for (const FieldDefinition& field : this->fields()) {
     if (field.presence() != PresenceQualifier::OPTIONAL_) {
       throw InvalidTypeError(
@@ -348,7 +358,12 @@ std::string_view kindToString(TypeRef::Kind k) noexcept {
 
 const Uri& DefinitionNode::uri() const {
   if (uri_.empty()) {
-    throw InvalidTypeError("Type does not have URI set.");
+    throw InvalidTypeError(
+        fmt::format(
+            "Type `{}` does not have URI set."
+            " The thrift file may be missing a package declaration,"
+            " see https://fburl.com/thrift-uri-add-package",
+            debugName_));
   }
   return uri_;
 }

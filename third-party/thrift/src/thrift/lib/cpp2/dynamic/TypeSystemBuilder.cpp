@@ -264,16 +264,19 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
   // Fill in definitions with uninitialized stubs
   for (auto& [uri, entry] : definitions_) {
     SerializableTypeDefinition& def = entry.definition;
+    std::string defName = entry.sourceInfo.has_value()
+        ? std::string(*entry.sourceInfo->name())
+        : std::string{};
     auto uninitDef = std::invoke([&]() -> TSDefinition {
       switch (def.getType()) {
         case SerializableTypeDefinition::Type::structDef:
-          return StructNode{uri, {}, {}, {}};
+          return StructNode{uri, {}, {}, {}, defName};
         case SerializableTypeDefinition::Type::unionDef:
-          return UnionNode{uri, {}, {}, {}};
+          return UnionNode{uri, {}, {}, {}, defName};
         case SerializableTypeDefinition::Type::enumDef:
-          return EnumNode{uri, {}, {}};
+          return EnumNode{uri, {}, {}, defName};
         case SerializableTypeDefinition::Type::opaqueAliasDef:
-          return OpaqueAliasNode{uri, TypeRef{TypeRef::Bool{}}, {}};
+          return OpaqueAliasNode{uri, TypeRef{TypeRef::Bool{}}, {}, defName};
         default:
           break;
       }
@@ -333,6 +336,9 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
     std::optional<SerializableThriftSourceInfo>& sourceInfo = entry.sourceInfo;
     // We created uninitialized stubs above so we can assume they exist
     TSDefinition& uninitDef = typeSystem->definitions.find(uri)->second;
+    std::string defName = sourceInfo.has_value()
+        ? std::string(*sourceInfo->name())
+        : std::string{};
 
     switch (def.getType()) {
       case SerializableTypeDefinition::Type::structDef: {
@@ -342,7 +348,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
             uri,
             makeFields(std::move(*structDef.fields())),
             *structDef.isSealed(),
-            makeAnnots(std::move(*structDef.annotations())));
+            makeAnnots(std::move(*structDef.annotations())),
+            defName);
         if (sourceInfo.has_value()) {
           typeSystem->tryAddToSourceIndex(
               SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
@@ -356,7 +363,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
             uri,
             makeFields(std::move(*unionDef.fields())),
             *unionDef.isSealed(),
-            makeAnnots(std::move(*unionDef.annotations())));
+            makeAnnots(std::move(*unionDef.annotations())),
+            defName);
         if (sourceInfo.has_value()) {
           typeSystem->tryAddToSourceIndex(
               SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
@@ -378,7 +386,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
         enumNode = EnumNode(
             uri,
             std::move(values),
-            makeAnnots(std::move(*enumDef.annotations())));
+            makeAnnots(std::move(*enumDef.annotations())),
+            defName);
         if (sourceInfo.has_value()) {
           typeSystem->tryAddToSourceIndex(
               SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
@@ -392,7 +401,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
         opaqueAliasNode = OpaqueAliasNode(
             uri,
             typeSystem->typeOf(*opaqueAliasDef.targetType()),
-            makeAnnots(std::move(*opaqueAliasDef.annotations())));
+            makeAnnots(std::move(*opaqueAliasDef.annotations())),
+            defName);
         if (sourceInfo.has_value()) {
           typeSystem->tryAddToSourceIndex(
               SourceIdentifier{*sourceInfo->locator(), *sourceInfo->name()},
@@ -425,15 +435,18 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
   for (const auto& uri : uris) {
     auto sourceDef = source.getUserDefinedType(uri);
     auto stubDef = sourceDef->visit(
-        [&](const StructNode&) -> TSDefinition {
-          return StructNode{uri, {}, false, {}};
+        [&](const StructNode& node) -> TSDefinition {
+          return StructNode{uri, {}, false, {}, std::string(node.debugName())};
         },
-        [&](const UnionNode&) -> TSDefinition {
-          return UnionNode{uri, {}, false, {}};
+        [&](const UnionNode& node) -> TSDefinition {
+          return UnionNode{uri, {}, false, {}, std::string(node.debugName())};
         },
-        [&](const EnumNode&) -> TSDefinition { return EnumNode{uri, {}, {}}; },
-        [&](const OpaqueAliasNode&) -> TSDefinition {
-          return OpaqueAliasNode{uri, TypeRef{TypeRef::Bool{}}, {}};
+        [&](const EnumNode& node) -> TSDefinition {
+          return EnumNode{uri, {}, {}, std::string(node.debugName())};
+        },
+        [&](const OpaqueAliasNode& node) -> TSDefinition {
+          return OpaqueAliasNode{
+              uri, TypeRef{TypeRef::Bool{}}, {}, std::string(node.debugName())};
         });
     typeSystem->definitions.emplace(uri, std::move(stubDef));
   }
@@ -484,7 +497,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
               uri,
               copyFields(node.fields()),
               node.isSealed(),
-              copyAnnotations(node.annotations()));
+              copyAnnotations(node.annotations()),
+              std::string(node.debugName()));
           if (options.includeSourceInfo) {
             auto sourceInfo =
                 source.getSourceIdentiferForUserDefinedType(*sourceDef);
@@ -503,7 +517,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
               uri,
               copyFields(node.fields()),
               node.isSealed(),
-              copyAnnotations(node.annotations()));
+              copyAnnotations(node.annotations()),
+              std::string(node.debugName()));
           if (options.includeSourceInfo) {
             auto sourceInfo =
                 source.getSourceIdentiferForUserDefinedType(*sourceDef);
@@ -526,7 +541,10 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
           }
           auto& enumNode = std::get<EnumNode>(stubDef);
           enumNode = EnumNode(
-              uri, std::move(values), copyAnnotations(node.annotations()));
+              uri,
+              std::move(values),
+              copyAnnotations(node.annotations()),
+              std::string(node.debugName()));
           if (options.includeSourceInfo) {
             auto sourceInfo =
                 source.getSourceIdentiferForUserDefinedType(*sourceDef);
@@ -544,7 +562,8 @@ std::unique_ptr<TypeSystem> TypeSystemBuilder::buildDerivedFrom(
           opaqueAliasNode = OpaqueAliasNode(
               uri,
               remapType(node.targetType()),
-              copyAnnotations(node.annotations()));
+              copyAnnotations(node.annotations()),
+              std::string(node.debugName()));
           if (options.includeSourceInfo) {
             auto sourceInfo =
                 source.getSourceIdentiferForUserDefinedType(*sourceDef);

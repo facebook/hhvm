@@ -385,4 +385,30 @@ TEST(TypeSystemPrunerTest, ExtractIntoSerializableByDefinitionRef) {
   EXPECT_FALSE(sts->types()->contains("test/Unrelated"));
 }
 
+TEST(TypeSystemPrunerTest, PrunedTypeSystem_NamePreserved) {
+  auto source = makeRichTypeSystem();
+
+  EXPECT_EQ(
+      source->getUserDefinedTypeOrThrow("test/A").asStruct().debugName(), "A");
+
+  std::vector<UriView> roots{"test/A", "test/U", "test/E", "test/Alias"};
+  auto pruned = TypeSystemBuilder::buildPrunedFrom(*source, roots);
+
+  EXPECT_EQ(
+      pruned->getUserDefinedTypeOrThrow("test/A").asStruct().debugName(), "A");
+  EXPECT_EQ(
+      pruned->getUserDefinedTypeOrThrow("test/B").asStruct().debugName(), "B");
+  EXPECT_EQ(
+      pruned->getUserDefinedTypeOrThrow("test/C").asStruct().debugName(), "C");
+  EXPECT_EQ(
+      pruned->getUserDefinedTypeOrThrow("test/U").asUnion().debugName(), "U");
+  EXPECT_EQ(
+      pruned->getUserDefinedTypeOrThrow("test/E").asEnum().debugName(), "E");
+  EXPECT_EQ(
+      pruned->getUserDefinedTypeOrThrow("test/Alias")
+          .asOpaqueAlias()
+          .debugName(),
+      "Alias");
+}
+
 } // namespace apache::thrift::type_system

@@ -272,7 +272,7 @@ TEST(StandardValidatorTest, WarnProgramMissingPackage) {
   )");
 
   check_compile(R"(
-    # expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+    # expected-warning@-1: Thrift file is missing a `package` directive. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
   )");
 }
 

@@ -1641,7 +1641,7 @@ TEST(CompilerTest, missing_uris_annotated_types) {
     include "thrift/annotation/thrift.thrift"
 
     package;
-    # expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+    # expected-warning@-1: Thrift file should have a (non-empty) package. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
 
     // Valid: struct with URI
     @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
@@ -1702,7 +1702,7 @@ TEST(CompilerTest, missing_uris_annotated_package) {
 
     @thrift.AllowLegacyMissingUris
     package;
-    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+    # expected-warning@-2: Thrift file should have a (non-empty) package. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
 
     // Valid: struct with explicit URI
     @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
@@ -1747,7 +1747,7 @@ TEST(CompilerTest, thrift_missing_uris_unnecessary_package_annotation) {
     @thrift.AllowLegacyMissingUris
     package;
     # expected-error@-2: Unnecessary use of @thrift.AllowLegacyMissingUris at the package level: there are no types who are missing URIs in the file.
-    # expected-warning@-3: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+    # expected-warning@-3: Thrift file should have a (non-empty) package. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
 
     // Struct has a URI, making the package annotation redundant.
     @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
@@ -1766,7 +1766,7 @@ TEST(CompilerTest, thrift_missing_uris_unnecessary_package_annotation_none) {
 
     @thrift.AllowLegacyMissingUris
     package;
-    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+    # expected-warning@-2: Thrift file should have a (non-empty) package. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
 
     // Struct has a URI, making the package annotation redundant.
     @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
@@ -1785,7 +1785,7 @@ TEST(CompilerTest, thrift_missing_uris_redundant_package_and_type_annotation) {
 
     @thrift.AllowLegacyMissingUris
     package;
-    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+    # expected-warning@-2: Thrift file should have a (non-empty) package. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
 
     // Annotation is redundant: package already has the annotation
     @thrift.AllowLegacyMissingUris
@@ -1807,7 +1807,7 @@ TEST(
 
     @thrift.AllowLegacyMissingUris
     package;
-    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+    # expected-warning@-2: Thrift file should have a (non-empty) package. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
 
     // Annotation is redundant: package already has the annotation
     @thrift.AllowLegacyMissingUris
@@ -3045,7 +3045,7 @@ TEST(CompilerTest, base_service_defined_after_use) {
 TEST(CompilerTest, cpp_orderable) {
   check_compile(
       R"(
-# expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+# expected-warning@-1: Thrift file is missing a `package` directive. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
@@ -3512,26 +3512,99 @@ TEST(CompilerTest, required_field_qualifier) {
       {"--extra-validation", "required_field_qualifier=warn"});
 }
 
-TEST(CompilerTest, missing_package) {
-  static const char* kMissingPackage =
-      "Thrift file should have a (non-empty) package. Packages will soon be "
-      "required, at which point missing packages will trigger a Thrift compiler error. "
-      "For more details, see https://fburl.com/thrift-uri-add-package";
+/**
+ * Tests the various validation behavior for missing package directives,
+ * depending on the `no_package` and `empty_or_no_package` validation flags.
+ */
+TEST(CompilerTest, no_package) {
+  // Missing directive, but no validation
   check_compile(
-      "struct TestStruct { }",
-      {"--extra-validation", "missing_package=none,missing_uris=none"});
+      R"(
+    struct TestStruct { }
+  )",
+      {"--extra-validation",
+       "empty_or_no_package=none,no_package=none,missing_uris=none"});
+
+  // Now with some validation. Note that the higher of `empty_or_no_package` and
+  // `no_package` takes effect.
   check_compile(
-      fmt::format(
-          "# expected-warning@1: {}\n"
-          "struct TestStruct {{ }}",
-          kMissingPackage),
-      {"--extra-validation", "missing_package=warn,missing_uris=none"});
+      R"(
+    # expected-warning@-1: Thrift file is missing a `package` directive. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
+    struct TestStruct { }
+  )",
+      {"--extra-validation",
+       "empty_or_no_package=warn,no_package=none,missing_uris=none"});
+
   check_compile(
-      fmt::format(
-          "# expected-error@1: {}\n"
-          "struct TestStruct {{ }}",
-          kMissingPackage),
-      {"--extra-validation", "missing_package=error,missing_uris=none"});
+      R"(
+    # expected-error@-1: Thrift file is missing a `package` directive. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
+    struct TestStruct { }
+  )",
+      {"--extra-validation",
+       "empty_or_no_package=warn,no_package=error,missing_uris=none"});
+}
+
+/**
+ * Tests the various validation behavior for explicitly empty package
+ * directives, depending on the `no_package` and `empty_or_no_package`
+ * validation flags.
+ */
+TEST(CompilerTest, empty_package) {
+  // Empty package directive, but no validation
+  check_compile(
+      R"(
+    package;
+
+    struct TestStruct { }
+  )",
+      {"--extra-validation",
+       "empty_or_no_package=none,no_package=none,missing_uris=none"});
+
+  // The no_package validation does not apply:
+  check_compile(
+      R"(
+    package;
+
+    struct TestStruct { }
+  )",
+      {"--extra-validation",
+       "empty_or_no_package=none,no_package=error,missing_uris=none"});
+
+  // The empty_or_no_package validation DOES apply
+  check_compile(
+      R"(
+    package;
+    # expected-warning@-1: Thrift file should have a (non-empty) package. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
+    struct TestStruct { }
+  )",
+      {"--extra-validation",
+       "empty_or_no_package=warn,no_package=error,missing_uris=none"});
+}
+
+/**
+ * Tests the various validation behavior for non-empty package directives,
+ * depending on the `no_package` and `empty_or_no_package` validation flags.
+ */
+TEST(CompilerTest, non_empty_package) {
+  // Non-empty package directive, but no validation
+  check_compile(
+      R"(
+    package "facebook.com/test"
+
+    struct TestStruct { }
+  )",
+      {"--extra-validation",
+       "empty_or_no_package=none,no_package=none,missing_uris=none"});
+
+  // Even with validation, no warnings/errors:
+  check_compile(
+      R"(
+    package "facebook.com/test"
+
+    struct TestStruct { }
+  )",
+      {"--extra-validation",
+       "empty_or_no_package=error,no_package=error,missing_uris=none"});
 }
 
 TEST(CompilerTest, bidirectional_streaming) {
@@ -4118,7 +4191,7 @@ TEST(CompilerTest, ignore_missing_uri_opt_out_basic) {
     include "thrift/annotation/thrift.thrift"
 
     package;
-    # expected-warning@-1: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+    # expected-warning@-1: Thrift file should have a (non-empty) package. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
 
     // Valid: struct with URI
     @thrift.Uri{value = "facebook.com/thrift/test/ValidStruct"}
@@ -4151,7 +4224,7 @@ TEST(CompilerTest, ignore_missing_uri_opt_out_with_allow_legacy) {
 
     @thrift.AllowLegacyMissingUris
     package;
-    # expected-warning@-2: Thrift file should have a (non-empty) package. Packages will soon be required, at which point missing packages will trigger a Thrift compiler error. For more details, see https://fburl.com/thrift-uri-add-package
+    # expected-warning@-2: Thrift file should have a (non-empty) package. This will soon become an error (see https://fburl.com/thrift-uri-add-package).
 
     // Error: package-level AllowLegacyMissingUris does not suppress
     struct PkgAnnotatedStruct { }

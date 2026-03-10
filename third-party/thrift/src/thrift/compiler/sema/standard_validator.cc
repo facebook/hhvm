@@ -455,15 +455,33 @@ void validate_python_namespaces(sema_context& ctx, const t_program& program) {
 
 void validate_program_package(sema_context& ctx, const t_program& program) {
   const t_package& package = program.package();
-  if (package.empty()) {
+  if (!package.is_explicit()) {
+    // No package directive at all. Both no_package and empty_or_no_package
+    // cover this case — report once at the higher level.
+    const sema_params::validation_level level = std::max(
+        ctx.sema_parameters().no_package,
+        ctx.sema_parameters().empty_or_no_package);
     ctx.report(
         program,
-        validation_to_diagnostic_level(ctx.sema_parameters().missing_package),
-        "Thrift file should have a (non-empty) package. Packages will soon be "
-        "required, at which point missing packages will trigger a Thrift compiler error. "
-        "For more details, see https://fburl.com/thrift-uri-add-package");
+        validation_to_diagnostic_level(level),
+        "Thrift file is missing a `package` directive. This will soon become "
+        "an error (see https://fburl.com/thrift-uri-add-package).");
     return;
   }
+
+  // There is a (potentially empty) `package` directive ...
+  if (package.empty()) {
+    // Explicitly empty package (package;). Only empty_or_no_package applies.
+    ctx.report(
+        program,
+        validation_to_diagnostic_level(
+            ctx.sema_parameters().empty_or_no_package),
+        "Thrift file should have a (non-empty) package. This will soon become "
+        "an error (see https://fburl.com/thrift-uri-add-package).");
+    return;
+  }
+
+  // There is a non-empty `package ...` directive ...
   try {
     thrift::detail::check_univeral_name_domain(package.domain());
   } catch (const std::exception& e) {

@@ -157,8 +157,13 @@ struct sema_params {
   // Action to take on `required` (struct and exception) fields.
   validation_level required_field_qualifier = validation_level::warn;
 
-  // Action to take on files without a package.
-  validation_level missing_package = validation_level::warn;
+  // Action to take on files without any `package` directive (not even an empty
+  // one).
+  validation_level no_package = validation_level::warn;
+
+  // Action to take on files that either do not have a package (like no_package
+  // above) or have an empty package (`package;`).
+  validation_level empty_or_no_package = validation_level::warn;
 
   // Action to take on types (struct, union, exception, enum) missing Thrift
   // URIs (without the annotation that explicitly allows it, i.e.

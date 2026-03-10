@@ -160,9 +160,22 @@ Options:
                   Action to take on `required` (struct and exception) fields.
                   Default: warn
 
-                missing_package=none|warn|error
-                  Action to take on files that do not have a package.
+                no_package=none|warn|error
+                  Action to take on files that do not have any `package`
+                  directive (not even an empty one).
                   Default: warn
+                  NOTE: This will become an `error` soon, following the full
+                  deployment of the empty `package;` (with
+                  `@thrift.AllowLegacyMissingUris`).
+
+                empty_or_no_package=none|warn|error
+                  Action to take on files that either do not have a package
+                  (like no_package above) OR have an empty package (`package;`).
+                  Default: warn
+
+                  NOTE: if both empty_or_no_package and no_package validations
+                  are enabled, the higher level of validation will be applied
+                  to the (overlapping) case when there is no `package` at all.
 
                 missing_uris=none|warn|error
                   Action to take on types (struct, union, exception, enum)
@@ -970,8 +983,15 @@ std::string parse_args(
 
           if (maybe_parse_validation_level_flag(
                   /*flag=*/validator,
-                  /*prefix=*/"missing_package",
-                  &sparams.missing_package)) {
+                  /*prefix=*/"no_package",
+                  &sparams.no_package)) {
+            continue;
+          }
+
+          if (maybe_parse_validation_level_flag(
+                  /*flag=*/validator,
+                  /*prefix=*/"empty_or_no_package",
+                  &sparams.empty_or_no_package)) {
             continue;
           }
 
@@ -1192,8 +1212,11 @@ void record_invocation_params(
           "required_field_qualifier={}",
           fmt::underlying(sparams.required_field_qualifier)));
   sema_params_metric.add(
+      fmt::format("no_package={}", fmt::underlying(sparams.no_package)));
+  sema_params_metric.add(
       fmt::format(
-          "missing_package={}", fmt::underlying(sparams.missing_package)));
+          "empty_or_no_package={}",
+          fmt::underlying(sparams.empty_or_no_package)));
   sema_params_metric.add(
       fmt::format("missing_uris={}", fmt::underlying(sparams.missing_uris)));
   sema_params_metric.add(

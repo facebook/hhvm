@@ -58,7 +58,7 @@ class EchoResponse : public HTTPSource {
     auto msg = std::make_unique<HTTPMessage>();
     msg->setStatusCode(200);
     headerEvent->headers->getHeaders().forEach(
-        [&msg](std::string& name, std::string& value) {
+        [&msg](const std::string& name, const std::string& value) {
           msg->getHeaders().set(folly::to<std::string>("x-echo-", name), value);
         });
     co_return HTTPHeaderEvent(std::move(msg), headerEvent->eom);

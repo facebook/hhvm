@@ -108,10 +108,6 @@ void HTTPHeaders::add(HTTPHeaders::headers_initializer_list l) {
   }
 }
 
-void HTTPHeaders::rawAdd(const std::string& name, const std::string& value) {
-  add(name, value);
-}
-
 bool HTTPHeaders::exists(folly::StringPiece name) const {
   const HTTPHeaderCode code = HTTPCommonHeaders::hash(name.data(), name.size());
   if (code != HTTP_HEADER_OTHER) {

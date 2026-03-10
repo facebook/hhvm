@@ -32,12 +32,9 @@ jobs:
     - id: paths
       name: Query paths
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages query-paths --recursive --src-dir=. fbthrift-python  >> "$GITHUB_OUTPUT"
-    - name: Fetch libaio
-      if: ${{ steps.paths.outputs.libaio_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests libaio
-    - name: Fetch xxhash
-      if: ${{ steps.paths.outputs.xxhash_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests xxhash
+    - name: Fetch libaio-python
+      if: ${{ steps.paths.outputs.libaio-python_SOURCE }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests libaio-python
     - name: Fetch ninja
       if: ${{ steps.paths.outputs.ninja_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests ninja
@@ -83,9 +80,9 @@ jobs:
     - name: Fetch snappy
       if: ${{ steps.paths.outputs.snappy_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests snappy
-    - name: Fetch c-ares
-      if: ${{ steps.paths.outputs.c-ares_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests c-ares
+    - name: Fetch xxhash
+      if: ${{ steps.paths.outputs.xxhash_SOURCE }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests xxhash
     - name: Fetch openssl
       if: ${{ steps.paths.outputs.openssl_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests openssl
@@ -122,47 +119,25 @@ jobs:
     - name: Fetch mvfst-python
       if: ${{ steps.paths.outputs.mvfst-python_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests mvfst-python
-    - name: Fetch gperf
-      if: ${{ steps.paths.outputs.gperf_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests gperf
     - name: Fetch wangle-python
       if: ${{ steps.paths.outputs.wangle-python_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests wangle-python
-    - name: Fetch proxygen-python
-      if: ${{ steps.paths.outputs.proxygen-python_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests proxygen-python
-    - name: Restore libaio from cache
-      id: restore_libaio
-      if: ${{ steps.paths.outputs.libaio_SOURCE }}
+    - name: Restore libaio-python from cache
+      id: restore_libaio-python
+      if: ${{ steps.paths.outputs.libaio-python_SOURCE }}
       uses: actions/cache/restore@v4
       with:
-       path: ${{ steps.paths.outputs.libaio_INSTALL }}
-       key: ${{ steps.paths.outputs.libaio_CACHE_KEY }}-install
-    - name: Build libaio
-      if: ${{ steps.paths.outputs.libaio_SOURCE && ! steps.restore_libaio.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests libaio
-    - name: Save libaio to cache
+       path: ${{ steps.paths.outputs.libaio-python_INSTALL }}
+       key: ${{ steps.paths.outputs.libaio-python_CACHE_KEY }}-install
+    - name: Build libaio-python
+      if: ${{ steps.paths.outputs.libaio-python_SOURCE && ! steps.restore_libaio-python.outputs.cache-hit }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests libaio-python
+    - name: Save libaio-python to cache
       uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.libaio_SOURCE && ! steps.restore_libaio.outputs.cache-hit }}
+      if: ${{ steps.paths.outputs.libaio-python_SOURCE && ! steps.restore_libaio-python.outputs.cache-hit }}
       with:
-       path: ${{ steps.paths.outputs.libaio_INSTALL }}
-       key: ${{ steps.paths.outputs.libaio_CACHE_KEY }}-install
-    - name: Restore xxhash from cache
-      id: restore_xxhash
-      if: ${{ steps.paths.outputs.xxhash_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.xxhash_INSTALL }}
-       key: ${{ steps.paths.outputs.xxhash_CACHE_KEY }}-install
-    - name: Build xxhash
-      if: ${{ steps.paths.outputs.xxhash_SOURCE && ! steps.restore_xxhash.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests xxhash
-    - name: Save xxhash to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.xxhash_SOURCE && ! steps.restore_xxhash.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.xxhash_INSTALL }}
-       key: ${{ steps.paths.outputs.xxhash_CACHE_KEY }}-install
+       path: ${{ steps.paths.outputs.libaio-python_INSTALL }}
+       key: ${{ steps.paths.outputs.libaio-python_CACHE_KEY }}-install
     - name: Restore ninja from cache
       id: restore_ninja
       if: ${{ steps.paths.outputs.ninja_SOURCE }}
@@ -403,22 +378,22 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.snappy_INSTALL }}
        key: ${{ steps.paths.outputs.snappy_CACHE_KEY }}-install
-    - name: Restore c-ares from cache
-      id: restore_c-ares
-      if: ${{ steps.paths.outputs.c-ares_SOURCE }}
+    - name: Restore xxhash from cache
+      id: restore_xxhash
+      if: ${{ steps.paths.outputs.xxhash_SOURCE }}
       uses: actions/cache/restore@v4
       with:
-       path: ${{ steps.paths.outputs.c-ares_INSTALL }}
-       key: ${{ steps.paths.outputs.c-ares_CACHE_KEY }}-install
-    - name: Build c-ares
-      if: ${{ steps.paths.outputs.c-ares_SOURCE && ! steps.restore_c-ares.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests c-ares
-    - name: Save c-ares to cache
+       path: ${{ steps.paths.outputs.xxhash_INSTALL }}
+       key: ${{ steps.paths.outputs.xxhash_CACHE_KEY }}-install
+    - name: Build xxhash
+      if: ${{ steps.paths.outputs.xxhash_SOURCE && ! steps.restore_xxhash.outputs.cache-hit }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests xxhash
+    - name: Save xxhash to cache
       uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.c-ares_SOURCE && ! steps.restore_c-ares.outputs.cache-hit }}
+      if: ${{ steps.paths.outputs.xxhash_SOURCE && ! steps.restore_xxhash.outputs.cache-hit }}
       with:
-       path: ${{ steps.paths.outputs.c-ares_INSTALL }}
-       key: ${{ steps.paths.outputs.c-ares_CACHE_KEY }}-install
+       path: ${{ steps.paths.outputs.xxhash_INSTALL }}
+       key: ${{ steps.paths.outputs.xxhash_CACHE_KEY }}-install
     - name: Restore openssl from cache
       id: restore_openssl
       if: ${{ steps.paths.outputs.openssl_SOURCE }}
@@ -611,22 +586,6 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.mvfst-python_INSTALL }}
        key: ${{ steps.paths.outputs.mvfst-python_CACHE_KEY }}-install
-    - name: Restore gperf from cache
-      id: restore_gperf
-      if: ${{ steps.paths.outputs.gperf_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.gperf_INSTALL }}
-       key: ${{ steps.paths.outputs.gperf_CACHE_KEY }}-install
-    - name: Build gperf
-      if: ${{ steps.paths.outputs.gperf_SOURCE && ! steps.restore_gperf.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests gperf
-    - name: Save gperf to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.gperf_SOURCE && ! steps.restore_gperf.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.gperf_INSTALL }}
-       key: ${{ steps.paths.outputs.gperf_CACHE_KEY }}-install
     - name: Restore wangle-python from cache
       id: restore_wangle-python
       if: ${{ steps.paths.outputs.wangle-python_SOURCE }}
@@ -643,22 +602,6 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.wangle-python_INSTALL }}
        key: ${{ steps.paths.outputs.wangle-python_CACHE_KEY }}-install
-    - name: Restore proxygen-python from cache
-      id: restore_proxygen-python
-      if: ${{ steps.paths.outputs.proxygen-python_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.proxygen-python_INSTALL }}
-       key: ${{ steps.paths.outputs.proxygen-python_CACHE_KEY }}-install
-    - name: Build proxygen-python
-      if: ${{ steps.paths.outputs.proxygen-python_SOURCE && ! steps.restore_proxygen-python.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests proxygen-python
-    - name: Save proxygen-python to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.proxygen-python_SOURCE && ! steps.restore_proxygen-python.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.proxygen-python_INSTALL }}
-       key: ${{ steps.paths.outputs.proxygen-python_CACHE_KEY }}-install
     - name: Build fbthrift-python
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --src-dir=. fbthrift-python --project-install-prefix fbthrift-python:/usr/local
     - name: Copy artifacts

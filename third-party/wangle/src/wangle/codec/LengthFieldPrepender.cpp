@@ -58,9 +58,9 @@ Future<Unit> LengthFieldPrepender::write(
         throw std::runtime_error("length does not fit byte");
       }
       if (networkByteOrder_) {
-        c.writeBE((uint8_t)length);
+        c.writeBE<uint8_t>((uint8_t)length);
       } else {
-        c.writeLE((uint8_t)length);
+        c.writeLE<uint8_t>((uint8_t)length);
       }
       break;
     }
@@ -69,25 +69,25 @@ Future<Unit> LengthFieldPrepender::write(
         throw std::runtime_error("length does not fit byte");
       }
       if (networkByteOrder_) {
-        c.writeBE((uint16_t)length);
+        c.writeBE<uint16_t>((uint16_t)length);
       } else {
-        c.writeLE((uint16_t)length);
+        c.writeLE<uint16_t>((uint16_t)length);
       }
       break;
     }
     case 4: {
       if (networkByteOrder_) {
-        c.writeBE((uint32_t)length);
+        c.writeBE<uint32_t>((uint32_t)length);
       } else {
-        c.writeLE((uint32_t)length);
+        c.writeLE<uint32_t>((uint32_t)length);
       }
       break;
     }
     case 8: {
       if (networkByteOrder_) {
-        c.writeBE((uint64_t)length);
+        c.writeBE<uint64_t>((uint64_t)length);
       } else {
-        c.writeLE((uint64_t)length);
+        c.writeLE<uint64_t>((uint64_t)length);
       }
       break;
     }

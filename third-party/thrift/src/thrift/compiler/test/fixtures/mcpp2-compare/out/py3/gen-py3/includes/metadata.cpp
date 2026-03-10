@@ -9,9 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_handlers.h"
 
-namespace a {
-namespace different {
-namespace ns {
+namespace a::different::ns {
 ::apache::thrift::metadata::ThriftMetadata includes_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -20,6 +18,4 @@ namespace ns {
   ::apache::thrift::detail::md::StructMetadata<AStructB>::gen(metadata);
   return metadata;
 }
-} // namespace a
-} // namespace different
-} // namespace ns
+} // namespace a::different::ns

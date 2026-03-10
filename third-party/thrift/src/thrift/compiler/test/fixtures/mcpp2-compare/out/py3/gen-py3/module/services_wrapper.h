@@ -26,9 +26,7 @@
 
 #include <memory>
 
-namespace some {
-namespace valid {
-namespace ns {
+namespace some::valid::ns {
 
 class EmptyServiceWrapper : virtual public EmptyServiceSvIf {
   protected:
@@ -213,6 +211,4 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> ParamServiceInterface(PyObject *if_object, folly::Executor *exc);
-} // namespace some
-} // namespace valid
-} // namespace ns
+} // namespace some::valid::ns

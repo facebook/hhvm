@@ -12,12 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/included_types.h"
 
-namespace apache {
-namespace thrift {
-namespace fixtures {
-namespace types {
+namespace apache::thrift::fixtures::types {
 ::apache::thrift::metadata::ThriftMetadata included_getThriftModuleMetadata();
-} // namespace apache
-} // namespace thrift
-} // namespace fixtures
-} // namespace types
+} // namespace apache::thrift::fixtures::types

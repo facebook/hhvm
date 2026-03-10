@@ -26,8 +26,7 @@
 
 #include <memory>
 
-namespace py3 {
-namespace simple {
+namespace py3::simple {
 
 class SimpleServiceWrapper : virtual public SimpleServiceSvIf {
   protected:
@@ -179,5 +178,4 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> RederivedServiceInterface(PyObject *if_object, folly::Executor *exc);
-} // namespace py3
-} // namespace simple
+} // namespace py3::simple

@@ -31,9 +31,7 @@
 
 #include <memory>
 
-namespace test {
-namespace fixtures {
-namespace basic {
+namespace test::fixtures::basic {
 
 class FooServiceWrapper : virtual public FooServiceSvIf {
   protected:
@@ -119,6 +117,4 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> DbMixedStackArgumentsInterface(PyObject *if_object, folly::Executor *exc);
-} // namespace test
-} // namespace fixtures
-} // namespace basic
+} // namespace test::fixtures::basic

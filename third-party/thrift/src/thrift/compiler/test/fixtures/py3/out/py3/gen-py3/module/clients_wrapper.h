@@ -35,8 +35,7 @@
 #include <set>
 #include <vector>
 
-namespace py3 {
-namespace simple {
+namespace py3::simple {
 
 class SimpleServiceClientWrapper : public ::thrift::py3::ClientWrapper {
   public:
@@ -185,5 +184,4 @@ class RederivedServiceClientWrapper : public ::py3::simple::DerivedServiceClient
 };
 
 
-} // namespace py3
-} // namespace simple
+} // namespace py3::simple

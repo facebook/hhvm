@@ -9,11 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace test {
-namespace fixtures {
-namespace terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 ::apache::thrift::metadata::ThriftMetadata terse_write_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -27,8 +23,4 @@ namespace terse_write {
   ::apache::thrift::detail::md::ExceptionMetadata<TerseException>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace test
-} // namespace fixtures
-} // namespace terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write

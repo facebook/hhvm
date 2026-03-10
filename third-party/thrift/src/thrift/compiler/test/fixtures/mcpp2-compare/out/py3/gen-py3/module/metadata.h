@@ -12,10 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h"
 
-namespace some {
-namespace valid {
-namespace ns {
+namespace some::valid::ns {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
-} // namespace some
-} // namespace valid
-} // namespace ns
+} // namespace some::valid::ns

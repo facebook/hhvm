@@ -12,10 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h"
 
-namespace test {
-namespace fixtures {
-namespace basic {
+namespace test::fixtures::basic {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
-} // namespace test
-} // namespace fixtures
-} // namespace basic
+} // namespace test::fixtures::basic

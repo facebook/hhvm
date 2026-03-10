@@ -25,8 +25,7 @@
 #include <set>
 #include <vector>
 
-namespace test {
-namespace namespace_from_package_without_module_name {
+namespace test::namespace_from_package_without_module_name {
 
 class TestServiceClientWrapper : public ::thrift::py3::ClientWrapper {
   public:
@@ -38,5 +37,4 @@ class TestServiceClientWrapper : public ::thrift::py3::ClientWrapper {
 };
 
 
-} // namespace test
-} // namespace namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name

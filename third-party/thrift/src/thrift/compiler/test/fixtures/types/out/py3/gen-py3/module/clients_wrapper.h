@@ -25,10 +25,7 @@
 #include <set>
 #include <vector>
 
-namespace apache {
-namespace thrift {
-namespace fixtures {
-namespace types {
+namespace apache::thrift::fixtures::types {
 
 class SomeServiceClientWrapper : public ::thrift::py3::ClientWrapper {
   public:
@@ -43,7 +40,4 @@ class SomeServiceClientWrapper : public ::thrift::py3::ClientWrapper {
 };
 
 
-} // namespace apache
-} // namespace thrift
-} // namespace fixtures
-} // namespace types
+} // namespace apache::thrift::fixtures::types

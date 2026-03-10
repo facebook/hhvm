@@ -35,9 +35,7 @@
 #include <set>
 #include <vector>
 
-namespace some {
-namespace valid {
-namespace ns {
+namespace some::valid::ns {
 
 class EmptyServiceClientWrapper : public ::thrift::py3::ClientWrapper {
   public:
@@ -225,6 +223,4 @@ class ParamServiceClientWrapper : public ::thrift::py3::ClientWrapper {
 };
 
 
-} // namespace some
-} // namespace valid
-} // namespace ns
+} // namespace some::valid::ns

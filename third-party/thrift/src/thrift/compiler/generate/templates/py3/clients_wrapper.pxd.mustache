@@ -71,19 +71,13 @@ cimport {{include.modulePathPeriodSeparated}}.clients_wrapper as _{{include.modu
 {{/each}}
 
 {{#each program.services as |service|}}
-cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_clients.h"{{!
-    }} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
-  cdef cppclass c{{service.name}}AsyncClient {{!
-    }}"::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{!
-    }}{{service.cpp_name}}AsyncClient":
+cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_clients.h" namespace "::{{program.cpp_namespace}}":
+  cdef cppclass c{{service.name}}AsyncClient "::{{program.cpp_namespace}}::{{service.cpp_name}}AsyncClient":
       pass
 
   {{#each service.supportedInteractions as |interaction|}}
-cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_clients.h"{{!
-    }} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
-  cdef cppclass c{{service.name}}AsyncClient_{{interaction.name}} {{!
-    }}"::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{!
-    }}{{service.name}}AsyncClient::{{interaction.name}}":
+cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_clients.h" namespace "::{{program.cpp_namespace}}":
+  cdef cppclass c{{service.name}}AsyncClient_{{interaction.name}} "::{{program.cpp_namespace}}::{{service.name}}AsyncClient::{{interaction.name}}":
       pass
 
   {{/each}}
@@ -95,12 +89,10 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "{{program.include_prefix}}gen-py3/{{program.name}}/clients_wrapper.h"{{!
-    }} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":{{!
+cdef extern from "{{program.include_prefix}}gen-py3/{{program.name}}/clients_wrapper.h" namespace "::{{program.cpp_namespace}}":{{!
     }}{{#if (array.empty? program.services)}}
   pass{{/if (array.empty? program.services)}}{{#each program.services as |service|}}
-  cdef cppclass c{{service.name}}ClientWrapper "{{!
-  }}::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.name}}ClientWrapper"{{#partial client_wrapper_parent service=service}}:
+  cdef cppclass c{{service.name}}ClientWrapper "::{{program.cpp_namespace}}::{{service.name}}ClientWrapper"{{#partial client_wrapper_parent service=service}}:
   {{#if (object.eq? null service.extends)}}
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
@@ -124,7 +116,7 @@ cdef extern from "{{program.include_prefix}}gen-py3/{{program.name}}/clients_wra
 
   {{#each service.supportedInteractions as |interaction|}}
   cdef cppclass c{{service.name}}ClientWrapper_{{interaction.name}}InteractionWrapper "{{!
-  }}::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.name}}ClientWrapper{{!
+  }}::{{program.cpp_namespace}}::{{service.name}}ClientWrapper{{!
   }}::{{interaction.name}}InteractionWrapper"(cClientWrapper):
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

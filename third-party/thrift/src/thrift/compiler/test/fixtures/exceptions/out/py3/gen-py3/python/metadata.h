@@ -12,12 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/exceptions/gen-cpp2/python_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace python {
+namespace facebook::thrift::annotation::python {
 ::apache::thrift::metadata::ThriftMetadata python_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace python
+} // namespace facebook::thrift::annotation::python

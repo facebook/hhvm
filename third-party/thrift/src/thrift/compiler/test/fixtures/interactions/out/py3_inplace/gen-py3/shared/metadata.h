@@ -12,8 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_types.h"
 
-namespace thrift {
-namespace shared_interactions {
+namespace thrift::shared_interactions {
 ::apache::thrift::metadata::ThriftMetadata shared_getThriftModuleMetadata();
-} // namespace thrift
-} // namespace shared_interactions
+} // namespace thrift::shared_interactions

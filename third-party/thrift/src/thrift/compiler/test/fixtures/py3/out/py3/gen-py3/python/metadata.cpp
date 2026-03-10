@@ -9,10 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/python_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace python {
+namespace facebook::thrift::annotation::python {
 ::apache::thrift::metadata::ThriftMetadata python_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -33,7 +30,4 @@ namespace python {
   ::apache::thrift::detail::md::StructMetadata<EnableUnsafeIssetInspection>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace python
+} // namespace facebook::thrift::annotation::python

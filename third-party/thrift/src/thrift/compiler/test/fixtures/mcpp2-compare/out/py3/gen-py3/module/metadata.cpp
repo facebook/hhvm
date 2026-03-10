@@ -9,9 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_handlers.h"
 
-namespace some {
-namespace valid {
-namespace ns {
+namespace some::valid::ns {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -39,6 +37,4 @@ namespace ns {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::some::valid::ns::ParamService>>::gen(response);
   return metadata;
 }
-} // namespace some
-} // namespace valid
-} // namespace ns
+} // namespace some::valid::ns

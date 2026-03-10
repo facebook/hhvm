@@ -9,9 +9,7 @@
 #include <thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-namespace some {
-namespace valid {
-namespace ns {
+namespace some::valid::ns {
 
 EmptyServiceWrapper::EmptyServiceWrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
@@ -1285,6 +1283,4 @@ folly::SemiFuture<folly::Unit> ParamServiceWrapper::semifuture_onStopRequested()
   );
   return std::move(future);
 }
-} // namespace some
-} // namespace valid
-} // namespace ns
+} // namespace some::valid::ns

@@ -444,7 +444,7 @@ element types.
 {{#else if type.string_or_binary?}}std::string
 {{#else if (or type.enum? type.structured?)}}
   {{#let ttype=type.true_type}}
-::{{#each ttype.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{ttype.cpp_name}}
+::{{ttype.program.cpp_namespace}}::{{ttype.cpp_name}}
 {{#else if (or type.list? type.set?)}}
   {{#let ttype=type.true_type}}
 {{type.cppTemplate}}<{{#partial cpp_value_type type=ttype.elem_type}}>

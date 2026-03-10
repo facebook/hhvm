@@ -7,8 +7,7 @@
 
 #include <thrift/compiler/test/fixtures/interactions/gen-py3/shared/clients_wrapper.h>
 
-namespace thrift {
-namespace shared_interactions {
+namespace thrift::shared_interactions {
 
 
 
@@ -89,5 +88,4 @@ InteractLocallyClientWrapper::SharedInteractionInteractionWrapper::tear_down(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-} // namespace thrift
-} // namespace shared_interactions
+} // namespace thrift::shared_interactions

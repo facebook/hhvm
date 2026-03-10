@@ -11,10 +11,6 @@
 
 #include <memory>
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
+namespace facebook::thrift::annotation {
 
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
+} // namespace facebook::thrift::annotation

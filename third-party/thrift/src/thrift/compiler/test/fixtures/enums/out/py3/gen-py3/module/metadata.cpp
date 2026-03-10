@@ -9,9 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_handlers.h"
 
-namespace test {
-namespace fixtures {
-namespace enums {
+namespace test::fixtures::enums {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -26,6 +24,4 @@ namespace enums {
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
   return metadata;
 }
-} // namespace test
-} // namespace fixtures
-} // namespace enums
+} // namespace test::fixtures::enums

@@ -12,14 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/terse_write_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace test {
-namespace fixtures {
-namespace terse_write {
+namespace facebook::thrift::test::fixtures::terse_write {
 ::apache::thrift::metadata::ThriftMetadata terse_write_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace test
-} // namespace fixtures
-} // namespace terse_write
+} // namespace facebook::thrift::test::fixtures::terse_write

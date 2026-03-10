@@ -26,9 +26,9 @@ cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::th
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_types.h"{{!
-}} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
+}} namespace "::{{program.cpp_namespace}}":
   {{/if first?}}
-    cdef cppclass {{#partial types.c_binding node=enum}} "::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{enum.cpp_name}}":
+    cdef cppclass {{#partial types.c_binding node=enum}} "::{{program.cpp_namespace}}::{{enum.cpp_name}}":
         pass
 
 {{/each}}

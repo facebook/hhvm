@@ -9,8 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_handlers.h"
 
-namespace test {
-namespace namespace_from_package_without_module_name {
+namespace test::namespace_from_package_without_module_name {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -18,5 +17,4 @@ namespace namespace_from_package_without_module_name {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::test::namespace_from_package_without_module_name::TestService>>::gen(response);
   return metadata;
 }
-} // namespace test
-} // namespace namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name

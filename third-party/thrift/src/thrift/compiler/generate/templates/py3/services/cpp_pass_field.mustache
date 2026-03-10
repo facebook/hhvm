@@ -15,17 +15,12 @@
   limitations under the License.
 
 }}{{!
-
 defines how a variable in a field should be passed into another c++ function
 from the current function. ie, when calling some_func(a, b, c), the variables
 a, b, and c would be written using this file. Most variables can be passed
 as themselves by value, but the complex types are unique_ptr values and
 need to be moved to the called function.
-
 }}
 {{#pragma ignore-newlines}}
-  {{#if (or field.type.bool? field.type.byte? field.type.i16? field.type.i32? field.type.i64? field.type.double? field.type.float? field.type.enum?)}}
-{{field.cpp_name}}
-  {{#else if (or field.type.string? field.type.binary? field.type.structured? field.type.container?)}}
-std::move({{field.cpp_name}})
-  {{/if (or field.type.bool? field.type.byte? field.type.i16? field.type.i32? field.type.i64? field.type.double? field.type.float? field.type.enum?)}}
+  {{#let should_move=(or field.type.string? field.type.binary? field.type.structured? field.type.container?)}}
+{{#if should_move}}std::move({{field.cpp_name}}){{#else}}{{field.cpp_name}}{{/if}}

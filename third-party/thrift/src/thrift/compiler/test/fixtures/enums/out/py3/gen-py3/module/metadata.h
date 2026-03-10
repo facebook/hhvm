@@ -12,10 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h"
 
-namespace test {
-namespace fixtures {
-namespace enums {
+namespace test::fixtures::enums {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
-} // namespace test
-} // namespace fixtures
-} // namespace enums
+} // namespace test::fixtures::enums

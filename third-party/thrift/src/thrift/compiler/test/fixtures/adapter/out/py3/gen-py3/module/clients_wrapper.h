@@ -30,11 +30,7 @@
 #include <set>
 #include <vector>
 
-namespace facebook {
-namespace thrift {
-namespace test {
-namespace fixtures {
-namespace adapter {
+namespace facebook::thrift::test::fixtures::adapter {
 
 class ServiceClientWrapper : public ::thrift::py3::ClientWrapper {
   public:
@@ -60,8 +56,4 @@ class AdapterServiceClientWrapper : public ::thrift::py3::ClientWrapper {
 };
 
 
-} // namespace facebook
-} // namespace thrift
-} // namespace test
-} // namespace fixtures
-} // namespace adapter
+} // namespace facebook::thrift::test::fixtures::adapter

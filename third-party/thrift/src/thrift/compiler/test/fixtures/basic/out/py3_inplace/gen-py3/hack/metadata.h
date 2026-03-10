@@ -12,12 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/hack_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace hack {
+namespace facebook::thrift::annotation::hack {
 ::apache::thrift::metadata::ThriftMetadata hack_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace hack
+} // namespace facebook::thrift::annotation::hack

@@ -25,11 +25,7 @@
 
 #include "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_types.h"
 
-  {{#each program.cppNamespaces as |ns|}}
-namespace {{ns}} {
-  {{/each}}
+namespace {{program.cpp_namespace}} {
 ::apache::thrift::metadata::ThriftMetadata {{program.name}}_getThriftModuleMetadata();
-  {{#each program.cppNamespaces as |ns|}}
-} // namespace {{ns}}
-  {{/each}}
+} // namespace {{program.cpp_namespace}}
 {{/if (not program.auto_migrate?)}}

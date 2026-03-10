@@ -9,9 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/basic/gen-cpp2/module_handlers.h"
 
-namespace test {
-namespace fixtures {
-namespace basic {
+namespace test::fixtures::basic {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -31,6 +29,4 @@ namespace basic {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>>::gen(response);
   return metadata;
 }
-} // namespace test
-} // namespace fixtures
-} // namespace basic
+} // namespace test::fixtures::basic

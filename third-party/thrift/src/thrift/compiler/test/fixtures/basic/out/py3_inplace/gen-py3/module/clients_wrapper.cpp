@@ -7,9 +7,7 @@
 
 #include <thrift/compiler/test/fixtures/basic/gen-py3/module/clients_wrapper.h>
 
-namespace test {
-namespace fixtures {
-namespace basic {
+namespace test::fixtures::basic {
 
 
 folly::Future<folly::Unit>
@@ -342,6 +340,4 @@ DbMixedStackArgumentsClientWrapper::getDataByKey1(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-} // namespace test
-} // namespace fixtures
-} // namespace basic
+} // namespace test::fixtures::basic

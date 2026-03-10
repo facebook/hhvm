@@ -22,9 +22,9 @@ This is a template for exposing cpp constants in .pxd
 {{#each (array.enumerate program.consts with_first=true) as |i constant first?|}}
   {{#if first?}}
 cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_constants.h"{{!
-}} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
+}} namespace "::{{program.cpp_namespace}}":
   {{/if first?}}
     cdef {{#if constant.type.string?}}const char*{{#else}}{{#partial types.cython_cpp_type type=constant.type}}{{/if}} {{!
-    }}{{#partial types.c_binding node=constant}} "::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{program.name}}_constants::{{constant.name}}"{{!
+    }}{{#partial types.c_binding node=constant}} "::{{program.cpp_namespace}}::{{program.name}}_constants::{{constant.name}}"{{!
     }}{{#if (or constant.type.structured? constant.type.string? constant.type.binary? constant.type.container? constant.type.enum?)}}(){{/if}}
 {{/each}}

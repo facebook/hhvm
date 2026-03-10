@@ -873,8 +873,9 @@ class t_mstch_py3_generator : public t_whisker_generator {
       }
       return whisker::make::array();
     });
-    def.property("cppNamespaces", [](const t_program& self) {
-      return to_whisker_string_array(cpp2::get_gen_namespace_components(self));
+    def.property("cpp_namespace", [](const t_program& self) {
+      return fmt::format(
+          "{}", fmt::join(cpp2::get_gen_namespace_components(self), "::"));
     });
     def.property("py3Namespaces", [](const t_program& self) {
       return to_whisker_string_array(get_py3_namespace(&self));

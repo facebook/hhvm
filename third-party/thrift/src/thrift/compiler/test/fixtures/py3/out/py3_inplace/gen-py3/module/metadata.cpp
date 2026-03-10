@@ -9,8 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/py3/gen-cpp2/module_handlers.h"
 
-namespace py3 {
-namespace simple {
+namespace py3::simple {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -33,5 +32,4 @@ namespace simple {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::RederivedService>>::gen(response);
   return metadata;
 }
-} // namespace py3
-} // namespace simple
+} // namespace py3::simple

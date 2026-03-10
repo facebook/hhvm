@@ -16,8 +16,7 @@
 
 #include <memory>
 
-namespace thrift {
-namespace shared_interactions {
+namespace thrift::shared_interactions {
 
 class InteractLocallyWrapper : virtual public InteractLocallySvIf {
   protected:
@@ -31,5 +30,4 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> InteractLocallyInterface(PyObject *if_object, folly::Executor *exc);
-} // namespace thrift
-} // namespace shared_interactions
+} // namespace thrift::shared_interactions

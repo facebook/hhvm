@@ -12,16 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/default_values_rectification_before/gen-cpp2/module_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace compiler {
-namespace test {
-namespace fixtures {
-namespace default_values_rectification_before {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace compiler
-} // namespace test
-} // namespace fixtures
-} // namespace default_values_rectification_before
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_before

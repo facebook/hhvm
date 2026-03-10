@@ -7,11 +7,7 @@
 
 #include <thrift/compiler/test/fixtures/single_file_service/gen-py3/thrift/clients_wrapper.h>
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
+namespace facebook::thrift::annotation {
 
 
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
+} // namespace facebook::thrift::annotation

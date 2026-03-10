@@ -12,10 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/included_enum_types.h"
 
-namespace test {
-namespace fixtures {
-namespace enums {
+namespace test::fixtures::enums {
 ::apache::thrift::metadata::ThriftMetadata included_enum_getThriftModuleMetadata();
-} // namespace test
-} // namespace fixtures
-} // namespace enums
+} // namespace test::fixtures::enums

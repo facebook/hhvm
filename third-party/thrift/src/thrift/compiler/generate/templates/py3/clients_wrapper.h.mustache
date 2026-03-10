@@ -51,15 +51,14 @@ Header file for ClientsWrapper.cpp for cython to import in CythonClients.pxd.
 #include <set>
 #include <vector>
 
-{{#each program.cppNamespaces as |ns|}}namespace {{ns}} {
-{{/each}}
+namespace {{program.cpp_namespace}} {
 
 {{#each program.services as |service|}}
 class {{service.name}}ClientWrapper : {{!
-}}{{#if (object.notnull? service.extends)}}public ::{{#each service.extends.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.extends.name}}ClientWrapper{{#else}}public ::thrift::py3::ClientWrapper{{/if}} {
+}}{{#if (object.notnull? service.extends)}}public ::{{service.extends.program.cpp_namespace}}::{{service.extends.name}}ClientWrapper{{#else}}public ::thrift::py3::ClientWrapper{{/if}} {
   public:
     using {{#if (object.notnull? service.extends)}}{{!
-    }}::{{#each service.extends.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.extends.name}}ClientWrapper::{{service.extends.name}}ClientWrapper{{!
+    }}::{{service.extends.program.cpp_namespace}}::{{service.extends.name}}ClientWrapper::{{service.extends.name}}ClientWrapper{{!
     }}{{#else}}::thrift::py3::ClientWrapper::ClientWrapper{{/if (object.notnull? service.extends)}};
 
 {{#each service.supportedFunctions as |function|}}
@@ -89,8 +88,6 @@ class {{service.name}}ClientWrapper : {{!
 };
 
 
-{{/each}}{{!
-}}{{#each program.cppNamespaces as |ns|}}
-} // namespace {{ns}}
 {{/each}}
+} // namespace {{program.cpp_namespace}}
 {{/if (not program.auto_migrate?)}}

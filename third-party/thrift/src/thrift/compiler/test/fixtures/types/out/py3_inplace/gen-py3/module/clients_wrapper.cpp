@@ -7,10 +7,7 @@
 
 #include <thrift/compiler/test/fixtures/types/gen-py3/module/clients_wrapper.h>
 
-namespace apache {
-namespace thrift {
-namespace fixtures {
-namespace types {
+namespace apache::thrift::fixtures::types {
 
 
 folly::Future<std::unordered_map<int32_t,std::string>>
@@ -61,7 +58,4 @@ SomeServiceClientWrapper::binary_keyed_map(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-} // namespace apache
-} // namespace thrift
-} // namespace fixtures
-} // namespace types
+} // namespace apache::thrift::fixtures::types

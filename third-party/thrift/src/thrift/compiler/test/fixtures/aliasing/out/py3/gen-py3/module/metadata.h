@@ -12,16 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/aliasing/gen-cpp2/module_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace compiler {
-namespace test {
-namespace fixtures {
-namespace aliasing {
+namespace facebook::thrift::compiler::test::fixtures::aliasing {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace compiler
-} // namespace test
-} // namespace fixtures
-} // namespace aliasing
+} // namespace facebook::thrift::compiler::test::fixtures::aliasing

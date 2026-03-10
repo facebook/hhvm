@@ -16,8 +16,7 @@
 
 #include <memory>
 
-namespace test {
-namespace namespace_from_package_without_module_name {
+namespace test::namespace_from_package_without_module_name {
 
 class TestServiceWrapper : virtual public TestServiceSvIf {
   protected:
@@ -33,5 +32,4 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> TestServiceInterface(PyObject *if_object, folly::Executor *exc);
-} // namespace test
-} // namespace namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name

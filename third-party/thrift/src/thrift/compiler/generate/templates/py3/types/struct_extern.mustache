@@ -44,17 +44,17 @@ cdef extern from "thrift/lib/cpp2/gen/module_metadata_h.h" namespace "apache::th
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "{{program.include_prefix}}{{program.cpp_gen_path}}/{{program.name}}_types_custom_protocol.h"{{!
-}} namespace "{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}":
+}} namespace "::{{program.cpp_namespace}}":
   {{/if first?}}
     {{#if struct.union?}}
-    cdef enum class {{#partial types.c_binding node=struct}}__type "::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{struct.name}}::Type":
+    cdef enum class {{#partial types.c_binding node=struct}}__type "::{{program.cpp_namespace}}::{{struct.name}}::Type":
         __EMPTY__,
       {{#each struct.py3_fields as |field|}}
         {{field.py_name}},
       {{/each}}
     {{/if struct.union?}}
 
-    cdef cppclass {{#partial types.c_binding node=struct}} "::{{#each program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{struct.name}}"{{#if struct.exception?}}(cTException){{/if}}:
+    cdef cppclass {{#partial types.c_binding node=struct}} "::{{program.cpp_namespace}}::{{struct.name}}"{{#if struct.exception?}}(cTException){{/if}}:
         {{#partial types.c_binding node=struct}}() except +
       {{#if (not struct.cpp_noncopyable?)}}
         {{#partial types.c_binding node=struct}}(const {{#partial types.c_binding node=struct}}&) except +

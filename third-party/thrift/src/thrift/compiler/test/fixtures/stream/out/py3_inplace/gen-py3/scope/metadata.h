@@ -12,10 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/stream/gen-cpp2/scope_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
+namespace facebook::thrift::annotation {
 ::apache::thrift::metadata::ThriftMetadata scope_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
+} // namespace facebook::thrift::annotation

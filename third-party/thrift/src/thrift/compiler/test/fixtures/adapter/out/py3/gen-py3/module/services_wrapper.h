@@ -21,11 +21,7 @@
 
 #include <memory>
 
-namespace facebook {
-namespace thrift {
-namespace test {
-namespace fixtures {
-namespace adapter {
+namespace facebook::thrift::test::fixtures::adapter {
 
 class ServiceWrapper : virtual public ServiceSvIf {
   protected:
@@ -60,8 +56,4 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> AdapterServiceInterface(PyObject *if_object, folly::Executor *exc);
-} // namespace facebook
-} // namespace thrift
-} // namespace test
-} // namespace fixtures
-} // namespace adapter
+} // namespace facebook::thrift::test::fixtures::adapter

@@ -9,9 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/int_limits/gen-cpp2/thrift_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
+namespace facebook::thrift::annotation {
 ::apache::thrift::metadata::ThriftMetadata thrift_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -43,6 +41,4 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<Deprecated>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
+} // namespace facebook::thrift::annotation

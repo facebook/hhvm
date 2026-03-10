@@ -9,10 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/rust_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace rust {
+namespace facebook::thrift::annotation::rust {
 ::apache::thrift::metadata::ThriftMetadata rust_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -32,7 +29,4 @@ namespace rust {
   ::apache::thrift::detail::md::StructMetadata<ServiceExn>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace rust
+} // namespace facebook::thrift::annotation::rust

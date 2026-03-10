@@ -9,8 +9,7 @@
 #include <thrift/compiler/test/fixtures/interactions/gen-py3/shared/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-namespace thrift {
-namespace shared_interactions {
+namespace thrift::shared_interactions {
 
 InteractLocallyWrapper::InteractLocallyWrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
@@ -41,5 +40,4 @@ folly::SemiFuture<folly::Unit> InteractLocallyWrapper::semifuture_onStopRequeste
   );
   return std::move(future);
 }
-} // namespace thrift
-} // namespace shared_interactions
+} // namespace thrift::shared_interactions

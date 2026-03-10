@@ -9,12 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/default_values_rectification_after/gen-cpp2/module_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace compiler {
-namespace test {
-namespace fixtures {
-namespace default_values_rectification_after {
+namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -22,9 +17,4 @@ namespace default_values_rectification_after {
   ::apache::thrift::detail::md::StructMetadata<TestStruct>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace compiler
-} // namespace test
-} // namespace fixtures
-} // namespace default_values_rectification_after
+} // namespace facebook::thrift::compiler::test::fixtures::default_values_rectification_after

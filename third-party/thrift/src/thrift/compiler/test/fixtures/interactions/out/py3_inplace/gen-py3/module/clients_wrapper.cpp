@@ -707,7 +707,7 @@ InteractWithSharedClientWrapper::MyInteractionInteractionWrapper::truthify(
 folly::Future<int32_t>
 InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::init(
     apache::thrift::RpcOptions& rpcOptions) {
-  auto* client = static_cast<::thrift::shared_interactions::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
+  auto* client = static_cast<::cpp2::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<int32_t>;
   folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
@@ -729,7 +729,7 @@ InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::init(
 folly::Future<::thrift::shared_interactions::DoSomethingResult>
 InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::do_something(
     apache::thrift::RpcOptions& rpcOptions) {
-  auto* client = static_cast<::thrift::shared_interactions::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
+  auto* client = static_cast<::cpp2::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::thrift::shared_interactions::DoSomethingResult>;
   folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();
@@ -751,7 +751,7 @@ InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::do_somethi
 folly::Future<folly::Unit>
 InteractWithSharedClientWrapper::SharedInteractionInteractionWrapper::tear_down(
     apache::thrift::RpcOptions& rpcOptions) {
-  auto* client = static_cast<::thrift::shared_interactions::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
+  auto* client = static_cast<::cpp2::InteractWithSharedAsyncClient::SharedInteraction*>(async_client_.get());
   using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<folly::Unit>;
   folly::Promise<CallbackHelper::PromiseResult> _promise;
   auto _future = _promise.getFuture();

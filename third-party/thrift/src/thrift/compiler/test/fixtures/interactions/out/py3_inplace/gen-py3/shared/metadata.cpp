@@ -9,8 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_handlers.h"
 
-namespace thrift {
-namespace shared_interactions {
+namespace thrift::shared_interactions {
 ::apache::thrift::metadata::ThriftMetadata shared_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -18,5 +17,4 @@ namespace shared_interactions {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::thrift::shared_interactions::InteractLocally>>::gen(response);
   return metadata;
 }
-} // namespace thrift
-} // namespace shared_interactions
+} // namespace thrift::shared_interactions

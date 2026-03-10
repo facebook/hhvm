@@ -9,9 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/module_handlers.h"
 
-namespace test {
-namespace fixtures {
-namespace enumstrict {
+namespace test::fixtures::enumstrict {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -22,6 +20,4 @@ namespace enumstrict {
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
   return metadata;
 }
-} // namespace test
-} // namespace fixtures
-} // namespace enumstrict
+} // namespace test::fixtures::enumstrict

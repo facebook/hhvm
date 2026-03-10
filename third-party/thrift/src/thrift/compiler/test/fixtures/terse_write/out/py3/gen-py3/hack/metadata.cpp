@@ -9,10 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/terse_write/gen-cpp2/hack_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace hack {
+namespace facebook::thrift::annotation::hack {
 ::apache::thrift::metadata::ThriftMetadata hack_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -31,7 +28,4 @@ namespace hack {
   ::apache::thrift::detail::md::StructMetadata<MigrationBlockingLegacyJSONSerialization>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace hack
+} // namespace facebook::thrift::annotation::hack

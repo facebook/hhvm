@@ -9,10 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/java_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace java {
+namespace facebook::thrift::annotation::java {
 ::apache::thrift::metadata::ThriftMetadata java_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -26,7 +23,4 @@ namespace java {
   ::apache::thrift::detail::md::StructMetadata<UseIntrinsicDefault>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace java
+} // namespace facebook::thrift::annotation::java

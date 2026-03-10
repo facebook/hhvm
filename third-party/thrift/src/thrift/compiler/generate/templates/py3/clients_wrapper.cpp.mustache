@@ -28,8 +28,7 @@ thread that will pass data to the cython callback.
 
 #include <{{program.include_prefix}}gen-py3/{{program.name}}/clients_wrapper.h>
 
-{{#each program.cppNamespaces as |ns|}}namespace {{ns}} {
-{{/each}}
+namespace {{program.cpp_namespace}} {
 
 
 {{#each program.services as |service|}}
@@ -38,7 +37,7 @@ folly::Future<{{#partial clients.cpp_return_type function=function}}>
 {{service.name}}ClientWrapper::{{function.cpp_name}}(
     apache::thrift::RpcOptions& rpcOptions{{#each function.params.fields as |field|}},
     {{#partial types.cpp_value_type type=field.type}} arg_{{field.py_name}}{{/each}}) {
-  auto* client = static_cast<::{{#each service.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.cpp_name}}AsyncClient*>(async_client_.get());
+  auto* client = static_cast<::{{service.program.cpp_namespace}}::{{service.cpp_name}}AsyncClient*>(async_client_.get());
   {{> clients/clients_wrapper.cpp_func_body}}
 
 }
@@ -64,14 +63,13 @@ folly::Future<{{#partial clients.cpp_return_type function=function}}>
 {{service.name}}ClientWrapper::{{interaction.name}}InteractionWrapper::{{function.cpp_name}}(
     apache::thrift::RpcOptions& rpcOptions{{#each function.params.fields as |field|}},
     {{#partial types.cpp_value_type type=field.type}} arg_{{field.py_name}}{{/each}}) {
-  auto* client = static_cast<::{{#each interaction.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.cpp_name}}AsyncClient::{{interaction.name}}*>(async_client_.get());
+  auto* client = static_cast<::{{service.program.cpp_namespace}}::{{service.cpp_name}}AsyncClient::{{interaction.name}}*>(async_client_.get());
   {{> clients/clients_wrapper.cpp_func_body}}
 
 }
 
     {{/each}}
   {{/each}}
-{{/each}}{{!
-}}{{#each program.cppNamespaces as |ns|}}} // namespace {{ns}}
 {{/each}}
+} // namespace {{program.cpp_namespace}}
 {{/if (not program.auto_migrate?)}}

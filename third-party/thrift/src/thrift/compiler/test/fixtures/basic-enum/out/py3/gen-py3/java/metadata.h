@@ -12,12 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/basic-enum/gen-cpp2/java_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace java {
+namespace facebook::thrift::annotation::java {
 ::apache::thrift::metadata::ThriftMetadata java_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace java
+} // namespace facebook::thrift::annotation::java

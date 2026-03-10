@@ -25,8 +25,7 @@
 #include <set>
 #include <vector>
 
-namespace thrift {
-namespace shared_interactions {
+namespace thrift::shared_interactions {
 
 class InteractLocallyClientWrapper : public ::thrift::py3::ClientWrapper {
   public:
@@ -51,5 +50,4 @@ class InteractLocallyClientWrapper : public ::thrift::py3::ClientWrapper {
 };
 
 
-} // namespace thrift
-} // namespace shared_interactions
+} // namespace thrift::shared_interactions

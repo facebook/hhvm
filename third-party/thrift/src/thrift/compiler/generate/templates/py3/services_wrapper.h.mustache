@@ -43,12 +43,11 @@ created by the thrift compiler for generated cpp2 code.
 
 #include <memory>
 
-{{#each program.cppNamespaces as |ns|}}namespace {{ns}} {
-{{/each}}
+namespace {{program.cpp_namespace}} {
 
 {{#each (array.enumerate program.services with_last=true) as |i service is_last_service?|}}
 class {{service.name}}Wrapper : {{!
-  }}{{#let parent = service.extends}}{{#if (object.notnull? parent)}}public ::{{#each parent.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{parent.name}}Wrapper, {{/if}}{{!
+  }}{{#let parent = service.extends}}{{#if (object.notnull? parent)}}public ::{{parent.program.cpp_namespace}}::{{parent.name}}Wrapper, {{/if}}{{!
   }}virtual public {{service.cpp_name}}SvIf {
 {{#if (object.eq? null service.extends)}}
   protected:
@@ -77,8 +76,6 @@ std::shared_ptr<apache::thrift::ServerInterface> {{service.name}}Interface(PyObj
 
 
   {{/if (not is_last_service?)}}
-{{/each}}{{!
-}}{{#each program.cppNamespaces as |ns|}}
-} // namespace {{ns}}
 {{/each}}
+} // namespace {{program.cpp_namespace}}
 {{/if (not program.auto_migrate?)}}

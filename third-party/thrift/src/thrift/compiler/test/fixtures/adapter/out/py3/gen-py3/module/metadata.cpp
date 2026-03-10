@@ -9,11 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace test {
-namespace fixtures {
-namespace adapter {
+namespace facebook::thrift::test::fixtures::adapter {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -48,8 +44,4 @@ namespace adapter {
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::fixtures::adapter::AdapterService>>::gen(response);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace test
-} // namespace fixtures
-} // namespace adapter
+} // namespace facebook::thrift::test::fixtures::adapter

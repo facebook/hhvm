@@ -12,16 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/default_values/gen-cpp2/module_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace compiler {
-namespace test {
-namespace fixtures {
-namespace default_values {
+namespace facebook::thrift::compiler::test::fixtures::default_values {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace compiler
-} // namespace test
-} // namespace fixtures
-} // namespace default_values
+} // namespace facebook::thrift::compiler::test::fixtures::default_values

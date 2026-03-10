@@ -39,15 +39,15 @@ namespace py3 {
   {{#if (not struct.union?)}}
 
 template<>
-inline void reset_field<{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}::{{struct.name}}>(
-    {{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}::{{struct.name}}& obj, uint16_t index) {
+inline void reset_field<::{{program.cpp_namespace}}::{{struct.name}}>(
+    ::{{program.cpp_namespace}}::{{struct.name}}& obj, uint16_t index) {
   switch (index) {
     {{#each (array.enumerate struct.py3_fields) as |field_idx field|}}
     case {{field_idx}}:
       {{#if field.reference?}}
       obj.{{field.cpp_name}}_ref(){{#if field.iobuf_ref?}}->{{#else}}.{{/if}}reset();
       {{#else}}
-      obj.{{field.cpp_name}}_ref().copy_from(default_inst<{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}::{{struct.name}}>().{{field.cpp_name}}_ref());
+      obj.{{field.cpp_name}}_ref().copy_from(default_inst<::{{program.cpp_namespace}}::{{struct.name}}>().{{field.cpp_name}}_ref());
       {{/if field.reference?}}
       return;
     {{/each}}
@@ -59,7 +59,7 @@ inline void reset_field<{{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    {{#each program.cppNamespaces as |ns|}}::{{ns}}{{/each}}::{{struct.name}}>::namesmap() {
+    ::{{program.cpp_namespace}}::{{struct.name}}>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
       {{#each struct.py3_fields as |field|}}{{#if field.hasPyName?}}

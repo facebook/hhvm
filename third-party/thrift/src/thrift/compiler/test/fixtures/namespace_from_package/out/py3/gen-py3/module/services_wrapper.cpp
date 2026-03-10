@@ -9,9 +9,7 @@
 #include <thrift/compiler/test/fixtures/namespace_from_package/gen-py3/module/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-namespace test {
-namespace namespace_from_package {
-namespace module {
+namespace test::namespace_from_package::module {
 
 TestServiceWrapper::TestServiceWrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
@@ -62,6 +60,4 @@ folly::SemiFuture<folly::Unit> TestServiceWrapper::semifuture_onStopRequested() 
   );
   return std::move(future);
 }
-} // namespace test
-} // namespace namespace_from_package
-} // namespace module
+} // namespace test::namespace_from_package::module

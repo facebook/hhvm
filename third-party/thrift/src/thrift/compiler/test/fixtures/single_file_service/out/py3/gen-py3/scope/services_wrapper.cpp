@@ -9,9 +9,5 @@
 #include <thrift/compiler/test/fixtures/single_file_service/gen-py3/scope/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
+namespace facebook::thrift::annotation {
+} // namespace facebook::thrift::annotation

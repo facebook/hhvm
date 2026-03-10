@@ -9,10 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/templated-deserialize/gen-cpp2/cpp_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace cpp {
+namespace facebook::thrift::annotation::cpp {
 ::apache::thrift::metadata::ThriftMetadata cpp_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -45,7 +42,4 @@ namespace cpp {
   ::apache::thrift::detail::md::StructMetadata<DeclareEqualToSpecialization>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace cpp
+} // namespace facebook::thrift::annotation::cpp

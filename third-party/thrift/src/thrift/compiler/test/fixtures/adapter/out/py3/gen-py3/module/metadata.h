@@ -12,14 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace test {
-namespace fixtures {
-namespace adapter {
+namespace facebook::thrift::test::fixtures::adapter {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace test
-} // namespace fixtures
-} // namespace adapter
+} // namespace facebook::thrift::test::fixtures::adapter

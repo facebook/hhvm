@@ -9,15 +9,11 @@
 
 #include "thrift/compiler/test/fixtures/enums/gen-cpp2/included_enum_handlers.h"
 
-namespace test {
-namespace fixtures {
-namespace enums {
+namespace test::fixtures::enums {
 ::apache::thrift::metadata::ThriftMetadata included_enum_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::EnumMetadata<IncludedEnum>::gen(metadata);
   return metadata;
 }
-} // namespace test
-} // namespace fixtures
-} // namespace enums
+} // namespace test::fixtures::enums

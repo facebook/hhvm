@@ -9,10 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/go_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace go {
+namespace facebook::thrift::annotation::go {
 ::apache::thrift::metadata::ThriftMetadata go_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -22,7 +19,4 @@ namespace go {
   ::apache::thrift::detail::md::StructMetadata<UseReflectCodec>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace go
+} // namespace facebook::thrift::annotation::go

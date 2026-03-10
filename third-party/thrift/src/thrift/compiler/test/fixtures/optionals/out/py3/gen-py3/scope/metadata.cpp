@@ -9,9 +9,7 @@
 
 #include "thrift/compiler/test/fixtures/optionals/gen-cpp2/scope_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
+namespace facebook::thrift::annotation {
 ::apache::thrift::metadata::ThriftMetadata scope_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
@@ -36,6 +34,4 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<DisableSchemaConst>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
+} // namespace facebook::thrift::annotation

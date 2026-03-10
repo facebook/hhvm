@@ -12,10 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/internal_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
+namespace facebook::thrift::annotation {
 ::apache::thrift::metadata::ThriftMetadata internal_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
+} // namespace facebook::thrift::annotation

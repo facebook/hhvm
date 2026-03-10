@@ -7,8 +7,7 @@
 
 #include <thrift/compiler/test/fixtures/py3/gen-py3/module/clients_wrapper.h>
 
-namespace py3 {
-namespace simple {
+namespace py3::simple {
 
 
 folly::Future<int32_t>
@@ -1037,5 +1036,4 @@ RederivedServiceClientWrapper::get_seven(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-} // namespace py3
-} // namespace simple
+} // namespace py3::simple

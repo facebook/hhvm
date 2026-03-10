@@ -16,10 +16,7 @@
 
 #include <memory>
 
-namespace apache {
-namespace thrift {
-namespace fixtures {
-namespace types {
+namespace apache::thrift::fixtures::types {
 
 class SomeServiceWrapper : virtual public SomeServiceSvIf {
   protected:
@@ -38,7 +35,4 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> SomeServiceInterface(PyObject *if_object, folly::Executor *exc);
-} // namespace apache
-} // namespace thrift
-} // namespace fixtures
-} // namespace types
+} // namespace apache::thrift::fixtures::types

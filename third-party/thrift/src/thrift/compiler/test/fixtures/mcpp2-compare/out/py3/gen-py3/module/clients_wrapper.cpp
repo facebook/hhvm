@@ -7,9 +7,7 @@
 
 #include <thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/clients_wrapper.h>
 
-namespace some {
-namespace valid {
-namespace ns {
+namespace some::valid::ns {
 
 
 folly::Future<folly::Unit>
@@ -1260,6 +1258,4 @@ ParamServiceClientWrapper::annotatedParams(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-} // namespace some
-} // namespace valid
-} // namespace ns
+} // namespace some::valid::ns

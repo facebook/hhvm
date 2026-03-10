@@ -40,9 +40,7 @@
 #include <set>
 #include <vector>
 
-namespace test {
-namespace fixtures {
-namespace basic {
+namespace test::fixtures::basic {
 
 class FooServiceClientWrapper : public ::thrift::py3::ClientWrapper {
   public:
@@ -111,6 +109,4 @@ class DbMixedStackArgumentsClientWrapper : public ::thrift::py3::ClientWrapper {
 };
 
 
-} // namespace test
-} // namespace fixtures
-} // namespace basic
+} // namespace test::fixtures::basic

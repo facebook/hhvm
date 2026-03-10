@@ -12,8 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 
-namespace py3 {
-namespace simple {
+namespace py3::simple {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata();
-} // namespace py3
-} // namespace simple
+} // namespace py3::simple

@@ -7,11 +7,7 @@
 
 #include <thrift/compiler/test/fixtures/adapter/gen-py3/module/clients_wrapper.h>
 
-namespace facebook {
-namespace thrift {
-namespace test {
-namespace fixtures {
-namespace adapter {
+namespace facebook::thrift::test::fixtures::adapter {
 
 
 folly::Future<int32_t>
@@ -88,8 +84,4 @@ AdapterServiceClientWrapper::adaptedTypes(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-} // namespace facebook
-} // namespace thrift
-} // namespace test
-} // namespace fixtures
-} // namespace adapter
+} // namespace facebook::thrift::test::fixtures::adapter

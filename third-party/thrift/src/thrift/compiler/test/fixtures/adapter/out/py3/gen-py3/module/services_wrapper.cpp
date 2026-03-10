@@ -9,11 +9,7 @@
 #include <thrift/compiler/test/fixtures/adapter/gen-py3/module/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-namespace facebook {
-namespace thrift {
-namespace test {
-namespace fixtures {
-namespace adapter {
+namespace facebook::thrift::test::fixtures::adapter {
 
 ServiceWrapper::ServiceWrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
@@ -140,8 +136,4 @@ folly::SemiFuture<folly::Unit> AdapterServiceWrapper::semifuture_onStopRequested
   );
   return std::move(future);
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace test
-} // namespace fixtures
-} // namespace adapter
+} // namespace facebook::thrift::test::fixtures::adapter

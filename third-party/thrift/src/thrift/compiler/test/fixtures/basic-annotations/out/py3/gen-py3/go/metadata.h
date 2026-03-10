@@ -12,12 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/go_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace go {
+namespace facebook::thrift::annotation::go {
 ::apache::thrift::metadata::ThriftMetadata go_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace go
+} // namespace facebook::thrift::annotation::go

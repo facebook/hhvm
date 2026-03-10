@@ -7,8 +7,7 @@
 
 #include <thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-py3/module/clients_wrapper.h>
 
-namespace test {
-namespace namespace_from_package_without_module_name {
+namespace test::namespace_from_package_without_module_name {
 
 
 folly::Future<int64_t>
@@ -35,5 +34,4 @@ TestServiceClientWrapper::init(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
-} // namespace test
-} // namespace namespace_from_package_without_module_name
+} // namespace test::namespace_from_package_without_module_name

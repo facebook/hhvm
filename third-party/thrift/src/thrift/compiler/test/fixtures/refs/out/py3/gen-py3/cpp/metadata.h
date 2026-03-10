@@ -12,12 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/refs/gen-cpp2/cpp_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace cpp {
+namespace facebook::thrift::annotation::cpp {
 ::apache::thrift::metadata::ThriftMetadata cpp_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace cpp
+} // namespace facebook::thrift::annotation::cpp

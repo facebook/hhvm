@@ -34,13 +34,12 @@ defined in ServicesCallbacks, along with appropriate arguments.
 #include <{{program.include_prefix}}gen-py3/{{program.name}}/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-{{#each program.cppNamespaces as |ns|}}namespace {{ns}} {
-{{/each}}
+namespace {{program.cpp_namespace}} {
 {{#each (array.enumerate program.services with_last=true) as |i service is_last_service?|}}
 
 {{#if (object.notnull? service.extends)}}
 {{service.name}}Wrapper::{{service.name}}Wrapper(PyObject *obj, folly::Executor* exc)
-  : ::{{#each service.extends.program.cppNamespaces as |ns|}}{{ns}}::{{/each}}{{service.extends.name}}Wrapper(obj, exc)
+  : ::{{service.extends.program.cpp_namespace}}::{{service.extends.name}}Wrapper(obj, exc)
   {
     import_{{#each program.py3Namespaces as |ns|}}{{ns}}__{{/each}}{{program.name}}__services();
   }
@@ -107,8 +106,6 @@ folly::SemiFuture<folly::Unit> {{service.name}}Wrapper::semifuture_{{function.cp
   {{#if (not is_last_service?)}}
 
   {{/if (not is_last_service?)}}
-{{/each}}{{!
-}}{{#each program.cppNamespaces as |ns|}}
-} // namespace {{ns}}
 {{/each}}
+} // namespace {{program.cpp_namespace}}
 {{/if (not program.auto_migrate?)}}

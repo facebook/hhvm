@@ -12,10 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_types.h"
 
-namespace a {
-namespace different {
-namespace ns {
+namespace a::different::ns {
 ::apache::thrift::metadata::ThriftMetadata includes_getThriftModuleMetadata();
-} // namespace a
-} // namespace different
-} // namespace ns
+} // namespace a::different::ns

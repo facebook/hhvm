@@ -9,10 +9,7 @@
 #include <thrift/compiler/test/fixtures/types/gen-py3/module/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-namespace apache {
-namespace thrift {
-namespace fixtures {
-namespace types {
+namespace apache::thrift::fixtures::types {
 
 SomeServiceWrapper::SomeServiceWrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
@@ -86,7 +83,4 @@ folly::SemiFuture<folly::Unit> SomeServiceWrapper::semifuture_onStopRequested() 
   );
   return std::move(future);
 }
-} // namespace apache
-} // namespace thrift
-} // namespace fixtures
-} // namespace types
+} // namespace apache::thrift::fixtures::types

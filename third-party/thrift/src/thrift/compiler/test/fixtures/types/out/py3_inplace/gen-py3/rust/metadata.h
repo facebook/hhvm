@@ -12,12 +12,6 @@
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/rust_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace annotation {
-namespace rust {
+namespace facebook::thrift::annotation::rust {
 ::apache::thrift::metadata::ThriftMetadata rust_getThriftModuleMetadata();
-} // namespace facebook
-} // namespace thrift
-} // namespace annotation
-} // namespace rust
+} // namespace facebook::thrift::annotation::rust

@@ -9,21 +9,11 @@
 
 #include "thrift/compiler/test/fixtures/aliasing/gen-cpp2/module_handlers.h"
 
-namespace facebook {
-namespace thrift {
-namespace compiler {
-namespace test {
-namespace fixtures {
-namespace aliasing {
+namespace facebook::thrift::compiler::test::fixtures::aliasing {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata();
   ::apache::thrift::detail::md::StructMetadata<Foo>::gen(metadata);
   return metadata;
 }
-} // namespace facebook
-} // namespace thrift
-} // namespace compiler
-} // namespace test
-} // namespace fixtures
-} // namespace aliasing
+} // namespace facebook::thrift::compiler::test::fixtures::aliasing

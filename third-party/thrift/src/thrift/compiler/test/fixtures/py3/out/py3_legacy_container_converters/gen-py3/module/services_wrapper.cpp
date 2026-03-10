@@ -9,8 +9,7 @@
 #include <thrift/compiler/test/fixtures/py3/gen-py3/module/services_api.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
-namespace py3 {
-namespace simple {
+namespace py3::simple {
 
 SimpleServiceWrapper::SimpleServiceWrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
@@ -1065,5 +1064,4 @@ folly::SemiFuture<folly::Unit> RederivedServiceWrapper::semifuture_onStopRequest
   );
   return std::move(future);
 }
-} // namespace py3
-} // namespace simple
+} // namespace py3::simple

@@ -50,13 +50,13 @@ void assertDigestNeq(T&& left, U&& right) {
 SerializableTypeDefinitionEntry makeStructEntry(
     SerializableStructDefinition s) {
   SerializableTypeDefinitionEntry entry;
-  entry.definition()->structDef_ref() = std::move(s);
+  entry.definition()->structDef() = std::move(s);
   return entry;
 }
 
 SerializableTypeDefinitionEntry makeUnionEntry(SerializableUnionDefinition u) {
   SerializableTypeDefinitionEntry entry;
-  entry.definition()->unionDef_ref() = std::move(u);
+  entry.definition()->unionDef() = std::move(u);
   return entry;
 }
 
@@ -337,7 +337,7 @@ TEST(TypeSystemDigestTest, TypeRefStructMatchesSerializable) {
 
   // Build SerializableTypeDefinition
   SerializableTypeDefinition serializableDef;
-  serializableDef.structDef_ref() = structDef;
+  serializableDef.structDef() = structDef;
 
   // Hash both - they should produce the same digest
   TypeSystemHasher hasher;
@@ -362,7 +362,7 @@ TEST(TypeSystemDigestTest, TypeRefUnionMatchesSerializable) {
 
   // Build SerializableTypeDefinition
   SerializableTypeDefinition serializableDef;
-  serializableDef.unionDef_ref() = unionDef;
+  serializableDef.unionDef() = unionDef;
 
   // Hash both - they should produce the same digest
   TypeSystemHasher hasher;
@@ -385,7 +385,7 @@ TEST(TypeSystemDigestTest, TypeRefEnumMatchesSerializable) {
 
   // Build SerializableTypeDefinition
   SerializableTypeDefinition serializableDef;
-  serializableDef.enumDef_ref() = enumDef;
+  serializableDef.enumDef() = enumDef;
 
   // Hash both - they should produce the same digest
   TypeSystemHasher hasher;
@@ -408,7 +408,7 @@ TEST(TypeSystemDigestTest, TypeRefOpaqueAliasMatchesSerializable) {
 
   // Build SerializableTypeDefinition
   SerializableTypeDefinition serializableDef;
-  serializableDef.opaqueAliasDef_ref() = opaqueAliasDef;
+  serializableDef.opaqueAliasDef() = opaqueAliasDef;
 
   // Hash both - they should produce the same digest
   TypeSystemHasher hasher;
@@ -484,7 +484,7 @@ TEST(TypeSystemDigestTest, TypeRefStructWithAnnotationsMatchesSerializable) {
       typeSystem->getUserDefinedTypeOrThrow("meta.com/AnnotatedStruct");
 
   SerializableTypeDefinition serializableDef;
-  serializableDef.structDef_ref() = structDef;
+  serializableDef.structDef() = structDef;
 
   TypeSystemHasher hasher;
   EXPECT_EQ(hasher(TypeRef::fromDefinition(defRef)), hasher(serializableDef));
@@ -505,7 +505,7 @@ TEST(TypeSystemDigestTest, TypeRefStructWithCustomDefaultMatchesSerializable) {
       typeSystem->getUserDefinedTypeOrThrow("meta.com/StructWithDefault");
 
   SerializableTypeDefinition serializableDef;
-  serializableDef.structDef_ref() = structDef;
+  serializableDef.structDef() = structDef;
 
   TypeSystemHasher hasher;
   EXPECT_EQ(hasher(TypeRef::fromDefinition(defRef)), hasher(serializableDef));
@@ -523,7 +523,7 @@ TEST(TypeSystemDigestTest, TypeRefStructSealedMatchesSerializable) {
   auto defRef = typeSystem->getUserDefinedTypeOrThrow("meta.com/SealedStruct");
 
   SerializableTypeDefinition serializableDef;
-  serializableDef.structDef_ref() = sealedStructDef;
+  serializableDef.structDef() = sealedStructDef;
 
   TypeSystemHasher hasher;
   EXPECT_EQ(hasher(TypeRef::fromDefinition(defRef)), hasher(serializableDef));
@@ -553,7 +553,7 @@ TEST(TypeSystemDigestTest, TypeRefStructWithManyFieldsMatchesSerializable) {
       typeSystem->getUserDefinedTypeOrThrow("meta.com/ManyFieldsStruct");
 
   SerializableTypeDefinition serializableDef;
-  serializableDef.structDef_ref() = structDef;
+  serializableDef.structDef() = structDef;
 
   TypeSystemHasher hasher;
   EXPECT_EQ(hasher(TypeRef::fromDefinition(defRef)), hasher(serializableDef));
@@ -577,7 +577,7 @@ TEST(TypeSystemDigestTest, TypeRefEnumWithAnnotationsMatchesSerializable) {
   auto defRef = typeSystem->getUserDefinedTypeOrThrow("meta.com/AnnotatedEnum");
 
   SerializableTypeDefinition serializableDef;
-  serializableDef.enumDef_ref() = enumDef;
+  serializableDef.enumDef() = enumDef;
 
   TypeSystemHasher hasher;
   EXPECT_EQ(hasher(TypeRef::fromDefinition(defRef)), hasher(serializableDef));
@@ -604,7 +604,7 @@ TEST(TypeSystemDigestTest, TypeRefEnumWithManyValuesMatchesSerializable) {
       typeSystem->getUserDefinedTypeOrThrow("meta.com/ManyValuesEnum");
 
   SerializableTypeDefinition serializableDef;
-  serializableDef.enumDef_ref() = enumDef;
+  serializableDef.enumDef() = enumDef;
 
   TypeSystemHasher hasher;
   EXPECT_EQ(hasher(TypeRef::fromDefinition(defRef)), hasher(serializableDef));
@@ -627,7 +627,7 @@ TEST(
       typeSystem->getUserDefinedTypeOrThrow("meta.com/AnnotatedAlias");
 
   SerializableTypeDefinition serializableDef;
-  serializableDef.opaqueAliasDef_ref() = opaqueAliasDef;
+  serializableDef.opaqueAliasDef() = opaqueAliasDef;
 
   TypeSystemHasher hasher;
   EXPECT_EQ(hasher(TypeRef::fromDefinition(defRef)), hasher(serializableDef));
@@ -1082,7 +1082,7 @@ TEST(TypeSystemDigestTest, FieldDefaultRecordKindsMatchSerializable) {
 
     auto defRef = typeSystem->getUserDefinedTypeOrThrow("meta.com/S");
     SerializableTypeDefinition serializableDef;
-    serializableDef.structDef_ref() = structDef;
+    serializableDef.structDef() = structDef;
 
     TypeSystemHasher hasher;
     EXPECT_EQ(hasher(TypeRef::fromDefinition(defRef)), hasher(serializableDef))
@@ -1202,7 +1202,7 @@ TEST(TypeSystemDigestTest, AnyTypeInStructFieldMatchesSerializable) {
 
   auto defRef = typeSystem->getUserDefinedTypeOrThrow("meta.com/Container");
   SerializableTypeDefinition serializableDef;
-  serializableDef.structDef_ref() = structDef;
+  serializableDef.structDef() = structDef;
 
   TypeSystemHasher hasher;
   EXPECT_EQ(hasher(TypeRef::fromDefinition(defRef)), hasher(serializableDef));
@@ -1261,7 +1261,7 @@ TEST(TypeSystemDigestTest, OpaqueAliasDiffersFromTargetType) {
   // So two aliases with the same target type should have the same definition
   // digest This tests that the alias definition itself is hashed correctly
   SerializableTypeDefinition serializableDef;
-  serializableDef.opaqueAliasDef_ref() = aliasDef;
+  serializableDef.opaqueAliasDef() = aliasDef;
   EXPECT_EQ(hasher(TypeRef::fromDefinition(aliasRef)), hasher(serializableDef));
   EXPECT_EQ(
       hasher(TypeRef::fromDefinition(accountIdRef)), hasher(serializableDef));
@@ -1289,8 +1289,8 @@ TEST(TypeSystemDigestTest, SerializableFieldWithVsWithoutDefaultDiffer) {
 
   // Also verify via SerializableTypeDefinition
   SerializableTypeDefinition defWithDefault, defWithoutDefault;
-  defWithDefault.structDef_ref() = structWithDefault;
-  defWithoutDefault.structDef_ref() = structWithoutDefault;
+  defWithDefault.structDef() = structWithDefault;
+  defWithoutDefault.structDef() = structWithoutDefault;
 
   TypeSystemHasher hasher;
   EXPECT_NE(hasher(defWithDefault), hasher(defWithoutDefault));

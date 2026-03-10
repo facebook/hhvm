@@ -1005,7 +1005,7 @@ cdef class BinaryUnion(thrift.py3.types.Union):
         if iobuf_val is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_iobuf_val(deref((<_fbthrift_iobuf.IOBuf?>iobuf_val)._this)) 
+            deref(c_inst).set_iobuf_val(deref((<_fbthrift_iobuf.IOBuf?>iobuf_val)._this))
             any_set = True
         # in C++ you don't have to call move(), but this doesn't translate
         # into a C++ return statement, so you do here
@@ -1039,7 +1039,7 @@ cdef class BinaryUnion(thrift.py3.types.Union):
         if self.py_value is not None or self.type_int == 0:
             return self.py_value
         elif self.type_int == 1:
-            self.py_value =  _fbthrift_iobuf.from_unique_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_iobuf_val().clone())
+            self.py_value = _fbthrift_iobuf.from_unique_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_iobuf_val().clone())
         return self.py_value
 
     cdef _initialize_py(BinaryUnion self):

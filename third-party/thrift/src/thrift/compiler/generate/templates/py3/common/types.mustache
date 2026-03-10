@@ -674,7 +674,7 @@ deref(c_inst).set_{{field.py_name}}({{#partial cython_cpp_type type=field.type}}
 deref(c_inst).set_{{field.py_name}}(deref((<{{#partial cython_python_type type=field.type}}?>{{field.py_name}}).{{#partial cpp_obj}}))
     {{/if field.type.container?}}
 {{#else if field.type.string?}}deref(c_inst).set_{{field.py_name}}({{field.py_name}}.encode('UTF-8'))
-{{#else if field.type.iobuf?}}deref(c_inst).set_{{field.py_name}}(deref((<_fbthrift_iobuf.IOBuf?>{{field.py_name}})._this)) {{! TODO(T256504508): trailing space preserved from original }}
+{{#else if field.type.iobuf?}}deref(c_inst).set_{{field.py_name}}(deref((<_fbthrift_iobuf.IOBuf?>{{field.py_name}})._this))
 {{#else if field.type.enum?}}deref(c_inst).set_{{field.py_name}}(<{{#partial cython_cpp_type type=field.type}}><int>{{field.py_name}})
 {{#else if field.type.structured?}}deref(c_inst).set_{{field.py_name}}(deref((<{{#partial cython_python_type type=field.type}}?> {{field.py_name}}).{{#partial cpp_obj}}))
 {{#else if field.type.container?}}deref(c_inst).set_{{field.py_name}}({{#partial container_to_cpp type=field.type}}({{field.py_name}}))
@@ -689,8 +689,7 @@ deref(c_inst).set_{{field.py_name}}(deref((<{{#partial cython_python_type type=f
   {{#let type=field.type}}
 {{#if type.bool?}}<bint>(deref(self.{{#partial cpp_obj}}).get_{{field.py_name}}())
 {{#else if type.string?}}bytes(deref(self.{{#partial cpp_obj}}).get_{{field.py_name}}()).decode('UTF-8')
-{{! TODO(T256504508): Preserved extra space before `_fbthrift_iobuf` }}
-{{#else if type.iobuf?}} _fbthrift_iobuf.from_unique_ptr(deref(self.{{#partial cpp_obj}}).get_{{field.py_name}}().clone())
+{{#else if type.iobuf?}}_fbthrift_iobuf.from_unique_ptr(deref(self.{{#partial cpp_obj}}).get_{{field.py_name}}().clone())
 {{#else if type.enum?}}translate_cpp_enum_to_python({{#partial python_type type=type}}, <int>deref(self.{{#partial cpp_obj}}).get_{{field.py_name}}())
 {{#else if type.structured?}}{{#partial cython_python_type type=type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[{{#partial cython_cpp_type type=type}}](deref(self.{{#partial cpp_obj}}).get_{{field.py_name}}()))
 {{#else if type.container?}}{{#partial container_from_cpp type=type}}(deref(self.{{#partial cpp_obj}}).get_{{field.py_name}}())
@@ -707,8 +706,7 @@ if not deref(self.{{#partial cpp_obj}}).get_{{field.py_name}}():
 else:
     {{#if field.type.container?}}
     self.py_value = {{#partial container_from_cpp type=field.type}}(deref(deref(self.{{#partial cpp_obj}}).get_{{field.py_name}}()))
-    {{#else}}{{! TODO(T256504508): Preserved extra newline below }}
-
+    {{#else}}
     {{! Use an aliasing constructor since the object we're returning is still
         managed by the top-level object, possible via a unique_ptr }}
     self.py_value = {{#partial cython_python_type type=field.type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!

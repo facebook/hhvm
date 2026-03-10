@@ -176,13 +176,11 @@ cdef class MyUnion(thrift.py3.types.Union):
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_anInteger():
                 self.py_value = None
             else:
-            
                 self.py_value = cint32_t._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_anInteger()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         elif self.type_int == 2:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_aString():
                 self.py_value = None
             else:
-            
                 self.py_value = str._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_aString()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.py_value
 
@@ -338,7 +336,6 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_int_field():
                 self.py_value = None
             else:
-            
                 self.py_value = cint32_t._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_int_field()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         return self.py_value
 

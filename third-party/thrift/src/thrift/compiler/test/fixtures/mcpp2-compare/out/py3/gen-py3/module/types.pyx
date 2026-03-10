@@ -1215,7 +1215,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         if MyCustomField is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_MyCustomField(deref((<_fbthrift_iobuf.IOBuf?>MyCustomField)._this)) 
+            deref(c_inst).set_MyCustomField(deref((<_fbthrift_iobuf.IOBuf?>MyCustomField)._this))
             any_set = True
         # in C++ you don't have to call move(), but this doesn't translate
         # into a C++ return statement, so you do here
@@ -1462,18 +1462,16 @@ cdef class ComplexUnion(thrift.py3.types.Union):
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_ref_field():
                 self.py_value = None
             else:
-            
                 self.py_value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_ref_field()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         elif self.type_int == 25:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_ref_field2():
                 self.py_value = None
             else:
-            
                 self.py_value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_ref_field2()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         elif self.type_int == 26:
             self.py_value = AnException._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cAnException](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_excp_field()))
         elif self.type_int == 27:
-            self.py_value =  _fbthrift_iobuf.from_unique_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_MyCustomField().clone())
+            self.py_value = _fbthrift_iobuf.from_unique_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_MyCustomField().clone())
         return self.py_value
 
     cdef _initialize_py(ComplexUnion self):

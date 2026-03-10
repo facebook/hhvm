@@ -57,7 +57,7 @@ func defaultServerConfig() *serverConfig {
 	return &serverConfig{
 		numWorkers:     GoroutinePerRequest,
 		log:            logger.Printf,
-		connContext:    WithConnInfo,
+		connContext:    withConnInfo,
 		processorStats: make(map[string]*stats.TimingSeries),
 		serverStats:    stats.NewServerStats(stats.NewTimingConfig(defaultStatsPeriod), defaultStatsPeriod),
 		serverObserver: newNoopServerObserver(),
@@ -92,7 +92,7 @@ func WithConnContext(connContext ConnContextFunc) ServerOption {
 			return
 		}
 		config.connContext = func(ctx context.Context, conn net.Conn) context.Context {
-			ctx = WithConnInfo(ctx, conn)
+			ctx = withConnInfo(ctx, conn)
 			return connContext(ctx, conn)
 		}
 	}

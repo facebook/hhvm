@@ -67,8 +67,8 @@ func (c ConnInfo) TLS() *tls.ConnectionState {
 	return &cs
 }
 
-// WithConnInfo adds connection info (from a thrift.Transport) to context, if applicable
-func WithConnInfo(ctx context.Context, conn net.Conn) context.Context {
+// withConnInfo adds connection info (from a thrift.Transport) to context, if applicable
+func withConnInfo(ctx context.Context, conn net.Conn) context.Context {
 	var tlsState tlsConnectionStater
 	if t, ok := conn.(tlsConnectionStater); ok {
 		tlsState = t
@@ -81,6 +81,8 @@ func WithConnInfo(ctx context.Context, conn net.Conn) context.Context {
 }
 
 // ConnInfoFromContext extracts and returns ConnInfo from context.
+//
+// Deprecated: Use GetRequestContext(ctx).ConnInfo instead.
 func ConnInfoFromContext(ctx context.Context) (ConnInfo, bool) {
 	v, ok := ctx.Value(connInfoKey).(ConnInfo)
 	return v, ok

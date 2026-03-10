@@ -544,3 +544,45 @@ _fbthrift_python_types.MapTypeInfo({{#partial typeinfo type=ttype.key_type}}, {{
   {{/if root_program.inplace_migrate?}}
 {{/if type.iobuf?}}
 {{/let partial}}
+
+
+{{! Used to convert C++ `c_vec[idx]` to python object (list elements). }}
+{{#let export partial vector_cpp_to_python |elem_type| captures |container_from_cpp python_type cython_cpp_type cython_python_type|}}
+{{#pragma ignore-newlines}}
+{{#if elem_type.iobuf?}}_fbthrift_iobuf.IOBuf.create(c_vec[idx].get(), self)
+{{#else if elem_type.iobufRef?}}_fbthrift_iobuf.IOBuf.create(c_vec[idx].get().get(), self)
+{{#else if elem_type.flexibleBinary?}}(<const char*>c_vec[idx].data())[:c_vec[idx].size()]
+{{#else if elem_type.string?}}__init_unicode_from_cpp(c_vec[idx])
+{{#else if elem_type.binary?}}bytes(<string>c_vec[idx])
+{{#else if elem_type.primitive?}}c_vec[idx]
+{{#else if elem_type.container?}}{{#partial container_from_cpp type=elem_type}}(c_vec[idx])
+{{#else if elem_type.enum?}}translate_cpp_enum_to_python({{#partial python_type type=elem_type}}, <int> c_vec[idx])
+{{#else if elem_type.structured?}}
+  {{#if root_program.inplace_migrate?}}
+{{#partial python_type type=elem_type}}.from_python({{elem_type.capi_converter_path}}.{{elem_type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=elem_type}}](c_vec[idx])))
+  {{#else}}
+{{#partial cython_python_type type=elem_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[{{#partial cython_cpp_type type=elem_type}}](c_vec[idx]))
+  {{/if root_program.inplace_migrate?}}
+{{/if elem_type.iobuf?}}
+{{/let partial}}
+
+
+{{! Used to convert C++ `citem` to python object (set elements). }}
+{{#let export partial set_cpp_to_python |elem_type| captures |container_from_cpp python_type cython_cpp_type cython_python_type|}}
+{{#pragma ignore-newlines}}
+{{#if elem_type.iobuf?}}_fbthrift_iobuf.IOBuf.create(citem.get(), self)
+{{#else if elem_type.iobufRef?}}_fbthrift_iobuf.IOBuf.create(citem.get().get(), self)
+{{#else if elem_type.flexibleBinary?}}(<const char*>citem.data())[:citem.size()]
+{{#else if elem_type.string?}}__init_unicode_from_cpp(citem)
+{{#else if elem_type.binary?}}bytes(<string>citem)
+{{#else if elem_type.primitive?}}citem
+{{#else if elem_type.container?}}{{#partial container_from_cpp type=elem_type}}(citem)
+{{#else if elem_type.enum?}}translate_cpp_enum_to_python({{#partial python_type type=elem_type}}, <int> citem)
+{{#else if elem_type.structured?}}
+  {{#if root_program.inplace_migrate?}}
+{{#partial python_type type=elem_type}}.from_python({{elem_type.capi_converter_path}}.{{elem_type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=elem_type}}](citem)))
+  {{#else}}
+{{#partial cython_python_type type=elem_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(citem))
+  {{/if root_program.inplace_migrate?}}
+{{/if elem_type.iobuf?}}
+{{/let partial}}

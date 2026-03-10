@@ -36,41 +36,37 @@ shared_ptr[{{#partial types.cython_cpp_type type=type}}]
 {{/let partial}}{{!
 
 container to cpp converter }}
-cdef {{#partial types.cython_cpp_type type=type:self}} {{type:flat_name}}__make_instance(object items) except *:
-{{#partial types.make_instance type=type:self}}
+cdef {{#partial types.cython_cpp_type type=type}} {{type.flat_name}}__make_instance(object items) except *:
+{{#partial types.make_instance type=type}}
 
-{{#type:list?}}
-cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}& c_vec) except *:
+  {{#if type.list?}}
+    {{#let elem_type=type.true_type.elem_type}}
+cdef object {{type.flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type}}& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
-    {{#type:list_elem_type}}
     for idx in range(c_vec.size()):
-        py_list.append({{> types/vector_cpp_to_python }})
-    {{/type:list_elem_type}}
-    return {{type:flat_name}}(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-{{/type:list?}}
-{{#type:set?}}
-cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}& c_set) except *:
+        py_list.append({{#partial types.vector_cpp_to_python elem_type=elem_type}})
+    return {{type.flat_name}}(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+  {{#else if type.set?}}
+    {{#let elem_type=type.true_type.elem_type}}
+cdef object {{type.flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type}}& c_set) except *:
     cdef list py_items = []
-    cdef __set_iter[{{#partial types.cython_cpp_type type=type:self}}] iter = __set_iter[{{#partial types.cython_cpp_type type=type:self}}](c_set)
-    {{#type:set_elem_type}}
-    cdef {{#partial cython_cpp_container_item_type type=type:self}} citem{{#partial type_default_value type=type:self}}
+    cdef __set_iter[{{#partial types.cython_cpp_type type=type}}] iter = __set_iter[{{#partial types.cython_cpp_type type=type}}](c_set)
+    cdef {{#partial cython_cpp_container_item_type type=elem_type}} citem{{#partial type_default_value type=elem_type}}
     for i in range(c_set.size()):
         iter.genNextItem(citem)
-        py_items.append({{> types/set_cpp_to_python }})
-    {{/type:set_elem_type}}
-    return {{type:flat_name}}(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
-{{/type:set?}}
-{{#type:map?}}
-{{#let key_type=type:true_type.key_type}}
-{{#let val_type=type:true_type.val_type}}
-cdef object {{type:flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type:self}}& c_map) except *:
+        py_items.append({{#partial types.set_cpp_to_python elem_type=elem_type}})
+    return {{type.flat_name}}(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+  {{#else if type.map?}}
+    {{#let key_type=type.true_type.key_type}}
+    {{#let val_type=type.true_type.val_type}}
+cdef object {{type.flat_name}}__from_cpp(const {{#partial types.cython_cpp_type type=type}}& c_map) except *:
     cdef dict py_items = {}
-    cdef __map_iter[{{#partial types.cython_cpp_type type=type:self}}] iter = __map_iter[{{#partial types.cython_cpp_type type=type:self}}](c_map)
+    cdef __map_iter[{{#partial types.cython_cpp_type type=type}}] iter = __map_iter[{{#partial types.cython_cpp_type type=type}}](c_map)
     cdef {{#partial cython_cpp_container_item_type type=key_type}} ckey{{#partial type_default_value type=key_type}}
     cdef {{#partial cython_cpp_container_item_type type=val_type}} cval{{#partial type_default_value type=val_type}}
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[{{#partial types.map_key_cpp_to_python type=key_type}}] = {{#partial types.map_val_cpp_to_python type=val_type}}
-    return {{type:flat_name}}(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
-{{/type:map?}}
+    return {{type.flat_name}}(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+  {{/if type.list?}}

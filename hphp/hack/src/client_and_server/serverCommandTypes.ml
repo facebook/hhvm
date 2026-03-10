@@ -151,6 +151,10 @@ module Package_lint = struct
 end
 
 module Find_my_tests = struct
+  open Ppx_yojson_conv_lib.Yojson_conv.Primitives
+
+  (* Types Used by both V1 and staging *)
+
   type member = {
     class_name: string;
     member_name: string;
@@ -170,6 +174,22 @@ module Find_my_tests = struct
   }
 
   type result = (result_entry list, string) Result.t
+
+  (* Types Used by staging only *)
+
+  type config = {
+    max_distance: int; [@default 1]
+    max_test_files: int option; [@default None]
+  }
+  [@@deriving yojson]
+
+  let default_config = { max_distance = 1; max_test_files = None }
+
+  type json_input = {
+    roots: string list;
+    config: config;
+  }
+  [@@deriving yojson]
 end
 
 module Rename = struct
@@ -443,7 +463,7 @@ type _ t =
       (int * int option * Find_my_tests.action list)
       -> Find_my_tests.result t
   | FIND_MY_TESTS_STAGING :
-      (int * int option * Find_my_tests.action list)
+      (Find_my_tests.config * Find_my_tests.action list)
       -> Find_my_tests.result t
   | PACKAGE_LINT : string -> Package_lint.fast_result t
 

@@ -1027,34 +1027,31 @@ let main_internal
           Printf.eprintf "Invalid input\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      let action =
-        parse_name_or_member_id
-          ~name_and_member_action:(fun class_name member_name ->
-            match kind with
-            | Some "Method"
-            | None ->
-              Method { class_name; member_name }
-            | Some "Typeconst" -> Typeconst { class_name; member_name }
-            | Some _ -> raise Exit_status.(Exit_with Input_error))
-          ~name_only_action:(fun name ->
-            match kind with
-            | Some "Class" -> Class { class_name = name }
-            | Some "Typedef" -> Typedef { name }
-            | Some _
-            | None ->
-              raise Exit_status.(Exit_with Input_error))
-          name
-      in
-      action
+      parse_name_or_member_id
+        ~name_and_member_action:(fun class_name member_name ->
+          match kind with
+          | Some "Method"
+          | None ->
+            Method { class_name; member_name }
+          | Some "Typeconst" -> Typeconst { class_name; member_name }
+          | Some _ -> raise Exit_status.(Exit_with Input_error))
+        ~name_only_action:(fun name ->
+          match kind with
+          | Some "Class" -> Class { class_name = name }
+          | Some "Typedef" -> Typedef { name }
+          | Some _
+          | None ->
+            raise Exit_status.(Exit_with Input_error))
+        name
     in
     let actions = List.map ~f:parse_symbol symbols in
-
+    let max_distance =
+      Option.value args.find_my_tests_max_distance ~default:1
+    in
     let%lwt (result, telemtry) =
       rpc args
       @@ ServerCommandTypes.FIND_MY_TESTS_V1
-           ( args.find_my_tests_max_distance,
-             args.find_my_tests_max_test_files,
-             actions )
+           (max_distance, args.find_my_tests_max_test_files, actions)
     in
     (match result with
     | Ok fmt_result ->
@@ -1063,8 +1060,18 @@ let main_internal
     | Error error ->
       Printf.eprintf "%s\n" error;
       Lwt.return (Exit_status.Input_error, telemtry))
-  | ClientEnv.MODE_FIND_MY_TESTS_STAGING symbols ->
+  | ClientEnv.MODE_FIND_MY_TESTS_STAGING path ->
     let open ServerCommandTypes.Find_my_tests in
+    if Option.is_some args.find_my_tests_max_distance then begin
+      Printf.eprintf
+        "--find-my-tests-max-distance cannot be used with --find-my-tests-staging\n";
+      raise Exit_status.(Exit_with Input_error)
+    end;
+    if Option.is_some args.find_my_tests_max_test_files then begin
+      Printf.eprintf
+        "--find-my-tests-max-test-files cannot be used with --find-my-tests-staging\n";
+      raise Exit_status.(Exit_with Input_error)
+    end;
     let parse_symbol symbol =
       let pieces = Str.split (Str.regexp "|") symbol in
       let (kind, name) =
@@ -1075,34 +1082,34 @@ let main_internal
           Printf.eprintf "Invalid input\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      let action =
-        parse_name_or_member_id
-          ~name_and_member_action:(fun class_name member_name ->
-            match kind with
-            | Some "Method"
-            | None ->
-              Method { class_name; member_name }
-            | Some "Typeconst" -> Typeconst { class_name; member_name }
-            | Some _ -> raise Exit_status.(Exit_with Input_error))
-          ~name_only_action:(fun name ->
-            match kind with
-            | Some "Class" -> Class { class_name = name }
-            | Some "Typedef" -> Typedef { name }
-            | Some _
-            | None ->
-              raise Exit_status.(Exit_with Input_error))
-          name
-      in
-      action
+      parse_name_or_member_id
+        ~name_and_member_action:(fun class_name member_name ->
+          match kind with
+          | Some "Method"
+          | None ->
+            Method { class_name; member_name }
+          | Some "Typeconst" -> Typeconst { class_name; member_name }
+          | Some _ -> raise Exit_status.(Exit_with Input_error))
+        ~name_only_action:(fun name ->
+          match kind with
+          | Some "Class" -> Class { class_name = name }
+          | Some "Typedef" -> Typedef { name }
+          | Some _
+          | None ->
+            raise Exit_status.(Exit_with Input_error))
+        name
     in
-    let actions = List.map ~f:parse_symbol symbols in
-
+    let json_content = Sys_utils.read_file path |> Bytes.to_string in
+    let input =
+      try json_input_of_yojson (Yojson.Safe.from_string json_content) with
+      | exn ->
+        Printf.eprintf "Failed to parse JSON: %s\n" (Exn.to_string exn);
+        raise Exit_status.(Exit_with Input_error)
+    in
+    let actions = List.map ~f:parse_symbol input.roots in
     let%lwt (result, telemtry) =
       rpc args
-      @@ ServerCommandTypes.FIND_MY_TESTS_STAGING
-           ( args.find_my_tests_max_distance,
-             args.find_my_tests_max_test_files,
-             actions )
+      @@ ServerCommandTypes.FIND_MY_TESTS_STAGING (input.config, actions)
     in
     (match result with
     | Ok fmt_result ->

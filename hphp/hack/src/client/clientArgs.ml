@@ -233,7 +233,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let set_mode_only_log_errors config =
     if !only_log_errors then set_mode (MODE_LOG_ERRORS config)
   in
-  let find_my_tests_max_distance = ref 1 in
+  let find_my_tests_max_distance = ref None in
   let find_my_tests_max_test_files = ref None in
   (* parse args *)
   let usage =
@@ -415,21 +415,14 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         " (mode) return test files that reference the given methods [C::m list]",
         (* typically invoked from code *) Arg_non_user_facing );
       ( "--find-my-tests-staging",
-        Arg.Rest
-          begin
-            fun symbol ->
-              set_mode
-                ~validate:false
-                (match !mode with
-                | None -> MODE_FIND_MY_TESTS_STAGING [symbol]
-                | Some (MODE_FIND_MY_TESTS_STAGING symbols) ->
-                  MODE_FIND_MY_TESTS_STAGING (symbol :: symbols)
-                | _ -> raise (Arg.Bad "only a single mode should be specified"))
-          end,
-        " (mode) return test files that reference the given methods, using the staging implementation [C::m list]",
+        Arg.String
+          (fun path ->
+            set_mode ~validate:true (MODE_FIND_MY_TESTS_STAGING path)),
+        " (mode) return test files that reference the given symbols, using the staging implementation",
         Arg_non_user_facing );
       ( "--find-my-tests-max-distance",
-        Arg.Int (fun max_distance -> find_my_tests_max_distance := max_distance),
+        Arg.Int
+          (fun max_distance -> find_my_tests_max_distance := Some max_distance),
         "maximum distance between given symbol(s) and any test that --find-my-tests will return (default: 1)",
         Arg_non_user_facing );
       ( "--find-my-tests-max-test-files",

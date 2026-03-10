@@ -30,7 +30,7 @@ type client_mode =
   | MODE_FIND_CLASS_REFS of string
   | MODE_FIND_REFS of string
   | MODE_FIND_MY_TESTS_V1 of string list
-  | MODE_FIND_MY_TESTS_STAGING of string list
+  | MODE_FIND_MY_TESTS_STAGING of string
   | MODE_FULL_FIDELITY_PARSE of string
   | MODE_FULL_FIDELITY_SCHEMA
   | MODE_GO_TO_IMPL_CLASS of string
@@ -119,7 +119,7 @@ type client_check_env = {
       number of places, e.g., error formatting and spinners. *)
   warning_switches: Filter_diagnostics.switch list;
   dump_config: bool;
-  find_my_tests_max_distance: int;
+  find_my_tests_max_distance: int option;
   find_my_tests_max_test_files: int option;
 }
 

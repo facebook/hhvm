@@ -18,7 +18,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --find-refs                                             (mode) finds references of the provided symbol; optionally specify the symbol kind like "Kind|Symbol" (looks for functions or methods if unspecified); valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst; use ExplicitClass instead of Class to exclude references via self/static/parent
   --find-my-tests                                         (deprecated, use --find-my-tests-v1) return test files that reference the given methods [C::m list]
   --find-my-tests-v1                                      (mode) return test files that reference the given methods [C::m list]
-  --find-my-tests-staging                                 (mode) return test files that reference the given methods, using the staging implementation [C::m list]
+  --find-my-tests-staging                                 (mode) return test files that reference the given symbols, using the staging implementation
   --find-my-tests-max-distance maximum                    distance between given symbol(s) and any test that --find-my-tests will return (default: 1)
   --find-my-tests-max-test-files maximum                  number of test files to return from --find-my-tests (default: unlimited)
   --force-dormant-start                                   If server is dormant, force start a new one instead of waiting for the next one to start up automatically (default: false)

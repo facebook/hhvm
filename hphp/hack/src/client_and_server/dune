@@ -292,7 +292,7 @@
   version
   warnings_saved_state)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std ppx_deriving.show ppx_deriving.enum)))
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.show ppx_deriving.enum ppx_yojson_conv)))
 
 (library
  (name server_args)

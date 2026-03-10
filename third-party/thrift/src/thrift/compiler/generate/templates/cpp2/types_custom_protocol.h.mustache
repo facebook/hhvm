@@ -25,11 +25,11 @@
  * VirtualProtocol) to read/write thrift structs.
  */
 
-#include "{{service:include_prefix}}{{service:name}}.tcc"
-#include "{{service:include_prefix}}{{service:program.name}}_types_custom_protocol.h"
+#include "{{service:program.include_prefix}}{{service:name}}.tcc"
+#include "{{service:program.include_prefix}}{{service:program.name}}_types_custom_protocol.h"
 {{#service:extends}}
-#include "{{service:include_prefix}}{{service:name}}_custom_protocol.h"
+#include "{{service:program.include_prefix}}{{service:name}}_custom_protocol.h"
 {{/service:extends}}
-{{#service:thrift_includes}}
-#include "{{program:include_prefix}}{{program:name}}_types_custom_protocol.h"
-{{/service:thrift_includes}}
+  {{#each service:program.thrift_includes as |included|}}
+#include "{{included.include_prefix}}{{included.name}}_types_custom_protocol.h"
+  {{/each}}

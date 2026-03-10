@@ -563,7 +563,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void generate_program() override;
   void fill_validator_visitors(ast_validator&) const override;
   static std::string get_cpp2_namespace(const t_program* program);
-  static mstch::array cpp_includes(const t_program* program);
   static std::string include_prefix(
       const t_program* program, const compiler_options_map& options);
 
@@ -795,6 +794,36 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       // `t_whisker_generator` in the future
       return to_array(
           program.get_includes_for_codegen(), proto.of<t_program>());
+    });
+    def.property("cpp_includes", [](const t_program& program) {
+      // C++ includes from IDL file
+      whisker::array::raw includes;
+      if (program.language_includes().count("cpp")) {
+        for (std::string include : program.language_includes().at("cpp")) {
+          if (include.at(0) != '<') {
+            include = fmt::format("\"{}\"", include);
+          }
+          includes.emplace_back(std::move(include));
+        }
+      }
+      return whisker::make::array(std::move(includes));
+    });
+    def.property("extra_cpp_includes", [this](const t_program&) {
+      // C++ includes from compiler options
+      std::optional<std::string_view> extra_includes_option =
+          get_compiler_option("includes");
+      if (extra_includes_option.value_or("").empty()) {
+        return whisker::make::array();
+      }
+      std::vector<std::string> extra_includes;
+      boost::split(extra_includes, extra_includes_option.value(), [](char c) {
+        return c == ':';
+      });
+      whisker::array::raw result;
+      for (std::string& s : extra_includes) {
+        result.emplace_back(std::move(s));
+      }
+      return whisker::make::array(std::move(result));
     });
     return std::move(def).make();
   }
@@ -1703,8 +1732,7 @@ class cpp_mstch_program : public mstch_program {
         sm_(sm) {
     register_methods(
         this,
-        {{"program:cpp_includes", &cpp_mstch_program::cpp_includes},
-         {"program:transitive_schema_initializers",
+        {{"program:transitive_schema_initializers",
           &cpp_mstch_program::transitive_schema_initializers},
          {"program:num_transitive_thrift_includes",
           &cpp_mstch_program::num_transitive_thrift_includes},
@@ -1717,19 +1745,6 @@ class cpp_mstch_program : public mstch_program {
   }
   std::string get_program_namespace(const t_program* program) override {
     return t_mstch_cpp2_generator::get_cpp2_namespace(program);
-  }
-
-  mstch::node cpp_includes() {
-    mstch::array includes = t_mstch_cpp2_generator::cpp_includes(program_);
-    if (auto it = context_.options->find("includes");
-        it != context_.options->end()) {
-      std::vector<std::string> extra_includes;
-      boost::split(extra_includes, it->second, [](char c) { return c == ':'; });
-      for (auto& include : extra_includes) {
-        includes.emplace_back(std::move(include));
-      }
-    }
-    return includes;
   }
   /**
    * To reduce build time, the generated constants code only includes the
@@ -1908,15 +1923,10 @@ class cpp_mstch_service : public mstch_service {
     register_methods(
         this,
         {
-            {"service:include_prefix", &cpp_mstch_service::include_prefix},
-            {"service:thrift_includes", &cpp_mstch_service::thrift_includes},
-            {"service:cpp_includes", &cpp_mstch_service::cpp_includes},
             {"service:parent_service_cpp_name",
              &cpp_mstch_service::parent_service_cpp_name},
             {"service:parent_service_qualified_name",
              &cpp_mstch_service::parent_service_qualified_name},
-            {"service:thrift_uri_or_service_name",
-             &cpp_mstch_service::thrift_uri_or_service_name},
         });
 
     const auto all_functions = mstch_service::get_functions();
@@ -1924,29 +1934,11 @@ class cpp_mstch_service : public mstch_service {
       split_functions_.push_back(all_functions[id]);
     }
   }
-  mstch::node cpp_includes() {
-    return t_mstch_cpp2_generator::cpp_includes(service_->program());
-  }
-  mstch::node include_prefix() {
-    return t_mstch_cpp2_generator::include_prefix(
-        service_->program(), *context_.options);
-  }
-  mstch::node thrift_includes() {
-    mstch::array a;
-    for (const auto* program :
-         service_->program()->get_includes_for_codegen()) {
-      a.emplace_back(make_mstch_program_cached(program, context_));
-    }
-    return a;
-  }
   mstch::node parent_service_cpp_name() {
     return cpp2::get_name(parent_service());
   }
   mstch::node parent_service_qualified_name() {
     return cpp2::get_service_qualified_name(*parent_service());
-  }
-  mstch::node thrift_uri_or_service_name() {
-    return service_->uri().empty() ? parent_service_name() : service_->uri();
   }
 
  private:
@@ -2453,19 +2445,6 @@ void t_mstch_cpp2_generator::generate_inline_services(
 std::string t_mstch_cpp2_generator::get_cpp2_namespace(
     const t_program* program) {
   return cpp2::get_gen_namespace(*program);
-}
-
-mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {
-  mstch::array a;
-  if (program->language_includes().count("cpp")) {
-    for (auto include : program->language_includes().at("cpp")) {
-      if (include.at(0) != '<') {
-        include = fmt::format("\"{}\"", include);
-      }
-      a.emplace_back(std::move(include));
-    }
-  }
-  return a;
 }
 
 std::string t_mstch_cpp2_generator::include_prefix(

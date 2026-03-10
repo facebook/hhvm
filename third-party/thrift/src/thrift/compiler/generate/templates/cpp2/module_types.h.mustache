@@ -31,9 +31,12 @@
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
   {{/if program:const_referenced_in_field_default?}}
 {{/program:thrift_includes}}
-{{#each program:cpp_includes as |cpp_include|}}
+  {{#each program:cpp_includes as |cpp_include|}}
 #include {{cpp_include}}
-{{/each}}
+  {{/each}}
+  {{#each program:extra_cpp_includes as |cpp_include|}}
+#include {{cpp_include}}
+  {{/each}}
 
 {{#program:structs?}}
 namespace apache::thrift {

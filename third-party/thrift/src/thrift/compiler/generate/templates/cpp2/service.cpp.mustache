@@ -18,11 +18,11 @@
 {{#service}}
 {{> Autogen}}
 
-#include "{{service:include_prefix}}{{service:name}}.h"
-#include "{{service:include_prefix}}{{service:name}}.tcc"
-#include "{{service:include_prefix}}{{service:program.name}}_types.h"
+#include "{{service:program.include_prefix}}{{service:name}}.h"
+#include "{{service:program.include_prefix}}{{service:name}}.tcc"
+#include "{{service:program.include_prefix}}{{service:program.name}}_types.h"
 {{#service:has_service_schema}}
-#include "{{service:include_prefix}}{{service:program.name}}_constants.h"
+#include "{{service:program.include_prefix}}{{service:program.name}}_constants.h"
 {{/service:has_service_schema}}
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 

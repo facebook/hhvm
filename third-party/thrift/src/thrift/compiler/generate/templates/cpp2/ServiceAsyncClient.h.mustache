@@ -20,31 +20,31 @@
 
 #include <thrift/lib/cpp2/gen/client_h.h>
 
-#include "{{service:include_prefix}}{{service:program.name}}_types.h"
+#include "{{service:program.include_prefix}}{{service:program.name}}_types.h"
 {{#service:extends}}
-#if __has_include("{{service:include_prefix}}{{service:name}}AsyncClient.h")
-#include "{{service:include_prefix}}{{service:name}}AsyncClient.h"
+#if __has_include("{{service:program.include_prefix}}{{service:name}}AsyncClient.h")
+#include "{{service:program.include_prefix}}{{service:name}}AsyncClient.h"
 #else
-#include "{{service:include_prefix}}{{service:program.name}}_clients.h"
+#include "{{service:program.include_prefix}}{{service:program.name}}_clients.h"
 #endif
 {{/service:extends}}
-{{#service:thrift_includes}}
-#include "{{program:include_prefix}}{{program:name}}_types.h"
-{{/service:thrift_includes}}
-{{#each service:cpp_includes as |cpp_include|}}
+  {{#each service:program.thrift_includes as |included|}}
+#include "{{included.include_prefix}}{{included.name}}_types.h"
+  {{/each}}
+  {{#each service:program.cpp_includes as |cpp_include|}}
 #include {{cpp_include}}
-{{/each}}
-{{#if (or service:streams? service:interactions?)}}
+  {{/each}}
+  {{#if (or service:streams? service:interactions?)}}
 #include <thrift/lib/cpp2/async/ClientBufferedStream.h>
 #include <thrift/lib/cpp2/async/ClientStreamInterceptorContext.h>
-{{/if (or service:streams? service:interactions?)}}
-{{#if (or service:sinks? service:interactions?)}}
+  {{/if (or service:streams? service:interactions?)}}
+  {{#if (or service:sinks? service:interactions?)}}
 #include <thrift/lib/cpp2/async/ClientSinkBridge.h>
 #include <thrift/lib/cpp2/async/Sink.h>
-{{/if (or service:sinks? service:interactions?)}}
-{{#if (or service:self.has_bidirectional_streams? service:interactions?)}}
+  {{/if (or service:sinks? service:interactions?)}}
+  {{#if (or service:self.has_bidirectional_streams? service:interactions?)}}
 #include <thrift/lib/cpp2/async/BiDiStream.h>
-{{/if (or service:self.has_bidirectional_streams? service:interactions?)}}
+  {{/if (or service:self.has_bidirectional_streams? service:interactions?)}}
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;

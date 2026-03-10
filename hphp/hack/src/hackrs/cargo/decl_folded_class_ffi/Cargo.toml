@@ -28,5 +28,5 @@ oxidized = { version = "0.0.0", path = "../../../oxidized" }
 pos = { version = "0.0.0", path = "../../pos/cargo/pos" }
 rayon = "1.11.0"
 relative_path = { version = "0.0.0", path = "../../../utils/rust/relative_path" }
-tempfile = "3.22"
+tempfile = "3.26.0"
 ty = { version = "0.0.0", path = "../../ty/cargo/ty" }

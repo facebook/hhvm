@@ -76,3 +76,23 @@ proxygen_add_test(TARGET HQSessionTests
     mvfst::mvfst_codec_types
     mvfst::mvfst_state_machine
 )
+
+add_executable(http_session_benchmark HTTPSessionBenchmark.cpp)
+target_include_directories(http_session_benchmark PUBLIC
+    ${LIBGMOCK_INCLUDE_DIR}
+    ${LIBGTEST_INCLUDE_DIRS}
+)
+target_compile_definitions(http_session_benchmark PUBLIC
+    ${LIBGMOCK_DEFINES}
+)
+target_compile_options(http_session_benchmark PRIVATE
+    ${_PROXYGEN_COMMON_COMPILE_OPTIONS}
+)
+target_link_libraries(http_session_benchmark PUBLIC
+    codectestutils
+    sessiontestutils
+    proxygen
+    Folly::folly
+    Folly::follybenchmark
+    ${LIBGMOCK_LIBRARIES}
+)

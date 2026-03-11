@@ -1200,6 +1200,13 @@ size_t HTTPTransaction::sendDeferredBody(uint32_t maxEgress) {
   // Update the handler's pause state
   notifyTransportPendingEgress();
 
+  // Outer check is a minor perf optimization — avoids the virtual call into
+  // checkIfEgressRateLimitedByUpstream() when the buffer is non-empty (common
+  // case), even though checkIfEgressRateLimitedByUpstream also checks this.
+  if (getOutstandingEgressBodyBytes() == 0) {
+    checkIfEgressRateLimitedByUpstream();
+  }
+
   if (transportCallback_) {
     transportCallback_->bodyBytesGenerated(nbytes);
   }

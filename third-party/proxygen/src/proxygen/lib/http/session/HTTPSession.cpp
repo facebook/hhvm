@@ -2056,11 +2056,6 @@ void HTTPSession::runLoopCallback() noexcept {
     inLoopCallback_ = false;
     // This ScopeGuard needs to be under the above DestructorGuard
     updatePendingWrites();
-    if (!hasMoreWrites() && isDownstream() && !hasPendingEgress()) {
-      invokeOnAllTransactions([](HTTPTransaction* txn) {
-        txn->checkIfEgressRateLimitedByUpstream();
-      });
-    }
     checkForShutdown();
   });
   VLOG(5) << *this << " in loop callback";
@@ -2660,10 +2655,6 @@ void HTTPSession::writeSuccess() noexcept {
     //             data to send...
     if (numActiveWrites_ == 0 && hasMoreWrites()) {
       runLoopCallback();
-    } else if (isDownstream() && !hasPendingEgress()) {
-      invokeOnAllTransactions([](HTTPTransaction* txn) {
-        txn->checkIfEgressRateLimitedByUpstream();
-      });
     }
   }
   onWriteCompleted();

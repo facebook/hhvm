@@ -53,10 +53,10 @@ TEST(counting_semaphore, basic) {
 
   std::vector<std::thread> threads;
   for (int i = 0; i < Y; ++i) {
-    threads.push_back(std::thread{&consume, i, X});
+    threads.emplace_back(&consume, i, X);
   }
   for (int i = 0; i < X; ++i) {
-    threads.push_back(std::thread{&produce, i, Y});
+    threads.emplace_back(&produce, i, Y);
   }
 
   for (auto& t : threads) {
@@ -77,10 +77,10 @@ TEST(counting_semaphore, nonblocking) {
 
   std::vector<std::thread> threads;
   for (int i = 0; i < X; ++i) {
-    threads.push_back(std::thread{&produce, i, Y});
+    threads.emplace_back(&produce, i, Y);
   }
   for (int i = 0; i < Y; ++i) {
-    threads.push_back(std::thread{&consume_nonblocking, i, X});
+    threads.emplace_back(&consume_nonblocking, i, X);
   }
 
   for (auto& t : threads) {

@@ -1,4 +1,5 @@
 <?hh
+// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 /*
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -27,6 +28,19 @@ final class ThriftContextPropHandlers {
     ?TTransportSupportsHeaders $headers_transport,
     ClientInstrumentationParams $instrumentation_params,
   ): void {
+    // Initialize agent CLI tracing if in an agent-spawned CLI context.
+    // Hack has no global Thrift client interceptor (unlike C++ initThrift),
+    // so this is the earliest hook where we know Thrift is being used.
+    // The call is idempotent — only the first invocation has effect.
+    try {
+      AgentCLITracing::maybeStartTrace();
+    } catch (Exception $ex) {
+      ope(
+        $ex,
+        causes_the('agent CLI tracing initialization')->to('be skipped'),
+      );
+    }
+
     // contextprop v2 handler
     // TODO T204080230: add a CPv2 handler for AM so it does not need its own handler
     $context_prop_state = ThriftContextPropState::get();

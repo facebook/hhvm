@@ -433,6 +433,77 @@ BidiInitialResponseClientTestResult runBidiInitialResponse(
 }
 
 template <typename ClientType>
+BidiStreamDeclaredExceptionClientTestResult runBidiStreamDeclaredException(
+    ClientType& client,
+    const BidiStreamDeclaredExceptionClientInstruction& instruction,
+    const RPCRequestParam<ClientType>& request) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<BidiStreamDeclaredExceptionClientTestResult> {
+        auto bidi = co_await client.co_bidiStreamDeclaredException(request);
+        BidiStreamDeclaredExceptionClientTestResult result;
+        co_await folly::coro::collectAll(
+            folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+              co_await bidi.sink.sink(
+                  [&]() -> folly::coro::AsyncGenerator<Request&&> {
+                    for (auto payload : *instruction.sinkPayloads()) {
+                      co_yield std::move(payload);
+                    }
+                  }());
+            }),
+            folly::coro::co_invoke(
+                [&, gen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+                    -> folly::coro::Task<void> {
+                  try {
+                    while (auto val = co_await gen.next()) {
+                      result.streamPayloads()->push_back(std::move(*val));
+                    }
+                  } catch (const UserException& e) {
+                    result.userException() = e;
+                  }
+                }));
+        co_return result;
+      }());
+}
+
+template <typename ClientType>
+BidiStreamUndeclaredExceptionClientTestResult runBidiStreamUndeclaredException(
+    ClientType& client,
+    const BidiStreamUndeclaredExceptionClientInstruction& instruction,
+    const RPCRequestParam<ClientType>& request) {
+  return folly::coro::blockingWait(
+      [&]()
+          -> folly::coro::Task<BidiStreamUndeclaredExceptionClientTestResult> {
+        auto bidi = co_await client.co_bidiStreamUndeclaredException(request);
+        BidiStreamUndeclaredExceptionClientTestResult result;
+        co_await folly::coro::collectAll(
+            folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+              co_await bidi.sink.sink(
+                  [&]() -> folly::coro::AsyncGenerator<Request&&> {
+                    for (auto payload : *instruction.sinkPayloads()) {
+                      co_yield std::move(payload);
+                    }
+                  }());
+            }),
+            folly::coro::co_invoke(
+                [&, gen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+                    -> folly::coro::Task<void> {
+                  try {
+                    while (auto val = co_await gen.next()) {
+                      result.streamPayloads()->push_back(std::move(*val));
+                    }
+                  } catch (const TApplicationException& e) {
+                    // BiDi transport prefixes exception type to message
+                    auto msg = e.getMessage();
+                    auto pos = msg.find(": ");
+                    result.exceptionMessage() =
+                        (pos != std::string::npos) ? msg.substr(pos + 2) : msg;
+                  }
+                }));
+        co_return result;
+      }());
+}
+
+template <typename ClientType>
 BidiMethodDeclaredExceptionClientTestResult runBidiMethodDeclaredException(
     ClientType& client, const RPCRequestParam<ClientType>& request) {
   BidiMethodDeclaredExceptionClientTestResult result;
@@ -628,6 +699,18 @@ ClientTestResult runClientSteps(
           runBidiInitialResponse(client, instruction, *instruction.request());
       break;
     }
+    case ClientInstruction::Type::bidiStreamDeclaredException: {
+      auto instruction = *clientInstruction.bidiStreamDeclaredException();
+      result.bidiStreamDeclaredException() = runBidiStreamDeclaredException(
+          client, instruction, *instruction.request());
+      break;
+    }
+    case ClientInstruction::Type::bidiStreamUndeclaredException: {
+      auto instruction = *clientInstruction.bidiStreamUndeclaredException();
+      result.bidiStreamUndeclaredException() = runBidiStreamUndeclaredException(
+          client, instruction, *instruction.request());
+      break;
+    }
     case ClientInstruction::Type::bidiMethodDeclaredException: {
       auto instruction = *clientInstruction.bidiMethodDeclaredException();
       result.bidiMethodDeclaredException() =
@@ -808,6 +891,19 @@ testing::AssertionResult runStatelessRpcTest(
         auto instruction = *clientInstruction.bidiInitialResponse();
         result.bidiInitialResponse() =
             runBidiInitialResponse(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::bidiStreamDeclaredException: {
+        auto instruction = *clientInstruction.bidiStreamDeclaredException();
+        result.bidiStreamDeclaredException() = runBidiStreamDeclaredException(
+            client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::bidiStreamUndeclaredException: {
+        auto instruction = *clientInstruction.bidiStreamUndeclaredException();
+        result.bidiStreamUndeclaredException() =
+            runBidiStreamUndeclaredException(
+                client, instruction, serverInstruction);
         break;
       }
       case ClientInstruction::Type::bidiMethodDeclaredException: {

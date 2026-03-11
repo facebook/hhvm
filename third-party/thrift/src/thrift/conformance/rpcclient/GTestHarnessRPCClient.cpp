@@ -318,6 +318,52 @@ class ConformanceVerificationServer
   }
 
   folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+  co_bidiStreamDeclaredException(std::unique_ptr<Request> req) override {
+    serverResult_.bidiStreamDeclaredException().emplace().request() = *req;
+    co_return apache::thrift::StreamTransformation<Request, Response>{
+        [this](folly::coro::AsyncGenerator<Request&&> input)
+            -> folly::coro::AsyncGenerator<Response&&> {
+          for (auto payload : *testCase_.serverInstruction()
+                                   ->bidiStreamDeclaredException()
+                                   ->streamPayloads()) {
+            co_yield std::move(payload);
+          }
+          // Read any sink payloads received before throwing
+          while (auto item = co_await input.next()) {
+            serverResult_.bidiStreamDeclaredException()
+                ->sinkPayloads()
+                ->push_back(std::move(*item));
+          }
+          throw *testCase_.serverInstruction()
+              ->bidiStreamDeclaredException()
+              ->userException();
+        }};
+  }
+
+  folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+  co_bidiStreamUndeclaredException(std::unique_ptr<Request> req) override {
+    serverResult_.bidiStreamUndeclaredException().emplace().request() = *req;
+    co_return apache::thrift::StreamTransformation<Request, Response>{
+        [this](folly::coro::AsyncGenerator<Request&&> input)
+            -> folly::coro::AsyncGenerator<Response&&> {
+          for (auto payload : *testCase_.serverInstruction()
+                                   ->bidiStreamUndeclaredException()
+                                   ->streamPayloads()) {
+            co_yield std::move(payload);
+          }
+          // Read any sink payloads received before throwing
+          while (auto item = co_await input.next()) {
+            serverResult_.bidiStreamUndeclaredException()
+                ->sinkPayloads()
+                ->push_back(std::move(*item));
+          }
+          throw std::runtime_error(*testCase_.serverInstruction()
+                                        ->bidiStreamUndeclaredException()
+                                        ->exceptionMessage());
+        }};
+  }
+
+  folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
   co_bidiMethodDeclaredException(std::unique_ptr<Request> req) override {
     serverResult_.bidiMethodDeclaredException().emplace().request() = *req;
     throw *testCase_.serverInstruction()

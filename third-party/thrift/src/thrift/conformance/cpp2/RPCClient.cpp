@@ -430,6 +430,75 @@ BidiInitialResponseClientTestResult bidiInitialResponseTest(
       }());
 }
 
+BidiStreamDeclaredExceptionClientTestResult bidiStreamDeclaredExceptionTest(
+    BidiStreamDeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<BidiStreamDeclaredExceptionClientTestResult> {
+        auto bidi = co_await client->co_bidiStreamDeclaredException(
+            *instruction.request());
+        BidiStreamDeclaredExceptionClientTestResult result;
+        co_await folly::coro::collectAll(
+            folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+              co_await bidi.sink.sink(
+                  [&]() -> folly::coro::AsyncGenerator<Request&&> {
+                    for (auto payload : *instruction.sinkPayloads()) {
+                      co_yield std::move(payload);
+                    }
+                  }());
+            }),
+            folly::coro::co_invoke(
+                [&, gen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+                    -> folly::coro::Task<void> {
+                  try {
+                    while (auto val = co_await gen.next()) {
+                      result.streamPayloads()->push_back(std::move(*val));
+                    }
+                  } catch (const UserException& e) {
+                    result.userException() = e;
+                  }
+                }));
+        co_return result;
+      }());
+}
+
+BidiStreamUndeclaredExceptionClientTestResult bidiStreamUndeclaredExceptionTest(
+    BidiStreamUndeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]()
+          -> folly::coro::Task<BidiStreamUndeclaredExceptionClientTestResult> {
+        auto bidi = co_await client->co_bidiStreamUndeclaredException(
+            *instruction.request());
+        BidiStreamUndeclaredExceptionClientTestResult result;
+        co_await folly::coro::collectAll(
+            folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+              co_await bidi.sink.sink(
+                  [&]() -> folly::coro::AsyncGenerator<Request&&> {
+                    for (auto payload : *instruction.sinkPayloads()) {
+                      co_yield std::move(payload);
+                    }
+                  }());
+            }),
+            folly::coro::co_invoke(
+                [&, gen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+                    -> folly::coro::Task<void> {
+                  try {
+                    while (auto val = co_await gen.next()) {
+                      result.streamPayloads()->push_back(std::move(*val));
+                    }
+                  } catch (const TApplicationException& e) {
+                    // BiDi transport prefixes exception type to message
+                    auto msg = e.getMessage();
+                    auto pos = msg.find(": ");
+                    result.exceptionMessage() =
+                        (pos != std::string::npos) ? msg.substr(pos + 2) : msg;
+                  }
+                }));
+        co_return result;
+      }());
+}
+
 BidiMethodDeclaredExceptionClientTestResult bidiMethodDeclaredExceptionTest(
     BidiMethodDeclaredExceptionClientInstruction& instruction) {
   auto client = createClient();
@@ -617,6 +686,15 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::bidiInitialResponse:
       result.bidiInitialResponse() =
           bidiInitialResponseTest(*clientInstruction.bidiInitialResponse());
+      break;
+    case ClientInstruction::Type::bidiStreamDeclaredException:
+      result.bidiStreamDeclaredException() = bidiStreamDeclaredExceptionTest(
+          *clientInstruction.bidiStreamDeclaredException());
+      break;
+    case ClientInstruction::Type::bidiStreamUndeclaredException:
+      result.bidiStreamUndeclaredException() =
+          bidiStreamUndeclaredExceptionTest(
+              *clientInstruction.bidiStreamUndeclaredException());
       break;
     case ClientInstruction::Type::bidiMethodDeclaredException:
       result.bidiMethodDeclaredException() = bidiMethodDeclaredExceptionTest(

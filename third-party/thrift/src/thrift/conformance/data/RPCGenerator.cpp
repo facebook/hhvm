@@ -1036,6 +1036,106 @@ Test createBidiInitialResponseTest() {
   return ret;
 }
 
+Test createBidiStreamDeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "BidiStreamDeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#bidi-stream-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "BidiStreamDeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction()
+                                .emplace()
+                                .bidiStreamDeclaredException()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  for (int i = 0; i < 100; i++) {
+    auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
+    sinkPayload.data() = folly::to<std::string>(i);
+  }
+
+  auto& serverInstruction = rpcTest.serverInstruction()
+                                .emplace()
+                                .bidiStreamDeclaredException()
+                                .emplace();
+  for (int i = 0; i < 100; i++) {
+    auto& payload = serverInstruction.streamPayloads()->emplace_back();
+    payload.data() = folly::to<std::string>(i);
+  }
+  serverInstruction.userException().emplace().msg() = "stream_error";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .bidiStreamDeclaredException()
+      .emplace()
+      .userException()
+      .emplace()
+      .msg() = "stream_error";
+  rpcTest.clientTestResult()
+      ->bidiStreamDeclaredException()
+      ->streamPayloads()
+      .copy_from(serverInstruction.streamPayloads());
+
+  auto& serverResult = rpcTest.serverTestResult()
+                           .emplace()
+                           .bidiStreamDeclaredException()
+                           .emplace();
+  serverResult.request().emplace().data() = "hello";
+  serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
+
+  return ret;
+}
+
+Test createBidiStreamUndeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "BidiStreamUndeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#bidi-stream-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "BidiStreamUndeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction()
+                                .emplace()
+                                .bidiStreamUndeclaredException()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  for (int i = 0; i < 100; i++) {
+    auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
+    sinkPayload.data() = folly::to<std::string>(i);
+  }
+
+  auto& serverInstruction = rpcTest.serverInstruction()
+                                .emplace()
+                                .bidiStreamUndeclaredException()
+                                .emplace();
+  for (int i = 0; i < 100; i++) {
+    auto& payload = serverInstruction.streamPayloads()->emplace_back();
+    payload.data() = folly::to<std::string>(i);
+  }
+  serverInstruction.exceptionMessage() = "stream_error";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .bidiStreamUndeclaredException()
+      .emplace()
+      .exceptionMessage() = "stream_error";
+  rpcTest.clientTestResult()
+      ->bidiStreamUndeclaredException()
+      ->streamPayloads()
+      .copy_from(serverInstruction.streamPayloads());
+
+  auto& serverResult = rpcTest.serverTestResult()
+                           .emplace()
+                           .bidiStreamUndeclaredException()
+                           .emplace();
+  serverResult.request().emplace().data() = "hello";
+  serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
+
+  return ret;
+}
+
 Test createBidiMethodDeclaredExceptionTest() {
   Test ret;
   ret.name() = "BidiMethodDeclaredExceptionTest";
@@ -1326,6 +1426,8 @@ void addCommonRPCTests(TestSuite& suite) {
   // =================== BiDi Streaming ===================
   suite.tests()->push_back(createBidiBasicTest());
   suite.tests()->push_back(createBidiInitialResponseTest());
+  suite.tests()->push_back(createBidiStreamDeclaredExceptionTest());
+  suite.tests()->push_back(createBidiStreamUndeclaredExceptionTest());
   suite.tests()->push_back(createBidiMethodDeclaredExceptionTest());
   suite.tests()->push_back(createBidiMethodUndeclaredExceptionTest());
   // =================== Interactions ===================

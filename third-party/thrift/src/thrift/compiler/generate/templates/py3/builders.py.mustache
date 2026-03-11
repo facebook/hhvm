@@ -43,7 +43,7 @@ import {{include.program.module_path}}.types as {{include.program.module_path_fo
   {{/if include.program.has_types?}}
 {{/each}}
 
-import {{program.module_path}}.{{> common/auto_migrate_import_prefix }}types as {{program.module_path_for_alias}}_types
+import {{program.module_path}}.{{#if program.auto_migrate?}}thrift_{{/if}}types as {{program.module_path_for_alias}}_types
 
 
 {{#each program.py3_visible_structured_definitions as |struct|}}

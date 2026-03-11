@@ -21,7 +21,7 @@ if {{#each function.exceptions as |exc|}}{{!
     try:
         exc = {{#if root_program.inplace_migrate?}}{{!
         }}{{#partial types.python_type type=exc.type}}.from_python({{!
-        }}{{exc.type.capi_converter_path}}.{{exc.type.true_type.name}}_from_cpp(
+        }}{{exc.type.true_type.program.module_path_for_alias}}_thrift_converter.{{exc.type.true_type.name}}_from_cpp(
             unwrap_exception[{{#partial types.cython_cpp_type type=exc.type}}](result.exception())
         ))
         {{#else}}

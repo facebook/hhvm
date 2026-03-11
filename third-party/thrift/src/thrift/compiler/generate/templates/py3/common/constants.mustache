@@ -37,12 +37,12 @@ file.
 
   {{#else if value.enum?}}
 {{#if (not value.enum_value?)}}__BadEnum({{/if}}
-{{#if (and ttype.enum? ttype.need_module_path?)}}{{ttype.module_path_period_separated}}.{{/if}}
+{{#if (and ttype.enum? ttype.need_module_path?)}}{{ttype.program.module_path}}.types.{{/if}}
 {{value.enum_name}}{{#if value.enum_value?}}.{{value.py3_enum_value_name}}{{/if}}
 {{#if (not value.enum_value?)}}, {{value.integer_value}}){{/if}}
 
   {{#else if value.structured?}}
-{{#if ttype.need_module_path?}}{{ttype.module_path_period_separated}}.{{/if}}{{ttype.name}}
+{{#if ttype.need_module_path?}}{{ttype.program.module_path}}.types.{{/if}}{{ttype.name}}
 (
     {{#each (array.enumerate value.structured_elements with_last=true) as |i elem last?|}}
 {{elem.field.name}}={{#partial inplace_const_value value=elem.value}}{{#if (not last?)}}, {{/if}}
@@ -90,9 +90,9 @@ file.
   {{#else if value.enum?}}
     {{#let enum_type=value.type.true_type}}
     {{#if value.enum_value?}}
-{{#if enum_type.need_module_path?}}{{enum_type.modulePath}}.{{/if}}{{value.enum_name}}.{{value.py3_enum_value_name}}
+{{#if enum_type.need_module_path?}}{{enum_type.program.module_path_for_alias}}_types.{{/if}}{{value.enum_name}}.{{value.py3_enum_value_name}}
     {{#else}}
-__BadEnum({{#if enum_type.need_module_path?}}{{enum_type.modulePath}}.{{/if}}{{value.enum_name}}, {{value.integer_value}})
+__BadEnum({{#if enum_type.need_module_path?}}{{enum_type.program.module_path_for_alias}}_types.{{/if}}{{value.enum_name}}, {{value.integer_value}})
     {{/if value.enum_value?}}
   {{/if value.bool?}}
 {{/let partial}}

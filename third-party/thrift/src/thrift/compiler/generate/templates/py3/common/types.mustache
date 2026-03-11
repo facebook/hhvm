@@ -36,10 +36,10 @@ in the client or server source rather than the type definition source.
 {{#else if type.void?}}object
 {{#else if type.string?}}str
 {{#else if type.binary?}}{{#if type.iobufWrapper?}}_fbthrift_iobuf.IOBuf{{#else}}bytes{{/if}}
-{{#else if type.container?}}{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.flat_name}}
+{{#else if type.container?}}{{#if type.need_module_path?}}{{type.true_type.program.module_path_for_alias}}_types.{{/if}}{{type.flat_name}}
   {{#else if (or type.structured? type.enum?)}}
     {{#let ttype=type.true_type}}
-{{#if ttype.need_module_path?}}{{ttype.modulePath}}.{{/if}}{{ttype.name}}
+{{#if ttype.need_module_path?}}{{ttype.program.module_path_for_alias}}_types.{{/if}}{{ttype.name}}
   {{/if type.bool?}}
 {{/let partial}}
 
@@ -65,13 +65,13 @@ referenced from types.pyx main file, field_setter, or container converter.
 }}
 {{#let export partial container_from_cpp |type|}}
 {{#pragma ignore-newlines}}
-{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.flat_name}}
+{{#if type.need_module_path?}}{{type.true_type.program.module_path_for_alias}}_types.{{/if}}{{type.flat_name}}
 __from_cpp
 {{/let partial}}
 
 {{#let export partial container_to_cpp |type|}}
 {{#pragma ignore-newlines}}
-{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.flat_name}}
+{{#if type.need_module_path?}}{{type.true_type.program.module_path_for_alias}}_types.{{/if}}{{type.flat_name}}
 __make_instance
 {{/let partial}}
 
@@ -94,7 +94,7 @@ _fbthrift_iobuf.cIOBuf
     {{#else if type.iobufRef?}}
 unique_ptr[_fbthrift_iobuf.cIOBuf]
     {{#else}}
-{{#if type.need_cbinding_path?}}{{type.cbinding_path}}.{{/if}}{{type.cythonCustomType}}
+{{#if type.need_cbinding_path?}}{{type.true_type.program.module_path_for_alias}}_cbindings.{{/if}}{{type.cythonCustomType}}
     {{/if type.iobuf?}}
 {{#else if type.void?}}cFollyUnit
 {{#else if type.bool?}}cbool
@@ -108,12 +108,12 @@ unique_ptr[_fbthrift_iobuf.cIOBuf]
 
   {{#else if (or type.enum? type.structured?)}}
     {{#let ttype = type.true_type}}
-{{#if ttype.need_cbinding_path?}}{{ttype.cbinding_path}}.{{/if}}
+{{#if ttype.need_cbinding_path?}}{{ttype.program.module_path_for_alias}}_cbindings.{{/if}}
 {{#partial c_binding node=ttype}}
 
   {{#else if type.container?}}
-{{#if (and (not type.defaultTemplate?) type.need_cbinding_path?)}}{{type.cbinding_path}}.{{/if}}
     {{#let ttype = type.true_type}}
+{{#if (and (not type.defaultTemplate?) type.need_cbinding_path?)}}{{ttype.program.module_path_for_alias}}_cbindings.{{/if}}
     {{#if type.map?}}
 {{type.cythonTemplate}}[
 {{#partial cython_cpp_type_resolved type=ttype.key_type enable_custom_type_overrides=true}},
@@ -158,7 +158,7 @@ in the client or server source rather than the type definition source.
   {{#if ttype.program.inplace_migrate?}}
 object
   {{#else}}
-{{#if ttype.need_module_path?}}{{ttype.modulePath}}.{{/if}}{{ttype.name}}
+{{#if ttype.need_module_path?}}{{ttype.program.module_path_for_alias}}_types.{{/if}}{{ttype.name}}
   {{/if ttype.program.inplace_migrate?}}
 {{/if type.iobufWrapper?}}
 {{/let partial}}
@@ -173,8 +173,8 @@ object
 {{#else if type.floating_point?}}(float, int)
 {{#else if type.string?}}str
 {{#else if type.binary?}}{{#if type.iobufWrapper?}}_fbthrift_iobuf.IOBuf{{#else}}bytes{{/if}}
-{{#else if type.container?}}{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{#partial cython_python_type type=type}}
-{{#else if (or type.structured? type.enum?)}}{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.true_type.name}}
+{{#else if type.container?}}{{#if type.need_module_path?}}{{type.true_type.program.module_path_for_alias}}_types.{{/if}}{{#partial cython_python_type type=type}}
+{{#else if (or type.structured? type.enum?)}}{{#if type.need_module_path?}}{{type.true_type.program.module_path_for_alias}}_types.{{/if}}{{type.true_type.name}}
 {{/if type.bool?}}
 {{/let partial}}
 
@@ -255,11 +255,11 @@ For map keys, use cython_python_to_cpp_key instead.
     {{#let ttype = type.true_type}}
     {{#if ttype.program.auto_migrate?}}
 __deref_const[{{#partial cython_cpp_type type=type}}](
-{{#if type.need_module_path?}}{{type.capi_converter_path}}.{{/if}}
+{{#if type.need_module_path?}}{{ttype.program.module_path_for_alias}}_thrift_converter.{{/if}}
 {{ttype.name}}_convert_to_cpp(item))
     {{#else if root_program.inplace_migrate?}}
 __deref_const[{{#partial cython_cpp_type type=type}}](
-{{type.capi_converter_path}}.{{ttype.name}}_convert_to_cpp(item._to_python()))
+{{ttype.program.module_path_for_alias}}_thrift_converter.{{ttype.name}}_convert_to_cpp(item._to_python()))
     {{#else}}
 deref((<{{#partial cython_python_type type=type}}>item).{{#partial cpp_obj}})
     {{/if ttype.program.auto_migrate?}}
@@ -305,11 +305,11 @@ use cython_python_to_cpp_item instead.
   {{#else if type.structured?}}
     {{#if root_program.auto_migrate?}}
 __deref_const[{{#partial cython_cpp_type type=type}}](
-{{#if type.need_module_path?}}{{type.capi_converter_path}}.{{/if}}
+{{#if type.need_module_path?}}{{type.true_type.program.module_path_for_alias}}_thrift_converter.{{/if}}
 {{type.true_type.name}}_convert_to_cpp(key))
     {{#else if root_program.inplace_migrate?}}
 __deref_const[{{#partial cython_cpp_type type=type}}](
-{{type.capi_converter_path}}.{{type.true_type.name}}_convert_to_cpp(key._to_python()))
+{{type.true_type.program.module_path_for_alias}}_thrift_converter.{{type.true_type.name}}_convert_to_cpp(key._to_python()))
     {{#else}}
 deref((<{{#partial cython_python_type type=type}}>key).{{#partial cpp_obj}})
     {{/if root_program.auto_migrate?}}
@@ -493,8 +493,8 @@ Recursive for container element types.
 {{#else if type.float?}}_fbthrift_python_types.typeinfo_float
 {{#else if type.string?}}_fbthrift_python_types.typeinfo_string
 {{#else if type.binary?}}{{#if type.iobuf?}}_fbthrift_python_types.typeinfo_iobuf{{#else}}_fbthrift_python_types.typeinfo_binary{{/if}}
-{{#else if type.enum?}}_fbthrift_python_types.EnumTypeInfo({{type.module_auto_migrate_path}}.{{type.true_type.name}})
-{{#else if type.structured?}}_fbthrift_python_types.StructTypeInfo({{type.module_auto_migrate_path}}.{{type.true_type.name}})
+{{#else if type.enum?}}_fbthrift_python_types.EnumTypeInfo({{type.true_type.program.module_path_for_alias}}_thrift_types.{{type.true_type.name}})
+{{#else if type.structured?}}_fbthrift_python_types.StructTypeInfo({{type.true_type.program.module_path_for_alias}}_thrift_types.{{type.true_type.name}})
 {{#else if type.list?}}_fbthrift_python_types.ListTypeInfo({{#partial typeinfo type=type.true_type.elem_type}})
 {{#else if type.set?}}_fbthrift_python_types.SetTypeInfo({{#partial typeinfo type=type.true_type.elem_type}})
   {{#else if type.map?}}
@@ -517,7 +517,7 @@ _fbthrift_python_types.MapTypeInfo({{#partial typeinfo type=ttype.key_type}}, {{
 {{#else if type.enum?}}translate_cpp_enum_to_python({{#partial python_type type=type}}, <int> ckey)
 {{#else if type.structured?}}
   {{#if root_program.inplace_migrate?}}
-{{#partial python_type type=type}}.from_python({{type.capi_converter_path}}.{{type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=type}}](ckey)))
+{{#partial python_type type=type}}.from_python({{type.true_type.program.module_path_for_alias}}_thrift_converter.{{type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=type}}](ckey)))
   {{#else}}
 {{#partial cython_python_type type=type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(ckey))
   {{/if root_program.inplace_migrate?}}
@@ -538,7 +538,7 @@ _fbthrift_python_types.MapTypeInfo({{#partial typeinfo type=ttype.key_type}}, {{
 {{#else if type.enum?}}translate_cpp_enum_to_python({{#partial python_type type=type}}, <int> cval)
 {{#else if type.structured?}}
   {{#if root_program.inplace_migrate?}}
-{{#partial python_type type=type}}.from_python({{type.capi_converter_path}}.{{type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=type}}](cval)))
+{{#partial python_type type=type}}.from_python({{type.true_type.program.module_path_for_alias}}_thrift_converter.{{type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=type}}](cval)))
   {{#else}}
 {{#partial cython_python_type type=type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
   {{/if root_program.inplace_migrate?}}
@@ -559,7 +559,7 @@ _fbthrift_python_types.MapTypeInfo({{#partial typeinfo type=ttype.key_type}}, {{
 {{#else if elem_type.enum?}}translate_cpp_enum_to_python({{#partial python_type type=elem_type}}, <int> c_vec[idx])
 {{#else if elem_type.structured?}}
   {{#if root_program.inplace_migrate?}}
-{{#partial python_type type=elem_type}}.from_python({{elem_type.capi_converter_path}}.{{elem_type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=elem_type}}](c_vec[idx])))
+{{#partial python_type type=elem_type}}.from_python({{elem_type.true_type.program.module_path_for_alias}}_thrift_converter.{{elem_type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=elem_type}}](c_vec[idx])))
   {{#else}}
 {{#partial cython_python_type type=elem_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[{{#partial cython_cpp_type type=elem_type}}](c_vec[idx]))
   {{/if root_program.inplace_migrate?}}
@@ -580,7 +580,7 @@ _fbthrift_python_types.MapTypeInfo({{#partial typeinfo type=ttype.key_type}}, {{
 {{#else if elem_type.enum?}}translate_cpp_enum_to_python({{#partial python_type type=elem_type}}, <int> citem)
 {{#else if elem_type.structured?}}
   {{#if root_program.inplace_migrate?}}
-{{#partial python_type type=elem_type}}.from_python({{elem_type.capi_converter_path}}.{{elem_type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=elem_type}}](citem)))
+{{#partial python_type type=elem_type}}.from_python({{elem_type.true_type.program.module_path_for_alias}}_thrift_converter.{{elem_type.true_type.name}}_from_cpp(__deref_const[{{#partial cython_cpp_type type=elem_type}}](citem)))
   {{#else}}
 {{#partial cython_python_type type=elem_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(citem))
   {{/if root_program.inplace_migrate?}}

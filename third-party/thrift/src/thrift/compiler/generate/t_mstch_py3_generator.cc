@@ -862,9 +862,6 @@ class t_mstch_py3_generator : public t_whisker_generator {
       return fmt::format(
           "{}", fmt::join(cpp2::get_gen_namespace_components(self), "::"));
     });
-    def.property("py3Namespaces", [](const t_program& self) {
-      return to_whisker_string_array(get_py3_namespace(&self));
-    });
     def.property("module_path", [](const t_program& self) {
       std::vector<std::string> segments = get_py3_namespace_with_name(&self);
       assert(!segments.empty());
@@ -1043,6 +1040,15 @@ class t_mstch_py3_generator : public t_whisker_generator {
     auto base = t_whisker_generator::make_prototype_for_type(proto);
     auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
 
+    // Override for base Whisker generator's `program` property, falling back to
+    // the current program for primitives/containers which have a `nullptr`
+    // program. This allows us to use the `t_program` module path properties
+    // without a mess of conditions in the template.
+    def.property("program", [&](const t_type& self) {
+      return proto.create<t_program>(
+          self.program() == nullptr ? *program_ : *self.program());
+    });
+
     // Overrides for `t_named` properties, resolving typedefs before computing
     // the value. This is necessary because the py3 generator previously used to
     // erase typedefs when initializing mstch_type, but still used the
@@ -1059,22 +1065,6 @@ class t_mstch_py3_generator : public t_whisker_generator {
     });
     def.property("cpp_name", [](const t_type& self) {
       return cpp2::get_name(self.get_true_type());
-    });
-    def.property("modulePath", [this](const t_type& self) {
-      const t_type* true_type = self.get_true_type();
-      const t_program* program = true_type->program() == nullptr
-          ? get_program()
-          : true_type->program();
-      return fmt::format(
-          "_{}_types", fmt::join(get_py3_namespace_with_name(program), "_"));
-    });
-    def.property("module_path_period_separated", [this](const t_type& self) {
-      const t_type* true_type = self.get_true_type();
-      const t_program* program = true_type->program() == nullptr
-          ? get_program()
-          : true_type->program();
-      return fmt::format(
-          "{}.types", fmt::join(get_py3_namespace_with_name(program), "."));
     });
     def.property("need_module_path?", [this](const t_type& self) {
       return file_type_ == FileType::NotTypesFile ||
@@ -1094,24 +1084,6 @@ class t_mstch_py3_generator : public t_whisker_generator {
       // different Thrift program
       return file_type_ != FileType::CBindingsFile ||
           get_true_type_program(self) != get_program();
-    });
-    def.property("cbinding_path", [this](const t_type& self) {
-      return fmt::format(
-          "_{}_cbindings",
-          fmt::join(
-              get_py3_namespace_with_name(get_true_type_program(self)), "_"));
-    });
-    def.property("capi_converter_path", [this](const t_type& self) {
-      return fmt::format(
-          "_{}_thrift_converter",
-          fmt::join(
-              get_py3_namespace_with_name(get_true_type_program(self)), "_"));
-    });
-    def.property("module_auto_migrate_path", [this](const t_type& self) {
-      return fmt::format(
-          "_{}_thrift_types",
-          fmt::join(
-              get_py3_namespace_with_name(get_true_type_program(self)), "_"));
     });
     def.property("cppTemplate", [this](const t_type& self) {
       return context_->get_cached_type_props(&self).cpp_template();

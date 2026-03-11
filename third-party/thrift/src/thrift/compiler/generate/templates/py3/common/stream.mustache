@@ -44,7 +44,7 @@ identification. Takes a function and produces
 {{#else if type.enum?}}{{#partial types.python_type type=type}}(<int> _value)
 {{#else if type.structured?}}
   {{#if root_program.inplace_migrate?}}
-{{#partial types.python_type type=type}}.from_python({{type.capi_converter_path}}.{{type.true_type.name}}_from_cpp(__deref_const[{{#partial types.cython_cpp_type type=type}}](_value)))
+{{#partial types.python_type type=type}}.from_python({{type.true_type.program.module_path_for_alias}}_thrift_converter.{{type.true_type.name}}_from_cpp(__deref_const[{{#partial types.cython_cpp_type type=type}}](_value)))
   {{#else}}
 {{#partial types.cython_python_type type=type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[{{#partial types.cython_cpp_type type=type}}](_value))
   {{/if root_program.inplace_migrate?}}

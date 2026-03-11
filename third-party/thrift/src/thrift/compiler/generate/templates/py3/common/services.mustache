@@ -31,7 +31,7 @@ __iobuf_cIOBuf
     {{#else if type.iobufRef?}}
 unique_ptr__iobuf_cIOBuf
     {{#else}}
-{{#if type.need_cbinding_path?}}{{type.cbinding_path}}_{{/if}}{{type.cythonCustomType}}
+{{#if type.need_cbinding_path?}}{{type.true_type.program.module_path_for_alias}}_cbindings_{{/if}}{{type.cythonCustomType}}
     {{/if type.iobuf?}}
 {{#else if type.bool?}}cbool
 {{#else if type.void?}}cFollyUnit
@@ -45,11 +45,11 @@ unique_ptr__iobuf_cIOBuf
 {{#else if type.binary?}}binary
   {{#else if (or type.structured? type.enum?)}}
     {{#let ttype = type.true_type}}
-{{#if ttype.need_cbinding_path?}}{{ttype.cbinding_path}}_{{/if}}{{!
+{{#if ttype.need_cbinding_path?}}{{ttype.program.module_path_for_alias}}_cbindings_{{/if}}{{!
 }}{{#partial types.c_binding node=ttype}}
   {{#else if type.container?}}
     {{#let ttype = type.true_type}}
-{{#if (and (not type.defaultTemplate?) type.need_cbinding_path?)}}{{type.cbinding_path}}_{{/if}}
+{{#if (and (not type.defaultTemplate?) type.need_cbinding_path?)}}{{ttype.program.module_path_for_alias}}_cbindings_{{/if}}
     {{#if type.map?}}
 {{type.cythonTemplate}}__{{#partial cython_cpp_type_ident type=ttype.key_type}}_{{#partial cython_cpp_type_ident type=ttype.val_type}}
     {{#else}}
@@ -133,7 +133,7 @@ cmove(deref((<ServerStream_{{#partial cython_cpp_type_ident type=function.stream
     {{#let ttype = type.true_type}}
 {{#if (not function.stack_arguments?)}}make_unique[{{#partial types.cython_cpp_type type=type}}]({{/if}}
     {{#if root_program.inplace_migrate?}}
-{{type.capi_converter_path}}.{{ttype.name}}_convert_to_cpp(result._to_python())
+{{ttype.program.module_path_for_alias}}_thrift_converter.{{ttype.name}}_convert_to_cpp(result._to_python())
     {{#else}}
 deref((<{{#partial types.cython_python_type type=type}}?> result).{{#partial types.cpp_obj}})
     {{/if root_program.inplace_migrate?}}

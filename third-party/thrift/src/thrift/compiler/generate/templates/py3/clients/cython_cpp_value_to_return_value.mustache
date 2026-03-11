@@ -35,7 +35,7 @@ to a python type.
 
   {{#else if (and function.return_type.structured? program.inplace_migrate?)}}
 {{#partial types.python_type type=function.return_type}}.from_python(
-{{function.return_type.capi_converter_path}}.{{function.return_type.true_type.name}}_from_cpp(
+{{function.return_type.true_type.program.module_path_for_alias}}_thrift_converter.{{function.return_type.true_type.name}}_from_cpp(
 __deref_const[{{#partial types.cython_cpp_type type=function.return_type}}](result.value())))
 
   {{#else if function.return_type.structured?}}

@@ -554,7 +554,7 @@ cdef class ClientBufferedStream__{{type.flat_name}}(ClientBufferedStream):
             pyfuture.set_exception({{!
             }}{{#if program.inplace_migrate?}}{{#if type.structured?}}{{!
                 }}{{#partial types.python_type type=type}}.from_python({{!
-                }}{{type.capi_converter_path}}.{{type.true_type.name}}_from_cpp({{!
+                }}{{type.true_type.program.module_path_for_alias}}_thrift_converter.{{type.true_type.name}}_from_cpp({{!
                 }}thrift.py3.exceptions.unwrap_exception[{{#partial types.cython_cpp_type type=type}}](result.exception()))){{!
             }}{{/if type.structured?}}{{#else}}{{!
                 }}{{#partial types.cython_python_type type=type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!

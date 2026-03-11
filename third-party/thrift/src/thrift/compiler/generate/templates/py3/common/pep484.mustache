@@ -34,7 +34,7 @@ thrift-py3 specific container types.
 {{#else if type.string?}}str
 {{#else if type.void?}}None
 {{#else if type.binary?}}{{#if type.iobufWrapper?}}_fbthrift_iobuf.IOBuf{{#else}}bytes{{/if}}
-{{#else if (or type.structured? type.enum?)}}{{#if type.need_module_path?}}{{type.modulePath}}.{{/if}}{{type.true_type.name}}
+{{#else if (or type.structured? type.enum?)}}{{#if type.need_module_path?}}{{type.true_type.program.module_path_for_alias}}_types.{{/if}}{{type.true_type.name}}
 {{#else if type.list?}}_typing.Sequence[{{#partial type_name type=type.true_type.elem_type}}]
 {{#else if type.set?}}_typing.AbstractSet[{{#partial type_name type=type.true_type.elem_type}}]
 {{#else if type.map?}}_typing.Mapping[{{#partial type_name type=type.true_type.key_type}}, {{#partial type_name type=type.true_type.val_type}}]
@@ -45,7 +45,7 @@ thrift-py3 specific container types.
 {{! pep 484 typing but with period separated module path }}
 {{#let export partial type_period_separated |type| captures |type_name|}}
 {{#pragma ignore-newlines}}
-{{#if (or type.structured? type.enum?)}}{{#if type.need_module_path?}}{{type.module_path_period_separated}}.{{/if}}{{type.true_type.name}}
+{{#if (or type.structured? type.enum?)}}{{#if type.need_module_path?}}{{type.true_type.program.module_path}}.types.{{/if}}{{type.true_type.name}}
 {{#else if type.list?}}_typing.Sequence[{{#partial type_period_separated type=type.true_type.elem_type}}]
 {{#else if type.set?}}_typing.AbstractSet[{{#partial type_period_separated type=type.true_type.elem_type}}]
 {{#else if type.map?}}_typing.Mapping[{{#partial type_period_separated type=type.true_type.key_type}}, {{#partial type_period_separated type=type.true_type.val_type}}]

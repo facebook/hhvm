@@ -34,7 +34,7 @@ This template assumes that the Python object is in a variable named <field>.
 {{#else if param.type.container?}}{{#partial types.container_to_cpp type=param.type}}({{param.py_name}})
 {{#else if param.type.enum?}}<{{#partial types.cython_cpp_type type=param.type}}><int>{{param.py_name}}
   {{#else if (and param.type.structured? program.inplace_migrate?)}}
-{{param.type.capi_converter_path}}.{{param.type.true_type.name}}_convert_to_cpp({{param.py_name}}._to_python())
+{{param.type.true_type.program.module_path_for_alias}}_thrift_converter.{{param.type.true_type.name}}_convert_to_cpp({{param.py_name}}._to_python())
 
   {{#else if param.type.structured?}}
 deref((<{{#partial types.cython_python_type type=param.type}}>{{param.py_name}}).{{#partial types.cpp_obj}})

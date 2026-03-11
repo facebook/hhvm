@@ -51,7 +51,7 @@ unique_ptr[{{#partial types.cython_cpp_type type=param.type}}]
   {{#if (not program.inplace_migrate?)}}
 {{#partial types.cython_python_type type=param.type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{#partial types.cython_cpp_type type=param.type}}]({{param.py_name}}.release()))
   {{#else}}
-{{#partial types.python_type type=param.type}}.from_python({{param.type.capi_converter_path}}.{{param.type.true_type.name}}_from_cpp(__deref_const[{{#partial types.cython_cpp_type type=param.type}}](cmove({{param.py_name}}))))
+{{#partial types.python_type type=param.type}}.from_python({{param.type.true_type.program.module_path_for_alias}}_thrift_converter.{{param.type.true_type.name}}_from_cpp(__deref_const[{{#partial types.cython_cpp_type type=param.type}}](cmove({{param.py_name}}))))
   {{/if (not program.inplace_migrate?)}}
 {{/if param.type.iobuf?}}
   {{/let partial}}
@@ -68,7 +68,7 @@ unique_ptr[{{#partial types.cython_cpp_type type=param.type}}]
   {{#if (not program.inplace_migrate?)}}
 {{#partial types.cython_python_type type=param.type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[{{#partial types.cython_cpp_type type=param.type}}]({{param.py_name}}))
   {{#else}}
-{{#partial types.python_type type=param.type}}.from_python({{param.type.capi_converter_path}}.{{param.type.true_type.name}}_from_cpp(__deref_const[{{#partial types.cython_cpp_type type=param.type}}]({{param.py_name}})))
+{{#partial types.python_type type=param.type}}.from_python({{param.type.true_type.program.module_path_for_alias}}_thrift_converter.{{param.type.true_type.name}}_from_cpp(__deref_const[{{#partial types.cython_cpp_type type=param.type}}]({{param.py_name}})))
   {{/if (not program.inplace_migrate?)}}
 {{/if param.type.iobuf?}}
   {{/let partial}}
@@ -101,7 +101,7 @@ async def {{service.name}}_{{function.name}}_coro(
         }}{{#if (not program.inplace_migrate?)}}{{!
           }}(deref((<{{#partial types.cython_python_type type=field.type}}> ex).{{#partial types.cpp_obj}})){{!
         }}{{#else if field.type.structured?}}{{!
-          }}({{field.type.capi_converter_path}}.{{field.type.true_type.name}}_convert_to_cpp(ex._to_python())){{!
+          }}({{field.type.true_type.program.module_path_for_alias}}_thrift_converter.{{field.type.true_type.name}}_convert_to_cpp(ex._to_python())){{!
         }}{{/if (not program.inplace_migrate?)}}
     {{/each}}
     except __ApplicationError as ex:

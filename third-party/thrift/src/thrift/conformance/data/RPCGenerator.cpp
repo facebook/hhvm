@@ -957,6 +957,46 @@ Test createSinkUndeclaredExceptionTest() {
   return ret;
 }
 
+// =================== BiDi Streaming ===================
+Test createBidiBasicTest() {
+  Test ret;
+  ret.name() = "BidiBasicTest";
+  ret.tags()->emplace("spec/protocol/interface/#bidi");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "BidiBasic/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  auto& clientInstruction =
+      rpcTest.clientInstruction().emplace().bidiBasic().emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  for (int i = 0; i < 100; i++) {
+    auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
+    sinkPayload.data() = folly::to<std::string>(i);
+  }
+
+  auto& serverInstruction =
+      rpcTest.serverInstruction().emplace().bidiBasic().emplace();
+  for (int i = 0; i < 100; i++) {
+    auto& payload = serverInstruction.streamPayloads()->emplace_back();
+    payload.data() = folly::to<std::string>(i);
+  }
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .bidiBasic()
+      .emplace()
+      .streamPayloads()
+      .copy_from(serverInstruction.streamPayloads());
+
+  auto& serverResult =
+      rpcTest.serverTestResult().emplace().bidiBasic().emplace();
+  serverResult.request().emplace().data() = "hello";
+  serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
+
+  return ret;
+}
+
 // =================== Interactions ===================
 Test createInteractionConstructorTest() {
   Test ret;
@@ -1160,6 +1200,8 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createSinkInitialResponseTest());
   suite.tests()->push_back(createSinkDeclaredExceptionTest());
   suite.tests()->push_back(createSinkUndeclaredExceptionTest());
+  // =================== BiDi Streaming ===================
+  suite.tests()->push_back(createBidiBasicTest());
   // =================== Interactions ===================
   suite.tests()->push_back(createInteractionConstructorTest());
   suite.tests()->push_back(createInteractionFactoryFunctionTest());

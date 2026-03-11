@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/conformance/if/gen-cpp2/RPCConformanceService.h>
+#include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 
@@ -70,6 +71,10 @@ class RPCServerConformanceHandler
 
   apache::thrift::SinkConsumer<Request, Response> sinkUndeclaredException(
       std::unique_ptr<Request> req) override;
+
+  // =================== BiDi Streaming ===================
+  folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+  co_bidiBasic(std::unique_ptr<Request> req) override;
 
   // =================== Interactions ===================
   class BasicInteraction : public BasicInteractionIf {

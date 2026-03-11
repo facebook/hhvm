@@ -31,6 +31,7 @@
 #include <thrift/conformance/RpcStructComparator.h>
 #include <thrift/conformance/Utils.h>
 #include <thrift/conformance/if/gen-cpp2/RPCConformanceService.h>
+#include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
@@ -274,6 +275,24 @@ class ConformanceVerificationServer
                                    ->sinkUndeclaredException()
                                    ->bufferSize())};
   }
+  // =================== BiDi Streaming ===================
+  folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+  co_bidiBasic(std::unique_ptr<Request> req) override {
+    serverResult_.bidiBasic().emplace().request() = *req;
+    co_return apache::thrift::StreamTransformation<Request, Response>{
+        [this](folly::coro::AsyncGenerator<Request&&> input)
+            -> folly::coro::AsyncGenerator<Response&&> {
+          for (auto payload :
+               *testCase_.serverInstruction()->bidiBasic()->streamPayloads()) {
+            co_yield std::move(payload);
+          }
+          while (auto item = co_await input.next()) {
+            serverResult_.bidiBasic()->sinkPayloads()->push_back(
+                std::move(*item));
+          }
+        }};
+  }
+
   // =================== Interactions ===================
   class BasicInteraction : public BasicInteractionIf {
    public:
@@ -425,7 +444,7 @@ class RPCClientConformanceTest : public testing::Test {
   void TestBody() override { verifyConformanceResult(runTest()); }
 
   void TearDown() override {
-    if (!connectViaServer_) {
+    if (!connectViaServer_ && clientProcess_.returnCode().running()) {
       clientProcess_.sendSignal(SIGINT);
       clientProcess_.waitOrTerminateOrKill(
           std::chrono::seconds(10), std::chrono::seconds(10));
@@ -459,9 +478,29 @@ class RPCClientConformanceTest : public testing::Test {
             << "client failed to fetch test case";
       }
 
-      // Wait for result from client
+      // Wait for result from client, polling subprocess health
+      auto resultFuture = handler_->clientResult();
+      auto deadline =
+          std::chrono::steady_clock::now() + std::chrono::seconds(10);
+      while (!resultFuture.isReady() &&
+             std::chrono::steady_clock::now() < deadline) {
+        if (!connectViaServer_) {
+          auto rc = clientProcess_.poll();
+          if (!rc.running()) {
+            return testing::AssertionFailure()
+                << "client process exited before sending test result";
+          }
+        }
+        /* sleep override */ std::this_thread::sleep_for(
+            std::chrono::milliseconds(100));
+      }
+
+      if (!resultFuture.isReady()) {
+        return testing::AssertionFailure() << "Timed out waiting for client";
+      }
+
       folly::Try<ClientTestResult> actualClientResult =
-          handler_->clientResult().within(std::chrono::seconds(10)).getTry();
+          std::move(resultFuture).getTry();
 
       // End test if result was not received
       if (actualClientResult.hasException()) {

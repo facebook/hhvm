@@ -31,6 +31,8 @@ python/ThriftRPCClientTest/StreamUndeclaredException/Success.StreamUndeclaredExc
 python/ThriftRPCClientTest/StreamInitialDeclaredException/Success.StreamInitialDeclaredExceptionTest
 python/ThriftRPCClientTest/StreamInitialUndeclaredException/Success.StreamInitialUndeclaredExceptionTest
 python/ThriftRPCClientTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
+# Python does not support BiDi streaming
+python/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
 # Python RPC conformance server tests
 python/ThriftRPCServerTest/StreamSubsequentCredits/Success.StreamSubsequentCreditsTest
 python/ThriftRPCServerTest/SinkBasic/Success.SinkBasicTest
@@ -53,6 +55,7 @@ python/ThriftRPCServerTest/StreamDeclaredException/Success.StreamDeclaredExcepti
 python/ThriftRPCServerTest/StreamUndeclaredException/Success.StreamUndeclaredExceptionTest
 python/ThriftRPCServerTest/StreamInitialDeclaredException/Success.StreamInitialDeclaredExceptionTest
 python/ThriftRPCServerTest/StreamInitialUndeclaredException/Success.StreamInitialUndeclaredExceptionTest
+python/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
 #
 #
 #
@@ -140,6 +143,9 @@ java2/ThriftRPCServerTest/InteractionFactoryFunctionTerminationTest/Success.Inte
 java2/ThriftRPCServerTest/SinkFragmentation/Success.SinkFragmentationTest
 java2/ThriftRPCServerTest/InteractionConstructorTerminationTest/Success.InteractionConstructorTerminationTest
 java2/ThriftRPCServerTest/InteractionFactoryFunctionTest/Success.InteractionFactoryFunctionTest
+# Java does not support BiDi streaming codegen
+java2/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
+java2/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
 #
 #
 # All type change tests are failing in Java
@@ -2723,6 +2729,8 @@ hack/ThriftRPCClientTest/StreamFragmentation/Success.StreamFragmentationTest
 hack/ThriftRPCClientTest/SinkFragmentation/Success.SinkFragmentationTest
 hack/ThriftRPCClientTest/RequestResponseFragmentation/Success.RequestResponseFragmentationTest
 hack/ThriftRPCClientTest/InteractionFactoryFunctionTest/Success.InteractionFactoryFunctionTest
+# Hack does not support BiDi streaming
+hack/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
 hack/ThriftRPCServerTest/SinkChunkTimeout/Success.SinkChunkTimeoutTest
 hack/ThriftRPCServerTest/InteractionConstructorTest/Success.InteractionConstructorTest
 hack/ThriftRPCServerTest/InteractionFactoryFunctionTest/Success.InteractionFactoryFunctionTest
@@ -2730,6 +2738,7 @@ hack/ThriftRPCServerTest/InteractionConstructorPersistsStateTest/Success.Interac
 hack/ThriftRPCServerTest/InteractionFactoryFunctionPersistsStateTest/Success.InteractionFactoryFunctionPersistsStateTest
 hack/ThriftRPCServerTest/InteractionConstructorTerminationTest/Success.InteractionConstructorTerminationTest
 hack/ThriftRPCServerTest/InteractionFactoryFunctionTerminationTest/Success.InteractionFactoryFunctionTerminationTest
+hack/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
 
 #
 #
@@ -2765,6 +2774,8 @@ erlang/ThriftRPCClientTest/InteractionFactoryFunctionTerminationTest/Success.Int
 erlang/ThriftRPCClientTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
 erlang/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 erlang/ThriftRPCClientTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
+# Erlang does not support BiDi streaming
+erlang/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
 
 # Go
 #
@@ -2911,6 +2922,8 @@ go/ThriftRPCClientTest/InteractionConstructorPersistsStateTest/Success.Interacti
 go/ThriftRPCClientTest/InteractionConstructorTerminationTest/Success.InteractionConstructorTerminationTest
 go/ThriftRPCClientTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
 go/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
+# Go does not support BiDi streaming
+go/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
 #
 # Go RPC conformance server tests
 go/ThriftRPCServerTest/SinkChunkTimeout/Success.SinkChunkTimeoutTest
@@ -2921,6 +2934,7 @@ go/ThriftRPCServerTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
 go/ThriftRPCServerTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 go/ThriftRPCServerTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
 go/ThriftRPCServerTest/RequestResponseTimeout/Success.RequestResponseTimeoutTest
+go/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
 
 #
 # Rust
@@ -3019,6 +3033,8 @@ rust/CompatibilityTest/testset.Optional.Terse/ChangeQualifier/empty.Compact
 # This is an actual non-conformance failure, because we are trying to send
 # encoded data to a server about a runtime exn T218969298
 rust/ThriftRPCServerTest/SinkUndeclaredException/Success.SinkUndeclaredExceptionTest
+# Rust does not yet support BiDi streaming in conformance tests
+rust/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
 
 # Rust RPC client tests
 
@@ -3026,3 +3042,4 @@ rust/ThriftRPCServerTest/SinkUndeclaredException/Success.SinkUndeclaredException
 # configuring the server in a client-test specific way. It should be
 # supported, but it's not today
 rust/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
+rust/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest

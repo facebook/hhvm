@@ -74,6 +74,7 @@ union ServerTestResult {
   301: InteractionFactoryFunctionServerTestResult interactionFactoryFunction;
   302: InteractionPersistsStateServerTestResult interactionPersistsState;
   303: InteractionTerminationServerTestResult interactionTermination;
+  400: BidiBasicServerTestResult bidiBasic;
 }
 
 union ClientTestResult {
@@ -102,6 +103,7 @@ union ClientTestResult {
   301: InteractionFactoryFunctionClientTestResult interactionFactoryFunction;
   302: InteractionPersistsStateClientTestResult interactionPersistsState;
   303: InteractionTerminationClientTestResult interactionTermination;
+  400: BidiBasicClientTestResult bidiBasic;
 }
 
 struct RequestResponseBasicServerTestResult {
@@ -208,6 +210,11 @@ struct InteractionTerminationServerTestResult {
   1: bool terminationReceived;
 }
 
+struct BidiBasicServerTestResult {
+  1: Request request;
+  2: list<Request> sinkPayloads;
+}
+
 struct RequestResponseBasicClientTestResult {
   1: Response response;
 }
@@ -309,6 +316,10 @@ struct InteractionPersistsStateClientTestResult {
 
 struct InteractionTerminationClientTestResult {}
 
+struct BidiBasicClientTestResult {
+  1: list<Response> streamPayloads;
+}
+
 union ClientInstruction {
   1: RequestResponseBasicClientInstruction requestResponseBasic;
   2: RequestResponseDeclaredExceptionClientInstruction requestResponseDeclaredException;
@@ -335,6 +346,7 @@ union ClientInstruction {
   301: InteractionFactoryFunctionClientInstruction interactionFactoryFunction;
   302: InteractionPersistsStateClientInstruction interactionPersistsState;
   303: InteractionTerminationClientInstruction interactionTermination;
+  400: BidiBasicClientInstruction bidiBasic;
 }
 
 union ServerInstruction {
@@ -363,6 +375,7 @@ union ServerInstruction {
   301: InteractionFactoryFunctionServerInstruction interactionFactoryFunction;
   302: InteractionPersistsStateServerInstruction interactionPersistsState;
   303: InteractionTerminationServerInstruction interactionTermination;
+  400: BidiBasicServerInstruction bidiBasic;
 }
 
 struct RequestResponseBasicClientInstruction {
@@ -475,6 +488,11 @@ struct InteractionTerminationClientInstruction {
   1: optional i32 initialSum;
 }
 
+struct BidiBasicClientInstruction {
+  1: Request request;
+  2: list<Request> sinkPayloads;
+}
+
 struct RequestResponseBasicServerInstruction {
   1: Response response;
 }
@@ -578,6 +596,10 @@ struct InteractionPersistsStateServerInstruction {}
 
 struct InteractionTerminationServerInstruction {}
 
+struct BidiBasicServerInstruction {
+  1: list<Response> streamPayloads;
+}
+
 interaction BasicInteraction {
   void init();
   // adds i to the cumulative sum and returns the new value
@@ -639,6 +661,10 @@ service RPCConformanceService {
   // =================== Interactions ===================
   performs BasicInteraction;
   BasicInteraction basicInteractionFactoryFunction(i32 initialSum);
+
+  // =================== BiDi Streaming ===================
+  // @lint-ignore THRIFTCHECKS new unreleased feature
+  sink<Request>, stream<Response> bidiBasic(1: Request req);
 }
 
 service RPCStatelessConformanceService {
@@ -688,4 +714,8 @@ service RPCStatelessConformanceService {
   sink<Request, Response> sinkUndeclaredException(
     1: ServerInstruction serverInstr,
   );
+
+  // =================== BiDi Streaming ===================
+  // @lint-ignore THRIFTCHECKS new unreleased feature
+  sink<Request>, stream<Response> bidiBasic(1: ServerInstruction serverInstr);
 }

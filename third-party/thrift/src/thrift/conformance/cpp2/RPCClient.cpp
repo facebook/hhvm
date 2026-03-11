@@ -20,6 +20,7 @@
 
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/BlockingWait.h>
+#include <folly/coro/Collect.h>
 #include <folly/coro/Sleep.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
@@ -372,6 +373,34 @@ SinkUndeclaredExceptionClientTestResult sinkUndeclaredExceptionTest(
       }());
 }
 
+// =================== Bidi ===================
+BidiBasicClientTestResult bidiBasicTest(
+    BidiBasicClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<BidiBasicClientTestResult> {
+        auto bidi = co_await client->co_bidiBasic(*instruction.request());
+        BidiBasicClientTestResult result;
+        co_await folly::coro::collectAll(
+            folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+              co_await bidi.sink.sink(
+                  [&]() -> folly::coro::AsyncGenerator<Request&&> {
+                    for (auto payload : *instruction.sinkPayloads()) {
+                      co_yield std::move(payload);
+                    }
+                  }());
+            }),
+            folly::coro::co_invoke(
+                [&, gen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+                    -> folly::coro::Task<void> {
+                  while (auto val = co_await gen.next()) {
+                    result.streamPayloads()->push_back(std::move(*val));
+                  }
+                }));
+        co_return result;
+      }());
+}
+
 // =================== Interactions ===================
 InteractionConstructorClientTestResult interactionConstructorTest(
     InteractionConstructorClientInstruction&) {
@@ -520,6 +549,9 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::interactionTermination:
       result.interactionTermination() = interactionTerminationTest(
           *clientInstruction.interactionTermination());
+      break;
+    case ClientInstruction::Type::bidiBasic:
+      result.bidiBasic() = bidiBasicTest(*clientInstruction.bidiBasic());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

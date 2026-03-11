@@ -228,6 +228,23 @@ RPCServerConformanceHandler::sinkUndeclaredException(
                                  ->bufferSize())};
 }
 
+// =================== BiDi Streaming ===================
+folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+RPCServerConformanceHandler::co_bidiBasic(std::unique_ptr<Request> req) {
+  result_.bidiBasic().emplace().request() = *req;
+  co_return apache::thrift::StreamTransformation<Request, Response>{
+      [this](folly::coro::AsyncGenerator<Request&&> input)
+          -> folly::coro::AsyncGenerator<Response&&> {
+        for (auto& payload :
+             *testCase_->serverInstruction()->bidiBasic()->streamPayloads()) {
+          co_yield std::move(payload);
+        }
+        while (auto item = co_await input.next()) {
+          result_.bidiBasic()->sinkPayloads()->push_back(std::move(*item));
+        }
+      }};
+}
+
 // =================== Interactions ===================
 std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
 RPCServerConformanceHandler::createBasicInteraction() {

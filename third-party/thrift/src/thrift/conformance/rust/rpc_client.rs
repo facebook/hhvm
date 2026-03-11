@@ -186,6 +186,7 @@ async fn test(client: &dyn RPCConformanceServiceExt<thriftclient::ThriftChannel>
             i
         )),
         sinkUndeclaredException(i) => sink_undeclared_exception(client, i).await,
+        bidiBasic(i) => Err(anyhow!("bidiBasic not implemented: {:?}", i)),
         UnknownField(i) => Err(anyhow!(format!("not supported: {:?}", i))),
     }
 }

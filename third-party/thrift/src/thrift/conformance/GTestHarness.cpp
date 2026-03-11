@@ -23,10 +23,12 @@
 #include <folly/ExceptionString.h>
 #include <folly/coro/AsyncGenerator.h>
 #include <folly/coro/BlockingWait.h>
+#include <folly/coro/Collect.h>
 #include <folly/coro/Sleep.h>
 #include <thrift/conformance/RpcStructComparator.h>
 #include <thrift/conformance/Utils.h>
 #include <thrift/conformance/if/gen-cpp2/rpc_types.h>
+#include <thrift/lib/cpp2/async/BiDiStream.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
 namespace apache::thrift::conformance {
@@ -370,6 +372,36 @@ SinkUndeclaredExceptionClientTestResult runSinkUndeclaredException(
       }());
 }
 
+// =================== BiDi Streaming ===================
+template <typename ClientType>
+BidiBasicClientTestResult runBidiBasic(
+    ClientType& client,
+    const BidiBasicClientInstruction& instruction,
+    const RPCRequestParam<ClientType>& request) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<BidiBasicClientTestResult> {
+        auto bidi = co_await client.co_bidiBasic(request);
+        BidiBasicClientTestResult result;
+        co_await folly::coro::collectAll(
+            folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+              co_await bidi.sink.sink(
+                  [&]() -> folly::coro::AsyncGenerator<Request&&> {
+                    for (auto payload : *instruction.sinkPayloads()) {
+                      co_yield std::move(payload);
+                    }
+                  }());
+            }),
+            folly::coro::co_invoke(
+                [&, gen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+                    -> folly::coro::Task<void> {
+                  while (auto val = co_await gen.next()) {
+                    result.streamPayloads()->push_back(std::move(*val));
+                  }
+                }));
+        co_return result;
+      }());
+}
+
 // =================== Interactions ===================
 InteractionConstructorClientTestResult runInteractionConstructor(
     RPCConformanceServiceAsyncClient& client,
@@ -520,6 +552,12 @@ ClientTestResult runClientSteps(
       auto instruction = *clientInstruction.sinkUndeclaredException();
       result.sinkUndeclaredException() = runSinkUndeclaredException(
           client, instruction, *instruction.request());
+      break;
+    }
+    case ClientInstruction::Type::bidiBasic: {
+      auto instruction = *clientInstruction.bidiBasic();
+      result.bidiBasic() =
+          runBidiBasic(client, instruction, *instruction.request());
       break;
     }
     case ClientInstruction::Type::interactionConstructor:
@@ -678,6 +716,12 @@ testing::AssertionResult runStatelessRpcTest(
         auto instruction = *clientInstruction.sinkUndeclaredException();
         result.sinkUndeclaredException() =
             runSinkUndeclaredException(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::bidiBasic: {
+        auto instruction = *clientInstruction.bidiBasic();
+        result.bidiBasic() =
+            runBidiBasic(client, instruction, serverInstruction);
         break;
       }
       case ClientInstruction::Type::interactionConstructor:

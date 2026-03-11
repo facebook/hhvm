@@ -17,7 +17,6 @@
 #include <thrift/compiler/generate/csharp/util.h>
 
 #include <fmt/core.h>
-
 #include <thrift/compiler/ast/t_container.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_primitive_type.h>

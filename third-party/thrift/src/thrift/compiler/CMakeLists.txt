@@ -151,6 +151,7 @@ add_library(
   generate/cpp/reference_type.cc
   generate/cpp/name_resolver.cc
   generate/cpp/util.cc
+  generate/csharp/util.cc
   generate/go/util.cc
   generate/java/util.cc
   generate/python/util.cc

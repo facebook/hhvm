@@ -117,8 +117,8 @@ class RocketClientTest : public testing::Test {
 // increased drastically.
 TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
   // Increase this if test is flaky.
-  size_t payloadSize = /*20MB*/ 20 * 1024 * 1024;
-  metadata_.keepAliveTimeoutMs() = 50;
+  size_t payloadSize = /*40MB*/ 40 * 1024 * 1024;
+  metadata_.keepAliveTimeoutMs() = 25;
 
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);
@@ -237,8 +237,8 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
 // between eventbases.
 TEST_F(RocketClientTest, KeepAliveEvbDetachAttachTest) {
   // Increase this if test is flaky.
-  size_t payloadSize = /*20MB*/ 20 * 1024 * 1024;
-  metadata_.keepAliveTimeoutMs() = 50;
+  size_t payloadSize = /*40MB*/ 40 * 1024 * 1024;
+  metadata_.keepAliveTimeoutMs() = 25;
 
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);

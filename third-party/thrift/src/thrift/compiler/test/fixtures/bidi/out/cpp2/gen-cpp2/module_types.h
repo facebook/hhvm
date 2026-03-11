@@ -525,17 +525,17 @@ unsigned long BiDiMethodException::read(Protocol_* iprot) {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::cpp2::BiDiSinkException, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 7057855000348553652;
-  static constexpr ::std::string_view definitionKey = {"\x91\xf2\x4f\x4a\x40\x2d\xcc\xfc\x14\x02\x55\x64\xe1\x46\xe1\x98", 16};
+  static constexpr int64_t programId = -4917658076821137601;
+  static constexpr ::std::string_view definitionKey = {"\x69\xb5\x05\xc1\x17\x01\xd7\xa0\xd1\xc6\xcd\x5f\xe0\x98\xf8\x52", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::BiDiStreamException, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 7057855000348553652;
-  static constexpr ::std::string_view definitionKey = {"\xe3\x35\x4f\x96\xa9\x24\xd2\x1b\x6a\xad\xcd\x36\x68\x06\x1d\xa2", 16};
+  static constexpr int64_t programId = -4917658076821137601;
+  static constexpr ::std::string_view definitionKey = {"\xb8\xab\xeb\xba\xd7\xc6\x33\xf6\x30\xce\xd8\x18\x24\xe4\x45\x97", 16};
 };
 template <> struct TSchemaAssociation<::cpp2::BiDiMethodException, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 7057855000348553652;
-  static constexpr ::std::string_view definitionKey = {"\xe9\x67\x01\xc5\x1b\x95\xd4\xea\xeb\x21\xd0\xe7\xdf\x55\x18\xa7", 16};
+  static constexpr int64_t programId = -4917658076821137601;
+  static constexpr ::std::string_view definitionKey = {"\xe8\xe9\x46\xee\x82\x8b\x7e\x38\x08\xd8\x2c\x7d\x0d\x8b\x23\x31", 16};
 };
 } // namespace apache::thrift::detail

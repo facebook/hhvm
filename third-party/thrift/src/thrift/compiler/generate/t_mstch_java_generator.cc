@@ -820,7 +820,7 @@ class mstch_java_service : public mstch_service {
   mstch::node get_streaming_functions() {
     std::vector<const t_function*> funcs;
     for (auto& func : service_->functions()) {
-      if (func.stream()) {
+      if (func.stream() && !func.is_bidirectional_stream()) {
         funcs.push_back(&func);
       }
     }
@@ -830,7 +830,7 @@ class mstch_java_service : public mstch_service {
   mstch::node get_sink_functions() {
     std::vector<const t_function*> funcs;
     for (auto& func : service_->functions()) {
-      if (func.sink()) {
+      if (func.sink() && !func.is_bidirectional_stream()) {
         funcs.push_back(&func);
       }
     }

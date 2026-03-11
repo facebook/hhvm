@@ -107,8 +107,8 @@ class ServiceHandler<::cpp2::BiDiService> : public apache::thrift::ServerInterfa
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::BiDiService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 7057855000348553652;
-  static constexpr ::std::string_view definitionKey = {"\x1c\xbf\xef\xd6\x9e\xb7\x63\x94\x23\x72\xb8\x01\x37\x20\x6a\x33", 16};
+  static constexpr int64_t programId = -4917658076821137601;
+  static constexpr ::std::string_view definitionKey = {"\xec\xc2\xd7\xab\xf5\xc7\xc5\x44\x3b\x30\x6f\xa5\x78\x7f\x04\x18", 16};
 };
 }
 } // namespace apache::thrift

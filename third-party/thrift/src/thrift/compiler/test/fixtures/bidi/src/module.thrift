@@ -16,6 +16,8 @@
 
 include "thrift/annotation/thrift.thrift"
 
+namespace java.swift test.fixtures.bidi
+
 @thrift.AllowLegacyMissingUris
 package;
 

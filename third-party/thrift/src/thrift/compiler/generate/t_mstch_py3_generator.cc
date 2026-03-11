@@ -735,12 +735,6 @@ class t_mstch_py3_generator : public t_whisker_generator {
     def.property("PEP484Optional?", [this](const t_field& self) {
       return !field_has_default_value(self, context_->get_field_cpp_kind(self));
     });
-    def.property("isset?", [this](const t_field& self) {
-      const field_cpp_kind cpp_kind = context_->get_field_cpp_kind(self);
-      return (cpp_kind == field_cpp_kind::value ||
-              cpp_kind == field_cpp_kind::iobuf) &&
-          self.qualifier() != t_field_qualifier::required;
-    });
     def.property("boxed_ref?", [](const t_field& self) {
       return gen::cpp::find_ref_type(self) == gen::cpp::reference_type::boxed;
     });
@@ -1206,32 +1200,6 @@ class t_mstch_py3_generator : public t_whisker_generator {
     def.property("is_container_of_struct?", [](const t_type& self) {
       const t_type& resolved = *self.get_true_type();
       return resolved.is<t_container>() && container_needs_convert(&resolved);
-    });
-    // type:list_elem_type etc. is defined in mstch_objects, so the returned
-    // type node doesn't define type:needs_convert
-    def.property("elem_needs_convert?", [](const t_type& self) {
-      const t_type& resolved = *self.get_true_type();
-      if (const t_list* list = resolved.try_as<t_list>()) {
-        return type_needs_convert(&list->elem_type().deref());
-      }
-      if (const t_set* set = resolved.try_as<t_set>()) {
-        return type_needs_convert(&set->elem_type().deref());
-      }
-      return false;
-    });
-    def.property("key_needs_convert?", [](const t_type& self) {
-      const t_type& resolved = *self.get_true_type();
-      if (const t_map* map = resolved.try_as<t_map>()) {
-        return type_needs_convert(&map->key_type().deref());
-      }
-      return false;
-    });
-    def.property("val_needs_convert?", [](const t_type& self) {
-      const t_type& resolved = *self.get_true_type();
-      if (const t_map* map = resolved.try_as<t_map>()) {
-        return type_needs_convert(&map->val_type().deref());
-      }
-      return false;
     });
 
     return std::move(def).make();

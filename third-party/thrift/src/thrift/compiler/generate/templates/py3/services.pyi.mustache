@@ -29,14 +29,14 @@ import typing as _typing
 from thrift.py3.server import RequestContext, ServiceInterface
 from abc import abstractmethod, ABCMeta
 
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+import {{program.module_path}}.types as {{program.module_path_for_alias}}_types
 {{#each program.includeNamespaces as |include|}}
   {{#if include.import_services?}}
-import {{include.modulePathPeriodSeparated}}.services as _{{include.modulePathUnderscoreSeparated}}_services
+import {{include.program.module_path}}.services as {{include.program.module_path_for_alias}}_services
   {{/if include.import_services?}}
-  {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-  {{/if include.has_types?}}
+  {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+  {{/if include.program.has_types?}}
 {{/each}}
 
 {{#each program.services as |service|}}
@@ -45,8 +45,7 @@ _{{service.name}}InterfaceT = _typing.TypeVar('_{{service.name}}InterfaceT', bou
 
 class {{service.name}}Interface(
     {{#let parent = service.extends}}{{#if (object.notnull? parent)}}{{#if parent.externalProgram?}}
-    _{{#each parent.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-        }}{{parent.program.name}}_services.{{/if parent.externalProgram?}}{{parent.name}}Interface,
+    {{parent.program.module_path_for_alias}}_services.{{/if parent.externalProgram?}}{{parent.name}}Interface,
     {{#else}}
     ServiceInterface,
     {{/if (object.notnull? parent)}}
@@ -58,7 +57,7 @@ class {{service.name}}Interface(
     @staticmethod
     def createPublisher_{{function.name}}(callback=None) -> _typing.Tuple[
         _typing.AsyncGenerator[{{#partial pep484.type_name type=function.stream.elem_type}}, None],
-        _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types.ServerPublisher_{{#partial services.cython_cpp_type_ident type=function.stream.elem_type}}
+        {{program.module_path_for_alias}}_types.ServerPublisher_{{#partial services.cython_cpp_type_ident type=function.stream.elem_type}}
     ]: ...
 
     {{/if function.stream?}}

@@ -51,7 +51,7 @@ cClientBufferedStream[
 {{! Stream response class name for clients }}
 {{#let export partial stream_response_class_name |function| captures |stream|}}
 {{#pragma ignore-newlines}}
-{{function.modulePath}}.
+{{function.program.module_path_for_alias}}_types.
   {{#if function.stream_has_first_response?}}
 ResponseAndClientBufferedStream__{{#partial stream.response_class_name_suffix function=function}}
   {{#else}}
@@ -64,8 +64,7 @@ ClientBufferedStream__{{function.stream.elem_type.flat_name}}
 {{#let parent = service.extends}}
   {{#if (object.notnull? parent)}}
     {{#if parent.externalProgram?}}
-_{{#each parent.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}
-{{parent.program.name}}_clients.
+{{parent.program.module_path_for_alias}}_clients.
     {{/if parent.externalProgram?}}
 {{parent.name}}
   {{#else}}

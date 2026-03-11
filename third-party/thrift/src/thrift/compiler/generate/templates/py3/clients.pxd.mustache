@@ -29,8 +29,7 @@ file exposes Python wrappers of the services client to the end user.
 {{#pragma ignore-newlines}}
   {{#if (object.notnull? service.extends)}}
     {{#if service.extends.externalProgram?}}
-_{{#each service.extends.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}
-{{service.extends.program.name}}_clients.
+{{service.extends.program.module_path_for_alias}}_clients.
     {{/if service.extends.externalProgram?}}
 {{service.extends.name}}
   {{#else}}
@@ -43,7 +42,7 @@ cimport thrift.py3.client
 
 {{#each program.includeNamespaces as |include|}}
   {{#if include.import_services?}}
-cimport {{include.modulePathPeriodSeparated}}.clients as _{{include.modulePathUnderscoreSeparated}}_clients
+cimport {{include.program.module_path}}.clients as {{include.program.module_path_for_alias}}_clients
   {{/if include.import_services?}}
 {{/each}}
 

@@ -666,7 +666,7 @@ class t_mstch_py3_generator : public t_whisker_generator {
   }
 
   void define_additional_prototypes(prototype_database& proto) const override {
-    proto.define(make_prototype_for_included_program());
+    proto.define(make_prototype_for_included_program(proto));
   }
 
   prototype<t_const_value>::ptr make_prototype_for_const_value(
@@ -772,12 +772,6 @@ class t_mstch_py3_generator : public t_whisker_generator {
     });
     def.property(
         "cpp_name", [](const t_named& self) { return cpp2::get_name(&self); });
-    def.property("modulePath", [this](const t_named& self) {
-      const t_program* program =
-          self.program() == nullptr ? get_program() : self.program();
-      return fmt::format(
-          "_{}_types", fmt::join(get_py3_namespace_with_name(program), "_"));
-    });
     return std::move(def).make();
   }
 
@@ -871,6 +865,21 @@ class t_mstch_py3_generator : public t_whisker_generator {
     def.property("py3Namespaces", [](const t_program& self) {
       return to_whisker_string_array(get_py3_namespace(&self));
     });
+    def.property("module_path", [](const t_program& self) {
+      std::vector<std::string> segments = get_py3_namespace_with_name(&self);
+      assert(!segments.empty());
+      return fmt::format("{}", fmt::join(segments, "."));
+    });
+    def.property("module_path_for_alias", [](const t_program& self) {
+      std::vector<std::string> segments = get_py3_namespace_with_name(&self);
+      assert(!segments.empty());
+      return fmt::format("_{}", fmt::join(segments, "_"));
+    });
+    def.property("module_path_cpp_import", [](const t_program& self) {
+      std::vector<std::string> segments = get_py3_namespace_with_name(&self);
+      assert(!segments.empty());
+      return fmt::format("{}", fmt::join(segments, "__"));
+    });
     def.property("includeNamespaces", [&](const t_program& self) {
       whisker::array::raw includes;
       for (const auto& [_, include] : context_->included_programs(self)) {
@@ -935,31 +944,17 @@ class t_mstch_py3_generator : public t_whisker_generator {
     return std::move(def).make();
   }
 
-  prototype<py3_included_program>::ptr make_prototype_for_included_program()
-      const {
+  prototype<py3_included_program>::ptr make_prototype_for_included_program(
+      const prototype_database& proto) const {
     whisker::dsl::prototype_builder<
         whisker::native_handle<py3_included_program>>
         def;
 
-    def.property(
-        "modulePathPeriodSeparated", [](const py3_included_program& self) {
-          std::vector<std::string> segments =
-              get_py3_namespace_with_name(self.program);
-          assert(!segments.empty());
-          return fmt::format("{}", fmt::join(segments, "."));
-        });
-    def.property(
-        "modulePathUnderscoreSeparated", [](const py3_included_program& self) {
-          std::vector<std::string> segments =
-              get_py3_namespace_with_name(self.program);
-          assert(!segments.empty());
-          return fmt::format("{}", fmt::join(segments, "_"));
-        });
+    def.property("program", [&proto](const py3_included_program& self) {
+      return proto.create<t_program>(*self.program);
+    });
     def.property("import_services?", [](const py3_included_program& self) {
       return self.importServices && !self.program->services().empty();
-    });
-    def.property("has_types?", [](const py3_included_program& self) {
-      return has_types(self.program);
     });
 
     return std::move(def).make();

@@ -28,15 +28,15 @@ Since this file will eventually be removed, do not import from here, use
   {{#if first?}}
 import thrift.py3.types
 
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types
+import {{program.module_path}}.types
     {{#each program.includeNamespaces as |include|}}
-      {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types
-      {{/if include.has_types?}}
+      {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types
+      {{/if include.program.has_types?}}
     {{/each}}
 
     {{#if program.has_container_types?}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+from {{program.module_path}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
       {{#each program.container_types as |type|}}
     {{type.flat_name}},
       {{/each}}

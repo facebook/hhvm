@@ -96,29 +96,29 @@ import asyncio
 from folly.coro cimport bridgeCoroTaskWith
   {{/if program.has_stream?}}
   {{#if (and program.inplace_migrate? program.needs_container_converters?)}}
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_converter as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter
+cimport {{program.module_path}}.thrift_converter as {{program.module_path_for_alias}}_thrift_converter
   {{/if (and program.inplace_migrate? program.needs_container_converters?)}}
   {{#each program.includeNamespaces as |include|}}
-    {{#if include.has_types?}}
-cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
+    {{#if include.program.has_types?}}
+cimport {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
       {{#if (and program.inplace_migrate? (or program.needs_container_converters? program.has_stream?))}}
-cimport {{include.modulePathPeriodSeparated}}.thrift_converter as _{{include.modulePathUnderscoreSeparated}}_thrift_converter
+cimport {{include.program.module_path}}.thrift_converter as {{include.program.module_path_for_alias}}_thrift_converter
       {{/if (and program.inplace_migrate? (or program.needs_container_converters? program.has_stream?))}}
-    {{/if include.has_types?}}
+    {{/if include.program.has_types?}}
   {{/each}}
 
   {{#if (not program.inplace_migrate?)}}
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types as _fbthrift_python_types
+import {{program.module_path}}.thrift_types as _fbthrift_python_types
     {{#if program.enums?}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_enums import (
+from {{program.module_path}}.thrift_enums import (
       {{#each program.enums as |enum|}}
     {{enum.name}},
       {{/each}}
 )
     {{/if program.enums?}}
     {{#if program.has_visible_union_types?}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
+from {{program.module_path}}.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
       {{#each program.py3_visible_structured_definitions as |struct|}}
         {{#if struct.union?}}
     __{{struct.name}}Type,
@@ -128,7 +128,7 @@ from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.typ
     {{/if program.has_visible_union_types?}}
 
     {{#if program.has_container_types?}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+from {{program.module_path}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
       {{#each program.container_types as |type|}}
     {{type.flat_name}},
       {{/each}}
@@ -137,10 +137,10 @@ from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.con
   {{#else}}
 
     {{#if program.has_stream?}}
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_converter as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter
+cimport {{program.module_path}}.thrift_converter as {{program.module_path_for_alias}}_thrift_converter
     {{/if program.has_stream?}}
 
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
+import {{program.module_path}}.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
     {{#each program.py3_visible_structured_definitions as |struct|}}
 {{struct.name}} = _fbthrift_types_inplace.{{struct.name}}
     {{/each}}
@@ -156,11 +156,11 @@ import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.t
   {{/if (not program.inplace_migrate?)}}
 
   {{#if (not program.inplace_migrate?)}}
-_fbthrift__module_name__ = "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types"
+_fbthrift__module_name__ = "{{program.module_path}}.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
-        "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_reflection"
+        "{{program.module_path}}.types_reflection"
     )
 
     {{#each program.py3_visible_structured_definitions as |struct|}}
@@ -173,7 +173,7 @@ cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}})
     __module__ = _fbthrift__module_name__
 
     def __init__({{struct.name}} self,{{#if struct.exception?}} *args,{{/if}} **kwargs):
-        self.{{#partial types.cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}]()
+        self.{{#partial types.cpp_obj}} = make_shared[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}]()
         self._fields_setter = _fbthrift_types_fields.__{{struct.name}}_FieldsSetter._fbthrift_create(self.{{#partial types.cpp_obj}}.get())
         super().__init__({{#if struct.exception?}} *args, {{/if}}**kwargs)
         {{#if (and (not struct.exception?) (not struct.cpp_noncopyable?))}}
@@ -185,7 +185,7 @@ cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}})
         if not kwargs:
             return self
         cdef {{struct.name}} __fbthrift_inst = {{struct.name}}.__new__({{struct.name}})
-        __fbthrift_inst.{{#partial types.cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](deref(self.{{#partial types.cpp_obj}}))
+        __fbthrift_inst.{{#partial types.cpp_obj}} = make_shared[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}](deref(self.{{#partial types.cpp_obj}}))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__{{struct.name}}_FieldsSetter._fbthrift_create(__fbthrift_inst.{{#partial types.cpp_obj}}.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
@@ -206,7 +206,7 @@ cdef class {{struct.name}}({{#partial types.python_struct_class struct=struct}})
         })
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}] cpp_obj):
         __fbthrift_inst = <{{struct.name}}>{{struct.name}}.__new__({{struct.name}}{{#if struct.exception?}}, (<bytes>deref(cpp_obj).what()).decode('utf-8'){{/if}})
         __fbthrift_inst.{{#partial types.cpp_obj}} = cmove(cpp_obj)
         {{#if struct.exception?}}
@@ -336,12 +336,12 @@ cdef class {{struct.name}}(thrift.py3.types.Union):
         raise ValueError(f"Unable to derive correct union field for value: {value}")
 
     @staticmethod
-    cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] _make_instance(
-        {{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}* base_instance{{#each struct.py3_fields as |field|}},
+    cdef unique_ptr[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}] _make_instance(
+        {{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}* base_instance{{#each struct.py3_fields as |field|}},
         {{#if field.type.cythonTypeNoneable?}}{{#partial types.cython_python_type type=field.type}}{{#else}}object{{/if}} {{field.py_name}}{{!
         }}{{/each}}
     ) except *:
-        cdef unique_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] c_inst = make_unique[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}]()
+        cdef unique_ptr[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}] c_inst = make_unique[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}]()
         cdef bint any_set = False
         {{#each struct.py3_fields as |field|}}
         if {{field.py_name}} is not None:
@@ -356,7 +356,7 @@ cdef class {{struct.name}}(thrift.py3.types.Union):
         return cmove(c_inst)
 
     @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] cpp_obj):
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}] cpp_obj):
         __fbthrift_inst = <{{struct.name}}>{{struct.name}}.__new__({{struct.name}})
         __fbthrift_inst.{{#partial types.cpp_obj}} = cmove(cpp_obj)
         __fbthrift_inst._initialize_py()
@@ -421,7 +421,7 @@ cdef class {{struct.name}}(thrift.py3.types.Union):
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](
+        return __richcmp[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}](
             self.{{#partial types.cpp_obj}},
             (<{{struct.name}}>other).{{#partial types.cpp_obj}},
             op,
@@ -436,9 +436,9 @@ cdef class {{struct.name}}(thrift.py3.types.Union):
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
       {{#if struct.exception?}}
-        {{> types/current_module_cbindings}}.ExceptionMetadata[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}].gen(meta)
+        {{program.module_path_for_alias}}_cbindings.ExceptionMetadata[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}].gen(meta)
       {{#else}}
-        {{> types/current_module_cbindings}}.StructMetadata[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}].gen(meta)
+        {{program.module_path_for_alias}}_cbindings.StructMetadata[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}].gen(meta)
       {{/if struct.exception?}}
         return __MetadataBox.box(cmove(meta))
 
@@ -459,7 +459,7 @@ cdef class {{struct.name}}(thrift.py3.types.Union):
       {{#else}}
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](idx))
+        return __sv_to_str(__get_field_name_by_index[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}](idx))
       {{/if struct.has_hidden_fields?}}
 
     @classmethod
@@ -469,7 +469,7 @@ cdef class {{struct.name}}(thrift.py3.types.Union):
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize({{struct.name}} self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](self.{{#partial types.cpp_obj}}.get(), proto))
+            data = cmove(serializer.cserialize[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}](self.{{#partial types.cpp_obj}}.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
     cdef cuint32_t _fbthrift_deserialize({{struct.name}} self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
@@ -481,9 +481,9 @@ cdef class {{struct.name}}(thrift.py3.types.Union):
             thrift.py3.serializer.deserialize does not have enough type information
             to call the staticmethod ._create_FBTHRIFT_ONLY_DO_NOT_USE()
         }}
-        self.{{#partial types.cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}]()
+        self.{{#partial types.cpp_obj}} = make_shared[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}]()
         with nogil:
-            needed = serializer.cdeserialize[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](buf, self.{{#partial types.cpp_obj}}.get(), proto)
+            needed = serializer.cdeserialize[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}](buf, self.{{#partial types.cpp_obj}}.get(), proto)
       {{#if struct.union?}}
         # clear cache reload since the underlying data's changed
         self._initialize_py()
@@ -493,14 +493,14 @@ cdef class {{struct.name}}(thrift.py3.types.Union):
       {{#if program.python_capi_converter?}}
     @staticmethod
     def from_python(object obj):
-        cdef shared_ptr[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}] cpp_obj = {{!
-            }}__python_to_py3[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}, _fbthrift__NamespaceTag](obj)
+        cdef shared_ptr[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}] cpp_obj = {{!
+            }}__python_to_py3[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}, _fbthrift__NamespaceTag](obj)
         return {{struct.name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
       {{/if program.python_capi_converter?}}
 
     def _to_python(self):
       {{#if program.python_capi_converter?}}
-        return __py3_to_python[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}, {{!
+        return __py3_to_python[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}, {{!
             }}_fbthrift__NamespaceTag](self.{{#partial types.cpp_obj}})
       {{#else}}
         return thrift.python.converter.to_python_struct(

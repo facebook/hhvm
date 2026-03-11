@@ -38,15 +38,15 @@ import itertools
 import thrift.py3.stream
 {{/if program.has_stream?}}
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-  {{/if include.has_types?}}
+  {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+  {{/if include.program.has_types?}}
 {{/each}}
-import {{> common/thrift_types_module_path}}
+import {{program.module_path}}.thrift_types
 
 
 {{#each program.enums as |enum|}}
-{{enum.name}} = {{> common/thrift_types_module_path}}.{{enum.name}}
+{{enum.name}} = {{program.module_path}}.thrift_types.{{enum.name}}
 {{/each}}
 
 {{#each program.py3_visible_structured_definitions as |struct|}}
@@ -108,10 +108,10 @@ class {{struct.name}}({{#partial types.python_struct_class struct=struct}}, _typ
 
     {{#if program.python_capi_converter?}}
     @staticmethod
-    def from_python(obj: {{> common/thrift_types_module_path}}.{{struct.name}}) -> {{struct.name}}: ...
+    def from_python(obj: {{program.module_path}}.thrift_types.{{struct.name}}) -> {{struct.name}}: ...
     {{/if program.python_capi_converter?}}
     {{!TODO: accommodate root_module_prefix}}
-    def _to_python(self) -> {{> common/thrift_types_module_path}}.{{struct.name}}: ...
+    def _to_python(self) -> {{program.module_path}}.thrift_types.{{struct.name}}: ...
     def _to_py3(self) -> {{struct.name}}: ...
     def _to_py_deprecated(self) -> "{{program.py_deprecated_module_path}}.ttypes.{{struct.name}}": ...   # type: ignore
 

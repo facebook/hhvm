@@ -26,8 +26,7 @@ Pxd file to expose the interface defined in ClientsWrapper.h to CythonClients.py
   {{#if (object.notnull? service.extends)}}
 (
     {{#if service.extends.externalProgram?}}
-_{{#each service.extends.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}
-{{service.extends.program.name}}_clients_wrapper.
+{{service.extends.program.module_path_for_alias}}_clients_wrapper.
     {{/if service.extends.externalProgram?}}
 c{{service.extends.name}}ClientWrapper)
   {{/if (object.notnull? service.extends)}}
@@ -54,19 +53,19 @@ cimport folly.iobuf as _fbthrift_iobuf
 from thrift.python.common cimport cRpcOptions
 from thrift.py3.client cimport cClientWrapper
 
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_cbindings
+cimport {{program.module_path}}.types as {{program.module_path_for_alias}}_types
+cimport {{program.module_path}}.cbindings as {{program.module_path_for_alias}}_cbindings
 {{#if program.has_stream?}}
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 {{/if program.has_stream?}}
 
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
-  {{/if include.has_types?}}
+  {{#if include.program.has_types?}}
+cimport {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+cimport {{include.program.module_path}}.cbindings as {{include.program.module_path_for_alias}}_cbindings
+  {{/if include.program.has_types?}}
   {{#if include.import_services?}}
-cimport {{include.modulePathPeriodSeparated}}.clients_wrapper as _{{include.modulePathUnderscoreSeparated}}_clients_wrapper
+cimport {{include.program.module_path}}.clients_wrapper as {{include.program.module_path_for_alias}}_clients_wrapper
   {{/if include.import_services?}}
 {{/each}}
 

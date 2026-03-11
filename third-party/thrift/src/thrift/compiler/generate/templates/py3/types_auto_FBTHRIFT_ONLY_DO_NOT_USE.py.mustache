@@ -43,9 +43,9 @@ want to include.
 {{> common/auto_generated_py}}
 {{#if program.auto_migrate?}}
 {{! Note this is needed even if IDL defines no types, in the case where service has arguments that are container<primitive>}}
-_fbthrift__py3_module_name = "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types"
+_fbthrift__py3_module_name = "{{program.module_path}}.types"
   {{#if program.has_types?}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types import (
+from {{program.module_path}}.thrift_types import (
     {{#each program.structured_definitions as |struct|}}
     {{struct.name}},
     {{/each}}
@@ -63,12 +63,12 @@ from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thr
   {{#if program.has_container_types?}}
 import importlib
 import thrift.python.types as _fbthrift_python_types
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types as {{!
-}}_{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_types
+import {{program.module_path}}.thrift_types as {{!
+}}{{program.module_path_for_alias}}_thrift_types
     {{#each program.includeNamespaces as |include|}}
-      {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.thrift_types as _{{include.modulePathUnderscoreSeparated}}_thrift_types
-      {{/if include.has_types?}}
+      {{#if include.program.has_types?}}
+import {{include.program.module_path}}.thrift_types as {{include.program.module_path_for_alias}}_thrift_types
+      {{/if include.program.has_types?}}
     {{/each}}
   {{/if program.has_container_types?}}
 {{!
@@ -79,7 +79,7 @@ py3-container "flat name" name aliases for backwards-compatibility
   {{#if program.has_container_types?}}
 def get_types_reflection():
     return importlib.import_module(
-        "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_reflection"
+        "{{program.module_path}}.types_reflection"
     )
   {{/if program.has_container_types?}}
   {{#each program.container_types as |type|}}

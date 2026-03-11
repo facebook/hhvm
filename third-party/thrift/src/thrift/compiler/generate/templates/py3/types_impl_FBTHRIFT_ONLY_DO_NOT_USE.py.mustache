@@ -25,9 +25,9 @@ are re-exported via types.pyx
 
 import enum
 import thrift.py3.types
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_enums as _fbthrift_python_enums
+import {{program.module_path}}.thrift_enums as _fbthrift_python_enums
 
-_fbthrift__module_name__ = "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types"
+_fbthrift__module_name__ = "{{program.module_path}}.types"
 
 
 {{#each program.enums as |enum|}}

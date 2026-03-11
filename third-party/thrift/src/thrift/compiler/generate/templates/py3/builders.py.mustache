@@ -38,17 +38,17 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-  {{/if include.has_types?}}
+  {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+  {{/if include.program.has_types?}}
 {{/each}}
 
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.{{> common/auto_migrate_import_prefix }}types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+import {{program.module_path}}.{{> common/auto_migrate_import_prefix }}types as {{program.module_path_for_alias}}_types
 
 
 {{#each program.py3_visible_structured_definitions as |struct|}}
 {{! This is a dumb hack to handle leading-__ name classes
-}}_fbthrift_struct_type__{{struct.name}} = _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types.{{struct.name}}
+}}_fbthrift_struct_type__{{struct.name}} = {{program.module_path_for_alias}}_types.{{struct.name}}
 class {{struct.name}}_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _fbthrift_struct_type__{{struct.name}}
 

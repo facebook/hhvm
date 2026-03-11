@@ -28,7 +28,7 @@ from apache.thrift.metadata.converter cimport (
     ThriftMetadata_from_cpp
 )
 
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.metadata cimport cGetThriftModuleMetadata
+from {{program.module_path}}.metadata cimport cGetThriftModuleMetadata
 
 def getThriftModuleMetadata():
     cdef shared_ptr[cThriftMetadata] metadata

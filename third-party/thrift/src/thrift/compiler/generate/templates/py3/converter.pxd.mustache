@@ -21,17 +21,17 @@
 {{#if program.gen_legacy_container_converters?}}
 {{> types/cimport_std }}
 
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as {{> types/current_module_cbindings}}
+cimport {{program.module_path}}.cbindings as {{program.module_path_for_alias}}_cbindings
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
-  {{/if include.has_types?}}
+  {{#if include.program.has_types?}}
+cimport {{include.program.module_path}}.cbindings as {{include.program.module_path_for_alias}}_cbindings
+  {{/if include.program.has_types?}}
 {{/each}}
 {{#else}}
 from libcpp.memory cimport shared_ptr
 {{/if program.gen_legacy_container_converters?}}
 
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as _fbthrift_cbindings
+cimport {{program.module_path}}.cbindings as _fbthrift_cbindings
 
 
 {{#each program.py3_visible_structured_definitions as |struct|}}

@@ -48,19 +48,19 @@ from collections.abc import Mapping, Sequence, Set
     If you `import` them directly from here, you will get nasty import errors.
 """
 
-_fbthrift__module_name__ = "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types"
+_fbthrift__module_name__ = "{{program.module_path}}.types"
 
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as {{> types/current_module_types}}
+import {{program.module_path}}.types as {{program.module_path_for_alias}}_types
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-  {{/if include.has_types?}}
+  {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+  {{/if include.program.has_types?}}
 {{/each}}
 from thrift.py3.types import _ensure_py3_or_raise
 
 def get_types_reflection():
     return importlib.import_module(
-        "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_reflection"
+        "{{program.module_path}}.types_reflection"
     )
 
 __all__ = []
@@ -72,7 +72,7 @@ __all__.append('{{type.flat_name}}')
 
 {{/each}}
 {{#else if program.has_container_types?}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.{{!
+from {{program.module_path}}.{{!
 }}{{#if program.auto_migrate?}}{{!
     }}types_auto_FBTHRIFT_ONLY_DO_NOT_USE{{!
 }}{{#else if program.inplace_migrate?}}{{!

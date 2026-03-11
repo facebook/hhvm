@@ -28,24 +28,24 @@ from thrift.py3.types cimport (
     const_pointer_cast,
     deref_const as __deref_const,
 )
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_converter as {{!
-    }}_{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter
+cimport {{program.module_path}}.thrift_converter as {{!
+    }}{{program.module_path_for_alias}}_thrift_converter
   {{#if program.gen_legacy_container_converters?}}
 
     {{#if (and program.inplace_migrate? (not program.auto_migrate?))}}
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as {{> types/current_module_types}}
+cimport {{program.module_path}}.types as {{program.module_path_for_alias}}_types
     {{/if (and program.inplace_migrate? (not program.auto_migrate?))}}
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as {{> types/current_module_types}}
+import {{program.module_path}}.types as {{program.module_path_for_alias}}_types
     {{#each program.includeNamespaces as |include|}}
-      {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-cimport {{include.modulePathPeriodSeparated}}.thrift_converter as _{{include.modulePathUnderscoreSeparated}}_thrift_converter
-      {{/if include.has_types?}}
+      {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+cimport {{include.program.module_path}}.thrift_converter as {{include.program.module_path_for_alias}}_thrift_converter
+      {{/if include.program.has_types?}}
     {{/each}}
 
   {{/if program.gen_legacy_container_converters?}}
 {{#else}}
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _fbthrift_ctypes
+cimport {{program.module_path}}.types as _fbthrift_ctypes
 from thrift.py3.serializer cimport (
     cserialize as __cserialize,
     cdeserialize as __cdeserialize,
@@ -54,7 +54,7 @@ from thrift.python.protocol cimport Protocol
 cimport folly.iobuf as _folly__iobuf
 {{/if (not program.gen_py3_cython?)}}
 {{#if (and program.inplace_migrate? (not program.gen_legacy_container_converters?))}}
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as {{> types/current_module_types}}
+import {{program.module_path}}.types as {{program.module_path_for_alias}}_types
 {{/if (and program.inplace_migrate? (not program.gen_legacy_container_converters?))}}
 
 
@@ -70,7 +70,7 @@ cdef shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct}}] {{
 
     {{/if (and program.inplace_migrate? (not program.auto_migrate?))}}
     return make_shared[_fbthrift_cbindings.{{#partial types.c_binding node=struct}}](
-        _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter.{{!
+        {{program.module_path_for_alias}}_thrift_converter.{{!
         }}{{struct.name}}_convert_to_cpp(inst)
     )
   {{#else}}
@@ -94,10 +94,10 @@ cdef shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct}}] {{
 {{! direct replacement for ._fbthrift_create }}
 cdef object {{struct.name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{#partial types.c_binding node=struct}}]& c_struct):
   {{#if (not program.gen_py3_cython?)}}
-    _py_struct = _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter.{{!
+    _py_struct = {{program.module_path_for_alias}}_thrift_converter.{{!
             }}{{struct.name}}_from_cpp(deref(const_pointer_cast(c_struct)))
     {{#if (and program.inplace_migrate? (not program.auto_migrate?))}}
-    _py_struct = {{> types/current_module_types}}.{{struct.name}}.from_python(_py_struct)
+    _py_struct = {{program.module_path_for_alias}}_types.{{struct.name}}.from_python(_py_struct)
     {{/if (and program.inplace_migrate? (not program.auto_migrate?))}}
     return _py_struct
   {{#else}}
@@ -114,7 +114,7 @@ cdef {{#partial types.cython_cpp_type type=type}} {{type.flat_name}}__make_insta
     {{#else if program.auto_migrate?}}
     {{#partial types.make_instance type=type}}
     {{#else if program.inplace_migrate?}}
-    return {{> types/current_module_types}}.{{type.flat_name}}__make_instance(items)
+    return {{program.module_path_for_alias}}_types.{{type.flat_name}}__make_instance(items)
     {{/if program.gen_py3_cython?}}
 
   {{/each}}

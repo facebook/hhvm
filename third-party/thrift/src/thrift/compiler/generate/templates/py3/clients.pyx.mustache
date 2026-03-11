@@ -76,40 +76,40 @@ import sys
 import types as _py_types
 from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_shield, InvalidStateError as asyncio_InvalidStateError
 
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_cbindings
+cimport {{program.module_path}}.types as {{program.module_path_for_alias}}_types
+cimport {{program.module_path}}.cbindings as {{program.module_path_for_alias}}_cbindings
 {{#if program.inplace_migrate?}}
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_converter as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter
+cimport {{program.module_path}}.thrift_converter as {{program.module_path_for_alias}}_thrift_converter
 {{/if program.inplace_migrate?}}
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+import {{program.module_path}}.types as {{program.module_path_for_alias}}_types
 {{#if program.has_stream?}}
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 {{/if program.has_stream?}}
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
+  {{#if include.program.has_types?}}
+cimport {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+cimport {{include.program.module_path}}.cbindings as {{include.program.module_path_for_alias}}_cbindings
     {{#if program.inplace_migrate?}}
-cimport {{include.modulePathPeriodSeparated}}.thrift_converter as _{{include.modulePathUnderscoreSeparated}}_thrift_converter
+cimport {{include.program.module_path}}.thrift_converter as {{include.program.module_path_for_alias}}_thrift_converter
     {{/if program.inplace_migrate?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-  {{/if include.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+  {{/if include.program.has_types?}}
   {{#if include.import_services?}}
-cimport {{include.modulePathPeriodSeparated}}.clients as _{{include.modulePathUnderscoreSeparated}}_clients
-import {{include.modulePathPeriodSeparated}}.clients as _{{include.modulePathUnderscoreSeparated}}_clients
+cimport {{include.program.module_path}}.clients as {{include.program.module_path_for_alias}}_clients
+import {{include.program.module_path}}.clients as {{include.program.module_path_for_alias}}_clients
   {{/if include.import_services?}}
 {{/each}}
 
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.services_interface as _fbthrift_services_interface
+cimport {{program.module_path}}.services_interface as _fbthrift_services_interface
 
 {{#each program.services as |service|}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.clients_wrapper cimport c{{service.name}}AsyncClient, c{{service.name}}ClientWrapper
+from {{program.module_path}}.clients_wrapper cimport c{{service.name}}AsyncClient, c{{service.name}}ClientWrapper
   {{#each service.supportedInteractions as |interaction|}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.clients_wrapper cimport c{{service.name}}ClientWrapper_{{interaction.name}}InteractionWrapper
+from {{program.module_path}}.clients_wrapper cimport c{{service.name}}ClientWrapper_{{interaction.name}}InteractionWrapper
   {{/each}}
   {{#let parent = service.extends}}
   {{#if (and (object.notnull? parent) parent.externalProgram?)}}
-from {{#each parent.program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{parent.program.name}}.clients_wrapper cimport c{{parent.name}}ClientWrapper
+from {{parent.program.module_path}}.clients_wrapper cimport c{{parent.name}}ClientWrapper
   {{/if (and (object.notnull? parent) parent.externalProgram?)}}
 {{/each}}
 

@@ -41,13 +41,13 @@ namespace {{program.cpp_namespace}} {
 {{service.name}}Wrapper::{{service.name}}Wrapper(PyObject *obj, folly::Executor* exc)
   : ::{{service.extends.program.cpp_namespace}}::{{service.extends.name}}Wrapper(obj, exc)
   {
-    import_{{#each program.py3Namespaces as |ns|}}{{ns}}__{{/each}}{{program.name}}__services();
+    import_{{program.module_path_cpp_import}}__services();
   }
 {{#else}}
 {{service.name}}Wrapper::{{service.name}}Wrapper(PyObject *obj, folly::Executor* exc)
   : if_object(obj), executor(exc)
   {
-    import_{{#each program.py3Namespaces as |ns|}}{{ns}}__{{/each}}{{program.name}}__services();
+    import_{{program.module_path_cpp_import}}__services();
   }
 
 {{/if (object.notnull? service.extends)}}

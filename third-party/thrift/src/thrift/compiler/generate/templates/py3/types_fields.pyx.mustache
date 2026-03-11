@@ -44,14 +44,14 @@ from thrift.py3.types import _from_python_or_raise
 from thrift.py3.types cimport _ensure_py3_container_or_raise
 
   {{#each program.includeNamespaces as |include|}}
-    {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-    {{/if include.has_types?}}
+    {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+    {{/if include.program.has_types?}}
   {{/each}}
 
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as {{> types/current_module_types}}
+import {{program.module_path}}.types as {{program.module_path_for_alias}}_types
   {{#if program.has_container_types?}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+from {{program.module_path}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     {{#each program.container_types as |type|}}
     {{type.flat_name}},
     {{/each}}
@@ -65,7 +65,7 @@ from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.con
 cdef class __{{struct.name}}_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __{{struct.name}}_FieldsSetter _fbthrift_create({{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}* struct_cpp_obj):
+    cdef __{{struct.name}}_FieldsSetter _fbthrift_create({{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}* struct_cpp_obj):
         cdef __{{struct.name}}_FieldsSetter __fbthrift_inst = __{{struct.name}}_FieldsSetter.__new__(__{{struct.name}}_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         {{#each (array.enumerate struct.py3_fields) as |field_idx field|}}
@@ -84,7 +84,7 @@ cdef class __{{struct.name}}_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_{{field_idx}}(self, _fbthrift_value) except *:
         # for field {{field.py_name}}
         if _fbthrift_value is None:
-            __reset_field[{{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}](deref(self._struct_cpp_obj), {{field_idx}})
+            __reset_field[{{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}](deref(self._struct_cpp_obj), {{field_idx}})
             return
         {{#if (not field.type.container?)}}
           {{#if field.type.enum?}}

@@ -30,13 +30,13 @@ import thrift.py3.common
 import typing as _typing
 from types import TracebackType
 
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+import {{program.module_path}}.types as {{program.module_path_for_alias}}_types
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-  {{/if include.has_types?}}
+  {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+  {{/if include.program.has_types?}}
   {{#if include.import_services?}}
-import {{include.modulePathPeriodSeparated}}.clients as _{{include.modulePathUnderscoreSeparated}}_clients
+import {{include.program.module_path}}.clients as {{include.program.module_path_for_alias}}_clients
   {{/if include.import_services?}}
 {{/each}}
 {{#each program.services as |service|}}
@@ -46,8 +46,7 @@ _{{service.name}}T = _typing.TypeVar('_{{service.name}}T', bound='{{service.name
 
 
 class {{service.name}}({{#let parent = service.extends}}{{#if (object.notnull? parent)}}{{#if parent.externalProgram?}}{{!
-    }}_{{#each parent.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-    }}{{parent.program.name}}_clients.{{/if parent.externalProgram?}}{{parent.name}}{{!
+    }}{{parent.program.module_path_for_alias}}_clients.{{/if parent.externalProgram?}}{{parent.name}}{{!
   }}{{#else}}thrift.py3.client.Client{{/if (object.notnull? parent)}}):
 
   {{#each service.supportedFunctions as |function|}}

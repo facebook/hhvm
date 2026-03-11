@@ -34,5 +34,5 @@ want to include.
 }}
 {{> common/auto_generated_py}}
 {{#if program.auto_migrate?}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_services import *
+from {{program.module_path}}.thrift_services import *
 {{/if program.auto_migrate?}}

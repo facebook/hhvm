@@ -51,30 +51,30 @@ from thrift.py3.types import (
 import thrift.py3.exceptions
 import thrift.python.exceptions
 import thrift.python.types
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types as _fbthrift_python_types
+import {{program.module_path}}.thrift_types as _fbthrift_python_types
 {{! must import thrift_types before thrift_enums due to enum dependence on metadata.thrift_types}}
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_enums as _fbthrift_python_enums
+import {{program.module_path}}.thrift_enums as _fbthrift_python_enums
 
 
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
+  {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
     {{#if (not (array.empty? program.consts))}}
-import {{include.modulePathPeriodSeparated}}.types
+import {{include.program.module_path}}.types
     {{/if (not (array.empty? program.consts))}}
-  {{/if include.has_types?}}
+  {{/if include.program.has_types?}}
 {{/each}}
 
 def get_types_reflection():
     return importlib.import_module(
-        "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types_reflection"
+        "{{program.module_path}}.types_reflection"
     )
 
 def _get_py_deprecated_module():
     import thrift.util.converter # needed by _to_py_deprecated() call
     return importlib.import_module("{{program.py_deprecated_module_path}}.ttypes")
 
-_fbthrift__module_name__ = "{{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types"
+_fbthrift__module_name__ = "{{program.module_path}}.types"
 
 __all__ = []
 

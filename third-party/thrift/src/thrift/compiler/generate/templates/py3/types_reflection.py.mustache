@@ -65,18 +65,18 @@ from thrift.py3.reflection import (
 )
 
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
+  {{#if include.program.has_types?}}
 try:
-    import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
+    import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
 except ModuleNotFoundError:
-    import {{include.modulePathPeriodSeparated}}.thrift_types as _{{include.modulePathUnderscoreSeparated}}_types
-  {{/if include.has_types?}}
+    import {{include.program.module_path}}.thrift_types as {{include.program.module_path_for_alias}}_types
+  {{/if include.program.has_types?}}
 {{/each}}
 
 try:
-    import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+    import {{program.module_path}}.types as {{program.module_path_for_alias}}_types
 except ModuleNotFoundError:
-    import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+    import {{program.module_path}}.thrift_types as {{program.module_path_for_alias}}_types
 
 
 
@@ -96,7 +96,7 @@ def get_reflection__{{struct.name}}() -> __StructSpec:
     )
   {{#each (array.enumerate struct.py3_fields with_first=true) as |i field is_first_field?|}}
     {{#if (and is_first_field? struct.has_defaulted_fields?)}}
-    defaults = _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types.{{struct.name}}()
+    defaults = {{program.module_path_for_alias}}_types.{{struct.name}}()
     {{/if (and is_first_field? struct.has_defaulted_fields?)}}
     spec.add_field(
         __FieldSpec._fbthrift_create(

@@ -38,14 +38,14 @@ from thrift.python.protocol cimport Protocol as __Protocol
 from folly.optional cimport cOptional as __cOptional
 
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
-  {{/if include.has_types?}}
+  {{#if include.program.has_types?}}
+cimport {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+cimport {{include.program.module_path}}.cbindings as {{include.program.module_path_for_alias}}_cbindings
+  {{/if include.program.has_types?}}
 {{/each}}
 
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as {{> types/current_module_types}}
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as {{> types/current_module_cbindings}}
+cimport {{program.module_path}}.types as {{program.module_path_for_alias}}_types
+cimport {{program.module_path}}.cbindings as {{program.module_path_for_alias}}_cbindings
 
 
 {{#each program.py3_visible_structured_definitions as |struct|}}
@@ -54,11 +54,11 @@ cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.
 ctypedef void (*__{{struct.name}}_FieldsSetterFunc)(__{{struct.name}}_FieldsSetter, object) except *
 
 cdef class __{{struct.name}}_FieldsSetter(__StructFieldsSetter):
-    cdef {{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}* _struct_cpp_obj
+    cdef {{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}* _struct_cpp_obj
     cdef cumap[__cstring_view, __{{struct.name}}_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __{{struct.name}}_FieldsSetter _fbthrift_create({{> types/current_module_cbindings}}.{{#partial types.c_binding node=struct}}* struct_cpp_obj)
+    cdef __{{struct.name}}_FieldsSetter _fbthrift_create({{program.module_path_for_alias}}_cbindings.{{#partial types.c_binding node=struct}}* struct_cpp_obj)
     {{#each (array.enumerate struct.py3_fields) as |field_idx field|}}
     cdef void _set_field_{{field_idx}}(self, _fbthrift_value) except *
     {{/each}}

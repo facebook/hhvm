@@ -89,28 +89,28 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 from libcpp.optional cimport optional
 from thrift.py3.stream cimport cServerStream, cServerStreamPublisher, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, pythonFuncToCppFunc, ServerStream, ServerPublisher
 {{/if program.has_stream?}}
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.cbindings as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_cbindings
+cimport {{program.module_path}}.types as {{program.module_path_for_alias}}_types
+cimport {{program.module_path}}.cbindings as {{program.module_path_for_alias}}_cbindings
 {{#if program.inplace_migrate?}}
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.thrift_converter as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_thrift_converter
+cimport {{program.module_path}}.thrift_converter as {{program.module_path_for_alias}}_thrift_converter
 {{/if program.inplace_migrate?}}
-import {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.types as _{{#each program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{program.name}}_types
+import {{program.module_path}}.types as {{program.module_path_for_alias}}_types
 {{#each program.includeNamespaces as |include|}}
   {{#if include.import_services?}}
-cimport {{include.modulePathPeriodSeparated}}.services as _{{include.modulePathUnderscoreSeparated}}_services
-import {{include.modulePathPeriodSeparated}}.services as _{{include.modulePathUnderscoreSeparated}}_services
+cimport {{include.program.module_path}}.services as {{include.program.module_path_for_alias}}_services
+import {{include.program.module_path}}.services as {{include.program.module_path_for_alias}}_services
   {{/if include.import_services?}}
-  {{#if include.has_types?}}
-import {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-cimport {{include.modulePathPeriodSeparated}}.types as _{{include.modulePathUnderscoreSeparated}}_types
-cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
+  {{#if include.program.has_types?}}
+import {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+cimport {{include.program.module_path}}.types as {{include.program.module_path_for_alias}}_types
+cimport {{include.program.module_path}}.cbindings as {{include.program.module_path_for_alias}}_cbindings
     {{#if program.inplace_migrate?}}
-cimport {{include.modulePathPeriodSeparated}}.thrift_converter as _{{include.modulePathUnderscoreSeparated}}_thrift_converter
+cimport {{include.program.module_path}}.thrift_converter as {{include.program.module_path_for_alias}}_thrift_converter
     {{/if program.inplace_migrate?}}
-  {{/if include.has_types?}}
+  {{/if include.program.has_types?}}
 {{/each}}
 
-cimport {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.services_interface as _fbthrift_services_interface
+cimport {{program.module_path}}.services_interface as _fbthrift_services_interface
 
 import asyncio
 import functools
@@ -119,7 +119,7 @@ import traceback
 import types as _py_types
 
 {{#each program.services as |service|}}
-from {{#each program.py3Namespaces as |ns|}}{{ns}}.{{/each}}{{program.name}}.services_wrapper cimport c{{service.name}}Interface
+from {{program.module_path}}.services_wrapper cimport c{{service.name}}Interface
 {{/each}}
 {{#each program.stream_types as |type|}}
 cdef class ServerPublisher_{{#partial services.cython_cpp_type_ident type=type}}(ServerPublisher):
@@ -227,8 +227,7 @@ cdef class {{service.name}}Interface(
     {{#let parent = service.extends}}
     {{#if (object.notnull? parent)}}
       {{#if parent.externalProgram?}}
-    _{{#each parent.program.py3Namespaces as |ns|}}{{ns}}_{{/each}}{{!
-        }}{{parent.program.name}}_services.{{/if parent.externalProgram?}}{{parent.name}}Interface
+    {{parent.program.module_path_for_alias}}_services.{{/if parent.externalProgram?}}{{parent.name}}Interface
     {{#else}}
     ServiceInterface
     {{/if (object.notnull? parent)}}

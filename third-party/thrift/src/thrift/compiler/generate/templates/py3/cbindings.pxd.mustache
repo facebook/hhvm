@@ -21,9 +21,9 @@
 {{> types/cimport_thrift }}
 
 {{#each program.includeNamespaces as |include|}}
-  {{#if include.has_types?}}
-cimport {{include.modulePathPeriodSeparated}}.cbindings as _{{include.modulePathUnderscoreSeparated}}_cbindings
-  {{/if include.has_types?}}
+  {{#if include.program.has_types?}}
+cimport {{include.program.module_path}}.cbindings as {{include.program.module_path_for_alias}}_cbindings
+  {{/if include.program.has_types?}}
 {{/each}}
 
 {{#each program.cppIncludes as |include|}}

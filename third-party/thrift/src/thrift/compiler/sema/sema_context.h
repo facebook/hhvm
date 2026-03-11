@@ -189,7 +189,7 @@ struct sema_params {
   // Action to take on unnecessary (or invalid) uses of the
   // @thrift.AllowUnsafeNonSealedKeyType annotation.
   validation_level unnecessary_allow_unsafe_non_sealed_key_type =
-      validation_level::error;
+      validation_level::warn;
 
   // Action to take when a namespace is declared more than once for the same
   // language within a single file. If not `error`, the first namespace wins.

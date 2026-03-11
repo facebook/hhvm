@@ -4068,7 +4068,7 @@ TEST(CompilerTest, sealed_key_type) {
     @thrift.AllowUnsafeNonSealedKeyType
     typedef set<NonSealedStructAliasAlias> NonSealedSet;
 
-    @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on set: `SealedSet`
+    @thrift.AllowUnsafeNonSealedKeyType # expected-warning: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on set: `SealedSet`
     typedef set<SealedStruct> SealedSet;
 
     struct MyStruct {
@@ -4076,7 +4076,7 @@ TEST(CompilerTest, sealed_key_type) {
 
       2: map<NonSealedStruct, string> field_2; # expected-error: Map `field_2` key type is not sealed: `NonSealedStruct`
 
-      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on map: `field_3`
+      @thrift.AllowUnsafeNonSealedKeyType # expected-warning: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on map: `field_3`
       3: map<SealedStruct, string> field_3;
 
       @thrift.AllowUnsafeNonSealedKeyType
@@ -4084,7 +4084,7 @@ TEST(CompilerTest, sealed_key_type) {
 
       5: set<SealedStruct>  field_5; // OK: set type is sealed
 
-      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on set: `field_6`
+      @thrift.AllowUnsafeNonSealedKeyType # expected-warning: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on set: `field_6`
       6: set<SealedStruct>  field_6;
 
       7: set<NonSealedStruct> field_7; # expected-error: Set `field_7` element type is not sealed: `NonSealedStruct`
@@ -4094,12 +4094,12 @@ TEST(CompilerTest, sealed_key_type) {
 
       9: i32 field_9;
 
-      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType: `field_10`
+      @thrift.AllowUnsafeNonSealedKeyType # expected-warning: Unnecessary @thrift.AllowUnsafeNonSealedKeyType: `field_10`
       10: i32 field_10;
 
       11: SealedMap field_11;
 
-      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType: `field_12`
+      @thrift.AllowUnsafeNonSealedKeyType # expected-warning: Unnecessary @thrift.AllowUnsafeNonSealedKeyType: `field_12`
       12: SealedMap field_12;
 
       13: set<SealedStructAlias> field_13;
@@ -4111,7 +4111,7 @@ TEST(CompilerTest, sealed_key_type) {
 
       16: NonSealedSet field_16; // Despite the set not being sealed, this should not fail here (but in the typedef definition, if not annotated).
 
-      @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType: `field_17`
+      @thrift.AllowUnsafeNonSealedKeyType # expected-warning: Unnecessary @thrift.AllowUnsafeNonSealedKeyType: `field_17`
       17: NonSealedSet field_17;
     }
   )",
@@ -4169,7 +4169,7 @@ TEST(CompilerTest, sealed_key_type_in_functions) {
         1: map<NonSealedStruct, string> param); // OK: annotation allows it
 
       void unnecessaryAnnotationOnParamFunction(
-        @thrift.AllowUnsafeNonSealedKeyType # expected-error: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on map: `param`
+        @thrift.AllowUnsafeNonSealedKeyType # expected-warning: Unnecessary @thrift.AllowUnsafeNonSealedKeyType on map: `param`
         1: map<SealedStruct, string> param);
 
       // 3. Multiple parameters

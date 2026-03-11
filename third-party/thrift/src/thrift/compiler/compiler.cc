@@ -205,7 +205,7 @@ Options:
                 unnecessary_allow_unsafe_non_sealed_key_type=none|warn|error
                   Action to take on unnecessary (or invalid) uses of the
                   @thrift.AllowUnsafeNonSealedKeyType annotation.
-                  Default: error
+                  Default: warn
 
                 duplicate_namespace=none|warn|error
                   Action to take when a namespace is declared more than once

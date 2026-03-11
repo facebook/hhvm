@@ -356,10 +356,9 @@ TEST_P(HTTPServerTests, TestFilterFailException) {
          const folly::AsyncTransportCertificate* /*peerCert*/,
          const std::string& /* nextProtocolName */,
          SecureTransportType /* secureTransportType */,
-         const wangle::TransportInfo& /* tinfo */) {
-        throw std::runtime_error("filter failed this connection");
-        return true;
-      };
+         const wangle::TransportInfo& /* tinfo */) -> bool {
+    throw std::runtime_error("filter failed this connection");
+  };
   startServer(nullptr, /*expectRequest=*/false);
   initClient();
 

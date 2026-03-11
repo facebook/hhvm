@@ -67,8 +67,7 @@ const std::string* %%name%%::getPointerToTable(
       // Controlled abort here so its clear from a crash stack this method
       // was called with a table type for which there is no current
       // implementation
-      CHECK(false);
-      return nullptr;
+      LOG(FATAL) << "unknown table type";
   }
 }
 

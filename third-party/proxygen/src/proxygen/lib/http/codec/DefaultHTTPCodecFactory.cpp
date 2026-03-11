@@ -60,7 +60,5 @@ std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
       // default
       return nullptr;
   }
-  // unreachable
-  return nullptr;
 }
 } // namespace proxygen

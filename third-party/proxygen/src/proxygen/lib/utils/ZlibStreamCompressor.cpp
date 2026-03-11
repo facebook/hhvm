@@ -123,7 +123,7 @@ std::unique_ptr<IOBuf> ZlibStreamCompressor::compress(const IOBuf* in,
       while (zlibStream_.avail_in != 0) {
         status_ = deflateHelper(&zlibStream_, out.get(), Z_NO_FLUSH);
         if (status_ != Z_OK) {
-          DLOG(FATAL) << "Deflate failed: " << zlibStream_.msg;
+          LOG(DFATAL) << "Deflate failed: " << zlibStream_.msg;
           return nullptr;
         }
       }
@@ -136,7 +136,7 @@ std::unique_ptr<IOBuf> ZlibStreamCompressor::compress(const IOBuf* in,
     } while (status_ == Z_OK);
 
     if (status_ != Z_STREAM_END) {
-      DLOG(FATAL) << "Deflate failed: " << zlibStream_.msg;
+      LOG(DFATAL) << "Deflate failed: " << zlibStream_.msg;
       return nullptr;
     }
   } else {
@@ -145,7 +145,7 @@ std::unique_ptr<IOBuf> ZlibStreamCompressor::compress(const IOBuf* in,
     } while (zlibStream_.avail_out == 0);
 
     if (status_ != Z_OK) {
-      DLOG(FATAL) << "Deflate failed: " << zlibStream_.msg;
+      LOG(DFATAL) << "Deflate failed: " << zlibStream_.msg;
       return nullptr;
     }
   }

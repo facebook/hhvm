@@ -132,10 +132,9 @@ CO_TEST_F_X(TransformFilterTest, InvokeOnError) {
         return std::move(headerEvent);
       };
   TransformFilter::BodyTransformFn bodyHook =
-      [](folly::Try<HTTPBodyEvent>&& bodyEvent) {
-        LOG(FATAL) << "unreachable";
-        return folly::Try<HTTPBodyEvent>();
-      };
+      [](folly::Try<HTTPBodyEvent>&& bodyEvent) -> folly::Try<HTTPBodyEvent> {
+    LOG(FATAL) << "unreachable";
+  };
 
   auto* transformSource = new TransformFilter(
       respSource, std::move(headerHook), std::move(bodyHook));
@@ -170,9 +169,8 @@ CO_TEST_F_X(TransformFilterTest, TransformBodyToError) {
 
   HTTPSourceReader reader(transformSource);
 
-  reader.onBody([](BufQueue body, bool /*eom*/) {
+  reader.onBody([](BufQueue body, bool /*eom*/) -> bool {
     LOG(FATAL) << "shouldn't happen";
-    return HTTPSourceReader::Continue;
   });
 
   // read response

@@ -861,9 +861,8 @@ TEST(HTTPHeaders, MoveFromTest) {
   HTTPHeaders h1;
   HTTPHeaders h2(std::move(h1));
   EXPECT_FALSE(h1.exists(HTTP_HEADER_CONNECTION));
-  h1.forEachValueOfHeader(HTTP_HEADER_HOST, [](const std::string&) {
+  h1.forEachValueOfHeader(HTTP_HEADER_HOST, [](const std::string&) -> bool {
     CHECK(false) << "Unreachable";
-    return false;
   });
   h1.add(HTTP_HEADER_CONNECTION, "close");
 

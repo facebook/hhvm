@@ -76,6 +76,17 @@ class RPCServerConformanceHandler
   folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
   co_bidiBasic(std::unique_ptr<Request> req) override;
 
+  folly::coro::Task<
+      apache::thrift::
+          ResponseAndStreamTransformation<Response, Request, Response>>
+  co_bidiInitialResponse(std::unique_ptr<Request> req) override;
+
+  folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+  co_bidiMethodDeclaredException(std::unique_ptr<Request> req) override;
+
+  folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+  co_bidiMethodUndeclaredException(std::unique_ptr<Request> req) override;
+
   // =================== Interactions ===================
   class BasicInteraction : public BasicInteractionIf {
    public:

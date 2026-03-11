@@ -245,6 +245,49 @@ RPCServerConformanceHandler::co_bidiBasic(std::unique_ptr<Request> req) {
       }};
 }
 
+folly::coro::Task<
+    apache::thrift::
+        ResponseAndStreamTransformation<Response, Request, Response>>
+RPCServerConformanceHandler::co_bidiInitialResponse(
+    std::unique_ptr<Request> req) {
+  result_.bidiInitialResponse().emplace().request() = *req;
+  co_return apache::thrift::
+      ResponseAndStreamTransformation<Response, Request, Response>{
+          *testCase_->serverInstruction()
+               ->bidiInitialResponse()
+               ->initialResponse(),
+          {[this](folly::coro::AsyncGenerator<Request&&> input)
+               -> folly::coro::AsyncGenerator<Response&&> {
+            for (auto& payload : *testCase_->serverInstruction()
+                                      ->bidiInitialResponse()
+                                      ->streamPayloads()) {
+              co_yield std::move(payload);
+            }
+            while (auto item = co_await input.next()) {
+              result_.bidiInitialResponse()->sinkPayloads()->push_back(
+                  std::move(*item));
+            }
+          }}};
+}
+
+folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+RPCServerConformanceHandler::co_bidiMethodDeclaredException(
+    std::unique_ptr<Request> req) {
+  result_.bidiMethodDeclaredException().emplace().request() = *req;
+  throw *testCase_->serverInstruction()
+      ->bidiMethodDeclaredException()
+      ->userException();
+}
+
+folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+RPCServerConformanceHandler::co_bidiMethodUndeclaredException(
+    std::unique_ptr<Request> req) {
+  result_.bidiMethodUndeclaredException().emplace().request() = *req;
+  throw std::runtime_error(*testCase_->serverInstruction()
+                                ->bidiMethodUndeclaredException()
+                                ->exceptionMessage());
+}
+
 // =================== Interactions ===================
 std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
 RPCServerConformanceHandler::createBasicInteraction() {

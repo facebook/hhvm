@@ -402,6 +402,68 @@ BidiBasicClientTestResult runBidiBasic(
       }());
 }
 
+template <typename ClientType>
+BidiInitialResponseClientTestResult runBidiInitialResponse(
+    ClientType& client,
+    const BidiInitialResponseClientInstruction& instruction,
+    const RPCRequestParam<ClientType>& request) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<BidiInitialResponseClientTestResult> {
+        auto bidi = co_await client.co_bidiInitialResponse(request);
+        BidiInitialResponseClientTestResult result;
+        result.initialResponse() = std::move(bidi.response);
+        co_await folly::coro::collectAll(
+            folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+              co_await bidi.sink.sink(
+                  [&]() -> folly::coro::AsyncGenerator<Request&&> {
+                    for (auto payload : *instruction.sinkPayloads()) {
+                      co_yield std::move(payload);
+                    }
+                  }());
+            }),
+            folly::coro::co_invoke(
+                [&, gen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+                    -> folly::coro::Task<void> {
+                  while (auto val = co_await gen.next()) {
+                    result.streamPayloads()->push_back(std::move(*val));
+                  }
+                }));
+        co_return result;
+      }());
+}
+
+template <typename ClientType>
+BidiMethodDeclaredExceptionClientTestResult runBidiMethodDeclaredException(
+    ClientType& client, const RPCRequestParam<ClientType>& request) {
+  BidiMethodDeclaredExceptionClientTestResult result;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    try {
+      co_await client.co_bidiMethodDeclaredException(request);
+    } catch (const UserException& e) {
+      result.userException() = e;
+    }
+  }());
+  return result;
+}
+
+template <typename ClientType>
+BidiMethodUndeclaredExceptionClientTestResult runBidiMethodUndeclaredException(
+    ClientType& client, const RPCRequestParam<ClientType>& request) {
+  BidiMethodUndeclaredExceptionClientTestResult result;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    try {
+      co_await client.co_bidiMethodUndeclaredException(request);
+    } catch (const TApplicationException& e) {
+      // BiDi transport prefixes exception type to message
+      auto msg = e.getMessage();
+      auto pos = msg.find(": ");
+      result.exceptionMessage() =
+          (pos != std::string::npos) ? msg.substr(pos + 2) : msg;
+    }
+  }());
+  return result;
+}
+
 // =================== Interactions ===================
 InteractionConstructorClientTestResult runInteractionConstructor(
     RPCConformanceServiceAsyncClient& client,
@@ -558,6 +620,24 @@ ClientTestResult runClientSteps(
       auto instruction = *clientInstruction.bidiBasic();
       result.bidiBasic() =
           runBidiBasic(client, instruction, *instruction.request());
+      break;
+    }
+    case ClientInstruction::Type::bidiInitialResponse: {
+      auto instruction = *clientInstruction.bidiInitialResponse();
+      result.bidiInitialResponse() =
+          runBidiInitialResponse(client, instruction, *instruction.request());
+      break;
+    }
+    case ClientInstruction::Type::bidiMethodDeclaredException: {
+      auto instruction = *clientInstruction.bidiMethodDeclaredException();
+      result.bidiMethodDeclaredException() =
+          runBidiMethodDeclaredException(client, *instruction.request());
+      break;
+    }
+    case ClientInstruction::Type::bidiMethodUndeclaredException: {
+      auto instruction = *clientInstruction.bidiMethodUndeclaredException();
+      result.bidiMethodUndeclaredException() =
+          runBidiMethodUndeclaredException(client, *instruction.request());
       break;
     }
     case ClientInstruction::Type::interactionConstructor:
@@ -722,6 +802,22 @@ testing::AssertionResult runStatelessRpcTest(
         auto instruction = *clientInstruction.bidiBasic();
         result.bidiBasic() =
             runBidiBasic(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::bidiInitialResponse: {
+        auto instruction = *clientInstruction.bidiInitialResponse();
+        result.bidiInitialResponse() =
+            runBidiInitialResponse(client, instruction, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::bidiMethodDeclaredException: {
+        result.bidiMethodDeclaredException() =
+            runBidiMethodDeclaredException(client, serverInstruction);
+        break;
+      }
+      case ClientInstruction::Type::bidiMethodUndeclaredException: {
+        result.bidiMethodUndeclaredException() =
+            runBidiMethodUndeclaredException(client, serverInstruction);
         break;
       }
       case ClientInstruction::Type::interactionConstructor:

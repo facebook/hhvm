@@ -997,6 +997,129 @@ Test createBidiBasicTest() {
   return ret;
 }
 
+Test createBidiInitialResponseTest() {
+  Test ret;
+  ret.name() = "BidiInitialResponseTest";
+  ret.tags()->emplace("spec/protocol/interface/#bidi-initial-response");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "BidiInitialResponse/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  auto& clientInstruction =
+      rpcTest.clientInstruction().emplace().bidiInitialResponse().emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  for (int i = 0; i < 100; i++) {
+    auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
+    sinkPayload.data() = folly::to<std::string>(i);
+  }
+
+  auto& serverInstruction =
+      rpcTest.serverInstruction().emplace().bidiInitialResponse().emplace();
+  for (int i = 0; i < 100; i++) {
+    auto& payload = serverInstruction.streamPayloads()->emplace_back();
+    payload.data() = folly::to<std::string>(i);
+  }
+  serverInstruction.initialResponse().emplace().data() = "world";
+
+  auto& clientTestResult =
+      rpcTest.clientTestResult().emplace().bidiInitialResponse().emplace();
+  clientTestResult.streamPayloads().copy_from(
+      serverInstruction.streamPayloads());
+  clientTestResult.initialResponse().emplace().data() = "world";
+
+  auto& serverResult =
+      rpcTest.serverTestResult().emplace().bidiInitialResponse().emplace();
+  serverResult.request().emplace().data() = "hello";
+  serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
+
+  return ret;
+}
+
+Test createBidiMethodDeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "BidiMethodDeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#bidi-method-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "BidiMethodDeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  rpcTest.clientInstruction()
+      .emplace()
+      .bidiMethodDeclaredException()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .bidiMethodDeclaredException()
+      .emplace()
+      .userException()
+      .emplace()
+      .msg() = "method_error";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .bidiMethodDeclaredException()
+      .emplace()
+      .userException()
+      .emplace()
+      .msg() = "method_error";
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .bidiMethodDeclaredException()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
+Test createBidiMethodUndeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "BidiMethodUndeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#bidi-method-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "BidiMethodUndeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  rpcTest.clientInstruction()
+      .emplace()
+      .bidiMethodUndeclaredException()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .bidiMethodUndeclaredException()
+      .emplace()
+      .exceptionMessage() = "method_error";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .bidiMethodUndeclaredException()
+      .emplace()
+      .exceptionMessage() = "method_error";
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .bidiMethodUndeclaredException()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
 // =================== Interactions ===================
 Test createInteractionConstructorTest() {
   Test ret;
@@ -1202,6 +1325,9 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createSinkUndeclaredExceptionTest());
   // =================== BiDi Streaming ===================
   suite.tests()->push_back(createBidiBasicTest());
+  suite.tests()->push_back(createBidiInitialResponseTest());
+  suite.tests()->push_back(createBidiMethodDeclaredExceptionTest());
+  suite.tests()->push_back(createBidiMethodUndeclaredExceptionTest());
   // =================== Interactions ===================
   suite.tests()->push_back(createInteractionConstructorTest());
   suite.tests()->push_back(createInteractionFactoryFunctionTest());

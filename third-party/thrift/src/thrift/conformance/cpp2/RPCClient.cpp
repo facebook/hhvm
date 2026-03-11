@@ -401,6 +401,67 @@ BidiBasicClientTestResult bidiBasicTest(
       }());
 }
 
+BidiInitialResponseClientTestResult bidiInitialResponseTest(
+    BidiInitialResponseClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<BidiInitialResponseClientTestResult> {
+        auto bidi =
+            co_await client->co_bidiInitialResponse(*instruction.request());
+        BidiInitialResponseClientTestResult result;
+        result.initialResponse() = std::move(bidi.response);
+        co_await folly::coro::collectAll(
+            folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+              co_await bidi.sink.sink(
+                  [&]() -> folly::coro::AsyncGenerator<Request&&> {
+                    for (auto payload : *instruction.sinkPayloads()) {
+                      co_yield std::move(payload);
+                    }
+                  }());
+            }),
+            folly::coro::co_invoke(
+                [&, gen = std::move(bidi.stream).toAsyncGenerator()]() mutable
+                    -> folly::coro::Task<void> {
+                  while (auto val = co_await gen.next()) {
+                    result.streamPayloads()->push_back(std::move(*val));
+                  }
+                }));
+        co_return result;
+      }());
+}
+
+BidiMethodDeclaredExceptionClientTestResult bidiMethodDeclaredExceptionTest(
+    BidiMethodDeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  BidiMethodDeclaredExceptionClientTestResult result;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    try {
+      co_await client->co_bidiMethodDeclaredException(*instruction.request());
+    } catch (const UserException& e) {
+      result.userException() = e;
+    }
+  }());
+  return result;
+}
+
+BidiMethodUndeclaredExceptionClientTestResult bidiMethodUndeclaredExceptionTest(
+    BidiMethodUndeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  BidiMethodUndeclaredExceptionClientTestResult result;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    try {
+      co_await client->co_bidiMethodUndeclaredException(*instruction.request());
+    } catch (const TApplicationException& e) {
+      // BiDi transport prefixes exception type to message
+      auto msg = e.getMessage();
+      auto pos = msg.find(": ");
+      result.exceptionMessage() =
+          (pos != std::string::npos) ? msg.substr(pos + 2) : msg;
+    }
+  }());
+  return result;
+}
+
 // =================== Interactions ===================
 InteractionConstructorClientTestResult interactionConstructorTest(
     InteractionConstructorClientInstruction&) {
@@ -552,6 +613,19 @@ int main(int argc, char** argv) {
       break;
     case ClientInstruction::Type::bidiBasic:
       result.bidiBasic() = bidiBasicTest(*clientInstruction.bidiBasic());
+      break;
+    case ClientInstruction::Type::bidiInitialResponse:
+      result.bidiInitialResponse() =
+          bidiInitialResponseTest(*clientInstruction.bidiInitialResponse());
+      break;
+    case ClientInstruction::Type::bidiMethodDeclaredException:
+      result.bidiMethodDeclaredException() = bidiMethodDeclaredExceptionTest(
+          *clientInstruction.bidiMethodDeclaredException());
+      break;
+    case ClientInstruction::Type::bidiMethodUndeclaredException:
+      result.bidiMethodUndeclaredException() =
+          bidiMethodUndeclaredExceptionTest(
+              *clientInstruction.bidiMethodUndeclaredException());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

@@ -33,6 +33,9 @@ python/ThriftRPCClientTest/StreamInitialUndeclaredException/Success.StreamInitia
 python/ThriftRPCClientTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
 # Python does not support BiDi streaming
 python/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
+python/ThriftRPCClientTest/BidiInitialResponse/Success.BidiInitialResponseTest
+python/ThriftRPCClientTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+python/ThriftRPCClientTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 # Python RPC conformance server tests
 python/ThriftRPCServerTest/StreamSubsequentCredits/Success.StreamSubsequentCreditsTest
 python/ThriftRPCServerTest/SinkBasic/Success.SinkBasicTest
@@ -56,6 +59,9 @@ python/ThriftRPCServerTest/StreamUndeclaredException/Success.StreamUndeclaredExc
 python/ThriftRPCServerTest/StreamInitialDeclaredException/Success.StreamInitialDeclaredExceptionTest
 python/ThriftRPCServerTest/StreamInitialUndeclaredException/Success.StreamInitialUndeclaredExceptionTest
 python/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
+python/ThriftRPCServerTest/BidiInitialResponse/Success.BidiInitialResponseTest
+python/ThriftRPCServerTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+python/ThriftRPCServerTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 #
 #
 #
@@ -145,7 +151,13 @@ java2/ThriftRPCServerTest/InteractionConstructorTerminationTest/Success.Interact
 java2/ThriftRPCServerTest/InteractionFactoryFunctionTest/Success.InteractionFactoryFunctionTest
 # Java does not support BiDi streaming codegen
 java2/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
+java2/ThriftRPCClientTest/BidiInitialResponse/Success.BidiInitialResponseTest
+java2/ThriftRPCClientTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+java2/ThriftRPCClientTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 java2/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
+java2/ThriftRPCServerTest/BidiInitialResponse/Success.BidiInitialResponseTest
+java2/ThriftRPCServerTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+java2/ThriftRPCServerTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 #
 #
 # All type change tests are failing in Java
@@ -2731,6 +2743,9 @@ hack/ThriftRPCClientTest/RequestResponseFragmentation/Success.RequestResponseFra
 hack/ThriftRPCClientTest/InteractionFactoryFunctionTest/Success.InteractionFactoryFunctionTest
 # Hack does not support BiDi streaming
 hack/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
+hack/ThriftRPCClientTest/BidiInitialResponse/Success.BidiInitialResponseTest
+hack/ThriftRPCClientTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+hack/ThriftRPCClientTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 hack/ThriftRPCServerTest/SinkChunkTimeout/Success.SinkChunkTimeoutTest
 hack/ThriftRPCServerTest/InteractionConstructorTest/Success.InteractionConstructorTest
 hack/ThriftRPCServerTest/InteractionFactoryFunctionTest/Success.InteractionFactoryFunctionTest
@@ -2739,6 +2754,9 @@ hack/ThriftRPCServerTest/InteractionFactoryFunctionPersistsStateTest/Success.Int
 hack/ThriftRPCServerTest/InteractionConstructorTerminationTest/Success.InteractionConstructorTerminationTest
 hack/ThriftRPCServerTest/InteractionFactoryFunctionTerminationTest/Success.InteractionFactoryFunctionTerminationTest
 hack/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
+hack/ThriftRPCServerTest/BidiInitialResponse/Success.BidiInitialResponseTest
+hack/ThriftRPCServerTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+hack/ThriftRPCServerTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 
 #
 #
@@ -2776,6 +2794,9 @@ erlang/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 erlang/ThriftRPCClientTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
 # Erlang does not support BiDi streaming
 erlang/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
+erlang/ThriftRPCClientTest/BidiInitialResponse/Success.BidiInitialResponseTest
+erlang/ThriftRPCClientTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+erlang/ThriftRPCClientTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 
 # Go
 #
@@ -2924,6 +2945,9 @@ go/ThriftRPCClientTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
 go/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 # Go does not support BiDi streaming
 go/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
+go/ThriftRPCClientTest/BidiInitialResponse/Success.BidiInitialResponseTest
+go/ThriftRPCClientTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+go/ThriftRPCClientTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 #
 # Go RPC conformance server tests
 go/ThriftRPCServerTest/SinkChunkTimeout/Success.SinkChunkTimeoutTest
@@ -2935,6 +2959,9 @@ go/ThriftRPCServerTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 go/ThriftRPCServerTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
 go/ThriftRPCServerTest/RequestResponseTimeout/Success.RequestResponseTimeoutTest
 go/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
+go/ThriftRPCServerTest/BidiInitialResponse/Success.BidiInitialResponseTest
+go/ThriftRPCServerTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+go/ThriftRPCServerTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 
 #
 # Rust
@@ -3035,6 +3062,9 @@ rust/CompatibilityTest/testset.Optional.Terse/ChangeQualifier/empty.Compact
 rust/ThriftRPCServerTest/SinkUndeclaredException/Success.SinkUndeclaredExceptionTest
 # Rust does not yet support BiDi streaming in conformance tests
 rust/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
+rust/ThriftRPCServerTest/BidiInitialResponse/Success.BidiInitialResponseTest
+rust/ThriftRPCServerTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+rust/ThriftRPCServerTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest
 
 # Rust RPC client tests
 
@@ -3043,3 +3073,6 @@ rust/ThriftRPCServerTest/BidiBasic/Success.BidiBasicTest
 # supported, but it's not today
 rust/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 rust/ThriftRPCClientTest/BidiBasic/Success.BidiBasicTest
+rust/ThriftRPCClientTest/BidiInitialResponse/Success.BidiInitialResponseTest
+rust/ThriftRPCClientTest/BidiMethodDeclaredException/Success.BidiMethodDeclaredExceptionTest
+rust/ThriftRPCClientTest/BidiMethodUndeclaredException/Success.BidiMethodUndeclaredExceptionTest

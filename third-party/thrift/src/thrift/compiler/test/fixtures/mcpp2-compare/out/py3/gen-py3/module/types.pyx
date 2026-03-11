@@ -3686,7 +3686,7 @@ cdef vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]] List__Ma
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[Empty, MyStruct]")
+            raise TypeError("None is not of type _typing.Mapping[Empty, MyStruct]")
         if not isinstance(item, Map__Empty_MyStruct):
             item = Map__Empty_MyStruct(item)
         c_inst.push_back(Map__Empty_MyStruct__make_instance(item))
@@ -3705,7 +3705,7 @@ cdef vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]] 
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[_typing.Mapping[Empty, MyStruct]]")
+            raise TypeError("None is not of type _typing.Sequence[_typing.Mapping[Empty, MyStruct]]")
         if not isinstance(item, List__Map__Empty_MyStruct):
             item = List__Map__Empty_MyStruct(item)
         c_inst.push_back(List__Map__Empty_MyStruct__make_instance(item))
@@ -3724,7 +3724,7 @@ cdef vector[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStr
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[_typing.Sequence[_typing.Mapping[Empty, MyStruct]]]")
+            raise TypeError("None is not of type _typing.Sequence[_typing.Sequence[_typing.Mapping[Empty, MyStruct]]]")
         if not isinstance(item, List__List__Map__Empty_MyStruct):
             item = List__List__Map__Empty_MyStruct(item)
         c_inst.push_back(List__List__Map__Empty_MyStruct__make_instance(item))
@@ -3925,7 +3925,7 @@ cdef vector[vector[cint32_t]] List__List__i32__make_instance(object items) excep
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[int]")
+            raise TypeError("None is not of type _typing.Sequence[int]")
         if not isinstance(item, List__i32):
             item = List__i32(item)
         c_inst.push_back(List__i32__make_instance(item))
@@ -3944,7 +3944,7 @@ cdef vector[vector[vector[cint32_t]]] List__List__List__i32__make_instance(objec
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[_typing.Sequence[int]]")
+            raise TypeError("None is not of type _typing.Sequence[_typing.Sequence[int]]")
         if not isinstance(item, List__List__i32):
             item = List__List__i32(item)
         c_inst.push_back(List__List__i32__make_instance(item))
@@ -3963,7 +3963,7 @@ cdef vector[vector[vector[vector[cint32_t]]]] List__List__List__List__i32__make_
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[_typing.Sequence[_typing.Sequence[int]]]")
+            raise TypeError("None is not of type _typing.Sequence[_typing.Sequence[_typing.Sequence[int]]]")
         if not isinstance(item, List__List__List__i32):
             item = List__List__List__i32(item)
         c_inst.push_back(List__List__List__i32__make_instance(item))
@@ -4028,7 +4028,7 @@ cdef vector[cset[string]] List__Set__string__make_instance(object items) except 
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.AbstractSet[str]")
+            raise TypeError("None is not of type _typing.AbstractSet[str]")
         if not isinstance(item, Set__string):
             item = Set__string(item)
         c_inst.push_back(Set__string__make_instance(item))
@@ -4454,7 +4454,7 @@ cdef vector[cset[_module_cbindings.cSimpleUnion]] List__Set__SimpleUnion__make_i
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.AbstractSet[SimpleUnion]")
+            raise TypeError("None is not of type _typing.AbstractSet[SimpleUnion]")
         if not isinstance(item, Set__SimpleUnion):
             item = Set__SimpleUnion(item)
         c_inst.push_back(Set__SimpleUnion__make_instance(item))
@@ -4552,7 +4552,7 @@ cdef vector[cset[cint32_t]] List__Set__i32__make_instance(object items) except *
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.AbstractSet[int]")
+            raise TypeError("None is not of type _typing.AbstractSet[int]")
         if not isinstance(item, Set__i32):
             item = Set__i32(item)
         c_inst.push_back(Set__i32__make_instance(item))
@@ -4740,7 +4740,7 @@ cdef vector[cmap[cint16_t,string]] List__Map__i16_string__make_instance(object i
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[int, str]")
+            raise TypeError("None is not of type _typing.Mapping[int, str]")
         if not isinstance(item, Map__i16_string):
             item = Map__i16_string(item)
         c_inst.push_back(Map__i16_string__make_instance(item))
@@ -4801,7 +4801,7 @@ cdef vector[cmap[string,cint32_t]] List__Map__string_i32__make_instance(object i
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[str, int]")
+            raise TypeError("None is not of type _typing.Mapping[str, int]")
         if not isinstance(item, Map__string_i32):
             item = Map__string_i32(item)
         c_inst.push_back(Map__string_i32__make_instance(item))

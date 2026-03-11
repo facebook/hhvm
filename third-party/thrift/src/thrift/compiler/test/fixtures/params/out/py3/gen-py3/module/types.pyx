@@ -198,7 +198,7 @@ cdef vector[cmap[cint32_t,cint32_t]] List__Map__i32_i32__make_instance(object it
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[int, int]")
+            raise TypeError("None is not of type _typing.Mapping[int, int]")
         if not isinstance(item, Map__i32_i32):
             item = Map__i32_i32(item)
         c_inst.push_back(Map__i32_i32__make_instance(item))
@@ -217,7 +217,7 @@ cdef vector[cset[cint32_t]] List__Set__i32__make_instance(object items) except *
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.AbstractSet[int]")
+            raise TypeError("None is not of type _typing.AbstractSet[int]")
         if not isinstance(item, Set__i32):
             item = Set__i32(item)
         c_inst.push_back(Set__i32__make_instance(item))
@@ -263,7 +263,7 @@ cdef vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]] List__Map__i32_Map__i3
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[int, _typing.Mapping[int, _typing.AbstractSet[int]]]")
+            raise TypeError("None is not of type _typing.Mapping[int, _typing.Mapping[int, _typing.AbstractSet[int]]]")
         if not isinstance(item, Map__i32_Map__i32_Set__i32):
             item = Map__i32_Map__i32_Set__i32(item)
         c_inst.push_back(Map__i32_Map__i32_Set__i32__make_instance(item))
@@ -282,7 +282,7 @@ cdef vector[vector[cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]]] List__List__Ma
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[_typing.Mapping[int, _typing.Mapping[int, _typing.AbstractSet[int]]]]")
+            raise TypeError("None is not of type _typing.Sequence[_typing.Mapping[int, _typing.Mapping[int, _typing.AbstractSet[int]]]]")
         if not isinstance(item, List__Map__i32_Map__i32_Set__i32):
             item = List__Map__i32_Map__i32_Set__i32(item)
         c_inst.push_back(List__Map__i32_Map__i32_Set__i32__make_instance(item))

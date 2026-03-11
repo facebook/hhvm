@@ -344,29 +344,7 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
     {{/if type.containerOfString?}}
     for item in items:
   {{/if (not type.map?)}}
-  {{#if type.list?}}
-    {{#let elem_type=type.true_type.elem_type}}
-    {{#if elem_type.container?}}
-        if item is None:
-            raise TypeError("None is not of the type {{#partial pep484.type_name type=elem_type}}")
-        if not isinstance(item, {{#partial python_type type=elem_type}}):
-            item = {{#partial python_type type=elem_type}}(item)
-    {{#else}}
-        if not isinstance(item, {{#partial python_is_instance_type type=elem_type}}):
-            raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=elem_type}}")
-      {{#if elem_type.integer?}}
-        {{! inject cython int overflow checks }}
-        item = <{{#partial cython_python_type type=elem_type}}> item
-      {{/if elem_type.integer?}}
-    {{/if elem_type.container?}}
-        c_inst.push_back({{#partial cython_python_to_cpp_item type=elem_type}})
-  {{#else if type.set?}}
-    {{!
-      TODO(hchok): This is very similar to the list branch.W e can likely consolidate a bunch of this,
-      but it's preserved as-is while converting the template to a partial, so we can rely on codegen
-      output parity as a correctness signal. The consolidation will be split into its own change,
-      alongside corresponding fixture changes.
-    }}
+  {{#if (or type.list? type.set?)}}
     {{#let elem_type=type.true_type.elem_type}}
     {{#if elem_type.container?}}
         if item is None:
@@ -378,13 +356,17 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
             raise TypeError(f"{item!r} is not of type {{#partial pep484.type_name type=elem_type}}")
       {{#if elem_type.integer?}}
         {{! inject cython int overflow checks }}
-        c_item = <{{#partial cython_python_type type=elem_type}}> item
+        {{#if type.set?}}c_{{/if}}item = <{{#partial cython_python_type type=elem_type}}> item
       {{/if elem_type.integer?}}
     {{/if elem_type.container?}}
-    {{#if (not elem_type.integer?)}}
+    {{#if type.list?}}
+        c_inst.push_back({{#partial cython_python_to_cpp_item type=elem_type}})
+    {{#else}}{{! Set }}
+      {{#if (not elem_type.integer?)}}
         c_item = {{#partial cython_python_to_cpp_item type=elem_type}}
-    {{/if (not elem_type.integer?)}}
+      {{/if (not elem_type.integer?)}}
         c_inst.insert(c_item)
+    {{/if type.list?}}
   {{#else if type.map?}}
     for key, item in items.items():
     {{#let key_type=type.true_type.key_type}}
@@ -420,7 +402,7 @@ between types.pyx (default mode) and converters.pyx (auto-migrate mode)
     {{/if val_type.container?}}
 
         c_inst[c_key] = {{#partial cython_python_to_cpp_item type=val_type}}
-  {{/if type.list?}}
+  {{/if (or type.list? type.set?)}}
     return cmove(c_inst)
 {{/let partial}}
 

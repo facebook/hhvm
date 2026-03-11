@@ -241,7 +241,7 @@ cdef vector[vector[cint32_t]] List__List__i32__make_instance(object items) excep
             return cmove(c_inst)
         for item in items:
             if item is None:
-                raise TypeError("None is not of the type _typing.Sequence[int]")
+                raise TypeError("None is not of type _typing.Sequence[int]")
             if not isinstance(item, _module_types.List__i32):
                 item = _module_types.List__i32(item)
             c_inst.push_back(List__i32__make_instance(item))
@@ -286,7 +286,7 @@ cdef vector[cset[string]] List__Set__string__make_instance(object items) except 
             return cmove(c_inst)
         for item in items:
             if item is None:
-                raise TypeError("None is not of the type _typing.AbstractSet[str]")
+                raise TypeError("None is not of type _typing.AbstractSet[str]")
             if not isinstance(item, _module_types.Set__string):
                 item = _module_types.Set__string(item)
             c_inst.push_back(Set__string__make_instance(item))
@@ -315,7 +315,7 @@ cdef vector[vector[string]] List__List__string__make_instance(object items) exce
             return cmove(c_inst)
         for item in items:
             if item is None:
-                raise TypeError("None is not of the type _typing.Sequence[str]")
+                raise TypeError("None is not of type _typing.Sequence[str]")
             if not isinstance(item, _module_types.List__string):
                 item = _module_types.List__string(item)
             c_inst.push_back(List__string__make_instance(item))
@@ -327,7 +327,7 @@ cdef vector[cset[cint32_t]] List__Set__i32__make_instance(object items) except *
             return cmove(c_inst)
         for item in items:
             if item is None:
-                raise TypeError("None is not of the type _typing.AbstractSet[int]")
+                raise TypeError("None is not of type _typing.AbstractSet[int]")
             if not isinstance(item, _module_types.Set__i32):
                 item = _module_types.Set__i32(item)
             c_inst.push_back(Set__i32__make_instance(item))
@@ -339,7 +339,7 @@ cdef vector[cmap[string,string]] List__Map__string_string__make_instance(object 
             return cmove(c_inst)
         for item in items:
             if item is None:
-                raise TypeError("None is not of the type _typing.Mapping[str, str]")
+                raise TypeError("None is not of type _typing.Mapping[str, str]")
             if not isinstance(item, _module_types.Map__string_string):
                 item = _module_types.Map__string_string(item)
             c_inst.push_back(Map__string_string__make_instance(item))
@@ -523,7 +523,7 @@ cdef vector[cmap[cint32_t,double]] List__Map__i32_double__make_instance(object i
             return cmove(c_inst)
         for item in items:
             if item is None:
-                raise TypeError("None is not of the type _typing.Mapping[int, float]")
+                raise TypeError("None is not of type _typing.Mapping[int, float]")
             if not isinstance(item, _module_types.Map__i32_double):
                 item = _module_types.Map__i32_double(item)
             c_inst.push_back(Map__i32_double__make_instance(item))

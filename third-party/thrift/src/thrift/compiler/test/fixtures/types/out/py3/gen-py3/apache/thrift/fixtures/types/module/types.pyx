@@ -4325,7 +4325,7 @@ cdef vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cin
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[int, str]")
+            raise TypeError("None is not of type _typing.Mapping[int, str]")
         if not isinstance(item, std_unordered_map__Map__i32_string):
             item = std_unordered_map__Map__i32_string(item)
         c_inst.push_back(std_unordered_map__Map__i32_string__make_instance(item))

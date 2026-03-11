@@ -217,7 +217,7 @@ cdef vector[vector[_c_cbindings.cC]] List__List__c_C__make_instance(object items
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[_c_types.C]")
+            raise TypeError("None is not of type _typing.Sequence[_c_types.C]")
         if not isinstance(item, List__c_C):
             item = List__c_C(item)
         c_inst.push_back(List__c_C__make_instance(item))

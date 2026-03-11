@@ -1414,7 +1414,7 @@ cdef vector[cmap[string,cint32_t]] List__Map__string_i32__make_instance(object i
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[str, int]")
+            raise TypeError("None is not of type _typing.Mapping[str, int]")
         if not isinstance(item, Map__string_i32):
             item = Map__string_i32(item)
         c_inst.push_back(Map__string_i32__make_instance(item))

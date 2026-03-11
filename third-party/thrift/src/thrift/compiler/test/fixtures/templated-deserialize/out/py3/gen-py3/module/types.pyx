@@ -568,7 +568,7 @@ cdef vector[vector[cint32_t]] List__List__i32__make_instance(object items) excep
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[int]")
+            raise TypeError("None is not of type _typing.Sequence[int]")
         if not isinstance(item, List__i32):
             item = List__i32(item)
         c_inst.push_back(List__i32__make_instance(item))
@@ -587,7 +587,7 @@ cdef vector[vector[vector[cint32_t]]] List__List__List__i32__make_instance(objec
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[_typing.Sequence[int]]")
+            raise TypeError("None is not of type _typing.Sequence[_typing.Sequence[int]]")
         if not isinstance(item, List__List__i32):
             item = List__List__i32(item)
         c_inst.push_back(List__List__i32__make_instance(item))
@@ -686,7 +686,7 @@ cdef vector[cset[cint32_t]] List__Set__i32__make_instance(object items) except *
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.AbstractSet[int]")
+            raise TypeError("None is not of type _typing.AbstractSet[int]")
         if not isinstance(item, Set__i32):
             item = Set__i32(item)
         c_inst.push_back(Set__i32__make_instance(item))
@@ -732,7 +732,7 @@ cdef vector[vector[vector[vector[cint32_t]]]] List__List__List__List__i32__make_
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[_typing.Sequence[_typing.Sequence[int]]]")
+            raise TypeError("None is not of type _typing.Sequence[_typing.Sequence[_typing.Sequence[int]]]")
         if not isinstance(item, List__List__List__i32):
             item = List__List__List__i32(item)
         c_inst.push_back(List__List__List__i32__make_instance(item))
@@ -864,7 +864,7 @@ cdef vector[cset[string]] List__Set__string__make_instance(object items) except 
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.AbstractSet[str]")
+            raise TypeError("None is not of type _typing.AbstractSet[str]")
         if not isinstance(item, Set__string):
             item = Set__string(item)
         c_inst.push_back(Set__string__make_instance(item))

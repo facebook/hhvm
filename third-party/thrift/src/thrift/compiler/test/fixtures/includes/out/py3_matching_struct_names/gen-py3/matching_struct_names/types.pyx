@@ -350,7 +350,7 @@ cdef vector[vector[_matching_struct_names_cbindings.cMyStruct]] List__List__MySt
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[MyStruct]")
+            raise TypeError("None is not of type _typing.Sequence[MyStruct]")
         if not isinstance(item, List__MyStruct):
             item = List__MyStruct(item)
         c_inst.push_back(List__MyStruct__make_instance(item))
@@ -386,7 +386,7 @@ cdef vector[vector[_module_cbindings.cMyStruct]] List__List__module_MyStruct__ma
         return cmove(c_inst)
     for item in items:
         if item is None:
-            raise TypeError("None is not of the type _typing.Sequence[_module_types.MyStruct]")
+            raise TypeError("None is not of type _typing.Sequence[_module_types.MyStruct]")
         if not isinstance(item, List__module_MyStruct):
             item = List__module_MyStruct(item)
         c_inst.push_back(List__module_MyStruct__make_instance(item))

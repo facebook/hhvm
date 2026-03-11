@@ -580,7 +580,12 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
         ~f:(localize ~ety_env)
         ~combine_ty_errs:Typing_error.multiple_opt
     in
-    let (env, ty) = Typing_intersection.intersect_list env r tyl in
+    let (env, ty) =
+      if ety_env.simplify_intersections then
+        Typing_intersection.intersect_list env r tyl
+      else
+        (env, MakeType.intersection r tyl)
+    in
     ((env, ty_err_opt, cycles), ty)
   | Taccess (root_ty, id) ->
     let origin_opt = find_origin dty in

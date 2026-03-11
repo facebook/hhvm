@@ -1,19 +1,43 @@
 ERROR: File "case_type_basics.php", line 16, characters 14-21:
 Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 4, characters 25-32:
+  Expected `(int | not arraykey)`
+  File "case_type_basics.php", line 15, characters 18-27:
+  But got `<expr#2> as XHPChild`
+  File "case_type_basics.php", line 16, characters 14-21:
+    where `<expr#2>` is a reference to this expression
+ERROR: File "case_type_basics.php", line 16, characters 14-21:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 4, characters 25-32:
+  Expected `nothing`
+  File "case_type_basics.php", line 4, characters 35-42:
+  But got `XHPChild`
+ERROR: File "case_type_basics.php", line 16, characters 14-21:
+Invalid argument (Typing[4110])
   File "case_type_basics.php", line 8, characters 21-23:
   Expected `int`
-  File "case_type_basics.php", line 15, characters 18-27:
-  But got `arraykey`
+  File "case_type_basics.php", line 4, characters 35-42:
+  But got `XHPChild`
+ERROR: File "case_type_basics.php", line 21, characters 20-27:
+Invalid argument (Typing[4110])
   File "case_type_basics.php", line 4, characters 25-32:
-    by the definition of `CT_Bounded`
+  Expected `(CT_No_Bounds | not arraykey)`
+  File "case_type_basics.php", line 15, characters 18-27:
+  But got `<expr#2> as XHPChild`
+  File "case_type_basics.php", line 21, characters 20-27:
+    where `<expr#2>` is a reference to this expression
+ERROR: File "case_type_basics.php", line 21, characters 20-27:
+Invalid argument (Typing[4110])
+  File "case_type_basics.php", line 4, characters 25-32:
+  Expected `nothing`
+  File "case_type_basics.php", line 4, characters 35-42:
+  But got `XHPChild`
 ERROR: File "case_type_basics.php", line 21, characters 20-27:
 Invalid argument (Typing[4110])
   File "case_type_basics.php", line 13, characters 27-38:
   Expected `CT_No_Bounds`
-  File "case_type_basics.php", line 15, characters 18-27:
-  But got `arraykey`
-  File "case_type_basics.php", line 4, characters 25-32:
-    by the definition of `CT_Bounded`
+  File "case_type_basics.php", line 4, characters 35-42:
+  But got `XHPChild`
 ERROR: File "case_type_basics.php", line 23, characters 14-23:
 Invalid argument (Typing[4110])
   File "case_type_basics.php", line 8, characters 21-23:

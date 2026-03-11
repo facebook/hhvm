@@ -245,6 +245,12 @@ type expand_env = {
           so on cycle we preserve the Tnewtype identity instead of collapsing
           to mixed — this prevents unsound subtyping through the constructor's
           type parameters. *)
+  simplify_intersections: bool;
+      (** When false, skip calling Typing_intersection.intersect_list during
+          localization of Tintersection types, and instead construct the
+          intersection directly. This breaks the cycle
+          localize -> intersect_list -> sub_type -> localize
+          that can occur when localizing recursive case type upper bounds. *)
 }
 
 val empty_expand_env : expand_env

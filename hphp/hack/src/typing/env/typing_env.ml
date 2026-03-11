@@ -2109,6 +2109,7 @@ module M = struct
           wildcard_action = _;
           ish_weakening;
           under_type_constructor = _;
+          simplify_intersections = _;
         } =
       if Typing_env_types.get_log_level env "expand_env" |> Int.( = ) 0 then
         []

@@ -159,7 +159,15 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
         if String.equal x SN.Classes.cSupportDyn then
           ((env, None, []), List.hd_exn argl)
         else
-          Phase.localize_rec ~ety_env:ety_env_inner env cstr
+          (* Disable intersection simplification when localizing the upper
+             bound constraint. Simplifying intersections during localization
+             calls Typing_intersection.intersect_list, which depends on
+             typing_subtype, which depends on typing_phase — creating a cycle
+             that can loop forever on recursive case type bounds. *)
+          let ety_env_cstr =
+            { ety_env_inner with simplify_intersections = false }
+          in
+          Phase.localize_rec ~ety_env:ety_env_cstr env cstr
       in
       let ((env, err, cycles), expanded_ty, bound) =
         match expansion with

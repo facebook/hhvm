@@ -1,0 +1,16 @@
+ERROR: File "case_type_recursive_bound_loop.php", line 7, characters 11-30:
+Invalid constraint on `newtype` (Typing[4332])
+  File "case_type_recursive_bound_loop.php", line 7, characters 35-37:
+  Expected `int`
+  File "case_type_recursive_bound_loop.php", line 7, characters 57-62:
+  But got `string`
+ERROR: File "case_type_recursive_bound_loop.php", line 7, characters 11-30:
+Invalid constraint on `newtype` (Typing[4332])
+  File "case_type_recursive_bound_loop.php", line 7, characters 40-53:
+  Expected `MyEtDemoOpType`
+  File "case_type_recursive_bound_loop.php", line 7, characters 57-62:
+  But got `string`
+ERROR: File "case_type_recursive_bound_loop.php", line 9, characters 11-24:
+Cyclic type definition (Typing[4498])
+  File "case_type_recursive_bound_loop.php", line 7, characters 40-53:
+  Cyclic use is here

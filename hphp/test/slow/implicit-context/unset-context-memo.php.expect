@@ -1,0 +1,24 @@
+=== Unset produces same memo state as backdoor ===
+No context (baseline):
+  keyed_memo EXECUTED (run #1, memo_key=0)
+  returned: result_1_key_0
+With sensitive context:
+  keyed_memo EXECUTED (run #2, memo_key=1)
+  returned: result_2_key_1
+After unset sensitive:
+  returned: result_1_key_0
+Via backdoor:
+  returned: result_1_key_0
+
+Total keyed_memo executions: 2
+
+=== Agnostic set/unset doesn't affect memo key ===
+With sensitive context:
+  keyed_memo2 EXECUTED (run #1, memo_key=1)
+  returned: result2_1_key_1
+With sensitive + agnostic set:
+  returned: result2_1_key_1
+With sensitive + agnostic unset:
+  returned: result2_1_key_1
+
+Total keyed_memo2 executions: 1

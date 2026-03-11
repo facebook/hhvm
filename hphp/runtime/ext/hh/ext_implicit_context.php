@@ -53,34 +53,8 @@ abstract class PreparedContext {
     vec<\HH\ImplicitContext\PreparedContext> $prepared,
     (function ()[_]: Awaitable<Tout>) $f,
   )[leak_safe, ctx $f]: Awaitable<Tout> {
-    invariant(!\HH\Lib\C\is_empty($prepared), 'Must have at least one context');
-
     $previous_ic = \HH\ImplicitContext\_Private\get_whole_implicit_context();
-    $ic = $previous_ic;
-    foreach ($prepared as $prepared_context) {
-      $ic_class = $prepared_context->icClass;
-      $context = $prepared_context->context;
-      if ($prepared_context is \HH\ImplicitContext\_Private\MemoAgnosticPreparedContext) {
-        $ic = \HH\ImplicitContext\_Private\set_memo_agnostic(
-          $ic,
-          $ic_class,
-          $context,
-        );
-      } else if ($prepared_context is \HH\ImplicitContext\_Private\MemoSensitivePreparedContext) {
-        $ic = \HH\ImplicitContext\_Private\set_memo_sensitive(
-          $ic,
-          $ic_class,
-          $context,
-          $context->getInstanceKey()
-        );
-      } else {
-        invariant_violation(
-          'Unexpected prepared context type: %s',
-          \get_class($prepared_context),
-        );
-      }
-    }
-
+    $ic = self::processPrepared($previous_ic, $prepared);
     try {
       \HH\ImplicitContext\_Private\set_implicit_context_by_value(
         $ic
@@ -103,34 +77,8 @@ abstract class PreparedContext {
     vec<\HH\ImplicitContext\PreparedContext> $prepared,
     (function ()[_]: Tout) $f,
   )[leak_safe, ctx $f]: Tout {
-    invariant(!\HH\Lib\C\is_empty($prepared), 'Must have at least one context');
-
     $previous_ic = \HH\ImplicitContext\_Private\get_whole_implicit_context();
-    $ic = $previous_ic;
-    foreach ($prepared as $prepared_context) {
-      $ic_class = $prepared_context->icClass;
-      $context = $prepared_context->context;
-      if ($prepared_context is \HH\ImplicitContext\_Private\MemoAgnosticPreparedContext) {
-        $ic = \HH\ImplicitContext\_Private\set_memo_agnostic(
-          $ic,
-          $ic_class,
-          $context,
-        );
-      } else if ($prepared_context is \HH\ImplicitContext\_Private\MemoSensitivePreparedContext) {
-        $ic = \HH\ImplicitContext\_Private\set_memo_sensitive(
-          $ic,
-          $ic_class,
-          $context,
-          $context->getInstanceKey()
-        );
-      } else {
-        invariant_violation(
-          'Unexpected prepared context type: %s',
-          \get_class($prepared_context),
-        );
-      }
-    }
-
+    $ic = self::processPrepared($previous_ic, $prepared);
     try {
       \HH\ImplicitContext\_Private\set_implicit_context_by_value(
         $ic
@@ -141,6 +89,51 @@ abstract class PreparedContext {
         $previous_ic,
       );
     }
+  }
+
+  private static function processPrepared(
+    \HH\ImplicitContext\_Private\ImplicitContextData $ic,
+    vec<\HH\ImplicitContext\PreparedContext> $prepared,
+  ): \HH\ImplicitContext\_Private\ImplicitContextData {
+    invariant(!\HH\Lib\C\is_empty($prepared), 'Must have at least one context');
+    foreach ($prepared as $prepared_context) {
+      $ic_class = $prepared_context->icClass;
+      $context = $prepared_context->context;
+      if ($prepared_context is \HH\ImplicitContext\_Private\MemoAgnosticPreparedContext) {
+        if ($context is nonnull) {
+          $ic = \HH\ImplicitContext\_Private\set_memo_agnostic(
+            $ic,
+            $ic_class,
+            $context,
+          );
+        } else {
+          $ic = \HH\ImplicitContext\_Private\unset_memo_agnostic(
+            $ic,
+            $ic_class,
+          );
+        }
+      } else if ($prepared_context is \HH\ImplicitContext\_Private\MemoSensitivePreparedContext) {
+        if ($context is nonnull) {
+          $ic = \HH\ImplicitContext\_Private\set_memo_sensitive(
+            $ic,
+            $ic_class,
+            $context,
+            $context->getInstanceKey()
+          );
+        } else {
+          $ic = \HH\ImplicitContext\_Private\unset_memo_sensitive(
+            $ic,
+            $ic_class,
+          );
+        }
+      } else {
+        invariant_violation(
+          'Unexpected prepared context type: %s',
+          \get_class($prepared_context),
+        );
+      }
+    }
+    return $ic;
   }
 }
 
@@ -192,6 +185,15 @@ function set_memo_agnostic<T as \HH\MemoAgnosticImplicitContext>(
 )[leak_safe]: ImplicitContextData;
 
 /**
+ * Unset memo agnostic implicit context keyed by $key.
+ */
+<<__Native>>
+function unset_memo_agnostic<T as \HH\MemoAgnosticImplicitContext>(
+  ImplicitContextData $ic,
+  class<T> $key,
+)[leak_safe]: ImplicitContextData;
+
+/**
  * Creates memo sensitive implicit context $context keyed by $key,
  * with $context's instance key provided by $context_key.
  */
@@ -201,6 +203,15 @@ function set_memo_sensitive<T as \HH\MemoSensitiveImplicitContext>(
   class<T> $key,
   \HH\IPureMemoizeParam $context,
   string $context_key,
+)[leak_safe]: ImplicitContextData;
+
+/**
+ * Unset memo sensitive implicit context keyed by $key.
+ */
+<<__Native>>
+function unset_memo_sensitive<T as \HH\MemoSensitiveImplicitContext>(
+  ImplicitContextData $ic,
+  class<T> $key,
 )[leak_safe]: ImplicitContextData;
 
 /*
@@ -222,7 +233,7 @@ function get_implicit_context_debug_info()[]: vec<string>;
 
 abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
   final protected static async function runWithAsync<Tout>(
-    this::TData $context,
+    ?this::TData $context,
     (function ()[_]: Awaitable<Tout>) $f,
   )[leak_safe, ctx $f]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\get_whole_implicit_context();
@@ -240,7 +251,7 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
   }
 
   final protected static function runWith<Tout>(
-    this::TData $context,
+    ?this::TData $context,
     (function ()[_]: Tout) $f,
   )[leak_safe, ctx $f]: Tout {
     $prev = ImplicitContext\_Private\get_whole_implicit_context();
@@ -255,7 +266,7 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
   }
 
   final protected static function prepare(
-    this::TData $context,
+    ?this::TData $context,
   )[]: \HH\ImplicitContext\PreparedContext {
     return new \HH\ImplicitContext\_Private\MemoAgnosticPreparedContext(
       static::class,
@@ -265,13 +276,20 @@ abstract class MemoAgnosticImplicitContext extends ImplicitContextBase {
 
   private static function createContext(
     ImplicitContext\_Private\ImplicitContextData $ic,
-    this::TData $context,
+    ?this::TData $context,
   )[leak_safe]: ImplicitContext\_Private\ImplicitContextData {
-    return ImplicitContext\_Private\set_memo_agnostic(
-      $ic,
-      static::class,
-      $context,
-    );
+    if ($context is nonnull) {
+      return ImplicitContext\_Private\set_memo_agnostic(
+        $ic,
+        static::class,
+        $context,
+      );
+    } else {
+      return ImplicitContext\_Private\unset_memo_agnostic(
+        $ic,
+        static::class,
+      );
+    }
   }
 }
 
@@ -279,7 +297,7 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
   abstract const type TData as IPureMemoizeParam;
 
   final protected static async function runWithAsync<Tout>(
-    this::TData $context,
+    ?this::TData $context,
     (function ()[_]: Awaitable<Tout>) $f,
   )[leak_safe, ctx $f]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\get_whole_implicit_context();
@@ -297,7 +315,7 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
   }
 
   final protected static function runWith<Tout>(
-    this::TData $context,
+    ?this::TData $context,
     (function ()[_]: Tout) $f,
   )[leak_safe, ctx $f]: Tout {
     $prev = ImplicitContext\_Private\get_whole_implicit_context();
@@ -312,7 +330,7 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
   }
 
   final protected static function prepare(
-    this::TData $context,
+    ?this::TData $context,
   )[]: \HH\ImplicitContext\PreparedContext {
     return new \HH\ImplicitContext\_Private\MemoSensitivePreparedContext(
       static::class,
@@ -322,14 +340,21 @@ abstract class MemoSensitiveImplicitContext extends ImplicitContextBase {
 
   private static function createContext(
     ImplicitContext\_Private\ImplicitContextData $ic,
-    this::TData $context,
+    ?this::TData $context,
   )[leak_safe]: ImplicitContext\_Private\ImplicitContextData {
-    return ImplicitContext\_Private\set_memo_sensitive(
-      $ic,
-      static::class,
-      $context,
-      $context->getInstanceKey(),
-    );
+    if ($context is nonnull) {
+      return ImplicitContext\_Private\set_memo_sensitive(
+        $ic,
+        static::class,
+        $context,
+        $context->getInstanceKey(),
+      );
+    } else {
+      return ImplicitContext\_Private\unset_memo_sensitive(
+        $ic,
+        static::class,
+      );
+    }
   }
 }
 
@@ -343,17 +368,17 @@ abstract class ImplicitContextBase {
   }
 
   abstract protected static function runWithAsync<Tout>(
-    this::TData $context,
+    ?this::TData $context,
     (function()[_]: Awaitable<Tout>) $f,
   )[leak_safe, ctx $f]: Awaitable<Tout>;
 
   abstract protected static function runWith<Tout>(
-    this::TData $context,
+    ?this::TData $context,
     (function()[_]: Tout) $f,
   )[leak_safe, ctx $f]: Tout;
 
   abstract protected static function prepare(
-    this::TData $context,
+    ?this::TData $context,
   )[]: \HH\ImplicitContext\PreparedContext;
 }
 

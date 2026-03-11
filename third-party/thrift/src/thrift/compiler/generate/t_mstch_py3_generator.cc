@@ -732,9 +732,6 @@ class t_mstch_py3_generator : public t_whisker_generator {
       return self.qualifier() == t_field_qualifier::optional &&
           self.default_value() != nullptr;
     });
-    def.property("PEP484Optional?", [this](const t_field& self) {
-      return !field_has_default_value(self, context_->get_field_cpp_kind(self));
-    });
     def.property("boxed_ref?", [](const t_field& self) {
       return gen::cpp::find_ref_type(self) == gen::cpp::reference_type::boxed;
     });
@@ -1182,15 +1179,6 @@ class t_mstch_py3_generator : public t_whisker_generator {
       return is_custom_binary_type(
           *self.get_true_type(),
           context_->get_cached_type_props(&self).cpp_type());
-    });
-    // types that don't have an underlying C++ type
-    // i.e., structs, unions, exceptions all enclose a C++ type
-    def.property("simple?", [this](const t_type& self) {
-      const t_type& resolved = *self.get_true_type();
-      return (resolved.is<t_primitive_type>() || resolved.is<t_enum>() ||
-              resolved.is<t_container>()) &&
-          !is_custom_binary_type(
-                 resolved, context_->get_cached_type_props(&self).cpp_type());
     });
     // types that need conversion to py3 if accessed from thrift-python struct
     // fields

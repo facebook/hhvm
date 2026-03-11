@@ -71,9 +71,9 @@ _typing.AsyncGenerator[{{#partial type_name type=function.stream.elem_type}}, No
 {{! The field's thrift-py3 python type, for type annotation purposes only }}
 {{#let export partial field_type |field| captures |type_name|}}
 {{#pragma ignore-newlines}}
-  {{#if field.PEP484Optional?}}
+  {{#if (not field.hasDefaultValue?)}}
 _typing.Optional[{{#partial type_name type=field.type}}]
   {{#else}}
 {{#partial type_name type=field.type}}
-  {{/if field.PEP484Optional?}}
+  {{/if (not field.hasDefaultValue?)}}
 {{/let partial}}

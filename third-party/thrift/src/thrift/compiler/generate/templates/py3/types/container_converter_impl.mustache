@@ -23,11 +23,12 @@ referenced from types.pyx main file, field_setter, or container converter.
 {{! Non-simple types live in shared_ptr in containers }}
 {{#let partial cython_cpp_container_item_type |type| captures |types|}}
 {{#pragma ignore-newlines}}
-  {{#if type.simple?}}
-{{#partial types.cython_cpp_type type=type}}
-  {{#else}}
+  {{#let needs_shared_ptr=(or type.customBinaryType? (not (or type.primitive? type.enum? type.container?)))}}
+  {{#if needs_shared_ptr}}
 shared_ptr[{{#partial types.cython_cpp_type type=type}}]
-  {{/if type.simple?}}
+  {{#else}}
+{{#partial types.cython_cpp_type type=type}}
+  {{/if needs_shared_ptr}}
 {{/let partial}}
 {{! Default value for number and bool types }}
 {{#let partial type_default_value |type|}}

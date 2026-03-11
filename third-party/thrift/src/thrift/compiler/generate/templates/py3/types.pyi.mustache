@@ -65,9 +65,7 @@ class {{struct.name}}({{#partial types.python_struct_class struct=struct}}, _typ
         pass
 
     {{#each struct.py3_fields as |field|}}
-    {{field.py_name}}: _typing.Final[{{#if field.PEP484Optional?}}_typing.Optional[{{/if}}{{!
-            }}{{#partial pep484.type_name type=field.type}}{{!
-            }}{{#if field.PEP484Optional?}}]{{/if}}] = ...
+    {{field.py_name}}: _typing.Final[{{#partial pep484.field_type field=field}}] = ...
     {{/each}}
 
     def __init__(

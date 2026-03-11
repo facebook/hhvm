@@ -216,6 +216,8 @@ def _parse_fixture_cmd(
             fixture_dir_abspath,
             "-I",
             repo_root_dir_abspath,
+            "--extra-validation",
+            "allow_unstructured_annotations",
         ]
         if _should_build_included_files_recursively(generator_spec):
             base_args.append("-r")

@@ -16,12 +16,9 @@
 }}
 {{#import "types/enum" as enum_tmpl}}
 {{> common/file_header}}
-{{#each root_program.includes as |inc|}}
+{{#each root_program.includes_for_codegen as |inc|}}
 {{#if inc.is_useful_alias?}}
-{{! Skip annotation includes - they are compile-time only metadata, not runtime types }}
-{{#if (not inc.is_annotation?)}}
 using {{inc.alias}} = {{inc.csharp_namespace}};
-{{/if (not inc.is_annotation?)}}
 {{/if inc.is_useful_alias?}}
 {{/each}}
 

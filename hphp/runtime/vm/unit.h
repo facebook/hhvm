@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/req-bitset.h"
+#include "hphp/runtime/base/req-memory.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/class.h"
@@ -616,7 +617,8 @@ private:
   PackedStringPtr m_moduleName{makeStaticString(Module::DEFAULT)};
   std::vector<DeclDep> m_deps;
 
-  mutable rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
+  mutable rds::Link<req::unique_ptr<req::dynamic_bitset>, rds::Mode::Normal>
+    m_coverage;
 
   Id m_entryPointId{kInvalidId};
 

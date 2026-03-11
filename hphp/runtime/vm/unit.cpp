@@ -193,33 +193,39 @@ void Unit::enableCoverage() {
     );
   }
   if (m_coverage.isInit()) return;
-  new (m_coverage.get()) req::dynamic_bitset{};
+  new (m_coverage.get()) req::unique_ptr<req::dynamic_bitset>{};
   m_coverage.markInit();
 }
 void Unit::disableCoverage() {
   if (!isCoverageEnabled()) return;
 
   m_coverage.markUninit();
-  m_coverage->req::dynamic_bitset::~dynamic_bitset();
+  m_coverage->~unique_ptr();
 }
 void Unit::clearCoverage() {
   assertx(isCoverageEnabled());
-  m_coverage->reset();
+  auto& ptr = *m_coverage;
+  if (ptr) ptr->reset();
 }
 void Unit::recordCoverage(int line) {
   assertx(isCoverageEnabled());
 
   if (line == -1) return;
 
-  if (m_coverage->size() <= line) m_coverage->resize(line + 1);
-  m_coverage->set(line);
+  auto& ptr = *m_coverage;
+  if (!ptr) ptr = req::make_unique<req::dynamic_bitset>();
+  if (ptr->size() <= line) ptr->resize(line + 1);
+  ptr->set(line);
 }
 Array Unit::reportCoverage() const {
   assertx(isCoverageEnabled());
 
-  auto const& c = *m_coverage;
+  auto& ptr = *m_coverage;
+  if (!ptr) return empty_vec_array();
+
+  auto const& c = *ptr;
   auto const end = req::dynamic_bitset::npos;
-  VecInit init{m_coverage->count()};
+  VecInit init{ptr->count()};
   for (auto i = c.find_first(); i != end; i = c.find_next(i)) {
     init.append(i);
   }

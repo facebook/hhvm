@@ -1136,6 +1136,103 @@ Test createBidiStreamUndeclaredExceptionTest() {
   return ret;
 }
 
+Test createBidiSinkDeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "BidiSinkDeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#bidi-sink-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "BidiSinkDeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction()
+                                .emplace()
+                                .bidiSinkDeclaredException()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "request";
+  for (int i = 0; i < 100; i++) {
+    auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
+    sinkPayload.data() = folly::to<std::string>(i);
+  }
+  clientInstruction.userException().emplace().msg() = "user_exception";
+
+  auto& serverInstruction = rpcTest.serverInstruction()
+                                .emplace()
+                                .bidiSinkDeclaredException()
+                                .emplace();
+  for (int i = 0; i < 100; i++) {
+    auto& payload = serverInstruction.streamPayloads()->emplace_back();
+    payload.data() = folly::to<std::string>(i);
+  }
+
+  auto& clientTestResult = rpcTest.clientTestResult()
+                               .emplace()
+                               .bidiSinkDeclaredException()
+                               .emplace();
+  clientTestResult.streamPayloads().copy_from(
+      serverInstruction.streamPayloads());
+  clientTestResult.sinkThrew() = true;
+
+  auto& serverResult = rpcTest.serverTestResult()
+                           .emplace()
+                           .bidiSinkDeclaredException()
+                           .emplace();
+  serverResult.request().emplace().data() = "request";
+  serverResult.userException().copy_from(clientInstruction.userException());
+  serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
+
+  return ret;
+}
+
+Test createBidiSinkUndeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "BidiSinkUndeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#bidi-sink-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "BidiSinkUndeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction()
+                                .emplace()
+                                .bidiSinkUndeclaredException()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "request";
+  for (int i = 0; i < 100; i++) {
+    auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
+    sinkPayload.data() = folly::to<std::string>(i);
+  }
+  clientInstruction.exceptionMessage() = "undeclared_exception";
+
+  auto& serverInstruction = rpcTest.serverInstruction()
+                                .emplace()
+                                .bidiSinkUndeclaredException()
+                                .emplace();
+  for (int i = 0; i < 100; i++) {
+    auto& payload = serverInstruction.streamPayloads()->emplace_back();
+    payload.data() = folly::to<std::string>(i);
+  }
+
+  auto& clientTestResult = rpcTest.clientTestResult()
+                               .emplace()
+                               .bidiSinkUndeclaredException()
+                               .emplace();
+  clientTestResult.streamPayloads().copy_from(
+      serverInstruction.streamPayloads());
+  clientTestResult.sinkThrew() = true;
+
+  auto& serverResult = rpcTest.serverTestResult()
+                           .emplace()
+                           .bidiSinkUndeclaredException()
+                           .emplace();
+  serverResult.request().copy_from(clientInstruction.request());
+  serverResult.exceptionMessage().copy_from(
+      clientInstruction.exceptionMessage());
+  serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
+
+  return ret;
+}
+
 Test createBidiMethodDeclaredExceptionTest() {
   Test ret;
   ret.name() = "BidiMethodDeclaredExceptionTest";
@@ -1428,6 +1525,8 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createBidiInitialResponseTest());
   suite.tests()->push_back(createBidiStreamDeclaredExceptionTest());
   suite.tests()->push_back(createBidiStreamUndeclaredExceptionTest());
+  suite.tests()->push_back(createBidiSinkDeclaredExceptionTest());
+  suite.tests()->push_back(createBidiSinkUndeclaredExceptionTest());
   suite.tests()->push_back(createBidiMethodDeclaredExceptionTest());
   suite.tests()->push_back(createBidiMethodUndeclaredExceptionTest());
   // =================== Interactions ===================

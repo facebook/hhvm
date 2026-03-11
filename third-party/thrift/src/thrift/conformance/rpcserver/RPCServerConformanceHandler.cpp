@@ -317,6 +317,58 @@ RPCServerConformanceHandler::co_bidiStreamUndeclaredException(
 }
 
 folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+RPCServerConformanceHandler::co_bidiSinkDeclaredException(
+    std::unique_ptr<Request> req) {
+  result_.bidiSinkDeclaredException().emplace().request() = *req;
+  co_return apache::thrift::StreamTransformation<Request, Response>{
+      [this](folly::coro::AsyncGenerator<Request&&> input)
+          -> folly::coro::AsyncGenerator<Response&&> {
+        for (auto& payload : *testCase_->serverInstruction()
+                                  ->bidiSinkDeclaredException()
+                                  ->streamPayloads()) {
+          co_yield std::move(payload);
+        }
+        try {
+          while (auto item = co_await input.next()) {
+            result_.bidiSinkDeclaredException()->sinkPayloads()->push_back(
+                std::move(*item));
+          }
+        } catch (const UserException& e) {
+          result_.bidiSinkDeclaredException()->userException() = e;
+        }
+      }};
+}
+
+folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
+RPCServerConformanceHandler::co_bidiSinkUndeclaredException(
+    std::unique_ptr<Request> req) {
+  result_.bidiSinkUndeclaredException().emplace().request() = *req;
+  co_return apache::thrift::StreamTransformation<Request, Response>{
+      [this](folly::coro::AsyncGenerator<Request&&> input)
+          -> folly::coro::AsyncGenerator<Response&&> {
+        for (auto& payload : *testCase_->serverInstruction()
+                                  ->bidiSinkUndeclaredException()
+                                  ->streamPayloads()) {
+          co_yield std::move(payload);
+        }
+        try {
+          while (auto item = co_await input.next()) {
+            result_.bidiSinkUndeclaredException()->sinkPayloads()->push_back(
+                std::move(*item));
+          }
+        } catch (const TApplicationException& e) {
+          // BiDi transport prefixes exception type to message
+          auto msg = e.getMessage();
+          auto pos = msg.find(": ");
+          result_.bidiSinkUndeclaredException()->exceptionMessage() =
+              (pos != std::string::npos) ? msg.substr(pos + 2) : msg;
+        } catch (const std::exception& e) {
+          result_.bidiSinkUndeclaredException()->exceptionMessage() = e.what();
+        }
+      }};
+}
+
+folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
 RPCServerConformanceHandler::co_bidiMethodDeclaredException(
     std::unique_ptr<Request> req) {
   result_.bidiMethodDeclaredException().emplace().request() = *req;

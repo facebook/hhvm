@@ -196,6 +196,14 @@ async fn test(client: &dyn RPCConformanceServiceExt<thriftclient::ThriftChannel>
             "bidiStreamUndeclaredException not implemented: {:?}",
             i
         )),
+        bidiSinkDeclaredException(i) => Err(anyhow!(
+            "bidiSinkDeclaredException not implemented: {:?}",
+            i
+        )),
+        bidiSinkUndeclaredException(i) => Err(anyhow!(
+            "bidiSinkUndeclaredException not implemented: {:?}",
+            i
+        )),
         bidiMethodDeclaredException(i) => Err(anyhow!(
             "bidiMethodDeclaredException not implemented: {:?}",
             i

@@ -78,6 +78,8 @@ union ServerTestResult {
   401: BidiInitialResponseServerTestResult bidiInitialResponse;
   402: BidiStreamDeclaredExceptionServerTestResult bidiStreamDeclaredException;
   403: BidiStreamUndeclaredExceptionServerTestResult bidiStreamUndeclaredException;
+  404: BidiSinkDeclaredExceptionServerTestResult bidiSinkDeclaredException;
+  405: BidiSinkUndeclaredExceptionServerTestResult bidiSinkUndeclaredException;
   406: BidiMethodDeclaredExceptionServerTestResult bidiMethodDeclaredException;
   407: BidiMethodUndeclaredExceptionServerTestResult bidiMethodUndeclaredException;
 }
@@ -112,6 +114,8 @@ union ClientTestResult {
   401: BidiInitialResponseClientTestResult bidiInitialResponse;
   402: BidiStreamDeclaredExceptionClientTestResult bidiStreamDeclaredException;
   403: BidiStreamUndeclaredExceptionClientTestResult bidiStreamUndeclaredException;
+  404: BidiSinkDeclaredExceptionClientTestResult bidiSinkDeclaredException;
+  405: BidiSinkUndeclaredExceptionClientTestResult bidiSinkUndeclaredException;
   406: BidiMethodDeclaredExceptionClientTestResult bidiMethodDeclaredException;
   407: BidiMethodUndeclaredExceptionClientTestResult bidiMethodUndeclaredException;
 }
@@ -238,6 +242,19 @@ struct BidiStreamDeclaredExceptionServerTestResult {
 struct BidiStreamUndeclaredExceptionServerTestResult {
   1: Request request;
   2: list<Request> sinkPayloads;
+}
+
+struct BidiSinkDeclaredExceptionServerTestResult {
+  1: Request request;
+  @thrift.Box
+  2: optional UserException userException;
+  3: list<Request> sinkPayloads;
+}
+
+struct BidiSinkUndeclaredExceptionServerTestResult {
+  1: Request request;
+  2: optional string exceptionMessage;
+  3: list<Request> sinkPayloads;
 }
 
 struct BidiMethodDeclaredExceptionServerTestResult {
@@ -369,6 +386,16 @@ struct BidiStreamUndeclaredExceptionClientTestResult {
   2: list<Response> streamPayloads;
 }
 
+struct BidiSinkDeclaredExceptionClientTestResult {
+  1: list<Response> streamPayloads;
+  2: bool sinkThrew;
+}
+
+struct BidiSinkUndeclaredExceptionClientTestResult {
+  1: list<Response> streamPayloads;
+  2: bool sinkThrew;
+}
+
 struct BidiMethodDeclaredExceptionClientTestResult {
   @thrift.Box
   1: optional UserException userException;
@@ -408,6 +435,8 @@ union ClientInstruction {
   401: BidiInitialResponseClientInstruction bidiInitialResponse;
   402: BidiStreamDeclaredExceptionClientInstruction bidiStreamDeclaredException;
   403: BidiStreamUndeclaredExceptionClientInstruction bidiStreamUndeclaredException;
+  404: BidiSinkDeclaredExceptionClientInstruction bidiSinkDeclaredException;
+  405: BidiSinkUndeclaredExceptionClientInstruction bidiSinkUndeclaredException;
   406: BidiMethodDeclaredExceptionClientInstruction bidiMethodDeclaredException;
   407: BidiMethodUndeclaredExceptionClientInstruction bidiMethodUndeclaredException;
 }
@@ -442,6 +471,8 @@ union ServerInstruction {
   401: BidiInitialResponseServerInstruction bidiInitialResponse;
   402: BidiStreamDeclaredExceptionServerInstruction bidiStreamDeclaredException;
   403: BidiStreamUndeclaredExceptionServerInstruction bidiStreamUndeclaredException;
+  404: BidiSinkDeclaredExceptionServerInstruction bidiSinkDeclaredException;
+  405: BidiSinkUndeclaredExceptionServerInstruction bidiSinkUndeclaredException;
   406: BidiMethodDeclaredExceptionServerInstruction bidiMethodDeclaredException;
   407: BidiMethodUndeclaredExceptionServerInstruction bidiMethodUndeclaredException;
 }
@@ -576,6 +607,19 @@ struct BidiStreamUndeclaredExceptionClientInstruction {
   2: list<Request> sinkPayloads;
 }
 
+struct BidiSinkDeclaredExceptionClientInstruction {
+  1: Request request;
+  2: list<Request> sinkPayloads;
+  @thrift.Box
+  3: optional UserException userException;
+}
+
+struct BidiSinkUndeclaredExceptionClientInstruction {
+  1: Request request;
+  2: list<Request> sinkPayloads;
+  3: optional string exceptionMessage;
+}
+
 struct BidiMethodDeclaredExceptionClientInstruction {
   1: Request request;
 }
@@ -707,6 +751,14 @@ struct BidiStreamUndeclaredExceptionServerInstruction {
   2: string exceptionMessage;
 }
 
+struct BidiSinkDeclaredExceptionServerInstruction {
+  1: list<Response> streamPayloads;
+}
+
+struct BidiSinkUndeclaredExceptionServerInstruction {
+  1: list<Response> streamPayloads;
+}
+
 struct BidiMethodDeclaredExceptionServerInstruction {
   @thrift.Box
   1: optional UserException userException;
@@ -790,6 +842,12 @@ service RPCConformanceService {
   // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiStreamUndeclaredException(1: Request req);
   // @lint-ignore THRIFTCHECKS new unreleased feature
+  sink<Request throws (1: UserException e)>, stream<
+    Response
+  > bidiSinkDeclaredException(1: Request req);
+  // @lint-ignore THRIFTCHECKS new unreleased feature
+  sink<Request>, stream<Response> bidiSinkUndeclaredException(1: Request req);
+  // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiMethodDeclaredException(
     1: Request req,
   ) throws (1: UserException e);
@@ -858,6 +916,14 @@ service RPCStatelessConformanceService {
   > bidiStreamDeclaredException(1: ServerInstruction serverInstr);
   // @lint-ignore THRIFTCHECKS new unreleased feature
   sink<Request>, stream<Response> bidiStreamUndeclaredException(
+    1: ServerInstruction serverInstr,
+  );
+  // @lint-ignore THRIFTCHECKS new unreleased feature
+  sink<Request throws (1: UserException e)>, stream<
+    Response
+  > bidiSinkDeclaredException(1: ServerInstruction serverInstr);
+  // @lint-ignore THRIFTCHECKS new unreleased feature
+  sink<Request>, stream<Response> bidiSinkUndeclaredException(
     1: ServerInstruction serverInstr,
   );
   // @lint-ignore THRIFTCHECKS new unreleased feature

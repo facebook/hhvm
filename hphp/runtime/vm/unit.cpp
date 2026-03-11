@@ -227,7 +227,13 @@ Array Unit::reportCoverage() const {
   return init.toArray();
 }
 rds::Handle Unit::coverageDataHandle() const {
-  assertx(m_coverage.bound());
+  if (!m_coverage.bound()) {
+    assertx(!Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage);
+    m_coverage.bind(
+      rds::Mode::Normal,
+      rds::LinkName{"UnitCoverage", origFilepath()}
+    );
+  }
   return m_coverage.handle();
 }
 
@@ -375,13 +381,6 @@ void Unit::initialMerge() {
 
   if (Cfg::Eval::EnableReverseDataMap) {
     data_map::register_start(this);
-  }
-
-  if (!Cfg::Repo::Authoritative && Cfg::Eval::EnablePerFileCoverage) {
-    m_coverage.bind(
-      rds::Mode::Normal,
-      rds::LinkName{"UnitCoverage", origFilepath()}
-    );
   }
 
   m_mergeState.store(MergeState::InitialMerged, std::memory_order_release);

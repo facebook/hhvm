@@ -616,7 +616,7 @@ private:
   PackedStringPtr m_moduleName{makeStaticString(Module::DEFAULT)};
   std::vector<DeclDep> m_deps;
 
-  rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
+  mutable rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
 
   Id m_entryPointId{kInvalidId};
 

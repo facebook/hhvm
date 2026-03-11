@@ -40,34 +40,34 @@ function checkdate(
   int $month,
   int $day,
   int $year,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function date_add(
-  HH\FIXME\MISSING_PARAM_TYPE $datetime,
-  HH\FIXME\MISSING_PARAM_TYPE $interval,
+  DateTime $datetime,
+  DateInterval $interval,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_create_from_format(
   string $format,
   string $time,
-  HH\FIXME\MISSING_PARAM_TYPE $timezone = null,
+  ?DateTimeZone $timezone = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_create(
-  HH\FIXME\MISSING_PARAM_TYPE $time = null,
-  HH\FIXME\MISSING_PARAM_TYPE $timezone = null,
+  ?string $time = null,
+  ?DateTimeZone $timezone = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_date_set(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
+  DateTime $object,
   int $year,
   int $month,
   int $day,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): void;
 <<__PHPStdLib>>
-function date_default_timezone_get(): HH\FIXME\MISSING_RETURN_TYPE;
+function date_default_timezone_get(): string;
 <<__PHPStdLib>>
-function date_default_timezone_set(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+function date_default_timezone_set(string $name): bool;
 <<__PHPStdLib>>
 function date_diff(
   HH\FIXME\MISSING_PARAM_TYPE $datetime,
@@ -87,21 +87,21 @@ function date_interval_create_from_date_string(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_interval_format(
-  HH\FIXME\MISSING_PARAM_TYPE $interval,
+  DateInterval $interval,
   string $format_spec,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function date_isodate_set(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
+  DateTime $object,
   int $year,
   int $week,
   int $day = 1,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): DateTime;
 <<__PHPStdLib>>
 function date_modify(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
+  DateTime $object,
   string $modify,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): void;
 <<__PHPStdLib>>
 function date_offset_get(
   HH\FIXME\MISSING_PARAM_TYPE $object,
@@ -110,8 +110,8 @@ function date_offset_get(
 function date_parse(string $date): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_sub(
-  HH\FIXME\MISSING_PARAM_TYPE $datetime,
-  HH\FIXME\MISSING_PARAM_TYPE $interval,
+  DateTime $datetime,
+  DateInterval $interval,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_sun_info(
@@ -139,7 +139,7 @@ function date_sunset(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_time_set(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
+  DateTime $object,
   int $hour,
   int $minute,
   int $second = 0,
@@ -150,7 +150,7 @@ function date_timestamp_get(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_timestamp_set(
-  HH\FIXME\MISSING_PARAM_TYPE $datetime,
+  DateTime $datetime,
   int $timestamp,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -159,8 +159,8 @@ function date_timezone_get(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_timezone_set(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
-  HH\FIXME\MISSING_PARAM_TYPE $timezone,
+  DateTime $object,
+  DateTimeZone $timezone,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date(
@@ -236,7 +236,7 @@ function timezone_identifiers_list(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function timezone_location_get(
-  HH\FIXME\MISSING_PARAM_TYPE $timezone,
+  DateTimeZone $timezone,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function timezone_name_from_abbr(
@@ -246,8 +246,8 @@ function timezone_name_from_abbr(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function timezone_name_get(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
-): HH\FIXME\MISSING_RETURN_TYPE;
+  DateTimeZone $object,
+): string;
 <<__PHPStdLib>>
 function timezone_offset_get(
   HH\FIXME\MISSING_PARAM_TYPE $object,
@@ -301,17 +301,17 @@ class DateTime implements DateTimeInterface {
     int $year,
     int $month,
     int $day,
-  )[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+  )[write_props]: this;
   public function setISODate(
     int $year,
     int $week,
     int $day = 1,
-  )[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+  )[write_props]: this;
   public function setTime(
     int $hour,
     int $minute,
     int $second = 0,
-  )[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+  )[write_props]: this;
   public function setTimestamp(int $unixtimestamp)[read_globals, write_props]: this;
   public function setTimezone(
     DateTimeZone $timezone,

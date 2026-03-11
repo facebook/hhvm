@@ -588,6 +588,19 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
   def.property("doc", mem_fn(&t_program::doc));
   def.property("include_prefix", mem_fn(&t_program::include_prefix));
   def.property("includes", mem_fn(&t_program::includes, proto.of<t_include>()));
+  def.property("includes_for_codegen", [&proto](const t_program& self) {
+    std::vector<t_program*> codegen_programs = self.get_includes_for_codegen();
+    whisker::array::raw includes;
+    for (const t_include* include : self.includes()) {
+      if (std::find(
+              codegen_programs.begin(),
+              codegen_programs.end(),
+              include->get_program()) != codegen_programs.end()) {
+        includes.emplace_back(proto.create<t_include>(*include));
+      }
+    }
+    return whisker::make::array(std::move(includes));
+  });
   def.property("autogen_path", [](const t_program& self) {
     std::string path = self.path();
     // use posix path separators, even on windows, for autogen comment

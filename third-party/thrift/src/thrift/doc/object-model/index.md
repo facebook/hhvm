@@ -1,3 +1,4 @@
+<!-- At Meta, this file is @generated - see https://fburl.com/thrift-object-model-draft -->
 # Object Model
 
 import specStackImageUrl from './spec-stack.png';

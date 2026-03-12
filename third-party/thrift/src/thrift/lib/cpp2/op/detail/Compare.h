@@ -737,46 +737,53 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>> {
   }
 };
 
+enum class FieldIterOrder { Declaration, FieldIdAscending };
+
 template <typename T, template <class...> class LessThanImpl = LessThan>
-folly::ordering compareStructFields(const T& lhs, const T& rhs) {
-  folly::Optional<folly::ordering> result;
-  for_each_ordinal<T>([&](auto ord) {
-    if (result.has_value()) {
+folly::ordering compareStructFields(
+    const T& lhs, const T& rhs, FieldIterOrder order) {
+  folly::ordering result = folly::ordering::eq;
+  auto compareField = [&](auto id) {
+    if (result != folly::ordering::eq) {
       return;
     }
-
-    using Ord = decltype(ord);
-    using Tag = get_type_tag<T, Ord>;
-    const auto* lhsValue = get_value_or_null(get<Ord>(lhs));
-    const auto* rhsValue = get_value_or_null(get<Ord>(rhs));
+    using Id = decltype(id);
+    using Tag = get_type_tag<T, Id>;
+    const auto* lhsValue = get_value_or_null(get<Id>(lhs));
+    const auto* rhsValue = get_value_or_null(get<Id>(rhs));
 
     if (lhsValue == nullptr && rhsValue == nullptr) {
       return;
     }
-
     if (lhsValue == nullptr) {
       result = folly::ordering::lt;
       return;
     }
-
     if (rhsValue == nullptr) {
       result = folly::ordering::gt;
       return;
     }
+    result = CompareThreeWay<Tag, LessThanImpl>{}(*lhsValue, *rhsValue);
+  };
 
-    auto ret = CompareThreeWay<Tag, LessThanImpl>{}(*lhsValue, *rhsValue);
-    if (ret != folly::ordering::eq) {
-      result = ret;
-    }
-  });
+  if (order == FieldIterOrder::FieldIdAscending) {
+    for_each_field_id_ascending<T>(compareField);
+  } else {
+    for_each_ordinal<T>(compareField);
+  }
+  return result;
+}
 
-  return result.value_or(folly::ordering::eq);
+template <typename T, template <class...> class LessThanImpl = LessThan>
+folly::ordering compareStructFieldsByFieldId(const T& lhs, const T& rhs) {
+  return compareStructFields<T, LessThanImpl>(
+      lhs, rhs, FieldIterOrder::FieldIdAscending);
 }
 
 template <typename T>
 struct CompareThreeWay<type::struct_t<T>> {
   folly::ordering operator()(const T& lhs, const T& rhs) const {
-    return compareStructFields<T>(lhs, rhs);
+    return compareStructFields<T>(lhs, rhs, FieldIterOrder::FieldIdAscending);
   }
 };
 
@@ -784,7 +791,20 @@ template <template <class...> class LessThanImpl = LessThan>
 struct StructLessThan {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
-    return compareStructFields<T, LessThanImpl>(lhs, rhs) ==
+    return compareStructFields<T, LessThanImpl>(
+               lhs, rhs, FieldIterOrder::Declaration) == folly::ordering::lt;
+  }
+};
+
+// StructLessThan but compare fields by sorted field id order (instead of
+// field declaration order). This is used to match the behavior of the
+// Thrift Object Model, which compares struct fields by sorted field id
+// order.
+template <template <class...> class LessThanImpl = LessThan>
+struct StructLessThanByFieldId {
+  template <class T>
+  bool operator()(const T& lhs, const T& rhs) const {
+    return compareStructFieldsByFieldId<T, LessThanImpl>(lhs, rhs) ==
         folly::ordering::lt;
   }
 };
@@ -849,6 +869,45 @@ struct UnionLessThan {
   }
 };
 
+// Similar to StructLessThanByFieldId, but for unions
+template <template <class...> class LessThanImpl = LessThan>
+struct UnionLessThanByFieldId {
+  template <class T>
+  bool operator()(const T& lhs, const T& rhs) const {
+    if (lhs.getType() == T::Type::__EMPTY__ &&
+        rhs.getType() == T::Type::__EMPTY__) {
+      return false;
+    }
+
+    if (lhs.getType() == T::Type::__EMPTY__) {
+      return true;
+    }
+
+    if (rhs.getType() == T::Type::__EMPTY__) {
+      return false;
+    }
+
+    if (lhs.getType() != rhs.getType()) {
+      // Under the Thrift object model, fields are compared in field-id order.
+      // `getType()` returns field id of active field. If `lhs` and `rhs` have
+      // different active field, we can use it to check which one is smaller.
+      //
+      // A union whose active field has a larger id compares as less-than: its
+      // earlier fields are all unset (null < non-null), so it loses before its
+      // own active field is ever reached.
+      //
+      // Example: union A { 1: i32 a1; 2: i32 a2; }
+      //   lhs.a2() = 1;  // active field id = 2
+      //   rhs.a1() = 2;  // active field id = 1
+      //   // Compare a1 first: null (lhs) < 2 (rhs) → lhs < rhs.
+      return lhs.getType() > rhs.getType();
+    }
+
+    // If `lhs.getType() == rhs.getType()` fallback to normal UnionLessThan
+    return UnionLessThan<LessThanImpl>{}(lhs, rhs);
+  }
+};
+
 template <template <class...> class Equality = EqualTo>
 struct UnionEquality {
   template <class T>
@@ -869,5 +928,41 @@ struct UnionEquality {
         });
   }
 };
+
+// ThriftObjectModelLessThan compares Thrift values recursively, comparing
+// struct fields by sorted field id order (instead of field declaration order).
+// This matches the behavior of the Thrift Object Model for comparison.
+template <class T>
+struct ThriftObjectModelLessThan : LessThan<T> {};
+
+template <class T>
+struct ThriftObjectModelLessThan<type::list<T>>
+    : ListLessThan<
+          type::native_type<type::list<T>>,
+          T,
+          ThriftObjectModelLessThan> {};
+
+template <class T>
+struct ThriftObjectModelLessThan<type::set<T>>
+    : SetLessThan<
+          type::native_type<type::set<T>>,
+          T,
+          ThriftObjectModelLessThan> {};
+
+template <class K, class V>
+struct ThriftObjectModelLessThan<type::map<K, V>>
+    : MapLessThan<
+          type::native_type<type::map<K, V>>,
+          K,
+          V,
+          ThriftObjectModelLessThan> {};
+
+template <class T>
+struct ThriftObjectModelLessThan<type::struct_t<T>>
+    : StructLessThanByFieldId<ThriftObjectModelLessThan> {};
+
+template <class T>
+struct ThriftObjectModelLessThan<type::union_t<T>>
+    : UnionLessThanByFieldId<ThriftObjectModelLessThan> {};
 
 } // namespace apache::thrift::op::detail

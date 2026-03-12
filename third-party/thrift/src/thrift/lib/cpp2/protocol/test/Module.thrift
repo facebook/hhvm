@@ -179,3 +179,18 @@ struct StructWithBinaryField {
 struct OpEncode {
   1: map<i32, i32> f;
 }
+
+struct OutOfOrderStruct {
+  2: i32 field_2;
+  1: i32 field_1;
+}
+
+union OutOfOrderUnion {
+  2: i32 field_2;
+  1: i32 field_1;
+}
+
+struct OutOfOrderNested {
+  1: OutOfOrderStruct s;
+  2: OutOfOrderUnion u;
+}

@@ -76,4 +76,15 @@ inline constexpr detail::
     CompareWith<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
         compare{};
 
+/// A binary operator that returns true iff one Thrift value is less than
+/// another, comparing struct fields by sorted field ID order (instead of
+/// field declaration order). This matches the comparison behavior of the
+/// Thrift Object Model.
+///
+/// For example:
+/// * thrift_object_model_less<MyStruct>(a, b) -> compares fields by field ID
+template <typename TagOrT = void>
+inline constexpr detail::ThriftObjectModelLessThan<type::infer_tag<TagOrT>>
+    thrift_object_model_less{};
+
 } // namespace apache::thrift::op

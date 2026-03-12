@@ -370,5 +370,61 @@ TEST(CompareTest, Nan) {
   EXPECT_FALSE(detail::StructLessThan{}(value, value));
 }
 
+TEST(CompareTest, ThriftObjectModelLess_OutOfOrderStruct) {
+  // OutOfOrderStruct has field_2 (id=2) declared first and field_1 (id=1)
+  // declared second.
+  test::OutOfOrderStruct lhs, rhs;
+  lhs.field_1() = 2;
+  lhs.field_2() = 10;
+  rhs.field_1() = 1;
+  rhs.field_2() = 20;
+
+  // operator< (declaration order): field_2 compared first: 10 < 20 → true
+  EXPECT_TRUE(lhs < rhs);
+  // thrift_object_model_less (field ID order): field_1 compared first:
+  // 2 > 1 → false
+  EXPECT_FALSE(thrift_object_model_less<test::OutOfOrderStruct>(lhs, rhs));
+  // and the reverse
+  EXPECT_FALSE(rhs < lhs);
+  EXPECT_TRUE(thrift_object_model_less<test::OutOfOrderStruct>(rhs, lhs));
+
+  // Test the case when struct is nested
+  test::OutOfOrderNested l, r;
+  l.s() = lhs;
+  r.s() = rhs;
+  EXPECT_FALSE(thrift_object_model_less<test::OutOfOrderNested>(l, r));
+  EXPECT_TRUE(thrift_object_model_less<test::OutOfOrderNested>(r, l));
+}
+
+TEST(CompareTest, ThriftObjectModelLess_OutOfOrderUnion) {
+  // OutOfOrderUnion has field_2 (id=2) and field_1 (id=1).
+  test::OutOfOrderUnion empty, lhs, rhs;
+  lhs.field_1() = 10;
+  rhs.field_2() = 10;
+  EXPECT_EQ(folly::to_underlying(lhs.getType()), 1); // active type id=1
+  EXPECT_EQ(folly::to_underlying(rhs.getType()), 2); // active type id=2
+
+  // operator<: field id compared first, type id 1 < type id 2 → true
+  EXPECT_TRUE(lhs < rhs);
+  // thrift_object_model_less: logically, `field_1` compared first. It's set in
+  // lhs but unset in rhs: 10 > unset → false
+  EXPECT_FALSE(thrift_object_model_less<test::OutOfOrderUnion>(lhs, rhs));
+  // and the reverse
+  EXPECT_FALSE(rhs < lhs);
+  EXPECT_TRUE(thrift_object_model_less<test::OutOfOrderUnion>(rhs, lhs));
+
+  // Test empty case
+  EXPECT_TRUE(thrift_object_model_less<test::OutOfOrderUnion>(empty, lhs));
+  EXPECT_FALSE(thrift_object_model_less<test::OutOfOrderUnion>(lhs, empty));
+  EXPECT_FALSE(thrift_object_model_less<test::OutOfOrderUnion>(empty, empty));
+
+  // Test the case when union is nested
+  test::OutOfOrderNested l, r;
+  l.u() = lhs;
+  r.u() = rhs;
+  EXPECT_FALSE(thrift_object_model_less<test::OutOfOrderNested>(l, r));
+  EXPECT_TRUE(thrift_object_model_less<test::OutOfOrderNested>(r, l));
+}
+
 } // namespace
 } // namespace apache::thrift::op

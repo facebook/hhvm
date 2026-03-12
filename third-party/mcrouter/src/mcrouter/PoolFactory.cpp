@@ -52,7 +52,7 @@ PoolFactory::PoolJson PoolFactory::parseNamedPool(folly::StringPiece name) {
         configApi_.partialReconfigurableSource(name.str(), poolConfigPath);
     if (partialReconfig) {
       json["enable_partial_reconfig"] = partialReconfig;
-      json["pool_config_path"] = poolConfigPath;
+      json["pool_config_path"] = std::move(poolConfigPath);
     }
     existingIt =
         pools_.emplace(name, std::make_pair(std::move(json), PoolState::PARSED))
@@ -80,7 +80,7 @@ PoolFactory::PoolJson PoolFactory::parseNamedPool(folly::StringPiece name) {
         jInherit->getString(), poolConfigPath);
     if (partialReconfig) {
       json["enable_partial_reconfig"] = partialReconfig;
-      json["pool_config_path"] = poolConfigPath;
+      json["pool_config_path"] = std::move(poolConfigPath);
     }
     if (json.get_ptr("servers")) {
       json["enable_partial_reconfig"] = false;

@@ -269,6 +269,32 @@ class LoadShedConfiguration {
     return nicHardLimitRatio_;
   }
 
+  /**
+   * Set/get the PSI full memory pressure avg10 soft limit ratio.
+   * Various shedding protections should engage when above this limit.
+   */
+  void setMemPressureFullSoftLimitRatio(double limit) {
+    CHECK_GE(limit, 0.0);
+    CHECK_LE(limit, 1.0);
+    memPressureFullSoftLimitRatio_ = limit;
+  }
+  double getMemPressureFullSoftLimitRatio() const {
+    return memPressureFullSoftLimitRatio_;
+  }
+
+  /**
+   * Set/get the PSI full memory pressure avg10 hard limit ratio.
+   * More extreme shedding protections should engage when above this limit.
+   */
+  void setMemPressureFullHardLimitRatio(double limit) {
+    CHECK_GE(limit, 0.0);
+    CHECK_LE(limit, 1.0);
+    memPressureFullHardLimitRatio_ = limit;
+  }
+  double getMemPressureFullHardLimitRatio() const {
+    return memPressureFullHardLimitRatio_;
+  }
+
   void setLoadUpdatePeriod(std::chrono::milliseconds period) {
     period_ = period;
   }
@@ -324,6 +350,9 @@ class LoadShedConfiguration {
 
   double nicSoftLimitRatio_{1.0};
   double nicHardLimitRatio_{1.0};
+
+  double memPressureFullSoftLimitRatio_{1.0};
+  double memPressureFullHardLimitRatio_{1.0};
 
   std::chrono::milliseconds period_;
 

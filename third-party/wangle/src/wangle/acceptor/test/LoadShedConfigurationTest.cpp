@@ -35,6 +35,12 @@ TEST(LoadShedConfigurationTest, TestSettersAndGetters) {
   lsc.setCpuHardLimitRatio(0.4);
   EXPECT_EQ(0.4, lsc.getCpuHardLimitRatio());
 
+  lsc.setMemPressureFullSoftLimitRatio(0.5);
+  EXPECT_EQ(0.5, lsc.getMemPressureFullSoftLimitRatio());
+
+  lsc.setMemPressureFullHardLimitRatio(0.6);
+  EXPECT_EQ(0.6, lsc.getMemPressureFullHardLimitRatio());
+
   EXPECT_EQ(0, lsc.getCpuUsageExceedWindowSize());
   lsc.setCpuUsageExceedWindowSize(12);
   EXPECT_EQ(12, lsc.getCpuUsageExceedWindowSize());

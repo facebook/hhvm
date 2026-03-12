@@ -95,6 +95,14 @@ void LoadShedConfiguration::checkIsSane(const SysParams& sysParams) const {
     CHECK_GE(udpMemSoftLimitRatio_, 0.0);
     CHECK_LE(udpMemSoftLimitRatio_, udpMemHardLimitRatio_);
 
+    // PSI full memory pressure soft/hard limit ratios must have values in
+    // the range of [0-1], inclusive, where the hard limit must be greater
+    // than or equal to the soft limit.
+    CHECK_GE(memPressureFullHardLimitRatio_, 0.0);
+    CHECK_LE(memPressureFullHardLimitRatio_, 1.0);
+    CHECK_GE(memPressureFullSoftLimitRatio_, 0.0);
+    CHECK_LE(memPressureFullSoftLimitRatio_, memPressureFullHardLimitRatio_);
+
     // Period must be greater than or equal to 0.
     CHECK_GE(period_.count(), std::chrono::milliseconds(0).count());
   }

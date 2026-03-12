@@ -18,10 +18,19 @@
 
 {{! Renders a C# type name for a given Thrift type.
     Uses short/keyword type names (e.g. "int", "string", "bool").
-    Container types recurse to build generic syntax. }}
+    Container types recurse to build generic syntax.
+    For typedefs resolving to binary/primitive, we use the resolved type directly
+    because C# using aliases don't support these (byte[], keyword types). }}
 {{#let export partial csharp_type |type|}}
   {{#pragma ignore-newlines}}
-{{#if type.typedef?}}{{type.csharp_qualified_name}}
+{{#if type.typedef?}}
+{{! If typedef resolves to binary or primitive, use the resolved type instead of the typedef name
+    because C# can't create using aliases for byte[] or keyword types like float/double }}
+{{#if (or type.resolved.binary? type.resolved.primitive?)}}
+{{#partial csharp_type type=type.resolved}} /* {{type.name}} */
+{{#else}}
+{{type.csharp_qualified_name}}
+{{/if (or type.resolved.binary? type.resolved.primitive?)}}
 {{#else if type.void?}}void
 {{#else if type.bool?}}bool
 {{#else if type.byte?}}sbyte

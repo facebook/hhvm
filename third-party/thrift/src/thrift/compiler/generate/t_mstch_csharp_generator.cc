@@ -106,6 +106,61 @@ class t_csharp_EXPERIMENTAL_generator : public t_whisker_generator {
 
     return std::move(def).make();
   }
+
+  prototype<t_const>::ptr make_prototype_for_const(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_const(proto);
+    auto def = whisker::dsl::prototype_builder<h_const>::extends(base);
+    return std::move(def).make();
+  }
+
+  prototype<t_const_value>::ptr make_prototype_for_const_value(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_const_value(proto);
+    auto def = whisker::dsl::prototype_builder<h_const_value>::extends(base);
+
+    // Override string_value to use C#-specific escaping
+    // The base generator uses get_escaped_string() which outputs octal escapes
+    // that C# doesn't understand. We need \t, \n, \r, etc.
+    def.property("string_value", [](const t_const_value& self) {
+      return self.kind() == t_const_value::CV_STRING
+          ? w::string(csharp::escape_csharp_string(self.get_string()))
+          : w::null;
+    });
+
+    // Returns the string value as a comma-separated list of byte values.
+    // For binary default values like "7", returns "55" (ASCII code for '7').
+    // Used in templates for generating C# byte array initializers.
+    def.property("byte_array_elements", [](const t_const_value& self) {
+      if (self.kind() != t_const_value::CV_STRING) {
+        return w::null;
+      }
+      const std::string& str = self.get_string();
+      whisker::array::raw result;
+      result.reserve(str.size());
+      for (unsigned char c : str) {
+        result.emplace_back(w::i64(static_cast<int64_t>(c)));
+      }
+      return w::array(std::move(result));
+    });
+
+    // Whisker's strict_printable_types only allows i64 and string to be
+    // printed via {{...}} interpolation. f64, bool, and null require
+    // explicit string conversion with language-specific formatting.
+    def.property("bool_string", [](const t_const_value& self) {
+      return self.kind() == t_const_value::CV_BOOL
+          ? w::string(self.get_bool() ? "true" : "false")
+          : w::null;
+    });
+
+    def.property("double_string", [](const t_const_value& self) {
+      return self.kind() == t_const_value::CV_DOUBLE
+          ? w::string(fmt::format("{}", self.get_double()))
+          : w::null;
+    });
+
+    return std::move(def).make();
+  }
 };
 
 } // namespace

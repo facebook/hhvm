@@ -35,16 +35,18 @@ namespace FBThrift
         /// </summary>
         public const int DefaultMaxDepth = 64;
 
-        // Cache for single-type generic methods (ReadListTyped, ReadHashSetTyped, WriteCollectionTyped)
+        // Cache compiled delegates for single-type generic methods (ReadListTyped, ReadHashSetTyped, WriteCollectionTyped).
+        // Uses Delegate.CreateDelegate for ~100x faster invocation vs MethodInfo.Invoke, with no
+        // object[] allocation or value-type boxing per call.
         private static readonly ConcurrentDictionary<Type, Func<IThriftProtocolReader, int, object>> s_readListCache = new();
         private static readonly ConcurrentDictionary<Type, Func<IThriftProtocolReader, int, object>> s_readHashSetCache = new();
         private static readonly ConcurrentDictionary<Type, Action<IThriftProtocolWriter, object>> s_writeCollectionCache = new();
 
-        // Cache for two-type generic methods (ReadDictionaryTyped, WriteMapTyped)
+        // Cache compiled delegates for two-type generic methods (ReadDictionaryTyped, WriteMapTyped)
         private static readonly ConcurrentDictionary<(Type, Type), Func<IThriftProtocolReader, int, object>> s_readDictionaryCache = new();
         private static readonly ConcurrentDictionary<(Type, Type), Action<IThriftProtocolWriter, System.Collections.IDictionary>> s_writeMapCache = new();
 
-        // Cache for ReadStruct (keyed by reader type + struct type)
+        // Cache MethodInfo for ReadStruct (keyed by reader type + struct type)
         private static readonly ConcurrentDictionary<(Type, Type), MethodInfo> s_readStructCache = new();
 
         // Cache for ICollection<T>.Count property
@@ -237,16 +239,44 @@ namespace FBThrift
             throw new NotSupportedException($"Cannot read value of type {typeof(T).Name}");
         }
 
-        // --- Typed container read helpers (single reflection dispatch, no reflection in loop) ---
+        // --- Delegate wrapper methods ---
+        // These have signatures matching the cached delegate types so Delegate.CreateDelegate
+        // can bind them directly, avoiding MethodInfo.Invoke overhead and object[] allocations.
+
+        private static object ReadListTypedDelegate<TElem>(IThriftProtocolReader reader, int size)
+        {
+            return ReadListTyped<TElem>(reader, size);
+        }
+
+        private static object ReadHashSetTypedDelegate<TElem>(IThriftProtocolReader reader, int size)
+        {
+            return ReadHashSetTyped<TElem>(reader, size);
+        }
+
+        private static object ReadDictionaryTypedDelegate<TKey, TVal>(IThriftProtocolReader reader, int size)
+            where TKey : notnull
+        {
+            return ReadDictionaryTyped<TKey, TVal>(reader, size);
+        }
+
+        private static void WriteCollectionTypedDelegate<TElem>(IThriftProtocolWriter writer, object collection)
+        {
+            WriteCollectionTyped(writer, (IEnumerable<TElem>)collection);
+        }
+
+        // --- Typed container read helpers (compiled delegate dispatch, no reflection per call) ---
 
         private static object ReadListInternal(IThriftProtocolReader reader, Type elemType, int size)
         {
-            var readDelegate = s_readListCache.GetOrAdd(elemType, t =>
-                (Func<IThriftProtocolReader, int, object>)typeof(ThriftProtocolHelper)
-                    .GetMethod(nameof(ReadListTyped), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(t)
-                    .CreateDelegate(typeof(Func<IThriftProtocolReader, int, object>)));
-            return readDelegate(reader, size);
+            var invoker = s_readListCache.GetOrAdd(elemType, t =>
+            {
+                var mi = typeof(ThriftProtocolHelper)
+                    .GetMethod(nameof(ReadListTypedDelegate), BindingFlags.NonPublic | BindingFlags.Static)!
+                    .MakeGenericMethod(t);
+                return (Func<IThriftProtocolReader, int, object>)Delegate.CreateDelegate(
+                    typeof(Func<IThriftProtocolReader, int, object>), mi);
+            });
+            return invoker(reader, size);
         }
 
         private static List<TElem> ReadListTyped<TElem>(IThriftProtocolReader reader, int size)
@@ -261,12 +291,15 @@ namespace FBThrift
 
         private static object ReadHashSetInternal(IThriftProtocolReader reader, Type elemType, int size)
         {
-            var readDelegate = s_readHashSetCache.GetOrAdd(elemType, t =>
-                (Func<IThriftProtocolReader, int, object>)typeof(ThriftProtocolHelper)
-                    .GetMethod(nameof(ReadHashSetTyped), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(t)
-                    .CreateDelegate(typeof(Func<IThriftProtocolReader, int, object>)));
-            return readDelegate(reader, size);
+            var invoker = s_readHashSetCache.GetOrAdd(elemType, t =>
+            {
+                var mi = typeof(ThriftProtocolHelper)
+                    .GetMethod(nameof(ReadHashSetTypedDelegate), BindingFlags.NonPublic | BindingFlags.Static)!
+                    .MakeGenericMethod(t);
+                return (Func<IThriftProtocolReader, int, object>)Delegate.CreateDelegate(
+                    typeof(Func<IThriftProtocolReader, int, object>), mi);
+            });
+            return invoker(reader, size);
         }
 
         private static HashSet<TElem> ReadHashSetTyped<TElem>(IThriftProtocolReader reader, int size)
@@ -282,12 +315,15 @@ namespace FBThrift
         private static object ReadDictionaryInternal(IThriftProtocolReader reader, Type keyType, Type valType, int size)
         {
             var cacheKey = (keyType, valType);
-            var readDelegate = s_readDictionaryCache.GetOrAdd(cacheKey, k =>
-                (Func<IThriftProtocolReader, int, object>)typeof(ThriftProtocolHelper)
-                    .GetMethod(nameof(ReadDictionaryTyped), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(k.Item1, k.Item2)
-                    .CreateDelegate(typeof(Func<IThriftProtocolReader, int, object>)));
-            return readDelegate(reader, size);
+            var invoker = s_readDictionaryCache.GetOrAdd(cacheKey, k =>
+            {
+                var mi = typeof(ThriftProtocolHelper)
+                    .GetMethod(nameof(ReadDictionaryTypedDelegate), BindingFlags.NonPublic | BindingFlags.Static)!
+                    .MakeGenericMethod(k.Item1, k.Item2);
+                return (Func<IThriftProtocolReader, int, object>)Delegate.CreateDelegate(
+                    typeof(Func<IThriftProtocolReader, int, object>), mi);
+            });
+            return invoker(reader, size);
         }
 
         private static Dictionary<TKey, TVal> ReadDictionaryTyped<TKey, TVal>(IThriftProtocolReader reader, int size)
@@ -418,14 +454,16 @@ namespace FBThrift
             var valType = genericArgs[1];
             writer.WriteMapBegin(GetThriftType(keyType), GetThriftType(valType), dict.Count);
 
-            // Single reflection dispatch, then direct generic calls in the typed helper
             var cacheKey = (keyType, valType);
-            var writeDelegate = s_writeMapCache.GetOrAdd(cacheKey, k =>
-                (Action<IThriftProtocolWriter, System.Collections.IDictionary>)typeof(ThriftProtocolHelper)
+            var invoker = s_writeMapCache.GetOrAdd(cacheKey, k =>
+            {
+                var mi = typeof(ThriftProtocolHelper)
                     .GetMethod(nameof(WriteMapTyped), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(k.Item1, k.Item2)
-                    .CreateDelegate(typeof(Action<IThriftProtocolWriter, System.Collections.IDictionary>)));
-            writeDelegate(writer, dict);
+                    .MakeGenericMethod(k.Item1, k.Item2);
+                return (Action<IThriftProtocolWriter, System.Collections.IDictionary>)Delegate.CreateDelegate(
+                    typeof(Action<IThriftProtocolWriter, System.Collections.IDictionary>), mi);
+            });
+            invoker(writer, dict);
         }
 
         private static void WriteMapTyped<TKey, TVal>(IThriftProtocolWriter writer, System.Collections.IDictionary dict)
@@ -457,13 +495,15 @@ namespace FBThrift
                 writer.WriteListBegin(thriftType, collection.Count);
             }
 
-            // Single reflection dispatch, then direct generic calls in the typed helper
-            var writeDelegate = s_writeCollectionCache.GetOrAdd(elemType, t =>
-                (Action<IThriftProtocolWriter, object>)typeof(ThriftProtocolHelper)
-                    .GetMethod(nameof(WriteCollectionTypedWrapper), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(t)
-                    .CreateDelegate(typeof(Action<IThriftProtocolWriter, object>)));
-            writeDelegate(writer, collection);
+            var invoker = s_writeCollectionCache.GetOrAdd(elemType, t =>
+            {
+                var mi = typeof(ThriftProtocolHelper)
+                    .GetMethod(nameof(WriteCollectionTypedDelegate), BindingFlags.NonPublic | BindingFlags.Static)!
+                    .MakeGenericMethod(t);
+                return (Action<IThriftProtocolWriter, object>)Delegate.CreateDelegate(
+                    typeof(Action<IThriftProtocolWriter, object>), mi);
+            });
+            invoker(writer, collection);
         }
 
         private static void WriteCollectionTyped<TElem>(IThriftProtocolWriter writer, IEnumerable<TElem> collection)
@@ -520,13 +560,15 @@ namespace FBThrift
                 writer.WriteListBegin(thriftType, count);
             }
 
-            // Single reflection dispatch, then direct generic calls in the typed helper
-            var writeDelegate = s_writeCollectionCache.GetOrAdd(elemType, t =>
-                (Action<IThriftProtocolWriter, object>)typeof(ThriftProtocolHelper)
-                    .GetMethod(nameof(WriteCollectionTypedWrapper), BindingFlags.NonPublic | BindingFlags.Static)!
-                    .MakeGenericMethod(t)
-                    .CreateDelegate(typeof(Action<IThriftProtocolWriter, object>)));
-            writeDelegate(writer, collection!);
+            var invoker = s_writeCollectionCache.GetOrAdd(elemType, t =>
+            {
+                var mi = typeof(ThriftProtocolHelper)
+                    .GetMethod(nameof(WriteCollectionTypedDelegate), BindingFlags.NonPublic | BindingFlags.Static)!
+                    .MakeGenericMethod(t);
+                return (Action<IThriftProtocolWriter, object>)Delegate.CreateDelegate(
+                    typeof(Action<IThriftProtocolWriter, object>), mi);
+            });
+            invoker(writer, collection);
         }
     }
 }

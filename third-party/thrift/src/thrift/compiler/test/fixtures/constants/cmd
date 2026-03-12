@@ -1,4 +1,5 @@
 android: android src/module.thrift
+csharp: csharp_EXPERIMENTAL src/module.thrift
 py: py src/module.thrift
 hack: hack:typedef,hack_collections=1 src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift

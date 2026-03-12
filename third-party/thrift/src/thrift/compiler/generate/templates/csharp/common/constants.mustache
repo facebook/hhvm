@@ -35,11 +35,11 @@
   {{#else if value.type.double?}}
 {{#if value.double?}}{{value.double_string}}{{#else}}{{value.integer_value}}.0{{/if}}
   {{#else if value.type.string?}}
-{{value.csharp_quoted_value}}
+"{{value.string_value}}"
   {{#else if value.type.binary?}}
 new byte[] { {{#each (array.enumerate value.byte_array_elements with_first=true) as |i elem first?|}}{{#if (not first?)}} {{/if}}{{elem}},{{/each}} }
   {{#else if value.type.enum?}}
-({{#partial types.csharp_type type=value.type}}){{value.integer_value}}
+{{#if value.enum_value?}}{{#partial types.csharp_type type=value.type}}.{{value.enum_value.csharp_name}}{{#else}}({{#partial types.csharp_type type=value.type}}){{value.integer_value}}{{/if value.enum_value?}}
   {{/if value.type.bool?}}
 {{/let partial}}
 
@@ -65,11 +65,11 @@ new byte[] { {{#each (array.enumerate value.byte_array_elements with_first=true)
 }}{{#else if value.type.structured?}}
 new {{#partial types.csharp_type type=value.type}}()
 {
-  {{#if (object.notnull? value.structured_elements)}}
-    {{#each value.structured_elements as |elem|}}
-  {{elem.field.csharp_property_name}} = {{#partial csharp_const_value value=elem.value}},
+  {{#if (object.notnull? value.map_elements)}}
+    {{#each value.map_elements as |entry|}}
+  {{entry.key.string_value}} = {{#partial csharp_const_value value=entry.value}},
     {{/each}}
-  {{/if (object.notnull? value.structured_elements)}}
+  {{/if (object.notnull? value.map_elements)}}
 }{{!
 }}{{#else if value.type.map?}}
 new {{#partial types.csharp_type type=value.type}}()

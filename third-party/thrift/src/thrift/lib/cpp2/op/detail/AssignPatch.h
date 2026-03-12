@@ -59,6 +59,7 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
   using Base = BaseAssignPatch<Patch, AssignPatch>;
   using T = typename Base::value_type;
   using Tag = get_type_tag<Patch, ident::assign>;
+  static inline constexpr bool kIsEnum = is_thrift_enum_v<T>;
 
  public:
   using Base::apply;
@@ -116,6 +117,14 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
     return toSafePatchImpl<typename SafePatchType<Tag>::type>(*this);
   }
   /// @endcond
+
+  template <class Visitor>
+    requires(requires(Visitor&& v) { v.assign(T{}); } && kIsEnum)
+  void customVisit(Visitor&& v) const {
+    if (auto&& p = data_.assign()) {
+      return v.assign(*p);
+    }
+  }
 
  private:
   using Base::data_;

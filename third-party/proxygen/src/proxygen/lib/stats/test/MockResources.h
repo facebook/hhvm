@@ -40,6 +40,7 @@ class MockResources : public proxygen::Resources {
     double cpuSoftIrqUtilRatio{0.5};
     uint64_t numCpuCores{1};
     double memUtilRatio{0.5};
+    double memPressureFullRatio{0.0};
     double tcpMemUtilRatio{0.5};
     double udpMemUtilRatio{0.5};
     double nicUtilRatio{0.0};
@@ -65,6 +66,9 @@ class MockResources : public proxygen::Resources {
     data.setMemStats(
         folly::to<uint64_t>(round(params.memUtilRatio * totalMemBytes)),
         totalMemBytes);
+    data.setMemPressureFullStats(params.memPressureFullRatio * 100,  // avg10
+                                 params.memPressureFullRatio * 100,  // avg60
+                                 params.memPressureFullRatio * 100); // avg300
     uint64_t totalNetMemBytes = 100;
     data.setTcpMemStats(
         folly::to<uint64_t>(round(params.tcpMemUtilRatio * totalNetMemBytes)),

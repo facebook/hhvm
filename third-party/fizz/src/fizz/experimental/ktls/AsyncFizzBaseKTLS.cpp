@@ -60,7 +60,7 @@ KTLSCallbackImpl::TicketHandler makeTicketHandler(
           version = *state.version(),
           cipher = *state.cipher(),
           group = state.group(),
-          clientCert = state.serverCert(),
+          clientCert = state.clientCert(),
           serverCert = state.serverCert(),
           alpn = state.alpn(),
           handshakeTime = *state.handshakeTime(),

@@ -52,7 +52,9 @@ type hack =
   | TypeInfo
   | HackToThrift
 
-type src = FileLines
+type src =
+  | FileLines
+  | IndexFailure
 
 type gencode = GenCode
 

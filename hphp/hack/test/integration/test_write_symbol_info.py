@@ -52,7 +52,7 @@ from glean.schema.hack.types import (
     TypedefDefinition,
     TypeInfo,
 )
-from glean.schema.src.types import FileLines
+from glean.schema.src.types import FileLines, IndexFailure
 from hphp.hack.test.integration.common_tests import CommonTestDriver
 from hphp.hack.test.integration.hh_paths import hh_server
 from thrift.py3 import deserialize, Protocol, Struct
@@ -181,6 +181,7 @@ max_workers = 2
             "hack.HackToThrift": HackToThrift,
             "hack.GlobalNamespaceAlias": GlobalNamespaceAlias,
             "src.FileLines": FileLines,
+            "src.IndexFailure": IndexFailure,
             "gencode.GenCode": GenCode,
         }
         predicate_base = predicate_name[: predicate_name.rfind(".")]

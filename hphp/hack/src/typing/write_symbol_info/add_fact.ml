@@ -642,6 +642,12 @@ let decl_span ~path pos declaration fa =
   in
   Fact_acc.add_fact Predicate.(Hack DeclarationSpan) json fa
 
+let index_failure ~path reason details fa =
+  let json =
+    IndexFailure.({ file = File.Key path; reason; details } |> to_json_key)
+  in
+  Fact_acc.add_fact Predicate.(Src IndexFailure) json fa
+
 let file_lines ~path sourceText fa =
   let lengths =
     Line_break_map.offsets_to_line_lengths

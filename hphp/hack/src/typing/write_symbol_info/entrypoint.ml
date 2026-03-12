@@ -17,6 +17,7 @@ module JobReturn = struct
     hashes: Md5.Set.t;
     reindexed: SSet.t;
     referenced: SSet.t; (* set of files referenced by the indexed files *)
+    index_failures: int;
   }
 
   let neutral =
@@ -25,6 +26,7 @@ module JobReturn = struct
       hashes = Md5.Set.empty;
       reindexed = SSet.empty;
       referenced = SSet.empty;
+      index_failures = 0;
     }
 
   let merge t1 t2 =
@@ -33,8 +35,13 @@ module JobReturn = struct
       hashes = Set.union t1.hashes t2.hashes;
       reindexed = SSet.union t1.reindexed t2.reindexed;
       referenced = SSet.union t1.referenced t2.referenced;
+      index_failures = t1.index_failures + t2.index_failures;
     }
 end
+
+(* Indexing failures should be non-existent or very rare as they
+   usually affect the hack typechecker as well *)
+let max_index_failures = 100
 
 let log_elapsed s elapsed =
   let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
@@ -114,6 +121,23 @@ let gen_global_facts ns ~ownership ~shard_name all_hashes =
       |> snd
       |> Fact_acc.to_json)
 
+let emit_index_failure_facts ~ownership ~out_dir index_failures =
+  if not (List.is_empty index_failures) then begin
+    let fa = Fact_acc.init ~ownership in
+    let fa =
+      List.fold index_failures ~init:fa ~f:(fun fa (path, details) ->
+          if ownership then Fact_acc.set_ownership_unit fa (Some path);
+          Add_fact.index_failure
+            ~path
+            Src.IndexFailureReason.CompileError
+            details
+            fa
+          |> snd)
+    in
+    let json_chunks = Fact_acc.to_json fa in
+    write_facts_file out_dir (`Count (List.length index_failures)) json_chunks
+  end
+
 let write_json
     (ctx : Provider_context.t)
     (ownership : bool)
@@ -149,7 +173,14 @@ let write_json
         file_info.File_info.sym_hash)
     |> Md5.Set.of_list
   in
-  JobReturn.{ elapsed; hashes; reindexed = SSet.empty; referenced = SSet.empty }
+  JobReturn.
+    {
+      elapsed;
+      hashes;
+      reindexed = SSet.empty;
+      referenced = SSet.empty;
+      index_failures = 0;
+    }
 
 let references_from_files_info ctx files_info =
   List.map files_info ~f:(File_info.referenced ctx)
@@ -170,16 +201,37 @@ let recheck_job
   (* in order to compute referenced files, we need to compute the path of referenced
      symbols *)
   let gen_references = Option.is_some opts.referenced_file in
-  let files_info =
-    List.filter_map
-      fa
-      ~f:
-        (File_info.create
-           ctx
-           ~root_path:opts.root_path
-           ~hhi_path:opts.hhi_path
-           ~gen_sym_hash)
+  let (files_info, index_failures) =
+    List.fold fa ~init:([], []) ~f:(fun (ok_acc, err_acc) indexable ->
+        try
+          match
+            File_info.create
+              ctx
+              ~root_path:opts.root_path
+              ~hhi_path:opts.hhi_path
+              ~gen_sym_hash
+              indexable
+          with
+          | Some fi -> (fi :: ok_acc, err_acc)
+          | None -> (ok_acc, err_acc)
+        with
+        | WorkerCancel.Worker_should_exit as exn ->
+          let e = Exception.wrap exn in
+          Exception.reraise e
+        | e ->
+          let path =
+            Relative_path.to_absolute_with_prefix
+              ~www:(Path.make_unsafe opts.root_path)
+              ~hhi:(Path.make_unsafe opts.hhi_path)
+              indexable.Indexable.path
+          in
+          Hh_logger.log
+            "WARNING: indexing failure for %s: %s"
+            path
+            (Exn.to_string e);
+          (ok_acc, (path, Exn.to_string e) :: err_acc))
   in
+  let files_info = List.rev files_info in
   let reindex f =
     match (f.File_info.fanout, opts.incremental, f.File_info.sym_hash) with
     | (true, Some table, Some hash) when Sym_hash.mem table hash -> false
@@ -187,6 +239,10 @@ let recheck_job
   in
   let to_reindex = List.filter ~f:reindex files_info in
   let res = write_json ctx opts.ownership opts.out_dir to_reindex start_time in
+  emit_index_failure_facts
+    ~ownership:opts.ownership
+    ~out_dir:opts.out_dir
+    index_failures;
   let fanout_reindexed =
     let f File_info.{ path; fanout; _ } =
       if fanout then
@@ -202,7 +258,13 @@ let recheck_job
     else
       SSet.empty
   in
-  JobReturn.{ res with reindexed = fanout_reindexed; referenced }
+  JobReturn.
+    {
+      res with
+      reindexed = fanout_reindexed;
+      referenced;
+      index_failures = List.length index_failures;
+    }
 
 let sym_hashes ctx ~files =
   let f file =
@@ -274,6 +336,15 @@ let go
   Option.iter
     opts.Indexer_options.reindexed_file
     ~f:(write_file jobs.JobReturn.reindexed);
+  let total_failures = jobs.JobReturn.index_failures in
+  if total_failures > 0 then
+    Hh_logger.log "Total indexing failures: %d" total_failures;
+  if total_failures > max_index_failures then
+    failwith
+      (Printf.sprintf
+         "Too many indexing failures (%d). Threshold is %d. Aborting."
+         total_failures
+         max_index_failures);
   let cumulated_elapsed = jobs.JobReturn.elapsed in
   log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;
   let elapsed = Unix.gettimeofday () -. start_time in

@@ -55,7 +55,10 @@ type hack =
   | HackToThrift
 [@@deriving ord]
 
-type src = FileLines [@@deriving ord]
+type src =
+  | FileLines
+  | IndexFailure
+[@@deriving ord]
 
 type gencode = GenCode [@@deriving ord]
 
@@ -162,10 +165,12 @@ let ordered_all =
     Hack IndexerInputsHash;
     Hack HackToThrift;
     Src FileLines;
+    Src IndexFailure;
   ]
 
 let src_to_string = function
   | FileLines -> "FileLines"
+  | IndexFailure -> "IndexFailure"
 
 let to_string = function
   | Hack x -> "hack." ^ hack_to_string x ^ ".6"

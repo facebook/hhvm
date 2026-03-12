@@ -162,6 +162,13 @@ val decl_comment :
 val decl_span :
   path:string -> Pos.t -> Declaration.t -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
+val index_failure :
+  path:string ->
+  Src.IndexFailureReason.t ->
+  string ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t
+
 val file_lines :
   path:string ->
   Full_fidelity_source_text.t ->

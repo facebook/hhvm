@@ -403,6 +403,29 @@ class cpp2_generator_context {
             return t->fields().size();
           });
     }
+
+    // Compute topologically sorted structured definitions and typedefs for the
+    // root program. We combine these because the adapter trait used in typedefs
+    // requires the typedefed struct to be complete, and the typedefs themselves
+    // cannot be forward declared. Topo sort the combined set to fulfill these
+    // requirements.
+    {
+      std::vector<const t_type*> nodes;
+      nodes.reserve(
+          root->structured_definitions().size() + root->typedefs().size());
+      nodes.insert(
+          nodes.end(), root->typedefs().begin(), root->typedefs().end());
+      nodes.insert(
+          nodes.end(),
+          root->structured_definitions().begin(),
+          root->structured_definitions().end());
+      type_definitions_topological_order_ =
+          cpp2::topological_sort<const t_type*>(
+              nodes.begin(),
+              nodes.end(),
+              /*edges=*/cpp2::gen_dependency_graph(root, nodes),
+              /*throwOnCycle=*/true);
+    }
   }
 
   bool is_orderable(const t_structured& structured_type) {
@@ -440,6 +463,16 @@ class cpp2_generator_context {
     auto it = fields_in_layout_order_.find(&strct);
     assert(it != fields_in_layout_order_.end());
     return it->second;
+  }
+
+  /**
+   * Structured definitions and typedefs defined by the program, in topological
+   * order.
+   */
+  const std::vector<const t_type*>& type_definitions_topological_order(
+      const t_program& program) const {
+    check_root_program(program);
+    return type_definitions_topological_order_;
   }
 
   // --- Program split state ---
@@ -558,6 +591,7 @@ class cpp2_generator_context {
   std::unordered_set<const t_program*> field_default_const_ref_programs_;
   std::unordered_map<const t_structured*, std::vector<const t_field*>>
       fields_in_layout_order_;
+  std::vector<const t_type*> type_definitions_topological_order_;
 
   // Program split: LPT-partitioned structured definitions
   std::vector<std::vector<t_structured*>> program_structured_definition_splits_;
@@ -1895,25 +1929,8 @@ class cpp_mstch_program : public mstch_program {
     return cpp2::get_gen_namespace(*program);
   }
   mstch::node structs_and_typedefs() {
-    // We combine these because the adapter trait used in typedefs requires the
-    // typedefed struct to be complete, and the typedefs themselves cannot be
-    // forward declared.
-    // Topo sort the combined set to fulfill these requirements.
-    // As in other parts of this codebase, structs includes unions and
-    // exceptions.
-    std::vector<const t_type*> nodes;
-    nodes.reserve(
-        program_->structured_definitions().size() +
-        program_->typedefs().size());
-    nodes.insert(
-        nodes.end(), program_->typedefs().begin(), program_->typedefs().end());
-    nodes.insert(
-        nodes.end(),
-        program_->structured_definitions().begin(),
-        program_->structured_definitions().end());
-    auto deps = cpp2::gen_dependency_graph(program_, nodes);
-    auto sorted = cpp2::topological_sort<const t_type*>(
-        nodes.begin(), nodes.end(), deps, true);
+    const std::vector<const t_type*>& sorted =
+        cpp_context_.type_definitions_topological_order(*program_);
 
     // Generate the sorted nodes
     mstch::array ret;

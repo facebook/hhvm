@@ -171,6 +171,7 @@ class RouteHandleTraverser {
   // individual route handles, if necessary.
   //
   struct State {
+    bool skipThreadAffinity{false};
     std::optional<uint64_t> threadAffinitySalt;
   };
 

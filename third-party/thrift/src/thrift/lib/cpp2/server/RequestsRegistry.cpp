@@ -60,7 +60,7 @@ struct RegistryIdManager {
 
  private:
   std::set<uint32_t> freeIds_;
-  uint32_t nextId_;
+  uint32_t nextId_{0};
 };
 
 folly::Synchronized<RegistryIdManager>& registryIdManager() {

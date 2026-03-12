@@ -16,10 +16,11 @@
 
 package com.facebook.thrift;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.facebook.thrift.java.test.MySimpleStruct;
 import com.facebook.thrift.java.test.MySimpleUnion;
@@ -30,7 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TBaseHelperTest {
   @Test
@@ -52,11 +53,11 @@ public class TBaseHelperTest {
     assertTrue(struct.isSetName());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testSetFieldValueWithUnknowFieldId() throws Exception {
     MySimpleStruct struct = new MySimpleStruct(123L, "toto");
     // Should throw, field id 55 doesn't exist
-    TBaseHelper.setFieldValue(struct, (short) 55, 0);
+    assertThrows(RuntimeException.class, () -> TBaseHelper.setFieldValue(struct, (short) 55, 0));
   }
 
   @Test

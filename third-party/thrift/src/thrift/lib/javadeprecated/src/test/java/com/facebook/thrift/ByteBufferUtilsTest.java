@@ -16,14 +16,14 @@
 
 package com.facebook.thrift;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 import com.facebook.thrift.utils.ByteBufferUtils;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ByteBufferUtilsTest {
   private ByteBuffer generateBuffer(boolean useDirectBuffer, byte[] bytes) {

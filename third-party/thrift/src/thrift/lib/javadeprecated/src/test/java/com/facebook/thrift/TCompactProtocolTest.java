@@ -16,9 +16,9 @@
 
 package com.facebook.thrift;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import com.facebook.thrift.protocol.TBinaryProtocol;
 import com.facebook.thrift.protocol.TCompactProtocol;
@@ -33,7 +33,7 @@ import com.facebook.thrift.server.TRpcConnectionContext;
 import com.facebook.thrift.transport.TMemoryBuffer;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import thrift.test.proto.CompactProtoTestStruct;
 import thrift.test.proto.HolyMoley;
 import thrift.test.proto.Nesting;

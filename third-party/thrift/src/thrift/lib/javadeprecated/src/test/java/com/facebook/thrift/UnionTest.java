@@ -16,12 +16,13 @@
 
 package com.facebook.thrift;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.facebook.thrift.java.test.MySimpleStruct;
 import com.facebook.thrift.java.test.MySimpleUnion;
@@ -36,7 +37,7 @@ import com.facebook.thrift.transport.TTransportException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import thrift.test.proto.Empty;
 import thrift.test.union.RandomStuff;
 import thrift.test.union.StructWithAUnion;
@@ -165,17 +166,17 @@ public class UnionTest {
     assertThat(swau2, equalTo(swau));
   }
 
-  @Test(expected = TProtocolException.class)
+  @Test
   public void testEmptyUnionBinarySerialization() {
     TMemoryBuffer buf = new TMemoryBuffer(0);
     TProtocol binaryProto = new TBinaryProtocol(buf);
     TestUnion emptyUnion = new TestUnion();
 
     // Should throw a TProtocolException when writing an empty union
-    emptyUnion.write(binaryProto);
+    assertThrows(TProtocolException.class, () -> emptyUnion.write(binaryProto));
   }
 
-  @Test(expected = TProtocolException.class)
+  @Test
   public void testEmptyUnionCompactSerialization() {
     TMemoryBuffer buf = new TMemoryBuffer(0);
     TProtocolFactory compactFactory = new TCompactProtocol.Factory();
@@ -183,20 +184,20 @@ public class UnionTest {
     TestUnion emptyUnion = new TestUnion();
 
     // Should throw a TProtocolException when writing an empty union
-    emptyUnion.write(compactProto);
+    assertThrows(TProtocolException.class, () -> emptyUnion.write(compactProto));
   }
 
-  @Test(expected = TTransportException.class)
+  @Test
   public void testEmptyUnionBinaryDeserialization() {
     TMemoryBuffer buf = new TMemoryBuffer(0);
     TProtocol binaryProto = new TBinaryProtocol(buf);
     TestUnion emptyUnion = new TestUnion();
 
     // Should throw a TTransportException when reading no bytes
-    emptyUnion.read(binaryProto);
+    assertThrows(TTransportException.class, () -> emptyUnion.read(binaryProto));
   }
 
-  @Test(expected = TTransportException.class)
+  @Test
   public void testEmptyUnionCompactDeserialization() {
     TMemoryBuffer buf = new TMemoryBuffer(0);
     TProtocolFactory compactFactory = new TCompactProtocol.Factory();
@@ -204,7 +205,7 @@ public class UnionTest {
     TestUnion emptyUnion = new TestUnion();
 
     // Should throw a TTransportException when reading no bytes
-    emptyUnion.read(compactProto);
+    assertThrows(TTransportException.class, () -> emptyUnion.read(compactProto));
   }
 
   @Test

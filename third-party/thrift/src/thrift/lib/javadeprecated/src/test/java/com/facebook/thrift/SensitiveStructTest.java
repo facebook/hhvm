@@ -16,10 +16,10 @@
 
 package com.facebook.thrift;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.facebook.thrift.java.test.MySensitiveStruct;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SensitiveStructTest {
   private static final String password = "toto1234";
@@ -28,14 +28,14 @@ public class SensitiveStructTest {
   @Test
   public void testJavaDeprecated() throws Exception {
     MySensitiveStruct struct = new MySensitiveStruct(123L, password);
-    assertFalse(errorMsg, struct.toString().contains(password));
+    assertFalse(struct.toString().contains(password), errorMsg);
   }
 
   @Test
   public void testAndroid() throws Exception {
     com.facebook.thrift.android.test.MySensitiveStruct struct =
         new com.facebook.thrift.android.test.MySensitiveStruct(123L, password);
-    assertFalse(errorMsg, struct.toString().contains(password));
+    assertFalse(struct.toString().contains(password), errorMsg);
   }
 
   @Test
@@ -45,6 +45,6 @@ public class SensitiveStructTest {
             .setId(123L)
             .setPassword(password)
             .build();
-    assertFalse(errorMsg, struct.toString().contains(password));
+    assertFalse(struct.toString().contains(password), errorMsg);
   }
 }

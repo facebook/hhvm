@@ -16,8 +16,8 @@
 
 package com.facebook.thrift;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
 
 import com.facebook.thrift.java.test.StructWithAllTypes;
 import com.facebook.thrift.java.test.StructWithMaps;
@@ -28,7 +28,7 @@ import com.facebook.thrift.transport.TMemoryInputTransport;
 import com.facebook.thrift.utils.StandardCharsets;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TCompactJSONTest {
 

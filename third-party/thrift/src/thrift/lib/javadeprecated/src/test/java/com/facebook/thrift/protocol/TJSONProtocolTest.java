@@ -20,8 +20,8 @@ import com.facebook.thrift.java.test.MySimpleUnion;
 import com.facebook.thrift.transport.TIOStreamTransport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TJSONProtocolTest {
   @Test
@@ -38,6 +38,6 @@ public class TJSONProtocolTest {
     TJSONProtocol protocol2 = new TJSONProtocol(transport1);
     MySimpleUnion read = new MySimpleUnion();
     read.read(protocol2);
-    Assert.assertEquals(union, read);
+    Assertions.assertEquals(union, read);
   }
 }

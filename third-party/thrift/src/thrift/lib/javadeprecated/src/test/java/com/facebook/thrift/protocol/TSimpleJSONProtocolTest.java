@@ -28,8 +28,8 @@ import com.google.common.collect.Lists;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TSimpleJSONProtocolTest {
 
@@ -42,36 +42,36 @@ public class TSimpleJSONProtocolTest {
     return struct;
   }
 
-  @Test(expected = TException.class)
+  @Test
   public void testInvalidFalse() throws Exception {
-    deserializeBoolStruct("{\"aBool\":felse}");
+    Assertions.assertThrows(TException.class, () -> deserializeBoolStruct("{\"aBool\":felse}"));
   }
 
-  @Test(expected = TException.class)
+  @Test
   public void testInvalidLongFalse() throws Exception {
-    deserializeBoolStruct("{\"aBool\":FalseASDF}");
+    Assertions.assertThrows(TException.class, () -> deserializeBoolStruct("{\"aBool\":FalseASDF}"));
   }
 
-  @Test(expected = TException.class)
+  @Test
   public void testInvalidTrue() throws Exception {
-    deserializeBoolStruct("{\"aBool\":Treu}");
+    Assertions.assertThrows(TException.class, () -> deserializeBoolStruct("{\"aBool\":Treu}"));
   }
 
-  @Test(expected = TException.class)
+  @Test
   public void testInvalidLongTrue() throws Exception {
-    deserializeBoolStruct("{\"aBool\":TrueASDF}");
+    Assertions.assertThrows(TException.class, () -> deserializeBoolStruct("{\"aBool\":TrueASDF}"));
   }
 
   @Test
   public void testQuotedTrue() throws Exception {
     BoolStruct read = deserializeBoolStruct("{\"aBool\":\"true\"}");
-    Assert.assertEquals(read.isABool(), true);
+    Assertions.assertEquals(read.isABool(), true);
   }
 
   @Test
   public void testQuotedFalse() throws Exception {
     BoolStruct read = deserializeBoolStruct("{\"aBool\":\"false\"}");
-    Assert.assertEquals(read.isABool(), false);
+    Assertions.assertEquals(read.isABool(), false);
   }
 
   @Test
@@ -88,7 +88,7 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1);
     BoolStruct read = new BoolStruct();
     read.read(protocol2);
-    Assert.assertEquals(boolStruct, read);
+    Assertions.assertEquals(boolStruct, read);
   }
 
   @Test
@@ -106,7 +106,7 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1);
     BoolStruct read = new BoolStruct();
     read.read(protocol2);
-    Assert.assertEquals(boolStruct, read);
+    Assertions.assertEquals(boolStruct, read);
   }
 
   @Test
@@ -164,7 +164,7 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1);
     Nesting read = new Nesting();
     read.read(protocol2);
-    Assert.assertEquals(nesting, read);
+    Assertions.assertEquals(nesting, read);
   }
 
   @Test
@@ -207,10 +207,10 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1);
     EveryLayout read = new EveryLayout();
     read.read(protocol2);
-    Assert.assertEquals(everyLayout, read);
+    Assertions.assertEquals(everyLayout, read);
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testAndroidEveryLayout() throws Exception {
     com.facebook.thrift.android.test.EveryLayout everyLayout =
         new com.facebook.thrift.android.test.EveryLayout.Builder()
@@ -250,7 +250,9 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1);
 
     // Android codegen doesn't generate metadata for code size reasons
-    com.facebook.thrift.android.test.EveryLayout.deserialize(protocol2);
+    Assertions.assertThrows(
+        UnsupportedOperationException.class,
+        () -> com.facebook.thrift.android.test.EveryLayout.deserialize(protocol2));
   }
 
   @Test
@@ -293,7 +295,7 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1, true);
     EveryLayout read0 = new EveryLayout();
     read0.read(protocol2);
-    Assert.assertEquals(everyLayout, read0);
+    Assertions.assertEquals(everyLayout, read0);
   }
 
   @Test
@@ -328,7 +330,7 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1);
     EveryLayout read = new EveryLayout();
     read.read(protocol2);
-    Assert.assertEquals(everyLayout, read);
+    Assertions.assertEquals(everyLayout, read);
   }
 
   private static final String prettyPrinted =
@@ -377,7 +379,7 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1);
     EveryLayout read = new EveryLayout();
     read.read(protocol2);
-    Assert.assertEquals(everyLayout, read);
+    Assertions.assertEquals(everyLayout, read);
   }
 
   private static final String prettyPrintedWithCollections =
@@ -477,13 +479,13 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol2 = new TSimpleJSONProtocol(transport1);
     EveryLayout read = new EveryLayout();
     read.read(protocol2);
-    Assert.assertEquals(everyLayout, read);
+    Assertions.assertEquals(everyLayout, read);
   }
 
   @Test
   public void testMissingBool() throws Exception {
     BoolStruct read = deserializeBoolStruct("{}");
-    Assert.assertEquals(read.isABool(), false);
+    Assertions.assertEquals(read.isABool(), false);
   }
 
   @Test
@@ -495,7 +497,7 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol = new TSimpleJSONProtocol(transport);
     EveryLayout read = new EveryLayout();
     read.read(protocol);
-    Assert.assertEquals(everyLayout, read);
+    Assertions.assertEquals(everyLayout, read);
   }
 
   @Test
@@ -507,8 +509,8 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol = new TSimpleJSONProtocol(transport);
     SimpleStructTypes read = new SimpleStructTypes();
     read.read(protocol);
-    Assert.assertEquals(-9999, read.getJ());
-    Assert.assertEquals(97, read.getY());
+    Assertions.assertEquals(-9999, read.getJ());
+    Assertions.assertEquals(97, read.getY());
   }
 
   @Test
@@ -538,6 +540,6 @@ public class TSimpleJSONProtocolTest {
     TSimpleJSONProtocol protocol = new TSimpleJSONProtocol(transport);
     EveryLayout read = new EveryLayout();
     read.read(protocol);
-    Assert.assertEquals(everyLayout, read);
+    Assertions.assertEquals(everyLayout, read);
   }
 }

@@ -16,9 +16,10 @@
 
 package com.facebook.thrift;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.facebook.thrift.java.test.StringAndList;
 import com.facebook.thrift.protocol.TBinaryProtocol;
@@ -30,8 +31,8 @@ import com.facebook.thrift.transport.TMemoryInputTransport;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ProtocolLimitTest {
 
@@ -65,7 +66,7 @@ public class ProtocolLimitTest {
   private TProtocol binaryOutProto;
   private TProtocol compactOutProto;
 
-  @Before
+  @BeforeEach
   public void setup() {
     bos = new ByteArrayOutputStream();
     out = new TIOStreamTransport(bos);
@@ -99,18 +100,18 @@ public class ProtocolLimitTest {
     readStruct.read(iproto);
   }
 
-  @Test(expected = TProtocolException.class)
+  @Test
   public void binaryProtocol_throwsTProtocolException_whenStringExceedsLimit() throws Exception {
     StringAndList struct =
         new StringAndList.Builder().setMyString(BIG_STRING).setMyInts(SMALL_INTS).build();
-    checkBinaryReadingOverLimit(struct);
+    assertThrows(TProtocolException.class, () -> checkBinaryReadingOverLimit(struct));
   }
 
-  @Test(expected = TProtocolException.class)
+  @Test
   public void binaryProtocol_throwsTProtocolException_whenContainerExceedsLimit() throws Exception {
     StringAndList struct =
         new StringAndList.Builder().setMyString(SMALL_STRING).setMyInts(BIG_INTS).build();
-    checkBinaryReadingOverLimit(struct);
+    assertThrows(TProtocolException.class, () -> checkBinaryReadingOverLimit(struct));
   }
 
   @Test
@@ -136,18 +137,18 @@ public class ProtocolLimitTest {
     readStruct.read(iproto);
   }
 
-  @Test(expected = TProtocolException.class)
+  @Test
   public void compactProtocol_throwsTProtocolException_whenStringExceedsLimit() throws Exception {
     StringAndList struct =
         new StringAndList.Builder().setMyString(BIG_STRING).setMyInts(SMALL_INTS).build();
-    checkCompactReadingOverLimit(struct);
+    assertThrows(TProtocolException.class, () -> checkCompactReadingOverLimit(struct));
   }
 
-  @Test(expected = TProtocolException.class)
+  @Test
   public void compactProtocol_throwsTProtocolException_whenContainerExceedsLimit()
       throws Exception {
     StringAndList struct =
         new StringAndList.Builder().setMyString(SMALL_STRING).setMyInts(BIG_INTS).build();
-    checkCompactReadingOverLimit(struct);
+    assertThrows(TProtocolException.class, () -> checkCompactReadingOverLimit(struct));
   }
 }

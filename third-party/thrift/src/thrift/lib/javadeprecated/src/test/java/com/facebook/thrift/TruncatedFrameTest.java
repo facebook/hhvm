@@ -16,8 +16,8 @@
 
 package com.facebook.thrift;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.facebook.thrift.java.test.MyListStruct;
 import com.facebook.thrift.java.test.MyMapStruct;
@@ -29,7 +29,7 @@ import com.facebook.thrift.protocol.TProtocol;
 import com.facebook.thrift.protocol.TProtocolException;
 import com.facebook.thrift.protocol.TType;
 import com.facebook.thrift.transport.TMemoryInputTransport;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TruncatedFrameTest {
   private static final byte[] kBinaryListEncoding = {
@@ -90,7 +90,7 @@ public class TruncatedFrameTest {
   public static void testTruncated(TBase struct, TProtocol iprot) throws Exception {
     try {
       struct.read(iprot);
-      assertTrue("Not reachable", false);
+      assertTrue(false, "Not reachable");
     } catch (TProtocolException ex) {
       assertEquals(
           "Not enough bytes to read the entire message, the data appears to be truncated",

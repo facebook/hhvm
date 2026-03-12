@@ -17,8 +17,8 @@
 package com.facebook.thrift;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
 
 import com.facebook.thrift.javaswift.test.ComplexNestedStruct;
 import com.facebook.thrift.javaswift.test.DefaultValueStruct;
@@ -40,7 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DeprecatedToSwiftTest {
 

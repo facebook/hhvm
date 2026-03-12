@@ -17,7 +17,7 @@
 package com.facebook.thrift;
 
 import com.facebook.thrift.utils.Logger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class LoggerTest {
 

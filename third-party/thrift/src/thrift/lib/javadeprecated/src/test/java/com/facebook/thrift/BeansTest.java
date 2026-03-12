@@ -16,11 +16,11 @@
 
 package com.facebook.thrift;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
 
 import com.facebook.thrift.javaswift.test.MySimpleBean;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BeansTest {
   @Test

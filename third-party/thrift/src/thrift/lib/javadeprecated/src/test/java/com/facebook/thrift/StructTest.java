@@ -16,10 +16,10 @@
 
 package com.facebook.thrift;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 import com.facebook.thrift.java.test.BigEnum;
 import com.facebook.thrift.java.test.MySimpleStruct;
@@ -31,7 +31,7 @@ import com.facebook.thrift.java.test.StructWithOptional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StructTest {
   @Test

@@ -30,6 +30,10 @@ public interface ExtendedService extends java.io.Closeable, com.facebook.thrift.
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new ExtendedServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<ExtendedService> clientBuilder() {
         return new ClientBuilder<ExtendedService>() {
             @java.lang.Override

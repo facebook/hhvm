@@ -43,6 +43,10 @@ public interface {{service:javaCapitalName}} extends java.io.Closeable, com.face
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new {{service:javaCapitalName}}ThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<{{service:javaCapitalName}}> clientBuilder() {
         return new ClientBuilder<{{service:javaCapitalName}}>() {
             @java.lang.Override

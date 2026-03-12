@@ -30,6 +30,10 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new TestServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<TestService> clientBuilder() {
         return new ClientBuilder<TestService>() {
             @java.lang.Override

@@ -30,6 +30,10 @@ public interface FooBarBazService extends java.io.Closeable, com.facebook.thrift
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new FooBarBazServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<FooBarBazService> clientBuilder() {
         return new ClientBuilder<FooBarBazService>() {
             @java.lang.Override

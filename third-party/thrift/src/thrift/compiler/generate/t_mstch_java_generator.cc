@@ -568,6 +568,20 @@ class t_mstch_java_generator : public t_mstch_generator {
           cache[rpc_server_handler_id],
           "RpcServerHandler",
           package_dir / rpc_server_handler_filename);
+
+      auto metadata_handler_filename =
+          service_name + "ThriftMetadataHandler.java";
+      const auto& metadata_handler_id =
+          id + service->name() + "ThriftMetadataHandler";
+      if (!cache.count(metadata_handler_id)) {
+        cache[metadata_handler_id] =
+            service_factory.make_mstch_object(service, mstch_context_);
+      }
+
+      render_to_file(
+          cache[metadata_handler_id],
+          "ThriftMetadataHandler",
+          package_dir / metadata_handler_filename);
     }
   }
 
@@ -766,6 +780,88 @@ class mstch_java_struct : public mstch_struct {
   }
 };
 
+std::string build_java_type_expression(const t_type* type) {
+  type = type->get_true_type();
+
+  if (type->is_void()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE)";
+  } else if (type->is_bool()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BOOL_TYPE)";
+  } else if (type->is_byte()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BYTE_TYPE)";
+  } else if (type->is_i16()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I16_TYPE)";
+  } else if (type->is_i32()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I32_TYPE)";
+  } else if (type->is_i64()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_I64_TYPE)";
+  } else if (type->is_float()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_FLOAT_TYPE)";
+  } else if (type->is_double()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_DOUBLE_TYPE)";
+  } else if (type->is_string()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_STRING_TYPE)";
+  } else if (type->is_binary()) {
+    return "ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE)";
+  } else if (type->is<t_list>()) {
+    auto elem_expr =
+        build_java_type_expression(&type->as<t_list>().elem_type().deref());
+    return "ThriftType.fromTList(new ThriftListType.Builder().setValueType(" +
+        elem_expr + ").build())";
+  } else if (type->is<t_set>()) {
+    auto elem_expr =
+        build_java_type_expression(&type->as<t_set>().elem_type().deref());
+    return "ThriftType.fromTSet(new ThriftSetType.Builder().setValueType(" +
+        elem_expr + ").build())";
+  } else if (type->is<t_map>()) {
+    auto key_expr =
+        build_java_type_expression(&type->as<t_map>().key_type().deref());
+    auto val_expr =
+        build_java_type_expression(&type->as<t_map>().val_type().deref());
+    return "ThriftType.fromTMap(new ThriftMapType.Builder().setKeyType(" +
+        key_expr + ").setValueType(" + val_expr + ").build())";
+  } else if (type->is<t_enum>()) {
+    auto fqn = get_namespace_or_default(*type->program()) + "." +
+        java::mangle_java_name(type->name(), true);
+    return "ThriftType.fromTEnum(new ThriftEnumType.Builder().setName(\"" +
+        fqn + "\").build())";
+  } else if (type->is<t_structured>()) {
+    auto fqn = get_namespace_or_default(*type->program()) + "." +
+        java::mangle_java_name(type->name(), true);
+    return "ThriftType.fromTStruct(new ThriftStructType.Builder().setName(\"" +
+        fqn + "\").build())";
+  }
+
+  throw std::runtime_error(
+      "Unknown Thrift type in metadata codegen: " + std::string(type->name()));
+}
+
+mstch::array build_meta_fields(
+    const t_structured& fields, bool use_exception_naming) {
+  mstch::array result;
+  int idx = 0;
+  for (const auto& field : fields.fields()) {
+    mstch::map entry;
+    entry["metaField:id"] = std::to_string(field.id());
+    if (use_exception_naming) {
+      // Synthetic names to match legacy handler's Swift annotation behavior.
+      entry["metaField:name"] =
+          std::string("exception_") + std::to_string(field.id());
+    } else {
+      entry["metaField:name"] = field.name();
+    }
+    entry["metaField:typeExpression"] =
+        build_java_type_expression(field.type().get_type());
+    entry["metaField:isOptional"] =
+        field.qualifier() == t_field_qualifier::optional;
+    bool is_last = (idx == static_cast<int>(fields.fields().size()) - 1);
+    entry["last?"] = is_last;
+    ++idx;
+    result.emplace_back(entry);
+  }
+  return result;
+}
+
 class mstch_java_service : public mstch_service {
  public:
   mstch_java_service(
@@ -786,6 +882,22 @@ class mstch_java_service : public mstch_service {
             {"service:streamingFunctions",
              &mstch_java_service::get_streaming_functions},
             {"service:sinkFunctions", &mstch_java_service::get_sink_functions},
+            {"service:metaHasParent?", &mstch_java_service::meta_has_parent},
+            {"service:metaParentFQN", &mstch_java_service::meta_parent_fqn},
+            {"service:metaParentPackage",
+             &mstch_java_service::meta_parent_package},
+            {"service:metaParentCapitalName",
+             &mstch_java_service::meta_parent_capital_name},
+            {"service:metaFunctions", &mstch_java_service::meta_functions},
+            {"service:metaFunctionBatches",
+             &mstch_java_service::meta_function_batches},
+            {"service:metaFQN", &mstch_java_service::meta_fqn},
+            {"service:metaReferencedStructs",
+             &mstch_java_service::meta_referenced_structs},
+            {"service:metaReferencedEnums",
+             &mstch_java_service::meta_referenced_enums},
+            {"service:metaReferencedExceptions",
+             &mstch_java_service::meta_referenced_exceptions},
         });
   }
   mstch::node get_oneway_functions() {
@@ -836,6 +948,130 @@ class mstch_java_service : public mstch_service {
     }
     return make_mstch_functions(funcs);
   }
+
+  mstch::node meta_has_parent() { return service_->extends() != nullptr; }
+
+  mstch::node meta_parent_fqn() {
+    if (auto* parent = service_->extends()) {
+      return get_namespace_or_default(*parent->program()) + "." +
+          java::mangle_java_name(parent->name(), true);
+    }
+    return std::string();
+  }
+
+  mstch::node meta_parent_package() {
+    if (auto* parent = service_->extends()) {
+      return get_namespace_or_default(*parent->program());
+    }
+    return std::string();
+  }
+
+  mstch::node meta_parent_capital_name() {
+    if (auto* parent = service_->extends()) {
+      return java::mangle_java_name(parent->name(), true);
+    }
+    return std::string();
+  }
+
+  mstch::node meta_fqn() {
+    return get_namespace_or_default(*service_->program()) + "." +
+        java::mangle_java_name(service_->name(), true);
+  }
+
+  mstch::node meta_functions() {
+    mstch::array functions;
+    int func_idx = 0;
+    auto all_funcs = get_functions();
+    std::vector<const t_function*> meta_funcs;
+    for (const auto* func : all_funcs) {
+      if (!func->is_interaction_constructor()) {
+        meta_funcs.push_back(func);
+      }
+    }
+    for (const auto* func : meta_funcs) {
+      mstch::map func_meta;
+      func_meta["metaFunction:name"] = func->name();
+      func_meta["metaFunction:returnTypeExpr"] =
+          build_java_type_expression(func->return_type().get_type());
+      func_meta["metaFunction:isOneway"] =
+          func->qualifier() == t_function_qualifier::oneway;
+
+      func_meta["metaFunction:args"] = build_meta_fields(func->params(), false);
+      func_meta["metaFunction:hasArgs"] = !func->params().fields().empty();
+
+      mstch::array exceptions;
+      bool has_exceptions = false;
+      if (func->exceptions() && !func->exceptions()->fields().empty()) {
+        exceptions = build_meta_fields(*func->exceptions(), true);
+        has_exceptions = true;
+      }
+      func_meta["metaFunction:exceptions"] = exceptions;
+      func_meta["metaFunction:hasExceptions"] = has_exceptions;
+
+      bool is_last = (func_idx == static_cast<int>(meta_funcs.size()) - 1);
+      func_meta["last?"] = is_last;
+      ++func_idx;
+      functions.emplace_back(func_meta);
+    }
+    return functions;
+  }
+
+  // Batches functions to avoid exceeding the JVM's 64KB method bytecode limit.
+  mstch::node meta_function_batches() {
+    static constexpr int kBatchSize = 100;
+    auto all_funcs = get_functions();
+    std::vector<const t_function*> meta_funcs;
+    for (const auto* func : all_funcs) {
+      if (!func->is_interaction_constructor()) {
+        meta_funcs.push_back(func);
+      }
+    }
+
+    mstch::array batches;
+    int batch_index = 0;
+    for (size_t i = 0; i < meta_funcs.size(); i += kBatchSize) {
+      mstch::map batch;
+      batch["metaBatch:index"] = batch_index;
+
+      mstch::array batch_functions;
+      size_t end =
+          std::min(i + static_cast<size_t>(kBatchSize), meta_funcs.size());
+      for (size_t j = i; j < end; ++j) {
+        const auto* func = meta_funcs[j];
+        mstch::map func_meta;
+        func_meta["metaFunction:name"] = func->name();
+        func_meta["metaFunction:returnTypeExpr"] =
+            build_java_type_expression(func->return_type().get_type());
+        func_meta["metaFunction:isOneway"] =
+            func->qualifier() == t_function_qualifier::oneway;
+        func_meta["metaFunction:args"] =
+            build_meta_fields(func->params(), false);
+        func_meta["metaFunction:hasArgs"] = !func->params().fields().empty();
+
+        mstch::array exceptions;
+        bool has_exceptions = false;
+        if (func->exceptions() && !func->exceptions()->fields().empty()) {
+          exceptions = build_meta_fields(*func->exceptions(), true);
+          has_exceptions = true;
+        }
+        func_meta["metaFunction:exceptions"] = exceptions;
+        func_meta["metaFunction:hasExceptions"] = has_exceptions;
+
+        batch_functions.emplace_back(std::move(func_meta));
+      }
+
+      batch["metaBatch:functions"] = std::move(batch_functions);
+      batches.emplace_back(std::move(batch));
+      ++batch_index;
+    }
+    return batches;
+  }
+
+  // TODO(leochashnikov): Traverse type graph to populate
+  // structs/enums/exceptions.
+  mstch::node meta_referenced_structs() { return mstch::array(); }
+  mstch::node meta_referenced_enums() { return mstch::array(); }
+  mstch::node meta_referenced_exceptions() { return mstch::array(); }
 };
 
 class mstch_java_interaction : public mstch_java_service {

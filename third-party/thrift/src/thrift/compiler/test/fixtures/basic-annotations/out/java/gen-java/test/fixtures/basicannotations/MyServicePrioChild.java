@@ -30,6 +30,10 @@ public interface MyServicePrioChild extends java.io.Closeable, com.facebook.thri
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new MyServicePrioChildThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<MyServicePrioChild> clientBuilder() {
         return new ClientBuilder<MyServicePrioChild>() {
             @java.lang.Override

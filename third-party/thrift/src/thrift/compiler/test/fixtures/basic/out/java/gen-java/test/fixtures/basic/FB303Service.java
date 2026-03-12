@@ -30,6 +30,10 @@ public interface FB303Service extends java.io.Closeable, com.facebook.thrift.uti
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new FB303ServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<FB303Service> clientBuilder() {
         return new ClientBuilder<FB303Service>() {
             @java.lang.Override

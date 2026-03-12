@@ -30,6 +30,10 @@ public interface Raiser extends java.io.Closeable, com.facebook.thrift.util.Bloc
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new RaiserThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<Raiser> clientBuilder() {
         return new ClientBuilder<Raiser>() {
             @java.lang.Override

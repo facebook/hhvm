@@ -30,6 +30,10 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new BadServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<BadService> clientBuilder() {
         return new ClientBuilder<BadService>() {
             @java.lang.Override

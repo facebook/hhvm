@@ -30,6 +30,10 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new PerformThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<Perform> clientBuilder() {
         return new ClientBuilder<Perform>() {
             @java.lang.Override

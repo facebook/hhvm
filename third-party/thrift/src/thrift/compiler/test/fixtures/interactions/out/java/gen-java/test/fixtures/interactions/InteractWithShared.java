@@ -30,6 +30,10 @@ public interface InteractWithShared extends java.io.Closeable, com.facebook.thri
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new InteractWithSharedThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<InteractWithShared> clientBuilder() {
         return new ClientBuilder<InteractWithShared>() {
             @java.lang.Override

@@ -30,6 +30,10 @@ public interface Factories extends java.io.Closeable, com.facebook.thrift.util.B
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new FactoriesThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<Factories> clientBuilder() {
         return new ClientBuilder<Factories>() {
             @java.lang.Override

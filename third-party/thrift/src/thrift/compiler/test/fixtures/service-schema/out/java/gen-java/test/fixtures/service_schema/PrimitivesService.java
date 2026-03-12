@@ -30,6 +30,10 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new PrimitivesServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<PrimitivesService> clientBuilder() {
         return new ClientBuilder<PrimitivesService>() {
             @java.lang.Override

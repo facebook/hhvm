@@ -30,6 +30,10 @@ public interface MyNode extends java.io.Closeable, com.facebook.thrift.util.Bloc
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new MyNodeThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<MyNode> clientBuilder() {
         return new ClientBuilder<MyNode>() {
             @java.lang.Override

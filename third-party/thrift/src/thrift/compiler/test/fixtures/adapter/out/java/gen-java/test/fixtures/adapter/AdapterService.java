@@ -30,6 +30,10 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new AdapterServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<AdapterService> clientBuilder() {
         return new ClientBuilder<AdapterService>() {
             @java.lang.Override

@@ -30,6 +30,10 @@ public interface PubSubStreamingService extends java.io.Closeable, com.facebook.
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new PubSubStreamingServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<PubSubStreamingService> clientBuilder() {
         return new ClientBuilder<PubSubStreamingService>() {
             @java.lang.Override

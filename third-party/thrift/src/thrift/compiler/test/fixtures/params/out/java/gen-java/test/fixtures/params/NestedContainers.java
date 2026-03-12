@@ -30,6 +30,10 @@ public interface NestedContainers extends java.io.Closeable, com.facebook.thrift
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new NestedContainersThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<NestedContainers> clientBuilder() {
         return new ClientBuilder<NestedContainers>() {
             @java.lang.Override

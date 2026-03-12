@@ -30,6 +30,10 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new DbMixedStackArgumentsThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<DbMixedStackArguments> clientBuilder() {
         return new ClientBuilder<DbMixedStackArguments>() {
             @java.lang.Override

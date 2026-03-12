@@ -30,6 +30,10 @@ public interface LegacyService extends java.io.Closeable, com.facebook.thrift.ut
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new LegacyServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<LegacyService> clientBuilder() {
         return new ClientBuilder<LegacyService>() {
             @java.lang.Override

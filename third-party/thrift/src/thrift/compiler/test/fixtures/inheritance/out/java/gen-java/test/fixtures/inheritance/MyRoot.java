@@ -30,6 +30,10 @@ public interface MyRoot extends java.io.Closeable, com.facebook.thrift.util.Bloc
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new MyRootThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<MyRoot> clientBuilder() {
         return new ClientBuilder<MyRoot>() {
             @java.lang.Override

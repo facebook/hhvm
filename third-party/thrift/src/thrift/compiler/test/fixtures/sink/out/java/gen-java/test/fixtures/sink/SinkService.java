@@ -30,6 +30,10 @@ public interface SinkService extends java.io.Closeable, com.facebook.thrift.util
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new SinkServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<SinkService> clientBuilder() {
         return new ClientBuilder<SinkService>() {
             @java.lang.Override

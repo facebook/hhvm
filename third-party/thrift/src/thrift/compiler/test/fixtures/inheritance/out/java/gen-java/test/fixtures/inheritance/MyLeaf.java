@@ -30,6 +30,10 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new MyLeafThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<MyLeaf> clientBuilder() {
         return new ClientBuilder<MyLeaf>() {
             @java.lang.Override

@@ -30,6 +30,10 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new BoxServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<BoxService> clientBuilder() {
         return new ClientBuilder<BoxService>() {
             @java.lang.Override

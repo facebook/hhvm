@@ -30,6 +30,10 @@ public interface FooService extends java.io.Closeable, com.facebook.thrift.util.
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new FooServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<FooService> clientBuilder() {
         return new ClientBuilder<FooService>() {
             @java.lang.Override

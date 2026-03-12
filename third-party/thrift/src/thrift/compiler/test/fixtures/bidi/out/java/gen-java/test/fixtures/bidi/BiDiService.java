@@ -30,6 +30,10 @@ public interface BiDiService extends java.io.Closeable, com.facebook.thrift.util
         };
     }
 
+    static com.facebook.thrift.server.ThriftMetadataHandler getMetadataHandler() {
+        return new BiDiServiceThriftMetadataHandler();
+    }
+
     static com.facebook.thrift.client.ClientBuilder<BiDiService> clientBuilder() {
         return new ClientBuilder<BiDiService>() {
             @java.lang.Override

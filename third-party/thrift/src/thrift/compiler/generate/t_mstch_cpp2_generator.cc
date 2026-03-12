@@ -385,18 +385,18 @@ struct cpp2_field_generator_context {
   int isset_index = -1;
 };
 
+std::vector<const t_field*> get_structured_fields_in_layout_order(
+    const t_structured& strct);
+
 class cpp2_generator_context {
  public:
-  static cpp2_generator_context create(
-      source_manager& sm, const t_program* root_program) {
-    return cpp2_generator_context(sm, root_program);
+  explicit cpp2_generator_context(source_manager& sm, const t_program* root)
+      : root_program_{root} {
+    root_program_has_schema_const_ =
+        root_program_->find(
+            {schematizer::name_schema(sm, *root_program_), source_range{}}) !=
+        nullptr;
   }
-
-  cpp2_generator_context(cpp2_generator_context&&) = default;
-  cpp2_generator_context& operator=(cpp2_generator_context&&) = default;
-  ~cpp2_generator_context() = default;
-  cpp2_generator_context(const cpp2_generator_context&) = delete;
-  cpp2_generator_context& operator=(const cpp2_generator_context&) = delete;
 
   bool is_orderable(const t_structured& structured_type) {
     return cpp2::OrderableTypeUtils::is_orderable(
@@ -427,13 +427,26 @@ class cpp2_generator_context {
     return root_program_has_schema_const_;
   }
 
+  const std::vector<const t_field*>& fields_in_layout_order(
+      const t_structured& strct) const {
+    check_root_program(*strct.program());
+    auto it = fields_in_layout_order_.find(&strct);
+    assert(it != fields_in_layout_order_.end());
+    return it->second;
+  }
+
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
     using context = t_whisker_generator::whisker_generator_visitor_context;
     // Compute field isset indexes and serialization order, which requires a
     // back-reference to the parent structured definition. Not using field
     // visitor here, since it requires forward/backward context.
     visitor.add_structured_definition_visitor(
-        [this](const context&, const t_structured& node) {
+        [this](const context& ctx, const t_structured& node) {
+          if (&ctx.program() == root_program_) {
+            fields_in_layout_order_[&node] =
+                get_structured_fields_in_layout_order(node);
+          }
+
           cpp2_field_generator_context field_ctx;
           for (const t_field& field : node.fields()) {
             if (cpp2::field_has_isset(&field)) {
@@ -467,10 +480,7 @@ class cpp2_generator_context {
       // If this field is in our root program and its default value is a
       // constant from an included program, track it so we can include the
       // corresponding `module_constants.h` in `module_types.h`
-      // t_field program is always nullptr, so get it from the parent node
-      if (node.default_value() == nullptr ||
-          static_cast<const t_structured*>(ctx.parent())->program() !=
-              root_program_) {
+      if (node.default_value() == nullptr || &ctx.program() != root_program_) {
         // Field doesn't have a default or originates in an included program
         return;
       }
@@ -487,14 +497,6 @@ class cpp2_generator_context {
   }
 
  private:
-  explicit cpp2_generator_context(source_manager& sm, const t_program* root)
-      : root_program_{root} {
-    root_program_has_schema_const_ =
-        root_program_->find(
-            {schematizer::name_schema(sm, *root_program_), source_range{}}) !=
-        nullptr;
-  }
-
   const t_program* root_program_;
   std::unordered_map<const t_type*, bool> is_orderable_memo_;
   cpp_name_resolver resolver_;
@@ -509,8 +511,9 @@ class cpp2_generator_context {
   // field_generator_context.
   std::unordered_map<const t_field*, cpp2_field_generator_context>
       field_context_map_;
-
   std::unordered_set<const t_program*> field_default_const_ref_programs_;
+  std::unordered_map<const t_structured*, std::vector<const t_field*>>
+      fields_in_layout_order_;
 
   void check_root_program(const t_program& program) const {
     if (&program != root_program_) {
@@ -693,8 +696,8 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void generate_inline_services(const std::vector<t_service*>& services);
 
   void initialize_context(context_visitor& visitor) override {
-    cpp_context_ = std::make_shared<cpp2_generator_context>(
-        cpp2_generator_context::create(source_mgr_, program_));
+    cpp_context_ =
+        std::make_unique<cpp2_generator_context>(source_mgr_, program_);
     cpp_context_->register_visitors(visitor);
   }
 
@@ -1811,7 +1814,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
   std::unordered_map<std::string, int> get_client_name_to_split_count() const;
 
-  std::shared_ptr<cpp2_generator_context> cpp_context_;
+  std::unique_ptr<cpp2_generator_context> cpp_context_;
   std::unordered_map<std::string, int32_t> client_name_to_split_count_;
   bool cpp_enable_same_program_const_referencing_ = true;
   mutable cpp2::is_eligible_for_constexpr is_eligible_for_constexpr_;
@@ -2012,8 +2015,11 @@ bool field_needs_op_encode(const t_field& field, const t_structured& strct) {
 class cpp_mstch_struct : public mstch_struct {
  public:
   cpp_mstch_struct(
-      const t_structured* s, mstch_context& ctx, mstch_element_position pos)
-      : mstch_struct(s, ctx, pos) {
+      const t_structured* s,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const cpp2_generator_context* cpp_context)
+      : mstch_struct(s, ctx, pos), cpp_context_(*cpp_context) {
     register_methods(
         this,
         {
@@ -2023,6 +2029,10 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::fields_in_layout_order},
         });
   }
+
+ private:
+  const cpp2_generator_context& cpp_context_;
+
   mstch::node explicitly_constructed_fields() {
     // Filter fields according to the following criteria:
     // Get all enums
@@ -2031,7 +2041,7 @@ class cpp_mstch_struct : public mstch_struct {
     // Get all non-optional references with basetypes, enums,
     // non-empty structs, and containers
     std::vector<const t_field*> filtered_fields;
-    for (const auto* field : get_members_in_layout_order()) {
+    for (const auto* field : cpp_context_.fields_in_layout_order(*struct_)) {
       const t_type* type = field->type()->get_true_type();
       // Filter out all optional references.
       if (cpp2::is_explicit_ref(field) &&
@@ -2058,145 +2068,139 @@ class cpp_mstch_struct : public mstch_struct {
     return make_mstch_fields(filtered_fields);
   }
 
- protected:
-  // Computes the alignment of field on the target platform.
-  // Throws exception if cannot compute the alignment .
-  static size_t compute_alignment(
-      const t_field* field, std::unordered_map<const t_field*, size_t>& memo) {
-    const size_t kMaxAlign = alignof(std::max_align_t);
-    auto find = memo.emplace(field, 0);
-    auto& ret = find.first->second;
-    if (!find.second) {
-      return ret;
-    }
-    if (cpp2::is_ref(field)) {
-      return ret = 8;
-    }
-    if (cpp2::is_custom_type(*field)) {
-      return ret = kMaxAlign;
-    }
-
-    const t_type* type = field->type()->get_true_type();
-
-    size_t result = type->visit(
-        [&](const t_primitive_type& primitive) -> size_t {
-          switch (primitive.primitive_type()) {
-            case t_primitive_type::type::t_bool:
-            case t_primitive_type::type::t_byte:
-              return 1;
-            case t_primitive_type::type::t_i16:
-              return 2;
-            case t_primitive_type::type::t_i32:
-            case t_primitive_type::type::t_float:
-              return 4;
-            case t_primitive_type::type::t_i64:
-            case t_primitive_type::type::t_double:
-            case t_primitive_type::type::t_string:
-            case t_primitive_type::type::t_binary:
-              return 8;
-            default:
-              throw std::logic_error(
-                  "Computing alignment of unknown primitive type");
-          }
-        },
-        [&](const t_enum& enm) -> size_t { return compute_alignment(enm); },
-        [&](const t_container&) -> size_t { return 8; },
-        [&](const t_structured& structured) {
-          // The type member of a union is an int
-          // The __isset member generated in presence of non-required fields of
-          // structs/exns only has bool fields so its alignment is 1
-          size_t align = structured.is<t_union>() ? 4 : 1;
-          for (const auto& field_2 : structured.fields()) {
-            size_t field_align = compute_alignment(&field_2, memo);
-            align = std::max(align, field_align);
-            if (align == kMaxAlign) {
-              // No need to continue because the structured already has the
-              // maximum alignment.
-              break;
-            }
-          }
-          return align;
-        },
-        [&](const t_service&) -> size_t {
-          throw std::logic_error("Computing alignment of service");
-        },
-        [&](const t_typedef&) -> size_t {
-          throw std::logic_error("Unreachable: typedefs resolved above");
-        });
-
-    return ret = result;
-  }
-
-  static size_t compute_alignment(const t_enum& e) {
-    if (const auto* annot =
-            e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
-      const auto& type = annot->get_value_from_structured_annotation("type");
-      switch (static_cast<enum_underlying_type>(type.get_integer())) {
-        case enum_underlying_type::i8:
-        case enum_underlying_type::u8:
-          return 1;
-        case enum_underlying_type::i16:
-        case enum_underlying_type::u16:
-          return 2;
-        case enum_underlying_type::u32:
-          return 4;
-        default:
-          throw std::runtime_error("unknown enum underlying type");
-      }
-    }
-    return 4;
-  }
-
-  // Returns the struct members reordered to minimize padding if the
-  // @cpp.MinimizePadding annotation is specified.
-  const std::vector<const t_field*>& get_members_in_layout_order() {
-    if (struct_->fields().size() == fields_in_layout_order_.size()) {
-      // Already reordered.
-      return fields_in_layout_order_;
-    }
-
-    if (!struct_->has_unstructured_annotation("cpp.minimize_padding") &&
-        !struct_->has_structured_annotation(kCppMinimizePaddingUri)) {
-      return fields_in_layout_order_ = struct_->fields().copy();
-    }
-
-    // Compute field alignments.
-    struct FieldAlign {
-      const t_field* field = nullptr;
-      size_t align = 0;
-    };
-    std::vector<FieldAlign> field_alignments;
-    field_alignments.reserve(struct_->fields().size());
-    std::unordered_map<const t_field*, size_t> memo;
-    for (const auto& field : struct_->fields()) {
-      size_t align = compute_alignment(&field, memo);
-      assert(align);
-      field_alignments.push_back(FieldAlign{&field, align});
-    }
-
-    // Sort by decreasing alignment using stable sort to avoid unnecessary
-    // reordering.
-    std::stable_sort(
-        field_alignments.begin(),
-        field_alignments.end(),
-        [](const auto& lhs, const auto& rhs) { return lhs.align > rhs.align; });
-
-    // Construct the reordered field vector.
-    fields_in_layout_order_.reserve(struct_->fields().size());
-    std::transform(
-        field_alignments.begin(),
-        field_alignments.end(),
-        std::back_inserter(fields_in_layout_order_),
-        [](const FieldAlign& fa) { return fa.field; });
-    return fields_in_layout_order_;
-  }
-
   mstch::node fields_in_layout_order() {
-    return make_mstch_fields(get_members_in_layout_order());
+    return make_mstch_fields(cpp_context_.fields_in_layout_order(*struct_));
+  }
+};
+
+// Computes the alignment of field on the target platform.
+// Throws exception if cannot compute the alignment.
+size_t compute_alignment(const t_enum& e) {
+  if (const auto* annot =
+          e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
+    const auto& type = annot->get_value_from_structured_annotation("type");
+    switch (static_cast<enum_underlying_type>(type.get_integer())) {
+      case enum_underlying_type::i8:
+      case enum_underlying_type::u8:
+        return 1;
+      case enum_underlying_type::i16:
+      case enum_underlying_type::u16:
+        return 2;
+      case enum_underlying_type::u32:
+        return 4;
+      default:
+        throw std::runtime_error("unknown enum underlying type");
+    }
+  }
+  return 4;
+}
+
+size_t compute_alignment(
+    const t_field* field, std::unordered_map<const t_field*, size_t>& memo) {
+  const size_t kMaxAlign = alignof(std::max_align_t);
+  auto find = memo.emplace(field, 0);
+  auto& ret = find.first->second;
+  if (!find.second) {
+    return ret;
+  }
+  if (cpp2::is_ref(field)) {
+    return ret = 8;
+  }
+  if (cpp2::is_custom_type(*field)) {
+    return ret = kMaxAlign;
   }
 
-  std::vector<const t_field*> fields_in_layout_order_;
-};
+  const t_type* type = field->type()->get_true_type();
+
+  size_t result = type->visit(
+      [&](const t_primitive_type& primitive) -> size_t {
+        switch (primitive.primitive_type()) {
+          case t_primitive_type::type::t_bool:
+          case t_primitive_type::type::t_byte:
+            return 1;
+          case t_primitive_type::type::t_i16:
+            return 2;
+          case t_primitive_type::type::t_i32:
+          case t_primitive_type::type::t_float:
+            return 4;
+          case t_primitive_type::type::t_i64:
+          case t_primitive_type::type::t_double:
+          case t_primitive_type::type::t_string:
+          case t_primitive_type::type::t_binary:
+            return 8;
+          default:
+            throw std::logic_error(
+                "Computing alignment of unknown primitive type");
+        }
+      },
+      [&](const t_enum& enm) -> size_t { return compute_alignment(enm); },
+      [&](const t_container&) -> size_t { return 8; },
+      [&](const t_structured& structured) {
+        // The type member of a union is an int
+        // The __isset member generated in presence of non-required fields of
+        // structs/exns only has bool fields so its alignment is 1
+        size_t align = structured.is<t_union>() ? 4 : 1;
+        for (const auto& field_2 : structured.fields()) {
+          size_t field_align = compute_alignment(&field_2, memo);
+          align = std::max(align, field_align);
+          if (align == kMaxAlign) {
+            // No need to continue because the structured already has the
+            // maximum alignment.
+            break;
+          }
+        }
+        return align;
+      },
+      [&](const t_service&) -> size_t {
+        throw std::logic_error("Computing alignment of service");
+      },
+      [&](const t_typedef&) -> size_t {
+        throw std::logic_error("Unreachable: typedefs resolved above");
+      });
+
+  return ret = result;
+}
+
+// Returns the struct members reordered to minimize padding if the
+// @cpp.MinimizePadding annotation is specified.
+std::vector<const t_field*> get_structured_fields_in_layout_order(
+    const t_structured& strct) {
+  if (!strct.has_unstructured_annotation("cpp.minimize_padding") &&
+      !strct.has_structured_annotation(kCppMinimizePaddingUri)) {
+    return strct.fields().copy();
+  }
+
+  // Compute field alignments.
+  struct FieldAlign {
+    const t_field* field = nullptr;
+    size_t align = 0;
+  };
+  std::vector<FieldAlign> field_alignments;
+  field_alignments.reserve(strct.fields().size());
+  std::unordered_map<const t_field*, size_t> memo;
+  for (const auto& field : strct.fields()) {
+    size_t align = compute_alignment(&field, memo);
+    assert(align);
+    field_alignments.push_back(FieldAlign{&field, align});
+  }
+
+  // Sort by decreasing alignment using stable sort to avoid unnecessary
+  // reordering.
+  std::stable_sort(
+      field_alignments.begin(),
+      field_alignments.end(),
+      [](const auto& lhs, const auto& rhs) { return lhs.align > rhs.align; });
+
+  // Construct the reordered field vector.
+  std::vector<const t_field*> result;
+  result.reserve(strct.fields().size());
+  std::transform(
+      field_alignments.begin(),
+      field_alignments.end(),
+      std::back_inserter(result),
+      [](const FieldAlign& fa) { return fa.field; });
+  return result;
+}
 
 void t_mstch_cpp2_generator::generate_program() {
   const auto* program = get_program();
@@ -2218,7 +2222,7 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_program>();
   mstch_context_.add<cpp_mstch_service>();
   mstch_context_.add<cpp_mstch_interaction>();
-  mstch_context_.add<cpp_mstch_struct>();
+  mstch_context_.add<cpp_mstch_struct>(cpp_context_.get());
 }
 
 void t_mstch_cpp2_generator::generate_constants(const t_program* program) {

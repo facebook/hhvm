@@ -13,7 +13,6 @@
 namespace proxygen {
 
 class ResponseHandler;
-class ExMessageHandler;
 
 /**
  * Interface to be implemented by objects that handle requests from
@@ -35,8 +34,10 @@ class RequestHandler {
   }
 
   /**
-   * Invoked when we have successfully fetched headers from client. This will
-   * always be the first callback invoked on your handler.
+   * This function is invoked when we've successfully parsed the headers from
+   * client. Usually this is the first method invoked on RequestHandler, however
+   * if an error occurs prior to receiving the downstream http headers
+   * (e.g. parsing errors, timeout, etc.) ::onError will be invoked instead.
    */
   virtual void onRequest(std::unique_ptr<HTTPMessage> headers) noexcept = 0;
 
@@ -68,8 +69,6 @@ class RequestHandler {
    * Request failed. Maybe because of read/write error on socket or client
    * not being able to send request in time.
    *
-   * NOTE: Can be invoked at any time (except for before onRequest).
-   *
    * No more callbacks will be invoked after this. You should clean up after
    * yourself.
    */
@@ -98,14 +97,6 @@ class RequestHandler {
    */
   virtual bool canHandleExpect() noexcept {
     return false;
-  }
-
-  /**
-   * Implement in control stream handler to support incoming child EX streams.
-   */
-  virtual ExMessageHandler* getExHandler() noexcept {
-    LOG(FATAL) << "Not implemented";
-    folly::assume_unreachable();
   }
 
   virtual ResponseHandler* getDownstream() noexcept {

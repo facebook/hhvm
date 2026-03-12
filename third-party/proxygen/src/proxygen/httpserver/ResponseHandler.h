@@ -13,7 +13,6 @@
 
 namespace proxygen {
 
-class ExMessageHandler;
 class RequestHandler;
 class PushHandler;
 

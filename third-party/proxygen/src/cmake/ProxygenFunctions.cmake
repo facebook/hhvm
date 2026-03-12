@@ -434,6 +434,8 @@ function(proxygen_resolve_deferred_dependencies)
       # link to _obj for include path propagation
       if(BUILD_SHARED_LIBS AND _target MATCHES "_obj$" AND TARGET ${_dep}_obj)
         list(APPEND _valid_deps ${_dep}_obj)
+      elseif(BUILD_SHARED_LIBS AND _target MATCHES "_obj$")
+        # No _obj version exists; skip to avoid cycle through monolithic library
       elseif(TARGET ${_dep})
         list(APPEND _valid_deps ${_dep})
       endif()

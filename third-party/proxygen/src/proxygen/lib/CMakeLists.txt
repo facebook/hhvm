@@ -114,12 +114,6 @@ proxygen_add_library(proxygen_http_http_common_headers
     proxygen-generated
     Folly::folly_range
 )
-target_include_directories(proxygen_http_http_common_headers PUBLIC
-    $<BUILD_INTERFACE:${PROXYGEN_FBCODE_ROOT}>
-    $<BUILD_INTERFACE:${PROXYGEN_GENERATED_ROOT}>
-    $<INSTALL_INTERFACE:include/>
-)
-
 proxygen_add_library(proxygen_utils_trace_event_types
   SRCS
     ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
@@ -128,12 +122,6 @@ proxygen_add_library(proxygen_utils_trace_event_types
     proxygen-generated
     Folly::folly_conv
 )
-target_include_directories(proxygen_utils_trace_event_types PUBLIC
-    $<BUILD_INTERFACE:${PROXYGEN_FBCODE_ROOT}>
-    $<BUILD_INTERFACE:${PROXYGEN_GENERATED_ROOT}>
-    $<INSTALL_INTERFACE:include/>
-)
-
 # Granular library for http_parser
 proxygen_add_library(proxygen_external_http_parser
   SRCS

@@ -1,0 +1,6 @@
+ERROR: File "script_header_hh.php", line 4, characters 10-21:
+Invalid return type (Typing[4110])
+  File "script_header_hh.php", line 3, characters 35-37:
+  Expected `int`
+  File "script_header_hh.php", line 4, characters 10-21:
+  But got `string`

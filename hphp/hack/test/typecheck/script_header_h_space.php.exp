@@ -1,0 +1,10 @@
+ERROR: File "script_header_h_space.php", line 1, characters 6-6:
+A semicolon `;` is expected here. (Parsing[1002])
+ERROR: File "script_header_h_space.php", line 1, characters 5-5:
+Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Naming[2128])
+ERROR: File "script_header_h_space.php", line 4, characters 10-21:
+Invalid return type (Typing[4110])
+  File "script_header_h_space.php", line 3, characters 40-42:
+  Expected `int`
+  File "script_header_h_space.php", line 4, characters 10-21:
+  But got `string`

@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
+use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_by_ref::syntax::Syntax;
@@ -39,16 +40,27 @@ pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<FileMode>) {
                     } => {
                         let syntax::MarkupSuffixChildren { name, .. } = *suffix_children;
                         match &name.children {
-                            // <?, <?php or <?anything_else except <?hh
-                            SyntaxVariant::Missing => (Language::PHP, None),
-                            // <?hh
-                            _ => {
-                                if text.file_path().has_extension("hhi") {
-                                    (Language::Hack, Some(FileMode::Hhi))
+                            SyntaxVariant::Token(token) => {
+                                let name_text =
+                                    text.sub_as_str(token.start_offset(), token.width());
+                                if name_text.eq_ignore_ascii_case("hh") {
+                                    if text.file_path().has_extension("hhi") {
+                                        (Language::Hack, Some(FileMode::Hhi))
+                                    } else {
+                                        (Language::Hack, Some(FileMode::Strict))
+                                    }
+                                } else if name_text.eq_ignore_ascii_case("php") {
+                                    (Language::PHP, None)
                                 } else {
+                                    // Invalid header like <?h or <?xyz — treat
+                                    // as Hack so we report errors instead of
+                                    // treating as PHP and silently ignoring the
+                                    // file.
                                     (Language::Hack, Some(FileMode::Strict))
                                 }
                             }
+                            // Bare <? (PHP short tag) — treat as PHP
+                            _ => (Language::PHP, None),
                         }
                     }
                     _ => {

@@ -2420,11 +2420,18 @@ where
         // skip <?
         self.advance(2);
         let name_token_offset = self.offset;
-        let ch0 = self.peek_char(0).to_ascii_lowercase();
-        let ch1 = self.peek_char(1).to_ascii_lowercase();
-        match (ch0, ch1) {
-            ('h', 'h') => self.make_long_tag(name_token_offset, 2, less_than_question_token),
-            _ => (less_than_question_token, (None)),
+        // Scan any name characters after <? to produce a name token.
+        // This ensures that typos like <?h or <?hx produce a name token
+        // rather than silently falling through as Missing (which would be
+        // classified as PHP and ignored).
+        let mut size = 0;
+        while Self::is_name_nondigit(self.peek_char(size)) {
+            size += 1;
+        }
+        if size > 0 {
+            self.make_long_tag(name_token_offset, size, less_than_question_token)
+        } else {
+            (less_than_question_token, (None))
         }
     }
 

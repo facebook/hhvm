@@ -91,3 +91,49 @@
   test_injector_config
   unit_test
   utils_core))
+
+(library
+ (name approxset_tag_domain)
+ (wrapped false)
+ (modules approxset_tag_domain)
+ (libraries
+  approx_set
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std ppx_compare ppx_sexp_conv ppx_hash ppx_let)))
+
+(executable
+ (name approxset_test_refinement)
+ (modules approxset_test_refinement)
+ (libraries
+  approx_set
+  approxset_tag_domain
+  ounit2
+  test_injector_config
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std ppx_compare ppx_sexp_conv ppx_hash ppx_let)))
+
+(executable
+ (name approxset_test_variant_filter)
+ (modules approxset_test_variant_filter)
+ (libraries
+  approx_set
+  approxset_tag_domain
+  ounit2
+  test_injector_config
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std ppx_compare ppx_sexp_conv ppx_hash ppx_let)))
+
+(executable
+ (name approxset_test_subtype_disj)
+ (modules approxset_test_subtype_disj)
+ (libraries
+  approx_set
+  approxset_tag_domain
+  ounit2
+  test_injector_config
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std ppx_compare ppx_sexp_conv ppx_hash ppx_let)))

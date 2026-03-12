@@ -50,6 +50,16 @@ std::string quote(std::string_view str) {
   }
 }
 
+bool is_enum_or_typedef_of_enum(const t_named& node) {
+  if (dynamic_cast<const t_enum*>(&node)) {
+    return true;
+  }
+  if (auto td = dynamic_cast<const t_typedef*>(&node)) {
+    return td->type()->get_true_type()->is<t_enum>();
+  }
+  return false;
+}
+
 class structure_annotations {
  public:
   structure_annotations(source_manager& sm, t_program& program)
@@ -261,14 +271,16 @@ class structure_annotations {
       }
     } else if (name == "cpp.declare_hash" || name == "cpp2.declare_hash") {
       to_remove.emplace_back(name, data);
-      if (!node.has_structured_annotation(kCppDeclareHashSpecialization)) {
+      if (!is_enum_or_typedef_of_enum(node) &&
+          !node.has_structured_annotation(kCppDeclareHashSpecialization)) {
         to_add.insert("@cpp.DeclareHashSpecialization");
         fm_.add_include("thrift/annotation/cpp.thrift");
       }
     } else if (
         name == "cpp.declare_equal_to" || name == "cpp2.declare_equal_to") {
       to_remove.emplace_back(name, data);
-      if (!node.has_structured_annotation(kCppDeclareEqualToSpecialization)) {
+      if (!is_enum_or_typedef_of_enum(node) &&
+          !node.has_structured_annotation(kCppDeclareEqualToSpecialization)) {
         to_add.insert("@cpp.DeclareEqualToSpecialization");
         fm_.add_include("thrift/annotation/cpp.thrift");
       }

@@ -664,3 +664,50 @@ class StructureAnnotationsTest(unittest.TestCase):
                 }"""
             ),
         )
+
+    def test_declare_hash_equal_to_on_enum(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                enum E {
+                  A = 1,
+                } (cpp.declare_hash, cpp.declare_equal_to)
+
+                enum F {
+                  B = 1,
+                } (cpp.declare_hash)
+
+                typedef E ET (cpp2.declare_hash, cpp2.declare_equal_to)
+
+                struct S {} (cpp.declare_hash, cpp.declare_equal_to)
+
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            self.trim(read_file("foo.thrift")),
+            self.trim(
+                """\
+                include "thrift/annotation/cpp.thrift"
+
+                enum E {
+                  A = 1,
+                }
+
+                enum F {
+                  B = 1,
+                }
+
+                typedef E ET
+
+                @cpp.DeclareEqualToSpecialization
+                @cpp.DeclareHashSpecialization
+                struct S {}
+                """
+            ),
+        )

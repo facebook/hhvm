@@ -231,21 +231,27 @@ let check_package_access
     end
   | `ClassPtrLinterOnly ->
     let current_package =
-      Option.map ~f:(fun p -> p.name) (Typing_env.get_current_package env)
+      Option.map ~f:(fun p -> p.Package.name) (Env.get_current_package env)
     in
-    let (_, target_package, _) =
-      Typing_packages.get_package_profile env target_package_membership
-    in
-    (match
-       Typing_packages.can_access_ignoring_package_override
-         ~env
-         ~current_package
-         ~target_package
-         ~target_file:(Pos_or_decl.filename def_pos)
-         ~classptr_reference_warning:true
-     with
-    | `Yes -> Package_access_ok
-    | `YesWarning w -> Package_access_linter_error (use_pos, w))
+    let current_package_membership = Env.get_current_package_membership env in
+    (match current_package_membership with
+    | Some (Aast_defs.PackageConfigAssignment _) ->
+      let (_, target_package, _) =
+        Typing_packages.get_package_profile env target_package_membership
+      in
+      (match
+         Typing_packages.can_access_ignoring_package_override
+           ~env
+           ~current_package
+           ~target_package
+           ~target_file:(Pos_or_decl.filename def_pos)
+           ~classptr_reference_warning:true
+       with
+      | `Yes -> Package_access_ok
+      | `YesWarning w -> Package_access_linter_error (use_pos, w))
+    | Some (Aast_defs.PackageOverride _)
+    | None ->
+      Package_access_ok)
 
 let is_visible_for_obj ~is_method ~is_receiver_interface env vis =
   let member_ty =

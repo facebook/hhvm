@@ -884,3 +884,87 @@ TEST(CursorSerializer, MoveActiveWrapper) {
 
   *wrapper2 = std::move(wrapper);
 }
+
+TEST(CursorSerializer, PrefixBufferWrite) {
+  CursorSerializationWrapper<Qualifiers> wrapper;
+  CursorWriteOpts opts;
+  opts.prefix = folly::IOBuf::create(1024);
+  auto writer = wrapper.beginWriteWithOpts(std::move(opts));
+  writer.write<ident::opt>(3);
+  writer.write<ident::unq>(1);
+  writer.write<ident::terse>(2);
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(*obj.opt(), 3);
+  EXPECT_EQ(*obj.unq(), 1);
+  EXPECT_EQ(*obj.terse(), 2);
+}
+
+TEST(CursorSerializer, PrefixBufferWriteWithOpts) {
+  CursorSerializationWrapper<Qualifiers> wrapper;
+  CursorWriteOpts opts;
+  opts.minGrowth = 4096;
+  opts.maxGrowth = 4096;
+  opts.prefix = folly::IOBuf::create(4096);
+  auto writer = wrapper.beginWriteWithOpts(std::move(opts));
+  writer.write<ident::opt>(7);
+  writer.write<ident::unq>(8);
+  writer.write<ident::terse>(9);
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(*obj.opt(), 7);
+  EXPECT_EQ(*obj.unq(), 8);
+  EXPECT_EQ(*obj.terse(), 9);
+}
+
+TEST(CursorSerializer, PrefixBufferAbandonWrite) {
+  CursorSerializationWrapper<Qualifiers> wrapper;
+  CursorWriteOpts opts;
+  opts.prefix = folly::IOBuf::create(1024);
+  auto writer = wrapper.beginWriteWithOpts(std::move(opts));
+  writer.write<ident::opt>(3);
+  wrapper.abandonWrite(std::move(writer));
+
+  // Wrapper should be in a clean state and reusable.
+  auto writer2 = wrapper.beginWrite();
+  writer2.write<ident::opt>(5);
+  writer2.write<ident::unq>(6);
+  writer2.write<ident::terse>(7);
+  wrapper.endWrite(std::move(writer2));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(*obj.opt(), 5);
+  EXPECT_EQ(*obj.unq(), 6);
+  EXPECT_EQ(*obj.terse(), 7);
+}
+
+TEST(CursorSerializer, PrefixBufferThenInternalWrite) {
+  // First write with a prefix buffer.
+  CursorSerializationWrapper<Qualifiers> wrapper;
+  CursorWriteOpts opts;
+  opts.prefix = folly::IOBuf::create(1024);
+  auto writer = wrapper.beginWriteWithOpts(std::move(opts));
+  writer.write<ident::opt>(10);
+  writer.write<ident::unq>(20);
+  writer.write<ident::terse>(30);
+  wrapper.endWrite(std::move(writer));
+
+  auto obj = wrapper.deserialize();
+  EXPECT_EQ(*obj.opt(), 10);
+  EXPECT_EQ(*obj.unq(), 20);
+  EXPECT_EQ(*obj.terse(), 30);
+
+  // Then write to internal queue using the same wrapper.
+  auto writer2 = wrapper.beginWrite();
+  writer2.write<ident::opt>(100);
+  writer2.write<ident::unq>(200);
+  writer2.write<ident::terse>(300);
+  wrapper.endWrite(std::move(writer2));
+
+  auto obj2 = wrapper.deserialize();
+  EXPECT_EQ(*obj2.opt(), 100);
+  EXPECT_EQ(*obj2.unq(), 200);
+  EXPECT_EQ(*obj2.terse(), 300);
+}

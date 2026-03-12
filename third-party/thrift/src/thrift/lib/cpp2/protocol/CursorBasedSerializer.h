@@ -61,6 +61,9 @@ struct CursorWriteOpts {
   bool padBuffer = false;
   size_t padSize = 128;
   ExternalBufferSharing sharing = ExternalBufferSharing::SHARE_EXTERNAL_BUFFER;
+  /// Optional pre-allocated buffer to write into. The writer will fill this
+  /// buffer's writable capacity first before allocating new buffers.
+  std::unique_ptr<folly::IOBuf> prefix;
 };
 
 /**
@@ -115,7 +118,8 @@ class CursorSerializationWrapper {
    */
   /* implicit */ CursorSerializationWrapper(
       const T& t, ExternalBufferSharing sharing = COPY_EXTERNAL_BUFFER) {
-    CursorWriteOpts opts{.sharing = sharing};
+    CursorWriteOpts opts;
+    opts.sharing = sharing;
     t.write(writer(opts));
     serializedData_ = queue_.move();
     done();
@@ -171,7 +175,7 @@ class CursorSerializationWrapper {
 
   /** Cursor write path */
   StructuredCursorWriter<Tag, ProtocolWriter> beginWriteWithOpts(
-      const CursorWriteOpts& opts) {
+      CursorWriteOpts opts) {
     serializedData_.reset(); // Prevent concurrent read from seeing wrong data.
     return StructuredCursorWriter<Tag, ProtocolWriter>(writer(opts));
   }
@@ -197,7 +201,6 @@ class CursorSerializationWrapper {
     queue_.reset();
     done();
   }
-
   /** Access to serialized data */
   const folly::IOBuf& serializedData() const& {
     checkHasData();
@@ -217,9 +220,12 @@ class CursorSerializationWrapper {
     return &reader;
   }
 
-  ProtocolWriter* writer(const CursorWriteOpts& opts) {
+  ProtocolWriter* writer(CursorWriteOpts& opts) {
     checkInactive("Concurrent reads/writes not supported");
     auto& writer = protocol_.template emplace<ProtocolWriter>(opts.sharing);
+    if (opts.prefix) {
+      queue_.append(std::move(opts.prefix), false, true);
+    }
     if (opts.padBuffer) {
       queue_.preallocate(opts.minGrowth, opts.minGrowth);
       queue_.trimStart(opts.padSize);

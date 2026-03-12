@@ -1012,7 +1012,8 @@ class DynamicCursorSerializationWrapper {
               is_same_v<std::decay_t<T>, std::optional<type_system::TypeRef>>>>
   /* implicit */ DynamicCursorSerializationWrapper(
       const T& t, ExternalBufferSharing sharing = COPY_EXTERNAL_BUFFER) {
-    CursorWriteOpts opts{.sharing = sharing};
+    CursorWriteOpts opts;
+    opts.sharing = sharing;
     t.write(writer(opts));
     serializedData_ = queue_.move();
     done();

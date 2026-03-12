@@ -193,10 +193,6 @@ bool resolves_to_container_or_struct(const t_type* type) {
   return type->is<t_container>() || type->is<t_structured>();
 }
 
-bool has_schema(source_manager& sm, const t_program& program) {
-  return program.find({schematizer::name_schema(sm, program), source_range{}});
-}
-
 bool generate_reduced_client(const t_interface& i) {
   return i.is<t_interaction>();
 }
@@ -300,8 +296,9 @@ struct cpp2_field_generator_context {
 
 class cpp2_generator_context {
  public:
-  static cpp2_generator_context create(const t_program* root_program) {
-    return cpp2_generator_context(root_program);
+  static cpp2_generator_context create(
+      source_manager& sm, const t_program* root_program) {
+    return cpp2_generator_context(sm, root_program);
   }
 
   cpp2_generator_context(cpp2_generator_context&&) = default;
@@ -332,6 +329,11 @@ class cpp2_generator_context {
   const std::unordered_set<const t_program*>& field_default_const_ref_programs()
       const {
     return field_default_const_ref_programs_;
+  }
+
+  bool has_schema_const(const t_program& program) const {
+    check_root_program(program);
+    return root_program_has_schema_const_;
   }
 
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
@@ -394,12 +396,18 @@ class cpp2_generator_context {
   }
 
  private:
-  explicit cpp2_generator_context(const t_program* root)
-      : root_program_{root} {}
+  explicit cpp2_generator_context(source_manager& sm, const t_program* root)
+      : root_program_{root} {
+    root_program_has_schema_const_ =
+        root_program_->find(
+            {schematizer::name_schema(sm, *root_program_), source_range{}}) !=
+        nullptr;
+  }
 
   const t_program* root_program_;
   std::unordered_map<const t_type*, bool> is_orderable_memo_;
   cpp_name_resolver resolver_;
+  bool root_program_has_schema_const_;
 
   // Although generator fields can be in a different order than the IDL
   // order, field_generator_context should be always computed in the IDL order,
@@ -412,6 +420,13 @@ class cpp2_generator_context {
       field_context_map_;
 
   std::unordered_set<const t_program*> field_default_const_ref_programs_;
+
+  void check_root_program(const t_program& program) const {
+    if (&program != root_program_) {
+      throw whisker::eval_error(
+          "This property is only implemented for the root program");
+    }
+  }
 };
 
 int checked_stoi(const std::string& s, const std::string& msg) {
@@ -589,7 +604,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
   void initialize_context(context_visitor& visitor) override {
     cpp_context_ = std::make_shared<cpp2_generator_context>(
-        cpp2_generator_context::create(program_));
+        cpp2_generator_context::create(source_mgr_, program_));
     cpp_context_->register_visitors(visitor);
   }
 
@@ -668,7 +683,11 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       return include_prefix(&self, compiler_options());
     });
     def.property("has_schema?", [this](const t_program& self) {
-      return ::apache::thrift::compiler::has_schema(source_mgr_, self);
+      return cpp_context_->has_schema_const(self);
+    });
+    def.property("schema_includes_const?", [this](const t_program& self) {
+      return cpp_context_->has_schema_const(self) &&
+          !self.has_structured_annotation(kDisableSchemaConstUri);
     });
     def.property("schema_name", [this](const t_program& self) {
       return schematizer::name_schema(source_mgr_, self);
@@ -1598,10 +1617,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     auto base = t_whisker_generator::make_prototype_for_interface(proto);
     auto def =
         whisker::dsl::prototype_builder<h_interface>::extends(std::move(base));
-    def.property("has_service_schema", [this](const t_interface& self) {
-      return ::apache::thrift::compiler::has_schema(
-          source_mgr_, *self.program());
-    });
     def.property("reduced_client?", &generate_reduced_client);
     def.property("metadata_name", [](const t_interface& self) {
       return fmt::format("{}_{}", self.program()->name(), self.name());
@@ -1738,8 +1753,6 @@ class cpp_mstch_program : public mstch_program {
           &cpp_mstch_program::num_transitive_thrift_includes},
          {"program:split_structs", &cpp_mstch_program::split_structs},
          {"program:split_enums", &cpp_mstch_program::split_enums},
-         {"program:schema_includes_const?",
-          &cpp_mstch_program::schema_includes_const},
          {"program:structs_and_typedefs",
           &cpp_mstch_program::structs_and_typedefs}});
   }
@@ -1886,24 +1899,7 @@ class cpp_mstch_program : public mstch_program {
         id);
   }
 
-  mstch::node schema_includes_const() {
-    return supports_schema_includes(program_);
-  }
-
  private:
-  bool supports_schema_includes(const t_program* program) {
-    enum class strong_bool {};
-    strong_bool supports = context_.cache().get(*program, [&] {
-      bool ret =
-          // If you don't have a schema const you don't need schema includes.
-          ::apache::thrift::compiler::has_schema(sm_, *program_) &&
-          // Opting out of schema const should disable all of its failure modes.
-          !program->has_structured_annotation(kDisableSchemaConstUri);
-      return std::make_unique<strong_bool>(static_cast<strong_bool>(ret));
-    });
-    return static_cast<bool>(supports);
-  }
-
   const std::optional<int32_t> split_id_;
   const std::optional<std::vector<t_structured*>> split_structs_;
   std::optional<std::vector<t_enum*>> split_enums_;

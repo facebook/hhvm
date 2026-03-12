@@ -63,7 +63,7 @@
 {{#function:creates_interaction?}}
 {{> common/fun_docblock}}
   std::pair<
-    apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction.cpp_name}},
+    apache::thrift::Client<{{service:qualified_name}}>::{{function:created_interaction.cpp_name}},
     folly::SemiFuture<{{> types/return_type_client_no_handle_lift_unit}}>
   > eager_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}});
 {{/function:creates_interaction?}}

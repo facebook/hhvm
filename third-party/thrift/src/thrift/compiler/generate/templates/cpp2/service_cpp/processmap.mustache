@@ -32,10 +32,10 @@ const {{service:cpp_name}}AsyncProcessor::ProcessMap {{service:cpp_name}}AsyncPr
 {{/function:return_type}}{{/function:starts_interaction?}}{{/service:functions}}
 {{#service:interactions}}{{#service:functions}}
   {"{{service:name}}.{{function:name}}",
-    {&{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &{{service:parent_service_cpp_name}}AsyncProcessor::setUpAndProcess_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
-     &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
-     &{{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+    {&{{parent_service.cpp_name}}AsyncProcessor::setUpAndProcess_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{parent_service.cpp_name}}AsyncProcessor::setUpAndProcess_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>,
+     &{{parent_service.cpp_name}}AsyncProcessor::executeRequest_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>,
+     &{{parent_service.cpp_name}}AsyncProcessor::executeRequest_{{interaction:name}}_{{function:cpp_name}}<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
 {{/service:functions}}{{/service:interactions}}
 };
 {{/service:functions?}}
@@ -51,7 +51,7 @@ apache::thrift::ServiceRequestInfoMap {{service:cpp_name}}ServiceInfoHolder::sta
   {"{{function:name}}",
     { {{#if function:event_based?}}true{{#else}}false{{/if}},
      {{> types/function_kind}},
-     "{{service:parent_service_name}}.{{> common/function_name}}",
+     "{{service:name}}.{{> common/function_name}}",
      std::nullopt,
      apache::thrift::concurrency::{{function:priority}},
      {{#if function:creates_interaction?}}"{{function:created_interaction.cpp_name}}"{{#else}}std::nullopt{{/if}},
@@ -61,11 +61,11 @@ apache::thrift::ServiceRequestInfoMap {{service:cpp_name}}ServiceInfoHolder::sta
   {"{{service:name}}.{{function:name}}",
     { {{#if function:event_based?}}true{{#else}}false{{/if}},
      {{> types/function_kind}},
-     "{{service:parent_service_name}}.{{> common/function_name}}",
+     "{{parent_service.name}}.{{> common/function_name}}",
      "{{service:name}}",
      apache::thrift::concurrency::{{function:priority}},
      std::nullopt,
-     ::apache::thrift::detail::getInteractionFunctionNode<{{service:parent_service_qualified_name}}>("{{service:name}}", "{{function:name}}")}},
+     ::apache::thrift::detail::getInteractionFunctionNode<{{parent_service.qualified_name}}>("{{service:name}}", "{{function:name}}")}},
 {{/function:return_type}}{{/service:functions}}{{/service:interactions}}
   };
 {{#service:extends}}

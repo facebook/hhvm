@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}
+}}{{#let parent_service=service:self}}
 namespace {{service:cpp_qualified_namespace}} {
 {{> service_common/typedefs}}
 } // namespace {{service:cpp_qualified_namespace}}
@@ -56,7 +56,7 @@ void apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}(f
 {{/function:oneway?}}
 {{/function:return_type}}
 {{#else}}
-apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction.name}} apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}() {
+apache::thrift::Client<{{service:qualified_name}}>::{{function:created_interaction.name}} apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}() {
   return {{function:created_interaction.name}}(channel_, "{{function:created_interaction.name}}", interceptors_);
 }
 {{/if (not function:starts_interaction?)}}

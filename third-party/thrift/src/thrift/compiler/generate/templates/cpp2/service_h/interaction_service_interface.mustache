@@ -21,7 +21,7 @@ class {{interaction:name}}If : public apache::thrift::{{#if interaction:serial?}
  public:
   std::string_view getGeneratedName() const override { return "{{service:name}}"; }
 
-  typedef {{service:parent_service_qualified_name}}AsyncProcessor ProcessorType;
+  typedef {{parent_service.qualified_name}}AsyncProcessor ProcessorType;
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     std::terminate();
   }

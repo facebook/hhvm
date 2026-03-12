@@ -114,7 +114,7 @@ folly::SemiFuture<{{> types/return_type_client_lift_unit}}> {{> service_common/c
 
 {{#function:creates_interaction?}}
 std::pair<
-  apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction.cpp_name}},
+  apache::thrift::Client<{{service:qualified_name}}>::{{function:created_interaction.cpp_name}},
   folly::SemiFuture<{{> types/return_type_client_no_handle_lift_unit}}>
 > {{> service_common/client_class_name}}::eager_semifuture_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function_comma}}{{> service_common/function_param_list_client}}) {
   auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_{{function:cpp_name}}, channel_);

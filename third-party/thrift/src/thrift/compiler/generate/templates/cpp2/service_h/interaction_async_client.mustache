@@ -16,12 +16,12 @@
 
 }}class {{interaction:name}} final : public apache::thrift::InteractionHandle {
   using apache::thrift::InteractionHandle::InteractionHandle;
-  friend class ::apache::thrift::Client<{{service:parent_service_qualified_name}}>;
+  friend class ::apache::thrift::Client<{{parent_service.qualified_name}}>;
  public:
 
 
   std::string_view getServiceName() const noexcept override {
-    return "{{service:parent_service_name}}";
+    return "{{parent_service.name}}";
   }
 
 

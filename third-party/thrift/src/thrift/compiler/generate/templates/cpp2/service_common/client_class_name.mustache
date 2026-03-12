@@ -16,7 +16,7 @@
 
 }}{{#pragma ignore-newlines}}
 {{#if service:interaction?}}
-apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{interaction:name}}
+apache::thrift::Client<{{parent_service.qualified_name}}>::{{interaction:name}}
 {{#else}}
 apache::thrift::Client<{{service:qualified_name}}>
 {{/if service:interaction?}}

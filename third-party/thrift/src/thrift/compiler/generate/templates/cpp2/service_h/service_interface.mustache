@@ -50,6 +50,7 @@ class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual p
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
+{{#let parent_service=service:self}}
 {{#service:interactions}}
 {{> service_h/interaction_service_interface}}
 {{/service:interactions}}

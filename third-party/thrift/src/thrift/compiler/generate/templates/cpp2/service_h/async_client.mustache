@@ -41,13 +41,14 @@ class Client<{{service:qualified_name}}> : public {{#service:extends}}::{{servic
   using {{#service:extends}}::{{service:cpp_qualified_namespace}}::{{service:cpp_name}}AsyncClient::{{service:cpp_name}}AsyncClient{{/service:extends}}{{^service:extends}}apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient{{/service:extends}};
 
   std::string_view getServiceName() const noexcept override {
-    return "{{service:parent_service_name}}";
+    return "{{service:name}}";
   }
 {{#service:uri}}
 
   static constexpr folly::cstring_view __fbthrift_thrift_uri = "{{service:uri}}";
 {{/service:uri}}
 
+{{#let parent_service=service:self}}
 {{#service:interactions}}
 {{> service_h/interaction_async_client}}
 {{/service:interactions}}

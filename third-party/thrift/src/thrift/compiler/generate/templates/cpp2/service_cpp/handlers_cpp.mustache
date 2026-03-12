@@ -49,12 +49,11 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
 
-{{^service:interaction?}}
 {{service:qualified_name}}ServiceInfoHolder {{> service_common/service_class_name}}::__fbthrift_serviceInfoHolder;
-{{/service:interaction?}}
 
 {{> service_cpp/service_interface_impl}}
 
+{{#let parent_service=service:self}}
 {{#service:interactions}}
 {{> service_cpp/service_interface_impl}}
 {{/service:interactions}}

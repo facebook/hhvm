@@ -30,7 +30,7 @@ void {{> service_common/client_class_name}}::fbthrift_send_{{function:cpp_name}}
         new ::apache::thrift::MethodMetadata::Data(
                 "{{> common/function_name}}",
                 ::apache::thrift::FunctionQualifier::{{function:qualifier}},
-                "{{#if (string.empty? service:uri)}}{{service:parent_service_name}}{{#else}}{{service:uri}}{{/if}}"{{#function:creates_interaction?}},
+                "{{#if (string.empty? service:uri)}}{{#if service:interaction?}}{{parent_service.name}}{{#else}}{{service:name}}{{/if}}{{#else}}{{service:uri}}{{/if}}"{{#function:creates_interaction?}},
                 ::apache::thrift::InteractionMethodPosition::Factory,
                 "{{function:created_interaction.cpp_name}}"{{/function:creates_interaction?}}{{#service:interaction?}},
                 ::apache::thrift::InteractionMethodPosition::Member,

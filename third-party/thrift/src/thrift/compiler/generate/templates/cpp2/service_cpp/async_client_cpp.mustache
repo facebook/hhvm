@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#let parent_service=service:self}}
+}}
 namespace {{service:cpp_qualified_namespace}} {
 {{> service_common/typedefs}}
 } // namespace {{service:cpp_qualified_namespace}}
@@ -62,6 +62,7 @@ apache::thrift::Client<{{service:qualified_name}}>::{{function:created_interacti
 {{/if (not function:starts_interaction?)}}
 {{/service:functions}}
 
+{{#let parent_service=service:self}}
 {{#service:interactions}}
 
 namespace {{service:cpp_qualified_namespace}} {

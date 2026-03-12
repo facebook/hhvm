@@ -40,7 +40,7 @@ void {{> service_common/client_class_name}}::{{function:cpp_name}}(apache::thrif
 apache::thrift::SerializedRequest {{> service_common/client_class_name}}::fbthrift_serialize_{{function:cpp_name}}(const RpcOptions& rpcOptions, apache::thrift::transport::THeader& header, apache::thrift::ContextStack* contextStack{{function_comma}}{{> service_common/function_param_list_client}}) {
   return apache::thrift::detail::ac::withProtocolWriter(apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId(), [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
-    ::{{service:cpp_qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_pargs args;
+    ::{{service:cpp_qualified_namespace}}::{{#if service:interaction?}}{{parent_service.cpp_name}}{{#else}}{{service:cpp_name}}{{/if}}_{{function:prefixed_name}}_pargs args;
   {{#each (array.enumerate function:params.fields) as |param_index param|}}
     args.get<{{param_index}}>().value = {{#if param.type.resolves_to_complex_return?}}const_cast<{{param.type.cpp_type}}*>(&p_{{param.cpp_name}}){{#else}}&p_{{param.cpp_name}}{{/if}};
   {{/each}}
@@ -84,7 +84,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
       handlers_,
       interceptors_,
       getServiceName(),
-      "{{service:parent_service_name}}.{{> common/function_name}}",
+      "{{#if service:interaction?}}{{parent_service.name}}{{#else}}{{service:name}}{{/if}}.{{> common/function_name}}",
       *header);
 
   return {std::move(ctx), std::move(header)};

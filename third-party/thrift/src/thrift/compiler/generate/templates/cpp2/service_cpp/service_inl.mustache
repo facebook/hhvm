@@ -19,6 +19,7 @@ namespace {{service:cpp_qualified_namespace}} {
 {{> service_common/typedefs}}
 {{> service_tcc/process_and_return}}
 
+{{#let parent_service=service:self}}
 {{#service:interactions}}
 {{> service_common/typedefs}}
 {{> service_tcc/process_and_return}}

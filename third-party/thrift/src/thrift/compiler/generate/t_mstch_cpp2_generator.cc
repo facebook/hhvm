@@ -1868,6 +1868,8 @@ class cpp_mstch_program : public mstch_program {
   const cpp2_generator_context& cpp_context_;
 };
 
+// Retained for `get_functions` override, which overrides mstch_service's
+// `service:functions`, during Whisker migration.
 class cpp_mstch_service : public mstch_service {
  public:
   cpp_mstch_service(
@@ -1877,22 +1879,7 @@ class cpp_mstch_service : public mstch_service {
       const cpp2_generator_context* cpp_context,
       const t_service* containing_service = nullptr)
       : mstch_service(service, ctx, pos, containing_service),
-        cpp_context_(*cpp_context) {
-    register_methods(
-        this,
-        {
-            {"service:parent_service_cpp_name",
-             &cpp_mstch_service::parent_service_cpp_name},
-            {"service:parent_service_qualified_name",
-             &cpp_mstch_service::parent_service_qualified_name},
-        });
-  }
-  mstch::node parent_service_cpp_name() {
-    return cpp2::get_name(parent_service());
-  }
-  mstch::node parent_service_qualified_name() {
-    return cpp2::get_service_qualified_name(*parent_service());
-  }
+        cpp_context_(*cpp_context) {}
 
  private:
   const std::vector<const t_function*>& get_functions() const override {
@@ -1922,6 +1909,8 @@ class cpp_mstch_service : public mstch_service {
   mutable int32_t cached_split_id_ = -1;
 };
 
+// Retained for cpp_mstch_service's `get_functions` override, which overrides
+// mstch_service's `service:functions`, during Whisker migration.
 class cpp_mstch_interaction : public cpp_mstch_service {
  public:
   using ast_type = t_interaction;

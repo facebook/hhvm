@@ -390,12 +390,19 @@ std::vector<const t_field*> get_structured_fields_in_layout_order(
 
 class cpp2_generator_context {
  public:
-  explicit cpp2_generator_context(source_manager& sm, const t_program* root)
+  explicit cpp2_generator_context(
+      source_manager& sm, const t_program* root, int program_split_count)
       : root_program_{root} {
     root_program_has_schema_const_ =
         root_program_->find(
             {schematizer::name_schema(sm, *root_program_), source_range{}}) !=
         nullptr;
+    if (program_split_count > 0) {
+      program_structured_definition_splits_ = cpp2::lpt_split(
+          root->structured_definitions(), program_split_count, [](auto t) {
+            return t->fields().size();
+          });
+    }
   }
 
   bool is_orderable(const t_structured& structured_type) {
@@ -433,6 +440,43 @@ class cpp2_generator_context {
     auto it = fields_in_layout_order_.find(&strct);
     assert(it != fields_in_layout_order_.end());
     return it->second;
+  }
+
+  // --- Program split state ---
+  void set_program_split(int32_t split_id) {
+    assert(!program_structured_definition_splits_.empty());
+    program_split_id_ = split_id;
+  }
+  void clear_program_split() { program_split_id_ = std::nullopt; }
+  std::optional<int32_t> program_split_id() const { return program_split_id_; }
+  const std::vector<t_structured*>&
+  program_current_split_structured_definitions() const {
+    assert(program_split_id_.has_value());
+    return program_structured_definition_splits_.at(*program_split_id_);
+  }
+  std::vector<const t_enum*> program_current_split_enums() const {
+    assert(program_split_id_.has_value());
+    std::vector<const t_enum*> split;
+    size_t split_count = program_structured_definition_splits_.size();
+    for (size_t i = *program_split_id_; i < root_program_->enums().size();
+         i += split_count) {
+      split.emplace_back(root_program_->enums()[i]);
+    }
+    return split;
+  }
+
+  // --- Service split state ---
+  void set_service_split(int32_t split_id, int32_t split_count) {
+    current_service_split_id_ = split_id;
+    current_service_split_count_ = split_count;
+  }
+  void clear_service_split() {
+    current_service_split_id_ = 0;
+    current_service_split_count_ = 1;
+  }
+  int32_t current_service_split_id() const { return current_service_split_id_; }
+  int32_t current_service_split_count() const {
+    return current_service_split_count_;
   }
 
   void register_visitors(t_whisker_generator::context_visitor& visitor) {
@@ -514,6 +558,16 @@ class cpp2_generator_context {
   std::unordered_set<const t_program*> field_default_const_ref_programs_;
   std::unordered_map<const t_structured*, std::vector<const t_field*>>
       fields_in_layout_order_;
+
+  // Program split: LPT-partitioned structured definitions
+  std::vector<std::vector<t_structured*>> program_structured_definition_splits_;
+  // Current program split ID, set per loop iteration in generate_structs.
+  std::optional<int32_t> program_split_id_;
+
+  // Current service split state, set per loop iteration in
+  // generate_out_of_line_service
+  int32_t current_service_split_id_ = 0;
+  int32_t current_service_split_count_ = 1;
 
   void check_root_program(const t_program& program) const {
     if (&program != root_program_) {
@@ -696,8 +750,8 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void generate_inline_services(const std::vector<t_service*>& services);
 
   void initialize_context(context_visitor& visitor) override {
-    cpp_context_ =
-        std::make_unique<cpp2_generator_context>(source_mgr_, program_);
+    cpp_context_ = std::make_unique<cpp2_generator_context>(
+        source_mgr_, program_, get_split_count(options()));
     cpp_context_->register_visitors(visitor);
   }
 
@@ -1826,15 +1880,14 @@ class cpp_mstch_program : public mstch_program {
       const t_program* program,
       mstch_context& ctx,
       mstch_element_position pos,
-      std::optional<int32_t> split_id = std::nullopt,
-      std::optional<std::vector<t_structured*>> split_structs = std::nullopt)
-      : mstch_program(program, ctx, pos),
-        split_id_(split_id),
-        split_structs_(std::move(split_structs)) {
+      const cpp2_generator_context* cpp_context)
+      : mstch_program(program, ctx, pos), cpp_context_(*cpp_context) {
     register_methods(
         this,
-        {{"program:split_structs", &cpp_mstch_program::split_structs},
-         {"program:split_enums", &cpp_mstch_program::split_enums},
+        {{"program:split_structs",
+          {with_no_caching, &cpp_mstch_program::split_structs}},
+         {"program:split_enums",
+          {with_no_caching, &cpp_mstch_program::split_enums}},
          {"program:structs_and_typedefs",
           &cpp_mstch_program::structs_and_typedefs}});
   }
@@ -1888,39 +1941,31 @@ class cpp_mstch_program : public mstch_program {
   }
 
   mstch::node split_structs() {
-    std::string id =
-        program_cache_id(program_, get_program_namespace(program_));
+    if (std::optional<int> split_id = cpp_context_.program_split_id()) {
+      return make_mstch_array(
+          cpp_context_.program_current_split_structured_definitions(),
+          *context_.struct_factory);
+    }
     return make_mstch_array_cached(
-        split_id_ ? *split_structs_ : program_->structured_definitions(),
+        program_->structured_definitions(),
         *context_.struct_factory,
         context_.struct_cache,
-        id);
+        program_cache_id(program_, get_program_namespace(program_)));
   }
 
   mstch::node split_enums() {
-    if (split_id_) {
-      if (!split_enums_) {
-        int split_count = std::max(get_split_count(*context_.options), 1);
-        const size_t cnt = program_->enums().size();
-        split_enums_.emplace();
-        for (size_t i = *split_id_; i < cnt; i += split_count) {
-          split_enums_->push_back(program_->enums()[i]);
-        }
-      }
+    if (std::optional<int> split_id = cpp_context_.program_split_id()) {
+      return make_mstch_array(
+          cpp_context_.program_current_split_enums(), *context_.enum_factory);
     }
     std::string id =
         program_cache_id(program_, get_program_namespace(program_));
     return make_mstch_array_cached(
-        split_id_ ? *split_enums_ : program_->enums(),
-        *context_.enum_factory,
-        context_.enum_cache,
-        id);
+        program_->enums(), *context_.enum_factory, context_.enum_cache, id);
   }
 
  private:
-  const std::optional<int32_t> split_id_;
-  const std::optional<std::vector<t_structured*>> split_structs_;
-  std::optional<std::vector<t_enum*>> split_enums_;
+  const cpp2_generator_context& cpp_context_;
 };
 
 class cpp_mstch_service : public mstch_service {
@@ -1929,10 +1974,10 @@ class cpp_mstch_service : public mstch_service {
       const t_service* service,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_service* containing_service = nullptr,
-      int32_t split_id = 0,
-      int32_t split_count = 1)
-      : mstch_service(service, ctx, pos, containing_service) {
+      const cpp2_generator_context* cpp_context,
+      const t_service* containing_service = nullptr)
+      : mstch_service(service, ctx, pos, containing_service),
+        cpp_context_(*cpp_context) {
     register_methods(
         this,
         {
@@ -1941,11 +1986,6 @@ class cpp_mstch_service : public mstch_service {
             {"service:parent_service_qualified_name",
              &cpp_mstch_service::parent_service_qualified_name},
         });
-
-    const auto all_functions = mstch_service::get_functions();
-    for (size_t id = split_id; id < all_functions.size(); id += split_count) {
-      split_functions_.push_back(all_functions[id]);
-    }
   }
   mstch::node parent_service_cpp_name() {
     return cpp2::get_name(parent_service());
@@ -1956,10 +1996,30 @@ class cpp_mstch_service : public mstch_service {
 
  private:
   const std::vector<const t_function*>& get_functions() const override {
+    int split_count = cpp_context_.current_service_split_count();
+    if (split_count <= 1) {
+      return mstch_service::get_functions();
+    }
+    int split_id = cpp_context_.current_service_split_id();
+    // TODO(T256504524): This is a very temporary hack as an intermediate step
+    // of migrating to Whisker, because `get_functions()` requires the return
+    // value to be a reference. Once the cpp2 migration is complete, this and
+    // `mstch_service::get_functions` are getting nuked from orbit (this is the
+    // only override).
+    if (split_functions_.empty() || cached_split_id_ != split_id) {
+      split_functions_.clear();
+      for (size_t id = split_id; id < service_->functions().size();
+           id += split_count) {
+        split_functions_.push_back(&service_->functions()[id]);
+      }
+      cached_split_id_ = split_id;
+    }
     return split_functions_;
   }
 
-  std::vector<const t_function*> split_functions_;
+  const cpp2_generator_context& cpp_context_;
+  mutable std::vector<const t_function*> split_functions_;
+  mutable int32_t cached_split_id_ = -1;
 };
 
 class cpp_mstch_interaction : public cpp_mstch_service {
@@ -1970,8 +2030,10 @@ class cpp_mstch_interaction : public cpp_mstch_service {
       const t_interaction* interaction,
       mstch_context& ctx,
       mstch_element_position pos,
-      const t_service* containing_service)
-      : cpp_mstch_service(interaction, ctx, pos, containing_service) {}
+      const t_service* containing_service,
+      const cpp2_generator_context* cpp_context)
+      : cpp_mstch_service(
+            interaction, ctx, pos, cpp_context, containing_service) {}
 };
 
 bool check_container_needs_op_encode(const t_type& type) {
@@ -2219,9 +2281,9 @@ void t_mstch_cpp2_generator::generate_program() {
 }
 
 void t_mstch_cpp2_generator::set_mstch_factories() {
-  mstch_context_.add<cpp_mstch_program>();
-  mstch_context_.add<cpp_mstch_service>();
-  mstch_context_.add<cpp_mstch_interaction>();
+  mstch_context_.add<cpp_mstch_program>(cpp_context_.get());
+  mstch_context_.add<cpp_mstch_service>(cpp_context_.get());
+  mstch_context_.add<cpp_mstch_interaction>(cpp_context_.get());
   mstch_context_.add<cpp_mstch_struct>(cpp_context_.get());
 }
 
@@ -2282,36 +2344,26 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
 
   if (int split_count = get_split_count(options())) {
     auto digit = std::to_string(split_count - 1).size();
-    auto shards = cpp2::lpt_split(
-        program->structured_definitions(), split_count, [](auto t) {
-          return t->fields().size();
-        });
     for (int split_id = 0; split_id < split_count; ++split_id) {
       auto s = std::to_string(split_id);
       s = std::string(digit - s.size(), '0') + s;
-      auto split_program = std::make_shared<cpp_mstch_program>(
-          program,
-          mstch_context_,
-          mstch_element_position(),
-          split_id,
-          shards.at(split_id));
+      cpp_context_->set_program_split(split_id);
       render_to_file(
-          std::shared_ptr<mstch_base>(split_program),
-          "module_types.cpp",
-          name + "_types." + s + ".split.cpp");
+          prog, "module_types.cpp", name + "_types." + s + ".split.cpp");
       render_to_file(
-          std::shared_ptr<mstch_base>(split_program),
+          prog,
           "module_types_binary.cpp",
           name + "_types_binary." + s + ".split.cpp");
       render_to_file(
-          std::shared_ptr<mstch_base>(split_program),
+          prog,
           "module_types_compact.cpp",
           name + "_types_compact." + s + ".split.cpp");
       render_to_file(
-          std::shared_ptr<mstch_base>(split_program),
+          prog,
           "module_types_serialization.cpp",
           name + "_types_serialization." + s + ".split.cpp");
     }
+    cpp_context_->clear_program_split();
   } else {
     render_to_file(prog, "module_types.cpp", name + "_types.cpp");
     render_to_file(prog, "module_types_binary.cpp", name + "_types_binary.cpp");
@@ -2358,17 +2410,23 @@ void t_mstch_cpp2_generator::generate_out_of_line_service(
     for (int split_id = 0; split_id < split_count; ++split_id) {
       auto s = std::to_string(split_id);
       s = std::string(digit - s.size(), '0') + s;
-      auto split_service = std::make_shared<cpp_mstch_service>(
-          service,
-          mstch_context_,
-          mstch_element_position(),
-          nullptr,
-          split_id,
-          split_count);
+      cpp_context_->set_service_split(split_id, split_count);
+      // We need to create a fresh `cpp_mstch_service` for every iteration,
+      // because properties on the base `mstch_service` get cached but we need
+      // volatile behavior for anything that calls `get_functions` because the
+      // split ID changes the functions returned.
+      // Once the relevant properties/templates are migrated to Whisker, this
+      // will no longer be necessary.
       render_to_file(
-          std::shared_ptr<mstch_base>(split_service),
+          std::make_shared<cpp_mstch_service>(
+              service,
+              mstch_context_,
+              mstch_element_position{},
+              cpp_context_.get(),
+              /*containing_service=*/nullptr),
           "ServiceAsyncClient.cpp",
           name + "." + s + ".async_client_split.cpp");
+      cpp_context_->clear_service_split();
     }
   } else {
     render_to_file(

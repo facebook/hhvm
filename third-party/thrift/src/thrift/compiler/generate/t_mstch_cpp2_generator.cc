@@ -909,6 +909,28 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("schema_name", [this](const t_program& self) {
       return schematizer::name_schema(source_mgr_, self);
     });
+    def.property(
+        "type_definitions_topological_order", [&](const t_program& self) {
+          return to_type_array(
+              cpp_context_->type_definitions_topological_order(self), proto);
+        });
+    def.property(
+        "current_split_structured_definitions", [&](const t_program& self) {
+          if (cpp_context_->program_split_id().has_value() &&
+              program_ == &self) {
+            return to_type_array(
+                cpp_context_->program_current_split_structured_definitions(),
+                proto);
+          }
+          return to_type_array(self.structured_definitions(), proto);
+        });
+    def.property("current_split_enums", [&](const t_program& self) {
+      if (cpp_context_->program_split_id().has_value() && program_ == &self) {
+        return to_type_array(
+            cpp_context_->program_current_split_enums(), proto);
+      }
+      return to_type_array(self.enums(), proto);
+    });
     def.property("fatal_enums", [](const t_program& program) {
       whisker::array::raw result;
       for (const auto* enm : program.enums()) {
@@ -1860,6 +1882,18 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  std::vector<const t_function*> current_split_functions(
+      const t_service& service) const {
+    int split_count = cpp_context_->current_service_split_count();
+    int split_id = cpp_context_->current_service_split_id();
+    std::vector<const t_function*> result;
+    for (size_t id = split_id; id < service.functions().size();
+         id += split_count) {
+      result.push_back(&service.functions()[id]);
+    }
+    return result;
+  }
+
   prototype<t_service>::ptr make_prototype_for_service(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_service(proto);
@@ -1873,6 +1907,23 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("qualified_name", &cpp2::get_service_qualified_name);
     def.property("user_type_footprint", [&](const t_service& service) {
       return build_user_type_footprint(service, proto);
+    });
+
+    // Override `functions` from t_interface to respect service split state
+    def.property("functions", [this, &proto](const t_service& service) {
+      return to_array(current_split_functions(service), proto.of<t_function>());
+    });
+    def.property("has_sink_functions?", [this](const t_service& service) {
+      std::vector<const t_function*> funcs = current_split_functions(service);
+      return std::any_of(funcs.begin(), funcs.end(), [](const t_function* f) {
+        return f->sink() != nullptr;
+      });
+    });
+    def.property("has_stream_functions?", [this](const t_service& service) {
+      std::vector<const t_function*> funcs = current_split_functions(service);
+      return std::any_of(funcs.begin(), funcs.end(), [](const t_function* f) {
+        return f->stream() != nullptr;
+      });
     });
 
     return std::move(def).make();
@@ -1889,6 +1940,19 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     def.property("serial?", [](const t_interaction& self) {
       return self.has_unstructured_annotation("serial") ||
           self.has_structured_annotation(kSerialUri);
+    });
+    // Interactions don't get split, so check all functions
+    def.property("has_sink_functions?", [](const t_interaction& self) {
+      return std::any_of(
+          self.functions().begin(),
+          self.functions().end(),
+          [](const t_function& f) { return f.sink() != nullptr; });
+    });
+    def.property("has_stream_functions?", [](const t_interaction& self) {
+      return std::any_of(
+          self.functions().begin(),
+          self.functions().end(),
+          [](const t_function& f) { return f.stream() != nullptr; });
     });
     return std::move(def).make();
   }
@@ -1980,6 +2044,7 @@ class cpp_mstch_program : public mstch_program {
     return cpp2::get_gen_namespace(*program);
   }
   mstch::node structs_and_typedefs() {
+    // Equivalent Whisker property: `type_definitions_topological_order`
     const std::vector<const t_type*>& sorted =
         cpp_context_.type_definitions_topological_order(*program_);
 
@@ -2009,6 +2074,7 @@ class cpp_mstch_program : public mstch_program {
   }
 
   mstch::node split_structs() {
+    // Equivalent Whisker property: `current_split_structured_definitions`
     if (std::optional<int> split_id = cpp_context_.program_split_id()) {
       return make_mstch_array(
           cpp_context_.program_current_split_structured_definitions(),
@@ -2022,6 +2088,7 @@ class cpp_mstch_program : public mstch_program {
   }
 
   mstch::node split_enums() {
+    // Equivalent Whisker property: `current_split_enums`
     if (std::optional<int> split_id = cpp_context_.program_split_id()) {
       return make_mstch_array(
           cpp_context_.program_current_split_enums(), *context_.enum_factory);

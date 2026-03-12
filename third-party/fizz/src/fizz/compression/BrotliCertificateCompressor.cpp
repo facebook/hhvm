@@ -36,7 +36,7 @@ brotliCompressImpl(int level, int windowSize, folly::ByteRange input) {
         "Failed to compress certificate: could not calculate upper bound");
   }
 
-  size_t size = input.size();
+  size_t size = upperBound;
   auto compressed = IOBuf::create(upperBound);
   if (!BrotliEncoderCompress(
           level,

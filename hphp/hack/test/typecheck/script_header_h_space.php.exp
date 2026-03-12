@@ -1,3 +1,5 @@
+ERROR: File "script_header_h_space.php", line 1, characters 3-3:
+`<?h` is not a valid script marker. Use `<?hh` to start a Hack file. (Parsing[1002])
 ERROR: File "script_header_h_space.php", line 1, characters 6-6:
 A semicolon `;` is expected here. (Parsing[1002])
 ERROR: File "script_header_h_space.php", line 1, characters 5-5:

@@ -3712,6 +3712,18 @@ fn p_markup<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
             {
                 raise_parsing_error(markup_suffix, env, &syntax_error::error1001);
             }
+            // Check that the name after <? is either "hh" or "php"
+            if let MarkupSuffix(suffix_children) = &markup_suffix.children {
+                let name = &suffix_children.name;
+                if !name.is_missing() {
+                    let name_text = text_str(name, env);
+                    if !name_text.eq_ignore_ascii_case("hh")
+                        && !name_text.eq_ignore_ascii_case("php")
+                    {
+                        raise_parsing_error(name, env, &syntax_error::error1061(name_text));
+                    }
+                }
+            }
             let stmt_ = ast::Stmt_::mk_markup((pos.clone(), text(markup_hashbang, env)));
             Ok(ast::Stmt::new(pos, stmt_))
         }

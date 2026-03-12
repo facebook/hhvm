@@ -212,6 +212,12 @@ pub fn error1060(extension: &str) -> Error {
         extension, kind
     ))
 }
+pub fn error1061(name: &str) -> Error {
+    Cow::Owned(format!(
+        "`<?{}` is not a valid script marker. Use `<?hh` to start a Hack file.",
+        name
+    ))
+}
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
 pub const error1064: Error = Cow::Borrowed("XHP children declarations are no longer supported.");
 pub const error1065: Error = Cow::Borrowed("A backtick ``` is expected here.");

@@ -69,11 +69,12 @@ TerminalInputHandler::TerminalInputHandler(
 void TerminalInputHandler::handlerReady(uint16_t events) noexcept {
   // Handle read ready on stdin, but only once we're connected.
   if (events & EventHandler::READ && cb_->connected()) {
-    std::array<char, 512> buf;
-    int result = read(0, buf.data(), buf.size());
+    auto buf = folly::IOBuf::createCombined(512);
+    auto result = read(0, buf->writableData(), buf->capacity());
 
     if (result > 0) {
-      cb_->write(IOBuf::wrapBuffer(buf.data(), result));
+      buf->append(result);
+      cb_->write(std::move(buf));
     } else {
       if (result < 0) {
         FIZZ_LOG(ERROR) << "Error on terminal read: " << folly::errnoStr(errno);

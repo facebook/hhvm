@@ -19,12 +19,10 @@
 #include <filesystem>
 #include <memory>
 #include <queue>
-#include <set>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/core.h>
 
@@ -58,22 +56,6 @@ enum class enum_underlying_type {
 
 const std::string& get_cpp_template(const t_type* type) {
   return type->get_unstructured_annotation({"cpp.template", "cpp2.template"});
-}
-
-bool is_annotation_blacklisted_in_fatal(const std::string& key) {
-  const static std::set<std::string> black_list{
-      "cpp.methods",
-      "cpp.name",
-      "cpp.ref",
-      "cpp.ref_type",
-      "cpp.template",
-      "cpp.type",
-      "cpp2.ref",
-      "cpp2.ref_type",
-      "cpp2.template",
-      "cpp2.type",
-  };
-  return black_list.find(key) != black_list.end();
 }
 
 bool is_complex_return(const t_type* type) {
@@ -121,58 +103,6 @@ bool same_types(const t_type* a, const t_type* b) {
         same_types(&map_a->val_type().deref(), &map_b->val_type().deref());
   }
   return true;
-}
-
-std::string get_fatal_string_short_id(const std::string& key) {
-  return boost::algorithm::replace_all_copy(
-      boost::algorithm::replace_all_copy(key, ".", "_"), "/", "_");
-}
-std::string get_fatal_string_short_id(const t_named* node) {
-  // Use the unmodified cpp name.
-  return cpp2::get_name(node);
-}
-
-std::string get_fatal_namespace_name_short_id(
-    const std::string& lang, const std::string& ns) {
-  std::string replacement = lang == "cpp" || lang == "cpp2" ? "__" : "_";
-  std::string result = boost::algorithm::replace_all_copy(ns, ".", replacement);
-  result = boost::algorithm::replace_all_copy(result, "/", "_");
-  return result;
-}
-
-std::string get_fatal_namespace(
-    const std::string& lang, const std::string& ns) {
-  if (lang == "cpp" || lang == "cpp2") {
-    return boost::algorithm::replace_all_copy(ns, ".", "::");
-  } else if (lang == "php") {
-    return boost::algorithm::replace_all_copy(ns, ".", "_");
-  }
-  return ns;
-}
-
-std::string render_fatal_string(const std::string& normal_string) {
-  const static std::map<char, std::string> substition{
-      {'\0', "\\0"},
-      {'\n', "\\n"},
-      {'\r', "\\r"},
-      {'\t', "\\t"},
-      {'\'', "\\\'"},
-      {'\\', "\\\\"},
-  };
-  std::ostringstream res;
-  res << "::fatal::sequence<char";
-  for (const char& c : normal_string) {
-    res << ", '";
-    auto found = substition.find(c);
-    if (found != substition.end()) {
-      res << found->second;
-    } else {
-      res << c;
-    }
-    res << "'";
-  }
-  res << ">";
-  return res.str();
 }
 
 std::string get_out_dir_base(
@@ -747,39 +677,6 @@ bool type_transitively_refers_to_struct(const t_type& type) {
   return false;
 }
 
-std::vector<const t_typedef*> get_aliases_to_struct(const t_program& program) {
-  std::vector<const t_typedef*> result;
-  for (const t_typedef* i : program.typedefs()) {
-    const t_type* alias = &i->type().deref();
-    if (alias->is<t_typedef>() &&
-        alias->has_unstructured_annotation("cpp.type")) {
-      const t_type* ttype = i->type()->get_true_type();
-      if (ttype->is<t_structured>() &&
-          !cpp_name_resolver::find_first_adapter(*ttype)) {
-        result.push_back(i);
-      }
-    }
-  }
-  return result;
-}
-
-template <typename Node>
-void collect_fatal_string_annotated(
-    whisker::map::raw& fatal_strings, const Node* node) {
-  fatal_strings.emplace(
-      get_fatal_string_short_id(node), render_fatal_string(node->name()));
-  auto hash = cpp2::sha256_hex(node->name());
-  fatal_strings.emplace(
-      fmt::format("__fbthrift_hash_{}", hash),
-      render_fatal_string(node->name()));
-  for (const auto& a : node->unstructured_annotations()) {
-    if (!is_annotation_blacklisted_in_fatal(a.first)) {
-      fatal_strings.emplace(
-          get_fatal_string_short_id(a.first), render_fatal_string(a.first));
-    }
-  }
-}
-
 class t_mstch_cpp2_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -843,22 +740,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
               return whisker::make::boolean(
                   cpp_enable_same_program_const_referencing_);
             });
-    globals["cpp_fatal_string_id"] = whisker::dsl::make_function(
-        "cpp_fatal_string_id",
-        [](whisker::dsl::function::context ctx) -> whisker::object {
-          ctx.declare_named_arguments({});
-          ctx.declare_arity(1);
-          return whisker::make::string(
-              get_fatal_string_short_id(ctx.argument<whisker::string>(0)));
-        });
-    globals["cpp_render_fatal"] = whisker::dsl::make_function(
-        "cpp_render_fatal",
-        [](whisker::dsl::function::context ctx) -> whisker::object {
-          ctx.declare_named_arguments({});
-          ctx.declare_arity(1);
-          return whisker::make::string(
-              render_fatal_string(ctx.argument<whisker::string>(0)));
-        });
     return globals;
   }
 
@@ -930,122 +811,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
             cpp_context_->program_current_split_enums(), proto);
       }
       return to_type_array(self.enums(), proto);
-    });
-    def.property("fatal_enums", [](const t_program& program) {
-      whisker::array::raw result;
-      for (const auto* enm : program.enums()) {
-        result.emplace_back(get_fatal_string_short_id(enm));
-      }
-      return whisker::make::array(std::move(result));
-    });
-    def.property("fatal_unions", [](const t_program& program) {
-      whisker::array::raw result;
-      for (const t_structured* obj : program.structured_definitions()) {
-        if (obj->is<t_union>()) {
-          result.emplace_back(get_fatal_string_short_id(obj));
-        }
-      }
-      return whisker::make::array(std::move(result));
-    });
-    def.property("fatal_structs", [](const t_program& program) {
-      whisker::array::raw result;
-      for (const t_structured* obj : program.structured_definitions()) {
-        if (!obj->is<t_union>() &&
-            !cpp_name_resolver::find_first_adapter(*obj)) {
-          result.emplace_back(get_fatal_string_short_id(obj));
-        }
-      }
-      // typedefs resolve to struct
-      for (const t_typedef* i : get_aliases_to_struct(program)) {
-        result.emplace_back(get_fatal_string_short_id(i));
-      }
-      return whisker::make::array(std::move(result));
-    });
-    def.property("fatal_constants", [](const t_program& program) {
-      whisker::array::raw result;
-      for (const auto* cnst : program.consts()) {
-        result.emplace_back(get_fatal_string_short_id(cnst));
-      }
-      return whisker::make::array(std::move(result));
-    });
-    def.property("fatal_services", [](const t_program& program) {
-      whisker::array::raw result;
-      for (const auto* service : program.services()) {
-        result.emplace_back(get_fatal_string_short_id(service));
-      }
-      return whisker::make::array(std::move(result));
-    });
-    def.property("fatal_languages", [](const t_program& program) {
-      whisker::array::raw result;
-      for (const auto& pair : program.namespaces()) {
-        if (!pair.second->ns().empty()) {
-          result.emplace_back(
-              whisker::make::string(get_fatal_string_short_id(pair.first)));
-        }
-      }
-      return whisker::make::array(std::move(result));
-    });
-    def.property("fatal_identifiers", [](const t_program& program) {
-      whisker::map::raw unique_names;
-      unique_names.emplace(
-          get_fatal_string_short_id(&program),
-          render_fatal_string(program.name()));
-      // languages and namespaces
-      for (const auto& pair : program.namespaces()) {
-        if (!pair.second->ns().empty()) {
-          unique_names.emplace(
-              get_fatal_string_short_id(pair.first),
-              render_fatal_string(pair.first));
-          unique_names.emplace(
-              get_fatal_namespace_name_short_id(pair.first, pair.second->ns()),
-              render_fatal_string(
-                  get_fatal_namespace(pair.first, pair.second->ns())));
-        }
-      }
-      // enums
-      for (const auto* enm : program.enums()) {
-        collect_fatal_string_annotated(unique_names, enm);
-        unique_names.emplace(
-            get_fatal_string_short_id(enm), render_fatal_string(enm->name()));
-        for (const auto& i : enm->values()) {
-          collect_fatal_string_annotated(unique_names, &i);
-        }
-      }
-      // structs, unions and exceptions
-      for (const t_structured* obj : program.structured_definitions()) {
-        if (obj->is<t_union>()) {
-          unique_names.emplace("Type", render_fatal_string("Type"));
-        }
-        collect_fatal_string_annotated(unique_names, obj);
-        for (const auto& m : obj->fields()) {
-          collect_fatal_string_annotated(unique_names, &m);
-        }
-      }
-      // consts
-      for (const auto* cnst : program.consts()) {
-        unique_names.emplace(
-            get_fatal_string_short_id(cnst), render_fatal_string(cnst->name()));
-      }
-      // services
-      for (const auto* service : program.services()) {
-        unique_names.emplace(
-            get_fatal_string_short_id(service),
-            render_fatal_string(service->name()));
-        for (const auto& f : service->functions()) {
-          unique_names.emplace(
-              get_fatal_string_short_id(&f), render_fatal_string(f.name()));
-          for (const auto& p : f.params().fields()) {
-            unique_names.emplace(
-                get_fatal_string_short_id(&p), render_fatal_string(p.name()));
-          }
-        }
-      }
-      // typedefs resolve to struct
-      for (const t_typedef* i : get_aliases_to_struct(program)) {
-        unique_names.emplace(
-            get_fatal_string_short_id(i), render_fatal_string(i->name()));
-      }
-      return whisker::make::map(std::move(unique_names));
     });
     def.property("thrift_includes", [&proto](const t_program& program) {
       // TODO(T256504524): Migrate to `includes_for_codegen` property in
@@ -2920,12 +2685,6 @@ THRIFT_REGISTER_GENERATOR(
       Generate empty metadata, do not generate _metadata.cpp.
     py3cpp
       if specified, output folder is "gen-py3cpp" instead of "gen-cpp2".
-    reflection
-      Enable the generation of "old-type" (a.k.a. "fatal") reflection for Thrift
-      types. This is deprecated in favor of always-on reflection (see
-      https://fburl.com/thrift-cpp-reflection). Note: the name "fatal" comes
-      from the name of the Facebook Template Library, see:
-      https://github.com/facebook/fatal/blob/main/README.md
     single_file_service
       Generate all RPC services and client code in a single file, respectively.
     sync_methods_return_try

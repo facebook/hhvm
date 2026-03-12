@@ -5119,10 +5119,12 @@ end = struct
       env
       p
       (cid, mid) =
+    let is_class_ptr = String.equal (snd mid) SN.Members.mClass in
     let (env, _tal, ce, cty) =
       Class_id.class_expr
         ~is_attribute_param
         ~is_const:true
+        ~is_classptr:is_class_ptr
         ~require_class_ptr
         env
         []
@@ -5137,10 +5139,11 @@ end = struct
     let env =
       match get_node cty with
       | Tclass ((_, class_name), _, _) ->
-        (* Check package constraints on constants.
+        (* Check package constraints on non-::class constants.
+         * ::class is handled by class_expr via ClassPtrLinterOnly.
          * NB: this code will be superseded by the package check on CI once
          * the allow_classconst_violation carveout is removed *)
-        if (not (String.equal (snd mid) "class")) && should_check_packages then begin
+        if (not is_class_ptr) && should_check_packages then begin
           match Env.get_class env class_name with
           | Decl_entry.Found class_ ->
             (match
@@ -11573,6 +11576,7 @@ and Class_id : sig
     ?check_explicit_targs:bool ->
     ?inside_nameof:bool ->
     ?is_const:bool ->
+    ?is_classptr:bool ->
     ?is_attribute:bool ->
     ?is_catch:bool ->
     ?require_class_ptr:classname_expr_error ->
@@ -11662,6 +11666,7 @@ end = struct
       ?(check_explicit_targs = false)
       ?(inside_nameof = false)
       ?(is_const = false)
+      ?(is_classptr = false)
       ?(is_attribute = false)
       ?(is_catch = false)
       ?(require_class_ptr = Class_id.Pass)
@@ -11799,7 +11804,12 @@ end = struct
                 `No
               else if is_const then begin
                 if Env.package_allow_classconst_violations env then
-                  `ClassPtrLinterOnly
+                  if is_classptr then
+                    `ClassPtrLinterOnly
+                  else
+                    (* Non-::class constants: skip the class-level check
+                       here and let class_const handle it *)
+                    `No
                 else
                   `Yes Typing_error.Primary.Package.Class
               end else

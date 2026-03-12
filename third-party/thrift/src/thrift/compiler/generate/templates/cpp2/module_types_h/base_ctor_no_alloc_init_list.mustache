@@ -14,20 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-
-}}{{! --------------- Empty constractor, no allocator, init list
-}}{{struct:cpp_underlying_name}}(){{!
-  }}{{#struct:explicitly_constructed_fields}}{{> common/colon_newline}}{{!
-    }}{{#field:type}}{{!
-      }}    {{field:cpp_storage_name}}({{!
-      }}{{#field:cpp_ref_not_boxed?}}{{> module_types_h/smart_ptr_constructor}}{{/field:cpp_ref_not_boxed?}}{{!
-      }}{{#field:boxed_ref?}}{{> field/default}}{{/field:boxed_ref?}}{{!
-        TODO(dokwon): Support custom default for intern boxed field.
-      }}{{#field:intern_boxed_ref?}}{{field:cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getDefault<{{> field/tag}}>()){{/field:intern_boxed_ref?}}{{!
-      }}{{^field:cpp_ref?}}{{#field:default_value}}{{!
-          Use value initialization when no custom default is provided.
-        }}{{> field/default}}{{/field:default_value}}{{!
-      }}{{/field:cpp_ref?}}{{!
-      }}){{> common/comma_newline}}{{!
-    }}{{/field:type}}{{!
-  }}{{/struct:explicitly_constructed_fields}}{{!}}
+}}{{! Empty constructor, no allocator, init list !}}
+{{#pragma ignore-newlines}}
+{{struct:cpp_underlying_name}}()
+{{#each (array.enumerate struct:explicitly_constructed_fields with_first=true with_last=true) as |i field first? last?|}}
+{{> common/colon_newline}}    {{field.cpp_storage_name}}(
+{{#if field.cpp_ref_not_boxed?}}{{#field}}{{#field.type}}{{> module_types_h/smart_ptr_constructor}}{{/field.type}}{{/field}}{{/if}}
+{{#if field.boxed_ref?}}{{#field}}{{#field.type}}{{> field/default}}{{/field.type}}{{/field}}{{/if}}
+  {{! TODO(dokwon): Support custom default for intern boxed field. }}
+{{#if field.intern_boxed_ref?}}{{field.cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getDefault<{{#partial fields.tag field=field struct=struct:self}}>()){{/if}}
+  {{! Use value initialization when no custom default is provided. }}
+{{#if (not field.cpp_ref?)}}{{#field}}{{#field.type}}{{#field.default_value}}{{> field/default}}{{/field.default_value}}{{/field.type}}{{/field}}{{/if}}
+){{> common/comma_newline}}
+{{/each}}

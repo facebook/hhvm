@@ -388,6 +388,42 @@ struct cpp2_field_generator_context {
 std::vector<const t_field*> get_structured_fields_in_layout_order(
     const t_structured& strct);
 
+/**
+ * Check fields for the meeting any of the following criteria:
+ * All enums
+ * All primitives except empty strings
+ * All non-empty structs and containers
+ * All non-optional references with basetypes, enums, non-empty structs, and
+ * containers
+ */
+bool is_field_explicitly_constructed(
+    const t_field& field, const t_structured& parent_struct) {
+  const t_type* type = field.type()->get_true_type();
+  if (cpp2::is_explicit_ref(&field) &&
+      field.qualifier() == t_field_qualifier::optional) {
+    return false;
+  }
+  if (type->is<t_enum>()) {
+    return true;
+  }
+  if (type->is<t_primitive_type>()) {
+    return !type->is_string_or_binary() || field.default_value() != nullptr ||
+        cpp2::is_explicit_ref(&field);
+  }
+  if (type->is<t_struct>() || type->is<t_union>()) {
+    return type != &parent_struct &&
+        (cpp2::is_explicit_ref(&field) ||
+         (field.default_value() != nullptr &&
+          !field.default_value()->is_empty()));
+  }
+  if (type->is<t_container>()) {
+    return cpp2::is_explicit_ref(&field) ||
+        (field.default_value() != nullptr &&
+         !field.default_value()->is_empty());
+  }
+  return false;
+}
+
 class cpp2_generator_context {
  public:
   explicit cpp2_generator_context(
@@ -1315,6 +1351,21 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
           }
           return whisker::make::array(std::move(fields));
         });
+    def.property("fields_in_layout_order", [&](const t_structured& strct) {
+      return to_array(
+          cpp_context_->fields_in_layout_order(strct), proto.of<t_field>());
+    });
+    def.property(
+        "explicitly_constructed_fields", [&](const t_structured& strct) {
+          std::vector<const t_field*> filtered;
+          for (const t_field* field :
+               cpp_context_->fields_in_layout_order(strct)) {
+            if (is_field_explicitly_constructed(*field, strct)) {
+              filtered.emplace_back(field);
+            }
+          }
+          return to_array(filtered, proto.of<t_field>());
+        });
 
     return std::move(def).make();
   }
@@ -2102,8 +2153,6 @@ class cpp_mstch_struct : public mstch_struct {
     register_methods(
         this,
         {
-            {"struct:explicitly_constructed_fields",
-             &cpp_mstch_struct::explicitly_constructed_fields},
             {"struct:fields_in_layout_order",
              &cpp_mstch_struct::fields_in_layout_order},
         });
@@ -2112,42 +2161,10 @@ class cpp_mstch_struct : public mstch_struct {
  private:
   const cpp2_generator_context& cpp_context_;
 
-  mstch::node explicitly_constructed_fields() {
-    // Filter fields according to the following criteria:
-    // Get all enums
-    // Get all base_types but empty strings
-    // Get all non-empty structs and containers
-    // Get all non-optional references with basetypes, enums,
-    // non-empty structs, and containers
-    std::vector<const t_field*> filtered_fields;
-    for (const auto* field : cpp_context_.fields_in_layout_order(*struct_)) {
-      const t_type* type = field->type()->get_true_type();
-      // Filter out all optional references.
-      if (cpp2::is_explicit_ref(field) &&
-          field->qualifier() == t_field_qualifier::optional) {
-        continue;
-      }
-      if (type->is<t_enum>() ||
-          (type->is<t_primitive_type>() && !type->is_string_or_binary()) ||
-          (type->is_string_or_binary() && field->default_value() != nullptr) ||
-          (type->is<t_container>() && field->default_value() != nullptr &&
-           !field->default_value()->is_empty()) ||
-          ((type->is<t_struct>() || type->is<t_union>()) &&
-           (struct_ != type->try_as<t_struct>()) &&
-           ((field->default_value() && !field->default_value()->is_empty()) ||
-            (cpp2::is_explicit_ref(field) &&
-             field->qualifier() != t_field_qualifier::optional))) ||
-          (type->is<t_container>() && cpp2::is_explicit_ref(field) &&
-           field->qualifier() != t_field_qualifier::optional) ||
-          (type->is<t_primitive_type>() && cpp2::is_explicit_ref(field) &&
-           field->qualifier() != t_field_qualifier::optional)) {
-        filtered_fields.push_back(field);
-      }
-    }
-    return make_mstch_fields(filtered_fields);
-  }
-
   mstch::node fields_in_layout_order() {
+    // TODO(T256504524): An equivalent Whisker property has been created, but we
+    // first need to migrate templates that rely on mstch behavior like implicit
+    // `first?`/`last?` properties
     return make_mstch_fields(cpp_context_.fields_in_layout_order(*struct_));
   }
 };

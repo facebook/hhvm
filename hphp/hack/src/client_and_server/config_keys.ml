@@ -19,8 +19,6 @@ let is_systemlib = key "is_systemlib"
 
 let disable_lval_as_an_expression = key "disable_lval_as_an_expression"
 
-let disable_legacy_soft_typehints = key "disable_legacy_soft_typehints"
-
 let const_default_func_args = key "const_default_func_args"
 
 let const_default_lambda_args = key "const_default_lambda_args"

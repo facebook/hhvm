@@ -1,2 +1,4 @@
+ERROR: File "case1.php", line 4, characters 3-6:
+The `@` syntax for soft typehints is not allowed. Use the `__Soft` attribute instead. (Parsing[1002])
 ERROR: File "case1.php", line 6, characters 8-8:
 The error suppression operator `@` is not allowed (Parsing[1002])

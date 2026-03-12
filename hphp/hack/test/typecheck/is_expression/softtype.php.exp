@@ -1,2 +1,4 @@
 ERROR: File "softtype.php", line 6, characters 13-16:
+The `@` syntax for soft typehints is not allowed. Use the `__Soft` attribute instead. (Parsing[1002])
+ERROR: File "softtype.php", line 6, characters 13-16:
 `__Soft` typehints cannot be used with `is` expressions (Parsing[1002])

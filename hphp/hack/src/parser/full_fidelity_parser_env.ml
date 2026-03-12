@@ -16,7 +16,6 @@ type t = {
   disable_lval_as_an_expression: bool;
   mode: FileInfo.mode option;
   rust: bool;
-  disable_legacy_soft_typehints: bool;
   leak_rust_tree: bool;
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
@@ -34,7 +33,6 @@ let default =
     disable_lval_as_an_expression = false;
     rust = true;
     mode = None;
-    disable_legacy_soft_typehints = false;
     leak_rust_tree = false;
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
@@ -50,7 +48,6 @@ let make
     ?(disable_lval_as_an_expression = default.disable_lval_as_an_expression)
     ?mode
     ?(rust = default.rust)
-    ?(disable_legacy_soft_typehints = default.disable_legacy_soft_typehints)
     ?((* DANGER: if you leak the root tree into OCaml, it's on you to ensure that
          * it's eventually disposed to avoid memory leak. *)
       leak_rust_tree = default.leak_rust_tree)
@@ -69,7 +66,6 @@ let make
     disable_lval_as_an_expression;
     mode;
     rust;
-    disable_legacy_soft_typehints;
     leak_rust_tree;
     enable_xhp_class_modifier;
     disable_xhp_element_mangling;
@@ -91,8 +87,6 @@ let mode e = e.mode
 let is_strict e = e.mode = Some FileInfo.Mstrict
 
 let rust e = e.rust
-
-let disable_legacy_soft_typehints e = e.disable_legacy_soft_typehints
 
 let leak_rust_tree e = e.leak_rust_tree
 

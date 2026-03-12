@@ -99,10 +99,7 @@ impl NativeEnv {
     fn to_options(&self) -> Options {
         Options {
             hhvm: Hhvm {
-                parser_options: ParserOptions {
-                    disable_legacy_soft_typehints: false,
-                    ..self.hhvm.parser_options.clone()
-                },
+                parser_options: self.hhvm.parser_options.clone(),
                 ..self.hhvm.clone()
             },
             hhbc: self.hhbc_flags.clone(),

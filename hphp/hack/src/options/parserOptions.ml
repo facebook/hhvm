@@ -20,7 +20,6 @@ type t = {
   hhvm_compat_mode: bool;
   hhi_mode: bool;
   codegen: bool;
-  disable_legacy_soft_typehints: bool;
   disable_xhp_children_declarations: bool;
   const_default_lambda_args: bool;
   interpret_soft_types_as_like_types: bool;
@@ -64,7 +63,6 @@ let default =
     hhvm_compat_mode = false;
     hhi_mode = false;
     codegen = false;
-    disable_legacy_soft_typehints = true;
     disable_xhp_children_declarations = false;
     const_default_lambda_args = false;
     interpret_soft_types_as_like_types = false;
@@ -113,7 +111,6 @@ type ffi_t =
   * bool
   * bool
   * bool
-  * bool
   * Experimental_features.feature_status SMap.t
   * bool
   * bool
@@ -126,7 +123,6 @@ let to_rust_ffi_t po =
     po.hhi_mode,
     po.codegen,
     po.disable_lval_as_an_expression,
-    po.disable_legacy_soft_typehints,
     po.const_static_props,
     po.const_default_func_args,
     po.abstract_static_props,

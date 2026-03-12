@@ -265,7 +265,6 @@ impl HhConfig {
                 "union_intersection_type_hints",
                 default.union_intersection_type_hints,
             )?,
-            disable_legacy_soft_typehints: default.disable_legacy_soft_typehints,
             allowed_decl_fixme_codes: hhconfig
                 .get_int_set_or("allowed_decl_fixme_codes", default.allowed_decl_fixme_codes)?,
             const_static_props: default.const_static_props,

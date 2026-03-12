@@ -320,9 +320,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         disable_lval_as_an_expression =
           bool_opt Config_keys.disable_lval_as_an_expression config
           >?? po_opt.disable_lval_as_an_expression;
-        disable_legacy_soft_typehints =
-          bool_opt Config_keys.disable_legacy_soft_typehints config
-          >?? po_opt.disable_legacy_soft_typehints;
         const_default_func_args =
           bool_opt Config_keys.const_default_func_args config
           >?? po_opt.const_default_func_args;

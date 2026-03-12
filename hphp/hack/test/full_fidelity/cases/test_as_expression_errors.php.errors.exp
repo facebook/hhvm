@@ -1,1 +1,2 @@
+(13,9)-(13,13) The `@` syntax for soft typehints is not allowed. Use the `__Soft` attribute instead.
 (13,9)-(13,13) `__Soft` typehints cannot be used with `as` expressions

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e4296266052a270dedbeb12189ca67bc>>
+// @generated SignedSource<<5c84650e70296309759722da70f0a50e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -60,8 +60,6 @@ pub struct ParserOptions {
     pub hhi_mode: bool,
     /// Are we emitting bytecode?
     pub codegen: bool,
-    /// Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute.
-    pub disable_legacy_soft_typehints: bool,
     /// Disable `children (foo|bar+|pcdata)` declarations as they can be implemented without special syntax
     pub disable_xhp_children_declarations: bool,
     /// Statically check default lambda arguments. Subset of default_func_args
@@ -140,7 +138,6 @@ pub struct ParserOptions {
 )]
 #[repr(C)]
 pub struct FfiT(
-    pub bool,
     pub bool,
     pub bool,
     pub bool,

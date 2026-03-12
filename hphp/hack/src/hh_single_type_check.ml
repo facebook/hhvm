@@ -275,7 +275,6 @@ let parse_options () =
   let check_redundant_generics = ref false in
   let disallow_static_memoized = ref false in
   let enable_supportdyn_hint = ref false in
-  let disable_legacy_soft_typehints = ref false in
   let glean_reponame = ref (Glean_options.reponame GlobalOptions.default) in
   let disable_xhp_element_mangling = ref false in
   let keep_user_attributes = ref false in
@@ -578,10 +577,6 @@ let parse_options () =
       ( "--enable-supportdyn-hint",
         Arg.Set enable_supportdyn_hint,
         " Allow the supportdyn type hint" );
-      ( "--disable-legacy-soft-typehints",
-        Arg.Set disable_legacy_soft_typehints,
-        " Disables the legacy @ syntax for soft typehints (use __Soft instead)"
-      );
       ( "--glean-reponame",
         Arg.String (fun str -> glean_reponame := str),
         " glean repo name" );
@@ -814,7 +809,6 @@ let parse_options () =
         allow_unstable_features = true;
         (* The remainder are set by the command line options *)
         is_systemlib = default.is_systemlib;
-        disable_legacy_soft_typehints = !disable_legacy_soft_typehints;
         const_default_func_args = default.const_default_func_args;
         const_default_lambda_args = default.const_default_lambda_args;
         const_static_props = default.const_static_props;

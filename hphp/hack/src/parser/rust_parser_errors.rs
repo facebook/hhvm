@@ -5412,10 +5412,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
     fn disabled_legacy_soft_typehint_errors(&mut self, node: S<'a>) {
         if let SoftTypeSpecifier(_) = node.children {
-            if self.env.parser_options.disable_legacy_soft_typehints {
-                self.errors
-                    .push(make_error_from_node(node, errors::no_legacy_soft_typehints))
-            }
+            self.errors
+                .push(make_error_from_node(node, errors::no_legacy_soft_typehints))
         }
     }
 

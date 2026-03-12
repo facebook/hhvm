@@ -23,8 +23,6 @@ val is_systemlib : string
 
 val disable_lval_as_an_expression : string
 
-val disable_legacy_soft_typehints : string
-
 val const_default_func_args : string
 
 val const_default_lambda_args : string

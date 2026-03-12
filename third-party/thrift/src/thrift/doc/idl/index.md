@@ -411,9 +411,17 @@ namespace cpp2 facebook.peoplesearch
 // `Meta.PeopleSearch`.
 namespace csharp Meta.PeopleSearch
 
+// Directs the compiler to generate Go code inside the package
+// `facebook.peoplesearch`.
+namespace go facebook.peoplesearch
+
 // Directs the compiler to generate Java code inside the package
 // `com.facebook.peoplesearch`.
 namespace java.swift com.facebook.peoplesearch
+
+// Directs the compiler to generate Rust code with crate name
+// `peoplesearch`.
+namespace rust peoplesearch
 ```
 
 ## Definitions

@@ -233,7 +233,9 @@ const StaticString
 PreClass* PreClassEmitter::create(Unit& unit) const {
   Attr attrs = m_attrs;
   assertx(IMPLIES(unit.isSystemLib(), attrs & AttrBuiltin));
-  if (attrs & AttrPersistent &&
+  if (Cfg::Eval::ForceAllPersistent) {
+    attrs |= AttrPersistent;
+  } else if (attrs & AttrPersistent &&
       !Cfg::Repo::Authoritative && !unit.isSystemLib()) {
     attrs = Attr(attrs & ~AttrPersistent);
   }

@@ -388,6 +388,7 @@ final class Options {
     public ?string $hh_single_type_check;
     public bool $bespoke = false;
     public bool $factsdir = false;
+    public bool $persistent = false;
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
@@ -448,6 +449,7 @@ function get_options(
     'write-to-checkout' => '',
     'bespoke' => '',
     '*factsdir' => '',
+    '*persistent' => '',
   ];
   $options = new Options() as dynamic;
   $files = vec[];
@@ -1072,6 +1074,10 @@ function hhvm_cmd(
     $file_cache =
       "\"" . Status::getTestWorkingDir($test) . "/file.cache\"";
     $cmd .= " -vServer.FileCache=$file_cache";
+  }
+
+  if ($options->persistent) {
+    $cmd .= ' -vEval.ForceAllPersistent=true';
   }
 
   if ($options->jitsample is nonnull) {
@@ -2557,6 +2563,11 @@ function should_skip_test_simple(
       file_exists("$test.$no_bespoke_tag")) {
       // Skip due to changes in array identity
       return 'skip-bespoke';
+  }
+
+  if ($options->persistent &&
+      file_exists("$test.skip-persistent")) {
+    return 'skip-persistent';
   }
 
   $no_jitserialize_tag = "nojitserialize";

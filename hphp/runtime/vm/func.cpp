@@ -823,7 +823,8 @@ void Func::def(Func* func) {
     if (Cfg::Eval::LockFreeFuncDef) {
       auto const persistent = func->isPersistent();
       assertx(!persistent ||
-              (Cfg::Repo::Authoritative || func->unit()->isSystemLib()));
+              (Cfg::Eval::ForceAllPersistent ||
+               Cfg::Repo::Authoritative || func->unit()->isSystemLib()));
 
       // Binding an RDS handle is an atomic operation. For persistent handles an
       // initial value can ve specified when binding succeeds which is also
@@ -845,7 +846,7 @@ void Func::def(Func* func) {
       f = ne->getCachedFunc();
       if (f == nullptr) {
         auto const persistent = func->isPersistent();
-        assertx(!persistent || (Cfg::Repo::Authoritative || func->unit()->isSystemLib()));
+        assertx(!persistent || (Cfg::Eval::ForceAllPersistent || Cfg::Repo::Authoritative || func->unit()->isSystemLib()));
 
         if (!ne->m_cachedFunc.bound()) {
           ne->m_cachedFunc.bind(

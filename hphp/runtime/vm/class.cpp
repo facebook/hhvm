@@ -1807,7 +1807,8 @@ Slot Class::clsCnsSlot(
 void Class::verifyPersistence() const {
   if (!debug) return;
   if (!isPersistent()) return;
-  assertx(preClass()->unit()->isSystemLib() || Cfg::Repo::Authoritative);
+  assertx(Cfg::Eval::ForceAllPersistent ||
+          preClass()->unit()->isSystemLib() || Cfg::Repo::Authoritative);
   assertx(!m_parent || classHasPersistentRDS(m_parent.get()));
   for (DEBUG_ONLY int i = 0; i < m_interfaces.size(); i++) {
     assertx(classHasPersistentRDS(m_interfaces[i]));

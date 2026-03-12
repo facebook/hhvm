@@ -885,7 +885,8 @@ void Unit::mergeImpl() {
           return true;
         }
         assertx(preClass->isPersistent() ==
-                (this->isSystemLib() || Cfg::Repo::Authoritative));
+                (Cfg::Eval::ForceAllPersistent ||
+                 this->isSystemLib() || Cfg::Repo::Authoritative));
         return Class::def(preClass.get(), failIsFatal) != nullptr;
       });
 

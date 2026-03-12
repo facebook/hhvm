@@ -601,7 +601,108 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
     in
     let renv = { renv with on_error } in
     let (renv, ty, _) = refresh_type renv Ast_defs.Covariant ty in
-    (refresh_tvars Tvid.Set.empty renv, ty)
+    let env = refresh_tvars Tvid.Set.empty renv in
+
+    (* Remove escaping expression-dependent types from the global tpenv.
+       Without this cleanup, expression-dependent types introduced inside
+       one lambda leak into subsequent lambdas via the global tpenv.
+       typing_taccess expands type constants on a Tgeneric by iterating
+       over all its upper bounds and intersecting the results. With the
+       recursive `with` refinement pattern (e.g.,
+         abstract const type TCB as IRepBuilder
+           with { type TCB = this::TCB };
+       ), each lambda adds a distinct `with` upper bound to the mangled
+       generic, so typing_taccess produces a growing intersection,
+       causing exponential blowup.
+
+       After the refresh steps above have replaced escaping types in
+       locals, the return type, and unsolved tyvar bounds, we:
+       1. Build a substitution mapping each deleted expr-dep generic
+          to its upper bound (read before deletion)
+       2. Delete the expr-dep entries from the tpenv
+       3. Apply the substitution to remaining tpenv entries' bounds
+          (cleaning stale `with` refinements that reference deleted types)
+       4. Apply the substitution to solved tyvar solutions (which the
+          refresh steps expanded inline but did not write back) *)
+    let pre_deletion_tpenv = Env.get_global_tpenv env in
+
+    (* Build substitution map: deleted name -> upper bound *)
+    let subst =
+      List.fold_left types ~init:SMap.empty ~f:(fun acc name ->
+          if Typing_defs.DependentKind.is_expr_dep_ty name then
+            match
+              TySet.elements
+                (Type_parameter_env.get_upper_bounds pre_deletion_tpenv name)
+            with
+            | [ub] -> SMap.add name ub acc
+            | _ -> acc
+          else
+            acc)
+    in
+    let subst_ty ty =
+      Typing_defs_core.Locl_subst.apply
+        ty
+        ~subst
+        ~combine_reasons:(fun ~src ~dest:_ -> src)
+    in
+
+    (* Delete expr-dep entries from the tpenv *)
+    let global_tpenv =
+      List.fold_left types ~init:pre_deletion_tpenv ~f:(fun tpenv name ->
+          if
+            Typing_defs.DependentKind.is_expr_dep_ty name
+            && Type_parameter_env.mem name tpenv
+          then
+            Type_parameter_env.remove tpenv name
+          else
+            tpenv)
+    in
+
+    (* Substitute in remaining entries bounds *)
+    let global_tpenv =
+      if SMap.is_empty subst then
+        global_tpenv
+      else
+        List.fold_left
+          (Type_parameter_env.get_tparam_names global_tpenv)
+          ~init:global_tpenv
+          ~f:(fun tpenv name ->
+            match Type_parameter_env.get_with_pos name tpenv with
+            | None -> tpenv
+            | Some (def_pos, tparam_info) ->
+              let ubs = TySet.map subst_ty tparam_info.upper_bounds in
+              let lbs = TySet.map subst_ty tparam_info.lower_bounds in
+              if
+                TySet.equal ubs tparam_info.upper_bounds
+                && TySet.equal lbs tparam_info.lower_bounds
+              then
+                tpenv
+              else
+                Type_parameter_env.add
+                  ~def_pos
+                  name
+                  { tparam_info with upper_bounds = ubs; lower_bounds = lbs }
+                  tpenv)
+    in
+    let env = Env.env_with_global_tpenv env global_tpenv in
+
+    (* Substitute in solved tyvar solutions *)
+    let env =
+      if SMap.is_empty subst then
+        env
+      else
+        List.fold_left (Env.get_all_tyvars env) ~init:env ~f:(fun env tv ->
+            if Env.tyvar_is_solved env tv then
+              let (env, solution) = Env.get_type env Typing_reason.none tv in
+              let solution' = subst_ty solution in
+              if phys_equal solution solution' then
+                env
+              else
+                Env.add env tv solution'
+            else
+              env)
+    in
+    (env, ty)
   )
 
 (********************************************************************)

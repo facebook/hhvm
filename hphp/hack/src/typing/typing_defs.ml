@@ -514,6 +514,8 @@ module DependentKind = struct
       Some (Str.matched_group 1 str)
     with
     | _ -> None
+
+  let is_expr_dep_ty str = Option.is_some (strip_generic_dep_ty str)
 end
 
 let rec is_denotable ty =

@@ -329,6 +329,8 @@ module DependentKind : sig
   val is_generic_dep_ty : string -> bool
 
   val strip_generic_dep_ty : string -> string option
+
+  val is_expr_dep_ty : string -> bool
 end
 
 module ShapeFieldMap : sig

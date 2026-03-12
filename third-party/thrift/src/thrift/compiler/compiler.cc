@@ -942,10 +942,6 @@ std::string parse_args(
           sparams.forbid_unstructured_annotations = true;
           continue;
         }
-        if (validator == "allow_unstructured_annotations") {
-          sparams.forbid_unstructured_annotations = false;
-          continue;
-        }
         if (validator == "warn_on_redundant_custom_default_values") {
           sparams.redundant_custom_default_values =
               sema_params::validation_level::warn;

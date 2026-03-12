@@ -104,7 +104,7 @@ TEST(CompilerTest, no_field_id) {
   check_compile(
       R"(
     package "facebook.com/thrift/test"
-    struct Experimental {} (thrift.uri = "facebook.com/thrift/annotation/Experimental") # expected-error: The annotation thrift.uri has been removed. Please use @thrift.Uri instead.
+    struct Experimental {} (thrift.uri = "facebook.com/thrift/annotation/Experimental") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
     struct Foo {
       @Experimental
       i32 field2; # expected-error@-1: No field id specified for `field2`
@@ -120,8 +120,7 @@ TEST(CompilerTest, zero_as_field_id_annotation) {
     package "facebook.com/thrift/test"
     struct Foo {
       0: i32 field (cpp.deprecated_allow_zero_as_field_id);
-        # expected-error@-1: Unstructured annotations are not allowed: `cpp.deprecated_allow_zero_as_field_id`.
-        # expected-warning@-2: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
+        # expected-warning@-1: Nonpositive field id (0) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): -1
 
       1: list<i32> other;
     }
@@ -729,16 +728,16 @@ TEST(CompilerTest, mixin_field_name_uniqueness) {
     struct A { 1: i32 i; }
     struct B { 2: i64 i; }
     struct C {
-      1: A a (cpp.mixin); # expected-error: The annotation cpp.mixin has been removed. Please use @thrift.Mixin instead.
+      1: A a (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
       2: B b (cpp.mixin); # expected-error: Field `B.i` and `A.i` can not have same name in `C`.
-    } # expected-error@-1: The annotation cpp.mixin has been removed. Please use @thrift.Mixin instead.
+    } # expected-warning@-1: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
   )");
   check_compile(R"(
     package "facebook.com/thrift/test"
     struct A { 1: i32 i; }
 
     struct C {
-      1: A a (cpp.mixin); # expected-error: The annotation cpp.mixin has been removed. Please use @thrift.Mixin instead.
+      1: A a (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
       2: i64 i; # expected-error: Field `C.i` and `A.i` can not have same name in `C`.
     }
   )");
@@ -762,7 +761,7 @@ TEST(CompilerTest, function_exception_field_name_uniqueness) {
 TEST(CompilerTest, annotation_positions) {
   check_compile(R"(
     package "facebook.com/thrift/test"
-    struct Type {1: string name} (thrift.uri = "facebook.com/thrift/annotation/Type") # expected-error: The annotation thrift.uri has been removed. Please use @thrift.Uri instead.
+    struct Type {1: string name} (thrift.uri = "facebook.com/thrift/annotation/Type") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
     typedef set<set<i32> (annot)> T # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
     const i32 (annot) C = 42 # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
     service S {
@@ -774,7 +773,6 @@ TEST(CompilerTest, annotation_positions) {
     struct Foo {
       1: i32 (annot) f
       # expected-error@-1: Annotations are not allowed in this position. Extract the type into a named typedef instead.
-      # expected-error@10: Unstructured annotations are not allowed: `annot`.
       @Type{name="foo"}
       2: i32 g
     }
@@ -853,13 +851,12 @@ TEST(CompilerTest, deprecated_annotations) {
 
     @hack.Attributes{attributes=[]} # expected-error: Duplicate annotations hack.attributes and @hack.Attributes.
     struct A {
-        1: optional i64 field (cpp.box) # expected-error: The annotation cpp.box has been removed. Please use @thrift.Box instead.
-        2: i64 with (py3.name = "w", go.name = "w") # expected-error: The annotation py3.name has been removed. Please use @python.Name instead.
-        # expected-error@-1: The annotation go.name has been removed. Please use @go.Name instead.
+        1: optional i64 field (cpp.box) # expected-warning: The annotation cpp.box is deprecated. Please use @thrift.Box instead.
+        2: i64 with (py3.name = "w", go.name = "w") # expected-warning: The annotation py3.name is deprecated. Please use @python.Name instead.
+        # expected-warning@-1: The annotation go.name is deprecated. Please use @go.Name instead.
     } (hack.attributes = "")
 
-    typedef i64 (cpp.type = "std::uint64_t") T # expected-error: The annotation cpp.type has been removed. Please use @cpp.Type instead.
-    # expected-error@-1: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+    typedef i64 (cpp.type = "std::uint64_t") T # expected-warning: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
 
     # This should not produce a warning even though the annotation is currently lowered.
     @cpp.Type{name = "std::uint64_t"}
@@ -892,9 +889,8 @@ TEST(CompilerTest, removed_annotations) {
 
     typedef map<string, string> (rust.type = "HashMap") HashMap
     # expected-error@-1: The annotation rust.type has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
-    # expected-error@-2: Annotations are not allowed in this position. Extract the type into a named typedef instead.
 
-    struct S {} (cpp.type = "foo") # expected-error: The annotation cpp.type has been removed. Please use @cpp.Type instead.
+    struct S {} (cpp.type = "foo") # expected-warning: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
     typedef S T
 
     service J {
@@ -925,12 +921,12 @@ TEST(CompilerTest, cpp_type_compatibility) {
     include "thrift/annotation/cpp.thrift"
 
     @cpp.Adapter{name="Adapter"} # expected-error: Definition `Bar1` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations
-    typedef i32 Bar1 (cpp.type = "std::uint32_t") # expected-error@-1: The annotation cpp.type has been removed. Please use @cpp.Type instead.
+    typedef i32 Bar1 (cpp.type = "std::uint32_t") # expected-warning@-1: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
 
     @cpp.Adapter{name="Adapter"} # expected-error: Definition `A` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations
     struct A {
       1: i32 field;
-    } (cpp.type = "CustomA") # expected-error@-3: The annotation cpp.type has been removed. Please use @cpp.Type instead.
+    } (cpp.type = "CustomA") # expected-warning@-3: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
 
     struct B {
       @cpp.Adapter{name="Adapter"} # expected-warning: At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.
@@ -993,18 +989,18 @@ TEST(CompilerTest, mixins_and_refs) {
   check_compile(R"(
     package "facebook.com/thrift/test"
     struct C {
-      1: i32 f1 (cpp.mixin); # expected-error: The annotation cpp.mixin has been removed. Please use @thrift.Mixin instead.
+      1: i32 f1 (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
         # expected-error@-1: Mixin field `f1` type must be a struct or union. Found `i32`.
     }
 
     struct D { 1: i32 i }
     union E {
-      1: D a (cpp.mixin); # expected-error: The annotation cpp.mixin has been removed. Please use @thrift.Mixin instead.
+      1: D a (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
         # expected-error@-1: Union `E` cannot contain mixin field `a`.
     }
 
     struct F {
-      1: optional D a (cpp.mixin); # expected-error: The annotation cpp.mixin has been removed. Please use @thrift.Mixin instead.
+      1: optional D a (cpp.mixin); # expected-warning: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
         # expected-error@-1: Mixin field `a` cannot be optional.
     }
   )");
@@ -1075,7 +1071,6 @@ TEST(CompilerTest, structured_ref) {
     struct Foo {
       1: optional Foo field1 (cpp.ref);
         # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field1`.
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp.ref`.
 
       @cpp.Ref{type = cpp.RefType.Unique}
         # expected-warning@-1: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `field2`.
@@ -1086,7 +1081,6 @@ TEST(CompilerTest, structured_ref) {
         # expected-warning@-2: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field3`.
         # expected-warning@-3: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `field3`.
       3: optional Foo field3 (cpp.ref);
-        # expected-error@14: Unstructured annotations are not allowed: `cpp.ref`.
 
       @cpp.Ref{type = cpp.RefType.Unique}
       @cpp.Ref{type = cpp.RefType.Unique}
@@ -1111,12 +1105,10 @@ TEST(CompilerTest, unstructured_and_structured_adapter) {
           # expected-error@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `my_field3` with @cpp.Adapter.
         @hack.Adapter{name="MyAdapter"}
         3: optional i64 my_field3 (cpp.ref);
-          # expected-error@10: Unstructured annotations are not allowed: `cpp.ref`.
         @cpp.Adapter{name="MyAdapter"}
           # expected-error@-1: cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `my_field4` with @cpp.Adapter.
         @hack.Adapter{name="MyAdapter"}
         4: optional i64 my_field4 (cpp.ref_type = "unique");
-          # expected-error@15: Unstructured annotations are not allowed: `cpp.ref_type`.
         @cpp.Adapter{name="MyAdapter"}
           # expected-error@-1: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `my_field5` with @cpp.Adapter.
         @hack.Adapter{name="MyAdapter"}
@@ -1312,8 +1304,10 @@ TEST(CompilerTest, non_beneficial_lazy_fields) {
     package "facebook.com/thrift/test"
     typedef double FP
     struct A {
-      1: i32 field (cpp.experimental.lazy); # expected-error: The annotation cpp.experimental.lazy has been removed. Please use @cpp.Lazy instead.
-      2: FP field2 (cpp.experimental.lazy); # expected-error: The annotation cpp.experimental.lazy has been removed. Please use @cpp.Lazy instead.
+      1: i32 field (cpp.experimental.lazy); # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
+        # expected-error@-1: Integral field `field` can not be marked as lazy, since doing so won't bring any benefit. [no-lazy-int-float-field-rule]
+      2: FP field2 (cpp.experimental.lazy); # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
+        # expected-error@-1: Floating point field `field2` can not be marked as lazy, since doing so won't bring any benefit. [no-lazy-int-float-field-rule]
     }
   )");
 }
@@ -1340,7 +1334,7 @@ TEST(CompilerTest, boxed_ref_and_optional) {
     struct A {
       1: i64 field (cpp.box)
         # expected-error@-1: The `thrift.box` annotation can only be used with optional fields. Make sure `field` is optional.
-        # expected-error@-2: The annotation cpp.box has been removed. Please use @thrift.Box instead.
+        # expected-warning@-2: The annotation cpp.box is deprecated. Please use @thrift.Box instead.
       @thrift.Box
       2: i64 field2
         # expected-error@-2: The `thrift.box` annotation can only be used with optional fields. Make sure `field2` is optional.
@@ -1363,8 +1357,7 @@ TEST(CompilerTest, boxed_ref_and_optional) {
     struct A {
         1: optional i64 field (cpp.ref, thrift.box);
           # expected-error@-1: The `@thrift.Box` annotation cannot be combined with the other reference annotations. Only annotate a single reference annotation from `field`.
-          # expected-error@-2: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-          # expected-error@-3: Unstructured annotations are not allowed: `cpp.ref`.
+          # expected-warning@-2: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
 
         @thrift.Box
           # expected-error@-1: The `@thrift.InternBox` annotation cannot be combined with the other reference annotations. Only annotate a single reference annotation from `field2`.
@@ -1404,11 +1397,9 @@ TEST(CompilerTest, unique_ref) {
     struct Bar {
       1: optional Foo field1 (cpp.ref);
         # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field1`.
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp.ref`.
 
       2: optional Foo field2 (cpp2.ref);
         # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field2`.
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp2.ref`.
 
       @cpp.Ref{type = cpp.RefType.Unique}
       3: optional Foo field3;
@@ -1422,25 +1413,19 @@ TEST(CompilerTest, unique_ref) {
 
       6: optional Foo field6 (cpp.ref_type = "unique");
         # expected-warning@-1: cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `field6`.
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp.ref_type`.
 
       7: optional Foo field7 (cpp2.ref_type = "unique");
         # expected-warning@-1: cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `field7`.
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp2.ref_type`.
 
       8: optional Foo field8 (cpp.ref_type = "shared");
-        # expected-error@-1: Unstructured annotations are not allowed: `cpp.ref_type`.
 
       9: optional Foo field9 (cpp2.ref_type = "shared");
-        # expected-error@-1: Unstructured annotations are not allowed: `cpp2.ref_type`.
 
       10: optional Foo field10 (cpp.ref = "true");
         # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field10`.
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp.ref`.
 
       11: optional Foo field11 (cpp2.ref = "true");
         # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field11`.
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp2.ref`.
 
       12: optional Foo field12;
 
@@ -1461,11 +1446,9 @@ TEST(CompilerTest, non_optional_ref_and_box_forbidden) {
     struct Bar {
       1: Foo field1 (cpp.ref);
         # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field1` (in `Bar`).
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp.ref`.
 
       2: Foo field2 (cpp2.ref);
         # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field2` (in `Bar`).
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp2.ref`.
 
       @cpp.Ref{type = cpp.RefType.Unique}
       3: Foo field3;
@@ -1481,27 +1464,21 @@ TEST(CompilerTest, non_optional_ref_and_box_forbidden) {
 
       6: Foo field6 (cpp.ref_type = "unique");
         # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field6` (in `Bar`).
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp.ref_type`.
 
       7: Foo field7 (cpp2.ref_type = "unique");
         # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field7` (in `Bar`).
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp2.ref_type`.
 
       8: Foo field8 (cpp.ref_type = "shared");
         # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field8` (in `Bar`).
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp.ref_type`.
 
       9: Foo field9 (cpp2.ref_type = "shared");
         # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field9` (in `Bar`).
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp2.ref_type`.
 
       10: Foo field10 (cpp.ref = "true");
         # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field10` (in `Bar`).
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp.ref`.
 
       11: Foo field11 (cpp2.ref = "true");
         # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field11` (in `Bar`).
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp2.ref`.
 
       12: Foo field12;
 
@@ -1524,7 +1501,6 @@ TEST(CompilerTest, non_optional_ref_legacy_allowed_annotation_on_wrong_field) {
     struct Bar {
       1: Foo field1 (cpp.ref);
         # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field1` (in `Bar`).
-        # expected-error@-2: Unstructured annotations are not allowed: `cpp.ref`.
 
       @cpp.AllowLegacyNonOptionalRef
       2: Foo field2;
@@ -1599,7 +1575,6 @@ TEST(CompilerTest, cpp_methods_validation) {
     package "facebook.com/thrift/test"
 
     struct Foo { # expected-error: cpp.methods is not supported
-      # expected-error@-1: Unstructured annotations are not allowed: `cpp.methods`.
     } (cpp.methods = "")
   )",
       {"--extra-validation", "deprecated_cpp_methods=error"});
@@ -1609,8 +1584,7 @@ TEST(CompilerTest, lazy_struct_compatibility) {
   check_compile(R"(
     package "facebook.com/thrift/test"
     struct Foo { # expected-error: cpp.methods is incompatible with lazy deserialization in struct `Foo`
-      # expected-error@-1: Unstructured annotations are not allowed: `cpp.methods`.
-      1: list<i32> field (cpp.experimental.lazy) # expected-error: The annotation cpp.experimental.lazy has been removed. Please use @cpp.Lazy instead.
+      1: list<i32> field (cpp.experimental.lazy) # expected-warning: The annotation cpp.experimental.lazy is deprecated. Please use @cpp.Lazy instead.
     } (cpp.methods = "")
   )");
 }
@@ -1646,12 +1620,12 @@ TEST(CompilerTest, thrift_uri_uniqueness) {
     include "file1.thrift"
     include "file2.thrift"
     struct Bar2 {
-    } (thrift.uri = "facebook.com/thrift/annotation/Bar") # expected-error@-1: The annotation thrift.uri has been removed. Please use @thrift.Uri instead.
+    } (thrift.uri = "facebook.com/thrift/annotation/Bar") # expected-warning@-1: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
       # expected-error@-2: Thrift URI `facebook.com/thrift/annotation/Bar` is already defined for `Bar2`.
     struct Baz1 {
-    } (thrift.uri = "facebook.com/thrift/annotation/Baz") # expected-error@-1: The annotation thrift.uri has been removed. Please use @thrift.Uri instead.
+    } (thrift.uri = "facebook.com/thrift/annotation/Baz") # expected-warning@-1: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
     struct Baz2 {
-    } (thrift.uri = "facebook.com/thrift/annotation/Baz") # expected-error@-1: The annotation thrift.uri has been removed. Please use @thrift.Uri instead.
+    } (thrift.uri = "facebook.com/thrift/annotation/Baz") # expected-warning@-1: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
       # expected-error@-2: Thrift URI `facebook.com/thrift/annotation/Baz` is already defined for `Baz2`.
   )";
   check_compile(name_contents_map, "main.thrift");
@@ -1905,68 +1879,68 @@ TEST(CompilerTest, time_complexity_of_for_each_transitive_field) {
     struct S_30 { 1: optional S_29 a (thrift.box); 2: optional S_29 b (thrift.box); }
     struct S_31 { 1: optional S_30 a (thrift.box); 2: optional S_30 b (thrift.box); }
     struct S_32 { 1: optional S_31 a (thrift.box); 2: optional S_31 b (thrift.box); }
-		# expected-error@4: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@4: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@5: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@5: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@6: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@6: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@7: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@7: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@8: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@8: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@9: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@9: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@10: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@10: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@11: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@11: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@12: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@12: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@13: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@13: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@14: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@14: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@15: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@15: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@16: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@16: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@17: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@17: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@18: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@18: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@19: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@19: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@20: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@20: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@21: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@21: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@22: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@22: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@23: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@23: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@24: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@24: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@25: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@25: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@26: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@26: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@27: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@27: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@28: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@28: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@29: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@29: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@30: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@30: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@31: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@31: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@32: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@32: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@33: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@33: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@34: The annotation thrift.box has been removed. Please use @thrift.Box instead.
-		# expected-error@34: The annotation thrift.box has been removed. Please use @thrift.Box instead.
+		# expected-warning@4: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@4: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@5: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@5: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@6: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@6: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@7: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@7: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@8: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@8: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@9: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@9: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@10: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@10: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@11: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@11: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@12: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@12: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@13: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@13: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@14: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@14: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@15: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@15: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@16: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@16: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@17: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@17: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@18: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@18: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@19: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@19: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@20: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@20: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@21: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@21: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@22: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@22: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@23: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@23: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@24: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@24: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@25: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@25: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@26: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@26: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@27: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@27: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@28: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@28: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@29: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@29: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@30: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@30: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@31: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@31: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@32: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@32: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@33: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@33: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@34: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+		# expected-warning@34: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
   )");
 }
 
@@ -2461,14 +2435,16 @@ TEST(CompilerTest, py3_enum_invalid_value_names) {
     package "facebook.com/thrift/test"
     enum Foo {
       name = 1,
+        # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
       value = 2 (py3.name = "value_"),
-        # expected-error@-1: The annotation py3.name has been removed. Please use @python.Name instead.
+        # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
     }
 
     enum Bar {
       name = 1 (py3.name = "name_"),
-        # expected-error@-1: The annotation py3.name has been removed. Please use @python.Name instead.
+        # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
       value = 2,
+        # expected-error@-1: 'value' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
     }
   )",
       {"--gen", "mstch_py3"});
@@ -2480,14 +2456,16 @@ TEST(CompilerTest, py3_invalid_field_names) {
     package "facebook.com/thrift/test"
     union Foo {
       1: string name;
+        # expected-error@-1: 'name' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
       2: i32 value (py3.name = "value_");
-        # expected-error@-1: The annotation py3.name has been removed. Please use @python.Name instead.
+        # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
     }
 
     union Bar {
       1: string name (py3.name = "name_");
-        # expected-error@-1: The annotation py3.name has been removed. Please use @python.Name instead.
+        # expected-warning@-1: The annotation py3.name is deprecated. Please use @python.Name instead.
       2: i32 value;
+        # expected-error@-1: 'value' should not be used as an enum/union field name in thrift-py3. Use a different name or annotate the field with `(py3.name="<new_py_name>")` [enum-member-union-field-names-rule]
     }
   )",
       {"--gen", "mstch_py3"});

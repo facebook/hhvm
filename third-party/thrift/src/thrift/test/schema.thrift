@@ -99,5 +99,4 @@ struct Annot {
 }
 
 @Annot{val = 42}
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"annot_with_val": "2023", "annot_without_val": "1"}}
-struct Annotated {}
+struct Annotated {} (annot_with_val = 2023, annot_without_val)

@@ -27,17 +27,17 @@ TEST(StandardValidatorTest, BadPriority) {
       void foo() (priority = "bad2");
     } (priority = "bad1")
     # expected-error@-3: Bad priority 'bad1'. Choose one of ["HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"].
-    # expected-error@-4: The annotation priority has been removed. Please use @thrift.Priority instead.
+    # expected-warning@-4: The annotation priority is deprecated. Please use @thrift.Priority instead.
     # expected-error@-4: Bad priority 'bad2'. Choose one of ["HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"].
-    # expected-error@-5: The annotation priority has been removed. Please use @thrift.Priority instead.
+    # expected-warning@-5: The annotation priority is deprecated. Please use @thrift.Priority instead.
 
     interaction Interaction {
       void foo() (priority = "bad4");
     } (priority = "bad3")
     # expected-error@-3: Bad priority 'bad3'. Choose one of ["HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"].
-    # expected-error@-4: The annotation priority has been removed. Please use @thrift.Priority instead.
+    # expected-warning@-4: The annotation priority is deprecated. Please use @thrift.Priority instead.
     # expected-error@-4: Bad priority 'bad4'. Choose one of ["HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"].
-    # expected-error@-5: The annotation priority has been removed. Please use @thrift.Priority instead.
+    # expected-warning@-5: The annotation priority is deprecated. Please use @thrift.Priority instead.
   )");
 }
 
@@ -66,7 +66,7 @@ TEST(StandardValidatorTest, UnionErrors) {
         # expected-warning@-1: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead: `req` (in `Union`).
       2: optional i64 opt; # expected-error: Unions cannot contain qualified fields. Remove `optional` qualifier from field `opt`.
       3: Struct mixin (cpp.mixin); # expected-error: Union `Union` cannot contain mixin field `mixin`.
-        # expected-error@-1: The annotation cpp.mixin has been removed. Please use @thrift.Mixin instead.
+        # expected-warning@-1: The annotation cpp.mixin is deprecated. Please use @thrift.Mixin instead.
       4: i64 non;
     }
   )");
@@ -95,7 +95,7 @@ TEST(StandardValidatorTest, ValidateExceptionMessage) {
     }
 
     exception MyExceptionWithDuplicatedDeprecatedExceptionMessage { # expected-error: Duplicate message annotation.
-      # expected-error@-1: The annotation message has been removed. Please use @thrift.ExceptionMessage instead.
+      # expected-warning@-1: The annotation message is deprecated. Please use @thrift.ExceptionMessage instead.
       @thrift.ExceptionMessage
       1: string valid_message;
       2: string invalid_message;

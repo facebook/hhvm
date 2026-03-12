@@ -43,13 +43,7 @@ def check_run_thrift(annotate, *args):
     gen_str = "json"
     if annotate:
         gen_str = "json:annotate"
-    argsx = [
-        thrift,
-        "--gen",
-        gen_str,
-        "--extra-validation",
-        "allow_unstructured_annotations",
-    ] + list(args)
+    argsx = [thrift, "--gen", gen_str] + list(args)
     pipe = subprocess.PIPE
     return subprocess.check_call(argsx, stdout=pipe, stderr=pipe)
 

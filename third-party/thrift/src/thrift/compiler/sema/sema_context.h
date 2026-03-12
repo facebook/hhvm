@@ -134,7 +134,7 @@ struct sema_params {
   // for a field, but that value is equal to the intrinsic default value.
   validation_level redundant_custom_default_values = validation_level::none;
 
-  bool forbid_unstructured_annotations = true;
+  bool forbid_unstructured_annotations = false;
 
   // Action to take when @cpp.EnableCustomTypeOrdering is present on a
   // (structured) type that does not need it.

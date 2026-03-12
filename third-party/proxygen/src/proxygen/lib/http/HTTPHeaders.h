@@ -286,10 +286,6 @@ class HTTPHeaders {
    */
   bool remove(std::string_view name);
   bool remove(HTTPHeaderCode code);
-  void rawRemove(const std::string& name) {
-    remove(name);
-  }
-
   /**
    * Remove all possible versions of header eg. if x-y-z is the
    * argument it will remove x-y_z, x_y-z and x_y_z too.

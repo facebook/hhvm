@@ -6,7 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#define PROXYGEN_HTTPHEADERS_IMPL
 #include <proxygen/lib/http/HTTPHeaders.h>
 
 #include <glog/logging.h>

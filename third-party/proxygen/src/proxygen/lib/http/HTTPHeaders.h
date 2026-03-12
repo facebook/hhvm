@@ -381,9 +381,4 @@ std::string HTTPHeaders::combine(const T& header,
   return combined;
 }
 
-#ifndef PROXYGEN_HTTPHEADERS_IMPL
-#undef ITERATE_OVER_CODES
-#undef ITERATE_OVER_STRINGS
-#endif // PROXYGEN_HTTPHEADERS_IMPL
-
 } // namespace proxygen

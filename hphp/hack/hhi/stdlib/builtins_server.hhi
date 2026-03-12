@@ -68,3 +68,8 @@ namespace HH {
   function jumpstart_prof_tag()[read_globals]: string;
   function mark_server_health(bool $healthy): void;
 }
+
+namespace HH\Experimental {
+  function enable_thread_hint(int $hint = 0): void;
+  function disable_thread_hint(int $hint = 0): void;
+}

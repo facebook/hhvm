@@ -288,6 +288,97 @@ whisker::array::ptr build_user_type_footprint(
   return whisker::array::of(std::move(ret));
 }
 
+// Program's transitive_schema_includes depends on consistent order.
+struct program_less {
+  bool operator()(const t_program* a, const t_program* b) const {
+    return a->path() < b->path();
+  }
+};
+
+/**
+ * Collect all transitive includes of a program into a sorted set, excluding
+ * programs with the `DisableSchemaConst` annotation.
+ */
+void collect_transitive_includes(
+    const t_program& program,
+    std::set<const t_program*, program_less>& result) {
+  for (const t_program* include : program.get_includes_for_codegen()) {
+    if (include->has_structured_annotation(kDisableSchemaConstUri)) {
+      continue;
+    }
+    if (result.insert(include).second) {
+      collect_transitive_includes(*include, result);
+    }
+  }
+}
+
+/**
+ * To reduce build time, the generated constants code only includes the
+ * headers for direct thrift includes in the .cpp file and not in the .h file,
+ * which means constants from transitive includes are not visible. To allow
+ * constructing a flattened array of schemas for transitive dependencies
+ * without undoing this optimization we indirect through the flattened array
+ * of one of the direct includes to reach the schema of the transitive
+ * include.
+ *
+ * This builds the information for how we will access the schema for all of
+ * the transitive dependencies of a program. Each entry has:
+ * - program: the included program
+ * - schema_provider_program: the  program whose _includes array provides access
+ *   (equals the root program for direct includes)
+ * - schema_index: 0-based position within the provider's sorted transitive
+ *   include set (template accounts for each program's own schema being
+ *   inserted at 0)
+ */
+whisker::object program_transitive_schema_includes(
+    const t_program& program, const whisker::prototype_database& proto) {
+  // Accumulate the full set of transitive schema includes in a stable order
+  std::map<const t_program*, whisker::object, program_less> items;
+  for (const t_program* include : program.get_includes_for_codegen()) {
+    if (include->has_structured_annotation(kDisableSchemaConstUri)) {
+      continue;
+    }
+    // Direct include: schema_provider_program is the root program itself.
+    items.emplace(
+        include,
+        whisker::map::of({
+            {"program",
+             whisker::make::native_handle(proto.create<t_program>(*include))},
+            {"schema_provider_program",
+             whisker::make::native_handle(proto.create<t_program>(program))},
+            {"schema_index", whisker::make::null},
+        }));
+    // Get all transitive includes of this direct include (sorted by path).
+    // The index within this sorted set determines the position in the
+    // corresponding _includes array
+    std::set<const t_program*, program_less> transitive_includes;
+    collect_transitive_includes(*include, transitive_includes);
+    int64_t i = 0;
+    for (const t_program* transitive : transitive_includes) {
+      if (!items.contains(transitive)) {
+        items.emplace(
+            transitive,
+            whisker::map::of({
+                {"program",
+                 whisker::make::native_handle(
+                     proto.create<t_program>(*transitive))},
+                {"schema_provider_program",
+                 whisker::make::native_handle(
+                     proto.create<t_program>(*include))},
+                {"schema_index", whisker::make::i64(i)},
+            }));
+      }
+      ++i;
+    }
+  }
+  whisker::array::raw result;
+  result.reserve(items.size());
+  for (auto& [_, item] : items) {
+    result.emplace_back(std::move(item));
+  }
+  return whisker::make::array(std::move(result));
+}
+
 struct cpp2_field_generator_context {
   const t_field* serialization_prev = nullptr;
   const t_field* serialization_next = nullptr;
@@ -577,7 +668,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 
   void generate_program() override;
   void fill_validator_visitors(ast_validator&) const override;
-  static std::string get_cpp2_namespace(const t_program* program);
   static std::string include_prefix(
       const t_program* program, const compiler_options_map& options);
 
@@ -844,6 +934,10 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       }
       return whisker::make::array(std::move(result));
     });
+    def.property(
+        "transitive_schema_includes", [&proto](const t_program& program) {
+          return program_transitive_schema_includes(program, proto);
+        });
     return std::move(def).make();
   }
 
@@ -1724,104 +1818,25 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
 };
 
 class cpp_mstch_program : public mstch_program {
-  // transitive_schema_initializers depends on consistent order.
-  struct program_less {
-    bool operator()(const t_program* a, const t_program* b) const {
-      return a->path() < b->path();
-    }
-  };
-  using transitive_include_map =
-      std::map<const t_program*, std::string, program_less>;
-
  public:
   cpp_mstch_program(
       const t_program* program,
       mstch_context& ctx,
       mstch_element_position pos,
-      source_manager& sm,
       std::optional<int32_t> split_id = std::nullopt,
       std::optional<std::vector<t_structured*>> split_structs = std::nullopt)
       : mstch_program(program, ctx, pos),
         split_id_(split_id),
-        split_structs_(std::move(split_structs)),
-        sm_(sm) {
+        split_structs_(std::move(split_structs)) {
     register_methods(
         this,
-        {{"program:transitive_schema_initializers",
-          &cpp_mstch_program::transitive_schema_initializers},
-         {"program:num_transitive_thrift_includes",
-          &cpp_mstch_program::num_transitive_thrift_includes},
-         {"program:split_structs", &cpp_mstch_program::split_structs},
+        {{"program:split_structs", &cpp_mstch_program::split_structs},
          {"program:split_enums", &cpp_mstch_program::split_enums},
          {"program:structs_and_typedefs",
           &cpp_mstch_program::structs_and_typedefs}});
   }
   std::string get_program_namespace(const t_program* program) override {
-    return t_mstch_cpp2_generator::get_cpp2_namespace(program);
-  }
-  /**
-   * To reduce build time, the generated constants code only includes the
-   * headers for direct thrift includes in the .cpp file and not in the .h
-   * file, which means constants from transitive includes are not visible. To
-   * allow constructing a flattened array of schemas for transitive
-   * dependencies without undoing this optimization we indirect through the
-   * flattened array of one of the direct includes to reach the schema of the
-   * transitive include. Constructing this in mustache would be horrible, so
-   * we build up the code here instead.
-   */
-  std::unique_ptr<transitive_include_map> gen_transitive_include_map(
-      const t_program* program) {
-    auto includes = std::make_unique<transitive_include_map>();
-    auto local_includes = program->get_includes_for_codegen();
-    for (const auto* include : local_includes) {
-      if (include->has_structured_annotation(kDisableSchemaConstUri)) {
-        continue;
-      }
-
-      includes->emplace(
-          include,
-          fmt::format(
-              "::apache::thrift::detail::mc::readSchema({}::{}_constants::{})",
-              t_mstch_cpp2_generator::get_cpp2_namespace(include),
-              include->name(),
-              schematizer::name_schema(sm_, *include)));
-      const auto& recursive_includes = context_.cache().get(
-          *include, [&] { return gen_transitive_include_map(include); });
-      // Transitive includes begin at 1 because every programs' list of includes
-      // has itself as the first entry.
-      size_t i = 1;
-      for (const auto& [recursive_include, _] : recursive_includes) {
-        if (includes->count(recursive_include) == 0) {
-          includes->emplace(
-              recursive_include,
-              fmt::format(
-                  "::apache::thrift::detail::mc::readSchemaInclude({}::{}_constants::{}_includes, {})",
-                  t_mstch_cpp2_generator::get_cpp2_namespace(include),
-                  include->name(),
-                  schematizer::name_schema(sm_, *include),
-                  i));
-        }
-        ++i;
-      }
-    }
-    return includes;
-  }
-  mstch::node transitive_schema_initializers() {
-    const auto& includes = context_.cache().get(
-        *program_, [&] { return gen_transitive_include_map(program_); });
-    mstch::array initializers = {
-        fmt::format("{}()", schematizer::name_schema(sm_, *program_))};
-    initializers.reserve(includes.size() + 1);
-    for (const auto& [_, include] : includes) {
-      initializers.emplace_back(include);
-    }
-    return initializers;
-  }
-  mstch::node num_transitive_thrift_includes() {
-    const auto& includes = context_.cache().get(
-        *program_, [&] { return gen_transitive_include_map(program_); });
-    // Codegen includes the root program but transitive_include_map does not.
-    return includes.size() + 1;
+    return cpp2::get_gen_namespace(*program);
   }
   mstch::node structs_and_typedefs() {
     // We combine these because the adapter trait used in typedefs requires the
@@ -1903,7 +1918,6 @@ class cpp_mstch_program : public mstch_program {
   const std::optional<int32_t> split_id_;
   const std::optional<std::vector<t_structured*>> split_structs_;
   std::optional<std::vector<t_enum*>> split_enums_;
-  source_manager& sm_;
 };
 
 class cpp_mstch_service : public mstch_service {
@@ -2201,7 +2215,7 @@ void t_mstch_cpp2_generator::generate_program() {
 }
 
 void t_mstch_cpp2_generator::set_mstch_factories() {
-  mstch_context_.add<cpp_mstch_program>(std::ref(source_mgr_));
+  mstch_context_.add<cpp_mstch_program>();
   mstch_context_.add<cpp_mstch_service>();
   mstch_context_.add<cpp_mstch_interaction>();
   mstch_context_.add<cpp_mstch_struct>();
@@ -2275,7 +2289,6 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
           program,
           mstch_context_,
           mstch_element_position(),
-          source_mgr_,
           split_id,
           shards.at(split_id));
       render_to_file(
@@ -2436,11 +2449,6 @@ void t_mstch_cpp2_generator::generate_inline_services(
       context, "module_handlers-inl.h", module_name + "_handlers-inl.h");
   render_to_file(context, "module_handlers.h", module_name + "_handlers.h");
   render_to_file(context, "module_handlers.cpp", module_name + "_handlers.cpp");
-}
-
-std::string t_mstch_cpp2_generator::get_cpp2_namespace(
-    const t_program* program) {
-  return cpp2::get_gen_namespace(*program);
 }
 
 std::string t_mstch_cpp2_generator::include_prefix(

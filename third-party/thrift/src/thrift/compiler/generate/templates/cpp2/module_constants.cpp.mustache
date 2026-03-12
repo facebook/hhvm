@@ -16,6 +16,25 @@
 
 }}
 {{#import "common/const_value" as const_value}}
+  {{#let partial read_include_schema |include|}}
+{{#pragma ignore-newlines}}
+::apache::thrift::detail::mc::
+  {{#if (object.eq? include.schema_provider_program root_program)}}
+    {{! Schema is for a program whose header we've directly included, because
+        the `schema_provider_program` is *this* program }}
+    {{#let prog=include.program}}
+readSchema(::{{prog.cpp_qualified_namespace}}::{{prog.name}}_constants::{{prog.schema_name}})
+  {{#else}}
+    {{! Schema is of a transitive include, because `schema_provider_program` is
+        a different program (whose header we have included). We need to access
+        it via the specific offset within that header's schema includes.
+        We add 1 to the include's index, since we always place the program
+        itself at position 0, with includes at positions 1 onwards. }}
+    {{#let prog=include.schema_provider_program}}
+readSchemaInclude(::{{prog.cpp_qualified_namespace}}::{{prog.name}}_constants
+::{{prog.schema_name}}_includes, {{(int.add 1 include.schema_index)}})
+  {{/if (object.eq? include.schema_provider_program root_program)}}
+  {{/let partial}}
 {{> Autogen}}
 
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
@@ -63,10 +82,13 @@ namespace {{program:name}}_constants {
 {{/program:has_schema?}}
 ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes() {
 {{#if program:schema_includes_const?}}
-  static const ::std::array<::std::string_view, {{program:num_transitive_thrift_includes}}> includes = {
-    {{#program:transitive_schema_initializers}}
-    {{ . }},
-    {{/program:transitive_schema_initializers}}
+  {{#let schema_includes=program:transitive_schema_includes}}
+  {{! Add 1 to length for the first entry (the current program), followed by all its transitive includes }}
+  static const ::std::array<::std::string_view, {{(int.add 1 (array.len schema_includes))}}> includes = {
+    {{program:schema_name}}(),
+    {{#each schema_includes as |include|}}
+    {{#partial read_include_schema include=include}},
+    {{/each}}
   };
   return ::folly::range(includes);
 {{#else}}

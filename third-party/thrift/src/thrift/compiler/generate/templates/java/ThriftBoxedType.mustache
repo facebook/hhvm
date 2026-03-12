@@ -24,12 +24,18 @@
       }}{{#type:typedef_type}}{{type:setAdapter}}{{> ThriftBoxedType}}{{type:unsetAdapter}}{{/type:typedef_type}}{{!
     }}{{/type:hasAdapter?}}{{!
     }}{{^type:hasAdapter?}}{{!
-      }}{{#type:isAdapterSet?}}{{!
-        }}{{#type:typedef_type}}{{type:setAdapter}}{{> ThriftBoxedType}}{{/type:typedef_type}}{{!
-      }}{{/type:isAdapterSet?}}{{!
-      }}{{^type:isAdapterSet?}}{{!
-        }}{{#type:typedef_type}}{{> ThriftBoxedType}}{{/type:typedef_type}}{{!
-      }}{{/type:isAdapterSet?}}{{!
+      }}{{#type:isBinaryString?}}{{!
+        }}{{#type:isAdapterSet?}}io.netty.buffer.ByteBuf{{/type:isAdapterSet?}}{{!
+        }}{{^type:isAdapterSet?}}{{#field:hasAdapter?}}io.netty.buffer.ByteBuf{{/field:hasAdapter?}}{{^field:hasAdapter?}}byte[]{{/field:hasAdapter?}}{{/type:isAdapterSet?}}{{!
+      }}{{/type:isBinaryString?}}{{!
+      }}{{^type:isBinaryString?}}{{!
+        }}{{#type:isAdapterSet?}}{{!
+          }}{{#type:typedef_type}}{{type:setAdapter}}{{> ThriftBoxedType}}{{/type:typedef_type}}{{!
+        }}{{/type:isAdapterSet?}}{{!
+        }}{{^type:isAdapterSet?}}{{!
+          }}{{#type:typedef_type}}{{> ThriftBoxedType}}{{/type:typedef_type}}{{!
+        }}{{/type:isAdapterSet?}}{{!
+      }}{{/type:isBinaryString?}}{{!
     }}{{/type:hasAdapter?}}{{!
   }}{{/type:typedef?}}{{!
 

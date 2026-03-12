@@ -23,9 +23,21 @@
     }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{type:setAdapter}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
   }}{{/type:isAdapterSet?}}{{!
   }}{{^type:isAdapterSet?}}{{!
+    }}{{#type:isBinaryString?}}{{!
+      }}{{#field:isNested?}}{{!
+        }}{{^field:hasAdapterOrWrapper?}}{{#type:isAdapterSet?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{> WriteNestedType}});{{/type:isAdapterSet?}}{{^type:isAdapterSet?}}oprot.writeBinary(java.nio.ByteBuffer.wrap({{> WriteNestedType}}));{{/type:isAdapterSet?}}{{/field:hasAdapterOrWrapper?}}{{!
+        }}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{> WriteNestedType}});{{/field:hasAdapterOrWrapper?}}{{!
+      }}{{/field:isNested?}}{{!
+      }}{{^field:isNested?}}{{!
+        }}{{^field:hasAdapterOrWrapper?}}oprot.writeBinary({{^type:javaType}}java.nio.ByteBuffer.wrap{{/type:javaType}}({{^struct:isUnion?}}this.{{/struct:isUnion?}}{{field:javaName}}));{{/field:hasAdapterOrWrapper?}}{{!
+        }}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{field:javaName}});{{/field:hasAdapterOrWrapper?}}{{!
+      }}{{/field:isNested?}}{{!
+    }}{{/type:isBinaryString?}}{{!
+    }}{{^type:isBinaryString?}}{{!
     }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
     }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
     }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+    }}{{/type:isBinaryString?}}{{!
   }}{{/type:isAdapterSet?}}{{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!

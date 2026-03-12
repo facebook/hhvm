@@ -156,6 +156,8 @@ inline constexpr auto kJavaFieldUseUnmangledNameUri =
     "facebook.com/thrift/annotation/java/FieldUseUnmangledName";
 inline constexpr auto kJavaUseIntrinsicDefaultUri =
     "facebook.com/thrift/annotation/java/UseIntrinsicDefault";
+inline constexpr auto kJavaBinaryStringUri =
+    "facebook.com/thrift/annotation/java/BinaryString";
 
 // Python:
 inline constexpr auto kPythonAdapterUri =

@@ -670,7 +670,7 @@ void add_annotations_to_node_type(
 }
 
 void lower_deprecated_annotations(
-    sema_context& ctx, mutator_context& mCtx, t_named& node) {
+    sema_context& ctx, mutator_context&, t_named& node) {
   if (auto cnst = node.find_structured_annotation_or_null(
           kDeprecatedUnvalidatedAnnotationsUri)) {
     ctx.check(
@@ -702,50 +702,6 @@ void lower_deprecated_annotations(
             src_range,
             v->get_string(),
             deprecated_annotation_value::origin::lowered_unstructured};
-      }
-
-      // The java generator has some interesting logic due to limitations in
-      // mustache that are being fixed in whisker. Until that lands, we
-      // propagate the affected annotations to the type of a typedef in order to
-      // unblock deprecating unstructured annotations.
-      if (map.count("java.swift.type") ||
-          map.count("java.swift.binary_string")) {
-        auto annot = map.count("java.swift.type") ? "java.swift.type"
-                                                  : "java.swift.binary_string";
-        auto* type = dynamic_cast<t_typedef*>(&node);
-        if (!type) {
-          ctx.error("Annotation {} is only supported on typedefs.", annot);
-          return;
-        }
-
-        auto* inner_type = const_cast<t_type*>(type->type().get_type());
-        if (inner_type->is<t_typedef>()) {
-          ctx.error("Cannot use {} on typedefs of typedefs", annot);
-        } else if (
-            !inner_type->is<t_container>() &&
-            !inner_type->is<t_primitive_type>()) {
-          ctx.error(
-              "Annotation {} is only supported on typedefs of primitive or container types.",
-              annot);
-        } else {
-          // Ensure annotations can be added to inner type
-          if (inner_type->is<t_primitive_type>() &&
-              inner_type->unstructured_annotations().empty()) {
-            auto new_type = std::make_unique<t_primitive_type>(
-                static_cast<const t_primitive_type&>(*inner_type));
-            inner_type = new_type.get();
-            type->set_type(t_type_ref::from_ptr(inner_type));
-            mCtx.program().add_unnamed_type(std::move(new_type));
-          }
-
-          inner_type->set_unstructured_annotation(
-              annot,
-              map[annot].value,
-              map[annot].src_range,
-              deprecated_annotation_value::origin::lowered_unstructured);
-        }
-
-        map.erase(annot);
       }
 
       node.reset_annotations(std::move(map));

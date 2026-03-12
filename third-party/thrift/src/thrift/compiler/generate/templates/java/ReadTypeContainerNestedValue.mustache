@@ -14,12 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:typedef?}}{{!
+}}{{#type:typedefWithoutJavaType?}}{{!
     }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadTypeContainerNestedValue}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
     }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadTypeContainerNestedValue}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
     }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadTypeContainerNestedValue}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
-}}{{/type:typedef?}}{{!
-}}{{^type:typedef?}}{{!
+}}{{/type:typedefWithoutJavaType?}}{{!
+}}{{^type:typedefWithoutJavaType?}}{{!
 
 }}{{#type:set?}}{{!
             }}{{> BoxedType}} _value{{field:nestedDepth}};
@@ -115,5 +115,5 @@
             oprot.readMapEnd();
 {{/type:map?}}{{!
 
-}}{{/type:typedef?}}{{!
+}}{{/type:typedefWithoutJavaType?}}{{!
 }}

@@ -21,9 +21,34 @@
     }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{type:setAdapter}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
   }}{{/type:isAdapterSet?}}{{!
   }}{{^type:isAdapterSet?}}{{!
+    }}{{#type:isBinaryString?}}{{!
+      }}{{#field:isNested?}}{{!
+        }}{{> ReadTypeBinary}}{{!
+      }}{{/field:isNested?}}{{!
+      }}{{^field:isNested?}}{{!
+        }}{{#field:type}}{{#type:hasAdapter?}}{{> ThriftBoxedType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> BoxedType}}{{/type:hasAdapter?}}{{/field:type}} {{field:javaName}} = {{!
+        }}{{> ReadTypeBinary}};{{!
+      }}{{/field:isNested?}}{{!
+    }}{{/type:isBinaryString?}}{{!
+    }}{{^type:isBinaryString?}}{{!
+    }}{{#type:javaType}}{{!
+      }}{{#type:container?}}{{!
+        }}{{#type:set?}}{{> ReadTypeContainer}}{{/type:set?}}{{!
+        }}{{#type:list?}}{{> ReadTypeContainer}}{{/type:list?}}{{!
+        }}{{#type:map?}}{{> ReadTypeContainer}}{{/type:map?}}{{!
+      }}{{/type:container?}}{{!
+      }}{{^type:container?}}{{!
+        }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+        }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+        }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+      }}{{/type:container?}}{{!
+    }}{{/type:javaType}}{{!
+    }}{{^type:javaType}}{{!
     }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
     }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
     }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+    }}{{/type:javaType}}{{!
+    }}{{/type:isBinaryString?}}{{!
   }}{{/type:isAdapterSet?}}{{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!

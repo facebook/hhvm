@@ -26,7 +26,7 @@ import static com.google.common.base.MoreObjects.ToStringHelper;
 public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSerializable {
     @ThriftConstructor
     public BinaryMapping(
-        @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE) final Map<String, String> binaryMap,
+        @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE) final Map<String, byte[]> binaryMap,
         @com.facebook.swift.codec.ThriftField(value=4, name="regularBinary", requiredness=Requiredness.NONE) final Map<String, byte[]> regularBinary
     ) {
         this.binaryMap = binaryMap;
@@ -48,15 +48,15 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
     }
 
     public static class Builder {
-        private Map<String, String> binaryMap = null;
+        private Map<String, byte[]> binaryMap = null;
         private Map<String, byte[]> regularBinary = null;
     
-        @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE)    public Builder setBinaryMap(Map<String, String> binaryMap) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE)    public Builder setBinaryMap(Map<String, byte[]> binaryMap) {
             this.binaryMap = binaryMap;
             return this;
         }
     
-        public Map<String, String> getBinaryMap() { return binaryMap; }
+        public Map<String, byte[]> getBinaryMap() { return binaryMap; }
     
             @com.facebook.swift.codec.ThriftField(value=4, name="regularBinary", requiredness=Requiredness.NONE)    public Builder setRegularBinary(Map<String, byte[]> regularBinary) {
             this.regularBinary = regularBinary;
@@ -85,7 +85,7 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("BinaryMapping");
-    private final Map<String, String> binaryMap;
+    private final Map<String, byte[]> binaryMap;
     public static final int _BINARYMAP = 3;
     private static final TField BINARY_MAP_FIELD_DESC = new TField("binaryMap", TType.MAP, (short)3);
         private final Map<String, byte[]> regularBinary;
@@ -102,7 +102,7 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE)
-    public Map<String, String> getBinaryMap() { return binaryMap; }
+    public Map<String, byte[]> getBinaryMap() { return binaryMap; }
 
     
     @Nullable
@@ -157,14 +157,14 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
         switch (__field.id) {
         case _BINARYMAP:
           if (__field.type == TType.MAP) {
-            Map<String, String> binaryMap;
+            Map<String, byte[]> binaryMap;
                 {
                 TMap _map = oprot.readMapBegin();
-                binaryMap = new HashMap<String, String>(Math.max(0, _map.size));
+                binaryMap = new HashMap<String, byte[]>(Math.max(0, _map.size));
                 for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
                     
                     String _key1 = oprot.readString();
-                    String _value1 = oprot.readString();
+                    byte[] _value1 = oprot.readBinary().array();
                     binaryMap.put(_key1, _value1);
                 }
                 }
@@ -207,11 +207,11 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
       oprot.writeStructBegin(STRUCT_DESC);
       if (binaryMap != null) {
         oprot.writeFieldBegin(BINARY_MAP_FIELD_DESC);
-        Map<String, String> _iter0 = binaryMap;
+        Map<String, byte[]> _iter0 = binaryMap;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
-            for (Map.Entry<String, String> _iter1 : _iter0.entrySet()) {
+            for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
               oprot.writeString(_iter1.getKey());
-              oprot.writeString(_iter1.getValue());
+              oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
             }
             oprot.writeMapEnd();
         oprot.writeFieldEnd();

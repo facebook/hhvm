@@ -310,13 +310,25 @@ class t_mstch_java_generator : public t_mstch_generator {
           t_typedef::get_first_structured_annotation_or_null(
               &self, kJavaAdapterUri) != nullptr;
     });
+    def.property("typedefWithoutJavaType?", [](const t_type& self) {
+      if (!self.is<t_typedef>()) {
+        return false;
+      }
+      return t_typedef::get_first_unstructured_annotation_or_null(
+                 &self, {"java.swift.type"}) == nullptr;
+    });
     def.property("javaType", [](const t_type& self) {
-      return self.get_true_type()->get_unstructured_annotation(
-          "java.swift.type");
+      auto* val = t_typedef::get_first_unstructured_annotation_or_null(
+          &self, {"java.swift.type"});
+      return val ? *val : "";
     });
     def.property("isBinaryString?", [](const t_type& self) {
-      return self.get_true_type()->get_unstructured_annotation(
-          "java.swift.binary_string");
+      if (t_typedef::get_first_structured_annotation_or_null(
+              &self, kJavaBinaryStringUri) != nullptr) {
+        return true;
+      }
+      return t_typedef::get_first_unstructured_annotation_or_null(
+                 &self, {"java.swift.binary_string"}) != nullptr;
     });
     def.property("adapterClassName", [](const t_type& self) {
       if (const t_const* annotation =

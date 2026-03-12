@@ -16,6 +16,7 @@
 
 }}{{#pragma ignore-newlines}}
 {{#if (not (string.empty? type:javaType))}}{{type:javaType}}
+{{#else if type:isBinaryString?}}byte[]
 {{! Recurse through every layer of typedef, as one may override javaType}}
 {{#else if type:typedef?}}{{#type:typedef_type}}{{> Type}}{{/type:typedef_type}}
 {{#else if type:void?}}void

@@ -17,8 +17,8 @@
 }}
 {{> Autogen}}
 #pragma once
-  {{#each program.thrift_includes as |included|}}
-#include "{{included.include_prefix}}{{included.name}}_visitation.h"
+  {{#each program.includes_for_codegen as |include|}}
+#include "{{include.program.include_prefix}}{{include.program.name}}_visitation.h"
   {{/each}}
 #include "{{program.include_prefix}}{{program.name}}_for_each_field.h"
 #include "{{program.include_prefix}}{{program.name}}_visit_union.h"

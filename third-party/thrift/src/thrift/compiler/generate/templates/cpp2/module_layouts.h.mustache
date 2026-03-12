@@ -20,9 +20,9 @@
 
 #include <thrift/lib/cpp2/frozen/Frozen.h>
 #include "{{program:include_prefix}}{{program:name}}_types.h"
-{{#program:thrift_includes}}
-#include "{{program:include_prefix}}{{program:name}}_layouts.h"
-{{/program:thrift_includes}}
+  {{#each program:includes_for_codegen as |include|}}
+#include "{{include.program.include_prefix}}{{include.program.name}}_layouts.h"
+  {{/each}}
 namespace apache { namespace thrift { namespace frozen {
 
 {{#program:structs_and_typedefs}}

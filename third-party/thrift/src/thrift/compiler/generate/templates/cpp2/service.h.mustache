@@ -29,8 +29,8 @@
 #include "{{service:program.include_prefix}}{{service:program.name}}_handlers.h"
 #endif
 {{/service:extends}}
-  {{#each service:program.thrift_includes as |included|}}
-#include "{{included.include_prefix}}{{included.name}}_types.h"
+  {{#each service:program.includes_for_codegen as |include|}}
+#include "{{include.program.include_prefix}}{{include.program.name}}_types.h"
   {{/each}}
   {{#each service:program.cpp_includes as |cpp_include|}}
 #include {{cpp_include}}

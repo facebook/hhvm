@@ -812,12 +812,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
       }
       return to_type_array(self.enums(), proto);
     });
-    def.property("thrift_includes", [&proto](const t_program& program) {
-      // TODO(T256504524): Migrate to `includes_for_codegen` property in
-      // `t_whisker_generator` in the future
-      return to_array(
-          program.get_includes_for_codegen(), proto.of<t_program>());
-    });
     def.property("cpp_includes", [](const t_program& program) {
       // C++ includes from IDL file
       whisker::array::raw includes;

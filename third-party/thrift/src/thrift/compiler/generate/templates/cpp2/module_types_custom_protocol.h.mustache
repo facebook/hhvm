@@ -30,9 +30,9 @@
 
 #include "{{program:include_prefix}}{{program:name}}_types.tcc"
 
-{{#program:thrift_includes}}
-#include "{{program:include_prefix}}{{program:name}}_types_custom_protocol.h"
-{{/program:thrift_includes}}
+  {{#each program:includes_for_codegen as |include|}}
+#include "{{include.program.include_prefix}}{{include.program.name}}_types_custom_protocol.h"
+  {{/each}}
 
 {{#if (not (has_compiler_option? "tablebased"))}}
 {{> module_types_custom_protocol_h/struct_traits}}

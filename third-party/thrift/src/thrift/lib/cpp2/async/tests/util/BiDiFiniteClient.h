@@ -61,7 +61,10 @@ class BiDiFiniteClient : public BiDiClientCallback, public SimpleStateBase {
   bool onStreamNext(StreamPayload&&) override {
     DCHECK(isStreamOpen())
         << "We can only receive stream chunks when stream is open";
-    DCHECK(serverCallback_->onStreamRequestN(1));
+    {
+      auto alive = serverCallback_->onStreamRequestN(1);
+      DCHECK(alive);
+    }
 
     LOG(INFO) << "Client received stream chunk #" << chunksReceived_++;
     if (chunksReceived_ == maxChunksToReceive_) {

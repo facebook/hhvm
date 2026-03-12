@@ -94,7 +94,10 @@ class BiDiConfigurableServer : public BiDiServerCallback,
         LOG(INFO) << "  Server will now COMPLETE the stream";
         closeStream();
         DCHECK(isTerminal());
-        DCHECK(!clientCallback_->onStreamComplete());
+        {
+          auto alive = clientCallback_->onStreamComplete();
+          DCHECK(!alive);
+        }
       } break;
       case SinkErrorAction::COMPLETE_STREAM: {
         DCHECK(isStreamOpen());
@@ -102,7 +105,10 @@ class BiDiConfigurableServer : public BiDiServerCallback,
         LOG(INFO) << "  Server will now COMPLETE the stream";
         closeStream();
         DCHECK(isTerminal());
-        DCHECK(!clientCallback_->onStreamComplete());
+        {
+          auto alive = clientCallback_->onStreamComplete();
+          DCHECK(!alive);
+        }
       } break;
     };
 
@@ -135,9 +141,12 @@ class BiDiConfigurableServer : public BiDiServerCallback,
         LOG(INFO) << "  Server will ERROR the stream";
         closeStream();
         DCHECK(isTerminal());
-        DCHECK(!clientCallback_->onStreamError(
-            folly::make_exception_wrapper<std::runtime_error>(
-                "Server received sink complete")));
+        {
+          auto alive = clientCallback_->onStreamError(
+              folly::make_exception_wrapper<std::runtime_error>(
+                  "Server received sink complete"));
+          DCHECK(!alive);
+        }
       } break;
       case SinkCompleteAction::CONTINUE_STREAM: {
         // This statement guarantees that wasTerminal == false
@@ -160,7 +169,10 @@ class BiDiConfigurableServer : public BiDiServerCallback,
         LOG(INFO) << "  Server will now COMPLETE the stream";
         closeStream();
         DCHECK(isTerminal());
-        DCHECK(!clientCallback_->onStreamComplete());
+        {
+          auto alive = clientCallback_->onStreamComplete();
+          DCHECK(!alive);
+        }
       } break;
       case SinkCompleteAction::COMPLETE_STREAM: {
         DCHECK(isStreamOpen());
@@ -168,7 +180,10 @@ class BiDiConfigurableServer : public BiDiServerCallback,
         LOG(INFO) << "  Server will now COMPLETE the stream";
         closeStream();
         DCHECK(isTerminal());
-        DCHECK(!clientCallback_->onStreamComplete());
+        {
+          auto alive = clientCallback_->onStreamComplete();
+          DCHECK(!alive);
+        }
       } break;
     }
 
@@ -204,7 +219,10 @@ class BiDiConfigurableServer : public BiDiServerCallback,
         LOG(INFO) << "  Server will CANCEL the sink";
         closeSink();
         DCHECK(isTerminal());
-        DCHECK(!clientCallback_->onSinkCancel());
+        {
+          auto alive = clientCallback_->onSinkCancel();
+          DCHECK(!alive);
+        }
       } break;
     }
 

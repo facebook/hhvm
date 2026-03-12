@@ -67,7 +67,8 @@ class BiDiEchoServer : public BiDiServerCallback, public SimpleStateBase {
 
     if (isStreamOpen()) {
       closeStream();
-      DCHECK(!clientCallback_->onStreamError(std::move(ew)));
+      auto alive = clientCallback_->onStreamError(std::move(ew));
+      DCHECK(!alive);
     } else {
       LOG(ERROR)
           << "  Server couldn't not error the stream because it's already closed";
@@ -88,7 +89,8 @@ class BiDiEchoServer : public BiDiServerCallback, public SimpleStateBase {
 
     if (isStreamOpen()) {
       closeStream();
-      DCHECK(!clientCallback_->onStreamComplete());
+      auto alive = clientCallback_->onStreamComplete();
+      DCHECK(!alive);
     } else {
       LOG(ERROR)
           << "  Server couldn't not complete the stream because it's already closed";
@@ -109,7 +111,8 @@ class BiDiEchoServer : public BiDiServerCallback, public SimpleStateBase {
 
     if (isSinkOpen()) {
       closeSink();
-      DCHECK(!clientCallback_->onSinkCancel());
+      auto alive = clientCallback_->onSinkCancel();
+      DCHECK(!alive);
     } else {
       LOG(ERROR)
           << "  Server couldn't not cancel the sink because it's already closed";

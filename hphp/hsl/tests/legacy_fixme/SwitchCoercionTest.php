@@ -361,15 +361,21 @@ class SwitchCoercionsTestDateTime implements DateTimeInterface {
     }
     return $this->timestamp;
   }
-  public function diff(mixed $dt, mixed $absolute = null): void {}
+  public function diff(mixed $dt, mixed $absolute = null): DateInterval {
+    return new DateInterval("P1D");
+  }
   public function format(mixed $format): void {}
-  public function getTimezone(): int { return 0; }
-  public function getOffset(): int { return 0; }
+  public function getTimezone(): int {
+    return 0;
+  }
+  public function getOffset(): int {
+    return 0;
+  }
 }
 
 class :xhpclass {
- public function __construct(
-    public darray<string,mixed> $a, // Attributes
+  public function __construct(
+    public darray<string, mixed> $a, // Attributes
     public varray<mixed> $c, // Children
     public string $f, // Filename
     public int $ln, // Line number

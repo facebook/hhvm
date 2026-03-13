@@ -412,7 +412,9 @@ class CoercionsTestDateTime1 implements \DateTimeInterface {
     }
     return $this->timestamp;
   }
-  public function diff(mixed $dt, mixed $absolute = null): void {}
+  public function diff(mixed $dt, mixed $absolute = null): \DateInterval {
+    return new \DateInterval("P1D");
+  }
   public function format(mixed $format): void {}
   public function getTimezone(): void {}
   public function getOffset(): int {
@@ -424,7 +426,9 @@ class CoercionsTestDateTime2 implements \DateTimeInterface {
   public function getTimestamp()[]: int {
     return 100;
   }
-  public function diff(mixed $dt, mixed $absolute = null): void {}
+  public function diff(mixed $dt, mixed $absolute = null): \DateInterval {
+    return new \DateInterval("P1D");
+  }
   public function format(mixed $format): void {}
   public function getTimezone(): void {}
   public function getOffset(): int {

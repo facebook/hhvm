@@ -45,18 +45,18 @@ function checkdate(
 function date_add(
   DateTime $datetime,
   DateInterval $interval,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): DateTime;
 <<__PHPStdLib>>
 function date_create_from_format(
   string $format,
   string $time,
   ?DateTimeZone $timezone = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): HH\FIXME\MISSING_RETURN_TYPE; /* DateTime | false */
 <<__PHPStdLib>>
 function date_create(
   ?string $time = null,
   ?DateTimeZone $timezone = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): HH\FIXME\MISSING_RETURN_TYPE; /* DateTime | false */
 <<__PHPStdLib>>
 function date_date_set(
   DateTime $object,
@@ -70,21 +70,21 @@ function date_default_timezone_get(): string;
 function date_default_timezone_set(string $name): bool;
 <<__PHPStdLib>>
 function date_diff(
-  HH\FIXME\MISSING_PARAM_TYPE $datetime,
-  HH\FIXME\MISSING_PARAM_TYPE $datetime2,
+  DateTime $datetime,
+  DateTimeInterface $datetime2,
   bool $absolute = false,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): DateInterval;
 <<__PHPStdLib>>
 function date_format(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
+  DateTimeInterface $object,
   string $format,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function date_get_last_errors(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_interval_create_from_date_string(
   string $time,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): DateInterval;
 <<__PHPStdLib>>
 function date_interval_format(
   DateInterval $interval,
@@ -104,15 +104,15 @@ function date_modify(
 ): void;
 <<__PHPStdLib>>
 function date_offset_get(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
-): HH\FIXME\MISSING_RETURN_TYPE;
+  DateTimeInterface $object,
+): ~int;
 <<__PHPStdLib>>
 function date_parse(string $date): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_sub(
   DateTime $datetime,
   DateInterval $interval,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): DateTime;
 <<__PHPStdLib>>
 function date_sun_info(
   int $ts,
@@ -143,11 +143,11 @@ function date_time_set(
   int $hour,
   int $minute,
   int $second = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): void;
 <<__PHPStdLib>>
 function date_timestamp_get(
-  HH\FIXME\MISSING_PARAM_TYPE $datetime,
-): HH\FIXME\MISSING_RETURN_TYPE;
+  DateTimeInterface $datetime,
+): ~int;
 <<__PHPStdLib>>
 function date_timestamp_set(
   DateTime $datetime,
@@ -155,13 +155,13 @@ function date_timestamp_set(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_timezone_get(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
+  DateTimeInterface $object,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function date_timezone_set(
   DateTime $object,
   DateTimeZone $timezone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): DateTime;
 <<__PHPStdLib>>
 function date(
   string $format,
@@ -250,8 +250,8 @@ function timezone_name_get(
 ): string;
 <<__PHPStdLib>>
 function timezone_offset_get(
-  HH\FIXME\MISSING_PARAM_TYPE $object,
-  HH\FIXME\MISSING_PARAM_TYPE $dt,
+  DateTimeZone $object,
+  DateTime $dt,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function timezone_open(string $timezone): HH\FIXME\MISSING_RETURN_TYPE;
@@ -262,17 +262,17 @@ function timezone_transitions_get(
   int $timestamp_end = PHP_INT_MAX,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function timezone_version_get(): HH\FIXME\MISSING_RETURN_TYPE;
+function timezone_version_get(): string;
 
 interface DateTimeInterface {
   public function diff(
     DateTimeInterface $datetime2,
     bool $absolute = false,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function format(string $format): HH\FIXME\MISSING_RETURN_TYPE;
+  ): ~DateInterval;
+  public function format(string $format): HH\FIXME\MISSING_RETURN_TYPE /* string (newtype ISODate) */;
   public function getOffset(): ~int;
   public function getTimestamp()[]: ~int;
-  public function getTimezone(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getTimezone(): HH\FIXME\MISSING_RETURN_TYPE /* DateTimeZone | false */;
 }
 
 class DateTime implements DateTimeInterface {
@@ -292,11 +292,11 @@ class DateTime implements DateTimeInterface {
     string $time = 'now',
     ?DateTimeZone $timezone = null,
   )[read_globals];
-  public function add(DateInterval $interval)[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function modify(string $modify)[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function add(DateInterval $interval)[write_props]: this;
+  public function modify(string $modify)[write_props]: HH\FIXME\MISSING_RETURN_TYPE /* this | false */;
   public function getOffset()[]: int;
   public function getTimestamp()[]: int;
-  public function getTimezone()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function getTimezone()[]: HH\FIXME\MISSING_RETURN_TYPE /* DateTimeZone | false */;
   public function setDate(
     int $year,
     int $month,
@@ -315,13 +315,13 @@ class DateTime implements DateTimeInterface {
   public function setTimestamp(int $unixtimestamp)[read_globals, write_props]: this;
   public function setTimezone(
     DateTimeZone $timezone,
-  )[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function sub(DateInterval $interval)[write_props]: HH\FIXME\MISSING_RETURN_TYPE;
+  )[write_props]: this;
+  public function sub(DateInterval $interval)[write_props]: this;
   public function diff(
     DateTimeInterface $datetime2,
     bool $absolute = false,
-  )[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function format(string $format)[]: HH\FIXME\MISSING_RETURN_TYPE;
+  )[]: DateInterval;
+  public function format(string $format)[]: HH\FIXME\MISSING_RETURN_TYPE /* string (newtype ISODate) */;
   public static function createFromFormat(
     string $format,
     string $time,
@@ -341,7 +341,7 @@ class DateTimeImmutable implements DateTimeInterface {
   public function modify(string $modify): this;
   public function getOffset(): int;
   public function getTimestamp()[]: int;
-  public function getTimezone(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getTimezone(): HH\FIXME\MISSING_RETURN_TYPE /* DateTimeZone | false */;
   public function setDate(int $year, int $month, int $day): this;
   public function setISODate(int $year, int $week, int $day = 1): this;
   public function setTime(int $hour, int $minute, int $second = 0): this;
@@ -351,16 +351,16 @@ class DateTimeImmutable implements DateTimeInterface {
   public function diff(
     DateTimeInterface $datetime2,
     bool $absolute = false,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function format(string $format): HH\FIXME\MISSING_RETURN_TYPE;
+  ): ~DateInterval;
+  public function format(string $format): HH\FIXME\MISSING_RETURN_TYPE /* string (newtype ISODate) */;
   public static function createFromFormat(
     string $format,
     string $time,
     ?DateTimeZone $timezone = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): HH\FIXME\MISSING_RETURN_TYPE /* DateTimeImmutable | false */;
   public static function createFromMutable(
     DateTime $datetime,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): HH\FIXME\MISSING_RETURN_TYPE /* DateTimeImmutable */;
   public static function getLastErrors(): DateTimeErrors;
   public function __clone(): void;
 }
@@ -390,7 +390,7 @@ class DateTimeZone {
   public function getName()[]: string {}
   public function getOffset(
     DateTimeInterface $datetime,
-  )[]: HH\FIXME\MISSING_RETURN_TYPE;
+  )[]: int;
   public function getTransitions(
     int $timestamp_begin = PHP_INT_MIN,
     int $timestamp_end = PHP_INT_MAX,
@@ -432,7 +432,7 @@ class DatePeriod implements Iterator<DateTime> {
   );
   public function current(): DateTime;
   public function rewind(): void;
-  public function key(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function key(): int;
   public function next(): void;
   public function valid(): bool;
   public function getStartDate(): DateTime;

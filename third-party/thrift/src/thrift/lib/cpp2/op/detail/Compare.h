@@ -267,7 +267,7 @@ struct DefaultLessThan {
 // A CompareThreeWay implementation that delegates to EqualTo and LessThan.
 template <
     typename Tag,
-    template <class...> class LessThanImpl = LessThan,
+    template <class...> class LessThanType = LessThan,
     typename T = type::native_type<Tag>,
     typename = void>
 struct DefaultCompareThreeWay {
@@ -277,7 +277,7 @@ struct DefaultCompareThreeWay {
     if (EqualTo<Tag>{}(lhs, rhs)) {
       return folly::ordering::eq;
     }
-    if (LessThanImpl<Tag>{}(lhs, rhs)) {
+    if (LessThanType<Tag>{}(lhs, rhs)) {
       return folly::ordering::lt;
     }
     return folly::ordering::gt;
@@ -287,9 +287,9 @@ struct DefaultCompareThreeWay {
 // The 'compare three way' operator.
 template <
     typename Tag,
-    template <class...> class LessThanImpl = LessThan,
+    template <class...> class LessThanType = LessThan,
     typename = void>
-struct CompareThreeWay : DefaultCompareThreeWay<Tag, LessThanImpl> {
+struct CompareThreeWay : DefaultCompareThreeWay<Tag, LessThanType> {
 }; // Delegates by default.
 
 // Use bit_cast for floating point identical.
@@ -395,7 +395,7 @@ template <class T, class Comp>
       l.begin(), l.end(), r.begin(), r.end(), compare_three_way);
 }
 
-template <class T, class E, template <class...> class LessThanImpl = LessThan>
+template <class T, class E, template <class...> class LessThanType = LessThan>
 struct ListLessThan {
   bool operator()(const T& l, const T& r) const {
     return lexicographicalCompareThreeWay(
@@ -403,15 +403,15 @@ struct ListLessThan {
                l.end(),
                r.begin(),
                r.end(),
-               CompareThreeWay<E, LessThanImpl>{}) == folly::ordering::lt;
+               CompareThreeWay<E, LessThanType>{}) == folly::ordering::lt;
   }
 };
 
-template <class T, class E, template <class...> class LessThanImpl = LessThan>
+template <class T, class E, template <class...> class LessThanType = LessThan>
 struct SetLessThan {
   bool operator()(const T& lhs, const T& rhs) const {
     return sortAndLexicographicalCompareThreeWay(
-               lhs, rhs, CompareThreeWay<E, LessThanImpl>{}) ==
+               lhs, rhs, CompareThreeWay<E, LessThanType>{}) ==
         folly::ordering::lt;
   }
 };
@@ -420,15 +420,15 @@ template <
     class T,
     class K,
     class V,
-    template <class...> class LessThanImpl = LessThan>
+    template <class...> class LessThanType = LessThan>
 struct MapLessThan {
   bool operator()(const T& lhs, const T& rhs) const {
     auto compare_three_way = [](const auto& l, const auto& r) {
-      auto ret = CompareThreeWay<K, LessThanImpl>{}(l.first, r.first);
+      auto ret = CompareThreeWay<K, LessThanType>{}(l.first, r.first);
       if (ret != folly::ordering::eq) {
         return ret;
       }
-      return CompareThreeWay<V, LessThanImpl>{}(l.second, r.second);
+      return CompareThreeWay<V, LessThanType>{}(l.second, r.second);
     };
 
     return sortAndLexicographicalCompareThreeWay(lhs, rhs, compare_three_way) ==
@@ -739,7 +739,7 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>> {
 
 enum class FieldIterOrder { Declaration, FieldIdAscending };
 
-template <typename T, template <class...> class LessThanImpl = LessThan>
+template <typename T, template <class...> class LessThanType = LessThan>
 folly::ordering compareStructFields(
     const T& lhs, const T& rhs, FieldIterOrder order) {
   folly::ordering result = folly::ordering::eq;
@@ -763,7 +763,7 @@ folly::ordering compareStructFields(
       result = folly::ordering::gt;
       return;
     }
-    result = CompareThreeWay<Tag, LessThanImpl>{}(*lhsValue, *rhsValue);
+    result = CompareThreeWay<Tag, LessThanType>{}(*lhsValue, *rhsValue);
   };
 
   if (order == FieldIterOrder::FieldIdAscending) {
@@ -774,9 +774,9 @@ folly::ordering compareStructFields(
   return result;
 }
 
-template <typename T, template <class...> class LessThanImpl = LessThan>
+template <typename T, template <class...> class LessThanType = LessThan>
 folly::ordering compareStructFieldsByFieldId(const T& lhs, const T& rhs) {
-  return compareStructFields<T, LessThanImpl>(
+  return compareStructFields<T, LessThanType>(
       lhs, rhs, FieldIterOrder::FieldIdAscending);
 }
 
@@ -787,11 +787,11 @@ struct CompareThreeWay<type::struct_t<T>> {
   }
 };
 
-template <template <class...> class LessThanImpl = LessThan>
+template <template <class...> class LessThanType = LessThan>
 struct StructLessThan {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
-    return compareStructFields<T, LessThanImpl>(
+    return compareStructFields<T, LessThanType>(
                lhs, rhs, FieldIterOrder::Declaration) == folly::ordering::lt;
   }
 };
@@ -800,11 +800,11 @@ struct StructLessThan {
 // field declaration order). This is used to match the behavior of the
 // Thrift Object Model, which compares struct fields by sorted field id
 // order.
-template <template <class...> class LessThanImpl = LessThan>
+template <template <class...> class LessThanType = LessThan>
 struct StructLessThanByFieldId {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
-    return compareStructFieldsByFieldId<T, LessThanImpl>(lhs, rhs) ==
+    return compareStructFieldsByFieldId<T, LessThanType>(lhs, rhs) ==
         folly::ordering::lt;
   }
 };
@@ -847,7 +847,7 @@ struct StructEquality {
   }
 };
 
-template <template <class...> class LessThanImpl = LessThan>
+template <template <class...> class LessThanType = LessThan>
 struct UnionLessThan {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
@@ -861,7 +861,7 @@ struct UnionLessThan {
           using Id = decltype(id);
           using Tag = get_type_tag<T, Id>;
           ::apache::thrift::detail::union_value_unsafe_fn f;
-          return LessThanImpl<Tag>{}(f(get<Id>(lhs)), f(get<Id>(rhs)));
+          return LessThanType<Tag>{}(f(get<Id>(lhs)), f(get<Id>(rhs)));
         },
         [] {
           return false; // union is __EMPTY__
@@ -870,7 +870,7 @@ struct UnionLessThan {
 };
 
 // Similar to StructLessThanByFieldId, but for unions
-template <template <class...> class LessThanImpl = LessThan>
+template <template <class...> class LessThanType = LessThan>
 struct UnionLessThanByFieldId {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
@@ -904,7 +904,7 @@ struct UnionLessThanByFieldId {
     }
 
     // If `lhs.getType() == rhs.getType()` fallback to normal UnionLessThan
-    return UnionLessThan<LessThanImpl>{}(lhs, rhs);
+    return UnionLessThan<LessThanType>{}(lhs, rhs);
   }
 };
 

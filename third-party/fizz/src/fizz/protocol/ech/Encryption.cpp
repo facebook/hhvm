@@ -9,6 +9,7 @@
 #include <fizz/protocol/ech/Encryption.h>
 #include "fizz/record/Types.h"
 
+#include <fizz/crypto/Utils.h>
 #include <fizz/crypto/hpke/Utils.h>
 #include <fizz/protocol/Protocol.h>
 #include <fizz/protocol/ech/ECHExtensions.h>
@@ -347,11 +348,12 @@ bool checkECHAccepted(
   auto acceptConfirmation = calculateAcceptConfirmation(
       shlo, std::move(context), std::move(scheduler));
   // ECH accepted if the 8 bytes match the accept_confirmation
-  return memcmp(
-             shlo.random.data() +
-                 (shlo.random.size() - kEchAcceptConfirmationSize),
-             acceptConfirmation.data(),
-             kEchAcceptConfirmationSize) == 0;
+  return CryptoUtils::equal(
+      folly::ByteRange(
+          shlo.random.data() +
+              (shlo.random.size() - kEchAcceptConfirmationSize),
+          kEchAcceptConfirmationSize),
+      folly::ByteRange(acceptConfirmation.data(), kEchAcceptConfirmationSize));
 }
 
 bool checkECHAccepted(
@@ -372,10 +374,10 @@ bool checkECHAccepted(
     return false;
   }
 
-  return memcmp(
-             echConf->confirmation.data(),
-             acceptConfirmation.data(),
-             kEchAcceptConfirmationSize) == 0;
+  return CryptoUtils::equal(
+      folly::ByteRange(
+          echConf->confirmation.data(), kEchAcceptConfirmationSize),
+      folly::ByteRange(acceptConfirmation.data(), kEchAcceptConfirmationSize));
 }
 
 void setAcceptConfirmation(

@@ -356,11 +356,13 @@ struct PathStmts {
         m_erase{db.prepare("DELETE FROM all_paths WHERE path = @path")},
         m_getAllPaths{db.prepare(
             "SELECT path, sha1sum FROM path_sha1sum"
-            " JOIN all_paths USING (pathid)")} {}
+            " JOIN all_paths USING (pathid)")},
+        m_getPathCount{db.prepare("SELECT COUNT(*) FROM all_paths")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_erase;
   SQLiteStmt m_getAllPaths;
+  SQLiteStmt m_getPathCount;
 };
 
 struct Sha1HexStmts {
@@ -1548,6 +1550,13 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
               .m_path = {std::string{q.getString(0)}},
               .m_hash = std::string{q.getString(1)}};
         }};
+  }
+
+  size_t getPathCount() override {
+    auto query = m_txn.query(m_pathStmts.m_getPathCount);
+    XLOGF(DBG9, "Running {}", query.sql());
+    query.step();
+    return static_cast<size_t>(query.getInt(0));
   }
 
   void insertClock(const Clock& clock) override {

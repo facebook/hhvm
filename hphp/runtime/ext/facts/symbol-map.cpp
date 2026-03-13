@@ -1432,11 +1432,12 @@ Clock SymbolMap::dbClock() const {
   return getDB()->getClock();
 }
 
-hphp_hash_map<Path, SHA1> SymbolMap::getAllPathsWithHashes() const {
+hphp_fast_map<Path, SHA1> SymbolMap::getAllPathsWithHashes() const {
   auto rlock = m_syncedData.rlock();
   auto db = getDB();
 
-  hphp_hash_map<Path, SHA1> allPaths;
+  hphp_fast_map<Path, SHA1> allPaths;
+  allPaths.reserve(db->getPathCount());
   for (auto&& [path, hash] : db->getAllPathsAndHashes()) {
     assertx(path.is_relative());
     allPaths.insert({Path{path}, SHA1{hash}});

@@ -393,6 +393,7 @@ struct MockAutoloadDB : public AutoloadDB {
    * Returns results in the form of a lazy generator.
    */
   MOCK_METHOD(MultiResult<PathAndHash>, getAllPathsAndHashes, (), (override));
+  MOCK_METHOD(size_t, getPathCount, (), (override));
 
   MOCK_METHOD(void, insertClock, (const Clock& clock), (override));
   MOCK_METHOD(Clock, getClock, (), (override));

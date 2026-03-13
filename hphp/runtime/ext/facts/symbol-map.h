@@ -477,7 +477,7 @@ struct SymbolMap {
   /**
    * Return a map from path to hash for every path we know about.
    */
-  hphp_hash_map<Path, SHA1> getAllPathsWithHashes() const;
+  hphp_fast_map<Path, SHA1> getAllPathsWithHashes() const;
 
   std::unique_ptr<folly::Executor> m_exec;
 

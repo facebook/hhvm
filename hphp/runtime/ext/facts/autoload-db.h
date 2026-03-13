@@ -286,6 +286,11 @@ struct AutoloadDB {
    */
   virtual MultiResult<PathAndHash> getAllPathsAndHashes() = 0;
 
+  /**
+   * Return the number of paths in the DB.
+   */
+  virtual size_t getPathCount() = 0;
+
   virtual void insertClock(const Clock& clock) = 0;
   virtual Clock getClock() = 0;
 

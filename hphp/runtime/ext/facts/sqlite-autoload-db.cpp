@@ -303,6 +303,10 @@ void rebuildIndices(SQLiteTxn& txn) {
       "CREATE INDEX IF NOT EXISTS "
       "file_attributes__attribute_name__pathid__attribute_position"
       " ON file_attributes (attribute_name, pathid, attribute_position)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS "
+      "file_attributes__attribute_name__attribute_value"
+      " ON file_attributes (attribute_name, attribute_value)");
 
   // file_modules
   txn.exec(

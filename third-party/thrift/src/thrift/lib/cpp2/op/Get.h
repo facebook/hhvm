@@ -472,12 +472,17 @@ using get_field_ref =
 // Implementation details.
 namespace detail {
 
+template <typename F, typename... Args>
+constexpr void for_each(F&& f, Args&&... args) {
+  // Use initializer_list-based expansion instead of fold expression to avoid
+  // exceeding compiler's expression nesting limit for structs with >256 fields.
+  std::ignore = std::initializer_list<int>{
+      (std::forward<F>(f)(std::forward<Args>(args)), 0)...};
+}
+
 template <size_t... I, typename F>
 constexpr void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
-  // This doesn't use fold expression (from C++17) as this file is used in
-  // C++14 environment as well.
-  int unused[] = {0, (f(type::detail::pos_to_ordinal<I>{}), 0)...};
-  static_cast<void>(unused);
+  for_each(std::forward<F>(f), type::detail::pos_to_ordinal<I>{}...);
 }
 
 template <typename T, typename F, size_t... I>
@@ -491,11 +496,7 @@ constexpr void for_each_field_id_ascending_impl(
     return fieldIds;
   });
 
-  // Use array-based expansion instead of fold expression to avoid exceeding
-  // compiler's expression nesting limit for structs with >256 fields.
-  std::array<int, sizeof...(I) + 1> unused{
-      {0, (f(field_id<sortedFieldIds[I]>{}), 0)...}};
-  static_cast<void>(unused);
+  for_each(std::forward<F>(f), field_id<sortedFieldIds[I]>{}...);
 }
 
 template <size_t... I, typename F>

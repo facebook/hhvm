@@ -23,6 +23,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/lang/Exception.h>
 #include <thrift/conformance/if/gen-cpp2/test_value_types.h>
+#include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 
 namespace apache::thrift::conformance::detail {
@@ -118,7 +119,7 @@ uint32_t invoke(const C& writes, W& writer) {
 class EncodeValueRecorder {
  public:
   explicit EncodeValueRecorder(EncodeValue* output) : output_(*output) {}
-  constexpr static bool kSortKeys() { return false; }
+  constexpr static KeyOrder keyOrder() { return KeyOrder::Unspecified; }
   constexpr static bool kHasIndexSupport() { return false; }
 
   uint32_t writeStructBegin(const char* name) {

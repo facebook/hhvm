@@ -38,7 +38,7 @@ class JSONProtocolWriter : public JSONProtocolWriterCommon {
     return ProtocolType::T_JSON_PROTOCOL;
   }
 
-  static constexpr bool kSortKeys() { return false; }
+  static constexpr KeyOrder keyOrder() { return KeyOrder::Unspecified; }
 
   static constexpr bool kHasIndexSupport() { return false; }
 

@@ -37,8 +37,8 @@ class CompactV1ProtocolWriter : protected CompactProtocolWriter {
   using ProtocolReader = CompactV1ProtocolReader;
 
   using CompactProtocolWriter::CompactProtocolWriter;
+  using CompactProtocolWriter::keyOrder;
   using CompactProtocolWriter::kHasIndexSupport;
-  using CompactProtocolWriter::kSortKeys;
   using CompactProtocolWriter::protocolType;
   using CompactProtocolWriter::setOutput;
 

@@ -26,6 +26,7 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/protocol/TProtocol.h>
 #include <thrift/lib/cpp/protocol/TType.h>
+#include <thrift/lib/cpp2/protocol/Protocol.h>
 
 namespace apache::thrift::op::detail {
 
@@ -114,7 +115,7 @@ class HashProtocol {
  public:
   explicit HashProtocol(Accumulator& accumulator) : acc_(accumulator) {}
 
-  static constexpr bool kSortKeys() { return false; }
+  static constexpr KeyOrder keyOrder() { return KeyOrder::Unspecified; }
 
   static constexpr bool kSupportsArithmeticVectors() { return false; }
 

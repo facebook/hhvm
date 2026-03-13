@@ -179,7 +179,7 @@ class BaseObjectAdapter {
   static constexpr ProtocolType protocolType() { return {}; }
   static constexpr bool kUsesFieldNames() { return false; }
   static constexpr bool kOmitsContainerSizes() { return false; }
-  static constexpr bool kSortKeys() { return false; }
+  static constexpr KeyOrder keyOrder() { return KeyOrder::Unspecified; }
   static constexpr bool kHasIndexSupport() { return false; }
 };
 

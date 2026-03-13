@@ -509,7 +509,7 @@ size_t writeThriftValue(
       written += ext.writeMap(
           &context,
           value.object,
-          iprot->kSortKeys(),
+          iprot->keyOrder(),
           [](const void* context, const void* key, const void* val) {
             const auto& typedContext = *static_cast<const Context*>(context);
             const TypeInfo& keyInfo = *typedContext.keyInfo;
@@ -540,7 +540,7 @@ size_t writeThriftValue(
       written += ext.writeSet(
           &context,
           value.object,
-          iprot->kSortKeys(),
+          iprot->keyOrder(),
           [](const void* context, const void* value) {
             const auto& typedContext = *static_cast<const Context*>(context);
             const TypeInfo& valInfo = *typedContext.valInfo;

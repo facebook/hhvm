@@ -830,9 +830,9 @@ TEST(EncodeTest, EncodeMethod) {
   EXPECT_EQ(encodeJSONMockStruct(debug, jsonMock), UseStructEncode);
 }
 
-TEST(EncodeTest, kSortKeys) {
+TEST(EncodeTest, keyOrder) {
   struct SortingProtocolWriter : CompactProtocolWriter {
-    static constexpr bool kSortKeys() { return true; }
+    static constexpr KeyOrder keyOrder() { return KeyOrder::NativeAscending; }
   };
 
   struct OrderPreservingSet : std::vector<int> {

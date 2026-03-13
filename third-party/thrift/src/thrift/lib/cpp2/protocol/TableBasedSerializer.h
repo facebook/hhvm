@@ -340,7 +340,7 @@ struct SetFieldExt final {
   size_t (*writeSet)(
       const void* context,
       const void* object,
-      bool protocolSortKeys,
+      KeyOrder protocolSortKeys,
       size_t (*writer)(const void* context, const void* val));
 };
 
@@ -370,7 +370,7 @@ struct MapFieldExt final {
   size_t (*writeMap)(
       const void* context,
       const void* object,
-      bool protocolSortKeys,
+      KeyOrder protocolSortKeys,
       size_t (*writer)(
           const void* context, const void* keyElem, const void* valueElem));
 };
@@ -518,7 +518,7 @@ template <typename Set>
 size_t writeSet(
     const void* context,
     const void* object,
-    bool protocolSortKeys,
+    KeyOrder protocolSortKeys,
     size_t (*writer)(const void* /*context*/, const void* /*val*/)) {
   const Set& out = *static_cast<const Set*>(object);
   size_t written = 0;
@@ -526,7 +526,7 @@ size_t writeSet(
   if (!folly::is_detected_v<
           ::apache::thrift::detail::pm::detect_key_compare,
           Set> &&
-      protocolSortKeys) {
+      protocolSortKeys != KeyOrder::Unspecified) {
     std::vector<typename Set::const_iterator> iters;
     iters.reserve(out.size());
     for (auto it = out.begin(); it != out.end(); ++it) {
@@ -551,7 +551,7 @@ template <typename Map>
 size_t writeMap(
     const void* context,
     const void* object,
-    bool protocolSortKeys,
+    KeyOrder protocolSortKeys,
     size_t (*writer)(
         const void* /*context*/,
         const void* /*keyElem*/,
@@ -561,7 +561,7 @@ size_t writeMap(
   if (!folly::is_detected_v<
           ::apache::thrift::detail::pm::detect_key_compare,
           Map> &&
-      protocolSortKeys) {
+      protocolSortKeys != KeyOrder::Unspecified) {
     std::vector<typename Map::const_iterator> iters;
     iters.reserve(out.size());
     for (auto it = out.begin(); it != out.end(); ++it) {

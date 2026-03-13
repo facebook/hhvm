@@ -503,10 +503,12 @@ class SetTypeInfoImpl final : public SetTypeInfoBase {
   static size_t write(
       const void* context,
       const void* object,
-      bool protocolSortKeys,
+      ::apache::thrift::KeyOrder protocolSortKeys,
       size_t (*writer)(const void* /*context*/, const void* /*val*/)) {
     PyObject* set = const_cast<PyObject*>(toPyObject(object));
-    const bool sortKeys = protocolSortKeys || KeySorted;
+    const bool sortKeys =
+        protocolSortKeys != ::apache::thrift::KeyOrder::Unspecified ||
+        KeySorted;
     UniquePyObjectPtr iter = UNLIKELY(sortKeys)
         ? SetTypeInfo_sortElem(set)
         : UniquePyObjectPtr{PyObject_GetIter(set)};
@@ -640,10 +642,11 @@ class MapTypeInfoImpl final : public MapTypeInfoBase {
   static size_t write(
       const void* context,
       const void* object,
-      bool protocolSortKeys,
+      ::apache::thrift::KeyOrder protocolSortKeys,
       size_t (*writer)(
           const void* context, const void* keyElem, const void* valueElem)) {
-    if (UNLIKELY(protocolSortKeys) || KeySorted) {
+    if (UNLIKELY(protocolSortKeys != ::apache::thrift::KeyOrder::Unspecified) ||
+        KeySorted) {
       return writeMapSorted(context, object, Handler::toItemList, writer);
     }
     return Handler::writeUnsorted(context, object, writer);

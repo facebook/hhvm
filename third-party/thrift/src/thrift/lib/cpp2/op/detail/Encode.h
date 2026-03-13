@@ -664,7 +664,7 @@ struct SetEncode {
         !folly::is_detected_v<
             ::apache::thrift::detail::pm::detect_key_compare,
             T> &&
-        Protocol::kSortKeys()) {
+        Protocol::keyOrder() != KeyOrder::Unspecified) {
       std::vector<typename T::const_iterator> iters;
       iters.reserve(set.size());
       for (auto it = set.begin(); it != set.end(); ++it) {
@@ -712,7 +712,7 @@ struct MapEncode {
         !folly::is_detected_v<
             ::apache::thrift::detail::pm::detect_key_compare,
             T> &&
-        Protocol::kSortKeys()) {
+        Protocol::keyOrder() != KeyOrder::Unspecified) {
       std::vector<typename T::const_iterator> iters;
       iters.reserve(map.size());
       for (auto it = map.begin(); it != map.end(); ++it) {

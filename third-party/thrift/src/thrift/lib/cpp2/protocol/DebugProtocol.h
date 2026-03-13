@@ -64,7 +64,7 @@ class DebugProtocolWriter {
     return ProtocolType::T_DEBUG_PROTOCOL;
   }
 
-  static constexpr bool kSortKeys() { return true; }
+  static constexpr KeyOrder keyOrder() { return KeyOrder::NativeAscending; }
 
   static constexpr bool kHasIndexSupport() { return false; }
 

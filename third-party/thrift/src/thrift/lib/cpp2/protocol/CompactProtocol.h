@@ -71,7 +71,7 @@ class CompactProtocolWriter : public detail::ProtocolBase {
     return ProtocolType::T_COMPACT_PROTOCOL;
   }
 
-  static constexpr bool kSortKeys() { return false; }
+  static constexpr KeyOrder keyOrder() { return KeyOrder::Unspecified; }
 
   static constexpr bool kHasIndexSupport() { return true; }
 

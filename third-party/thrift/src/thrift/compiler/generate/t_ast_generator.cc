@@ -503,7 +503,7 @@ type::Schema t_ast_generator::gen_schema(
 namespace {
 template <typename Writer>
 struct SortingProtocolWriter : Writer {
-  static constexpr bool kSortKeys() { return true; }
+  static constexpr KeyOrder keyOrder() { return KeyOrder::NativeAscending; }
 };
 } // namespace
 

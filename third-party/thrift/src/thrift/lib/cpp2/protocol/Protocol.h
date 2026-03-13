@@ -460,6 +460,14 @@ constexpr bool usesFieldNames() {
   }
 }
 
+/// How to sort keys in set/map during serialization.
+enum class KeyOrder {
+  /// No sorting applied.
+  Unspecified,
+  /// Sorted by C++ `operator<`, in ascending order.
+  NativeAscending,
+};
+
 /// Specifies the order in which struct fields are serialized.
 enum class FieldOrder {
   /// Field declaration order in IDL, unless SerializeInFieldIdOrder annotation

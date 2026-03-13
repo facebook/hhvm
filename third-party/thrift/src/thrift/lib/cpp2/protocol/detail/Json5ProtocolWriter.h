@@ -117,7 +117,7 @@ class Json5ProtocolWriter final {
   explicit Json5ProtocolWriter(JsonWriterOptions options = {})
       : options_(options), writer_(options) {}
 
-  static constexpr bool kSortKeys() { return true; }
+  static constexpr KeyOrder keyOrder() { return KeyOrder::NativeAscending; }
   FieldOrder fieldOrder() const { return FieldOrder::IdAscending; }
 
   static constexpr size_t kDefaultGrowth = 1 << 14; // 16KB

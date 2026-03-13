@@ -15,13 +15,13 @@ class Bar {
 }
 
 class Baz {
-  public static @HH\classname $f = Foo::class;
+  <<__Soft>> public static HH\classname $f = Foo::class;
 }
 
 type T = null;
 type N = HH\classname;
 
-function foo(@HH\classname $x) : @N {
+function foo(<<__Soft>> HH\classname $x) : <<__Soft>> N {
   var_dump($x);
   return Bar::class;
 }

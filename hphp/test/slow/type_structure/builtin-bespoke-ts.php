@@ -7,7 +7,7 @@ class C {
 
 type TBool = bool;
 type TFloat = float;
-type TString = ?@~string;
+type TString = ?<<__Soft>> ~string;
 newtype TNum = num;
 
 type TShape = shape('a' => bool, 'b' => int);

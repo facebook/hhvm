@@ -2,13 +2,13 @@
 
 <<file:__EnableUnstableFeatures('class_type')>>
 
-function param_class(@class<C> $c): void {}
-function ret_class(mixed $m): @class<C> {
+function param_class(<<__Soft>> class<C> $c): void {}
+function ret_class(mixed $m): <<__Soft>> class<C> {
   return $m;
 }
 
 class C {
-  public static @?class<C> $c = null;
+  <<__Soft>> public static ?class<C> $c = null;
 }
 
 function caller(mixed $m): void {

@@ -8,19 +8,19 @@ class Baz {}
 class Bar {
   public string $p1 = Baz::class;
   public T $p2 = Baz::class;
-  public @HH\classname $p3 = Baz::class;
+  <<__Soft>> public HH\classname $p3 = Baz::class;
   public arraykey $p4 = Baz::class;
   public static string $sp1 = Baz::class;
   public static T $sp2 = Baz::class;
-  public static @HH\classname $sp3 = Baz::class;
+  <<__Soft>> public static HH\classname $sp3 = Baz::class;
   public static arraykey $sp4 = Baz::class;
   public string $lp1 = Baz::class;
   public T $lp2 = Baz::class;
-  public @HH\classname $lp3 = Baz::class;
+  <<__Soft>> public HH\classname $lp3 = Baz::class;
   public arraykey $lp4 = Baz::class;
   public static string $slp1 = Baz::class;
   public static T $slp2 = Baz::class;
-  public static @HH\classname $slp3 = Baz::class;
+  <<__Soft>> public static HH\classname $slp3 = Baz::class;
   public static arraykey $slp4 = Baz::class;
 }
 
@@ -29,7 +29,7 @@ function foo1(string $x) : string {
   return Foo::class;
 }
 
-function foo2(@HH\classname $x) : @HH\classname {
+function foo2(<<__Soft>> HH\classname $x) : <<__Soft>> HH\classname {
   var_dump($x);
   return Foo::class;
 }
@@ -39,7 +39,7 @@ function foo3(T $x) : T {
   return Foo::class;
 }
 
-function foo4(inout @HH\classname $x) :mixed{
+function foo4(inout <<__Soft>> HH\classname $x) :mixed{
   var_dump($x);
   $x = Baz::class;
 }
@@ -54,7 +54,7 @@ function foo6<reify T>(T $x) : T {
   return Foo::class;
 }
 
-function foo7(@HH\classname $a, inout arraykey $b) : string {
+function foo7(<<__Soft>> HH\classname $a, inout arraykey $b) : string {
   var_dump($a);
   var_dump($b);
   $b = __hhvm_intrinsics\launder_value(Baz::class);

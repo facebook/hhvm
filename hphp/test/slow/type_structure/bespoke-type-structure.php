@@ -26,8 +26,8 @@ newtype FooClass = Foo<bool>;
 newtype FooAny = ?AnyArray<string, bool>;
 newtype FooTuple = (FooString, mixed);
 
-newtype FooSoftInt = @~int;
-newtype FooLikeInt = ~@int;
+newtype FooSoftInt = <<__Soft>> ~int;
+newtype FooLikeInt = ~<<__Soft>> int;
 
 type ComplicatedType<T> = shape(
   'a' => int,

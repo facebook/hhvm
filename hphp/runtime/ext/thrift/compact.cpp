@@ -794,7 +794,7 @@ struct CompactReader {
 
       SpecHolder specHolder;
       auto const& spec = specHolder.getSpec(*cls);
-      StrictUnionChecker strictUnionChecker{spec.isStrictUnion};
+      StrictUnionChecker strictUnionChecker{spec.isStrictUnion, clsName};
       Object dest = spec.newObject(*cls);
       spec.clearTerseFields(*cls, dest);
 

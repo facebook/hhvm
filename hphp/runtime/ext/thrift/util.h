@@ -106,21 +106,26 @@ inline void check_container_size(const uint32_t size) {
 
 class StrictUnionChecker {
 public:
-  explicit StrictUnionChecker(bool enabled) : enabled_{enabled}, unionFieldFound_{false} {}
+  StrictUnionChecker(bool enabled, const String& clsName)
+      : enabled_{enabled}, clsName_{clsName}, unionFieldFound_{false} {}
 
   void markFieldFound() {
-    if (!enabled_) {
-      return;
-    }
-
     if (unionFieldFound_) {
-      thrift_error("Union field already set", ERR_INVALID_DATA);
+      if (enabled_) {
+        thrift_error("Union field already set", ERR_INVALID_DATA);
+      } else if (!alreadyRaised_) {
+        raise_warning(
+            "Thrift union %s has multiple fields set", clsName_.c_str());
+        alreadyRaised_ = true;
+      }
     }
     unionFieldFound_ = true;
   }
 private:
   bool enabled_{false};
+  String clsName_;
   bool unionFieldFound_{false};
+  bool alreadyRaised_{false};
 };
 
 }

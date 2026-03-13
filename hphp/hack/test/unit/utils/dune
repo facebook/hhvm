@@ -137,3 +137,14 @@
   utils_core)
  (preprocess
   (pps ppx_deriving.std ppx_compare ppx_sexp_conv ppx_hash ppx_let)))
+
+(executable
+ (name approxset_bench)
+ (modules approxset_bench)
+ (libraries
+  approx_set
+  approxset_tag_domain
+  unix
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std ppx_sexp_conv ppx_hash ppx_let)))

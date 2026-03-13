@@ -238,7 +238,7 @@ macro(thrift_generate
     ${output_path}/gen-${language}/${source_file_name}_data.h
     ${output_path}/gen-${language}/${source_file_name}_metadata.h
     ${output_path}/gen-${language}/${source_file_name}_types.h
-    ${output_path}/gen-${language}/${source_file_name}_types.tcch
+    ${output_path}/gen-${language}/${source_file_name}_types.tcc
     ${output_path}/gen-${language}/${source_file_name}_types_custom_protocol.h
   )
   set("${target_file_name}-${language}-SOURCES"

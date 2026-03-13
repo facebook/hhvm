@@ -158,9 +158,7 @@ class DeterministicAccumulator {
 // Creates a deterministic accumulator using the provided hasher.
 template <class Hasher>
 [[nodiscard]] auto makeDeterministicAccumulator() {
-  // C++14 can not implicitly generate deduction guide for lambda.
-  auto hashGen = [] { return Hasher{}; };
-  return DeterministicAccumulator<decltype(hashGen)>(std::move(hashGen));
+  return DeterministicAccumulator([] { return Hasher{}; });
 }
 
 template <class Accumulator>

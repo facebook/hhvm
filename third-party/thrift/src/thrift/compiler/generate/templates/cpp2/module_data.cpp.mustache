@@ -16,57 +16,58 @@
 
 }}
 {{#import "types/schema_association" as schema_association}}
+{{#import "common/types" as types}}
 {{> Autogen}}
 
-#include "{{program:include_prefix}}{{program:name}}_data.h"
-#include "{{program:include_prefix}}{{program:name}}_constants.h"
+#include "{{program.include_prefix}}{{program.name}}_data.h"
+#include "{{program.include_prefix}}{{program.name}}_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-{{#program:services}}
-namespace {{service:cpp_qualified_namespace}} {
-class {{service:cpp_name}};
-} // namespace {{service:cpp_qualified_namespace}}
-{{/program:services}}
+  {{#each program.services as |svc|}}
+namespace {{svc.cpp_qualified_namespace}} {
+class {{svc.cpp_name}};
+} // namespace {{svc.cpp_qualified_namespace}}
+  {{/each}}
 namespace apache::thrift {
-{{#program:structs}}
+  {{#each program.structured_definitions as |struct|}}
 
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<{{struct:cpp_fullname}}>::name = "{{struct:name}}";
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, {{(array.len struct:fields)}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_names = { {
-  {{#struct:fields}}
-  "{{field:name}}"sv,
-  {{/struct:fields}}
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::string_view TStructDataStorage<{{struct.cpp_fullname}}>::name = "{{struct.name}}";
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<std::string_view, {{(array.len struct.fields)}}> TStructDataStorage<{{struct.cpp_fullname}}>::fields_names = { {
+    {{#each struct.fields as |field|}}
+  "{{field.name}}"sv,
+    {{/each}}
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, {{(array.len struct:fields)}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_ids = { {
-  {{#struct:fields}}
-  {{field:id}},
-  {{/struct:fields}}
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int16_t, {{(array.len struct.fields)}}> TStructDataStorage<{{struct.cpp_fullname}}>::fields_ids = { {
+    {{#each struct.fields as |field|}}
+  {{field.id}},
+    {{/each}}
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, {{(array.len struct:fields)}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_types = { {
-  {{#struct:fields}}{{#field:type}}
-  TType::{{> common/struct_type}},
-  {{/field:type}}{{/struct:fields}}
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<protocol::TType, {{(array.len struct.fields)}}> TStructDataStorage<{{struct.cpp_fullname}}>::fields_types = { {
+    {{#each struct.fields as |field|}}
+  TType::{{#partial types.protocol_type type=field.type}},
+    {{/each}}
 }};
-THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, {{(array.len struct:fields)}}> TStructDataStorage<{{struct:cpp_fullname}}>::isset_indexes = { {
-  {{#struct:fields}}
-  {{#field:has_isset?}}{{field:isset_index}}{{/field:has_isset?}}{{^field:has_isset?}}-1{{/field:has_isset?}},
-  {{/struct:fields}}
+THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, {{(array.len struct.fields)}}> TStructDataStorage<{{struct.cpp_fullname}}>::isset_indexes = { {
+    {{#each struct.fields as |field|}}
+  {{#if field.has_isset?}}{{field.isset_index}}{{#else}}-1{{/if}},
+    {{/each}}
 }};
-{{/program:structs}}
+  {{/each}}
 
 namespace detail {
-{{#program:structs}}
+  {{#each program.structured_definitions as |struct|}}
 
-{{#partial schema_association.definition node=struct:self}}
-{{/program:structs}}
-{{#program:enums}}
+{{#partial schema_association.definition node=struct}}
+  {{/each}}
+  {{#each program.enums as |enum|}}
 
-{{#partial schema_association.definition node=enum:self}}
-{{/program:enums}}
+{{#partial schema_association.definition node=enum}}
+  {{/each}}
 
-{{#program:services}}
-{{#partial schema_association.declaration node=service:self}}
-{{#partial schema_association.definition node=service:self}}
-{{/program:services}}
+  {{#each program.services as |svc|}}
+{{#partial schema_association.declaration node=svc}}
+{{#partial schema_association.definition node=svc}}
+  {{/each}}
 } // namespace detail
 } // namespace apache::thrift

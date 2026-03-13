@@ -2178,7 +2178,7 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
   const auto& prog = cached_program(program);
 
   render_whisker_file("module_data.h", fmt::format("{}_data.h", name));
-  render_to_file(prog, "module_data.cpp", name + "_data.cpp");
+  render_whisker_file("module_data.cpp", fmt::format("{}_data.cpp", name));
 
   // module_types.h is an exception to same program const referencing, because
   // module_constants.h (where const accessors are declared) depends on

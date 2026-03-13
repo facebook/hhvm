@@ -207,9 +207,11 @@ target_link_libraries(
 )
 
 bypass_source_check("${type-cpp2-SOURCES}")
+bypass_source_check("${any_rep-cpp2-SOURCES}")
 add_library(
   thrifttype
 
+  ${any_rep-cpp2-SOURCES}
   ${type-cpp2-SOURCES}
 
   op/Serializer.cpp
@@ -229,26 +231,17 @@ target_link_libraries(
     common
     Folly::folly
     thriftannotation
+    thriftanyrep
     thrifttyperep
     thriftprotocol
 )
 
-bypass_source_check("${any_rep-cpp2-SOURCES}")
-add_library(
-  thriftanyrep
-
-  ${any_rep-cpp2-SOURCES}
-)
-add_dependencies(thriftanyrep any_rep-cpp2-target thriftannotation thrifttype
-  thrifttyperep)
-target_link_libraries(
-  thriftanyrep
-  PUBLIC
-    Folly::folly
-    thriftannotation
-    thrifttype
-    thrifttyperep
-)
+# thriftanyrep sources are now compiled into thrifttype to avoid a circular
+# shared library dependency. Keep thriftanyrep as a thin wrapper so that
+# existing consumers (e.g. Haskell FFI) that link -lthriftanyrep keep working.
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/thriftanyrep_stub.cpp" "")
+add_library(thriftanyrep "${CMAKE_CURRENT_BINARY_DIR}/thriftanyrep_stub.cpp")
+target_link_libraries(thriftanyrep PUBLIC thrifttype)
 
 bypass_source_check("${RpcMetadata-cpp2-SOURCES}")
 add_library(
@@ -561,7 +554,7 @@ install(
 if (BUILD_SHARED_LIBS)
   set_target_properties(rpcmetadata thriftannotation thriftmetadata thrift_path
     thrift_dynamic_value thriftfrozen2 thriftprotocol thriftcpp2 thrifttyperep thrifttype
-    serverdbginfo
+    thriftanyrep serverdbginfo
     PROPERTIES VERSION ${PACKAGE_VERSION}
     )
 endif()

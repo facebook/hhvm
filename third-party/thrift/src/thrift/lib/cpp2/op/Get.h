@@ -47,13 +47,8 @@ struct Get;
 template <class T>
 consteval type::Ordinal findOrdinal(
     const T* first, const T* last, const T& value) {
-  for (const T* iter = first; iter != last; ++iter) {
-    if (*iter == value) {
-      return static_cast<type::Ordinal>(iter - first + 1);
-    }
-  }
-
-  return static_cast<type::Ordinal>(0);
+  auto iter = std::find(first, last, value);
+  return static_cast<type::Ordinal>(iter == last ? 0 : iter - first + 1);
 }
 
 template <class T, class List>
@@ -69,11 +64,7 @@ class FindOrdinal<T, folly::tag_t<Args...>> {
  public:
   static constexpr auto value = findOrdinal(matches, std::end(matches), true);
   static consteval size_t count() {
-    size_t count = 0;
-    for (bool b : matches) {
-      count += b;
-    }
-    return count;
+    return std::count(matches, std::end(matches), true);
   }
 };
 

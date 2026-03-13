@@ -16,21 +16,21 @@
 
 }}
 {{> Autogen}}
-#include "{{program:include_prefix}}{{program:name}}_types_custom_protocol.h"
+#include "{{program.include_prefix}}{{program.name}}_types_custom_protocol.h"
 
-namespace {{program:cpp_qualified_namespace}} {
-{{#program:split_structs}}
+namespace {{program.cpp_qualified_namespace}} {
+  {{#each program.current_split_structured_definitions as |struct|}}
 
-{{#struct:extra_namespace}}
-namespace {{struct:extra_namespace}} {
-{{/struct:extra_namespace}}
-template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t {{struct:cpp_underlying_name}}::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t {{struct:cpp_underlying_name}}::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-{{#struct:extra_namespace}}
-} // namespace {{struct:extra_namespace}}
-{{/struct:extra_namespace}}
-{{/program:split_structs}}
+    {{#if struct.extra_namespace}}
+namespace {{struct.extra_namespace}} {
+    {{/if struct.extra_namespace}}
+template void {{struct.cpp_underlying_name}}::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t {{struct.cpp_underlying_name}}::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t {{struct.cpp_underlying_name}}::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t {{struct.cpp_underlying_name}}::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+    {{#if struct.extra_namespace}}
+} // namespace {{struct.extra_namespace}}
+    {{/if struct.extra_namespace}}
+  {{/each}}
 
-} // namespace {{program:cpp_qualified_namespace}}
+} // namespace {{program.cpp_qualified_namespace}}

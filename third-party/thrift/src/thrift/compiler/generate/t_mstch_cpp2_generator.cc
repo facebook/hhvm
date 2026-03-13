@@ -2146,19 +2146,18 @@ void t_mstch_cpp2_generator::generate_constants(const t_program* program) {
 
 void t_mstch_cpp2_generator::generate_metadata(const t_program* program) {
   const auto& name = program->name();
-  const auto& prog = cached_program(program);
 
-  render_to_file(prog, "module_metadata.h", name + "_metadata.h");
+  render_whisker_file("module_metadata.h", fmt::format("{}_metadata.h", name));
   if (!has_option("no_metadata")) {
-    render_to_file(prog, "module_metadata.cpp", name + "_metadata.cpp");
+    render_whisker_file(
+        "module_metadata.cpp", fmt::format("{}_metadata.cpp", name));
   }
 }
 
 void t_mstch_cpp2_generator::generate_sinit(const t_program* program) {
   const auto& name = program->name();
-  const auto& prog = cached_program(program);
 
-  render_to_file(prog, "module_sinit.cpp", name + "_sinit.cpp");
+  render_whisker_file("module_sinit.cpp", fmt::format("{}_sinit.cpp", name));
 }
 
 void t_mstch_cpp2_generator::generate_visitation() {
@@ -2189,7 +2188,7 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
   cpp_enable_same_program_const_referencing_ = true;
 
   render_to_file(prog, "module_types_fwd.h", name + "_types_fwd.h");
-  render_to_file(prog, "module_types.tcc", name + "_types.tcc");
+  render_whisker_file("module_types.tcc", fmt::format("{}_types.tcc", name));
 
   if (int split_count = get_split_count(options())) {
     auto digit = std::to_string(split_count - 1).size();
@@ -2199,12 +2198,10 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
       cpp_context_->set_program_split(split_id);
       render_to_file(
           prog, "module_types.cpp", name + "_types." + s + ".split.cpp");
-      render_to_file(
-          prog,
+      render_whisker_file(
           "module_types_binary.cpp",
           name + "_types_binary." + s + ".split.cpp");
-      render_to_file(
-          prog,
+      render_whisker_file(
           "module_types_compact.cpp",
           name + "_types_compact." + s + ".split.cpp");
       render_to_file(
@@ -2215,9 +2212,10 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
     cpp_context_->clear_program_split();
   } else {
     render_to_file(prog, "module_types.cpp", name + "_types.cpp");
-    render_to_file(prog, "module_types_binary.cpp", name + "_types_binary.cpp");
-    render_to_file(
-        prog, "module_types_compact.cpp", name + "_types_compact.cpp");
+    render_whisker_file(
+        "module_types_binary.cpp", fmt::format("{}_types_binary.cpp", name));
+    render_whisker_file(
+        "module_types_compact.cpp", fmt::format("{}_types_compact.cpp", name));
     render_to_file(
         prog,
         "module_types_serialization.cpp",

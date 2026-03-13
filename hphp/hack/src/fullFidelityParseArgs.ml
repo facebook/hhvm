@@ -31,7 +31,6 @@ type t = {
   quick_mode: bool;
   (* Defining the input *)
   files: string list;
-  disable_lval_as_an_expression: bool;
   const_default_func_args: bool;
   const_default_lambda_args: bool;
   const_static_props: bool;
@@ -66,7 +65,6 @@ let make
     quick_mode
     show_file_name
     files
-    disable_lval_as_an_expression
     const_default_func_args
     const_default_lambda_args
     const_static_props
@@ -99,7 +97,6 @@ let make
     quick_mode;
     show_file_name;
     files;
-    disable_lval_as_an_expression;
     const_default_func_args;
     const_default_lambda_args;
     const_static_props;
@@ -150,7 +147,6 @@ let parse_args () =
   let quick_mode = ref false in
   let enable_hh_syntax = ref false in
   let show_file_name = ref false in
-  let disable_lval_as_an_expression = ref false in
   let set_show_file_name () = show_file_name := true in
   let files = ref [] in
   let push_file file = files := file :: !files in
@@ -248,9 +244,6 @@ No errors are filtered out."
       ( "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name." );
-      ( "--disable-lval-as-an-expression",
-        Arg.Set disable_lval_as_an_expression,
-        "Disable lval as an expression." );
       ( "--const-default-func-args",
         Arg.Set const_default_func_args,
         "Statically check default function arguments are constant initializers"
@@ -331,7 +324,6 @@ No errors are filtered out."
     !quick_mode
     !show_file_name
     (List.rev !files)
-    !disable_lval_as_an_expression
     !const_default_func_args
     !const_default_lambda_args
     !const_static_props
@@ -348,7 +340,6 @@ let to_parser_options (args : t) : ParserOptions.t =
   {
     ParserOptions.default with
     ParserOptions.codegen = args.codegen;
-    disable_lval_as_an_expression = args.disable_lval_as_an_expression;
     const_default_func_args = args.const_default_func_args;
     const_default_lambda_args = args.const_default_lambda_args;
     const_static_props = args.const_static_props;
@@ -361,9 +352,5 @@ let to_parser_options (args : t) : ParserOptions.t =
       args.disallow_static_constants_in_default_func_args;
   }
 
-let to_parser_env args ~leak_rust_tree ~mode =
-  Full_fidelity_parser_env.make
-    ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
-    ~leak_rust_tree
-    ?mode
-    ()
+let to_parser_env _args ~leak_rust_tree ~mode =
+  Full_fidelity_parser_env.make ~leak_rust_tree ?mode ()

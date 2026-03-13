@@ -1,4 +1,4 @@
-// RUN: %hackc compile-infer --fail-fast -vHack.Lang.DisableLvalAsAnExpression=false %s | FileCheck %s
+// RUN: %hackc compile-infer --fail-fast %s | FileCheck %s
 
 class D {
   public int $foo = 42;
@@ -210,14 +210,14 @@ function mop_basel_setm_w(vec<int> $a): void {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_incdec_ei
-// CHECK: define $root.mop_basel_incdec_ei($this: *void, $a: .notnull *HackVec) : .notnull *HackInt {
+// CHECK: define $root.mop_basel_incdec_ei($this: *void, $a: .notnull *HackVec) : *void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
 // CHECK: // .column 1
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK: // .column 1
 // CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
-// CHECK: // .column 10
+// CHECK: // .column 3
 // CHECK:   n3 = $builtins.hack_int(3)
 // CHECK:   n4: *HackMixed = load &$a
 // CHECK:   n5 = $builtins.hack_array_get(n4, n3)
@@ -225,12 +225,11 @@ function mop_basel_setm_w(vec<int> $a): void {
 // CHECK:   n7: *HackMixed = load &$a
 // CHECK:   n8 = $builtins.hack_array_cow_set(n7, n3, n6)
 // CHECK:   store &$a <- n8: *HackMixed
-// CHECK: // .column 3
-// CHECK:   ret n5
+// CHECK: // .column 2
+// CHECK:   ret null
 // CHECK: }
-function mop_basel_incdec_ei(vec<int> $a): int {
-  /* HH_FIXME[1002] Assignment as expression */
-  return $a[3]++;
+function mop_basel_incdec_ei(vec<int> $a): void {
+  $a[3]++;
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_unset_ei

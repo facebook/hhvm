@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5c84650e70296309759722da70f0a50e>>
+// @generated SignedSource<<5989cbf9964c962f3be28bd84bb34f8d>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -36,8 +36,6 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (show, eq)")]
 #[repr(C)]
 pub struct ParserOptions {
-    /// Flag to disable using lvals as expressions.
-    pub disable_lval_as_an_expression: bool,
     /// Enable const static properties
     pub const_static_props: bool,
     /// Statically check default function arguments
@@ -138,7 +136,6 @@ pub struct ParserOptions {
 )]
 #[repr(C)]
 pub struct FfiT(
-    pub bool,
     pub bool,
     pub bool,
     pub bool,

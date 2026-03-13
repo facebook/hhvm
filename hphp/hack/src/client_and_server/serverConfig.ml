@@ -317,9 +317,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         (* The remainder are set in the config file *)
         is_systemlib =
           bool_opt Config_keys.is_systemlib config >?? po_opt.is_systemlib;
-        disable_lval_as_an_expression =
-          bool_opt Config_keys.disable_lval_as_an_expression config
-          >?? po_opt.disable_lval_as_an_expression;
         const_default_func_args =
           bool_opt Config_keys.const_default_func_args config
           >?? po_opt.const_default_func_args;

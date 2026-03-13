@@ -13,7 +13,6 @@ type t = {
   hhvm_compat_mode: bool;
   php5_compat_mode: bool;
   codegen: bool;
-  disable_lval_as_an_expression: bool;
   mode: FileInfo.mode option;
   rust: bool;
   leak_rust_tree: bool;
@@ -30,7 +29,6 @@ let default =
     hhvm_compat_mode = false;
     php5_compat_mode = false;
     codegen = false;
-    disable_lval_as_an_expression = false;
     rust = true;
     mode = None;
     leak_rust_tree = false;
@@ -45,7 +43,6 @@ let make
     ?(hhvm_compat_mode = default.hhvm_compat_mode)
     ?(php5_compat_mode = default.php5_compat_mode)
     ?(codegen = default.codegen)
-    ?(disable_lval_as_an_expression = default.disable_lval_as_an_expression)
     ?mode
     ?(rust = default.rust)
     ?((* DANGER: if you leak the root tree into OCaml, it's on you to ensure that
@@ -63,7 +60,6 @@ let make
     hhvm_compat_mode;
     php5_compat_mode;
     codegen;
-    disable_lval_as_an_expression;
     mode;
     rust;
     leak_rust_tree;
@@ -79,8 +75,6 @@ let hhvm_compat_mode e = e.hhvm_compat_mode
 let php5_compat_mode e = e.php5_compat_mode
 
 let codegen e = e.codegen
-
-let disable_lval_as_an_expression e = e.disable_lval_as_an_expression
 
 let mode e = e.mode
 

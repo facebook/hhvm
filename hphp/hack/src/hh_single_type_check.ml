@@ -795,7 +795,6 @@ let parse_options () =
         hhvm_compat_mode = default.hhvm_compat_mode;
         hhi_mode = default.hhi_mode;
         codegen = default.codegen;
-        disable_lval_as_an_expression = default.disable_lval_as_an_expression;
         disallow_static_constants_in_default_func_args =
           default.disallow_static_constants_in_default_func_args;
         stack_size = default.stack_size;

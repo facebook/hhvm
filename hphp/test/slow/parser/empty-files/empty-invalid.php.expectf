@@ -1,1 +1,1 @@
-Fatal error: A semicolon `;` is expected here. in %s/test/slow/parser/empty-files/empty-invalid.php on line 2
+Fatal error: `<?hhx` is not a valid script marker. Use `<?hh` to start a Hack file. in %s/test/slow/parser/empty-files/empty-invalid.php on line 1

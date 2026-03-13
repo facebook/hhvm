@@ -316,21 +316,13 @@ std::vector<Symbol<SymKind::Module>> SymbolMap::getFileModules(
 }
 
 std::vector<Symbol<SymKind::Module>> SymbolMap::getAllModules() {
-  using ModuleVec = std::vector<Symbol<SymKind::Module>>;
-  return readOrUpdate<ModuleVec>(
-      [&](const Data& data) -> Optional<ModuleVec> { return std::nullopt; },
-      [&](std::shared_ptr<AutoloadDB> db) -> ModuleVec {
-        auto const moduleStrs = db->getAllModules();
-        ModuleVec modules;
-        modules.reserve(moduleStrs.size());
-        for (auto const& moduleStr : moduleStrs) {
-          modules.emplace_back(moduleStr);
-        }
-        return modules;
-      },
-      [&](Data& data, ModuleVec modulesFromDB) -> ModuleVec {
-        return modulesFromDB;
-      });
+  auto const moduleStrs = getDB()->getAllModules();
+  std::vector<Symbol<SymKind::Module>> modules;
+  modules.reserve(moduleStrs.size());
+  for (auto const& moduleStr : moduleStrs) {
+    modules.emplace_back(moduleStr);
+  }
+  return modules;
 }
 
 std::optional<Symbol<SymKind::ModuleMembership>>
@@ -824,33 +816,21 @@ SymbolMap::getTypeMethodAttributes(Symbol<SymKind::Type> type) {
   if (path == nullptr) {
     return {};
   }
-  // This uses a DB-only strategy (like getFilesAndAttrValsWithAttribute)
-  // because the in-memory m_methodAttrs map is keyed by MethodDecl, not by
+  // DB-only: the in-memory m_methodAttrs map is keyed by MethodDecl, not by
   // type, so we can't efficiently query it without iterating all methods.
   // The DB query is a direct point lookup.
-  using PairVec =
-      std::vector<std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>;
-  return readOrUpdate<PairVec>(
-      [&](const UNUSED Data& data) -> Optional<PairVec> {
-        return std::nullopt;
-      },
-      [&](std::shared_ptr<AutoloadDB> db) -> PairVec {
-        if (m_enableBlockingDbWait) {
-          waitForDBUpdate(std::chrono::milliseconds(m_blockingDbWaitTimeout));
-        }
-        auto const dbPairs = db->getTypeMethodAttributes(
-            type.slice(), fs::path{std::string{path.slice()}});
-        PairVec result;
-        result.reserve(dbPairs.size());
-        for (auto const& [method, attr] : dbPairs) {
-          result.emplace_back(
-              Symbol<SymKind::Method>{method}, Symbol<SymKind::Type>{attr});
-        }
-        return result;
-      },
-      [&](Data& UNUSED data, PairVec resultFromDB) -> PairVec {
-        return resultFromDB;
-      });
+  if (m_enableBlockingDbWait) {
+    waitForDBUpdate(m_blockingDbWaitTimeout);
+  }
+  auto const dbPairs = getDB()->getTypeMethodAttributes(
+      type.slice(), fs::path{std::string{path.slice()}});
+  std::vector<std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>> result;
+  result.reserve(dbPairs.size());
+  for (auto const& [method, attr] : dbPairs) {
+    result.emplace_back(
+        Symbol<SymKind::Method>{method}, Symbol<SymKind::Type>{attr});
+  }
+  return result;
 }
 
 std::vector<std::pair<Symbol<SymKind::Method>, Symbol<SymKind::Type>>>
@@ -948,31 +928,17 @@ std::vector<FileAttrVal> SymbolMap::getFilesAndAttrValsWithAttribute(
 std::vector<FileAttrVal> SymbolMap::getFilesAndAttrValsWithAttribute(
     Symbol<SymKind::Type> attr) {
   using FileAttrValVec = std::vector<FileAttrVal>;
-  // This API uses a 'db only' strategy because it executes a join,
-  // which does not map well onto the symbol map data model.  That means:
-  // 1) never look in memory for the answer
-  // 2) always wait for db commit before returning from db
-  // 3) never try to update memory with the answer.
-  auto out = readOrUpdate<FileAttrValVec>(
-      [&](const UNUSED Data& data) -> Optional<FileAttrValVec> {
-        return std::nullopt;
-      },
-      [&](std::shared_ptr<AutoloadDB> db) -> FileAttrValVec {
-        if (m_enableBlockingDbWait) {
-          waitForDBUpdate(std::chrono::milliseconds(m_blockingDbWaitTimeout));
-        }
-        auto fromDb = db->getFilesAndAttrValsWithAttribute(attr.slice());
-        FileAttrValVec innerRet;
-        innerRet.reserve(fromDb.size());
-        for (auto const& row : fromDb) {
-          innerRet.push_back(FileAttrVal{Path{row.m_path}, row.m_AttrVal});
-        }
-        return innerRet;
-      },
-      [&](Data& UNUSED data, FileAttrValVec resultsFromDb) -> FileAttrValVec {
-        return resultsFromDb;
-      });
-  return out;
+  // DB-only: this executes a JOIN that doesn't map to the in-memory data model.
+  if (m_enableBlockingDbWait) {
+    waitForDBUpdate(m_blockingDbWaitTimeout);
+  }
+  auto fromDb = getDB()->getFilesAndAttrValsWithAttribute(attr.slice());
+  FileAttrValVec result;
+  result.reserve(fromDb.size());
+  for (auto const& row : fromDb) {
+    result.push_back(FileAttrVal{Path{row.m_path}, row.m_AttrVal});
+  }
+  return result;
 }
 
 std::vector<Path> SymbolMap::getFilesWithAttributeAndAnyValue(

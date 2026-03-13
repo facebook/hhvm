@@ -229,7 +229,8 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   auto certMsg = param->asCertificateMsg();
   auto certVerify = param2->asCertificateVerify();
   finished = param3->asFinished();
-  if (!certMsg || !certVerify || !finished) {
+  if (!certMsg || !certVerify || !finished ||
+      certMsg->certificate_list.empty()) {
     return folly::none;
   }
 

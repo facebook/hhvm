@@ -38,9 +38,20 @@
         }}{{#type:map?}}{{> ReadTypeContainer}}{{/type:map?}}{{!
       }}{{/type:container?}}{{!
       }}{{^type:container?}}{{!
+        }}{{#type:binary?}}{{!
+          }}{{#field:isNested?}}{{!
+            }}{{> ReadTypeBinary}}{{!
+          }}{{/field:isNested?}}{{!
+          }}{{^field:isNested?}}{{!
+            }}{{#field:type}}{{#type:hasAdapter?}}{{> ThriftBoxedType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> BoxedType}}{{/type:hasAdapter?}}{{/field:type}} {{field:javaName}} = {{!
+            }}{{> ReadTypeBinary}};{{!
+          }}{{/field:isNested?}}{{!
+        }}{{/type:binary?}}{{!
+        }}{{^type:binary?}}{{!
         }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
         }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
         }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+        }}{{/type:binary?}}{{!
       }}{{/type:container?}}{{!
     }}{{/type:javaType}}{{!
     }}{{^type:javaType}}{{!

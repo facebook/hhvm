@@ -34,9 +34,25 @@
       }}{{/field:isNested?}}{{!
     }}{{/type:isBinaryString?}}{{!
     }}{{^type:isBinaryString?}}{{!
+    }}{{#type:javaType}}{{#type:binary?}}{{!
+      }}{{#field:isNested?}}{{!
+        }}{{^field:hasAdapterOrWrapper?}}oprot.writeBinary({{> WriteNestedType}});{{/field:hasAdapterOrWrapper?}}{{!
+        }}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{> WriteNestedType}});{{/field:hasAdapterOrWrapper?}}{{!
+      }}{{/field:isNested?}}{{!
+      }}{{^field:isNested?}}{{!
+        }}{{^field:hasAdapterOrWrapper?}}oprot.writeBinary({{^struct:isUnion?}}this.{{/struct:isUnion?}}{{field:javaName}});{{/field:hasAdapterOrWrapper?}}{{!
+        }}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{field:javaName}});{{/field:hasAdapterOrWrapper?}}{{!
+      }}{{/field:isNested?}}{{!
+    }}{{/type:binary?}}{{^type:binary?}}{{!
     }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
     }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
     }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+    }}{{/type:binary?}}{{/type:javaType}}{{!
+    }}{{^type:javaType}}{{!
+    }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+    }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+    }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+    }}{{/type:javaType}}{{!
     }}{{/type:isBinaryString?}}{{!
   }}{{/type:isAdapterSet?}}{{!
 }}{{/type:typedef?}}{{!

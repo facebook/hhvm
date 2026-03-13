@@ -325,7 +325,7 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldEnd();
       if (binaryTestBuffer != null) {
         oprot.writeFieldBegin(BINARY_TEST_BUFFER_FIELD_DESC);
-        oprot.writeBinary((this.binaryTestBuffer));
+        oprot.writeBinary(this.binaryTestBuffer);
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();

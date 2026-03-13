@@ -289,6 +289,62 @@ int is_adjacent_vptr64(const Vptr64& a, const Vptr64& b, int32_t step, int32_t m
   return 0;
 }
 
+bool tryMoveAndPairStores32(Env& env, const storel& st1, Vlabel b, size_t i) {
+  // It's best to move stores around before register allocation because
+  // otherwise we could end up in situations like this:
+  //   store x0, [sp - 0x80]
+  //   ldimml ..., x0
+  //   store x0, [sp - 0x7c]
+  // In this example we can't push the first store next to the second due to the
+  // reuse of x0.
+  if (!st1.s.isVirt()) return false;
+
+  // Make sure the first store is of the same class of register as the second.
+  if (env.def_insts[st1.s] != Vinstr::ldimml) return false;
+
+  // Look for an intervening instruction that can be easily moved. For now, this
+  // is limited to patterns like this:
+  //  store %t0, ...
+  //  ldimml ..., %t1
+  //  store %t1, ...
+  Vreg r;
+  Immed s(0);
+  if (!if_inst<Vinstr::ldimml>(env, b, i + 1, [&](const ldimml& ld) {
+        if (!ld.d.isVirt()) return false;
+        r = ld.d;
+        s = ld.s;
+        return true;
+      })) {
+    return false;
+  }
+
+  Vptr m2;
+  if (!if_inst<Vinstr::storel>(env, b, i + 2, [&](const storel& st2) {
+        if (st2.s != r) return false;
+        m2 = st2.m;
+        return true;
+      })) {
+    return false;
+  }
+
+  const auto rv = is_adjacent_vptr64(st1.m, m2, 4, -256, 252);
+  if (rv == 0) return false;
+
+  // We have to immediately create the storepair now rather than leave them as
+  // individual stores, in order to prevent the second store being similarly
+  // shuffled afterwards.
+  return simplify_impl(env, b, i, [&] (Vout &v) {
+    auto const tmp = v.makeReg();
+    v << ldimml{s, tmp};
+    if (rv < 0) {
+      v << storepairl{st1.s, tmp, st1.m};
+    } else {
+      v << storepairl{tmp, st1.s, m2};
+    }
+    return 3;
+  });
+}
+
 bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
   // store{s, d}; store{s, d} --> storepair{s0, s1, d}
   return if_inst<Vinstr::store>(env, b, i + 1, [&](const store& st) {
@@ -313,7 +369,7 @@ bool simplify(Env& env, const store& inst, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
   // storel{s, d}; storel{s, d} --> storepairl{s0, s1, d}
-  return if_inst<Vinstr::storel>(env, b, i + 1, [&](const storel& st) {
+  if (if_inst<Vinstr::storel>(env, b, i + 1, [&](const storel& st) {
     if (!inst.s.isGP()) return false;
     if (!st.s.isGP()) return false;
     const auto rv = is_adjacent_vptr64(inst.m, st.m, 4, -256, 252);
@@ -328,7 +384,11 @@ bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
       });
     }
     return false;
-  });
+    })) {
+    return true;
+  }
+
+  return tryMoveAndPairStores32(env, inst, b, i);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

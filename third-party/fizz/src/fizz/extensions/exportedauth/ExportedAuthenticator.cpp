@@ -9,6 +9,7 @@
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/crypto/Hasher.h>
 #include <fizz/crypto/Hmac.h>
+#include <fizz/crypto/Utils.h>
 #include <fizz/extensions/exportedauth/ExportedAuthenticator.h>
 #include <fizz/extensions/exportedauth/Util.h>
 #include <fizz/protocol/DefaultFactory.h>
@@ -206,7 +207,7 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
         std::move(authenticatorRequest),
         std::move(handshakeContext),
         std::move(finishedMacKey));
-    if (folly::IOBufEqualTo()(emptyAuth, authClone)) {
+    if (CryptoUtils::equal(emptyAuth->coalesce(), authClone->coalesce())) {
       return std::vector<CertificateEntry>();
     } else {
       return folly::none;
@@ -264,7 +265,8 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   auto verifyData = detail::getFinishedData(
       makeHasher, finishedMacKey, finishedTranscriptHash);
 
-  if (folly::IOBufEqualTo()(finished->verify_data, verifyData)) {
+  if (CryptoUtils::equal(
+          finished->verify_data->coalesce(), verifyData->coalesce())) {
     certs = std::move(certMsg->certificate_list);
     return certs;
   } else {

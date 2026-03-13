@@ -179,30 +179,20 @@ inline constexpr type::Ordinal
 #endif
 
 template <class Id, class Idents, class TypeTags>
-consteval std::enable_if_t<std::is_same_v<Id, void>, FieldOrdinal>
-getFieldOrdinal(const int16_t*, size_t) {
-  return static_cast<FieldOrdinal>(0);
-}
-
-template <class Id, class Idents, class TypeTags>
-consteval std::enable_if_t<type::is_field_id_v<Id>, FieldOrdinal>
-getFieldOrdinal(const int16_t* ids, size_t numFields) {
-  return findOrdinal(
-      ids + 1, ids + numFields + 1, folly::to_underlying(Id::value));
-}
-
-template <class Id, class Idents, class TypeTags>
-consteval std::enable_if_t<type::is_ident_v<Id>, FieldOrdinal> getFieldOrdinal(
-    const int16_t*, size_t) {
-  return FindOrdinalInUniqueTypes<Id, Idents>;
-}
-
-template <class Id, class Idents, class TypeTags>
-consteval std::enable_if_t<type::detail::is_type_tag_v<Id>, FieldOrdinal>
-getFieldOrdinal(const int16_t*, size_t) {
-  static_assert(
-      FindOrdinal<Id, TypeTags>::count() <= 1, "Type Tag is not unique");
-  return FindOrdinal<Id, TypeTags>::value;
+consteval FieldOrdinal getFieldOrdinal(const int16_t* ids, size_t numFields) {
+  if constexpr (std::is_same_v<Id, void>) {
+    return static_cast<FieldOrdinal>(0);
+  } else if constexpr (type::is_field_id_v<Id>) {
+    return findOrdinal(
+        ids + 1, ids + numFields + 1, folly::to_underlying(Id::value));
+  } else if constexpr (type::is_ident_v<Id>) {
+    return FindOrdinalInUniqueTypes<Id, Idents>;
+  } else {
+    static_assert(type::detail::is_type_tag_v<Id>);
+    static_assert(
+        FindOrdinal<Id, TypeTags>::count() <= 1, "Type Tag is not unique");
+    return FindOrdinal<Id, TypeTags>::value;
+  }
 }
 
 template <typename Id, typename Tag>
@@ -332,18 +322,15 @@ constexpr void for_each_ordinal(F&& f) {
 
 /// Calls the given function with with ordinal<1> to ordinal<N>, returing the
 /// first 'true' result produced.
-template <
-    typename T,
-    typename F,
-    std::enable_if_t<num_fields<T> != 0>* = nullptr>
-decltype(auto) find_by_ordinal(F&& f) {
-  return detail::find_by_ordinal_impl(
-      std::forward<F>(f), std::make_integer_sequence<size_t, num_fields<T>>{});
-}
-
 template <typename T, typename F>
-std::enable_if_t<num_fields<T> == 0, bool> find_by_ordinal(F&&) {
-  return false;
+decltype(auto) find_by_ordinal(F&& f) {
+  if constexpr (num_fields<T> == 0) {
+    return false;
+  } else {
+    return detail::find_by_ordinal_impl(
+        std::forward<F>(f),
+        std::make_integer_sequence<size_t, num_fields<T>>{});
+  }
 }
 
 template <typename T, typename Id>
@@ -524,17 +511,11 @@ struct Get {
 template <typename Id, type::ConcreteThriftTypeTag Tag>
 struct Get<Id, Tag> {
   using T = type::native_type<Tag>;
-  constexpr decltype(auto) operator()(T& obj) const {
-    return op::get<Id, T>(obj);
-  }
-  constexpr decltype(auto) operator()(T&& obj) const {
-    return op::get<Id, T>(std::move(obj));
-  }
-  constexpr decltype(auto) operator()(const T& obj) const {
-    return op::get<Id, T>(obj);
-  }
-  constexpr decltype(auto) operator()(const T&& obj) const {
-    return op::get<Id, T>(std::move(obj));
+  template <typename U>
+  constexpr decltype(auto) operator()(U&& obj) const
+    requires std::is_same_v<folly::remove_cvref_t<U>, T>
+  {
+    return op::get<Id, T>(std::forward<U>(obj));
   }
 };
 
@@ -576,42 +557,34 @@ class InvokeByFieldId {
   using OrdToFieldId = get_field_id<T, field_ordinal<std::min(Ordinal, N)>>;
 
  public:
-  template <
-      typename F,
-      std::enable_if_t<sizeof(F) != 0 && pos != N, bool> = false>
+  template <typename F>
   FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(
       FieldId id, F&& f) const {
-    // By default clang's maximum depth of recursive template instantiation is
-    // 512. If we handle 8 cases at a time, it works with struct that has 4096
-    // fields.
-    if (id == OrdToFieldId<pos + 1>::value) {
-      return std::forward<F>(f)(OrdToFieldId<pos + 1>{});
-    } else if (id == OrdToFieldId<pos + 2>::value) {
-      return std::forward<F>(f)(OrdToFieldId<pos + 2>{});
-    } else if (id == OrdToFieldId<pos + 3>::value) {
-      return std::forward<F>(f)(OrdToFieldId<pos + 3>{});
-    } else if (id == OrdToFieldId<pos + 4>::value) {
-      return std::forward<F>(f)(OrdToFieldId<pos + 4>{});
-    } else if (id == OrdToFieldId<pos + 5>::value) {
-      return std::forward<F>(f)(OrdToFieldId<pos + 5>{});
-    } else if (id == OrdToFieldId<pos + 6>::value) {
-      return std::forward<F>(f)(OrdToFieldId<pos + 6>{});
-    } else if (id == OrdToFieldId<pos + 7>::value) {
-      return std::forward<F>(f)(OrdToFieldId<pos + 7>{});
-    } else if (id == OrdToFieldId<pos + 8>::value) {
-      return std::forward<F>(f)(OrdToFieldId<pos + 8>{});
+    if constexpr (pos == N) {
+      return std::forward<F>(f)();
+    } else {
+      // By default clang's maximum depth of recursive template instantiation is
+      // 512. If we handle 8 cases at a time, it works with struct that has 4096
+      // fields.
+      if (id == OrdToFieldId<pos + 1>::value) {
+        return std::forward<F>(f)(OrdToFieldId<pos + 1>{});
+      } else if (id == OrdToFieldId<pos + 2>::value) {
+        return std::forward<F>(f)(OrdToFieldId<pos + 2>{});
+      } else if (id == OrdToFieldId<pos + 3>::value) {
+        return std::forward<F>(f)(OrdToFieldId<pos + 3>{});
+      } else if (id == OrdToFieldId<pos + 4>::value) {
+        return std::forward<F>(f)(OrdToFieldId<pos + 4>{});
+      } else if (id == OrdToFieldId<pos + 5>::value) {
+        return std::forward<F>(f)(OrdToFieldId<pos + 5>{});
+      } else if (id == OrdToFieldId<pos + 6>::value) {
+        return std::forward<F>(f)(OrdToFieldId<pos + 6>{});
+      } else if (id == OrdToFieldId<pos + 7>::value) {
+        return std::forward<F>(f)(OrdToFieldId<pos + 7>{});
+      } else if (id == OrdToFieldId<pos + 8>::value) {
+        return std::forward<F>(f)(OrdToFieldId<pos + 8>{});
+      }
+      return InvokeByFieldId<T, std::min(pos + 8, N)>{}(id, std::forward<F>(f));
     }
-
-    return InvokeByFieldId<T, std::min(pos + 8, N)>{}(id, std::forward<F>(f));
-  }
-
-  template <
-      typename F,
-      std::enable_if_t<sizeof(F) != 0 && pos == N, bool> = false>
-  FOLLY_ALWAYS_INLINE constexpr decltype(auto) operator()(
-      FieldId, F&& f) const {
-    // If not found, f() will be invoked.
-    return std::forward<F>(f)();
   }
 
   template <typename... F>

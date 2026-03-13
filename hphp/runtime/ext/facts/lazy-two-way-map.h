@@ -145,6 +145,8 @@ struct LazyTwoWayMap {
 
     // Data in the DB is always considered to be more stale than data in the
     // map, and gets a version number of 0.
+    versionedKeys->m_keys.reserve(
+        versionedKeys->m_keys.size() + keysFromSource.size());
     for (auto const& key : keysFromSource) {
       versionedKeys->m_keys.insert({key, 0});
     }

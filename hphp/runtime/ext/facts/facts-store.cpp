@@ -1323,7 +1323,6 @@ struct FactsStoreImpl final
       assertx(pathData.m_exists);
 
       auto& path = pathData.m_path;
-      auto pathStr = Path{path};
       auto sha1hex = pathData.m_watcher_hash;
 
       // Watchman is sending us all the files in the repo, regardless of
@@ -1334,7 +1333,7 @@ struct FactsStoreImpl final
         if (!sha1hex.has_value()) {
           return false;
         }
-        auto const it = allPaths.find(pathStr);
+        auto const it = allPaths.find(path.native());
         if (it == allPaths.end()) {
           return false;
         }
@@ -1345,7 +1344,7 @@ struct FactsStoreImpl final
       // it. Watchman doesn't know about files which have been deleted
       // while it was down, so we have to figure out which files were
       // deleted ourselves.
-      allPaths.erase(pathStr);
+      allPaths.erase(path.native());
 
       if (sha1HexMatches) {
         continue;
@@ -1359,7 +1358,7 @@ struct FactsStoreImpl final
     std::vector<fs::path> deletedPaths;
     deletedPaths.reserve(allPaths.size());
     for (auto const& [pathStr, _] : allPaths) {
-      deletedPaths.emplace_back(std::string{pathStr.slice()});
+      deletedPaths.emplace_back(pathStr);
     }
 
     return {std::move(alteredPaths), std::move(deletedPaths)};

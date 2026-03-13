@@ -987,7 +987,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     for (query.step(); query.row(); query.step()) {
       derivedTypes.push_back(
           {.m_symbol = std::string{query.getString(1)},
-           .m_path = fs::path{std::string{query.getString(0)}}});
+           .m_path = std::string{query.getString(0)}});
     }
     return derivedTypes;
   }
@@ -1139,7 +1139,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       results.push_back(
           SymbolPath{
               .m_symbol = std::string{query.getString(0)},
-              .m_path = fs::path{std::string{query.getString(1)}}});
+              .m_path = std::string{query.getString(1)}});
     }
     return results;
   }
@@ -1154,7 +1154,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       results.push_back(
           SymbolPath{
               .m_symbol = std::string{query.getString(0)},
-              .m_path = fs::path{std::string{query.getString(1)}}});
+              .m_path = std::string{query.getString(1)}});
     }
     return results;
   }
@@ -1169,7 +1169,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
           MethodPath{
               .m_type = std::string{query.getString(0)},
               .m_method = std::string{query.getString(1)},
-              .m_path = fs::path{std::string{query.getString(2)}}});
+              .m_path = std::string{query.getString(2)}});
     }
     return results;
   }
@@ -1185,7 +1185,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
           MethodPath{
               .m_type = std::string{query.getString(0)},
               .m_method = std::string{query.getString(1)},
-              .m_path = fs::path{std::string{query.getString(2)}}});
+              .m_path = std::string{query.getString(2)}});
     }
     return results;
   }
@@ -1547,7 +1547,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
             return {};
           }
           return PathAndHash{
-              .m_path = {std::string{q.getString(0)}},
+              .m_path = std::string{q.getString(0)},
               .m_hash = std::string{q.getString(1)}};
         }};
   }

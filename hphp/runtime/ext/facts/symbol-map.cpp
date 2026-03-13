@@ -475,7 +475,7 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getDerivedTypes(
               EdgeToSupertype{
                   .m_type = Symbol<SymKind::Type>{typeDefStr.m_symbol},
                   .m_kind = kind,
-                  .m_path = Path{typeDefStr.m_path}});
+                  .m_path = Path{std::string_view{typeDefStr.m_path}}});
         }
         return typeDefs;
       },
@@ -664,7 +664,8 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getTypesWithAttribute(
         std::vector<TypeDecl> typeDefs;
         typeDefs.reserve(typeDefStrs.size());
         for (auto const& [type, path] : typeDefStrs) {
-          typeDefs.push_back({Symbol<SymKind::Type>{type}, Path{path}});
+          typeDefs.push_back(
+              {Symbol<SymKind::Type>{type}, Path{std::string_view{path}}});
         }
         return typeDefs;
       },
@@ -705,7 +706,8 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getTypeAliasesWithAttribute(
         std::vector<TypeDecl> typeAliasDefs;
         typeAliasDefs.reserve(typeAliasDefStrs.size());
         for (auto const& [type, path] : typeAliasDefStrs) {
-          typeAliasDefs.push_back({Symbol<SymKind::Type>{type}, Path{path}});
+          typeAliasDefs.push_back(
+              {Symbol<SymKind::Type>{type}, Path{std::string_view{path}}});
         }
         return typeAliasDefs;
       },
@@ -799,7 +801,7 @@ std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
                   .m_type =
                       TypeDecl{
                           .m_name = Symbol<SymKind::Type>{type},
-                          .m_path = Path{path}},
+                          .m_path = Path{std::string_view{path}}},
                   .m_method = Symbol<SymKind::Method>{method}});
         }
         return methodDecls;
@@ -1432,24 +1434,23 @@ Clock SymbolMap::dbClock() const {
   return getDB()->getClock();
 }
 
-hphp_fast_map<Path, SHA1> SymbolMap::getAllPathsWithHashes() const {
+hphp_fast_map<std::string, SHA1> SymbolMap::getAllPathsWithHashes() const {
   auto rlock = m_syncedData.rlock();
   auto db = getDB();
 
-  hphp_fast_map<Path, SHA1> allPaths;
+  hphp_fast_map<std::string, SHA1> allPaths;
   allPaths.reserve(db->getPathCount());
   for (auto&& [path, hash] : db->getAllPathsAndHashes()) {
-    assertx(path.is_relative());
-    allPaths.insert({Path{path}, SHA1{hash}});
+    allPaths.insert({std::move(path), SHA1{hash}});
   }
   for (auto const& [path, sha1] : rlock->m_sha1Hashes) {
-    allPaths.insert_or_assign(path, sha1);
+    allPaths.insert_or_assign(std::string{path.slice()}, sha1);
   }
   for (auto const& [path, exists] : rlock->m_fileExistsMap) {
     if (exists) {
-      assertx(allPaths.find(path) != allPaths.end());
+      assertx(allPaths.find(std::string{path.slice()}) != allPaths.end());
     } else {
-      allPaths.erase(path);
+      allPaths.erase(std::string{path.slice()});
     }
   }
   return allPaths;

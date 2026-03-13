@@ -1730,14 +1730,14 @@ TEST_F(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
   m2.drain();
   m1.waitForDBUpdate();
   auto oldHash = getSha1Hex(ff);
-  EXPECT_EQ(m1.getAllPathsWithHashes().at(Path{path1}).toString(), oldHash);
+  EXPECT_EQ(m1.getAllPathsWithHashes().at(path1.native()).toString(), oldHash);
 
   ff.types[0].name = "OtherClass";
   auto newHash = getSha1Hex(ff);
   ASSERT_NE(oldHash, newHash);
 
   update(m2, "1:2:3", "1:2:4", {path1}, {}, {ff});
-  EXPECT_EQ(m2.getAllPathsWithHashes().at(Path{path1}).toString(), newHash);
+  EXPECT_EQ(m2.getAllPathsWithHashes().at(path1.native()).toString(), newHash);
 }
 
 TEST_F(SymbolMapTest, PartiallyFillDerivedTypeInfo) {

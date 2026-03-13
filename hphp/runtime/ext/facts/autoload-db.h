@@ -64,17 +64,17 @@ struct AutoloadDB {
 
   struct SymbolPath {
     std::string m_symbol;
-    std::filesystem::path m_path;
+    std::string m_path;
   };
 
   struct MethodPath {
     std::string m_type;
     std::string m_method;
-    std::filesystem::path m_path;
+    std::string m_path;
   };
 
   struct PathAndHash {
-    std::filesystem::path m_path;
+    std::string m_path;
     std::string m_hash;
   };
 

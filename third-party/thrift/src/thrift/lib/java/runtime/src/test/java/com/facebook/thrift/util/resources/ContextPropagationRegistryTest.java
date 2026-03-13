@@ -18,20 +18,20 @@ package com.facebook.thrift.util.resources;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ContextPropagationRegistryTest {
   @Test
   public void testRegistry() {
     Set<String> keys = new HashSet<>();
-    Assert.assertEquals(false, ContextPropagationRegistry.isContextPropEnabled());
-    Assert.assertEquals(keys, ContextPropagationRegistry.getContextPropagationKeys());
+    Assertions.assertEquals(false, ContextPropagationRegistry.isContextPropEnabled());
+    Assertions.assertEquals(keys, ContextPropagationRegistry.getContextPropagationKeys());
 
     keys.add("foo");
     ContextPropagationRegistry.registerContextPropagationKey("foo");
 
-    Assert.assertEquals(true, ContextPropagationRegistry.isContextPropEnabled());
-    Assert.assertEquals(keys, ContextPropagationRegistry.getContextPropagationKeys());
+    Assertions.assertEquals(true, ContextPropagationRegistry.isContextPropEnabled());
+    Assertions.assertEquals(keys, ContextPropagationRegistry.getContextPropagationKeys());
   }
 }

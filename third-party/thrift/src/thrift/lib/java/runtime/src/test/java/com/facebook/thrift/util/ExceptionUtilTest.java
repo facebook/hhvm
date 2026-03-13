@@ -16,12 +16,12 @@
 
 package com.facebook.thrift.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.thrift.TApplicationException;
 import org.apache.thrift.TBaseException;
 import org.apache.thrift.TException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.Exceptions;
 
 public class ExceptionUtilTest {

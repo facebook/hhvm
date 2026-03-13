@@ -19,13 +19,13 @@ package com.facebook.thrift.util;
 import static com.facebook.thrift.util.NettyUtil.TransportType.EPOLL;
 import static com.facebook.thrift.util.NettyUtil.TransportType.IO_URING;
 import static com.facebook.thrift.util.NettyUtil.TransportType.NIO;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.mockStatic;
 
 import com.facebook.thrift.client.ThriftClientConfig;
@@ -72,7 +72,8 @@ import org.apache.thrift.protocol.TField;
 import org.apache.thrift.protocol.TStruct;
 import org.apache.thrift.protocol.TType;
 import org.apache.thrift.transport.TTransportException;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import reactor.core.Exceptions;
 
@@ -110,13 +111,13 @@ public class RpcClientUtilsTest {
 
   @Test
   public void testGetEventLoopGroup() {
-    assertNotNull("EventLoopGroup should not be null", RpcResources.getEventLoopGroup());
+    assertNotNull(RpcResources.getEventLoopGroup(), "EventLoopGroup should not be null");
   }
 
   @Test
   public void testDomainSocketChannelLinuxJava9() {
-    assumeFalse("Not Macos", isMacos());
-    assumeTrue("Java 9+", PlatformDependent.javaVersion() >= 9);
+    assumeFalse(isMacos(), "Not Macos");
+    assumeTrue(PlatformDependent.javaVersion() >= 9, "Java 9+");
 
     try (MockedStatic<NettyUtil> mockNettyUtil = mockStatic(NettyUtil.class)) {
       mockNettyUtil.when(NettyUtil::getTransportType).thenReturn(IO_URING);
@@ -129,7 +130,7 @@ public class RpcClientUtilsTest {
 
   @Test
   public void testDomainSocketChannelLinux() {
-    assumeFalse("Not Macos", isMacos());
+    assumeFalse(isMacos(), "Not Macos");
 
     try (MockedStatic<NettyUtil> mockNettyUtil = mockStatic(NettyUtil.class)) {
       mockNettyUtil.when(NettyUtil::getTransportType).thenReturn(EPOLL);
@@ -156,7 +157,7 @@ public class RpcClientUtilsTest {
   @Test
   public void testIoUringSocketChannel() {
     assumeFalse(isMacos());
-    assumeTrue("Java 9+", PlatformDependent.javaVersion() >= 9);
+    assumeTrue(PlatformDependent.javaVersion() >= 9, "Java 9+");
 
     try (MockedStatic<NettyUtil> mockNettyUtil = mockStatic(NettyUtil.class)) {
       mockNettyUtil.when(NettyUtil::getTransportType).thenReturn(IO_URING);
@@ -196,16 +197,20 @@ public class RpcClientUtilsTest {
     }
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testInvalidSocketGroupCombination() {
     assumeTrue(PlatformDependent.javaVersion() < 16);
 
-    try (MockedStatic<NettyUtil> mockNettyUtil = mockStatic(NettyUtil.class)) {
-      mockNettyUtil.when(NettyUtil::getTransportType).thenReturn(NIO);
+    Assertions.assertThrows(
+        UnsupportedOperationException.class,
+        () -> {
+          try (MockedStatic<NettyUtil> mockNettyUtil = mockStatic(NettyUtil.class)) {
+            mockNettyUtil.when(NettyUtil::getTransportType).thenReturn(NIO);
 
-      SocketAddress socketAddress = new DomainSocketAddress("/foo");
-      RpcClientUtils.getChannelClass(socketAddress);
-    }
+            SocketAddress socketAddress = new DomainSocketAddress("/foo");
+            RpcClientUtils.getChannelClass(socketAddress);
+          }
+        });
   }
 
   @Test

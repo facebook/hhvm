@@ -17,8 +17,8 @@
 package com.facebook.thrift.util;
 
 import static com.facebook.thrift.util.SerializationProtocol.TCompact;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -29,13 +29,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ReaderWriterTest {
   private Random random;
 
-  @Before
+  @BeforeEach
   public void setup() {
     random = new Random();
   }

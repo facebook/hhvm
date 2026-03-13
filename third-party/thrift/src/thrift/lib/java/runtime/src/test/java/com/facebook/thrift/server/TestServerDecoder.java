@@ -16,8 +16,8 @@
 
 package com.facebook.thrift.server;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.client.RpcClientFactory;
@@ -37,7 +37,7 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,11 +86,11 @@ public class TestServerDecoder {
               + " succeeded. This indicates the bug where maxFrameSize is not enforced.");
     } catch (Exception e) {
       assertTrue(
-          "Expected a frame size related exception",
           e.getMessage().contains("frame")
               || e.getMessage().contains("size")
               || e.getMessage().contains("large")
-              || e.getCause() != null);
+              || e.getCause() != null,
+          "Expected a frame size related exception");
     } finally {
       transport.dispose();
     }
@@ -121,7 +121,7 @@ public class TestServerDecoder {
     PingRequest request = new PingRequest.Builder().setRequest("small message").build();
     try {
       PingResponse response = client.ping(request);
-      assertTrue("Expected echo response", response.getResponse().contains("small message"));
+      assertTrue(response.getResponse().contains("small message"), "Expected echo response");
     } catch (Exception e) {
       fail("Small message should be accepted but got exception: " + e);
     } finally {
@@ -168,11 +168,11 @@ public class TestServerDecoder {
               + " but request succeeded. This indicates maxFrameSize is not enforced.");
     } catch (Exception e) {
       assertTrue(
-          "Expected a frame size related exception",
           e.getMessage().contains("frame")
               || e.getMessage().contains("size")
               || e.getMessage().contains("length")
-              || e.getCause() != null);
+              || e.getCause() != null,
+          "Expected a frame size related exception");
     } finally {
       transport.dispose();
     }

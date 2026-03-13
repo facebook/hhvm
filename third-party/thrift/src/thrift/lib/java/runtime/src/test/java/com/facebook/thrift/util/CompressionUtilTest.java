@@ -23,8 +23,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.DeflaterInputStream;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class CompressionUtilTest {
   @Test
@@ -54,7 +54,7 @@ public class CompressionUtilTest {
 
     String text = new String(bos.toByteArray(), StandardCharsets.UTF_8);
 
-    Assert.assertEquals(text, deflatedText);
+    Assertions.assertEquals(text, deflatedText);
   }
 
   @Test
@@ -85,7 +85,7 @@ public class CompressionUtilTest {
 
     String text = new String(bos.toByteArray(), StandardCharsets.UTF_8);
 
-    Assert.assertEquals(text, deflatedText);
-    Assert.assertEquals(0, in.refCnt());
+    Assertions.assertEquals(text, deflatedText);
+    Assertions.assertEquals(0, in.refCnt());
   }
 }

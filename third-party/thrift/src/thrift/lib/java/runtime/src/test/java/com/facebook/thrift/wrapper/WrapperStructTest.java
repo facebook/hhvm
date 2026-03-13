@@ -16,8 +16,7 @@
 
 package com.facebook.thrift.wrapper;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.any.Any;
 import com.facebook.thrift.test.wrapper.MutableTerseWrappedTestStruct;
@@ -34,23 +33,17 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Collection;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class WrapperStructTest {
 
-  private final boolean exception;
+  private boolean exception;
 
-  public WrapperStructTest(boolean exception) {
-    this.exception = exception;
-  }
-
-  @Parameterized.Parameters
-  public static Collection<Boolean> data() {
-    return Arrays.asList(false, true);
+  static Stream<Arguments> data() {
+    return Stream.of(Arguments.of(false), Arguments.of(true));
   }
 
   private byte[] serializeWrapped(WrappedTestStruct struct) {
@@ -95,8 +88,10 @@ public class WrapperStructTest {
         TestStruct.asReader(), bytes, SerializationProtocol.TCompact);
   }
 
-  @Test
-  public void testBoolFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBoolFieldWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st = new TestStruct.Builder().setContext(1).setWrappedBooleanField(true).build();
     WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
 
@@ -112,8 +107,10 @@ public class WrapperStructTest {
     assertNull(wrapped.getWrappedBooleanField().getZonedValue());
   }
 
-  @Test
-  public void testIntFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntFieldWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st = new TestStruct.Builder().setContext(1).setWrappedIntField(3).build();
     WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
 
@@ -129,8 +126,10 @@ public class WrapperStructTest {
     assertNull(wrapped.getWrappedIntField().getZonedValue());
   }
 
-  @Test
-  public void testSetIntFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSetIntFieldWrapper(boolean exception) {
+    this.exception = exception;
     WrappedTestStruct wrapped =
         new WrappedTestStruct.Builder()
             .setContext(1)
@@ -142,8 +141,10 @@ public class WrapperStructTest {
     assertEquals(20, (int) wrapped.getWrappedIntField().getValue());
   }
 
-  @Test
-  public void testByteBufFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testByteBufFieldWrapper(boolean exception) {
+    this.exception = exception;
     byte[] bytes = new byte[] {1, 2, 3};
     TestStruct st = new TestStruct.Builder().setContext(0).setWrappedByteBufField(bytes).build();
     WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
@@ -155,8 +156,10 @@ public class WrapperStructTest {
     assertNull(wrapped.getWrappedByteBufField().getZonedValue());
   }
 
-  @Test
-  public void testByteBufInnerFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testByteBufInnerFieldWrapper(boolean exception) {
+    this.exception = exception;
     byte[] bytes = new byte[] {1, 2, 3};
     TestStruct st = new TestStruct.Builder().setContext(1).setWrappedByteBufField2(bytes).build();
     WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
@@ -171,8 +174,10 @@ public class WrapperStructTest {
             ByteBufUtil.getBytes((ByteBuf) wrapped.getWrappedByteBufField2().getZonedValue())));
   }
 
-  @Test
-  public void testSingleAdaptedIntFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSingleAdaptedIntFieldWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st =
         new TestStruct.Builder().setContext(1).setWrappedSingleAdaptedIntField(200).build();
     WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
@@ -182,8 +187,10 @@ public class WrapperStructTest {
     assertEquals("200", (String) wrapped.getWrappedSingleAdaptedIntField().getZonedValue());
   }
 
-  @Test
-  public void testDoubleAdaptedIntFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDoubleAdaptedIntFieldWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st =
         new TestStruct.Builder().setContext(1).setWrappedDoubleAdaptedIntField(100).build();
     WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
@@ -193,8 +200,10 @@ public class WrapperStructTest {
     assertEquals(100L, (long) wrapped.getWrappedDoubleAdaptedIntField().getZonedValue());
   }
 
-  @Test
-  public void testTerseFields() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testTerseFields(boolean exception) {
+    this.exception = exception;
     TerseWrappedTestStruct st = new TerseWrappedTestStruct.Builder().build();
     assertEquals(IntrinsicDefaults.defaultInt(), st.getContext());
     assertEquals(IntrinsicDefaults.defaultBoolean(), st.getWrappedBooleanField().getValue());
@@ -206,8 +215,10 @@ public class WrapperStructTest {
     assertEquals("0", st.getWrappedSingleAdaptedIntField().getValue());
   }
 
-  @Test
-  public void testEquals() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testEquals(boolean exception) {
+    this.exception = exception;
     WrappedTestStruct st1 =
         new WrappedTestStruct.Builder()
             .setContext(4)
@@ -233,8 +244,10 @@ public class WrapperStructTest {
     assertEquals(st1, st2);
   }
 
-  @Test
-  public void testSetTerseFields() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSetTerseFields(boolean exception) {
+    this.exception = exception;
     TerseWrappedTestStruct st =
         new TerseWrappedTestStruct.Builder()
             .setWrappedBooleanField(new PoliciedField<>(true))
@@ -257,8 +270,10 @@ public class WrapperStructTest {
     assertEquals("9", st.getWrappedSingleAdaptedIntField().getValue());
   }
 
-  @Test
-  public void testMutableIntFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMutableIntFieldWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st = new TestStruct.Builder().setContext(1).setWrappedIntField(3).build();
     MutableTerseWrappedTestStruct wrapped =
         SerializerUtil.fromByteArray(
@@ -282,8 +297,10 @@ public class WrapperStructTest {
     assertNull(wrapped.getWrappedIntField().getZonedValue());
   }
 
-  @Test
-  public void testMutableSingleAdaptedIntFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMutableSingleAdaptedIntFieldWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st =
         new TestStruct.Builder().setContext(1).setWrappedSingleAdaptedIntField(200).build();
     MutableTerseWrappedTestStruct wrapped =
@@ -297,8 +314,10 @@ public class WrapperStructTest {
     assertEquals("200", (String) wrapped.getWrappedSingleAdaptedIntField().getZonedValue());
   }
 
-  @Test
-  public void testMutableDoubleAdaptedIntFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMutableDoubleAdaptedIntFieldWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st =
         new TestStruct.Builder().setContext(1).setWrappedDoubleAdaptedIntField(100).build();
     MutableTerseWrappedTestStruct wrapped =
@@ -312,8 +331,10 @@ public class WrapperStructTest {
     assertEquals(100L, (long) wrapped.getWrappedDoubleAdaptedIntField().getZonedValue());
   }
 
-  @Test
-  public void testMutableTerseFields() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMutableTerseFields(boolean exception) {
+    this.exception = exception;
     MutableTerseWrappedTestStruct st = new MutableTerseWrappedTestStruct.Builder().build();
     assertEquals(IntrinsicDefaults.defaultInt(), st.getContext());
     assertEquals(IntrinsicDefaults.defaultBoolean(), st.getWrappedBooleanField().getValue());
@@ -325,8 +346,10 @@ public class WrapperStructTest {
     assertEquals("0", st.getWrappedSingleAdaptedIntField().getValue());
   }
 
-  @Test
-  public void testIntListFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntListFieldWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st =
         new TestStruct.Builder().setContext(1).setListAdaptedIntField(Arrays.asList(2)).build();
     WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
@@ -335,8 +358,10 @@ public class WrapperStructTest {
     assertEquals("2", wrapped.getListAdaptedIntField().getValue().get(0));
   }
 
-  @Test
-  public void testAnyListFieldWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testAnyListFieldWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st =
         new TestStruct.Builder()
             .setContext(1)
@@ -348,8 +373,10 @@ public class WrapperStructTest {
     assertEquals("foo", wrapped.getAnyListField().getValue().get(0).get());
   }
 
-  @Test
-  public void testMultipleAdapterAndWrapper() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMultipleAdapterAndWrapper(boolean exception) {
+    this.exception = exception;
     TestStruct st =
         new TestStruct.Builder()
             .setContext(1)

@@ -16,30 +16,35 @@
 
 package com.facebook.thrift.client;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.facebook.thrift.payload.ClientRequestPayload;
 import io.airlift.units.Duration;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 public class TimeoutRpcClientFactoryTest {
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowExceptionWhenDelegateFactoryIsNull() {
-    new TimeoutRpcClientFactory(null, new ThriftClientConfig());
+    Assertions.assertThrows(
+        NullPointerException.class,
+        () -> new TimeoutRpcClientFactory(null, new ThriftClientConfig()));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowExceptionWhenConfigIsNull() {
-    new TimeoutRpcClientFactory(Mockito.mock(RpcClientFactory.class), null);
+    Assertions.assertThrows(
+        NullPointerException.class,
+        () -> new TimeoutRpcClientFactory(Mockito.mock(RpcClientFactory.class), null));
   }
 
   @Test
@@ -57,12 +62,16 @@ public class TimeoutRpcClientFactoryTest {
     }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowExceptionWhenDefaultTimeoutIsInvalid() {
-    ThriftClientConfig config = new ThriftClientConfig();
-    Duration duration = Duration.succinctDuration(0, TimeUnit.SECONDS);
-    config.setRequestTimeout(duration);
-    new TimeoutRpcClientFactory(Mockito.mock(RpcClientFactory.class), config);
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          ThriftClientConfig config = new ThriftClientConfig();
+          Duration duration = Duration.succinctDuration(0, TimeUnit.SECONDS);
+          config.setRequestTimeout(duration);
+          new TimeoutRpcClientFactory(Mockito.mock(RpcClientFactory.class), config);
+        });
   }
 
   @Test
@@ -103,25 +112,26 @@ public class TimeoutRpcClientFactoryTest {
     long l = rpcClient.calculateRequestTimeout(RpcOptions.EMPTY);
     System.out.println(l);
 
-    Assert.assertEquals(1_000, l);
+    Assertions.assertEquals(1_000, l);
 
     RpcOptions r = new RpcOptions.Builder().setClientTimeoutMs(1).setQueueTimeoutMs(0).build();
 
     l = rpcClient.calculateRequestTimeout(r);
-    Assert.assertEquals(1, l);
+    Assertions.assertEquals(1, l);
 
     r = new RpcOptions.Builder().setClientTimeoutMs(0).setQueueTimeoutMs(1).build();
 
     l = rpcClient.calculateRequestTimeout(r);
-    Assert.assertEquals(1, l);
+    Assertions.assertEquals(1, l);
 
     r = new RpcOptions.Builder().setClientTimeoutMs(1).setQueueTimeoutMs(1).build();
 
     l = rpcClient.calculateRequestTimeout(r);
-    Assert.assertEquals(2, l);
+    Assertions.assertEquals(2, l);
   }
 
-  @Test(timeout = 10_000)
+  @Test
+  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void testTimeoutWithDefaultTimeout() {
     ClientRequestPayload payload = Mockito.mock(ClientRequestPayload.class);
@@ -146,7 +156,8 @@ public class TimeoutRpcClientFactoryTest {
         .verifyError(TimeoutException.class);
   }
 
-  @Test(timeout = 10_000)
+  @Test
+  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
   public void testConnectionTimeout() {
     SocketAddress address = Mockito.mock(SocketAddress.class);
     RpcClientFactory delegate = Mockito.mock(RpcClientFactory.class);

@@ -16,8 +16,7 @@
 
 package com.facebook.thrift.compatibility;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.payload.Reader;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
@@ -41,22 +40,18 @@ import com.facebook.thrift.util.SerializerUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.apache.thrift.protocol.TProtocolException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class StringCompatibilityTest {
 
-  @Rule public ExpectedException expectedException = ExpectedException.none();
   public static byte[] malformedUtfBytes = new byte[] {50, -1, -1, 52, 53};
   public static byte[] replacedUtfBytes =
       new byte[] {
@@ -75,19 +70,18 @@ public class StringCompatibilityTest {
     }
   }
 
-  @Parameterized.Parameters
-  public static Collection<Param> data() {
-    return Arrays.asList(
-        new Param(SerializationProtocol.TCompact, false),
-        new Param(SerializationProtocol.TCompact, true),
-        new Param(SerializationProtocol.TBinary, false),
-        new Param(SerializationProtocol.TBinary, true));
+  static Stream<Arguments> data() {
+    return Stream.of(
+        Arguments.of(new Param(SerializationProtocol.TCompact, false)),
+        Arguments.of(new Param(SerializationProtocol.TCompact, true)),
+        Arguments.of(new Param(SerializationProtocol.TBinary, false)),
+        Arguments.of(new Param(SerializationProtocol.TBinary, true)));
   }
 
-  private final SerializationProtocol protocol;
-  private final boolean offHeap;
+  private SerializationProtocol protocol;
+  private boolean offHeap;
 
-  public StringCompatibilityTest(Param param) {
+  private void initParams(Param param) {
     this.protocol = param.protocol;
     this.offHeap = param.offHeap;
   }
@@ -148,11 +142,6 @@ public class StringCompatibilityTest {
     return map;
   }
 
-  private void expectMalformedUtfException() {
-    expectedException.expect(TProtocolException.class);
-    expectedException.expectMessage("Malformed UTF8 string: 32ffff3435");
-  }
-
   private TestStruct testStruct() {
     return new TestStruct.Builder()
         .setStrField(malformedUtfBytes)
@@ -181,8 +170,10 @@ public class StringCompatibilityTest {
         .build();
   }
 
-  @Test
-  public void testReadAsString() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testReadAsString(Param param) {
+    initParams(param);
     TestStructString received = deserializeString(serialize(testStructValidUtf8()));
     assertEquals("±foo±", received.getStrField());
     assertEquals("bar", received.getStrList().get(0));
@@ -196,8 +187,10 @@ public class StringCompatibilityTest {
     assertEquals((Long) 123L, received.getAdaptedUtf8Str());
   }
 
-  @Test
-  public void testUtf8Legacy() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUtf8Legacy(Param param) {
+    initParams(param);
     Utf8TestStructLegacy received = deserializeLegacy(serialize(testStruct()));
     assertArrayEquals(replacedUtfBytes, received.getStrField().getBytes());
     assertArrayEquals(replacedUtfBytes, received.getStrList().get(0).getBytes());
@@ -223,8 +216,10 @@ public class StringCompatibilityTest {
     }
   }
 
-  @Test
-  public void testReadMalformedUtfReport() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testReadMalformedUtfReport(Param param) {
+    initParams(param);
     TestStruct st = testStructValidUtf8();
     assertErrorRaised(new TestStruct.Builder(st).setStrField(malformedUtfBytes).build());
     assertErrorRaised(
@@ -246,24 +241,40 @@ public class StringCompatibilityTest {
     assertErrorRaised(new TestStruct.Builder(st).setAdaptedUtf8Str(malformedUtfBytes).build());
   }
 
-  @Test
-  public void testUnion() {
-    expectMalformedUtfException();
-    TestUnion u = TestUnion.fromField1(malformedUtfBytes);
-
-    fromByteArray(TestUnionCompat.asReader(), SerializerUtil.toByteArray(u, protocol), protocol);
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUnion(Param param) {
+    initParams(param);
+    TProtocolException ex =
+        assertThrows(
+            TProtocolException.class,
+            () -> {
+              TestUnion u = TestUnion.fromField1(malformedUtfBytes);
+              fromByteArray(
+                  TestUnionCompat.asReader(), SerializerUtil.toByteArray(u, protocol), protocol);
+            });
+    assertTrue(ex.getMessage().contains("Malformed UTF8 string: 32ffff3435"));
   }
 
-  @Test
-  public void testUnionTypedef() {
-    expectMalformedUtfException();
-    TestUnion u = TestUnion.fromUtf8Str(malformedUtfBytes);
-
-    fromByteArray(TestUnionCompat.asReader(), SerializerUtil.toByteArray(u, protocol), protocol);
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUnionTypedef(Param param) {
+    initParams(param);
+    TProtocolException ex =
+        assertThrows(
+            TProtocolException.class,
+            () -> {
+              TestUnion u = TestUnion.fromUtf8Str(malformedUtfBytes);
+              fromByteArray(
+                  TestUnionCompat.asReader(), SerializerUtil.toByteArray(u, protocol), protocol);
+            });
+    assertTrue(ex.getMessage().contains("Malformed UTF8 string: 32ffff3435"));
   }
 
-  @Test
-  public void testBinaryString() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBinaryString(Param param) {
+    initParams(param);
     Utf8TestStructBin received = deserializeBin(serialize(testStruct()));
     assertArrayEquals(malformedUtfBytes, received.getStrField());
     assertArrayEquals(malformedUtfBytes, received.getStrList().get(0));
@@ -280,35 +291,63 @@ public class StringCompatibilityTest {
     assertArrayEquals(malformedUtfBytes, value1);
   }
 
-  @Test
-  public void testException() {
-    expectMalformedUtfException();
-    TestException e =
-        new TestException.Builder().setErrCode((byte) 5).setErrMsg(malformedUtfBytes).build();
-
-    SerializerUtil.toByteArray(e, protocol);
-    fromByteArray(
-        TestExceptionCompat.asReader(), SerializerUtil.toByteArray(e, protocol), protocol);
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testException(Param param) {
+    initParams(param);
+    TProtocolException ex =
+        assertThrows(
+            TProtocolException.class,
+            () -> {
+              TestException e =
+                  new TestException.Builder()
+                      .setErrCode((byte) 5)
+                      .setErrMsg(malformedUtfBytes)
+                      .build();
+              SerializerUtil.toByteArray(e, protocol);
+              fromByteArray(
+                  TestExceptionCompat.asReader(),
+                  SerializerUtil.toByteArray(e, protocol),
+                  protocol);
+            });
+    assertTrue(ex.getMessage().contains("Malformed UTF8 string: 32ffff3435"));
   }
 
-  @Test
-  public void testDefaultStringAnnotation() {
-    expectMalformedUtfException();
-    TestStruct st = new TestStruct.Builder().setStrField(malformedUtfBytes).build();
-    deserializeCompat(serialize(st));
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDefaultStringAnnotation(Param param) {
+    initParams(param);
+    TProtocolException ex =
+        assertThrows(
+            TProtocolException.class,
+            () -> {
+              TestStruct st = new TestStruct.Builder().setStrField(malformedUtfBytes).build();
+              deserializeCompat(serialize(st));
+            });
+    assertTrue(ex.getMessage().contains("Malformed UTF8 string: 32ffff3435"));
   }
 
-  @Test
-  public void testPackageLevelAnnotation() {
-    expectMalformedUtfException();
-    TestStruct e = new TestStruct.Builder().setStrField(malformedUtfBytes).build();
-
-    fromByteArray(
-        TestStructReportPkg.asReader(), SerializerUtil.toByteArray(e, protocol), protocol);
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPackageLevelAnnotation(Param param) {
+    initParams(param);
+    TProtocolException ex =
+        assertThrows(
+            TProtocolException.class,
+            () -> {
+              TestStruct e = new TestStruct.Builder().setStrField(malformedUtfBytes).build();
+              fromByteArray(
+                  TestStructReportPkg.asReader(),
+                  SerializerUtil.toByteArray(e, protocol),
+                  protocol);
+            });
+    assertTrue(ex.getMessage().contains("Malformed UTF8 string: 32ffff3435"));
   }
 
-  @Test
-  public void testPackageLevelAnnotationOverride() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPackageLevelAnnotationOverride(Param param) {
+    initParams(param);
     TestStruct e = new TestStruct.Builder().setStrField(malformedUtfBytes).build();
 
     TestStructPkg received =
@@ -316,8 +355,10 @@ public class StringCompatibilityTest {
     assertEquals(replacedUtfString, received.getStrField());
   }
 
-  @Test
-  public void testPackageLevelAnnotationOverrideUnion() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPackageLevelAnnotationOverrideUnion(Param param) {
+    initParams(param);
     TestUnion u = TestUnion.fromField1(malformedUtfBytes);
 
     TestUnionPkg received =
@@ -325,8 +366,10 @@ public class StringCompatibilityTest {
     assertEquals(replacedUtfString, received.getField1());
   }
 
-  @Test
-  public void testPackageLevelAnnotationOverrideException() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPackageLevelAnnotationOverrideException(Param param) {
+    initParams(param);
     TestException u = new TestException.Builder().setErrMsg(malformedUtfBytes).build();
 
     TestExceptionPkg e =
@@ -335,21 +378,36 @@ public class StringCompatibilityTest {
     assertEquals(replacedUtfString, e.getErrMsg());
   }
 
-  @Test
-  public void testTypedefPrecedence() {
-    expectMalformedUtfException();
-    TestStruct st = new TestStruct.Builder().setUtf8Str(malformedUtfBytes).build();
-    deserializeCompat(serialize(st));
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testTypedefPrecedence(Param param) {
+    initParams(param);
+    TProtocolException ex =
+        assertThrows(
+            TProtocolException.class,
+            () -> {
+              TestStruct st = new TestStruct.Builder().setUtf8Str(malformedUtfBytes).build();
+              deserializeCompat(serialize(st));
+            });
+    assertTrue(ex.getMessage().contains("Malformed UTF8 string: 32ffff3435"));
   }
 
-  @Test
-  public void testNestedElementType() {
-    expectMalformedUtfException();
-    TestStruct st =
-        new TestStruct.Builder()
-            .setComplexField(createMap(malformedUtfBytes, malformedUtfBytes, malformedUtfBytes))
-            .build();
-    // UTF-8 settings on nested element types are not supported.
-    deserializeCompat(serialize(st));
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedElementType(Param param) {
+    initParams(param);
+    TProtocolException ex =
+        assertThrows(
+            TProtocolException.class,
+            () -> {
+              TestStruct st =
+                  new TestStruct.Builder()
+                      .setComplexField(
+                          createMap(malformedUtfBytes, malformedUtfBytes, malformedUtfBytes))
+                      .build();
+              // UTF-8 settings on nested element types are not supported.
+              deserializeCompat(serialize(st));
+            });
+    assertTrue(ex.getMessage().contains("Malformed UTF8 string: 32ffff3435"));
   }
 }

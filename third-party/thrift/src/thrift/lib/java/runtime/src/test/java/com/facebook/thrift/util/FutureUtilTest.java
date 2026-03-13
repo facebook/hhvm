@@ -29,8 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
@@ -81,7 +81,7 @@ public class FutureUtilTest {
         .assertNext(
             s -> {
               Thread thread = Thread.currentThread();
-              Assert.assertTrue(thread.getName().contains("MyThread"));
+              Assertions.assertTrue(thread.getName().contains("MyThread"));
             })
         .verifyComplete();
   }
@@ -98,14 +98,14 @@ public class FutureUtilTest {
 
     ListenableFuture<Long> future = FutureUtil.toListenableFuture(count);
     Long aLong = future.get();
-    Assert.assertEquals(100L, aLong.longValue());
+    Assertions.assertEquals(100L, aLong.longValue());
   }
 
   @Test
   public void testMonoEmpty() throws Exception {
     ListenableFuture future = FutureUtil.toListenableFuture(Mono.empty());
     Object o = future.get();
-    Assert.assertNull(o);
+    Assertions.assertNull(o);
   }
 
   @Test
@@ -121,7 +121,7 @@ public class FutureUtilTest {
 
     ListenableFuture future = FutureUtil.toListenableFuture(m);
     Object o = future.get();
-    Assert.assertNull(o);
+    Assertions.assertNull(o);
   }
 
   @Test
@@ -137,20 +137,25 @@ public class FutureUtilTest {
 
     ListenableFuture future = FutureUtil.toListenableFuture(m);
     int i = (int) future.get();
-    Assert.assertEquals(1, i);
+    Assertions.assertEquals(1, i);
   }
 
   @Test
   public void testWithScalarMono() throws Exception {
     ListenableFuture future = FutureUtil.toListenableFuture(Mono.just(1));
     int i = (int) future.get();
-    Assert.assertEquals(1, i);
+    Assertions.assertEquals(1, i);
   }
 
-  @Test(expected = ExecutionException.class)
+  @Test
   public void testWithScalarMonoThatEmitsException() throws Exception {
-    ListenableFuture future = FutureUtil.toListenableFuture(Mono.error(new RuntimeException()));
-    future.get();
+    Assertions.assertThrows(
+        ExecutionException.class,
+        () -> {
+          ListenableFuture future =
+              FutureUtil.toListenableFuture(Mono.error(new RuntimeException()));
+          future.get();
+        });
   }
 
   @Test
@@ -173,7 +178,8 @@ public class FutureUtilTest {
     ListenableFuture<String> future = FutureUtil.toListenableFuture(mono);
 
     // Wait for subscription to be established
-    Assert.assertTrue("Subscription should be established", subscribed.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(
+        subscribed.await(1, TimeUnit.SECONDS), "Subscription should be established");
 
     // Cancel the future
     future.cancel(true);
@@ -182,9 +188,9 @@ public class FutureUtilTest {
     Thread.sleep(50);
 
     // Verify upstream was cancelled
-    Assert.assertTrue("Upstream subscription should be cancelled", upstreamCancelled.get());
-    Assert.assertTrue("doFinally should be invoked with CANCEL", finallyInvoked.get());
-    Assert.assertTrue("Future should report cancelled", future.isCancelled());
+    Assertions.assertTrue(upstreamCancelled.get(), "Upstream subscription should be cancelled");
+    Assertions.assertTrue(finallyInvoked.get(), "doFinally should be invoked with CANCEL");
+    Assertions.assertTrue(future.isCancelled(), "Future should report cancelled");
   }
 
   @Test
@@ -200,7 +206,7 @@ public class FutureUtilTest {
     ListenableFuture<String> future = FutureUtil.toListenableFuture(mono);
 
     // Wait for subscription
-    Assert.assertTrue(subscribed.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(subscribed.await(1, TimeUnit.SECONDS));
 
     // Cancel multiple times
     future.cancel(true);
@@ -211,7 +217,7 @@ public class FutureUtilTest {
     Thread.sleep(50);
 
     // Should only cancel upstream once
-    Assert.assertEquals("Should only cancel once", 1, cancelCount.get());
+    Assertions.assertEquals(1, cancelCount.get(), "Should only cancel once");
   }
 
   @Test
@@ -268,8 +274,8 @@ public class FutureUtilTest {
     }
 
     // Either cancelled or completed successfully - no exceptions
-    Assert.assertEquals("Should have no errors", 0, errorCount.get());
-    Assert.assertEquals(
-        "All iterations accounted for", iterations, successCount.get() + cancelledCount.get());
+    Assertions.assertEquals(0, errorCount.get(), "Should have no errors");
+    Assertions.assertEquals(
+        iterations, successCount.get() + cancelledCount.get(), "All iterations accounted for");
   }
 }

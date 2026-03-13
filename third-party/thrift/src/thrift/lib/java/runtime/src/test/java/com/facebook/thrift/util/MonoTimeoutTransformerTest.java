@@ -33,8 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -166,16 +166,17 @@ public class MonoTimeoutTransformerTest {
     StepVerifier.create(infinite)
         .verifyErrorSatisfies(
             throwable -> {
-              Assert.assertTrue(throwable instanceof TimeoutException);
+              Assertions.assertTrue(throwable instanceof TimeoutException);
               Thread thread = Thread.currentThread();
-              Assert.assertTrue(
+              Assertions.assertTrue(
                   thread instanceof io.netty.util.concurrent.FastThreadLocalThread
                       || thread
                           instanceof com.facebook.thrift.util.resources.FastThreadLocalThread);
             });
   }
 
-  @Test(timeout = 5_000)
+  @Test
+  @org.junit.jupiter.api.Timeout(value = 5_000, unit = TimeUnit.MILLISECONDS)
   public void testShouldTimeOutWhenNeverRequested() {
     Mono<Object> never =
         Mono.never()
@@ -190,19 +191,26 @@ public class MonoTimeoutTransformerTest {
   // Validation Tests
   // ===================================================================================
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testNullSchedulerThrows() {
-    new MonoTimeoutTransformer<>(null, 1, TimeUnit.SECONDS);
+    Assertions.assertThrows(
+        NullPointerException.class, () -> new MonoTimeoutTransformer<>(null, 1, TimeUnit.SECONDS));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testNullTimeUnitThrows() {
-    new MonoTimeoutTransformer<>(RpcResources.getClientOffLoopScheduler(), 1, null);
+    Assertions.assertThrows(
+        NullPointerException.class,
+        () -> new MonoTimeoutTransformer<>(RpcResources.getClientOffLoopScheduler(), 1, null));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNegativeDelayThrows() {
-    new MonoTimeoutTransformer<>(RpcResources.getClientOffLoopScheduler(), -1, TimeUnit.SECONDS);
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new MonoTimeoutTransformer<>(
+                RpcResources.getClientOffLoopScheduler(), -1, TimeUnit.SECONDS));
   }
 
   @Test
@@ -259,7 +267,7 @@ public class MonoTimeoutTransformerTest {
                 new MonoTimeoutTransformer<>(
                     RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.SECONDS));
 
-    StepVerifier.create(transform).verifyErrorSatisfies(t -> Assert.assertEquals(testError, t));
+    StepVerifier.create(transform).verifyErrorSatisfies(t -> Assertions.assertEquals(testError, t));
   }
 
   @Test
@@ -272,7 +280,7 @@ public class MonoTimeoutTransformerTest {
                 new MonoTimeoutTransformer<>(
                     RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.SECONDS));
 
-    StepVerifier.create(transform).verifyErrorSatisfies(t -> Assert.assertEquals(testError, t));
+    StepVerifier.create(transform).verifyErrorSatisfies(t -> Assertions.assertEquals(testError, t));
   }
 
   @Test
@@ -287,7 +295,8 @@ public class MonoTimeoutTransformerTest {
                     TimeUnit.MILLISECONDS,
                     Mono.error(fallbackError)));
 
-    StepVerifier.create(transform).verifyErrorSatisfies(t -> Assert.assertEquals(fallbackError, t));
+    StepVerifier.create(transform)
+        .verifyErrorSatisfies(t -> Assertions.assertEquals(fallbackError, t));
   }
 
   // ===================================================================================
@@ -318,15 +327,15 @@ public class MonoTimeoutTransformerTest {
 
     // Wait a bit for subscription to propagate
     Thread.sleep(50);
-    Assert.assertTrue("Source should be subscribed", sourceSubscribed.get());
+    Assertions.assertTrue(sourceSubscribed.get(), "Source should be subscribed");
 
     // Cancel before timeout
     disposable.dispose();
 
     // Verify source was cancelled
-    Assert.assertTrue(
-        "Cancel should complete within timeout", cancelLatch.await(1, TimeUnit.SECONDS));
-    Assert.assertTrue("Source should be cancelled", sourceCancelled.get());
+    Assertions.assertTrue(
+        cancelLatch.await(1, TimeUnit.SECONDS), "Cancel should complete within timeout");
+    Assertions.assertTrue(sourceCancelled.get(), "Source should be cancelled");
   }
 
   @Test
@@ -346,14 +355,14 @@ public class MonoTimeoutTransformerTest {
     Disposable disposable = transform.subscribe();
 
     // Wait for value
-    Assert.assertTrue("Value should be emitted", valueLatch.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(valueLatch.await(1, TimeUnit.SECONDS), "Value should be emitted");
 
     // Cancel after value (should be a no-op since already completed)
     disposable.dispose();
 
     // Give time for completion
     Thread.sleep(100);
-    Assert.assertTrue("Should complete after value", completed.get());
+    Assertions.assertTrue(completed.get(), "Should complete after value");
   }
 
   @Test
@@ -386,15 +395,17 @@ public class MonoTimeoutTransformerTest {
     Disposable disposable = transform.subscribe();
 
     // Wait for fallback to be subscribed (after timeout)
-    Assert.assertTrue("Fallback should be subscribed", fallbackLatch.await(2, TimeUnit.SECONDS));
-    Assert.assertTrue("Fallback subscribed flag should be set", fallbackSubscribed.get());
+    Assertions.assertTrue(
+        fallbackLatch.await(2, TimeUnit.SECONDS), "Fallback should be subscribed");
+    Assertions.assertTrue(fallbackSubscribed.get(), "Fallback subscribed flag should be set");
 
     // Cancel during fallback
     disposable.dispose();
 
     // Verify fallback was cancelled
-    Assert.assertTrue("Fallback cancel should complete", cancelLatch.await(1, TimeUnit.SECONDS));
-    Assert.assertTrue("Fallback should be cancelled", fallbackCancelled.get());
+    Assertions.assertTrue(
+        cancelLatch.await(1, TimeUnit.SECONDS), "Fallback cancel should complete");
+    Assertions.assertTrue(fallbackCancelled.get(), "Fallback should be cancelled");
   }
 
   // ===================================================================================
@@ -433,9 +444,9 @@ public class MonoTimeoutTransformerTest {
     }
 
     // Both outcomes are valid - just ensure we don't have errors
-    Assert.assertTrue(
-        "Should have some successes or timeouts",
-        successCount.get() + timeoutCount.get() == iterations);
+    Assertions.assertTrue(
+        successCount.get() + timeoutCount.get() == iterations,
+        "Should have some successes or timeouts");
   }
 
   @Test
@@ -474,7 +485,7 @@ public class MonoTimeoutTransformerTest {
     // We shouldn't have any unexpected errors
     for (Throwable error : errors) {
       if (!(error instanceof TimeoutException)) {
-        Assert.fail("Unexpected error: " + error);
+        Assertions.fail("Unexpected error: " + error);
       }
     }
   }
@@ -518,10 +529,10 @@ public class MonoTimeoutTransformerTest {
     startLatch.countDown();
 
     // Wait for all to complete
-    Assert.assertTrue("All threads should complete", doneLatch.await(5, TimeUnit.SECONDS));
+    Assertions.assertTrue(doneLatch.await(5, TimeUnit.SECONDS), "All threads should complete");
 
     // Should not have errors
-    Assert.assertTrue("Should have no errors: " + errors, errors.isEmpty());
+    Assertions.assertTrue(errors.isEmpty(), "Should have no errors: " + errors);
   }
 
   @Test
@@ -546,7 +557,7 @@ public class MonoTimeoutTransformerTest {
     // Small delay to let any async errors propagate
     Thread.sleep(200);
 
-    Assert.assertTrue("Should have no errors: " + errors, errors.isEmpty());
+    Assertions.assertTrue(errors.isEmpty(), "Should have no errors: " + errors);
   }
 
   // ===================================================================================
@@ -621,8 +632,8 @@ public class MonoTimeoutTransformerTest {
 
     StepVerifier.create(transform).expectNext("result").verifyComplete();
 
-    Assert.assertEquals(
-        "Context should be propagated to source", contextValue, capturedValue.get());
+    Assertions.assertEquals(
+        contextValue, capturedValue.get(), "Context should be propagated to source");
   }
 
   @Test
@@ -647,8 +658,8 @@ public class MonoTimeoutTransformerTest {
 
     StepVerifier.create(transform).expectNext("fallback").verifyComplete();
 
-    Assert.assertEquals(
-        "Context should be propagated to fallback", contextValue, capturedValue.get());
+    Assertions.assertEquals(
+        contextValue, capturedValue.get(), "Context should be propagated to fallback");
   }
 
   // ===================================================================================
@@ -824,8 +835,8 @@ public class MonoTimeoutTransformerTest {
     Thread.sleep(50);
 
     // We should not have any unexpected errors
-    Assert.assertTrue(
-        "Should have no unexpected errors: " + unexpectedErrors, unexpectedErrors.isEmpty());
+    Assertions.assertTrue(
+        unexpectedErrors.isEmpty(), "Should have no unexpected errors: " + unexpectedErrors);
 
     // Due to the race, some iterations may timeout before cancel, others may be cancelled
     // The key is that we don't have any unexpected behavior
@@ -895,8 +906,8 @@ public class MonoTimeoutTransformerTest {
     // Small delay to let any async work complete
     Thread.sleep(50);
 
-    Assert.assertTrue(
-        "Should have no unexpected errors: " + unexpectedErrors, unexpectedErrors.isEmpty());
+    Assertions.assertTrue(
+        unexpectedErrors.isEmpty(), "Should have no unexpected errors: " + unexpectedErrors);
 
     System.out.println(
         "Cancel after timeout with fallback test: "
@@ -951,8 +962,8 @@ public class MonoTimeoutTransformerTest {
     // Small delay to let any async work complete
     Thread.sleep(50);
 
-    Assert.assertTrue(
-        "Should have no unexpected errors: " + unexpectedErrors, unexpectedErrors.isEmpty());
+    Assertions.assertTrue(
+        unexpectedErrors.isEmpty(), "Should have no unexpected errors: " + unexpectedErrors);
 
     System.out.println(
         "Cancel after timeout with scalar fallback test: "
@@ -986,9 +997,9 @@ public class MonoTimeoutTransformerTest {
     StepVerifier.create(transform).verifyError(TimeoutException.class);
 
     // Verify upstream was cancelled
-    Assert.assertTrue(
-        "Upstream should be cancelled when timeout fires", cancelLatch.await(1, TimeUnit.SECONDS));
-    Assert.assertTrue("Upstream cancelled flag should be set", upstreamCancelled.get());
+    Assertions.assertTrue(
+        cancelLatch.await(1, TimeUnit.SECONDS), "Upstream should be cancelled when timeout fires");
+    Assertions.assertTrue(upstreamCancelled.get(), "Upstream cancelled flag should be set");
   }
 
   @Test
@@ -1015,9 +1026,9 @@ public class MonoTimeoutTransformerTest {
     StepVerifier.create(transform).expectNext("fallback").verifyComplete();
 
     // Verify upstream was cancelled
-    Assert.assertTrue(
-        "Upstream should be cancelled when timeout fires", cancelLatch.await(1, TimeUnit.SECONDS));
-    Assert.assertTrue("Upstream cancelled flag should be set", upstreamCancelled.get());
+    Assertions.assertTrue(
+        cancelLatch.await(1, TimeUnit.SECONDS), "Upstream should be cancelled when timeout fires");
+    Assertions.assertTrue(upstreamCancelled.get(), "Upstream cancelled flag should be set");
   }
 
   // ===================================================================================
@@ -1040,8 +1051,8 @@ public class MonoTimeoutTransformerTest {
 
     StepVerifier.create(transform).expectNext("value").verifyComplete();
 
-    Assert.assertEquals("Should receive exactly one onNext", 1, onNextCount.get());
-    Assert.assertEquals("Should receive exactly one onComplete", 1, onCompleteCount.get());
+    Assertions.assertEquals(1, onNextCount.get(), "Should receive exactly one onNext");
+    Assertions.assertEquals(1, onCompleteCount.get(), "Should receive exactly one onComplete");
   }
 
   @Test
@@ -1060,8 +1071,8 @@ public class MonoTimeoutTransformerTest {
 
     StepVerifier.create(transform).verifyComplete();
 
-    Assert.assertEquals("Should receive no onNext", 0, onNextCount.get());
-    Assert.assertEquals("Should receive exactly one onComplete", 1, onCompleteCount.get());
+    Assertions.assertEquals(0, onNextCount.get(), "Should receive no onNext");
+    Assertions.assertEquals(1, onCompleteCount.get(), "Should receive exactly one onComplete");
   }
 
   @Test
@@ -1079,7 +1090,7 @@ public class MonoTimeoutTransformerTest {
 
     StepVerifier.create(transform).verifyError(RuntimeException.class);
 
-    Assert.assertEquals("Should receive exactly one onError", 1, onErrorCount.get());
+    Assertions.assertEquals(1, onErrorCount.get(), "Should receive exactly one onError");
   }
 
   @Test
@@ -1096,7 +1107,7 @@ public class MonoTimeoutTransformerTest {
 
     StepVerifier.create(transform).verifyError(TimeoutException.class);
 
-    Assert.assertEquals("Should receive exactly one onError", 1, onErrorCount.get());
+    Assertions.assertEquals(1, onErrorCount.get(), "Should receive exactly one onError");
   }
 
   @Test
@@ -1122,7 +1133,7 @@ public class MonoTimeoutTransformerTest {
     // Small delay to ensure no signals are sent
     Thread.sleep(100);
 
-    Assert.assertEquals("Should receive no signals after cancel", 0, signalCount.get());
+    Assertions.assertEquals(0, signalCount.get(), "Should receive no signals after cancel");
   }
 
   // ===================================================================================
@@ -1164,7 +1175,8 @@ public class MonoTimeoutTransformerTest {
                     TimeUnit.MILLISECONDS,
                     throwingFallback));
 
-    StepVerifier.create(transform).verifyErrorSatisfies(e -> Assert.assertEquals(fallbackError, e));
+    StepVerifier.create(transform)
+        .verifyErrorSatisfies(e -> Assertions.assertEquals(fallbackError, e));
   }
 
   // ===================================================================================
@@ -1198,7 +1210,7 @@ public class MonoTimeoutTransformerTest {
     Thread.sleep(50);
 
     // Should have no errors
-    Assert.assertTrue("Should have no errors: " + errors, errors.isEmpty());
+    Assertions.assertTrue(errors.isEmpty(), "Should have no errors: " + errors);
 
     // Note: cancelCount may be 1 or more depending on how cancellation propagates
     // The key is no errors and no exceptions
@@ -1225,7 +1237,7 @@ public class MonoTimeoutTransformerTest {
     // Wait longer than the timeout to ensure timer doesn't fire
     Thread.sleep(200);
 
-    Assert.assertEquals("Timer should not fire after source emits", 0, errorCount.get());
+    Assertions.assertEquals(0, errorCount.get(), "Timer should not fire after source emits");
   }
 
   @Test
@@ -1243,7 +1255,7 @@ public class MonoTimeoutTransformerTest {
 
     Thread.sleep(200);
 
-    Assert.assertEquals("Timer should not fire after source completes", 0, errorCount.get());
+    Assertions.assertEquals(0, errorCount.get(), "Timer should not fire after source completes");
   }
 
   @Test
@@ -1266,7 +1278,7 @@ public class MonoTimeoutTransformerTest {
 
     Thread.sleep(200);
 
-    Assert.assertEquals("Timer should not fire after source errors", 0, timeoutCount.get());
+    Assertions.assertEquals(0, timeoutCount.get(), "Timer should not fire after source errors");
   }
 
   // ===================================================================================
@@ -1293,8 +1305,8 @@ public class MonoTimeoutTransformerTest {
 
     StepVerifier.create(transform).expectNext("value").verifyComplete();
 
-    Assert.assertEquals(
-        "Request should be forwarded to upstream with Long.MAX_VALUE", 1, requestedCount.get());
+    Assertions.assertEquals(
+        1, requestedCount.get(), "Request should be forwarded to upstream with Long.MAX_VALUE");
   }
 
   @Test
@@ -1321,8 +1333,8 @@ public class MonoTimeoutTransformerTest {
 
     StepVerifier.create(transform).expectNext("fallback").verifyComplete();
 
-    Assert.assertEquals(
-        "Request should be forwarded to fallback with Long.MAX_VALUE", 1, requestedCount.get());
+    Assertions.assertEquals(
+        1, requestedCount.get(), "Request should be forwarded to fallback with Long.MAX_VALUE");
   }
 
   // ===================================================================================
@@ -1344,7 +1356,8 @@ public class MonoTimeoutTransformerTest {
                     TimeUnit.SECONDS,
                     Mono.just("fallback")));
 
-    StepVerifier.create(transform).verifyErrorSatisfies(e -> Assert.assertEquals(sourceError, e));
+    StepVerifier.create(transform)
+        .verifyErrorSatisfies(e -> Assertions.assertEquals(sourceError, e));
   }
 
   // ===================================================================================
@@ -1395,18 +1408,19 @@ public class MonoTimeoutTransformerTest {
     controllableTimer.fireAllTimeouts();
 
     // Wait for run() to be scheduled
-    Assert.assertTrue("run() should be scheduled", runScheduled.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(runScheduled.await(1, TimeUnit.SECONDS), "run() should be scheduled");
 
     // Step 3: Cancel BEFORE run() executes
     disposableRef.get().dispose();
 
     // Step 4: Now execute run()
     Runnable runMethod = scheduledRunnable.get();
-    Assert.assertNotNull("run() should have been captured", runMethod);
+    Assertions.assertNotNull(runMethod, "run() should have been captured");
     runMethod.run();
 
     // Verify: Fallback should NOT be subscribed because we cancelled
-    Assert.assertFalse("Fallback should NOT be subscribed after cancel", fallbackSubscribed.get());
+    Assertions.assertFalse(
+        fallbackSubscribed.get(), "Fallback should NOT be subscribed after cancel");
   }
 
   @Test
@@ -1439,7 +1453,7 @@ public class MonoTimeoutTransformerTest {
     controllableTimer.fireAllTimeouts();
 
     // Wait for run() to be scheduled
-    Assert.assertTrue("run() should be scheduled", runScheduled.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(runScheduled.await(1, TimeUnit.SECONDS), "run() should be scheduled");
 
     // Step 3: Cancel before run() executes
     disposableRef.get().dispose();
@@ -1448,7 +1462,7 @@ public class MonoTimeoutTransformerTest {
     scheduledRunnable.get().run();
 
     // Verify: Value should NOT be emitted
-    Assert.assertEquals("Scalar fallback value should NOT be emitted", 0, valueReceived.get());
+    Assertions.assertEquals(0, valueReceived.get(), "Scalar fallback value should NOT be emitted");
   }
 
   @Test
@@ -1489,7 +1503,7 @@ public class MonoTimeoutTransformerTest {
     controllableTimer.fireAllTimeouts();
 
     // Wait for run() to be scheduled
-    Assert.assertTrue("run() should be scheduled", runScheduled.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(runScheduled.await(1, TimeUnit.SECONDS), "run() should be scheduled");
 
     // Step 3: Cancel before run() executes
     disposableRef.get().dispose();
@@ -1498,7 +1512,7 @@ public class MonoTimeoutTransformerTest {
     scheduledRunnable.get().run();
 
     // Verify: TimeoutException should NOT be emitted
-    Assert.assertEquals("TimeoutException should NOT be emitted", 0, errorReceived.get());
+    Assertions.assertEquals(0, errorReceived.get(), "TimeoutException should NOT be emitted");
   }
 
   @Test
@@ -1509,16 +1523,16 @@ public class MonoTimeoutTransformerTest {
 
     Timeout timeout = timer.newTimeout(t -> taskExecuted.set(true), 1, TimeUnit.SECONDS);
 
-    Assert.assertFalse("Task should not execute before fire", taskExecuted.get());
-    Assert.assertFalse("Should not be expired", timeout.isExpired());
-    Assert.assertFalse("Should not be cancelled", timeout.isCancelled());
+    Assertions.assertFalse(taskExecuted.get(), "Task should not execute before fire");
+    Assertions.assertFalse(timeout.isExpired(), "Should not be expired");
+    Assertions.assertFalse(timeout.isCancelled(), "Should not be cancelled");
 
     // Fire the timeout
     ((ControllableTimeout) timeout).fire();
 
-    Assert.assertTrue("Task should execute after fire", taskExecuted.get());
-    Assert.assertTrue("Should be expired", timeout.isExpired());
-    Assert.assertFalse("Should not be cancelled", timeout.isCancelled());
+    Assertions.assertTrue(taskExecuted.get(), "Task should execute after fire");
+    Assertions.assertTrue(timeout.isExpired(), "Should be expired");
+    Assertions.assertFalse(timeout.isCancelled(), "Should not be cancelled");
   }
 
   @Test
@@ -1531,14 +1545,14 @@ public class MonoTimeoutTransformerTest {
 
     // Cancel the timeout
     boolean cancelled = timeout.cancel();
-    Assert.assertTrue("Cancel should succeed", cancelled);
-    Assert.assertTrue("Should be cancelled", timeout.isCancelled());
+    Assertions.assertTrue(cancelled, "Cancel should succeed");
+    Assertions.assertTrue(timeout.isCancelled(), "Should be cancelled");
 
     // Try to fire - should do nothing
     ((ControllableTimeout) timeout).fire();
 
-    Assert.assertFalse("Task should NOT execute after cancel", taskExecuted.get());
-    Assert.assertFalse("Should not be expired after cancel", timeout.isExpired());
+    Assertions.assertFalse(taskExecuted.get(), "Task should NOT execute after cancel");
+    Assertions.assertFalse(timeout.isExpired(), "Should not be expired after cancel");
   }
 
   // ===================================================================================
@@ -1576,15 +1590,15 @@ public class MonoTimeoutTransformerTest {
             () -> {}));
 
     // Wait for fallback to be subscribed (after timeout)
-    Assert.assertTrue(
-        "Fallback should be subscribed", fallbackSubscribed.await(2, TimeUnit.SECONDS));
+    Assertions.assertTrue(
+        fallbackSubscribed.await(2, TimeUnit.SECONDS), "Fallback should be subscribed");
 
     // Emit first value - this should be received
     sink.tryEmitNext("first");
 
     // Wait for first value to be received
-    Assert.assertTrue(
-        "First value should be received", firstValueReceived.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(
+        firstValueReceived.await(1, TimeUnit.SECONDS), "First value should be received");
 
     // Now cancel the subscription
     disposableRef.get().dispose();
@@ -1597,11 +1611,11 @@ public class MonoTimeoutTransformerTest {
     Thread.sleep(50);
 
     // Verify only one value was received
-    Assert.assertEquals(
-        "Only the first value should be received (before cancel)", 1, valueCount.get());
+    Assertions.assertEquals(
+        1, valueCount.get(), "Only the first value should be received (before cancel)");
 
     // Verify no errors
-    Assert.assertTrue("Should have no errors: " + errors, errors.isEmpty());
+    Assertions.assertTrue(errors.isEmpty(), "Should have no errors: " + errors);
   }
 
   @Test
@@ -1624,8 +1638,8 @@ public class MonoTimeoutTransformerTest {
     disposableRef.set(transform.subscribe(v -> {}, e -> errorCount.incrementAndGet(), () -> {}));
 
     // Wait for fallback to be subscribed
-    Assert.assertTrue(
-        "Fallback should be subscribed", fallbackSubscribed.await(2, TimeUnit.SECONDS));
+    Assertions.assertTrue(
+        fallbackSubscribed.await(2, TimeUnit.SECONDS), "Fallback should be subscribed");
 
     // Cancel before any signal from fallback
     disposableRef.get().dispose();
@@ -1636,7 +1650,7 @@ public class MonoTimeoutTransformerTest {
     Thread.sleep(50);
 
     // Verify no error was received
-    Assert.assertEquals("Error after cancel should be dropped", 0, errorCount.get());
+    Assertions.assertEquals(0, errorCount.get(), "Error after cancel should be dropped");
   }
 
   @Test
@@ -1659,8 +1673,8 @@ public class MonoTimeoutTransformerTest {
     disposableRef.set(transform.subscribe(v -> {}, e -> {}, () -> completed.set(true)));
 
     // Wait for fallback to be subscribed
-    Assert.assertTrue(
-        "Fallback should be subscribed", fallbackSubscribed.await(2, TimeUnit.SECONDS));
+    Assertions.assertTrue(
+        fallbackSubscribed.await(2, TimeUnit.SECONDS), "Fallback should be subscribed");
 
     // Cancel before completion
     disposableRef.get().dispose();
@@ -1671,7 +1685,7 @@ public class MonoTimeoutTransformerTest {
     Thread.sleep(50);
 
     // Verify onComplete was not called
-    Assert.assertFalse("onComplete after cancel should be dropped", completed.get());
+    Assertions.assertFalse(completed.get(), "onComplete after cancel should be dropped");
   }
 
   // ===================================================================================
@@ -1707,8 +1721,8 @@ public class MonoTimeoutTransformerTest {
         transform.subscribe(v -> valuesReceived.incrementAndGet(), errors::add, () -> {}));
 
     // Wait for fallback to be subscribed
-    Assert.assertTrue(
-        "Fallback should be subscribed", fallbackSubscribed.await(2, TimeUnit.SECONDS));
+    Assertions.assertTrue(
+        fallbackSubscribed.await(2, TimeUnit.SECONDS), "Fallback should be subscribed");
 
     // Cancel the main subscription
     mainDisposable.get().dispose();
@@ -1722,10 +1736,10 @@ public class MonoTimeoutTransformerTest {
     Thread.sleep(50);
 
     // Verify no values were received (all dropped after cancel)
-    Assert.assertEquals("All values after cancel should be dropped", 0, valuesReceived.get());
+    Assertions.assertEquals(0, valuesReceived.get(), "All values after cancel should be dropped");
 
     // Verify no unexpected errors
-    Assert.assertTrue("Should have no errors: " + errors, errors.isEmpty());
+    Assertions.assertTrue(errors.isEmpty(), "Should have no errors: " + errors);
   }
 
   @Test
@@ -1756,12 +1770,13 @@ public class MonoTimeoutTransformerTest {
             () -> {}));
 
     // Wait for fallback subscription
-    Assert.assertTrue(
-        "Fallback should be subscribed", fallbackSubscribed.await(2, TimeUnit.SECONDS));
+    Assertions.assertTrue(
+        fallbackSubscribed.await(2, TimeUnit.SECONDS), "Fallback should be subscribed");
 
     // Emit first value
     sink.tryEmitNext("first");
-    Assert.assertTrue("First value should be received", firstValueLatch.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(
+        firstValueLatch.await(1, TimeUnit.SECONDS), "First value should be received");
 
     // Cancel
     mainDisposable.get().dispose();
@@ -1773,8 +1788,8 @@ public class MonoTimeoutTransformerTest {
     Thread.sleep(50);
 
     // Only first value should be in the list
-    Assert.assertEquals("Should receive exactly one value", 1, receivedValues.size());
-    Assert.assertEquals("First value should be 'first'", "first", receivedValues.get(0));
+    Assertions.assertEquals(1, receivedValues.size(), "Should receive exactly one value");
+    Assertions.assertEquals("first", receivedValues.get(0), "First value should be 'first'");
   }
 
   // ===================================================================================

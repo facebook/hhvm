@@ -16,19 +16,19 @@
 
 package com.facebook.thrift.type;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.facebook.thrift.payload.Reader;
 import com.facebook.thrift.test.universalname.TestException;
 import com.facebook.thrift.test.universalname.TestRequest;
 import com.facebook.thrift.test.universalname.TestUnion;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TypeRegistryRuntimeTest {
 
-  @Before
+  @BeforeEach
   public void init() throws Exception {
     // Static binding
     new TestRequest.Builder().build();

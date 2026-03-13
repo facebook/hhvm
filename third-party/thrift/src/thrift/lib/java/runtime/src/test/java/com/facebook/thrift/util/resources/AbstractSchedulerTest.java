@@ -21,8 +21,9 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import reactor.core.Disposable;
 import reactor.core.Exceptions;
 import reactor.core.scheduler.Scheduler;
@@ -55,7 +56,8 @@ public abstract class AbstractSchedulerTest {
     return true;
   }
 
-  @Test(timeout = 10000)
+  @Test
+  @Timeout(value = 10000, unit = TimeUnit.MILLISECONDS)
   public final void directScheduleAndDispose() throws Exception {
     Scheduler s = scheduler();
 
@@ -73,7 +75,7 @@ public abstract class AbstractSchedulerTest {
                     if (latch2 != null
                         && !latch2.await(10, TimeUnit.SECONDS)
                         && shouldCheckInterrupted()) {
-                      Assert.fail("Should have interrupted");
+                      Assertions.fail("Should have interrupted");
                     }
                   } catch (InterruptedException e) {
                   }
@@ -129,7 +131,8 @@ public abstract class AbstractSchedulerTest {
     }
   }
 
-  @Test(timeout = 10000)
+  @Test
+  @Timeout(value = 10000, unit = TimeUnit.MILLISECONDS)
   public final void workerScheduleAndDispose() throws Exception {
     Scheduler s = scheduler();
     try {
@@ -148,7 +151,7 @@ public abstract class AbstractSchedulerTest {
                     if (latch2 != null
                         && !latch2.await(10, TimeUnit.SECONDS)
                         && shouldCheckInterrupted()) {
-                      Assert.fail("Should have interrupted");
+                      Assertions.fail("Should have interrupted");
                     }
                   } catch (InterruptedException e) {
                   }
@@ -219,7 +222,8 @@ public abstract class AbstractSchedulerTest {
     }
   }
 
-  @Test(timeout = 10000)
+  @Test
+  @Timeout(value = 10000, unit = TimeUnit.MILLISECONDS)
   public final void directScheduleAndDisposeDelay() throws Exception {
     Scheduler s = scheduler();
 
@@ -267,7 +271,8 @@ public abstract class AbstractSchedulerTest {
     }
   }
 
-  @Test(timeout = 10000)
+  @Test
+  @Timeout(value = 10000, unit = TimeUnit.MILLISECONDS)
   public final void workerScheduleAndDisposeDelay() throws Exception {
     Scheduler s = scheduler();
     Scheduler.Worker w = s.createWorker();
@@ -318,7 +323,8 @@ public abstract class AbstractSchedulerTest {
     }
   }
 
-  @Test(timeout = 10000)
+  @Test
+  @Timeout(value = 10000, unit = TimeUnit.MILLISECONDS)
   public final void directScheduleAndDisposePeriod() throws Exception {
     Scheduler s = scheduler();
 
@@ -370,7 +376,8 @@ public abstract class AbstractSchedulerTest {
     }
   }
 
-  @Test(timeout = 10000)
+  @Test
+  @Timeout(value = 10000, unit = TimeUnit.MILLISECONDS)
   public final void workerScheduleAndDisposePeriod() throws Exception {
     Scheduler s = scheduler();
     Scheduler.Worker w = s.createWorker();

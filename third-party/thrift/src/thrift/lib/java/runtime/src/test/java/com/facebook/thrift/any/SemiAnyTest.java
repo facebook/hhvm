@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.any;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.standard_type.StandardProtocol;
 import com.facebook.thrift.standard_type.TypeName;
@@ -27,13 +27,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class SemiAnyTest {
-
-  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   private ByteBuf createData() {
     return Unpooled.wrappedBuffer(new byte[] {30});
@@ -41,88 +38,129 @@ public class SemiAnyTest {
 
   @Test
   public void testNullData() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Value or data must be provided");
-    new SemiAny.Builder<>().setData(null).build();
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              new SemiAny.Builder<>().setData(null).build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Value or data must be provided"));
   }
 
   @Test
   public void testEmptyData() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Value or data must be provided");
-    new SemiAny.Builder<>().setData(Unpooled.wrappedBuffer(new byte[] {})).build();
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              new SemiAny.Builder<>().setData(Unpooled.wrappedBuffer(new byte[] {})).build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Value or data must be provided"));
   }
 
   @Test
   public void testPromoteMissingType() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Type and data must be provided");
     ByteBuf data = createData();
     SemiAny semiAny = new SemiAny.Builder<>().setData(data).build();
-    semiAny.promote(StandardProtocol.COMPACT);
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              semiAny.promote(StandardProtocol.COMPACT);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Type and data must be provided"));
   }
 
   @Test
   public void testSetTypeStructAndValueType() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Can not set both type struct and value type");
     TypeStruct type =
         new TypeStruct.Builder().setName(TypeName.fromStringType(Void.UNUSED)).build();
-    SemiAny<List<String>> semiAny =
-        new SemiAny.Builder<>(Arrays.asList("foo"), String.class).setType(type).build();
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              SemiAny<List<String>> semiAny =
+                  new SemiAny.Builder<>(Arrays.asList("foo"), String.class).setType(type).build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Can not set both type struct and value type"));
   }
 
   @Test
   public void testSetTypeStructForPrimitiveValue() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Can not set type struct when value is non container type");
     TypeStruct type =
         new TypeStruct.Builder().setName(TypeName.fromStringType(Void.UNUSED)).build();
-    SemiAny<String> semiAny = new SemiAny.Builder<>("foo").setType(type).build();
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              SemiAny<String> semiAny = new SemiAny.Builder<>("foo").setType(type).build();
+            });
+    Assertions.assertTrue(
+        ex.getMessage().contains("Can not set type struct when value is non container type"));
   }
 
   @Test
   public void testPromoteNullType() {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("Protocol can not be null");
     ByteBuf data = createData();
     SemiAny semiAny = new SemiAny.Builder<>().setData(data).build();
-    semiAny.promote((StandardProtocol) null);
+    NullPointerException ex =
+        Assertions.assertThrows(
+            NullPointerException.class,
+            () -> {
+              semiAny.promote((StandardProtocol) null);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Protocol can not be null"));
   }
 
   @Test
   public void testPromoteMissingTypeMissingProtocol() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Type, protocol and data must be provided");
     ByteBuf data = createData();
     SemiAny semiAny = new SemiAny.Builder<>().setData(data).build();
-    semiAny.promote();
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              semiAny.promote();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Type, protocol and data must be provided"));
   }
 
   @Test
   public void testPromoteBothDataAndValueSet() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Can not set both value and data");
-    new SemiAny.Builder<>().setData(createData()).setValue("foo").build();
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              new SemiAny.Builder<>().setData(createData()).setValue("foo").build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Can not set both value and data"));
   }
 
   @Test
   public void testPromoteNullTypeWithProtocol() {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("TypeStruct can not be null");
     ByteBuf data = createData();
     SemiAny semiAny = new SemiAny.Builder<>().setData(data).build();
-    semiAny.promote(null, ProtocolUnion.fromStandard(StandardProtocol.COMPACT));
+    NullPointerException ex =
+        Assertions.assertThrows(
+            NullPointerException.class,
+            () -> {
+              semiAny.promote(null, ProtocolUnion.fromStandard(StandardProtocol.COMPACT));
+            });
+    Assertions.assertTrue(ex.getMessage().contains("TypeStruct can not be null"));
   }
 
   @Test
   public void testPromoteNullProtocol() {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("ProtocolUnion can not be null");
     ByteBuf data = createData();
     SemiAny semiAny = new SemiAny.Builder<>().setData(data).build();
     TypeStruct type = new TypeStruct.Builder().setName(TypeName.fromI32Type(Void.UNUSED)).build();
-    semiAny.promote(type, null);
+    NullPointerException ex =
+        Assertions.assertThrows(
+            NullPointerException.class,
+            () -> {
+              semiAny.promote(type, null);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("ProtocolUnion can not be null"));
   }
 
   private static ByteBuf mySerializer(Object o) {
@@ -137,11 +175,16 @@ public class SemiAnyTest {
 
   @Test
   public void testGetWithMissingInfo() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Type, protocol and data must be provided to get the value");
     SemiAny semiAny =
         new SemiAny.Builder<>().setData(Unpooled.wrappedBuffer("foo".getBytes())).build();
-    semiAny.get();
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              semiAny.get();
+            });
+    Assertions.assertTrue(
+        ex.getMessage().contains("Type, protocol and data must be provided to get the value"));
   }
 
   @Test

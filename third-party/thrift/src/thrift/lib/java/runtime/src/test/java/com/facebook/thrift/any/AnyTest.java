@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.any;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.test.universalname.TestRequest;
@@ -32,13 +32,10 @@ import io.netty.buffer.Unpooled;
 import org.apache.thrift.conformance.Any;
 import org.apache.thrift.conformance.StandardProtocol;
 import org.apache.thrift.protocol.TProtocol;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class AnyTest {
-
-  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   private ByteBufTProtocol createTProtocol(SerializationProtocol serializationProtocol) {
     ByteBuf dest = RpcResources.getUnpooledByteBufAllocator().buffer();
@@ -242,42 +239,68 @@ public class AnyTest {
 
   @Test
   public void testNoCustomProtocol() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Custom protocol deserializer not registered");
     LazyAny.registerSerializer("cp1", AnyTest::customSerializer);
     LazyAny lazyAny =
         new LazyAny.Builder<>().setValue(createSampleRequest()).setCustomProtocol("cp1").build();
 
     ByteBufTProtocol protocol = serialize(lazyAny);
-    deserialize(protocol);
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              deserialize(protocol);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Custom protocol deserializer not registered"));
   }
 
   @Test
   public void testMissingValue() {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("value");
-    new LazyAny.Builder<>().build();
+    NullPointerException ex =
+        Assertions.assertThrows(
+            NullPointerException.class,
+            () -> {
+              new LazyAny.Builder<>().build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("value"));
   }
 
   @Test
   public void testMissingCustomProtocol() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("serializer");
-    new LazyAny.Builder<>(createSampleRequest()).setCustomProtocol("test-protocol").build();
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              new LazyAny.Builder<>(createSampleRequest())
+                  .setCustomProtocol("test-protocol")
+                  .build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("serializer"));
   }
 
   @Test
   public void testMissingType() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("String");
-    new LazyAny.Builder<>(new String("test")).build();
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              new LazyAny.Builder<>(new String("test")).build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("String"));
   }
 
   @Test
   public void testTypeAndUri() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("not both");
-    new LazyAny.Builder<>().setValue(createSampleRequest()).useUri().useHashPrefix().build();
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              new LazyAny.Builder<>()
+                  .setValue(createSampleRequest())
+                  .useUri()
+                  .useHashPrefix()
+                  .build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("not both"));
   }
 
   @Test
@@ -293,10 +316,14 @@ public class AnyTest {
 
   @Test
   public void testMissingCustomSerializer() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("You must register a serializer");
     TypeRegistry.add(new Type(new UniversalName("foo.com/a/b"), Integer.class, null));
-    new LazyAny.Builder<>().setValue(Integer.MAX_VALUE).build();
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              new LazyAny.Builder<>().setValue(Integer.MAX_VALUE).build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("You must register a serializer"));
   }
 
   @Test
@@ -347,9 +374,13 @@ public class AnyTest {
 
   @Test
   public void testZeroHashBytes() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("select one or more bytes");
-    new LazyAny.Builder<>(createSampleRequest()).useHashPrefix(0).build();
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              new LazyAny.Builder<>(createSampleRequest()).useHashPrefix(0).build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("select one or more bytes"));
   }
 
   @Test

@@ -18,8 +18,8 @@ package com.facebook.thrift.client;
 
 import static com.facebook.swift.service.SwiftConstants.STICKY_HASH_KEY;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 
@@ -33,10 +33,10 @@ public class SimpleLoadBalancingRpcClientMonoTest {
     clients[2] = Mono.just(Mockito.mock(RpcClient.class));
 
     SimpleLoadBalancingRpcClientMono mono = new SimpleLoadBalancingRpcClientMono(clients);
-    Assert.assertEquals(clients[0].block(), mono.block());
-    Assert.assertEquals(clients[1].block(), mono.block());
-    Assert.assertEquals(clients[2].block(), mono.block());
-    Assert.assertEquals(clients[0].block(), mono.block());
+    Assertions.assertEquals(clients[0].block(), mono.block());
+    Assertions.assertEquals(clients[1].block(), mono.block());
+    Assertions.assertEquals(clients[2].block(), mono.block());
+    Assertions.assertEquals(clients[0].block(), mono.block());
   }
 
   @Test
@@ -50,6 +50,6 @@ public class SimpleLoadBalancingRpcClientMonoTest {
     SimpleLoadBalancingRpcClientMono mono = new SimpleLoadBalancingRpcClientMono(clients);
     RpcClient client1 = mono.contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, 12345)).block();
     RpcClient client2 = mono.contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, 12345)).block();
-    Assert.assertEquals(client1, client2);
+    Assertions.assertEquals(client1, client2);
   }
 }

@@ -16,17 +16,17 @@
 
 package com.facebook.thrift.util.resources;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.ResourceLeakDetector;
 import java.util.concurrent.CountDownLatch;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 public class TestResourcesHolder {
@@ -44,12 +44,16 @@ public class TestResourcesHolder {
     holder.dispose();
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testHashedWheelTimerSupplierShouldStopTimerAfterClose() {
-    ResourcesHolder holder = new ResourcesHolder();
-    HashedWheelTimer h1 = holder.getTimer();
-    holder.dispose();
-    h1.start();
+    Assertions.assertThrows(
+        IllegalStateException.class,
+        () -> {
+          ResourcesHolder holder = new ResourcesHolder();
+          HashedWheelTimer h1 = holder.getTimer();
+          holder.dispose();
+          h1.start();
+        });
   }
 
   @Test
@@ -68,7 +72,7 @@ public class TestResourcesHolder {
         () -> {
           try {
             Flux.just("foo").blockLast();
-            Assert.fail();
+            Assertions.fail();
           } catch (Throwable e) {
             assertTrue(e instanceof IllegalStateException);
           }

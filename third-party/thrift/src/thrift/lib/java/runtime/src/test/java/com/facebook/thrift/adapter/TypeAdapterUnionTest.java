@@ -16,8 +16,7 @@
 
 package com.facebook.thrift.adapter;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.any.Any;
 import com.facebook.thrift.test.adapter.AdaptedTestUnion;
@@ -28,7 +27,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,26 +35,23 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class TypeAdapterUnionTest {
 
-  @Parameterized.Parameters
-  public static Collection<Object> data() {
-    return Arrays.asList(SerializationProtocol.TCompact, SerializationProtocol.TBinary);
+  static Stream<Arguments> data() {
+    return Stream.of(
+        Arguments.of(SerializationProtocol.TCompact), Arguments.of(SerializationProtocol.TBinary));
   }
 
-  private final SerializationProtocol protocol;
+  private SerializationProtocol protocol;
 
-  public TypeAdapterUnionTest(SerializationProtocol protocol) {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSerializeTypeAdapterWithEmptyByteBufs(SerializationProtocol protocol) {
     this.protocol = protocol;
-  }
-
-  @Test
-  public void testSerializeTypeAdapterWithEmptyByteBufs() {
     AdaptedTestUnion struct = AdaptedTestUnion.defaultInstance();
     byte[] bytes = SerializerUtil.toByteArray(struct, protocol);
     AdaptedTestUnion fromBytes =
@@ -90,8 +85,10 @@ public class TypeAdapterUnionTest {
     return ByteBufUtil.hexDump(bytes);
   }
 
-  @Test
-  public void testBooleanToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBooleanToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedBooleanField("true"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -100,8 +97,10 @@ public class TypeAdapterUnionTest {
     assertEquals(true, received.isBooleanField());
   }
 
-  @Test
-  public void testByteToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testByteToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedByteField("100"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -110,8 +109,10 @@ public class TypeAdapterUnionTest {
     assertEquals(100, received.getByteField());
   }
 
-  @Test
-  public void testShortToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testShortToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedShortField("100"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -120,8 +121,10 @@ public class TypeAdapterUnionTest {
     assertEquals(100, received.getShortField());
   }
 
-  @Test
-  public void testIntToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedIntField("100"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -130,8 +133,10 @@ public class TypeAdapterUnionTest {
     assertEquals(100, received.getIntField());
   }
 
-  @Test
-  public void testLongToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testLongToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedLongField("1000000000000"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -140,8 +145,10 @@ public class TypeAdapterUnionTest {
     assertEquals(1000000000000L, received.getLongField());
   }
 
-  @Test
-  public void testFloatToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testFloatToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedFloatField("1700.15"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -150,8 +157,10 @@ public class TypeAdapterUnionTest {
     assertEquals(1700.15, received.getFloatField(), 0.1);
   }
 
-  @Test
-  public void testDoubleToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDoubleToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedDoubleField("9283.332"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -160,8 +169,10 @@ public class TypeAdapterUnionTest {
     assertEquals(9283.332, received.getDoubleField(), 0.1);
   }
 
-  @Test
-  public void testStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(
             AdaptedTestUnion.fromAdaptedStringField(Unpooled.wrappedBuffer("foo".getBytes())));
@@ -172,8 +183,10 @@ public class TypeAdapterUnionTest {
     assertEquals("foo", received.getStringField());
   }
 
-  @Test
-  public void testSlicedByteBufTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSlicedByteBufTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     final ByteBuf b = generateByteBuf();
     final String s = hexDump(b);
 
@@ -185,8 +198,10 @@ public class TypeAdapterUnionTest {
     assertEquals(s, hexDump(received.getB1()));
   }
 
-  @Test
-  public void testCopiedByteBufTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testCopiedByteBufTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     final ByteBuf b = generateByteBuf();
     final String s = hexDump(b);
 
@@ -198,8 +213,10 @@ public class TypeAdapterUnionTest {
     assertEquals(s, hexDump(received.getB2()));
   }
 
-  @Test
-  public void testUnpooledByteBufTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUnpooledByteBufTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     final ByteBuf b = generateByteBuf();
     final String s = hexDump(b);
 
@@ -211,8 +228,10 @@ public class TypeAdapterUnionTest {
     assertEquals(s, hexDump(received.getB3()));
   }
 
-  @Test
-  public void testDateTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDateTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromDateField(new Date(6700)));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -221,8 +240,10 @@ public class TypeAdapterUnionTest {
     assertEquals(6700, received.getDateField());
   }
 
-  @Test
-  public void testIntListToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntListToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedIntListField("1,2,3,4"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -231,8 +252,10 @@ public class TypeAdapterUnionTest {
     assertEquals(Arrays.asList(1, 2, 3, 4), received.getIntListField());
   }
 
-  @Test
-  public void testHexListTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testHexListTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(AdaptedTestUnion.fromAdaptedBinaryListField("ab0503:ddee:a1a2a3a4"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -244,8 +267,10 @@ public class TypeAdapterUnionTest {
     assertEquals("a1a2a3a4", hexDump(received.getBinaryListField().get(2)));
   }
 
-  @Test
-  public void testStringListStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStringListStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(AdaptedTestUnion.fromAdaptedListIntListField("1,2,3:4,4:7,8,9,10"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -257,8 +282,10 @@ public class TypeAdapterUnionTest {
     assertEquals(Arrays.asList(7, 8, 9, 10), received.getListIntListField().get(2));
   }
 
-  @Test
-  public void testIntSetToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntSetToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedIntSetField("7,7,6,7"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -268,8 +295,10 @@ public class TypeAdapterUnionTest {
     assertEquals(new HashSet<>(Arrays.asList(7, 6)), received.getIntSetField());
   }
 
-  @Test
-  public void testBinarySetToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBinarySetToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(AdaptedTestUnion.fromAdaptedBinarySetField("ab0503,ddee,a1a2a3"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -287,8 +316,10 @@ public class TypeAdapterUnionTest {
     }
   }
 
-  @Test
-  public void testIntMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntMapToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedIntMapField("5=9,7=12"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -300,8 +331,10 @@ public class TypeAdapterUnionTest {
         received.getIntMapField());
   }
 
-  @Test
-  public void testIntBinaryMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntBinaryMapToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(AdaptedTestUnion.fromAdaptedIntBinaryMapField("3=aabb,4=12abef"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -313,8 +346,10 @@ public class TypeAdapterUnionTest {
     assertEquals("12abef", hexDump(received.getIntBinaryMapField().get(4)));
   }
 
-  @Test
-  public void testIntStringMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntStringMapToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(AdaptedTestUnion.fromAdaptedIntStringMapField("3=aabb,4=12abef"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -326,8 +361,10 @@ public class TypeAdapterUnionTest {
     assertEquals("12abef", received.getIntStringMapField().get(4));
   }
 
-  @Test
-  public void testIntBinaryStringMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntBinaryStringMapToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(AdaptedTestUnion.fromAdaptedIntBinaryStringMapField("3=aabb,4=12abef"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -339,8 +376,10 @@ public class TypeAdapterUnionTest {
     assertEquals("12abef", hexDump(received.getIntBinaryStringMapField().get(4)));
   }
 
-  @Test
-  public void testIntBinaryListMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntBinaryListMapToStringTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(AdaptedTestUnion.fromAdaptedIntBinaryListMapField("3=aabb:de,9=12:22:31"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -353,8 +392,10 @@ public class TypeAdapterUnionTest {
     assertEquals("31", hexDump(received.getIntBinaryListMapField().get(9).get(2)));
   }
 
-  @Test
-  public void testBooleanToStringInlineTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBooleanToStringInlineTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedBooleanField2("true"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -363,8 +404,10 @@ public class TypeAdapterUnionTest {
     assertEquals(true, received.isBooleanField2());
   }
 
-  @Test
-  public void testHexListInlineTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testHexListInlineTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(AdaptedTestUnion.fromAdaptedBinaryListField2("ab0503:ddee:a1a2a3a4"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -376,8 +419,10 @@ public class TypeAdapterUnionTest {
     assertEquals("a1a2a3a4", hexDump(received.getBinaryListField2().get(2)));
   }
 
-  @Test
-  public void testDoubleAdaptedIntTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDoubleAdaptedIntTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromDoubleAdaptedIntField(5000L));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -386,8 +431,10 @@ public class TypeAdapterUnionTest {
     assertEquals(5000, received.getIntField2());
   }
 
-  @Test
-  public void testDoubleTypeDefIntTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDoubleTypeDefIntTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromDoubleTypedefAdaptedIntField("75"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -396,8 +443,10 @@ public class TypeAdapterUnionTest {
     assertEquals(75, received.getDoubleTypedefIntField());
   }
 
-  @Test
-  public void testMultipleTypeDefIntTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMultipleTypeDefIntTypeAdapter(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromMultipleTypedefAdaptedIntField("60"));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -406,8 +455,10 @@ public class TypeAdapterUnionTest {
     assertEquals(60, received.getMultipleTypedefIntField());
   }
 
-  @Test
-  public void testAdaptedSetList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testAdaptedSetList(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedSetListField(Arrays.asList("7")));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
     TestUnion received = deserialize(bytes);
@@ -416,8 +467,10 @@ public class TypeAdapterUnionTest {
     assertTrue(received.getAdaptedSetListField().get(0).contains(7));
   }
 
-  @Test
-  public void testListOfAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedInt(SerializationProtocol protocol) {
+    this.protocol = protocol;
     List<String> list = Arrays.asList("1", "2", "3");
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromListAdaptedIntField(list));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -427,8 +480,10 @@ public class TypeAdapterUnionTest {
     assertArrayEquals(new Integer[] {1, 2, 3}, received.getListAdaptedIntField().toArray());
   }
 
-  @Test
-  public void testMapOfMapAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMapOfMapAdaptedInt(SerializationProtocol protocol) {
+    this.protocol = protocol;
     Map<String, Map<String, String>> map = new HashMap<>();
     Map<String, String> map1 = new HashMap<>();
     map1.put("5", "13");
@@ -442,8 +497,10 @@ public class TypeAdapterUnionTest {
     assertEquals(13L, (long) received.getMapOfIntToMapIntToShortField().get(7).get(5));
   }
 
-  @Test
-  public void testListOfAdaptedShort() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedShort(SerializationProtocol protocol) {
+    this.protocol = protocol;
     List<String> list = Arrays.asList("10", "11");
     byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedShortListField(list));
     AdaptedTestUnion adapted = deserializeAdapted(bytes);
@@ -453,8 +510,10 @@ public class TypeAdapterUnionTest {
     assertArrayEquals(new Short[] {10, 11}, received.getAdaptedShortListField().toArray());
   }
 
-  @Test
-  public void testNestedListOfAdaptedBinary() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedListOfAdaptedBinary(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] foo = "foo".getBytes();
     byte[] bar = "bar".getBytes();
 
@@ -471,8 +530,10 @@ public class TypeAdapterUnionTest {
     assertArrayEquals(bar, received.getAdaptedBinList3Field().get(0).get(0).get(1));
   }
 
-  @Test
-  public void testListOfMultiLevelTypeDef() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfMultiLevelTypeDef(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] foo = "foo".getBytes();
     byte[] bar = "bar".getBytes();
 
@@ -487,8 +548,10 @@ public class TypeAdapterUnionTest {
     assertArrayEquals(bar, received.getAdaptedBinNestedTypeDefListField().get(1));
   }
 
-  @Test
-  public void testStructList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStructList(SerializationProtocol protocol) {
+    this.protocol = protocol;
     byte[] bytes =
         serializeAdapted(
             AdaptedTestUnion.fromAnyListField(Arrays.asList(new Any.Builder("foo").build())));

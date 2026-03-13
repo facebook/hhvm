@@ -16,40 +16,35 @@
 
 package com.facebook.thrift.protocol;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.facebook.thrift.test.EveryLayout;
 import com.facebook.thrift.util.SerializationProtocol;
 import com.facebook.thrift.util.SerializerUtil;
 import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
-import java.util.Arrays;
-import java.util.Collection;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class ByteBufTProtocolTest {
 
-  @Parameterized.Parameters
-  public static Collection<Object> data() {
-    return Arrays.asList(
-        SerializationProtocol.TCompact,
-        SerializationProtocol.TBinary,
-        SerializationProtocol.TSimpleJSONBase64,
-        SerializationProtocol.TSimpleJSON,
-        SerializationProtocol.TJSON);
+  static Stream<Arguments> data() {
+    return Stream.of(
+        Arguments.of(SerializationProtocol.TCompact),
+        Arguments.of(SerializationProtocol.TBinary),
+        Arguments.of(SerializationProtocol.TSimpleJSONBase64),
+        Arguments.of(SerializationProtocol.TSimpleJSON),
+        Arguments.of(SerializationProtocol.TJSON));
   }
 
-  private final SerializationProtocol serializationProtocol;
+  private SerializationProtocol serializationProtocol;
 
-  public ByteBufTProtocolTest(SerializationProtocol serializationProtocol) {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testProtocol(SerializationProtocol serializationProtocol) {
     this.serializationProtocol = serializationProtocol;
-  }
-
-  @Test
-  public void testProtocol() {
     EveryLayout struct =
         new EveryLayout.Builder().setAInt(5).setALong(1000).setAString("test").build();
 
@@ -64,8 +59,10 @@ public class ByteBufTProtocolTest {
     assertEquals(struct.getAString(), received.getAString());
   }
 
-  @Test
-  public void testUnicodeCharterEncodingAndEscape() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUnicodeCharterEncodingAndEscape(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     EveryLayout struct =
         new EveryLayout.Builder().setAInt(5).setALong(1000).setAString("\n\u0001😀").build();
 

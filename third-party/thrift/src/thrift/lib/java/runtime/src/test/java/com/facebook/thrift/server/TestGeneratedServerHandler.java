@@ -36,15 +36,15 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
 import org.apache.thrift.TApplicationException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 public class TestGeneratedServerHandler {
   PingService.Reactive client;
 
-  @Before
+  @BeforeEach
   public void setup() {
     PingServiceRpcServerHandler serverHandler =
         new PingServiceRpcServerHandler(new BlockingPingService(), Collections.emptyList());
@@ -67,7 +67,8 @@ public class TestGeneratedServerHandler {
   @Test
   public void testPing() {
     StepVerifier.create(client.ping(new PingRequest.Builder().setRequest("ping").build()))
-        .consumeNextWith(response -> Assert.assertThat(response.getResponse(), is("ping_pong_0")))
+        .consumeNextWith(
+            response -> MatcherAssert.assertThat(response.getResponse(), is("ping_pong_0")))
         .verifyComplete();
   }
 
@@ -76,8 +77,8 @@ public class TestGeneratedServerHandler {
     StepVerifier.create(client.pingException(new PingRequest.Builder().setRequest("ping").build()))
         .consumeErrorWith(
             error -> {
-              Assert.assertThat(error, instanceOf(CustomException.class));
-              Assert.assertThat(error.getMessage(), is("custom exception"));
+              MatcherAssert.assertThat(error, instanceOf(CustomException.class));
+              MatcherAssert.assertThat(error.getMessage(), is("custom exception"));
             });
   }
 
@@ -86,8 +87,8 @@ public class TestGeneratedServerHandler {
     StepVerifier.create(client.pingException(new PingRequest.Builder().setRequest("npe").build()))
         .consumeErrorWith(
             error -> {
-              Assert.assertThat(error, instanceOf(TApplicationException.class));
-              Assert.assertThat(error.getMessage(), is("npe from pingException"));
+              MatcherAssert.assertThat(error, instanceOf(TApplicationException.class));
+              MatcherAssert.assertThat(error.getMessage(), is("npe from pingException"));
             });
   }
 }

@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.any;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.standard_type.StandardProtocol;
 import com.facebook.thrift.standard_type.TypeName;
@@ -31,34 +31,24 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class SemiAnyStandardProtocolTest {
 
-  @Rule public ExpectedException expectedException = ExpectedException.none();
-
-  @Parameterized.Parameters
-  public static Collection<Object> data() {
-    return Arrays.asList(
-        StandardProtocol.COMPACT,
-        StandardProtocol.BINARY,
-        StandardProtocol.JSON,
-        StandardProtocol.SIMPLE_JSON);
+  static Stream<Arguments> data() {
+    return Stream.of(
+        Arguments.of(StandardProtocol.COMPACT),
+        Arguments.of(StandardProtocol.BINARY),
+        Arguments.of(StandardProtocol.JSON),
+        Arguments.of(StandardProtocol.SIMPLE_JSON));
   }
 
-  private final StandardProtocol standardProtocol;
-
-  public SemiAnyStandardProtocolTest(StandardProtocol standardProtocol) {
-    this.standardProtocol = standardProtocol;
-  }
+  private StandardProtocol standardProtocol;
 
   private <T> SemiAny<T> createSemiAny(T o) {
     return new SemiAny.Builder<>(o).setProtocol(standardProtocol).build();
@@ -88,8 +78,10 @@ public class SemiAnyStandardProtocolTest {
     return any.getAny().getType().getParams().get(inx).getName();
   }
 
-  @Test
-  public void testBool() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBool(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     SemiAny<Boolean> any = createSemiAny(true);
     assertEquals(true, any.get());
     assertTrue(getType(any).isSetBoolType());
@@ -101,8 +93,10 @@ public class SemiAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testInteger() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testInteger(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     SemiAny<Integer> any = createSemiAny(500);
     assertEquals(500, (int) any.get());
     assertTrue(getType(any).isSetI32Type());
@@ -121,8 +115,10 @@ public class SemiAnyStandardProtocolTest {
     assertTrue(getParams(any, 0).isSetStringType());
   }
 
-  @Test
-  public void testListOfString() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfString(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     SemiAny<List<String>> any = createSemiAny(Arrays.asList("foo", "bar", "baz"), String.class);
     assertListOfString(any);
 
@@ -130,8 +126,10 @@ public class SemiAnyStandardProtocolTest {
     assertListOfString(received);
   }
 
-  @Test
-  public void testPromoteFromValue() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPromoteFromValue(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     SemiAny<Integer> semiAny = createSemiAny(500);
     assertEquals(500, (int) semiAny.get());
     assertTrue(getType(semiAny).isSetI32Type());
@@ -148,8 +146,10 @@ public class SemiAnyStandardProtocolTest {
     return Unpooled.wrappedBuffer(new byte[] {30});
   }
 
-  @Test
-  public void testPromoteFromData() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPromoteFromData(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     ByteBuf data = createData();
     TypeStruct type = new TypeStruct.Builder().setName(TypeName.fromI32Type(Void.UNUSED)).build();
     SemiAny semiAny =
@@ -160,8 +160,10 @@ public class SemiAnyStandardProtocolTest {
     assertEquals(standardProtocol, any.getAny().getProtocol().getStandard());
   }
 
-  @Test
-  public void testPromoteFromDataWithProtocol() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPromoteFromDataWithProtocol(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     ByteBuf data = createData();
     TypeStruct type = new TypeStruct.Builder().setName(TypeName.fromI32Type(Void.UNUSED)).build();
     SemiAny semiAny = new SemiAny.Builder<>().setData(data).setType(type).build();
@@ -170,8 +172,10 @@ public class SemiAnyStandardProtocolTest {
     assertEquals(ByteBufUtil.hexDump(data), ByteBufUtil.hexDump(any.getAny().getData()));
   }
 
-  @Test
-  public void testPromoteFromListWithProtocol() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPromoteFromListWithProtocol(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     List<Integer> list = new ArrayList<>();
     list.add(7);
 
@@ -186,8 +190,10 @@ public class SemiAnyStandardProtocolTest {
     assertEquals(standardProtocol, any.getAny().getProtocol().getStandard());
   }
 
-  @Test
-  public void testPromoteFromDataWithProtocolUnion() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPromoteFromDataWithProtocolUnion(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     ByteBuf data = createData();
     TypeStruct type = new TypeStruct.Builder().setName(TypeName.fromI32Type(Void.UNUSED)).build();
     SemiAny semiAny = new SemiAny.Builder<>().setData(data).setType(type).build();
@@ -197,8 +203,10 @@ public class SemiAnyStandardProtocolTest {
     assertEquals(standardProtocol, any.getAny().getProtocol().getStandard());
   }
 
-  @Test
-  public void testPromoteFromValueWithProtocolUnion() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPromoteFromValueWithProtocolUnion(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     TypeStruct type =
         new TypeStruct.Builder().setName(TypeName.fromStringType(Void.UNUSED)).build();
     SemiAny<String> semiAny = new SemiAny.Builder<>("foo").build();
@@ -209,8 +217,10 @@ public class SemiAnyStandardProtocolTest {
     assertEquals(type, any.getAny().getType());
   }
 
-  @Test
-  public void testPromoteFromDataWithTypeAndProtocolUnion() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPromoteFromDataWithTypeAndProtocolUnion(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     ByteBuf data = createData();
     TypeStruct type = new TypeStruct.Builder().setName(TypeName.fromI32Type(Void.UNUSED)).build();
     SemiAny semiAny = new SemiAny.Builder<>().setData(data).build();
@@ -221,8 +231,10 @@ public class SemiAnyStandardProtocolTest {
     assertEquals(type, any.getAny().getType());
   }
 
-  @Test
-  public void testPromoteFromValueWithTypeAndProtocolUnion() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testPromoteFromValueWithTypeAndProtocolUnion(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     TypeStruct type = new TypeStruct.Builder().setName(TypeName.fromI32Type(Void.UNUSED)).build();
     SemiAny<List<String>> semiAny =
         new SemiAny.Builder<>(Arrays.asList("foo"), String.class).build();
@@ -233,8 +245,10 @@ public class SemiAnyStandardProtocolTest {
     assertEquals(type, any.getAny().getType());
   }
 
-  @Test
-  public void testSemiAnyAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSemiAnyAdapter(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     SemiAny<List<Integer>> any = createSemiAny(Arrays.asList(5, 6, 7), Integer.class);
     TestStruct st = new TestStruct.Builder().setSemianyField(any).build();
 
@@ -247,8 +261,10 @@ public class SemiAnyStandardProtocolTest {
         new Integer[] {5, 6, 7}, ((List<Integer>) received.getSemianyField().get()).toArray());
   }
 
-  @Test
-  public void testSemiAnyAdapterPromoteToAny() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSemiAnyAdapterPromoteToAny(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     SemiAny<List<Integer>> semiAny = createSemiAny(Arrays.asList(5, 6, 7), Integer.class);
     TestStruct st = new TestStruct.Builder().setSemianyField(semiAny).build();
 

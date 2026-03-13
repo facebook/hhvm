@@ -27,9 +27,9 @@ import com.facebook.thrift.metrics.distribution.Utils;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 public class TestThriftServerStats {
@@ -40,7 +40,7 @@ public class TestThriftServerStats {
 
   @Captor ArgumentCaptor<Runnable> runnableCaptor;
 
-  @Before
+  @BeforeEach
   public void setup() {
     initMocks(this);
     Utils.setExecutorService(executorService);
@@ -57,22 +57,22 @@ public class TestThriftServerStats {
   public void testRequestReceived() throws Exception {
     thriftServerStats.requestReceived(10L, "foo");
     Map<String, Long> actual = thriftServerStats.getCounters();
-    Assert.assertEquals(1L, (long) actual.get("thrift.received_requests.count"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.received_requests.count.60"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.received_requests.count.3600"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.received_requests.count"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.received_requests.count.60"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.received_requests.count.3600"));
 
-    Assert.assertEquals(1L, (long) actual.get("thrift.foo.num_calls.sum"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.foo.num_calls.sum.60"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.foo.num_calls.sum.3600"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.foo.num_calls.sum"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.foo.num_calls.sum.60"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.foo.num_calls.sum.3600"));
   }
 
   @Test
   public void testReplySent() throws Exception {
     thriftServerStats.replySent(20L, "foo");
     Map<String, Long> actual = thriftServerStats.getCounters();
-    Assert.assertEquals(1L, (long) actual.get("thrift.sent_replies.count"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.sent_replies.count.60"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.sent_replies.count.3600"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.sent_replies.count"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.sent_replies.count.60"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.sent_replies.count.3600"));
   }
 
   @Test
@@ -83,30 +83,30 @@ public class TestThriftServerStats {
 
     Map<String, Long> actual = thriftServerStats.getCounters();
 
-    Assert.assertEquals(10L, (long) actual.get("thrift.process_time.avg"));
-    Assert.assertEquals(10L, (long) actual.get("thrift.process_time.avg.60"));
-    Assert.assertEquals(10L, (long) actual.get("thrift.process_time.avg.3600"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.process_time.avg"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.process_time.avg.60"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.process_time.avg.3600"));
 
-    Assert.assertEquals(10L, (long) actual.get("thrift.process_time.p99"));
-    Assert.assertEquals(10L, (long) actual.get("thrift.process_time.p99.60"));
-    Assert.assertEquals(10L, (long) actual.get("thrift.process_time.p99.3600"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.process_time.p99"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.process_time.p99.60"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.process_time.p99.3600"));
 
-    Assert.assertEquals(1L, (long) actual.get("thrift.foo.num_processed.sum"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.foo.num_processed.sum.60"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.foo.num_processed.sum.3600"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.foo.num_processed.sum"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.foo.num_processed.sum.60"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.foo.num_processed.sum.3600"));
 
-    Assert.assertEquals(10L, (long) actual.get("thrift.foo.time_process_us.avg"));
-    Assert.assertEquals(10L, (long) actual.get("thrift.foo.time_process_us.avg.60"));
-    Assert.assertEquals(10L, (long) actual.get("thrift.foo.time_process_us.avg.3600"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.foo.time_process_us.avg"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.foo.time_process_us.avg.60"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.foo.time_process_us.avg.3600"));
   }
 
   @Test
   public void testError() throws Exception {
     thriftServerStats.error("foo");
     Map<String, Long> actual = thriftServerStats.getCounters();
-    Assert.assertEquals(1L, (long) actual.get("thrift.foo.num_exceptions.sum"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.foo.num_exceptions.sum.60"));
-    Assert.assertEquals(1L, (long) actual.get("thrift.foo.num_exceptions.sum.3600"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.foo.num_exceptions.sum"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.foo.num_exceptions.sum.60"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift.foo.num_exceptions.sum.3600"));
   }
 
   @Test
@@ -117,8 +117,8 @@ public class TestThriftServerStats {
 
     Map<String, Long> actual = thriftServerStats.getCounters();
 
-    Assert.assertEquals(10L, (long) actual.get("thrift.write_time.p99"));
-    Assert.assertEquals(10L, (long) actual.get("thrift.write_time.p99.60"));
-    Assert.assertEquals(10L, (long) actual.get("thrift.write_time.p99.3600"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.write_time.p99"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.write_time.p99.60"));
+    Assertions.assertEquals(10L, (long) actual.get("thrift.write_time.p99.3600"));
   }
 }

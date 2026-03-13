@@ -19,8 +19,8 @@ package com.facebook.thrift.serialization;
 import com.facebook.thrift.test.JustABinary;
 import com.facebook.thrift.test.TestUnion;
 import java.util.ArrayList;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class UnionTest {
   @Test
@@ -28,25 +28,30 @@ public class UnionTest {
     TestUnion.from(TestUnion._ABINARY, JustABinary.defaultInstance());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testCreatingInvalidType() {
-    TestUnion.from(Integer.MIN_VALUE, JustABinary.defaultInstance());
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> TestUnion.from(Integer.MIN_VALUE, JustABinary.defaultInstance()));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidObject() {
-    TestUnion.from(TestUnion._ABINARY, new ArrayList<>());
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> TestUnion.from(TestUnion._ABINARY, new ArrayList<>()));
   }
 
   @Test
   public void testUnionType() {
     TestUnion anUnion = TestUnion.from(TestUnion._ABINARY, JustABinary.defaultInstance());
-    Assert.assertEquals(anUnion.getThriftUnionType(), TestUnion.TypeEnum.A_BINARY);
+    Assertions.assertEquals(anUnion.getThriftUnionType(), TestUnion.TypeEnum.A_BINARY);
   }
 
   @Test
   public void testEmptyUnion() {
     TestUnion anUnion = new TestUnion();
-    Assert.assertEquals(anUnion.getThriftUnionType(), TestUnion.TypeEnum.__FBTHRIFT_EMPTY_UNION__);
+    Assertions.assertEquals(
+        anUnion.getThriftUnionType(), TestUnion.TypeEnum.__FBTHRIFT_EMPTY_UNION__);
   }
 }

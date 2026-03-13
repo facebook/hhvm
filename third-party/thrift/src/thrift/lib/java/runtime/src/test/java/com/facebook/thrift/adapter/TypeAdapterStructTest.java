@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.adapter;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.adapter.test.Wrapped;
 import com.facebook.thrift.any.Any;
@@ -33,7 +33,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,11 +43,10 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class TypeAdapterStructTest {
 
   private static class Param {
@@ -61,19 +59,18 @@ public class TypeAdapterStructTest {
     }
   }
 
-  @Parameterized.Parameters
-  public static Collection<Param> data() {
-    return Arrays.asList(
-        new Param(SerializationProtocol.TCompact, false),
-        new Param(SerializationProtocol.TCompact, true),
-        new Param(SerializationProtocol.TBinary, false),
-        new Param(SerializationProtocol.TBinary, true));
+  static Stream<Arguments> data() {
+    return Stream.of(
+        Arguments.of(new Param(SerializationProtocol.TCompact, false)),
+        Arguments.of(new Param(SerializationProtocol.TCompact, true)),
+        Arguments.of(new Param(SerializationProtocol.TBinary, false)),
+        Arguments.of(new Param(SerializationProtocol.TBinary, true)));
   }
 
-  private final SerializationProtocol protocol;
-  private final boolean exception;
+  private SerializationProtocol protocol;
+  private boolean exception;
 
-  public TypeAdapterStructTest(Param param) {
+  private void initParams(Param param) {
     this.protocol = param.protocol;
     this.exception = param.exception;
   }
@@ -134,8 +131,10 @@ public class TypeAdapterStructTest {
     return ByteBufUtil.hexDump(s.getBytes());
   }
 
-  @Test
-  public void testBooleanToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBooleanToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedBooleanField("true").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -146,8 +145,10 @@ public class TypeAdapterStructTest {
     assertEquals(true, received.isBooleanDefault());
   }
 
-  @Test
-  public void testByteToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testByteToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedByteField("100").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -158,8 +159,10 @@ public class TypeAdapterStructTest {
     assertEquals(9, received.getByteDefault());
   }
 
-  @Test
-  public void testShortToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testShortToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedShortField("100").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -170,8 +173,10 @@ public class TypeAdapterStructTest {
     assertEquals(101, received.getShortDefault());
   }
 
-  @Test
-  public void testIntToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedIntField("100").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -182,8 +187,10 @@ public class TypeAdapterStructTest {
     assertEquals(1024, received.getIntDefault());
   }
 
-  @Test
-  public void testLongToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testLongToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedLongField("1000000000000").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -194,8 +201,10 @@ public class TypeAdapterStructTest {
     assertEquals(5000L, received.getLongDefault());
   }
 
-  @Test
-  public void testFloatToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testFloatToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedFloatField("1700.15").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -206,8 +215,10 @@ public class TypeAdapterStructTest {
     assertEquals(2.3, received.getFloatDefault(), 0.1);
   }
 
-  @Test
-  public void testDoubleToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDoubleToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedDoubleField("9283.332").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -218,8 +229,10 @@ public class TypeAdapterStructTest {
     assertEquals(5.67, received.getDoubleDefault(), 0.1);
   }
 
-  @Test
-  public void testStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance()
@@ -234,8 +247,10 @@ public class TypeAdapterStructTest {
     assertEquals("test", received.getStringDefault());
   }
 
-  @Test
-  public void testSlicedByteBufTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSlicedByteBufTypeAdapter(Param param) {
+    initParams(param);
     final ByteBuf b = generateByteBuf();
     final String s = hexDump(b);
 
@@ -249,8 +264,10 @@ public class TypeAdapterStructTest {
     assertEquals(hexDump("b1b1".getBytes()), hexDump(received.getB1Default()));
   }
 
-  @Test
-  public void testCopiedByteBufTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testCopiedByteBufTypeAdapter(Param param) {
+    initParams(param);
     final ByteBuf b = generateByteBuf();
     final String s = hexDump(b);
 
@@ -264,8 +281,10 @@ public class TypeAdapterStructTest {
     assertEquals(hexDump("b2b2".getBytes()), hexDump(received.getB2Default()));
   }
 
-  @Test
-  public void testUnpooledByteBufTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUnpooledByteBufTypeAdapter(Param param) {
+    initParams(param);
     final ByteBuf b = generateByteBuf();
     final String s = hexDump(b);
 
@@ -279,8 +298,10 @@ public class TypeAdapterStructTest {
     assertEquals(hexDump("b3b3".getBytes()), hexDump(received.getB3Default()));
   }
 
-  @Test
-  public void testDateTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDateTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setDateField(new Date(6700)).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -289,8 +310,10 @@ public class TypeAdapterStructTest {
     assertEquals(6700, received.getDateField());
   }
 
-  @Test
-  public void testIntListToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntListToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedIntListField("1,2,3,4").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -301,8 +324,10 @@ public class TypeAdapterStructTest {
     assertEquals(Arrays.asList(2, 4), received.getIntListDefault());
   }
 
-  @Test
-  public void testHexListTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testHexListTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance().setAdaptedBinaryListField("ab0503:ddee:a1a2a3a4").build());
@@ -317,8 +342,10 @@ public class TypeAdapterStructTest {
     assertTrue(Arrays.equals("aa".getBytes(), received.getBinaryListDefault().get(0)));
   }
 
-  @Test
-  public void testStringListStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStringListStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance().setAdaptedListIntListField("1,2,3:4,4:7,8,9,10").build());
@@ -331,8 +358,10 @@ public class TypeAdapterStructTest {
     assertEquals(Arrays.asList(7, 8, 9, 10), received.getListIntListField().get(2));
   }
 
-  @Test
-  public void testIntSetToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntSetToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedIntSetField("7,7,6,7").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -345,8 +374,10 @@ public class TypeAdapterStructTest {
     assertEquals(new HashSet<>(Arrays.asList(10, 20)), received.getIntSetDefault());
   }
 
-  @Test
-  public void testBinarySetToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBinarySetToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(defaultInstance().setAdaptedBinarySetField("ab0503,ddee,a1a2a3").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -372,8 +403,10 @@ public class TypeAdapterStructTest {
     }
   }
 
-  @Test
-  public void testIntMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntMapToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedIntMapField("5=9,7=12").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -387,8 +420,10 @@ public class TypeAdapterStructTest {
     assertEquals(Collections.singletonMap(1, 7), received.getIntMapDefault());
   }
 
-  @Test
-  public void testIntBinaryMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntBinaryMapToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(defaultInstance().setAdaptedIntBinaryMapField("3=aabb,4=12abef").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -402,8 +437,10 @@ public class TypeAdapterStructTest {
     assertEquals(hexDump("foo"), hexDump(received.getIntBinaryMapDefault().get(8)));
   }
 
-  @Test
-  public void testIntStringMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntStringMapToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(defaultInstance().setAdaptedIntStringMapField("3=aabb,4=12abef").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -415,8 +452,10 @@ public class TypeAdapterStructTest {
     assertEquals("12abef", received.getIntStringMapField().get(4));
   }
 
-  @Test
-  public void testIntBinaryStringMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntBinaryStringMapToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance().setAdaptedIntBinaryStringMapField("3=aabb,4=12abef").build());
@@ -429,8 +468,10 @@ public class TypeAdapterStructTest {
     assertEquals("12abef", hexDump(received.getIntBinaryStringMapField().get(4)));
   }
 
-  @Test
-  public void testIntBinaryListMapToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntBinaryListMapToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance().setAdaptedIntBinaryListMapField("3=aabb:de,9=12:22:31").build());
@@ -447,8 +488,10 @@ public class TypeAdapterStructTest {
     assertEquals(hexDump("bar"), hexDump(received.getIntBinaryListMapDefault().get(7).get(1)));
   }
 
-  @Test
-  public void testOptionalBooleanToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testOptionalBooleanToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -457,8 +500,10 @@ public class TypeAdapterStructTest {
     assertEquals(null, received.isOptionalBooleanField());
   }
 
-  @Test
-  public void testOptionalBinaryToStringTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testOptionalBinaryToStringTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -467,8 +512,10 @@ public class TypeAdapterStructTest {
     assertEquals(null, received.getOptionalB1());
   }
 
-  @Test
-  public void testBooleanToStringInlineTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBooleanToStringInlineTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedBooleanField2("true").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -476,8 +523,10 @@ public class TypeAdapterStructTest {
     assertEquals(true, received.isBooleanField2());
   }
 
-  @Test
-  public void testHexListInlineTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testHexListInlineTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance().setAdaptedBinaryListField2("ab0503:ddee:a1a2a3a4").build());
@@ -505,8 +554,10 @@ public class TypeAdapterStructTest {
         .build();
   }
 
-  @Test
-  public void testEquals() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testEquals(Param param) {
+    initParams(param);
     AdaptedTestStructWithoutDefaults adapted = createAdaptedTestStructWithoutDefaults();
     byte[] bytes = SerializerUtil.toByteArray(adapted, protocol);
     AdaptedTestStructWithoutDefaults adapted2 =
@@ -533,8 +584,10 @@ public class TypeAdapterStructTest {
     assertEquals(adapted4, adapted5);
   }
 
-  @Test
-  public void testHashCode() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testHashCode(Param param) {
+    initParams(param);
     AdaptedTestStructWithoutDefaults adapted = createAdaptedTestStructWithoutDefaults();
     byte[] bytes = SerializerUtil.toByteArray(adapted, protocol);
     AdaptedTestStructWithoutDefaults adapted2 =
@@ -546,8 +599,10 @@ public class TypeAdapterStructTest {
     assertNotEquals(adapted.hashCode(), adapted3.hashCode());
   }
 
-  @Test
-  public void testDoubleAdaptedIntTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDoubleAdaptedIntTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes = serializeAdapted(defaultInstance().setDoubleAdaptedIntField(5000L).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
@@ -558,8 +613,10 @@ public class TypeAdapterStructTest {
     assertEquals(3000, received.getIntDefault2());
   }
 
-  @Test
-  public void testDoubleTypeDefIntTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDoubleTypeDefIntTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(defaultInstance().setDoubleTypedefAdaptedIntField("75").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -569,8 +626,10 @@ public class TypeAdapterStructTest {
     assertEquals(75, received.getDoubleTypedefIntField());
   }
 
-  @Test
-  public void testMultipleTypeDefIntTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMultipleTypeDefIntTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(defaultInstance().setMultipleTypedefAdaptedIntField("60").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -582,8 +641,10 @@ public class TypeAdapterStructTest {
     assertEquals(50, received.getMultipleTypedefIntDefault());
   }
 
-  @Test
-  public void testGenericTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testGenericTypeAdapter(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(defaultInstance().setGenericAdapterField(new Wrapped(23.45d)).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -592,8 +653,10 @@ public class TypeAdapterStructTest {
     assertEquals(23.45d, adapted.getGenericAdapterField().getValue());
   }
 
-  @Test
-  public void testListOfAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedInt(Param param) {
+    initParams(param);
     List<String> list = Arrays.asList("1", "2", "3");
     byte[] bytes = serializeAdapted(defaultInstance().setListAdaptedIntField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -604,14 +667,18 @@ public class TypeAdapterStructTest {
     assertArrayEquals(new String[] {"5", "6", "7"}, adapted.getListAdaptedIntDefault().toArray());
   }
 
-  @Test
-  public void testListOfAdaptedIntDefault() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedIntDefault(Param param) {
+    initParams(param);
     AdaptedTestStruct adapted = deserializeAdapted(serializeAdapted(defaultInstance().build()));
     assertArrayEquals(new String[] {"5", "6", "7"}, adapted.getListAdaptedIntDefault().toArray());
   }
 
-  @Test
-  public void testListOfListOfAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfListOfAdaptedInt(Param param) {
+    initParams(param);
     List<List<String>> list = Arrays.asList(Arrays.asList("1", "2", "3"));
     byte[] bytes = serializeAdapted(defaultInstance().setListOfListAdaptedIntField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -623,15 +690,19 @@ public class TypeAdapterStructTest {
         new Integer[] {1, 2, 3}, received.getListOfListAdaptedIntField().get(0).toArray());
   }
 
-  @Test
-  public void testListOfListOfAdaptedIntDefault() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfListOfAdaptedIntDefault(Param param) {
+    initParams(param);
     AdaptedTestStruct adapted = deserializeAdapted(serializeAdapted(defaultInstance().build()));
     assertArrayEquals(
         new String[] {"3", "4", "5"}, adapted.getListOfListAdaptedIntDefault().get(1).toArray());
   }
 
-  @Test
-  public void testNestedListOfAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedListOfAdaptedInt(Param param) {
+    initParams(param);
     List<List<List<String>>> list = Arrays.asList(Arrays.asList(Arrays.asList("1", "2", "3")));
     byte[] bytes = serializeAdapted(defaultInstance().setNestedListAdaptedIntField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -644,8 +715,10 @@ public class TypeAdapterStructTest {
         new Integer[] {1, 2, 3}, received.getNestedListAdaptedIntField().get(0).get(0).toArray());
   }
 
-  @Test
-  public void testNestedListOfAdaptedIntDefault() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedListOfAdaptedIntDefault(Param param) {
+    initParams(param);
     AdaptedTestStruct adapted = deserializeAdapted(serializeAdapted(defaultInstance().build()));
     assertArrayEquals(
         new String[] {"3", "4", "5"},
@@ -660,8 +733,10 @@ public class TypeAdapterStructTest {
     return set;
   }
 
-  @Test
-  public void testSetOfAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSetOfAdaptedInt(Param param) {
+    initParams(param);
     Set<String> set = createSet("1", "2", "3");
     byte[] bytes = serializeAdapted(defaultInstance().setSetAdaptedIntField(set).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -671,14 +746,18 @@ public class TypeAdapterStructTest {
     assertEquals(3, received.getSetAdaptedIntField().size());
   }
 
-  @Test
-  public void testSetOfAdaptedIntDefault() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSetOfAdaptedIntDefault(Param param) {
+    initParams(param);
     AdaptedTestStruct adapted = deserializeAdapted(serializeAdapted(defaultInstance().build()));
     assertTrue(adapted.getSetAdaptedIntDefault().contains("7"));
   }
 
-  @Test
-  public void testMapOfAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMapOfAdaptedInt(Param param) {
+    initParams(param);
     Map<String, String> map = new HashMap<>();
     map.put("5", "13");
 
@@ -690,14 +769,18 @@ public class TypeAdapterStructTest {
     assertEquals(13L, (long) received.getMapOfIntToShortField().get(5));
   }
 
-  @Test
-  public void testMapOfAdaptedIntDefault() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMapOfAdaptedIntDefault(Param param) {
+    initParams(param);
     AdaptedTestStruct adapted = deserializeAdapted(serializeAdapted(defaultInstance().build()));
     assertEquals("9", adapted.getMapOfIntToShortDefault().get("8"));
   }
 
-  @Test
-  public void testMapOfMapAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMapOfMapAdaptedInt(Param param) {
+    initParams(param);
     Map<String, Map<String, String>> map = new HashMap<>();
     Map<String, String> map1 = new HashMap<>();
     map1.put("5", "13");
@@ -711,14 +794,18 @@ public class TypeAdapterStructTest {
     assertEquals(13L, (long) received.getMapOfIntToMapIntToShortField().get(7).get(5));
   }
 
-  @Test
-  public void testMapOfMapAdaptedIntDefault() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMapOfMapAdaptedIntDefault(Param param) {
+    initParams(param);
     AdaptedTestStruct adapted = deserializeAdapted(serializeAdapted(defaultInstance().build()));
     assertEquals("9", adapted.getMapOfIntToMapIntToShortDefault().get("7").get("8"));
   }
 
-  @Test
-  public void testLisfOfSetAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testLisfOfSetAdaptedInt(Param param) {
+    initParams(param);
     List<Set<String>> list = Arrays.asList(createSet("1", "2", "3"));
     byte[] bytes = serializeAdapted(defaultInstance().setListOfSetAdaptedIntField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -729,8 +816,10 @@ public class TypeAdapterStructTest {
     assertEquals(3, received.getListOfSetAdaptedIntField().get(0).size());
   }
 
-  @Test
-  public void testNestedMapOfAdaptedTypes() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedMapOfAdaptedTypes(Param param) {
+    initParams(param);
     Map<String, Map<String, List<String>>> map = new HashMap<>();
     Map<String, List<String>> map1 = new HashMap<>();
     map1.put("3", Arrays.asList("8"));
@@ -744,21 +833,27 @@ public class TypeAdapterStructTest {
     assertEquals((short) 8, (short) received.getNestedAdaptedField().get(7).get((short) 3).get(0));
   }
 
-  @Test
-  public void testNestedMapOfAdaptedTypesDefault() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedMapOfAdaptedTypesDefault(Param param) {
+    initParams(param);
     AdaptedTestStruct adapted = deserializeAdapted(serializeAdapted(defaultInstance().build()));
     assertEquals("10", adapted.getNestedMapIntToShortDefault().get("7").get("8").get("9"));
   }
 
-  @Test
-  public void testNestedAdaptedTypesDefault() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedAdaptedTypesDefault(Param param) {
+    initParams(param);
     AdaptedTestStruct adapted = deserializeAdapted(serializeAdapted(defaultInstance().build()));
     assertArrayEquals(
         new String[] {"1", "2"}, adapted.getNestedAdaptedDefault().get("7").get("3").toArray());
   }
 
-  @Test
-  public void testListOfAdaptedBool() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedBool(Param param) {
+    initParams(param);
     List<String> list = Arrays.asList("true", "false");
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedBooleanListField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -768,8 +863,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(new Boolean[] {true, false}, received.getAdaptedBooleanListField().toArray());
   }
 
-  @Test
-  public void testListOfAdaptedByte() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedByte(Param param) {
+    initParams(param);
     List<String> list = Arrays.asList("10", "11");
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedByteListField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -779,8 +876,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(new Byte[] {10, 11}, received.getAdaptedByteListField().toArray());
   }
 
-  @Test
-  public void testListOfAdaptedShort() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedShort(Param param) {
+    initParams(param);
     List<String> list = Arrays.asList("10", "11");
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedShortListField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -790,8 +889,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(new Short[] {10, 11}, received.getAdaptedShortListField().toArray());
   }
 
-  @Test
-  public void testListOfAdaptedLong() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedLong(Param param) {
+    initParams(param);
     List<String> list = Arrays.asList("10", "11");
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedLongListField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -801,8 +902,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(new Long[] {10L, 11L}, received.getAdaptedLongListField().toArray());
   }
 
-  @Test
-  public void testListOfAdaptedFloat() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedFloat(Param param) {
+    initParams(param);
     List<String> list = Arrays.asList("10", "11");
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedFloatListField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -812,8 +915,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(new Float[] {10f, 11f}, received.getAdaptedFloatListField().toArray());
   }
 
-  @Test
-  public void testListOfAdaptedDouble() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedDouble(Param param) {
+    initParams(param);
     List<String> list = Arrays.asList("10", "11");
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedDoubleListField(list).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -823,8 +928,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(new Double[] {10d, 11d}, received.getAdaptedDoubleListField().toArray());
   }
 
-  @Test
-  public void testListOfAdaptedString() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedString(Param param) {
+    initParams(param);
     List<ByteBuf> list =
         Arrays.asList(
             Unpooled.wrappedBuffer("foo".getBytes()), Unpooled.wrappedBuffer("bar".getBytes()));
@@ -836,8 +943,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(new String[] {"foo", "bar"}, received.getAdaptedStringListField().toArray());
   }
 
-  @Test
-  public void testListOfAdaptedBinary() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfAdaptedBinary(Param param) {
+    initParams(param);
     byte[] foo = "foo".getBytes();
     byte[] bar = "bar".getBytes();
 
@@ -852,8 +961,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(bar, received.getAdaptedBinListField().get(1));
   }
 
-  @Test
-  public void testListOfListOfAdaptedBinary() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfListOfAdaptedBinary(Param param) {
+    initParams(param);
     byte[] foo = "foo".getBytes();
     byte[] bar = "bar".getBytes();
 
@@ -869,8 +980,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(bar, received.getAdaptedBinList2Field().get(0).get(1));
   }
 
-  @Test
-  public void testNestedListOfAdaptedBinary() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedListOfAdaptedBinary(Param param) {
+    initParams(param);
     byte[] foo = "foo".getBytes();
     byte[] bar = "bar".getBytes();
 
@@ -887,8 +1000,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(bar, received.getAdaptedBinList3Field().get(0).get(0).get(1));
   }
 
-  @Test
-  public void testMapOfAdaptedBinary() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMapOfAdaptedBinary(Param param) {
+    initParams(param);
     byte[] foo = "foo".getBytes();
 
     Map<Integer, ByteBuf> map = new HashMap<>();
@@ -901,8 +1016,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(foo, received.getAdaptedBinMapField().get(5));
   }
 
-  @Test
-  public void testMapOfMapOfAdaptedBinary() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMapOfMapOfAdaptedBinary(Param param) {
+    initParams(param);
     byte[] foo = "foo".getBytes();
 
     Map<Integer, ByteBuf> map1 = new HashMap<>();
@@ -918,8 +1035,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(foo, received.getAdaptedBinMap2Field().get(7).get(5));
   }
 
-  @Test
-  public void testListOfListOfAdaptedBinaryString() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfListOfAdaptedBinaryString(Param param) {
+    initParams(param);
     byte[] foo = "foo".getBytes();
     byte[] bar = "bar".getBytes();
 
@@ -935,8 +1054,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(bar, received.getAdaptedBinStringList2Field().get(0).get(1));
   }
 
-  @Test
-  public void testListOfMultiLevelTypeDef() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfMultiLevelTypeDef(Param param) {
+    initParams(param);
     byte[] foo = "foo".getBytes();
     byte[] bar = "bar".getBytes();
 
@@ -952,8 +1073,10 @@ public class TypeAdapterStructTest {
     assertArrayEquals(bar, received.getAdaptedBinNestedTypeDefListField().get(1));
   }
 
-  @Test
-  public void testAdaptedSetList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testAdaptedSetList(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(defaultInstance().setAdaptedSetListField(Arrays.asList("7")).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
@@ -963,8 +1086,10 @@ public class TypeAdapterStructTest {
     assertTrue(received.getAdaptedSetListField().get(0).contains(7));
   }
 
-  @Test
-  public void testDoubleAdaptedList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDoubleAdaptedList(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance().setDoubleAdaptedListField(new Wrapped<>(Arrays.asList("7"))).build());
@@ -975,8 +1100,10 @@ public class TypeAdapterStructTest {
     assertEquals(7L, (long) received.getDoubleAdaptedListField().get(0));
   }
 
-  @Test
-  public void testStructList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStructList(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance()
@@ -989,8 +1116,10 @@ public class TypeAdapterStructTest {
     assertEquals("foo", received.getAnyListField().get(0).get());
   }
 
-  @Test
-  public void testStructMap() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStructMap(Param param) {
+    initParams(param);
     Map<Integer, List<Any>> map = new HashMap<>();
     map.put(1, Arrays.asList(new Any.Builder("foo").build()));
     byte[] bytes = serializeAdapted(defaultInstance().setAnyMapField(map).build());
@@ -1001,8 +1130,10 @@ public class TypeAdapterStructTest {
     assertEquals("foo", received.getAnyMapField().get(1).get(0).get());
   }
 
-  @Test
-  public void testUnionList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUnionList(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance()
@@ -1015,8 +1146,10 @@ public class TypeAdapterStructTest {
     assertEquals(5, received.getUnionListField().get(0).getIntField());
   }
 
-  @Test
-  public void testExceptionList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testExceptionList(Param param) {
+    initParams(param);
     byte[] bytes =
         serializeAdapted(
             defaultInstance()
@@ -1030,8 +1163,10 @@ public class TypeAdapterStructTest {
     assertEquals(5, received.getExceptionListField().get(0).getIntField());
   }
 
-  @Test
-  public void testEqualsAndHashCodeAdaptedInt() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testEqualsAndHashCodeAdaptedInt(Param param) {
+    initParams(param);
     List<String> list = Arrays.asList("1", "2", "3");
     byte[] bytes = serializeAdapted(defaultInstance().setListAdaptedIntField(list).build());
     AdaptedTestStruct adapted1 = deserializeAdapted(bytes);

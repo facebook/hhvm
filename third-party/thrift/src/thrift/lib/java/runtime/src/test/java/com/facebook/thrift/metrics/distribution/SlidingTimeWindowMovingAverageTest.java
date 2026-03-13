@@ -20,14 +20,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.facebook.thrift.metrics.rate.SlidingTimeWindowMovingCounter;
 import java.util.concurrent.TimeUnit;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SlidingTimeWindowMovingAverageTest {
   private SlidingTimeWindowMovingCounter rate;
   private final TestClock testClock = new TestClock();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     rate = new SlidingTimeWindowMovingCounter(testClock);
   }

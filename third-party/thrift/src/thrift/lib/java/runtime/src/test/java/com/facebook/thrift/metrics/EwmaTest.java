@@ -16,8 +16,8 @@
 
 package com.facebook.thrift.metrics;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -35,7 +35,7 @@ public class EwmaTest {
       ewma2.insert(i);
     }
 
-    Assert.assertTrue(ewma.value() < ewma2.value());
+    Assertions.assertTrue(ewma.value() < ewma2.value());
   }
 
   @Test
@@ -43,10 +43,10 @@ public class EwmaTest {
     Ewma ewma = Ewma.oneSecondDecay();
     ewma.insert(100);
     double value = ewma.value();
-    Assert.assertEquals(value, 100, 0);
+    Assertions.assertEquals(value, 100, 0);
     ewma.insert(1);
     double value1 = ewma.value();
-    Assert.assertTrue(value1 < value);
+    Assertions.assertTrue(value1 < value);
   }
 
   @Test
@@ -62,7 +62,7 @@ public class EwmaTest {
             .map(__ -> ewma.value());
 
     StepVerifier.create(sequential)
-        .assertNext(expected -> Assert.assertEquals(expected, 10000, 0))
+        .assertNext(expected -> Assertions.assertEquals(expected, 10000, 0))
         .verifyComplete();
   }
 }

@@ -26,14 +26,14 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SerializerUtilTest {
   private EveryLayout everyLayout;
 
-  @Before
+  @BeforeEach
   public void setup() {
     byte[] bytes = new byte[128];
     ThreadLocalRandom.current().nextBytes(bytes);
@@ -60,7 +60,7 @@ public class SerializerUtilTest {
         SerializerUtil.fromByteBuffer(
             EveryLayout.asReader(), byteBuffer, SerializationProtocol.TBinary);
 
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   @Test
@@ -70,7 +70,7 @@ public class SerializerUtilTest {
     EveryLayout everyLayout =
         SerializerUtil.fromByteArray(EveryLayout.asReader(), bytes, SerializationProtocol.TBinary);
 
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   @Test
@@ -84,7 +84,7 @@ public class SerializerUtilTest {
         SerializerUtil.fromByteArray(
             EveryLayout.asReader(), other, 1, bytes.length, SerializationProtocol.TBinary);
 
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   @Test
@@ -92,7 +92,7 @@ public class SerializerUtilTest {
     InputStream in = SerializerUtil.toInputStream(everyLayout, SerializationProtocol.TBinary);
     EveryLayout everyLayout =
         SerializerUtil.fromInputStream(EveryLayout.asReader(), in, SerializationProtocol.TBinary);
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   /**
@@ -107,25 +107,30 @@ public class SerializerUtilTest {
     EveryLayout everyLayout =
         SerializerUtil.fromInputStream(
             EveryLayout.asReader(), new ChunkedInputStream(in), SerializationProtocol.TBinary);
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
-  @Test(expected = IndexOutOfBoundsException.class)
+  @Test
   public void testBadDataWithoutStopTagThrowsIndexOutOfBoundsException() {
-    ByteBuffer in =
-        SerializerUtil.toByteBuffer(
-            new TestRequest.Builder().setAString("abcd").build(), SerializationProtocol.TCompact);
+    Assertions.assertThrows(
+        IndexOutOfBoundsException.class,
+        () -> {
+          ByteBuffer in =
+              SerializerUtil.toByteBuffer(
+                  new TestRequest.Builder().setAString("abcd").build(),
+                  SerializationProtocol.TCompact);
 
-    // Remove Trailing byte tha would normally indicate STOP
-    byte[] slice = new byte[in.capacity() - 1];
-    in.get(slice, 0, in.capacity() - 1);
+          // Remove Trailing byte tha would normally indicate STOP
+          byte[] slice = new byte[in.capacity() - 1];
+          in.get(slice, 0, in.capacity() - 1);
 
-    // Use ByteArrayInputStream to simulate use of input stream
-    TestRequest everyLayout =
-        SerializerUtil.fromInputStream(
-            TestRequest.asReader(),
-            new ByteArrayInputStream(slice),
-            SerializationProtocol.TCompact);
+          // Use ByteArrayInputStream to simulate use of input stream
+          TestRequest everyLayout =
+              SerializerUtil.fromInputStream(
+                  TestRequest.asReader(),
+                  new ByteArrayInputStream(slice),
+                  SerializationProtocol.TCompact);
+        });
   }
 
   @Test
@@ -135,7 +140,7 @@ public class SerializerUtilTest {
     EveryLayout everyLayout =
         SerializerUtil.fromByteArray(
             EveryLayout.asReader(), bos.toByteArray(), SerializationProtocol.TBinary);
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   @Test
@@ -144,7 +149,7 @@ public class SerializerUtilTest {
     SerializerUtil.toOutStream(everyLayout, bos, SerializationProtocol.TSimpleJSONBase64);
     String json = new String(bos.toByteArray(), StandardCharsets.UTF_8);
     EveryLayout everyLayout = SerializerUtil.fromJsonStringBase64(EveryLayout.asReader(), json);
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   @Test
@@ -153,7 +158,7 @@ public class SerializerUtilTest {
     SerializerUtil.toOutStream(everyLayout, bos, SerializationProtocol.TJSON);
     String json = new String(bos.toByteArray(), StandardCharsets.UTF_8);
     EveryLayout everyLayout = SerializerUtil.fromTJsonString(EveryLayout.asReader(), json);
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   @Test
@@ -162,7 +167,7 @@ public class SerializerUtilTest {
     EveryLayout everyLayout =
         SerializerUtil.fromBase64(
             EveryLayout.asReader(), base64, false, SerializationProtocol.TBinary);
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   @Test
@@ -171,7 +176,7 @@ public class SerializerUtilTest {
     EveryLayout everyLayout =
         SerializerUtil.fromBase64(
             EveryLayout.asReader(), base64, false, SerializationProtocol.TCompact);
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   @Test
@@ -180,7 +185,7 @@ public class SerializerUtilTest {
     EveryLayout everyLayout =
         SerializerUtil.fromBase64(
             EveryLayout.asReader(), base64, true, SerializationProtocol.TBinary);
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 
   @Test
@@ -189,6 +194,6 @@ public class SerializerUtilTest {
     EveryLayout everyLayout =
         SerializerUtil.fromBase64(
             EveryLayout.asReader(), base64, true, SerializationProtocol.TCompact);
-    Assert.assertEquals(this.everyLayout, everyLayout);
+    Assertions.assertEquals(this.everyLayout, everyLayout);
   }
 }

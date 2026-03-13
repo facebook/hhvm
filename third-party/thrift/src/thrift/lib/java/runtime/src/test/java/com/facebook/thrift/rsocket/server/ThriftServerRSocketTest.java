@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.rsocket.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.protocol.TProtocolType;
 import com.facebook.thrift.rsocket.util.PayloadUtil;
@@ -32,9 +32,8 @@ import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.Payload;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import org.apache.thrift.ErrorBlame;
 import org.apache.thrift.PayloadExceptionMetadataBase;
 import org.apache.thrift.PayloadResponseMetadata;
@@ -47,24 +46,18 @@ import org.apache.thrift.protocol.TField;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TStruct;
 import org.apache.thrift.protocol.TType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import reactor.test.StepVerifier;
 
-@RunWith(Parameterized.class)
 public class ThriftServerRSocketTest {
 
-  @Parameterized.Parameters
-  public static Collection<Object> data() {
-    return Arrays.asList(ProtocolId.COMPACT, ProtocolId.BINARY);
+  static Stream<Arguments> data() {
+    return Stream.of(Arguments.of(ProtocolId.COMPACT), Arguments.of(ProtocolId.BINARY));
   }
 
-  private final ProtocolId protocolId;
-
-  public ThriftServerRSocketTest(ProtocolId protocolId) {
-    this.protocolId = protocolId;
-  }
+  private ProtocolId protocolId;
 
   ByteBufAllocator alloc = RpcResources.getByteBufAllocator();
 
@@ -220,8 +213,10 @@ public class ThriftServerRSocketTest {
         streamMetadata.getPayloadMetadata().getResponseMetadata());
   }
 
-  @Test
-  public void testRequestResponse() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testRequestResponse(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata("requestResponse", RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE);
     Payload request = createPayload(requestMetadata, 5, "foo");
@@ -237,8 +232,10 @@ public class ThriftServerRSocketTest {
         .verifyComplete();
   }
 
-  @Test
-  public void testRequestResponseVoid() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testRequestResponseVoid(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata("requestResponseVoid", RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE);
     Payload request = createPayload(requestMetadata, 5, "foo");
@@ -254,8 +251,10 @@ public class ThriftServerRSocketTest {
         .verifyComplete();
   }
 
-  @Test
-  public void testStreamBasic() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamBasic(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata("streamResponse", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
     Payload request = createPayload(requestMetadata, 0, "foo");
@@ -282,8 +281,10 @@ public class ThriftServerRSocketTest {
     steps.verifyComplete();
   }
 
-  @Test
-  public void testNullStream() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNullStream(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata("streamResponseNull", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
     Payload request = createPayload(requestMetadata, 0, "foo");
@@ -305,8 +306,10 @@ public class ThriftServerRSocketTest {
         .verifyComplete();
   }
 
-  @Test
-  public void testEmptyStream() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testEmptyStream(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata("streamResponseEmpty", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
     Payload request = createPayload(requestMetadata, 0, "foo");
@@ -320,8 +323,10 @@ public class ThriftServerRSocketTest {
         .verifyComplete();
   }
 
-  @Test
-  public void testStreamInitialResponse() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamInitialResponse(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata(
             "streamInitialResponse", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
@@ -408,18 +413,24 @@ public class ThriftServerRSocketTest {
         .verifyComplete();
   }
 
-  @Test
-  public void testStreamDeclaredException() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamDeclaredException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     checkDeclaredException("streamDeclaredException");
   }
 
-  @Test
-  public void testStreamDeclaredException2() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamDeclaredException2(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     checkDeclaredExceptionNoStream("streamDeclaredException2");
   }
 
-  @Test
-  public void testDeclaredFunctionException() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDeclaredFunctionException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata(
             "streamDeclaredAndFunctionException", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
@@ -472,24 +483,32 @@ public class ThriftServerRSocketTest {
     checkUndeclaredException(funcName, IllegalArgumentException.class.getName(), "exc");
   }
 
-  @Test
-  public void testStreamUndeclaredException() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamUndeclaredException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     checkUndeclaredException("streamUndeclaredException");
   }
 
-  @Test
-  public void testStreamUndeclaredException2() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamUndeclaredException2(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     checkUndeclaredExceptionNoStream(
         "streamUndeclaredException2", IllegalArgumentException.class.getName(), "exc");
   }
 
-  @Test
-  public void testUndeclaredFunctionException() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUndeclaredFunctionException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     checkUndeclaredException("streamUndeclaredAndFunctionException");
   }
 
-  @Test
-  public void testInitialResponseDeclaredException() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testInitialResponseDeclaredException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata(
             "streamInitialResponseDeclaredException", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
@@ -529,8 +548,10 @@ public class ThriftServerRSocketTest {
             .getBlame());
   }
 
-  @Test
-  public void testStreamDeclaredExceptionFluxError() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamDeclaredExceptionFluxError(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata(
             "streamDeclaredExceptionFluxError", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
@@ -546,8 +567,10 @@ public class ThriftServerRSocketTest {
         .verifyComplete();
   }
 
-  @Test
-  public void testStreamMultiInput() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamMultiInput(ProtocolId protocolId) {
+    this.protocolId = protocolId;
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata(
             "streamDeclaredExceptionMultiInput", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);

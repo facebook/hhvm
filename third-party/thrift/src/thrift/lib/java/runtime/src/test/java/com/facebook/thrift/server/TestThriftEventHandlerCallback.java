@@ -34,8 +34,8 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.apache.thrift.ProtocolId;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestThriftEventHandlerCallback {
 
@@ -94,7 +94,7 @@ public class TestThriftEventHandlerCallback {
       } while (elapsedTime < MAX_WAIT_TIME_MS);
     }
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         String.format(EXPECTED_OUTPUT_STRING, "PingService.ping", numIterations - 1),
         testDoneThriftEventHandler.getOutputString());
   }

@@ -16,14 +16,14 @@
 
 package com.facebook.thrift.metadata;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ClientInfoTest {
 
-  @Before
+  @BeforeEach
   public void init() {
     ClientInfo.reset();
   }

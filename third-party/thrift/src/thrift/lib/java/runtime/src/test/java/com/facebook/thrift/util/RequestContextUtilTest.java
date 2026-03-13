@@ -17,8 +17,8 @@
 package com.facebook.thrift.util;
 
 import java.time.Duration;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class RequestContextUtilTest {
 
@@ -27,7 +27,7 @@ public class RequestContextUtilTest {
     String time = "1000";
     Duration expectedResult = Duration.ofMillis(1000);
     Duration actualResult = RequestContextUtil.getDurationFromString(time);
-    Assert.assertEquals(expectedResult, actualResult);
+    Assertions.assertEquals(expectedResult, actualResult);
   }
 
   @Test
@@ -35,7 +35,7 @@ public class RequestContextUtilTest {
     String time = "1sddsds";
     Duration expectedResult = null;
     Duration actualResult = RequestContextUtil.getDurationFromString(time);
-    Assert.assertEquals(expectedResult, actualResult);
+    Assertions.assertEquals(expectedResult, actualResult);
   }
 
   @Test
@@ -43,7 +43,7 @@ public class RequestContextUtilTest {
     String time = null;
     Duration expectedResult = null;
     Duration actualResult = RequestContextUtil.getDurationFromString(time);
-    Assert.assertEquals(expectedResult, actualResult);
+    Assertions.assertEquals(expectedResult, actualResult);
   }
 
   @Test
@@ -51,6 +51,6 @@ public class RequestContextUtilTest {
     String time = "";
     Duration expectedResult = null;
     Duration actualResult = RequestContextUtil.getDurationFromString(time);
-    Assert.assertEquals(expectedResult, actualResult);
+    Assertions.assertEquals(expectedResult, actualResult);
   }
 }

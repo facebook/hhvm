@@ -16,27 +16,27 @@
 
 package com.facebook.thrift.loadbalancing;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class OutstandingRequestLoadSupplierTest {
   AutoCloseable closeable;
   OutstandingRequestLoadSupplier supplier;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     closeable = openMocks(this);
     supplier = new OutstandingRequestLoadSupplier();
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     closeable.close();
   }

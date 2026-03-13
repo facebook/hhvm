@@ -20,21 +20,21 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class CleanerWrapperTest {
   @Test
   public void testCreate() {
     CleanerWrapper wrapper = CleanerWrapper.create();
-    Assert.assertNotNull(wrapper);
+    Assertions.assertNotNull(wrapper);
   }
 
   @Test
   public void testCreateWithThreadFactory() {
     CleanerWrapper wrapper = CleanerWrapper.create(Thread::new);
 
-    Assert.assertNotNull(wrapper);
+    Assertions.assertNotNull(wrapper);
   }
 
   @Test
@@ -47,7 +47,7 @@ public class CleanerWrapperTest {
     CleanerWrapper.create().register(new Object(), latch::countDown);
     System.gc();
     boolean result = latch.await(10, TimeUnit.SECONDS);
-    Assert.assertTrue(result);
+    Assertions.assertTrue(result);
   }
 
   @Test
@@ -62,6 +62,6 @@ public class CleanerWrapperTest {
     CleanerWrapper.create(threadFactory).register(new Object(), latch::countDown);
     System.gc();
     boolean result = latch.await(10, TimeUnit.SECONDS);
-    Assert.assertTrue(result);
+    Assertions.assertTrue(result);
   }
 }

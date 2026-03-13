@@ -17,9 +17,9 @@
 package com.facebook.thrift.util.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -31,7 +31,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -40,7 +41,8 @@ import reactor.test.StepVerifier;
 
 public class VirtualThreadSchedulerTest extends AbstractSchedulerTest {
 
-  @Test(timeout = 5000)
+  @Test
+  @Timeout(value = 5000, unit = TimeUnit.MILLISECONDS)
   public void scheduleThenDisposeOfScheduler() throws Exception {
     Scheduler s = new VirtualThreadScheduler();
 
@@ -147,7 +149,8 @@ public class VirtualThreadSchedulerTest extends AbstractSchedulerTest {
     assertThat(latch.await(300, TimeUnit.MILLISECONDS)).isFalse();
   }
 
-  @Test(timeout = 10000)
+  @Test
+  @Timeout(value = 10000, unit = TimeUnit.MILLISECONDS)
   public void workerExecutesTasksSerially() throws Exception {
     Scheduler s = scheduler();
     Scheduler.Worker w = s.createWorker();
@@ -195,7 +198,8 @@ public class VirtualThreadSchedulerTest extends AbstractSchedulerTest {
     }
   }
 
-  @Test(timeout = 10000)
+  @Test
+  @Timeout(value = 10000, unit = TimeUnit.MILLISECONDS)
   public void workerDoesNotSpawnMultipleQueueProcessors() throws Exception {
     Scheduler s = scheduler();
     Scheduler.Worker w = s.createWorker();
@@ -245,7 +249,8 @@ public class VirtualThreadSchedulerTest extends AbstractSchedulerTest {
     }
   }
 
-  @Test(timeout = 5000)
+  @Test
+  @Timeout(value = 5000, unit = TimeUnit.MILLISECONDS)
   public void tasksRunOnVirtualThreads() throws Exception {
     Scheduler s = scheduler();
 
@@ -271,7 +276,8 @@ public class VirtualThreadSchedulerTest extends AbstractSchedulerTest {
     }
   }
 
-  @Test(timeout = 10000)
+  @Test
+  @Timeout(value = 10000, unit = TimeUnit.MILLISECONDS)
   public void workerDelayedTasksMaintainSerialization() throws Exception {
     Scheduler s = scheduler();
     Scheduler.Worker w = s.createWorker();

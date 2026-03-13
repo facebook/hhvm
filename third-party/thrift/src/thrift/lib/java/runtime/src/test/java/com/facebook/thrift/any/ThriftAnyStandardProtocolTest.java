@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.any;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.standard_type.StandardProtocol;
@@ -38,7 +38,6 @@ import io.netty.buffer.Unpooled;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,31 +45,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class ThriftAnyStandardProtocolTest {
 
-  @Rule public ExpectedException expectedException = ExpectedException.none();
-
-  @Parameterized.Parameters
-  public static Collection<Object> data() {
-    return Arrays.asList(
-        StandardProtocol.COMPACT,
-        StandardProtocol.BINARY,
-        StandardProtocol.JSON,
-        StandardProtocol.SIMPLE_JSON);
+  static Stream<Arguments> data() {
+    return Stream.of(
+        Arguments.of(StandardProtocol.COMPACT),
+        Arguments.of(StandardProtocol.BINARY),
+        Arguments.of(StandardProtocol.JSON),
+        Arguments.of(StandardProtocol.SIMPLE_JSON));
   }
 
-  private final StandardProtocol standardProtocol;
-
-  public ThriftAnyStandardProtocolTest(StandardProtocol standardProtocol) {
-    this.standardProtocol = standardProtocol;
-  }
+  private StandardProtocol standardProtocol;
 
   private <T> Any<T> createAny(T o) {
     return new Any.Builder<>(o).setProtocol(standardProtocol).build();
@@ -100,8 +90,10 @@ public class ThriftAnyStandardProtocolTest {
     return any.getAny().getType().getParams().get(inx);
   }
 
-  @Test
-  public void testBool() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBool(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<Boolean> any = createAny(true);
     assertEquals(true, any.get());
     assertTrue(getType(any).isSetBoolType());
@@ -113,8 +105,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testByte() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testByte(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<Byte> any = createAny((byte) 3);
     assertEquals(3, (byte) any.get());
     assertTrue(getType(any).isSetByteType());
@@ -126,8 +120,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testShort() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testShort(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<Short> any = createAny((short) 1000);
     assertEquals(1000, (short) any.get());
     assertTrue(getType(any).isSetI16Type());
@@ -139,8 +135,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testInteger() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testInteger(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<Integer> any = createAny(500);
     assertEquals(500, (int) any.get());
     assertTrue(getType(any).isSetI32Type());
@@ -152,8 +150,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testLong() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testLong(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<Long> any = createAny((long) Integer.MAX_VALUE);
     assertEquals(Integer.MAX_VALUE, (long) any.get());
     assertTrue(getType(any).isSetI64Type());
@@ -165,8 +165,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testFloat() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testFloat(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<Float> any = createAny(100.77f);
     assertEquals(100.77f, any.get(), 0.1);
     assertTrue(getType(any).isSetFloatType());
@@ -178,8 +180,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testDouble() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDouble(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<Double> any = createAny(200.3d);
     assertEquals(200.3d, any.get(), 0.1);
     assertTrue(getType(any).isSetDoubleType());
@@ -191,8 +195,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testString() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testString(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<String> any = createAny("foo");
     assertEquals("foo", any.get());
     assertTrue(getType(any).isSetStringType());
@@ -219,8 +225,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testByteArrayBinary() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testByteArrayBinary(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<byte[]> any = createAny("foo".getBytes());
     assertArrayEquals("foo".getBytes(), any.get());
     assertTrue(getType(any).isSetBinaryType());
@@ -229,8 +237,10 @@ public class ThriftAnyStandardProtocolTest {
     assertReceivedByteBuf(any.getAny());
   }
 
-  @Test
-  public void testByteBufferBinary() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testByteBufferBinary(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<ByteBuffer> any = createAny(ByteBuffer.wrap("foo".getBytes()));
     assertArrayEquals("foo".getBytes(), any.get().array());
     assertTrue(getType(any).isSetBinaryType());
@@ -239,8 +249,10 @@ public class ThriftAnyStandardProtocolTest {
     assertReceivedByteBuf(any.getAny());
   }
 
-  @Test
-  public void testByteBufBinary() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testByteBufBinary(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     ByteBuf byteBuf = Unpooled.wrappedBuffer("foo".getBytes());
     Any<ByteBuf> any = createAny(byteBuf);
     assertEquals(hexDump("foo".getBytes()), hexDump(any.get()));
@@ -257,8 +269,10 @@ public class ThriftAnyStandardProtocolTest {
     assertTrue(getParams(any, 0).isSetStringType());
   }
 
-  @Test
-  public void testListOfString() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfString(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<List<String>> any = createAny(Arrays.asList("foo", "bar", "baz"), String.class);
     assertListOfString(any);
 
@@ -273,8 +287,10 @@ public class ThriftAnyStandardProtocolTest {
     assertTrue(getParams(any, 0).isSetI32Type());
   }
 
-  @Test
-  public void testListOfInteger() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfInteger(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<List<Integer>> any = createAny(Arrays.asList(5, 6, 7), Integer.class);
     assertListOfInteger(any);
 
@@ -282,8 +298,10 @@ public class ThriftAnyStandardProtocolTest {
     assertListOfInteger(received);
   }
 
-  @Test
-  public void testListOfFloat() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfFloat(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<List<Float>> any = createAny(Arrays.asList(5.1f, 6.1f, 7.1f), Float.class);
 
     Any<List<Float>> received = Any.wrap(any.getAny());
@@ -291,8 +309,10 @@ public class ThriftAnyStandardProtocolTest {
     assertArrayEquals(new Float[] {5.1f, 6.1f, 7.1f}, any.get().toArray());
   }
 
-  @Test
-  public void testEmptyList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testEmptyList(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<List<String>> any = createAny(Collections.EMPTY_LIST, String.class);
     assertEquals(0, any.get().size());
     assertEquals(Collections.EMPTY_LIST, any.get());
@@ -315,8 +335,10 @@ public class ThriftAnyStandardProtocolTest {
     assertTrue(getParams(any, 0).isSetI32Type());
   }
 
-  @Test
-  public void testSetOfInteger() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testSetOfInteger(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<Set<Integer>> any = createAny(new HashSet<>(Arrays.asList(3, 4, 5)), Integer.class);
     assertSetOfInteger(any);
 
@@ -344,8 +366,10 @@ public class ThriftAnyStandardProtocolTest {
     assertTrue(getParams(any, 1).isSetI32Type());
   }
 
-  @Test
-  public void testMap() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMap(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Map<Short, Long> map = new HashMap<>();
     map.put((short) 5, 13L);
     map.put((short) 7, 20L);
@@ -357,8 +381,10 @@ public class ThriftAnyStandardProtocolTest {
     assertMap(received);
   }
 
-  @Test
-  public void testIntegerMap() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testIntegerMap(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Map<Integer, Integer> map = new HashMap<>();
     map.put(5, 13);
     map.put(7, 20);
@@ -380,8 +406,10 @@ public class ThriftAnyStandardProtocolTest {
     assertTrue(getParams(any, 1).isSetStringType());
   }
 
-  @Test
-  public void testDoubleMap() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDoubleMap(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Map<Double, String> map = new HashMap<>();
     map.put(1d, "bar");
     map.put(2d, "baz");
@@ -402,8 +430,10 @@ public class ThriftAnyStandardProtocolTest {
     assertTrue(getTypeStruct(any, 0).getParams().get(0).getName().isSetStringType());
   }
 
-  @Test
-  public void testListOfList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfList(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<List<List<String>>> any =
         createAny(
             Arrays.asList(Arrays.asList("a", "b"), Arrays.asList("foo", "bar", "baz")),
@@ -431,8 +461,10 @@ public class ThriftAnyStandardProtocolTest {
         getTypeStruct(any, 1).getParams().get(0).getParams().get(0).getName().isSetStringType());
   }
 
-  @Test
-  public void testMapListOfList() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMapListOfList(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Map<Float, List<List<String>>> map = new HashMap<>();
     map.put(5f, Arrays.asList(Arrays.asList("a", "b", "c"), Arrays.asList("foo", "bar", "baz")));
     map.put(6f, Arrays.asList(Arrays.asList("d"), Arrays.asList("e")));
@@ -459,8 +491,10 @@ public class ThriftAnyStandardProtocolTest {
     assertTrue(getParams(any, 1).isSetMapType());
   }
 
-  @Test
-  public void testMapOfMap() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testMapOfMap(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Map<Boolean, Map<String, Integer>> map = new HashMap<>();
     Map<String, Integer> map1 = new HashMap<>();
     map1.put("foo", 4);
@@ -482,8 +516,10 @@ public class ThriftAnyStandardProtocolTest {
     assertMapOfMap(received);
   }
 
-  @Test
-  public void testStruct() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStruct(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     List<Integer> list = new ArrayList<>();
     list.add(5);
     TestStruct st =
@@ -507,8 +543,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testListOfStruct() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testListOfStruct(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     List<TestStruct> list = new ArrayList<>();
     list.add(new TestStruct.Builder().setInfField(10).build());
     list.add(new TestStruct.Builder().setInfField(11).build());
@@ -526,8 +564,10 @@ public class ThriftAnyStandardProtocolTest {
     assertTrue(getParams(received, 0).isSetStructType());
   }
 
-  @Test
-  public void testException() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testException(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     TestException st = new TestException.Builder().setBoolField(true).setInfField(12).build();
 
     ByteBuf dest = RpcResources.getUnpooledByteBufAllocator().buffer();
@@ -546,8 +586,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testUnion() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUnion(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     TestUnion st = TestUnion.fromInfField(13);
 
     Any<TestUnion> any = createAny(st);
@@ -561,8 +603,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testEnum() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testEnum(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     TestEnum e = TestEnum.TWO;
 
     Any<TestEnum> any = createAny(e);
@@ -576,8 +620,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testOpenEnum() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testOpenEnum(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     TestOpenEnum e = TestOpenEnum.TWO;
 
     Any<TestOpenEnum> any = createAny(e);
@@ -591,8 +637,10 @@ public class ThriftAnyStandardProtocolTest {
     assertParamsEmpty(received);
   }
 
-  @Test
-  public void testAnyAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testAnyAdapter(StandardProtocol standardProtocol) {
+    this.standardProtocol = standardProtocol;
     Any<List<Integer>> any = createAny(Arrays.asList(5, 6, 7), Integer.class);
     TestStruct st = new TestStruct.Builder().setAnyField(any).build();
 

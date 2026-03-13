@@ -30,14 +30,14 @@ import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TestBlockingBehavior {
   BlockingTestService.Reactive client;
 
-  @Before
+  @BeforeEach
   public void setup() {
     BlockingTestServiceRpcServerHandler serverHandler =
         new BlockingTestServiceRpcServerHandler(
@@ -47,7 +47,7 @@ public class TestBlockingBehavior {
         new LegacyServerTransportFactory(new ThriftServerConfig().setSslEnabled(false));
 
     LegacyServerTransport transport = transportFactory.createServerTransport(serverHandler).block();
-    Assert.assertFalse(transport.isDisposed());
+    Assertions.assertFalse(transport.isDisposed());
 
     SocketAddress address = transport.getAddress();
 

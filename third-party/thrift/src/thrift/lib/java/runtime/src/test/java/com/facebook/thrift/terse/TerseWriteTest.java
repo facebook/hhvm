@@ -16,10 +16,10 @@
 
 package com.facebook.thrift.terse;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.facebook.thrift.payload.ThriftSerializable;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
@@ -41,13 +41,10 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TerseWriteTest {
-
-  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   private ByteBufTProtocol serialize(ThriftSerializable st) {
     ByteBuf dest = RpcResources.getUnpooledByteBufAllocator().buffer();
@@ -122,20 +119,28 @@ public class TerseWriteTest {
 
   @Test
   public void testTerseStructWithPrimitiveTypeAdapterNullValue() {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("must not be null");
     TerseStructWithPrimitiveTypeAdapter st =
         new TerseStructWithPrimitiveTypeAdapter.Builder().setBinaryField(null).build();
-    serialize(st);
+    NullPointerException ex =
+        Assertions.assertThrows(
+            NullPointerException.class,
+            () -> {
+              serialize(st);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("must not be null"));
   }
 
   @Test
   public void testTerseStructWithStructTypeAdapterNullValue() {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("must not be null");
     TerseStructWithStructTypeAdapter st =
         new TerseStructWithStructTypeAdapter.Builder().setAnyField(null).build();
-    serialize(st);
+    NullPointerException ex =
+        Assertions.assertThrows(
+            NullPointerException.class,
+            () -> {
+              serialize(st);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("must not be null"));
   }
 
   @Test
@@ -175,8 +180,6 @@ public class TerseWriteTest {
 
   @Test
   public void testStructLevelTerseStructNullUnionValue() {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("unionField must not be null");
     StructLevelTerseStruct st =
         new StructLevelTerseStruct.Builder()
             .setStringField("test")
@@ -189,7 +192,13 @@ public class TerseWriteTest {
             .setInnerField(new InnerTerseStruct.Builder().build())
             .setUnionField(null)
             .build();
-    serialize(st);
+    NullPointerException ex =
+        Assertions.assertThrows(
+            NullPointerException.class,
+            () -> {
+              serialize(st);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("unionField must not be null"));
   }
 
   @Test

@@ -26,9 +26,9 @@ import com.facebook.thrift.metrics.distribution.Utils;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -41,7 +41,7 @@ public class TestThriftClientStats {
 
   @Captor ArgumentCaptor<Runnable> runnableCaptor;
 
-  @Before
+  @BeforeEach
   public void setup() {
     initMocks(this);
     Utils.setExecutorService(executorService);
@@ -58,9 +58,9 @@ public class TestThriftClientStats {
   public void testCall() throws Exception {
     thriftClientStats.call("foo");
     Map<String, Long> actual = thriftClientStats.getCounters();
-    Assert.assertEquals(1L, (long) actual.get("thrift_client.foo.num_calls.sum"));
-    Assert.assertEquals(1L, (long) actual.get("thrift_client.foo.num_calls.sum.60"));
-    Assert.assertEquals(1L, (long) actual.get("thrift_client.foo.num_calls.sum.3600"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift_client.foo.num_calls.sum"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift_client.foo.num_calls.sum.60"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift_client.foo.num_calls.sum.3600"));
   }
 
   @Test
@@ -74,21 +74,21 @@ public class TestThriftClientStats {
     performIntervalSampleOnDistributions();
 
     Map<String, Long> actual = thriftClientStats.getCounters();
-    Assert.assertEquals(5L, (long) actual.get("thrift_client.foo.num_writes.sum"));
-    Assert.assertEquals(5L, (long) actual.get("thrift_client.foo.num_writes.sum.60"));
-    Assert.assertEquals(5L, (long) actual.get("thrift_client.foo.num_writes.sum.3600"));
+    Assertions.assertEquals(5L, (long) actual.get("thrift_client.foo.num_writes.sum"));
+    Assertions.assertEquals(5L, (long) actual.get("thrift_client.foo.num_writes.sum.60"));
+    Assertions.assertEquals(5L, (long) actual.get("thrift_client.foo.num_writes.sum.3600"));
 
-    Assert.assertEquals(30L, (long) actual.get("thrift_client.foo.time_write_us.avg"));
-    Assert.assertEquals(30L, (long) actual.get("thrift_client.foo.time_write_us.avg.60"));
-    Assert.assertEquals(30L, (long) actual.get("thrift_client.foo.time_write_us.avg.3600"));
+    Assertions.assertEquals(30L, (long) actual.get("thrift_client.foo.time_write_us.avg"));
+    Assertions.assertEquals(30L, (long) actual.get("thrift_client.foo.time_write_us.avg.60"));
+    Assertions.assertEquals(30L, (long) actual.get("thrift_client.foo.time_write_us.avg.3600"));
 
-    Assert.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p90"));
-    Assert.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p90.60"));
-    Assert.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p90.3600"));
+    Assertions.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p90"));
+    Assertions.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p90.60"));
+    Assertions.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p90.3600"));
 
-    Assert.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p99"));
-    Assert.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p99.60"));
-    Assert.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p99.3600"));
+    Assertions.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p99"));
+    Assertions.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p99.60"));
+    Assertions.assertEquals(50L, (long) actual.get("thrift_client.foo.time_write_us.p99.3600"));
   }
 
   @Test
@@ -102,21 +102,21 @@ public class TestThriftClientStats {
     performIntervalSampleOnDistributions();
 
     Map<String, Long> actual = thriftClientStats.getCounters();
-    Assert.assertEquals(5L, (long) actual.get("thrift_client.foo.num_reads.sum"));
-    Assert.assertEquals(5L, (long) actual.get("thrift_client.foo.num_reads.sum.60"));
-    Assert.assertEquals(5L, (long) actual.get("thrift_client.foo.num_reads.sum.3600"));
+    Assertions.assertEquals(5L, (long) actual.get("thrift_client.foo.num_reads.sum"));
+    Assertions.assertEquals(5L, (long) actual.get("thrift_client.foo.num_reads.sum.60"));
+    Assertions.assertEquals(5L, (long) actual.get("thrift_client.foo.num_reads.sum.3600"));
 
-    Assert.assertEquals(38L, (long) actual.get("thrift_client.foo.time_read_us.avg"));
-    Assert.assertEquals(38L, (long) actual.get("thrift_client.foo.time_read_us.avg.60"));
-    Assert.assertEquals(38L, (long) actual.get("thrift_client.foo.time_read_us.avg.3600"));
+    Assertions.assertEquals(38L, (long) actual.get("thrift_client.foo.time_read_us.avg"));
+    Assertions.assertEquals(38L, (long) actual.get("thrift_client.foo.time_read_us.avg.60"));
+    Assertions.assertEquals(38L, (long) actual.get("thrift_client.foo.time_read_us.avg.3600"));
 
-    Assert.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p90"));
-    Assert.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p90.60"));
-    Assert.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p90.3600"));
+    Assertions.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p90"));
+    Assertions.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p90.60"));
+    Assertions.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p90.3600"));
 
-    Assert.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p99"));
-    Assert.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p99.60"));
-    Assert.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p99.3600"));
+    Assertions.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p99"));
+    Assertions.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p99.60"));
+    Assertions.assertEquals(70L, (long) actual.get("thrift_client.foo.time_read_us.p99.3600"));
   }
 
   @Test
@@ -130,25 +130,25 @@ public class TestThriftClientStats {
     performIntervalSampleOnDistributions();
 
     Map<String, Long> actual = thriftClientStats.getCounters();
-    Assert.assertEquals(34L, (long) actual.get("thrift_client.foo.time_process_us.avg"));
-    Assert.assertEquals(34L, (long) actual.get("thrift_client.foo.time_process_us.avg.60"));
-    Assert.assertEquals(34L, (long) actual.get("thrift_client.foo.time_process_us.avg.3600"));
+    Assertions.assertEquals(34L, (long) actual.get("thrift_client.foo.time_process_us.avg"));
+    Assertions.assertEquals(34L, (long) actual.get("thrift_client.foo.time_process_us.avg.60"));
+    Assertions.assertEquals(34L, (long) actual.get("thrift_client.foo.time_process_us.avg.3600"));
 
-    Assert.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p90"));
-    Assert.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p90.60"));
-    Assert.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p90.3600"));
+    Assertions.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p90"));
+    Assertions.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p90.60"));
+    Assertions.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p90.3600"));
 
-    Assert.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p99"));
-    Assert.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p99.60"));
-    Assert.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p99.3600"));
+    Assertions.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p99"));
+    Assertions.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p99.60"));
+    Assertions.assertEquals(60L, (long) actual.get("thrift_client.foo.time_process_us.p99.3600"));
   }
 
   @Test
   public void testError() throws Exception {
     thriftClientStats.error("foo");
     Map<String, Long> actual = thriftClientStats.getCounters();
-    Assert.assertEquals(1L, (long) actual.get("thrift_client.foo.num_exceptions.sum"));
-    Assert.assertEquals(1L, (long) actual.get("thrift_client.foo.num_exceptions.sum.60"));
-    Assert.assertEquals(1L, (long) actual.get("thrift_client.foo.num_exceptions.sum.3600"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift_client.foo.num_exceptions.sum"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift_client.foo.num_exceptions.sum.60"));
+    Assertions.assertEquals(1L, (long) actual.get("thrift_client.foo.num_exceptions.sum.3600"));
   }
 }

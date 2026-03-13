@@ -16,8 +16,8 @@
 
 package com.facebook.thrift.loadbalancing;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -35,9 +35,9 @@ import com.google.common.collect.ImmutableMap;
 import java.util.function.Function;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.thrift.ResponseRpcMetadata;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -71,7 +71,7 @@ public class LoadHeaderRpcServerHandlerTest {
   private AutoCloseable closeable;
   private LoadHeaderRpcServerHandler loadHeaderHandler;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     closeable = openMocks(this);
 
@@ -85,7 +85,7 @@ public class LoadHeaderRpcServerHandlerTest {
         .thenReturn(Mono.just(serverResponsePayload));
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     closeable.close();
   }

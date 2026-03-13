@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.any;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.payload.ThriftSerializable;
 import com.facebook.thrift.standard_type.StandardProtocol;
@@ -42,13 +42,10 @@ import java.util.List;
 import java.util.Objects;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ThriftAnyTest {
-
-  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   private <T> Any<T> createAny(T o) {
     return new Any.Builder<>(o).setProtocol(StandardProtocol.BINARY).build();
@@ -72,16 +69,18 @@ public class ThriftAnyTest {
 
   @Test
   public void testSerializeUnsupportedType() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Unsupported type");
     Any<Date> any = createAny(new Date());
-    getType(any);
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              getType(any);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Unsupported type"));
   }
 
   @Test
   public void testDeserializeInvalidUN() {
-    expectedException.expect(InvalidUniversalNameURIException.class);
-    expectedException.expectMessage("Invalid universal name");
     AnyStruct any =
         new AnyStruct.Builder()
             .setType(
@@ -92,13 +91,17 @@ public class ThriftAnyTest {
             .build();
 
     Any<TestEnum> received = Any.wrap(any);
-    received.get();
+    InvalidUniversalNameURIException ex =
+        Assertions.assertThrows(
+            InvalidUniversalNameURIException.class,
+            () -> {
+              received.get();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Invalid universal name"));
   }
 
   @Test
   public void testDeserializeUnregisteredUri() {
-    expectedException.expect(ObjectNotRegisteredException.class);
-    expectedException.expectMessage("Unable to find type");
     AnyStruct any =
         new AnyStruct.Builder()
             .setType(
@@ -109,13 +112,17 @@ public class ThriftAnyTest {
             .build();
 
     Any<TestEnum> received = Any.wrap(any);
-    received.get();
+    ObjectNotRegisteredException ex =
+        Assertions.assertThrows(
+            ObjectNotRegisteredException.class,
+            () -> {
+              received.get();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Unable to find type"));
   }
 
   @Test
   public void testDeserializeUnregisteredHash() {
-    expectedException.expect(ObjectNotRegisteredException.class);
-    expectedException.expectMessage("Unable to find type");
     AnyStruct any =
         new AnyStruct.Builder()
             .setType(
@@ -129,18 +136,28 @@ public class ThriftAnyTest {
             .build();
 
     Any<TestEnum> received = Any.wrap(any);
-    received.get();
+    ObjectNotRegisteredException ex =
+        Assertions.assertThrows(
+            ObjectNotRegisteredException.class,
+            () -> {
+              received.get();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Unable to find type"));
   }
 
   @Test
   public void testSerializeUnsupportedElementType() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Unsupported type");
     List<Date> list = new ArrayList<>();
     list.add(new Date());
 
     Any<List<Date>> any = createAny(list, Date.class);
-    getType(any);
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              getType(any);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Unsupported type"));
   }
 
   private static class UnregisteredTestStruct implements ThriftSerializable {
@@ -150,21 +167,29 @@ public class ThriftAnyTest {
 
   @Test
   public void testUnregisteredObject() {
-    expectedException.expect(ObjectNotRegisteredException.class);
-    expectedException.expectMessage("Unable to find type for any to serialize object");
-
     Any<UnregisteredTestStruct> any =
         new Any.Builder<>(new UnregisteredTestStruct())
             .setProtocol(StandardProtocol.COMPACT)
             .build();
-    getType(any);
+    ObjectNotRegisteredException ex =
+        Assertions.assertThrows(
+            ObjectNotRegisteredException.class,
+            () -> {
+              getType(any);
+            });
+    Assertions.assertTrue(
+        ex.getMessage().contains("Unable to find type for any to serialize object"));
   }
 
   @Test
   public void testNullValue() {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("Any must have a value");
-    createAny(null);
+    NullPointerException ex =
+        Assertions.assertThrows(
+            NullPointerException.class,
+            () -> {
+              createAny(null);
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Any must have a value"));
   }
 
   @Test
@@ -204,16 +229,24 @@ public class ThriftAnyTest {
 
   @Test
   public void testSetBothUriAndHash() {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Can not set both useHashPrefix and useUri");
-    new Any.Builder<>("foo").useUri().useHashPrefix().build();
+    IllegalStateException ex =
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> {
+              new Any.Builder<>("foo").useUri().useHashPrefix().build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Can not set both useHashPrefix and useUri"));
   }
 
   @Test
   public void testSetInvalidHashPrefix() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Number of hash prefix must be at least 1");
-    new Any.Builder<>("foo").useHashPrefix(0).build();
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              new Any.Builder<>("foo").useHashPrefix(0).build();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Number of hash prefix must be at least 1"));
   }
 
   private void assertInvalidProtocol(AnyBuilder builder) {
@@ -319,51 +352,71 @@ public class ThriftAnyTest {
 
   @Test
   public void testUnknownCustomSerializer() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Custom protocol serializer is not registered");
     Any<String> any = new Any.Builder<>("foo").setCustomProtocol(0L).build();
-    any.getAny();
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              any.getAny();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Custom protocol serializer is not registered"));
   }
 
   @Test
   public void testListWithoutType() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("List element type class is not provided");
-
-    createAny(new ArrayList<>());
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              createAny(new ArrayList<>());
+            });
+    Assertions.assertTrue(ex.getMessage().contains("List element type class is not provided"));
   }
 
   @Test
   public void testSetWithoutType() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Set element type class is not provided");
-
-    createAny(new HashSet<>());
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              createAny(new HashSet<>());
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Set element type class is not provided"));
   }
 
   @Test
   public void testMapWithoutType() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Map key and value element type classes are not provided");
-
-    createAny(new HashMap<>());
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              createAny(new HashMap<>());
+            });
+    Assertions.assertTrue(
+        ex.getMessage().contains("Map key and value element type classes are not provided"));
   }
 
   @Test
   public void testMissingTypeInfo() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Type class is not provided for nested value");
-
     Any<HashMap<String, Integer>> any = createAny(new HashMap<>(), String.class);
-    any.getAny();
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              any.getAny();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Type class is not provided for nested value"));
   }
 
   @Test
   public void testInvalidTypeInfo() {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Unsupported type");
-
     Any<HashMap<String, Integer>> any = createAny(new HashMap<>(), String.class, Date.class);
-    any.getAny();
+    IllegalArgumentException ex =
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              any.getAny();
+            });
+    Assertions.assertTrue(ex.getMessage().contains("Unsupported type"));
   }
 }

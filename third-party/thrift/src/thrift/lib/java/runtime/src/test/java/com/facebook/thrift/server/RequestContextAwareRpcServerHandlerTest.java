@@ -36,8 +36,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 
@@ -83,7 +83,7 @@ public class RequestContextAwareRpcServerHandlerTest {
     RpcOptions message = new Builder().setRequestHeaders(map).build();
 
     PingResponse ping = client.ping(PingRequest.defaultInstance(), message);
-    Assert.assertEquals(s, ping.getResponse());
+    Assertions.assertEquals(s, ping.getResponse());
   }
 
   @Test
@@ -127,7 +127,7 @@ public class RequestContextAwareRpcServerHandlerTest {
     RpcOptions message = new Builder().setRequestHeaders(map).build();
 
     PingResponse ping = client.ping(PingRequest.defaultInstance(), message);
-    Assert.assertEquals(s, ping.getResponse());
+    Assertions.assertEquals(s, ping.getResponse());
   }
 
   @Test
@@ -175,6 +175,6 @@ public class RequestContextAwareRpcServerHandlerTest {
     RpcOptions message = new Builder().setRequestHeaders(map).build();
 
     PingResponse ping = client.ping(PingRequest.defaultInstance(), message);
-    Assert.assertEquals(s, ping.getResponse());
+    Assertions.assertEquals(s, ping.getResponse());
   }
 }

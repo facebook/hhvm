@@ -16,10 +16,10 @@
 
 package com.facebook.thrift.terse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.facebook.thrift.any.LazyAny;
 import com.facebook.thrift.payload.ThriftSerializable;
@@ -47,30 +47,24 @@ import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class TerseWriteProtocolTest {
 
-  @Parameterized.Parameters
-  public static Collection<Object> data() {
-    return Arrays.asList(
-        SerializationProtocol.TCompact,
-        SerializationProtocol.TBinary,
-        SerializationProtocol.TSimpleJSONBase64,
-        SerializationProtocol.TSimpleJSON,
-        SerializationProtocol.TJSON);
+  static Stream<Arguments> data() {
+    return Stream.of(
+        Arguments.of(SerializationProtocol.TCompact),
+        Arguments.of(SerializationProtocol.TBinary),
+        Arguments.of(SerializationProtocol.TSimpleJSONBase64),
+        Arguments.of(SerializationProtocol.TSimpleJSON),
+        Arguments.of(SerializationProtocol.TJSON));
   }
 
-  private final SerializationProtocol serializationProtocol;
-
-  public TerseWriteProtocolTest(SerializationProtocol serializationProtocol) {
-    this.serializationProtocol = serializationProtocol;
-  }
+  private SerializationProtocol serializationProtocol;
 
   private ByteBuf dest;
   private ByteBufTProtocol protocol;
@@ -97,8 +91,10 @@ public class TerseWriteProtocolTest {
         && serializationProtocol != SerializationProtocol.TBinary);
   }
 
-  @Test
-  public void testDeserializeTerseStruct() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDeserializeTerseStruct(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     TopLevelStruct st = new TopLevelStruct.Builder().build();
     serialize(st);
 
@@ -111,8 +107,10 @@ public class TerseWriteProtocolTest {
     assertEquals(IntrinsicDefaults.defaultInt(), read.getInnerField().getIntField());
   }
 
-  @Test
-  public void testEmptyStruct() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testEmptyStruct(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     Structv1 v1 = new Structv1.Builder().setStringField("test").build();
     assertEquals("test", v1.getStringField());
 
@@ -124,8 +122,10 @@ public class TerseWriteProtocolTest {
     assertEquals(size(v1), size(v2));
   }
 
-  @Test
-  public void testNestedEmptyStruct() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedEmptyStruct(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     Structv1 v1 = new Structv1.Builder().setStringField("test").build();
     assertEquals("test", v1.getStringField());
 
@@ -138,8 +138,10 @@ public class TerseWriteProtocolTest {
     assertEquals(size(v1), size(v3));
   }
 
-  @Test
-  public void testNestedNonEmptyStruct() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testNestedNonEmptyStruct(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     Structv1 v1 = new Structv1.Builder().setStringField("test").build();
     assertEquals("test", v1.getStringField());
 
@@ -153,8 +155,10 @@ public class TerseWriteProtocolTest {
     assertNotEquals(size(v1), size(v3));
   }
 
-  @Test
-  public void testEmptyStructWIthAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testEmptyStructWIthAdapter(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     if (protocolNotSupported()) {
       return;
     }
@@ -185,8 +189,10 @@ public class TerseWriteProtocolTest {
     assertTrue(size - emptySize >= 4);
   }
 
-  @Test
-  public void testTerseStructWithStructTypeAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testTerseStructWithStructTypeAdapter(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     if (protocolNotSupported()) {
       return;
     }
@@ -212,8 +218,10 @@ public class TerseWriteProtocolTest {
     assertTrue(size(st) > size);
   }
 
-  @Test
-  public void testTerseStructWithDateAdapter() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testTerseStructWithDateAdapter(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     TerseStructWithDateAdapter st =
         new TerseStructWithDateAdapter.Builder().setStringField("foo").build();
     assertEquals("foo", st.getStringField());
@@ -239,8 +247,10 @@ public class TerseWriteProtocolTest {
     assertTrue(size(st) > size);
   }
 
-  @Test
-  public void testUnion() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testUnion(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     // even the value is intrinsic default, this should be written
     MyUnion u = MyUnion.fromIntField3(0);
     StructLevelTerseStruct st1 =
@@ -262,8 +272,10 @@ public class TerseWriteProtocolTest {
     assertTrue(size(st1) > size(st3));
   }
 
-  @Test
-  public void testDeserializeUnion() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testDeserializeUnion(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     StructLevelTerseStruct st = new StructLevelTerseStruct.Builder().build();
     serialize(st);
 
@@ -273,8 +285,10 @@ public class TerseWriteProtocolTest {
     assertNotNull(read.getUnionField());
   }
 
-  @Test
-  public void testException() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testException(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     MyUnion u = MyUnion.fromIntField3(0);
     StructLevelTerseStruct st1 =
         new StructLevelTerseStruct.Builder().setStringField("test").setUnionField(u).build();
@@ -291,8 +305,10 @@ public class TerseWriteProtocolTest {
     assertEquals(size(st1), size(st2));
   }
 
-  @Test
-  public void testExceptionDefaultValue() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testExceptionDefaultValue(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     MyUnion u = MyUnion.fromIntField3(0);
     StructLevelTerseStruct st =
         new StructLevelTerseStruct.Builder().setStringField("test").setUnionField(u).build();
@@ -304,8 +320,10 @@ public class TerseWriteProtocolTest {
     assertNotNull(read.getExceptionField());
   }
 
-  @Test
-  public void testAdaptedTerseStruct() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testAdaptedTerseStruct(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     if (protocolNotSupported()) {
       return;
     }
@@ -326,8 +344,10 @@ public class TerseWriteProtocolTest {
     assertEquals(IntrinsicDefaults.defaultInt(), received.getDoubleTypedefIntField());
   }
 
-  @Test
-  public void testBuildFromOther() {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testBuildFromOther(SerializationProtocol serializationProtocol) {
+    this.serializationProtocol = serializationProtocol;
     TerseStructWithDateAdapter st =
         new TerseStructWithDateAdapter.Builder()
             .setStringField("foo")

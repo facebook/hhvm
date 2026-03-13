@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.rsocket;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.client.RpcClientFactory;
@@ -40,17 +40,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 public class RSocketThriftClientTest {
 
-  @Rule public ExpectedException expectedException = ExpectedException.none();
-
-  @Test(expected = CustomException.class)
+  @Test
   public void testPingException() {
     System.out.println("create server handler");
     RpcServerHandler serverHandler =
@@ -78,7 +75,11 @@ public class RSocketThriftClientTest {
     PingService client =
         PingService.clientBuilder().setProtocolId(ProtocolId.BINARY).build(factory, address);
 
-    client.pingException(new PingRequest.Builder().setRequest("ping").build());
+    Assertions.assertThrows(
+        CustomException.class,
+        () -> {
+          client.pingException(new PingRequest.Builder().setRequest("ping").build());
+        });
   }
 
   @Test

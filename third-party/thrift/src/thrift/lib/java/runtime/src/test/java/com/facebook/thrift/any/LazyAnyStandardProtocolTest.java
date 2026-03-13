@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.any;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.test.universalname.TestRequest;
@@ -24,34 +24,29 @@ import com.facebook.thrift.util.SerializationProtocol;
 import com.facebook.thrift.util.SerializerUtil;
 import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 import org.apache.thrift.conformance.Any;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
 public class LazyAnyStandardProtocolTest {
 
-  @Parameterized.Parameters
-  public static Collection<Object> data() {
-    return Arrays.asList(
-        SerializationProtocol.TCompact,
-        SerializationProtocol.TBinary,
-        SerializationProtocol.TSimpleJSONBase64,
-        SerializationProtocol.TSimpleJSON,
-        SerializationProtocol.TJSON);
+  static Stream<Arguments> data() {
+    return Stream.of(
+        Arguments.of(SerializationProtocol.TCompact),
+        Arguments.of(SerializationProtocol.TBinary),
+        Arguments.of(SerializationProtocol.TSimpleJSONBase64),
+        Arguments.of(SerializationProtocol.TSimpleJSON),
+        Arguments.of(SerializationProtocol.TJSON));
   }
 
-  private final SerializationProtocol serializationProtocol;
+  private SerializationProtocol serializationProtocol;
 
-  public LazyAnyStandardProtocolTest(SerializationProtocol serializationProtocol) {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStandardProtocol(SerializationProtocol serializationProtocol) {
     this.serializationProtocol = serializationProtocol;
-  }
-
-  @Test
-  public void testStandardProtocol() {
     TestRequest req =
         new TestRequest.Builder().setABool(true).setAString("test").setALong(1050).build();
     LazyAny any = new LazyAny.Builder<>(req).setProtocol(serializationProtocol).build();

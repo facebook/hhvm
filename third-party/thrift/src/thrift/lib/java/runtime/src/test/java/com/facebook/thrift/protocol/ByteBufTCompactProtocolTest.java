@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.protocol;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.facebook.nifty.header.protocol.TFacebookCompactProtocol;
 import com.facebook.thrift.test.EveryLayout;
@@ -32,7 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.transport.TIOStreamTransport;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ByteBufTCompactProtocolTest {
   private static final byte[] binary;

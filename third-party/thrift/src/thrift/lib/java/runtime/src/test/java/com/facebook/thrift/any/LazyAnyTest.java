@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.any;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.test.any.Circle;
@@ -30,7 +30,7 @@ import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class LazyAnyTest {
 

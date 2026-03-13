@@ -16,7 +16,7 @@
 
 package com.facebook.thrift.compatibility;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.facebook.thrift.payload.ThriftSerializable;
 import com.facebook.thrift.test.enums.TestEnumLegacy1;
@@ -45,7 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class EnumCompatibilityTest {
 

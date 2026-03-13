@@ -26,8 +26,8 @@ import com.facebook.thrift.legacy.server.testservices.BlockingPingService;
 import java.util.Collections;
 import java.util.Set;
 import org.apache.thrift.TException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class TestGeneratedRpcServerHandlerBuilder {
@@ -36,8 +36,8 @@ public class TestGeneratedRpcServerHandlerBuilder {
     PingService mock = Mockito.mock(PingService.class);
     Set<Class<?>> thriftInterfaces =
         GeneratedRpcServerHandlerBuilder.getAllThriftInterfaces(mock.getClass());
-    Assert.assertEquals(1, thriftInterfaces.size());
-    Assert.assertTrue(thriftInterfaces.contains(PingService.class));
+    Assertions.assertEquals(1, thriftInterfaces.size());
+    Assertions.assertTrue(thriftInterfaces.contains(PingService.class));
   }
 
   @Test
@@ -45,7 +45,7 @@ public class TestGeneratedRpcServerHandlerBuilder {
     Object mock = Mockito.mock(Object.class);
     Set<Class<?>> thriftInterfaces =
         GeneratedRpcServerHandlerBuilder.getAllThriftInterfaces(mock.getClass());
-    Assert.assertTrue(thriftInterfaces.isEmpty());
+    Assertions.assertTrue(thriftInterfaces.isEmpty());
   }
 
   @Test
@@ -54,8 +54,8 @@ public class TestGeneratedRpcServerHandlerBuilder {
     PingService mock = Mockito.mock(ExtendedPing.class);
     Set<Class<?>> thriftInterfaces =
         GeneratedRpcServerHandlerBuilder.getAllThriftInterfaces(mock.getClass());
-    Assert.assertEquals(2, thriftInterfaces.size());
-    Assert.assertTrue(thriftInterfaces.contains(ExtendedPing.class));
+    Assertions.assertEquals(2, thriftInterfaces.size());
+    Assertions.assertTrue(thriftInterfaces.contains(ExtendedPing.class));
   }
 
   @Test
@@ -63,9 +63,9 @@ public class TestGeneratedRpcServerHandlerBuilder {
     // Note: PingAB implements both PingA and PingB
     Set<Class<?>> thriftInterfaces =
         GeneratedRpcServerHandlerBuilder.getAllThriftInterfaces(PingAB.class);
-    Assert.assertEquals(2, thriftInterfaces.size());
-    Assert.assertTrue(thriftInterfaces.contains(PingA.class));
-    Assert.assertTrue(thriftInterfaces.contains(PingB.class));
+    Assertions.assertEquals(2, thriftInterfaces.size());
+    Assertions.assertTrue(thriftInterfaces.contains(PingA.class));
+    Assertions.assertTrue(thriftInterfaces.contains(PingB.class));
   }
 
   @Test
@@ -78,10 +78,13 @@ public class TestGeneratedRpcServerHandlerBuilder {
         Mockito.mock(PingService.Reactive.class), PingService.Reactive.class);
   }
 
-  @Test(expected = ClassCastException.class)
+  @Test
   public void testCannotFindServerHandlerBuilder() {
-    GeneratedRpcServerHandlerBuilder.getServerHandlerBuilder(
-        Mockito.mock(PingService.class), PingService.Async.class);
+    Assertions.assertThrows(
+        ClassCastException.class,
+        () ->
+            GeneratedRpcServerHandlerBuilder.getServerHandlerBuilder(
+                Mockito.mock(PingService.class), PingService.Async.class));
   }
 
   @Test

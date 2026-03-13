@@ -31,8 +31,8 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.thrift.ProtocolId;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
@@ -79,9 +79,9 @@ public class FusableReconnectingRpcClientMonoTest {
 
       ReconnectingRpcClientFactory factory = new ReconnectingRpcClientFactory(nettyFactory, true);
       Mono<RpcClient> rpcClient = factory.createRpcClient(freePort.getT2());
-      Assert.assertTrue(rpcClient instanceof FusableReconnectingRpcClientMono);
+      Assertions.assertTrue(rpcClient instanceof FusableReconnectingRpcClientMono);
       RpcClient block = rpcClient.flatMap(Mono::just).block();
-      Assert.assertNotNull(block);
+      Assertions.assertNotNull(block);
     } finally {
       service.dispose();
     }
@@ -165,9 +165,9 @@ public class FusableReconnectingRpcClientMonoTest {
                 .ping(PingRequest.defaultInstance())
                 .doOnSubscribe(
                     s ->
-                        Assert.assertNull(
-                            "client should be subscribed to before service is created",
-                            serviceRef.get())))
+                        Assertions.assertNull(
+                            serviceRef.get(),
+                            "client should be subscribed to before service is created")))
         .then(
             () -> {
               ServerTransport service = createServerTransport(freePort.getT1());

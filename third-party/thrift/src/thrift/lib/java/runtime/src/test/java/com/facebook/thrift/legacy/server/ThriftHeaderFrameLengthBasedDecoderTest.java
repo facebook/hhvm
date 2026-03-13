@@ -16,13 +16,14 @@
 
 package com.facebook.thrift.legacy.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.TooLongFrameException;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ThriftHeaderFrameLengthBasedDecoderTest {
 
@@ -79,18 +80,22 @@ public class ThriftHeaderFrameLengthBasedDecoderTest {
     channel.finish();
   }
 
-  @Test(expected = TooLongFrameException.class)
+  @Test
   public void testNormalFrameOverSizePayloadFails() {
-    // Max Fame Size + 1
-    int frameLength = 0x3FFFFFFF + 1;
-    ByteBuf buf = Unpooled.buffer(frameLength + 4);
-    buf.writeInt(frameLength);
-    for (int i = 0; i < frameLength; i++) {
-      buf.writeByte(i % Byte.MAX_VALUE);
-    }
-    EmbeddedChannel channel = new EmbeddedChannel(new ThriftHeaderFrameLengthBasedDecoder());
+    Assertions.assertThrows(
+        TooLongFrameException.class,
+        () -> {
+          // Max Fame Size + 1
+          int frameLength = 0x3FFFFFFF + 1;
+          ByteBuf buf = Unpooled.buffer(frameLength + 4);
+          buf.writeInt(frameLength);
+          for (int i = 0; i < frameLength; i++) {
+            buf.writeByte(i % Byte.MAX_VALUE);
+          }
+          EmbeddedChannel channel = new EmbeddedChannel(new ThriftHeaderFrameLengthBasedDecoder());
 
-    channel.writeInbound(buf);
+          channel.writeInbound(buf);
+        });
   }
 
   @Test
@@ -142,13 +147,13 @@ public class ThriftHeaderFrameLengthBasedDecoderTest {
     // Verify all frames were decoded correctly
     for (int frame = 0; frame < numFrames; frame++) {
       ByteBuf b = channel.readInbound();
-      assertNotNull("Frame " + frame + " should not be null", b);
-      assertEquals("Frame " + frame + " size mismatch", payloadSize, b.readableBytes());
+      assertNotNull(b, "Frame " + frame + " should not be null");
+      assertEquals(payloadSize, b.readableBytes(), "Frame " + frame + " size mismatch");
 
       for (int i = 0; i < payloadSize; i++) {
         byte expected = (byte) ((frame * 256 + i) % 256);
         byte actual = b.readByte();
-        assertEquals("Frame " + frame + " byte " + i + " mismatch", expected, actual);
+        assertEquals(expected, actual, "Frame " + frame + " byte " + i + " mismatch");
       }
       b.release();
     }
@@ -177,13 +182,13 @@ public class ThriftHeaderFrameLengthBasedDecoderTest {
     // Verify all frames were decoded correctly with expected sizes
     for (int frame = 0; frame < frameSizes.length; frame++) {
       ByteBuf b = channel.readInbound();
-      assertNotNull("Frame " + frame + " should not be null", b);
-      assertEquals("Frame " + frame + " size mismatch", frameSizes[frame], b.readableBytes());
+      assertNotNull(b, "Frame " + frame + " should not be null");
+      assertEquals(frameSizes[frame], b.readableBytes(), "Frame " + frame + " size mismatch");
 
       for (int i = 0; i < frameSizes[frame]; i++) {
         byte expected = (byte) ((frame + i) % 256);
         byte actual = b.readByte();
-        assertEquals("Frame " + frame + " byte " + i + " mismatch", expected, actual);
+        assertEquals(expected, actual, "Frame " + frame + " byte " + i + " mismatch");
       }
       b.release();
     }
@@ -213,13 +218,13 @@ public class ThriftHeaderFrameLengthBasedDecoderTest {
     // Verify all big frames were decoded correctly
     for (int frame = 0; frame < numFrames; frame++) {
       ByteBuf b = channel.readInbound();
-      assertNotNull("Frame " + frame + " should not be null", b);
-      assertEquals("Frame " + frame + " size mismatch", payloadSize, b.readableBytes());
+      assertNotNull(b, "Frame " + frame + " should not be null");
+      assertEquals(payloadSize, b.readableBytes(), "Frame " + frame + " size mismatch");
 
       for (int i = 0; i < payloadSize; i++) {
         byte expected = (byte) ((frame * 256 + i) % 256);
         byte actual = b.readByte();
-        assertEquals("Frame " + frame + " byte " + i + " mismatch", expected, actual);
+        assertEquals(expected, actual, "Frame " + frame + " byte " + i + " mismatch");
       }
       b.release();
     }
@@ -261,13 +266,13 @@ public class ThriftHeaderFrameLengthBasedDecoderTest {
       int expectedSize = isBigFrame ? bigPayloadSize : normalPayloadSize;
 
       ByteBuf b = channel.readInbound();
-      assertNotNull("Frame " + frame + " should not be null", b);
-      assertEquals("Frame " + frame + " size mismatch", expectedSize, b.readableBytes());
+      assertNotNull(b, "Frame " + frame + " should not be null");
+      assertEquals(expectedSize, b.readableBytes(), "Frame " + frame + " size mismatch");
 
       for (int i = 0; i < expectedSize; i++) {
         byte expected = (byte) ((frame * 256 + i) % 256);
         byte actual = b.readByte();
-        assertEquals("Frame " + frame + " byte " + i + " mismatch", expected, actual);
+        assertEquals(expected, actual, "Frame " + frame + " byte " + i + " mismatch");
       }
       b.release();
     }
@@ -298,13 +303,13 @@ public class ThriftHeaderFrameLengthBasedDecoderTest {
     // Verify all 100 frames were decoded correctly
     for (int frame = 0; frame < numFrames; frame++) {
       ByteBuf b = channel.readInbound();
-      assertNotNull("Frame " + frame + " should not be null", b);
-      assertEquals("Frame " + frame + " size mismatch", payloadSize, b.readableBytes());
+      assertNotNull(b, "Frame " + frame + " should not be null");
+      assertEquals(payloadSize, b.readableBytes(), "Frame " + frame + " size mismatch");
 
       for (int i = 0; i < payloadSize; i++) {
         byte expected = (byte) (frame + i);
         byte actual = b.readByte();
-        assertEquals("Frame " + frame + " byte " + i + " mismatch", expected, actual);
+        assertEquals(expected, actual, "Frame " + frame + " byte " + i + " mismatch");
       }
       b.release();
     }

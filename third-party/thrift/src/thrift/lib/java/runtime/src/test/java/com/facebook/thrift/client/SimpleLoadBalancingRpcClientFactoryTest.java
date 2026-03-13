@@ -19,8 +19,8 @@ package com.facebook.thrift.client;
 import java.net.SocketAddress;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 
@@ -45,10 +45,10 @@ public class SimpleLoadBalancingRpcClientFactoryTest {
 
     for (int i = 0; i < 20; i++) {
       RpcClient block = rpcClient.block();
-      Assert.assertNotNull(block);
+      Assertions.assertNotNull(block);
       clientSet.add(block);
     }
 
-    Assert.assertEquals(5, clientSet.size());
+    Assertions.assertEquals(5, clientSet.size());
   }
 }

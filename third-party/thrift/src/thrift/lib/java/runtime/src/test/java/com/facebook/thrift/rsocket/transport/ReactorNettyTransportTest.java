@@ -35,10 +35,10 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
@@ -56,12 +56,12 @@ public class ReactorNettyTransportTest {
 
   private final TransportPair TRANSPORT_PAIR = new TransportPair();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     Hooks.onOperatorDebug();
   }
 
-  @After
+  @AfterEach
   public void close() {
     getTransportPair().dispose();
     Hooks.resetOnOperatorDebug();
@@ -192,7 +192,7 @@ public class ReactorNettyTransportTest {
         .expectComplete()
         .verify(getTimeout());
 
-    Assert.assertEquals(3L, requested.get());
+    Assertions.assertEquals(3L, requested.get());
   }
 
   @Test

@@ -16,8 +16,8 @@
 
 package com.facebook.thrift.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.example.ping.PingRequest;
@@ -39,10 +39,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +52,6 @@ import reactor.test.StepVerifier;
 public class SimpleThriftClientTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(SimpleThriftClientTest.class);
-
-  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testPingVoidBlocking() {
@@ -123,7 +119,7 @@ public class SimpleThriftClientTest {
         .then(
             invocation -> {
               if (RpcResources.isForceExecutionOffEventLoop()) {
-                Assert.assertFalse(Thread.currentThread() instanceof NonBlocking);
+                Assertions.assertFalse(Thread.currentThread() instanceof NonBlocking);
               }
               return Mono.just(PingResponse.defaultInstance());
             });

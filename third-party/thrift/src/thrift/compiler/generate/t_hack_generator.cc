@@ -2376,6 +2376,9 @@ t_hack_generator::ThriftPrimitiveType t_hack_generator::base_to_t_primitive(
 std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
     const t_type* type) {
   auto tmeta_ThriftType = t_const_value::make_map();
+  if (type == nullptr) {
+    return tmeta_ThriftType;
+  }
 
   if (const auto* tbase_type = type->try_as<t_primitive_type>()) {
     tmeta_ThriftType->add_map(

@@ -31,7 +31,7 @@ namespace apache::thrift::compiler {
 /**
  * Represents an enum definition.
  */
-class t_enum : public t_type {
+class t_enum final : public t_type {
  public:
   // An ~arbitrary, unlikely yet small number.
   static constexpr int32_t default_unused = 113;

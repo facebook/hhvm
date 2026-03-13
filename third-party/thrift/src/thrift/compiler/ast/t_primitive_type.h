@@ -25,7 +25,7 @@ namespace apache::thrift::compiler {
  * inside this definition.
  *
  */
-class t_primitive_type : public t_type {
+class t_primitive_type final : public t_type {
  public:
   /** The types of primitive a `t_primitive_type` instance can represent. */
   enum class type {

@@ -16,10 +16,9 @@
 
 #pragma once
 
-#include <stdint.h>
-
 #include <stdexcept>
 #include <string>
+#include <typeinfo>
 #include <utility>
 
 #include <thrift/compiler/ast/t_named.h>
@@ -57,9 +56,14 @@ class t_type : public t_named {
   const t_type* get_true_type() const;
 
   // Conversions and checks to more specific types.
+  // For final classes, typeid comparison (a pointer compare) replaces the
+  // expensive RTTI hierarchy traversal done by dynamic_cast.
   template <typename T>
   bool is() const {
     static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<T>>, T>);
+    if constexpr (std::is_final_v<T>) {
+      return typeid(*this) == typeid(T);
+    }
     return dynamic_cast<const T*>(this) != nullptr;
   }
   template <typename T>
@@ -75,11 +79,17 @@ class t_type : public t_named {
   template <typename T>
   T* try_as() {
     static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<T>>, T>);
+    if constexpr (std::is_final_v<T>) {
+      return typeid(*this) == typeid(T) ? static_cast<T*>(this) : nullptr;
+    }
     return dynamic_cast<T*>(this);
   }
   template <typename T>
   const T* try_as() const {
     static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<T>>, T>);
+    if constexpr (std::is_final_v<T>) {
+      return typeid(*this) == typeid(T) ? static_cast<const T*>(this) : nullptr;
+    }
     return dynamic_cast<const T*>(this);
   }
 

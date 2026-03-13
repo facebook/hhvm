@@ -134,12 +134,18 @@ namespace MethodCache {
  * One-way request-local cache for object method lookups.
  *
  * MethodCache entries cache the dispatch target for an object method call.
- * Each line consists of a Class* key and a Func* (stored as a uintptr_t).
+ * Each line consists of a Class* key and a Func*.
+ *
+ * We store a lot of these in Normal RDS so the space these take up is
+ * sizeof(Entry) + alignof(Entry). So be aware of that if you change it.
  */
 struct Entry {
-  const Class* m_key;
-  const Func* m_value;
+  PackedPtr<const Class> m_key;
+  PackedPtr<const Func> m_value;
 };
+
+static_assert(sizeof(Entry) == sizeof(Entry::m_key) + sizeof(Entry::m_value));
+static_assert(alignof(Entry) == sizeof(Entry::m_key));
 
 const Func* handleDynamicCall(const Class* cls,
                               const StringData* name,

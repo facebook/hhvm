@@ -111,10 +111,9 @@ void cgLdObjMethodS(IRLS& env, const IRInstruction* inst) {
   using namespace MethodCache;
 
   // Allocate the request-local one-way method cache for this lookup.
-  auto const handle =
-    rds::alloc<Entry, rds::Mode::Normal, sizeof(Entry)>().handle();
+  auto const handle = rds::alloc<Entry, rds::Mode::Normal>().handle();
   if (Cfg::Eval::PerfDataMap) {
-    rds::recordRds(handle, sizeof(TypedValue), "MethodCache",
+    rds::recordRds(handle, sizeof(Entry), "MethodCache",
                    inst->marker().func()->fullName()->slice());
   }
 

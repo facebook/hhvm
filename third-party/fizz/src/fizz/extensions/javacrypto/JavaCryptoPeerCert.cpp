@@ -45,9 +45,13 @@ std::string JavaCryptoPeerCert::getIdentity() const {
   auto env = jni::getEnv(&shouldDetach);
 
   auto jIdentity = (jstring)env->CallObjectMethod(jobject_, getIdentityMethod);
-  auto cIdentity = env->GetStringUTFChars(jIdentity, JNI_FALSE /* isCopy */);
+  auto cIdentity = jIdentity
+      ? env->GetStringUTFChars(jIdentity, JNI_FALSE /* isCopy */)
+      : "";
   std::string identity{cIdentity};
-  env->ReleaseStringUTFChars(jIdentity, cIdentity);
+  if (jIdentity) {
+    env->ReleaseStringUTFChars(jIdentity, cIdentity);
+  }
 
   jni::maybeThrowException(env, shouldDetach);
   jni::releaseEnv(shouldDetach);

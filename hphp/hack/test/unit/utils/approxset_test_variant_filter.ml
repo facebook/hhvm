@@ -203,12 +203,16 @@ module ApproxSetImpl : S_for_test = struct
   include ApproxSet.Make (TagDomain)
 
   let name = "ApproxSet"
+
+  let expect_complete = false
 end
 
 module BddSetImpl : S_for_test = struct
   include BddSet.Make (OrderedTagDomain)
 
   let name = "BddSet"
+
+  let expect_complete = false
 end
 
 module ApproxSetTests = Test (ApproxSetImpl)

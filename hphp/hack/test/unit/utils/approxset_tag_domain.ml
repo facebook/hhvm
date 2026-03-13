@@ -527,38 +527,6 @@ let make_denotation (h : hierarchy) : tag -> Int.Set.t =
   denote
 
 (* ------------------------------------------------------------------ *)
-(* Verify soundness invariant *)
-(* ------------------------------------------------------------------ *)
-
-let verify_relation_soundness (h : hierarchy) (denote : tag -> Int.Set.t) : unit
-    =
-  (* Collect all tags we'll use *)
-  let all_tags =
-    [Mixed; Object; Dict; Shape; Vec; Tuple; BuiltIn]
-    @ List.map all_of_prim ~f:(fun p -> Prim p)
-    @ List.init h.num_classes ~f:(fun i ->
-          let kind =
-            if h.is_interface i then
-              Interface
-            else if h.is_final i then
-              Final
-            else
-              NonFinal
-          in
-          Instance { id = i; kind; ancestor_count = Set.length (h.ancestors i) })
-  in
-  List.iter all_tags ~f:(fun t1 ->
-      List.iter all_tags ~f:(fun t2 ->
-          let rel = TagDomain.relation t1 ~ctx:h t2 in
-          let d1 = denote t1 and d2 = denote t2 in
-          if SetRelation.is_disjoint rel && not (Set.are_disjoint d1 d2) then
-            failwith
-              (Printf.sprintf
-                 "Soundness violation: relation says disjoint but denote(%s) ∩ denote(%s) ≠ ∅"
-                 (Sexp.to_string_hum (sexp_of_tag t1))
-                 (Sexp.to_string_hum (sexp_of_tag t2)))))
-
-(* ------------------------------------------------------------------ *)
 (* Wrapped ASet (ground-truth tracking) *)
 (* ------------------------------------------------------------------ *)
 
@@ -566,6 +534,8 @@ module type S_for_test = sig
   include ApproxSet_intf.S with module Domain := TagDomain
 
   val name : string
+
+  val expect_complete : bool
 end
 
 module ASet (Impl : S_for_test) = struct
@@ -749,12 +719,26 @@ module Gen_type_set (Impl : S_for_test) = struct
     let gen_object =
       Quickcheck.Generator.return (A.singleton_with_denote denote Object)
     in
+    let gen_neg_interface =
+      (* Model Tneg(IsTag(ClassTag(interface_name)))
+         = diff(mixed, to_datatypes(interface)) *)
+      let iface_ids =
+        List.filter (List.init h.num_classes ~f:Fun.id) ~f:(fun i ->
+            h.is_interface i)
+      in
+      match iface_ids with
+      | [] -> gen_class_type (* fallback if no interfaces *)
+      | _ ->
+        let%map iface_id = Quickcheck.Generator.of_list iface_ids in
+        A.diff (A.mixed_with_denote denote) (to_dt iface_id)
+    in
     Quickcheck.Generator.recursive_union
       [
         Quickcheck.Generator.weighted_union
           [
-            (35.0, gen_class_type);
-            (20.0, gen_prim_singleton);
+            (30.0, gen_class_type);
+            (15.0, gen_prim_singleton);
+            (15.0, gen_neg_interface);
             (10.0, gen_nullable);
             (5.0, gen_object);
           ];

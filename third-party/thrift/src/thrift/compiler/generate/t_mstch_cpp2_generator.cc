@@ -2162,19 +2162,22 @@ void t_mstch_cpp2_generator::generate_sinit(const t_program* program) {
 
 void t_mstch_cpp2_generator::generate_visitation() {
   const std::string& name = program_->name();
-  render_whisker_file("module_visitation.h", name + "_visitation.h");
-  render_whisker_file("module_for_each_field.h", name + "_for_each_field.h");
-  render_whisker_file("module_visit_union.h", name + "_visit_union.h");
+  render_whisker_file(
+      "module_visitation.h", fmt::format("{}_visitation.h", name));
+  render_whisker_file(
+      "module_for_each_field.h", fmt::format("{}_for_each_field.h", name));
+  render_whisker_file(
+      "module_visit_union.h", fmt::format("{}_visit_union.h", name));
   render_whisker_file(
       "module_visit_by_thrift_field_metadata.h",
-      name + "_visit_by_thrift_field_metadata.h");
+      fmt::format("{}_visit_by_thrift_field_metadata.h", name));
 }
 
 void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
   const auto& name = program->name();
   const auto& prog = cached_program(program);
 
-  render_to_file(prog, "module_data.h", name + "_data.h");
+  render_whisker_file("module_data.h", fmt::format("{}_data.h", name));
   render_to_file(prog, "module_data.cpp", name + "_data.cpp");
 
   // module_types.h is an exception to same program const referencing, because
@@ -2191,23 +2194,25 @@ void t_mstch_cpp2_generator::generate_structs(const t_program* program) {
   render_whisker_file("module_types.tcc", fmt::format("{}_types.tcc", name));
 
   if (int split_count = get_split_count(options())) {
-    auto digit = std::to_string(split_count - 1).size();
+    size_t split_id_width = std::to_string(split_count - 1).size();
     for (int split_id = 0; split_id < split_count; ++split_id) {
-      auto s = std::to_string(split_id);
-      s = std::string(digit - s.size(), '0') + s;
       cpp_context_->set_program_split(split_id);
+      std::string split_suffix =
+          fmt::format("{:0{}}.split.cpp", split_id, split_id_width);
       render_to_file(
-          prog, "module_types.cpp", name + "_types." + s + ".split.cpp");
+          prog,
+          "module_types.cpp",
+          fmt::format("{}_types.{}", name, split_suffix));
       render_whisker_file(
           "module_types_binary.cpp",
-          name + "_types_binary." + s + ".split.cpp");
+          fmt::format("{}_types_binary.{}", name, split_suffix));
       render_whisker_file(
           "module_types_compact.cpp",
-          name + "_types_compact." + s + ".split.cpp");
+          fmt::format("{}_types_compact.{}", name, split_suffix));
       render_to_file(
           prog,
           "module_types_serialization.cpp",
-          name + "_types_serialization." + s + ".split.cpp");
+          fmt::format("{}_types_serialization.{}", name, split_suffix));
     }
     cpp_context_->clear_program_split();
   } else {

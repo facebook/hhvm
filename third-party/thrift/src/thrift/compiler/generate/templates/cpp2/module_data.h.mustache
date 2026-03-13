@@ -20,49 +20,49 @@
 
 #include <thrift/lib/cpp2/gen/module_data_h.h>
 
-#include "{{program:include_prefix}}{{program:name}}_types.h"
+#include "{{program.include_prefix}}{{program.name}}_types.h"
 
 namespace apache { namespace thrift {
-{{#program:enums}}
+  {{#each program.enums as |enum|}}
 
-template <> struct TEnumDataStorage<::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}}> {
-  using type = ::{{program:cpp_qualified_namespace}}::{{enum:cpp_name}};
-  static constexpr const std::size_t size = {{(array.len enum:values)}};
+template <> struct TEnumDataStorage<::{{program.cpp_qualified_namespace}}::{{enum.cpp_name}}> {
+  using type = ::{{program.cpp_qualified_namespace}}::{{enum.cpp_name}};
+  static constexpr const std::size_t size = {{(array.len enum.values)}};
   static constexpr std::array<type, size> values = { {
-{{#enum:values}}{{!
-}}      type::{{enum_value:cpp_name}},
-{{/enum:values}}
+    {{#each enum.values as |val|}}
+      type::{{val.cpp_name}},
+    {{/each}}
   }};
   static constexpr std::array<std::string_view, size> names = { {
-{{#enum:values}}{{!
-}}      "{{enum_value:name}}"sv,
-{{/enum:values}}
+    {{#each enum.values as |val|}}
+      "{{val.name}}"sv,
+    {{/each}}
   }};
 };
-{{/program:enums}}
-  {{#each program:structured_definitions as |def|}}
+  {{/each}}
+  {{#each program.structured_definitions as |def|}}
     {{#if def.union?}}
 
 template <> struct TEnumDataStorage<{{def.cpp_fullname}}::Type> {
   using type = {{def.cpp_fullname}}::Type;
   static constexpr const std::size_t size = {{(array.len def.fields)}};
   static constexpr std::array<type, size> values = { {
-{{#each def.fields as |field|}}{{!
-}}      type::{{field.cpp_name}},
-{{/each}}
+    {{#each def.fields as |field|}}
+      type::{{field.cpp_name}},
+    {{/each}}
   }};
   static constexpr std::array<std::string_view, size> names = { {
-{{#each def.fields as |field|}}{{!
-}}      "{{field.name}}"sv,
-{{/each}}
+    {{#each def.fields as |field|}}
+      "{{field.name}}"sv,
+    {{/each}}
   }};
 };
     {{/if def.union?}}
   {{/each}}
-{{#program:structs}}
+  {{#each program.structured_definitions as |struct|}}
 
-template <> struct TStructDataStorage<{{struct:cpp_fullname}}> {
-  static constexpr const std::size_t fields_size = {{(array.len struct:fields)}};
+template <> struct TStructDataStorage<{{struct.cpp_fullname}}> {
+  static constexpr const std::size_t fields_size = {{(array.len struct.fields)}};
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -75,6 +75,6 @@ template <> struct TStructDataStorage<{{struct:cpp_fullname}}> {
   // -1 if the field has no isset.
   static const std::array<int, fields_size> isset_indexes;
 };
-{{/program:structs}}
+  {{/each}}
 
 }} // apache::thrift

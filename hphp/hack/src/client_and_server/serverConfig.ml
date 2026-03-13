@@ -537,6 +537,8 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?needs_concrete:(bool_opt Config_keys.needs_concrete config)
     ?needs_concrete_override_check:
       (bool_opt Config_keys.needs_concrete_override_check config)
+    ?strict_consistent_construct:
+      (bool_opt Config_keys.strict_consistent_construct config)
     ?allow_class_string_cast:
       (bool_opt Config_keys.allow_class_string_cast config)
     ?class_pointer_ban_classname_new:

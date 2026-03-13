@@ -4219,6 +4219,31 @@ end = struct
     and reasons = lazy [(decl_pos, "Declaration is here")] in
     create ~code:Error_code.ExtendFinal ~claim ~reasons ()
 
+  let consistent_construct_abstract_extends_non_abstract
+      pos decl_pos ~child_name ~parent_name ~inherited =
+    let inherited_suffix =
+      if inherited then
+        " (inherited attribute)"
+      else
+        ""
+    in
+    let claim =
+      lazy
+        ( pos,
+          "An abstract class cannot extend a nonabstract class that is `__ConsistentConstruct`. "
+          ^ Markdown_lite.md_codify (Render.strip_ns child_name)
+          ^ " is abstract and "
+          ^ Markdown_lite.md_codify (Render.strip_ns parent_name)
+          ^ " is `__ConsistentConstruct`"
+          ^ inherited_suffix
+          ^ "." )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create
+      ~code:Error_code.ConsistentConstructAbstractExtendsNonAbstract
+      ~claim
+      ~reasons
+      ()
+
   let extend_sealed child_pos parent_pos parent_name parent_kind verb =
     let claim =
       lazy
@@ -5283,6 +5308,14 @@ end = struct
       visibility pos msg decl_pos reason_msg
     | Bad_call { pos; ty_name } -> bad_call pos @@ Lazy.force ty_name
     | Extend_final { pos; name; decl_pos } -> extend_final pos decl_pos name
+    | Consistent_construct_abstract_extends_non_abstract
+        { pos; child_name; parent_name; decl_pos; inherited } ->
+      consistent_construct_abstract_extends_non_abstract
+        pos
+        decl_pos
+        ~child_name
+        ~parent_name
+        ~inherited
     | Extend_sealed { pos; parent_pos; parent_name; parent_kind; verb } ->
       extend_sealed pos parent_pos parent_name parent_kind verb
     | Trait_prop_const_class { pos; name } -> trait_prop_const_class pos name

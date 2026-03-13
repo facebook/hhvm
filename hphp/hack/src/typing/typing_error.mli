@@ -1179,6 +1179,13 @@ module Primary : sig
         name: string;
         decl_pos: Pos_or_decl.t;
       }
+    | Consistent_construct_abstract_extends_non_abstract of {
+        pos: Pos.t;
+        child_name: string;
+        parent_name: string;
+        decl_pos: Pos_or_decl.t;
+        inherited: bool;
+      }
     | Extend_sealed of {
         pos: Pos.t;
         parent_pos: Pos_or_decl.t;

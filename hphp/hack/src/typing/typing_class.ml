@@ -417,7 +417,8 @@ let method_def ~is_disposable env cls m =
 
 (** Checks that extending the base class is legal, i.e.:
     - the parent is not final
-    - if the class is const, the parent should also be. *)
+    - if the class is const, the parent should also be
+    - an abstract class cannot extend a nonabstract class that is __ConsistentConstruct. *)
 let check_parent env class_def class_type =
   match Env.get_parent_class env with
   | Decl_entry.Found parent_type ->
@@ -439,7 +440,41 @@ let check_parent env class_def class_type =
                  pos = position;
                  decl_pos = Cls.pos parent_type;
                  name = Cls.name parent_type;
+               });
+    if
+      TCO.strict_consistent_construct (Env.get_tcopt env)
+      && Cls.abstract class_type
+      && (match snd (Cls.construct parent_type) with
+         | ConsistentConstruct -> true
+         | _ -> false)
+      && not (Cls.abstract parent_type)
+    then begin
+      let inherited =
+        match
+          Decl_provider.get_shallow_class
+            (Env.get_ctx env)
+            (Cls.name parent_type)
+        with
+        | Some sc ->
+          not
+            (Attributes.mem
+               SN.UserAttributes.uaConsistentConstruct
+               sc.Shallow_decl_defs.sc_user_attributes)
+        | None -> false
+      in
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          primary
+          @@ Primary.Consistent_construct_abstract_extends_non_abstract
+               {
+                 pos = position;
+                 child_name = snd class_def.c_name;
+                 parent_name = Cls.name parent_type;
+                 decl_pos = Cls.pos parent_type;
+                 inherited;
                })
+    end
   | Decl_entry.DoesNotExist
   | Decl_entry.NotYetAvailable ->
     ()

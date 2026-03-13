@@ -235,6 +235,8 @@ val needs_concrete : string
 
 val needs_concrete_override_check : string
 
+val strict_consistent_construct : string
+
 val allow_class_string_cast : string
 
 val class_pointer_ban_classname_new : string

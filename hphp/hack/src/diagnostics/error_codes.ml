@@ -797,6 +797,7 @@ module Typing = struct
     | NeedsConcreteInFinalClass [@value 4505]
     | NeedsConcreteOnInstanceMethod [@value 4506]
     | NeedsConcreteOnConstructor [@value 4507]
+    | ConsistentConstructAbstractExtendsNonAbstract [@value 4508]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

@@ -604,6 +604,10 @@ impl HhConfig {
                 "needs_concrete_override_check",
                 default.needs_concrete_override_check,
             )?,
+            strict_consistent_construct: hhconfig.get_bool_or(
+                "strict_consistent_construct",
+                default.strict_consistent_construct,
+            )?,
             allow_class_string_cast: hhconfig
                 .get_bool_or("allow_class_string_cast", default.allow_class_string_cast)?,
             class_pointer_ban_classname_new: hhconfig.get_int_or(

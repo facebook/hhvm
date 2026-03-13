@@ -1208,6 +1208,18 @@ static bool HHVM_METHOD(AsyncMysqlConnection, isSSL) {
   return data->m_conn->isSSL();
 }
 
+static bool HHVM_METHOD(AsyncMysqlConnection, wasFromPoolHit) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+  data->verifyValidConnection();
+  return data->m_conn->wasFromPoolHit();
+}
+
+static bool HHVM_METHOD(AsyncMysqlConnection, wasReusedWithChangeUser) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+  data->verifyValidConnection();
+  return data->m_conn->wasReusedWithChangeUser();
+}
+
 static int64_t HHVM_METHOD(AsyncMysqlConnection, warningCount) {
   auto* data = Native::data<AsyncMysqlConnection>(this_);
 
@@ -2264,6 +2276,8 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnection, port);
     HHVM_ME(AsyncMysqlConnection, setReusable);
     HHVM_ME(AsyncMysqlConnection, isReusable);
+    HHVM_ME(AsyncMysqlConnection, wasFromPoolHit);
+    HHVM_ME(AsyncMysqlConnection, wasReusedWithChangeUser);
     HHVM_ME(AsyncMysqlConnection, connectResult);
     HHVM_ME(AsyncMysqlConnection, lastActivityTime);
     HHVM_ME(AsyncMysqlConnection, getSslCertCn);

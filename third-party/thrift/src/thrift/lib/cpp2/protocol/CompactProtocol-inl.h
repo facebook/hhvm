@@ -285,6 +285,11 @@ inline uint32_t CompactProtocolWriter::writeI32(int32_t i32) {
   return sz;
 }
 
+inline uint32_t CompactProtocolWriter::writeEnum(
+    std::string_view /*name*/, int32_t value) {
+  return writeI32(value);
+}
+
 inline uint32_t CompactProtocolWriter::writeI64(int64_t i64) {
   return apache::thrift::util::writeVarint(
       out_, apache::thrift::util::i64ToZigzag(i64));

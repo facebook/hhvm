@@ -143,6 +143,9 @@ class HashProtocol {
   uint32_t writeByte(int8_t val) { return (acc_.combine(val), 0); }
   uint32_t writeI16(int16_t val) { return (acc_.combine(val), 0); }
   uint32_t writeI32(int32_t val) { return (acc_.combine(val), 0); }
+  uint32_t writeEnum(std::string_view /*name*/, int32_t val) {
+    return writeI32(val);
+  }
   uint32_t writeI64(int64_t val) { return (acc_.combine(val), 0); }
   uint32_t writeDouble(double val) { return (acc_.combine(val), 0); }
   uint32_t writeFloat(float val) { return (acc_.combine(val), 0); }

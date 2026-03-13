@@ -95,6 +95,7 @@ class JSONProtocolWriterCommon : public detail::ProtocolBase {
   uint32_t writeByte(int8_t byte);
   uint32_t writeI16(int16_t i16);
   uint32_t writeI32(int32_t i32);
+  uint32_t writeEnum(std::string_view name, int32_t value);
   uint32_t writeI64(int64_t i64);
   uint32_t writeDouble(double dub);
   uint32_t writeFloat(float flt);

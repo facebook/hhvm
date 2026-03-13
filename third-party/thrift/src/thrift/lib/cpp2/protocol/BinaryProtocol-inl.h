@@ -133,6 +133,11 @@ inline uint32_t BinaryProtocolWriter::writeI32(int32_t i32) {
   return sizeof(i32);
 }
 
+inline uint32_t BinaryProtocolWriter::writeEnum(
+    std::string_view /*name*/, int32_t value) {
+  return writeI32(value);
+}
+
 inline uint32_t BinaryProtocolWriter::writeI64(int64_t i64) {
   out_.writeBE<int64_t>(i64);
   return sizeof(i64);

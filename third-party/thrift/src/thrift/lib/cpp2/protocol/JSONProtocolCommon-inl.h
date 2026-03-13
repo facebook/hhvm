@@ -107,6 +107,11 @@ inline uint32_t JSONProtocolWriterCommon::writeI32(int32_t i32) {
   return ret + writeJSONInt(i32);
 }
 
+inline uint32_t JSONProtocolWriterCommon::writeEnum(
+    std::string_view /*name*/, int32_t value) {
+  return writeI32(value);
+}
+
 inline uint32_t JSONProtocolWriterCommon::writeI64(int64_t i64) {
   auto ret = writeContext();
   return ret + writeJSONInt(i64);

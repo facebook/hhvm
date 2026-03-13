@@ -291,6 +291,11 @@ uint32_t DebugProtocolWriter::writeI32(int32_t v) {
   return 0;
 }
 
+uint32_t DebugProtocolWriter::writeEnum(
+    std::string_view /*name*/, int32_t value) {
+  return writeI32(value);
+}
+
 uint32_t DebugProtocolWriter::writeI64(int64_t v) {
   writeItem("{}", v);
   return 0;

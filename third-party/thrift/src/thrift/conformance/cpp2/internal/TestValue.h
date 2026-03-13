@@ -206,6 +206,10 @@ class EncodeValueRecorder {
     return 0;
   }
 
+  uint32_t writeEnum(std::string_view /*name*/, int32_t value) {
+    return writeI32(value);
+  }
+
   uint32_t writeI64(int64_t i64) {
     next().writeI64().ensure() = i64;
     return 0;

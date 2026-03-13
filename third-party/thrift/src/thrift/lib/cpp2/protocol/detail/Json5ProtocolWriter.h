@@ -152,6 +152,7 @@ class Json5ProtocolWriter final {
   std::uint32_t writeByte(int8_t value);
   std::uint32_t writeI16(int16_t value);
   std::uint32_t writeI32(int32_t value);
+  std::uint32_t writeEnum(std::string_view name, int32_t value);
   std::uint32_t writeI64(int64_t value);
   std::uint32_t writeFloat(float value);
   std::uint32_t writeDouble(double value);
@@ -161,8 +162,6 @@ class Json5ProtocolWriter final {
   std::uint32_t writeBinary(folly::ByteRange str);
   std::uint32_t writeBinary(const std::unique_ptr<folly::IOBuf>& buf);
   std::uint32_t writeBinary(const folly::IOBuf& buf);
-
-  std::uint32_t writeEnum(std::string_view name, std::int32_t value);
 
  private:
   std::uint32_t writeMapBegin(bool objectForm);

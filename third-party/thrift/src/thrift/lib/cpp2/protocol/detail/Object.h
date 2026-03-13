@@ -279,6 +279,10 @@ class ObjectWriter : public BaseObjectAdapter {
     return endValue(Value::Type::i32Value);
   }
 
+  uint32_t writeEnum(std::string_view /*name*/, int32_t value) {
+    return writeI32(value);
+  }
+
   uint32_t writeI64(int64_t value) {
     ValueHelper<type::i64_t>::set(beginValue(), value);
     return endValue(Value::Type::i64Value);

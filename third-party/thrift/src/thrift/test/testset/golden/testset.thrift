@@ -21,4049 +21,4952 @@ namespace py.asyncio thrift_asyncio.test.testset
 namespace java.swift org.apache.thrift.test
 namespace go thrift.test.testset
 
+@thrift.Sealed
 struct struct_empty {
 }
+@thrift.Sealed
 struct struct_list_bool {
   1: list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_list_byte {
   1: list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_list_i16 {
   1: list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_list_i32 {
   1: list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_list_i64 {
   1: list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_list_float {
   1: list<float> field_1;
 }
+@thrift.Sealed
 struct struct_list_double {
   1: list<double> field_1;
 }
+@thrift.Sealed
 struct struct_list_binary {
   1: list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_list_string {
   1: list<string> field_1;
 }
+@thrift.Sealed
 struct struct_list_struct_empty {
   1: list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_bool {
   1: list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_byte {
   1: list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i16 {
   1: list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i32 {
   1: list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i64 {
   1: list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_float {
   1: list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_double {
   1: list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_binary {
   1: list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_string {
   1: list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_struct_empty {
   1: list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_set_byte {
   1: set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_set_i16 {
   1: set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_set_i32 {
   1: set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_set_i64 {
   1: set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
+@thrift.Sealed
 struct struct_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
+@thrift.Sealed
 struct struct_set_binary {
   1: set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_set_string {
   1: set<string> field_1;
 }
+@thrift.Sealed
 struct struct_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_byte {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i16 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i32 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i64 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_binary {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_string {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_bool {
   1: map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_byte {
   1: map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i16 {
   1: map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i32 {
   1: map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i64 {
   1: map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_float {
   1: map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_double {
   1: map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_binary {
   1: map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_string {
   1: map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_struct_empty {
   1: map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_bool {
   1: map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_byte {
   1: map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i16 {
   1: map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i32 {
   1: map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i64 {
   1: map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_float {
   1: map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_double {
   1: map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_binary {
   1: map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_string {
   1: map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_struct_empty {
   1: map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_byte {
   1: map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i16 {
   1: map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i32 {
   1: map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i64 {
   1: map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_binary {
   1: map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_string {
   1: map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_byte {
   1: map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i16 {
   1: map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i32 {
   1: map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i64 {
   1: map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_binary {
   1: map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_string {
   1: map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
+@thrift.Sealed
 struct struct_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
+@thrift.Sealed
 struct struct_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
+@thrift.Sealed
 struct struct_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
+@thrift.Sealed
 struct struct_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
+@thrift.Sealed
 struct struct_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
+@thrift.Sealed
 struct struct_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
+@thrift.Sealed
 struct struct_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
+@thrift.Sealed
 struct struct_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
+@thrift.Sealed
 struct struct_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
+@thrift.Sealed
 struct struct_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
+@thrift.Sealed
 struct struct_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
+@thrift.Sealed
 struct struct_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_bool {
   1: bool field_1;
 }
+@thrift.Sealed
 struct struct_byte {
   1: byte field_1;
 }
+@thrift.Sealed
 struct struct_i16 {
   1: i16 field_1;
 }
+@thrift.Sealed
 struct struct_i32 {
   1: i32 field_1;
 }
+@thrift.Sealed
 struct struct_i64 {
   1: i64 field_1;
 }
+@thrift.Sealed
 struct struct_float {
   1: float field_1;
 }
+@thrift.Sealed
 struct struct_double {
   1: double field_1;
 }
+@thrift.Sealed
 struct struct_binary {
   1: binary field_1;
 }
+@thrift.Sealed
 struct struct_string {
   1: string field_1;
 }
+@thrift.Sealed
 struct struct_bool_custom_default {
   1: bool field_1 = true;
 }
+@thrift.Sealed
 struct struct_byte_custom_default {
   1: byte field_1 = 1;
 }
+@thrift.Sealed
 struct struct_i16_custom_default {
   1: i16 field_1 = 2;
 }
+@thrift.Sealed
 struct struct_i32_custom_default {
   1: i32 field_1 = 3;
 }
+@thrift.Sealed
 struct struct_i64_custom_default {
   1: i64 field_1 = 4;
 }
+@thrift.Sealed
 struct struct_float_custom_default {
   1: float field_1 = 5;
 }
+@thrift.Sealed
 struct struct_double_custom_default {
   1: double field_1 = 6;
 }
+@thrift.Sealed
 struct struct_binary_custom_default {
   1: binary field_1 = "7";
 }
+@thrift.Sealed
 struct struct_string_custom_default {
   1: string field_1 = "8";
 }
+@thrift.Sealed
 struct struct_bool_alternative_custom_default {
   1: bool field_1 = true;
 }
+@thrift.Sealed
 struct struct_byte_alternative_custom_default {
   1: byte field_1 = 10;
 }
+@thrift.Sealed
 struct struct_i16_alternative_custom_default {
   1: i16 field_1 = 20;
 }
+@thrift.Sealed
 struct struct_i32_alternative_custom_default {
   1: i32 field_1 = 30;
 }
+@thrift.Sealed
 struct struct_i64_alternative_custom_default {
   1: i64 field_1 = 40;
 }
+@thrift.Sealed
 struct struct_float_alternative_custom_default {
   1: float field_1 = 50;
 }
+@thrift.Sealed
 struct struct_double_alternative_custom_default {
   1: double field_1 = 60;
 }
+@thrift.Sealed
 struct struct_binary_alternative_custom_default {
   1: binary field_1 = "70";
 }
+@thrift.Sealed
 struct struct_string_alternative_custom_default {
   1: string field_1 = "80";
 }
+@thrift.Sealed
 struct struct_optional_list_bool {
   1: optional list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_byte {
   1: optional list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i16 {
   1: optional list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i32 {
   1: optional list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i64 {
   1: optional list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_float {
   1: optional list<float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_double {
   1: optional list<double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_binary {
   1: optional list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_string {
   1: optional list<string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_struct_empty {
   1: optional list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_bool {
   1: optional list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_byte {
   1: optional list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i16 {
   1: optional list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i32 {
   1: optional list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i64 {
   1: optional list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_float {
   1: optional list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_double {
   1: optional list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_binary {
   1: optional list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_string {
   1: optional list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_struct_empty {
   1: optional list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_byte {
   1: optional set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i16 {
   1: optional set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i32 {
   1: optional set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i64 {
   1: optional set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_binary {
   1: optional set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_string {
   1: optional set<string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_byte {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i16 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i32 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i64 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_binary {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_string {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_bool {
   1: optional map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_byte {
   1: optional map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i16 {
   1: optional map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i32 {
   1: optional map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i64 {
   1: optional map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_float {
   1: optional map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_double {
   1: optional map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_binary {
   1: optional map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_string {
   1: optional map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_struct_empty {
   1: optional map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_bool {
   1: optional map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_byte {
   1: optional map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i16 {
   1: optional map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i32 {
   1: optional map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i64 {
   1: optional map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_float {
   1: optional map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_double {
   1: optional map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_binary {
   1: optional map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_string {
   1: optional map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_struct_empty {
   1: optional map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_byte {
   1: optional map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i16 {
   1: optional map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i32 {
   1: optional map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i64 {
   1: optional map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_binary {
   1: optional map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_string {
   1: optional map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_byte {
   1: optional map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i16 {
   1: optional map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i32 {
   1: optional map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i64 {
   1: optional map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_binary {
   1: optional map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_string {
   1: optional map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_bool {
   1: optional bool field_1;
 }
+@thrift.Sealed
 struct struct_optional_byte {
   1: optional byte field_1;
 }
+@thrift.Sealed
 struct struct_optional_i16 {
   1: optional i16 field_1;
 }
+@thrift.Sealed
 struct struct_optional_i32 {
   1: optional i32 field_1;
 }
+@thrift.Sealed
 struct struct_optional_i64 {
   1: optional i64 field_1;
 }
+@thrift.Sealed
 struct struct_optional_float {
   1: optional float field_1;
 }
+@thrift.Sealed
 struct struct_optional_double {
   1: optional double field_1;
 }
+@thrift.Sealed
 struct struct_optional_binary {
   1: optional binary field_1;
 }
+@thrift.Sealed
 struct struct_optional_string {
   1: optional string field_1;
 }
+@thrift.Sealed
 struct struct_optional_bool_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
+@thrift.Sealed
 struct struct_optional_byte_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 1;
 }
+@thrift.Sealed
 struct struct_optional_i16_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 2;
 }
+@thrift.Sealed
 struct struct_optional_i32_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 3;
 }
+@thrift.Sealed
 struct struct_optional_i64_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 4;
 }
+@thrift.Sealed
 struct struct_optional_float_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 5;
 }
+@thrift.Sealed
 struct struct_optional_double_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 6;
 }
+@thrift.Sealed
 struct struct_optional_binary_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "7";
 }
+@thrift.Sealed
 struct struct_optional_string_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "8";
 }
+@thrift.Sealed
 struct struct_optional_bool_alternative_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional bool field_1 = true;
 }
+@thrift.Sealed
 struct struct_optional_byte_alternative_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional byte field_1 = 10;
 }
+@thrift.Sealed
 struct struct_optional_i16_alternative_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i16 field_1 = 20;
 }
+@thrift.Sealed
 struct struct_optional_i32_alternative_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i32 field_1 = 30;
 }
+@thrift.Sealed
 struct struct_optional_i64_alternative_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional i64 field_1 = 40;
 }
+@thrift.Sealed
 struct struct_optional_float_alternative_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional float field_1 = 50;
 }
+@thrift.Sealed
 struct struct_optional_double_alternative_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional double field_1 = 60;
 }
+@thrift.Sealed
 struct struct_optional_binary_alternative_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional binary field_1 = "70";
 }
+@thrift.Sealed
 struct struct_optional_string_alternative_custom_default {
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   1: optional string field_1 = "80";
 }
+@thrift.Sealed
 struct struct_required_list_bool {
   1: required list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_byte {
   1: required list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_i16 {
   1: required list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_i32 {
   1: required list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_i64 {
   1: required list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_float {
   1: required list<float> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_double {
   1: required list<double> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_binary {
   1: required list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_string {
   1: required list<string> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_struct_empty {
   1: required list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_bool {
   1: required list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_byte {
   1: required list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_i16 {
   1: required list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_i32 {
   1: required list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_i64 {
   1: required list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_float {
   1: required list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_double {
   1: required list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_binary {
   1: required list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_string {
   1: required list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_struct_empty {
   1: required list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_byte {
   1: required set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_i16 {
   1: required set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_i32 {
   1: required set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_i64 {
   1: required set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_binary {
   1: required set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_string {
   1: required set<string> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_byte {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_i16 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_i32 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_i64 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_binary {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_string {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_bool {
   1: required map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_byte {
   1: required map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_i16 {
   1: required map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_i32 {
   1: required map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_i64 {
   1: required map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_float {
   1: required map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_double {
   1: required map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_binary {
   1: required map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_string {
   1: required map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_struct_empty {
   1: required map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_bool {
   1: required map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_byte {
   1: required map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_i16 {
   1: required map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_i32 {
   1: required map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_i64 {
   1: required map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_float {
   1: required map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_double {
   1: required map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_binary {
   1: required map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_string {
   1: required map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_struct_empty {
   1: required map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_byte {
   1: required map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_i16 {
   1: required map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_i32 {
   1: required map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_i64 {
   1: required map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_binary {
   1: required map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_string {
   1: required map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_byte {
   1: required map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_i16 {
   1: required map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_i32 {
   1: required map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_i64 {
   1: required map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_binary {
   1: required map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_string {
   1: required map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_list_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<float> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<double> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_required_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: required map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_required_bool {
   1: required bool field_1;
 }
+@thrift.Sealed
 struct struct_required_byte {
   1: required byte field_1;
 }
+@thrift.Sealed
 struct struct_required_i16 {
   1: required i16 field_1;
 }
+@thrift.Sealed
 struct struct_required_i32 {
   1: required i32 field_1;
 }
+@thrift.Sealed
 struct struct_required_i64 {
   1: required i64 field_1;
 }
+@thrift.Sealed
 struct struct_required_float {
   1: required float field_1;
 }
+@thrift.Sealed
 struct struct_required_double {
   1: required double field_1;
 }
+@thrift.Sealed
 struct struct_required_binary {
   1: required binary field_1;
 }
+@thrift.Sealed
 struct struct_required_string {
   1: required string field_1;
 }
+@thrift.Sealed
 struct struct_required_bool_custom_default {
   1: required bool field_1 = true;
 }
+@thrift.Sealed
 struct struct_required_byte_custom_default {
   1: required byte field_1 = 1;
 }
+@thrift.Sealed
 struct struct_required_i16_custom_default {
   1: required i16 field_1 = 2;
 }
+@thrift.Sealed
 struct struct_required_i32_custom_default {
   1: required i32 field_1 = 3;
 }
+@thrift.Sealed
 struct struct_required_i64_custom_default {
   1: required i64 field_1 = 4;
 }
+@thrift.Sealed
 struct struct_required_float_custom_default {
   1: required float field_1 = 5;
 }
+@thrift.Sealed
 struct struct_required_double_custom_default {
   1: required double field_1 = 6;
 }
+@thrift.Sealed
 struct struct_required_binary_custom_default {
   1: required binary field_1 = "7";
 }
+@thrift.Sealed
 struct struct_required_string_custom_default {
   1: required string field_1 = "8";
 }
+@thrift.Sealed
 struct struct_required_bool_alternative_custom_default {
   1: required bool field_1 = true;
 }
+@thrift.Sealed
 struct struct_required_byte_alternative_custom_default {
   1: required byte field_1 = 10;
 }
+@thrift.Sealed
 struct struct_required_i16_alternative_custom_default {
   1: required i16 field_1 = 20;
 }
+@thrift.Sealed
 struct struct_required_i32_alternative_custom_default {
   1: required i32 field_1 = 30;
 }
+@thrift.Sealed
 struct struct_required_i64_alternative_custom_default {
   1: required i64 field_1 = 40;
 }
+@thrift.Sealed
 struct struct_required_float_alternative_custom_default {
   1: required float field_1 = 50;
 }
+@thrift.Sealed
 struct struct_required_double_alternative_custom_default {
   1: required double field_1 = 60;
 }
+@thrift.Sealed
 struct struct_required_binary_alternative_custom_default {
   1: required binary field_1 = "70";
 }
+@thrift.Sealed
 struct struct_required_string_alternative_custom_default {
   1: required string field_1 = "80";
 }
+@thrift.Sealed
 struct struct_terse_list_bool {
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_byte {
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_i16 {
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_i32 {
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_i64 {
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_float {
   @thrift.TerseWrite
   1: list<float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_double {
   @thrift.TerseWrite
   1: list<double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_binary {
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_string {
   @thrift.TerseWrite
   1: list<string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_struct_empty {
   @thrift.TerseWrite
   1: list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_bool {
   @thrift.TerseWrite
   1: list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_byte {
   @thrift.TerseWrite
   1: list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_i16 {
   @thrift.TerseWrite
   1: list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_i32 {
   @thrift.TerseWrite
   1: list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_i64 {
   @thrift.TerseWrite
   1: list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_float {
   @thrift.TerseWrite
   1: list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_double {
   @thrift.TerseWrite
   1: list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_binary {
   @thrift.TerseWrite
   1: list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_string {
   @thrift.TerseWrite
   1: list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_struct_empty {
   @thrift.TerseWrite
   1: list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_byte {
   @thrift.TerseWrite
   1: set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_i16 {
   @thrift.TerseWrite
   1: set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_i32 {
   @thrift.TerseWrite
   1: set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_i64 {
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_binary {
   @thrift.TerseWrite
   1: set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_string {
   @thrift.TerseWrite
   1: set<string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_byte {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_i16 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_i32 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_i64 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_binary {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_string {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_bool {
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_byte {
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_i16 {
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_i32 {
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_i64 {
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_float {
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_double {
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_binary {
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_string {
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_struct_empty {
   @thrift.TerseWrite
   1: map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_bool {
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_byte {
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_i16 {
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_i32 {
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_i64 {
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_float {
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_double {
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_binary {
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_string {
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_struct_empty {
   @thrift.TerseWrite
   1: map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_byte {
   @thrift.TerseWrite
   1: map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_i16 {
   @thrift.TerseWrite
   1: map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_i32 {
   @thrift.TerseWrite
   1: map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_i64 {
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_binary {
   @thrift.TerseWrite
   1: map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_string {
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_byte {
   @thrift.TerseWrite
   1: map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_i16 {
   @thrift.TerseWrite
   1: map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_i32 {
   @thrift.TerseWrite
   1: map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_i64 {
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_binary {
   @thrift.TerseWrite
   1: map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_string {
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4071,30 +4974,35 @@ struct struct_terse_set_bool_cpp_ref {
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4102,6 +5010,7 @@ struct struct_terse_set_float_cpp_ref {
   @thrift.TerseWrite
   1: set<float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4109,18 +5018,21 @@ struct struct_terse_set_double_cpp_ref {
   @thrift.TerseWrite
   1: set<double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4128,6 +5040,7 @@ struct struct_terse_set_struct_empty_cpp_ref {
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4135,6 +5048,7 @@ struct struct_terse_set_set_bool_cpp_ref {
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4142,6 +5056,7 @@ struct struct_terse_set_set_byte_cpp_ref {
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4149,6 +5064,7 @@ struct struct_terse_set_set_i16_cpp_ref {
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4156,6 +5072,7 @@ struct struct_terse_set_set_i32_cpp_ref {
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4163,6 +5080,7 @@ struct struct_terse_set_set_i64_cpp_ref {
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4170,6 +5088,7 @@ struct struct_terse_set_set_float_cpp_ref {
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4177,6 +5096,7 @@ struct struct_terse_set_set_double_cpp_ref {
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4184,6 +5104,7 @@ struct struct_terse_set_set_binary_cpp_ref {
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4191,6 +5112,7 @@ struct struct_terse_set_set_string_cpp_ref {
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4198,126 +5120,147 @@ struct struct_terse_set_set_struct_empty_cpp_ref {
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4325,30 +5268,35 @@ struct struct_terse_map_string_set_bool_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4356,6 +5304,7 @@ struct struct_terse_map_string_set_float_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4363,18 +5312,21 @@ struct struct_terse_map_string_set_double_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4382,6 +5334,7 @@ struct struct_terse_map_string_set_struct_empty_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4389,30 +5342,35 @@ struct struct_terse_map_i64_set_bool_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4420,6 +5378,7 @@ struct struct_terse_map_i64_set_float_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4427,18 +5386,21 @@ struct struct_terse_map_i64_set_double_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_struct_empty_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -4446,126 +5408,147 @@ struct struct_terse_map_i64_set_struct_empty_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_list_list_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4573,30 +5556,35 @@ struct struct_terse_set_bool_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4604,6 +5592,7 @@ struct struct_terse_set_float_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4611,18 +5600,21 @@ struct struct_terse_set_double_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4630,6 +5622,7 @@ struct struct_terse_set_struct_empty_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4637,6 +5630,7 @@ struct struct_terse_set_set_bool_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4644,6 +5638,7 @@ struct struct_terse_set_set_byte_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4651,6 +5646,7 @@ struct struct_terse_set_set_i16_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4658,6 +5654,7 @@ struct struct_terse_set_set_i32_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4665,6 +5662,7 @@ struct struct_terse_set_set_i64_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4672,6 +5670,7 @@ struct struct_terse_set_set_float_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4679,6 +5678,7 @@ struct struct_terse_set_set_double_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4686,6 +5686,7 @@ struct struct_terse_set_set_binary_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4693,6 +5694,7 @@ struct struct_terse_set_set_string_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_set_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4700,126 +5702,147 @@ struct struct_terse_set_set_struct_empty_shared_cpp_ref {
   @thrift.TerseWrite
   1: set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4827,30 +5850,35 @@ struct struct_terse_map_string_set_bool_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4858,6 +5886,7 @@ struct struct_terse_map_string_set_float_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4865,18 +5894,21 @@ struct struct_terse_map_string_set_double_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_string_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4884,6 +5916,7 @@ struct struct_terse_map_string_set_struct_empty_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4891,30 +5924,35 @@ struct struct_terse_map_i64_set_bool_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4922,6 +5960,7 @@ struct struct_terse_map_i64_set_float_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4929,18 +5968,21 @@ struct struct_terse_map_i64_set_double_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_map_i64_set_struct_empty_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.AllowLegacyNonOptionalRef
@@ -4948,384 +5990,474 @@ struct struct_terse_map_i64_set_struct_empty_shared_cpp_ref {
   @thrift.TerseWrite
   1: map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_terse_bool {
   @thrift.TerseWrite
   1: bool field_1;
 }
+@thrift.Sealed
 struct struct_terse_byte {
   @thrift.TerseWrite
   1: byte field_1;
 }
+@thrift.Sealed
 struct struct_terse_i16 {
   @thrift.TerseWrite
   1: i16 field_1;
 }
+@thrift.Sealed
 struct struct_terse_i32 {
   @thrift.TerseWrite
   1: i32 field_1;
 }
+@thrift.Sealed
 struct struct_terse_i64 {
   @thrift.TerseWrite
   1: i64 field_1;
 }
+@thrift.Sealed
 struct struct_terse_float {
   @thrift.TerseWrite
   1: float field_1;
 }
+@thrift.Sealed
 struct struct_terse_double {
   @thrift.TerseWrite
   1: double field_1;
 }
+@thrift.Sealed
 struct struct_terse_binary {
   @thrift.TerseWrite
   1: binary field_1;
 }
+@thrift.Sealed
 struct struct_terse_string {
   @thrift.TerseWrite
   1: string field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_bool_box {
   @thrift.Box
   1: optional list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_byte_box {
   @thrift.Box
   1: optional list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i16_box {
   @thrift.Box
   1: optional list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i32_box {
   @thrift.Box
   1: optional list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_i64_box {
   @thrift.Box
   1: optional list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_float_box {
   @thrift.Box
   1: optional list<float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_double_box {
   @thrift.Box
   1: optional list<double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_binary_box {
   @thrift.Box
   1: optional list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_string_box {
   @thrift.Box
   1: optional list<string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_struct_empty_box {
   @thrift.Box
   1: optional list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_bool_box {
   @thrift.Box
   1: optional list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_byte_box {
   @thrift.Box
   1: optional list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i16_box {
   @thrift.Box
   1: optional list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i32_box {
   @thrift.Box
   1: optional list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_i64_box {
   @thrift.Box
   1: optional list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_float_box {
   @thrift.Box
   1: optional list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_double_box {
   @thrift.Box
   1: optional list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_binary_box {
   @thrift.Box
   1: optional list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_string_box {
   @thrift.Box
   1: optional list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_list_list_struct_empty_box {
   @thrift.Box
   1: optional list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_bool_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_byte_box {
   @thrift.Box
   1: optional set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i16_box {
   @thrift.Box
   1: optional set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i32_box {
   @thrift.Box
   1: optional set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_i64_box {
   @thrift.Box
   1: optional set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_float_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_double_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_binary_box {
   @thrift.Box
   1: optional set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_string_box {
   @thrift.Box
   1: optional set<string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_struct_empty_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_bool_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_byte_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i16_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i32_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_i64_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_float_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_double_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_binary_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_string_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_set_set_struct_empty_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_bool_box {
   @thrift.Box
   1: optional map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_byte_box {
   @thrift.Box
   1: optional map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i16_box {
   @thrift.Box
   1: optional map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i32_box {
   @thrift.Box
   1: optional map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_i64_box {
   @thrift.Box
   1: optional map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_float_box {
   @thrift.Box
   1: optional map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_double_box {
   @thrift.Box
   1: optional map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_binary_box {
   @thrift.Box
   1: optional map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_string_box {
   @thrift.Box
   1: optional map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_struct_empty_box {
   @thrift.Box
   1: optional map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_bool_box {
   @thrift.Box
   1: optional map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_byte_box {
   @thrift.Box
   1: optional map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i16_box {
   @thrift.Box
   1: optional map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i32_box {
   @thrift.Box
   1: optional map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_i64_box {
   @thrift.Box
   1: optional map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_float_box {
   @thrift.Box
   1: optional map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_double_box {
   @thrift.Box
   1: optional map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_binary_box {
   @thrift.Box
   1: optional map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_string_box {
   @thrift.Box
   1: optional map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_struct_empty_box {
   @thrift.Box
   1: optional map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_bool_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_byte_box {
   @thrift.Box
   1: optional map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i16_box {
   @thrift.Box
   1: optional map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i32_box {
   @thrift.Box
   1: optional map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_i64_box {
   @thrift.Box
   1: optional map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_float_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_double_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_binary_box {
   @thrift.Box
   1: optional map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_string_box {
   @thrift.Box
   1: optional map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_string_set_struct_empty_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_bool_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_byte_box {
   @thrift.Box
   1: optional map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i16_box {
   @thrift.Box
   1: optional map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i32_box {
   @thrift.Box
   1: optional map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_i64_box {
   @thrift.Box
   1: optional map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_float_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_double_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_binary_box {
   @thrift.Box
   1: optional map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_string_box {
   @thrift.Box
   1: optional map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_optional_map_i64_set_struct_empty_box {
   @thrift.Box
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: optional map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5333,6 +6465,7 @@ struct struct_adapted_bool {
   @hack.Adapter{name = 'ConformanceTestAdapter_bool'}
   1: bool field_1;
 }
+@thrift.Sealed
 struct struct_adapted_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5340,6 +6473,7 @@ struct struct_adapted_byte {
   @hack.Adapter{name = 'ConformanceTestAdapter_byte'}
   1: byte field_1;
 }
+@thrift.Sealed
 struct struct_adapted_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5347,6 +6481,7 @@ struct struct_adapted_i16 {
   @hack.Adapter{name = 'ConformanceTestAdapter_i16'}
   1: i16 field_1;
 }
+@thrift.Sealed
 struct struct_adapted_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5354,6 +6489,7 @@ struct struct_adapted_i32 {
   @hack.Adapter{name = 'ConformanceTestAdapter_i32'}
   1: i32 field_1;
 }
+@thrift.Sealed
 struct struct_adapted_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5361,6 +6497,7 @@ struct struct_adapted_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_i64'}
   1: i64 field_1;
 }
+@thrift.Sealed
 struct struct_adapted_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5368,6 +6505,7 @@ struct struct_adapted_float {
   @hack.Adapter{name = 'ConformanceTestAdapter_float'}
   1: float field_1;
 }
+@thrift.Sealed
 struct struct_adapted_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5375,6 +6513,7 @@ struct struct_adapted_double {
   @hack.Adapter{name = 'ConformanceTestAdapter_double'}
   1: double field_1;
 }
+@thrift.Sealed
 struct struct_adapted_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5382,6 +6521,7 @@ struct struct_adapted_binary {
   @hack.Adapter{name = 'ConformanceTestAdapter_binary'}
   1: binary field_1;
 }
+@thrift.Sealed
 struct struct_adapted_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5389,6 +6529,7 @@ struct struct_adapted_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_string'}
   1: string field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5396,6 +6537,7 @@ struct struct_adapted_list_bool {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_bool'}
   1: list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5403,6 +6545,7 @@ struct struct_adapted_list_byte {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_byte'}
   1: list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5410,6 +6553,7 @@ struct struct_adapted_list_i16 {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_i16'}
   1: list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5417,6 +6561,7 @@ struct struct_adapted_list_i32 {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_i32'}
   1: list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5424,6 +6569,7 @@ struct struct_adapted_list_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_i64'}
   1: list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5431,6 +6577,7 @@ struct struct_adapted_list_float {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_float'}
   1: list<float> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5438,6 +6585,7 @@ struct struct_adapted_list_double {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_double'}
   1: list<double> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5445,6 +6593,7 @@ struct struct_adapted_list_binary {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_binary'}
   1: list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5452,6 +6601,7 @@ struct struct_adapted_list_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_string'}
   1: list<string> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5459,6 +6609,7 @@ struct struct_adapted_list_struct_empty {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_struct_empty'}
   1: list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5466,6 +6617,7 @@ struct struct_adapted_list_list_bool {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_bool'}
   1: list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5473,6 +6625,7 @@ struct struct_adapted_list_list_byte {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_byte'}
   1: list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5480,6 +6633,7 @@ struct struct_adapted_list_list_i16 {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i16'}
   1: list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5487,6 +6641,7 @@ struct struct_adapted_list_list_i32 {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i32'}
   1: list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5494,6 +6649,7 @@ struct struct_adapted_list_list_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_i64'}
   1: list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5501,6 +6657,7 @@ struct struct_adapted_list_list_float {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_float'}
   1: list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5508,6 +6665,7 @@ struct struct_adapted_list_list_double {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_double'}
   1: list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5515,6 +6673,7 @@ struct struct_adapted_list_list_binary {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_binary'}
   1: list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5522,6 +6681,7 @@ struct struct_adapted_list_list_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_string'}
   1: list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_list_list_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5529,6 +6689,7 @@ struct struct_adapted_list_list_struct_empty {
   @hack.Adapter{name = 'ConformanceTestAdapter_list_list_struct_empty'}
   1: list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5537,6 +6698,7 @@ struct struct_adapted_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5544,6 +6706,7 @@ struct struct_adapted_set_byte {
   @hack.Adapter{name = 'ConformanceTestAdapter_set_byte'}
   1: set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5551,6 +6714,7 @@ struct struct_adapted_set_i16 {
   @hack.Adapter{name = 'ConformanceTestAdapter_set_i16'}
   1: set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5558,6 +6722,7 @@ struct struct_adapted_set_i32 {
   @hack.Adapter{name = 'ConformanceTestAdapter_set_i32'}
   1: set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5565,6 +6730,7 @@ struct struct_adapted_set_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_set_i64'}
   1: set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5573,6 +6739,7 @@ struct struct_adapted_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5581,6 +6748,7 @@ struct struct_adapted_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5588,6 +6756,7 @@ struct struct_adapted_set_binary {
   @hack.Adapter{name = 'ConformanceTestAdapter_set_binary'}
   1: set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5595,6 +6764,7 @@ struct struct_adapted_set_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_set_string'}
   1: set<string> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5603,6 +6773,7 @@ struct struct_adapted_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5611,6 +6782,7 @@ struct struct_adapted_set_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5619,6 +6791,7 @@ struct struct_adapted_set_set_byte {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5627,6 +6800,7 @@ struct struct_adapted_set_set_i16 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5635,6 +6809,7 @@ struct struct_adapted_set_set_i32 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5643,6 +6818,7 @@ struct struct_adapted_set_set_i64 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5651,6 +6827,7 @@ struct struct_adapted_set_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5659,6 +6836,7 @@ struct struct_adapted_set_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5667,6 +6845,7 @@ struct struct_adapted_set_set_binary {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5675,6 +6854,7 @@ struct struct_adapted_set_set_string {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_set_set_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5683,6 +6863,7 @@ struct struct_adapted_set_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5690,6 +6871,7 @@ struct struct_adapted_map_string_bool {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_bool'}
   1: map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5697,6 +6879,7 @@ struct struct_adapted_map_string_byte {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_byte'}
   1: map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5704,6 +6887,7 @@ struct struct_adapted_map_string_i16 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i16'}
   1: map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5711,6 +6895,7 @@ struct struct_adapted_map_string_i32 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i32'}
   1: map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5718,6 +6903,7 @@ struct struct_adapted_map_string_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_i64'}
   1: map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5725,6 +6911,7 @@ struct struct_adapted_map_string_float {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_float'}
   1: map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5732,6 +6919,7 @@ struct struct_adapted_map_string_double {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_double'}
   1: map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5739,6 +6927,7 @@ struct struct_adapted_map_string_binary {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_binary'}
   1: map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5746,6 +6935,7 @@ struct struct_adapted_map_string_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_string'}
   1: map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5753,6 +6943,7 @@ struct struct_adapted_map_string_struct_empty {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_struct_empty'}
   1: map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5760,6 +6951,7 @@ struct struct_adapted_map_i64_bool {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_bool'}
   1: map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5767,6 +6959,7 @@ struct struct_adapted_map_i64_byte {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_byte'}
   1: map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5774,6 +6967,7 @@ struct struct_adapted_map_i64_i16 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i16'}
   1: map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5781,6 +6975,7 @@ struct struct_adapted_map_i64_i32 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i32'}
   1: map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5788,6 +6983,7 @@ struct struct_adapted_map_i64_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_i64'}
   1: map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5795,6 +6991,7 @@ struct struct_adapted_map_i64_float {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_float'}
   1: map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5802,6 +6999,7 @@ struct struct_adapted_map_i64_double {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_double'}
   1: map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5809,6 +7007,7 @@ struct struct_adapted_map_i64_binary {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_binary'}
   1: map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5816,6 +7015,7 @@ struct struct_adapted_map_i64_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_string'}
   1: map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5823,6 +7023,7 @@ struct struct_adapted_map_i64_struct_empty {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_struct_empty'}
   1: map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5831,6 +7032,7 @@ struct struct_adapted_map_string_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5838,6 +7040,7 @@ struct struct_adapted_map_string_set_byte {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_byte'}
   1: map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5845,6 +7048,7 @@ struct struct_adapted_map_string_set_i16 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i16'}
   1: map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5852,6 +7056,7 @@ struct struct_adapted_map_string_set_i32 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i32'}
   1: map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5859,6 +7064,7 @@ struct struct_adapted_map_string_set_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_i64'}
   1: map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5867,6 +7073,7 @@ struct struct_adapted_map_string_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5875,6 +7082,7 @@ struct struct_adapted_map_string_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5882,6 +7090,7 @@ struct struct_adapted_map_string_set_binary {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_binary'}
   1: map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5889,6 +7098,7 @@ struct struct_adapted_map_string_set_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_string_set_string'}
   1: map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_string_set_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5897,6 +7107,7 @@ struct struct_adapted_map_string_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5905,6 +7116,7 @@ struct struct_adapted_map_i64_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5912,6 +7124,7 @@ struct struct_adapted_map_i64_set_byte {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_byte'}
   1: map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5919,6 +7132,7 @@ struct struct_adapted_map_i64_set_i16 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i16'}
   1: map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5926,6 +7140,7 @@ struct struct_adapted_map_i64_set_i32 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i32'}
   1: map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5933,6 +7148,7 @@ struct struct_adapted_map_i64_set_i64 {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_i64'}
   1: map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5941,6 +7157,7 @@ struct struct_adapted_map_i64_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5949,6 +7166,7 @@ struct struct_adapted_map_i64_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5956,6 +7174,7 @@ struct struct_adapted_map_i64_set_binary {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_binary'}
   1: map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5963,6 +7182,7 @@ struct struct_adapted_map_i64_set_string {
   @hack.Adapter{name = 'ConformanceTestAdapter_map_i64_set_string'}
   1: map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_adapted_map_i64_set_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestAdapter'}
   @java.Adapter{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5971,6 +7191,7 @@ struct struct_adapted_map_i64_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5978,6 +7199,7 @@ struct struct_field_adapted_bool {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: bool field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5985,6 +7207,7 @@ struct struct_field_adapted_byte {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: byte field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5992,6 +7215,7 @@ struct struct_field_adapted_i16 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: i16 field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -5999,6 +7223,7 @@ struct struct_field_adapted_i32 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: i32 field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6006,6 +7231,7 @@ struct struct_field_adapted_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: i64 field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6013,6 +7239,7 @@ struct struct_field_adapted_float {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: float field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6020,6 +7247,7 @@ struct struct_field_adapted_double {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: double field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6027,6 +7255,7 @@ struct struct_field_adapted_binary {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: binary field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6034,6 +7263,7 @@ struct struct_field_adapted_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: string field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6041,6 +7271,7 @@ struct struct_field_adapted_list_bool {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6048,6 +7279,7 @@ struct struct_field_adapted_list_byte {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6055,6 +7287,7 @@ struct struct_field_adapted_list_i16 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6062,6 +7295,7 @@ struct struct_field_adapted_list_i32 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6069,6 +7303,7 @@ struct struct_field_adapted_list_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6076,6 +7311,7 @@ struct struct_field_adapted_list_float {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<float> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6083,6 +7319,7 @@ struct struct_field_adapted_list_double {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<double> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6090,6 +7327,7 @@ struct struct_field_adapted_list_binary {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6097,6 +7335,7 @@ struct struct_field_adapted_list_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<string> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6104,6 +7343,7 @@ struct struct_field_adapted_list_struct_empty {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6111,6 +7351,7 @@ struct struct_field_adapted_list_list_bool {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6118,6 +7359,7 @@ struct struct_field_adapted_list_list_byte {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6125,6 +7367,7 @@ struct struct_field_adapted_list_list_i16 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6132,6 +7375,7 @@ struct struct_field_adapted_list_list_i32 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6139,6 +7383,7 @@ struct struct_field_adapted_list_list_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6146,6 +7391,7 @@ struct struct_field_adapted_list_list_float {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6153,6 +7399,7 @@ struct struct_field_adapted_list_list_double {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6160,6 +7407,7 @@ struct struct_field_adapted_list_list_binary {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6167,6 +7415,7 @@ struct struct_field_adapted_list_list_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_list_list_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6174,6 +7423,7 @@ struct struct_field_adapted_list_list_struct_empty {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6182,6 +7432,7 @@ struct struct_field_adapted_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6189,6 +7440,7 @@ struct struct_field_adapted_set_byte {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6196,6 +7448,7 @@ struct struct_field_adapted_set_i16 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6203,6 +7456,7 @@ struct struct_field_adapted_set_i32 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6210,6 +7464,7 @@ struct struct_field_adapted_set_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6218,6 +7473,7 @@ struct struct_field_adapted_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6226,6 +7482,7 @@ struct struct_field_adapted_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6233,6 +7490,7 @@ struct struct_field_adapted_set_binary {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6240,6 +7498,7 @@ struct struct_field_adapted_set_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: set<string> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6248,6 +7507,7 @@ struct struct_field_adapted_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6256,6 +7516,7 @@ struct struct_field_adapted_set_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6264,6 +7525,7 @@ struct struct_field_adapted_set_set_byte {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6272,6 +7534,7 @@ struct struct_field_adapted_set_set_i16 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6280,6 +7543,7 @@ struct struct_field_adapted_set_set_i32 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6288,6 +7552,7 @@ struct struct_field_adapted_set_set_i64 {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6296,6 +7561,7 @@ struct struct_field_adapted_set_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6304,6 +7570,7 @@ struct struct_field_adapted_set_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6312,6 +7579,7 @@ struct struct_field_adapted_set_set_binary {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6320,6 +7588,7 @@ struct struct_field_adapted_set_set_string {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_set_set_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6328,6 +7597,7 @@ struct struct_field_adapted_set_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6335,6 +7605,7 @@ struct struct_field_adapted_map_string_bool {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6342,6 +7613,7 @@ struct struct_field_adapted_map_string_byte {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6349,6 +7621,7 @@ struct struct_field_adapted_map_string_i16 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6356,6 +7629,7 @@ struct struct_field_adapted_map_string_i32 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6363,6 +7637,7 @@ struct struct_field_adapted_map_string_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6370,6 +7645,7 @@ struct struct_field_adapted_map_string_float {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6377,6 +7653,7 @@ struct struct_field_adapted_map_string_double {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6384,6 +7661,7 @@ struct struct_field_adapted_map_string_binary {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6391,6 +7669,7 @@ struct struct_field_adapted_map_string_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6398,6 +7677,7 @@ struct struct_field_adapted_map_string_struct_empty {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6405,6 +7685,7 @@ struct struct_field_adapted_map_i64_bool {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6412,6 +7693,7 @@ struct struct_field_adapted_map_i64_byte {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6419,6 +7701,7 @@ struct struct_field_adapted_map_i64_i16 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6426,6 +7709,7 @@ struct struct_field_adapted_map_i64_i32 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6433,6 +7717,7 @@ struct struct_field_adapted_map_i64_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6440,6 +7725,7 @@ struct struct_field_adapted_map_i64_float {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6447,6 +7733,7 @@ struct struct_field_adapted_map_i64_double {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6454,6 +7741,7 @@ struct struct_field_adapted_map_i64_binary {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6461,6 +7749,7 @@ struct struct_field_adapted_map_i64_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6468,6 +7757,7 @@ struct struct_field_adapted_map_i64_struct_empty {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6476,6 +7766,7 @@ struct struct_field_adapted_map_string_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6483,6 +7774,7 @@ struct struct_field_adapted_map_string_set_byte {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6490,6 +7782,7 @@ struct struct_field_adapted_map_string_set_i16 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6497,6 +7790,7 @@ struct struct_field_adapted_map_string_set_i32 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6504,6 +7798,7 @@ struct struct_field_adapted_map_string_set_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6512,6 +7807,7 @@ struct struct_field_adapted_map_string_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6520,6 +7816,7 @@ struct struct_field_adapted_map_string_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6527,6 +7824,7 @@ struct struct_field_adapted_map_string_set_binary {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6534,6 +7832,7 @@ struct struct_field_adapted_map_string_set_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_string_set_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6542,6 +7841,7 @@ struct struct_field_adapted_map_string_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_bool {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6550,6 +7850,7 @@ struct struct_field_adapted_map_i64_set_bool {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_byte {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6557,6 +7858,7 @@ struct struct_field_adapted_map_i64_set_byte {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_i16 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6564,6 +7866,7 @@ struct struct_field_adapted_map_i64_set_i16 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_i32 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6571,6 +7874,7 @@ struct struct_field_adapted_map_i64_set_i32 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_i64 {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6578,6 +7882,7 @@ struct struct_field_adapted_map_i64_set_i64 {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_float {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6586,6 +7891,7 @@ struct struct_field_adapted_map_i64_set_float {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_double {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6594,6 +7900,7 @@ struct struct_field_adapted_map_i64_set_double {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_binary {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6601,6 +7908,7 @@ struct struct_field_adapted_map_i64_set_binary {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_string {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6608,6 +7916,7 @@ struct struct_field_adapted_map_i64_set_string {
   @hack.Wrapper{name = '\ConformanceTestFieldWrapper'}
   1: map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_field_adapted_map_i64_set_struct_empty {
   @cpp.Adapter{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}
   @java.Wrapper{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}
@@ -6616,348 +7925,429 @@ struct struct_field_adapted_map_i64_set_struct_empty {
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_list_bool_lazy {
   @cpp.Lazy
   1: list<bool> field_1;
 }
+@thrift.Sealed
 struct struct_list_byte_lazy {
   @cpp.Lazy
   1: list<byte> field_1;
 }
+@thrift.Sealed
 struct struct_list_i16_lazy {
   @cpp.Lazy
   1: list<i16> field_1;
 }
+@thrift.Sealed
 struct struct_list_i32_lazy {
   @cpp.Lazy
   1: list<i32> field_1;
 }
+@thrift.Sealed
 struct struct_list_i64_lazy {
   @cpp.Lazy
   1: list<i64> field_1;
 }
+@thrift.Sealed
 struct struct_list_float_lazy {
   @cpp.Lazy
   1: list<float> field_1;
 }
+@thrift.Sealed
 struct struct_list_double_lazy {
   @cpp.Lazy
   1: list<double> field_1;
 }
+@thrift.Sealed
 struct struct_list_binary_lazy {
   @cpp.Lazy
   1: list<binary> field_1;
 }
+@thrift.Sealed
 struct struct_list_string_lazy {
   @cpp.Lazy
   1: list<string> field_1;
 }
+@thrift.Sealed
 struct struct_list_struct_empty_lazy {
   @cpp.Lazy
   1: list<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_bool_lazy {
   @cpp.Lazy
   1: list<list<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_byte_lazy {
   @cpp.Lazy
   1: list<list<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i16_lazy {
   @cpp.Lazy
   1: list<list<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i32_lazy {
   @cpp.Lazy
   1: list<list<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_i64_lazy {
   @cpp.Lazy
   1: list<list<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_float_lazy {
   @cpp.Lazy
   1: list<list<float>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_double_lazy {
   @cpp.Lazy
   1: list<list<double>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_binary_lazy {
   @cpp.Lazy
   1: list<list<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_string_lazy {
   @cpp.Lazy
   1: list<list<string>> field_1;
 }
+@thrift.Sealed
 struct struct_list_list_struct_empty_lazy {
   @cpp.Lazy
   1: list<list<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_set_bool_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<bool> field_1;
 }
+@thrift.Sealed
 struct struct_set_byte_lazy {
   @cpp.Lazy
   1: set<byte> field_1;
 }
+@thrift.Sealed
 struct struct_set_i16_lazy {
   @cpp.Lazy
   1: set<i16> field_1;
 }
+@thrift.Sealed
 struct struct_set_i32_lazy {
   @cpp.Lazy
   1: set<i32> field_1;
 }
+@thrift.Sealed
 struct struct_set_i64_lazy {
   @cpp.Lazy
   1: set<i64> field_1;
 }
+@thrift.Sealed
 struct struct_set_float_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<float> field_1;
 }
+@thrift.Sealed
 struct struct_set_double_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<double> field_1;
 }
+@thrift.Sealed
 struct struct_set_binary_lazy {
   @cpp.Lazy
   1: set<binary> field_1;
 }
+@thrift.Sealed
 struct struct_set_string_lazy {
   @cpp.Lazy
   1: set<string> field_1;
 }
+@thrift.Sealed
 struct struct_set_struct_empty_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_bool_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_byte_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i16_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i32_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_i64_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_float_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_double_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_binary_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_string_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_set_set_struct_empty_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: set<set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_bool_lazy {
   @cpp.Lazy
   1: map<string, bool> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_byte_lazy {
   @cpp.Lazy
   1: map<string, byte> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i16_lazy {
   @cpp.Lazy
   1: map<string, i16> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i32_lazy {
   @cpp.Lazy
   1: map<string, i32> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_i64_lazy {
   @cpp.Lazy
   1: map<string, i64> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_float_lazy {
   @cpp.Lazy
   1: map<string, float> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_double_lazy {
   @cpp.Lazy
   1: map<string, double> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_binary_lazy {
   @cpp.Lazy
   1: map<string, binary> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_string_lazy {
   @cpp.Lazy
   1: map<string, string> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_struct_empty_lazy {
   @cpp.Lazy
   1: map<string, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_bool_lazy {
   @cpp.Lazy
   1: map<i64, bool> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_byte_lazy {
   @cpp.Lazy
   1: map<i64, byte> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i16_lazy {
   @cpp.Lazy
   1: map<i64, i16> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i32_lazy {
   @cpp.Lazy
   1: map<i64, i32> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_i64_lazy {
   @cpp.Lazy
   1: map<i64, i64> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_float_lazy {
   @cpp.Lazy
   1: map<i64, float> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_double_lazy {
   @cpp.Lazy
   1: map<i64, double> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_binary_lazy {
   @cpp.Lazy
   1: map<i64, binary> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_string_lazy {
   @cpp.Lazy
   1: map<i64, string> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_struct_empty_lazy {
   @cpp.Lazy
   1: map<i64, struct_empty> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_bool_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_byte_lazy {
   @cpp.Lazy
   1: map<string, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i16_lazy {
   @cpp.Lazy
   1: map<string, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i32_lazy {
   @cpp.Lazy
   1: map<string, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_i64_lazy {
   @cpp.Lazy
   1: map<string, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_float_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_double_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_binary_lazy {
   @cpp.Lazy
   1: map<string, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_string_lazy {
   @cpp.Lazy
   1: map<string, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_map_string_set_struct_empty_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<string, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_bool_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<bool>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_byte_lazy {
   @cpp.Lazy
   1: map<i64, set<byte>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i16_lazy {
   @cpp.Lazy
   1: map<i64, set<i16>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i32_lazy {
   @cpp.Lazy
   1: map<i64, set<i32>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_i64_lazy {
   @cpp.Lazy
   1: map<i64, set<i64>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_float_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<float>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_double_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<double>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_binary_lazy {
   @cpp.Lazy
   1: map<i64, set<binary>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_string_lazy {
   @cpp.Lazy
   1: map<i64, set<string>> field_1;
 }
+@thrift.Sealed
 struct struct_map_i64_set_struct_empty_lazy {
   @cpp.Lazy
   @hack.SkipCodegen{reason = 'Invalid key type'}
   1: map<i64, set<struct_empty>> field_1;
 }
+@thrift.Sealed
 struct struct_string_lazy {
   @cpp.Lazy
   1: string field_1;

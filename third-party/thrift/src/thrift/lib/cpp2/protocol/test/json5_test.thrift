@@ -68,6 +68,7 @@ struct Example {
   // @lint-ignore THRIFTCHECKS bad-key-type
   19: optional map<map<map<i32, i32>, i32>, i32> nestedMapAsKey;
   // @lint-ignore THRIFTCHECKS bad-key-type
+  @thrift.AllowUnsafeNonSealedKeyType
   20: optional set<OutOfOrderFields> outOfOrderFields;
 }
 

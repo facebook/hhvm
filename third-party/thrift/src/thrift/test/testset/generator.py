@@ -197,7 +197,7 @@ PRIMATIVE_ALTERNATIVE_CUSTOM_DEFAULT_TRANSFORM: Dict[Target, str] = {
 
 STRUCT_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "struct_{}",
-    Target.THRIFT: "struct {}",
+    Target.THRIFT: "@thrift.Sealed\nstruct {}",
     Target.CPP2: CPP2_TYPE_NS + "::struct_t<{}>",
 }
 

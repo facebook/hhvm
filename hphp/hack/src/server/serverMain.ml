@@ -368,16 +368,18 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     end else
       env
   in
+  (* We need to union with the existing env.disk_needs_parsing here and use that to decide whether
+     to start another type-check: After a complete type-check (i.e., env.needs_recheck is empty,
+     and env.full_check_status is Full_check_done), we may have that env.disk_needs_parsing is
+     non-empty due to the interrupt handlers adding files there. *)
+  let disk_needs_parsing =
+    Relative_path.Set.union updates env.disk_needs_parsing
+  in
   let env =
-    if Relative_path.Set.is_empty updates then
+    if Relative_path.Set.is_empty disk_needs_parsing then
       env
     else
-      {
-        env with
-        disk_needs_parsing =
-          Relative_path.Set.union updates env.disk_needs_parsing;
-        full_check_status = Full_check_started;
-      }
+      { env with disk_needs_parsing; full_check_status = Full_check_started }
   in
   let telemetry = Telemetry.duration telemetry ~key:"got_updates" ~start_time in
 

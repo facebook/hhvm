@@ -901,6 +901,10 @@ let type_check_core
   in
   let full_check_status =
     if Relative_path.Set.is_empty needs_recheck then
+      (* TODO(frankemrich) It's surprising that we do not look at env.disk_needs_parsing here as
+         well:  The latter may be added to by the interrupt handlers and is not necessarily empty
+         here. Revisit this once ServerPrecheckedFiles is gone, and it becomes easier to lock down
+         the intended semantics of Full_check_done *)
       Full_check_done
     else
       env.full_check_status
@@ -1133,20 +1137,24 @@ let type_check :
   in
 
   (* If the typecheck completed, them mark the errors-file as complete.
-     A "completed" typecheck means (1) all the [env.needs_recheck] files
-     were indeed typechecked, i.e. not interrupted and cancelled by an
-     interrupt handler like the file watcher; (2) file watcher interrupt didn't
-     insert any [env.disk_needs_parsing] files.
-     Because we mark the errors-file as complete, anyone tailing it will
-     know that they can finish their tailing.
+      A "completed" typecheck means (1) all the [env.needs_recheck] files
+      were indeed typechecked, i.e. not interrupted and cancelled by an
+      interrupt handler like the file watcher; (2) file watcher interrupt didn't
+      insert any [env.disk_needs_parsing] files.
+      Because we mark the errors-file as complete, anyone tailing it will
+      know that they can finish their tailing.
 
-     For incomplete typechecks, we don't do anything here. Necessarily ServerMain
-     will do another round of [ServerTypeCheck.type_check] (i.e. us) shortly,
-     and then next round will call [Server_progress.ErrorsWrite.new_empty_file]
-     which will put a "restarted" sentinel at the end of the current file as
-     well as starting a new file. Indeed it's *better* to place the "restarted"
-     sentinel at that future time rather than now, because it'll have a more
-     up-to-date watchclock at that time. *)
+      For incomplete typechecks, we don't do anything here. Necessarily ServerMain
+      will do another round of [ServerTypeCheck.type_check] (i.e. us) shortly,
+      and then next round will call [Server_progress.ErrorsWrite.new_empty_file]
+      which will put a "restarted" sentinel at the end of the current file as
+      well as starting a new file. Indeed it's *better* to place the "restarted"
+      sentinel at that future time rather than now, because it'll have a more
+      up-to-date watchclock at that time.
+      NOTE(frankemrich) It is surprising that here we consider a type-check
+      "complete" only if needs_recheck AND disk_needs_parsing are both empty, but
+      in type_check_core we only look at needs_recheck to decide whether to set
+      full_checK_status to Full_check_done. *)
   let is_complete =
     Relative_path.Set.is_empty env.needs_recheck
     && Relative_path.Set.is_empty env.disk_needs_parsing

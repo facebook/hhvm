@@ -72,8 +72,16 @@ final class ThriftContextPropState {
     if ($tfm === null) {
       return 0;
     }
-    return
-      self::getTfmFromString($tfm, $skip_experiment_id_ingestion)->origin_id;
+    $parsed_tfm = self::getTfmFromString($tfm, $skip_experiment_id_ingestion);
+
+    // Set dynostats user ID from subrequest baggage if not already set.
+    // Baggage ig_user_id is already IGFBIDv2 (FBID); dyno_set_user expects FBID.
+    $ig_user_id = $parsed_tfm->baggage?->user_ids?->ig_user_id;
+    if (dyno_get_user() === 0 && $ig_user_id is nonnull && $ig_user_id > 0) {
+      dyno_set_user($ig_user_id);
+    }
+
+    return $parsed_tfm->origin_id;
   }
 
   // If anything changes with the ThriftFrameworkMetadata, throw out the

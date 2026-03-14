@@ -139,7 +139,7 @@ Booleans that are field values are encoded in the type code, so they have no add
 
 #### INTEGRAL TYPES LARGER THAN 1 BYTE
 
-The integral types that are larger than 1 Byte (`i16`, `i32`, and `i64`) are encoded using the varint format.
+The integral types that are larger than 1 Byte (`i16`, `i32`, and `i64`) are encoded using the little-endian varint format.
 
 #### OTHER NUMERIC TYPE
 

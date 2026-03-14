@@ -20,8 +20,7 @@
 #include <thrift/compiler/ast/t_container.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
-#include <thrift/compiler/ast/t_struct.h>
-#include <thrift/compiler/ast/t_union.h>
+#include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/diagnostic.h>
 
 namespace apache::thrift::compiler::csharp {
@@ -75,8 +74,7 @@ uint8_t get_csharp_ttype(const t_type* type) {
     return 8; // I32 (enums are serialized as i32)
   }
 
-  if (dynamic_cast<const t_struct*>(type) ||
-      dynamic_cast<const t_union*>(type)) {
+  if (dynamic_cast<const t_structured*>(type)) {
     return 12; // STRUCT
   }
 
@@ -179,4 +177,39 @@ std::string quote_csharp_string(const std::string& value) {
   return "\"" + escape_csharp_string(value) + "\"";
 }
 
+bool is_csharp_nullable_type(const t_type* type) {
+  type = type->get_true_type();
+
+  // Reference types are nullable
+  if (dynamic_cast<const t_structured*>(type)) {
+    return true;
+  }
+
+  if (const auto* prim_type = dynamic_cast<const t_primitive_type*>(type)) {
+    switch (prim_type->primitive_type()) {
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
+        return true;
+      case t_primitive_type::type::t_void:
+      case t_primitive_type::type::t_bool:
+      case t_primitive_type::type::t_byte:
+      case t_primitive_type::type::t_i16:
+      case t_primitive_type::type::t_i32:
+      case t_primitive_type::type::t_i64:
+      case t_primitive_type::type::t_float:
+      case t_primitive_type::type::t_double:
+        return false;
+      default:
+        return false;
+    }
+  }
+
+  // Collections are reference types
+  if (dynamic_cast<const t_list*>(type) || dynamic_cast<const t_set*>(type) ||
+      dynamic_cast<const t_map*>(type)) {
+    return true;
+  }
+
+  return false;
+}
 } // namespace apache::thrift::compiler::csharp

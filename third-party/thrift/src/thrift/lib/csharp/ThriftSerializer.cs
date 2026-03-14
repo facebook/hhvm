@@ -35,7 +35,7 @@ namespace FBThrift
 
             using var ms = new MemoryStream();
             var writer = new ThriftBinaryWriter(ms);
-            obj.Write(writer);
+            obj.__fbthrift_write(writer);
             return ms.ToArray();
         }
 
@@ -49,7 +49,7 @@ namespace FBThrift
             using var ms = new MemoryStream(data);
             var reader = new ThriftBinaryReader(ms);
             var result = new T();
-            result.Read(reader);
+            result.__fbthrift_read(reader);
             return result;
         }
 
@@ -62,7 +62,7 @@ namespace FBThrift
 
             using var ms = new MemoryStream();
             var writer = new ThriftCompactWriter(ms);
-            obj.Write(writer);
+            obj.__fbthrift_write(writer);
             return ms.ToArray();
         }
 
@@ -76,7 +76,7 @@ namespace FBThrift
             using var ms = new MemoryStream(data);
             var reader = new ThriftCompactReader(ms);
             var result = new T();
-            result.Read(reader);
+            result.__fbthrift_read(reader);
             return result;
         }
     }

@@ -1,0 +1,106 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+
+{{#let export partial struct_equals |struct| captures |types|}}
+public override bool Equals(object? obj)
+{
+    if (obj is not {{struct.csharp_name}} other)
+    {
+        return false;
+    }
+{{#each struct.fields as |field|}}
+{{#if field.type.binary?}}
+    if (!ReferenceEquals({{field.csharp_property_name}}, other.{{field.csharp_property_name}}))
+    {
+        if ({{field.csharp_property_name}} == null || other.{{field.csharp_property_name}} == null) { return false; }
+        if (!{{field.csharp_property_name}}.AsSpan().SequenceEqual(other.{{field.csharp_property_name}}.AsSpan())) { return false; }
+    }
+{{#else if field.type.list?}}
+    if (!ReferenceEquals({{field.csharp_property_name}}, other.{{field.csharp_property_name}}))
+    {
+        if ({{field.csharp_property_name}} == null || other.{{field.csharp_property_name}} == null) { return false; }
+        if ({{field.csharp_property_name}}.Count != other.{{field.csharp_property_name}}.Count) { return false; }
+        for (int i = 0; i < {{field.csharp_property_name}}.Count; i++)
+        {
+            if (!Equals({{field.csharp_property_name}}[i], other.{{field.csharp_property_name}}[i]))
+            {
+                return false;
+            }
+        }
+    }
+{{#else if field.type.set?}}
+    if (!ReferenceEquals({{field.csharp_property_name}}, other.{{field.csharp_property_name}}))
+    {
+        if ({{field.csharp_property_name}} == null || other.{{field.csharp_property_name}} == null) { return false; }
+        if (!{{field.csharp_property_name}}.SetEquals(other.{{field.csharp_property_name}})) { return false; }
+    }
+{{#else if field.type.map?}}
+    if (!ReferenceEquals({{field.csharp_property_name}}, other.{{field.csharp_property_name}}))
+    {
+        if ({{field.csharp_property_name}} == null || other.{{field.csharp_property_name}} == null) { return false; }
+        if ({{field.csharp_property_name}}.Count != other.{{field.csharp_property_name}}.Count) { return false; }
+        foreach (var kvp in {{field.csharp_property_name}})
+        {
+            if (!other.{{field.csharp_property_name}}.TryGetValue(kvp.Key, out var otherVal) || !Equals(kvp.Value, otherVal))
+            {
+                return false;
+            }
+        }
+    }
+{{#else}}
+    if (!Equals({{field.csharp_property_name}}, other.{{field.csharp_property_name}}))
+    {
+        return false;
+    }
+{{/if field.type.binary?}}
+{{/each}}
+    return true;
+}
+
+public override int GetHashCode()
+{
+    var hashCode = new HashCode();
+{{#each struct.fields as |field|}}
+{{#if field.type.list?}}
+    if ({{field.csharp_property_name}} != null)
+        foreach (var item in {{field.csharp_property_name}}) hashCode.Add(item);
+{{#else if field.type.set?}}
+    if ({{field.csharp_property_name}} != null)
+    {
+        var setHash = 0;
+        foreach (var item in {{field.csharp_property_name}}) setHash ^= item.GetHashCode();
+        hashCode.Add(setHash);
+    }
+{{#else if field.type.map?}}
+    if ({{field.csharp_property_name}} != null)
+    {
+        var mapHash = 0;
+        foreach (var kvp in {{field.csharp_property_name}}) mapHash ^= HashCode.Combine(kvp.Key, kvp.Value);
+        hashCode.Add(mapHash);
+    }
+{{#else if field.type.binary?}}
+    if ({{field.csharp_property_name}} != null)
+        hashCode.AddBytes({{field.csharp_property_name}}.AsSpan());
+{{#else}}
+    hashCode.Add({{field.csharp_property_name}});
+{{/if field.type.list?}}
+{{/each}}
+    return hashCode.ToHashCode();
+}
+{{/let partial}}

@@ -26,12 +26,12 @@ namespace FBThrift
         /// Writes this object to the specified Thrift protocol writer.
         /// </summary>
         /// <param name="writer">The protocol writer to write to.</param>
-        void Write(IThriftProtocolWriter writer);
+        void __fbthrift_write(IThriftProtocolWriter writer);
 
         /// <summary>
         /// Reads this object's fields from the specified Thrift protocol reader.
         /// </summary>
         /// <param name="reader">The protocol reader to read from.</param>
-        void Read(IThriftProtocolReader reader);
+        void __fbthrift_read(IThriftProtocolReader reader);
     }
 }

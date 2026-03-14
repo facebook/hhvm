@@ -320,7 +320,7 @@ namespace FBThrift
             _lastFieldId = 0;
 
             var result = new T();
-            result.Read(this);
+            result.__fbthrift_read(this);
 
             _lastFieldId = savedFieldId;
             return result;

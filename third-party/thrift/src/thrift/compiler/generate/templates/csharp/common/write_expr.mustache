@@ -1,0 +1,43 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{! Renders a C# writer method call expression for a given Thrift type.
+    Takes a 'value' parameter — the C# expression for the value to write.
+    Maps primitive types to direct writer method calls.
+    Enums are cast to int before writing as i32.
+    Structs use WriteStruct().
+    Containers are not handled here — templates handle those inline
+    with loop expansion. }}
+{{#let export partial csharp_write_expr |type value|}}
+  {{#pragma ignore-newlines}}
+{{#if type.bool?}}writer.WriteBool({{value}})
+{{#else if type.byte?}}writer.WriteByte({{value}})
+{{#else if type.i16?}}writer.WriteI16({{value}})
+{{#else if type.i32?}}writer.WriteI32({{value}})
+{{#else if type.i64?}}writer.WriteI64({{value}})
+{{#else if type.float?}}writer.WriteFloat({{value}})
+{{#else if type.double?}}writer.WriteDouble({{value}})
+{{#else if type.string?}}writer.WriteString({{value}})
+{{#else if type.binary?}}writer.WriteBinary({{value}})
+{{#else if type.enum?}}writer.WriteI32((int){{value}})
+{{#else if type.structured?}}writer.WriteStruct({{value}})
+{{#else if type.list?}}writer.WriteList({{value}})
+{{#else if type.set?}}writer.WriteSet({{value}})
+{{#else if type.map?}}writer.WriteMap({{value}})
+{{/if type.bool?}}
+{{/let partial}}

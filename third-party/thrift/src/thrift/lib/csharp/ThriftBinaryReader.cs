@@ -257,7 +257,7 @@ namespace FBThrift
         public T ReadStruct<T>() where T : IThriftSerializable, new()
         {
             var result = new T();
-            result.Read(this);
+            result.__fbthrift_read(this);
             return result;
         }
 

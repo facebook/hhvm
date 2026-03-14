@@ -14,14 +14,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#nullable enable
+using System;
 using System.Collections.Generic;
-using @MyCompany = @Company;
-using @MyMapIdentifier = Dictionary<string, string>;
-using @CompanyLocationsMap = Dictionary<@Company, List<@City>>;
+using System.IO;
+using System.Linq;
+using FBThrift;
 
 namespace Test.Fixtures.Constants
 {
+    using @MyCompany = @Company;
+    using @MyMapIdentifier = Dictionary<string, string>;
+    using @CompanyLocationsMap = Dictionary<@Company, List<@City>>;
     /// <summary>
     /// Auto-generated enum from EmptyEnum
     /// </summary>
@@ -52,6 +56,965 @@ namespace Test.Fixtures.Constants
         @__FRIEND__FEED = 4
     }
 
+    /// <summary>
+    /// Auto-generated from Internship
+    /// </summary>
+    public class @Internship : IThriftSerializable
+    {
+        /// <summary>Gets or sets the weeks field.</summary>
+        public int @weeks { get; set; }
+        /// <summary>Gets or sets the title field.</summary>
+        public string @title { get; set; } = string.Empty;
+        /// <summary>Gets or sets the employer field (optional).</summary>
+        public @Company? @employer { get; set; }
+        /// <summary>Gets or sets the compensation field (optional).</summary>
+        public double? @compensation { get; set; }
+        /// <summary>Gets or sets the school field (optional).</summary>
+        public string? @school { get; set; }
+    
+        public @Internship()
+        {
+            @title = string.Empty;
+        }
+    
+        public void __fbthrift_clear()
+        {
+            @weeks = default;
+            @title = string.Empty;
+            @employer = null;
+            @compensation = null;
+            @school = null;
+        }
+    
+        public bool __fbthrift_is_empty()
+        {
+            if (@weeks != default) { return false; }
+            if (@title != null && @title.Length != 0) { return false; }
+            if (@employer != null) { return false; }
+            if (@compensation != null) { return false; }
+            if (@school != null) { return false; }
+            return true;
+        }
+    
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            // Field 1: weeks (int)
+            writer.WriteFieldBegin(ThriftWireType.I32, 1);
+            writer.WriteI32(@weeks);
+            // Field 2: title (string)
+            writer.WriteFieldBegin(ThriftWireType.String, 2);
+            writer.WriteString(@title);
+            // Field 3: employer (@Company)
+            if (@employer != null)
+            {
+                writer.WriteFieldBegin(ThriftWireType.I32, 3);
+                writer.WriteI32((int)@employer.Value);
+            }
+            // Field 4: compensation (double)
+            if (@compensation != null)
+            {
+                writer.WriteFieldBegin(ThriftWireType.Double, 4);
+                writer.WriteValue(@compensation.Value);
+            }
+            // Field 5: school (string)
+            if (@school != null)
+            {
+                writer.WriteFieldBegin(ThriftWireType.String, 5);
+                writer.WriteString(@school);
+            }
+            writer.WriteFieldStop();
+        }
+    
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+        
+                switch (fieldId)
+                {
+                    case 1: // weeks
+                        if (fieldType == ThriftWireType.I32)
+                        {
+                            @weeks = reader.ReadI32();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 2: // title
+                        if (fieldType == ThriftWireType.String)
+                        {
+                            @title = reader.ReadString();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 3: // employer
+                        if (fieldType == ThriftWireType.I32)
+                        {
+                            @employer = (@Company)reader.ReadI32();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 4: // compensation
+                        if (fieldType == ThriftWireType.Double)
+                        {
+                            @compensation = reader.ReadDouble();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 5: // school
+                        if (fieldType == ThriftWireType.String)
+                        {
+                            @school = reader.ReadString();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+    
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @Internship other)
+            {
+                return false;
+            }
+            if (!Equals(@weeks, other.@weeks))
+            {
+                return false;
+            }
+            if (!Equals(@title, other.@title))
+            {
+                return false;
+            }
+            if (!Equals(@employer, other.@employer))
+            {
+                return false;
+            }
+            if (!Equals(@compensation, other.@compensation))
+            {
+                return false;
+            }
+            if (!Equals(@school, other.@school))
+            {
+                return false;
+            }
+            return true;
+        }
+        
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(@weeks);
+            hashCode.Add(@title);
+            hashCode.Add(@employer);
+            hashCode.Add(@compensation);
+            hashCode.Add(@school);
+            return hashCode.ToHashCode();
+        }
+    
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("Internship(");
+            sb.Append("weeks=");
+            sb.Append(@weeks);
+            sb.Append(", ");
+            sb.Append("title=");
+            sb.Append(@title);
+            sb.Append(", ");
+            sb.Append("employer=");
+            sb.Append(@employer);
+            sb.Append(", ");
+            sb.Append("compensation=");
+            sb.Append(@compensation);
+            sb.Append(", ");
+            sb.Append("school=");
+            sb.Append(@school);
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Auto-generated from Range
+    /// </summary>
+    public class @Range : IThriftSerializable
+    {
+        /// <summary>Gets or sets the min field.</summary>
+        public int @min { get; set; }
+        /// <summary>Gets or sets the max field.</summary>
+        public int @max { get; set; }
+    
+        public @Range()
+        {
+        }
+    
+        public void __fbthrift_clear()
+        {
+            @min = default;
+            @max = default;
+        }
+    
+        public bool __fbthrift_is_empty()
+        {
+            if (@min != default) { return false; }
+            if (@max != default) { return false; }
+            return true;
+        }
+    
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            // Field 1: min (int)
+            writer.WriteFieldBegin(ThriftWireType.I32, 1);
+            writer.WriteI32(@min);
+            // Field 2: max (int)
+            writer.WriteFieldBegin(ThriftWireType.I32, 2);
+            writer.WriteI32(@max);
+            writer.WriteFieldStop();
+        }
+    
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+        
+                switch (fieldId)
+                {
+                    case 1: // min
+                        if (fieldType == ThriftWireType.I32)
+                        {
+                            @min = reader.ReadI32();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 2: // max
+                        if (fieldType == ThriftWireType.I32)
+                        {
+                            @max = reader.ReadI32();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+    
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @Range other)
+            {
+                return false;
+            }
+            if (!Equals(@min, other.@min))
+            {
+                return false;
+            }
+            if (!Equals(@max, other.@max))
+            {
+                return false;
+            }
+            return true;
+        }
+        
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(@min);
+            hashCode.Add(@max);
+            return hashCode.ToHashCode();
+        }
+    
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("Range(");
+            sb.Append("min=");
+            sb.Append(@min);
+            sb.Append(", ");
+            sb.Append("max=");
+            sb.Append(@max);
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Auto-generated from struct1
+    /// </summary>
+    public class @struct1 : IThriftSerializable
+    {
+        /// <summary>Gets or sets the a field.</summary>
+        public int @a { get; set; } = 1234567;
+        /// <summary>Gets or sets the b field.</summary>
+        public string @b { get; set; } = "<uninitialized>";
+    
+        public @struct1()
+        {
+            @a = 1234567;
+            @b = "<uninitialized>";
+        }
+    
+        public void __fbthrift_clear()
+        {
+            @a = default;
+            @b = string.Empty;
+        }
+    
+        public bool __fbthrift_is_empty()
+        {
+            if (@a != default) { return false; }
+            if (@b != null && @b.Length != 0) { return false; }
+            return true;
+        }
+    
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            // Field 1: a (int)
+            writer.WriteFieldBegin(ThriftWireType.I32, 1);
+            writer.WriteI32(@a);
+            // Field 2: b (string)
+            writer.WriteFieldBegin(ThriftWireType.String, 2);
+            writer.WriteString(@b);
+            writer.WriteFieldStop();
+        }
+    
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+        
+                switch (fieldId)
+                {
+                    case 1: // a
+                        if (fieldType == ThriftWireType.I32)
+                        {
+                            @a = reader.ReadI32();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 2: // b
+                        if (fieldType == ThriftWireType.String)
+                        {
+                            @b = reader.ReadString();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+    
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @struct1 other)
+            {
+                return false;
+            }
+            if (!Equals(@a, other.@a))
+            {
+                return false;
+            }
+            if (!Equals(@b, other.@b))
+            {
+                return false;
+            }
+            return true;
+        }
+        
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(@a);
+            hashCode.Add(@b);
+            return hashCode.ToHashCode();
+        }
+    
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("struct1(");
+            sb.Append("a=");
+            sb.Append(@a);
+            sb.Append(", ");
+            sb.Append("b=");
+            sb.Append(@b);
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Auto-generated from struct2
+    /// </summary>
+    public class @struct2 : IThriftSerializable
+    {
+        /// <summary>Gets or sets the a field.</summary>
+        public int @a { get; set; }
+        /// <summary>Gets or sets the b field.</summary>
+        public string @b { get; set; } = string.Empty;
+        /// <summary>Gets or sets the c field.</summary>
+        public @struct1 @c { get; set; } = new @struct1();
+        /// <summary>Gets or sets the d field.</summary>
+        public List<int> @d { get; set; } = new List<int>();
+    
+        public @struct2()
+        {
+            @b = string.Empty;
+            @c = new @struct1();
+            @d = new List<int>();
+        }
+    
+        public void __fbthrift_clear()
+        {
+            @a = default;
+            @b = string.Empty;
+            @c = new @struct1();
+            @d = new List<int>();
+        }
+    
+        public bool __fbthrift_is_empty()
+        {
+            if (@a != default) { return false; }
+            if (@b != null && @b.Length != 0) { return false; }
+            if (@c != null && !@c.__fbthrift_is_empty()) { return false; }
+            if (@d != null && @d.Count != 0) { return false; }
+            return true;
+        }
+    
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            // Field 1: a (int)
+            writer.WriteFieldBegin(ThriftWireType.I32, 1);
+            writer.WriteI32(@a);
+            // Field 2: b (string)
+            writer.WriteFieldBegin(ThriftWireType.String, 2);
+            writer.WriteString(@b);
+            // Field 3: c (@struct1)
+            writer.WriteFieldBegin(ThriftWireType.Struct, 3);
+            writer.WriteStruct(@c);
+            // Field 4: d (List<int>)
+            writer.WriteFieldBegin(ThriftWireType.List, 4);
+            writer.WriteListBegin(ThriftWireType.I32, @d.Count);
+            foreach (var _elem in @d)
+            {
+                writer.WriteI32(_elem);
+            }
+            writer.WriteFieldStop();
+        }
+    
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+        
+                switch (fieldId)
+                {
+                    case 1: // a
+                        if (fieldType == ThriftWireType.I32)
+                        {
+                            @a = reader.ReadI32();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 2: // b
+                        if (fieldType == ThriftWireType.String)
+                        {
+                            @b = reader.ReadString();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 3: // c
+                        if (fieldType == ThriftWireType.Struct)
+                        {
+                            @c = reader.ReadStruct<@struct1>();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 4: // d
+                        if (fieldType == ThriftWireType.List)
+                        {
+                            @d = reader.ReadList<int>();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+    
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @struct2 other)
+            {
+                return false;
+            }
+            if (!Equals(@a, other.@a))
+            {
+                return false;
+            }
+            if (!Equals(@b, other.@b))
+            {
+                return false;
+            }
+            if (!Equals(@c, other.@c))
+            {
+                return false;
+            }
+            if (!ReferenceEquals(@d, other.@d))
+            {
+                if (@d == null || other.@d == null) { return false; }
+                if (@d.Count != other.@d.Count) { return false; }
+                for (int i = 0; i < @d.Count; i++)
+                {
+                    if (!Equals(@d[i], other.@d[i]))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(@a);
+            hashCode.Add(@b);
+            hashCode.Add(@c);
+            if (@d != null)
+                foreach (var item in @d) hashCode.Add(item);
+            return hashCode.ToHashCode();
+        }
+    
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("struct2(");
+            sb.Append("a=");
+            sb.Append(@a);
+            sb.Append(", ");
+            sb.Append("b=");
+            sb.Append(@b);
+            sb.Append(", ");
+            sb.Append("c=");
+            sb.Append(@c);
+            sb.Append(", ");
+            sb.Append("d=");
+            if (@d != null) { sb.Append("["); sb.Append(string.Join(", ", @d)); sb.Append("]"); } else { sb.Append("null"); }
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Auto-generated from struct3
+    /// </summary>
+    public class @struct3 : IThriftSerializable
+    {
+        /// <summary>Gets or sets the a field.</summary>
+        public string @a { get; set; } = string.Empty;
+        /// <summary>Gets or sets the b field.</summary>
+        public int @b { get; set; }
+        /// <summary>Gets or sets the c field.</summary>
+        public @struct2 @c { get; set; } = new @struct2();
+    
+        public @struct3()
+        {
+            @a = string.Empty;
+            @c = new @struct2();
+        }
+    
+        public void __fbthrift_clear()
+        {
+            @a = string.Empty;
+            @b = default;
+            @c = new @struct2();
+        }
+    
+        public bool __fbthrift_is_empty()
+        {
+            if (@a != null && @a.Length != 0) { return false; }
+            if (@b != default) { return false; }
+            if (@c != null && !@c.__fbthrift_is_empty()) { return false; }
+            return true;
+        }
+    
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            // Field 1: a (string)
+            writer.WriteFieldBegin(ThriftWireType.String, 1);
+            writer.WriteString(@a);
+            // Field 2: b (int)
+            writer.WriteFieldBegin(ThriftWireType.I32, 2);
+            writer.WriteI32(@b);
+            // Field 3: c (@struct2)
+            writer.WriteFieldBegin(ThriftWireType.Struct, 3);
+            writer.WriteStruct(@c);
+            writer.WriteFieldStop();
+        }
+    
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+        
+                switch (fieldId)
+                {
+                    case 1: // a
+                        if (fieldType == ThriftWireType.String)
+                        {
+                            @a = reader.ReadString();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 2: // b
+                        if (fieldType == ThriftWireType.I32)
+                        {
+                            @b = reader.ReadI32();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 3: // c
+                        if (fieldType == ThriftWireType.Struct)
+                        {
+                            @c = reader.ReadStruct<@struct2>();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+    
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @struct3 other)
+            {
+                return false;
+            }
+            if (!Equals(@a, other.@a))
+            {
+                return false;
+            }
+            if (!Equals(@b, other.@b))
+            {
+                return false;
+            }
+            if (!Equals(@c, other.@c))
+            {
+                return false;
+            }
+            return true;
+        }
+        
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(@a);
+            hashCode.Add(@b);
+            hashCode.Add(@c);
+            return hashCode.ToHashCode();
+        }
+    
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("struct3(");
+            sb.Append("a=");
+            sb.Append(@a);
+            sb.Append(", ");
+            sb.Append("b=");
+            sb.Append(@b);
+            sb.Append(", ");
+            sb.Append("c=");
+            sb.Append(@c);
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Auto-generated from struct4
+    /// </summary>
+    public class @struct4 : IThriftSerializable
+    {
+        /// <summary>Gets or sets the a field.</summary>
+        public int @a { get; set; }
+        /// <summary>Gets or sets the b field (optional).</summary>
+        public double? @b { get; set; }
+        /// <summary>Gets or sets the c field (optional).</summary>
+        public sbyte? @c { get; set; }
+    
+        public @struct4()
+        {
+        }
+    
+        public void __fbthrift_clear()
+        {
+            @a = default;
+            @b = null;
+            @c = null;
+        }
+    
+        public bool __fbthrift_is_empty()
+        {
+            if (@a != default) { return false; }
+            if (@b != null) { return false; }
+            if (@c != null) { return false; }
+            return true;
+        }
+    
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            // Field 1: a (int)
+            writer.WriteFieldBegin(ThriftWireType.I32, 1);
+            writer.WriteI32(@a);
+            // Field 2: b (double)
+            if (@b != null)
+            {
+                writer.WriteFieldBegin(ThriftWireType.Double, 2);
+                writer.WriteValue(@b.Value);
+            }
+            // Field 3: c (sbyte)
+            if (@c != null)
+            {
+                writer.WriteFieldBegin(ThriftWireType.Byte, 3);
+                writer.WriteValue(@c.Value);
+            }
+            writer.WriteFieldStop();
+        }
+    
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+        
+                switch (fieldId)
+                {
+                    case 1: // a
+                        if (fieldType == ThriftWireType.I32)
+                        {
+                            @a = reader.ReadI32();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 2: // b
+                        if (fieldType == ThriftWireType.Double)
+                        {
+                            @b = reader.ReadDouble();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 3: // c
+                        if (fieldType == ThriftWireType.Byte)
+                        {
+                            @c = reader.ReadByte();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+    
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @struct4 other)
+            {
+                return false;
+            }
+            if (!Equals(@a, other.@a))
+            {
+                return false;
+            }
+            if (!Equals(@b, other.@b))
+            {
+                return false;
+            }
+            if (!Equals(@c, other.@c))
+            {
+                return false;
+            }
+            return true;
+        }
+        
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(@a);
+            hashCode.Add(@b);
+            hashCode.Add(@c);
+            return hashCode.ToHashCode();
+        }
+    
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("struct4(");
+            sb.Append("a=");
+            sb.Append(@a);
+            sb.Append(", ");
+            sb.Append("b=");
+            sb.Append(@b);
+            sb.Append(", ");
+            sb.Append("c=");
+            sb.Append(@c);
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Placeholder for union type union1 (full codegen pending).
+    /// </summary>
+    public class @union1 : IThriftSerializable
+    {
+        public bool __fbthrift_is_empty() => true;
+
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, _) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+                reader.Skip(fieldType);
+            }
+        }
+
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            writer.WriteFieldStop();
+        }
+    }
+
+    /// <summary>
+    /// Placeholder for union type union2 (full codegen pending).
+    /// </summary>
+    public class @union2 : IThriftSerializable
+    {
+        public bool __fbthrift_is_empty() => true;
+
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, _) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+                reader.Skip(fieldType);
+            }
+        }
+
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            writer.WriteFieldStop();
+        }
+    }
+
 
     /// <summary>
     /// Auto-generated constants
@@ -61,18 +1024,15 @@ namespace Test.Fixtures.Constants
         public static readonly int @myInt = 1337;
         public static readonly string @name = "Mark Zuckerberg";
         public static readonly string @multi_line_string = "This\nis a\nmulti line string.\n";
-        public static readonly List<Dictionary<string, int>> @states = 
-new List<Dictionary<string, int>>()
+        public static readonly List<Dictionary<string, int>> @states = new List<Dictionary<string, int>>()
 {
-  
-new Dictionary<string, int>()
+  new Dictionary<string, int>()
 {
   { "San Diego", 3211000 },
   { "Sacramento", 479600 },
   { "SF", 837400 },
 },
-  
-new Dictionary<string, int>()
+  new Dictionary<string, int>()
 {
   { "New York", 8406000 },
   { "Albany", 98400 },
@@ -87,43 +1047,38 @@ new Dictionary<string, int>()
         public static readonly @MyCompany @my_company = @MyCompany.@FACEBOOK;
         public static readonly string /* MyStringIdentifier */ @foo = "foo";
         public static readonly int /* MyIntIdentifier */ @bar = 42;
-        public static readonly @MyMapIdentifier @mymap = 
-new @MyMapIdentifier()
+        public static readonly @MyMapIdentifier @mymap = new @MyMapIdentifier()
 {
   { "keys", "values" },
 };
-        public static readonly List<@Company> @my_apps = 
-new List<@Company>()
+        public static readonly List<@Company> @my_apps = new List<@Company>()
 {
   @Company.@FACEBOOK,
   @Company.@__FRIEND__FEED,
 };
         public static readonly @Internship @instagram = new @Internship()
 {
-  weeks = 12,
-  title = "Software Engineer",
-  employer = @Company.@INSTAGRAM,
-  compensation = 1200,
-  school = "Monters University",
+  @weeks = 12,
+  @title = "Software Engineer",
+  @employer = @Company.@INSTAGRAM,
+  @compensation = 1200,
+  @school = "Monters University",
 };
         public static readonly @Internship @partial_const = new @Internship()
 {
-  weeks = 8,
-  title = "Some Job",
+  @weeks = 8,
+  @title = "Some Job",
 };
-        public static readonly List<@City> @cities = 
-new List<@City>()
+        public static readonly List<@City> @cities = new List<@City>()
 {
   @City.@NYC,
   @City.@MPK,
   @City.@SEA,
   @City.@LON,
 };
-        public static readonly @CompanyLocationsMap @company_locations = 
-new @CompanyLocationsMap()
+        public static readonly @CompanyLocationsMap @company_locations = new @CompanyLocationsMap()
 {
-  { @Company.@FACEBOOK, 
-new List<@City>()
+  { @Company.@FACEBOOK, new List<@City>()
 {
   @City.@NYC,
   @City.@MPK,
@@ -131,37 +1086,35 @@ new List<@City>()
   @City.@LON,
 } },
 };
-        public static readonly List<@Range> @kRanges = 
-new List<@Range>()
+        public static readonly List<@Range> @kRanges = new List<@Range>()
 {
   new @Range()
 {
-  min = 1,
-  max = 2,
+  @min = 1,
+  @max = 2,
 },
   new @Range()
 {
-  min = 5,
-  max = 6,
+  @min = 5,
+  @max = 6,
 },
 };
-        public static readonly List<@Internship> @internList = 
-new List<@Internship>()
+        public static readonly List<@Internship> @internList = new List<@Internship>()
 {
   new @Internship()
 {
-  weeks = 12,
-  title = "Software Engineer",
-  employer = @Company.@INSTAGRAM,
-  compensation = 1200,
-  school = "Monters University",
+  @weeks = 12,
+  @title = "Software Engineer",
+  @employer = @Company.@INSTAGRAM,
+  @compensation = 1200,
+  @school = "Monters University",
 },
   new @Internship()
 {
-  weeks = 10,
-  title = "Sales Intern",
-  employer = @Company.@FACEBOOK,
-  compensation = 1000,
+  @weeks = 10,
+  @title = "Sales Intern",
+  @employer = @Company.@FACEBOOK,
+  @compensation = 1000,
 },
 };
         public static readonly @struct1 @pod_0 = new @struct1()
@@ -172,25 +1125,24 @@ new List<@Internship>()
 };
         public static readonly @struct1 @pod_1 = new @struct1()
 {
-  a = 10,
-  b = "foo",
+  @a = 10,
+  @b = "foo",
 };
         public static readonly @struct1 @pod_s_1 = new @struct1()
 {
-  a = 10,
-  b = "foo",
+  @a = 10,
+  @b = "foo",
 };
         public static readonly @struct2 @pod_2 = new @struct2()
 {
-  a = 98,
-  b = "gaz",
-  c = new @struct1()
+  @a = 98,
+  @b = "gaz",
+  @c = new @struct1()
 {
-  a = 12,
-  b = "bar",
+  @a = 12,
+  @b = "bar",
 },
-  d = 
-new List<int>()
+  @d = new List<int>()
 {
   11,
   22,
@@ -199,15 +1151,14 @@ new List<int>()
 };
         public static readonly @struct2 @pod_trailing_commas = new @struct2()
 {
-  a = 98,
-  b = "gaz",
-  c = new @struct1()
+  @a = 98,
+  @b = "gaz",
+  @c = new @struct1()
 {
-  a = 12,
-  b = "bar",
+  @a = 12,
+  @b = "bar",
 },
-  d = 
-new List<int>()
+  @d = new List<int>()
 {
   11,
   22,
@@ -216,15 +1167,14 @@ new List<int>()
 };
         public static readonly @struct2 @pod_s_2 = new @struct2()
 {
-  a = 98,
-  b = "gaz",
-  c = new @struct1()
+  @a = 98,
+  @b = "gaz",
+  @c = new @struct1()
 {
-  a = 12,
-  b = "bar",
+  @a = 12,
+  @b = "bar",
 },
-  d = 
-new List<int>()
+  @d = new List<int>()
 {
   11,
   22,
@@ -233,17 +1183,16 @@ new List<int>()
 };
         public static readonly @struct3 @pod_3 = new @struct3()
 {
-  a = "abc",
-  b = 456,
-  c = new @struct2()
+  @a = "abc",
+  @b = 456,
+  @c = new @struct2()
 {
-  a = 888,
-  c = new @struct1()
+  @a = 888,
+  @c = new @struct1()
 {
-  b = "gaz",
+  @b = "gaz",
 },
-  d = 
-new List<int>()
+  @d = new List<int>()
 {
   1,
   2,
@@ -253,17 +1202,16 @@ new List<int>()
 };
         public static readonly @struct3 @pod_s_3 = new @struct3()
 {
-  a = "abc",
-  b = 456,
-  c = new @struct2()
+  @a = "abc",
+  @b = 456,
+  @c = new @struct2()
 {
-  a = 888,
-  c = new @struct1()
+  @a = 888,
+  @c = new @struct1()
 {
-  b = "gaz",
+  @b = "gaz",
 },
-  d = 
-new List<int>()
+  @d = new List<int>()
 {
   1,
   2,
@@ -273,54 +1221,54 @@ new List<int>()
 };
         public static readonly @struct4 @pod_4 = new @struct4()
 {
-  a = 1234,
-  b = 0.333,
-  c = (sbyte)25,
+  @a = 1234,
+  @b = 0.333,
+  @c = (sbyte)25,
 };
         public static readonly @union1 @u_1_1 = new @union1()
 {
-  i = 97,
+  @i = 97,
 };
         public static readonly @union1 @u_1_2 = new @union1()
 {
-  d = 5.6,
+  @d = 5.6,
 };
         public static readonly @union1 @u_1_3 = new @union1()
 {
 };
         public static readonly @union2 @u_2_1 = new @union2()
 {
-  i = 51,
+  @i = 51,
 };
         public static readonly @union2 @u_2_2 = new @union2()
 {
-  d = 6.7,
+  @d = 6.7,
 };
         public static readonly @union2 @u_2_3 = new @union2()
 {
-  s = new @struct1()
+  @s = new @struct1()
 {
-  a = 8,
-  b = "abacabb",
+  @a = 8,
+  @b = "abacabb",
 },
 };
         public static readonly @union2 @u_2_4 = new @union2()
 {
-  u = new @union1()
+  @u = new @union1()
 {
-  i = 43,
+  @i = 43,
 },
 };
         public static readonly @union2 @u_2_5 = new @union2()
 {
-  u = new @union1()
+  @u = new @union1()
 {
-  d = 9.8,
+  @d = 9.8,
 },
 };
         public static readonly @union2 @u_2_6 = new @union2()
 {
-  u = new @union1()
+  @u = new @union1()
 {
 },
 };
@@ -329,16 +1277,14 @@ new List<int>()
         public static readonly string @quotationMark = "\"";
         public static readonly string @backslash = "\\";
         public static readonly string @escaped_a = "a";
-        public static readonly Dictionary<string, int> @char2ascii = 
-new Dictionary<string, int>()
+        public static readonly Dictionary<string, int> @char2ascii = new Dictionary<string, int>()
 {
   { "'", 39 },
   { "\"", 34 },
   { "\\", 92 },
   { "a", 97 },
 };
-        public static readonly List<string> @escaped_strings = 
-new List<string>()
+        public static readonly List<string> @escaped_strings = new List<string>()
 {
   "\u0001",
   "\u001f",
@@ -365,8 +1311,7 @@ new List<string>()
   "zzzjyyy",
   "zzz¦yyy",
 };
-        public static readonly List<string> @unicode_list = 
-new List<string>()
+        public static readonly List<string> @unicode_list = new List<string>()
 {
   "Bulgaria",
   "Benin",
@@ -380,40 +1325,31 @@ new List<string>()
         public static readonly long @zero64 = 0L;
         public static readonly double @zero_dot_zero = 0;
         public static readonly string @empty_string = "";
-        public static readonly List<int> @empty_int_list = 
-new List<int>()
+        public static readonly List<int> @empty_int_list = new List<int>()
 {
 };
-        public static readonly List<string> @empty_string_list = 
-new List<string>()
+        public static readonly List<string> @empty_string_list = new List<string>()
 {
 };
-        public static readonly HashSet<int> @empty_int_set = 
-new HashSet<int>()
+        public static readonly HashSet<int> @empty_int_set = new HashSet<int>()
 {
 };
-        public static readonly HashSet<string> @empty_string_set = 
-new HashSet<string>()
+        public static readonly HashSet<string> @empty_string_set = new HashSet<string>()
 {
 };
-        public static readonly Dictionary<int, int> @empty_int_int_map = 
-new Dictionary<int, int>()
+        public static readonly Dictionary<int, int> @empty_int_int_map = new Dictionary<int, int>()
 {
 };
-        public static readonly Dictionary<int, string> @empty_int_string_map = 
-new Dictionary<int, string>()
+        public static readonly Dictionary<int, string> @empty_int_string_map = new Dictionary<int, string>()
 {
 };
-        public static readonly Dictionary<string, int> @empty_string_int_map = 
-new Dictionary<string, int>()
+        public static readonly Dictionary<string, int> @empty_string_int_map = new Dictionary<string, int>()
 {
 };
-        public static readonly Dictionary<string, string> @empty_string_string_map = 
-new Dictionary<string, string>()
+        public static readonly Dictionary<string, string> @empty_string_string_map = new Dictionary<string, string>()
 {
 };
-        public static readonly Dictionary<string, string> @unicode_map = 
-new Dictionary<string, string>()
+        public static readonly Dictionary<string, string> @unicode_map = new Dictionary<string, string>()
 {
   { "BG", "Bulgaria" },
   { "BH", "Bahrain" },
@@ -440,32 +1376,27 @@ new Dictionary<string, string>()
         public static readonly double @maxNDub = -1.7976931348623157e+308;
         public static readonly double @minNDub = -2.2250738585072014e-308;
         public static readonly double @minNSDub = -5e-324;
-        public static readonly Dictionary<int, bool> @I2B = 
-new Dictionary<int, bool>()
+        public static readonly Dictionary<int, bool> @I2B = new Dictionary<int, bool>()
 {
   { 0, false },
   { 1, true },
   { 2, true },
   { 3, false },
 };
-        public static readonly Dictionary<int, bool> @I2B_REF = 
-new Dictionary<int, bool>()
+        public static readonly Dictionary<int, bool> @I2B_REF = new Dictionary<int, bool>()
 {
   { 0, false },
   { 1, true },
   { 2, true },
   { 3, false },
 };
-        public static readonly Dictionary<int, int> @map_list_initializer = 
-new Dictionary<int, int>()
+        public static readonly Dictionary<int, int> @map_list_initializer = new Dictionary<int, int>()
 {
 };
-        public static readonly List<int> @list_map_initializer = 
-new List<int>()
+        public static readonly List<int> @list_map_initializer = new List<int>()
 {
 };
-        public static readonly HashSet<int> @set_map_initializer = 
-new HashSet<int>()
+        public static readonly HashSet<int> @set_map_initializer = new HashSet<int>()
 {
 };
     }}

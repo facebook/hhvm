@@ -14,8 +14,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#nullable enable
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using FBThrift;
 
 namespace Test.Fixtures.CsharpConstants
 {
@@ -42,8 +46,7 @@ namespace Test.Fixtures.CsharpConstants
         public static readonly bool @enabled = true;
         public static readonly bool @disabled = false;
         public static readonly @Color @favoriteColor = @Color.@GREEN;
-        public static readonly List<int> @numbers = 
-new List<int>()
+        public static readonly List<int> @numbers = new List<int>()
 {
   1,
   2,
@@ -51,61 +54,51 @@ new List<int>()
   4,
   5,
 };
-        public static readonly List<string> @names = 
-new List<string>()
+        public static readonly List<string> @names = new List<string>()
 {
   "Alice",
   "Bob",
   "Charlie",
 };
-        public static readonly List<@Color> @palette = 
-new List<@Color>()
+        public static readonly List<@Color> @palette = new List<@Color>()
 {
   @Color.@RED,
   @Color.@GREEN,
   @Color.@BLUE,
 };
-        public static readonly HashSet<int> @uniqueNumbers = 
-new HashSet<int>()
+        public static readonly HashSet<int> @uniqueNumbers = new HashSet<int>()
 {
   1,
   2,
   3,
 };
-        public static readonly HashSet<string> @tags = 
-new HashSet<string>()
+        public static readonly HashSet<string> @tags = new HashSet<string>()
 {
   "alpha",
   "beta",
 };
-        public static readonly Dictionary<string, int> @ages = 
-new Dictionary<string, int>()
+        public static readonly Dictionary<string, int> @ages = new Dictionary<string, int>()
 {
   { "Alice", 30 },
   { "Bob", 25 },
 };
-        public static readonly Dictionary<int, string> @idToName = 
-new Dictionary<int, string>()
+        public static readonly Dictionary<int, string> @idToName = new Dictionary<int, string>()
 {
   { 1, "One" },
   { 2, "Two" },
 };
-        public static readonly Dictionary<string, @Color> @colorLookup = 
-new Dictionary<string, @Color>()
+        public static readonly Dictionary<string, @Color> @colorLookup = new Dictionary<string, @Color>()
 {
   { "red", @Color.@RED },
   { "green", @Color.@GREEN },
 };
-        public static readonly List<int> @emptyList = 
-new List<int>()
+        public static readonly List<int> @emptyList = new List<int>()
 {
 };
-        public static readonly HashSet<string> @emptySet = 
-new HashSet<string>()
+        public static readonly HashSet<string> @emptySet = new HashSet<string>()
 {
 };
-        public static readonly Dictionary<int, int> @emptyMap = 
-new Dictionary<int, int>()
+        public static readonly Dictionary<int, int> @emptyMap = new Dictionary<int, int>()
 {
 };
         public static readonly string @apostrophe = "'";

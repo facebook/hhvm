@@ -195,7 +195,7 @@ namespace FBThrift
             }
             var savedFieldId = _lastFieldId;
             _lastFieldId = 0;
-            value.Write(this);
+            value.__fbthrift_write(this);
             _lastFieldId = savedFieldId;
         }
 

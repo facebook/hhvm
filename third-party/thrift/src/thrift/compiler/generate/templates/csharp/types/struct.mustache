@@ -1,0 +1,69 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+{{#import "common/defaults" as defaults}}
+{{#import "types/struct_properties" as props}}
+{{#import "types/struct_ctor" as ctor}}
+{{#import "types/struct_clear" as clr}}
+{{#import "types/struct_isempty" as empty}}
+{{#import "types/struct_equals" as eq}}
+{{#import "types/struct_tostring" as ts}}
+{{#import "codec/write" as wr}}
+{{#import "codec/read" as rd}}
+
+{{#let export partial struct_type |struct| captures |types defaults props ctor clr empty eq ts wr rd|}}
+{{#if (not struct.union?)}}
+/// <summary>
+/// Auto-generated from {{struct.name}}
+/// </summary>
+public class {{struct.csharp_name}} : {{#if struct.exception?}}Exception, {{/if struct.exception?}}IThriftSerializable
+{
+{{#if (not (string.empty? struct.uri))}}
+    /// <summary>The Thrift URI for this type, used for type registration.</summary>
+    public static readonly string __fbthrift_uri = "{{struct.uri}}";
+{{/if (not (string.empty? struct.uri))}}
+{{#each struct.fields as |field|}}
+{{#if struct.exception?}}
+{{#if field.optional?}}
+    /// <summary>Gets or sets the {{field.name}} field (optional).</summary>
+    public {{#partial types.csharp_type type=field.type}}{{#if field.type.csharp_primitive?}}?{{/if field.type.csharp_primitive?}}{{#if field.type.enum?}}?{{/if field.type.enum?}}{{#if (not field.type.csharp_primitive?)}}{{#if (not field.type.enum?)}}?{{/if (not field.type.enum?)}}{{/if (not field.type.csharp_primitive?)}} {{field.csharp_property_name}} { get; set; }
+{{#else}}
+    /// <summary>Gets or sets the {{field.name}} field.</summary>
+    public {{#if field.is_message?}}new {{/if field.is_message?}}{{#partial types.csharp_type type=field.type}} {{field.csharp_property_name}} { get; set; }{{#if field.type.is_nullable?}} = {{#partial defaults.csharp_default_value type=field.type}};{{/if field.type.is_nullable?}}
+{{/if field.optional?}}
+{{#else}}
+    {{#partial props.struct_properties field=field struct=struct}}
+{{/if struct.exception?}}
+{{/each}}
+
+    {{#partial ctor.struct_ctor struct=struct}}
+
+    {{#partial clr.struct_clear struct=struct}}
+
+    {{#partial empty.struct_isempty struct=struct}}
+
+    {{#partial wr.struct_write struct=struct}}
+
+    {{#partial rd.struct_read struct=struct}}
+
+    {{#partial eq.struct_equals struct=struct}}
+
+    {{#partial ts.struct_tostring struct=struct}}
+}
+{{/if (not struct.union?)}}
+{{/let partial}}

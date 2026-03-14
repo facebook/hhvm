@@ -1,0 +1,43 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+
+{{#let export partial struct_clear |struct| captures |types|}}
+public void __fbthrift_clear()
+{
+{{#each struct.fields as |field|}}
+{{#if field.optional?}}
+    {{field.csharp_property_name}} = null;
+{{#else if field.type.list?}}
+    {{field.csharp_property_name}} = new {{#partial types.csharp_type type=field.type}}();
+{{#else if field.type.set?}}
+    {{field.csharp_property_name}} = new {{#partial types.csharp_type type=field.type}}();
+{{#else if field.type.map?}}
+    {{field.csharp_property_name}} = new {{#partial types.csharp_type type=field.type}}();
+{{#else if field.type.string?}}
+    {{field.csharp_property_name}} = string.Empty;
+{{#else if field.type.binary?}}
+    {{field.csharp_property_name}} = Array.Empty<byte>();
+{{#else if field.type.structured?}}
+    {{field.csharp_property_name}} = new {{#partial types.csharp_type type=field.type}}();
+{{#else}}
+    {{field.csharp_property_name}} = default;
+{{/if field.optional?}}
+{{/each}}
+}
+{{/let partial}}

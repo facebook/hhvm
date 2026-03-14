@@ -14,16 +14,27 @@
   limitations under the License.
 
 }}
-{{#import "common/types" as types}}
 {{#import "types/enum" as enum_tmpl}}
+{{#import "types/struct" as struct_tmpl}}
+{{#import "common/types" as types}}
 {{> common/file_header}}
 
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using FBThrift;
 {{#each root_program.includes_for_codegen as |inc|}}
 {{#if inc.is_useful_alias?}}
 using {{inc.alias}} = {{inc.csharp_namespace}};
 {{/if inc.is_useful_alias?}}
 {{/each}}
-{{! Generate typedef aliases - maps Thrift typedefs to C# using aliases.
+
+namespace {{root_program.csharp_namespace}}
+{
+{{! Typedef aliases must be inside the namespace block so they can resolve
+    types defined in the same namespace (e.g. enum/struct types).
     NOTE: Skip typedefs that resolve to types incompatible with C# using aliases:
     - binary -> byte[] (arrays not allowed in using aliases until C# 12 / .NET 8+)
     - float/double -> C# keywords can't be used directly in using aliases
@@ -31,14 +42,43 @@ using {{inc.alias}} = {{inc.csharp_namespace}};
     Once we upgrade to .NET 8+, we can use C# 12's "alias any type" feature. }}
 {{#each root_program.typedefs as |td|}}
 {{#if (and (not td.resolved.binary?) (not td.resolved.primitive?))}}
-using {{td.csharp_name}} = {{#partial types.csharp_type type=td.resolved}};
+    using {{td.csharp_name}} = {{#partial types.csharp_type type=td.resolved}};
 {{/if (and (not td.resolved.binary?) (not td.resolved.primitive?))}}
 {{/each}}
-
-namespace {{root_program.csharp_namespace}}
-{
 {{#each root_program.enums as |enum|}}
     {{#partial enum_tmpl.enum_type enum=enum}}
+
+{{/each}}
+{{#each root_program.structured_definitions as |struct|}}
+{{#if struct.union?}}
+    /// <summary>
+    /// Placeholder for union type {{struct.name}} (full codegen pending).
+    /// </summary>
+    public class {{struct.csharp_name}} : IThriftSerializable
+    {
+        public bool __fbthrift_is_empty() => true;
+
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, _) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+                reader.Skip(fieldType);
+            }
+        }
+
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            writer.WriteFieldStop();
+        }
+    }
+{{#else}}
+    {{#partial struct_tmpl.struct_type struct=struct}}
+{{/if struct.union?}}
 
 {{/each}}
 {{#if root_program.constants?}}

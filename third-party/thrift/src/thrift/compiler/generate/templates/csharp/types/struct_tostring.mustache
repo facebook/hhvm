@@ -1,0 +1,45 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/types" as types}}
+
+{{#let export partial struct_tostring |struct| captures |types|}}
+public override string ToString()
+{
+    var sb = new System.Text.StringBuilder();
+    sb.Append("{{struct.name}}(");
+{{#each (array.enumerate struct.fields with_first=true) as |index field first?|}}
+{{#if (not first?)}}
+    sb.Append(", ");
+{{/if (not first?)}}
+    sb.Append("{{field.name}}=");
+{{#if field.type.list?}}
+    if ({{field.csharp_property_name}} != null) { sb.Append("["); sb.Append(string.Join(", ", {{field.csharp_property_name}})); sb.Append("]"); } else { sb.Append("null"); }
+{{#else if field.type.set?}}
+    if ({{field.csharp_property_name}} != null) { sb.Append("{"); sb.Append(string.Join(", ", {{field.csharp_property_name}})); sb.Append("}"); } else { sb.Append("null"); }
+{{#else if field.type.map?}}
+    if ({{field.csharp_property_name}} != null) { sb.Append("{"); var __first = true; foreach (var kvp in {{field.csharp_property_name}}) { if (!__first) sb.Append(", "); __first = false; sb.Append(kvp.Key); sb.Append("="); sb.Append(kvp.Value); } sb.Append("}"); } else { sb.Append("null"); }
+{{#else if field.type.binary?}}
+    if ({{field.csharp_property_name}} != null) { sb.Append(BitConverter.ToString({{field.csharp_property_name}})); } else { sb.Append("null"); }
+{{#else}}
+    sb.Append({{field.csharp_property_name}});
+{{/if field.type.list?}}
+{{/each}}
+    sb.Append(")");
+    return sb.ToString();
+}
+{{/let partial}}

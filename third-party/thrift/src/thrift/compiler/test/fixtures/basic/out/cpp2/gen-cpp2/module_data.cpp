@@ -211,76 +211,76 @@ THRIFT_DATA_MEMBER FOLLY_ATTR_WEAK const std::array<int, 1> TStructDataStorage<:
 namespace detail {
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::MyStruct, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::Containers, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::MyDataItem, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::MyUnion, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::MyException, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::MyExceptionWithMessage, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::ReservedKeyword, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::UnionToBeRenamed, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::MyEnum, true>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::HackEnum, true>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 
 template <> struct TSchemaAssociation<::test::fixtures::basic::FooService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 8924281123066096965;
-  static constexpr ::std::string_view definitionKey = {"\x37\x4e\xff\x88\x7f\xf8\xd2\x44\xdf\x64\x1f\x98\x6a\xaf\x8c\x54", 16};
+  static constexpr int64_t programId = 7981091053700749514;
+  static constexpr ::std::string_view definitionKey = {"\xf4\x3e\x55\xdd\xfb\xe0\x48\x44\xd9\x51\x53\x9f\xfe\x34\xb7\xc6", 16};
 };
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::FooService, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 template <> struct TSchemaAssociation<::test::fixtures::basic::FB303Service, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 8924281123066096965;
-  static constexpr ::std::string_view definitionKey = {"\xbe\x62\x1f\x2c\xea\xe1\xe4\xe3\xf2\x8c\x43\x61\x08\xa8\x65\x24", 16};
+  static constexpr int64_t programId = 7981091053700749514;
+  static constexpr ::std::string_view definitionKey = {"\x15\x0f\x09\x29\x50\x44\xc7\xb0\x60\xae\xbe\xe7\x08\x0f\xf4\x1e", 16};
 };
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::FB303Service, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 template <> struct TSchemaAssociation<::test::fixtures::basic::MyService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 8924281123066096965;
-  static constexpr ::std::string_view definitionKey = {"\x2e\xcf\xb9\x8c\x99\xa4\xcc\xaf\x6f\x90\x89\x13\x69\x24\x5e\xd1", 16};
+  static constexpr int64_t programId = 7981091053700749514;
+  static constexpr ::std::string_view definitionKey = {"\x6f\xfb\xe6\x96\x55\x2a\x2e\x71\xd8\x0f\x8d\xef\xf0\xf7\x67\x81", 16};
 };
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::MyService, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 template <> struct TSchemaAssociation<::test::fixtures::basic::DbMixedStackArguments, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 8924281123066096965;
-  static constexpr ::std::string_view definitionKey = {"\x90\x3a\x60\x8d\x78\xf7\x64\x97\x92\x8d\x4c\x84\x38\x6d\xed\x0e", 16};
+  static constexpr int64_t programId = 7981091053700749514;
+  static constexpr ::std::string_view definitionKey = {"\x41\x1e\xf3\x03\xa0\x4e\xa0\x73\x86\x63\xf6\x6a\xe3\x04\x6a\x34", 16};
 };
 ::folly::Range<const ::std::string_view*> TSchemaAssociation<::test::fixtures::basic::DbMixedStackArguments, false>::bundle() {
-    return ::test::fixtures::basic::module_constants::_fbthrift_schema_7bd96a6608142d45_includes();
+    return ::test::fixtures::basic::module_constants::_fbthrift_schema_6ec2880717e198ca_includes();
 }
 } // namespace detail
 } // namespace apache::thrift

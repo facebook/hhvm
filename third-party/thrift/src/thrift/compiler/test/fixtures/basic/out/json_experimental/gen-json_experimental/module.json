@@ -7,6 +7,7 @@
   },
   "namespaces": {
     "android": "test.fixtures.basic",
+    "csharp": "Test.Fixtures.Basic",
     "hack.module": "hack.module.test",
     "java": "test.fixtures.basic",
     "java.swift": "test.fixtures.basic"
@@ -26,7 +27,7 @@
   "name" : "MyEnum"
 },
         "is_exception": false,
-        "lineno": 45
+        "lineno": 46
       },
       "MyDataItemAlias": {
         "name": "MyDataItemAlias",
@@ -35,7 +36,7 @@
   "name" : "MyDataItem"
 },
         "is_exception": false,
-        "lineno": 70
+        "lineno": 71
       }
   },
   "constants": {
@@ -43,55 +44,55 @@
         "name": "FLAG",
         "type": "bool",
         "value": true,
-        "lineno": 27
+        "lineno": 28
       },
       "OFFSET": {
         "name": "OFFSET",
         "type": "byte",
         "value": -10,
-        "lineno": 28
+        "lineno": 29
       },
       "COUNT": {
         "name": "COUNT",
         "type": "i16",
         "value": 200,
-        "lineno": 29
+        "lineno": 30
       },
       "MASK": {
         "name": "MASK",
         "type": "i32",
         "value": 16388846,
-        "lineno": 30
+        "lineno": 31
       },
       "E": {
         "name": "E",
         "type": "double",
         "value": 2.718281828459,
-        "lineno": 31
+        "lineno": 32
       },
       "DATE": {
         "name": "DATE",
         "type": "string",
         "value": "June 28, 2017",
-        "lineno": 32
+        "lineno": 33
       },
       "AList": {
         "name": "AList",
         "type": "list<i32>",
         "value": [2, 3, 5, 7],
-        "lineno": 34
+        "lineno": 35
       },
       "ASet": {
         "name": "ASet",
         "type": "set<string>",
         "value": ["foo", "bar", "baz"],
-        "lineno": 36
+        "lineno": 37
       },
       "AMap": {
         "name": "AMap",
         "type": "map<string, list<i32>>",
         "value": {"foo": [1, 2, 3, 4], "bar": [10, 32, 54]},
-        "lineno": 38
+        "lineno": 39
       }
   },
   "enumerations" :
@@ -101,32 +102,32 @@
         "constants" : {
           "MyValue1" : {
             "name" : "MyValue1",
-            "lineno" : 41,
+            "lineno" : 42,
             "value" : 0
           },
           "MyValue2" : {
             "name" : "MyValue2",
-            "lineno" : 42,
+            "lineno" : 43,
             "value" : 1
           }
         },
-        "lineno" : 40
+        "lineno" : 41
       },
       "HackEnum" : {
         "name" : "HackEnum",
         "constants" : {
           "Value1" : {
             "name" : "Value1",
-            "lineno" : 104,
+            "lineno" : 105,
             "value" : 0
           },
           "Value2" : {
             "name" : "Value2",
-            "lineno" : 105,
+            "lineno" : 106,
             "value" : 1
           }
         },
-        "lineno" : 102
+        "lineno" : 103
       }
   },
   "structs" :
@@ -137,21 +138,21 @@
           "MyIntField" : {
             "name" : "MyIntField",
             "key" : 1,
-            "lineno" : 49,
+            "lineno" : 50,
             "required" : "opt-in-req-out",
             "type" : "i64"
                   },
           "MyStringField" : {
             "name" : "MyStringField",
             "key" : 2,
-            "lineno" : 50,
+            "lineno" : 51,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "MyDataField" : {
             "name" : "MyDataField",
             "key" : 3,
-            "lineno" : 52,
+            "lineno" : 53,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "struct",
@@ -161,7 +162,7 @@
           "myEnum" : {
             "name" : "myEnum",
             "key" : 4,
-            "lineno" : 53,
+            "lineno" : 54,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -171,28 +172,28 @@
           "oneway" : {
             "name" : "oneway",
             "key" : 5,
-            "lineno" : 54,
+            "lineno" : 55,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "readonly" : {
             "name" : "readonly",
             "key" : 6,
-            "lineno" : 55,
+            "lineno" : 56,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "idempotent" : {
             "name" : "idempotent",
             "key" : 7,
-            "lineno" : 56,
+            "lineno" : 57,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "floatSet" : {
             "name" : "floatSet",
             "key" : 8,
-            "lineno" : 57,
+            "lineno" : 58,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "set",
@@ -213,7 +214,7 @@
           "no_hack_codegen_field" : {
             "name" : "no_hack_codegen_field",
             "key" : 9,
-            "lineno" : 59,
+            "lineno" : 60,
             "required" : "opt-in-req-out",
             "type" : "string"
             ,
@@ -231,7 +232,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 48
+        "lineno" : 49
       },
       "Containers" : {
         "name" : "Containers",
@@ -239,7 +240,7 @@
           "I32List" : {
             "name" : "I32List",
             "key" : 1,
-            "lineno" : 64,
+            "lineno" : 65,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "list",
@@ -249,7 +250,7 @@
           "StringSet" : {
             "name" : "StringSet",
             "key" : 2,
-            "lineno" : 65,
+            "lineno" : 66,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "set",
@@ -259,7 +260,7 @@
           "StringToI64Map" : {
             "name" : "StringToI64Map",
             "key" : 3,
-            "lineno" : 66,
+            "lineno" : 67,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "map",
@@ -270,13 +271,13 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 63
+        "lineno" : 64
       },
       "MyDataItem" : {
         "name" : "MyDataItem",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 69
+        "lineno" : 70
       },
       "MyUnion" : {
         "name" : "MyUnion",
@@ -284,7 +285,7 @@
           "myEnum" : {
             "name" : "myEnum",
             "key" : 1,
-            "lineno" : 74,
+            "lineno" : 75,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "enum",
@@ -294,7 +295,7 @@
           "myStruct" : {
             "name" : "myStruct",
             "key" : 2,
-            "lineno" : 75,
+            "lineno" : 76,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "struct",
@@ -304,7 +305,7 @@
           "myDataItem" : {
             "name" : "myDataItem",
             "key" : 3,
-            "lineno" : 76,
+            "lineno" : 77,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "struct",
@@ -314,7 +315,7 @@
           "floatSet" : {
             "name" : "floatSet",
             "key" : 4,
-            "lineno" : 77,
+            "lineno" : 78,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "set",
@@ -335,7 +336,7 @@
         },
         "is_exception" : false,
         "is_union" : true,
-        "lineno" : 73
+        "lineno" : 74
       },
       "MyException" : {
         "name" : "MyException",
@@ -343,21 +344,21 @@
           "MyIntField" : {
             "name" : "MyIntField",
             "key" : 1,
-            "lineno" : 82,
+            "lineno" : 83,
             "required" : "opt-in-req-out",
             "type" : "i64"
                   },
           "MyStringField" : {
             "name" : "MyStringField",
             "key" : 2,
-            "lineno" : 83,
+            "lineno" : 84,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "myStruct" : {
             "name" : "myStruct",
             "key" : 3,
-            "lineno" : 84,
+            "lineno" : 85,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "struct",
@@ -367,7 +368,7 @@
           "myUnion" : {
             "name" : "myUnion",
             "key" : 4,
-            "lineno" : 85,
+            "lineno" : 86,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "struct",
@@ -377,7 +378,7 @@
         },
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 81
+        "lineno" : 82
       },
       "MyExceptionWithMessage" : {
         "name" : "MyExceptionWithMessage",
@@ -385,14 +386,14 @@
           "MyIntField" : {
             "name" : "MyIntField",
             "key" : 1,
-            "lineno" : 89,
+            "lineno" : 90,
             "required" : "opt-in-req-out",
             "type" : "i64"
                   },
           "MyStringField" : {
             "name" : "MyStringField",
             "key" : 2,
-            "lineno" : 90,
+            "lineno" : 91,
             "required" : "opt-in-req-out",
             "type" : "string"
             ,
@@ -410,7 +411,7 @@
           "myStruct" : {
             "name" : "myStruct",
             "key" : 3,
-            "lineno" : 92,
+            "lineno" : 93,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "struct",
@@ -420,7 +421,7 @@
           "myUnion" : {
             "name" : "myUnion",
             "key" : 4,
-            "lineno" : 93,
+            "lineno" : 94,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "struct",
@@ -430,7 +431,7 @@
         },
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 88
+        "lineno" : 89
       },
       "ReservedKeyword" : {
         "name" : "ReservedKeyword",
@@ -448,7 +449,7 @@
           "reserved_field" : {
             "name" : "reserved_field",
             "key" : 1,
-            "lineno" : 98,
+            "lineno" : 99,
             "required" : "opt-in-req-out",
             "type" : "i32"
             ,
@@ -466,7 +467,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 96
+        "lineno" : 97
       },
       "UnionToBeRenamed" : {
         "name" : "UnionToBeRenamed",
@@ -484,7 +485,7 @@
           "reserved_field" : {
             "name" : "reserved_field",
             "key" : 1,
-            "lineno" : 111,
+            "lineno" : 112,
             "required" : "opt-in-req-out",
             "type" : "i32"
             ,
@@ -502,19 +503,19 @@
         },
         "is_exception" : false,
         "is_union" : true,
-        "lineno" : 109
+        "lineno" : 110
       }
   },
   "services" :
   {
       "FooService" : { 
         "name" : "FooService",
-        "lineno" : 115,
+        "lineno" : 116,
         "functions" : {
           "simple_rpc" : {
             "name" : "simple_rpc",
             "returnType" : "void",
-            "lineno" : 117
+            "lineno" : 118
           }
         }
         ,
@@ -531,7 +532,7 @@
       },
       "FB303Service" : { 
         "name" : "FB303Service",
-        "lineno" : 120,
+        "lineno" : 121,
         "functions" : {
           "simple_rpc" : {
             "name" : "simple_rpc",
@@ -540,7 +541,7 @@
                 "name" : "int_parameter",
                 "type" : "i32",
                 "key" : 1,
-                "lineno" : 123,
+                "lineno" : 124,
                 "required" : "opt-in-req-out"
                 ,
                 "structured_annotations": {
@@ -559,7 +560,7 @@
       "type" : "struct",
       "name" : "ReservedKeyword"
     },
-            "lineno" : 121,
+            "lineno" : 122,
             "structured_annotations": {
               "hack.Name" : {
                 "type" : {
@@ -575,17 +576,17 @@
           },
       "MyService" : { 
         "name" : "MyService",
-        "lineno" : 128,
+        "lineno" : 129,
         "functions" : {
           "ping" : {
             "name" : "ping",
             "returnType" : "void",
-            "lineno" : 129
+            "lineno" : 130
           },
           "getRandomData" : {
             "name" : "getRandomData",
             "returnType" : "string",
-            "lineno" : 130
+            "lineno" : 131
           },
           "sink" : {
             "name" : "sink",
@@ -594,12 +595,12 @@
                 "name" : "sink",
                 "type" : "i64",
                 "key" : 1,
-                "lineno" : 131,
+                "lineno" : 132,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : "void",
-            "lineno" : 131
+            "lineno" : 132
           },
           "putDataById" : {
             "name" : "putDataById",
@@ -608,36 +609,22 @@
                 "name" : "id",
                 "type" : "i64",
                 "key" : 1,
-                "lineno" : 133,
+                "lineno" : 134,
                 "required" : "opt-in-req-out"
                           },
               "data": {
                 "name" : "data",
                 "type" : "string",
                 "key" : 2,
-                "lineno" : 133,
-                "required" : "opt-in-req-out"
-                          }
-            },
-            "returnType" : "void",
-            "lineno" : 133
-          },
-          "hasDataById" : {
-            "name" : "hasDataById",
-            "args" : {
-              "id": {
-                "name" : "id",
-                "type" : "i64",
-                "key" : 1,
                 "lineno" : 134,
                 "required" : "opt-in-req-out"
                           }
             },
-            "returnType" : "bool",
+            "returnType" : "void",
             "lineno" : 134
           },
-          "getDataById" : {
-            "name" : "getDataById",
+          "hasDataById" : {
+            "name" : "hasDataById",
             "args" : {
               "id": {
                 "name" : "id",
@@ -647,11 +634,11 @@
                 "required" : "opt-in-req-out"
                           }
             },
-            "returnType" : "string",
+            "returnType" : "bool",
             "lineno" : 135
           },
-          "deleteDataById" : {
-            "name" : "deleteDataById",
+          "getDataById" : {
+            "name" : "getDataById",
             "args" : {
               "id": {
                 "name" : "id",
@@ -661,8 +648,22 @@
                 "required" : "opt-in-req-out"
                           }
             },
-            "returnType" : "void",
+            "returnType" : "string",
             "lineno" : 136
+          },
+          "deleteDataById" : {
+            "name" : "deleteDataById",
+            "args" : {
+              "id": {
+                "name" : "id",
+                "type" : "i64",
+                "key" : 1,
+                "lineno" : 137,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "void",
+            "lineno" : 137
           },
           "lobDataById" : {
             "name" : "lobDataById",
@@ -671,19 +672,19 @@
                 "name" : "id",
                 "type" : "i64",
                 "key" : 1,
-                "lineno" : 137,
+                "lineno" : 138,
                 "required" : "opt-in-req-out"
                           },
               "data": {
                 "name" : "data",
                 "type" : "string",
                 "key" : 2,
-                "lineno" : 137,
+                "lineno" : 138,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : "void",
-            "lineno" : 137
+            "lineno" : 138
           },
           "invalid_return_for_hack" : {
             "name" : "invalid_return_for_hack",
@@ -691,7 +692,7 @@
       "type" : "set",
       "inner_type" : "float"
     },
-            "lineno" : 139,
+            "lineno" : 140,
             "structured_annotations": {
               "hack.SkipCodegen" : {
                 "type" : {
@@ -706,7 +707,7 @@
           "rpc_skipped_codegen" : {
             "name" : "rpc_skipped_codegen",
             "returnType" : "void",
-            "lineno" : 142,
+            "lineno" : 143,
             "structured_annotations": {
               "hack.SkipCodegen" : {
                 "type" : {
@@ -722,24 +723,10 @@
           },
       "DbMixedStackArguments" : { 
         "name" : "DbMixedStackArguments",
-        "lineno" : 146,
+        "lineno" : 147,
         "functions" : {
           "getDataByKey0" : {
             "name" : "getDataByKey0",
-            "args" : {
-              "key": {
-                "name" : "key",
-                "type" : "string",
-                "key" : 1,
-                "lineno" : 147,
-                "required" : "opt-in-req-out"
-                          }
-            },
-            "returnType" : "binary",
-            "lineno" : 147
-          },
-          "getDataByKey1" : {
-            "name" : "getDataByKey1",
             "args" : {
               "key": {
                 "name" : "key",
@@ -751,6 +738,20 @@
             },
             "returnType" : "binary",
             "lineno" : 148
+          },
+          "getDataByKey1" : {
+            "name" : "getDataByKey1",
+            "args" : {
+              "key": {
+                "name" : "key",
+                "type" : "string",
+                "key" : 1,
+                "lineno" : 149,
+                "required" : "opt-in-req-out"
+                          }
+            },
+            "returnType" : "binary",
+            "lineno" : 149
           }
         }
           }

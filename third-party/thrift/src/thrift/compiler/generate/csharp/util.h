@@ -73,4 +73,8 @@ std::string escape_csharp_string(const std::string& value);
  */
 std::string quote_csharp_string(const std::string& value);
 
+/**
+ * Returns true if the C# type is nullable (reference type).
+ */
+bool is_csharp_nullable_type(const t_type* type);
 } // namespace apache::thrift::compiler::csharp

@@ -62,6 +62,49 @@ class t_csharp_EXPERIMENTAL_generator : public t_whisker_generator {
     return std::move(def).make();
   }
 
+  prototype<t_field>::ptr make_prototype_for_field(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_field(proto);
+    auto def = whisker::dsl::prototype_builder<h_field>::extends(base);
+
+    def.property("csharp_property_name", [](const t_field& self) {
+      return "@" + csharp::get_csharp_property_name(std::string(self.name()));
+    });
+
+    def.property("is_message?", [](const t_field& self) {
+      return self.name() == "message";
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_type>::ptr make_prototype_for_type(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_type(proto);
+    auto def = whisker::dsl::prototype_builder<h_type>::extends(base);
+
+    def.property("csharp_ttype_byte", [](const t_type& self) {
+      return static_cast<int64_t>(csharp::get_csharp_ttype(&self));
+    });
+
+    def.property("is_nullable?", [](const t_type& self) {
+      return csharp::is_csharp_nullable_type(&self);
+    });
+
+    // C# value-type primitive (excludes string/binary which are reference
+    // types in C#). Distinct from base primitive? which includes all
+    // t_primitive_type.
+    def.property("csharp_primitive?", [](const t_type& self) {
+      const auto* true_type = self.get_true_type();
+      if (const auto* prim = true_type->try_as<t_primitive_type>()) {
+        return !prim->is_string() && !prim->is_binary();
+      }
+      return false;
+    });
+
+    return std::move(def).make();
+  }
+
   prototype<t_include>::ptr make_prototype_for_include(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_include(proto);
@@ -102,6 +145,18 @@ class t_csharp_EXPERIMENTAL_generator : public t_whisker_generator {
             std::string(self.name());
       }
       return "@" + std::string(self.name());
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<t_typedef>::ptr make_prototype_for_typedef(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_typedef(proto);
+    auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
+
+    def.property("defined_kind?", [](const t_typedef& self) {
+      return self.typedef_kind() == t_typedef::kind::defined;
     });
 
     return std::move(def).make();

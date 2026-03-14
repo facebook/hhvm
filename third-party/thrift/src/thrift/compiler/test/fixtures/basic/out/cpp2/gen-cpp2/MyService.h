@@ -210,8 +210,8 @@ class ServiceHandler<::test::fixtures::basic::MyService> : public apache::thrift
 namespace detail {
 template <> struct TSchemaAssociation<::test::fixtures::basic::MyService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = 8924281123066096965;
-  static constexpr ::std::string_view definitionKey = {"\x2e\xcf\xb9\x8c\x99\xa4\xcc\xaf\x6f\x90\x89\x13\x69\x24\x5e\xd1", 16};
+  static constexpr int64_t programId = 7981091053700749514;
+  static constexpr ::std::string_view definitionKey = {"\x6f\xfb\xe6\x96\x55\x2a\x2e\x71\xd8\x0f\x8d\xef\xf0\xf7\x67\x81", 16};
 };
 }
 } // namespace apache::thrift

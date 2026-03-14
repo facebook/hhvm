@@ -20,6 +20,7 @@ namespace android test.fixtures.basic
 namespace java test.fixtures.basic
 namespace java.swift test.fixtures.basic
 namespace hack.module hack.module.test
+namespace csharp Test.Fixtures.Basic
 
 include "thrift/annotation/hack.thrift"
 include "thrift/annotation/thrift.thrift"

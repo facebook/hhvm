@@ -198,7 +198,7 @@ namespace FBThrift
                 throw new ArgumentNullException(nameof(value),
                     "Cannot write null struct — this would produce invalid wire data (missing field stop marker)");
             }
-            value.Write(this);
+            value.__fbthrift_write(this);
         }
 
         /// <summary>

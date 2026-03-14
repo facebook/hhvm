@@ -37,55 +37,55 @@ readSchemaInclude(::{{prog.cpp_qualified_namespace}}::{{prog.name}}_constants
   {{/let partial}}
 {{> Autogen}}
 
-#include "{{program:include_prefix}}{{program:name}}_constants.h"
+#include "{{program.include_prefix}}{{program.name}}_constants.h"
 
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
-  {{#each program:includes_for_codegen as |include|}}
+  {{#each program.includes_for_codegen as |include|}}
 #include "{{include.program.include_prefix}}{{include.program.name}}_constants.h"
   {{/each}}
 
-namespace {{program:cpp_qualified_namespace}} {
-namespace {{program:name}}_constants {
+namespace {{program.cpp_qualified_namespace}} {
+namespace {{program.name}}_constants {
 
-{{#program:constants}}
-  {{#if constant:outline_init?}}
-{{constant:cpp_type}} const& {{constant:name}}() {
-    {{#if (object.eq? constant:cpp_adapter null)}}
-  static folly::Indestructible<{{constant:self.type.type:cpp_type}}> const instance{ {{!
-    }}{{#partial const_value.iterate_const_values_adapted value=constant:self.value root_const=constant:self}} };
-    {{#else}}
-  static folly::Indestructible<{{constant:cpp_type}}> const instance{
-      folly::factory_constructor, [](){ return {{constant:cpp_adapter}}::fromThrift({{constant:self.type.type:cpp_type}}({{!
-        }}{{#partial const_value.iterate_const_values value=constant:self.value root_const=constant:self}}){{!
-        }}{{#let extra_arg=constant:extra_arg}}{{#if (object.notnull? extra_arg)}},
+  {{#each program.consts as |const|}}
+    {{#if const.outline_init?}}
+{{const.cpp_type}} const& {{const.name}}() {
+      {{#if (object.eq? const.cpp_adapter null)}}
+  static folly::Indestructible<{{const.type.cpp_type}}> const instance{ {{!
+    }}{{#partial const_value.iterate_const_values_adapted value=const.value root_const=const}} };
+      {{#else}}
+  static folly::Indestructible<{{const.cpp_type}}> const instance{
+      folly::factory_constructor, [](){ return {{const.cpp_adapter}}::fromThrift({{const.type.cpp_type}}({{!
+        }}{{#partial const_value.iterate_const_values value=const.value root_const=const}}){{!
+        }}{{#let extra_arg=const.extra_arg}}{{#if (object.notnull? extra_arg)}},
                                             {{#partial const_value.iterate_const_values value=extra_arg.value root_const=extra_arg}},
-                                            "{{constant:uri}}"{{/if (object.notnull? extra_arg)}}); }};
-    {{/if (object.eq? constant:cpp_adapter null)}}
+                                            "{{const.uri}}"{{/if (object.notnull? extra_arg)}}); }};
+      {{/if (object.eq? const.cpp_adapter null)}}
   return *instance;
 }
-  {{#else if (and constant:generated? constant:self.type.binary?)}}
-::std::string_view {{constant:name}}() {
-  constexpr static ::std::string_view {{constant:name}}_{
-    /*@fbthrift_strip_from_fixtures*/"{{constant:self.value.string_value}}",
-    {{constant:self.value.string_length}}/*@fbthrift_strip_from_fixtures*/};
-  return {{constant:name}}_;
+    {{#else if (and const.generated? const.type.binary?)}}
+::std::string_view {{const.name}}() {
+  constexpr static ::std::string_view {{const.name}}_{
+    /*@fbthrift_strip_from_fixtures*/"{{const.value.string_value}}",
+    {{const.value.string_length}}/*@fbthrift_strip_from_fixtures*/};
+  return {{const.name}}_;
 }
-  {{/if constant:outline_init?}}
+    {{/if const.outline_init?}}
 
-{{/program:constants}}
+  {{/each}}
 
-{{^program:has_schema?}}
-::std::string_view {{program:schema_name}}() {
+  {{#if (not program.has_schema?)}}
+::std::string_view {{program.schema_name}}() {
   return "";
 }
-{{/program:has_schema?}}
-::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes() {
-{{#if program:schema_includes_const?}}
-  {{#let schema_includes=program:transitive_schema_includes}}
+  {{/if (not program.has_schema?)}}
+::folly::Range<const ::std::string_view*> {{program.schema_name}}_includes() {
+{{#if program.schema_includes_const?}}
+  {{#let schema_includes=program.transitive_schema_includes}}
   {{! Add 1 to length for the first entry (the current program), followed by all its transitive includes }}
   static const ::std::array<::std::string_view, {{(int.add 1 (array.len schema_includes))}}> includes = {
-    {{program:schema_name}}(),
+    {{program.schema_name}}(),
     {{#each schema_includes as |include|}}
     {{#partial read_include_schema include=include}},
     {{/each}}
@@ -93,20 +93,20 @@ namespace {{program:name}}_constants {
   return ::folly::range(includes);
 {{#else}}
   return {};
-{{/if program:schema_includes_const?}}
+{{/if program.schema_includes_const?}}
 }
-::folly::Range<const ::std::string_view*> {{program:schema_name}}_uris() {
-{{#if program:schema_includes_const?}}
-  static const ::std::array<::std::string_view, {{(array.len program:uris)}}> uris = {
-    {{#program:uris}}
-    "{{ . }}",
-    {{/program:uris}}
+::folly::Range<const ::std::string_view*> {{program.schema_name}}_uris() {
+{{#if program.schema_includes_const?}}
+  static const ::std::array<::std::string_view, {{(array.len program.uris)}}> uris = {
+    {{#each program.uris as |uri|}}
+    "{{uri}}",
+    {{/each}}
   };
   return ::folly::range(uris);
 {{#else}}
   return {};
-{{/if program:schema_includes_const?}}
+{{/if program.schema_includes_const?}}
 }
 
-} // namespace {{program:name}}_constants
-} // namespace {{program:cpp_qualified_namespace}}
+} // namespace {{program.name}}_constants
+} // namespace {{program.cpp_qualified_namespace}}

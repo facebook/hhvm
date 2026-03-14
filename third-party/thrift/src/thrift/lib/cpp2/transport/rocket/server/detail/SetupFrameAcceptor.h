@@ -38,6 +38,8 @@ class SetupFrameAcceptor {
       : connection_(&connection), handler_(&handler) {}
 
   void handle(SetupFrame&& frame) noexcept {
+    connection_->setDecodeMetadataUsingBinary(
+        frame.encodeMetadataUsingBinary());
     handler_->handleSetupFrame(
         std::move(frame), *connection_->getWrappedConnection());
   }

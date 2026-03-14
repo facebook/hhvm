@@ -210,6 +210,12 @@ void RefactoredThriftRocketServerHandler::connectionClosing() {
   }
 }
 
+void RefactoredThriftRocketServerHandler::onIdleTimeout() {
+  if (auto* observer = worker_->getServer()->getObserver()) {
+    observer->connClosedByIdleTimeout();
+  }
+}
+
 void RefactoredThriftRocketServerHandler::requestComplete() {
   if (requestHandler_) {
     requestHandler_->requestComplete();

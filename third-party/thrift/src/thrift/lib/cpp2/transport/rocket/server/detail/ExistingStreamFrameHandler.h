@@ -55,12 +55,26 @@ class ExistingStreamFrameHandler {
    */
   template <typename Frame>
   void handle(Frame&& frame) noexcept {
+    // For PayloadFrame, handle before stream lookup since it may be for
+    // a partial request that isn't in streams_ yet
+    if constexpr (std::is_same_v<std::decay_t<Frame>, PayloadFrame>) {
+      handlePayloadFrame(std::forward<Frame>(frame));
+      return;
+    }
+
     // Extract stream ID for stream lookup
     const StreamId streamId = frame.streamId();
     auto it = connection_->getWrappedConnection()->findStream(streamId);
 
     if (it == connection_->getWrappedConnection()->streamsEnd()) {
-      // Stream not found - this is an error condition
+      // Stream not found - silently ignore CANCEL and REQUEST_N frames for
+      // non-existent streams, consistent with original RocketServerConnection
+      // behavior (handleUntrackedFrame).
+      if constexpr (
+          std::is_same_v<std::decay_t<Frame>, RequestNFrame> ||
+          std::is_same_v<std::decay_t<Frame>, CancelFrame>) {
+        return;
+      }
       connection_->close(
           folly::make_exception_wrapper<RocketException>(
               ErrorCode::INVALID,
@@ -70,9 +84,7 @@ class ExistingStreamFrameHandler {
       return;
     }
 
-    if constexpr (std::is_same_v<std::decay_t<Frame>, PayloadFrame>) {
-      handlePayloadFrame(std::forward<Frame>(frame));
-    } else if constexpr (std::is_same_v<std::decay_t<Frame>, RequestNFrame>) {
+    if constexpr (std::is_same_v<std::decay_t<Frame>, RequestNFrame>) {
       handleRequestNFrame(std::forward<Frame>(frame), it);
     } else if constexpr (std::is_same_v<std::decay_t<Frame>, CancelFrame>) {
       handleCancelFrame(std::forward<Frame>(frame), it);
@@ -121,6 +133,15 @@ class ExistingStreamFrameHandler {
         it->second,
         [&](std::unique_ptr<RequestStreamCallback>& clientCallback) {
           if (clientCallback) {
+            if (!clientCallback->serverCallbackReady()) {
+              connection_->close(
+                  folly::make_exception_wrapper<RocketException>(
+                      ErrorCode::INVALID,
+                      fmt::format(
+                          "Received unexpected early frame, stream id ({}) type (REQUEST_N)",
+                          static_cast<uint32_t>(frame.streamId()))));
+              return;
+            }
             clientCallback->handle(std::move(frame));
           }
         },
@@ -130,10 +151,20 @@ class ExistingStreamFrameHandler {
           }
         },
         [&](auto& clientCallback) {
-          // Handle other variants like BiDi callbacks
-          // For now, skip handling BiDi callbacks - they will be handled
-          // specifically later
-          (void)clientCallback;
+          if (clientCallback) {
+            if (!clientCallback->serverCallbackReady()) {
+              connection_->close(
+                  folly::make_exception_wrapper<RocketException>(
+                      ErrorCode::INVALID,
+                      fmt::format(
+                          "Received unexpected early frame, stream id ({}) type (REQUEST_N)",
+                          static_cast<uint32_t>(frame.streamId()))));
+              return;
+            }
+            if (clientCallback->isStreamOpen()) {
+              clientCallback->onStreamRequestN(frame.requestN());
+            }
+          }
         });
   }
 
@@ -171,12 +202,22 @@ class ExistingStreamFrameHandler {
    * Handle EXT frames - interface matches handleFrame expectation.
    * Uses pure delegation to avoid circular dependencies.
    */
-  void handleExtFrame(ExtFrame&&) noexcept {
-    XLOG(FATAL) << "ext not implemented yet";
+  void handleExtFrame(ExtFrame&& extFrame) noexcept {
+    if (!extFrame.hasIgnore()) {
+      connection_->close(
+          folly::make_exception_wrapper<RocketException>(
+              ErrorCode::INVALID,
+              fmt::format(
+                  "Received unsupported EXT frame type ({}) for stream (id {})",
+                  static_cast<uint32_t>(extFrame.extFrameType()),
+                  static_cast<uint32_t>(extFrame.streamId()))));
+    }
   }
 
-  void handleSinkPayloadFrame(StreamId, PayloadFrame&&) noexcept {
-    XLOG(FATAL) << "sink payload not implemented yet";
+  void handleSinkPayloadFrame(
+      StreamId /*streamId*/, PayloadFrame&& payloadFrame) noexcept {
+    connection_->getWrappedConnection()->handleExistingStreamPayloadFrame(
+        std::move(payloadFrame));
   }
 };
 

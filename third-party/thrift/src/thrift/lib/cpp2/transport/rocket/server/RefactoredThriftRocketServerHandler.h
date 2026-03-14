@@ -107,6 +107,7 @@ class RefactoredThriftRocketServerHandler : public RocketServerHandler {
       RocketServerFrameContext&& context,
       ChannelRequestCallbackFactory clientCallback) final;
   void connectionClosing() final;
+  void onIdleTimeout() final;
   void requestComplete() final;
   void terminateInteraction(int64_t id) final;
 

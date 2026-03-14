@@ -212,6 +212,13 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
    */
   bool handleExtFrame(ExtFrame&& frame);
 
+  /**
+   * Handle a PAYLOAD frame for an existing sink/bidi stream.
+   * Called from ExistingStreamFrameHandler when a PAYLOAD frame is received
+   * for a stream that is not a partial request reassembly.
+   */
+  void handleExistingStreamPayloadFrame(PayloadFrame&& payloadFrame);
+
   void incInflightFinalResponse() override { inflightSinkFinalResponses_++; }
   void decInflightFinalResponse() override {
     DCHECK(inflightSinkFinalResponses_ != 0);
@@ -261,6 +268,10 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
   }
 
   folly::AsyncSocket* getRawSocket() const override { return rawSocket_; }
+
+  std::vector<InteractionInfo> getInteractionSnapshots() const override;
+
+  void terminateInteraction(int64_t id) override;
 
  private:
   void startDrain(std::optional<DrainCompleteCode> drainCompleteCode);
@@ -432,12 +443,20 @@ class RefactoredRocketServerConnection final : public IRocketServerConnection {
       Flags flags,
       folly::io::Cursor cursor,
       RocketSinkClientCallback& clientCallback);
+  void handleSinkPayloadFromFrame(
+      StreamId streamId,
+      PayloadFrame&& payloadFrame,
+      RocketSinkClientCallback& clientCallback);
   void handleBiDiFrame(
       std::unique_ptr<folly::IOBuf> frame,
       StreamId streamId,
       FrameType frameType,
       Flags flags,
       folly::io::Cursor cursor,
+      RocketBiDiClientCallback& clientCallback);
+  void handleBiDiPayloadFromFrame(
+      StreamId streamId,
+      PayloadFrame&& payloadFrame,
       RocketBiDiClientCallback& clientCallback);
   void handleUntrackedFrame(
       std::unique_ptr<folly::IOBuf> frame,

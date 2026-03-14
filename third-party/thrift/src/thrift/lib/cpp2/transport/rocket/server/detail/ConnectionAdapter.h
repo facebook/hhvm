@@ -73,6 +73,10 @@ class ConnectionAdapter {
 
   void close(folly::exception_wrapper ew) { connection_->close(std::move(ew)); }
 
+  void setDecodeMetadataUsingBinary(bool value) {
+    connection_->decodeMetadataUsingBinary_.emplace(value);
+  }
+
   AdaptedConnectionT* getWrappedConnection() { return connection_; }
 
   // Accessor methods for WriteCallback functionality

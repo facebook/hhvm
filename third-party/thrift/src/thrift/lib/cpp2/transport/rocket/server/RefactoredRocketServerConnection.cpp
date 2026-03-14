@@ -42,6 +42,8 @@
 #include <wangle/acceptor/ConnectionManager.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp2/async/Interaction.h>
+#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -54,6 +56,7 @@
 #include <thrift/lib/cpp2/transport/rocket/server/detail/OutgoingFrameHandler.h>
 
 THRIFT_FLAG_DECLARE_bool(enable_rocket_connection_observers);
+THRIFT_FLAG_DECLARE_bool(thrift_check_free_stream_thread);
 THRIFT_FLAG_DEFINE_bool(rocket_use_outgoing_frame_handler, false);
 
 namespace apache::thrift::rocket {
@@ -404,19 +407,68 @@ void RefactoredRocketServerConnection::handleFrame(
 
   frameHandler_->onBeforeHandleFrame();
 
-  // Fast path: use cached pointer to avoid EventBaseLocal lookup overhead
-  auto* batcher = cachedBatcher_;
-  if (FOLLY_UNLIKELY(batcher == nullptr)) {
-    batcher = batcher_.get(evb_);
-    if (FOLLY_UNLIKELY(batcher == nullptr)) {
-      batcher_.emplace(evb_, evb_);
-      batcher = batcher_.get(evb_);
-    }
-    // Cache the pointer for subsequent calls
-    cachedBatcher_ = batcher;
-  }
+  // Process frames inline to avoid deferred processing issues.
+  incomingFrameHandler_.handle(std::move(frame));
+}
 
-  batcher->handle(std::move(frame), connectionAdapter_, incomingFrameHandler_);
+void RefactoredRocketServerConnection::handleSinkPayloadFromFrame(
+    StreamId streamId,
+    PayloadFrame&& payloadFrame,
+    RocketSinkClientCallback& clientCallback) {
+  const bool next = payloadFrame.hasNext();
+  const bool complete = payloadFrame.hasComplete();
+  if (auto fullPayload = bufferOrGetFullPayload(std::move(payloadFrame))) {
+    bool notViolateContract = true;
+    if (next) {
+      auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
+          std::move(*fullPayload), decodeMetadataUsingBinary_.value());
+      if (streamPayload.hasException()) {
+        notViolateContract =
+            clientCallback.onSinkError(std::move(streamPayload.exception()));
+        if (notViolateContract) {
+          freeStream(streamId, true);
+        }
+      } else {
+        // FIXME: As noted in `RocketClient::handleSinkResponse`, sinks
+        // currently lack the codegen to be able to support FD passing.
+        DCHECK(
+            !streamPayload->metadata.fdMetadata().has_value() ||
+            streamPayload->metadata.fdMetadata()->numFds().value_or(0) == 0)
+            << "FD passing is not implemented for sinks";
+
+        auto payloadMetadataRef = streamPayload->metadata.payloadMetadata();
+        if (payloadMetadataRef &&
+            payloadMetadataRef->getType() ==
+                PayloadMetadata::Type::exceptionMetadata) {
+          notViolateContract = clientCallback.onSinkError(
+              apache::thrift::detail::EncodedStreamError(
+                  std::move(streamPayload.value())));
+          if (notViolateContract) {
+            freeStream(streamId, true);
+          }
+        } else {
+          notViolateContract =
+              clientCallback.onSinkNext(std::move(*streamPayload));
+        }
+      }
+    }
+
+    if (complete) {
+      // it is possible final response(error) sent from serverCallback,
+      // serverCallback may be already destroyed.
+      if (streams_.find(streamId) != streams_.end()) {
+        notViolateContract = clientCallback.onSinkComplete();
+      }
+    }
+
+    if (!notViolateContract) {
+      close(
+          folly::make_exception_wrapper<transport::TTransportException>(
+              transport::TTransportException::TTransportExceptionType::
+                  STREAMING_CONTRACT_VIOLATION,
+              "receiving sink payload frame after sink completion"));
+    }
+  }
 }
 
 void RefactoredRocketServerConnection::handleSinkFrame(
@@ -442,67 +494,11 @@ void RefactoredRocketServerConnection::handleSinkFrame(
                 static_cast<uint8_t>(frameType))));
   }
 
-  auto handleSinkPayload = [&](PayloadFrame&& payloadFrame) {
-    const bool next = payloadFrame.hasNext();
-    const bool complete = payloadFrame.hasComplete();
-    if (auto fullPayload = bufferOrGetFullPayload(std::move(payloadFrame))) {
-      bool notViolateContract = true;
-      if (next) {
-        auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
-            std::move(*fullPayload), decodeMetadataUsingBinary_.value());
-        if (streamPayload.hasException()) {
-          notViolateContract =
-              clientCallback.onSinkError(std::move(streamPayload.exception()));
-          if (notViolateContract) {
-            freeStream(streamId, true);
-          }
-        } else {
-          // FIXME: As noted in `RocketClient::handleSinkResponse`, sinks
-          // currently lack the codegen to be able to support FD passing.
-          DCHECK(
-              !streamPayload->metadata.fdMetadata().has_value() ||
-              streamPayload->metadata.fdMetadata()->numFds().value_or(0) == 0)
-              << "FD passing is not implemented for sinks";
-
-          auto payloadMetadataRef = streamPayload->metadata.payloadMetadata();
-          if (payloadMetadataRef &&
-              payloadMetadataRef->getType() ==
-                  PayloadMetadata::Type::exceptionMetadata) {
-            notViolateContract = clientCallback.onSinkError(
-                apache::thrift::detail::EncodedStreamError(
-                    std::move(streamPayload.value())));
-            if (notViolateContract) {
-              freeStream(streamId, true);
-            }
-          } else {
-            notViolateContract =
-                clientCallback.onSinkNext(std::move(*streamPayload));
-          }
-        }
-      }
-
-      if (complete) {
-        // it is possible final response(error) sent from serverCallback,
-        // serverCallback may be already destroyed.
-        if (streams_.find(streamId) != streams_.end()) {
-          notViolateContract = clientCallback.onSinkComplete();
-        }
-      }
-
-      if (!notViolateContract) {
-        close(
-            folly::make_exception_wrapper<transport::TTransportException>(
-                transport::TTransportException::TTransportExceptionType::
-                    STREAMING_CONTRACT_VIOLATION,
-                "receiving sink payload frame after sink completion"));
-      }
-    }
-  };
-
   switch (frameType) {
     case FrameType::PAYLOAD: {
       PayloadFrame payloadFrame(streamId, flags, cursor, std::move(frame));
-      handleSinkPayload(std::move(payloadFrame));
+      handleSinkPayloadFromFrame(
+          streamId, std::move(payloadFrame), clientCallback);
     } break;
 
     case FrameType::ERROR: {
@@ -546,6 +542,57 @@ void RefactoredRocketServerConnection::handleSinkFrame(
   }
 }
 
+void RefactoredRocketServerConnection::handleBiDiPayloadFromFrame(
+    StreamId /*streamId*/,
+    PayloadFrame&& payloadFrame,
+    RocketBiDiClientCallback& clientCallback) {
+  const bool next = payloadFrame.hasNext();
+  const bool complete = payloadFrame.hasComplete();
+  bool alive = true;
+
+  if (auto fullPayload = bufferOrGetFullPayload(std::move(payloadFrame))) {
+    if (next) {
+      auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
+          std::move(*fullPayload), decodeMetadataUsingBinary_.value());
+
+      if (streamPayload.hasException()) {
+        if (clientCallback.isSinkOpen()) {
+          alive =
+              clientCallback.onSinkError(std::move(streamPayload.exception()));
+        }
+      } else {
+        // As noted in `RocketClient::handleSinkResponse`, bidi streams
+        // currently lack the codegen to be able to support FD passing.
+        DCHECK(
+            !streamPayload->metadata.fdMetadata().has_value() ||
+            streamPayload->metadata.fdMetadata()->numFds().value_or(0) == 0)
+            << "FD passing is not implemented for bidi streams";
+
+        auto payloadMetadataRef = streamPayload->metadata.payloadMetadata();
+        if (payloadMetadataRef &&
+            payloadMetadataRef->getType() ==
+                PayloadMetadata::Type::exceptionMetadata) {
+          if (clientCallback.isSinkOpen()) {
+            alive = clientCallback.onSinkError(
+                apache::thrift::detail::EncodedStreamError(
+                    std::move(streamPayload.value())));
+          }
+        } else {
+          if (clientCallback.isSinkOpen()) {
+            alive = clientCallback.onSinkNext(std::move(*streamPayload));
+          }
+        }
+      }
+    }
+
+    if (complete) {
+      if (alive && clientCallback.isSinkOpen()) {
+        std::ignore = clientCallback.onSinkComplete();
+      }
+    }
+  }
+}
+
 void RefactoredRocketServerConnection::handleBiDiFrame(
     std::unique_ptr<folly::IOBuf> frame,
     StreamId streamId,
@@ -573,61 +620,6 @@ void RefactoredRocketServerConnection::handleBiDiFrame(
     return;
   }
 
-  auto getErrorFromPayload = [](folly::Try<StreamPayload>& payload)
-      -> std::optional<folly::exception_wrapper> {
-    if (payload.hasException()) {
-      return payload.exception();
-    }
-
-    if (auto metadata = payload->metadata.payloadMetadata()) {
-      if (metadata->getType() == PayloadMetadata::Type::exceptionMetadata) {
-        return apache::thrift::detail::EncodedStreamError(std::move(*payload));
-      }
-    }
-
-    return std::nullopt;
-  };
-
-  auto dcheckFDPassingIsNotSupported = [](folly::Try<StreamPayload>& payload) {
-    // As noted in `RocketClient::handleSinkResponse`, bidi streams
-    // currently lack the codegen to be able to support FD passing.
-    DCHECK(
-        !payload->metadata.fdMetadata().has_value() ||
-        payload->metadata.fdMetadata()->numFds().value_or(0) == 0)
-        << "FD passing is not implemented for bidi streams";
-  };
-
-  auto handlePayloadFrame = [&](PayloadFrame&& payloadFrame) {
-    const bool next = payloadFrame.hasNext();
-    const bool complete = payloadFrame.hasComplete();
-    bool alive = true;
-
-    if (auto fullPayload = bufferOrGetFullPayload(std::move(payloadFrame))) {
-      if (next) {
-        auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
-            std::move(*fullPayload), decodeMetadataUsingBinary_.value());
-
-        dcheckFDPassingIsNotSupported(streamPayload);
-
-        if (auto error = getErrorFromPayload(streamPayload)) {
-          if (clientCallback.isSinkOpen()) {
-            alive = clientCallback.onSinkError(std::move(*error));
-          }
-        } else {
-          if (clientCallback.isSinkOpen()) {
-            alive = clientCallback.onSinkNext(std::move(*streamPayload));
-          }
-        }
-      }
-
-      if (complete) {
-        if (alive && clientCallback.isSinkOpen()) {
-          std::ignore = clientCallback.onSinkComplete();
-        }
-      }
-    }
-  };
-
   auto handleErrorFrame = [&](ErrorFrame&& errorFrame) {
     auto ew = [&] {
       if (errorFrame.errorCode() == ErrorCode::CANCELED) {
@@ -654,8 +646,10 @@ void RefactoredRocketServerConnection::handleBiDiFrame(
 
   switch (frameType) {
     case FrameType::PAYLOAD: {
-      handlePayloadFrame(
-          PayloadFrame{streamId, flags, cursor, std::move(frame)});
+      handleBiDiPayloadFromFrame(
+          streamId,
+          PayloadFrame{streamId, flags, cursor, std::move(frame)},
+          clientCallback);
     } break;
     case FrameType::ERROR: {
       handleErrorFrame(ErrorFrame(std::move(frame)));
@@ -720,6 +714,7 @@ void RefactoredRocketServerConnection::timeoutExpired() noexcept {
   DestructorGuard dg(this);
 
   if (!isBusy()) {
+    frameHandler_->onIdleTimeout();
     closeWhenIdle();
   }
 }
@@ -793,8 +788,9 @@ void RefactoredRocketServerConnection::closeWhenIdle() {
 
 void RefactoredRocketServerConnection::scheduleStreamTimeout(
     folly::HHWheelTimer::Callback* timeoutCallback) {
-  // Delegate to StreamCallbackManager - STREAMING-ONLY refactoring
-  streamCallbackManager_.scheduleStreamTimeout(timeoutCallback);
+  if (streamStarvationTimeout_ != std::chrono::milliseconds::zero()) {
+    evb_.timer().scheduleTimeout(timeoutCallback, streamStarvationTimeout_);
+  }
 }
 
 void RefactoredRocketServerConnection::scheduleSinkTimeout(
@@ -974,18 +970,67 @@ void RefactoredRocketServerConnection::sendMetadataPush(
 
 void RefactoredRocketServerConnection::freeStream(
     StreamId streamId, bool markRequestComplete) {
+  if (THRIFT_FLAG(thrift_check_free_stream_thread)) {
+    getEventBase().checkIsInEventBaseThread();
+  }
   DestructorGuard dg(this);
 
   bufferedFragments_.erase(streamId);
 
-  DCHECK(streams_.find(streamId) != streams_.end());
-  streams_.erase(streamId);
-  if (markRequestComplete) {
-    requestComplete();
+  if (auto it = streams_.find(streamId); it != streams_.end()) {
+    streams_.erase(it);
+    if (markRequestComplete) {
+      requestComplete();
+    }
+  }
+}
+
+void RefactoredRocketServerConnection::handleExistingStreamPayloadFrame(
+    PayloadFrame&& payloadFrame) {
+  const StreamId streamId = payloadFrame.streamId();
+
+  auto iter = streams_.find(streamId);
+  if (iter == streams_.end()) {
+    return;
   }
 
-  // Delegate to StreamCallbackManager - STREAMING-ONLY refactoring
-  streamCallbackManager_.freeStream(streamId, markRequestComplete);
+  folly::variant_match(
+      iter->second,
+      [&](const std::unique_ptr<RocketStreamClientCallback>&) {
+        // REQUEST_STREAM doesn't receive PAYLOAD from client
+        close(
+            folly::make_exception_wrapper<RocketException>(
+                ErrorCode::INVALID,
+                fmt::format(
+                    "Received unexpected payload for stream (id {})",
+                    static_cast<uint32_t>(streamId))));
+      },
+      [&](const std::unique_ptr<RocketSinkClientCallback>& cb) {
+        if (!cb || !cb->serverCallbackReady()) {
+          close(
+              folly::make_exception_wrapper<RocketException>(
+                  ErrorCode::INVALID,
+                  fmt::format(
+                      "Received unexpected early frame, stream id ({}) type ({})",
+                      static_cast<uint32_t>(streamId),
+                      static_cast<uint8_t>(FrameType::PAYLOAD))));
+          return;
+        }
+        handleSinkPayloadFromFrame(streamId, std::move(payloadFrame), *cb);
+      },
+      [&](const std::unique_ptr<RocketBiDiClientCallback>& cb) {
+        if (!cb || !cb->serverCallbackReady()) {
+          close(
+              folly::make_exception_wrapper<RocketException>(
+                  ErrorCode::INVALID,
+                  fmt::format(
+                      "Received unexpected early frame, stream id ({}) type ({})",
+                      static_cast<uint32_t>(streamId),
+                      static_cast<uint8_t>(FrameType::PAYLOAD))));
+          return;
+        }
+        handleBiDiPayloadFromFrame(streamId, std::move(payloadFrame), *cb);
+      });
 }
 
 void RefactoredRocketServerConnection::applyQosMarking(
@@ -1080,6 +1125,35 @@ void RefactoredRocketServerConnection::requestComplete() {
     return;
   }
   frameHandler_->requestComplete();
+}
+
+std::vector<InteractionInfo>
+RefactoredRocketServerConnection::getInteractionSnapshots() const {
+  std::vector<InteractionInfo> result;
+  if (auto* ctx = frameHandler_->getCpp2ConnContext()) {
+    apache::thrift::detail::Cpp2ConnContextInternalAPI api(*ctx);
+    api.forEachTile([&result](int64_t id, Tile& tile) {
+      apache::thrift::detail::TileInternalAPI tileApi(tile);
+      result.push_back(
+          InteractionInfo{
+              id,
+              tile.getInteractionCreationTime(),
+              tileApi.getLastActivityTime(),
+              tileApi.getRefCount()});
+    });
+  }
+  return result;
+}
+
+void RefactoredRocketServerConnection::terminateInteraction(int64_t id) {
+  if (evb_.isInEventBaseThread()) {
+    frameHandler_->terminateInteraction(id);
+  } else {
+    evb_.runInEventBaseThread(
+        [this, dg = folly::DelayedDestruction::DestructorGuard(this), id] {
+          frameHandler_->terminateInteraction(id);
+        });
+  }
 }
 
 } // namespace apache::thrift::rocket

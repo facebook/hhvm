@@ -43,14 +43,16 @@ SubprocessScheduler::SubprocessScheduler(uint64_t maxMemoryUsage)
 
 uint64_t SubprocessScheduler::acquire(const std::string& jobName) {
   do {
-    std::lock_guard<std::mutex> _{m_subprocessMapLock};
-    uint64_t usageEstimate = getRSSEstimate(jobName);
-    if (usageEstimate == 0 ||
-        m_estimatedMemoryUsage + usageEstimate <= m_maxMemoryUsage) {
-      FTRACE(3, "Scheduling `{}` job ({} running). est. job RSS: {}, est. total memory usage: {}\n",
-              jobName, m_runningSubprocesses.size(), usageEstimate, m_estimatedMemoryUsage);
-      m_estimatedMemoryUsage += usageEstimate;
-      return usageEstimate;
+    {
+      std::lock_guard<std::mutex> _{m_subprocessMapLock};
+      uint64_t usageEstimate = getRSSEstimate(jobName);
+      if (usageEstimate == 0 ||
+          m_estimatedMemoryUsage + usageEstimate <= m_maxMemoryUsage) {
+        FTRACE(3, "Scheduling `{}` job ({} running). est. job RSS: {}, est. total memory usage: {}\n",
+                jobName, m_runningSubprocesses.size(), usageEstimate, m_estimatedMemoryUsage);
+        m_estimatedMemoryUsage += usageEstimate;
+        return usageEstimate;
+      }
     }
     std::unique_lock<std::mutex> lock(m_subprocessSchedulingLock);
     m_subprocessSchedulingCV.wait(lock);

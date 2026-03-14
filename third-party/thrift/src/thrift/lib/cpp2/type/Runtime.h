@@ -75,8 +75,7 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
 // Should typically be passed by value as it only holds two
 // ponters; a pointer to the value being reference and a pointer to the static
 // runtime metadata associated with the type of the value.
-class Ref final : private detail::DynCmp<Ref, ConstRef>,
-                  public detail::BaseRef<Ref, ConstRef> {
+class Ref final : public detail::BaseRef<Ref, ConstRef> {
   using Base = detail::BaseRef<Ref, ConstRef>;
   using Base::if_not_index;
 
@@ -181,9 +180,7 @@ inline Ref Ptr::operator*() const noexcept {
 // A runtime Thrift value that owns it's own memory.
 //
 // TODO(afuller): Store small values in-situ.
-class Value : private detail::DynCmp<Value, ConstRef>,
-              private detail::DynCmp<Value, Ref>,
-              public detail::BaseDyn<ConstRef, Ref, Value> {
+class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
   using Base = detail::BaseDyn<ConstRef, Ref, Value>;
   using Dyn = detail::Dyn;
 

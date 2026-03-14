@@ -80,26 +80,6 @@ struct BaseOp : type::detail::BaseErasedOp {
     assert(rhs.type() == Tag{});
     return op::identical<Tag>(ref(lhs), rhs.as<Tag>());
   }
-
-  static folly::partial_ordering compare(const void* lhs, const Dyn& rhs) {
-    if (const T* ptr = rhs.tryAs<Tag>()) {
-      return partialCmp<Tag>(ref(lhs), *ptr);
-    }
-    // TODO(afuller): Throw bad_op() when all compatible type overloads are
-    // implemented.
-    unimplemented();
-  }
-
- private:
-  template <typename UTag>
-  static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs) {
-    return op::compare<Tag>(lhs, rhs);
-  }
-  template <typename UTag>
-  static if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs) {
-    return op::equal<Tag>(lhs, rhs) ? folly::partial_ordering::equivalent
-                                    : folly::partial_ordering::unordered;
-  }
 };
 
 } // namespace apache::thrift::op::detail

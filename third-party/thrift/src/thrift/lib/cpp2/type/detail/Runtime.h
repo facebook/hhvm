@@ -157,12 +157,6 @@ class Dyn {
   }
   [[nodiscard]] bool contains(const Dyn& key) const;
 
-  [[nodiscard]] bool equal(const Dyn& rhs) const {
-    return type_->equal(ptr_, rhs);
-  }
-  [[nodiscard]] folly::ordering compare(const Dyn& rhs) const {
-    return type_->compare(ptr_, rhs);
-  }
   // TODO(dokwon): Only use op::isEmpty after migrating TypeStruct to terse
   // write.
   [[nodiscard]] bool has_value() const {
@@ -354,30 +348,6 @@ struct BaseErasedOp {
   [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn&) { bad_op(); }
   [[noreturn]] static size_t size(const void*) { bad_op(); }
 };
-
-template <typename L, typename R>
-class BaseDynCmp {
- private:
-  friend bool operator==(const L& lhs, const R& rhs) { return lhs.equal(rhs); }
-  friend bool operator!=(const L& lhs, const R& rhs) { return !lhs.equal(rhs); }
-  friend bool operator<(const L& lhs, const R& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<=(const L& lhs, const R& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator>(const L& lhs, const R& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>=(const L& lhs, const R& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
-};
-
-template <typename T1, typename T2 = T1>
-class DynCmp : public BaseDynCmp<T1, T2>, public BaseDynCmp<T2, T1> {};
-template <typename T>
-class DynCmp<T, T> : public BaseDynCmp<T, T> {};
 
 // A wrapper for a Cursor that support the standard iterator interface.
 template <typename RefT, typename Derived>
@@ -602,9 +572,7 @@ class Iterable {
 // views, with APIs that match c++ standard containers (vs the Thrift 'op' names
 // used in the core API).
 template <typename ConstT, typename MutT, typename Derived>
-class BaseDyn : public Dyn,
-                public BaseDerived<Derived>,
-                private DynCmp<Derived> {
+class BaseDyn : public Dyn, public BaseDerived<Derived> {
   using Base = Dyn;
 
  public:
@@ -824,45 +792,6 @@ class BaseDyn : public Dyn,
   void clear(FieldId id) { Base::remove(id); }
   void clear(ConstT key) { Base::remove(key); }
   void clear(std::string name) { Base::remove(asRef<string_t>(name)); }
-
- private:
-  // TODO(afuller): Support capturing string literals directly and remove these.
-  friend bool operator==(const std::string& lhs, const Derived& rhs) {
-    return asRef(lhs) == rhs;
-  }
-  friend bool operator!=(const std::string& lhs, const Derived& rhs) {
-    return asRef(lhs) != rhs;
-  }
-  friend bool operator<(const std::string& lhs, const Derived& rhs) {
-    return asRef(lhs) < rhs;
-  }
-  friend bool operator<=(const std::string& lhs, const Derived& rhs) {
-    return asRef(lhs) <= rhs;
-  }
-  friend bool operator>(const std::string& lhs, const Derived& rhs) {
-    return asRef(lhs) > rhs;
-  }
-  friend bool operator>=(const std::string& lhs, const Derived& rhs) {
-    return asRef(lhs) >= rhs;
-  }
-  friend bool operator==(const Derived& lhs, const std::string& rhs) {
-    return lhs == asRef(rhs);
-  }
-  friend bool operator!=(const Derived& lhs, const std::string& rhs) {
-    return lhs != asRef(rhs);
-  }
-  friend bool operator<(const Derived& lhs, const std::string& rhs) {
-    return lhs < asRef(rhs);
-  }
-  friend bool operator<=(const Derived& lhs, const std::string& rhs) {
-    return lhs <= asRef(rhs);
-  }
-  friend bool operator>(const Derived& lhs, const std::string& rhs) {
-    return lhs > asRef(rhs);
-  }
-  friend bool operator>=(const Derived& lhs, const std::string& rhs) {
-    return lhs >= asRef(rhs);
-  }
 };
 
 template <typename Derived, typename ConstT = Derived>
@@ -909,10 +838,6 @@ struct VoidErasedOp : BaseErasedOp {
   }
   static bool empty(const void*) { return true; }
   static bool identical(const void*, const Dyn&) { return true; }
-  static folly::partial_ordering compare(const void*, const Dyn& rhs) {
-    check_op(!rhs.has_value());
-    return folly::partial_ordering::equivalent;
-  }
   static void clear(void*) {}
   static void assign(void*, const Dyn& val) { check_op(!val.has_value()); }
 };

@@ -17,13 +17,10 @@
 #pragma once
 
 #include <any>
-#include <stdexcept>
 #include <typeinfo>
 
 #include <folly/CPortability.h>
 #include <folly/lang/Exception.h>
-#include <folly/lang/Ordering.h>
-#include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -46,7 +43,6 @@ struct TypeInfo {
   void* (*make)(void*, bool);
   bool (*empty)(const void*);
   bool (*identical)(const void*, const Dyn&);
-  folly::partial_ordering (*compare_)(const void*, const Dyn&);
   void (*clear)(void*);
   void (*assign)(void*, const Dyn&);
   void (*append)(void*, const Dyn&);
@@ -57,18 +53,6 @@ struct TypeInfo {
   Ptr (*get_)(void*, FieldId, size_t, const Dyn&);
   Ptr (*next)(void*, IterType, std::any&);
   size_t (*size)(const void*);
-
-  bool equal(const void* lhs, const Dyn& rhs) const {
-    return op::detail::is_eq(compare_(lhs, rhs));
-  }
-
-  folly::ordering compare(const void* lhs, const Dyn& rhs) const {
-    return folly::ordering(compare_(lhs, rhs));
-  }
-
-  bool less(const void* lhs, const Dyn& rhs) const {
-    return op::detail::is_lt(compare(lhs, rhs));
-  }
 
   Ptr get(void* ptr, FieldId id) const;
   Ptr get(void* ptr, size_t pos) const;
@@ -115,7 +99,6 @@ FOLLY_EXPORT const TypeInfo& getTypeInfo() {
       &Op::make,
       &Op::empty,
       &Op::identical,
-      &Op::compare,
       &Op::clear,
       &Op::assign,
       &Op::append,

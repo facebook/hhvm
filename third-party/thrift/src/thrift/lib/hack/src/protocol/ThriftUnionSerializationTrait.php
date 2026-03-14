@@ -316,4 +316,47 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
       );
     }
   }
+
+  private function getFieldInfo(): (int, int) {
+    $num_field_count = 0;
+    foreach ($this::SPEC as $_field_id => $field) {
+      $field_name = $field['var'];
+      /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
+      $field_value = $this->$field_name;
+      /* HH_FIXME[4016] Field value may not exist*/
+      if (isset($field_value)) {
+        $num_field_count++;
+      }
+    }
+
+    /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
+    $type = HH_FIXME::dynamicCastForMissingMember($this)->_type;
+
+    return tuple($type, $num_field_count);
+  }
+
+  final public function __wakeup()[]: void {
+    try {
+      HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
+        ()[defaults] ==> {
+          if (
+            $this is IThriftStrictUnion<_> || $this is IThriftProtectedUnion<_>
+          ) {
+            return;
+          }
+
+          list($type, $num_field_count) = $this->getFieldInfo();
+          signal_log_in_psp(
+            SignalDynamicLoggerDataset::THRIFT_SIGNAL_DYNAMIC_LOGGER,
+            SignalDynamicLoggerProject::THRIFT_UNION_PHP_DESERIALIZATION,
+            nameof static,
+            Str\format("Type: %d, Fields: %d", $type, $num_field_count),
+          );
+        },
+        'Operational logging of class and field counts',
+      );
+    // @lint-ignore [EMPTY_CATCH]
+    } catch (Exception $_e) {
+    }
+  }
 }

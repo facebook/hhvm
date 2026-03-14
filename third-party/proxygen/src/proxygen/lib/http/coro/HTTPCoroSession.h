@@ -507,6 +507,9 @@ class HTTPCoroSession
   };
 
  protected:
+  struct WtHelper;
+  friend struct WtHelper;
+
   using StreamMap =
       folly::F14FastMap<HTTPCodec::StreamID, std::unique_ptr<StreamState>>;
 
@@ -601,13 +604,13 @@ class HTTPCoroSession
 
   bool checkForDetach(StreamState& stream);
 
-  uint32_t getStreamSendFlowControlWindow() {
+  uint32_t getStreamSendFlowControlWindow() const {
     return getStreamFlowControlWindow(codec_->getIngressSettings());
   }
   uint32_t getStreamRecvFlowControlWindow() {
     return getStreamFlowControlWindow(codec_->getEgressSettings());
   }
-  uint32_t getStreamFlowControlWindow(const HTTPSettings* settings) {
+  uint32_t getStreamFlowControlWindow(const HTTPSettings* settings) const {
     if (codec_->supportsStreamFlowControl()) {
       XCHECK(settings) << "H2 has settings and stream flow control";
       auto setting = settings->getSetting(SettingsId::INITIAL_WINDOW_SIZE);

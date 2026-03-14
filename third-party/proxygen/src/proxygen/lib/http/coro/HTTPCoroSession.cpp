@@ -76,6 +76,19 @@ void setSecureMsg(HTTPMessage& msg,
   msg.setSecure(setupTransportInfo.secure);
 }
 
+using CoroWtSession = proxygen::coro::detail::CoroWtSession;
+class CoroWtSessionImpl : public CoroWtSession {
+ public:
+  using CoroWtSession::CoroWtSession;
+  HTTPSessionContextPtr ka{}; // ensures session isn't destroyed before WtHandle
+  const folly::SocketAddress& getLocalAddress() const noexcept override {
+    return ka->getLocalAddress();
+  }
+  const folly::SocketAddress& getPeerAddress() const noexcept override {
+    return ka->getPeerAddress();
+  }
+};
+
 } // namespace
 
 using folly::coro::co_error;
@@ -90,6 +103,37 @@ HTTPSource* getErrorResponse(uint16_t statusCode, const std::string& body) {
   resp->msg_->setWantsKeepalive(false);
   return resp;
 }
+
+struct HTTPCoroSession::WtHelper {
+  HTTPCoroSession& sess;
+  auto createEgressSource() const noexcept {
+    return detail::EgressSourcePtr(new detail::EgressSource(
+        sess.eventBase_.get(),
+        /*id=*/folly::none,
+        /*callback=*/nullptr,
+        /*egressBufferSize=*/sess.getStreamSendFlowControlWindow()));
+  }
+  auto createHttpSourceTransport(detail::EgressSourcePtr&& egress,
+                                 HTTPSourceHolder&& ingress) const noexcept {
+    return detail::makeHttpSourceTransport(
+        sess.eventBase_.get(), std::move(egress), std::move(ingress));
+  }
+  auto createWtSession(std::unique_ptr<folly::coro::TransportIf> transport,
+                       WebTransportHandler::Ptr wtHandler) noexcept {
+    using namespace proxygen::detail;
+    auto dir = sess.isDownstream() ? WtDir::Server : WtDir::Client;
+    auto wt = std::make_shared<CoroWtSessionImpl>(
+        sess.eventBase_.get(),
+        dir,
+        getWtConfig(sess.codec_->getIngressSettings(),
+                    sess.codec_->getEgressSettings()),
+        std::move(wtHandler),
+        std::move(transport));
+    wt->ka = sess.acquireKeepAlive();
+    wt->start(wt);
+    return wt;
+  }
+};
 
 struct HTTPCoroSession::StreamState {
  private:
@@ -3715,19 +3759,6 @@ folly::coro::Task<WtReqResult> makeInternalEx(std::string_view err) {
       HTTPError{HTTPErrorCode::INTERNAL_ERROR, std::string(err)});
 }
 
-class CoroWtSessionImpl : public detail::CoroWtSession {
- public:
-  using CoroWtSession::CoroWtSession;
-  HTTPSessionContextPtr ka_{}; // ensures session isn't destructed prior to
-                               // WtHandle
-  const folly::SocketAddress& getLocalAddress() const noexcept override {
-    return ka_->getLocalAddress();
-  }
-  const folly::SocketAddress& getPeerAddress() const noexcept override {
-    return ka_->getPeerAddress();
-  }
-};
-
 }; // namespace
 
 /**
@@ -3769,11 +3800,8 @@ folly::coro::Task<WtReqResult> HTTPUniplexTransportSession::sendWtReq(
   }
 
   // valid wt req
-  auto egressSource = detail::EgressSourcePtr(new detail::EgressSource(
-      eventBase_.get(),
-      /*id=*/folly::none,
-      /*callback=*/nullptr,
-      /*egressBufferSize=*/getStreamSendFlowControlWindow()));
+  WtHelper wtHelper{*this};
+  auto egressSource = wtHelper.createEgressSource();
   egressSource->validateHeadersAndSkip(msg);
 
   auto res = sendRequestImpl(/*headers=*/msg,
@@ -3793,19 +3821,9 @@ folly::coro::Task<WtReqResult> HTTPUniplexTransportSession::sendWtReq(
   }
 
   // wt upgrade successful
-  auto transport = detail::makeHttpSourceTransport(
-      eventBase_.get(), std::move(egressSource), std::move(*res));
-  auto wt = std::make_shared<CoroWtSessionImpl>(
-      eventBase_.get(),
-      ::proxygen::detail::WtDir::Client,
-      ::proxygen::detail::getWtConfig(codec_->getIngressSettings(),
-                                      codec_->getEgressSettings()),
-      std::move(wtHandler),
-      std::move(transport));
-  wt->ka_ = acquireKeepAlive();
-  wt->start(wt);
-
-  ret.wt = std::move(wt);
+  auto transport = wtHelper.createHttpSourceTransport(std::move(egressSource),
+                                                      std::move(*res));
+  ret.wt = wtHelper.createWtSession(std::move(transport), std::move(wtHandler));
   co_return ret;
 }
 

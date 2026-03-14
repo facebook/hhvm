@@ -8,6 +8,7 @@
 
 #include <folly/coro/DetachOnCancel.h>
 
+#include "proxygen/lib/http/coro/HTTPFixedSource.h"
 #include "proxygen/lib/http/coro/HTTPSourceReader.h"
 #include "proxygen/lib/http/coro/HTTPTransactionAdaptorSource.h"
 #include "proxygen/lib/http/coro/client/test/HTTPClientTestsCommon.h"
@@ -70,6 +71,7 @@ class HTTPTransactionAdaptorSourceTests : public HTTPClientTests {
         .WillByDefault(::testing::Invoke([mockPtr = mock.get()] {
           mockPtr->HTTPTransaction::resumeIngress();
         }));
+    EXPECT_CALL(*mock, resumeIngress()).Times(AnyNumber());
 
     return mock;
   }
@@ -432,6 +434,98 @@ CO_TEST_P_X(HTTPTransactionAdaptorSourceTests, IngressNoErrorAbortNoCrash) {
   auto responseTry = co_await co_awaitTry(folly::coro::detachOnCancel(
       handler->handleRequest(&evb_, ctx_.acquireKeepAlive(), ingressSource)));
   EXPECT_TRUE(responseTry.hasException());
+
+  getHandler()->detachTransaction();
+}
+
+CO_TEST_P_X(HTTPTransactionAdaptorSourceTests,
+            WebSocketPausesIngressAndResumesOnEgressHeaders) {
+  auto ingressSource = adaptor_->getIngressSource();
+
+  auto req = std::make_unique<HTTPMessage>();
+  req->setURL("https://www.facebook.com/");
+  req->setIngressWebsocketUpgrade();
+
+  // pauseIngress() should be called on websocket upgrade request.
+  EXPECT_CALL(*mockTxn_, pauseIngress()).Times(1);
+  getHandler()->onHeadersComplete(std::move(req));
+
+  auto headerEvent =
+      co_await co_nothrow(HTTPSourceHolder(ingressSource).readHeaderEvent());
+  EXPECT_FALSE(headerEvent.eom);
+  EXPECT_TRUE(headerEvent.headers->isIngressWebsocketUpgrade());
+
+  auto resp = std::make_unique<HTTPMessage>();
+  auto egressSource = HTTPFixedSource::makeFixedSource(std::move(resp));
+
+  // When the response comes back, resumeIngress() should be called.
+  EXPECT_CALL(*mockTxn_, sendHeadersWithOptionalEOM).Times(1);
+  EXPECT_CALL(*mockTxn_, resumeIngress()).Times(1);
+
+  ON_CALL(*mockTxn_, resumeIngress()).WillByDefault([&] {
+    mockTxn_->HTTPTransaction::resumeIngress();
+    getHandler()->detachTransaction();
+  });
+  adaptor_->setEgressSource(egressSource);
+}
+
+CO_TEST_P_X(HTTPTransactionAdaptorSourceTests,
+            WebSocketWithBodyDoesNotResumeIngressUntilWindowOpens) {
+  auto ingressSource = adaptor_->getIngressSource();
+
+  auto req = std::make_unique<HTTPMessage>();
+  req->setURL("https://www.facebook.com/");
+  req->setIngressWebsocketUpgrade();
+
+  // pauseIngress() should be called twice:
+  // 1. On websocket upgrade request
+  // 2. When body fills the flow control window
+  EXPECT_CALL(*mockTxn_, pauseIngress()).Times(2);
+  getHandler()->onHeadersComplete(std::move(req));
+
+  // Send a large body to fill the buffer which will close the window.
+  std::string body(70000, 'a');
+  getHandler()->onBody(folly::IOBuf::copyBuffer(body));
+  getHandler()->onEOM();
+
+  HTTPSourceHolder sourceHolder(ingressSource);
+  auto headerEvent = co_await co_nothrow(sourceHolder.readHeaderEvent());
+  EXPECT_FALSE(headerEvent.eom);
+  EXPECT_TRUE(headerEvent.headers->isIngressWebsocketUpgrade());
+
+  // resumeIngress() should only be called once, when the window opens again.
+  EXPECT_CALL(*mockTxn_, resumeIngress()).Times(1);
+  auto resp = std::make_unique<HTTPMessage>();
+  auto egressSource = HTTPFixedSource::makeFixedSource(std::move(resp));
+
+  // Used to track where resumeIngress() is called.
+  bool resumeIngressCalled = false;
+  folly::coro::Baton headersSentBaton;
+
+  ON_CALL(*mockTxn_, resumeIngress()).WillByDefault([&] {
+    resumeIngressCalled = true;
+    mockTxn_->HTTPTransaction::resumeIngress();
+  });
+  EXPECT_CALL(*mockTxn_, sendHeadersWithOptionalEOM).Times(1).WillOnce([&] {
+    headersSentBaton.post();
+  });
+
+  adaptor_->setEgressSource(egressSource);
+
+  // Wait for egress headers to be sent.
+  co_await headersSentBaton;
+
+  EXPECT_FALSE(resumeIngressCalled)
+      << "resumeIngress should not be called on egress headers when window is "
+         "closed";
+
+  // Now read the body from ingress source. This drains the buffer and
+  // triggers windowOpen callback, which should call resumeIngress().
+  auto bodyEvent = co_await co_nothrow(sourceHolder.readBodyEvent());
+
+  // Verify resumeIngress WAS called after body was read (window opened)
+  EXPECT_TRUE(resumeIngressCalled)
+      << "resumeIngress should be called when window opens after body drain";
 
   getHandler()->detachTransaction();
 }

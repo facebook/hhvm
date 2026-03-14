@@ -71,6 +71,10 @@ void HTTPTransactionAdaptorSource::detachTransaction() noexcept {
 
 void HTTPTransactionAdaptorSource::onHeadersComplete(
     std::unique_ptr<HTTPMessage> msg) noexcept {
+  // When using http/1.1, ingress must be paused during a WebSocket request.
+  if (msg->isIngressWebsocketUpgrade()) {
+    txn_->pauseIngress();
+  };
   ingressSource_.headers(std::move(msg), false /*eom*/);
 }
 
@@ -154,6 +158,14 @@ folly::coro::Task<void> HTTPTransactionAdaptorSource::egressLoop() {
           return HTTPSourceReader::Cancel;
         }
         txn_->sendHeadersWithOptionalEOM(*msg, eom);
+        // Resume ingress if it was previously paused (e.g. for WebSocket
+        // upgrade).
+        const bool resumeIngress =
+            !token.isCancellationRequested() &&
+            windowState_ == HTTPStreamSource::FlowControlState::OPEN;
+        if (resumeIngress) {
+          txn_->resumeIngress();
+        }
         return HTTPSourceReader::Continue;
       })
       .onBody([&, token = cancelSource_.getToken()](BufQueue body,

@@ -174,12 +174,16 @@ HTTPCoroAcceptor* HTTPServer::createAcceptor(
     folly::EventBase* evb,
     std::shared_ptr<const AcceptorConfiguration> acceptorConfig) {
   auto [it, _] = acceptors_.try_emplace(evb, std::list<HTTPCoroAcceptor>());
-  return &(*it->second.emplace(it->second.end(),
-                               std::move(acceptorConfig),
-                               handler_,
-                               &config_.newConnectionFilter,
-                               /* codecFactory = */ nullptr,
-                               config_.fizzLoggingCallback));
+  auto* acceptor = &(*it->second.emplace(it->second.end(),
+                                         std::move(acceptorConfig),
+                                         handler_,
+                                         &config_.newConnectionFilter,
+                                         /* codecFactory = */ nullptr,
+                                         config_.fizzLoggingCallback));
+  if (config_.zeroCopyEnableThreshold > 0) {
+    acceptor->setZeroCopyEnableThreshold(config_.zeroCopyEnableThreshold);
+  }
+  return acceptor;
 }
 
 HTTPCoroAcceptor* FOLLY_NULLABLE
@@ -206,6 +210,9 @@ void HTTPServer::startTcp(const KeepAliveEventBaseVec& keepAliveEvbs) {
         new folly::AsyncServerSocket(&eventBase_));
     try {
       serverSocket->setReusePortEnabled(setReusePortSocketOption_);
+      if (config_.socketConfig.useZeroCopy) {
+        serverSocket->setZeroCopy(true);
+      }
       if (config_.preboundSocket.has_value()) {
         serverSocket->useExistingSocket(
             folly::NetworkSocket::fromFd(config_.preboundSocket.value()));

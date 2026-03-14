@@ -159,6 +159,12 @@ void HTTPCoroAcceptor::onNewConnection(
   }
 
   auto eventBase = transport->getEventBase();
+
+  if (zeroCopyEnableThreshold_ > 0) {
+    transport->setZeroCopy(true);
+    transport->setZeroCopyEnableThreshold(zeroCopyEnableThreshold_);
+  }
+
   auto session = factory_.makeUniplexSession(std::move(transport),
                                              peerAddress,
                                              nextProtocol,

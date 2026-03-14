@@ -121,6 +121,10 @@ class HTTPCoroAcceptor : public wangle::Acceptor {
     onConnectionsDrainedFn_ = std::move(fn);
   }
 
+  void setZeroCopyEnableThreshold(size_t threshold) {
+    zeroCopyEnableThreshold_ = threshold;
+  }
+
   void stopAcceptingQuic() {
     acceptStopped();
   }
@@ -167,6 +171,7 @@ class HTTPCoroAcceptor : public wangle::Acceptor {
   std::function<void()> onConnectionsDrainedFn_;
   folly::Synchronized<folly::Executor::KeepAlive<folly::EventBase>> keepAlive_;
   std::shared_ptr<wangle::FizzLoggingCallback> loggingCallback_;
+  size_t zeroCopyEnableThreshold_{0};
 };
 
 } // namespace proxygen::coro

@@ -22,8 +22,10 @@
 
 #include <chrono>
 #include <folly/coro/GtestHelpers.h>
+#include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/portability/Sockets.h>
 #include <folly/testing/TestUtil.h>
 #include <proxygen/lib/http/coro/test/TestUtils.h>
 #include <quic/api/test/Mocks.h>
@@ -726,6 +728,186 @@ TEST(StatsFilterFactory, LatencyOnDestruction) {
   delete filters.first;
   delete filters.second;
   EXPECT_EQ(stats.latencies.at(0).count(), 0);
+}
+
+class ZeroCopyHTTPServerTest : public HTTPServerTests {};
+
+// Verify that configuring zero copy on the server does not break normal
+// request handling. This exercises the full path: Config -> startTcp() ->
+// createAcceptor() -> setZeroCopyEnableThreshold -> onNewConnection() ->
+// transport zero copy setup.
+TEST_P(ZeroCopyHTTPServerTest, TestZeroCopyConfigBasicRequest) {
+  serverConfig_.socketConfig.useZeroCopy = true;
+  serverConfig_.zeroCopyEnableThreshold = 32768;
+
+  startServer(nullptr, /*expectRequest=*/true);
+  initClient();
+
+  auto url = fmt::format("https://{}/test", server_->address()->describe());
+  auto useQuic = GetParam() == TransportType::QUIC;
+  EventBase evb;
+  auto response = blockingWait(
+      HTTPClient::get(&evb, url, std::chrono::milliseconds(500), useQuic),
+      &evb);
+  EXPECT_NE(response.headers.get(), nullptr);
+  EXPECT_EQ(response.headers->getStatusCode(), 200);
+  stopServer();
+}
+
+// Verify that only socketConfig.useZeroCopy (without zeroCopyEnableThreshold)
+// also works. The server socket gets SO_ZEROCOPY but accepted connections
+// won't have the per-write threshold.
+TEST_P(ZeroCopyHTTPServerTest, TestZeroCopySocketOnlyBasicRequest) {
+  serverConfig_.socketConfig.useZeroCopy = true;
+  // No zeroCopyEnableThreshold set
+
+  startServer(nullptr, /*expectRequest=*/true);
+  initClient();
+
+  auto url = fmt::format("https://{}/test", server_->address()->describe());
+  auto useQuic = GetParam() == TransportType::QUIC;
+  EventBase evb;
+  auto response = blockingWait(
+      HTTPClient::get(&evb, url, std::chrono::milliseconds(500), useQuic),
+      &evb);
+  EXPECT_NE(response.headers.get(), nullptr);
+  EXPECT_EQ(response.headers->getStatusCode(), 200);
+  stopServer();
+}
+
+INSTANTIATE_TEST_SUITE_P(ZeroCopy,
+                         ZeroCopyHTTPServerTest,
+                         testing::Values(TransportType::QUIC,
+                                         TransportType::TLS),
+                         transportTypeToString);
+
+namespace {
+
+// Creates a pair of connected TCP sockets (server-side, client-side).
+std::pair<folly::NetworkSocket, folly::NetworkSocket> createTcpSocketPair() {
+  int listenFd = ::socket(AF_INET, SOCK_STREAM, 0);
+  CHECK_GE(listenFd, 0);
+
+  struct sockaddr_in addr{};
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  addr.sin_port = 0;
+  CHECK_EQ(::bind(listenFd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)),
+           0);
+  CHECK_EQ(::listen(listenFd, 1), 0);
+
+  socklen_t addrLen = sizeof(addr);
+  CHECK_EQ(
+      ::getsockname(listenFd, reinterpret_cast<sockaddr*>(&addr), &addrLen), 0);
+
+  int clientFd = ::socket(AF_INET, SOCK_STREAM, 0);
+  CHECK_GE(clientFd, 0);
+  CHECK_EQ(
+      ::connect(clientFd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)), 0);
+
+  int serverFd = ::accept(listenFd, nullptr, nullptr);
+  CHECK_GE(serverFd, 0);
+  ::close(listenFd);
+
+  return {folly::NetworkSocket::fromFd(serverFd),
+          folly::NetworkSocket::fromFd(clientFd)};
+}
+
+// Exposes the protected TCP onNewConnection for direct unit testing.
+class TestableHTTPCoroAcceptor : public HTTPCoroAcceptor {
+ public:
+  using HTTPCoroAcceptor::HTTPCoroAcceptor;
+  using HTTPCoroAcceptor::onNewConnection;
+};
+
+} // namespace
+
+// Verify that zero copy is applied to accepted TCP connections when the
+// zeroCopyEnableThreshold is set on the acceptor.
+TEST(ZeroCopyAcceptor, ZeroCopyAppliedToAcceptedTransport) {
+  auto [serverFd, clientFd] = createTcpSocketPair();
+
+  auto accConfig = std::make_shared<AcceptorConfiguration>();
+  accConfig->plaintextProtocol = "http/1.1";
+  auto handler = std::make_shared<TestHandler>();
+
+  folly::ScopedEventBaseThread evbThread;
+  auto* evb = evbThread.getEventBase();
+
+  auto acceptor =
+      std::make_unique<TestableHTTPCoroAcceptor>(accConfig, handler);
+  evb->runInEventBaseThreadAndWait([&]() { acceptor->init(nullptr, evb); });
+  acceptor->setZeroCopyEnableThreshold(32768);
+
+  std::atomic<bool> zeroCopyApplied{false};
+
+  evb->runInEventBaseThreadAndWait([&]() {
+    auto socket = folly::AsyncSocket::newSocket(evb, serverFd);
+    auto* rawSocket = socket.get();
+
+    folly::SocketAddress addr;
+    wangle::TransportInfo tinfo;
+    acceptor->onNewConnection(
+        folly::AsyncTransport::UniquePtr(socket.release()),
+        &addr,
+        "http/1.1",
+        wangle::SecureTransportType::NONE,
+        tinfo);
+
+    zeroCopyApplied = rawSocket->getZeroCopy();
+  });
+
+  EXPECT_TRUE(zeroCopyApplied.load());
+
+  ::close(clientFd.toFd());
+  // forceStop defers dropAllConnections via runInLoop, so we must let the
+  // EventBase process that callback before destroying the acceptor.
+  evb->runInEventBaseThreadAndWait([&]() { acceptor->forceStop(); });
+  evb->runInEventBaseThreadAndWait([&]() { acceptor.reset(); });
+}
+
+// Verify that zero copy is NOT applied when zeroCopyEnableThreshold is not set.
+TEST(ZeroCopyAcceptor, ZeroCopyNotAppliedWithoutThreshold) {
+  auto [serverFd, clientFd] = createTcpSocketPair();
+
+  auto accConfig = std::make_shared<AcceptorConfiguration>();
+  accConfig->plaintextProtocol = "http/1.1";
+  auto handler = std::make_shared<TestHandler>();
+
+  folly::ScopedEventBaseThread evbThread;
+  auto* evb = evbThread.getEventBase();
+
+  auto acceptor =
+      std::make_unique<TestableHTTPCoroAcceptor>(accConfig, handler);
+  evb->runInEventBaseThreadAndWait([&]() { acceptor->init(nullptr, evb); });
+  // Deliberately NOT setting zeroCopyEnableThreshold
+
+  std::atomic<bool> zeroCopyApplied{false};
+
+  evb->runInEventBaseThreadAndWait([&]() {
+    auto socket = folly::AsyncSocket::newSocket(evb, serverFd);
+    auto* rawSocket = socket.get();
+
+    folly::SocketAddress addr;
+    wangle::TransportInfo tinfo;
+    acceptor->onNewConnection(
+        folly::AsyncTransport::UniquePtr(socket.release()),
+        &addr,
+        "http/1.1",
+        wangle::SecureTransportType::NONE,
+        tinfo);
+
+    zeroCopyApplied = rawSocket->getZeroCopy();
+  });
+
+  // Without zeroCopyEnableThreshold, zero copy should remain disabled.
+  EXPECT_FALSE(zeroCopyApplied.load());
+
+  ::close(clientFd.toFd());
+  // forceStop defers dropAllConnections via runInLoop, so we must let the
+  // EventBase process that callback before destroying the acceptor.
+  evb->runInEventBaseThreadAndWait([&]() { acceptor->forceStop(); });
+  evb->runInEventBaseThreadAndWait([&]() { acceptor.reset(); });
 }
 
 } // namespace proxygen::coro::test

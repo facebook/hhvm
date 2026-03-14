@@ -75,6 +75,14 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
     NewConnectionFilter newConnectionFilter;
     ServerFilterFactoryList filterFactories;
     std::shared_ptr<wangle::FizzLoggingCallback> fizzLoggingCallback;
+
+    /**
+     * Zero copy enable threshold. When set to a non-zero value (along with
+     * socketConfig.useZeroCopy = true), each accepted TCP connection will
+     * have zero copy enabled and MSG_ZEROCOPY will be used for writes
+     * whose total length meets or exceeds this threshold.
+     */
+    size_t zeroCopyEnableThreshold{0};
   };
 
   static wangle::SSLContextConfig getDefaultTLSConfig() {

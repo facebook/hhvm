@@ -146,7 +146,11 @@ inline strhash_t StringData::hash(const char* s, size_t len) {
 
 inline strhash_t StringData::hash() const {
   strhash_t h = m_hash & STRHASH_MASK;
-  return h ? h : hashHelper();
+  if (h) return h;
+  h = hash_string_i_unsafe(data(), m_len);
+  assertx(h >= 0);
+  m_hash |= h;
+  return h;
 }
 
 inline strhash_t StringData::hashStatic() const {

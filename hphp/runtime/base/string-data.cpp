@@ -632,18 +632,6 @@ void StringData::preCompute() {
   }
 }
 
-#if !defined(USE_X86_STRING_HELPERS)
-// This function is implemented directly in ASM in string-data-*.S otherwise.
-// For Arm we fall back to the (possibly) accelerated hash_string_i_unsafe
-// function.
-NEVER_INLINE strhash_t StringData::hashHelper() const {
-  strhash_t h = hash_string_i_unsafe(data(), m_len);
-  assertx(h >= 0);
-  m_hash |= h;
-  return h;
-}
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
 

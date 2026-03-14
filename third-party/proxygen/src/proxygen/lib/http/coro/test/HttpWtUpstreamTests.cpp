@@ -15,8 +15,10 @@
 #include <proxygen/lib/http/codec/webtransport/WebTransportCapsuleCodec.h>
 #include <proxygen/lib/http/coro/util/CoroWtSession.h>
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
+#include <proxygen/lib/http/webtransport/test/Mocks.h>
 
 using namespace proxygen;
+using namespace proxygen::test;
 using namespace testing;
 using namespace proxygen::detail;
 
@@ -115,36 +117,6 @@ struct WtCapsuleCodecCallback : public WebTransportCapsuleCodec::Callback {
   folly::coro::Baton baton;
 };
 
-struct WtHandler : public WebTransportHandler {
-  WtHandler() = default;
-  void onNewUniStream(
-      WebTransport::StreamReadHandle* readHandle) noexcept override {
-    ctx->peerStreams.push_back({.readHandle = readHandle});
-  }
-  void onNewBidiStream(
-      WebTransport::BidiStreamHandle bidiHandle) noexcept override {
-    ctx->peerStreams.push_back(bidiHandle);
-  }
-  void onDatagram(std::unique_ptr<folly::IOBuf> datagram) noexcept override {
-  }
-  void onSessionEnd(folly::Optional<uint32_t> error) noexcept override {
-    ctx->err = error.value_or(0);
-  }
-  void onSessionDrain() noexcept override {
-  }
-  void onWebTransportSession(
-      std::shared_ptr<WebTransport> wtSession) noexcept override {
-    this->wtSession = std::move(wtSession);
-  }
-
-  struct Ctx {
-    std::vector<WebTransport::BidiStreamHandle> peerStreams;
-    folly::Optional<uint32_t> err;
-  };
-  std::shared_ptr<Ctx> ctx = std::make_shared<Ctx>();
-  std::shared_ptr<WebTransport> wtSession;
-};
-
 class HttpWtUpstreamSessionTest : public HTTPCoroSessionTest {
  public:
   HttpWtUpstreamSessionTest()
@@ -208,11 +180,11 @@ CO_TEST_P_X(H2WtUpstreamSessionTest, Simple) {
   msg.setUpgradeProtocol("webtransport");
 
   auto reservation = session_->reserveRequest();
-  auto fut = co_withExecutor(&evb_,
-                             session_->sendWtReq(std::move(*reservation),
-                                                 msg,
-                                                 std::make_unique<WtHandler>()))
-                 .start();
+  auto fut =
+      co_withExecutor(&evb_,
+                      session_->sendWtReq(
+                          std::move(*reservation), msg, DummyWtHandler::make()))
+          .start();
 
   MockLifecycleObserver obs;
   session_->addLifecycleObserver(&obs);
@@ -244,11 +216,11 @@ CO_TEST_P_X(H2WtUpstreamSessionTest, Non2xxResp) {
   msg.setUpgradeProtocol("webtransport");
 
   auto reservation = session_->reserveRequest();
-  auto fut = co_withExecutor(&evb_,
-                             session_->sendWtReq(std::move(*reservation),
-                                                 msg,
-                                                 std::make_unique<WtHandler>()))
-                 .start();
+  auto fut =
+      co_withExecutor(&evb_,
+                      session_->sendWtReq(
+                          std::move(*reservation), msg, DummyWtHandler::make()))
+          .start();
 
   // server rejecting CONNECT (i.e. sending 5xx) => res->wt == nullptr
   deliverRespHeaders(/*id=*/1, makeResponse(500), /*eom=*/false);
@@ -268,7 +240,7 @@ CO_TEST_P_X(H2WtUpstreamSessionTest, WtUpgradeReqRstErr) {
   evb_.runAfterDelay([this]() { deliverRstStream(/*id=*/1); },
                      /*milliseconds=*/50);
   auto res = co_await co_awaitTry(session_->sendWtReq(
-      std::move(*reservation), msg, std::make_unique<WtHandler>()));
+      std::move(*reservation), msg, DummyWtHandler::make()));
   auto* ex = res.tryGetExceptionObject<HTTPError>();
   EXPECT_TRUE(ex && ex->code == HTTPErrorCode::CANCEL);
 }
@@ -281,7 +253,7 @@ CO_TEST_P_X(H2WtUpstreamSessionTest, SendInvalidWtReq) {
     // invalid reservation
     HTTPCoroSession::RequestReservation reservation;
     auto res = co_await co_awaitTry(session_->sendWtReq(
-        std::move(reservation), msg, std::make_unique<WtHandler>()));
+        std::move(reservation), msg, DummyWtHandler::make()));
     auto* ex = res.tryGetExceptionObject<HTTPError>();
     EXPECT_TRUE(ex && ex->code == HTTPErrorCode::INTERNAL_ERROR);
   }
@@ -290,7 +262,7 @@ CO_TEST_P_X(H2WtUpstreamSessionTest, SendInvalidWtReq) {
     // invalid msg
     auto reservation = session_->reserveRequest();
     auto res = co_await co_awaitTry(session_->sendWtReq(
-        std::move(*reservation), msg, std::make_unique<WtHandler>()));
+        std::move(*reservation), msg, DummyWtHandler::make()));
     auto* ex = res.tryGetExceptionObject<HTTPError>();
     EXPECT_TRUE(ex && ex->code == HTTPErrorCode::INTERNAL_ERROR);
   }
@@ -302,7 +274,7 @@ CO_TEST_P_X(H2WtUpstreamSessionTest, SendInvalidWtReq) {
     msg.setUpgradeProtocol("webtransport");
     auto reservation = session_->reserveRequest();
     auto res = co_await co_awaitTry(session_->sendWtReq(
-        std::move(*reservation), msg, std::make_unique<WtHandler>()));
+        std::move(*reservation), msg, DummyWtHandler::make()));
     auto* ex = res.tryGetExceptionObject<HTTPError>();
     EXPECT_TRUE(ex && ex->code == HTTPErrorCode::INTERNAL_ERROR);
   }
@@ -354,7 +326,7 @@ class WtTest : public H2WtUpstreamSessionTest {
     msg.setMethod(HTTPMethod::CONNECT);
     msg.setUpgradeProtocol("webtransport");
 
-    auto handler = std::make_unique<WtHandler>();
+    auto handler = DummyWtHandler::make();
     wtHandlerCtx = handler->ctx;
 
     // send/serialize CONNECT request
@@ -413,7 +385,7 @@ class WtTest : public H2WtUpstreamSessionTest {
   WtCapsuleCodecCallback wtCodecCb;
   WebTransportCapsuleCodec wtCodec{&wtCodecCb, CodecVersion::H2};
   TestCoroTransport* coroTp{nullptr};
-  std::shared_ptr<const WtHandler::Ctx> wtHandlerCtx;
+  std::shared_ptr<const DummyWtHandler::Ctx> wtHandlerCtx;
   // wtBuf contains the serialize wt capsules; simulating a peer sending data
   // to client
   folly::IOBufQueue wtBuf{folly::IOBufQueue::cacheChainLength()};

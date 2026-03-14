@@ -151,4 +151,38 @@ class MockWebTransportHandler : public WebTransportHandler {
   MOCK_METHOD(void, onSessionDrain, (), (noexcept, override));
 };
 
+struct DummyWtHandler : public WebTransportHandler {
+  DummyWtHandler() = default;
+  void onNewUniStream(
+      WebTransport::StreamReadHandle* readHandle) noexcept override {
+    ctx->peerStreams.push_back({.readHandle = readHandle});
+  }
+  void onNewBidiStream(
+      WebTransport::BidiStreamHandle bidiHandle) noexcept override {
+    ctx->peerStreams.push_back(bidiHandle);
+  }
+  void onDatagram(std::unique_ptr<folly::IOBuf> datagram) noexcept override {
+  }
+  void onSessionEnd(folly::Optional<uint32_t> error) noexcept override {
+    ctx->err = error.value_or(0);
+  }
+  void onSessionDrain() noexcept override {
+  }
+  void onWebTransportSession(
+      std::shared_ptr<WebTransport> wtSession) noexcept override {
+    this->wtSession = std::move(wtSession);
+  }
+
+  static std::unique_ptr<DummyWtHandler> make() {
+    return std::make_unique<DummyWtHandler>();
+  }
+
+  struct Ctx {
+    std::vector<WebTransport::BidiStreamHandle> peerStreams;
+    folly::Optional<uint32_t> err;
+  };
+  std::shared_ptr<Ctx> ctx = std::make_shared<Ctx>();
+  std::shared_ptr<WebTransport> wtSession;
+};
+
 } // namespace proxygen::test

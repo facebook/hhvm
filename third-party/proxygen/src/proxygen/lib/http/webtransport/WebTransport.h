@@ -296,6 +296,7 @@ class WebTransport {
 //  * The end of of session
 class WebTransportHandler {
  public:
+  using Ptr = std::unique_ptr<WebTransportHandler>;
   virtual ~WebTransportHandler() noexcept = default;
 
   virtual void onNewUniStream(

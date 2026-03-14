@@ -122,13 +122,7 @@ An annotation without an explicitly provided value is implicitly assigned the de
     I briefly considered _fbthrift_WILL_NOT_FIX_BREAKAGES_IF_YOU_USE_THIS_.
     That makes the generated code hard to read.
 
-    I decided to stay simple to unblock this fix. I added the DO_BEFORE below
-    to revisit this issue.
-
-    DO_BEFORE(satishvk, 20241231): Determine if it is acceptable to accept
-    the risk that user code will use the _fbthrift_actual_symbol or
-    it is important enough to find a different approach to solve the problem
-    of fieldname matches the typename.
+    I decided to stay simple to unblock this fix.
 }}
 {{#let export partial private_alias_prefix}}
 {{#pragma ignore-newlines}}

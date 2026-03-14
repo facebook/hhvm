@@ -929,40 +929,30 @@ struct UnionEquality {
   }
 };
 
-// ThriftObjectModelLessThan compares Thrift values recursively, comparing
+// StableLessThan compares Thrift values recursively, comparing
 // struct fields by sorted field id order (instead of field declaration order).
 // This matches the behavior of the Thrift Object Model for comparison.
 template <class T>
-struct ThriftObjectModelLessThan : LessThan<T> {};
+struct StableLessThan : LessThan<T> {};
 
 template <class T>
-struct ThriftObjectModelLessThan<type::list<T>>
-    : ListLessThan<
-          type::native_type<type::list<T>>,
-          T,
-          ThriftObjectModelLessThan> {};
+struct StableLessThan<type::list<T>>
+    : ListLessThan<type::native_type<type::list<T>>, T, StableLessThan> {};
 
 template <class T>
-struct ThriftObjectModelLessThan<type::set<T>>
-    : SetLessThan<
-          type::native_type<type::set<T>>,
-          T,
-          ThriftObjectModelLessThan> {};
+struct StableLessThan<type::set<T>>
+    : SetLessThan<type::native_type<type::set<T>>, T, StableLessThan> {};
 
 template <class K, class V>
-struct ThriftObjectModelLessThan<type::map<K, V>>
-    : MapLessThan<
-          type::native_type<type::map<K, V>>,
-          K,
-          V,
-          ThriftObjectModelLessThan> {};
+struct StableLessThan<type::map<K, V>>
+    : MapLessThan<type::native_type<type::map<K, V>>, K, V, StableLessThan> {};
 
 template <class T>
-struct ThriftObjectModelLessThan<type::struct_t<T>>
-    : StructLessThanByFieldId<ThriftObjectModelLessThan> {};
+struct StableLessThan<type::struct_t<T>>
+    : StructLessThanByFieldId<StableLessThan> {};
 
 template <class T>
-struct ThriftObjectModelLessThan<type::union_t<T>>
-    : UnionLessThanByFieldId<ThriftObjectModelLessThan> {};
+struct StableLessThan<type::union_t<T>>
+    : UnionLessThanByFieldId<StableLessThan> {};
 
 } // namespace apache::thrift::op::detail

@@ -42,7 +42,7 @@
  * - Binary field encoding: JSON object with "utf-8" or "base64url" key.
  *   The value is either utf-8 encoded or base64url encoded (RFC 4648 §5) string
  * - AnyStruct: outputted as raw thrift struct.
- * - Deterministic output: Not supported.
+ * - Deterministic output: supported.
  *
  * ## Enum encoding
  *
@@ -117,7 +117,7 @@ class Json5ProtocolWriter final {
   explicit Json5ProtocolWriter(JsonWriterOptions options = {})
       : options_(options), writer_(options) {}
 
-  static constexpr KeyOrder keyOrder() { return KeyOrder::NativeAscending; }
+  KeyOrder keyOrder() const { return KeyOrder::StableAscending; }
   FieldOrder fieldOrder() const { return FieldOrder::IdAscending; }
 
   static constexpr size_t kDefaultGrowth = 1 << 14; // 16KB

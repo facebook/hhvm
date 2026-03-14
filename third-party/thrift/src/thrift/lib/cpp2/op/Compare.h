@@ -84,7 +84,7 @@ inline constexpr detail::
 /// For example:
 /// * thrift_object_model_less<MyStruct>(a, b) -> compares fields by field ID
 template <typename TagOrT = void>
-inline constexpr detail::ThriftObjectModelLessThan<type::infer_tag<TagOrT>>
+inline constexpr detail::StableLessThan<type::infer_tag<TagOrT>>
     thrift_object_model_less{};
 
 } // namespace apache::thrift::op

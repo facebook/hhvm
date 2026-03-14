@@ -466,6 +466,8 @@ enum class KeyOrder {
   Unspecified,
   /// Sorted by C++ `operator<`, in ascending order.
   NativeAscending,
+  /// Sorted by Thrift stable comparison (field id order), in ascending order.
+  StableAscending,
 };
 
 /// Specifies the order in which struct fields are serialized.

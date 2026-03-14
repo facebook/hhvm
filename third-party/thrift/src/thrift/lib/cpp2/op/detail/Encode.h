@@ -29,7 +29,9 @@
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Clear.h>
+#include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -660,18 +662,24 @@ struct SetEncode {
     xfer += prot.writeSetBegin(
         typeTagToTType<Tag>, checked_container_size(set.size()));
 
-    if constexpr (
-        !folly::is_detected_v<
-            ::apache::thrift::detail::pm::detect_key_compare,
-            T> &&
-        Protocol::keyOrder() != KeyOrder::Unspecified) {
+    constexpr bool kContainerIsOrdered = folly::
+        is_detected_v<::apache::thrift::detail::pm::detect_key_compare, T>;
+    const bool shouldSort = prot.keyOrder() == KeyOrder::StableAscending ||
+        (prot.keyOrder() == KeyOrder::NativeAscending && !kContainerIsOrdered);
+
+    if (shouldSort) {
       std::vector<typename T::const_iterator> iters;
       iters.reserve(set.size());
       for (auto it = set.begin(); it != set.end(); ++it) {
         iters.push_back(it);
       }
-      std::sort(
-          iters.begin(), iters.end(), [](auto a, auto b) { return *a < *b; });
+      auto compare = [order = prot.keyOrder()](auto a, auto b) {
+        if (order == KeyOrder::StableAscending) {
+          return StableLessThan<Tag>{}(*a, *b);
+        }
+        return *a < *b;
+      };
+      std::sort(iters.begin(), iters.end(), compare);
       for (auto it : iters) {
         xfer += Encode<Tag>{}(prot, *it);
       }
@@ -708,19 +716,24 @@ struct MapEncode {
           checked_container_size(map.size()));
     }
 
-    if constexpr (
-        !folly::is_detected_v<
-            ::apache::thrift::detail::pm::detect_key_compare,
-            T> &&
-        Protocol::keyOrder() != KeyOrder::Unspecified) {
+    constexpr bool kContainerIsOrdered = folly::
+        is_detected_v<::apache::thrift::detail::pm::detect_key_compare, T>;
+    const bool shouldSort = prot.keyOrder() == KeyOrder::StableAscending ||
+        (prot.keyOrder() == KeyOrder::NativeAscending && !kContainerIsOrdered);
+
+    if (shouldSort) {
       std::vector<typename T::const_iterator> iters;
       iters.reserve(map.size());
       for (auto it = map.begin(); it != map.end(); ++it) {
         iters.push_back(it);
       }
-      std::sort(iters.begin(), iters.end(), [](auto a, auto b) {
+      auto compare = [order = prot.keyOrder()](auto a, auto b) {
+        if (order == KeyOrder::StableAscending) {
+          return StableLessThan<Key>{}((*a).first, (*b).first);
+        }
         return (*a).first < (*b).first;
-      });
+      };
+      std::sort(iters.begin(), iters.end(), compare);
       for (auto it : iters) {
         xfer += apache::thrift::detail::pm::writeMapValueBegin(prot);
         xfer += Encode<Key>{}(prot, (*it).first);

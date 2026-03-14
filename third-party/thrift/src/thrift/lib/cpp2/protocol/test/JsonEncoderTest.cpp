@@ -293,5 +293,11 @@ TEST_P(Json5EncoderTest, StructWithOutOfOrderFieldIds) {
       !isJson5() ? outOfOrderFieldsJson() : outOfOrderFieldsJson5());
 }
 
+TEST_P(Json5EncoderTest, StructWithOutOfOrderFieldIdsInMap) {
+  EXPECT_EQ(
+      encode(outOfOrderFieldsInMapExample()),
+      !isJson5() ? outOfOrderFieldsInMapJson() : outOfOrderFieldsInMapJson5());
+}
+
 } // namespace
 } // namespace apache::thrift

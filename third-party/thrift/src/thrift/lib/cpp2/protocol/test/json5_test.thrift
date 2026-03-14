@@ -69,7 +69,9 @@ struct Example {
   19: optional map<map<map<i32, i32>, i32>, i32> nestedMapAsKey;
   // @lint-ignore THRIFTCHECKS bad-key-type
   @thrift.AllowUnsafeNonSealedKeyType
-  20: optional set<OutOfOrderFields> outOfOrderFields;
+  20: optional set<OutOfOrderFields> outOfOrderFieldsInSet;
+  // @lint-ignore THRIFTCHECKS bad-key-type
+  21: optional map<OutOfOrderFields, i32> outOfOrderFieldsInMap;
 }
 
 // --
@@ -434,15 +436,22 @@ const string binaryBase64Json5 = "{
 }";
 
 const Example outOfOrderFieldsExample = Example{
-  outOfOrderFields = [
+  outOfOrderFieldsInSet = [
+    OutOfOrderFields{Three = 0, One = 0, Two = 0},
+    OutOfOrderFields{Three = 1, One = 1, Two = 1},
+    OutOfOrderFields{Three = 0, One = 0, Two = 1},
     OutOfOrderFields{Three = 0, One = 1, Two = 0},
     OutOfOrderFields{Three = 1, One = 0, Two = 0},
+    OutOfOrderFields{Three = 1, One = 1, Two = 0},
+    OutOfOrderFields{Three = 1, One = 0, Two = 1},
+    OutOfOrderFields{Three = 0, One = 1, Two = 1},
+    OutOfOrderFields{Three = 0, One = 0, Two = 2},
   ],
 };
 const string outOfOrderFieldsJson = "{
-  \"outOfOrderFields\": [
+  \"outOfOrderFieldsInSet\": [
     {
-      \"One\": 1,
+      \"One\": 0,
       \"Two\": 0,
       \"Three\": 0
     },
@@ -450,13 +459,48 @@ const string outOfOrderFieldsJson = "{
       \"One\": 0,
       \"Two\": 0,
       \"Three\": 1
+    },
+    {
+      \"One\": 0,
+      \"Two\": 1,
+      \"Three\": 0
+    },
+    {
+      \"One\": 0,
+      \"Two\": 1,
+      \"Three\": 1
+    },
+    {
+      \"One\": 0,
+      \"Two\": 2,
+      \"Three\": 0
+    },
+    {
+      \"One\": 1,
+      \"Two\": 0,
+      \"Three\": 0
+    },
+    {
+      \"One\": 1,
+      \"Two\": 0,
+      \"Three\": 1
+    },
+    {
+      \"One\": 1,
+      \"Two\": 1,
+      \"Three\": 0
+    },
+    {
+      \"One\": 1,
+      \"Two\": 1,
+      \"Three\": 1
     }
   ]
 }";
 const string outOfOrderFieldsJson5 = "{
-  outOfOrderFields: [
+  outOfOrderFieldsInSet: [
     {
-      One: 1,
+      One: 0,
       Two: 0,
       Three: 0,
     },
@@ -464,6 +508,207 @@ const string outOfOrderFieldsJson5 = "{
       One: 0,
       Two: 0,
       Three: 1,
+    },
+    {
+      One: 0,
+      Two: 1,
+      Three: 0,
+    },
+    {
+      One: 0,
+      Two: 1,
+      Three: 1,
+    },
+    {
+      One: 0,
+      Two: 2,
+      Three: 0,
+    },
+    {
+      One: 1,
+      Two: 0,
+      Three: 0,
+    },
+    {
+      One: 1,
+      Two: 0,
+      Three: 1,
+    },
+    {
+      One: 1,
+      Two: 1,
+      Three: 0,
+    },
+    {
+      One: 1,
+      Two: 1,
+      Three: 1,
+    },
+  ],
+}";
+
+const Example outOfOrderFieldsInMapExample = Example{
+  outOfOrderFieldsInMap = {
+    OutOfOrderFields{Three = 0, One = 0, Two = 0}: 0,
+    OutOfOrderFields{Three = 1, One = 1, Two = 1}: 1,
+    OutOfOrderFields{Three = 0, One = 0, Two = 1}: 2,
+    OutOfOrderFields{Three = 0, One = 1, Two = 0}: 3,
+    OutOfOrderFields{Three = 1, One = 0, Two = 0}: 4,
+    OutOfOrderFields{Three = 1, One = 1, Two = 0}: 5,
+    OutOfOrderFields{Three = 1, One = 0, Two = 1}: 6,
+    OutOfOrderFields{Three = 0, One = 1, Two = 1}: 7,
+    OutOfOrderFields{Three = 0, One = 0, Two = 2}: 8,
+  },
+};
+const string outOfOrderFieldsInMapJson = "{
+  \"outOfOrderFieldsInMap\": [
+    {
+      \"key\": {
+        \"One\": 0,
+        \"Two\": 0,
+        \"Three\": 0
+      },
+      \"value\": 0
+    },
+    {
+      \"key\": {
+        \"One\": 0,
+        \"Two\": 0,
+        \"Three\": 1
+      },
+      \"value\": 4
+    },
+    {
+      \"key\": {
+        \"One\": 0,
+        \"Two\": 1,
+        \"Three\": 0
+      },
+      \"value\": 2
+    },
+    {
+      \"key\": {
+        \"One\": 0,
+        \"Two\": 1,
+        \"Three\": 1
+      },
+      \"value\": 6
+    },
+    {
+      \"key\": {
+        \"One\": 0,
+        \"Two\": 2,
+        \"Three\": 0
+      },
+      \"value\": 8
+    },
+    {
+      \"key\": {
+        \"One\": 1,
+        \"Two\": 0,
+        \"Three\": 0
+      },
+      \"value\": 3
+    },
+    {
+      \"key\": {
+        \"One\": 1,
+        \"Two\": 0,
+        \"Three\": 1
+      },
+      \"value\": 5
+    },
+    {
+      \"key\": {
+        \"One\": 1,
+        \"Two\": 1,
+        \"Three\": 0
+      },
+      \"value\": 7
+    },
+    {
+      \"key\": {
+        \"One\": 1,
+        \"Two\": 1,
+        \"Three\": 1
+      },
+      \"value\": 1
+    }
+  ]
+}";
+const string outOfOrderFieldsInMapJson5 = "{
+  outOfOrderFieldsInMap: [
+    {
+      key: {
+        One: 0,
+        Two: 0,
+        Three: 0,
+      },
+      value: 0,
+    },
+    {
+      key: {
+        One: 0,
+        Two: 0,
+        Three: 1,
+      },
+      value: 4,
+    },
+    {
+      key: {
+        One: 0,
+        Two: 1,
+        Three: 0,
+      },
+      value: 2,
+    },
+    {
+      key: {
+        One: 0,
+        Two: 1,
+        Three: 1,
+      },
+      value: 6,
+    },
+    {
+      key: {
+        One: 0,
+        Two: 2,
+        Three: 0,
+      },
+      value: 8,
+    },
+    {
+      key: {
+        One: 1,
+        Two: 0,
+        Three: 0,
+      },
+      value: 3,
+    },
+    {
+      key: {
+        One: 1,
+        Two: 0,
+        Three: 1,
+      },
+      value: 5,
+    },
+    {
+      key: {
+        One: 1,
+        Two: 1,
+        Three: 0,
+      },
+      value: 7,
+    },
+    {
+      key: {
+        One: 1,
+        Two: 1,
+        Three: 1,
+      },
+      value: 1,
     },
   ],
 }";

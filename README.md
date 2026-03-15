@@ -1,7 +1,7 @@
 # HHVM
 
 [HHVM page](https://hhvm.com) |
-[HHVM documentation](https://docs.hhvm.com/hhvm/) |
+[HHVM documentation](https://docs.hhvm.com/hhvm-overview/) |
 [Hacklang page](http://hacklang.org) |
 [General group](https://www.facebook.com/groups/hhvm.general/) |
 [Dev group](https://www.facebook.com/groups/hhvm.dev/) |

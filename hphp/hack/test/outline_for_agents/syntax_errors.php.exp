@@ -1,0 +1,10 @@
+WARNING: File contains syntax errors. Outline is best-effort.
+
+class ValidClass | lines 5-7
+  function method | line 6
+enum BadEnum | lines 9-15
+  FOO
+  public
+class ClassWithPrivateConst | lines 17-21
+  function method | line 20
+function missing_semicolon | lines 23-25

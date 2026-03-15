@@ -7,6 +7,7 @@
    clientLogCommand
    clientGetDefinition
    clientHighlightRefs
+   outline_for_agents
    server_progress_lwt))
  (libraries
   connection_tracker
@@ -26,6 +27,7 @@
   messages
   notebook_convert
   nuclide_rpc_message_printer
+  outline_for_agents
   pos
   rage
   redeclarations
@@ -70,5 +72,16 @@
  (modules server_progress_lwt)
  (libraries
    server_progress)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name outline_for_agents)
+ (wrapped false)
+ (modules outline_for_agents)
+ (libraries
+  full_fidelity
+  relative_path
+  utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

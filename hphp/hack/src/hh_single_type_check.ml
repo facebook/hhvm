@@ -64,6 +64,7 @@ type mode =
   | Find_local of File_content.Position.t
   | Get_member of string
   | Outline
+  | Outline_for_agents
   | Dump_nast
   | Dump_stripped_tast
   | Dump_tast
@@ -478,6 +479,10 @@ let parse_options () =
         Arg.Int (fun num_errors -> max_errors := Some num_errors),
         " Maximum number of errors to display" );
       ("--outline", Arg.Unit (set_mode Outline), " Print file outline");
+      ( "--outline-for-agents",
+        Arg.Unit (set_mode Outline_for_agents),
+        " <file> (mode) outline the file, including line spans, to help agents efficiently navigate large files."
+      );
       ("--nast", Arg.Unit (set_mode Dump_nast), " Print out the named AST");
       ("--tast", Arg.Unit (set_mode Dump_tast), " Print out the typed AST");
       ( "--stripped-tast",
@@ -1896,6 +1901,11 @@ let handle_mode
           FileOutline.outline (Provider_context.get_popt ctx) file
         in
         FileOutline.print ~short_pos:true results)
+  | Outline_for_agents ->
+    iter_over_files (fun filename ->
+        let file = cat (Relative_path.to_absolute filename) in
+        let result = Outline_for_agents.outline file in
+        print_string result)
   | Dump_nast ->
     let (errors, nasts) =
       Diagnostics.do_ (fun () -> create_nasts ctx files_info)

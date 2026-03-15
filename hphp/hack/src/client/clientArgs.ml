@@ -699,6 +699,10 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         Arg.Unit (fun () -> set_mode MODE_OUTLINE),
         " (mode) prints an outline of the text on stdin",
         Arg_user_facing );
+      ( "--outline-for-agents",
+        Arg.String (fun x -> set_mode (MODE_OUTLINE_FOR_AGENTS x)),
+        " <file> (mode) outline the file, including line spans, to help agents efficiently navigate large files",
+        Arg_user_facing );
       ( "--package-lint",
         Arg.String (fun x -> set_mode (MODE_PACKAGE_LINT x)),
         "Support for linting of __PackageOverride annotations",

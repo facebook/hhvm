@@ -33,6 +33,7 @@
   hhi_get
   naming_ast_print
   memtrace
+  outline_for_agents
   package_info
   package_config
   parent

@@ -65,6 +65,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --no-load                                               start from a fresh state
   --notebook-to-hack Convert                              notebook to a Hack file. Arg: notebook_number (example: "N12345"). Pass notebook in .ipynb format to stdin and a header (such as a copyright notice comment)
   --outline                                               (mode) prints an outline of the text on stdin
+  --outline-for-agents                                    <file> (mode) outline the file, including line spans, to help agents efficiently navigate large files
   --package-lint Support                                  for linting of __PackageOverride annotations
   --prechecked                                            override value of "prechecked_files" flag from hh.conf
   --no-prechecked                                         override value of "prechecked_files" flag from hh.conf

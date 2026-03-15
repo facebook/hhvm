@@ -762,6 +762,11 @@ let main_internal
     in
     ClientOutline.go results args.output_json;
     Lwt.return (Exit_status.No_error, Telemetry.create ())
+  | ClientEnv.MODE_OUTLINE_FOR_AGENTS path ->
+    let content = Sys_utils.cat path in
+    let result = Outline_for_agents.outline content in
+    print_string result;
+    Lwt.return (Exit_status.No_error, Telemetry.create ())
   | ClientEnv.MODE_METHOD_JUMP_CHILDREN class_ ->
     let filter = ServerCommandTypes.Method_jumps.No_filter in
     let%lwt (results, telemetry) =

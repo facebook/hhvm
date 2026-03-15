@@ -1,0 +1,4 @@
+class DocCommentExample | lines 3-16
+  $name | lines 7-8
+  function doThing | lines 10-15
+function standalone | lines 19-21

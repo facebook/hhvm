@@ -1,0 +1,4 @@
+class ServiceController | lines 3-30
+  function handleRequest | lines 4-12
+  function validateAndProcess | lines 14-21
+function process_batch | lines 32-38

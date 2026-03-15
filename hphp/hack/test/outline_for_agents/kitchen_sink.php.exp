@@ -1,0 +1,68 @@
+module facebook.test | line 3
+const GLOBAL_CONST | line 6
+const GLOBAL_STRING | line 7
+function main | lines 9-16
+abstract class AbstractBase | lines 19-66
+  $name | line 26
+  $count | line 27
+  $instances | line 28
+  $cached | line 29
+  const MAX_SIZE | line 32
+  const MIN_SIZE | line 33
+  const type TData | line 36
+  const type TItem | line 37
+  const type TDefault | line 38
+  function process | line 41
+  function greet | lines 44-46
+  function handleRequest | lines 49-57
+  function helper | line 60
+  function memoized | lines 62-65
+class Concrete | lines 71-109
+  const type TItem | line 76
+  const MIN_SIZE | line 77
+  function process | lines 82-83
+  function doSomething | lines 85-88
+  function __construct | lines 91-96
+  function create | lines 98-101
+  function fetchData | lines 104-108
+interface IFoo | lines 111-118
+  function doSomething | line 112
+  function withDefault | lines 115-117
+interface IBar | lines 120-125
+  const VERSION | line 124
+trait MyTrait | lines 128-143
+  function traitMethod | line 135
+  function traitAsync | lines 138-142
+trait OtherTrait | lines 145-147
+  function otherMethod | line 146
+enum Color | lines 150-154
+  RED
+  GREEN
+  BLUE
+enum class Priority | lines 157-161
+  LOW
+  MEDIUM
+  HIGH
+enum class MyEnumClass | lines 164-168
+  FOO
+  BAR
+  BAZ
+type MyAlias | line 171
+type ComplexAlias | lines 172-177
+newtype OpaqueId | line 180
+newtype OpaqueId2 | line 181
+case type MaybeInt | line 184
+case type Result | line 185
+function simple | line 188
+function with_doc | lines 190-195
+function process_batch | lines 198-205
+function generic | lines 208-212
+function with_attributes | lines 215-216
+class UseExample | lines 221-225
+  function example | lines 222-224
+class StandaloneClass | lines 228-231
+  function method | line 230
+class EmptyClass | line 234
+class OnlyPrivate | lines 237-241
+abstract class StaticUtility | lines 247-250
+  function helper | line 248

@@ -1,0 +1,4 @@
+namespace MyApp | lines 3-13
+  class InNamespace | lines 4-8
+    function method | lines 5-7
+  function nsFunc | lines 10-12

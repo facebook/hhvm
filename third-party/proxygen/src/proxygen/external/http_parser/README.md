@@ -57,7 +57,7 @@ When data is received on the socket execute the parser and check for errors.
     }
 
     /* Start up / continue the parser.
-     * Note we pass recved==0 to signal that EOF has been recieved.
+     * Note we pass recved==0 to signal that EOF has been received.
      */
     nparsed = http_parser_execute(parser, &settings, buf, recved);
 

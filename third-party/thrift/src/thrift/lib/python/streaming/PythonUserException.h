@@ -30,7 +30,9 @@ class PythonUserException final : public std::exception {
   PythonUserException(
       std::string type, std::string reason, std::unique_ptr<folly::IOBuf> buf);
   PythonUserException(const PythonUserException& ex);
+  PythonUserException(PythonUserException&&) noexcept = default;
   PythonUserException& operator=(const PythonUserException& ex);
+  PythonUserException& operator=(PythonUserException&&) noexcept = default;
 
   const std::string& type() const { return type_; }
   const std::string& reason() const { return reason_; }

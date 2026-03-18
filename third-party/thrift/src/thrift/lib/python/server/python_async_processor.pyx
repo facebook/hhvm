@@ -268,6 +268,10 @@ cdef class Promise_BiDi(Promise_Py):
         inst._cPromise[0] = cmove(promise)
         return inst
 
+cdef void _move_python_user_exception(Promise_Py promise, PythonUserException pyex):
+    cdef unique_ptr[cPythonUserException] owned = cmove(pyex._cpp_obj)
+    promise.error_py(cmove(dereference(owned.get())))
+
 async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise, IOBuf buf, Protocol prot, RpcKind kind):
     try:
         if kind is RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE:
@@ -285,7 +289,7 @@ async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise,
         else:
             val = await callFunc(buf, prot)
     except PythonUserException as pyex:
-        promise.error_py(cmove(dereference((<PythonUserException>pyex)._cpp_obj.release())))
+        _move_python_user_exception(promise, <PythonUserException>pyex)
     except ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.error_ta(cTApplicationException(
@@ -317,7 +321,7 @@ async def lifecycle_coro(object func, str funcName, Promise_Py promise):
             return
         await func()
     except PythonUserException as pyex:
-        promise.error_py(cmove(dereference((<PythonUserException>pyex)._cpp_obj.release())))
+        _move_python_user_exception(promise, <PythonUserException>pyex)
     except ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.error_ta(cTApplicationException(

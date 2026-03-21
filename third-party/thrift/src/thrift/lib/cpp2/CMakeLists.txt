@@ -98,6 +98,7 @@ add_library(
   ${syntax_graph-cpp2-SOURCES}
 )
 add_dependencies(thriftmetadata metadata-cpp2-target
+  any_rep-cpp2-target
   protocol-cpp2-target
   protocol_detail-cpp2-target
   type_id-cpp2-target

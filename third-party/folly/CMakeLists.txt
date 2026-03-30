@@ -71,13 +71,6 @@ ExternalProject_add(
     -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
   BUILD_COMMAND
     $(MAKE) folly
-  INSTALL_COMMAND
-# Prefered, but needs CMake 3.15 or above. Revist when Ubuntu 18.04 support is removed
-#    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&
-#    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component lib
-# Legacy way:
-    ${CMAKE_COMMAND} -DCOMPONENT=dev -P cmake_install.cmake --config ${CMAKE_BUILD_TYPE} &&
-    ${CMAKE_COMMAND} -DCOMPONENT=lib -P cmake_install.cmake --config ${CMAKE_BUILD_TYPE}
 )
 ExternalProject_Get_Property(bundled_folly INSTALL_DIR)
 set(

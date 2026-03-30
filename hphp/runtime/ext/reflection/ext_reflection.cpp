@@ -2519,7 +2519,7 @@ struct ReflectionExtension final : Extension {
       ReflectionExtensionLoader::className());
   }
 
-  std::vector<std::string> hackFiles() const {
+  std::vector<std::string> hackFiles() const override {
     return {
       "reflection.php",
       "reflection-classes.php",

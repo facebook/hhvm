@@ -101,7 +101,7 @@ private:
   }
 
   Clock::time_point m_begin;
-  const char* m_msg;
+  [[maybe_unused]] const char* m_msg;
   std::string m_str;
 
   TRACE_SET_MOD(extern_worker)

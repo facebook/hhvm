@@ -18,7 +18,6 @@ from thrift.python.streaming.python_user_exception import PythonUserException as
 from typing import AsyncGenerator as _typing_AsyncGenerator
 from thrift.python.serializer import serialize_iobuf, deserialize
 import thrift.python.types as _fbthrift_python_types
-import thrift.python.container_typedefs as _fbthrift_python_container_typedefs
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 

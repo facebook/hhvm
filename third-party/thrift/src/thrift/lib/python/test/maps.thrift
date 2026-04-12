@@ -30,9 +30,7 @@ typedef string AtoIValue
 const map<i16, map<i16, i16>> LocationMap = {1: {1: 1}};
 typedef list<i32> I32List
 typedef map<string, i64> StrIntMap
-typedef map<string, i64> AnotherStrIntMap
 typedef map<string, I32List> StrI32ListMap
-typedef map<string, list<i32>> AnotherStrI32ListMap
 typedef map<string, easy> StrEasyMap
 typedef map<string, string> StrStrMap
 typedef map<string, AtoIValue> StrAtoIValueMap

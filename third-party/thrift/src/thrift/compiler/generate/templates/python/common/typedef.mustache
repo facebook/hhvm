@@ -55,38 +55,6 @@
 {{typedef.py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{#partial python_type type=typedef.resolved}}]{{/if}}
       {{#else if (and typedef.binary? typedef.iobuf?)}}
 {{typedef.py_name}} = _fbthrift_iobuf.IOBuf
-      {{#else if typedef.list?}}
-        {{#if python.generate_immutable_types?}}
-          {{#let resolved = typedef.resolved}}
-class {{typedef.py_name}}(_fbthrift_python_container_typedefs._ListTypedefBase):
-    __slots__ = ()
-    _fbthrift_list_type_info = {{#partial m_types.typeinfo type=resolved.true_type.elem_type}}
-        {{/if python.generate_immutable_types?}}
-        {{#if python.generate_mutable_types?}}
-{{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}
-        {{/if python.generate_mutable_types?}}
-      {{#else if typedef.set?}}
-        {{#if python.generate_immutable_types?}}
-          {{#let resolved = typedef.resolved}}
-class {{typedef.py_name}}(_fbthrift_python_container_typedefs._SetTypedefBase):
-    __slots__ = ()
-    _fbthrift_set_type_info = {{#partial m_types.typeinfo type=resolved.true_type.elem_type}}
-        {{/if python.generate_immutable_types?}}
-        {{#if python.generate_mutable_types?}}
-{{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}
-        {{/if python.generate_mutable_types?}}
-      {{#else if typedef.map?}}
-        {{#if python.generate_immutable_types?}}
-          {{#let resolved = typedef.resolved}}
-          {{#let map = resolved.true_type}}
-class {{typedef.py_name}}(_fbthrift_python_container_typedefs._MapTypedefBase):
-    __slots__ = ()
-    _fbthrift_map_key_type_info = {{#partial m_types.typeinfo type=map.key_type}}
-    _fbthrift_map_val_type_info = {{#partial m_types.typeinfo type=map.val_type}}
-        {{/if python.generate_immutable_types?}}
-        {{#if python.generate_mutable_types?}}
-{{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}
-        {{/if python.generate_mutable_types?}}
       {{#else}}
 {{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}
       {{/if typedef.has_adapter?}}

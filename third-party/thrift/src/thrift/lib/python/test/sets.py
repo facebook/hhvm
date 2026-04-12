@@ -20,20 +20,16 @@ from __future__ import annotations
 
 import copy
 import unittest
-from collections.abc import Set as AbstractSetABC
 from typing import AbstractSet, Sequence, Tuple, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
 import python_test.sets.thrift_mutable_types as mutable_sets_types
 import python_test.sets.thrift_types as immutable_sets_types
-import thrift.python.types as _fbthrift_python_types
 from folly.iobuf import IOBuf
 from parameterized import parameterized_class
 from python_test.containers.thrift_types import Color, Foo, Sets
 from python_test.sets.thrift_types import (
-    AnotherSetI32,
-    AnotherSetI32Lists,
     constant_set,
     easy,
     EasySet,
@@ -283,31 +279,6 @@ class ImmutableSetTests(unittest.TestCase):
     hashable.
     """
 
-    def test_typedef_isinstance(self) -> None:
-        int_set = SetI32({1, 2, 3})
-        # SetI32 and AnotherSetI32 both resolve to set<i32>
-        self.assertIsInstance(int_set, SetI32)
-        self.assertIsInstance(int_set, AnotherSetI32)
-        self.assertIsInstance(int_set, _fbthrift_python_types.Set)
-        self.assertIsInstance(int_set, AbstractSetABC)
-        self.assertTrue(issubclass(SetI32, AbstractSetABC))
-        self.assertTrue(issubclass(SetI32, AnotherSetI32))
-        self.assertTrue(issubclass(AnotherSetI32, SetI32))
-        self.assertTrue(issubclass(SetI32, _fbthrift_python_types.Set))
-        # Different element types should not match
-        self.assertNotIsInstance(int_set, EasySet)
-        self.assertFalse(issubclass(SetI32, EasySet))
-        # Struct fields typed as set<i32> should also pass isinstance
-        self.assertIsInstance(
-            easy(val_list=[1, 2]).val_list, _fbthrift_python_types.List
-        )
-        # Nested container: SetI32Lists is set<list<i32>>, AnotherSetI32Lists is also set<list<i32>>
-        nested_set = SetI32Lists({(1, 2), (3, 4)})
-        self.assertIsInstance(nested_set, SetI32Lists)
-        self.assertIsInstance(nested_set, AnotherSetI32Lists)
-        self.assertTrue(issubclass(SetI32Lists, AnotherSetI32Lists))
-        self.assertTrue(issubclass(AnotherSetI32Lists, SetI32Lists))
-
     def test_empty(self) -> None:
         SetI32Lists(set())
         SetI32Lists({()})
@@ -358,9 +329,7 @@ class ImmutableSetTests(unittest.TestCase):
 
     def test_set_module_name(self) -> None:
         easy_set = EasySet({easy()})
-        # Immutable container typedefs are now proper classes in the
-        # generated module, inheriting from thrift.python.types.Set
-        self.assertEqual(easy_set.__class__.__module__, "python_test.sets.thrift_types")
+        self.assertEqual(easy_set.__class__.__module__, "thrift.python.types")
 
     def test_constant_set(self) -> None:
         self.assertEqual({"1", "2", "3"}, constant_set)

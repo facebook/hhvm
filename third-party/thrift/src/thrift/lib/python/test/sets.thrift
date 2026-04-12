@@ -32,11 +32,9 @@ typedef list<i32> I32List
 @thrift.AllowUnsafeNonSealedKeyType
 typedef set<easy> EasySet
 typedef set<i32> SetI32
-typedef set<i32> AnotherSetI32
 typedef set<AtoIValue> SetAtoIValue
 typedef set<I32List> SetI32Lists
 typedef set<SetI32Lists> SetSetI32Lists
-typedef set<list<i32>> AnotherSetI32Lists
 
 const set<string> constant_set = ["1", "2", "3"];
 

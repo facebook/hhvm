@@ -30,13 +30,10 @@ const list<string> unicode_list = ["Bulgaria", "Benin", "Saint Barthélemy"];
 }
 typedef string AtoIValue
 
-typedef i32 Id
-typedef list<Id> IdList
 typedef list<i32> I32List
 typedef list<easy> EasyList
 typedef list<string> StringList
 typedef list<list<string>> StrList2D
-typedef list<list<string>> AnotherStrList2D
 typedef list<map<string, i32>> ListOfStrToI32Map
 typedef list<AtoIValue> AtoIValueList
 

@@ -101,12 +101,8 @@ cdef inline str sv_to_str(string_view sv) except +:
 
 cdef extern from "thrift/lib/python/std_libcpp.h" namespace "::apache::thrift::python":
     cdef string_view extractStringViewFromBytes(PyObject*) 
-    cdef string_view extractStringViewFromUnicode(PyObject*)
 
 cdef inline string_view bytes_to_string_view(bytes s) except+:
     return extractStringViewFromBytes(<PyObject*>s)
-
-cdef inline string_view str_to_string_view(str s) except+:
-    return extractStringViewFromUnicode(<PyObject*>s)
 
     

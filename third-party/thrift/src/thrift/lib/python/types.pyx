@@ -41,7 +41,6 @@ import types
 from folly cimport cFollyIsDebug
 from thrift.python.exceptions cimport GeneratedError
 from thrift.python.serializer cimport cserialize, cdeserialize
-from thrift.python.std_libcpp cimport str_to_string_view
 
 # if True, then cinder is importable, and use_cinder = True,
 # meaning cinder functions use native extensions, not inefficient fallbacks
@@ -1080,12 +1079,6 @@ cdef class StructTypeInfo(TypeInfoBase):
 cdef class EnumTypeInfo(TypeInfoBase):
     def __cinit__(self, klass):
         self._class = klass
-        cdef vector[string_view] names
-        cdef vector[int32_t] values
-        for member in klass:
-            names.push_back(str_to_string_view(member.name))
-            values.push_back(<int32_t>member._fbthrift_value_)
-        self.cpp_obj.reset(new cEnumTypeInfo(cmove(names), cmove(values)))
 
     cpdef to_internal_data(self, object value):
         """
@@ -1126,7 +1119,7 @@ cdef class EnumTypeInfo(TypeInfoBase):
         return value
 
     cdef const cTypeInfo* get_cTypeInfo(self):
-        return self.cpp_obj.get().get()
+        return &i32TypeInfo
 
     def same_as(EnumTypeInfo self, other):
         if other is self:

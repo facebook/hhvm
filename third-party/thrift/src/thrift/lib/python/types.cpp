@@ -1253,20 +1253,6 @@ inline bool isStringType(const detail::TypeInfo* typeInfo) {
 
 } // namespace
 
-EnumTypeInfo::EnumTypeInfo(
-    std::vector<std::string_view> names, std::vector<std::int32_t> values)
-    : names_(std::move(names)),
-      values_(std::move(values)),
-      meta_{values_.size(), values_.data(), names_.data()},
-      find_(meta_),
-      ext_{find_},
-      typeinfo_{
-          /* .type */ protocol::TType::T_I32,
-          /* .get */ i32TypeInfo.get,
-          /* .set */ i32TypeInfo.set,
-          /* .typeExt */ &ext_,
-      } {}
-
 PyObject* ImmutableInternalDict_New() {
   ensureImportOrThrow();
   return createImmutableInternalMap();

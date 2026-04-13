@@ -28,7 +28,7 @@ template <typename Key,
           uint8_t KeyCommonOffset,
           uint64_t NumKeys>
 struct PerfectIndexMapTestsTemplateParams {
-  typedef Key TKey;
+  using TKey = Key;
   static const Key TOtherKey = OtherKey;
   static const Key TNoneKey = NoneKey;
   static const bool TAllowDuplicates = AllowDuplicates;
@@ -60,7 +60,7 @@ class PerfectIndexMapTests : public testing::Test {
 };
 
 // Register the template configurations we wish to automatically test
-typedef testing::Types<
+using TestTypes = testing::Types<
     PerfectIndexMapTestsTemplateParams<HTTPHeaderCode,
                                        HTTP_HEADER_OTHER,
                                        HTTP_HEADER_NONE,
@@ -92,12 +92,11 @@ typedef testing::Types<
                                        false,
                                        false,
                                        HTTPHeaderCodeCommonOffset,
-                                       HTTPCommonHeaders::num_codes>>
-    TestTypes;
+                                       HTTPCommonHeaders::num_codes>>;
 TYPED_TEST_SUITE(PerfectIndexMapTests, TestTypes);
 
 TYPED_TEST(PerfectIndexMapTests, BasicKeySetAddRemoveGetSingleOrNone) {
-  typedef typename TypeParam::TKey Key;
+  using Key = typename TypeParam::TKey;
 
   EXPECT_EQ(this->testMap_.size(), 0);
 

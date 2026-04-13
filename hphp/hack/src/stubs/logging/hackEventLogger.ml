@@ -137,6 +137,8 @@ let client_check _ _ ~init_proc_stack:_ ~spinner:_ = ()
 
 let client_check_partial _ _ ~init_proc_stack:_ ~spinner:_ = ()
 
+let client_check_heartbeat ~path:_ ~start_time:_ = ()
+
 let client_check_bad_exit _ _ ~init_proc_stack:_ ~spinner:_ = ()
 
 let client_check_errors_file_restarted _ = ()

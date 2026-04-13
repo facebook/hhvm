@@ -73,6 +73,7 @@ let default =
     silence_errors_under_dynamic = false;
     num_local_workers = None;
     defer_class_declaration_threshold = None;
+    heartbeat_interval = None;
     produce_streaming_errors = true;
     consume_streaming_errors = false;
     rust_elab = false;
@@ -614,6 +615,9 @@ let load_
   let defer_class_declaration_threshold =
     int_opt Config_keys.Hhconf.defer_class_declaration_threshold config
   in
+  let heartbeat_interval =
+    int_opt Config_keys.Hhconf.heartbeat_interval config
+  in
   let produce_streaming_errors =
     bool_
       Config_keys.Hhconf.produce_streaming_errors
@@ -1118,6 +1122,7 @@ let load_
     silence_errors_under_dynamic;
     num_local_workers;
     defer_class_declaration_threshold;
+    heartbeat_interval;
     produce_streaming_errors;
     consume_streaming_errors;
     rust_elab;

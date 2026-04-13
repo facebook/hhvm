@@ -227,6 +227,55 @@ type seconds_since_epoch = float
 
 type log_message = string
 
+(** Heartbeat logging: logs when a file takes longer than [heartbeat_interval]
+    seconds to type-check. Uses [Timer] (SIGALRM) so it fires during type-checking,
+    not after. Only active when [heartbeat_interval] is set. *)
+module Heartbeat : sig
+  val with_heartbeat : int option -> workitem -> (unit -> 'a) -> 'a
+end = struct
+  let path_of_workitem workitem =
+    match workitem with
+    | Check { path; _ }
+    | Declare (path, _) ->
+      path
+
+  let with_heartbeat interval_seconds workitem fn =
+    match interval_seconds with
+    | None -> fn ()
+    | Some interval ->
+      let start_time = Unix.gettimeofday () in
+      let timer_id = ref None in
+      let rec schedule () =
+        timer_id :=
+          Some
+            (Timer.set_timer
+               ~interval:(Float.of_int interval)
+               ~callback:(fun () ->
+                 let elapsed =
+                   Unix.gettimeofday () -. start_time |> Float.to_int
+                 in
+                 Hh_logger.log
+                   "[heartbeat] Still checking %s after %ds"
+                   (Relative_path.suffix (path_of_workitem workitem))
+                   elapsed;
+                 HackEventLogger.client_check_heartbeat
+                   ~path:(path_of_workitem workitem)
+                   ~start_time;
+                 schedule ()))
+      in
+      schedule ();
+      let cancel () = Option.iter !timer_id ~f:Timer.cancel_timer in
+      let result =
+        try fn () with
+        | exn ->
+          let e = Exception.wrap exn in
+          cancel ();
+          Exception.reraise e
+      in
+      cancel ();
+      result
+end
+
 let neutral : unit -> typing_result = Typing_service_types.make_typing_result
 
 let should_enable_deferring (file : check_file_workitem) =
@@ -391,6 +440,7 @@ let process_one_workitem
     (fn : workitem)
     ({ diagnostics; map_reduce_data; tally; stats } : workitem_accumulator) :
     TypingProgress.progress_outcome * workitem_accumulator =
+  let heartbeat_interval = check_info.heartbeat_interval in
   let decl_cap_mb = None in
   let workitem_cap_mb = Option.value memory_cap ~default:Int.max_value in
   let type_check_twice =
@@ -405,6 +455,7 @@ let process_one_workitem
         map_reduce_data,
         deferred_workitems,
         tally ) =
+    Heartbeat.with_heartbeat heartbeat_interval fn @@ fun () ->
     match fn with
     | Check file ->
       let { file_diagnostics; file_map_reduce_data; deferred_decls } =

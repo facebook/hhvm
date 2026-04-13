@@ -543,6 +543,8 @@ module Hhconf = struct
 
   let fetch_remote_old_decls = hhconf_key "fetch_remote_old_decls"
 
+  let heartbeat_interval = hhconf_key "heartbeat_interval"
+
   let hg_aware = hhconf_key "hg_aware"
 
   let hg_aware_parsing_restart_threshold =

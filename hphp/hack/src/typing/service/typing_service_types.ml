@@ -161,6 +161,7 @@ type check_info = {
   recheck_id: string option;
   per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;
   memtrace_dir: string option;
+  heartbeat_interval: int option;
 }
 
 type workitems_to_process = workitem BigList.t

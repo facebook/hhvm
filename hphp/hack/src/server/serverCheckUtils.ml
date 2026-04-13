@@ -121,6 +121,7 @@ let get_check_info ~check_reason ~log_errors ~discard_warnings (genv : genv) env
     recheck_id = env.init_env.recheck_id;
     per_file_profiling = genv.local_config.ServerLocalConfig.per_file_profiling;
     memtrace_dir = genv.local_config.ServerLocalConfig.memtrace_dir;
+    heartbeat_interval = genv.local_config.ServerLocalConfig.heartbeat_interval;
   }
 
 type user_filter =

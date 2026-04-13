@@ -297,6 +297,8 @@ type t = {
   defer_class_declaration_threshold: int option;
       (** If set, defers class declarations after N lazy declarations; if not set,
       always lazily declares classes not already in cache. *)
+  heartbeat_interval: int option;
+      (** If set, periodically log which file is being type-checked, every this many seconds *)
   produce_streaming_errors: bool;
       (** whether hh_server should write errors to errors.bin file *)
   consume_streaming_errors: bool;

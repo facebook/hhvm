@@ -493,6 +493,8 @@ module Hhconf : sig
 
   val fetch_remote_old_decls : string
 
+  val heartbeat_interval : string
+
   val hg_aware : string
 
   val hg_aware_parsing_restart_threshold : string

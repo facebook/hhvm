@@ -67,6 +67,7 @@ let test () =
       recheck_id = Some "";
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
       memtrace_dir = None;
+      heartbeat_interval = None;
     }
   in
   let { Typing_check_service.diagnostics; telemetry; _ } =

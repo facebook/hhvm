@@ -262,6 +262,15 @@ class H3WtSession final : public QuicWtSessionBase {
       override;
 
   /**
+   * Serializes the http/3 datagram, i.e. prefixes the datagram w/ quarter
+   * stream id (connectStreamId_ / 4) per RFC9297. Similarly to
+   * ::create(Uni|Bidi)Stream functions above, ::sendDatagram writes bypass
+   * the http session and directly write to the QuicSocket.
+   */
+  folly::Expected<folly::Unit, ErrorCode> sendDatagram(
+      IoBufPtr datagram) noexcept override;
+
+  /**
    * The backing http/3 session should invoke these functions when the
    * corresponding capsules have been received & parsed on the CONNECT stream.
    */

@@ -496,6 +496,26 @@ folly::Expected<folly::Unit, WebTransport::ErrorCode> H3WtSession::closeSession(
   return folly::unit;
 }
 
+folly::Expected<folly::Unit, WebTransport::ErrorCode> H3WtSession::sendDatagram(
+    IoBufPtr datagram) noexcept {
+  /**
+   * RFC9297:
+   * HTTP/3 Datagram {
+   *   Quarter Stream ID (i),
+   *   HTTP Datagram Payload (..),
+   * }
+   */
+  const uint64_t quarterStreamId = connectStreamId_ / 4;
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  constexpr uint8_t kGrowth = 8;
+  folly::io::QueueAppender appender(&queue, kGrowth);
+  auto encodeRes = quic::encodeQuicInteger(
+      quarterStreamId, [&appender](auto val) { appender.writeBE(val); });
+  XCHECK(encodeRes);
+  queue.append(std::move(datagram));
+  return QuicWtSessionBase::sendDatagram(queue.move());
+}
+
 folly::Expected<WebTransport::StreamWriteHandle*, WebTransport::ErrorCode>
 H3WtSession::createUniStream() noexcept {
   auto result = QuicWtSessionBase::createUniStream();

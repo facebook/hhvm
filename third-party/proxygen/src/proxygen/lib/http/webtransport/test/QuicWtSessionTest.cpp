@@ -928,3 +928,50 @@ TEST_F(H3WtSessionTest, AcquireIngressStream) {
     EXPECT_TRUE(read->value().fin);
   }
 }
+
+TEST_F(H3WtSessionTest, SendDatagram) {
+  // connectStreamId=0 => quarterStreamId=0 => varint = 0x00
+  auto payload = folly::IOBuf::copyBuffer("dgram");
+  auto res = session_->sendDatagram(std::move(payload));
+  EXPECT_TRUE(res.hasValue());
+
+  ASSERT_EQ(socketDriver_.outDatagrams_.size(), 1);
+  auto buf = socketDriver_.outDatagrams_[0].move();
+  ASSERT_NE(buf, nullptr);
+
+  // expect: 1 byte varint(0) + 5 bytes "dgram" = 6 bytes total
+  EXPECT_EQ(buf->computeChainDataLength(), 6);
+  folly::io::Cursor cursor(buf.get());
+  EXPECT_EQ(cursor.readBE<uint8_t>(), 0x00); // quarter stream id = 0
+  auto remaining = cursor.readFixedString(5);
+  EXPECT_EQ(remaining, "dgram");
+}
+
+TEST_F(H3WtSessionTest, SendDatagramLargeConnectStreamId) {
+  // connectStreamId=256 => quarterStreamId=64 => 2-byte varint
+  auto handler = std::make_unique<StrictMock<MockWebTransportHandler>>();
+  EXPECT_CALL(*handler, onSessionEnd(folly::Optional<uint32_t>{folly::none}));
+  auto session =
+      std::make_shared<H3WtSession>(socketDriver_.getSocket(),
+                                    std::move(handler),
+                                    detail::WtStreamManager::WtConfig{},
+                                    /*connectStreamId=*/256,
+                                    connectStreamCb_);
+  auto payload = folly::IOBuf::copyBuffer("hi");
+  auto res = session->sendDatagram(std::move(payload));
+  EXPECT_TRUE(res.hasValue());
+
+  ASSERT_EQ(socketDriver_.outDatagrams_.size(), 1);
+  auto buf = socketDriver_.outDatagrams_[0].move();
+  ASSERT_NE(buf, nullptr);
+
+  // expect: 2 byte varint(64) + 2 bytes "hi" = 4 bytes total
+  EXPECT_EQ(buf->computeChainDataLength(), 4);
+  folly::io::Cursor cursor(buf.get());
+  EXPECT_EQ(cursor.readBE<uint8_t>(), 0x40); // 2-byte varint prefix
+  EXPECT_EQ(cursor.readBE<uint8_t>(), 0x40); // value = 64
+  auto remaining = cursor.readFixedString(2);
+  EXPECT_EQ(remaining, "hi");
+
+  session->closeSession(folly::none);
+}

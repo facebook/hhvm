@@ -54,14 +54,17 @@ rocket::Payload DefaultPayloadSerializerStrategy::packWithFds(
     folly::SocketFds fds,
     bool encodeMetadataUsingBinary,
     folly::AsyncTransport* transport,
-    folly::IOBufFactory* ioBufFactory) {
-  if (auto compression = metadata->compression_ref()) {
-    const auto compressionAlgorithm = *compression;
-    if (compressionAlgorithm != CompressionAlgorithm::NONE &&
-        compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
-      // Custom compression is supported in
-      // CustomCompressionPayloadSerializerStrategy
-      payload = compressBuffer(std::move(payload), compressionAlgorithm);
+    folly::IOBufFactory* ioBufFactory,
+    bool skipCompression) {
+  if (!skipCompression) {
+    if (auto compression = metadata->compression_ref()) {
+      const auto compressionAlgorithm = *compression;
+      if (compressionAlgorithm != CompressionAlgorithm::NONE &&
+          compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
+        // Custom compression is supported in
+        // CustomCompressionPayloadSerializerStrategy
+        payload = compressBuffer(std::move(payload), compressionAlgorithm);
+      }
     }
   }
 
@@ -85,7 +88,8 @@ DefaultPayloadSerializerStrategy::packWithFds<RequestRpcMetadata>(
     folly::SocketFds,
     bool,
     folly::AsyncTransport*,
-    folly::IOBufFactory*);
+    folly::IOBufFactory*,
+    bool);
 
 template rocket::Payload
 DefaultPayloadSerializerStrategy::packWithFds<ResponseRpcMetadata>(
@@ -94,7 +98,8 @@ DefaultPayloadSerializerStrategy::packWithFds<ResponseRpcMetadata>(
     folly::SocketFds,
     bool,
     folly::AsyncTransport*,
-    folly::IOBufFactory*);
+    folly::IOBufFactory*,
+    bool);
 
 template rocket::Payload
 DefaultPayloadSerializerStrategy::packWithFds<StreamPayloadMetadata>(
@@ -103,7 +108,8 @@ DefaultPayloadSerializerStrategy::packWithFds<StreamPayloadMetadata>(
     folly::SocketFds,
     bool,
     folly::AsyncTransport*,
-    folly::IOBufFactory*);
+    folly::IOBufFactory*,
+    bool);
 
 bool DefaultPayloadSerializerStrategy::
     canSerializeMetadataIntoDataBufferHeadroom(

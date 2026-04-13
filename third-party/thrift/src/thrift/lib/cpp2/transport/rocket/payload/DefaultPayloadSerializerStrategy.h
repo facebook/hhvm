@@ -67,7 +67,8 @@ class DefaultPayloadSerializerStrategy final
       folly::SocketFds fds,
       bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport,
-      folly::IOBufFactory* ioBufFactory = nullptr);
+      folly::IOBufFactory* ioBufFactory = nullptr,
+      bool skipCompression = false);
 
   template <typename T>
   std::unique_ptr<folly::IOBuf> packCompact(const T& data) {

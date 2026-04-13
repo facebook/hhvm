@@ -184,6 +184,19 @@ class RpcOptions {
   bool getForceSyncOnFiber() const;
 
   /**
+   * Indicates that the payload buffer in SerializedRequest is already
+   * compressed with the specified algorithm. When set, the channel layer
+   * will set metadata.compression for the wire but skip re-compressing
+   * the buffer in packWithFds().
+   *
+   * This is used by proxies (e.g., SR Proxy) to forward compressed payloads
+   * without decompression/recompression when the target supports the same
+   * compression algorithm.
+   */
+  RpcOptions& setPreCompressedAlgorithm(CompressionAlgorithm algo);
+  CompressionAlgorithm getPreCompressedAlgorithm() const;
+
+  /**
    * Set routing objective key for global routing optimization.
    *
    * This key is used by the routing layer to select the appropriate routing
@@ -257,6 +270,9 @@ class RpcOptions {
   Checksum checksum_{Checksum::NONE};
 
   bool forceSyncOnFiber_{false};
+
+  // When set, indicates the payload is already compressed with this algorithm.
+  CompressionAlgorithm preCompressedAlgorithm_{CompressionAlgorithm::NONE};
 
   // Metrics to be sent back to the client
   std::shared_ptr<void> metricsToCollect_;

@@ -1,0 +1,1 @@
+5 18 --config package_allow_typedef_violations=true

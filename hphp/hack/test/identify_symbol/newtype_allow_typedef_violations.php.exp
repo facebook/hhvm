@@ -1,0 +1,11 @@
+name: \ForeignPackageType, kind: class, span: line 5, characters 18-35, is_declaration: false
+affects_prod_build: false
+definition:
+ ForeignPackageType
+   kind: class
+   id: type_id::ForeignPackageType
+   position: line 3, characters 7-24
+   span: line 3, character 1 - line 3, character 27
+   modifiers: 
+
+

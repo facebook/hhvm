@@ -399,6 +399,8 @@ let visitor =
   let in_class_ptr = ref false in
   let in_attribute = ref false in
   let in_require_package_intern = ref false in
+  let in_typedef = ref false in
+  let in_newtype = ref false in
 
   object (self)
     inherit [_] Tast_visitor.reduce as super
@@ -538,6 +540,11 @@ let visitor =
           else if !in_class_ptr then
             let tcopt = Tast_env.get_tcopt env in
             not (TypecheckerOptions.package_allow_classconst_violations tcopt)
+          else if !in_newtype then
+            false
+          else if !in_typedef then
+            let tcopt = Tast_env.get_tcopt env in
+            not (TypecheckerOptions.package_allow_typedef_violations tcopt)
           else
             true
         in
@@ -723,9 +730,18 @@ let visitor =
       | [h] when String.equal (snd sid) SN.Classes.cSupportDyn ->
         self#on_hint env h
       | _ ->
-        let acc =
-          process_class_id ~affects_prod_build:(not !in_attribute) sid
+        let affects_prod_build =
+          if !in_attribute then
+            false
+          else if !in_newtype then
+            false
+          else if !in_typedef then
+            let tcopt = Tast_env.get_tcopt env in
+            not (TypecheckerOptions.package_allow_typedef_violations tcopt)
+          else
+            true
         in
+        let acc = process_class_id ~affects_prod_build sid in
         self#plus acc (super#on_Happly env sid hl)
 
     method! on_catch env (sid, lid, block) =
@@ -869,7 +885,21 @@ let visitor =
       let acc =
         process_class_id ~is_declaration:typedef.Aast.t_span typedef.Aast.t_name
       in
-      self#plus acc (super#on_typedef env typedef)
+      let is_newtype =
+        match typedef.Aast.t_assignment with
+        | Aast.SimpleTypeDef
+            { Aast.tvh_vis = Aast.Opaque | Aast.OpaqueModule; _ } ->
+          true
+        | _ -> false
+      in
+      let old_in_typedef = !in_typedef in
+      let old_in_newtype = !in_newtype in
+      in_typedef := true;
+      in_newtype := is_newtype;
+      let result = self#plus acc (super#on_typedef env typedef) in
+      in_typedef := old_in_typedef;
+      in_newtype := old_in_newtype;
+      result
 
     method! on_gconst env cst =
       let acc =

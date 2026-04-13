@@ -462,8 +462,8 @@ TEST(DiffVisitorTest, Union) {
 
 TEST(DynamicPatch, List) {
   DynamicListPatch p;
-  p.push_back(asValueStruct<type::i32_t>(1));
-  p.push_back(asValueStruct<type::i32_t>(2));
+  p.append(asValueStruct<type::i32_t>(1));
+  p.append(asValueStruct<type::i32_t>(2));
 
   ValueList l;
 
@@ -499,22 +499,20 @@ TEST(DynamicPatch, InvalidListPatch) {
   }
   {
     DynamicListPatch p;
-    p.push_back(asValueStruct<type::i32_t>(1));
-    EXPECT_THROW(
-        p.push_back(asValueStruct<type::i64_t>(2)), std::runtime_error);
+    p.append(asValueStruct<type::i32_t>(1));
+    EXPECT_THROW(p.append(asValueStruct<type::i64_t>(2)), std::runtime_error);
   }
   {
     DynamicListPatch p;
     p.assign(asValueStruct<type::list<type::i32_t>>({1}).as_list());
-    EXPECT_THROW(
-        p.push_back(asValueStruct<type::i64_t>(2)), std::runtime_error);
+    EXPECT_THROW(p.append(asValueStruct<type::i64_t>(2)), std::runtime_error);
   }
 }
 
 TEST(DynamicPatch, Set) {
   DynamicSetPatch p;
-  p.insert(asValueStruct<type::i32_t>(1));
-  p.insert(asValueStruct<type::i32_t>(2));
+  p.add(asValueStruct<type::i32_t>(1));
+  p.add(asValueStruct<type::i32_t>(2));
 
   ValueSet s;
 
@@ -548,13 +546,13 @@ TEST(DynamicPatch, InvalidSetPatch) {
   }
   {
     DynamicSetPatch p;
-    p.insert(asValueStruct<type::i32_t>(1));
-    EXPECT_THROW(p.insert(asValueStruct<type::i64_t>(2)), std::runtime_error);
+    p.add(asValueStruct<type::i32_t>(1));
+    EXPECT_THROW(p.add(asValueStruct<type::i64_t>(2)), std::runtime_error);
   }
   {
     DynamicSetPatch p;
     p.assign(asValueStruct<type::set<type::i32_t>>({1}).as_set());
-    EXPECT_THROW(p.insert(asValueStruct<type::i64_t>(2)), std::runtime_error);
+    EXPECT_THROW(p.add(asValueStruct<type::i64_t>(2)), std::runtime_error);
   }
 }
 
@@ -586,12 +584,10 @@ TEST(DynamicPatch, InvalidMapPatch) {
   }
   auto testInvalidMapPatch = [](auto& p) {
     EXPECT_THROW(
-        p.insert_or_assign(
-            asValueStruct<type::i64_t>(1), asValueStruct<type::i32_t>(1)),
+        p.put(asValueStruct<type::i64_t>(1), asValueStruct<type::i32_t>(1)),
         std::runtime_error);
     EXPECT_THROW(
-        p.insert_or_assign(
-            asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)),
+        p.put(asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)),
         std::runtime_error);
     EXPECT_THROW(
         p.tryPutMulti(
@@ -612,8 +608,7 @@ TEST(DynamicPatch, InvalidMapPatch) {
   };
   {
     DynamicMapPatch p;
-    p.insert_or_assign(
-        asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1));
+    p.put(asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1));
     testInvalidMapPatch(p);
   }
   {
@@ -655,10 +650,10 @@ struct StringVsBinaryTest : testing::Test {
   void SetUp() override {
     s.stringSet()->insert("foo");
     s.binarySet()->insert("foo");
-    staticStringSetPatch.erase("foo");
-    staticBinarySetPatch.erase("foo");
-    dynamicStringSetPatch.erase(stringFoo());
-    dynamicBinarySetPatch.erase(binaryFoo());
+    staticStringSetPatch.remove("foo");
+    staticBinarySetPatch.remove("foo");
+    dynamicStringSetPatch.remove(stringFoo());
+    dynamicBinarySetPatch.remove(binaryFoo());
     stringSetValue.emplace_set().insert(stringFoo());
     binarySetValue.emplace_set().insert(binaryFoo());
   }
@@ -734,7 +729,7 @@ TEST(DynamicPatch, Map) {
 
   {
     DynamicMapPatch patch;
-    patch.erase(asValueStruct<type::i32_t>(1));
+    patch.remove(asValueStruct<type::i32_t>(1));
     patch.apply(badge, m);
     EXPECT_EQ(m.size(), 1);
     EXPECT_EQ(

@@ -102,10 +102,13 @@ class CustomCompressionPayloadSerializerStrategy final
       folly::SocketFds fds,
       bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport,
-      folly::IOBufFactory* ioBufFactory = nullptr) {
-    if (auto compress = metadata->compression()) {
-      if (*compress == CompressionAlgorithm::CUSTOM) {
-        payload = customCompressBuffer(std::move(payload));
+      folly::IOBufFactory* ioBufFactory = nullptr,
+      bool skipCompression = false) {
+    if (!skipCompression) {
+      if (auto compress = metadata->compression()) {
+        if (*compress == CompressionAlgorithm::CUSTOM) {
+          payload = customCompressBuffer(std::move(payload));
+        }
       }
     }
 
@@ -115,7 +118,8 @@ class CustomCompressionPayloadSerializerStrategy final
         std::move(fds),
         encodeMetadataUsingBinary,
         transport,
-        ioBufFactory);
+        ioBufFactory,
+        skipCompression);
   }
 
   template <class PayloadType>

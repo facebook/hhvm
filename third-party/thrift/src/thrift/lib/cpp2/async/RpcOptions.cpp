@@ -305,6 +305,15 @@ const std::shared_ptr<void>& RpcOptions::getMetricsToCollect() const {
   return metricsToCollect_;
 }
 
+RpcOptions& RpcOptions::setPreCompressedAlgorithm(CompressionAlgorithm algo) {
+  preCompressedAlgorithm_ = algo;
+  return *this;
+}
+
+CompressionAlgorithm RpcOptions::getPreCompressedAlgorithm() const {
+  return preCompressedAlgorithm_;
+}
+
 RpcOptions& RpcOptions::setRoutingObjectiveKey(
     std::string routingObjectiveKey) {
   routingObjectiveKey_ = std::move(routingObjectiveKey);

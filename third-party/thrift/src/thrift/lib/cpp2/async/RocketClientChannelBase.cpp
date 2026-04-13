@@ -45,6 +45,7 @@
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -978,6 +979,55 @@ void RocketClientChannelBase::sendThriftRequest(
       std::move(frameworkMetadata),
       hasCustomCompressor());
 
+  // If the payload is already compressed (pre-compressed pass-through mode),
+  // check whether we can forward the compressed buffer as-is. This requires:
+  //   1. The outbound channel either has no compression configured, or its
+  //      configured algorithm matches the inbound pre-compressed algorithm.
+  //   2. The target server supports the inbound algorithm.
+  // If both conditions are met, set metadata.compression to the inbound
+  // algorithm (so the receiver knows to decompress) and skip re-compression.
+  // Otherwise, decompress the buffer and let normal compression flow proceed.
+  bool skipCompression = false;
+  auto preCompressedAlgo = rpcOptions.getPreCompressedAlgorithm();
+  if (preCompressedAlgo != CompressionAlgorithm::NONE) {
+    // Check if the outbound channel already has compression configured
+    // (via makeRequestRpcMetadata from THeader's DesiredCompressionConfig).
+    auto outboundCompression = metadata.compression();
+    bool outboundAlgoConflicts = outboundCompression.has_value() &&
+        *outboundCompression != CompressionAlgorithm::NONE &&
+        *outboundCompression != preCompressedAlgo;
+
+    if (outboundAlgoConflicts) {
+      // Outbound wants a different algorithm than what we have --
+      // decompress so packWithFds can re-compress with the outbound algo.
+      buf = rocket::CompressionManager().uncompressBuffer(
+          std::move(buf), preCompressedAlgo);
+    } else {
+      // No conflicting outbound algo. Check if target supports inbound algo.
+      bool targetSupportsAlgo = false;
+      switch (preCompressedAlgo) {
+        case CompressionAlgorithm::ZSTD:
+        case CompressionAlgorithm::ZSTD_LESS:
+        case CompressionAlgorithm::ZSTD_MORE:
+          targetSupportsAlgo = getRocketClientImpl().getServerZstdSupported();
+          break;
+        default:
+          // No reliable detection for non-ZSTD algorithms yet
+          targetSupportsAlgo = false;
+          break;
+      }
+      if (targetSupportsAlgo) {
+        metadata.compression() = preCompressedAlgo;
+        skipCompression = true;
+      } else {
+        // Target doesn't support this algorithm -- decompress and let
+        // normal compression logic in packWithFds handle it.
+        buf = rocket::CompressionManager().uncompressBuffer(
+            std::move(buf), preCompressedAlgo);
+      }
+    }
+  }
+
   size_t requestSerializedSize;
   // Avoid unnecessary computation for streaming methods.
   if constexpr (std::is_same_v<Callback, RequestClientCallback::Ptr>) {
@@ -991,7 +1041,8 @@ void RocketClientChannelBase::sendThriftRequest(
         rpcOptions.copySocketFdsToSend(),
         encodeMetadataUsingBinary(),
         getRocketClientImpl().getTransportWrapper(),
-        getRocketClientImpl().getIOBufFactory());
+        getRocketClientImpl().getIOBufFactory(),
+        skipCompression);
     requestPayload.setDataFirstFieldAlignment(
         rpcOptions.getFrameRelativeDataAlignment());
     if (metadata.protocol()) {

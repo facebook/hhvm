@@ -240,7 +240,8 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
       folly::SocketFds fds,
       bool encodeMetadataUsingBinary,
       folly::AsyncTransport* transport,
-      folly::IOBufFactory* ioBufFactory = nullptr) {
+      folly::IOBufFactory* ioBufFactory = nullptr,
+      bool skipCompression = false) {
     if (!supportsChecksum()) {
       if (metadata->checksum().has_value() &&
           metadata->checksum()->algorithm().value() !=
@@ -259,7 +260,8 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
           std::move(fds),
           encodeMetadataUsingBinary,
           transport,
-          ioBufFactory);
+          ioBufFactory,
+          skipCompression);
     });
   }
 

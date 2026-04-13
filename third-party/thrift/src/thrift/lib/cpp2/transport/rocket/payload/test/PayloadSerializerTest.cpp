@@ -116,6 +116,82 @@ TEST(PayloadSerializerTest, TestMakeCustomCompression) {
   testPackAndUnpackWithCompactProtocol(ps);
 }
 
+TEST(PayloadSerializerTest, TestSkipCompressionPreservesBuffer) {
+  if (!folly::kIsLinux) {
+    return;
+  }
+
+  // Test that packWithFds with skipCompression=true preserves the buffer
+  // unchanged while still writing the compression algorithm into metadata.
+  // This is used by the SR Proxy pass-through path: the payload is already
+  // compressed, so we set metadata.compression for the receiver but skip
+  // re-compressing the buffer.
+
+  PayloadSerializer::reset();
+  PayloadSerializer::initialize(DefaultPayloadSerializerStrategy());
+  auto& serializer = *PayloadSerializer::getInstance().get();
+
+  std::string const plaintext = "hello world - test payload for compression";
+
+  // First, compress the buffer to simulate a pre-compressed payload
+  auto preCompressed = serializer.compressBuffer(
+      folly::IOBuf::fromString(plaintext), CompressionAlgorithm::ZSTD);
+  auto preCompressedCopy = preCompressed->clone();
+
+  // Pack with skipCompression=true: metadata says ZSTD, but buffer is NOT
+  // re-compressed
+  RequestRpcMetadata metadata;
+  metadata.protocol() = ProtocolId::COMPACT;
+  metadata.compression() = CompressionAlgorithm::ZSTD;
+  auto payload = serializer.packWithFds(
+      &metadata,
+      std::move(preCompressed),
+      folly::SocketFds(),
+      false, /* encodeMetadataUsingBinary */
+      nullptr, /* transport */
+      nullptr, /* ioBufFactory */
+      true /* skipCompression */);
+
+  // Unpack the payload -- the receiver sees metadata.compression=ZSTD and
+  // will decompress the buffer
+  auto unpacked = serializer.unpack<RequestPayload>(std::move(payload), false);
+  ASSERT_FALSE(unpacked.hasException());
+  auto& result = unpacked.value();
+
+  // The metadata should indicate ZSTD compression
+  EXPECT_TRUE(result.metadata.compression().has_value());
+  EXPECT_EQ(*result.metadata.compression(), CompressionAlgorithm::ZSTD);
+
+  // The unpacked payload should be the pre-compressed bytes (since the
+  // receiver's unpack sees compression=ZSTD and decompresses)
+  // So we should get back the original plaintext
+  EXPECT_EQ(result.payload->toString(), plaintext);
+
+  // Now do the same WITHOUT skipCompression (normal path) -- the buffer
+  // would be double-compressed and decompression would yield garbage or fail
+  auto preCompressed2 = serializer.compressBuffer(
+      folly::IOBuf::fromString(plaintext), CompressionAlgorithm::ZSTD);
+
+  RequestRpcMetadata metadata2;
+  metadata2.protocol() = ProtocolId::COMPACT;
+  metadata2.compression() = CompressionAlgorithm::ZSTD;
+  auto payload2 = serializer.packWithFds(
+      &metadata2,
+      std::move(preCompressed2),
+      folly::SocketFds(),
+      false,
+      nullptr,
+      nullptr,
+      false /* skipCompression = false, will double-compress */);
+
+  auto unpacked2 =
+      serializer.unpack<RequestPayload>(std::move(payload2), false);
+  ASSERT_FALSE(unpacked2.hasException());
+
+  // Double-compressed then single-decompressed: result should NOT be plaintext
+  EXPECT_NE(unpacked2.value().payload->toString(), plaintext);
+}
+
 TEST(PayloadSerializerTest, TestCompressionAndUncompression) {
   if (!folly::kIsLinux) {
     // on non-linux platforms

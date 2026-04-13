@@ -13,7 +13,7 @@ namespace {
 <<__PHPStdLib>>
 function apache_note(
   string $note_name,
-  HH\FIXME\MISSING_PARAM_TYPE $note_value = "",
+  ?string $note_value = "",
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apache_notes(dict<string, string> $notes): void {}
@@ -24,7 +24,7 @@ function apache_setenv(
   string $variable,
   string $value,
   bool $walk_to_top = false,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+): bool {}
 <<__PHPStdLib>>
 function virtual(
   HH\FIXME\MISSING_PARAM_TYPE $filename,

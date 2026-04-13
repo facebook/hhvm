@@ -34,7 +34,20 @@ add_custom_command(
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-ptr-def.sh
 )
 
+if(USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
+  set(JEMALLOC_DEF_ARG "--jemalloc")
+else()
+  set(JEMALLOC_DEF_ARG "")
+endif()
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/jemalloc-def.h
+  COMMAND INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR} bash ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-jemalloc-def.sh ignored ${JEMALLOC_DEF_ARG}
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-jemalloc-def.sh
+)
+
 list(APPEND HEADER_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/ptr-def.h)
+list(APPEND HEADER_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/jemalloc-def.h)
 
 HHVM_PUBLIC_HEADERS(util ${HEADER_SOURCES})
 

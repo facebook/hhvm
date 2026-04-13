@@ -19,12 +19,16 @@ fi
 cat <<EOF >> "${INSTALL_DIR}/ptr-def.h"
 #ifdef __has_feature
  #if __has_feature(address_sanitizer) || __has_feature(thread_sanitizer)
-  #undef USE_LOWPTR
+  #ifdef USE_LOWPTR
+   #error "USE_LOWPTR is incompatible with sanitizer builds"
+  #endif
  #endif
 #endif
 
 #if __SANITIZE_ADDRESS__ || __SANITIZE_THREAD__
- #undef USE_LOWPTR
+ #ifdef USE_LOWPTR
+  #error "USE_LOWPTR is incompatible with sanitizer builds"
+ #endif
 #endif
 
 #ifndef USE_LOWPTR

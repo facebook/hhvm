@@ -21,15 +21,20 @@
 
 #include <folly/CPortability.h>
 #include "folly/memory/detail/MallocImpl.h"
+#include "hphp/util/jemalloc-def.h"
 #include "hphp/util/ptr.h"
 
 #if FOLLY_SANITIZE
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
 #  define VALGRIND
-// TODO: (t2869817) ASan doesn't play well with jemalloc
+// Jemalloc doesn't play well with sanitizers
 #  ifdef USE_JEMALLOC
 #    undef USE_JEMALLOC
 #  endif
+#endif
+
+#if defined(USE_LOWPTR) && !defined(USE_JEMALLOC)
+#  error "USE_LOWPTR requires USE_JEMALLOC (jemalloc arenas constrain allocation addresses)"
 #endif
 
 #ifdef USE_JEMALLOC

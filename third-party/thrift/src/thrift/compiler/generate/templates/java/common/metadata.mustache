@@ -57,17 +57,12 @@ ThriftType.fromTStruct(new ThriftStructType.Builder().setName(
   {{/if type.typedef?}}
 {{/let partial}}
 
-{{! Like thrift_type_expression but wraps binary in ThriftListType for legacy
-    parity with the reflection-based ThriftMetadataServiceHandler.
-    type.foo? predicates resolve through typedefs for primitives; for
-    containers, struct, and enum we use type.true_type to access the
-    resolved elem_type/key_type/val_type and package/name. }}
+{{! Like thrift_type_expression but resolves through typedefs for containers,
+    struct, and enum using type.true_type to access elem_type/key_type/val_type
+    and package/name. }}
 {{#let export partial thrift_type_expression_metadata |type|}}
   {{#pragma ignore-newlines}}
-{{! binary wrapped in ThriftListType: Swift codec maps binary to byte[]
-    (ThriftProtocolType.BINARY), and convertType() wraps that in
-    ThriftListType(THRIFT_BINARY_TYPE). }}
-{{#if type.binary?}}ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE)).build())
+{{#if type.binary?}}ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE)
 {{#else if type.void?}}ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_VOID_TYPE)
 {{#else if type.bool?}}ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BOOL_TYPE)
 {{#else if type.byte?}}ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BYTE_TYPE)

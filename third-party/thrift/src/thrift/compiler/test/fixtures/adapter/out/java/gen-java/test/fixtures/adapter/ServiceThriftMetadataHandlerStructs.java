@@ -69,7 +69,7 @@ class ServiceThriftMetadataHandlerStructs_0 {
                     .build(),
                 new ThriftField.Builder()
                     .setId(8)
-                    .setType(ThriftType.fromTList(new ThriftListType.Builder().setValueType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE)).build()))
+                    .setType(ThriftType.fromTPrimitive(ThriftPrimitiveType.THRIFT_BINARY_TYPE))
                     .setName("binaryField")
                     .setIsOptional(false)
                     .build(),

@@ -195,76 +195,76 @@ const int GRAPHEME_EXTR_MAXBYTES;
 const int GRAPHEME_EXTR_MAXCHARS;
 
 <<__PHPStdLib>>
-function intl_get_error_code(): HH\FIXME\MISSING_RETURN_TYPE;
+function intl_get_error_code(): int;
 <<__PHPStdLib>>
-function intl_get_error_message(): HH\FIXME\MISSING_RETURN_TYPE;
+function intl_get_error_message(): string;
 <<__PHPStdLib>>
-function intl_error_name(int $error_code): HH\FIXME\MISSING_RETURN_TYPE;
+function intl_error_name(int $error_code): string;
 <<__PHPStdLib>>
-function intl_is_failure(int $error_code): HH\FIXME\MISSING_RETURN_TYPE;
+function intl_is_failure(int $error_code): bool;
 <<__PHPStdLib>>
 function collator_asort(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
   inout HH\FIXME\MISSING_PARAM_TYPE $arr,
   int $sort_flag = Collator::SORT_REGULAR,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function collator_compare(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
   HH\FIXME\MISSING_PARAM_TYPE $str1,
   HH\FIXME\MISSING_PARAM_TYPE $str2,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
-function collator_create(string $locale): HH\FIXME\MISSING_RETURN_TYPE;
+function collator_create(string $locale): Collator;
 <<__PHPStdLib>>
 function collator_get_attribute(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
   int $attr,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function collator_get_error_code(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function collator_get_error_message(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function collator_get_locale(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
   int $type = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function collator_get_sort_key(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
   string $str,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function collator_get_strength(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function collator_set_attribute(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
   int $attr,
   int $val,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function collator_set_strength(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
   int $strength,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function collator_sort_with_sort_keys(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
   inout HH\FIXME\MISSING_PARAM_TYPE $arr,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function collator_sort(
   HH\FIXME\MISSING_PARAM_TYPE $obj,
   inout HH\FIXME\MISSING_PARAM_TYPE $arr,
   int $sort_flag = Collator::SORT_REGULAR,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function idn_to_ascii(
   string $domain,
@@ -296,57 +296,57 @@ function datefmt_create(
 function datefmt_format(
   HH\FIXME\MISSING_PARAM_TYPE $args = null,
   HH\FIXME\MISSING_PARAM_TYPE $array = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function datefmt_format_object(
   HH\FIXME\MISSING_PARAM_TYPE $object,
   HH\FIXME\MISSING_PARAM_TYPE $format = null,
   HH\FIXME\MISSING_PARAM_TYPE $locale = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function datefmt_get_calendar(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function datefmt_get_calendar_object(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): IntlCalendar;
 <<__PHPStdLib>>
 function datefmt_get_datetype(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function datefmt_get_error_code(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function datefmt_get_error_message(
   HH\FIXME\MISSING_PARAM_TYPE $coll,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function datefmt_get_locale(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function datefmt_get_pattern(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function datefmt_get_timetype(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function datefmt_get_timezone(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): IntlTimeZone;
 <<__PHPStdLib>>
 function datefmt_get_timezone_id(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function datefmt_is_lenient(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function datefmt_localtime(
   HH\FIXME\MISSING_PARAM_TYPE $formatter,
@@ -363,26 +363,26 @@ function datefmt_parse(
 function datefmt_set_calendar(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
   HH\FIXME\MISSING_PARAM_TYPE $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function datefmt_set_lenient(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function datefmt_set_pattern(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
   HH\FIXME\MISSING_PARAM_TYPE $pattern,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function datefmt_set_timezone(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
   HH\FIXME\MISSING_PARAM_TYPE $timezone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function datefmt_set_timezone_id(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
   HH\FIXME\MISSING_PARAM_TYPE $timezone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function grapheme_extract(
   string $haystack,
@@ -440,32 +440,32 @@ function intlcal_add(
   IntlCalendar $calendar,
   int $field,
   int $amount,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_after(
   IntlCalendar $calendar,
   IntlCalendar $otherCalendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_before(
   IntlCalendar $calendar,
   IntlCalendar $otherCalendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_clear(
   IntlCalendar $calendar,
   HH\FIXME\MISSING_PARAM_TYPE $field = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_create_instance(
   HH\FIXME\MISSING_PARAM_TYPE $timeZone = null,
   string $locale = "",
-): HH\FIXME\MISSING_RETURN_TYPE;
+): IntlCalendar;
 <<__PHPStdLib>>
 function intlcal_equals(
   IntlCalendar $calendar,
   IntlCalendar $otherCalendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_field_difference(
   IntlCalendar $calendar,
@@ -475,7 +475,7 @@ function intlcal_field_difference(
 <<__PHPStdLib>>
 function intlcal_from_date_time(
   HH\FIXME\MISSING_PARAM_TYPE $dateTime,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): IntlCalendar;
 <<__PHPStdLib>>
 function intlcal_get(
   IntlCalendar $calendar,
@@ -501,11 +501,11 @@ function intlcal_get_day_of_week_type(
 <<__PHPStdLib>>
 function intlcal_get_error_code(
   IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function intlcal_get_error_message(
   IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function intlcal_get_first_day_of_week(
   IntlCalendar $calendar,
@@ -546,21 +546,21 @@ function intlcal_get_minimum(
   int $field,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function intlcal_get_now(): HH\FIXME\MISSING_RETURN_TYPE;
+function intlcal_get_now(): float;
 <<__PHPStdLib>>
 function intlcal_get_repeated_wall_time_option(
   IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function intlcal_get_skipped_wall_time_option(
   IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function intlcal_get_time(IntlCalendar $calendar): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function intlcal_get_time_zone(
   IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): IntlTimeZone;
 <<__PHPStdLib>>
 function intlcal_get_type(IntlCalendar $calendar): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -571,32 +571,32 @@ function intlcal_get_weekend_transition(
 <<__PHPStdLib>>
 function intlcal_in_daylight_time(
   IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_is_equivalent_to(
   IntlCalendar $calendar,
   IntlCalendar $otherCalendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_is_lenient(
   IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_is_set(
   IntlCalendar $calendar,
   int $field,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_is_weekend(
   IntlCalendar $calendar,
   HH\FIXME\MISSING_PARAM_TYPE $date = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_roll(
   IntlCalendar $calendar,
   int $field,
   HH\FIXME\MISSING_PARAM_TYPE $amountOrUpOrDown = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_set(
   IntlCalendar $calendar,
@@ -606,46 +606,46 @@ function intlcal_set(
   HH\FIXME\MISSING_PARAM_TYPE $hour = null,
   HH\FIXME\MISSING_PARAM_TYPE $minute = null,
   HH\FIXME\MISSING_PARAM_TYPE $second = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_set_first_day_of_week(
   IntlCalendar $calendar,
   int $dayOfWeek,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_set_lenient(
   IntlCalendar $calendar,
   bool $isLenient,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_set_minimal_days_in_first_week(
   IntlCalendar $calendar,
   int $numberOfDays,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_set_repeated_wall_time_option(
   IntlCalendar $calendar,
   int $wallTimeOption,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_set_skipped_wall_time_option(
   IntlCalendar $calendar,
   int $wallTimeOption,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_set_time(
   IntlCalendar $calendar,
   HH\FIXME\MISSING_PARAM_TYPE $date,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_set_time_zone(
   IntlCalendar $calendar,
   HH\FIXME\MISSING_PARAM_TYPE $timeZone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlcal_to_date_time(
   IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): DateTime;
 <<__PHPStdLib>>
 function intlgregcal_create_instance(
   HH\FIXME\MISSING_PARAM_TYPE $timeZoneOrYear = null,
@@ -654,33 +654,33 @@ function intlgregcal_create_instance(
   HH\FIXME\MISSING_PARAM_TYPE $hour = null,
   HH\FIXME\MISSING_PARAM_TYPE $minute = null,
   HH\FIXME\MISSING_PARAM_TYPE $second = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): IntlGregorianCalendar;
 <<__PHPStdLib>>
 function intlgregcal_get_gregorian_change(
   IntlGregorianCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): float;
 <<__PHPStdLib>>
 function intlgregcal_is_leap_year(
   IntlGregorianCalendar $calendar,
   int $year,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intlgregcal_set_gregorian_change(
   IntlGregorianCalendar $calendar,
   float $date,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intltz_count_equivalent_ids(
   string $zoneId,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function intltz_create_default(): HH\FIXME\MISSING_RETURN_TYPE;
+function intltz_create_default(): IntlTimeZone;
 <<__PHPStdLib>>
 function intltz_create_enumeration(
   HH\FIXME\MISSING_PARAM_TYPE $countryOrRawOffset = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function intltz_create_time_zone(string $zoneId): HH\FIXME\MISSING_RETURN_TYPE;
+function intltz_create_time_zone(string $zoneId): IntlTimeZone;
 <<__PHPStdLib>>
 function intltz_create_time_zone_id_enumeration(
   int $zoneType,
@@ -690,7 +690,7 @@ function intltz_create_time_zone_id_enumeration(
 <<__PHPStdLib>>
 function intltz_from_date_time_zone(
   DateTimeZone $dateTimeZone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): IntlTimeZone;
 <<__PHPStdLib>>
 function intltz_get_canonical_id(
   string $zoneId,
@@ -706,7 +706,7 @@ function intltz_get_display_name(
 <<__PHPStdLib>>
 function intltz_get_dst_savings(
   IntlTimeZone $timeZone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function intltz_get_equivalent_id(
   string $zoneId,
@@ -715,15 +715,15 @@ function intltz_get_equivalent_id(
 <<__PHPStdLib>>
 function intltz_get_error_code(
   IntlTimeZone $timeZone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function intltz_get_error_message(
   IntlTimeZone $timeZone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
-function intltz_get_gmt(): HH\FIXME\MISSING_RETURN_TYPE;
+function intltz_get_gmt(): IntlTimeZone;
 <<__PHPStdLib>>
-function intltz_get_id(IntlTimeZone $timeZone): HH\FIXME\MISSING_RETURN_TYPE;
+function intltz_get_id(IntlTimeZone $timeZone): string;
 <<__PHPStdLib>>
 function intltz_get_offset(
   IntlTimeZone $timeZone,
@@ -731,7 +731,7 @@ function intltz_get_offset(
   bool $local,
   inout int $rawOffset,
   inout int $dstOffset,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intltz_get_raw_offset(
   IntlTimeZone $timeZone,
@@ -741,20 +741,20 @@ function intltz_get_region(string $zoneId): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function intltz_get_tz_data_version(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function intltz_get_unknown(): HH\FIXME\MISSING_RETURN_TYPE;
+function intltz_get_unknown(): IntlTimeZone;
 <<__PHPStdLib>>
 function intltz_has_same_rules(
   IntlTimeZone $timeZone,
   ?IntlTimeZone $otherTimeZone = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function intltz_to_date_time_zone(
   IntlTimeZone $timeZone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): DateTimeZone;
 <<__PHPStdLib>>
 function intltz_use_daylight_time(
   IntlTimeZone $timeZone,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function locale_accept_from_http(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -768,42 +768,42 @@ function locale_filter_matches(
   HH\FIXME\MISSING_PARAM_TYPE $arg1,
   HH\FIXME\MISSING_PARAM_TYPE $arg2,
   HH\FIXME\MISSING_PARAM_TYPE $arg3,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function locale_get_all_variants(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function locale_get_default(): HH\FIXME\MISSING_RETURN_TYPE;
+function locale_get_default(): string;
 <<__PHPStdLib>>
 function locale_get_display_language(
   string $arg1,
   string $arg2,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function locale_get_display_name(
   string $arg1,
   string $arg2,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function locale_get_display_region(
   string $arg1,
   string $arg2,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function locale_get_display_script(
   string $arg1,
   string $arg2,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function locale_get_display_variant(
   string $arg1,
   string $arg2,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function locale_get_keywords(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function locale_get_primary_language(
   string $arg1,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function locale_get_region(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -814,16 +814,16 @@ function locale_lookup(
   string $arg2,
   bool $arg3,
   string $arg4,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function locale_parse(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function locale_set_default(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
+function locale_set_default(string $arg1): bool;
 <<__PHPStdLib>>
 function msgfmt_create(
   string $locale,
   string $pattern,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): ?MessageFormatter;
 <<__PHPStdLib>>
 function msgfmt_format(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
@@ -834,23 +834,23 @@ function msgfmt_format_message(
   string $locale,
   string $pattern,
   HH\FIXME\MISSING_PARAM_TYPE $args,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function msgfmt_get_error_code(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function msgfmt_get_error_message(
   HH\FIXME\MISSING_PARAM_TYPE $coll,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function msgfmt_get_locale(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function msgfmt_get_pattern(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function msgfmt_parse(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
@@ -866,12 +866,12 @@ function msgfmt_parse_message(
 function msgfmt_set_pattern(
   HH\FIXME\MISSING_PARAM_TYPE $mf,
   string $pattern,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function normalizer_is_normalized(
   string $input,
   int $form = Normalizer::FORM_C,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function normalizer_normalize(
   string $input,
@@ -903,16 +903,16 @@ function numfmt_get_attribute(
 <<__PHPStdLib>>
 function numfmt_get_error_code(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function numfmt_get_error_message(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function numfmt_get_locale(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
   HH\FIXME\MISSING_PARAM_TYPE $type = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function numfmt_get_pattern(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
@@ -946,28 +946,28 @@ function numfmt_set_attribute(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
   HH\FIXME\MISSING_PARAM_TYPE $attr,
   HH\FIXME\MISSING_PARAM_TYPE $value,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function numfmt_set_pattern(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
   HH\FIXME\MISSING_PARAM_TYPE $pattern,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function numfmt_set_symbol(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
   HH\FIXME\MISSING_PARAM_TYPE $attr,
   HH\FIXME\MISSING_PARAM_TYPE $symbol,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function numfmt_set_text_attribute(
   HH\FIXME\MISSING_PARAM_TYPE $nf,
   HH\FIXME\MISSING_PARAM_TYPE $attr,
   HH\FIXME\MISSING_PARAM_TYPE $value,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function resourcebundle_count(
   HH\FIXME\MISSING_PARAM_TYPE $bundle,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function resourcebundle_create(
   HH\FIXME\MISSING_PARAM_TYPE $locale,
@@ -982,11 +982,11 @@ function resourcebundle_get(
 <<__PHPStdLib>>
 function resourcebundle_get_error_code(
   HH\FIXME\MISSING_PARAM_TYPE $bundle,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function resourcebundle_get_error_message(
   HH\FIXME\MISSING_PARAM_TYPE $bundle,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function resourcebundle_locales(
   string $bundlename,
@@ -1022,30 +1022,30 @@ class Collator {
   public function asort(
     inout dynamic $arr,
     int $sort_flag = Collator::SORT_REGULAR,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function compare(
     HH\FIXME\MISSING_PARAM_TYPE $str1,
     HH\FIXME\MISSING_PARAM_TYPE $str2,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  static public function create(string $locale): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getAttribute(int $attr): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorCode(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorMessage(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getLocale(int $type = 0): HH\FIXME\MISSING_RETURN_TYPE;
+  static public function create(string $locale): Collator;
+  public function getAttribute(int $attr): int;
+  public function getErrorCode(): int;
+  public function getErrorMessage(): string;
+  public function getLocale(int $type = 0): string;
   public function getSortKey(string $str): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getStrength(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getStrength(): int;
   public function setAttribute(
     int $attr,
     int $val,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setStrength(int $strength): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function setStrength(int $strength): bool;
   public function sortWithSortKeys(
     inout HH\FIXME\MISSING_PARAM_TYPE $arr,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function sort(
     inout dynamic $arr,
     int $sort_flag = Collator::SORT_REGULAR,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
 }
 
 class Locale {
@@ -1073,37 +1073,37 @@ class Locale {
     HH\FIXME\MISSING_PARAM_TYPE $arg1,
     HH\FIXME\MISSING_PARAM_TYPE $arg2,
     HH\FIXME\MISSING_PARAM_TYPE $arg3,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public static function getAllVariants(
     string $arg1,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public static function getDefault(): HH\FIXME\MISSING_RETURN_TYPE;
+  public static function getDefault(): string;
   public static function getDisplayLanguage(
     string $arg1,
     string $arg2,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
   public static function getDisplayName(
     string $arg1,
     string $arg2,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
   public static function getDisplayRegion(
     string $arg1,
     string $arg2,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
   public static function getDisplayScript(
     string $arg1,
     string $arg2,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
   public static function getDisplayVariant(
     string $arg1,
     string $arg2,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
   public static function getKeywords(
     string $arg1,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public static function getPrimaryLanguage(
     string $arg1,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
   public static function getRegion(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
   public static function getScript(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
   public static function lookup(
@@ -1111,11 +1111,11 @@ class Locale {
     string $arg2,
     bool $arg3,
     string $arg4,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
   public static function parseLocale(
     string $arg1,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public static function setDefault(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
+  public static function setDefault(string $arg1): bool;
 }
 
 class Normalizer {
@@ -1132,7 +1132,7 @@ class Normalizer {
   static public function isNormalized(
     string $input,
     int $form = Normalizer::FORM_C,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   static public function normalize(
     string $input,
     int $form = Normalizer::FORM_C,
@@ -1144,7 +1144,7 @@ class MessageFormatter {
   public static function create(
     string $locale,
     string $pattern,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): ?MessageFormatter;
   public function format(
     HH\FIXME\MISSING_PARAM_TYPE $args,
   ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -1153,17 +1153,17 @@ class MessageFormatter {
     string $pattern,
     HH\FIXME\MISSING_PARAM_TYPE $args,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorCode(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorMessage(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getLocale(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getPattern(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getErrorCode(): int;
+  public function getErrorMessage(): string;
+  public function getLocale(): string;
+  public function getPattern(): string;
   public function parse(string $source): HH\FIXME\MISSING_RETURN_TYPE;
   public static function parseMessage(
     string $locale,
     string $pattern,
     string $args,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setPattern(string $pattern): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setPattern(string $pattern): bool;
 }
 
 class IntlDateFormatter {
@@ -1193,23 +1193,23 @@ class IntlDateFormatter {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function format(
     HH\FIXME\MISSING_PARAM_TYPE $args = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
   public static function FormatObject(
     HH\FIXME\MISSING_PARAM_TYPE $object,
     HH\FIXME\MISSING_PARAM_TYPE $format = null,
     HH\FIXME\MISSING_PARAM_TYPE $locale = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getCalendar(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getCalendarObject(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getDateType(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorCode(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorMessage(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getLocale(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getPattern(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getTimeType(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getTimezone(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getTimezoneId(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function isLenient(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): string;
+  public function getCalendar(): int;
+  public function getCalendarObject(): IntlCalendar;
+  public function getDateType(): int;
+  public function getErrorCode(): int;
+  public function getErrorMessage(): string;
+  public function getLocale(): string;
+  public function getPattern(): string;
+  public function getTimeType(): int;
+  public function getTimezone(): IntlTimeZone;
+  public function getTimezoneId(): string;
+  public function isLenient(): bool;
   public function localtime(
     string $string,
     inout HH\FIXME\MISSING_PARAM_TYPE $position,
@@ -1221,13 +1221,13 @@ class IntlDateFormatter {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setCalendar(
     HH\FIXME\MISSING_PARAM_TYPE $which,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setLenient(bool $lenient): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setPattern(string $pattern): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function setLenient(bool $lenient): bool;
+  public function setPattern(string $pattern): bool;
   public function setTimezone(
     HH\FIXME\MISSING_PARAM_TYPE $zone,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setTimezoneId(string $zone): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function setTimezoneId(string $zone): bool;
 }
 
 class ResourceBundle<T> implements Traversable<T> {
@@ -1236,7 +1236,7 @@ class ResourceBundle<T> implements Traversable<T> {
     HH\FIXME\MISSING_PARAM_TYPE $bundlename,
     bool $fallback = true,
   );
-  public function count(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function count(): int;
   public static function create(
     HH\FIXME\MISSING_PARAM_TYPE $locale,
     HH\FIXME\MISSING_PARAM_TYPE $bundlename,
@@ -1246,8 +1246,8 @@ class ResourceBundle<T> implements Traversable<T> {
     HH\FIXME\MISSING_PARAM_TYPE $index,
     bool $fallback = true,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorCode(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorMessage(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getErrorCode(): int;
+  public function getErrorMessage(): string;
   public static function getLocales(
     string $bundlename,
   ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -1270,13 +1270,13 @@ class IntlTimeZone {
   public static function countEquivalentIDs(
     string $zoneId,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public static function createDefault(): HH\FIXME\MISSING_RETURN_TYPE;
+  public static function createDefault(): IntlTimeZone;
   public static function createEnumeration(
     HH\FIXME\MISSING_PARAM_TYPE $countryOrRawOffset = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public static function createTimeZone(
     string $zoneId,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): IntlTimeZone;
   public static function createTimeZoneIDEnumeration(
     int $zoneType,
     string $region = "",
@@ -1284,12 +1284,12 @@ class IntlTimeZone {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public static function fromDateTimeZone(
     HH\FIXME\MISSING_PARAM_TYPE $zoneId,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): IntlTimeZone;
   public static function getCanonicalID(
     string $zoneId,
     inout HH\FIXME\MISSING_PARAM_TYPE $isSystemID,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getDSTSavings(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDSTSavings(): int;
   public function getDisplayName(
     bool $isDaylight = false,
     int $style = IntlTimeZone::DISPLAY_LONG,
@@ -1299,27 +1299,27 @@ class IntlTimeZone {
     string $zoneId,
     int $index,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorCode(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorMessage(): HH\FIXME\MISSING_RETURN_TYPE;
-  public static function getGMT(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getErrorCode(): int;
+  public function getErrorMessage(): string;
+  public static function getGMT(): IntlTimeZone;
   public function getID(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getOffset(
     float $date,
     bool $local,
     inout int $rawOffset,
     inout int $dstOffset,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function getRawOffset(): HH\FIXME\MISSING_RETURN_TYPE;
   public static function getRegion(
     string $zoneId,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public static function getTZDataVersion(): HH\FIXME\MISSING_RETURN_TYPE;
-  public static function getUnknown(): HH\FIXME\MISSING_RETURN_TYPE;
+  public static function getUnknown(): IntlTimeZone;
   public function hasSameRules(
     IntlTimeZone $otherTimeZone,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function toDateTimeZone(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function useDaylightTime(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function toDateTimeZone(): DateTimeZone;
+  public function useDaylightTime(): bool;
 }
 
 class IntlCalendar {
@@ -1364,24 +1364,24 @@ class IntlCalendar {
   const int WALLTIME_NEXT_VALID;
 
   private function __construct();
-  public function add(int $field, int $amount): HH\FIXME\MISSING_RETURN_TYPE;
-  public function after(IntlCalendar $calendar): HH\FIXME\MISSING_RETURN_TYPE;
-  public function before(IntlCalendar $calendar): HH\FIXME\MISSING_RETURN_TYPE;
+  public function add(int $field, int $amount): bool;
+  public function after(IntlCalendar $calendar): bool;
+  public function before(IntlCalendar $calendar): bool;
   public function clear(
     HH\FIXME\MISSING_PARAM_TYPE $field = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public static function createInstance(
     HH\FIXME\MISSING_PARAM_TYPE $timeZone = null,
     string $locale = "",
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function equals(IntlCalendar $calendar): HH\FIXME\MISSING_RETURN_TYPE;
+  ): IntlCalendar;
+  public function equals(IntlCalendar $calendar): bool;
   public function fieldDifference(
     HH\FIXME\MISSING_PARAM_TYPE $when,
     int $field,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public static function fromDateTime(
     HH\FIXME\MISSING_PARAM_TYPE $dateTime,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): IntlCalendar;
   public function get(int $field): HH\FIXME\MISSING_RETURN_TYPE;
   public function getActualMaximum(int $field): HH\FIXME\MISSING_RETURN_TYPE;
   public function getActualMinimum(int $field): HH\FIXME\MISSING_RETURN_TYPE;
@@ -1389,8 +1389,8 @@ class IntlCalendar {
   public function getDayOfWeekType(
     int $dayOfWeek,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorCode(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorMessage(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getErrorCode(): int;
+  public function getErrorMessage(): string;
   public function getFirstDayOfWeek(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getGreatestMinimum(int $field): HH\FIXME\MISSING_RETURN_TYPE;
   public static function getKeywordValuesForLocale(
@@ -1403,30 +1403,30 @@ class IntlCalendar {
   public function getMaximum(int $field): HH\FIXME\MISSING_RETURN_TYPE;
   public function getMinimalDaysInFirstWeek(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getMinimum(int $field): HH\FIXME\MISSING_RETURN_TYPE;
-  public static function getNow(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getRepeatedWallTimeOption(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getSkippedWallTimeOption(): HH\FIXME\MISSING_RETURN_TYPE;
+  public static function getNow(): float;
+  public function getRepeatedWallTimeOption(): int;
+  public function getSkippedWallTimeOption(): int;
   public function getTime(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getTimezone(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getTimezone(): IntlTimeZone;
   public function getType(): HH\FIXME\MISSING_RETURN_TYPE;
   public function getWeekendTransition(
     int $dayOfWeek,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function inDaylightTime(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function inDaylightTime(): bool;
   public function isEquivalentTo(
     IntlCalendar $calendar,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function isLenient(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function isLenient(): bool;
   public function isSet(
     HH\FIXME\MISSING_PARAM_TYPE $field,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function isWeekend(
     HH\FIXME\MISSING_PARAM_TYPE $date = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function roll(
     int $field,
     HH\FIXME\MISSING_PARAM_TYPE $amountOrUpOrDown,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function set(
     int $fieldOrYear,
     int $valueOrMonth,
@@ -1434,33 +1434,33 @@ class IntlCalendar {
     HH\FIXME\MISSING_PARAM_TYPE $hour = null,
     HH\FIXME\MISSING_PARAM_TYPE $minute = null,
     HH\FIXME\MISSING_PARAM_TYPE $second = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function setFirstDayOfWeek(
     int $dayOfWeek,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setLenient(bool $isLenient): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function setLenient(bool $isLenient): bool;
   public function setMinimalDaysInFirstWeek(
     int $numberOfDays,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function setRepeatedWallTimeOption(
     int $wallTimeOption,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function setSkippedWallTimeOption(
     int $wallTimeOption,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function setTime(
     HH\FIXME\MISSING_PARAM_TYPE $date,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function setTimezone(
     HH\FIXME\MISSING_PARAM_TYPE $timeZone,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function toDateTime(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function toDateTime(): DateTime;
 }
 
 class IntlGregorianCalendar extends IntlCalendar {
-  public function getGregorianChange(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function isLeapYear(int $year): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setGregorianChange(float $date): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getGregorianChange(): float;
+  public function isLeapYear(int $year): bool;
+  public function setGregorianChange(float $date): bool;
 }
 
 class IntlIterator<Tv> implements KeyedIterator<int, Tv> {

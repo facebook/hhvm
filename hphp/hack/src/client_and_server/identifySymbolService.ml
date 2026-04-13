@@ -401,6 +401,8 @@ let visitor =
   let in_require_package_intern = ref false in
   let in_typedef = ref false in
   let in_newtype = ref false in
+  let in_is_expression = ref false in
+  let in_as_expression = ref false in
 
   object (self)
     inherit [_] Tast_visitor.reduce as super
@@ -540,11 +542,15 @@ let visitor =
           else if !in_class_ptr then
             let tcopt = Tast_env.get_tcopt env in
             not (TypecheckerOptions.package_allow_classconst_violations tcopt)
-          else if !in_newtype then
+          else if !in_newtype || !in_is_expression then
             false
           else if !in_typedef then
             let tcopt = Tast_env.get_tcopt env in
             not (TypecheckerOptions.package_allow_typedef_violations tcopt)
+          else if !in_as_expression then
+            let tcopt = Tast_env.get_tcopt env in
+            not
+              (TypecheckerOptions.package_allow_as_expression_violations tcopt)
           else
             true
         in
@@ -557,6 +563,22 @@ let visitor =
       match ServerUtils.resugar_invariant_call env cond then_block with
       | Some e -> self#on_expr env e
       | None -> super#on_If env cond then_block else_block
+
+    method! on_Is env e h =
+      let acc = self#on_expr env e in
+      let old_in_is_expression = !in_is_expression in
+      in_is_expression := true;
+      let result = self#plus acc (self#on_hint env h) in
+      in_is_expression := old_in_is_expression;
+      result
+
+    method! on_As env as_ =
+      let acc = self#on_expr env as_.Aast.expr in
+      let old_in_as_expression = !in_as_expression in
+      in_as_expression := true;
+      let result = self#plus acc (self#on_hint env as_.Aast.hint) in
+      in_as_expression := old_in_as_expression;
+      result
 
     method! on_Call
         env
@@ -733,11 +755,15 @@ let visitor =
         let affects_prod_build =
           if !in_attribute then
             false
-          else if !in_newtype then
+          else if !in_newtype || !in_is_expression then
             false
           else if !in_typedef then
             let tcopt = Tast_env.get_tcopt env in
             not (TypecheckerOptions.package_allow_typedef_violations tcopt)
+          else if !in_as_expression then
+            let tcopt = Tast_env.get_tcopt env in
+            not
+              (TypecheckerOptions.package_allow_as_expression_violations tcopt)
           else
             true
         in

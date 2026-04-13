@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/http/codec/HTTP2Framer.h>
 
+#include <array>
 #include <folly/tracing/ScopedTraceSection.h>
 #include <proxygen/lib/http/codec/CodecUtil.h>
 
@@ -26,7 +27,7 @@ namespace {
 const uint32_t kLengthMask = 0x00ffffff;
 const uint32_t kUint31Mask = 0x7fffffff;
 
-static const uint64_t kZeroPad[32] = {0};
+constexpr std::array<uint64_t, 32> kZeroPad = {0};
 
 static const bool kStrictPadding = true;
 
@@ -208,7 +209,7 @@ ErrorCode skipPadding(Cursor& cursor, uint8_t length, bool verify) {
     while (length > 0) {
       auto cur = cursor.peek();
       uint8_t toCmp = std::min<size_t>(cur.size(), length);
-      if (memcmp(cur.data(), kZeroPad, toCmp) != 0) {
+      if (memcmp(cur.data(), kZeroPad.data(), toCmp) != 0) {
         return ErrorCode::PROTOCOL_ERROR;
       }
       cursor.skip(toCmp);

@@ -186,10 +186,11 @@ static bool php_set_inet6_addr(struct sockaddr_in6 *sin6,
   }
 
   const char *scope = strchr(address, '%');
-  if (scope++) {
+  if (scope) {
     int64_t lval = 0;
     double dval = 0;
     unsigned scope_id = 0;
+    scope += 1; // skip '%'
     if (KindOfInt64 == is_numeric_string(scope, strlen(scope), &lval, &dval,
                                          0)) {
       if (lval > 0 && lval <= UINT_MAX) {

@@ -5668,6 +5668,12 @@ static int exif_file_sections_add(image_info_type *ImageInfo, int type,
   int count = ImageInfo->file.count;
   size_t realloc_size = (count+1) * sizeof(file_section);
   tmp = (file_section *)IM_REALLOC(ImageInfo->file.list, realloc_size);
+  if (!tmp) {
+    // IM_REALLOC freed the old buffer on failure; null out the stale pointer
+    // to prevent use-after-free in exif_file_sections_free (CVE-2026-23867).
+    ImageInfo->file.list = nullptr;
+    ImageInfo->file.count = 0;
+  }
   CHECK_ALLOC_R(tmp, realloc_size, -1);
   ImageInfo->file.list = tmp;
   ImageInfo->file.list[count].type = 0xFFFF;
@@ -5678,7 +5684,12 @@ static int exif_file_sections_add(image_info_type *ImageInfo, int type,
     data = nullptr;
   } else if (data == nullptr) {
     data = (unsigned char *)IM_MALLOC(size);
-    if (data == nullptr) IM_FREE(tmp);
+    if (data == nullptr) {
+      IM_FREE(tmp);
+      // Null out the stale pointer to prevent use-after-free during cleanup.
+      ImageInfo->file.list = nullptr;
+      ImageInfo->file.count = 0;
+    }
     CHECK_ALLOC_R(data, size, -1);
   }
   ImageInfo->file.list[count].type = type;

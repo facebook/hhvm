@@ -439,11 +439,12 @@ bool HHVM_FUNCTION(stream_is_local,
 
 static Variant socket_accept_impl(
   const OptResource& socket,
-  struct sockaddr *addr,
+  struct sockaddr_storage *sas_addr,
   socklen_t *addrlen
 ) {
   req::ptr<Socket> new_sock;
   req::ptr<SSLSocket> sslsock;
+  auto addr = (struct sockaddr *)sas_addr;
   if (isa<SSLSocket>(socket)) {
     auto sock = cast<SSLSocket>(socket);
     auto new_fd = accept(sock->fd(), addr, addrlen);
@@ -473,12 +474,12 @@ static Variant socket_accept_impl(
   return Variant(std::move(new_sock));
 }
 
-static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
+static String get_sockaddr_name(struct sockaddr_storage *sas, socklen_t sl) {
   char abuf[256];
   char* buf = nullptr;
   char textaddr[1024] = {'\0'};
   int textaddrlen = 0;
-
+  auto sa = (struct sockaddr *)sas;
   switch (sa->sa_family) {
   case AF_INET:
     buf = inet_ntoa(((struct sockaddr_in*)sa)->sin_addr);
@@ -542,7 +543,7 @@ Variant HHVM_FUNCTION(stream_socket_accept,
   }
   n = poll(&p, 1, (uint64_t)(timeout * 1000.0));
   if (n > 0) {
-    struct sockaddr sa;
+    struct sockaddr_storage sa;
     socklen_t salen = sizeof(sa);
     auto new_sock = socket_accept_impl(server_socket, &sa, &salen);
     peername = get_sockaddr_name(&sa, salen);

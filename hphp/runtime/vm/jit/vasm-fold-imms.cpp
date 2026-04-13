@@ -496,16 +496,19 @@ struct ImmFolder {
   void fold(cmpq& in, Vinstr& out) { return fold_cmp<cmpqi>(in, out); }
 
   void fold(andq& in, Vinstr& out) {
-    if (!uses[in.sf] && valid.test(in.s0) && valid.test(in.s1)) {
-      out = ldimmq{vals[in.s0] & vals[in.s1], in.d};
-      return;
+    // Copy `in` because it aliases `out` through the Vinstr union, and
+    // writing a differently-laid-out variant (e.g. andqi64) to `out` can
+    // corrupt fields read from `in`.
+    auto const in_copy = in;
+    if (!uses[in_copy.sf] && valid.test(in_copy.s0) && valid.test(in_copy.s1)) {
+      out = ldimmq{vals[in_copy.s0] & vals[in_copy.s1], in_copy.d};
     }
     int val;
     uint64_t bm;
-    if (logical_imm(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
-    else if (logical_imm(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
-    else if (logical_bmsk(in.s0, bm)) { out = andqi64{bm, in.s1, in.d, in.sf}; }
-    else if (logical_bmsk(in.s1, bm)) { out = andqi64{bm, in.s0, in.d, in.sf}; }
+    if (logical_imm(in_copy.s0, val))      { out = andqi{val, in_copy.s1, in_copy.d, in_copy.sf}; }
+    else if (logical_imm(in_copy.s1, val)) { out = andqi{val, in_copy.s0, in_copy.d, in_copy.sf}; }
+    else if (logical_bmsk(in_copy.s0, bm)) { out = andqi64{bm, in_copy.s1, in_copy.d, in_copy.sf}; }
+    else if (logical_bmsk(in_copy.s1, bm)) { out = andqi64{bm, in_copy.s0, in_copy.d, in_copy.sf}; }
   }
 
   void fold(andqi& in, Vinstr& out) {

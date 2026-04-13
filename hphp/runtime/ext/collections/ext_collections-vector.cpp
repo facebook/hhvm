@@ -377,8 +377,8 @@ void c_Vector::php_splice(const Variant& offset,
   if (!len.isNull()) {
     end = len.toInt64();
     if (LIKELY(end > 0)) {
-      end += start;
-      if ((uint64_t)end > (uint64_t)sz) end = sz;
+      if (__builtin_add_overflow(start, end, &end)) end = sz;
+      if (end > sz) end = sz;
     } else {
       if (!end) return;
       end += sz;

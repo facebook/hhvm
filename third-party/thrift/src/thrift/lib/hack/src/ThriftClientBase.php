@@ -145,6 +145,12 @@ abstract class ThriftClientBase implements IThriftClient {
   ): int {
     $currentseqid = $this->getNextSequenceID();
     try {
+      // Generated thrift clients pass $is_one_way=true for `oneway void`
+      // IDL methods. Notify handlers so the request edge gets annotated
+      // (see ThriftContextPropClientEventHandler::postSendHelper).
+      if ($is_one_way) {
+        $this->eventHandler_->markCallAsOneway($currentseqid);
+      }
       $this->eventHandler_
         ->preSend($function_name, $args, $currentseqid, $service_name);
       $this->output_->writeRPCMessage(

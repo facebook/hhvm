@@ -46,6 +46,10 @@ class TClientEventHandler {
     Exception $ex,
   ): void {}
 
+  // Called before preSend when the call is a fire-and-forget (oneway) call.
+  // Subclasses can override to track which sequence IDs are oneway.
+  public function markCallAsOneway(int $_sequence_id): void {}
+
   // Called before the response is read from the server
   // Exceptions thrown here are caught by clientException and clientError.
   public function preRecv(string $fn_name, ?int $ex_sequence_id): void {}

@@ -43,3 +43,43 @@ function test_classname(readonly ?classname<Foo> $x) : void {
 function test_enum(readonly ?Bar $x): void {
   HH\Readonly\as_mut($x); // ok
 }
+
+function test_shape_with_dict(readonly shape("x" => dict<string, int>) $y) : void {
+  HH\Readonly\as_mut($y); // ok
+}
+
+function test_shape_with_vec(readonly shape("x" => vec<int>) $y) : void {
+  HH\Readonly\as_mut($y); // ok
+}
+
+function test_shape_with_keyset(readonly shape("x" => keyset<string>) $y) : void {
+  HH\Readonly\as_mut($y); // ok
+}
+
+function test_shape_with_nested_collections(readonly shape("x" => dict<string, vec<int>>) $y) : void {
+  HH\Readonly\as_mut($y); // ok
+}
+
+function test_shape_with_like_dict(readonly shape("x" => ~dict<string, int>) $y) : void {
+  HH\Readonly\as_mut($y); // ok
+}
+
+function test_like_dict(readonly ~dict<string, int> $x) : void {
+  HH\Readonly\as_mut($x); // ok
+}
+
+function test_like_vec(readonly ~vec<int> $x) : void {
+  HH\Readonly\as_mut($x); // ok
+}
+
+function test_shape_with_lambda(readonly shape("f" => (function(): void)) $y) : void {
+  HH\Readonly\as_mut($y); // error
+}
+
+function test_shape_with_like_lambda(readonly shape("f" => ~(function(): void)) $y) : void {
+  HH\Readonly\as_mut($y); // error
+}
+
+function test_plain_lambda(readonly (function(): void) $f) : void {
+  HH\Readonly\as_mut($f); // error
+}

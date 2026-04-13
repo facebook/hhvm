@@ -213,6 +213,10 @@ let is_value_collection_ty env ty =
 let rec is_safe_mut_ty env (seen : SSet.t) ty =
   let open Typing_defs_core in
   let (env, ty) = Tast_env.expand_type env ty in
+  (* Strip dynamic from like types (~T = T | dynamic) so we check
+     the underlying type. Without this, ~(function(): void) would pass
+     because dynamic is not disjoint from primitives. *)
+  let ty = Tast_env.strip_dynamic env ty in
   match get_node ty with
   (* Allow all primitive types *)
   | Tprim _ -> true
@@ -220,6 +224,12 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
      we will allow you to call the function. Note that the function fails at runtime if any shape fields are objects. *)
   | Tshape { s_fields = fields; _ } ->
     TShapeMap.for_all (fun _k v -> is_safe_mut_ty env seen v.sft_ty) fields
+  (* Nullable types: check the inner type. ?vec<string> is safe, ?Foo is not. *)
+  | Toption ty_inner -> is_safe_mut_ty env seen ty_inner
+  (* For newtypes (including supportdyn<T>), check through the bound.
+     supportdyn<T> has bound T; newtype Foo as Bar has bound Bar.
+     This lets us see through opaque type aliases to the underlying type. *)
+  | Tnewtype (_, _, bound) -> is_safe_mut_ty env seen bound
   (* If it's a Tclass it's an array type by is_value_collection *)
   | Tintersection tyl -> List.exists tyl ~f:(fun l -> is_safe_mut_ty env seen l)
   (* Only error if there isn't a type that it could be that's primitive *)

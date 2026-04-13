@@ -2,3 +2,9 @@ ERROR: File "as_mut_collections.php", line 24, characters 3-20:
 Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
 ERROR: File "as_mut_collections.php", line 36, characters 3-20:
 Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
+ERROR: File "as_mut_collections.php", line 76, characters 3-20:
+Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
+ERROR: File "as_mut_collections.php", line 80, characters 3-20:
+Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
+ERROR: File "as_mut_collections.php", line 84, characters 3-20:
+Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])

@@ -69,9 +69,6 @@ add_library(
   ${metadata-cpp2-SOURCES}
   gen/module_types_cpp.cpp
   detail/Enum.cpp
-  protocol/CompactProtocol.cpp # can't link against thriftprotocol, dep cycle
-  ../cpp/protocol/TProtocolException.cpp
-  ../cpp/util/VarintUtils.cpp
 
   dynamic/SerializableRecord.cpp
   dynamic/SerializableTypeSystemBuilder.cpp
@@ -110,7 +107,13 @@ target_link_libraries(
   thriftmetadata
   PUBLIC
     Folly::folly
+    thriftprotocol
 )
+# SerializableRecord.cpp includes F14Map and instantiates PrimitiveDatum for
+# every primitive type; on MSVC this exceeds the default COFF section limit.
+if (MSVC)
+  target_compile_options(thriftmetadata PRIVATE /bigobj)
+endif ()
 
 add_library(
   thrift_path
@@ -167,6 +170,11 @@ target_link_libraries(
     thriftprotocol
     thrift_path
 )
+# dynamic/Map.cpp and ConcreteMap*.cpp instantiate F14Map for every value type;
+# on MSVC this exceeds the default COFF section limit.
+if (MSVC)
+  target_compile_options(thrift_dynamic_value PRIVATE /bigobj)
+endif ()
 
 bypass_source_check("${frozen-cpp2-SOURCES}")
 add_library(
@@ -250,17 +258,13 @@ add_library(
   ${RpcMetadata-cpp2-SOURCES}
   gen/module_types_cpp.cpp
   detail/Enum.cpp
-  protocol/CompactProtocol.cpp # can't link against thriftprotocol, dep cycle
-  protocol/JSONProtocolCommon.cpp
-  ../cpp/protocol/TBase64Utils.cpp
-  ../cpp/protocol/TProtocolException.cpp
-  ../cpp/util/VarintUtils.cpp
 )
 add_dependencies(rpcmetadata RpcMetadata-cpp2-target)
 target_link_libraries(
   rpcmetadata
   PUBLIC
     Folly::folly
+    thriftprotocol
 )
 
 bypass_source_check("${serverdbginfo-cpp2-SOURCES}")
@@ -300,9 +304,7 @@ target_link_libraries(
   thriftprotocol
   PUBLIC
     fmt::fmt
-    thrift
     Folly::folly
-    wangle::wangle
     ${GLOG_LIBRARIES}
     thrift-core
 )

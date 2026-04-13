@@ -71,11 +71,10 @@ struct PrimitiveDatum {
   friend bool operator==(const PrimitiveDatum& lhs, const U& rhs) {
     return lhs.datum == rhs;
   }
-  template <typename U>
-    requires(!std::same_as<U, PrimitiveDatum> && std::convertible_to<U, T>)
-  friend bool operator==(const U& lhs, const PrimitiveDatum& rhs) {
-    return rhs == lhs;
-  }
+  // C++20 symmetric comparison rewrites `u == PrimitiveDatum` as
+  // `PrimitiveDatum == u` using the overload above, so no second overload
+  // is needed. A second overload whose body calls `rhs == lhs` triggers
+  // MSVC warning C5232 (potentially recursive via C++20 rewriting).
 };
 
 using SerializableRecordBool = PrimitiveDatum<bool>;

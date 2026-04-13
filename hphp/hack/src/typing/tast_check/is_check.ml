@@ -18,6 +18,21 @@ let error_codes = Typing_warning_utils.codes warning_kind
 
 let nothing_ty = Typing_make_type.nothing Typing_reason.none
 
+(* Tany indicates missing type information (e.g. unresolved generics). Subtype
+   checks involving Tany are unreliable since Tany <: T for all T. The nothing
+   guard below catches bare Tany (Tany <: nothing), but not ?Tany or
+   supportdyn<Tany> since null is not <: nothing. This helper catches those. *)
+let rec has_tany env ty =
+  let (_env, ty) = Env.expand_type env ty in
+  match T.get_node ty with
+  | T.Tany _ -> true
+  | T.Toption inner -> has_tany env inner
+  | T.Tunion tys
+  | T.Tintersection tys ->
+    List.exists tys ~f:(has_tany env)
+  | T.Tnewtype (_, tys, _) -> List.exists tys ~f:(has_tany env)
+  | _ -> false
+
 (* To handle typechecking against placeholder, e.g., `... as C<_>`, we convert
    the generic the placeholder is elaborated to into a type variable so that
    the subtyping query can be discharged. *)
@@ -76,8 +91,8 @@ let trivial_check
     ~(never :
        Pos.t -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> Env.env -> unit) :
     unit =
-  if Env.is_sub_type env lhs_ty nothing_ty then
-    (* If we have a nothing in our hands, there was a bigger problem
+  if Env.is_sub_type env lhs_ty nothing_ty || has_tany env lhs_ty then
+    (* If we have a nothing or Tany in our hands, there was a bigger problem
        originating from earlier in the program. Don't flag it here, as it is
        merely a symptom. *)
     ()

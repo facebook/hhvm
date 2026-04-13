@@ -158,6 +158,58 @@ TEST_F(LatencyInjectionRouteTest, routeTotal) {
   EXPECT_GE(elapsed.count(), 999);
 }
 
+constexpr folly::StringPiece kLatencyInjectionRouteTotalPercentile = R"(
+{
+  "total_latency_percentile_ms": [[50, 500], [90, 1000], [99, 2000]],
+  "child": "NullRoute"
+}
+)";
+
+TEST_F(LatencyInjectionRouteTest, createTotalPercentile) {
+  testCreate(kLatencyInjectionRouteTotalPercentile);
+}
+
+TEST_F(LatencyInjectionRouteTest, routeTotalPercentile) {
+  auto rh = getLatencyInjectionRoute(kLatencyInjectionRouteTotalPercentile);
+  ASSERT_TRUE(rh);
+
+  HelloRequest req;
+  HelloReply reply;
+
+  const auto before_ms = getCurrentTimeInMs();
+  reply = rh->route(req);
+  const auto elapsed =
+      std::chrono::milliseconds(getCurrentTimeInMs() - before_ms);
+  EXPECT_EQ(carbon::Result::NOTFOUND, *reply.result());
+  // Should have some latency injected (at minimum p50=500ms)
+  EXPECT_GE(elapsed.count(), 499);
+}
+
+constexpr folly::StringPiece kLatencyInjectionRouteTotalPrecedence = R"(
+{
+  "total_latency_ms": 1000,
+  "total_latency_percentile_ms": [[50, 5000], [99, 10000]],
+  "child": "NullRoute"
+}
+)";
+
+TEST_F(LatencyInjectionRouteTest, routeTotalPrecedence) {
+  auto rh = getLatencyInjectionRoute(kLatencyInjectionRouteTotalPrecedence);
+  ASSERT_TRUE(rh);
+
+  HelloRequest req;
+  HelloReply reply;
+
+  const auto before_ms = getCurrentTimeInMs();
+  reply = rh->route(req);
+  const auto elapsed =
+      std::chrono::milliseconds(getCurrentTimeInMs() - before_ms);
+  EXPECT_EQ(carbon::Result::NOTFOUND, *reply.result());
+  // Fixed total_latency_ms=1000 should take precedence over percentile
+  EXPECT_GE(elapsed.count(), 999);
+  EXPECT_LT(elapsed.count(), 3000);
+}
+
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

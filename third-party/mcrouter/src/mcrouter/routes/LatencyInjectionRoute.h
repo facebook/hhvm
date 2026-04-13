@@ -9,10 +9,13 @@
 
 #include <cassert>
 #include <chrono>
+#include <utility>
+#include <vector>
 
 #include <fmt/format.h>
 
 #include <folly/Format.h>
+#include <folly/Random.h>
 #include <folly/fibers/Baton.h>
 
 #include <folly/concurrency/memory/ReadMostlySharedPtr.h>
@@ -78,26 +81,32 @@ class LatencyInjectionRoute {
       std::chrono::milliseconds afterLatency,
       std::chrono::milliseconds totalLatency,
       bool requestLatency,
-      std::chrono::microseconds maxRequestLatency)
+      std::chrono::microseconds maxRequestLatency,
+      std::vector<std::pair<double, std::chrono::milliseconds>>
+          totalLatencyPercentile = {})
       : rh_(std::move(rh)),
         beforeLatency_(beforeLatency),
         afterLatency_(afterLatency),
         totalLatency_(totalLatency),
         requestLatency_(requestLatency),
-        maxRequestLatency_(maxRequestLatency) {
+        maxRequestLatency_(maxRequestLatency),
+        totalLatencyPercentile_(std::move(totalLatencyPercentile)) {
     assert(rh_);
     assert(
         beforeLatency_.count() > 0 || afterLatency_.count() > 0 ||
-        totalLatency_.count() > 0 || requestLatency_);
+        totalLatency_.count() > 0 || requestLatency_ ||
+        !totalLatencyPercentile_.empty());
   }
 
   std::string routeName() const {
     return fmt::format(
         "latency-injection|before:{}ms|after:{}ms|total:{}ms|"
+        "total_pctl_points:{}|"
         "request_payload:{}|max_request_latency_us:{}",
         beforeLatency_.count(),
         afterLatency_.count(),
         totalLatency_.count(),
+        totalLatencyPercentile_.size(),
         requestLatency_ ? "true" : "false",
         maxRequestLatency_.count());
   }
@@ -112,16 +121,17 @@ class LatencyInjectionRoute {
   ReplyT<Request> route(const Request& req) const {
     auto& proxy = fiber_local<RouterInfo>::getSharedCtx()->proxy();
     const auto before_ms = getCurrentTimeInMs();
+    const auto sampledTotalLatency = sampleTotalLatency();
     SCOPE_EXIT {
-      if (totalLatency_.count() > 0) {
+      if (sampledTotalLatency.count() > 0) {
         auto elapsed =
             std::chrono::milliseconds(getCurrentTimeInMs() - before_ms);
 
         // Pad latency out to total latency configured.
-        if (totalLatency_ > elapsed) {
+        if (sampledTotalLatency > elapsed) {
           proxy.stats().increment(mcrouter::total_latency_injected_stat);
           folly::fibers::Baton totalBaton;
-          totalBaton.try_wait_for(totalLatency_ - elapsed);
+          totalBaton.try_wait_for(sampledTotalLatency - elapsed);
         }
       }
     };
@@ -200,12 +210,35 @@ class LatencyInjectionRoute {
   }
 
  private:
+  std::chrono::milliseconds sampleTotalLatency() const {
+    // Fixed total latency takes precedence.
+    if (totalLatency_.count() > 0) {
+      return totalLatency_;
+    }
+    if (totalLatencyPercentile_.empty()) {
+      return std::chrono::milliseconds{0};
+    }
+    // Draw a random percentile in [0, 100).
+    double r = folly::Random::randDouble01() * 100.0;
+    // Step function: find the first bucket where r < percentile.
+    for (const auto& [percentile, latency] : totalLatencyPercentile_) {
+      if (r < percentile) {
+        return latency;
+      }
+    }
+    // r >= last percentile, use last bucket's latency.
+    return totalLatencyPercentile_.back().second;
+  }
+
   const RouteHandlePtr rh_;
   const std::chrono::milliseconds beforeLatency_;
   const std::chrono::milliseconds afterLatency_;
   const std::chrono::milliseconds totalLatency_;
   bool requestLatency_;
   const std::chrono::microseconds maxRequestLatency_;
+  // Sorted by percentile ascending. Each entry: {percentile (0-100], latency}.
+  const std::vector<std::pair<double, std::chrono::milliseconds>>
+      totalLatencyPercentile_;
 };
 
 /**
@@ -234,11 +267,14 @@ typename RouterInfo::RouteHandlePtr makeLatencyInjectionRoute(
   auto jAfterLatency = json.get_ptr("after_latency_ms");
   auto jTotalLatency = json.get_ptr("total_latency_ms");
   auto jRequestLatency = json.get_ptr("request_payload_latency");
+  auto jTotalLatencyPercentile = json.get_ptr("total_latency_percentile_ms");
   checkLogic(
       jBeforeLatency != nullptr || jAfterLatency != nullptr ||
-          jTotalLatency != nullptr || jRequestLatency != nullptr,
+          jTotalLatency != nullptr || jRequestLatency != nullptr ||
+          jTotalLatencyPercentile != nullptr,
       "LatencyInjectionRoute must specify either 'before_latency_ms', "
-      "'after_latency_ms', 'total_latency_ms' or 'request_payload_latency'");
+      "'after_latency_ms', 'total_latency_ms', "
+      "'total_latency_percentile_ms' or 'request_payload_latency'");
 
   std::chrono::milliseconds beforeLatency{0};
   std::chrono::milliseconds afterLatency{0};
@@ -282,8 +318,38 @@ typename RouterInfo::RouteHandlePtr makeLatencyInjectionRoute(
     maxRequestLatency = std::chrono::microseconds(jMaxRequestLatency->asInt());
   }
 
+  std::vector<std::pair<double, std::chrono::milliseconds>>
+      totalLatencyPercentile;
+  if (jTotalLatencyPercentile) {
+    checkLogic(
+        jTotalLatencyPercentile->isArray(),
+        "LatencyInjectionRoute: 'total_latency_percentile_ms' must be an array.");
+    for (const auto& entry : *jTotalLatencyPercentile) {
+      checkLogic(
+          entry.isArray() && entry.size() == 2,
+          "LatencyInjectionRoute: each entry in 'total_latency_percentile_ms' "
+          "must be a [percentile, latency_ms] array.");
+      double pct = entry[0].asDouble();
+      int64_t latMs = entry[1].asInt();
+      checkLogic(
+          pct > 0.0 && pct <= 100.0,
+          "LatencyInjectionRoute: percentile must be in (0, 100].");
+      checkLogic(
+          latMs >= 0,
+          "LatencyInjectionRoute: latency_ms must be non-negative.");
+      checkLogic(
+          totalLatencyPercentile.empty() ||
+              pct > totalLatencyPercentile.back().first,
+          "LatencyInjectionRoute: percentiles in "
+          "'total_latency_percentile_ms' must be strictly increasing.");
+      totalLatencyPercentile.emplace_back(
+          pct, std::chrono::milliseconds(latMs));
+    }
+  }
+
   if (beforeLatency.count() == 0 && afterLatency.count() == 0 &&
-      totalLatency.count() == 0 && !requestLatency) {
+      totalLatency.count() == 0 && !requestLatency &&
+      totalLatencyPercentile.empty()) {
     // if we are not injecting any latency, optimize this rh away.
     return child;
   }
@@ -294,7 +360,8 @@ typename RouterInfo::RouteHandlePtr makeLatencyInjectionRoute(
       afterLatency,
       totalLatency,
       requestLatency,
-      maxRequestLatency);
+      maxRequestLatency,
+      std::move(totalLatencyPercentile));
 }
 
 } // namespace mcrouter

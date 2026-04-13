@@ -238,6 +238,15 @@ class H3WtSession final : public QuicWtSessionBase {
   using QuicWtSessionBase::acquireIngressStream;
 
   /**
+   * Invoked when the backing http/3 session receives a datagram destined for
+   * this CONNECT stream.
+   *
+   * NOTE: the quarter stream id is expected to have already been consumed by
+   * the backing http/3 session.
+   */
+  using QuicWtSessionBase::onDatagram;
+
+  /**
    * An egress stream is created by either of the two below functions. Currently
    * the way this designed, the backing http/3 session is completely oblivious
    * of any outgoing streams (as they're fully managed by H3WtSession).

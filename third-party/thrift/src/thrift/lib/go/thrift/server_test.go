@@ -1004,6 +1004,7 @@ func TestRocketServerFallbackToHeader(t *testing.T) {
 	mockObserver.On("DeclaredException").Maybe()
 	mockObserver.On("UndeclaredException").Maybe()
 	mockObserver.On("ServerOverloaded").Maybe()
+	mockObserver.On("UndeclaredExceptionForFunction", mock.Anything).Maybe()
 	mockObserver.On("AnyExceptionForFunction", mock.Anything).Maybe()
 	mockObserver.On("TimeReadUsForFunction", mock.Anything, mock.Anything).Maybe()
 	mockObserver.On("TimeProcessUsForFunction", mock.Anything, mock.Anything).Maybe()

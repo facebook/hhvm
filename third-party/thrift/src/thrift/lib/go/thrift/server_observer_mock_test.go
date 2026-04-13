@@ -91,6 +91,10 @@ func (m *MockServerObserver) ReceivedRequestForFunction(function string) {
 	m.Called(function)
 }
 
+func (m *MockServerObserver) UndeclaredExceptionForFunction(function string) {
+	m.Called(function)
+}
+
 func (m *MockServerObserver) AnyExceptionForFunction(function string) {
 	m.Called(function)
 }

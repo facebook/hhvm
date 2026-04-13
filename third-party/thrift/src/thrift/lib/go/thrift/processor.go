@@ -189,6 +189,7 @@ func process(
 		}
 		// Track undeclared exception only after successful write
 		observer.UndeclaredException()
+		observer.UndeclaredExceptionForFunction(methodName)
 		observer.AnyExceptionForFunction(methodName)
 	} else {
 		if writeErr := sendWritableStruct(prot, methodName, types.REPLY, seqID, result); writeErr != nil {

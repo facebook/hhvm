@@ -89,8 +89,14 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   }
   /// Appends the given element value.
   template <typename U = typename T::value_type>
-  void push_back(U&& val) {
+  void append(U&& val) {
     assignOr(*data_.append()).push_back(std::forward<U>(val));
+  }
+  /// @deprecated Use `append` instead.
+  template <typename U = typename T::value_type>
+  [[deprecated("Use `append` instead.")]]
+  void push_back(U&& val) {
+    append(std::forward<U>(val));
   }
 
   /// @copybrief StructPatch::customVisit
@@ -188,8 +194,14 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
   }
   /// Adds a key.
   template <typename U = typename T::value_type>
-  void insert(U&& val) {
+  void add(U&& val) {
     addMulti(single(std::forward<U>(val)));
+  }
+  /// @deprecated Use `add` instead.
+  template <typename U = typename T::value_type>
+  [[deprecated("Use `add` instead.")]]
+  void insert(U&& val) {
+    add(std::forward<U>(val));
   }
 
   /// Removes keys.
@@ -202,10 +214,16 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     erase_all(*data_.add(), keys);
     data_.remove()->insert(keys.begin(), keys.end());
   }
-  /// Remove a key.
+  /// Removes a key.
   template <typename U = typename T::value_type>
-  void erase(U&& val) {
+  void remove(U&& val) {
     removeMulti(single(std::forward<U>(val)));
+  }
+  /// @deprecated Use `remove` instead.
+  template <typename U = typename T::value_type>
+  [[deprecated("Use `remove` instead.")]]
+  void erase(U&& val) {
+    remove(std::forward<U>(val));
   }
 
   /// @copybrief StructPatch::customVisit
@@ -297,11 +315,17 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     }
   }
 
-  /// Inserts entries. Override entries if exists.
+  /// Inserts or overwrites a single entry.
   template <typename K, typename V>
-  void insert_or_assign(K&& key, V&& value) {
+  void put(K&& key, V&& value) {
     putMulti(single(
         std::pair<K&&, V&&>(std::forward<K>(key), std::forward<V>(value))));
+  }
+  /// @deprecated Use `put` instead.
+  template <typename K, typename V>
+  [[deprecated("Use `put` instead.")]]
+  void insert_or_assign(K&& key, V&& value) {
+    put(std::forward<K>(key), std::forward<V>(value));
   }
 
   /// Inserts entries. Ignore entries that already exist.
@@ -316,6 +340,13 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
         added = {};
       }
     }
+  }
+
+  /// Inserts a single entry if the key does not already exist.
+  template <typename K, typename V>
+  void tryPut(K&& key, V&& value) {
+    tryPutMulti(single(
+        std::pair<K&&, V&&>(std::forward<K>(key), std::forward<V>(value))));
   }
 
   /// Removes keys.
@@ -335,8 +366,14 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
 
   /// Removes a key.
   template <typename K = typename T::key_type>
-  void erase(K&& key) {
+  void remove(K&& key) {
     removeMulti(single(std::forward<K>(key)));
+  }
+  /// @deprecated Use `remove` instead.
+  template <typename K = typename T::key_type>
+  [[deprecated("Use `remove` instead.")]]
+  void erase(K&& key) {
+    remove(std::forward<K>(key));
   }
 
   /// Returns the patch that for the entry.

@@ -405,8 +405,7 @@ class DynamicListPatch : public DynamicPatchBase {
     get(op::PatchOp::Assign).emplace_list(std::move(v));
   }
 
-  [[deprecated("Use append(value) instead")]]
-  void push_back(Value v) {
+  void append(Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
       detail::checkCompatibleType(assign->as_list(), v);
       assign->as_list().push_back(std::move(v));
@@ -417,7 +416,10 @@ class DynamicListPatch : public DynamicPatchBase {
     l.push_back(std::move(v));
   }
 
-  void append(Value v) { push_back(std::move(v)); }
+  [[deprecated("Use append(value) instead")]]
+  void push_back(Value v) {
+    append(std::move(v));
+  }
   void appendMulti(ValueList v) {
     for (auto&& i : v) {
       append(std::move(i));
@@ -486,7 +488,7 @@ class DynamicSetPatch : public DynamicPatchBase {
     get(op::PatchOp::Assign).emplace_set(std::move(v));
   }
 
-  void insert(Value v) {
+  void add(Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
       detail::checkCompatibleType(assign->as_set(), v);
       assign->as_set().insert(std::move(v));
@@ -500,7 +502,12 @@ class DynamicSetPatch : public DynamicPatchBase {
     s.insert(std::move(v));
   }
 
-  void erase(Value v) {
+  [[deprecated("Use `add` instead.")]]
+  void insert(Value v) {
+    add(std::move(v));
+  }
+
+  void remove(Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
       assign->as_set().erase(v);
       return;
@@ -511,14 +518,20 @@ class DynamicSetPatch : public DynamicPatchBase {
     get(op::PatchOp::Remove).ensure_set().insert(std::move(v));
   }
 
+  [[deprecated("Use `remove` instead.")]]
+  void erase(Value v) {
+    remove(std::move(v));
+  }
+
   void addMulti(ValueSet add) {
     add.eraseInto(
-        add.begin(), add.end(), [&](auto&& k) { insert(std::move(k)); });
+        add.begin(), add.end(), [&](auto&& k) { this->add(std::move(k)); });
   }
 
   void removeMulti(ValueSet remove) {
-    remove.eraseInto(
-        remove.begin(), remove.end(), [&](auto&& k) { erase(std::move(k)); });
+    remove.eraseInto(remove.begin(), remove.end(), [&](auto&& k) {
+      this->remove(std::move(k));
+    });
   }
 
   template <class Patch>
@@ -852,17 +865,26 @@ class DynamicMapPatch {
     clear_ = true;
   }
 
-  void insert_or_assign(Value k, Value v);
-  void erase(Value k);
+  void put(Value k, Value v);
+  void remove(Value k);
+
+  [[deprecated("Use `put` instead.")]]
+  void insert_or_assign(Value k, Value v) {
+    put(std::move(k), std::move(v));
+  }
+  [[deprecated("Use `remove` instead.")]]
+  void erase(Value k) {
+    remove(std::move(k));
+  }
 
   void tryPutMulti(ValueMap v);
   void removeMulti(ValueSet v) {
-    v.eraseInto(v.begin(), v.end(), [&](auto&& k) { erase(std::move(k)); });
+    v.eraseInto(v.begin(), v.end(), [&](auto&& k) { remove(std::move(k)); });
   }
   void putMulti(ValueMap m) {
     detail::checkHomogeneousContainer(m);
     m.eraseInto(m.begin(), m.end(), [&](auto&& k, auto&& v) {
-      insert_or_assign(std::move(k), std::move(v));
+      put(std::move(k), std::move(v));
     });
   }
 

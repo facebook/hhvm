@@ -744,13 +744,13 @@ template std::uint32_t DynamicUnionPatch::encode(
 template std::uint32_t DynamicUnionPatch::encode(
     apache::thrift::protocol::detail::ObjectWriter&) const;
 
-void DynamicMapPatch::insert_or_assign(Value k, Value v) {
+void DynamicMapPatch::put(Value k, Value v) {
   undoChanges(k);
   setOrCheckMapType(k, v);
   put_.insert_or_assign(std::move(k), std::move(v));
 }
 
-void DynamicMapPatch::erase(Value k) {
+void DynamicMapPatch::remove(Value k) {
   undoChanges(k);
   remove_.insert(std::move(k));
 }

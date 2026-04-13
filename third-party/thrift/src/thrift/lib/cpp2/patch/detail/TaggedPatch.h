@@ -62,8 +62,13 @@ class TaggedPatchRef<type::list<Tag>> {
 
   void clear() { patch_.get().clear(); }
 
+  void append(const typename type::native_type<Tag>& v) {
+    patch_.get().append(asValueStruct<Tag>(v));
+  }
+
+  [[deprecated("Use `append` instead.")]]
   void push_back(const typename type::native_type<Tag>& v) {
-    patch_.get().push_back(asValueStruct<Tag>(v));
+    append(v);
   }
 
   void apply(value_type& v) const { apply_impl(v); }
@@ -108,12 +113,22 @@ class TaggedPatchRef<type::set<Tag>> {
 
   void clear() { patch_.get().clear(); }
 
-  void insert(const typename type::native_type<Tag>& v) {
-    patch_.get().insert(asValueStruct<Tag>(v));
+  void add(const typename type::native_type<Tag>& v) {
+    patch_.get().add(asValueStruct<Tag>(v));
   }
 
+  [[deprecated("Use `add` instead.")]]
+  void insert(const typename type::native_type<Tag>& v) {
+    add(v);
+  }
+
+  void remove(const typename type::native_type<Tag>& v) {
+    patch_.get().remove(asValueStruct<Tag>(v));
+  }
+
+  [[deprecated("Use `remove` instead.")]]
   void erase(const typename type::native_type<Tag>& v) {
-    patch_.get().erase(asValueStruct<Tag>(v));
+    remove(v);
   }
 
   void apply(value_type& v) const { apply_impl(v); }
@@ -185,18 +200,27 @@ class TaggedPatchRef<type::map<K, V>> {
 
   void clear() { patch_.get().clear(); }
 
+  void put(const type::native_type<K>& key, const type::native_type<V>& value) {
+    patch_.get().put(asValueStruct<K>(key), asValueStruct<V>(value));
+  }
+
+  [[deprecated("Use `put` instead.")]]
   void insert_or_assign(
       const type::native_type<K>& key, const type::native_type<V>& value) {
-    patch_.get().insert_or_assign(
-        asValueStruct<K>(key), asValueStruct<V>(value));
+    put(key, value);
   }
 
   void tryPutMulti(const type::native_type<Map>& map) {
     patch_.get().tryPutMulti(asValueStruct<Map>(map).as_map());
   }
 
+  void remove(const type::native_type<K>& key) {
+    patch_.get().remove(asValueStruct<K>(key));
+  }
+
+  [[deprecated("Use `remove` instead.")]]
   void erase(const type::native_type<K>& key) {
-    patch_.get().erase(asValueStruct<K>(key));
+    remove(key);
   }
 
   auto& patchByKey(const type::native_type<K>& key) {

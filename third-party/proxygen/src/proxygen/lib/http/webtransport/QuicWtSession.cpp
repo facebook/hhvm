@@ -542,4 +542,9 @@ void H3WtSession::onCloseSession(WtStreamManager::CloseSession&& cs) noexcept {
   return sm_.onCloseSession(std::move(cs));
 }
 
+void H3ConnectStreamCallback::onEvent(
+    detail::WtStreamManager::Event&& ev) noexcept {
+  std::visit(visitor, ev);
+}
+
 } // namespace proxygen

@@ -22,7 +22,7 @@ using StreamId = quic::StreamId;
 using QuicError = quic::QuicError;
 
 // fwd-decl; defined below
-class H3ConnectStreamCallback;
+struct H3ConnectStreamCallback;
 
 /**
  * This class is effectively an adaptor, it exposes a WebTransport interace over
@@ -207,10 +207,13 @@ class QuicWtSession final : public QuicWtSessionBase {
  * MaxConnData, MaxStreams(Uni|Bidi), CloseSession, DrainSession), maybe
  * should we instead create a virtual fn for each of the subset?
  */
-class H3ConnectStreamCallback {
- public:
+struct H3ConnectStreamCallback {
+  explicit H3ConnectStreamCallback(folly::IOBufQueue& writeBuf) noexcept
+      : visitor(writeBuf) {
+  }
   virtual ~H3ConnectStreamCallback() noexcept = default;
-  virtual void onEvent(detail::WtStreamManager::Event&& ev) noexcept = 0;
+  virtual void onEvent(detail::WtStreamManager::Event&& ev) noexcept;
+  detail::WtEventVisitor visitor;
 };
 
 class H3WtSession final : public QuicWtSessionBase {

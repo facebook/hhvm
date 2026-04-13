@@ -812,9 +812,13 @@ class H3WtSessionTest : public Test {
   folly::Optional<uint32_t> expectedWtHandlerErr_{folly::none};
 
   class H3ConnectCb : public proxygen::H3ConnectStreamCallback {
+   public:
+    H3ConnectCb() : H3ConnectStreamCallback(this->writeBuf) {
+    }
     void onEvent(detail::WtStreamManager::Event&& ev) noexcept override {
       events.push_back(std::move(ev));
     }
+    folly::IOBufQueue writeBuf;
     std::vector<detail::WtStreamManager::Event> events;
   } connectStreamCb_;
 };

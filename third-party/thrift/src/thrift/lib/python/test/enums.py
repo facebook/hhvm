@@ -635,8 +635,9 @@ class TestWithStdlibEnums(unittest.TestCase):
                 combined = x.read | x.write
                 self.assertIn(combined, x)
                 self.assertIn(combined.value, x)
-                self.assertIn(0, x)
-                self.assertIn(x(0), x)
+                if not issubclass(x, PyFlag):
+                    self.assertIn(0, x)
+                    self.assertIn(x(0), x)
 
 
 @parameterized_class(

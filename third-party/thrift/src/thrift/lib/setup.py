@@ -328,6 +328,11 @@ else:
             **common_options,
         ),
         Extension(
+            "thrift.python.streaming.closeable",
+            sources=["thrift/python/streaming/closeable.pyx"],
+            **common_options,
+        ),
+        Extension(
             "thrift.python.types",
             sources=["thrift/python/_types.pyx"],
             **common_options,
@@ -526,7 +531,7 @@ else:
         "thrift.python.conformance",
         "thrift.python.server_impl",
         "thrift.python.server_impl.interceptor",
-        # "thrift.python.streaming",  # DISABLED FOR NOW
+        "thrift.python.streaming",
         "thrift.py3",
         "thrift.lib",
         "thrift.lib.python",

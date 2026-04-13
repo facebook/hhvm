@@ -446,5 +446,5 @@ set_map_initializer: _typing.AbstractSet[builtins.int] = ...
 
 MyStringIdentifier = builtins.str
 MyIntIdentifier = builtins.int
-MyMapIdentifier = _typing.Dict[builtins.str, builtins.str]
-CompanyLocationsMap = _typing.Dict[_fbthrift_Company, _typing.Sequence[_fbthrift_City]]
+MyMapIdentifier = _fbthrift_python_types.ImmutableMap[builtins.str, builtins.str]
+CompanyLocationsMap = _fbthrift_python_types.ImmutableMap[_fbthrift_Company, _typing.Sequence[_fbthrift_City]]

@@ -279,4 +279,4 @@ class NonCopyableUnion(_fbthrift_python_types.Union, _fbthrift_python_abstract_t
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableUnion": ...  # type: ignore
 _fbthrift_NonCopyableUnion = NonCopyableUnion
 
-containerTypedef = _typing.Dict[builtins.int, builtins.str]
+containerTypedef = _fbthrift_python_types.ImmutableMap[builtins.int, builtins.str]

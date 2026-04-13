@@ -481,8 +481,8 @@ CustomDouble = builtins.float
 CustomString = builtins.str
 CustomBinary = builtins.bytes
 CustomList = _fbthrift_python_types.ImmutableList[builtins.int]
-CustomSet = _typing.Set[builtins.int]
-CustomMap = _typing.Dict[builtins.int, builtins.int]
+CustomSet = _fbthrift_python_types.ImmutableSet[builtins.int]
+CustomMap = _fbthrift_python_types.ImmutableMap[builtins.int, builtins.int]
 CustomStruct = _fbthrift_SimpleStruct
 AdaptedBool = builtins.bool
 AdaptedInteger = builtins.int
@@ -490,8 +490,8 @@ AdaptedDouble = builtins.float
 AdaptedString = builtins.str
 AdaptedBinary = builtins.bytes
 AdaptedList = _fbthrift_python_types.ImmutableList[builtins.int]
-AdaptedSet = _typing.Set[builtins.int]
-AdaptedMap = _typing.Dict[builtins.int, builtins.int]
+AdaptedSet = _fbthrift_python_types.ImmutableSet[builtins.int]
+AdaptedMap = _fbthrift_python_types.ImmutableMap[builtins.int, builtins.int]
 AdaptedStruct = _fbthrift_SimpleStruct
 
 

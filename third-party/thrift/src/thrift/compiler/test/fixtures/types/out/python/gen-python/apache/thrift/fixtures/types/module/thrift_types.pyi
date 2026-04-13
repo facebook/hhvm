@@ -784,10 +784,10 @@ SomeListOfTypeMap_2468 = _fbthrift_python_types.ImmutableList[_typing.Mapping[bu
 TBinary_8623 = builtins.bytes
 i32_9314 = builtins.int
 list_i32_9187 = _fbthrift_python_types.ImmutableList[builtins.int]
-map_i32_i32_9565 = _typing.Dict[builtins.int, builtins.int]
-map_i32_string_1261 = _typing.Dict[builtins.int, builtins.str]
-set_i32_7070 = _typing.Set[builtins.int]
-set_i32_7194 = _typing.Set[builtins.int]
+map_i32_i32_9565 = _fbthrift_python_types.ImmutableMap[builtins.int, builtins.int]
+map_i32_string_1261 = _fbthrift_python_types.ImmutableMap[builtins.int, builtins.str]
+set_i32_7070 = _fbthrift_python_types.ImmutableSet[builtins.int]
+set_i32_7194 = _fbthrift_python_types.ImmutableSet[builtins.int]
 string_5252 = builtins.str
 
 

@@ -23,8 +23,8 @@
   {{#pragma ignore-newlines}}
   {{#if python.generate_immutable_types?}}
 {{#if type.list?}}_fbthrift_python_types.ImmutableList
-{{#else if type.set?}}_typing.Set
-{{#else if type.map?}}_typing.Dict{{/if type.list?}}
+{{#else if type.set?}}_fbthrift_python_types.ImmutableSet
+{{#else if type.map?}}_fbthrift_python_types.ImmutableMap{{/if type.list?}}
   {{#else}}
 {{#if type.list?}}{{#partial m_types.sequence}}
 {{#else if type.set?}}{{#partial m_types.set}}

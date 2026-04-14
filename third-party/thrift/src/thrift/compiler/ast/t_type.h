@@ -34,7 +34,12 @@ namespace detail {
 template <typename... Visitors>
 extern decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors);
 
-}
+// Allow semantic resolution access to the private unresolved name of
+// `t_type_ref` without exposing it to any other components of the compiler, or
+// plugins outside the compiler.
+struct sema_unresolved_private_access;
+
+} // namespace detail
 
 /**
  * Generic representation of a thrift type.
@@ -349,6 +354,10 @@ class t_type_ref final {
    * exception.
    */
   const t_type& deref_or_throw() const;
+
+  // Allow semantic resolution access to private members for unresolved name to
+  // try resolve the type via implicit includes.
+  friend struct detail::sema_unresolved_private_access;
 
   /**
    * If this type reference refers to an unresolved type, returns the referenced

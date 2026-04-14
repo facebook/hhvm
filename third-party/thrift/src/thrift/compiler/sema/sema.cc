@@ -29,6 +29,17 @@
 #include <thrift/compiler/sema/standard_validator.h>
 
 namespace apache::thrift::compiler {
+
+namespace detail {
+
+struct sema_unresolved_private_access {
+  static const std::string& get_unresolved_name(const t_type_ref& ref) {
+    return ref.unresolved_name();
+  }
+};
+
+} // namespace detail
+
 namespace {
 
 void report_missing_type(sema_context& ctx, const t_named& named) {
@@ -59,7 +70,7 @@ class ast_mutator
   }
 };
 
-/// An AST mutator that replaces placeholder_typedefs with resolved types.
+/// An AST mutator that resolves native unresolved type refs in place.
 class type_ref_resolver {
  private:
   sema_context& ctx_;
@@ -70,8 +81,10 @@ class type_ref_resolver {
   explicit type_ref_resolver(sema_context& ctx, t_program_bundle& bundle)
       : ctx_{ctx}, bundle_{bundle} {}
 
-  const t_type* resolve_implicit_includes(const t_placeholder_typedef& td) {
-    const scope::identifier id{td.name(), td.src_range()};
+  const t_type* resolve_implicit_includes(const t_type_ref& ref) {
+    const scope::identifier id{
+        detail::sema_unresolved_private_access::get_unresolved_name(ref),
+        ref.src_range()};
     return dynamic_cast<const t_type*>(bundle_.root_program()->find(id));
   }
 
@@ -80,9 +93,8 @@ class type_ref_resolver {
       return;
     }
 
-    if (const auto* node = resolve_implicit_includes(*ref.unresolved_type())) {
-      ref = t_type_ref{*node};
-      ref.resolve();
+    if (const t_type* node = resolve_implicit_includes(ref)) {
+      ref = t_type_ref{*node, ref.src_range()};
       assert(ref.resolved());
       return;
     }
@@ -303,7 +315,7 @@ void match_type_with_const_value(
       }
     }
   } else if (const t_structured* structured = type->try_as<t_structured>()) {
-    if (auto ttype = value->type()) {
+    if (const t_type_ref& ttype = value->type()) {
       if (!ttype.resolved()) {
         ctx.error(
             value->ref_range().begin,
@@ -311,7 +323,7 @@ void match_type_with_const_value(
             // detail to the error. Hence it's better to error here as opposed
             // to later in validator which will only print 'unknown symbol'
             "could not resolve type `{}` (expected `{}`)",
-            ttype.unresolved_type()->get_full_name(),
+            detail::sema_unresolved_private_access::get_unresolved_name(ttype),
             type->get_full_name());
         // Resolve global placeholder to avoid the duplicate message
         for (auto& td : mctx.bundle->root_program()
@@ -841,7 +853,8 @@ bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
       continue;
     }
 
-    if (const auto* ttype = resolver.resolve_implicit_includes(td)) {
+    if (const auto* ttype = resolver.resolve_implicit_includes(
+            t_type_ref::for_unresolved(*td.program(), td.name()))) {
       td.set_type(t_type_ref::from_ptr(ttype));
       assert(td.type().resolved());
       continue;
@@ -858,26 +871,27 @@ bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
 bool sema::check_circular_typedef(
     sema_context& diags, t_program_bundle& bundle) {
   std::unordered_set<const t_type*> checked;
-  for (auto& td :
-       bundle.root_program()->global_scope()->placeholder_typedefs()) {
-    if (checked.contains(td.type().get_type())) {
-      continue;
-    }
-    std::unordered_set<const t_type*> visited;
-    std::vector<const t_type*> chain;
-    if (nullptr !=
-        t_typedef::find_type_if(td.type().get_type(), [&](const t_type* t) {
-          // Find the first typedef which insertion failed
-          checked.insert(t);
-          chain.push_back(t);
-          return visited.insert(t).second == false;
-        })) {
-      std::string msg;
-      for (const auto& i : chain) {
-        msg += i->name() + (&i != &chain.back() ? " --> " : "");
+  for (const t_program& program : bundle.programs()) {
+    for (const t_typedef* td : program.typedefs()) {
+      if (!td->type().resolved() || checked.contains(&td->type().deref())) {
+        continue;
       }
-      diags.error(td, "Circular typedef: {}", msg);
-      return false;
+      std::unordered_set<const t_type*> visited;
+      std::vector<const t_type*> chain;
+      if (nullptr !=
+          t_typedef::find_type_if(&td->type().deref(), [&](const t_type* t) {
+            // Find the first typedef which insertion failed
+            checked.insert(t);
+            chain.push_back(t);
+            return visited.insert(t).second == false;
+          })) {
+        std::string msg;
+        for (const auto& i : chain) {
+          msg += i->name() + (&i != &chain.back() ? " --> " : "");
+        }
+        diags.error(*td, "Circular typedef: {}", msg);
+        return false;
+      }
     }
   }
   return true;

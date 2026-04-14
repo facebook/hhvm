@@ -1156,7 +1156,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
   if (sparams) {
     ctx.sema_parameters() = *sparams;
   }
-  sema(params.use_legacy_type_ref_resolution).run(ctx, *programs);
+  sema().run(ctx, *programs);
   return programs;
 }
 

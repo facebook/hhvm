@@ -26,8 +26,6 @@ class t_program_bundle;
 // stages.
 struct sema {
  private:
-  bool use_legacy_type_ref_resolution_;
-
   // Tries to resolve any unresolved type references, returning true if
   // successful and reporting any errors via diags.
   bool resolve_all_types(sema_context& diags, t_program_bundle& bundle);
@@ -39,8 +37,7 @@ struct sema {
   bool check_circular_typedef(sema_context& diags, t_program_bundle& bundle);
 
  public:
-  explicit sema(bool use_legacy_type_ref_resolution)
-      : use_legacy_type_ref_resolution_(use_legacy_type_ref_resolution) {}
+  explicit sema() {}
 
   struct result {
     bool unresolved_types = false;

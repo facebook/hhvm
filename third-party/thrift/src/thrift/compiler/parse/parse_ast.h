@@ -61,12 +61,6 @@ struct parsing_params {
   bool allow_self_relative_includes = true;
 
   /**
-   * Whether to use the legacy type ref resolution behavior, which produces a
-   * worse AST. Do not use in new code. Only enabled for plugins.
-   */
-  bool use_legacy_type_ref_resolution = false;
-
-  /**
    * Whether to use the global resolution (~ via t_global_scope) for identifiers
    * or rely only on the local resolution (~ via program_scope).
    */

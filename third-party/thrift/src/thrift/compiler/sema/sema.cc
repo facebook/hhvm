@@ -832,12 +832,8 @@ std::vector<ast_mutator> post_validation_standard_mutators() {
 } // namespace
 
 bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
-  bool success = true;
   type_ref_resolver resolver(diags, bundle);
-
-  if (!use_legacy_type_ref_resolution_) {
-    success = resolver.run();
-  }
+  bool success = resolver.run();
 
   for (auto& td :
        bundle.root_program()->global_scope()->placeholder_typedefs()) {
@@ -849,10 +845,6 @@ bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
       td.set_type(t_type_ref::from_ptr(ttype));
       assert(td.type().resolved());
       continue;
-    }
-
-    if (use_legacy_type_ref_resolution_ && !td.resolve()) {
-      success = false;
     }
 
     report_missing_type(diags, td);
@@ -893,9 +885,7 @@ bool sema::check_circular_typedef(
 
 sema::result sema::run(sema_context& ctx, t_program_bundle& bundle) {
   // Resolve types in the root program.
-  if (!use_legacy_type_ref_resolution_) {
-    type_ref_resolver(ctx, bundle).run();
-  }
+  type_ref_resolver(ctx, bundle).run();
 
   t_program& root_program = *bundle.root_program();
   std::string program_prefix = root_program.name() + ".";

@@ -1185,9 +1185,6 @@ void record_invocation_params(
       "allow_self_relative_includes=" +
       std::to_string(pparams.allow_self_relative_includes));
   parse_params_metric.add(
-      "use_legacy_type_ref_resolution=" +
-      std::to_string(pparams.use_legacy_type_ref_resolution));
-  parse_params_metric.add(
       "use_global_resolution=" + std::to_string(pparams.use_global_resolution));
 
   detail::event<std::string>& gen_params_metric =

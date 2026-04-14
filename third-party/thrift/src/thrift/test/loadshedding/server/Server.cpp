@@ -35,14 +35,14 @@ int main(int argc, char** argv) {
   server->setInterface(handler);
 
   std::thread logger([&] {
-    auto last = std::chrono::system_clock::now();
+    auto lastLogTime = std::chrono::system_clock::now();
     for (;;) {
       auto sleepTime = std::chrono::seconds(1);
       std::this_thread::sleep_for(sleepTime);
       auto now = std::chrono::system_clock::now();
       auto elapsed =
-          std::chrono::duration_cast<std::chrono::seconds>(now - last);
-      last = now;
+          std::chrono::duration_cast<std::chrono::seconds>(now - lastLogTime);
+      lastLogTime = now;
       double counter = handler->getAndResetRequestCount();
       LOG(INFO) << "RPS: " << (counter / elapsed.count())
                 << ", active req: " << server->getActiveRequests();

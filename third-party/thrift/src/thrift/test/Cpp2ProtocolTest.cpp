@@ -40,21 +40,21 @@ map<string, vector<set<map<int, int>>>> nested_foo = {
 };
 
 template <typename Object>
-void testOoe(Object& ooe) {
-  ASSERT_EQ(*ooe.im_true_ref(), true);
-  ASSERT_EQ(*ooe.im_false_ref(), false);
-  ASSERT_EQ((uint8_t)*ooe.a_bite_ref(), 0xd6);
-  ASSERT_EQ(*ooe.integer16_ref(), 27000);
-  ASSERT_EQ(*ooe.integer32_ref(), 1 << 24);
-  ASSERT_EQ(*ooe.integer64_ref(), (uint64_t)6000 * 1000 * 1000);
-  ASSERT_EQ(*ooe.double_precision_ref(), M_PI);
-  ASSERT_EQ(*ooe.float_precision_ref(), (float)12.345);
-  ASSERT_EQ(*ooe.some_characters_ref(), "JSON THIS! \"\1");
-  ASSERT_EQ(*ooe.zomg_unicode_ref(), "\xd7\n\a\t");
-  ASSERT_EQ(*ooe.base64_ref(), "\1\2\3\255");
-  ASSERT_EQ(ooe.rank_map_ref()->size(), 2);
-  ASSERT_EQ(ooe.rank_map_ref()[567419810], (float)0.211184);
-  ASSERT_EQ(ooe.rank_map_ref()[507959914], (float)0.080382);
+void testOoe(Object& obj) {
+  ASSERT_EQ(*obj.im_true_ref(), true);
+  ASSERT_EQ(*obj.im_false_ref(), false);
+  ASSERT_EQ((uint8_t)*obj.a_bite_ref(), 0xd6);
+  ASSERT_EQ(*obj.integer16_ref(), 27000);
+  ASSERT_EQ(*obj.integer32_ref(), 1 << 24);
+  ASSERT_EQ(*obj.integer64_ref(), (uint64_t)6000 * 1000 * 1000);
+  ASSERT_EQ(*obj.double_precision_ref(), M_PI);
+  ASSERT_EQ(*obj.float_precision_ref(), (float)12.345);
+  ASSERT_EQ(*obj.some_characters_ref(), "JSON THIS! \"\1");
+  ASSERT_EQ(*obj.zomg_unicode_ref(), "\xd7\n\a\t");
+  ASSERT_EQ(*obj.base64_ref(), "\1\2\3\255");
+  ASSERT_EQ(obj.rank_map_ref()->size(), 2);
+  ASSERT_EQ(obj.rank_map_ref()[567419810], (float)0.211184);
+  ASSERT_EQ(obj.rank_map_ref()[507959914], (float)0.080382);
 }
 
 template <typename Object>

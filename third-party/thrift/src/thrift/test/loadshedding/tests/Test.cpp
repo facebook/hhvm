@@ -46,14 +46,14 @@ int main(int argc, char* argv[]) {
 
   std::atomic<bool> loggerEnabled{true};
   std::thread logger([&client, &loggerEnabled] {
-    auto last = std::chrono::system_clock::now();
+    auto lastLogTime = std::chrono::system_clock::now();
     while (loggerEnabled) {
       auto sleepTime = std::chrono::seconds(1);
       std::this_thread::sleep_for(sleepTime);
       auto now = std::chrono::system_clock::now();
       auto elapsed =
-          std::chrono::duration_cast<std::chrono::seconds>(now - last);
-      last = now;
+          std::chrono::duration_cast<std::chrono::seconds>(now - lastLogTime);
+      lastLogTime = now;
 
       uint64_t count = client.getResponseCount();
       double rate = static_cast<double>(client.getSuccess()) /

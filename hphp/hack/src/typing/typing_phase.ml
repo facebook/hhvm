@@ -405,6 +405,8 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
           true
         | Tunion tyl -> List.exists tyl ~f:null_is_subtype_of
         | Tintersection tyl -> List.for_all tyl ~f:null_is_subtype_of
+        | Tnewtype (n, [inner], _) when String.equal n SN.Classes.cSupportDyn ->
+          null_is_subtype_of inner
         | _ -> false
       in
       if null_is_subtype_of ty then

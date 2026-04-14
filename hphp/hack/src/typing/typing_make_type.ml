@@ -124,16 +124,26 @@ let like r ty =
       ty
     | _ -> mk (r, Tlike ty)
 
+(* A locl type already subsumes dynamic if adding ~ty would be redundant.
+   Do NOT simplify mixed (?nonnull) here: downstream code (e.g. type_switch
+   refinement) relies on detecting dynamic in a Tunion to preserve like-type
+   wrapping through predicate-based refinement. *)
+let rec is_locl_supertype_of_dynamic ty =
+  match get_node ty with
+  | Tdynamic -> true
+  | Tany _ -> true
+  | Toption inner -> is_locl_supertype_of_dynamic inner
+  | Tnewtype (n, [inner], _)
+    when String.equal n Naming_special_names.Classes.cSupportDyn ->
+    is_locl_supertype_of_dynamic inner
+  | Tunion tys -> List.exists is_locl_supertype_of_dynamic tys
+  | _ -> false
+
 let locl_like r ty =
-  if Typing_defs.is_dynamic ty then
-    ty
-  else
-    match get_node ty with
-    | Tprim Aast.Tnoreturn
-    | Tany _ ->
-      ty
-    | Tunion tys when List.exists Typing_defs.is_dynamic tys -> ty
-    | _ -> mk (r, Tunion [dynamic r; ty])
+  match get_node ty with
+  | Tprim Aast.Tnoreturn -> ty
+  | _ when is_locl_supertype_of_dynamic ty -> ty
+  | _ -> mk (r, Tunion [dynamic r; ty])
 
 (* Wrap supportdyn around a type unless it's already got it
  * or trivially supports dynamic

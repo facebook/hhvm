@@ -156,6 +156,54 @@ function hhvm_binary_routes(): dict<string, string> {
   ];
 }
 
+// Return build-route directories in priority order, encoding the selection
+// policy once.  If FBCODE_BUILD_TOOL is set, only that tool's route is
+// returned; otherwise all routes are returned in definition order.
+function build_route_candidates(dict<string, string> $routes): vec<string> {
+  $home = hphp_home();
+  $env_tool = getenv("FBCODE_BUILD_TOOL");
+  if ($env_tool !== false) {
+    return vec[$home . $routes[$env_tool]];
+  }
+  $out = vec[];
+  foreach ($routes as $_ => $path) {
+    $out[] = $home . $path;
+  }
+  return $out;
+}
+
+// Extract the build-tree prefix from a build output directory — everything
+// before the /hphp/ package root.  Works for gen/, art/, and cmake layouts.
+// Returns null when the path doesn't look like an hphp build tree.
+function build_tree_prefix(string $build_dir): ?string {
+  $pos = strpos($build_dir, '/hphp/');
+  return $pos !== false ? substr($build_dir, 0, $pos) : null;
+}
+
+// Find a binary by probing build-output routes (same mechanism as bin_root).
+// When gen/ routes are empty (deferred materialisation), derives the art/
+// path from hhvm's build tree using the buck2 route's target subpath.
+function find_build_binary(
+  string $name,
+  dict<string, string> $routes,
+): ?string {
+  foreach (build_route_candidates($routes) as $dir) {
+    $candidate = $dir . '/' . $name;
+    if (is_file($candidate)) return $candidate;
+  }
+  $prefix = build_tree_prefix(bin_root());
+  $buck2 = $routes["buck2"] ?? null;
+  if ($prefix is nonnull && $buck2 is nonnull) {
+    $gen_stem = '/../buck-out/v2/gen/fbcode/';
+    if (strpos($buck2, $gen_stem) === 0) {
+      $candidate = $prefix . '/' . substr($buck2, strlen($gen_stem))
+        . '/' . $name;
+      if (is_file($candidate)) return $candidate;
+    }
+  }
+  return null;
+}
+
 // For Facebook: We have several build systems, and we can use any of them in
 // the same code repo.  If multiple binaries exist, we want the onus to be on
 // the user to specify a particular one because before we chose the buck one
@@ -220,22 +268,21 @@ function bin_root(): string {
     return dirname(realpath($hhvm_bin));
   }
 
-  $home = hphp_home();
-  $env_tool = getenv("FBCODE_BUILD_TOOL");
-  $routes = hhvm_binary_routes();
+  $candidates = build_route_candidates(hhvm_binary_routes());
 
-  if ($env_tool !== false) {
-    return $home . $routes[$env_tool];
+  // When FBCODE_BUILD_TOOL selects a specific route, return it
+  // unconditionally (matching existing behavior).
+  if (getenv("FBCODE_BUILD_TOOL") !== false) {
+    return $candidates[0];
   }
 
-  foreach ($routes as $_ => $path) {
-    $dir = $home . $path;
+  foreach ($candidates as $dir) {
     if (is_dir($dir)) {
       return $dir;
     }
   }
 
-  return $home . $routes["cmake"];
+  return hphp_home() . hhvm_binary_routes()["cmake"];
 }
 
 function read_opts_file(?string $file, ?string $input_dir = null): string {
@@ -864,13 +911,28 @@ function sbcc_uses_builder(string $test): bool {
   return is_file("$test.sbcc_files");
 }
 
+function sbcc_binary_routes(): dict<string, string> {
+  return dict[
+    "buck"  => "/buck-out/gen/hphp/runtime/ext/sbcc/sbcc-build",
+    "buck2" => "/../buck-out/v2/gen/fbcode/hphp/runtime/ext/sbcc/__sbcc-build__/out",
+    "cmake" => "/hphp/runtime/ext/sbcc",
+  ];
+}
+
 function sbcc_build_binary(): string {
-  // SBCC_BUILD is set by the test infrastructure in DEFS.bzl via
+  // SBCC_BUILD is set by the buck2 test infrastructure in DEFS.bzl via
   // $(location //hphp/runtime/ext/sbcc:sbcc-build).
   $env = getenv('SBCC_BUILD');
   if ($env is string && is_file($env)) return $env;
+  // Check alongside hhvm, for when both binaries were copied to the same
+  // directory (e.g. /tmp/).
   $candidate = dirname(hhvm_path()).'/sbcc-build';
   if (is_file($candidate)) return $candidate;
+  // Probe build routes — same infrastructure as bin_root() / hhvm_path().
+  $found = find_build_binary('sbcc-build', sbcc_binary_routes());
+  if ($found is nonnull) return $found;
+  // Bare fallback — unlike hhvm_path() which errors, sbcc-build is optional;
+  // tests that need it call sbcc_enabled() first and skip when inapplicable.
   return 'sbcc-build';
 }
 

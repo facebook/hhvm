@@ -48,7 +48,7 @@ const std::vector<std::any>& TEnumTraits<::{{program.cpp_qualified_namespace}}::
       std::vector<std::any> values;
   {{#each enum.structured_annotations as |annot|}}
     {{#if annot.is_runtime_annotation?}}
-      values.emplace_back({{#partial const_value.iterate_const_values value=annot.value root_const=annot}});
+      values.emplace_back({{#partial const_value.iterate_const_values value=annot.rendered_value root_const=annot}});
     {{/if annot.is_runtime_annotation?}}
   {{/each}}
       return values;
@@ -68,7 +68,7 @@ const std::vector<std::any>& TEnumTraits<::{{program.cpp_qualified_namespace}}::
           std::vector<std::any> values;
       {{#each enum_value.structured_annotations as |annot|}}
         {{#if annot.is_runtime_annotation?}}
-          values.emplace_back({{#partial const_value.iterate_const_values value=annot.value root_const=annot}});
+          values.emplace_back({{#partial const_value.iterate_const_values value=annot.rendered_value root_const=annot}});
         {{/if annot.is_runtime_annotation?}}
       {{/each}}
           return values;

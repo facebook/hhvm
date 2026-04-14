@@ -28,17 +28,17 @@
 {{! Primitive Constant Value }}
 {{#let export partial primitive |value|}}
 {{#pragma ignore-newlines}}
-{{#if value.bool?}}{{#if value.bool_value}}true{{#else}}false{{/if}}
-{{#else if value.integer?}}static_cast<{{value.type.cpp_standard_type}}>({{value.integer_value}})
-{{#else if value.double?}}static_cast<{{value.type.cpp_standard_type}}>({{(float_to_string value.double_value)}})
-{{#else if value.string?}}"{{value.string_value}}"
-  {{#else if value.enum?}}
-    {{#if value.enum_value?}}
- ::{{value.type.cpp_qualified_namespace}}::{{value.type.cpp_name}}::{{value.enum_value.cpp_name}}
+{{#if value.value.bool?}}{{#if value.value.bool_value}}true{{#else}}false{{/if}}
+{{#else if value.value.integer?}}static_cast<{{value.type.cpp_standard_type}}>({{value.value.integer_value}})
+{{#else if value.value.double?}}static_cast<{{value.type.cpp_standard_type}}>({{(float_to_string value.value.double_value)}})
+{{#else if value.value.string?}}"{{value.value.string_value}}"
+  {{#else if value.value.enum?}}
+    {{#if value.value.enum_value?}}
+ ::{{value.type.type.cpp_qualified_namespace}}::{{value.type.type.cpp_name}}::{{value.value.enum_value.cpp_name}}
     {{#else}}
-static_cast< ::{{value.type.cpp_qualified_namespace}}::{{value.type.cpp_name}}>({{value.integer_value}})
-    {{/if value.enum_value?}}
-  {{/if value.bool?}}
+static_cast< ::{{value.type.type.cpp_qualified_namespace}}::{{value.type.type.cpp_name}}>({{value.value.integer_value}})
+    {{/if value.value.enum_value?}}
+  {{/if value.value.bool?}}
 {{/let partial}}
 
 {{#let export partial iterate_const_values |value root_const| captures |primitive|}}
@@ -54,9 +54,9 @@ static_cast< ::{{value.type.cpp_qualified_namespace}}::{{value.type.cpp_name}}>(
   {{! Used by list/map values }}
   {{#let partial iterate_const_values_adapted_nested |value| captures |iterate_const_values root_const|}}
 {{#pragma ignore-newlines}}
-{{#if (object.notnull? value.type.cpp_adapter)}}{{value.type.cpp_adapter}}::fromThrift({{value.type.cpp_standard_type}}({{/if}}
+{{#if (object.notnull? value.type.type.cpp_adapter)}}{{value.type.type.cpp_adapter}}::fromThrift({{value.type.cpp_standard_type}}({{/if}}
 {{#partial iterate_const_values value=value root_const=root_const}}
-{{#if (object.notnull? value.type.cpp_adapter)}})){{/if}}
+{{#if (object.notnull? value.type.type.cpp_adapter)}})){{/if}}
   {{/let partial}}{{! end of `iterate_const_values_adapted_nested` nested partial }}
 
   {{!
@@ -66,7 +66,7 @@ static_cast< ::{{value.type.cpp_qualified_namespace}}::{{value.type.cpp_name}}>(
     commenting every line break we don't want to emit.
   }}
   {{#let partial list_value captures |iterate_const_values_adapted_nested value|}}
-std::initializer_list<{{value.type.true_type.elem_type.cpp_type}}>{{!
+std::initializer_list<{{value.type.type.true_type.elem_type.cpp_type}}>{{!
   }}{ {{#each (array.enumerate value.list_elements with_last=true) as |i elem last?|}}{{!
 }}{{#partial iterate_const_values_adapted_nested value=elem}}{{#if (not last?)}},
   {{/if (not last?)}}{{/each}} }{{!
@@ -82,17 +82,17 @@ std::initializer_list<{{value.type.cpp_type}}::value_type>{{!
 
 
 {{! End of nested partials; start of main `iterate_const_values` content }}
-  {{#if value.string?}}
+  {{#if value.value.string?}}
 apache::thrift::StringTraits<{{value.type.cpp_standard_type}}>::fromStringLiteral({{#partial primitive value=value}})
-  {{#else if (not value.container?)}}
+  {{#else if (not value.value.container?)}}
     {{! Any non-string primitive or enum type }}
 {{#partial primitive value=value}}
-  {{#else if (and (value.referenceable_from? root_const) (or value.owner.external? (cpp_enable_same_program_const_referencing?)))}}
+  {{#else if (and (value.referenceable_from? root_const) (or value.value.owner.external? (cpp_enable_same_program_const_referencing?)))}}
     {{! Reference other constants:
         This is allowed when a value is considered referenceable AND the const to be
         referenced is defined in an external program (i.e. external? is true), or same
         program const referencing is enabled in the current context. }}
-::{{value.owner.program.cpp_qualified_namespace}}::{{value.owner.program.name}}_constants::{{value.owner.name}}()
+::{{value.value.owner.program.cpp_qualified_namespace}}::{{value.value.owner.program.name}}_constants::{{value.value.owner.name}}()
   {{#else if value.structured?}}
     {{! Struct/union values }}
 ::apache::thrift::detail::make_structured_constant<{{value.type.cpp_standard_type}}>(
@@ -104,18 +104,18 @@ apache::thrift::StringTraits<{{value.type.cpp_standard_type}}>::fromStringLitera
     {{/each}}
 )
 
-  {{#else if (and value.list? (or value.type.list? value.type.set?))}}
+  {{#else if (and value.value.list? (or value.type.type.list? value.type.type.set?))}}
 {{#partial list_value}}
-  {{#else if value.map?}}
+  {{#else if value.value.map?}}
 {{#partial map_value}}
-  {{/if value.string?}}
+  {{/if value.value.string?}}
 {{/let partial}}
 
 {{! This has the same implementation as `iterate_const_values_adapted_nested`, but
     exported for use in `module_constants`. }}
 {{#let export partial iterate_const_values_adapted |value root_const| captures |iterate_const_values|}}
 {{#pragma ignore-newlines}}
-{{#if (object.notnull? value.type.cpp_adapter)}}{{value.type.cpp_adapter}}::fromThrift({{value.type.cpp_standard_type}}({{/if}}
+{{#if (object.notnull? value.type.type.cpp_adapter)}}{{value.type.type.cpp_adapter}}::fromThrift({{value.type.cpp_standard_type}}({{/if}}
 {{#partial iterate_const_values value=value root_const=root_const}}
-{{#if (object.notnull? value.type.cpp_adapter)}})){{/if}}
+{{#if (object.notnull? value.type.type.cpp_adapter)}})){{/if}}
 {{/let partial}}

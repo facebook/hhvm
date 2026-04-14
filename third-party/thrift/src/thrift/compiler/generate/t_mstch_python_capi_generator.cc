@@ -305,9 +305,17 @@ bool is_capi_eligible_type_annotation(const t_const* annotation) {
   return false;
 }
 
-bool is_capi_eligible_type(const t_type* type) {
-  if (type->has_structured_annotation(kCppAdapterUri)) {
+bool is_capi_eligible_type(const t_type* type, const t_field* field = nullptr) {
+  if ((field != nullptr && field->has_structured_annotation(kCppAdapterUri)) ||
+      type->has_structured_annotation(kCppAdapterUri)) {
     return false;
+  }
+  if (field != nullptr) {
+    if (const auto* cpp_type_anno =
+            field->find_structured_annotation_or_null(kCppTypeUri);
+        cpp_type_anno && !is_capi_eligible_type_annotation(cpp_type_anno)) {
+      return false;
+    }
   }
   if (const auto* cpp_type_anno =
           type->find_structured_annotation_or_null(kCppTypeUri);
@@ -327,17 +335,6 @@ bool is_capi_eligible_type(const t_type* type) {
   }
   if (const t_typedef* tdef = type->try_as<t_typedef>()) {
     return is_capi_eligible_type(&tdef->type().deref());
-  }
-  return true;
-}
-
-bool is_capi_eligible_field(const t_field& field) {
-  if (field.has_structured_annotation(kCppAdapterUri)) {
-    return false;
-  }
-  if (const auto* cpp_type_anno =
-          field.find_structured_annotation_or_null(kCppTypeUri)) {
-    return is_capi_eligible_type_annotation(cpp_type_anno);
   }
   return true;
 }
@@ -571,8 +568,7 @@ class t_mstch_python_capi_generator : public t_whisker_generator {
         return true;
       }
       for (const t_field& f : self.fields()) {
-        if (!is_capi_eligible_field(f) ||
-            !is_capi_eligible_type(&f.type().deref())) {
+        if (!is_capi_eligible_type(&f.type().deref(), &f)) {
           return false;
         }
       }

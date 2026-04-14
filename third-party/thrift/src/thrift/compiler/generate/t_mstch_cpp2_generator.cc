@@ -26,7 +26,11 @@
 #include <boost/algorithm/string/split.hpp>
 #include <fmt/core.h>
 
+#include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_field.h>
+#include <thrift/compiler/ast/t_list.h>
+#include <thrift/compiler/ast/t_map.h>
+#include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/ast/type_visitor.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
@@ -56,12 +60,71 @@ enum class enum_underlying_type {
   u32 = 4,
 };
 
-const std::string& get_cpp_template(const t_type* type) {
-  if (const auto* val = cpp_name_resolver::find_template(*type)) {
-    return *val;
+// A "rendered" type/value is a thin wrapper that carries the field context
+// needed for field-aware C++ type resolution. When a field has a @cpp.Type
+// annotation, the resolved C++ type differs from the underlying t_type's
+// default — these wrappers allow templates to access both the field-aware
+// type (via cpp_type / cpp_standard_type) and the underlying t_type's
+// properties (via the "type" property) without mutating the shared AST node.
+struct cpp2_rendered_type {
+  const t_type* type = nullptr;
+  const t_field* field = nullptr;
+  const t_structured* parent = nullptr;
+};
+
+struct cpp2_rendered_const_value {
+  const t_const_value* value = nullptr;
+  const t_type* expected_type = nullptr;
+  const t_field* field = nullptr;
+  const t_structured* parent = nullptr;
+};
+
+std::string_view get_field_cpp_type_property(
+    const t_field* field, const char* key) {
+  if (field == nullptr) {
+    return "";
   }
-  static const std::string empty;
-  return empty;
+  if (const auto* annot =
+          field->find_structured_annotation_or_null(kCppTypeUri);
+      annot != nullptr) {
+    if (const auto* value =
+            annot->get_value_from_structured_annotation_or_null(key)) {
+      return value->get_string();
+    }
+  }
+  return "";
+}
+
+bool has_field_cpp_type_annotation(const t_field* field) {
+  return field != nullptr &&
+      field->find_structured_annotation_or_null(kCppTypeUri) != nullptr;
+}
+
+std::string_view get_cpp_type_name_with_field_override(
+    const t_type* type, const t_field* field = nullptr) {
+  if (auto value = get_field_cpp_type_property(field, "name"); !value.empty()) {
+    return value;
+  }
+  if (type != nullptr) {
+    if (const auto* value = cpp_name_resolver::find_type(*type)) {
+      return *value;
+    }
+  }
+  return "";
+}
+
+std::string_view get_cpp_template_with_field_override(
+    const t_type* type, const t_field* field = nullptr) {
+  if (auto value = get_field_cpp_type_property(field, "template");
+      !value.empty()) {
+    return value;
+  }
+  if (type != nullptr) {
+    if (const auto* value = cpp_name_resolver::find_template(*type)) {
+      return *value;
+    }
+  }
+  return "";
 }
 
 bool is_complex_return(const t_type* type) {
@@ -69,12 +132,29 @@ bool is_complex_return(const t_type* type) {
       type->is<t_structured>();
 }
 
-bool same_types(const t_type* a, const t_type* b) {
+const t_type* get_effective_type(const cpp2_rendered_const_value& value) {
+  if (value.expected_type != nullptr) {
+    return value.expected_type;
+  }
+  if (!value.value->type().empty()) {
+    return value.value->type().get_type();
+  }
+  if (value.value->get_owner() != nullptr) {
+    return value.value->get_owner()->type();
+  }
+  return nullptr;
+}
+
+bool same_types_with_field_override(
+    const t_type* a, const t_type* b, const t_field* a_field = nullptr) {
   if (!a || !b) {
     return false;
   }
 
-  if (get_cpp_template(a) != get_cpp_template(b) ||
+  if (get_cpp_template_with_field_override(a, a_field) !=
+          get_cpp_template_with_field_override(b) ||
+      get_cpp_type_name_with_field_override(a, a_field) !=
+          get_cpp_type_name_with_field_override(b) ||
       cpp2::get_type(a) != cpp2::get_type(b)) {
     return false;
   }
@@ -97,15 +177,18 @@ bool same_types(const t_type* a, const t_type* b) {
 
   if (const t_list* list_a = resolved_a->try_as<t_list>()) {
     const auto* list_b = static_cast<const t_list*>(resolved_b);
-    return same_types(
+    return same_types_with_field_override(
         &list_a->elem_type().deref(), &list_b->elem_type().deref());
   } else if (const t_set* set_a = resolved_a->try_as<t_set>()) {
     const auto* set_b = static_cast<const t_set*>(resolved_b);
-    return same_types(&set_a->elem_type().deref(), &set_b->elem_type().deref());
+    return same_types_with_field_override(
+        &set_a->elem_type().deref(), &set_b->elem_type().deref());
   } else if (const t_map* map_a = resolved_a->try_as<t_map>()) {
     const auto* map_b = static_cast<const t_map*>(resolved_b);
-    return same_types(&map_a->key_type().deref(), &map_b->key_type().deref()) &&
-        same_types(&map_a->val_type().deref(), &map_b->val_type().deref());
+    return same_types_with_field_override(
+               &map_a->key_type().deref(), &map_b->key_type().deref()) &&
+        same_types_with_field_override(
+               &map_a->val_type().deref(), &map_b->val_type().deref());
   }
   return true;
 }
@@ -557,15 +640,6 @@ class cpp2_generator_context {
       if (const_program != nullptr && const_program != root_program_) {
         field_default_const_ref_programs_.emplace(const_program);
       }
-      fix_const_value_type_for_field(node, *node.default_value());
-    });
-
-    // Also fix const_value types inside struct/list/map/set constants.
-    visitor.add_const_visitor([this](const context&, const t_const& cnst) {
-      if (cnst.type() != nullptr) {
-        fix_const_value_types_recursive(
-            cnst.type(), const_cast<t_const_value&>(*cnst.value()));
-      }
     });
 
     visitor.add_service_visitor(
@@ -591,75 +665,6 @@ class cpp2_generator_context {
         });
   }
 
-  // When a field has @cpp.Type on a non-container type, create a primitive
-  // copy with the annotation and set it on the const_value so templates
-  // render the correct C++ type (e.g., StringTraits<folly::IOBuf>).
-  void fix_const_value_type_for_field(
-      const t_field& field, const t_const_value& value) {
-    const auto* annot = field.find_structured_annotation_or_null(kCppTypeUri);
-    if (!annot) {
-      return;
-    }
-    if (!annot->get_value_from_structured_annotation_or_null("name") &&
-        !annot->get_value_from_structured_annotation_or_null("template")) {
-      return;
-    }
-    if (const auto* prim =
-            field.type()->get_true_type()->try_as<t_primitive_type>()) {
-      auto copy = std::make_unique<t_primitive_type>(*prim);
-      copy->add_structured_annotation(annot->clone());
-      const_cast<t_const_value&>(value).set_type(
-          t_type_ref::from_ptr(copy.get()));
-      owned_types_.push_back(std::move(copy));
-    }
-  }
-
-  // Recursively fix const_value types inside struct/container constants.
-  void fix_const_value_types_recursive(
-      const t_type* type, t_const_value& value) {
-    using cv = t_const_value::t_const_value_kind;
-    if (!type) {
-      return;
-    }
-    type = type->get_true_type();
-    if (const auto* strct = type->try_as<t_structured>();
-        strct && value.kind() == cv::CV_MAP) {
-      for (const auto& [field_val, val_val] : value.get_map()) {
-        // Struct const values use field names (strings) or IDs (integers)
-        // as keys depending on how they were parsed.
-        for (const auto& field : strct->fields()) {
-          bool match = false;
-          if (field_val->kind() == cv::CV_INTEGER) {
-            match = field.id() == field_val->get_integer();
-          } else if (field_val->kind() == cv::CV_STRING) {
-            match = field.name() == field_val->get_string();
-          }
-          if (match) {
-            fix_const_value_type_for_field(field, *val_val);
-            fix_const_value_types_recursive(field.type().get_type(), *val_val);
-            break;
-          }
-        }
-      }
-    } else if (const auto* list = type->try_as<t_list>();
-               list && value.kind() == cv::CV_LIST) {
-      for (const auto& elem : value.get_list()) {
-        fix_const_value_types_recursive(list->elem_type().get_type(), *elem);
-      }
-    } else if (const auto* set = type->try_as<t_set>();
-               set && value.kind() == cv::CV_LIST) {
-      for (const auto& elem : value.get_list()) {
-        fix_const_value_types_recursive(set->elem_type().get_type(), *elem);
-      }
-    } else if (const auto* map = type->try_as<t_map>();
-               map && value.kind() == cv::CV_MAP) {
-      for (const auto& [k, v] : value.get_map()) {
-        fix_const_value_types_recursive(map->key_type().get_type(), *k);
-        fix_const_value_types_recursive(map->val_type().get_type(), *v);
-      }
-    }
-  }
-
  private:
   const t_program* root_program_;
   std::unordered_map<const t_type*, bool> is_orderable_memo_;
@@ -680,8 +685,6 @@ class cpp2_generator_context {
   std::unordered_map<const t_field*, cpp2_field_generator_context>
       field_context_map_;
   std::unordered_set<const t_program*> field_default_const_ref_programs_;
-  // Primitive type copies with @cpp.Type, kept alive for const_value type refs.
-  std::vector<std::unique_ptr<t_primitive_type>> owned_types_;
   std::unordered_map<const t_structured*, std::vector<const t_field*>>
       fields_in_layout_order_;
   std::vector<const t_type*> type_definitions_topological_order_;
@@ -844,6 +847,208 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
              render_state().prototypes->create<t_service>(service))},
     });
     t_whisker_generator::render_to_file(output, template_name, context);
+  }
+
+  whisker::object make_rendered_type(
+      const prototype_database& proto,
+      const t_type* type,
+      const t_field* field = nullptr) const {
+    if (type == nullptr) {
+      return whisker::make::null;
+    }
+    const t_structured* parent =
+        field == nullptr ? nullptr : context().get_field_parent(field);
+    return whisker::object(proto.create<cpp2_rendered_type>(
+        whisker::manage_owned<cpp2_rendered_type>(cpp2_rendered_type{
+            .type = type, .field = field, .parent = parent})));
+  }
+
+  whisker::object make_rendered_const_value(
+      const prototype_database& proto,
+      const t_const_value* value,
+      const t_type* expected_type = nullptr,
+      const t_field* field = nullptr) const {
+    if (value == nullptr) {
+      return whisker::make::null;
+    }
+    const t_structured* parent =
+        field == nullptr ? nullptr : context().get_field_parent(field);
+    return whisker::object(proto.create<cpp2_rendered_const_value>(
+        whisker::manage_owned<cpp2_rendered_const_value>(
+            cpp2_rendered_const_value{
+                .value = value,
+                .expected_type = expected_type,
+                .field = field,
+                .parent = parent,
+            })));
+  }
+
+  void define_additional_prototypes(prototype_database& db) const override {
+    db.define(make_prototype_for_rendered_type(db));
+    db.define(make_prototype_for_rendered_const_value(db));
+  }
+
+  prototype<cpp2_rendered_type>::ptr make_prototype_for_rendered_type(
+      const prototype_database& proto) const {
+    whisker::dsl::prototype_builder<whisker::native_handle<cpp2_rendered_type>>
+        def;
+
+    // Expose the underlying t_type handle for access to non-field-aware
+    // properties (e.g. list?, set?, map?, cpp_adapter, cpp_name, etc.).
+    def.property("type", [&proto](const cpp2_rendered_type& self) {
+      return resolve_derived_t_type(proto, *self.type);
+    });
+
+    // Field-aware properties — these are the reason this wrapper exists.
+    def.property("cpp_standard_type", [this](const cpp2_rendered_type& self) {
+      if (has_field_cpp_type_annotation(self.field)) {
+        return cpp_context_->resolver().get_standard_type(*self.field);
+      }
+      return cpp_context_->resolver().get_standard_type(*self.type);
+    });
+    def.property("cpp_type", [this](const cpp2_rendered_type& self) {
+      if (has_field_cpp_type_annotation(self.field) && self.parent != nullptr) {
+        return cpp_context_->resolver().get_native_type(
+            *self.field, *self.parent);
+      }
+      return cpp_context_->resolver().get_native_type(*self.type);
+    });
+
+    return std::move(def).make();
+  }
+
+  prototype<cpp2_rendered_const_value>::ptr
+  make_prototype_for_rendered_const_value(
+      const prototype_database& proto) const {
+    using cv = t_const_value::t_const_value_kind;
+    whisker::dsl::prototype_builder<
+        whisker::native_handle<cpp2_rendered_const_value>>
+        def;
+
+    // Expose the underlying t_const_value handle for access to non-field-aware
+    // properties (e.g. bool?, string?, integer_value, owner, etc.).
+    def.property("value", [&proto](const cpp2_rendered_const_value& self) {
+      return whisker::object(proto.create<t_const_value>(*self.value));
+    });
+
+    // Field-aware type — returns a rendered type with field context.
+    def.property("type", [this, &proto](const cpp2_rendered_const_value& self) {
+      const t_type* type = get_effective_type(self);
+      if (type == nullptr) {
+        throw whisker::eval_error("Const value has indeterminate type");
+      }
+      return make_rendered_type(proto, type, self.field);
+    });
+
+    // Context-aware structured? — uses expected_type rather than the value's
+    // own type, which may not be set for nested const values.
+    def.property("structured?", [](const cpp2_rendered_const_value& self) {
+      const t_type* type = get_effective_type(self);
+      return self.value->kind() == cv::CV_MAP && type != nullptr &&
+          type->get_true_type()->is<t_structured>();
+    });
+
+    // Context-aware container elements — creates nested rendered const values
+    // with field-aware type context from the parent container's element types.
+    def.property(
+        "structured_elements",
+        [this, &proto](const cpp2_rendered_const_value& self) {
+          const t_type* type = get_effective_type(self);
+          const t_structured* strct = type == nullptr
+              ? nullptr
+              : type->get_true_type()->try_as<t_structured>();
+          if (strct == nullptr) {
+            return whisker::make::null;
+          }
+          whisker::array::raw result;
+          for (const auto& [key_const_val, val_const_val] :
+               self.value->get_map()) {
+            const t_field* field =
+                strct->get_field_by_name(key_const_val->get_string());
+            assert(field != nullptr);
+            result.emplace_back(
+                whisker::make::map({
+                    {"field",
+                     whisker::make::native_handle(
+                         proto.create<t_field>(*field))},
+                    {"value",
+                     make_rendered_const_value(
+                         proto,
+                         val_const_val,
+                         field->type().get_type(),
+                         field)},
+                }));
+          }
+          return whisker::make::array(std::move(result));
+        });
+    def.property(
+        "list_elements", [this, &proto](const cpp2_rendered_const_value& self) {
+          if (self.value->kind() != cv::CV_LIST) {
+            return whisker::make::null;
+          }
+          const t_type* type = get_effective_type(self);
+          const t_type* elem_type = nullptr;
+          if (type != nullptr) {
+            if (const auto* list = type->get_true_type()->try_as<t_list>()) {
+              elem_type = list->elem_type().get_type();
+            } else if (
+                const auto* set = type->get_true_type()->try_as<t_set>()) {
+              elem_type = set->elem_type().get_type();
+            }
+          }
+          whisker::array::raw result;
+          for (const auto* elem : self.value->get_list()) {
+            result.emplace_back(
+                make_rendered_const_value(proto, elem, elem_type));
+          }
+          return whisker::make::array(std::move(result));
+        });
+    def.property(
+        "map_elements", [this, &proto](const cpp2_rendered_const_value& self) {
+          if (self.value->kind() != cv::CV_MAP) {
+            return whisker::make::null;
+          }
+          const t_type* key_type = nullptr;
+          const t_type* val_type = nullptr;
+          if (const t_type* type = get_effective_type(self); type != nullptr) {
+            if (const auto* map = type->get_true_type()->try_as<t_map>()) {
+              key_type = map->key_type().get_type();
+              val_type = map->val_type().get_type();
+            }
+          }
+          whisker::array::raw result;
+          for (const auto& [key_const_val, val_const_val] :
+               self.value->get_map()) {
+            result.emplace_back(
+                whisker::make::map({
+                    {"key",
+                     make_rendered_const_value(proto, key_const_val, key_type)},
+                    {"value",
+                     make_rendered_const_value(proto, val_const_val, val_type)},
+                }));
+          }
+          return whisker::make::array(std::move(result));
+        });
+
+    // Context-aware referenceable_from? — uses same_types_with_field_override
+    // to compare types accounting for field-level @cpp.Type annotations.
+    def.function(
+        "referenceable_from?",
+        [](const cpp2_rendered_const_value& self,
+           whisker::dsl::function::context ctx) {
+          ctx.declare_arity(1);
+          ctx.declare_named_arguments({});
+          const t_const* from_const =
+              ctx.raw().positional_arguments()[0].is_null()
+              ? nullptr
+              : ctx.argument<whisker::native_handle<t_const>>(0).ptr().get();
+          const t_const* owner = self.value->get_owner();
+          return owner != nullptr && owner != from_const &&
+              same_types_with_field_override(
+                     get_effective_type(self), owner->type(), self.field);
+        });
+
+    return std::move(def).make();
   }
 
   void generate_sinit();
@@ -1490,6 +1695,10 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
     auto base = t_whisker_generator::make_prototype_for_field(proto);
     auto def = whisker::dsl::prototype_builder<h_field>::extends(base);
 
+    def.property("default_value", [this, &proto](const t_field& self) {
+      return make_rendered_const_value(
+          proto, self.default_value(), self.type().get_type(), &self);
+    });
     def.property("cpp_adapter", [](const t_field& self) {
       const std::string* adapter =
           cpp_name_resolver::find_structured_adapter_annotation(self);
@@ -1882,6 +2091,9 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_const(proto);
     auto def = whisker::dsl::prototype_builder<h_const>::extends(base);
+    def.property("rendered_value", [this, &proto](const t_const& self) {
+      return make_rendered_const_value(proto, self.value(), self.type());
+    });
     def.property("external?", [this](const t_const& self) {
       return self.program() != program_;
     });
@@ -1928,7 +2140,7 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
           // referenced from any const that's not the owner and the type is what
           // we expect it to be
           return owner != nullptr && owner != from_const &&
-              same_types(
+              same_types_with_field_override(
                      self.type().empty() ? nullptr : &self.type().deref(),
                      owner->type());
         });

@@ -36,9 +36,9 @@ namespace {{program.name}}_constants {
   FOLLY_EXPORT {{#partial const_value.const_value_type const=const}} {{const.name}}();
     {{#else}}
       {{#if const.type.binary?}}
-  {{#partial glean.const_docblock const=const}}  constexpr ::std::string_view {{const.name}}_{"{{const.value.string_value}}", {{const.value.string_length}}};
+  {{#partial glean.const_docblock const=const}}  constexpr ::std::string_view {{const.name}}_{"{{const.rendered_value.value.string_value}}", {{const.rendered_value.value.string_length}}};
       {{#else}}
-  {{#partial glean.const_docblock const=const}}  constexpr {{#partial const_value.const_value_type const=const}} const {{const.name}}_ = {{#partial const_value.primitive value=const.value}};
+  {{#partial glean.const_docblock const=const}}  constexpr {{#partial const_value.const_value_type const=const}} const {{const.name}}_ = {{#partial const_value.primitive value=const.rendered_value}};
       {{/if const.type.binary?}}
   {{#partial glean.const_docblock const=const}}  constexpr {{#partial const_value.const_value_type const=const}} {{const.name}}() {
     return {{const.name}}_;

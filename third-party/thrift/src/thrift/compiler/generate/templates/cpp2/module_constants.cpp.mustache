@@ -53,13 +53,13 @@ namespace {{program.name}}_constants {
 {{const.cpp_type}} const& {{const.name}}() {
       {{#if (object.eq? const.cpp_adapter null)}}
   static folly::Indestructible<{{const.type.cpp_type}}> const instance{ {{!
-    }}{{#partial const_value.iterate_const_values_adapted value=const.value root_const=const}} };
+    }}{{#partial const_value.iterate_const_values_adapted value=const.rendered_value root_const=const}} };
       {{#else}}
   static folly::Indestructible<{{const.cpp_type}}> const instance{
       folly::factory_constructor, [](){ return {{const.cpp_adapter}}::fromThrift({{const.type.cpp_type}}({{!
-        }}{{#partial const_value.iterate_const_values value=const.value root_const=const}}){{!
+        }}{{#partial const_value.iterate_const_values value=const.rendered_value root_const=const}}){{!
         }}{{#let extra_arg=const.extra_arg}}{{#if (object.notnull? extra_arg)}},
-                                            {{#partial const_value.iterate_const_values value=extra_arg.value root_const=extra_arg}},
+                                            {{#partial const_value.iterate_const_values value=extra_arg.rendered_value root_const=extra_arg}},
                                             "{{const.uri}}"{{/if (object.notnull? extra_arg)}}); }};
       {{/if (object.eq? const.cpp_adapter null)}}
   return *instance;
@@ -67,8 +67,8 @@ namespace {{program.name}}_constants {
     {{#else if (and const.generated? const.type.binary?)}}
 ::std::string_view {{const.name}}() {
   constexpr static ::std::string_view {{const.name}}_{
-    /*@fbthrift_strip_from_fixtures*/"{{const.value.string_value}}",
-    {{const.value.string_length}}/*@fbthrift_strip_from_fixtures*/};
+    /*@fbthrift_strip_from_fixtures*/"{{const.rendered_value.value.string_value}}",
+    {{const.rendered_value.value.string_length}}/*@fbthrift_strip_from_fixtures*/};
   return {{const.name}}_;
 }
     {{/if const.outline_init?}}

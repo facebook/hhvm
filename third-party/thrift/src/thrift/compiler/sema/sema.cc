@@ -764,22 +764,6 @@ std::vector<ast_mutator> pre_validation_standard_mutators() {
   std::vector<ast_mutator> mutators;
 
   ast_mutator initial;
-  // For fields with @cpp.Type on a container type (unique per field
-  // declaration), propagate the structured annotation to the type node so
-  // consumers that resolve types from the type node (e.g. ThriftCppUtils)
-  // can see it.
-  initial.add_field_visitor([](sema_context&, mutator_context&, t_field& node) {
-    if (const auto* annot =
-            node.find_structured_annotation_or_null(kCppTypeUri)) {
-      const t_type* node_type = node.type().get_type();
-      if (node_type->is<t_container>()) {
-        auto generated_annot = annot->clone();
-        generated_annot->set_generated();
-        const_cast<t_type&>(*node_type)
-            .add_structured_annotation(std::move(generated_annot));
-      }
-    }
-  });
   initial.add_function_visitor(&normalize_return_type);
   initial.add_named_visitor(&lower_deprecated_annotations);
   mutators.push_back(std::move(initial));

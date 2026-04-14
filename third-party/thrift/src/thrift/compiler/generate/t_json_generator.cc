@@ -78,8 +78,6 @@ class t_json_generator : public t_concat_generator {
 
   string type_name(const t_type* ttype);
 
-  bool should_resolve_to_true_type(const t_type* ttype);
-
   std::ofstream f_out_;
 
  private:
@@ -233,10 +231,6 @@ void t_json_generator::generate_program() {
  * Converts the type to a string.
  */
 string t_json_generator::to_string(const t_type* type) {
-  if (should_resolve_to_true_type(type)) {
-    type = type->get_true_type();
-  }
-
   if (const auto* primitive = type->try_as<t_primitive_type>()) {
     t_primitive_type::type tbase = primitive->primitive_type();
     switch (tbase) {
@@ -291,10 +285,6 @@ string t_json_generator::to_string(const t_service*) {
  *              | { "key_type" : tuple_spec, "val_type" : tuple_spec}  // (maps)
  */
 string t_json_generator::to_spec_args(const t_type* type) {
-  if (should_resolve_to_true_type(type)) {
-    type = type->get_true_type();
-  }
-
   if (type->is<t_primitive_type>()) {
     return "null";
   } else if (
@@ -812,11 +802,6 @@ void t_json_generator::generate_service(const t_service* tservice) {
   f_out_ << endl;
   indent_down();
   indent(f_out_) << "}";
-}
-
-bool t_json_generator::should_resolve_to_true_type(const t_type* ttype) {
-  // Only resolve undefined typedefs as they were used for undeclared types
-  return ttype->is<t_placeholder_typedef>();
 }
 
 /**

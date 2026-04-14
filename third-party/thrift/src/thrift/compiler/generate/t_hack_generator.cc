@@ -2039,9 +2039,6 @@ std::string t_hack_generator::render_const_value_helper(
     bool force_arrays,
     bool exclude_from_fixtures) {
   std::ostringstream out;
-  if (const auto* ttypedef = type->try_as<t_placeholder_typedef>()) {
-    type = &ttypedef->type().deref();
-  }
   if (const auto* ttypedef = type->try_as<t_typedef>()) {
     type = &ttypedef->type().deref();
     auto val = render_const_value_helper(
@@ -3306,9 +3303,6 @@ bool t_hack_generator::type_uses_recursive_shape(
     return false;
   }
 
-  if (const auto* ttypedef = ttype->try_as<t_placeholder_typedef>()) {
-    ttype = &ttypedef->type().deref();
-  }
   if (find_hack_adapter(ttype)) {
     return false;
   }
@@ -3369,9 +3363,6 @@ std::string t_hack_generator::type_to_recursive_shape_typehint(
     return type_to_typehint(ttype, shape_variations);
   }
 
-  if (const auto* ttypedef = ttype->try_as<t_placeholder_typedef>()) {
-    ttype = &ttypedef->type().deref();
-  }
   if (const auto* ttypedef = ttype->try_as<t_typedef>()) {
     ttype = &ttypedef->type().deref();
   }
@@ -3847,9 +3838,6 @@ bool t_hack_generator::
         bool is_shape_method,
         bool uses_thrift_only_methods,
         const t_structured* root_shape_struct) {
-  if (const auto* ttypedef = ttype->try_as<t_placeholder_typedef>()) {
-    ttype = &ttypedef->type().deref();
-  }
   if (std::optional<std::string> adapter = find_hack_adapter(ttype)) {
     out << val;
     return false;
@@ -3916,9 +3904,6 @@ bool t_hack_generator::
       val_type = static_cast<const t_list*>(ttype)->elem_type().get_type();
     }
 
-    if (const auto* ttypedef = val_type->try_as<t_placeholder_typedef>()) {
-      val_type = &ttypedef->type().deref();
-    }
     auto [wrapper, name, ns] = find_hack_wrapper(val_type);
     std::stringstream inner;
     std::string inner_val = namer("$val");
@@ -4044,9 +4029,6 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
       val_type = static_cast<const t_list*>(ttype)->elem_type().get_type();
     }
 
-    if (const auto* ttypedef = val_type->try_as<t_placeholder_typedef>()) {
-      val_type = &ttypedef->type().deref();
-    }
     auto [wrapper, name, ns] = find_hack_wrapper(val_type);
     if (val_type->is<t_container>() || val_type->is<t_struct>() ||
         val_type->is<t_union>()) {
@@ -7058,9 +7040,6 @@ std::string t_hack_generator::typedef_to_typehint(
  */
 std::string t_hack_generator::type_to_typehint(
     const t_type* ttype, std::map<TypeToTypehintVariations, bool> variations) {
-  if (const auto* ttypedef = ttype->try_as<t_placeholder_typedef>()) {
-    ttype = &ttypedef->type().deref();
-  }
   if (const auto* ttypedef = ttype->try_as<t_typedef>()) {
     return typedef_to_typehint(ttypedef, variations);
   }

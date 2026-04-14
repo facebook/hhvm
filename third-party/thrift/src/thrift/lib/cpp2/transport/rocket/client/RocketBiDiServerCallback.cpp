@@ -130,6 +130,9 @@ bool RocketBiDiServerCallback::onStreamFinalPayload(StreamPayload&& payload) {
 }
 
 bool RocketBiDiServerCallback::onStreamComplete() {
+  if (!state_.isStreamOpen()) {
+    return state_.isSinkOpen();
+  }
   state_.onStreamComplete();
   return clientCallback_->onStreamComplete();
 }

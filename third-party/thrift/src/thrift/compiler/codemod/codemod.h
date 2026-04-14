@@ -25,13 +25,7 @@
 namespace apache::thrift::compiler {
 
 struct codemod_parsing_options {
-  // Thrift compiler will convert the structured annotaton `@cpp.Type` to
-  // `cpp.type`/`cpp.template` (lowering annotation from structured to
-  // unstructured). In codemod program, by default we don't do such conversion
-  // and this option changes it.
-  bool skip_lowering_cpp_type_annotations = true;
   bool skip_lowering_annotations = true;
-
   /**
    * Override the default diagnostics handling behavior.
    * By default, all error level diagnostics are printed to stderr, and lower

@@ -249,19 +249,7 @@ TEST(
       source_mgr,
       kHeaderWithUri + kOrderabilityTestProgram,
       parsing_params{},
-      sema_params{.skip_lowering_cpp_type_annotations = false});
-  checkCustomSetOrderabilityWithUriButPreservedOldBehavior(*program);
-}
-
-TEST(
-    OrderableTypeUtilsTest,
-    CustomSetOrderabilityWithUriButPreservedOldBehaviorSkipLoweringCppTypeAnnotations) {
-  source_manager source_mgr;
-  std::shared_ptr<t_program> program = dedent_and_parse_to_program(
-      source_mgr,
-      kHeaderWithUri + kOrderabilityTestProgram,
-      parsing_params{},
-      sema_params{.skip_lowering_cpp_type_annotations = true});
+      sema_params{});
   checkCustomSetOrderabilityWithUriButPreservedOldBehavior(*program);
 }
 
@@ -367,22 +355,7 @@ void checkGetOrderableCondition(const t_program& program) {
 TEST(OrderableTypeUtilsTest, GetOrderableCondition) {
   source_manager source_mgr;
   std::shared_ptr<const t_program> program = dedent_and_parse_to_program(
-      source_mgr,
-      kOrderabilityTestProgram2,
-      parsing_params{},
-      sema_params{.skip_lowering_cpp_type_annotations = false});
-  checkGetOrderableCondition(*program);
-}
-
-TEST(
-    OrderableTypeUtilsTest,
-    GetOrderableConditionSkipLoweringCppTypeAnnotations) {
-  source_manager source_mgr;
-  std::shared_ptr<const t_program> program = dedent_and_parse_to_program(
-      source_mgr,
-      kOrderabilityTestProgram2,
-      parsing_params{},
-      sema_params{.skip_lowering_cpp_type_annotations = true});
+      source_mgr, kOrderabilityTestProgram2, parsing_params{}, sema_params{});
   checkGetOrderableCondition(*program);
 }
 

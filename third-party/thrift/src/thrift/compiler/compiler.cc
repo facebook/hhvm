@@ -1206,9 +1206,6 @@ void record_invocation_params(
       "skip_lowering_annotations=" +
       std::to_string(sparams.skip_lowering_annotations));
   sema_params_metric.add(
-      "skip_lowering_cpp_type_annotations=" +
-      std::to_string(sparams.skip_lowering_cpp_type_annotations));
-  sema_params_metric.add(
       fmt::format(
           "redundant_custom_default_values={}",
           fmt::underlying(sparams.redundant_custom_default_values)));

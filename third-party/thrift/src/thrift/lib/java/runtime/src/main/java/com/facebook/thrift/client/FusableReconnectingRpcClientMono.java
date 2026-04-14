@@ -91,7 +91,7 @@ final class FusableReconnectingRpcClientMono extends Mono<RpcClient> implements 
   public void subscribe(CoreSubscriber<? super RpcClient> actual) {
     Objects.requireNonNull(actual);
     RpcClient current = this.rpcClient;
-    if (state == State.CONNECTED && current != null) {
+    if (state == State.CONNECTED && current != null && !current.isDisposed()) {
       fastPath(actual, current);
     } else {
       slowPath(actual);
@@ -120,7 +120,15 @@ final class FusableReconnectingRpcClientMono extends Mono<RpcClient> implements 
     do {
       state = this.state;
       if (state == State.CONNECTED) {
-        drainWithRpcClient(rpcClient);
+        RpcClient current = this.rpcClient;
+        if (current != null && current.isDisposed()) {
+          // Client is disposed but onClose() hasn't fired yet (race window).
+          // Transition to DISCONNECTED to trigger reconnection.
+          setStateDisconnected();
+          state = this.state;
+        } else {
+          drainWithRpcClient(current);
+        }
       }
 
       if (state == State.DISCONNECTED) {

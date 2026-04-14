@@ -22,7 +22,6 @@ import (
 	"net"
 	"testing"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 	"github.com/stretchr/testify/require"
 )
 
@@ -84,25 +83,6 @@ func TestWithLog(t *testing.T) {
 	require.NotNil(t, customConfig.log)
 	customConfig.log("test")
 	require.True(t, invoked)
-}
-
-func TestWithServerStats(t *testing.T) {
-	defaultConfig := newServerConfig()
-	require.NotNil(t, defaultConfig.serverStats)
-
-	customServerStats := stats.NewServerStats(stats.NewTimingConfig(60), 60)
-	customConfig := newServerConfig(WithServerStats(customServerStats))
-	require.Equal(t, customServerStats, customConfig.serverStats)
-}
-
-func TestWithProcessorStats(t *testing.T) {
-	defaultConfig := newServerConfig()
-	require.NotNil(t, defaultConfig.processorStats)
-	require.Len(t, defaultConfig.processorStats, 0)
-
-	customProcessorStats := map[string]*stats.TimingSeries{"test": {}}
-	customConfig := newServerConfig(WithProcessorStats(customProcessorStats))
-	require.Equal(t, customProcessorStats, customConfig.processorStats)
 }
 
 func TestWithServerObserver(t *testing.T) {

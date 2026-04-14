@@ -24,7 +24,6 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rocket_upgrade"
 	"github.com/rsocket/rsocket-go/core/transport"
 )
@@ -36,8 +35,6 @@ type rocketServerTransport struct {
 	transportID TransportID
 	connContext ConnContextFunc
 	log         func(format string, args ...any)
-	stats       *stats.ServerStats
-	pstats      map[string]*stats.TimingSeries
 	observer    ServerObserver
 }
 
@@ -50,8 +47,6 @@ func newRocketServerTransport(
 	processor Processor,
 	transportID TransportID,
 	log func(format string, args ...any),
-	stats *stats.ServerStats,
-	pstats map[string]*stats.TimingSeries,
 	observer ServerObserver,
 ) transport.ServerTransport {
 	return &rocketServerTransport{
@@ -60,8 +55,6 @@ func newRocketServerTransport(
 		transportID: transportID,
 		connContext: connContext,
 		log:         log,
-		stats:       stats,
-		pstats:      pstats,
 		observer:    observer,
 	}
 }
@@ -221,7 +214,7 @@ func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protoc
 	// Track each individual header request being processed
 	r.observer.ReceivedHeaderRequest()
 
-	_, err := process(ctx, processor, protocol, r.pstats, r.observer)
+	_, err := process(ctx, processor, protocol, r.observer)
 	if isEOF(err) {
 		return err
 	}

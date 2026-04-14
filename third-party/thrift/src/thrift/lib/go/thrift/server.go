@@ -36,7 +36,6 @@ import (
 	"github.com/rsocket/rsocket-go/rx/mono"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/rocket"
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
@@ -90,8 +89,6 @@ func NewServer(proc Processor, listener net.Listener, transportType TransportID,
 
 		numWorkers: config.numWorkers,
 
-		pstats:      config.processorStats,
-		stats:       config.serverStats,
 		observer:    config.serverObserver,
 		maxRequests: config.maxRequests,
 	}
@@ -113,8 +110,6 @@ type rocketServer struct {
 
 	numWorkers int
 
-	stats                   *stats.ServerStats
-	pstats                  map[string]*stats.TimingSeries
 	observer                ServerObserver
 	maxRequests             int64
 	totalActiveRequestCount atomic.Int64
@@ -131,8 +126,6 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 			s.proc,
 			s.transportID,
 			s.log,
-			s.stats,
-			s.pstats,
 			s.observer,
 		), nil
 	}
@@ -215,7 +208,7 @@ func (s *rocketServerSocket) processWithPanicTracking(ctx context.Context, proce
 			panic(r)
 		}
 	}()
-	return process(ctx, processor, protocol, s.pstats, s.observer)
+	return process(ctx, processor, protocol, s.observer)
 }
 
 // getQueueTimeout returns the queue timeout duration from metadata, or max duration if not set

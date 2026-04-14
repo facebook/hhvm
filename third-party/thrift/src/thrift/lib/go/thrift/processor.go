@@ -22,7 +22,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
@@ -90,7 +89,6 @@ func process(
 	ctx context.Context,
 	processor Processor,
 	prot Protocol,
-	processorStats map[string]*stats.TimingSeries,
 	observer ServerObserver,
 ) (*ApplicationException, error) {
 	// Step 1: Decode message only using Decoder interface and GetResponseHeaders method on the protocol.
@@ -151,9 +149,6 @@ func process(
 		pfuncStartTime := time.Now()
 		result, runError = pfunc.RunContext(ctx, argStruct)
 		pfuncDuration := time.Since(pfuncStartTime)
-		if timingSeries := processorStats[methodName]; timingSeries != nil {
-			timingSeries.RecordWithStatus(pfuncDuration, runError == nil)
-		}
 		// Record function-level process timing for stats collection
 		observer.TimeProcessUsForFunction(methodName, pfuncDuration)
 		if runError != nil {

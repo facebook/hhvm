@@ -23,8 +23,6 @@ import (
 	"net"
 	"os"
 	"time"
-
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 )
 
 const (
@@ -45,8 +43,6 @@ type serverConfig struct {
 	numWorkers      int
 	log             func(format string, args ...any)
 	userConnContext ConnContextFunc
-	serverStats     *stats.ServerStats
-	processorStats  map[string]*stats.TimingSeries
 	serverObserver  ServerObserver
 	maxRequests     int64
 	loadFn          func() uint32
@@ -57,8 +53,6 @@ func newServerConfig(options ...ServerOption) *serverConfig {
 	config := &serverConfig{
 		numWorkers:     GoroutinePerRequest,
 		log:            logger.Printf,
-		processorStats: make(map[string]*stats.TimingSeries),
-		serverStats:    stats.NewServerStats(stats.NewTimingConfig(defaultStatsPeriod), defaultStatsPeriod),
 		serverObserver: newNoopServerObserver(),
 		maxRequests:    0, // disable
 	}
@@ -102,20 +96,6 @@ func WithConnContext(connContext ConnContextFunc) ServerOption {
 func WithLog(log func(format string, args ...any)) ServerOption {
 	return func(config *serverConfig) {
 		config.log = log
-	}
-}
-
-// WithServerStats allows the user to provide stats for the server to update.
-func WithServerStats(serverStats *stats.ServerStats) ServerOption {
-	return func(config *serverConfig) {
-		config.serverStats = serverStats
-	}
-}
-
-// WithProcessorStats allows the user to provide stats for the server to update for each processor function.
-func WithProcessorStats(processorStats map[string]*stats.TimingSeries) ServerOption {
-	return func(config *serverConfig) {
-		config.processorStats = processorStats
 	}
 }
 

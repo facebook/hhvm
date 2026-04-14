@@ -23,26 +23,6 @@ import (
 	"time"
 )
 
-// AtomicCounter is a simple non-blocking incr/decr counter for instantaneous values exported by thrift
-type AtomicCounter struct {
-	Counter int64
-}
-
-// Incr non blocking increments by 1
-func (ac *AtomicCounter) Incr() int64 {
-	return atomic.AddInt64(&ac.Counter, 1)
-}
-
-// Decr non blocking increments by 1
-func (ac *AtomicCounter) Decr() int64 {
-	return atomic.AddInt64(&ac.Counter, -1)
-}
-
-// Get non blocking gets current value
-func (ac *AtomicCounter) Get() int64 {
-	return atomic.LoadInt64(&ac.Counter)
-}
-
 // TimingSeries keeps rolling statistics for duration based
 // events over a period of time.  As each event occurs you
 // call .Record() to record the event, and then can request

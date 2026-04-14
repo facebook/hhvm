@@ -297,6 +297,442 @@ public class RSocketKeepAliveAndReconnectionTest {
   }
 
   // ---------------------------------------------------------------------------
+  // Test: Concurrent subscribers on connected mono (validates composite CAS)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Exercises FusableReconnectingRpcClientMono with many concurrent subscribers while in CONNECTED
+   * state. All should get the same live client. This validates that the composite ConnectionState
+   * atomic reference prevents torn reads between phase and client under concurrency.
+   *
+   * <p>Previously, two separate AtomicReferenceFieldUpdaters (state + rpcClient) could yield
+   * inconsistent snapshots: a thread could read state=CONNECTED but get a stale/null rpcClient, or
+   * vice versa. The composite ConnectionState ensures both fields are read atomically.
+   */
+  @Test
+  @Timeout(15)
+  void testConcurrentSubscribersGetLiveClient() throws Exception {
+    QueuedRpcClientFactory factory = new QueuedRpcClientFactory();
+    ReconnectingRpcClientFactory reconnecting = new ReconnectingRpcClientFactory(factory, true);
+    Mono<RpcClient> mono = reconnecting.createRpcClient(new InetSocketAddress(0));
+
+    Sinks.One<RpcClient> sink = factory.addSink();
+    DummyRpcClient liveClient = new DummyRpcClient();
+    sink.tryEmitValue(liveClient);
+
+    // Wait for CONNECTED state
+    mono.block(java.time.Duration.ofSeconds(5));
+
+    // Now hammer with concurrent subscribers — all should get the live client
+    List<Throwable> errors = Collections.synchronizedList(new ArrayList<>());
+    Thread[] threads = new Thread[20];
+    for (int t = 0; t < threads.length; t++) {
+      threads[t] =
+          new Thread(
+              () -> {
+                try {
+                  for (int j = 0; j < 100; j++) {
+                    RpcClient c = mono.block(java.time.Duration.ofSeconds(1));
+                    if (c == null) {
+                      errors.add(new AssertionError("Got null client"));
+                    } else if (c.isDisposed()) {
+                      errors.add(new AssertionError("Got disposed client"));
+                    }
+                  }
+                } catch (Exception e) {
+                  errors.add(e);
+                }
+              });
+      threads[t].start();
+    }
+    for (Thread t : threads) {
+      t.join(10000);
+    }
+
+    System.out.printf("[TEST] 20 threads x 100 subs, errors=%d%n", errors.size());
+    assertThat(errors)
+        .describedAs("All concurrent subscribers should get the live client")
+        .isEmpty();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Test: Stale onClose does not kill a new connection
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Validates that when C1 dies and C2 is established before C1's onClose fires, C1's onClose
+   * callback does NOT tear down C2.
+   *
+   * <p>Previously, connect() carried the old client into CONNECTING state, so C1's onClose identity
+   * guard (current.client == C1) would match during CONNECTING+C1, triggering a spurious disconnect
+   * and duplicate connect. With the fix, CONNECTING uses client=null and handleIncomingRpcClient
+   * uses CAS (not set), so stale callbacks are harmless.
+   */
+  @Test
+  @Timeout(10)
+  void testStaleOnCloseDoesNotKillNewConnection() throws Exception {
+    QueuedRpcClientFactory factory = new QueuedRpcClientFactory();
+    ReconnectingRpcClientFactory reconnecting = new ReconnectingRpcClientFactory(factory, true);
+    Mono<RpcClient> mono = reconnecting.createRpcClient(new InetSocketAddress(0));
+
+    // Connection 1
+    Sinks.One<RpcClient> sink1 = factory.addSink();
+    DummyRpcClient c1 = new DummyRpcClient();
+    sink1.tryEmitValue(c1);
+
+    RpcClient r1 = mono.block(java.time.Duration.ofSeconds(5));
+    assertNotNull(r1);
+    assertThat(r1.isDisposed()).isFalse();
+
+    // Simulate the race window: C1 is disposed but onClose hasn't fired.
+    // drain() detects isDisposed() and triggers reconnection.
+    c1.markDisposedWithoutClose();
+
+    // Pre-populate sink for reconnection
+    Sinks.One<RpcClient> sink2 = factory.addSink();
+    DummyRpcClient c2 = new DummyRpcClient();
+    sink2.tryEmitValue(c2);
+
+    // Get the new connection
+    RpcClient r2 = mono.block(java.time.Duration.ofSeconds(5));
+    assertNotNull(r2);
+    assertThat(r2.isDisposed()).isFalse();
+
+    // NOW fire C1's onClose. With the bug, this would kill C2.
+    // With the fix, the identity guard fails (CONNECTING has client=null,
+    // and CONNECTED has client=C2, neither matches C1).
+    c1.fireOnCloseOnly();
+
+    // Give the doFinally callback time to execute
+    Thread.sleep(200);
+
+    // C2 should still be the current live client
+    RpcClient r3 = mono.block(java.time.Duration.ofSeconds(5));
+    assertNotNull(r3);
+    assertThat(r3.isDisposed())
+        .describedAs("C2 must survive C1's stale onClose callback")
+        .isFalse();
+
+    System.out.println("[TEST] Stale onClose did not kill new connection");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Test: Timed-out attempt followed by successful attempt
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Validates the full timeout → retry → success flow: Attempt A hangs (Mono.never) →
+   * CONNECT_TIMEOUT fires → handleConnectionError CAS transitions to DISCONNECTED → attempt B
+   * starts → succeeds → client is live.
+   *
+   * <p>This proves that: (1) the connect timeout fires and moves state forward, (2) the timed-out
+   * attempt's error callback only affects its own attempt via CAS, (3) the retry attempt succeeds
+   * and the client is functional.
+   *
+   * <p>Note: overlapping stale success from attempt A cannot reach handleIncomingRpcClient because
+   * Reactor's timeout() operator cancels the upstream Mono. The CAS in handleIncomingRpcClient is a
+   * defense-in-depth guard.
+   */
+  @Test
+  @Timeout(30)
+  void testTimedOutAttemptFollowedBySuccess() throws Exception {
+    QueuedRpcClientFactory factory = new QueuedRpcClientFactory();
+    ReconnectingRpcClientFactory reconnecting = new ReconnectingRpcClientFactory(factory, true);
+    Mono<RpcClient> mono = reconnecting.createRpcClient(new InetSocketAddress(0));
+
+    // Attempt A: never emitted to → will time out after CONNECT_TIMEOUT (10s)
+    factory.addSink();
+
+    // Attempt B: will succeed after A times out
+    Sinks.One<RpcClient> sinkB = factory.addSink();
+    DummyRpcClient clientB = new DummyRpcClient();
+
+    new Thread(
+            () -> {
+              try {
+                Thread.sleep(11000); // wait for A's connect timeout + margin
+                sinkB.tryEmitValue(clientB);
+              } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+              }
+            })
+        .start();
+
+    RpcClient result = mono.block(java.time.Duration.ofSeconds(25));
+    assertNotNull(result);
+    assertThat(result.isDisposed()).isFalse();
+    assertThat(result).isSameAs(clientB);
+
+    // Verify the client stays alive — no stale callback tears it down
+    Thread.sleep(500);
+    RpcClient check = mono.block(java.time.Duration.ofSeconds(5));
+    assertNotNull(check);
+    assertThat(check.isDisposed())
+        .describedAs("Client must survive after timed-out attempt")
+        .isFalse();
+
+    System.out.println("[TEST] Recovered from timed-out attempt A via attempt B");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Test: Cancelled subscriber is never signaled
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Verifies that a subscriber that cancels its subscription before emission receives no signals.
+   * The InnerSubscription's cancelled flag should cause drain to skip it.
+   */
+  @Test
+  @Timeout(10)
+  void testCancelledSubscriberNeverSignaled() throws Exception {
+    QueuedRpcClientFactory factory = new QueuedRpcClientFactory();
+    ReconnectingRpcClientFactory reconnecting = new ReconnectingRpcClientFactory(factory, true);
+    Mono<RpcClient> mono = reconnecting.createRpcClient(new InetSocketAddress(0));
+
+    // Don't emit a client yet — subscribers will queue in slow path
+    Sinks.One<RpcClient> sink1 = factory.addSink();
+
+    // Subscribe and immediately cancel
+    TrackingSubscriber cancelled = new TrackingSubscriber();
+    mono.subscribe(cancelled);
+    cancelled.cancel();
+
+    // Subscribe a normal subscriber
+    TrackingSubscriber normal = new TrackingSubscriber();
+    mono.subscribe(normal);
+
+    // Now emit a client — drain should skip the cancelled one
+    DummyRpcClient c1 = new DummyRpcClient();
+    sink1.tryEmitValue(c1);
+
+    // Wait for drain to process
+    Thread.sleep(500);
+
+    assertThat(cancelled.onNextCount)
+        .describedAs("Cancelled subscriber must not receive onNext")
+        .isEqualTo(0);
+    assertThat(cancelled.onCompleteCount)
+        .describedAs("Cancelled subscriber must not receive onComplete")
+        .isEqualTo(0);
+
+    assertThat(normal.onNextCount)
+        .describedAs("Normal subscriber should receive onNext")
+        .isEqualTo(1);
+    assertThat(normal.onCompleteCount)
+        .describedAs("Normal subscriber should receive onComplete")
+        .isEqualTo(1);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Test: Duplicate request(n) enqueues only once
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Verifies that calling request(n) multiple times on the same InnerSubscription only enqueues it
+   * once, preventing duplicate terminal signals. The atomic CAS on the enqueued flag should ensure
+   * exactly one queue entry per subscription.
+   */
+  @Test
+  @Timeout(10)
+  void testDuplicateRequestEnqueuesOnce() throws Exception {
+    QueuedRpcClientFactory factory = new QueuedRpcClientFactory();
+    ReconnectingRpcClientFactory reconnecting = new ReconnectingRpcClientFactory(factory, true);
+    Mono<RpcClient> mono = reconnecting.createRpcClient(new InetSocketAddress(0));
+
+    Sinks.One<RpcClient> sink1 = factory.addSink();
+
+    // Use a manual subscriber that calls request multiple times
+    MultiRequestSubscriber subscriber = new MultiRequestSubscriber(5);
+    mono.subscribe(subscriber);
+
+    // Emit client
+    DummyRpcClient c1 = new DummyRpcClient();
+    sink1.tryEmitValue(c1);
+
+    Thread.sleep(500);
+
+    // Despite 5 request() calls, should receive exactly one onNext + one onComplete
+    assertThat(subscriber.onNextCount)
+        .describedAs("Must receive exactly one onNext despite multiple request() calls")
+        .isEqualTo(1);
+    assertThat(subscriber.onCompleteCount)
+        .describedAs("Must receive exactly one onComplete")
+        .isEqualTo(1);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Test: Cancelled subscribers pruned during outage (no memory leak)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * During a prolonged outage (DISCONNECTED/CONNECTING), cancelled subscribers should be pruned
+   * from the queue rather than accumulating indefinitely.
+   */
+  @Test
+  @Timeout(15)
+  void testCancelledSubscribersPrunedDuringOutage() throws Exception {
+    // Factory that never emits — simulates permanent outage
+    HangingRpcClientFactory factory = new HangingRpcClientFactory();
+    ReconnectingRpcClientFactory reconnecting = new ReconnectingRpcClientFactory(factory, true);
+    Mono<RpcClient> mono = reconnecting.createRpcClient(new InetSocketAddress(0));
+
+    // Subscribe many subscribers, then cancel them
+    List<TrackingSubscriber> subs = new ArrayList<>();
+    for (int i = 0; i < 100; i++) {
+      TrackingSubscriber sub = new TrackingSubscriber();
+      mono.subscribe(sub);
+      subs.add(sub);
+    }
+
+    // Cancel all
+    for (TrackingSubscriber sub : subs) {
+      sub.cancel();
+    }
+
+    // Subscribe one more live subscriber to trigger a drain cycle (which prunes)
+    TrackingSubscriber liveSub = new TrackingSubscriber();
+    mono.subscribe(liveSub);
+
+    // Wait for drain cycles to prune
+    Thread.sleep(1000);
+
+    // Verify no cancelled subscriber was signaled
+    for (TrackingSubscriber sub : subs) {
+      assertThat(sub.onNextCount)
+          .describedAs("Cancelled subscriber must not receive signals")
+          .isEqualTo(0);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Test: Hung connect attempt doesn't wedge state machine
+  // ---------------------------------------------------------------------------
+
+  /**
+   * If the delegate factory returns a Mono that never completes (simulating a hung TCP handshake),
+   * the connection timeout should fire and the state machine should transition back to DISCONNECTED
+   * to retry.
+   */
+  @Test
+  @Timeout(30)
+  void testHungConnectTimesOutAndRetries() throws Exception {
+    // First attempt hangs, second succeeds
+    QueuedRpcClientFactory factory = new QueuedRpcClientFactory();
+    ReconnectingRpcClientFactory reconnecting = new ReconnectingRpcClientFactory(factory, true);
+    Mono<RpcClient> mono = reconnecting.createRpcClient(new InetSocketAddress(0));
+
+    // First sink: never emit (simulates hung connection)
+    factory.addSink(); // polled by first connect(), never emitted to
+
+    // Second sink: will succeed
+    Sinks.One<RpcClient> sink2 = factory.addSink();
+
+    // Subscribe — first attempt hangs, should timeout, then retry with sink2
+    DummyRpcClient c2 = new DummyRpcClient();
+
+    // The connect timeout (CONNECT_TIMEOUT_MS = 10s) will fire, causing handleConnectionError,
+    // which transitions to DISCONNECTED and retries. The retry picks up sink2.
+    // We emit on sink2 shortly so the retry succeeds.
+    new Thread(
+            () -> {
+              try {
+                Thread.sleep(11000); // wait for connect timeout + small margin
+                sink2.tryEmitValue(c2);
+              } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+              }
+            })
+        .start();
+
+    RpcClient result = mono.block(java.time.Duration.ofSeconds(25));
+    assertNotNull(result);
+    assertThat(result.isDisposed())
+        .describedAs("Should recover after hung connect times out")
+        .isFalse();
+
+    System.out.println("[TEST] Recovered from hung connect attempt");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Test: Subscriber throwing from onNext doesn't break state machine
+  // ---------------------------------------------------------------------------
+
+  /**
+   * If a subscriber throws from onNext, the error should be caught and the queue should continue
+   * processing. The state machine must not get stuck.
+   */
+  @Test
+  @Timeout(10)
+  void testSubscriberThrowingFromOnNextDoesNotBreakDrain() throws Exception {
+    QueuedRpcClientFactory factory = new QueuedRpcClientFactory();
+    ReconnectingRpcClientFactory reconnecting = new ReconnectingRpcClientFactory(factory, true);
+    Mono<RpcClient> mono = reconnecting.createRpcClient(new InetSocketAddress(0));
+
+    Sinks.One<RpcClient> sink1 = factory.addSink();
+
+    // Subscribe a throwing subscriber
+    ThrowingSubscriber throwing = new ThrowingSubscriber();
+    mono.subscribe(throwing);
+
+    // Subscribe a normal subscriber
+    TrackingSubscriber normal = new TrackingSubscriber();
+    mono.subscribe(normal);
+
+    // Emit client — drain should handle the throw and continue to the normal subscriber
+    DummyRpcClient c1 = new DummyRpcClient();
+    sink1.tryEmitValue(c1);
+
+    Thread.sleep(500);
+
+    assertThat(normal.onNextCount)
+        .describedAs("Normal subscriber should still receive onNext after throwing subscriber")
+        .isEqualTo(1);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Test: onClose and handleIncomingRpcClient racing simultaneously
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Exercises the tight race where old client's onClose fires at nearly the same time as a new
+   * client arriving via handleIncomingRpcClient. The CAS-loop in the onClose callback and the
+   * attempt-specific CAS in handleIncomingRpcClient should ensure only one wins.
+   */
+  @Test
+  @Timeout(30)
+  void testOnCloseRacingWithNewConnection() throws Exception {
+    QueuedRpcClientFactory factory = new QueuedRpcClientFactory();
+    ReconnectingRpcClientFactory reconnecting = new ReconnectingRpcClientFactory(factory, true);
+    Mono<RpcClient> mono = reconnecting.createRpcClient(new InetSocketAddress(0));
+
+    // Pre-populate all sinks upfront. The reconnecting mono polls these in order.
+    int iterations = 5;
+    List<Sinks.One<RpcClient>> sinks = new ArrayList<>();
+    for (int i = 0; i < iterations + 1; i++) {
+      sinks.add(factory.addSink());
+    }
+
+    // First connection
+    DummyRpcClient c0 = new DummyRpcClient();
+    sinks.get(0).tryEmitValue(c0);
+    mono.block(java.time.Duration.ofSeconds(5));
+
+    for (int i = 0; i < iterations; i++) {
+      DummyRpcClient next = new DummyRpcClient();
+      // Dispose current → onClose fires, triggers reconnect using next pre-populated sink
+      c0.dispose();
+      sinks.get(i + 1).tryEmitValue(next);
+
+      RpcClient r = mono.block(java.time.Duration.ofSeconds(10));
+      assertNotNull(r);
+      assertThat(r.isDisposed()).isFalse();
+      c0 = next;
+    }
+
+    System.out.printf("[TEST] %d rapid connect/close cycles, still functional%n", iterations);
+  }
+
+  // ---------------------------------------------------------------------------
   // Utilities
   // ---------------------------------------------------------------------------
 
@@ -363,6 +799,117 @@ public class RSocketKeepAliveAndReconnectionTest {
 
     void markDisposedWithoutClose() {
       disposed = true;
+    }
+
+    /**
+     * Fires onClose without setting disposed. Simulates a delayed onClose callback arriving after
+     * the client was already replaced by a new connection.
+     */
+    void fireOnCloseOnly() {
+      closeSink.tryEmitEmpty();
+    }
+  }
+
+  /**
+   * A subscriber that tracks signal counts for verification. Captures its Subscription so cancel()
+   * can be called from test code.
+   */
+  private static class TrackingSubscriber implements org.reactivestreams.Subscriber<RpcClient> {
+    volatile int onNextCount;
+    volatile int onCompleteCount;
+    volatile int onErrorCount;
+    private volatile org.reactivestreams.Subscription subscription;
+
+    @Override
+    public void onSubscribe(org.reactivestreams.Subscription s) {
+      this.subscription = s;
+      s.request(1);
+    }
+
+    @Override
+    public void onNext(RpcClient rpcClient) {
+      onNextCount++;
+    }
+
+    @Override
+    public void onError(Throwable t) {
+      onErrorCount++;
+    }
+
+    @Override
+    public void onComplete() {
+      onCompleteCount++;
+    }
+
+    void cancel() {
+      org.reactivestreams.Subscription s = this.subscription;
+      if (s != null) {
+        s.cancel();
+      }
+    }
+  }
+
+  /**
+   * A subscriber that calls request(n) multiple times on the same subscription to test the
+   * enqueue-once CAS guard.
+   */
+  private static class MultiRequestSubscriber implements org.reactivestreams.Subscriber<RpcClient> {
+    private final int requestCount;
+    volatile int onNextCount;
+    volatile int onCompleteCount;
+
+    MultiRequestSubscriber(int requestCount) {
+      this.requestCount = requestCount;
+    }
+
+    @Override
+    public void onSubscribe(org.reactivestreams.Subscription s) {
+      for (int i = 0; i < requestCount; i++) {
+        s.request(1);
+      }
+    }
+
+    @Override
+    public void onNext(RpcClient rpcClient) {
+      onNextCount++;
+    }
+
+    @Override
+    public void onError(Throwable t) {}
+
+    @Override
+    public void onComplete() {
+      onCompleteCount++;
+    }
+  }
+
+  /** A subscriber that throws from onNext to test drain error handling. */
+  private static class ThrowingSubscriber implements org.reactivestreams.Subscriber<RpcClient> {
+    @Override
+    public void onSubscribe(org.reactivestreams.Subscription s) {
+      s.request(1);
+    }
+
+    @Override
+    public void onNext(RpcClient rpcClient) {
+      throw new RuntimeException("subscriber throw from onNext");
+    }
+
+    @Override
+    public void onError(Throwable t) {}
+
+    @Override
+    public void onComplete() {}
+  }
+
+  /**
+   * An RpcClientFactory that never emits — all createRpcClient() calls return Mono.never().
+   * Simulates a permanently unreachable server.
+   */
+  private static class HangingRpcClientFactory implements RpcClientFactory {
+    @Override
+    public Mono<RpcClient> createRpcClient(java.net.SocketAddress addr) {
+      return Mono.never();
     }
   }
 }

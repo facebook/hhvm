@@ -2449,6 +2449,7 @@ std::string deserializeProfData(const std::string& filename,
         entry.setStr("orig_filepath", func->unit()->origFilepath()->data());
         entry.setStr("function_name", func->fullName()->data());
         entry.setInt("function_bytecode_hash", func->bcHash());
+        entry.setInt("config_id", RuntimeOption::ConfigId);
         StructuredLog::log("hhvm_jit_profile_stats", entry);
       };
 

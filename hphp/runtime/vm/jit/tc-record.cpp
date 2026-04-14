@@ -516,6 +516,7 @@ void logTranslation(const Translator* trans, const TransRange& range) {
   cols.setInt("cold_size", range.cold.size());
   cols.setInt("frozen_size", range.frozen.size());
 
+  cols.setInt("config_id", RuntimeOption::ConfigId);
   // finish & log
   StructuredLog::log("hhvm_jit", cols);
 }

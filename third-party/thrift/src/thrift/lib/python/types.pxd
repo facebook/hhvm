@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from libc.stdint cimport uint32_t, int16_t, int64_t
+from libc.stdint cimport uint32_t, int16_t, int32_t, int64_t
 cimport folly.iobuf
 
 from cpython.object cimport PyTypeObject
 from cpython.ref cimport PyObject
 from libcpp.memory cimport unique_ptr
+from libcpp.vector cimport vector
+
+from thrift.python.std_libcpp cimport string_view
 
 from thrift.python.protocol cimport Protocol
 
@@ -65,6 +68,10 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         ) except+
         void addFieldValue(int16_t index, object fieldValue) except+
         bint isUnion()
+
+    cdef cppclass cEnumTypeInfo "::apache::thrift::python::EnumTypeInfo":
+        cEnumTypeInfo(vector[string_view] names, vector[int32_t] values) except+
+        const cTypeInfo* get()
 
     cdef cppclass cListTypeInfo "::apache::thrift::python::ListTypeInfo":
         cListTypeInfo(cTypeInfo& valInfo)
@@ -249,6 +256,7 @@ cdef class StructTypeInfo(TypeInfoBase):
 
 cdef class EnumTypeInfo(TypeInfoBase):
     cdef object _class
+    cdef unique_ptr[cEnumTypeInfo] cpp_obj
     cpdef to_internal_data(self, object)
     cpdef to_python_value(self, object)
     cdef const cTypeInfo* get_cTypeInfo(self)

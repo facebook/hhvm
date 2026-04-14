@@ -28,35 +28,17 @@ from thrift.python.exceptions import Error
 from thrift.python.serializer import deserialize, Protocol, serialize
 
 
-# Enum name serialization is not yet supported in thrift-python.
-# Skip test cases that rely on enum name output until support is added.
-_SKIP_ENUM_CASES = {"Primitive", "EnumAsKey", "NegativeEnum"}
-_SKIP_COMPAT_ENUM_CASES = {
-    "EnumOne",
-    "EnumTwo",
-    "EnumDefault",
-    "EnumAsKey",
-    "EnumNegativeOne",
-    "EnumUnregistered",
-}
-_SKIP_NEGATIVE_ENUM_CASES = {"ExtraWhitespace2"}
-
-
 class Json5SerializerTest(unittest.TestCase):
     """Test JSON5 serialization using test cases from json5_test.thrift."""
 
     def test_serialize(self) -> None:
         for tc in test_types.testCases:
-            if tc.name in _SKIP_ENUM_CASES:
-                continue
             with self.subTest(tc.name):
                 json_str = serialize(tc.example, protocol=Protocol.JSON5).decode()
                 self.assertEqual(json.loads(json_str), json.loads(tc.json))
 
     def test_deserialize_json(self) -> None:
         for tc in test_types.testCases:
-            if tc.name in _SKIP_ENUM_CASES:
-                continue
             with self.subTest(tc.name):
                 result = deserialize(
                     test_types.Example, tc.json.encode(), Protocol.JSON5
@@ -65,8 +47,6 @@ class Json5SerializerTest(unittest.TestCase):
 
     def test_deserialize_json5(self) -> None:
         for tc in test_types.testCases:
-            if tc.name in _SKIP_ENUM_CASES:
-                continue
             with self.subTest(tc.name):
                 result = deserialize(
                     test_types.Example, tc.json5.encode(), Protocol.JSON5
@@ -146,8 +126,6 @@ class Json5CompatibilityTest(unittest.TestCase):
 
     def test_compatibility(self) -> None:
         for tc in compat_types.compatibilityTestCases:
-            if tc.name in _SKIP_COMPAT_ENUM_CASES:
-                continue
             with self.subTest(tc.name):
                 for input_json in tc.inputs:
                     result = deserialize(
@@ -223,8 +201,6 @@ class Json5NegativeTest(unittest.TestCase):
         ]
         for category, test_cases in cases:
             for tc in test_cases:
-                if category == "enum" and tc.name in _SKIP_NEGATIVE_ENUM_CASES:
-                    continue
                 with self.subTest(f"{category}_{tc.name}"):
                     with self.assertRaises(Error):
                         deserialize(

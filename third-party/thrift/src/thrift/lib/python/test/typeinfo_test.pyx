@@ -245,7 +245,7 @@ cdef class TypeInfoTests():
         self.ut.assertEqual(enum_type_info.to_python_value(data), Bar.ONE)
 
         self.assertEqual(
-            &i32TypeInfo,
+            (<EnumTypeInfo>enum_type_info).cpp_obj.get().get(),
             getCTypeInfo(enum_type_info),
         )
 

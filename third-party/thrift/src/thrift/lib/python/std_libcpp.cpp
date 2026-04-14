@@ -29,4 +29,13 @@ std::string_view extractStringViewFromBytes(PyObject* bytes) {
   return std::string_view(buffer, size);
 }
 
+std::string_view extractStringViewFromUnicode(PyObject* unicode) {
+  Py_ssize_t size = 0;
+  const char* buffer = PyUnicode_AsUTF8AndSize(unicode, &size);
+  if (buffer == nullptr) {
+    folly::python::handlePythonError("extractStringViewFromUnicode");
+  }
+  return std::string_view(buffer, size);
+}
+
 } // namespace apache::thrift::python

@@ -233,6 +233,7 @@ let rec from_type : env -> show_like_ty:bool -> locl_ty -> Yojson.Safe.t =
           List.map predicates ~f:(fun p -> obj @@ predicate_json p)
         in
         name "isunion" @ [("args", `List predicates_json)]
+      | IsNot inner -> name "isnot" @ [("arg", obj @@ predicate_json inner)]
       (* TODO: T196048813 optional, open, fuel? *)
     in
     obj @@ kind p "negation" @ predicate_json predicate

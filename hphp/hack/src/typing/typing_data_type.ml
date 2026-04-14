@@ -727,6 +727,11 @@ module Make (Set : SET) = struct
             fromPredicate ~safe_for_are_disjoint ~trail env pred)
       in
       (env, List.fold sets ~init:Set.empty ~f:Set.union)
+    | IsNot inner ->
+      let (env, inner_set) =
+        fromPredicate ~safe_for_are_disjoint ~trail env inner
+      in
+      (env, Set.diff (mixed ~reason) inner_set)
 
   type context = {
     safe_for_are_disjoint: bool;

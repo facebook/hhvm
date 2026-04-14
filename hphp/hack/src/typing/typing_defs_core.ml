@@ -266,6 +266,7 @@ and type_predicate_ =
   | IsTupleOf of tuple_predicate
   | IsShapeOf of shape_predicate
   | IsUnionOf of type_predicate list
+  | IsNot of type_predicate
 [@@oxidize.exclude]
 
 and type_predicate =
@@ -710,6 +711,10 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>IsUnionOf@ ";
       pp_list pp_type_predicate fmt predicates;
       Format.fprintf fmt "@])"
+    | IsNot predicate ->
+      Format.fprintf fmt "(@[<2>IsNot@ ";
+      pp_type_predicate fmt predicate;
+      Format.fprintf fmt "@])"
 
   and pp_tuple_predicate fmt { tp_required } =
     Format.fprintf fmt "@[<2>{ ";
@@ -850,6 +855,7 @@ let type_predicate__con_ordinal type_predicate_ =
   | IsTupleOf _ -> 1
   | IsShapeOf _ -> 2
   | IsUnionOf _ -> 3
+  | IsNot _ -> 4
 
 let type_tag_con_ordinal type_tag =
   match type_tag with
@@ -1144,6 +1150,7 @@ and compare_type_predicate (_, p1) (_, p2) =
   | (IsTag tag1, IsTag tag2) -> compare_type_tag tag1 tag2
   | (IsTupleOf tp1, IsTupleOf tp2) -> compare_tuple_predicate tp1 tp2
   | (IsShapeOf sp1, IsShapeOf sp2) -> compare_shape_predicate sp1 sp2
+  | (IsNot p1, IsNot p2) -> compare_type_predicate p1 p2
   | _ -> type_predicate__con_ordinal p1 - type_predicate__con_ordinal p2
 
 and compare_type_tag_generic g1 g2 =

@@ -1332,7 +1332,10 @@ module Full = struct
             ( fuel,
               Concat
                 (List.intersperse texts ~sep:(Concat [Space; text "|"; Space]))
-            ))
+            )
+          | IsNot inner ->
+            let (fuel, inner_doc) = predicate_doc fuel inner in
+            (fuel, Concat [text "not "; inner_doc]))
     in
     let (fuel, pdoc) = predicate_doc fuel predicate in
     let doc =
@@ -1810,6 +1813,7 @@ module ErrorString = struct
         | IsUnionOf predicates ->
           let strings = List.map predicates ~f:(fun (_, pred) -> str pred) in
           String.concat ~sep:" | " strings
+        | IsNot (_, pred) -> "not " ^ str pred
         (* TODO: T196048813, dedupe?, fuel? *)
       in
       (fuel, "anything but " ^ str @@ snd predicate)

@@ -138,7 +138,8 @@ module TyPredicate = struct
       Result.Ok (next_wildcard_id, IsTag (ClassTag (name, generics)))
     | Tprim Aast.Tvoid -> Result.Error "void"
     | Tprim Aast.Tnoreturn -> Result.Error "noreturn"
-    | Tnonnull -> Result.Error "nonnull"
+    | Tnonnull ->
+      Result.Ok (next_wildcard_id, IsNot (get_reason ty, IsTag NullTag))
     | Tdynamic -> Result.Error "dynamic"
     | Tany _ -> Result.Error "any"
     | Toption ty_opt -> begin
@@ -307,6 +308,7 @@ module TyPredicate = struct
             (env, new_tparams))
       in
       (env, List.fold new_tparams ~init:IMap.empty ~f:IMap.union)
+    | (_reason, IsNot inner) -> instantiate_wildcards_for_predicate env inner p
 
   let rec to_ty lookup_wildcard predicate =
     let tag_to_ty reason tag =
@@ -374,6 +376,7 @@ module TyPredicate = struct
         Typing_make_type.union reason
         @@ List.map predicates ~f:(to_ty lookup_wildcard)
     end
+    | (reason, IsNot inner) -> Typing_make_type.neg reason inner
 
   exception FoundWildcard
 
@@ -663,6 +666,9 @@ module TyPartition = struct
   let span = Partition.span
 
   let right = Partition.right
+
+  let flip (partition, true_assumptions, false_assumptions) =
+    (Partition.flip partition, false_assumptions, true_assumptions)
 end
 
 type dnf_ty = locl_ty list list
@@ -894,7 +900,7 @@ and split_ty
     (ty : locl_ty)
     ~(predicate : type_predicate) : env * TyPartition.t =
   let (env, ety) = Env.expand_type env ty in
-  let partition_f ((env : env), (ty_datatype : DataType.t)) :
+  let rec partition_f predicate ((env : env), (ty_datatype : DataType.t)) :
       env * TyPartition.t =
     match snd predicate with
     | IsTupleOf { tp_required = sub_predicates } ->
@@ -916,7 +922,11 @@ and split_ty
     | IsTag tag -> split_ty_by_tag ~ty_datatype env ety tag predicate
     | IsUnionOf predicates ->
       split_ty_by_union ~other_intersected_tys ~expansions env ety predicates
+    | IsNot inner ->
+      let (env, split) = partition_f inner (env, ty_datatype) in
+      (env, TyPartition.flip split)
   in
+  let partition_f = partition_f predicate in
   let split_union ~other_intersected_tys ~expansions env (tys : locl_ty list) =
     let (env, partitions) =
       List.fold_map
@@ -987,6 +997,9 @@ and split_ty
             ~f:(fun env dt_acc pred ->
               let (env, dt) = to_dty env (snd pred) in
               (env, DataType.union dt_acc dt))
+        | IsNot inner_pred ->
+          let (env, inner_dt) = to_dty env (snd inner_pred) in
+          (env, DataType.complement inner_dt)
       in
       let (env, dty) = to_dty env predicate in
       let dty = DataType.complement dty in

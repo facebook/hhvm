@@ -626,6 +626,7 @@ module Subtype_negation = struct
           | IsTupleOf { tp_required = preds } ->
             List.exists preds ~f:has_isshape
           | IsShapeOf _ -> true
+          | IsNot inner -> has_isshape inner
         in
         if has_isshape predicate then
           None

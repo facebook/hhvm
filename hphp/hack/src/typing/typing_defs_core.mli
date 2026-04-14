@@ -252,6 +252,7 @@ and type_predicate_ =
   | IsTupleOf of tuple_predicate
   | IsShapeOf of shape_predicate
   | IsUnionOf of type_predicate list
+  | IsNot of type_predicate
 
 and type_predicate = (Reason.t[@transform.opaque]) * type_predicate_
 

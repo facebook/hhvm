@@ -23,6 +23,8 @@ let neg r neg_t =
   match snd neg_t with
   (* Represent the negation of Tnull as Tnonnull, instead of Tneg Tnull *)
   | IsTag NullTag -> mk (r, Tnonnull)
+  (* Represent the negation of IsNot(NullTag) (= nonnull) as Tnull *)
+  | IsNot (_, IsTag NullTag) -> mk (r, Tprim Aast.Tnull)
   | _ -> mk (r, Tneg neg_t)
 
 let traversable r ty = class_type r SN.Collections.cTraversable [ty]

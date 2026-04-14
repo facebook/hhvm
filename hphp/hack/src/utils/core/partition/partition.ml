@@ -275,6 +275,8 @@ end) : S with type atom := Atom.t = struct
 
   let right t = Lattice.to_list t.right
 
+  let flip { left; span; right } = { left = right; span; right = left }
+
   (*
     A := Al | As | Ar
     B := Bl | Bs | Br

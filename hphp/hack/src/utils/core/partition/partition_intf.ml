@@ -72,6 +72,9 @@ module type S = sig
       is definitely within the right side of the partition *)
   val right : t -> dnf
 
+  (** Returns the complement of the partition -- left and right are swapped **)
+  val flip : t -> t
+
   (** Given a product function from atoms to an atom and a list of partitions,
       Returns a new partition that is the "product" of the given partitions
       such that:

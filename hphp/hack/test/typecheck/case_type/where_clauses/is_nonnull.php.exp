@@ -1,0 +1,6 @@
+ERROR: File "is_nonnull.php", line 20, characters 12-24:
+Invalid return type (Typing[4110])
+  File "is_nonnull.php", line 16, characters 60-60:
+  Expected `T`
+  File "is_nonnull.php", line 20, characters 16-22:
+  But got `MyClass`

@@ -32,6 +32,6 @@ function icu_match_with_matches(
 function icu_transliterate(
   string $str,
   bool $remove_accents,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): string;
 <<__PHPStdLib>>
 function icu_tokenize(string $text): HH\FIXME\MISSING_RETURN_TYPE;

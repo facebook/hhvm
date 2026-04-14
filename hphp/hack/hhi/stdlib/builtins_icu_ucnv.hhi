@@ -55,18 +55,18 @@ class UConverter {
     string $toEncoding = "utf-8",
     string $fromEncoding = "utf-8",
   );
-  public function getSourceEncoding(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getSourceEncoding(): ?string;
   public function setSourceEncoding(
     string $encoding,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getDestinationEncoding(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function getDestinationEncoding(): ?string;
   public function setDestinationEncoding(
     string $encoding,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getSourceType(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getDestinationType(): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
+  public function getSourceType(): int;
+  public function getDestinationType(): int;
   public function getSubstChars(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setSubstChars(string $chars): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setSubstChars(string $chars): bool;
   public function fromUCallback(
     int $reason,
     HH\FIXME\MISSING_PARAM_TYPE $source,
@@ -75,8 +75,8 @@ class UConverter {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function toUCallback(
     int $reason,
-    HH\FIXME\MISSING_PARAM_TYPE $source,
-    HH\FIXME\MISSING_PARAM_TYPE $codeunits,
+    ?string $source,
+    ?string $codeunits,
     inout int $error,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function convert(
@@ -89,8 +89,8 @@ class UConverter {
     string $fromEncoding,
     HH\FIXME\MISSING_PARAM_TYPE $options = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorCode(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getErrorMessage(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getErrorCode(): int;
+  public function getErrorMessage(): string;
   static public function reasonText(int $reason): HH\FIXME\MISSING_RETURN_TYPE;
   static public function getAvailable(): HH\FIXME\MISSING_RETURN_TYPE;
   static public function getAliases(

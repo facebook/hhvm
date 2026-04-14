@@ -26,10 +26,10 @@ let recheck_typing ctx (path_list : Relative_path.t list) =
       ~init:(ctx, [])
       ~f:(fun (ctx, paths_and_tasts) path ->
         let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-        let { Tast_provider.Compute_tast.tast; _ } =
-          Tast_provider.compute_tast_unquarantined ~ctx ~entry
-        in
-        (ctx, (path, tast) :: paths_and_tasts))
+        match Tast_provider.compute_tast_unquarantined ~ctx ~entry with
+        | { Tast_provider.Compute_tast.tast; _ } ->
+          (ctx, (path, tast) :: paths_and_tasts)
+        | exception Sys_error _ -> (ctx, paths_and_tasts))
   in
   (ctx, paths_and_tasts)
 

@@ -51,7 +51,7 @@ void EvbHandshakeHelper::dropConnection(SSLErrorEnum reason) {
   auto transition =
       tryTransition(HandshakeState::Started, HandshakeState::Dropped);
 
-  // Regardless of whether or not we win the race or not, we will set
+  // Regardless of whether or not we win the race, we will set
   // dropConnectionGuard_ (see case 2) to let a potential C' know that the
   // connection was dropped. C', seeing this, is responsible for clearing
   // the dropConnectionGuard.
@@ -118,7 +118,7 @@ void EvbHandshakeHelper::connectionReady(
               VLOG(5) << "calling underlying callback connectionReady";
               transport->attachEventBase(originalEvb_);
 
-              // If a dropConnection call occured by the time this lambda runs,
+              // If a dropConnection call occurred by the time this lambda runs,
               // we don't want to fire the callback. (See Case 2)
               if (dropConnectionGuard_.has_value()) {
                 dropConnectionGuard_.reset();
@@ -157,7 +157,7 @@ void EvbHandshakeHelper::connectionError(
         DCHECK(callback_);
         VLOG(5) << "calling underlying callback connectionError";
 
-        // If a dropConnection call occured by the time this lambda runs, we
+        // If a dropConnection call occurred by the time this lambda runs, we
         // don't want to fire the callback. (See Case 2)
         if (dropConnectionGuard_.has_value()) {
           dropConnectionGuard_.reset();

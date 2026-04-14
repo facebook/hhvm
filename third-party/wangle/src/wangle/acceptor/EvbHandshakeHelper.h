@@ -118,8 +118,8 @@ class EvbHandshakeHelper : public AcceptorHandshakeHelper,
   // (Remember that in all of these cases, the handshake thread is invisible to
   // an observer. As far as wangle::Acceptor is concerned, there is only one
   // acceptor thread. This means that from an observer's point of view, as long
-  // as some event has not occured on the originalEvb_ thread, then that event
-  // has never occured at all. (Trees falling in forests when the observer
+  // as some event has not occurred on the originalEvb_ thread, then that event
+  // has never occurred at all. (Trees falling in forests when the observer
   // doesn't live in the forest))
   //
   // # Case 1: D and C race, and D wins:

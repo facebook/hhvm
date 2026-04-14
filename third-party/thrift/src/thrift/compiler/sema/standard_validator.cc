@@ -1274,16 +1274,13 @@ void validate_interaction_annotations(
     sema_context& ctx, const t_interaction& node) {
   for (auto& func : node.functions()) {
     ctx.check(
-        !func.has_unstructured_annotation("thread") &&
-            !func.has_structured_annotation(kCppProcessInEbThreadUri),
+        !func.has_structured_annotation(kCppProcessInEbThreadUri),
         "Interaction methods cannot be individually annotated with "
-        "thread='eb'. Use process_in_event_base on the interaction instead.");
+        "thread='eb'. Use @cpp.ProcessInEbThread on the interaction instead.");
   }
-  if (node.has_unstructured_annotation("process_in_event_base") ||
-      node.has_structured_annotation(kCppProcessInEbThreadUri)) {
+  if (node.has_structured_annotation(kCppProcessInEbThreadUri)) {
     ctx.check(
-        !node.has_unstructured_annotation("serial") &&
-            !node.has_structured_annotation(kSerialUri),
+        !node.has_structured_annotation(kSerialUri),
         "EB interactions are already serial");
   }
 }

@@ -1741,9 +1741,7 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
     def.property("event_based?", [this](const t_function& f) {
       const t_interface* parent = context().get_function_parent(&f);
       assert(parent != nullptr);
-      return f.get_unstructured_annotation("thread") == "eb" ||
-          f.has_structured_annotation(kCppProcessInEbThreadUri) ||
-          parent->has_unstructured_annotation("process_in_event_base") ||
+      return f.has_structured_annotation(kCppProcessInEbThreadUri) ||
           parent->has_structured_annotation(kCppProcessInEbThreadUri);
     });
 
@@ -1859,12 +1857,10 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
     auto base = t_whisker_generator::make_prototype_for_interaction(proto);
     auto def = whisker::dsl::prototype_builder<h_interaction>::extends(base);
     def.property("event_base?", [](const t_interaction& self) {
-      return self.has_unstructured_annotation("process_in_event_base") ||
-          self.has_structured_annotation(kCppProcessInEbThreadUri);
+      return self.has_structured_annotation(kCppProcessInEbThreadUri);
     });
     def.property("serial?", [](const t_interaction& self) {
-      return self.has_unstructured_annotation("serial") ||
-          self.has_structured_annotation(kSerialUri);
+      return self.has_structured_annotation(kSerialUri);
     });
     // Interactions don't get split, so check all functions
     def.property("has_sink_functions?", [](const t_interaction& self) {
@@ -2078,8 +2074,7 @@ size_t compute_alignment(
 // @cpp.MinimizePadding annotation is specified.
 std::vector<const t_field*> get_structured_fields_in_layout_order(
     const t_structured& strct) {
-  if (!strct.has_unstructured_annotation("cpp.minimize_padding") &&
-      !strct.has_structured_annotation(kCppMinimizePaddingUri)) {
+  if (!strct.has_structured_annotation(kCppMinimizePaddingUri)) {
     return strct.fields().copy();
   }
 

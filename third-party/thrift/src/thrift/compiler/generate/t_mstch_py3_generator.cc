@@ -890,14 +890,12 @@ class t_mstch_py3_generator : public t_whisker_generator {
         whisker::dsl::prototype_builder<h_function>::extends(std::move(base));
 
     def.property("eb?", [this](const t_function& self) {
-      if (self.get_unstructured_annotation("thread") == "eb" ||
-          self.has_structured_annotation(kCppProcessInEbThreadUri)) {
+      if (self.has_structured_annotation(kCppProcessInEbThreadUri)) {
         return true;
       }
       const t_interface* parent = context().get_function_parent(&self);
       assert(parent != nullptr);
-      return parent->has_unstructured_annotation("process_in_event_base") ||
-          parent->has_structured_annotation(kCppProcessInEbThreadUri);
+      return parent->has_structured_annotation(kCppProcessInEbThreadUri);
     });
     def.property("stack_arguments?", [this](const t_function& self) {
       return cpp2::is_stack_arguments(compiler_options(), self);

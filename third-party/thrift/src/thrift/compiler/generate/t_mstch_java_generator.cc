@@ -538,14 +538,9 @@ class t_mstch_java_generator : public t_whisker_generator {
       return self.default_value() != nullptr;
     });
     def.property("javaAnnotations?", [](const t_field& self) {
-      return self.has_unstructured_annotation("java.swift.annotations") ||
-          self.has_structured_annotation(kJavaAnnotationUri);
+      return self.has_structured_annotation(kJavaAnnotationUri);
     });
     def.property("javaAnnotations", [](const t_field& self) -> whisker::object {
-      if (self.has_unstructured_annotation("java.swift.annotations")) {
-        return whisker::make::string(
-            self.get_unstructured_annotation("java.swift.annotations"));
-      }
       if (auto annotation =
               self.find_structured_annotation_or_null(kJavaAnnotationUri)) {
         for (const auto& item : annotation->value()->get_map()) {
@@ -939,14 +934,10 @@ class t_mstch_java_generator : public t_whisker_generator {
     });
 
     def.property("javaAnnotations?", [](const t_structured& self) {
-      return self.has_unstructured_annotation("java.swift.annotations") ||
-          self.has_structured_annotation(kJavaAnnotationUri);
+      return self.has_structured_annotation(kJavaAnnotationUri);
     });
     def.property(
         "javaAnnotations", [](const t_structured& self) -> std::string {
-          if (self.has_unstructured_annotation("java.swift.annotations")) {
-            return self.get_unstructured_annotation("java.swift.annotations");
-          }
           if (auto annotation =
                   self.find_structured_annotation_or_null(kJavaAnnotationUri)) {
             for (const auto& item : annotation->value()->get_map()) {

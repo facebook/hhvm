@@ -451,8 +451,7 @@ bool is_stack_arguments(
 }
 
 bool is_mixin(const t_field& field) {
-  return field.has_unstructured_annotation("cpp.mixin") ||
-      field.has_structured_annotation(kMixinUri);
+  return field.has_structured_annotation(kMixinUri);
 }
 
 bool has_ref_annotation(const t_field& field) {

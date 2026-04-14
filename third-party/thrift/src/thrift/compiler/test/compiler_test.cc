@@ -866,7 +866,7 @@ TEST(CompilerTest, deprecated_annotations) {
       @thrift.DeprecatedUnvalidatedAnnotations{items = {"py3.name": "w", "go.name": "w"}}
       2: i64 with;
       # expected-warning@-2: The annotation py3.name is deprecated. Please use @python.Name instead.
-      # expected-warning@-3: The annotation go.name is deprecated. Please use @go.Name instead.
+      # expected-error@-3: The annotation go.name has been removed. Please use @go.Name instead.
     }
 
     @thrift.DeprecatedUnvalidatedAnnotations{items = {"hack.attributes": ""}}
@@ -875,8 +875,13 @@ TEST(CompilerTest, deprecated_annotations) {
 
     @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.type": "std::uint64_t"}}
     typedef i64 T
-    # expected-warning@21: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
+    # expected-error@21: The annotation cpp.type has been removed. Please use @cpp.Type instead.
     # expected-warning@21: Unstructured annotation cpp.type/cpp.template on typedef `T` is ignored. Use @cpp.Type instead.
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.template": "std::deque"}}
+    typedef list<i64> U
+    # expected-error@26: The annotation cpp.template has been removed. Please use @cpp.Type instead.
+    # expected-warning@26: Unstructured annotation cpp.type/cpp.template on typedef `U` is ignored. Use @cpp.Type instead.
 
     # This should not produce a warning even though the annotation is currently lowered.
     @cpp.Type{name = "std::uint64_t"}

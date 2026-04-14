@@ -155,6 +155,20 @@ let handle :
           ServerInferType.go_ctx ~ctx ~entry pos)
     in
     (env, result)
+  | ServerCommandTypes.ENFORCEMENT_AT_POS_BATCH positions ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    let results =
+      List.map positions ~f:(fun (fn, pos) ->
+          let path = Relative_path.create_detect_prefix fn in
+          let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+          let result =
+            Provider_utils.respect_but_quarantine_unsaved_changes
+              ~ctx
+              ~f:(fun () -> ServerEnforcementAtPos.go_ctx ~ctx ~entry pos)
+          in
+          ServerEnforcementAtPos.result_to_json_string result (fn, pos))
+    in
+    (env, results)
   | ServerCommandTypes.INFER_TYPE_BATCH positions ->
     (env, ServerInferTypeBatch.go genv.ServerEnv.workers positions env)
   | ServerCommandTypes.IS_SUBTYPE stdin ->

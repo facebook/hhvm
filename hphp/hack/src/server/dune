@@ -162,6 +162,7 @@
     provider_backend
     security_stubs
     server
+    server_enforcement_at_pos
     server_env_build
     server_incremental
     server_go_to

@@ -72,6 +72,8 @@ type mode =
   | Highlight_refs of File_content.Position.t
   | Go_to_impl of File_content.Position.t
   | Hover of File_content.Position.t option
+  | Enforcement of File_content.Position.t option
+  | Enforcement_batch
   | Apply_quickfixes
   | Refactor_sound_dynamic of string * string * string
   | RemoveDeadUnsafeCasts
@@ -633,6 +635,25 @@ let parse_options () =
       ( "--hover-at-caret",
         Arg.Unit (fun () -> set_mode (Hover None) ()),
         " Show the hover information indicated by // ^ hover-at-caret" );
+      ( "--enforcement",
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (fun x -> line := x);
+             Arg.Int
+               (fun column ->
+                 set_mode
+                   (Enforcement
+                      (Some (File_content.Position.from_one_based !line column)))
+                   ());
+           ]),
+        "<pos> Display enforcement at position" );
+      ( "--enforcement-at-caret",
+        Arg.Unit (fun () -> set_mode (Enforcement None) ()),
+        " Show the enforcement indicated by // ^ enforcement-at-caret" );
+      ( "--enforcement-at-caret-batch",
+        Arg.Unit (fun () -> set_mode Enforcement_batch ()),
+        " Show enforcement at all // ^ enforcement-at-caret positions" );
       ( "--fix",
         Arg.Unit (fun () -> set_mode Apply_quickfixes ()),
         " Apply quickfixes for all the errors in the file, and print the resulting code. Prefer --ide-code-actions, which tests more."
@@ -1146,6 +1167,23 @@ let caret_pos_exn (src : string) (marker : string) =
             "Could not find any occurrence of '%s' in source code"
             marker)
 
+(** Like [caret_pos] but finds ALL occurrences of the marker in the source. *)
+let all_caret_positions (src : string) (marker : string) :
+    File_content.Position.t list =
+  String.split_lines src
+  |> List.filter_mapi ~f:(fun line_num line_src ->
+         if String.is_substring line_src ~substring:marker then
+           let col_num =
+             String.lfindi line_src ~f:(fun _ c ->
+                 match c with
+                 | '^' -> true
+                 | _ -> false)
+           in
+           Option.map col_num ~f:(fun col ->
+               File_content.Position.from_one_based line_num (col + 1))
+         else
+           None)
+
 let find_ide_range_exn src : Ide_api_types.range =
   let open Option.Let_syntax in
   let start_marker = "/*range-start*/" in
@@ -1640,6 +1678,43 @@ let do_hover ~ctx ~filename oc (pos_given : File_content.Position.t option) =
     |> String.concat ~sep:"\n"
   in
   Printf.fprintf oc "%s\n" formatted_results
+
+let do_enforcement
+    ~ctx ~filename oc (pos_given : File_content.Position.t option) =
+  let (ctx, entry) =
+    Provider_context.add_entry_if_missing ~ctx ~path:filename
+  in
+  let pos =
+    match pos_given with
+    | Some pos -> pos
+    | None ->
+      let src = Provider_context.read_file_contents_exn entry in
+      caret_pos_exn src "^ enforcement-at-caret"
+  in
+  let open EnforcementAtPosService in
+  let result = ServerEnforcementAtPos.go_ctx ~ctx ~entry pos in
+  match result with
+  | Some (Enforced types) ->
+    let ty_strs = List.map types ~f:(fun t -> t.ty_str) in
+    Printf.fprintf oc "%s: Enforced\n" (String.concat ~sep:", " ty_strs)
+  | Some Unenforced -> Printf.fprintf oc "Unenforced\n"
+  | None -> Printf.fprintf oc "(unknown)\n"
+
+let do_enforcement_batch ~ctx ~filename oc =
+  let (ctx, entry) =
+    Provider_context.add_entry_if_missing ~ctx ~path:filename
+  in
+  let src = Provider_context.read_file_contents_exn entry in
+  let open EnforcementAtPosService in
+  let positions = all_caret_positions src "^ enforcement-at-caret" in
+  List.iter positions ~f:(fun pos ->
+      let result = ServerEnforcementAtPos.go_ctx ~ctx ~entry pos in
+      match result with
+      | Some (Enforced types) ->
+        let ty_strs = List.map types ~f:(fun t -> t.ty_str) in
+        Printf.fprintf oc "%s: Enforced\n" (String.concat ~sep:", " ty_strs)
+      | Some Unenforced -> Printf.fprintf oc "Unenforced\n"
+      | None -> Printf.fprintf oc "(unknown)\n")
 
 let handle_mode
     mode
@@ -2177,6 +2252,28 @@ let handle_mode
   | Hover pos_given ->
     let filename = expect_single_file () in
     do_hover ~ctx ~filename stdout pos_given
+  | Enforcement None when batch_mode ->
+    iter_over_files (fun filename ->
+        let oc =
+          Out_channel.create (Relative_path.to_absolute filename ^ out_extension)
+        in
+        Typing_log.out_channel := oc;
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+            do_enforcement ~ctx ~filename oc None))
+  | Enforcement pos_given ->
+    let filename = expect_single_file () in
+    do_enforcement ~ctx ~filename stdout pos_given
+  | Enforcement_batch when batch_mode ->
+    iter_over_files (fun filename ->
+        let oc =
+          Out_channel.create (Relative_path.to_absolute filename ^ out_extension)
+        in
+        Typing_log.out_channel := oc;
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+            do_enforcement_batch ~ctx ~filename oc))
+  | Enforcement_batch ->
+    let filename = expect_single_file () in
+    do_enforcement_batch ~ctx ~filename stdout
   | Apply_quickfixes ->
     let path = expect_single_file () in
     let (ctx, _entry) = Provider_context.add_entry_if_missing ~ctx ~path in

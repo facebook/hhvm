@@ -41,6 +41,7 @@
   refactor_sd
   remove_dead_unsafe_casts
   server_env
+  server_enforcement_at_pos
   server_env_build
   code_actions_services
   server_file_outline

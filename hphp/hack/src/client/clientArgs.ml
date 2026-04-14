@@ -369,6 +369,20 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<extended|raw|context|highlighted|plain> Error formatting style; (default: highlighted)",
         Arg_user_facing );
+      ( "--enforcement-at-pos-batch",
+        Arg.Rest
+          begin
+            fun position ->
+              set_mode
+                ~validate:false
+                (match !mode with
+                | None -> MODE_ENFORCEMENT_AT_POS_BATCH [position]
+                | Some (MODE_ENFORCEMENT_AT_POS_BATCH positions) ->
+                  MODE_ENFORCEMENT_AT_POS_BATCH (position :: positions)
+                | _ -> raise (Arg.Bad "only a single mode should be specified"))
+          end,
+        " (mode) show enforcement at multiple positions [file:line:character list]",
+        Arg_user_facing );
       ( "--file-dependents",
         Arg.Unit
           (fun () ->

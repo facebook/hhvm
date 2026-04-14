@@ -205,6 +205,30 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+ (name server_enforcement_at_pos)
+ (wrapped false)
+ (modules serverEnforcementAtPos)
+ (libraries
+  annotated_ast
+  decl_provider
+  decl_provider_internals
+  file_content
+  naming_special_names
+  shallow_decl_defs
+  hh_json
+  pos
+  provider_context
+  server_command_types
+  tast_env
+  tast_provider
+  typing
+  typing_defs
+  utils_core
+  visitors_runtime)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name server_docblock_at)
  (wrapped false)
  (modules serverDocblockAt)
@@ -260,6 +284,7 @@
  (modules
   autocompleteTypes
   docblockService
+  enforcementAtPosService
   findRefsWireFormat
   hoverService
   inferAtPosService

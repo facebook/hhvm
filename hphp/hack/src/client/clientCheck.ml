@@ -588,6 +588,27 @@ let main_internal
     in
     ClientTypeAtPos.go ty args.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
+  | ClientEnv.MODE_ENFORCEMENT_AT_POS_BATCH positions ->
+    let positions =
+      List.map positions ~f:(fun pos ->
+          try
+            match Str.split (Str.regexp ":") pos with
+            | [filename; line; char] ->
+              ( expand_path filename,
+                File_content.Position.from_one_based
+                  (int_of_string line)
+                  (int_of_string char) )
+            | _ -> raise Exit
+          with
+          | _ ->
+            Printf.eprintf "Invalid position\n";
+            raise Exit_status.(Exit_with Input_error))
+    in
+    let%lwt (responses, telemetry) =
+      rpc args @@ ServerCommandTypes.ENFORCEMENT_AT_POS_BATCH positions
+    in
+    List.iter responses ~f:print_endline;
+    Lwt.return (Exit_status.No_error, telemetry)
   | ClientEnv.MODE_TYPE_AT_POS_BATCH positions ->
     let positions =
       List.map positions ~f:(fun pos ->

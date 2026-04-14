@@ -71,6 +71,7 @@ type client_mode =
   | MODE_STATUS_SINGLE of status_single
   | MODE_LOG_ERRORS of log_errors_params
   | MODE_TYPE_AT_POS of string
+  | MODE_ENFORCEMENT_AT_POS_BATCH of string list
   | MODE_TYPE_AT_POS_BATCH of string list
   | MODE_TYPE_ERROR_AT_POS of string
   | MODE_IS_SUBTYPE

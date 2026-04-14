@@ -6,6 +6,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --deps-out-at-pos-batch                                 (mode) for each entry in input list get list of what it depends on [file:line:character list]
   --deps-in-at-pos-batch                                  (mode) for each entry in input list get list of what depends on it [file:line:character list]
   --error-format <extended|raw|context|highlighted|plain> Error formatting style; (default: highlighted)
+  --enforcement-at-pos-batch                              (mode) show enforcement at multiple positions [file:line:character list]
   --file-dependents                                       (mode) Given a list of filepaths, shows list of (possibly) dependent files
   --find-class-refs                                       (mode) finds references of the provided class name
   --find-refs                                             (mode) finds references of the provided symbol; optionally specify the symbol kind like "Kind|Symbol" (looks for functions or methods if unspecified); valid kinds are Method, Property, Class_const, Typeconst, Function, Class, ExplicitClass, and GConst; use ExplicitClass instead of Class to exclude references via self/static/parent

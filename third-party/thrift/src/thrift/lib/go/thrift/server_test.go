@@ -1042,3 +1042,193 @@ func TestRocketServerFallbackToHeader(t *testing.T) {
 	err = serverEG.Wait()
 	require.ErrorIs(t, err, context.Canceled)
 }
+
+// TestStreamingSinkExceptionObserver verifies that observer exception tracking
+// methods are called for streaming (requestStream) and sink/channel (requestChannel)
+// code paths in the server.
+func TestStreamingSinkExceptionObserver(t *testing.T) {
+	setup := func(t *testing.T) (dummyif.DummyClient, *MockServerObserver) {
+		mockObserver := &MockServerObserver{}
+		mockObserver.On("ConnAccepted").Maybe()
+		mockObserver.On("ConnTLSAccepted").Maybe()
+		mockObserver.On("ConnDropped").Maybe()
+		mockObserver.On("ReceivedHeaderRequest").Maybe()
+		mockObserver.On("ReceivedRequest").Maybe()
+		mockObserver.On("ReceivedRequestForFunction", mock.Anything).Maybe()
+		mockObserver.On("SentReply").Maybe()
+		mockObserver.On("ActiveRequests", mock.Anything).Maybe()
+		mockObserver.On("ProcessDelay", mock.Anything).Maybe()
+		mockObserver.On("ProcessTime", mock.Anything).Maybe()
+		mockObserver.On("ProcessorPanic").Maybe()
+		mockObserver.On("TaskKilled").Maybe()
+		mockObserver.On("TaskTimeout").Maybe()
+		mockObserver.On("DeclaredException").Maybe()
+		mockObserver.On("UndeclaredException").Maybe()
+		mockObserver.On("ServerOverloaded").Maybe()
+		mockObserver.On("UndeclaredExceptionForFunction", mock.Anything).Maybe()
+		mockObserver.On("AnyExceptionForFunction", mock.Anything).Maybe()
+		mockObserver.On("TimeReadUsForFunction", mock.Anything, mock.Anything).Maybe()
+		mockObserver.On("TimeProcessUsForFunction", mock.Anything, mock.Anything).Maybe()
+		mockObserver.On("TimeWriteUsForFunction", mock.Anything, mock.Anything).Maybe()
+
+		listener, err := net.Listen("tcp", "[::]:0")
+		require.NoError(t, err)
+		addr := listener.Addr()
+
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
+		server := NewServer(processor, listener, TransportIDRocket, WithServerObserver(mockObserver))
+
+		serverCtx, serverCancel := context.WithCancel(context.Background())
+		var serverEG errgroup.Group
+		serverEG.Go(func() error {
+			return server.ServeContext(serverCtx)
+		})
+
+		channel, err := NewClient(
+			WithRocket(),
+			WithIoTimeout(5*time.Second),
+			WithDialer(func() (net.Conn, error) {
+				return net.DialTimeout(addr.Network(), addr.String(), 5*time.Second)
+			}),
+		)
+		require.NoError(t, err)
+
+		t.Cleanup(func() {
+			channel.Close()
+			serverCancel()
+			serverEG.Wait()
+		})
+
+		return dummyif.NewDummyChannelClient(channel), mockObserver
+	}
+
+	tests := []struct {
+		name             string
+		rpcCall          func(t *testing.T, client dummyif.DummyClient)
+		expectUndeclared bool
+		expectDeclared   bool
+		functionName     string
+	}{
+		{
+			name: "stream_undeclared_exception",
+			rpcCall: func(t *testing.T, client dummyif.DummyClient) {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				streamSeq, err := client.StreamWithUndeclaredException(ctx)
+				require.NoError(t, err)
+				for _, err := range streamSeq {
+					if err != nil {
+						break
+					}
+				}
+			},
+			expectUndeclared: true,
+			functionName:     "StreamWithUndeclaredException",
+		},
+		{
+			name: "stream_declared_exception",
+			rpcCall: func(t *testing.T, client dummyif.DummyClient) {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				streamSeq, err := client.StreamWithDeclaredException(ctx)
+				require.NoError(t, err)
+				for _, err := range streamSeq {
+					if err != nil {
+						break
+					}
+				}
+			},
+			expectDeclared: true,
+			functionName:   "StreamWithDeclaredException",
+		},
+		{
+			name: "response_and_stream_undeclared_exception",
+			rpcCall: func(t *testing.T, client dummyif.DummyClient) {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				_, _, err := client.ResponseAndStreamWithUndeclaredException(ctx)
+				require.Error(t, err)
+			},
+			expectUndeclared: true,
+			functionName:     "ResponseAndStreamWithUndeclaredException",
+		},
+		{
+			name: "sink_undeclared_final_exception",
+			rpcCall: func(t *testing.T, client dummyif.DummyClient) {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				sinkCallback, err := client.SinkWithUndeclaredFinalException(ctx)
+				require.NoError(t, err)
+				sinkSeq := func(yield func(int32, error) bool) {
+					for i := int32(1); i <= 3; i++ {
+						if !yield(i, nil) {
+							return
+						}
+					}
+				}
+				_, err = sinkCallback(sinkSeq)
+				require.Error(t, err)
+			},
+			expectUndeclared: true,
+			functionName:     "SinkWithUndeclaredFinalException",
+		},
+		{
+			name: "sink_declared_final_exception",
+			rpcCall: func(t *testing.T, client dummyif.DummyClient) {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				sinkCallback, err := client.SinkWithDeclaredFinalException(ctx)
+				require.NoError(t, err)
+				sinkSeq := func(yield func(int32, error) bool) {
+					for i := int32(1); i <= 3; i++ {
+						if !yield(i, nil) {
+							return
+						}
+					}
+				}
+				_, err = sinkCallback(sinkSeq)
+				require.Error(t, err)
+			},
+			expectDeclared: true,
+			functionName:   "SinkWithDeclaredFinalException",
+		},
+		{
+			name: "response_and_sink_undeclared_exception",
+			rpcCall: func(t *testing.T, client dummyif.DummyClient) {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				_, _, err := client.ResponseAndSinkWithUndeclaredException(ctx)
+				require.Error(t, err)
+			},
+			expectUndeclared: true,
+			functionName:     "ResponseAndSinkWithUndeclaredException",
+		},
+		{
+			name: "response_and_sink_declared_exception",
+			rpcCall: func(t *testing.T, client dummyif.DummyClient) {
+				ctx, cancel := context.WithCancel(context.Background())
+				defer cancel()
+				_, _, err := client.ResponseAndSinkWithDeclaredException(ctx)
+				require.Error(t, err)
+			},
+			expectDeclared: true,
+			functionName:   "ResponseAndSinkWithDeclaredException",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mockObserver := setup(t)
+			tt.rpcCall(t, client)
+
+			if tt.expectUndeclared {
+				mockObserver.AssertCalled(t, "UndeclaredException")
+				mockObserver.AssertCalled(t, "UndeclaredExceptionForFunction", tt.functionName)
+			}
+			if tt.expectDeclared {
+				mockObserver.AssertCalled(t, "DeclaredException")
+			}
+			mockObserver.AssertCalled(t, "AnyExceptionForFunction", tt.functionName)
+		})
+	}
+}

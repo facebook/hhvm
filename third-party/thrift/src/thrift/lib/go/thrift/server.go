@@ -561,6 +561,9 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 				var payload payload.Payload
 				appException, isAppException := respStruct.(*types.ApplicationException)
 				if isAppException {
+					s.observer.UndeclaredException()
+					s.observer.UndeclaredExceptionForFunction(rpcFuncName)
+					s.observer.AnyExceptionForFunction(rpcFuncName)
 					payload, err = rocket.EncodeResponseApplicationErrorPayload(
 						appException,
 						protocol.getRequestHeaders(),
@@ -607,6 +610,9 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 					)
 					// Response should be empty to adhere to spec
 					dataBytes = nil
+					s.observer.UndeclaredException()
+					s.observer.UndeclaredExceptionForFunction(rpcFuncName)
+					s.observer.AnyExceptionForFunction(rpcFuncName)
 				} else if streamResult, ok := streamStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
 					declaredErr := streamResult.Exception()
 					exceptionMetadataBase = rocket.NewPayloadExceptionMetadataBase(
@@ -617,6 +623,8 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 						rpcmetadata.ErrorBlame_UNSPECIFIED,
 						rpcmetadata.ErrorSafety_UNSPECIFIED,
 					)
+					s.observer.DeclaredException()
+					s.observer.AnyExceptionForFunction(rpcFuncName)
 				}
 
 				if exceptionMetadataBase != nil {
@@ -749,6 +757,9 @@ func (s *rocketServerSocket) requestChannel(request payload.Payload, requests fl
 					rpcmetadata.ErrorSafety_UNSPECIFIED,
 				)
 				dataBytes = nil
+				s.observer.UndeclaredException()
+				s.observer.UndeclaredExceptionForFunction(rpcFuncName)
+				s.observer.AnyExceptionForFunction(rpcFuncName)
 			} else if streamResult, ok := respStruct.(types.WritableResult); ok && streamResult.Exception() != nil {
 				declaredErr := streamResult.Exception()
 				exceptionMetadata = rocket.NewPayloadExceptionMetadataBase(
@@ -759,6 +770,8 @@ func (s *rocketServerSocket) requestChannel(request payload.Payload, requests fl
 					rpcmetadata.ErrorBlame_UNSPECIFIED,
 					rpcmetadata.ErrorSafety_UNSPECIFIED,
 				)
+				s.observer.DeclaredException()
+				s.observer.AnyExceptionForFunction(rpcFuncName)
 			}
 
 			if isFirstResponse {

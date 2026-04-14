@@ -122,7 +122,9 @@ CookieState getCookieState(
   state.group = group;
   state.appToken = std::move(appToken);
 
-  auto handshakeContext = factory.makeHandshakeContext(*cipher);
+  std::unique_ptr<HandshakeContext> handshakeContext;
+  FIZZ_THROW_ON_ERROR(
+      factory.makeHandshakeContext(handshakeContext, err, *cipher), err);
   handshakeContext->appendToTranscript(*chlo.originalEncoding);
   state.chloHash = handshakeContext->getHandshakeContext();
 

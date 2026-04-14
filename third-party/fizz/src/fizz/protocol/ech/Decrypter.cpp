@@ -28,21 +28,24 @@ struct DecrypterLookupResult {
 // matching config.
 //
 // Can return folly::none if no matching config is found.
-folly::Optional<DecrypterLookupResult> decodeAndGetParam(
+Status decodeAndGetParam(
+    folly::Optional<DecrypterLookupResult>& ret,
+    Error& err,
     const Extension& encodedECHExtension,
     const std::vector<DecrypterParams>& decrypterParams) {
   folly::io::Cursor cursor(encodedECHExtension.extension_data.get());
   ech::OuterECHClientHello echExtension;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      getExtension<ech::OuterECHClientHello>(echExtension, err, cursor), err);
+  FIZZ_RETURN_ON_ERROR(
+      getExtension<ech::OuterECHClientHello>(echExtension, err, cursor));
   for (const auto& param : decrypterParams) {
     if (echExtension.config_id == param.echConfig.key_config.config_id) {
-      return DecrypterLookupResult{std::move(echExtension), param};
+      ret.emplace(DecrypterLookupResult{std::move(echExtension), param});
+      return Status::Success;
     }
   }
   // No match
-  return folly::none;
+  ret = folly::none;
+  return Status::Success;
 }
 
 Status tryToDecodeECH(
@@ -52,7 +55,9 @@ Status tryToDecodeECH(
     const ClientHello& clientHelloOuter,
     const Extension& encodedECHExtension,
     const std::vector<DecrypterParams>& decrypterParams) {
-  auto configIdResult = decodeAndGetParam(encodedECHExtension, decrypterParams);
+  folly::Optional<DecrypterLookupResult> configIdResult;
+  FIZZ_RETURN_ON_ERROR(decodeAndGetParam(
+      configIdResult, err, encodedECHExtension, decrypterParams));
 
   if (!configIdResult.has_value()) {
     ret = folly::none;
@@ -60,13 +65,18 @@ Status tryToDecodeECH(
   }
 
   try {
-    auto context = setupDecryptionContext(
-        factory,
-        configIdResult->matchingParam.echConfig,
-        configIdResult->echExtension.cipher_suite,
-        configIdResult->echExtension.enc,
-        configIdResult->matchingParam.kex->clone(),
-        0);
+    std::unique_ptr<hpke::HpkeContext> context;
+    FIZZ_THROW_ON_ERROR(
+        setupDecryptionContext(
+            context,
+            err,
+            factory,
+            configIdResult->matchingParam.echConfig,
+            configIdResult->echExtension.cipher_suite,
+            configIdResult->echExtension.enc,
+            configIdResult->matchingParam.kex->clone(),
+            0),
+        err);
     ClientHello chlo;
     FIZZ_THROW_ON_ERROR(
         decryptECHWithContext(
@@ -111,7 +121,9 @@ Status decodeClientHelloHRR(
         "ech not sent for hrr", AlertDescription::missing_extension);
   }
 
-  auto configIdResult = decodeAndGetParam(*it, decrypterParams);
+  folly::Optional<DecrypterLookupResult> configIdResult;
+  FIZZ_RETURN_ON_ERROR(
+      decodeAndGetParam(configIdResult, err, *it, decrypterParams));
 
   if (!configIdResult.has_value()) {
     return err.error(
@@ -135,13 +147,18 @@ Status decodeClientHelloHRR(
           err);
       return Status::Success;
     } else {
-      auto recreatedContext = setupDecryptionContext(
-          factory,
-          configIdResult->matchingParam.echConfig,
-          configIdResult->echExtension.cipher_suite,
-          encapsulatedKey,
-          configIdResult->matchingParam.kex->clone(),
-          1);
+      std::unique_ptr<hpke::HpkeContext> recreatedContext;
+      FIZZ_THROW_ON_ERROR(
+          setupDecryptionContext(
+              recreatedContext,
+              err,
+              factory,
+              configIdResult->matchingParam.echConfig,
+              configIdResult->echExtension.cipher_suite,
+              encapsulatedKey,
+              configIdResult->matchingParam.kex->clone(),
+              1),
+          err);
       FIZZ_THROW_ON_ERROR(
           decryptECHWithContext(
               ret,
@@ -202,16 +219,17 @@ Status ECHConfigManager::decryptClientHelloHRR(
       ret, err, *factory_, chlo, encapsulatedKey, dummy, configs_);
 }
 
-std::vector<ech::ECHConfig> ECHConfigManager::getRetryConfigs(
+Status ECHConfigManager::getRetryConfigs(
+    std::vector<ech::ECHConfig>& ret,
+    Error& err,
     const folly::Optional<std::string>& maybeSni) const {
   std::vector<ech::ECHConfig> retryConfigs;
   std::vector<ech::ECHConfig> nonMatchingConfigs;
   for (const auto& config : configs_) {
     auto echConfig = ech::ECHConfig{};
     echConfig.version = ech::ECHVersion::Draft15;
-    Error err;
-    FIZZ_THROW_ON_ERROR(
-        encode(echConfig.ech_config_content, err, config.echConfig), err);
+    FIZZ_RETURN_ON_ERROR(
+        encode(echConfig.ech_config_content, err, config.echConfig));
     if (maybeSni.hasValue() &&
         maybeSni.value() == config.echConfig.public_name) {
       retryConfigs.push_back(std::move(echConfig));
@@ -223,7 +241,8 @@ std::vector<ech::ECHConfig> ECHConfigManager::getRetryConfigs(
       retryConfigs.end(),
       std::make_move_iterator(nonMatchingConfigs.begin()),
       std::make_move_iterator(nonMatchingConfigs.end()));
-  return retryConfigs;
+  ret = std::move(retryConfigs);
+  return Status::Success;
 }
 
 } // namespace ech

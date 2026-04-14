@@ -772,7 +772,9 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   if (ech) {
     echConfigs = getDefaultECHConfigs();
   } else if (!echConfigsBase64.empty()) {
-    echConfigs = parseECHConfigsBase64(echConfigsBase64);
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        parseECHConfigsBase64(echConfigs, err, echConfigsBase64), err);
     if (!echConfigs.has_value()) {
       FIZZ_LOG(ERROR) << "Unable to parse ECHConfigList base64.";
       return 1;

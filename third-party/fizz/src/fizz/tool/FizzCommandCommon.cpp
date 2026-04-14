@@ -149,27 +149,33 @@ folly::Optional<folly::dynamic> readECHConfigsJson(std::string echFile) {
   return json;
 }
 
-folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigsBase64(
+Status parseECHConfigsBase64(
+    folly::Optional<std::vector<ech::ParsedECHConfig>>& ret,
+    Error& err,
     std::string echConfigListBase64) {
   std::vector<ech::ParsedECHConfig> echConfigs;
   auto configBuf = folly::IOBuf::copyBuffer(
       folly::base64Decode(folly::trimWhitespace(echConfigListBase64)));
   folly::io::Cursor cursor(configBuf.get());
   ech::ECHConfigList configList;
-  Error err;
-  FIZZ_THROW_ON_ERROR(decode<ech::ECHConfigList>(configList, err, cursor), err);
+  FIZZ_RETURN_ON_ERROR(decode<ech::ECHConfigList>(configList, err, cursor));
   for (const auto& config : configList.configs) {
-    if (auto maybeParsedECHConfig =
-            ech::ParsedECHConfig::parseSupportedECHConfig(config)) {
+    folly::Optional<ech::ParsedECHConfig> maybeParsedECHConfig;
+    FIZZ_RETURN_ON_ERROR(
+        ech::ParsedECHConfig::parseSupportedECHConfig(
+            maybeParsedECHConfig, err, config));
+    if (maybeParsedECHConfig.hasValue()) {
       echConfigs.push_back(std::move(maybeParsedECHConfig.value()));
     }
   }
 
   if (echConfigs.empty()) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
 
-  return echConfigs;
+  ret = std::move(echConfigs);
+  return Status::Success;
 }
 
 folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigs(

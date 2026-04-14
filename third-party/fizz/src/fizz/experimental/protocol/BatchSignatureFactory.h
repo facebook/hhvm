@@ -47,14 +47,18 @@ class BatchSignatureFactory : public Factory {
     return original_->makeEncryptedWriteRecordLayer(encryptionLevel);
   }
 
-  std::unique_ptr<KeyScheduler> makeKeyScheduler(
+  Status makeKeyScheduler(
+      std::unique_ptr<KeyScheduler>& ret,
+      Error& err,
       CipherSuite cipher) const override {
-    return original_->makeKeyScheduler(cipher);
+    return original_->makeKeyScheduler(ret, err, cipher);
   }
 
-  std::unique_ptr<KeyDerivation> makeKeyDeriver(
+  Status makeKeyDeriver(
+      std::unique_ptr<KeyDerivation>& ret,
+      Error& err,
       CipherSuite cipher) const override {
-    return original_->makeKeyDeriver(cipher);
+    return original_->makeKeyDeriver(ret, err, cipher);
   }
 
   Status makeHasherFactory(
@@ -64,9 +68,11 @@ class BatchSignatureFactory : public Factory {
     return original_->makeHasherFactory(ret, err, digest);
   }
 
-  std::unique_ptr<HandshakeContext> makeHandshakeContext(
+  Status makeHandshakeContext(
+      std::unique_ptr<HandshakeContext>& ret,
+      Error& err,
       CipherSuite cipher) const override {
-    return original_->makeHandshakeContext(cipher);
+    return original_->makeHandshakeContext(ret, err, cipher);
   }
 
   Status makeKeyExchange(

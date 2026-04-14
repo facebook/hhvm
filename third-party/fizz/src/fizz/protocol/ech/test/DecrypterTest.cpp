@@ -38,13 +38,20 @@ ClientHello getChloOuterWithExt(
       maxNameLength,
       HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
-  auto setupResult = constructHpkeSetupResult(
-      fizz::DefaultFactory(), std::move(kex), negotiatedECHConfig);
+  hpke::SetupResult setupResult;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      constructHpkeSetupResult(
+          setupResult,
+          err,
+          fizz::DefaultFactory(),
+          std::move(kex),
+          negotiatedECHConfig),
+      err);
 
   auto chloInner = TestMessages::clientHello();
   InnerECHClientHello chloInnerECHExt;
   Extension innerECHExt;
-  Error err;
   FIZZ_THROW_ON_ERROR(encodeExtension(innerECHExt, err, chloInnerECHExt), err);
   chloInner.extensions.push_back(std::move(innerECHExt));
 
@@ -52,8 +59,18 @@ ClientHello getChloOuterWithExt(
   ClientHello chloOuter = getClientHelloOuter();
   chloOuter.legacy_session_id = folly::IOBuf::create(0);
 
-  OuterECHClientHello echExt = encryptClientHello(
-      negotiatedECHConfig, chloInner, chloOuter, setupResult, folly::none, {});
+  OuterECHClientHello echExt;
+  FIZZ_THROW_ON_ERROR(
+      encryptClientHello(
+          echExt,
+          err,
+          negotiatedECHConfig,
+          chloInner,
+          chloOuter,
+          setupResult,
+          folly::none,
+          {}),
+      err);
 
   // Add ECH extension
   Extension outerECHExt;
@@ -77,13 +94,20 @@ ClientHello getChloOuterHRRWithExt(
       echConfigContent.maximum_name_length,
       HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
-  auto setupResult = constructHpkeSetupResult(
-      fizz::DefaultFactory(), std::move(kex), negotiatedECHConfig);
+  hpke::SetupResult setupResult;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      constructHpkeSetupResult(
+          setupResult,
+          err,
+          fizz::DefaultFactory(),
+          std::move(kex),
+          negotiatedECHConfig),
+      err);
 
   auto chloInner = TestMessages::clientHello();
   InnerECHClientHello chloInnerECHExt;
   Extension innerECHExt;
-  Error err;
   FIZZ_THROW_ON_ERROR(encodeExtension(innerECHExt, err, chloInnerECHExt), err);
   chloInner.extensions.push_back(std::move(innerECHExt));
 
@@ -91,8 +115,18 @@ ClientHello getChloOuterHRRWithExt(
   chloOuter.legacy_session_id = folly::IOBuf::create(0);
 
   // Encrypt client hello once to increment counter and get enc value.
-  auto initialECH = encryptClientHello(
-      negotiatedECHConfig, chloInner, chloOuter, setupResult, folly::none, {});
+  OuterECHClientHello initialECH;
+  FIZZ_THROW_ON_ERROR(
+      encryptClientHello(
+          initialECH,
+          err,
+          negotiatedECHConfig,
+          chloInner,
+          chloOuter,
+          setupResult,
+          folly::none,
+          {}),
+      err);
 
   // First, save out the first ECH
   initialOuterChlo = chloOuter.clone();
@@ -104,8 +138,18 @@ ClientHello getChloOuterHRRWithExt(
   enc = std::move(initialECH.enc);
 
   // Second encryption for HRR
-  OuterECHClientHello echExt = encryptClientHelloHRR(
-      negotiatedECHConfig, chloInner, chloOuter, setupResult, folly::none, {});
+  OuterECHClientHello echExt;
+  FIZZ_THROW_ON_ERROR(
+      encryptClientHelloHRR(
+          echExt,
+          err,
+          negotiatedECHConfig,
+          chloInner,
+          chloOuter,
+          setupResult,
+          folly::none,
+          {}),
+      err);
 
   // Add ECH extension
   Extension outerECHExt;
@@ -135,7 +179,11 @@ void checkRetryConfigExpectation(
     const std::vector<ECHConfig>& configs) {
   ASSERT_EQ(expectations.size(), configs.size());
   for (size_t i = 0; i < expectations.size(); ++i) {
-    auto config = ParsedECHConfig::parseSupportedECHConfig(configs[i]);
+    folly::Optional<ParsedECHConfig> config;
+    Error err;
+    EXPECT_EQ(
+        ParsedECHConfig::parseSupportedECHConfig(config, err, configs[i]),
+        Status::Success);
     ASSERT_TRUE(config.hasValue());
     EXPECT_EQ(expectations[i].id, config->key_config.config_id);
     EXPECT_EQ(expectations[i].name, config->public_name);
@@ -371,6 +419,15 @@ TEST(DecrypterTest, TestGetRetryConfigs) {
         {.echConfig = makeDummyConfig(configId++, name)});
   }
 
+  auto getRetryConfigsHelper =
+      [&decrypter](const folly::Optional<std::string>& maybeSni) {
+        std::vector<ECHConfig> ret;
+        Error err;
+        EXPECT_EQ(
+            decrypter.getRetryConfigs(ret, err, maybeSni), Status::Success);
+        return ret;
+      };
+
   checkRetryConfigExpectation(
       {{0, "a.com"},
        {2, "a.com"},
@@ -378,7 +435,7 @@ TEST(DecrypterTest, TestGetRetryConfigs) {
        {1, "b.com"},
        {3, "c.com"},
        {4, "b.com"}},
-      decrypter.getRetryConfigs("a.com"s));
+      getRetryConfigsHelper("a.com"s));
   checkRetryConfigExpectation(
       {{1, "b.com"},
        {4, "b.com"},
@@ -386,7 +443,7 @@ TEST(DecrypterTest, TestGetRetryConfigs) {
        {2, "a.com"},
        {3, "c.com"},
        {5, "a.com"}},
-      decrypter.getRetryConfigs("b.com"s));
+      getRetryConfigsHelper("b.com"s));
   checkRetryConfigExpectation(
       {{3, "c.com"},
        {0, "a.com"},
@@ -394,7 +451,7 @@ TEST(DecrypterTest, TestGetRetryConfigs) {
        {2, "a.com"},
        {4, "b.com"},
        {5, "a.com"}},
-      decrypter.getRetryConfigs("c.com"s));
+      getRetryConfigsHelper("c.com"s));
   checkRetryConfigExpectation(
       {{0, "a.com"},
        {1, "b.com"},
@@ -402,7 +459,7 @@ TEST(DecrypterTest, TestGetRetryConfigs) {
        {3, "c.com"},
        {4, "b.com"},
        {5, "a.com"}},
-      decrypter.getRetryConfigs("d.com"s));
+      getRetryConfigsHelper("d.com"s));
   checkRetryConfigExpectation(
       {{0, "a.com"},
        {1, "b.com"},
@@ -410,7 +467,7 @@ TEST(DecrypterTest, TestGetRetryConfigs) {
        {3, "c.com"},
        {4, "b.com"},
        {5, "a.com"}},
-      decrypter.getRetryConfigs(folly::none));
+      getRetryConfigsHelper(folly::none));
 }
 
 } // namespace test

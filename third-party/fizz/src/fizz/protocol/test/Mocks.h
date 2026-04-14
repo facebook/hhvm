@@ -271,14 +271,26 @@ class MockFactory : public ::fizz::DefaultFactory {
       (const));
   MOCK_METHOD(
       std::unique_ptr<KeyScheduler>,
-      makeKeyScheduler,
+      _makeKeyScheduler,
       (CipherSuite cipher),
       (const));
+  Status makeKeyScheduler(
+      std::unique_ptr<KeyScheduler>& ret,
+      Error& err,
+      CipherSuite cipher) const override {
+    FIZZ_THROW_TO_ERROR(ret, _makeKeyScheduler(cipher));
+  }
   MOCK_METHOD(
       std::unique_ptr<HandshakeContext>,
-      makeHandshakeContext,
+      _makeHandshakeContext,
       (CipherSuite cipher),
       (const));
+  Status makeHandshakeContext(
+      std::unique_ptr<HandshakeContext>& ret,
+      Error& err,
+      CipherSuite cipher) const override {
+    FIZZ_THROW_TO_ERROR(ret, _makeHandshakeContext(cipher));
+  }
   MOCK_METHOD(
       std::unique_ptr<KeyExchange>,
       _makeKeyExchange,
@@ -351,12 +363,12 @@ class MockFactory : public ::fizz::DefaultFactory {
           return ret;
         }));
 
-    ON_CALL(*this, makeKeyScheduler(_)).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _makeKeyScheduler(_)).WillByDefault(InvokeWithoutArgs([]() {
       auto ret = std::make_unique<NiceMock<MockKeyScheduler>>();
       ret->setDefaults();
       return ret;
     }));
-    ON_CALL(*this, makeHandshakeContext(_))
+    ON_CALL(*this, _makeHandshakeContext(_))
         .WillByDefault(InvokeWithoutArgs([]() {
           auto ret = std::make_unique<NiceMock<MockHandshakeContext>>();
           ret->setDefaults();
@@ -536,9 +548,16 @@ class MockECHDecrypter : public ech::Decrypter {
 
   MOCK_METHOD(
       std::vector<ech::ECHConfig>,
-      getRetryConfigs,
+      _getRetryConfigs,
       (const folly::Optional<std::string>& maybeSni),
-      (const, override));
+      (const));
+
+  Status getRetryConfigs(
+      std::vector<ech::ECHConfig>& ret,
+      Error& err,
+      const folly::Optional<std::string>& maybeSni) const override {
+    FIZZ_THROW_TO_ERROR(ret, _getRetryConfigs(maybeSni));
+  }
 };
 } // namespace test
 } // namespace fizz

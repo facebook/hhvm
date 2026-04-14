@@ -89,8 +89,13 @@ hpke::SetupResult constructSetupResult(
   kex->setPrivateKey(std::move(privateKey));
   EXPECT_CALL(*kex, generateKeyPair()).Times(1);
 
-  return constructHpkeSetupResult(
-      fizz::DefaultFactory(), std::move(kex), supportedConfig);
+  hpke::SetupResult ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      constructHpkeSetupResult(
+          ret, err, fizz::DefaultFactory(), std::move(kex), supportedConfig),
+      err);
+  return ret;
 }
 
 OuterECHClientHello getTestOuterECHClientHelloWithInner(ClientHello chloInner) {
@@ -106,13 +111,20 @@ OuterECHClientHello getTestOuterECHClientHelloWithInner(ClientHello chloInner) {
   chloInner.legacy_session_id = folly::IOBuf::copyBuffer(testLegacySessionId);
 
   std::vector<ExtensionType> outerExtensionTypes = {ExtensionType::key_share};
-  return encryptClientHello(
-      supportedConfig,
-      std::move(chloInner),
-      getClientHelloOuter(),
-      setupResult,
-      folly::none,
-      outerExtensionTypes);
+  OuterECHClientHello ret;
+  Error err;
+  EXPECT_EQ(
+      encryptClientHello(
+          ret,
+          err,
+          supportedConfig,
+          chloInner,
+          getClientHelloOuter(),
+          setupResult,
+          folly::none,
+          outerExtensionTypes),
+      Status::Success);
+  return ret;
 }
 
 OuterECHClientHello getTestOuterECHClientHello() {
@@ -328,10 +340,15 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
 
   // Check padding
   auto configContent = getParsedECHConfig();
-  auto paddingSize = calculateECHPadding(
-      gotChlo,
-      encodedECHInnerCursor.getCurrentPosition(),
-      configContent.maximum_name_length);
+  size_t paddingSize;
+  EXPECT_EQ(
+      calculateECHPadding(
+          paddingSize,
+          err,
+          gotChlo,
+          encodedECHInnerCursor.getCurrentPosition(),
+          configContent.maximum_name_length),
+      Status::Success);
   for (size_t i = 0; i < paddingSize; i++) {
     EXPECT_EQ(0, encodedECHInnerCursor.read<uint8_t>());
   }
@@ -366,13 +383,18 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
   auto privateKey = getPrivateKey(kP256Key);
   kex->setPrivateKey(std::move(privateKey));
 
-  auto context = setupDecryptionContext(
-      fizz::DefaultFactory(),
-      getParsedECHConfig(),
-      testECH.cipher_suite,
-      testECH.enc->clone(),
-      std::move(kex),
-      0);
+  std::unique_ptr<hpke::HpkeContext> context;
+  EXPECT_EQ(
+      setupDecryptionContext(
+          context,
+          err,
+          fizz::DefaultFactory(),
+          getParsedECHConfig(),
+          testECH.cipher_suite,
+          testECH.enc->clone(),
+          std::move(kex),
+          0),
+      Status::Success);
 
   ClientHello chlo;
   EXPECT_EQ(
@@ -997,8 +1019,15 @@ TEST(EncryptionTest, TestGenerateGreasePsk) {
   factory.setDefaults();
 
   // If no psk extension is present, expect no GREASE PSK.
-  EXPECT_EQ(
-      generateGreasePSK(TestMessages::clientHello(), &factory), folly::none);
+  {
+    folly::Optional<ClientPresharedKey> greasePsk;
+    Error err;
+    EXPECT_EQ(
+        generateGreasePSK(
+            greasePsk, err, TestMessages::clientHello(), &factory),
+        Status::Success);
+    EXPECT_EQ(greasePsk, folly::none);
+  }
 
   auto chlo = TestMessages::clientHelloPsk();
   folly::Optional<ClientPresharedKey> psk;
@@ -1008,7 +1037,8 @@ TEST(EncryptionTest, TestGenerateGreasePsk) {
       Status::Success);
 
   // Check that data is replaced with random data for GREASE PSK
-  auto greasePsk = generateGreasePSK(chlo, &factory);
+  folly::Optional<ClientPresharedKey> greasePsk;
+  EXPECT_EQ(generateGreasePSK(greasePsk, err, chlo, &factory), Status::Success);
   EXPECT_TRUE(greasePsk.has_value());
   EXPECT_EQ(greasePsk->identities.size(), psk->identities.size());
   EXPECT_EQ(greasePsk->binders.size(), psk->binders.size());
@@ -1085,8 +1115,11 @@ TEST(EncryptionTest, TestGenerateAndReplaceOuterExtensions) {
   expectedExts.push_back(keyShare.clone());
   expectedExts.push_back(certificateAuthorities.clone());
 
-  auto extsWithOuterExtensions =
-      generateAndReplaceOuterExtensions(std::move(exts), outerExtensionTypes);
+  std::vector<Extension> extsWithOuterExtensions;
+  EXPECT_EQ(
+      generateAndReplaceOuterExtensions(
+          extsWithOuterExtensions, err, std::move(exts), outerExtensionTypes),
+      Status::Success);
   checkExtensions(extsWithOuterExtensions, expectedExts);
 }
 

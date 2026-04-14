@@ -29,30 +29,38 @@ Factory::makeEncryptedWriteRecordLayer(EncryptionLevel encryptionLevel) const {
   return std::make_unique<EncryptedWriteRecordLayer>(encryptionLevel);
 }
 
-std::unique_ptr<KeyScheduler> Factory::makeKeyScheduler(
+Status Factory::makeKeyScheduler(
+    std::unique_ptr<KeyScheduler>& ret,
+    Error& err,
     CipherSuite cipher) const {
-  auto keyDer = makeKeyDeriver(cipher);
-  return std::make_unique<KeyScheduler>(std::move(keyDer));
+  std::unique_ptr<KeyDerivation> keyDer;
+  FIZZ_RETURN_ON_ERROR(makeKeyDeriver(keyDer, err, cipher));
+  ret = std::make_unique<KeyScheduler>(std::move(keyDer));
+  return Status::Success;
 }
 
-std::unique_ptr<HandshakeContext> Factory::makeHandshakeContext(
+Status Factory::makeHandshakeContext(
+    std::unique_ptr<HandshakeContext>& ret,
+    Error& err,
     CipherSuite cipher) const {
   HashFunction hash;
   const HasherFactoryWithMetadata* hasherFactory = nullptr;
-  Error err;
-  FIZZ_THROW_ON_ERROR(getHashFunction(hash, err, cipher), err);
-  FIZZ_THROW_ON_ERROR(makeHasherFactory(hasherFactory, err, hash), err);
-  return std::make_unique<HandshakeContextImpl>(hasherFactory);
+  FIZZ_RETURN_ON_ERROR(getHashFunction(hash, err, cipher));
+  FIZZ_RETURN_ON_ERROR(makeHasherFactory(hasherFactory, err, hash));
+  ret = std::make_unique<HandshakeContextImpl>(hasherFactory);
+  return Status::Success;
 }
 
-std::unique_ptr<KeyDerivation> Factory::makeKeyDeriver(
+Status Factory::makeKeyDeriver(
+    std::unique_ptr<KeyDerivation>& ret,
+    Error& err,
     CipherSuite cipher) const {
   HashFunction hash;
-  const HasherFactoryWithMetadata* hasher = nullptr;
-  Error err;
-  FIZZ_THROW_ON_ERROR(getHashFunction(hash, err, cipher), err);
-  FIZZ_THROW_ON_ERROR(makeHasherFactory(hasher, err, hash), err);
-  return std::make_unique<KeyDerivationImpl>(hasher);
+  const HasherFactoryWithMetadata* hasherFactory = nullptr;
+  FIZZ_RETURN_ON_ERROR(getHashFunction(hash, err, cipher));
+  FIZZ_RETURN_ON_ERROR(makeHasherFactory(hasherFactory, err, hash));
+  ret = std::make_unique<KeyDerivationImpl>(hasherFactory);
+  return Status::Success;
 }
 
 std::shared_ptr<Cert> Factory::makeIdentityOnlyCert(std::string ident) const {

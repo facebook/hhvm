@@ -659,12 +659,12 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
@@ -950,12 +950,12 @@ TEST_F(ServerProtocolTest, TestClientHelloAsyncCertFullHandshakeFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
@@ -1258,12 +1258,12 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
@@ -1581,13 +1581,13 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
   mockHandshakeContext_ = new MockHandshakeContext();
   auto mockEchContext = new MockHandshakeContext();
   Sequence factorySchedulerSeq;
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(factorySchedulerSeq)
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
@@ -1595,7 +1595,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
       *mockHandshakeContext_,
       appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(contextSeq);
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(factorySchedulerSeq)
       .WillOnce(InvokeWithoutArgs([=]() {
         return std::unique_ptr<KeyScheduler>(mockEchKeyScheduler);
@@ -1945,7 +1945,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
   auto decrypter = std::make_shared<MockECHDecrypter>();
   EXPECT_CALL(*decrypter, _decryptClientHello(_))
       .WillOnce(InvokeWithoutArgs([=]() { return folly::none; }));
-  EXPECT_CALL(*decrypter, getRetryConfigs(_))
+  EXPECT_CALL(*decrypter, _getRetryConfigs(_))
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
         cfg.version = ech::ECHVersion::Draft15;
@@ -1960,12 +1960,12 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
 
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
@@ -2266,12 +2266,12 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
@@ -2558,12 +2558,12 @@ TEST_F(ServerProtocolTest, TestClientHelloPskFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
@@ -2798,12 +2798,12 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
@@ -3039,7 +3039,7 @@ TEST_F(ServerProtocolTest, TestClientHelloHelloRetryRequestFlow) {
   Sequence firstContextSeq;
   Sequence factorySeq;
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(factorySeq)
       .WillOnce(InvokeWithoutArgs([=]() {
         return std::unique_ptr<HandshakeContext>(firstHandshakeContext);
@@ -3054,7 +3054,7 @@ TEST_F(ServerProtocolTest, TestClientHelloHelloRetryRequestFlow) {
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_hash"); }));
   auto secondHandshakeContext = new MockHandshakeContext();
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(factorySeq)
       .WillOnce(InvokeWithoutArgs([=]() {
         return std::unique_ptr<HandshakeContext>(secondHandshakeContext);
@@ -3121,7 +3121,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
   setUpExpectingClientHelloRetry();
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
@@ -3396,7 +3396,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
       }));
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
@@ -3627,7 +3627,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   Sequence factorySchedulerSeq;
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(factorySchedulerSeq)
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
@@ -3665,7 +3665,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
         return ret;
       }));
   auto mockEchKeyScheduler = new MockKeyScheduler();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(factorySchedulerSeq)
       .WillOnce(InvokeWithoutArgs([=]() {
         return std::unique_ptr<KeyScheduler>(mockEchKeyScheduler);
@@ -3967,7 +3967,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
   echState.outerSni = "test.net";
   state_.echState() = std::move(echState);
   auto decrypter = std::make_shared<MockECHDecrypter>();
-  EXPECT_CALL(*decrypter, getRetryConfigs(_))
+  EXPECT_CALL(*decrypter, _getRetryConfigs(_))
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
         cfg.version = ech::ECHVersion::Draft15;
@@ -3981,7 +3981,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
   context_->setECHDecrypter(decrypter);
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
@@ -4277,12 +4277,12 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));
@@ -4585,12 +4585,12 @@ TEST_F(ServerProtocolTest, TestClientHelloPskEarlyFlow) {
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
-  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+  EXPECT_CALL(*factory_, _makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<KeyScheduler>(mockKeyScheduler_);
       }));
   EXPECT_CALL(
-      *factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      *factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=, this]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext_);
       }));

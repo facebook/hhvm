@@ -59,7 +59,7 @@ TEST_F(GetCookieStateTest, TestBasic) {
   auto mockHandshakeContext = new MockHandshakeContext();
   Sequence seq;
   EXPECT_CALL(
-      factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .InSequence(seq)
       .WillOnce(InvokeWithoutArgs([=]() {
         return std::unique_ptr<HandshakeContext>(mockHandshakeContext);
@@ -115,7 +115,7 @@ TEST_F(GetCookieStateTest, TestVersionMismatch) {
 
 TEST_F(GetCookieStateTest, TestCipherNegotiate) {
   EXPECT_CALL(
-      factory_, makeHandshakeContext(CipherSuite::TLS_AES_256_GCM_SHA384))
+      factory_, _makeHandshakeContext(CipherSuite::TLS_AES_256_GCM_SHA384))
       .WillOnce(InvokeWithoutArgs([=]() {
         auto ret = std::make_unique<MockHandshakeContext>();
         ret->setDefaults();
@@ -134,7 +134,7 @@ TEST_F(GetCookieStateTest, TestCipherNegotiate) {
 
 TEST_F(GetCookieStateTest, TestCipherNegotiateTie) {
   EXPECT_CALL(
-      factory_, makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
+      factory_, _makeHandshakeContext(CipherSuite::TLS_AES_128_GCM_SHA256))
       .WillOnce(InvokeWithoutArgs([=]() {
         auto ret = std::make_unique<MockHandshakeContext>();
         ret->setDefaults();

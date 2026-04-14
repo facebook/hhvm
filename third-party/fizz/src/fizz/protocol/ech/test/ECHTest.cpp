@@ -52,7 +52,11 @@ TEST(ECHTest, TestECHConfigListEncodeDecode) {
   // All ECHConfigs in ECHConfigList should be the same
   for (auto& echConfig : gotECHConfigList.configs) {
     EXPECT_EQ(echConfig.version, ECHVersion::Draft15);
-    auto gotConfigContent = ParsedECHConfig::parseSupportedECHConfig(echConfig);
+    folly::Optional<ParsedECHConfig> gotConfigContent;
+    EXPECT_EQ(
+        ParsedECHConfig::parseSupportedECHConfig(
+            gotConfigContent, err, echConfig),
+        Status::Success);
     ASSERT_TRUE(gotConfigContent.hasValue());
     EXPECT_TRUE(isEqual(*gotConfigContent, getParsedECHConfig()));
   }
@@ -82,8 +86,11 @@ TEST(ECHTest, TestECHConfigEncodeDecode) {
   EXPECT_TRUE(
       folly::IOBufEqualTo()(gotECHConfig.ech_config_content, configContentBuf));
 
-  auto gotConfigContent =
-      ParsedECHConfig::parseSupportedECHConfig(gotECHConfig);
+  folly::Optional<ParsedECHConfig> gotConfigContent;
+  EXPECT_EQ(
+      ParsedECHConfig::parseSupportedECHConfig(
+          gotConfigContent, err, gotECHConfig),
+      Status::Success);
   ASSERT_TRUE(gotConfigContent.hasValue());
   EXPECT_TRUE(isEqual(*gotConfigContent, getParsedECHConfig()));
 }
@@ -150,8 +157,12 @@ TEST(ECHTest, TestUnsupportedECHConfigEncodeDecode) {
   EXPECT_EQ(decode<ECHConfig>(gotECHConfig, err, cursor), Status::Success);
 
   EXPECT_EQ(gotECHConfig.version, static_cast<ECHVersion>(4));
-  EXPECT_FALSE(
-      ParsedECHConfig::parseSupportedECHConfig(gotECHConfig).hasValue());
+  folly::Optional<ParsedECHConfig> unsupportedConfigContent;
+  EXPECT_EQ(
+      ParsedECHConfig::parseSupportedECHConfig(
+          unsupportedConfigContent, err, gotECHConfig),
+      Status::Success);
+  EXPECT_FALSE(unsupportedConfigContent.hasValue());
   EXPECT_TRUE(
       folly::IOBufEqualTo()(configContentBuf, gotECHConfig.ech_config_content));
 }

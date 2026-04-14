@@ -718,15 +718,17 @@ static std::
         PskType pskType,
         std::unique_ptr<HandshakeContext> handshakeContext,
         ProtocolVersion /*version*/) {
-  auto scheduler = factory.makeKeyScheduler(cipher);
+  std::unique_ptr<KeyScheduler> scheduler;
+  Error err;
+  FIZZ_THROW_ON_ERROR(factory.makeKeyScheduler(scheduler, err, cipher), err);
 
   if (cookieState) {
-    handshakeContext = factory.makeHandshakeContext(cipher);
+    FIZZ_THROW_ON_ERROR(
+        factory.makeHandshakeContext(handshakeContext, err, cipher), err);
 
     message_hash chloHash;
     chloHash.hash = cookieState->chloHash->clone();
     Buf encodedChloHash;
-    Error err;
     FIZZ_THROW_ON_ERROR(
         encodeHandshake(encodedChloHash, err, std::move(chloHash)), err);
     handshakeContext->appendToTranscript(encodedChloHash);
@@ -740,11 +742,11 @@ static std::
         cookieState->group,
         std::move(cookie->cookie)));
   } else if (!handshakeContext) {
-    handshakeContext = factory.makeHandshakeContext(cipher);
+    FIZZ_THROW_ON_ERROR(
+        factory.makeHandshakeContext(handshakeContext, err, cipher), err);
   }
 
   if (resState) {
-    Error err;
     FIZZ_THROW_ON_ERROR(
         scheduler->deriveEarlySecret(
             err, resState->resumptionSecret->coalesce()),
@@ -1643,8 +1645,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
 
             message_hash chloHash;
             chloHash.hash = handshakeContext->getHandshakeContext();
-            handshakeContext =
-                state.context()->getFactory()->makeHandshakeContext(cipher);
+            FIZZ_THROW_ON_ERROR(
+                state.context()->getFactory()->makeHandshakeContext(
+                    handshakeContext, err, cipher),
+                err);
             Buf encodedChloHash;
             FIZZ_THROW_ON_ERROR(
                 encodeHandshake(encodedChloHash, err, std::move(chloHash)),
@@ -1660,8 +1664,11 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
 
             if (echStatus == ECHStatus::Accepted) {
               // Set up acceptance scheduler
-              auto echScheduler =
-                  state.context()->getFactory()->makeKeyScheduler(cipher);
+              std::unique_ptr<KeyScheduler> echScheduler;
+              FIZZ_THROW_ON_ERROR(
+                  state.context()->getFactory()->makeKeyScheduler(
+                      echScheduler, err, cipher),
+                  err);
               FIZZ_THROW_ON_ERROR(
                   echScheduler->deriveEarlySecret(
                       err, folly::range(chlo.random)),
@@ -1832,8 +1839,11 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               folly::Optional<std::vector<ech::ECHConfig>> echRetryConfigs;
               if (echStatus == ECHStatus::Accepted) {
                 // Set up acceptance scheduler
-                auto echScheduler =
-                    state.context()->getFactory()->makeKeyScheduler(cipher);
+                std::unique_ptr<KeyScheduler> echScheduler;
+                FIZZ_THROW_ON_ERROR(
+                    state.context()->getFactory()->makeKeyScheduler(
+                        echScheduler, err, cipher),
+                    err);
                 FIZZ_THROW_ON_ERROR(
                     echScheduler->deriveEarlySecret(
                         err, folly::range(chlo.random)),
@@ -1850,8 +1860,12 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                 auto decrypter = state.context()->getECHDecrypter();
                 FIZZ_DCHECK(decrypter);
                 FIZZ_DCHECK(echState);
-                echRetryConfigs =
-                    decrypter->getRetryConfigs(echState->outerSni);
+                std::vector<ech::ECHConfig> retryConf;
+                FIZZ_THROW_ON_ERROR(
+                    decrypter->getRetryConfigs(
+                        retryConf, err, echState->outerSni),
+                    err);
+                echRetryConfigs = std::move(retryConf);
               }
 
               Buf encodedServerHello;
@@ -2042,9 +2056,14 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                           *handshakeContext);
                     }
 
-                    auto encodedFinished = Protocol::getFinished(
-                        folly::range(handshakeWriteSecret.secret),
-                        *handshakeContext);
+                    Buf encodedFinished;
+                    FIZZ_THROW_ON_ERROR(
+                        Protocol::getFinished(
+                            encodedFinished,
+                            err,
+                            folly::range(handshakeWriteSecret.secret),
+                            *handshakeContext),
+                        err);
 
                     folly::IOBufQueue combined;
                     if (encodedCertificate) {
@@ -2759,9 +2778,12 @@ Status EventHandler<
     throw FizzException("data after key_update", folly::none);
   }
   auto& keyUpdateInitiation = *param.asKeyUpdateInitiation();
-  auto encodedKeyUpdated =
-      Protocol::getKeyUpdated(keyUpdateInitiation.request_update);
+  Buf encodedKeyUpdated;
   Error err;
+  FIZZ_THROW_ON_ERROR(
+      Protocol::getKeyUpdated(
+          encodedKeyUpdated, err, keyUpdateInitiation.request_update),
+      err);
   TLSContent content;
   FIZZ_THROW_ON_ERROR(
       state.writeRecordLayer()->writeHandshake(
@@ -2843,8 +2865,11 @@ EventHandler<ServerTypes, StateEnum::AcceptingData, Event::KeyUpdate>::handle(
     return Status::Success;
   }
 
-  auto encodedKeyUpdated =
-      Protocol::getKeyUpdated(KeyUpdateRequest::update_not_requested);
+  Buf encodedKeyUpdated;
+  FIZZ_THROW_ON_ERROR(
+      Protocol::getKeyUpdated(
+          encodedKeyUpdated, err, KeyUpdateRequest::update_not_requested),
+      err);
   TLSContent content;
   FIZZ_THROW_ON_ERROR(
       state.writeRecordLayer()->writeHandshake(

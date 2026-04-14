@@ -20,8 +20,12 @@ namespace test {
 class HandshakeContextTest : public testing::Test {};
 
 TEST_F(HandshakeContextTest, TestHandshakeContextSingle) {
-  auto context = fizz::DefaultFactory().makeHandshakeContext(
-      CipherSuite::TLS_AES_128_GCM_SHA256);
+  std::unique_ptr<HandshakeContext> context;
+  Error err;
+  EXPECT_EQ(
+      fizz::DefaultFactory().makeHandshakeContext(
+          context, err, CipherSuite::TLS_AES_128_GCM_SHA256),
+      Status::Success);
   context->appendToTranscript(folly::IOBuf::copyBuffer("ClientHello"));
   auto c = context->getHandshakeContext();
   EXPECT_EQ(
@@ -30,8 +34,12 @@ TEST_F(HandshakeContextTest, TestHandshakeContextSingle) {
 }
 
 TEST_F(HandshakeContextTest, TestHandshakeContextMultiple) {
-  auto context = fizz::DefaultFactory().makeHandshakeContext(
-      CipherSuite::TLS_AES_128_GCM_SHA256);
+  std::unique_ptr<HandshakeContext> context;
+  Error err;
+  EXPECT_EQ(
+      fizz::DefaultFactory().makeHandshakeContext(
+          context, err, CipherSuite::TLS_AES_128_GCM_SHA256),
+      Status::Success);
   context->appendToTranscript(folly::IOBuf::copyBuffer("ClientHello"));
   context->appendToTranscript(folly::IOBuf::copyBuffer("ServerHello"));
   auto c = context->getHandshakeContext();
@@ -41,8 +49,12 @@ TEST_F(HandshakeContextTest, TestHandshakeContextMultiple) {
 }
 
 TEST_F(HandshakeContextTest, TestFinished) {
-  auto context = fizz::DefaultFactory().makeHandshakeContext(
-      CipherSuite::TLS_AES_128_GCM_SHA256);
+  std::unique_ptr<HandshakeContext> context;
+  Error err;
+  EXPECT_EQ(
+      fizz::DefaultFactory().makeHandshakeContext(
+          context, err, CipherSuite::TLS_AES_128_GCM_SHA256),
+      Status::Success);
   context->appendToTranscript(folly::IOBuf::copyBuffer("ClientHello"));
   std::vector<uint8_t> baseKey(Sha256::HashLen);
   auto f = context->getFinishedData(range(baseKey));
@@ -52,8 +64,12 @@ TEST_F(HandshakeContextTest, TestFinished) {
 }
 
 TEST_F(HandshakeContextTest, TestEmpty) {
-  auto context = fizz::DefaultFactory().makeHandshakeContext(
-      CipherSuite::TLS_AES_128_GCM_SHA256);
+  std::unique_ptr<HandshakeContext> context;
+  Error err;
+  EXPECT_EQ(
+      fizz::DefaultFactory().makeHandshakeContext(
+          context, err, CipherSuite::TLS_AES_128_GCM_SHA256),
+      Status::Success);
   context->getHandshakeContext();
   std::array<uint8_t, Sha256::HashLen> key{4};
   auto f = context->getFinishedData(folly::range(key));

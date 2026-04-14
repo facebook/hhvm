@@ -96,7 +96,9 @@ struct HpkeKeyConfig {
 };
 
 struct ECHConfigContentDraft {
-  static folly::Optional<ECHConfigContentDraft> parseSupportedECHConfig(
+  static Status parseSupportedECHConfig(
+      folly::Optional<ECHConfigContentDraft>& ret,
+      Error& err,
       const ECHConfig&);
 
   ECHConfigContentDraft() = default;

@@ -23,7 +23,9 @@ namespace {
 
 static const size_t kGreasePSKIdentitySize = 16;
 
-std::unique_ptr<folly::IOBuf> makeClientHelloOuterForAad(
+Status makeClientHelloOuterForAad(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const ClientHello& clientHelloOuter) {
   // Copy client hello outer
   ClientHello chloCopy = clientHelloOuter.clone();
@@ -36,9 +38,8 @@ std::unique_ptr<folly::IOBuf> makeClientHelloOuterForAad(
 
   folly::io::Cursor cursor(it->extension_data.get());
   OuterECHClientHello echExtension;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      getExtension<OuterECHClientHello>(echExtension, err, cursor), err);
+  FIZZ_RETURN_ON_ERROR(
+      getExtension<OuterECHClientHello>(echExtension, err, cursor));
 
   // Create a zeroed out version of the payload
   size_t payloadSize = echExtension.payload->computeChainDataLength();
@@ -46,32 +47,35 @@ std::unique_ptr<folly::IOBuf> makeClientHelloOuterForAad(
   memset(echExtension.payload->writableData(), 0, payloadSize);
   echExtension.payload->append(payloadSize);
 
-  FIZZ_THROW_ON_ERROR(encodeExtension(*it, err, echExtension), err);
+  FIZZ_RETURN_ON_ERROR(encodeExtension(*it, err, echExtension));
 
   // Get the serialized version of the client hello outer
   // without the ECH extension to use
-  std::unique_ptr<folly::IOBuf> encoded;
-  FIZZ_THROW_ON_ERROR(encode(encoded, err, chloCopy), err);
-  return encoded;
+  FIZZ_RETURN_ON_ERROR(encode(ret, err, chloCopy));
+  return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
+Status extractEncodedClientHelloInner(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     ECHVersion version,
     std::unique_ptr<folly::IOBuf> encryptedCh,
     std::unique_ptr<hpke::HpkeContext>& context,
     const ClientHello& clientHelloOuter) {
-  std::unique_ptr<folly::IOBuf> encodedClientHelloInner;
   switch (version) {
     case ECHVersion::Draft15: {
-      auto aadCH = makeClientHelloOuterForAad(clientHelloOuter);
-      encodedClientHelloInner =
-          context->open(aadCH.get(), std::move(encryptedCh));
+      std::unique_ptr<folly::IOBuf> aadCH;
+      FIZZ_RETURN_ON_ERROR(
+          makeClientHelloOuterForAad(aadCH, err, clientHelloOuter));
+      ret = context->open(aadCH.get(), std::move(encryptedCh));
     }
   }
-  return encodedClientHelloInner;
+  return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
+Status makeHpkeContextInfoParam(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const ParsedECHConfig& echConfig) {
   // The "info" parameter to setupWithEncap is the
   // concatenation of "tls ech", a zero byte, and the serialized
@@ -81,12 +85,12 @@ std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
   auto bufContents = folly::IOBuf::copyBuffer(tlsEchPrefix);
   auto config = ECHConfig{};
   config.version = ECHVersion::Draft15;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encode(config.ech_config_content, err, echConfig), err);
+  FIZZ_RETURN_ON_ERROR(encode(config.ech_config_content, err, echConfig));
   std::unique_ptr<folly::IOBuf> encodedConfig;
-  FIZZ_THROW_ON_ERROR(encode(encodedConfig, err, std::move(config)), err);
+  FIZZ_RETURN_ON_ERROR(encode(encodedConfig, err, std::move(config)));
   bufContents->prependChain(std::move(encodedConfig));
-  return bufContents;
+  ret = std::move(bufContents);
+  return Status::Success;
 }
 
 bool isValidPublicName(const std::string& publicName) {
@@ -226,7 +230,9 @@ static Status getSetupParam(
   return Status::Success;
 }
 
-hpke::SetupResult constructHpkeSetupResult(
+Status constructHpkeSetupResult(
+    hpke::SetupResult& ret,
+    Error& err,
     const fizz::Factory& factory,
     std::unique_ptr<KeyExchange> kex,
     const NegotiatedECHConfig& negotiatedECHConfig) {
@@ -236,8 +242,7 @@ hpke::SetupResult constructHpkeSetupResult(
 
   // Get shared secret
   const HasherFactoryWithMetadata* hasherFactory = nullptr;
-  Error err;
-  FIZZ_THROW_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash), err);
+  FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash));
   auto hkdf =
       std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasherFactory));
   std::unique_ptr<DHKEM> dhkem = std::make_unique<DHKEM>(
@@ -246,25 +251,25 @@ hpke::SetupResult constructHpkeSetupResult(
       std::move(hkdf));
 
   // Get context
-  std::unique_ptr<folly::IOBuf> info =
-      makeHpkeContextInfoParam(negotiatedECHConfig.config);
+  std::unique_ptr<folly::IOBuf> info;
+  FIZZ_RETURN_ON_ERROR(
+      makeHpkeContextInfoParam(info, err, negotiatedECHConfig.config));
 
   hpke::SetupParam setupParam;
-  FIZZ_THROW_ON_ERROR(
-      getSetupParam(
-          setupParam,
-          err,
-          factory,
-          std::move(dhkem),
-          echConfigContent.key_config.kem_id,
-          cipherSuite),
-      err);
-  return setupWithEncap(
+  FIZZ_RETURN_ON_ERROR(getSetupParam(
+      setupParam,
+      err,
+      factory,
+      std::move(dhkem),
+      echConfigContent.key_config.kem_id,
+      cipherSuite));
+  ret = setupWithEncap(
       hpke::Mode::Base,
       echConfigContent.key_config.public_key->clone()->coalesce(),
       std::move(info),
       folly::none,
       std::move(setupParam));
+  return Status::Success;
 }
 
 ServerHello makeDummyServerHello(const ServerHello& shlo) {
@@ -491,20 +496,22 @@ ClientPresharedKey generateGreasePskCommon(
 }
 } // namespace
 
-folly::Optional<ClientPresharedKey> generateGreasePSK(
+Status generateGreasePSK(
+    folly::Optional<ClientPresharedKey>& ret,
+    Error& err,
     const ClientHello& chloInner,
     const Factory* factory) {
   folly::Optional<ClientPresharedKey> innerPsk;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      getExtension<ClientPresharedKey>(innerPsk, err, chloInner.extensions),
-      err);
+  FIZZ_RETURN_ON_ERROR(
+      getExtension<ClientPresharedKey>(innerPsk, err, chloInner.extensions));
   if (!innerPsk) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
 
   // For client hello, don't preserve identity.
-  return generateGreasePskCommon(*innerPsk, factory, false);
+  ret = generateGreasePskCommon(*innerPsk, factory, false);
+  return Status::Success;
 }
 
 ClientPresharedKey generateGreasePSKForHRR(
@@ -515,15 +522,15 @@ ClientPresharedKey generateGreasePSKForHRR(
   return generateGreasePskCommon(previousPsk, factory, true);
 }
 
-size_t calculateECHPadding(
+Status calculateECHPadding(
+    size_t& ret,
+    Error& err,
     const ClientHello& chlo,
     size_t encodedSize,
     size_t maxLen) {
   size_t padding = 0;
   folly::Optional<ServerNameList> sni;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      getExtension<ServerNameList>(sni, err, chlo.extensions), err);
+  FIZZ_RETURN_ON_ERROR(getExtension<ServerNameList>(sni, err, chlo.extensions));
   if (sni) {
     // Add max(0, maxLen - len(server_name))
     size_t sniLen =
@@ -541,10 +548,13 @@ size_t calculateECHPadding(
   // N = 31 - ((L - 1) % 32)
   size_t currentLen = encodedSize + padding;
   padding += 31 - ((currentLen - 1) % 32);
-  return padding;
+  ret = padding;
+  return Status::Success;
 }
 
-std::vector<Extension> generateAndReplaceOuterExtensions(
+Status generateAndReplaceOuterExtensions(
+    std::vector<Extension>& ret,
+    Error& err,
     std::vector<Extension>&& chloInnerExt,
     const std::vector<ExtensionType>& outerExtensionTypes) {
   std::vector<ExtensionType> extTypes;
@@ -557,7 +567,8 @@ std::vector<Extension> generateAndReplaceOuterExtensions(
     }
   }
   if (extTypes.size() == 0) {
-    return std::move(chloInnerExt);
+    ret = std::move(chloInnerExt);
+    return Status::Success;
   }
 
   OuterExtensions outerExt;
@@ -570,20 +581,21 @@ std::vector<Extension> generateAndReplaceOuterExtensions(
           return ext.extension_type == extType;
         });
     if (!outerExtensionsInserted) {
-      Error err;
-      FIZZ_THROW_ON_ERROR(encodeExtension(*it, err, outerExt), err);
+      FIZZ_RETURN_ON_ERROR(encodeExtension(*it, err, outerExt));
       outerExtensionsInserted = true;
     } else {
       chloInnerExt.erase(it);
     }
   }
 
-  return std::move(chloInnerExt);
+  ret = std::move(chloInnerExt);
+  return Status::Success;
 }
 
 namespace {
 
-void encryptClientHelloImpl(
+Status encryptClientHelloImpl(
+    Error& err,
     OuterECHClientHello& echExtension,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
@@ -594,16 +606,23 @@ void encryptClientHelloImpl(
   // Remove legacy_session_id and serialize the client hello inner
   auto chloInnerCopy = clientHelloInner.clone();
   chloInnerCopy.legacy_session_id = folly::IOBuf::copyBuffer("");
-  chloInnerCopy.extensions = generateAndReplaceOuterExtensions(
-      std::move(chloInnerCopy.extensions), outerExtensionTypes);
+  std::vector<Extension> processedExtensions;
+  FIZZ_RETURN_ON_ERROR(generateAndReplaceOuterExtensions(
+      processedExtensions,
+      err,
+      std::move(chloInnerCopy.extensions),
+      outerExtensionTypes));
+  chloInnerCopy.extensions = std::move(processedExtensions);
   std::unique_ptr<folly::IOBuf> encodedClientHelloInner;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encode(encodedClientHelloInner, err, chloInnerCopy), err);
+  FIZZ_RETURN_ON_ERROR(encode(encodedClientHelloInner, err, chloInnerCopy));
 
-  size_t padding = calculateECHPadding(
+  size_t padding;
+  FIZZ_RETURN_ON_ERROR(calculateECHPadding(
+      padding,
+      err,
       clientHelloInner,
       encodedClientHelloInner->computeChainDataLength(),
-      maxLen);
+      maxLen));
   if (padding > 0) {
     auto paddingBuf = folly::IOBuf::create(padding);
     memset(paddingBuf->writableData(), 0, padding);
@@ -623,28 +642,31 @@ void encryptClientHelloImpl(
   memset(echExtension.payload->writableData(), 0, dummyPayloadSize);
   echExtension.payload->append(dummyPayloadSize);
   Extension ext1;
-  FIZZ_THROW_ON_ERROR(encodeExtension(ext1, err, echExtension), err);
+  FIZZ_RETURN_ON_ERROR(encodeExtension(ext1, err, echExtension));
   chloOuterForAAD.extensions.push_back(std::move(ext1));
 
   // Add grease PSK if passed in
   if (greasePsk.has_value()) {
     Extension ext2;
-    FIZZ_THROW_ON_ERROR(encodeExtension(ext2, err, *greasePsk), err);
+    FIZZ_RETURN_ON_ERROR(encodeExtension(ext2, err, *greasePsk));
     chloOuterForAAD.extensions.push_back(std::move(ext2));
   }
 
   // Serialize for AAD
   std::unique_ptr<folly::IOBuf> clientHelloOuterAad;
-  FIZZ_THROW_ON_ERROR(encode(clientHelloOuterAad, err, chloOuterForAAD), err);
+  FIZZ_RETURN_ON_ERROR(encode(clientHelloOuterAad, err, chloOuterForAAD));
 
   // Encrypt inner client hello
   echExtension.payload = setupResult.context->seal(
       clientHelloOuterAad.get(), std::move(encodedClientHelloInner));
+  return Status::Success;
 }
 
 } // namespace
 
-OuterECHClientHello encryptClientHelloHRR(
+Status encryptClientHelloHRR(
+    OuterECHClientHello& ret,
+    Error& err,
     const NegotiatedECHConfig& negotiatedECHConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
@@ -652,24 +674,26 @@ OuterECHClientHello encryptClientHelloHRR(
     const folly::Optional<ClientPresharedKey>& greasePsk,
     const std::vector<ExtensionType>& outerExtensionTypes) {
   // Create ECH extension with blank config ID and enc for HRR
-  OuterECHClientHello echExtension;
-  echExtension.cipher_suite = negotiatedECHConfig.cipherSuite;
-  echExtension.config_id = negotiatedECHConfig.configId;
-  echExtension.enc = folly::IOBuf::create(0);
+  ret.cipher_suite = negotiatedECHConfig.cipherSuite;
+  ret.config_id = negotiatedECHConfig.configId;
+  ret.enc = folly::IOBuf::create(0);
 
-  encryptClientHelloImpl(
-      echExtension,
+  FIZZ_RETURN_ON_ERROR(encryptClientHelloImpl(
+      err,
+      ret,
       clientHelloInner,
       clientHelloOuter,
       setupResult,
       greasePsk,
       negotiatedECHConfig.maxLen,
-      outerExtensionTypes);
+      outerExtensionTypes));
 
-  return echExtension;
+  return Status::Success;
 }
 
-OuterECHClientHello encryptClientHello(
+Status encryptClientHello(
+    OuterECHClientHello& ret,
+    Error& err,
     const NegotiatedECHConfig& negotiatedECHConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
@@ -677,21 +701,21 @@ OuterECHClientHello encryptClientHello(
     const folly::Optional<ClientPresharedKey>& greasePsk,
     const std::vector<ExtensionType>& outerExtensionTypes) {
   // Create ECH extension
-  OuterECHClientHello echExtension;
-  echExtension.cipher_suite = negotiatedECHConfig.cipherSuite;
-  echExtension.config_id = negotiatedECHConfig.configId;
-  echExtension.enc = setupResult.enc->clone();
+  ret.cipher_suite = negotiatedECHConfig.cipherSuite;
+  ret.config_id = negotiatedECHConfig.configId;
+  ret.enc = setupResult.enc->clone();
 
-  encryptClientHelloImpl(
-      echExtension,
+  FIZZ_RETURN_ON_ERROR(encryptClientHelloImpl(
+      err,
+      ret,
       clientHelloInner,
       clientHelloOuter,
       setupResult,
       greasePsk,
       negotiatedECHConfig.maxLen,
-      outerExtensionTypes);
+      outerExtensionTypes));
 
-  return echExtension;
+  return Status::Success;
 }
 
 Status decryptECHWithContext(
@@ -705,8 +729,14 @@ Status decryptECHWithContext(
     std::unique_ptr<folly::IOBuf> encryptedCh,
     ECHVersion version,
     std::unique_ptr<hpke::HpkeContext>& context) {
-  auto encodedClientHelloInner = extractEncodedClientHelloInner(
-      version, std::move(encryptedCh), context, clientHelloOuter);
+  std::unique_ptr<folly::IOBuf> encodedClientHelloInner;
+  FIZZ_RETURN_ON_ERROR(extractEncodedClientHelloInner(
+      encodedClientHelloInner,
+      err,
+      version,
+      std::move(encryptedCh),
+      context,
+      clientHelloOuter));
 
   // Set actual client hello, ECH acceptance
   folly::io::Cursor encodedECHInnerCursor(encodedClientHelloInner.get());
@@ -741,7 +771,9 @@ Status decryptECHWithContext(
   return Status::Success;
 }
 
-std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
+Status setupDecryptionContext(
+    std::unique_ptr<hpke::HpkeContext>& ret,
+    Error& err,
     const fizz::Factory& factory,
     const ParsedECHConfig& echConfig,
     HpkeSymmetricCipherSuite cipherSuite,
@@ -754,8 +786,7 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
   NamedGroup group = hpke::getKexGroup(kemId);
   auto hash = getHashFunction(cipherSuite.kdf_id);
   const HasherFactoryWithMetadata* hasherFactory = nullptr;
-  Error err;
-  FIZZ_THROW_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash), err);
+  FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash));
   auto hkdf =
       std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasherFactory));
 
@@ -765,11 +796,10 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
       group, hpke::getHashFunction(kdfId), hpke::getCipherSuite(aeadId));
 
   std::unique_ptr<Aead> aead;
-  FIZZ_THROW_ON_ERROR(factory.makeAead(aead, err, getCipherSuite(aeadId)), err);
+  FIZZ_RETURN_ON_ERROR(factory.makeAead(aead, err, getCipherSuite(aeadId)));
 
   const HasherFactoryWithMetadata* hasherFactory2 = nullptr;
-  FIZZ_THROW_ON_ERROR(
-      factory.makeHasherFactory(hasherFactory2, err, hash), err);
+  FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory2, err, hash));
   hpke::SetupParam setupParam{
       std::move(dhkem),
       std::move(aead),
@@ -777,15 +807,17 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
       std::move(suiteId),
       seqNum};
 
-  std::unique_ptr<folly::IOBuf> info = makeHpkeContextInfoParam(echConfig);
+  std::unique_ptr<folly::IOBuf> info;
+  FIZZ_RETURN_ON_ERROR(makeHpkeContextInfoParam(info, err, echConfig));
 
-  return hpke::setupWithDecap(
+  ret = hpke::setupWithDecap(
       hpke::Mode::Base,
       encapsulatedKey->coalesce(),
       folly::none,
       std::move(info),
       folly::none,
       std::move(setupParam));
+  return Status::Success;
 }
 
 Status substituteOuterExtensions(

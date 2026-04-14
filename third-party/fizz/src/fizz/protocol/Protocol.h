@@ -61,28 +61,25 @@ class Protocol {
     return Status::Success;
   }
 
-  static Buf getFinished(
+  static Status getFinished(
+      Buf& ret,
+      Error& err,
       folly::ByteRange handshakeWriteSecret,
       HandshakeContext& handshakeContext) {
     Finished finished;
     finished.verify_data =
         handshakeContext.getFinishedData(handshakeWriteSecret);
-    Error err;
-    Buf encodedFinished;
-    FIZZ_THROW_ON_ERROR(
-        encodeHandshake(encodedFinished, err, std::move(finished)), err);
-    handshakeContext.appendToTranscript(encodedFinished);
-    return encodedFinished;
+    FIZZ_RETURN_ON_ERROR(encodeHandshake(ret, err, std::move(finished)));
+    handshakeContext.appendToTranscript(ret);
+    return Status::Success;
   }
 
-  static Buf getKeyUpdated(KeyUpdateRequest request_update) {
+  static Status
+  getKeyUpdated(Buf& ret, Error& err, KeyUpdateRequest request_update) {
     KeyUpdate keyUpdated;
     keyUpdated.request_update = request_update;
-    Buf encodedKeyUpdated;
-    Error err;
-    FIZZ_THROW_ON_ERROR(
-        encodeHandshake(encodedKeyUpdated, err, std::move(keyUpdated)), err);
-    return encodedKeyUpdated;
+    FIZZ_RETURN_ON_ERROR(encodeHandshake(ret, err, std::move(keyUpdated)));
+    return Status::Success;
   }
 
   static Status checkAllowedExtensions(

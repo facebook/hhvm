@@ -31,7 +31,9 @@ Status negotiateECHConfig(
     std::vector<hpke::KEMId> supportedKEMs,
     std::vector<hpke::AeadId> supportedAeads);
 
-hpke::SetupResult constructHpkeSetupResult(
+Status constructHpkeSetupResult(
+    hpke::SetupResult& ret,
+    Error& err,
     const fizz::Factory& factory,
     std::unique_ptr<KeyExchange> kex,
     const NegotiatedECHConfig& negotiatedECHConfig);
@@ -42,7 +44,9 @@ std::unique_ptr<folly::IOBuf> makeClientHelloAad(
     const std::unique_ptr<folly::IOBuf>& enc,
     const std::unique_ptr<folly::IOBuf>& clientHello);
 
-folly::Optional<ClientPresharedKey> generateGreasePSK(
+Status generateGreasePSK(
+    folly::Optional<ClientPresharedKey>& ret,
+    Error& err,
     const ClientHello& chloInner,
     const Factory* factory);
 
@@ -80,14 +84,22 @@ Status setAcceptConfirmation(
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler);
 
-size_t
-calculateECHPadding(const ClientHello& chlo, size_t encodedSize, size_t maxLen);
+Status calculateECHPadding(
+    size_t& ret,
+    Error& err,
+    const ClientHello& chlo,
+    size_t encodedSize,
+    size_t maxLen);
 
-std::vector<Extension> generateAndReplaceOuterExtensions(
+Status generateAndReplaceOuterExtensions(
+    std::vector<Extension>& ret,
+    Error& err,
     std::vector<Extension>&& chloInnerExt,
     const std::vector<ExtensionType>& outerExtensionTypes);
 
-OuterECHClientHello encryptClientHelloHRR(
+Status encryptClientHelloHRR(
+    OuterECHClientHello& ret,
+    Error& err,
     const NegotiatedECHConfig& negotiatedECHConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
@@ -95,7 +107,9 @@ OuterECHClientHello encryptClientHelloHRR(
     const folly::Optional<ClientPresharedKey>& greasePsk,
     const std::vector<ExtensionType>& outerExtensionTypes);
 
-OuterECHClientHello encryptClientHello(
+Status encryptClientHello(
+    OuterECHClientHello& ret,
+    Error& err,
     const NegotiatedECHConfig& negotiatedECHConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
@@ -115,7 +129,9 @@ Status decryptECHWithContext(
     ECHVersion version,
     std::unique_ptr<hpke::HpkeContext>& context);
 
-std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
+Status setupDecryptionContext(
+    std::unique_ptr<hpke::HpkeContext>& ret,
+    Error& err,
     const fizz::Factory& factory,
     const ParsedECHConfig& echConfig,
     HpkeSymmetricCipherSuite cipherSuite,

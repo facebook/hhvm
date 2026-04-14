@@ -22,7 +22,11 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsBase64) {
       "AEj+DQBEAQAgACAX5SnnUbopIr5I/MqIqLWuSAZckHI2sR+aIr0slN2uGAAEAAEAAWQVZWNoLXB1YmxpYy5hdG1ldGEuY29tAAA=";
   auto expectedPubKey =
       "17e529e751ba2922be48fcca88a8b5ae48065c907236b11f9a22bd2c94ddae18";
-  auto maybeParsedECHConfigs = parseECHConfigsBase64(echConfig64);
+  folly::Optional<std::vector<ech::ParsedECHConfig>> maybeParsedECHConfigs;
+  Error err;
+  EXPECT_EQ(
+      parseECHConfigsBase64(maybeParsedECHConfigs, err, echConfig64),
+      Status::Success);
   ASSERT_TRUE(maybeParsedECHConfigs.has_value());
 
   auto echConfigs = std::move(maybeParsedECHConfigs.value());

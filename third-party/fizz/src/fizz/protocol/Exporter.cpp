@@ -24,7 +24,8 @@ Status Exporter::getExportedKeyingMaterial(
     context = folly::IOBuf::create(0);
   }
 
-  auto deriver = factory.makeKeyDeriver(cipher);
+  std::unique_ptr<KeyDerivation> deriver;
+  FIZZ_RETURN_ON_ERROR(factory.makeKeyDeriver(deriver, err, cipher));
 
   std::vector<uint8_t> base(deriver->hashLength());
   folly::MutableByteRange hashedContext(base.data(), base.size());

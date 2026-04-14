@@ -48,7 +48,9 @@ class Decrypter {
       Error& err,
       const ClientHello& chlo,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) = 0;
-  virtual std::vector<ech::ECHConfig> getRetryConfigs(
+  virtual Status getRetryConfigs(
+      std::vector<ech::ECHConfig>& ret,
+      Error& err,
       const folly::Optional<std::string>& maybeSni) const = 0;
 };
 
@@ -71,7 +73,9 @@ class ECHConfigManager : public Decrypter {
       Error& err,
       const ClientHello& chlo,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) override;
-  std::vector<ech::ECHConfig> getRetryConfigs(
+  Status getRetryConfigs(
+      std::vector<ech::ECHConfig>& ret,
+      Error& err,
       const folly::Optional<std::string>& maybeSni) const override;
 
  protected:

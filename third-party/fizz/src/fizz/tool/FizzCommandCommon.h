@@ -33,13 +33,18 @@ namespace tool {
 
 std::string tryReadFile(const std::string& echFile);
 
-/** Parses base64 encoded ECH config list.
+/**
+ * Parses Base64 encoded ECH config list.
+ * @param ret Output parameter for the parsed ECH configs (none if empty).
+ * @param err Error output parameter.
  * @param echConfigListBase64 ECH config list encoded in base64. It must use
  * the format specified in the ECH RFC
  *(https://www.ietf.org/archive/id/draft-ietf-tls-esni-16.html#name-encrypted-clienthello-confi)
- * @return Parsed ECH config contents.
+ * @return Status indicating success or failure.
  **/
-folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigsBase64(
+Status parseECHConfigsBase64(
+    folly::Optional<std::vector<ech::ParsedECHConfig>>& ret,
+    Error& err,
     std::string echConfigListBase64);
 
 folly::Optional<std::vector<ech::ParsedECHConfig>> parseECHConfigs(

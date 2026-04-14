@@ -69,13 +69,19 @@ class Factory {
   /**
    * Should not be overridden *unless* for testing.
    */
-  virtual std::unique_ptr<KeyScheduler> makeKeyScheduler(
+  virtual Status makeKeyScheduler(
+      std::unique_ptr<KeyScheduler>& ret,
+      Error& err,
       CipherSuite cipher) const;
 
-  virtual std::unique_ptr<KeyDerivation> makeKeyDeriver(
+  virtual Status makeKeyDeriver(
+      std::unique_ptr<KeyDerivation>& ret,
+      Error& err,
       CipherSuite cipher) const;
 
-  virtual std::unique_ptr<HandshakeContext> makeHandshakeContext(
+  virtual Status makeHandshakeContext(
+      std::unique_ptr<HandshakeContext>& ret,
+      Error& err,
       CipherSuite cipher) const;
 
   virtual Status makeKeyExchange(

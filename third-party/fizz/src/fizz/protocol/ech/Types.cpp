@@ -10,16 +10,19 @@
 
 namespace fizz::ech {
 
-folly::Optional<ECHConfigContentDraft>
-ECHConfigContentDraft::parseSupportedECHConfig(const ECHConfig& config) {
+Status ECHConfigContentDraft::parseSupportedECHConfig(
+    folly::Optional<ECHConfigContentDraft>& ret,
+    Error& err,
+    const ECHConfig& config) {
   if (config.version == ECHVersion::Draft15) {
     folly::io::Cursor cursor(config.ech_config_content.get());
     ECHConfigContentDraft echConfigContent;
-    Error err;
-    FIZZ_THROW_ON_ERROR(
-        decode<ECHConfigContentDraft>(echConfigContent, err, cursor), err);
-    return echConfigContent;
+    FIZZ_RETURN_ON_ERROR(
+        decode<ECHConfigContentDraft>(echConfigContent, err, cursor));
+    ret = std::move(echConfigContent);
+    return Status::Success;
   }
-  return folly::none;
+  ret = folly::none;
+  return Status::Success;
 }
 } // namespace fizz::ech

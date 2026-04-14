@@ -57,13 +57,13 @@ function openssl_csr_export_to_file(
   HH\FIXME\MISSING_PARAM_TYPE $csr,
   string $outfilename,
   bool $notext = true,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_csr_export(
   HH\FIXME\MISSING_PARAM_TYPE $csr,
   inout HH\FIXME\MISSING_PARAM_TYPE $out,
   bool $notext = true,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_csr_get_public_key(
   HH\FIXME\MISSING_PARAM_TYPE $csr,
@@ -105,7 +105,7 @@ function openssl_open(
   inout HH\FIXME\MISSING_PARAM_TYPE $open_data,
   string $env_key,
   HH\FIXME\MISSING_PARAM_TYPE $priv_key_id,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_pkcs12_export_to_file(
   HH\FIXME\MISSING_PARAM_TYPE $x509,
@@ -113,7 +113,7 @@ function openssl_pkcs12_export_to_file(
   HH\FIXME\MISSING_PARAM_TYPE $priv_key,
   string $pass,
   HH\FIXME\MISSING_PARAM_TYPE $args = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_pkcs12_export(
   HH\FIXME\MISSING_PARAM_TYPE $x509,
@@ -121,20 +121,20 @@ function openssl_pkcs12_export(
   HH\FIXME\MISSING_PARAM_TYPE $priv_key,
   string $pass,
   HH\FIXME\MISSING_PARAM_TYPE $args = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_pkcs12_read(
   string $pkcs12,
   inout HH\FIXME\MISSING_PARAM_TYPE $certs,
   string $pass,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_pkcs7_decrypt(
   string $infilename,
   string $outfilename,
   HH\FIXME\MISSING_PARAM_TYPE $recipcert,
   HH\FIXME\MISSING_PARAM_TYPE $recipkey = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_pkcs7_encrypt(
   string $infilename,
@@ -143,7 +143,7 @@ function openssl_pkcs7_encrypt(
   HH\FIXME\MISSING_PARAM_TYPE $headers,
   int $flags = 0,
   int $cipherid = OPENSSL_CIPHER_RC2_40,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_pkcs7_sign(
   string $infilename,
@@ -153,7 +153,7 @@ function openssl_pkcs7_sign(
   HH\FIXME\MISSING_PARAM_TYPE $headers,
   int $flags = PKCS7_DETACHED,
   string $extracerts = "",
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_pkcs7_verify(
   string $filename,
@@ -169,18 +169,18 @@ function openssl_pkey_export_to_file(
   string $outfilename,
   string $passphrase = "",
   HH\FIXME\MISSING_PARAM_TYPE $configargs = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_pkey_export(
   HH\FIXME\MISSING_PARAM_TYPE $key,
   inout HH\FIXME\MISSING_PARAM_TYPE $out,
   string $passphrase = "",
   HH\FIXME\MISSING_PARAM_TYPE $configargs = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
-function openssl_pkey_free(resource $key): HH\FIXME\MISSING_RETURN_TYPE;
+function openssl_pkey_free(resource $key): void;
 <<__PHPStdLib>>
-function openssl_free_key(resource $key): HH\FIXME\MISSING_RETURN_TYPE;
+function openssl_free_key(resource $key): void;
 <<__PHPStdLib>>
 function openssl_pkey_get_details(resource $key): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -211,28 +211,28 @@ function openssl_private_decrypt(
   inout HH\FIXME\MISSING_PARAM_TYPE $decrypted,
   HH\FIXME\MISSING_PARAM_TYPE $key,
   int $padding = OPENSSL_PKCS1_PADDING,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_private_encrypt(
   string $data,
   inout HH\FIXME\MISSING_PARAM_TYPE $crypted,
   HH\FIXME\MISSING_PARAM_TYPE $key,
   int $padding = OPENSSL_PKCS1_PADDING,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_public_decrypt(
   string $data,
   inout HH\FIXME\MISSING_PARAM_TYPE $decrypted,
   HH\FIXME\MISSING_PARAM_TYPE $key,
   int $padding = OPENSSL_PKCS1_PADDING,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_public_encrypt(
   string $data,
   inout HH\FIXME\MISSING_PARAM_TYPE $crypted,
   HH\FIXME\MISSING_PARAM_TYPE $key,
   int $padding = OPENSSL_PKCS1_PADDING,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_seal(
   string $data,
@@ -248,7 +248,7 @@ function openssl_sign(
   inout HH\FIXME\MISSING_PARAM_TYPE $signature,
   HH\FIXME\MISSING_PARAM_TYPE $priv_key_id,
   HH\FIXME\MISSING_PARAM_TYPE $signature_alg = OPENSSL_ALGO_SHA1,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_verify(
   string $data,
@@ -260,7 +260,7 @@ function openssl_verify(
 function openssl_x509_check_private_key(
   HH\FIXME\MISSING_PARAM_TYPE $cert,
   HH\FIXME\MISSING_PARAM_TYPE $key,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_x509_checkpurpose(
   HH\FIXME\MISSING_PARAM_TYPE $x509cert,
@@ -277,15 +277,15 @@ function openssl_x509_export_to_file(
   HH\FIXME\MISSING_PARAM_TYPE $x509,
   string $outfilename,
   bool $notext = true,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function openssl_x509_export(
   HH\FIXME\MISSING_PARAM_TYPE $x509,
   inout HH\FIXME\MISSING_PARAM_TYPE $output,
   bool $notext = true,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
-function openssl_x509_free(resource $x509cert): HH\FIXME\MISSING_RETURN_TYPE;
+function openssl_x509_free(resource $x509cert): void;
 <<__PHPStdLib>>
 function openssl_x509_parse(
   HH\FIXME\MISSING_PARAM_TYPE $x509cert,
@@ -298,7 +298,7 @@ function openssl_x509_read(
 <<__PHPStdLib>>
 function openssl_random_pseudo_bytes(
   int $length,
-  inout HH\FIXME\MISSING_PARAM_TYPE $crypto_strong,
+  inout bool $crypto_strong,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function openssl_cipher_iv_length(string $method): HH\FIXME\MISSING_RETURN_TYPE;

@@ -234,32 +234,52 @@ class t_type_ref final {
    * Returns the resolved type being referenced.
    *
    * Throws a std::runtime_error if the type has not been set, or an unresolved
-   * t_placeholder_typedef is encountered.
+   * type is encountered.
    */
   const t_type& deref() const { return deref_or_throw(); }
 
-  // Returns true the type reference has not been initialized.
-  bool empty() const noexcept { return type_ == nullptr; }
+  /**
+   * Returns true if the type reference has not been initialized (i.e. does not
+   * refer to any type, resolved or unresolved).
+   * This explicitly means *no* reference to a type, rather than a reference to
+   * a type which does not exist.
+   */
+  bool empty() const noexcept {
+    return type_ == nullptr && unresolved_typedef_ == nullptr &&
+        unresolved_name_.empty();
+  }
+
+  // Returns true if the type reference names an unresolved type.
+  bool unresolved() const noexcept { return !empty() && !resolved(); }
 
   /**
    * Boolean operator is equivalent to "not empty".
+   * This does not guarantee that the type is resolved or resolvable, just that
+   * this ref does intend to refer to a type.
    */
   explicit operator bool() const { return !empty(); }
 
   /**
    * Returns true if this reference has been initialized (i.e., is not
-   * `empty()`) and any previously unresolved "placeholder typedef" has been
-   * resolved.
+   * `empty()`) AND points to a resolved type.
    */
   bool resolved() const noexcept;
 
   /**
-   * Attempts to resolve the underlying unresolved "placeholder typedef", if
-   * any.
+   * Attempts to resolve the underlying unresolved type, if any.
+   * Returns true if the ref is empty (does not refer to any type), or
+   * successfully resolved to a type.
+   * Returns false if the ref is not empty and the type could not be resolved.
    */
   bool resolve();
 
   source_range src_range() const { return range_; }
+
+  // Helpers for constructing unresolved references.
+  static t_type_ref for_unresolved(
+      const t_program& program, std::string name, source_range range = {}) {
+    return t_type_ref(&program, std::move(name), range);
+  }
 
   // Helpers for constructing from pointers.
   static t_type_ref from_ptr(const t_type* type, source_range range = {}) {
@@ -283,8 +303,7 @@ class t_type_ref final {
  private:
   /**
    * The resolved underlying type being referred to by this t_type_ref, if any.
-   *
-   * `type == nullptr`  <=> `this->empty()` <=> `!bool(*this)`
+   * If this is nullptr, then the type is either unresolved or empty.
    */
   const t_type* type_ = nullptr;
 
@@ -296,7 +315,18 @@ class t_type_ref final {
   // TODO(T244601847): Make an unresolved reference directly representable in
   // the AST, merging `t_placeholder_typedef` into `t_type_ref`.
   t_placeholder_typedef* unresolved_typedef_ = nullptr;
+  /**
+   * If this type reference refers to an unresolved type, this is the program
+   * from which the reference was made (i.e. the program whose context the type
+   * resolution will be attempted from).
+   * `nullptr` if this type ref is empty, or already resolved.
+   * E.g. if a node in the program `foo` references a currently unresolved type
+   * `bar.Baz`, this will be a a pointer to the program `foo` (NOT `bar`).
+   */
+  const t_program* unresolved_program_ = nullptr;
+  std::string unresolved_name_;
 
+  // Note: Use for_placeholder for public access.
   explicit t_type_ref(
       const t_type& type,
       t_placeholder_typedef& unresolved_type,
@@ -307,11 +337,28 @@ class t_type_ref final {
   explicit t_type_ref(const t_type* type, source_range range)
       : type_(type), range_(range) {}
 
+  // Note: Use for_unresolved for public access.
+  explicit t_type_ref(
+      const t_program* program, std::string name, source_range range)
+      : range_(range),
+        unresolved_program_(program),
+        unresolved_name_(std::move(name)) {}
+
   /**
    * Returns the resolved underlying type being referred to, or throws an
    * exception.
    */
   const t_type& deref_or_throw() const;
+
+  /**
+   * If this type reference refers to an unresolved type, returns the referenced
+   * name of the type. This is the name of the type as it appears in the IDL in
+   * the context from which it is to be resolved.
+   * Otherwise, returns an empty string.
+   */
+  const std::string& unresolved_name() const noexcept {
+    return unresolved_name_;
+  }
 
  public:
   // TODO(T244601847): Remove get_type() once t_placeholder_typedef, at which
@@ -329,14 +376,9 @@ class t_type_ref final {
    * When we parse an AST, `t_type_ref` represents all type references. E.g. the
    * type of a field `1: Foo myField` is a type-ref to the AST type `Foo`.
    *
-   * When a type is not immediately resolvable at parse time (i.e. the parser
-   * has not yet encountered the declaration of type `Foo`), we generate a
-   * "placeholder typedef"  to Foo (i.e. instead of pointing to the definition
-   * `Foo`, the type-ref points to a t_placeholder_typedef representing Foo).
-   *
-   * After parsing completes, we attempt deferred resolution for placeholder
-   * typedefs to resolve types which were declared after their use, and emit
-   * errors for types not found even during deferred resolution.
+   * During the migration off placeholder typedefs, unresolved types may be
+   * represented either by a placeholder-backed ref or directly by the target
+   * program and unresolved name. Both modes are resolved through this API.
    */
   t_placeholder_typedef* unresolved_type() { return unresolved_typedef_; }
 

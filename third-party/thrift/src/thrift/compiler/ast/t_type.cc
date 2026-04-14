@@ -18,6 +18,7 @@
 
 #include <stdexcept>
 
+#include <thrift/compiler/ast/scope_identifier.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
@@ -31,41 +32,66 @@ const t_type* t_type::get_true_type() const {
 }
 
 bool t_type_ref::resolved() const noexcept {
-  return !empty() &&
-      (unresolved_typedef_ == nullptr ||
-       unresolved_typedef_->type().resolved());
+  if (type_ == nullptr) {
+    return false;
+  }
+  if (unresolved_typedef_ != nullptr) {
+    return unresolved_typedef_->type().resolved();
+  }
+  return unresolved_name_.empty();
 }
 
 bool t_type_ref::resolve() {
-  if (unresolved_typedef_ == nullptr) {
+  if (resolved() || empty()) {
     // Already resolved
     return true;
   }
 
-  // Try to resolve.
-  if (!unresolved_typedef_->resolve()) {
+  // Try to resolve via the placeholder typedef
+  if (unresolved_typedef_ != nullptr) {
+    if (!unresolved_typedef_->resolve()) {
+      return false;
+    }
+
+    // Try to excise the placeholder typedef so dynamic_cast works.
+    if (unresolved_typedef_->unstructured_annotations().empty()) {
+      type_ = unresolved_typedef_->type().get_type();
+    }
+    unresolved_typedef_ = nullptr;
+    unresolved_program_ = nullptr;
+    unresolved_name_.clear();
+    return true;
+  }
+
+  if (unresolved_program_ == nullptr) {
     return false;
   }
 
-  // Try to excise the placeholder typedef so dynamic_cast works.
-  if (unresolved_typedef_->unstructured_annotations().empty()) {
-    type_ = unresolved_typedef_->type().get_type();
+  const t_type* resolved_type = unresolved_program_->find<t_type>(
+      scope::identifier{unresolved_name_, range_});
+  if (resolved_type == nullptr) {
+    return false;
   }
-  unresolved_typedef_ = nullptr;
 
+  type_ = resolved_type;
+  unresolved_typedef_ = nullptr;
+  unresolved_program_ = nullptr;
+  unresolved_name_.clear();
   return true;
 }
 
 const t_type& t_type_ref::deref() {
   if (!resolve()) {
-    throw std::runtime_error(
-        "Could not resolve type: " + unresolved_typedef_->get_full_name());
+    throw std::runtime_error("Could not resolve type: " + unresolved_name_);
   }
   return deref_or_throw();
 }
 
 const t_type& t_type_ref::deref_or_throw() const {
   if (type_ == nullptr) {
+    if (!unresolved_name_.empty()) {
+      throw std::runtime_error("Could not resolve type: " + unresolved_name_);
+    }
     throw std::runtime_error("t_type_ref has no type.");
   }
   if (auto ph = dynamic_cast<const t_placeholder_typedef*>(type_)) {
@@ -75,8 +101,13 @@ const t_type& t_type_ref::deref_or_throw() const {
 }
 
 t_type_ref t_type_ref::for_placeholder(t_placeholder_typedef& unresolved_type) {
-  return t_type_ref{
-      unresolved_type, unresolved_type, unresolved_type.src_range()};
+  t_type_ref ref{unresolved_type, unresolved_type, unresolved_type.src_range()};
+  // NOTE: not part of the constructor initializers because
+  // `t_placeholder_typedef` is incomplete in `t_type.h`, since it's defined in
+  // `t_typedef.h` which depends on `t_type.h`
+  ref.unresolved_program_ = unresolved_type.program();
+  ref.unresolved_name_ = unresolved_type.name();
+  return ref;
 }
 
 const t_type_ref& t_type_ref::none() {

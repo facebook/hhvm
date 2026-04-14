@@ -1547,7 +1547,7 @@ void HTTPSession::onEgressMessageFinished(HTTPTransaction* txn, bool withRST) {
         // to keep it live until the loopCb runs
         shutdownTransportCb_ =
             std::make_unique<ShutdownTransportCallback>(this);
-        sock_->getEventBase()->runInLoop(shutdownTransportCb_.get());
+        shutdownTransportCb_->scheduleInLoop(sock_->getEventBase());
       }
     } else {
       // Parsing of new transactions is not going to work anymore, but we can't
@@ -1562,7 +1562,7 @@ void HTTPSession::onEgressMessageFinished(HTTPTransaction* txn, bool withRST) {
   }
 }
 
-void HTTPSession::ShutdownTransportCallback::runLoopCallback() noexcept {
+void HTTPSession::ShutdownTransportCallback::runSessionLoopCallback() noexcept {
   VLOG(4) << *session_ << " shutdown from onEgressMessageFinished";
   // Continuation of the above logic.  Writes will be shutdown, reads are
   // forced shutdown in specific cases:
@@ -1872,7 +1872,7 @@ void HTTPSession::notifyIngressBodyProcessed(uint32_t bytes) noexcept {
 void HTTPSession::notifyEgressBodyBuffered(int64_t bytes) noexcept {
   if (HTTPSessionBase::notifyEgressBodyBuffered(bytes, true) &&
       !inLoopCallback_ && !isLoopCallbackScheduled()) {
-    sock_->getEventBase()->runInLoop(this);
+    scheduleInLoop(sock_->getEventBase());
   }
 }
 
@@ -2045,7 +2045,7 @@ unique_ptr<IOBuf> HTTPSession::getNextToSend(bool* cork,
   return writeBuf_.move();
 }
 
-void HTTPSession::runLoopCallback() noexcept {
+void HTTPSession::runSessionLoopCallback() noexcept {
   // We schedule this callback to run at the end of an event
   // loop iteration if either of two conditions has happened:
   //   * The session has generated some egress data (see scheduleWrite())
@@ -2150,7 +2150,7 @@ void HTTPSession::scheduleWrite() {
   if (!isLoopCallbackScheduled() &&
       (writeBuf_.front() || !txnEgressQueue_.empty())) {
     VLOG(5) << *this << " scheduling write callback";
-    sock_->getEventBase()->runInLoop(this);
+    scheduleInLoop(sock_->getEventBase());
   }
 }
 
@@ -2654,7 +2654,7 @@ void HTTPSession::writeSuccess() noexcept {
     //             whereby the socket asks us for a given amount of
     //             data to send...
     if (numActiveWrites_ == 0 && hasMoreWrites()) {
-      runLoopCallback();
+      runSessionLoopCallback();
     }
   }
   onWriteCompleted();
@@ -2777,7 +2777,7 @@ void HTTPSession::resumeReadsImpl() {
   reads_ = SocketState::UNPAUSED;
   codec_->setParserPaused(false);
   if (!isLoopCallbackScheduled()) {
-    sock_->getEventBase()->runInLoop(this);
+    scheduleInLoop(sock_->getEventBase());
   }
 }
 

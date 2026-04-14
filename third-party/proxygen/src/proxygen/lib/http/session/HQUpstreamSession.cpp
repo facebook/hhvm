@@ -136,7 +136,7 @@ void HQUpstreamSession::attachThreadLocals(
   }
   codec_.foreach (fn);
   setHeaderCodecStats(headerCodecStats);
-  getEventBase()->runInLoop(this);
+  scheduleInLoop(getEventBase());
   // The caller MUST re-add the connection to a new connection manager.
 }
 

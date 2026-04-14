@@ -28,7 +28,6 @@
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestructionBase.h>
-#include <folly/io/async/EventBase.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <quic/QuicConstants.h>
 #include <quic/common/BufUtil.h>
@@ -1078,7 +1077,7 @@ bool HQSession::eraseStream(quic::StreamId streamId) {
   return erased;
 }
 
-void HQSession::runLoopCallback() noexcept {
+void HQSession::runSessionLoopCallback() noexcept {
   // We schedule this callback to run at the end of an event
   // loop iteration if either of two conditions has happened:
   //   * The session has generated some egress data (see scheduleWrite())
@@ -1161,16 +1160,13 @@ void HQSession::scheduleWrite() {
 
   scheduledWrite_ = true;
   if (auto* evb = getEventBase()) {
-    // Pass nullptr for RequestContext. The write scheduler handles writes for
-    // all streams on this connection; its CPU cost should not be attributed to
-    // any single request.
-    evb->runInLoop(&writeScheduler_, /*thisIteration=*/true, /*rctx=*/nullptr);
+    writeScheduler_.scheduleInLoop(evb, /*thisIteration=*/true);
   } else {
     sock_->notifyPendingWriteOnConnection(this);
   }
 }
 
-void HQSession::WriteScheduler::runLoopCallback() noexcept {
+void HQSession::WriteScheduler::runSessionLoopCallback() noexcept {
   if (session_.sock_) {
     session_.sock_->notifyPendingWriteOnConnection(&session_);
   }
@@ -1179,10 +1175,7 @@ void HQSession::WriteScheduler::runLoopCallback() noexcept {
 void HQSession::scheduleLoopCallback(bool thisIteration) {
   if (sock_ && sock_->getEventBase()) {
     if (!isLoopCallbackScheduled()) {
-      // Pass nullptr for RequestContext. Session-level callbacks handle work
-      // for all streams; their cost should not be attributed to any single
-      // request.
-      getEventBase()->runInLoop(this, thisIteration, /*rctx=*/nullptr);
+      scheduleInLoop(getEventBase(), thisIteration);
     }
   }
 }
@@ -1707,7 +1700,7 @@ void HQSession::onPushPriority(hq::PushId pushId, const HTTPPriority& pri) {
 void HQSession::notifyEgressBodyBuffered(int64_t bytes) {
   if (HTTPSessionBase::notifyEgressBodyBuffered(bytes, true) &&
       !inLoopCallback_ && !isLoopCallbackScheduled() && sock_) {
-    getEventBase()->runInLoop(this);
+    scheduleInLoop(getEventBase());
   }
 }
 

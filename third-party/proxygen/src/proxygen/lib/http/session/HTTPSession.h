@@ -29,6 +29,7 @@
 #include <proxygen/lib/http/session/HTTPSessionBase.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/session/SecondaryAuthManagerBase.h>
+#include <proxygen/lib/http/session/SessionLoopCallback.h>
 #include <proxygen/lib/utils/WheelTimerInstance.h>
 #include <vector>
 
@@ -48,7 +49,7 @@ class HTTPSession
     , protected folly::AsyncTransport::BufferCallback
     , private FlowControlFilter::Callback
     , private HTTPCodec::Callback
-    , private folly::EventBase::LoopCallback
+    , private SessionLoopCallback
     , private folly::AsyncTransport::ReadCallback
     , private folly::AsyncTransport::ReplaySafetyCallback
     , private folly::AsyncTransport::WriteCallback {
@@ -556,8 +557,8 @@ class HTTPSession
    */
   void shutdownRead();
 
-  // EventBase::LoopCallback methods
-  void runLoopCallback() noexcept override;
+  // SessionLoopCallback methods
+  void runSessionLoopCallback() noexcept override;
 
   /**
    * Schedule a write to occur at the end of this event loop.
@@ -674,12 +675,13 @@ class HTTPSession
 
   void rescheduleLoopCallbacks() {
     if (!isLoopCallbackScheduled()) {
-      sock_->getEventBase()->runInLoop(this);
+      scheduleInLoop(sock_->getEventBase());
     }
 
     if (shutdownTransportCb_ &&
         !shutdownTransportCb_->isLoopCallbackScheduled()) {
-      sock_->getEventBase()->runInLoop(shutdownTransportCb_.get(), true);
+      shutdownTransportCb_->scheduleInLoop(sock_->getEventBase(),
+                                           /*thisIteration=*/true);
     }
   }
 
@@ -954,7 +956,7 @@ class HTTPSession
   size_t receiveStreamWindowSize_{0};
   size_t receiveSessionWindowSize_{0};
 
-  class ShutdownTransportCallback : public folly::EventBase::LoopCallback {
+  class ShutdownTransportCallback : public SessionLoopCallback {
    public:
     explicit ShutdownTransportCallback(HTTPSession* session)
         : session_(session), dg_(std::make_unique<DestructorGuard>(session)) {
@@ -962,7 +964,7 @@ class HTTPSession
 
     ~ShutdownTransportCallback() override = default;
 
-    void runLoopCallback() noexcept override;
+    void runSessionLoopCallback() noexcept override;
 
    private:
     HTTPSession* session_;

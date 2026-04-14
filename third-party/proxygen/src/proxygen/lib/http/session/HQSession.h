@@ -31,6 +31,7 @@
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/session/QuicProtocolInfo.h>
 #include <proxygen/lib/http/session/ServerPushLifecycle.h>
+#include <proxygen/lib/http/session/SessionLoopCallback.h>
 #include <proxygen/lib/http/session/WebTransportFilter.h>
 #include <proxygen/lib/utils/ConditionalGate.h>
 #include <quic/QuicConstants.h>
@@ -87,7 +88,7 @@ class HQSession
     , public quic::QuicSocket::DatagramCallback
     , public quic::QuicSocket::PingCallback
     , public HTTPSessionBase
-    , public folly::EventBase::LoopCallback
+    , public SessionLoopCallback
     , public HQUniStreamDispatcher::Callback
     , public HQBidiStreamDispatcher::Callback {
   // Forward declarations
@@ -702,8 +703,8 @@ class HQSession
     initCodecHeaderIndexingStrategy();
   }
 
-  // EventBase::LoopCallback methods
-  void runLoopCallback() noexcept override;
+  // SessionLoopCallback methods
+  void runSessionLoopCallback() noexcept override;
 
   /**
    * Called by transactionTimeout if the transaction has no handler.
@@ -2069,12 +2070,12 @@ class HQSession
         &sessionObserverContainer_);
   }
 
-  class WriteScheduler : public folly::EventBase::LoopCallback {
+  class WriteScheduler : public SessionLoopCallback {
    public:
     explicit WriteScheduler(HQSession& session) : session_(session) {
     }
     ~WriteScheduler() override = default;
-    void runLoopCallback() noexcept override;
+    void runSessionLoopCallback() noexcept override;
 
    private:
     HQSession& session_;

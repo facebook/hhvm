@@ -140,18 +140,10 @@ class parser_actions {
       source_range range, type_throws_spec spec) = 0;
 
   virtual t_type_ref on_list_type(
-      source_range range,
-      t_type_ref element_type,
-      std::unique_ptr<deprecated_annotations> annotations) = 0;
-  virtual t_type_ref on_set_type(
-      source_range range,
-      t_type_ref key_type,
-      std::unique_ptr<deprecated_annotations> annotations) = 0;
+      source_range range, t_type_ref element_type) = 0;
+  virtual t_type_ref on_set_type(source_range range, t_type_ref key_type) = 0;
   virtual t_type_ref on_map_type(
-      source_range range,
-      t_type_ref key_type,
-      t_type_ref value_type,
-      std::unique_ptr<deprecated_annotations> annotations) = 0;
+      source_range range, t_type_ref key_type, t_type_ref value_type) = 0;
 
   virtual std::unique_ptr<t_function> on_performs(
       source_range range, const identifier& interaction_name) = 0;
@@ -196,14 +188,9 @@ class parser_actions {
       std::optional<comment> doc) = 0;
 
   virtual t_type_ref on_type(
-      source_range range,
-      const t_primitive_type& type,
-      std::unique_ptr<deprecated_annotations> annotations) = 0;
+      source_range range, const t_primitive_type& type) = 0;
 
-  virtual t_type_ref on_type(
-      source_range range,
-      std::string_view name,
-      std::unique_ptr<deprecated_annotations> annotations) = 0;
+  virtual t_type_ref on_type(source_range range, std::string_view name) = 0;
 
   virtual void on_enum(
       source_range range,

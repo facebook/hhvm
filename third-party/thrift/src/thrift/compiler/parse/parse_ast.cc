@@ -294,14 +294,6 @@ class ast_builder : public parser_actions {
         doc->range);
   }
 
-  // Sets the annotations on the given node.
-  static void set_annotations(
-      t_node* node, std::unique_ptr<deprecated_annotations> annotations) {
-    if (annotations) {
-      node->reset_annotations(annotations->strings);
-    }
-  }
-
   // Sets the attributes on the given node.
   void set_attributes(
       t_named& node,
@@ -317,7 +309,6 @@ class ast_builder : public parser_actions {
     for (auto& annotation : attrs->annotations) {
       node.add_structured_annotation(std::move(annotation));
     }
-    set_annotations(&node, std::move(attrs->deprecated_annotations));
   }
 
   void add_definition(std::unique_ptr<t_named> definition) {
@@ -379,59 +370,23 @@ class ast_builder : public parser_actions {
 
   // Creates a reference to a known type, potentally with additional
   // annotations.
-  t_type_ref new_type_ref(
-      const t_type& type,
-      std::unique_ptr<deprecated_annotations> annotations,
-      const source_range& range = {}) {
-    if (!annotations) {
-      return {type, range};
-    }
-
-    // Make a copy of the node to hold the annotations.
-    if (const auto* tbase_type = dynamic_cast<const t_primitive_type*>(&type)) {
-      // Base types can be copy constructed.
-      auto node = std::make_unique<t_primitive_type>(*tbase_type);
-      set_annotations(node.get(), std::move(annotations));
-      t_type_ref result(*node, range);
-      program_.add_unnamed_type(std::move(node));
-      return result;
-    }
-
-    // Containers always use a new type, so should never show up here.
-    assert(!type.is<t_container>());
-    // Unstructured annotations are rejected at parse time, so we should never
-    // reach here with annotations on non-primitive, non-container types.
+  t_type_ref new_type_ref(const t_type& type, const source_range& range = {}) {
     return {type, range};
   }
 
   // Creates a reference to a newly instantiated container type.
   t_type_ref new_type_ref(
-      source_range range,
-      std::unique_ptr<t_container> node,
-      std::unique_ptr<deprecated_annotations> annotations) {
+      source_range range, std::unique_ptr<t_container> node) {
     assert(node != nullptr);
     const t_type* type = node.get();
-    set_annotations(node.get(), std::move(annotations));
     node->set_src_range(range);
     program_.add_type_instantiation(std::move(node));
     return {*type, range};
   }
 
   // Creates a reference to a named type.
-  t_type_ref new_type_ref(
-      const std::string& name,
-      std::unique_ptr<deprecated_annotations> annotations,
-      const source_range& range) {
-    t_type_ref result = global_scope_->ref_type(program_, name, range);
-
-    if (auto* node = result.unresolved_type()) { // A newly created ph.
-      set_annotations(node, std::move(annotations));
-    } else if (annotations) {
-      // TODO: Remove support for annotations on type references.
-      return new_type_ref(result.deref(), std::move(annotations), range);
-    }
-
-    return result;
+  t_type_ref new_type_ref(const std::string& name, const source_range& range) {
+    return global_scope_->ref_type(program_, name, range);
   }
 
   // Tries to set the given fields, reporting an error on a collision.
@@ -545,7 +500,7 @@ class ast_builder : public parser_actions {
   std::unique_ptr<t_const> on_structured_annotation(
       source_range range, std::string_view name) override {
     auto const_value = t_const_value::make_map();
-    t_type_ref type = new_type_ref(fmt::to_string(name), nullptr, range);
+    t_type_ref type = new_type_ref(fmt::to_string(name), range);
     const_value->set_type(type);
     return on_structured_annotation(range, std::move(const_value));
   }
@@ -619,7 +574,7 @@ class ast_builder : public parser_actions {
         diags_.error(
             ret.name.loc, "'{}' does not name an interaction", return_name);
       } else {
-        return_type = on_type(ret.name.range(), return_name, {});
+        return_type = on_type(ret.name.range(), return_name);
       }
     }
 
@@ -686,30 +641,17 @@ class ast_builder : public parser_actions {
   }
 
   t_type_ref on_list_type(
-      source_range range,
-      t_type_ref element_type,
-      std::unique_ptr<deprecated_annotations> annotations) override {
-    return new_type_ref(
-        range, std::make_unique<t_list>(element_type), std::move(annotations));
+      source_range range, t_type_ref element_type) override {
+    return new_type_ref(range, std::make_unique<t_list>(element_type));
   }
 
-  t_type_ref on_set_type(
-      source_range range,
-      t_type_ref key_type,
-      std::unique_ptr<deprecated_annotations> annotations) override {
-    return new_type_ref(
-        range, std::make_unique<t_set>(key_type), std::move(annotations));
+  t_type_ref on_set_type(source_range range, t_type_ref key_type) override {
+    return new_type_ref(range, std::make_unique<t_set>(key_type));
   }
 
   t_type_ref on_map_type(
-      source_range range,
-      t_type_ref key_type,
-      t_type_ref value_type,
-      std::unique_ptr<deprecated_annotations> annotations) override {
-    return new_type_ref(
-        range,
-        std::make_unique<t_map>(key_type, value_type),
-        std::move(annotations));
+      source_range range, t_type_ref key_type, t_type_ref value_type) override {
+    return new_type_ref(range, std::make_unique<t_map>(key_type, value_type));
   }
 
   std::unique_ptr<t_function> on_performs(
@@ -812,17 +754,12 @@ class ast_builder : public parser_actions {
   }
 
   t_type_ref on_type(
-      source_range range,
-      const t_primitive_type& type,
-      std::unique_ptr<deprecated_annotations> annotations) override {
-    return new_type_ref(type, std::move(annotations), range);
+      source_range range, const t_primitive_type& type) override {
+    return new_type_ref(type, range);
   }
 
-  t_type_ref on_type(
-      source_range range,
-      std::string_view name,
-      std::unique_ptr<deprecated_annotations> annotations) override {
-    return new_type_ref(fmt::to_string(name), std::move(annotations), range);
+  t_type_ref on_type(source_range range, std::string_view name) override {
+    return new_type_ref(fmt::to_string(name), range);
   }
 
   void on_enum(
@@ -937,7 +874,7 @@ class ast_builder : public parser_actions {
   std::unique_ptr<t_const_value> on_struct_initializer(
       source_range range, std::string_view name) override {
     auto const_value = t_const_value::make_map();
-    const_value->set_type(new_type_ref(fmt::to_string(name), nullptr, range));
+    const_value->set_type(new_type_ref(fmt::to_string(name), range));
     const_value->set_ref_range(range);
     const_value->set_is_struct_literal(true);
     return const_value;

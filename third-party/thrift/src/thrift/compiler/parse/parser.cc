@@ -499,8 +499,7 @@ class parser {
     switch (token_.kind) {
       case tok::kw_void:
         is_void = true;
-        ret.type =
-            actions_.on_type(token_.range, t_primitive_type::t_void(), {});
+        ret.type = actions_.on_type(token_.range, t_primitive_type::t_void());
         consume_token();
         break;
       case tok::kw_sink:
@@ -790,29 +789,30 @@ class parser {
   t_type_ref parse_type() {
     auto range = track_range();
     if (const t_primitive_type* type = try_parse_base_type()) {
-      return actions_.on_type(range, *type, try_parse_deprecated_annotations());
+      try_parse_deprecated_annotations();
+      return actions_.on_type(range, *type);
     }
     switch (token_.kind) {
       case tok::identifier: {
         auto name = consume_token().string_value();
-        auto annotations = try_parse_deprecated_annotations();
-        return actions_.on_type(range, name, std::move(annotations));
+        try_parse_deprecated_annotations();
+        return actions_.on_type(range, name);
       }
       case tok::kw_list: {
         consume_token();
         expect_and_consume('<');
         auto element_type = parse_type();
         expect_and_consume('>');
-        return actions_.on_list_type(
-            range, element_type, try_parse_deprecated_annotations());
+        try_parse_deprecated_annotations();
+        return actions_.on_list_type(range, element_type);
       }
       case tok::kw_set: {
         consume_token();
         expect_and_consume('<');
         auto key_type = parse_type();
         expect_and_consume('>');
-        return actions_.on_set_type(
-            range, key_type, try_parse_deprecated_annotations());
+        try_parse_deprecated_annotations();
+        return actions_.on_set_type(range, key_type);
       }
       case tok::kw_map: {
         consume_token();
@@ -821,8 +821,8 @@ class parser {
         expect_and_consume(',');
         auto value_type = parse_type();
         expect_and_consume('>');
-        return actions_.on_map_type(
-            range, key_type, value_type, try_parse_deprecated_annotations());
+        try_parse_deprecated_annotations();
+        return actions_.on_map_type(range, key_type, value_type);
       }
       case tok::kw_void:
         report_error("`void` cannot be used as a data type");

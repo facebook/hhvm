@@ -529,8 +529,6 @@ std::unique_ptr<t_field> clone_injected_field(
   if (field.default_value() != nullptr) {
     clone->set_default_value(field.default_value()->clone());
   }
-  // unstructured annotations
-  clone->reset_annotations(field.unstructured_annotations());
   // structured annotations
   for (const auto& annot : field.structured_annotations()) {
     clone->add_structured_annotation(annot.clone());
@@ -612,70 +610,6 @@ void mutate_inject_metadata_fields(
   }
 }
 
-// Strips haskell annotations and optionally inserts new annotations.
-void update_annotations(
-    t_named& node,
-    const std::map<std::string, std::string>& new_annotations = {},
-    deprecated_annotation_value::origin new_annotation_origin = {}) {
-  auto annotations = node.unstructured_annotations();
-  // First strip any haskell annotations
-  for (auto it = annotations.begin(); it != annotations.end();) {
-    if (it->first.find("hs.") == 0) {
-      it = annotations.erase(it);
-    } else {
-      ++it;
-    }
-  }
-  for (auto& [k, v] : new_annotations) {
-    annotations[k] = {source_range{}, v, new_annotation_origin};
-  }
-  node.reset_annotations(std::move(annotations));
-}
-
-void lower_deprecated_annotations(
-    sema_context& ctx, mutator_context&, t_named& node) {
-  if (auto cnst = node.find_structured_annotation_or_null(
-          kDeprecatedUnvalidatedAnnotationsUri)) {
-    ctx.check(
-        std::all_of(
-            node.unstructured_annotations().begin(),
-            node.unstructured_annotations().end(),
-            [](const auto& pair) { return pair.first.find("hs.") == 0; }),
-        "Cannot combine @thrift.DeprecatedUnvalidatedAnnotations with legacy annotation syntax.");
-    auto val = cnst->get_value_from_structured_annotation_or_null("items");
-    if (!val || val->get_map().empty()) {
-      ctx.error(
-          "Must specify at least one item in @thrift.DeprecatedUnvalidatedAnnotations.");
-      return;
-    }
-    if (!ctx.sema_parameters().skip_lowering_annotations) {
-      deprecated_annotation_map map;
-      for (auto& [k, v] : val->get_map()) {
-        // If key and value don't have a source range, we'll end up with the
-        // default (empty) value
-        source_range src_range;
-        if (k->src_range().has_value()) {
-          // If the key has a source range, try use the key-value source range,
-          // otherwise fallback to just the key source range.
-          src_range = v->src_range().has_value()
-              ? source_range{k->src_range()->begin, v->src_range()->end}
-              : k->src_range().value();
-        }
-        map[k->get_string()] = {
-            src_range,
-            v->get_string(),
-            deprecated_annotation_value::origin::lowered_unstructured};
-      }
-
-      node.reset_annotations(std::move(map));
-    } else {
-      update_annotations(node);
-    }
-  } else {
-    update_annotations(node);
-  }
-}
-
 void normalize_return_type(
     sema_context& ctx, mutator_context&, t_function& node) {
   auto& type = node.return_type();
@@ -750,7 +684,6 @@ std::vector<ast_mutator> pre_validation_standard_mutators() {
 
   ast_mutator initial;
   initial.add_function_visitor(&normalize_return_type);
-  initial.add_named_visitor(&lower_deprecated_annotations);
   mutators.push_back(std::move(initial));
 
   ast_mutator main;

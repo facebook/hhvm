@@ -19,6 +19,7 @@
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_type.h>
+#include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/parse_ast.h>
 #include <thrift/compiler/test/parser_test_helpers.h>
@@ -155,4 +156,58 @@ TEST(TypedefTest, inherited_annotations) {
   EXPECT_EQ(t_typedef::get_first_unstructured_annotation(p1, {"foo2"}), "");
   EXPECT_EQ(t_typedef::get_first_unstructured_annotation(p2, {"foo2"}), "a");
   EXPECT_EQ(t_typedef::get_first_unstructured_annotation(p3, {"foo2"}), "d");
+}
+
+TEST(TypedefTest, duva_annotations_are_exposed_through_t_node_accessors) {
+  auto source_mgr = source_manager();
+  auto program = dedent_and_parse_to_program(
+      source_mgr,
+      R"(
+        package "facebook.com/thrift/test"
+        include "thrift/annotation/thrift.thrift"
+
+        @thrift.DeprecatedUnvalidatedAnnotations{items = {"foo": "bar"}}
+        typedef i32 I32WithFoo
+
+        typedef I32WithFoo Alias
+
+        struct S {
+          @thrift.DeprecatedUnvalidatedAnnotations{items = {"baz": "qux"}}
+          1: Alias field;
+        }
+      )",
+      {},
+      {});
+
+  const auto& typedefs = program->typedefs();
+  ASSERT_EQ(typedefs.size(), 2);
+  const auto& alias = *typedefs[1];
+  EXPECT_EQ(
+      t_typedef::get_first_unstructured_annotation(
+          alias.type().get_type(), {"foo"}),
+      "bar");
+
+  const auto& fields = program->structs_and_unions()[0]->fields();
+  ASSERT_EQ(fields.size(), 1);
+  const auto& field = fields[0];
+  EXPECT_TRUE(field.has_unstructured_annotation("baz"));
+  EXPECT_EQ(field.get_unstructured_annotation("baz"), "qux");
+}
+
+TEST(TypedefTest, set_unstructured_annotation_populates_duva_items_field) {
+  t_program program("test", "test");
+  t_typedef alias(&program, "Alias", t_primitive_type::t_i32());
+
+  alias.set_unstructured_annotation("foo", "bar");
+
+  const auto* annotation = alias.find_structured_annotation_or_null(
+      kDeprecatedUnvalidatedAnnotationsUri);
+  ASSERT_NE(annotation, nullptr);
+
+  const auto* items =
+      annotation->get_value_from_structured_annotation_or_null("items");
+  ASSERT_NE(items, nullptr);
+  ASSERT_EQ(items->get_map().size(), 1);
+  EXPECT_EQ(items->get_map()[0].first->get_string(), "foo");
+  EXPECT_EQ(items->get_map()[0].second->get_string(), "bar");
 }

@@ -27,13 +27,6 @@ namespace apache::thrift::compiler {
 struct deprecated_annotation_value {
   source_range src_range;
   std::string value;
-
-  enum class origin {
-    unknown,
-    lowered_unstructured,
-    lowered_cpp_type,
-    unstructured,
-  } from;
 };
 
 using deprecated_annotation_map =
@@ -51,10 +44,9 @@ class t_node {
   const source_range& src_range() const { return range_; }
   void set_src_range(const source_range& r) { range_ = r; }
 
-  // Returns the map of deprecated annotations associated with this node.
-  const deprecated_annotation_map& unstructured_annotations() const {
-    return annotations_;
-  }
+  // Returns the effective map of deprecated annotations associated with this
+  // node. Values are derived from @thrift.DeprecatedUnvalidatedAnnotations.
+  deprecated_annotation_map unstructured_annotations() const;
 
   // Returns true if there exists an annotation with the given name.
   bool has_unstructured_annotation(
@@ -89,17 +81,10 @@ class t_node {
         std::forward<D>(default_value));
   }
 
-  void reset_annotations(deprecated_annotation_map annotations) {
-    annotations_ = std::move(annotations);
-  }
-
   void set_unstructured_annotation(
       const std::string& key,
       const std::string& value = {},
-      const source_range& range = {},
-      deprecated_annotation_value::origin origin = {}) {
-    annotations_[key] = {range, value, origin};
-  }
+      const source_range& range = {});
 
  protected:
   // t_node is abstract.
@@ -128,7 +113,6 @@ class t_node {
 
  private:
   source_range range_;
-  deprecated_annotation_map annotations_;
 };
 
 using t_annotation = deprecated_annotation_map::value_type;

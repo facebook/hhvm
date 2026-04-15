@@ -367,8 +367,6 @@ class t_concat_generator : public t_generator {
       if (field.default_value()) {
         clone.set_default_value(field.default_value()->clone());
       }
-      // unstructured annotations
-      clone.reset_annotations(field.unstructured_annotations());
       // structured annotations
       for (const auto& annot : field.structured_annotations()) {
         clone.add_structured_annotation(annot.clone());

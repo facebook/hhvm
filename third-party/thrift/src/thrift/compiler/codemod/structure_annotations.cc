@@ -629,7 +629,6 @@ class structure_annotations {
             deprecated_annotation_value{
                 {},
                 data->get_string(),
-                {},
             },
             to_add,
             to_remove,

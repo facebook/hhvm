@@ -1203,9 +1203,6 @@ void record_invocation_params(
   detail::event<std::string>& sema_params_metric =
       metrics.get(detail::metrics::EventString::SEMA_PARAMS);
   sema_params_metric.add(
-      "skip_lowering_annotations=" +
-      std::to_string(sparams.skip_lowering_annotations));
-  sema_params_metric.add(
       fmt::format(
           "redundant_custom_default_values={}",
           fmt::underlying(sparams.redundant_custom_default_values)));

@@ -126,7 +126,6 @@ struct sema_params {
    */
   static std::string validation_level_to_string(validation_level lvl);
 
-  bool skip_lowering_annotations = false;
   // If true, will issue a warning if a default value is explicitly specified
   // for a field, but that value is equal to the intrinsic default value.
   validation_level redundant_custom_default_values = validation_level::none;

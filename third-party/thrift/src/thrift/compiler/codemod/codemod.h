@@ -25,7 +25,6 @@
 namespace apache::thrift::compiler {
 
 struct codemod_parsing_options {
-  bool skip_lowering_annotations = true;
   /**
    * Override the default diagnostics handling behavior.
    * By default, all error level diagnostics are printed to stderr, and lower

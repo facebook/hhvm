@@ -1708,13 +1708,7 @@ void validate_reserved_ids_enum(sema_context& ctx, const t_enum& node) {
 }
 
 bool owns_annotations(const t_type* type) {
-  if (std::none_of(
-          type->unstructured_annotations().begin(),
-          type->unstructured_annotations().end(),
-          [](const auto& a) {
-            return a.second.from ==
-                deprecated_annotation_value::origin::unstructured;
-          })) {
+  if (type->unstructured_annotations().empty()) {
     return false;
   }
   if (type->is<t_container>()) {
@@ -1754,7 +1748,7 @@ void validate_custom_cpp_type_annotations(
       "Definition `{}` cannot have both cpp.type/cpp.template and @cpp.Adapter annotations",
       node.name());
 
-  // Excludes annotations that result from annotation lowering.
+  // Only source-backed annotations should count as user-provided.
   auto has_real_annotation = [](const auto& node) {
     if (!owns_annotations(node.type())) {
       return false;
@@ -1784,6 +1778,18 @@ void validate_custom_cpp_type_annotations(
   ctx.check(
       hasCppType + hasStructuredCppType + hasUnnamedCppType <= 1,
       "Duplicate cpp.Type annotation");
+}
+
+void validate_deprecated_annotations(sema_context& ctx, const t_named& node) {
+  if (const auto* annotation = node.find_structured_annotation_or_null(
+          kDeprecatedUnvalidatedAnnotationsUri)) {
+    const auto* items =
+        annotation->get_value_from_structured_annotation_or_null("items");
+    if (items == nullptr || items->get_map().empty()) {
+      ctx.error(
+          "Must specify at least one item in @thrift.DeprecatedUnvalidatedAnnotations.");
+    }
+  }
 }
 
 template <typename Node>
@@ -2003,11 +2009,10 @@ struct ValidateAnnotationPositions {
     }
   }
   void operator()(sema_context& ctx, const t_field& node) {
+    auto annotations = node.type()->unstructured_annotations();
     if (owns_annotations(node.type()) &&
         std::any_of(
-            node.type()->unstructured_annotations().begin(),
-            node.type()->unstructured_annotations().end(),
-            [](const auto& pair) {
+            annotations.begin(), annotations.end(), [](const auto& pair) {
               return pair.second.src_range.begin != source_location{};
             })) {
       err(ctx);
@@ -2107,8 +2112,7 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
   std::map<std::string, std::string> removed_prefixes = {{"rust.", "rust"}};
 
   for (const auto& [k, v] : node.unstructured_annotations()) {
-    // Exclude lowered type annotations.
-    if (v.from == deprecated_annotation_value::origin::lowered_cpp_type) {
+    if (v.src_range.begin == source_location{}) {
       continue;
     }
     std::optional<std::string> prefix;
@@ -2368,6 +2372,7 @@ ast_validator standard_validator() {
   validator.add_named_visitor(&validate_java_wrapper_annotation);
   validator.add_named_visitor(&validate_java_wrapper_and_adapter_annotation);
   validator.add_named_visitor(&validate_custom_cpp_type_annotations);
+  validator.add_named_visitor(&validate_deprecated_annotations);
   validator.add_named_visitor(&deprecate_annotations);
 
   validator.add_function_param_visitor(

@@ -55,46 +55,46 @@ namespace {
   function fb_intercept2(
     string $name,
     HH\FIXME\MISSING_PARAM_TYPE $handler,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   <<__PHPStdLib>>
   function fb_rename_function(
     string $orig_func_name,
     string $new_func_name,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   <<__PHPStdLib>>
   function fb_utf8ize(
     inout string $input,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   <<__PHPStdLib>>
-  function fb_utf8_strlen(string $input)[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function fb_utf8_strlen(string $input)[]: int;
   <<__PHPStdLib>>
   function fb_utf8_substr(
     string $str,
     int $start,
     int $length = PHP_INT_MAX,
-  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  )[]: string;
   <<__PHPStdLib>>
   function fb_get_code_coverage(bool $flush): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function fb_enable_code_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
+  function fb_enable_code_coverage(): void;
   <<__PHPStdLib>>
   function fb_disable_code_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function fb_output_compression(
     bool $new_value,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   <<__PHPStdLib>>
   function fb_set_exit_callback(
     HH\FIXME\MISSING_PARAM_TYPE $function,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): void;
   <<__PHPStdLib>>
-  function fb_get_last_flush_size(): \HH\FIXME\MISSING_RETURN_TYPE;
+  function fb_get_last_flush_size(): int;
   <<__PHPStdLib>>
   function fb_setprofile(
     HH\FIXME\MISSING_PARAM_TYPE $callback,
     int $flags = SETPROFILE_FLAGS_DEFAULT,
     vec<string> $functions = vec[],
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): void;
 
   function fb_call_user_func_async(
     string $initialDoc,
@@ -131,7 +131,7 @@ namespace HH {
    */
   function int_mul_add_overflow(int $a, int $b, int $bias): int;
 
-  function enable_function_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
+  function enable_function_coverage(): void;
 
   function collect_function_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
 

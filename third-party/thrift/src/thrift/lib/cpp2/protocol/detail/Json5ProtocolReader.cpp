@@ -304,11 +304,12 @@ void Json5ProtocolReader::skip(protocol::TType /*type*/, int depth) {
 // Enum Parsing Helpers
 // ============================================================================
 
-Json5ProtocolReader::EnumReadResult Json5ProtocolReader::readEnumImpl() {
+Json5ProtocolReader::IdentifierReadResult<>
+Json5ProtocolReader::readEnumImpl() {
   // When reading enum as a map key in Object form, the enum value is the
   // JSON object property name (a string), not a JSON value.
   if (auto key = tryReadObjectMapKey()) {
-    return parseEnumString(std::move(*key));
+    return parseIdentifierString(std::move(*key));
   }
 
   beginReadValue();
@@ -320,12 +321,13 @@ Json5ProtocolReader::EnumReadResult Json5ProtocolReader::readEnumImpl() {
     return {.name = {}, .value = folly::to<std::int32_t>(*i)};
   }
 
-  return parseEnumString(std::get<std::string>(primitive));
+  return parseIdentifierString(std::get<std::string>(primitive));
 }
 
-Json5ProtocolReader::EnumReadResult Json5ProtocolReader::parseEnumString(
-    std::string s) {
-  EnumReadResult ret;
+template <typename T>
+Json5ProtocolReader::IdentifierReadResult<T>
+Json5ProtocolReader::parseIdentifierString(std::string s) {
+  IdentifierReadResult<T> ret;
 
   // matches "NAME (value)" or "(value)" format
   static const re2::RE2 kNameValuePattern = R"(^(\w*)\s*\((-?\d+)\)$)";
@@ -336,7 +338,7 @@ Json5ProtocolReader::EnumReadResult Json5ProtocolReader::parseEnumString(
 
   // matches bare integer "-123" or "123"
   {
-    std::int32_t i;
+    T i;
     auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), i);
     if (ec == std::errc{} && ptr == s.data() + s.size()) {
       return {.name = {}, .value = i};
@@ -349,8 +351,11 @@ Json5ProtocolReader::EnumReadResult Json5ProtocolReader::parseEnumString(
     return {.name = std::move(s), .value = std::nullopt};
   }
 
-  throwError(fmt::format("invalid enum value: '{}'", s));
+  throwError(fmt::format("invalid identifier: '{}'", s));
 }
+
+template Json5ProtocolReader::IdentifierReadResult<std::int32_t>
+    Json5ProtocolReader::parseIdentifierString<std::int32_t>(std::string);
 
 // ============================================================================
 // Internal Value Reading Helpers

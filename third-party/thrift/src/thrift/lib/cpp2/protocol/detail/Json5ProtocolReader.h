@@ -206,17 +206,20 @@ class Json5ProtocolReader final {
   std::string readStringValue();
   std::string readBinaryValue();
 
-  struct EnumReadResult {
+  template <typename T = std::int32_t>
+  struct IdentifierReadResult {
     std::string name;
-    std::optional<std::int32_t> value;
+    std::optional<T> value;
   };
 
   // Parse enum from JSON input, returning parsed name and optional integer
   // value. The caller is responsible for resolving the name to an enum value.
-  EnumReadResult readEnumImpl();
+  IdentifierReadResult<> readEnumImpl();
 
-  // Parse an enum string in "NAME (value)", "(value)", or "NAME" format.
-  static EnumReadResult parseEnumString(std::string s);
+  // Parse a string in "NAME (value)", "(value)", or "NAME" format.
+  // Used for both enum values and field identifiers.
+  template <typename T = std::int32_t>
+  static IdentifierReadResult<T> parseIdentifierString(std::string s);
 
   CompoundTypeTracker containerStack_;
   Json5Reader reader_;

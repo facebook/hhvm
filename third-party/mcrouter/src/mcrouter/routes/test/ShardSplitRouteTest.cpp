@@ -75,7 +75,6 @@ TEST(shardSplitRoute, simpleSplit_deleteDirect) {
 
 TEST(shardSplitRoute, simpleSplit_deleteFanout) {
   globals::HostidMock hostidMock(1);
-  constexpr size_t kNumSplits = 26 * 26 + 1;
   std::vector<std::string> allKeys{"test:123:"};
   for (size_t i = 0; i < kNumSplits - 1; ++i) {
     allKeys.emplace_back(

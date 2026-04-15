@@ -3801,8 +3801,13 @@ folly::coro::Task<WtReqResult> HTTPCoroSession::sendWtReq(
     return makeInternalEx("Invalid reservation");
   }
 
-  const bool wtEnabled = ::proxygen::detail::supportsWt(
-      {codec_->getIngressSettings(), codec_->getEgressSettings()});
+  const auto* ingress = codec_->getIngressSettings();
+  const auto* egress = codec_->getEgressSettings();
+  const bool wtEnabled =
+      isHQCodecProtocol(getCodecProtocol())
+          ? ::proxygen::detail::supportsH3Wt(
+                codec_->getTransportDirection(), ingress, egress)
+          : ::proxygen::detail::supportsH2Wt({ingress, egress});
   const bool validWtReq = HTTPWebTransport::isConnectMessage(msg);
   if (!(wtEnabled && validWtReq)) {
     auto err = !validWtReq ? kInvalidWtReq : kWtNotSupported;

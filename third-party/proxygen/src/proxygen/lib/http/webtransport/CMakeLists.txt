@@ -89,6 +89,7 @@ proxygen_add_library(proxygen_http_webtransport_wt_util
     proxygen_http_codec_codec_common
     Folly::folly_logging_logging
   EXPORTED_DEPS
+    proxygen_http_codec_direction
     proxygen_http_codec_webtransport_webtransport_capsule_codec
     proxygen_http_webtransport_wt_stream_manager
 )

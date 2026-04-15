@@ -40,7 +40,7 @@ namespace proxygen::detail {
 
 // sets default egress h2 wt http settings if ENABLE_CONNECT_PROTOCOL set
 void setEgressWtHttpSettings(HTTPSettings* settings) {
-  if (supportsWt({settings})) {
+  if (supportsH2Wt({settings})) {
     // max data
     constexpr uint64_t kWtInitMaxData = std::numeric_limits<uint16_t>::max();
     static constexpr auto kMaxDataSettings = {
@@ -119,7 +119,8 @@ WtStreamManager::WtConfig getH3WtConfig(const HTTPSettings* ingress,
   return config;
 }
 
-bool supportsWt(std::initializer_list<const HTTPSettings*> settings) {
+bool supportsH2Wt(
+    std::initializer_list<const HTTPSettings*> settings) noexcept {
   constexpr auto kEnableConnectProto = SettingsId::ENABLE_CONNECT_PROTOCOL;
   constexpr auto kEnableWtMaxSess = SettingsId::WT_MAX_SESSIONS;
   return std::all_of(settings.begin(), settings.end(), [](auto* settings) {
@@ -127,6 +128,23 @@ bool supportsWt(std::initializer_list<const HTTPSettings*> settings) {
            settings->getSetting(kEnableConnectProto, /*defaultVal=*/0) &&
            settings->getSetting(kEnableWtMaxSess, /*defaultVal=*/0);
   });
+}
+
+bool supportsH3Wt(TransportDirection dir,
+                  const HTTPSettings* ingress,
+                  const HTTPSettings* egress) noexcept {
+  const HTTPSettings* server = isUpstream(dir) ? ingress : egress;
+  const HTTPSettings* client = isUpstream(dir) ? egress : ingress;
+  bool serverOk = server &&
+                  server->getSetting(SettingsId::WT_ENABLED,
+                                     /*defaultVal=*/0) &&
+                  server->getSetting(SettingsId::ENABLE_CONNECT_PROTOCOL,
+                                     /*defaultVal=*/0) &&
+                  server->getSetting(SettingsId::_HQ_DATAGRAM_RFC,
+                                     /*defaultVal=*/0);
+  bool clientOk = client && client->getSetting(SettingsId::_HQ_DATAGRAM_RFC,
+                                               /*defaultVal=*/0);
+  return serverOk && clientOk;
 }
 
 void WtEventVisitor::operator()(

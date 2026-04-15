@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <proxygen/lib/http/codec/TransportDirection.h>
 #include <proxygen/lib/http/codec/webtransport/WebTransportCapsuleCodec.h>
 #include <proxygen/lib/http/webtransport/WtStreamManager.h>
 
@@ -38,7 +39,21 @@ WtStreamManager::WtConfig getH3WtConfig(const HTTPSettings* ingress,
  * > An endpoint needs to send both SETTINGS_ENABLE_CONNECT_PROTOCOL and
  * > SETTINGS_WEBTRANSPORT_MAX_SESSIONS for WebTransport to be enabled.
  */
-bool supportsWt(std::initializer_list<const HTTPSettings*> settings);
+bool supportsH2Wt(std::initializer_list<const HTTPSettings*> settings) noexcept;
+
+/**
+ * http/3 wt draft:
+ * Servers supporting WebTransport over HTTP/3 send:
+ *   - A SETTINGS_WT_ENABLED setting with a value greater than "0"
+ *   - A SETTINGS_ENABLE_CONNECT_PROTOCOL setting with a value of "1"
+ *   - A SETTINGS_H3_DATAGRAM setting with a value of 1
+ *
+ * Clients supporting WebTransport over HTTP/3 send:
+ *   - A SETTINGS_H3_DATAGRAM setting with a value of 1
+ */
+bool supportsH3Wt(TransportDirection dir,
+                  const HTTPSettings* ingress,
+                  const HTTPSettings* egress) noexcept;
 
 /**
  * This is a helper utility (applicable to both http/2 and http/3) to visit

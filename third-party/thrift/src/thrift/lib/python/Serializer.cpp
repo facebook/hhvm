@@ -27,6 +27,24 @@ namespace apache::thrift::python {
 
 using apache::thrift::protocol::PROTOCOL_TYPES;
 
+std::unique_ptr<folly::IOBuf> serializeJson5(
+    [[maybe_unused]] const DynamicStructInfo& dynamicStructInfo,
+    [[maybe_unused]] const PyObject* object,
+    [[maybe_unused]] const json5::detail::Json5ProtocolWriter::Options&
+        options) {
+#ifdef THRIFT_HAS_JSON5_PROTOCOL
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+  json5::detail::Json5ProtocolWriter writer(SHARE_EXTERNAL_BUFFER, options);
+  writer.setOutput(&queue);
+  detail::write(&writer, dynamicStructInfo.getStructInfo(), object);
+  return queue.move();
+#else
+  throw TProtocolException(
+      TProtocolException::NOT_IMPLEMENTED,
+      "Json5 serialization is not supported on this platform");
+#endif
+}
+
 std::unique_ptr<folly::IOBuf> serialize(
     const DynamicStructInfo& dynamicStructInfo,
     const PyObject* object,

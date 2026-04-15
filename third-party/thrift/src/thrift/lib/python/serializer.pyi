@@ -26,8 +26,35 @@ sT = typing.TypeVar("sT", bound=typing.Union[StructOrUnion, GeneratedError])
 
 Protocol = _Protocol
 
-def serialize_iobuf(strct: sT, protocol: Protocol = Protocol.COMPACT) -> IOBuf: ...
-def serialize(struct: sT, protocol: Protocol = Protocol.COMPACT) -> bytes: ...
+class JsonWriterOptions:
+    def __init__(
+        self,
+        *,
+        list_trailing_comma: bool = False,
+        object_trailing_comma: bool = False,
+        unquote_object_name: bool = False,
+        allow_nan_inf: bool = False,
+        indent_width: int = 0,
+    ) -> None: ...
+
+class Json5ProtocolWriterOptions:
+    writer: JsonWriterOptions
+    def __init__(
+        self,
+        *,
+        writer: JsonWriterOptions | None = None,
+    ) -> None: ...
+
+def serialize_iobuf(
+    strct: sT,
+    protocol: Protocol = Protocol.COMPACT,
+    json5_options: typing.Optional[Json5ProtocolWriterOptions] = None,
+) -> IOBuf: ...
+def serialize(
+    struct: sT,
+    protocol: Protocol = Protocol.COMPACT,
+    json5_options: typing.Optional[Json5ProtocolWriterOptions] = None,
+) -> bytes: ...
 def deserialize_with_length(
     klass: typing.Type[sT],
     # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.

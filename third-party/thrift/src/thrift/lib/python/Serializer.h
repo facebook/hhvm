@@ -20,6 +20,24 @@
 
 #include <folly/io/IOBuf.h>
 
+#ifdef THRIFT_HAS_JSON5_PROTOCOL
+#include <thrift/lib/cpp2/protocol/detail/Json5ProtocolWriter.h>
+#else
+namespace apache::thrift::json5::detail {
+struct JsonWriterOptions {
+  bool listTrailingComma = false;
+  bool objectTrailingComma = false;
+  bool unquoteObjectName = false;
+  bool allowNanInf = false;
+  size_t indentWidth = 0;
+};
+struct Json5ProtocolWriter {
+  struct Options {
+    JsonWriterOptions writer;
+  };
+};
+} // namespace apache::thrift::json5::detail
+#endif
 #include <thrift/lib/python/types.h>
 
 namespace apache::thrift::python {
@@ -80,5 +98,10 @@ size_t mutable_deserialize(
     const folly::IOBuf* buf,
     void* object,
     PROTOCOL_TYPES protocol);
+
+std::unique_ptr<folly::IOBuf> serializeJson5(
+    const DynamicStructInfo& dynamicStructInfo,
+    const PyObject* object,
+    const json5::detail::Json5ProtocolWriter::Options& options);
 
 } // namespace apache::thrift::python

@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cython.operator cimport dereference as deref
 from cython.view cimport memoryview
 from folly.iobuf cimport IOBuf
+from libcpp.utility cimport move as cmove
 from thrift.python.exceptions cimport Error, GeneratedError
-from thrift.python.types cimport Struct, StructOrUnion, Union
+from thrift.python.types cimport Struct, StructOrUnion, StructInfo, Union
 from thrift.python.protocol import Protocol
+from thrift.python.serializer cimport cJsonWriterOptions, cJson5ProtocolWriterOptions
 
 cdef extern from *:
     """
@@ -27,15 +30,70 @@ cdef extern from "<Python.h>":
     cdef int PyObject_CheckBuffer(object)
 
 
-def serialize_iobuf(strct, cProtocol protocol=cProtocol.COMPACT):
+cdef class JsonWriterOptions:
+    """Options for the JSON writer that are passed to C++."""
+    cdef cJsonWriterOptions _c_writer
+
+    def __init__(
+        self,
+        *,
+        list_trailing_comma=False,
+        object_trailing_comma=False,
+        unquote_object_name=False,
+        allow_nan_inf=False,
+        indent_width=0,
+    ):
+        self._c_writer.listTrailingComma = list_trailing_comma
+        self._c_writer.objectTrailingComma = object_trailing_comma
+        self._c_writer.unquoteObjectName = unquote_object_name
+        self._c_writer.allowNanInf = allow_nan_inf
+        self._c_writer.indentWidth = indent_width
+
+
+cdef class Json5ProtocolWriterOptions:
+    """Options for the JSON5 protocol writer that are passed to C++."""
+    cdef public JsonWriterOptions writer
+
+    def __init__(self, *, writer=None):
+        self.writer = writer if writer is not None else JsonWriterOptions()
+
+
+cdef cJson5ProtocolWriterOptions _to_c_options(Json5ProtocolWriterOptions options):
+    cdef cJson5ProtocolWriterOptions c_options
+    c_options.writer = options.writer._c_writer
+    return c_options
+
+
+cdef _serialize_json5_iobuf(strct, Json5ProtocolWriterOptions options):
+    cdef cJson5ProtocolWriterOptions c_options = _to_c_options(options)
+    cdef StructInfo info
+    if isinstance(strct, Struct):
+        info = (<Struct>strct)._fbthrift_struct_info
+        data = (<Struct>strct)._fbthrift_data
+    elif isinstance(strct, Union):
+        info = (<Union>strct)._fbthrift_struct_info
+        data = (<Union>strct)._fbthrift_data
+    else:
+        info = (<GeneratedError>strct)._fbthrift_struct_info
+        data = (<GeneratedError>strct)._fbthrift_data
+    return folly.iobuf.from_unique_ptr(
+        cmove(cserializeJson5(deref(info.cpp_obj), data, c_options))
+    )
+
+
+def serialize_iobuf(strct, cProtocol protocol=cProtocol.COMPACT, json5_options=None):
+    if json5_options is not None and protocol != cProtocol.JSON5:
+        raise ValueError("json5_options only valid with Protocol.JSON5")
     if not isinstance(strct, (StructOrUnion, GeneratedError)):
         raise TypeError("thrift-python serialization only supports thrift-python types")
+    if json5_options is not None:
+        return _serialize_json5_iobuf(strct, json5_options)
     if isinstance(strct, StructOrUnion):
         return (<StructOrUnion>strct)._serialize(protocol)
     return (<GeneratedError>strct)._serialize(protocol)
 
-def serialize(struct, cProtocol protocol=cProtocol.COMPACT):
-    return b''.join(serialize_iobuf(struct, protocol))
+def serialize(struct, cProtocol protocol=cProtocol.COMPACT, json5_options=None):
+    return b''.join(serialize_iobuf(struct, protocol, json5_options))
 
 # some users define custom cpp extensions that implement buffer protocol
 cdef inline _is_buffer(object obj):

@@ -475,47 +475,6 @@ let is_return_disposable_fun_type env ty =
     get_ft_return_disposable ft
     || Option.is_some (Typing_disposable.is_disposable_type env ft.ft_ret)
 
-let set_tcopt_unstable_features env { fa_user_attributes; _ } =
-  match
-    Naming_attributes.find
-      SN.UserAttributes.uaEnableUnstableFeatures
-      fa_user_attributes
-  with
-  | None -> env
-  | Some { ua_name = _; ua_params } ->
-    List.fold ua_params ~init:env ~f:(fun env (_, _, feature) ->
-        match feature with
-        | Aast.String s ->
-          (* Always add to the unstable features set *)
-          let env =
-            Env.map_tcopt
-              ~f:(fun t ->
-                GlobalOptions.
-                  {
-                    t with
-                    tco_enabled_unstable_features =
-                      SSet.add s t.tco_enabled_unstable_features;
-                  })
-              env
-          in
-          (* Then set any feature-specific options *)
-          let env =
-            if String.equal s SN.UnstableFeatures.expression_trees then
-              Env.map_tcopt
-                ~f:(fun t -> TCO.set_tco_enable_expression_trees t true)
-                env
-            else
-              env
-          in
-          let env =
-            if String.equal s SN.UnstableFeatures.recursive_case_types then
-              Env.map_tcopt ~f:TCO.enable_recursive_case_types env
-            else
-              env
-          in
-          env
-        | _ -> env)
-
 let check_expected_ty_res
     ~(coerce_for_op : bool)
     (env : env)
@@ -13820,7 +13779,6 @@ end = struct
             SN.AttributeKinds.file
             fa.fa_user_attributes
         in
-        let env = set_tcopt_unstable_features env fa in
         ( env,
           {
             Aast.fa_user_attributes = user_attributes;

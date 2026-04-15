@@ -61,6 +61,7 @@ impl FeatureName {
             ShapeFieldPunning => Unstable,
             RepresentableAs => Unstable,
             TestFeature => Unstable,
+            WithRefinementAlias => Preview,
         }
     }
 

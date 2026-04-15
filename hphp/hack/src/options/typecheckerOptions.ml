@@ -311,3 +311,7 @@ let enable_recursive_case_types t =
 
 let is_unstable_feature_enabled t name =
   SSet.mem name t.GlobalOptions.tco_enabled_unstable_features
+  ||
+  match SMap.find_opt name t.GlobalOptions.po.experimental_features with
+  | Some OngoingRelease -> true
+  | _ -> false

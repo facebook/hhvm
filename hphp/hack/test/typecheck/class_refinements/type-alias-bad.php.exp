@@ -1,0 +1,6 @@
+ERROR: File "type-alias-bad.php", line 8, characters 3-27:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+ERROR: File "type-alias-bad.php", line 11, characters 17-44:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+ERROR: File "type-alias-bad.php", line 12, characters 22-47:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2140890007b2327b2ec3d1d2a5396258>>
+// @generated SignedSource<<518f2d4e6ed5f0b3fbfe7a93bc780c75>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -135,6 +135,7 @@ pub enum FeatureName {
     ShapeFieldPunning,
     RepresentableAs,
     TestFeature,
+    WithRefinementAlias,
 }
 impl TrivialDrop for FeatureName {}
 arena_deserializer::impl_deserialize_in_arena!(FeatureName);

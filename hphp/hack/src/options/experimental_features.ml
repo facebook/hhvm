@@ -76,6 +76,7 @@ type feature_name =
   | ShapeFieldPunning
   | RepresentableAs
   | TestFeature
+  | WithRefinementAlias
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -128,6 +129,7 @@ let feature_name_map =
       ("shape_field_punning", ShapeFieldPunning);
       ("representable_as", RepresentableAs);
       ("test_feature", TestFeature);
+      ("with_refinement_alias", WithRefinementAlias);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

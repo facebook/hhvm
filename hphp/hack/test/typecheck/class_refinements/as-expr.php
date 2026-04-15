@@ -1,5 +1,8 @@
 <?hh
 
+// Even with this enabled, we should not be able to do as-tests
+<<file:__EnableUnstableFeatures('with_refinement_alias')>>
+
 interface Box {
   abstract const type T;
 }

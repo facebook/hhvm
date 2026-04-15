@@ -10,6 +10,10 @@ let visitor ctx =
     TypecheckerOptions.record_fine_grained_dependencies tcopt
   in
 
+  let with_refinement_alias_enabled =
+    TypecheckerOptions.is_unstable_feature_enabled tcopt "with_refinement_alias"
+  in
+
   let handlers =
     [
       Const_prohibited_check.handler;
@@ -32,7 +36,7 @@ let visitor ctx =
       List_rvalue_check.handler;
       Private_final_check.handler;
       Well_formed_internal_trait.handler;
-      Type_structure_leak_check.handler;
+      Type_structure_leak_check.handler with_refinement_alias_enabled;
       Package_expression_check.handler;
     ]
   in
@@ -49,6 +53,7 @@ let visitor ctx =
     else
       handlers
   in
+
   Nast_visitor.iter_with handlers
 
 let stateful_visitor ctx =

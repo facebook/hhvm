@@ -1,18 +1,16 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('with_refinement_alias')>>
-
 interface Box {
   abstract const type T;
 }
 
 interface Bad {
-  const type TBad = Box with { type T = int }; // OK (refinements now allowed)
+  const type TBad = Box with { type T = int }; // ERROR (refinements only allowed under flag)
 
-  const type TBadNested = (int, Box with { type T = int }); // OK
+  const type TBadNested = (int, Box with { type T = int }); // ERROR
 
   abstract const type TBadInPartiallyAbstractRHS = shape(
-    'nested' => Box with { type T = int }, // OK
+    'nested' => Box with { type T = int }, // ERROR
   );
 }
 

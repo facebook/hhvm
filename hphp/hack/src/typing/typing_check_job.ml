@@ -63,11 +63,67 @@ let intersect_dynamic_warnings ctx (twd : Tast.def Tast_with_dynamic.t) : unit =
   in
   Diagnostics.mark_warnings_trusted keys
 
+let set_tcopt_unstable_features env { Aast.fa_user_attributes; _ } =
+  match
+    Naming_attributes.find
+      Naming_special_names.UserAttributes.uaEnableUnstableFeatures
+      fa_user_attributes
+  with
+  | None -> env
+  | Some { ua_name = _; ua_params } ->
+    List.fold ua_params ~init:env ~f:(fun env (_, _, feature) ->
+        match feature with
+        | Aast.String s ->
+          (* Always add to the unstable features set *)
+          let env =
+            Provider_context.map_tcopt
+              ~f:(fun t ->
+                GlobalOptions.
+                  {
+                    t with
+                    tco_enabled_unstable_features =
+                      SSet.add s t.tco_enabled_unstable_features;
+                  })
+              env
+          in
+          (* Then set any feature-specific options *)
+          let env =
+            if
+              String.equal
+                s
+                Naming_special_names.UnstableFeatures.expression_trees
+            then
+              Provider_context.map_tcopt
+                ~f:(fun t ->
+                  TypecheckerOptions.set_tco_enable_expression_trees t true)
+                env
+            else
+              env
+          in
+          let env =
+            if
+              String.equal
+                s
+                Naming_special_names.UnstableFeatures.recursive_case_types
+            then
+              Provider_context.map_tcopt
+                ~f:TypecheckerOptions.enable_recursive_case_types
+                env
+            else
+              env
+          in
+          env
+        | _ -> env)
+
 let type_fun (ctx : Provider_context.t) ~(full_ast : Nast.fun_def) :
     Tast.def Tast_with_dynamic.t option =
   let f = full_ast.Aast.fd_fun in
   handle_exn_as_error f.Aast.f_span (fun () ->
       let fun_ = Naming.fun_def ctx full_ast in
+      let ctx =
+        List.fold fun_.fd_file_attributes ~init:ctx ~f:(fun env fa ->
+            set_tcopt_unstable_features env fa)
+      in
       Nast_check.def ctx (Aast.Fun fun_);
       let def_opt =
         Typing_toplevel.fun_def ctx fun_
@@ -84,6 +140,10 @@ let type_class (ctx : Provider_context.t) ~(full_ast : Nast.class_) :
     Tast.def Tast_with_dynamic.t option =
   handle_exn_as_error full_ast.Aast.c_span (fun () ->
       let class_ = Naming.class_ ctx full_ast in
+      let ctx =
+        List.fold class_.c_file_attributes ~init:ctx ~f:(fun env fa ->
+            set_tcopt_unstable_features env fa)
+      in
       Nast_check.def ctx (Aast.Class class_);
       let def_opt =
         Typing_toplevel.class_def ctx class_
@@ -100,6 +160,10 @@ let check_typedef (ctx : Provider_context.t) ~(full_ast : Nast.typedef) :
     Tast.def option =
   handle_exn_as_error Pos.none (fun () ->
       let typedef = Naming.typedef ctx full_ast in
+      let ctx =
+        List.fold typedef.t_file_attributes ~init:ctx ~f:(fun env fa ->
+            set_tcopt_unstable_features env fa)
+      in
       Nast_check.def ctx (Aast.Typedef typedef);
       let ret = Typing_toplevel.typedef_def ctx typedef in
       let def = Aast.Typedef ret in

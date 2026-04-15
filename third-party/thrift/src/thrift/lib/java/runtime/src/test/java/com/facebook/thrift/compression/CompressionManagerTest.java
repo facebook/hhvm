@@ -134,6 +134,23 @@ class CompressionManagerTest {
   // --- decompressFromTransform tests ---
 
   @Test
+  void decompressFromTransformZlibRoundtrip() {
+    byte[] original = "ZLIB roundtrip via CompressionManager".getBytes(StandardCharsets.UTF_8);
+    ByteBuf input = Unpooled.wrappedBuffer(original);
+
+    ByteBuf compressed = CompressionManager.compress(CompressionAlgorithm.ZLIB, allocator, input);
+    ByteBuf decompressed =
+        CompressionManager.decompressFromTransform(
+            TTransform.ZLIB.getValue(), allocator, compressed);
+
+    byte[] result = new byte[decompressed.readableBytes()];
+    decompressed.readBytes(result);
+    decompressed.release();
+
+    assertThat(result).isEqualTo(original);
+  }
+
+  @Test
   void decompressFromTransformNoneReturnsDataUnchanged() {
     ByteBuf data = Unpooled.wrappedBuffer("pass through".getBytes(StandardCharsets.UTF_8));
     ByteBuf result =

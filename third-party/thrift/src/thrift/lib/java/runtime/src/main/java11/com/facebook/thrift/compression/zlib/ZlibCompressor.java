@@ -19,18 +19,22 @@ package com.facebook.thrift.compression.zlib;
 import com.facebook.thrift.compression.ThriftCompressor;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.FastThreadLocal;
 import io.netty.util.concurrent.FastThreadLocalThread;
+import java.nio.ByteBuffer;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 import reactor.core.Exceptions;
 
 /**
- * ZLIB compression using the JDK's Inflater/Deflater (Java 8 base version). Matches C++
- * folly::compression::CodecType::ZLIB (RFC 1950 zlib wrapper format).
+ * Java 11+ ZLIB compressor that uses ByteBuffer-based Deflater/Inflater APIs for zero-copy I/O.
+ * Replaces the base Java 8 version via multi-release JAR.
+ *
+ * <p>Uses {@link Deflater#setInput(ByteBuffer)} + {@link Deflater#deflate(ByteBuffer)} and {@link
+ * Inflater#setInput(ByteBuffer)} + {@link Inflater#inflate(ByteBuffer)} (added in Java 11) with
+ * {@link ByteBuf#nioBuffer()} to avoid all heap byte array copies.
  *
  * <p>On Netty event loop threads ({@link FastThreadLocalThread}), Deflater and Inflater instances
  * are cached in {@link FastThreadLocal} to avoid native resource allocation per request.
@@ -39,7 +43,7 @@ public final class ZlibCompressor implements ThriftCompressor {
 
   public static final ZlibCompressor INSTANCE = new ZlibCompressor();
 
-  private static final int BUFFER_SIZE = 1024;
+  private static final int MIN_WRITABLE_BYTES = 1024;
 
   private static final FastThreadLocal<Deflater> DEFLATER_CACHE = new FastThreadLocal<>();
   private static final FastThreadLocal<Inflater> INFLATER_CACHE = new FastThreadLocal<>();
@@ -52,16 +56,17 @@ public final class ZlibCompressor implements ThriftCompressor {
     boolean cached = Thread.currentThread() instanceof FastThreadLocalThread;
     Deflater deflater = cached ? acquireDeflater() : new Deflater();
     try {
-      byte[] input = ByteBufUtil.getBytes(data, data.readerIndex(), data.readableBytes(), false);
-      deflater.setInput(input);
+      deflater.setInput(data.nioBuffer());
       deflater.finish();
 
-      output = allocator.buffer();
-      byte[] buffer = new byte[BUFFER_SIZE];
+      output = allocator.directBuffer();
       while (!deflater.finished()) {
-        int count = deflater.deflate(buffer);
-        output.writeBytes(buffer, 0, count);
+        output.ensureWritable(MIN_WRITABLE_BYTES);
+        ByteBuffer destination = output.nioBuffer(output.writerIndex(), output.writableBytes());
+        int written = deflater.deflate(destination);
+        output.writerIndex(output.writerIndex() + written);
       }
+
       return output;
     } catch (Exception exception) {
       ReferenceCountUtil.safeRelease(output);
@@ -82,18 +87,19 @@ public final class ZlibCompressor implements ThriftCompressor {
     boolean cached = Thread.currentThread() instanceof FastThreadLocalThread;
     Inflater inflater = cached ? acquireInflater() : new Inflater();
     try {
-      byte[] input = ByteBufUtil.getBytes(data, data.readerIndex(), data.readableBytes(), false);
-      inflater.setInput(input);
+      inflater.setInput(data.nioBuffer());
 
-      output = allocator.buffer();
-      byte[] buffer = new byte[BUFFER_SIZE];
+      output = allocator.directBuffer();
       while (!inflater.finished()) {
-        int count = inflater.inflate(buffer);
-        if (count == 0 && inflater.needsInput()) {
+        output.ensureWritable(MIN_WRITABLE_BYTES);
+        ByteBuffer destination = output.nioBuffer(output.writerIndex(), output.writableBytes());
+        int written = inflater.inflate(destination);
+        output.writerIndex(output.writerIndex() + written);
+        if (written == 0 && inflater.needsInput()) {
           break;
         }
-        output.writeBytes(buffer, 0, count);
       }
+
       return output;
     } catch (DataFormatException exception) {
       ReferenceCountUtil.safeRelease(output);

@@ -17,12 +17,19 @@
 package com.facebook.thrift.rsocket.server;
 
 import com.facebook.thrift.payload.Constants;
+import com.facebook.thrift.protocol.ProtocolUtil;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.util.resources.RpcResources;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.rsocket.ConnectionSetupPayload;
+import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.exceptions.UnsupportedSetupException;
+import io.rsocket.util.ByteBufPayload;
+import org.apache.thrift.ServerPushMetadata;
+import org.apache.thrift.SetupResponse;
 import reactor.core.publisher.Mono;
 
 public class ThriftSocketAcceptor implements SocketAcceptor {
@@ -43,6 +50,21 @@ public class ThriftSocketAcceptor implements SocketAcceptor {
     ThriftServerRSocket rSocket =
         new ThriftServerRSocket(serverHandler, RpcResources.getByteBufAllocator());
 
-    return Mono.just(rSocket);
+    return sendSetupResponse(sendingSocket).thenReturn(rSocket);
+  }
+
+  /**
+   * Sends a ServerPushMetadata with SetupResponse to the client, advertising compression support.
+   * Matches C++ ThriftRocketServerHandler which sends zstdSupported=true during connection setup.
+   */
+  private static Mono<Void> sendSetupResponse(RSocket sendingSocket) {
+    SetupResponse setupResponse = new SetupResponse.Builder().setZstdSupported(true).build();
+    ServerPushMetadata serverPushMetadata = ServerPushMetadata.fromSetupResponse(setupResponse);
+
+    ByteBuf metadata = RpcResources.getByteBufAllocator().buffer();
+    ProtocolUtil.writeCompact(serverPushMetadata::write0, metadata);
+
+    Payload payload = ByteBufPayload.create(Unpooled.EMPTY_BUFFER, metadata);
+    return sendingSocket.metadataPush(payload);
   }
 }

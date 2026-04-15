@@ -21,6 +21,7 @@ import static com.facebook.thrift.rsocket.util.PayloadUtil.createPayload;
 import com.facebook.nifty.core.ConnectionContext;
 import com.facebook.nifty.core.NiftyConnectionContext;
 import com.facebook.nifty.core.RequestContext;
+import com.facebook.thrift.compression.CompressionManager;
 import com.facebook.thrift.payload.Reader;
 import com.facebook.thrift.payload.ServerRequestPayload;
 import com.facebook.thrift.payload.ServerResponsePayload;
@@ -32,6 +33,7 @@ import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.util.NettyNiftyRequestContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.util.ReferenceCountUtil;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import org.apache.thrift.CompressionAlgorithm;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.RpcKind;
 import org.apache.thrift.protocol.TProtocol;
@@ -61,27 +64,33 @@ public class ThriftServerRSocket implements RSocket {
 
   @Override
   public Mono<Payload> requestResponse(Payload payload) {
+    ByteBuf data = null;
     try {
       RequestRpcMetadata requestRpcMetadata = decodeRequestRpcMetadata(payload);
 
       RequestContext requestContext = createRequestContext(requestRpcMetadata.getOtherMetadata());
 
+      data = maybeDecompressRequestData(requestRpcMetadata, payload);
+
       ServerRequestPayload requestPayload =
-          deserializeRequest(payload, requestRpcMetadata, requestContext);
+          deserializeRequest(data, requestRpcMetadata, requestContext);
 
       assert requestPayload.getRequestRpcMetadata().getKind()
           == RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE;
 
+      final ByteBuf requestData = data;
       return rpcServerHandler
           .singleRequestSingleResponse(requestPayload)
           .map(responsePayload -> handleResponse(alloc, requestPayload, responsePayload))
           .doFinally(
               __ -> {
+                requestData.release();
                 if (payload.refCnt() > 0) {
                   payload.release();
                 }
               });
     } catch (Throwable t) {
+      ReferenceCountUtil.safeRelease(data);
       payload.release();
       return Mono.error(t);
     }
@@ -89,27 +98,33 @@ public class ThriftServerRSocket implements RSocket {
 
   @Override
   public Flux<Payload> requestStream(Payload payload) {
+    ByteBuf data = null;
     try {
       RequestRpcMetadata requestRpcMetadata = decodeRequestRpcMetadata(payload);
 
       RequestContext requestContext = createRequestContext(requestRpcMetadata.getOtherMetadata());
 
+      data = maybeDecompressRequestData(requestRpcMetadata, payload);
+
       ServerRequestPayload requestPayload =
-          deserializeRequest(payload, requestRpcMetadata, requestContext);
+          deserializeRequest(data, requestRpcMetadata, requestContext);
 
       assert requestPayload.getRequestRpcMetadata().getKind()
           == RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE;
 
+      final ByteBuf requestData = data;
       return rpcServerHandler
           .singleRequestStreamingResponse(requestPayload)
           .map(responsePayload -> handleStreamResponse(alloc, requestPayload, responsePayload))
           .doFinally(
               __ -> {
+                requestData.release();
                 if (payload.refCnt() > 0) {
                   payload.release();
                 }
               });
     } catch (Throwable t) {
+      ReferenceCountUtil.safeRelease(data);
       payload.release();
       return Flux.error(t);
     }
@@ -147,11 +162,25 @@ public class ThriftServerRSocket implements RSocket {
     return new NettyNiftyRequestContext(requestHeaders, connectionContext);
   }
 
+  /**
+   * Returns the request data, decompressing if the metadata specifies compression. The returned
+   * buffer is always independently owned — the caller must release it.
+   */
+  private ByteBuf maybeDecompressRequestData(RequestRpcMetadata metadata, Payload payload) {
+    ByteBuf data = payload.sliceData();
+    data.retain();
+    CompressionAlgorithm compression = metadata.getCompression();
+    if (compression == null || compression == CompressionAlgorithm.NONE) {
+      return data;
+    }
+    return CompressionManager.decompress(compression, alloc, data);
+  }
+
   @SuppressWarnings("rawtypes")
   private static ServerRequestPayload deserializeRequest(
-      Payload payload, RequestRpcMetadata requestRpcMetadata, RequestContext requestContext) {
+      ByteBuf data, RequestRpcMetadata requestRpcMetadata, RequestContext requestContext) {
     ByteBufTProtocol out =
-        TProtocolType.fromProtocolId(requestRpcMetadata.getProtocol()).apply(payload.sliceData());
+        TProtocolType.fromProtocolId(requestRpcMetadata.getProtocol()).apply(data);
     Function<List<Reader>, List<Object>> readerTransformer = createReaderFunction(out);
     return ServerRequestPayload.create(readerTransformer, requestRpcMetadata, requestContext);
   }
@@ -217,25 +246,31 @@ public class ThriftServerRSocket implements RSocket {
 
   @Override
   public Mono<Void> fireAndForget(Payload payload) {
+    ByteBuf data = null;
     try {
       RequestRpcMetadata requestRpcMetadata = decodeRequestRpcMetadata(payload);
 
       RequestContext requestContext = createRequestContext(requestRpcMetadata.getOtherMetadata());
 
+      data = maybeDecompressRequestData(requestRpcMetadata, payload);
+
       ServerRequestPayload requestPayload =
-          deserializeRequest(payload, requestRpcMetadata, requestContext);
+          deserializeRequest(data, requestRpcMetadata, requestContext);
 
       assert requestPayload.getRequestRpcMetadata().getKind() == RpcKind.SINGLE_REQUEST_NO_RESPONSE;
 
+      final ByteBuf requestData = data;
       return rpcServerHandler
           .singleRequestNoResponse(requestPayload)
           .doFinally(
               __ -> {
+                requestData.release();
                 if (payload.refCnt() > 0) {
                   payload.release();
                 }
               });
     } catch (Throwable t) {
+      ReferenceCountUtil.safeRelease(data);
       payload.release();
       return Mono.error(t);
     }

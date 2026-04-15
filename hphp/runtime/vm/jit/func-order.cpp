@@ -135,28 +135,31 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     }
   };
 
-  pd->forEachProfilingFunc([&] (auto const& func) {
+  jit::hash_map<TargetId, uint64_t> totalSampleCounts;
+  pd->forEachProfilingPrologue([&] (auto const& func, auto const _nargs, auto const& transId) {
     always_assert(func);
     auto const fid = func->getFuncId();
     auto const calleeTargetId = targetID[fid];
-    auto const transIds = pd->funcProfTransIDs(fid);
-    uint64_t totalCalls = 0;
-    for (int nargs = 0; nargs <= func->numNonVariadicParams() + 1; nargs++) {
-      auto transId = pd->proflogueTransId(func, nargs);
-      if (transId == kInvalidTransID) continue;
 
-      FTRACE(1, "  - processing ProfPrologue w/ transId = {}\n", transId);
-      const auto trec = pd->transRec(transId);
-      assertx(trec->kind() == TransKind::ProfPrologue);
+    uint64_t totalCalls = 0;
+    FTRACE(1, "  - processing ProfPrologue w/ transId = {}\n", transId);
+    const auto trec = pd->transRec(transId);
+    assertx(trec->kind() == TransKind::ProfPrologue);
+    {
       auto lock = trec->lockCallerList();
       for (auto const callerTransId : trec->profCallers()) {
         addCallerCount(nullptr, calleeTargetId, callerTransId, totalCalls);
       }
       addCallersCount(calleeTargetId, trec->mainCallers(),  totalCalls);
     }
-    auto samples = cg.getSamples(calleeTargetId);
-    cg.setSamples(calleeTargetId, std::max(totalCalls, samples));
+    totalSampleCounts[calleeTargetId] += totalCalls;
   });
+
+  for (auto const& it : totalSampleCounts) {
+    auto samples = cg.getSamples(it.first);
+    cg.setSamples(it.first, std::max(it.second, samples));
+  }
+
   cg.normalizeArcWeights();
   return cg;
 }

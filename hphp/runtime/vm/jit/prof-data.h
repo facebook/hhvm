@@ -502,6 +502,15 @@ struct ProfData {
     }
   }
 
+  template<class Fn>
+  void forEachProfilingPrologue(Fn fn) {
+    for (auto it : m_proflogueDB) {
+      auto funcId = FuncId::fromInt(it.first >> 32);
+      auto func = Func::fromFuncId(funcId);
+      fn(func, it.first & 0xffffffff, it.second);
+    }
+  }
+
   /*
    * Returns the count of functions that are or were profiling or have been
    * optimized, respectively.
@@ -603,7 +612,7 @@ struct ProfData {
 
     /* implicit */ operator uint64_t() const {
       assertx(nArgs >= 0);
-      return (uint64_t(func.toStableInt()) << 32) | nArgs;
+      return (uint64_t(func.toInt()) << 32) | nArgs;
     }
   };
 

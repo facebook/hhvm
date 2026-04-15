@@ -174,7 +174,7 @@ bool HQUpstreamSession::tryBindIngressStreamToTxn(
           << " to pushID=" << pushId;
   pushStream->bindTo(streamId);
 
-#if DEBUG
+#if defined(DEBUG) && DEBUG
   // Check postconditions - the ingress push stream
   // should own both the push id and the stream id.
   // No nascent stream should own the stream id
@@ -344,7 +344,7 @@ void HQUpstreamSession::HQIngressPushStream::bindTo(quic::StreamId streamId) {
   DCHECK(txn_.getAssocTxnId().has_value());
   VLOG(4) << __func__ << " Binding streamID=" << streamId
           << " to txn=" << txn_.getID();
-#if DEBUG
+#if defined(DEBUG) && DEBUG
   // will throw bad-cast
   HQUpstreamSession& session = dynamic_cast<HQUpstreamSession&>(session_);
 #else

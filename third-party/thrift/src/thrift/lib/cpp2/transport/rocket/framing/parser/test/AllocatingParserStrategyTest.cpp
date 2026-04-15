@@ -501,9 +501,9 @@ TEST(AllocatingParserStrategyTest, testManyTinyFrameWithIncompleteFrame) {
 TEST(AllocatingParserStrategyTest, testWithAllocatorFromSharedPtr) {
   char poolBuf[10'000];
   std::pmr::monotonic_buffer_resource pool(poolBuf, sizeof(poolBuf));
-  ParserAllocatorType alloc(&pool);
+  ParserAllocatorType poolAlloc(&pool);
   FakeOwner owner;
-  AllocatingParserStrategy<FakeOwner> parser(owner, alloc);
+  AllocatingParserStrategy<FakeOwner> parser(owner, poolAlloc);
 
   void* buf;
   size_t lenReturn;

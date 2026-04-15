@@ -94,21 +94,23 @@ The rest of this document describes its contents.
 The `header` is an *unrendered* section of the source. It may contain:
   * [Comments](#comments)
   * [Pragma statements](#pragma-statements)
-  * [Whitespace-only `text` (including `newline`)](#text).
   * [Import statements](#import-statements)
+  * Whitespace-only [text](#text) (including `newline`) between header elements.
 
-Whisker ignores whitespaces in the `header` and does not render them.
+Whisker ignores whitespace in the `header` and does not render it.
 
 <Grammar>
 
 ```
-root → { (whitespace* ~ header)* ~ body* }
+root → { header* ~ body* }
 
 header     → { comment | pragma-statement | import-statement }
 
-body     → { text | template }
-text     → { <see below> }
-template → { <see below> }
+body       → { text | newline | template | comment }
+text       → { <see below> }
+newline    → { <see below> }
+template   → { <see below> }
+comment    → { <see below> }
 ```
 
 </Grammar>
@@ -696,7 +698,7 @@ pair of iterations regardless of whether the body produces output.
 <Grammar>
 
 ```
-each-block          → { each-block-open ~ body* ~ else-block ~ each-block-close }
+each-block          → { each-block-open ~ body* ~ else-block? ~ each-block-close }
 each-block-open     → { "{{" ~ "#" ~ "each" ~ expression ~ each-block-capture? ~ separator-clause? ~ "}}" }
 each-block-capture  → { "as" ~ "|" ~ identifier+ ~ "|" }
 separator-clause    → { "separator" ~ "=" ~ expression }
@@ -1109,7 +1111,7 @@ Partial statements retain the *preceding indentation* at the site of the applica
   {{person.firstName}}
 {{/let partial}}
 Some historic presidents are:
-{{#each presidents as person}}
+{{#each presidents as |person|}}
   {{#partial president person=person}}
 {{/each}}
 ```
@@ -1312,7 +1314,7 @@ It is an error to export `good-mood?` in a nested scope, such as a conditional b
 ```whisker
 {{#if sunny?}}
   {{#let export good-mood? = true}}
-{{else}}
+{{#else}}
   {{#let export good-mood? = false}}
 {{/if sunny?}}
 ```
@@ -1695,11 +1697,26 @@ Adding a `~` inside the `{{`/`}}` delimiters strips whitespace (including newlin
 * `{{~ expr ~}}` — **both tildes**: strips whitespace on both sides.
 * `{{ expr }}` — **no tildes**: no trimming (status quo).
 
-Whitespace **must** separate the `~` from the tag content. This is a deliberate readability constraint:
+Tilde spacing follows one rule:
+
+* A tilde must be adjacent to the delimiter it modifies.
+* A tilde must be separated from tag content by whitespace.
+
+This is a deliberate readability constraint:
 
 ```whisker
-{{~ #if condition ~}}     ✓  Correct — tilde is visually distinct
-{{~#if condition~}}       ✗  Parse error — no whitespace after/before tilde
+{{~ #if condition ~}}     ✓  left tilde touches `{{`, right tilde touches `}}`
+{{~#if condition ~}}      ✗  no whitespace between left tilde and tag content
+{{#if condition ~}}       ✓  whitespace between tag content and right tilde
+{{#if condition~}}        ✗  no whitespace between tag content and right tilde
+{{#if condition ~ }}      ✗  whitespace between right tilde and `}}`
+```
+
+Escaped comments use `-- ~}}` for a right-tilde close:
+
+```whisker
+{{!-- comment -- ~}}      ✓
+{{!-- comment --~}}       ✗
 ```
 
 Tilde trimming applies to interpolations (`{{ }}`), blocks (`{{# }}`), closing tags (`{{/ }}`), statements (`{{# }}`), macros (`{{> }}`), partial statements, and comments (`{{! }}`). Import statements (`{{#import}}`) do not support tilde trimming.
@@ -1710,8 +1727,6 @@ Tilde trimming applies to interpolations (`{{ }}`), blocks (`{{# }}`), closing t
 template-open  → { "{{" ~ "~"? }
 template-close → { "~"? ~ "}}" }
 ```
-
-When a `~` is present, whitespace is required between it and the tag content.
 
 </Grammar>
 

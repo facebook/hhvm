@@ -892,6 +892,7 @@ TEST_F(LexerTest, source_ranges) {
   EXPECT_EQ(token_range_text(*needle++), "");
 }
 
+// Whitespace-sensitive tilde handling across template constructs.
 TEST_F(LexerTest, tilde_left) {
   auto lexer = make_lexer("{{~ foo }}");
   const std::vector<token_description> expected = {
@@ -905,6 +906,23 @@ TEST_F(LexerTest, tilde_left) {
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
 }
 
+TEST_F(LexerTest, tilde_left_requires_suffix_whitespace) {
+  auto lexer = make_lexer("{{~foo}}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::error, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between '~' and tag content in '{{~'",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(LexerTest, tilde_right) {
   auto lexer = make_lexer("{{foo ~}}");
   const std::vector<token_description> expected = {
@@ -916,6 +934,43 @@ TEST_F(LexerTest, tilde_right) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+TEST_F(LexerTest, tilde_right_requires_prefix_whitespace) {
+  auto lexer = make_lexer("{{foo~}}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::identifier, "foo"},
+      {tok::error, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between tag content and '~}}'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(LexerTest, tilde_right_whitespace_before_close_error) {
+  // ~ must be immediately followed by }} — no whitespace allowed.
+  auto lexer = make_lexer("{{foo ~ }}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::identifier, "foo"},
+      {tok::error, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unexpected token in input: ~",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, tilde_both) {
@@ -947,6 +1002,20 @@ TEST_F(LexerTest, tilde_left_with_block) {
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
 }
 
+TEST_F(LexerTest, tilde_no_whitespace_block_open_error) {
+  // {{~#if — no whitespace between ~ and #
+  auto lexer = make_lexer("{{~#if cond}}");
+  auto actual = lexer.tokenize_all();
+  EXPECT_TRUE(actual.back().kind == tok::error);
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between '~' and tag content in '{{~'",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(LexerTest, tilde_right_with_close_block) {
   auto lexer = make_lexer("{{/if ~}}");
   const std::vector<token_description> expected = {
@@ -959,6 +1028,20 @@ TEST_F(LexerTest, tilde_right_with_close_block) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+TEST_F(LexerTest, tilde_no_whitespace_block_close_error) {
+  // {{~/if — no whitespace between ~ and /
+  auto lexer = make_lexer("{{~/if cond}}");
+  auto actual = lexer.tokenize_all();
+  EXPECT_TRUE(actual.back().kind == tok::error);
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between '~' and tag content in '{{~'",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, tilde_with_comment_no_whitespace_error) {
@@ -1006,18 +1089,22 @@ TEST_F(LexerTest, tilde_in_comment_is_right_tilde) {
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
 }
 
-TEST_F(LexerTest, tilde_in_raw_text) {
-  auto lexer = make_lexer("hello ~ world");
+TEST_F(LexerTest, tilde_in_comment_requires_prefix_whitespace) {
+  auto lexer = make_lexer("{{! comment~}}");
   const std::vector<token_description> expected = {
-      {tok::text, "hello"},
-      {tok::whitespace, " "},
-      {tok::text, "~"},
-      {tok::whitespace, " "},
-      {tok::text, "world"},
-      {tok::eof, {}},
+      {tok::open, {}},
+      {tok::bang, {}},
+      {tok::error, {}},
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between tag content and '~}}'",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(LexerTest, tilde_with_macro_no_whitespace_error) {
@@ -1046,6 +1133,139 @@ TEST_F(LexerTest, tilde_with_macro) {
       {tok::path_component, "bar"},
       {tok::tilde, {}},
       {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+TEST_F(LexerTest, tilde_with_macro_requires_prefix_whitespace) {
+  auto lexer = make_lexer("{{> foo/bar~}}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::gt, {}},
+      {tok::path_component, "foo"},
+      {tok::slash, {}},
+      {tok::path_component, "bar"},
+      {tok::error, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between tag content and '~}}'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(LexerTest, tilde_left_with_escaped_comment_requires_suffix_whitespace) {
+  // {{~! is an error — whitespace is required after ~ (and comments
+  // don't support tilde stripping regardless).
+  auto lexer = make_lexer("{{~!-- comment --}}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::error, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between '~' and tag content in '{{~'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(LexerTest, tilde_left_with_escaped_comment) {
+  // {{~ !-- starts an escaped comment with left tilde
+  auto lexer = make_lexer("{{~ !-- comment --}}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::tilde, {}},
+      {tok::bang, {}},
+      {tok::text, " comment "},
+      {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+TEST_F(LexerTest, tilde_right_with_escaped_comment) {
+  // -- ~}} is a right tilde on an escaped comment.
+  auto lexer = make_lexer("{{!-- comment -- ~}}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::bang, {}},
+      {tok::text, " comment "},
+      {tok::tilde, {}},
+      {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+TEST_F(
+    LexerTest, tilde_right_with_escaped_comment_requires_separator_whitespace) {
+  // --~}} without whitespace is not recognized as a right tilde close.
+  // The comment is unterminated — "--~}}" becomes part of the comment text.
+  auto lexer = make_lexer("{{!-- comment --~}}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::bang, {}},
+      {tok::text, " comment --~}}"},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+}
+
+TEST_F(
+    LexerTest,
+    tilde_right_with_escaped_comment_requires_separator_whitespace_without_content_space) {
+  // The separator still needs whitespace before ~ even when the comment text
+  // runs directly into the escaped close marker.
+  auto lexer = make_lexer("{{!-- comment--~}}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::bang, {}},
+      {tok::text, " comment--~}}"},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+}
+
+TEST_F(LexerTest, tilde_both_with_escaped_comment) {
+  auto lexer = make_lexer("{{~ !-- comment -- ~}}");
+  const std::vector<token_description> expected = {
+      {tok::open, {}},
+      {tok::tilde, {}},
+      {tok::bang, {}},
+      {tok::text, " comment "},
+      {tok::tilde, {}},
+      {tok::close, {}},
+      {tok::eof, {}},
+  };
+  auto actual = lexer.tokenize_all();
+  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
+}
+
+// Other tilde handling.
+TEST_F(LexerTest, tilde_in_raw_text) {
+  auto lexer = make_lexer("hello ~ world");
+  const std::vector<token_description> expected = {
+      {tok::text, "hello"},
+      {tok::whitespace, " "},
+      {tok::text, "~"},
+      {tok::whitespace, " "},
+      {tok::text, "world"},
       {tok::eof, {}},
   };
   auto actual = lexer.tokenize_all();
@@ -1101,25 +1321,6 @@ TEST_F(LexerTest, tilde_on_standalone_line) {
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
 }
 
-TEST_F(LexerTest, tilde_right_whitespace_before_close_error) {
-  // ~ must be immediately followed by }} — no whitespace allowed.
-  auto lexer = make_lexer("{{foo ~ }}");
-  const std::vector<token_description> expected = {
-      {tok::open, {}},
-      {tok::identifier, "foo"},
-      {tok::error, {}},
-  };
-  auto actual = lexer.tokenize_all();
-  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-  EXPECT_THAT(
-      diagnostics,
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "unexpected token in input: ~",
-          path_to_file(1),
-          1)));
-}
-
 TEST_F(LexerTest, tilde_not_followed_by_close) {
   // ~ not followed by }} in template is an error
   auto lexer = make_lexer("{{~ foo ~ bar}}");
@@ -1140,21 +1341,6 @@ TEST_F(LexerTest, tilde_not_followed_by_close) {
           1)));
 }
 
-TEST_F(LexerTest, tilde_with_escaped_comment_error) {
-  // {{~! is an error — whitespace is required after ~ (and comments
-  // don't support tilde stripping regardless).
-  auto lexer = make_lexer("{{~!-- comment --}}");
-  auto actual = lexer.tokenize_all();
-  EXPECT_TRUE(actual.back().kind == tok::error);
-  EXPECT_THAT(
-      diagnostics,
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "whitespace is required between '~' and tag content in '{{~'",
-          path_to_file(1),
-          1)));
-}
-
 TEST_F(LexerTest, tilde_in_comment_text) {
   // ~ in the middle of a comment (not before close) is just text
   auto lexer = make_lexer("{{! a ~ b }}");
@@ -1162,65 +1348,6 @@ TEST_F(LexerTest, tilde_in_comment_text) {
       {tok::open, {}},
       {tok::bang, {}},
       {tok::text, " a ~ b "},
-      {tok::close, {}},
-      {tok::eof, {}},
-  };
-  auto actual = lexer.tokenize_all();
-  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-}
-
-TEST_F(LexerTest, tilde_left_with_escaped_comment) {
-  // {{~ !-- starts an escaped comment with left tilde
-  auto lexer = make_lexer("{{~ !-- comment --}}");
-  const std::vector<token_description> expected = {
-      {tok::open, {}},
-      {tok::tilde, {}},
-      {tok::bang, {}},
-      {tok::text, " comment "},
-      {tok::close, {}},
-      {tok::eof, {}},
-  };
-  auto actual = lexer.tokenize_all();
-  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-}
-
-TEST_F(LexerTest, tilde_right_with_escaped_comment) {
-  // -- ~}} is a right tilde on an escaped comment.
-  auto lexer = make_lexer("{{!-- comment -- ~}}");
-  const std::vector<token_description> expected = {
-      {tok::open, {}},
-      {tok::bang, {}},
-      {tok::text, " comment "},
-      {tok::tilde, {}},
-      {tok::close, {}},
-      {tok::eof, {}},
-  };
-  auto actual = lexer.tokenize_all();
-  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-}
-
-TEST_F(LexerTest, tilde_right_escaped_comment_no_whitespace) {
-  // --~}} without whitespace is not recognized as a right tilde close.
-  // The comment is unterminated — "--~}}" becomes part of the comment text.
-  auto lexer = make_lexer("{{!-- comment --~}}");
-  const std::vector<token_description> expected = {
-      {tok::open, {}},
-      {tok::bang, {}},
-      {tok::text, " comment --~}}"},
-      {tok::eof, {}},
-  };
-  auto actual = lexer.tokenize_all();
-  EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-}
-
-TEST_F(LexerTest, tilde_both_with_escaped_comment) {
-  auto lexer = make_lexer("{{~ !-- comment -- ~}}");
-  const std::vector<token_description> expected = {
-      {tok::open, {}},
-      {tok::tilde, {}},
-      {tok::bang, {}},
-      {tok::text, " comment "},
-      {tok::tilde, {}},
       {tok::close, {}},
       {tok::eof, {}},
   };
@@ -1240,48 +1367,6 @@ TEST_F(LexerTest, tilde_in_escaped_comment_text) {
   };
   auto actual = lexer.tokenize_all();
   EXPECT_THAT(actual, testing::ElementsAreArray(expected));
-}
-
-TEST_F(LexerTest, tilde_no_whitespace_interpolation_error) {
-  // {{~foo}} — no whitespace between ~ and identifier
-  auto lexer = make_lexer("{{~foo}}");
-  auto actual = lexer.tokenize_all();
-  EXPECT_TRUE(actual.back().kind == tok::error);
-  EXPECT_THAT(
-      diagnostics,
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "whitespace is required between '~' and tag content in '{{~'",
-          path_to_file(1),
-          1)));
-}
-
-TEST_F(LexerTest, tilde_no_whitespace_block_open_error) {
-  // {{~#if — no whitespace between ~ and #
-  auto lexer = make_lexer("{{~#if cond}}");
-  auto actual = lexer.tokenize_all();
-  EXPECT_TRUE(actual.back().kind == tok::error);
-  EXPECT_THAT(
-      diagnostics,
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "whitespace is required between '~' and tag content in '{{~'",
-          path_to_file(1),
-          1)));
-}
-
-TEST_F(LexerTest, tilde_no_whitespace_block_close_error) {
-  // {{~/if — no whitespace between ~ and /
-  auto lexer = make_lexer("{{~/if cond}}");
-  auto actual = lexer.tokenize_all();
-  EXPECT_TRUE(actual.back().kind == tok::error);
-  EXPECT_THAT(
-      diagnostics,
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "whitespace is required between '~' and tag content in '{{~'",
-          path_to_file(1),
-          1)));
 }
 
 TEST_F(LexerTest, tilde_with_i64_literal) {

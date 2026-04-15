@@ -2286,6 +2286,17 @@ TEST_F(ParserTest, tilde_interpolation_right) {
       "╰─ interpolation [strip-right] <line:1:1, col:11> 'foo'\n");
 }
 
+TEST_F(ParserTest, tilde_interpolation_right_requires_prefix_whitespace) {
+  auto ast = try_parse_ast("{{foo~}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::Contains(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between tag content and '~}}'",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(ParserTest, tilde_interpolation_both) {
   auto ast = parse_ast("{{~ foo ~}}");
   EXPECT_EQ(
@@ -2334,6 +2345,17 @@ TEST_F(ParserTest, tilde_comment_right) {
       "├─ text <line:1:1, col:5> 'text'\n"
       "├─ comment [strip-right] <line:1:5, col:20> ' comment '\n"
       "╰─ text <line:1:20, col:24> 'more'\n");
+}
+
+TEST_F(ParserTest, tilde_comment_right_requires_prefix_whitespace) {
+  auto ast = try_parse_ast("text{{! comment~}}more");
+  EXPECT_THAT(
+      diagnostics,
+      testing::Contains(diagnostic(
+          diagnostic_level::error,
+          "whitespace is required between tag content and '~}}'",
+          path_to_file(1),
+          1)));
 }
 
 TEST_F(ParserTest, tilde_comment_both) {

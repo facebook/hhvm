@@ -190,7 +190,7 @@ struct [[nodiscard]] lex_result : private lex_result_n<1> {
   }
 };
 
-// Returns the skipped scan_window if the comment is escaped "{{--"
+// Returns the skipped scan_window if the comment is escaped "{{!--"
 std::optional<detail::lexer_scan_window> lex_comment_escape(
     detail::lexer_scan_window scan) {
   for (int i = 0; i < 2; ++i) {
@@ -403,7 +403,8 @@ lex_result lex_close(detail::lexer_scan_window scan) {
 
 /**
  * Looks for a right tilde: "~" immediately followed by "}}" (the close
- * delimiter). No whitespace is allowed between "~" and "}}".
+ * delimiter). The caller is responsible for enforcing any required whitespace
+ * before "~". No whitespace is allowed between "~" and "}}".
  *
  * If found, produces a tok::tilde token. Importantly, the "}}" is NOT
  * consumed — it is left for the caller's next iteration to handle via
@@ -501,8 +502,9 @@ class lexer::state_text : public lexer::state_base {
  * This implementation assumes that we transition after "{{" but before "!".
  *
  * Right-tilde detection is handled within the text scanning loop.
- * The "~" must be immediately followed by "}}" (no whitespace):
- *   - Basic comments: "~}}" emits tok::tilde; "}}" is consumed next.
+ * The tilde must touch the delimiter it modifies and be separated from comment
+ * text by whitespace:
+ *   - Basic comments: " ~}}" emits tok::tilde; "}}" is consumed next.
  *   - Escaped comments: "-- ~}}" emits tok::tilde and tok::close together.
  *
  * Left-tilde detection ("{{~") is handled in state_text before transitioning
@@ -522,7 +524,7 @@ class lexer::state_comment : public lexer::state_base {
       } else {
         init_ = {false /* is_escaped */};
       }
-      return std::move(bang_token);
+      return bang_token;
     }
 
     std::string text;
@@ -537,13 +539,21 @@ class lexer::state_comment : public lexer::state_base {
         tokens.push_back(std::move(close).advance_to_token(&scan));
         return {std::move(tokens), std::make_unique<lexer::state_text>()};
       }
-      // Check for right tilde on basic comments: "~}}" with no
+      // Check for right tilde on basic comments: " ~}}" with no
       // whitespace between "~" and "}}".
       if (!init_->is_escaped && scan.peek() == '~') {
         auto tilde_scan = scan.make_fresh();
         tilde_scan.advance(); // consume '~'
         auto lookahead = tilde_scan.make_fresh();
-        if (lex_comment_close(lookahead, false)) {
+        if (lex_comment_close(lookahead, false /* escaped */)) {
+          if (text.empty() || !detail::is_whitespace(text.back())) {
+            scan = scan.make_fresh();
+            scan.advance();
+            return lex.diagnose().report_error(
+                scan,
+                "{}",
+                "whitespace is required between tag content and '~}}'");
+          }
           // Right tilde found: ~}}
           std::vector<token> tokens;
           if (!text.empty()) {
@@ -584,10 +594,6 @@ class lexer::state_comment : public lexer::state_base {
  * Reads the templating language constructs in between "{{" and "}}" (except
  * macros and comments).
  *
- * Right-tilde detection ("~}}") is handled by lex_right_tilde(), which emits
- * tok::tilde on one iteration. The following "}}" is then picked up by
- * lex_close() on the next iteration, which transitions back to state_text.
- *
  * Left-tilde detection ("{{~") is handled in state_text before transitioning
  * to this state, so state_template never sees the left tilde.
  */
@@ -598,6 +604,7 @@ class lexer::state_template : public lexer::state_base {
 
     // In template bodies, whitespace is ignored (unlike in raw text).
     skip_whitespace(&scan);
+    const bool had_leading_whitespace = !scan.empty();
     scan = scan.make_fresh();
 
     if (!scan.can_advance()) {
@@ -612,7 +619,12 @@ class lexer::state_template : public lexer::state_base {
     }
     // "~" followed by "}}" — right tilde. The "}}" is consumed next iteration.
     if (lex_result tilde = lex_right_tilde(scan)) {
-      return std::move(tilde).advance_to_token(&scan);
+      if (had_leading_whitespace) {
+        return std::move(tilde).advance_to_token(&scan);
+      }
+      scan.advance();
+      return lex.diagnose().report_error(
+          scan, "{}", "whitespace is required between tag content and '~}}'");
     }
     // Punctuation, identifiers, keywords, literals, etc.
     if (lex_result any = lex_template_part(scan, lex.diagnose())) {
@@ -634,7 +646,8 @@ class lexer::state_template : public lexer::state_base {
  * This implementation assumes we transition after "{{" but before ">".
  *
  * Right-tilde ("~}}") and left-tilde ("{{~") handling follows the same
- * strategy as state_template — see its class comment for details.
+ * strategy as state_template, including the rule that the tilde must touch the
+ * delimiter it modifies and be separated from tag content by whitespace.
  */
 class lexer::state_macro : public lexer::state_base {
   result next(lexer& lex) override {
@@ -643,6 +656,7 @@ class lexer::state_macro : public lexer::state_base {
 
     // In template bodies, whitespace is ignored (unlike in raw text).
     skip_whitespace(&scan);
+    const bool had_leading_whitespace = !scan.empty();
     if (!init_) {
       init_ = true;
       [[maybe_unused]] char c = scan.advance();
@@ -664,7 +678,12 @@ class lexer::state_macro : public lexer::state_base {
     }
     // "~" followed by "}}" — right tilde. The "}}" is consumed next iteration.
     if (lex_result tilde = lex_right_tilde(scan)) {
-      return std::move(tilde).advance_to_token(&scan);
+      if (had_leading_whitespace) {
+        return std::move(tilde).advance_to_token(&scan);
+      }
+      scan.advance();
+      return lex.diagnose().report_error(
+          scan, "{}", "whitespace is required between tag content and '~}}'");
     }
     if (lex_result path_separator = lex_path_separator(scan)) {
       return std::move(path_separator).advance_to_token(&scan);
@@ -734,12 +753,13 @@ class lexer::state_template_choice : public lexer::state_base {
     auto tilde_scan = scan.make_fresh();
     tilde_scan.advance(); // consume '~'
 
-    // Whitespace is required between "~" and tag content:
-    //   {{~ #if condition ~}}     ✓  whitespace after ~
-    //   {{~ > path }}             ✓  whitespace after ~
-    //   {{~#if condition}}        ✗  error — no whitespace
-    //   {{~! comment }}           ✗  error — no whitespace
-    //   {{~> path }}              ✗  error — no whitespace
+    // The tilde must touch the delimiter it modifies and be separated from tag
+    // content by whitespace:
+    //   {{~ #if condition ~}}     ✓  tilde touches "{{"
+    //   {{~ > path }}             ✓  tilde touches "{{"
+    //   {{~#if condition}}        ✗  no whitespace after "~"
+    //   {{~! comment }}           ✗  no whitespace after "~"
+    //   {{~> path }}              ✗  no whitespace after "~"
     if (!detail::is_whitespace(tilde_scan.peek())) {
       scan = scan.make_fresh();
       scan.advance();

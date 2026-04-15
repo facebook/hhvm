@@ -1116,8 +1116,10 @@ class parser {
       ast::pragma_statement,
       ast::macro>;
   // template → { interpolation | block | statement | macro }
-  // block → { section-block | conditional-block }
-  // statement → { let-statement | pragma-statement }
+  // block →
+  //   { section-block | conditional-block | with-block | each-block |
+  //     partial-block }
+  // statement → { let-statement | pragma-statement | partial-statement }
   parse_result<template_body> parse_template(parser_scan_window scan) {
     assert(scan.empty());
     if (scan.peek().kind != tok::open) {
@@ -1892,7 +1894,7 @@ class parser {
   }
 
   // each-block →
-  //   { each-block-open ~ body* ~ else-block ~ each-block-close }
+  //   { each-block-open ~ body* ~ else-block? ~ each-block-close }
   // each-block-open →
   //   { "{{" ~ "~"? ~ "#" ~ "each" ~ expression ~
   //     each-block-capture? ~ separator-clause? ~ "~"? ~ "}}" }

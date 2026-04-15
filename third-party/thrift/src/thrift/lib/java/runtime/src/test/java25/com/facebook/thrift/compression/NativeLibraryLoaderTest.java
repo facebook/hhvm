@@ -29,61 +29,95 @@ class NativeLibraryLoaderTest {
 
   private static final boolean IS_MAC =
       System.getProperty("os.name", "").toLowerCase().contains("mac");
-  private static final String REQUIRED_SYMBOL = "ZSTD_versionString";
-  private static final String[] EXACT_FILE_NAMES =
-      IS_MAC
-          ? new String[] {"libzstd.dylib", "libzstd.1.dylib"}
-          : new String[] {"libzstd.so", "libzstd.so.1"};
-  private static final String NON_CANONICAL_FILE_NAME =
-      IS_MAC ? "libzstd-jni.dylib" : "libzstd-jni.so";
+  private static final CodecSpec ZSTD =
+      new CodecSpec(
+          "zstd",
+          "ZSTD_versionString",
+          IS_MAC
+              ? new String[] {"libzstd.dylib", "libzstd.1.dylib"}
+              : new String[] {"libzstd.so", "libzstd.so.1"},
+          IS_MAC ? "libzstd-jni.dylib" : "libzstd-jni.so");
+  private static final CodecSpec LZ4 =
+      new CodecSpec(
+          "lz4",
+          "LZ4_versionString",
+          IS_MAC
+              ? new String[] {"liblz4.dylib", "liblz4.1.dylib"}
+              : new String[] {"liblz4.so", "liblz4.so.1"},
+          IS_MAC ? "liblz4-java.dylib" : "liblz4-java.so");
 
   @TempDir Path tempDir;
 
   @Test
-  void prefersExactCanonicalName() throws IOException {
-    Path realLibrary = resolveRealLibrary();
-    Path exactMatch = Files.createSymbolicLink(tempDir.resolve(EXACT_FILE_NAMES[0]), realLibrary);
-    Files.createSymbolicLink(tempDir.resolve(NON_CANONICAL_FILE_NAME), realLibrary);
+  void zstdPrefersExactCanonicalName() throws IOException {
+    assertPrefersExactCanonicalName(ZSTD);
+  }
+
+  @Test
+  void zstdSkipsBrokenExactCandidate() throws IOException {
+    assertSkipsWrongExactCandidate(ZSTD);
+  }
+
+  @Test
+  void lz4PrefersExactCanonicalName() throws IOException {
+    assertPrefersExactCanonicalName(LZ4);
+  }
+
+  @Test
+  void lz4SkipsBrokenExactCandidate() throws IOException {
+    assertSkipsWrongExactCandidate(LZ4);
+  }
+
+  private void assertPrefersExactCanonicalName(CodecSpec codec) throws IOException {
+    Path realLibrary = resolveRealLibrary(codec);
+    Path exactMatch =
+        Files.createSymbolicLink(tempDir.resolve(codec.exactFileNames()[0]), realLibrary);
+    Files.createSymbolicLink(tempDir.resolve(codec.nonCanonicalFileName()), realLibrary);
 
     NativeLibraryLoader.LoadResult result =
         NativeLibraryLoader.findLibrary(
             List.of(new NativeLibraryLoader.SearchDirectory(tempDir, "temp")),
-            REQUIRED_SYMBOL,
-            EXACT_FILE_NAMES);
+            codec.requiredSymbol(),
+            codec.exactFileNames());
 
     assertThat(result).isNotNull();
     assertThat(result.path()).isEqualTo(exactMatch.toString());
     assertThat(result.source()).isEqualTo("temp");
   }
 
-  @Test
-  void skipsWrongExactCandidate() throws IOException {
-    Path realLibrary = resolveRealLibrary();
+  private void assertSkipsWrongExactCandidate(CodecSpec codec) throws IOException {
+    Path realLibrary = resolveRealLibrary(codec);
     Path wrongExact =
         Files.createSymbolicLink(
-            tempDir.resolve(EXACT_FILE_NAMES[0]),
+            tempDir.resolve(codec.exactFileNames()[0]),
             Path.of(ProcessHandle.current().info().command().orElseThrow()));
     Path fallbackExact =
-        Files.createSymbolicLink(tempDir.resolve(EXACT_FILE_NAMES[1]), realLibrary);
+        Files.createSymbolicLink(tempDir.resolve(codec.exactFileNames()[1]), realLibrary);
 
     NativeLibraryLoader.LoadResult result =
         NativeLibraryLoader.findLibrary(
             List.of(new NativeLibraryLoader.SearchDirectory(tempDir, "temp")),
-            REQUIRED_SYMBOL,
-            EXACT_FILE_NAMES);
+            codec.requiredSymbol(),
+            codec.exactFileNames());
 
     assertThat(result).isNotNull();
     assertThat(result.path()).isNotEqualTo(wrongExact.toString());
     assertThat(result.path()).isEqualTo(fallbackExact.toString());
   }
 
-  private static Path resolveRealLibrary() {
+  private static Path resolveRealLibrary(CodecSpec codec) {
     NativeLibraryLoader.LoadResult result =
-        NativeLibraryLoader.findLibrary(REQUIRED_SYMBOL, EXACT_FILE_NAMES);
+        NativeLibraryLoader.findLibrary(codec.requiredSymbol(), codec.exactFileNames());
     if (result == null) {
-      result = NativeLibraryLoader.findLibraryByName(REQUIRED_SYMBOL, "zstd");
+      result = NativeLibraryLoader.findLibraryByName(codec.requiredSymbol(), codec.libraryName());
     }
     assertThat(result).isNotNull();
     return Path.of(result.path());
   }
+
+  private record CodecSpec(
+      String libraryName,
+      String requiredSymbol,
+      String[] exactFileNames,
+      String nonCanonicalFileName) {}
 }

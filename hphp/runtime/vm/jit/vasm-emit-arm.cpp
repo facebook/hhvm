@@ -1500,6 +1500,8 @@ Y(shlqi, Lsl, X, 64, xzr)
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const popp& i) {
+  // ldp x0, x0 is unpredictable on ARM
+  always_assert(i.d0 != i.d1);
   a->Ldp(X(i.d0), X(i.d1), MemOperand(sp, 16, PostIndex));
 }
 

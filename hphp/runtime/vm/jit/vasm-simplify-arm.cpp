@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-simplify-internal.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -331,6 +332,18 @@ bool simplify(Env& env, const storel& inst, Vlabel b, size_t i) {
   });
 }
 
+bool simplify(Env& env, const push& inst, Vlabel b, size_t i) {
+  // push{s1}; push{s2} --> pushp{s1, s2}
+  return if_inst<Vinstr::push>(env, b, i + 1, [&](const push& p) {
+    if (!inst.s.isGP()) return false;
+    if (!p.s.isGP()) return false;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << pushp{inst.s, p.s};
+      return 2;
+    });
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
@@ -358,6 +371,19 @@ bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
       });
     }
     return false;
+  });
+}
+
+bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
+  // pop{d1}; pop{d2} --> popp{d1, d2}
+  return if_inst<Vinstr::pop>(env, b, i + 1, [&](const pop& p) {
+    if (inst.d == p.d) return false;
+    if (!inst.d.isGP()) return false;
+    if (!p.d.isGP()) return false;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << popp{inst.d, p.d};
+      return 2;
+    });
   });
 }
 
@@ -437,6 +463,71 @@ bool psimplify(Env& env, const load& inst, Vlabel b, size_t i) {
 
 bool psimplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
   return simplify(env, inst, b, i);
+}
+
+bool psimplify(Env& env, const push& inst, Vlabel b, size_t i) {
+  return simplify(env, inst, b, i);
+}
+
+bool psimplify(Env& env, const pop& inst, Vlabel b, size_t i) {
+  return simplify(env, inst, b, i);
+}
+
+/*
+ * Only run this in post-RA simplify as this prevents greedy optimization
+ * of shorter popp sequences. After RA, we would have exposed the most number
+ * of opportunities.
+ */
+bool psimplify(Env& env, const popp& inst, Vlabel b, size_t i) {
+  auto const& code = env.unit.blocks[b].code;
+
+  auto j = i;
+  while (j < code.size() && code[j].op == Vinstr::popp) {
+    if (code[j].popp_.d0 == code[j].popp_.d1) return false;
+    ++j;
+  }
+  uint32_t count = j - i;
+
+  // Stay within the ldp offset range of [-512, 504]
+  if (count < 2 || (count - 1) * 16 > 504) return false;
+
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    for (uint32_t idx = 0; idx < count; idx++) {
+      auto const& pp = code[i + idx].popp_;
+      auto const disp = idx * 16;
+      v << loadpair{Vptr128{rsp(), disp}, pp.d0, pp.d1};
+    }
+    auto const total = static_cast<int32_t>(count * 16);
+    v << lea{rsp()[total], rsp()};
+    return count;
+  });
+}
+
+/*
+ * Only run this in post-RA simplify as this prevents greedy optimization
+ * of shorter pushp sequences. After RA, we would have exposed the most number
+ * of opportunities.
+ */
+bool psimplify(Env& env, const pushp& inst, Vlabel b, size_t i) {
+  auto const& code = env.unit.blocks[b].code;
+
+  auto j = i;
+  while (j < code.size() && code[j].op == Vinstr::pushp) ++j;
+  uint32_t count = j - i;
+
+  // Stay within the stp offset range of [-512, 504]
+  if (count < 2 || (count - 1) * 16 > 504) return false;
+
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    auto disp = 16 * count;
+    v << lea{rsp()[-disp], rsp()};
+    for (auto idx = 0; idx < count; idx++) {
+      disp -= 16;
+      auto const& pp = code[i + idx].pushp_;
+      v << storepair{pp.s1, pp.s0, Vptr128{rsp(), disp}};
+    }
+    return count;
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

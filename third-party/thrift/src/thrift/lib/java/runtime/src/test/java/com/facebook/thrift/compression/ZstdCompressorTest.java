@@ -139,6 +139,45 @@ class ZstdCompressorTest {
   }
 
   @Test
+  void roundtripWithHeapSlice() {
+    byte[] padding = "prefix-".getBytes(StandardCharsets.UTF_8);
+    byte[] original = "Heap slice roundtrip test data for ZSTD".getBytes(StandardCharsets.UTF_8);
+    byte[] suffix = "-suffix".getBytes(StandardCharsets.UTF_8);
+    byte[] backing = new byte[padding.length + original.length + suffix.length];
+    System.arraycopy(padding, 0, backing, 0, padding.length);
+    System.arraycopy(original, 0, backing, padding.length, original.length);
+    System.arraycopy(suffix, 0, backing, padding.length + original.length, suffix.length);
+
+    ByteBuf input = Unpooled.wrappedBuffer(backing, padding.length, original.length);
+    ByteBuf compressed = compressor.compress(allocator, input);
+    ByteBuf decompressed = compressor.decompress(allocator, compressed);
+
+    byte[] result = new byte[decompressed.readableBytes()];
+    decompressed.readBytes(result);
+    decompressed.release();
+
+    assertThat(result).isEqualTo(original);
+  }
+
+  @Test
+  void roundtripWithDirectSlice() {
+    byte[] original = "Direct slice roundtrip test data for ZSTD".getBytes(StandardCharsets.UTF_8);
+    ByteBuf backing = allocator.directBuffer(original.length + 8);
+    backing.writeZero(3).writeBytes(original).writeZero(5);
+    ByteBuf input = backing.retainedSlice(3, original.length);
+    backing.release();
+
+    ByteBuf compressed = compressor.compress(allocator, input);
+    ByteBuf decompressed = compressor.decompress(allocator, compressed);
+
+    byte[] result = new byte[decompressed.readableBytes()];
+    decompressed.readBytes(result);
+    decompressed.release();
+
+    assertThat(result).isEqualTo(original);
+  }
+
+  @Test
   void compressHeapDecompressDirect() {
     byte[] original = "Cross heap-to-direct test".getBytes(StandardCharsets.UTF_8);
 

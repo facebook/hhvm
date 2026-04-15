@@ -17,7 +17,7 @@ const int FORCE_GZIP;
 const int FORCE_DEFLATE;
 
 <<__PHPStdLib>>
-function gzclose(resource $zp): HH\FIXME\MISSING_RETURN_TYPE;
+function gzclose(resource $zp): bool;
 <<__PHPStdLib>>
 function gzcompress(string $data, int $level = -1)[]: mixed;
 <<__PHPStdLib>>
@@ -27,7 +27,7 @@ function gzdeflate(string $data, int $level = -1)[]: mixed;
 <<__PHPStdLib>>
 function gzencode(string $data, int $level = -1)[]: mixed;
 <<__PHPStdLib>>
-function gzeof(resource $zp): HH\FIXME\MISSING_RETURN_TYPE;
+function gzeof(resource $zp): bool;
 <<__PHPStdLib>>
 function gzfile(
   string $filename,
@@ -62,7 +62,7 @@ function gzputs(
 <<__PHPStdLib>>
 function gzread(resource $zp, int $length = 0): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function gzrewind(resource $zp): HH\FIXME\MISSING_RETURN_TYPE;
+function gzrewind(resource $zp): bool;
 <<__PHPStdLib>>
 function gzseek(
   resource $zp,
@@ -103,4 +103,4 @@ function zlib_decode(
 <<__PHPStdLib>>
 function zlib_encode(string $data, int $encoding, int $level = -1)[]: mixed;
 <<__PHPStdLib>>
-function zlib_get_coding_type(): HH\FIXME\MISSING_RETURN_TYPE;
+function zlib_get_coding_type(): string;

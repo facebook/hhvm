@@ -49,6 +49,8 @@
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+THRIFT_FLAG_DECLARE_bool(thrift_server_compress_response_on_cpu);
+
 namespace apache::thrift {
 
 namespace detail {

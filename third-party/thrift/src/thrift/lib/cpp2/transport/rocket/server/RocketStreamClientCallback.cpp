@@ -21,7 +21,6 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerUtil.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-THRIFT_FLAG_DECLARE_bool(thrift_server_compress_response_on_cpu);
 THRIFT_FLAG_DEFINE_bool(rocket_server_disable_send_callback, false);
 
 namespace apache::thrift::rocket {
@@ -65,7 +64,7 @@ bool RocketStreamClientCallback::onFirstResponse(
 
   firstResponse.metadata.streamId() = static_cast<uint32_t>(streamId_);
 
-  if (THRIFT_FLAG(thrift_server_compress_response_on_cpu)) {
+  if (cpuCompressionEnabled_) {
     // CPU-thread compression path: bypass IO-thread compression entirely.
     rocket::Payload rocketPayload;
     try {
@@ -75,7 +74,6 @@ bool RocketStreamClientCallback::onFirstResponse(
           std::move(firstResponse.payload),
           std::move(firstResponse.fds));
     } catch (std::exception const& ex) {
-      LOG(ERROR) << "Failed to serialize stream first response: " << ex.what();
       sendError(RocketException(ErrorCode::CANCELED, ex.what()));
       return false;
     }
@@ -127,9 +125,30 @@ bool RocketStreamClientCallback::onStreamNext(StreamPayload&& payload) {
 
   ++(*chunksInMemory_);
 
-  applyCompressionConfigIfNeeded(payload);
-
-  sendStreamPayload(std::move(payload));
+  if (cpuCompressionEnabled_) {
+    // CPU-thread compression path: compression (if any) was already done on
+    // the CPU thread. Skip IO-thread compression entirely — no fallback.
+    // If the payload wasn't compressed (e.g., below size limit, or config
+    // not yet set), it goes out uncompressed, making the behavior clean
+    // and debuggable.
+    rocket::Payload rocketPayload;
+    try {
+      rocketPayload = rocket::makePreCompressedPayload(
+          connection_, payload.metadata, std::move(payload.payload));
+    } catch (std::exception const& ex) {
+      sendError(RocketException(ErrorCode::CANCELED, ex.what()));
+      connection_.freeStream(streamId_, /* complete */ true);
+      return false;
+    }
+    connection_.sendPayload(
+        streamId_,
+        std::move(rocketPayload),
+        Flags().next(true).complete(false),
+        makeSendCallback(/* endReason */ std::nullopt));
+  } else {
+    applyCompressionConfigIfNeeded(payload);
+    sendStreamPayload(std::move(payload));
+  }
 
   return true;
 }
@@ -337,8 +356,9 @@ void RocketStreamClientCallback::setProtoId(protocol::PROTOCOL_TYPES protoId) {
 }
 
 void RocketStreamClientCallback::setCompressionConfig(
-    CompressionConfig compressionConfig) {
+    const CompressionConfig& compressionConfig, bool cpuCompressionEnabled) {
   compressionConfig_ = std::make_unique<CompressionConfig>(compressionConfig);
+  cpuCompressionEnabled_ = cpuCompressionEnabled;
 }
 
 StreamServerCallback& RocketStreamClientCallback::getStreamServerCallback() {

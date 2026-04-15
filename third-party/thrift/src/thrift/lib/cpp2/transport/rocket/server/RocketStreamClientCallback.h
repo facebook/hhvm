@@ -75,7 +75,9 @@ class RocketStreamClientCallback final : public StreamClientCallback,
   StreamServerCallback& getStreamServerCallback();
   void timeoutExpired() noexcept;
   void setProtoId(protocol::PROTOCOL_TYPES);
-  void setCompressionConfig(CompressionConfig compressionConfig);
+  void setCompressionConfig(
+      const CompressionConfig& compressionConfig,
+      bool cpuCompressionEnabled = false);
   bool serverCallbackReady() const {
     return serverCallbackOrCancelled_ != kCancelledFlag && serverCallback();
   }
@@ -188,6 +190,12 @@ class RocketStreamClientCallback final : public StreamClientCallback,
   std::unique_ptr<folly::HHWheelTimer::Callback> timeoutCallback_;
   protocol::PROTOCOL_TYPES protoId_;
   std::unique_ptr<CompressionConfig> compressionConfig_;
+  // Captured once at stream setup so the flag isn't re-read per item.
+  // A mid-stream flag flip would cause mismatched paths: the CPU-side
+  // generator may pre-compress items that the IO side then re-compresses
+  // (double compression), or skip compression expecting the IO side to
+  // handle it when it won't (no compression).
+  bool cpuCompressionEnabled_{false};
   std::string rpcMethodName_{"<unknown_stream_method>"};
   std::shared_ptr<ContextStack> contextStack_{nullptr};
 

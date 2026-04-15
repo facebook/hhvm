@@ -305,7 +305,8 @@ class ServerPublisherStream : private StreamServerCallback {
             TilePtr&& interaction,
             std::shared_ptr<ContextStack> contextStack,
             std::shared_ptr<StreamInterceptorContext>,
-            std::unique_ptr<ThriftStreamLog> streamLog) mutable {
+            std::unique_ptr<ThriftStreamLog> streamLog,
+            const std::optional<CompressionConfig>&) mutable {
           stream->streamClientCallback_ = callback;
           stream->clientEventBase_ = clientEb;
           stream->contextStack_ = std::move(contextStack);

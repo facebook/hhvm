@@ -15,17 +15,17 @@
  */
 
 #pragma once
+#include <optional>
 #include <string_view>
 #include <type_traits>
 
 #include <folly/Try.h>
+#include <folly/compression/Compression.h>
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
-
-namespace apache::thrift {
-class ThriftStreamLog;
-} // namespace apache::thrift
+#include <thrift/lib/cpp2/logging/ThriftStreamLog.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::detail {
 
@@ -38,7 +38,8 @@ using ServerStreamFactoryFn = folly::Function<void(
     TilePtr&&,
     std::shared_ptr<ContextStack>,
     std::shared_ptr<StreamInterceptorContext>,
-    std::unique_ptr<ThriftStreamLog>)>;
+    std::unique_ptr<ThriftStreamLog>,
+    std::optional<CompressionConfig>)>;
 
 struct ServerStreamFactory {
   ServerStreamFactory() = default;
@@ -56,7 +57,8 @@ struct ServerStreamFactory {
               TilePtr&&,
               std::shared_ptr<ContextStack>,
               std::shared_ptr<StreamInterceptorContext>,
-              std::unique_ptr<ThriftStreamLog>>,
+              std::unique_ptr<ThriftStreamLog>,
+              std::optional<CompressionConfig>>,
           int> = 0>
   explicit ServerStreamFactory(F&& fn) : fn_(std::forward<F>(fn)) {}
 
@@ -86,6 +88,10 @@ struct ServerStreamFactory {
     streamLog_ = std::move(log);
   }
 
+  void setCompressionConfig(std::optional<CompressionConfig> config) {
+    compressionConfig_ = std::move(config);
+  }
+
   void operator()(
       FirstResponsePayload&& payload,
       StreamClientCallback* cb,
@@ -96,7 +102,8 @@ struct ServerStreamFactory {
         std::move(interaction_),
         std::move(contextStack_),
         std::move(interceptorContext_),
-        std::move(streamLog_));
+        std::move(streamLog_),
+        std::move(compressionConfig_));
   }
 
   explicit operator bool() { return !!fn_; }
@@ -108,11 +115,30 @@ struct ServerStreamFactory {
   std::shared_ptr<StreamInterceptorContext> interceptorContext_;
   std::string_view methodName_;
   std::unique_ptr<ThriftStreamLog> streamLog_;
+  std::optional<CompressionConfig> compressionConfig_;
 };
 
 template <typename T>
 using ServerStreamFn = folly::Function<ServerStreamFactory(
     folly::Executor::KeepAlive<>,
     apache::thrift::detail::StreamElementEncoder<T>*)>;
+
+// Holds pre-resolved compression state so we don't re-resolve per item.
+struct StreamCompressionContext {
+  CompressionAlgorithm algorithm;
+  std::unique_ptr<folly::compression::Codec> codec;
+  size_t sizeLimit;
+};
+
+// Resolves the compression config into a cached codec + algorithm.
+// Returns nullopt if compression should not be applied (no config,
+// NONE/CUSTOM algorithm, etc.).
+std::optional<StreamCompressionContext> makeCompressionContext(
+    const CompressionConfig& config);
+
+// Compress a stream item on the CPU thread if it exceeds the size limit.
+// On failure, leaves the payload uncompressed.
+void compressStreamItem(
+    StreamPayload& sp, const StreamCompressionContext& ctx, size_t payloadSize);
 
 } // namespace apache::thrift::detail

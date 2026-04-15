@@ -54,4 +54,24 @@ Payload makePreCompressedPayload(
   return payload;
 }
 
+Payload makePreCompressedPayload(
+    IRocketServerConnection& connection,
+    StreamPayloadMetadata& metadata,
+    std::unique_ptr<folly::IOBuf> data) {
+  std::unique_ptr<folly::IOBuf> serializedMetadata;
+  if (connection.isDecodingMetadataUsingBinaryProtocol()) {
+    BinaryProtocolWriter writer;
+    folly::IOBufQueue queue;
+    writer.setOutput(&queue);
+    metadata.write(&writer);
+    serializedMetadata = queue.move();
+  } else {
+    serializedMetadata =
+        connection.getPayloadSerializer()->packCompact(metadata);
+  }
+
+  return Payload::makeFromMetadataAndData(
+      std::move(serializedMetadata), std::move(data));
+}
+
 } // namespace apache::thrift::rocket

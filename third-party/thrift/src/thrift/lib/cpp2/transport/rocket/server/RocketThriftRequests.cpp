@@ -685,8 +685,10 @@ ThriftServerRequestStream::ThriftServerRequestStream(
       getProtoId(),
       std::move(debugPayload),
       stateMachine_);
+  const bool cpuCompression =
+      THRIFT_FLAG(thrift_server_compress_response_on_cpu);
   if (auto compressionConfig = getCompressionConfig()) {
-    clientCallback_->setCompressionConfig(*compressionConfig);
+    clientCallback_->setCompressionConfig(*compressionConfig, cpuCompression);
   }
   clientCallback_->setRpcMethodName(getMethodName());
   scheduleTimeouts();
@@ -761,6 +763,19 @@ void ThriftServerRequestStream::sendStreamThriftResponse(
   if (!stream) {
     sendSerializedError(std::move(metadata), std::move(data));
     return;
+  }
+
+  // Read the flag once so the CPU-side (stream factory) and IO-side
+  // (clientCallback) decisions are consistent for this stream.
+  const bool cpuCompression =
+      THRIFT_FLAG(thrift_server_compress_response_on_cpu);
+
+  // Pass compression config to the stream factory for CPU-thread compression
+  // of subsequent stream items (when the flag is enabled).
+  if (cpuCompression) {
+    if (auto compressionConfig = getCompressionConfig()) {
+      stream.setCompressionConfig(*compressionConfig);
+    }
   }
 
   if (isResponsePreCompressed()) {

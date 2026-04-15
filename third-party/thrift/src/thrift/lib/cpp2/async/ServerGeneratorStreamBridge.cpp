@@ -47,7 +47,8 @@ ServerGeneratorStreamBridge::fromProducerCallback(
           TilePtr&&,
           std::shared_ptr<ContextStack>,
           std::shared_ptr<StreamInterceptorContext>,
-          std::unique_ptr<ThriftStreamLog> streamLog) mutable {
+          std::unique_ptr<ThriftStreamLog> streamLog,
+          const std::optional<CompressionConfig>&) mutable {
         DCHECK(clientEb->isInEventBaseThread());
         auto stream = new ServerGeneratorStreamBridge(clientCallback, clientEb);
         stream->streamLog_ = std::move(streamLog);

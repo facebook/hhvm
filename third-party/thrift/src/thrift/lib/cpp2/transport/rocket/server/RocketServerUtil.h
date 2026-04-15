@@ -34,4 +34,10 @@ Payload makePreCompressedPayload(
     std::unique_ptr<folly::IOBuf> data,
     folly::SocketFds fds);
 
+// Overload for stream payloads (StreamPayloadMetadata, no FDs).
+Payload makePreCompressedPayload(
+    IRocketServerConnection& connection,
+    StreamPayloadMetadata& metadata,
+    std::unique_ptr<folly::IOBuf> data);
+
 } // namespace apache::thrift::rocket

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <optional>
 #include <variant>
 
 #include <folly/Overload.h>
@@ -100,8 +101,9 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
                                      std::shared_ptr<ContextStack> contextStack,
                                      std::shared_ptr<StreamInterceptorContext>
                                          interceptorContext,
-                                     std::unique_ptr<ThriftStreamLog>
-                                         streamLog) mutable {
+                                     std::unique_ptr<ThriftStreamLog> streamLog,
+                                     std::optional<CompressionConfig>
+                                         compressionConfig) mutable {
         DCHECK(evb->isInEventBaseThread());
 
         auto stream =
@@ -114,7 +116,8 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
             std::move(gen),
             TileStreamGuard::transferFrom(std::move(interaction)),
             contextStack,
-            std::move(interceptorContext))
+            std::move(interceptorContext),
+            std::move(compressionConfig))
             .scheduleOn(std::move(serverExecutor))
             .start([stream = stream->copy()](folly::Try<folly::Unit> t) {
               if (t.hasException()) {
@@ -157,7 +160,8 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
       TileStreamGuard interaction,
       std::shared_ptr<ContextStack> contextStack,
-      std::shared_ptr<StreamInterceptorContext> interceptorContext) {
+      std::shared_ptr<StreamInterceptorContext> interceptorContext,
+      std::optional<CompressionConfig> compressionConfig = std::nullopt) {
     class ReadyCallback final : public QueueConsumer {
      public:
       void consume() override { baton_.post(); }
@@ -191,6 +195,12 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
 
     // ensure the generator is destroyed before the interaction TimeStreamGuard
     auto gen_ = std::move(gen);
+
+    // Resolve compression codec once, reuse for all stream items.
+    std::optional<StreamCompressionContext> compressionCtx;
+    if (compressionConfig) {
+      compressionCtx = makeCompressionContext(*compressionConfig);
+    }
 
     while (true) {
       if (credits == 0 || pauseStream) {
@@ -318,6 +328,9 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
             encodeMessageVariant(encode, std::move(item));
         bool hasPayload = sp->payload || sp->isOrderedHeader;
         payloadBytes = sp->payload ? sp->payload->computeChainDataLength() : 0;
+        if (compressionCtx && hasPayload && sp->payload) {
+          compressStreamItem(*sp, *compressionCtx, payloadBytes);
+        }
         stream->serverPush(StreamMessage::PayloadOrError{std::move(sp)});
         if (hasPayload) {
           --credits;
@@ -326,6 +339,9 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
         auto encoded = (*encode)(std::move(item));
         payloadBytes =
             encoded->payload ? encoded->payload->computeChainDataLength() : 0;
+        if (compressionCtx && encoded->payload) {
+          compressStreamItem(encoded.value(), *compressionCtx, payloadBytes);
+        }
         stream->serverPush(StreamMessage::PayloadOrError{std::move(encoded)});
         --credits;
       }

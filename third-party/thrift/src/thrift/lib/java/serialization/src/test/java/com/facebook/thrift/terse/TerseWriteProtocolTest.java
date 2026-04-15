@@ -43,8 +43,8 @@ import com.facebook.thrift.test.terse.TopLevelStruct;
 import com.facebook.thrift.util.IntrinsicDefaults;
 import com.facebook.thrift.util.SerializationProtocol;
 import com.facebook.thrift.util.SerializerUtil;
-import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import java.util.Arrays;
 import java.util.Date;
@@ -74,13 +74,13 @@ public class TerseWriteProtocolTest {
   }
 
   private void serialize(ThriftSerializable st) {
-    dest = RpcResources.getUnpooledByteBufAllocator().buffer();
+    dest = ByteBufAllocator.DEFAULT.buffer();
     protocol = SerializerUtil.toByteBufProtocol(serializationProtocol, dest);
     st.write0(protocol);
   }
 
   private int size(ThriftSerializable t) {
-    dest = RpcResources.getUnpooledByteBufAllocator().buffer();
+    dest = ByteBufAllocator.DEFAULT.buffer();
     protocol = SerializerUtil.toByteBufProtocol(serializationProtocol, dest);
     t.write0(protocol);
     return dest.readableBytes();

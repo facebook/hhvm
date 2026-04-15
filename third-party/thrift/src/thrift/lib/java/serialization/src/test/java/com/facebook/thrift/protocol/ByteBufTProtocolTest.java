@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.facebook.thrift.test.EveryLayout;
 import com.facebook.thrift.util.SerializationProtocol;
 import com.facebook.thrift.util.SerializerUtil;
-import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -48,7 +48,7 @@ public class ByteBufTProtocolTest {
     EveryLayout struct =
         new EveryLayout.Builder().setAInt(5).setALong(1000).setAString("test").build();
 
-    ByteBuf dest = RpcResources.getUnpooledByteBufAllocator().buffer();
+    ByteBuf dest = ByteBufAllocator.DEFAULT.buffer();
     ByteBufTProtocol protocol = SerializerUtil.toByteBufProtocol(serializationProtocol, dest);
 
     struct.write0(protocol);
@@ -66,7 +66,7 @@ public class ByteBufTProtocolTest {
     EveryLayout struct =
         new EveryLayout.Builder().setAInt(5).setALong(1000).setAString("\n\u0001😀").build();
 
-    ByteBuf dest = RpcResources.getUnpooledByteBufAllocator().buffer();
+    ByteBuf dest = ByteBufAllocator.DEFAULT.buffer();
     ByteBufTProtocol protocol = SerializerUtil.toByteBufProtocol(serializationProtocol, dest);
 
     struct.write0(protocol);

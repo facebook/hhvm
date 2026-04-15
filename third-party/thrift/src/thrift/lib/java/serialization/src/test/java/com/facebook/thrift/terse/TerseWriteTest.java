@@ -36,8 +36,8 @@ import com.facebook.thrift.test.terse.TerseStructWithStructTypeAdapter;
 import com.facebook.thrift.util.IntrinsicDefaults;
 import com.facebook.thrift.util.SerializationProtocol;
 import com.facebook.thrift.util.SerializerUtil;
-import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
 public class TerseWriteTest {
 
   private ByteBufTProtocol serialize(ThriftSerializable st) {
-    ByteBuf dest = RpcResources.getUnpooledByteBufAllocator().buffer();
+    ByteBuf dest = ByteBufAllocator.DEFAULT.buffer();
     ByteBufTProtocol protocol =
         SerializerUtil.toByteBufProtocol(SerializationProtocol.TBinary, dest);
     st.write0(protocol);

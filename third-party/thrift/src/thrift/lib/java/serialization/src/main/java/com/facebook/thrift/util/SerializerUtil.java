@@ -25,11 +25,12 @@ import com.facebook.thrift.protocol.ByteBufTJSONProtocol;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.protocol.ProtocolUtil;
 import com.facebook.thrift.protocol.TProtocolType;
-import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.util.ReferenceCountUtil;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -194,7 +195,7 @@ public final class SerializerUtil {
   }
 
   private static byte[] doToByteArray(Writer writer, SerializationProtocol protocol) {
-    ByteBuf dst = RpcResources.getByteBufAllocator().buffer();
+    ByteBuf dst = ByteBufAllocator.DEFAULT.buffer();
     try {
       ByteBufTProtocol apply = toByteBufProtocol(protocol, dst);
       writer.write(apply);
@@ -225,7 +226,7 @@ public final class SerializerUtil {
   }
 
   private static ByteBufInputStream doToInputStream(Writer writer, SerializationProtocol protocol) {
-    ByteBuf dst = RpcResources.getUnpooledByteBufAllocator().buffer();
+    ByteBuf dst = UnpooledByteBufAllocator.DEFAULT.buffer();
     writer.write(toByteBufProtocol(protocol, dst));
     return new ByteBufInputStream(dst);
   }
@@ -262,7 +263,7 @@ public final class SerializerUtil {
   public static <R extends ThriftSerializable> R deepCopy(R source, Reader<R> reader) {
     ByteBuf temp = null;
     try {
-      temp = RpcResources.getByteBufAllocator().buffer();
+      temp = ByteBufAllocator.DEFAULT.buffer();
       ByteBufTProtocol protocol = TProtocolType.TBinary.apply(temp);
       ProtocolUtil.write(source::write0, protocol);
       return ProtocolUtil.read(reader, protocol);

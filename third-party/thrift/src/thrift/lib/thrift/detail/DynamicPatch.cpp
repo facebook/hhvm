@@ -1270,7 +1270,7 @@ DynamicSetPatch DiffVisitorBase::diffSet(
   // remove keys
   for (const auto& i : src) {
     if (!dst.contains(i)) {
-      patch.erase(i);
+      patch.remove(i);
     }
   }
   if (dst.size() < patch.patchedElementCount(badge)) {

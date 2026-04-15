@@ -601,7 +601,7 @@ namespace {
 
   <<__PHPStdLib>>
   function curl_init(
-    HH\FIXME\MISSING_PARAM_TYPE $url = null,
+    ?string $url = null,
   )[leak_safe]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function curl_init_pooled(
@@ -617,12 +617,12 @@ namespace {
     resource $ch,
     int $option,
     HH\FIXME\MISSING_PARAM_TYPE $value,
-  )[write_props]: \HH\FIXME\MISSING_RETURN_TYPE;
+  )[write_props]: bool;
   <<__PHPStdLib>>
   function curl_setopt_array(
     resource $ch,
     HH\FIXME\MISSING_PARAM_TYPE $options,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   <<__PHPStdLib>>
   function curl_exec(resource $ch): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
@@ -635,54 +635,54 @@ namespace {
   <<__PHPStdLib>>
   function curl_error(resource $ch)[]: \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function curl_strerror(int $code): \HH\FIXME\MISSING_RETURN_TYPE;
+  function curl_strerror(int $code): string;
   <<__PHPStdLib>>
-  function curl_close(resource $ch)[leak_safe]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function curl_close(resource $ch)[leak_safe]: ?bool;
   <<__PHPStdLib>>
-  function curl_multi_init(): \HH\FIXME\MISSING_RETURN_TYPE;
+  function curl_multi_init(): resource;
   <<__PHPStdLib>>
   function curl_multi_strerror(int $errornum): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function curl_multi_add_handle(
     resource $mh,
     resource $ch,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): ?int;
   <<__PHPStdLib>>
   function curl_multi_remove_handle(
     resource $mh,
     resource $ch,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): ?int;
   <<__PHPStdLib>>
   function curl_multi_exec(
     resource $mh,
     inout int $still_running,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): ?int;
   <<__PHPStdLib>>
   function curl_multi_select(
     resource $mh,
     float $timeout = 1.0,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): ?int;
   <<__PHPStdLib>>
   function curl_multi_await(resource $mh, float $timeout = 1.0): Awaitable<int>;
   <<__PHPStdLib>>
-  function curl_multi_getcontent(resource $ch): \HH\FIXME\MISSING_RETURN_TYPE;
+  function curl_multi_getcontent(resource $ch): ?string;
   <<__PHPStdLib>>
   function curl_multi_info_read(
     resource $mh,
-    inout HH\FIXME\MISSING_PARAM_TYPE $msgs_in_queue,
+    inout int $msgs_in_queue,
   ): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   function curl_multi_close(resource $mh): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
-  function curl_share_init(): \HH\FIXME\MISSING_RETURN_TYPE;
+  function curl_share_init(): resource;
   <<__PHPStdLib>>
-  function curl_share_close(resource $sh): \HH\FIXME\MISSING_RETURN_TYPE;
+  function curl_share_close(resource $sh): void;
   <<__PHPStdLib>>
   function curl_share_setopt(
     resource $sh,
     int $option,
     HH\FIXME\MISSING_PARAM_TYPE $value,
-  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
 
   class CURLFile {
     public string $name = '';

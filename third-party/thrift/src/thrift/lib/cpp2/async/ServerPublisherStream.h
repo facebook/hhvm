@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <atomic>
+#include <mutex>
+
 #include <folly/Try.h>
 #include <folly/synchronization/AtomicUtil.h>
 #include <folly/synchronization/Baton.h>
@@ -227,9 +230,17 @@ class ServerPublisherStream : private StreamServerCallback {
             encodeOrQueue_.pushOrGetClosedPayload(std::move(payload))) {
       if (payload.hasValue()) {
         if constexpr (WithHeader) {
-          queue_.push(encodeMessageVariant(encode, std::move(payload.value())));
+          auto sp = encodeMessageVariant(encode, std::move(payload.value()));
+          if (sp.hasValue() && sp->payload) {
+            maybeCompressStreamItem(*sp);
+          }
+          queue_.push(std::move(sp));
         } else {
-          queue_.push((*encode)(std::move(payload.value())));
+          auto encoded = (*encode)(std::move(payload.value()));
+          if (encoded.hasValue()) {
+            maybeCompressStreamItem(encoded.value());
+          }
+          queue_.push(std::move(encoded));
         }
       } else if (payload.hasException()) {
         queue_.push((*encode)(std::move(payload.exception())));
@@ -247,6 +258,9 @@ class ServerPublisherStream : private StreamServerCallback {
 
   void publish(folly::Try<StreamPayload>&& payload) {
     bool close = !payload.hasValue();
+    if (payload.hasValue()) {
+      maybeCompressStreamItem(payload.value());
+    }
     queue_.push(std::move(payload));
     if (close) {
       // ensure the callback has completed when we return from complete()
@@ -306,13 +320,23 @@ class ServerPublisherStream : private StreamServerCallback {
             std::shared_ptr<ContextStack> contextStack,
             std::shared_ptr<StreamInterceptorContext>,
             std::unique_ptr<ThriftStreamLog> streamLog,
-            const std::optional<CompressionConfig>&) mutable {
+            const std::optional<CompressionConfig>& compressionConfig) mutable {
           stream->streamClientCallback_ = callback;
           stream->clientEventBase_ = clientEb;
           stream->contextStack_ = std::move(contextStack);
           stream->streamLog_ = std::move(streamLog);
           stream->interaction_ =
               TileStreamGuard::transferFrom(std::move(interaction));
+          if (THRIFT_FLAG(thrift_server_compress_response_on_cpu)) {
+            if (compressionConfig) {
+              auto ctx = makeCompressionContext(*compressionConfig);
+              if (ctx) {
+                stream->compressionCtx_ = std::move(*ctx);
+                stream->compressionCtxReady_.store(
+                    true, std::memory_order_release);
+              }
+            }
+          }
 
           // Notify stream subscribe
           notifyStreamSubscribe(
@@ -457,6 +481,25 @@ class ServerPublisherStream : private StreamServerCallback {
     Ptr(this);
   }
 
+  // Compress a stream item if compression context is available.
+  // Thread-safe: compressionCtx_ is written once (with release) in the
+  // ServerStreamFactory lambda, and read here (with acquire) from the
+  // publisher thread. A mutex serializes concurrent compress() calls
+  // because folly::compression::Codec is not thread-safe.
+  //
+  // No per-item THRIFT_FLAG check: compressionCtxReady_ is only set at
+  // stream setup when the flag is on, so it already gates this path.
+  // Re-reading the flag per item would be incorrect — the IO side captures
+  // it once, so a mid-stream flip would cause double- or no-compression.
+  void maybeCompressStreamItem(StreamPayload& sp) {
+    if (compressionCtxReady_.load(std::memory_order_acquire) && sp.payload &&
+        !sp.payload->empty()) {
+      std::lock_guard lock(compressionMutex_);
+      compressStreamItem(
+          sp, compressionCtx_, sp.payload->computeChainDataLength());
+    }
+  }
+
   void decref() {
     if (refCount_.fetch_sub(1, std::memory_order_acq_rel) == 1) {
       delete this;
@@ -485,6 +528,15 @@ class ServerPublisherStream : private StreamServerCallback {
 
   std::shared_ptr<ContextStack> contextStack_;
   std::unique_ptr<ThriftStreamLog> streamLog_;
+
+  // Pre-resolved compression context for CPU-thread compression of stream
+  // items. Resolved once in the ServerStreamFactory lambda (IO thread) with
+  // release semantics, read from publish() (publisher thread) with acquire.
+  // compressionMutex_ serializes concurrent codec->compress() calls since
+  // folly::compression::Codec is not thread-safe.
+  StreamCompressionContext compressionCtx_;
+  std::atomic<bool> compressionCtxReady_{false};
+  std::mutex compressionMutex_;
 
   //
   // Helper methods to encapsulate ContextStack usage

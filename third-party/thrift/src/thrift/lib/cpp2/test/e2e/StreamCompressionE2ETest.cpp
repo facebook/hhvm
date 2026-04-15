@@ -111,6 +111,45 @@ CO_TEST_F(StreamCompressionE2ETest, StreamWithResponseAndCpuCompression) {
   EXPECT_FALSE((co_await gen.next()).has_value());
 }
 
+// Verifies that ServerPublisherStream (push-based) compresses stream items
+// on the CPU thread when the flag is enabled.
+CO_TEST_F(StreamCompressionE2ETest, PublisherStreamWithCpuCompression) {
+  THRIFT_FLAG_SET_MOCK(thrift_server_compress_response_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestStreamE2EService> {
+    ServerStream<int32_t> publisherRange(int32_t from, int32_t to) override {
+      auto [stream, publisher] = ServerStream<int32_t>::createPublisher([] {});
+      for (int32_t i = from; i <= to; ++i) {
+        publisher.next(i);
+      }
+      std::move(publisher).complete();
+      // @lint-ignore ASTGREP
+      return std::move(stream);
+    }
+  };
+
+  testConfig(
+      {std::make_shared<Handler>(),
+       /* serverConfigCb */ {},
+       [](folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
+         auto channel = RocketClientChannel::newChannel(std::move(socket));
+         CompressionConfig compressionConfig;
+         compressionConfig.codecConfig().ensure().set_zstdConfig();
+         channel->setDesiredCompressionConfig(compressionConfig);
+         return channel;
+       }});
+
+  auto client = makeClient<detail::test::TestStreamE2EService>();
+  auto gen = (co_await client->co_publisherRange(0, 9)).toAsyncGenerator();
+
+  for (int32_t expected = 0; expected <= 9; ++expected) {
+    auto item = co_await gen.next();
+    EXPECT_TRUE(item.has_value());
+    EXPECT_EQ(*item, expected);
+  }
+  EXPECT_FALSE((co_await gen.next()).has_value());
+}
+
 } // namespace
 
 } // namespace apache::thrift

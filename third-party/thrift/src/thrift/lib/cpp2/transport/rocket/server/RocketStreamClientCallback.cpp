@@ -64,7 +64,7 @@ bool RocketStreamClientCallback::onFirstResponse(
 
   firstResponse.metadata.streamId() = static_cast<uint32_t>(streamId_);
 
-  if (cpuCompressionEnabled_) {
+  if (firstResponse.preCompressed) {
     // CPU-thread compression path: bypass IO-thread compression entirely.
     rocket::Payload rocketPayload;
     try {

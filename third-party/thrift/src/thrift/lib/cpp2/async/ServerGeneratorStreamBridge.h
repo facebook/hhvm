@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <atomic>
+#include <mutex>
 #include <optional>
 #include <variant>
 
@@ -109,6 +111,16 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
         auto stream =
             new ServerGeneratorStreamBridge(clientCallback, evb, contextStack);
         stream->streamLog_ = std::move(streamLog);
+        if (THRIFT_FLAG(thrift_server_compress_response_on_cpu)) {
+          if (compressionConfig) {
+            auto ctx = makeCompressionContext(*compressionConfig);
+            if (ctx) {
+              stream->compressionCtx_ = std::move(*ctx);
+              stream->compressionCtxReady_.store(
+                  true, std::memory_order_release);
+            }
+          }
+        }
         auto streamPtr = stream->copy();
         fromAsyncGeneratorImpl<WithHeader>(
             std::move(streamPtr),
@@ -116,8 +128,7 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
             std::move(gen),
             TileStreamGuard::transferFrom(std::move(interaction)),
             contextStack,
-            std::move(interceptorContext),
-            std::move(compressionConfig))
+            std::move(interceptorContext))
             .scheduleOn(std::move(serverExecutor))
             .start([stream = stream->copy()](folly::Try<folly::Unit> t) {
               if (t.hasException()) {
@@ -150,6 +161,30 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
   using TwoWayBridge::serverPush;
   using TwoWayBridge::serverWait;
 
+  // Compresses stream payload (if compression was configured at stream setup)
+  // and then pushes it onto the bridge. Both AsyncGenerator and
+  // ProducerCallback paths use this so compression logic lives in one place.
+  //
+  // No per-item THRIFT_FLAG check: compressionCtxReady_ is only set at
+  // stream setup when the flag is on, so it already gates this path.
+  // Re-reading the flag per item would be incorrect — the IO side captures
+  // it once, so a mid-stream flip would cause double- or no-compression.
+  void serverPushMaybeCompress(ServerStreamMessageServerToClient&& msg) {
+    if (auto* p = std::get_if<StreamMessage::PayloadOrError>(&msg)) {
+      auto& payload = p->streamPayloadTry;
+      if (compressionCtxReady_.load(std::memory_order_acquire) &&
+          payload.hasValue() && payload.value().payload &&
+          !payload.value().payload->empty()) {
+        std::lock_guard lock(compressionMutex_);
+        compressStreamItem(
+            payload.value(),
+            compressionCtx_,
+            payload.value().payload->computeChainDataLength());
+      }
+    }
+    TwoWayBridge::serverPush(std::move(msg));
+  }
+
  private:
 #if FOLLY_HAS_COROUTINES
   template <bool WithHeader, typename T>
@@ -160,8 +195,7 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
       TileStreamGuard interaction,
       std::shared_ptr<ContextStack> contextStack,
-      std::shared_ptr<StreamInterceptorContext> interceptorContext,
-      std::optional<CompressionConfig> compressionConfig = std::nullopt) {
+      std::shared_ptr<StreamInterceptorContext> interceptorContext) {
     class ReadyCallback final : public QueueConsumer {
      public:
       void consume() override { baton_.post(); }
@@ -195,12 +229,6 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
 
     // ensure the generator is destroyed before the interaction TimeStreamGuard
     auto gen_ = std::move(gen);
-
-    // Resolve compression codec once, reuse for all stream items.
-    std::optional<StreamCompressionContext> compressionCtx;
-    if (compressionConfig) {
-      compressionCtx = makeCompressionContext(*compressionConfig);
-    }
 
     while (true) {
       if (credits == 0 || pauseStream) {
@@ -328,10 +356,8 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
             encodeMessageVariant(encode, std::move(item));
         bool hasPayload = sp->payload || sp->isOrderedHeader;
         payloadBytes = sp->payload ? sp->payload->computeChainDataLength() : 0;
-        if (compressionCtx && hasPayload && sp->payload) {
-          compressStreamItem(*sp, *compressionCtx, payloadBytes);
-        }
-        stream->serverPush(StreamMessage::PayloadOrError{std::move(sp)});
+        stream->serverPushMaybeCompress(
+            StreamMessage::PayloadOrError{std::move(sp)});
         if (hasPayload) {
           --credits;
         }
@@ -339,10 +365,8 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
         auto encoded = (*encode)(std::move(item));
         payloadBytes =
             encoded->payload ? encoded->payload->computeChainDataLength() : 0;
-        if (compressionCtx && encoded->payload) {
-          compressStreamItem(encoded.value(), *compressionCtx, payloadBytes);
-        }
-        stream->serverPush(StreamMessage::PayloadOrError{std::move(encoded)});
+        stream->serverPushMaybeCompress(
+            StreamMessage::PayloadOrError{std::move(encoded)});
         --credits;
       }
 
@@ -389,6 +413,15 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
   folly::EventBase* evb_;
   std::shared_ptr<ContextStack> contextStack_;
   std::unique_ptr<ThriftStreamLog> streamLog_;
+
+  // Pre-resolved compression context for CPU-thread compression of stream
+  // items. Resolved once in the ServerStreamFactory lambda (IO thread) with
+  // release semantics, read from serverPush() (producer thread) with
+  // acquire. compressionMutex_ serializes concurrent codec->compress()
+  // calls since folly::compression::Codec is not thread-safe.
+  StreamCompressionContext compressionCtx_;
+  std::atomic<bool> compressionCtxReady_{false};
+  std::mutex compressionMutex_;
 
 #if FOLLY_HAS_COROUTINES
   folly::CancellationSource cancelSource_;

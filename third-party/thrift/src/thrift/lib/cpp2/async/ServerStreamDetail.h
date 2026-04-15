@@ -25,6 +25,7 @@
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/logging/ThriftStreamLog.h>
+#include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::detail {
@@ -125,9 +126,9 @@ using ServerStreamFn = folly::Function<ServerStreamFactory(
 
 // Holds pre-resolved compression state so we don't re-resolve per item.
 struct StreamCompressionContext {
-  CompressionAlgorithm algorithm;
+  CompressionAlgorithm algorithm{CompressionAlgorithm::NONE};
   std::unique_ptr<folly::compression::Codec> codec;
-  size_t sizeLimit;
+  size_t sizeLimit{0};
 };
 
 // Resolves the compression config into a cached codec + algorithm.

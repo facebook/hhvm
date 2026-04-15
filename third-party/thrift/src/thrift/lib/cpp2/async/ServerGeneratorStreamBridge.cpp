@@ -48,10 +48,20 @@ ServerGeneratorStreamBridge::fromProducerCallback(
           std::shared_ptr<ContextStack>,
           std::shared_ptr<StreamInterceptorContext>,
           std::unique_ptr<ThriftStreamLog> streamLog,
-          const std::optional<CompressionConfig>&) mutable {
+          const std::optional<CompressionConfig>& compressionConfig) mutable {
         DCHECK(clientEb->isInEventBaseThread());
         auto stream = new ServerGeneratorStreamBridge(clientCallback, clientEb);
         stream->streamLog_ = std::move(streamLog);
+        if (THRIFT_FLAG(thrift_server_compress_response_on_cpu)) {
+          if (compressionConfig) {
+            auto ctx = makeCompressionContext(*compressionConfig);
+            if (ctx) {
+              stream->compressionCtx_ = std::move(*ctx);
+              stream->compressionCtxReady_.store(
+                  true, std::memory_order_release);
+            }
+          }
+        }
         std::ignore = clientCallback->onFirstResponse(
             std::move(payload), clientEb, stream);
         producerCallback->provideStream(stream->copy());

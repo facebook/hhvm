@@ -32,6 +32,9 @@ struct FirstResponsePayload {
   std::unique_ptr<folly::IOBuf> payload;
   ResponseRpcMetadata metadata;
   folly::SocketFds fds;
+  // True when the payload was already compressed on the CPU thread.
+  // When set, the IO-thread send path should bypass compression.
+  bool preCompressed{false};
 };
 
 struct StreamPayload {

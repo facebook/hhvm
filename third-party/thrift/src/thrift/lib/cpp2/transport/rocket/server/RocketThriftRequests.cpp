@@ -735,6 +735,7 @@ bool ThriftServerRequestStream::sendStreamThriftResponse(
     clientCallback_->setProtoId(getProtoId());
     auto payload = FirstResponsePayload{std::move(data), std::move(metadata)};
     payload.fds = std::move(fds.dcheckToSendOrEmpty());
+    payload.preCompressed = true;
     return clientCallback_->onFirstResponse(
         std::move(payload), nullptr /* evb */, stream.release());
   }
@@ -803,6 +804,7 @@ void ThriftServerRequestStream::sendStreamThriftResponse(
     auto payload = apache::thrift::FirstResponsePayload{
         std::move(data), std::move(metadata)};
     payload.fds = std::move(fds.dcheckToSendOrEmpty());
+    payload.preCompressed = true;
     stream(std::move(payload), clientCallback_, &evb_);
     return;
   }

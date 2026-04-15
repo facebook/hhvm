@@ -34,4 +34,5 @@ service TestStreamE2EService {
   );
   stream<string> stringRange(1: i32 from, 2: i32 to);
   string, stream<string> stringRangeWithResponse(1: i32 from, 2: i32 to);
+  stream<i32> publisherRange(1: i32 from, 2: i32 to);
 }

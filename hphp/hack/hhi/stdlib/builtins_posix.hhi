@@ -12,19 +12,19 @@
 function posix_access(
   string $file,
   int $mode = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
-function posix_ctermid(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_ctermid(): string;
 <<__PHPStdLib>>
-function posix_get_last_error(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_get_last_error(): int;
 <<__PHPStdLib>>
-function posix_getcwd(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_getcwd(): string;
 <<__PHPStdLib>>
-function posix_getegid(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_getegid(): int;
 <<__PHPStdLib>>
-function posix_geteuid(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_geteuid(): int;
 <<__PHPStdLib>>
-function posix_getgid(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_getgid(): int;
 <<__PHPStdLib>>
 function posix_getgrgid(int $gid): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -36,11 +36,11 @@ function posix_getlogin(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function posix_getpgid(int $pid): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function posix_getpgrp(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_getpgrp(): int;
 <<__PHPStdLib>>
-function posix_getpid(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_getpid(): int;
 <<__PHPStdLib>>
-function posix_getppid(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_getppid(): int;
 <<__PHPStdLib>>
 function posix_getpwnam(string $username): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -50,44 +50,44 @@ function posix_getrlimit(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function posix_getsid(int $pid): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function posix_getuid(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_getuid(): int;
 <<__PHPStdLib>>
 function posix_initgroups(
   string $name,
   int $base_group_id,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function posix_isatty(
   HH\FIXME\MISSING_PARAM_TYPE $fd,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
-function posix_kill(int $pid, int $sig): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_kill(int $pid, int $sig): bool;
 <<__PHPStdLib>>
 function posix_mkfifo(
   string $pathname,
   int $mode,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function posix_mknod(
   string $pathname,
   int $mode,
   int $major = 0,
   int $minor = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
-function posix_setegid(int $gid): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_setegid(int $gid): bool;
 <<__PHPStdLib>>
-function posix_seteuid(int $uid): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_seteuid(int $uid): bool;
 <<__PHPStdLib>>
-function posix_setgid(int $gid): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_setgid(int $gid): bool;
 <<__PHPStdLib>>
-function posix_setpgid(int $pid, int $pgid): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_setpgid(int $pid, int $pgid): bool;
 <<__PHPStdLib>>
-function posix_setsid(): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_setsid(): int;
 <<__PHPStdLib>>
-function posix_setuid(int $uid): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_setuid(int $uid): bool;
 <<__PHPStdLib>>
-function posix_strerror(int $errnum): HH\FIXME\MISSING_RETURN_TYPE;
+function posix_strerror(int $errnum): string;
 <<__PHPStdLib>>
 function posix_times(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

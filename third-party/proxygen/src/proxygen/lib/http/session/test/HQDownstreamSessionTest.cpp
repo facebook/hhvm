@@ -3462,6 +3462,39 @@ INSTANTIATE_TEST_SUITE_P(HQDownstreamSessionTest,
                          }()),
                          paramsToTestName);
 
+class HQDownstreamSessionTestPriorityRate : public HQDownstreamSessionTest {};
+TEST_P(HQDownstreamSessionTestPriorityRate, EgressRateLimitFromPriorityHeader) {
+  // requiredBps should be cached when r > 0 in Priority header
+  auto req = getGetRequest();
+  req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=0, i, r=5000000"); // 5 Mbps
+
+  sendRequest(req);
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&]() {
+    EXPECT_CALL(*socketDriver_->getSocket(),
+                getStreamPriority(handler->txn_->getID()))
+        .WillRepeatedly(Return(quic::HTTPPriorityQueue::Priority(0, true)));
+
+    auto priority = handler->txn_->getHTTPPriority();
+    ASSERT_TRUE(priority.hasValue());
+    EXPECT_EQ(priority->requiredBps, 5000000);
+    handler->sendReplyWithBody(200, 100);
+  });
+  handler->expectDetachTransaction();
+  flushRequestsAndLoop();
+  hqSession_->closeWhenIdle();
+}
+
+INSTANTIATE_TEST_SUITE_P(HQDownstreamSessionTest,
+                         HQDownstreamSessionTestPriorityRate,
+                         Values([] {
+                           TestParams tp;
+                           tp.alpn_ = "h3";
+                           return tp;
+                         }()),
+                         paramsToTestName);
+
 class HQDownstreamSessionTestWebTransport : public HQDownstreamSessionTest {};
 
 TEST_P(HQDownstreamSessionTestWebTransport, WTRequestNegotiates) {

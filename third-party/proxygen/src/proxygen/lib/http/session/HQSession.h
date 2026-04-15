@@ -1471,8 +1471,11 @@ class HQSession
         auto sp = session_.sock_->getStreamPriority(getStreamId());
         if (sp) {
           quic::HTTPPriorityQueue::Priority priority(sp.value());
-          return HTTPPriority(
-              priority->urgency, priority->incremental, priority->order);
+          return HTTPPriority(priority->urgency,
+                              priority->incremental,
+                              priority->order,
+                              false,
+                              requiredBps_);
         }
       }
       return folly::none;
@@ -1687,6 +1690,8 @@ class HQSession
     bool hasHeaders_{false};
     enum class EOMType { CODEC, TRANSPORT };
     ConditionalGate<EOMType, 2> eomGate_;
+
+    uint64_t requiredBps_{kDefaultRequiredBps};
 
     folly::Optional<HTTPCodec::StreamID> codecStreamId_;
 

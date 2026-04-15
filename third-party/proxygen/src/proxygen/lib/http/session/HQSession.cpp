@@ -2650,14 +2650,15 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
   // In case a priority update was received on the control stream before
   // getting here that overrides the initial priority received in the headers
   if (sock && session_.enableEgressPrioritization_) {
+    const auto httpPriority = httpPriorityFromHTTPMessage(*msg);
     auto itr = session_.priorityUpdatesBuffer_.find(streamId);
     if (itr != session_.priorityUpdatesBuffer_.end()) {
       setPriority(*sock, streamId, itr->second);
-    } else {
-      const auto httpPriority = httpPriorityFromHTTPMessage(*msg);
-      if (httpPriority) {
-        setPriority(*sock, streamId, httpPriority.value());
-      }
+    } else if (httpPriority) {
+      setPriority(*sock, streamId, httpPriority.value());
+    }
+    if (httpPriority) {
+      requiredBps_ = httpPriority->requiredBps;
     }
   }
 

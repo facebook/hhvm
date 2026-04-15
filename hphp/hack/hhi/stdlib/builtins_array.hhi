@@ -110,7 +110,7 @@ function array_flip(
 function key_exists(
   HH\FIXME\MISSING_PARAM_TYPE $key,
   HH\FIXME\MISSING_PARAM_TYPE $search,
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+)[]: bool;
 <<__PHPStdLib>>
 function array_keys<Tk as arraykey>(
   KeyedContainer<Tk, mixed> $input,
@@ -151,25 +151,25 @@ function array_replace(
   HH\FIXME\MISSING_PARAM_TYPE ...$args
 )[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_multisort1(inout mixed $arg1): HH\FIXME\MISSING_RETURN_TYPE;
+function array_multisort1(inout mixed $arg1): bool;
 <<__PHPStdLib>>
 function array_multisort2(
   inout mixed $arg1,
   inout mixed $arg2,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function array_multisort3(
   inout mixed $arg1,
   inout mixed $arg2,
   inout mixed $arg3,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function array_multisort4(
   inout mixed $arg1,
   inout mixed $arg2,
   inout mixed $arg3,
   inout mixed $arg4,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function array_multisort5(
   inout mixed $arg1,
@@ -177,7 +177,7 @@ function array_multisort5(
   inout mixed $arg3,
   inout mixed $arg4,
   inout mixed $arg5,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function array_multisort6(
   inout mixed $arg1,
@@ -186,7 +186,7 @@ function array_multisort6(
   inout mixed $arg4,
   inout mixed $arg5,
   inout mixed $arg6,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function array_multisort7(
   inout mixed $arg1,
@@ -196,7 +196,7 @@ function array_multisort7(
   inout mixed $arg5,
   inout mixed $arg6,
   inout mixed $arg7,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function array_multisort8(
   inout mixed $arg1,
@@ -207,7 +207,7 @@ function array_multisort8(
   inout mixed $arg6,
   inout mixed $arg7,
   inout mixed $arg8,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function array_multisort9(
   inout mixed $arg1,
@@ -219,7 +219,7 @@ function array_multisort9(
   inout mixed $arg7,
   inout mixed $arg8,
   inout mixed $arg9,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function array_pad(
   HH\FIXME\MISSING_PARAM_TYPE $input,
@@ -298,7 +298,7 @@ function shuffle<T>(inout T $array)[leak_safe]: void;
 >>
 function sizeof(
   HH\FIXME\MISSING_PARAM_TYPE $var,
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+)[]: int;
 <<__PHPStdLib>>
 function hphp_get_iterator(
   HH\FIXME\MISSING_PARAM_TYPE $iterable,
@@ -308,7 +308,7 @@ function in_array(
   HH\FIXME\MISSING_PARAM_TYPE $needle,
   HH\FIXME\MISSING_PARAM_TYPE $haystack,
   bool $strict = false,
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+)[]: bool;
 <<__PHPStdLib>>
 function range(
   HH\FIXME\MISSING_PARAM_TYPE $low,
@@ -426,21 +426,21 @@ function array_intersect_ukey(
 <<__PHPStdLib>>
 function natsort(
   inout HH\FIXME\MISSING_PARAM_TYPE $array,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function natcasesort(
   inout HH\FIXME\MISSING_PARAM_TYPE $array,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
-function i18n_loc_get_default(): HH\FIXME\MISSING_RETURN_TYPE;
+function i18n_loc_get_default(): string;
 <<__PHPStdLib>>
-function i18n_loc_set_default(string $locale): HH\FIXME\MISSING_RETURN_TYPE;
+function i18n_loc_set_default(string $locale): bool;
 <<__PHPStdLib>>
 function i18n_loc_set_attribute(
   int $attr,
   int $val,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
-function i18n_loc_set_strength(int $strength): HH\FIXME\MISSING_RETURN_TYPE;
+function i18n_loc_set_strength(int $strength): bool;
 <<__PHPStdLib>>
 function i18n_loc_get_error_code(): HH\FIXME\MISSING_RETURN_TYPE;

@@ -90,10 +90,10 @@ TEST(HashTest, HashType) {
 
   std::unordered_set<std::size_t> s;
   auto check_and_add = [&s](auto tag, const auto& v) {
-    using Tag = decltype(tag);
-    EXPECT_FALSE(s.contains(hash<Tag>(v)));
-    s.insert(hash<Tag>(v));
-    EXPECT_TRUE(s.contains(hash<Tag>(v)));
+    using TypeTag = decltype(tag);
+    EXPECT_FALSE(s.contains(hash<TypeTag>(v)));
+    s.insert(hash<TypeTag>(v));
+    EXPECT_TRUE(s.contains(hash<TypeTag>(v)));
   };
 
   for (auto i = 0; i < 10; i++) {

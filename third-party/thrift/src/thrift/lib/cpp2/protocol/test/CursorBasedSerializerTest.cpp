@@ -45,15 +45,15 @@ TEST(CursorSerializerTest, RpcExample) {
       nullptr /* streamInjectFault */,
       protocol::T_BINARY_PROTOCOL);
 
-  EmptyWrapper empty(Empty{});
+  EmptyWrapper emptyWrapper(Empty{});
   EmptyWrapper ret;
-  client->sync_identity(ret, empty);
+  client->sync_identity(ret, emptyWrapper);
   std::ignore = ret.deserialize();
 
   client =
       makeTestClient(handler, nullptr, nullptr, protocol::T_COMPACT_PROTOCOL);
   EXPECT_THAT(
-      [&] { client->sync_identity(ret, empty); },
+      [&] { client->sync_identity(ret, emptyWrapper); },
       ThrowsMessage<std::runtime_error>(
           "Single pass serialization only supports binary protocol."));
 }

@@ -42,10 +42,10 @@ class EventHandler : public TProcessorEventHandler {
   void userException(
       void*,
       std::string_view,
-      std::string_view ex_type,
-      std::string_view ex_what) override {
-    this->ex_type = std::string(ex_type);
-    this->ex_what = std::string(ex_what);
+      std::string_view type,
+      std::string_view what) override {
+    ex_type = std::string(type);
+    ex_what = std::string(what);
   }
 };
 

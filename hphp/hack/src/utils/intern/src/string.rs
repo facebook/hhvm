@@ -399,9 +399,6 @@ mod tests {
         use std::thread;
         use std::u32;
 
-        use rand::Rng;
-        use rand::rng;
-
         // Load test lots of threads creating strings, with load
         // gradually getting heavier on later (popular) strings.
         const N: usize = 20_000_000;
@@ -416,9 +413,12 @@ mod tests {
         for k in 0..WRITERS {
             let avail = avail.clone();
             workers.push(thread::spawn(move || {
-                let mut rng = rng();
                 for i in 0..MAX {
-                    let r = if k == 0 { i } else { rng.random_range(i..MAX) };
+                    let r = if k == 0 {
+                        i
+                    } else {
+                        rand::random_range(i..MAX)
+                    };
                     let id = intern(r.to_string());
                     let ix = id.0.index();
                     let av = avail[r].load(Ordering::Relaxed);

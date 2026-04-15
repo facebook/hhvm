@@ -138,7 +138,7 @@ mod tests {
     use hash::HashSet;
     use ir_core::Block;
     use ir_core::BlockId;
-    use rand::Rng;
+    use rand::RngExt as _;
     use rand::rng;
     use rand::seq::SliceRandom;
 

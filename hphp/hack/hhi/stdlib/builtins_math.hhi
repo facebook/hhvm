@@ -72,11 +72,11 @@ function rad2deg(float $number)[]: float;
 <<__PHPStdLib>>
 function decbin(
   HH\FIXME\MISSING_PARAM_TYPE $number,
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+)[]: string;
 <<__PHPStdLib>>
 function decoct(
   HH\FIXME\MISSING_PARAM_TYPE $number,
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+)[]: string;
 <<__PHPStdLib>>
 function bindec(
   HH\FIXME\MISSING_PARAM_TYPE $binary_string,
@@ -143,28 +143,28 @@ function fmod(float $x, float $y)[]: float;
 <<__PHPStdLib>>
 function sqrt(float $arg)[]: float;
 <<__PHPStdLib>>
-function getrandmax()[]: HH\FIXME\MISSING_RETURN_TYPE;
+function getrandmax()[]: int;
 <<__PHPStdLib>>
 function srand(
   HH\FIXME\MISSING_PARAM_TYPE $seed = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): void;
 <<__PHPStdLib>>
 function rand(
   int $min = 0,
-  HH\FIXME\MISSING_PARAM_TYPE $max = -1, /* getrandmax */
-): HH\FIXME\MISSING_RETURN_TYPE;
+  ?int $max = null,
+): int;
 <<__PHPStdLib>>
-function mt_getrandmax()[]: HH\FIXME\MISSING_RETURN_TYPE;
+function mt_getrandmax()[]: int;
 <<__PHPStdLib>>
 function mt_srand(
   HH\FIXME\MISSING_PARAM_TYPE $seed = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): void;
 <<__PHPStdLib>>
 function mt_rand(
   int $min = 0,
-  HH\FIXME\MISSING_PARAM_TYPE $max = -1, /* mt_getrandmax */
-)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
+  ?int $max = null,
+)[leak_safe]: int;
 <<__PHPStdLib>>
-function lcg_value(): HH\FIXME\MISSING_RETURN_TYPE;
+function lcg_value(): float;
 <<__PHPStdLib>>
 function intdiv(int $numerator, int $denominator)[]: int;

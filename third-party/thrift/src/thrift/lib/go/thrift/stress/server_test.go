@@ -164,7 +164,12 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 }
 
 func getNumFileDesciptors() (int, error) {
-	fdDir, err := os.Open(fmt.Sprintf("/proc/%d/fd", os.Getpid()))
+	fdPath := fmt.Sprintf("/proc/%d/fd", os.Getpid())
+	if runtime.GOOS == "darwin" {
+		fdPath = "/dev/fd"
+	}
+
+	fdDir, err := os.Open(fdPath)
 	if err != nil {
 		return -1, err
 	}
@@ -174,6 +179,5 @@ func getNumFileDesciptors() (int, error) {
 	if err != nil {
 		return -1, err
 	}
-
 	return len(files), nil
 }

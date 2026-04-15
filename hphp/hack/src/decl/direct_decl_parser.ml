@@ -39,7 +39,7 @@ external parse_and_hash_decls :
   parsed_file_with_hashes = "hh_parse_and_hash_decls_ffi"
 
 (* NB: Must be manually kept in sync with Rust function
-   `hackrs_provider_backend::FileInfo::from::<ParsedFileWithHashes>` *)
+   `rust_batch_index_ffi::parsed_file_to_file_info' *)
 let decls_to_fileinfo fn (parsed_file : parsed_file_with_hashes) =
   let file_mode = parsed_file.pfh_mode in
   let position_free_decl_hash = Some parsed_file.pfh_hash in

@@ -46,6 +46,7 @@ type ClientIdentityHook func(tlsState *tls.ConnectionState, peerAddr net.Addr) a
 
 // ConnInfo contains connection information from clients of the Server.
 type ConnInfo struct {
+	LocalAddr      net.Addr
 	RemoteAddr     net.Addr
 	PeerIdentities any
 	tlsState       tlsConnectionStater // set by thrift tcp servers
@@ -96,8 +97,6 @@ type RequestContext struct {
 	InteractionID  int64
 	Priority       Priority
 
-	LocalAddress     net.Addr
-	PeerAddress      net.Addr
 	SecurityProtocol string
 	PeerIdentities   []Identity
 	PeerCommonName   string
@@ -117,11 +116,12 @@ func withConnInfo(ctx context.Context, conn net.Conn, hook ClientIdentityHook) c
 		tlsState = t
 	}
 	connInfo := ConnInfo{
-		RemoteAddr: conn.RemoteAddr(),
-		tlsState:   tlsState,
+		LocalAddr:    conn.LocalAddr(),
+		RemoteAddr:   conn.RemoteAddr(),
+		tlsState:     tlsState,
 	}
 	if hook != nil {
-		connInfo.PeerIdentities = hook(connInfo.TLS(), conn.RemoteAddr())
+		connInfo.PeerIdentities = hook(connInfo.TLS(), connInfo.RemoteAddr)
 	}
 	return context.WithValue(ctx, connInfoKey, connInfo)
 }

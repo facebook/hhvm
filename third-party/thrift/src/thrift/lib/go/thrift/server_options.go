@@ -40,12 +40,13 @@ type ConnContextFunc func(context.Context, net.Conn) context.Context
 
 // serverConfig is config needed to run a thrift server
 type serverConfig struct {
-	numWorkers      int
-	log             func(format string, args ...any)
-	userConnContext ConnContextFunc
-	serverObserver  ServerObserver
-	maxRequests     int64
-	loadFn          func() uint32
+	numWorkers         int
+	log                func(format string, args ...any)
+	userConnContext    ConnContextFunc
+	clientIdentityHook ClientIdentityHook
+	serverObserver     ServerObserver
+	maxRequests        int64
+	loadFn             func() uint32
 }
 
 func newServerConfig(options ...ServerOption) *serverConfig {
@@ -65,7 +66,7 @@ func newServerConfig(options ...ServerOption) *serverConfig {
 
 // connContext returns a context enriched with connection info and any user-provided context modifications.
 func (c *serverConfig) connContext(ctx context.Context, conn net.Conn) context.Context {
-	ctx = withConnInfo(ctx, conn)
+	ctx = withConnInfo(ctx, conn, c.clientIdentityHook)
 	if c.userConnContext != nil {
 		ctx = c.userConnContext(ctx, conn)
 	}
@@ -88,6 +89,16 @@ func WithNumWorkers(num int) ServerOption {
 func WithConnContext(connContext ConnContextFunc) ServerOption {
 	return func(config *serverConfig) {
 		config.userConnContext = connContext
+	}
+}
+
+// WithClientIdentityHook sets a hook that extracts peer identities from a TLS connection.
+// This mirrors the C++ ThriftServer::setClientIdentityHook API.
+// The hook is called once per connection during connection setup, and the result
+// is stored on ConnInfo.PeerIdentities.
+func WithClientIdentityHook(hook ClientIdentityHook) ServerOption {
+	return func(config *serverConfig) {
+		config.clientIdentityHook = hook
 	}
 }
 

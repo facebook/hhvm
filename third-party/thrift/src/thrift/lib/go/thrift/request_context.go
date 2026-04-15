@@ -37,10 +37,18 @@ type Identity struct {
 	Data string
 }
 
+// ClientIdentityHook is a function that extracts peer identities from a TLS connection.
+// This mirrors the C++ ClientIdentityHook type in Cpp2ConnContext.h.
+// The hook is called once per connection during connection setup.
+// The return value is stored as-is on ConnInfo.PeerIdentities (type-erased via any).
+// Consumers (e.g. aclchecker) are responsible for type-asserting the result.
+type ClientIdentityHook func(tlsState *tls.ConnectionState, peerAddr net.Addr) any
+
 // ConnInfo contains connection information from clients of the Server.
 type ConnInfo struct {
-	RemoteAddr net.Addr
-	tlsState   tlsConnectionStater // set by thrift tcp servers
+	RemoteAddr     net.Addr
+	PeerIdentities any
+	tlsState       tlsConnectionStater // set by thrift tcp servers
 }
 
 // tlsConnectionStater is an abstract interface for types that can return
@@ -100,17 +108,22 @@ type RequestContext struct {
 	contextHeaders
 }
 
-// withConnInfo adds connection info (from a thrift.Transport) to context, if applicable
-func withConnInfo(ctx context.Context, conn net.Conn) context.Context {
+// withConnInfo adds connection info (from a thrift.Transport) to context, if applicable.
+// If a ClientIdentityHook is provided, it is called to extract peer identities,
+// mirroring the C++ Cpp2ConnContext constructor behavior.
+func withConnInfo(ctx context.Context, conn net.Conn, hook ClientIdentityHook) context.Context {
 	var tlsState tlsConnectionStater
 	if t, ok := conn.(tlsConnectionStater); ok {
 		tlsState = t
 	}
-	ctx = context.WithValue(ctx, connInfoKey, ConnInfo{
+	connInfo := ConnInfo{
 		RemoteAddr: conn.RemoteAddr(),
 		tlsState:   tlsState,
-	})
-	return ctx
+	}
+	if hook != nil {
+		connInfo.PeerIdentities = hook(connInfo.TLS(), conn.RemoteAddr())
+	}
+	return context.WithValue(ctx, connInfoKey, connInfo)
 }
 
 // connInfoFromContext extracts and returns ConnInfo from context.

@@ -96,6 +96,20 @@ func TestWithServerObserver(t *testing.T) {
 	require.Equal(t, customObserver, customConfig.serverObserver)
 }
 
+func TestWithClientIdentityHook(t *testing.T) {
+	defaultConfig := newServerConfig()
+	require.Nil(t, defaultConfig.clientIdentityHook)
+
+	hook := func(tlsState *tls.ConnectionState, peerAddr net.Addr) any {
+		return []string{"identity1", "identity2"}
+	}
+	customConfig := newServerConfig(WithClientIdentityHook(hook))
+	require.NotNil(t, customConfig.clientIdentityHook)
+
+	result := customConfig.clientIdentityHook(nil, nil)
+	require.Equal(t, []string{"identity1", "identity2"}, result)
+}
+
 func TestWithLoadFn(t *testing.T) {
 	defaultConfig := newServerConfig()
 	require.Nil(t, defaultConfig.loadFn)

@@ -315,18 +315,6 @@ class FizzClientContext {
   }
 
   /**
-   * Option to place the SNI extension first in the ClientHello. Default is
-   * false.
-   */
-  void setSniExtFirst(bool sniExtFirst) {
-    sniExtFirst_ = sniExtFirst;
-  }
-
-  bool getSniExtFirst() const {
-    return sniExtFirst_;
-  }
-
-  /**
    * Sets the grease ECH setting. If not set, no grease ECH extension is send.
    */
   void setGreaseECHSetting(ech::GreaseECHSetting setting) {
@@ -387,7 +375,6 @@ class FizzClientContext {
 
   std::chrono::seconds maxPskHandshakeLife_{std::chrono::hours(168)};
 
-  bool sniExtFirst_{false};
   folly::Optional<ech::GreaseECHSetting> greaseECHSetting_;
 };
 } // namespace client

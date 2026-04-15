@@ -887,41 +887,6 @@ TEST_F(ClientProtocolTest, TestConnectExtension) {
           *state_.encodedClientHello(), expectedEncodedHello));
 }
 
-TEST_F(ClientProtocolTest, TestConnectSniExtFirst) {
-  Connect connect;
-  context_->setSniExtFirst(true);
-  connect.context = context_;
-  connect.verifier = verifier_;
-  connect.sni = "www.hostname.com";
-  auto extensions = std::make_shared<MockClientExtensions>();
-  connect.extensions = extensions;
-
-  fizz::Param param = std::move(connect);
-  auto actions = detail::processEvent(state_, param);
-  expectActions<MutateState, WriteToSocket>(actions);
-  processStateMutations(actions);
-  EXPECT_EQ(state_.state(), StateEnum::ExpectingServerHello);
-  auto chlo = getDefaultClientHello();
-
-  // Move SNI extension to front of extension list
-  auto sniExtIt = std::find_if(
-      chlo.extensions.begin(), chlo.extensions.end(), [](const auto& ext) {
-        return ext.extension_type == ExtensionType::server_name;
-      });
-  auto sniExt = sniExtIt->clone();
-  chlo.extensions.erase(sniExtIt);
-  chlo.extensions.insert(chlo.extensions.begin(), std::move(sniExt));
-
-  Buf expectedEncodedHello;
-  Error err;
-  EXPECT_EQ(
-      encodeHandshake(expectedEncodedHello, err, std::move(chlo)),
-      Status::Success);
-  EXPECT_TRUE(
-      folly::IOBufEqualTo()(
-          *state_.encodedClientHello(), std::move(expectedEncodedHello)));
-}
-
 TEST_F(ClientProtocolTest, TestConnectMultipleShares) {
   MockKeyExchange* mockKex1;
   MockKeyExchange* mockKex2;

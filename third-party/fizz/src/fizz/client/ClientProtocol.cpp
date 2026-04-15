@@ -534,7 +534,6 @@ static Status getClientHello(
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<PskKeyExchangeMode>& supportedPskModes,
     const folly::Optional<std::string>& hostname,
-    const bool sniExtFirst,
     const std::vector<std::string>& supportedAlpns,
     const std::vector<CertificateCompressionAlgorithm>& compressionAlgos,
     const Optional<EarlyDataParams>& earlyDataParams,
@@ -548,14 +547,12 @@ static Status getClientHello(
   chlo.cipher_suites = supportedCiphers;
   chlo.legacy_compression_methods.push_back(0x00);
 
-  if (sniExtFirst) {
-    if (hostname) {
-      auto hostnameBuf = folly::IOBuf::copyBuffer(*hostname);
-      auto sni = ServerNameList(ServerName(std::move(hostnameBuf)));
-      Extension ext;
-      TRY(encodeExtension(ext, ctx.err, sni));
-      chlo.extensions.push_back(std::move(ext));
-    }
+  if (hostname) {
+    auto hostnameBuf = folly::IOBuf::copyBuffer(*hostname);
+    auto sni = ServerNameList(ServerName(std::move(hostnameBuf)));
+    Extension ext;
+    TRY(encodeExtension(ext, ctx.err, sni));
+    chlo.extensions.push_back(std::move(ext));
   }
 
   SupportedVersions versions;
@@ -587,16 +584,6 @@ static Status getClientHello(
   Extension sigAlgsExt;
   TRY(encodeExtension(sigAlgsExt, ctx.err, sigAlgs));
   chlo.extensions.push_back(std::move(sigAlgsExt));
-
-  if (!sniExtFirst) {
-    if (hostname) {
-      auto hostnameBuf = folly::IOBuf::copyBuffer(*hostname);
-      auto sni = ServerNameList(ServerName(std::move(hostnameBuf)));
-      Extension ext;
-      TRY(encodeExtension(ext, ctx.err, sni));
-      chlo.extensions.push_back(std::move(ext));
-    }
-  }
 
   if (!supportedAlpns.empty()) {
     ProtocolNameList alpn;
@@ -1038,7 +1025,6 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
       context->getSupportedSigSchemes(),
       context->getSupportedPskModes(),
       sni,
-      context->getSniExtFirst(),
       context->getSupportedAlpns(),
       context->getSupportedCertDecompressionAlgorithms(),
       earlyDataParams,
@@ -1861,7 +1847,6 @@ Status EventHandler<
       state.context()->getSupportedSigSchemes(),
       state.context()->getSupportedPskModes(),
       std::move(sni),
-      state.context()->getSniExtFirst(),
       state.context()->getSupportedAlpns(),
       state.context()->getSupportedCertDecompressionAlgorithms(),
       folly::none,

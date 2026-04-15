@@ -5873,11 +5873,11 @@ TEST_F(ServerProtocolTest, TestClientHelloHandshakeLogging) {
   EXPECT_EQ(
       state_.handshakeLogging()->clientExtensions,
       std::vector<ExtensionType>(
-          {ExtensionType::supported_versions,
+          {ExtensionType::server_name,
+           ExtensionType::supported_versions,
            ExtensionType::supported_groups,
            ExtensionType::key_share,
            ExtensionType::signature_algorithms,
-           ExtensionType::server_name,
            ExtensionType::application_layer_protocol_negotiation,
            ExtensionType::psk_key_exchange_modes}));
   EXPECT_EQ(

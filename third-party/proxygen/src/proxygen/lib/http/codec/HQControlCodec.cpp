@@ -105,6 +105,7 @@ ParseResult HQControlCodec::parseSettings(Cursor& cursor,
       case hq::SettingId::H3_DATAGRAM_DRAFT_8:
       case hq::SettingId::H3_DATAGRAM_RFC:
       case hq::SettingId::ENABLE_WEBTRANSPORT:
+      case hq::SettingId::WT_ENABLED:
         // only 0/1 are legal
         if (setting.second > 1) {
           return HTTP3::ErrorCode::HTTP_SETTINGS_ERROR;
@@ -234,6 +235,7 @@ size_t HQControlCodec::generateSettings(folly::IOBufQueue& writeBuf) {
         case hq::SettingId::ENABLE_WEBTRANSPORT:
         case hq::SettingId::H3_WT_MAX_SESSIONS:
         case hq::SettingId::WT_INITIAL_MAX_DATA:
+        case hq::SettingId::WT_ENABLED:
           break;
       }
       settings.emplace_back(*id, (SettingValue)setting.value);

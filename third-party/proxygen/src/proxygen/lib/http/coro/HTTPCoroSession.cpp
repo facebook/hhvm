@@ -775,6 +775,7 @@ void HTTPQuicCoroSession::applyEgressSettings() {
         case hq::SettingId::ENABLE_WEBTRANSPORT:
         case hq::SettingId::H3_WT_MAX_SESSIONS:
         case hq::SettingId::WT_INITIAL_MAX_DATA:
+        case hq::SettingId::WT_ENABLED:
           // TODO
           break;
       }
@@ -1608,6 +1609,7 @@ void HTTPQuicCoroSession::onSettings(const SettingsList& settings) {
         case hq::SettingId::ENABLE_WEBTRANSPORT:
         case hq::SettingId::H3_WT_MAX_SESSIONS:
         case hq::SettingId::WT_INITIAL_MAX_DATA:
+        case hq::SettingId::WT_ENABLED:
           // TODO
           break;
       }

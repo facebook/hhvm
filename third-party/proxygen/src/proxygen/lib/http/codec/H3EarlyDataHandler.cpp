@@ -51,6 +51,7 @@ bool isLimitSetting(hq::SettingId id) {
     case hq::SettingId::H3_DATAGRAM_DRAFT_8:
     case hq::SettingId::H3_DATAGRAM_RFC:
     case hq::SettingId::ENABLE_WEBTRANSPORT:
+    case hq::SettingId::WT_ENABLED:
       return false;
   }
   // Unknown settings are treated as limits

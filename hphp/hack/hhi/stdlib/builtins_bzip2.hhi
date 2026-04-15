@@ -9,7 +9,7 @@
  */
 
 <<__PHPStdLib>>
-function bzclose(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
+function bzclose(resource $bz): bool;
 <<__PHPStdLib>>
 function bzopen(
   HH\FIXME\MISSING_PARAM_TYPE $filename,
@@ -24,7 +24,7 @@ function bzwrite(
   int $length = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzflush(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
+function bzflush(resource $bz): bool;
 <<__PHPStdLib>>
 function bzerrstr(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

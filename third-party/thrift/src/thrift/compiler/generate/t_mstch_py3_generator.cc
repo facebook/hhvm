@@ -138,16 +138,18 @@ std::string get_cpp_template(const t_type& type) {
 
 bool is_hidden(const t_named& node) {
   return node.has_unstructured_annotation("py3.hidden") ||
-      node.has_structured_annotation(kPythonPy3HiddenUri);
+      node.has_structured_annotation(kPythonPy3HiddenUri) ||
+      node.uri() == kScopeEnumUri;
 }
 bool is_hidden(const t_typedef& node) {
   return node.generated() || node.has_unstructured_annotation("py3.hidden") ||
       node.has_structured_annotation(kPythonPy3HiddenUri) ||
-      is_hidden(*node.get_true_type());
+      node.uri() == kScopeEnumUri || is_hidden(*node.get_true_type());
 }
 bool is_hidden(const t_type& node) {
   return node.generated() || node.has_unstructured_annotation("py3.hidden") ||
       node.has_structured_annotation(kPythonPy3HiddenUri) ||
+      node.uri() == kScopeEnumUri ||
       cpp_name_resolver::is_directly_adapted(node);
 }
 

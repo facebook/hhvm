@@ -186,35 +186,6 @@
       "lineno" : 105,
       "is_exception" : false,
       "is_union" : false,
-      "annotations" : {
-        "hack.name" : {
-          "value" : "TFunction",
-          "source_range" : {
-            "begin" : {
-              "line" : 0,
-              "column" : 0
-            },
-            "end" : {
-              "line" : 0,
-              "column" : 0
-            }
-          }
-        }
-,
-        "js.name" : {
-          "value" : "TFunction",
-          "source_range" : {
-            "begin" : {
-              "line" : 0,
-              "column" : 0
-            },
-            "end" : {
-              "line" : 0,
-              "column" : 0
-            }
-          }
-        }
-      },
       "fields" : {
 
       },
@@ -269,21 +240,6 @@
       "lineno" : 115,
       "is_exception" : false,
       "is_union" : false,
-      "annotations" : {
-        "hack.name" : {
-          "value" : "TConst",
-          "source_range" : {
-            "begin" : {
-              "line" : 0,
-              "column" : 0
-            },
-            "end" : {
-              "line" : 0,
-              "column" : 0
-            }
-          }
-        }
-      },
       "fields" : {
 
       },
@@ -302,21 +258,6 @@
       "lineno" : 120,
       "is_exception" : false,
       "is_union" : false,
-      "annotations" : {
-        "py3.hidden" : {
-          "value" : "1",
-          "source_range" : {
-            "begin" : {
-              "line" : 0,
-              "column" : 0
-            },
-            "end" : {
-              "line" : 0,
-              "column" : 0
-            }
-          }
-        }
-      },
       "fields" : {
 
       },
@@ -359,21 +300,6 @@
       "lineno" : 131,
       "is_exception" : false,
       "is_union" : false,
-      "annotations" : {
-        "hack.name" : {
-          "value" : "TInterface",
-          "source_range" : {
-            "begin" : {
-              "line" : 0,
-              "column" : 0
-            },
-            "end" : {
-              "line" : 0,
-              "column" : 0
-            }
-          }
-        }
-      },
       "structured_annotations" : {
         "Service" : {  },
         "Interaction" : {  },

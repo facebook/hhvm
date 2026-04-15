@@ -1788,8 +1788,6 @@ Function.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Function.thrift_struct_annotations = {
-  "hack.name": "TFunction",
-  "js.name": "TFunction",
 }
 Function.thrift_field_annotations = {
 }
@@ -1817,7 +1815,6 @@ Const.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Const.thrift_struct_annotations = {
-  "hack.name": "TConst",
 }
 Const.thrift_field_annotations = {
 }
@@ -1827,7 +1824,6 @@ Enum.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Enum.thrift_struct_annotations = {
-  "py3.hidden": "1",
 }
 Enum.thrift_field_annotations = {
 }
@@ -1846,7 +1842,6 @@ Interface.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 )))
 
 Interface.thrift_struct_annotations = {
-  "hack.name": "TInterface",
 }
 Interface.thrift_field_annotations = {
 }

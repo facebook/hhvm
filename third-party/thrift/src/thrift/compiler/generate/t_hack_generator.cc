@@ -845,6 +845,19 @@ class t_hack_generator : public t_concat_generator {
             tnamed->find_unstructured_annotation_or_null("hack.name")) {
       return *annotation;
     }
+    // scope.thrift can't use structured annotations for circular dependency
+    // reasons, so check for special URIs that imply a hack name override.
+    static const std::string kTFunction = "TFunction";
+    static const std::string kTConst = "TConst";
+    static const std::string kTInterface = "TInterface";
+    const auto& uri = tnamed->uri();
+    if (uri == kScopeFunctionUri) {
+      return kTFunction;
+    } else if (uri == kScopeConstUri) {
+      return kTConst;
+    } else if (uri == "facebook.com/thrift/annotation/Interface") {
+      return kTInterface;
+    }
     return default_name;
   }
 

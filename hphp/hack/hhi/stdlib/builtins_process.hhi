@@ -12,15 +12,15 @@ const int WNOHANG;
 const int WUNTRACED;
 
 <<__PHPStdLib>>
-function pcntl_alarm(int $seconds): HH\FIXME\MISSING_RETURN_TYPE;
+function pcntl_alarm(int $seconds): int;
 <<__PHPStdLib>>
 function pcntl_exec(
   string $path,
   HH\FIXME\MISSING_PARAM_TYPE $args = null,
   HH\FIXME\MISSING_PARAM_TYPE $envs = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): void;
 <<__PHPStdLib>>
-function pcntl_fork(): HH\FIXME\MISSING_RETURN_TYPE;
+function pcntl_fork(): int;
 <<__PHPStdLib>>
 function pcntl_getpriority(
   int $pid = 0,
@@ -31,63 +31,63 @@ function pcntl_setpriority(
   int $priority,
   int $pid = 0,
   int $process_identifier = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function pcntl_signal(
   int $signo,
   HH\FIXME\MISSING_PARAM_TYPE $handler,
   bool $restart_syscalls = true,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 
 <<__PHPStdLib>>
 function pcntl_wait(
   inout ?int $status,
   int $options = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
 function pcntl_waitpid(
   int $pid,
   inout ?int $status,
   int $options = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): int;
 <<__PHPStdLib>>
-function pcntl_wexitstatus(int $status): HH\FIXME\MISSING_RETURN_TYPE;
+function pcntl_wexitstatus(int $status): int;
 <<__PHPStdLib>>
-function pcntl_wifexited(int $status): HH\FIXME\MISSING_RETURN_TYPE;
+function pcntl_wifexited(int $status): bool;
 <<__PHPStdLib>>
-function pcntl_wifsignaled(int $status): HH\FIXME\MISSING_RETURN_TYPE;
+function pcntl_wifsignaled(int $status): bool;
 <<__PHPStdLib>>
-function pcntl_wifstopped(int $status): HH\FIXME\MISSING_RETURN_TYPE;
+function pcntl_wifstopped(int $status): bool;
 <<__PHPStdLib>>
-function pcntl_wstopsig(int $status): HH\FIXME\MISSING_RETURN_TYPE;
+function pcntl_wstopsig(int $status): int;
 <<__PHPStdLib>>
-function pcntl_wtermsig(int $status): HH\FIXME\MISSING_RETURN_TYPE;
+function pcntl_wtermsig(int $status): int;
 <<__PHPStdLib>>
-function pcntl_signal_dispatch(): HH\FIXME\MISSING_RETURN_TYPE;
+function pcntl_signal_dispatch(): bool;
 <<__PHPStdLib>>
 function shell_exec(string $cmd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function exec(
   string $command,
   inout dynamic $output,
-  inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
-): HH\FIXME\MISSING_RETURN_TYPE;
+  inout int $return_var,
+): string;
 <<__PHPStdLib>>
 function passthru(
   string $command,
-  inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
-): HH\FIXME\MISSING_RETURN_TYPE;
+  inout int $return_var,
+): void;
 <<__PHPStdLib>>
 function system(
   string $command,
-  inout HH\FIXME\MISSING_PARAM_TYPE $return_var,
-): HH\FIXME\MISSING_RETURN_TYPE;
+  inout int $return_var,
+): string;
 <<__PHPStdLib>>
 function proc_open(
   string $cmd,
   darray<int, mixed> $descriptorspec,
   inout ?vec_or_dict<resource> $pipes,
-  HH\FIXME\MISSING_PARAM_TYPE $cwd = null,
+  ?string $cwd = null,
   HH\FIXME\MISSING_PARAM_TYPE $env = null,
   HH\FIXME\MISSING_PARAM_TYPE $other_options = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -95,17 +95,17 @@ function proc_open(
 function proc_terminate(
   resource $process,
   int $signal = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
-function proc_close(resource $process): HH\FIXME\MISSING_RETURN_TYPE;
+function proc_close(resource $process): int;
 <<__PHPStdLib>>
 function proc_get_status(resource $process): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_nice(int $increment): HH\FIXME\MISSING_RETURN_TYPE;
+function proc_nice(int $increment): bool;
 <<__PHPStdLib>>
-function escapeshellarg(string $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function escapeshellarg(string $arg)[]: string;
 <<__PHPStdLib>>
-function escapeshellcmd(string $command): HH\FIXME\MISSING_RETURN_TYPE;
+function escapeshellcmd(string $command): string;
 
 const int SIGABRT;
 const int SIGALRM;

@@ -49,6 +49,7 @@ type ConnInfo struct {
 	LocalAddr        net.Addr
 	RemoteAddr       net.Addr
 	SecurityProtocol string
+	PeerCommonName   string
 	PeerIdentities   any
 	tlsState         tlsConnectionStater // set by thrift tcp servers
 }
@@ -99,7 +100,6 @@ type RequestContext struct {
 	Priority       Priority
 
 	PeerIdentities []Identity
-	PeerCommonName string
 
 	ConnInfo ConnInfo
 
@@ -116,13 +116,19 @@ func withConnInfo(ctx context.Context, conn net.Conn, hook ClientIdentityHook) c
 		tlsState = t
 	}
 	securityProtocol := ""
+	peerCommonName := ""
 	if tlsState != nil {
 		securityProtocol = "TLS"
+		cs := tlsState.ConnectionState()
+		if len(cs.PeerCertificates) > 0 {
+			peerCommonName = cs.PeerCertificates[0].Subject.CommonName
+		}
 	}
 	connInfo := ConnInfo{
 		LocalAddr:        conn.LocalAddr(),
 		RemoteAddr:       conn.RemoteAddr(),
 		SecurityProtocol: securityProtocol,
+		PeerCommonName:   peerCommonName,
 		tlsState:         tlsState,
 	}
 	if hook != nil {

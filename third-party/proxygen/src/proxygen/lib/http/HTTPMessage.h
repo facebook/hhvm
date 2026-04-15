@@ -36,39 +36,45 @@ constexpr uint8_t kDefaultHttpPriorityUrgency = 3;
 constexpr bool kDefaultHttpPriorityIncremental = true;
 constexpr uint64_t kDefaultOrderId = 0;
 constexpr bool kDefaultPaused = false;
+constexpr uint64_t kDefaultRequiredBps = 0;
 constexpr int8_t kMinPriority = 0;
 constexpr int8_t kMaxPriority = 7;
-
 struct HTTPPriority {
   uint8_t urgency : 3;
   bool incremental : 1;
   uint32_t orderId;
   bool paused : 1;
+  uint64_t requiredBps;
 
   HTTPPriority()
       : urgency(kDefaultHttpPriorityUrgency),
         incremental(kDefaultHttpPriorityIncremental),
         orderId(kDefaultOrderId),
-        paused(kDefaultPaused) {
+        paused(kDefaultPaused),
+        requiredBps(kDefaultRequiredBps) {
   }
 
   HTTPPriority(uint8_t urgencyIn,
                bool incrementalIn,
                uint32_t orderIdIn = kDefaultOrderId,
-               bool pausedIn = kDefaultPaused)
+               bool pausedIn = kDefaultPaused,
+               uint64_t rateIn = kDefaultRequiredBps)
       : urgency(std::min(urgencyIn, static_cast<uint8_t>(kMaxPriority))),
         incremental(incrementalIn),
         orderId(orderIdIn),
-        paused(pausedIn) {
+        paused(pausedIn),
+        requiredBps(rateIn) {
   }
 };
 
 inline bool operator==(const HTTPPriority& a, const HTTPPriority& b) {
   return a.urgency == b.urgency && a.incremental == b.incremental &&
-         a.orderId == b.orderId && a.paused == b.paused;
+         a.orderId == b.orderId && a.paused == b.paused &&
+         a.requiredBps == b.requiredBps;
 }
 
-// Convert Priority to a string representation in the form of "u=urgency[,i]"
+// Convert Priority to a string representation in the form of
+// "u=urgency[,i][,r=rate]"
 std::string httpPriorityToString(const HTTPPriority& priority);
 
 class HTTPMessage;

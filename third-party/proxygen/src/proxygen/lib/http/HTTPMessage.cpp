@@ -25,7 +25,9 @@ std::string httpPriorityToString(const HTTPPriority& pri) {
       std::min(static_cast<uint8_t>(proxygen::kMaxPriority), pri.urgency),
       pri.incremental ? ",i" : "",
       pri.orderId > 0 ? folly::to<std::string>(",o=", pri.orderId) : "",
-      pri.paused ? ",p" : "");
+      pri.paused ? ",p" : "",
+      pri.requiredBps > 0 ? folly::to<std::string>(",r=", pri.requiredBps)
+                          : "");
 }
 
 std::mutex HTTPMessage::mutexDump_;

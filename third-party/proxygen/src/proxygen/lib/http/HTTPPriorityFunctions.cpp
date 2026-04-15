@@ -63,22 +63,30 @@ folly::Optional<HTTPPriority> httpPriorityFromString(
   bool uMissing = false;
   bool iMissing = false;
   bool oMissing = false;
+  bool rMissing = false;
   bool pMissing = false;
   bool malformed = false;
+
   auto urgency = getWithDefault<int64_t>(
       dict, "u", (int64_t)kDefaultHttpPriorityUrgency, uMissing, malformed);
   bool incremental = getWithDefault(dict, "i", false, iMissing, malformed);
   auto orderId = getWithDefault<int64_t>(dict, "o", 0, oMissing, malformed);
   auto paused = getWithDefault(dict, "p", false, pMissing, malformed);
+  auto requiredBps = getWithDefault<int64_t>(
+      dict, "r", (int64_t)kDefaultRequiredBps, rMissing, malformed);
+
   if ((urgency > kMaxPriority || urgency < kMinPriority) || (orderId < 0) ||
-      (uMissing && iMissing && oMissing && pMissing) || malformed) {
+      (requiredBps < 0) ||
+      (uMissing && iMissing && oMissing && pMissing && rMissing) || malformed) {
     logBadHeader = true;
     return folly::none;
   }
+
   return HTTPPriority(static_cast<uint8_t>(urgency),
                       incremental,
                       static_cast<uint32_t>(orderId),
-                      paused);
+                      paused,
+                      static_cast<uint64_t>(requiredBps));
 }
 
 } // namespace proxygen

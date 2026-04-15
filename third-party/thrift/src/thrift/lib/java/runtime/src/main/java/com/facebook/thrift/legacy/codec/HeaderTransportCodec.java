@@ -19,9 +19,9 @@ package com.facebook.thrift.legacy.codec;
 import static com.google.common.base.Verify.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.facebook.thrift.compression.CompressionManager;
 import com.facebook.thrift.metadata.ClientInfo;
 import com.facebook.thrift.protocol.TProtocolType;
-import com.facebook.thrift.util.CompressionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -57,8 +57,6 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
 
   private static final int NORMAL_HEADERS = 0x01;
   private static final int PERSISTENT_HEADERS = 0x02;
-
-  private static final int ZLIB_TRANSFORM = 0x01;
 
   private static final long LOG_INTERVAL = 30_000_000_000L; // 30 sec
   private static final AtomicLong logTime = new AtomicLong(0);
@@ -265,15 +263,9 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
 
     // read transforms
     int numberOfTransforms = readVarInt32(messageHeader);
-    boolean inflate = false;
-    if (numberOfTransforms > 0) {
-      // only support zlib transformation
-      int transform = readVarInt32(messageHeader);
-      inflate = ZLIB_TRANSFORM == transform;
-
-      if (!inflate) {
-        throw new IllegalArgumentException("Unsupported transform -> " + transform);
-      }
+    int[] transforms = new int[numberOfTransforms];
+    for (int i = 0; i < numberOfTransforms; i++) {
+      transforms[i] = readVarInt32(messageHeader);
     }
 
     // Persistent headers override normal headers on key collision (consistent with Netty 3).
@@ -292,8 +284,9 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
     }
     allHeaders.putAll(persistentHeaders);
 
-    if (inflate) {
-      buffer = CompressionUtil.inflate(alloc, buffer);
+    // Apply decompression in reverse order, matching C++ THeader::untransform()
+    for (int i = transforms.length - 1; i >= 0; i--) {
+      buffer = CompressionManager.decompressFromTransform(transforms[i], alloc, buffer);
     }
 
     ThriftFrame frame =

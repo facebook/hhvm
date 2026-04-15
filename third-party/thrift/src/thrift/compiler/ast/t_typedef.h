@@ -35,8 +35,10 @@ namespace apache::thrift::compiler {
  * must (eventually) resolve to an underlying TOM type (eg. a struct, primitive,
  * etc.). They are *transparent* aliases.
  */
-class t_typedef : public t_type {
+class t_typedef final : public t_type {
  public:
+  // TODO(T244601847): Clean up usages and remove, as unresolved types are no
+  // longer represented using placeholder typedefs, so there is only one kind.
   enum class kind {
     defined,
     placeholder,
@@ -48,6 +50,8 @@ class t_typedef : public t_type {
   const t_type_ref& type() const { return aliased_type_ref_; }
   void set_type(t_type_ref type) { aliased_type_ref_ = type; }
 
+  // TODO(T244601847): Clean up usages and remove, as unresolved types are no
+  // longer represented using placeholder typedefs, so there is only one kind.
   kind typedef_kind() const;
 
   // Returns the first type, in the typedef type hierarchy, matching the
@@ -100,30 +104,6 @@ class t_typedef : public t_type {
    * Reference to the IDL type being transparently aliased by this typedef.
    */
   t_type_ref aliased_type_ref_;
-};
-
-// A placeholder for a type that can't be resolved at parse time.
-//
-// TODO(T244601847): Merge this class with t_type_ref and resolve all types
-// after parsing. This class assumes that, since the type was referenced by
-// name, it is safe to create a dummy typedef to use as a proxy for the original
-// type. However, this actually breaks dynamic_cast for t_node and t_type::is_*
-// calls, resulting in a lot of subtle bugs that may or may not show up,
-// depending on the order of IDL declarations.
-class t_placeholder_typedef final : public t_typedef {
- public:
-  t_placeholder_typedef(const t_program* program, std::string name)
-      : t_typedef(program, std::move(name), {}) {}
-
-  /**
-   * Resolve and find the actual type that the symbolic name refers to.
-   * Return true iff the type exists in the scope.
-   */
-  bool resolve();
-
-  std::string get_full_name() const override {
-    return aliased_type_ref_ ? aliased_type_ref_->get_full_name() : name();
-  }
 };
 
 } // namespace apache::thrift::compiler

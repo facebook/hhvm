@@ -40,39 +40,11 @@ const t_const* t_typedef::get_first_structured_annotation_or_null(
 }
 
 t_typedef::kind t_typedef::typedef_kind() const {
-  if (this->is<t_placeholder_typedef>()) {
-    return kind::placeholder;
-  }
   return kind::defined;
 }
 
 bool t_typedef::is_sealed() const {
   return aliased_type_ref_->is_sealed(); // Throws if unresolved
-}
-
-bool t_placeholder_typedef::resolve() {
-  if (!aliased_type_ref_.empty()) {
-    // Already resolved
-    return true;
-  }
-
-  aliased_type_ref_ = t_type_ref::from_ptr(
-      program()->find<t_type>(scope::identifier{name(), src_range()}));
-  if (aliased_type_ref_.empty()) {
-    // Could not resolve
-    return false;
-  }
-
-  // Update the type to mirror the underlying one.
-  // TODO(afuller): Update codegen to always skip over placeholders via
-  // type_ref instead.
-  set_name(aliased_type_ref_->name());
-  set_program(aliased_type_ref_->program());
-  // Copy the URI from the resolved type so that URI-based lookups work
-  // correctly (e.g., find_structured_annotation_or_null).
-  set_uri(aliased_type_ref_->uri(), aliased_type_ref_->explicit_uri());
-  // Successfully resolved, and updated name, program, uri.
-  return true;
 }
 
 } // namespace apache::thrift::compiler

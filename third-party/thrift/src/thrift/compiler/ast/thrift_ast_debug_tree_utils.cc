@@ -128,20 +128,14 @@ scope& addChildForTypeRef(
   typeRefScope.make_child("resolved? {}", isResolved);
   addChildForSourceRange("src_range", typeRef.src_range(), typeRefScope);
 
-  const t_type* typePtr = typeRef.get_type();
-  scope& typeScope =
-      typeRefScope.make_child("type: [t_type*] {:#x}", uintptr_t(typePtr));
-  if (typePtr != nullptr) {
-    typeScope.make_child("full_name: {}", typePtr->get_full_name());
-  }
-
-  const t_placeholder_typedef* unresolvedTypePtr = typeRef.unresolved_type();
-  scope& unresolvedTypeScope = typeRefScope.make_child(
-      "unresolved_type: [t_placeholder_typedef*] {:#x}",
-      uintptr_t(unresolvedTypePtr));
-  if (unresolvedTypePtr != nullptr) {
-    unresolvedTypeScope.make_child(
-        "full_name: {}", unresolvedTypePtr->get_full_name());
+  if (typeRef.resolved()) {
+    typeRefScope
+        .make_child("type: [t_type*] {:#x}", uintptr_t(&typeRef.deref()))
+        .make_child("full_name: {}", typeRef->get_full_name());
+  } else if (!typeRef.empty()) {
+    typeRefScope.make_child(
+        "unresolved_name: {}",
+        detail::unresolved_type_ref_info::unresolved_name(typeRef));
   }
 
   return typeRefScope;
@@ -471,20 +465,6 @@ scope& addChildForGlobalScope(
     scope& parentScope) {
   scope& globalScopeScope = parentScope.make_child(
       "{} [t_global_scope] @{:#x}", prefix, uintptr_t(&globalScope));
-
-  // placeholder_typedefs
-  node_list_view<const t_placeholder_typedef> placeholderTypedefs =
-      globalScope.placeholder_typedefs();
-  scope& placeholderTypedefsScope = globalScopeScope.make_child(
-      "placeholder_typedefs (size: {})", placeholderTypedefs.size());
-  for (std::size_t i = 0; i < placeholderTypedefs.size(); ++i) {
-    const t_placeholder_typedef& placeholderTypedef = placeholderTypedefs[i];
-    scope& placeholderTypedefScope = placeholderTypedefsScope.make_child(
-        "placeholder_typedefs[{}] [t_placeholder_typedef] @{:#x}",
-        i,
-        uintptr_t(&placeholderTypedef));
-    addChildForTypedef("(base)", placeholderTypedef, placeholderTypedefScope);
-  }
 
   // resolution_mismatches
   const t_global_scope::ResolutionMismatches& resolutionMismatches =

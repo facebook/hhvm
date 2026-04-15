@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <functional>
 #include <unordered_set>
+#include <vector>
 
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/uri.h>
@@ -30,21 +31,12 @@
 
 namespace apache::thrift::compiler {
 
-namespace detail {
-
-struct sema_unresolved_private_access {
-  static const std::string& get_unresolved_name(const t_type_ref& ref) {
-    return ref.unresolved_name();
-  }
-};
-
-} // namespace detail
-
 namespace {
 
-void report_missing_type(sema_context& ctx, const t_named& named) {
-  ctx.error(named, "Type `{}` not defined.", named.name());
-}
+struct unresolved_type_ref_info {
+  source_range range;
+  std::string name;
+};
 
 // Mutators have mutable access to the AST.
 struct mutator_context : visitor_context {
@@ -75,7 +67,7 @@ class type_ref_resolver {
  private:
   sema_context& ctx_;
   t_program_bundle& bundle_;
-  bool unresolved_ = false;
+  std::vector<unresolved_type_ref_info> unresolved_type_refs_;
 
  public:
   explicit type_ref_resolver(sema_context& ctx, t_program_bundle& bundle)
@@ -83,7 +75,7 @@ class type_ref_resolver {
 
   const t_type* resolve_implicit_includes(const t_type_ref& ref) {
     const scope::identifier id{
-        detail::sema_unresolved_private_access::get_unresolved_name(ref),
+        detail::unresolved_type_ref_info::unresolved_name(ref),
         ref.src_range()};
     return dynamic_cast<const t_type*>(bundle_.root_program()->find(id));
   }
@@ -99,7 +91,18 @@ class type_ref_resolver {
       return;
     }
 
-    unresolved_ = true;
+    const unresolved_type_ref_info unresolved{
+        .range = ref.src_range(),
+        .name = detail::unresolved_type_ref_info::unresolved_name(ref)};
+    if (std::none_of(
+            unresolved_type_refs_.begin(),
+            unresolved_type_refs_.end(),
+            [&](const unresolved_type_ref_info& existing) {
+              return existing.range == unresolved.range &&
+                  existing.name == unresolved.name;
+            })) {
+      unresolved_type_refs_.push_back(unresolved);
+    }
   }
 
   [[nodiscard]] t_type_ref resolve(t_type_ref ref) {
@@ -107,7 +110,7 @@ class type_ref_resolver {
     return ref;
   }
 
-  bool run() {
+  void run() {
     ast_mutator mutator;
     auto resolve_const_value = [&](t_const_value& node, auto& recurse) -> void {
       node.set_type(resolve(node.type()));
@@ -181,9 +184,19 @@ class type_ref_resolver {
           resolve_in_place(node.type_ref());
           resolve_const_value(*node.value(), resolve_const_value);
         });
+    mutator.add_named_visitor(
+        [&](sema_context&, mutator_context&, t_named& node) {
+          for (t_const& annot : node.structured_annotations()) {
+            resolve_in_place(annot.type_ref());
+            resolve_const_value(*annot.value(), resolve_const_value);
+          }
+        });
 
     mutator.mutate(ctx_, bundle_);
-    return !unresolved_;
+  }
+
+  const std::vector<unresolved_type_ref_info>& unresolved_type_refs() const {
+    return unresolved_type_refs_;
   }
 };
 
@@ -323,17 +336,8 @@ void match_type_with_const_value(
             // detail to the error. Hence it's better to error here as opposed
             // to later in validator which will only print 'unknown symbol'
             "could not resolve type `{}` (expected `{}`)",
-            detail::sema_unresolved_private_access::get_unresolved_name(ttype),
+            detail::unresolved_type_ref_info::unresolved_name(ttype),
             type->get_full_name());
-        // Resolve global placeholder to avoid the duplicate message
-        for (auto& td : mctx.bundle->root_program()
-                            ->global_scope()
-                            ->placeholder_typedefs()) {
-          if (!td.type() &&
-              td.name() == ttype.unresolved_type()->get_full_name()) {
-            td.set_type(t_type_ref::from_ptr(type));
-          }
-        }
       } else if (ttype->get_true_type() != type) {
         ctx.error(
             value->ref_range().begin,
@@ -746,27 +750,15 @@ std::vector<ast_mutator> post_validation_standard_mutators() {
 
 bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
   type_ref_resolver resolver(diags, bundle);
-  bool success = resolver.run();
-
-  for (auto& td :
-       bundle.root_program()->global_scope()->placeholder_typedefs()) {
-    if (td.type()) {
-      continue;
-    }
-
-    if (const auto* ttype = resolver.resolve_implicit_includes(
-            t_type_ref::for_unresolved(*td.program(), td.name()))) {
-      td.set_type(t_type_ref::from_ptr(ttype));
-      assert(td.type().resolved());
-      continue;
-    }
-
-    report_missing_type(diags, td);
-
-    assert(!td.resolve());
-    success = false;
+  resolver.run();
+  for (const unresolved_type_ref_info& unresolved :
+       resolver.unresolved_type_refs()) {
+    diags.error(
+        unresolved.range.begin, "Type `{}` not defined.", unresolved.name);
   }
-  return success && check_circular_typedef(diags, bundle);
+
+  return resolver.unresolved_type_refs().empty() &&
+      check_circular_typedef(diags, bundle);
 }
 
 bool sema::check_circular_typedef(
@@ -800,33 +792,18 @@ bool sema::check_circular_typedef(
 
 sema::result sema::run(sema_context& ctx, t_program_bundle& bundle) {
   // Resolve types in the root program.
-  type_ref_resolver(ctx, bundle).run();
-
-  t_program& root_program = *bundle.root_program();
-  std::string program_prefix = root_program.name() + ".";
-
-  result ret;
-  for (t_placeholder_typedef& t :
-       root_program.global_scope()->placeholder_typedefs()) {
-    if (!t.resolve() && t.name().find(program_prefix) == 0) {
-      report_missing_type(ctx, t);
-      ret.unresolved_types = true;
-    }
-  }
-  if (ctx.has_errors()) {
+  result ret{.unresolved_types = !resolve_all_types(ctx, bundle)};
+  if (ctx.has_errors() || ret.unresolved_types) {
     return ret;
   }
 
-  ret.unresolved_types = !resolve_all_types(ctx, bundle);
-  if (!ret.unresolved_types) {
-    for (auto& mutator : pre_validation_standard_mutators()) {
+  for (auto& mutator : pre_validation_standard_mutators()) {
+    mutator.mutate(ctx, bundle);
+  }
+  standard_validator()(ctx, *bundle.root_program());
+  if (!ctx.has_errors()) {
+    for (auto& mutator : post_validation_standard_mutators()) {
       mutator.mutate(ctx, bundle);
-    }
-    standard_validator()(ctx, *bundle.root_program());
-    if (!ctx.has_errors()) {
-      for (auto& mutator : post_validation_standard_mutators()) {
-        mutator.mutate(ctx, bundle);
-      }
     }
   }
   return ret;

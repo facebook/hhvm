@@ -30,19 +30,10 @@ t_type_ref t_global_scope::ref_type(
     return {*type, range}; // We found the type!
   }
 
-  /*
-   Either this type isn't yet declared, or it's never
-   declared. Either way allow it and we'll figure it out
-   during generation.
-  */
-  // NOTE(afuller): This assumes that, since the type was referenced by name, it
-  // is safe to create a dummy typedef to use as a proxy for the original type.
-  // However, this actually breaks dynamic casts.
-  // TODO(T244601847): Merge t_placeholder_typedef into t_type_ref and remove
-  // const cast.
-  auto ph = std::make_unique<t_placeholder_typedef>(&program, name);
-  ph->set_src_range(range);
-  return add_placeholder_typedef(std::move(ph));
+  // Type has not yet been declared. Represent it as an unresolved placeholder.
+  // Semantic analysis will try resolve it, and produce a diagnostic if it was
+  // never declared.
+  return t_type_ref::for_unresolved(program, name, range);
 }
 
 const t_named* t_global_scope::add_def_by_uri(const t_named& node) {

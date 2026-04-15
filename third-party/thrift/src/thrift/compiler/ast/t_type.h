@@ -26,18 +26,38 @@
 namespace apache::thrift::compiler {
 
 class t_program;
-class t_placeholder_typedef;
 class t_type;
+class t_type_ref;
 
 namespace detail {
 
 template <typename... Visitors>
 extern decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors);
 
-// Allow semantic resolution access to the private unresolved name of
-// `t_type_ref` without exposing it to any other components of the compiler, or
-// plugins outside the compiler.
-struct sema_unresolved_private_access;
+/**
+ * Allow semantic resolution, linters, etc. access to unresolved type
+ * information in `t_type_ref` without publicly exposing it to any other
+ * components of the compiler, or plugins outside the compiler.
+ *
+ * Semantic resolution needs to resolve type references to types which are used
+ * before declaration (or potentially never declared). Linters need to be able
+ * inspect ASTs which are not valid (e.g. contain references to undeclared
+ * types).
+ *
+ * If you are writing a generator or plugin, you should NOT use this class.
+ * The AST is fully resolved and validated by the time generators and plugins
+ * are invoked. You should only need the `empty` and `resolved` methods to
+ * inspect type ref state.
+ */
+struct unresolved_type_ref_info {
+  /**
+   * If this type reference refers to an unresolved type, returns the referenced
+   * name of the type. This is the name of the type as it appears in the IDL in
+   * the context from which it is to be resolved.
+   * Otherwise, returns an empty string.
+   */
+  static const std::string& unresolved_name(const t_type_ref&);
+};
 
 } // namespace detail
 
@@ -210,7 +230,7 @@ class t_type : public t_named {
  * the primitive built-in type `i32`).
  *
  * Type references are different from other references because they can be
- * annotated and unresolved.
+ * unresolved during parsing.
  *
  * Instances of `t_type_ref` provide pass-through dereference semantics (i.e.,
  * `->` and `*` operators) to the underlying referenced `t_type`.
@@ -238,8 +258,7 @@ class t_type_ref final {
   /**
    * Returns the resolved type being referenced.
    *
-   * Throws a std::runtime_error if the type has not been set, or an unresolved
-   * type is encountered.
+   * Throws a std::runtime_error if the type has not been set or resolved.
    */
   const t_type& deref() const { return deref_or_throw(); }
 
@@ -250,8 +269,7 @@ class t_type_ref final {
    * a type which does not exist.
    */
   bool empty() const noexcept {
-    return type_ == nullptr && unresolved_typedef_ == nullptr &&
-        unresolved_name_.empty();
+    return type_ == nullptr && unresolved_name_.empty();
   }
 
   // Returns true if the type reference names an unresolved type.
@@ -268,7 +286,7 @@ class t_type_ref final {
    * Returns true if this reference has been initialized (i.e., is not
    * `empty()`) AND points to a resolved type.
    */
-  bool resolved() const noexcept;
+  bool resolved() const noexcept { return type_ != nullptr; }
 
   /**
    * Attempts to resolve the underlying unresolved type, if any.
@@ -313,13 +331,6 @@ class t_type_ref final {
   const t_type* type_ = nullptr;
 
   source_range range_;
-  // The placeholder we have write access to, if we need to resolve the type
-  // before derefing.
-  // Note: It is not thread safe to access this value if 'this' is const.
-  //
-  // TODO(T244601847): Make an unresolved reference directly representable in
-  // the AST, merging `t_placeholder_typedef` into `t_type_ref`.
-  t_placeholder_typedef* unresolved_typedef_ = nullptr;
   /**
    * If this type reference refers to an unresolved type, this is the program
    * from which the reference was made (i.e. the program whose context the type
@@ -331,12 +342,8 @@ class t_type_ref final {
   const t_program* unresolved_program_ = nullptr;
   std::string unresolved_name_;
 
-  // Note: Use for_placeholder for public access.
-  explicit t_type_ref(
-      const t_type& type,
-      t_placeholder_typedef& unresolved_type,
-      source_range range)
-      : type_(&type), range_(range), unresolved_typedef_(&unresolved_type) {}
+  // Allow access to private members for unresolved type information.
+  friend struct detail::unresolved_type_ref_info;
 
   // Note: Use from_ptr or from_req_ptr for public access.
   explicit t_type_ref(const t_type* type, source_range range)
@@ -355,48 +362,10 @@ class t_type_ref final {
    */
   const t_type& deref_or_throw() const;
 
-  // Allow semantic resolution access to private members for unresolved name to
-  // try resolve the type via implicit includes.
-  friend struct detail::sema_unresolved_private_access;
-
-  /**
-   * If this type reference refers to an unresolved type, returns the referenced
-   * name of the type. This is the name of the type as it appears in the IDL in
-   * the context from which it is to be resolved.
-   * Otherwise, returns an empty string.
-   */
-  const std::string& unresolved_name() const noexcept {
-    return unresolved_name_;
-  }
-
  public:
-  // TODO(T244601847): Remove get_type() once t_placeholder_typedef, at which
-  // point resolved() and deref() are all that's necessary
+  // TODO(T244601847): Remove get_type() once usages are removed and replaced
+  // with empty/deref.
   const t_type* get_type() const { return type_; }
-
-  static t_type_ref for_placeholder(t_placeholder_typedef& unresolved_type);
-
-  // TODO(T244601847): unresolved_type() and t_placeholder_typedef will
-  // eventually be removed, and instead unresolved types will be represented by
-  // a t_type_ref with NO underlying type (placeholder or otherwise). Such a
-  // t_type_ref will be identifiable by calling the `resolved()` method
-  // (returning false).
-  /**
-   * When we parse an AST, `t_type_ref` represents all type references. E.g. the
-   * type of a field `1: Foo myField` is a type-ref to the AST type `Foo`.
-   *
-   * During the migration off placeholder typedefs, unresolved types may be
-   * represented either by a placeholder-backed ref or directly by the target
-   * program and unresolved name. Both modes are resolved through this API.
-   */
-  t_placeholder_typedef* unresolved_type() { return unresolved_typedef_; }
-
-  /**
-   * See (non-const) `unresolved_type()`.
-   */
-  const t_placeholder_typedef* unresolved_type() const {
-    return unresolved_typedef_;
-  }
 };
 
 bool is_scalar(const t_type& type);

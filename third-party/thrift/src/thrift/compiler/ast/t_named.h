@@ -105,13 +105,6 @@ class t_named : public t_node {
   t_named(t_named&&) = delete;
   t_named& operator=(t_named&&) = delete;
 
-  /**
-   * Set the program for this node. This is primarily exposed for the purpose of
-   * placeholder typedefs, where the initial program that triggers placeholder
-   * generation may not be the final program the resolved type belongs to.
-   */
-  void set_program(const t_program* program) { program_ = program; }
-
  private:
   std::string name_;
   const t_program* program_;

@@ -58,9 +58,8 @@ TEST(TypedefTest, bad_true_type) {
   const t_field* second_field = my_struct->get_field_by_id(2);
   ASSERT_NE(second_field, nullptr);
   EXPECT_EQ(second_field->name(), "second");
-  const t_type* second_field_type = second_field->type().get_type();
-  ASSERT_NE(second_field_type, nullptr);
-  EXPECT_EQ(second_field_type->get_true_type(), nullptr);
+  EXPECT_FALSE(second_field->type().empty());
+  EXPECT_TRUE(second_field->type().unresolved());
 }
 
 TEST(TypedefTest, inherited_annotations) {

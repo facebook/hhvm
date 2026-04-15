@@ -137,21 +137,12 @@ class t_global_scope {
     return it != definitions_by_uri_.end() ? it->second : nullptr;
   }
 
-  // Get a (poetically unresolved) reference to given type, declared in the
+  // Get a (potentially unresolved) reference to given type, declared in the
   // given program.
   t_type_ref ref_type(
       const t_program& program,
       const std::string& name,
       const source_range& range);
-
-  // TODO(T244601847): Merge t_placeholder_typedef with t_type_ref and resolve
-  // all types after parsing.
-  node_list_view<t_placeholder_typedef> placeholder_typedefs() {
-    return placeholder_typedefs_;
-  }
-  node_list_view<const t_placeholder_typedef> placeholder_typedefs() const {
-    return placeholder_typedefs_;
-  }
 
   const ResolutionMismatches& resolution_mismatches() const {
     return resolution_mismatches_;
@@ -185,18 +176,6 @@ class t_global_scope {
   }
 
  private:
-  // TODO(T244601847): Merge t_placeholder_typedef with t_type_ref and resolve
-  // all types after parsing.
-  t_type_ref add_placeholder_typedef(
-      std::unique_ptr<t_placeholder_typedef> ptd) {
-    assert(ptd != nullptr);
-    auto result = t_type_ref::for_placeholder(*ptd);
-    placeholder_typedefs_.emplace_back(std::move(ptd));
-    return result;
-  }
-
-  node_list<t_placeholder_typedef> placeholder_typedefs_;
-
   // A mapping from scope names/alias to a collection of definitions.
   ProgramScopes program_scopes_;
 

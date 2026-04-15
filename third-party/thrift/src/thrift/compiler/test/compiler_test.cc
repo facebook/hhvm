@@ -714,6 +714,80 @@ TEST(CompilerTest, undefined_annotation_external) {
   )");
 }
 
+TEST(CompilerTest, missing_type_diagnostics_cover_all_type_refs) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["included.thrift"] = R"(
+    package "facebook.com/thrift/test"
+
+    typedef MissingIncludedTypedef IncludedAlias
+      # expected-error@-1: Type `MissingIncludedTypedef` not defined.
+
+    struct IncludedStruct {
+      1: MissingIncludedField field; # expected-error: Type `MissingIncludedField` not defined.
+    }
+
+    const MissingIncludedConst includedConst = 0;
+      # expected-error@-1: Type `MissingIncludedConst` not defined.
+
+    service IncludedService {
+      MissingIncludedReturn ret(); # expected-error: Type `MissingIncludedReturn` not defined.
+    }
+  )";
+  name_contents_map["main.thrift"] = R"(
+    package "facebook.com/thrift/test"
+
+    include "included.thrift"
+
+    struct KnownStruct {}
+    struct Ann {
+      1: KnownStruct payload;
+    }
+
+    typedef MissingTypedef Alias
+      # expected-error@-1: Type `MissingTypedef` not defined.
+
+    @MissingAnnotationType
+      # expected-error@-1: Type `MissingAnnotationType` not defined.
+    struct UsesMissingAnnot {}
+
+    @Ann{payload = MissingAnnotationLiteral{}}
+      # expected-error@-1: Type `MissingAnnotationLiteral` not defined.
+    struct UsesAnn {}
+
+    struct MainStruct {
+      1: MissingField field; # expected-error: Type `MissingField` not defined.
+      2: KnownStruct d = MissingDefaultLiteral{};
+        # expected-error@-1: Type `MissingDefaultLiteral` not defined.
+    }
+
+    const MissingConst badConst = 0;
+      # expected-error@-1: Type `MissingConst` not defined.
+    const KnownStruct badStructConst = MissingConstLiteral{};
+      # expected-error@-1: Type `MissingConstLiteral` not defined.
+    const list<KnownStruct> badListLiteral = [MissingListLiteral{}];
+      # expected-error@-1: Type `MissingListLiteral` not defined.
+    const map<MissingMapKey, MissingMapVal> badMap = {};
+      # expected-error@-1: Type `MissingMapVal` not defined.
+      # expected-error@-2: Type `MissingMapKey` not defined.
+    const list<MissingListElem> badList = [];
+      # expected-error@-1: Type `MissingListElem` not defined.
+    const set<MissingSetElem> badSet = [];
+      # expected-error@-1: Type `MissingSetElem` not defined.
+
+    service MainService {
+      MissingReturn ret(); # expected-error: Type `MissingReturn` not defined.
+      void param(1: MissingParam p); # expected-error: Type `MissingParam` not defined.
+      void ex() throws (1: MissingThrows e); # expected-error: Type `MissingThrows` not defined.
+      stream<MissingStream> streamFn(); # expected-error: Type `MissingStream` not defined.
+      sink<MissingSinkElem, MissingSinkFinal> sinkFn();
+        # expected-error@-1: Type `MissingSinkElem` not defined.
+        # expected-error@-2: Type `MissingSinkFinal` not defined.
+    }
+  )";
+
+  check_compile(name_contents_map, "main.thrift");
+}
+
 TEST(CompilerTest, field_name_uniqueness) {
   check_compile(R"(
     package "facebook.com/thrift/test"

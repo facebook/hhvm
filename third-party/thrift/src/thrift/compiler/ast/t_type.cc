@@ -31,39 +31,13 @@ const t_type* t_type::get_true_type() const {
       this, [](const t_type* type) { return !type->is<t_typedef>(); });
 }
 
-bool t_type_ref::resolved() const noexcept {
-  if (type_ == nullptr) {
-    return false;
-  }
-  if (unresolved_typedef_ != nullptr) {
-    return unresolved_typedef_->type().resolved();
-  }
-  return unresolved_name_.empty();
-}
-
 bool t_type_ref::resolve() {
   if (resolved() || empty()) {
     // Already resolved
     return true;
   }
 
-  // Try to resolve via the placeholder typedef
-  if (unresolved_typedef_ != nullptr) {
-    if (!unresolved_typedef_->resolve()) {
-      return false;
-    }
-
-    // Try to excise the placeholder typedef so dynamic_cast works.
-    if (unresolved_typedef_->unstructured_annotations().empty()) {
-      type_ = unresolved_typedef_->type().get_type();
-    }
-    unresolved_typedef_ = nullptr;
-    unresolved_program_ = nullptr;
-    unresolved_name_.clear();
-    return true;
-  }
-
-  if (unresolved_program_ == nullptr) {
+  if (unresolved_program_ == nullptr || unresolved_name_.empty()) {
     return false;
   }
 
@@ -74,7 +48,6 @@ bool t_type_ref::resolve() {
   }
 
   type_ = resolved_type;
-  unresolved_typedef_ = nullptr;
   unresolved_program_ = nullptr;
   unresolved_name_.clear();
   return true;
@@ -94,20 +67,7 @@ const t_type& t_type_ref::deref_or_throw() const {
     }
     throw std::runtime_error("t_type_ref has no type.");
   }
-  if (auto ph = dynamic_cast<const t_placeholder_typedef*>(type_)) {
-    return ph->type().deref();
-  }
   return *type_;
-}
-
-t_type_ref t_type_ref::for_placeholder(t_placeholder_typedef& unresolved_type) {
-  t_type_ref ref{unresolved_type, unresolved_type, unresolved_type.src_range()};
-  // NOTE: not part of the constructor initializers because
-  // `t_placeholder_typedef` is incomplete in `t_type.h`, since it's defined in
-  // `t_typedef.h` which depends on `t_type.h`
-  ref.unresolved_program_ = unresolved_type.program();
-  ref.unresolved_name_ = unresolved_type.name();
-  return ref;
 }
 
 const t_type_ref& t_type_ref::none() {
@@ -126,5 +86,17 @@ bool is_scalar(const t_type& type) {
       primitive->primitive_type() != t_primitive_type::type::t_string &&
       primitive->primitive_type() != t_primitive_type::type::t_void;
 }
+
+namespace detail {
+
+// Declared on struct helper rather than a public method on `t_type_ref` to add
+// friction and discourage unnecessary use of this method in contexts dealing
+// with fully resolved/valid AST.
+const std::string& unresolved_type_ref_info::unresolved_name(
+    const t_type_ref& ref) {
+  return ref.unresolved_name_;
+}
+
+} // namespace detail
 
 } // namespace apache::thrift::compiler

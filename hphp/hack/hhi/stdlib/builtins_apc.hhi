@@ -56,7 +56,7 @@ function apc_cache_info(
   bool $limited = false,
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_clear_cache(string $cache_id = "")[globals]: HH\FIXME\MISSING_RETURN_TYPE {}
+function apc_clear_cache(string $cache_id = "")[globals]: bool {}
 <<__PHPStdLib>>
 function apc_sma_info(bool $limited = false)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
@@ -76,7 +76,7 @@ function apc_cas(
   string $key,
   int $old_cas,
   int $new_cas,
-)[globals]: HH\FIXME\MISSING_RETURN_TYPE {}
+)[globals]: bool {}
 <<__PHPStdLib>>
 function apc_exists(
   HH\FIXME\MISSING_PARAM_TYPE $key,

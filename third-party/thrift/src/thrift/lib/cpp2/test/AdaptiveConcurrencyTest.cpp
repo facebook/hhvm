@@ -24,8 +24,6 @@
 using namespace std::literals::chrono_literals;
 using namespace apache::thrift;
 
-using Clock = std::chrono::steady_clock;
-
 namespace apache::thrift {
 
 constexpr int defaultRequestCount = 200;
@@ -69,13 +67,13 @@ class AdaptiveConcurrencyBase : public testing::Test {
   }
 
   void setConfig(
-      size_t minConcurrency,
+      size_t minConcurrencyLimit,
       double jitter = 0.0,
       std::chrono::milliseconds targetRttFixed = {},
       std::chrono::milliseconds minTargetRtt = {},
       double targetRttPercentile = 0.95) {
     oConfig.setValue(makeConfig(
-        minConcurrency,
+        minConcurrencyLimit,
         jitter,
         targetRttFixed,
         minTargetRtt,
@@ -84,13 +82,13 @@ class AdaptiveConcurrencyBase : public testing::Test {
   }
 
   static auto makeConfig(
-      size_t minConcurrency,
+      size_t minConcurrencyLimit,
       double jitter = 0.0,
       std::chrono::milliseconds targetRttFixed = {},
       std::chrono::milliseconds minTargetRtt = {},
       double targetRttPercentile = 0.95) {
     AdaptiveConcurrencyController::Config config;
-    config.minConcurrency = minConcurrency;
+    config.minConcurrency = minConcurrencyLimit;
     config.recalcPeriodJitter = jitter;
     config.targetRttFixed = targetRttFixed;
     config.minTargetRtt = minTargetRtt;

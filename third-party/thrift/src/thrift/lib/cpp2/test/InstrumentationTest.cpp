@@ -1221,8 +1221,8 @@ class TimestampsTest
   struct Observer : public server::TServerObserver {
     explicit Observer(folly::Function<void(const CallTimestamps&)>&& f)
         : server::TServerObserver(1), f_(std::move(f)) {}
-    void callCompleted(const CallTimestamps& timestamps) override {
-      f_(timestamps);
+    void callCompleted(const CallTimestamps& callTimestamps) override {
+      f_(callTimestamps);
     }
     folly::Function<void(const CallTimestamps&)> f_;
   };

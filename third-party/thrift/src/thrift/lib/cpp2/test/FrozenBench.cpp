@@ -61,8 +61,8 @@ BENCHMARK(Freeze, iters) {
       buffer.resize(bytes);
     }
     byte* p = buffer.data();
-    auto frozen = freeze(team, p);
-    (void)frozen;
+    auto frozenResult = freeze(team, p);
+    (void)frozenResult;
   }
 }
 
@@ -70,8 +70,8 @@ BENCHMARK_RELATIVE(FreezePreallocated, iters) {
   vector<byte> buffer(102400);
   while (iters--) {
     byte* p = buffer.data();
-    auto frozen = freeze(team, p);
-    (void)frozen;
+    auto frozenResult = freeze(team, p);
+    (void)frozenResult;
     assert(p <= &buffer.back());
   }
 }

@@ -13,17 +13,17 @@ function ob_start(
   HH\FIXME\MISSING_PARAM_TYPE $output_callback = null,
   int $chunk_size = 0,
   int $erase = PHP_OUTPUT_HANDLER_STDFLAGS,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+): bool {}
 <<__PHPStdLib>>
-function ob_clean(): HH\FIXME\MISSING_RETURN_TYPE {}
+function ob_clean(): void {}
 <<__PHPStdLib>>
-function ob_flush(): HH\FIXME\MISSING_RETURN_TYPE {}
+function ob_flush(): bool {}
 <<__PHPStdLib>>
-function ob_end_clean(): HH\FIXME\MISSING_RETURN_TYPE {}
+function ob_end_clean(): bool {}
 <<__PHPStdLib>>
-function ob_end_flush(): HH\FIXME\MISSING_RETURN_TYPE {}
+function ob_end_flush(): bool {}
 <<__PHPStdLib>>
-function flush(): HH\FIXME\MISSING_RETURN_TYPE {}
+function flush(): void {}
 <<__PHPStdLib>>
 function ob_get_clean(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
@@ -31,9 +31,9 @@ function ob_get_contents()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function ob_get_flush(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ob_get_length()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ob_get_length()[read_globals]: int {}
 <<__PHPStdLib>>
-function ob_get_level()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
+function ob_get_level()[read_globals]: int {}
 <<__PHPStdLib>>
 function ob_get_status(
   bool $full_status = false,
@@ -44,7 +44,7 @@ function ob_gzhandler(
   HH\FIXME\MISSING_PARAM_TYPE $mode,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ob_implicit_flush(bool $flag = true): HH\FIXME\MISSING_RETURN_TYPE {}
+function ob_implicit_flush(bool $flag = true): void {}
 <<__PHPStdLib>>
 function ob_list_handlers()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 
@@ -52,19 +52,19 @@ function ob_list_handlers()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 function hphp_crash_log(
   string $name,
   string $value,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): void;
 <<__PHPStdLib>>
-function hphp_stats(string $name, int $value): HH\FIXME\MISSING_RETURN_TYPE;
+function hphp_stats(string $name, int $value): void;
 <<__PHPStdLib>>
 function hphp_get_stats(
   string $name,
-)[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
+)[read_globals]: int;
 <<__PHPStdLib>>
 function hphp_get_status()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function hphp_get_iostatus()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function hphp_set_iostatus_address(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+function hphp_set_iostatus_address(string $name): void;
 <<__PHPStdLib>>
 function hphp_get_timers(
   bool $get_as_float = true,
@@ -75,16 +75,16 @@ function hphp_output_global_state(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hphp_instruction_counter(
-)[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
+)[read_globals]: int {}
 <<__PHPStdLib>>
 function hphp_get_hardware_counters(
 )[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function hphp_set_hardware_events(
-  HH\FIXME\MISSING_PARAM_TYPE $events = null,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+  ?string $events = null,
+): bool {}
 <<__PHPStdLib>>
-function hphp_clear_hardware_events(): HH\FIXME\MISSING_RETURN_TYPE {}
+function hphp_clear_hardware_events(): void {}
 
 const int PHP_OUTPUT_HANDLER_START;
 const int PHP_OUTPUT_HANDLER_WRITE;

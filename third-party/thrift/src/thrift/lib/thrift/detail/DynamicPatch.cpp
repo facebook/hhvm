@@ -1252,7 +1252,7 @@ DynamicListPatch DiffVisitorBase::diffList(
   }
 
   for (size_t i = src.size(); i < dst.size(); ++i) {
-    patch.push_back(dst[i]);
+    patch.append(dst[i]);
   }
   return patch;
 }

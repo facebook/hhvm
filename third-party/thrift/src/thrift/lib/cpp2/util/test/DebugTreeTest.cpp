@@ -376,7 +376,7 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
 
 TEST(DebugTreeTest, DynamicContainerPatch) {
   MyStructPatch patch;
-  patch.patchIfSet<ident::optListVal>().push_back(42);
+  patch.patchIfSet<ident::optListVal>().append(42);
   patch.patchIfSet<ident::optSetVal>().insert("SetElem");
   patch.patchIfSet<ident::optMapVal>().patchByKey("Key").append("Suffix");
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
@@ -431,7 +431,7 @@ TEST(DebugTreeTest, DynamicComplexContainerPatch) {
   d.field() = 42;
 
   StructWithTypedefPatch patch;
-  patch.patch<ident::list_field>().push_back(d);
+  patch.patch<ident::list_field>().append(d);
   patch.patch<ident::set_field>().insert(d);
   patch.patch<ident::map_field>().patchByKey(42).patch<ident::field>() += 10;
 

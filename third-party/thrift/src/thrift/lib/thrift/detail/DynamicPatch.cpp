@@ -1281,7 +1281,7 @@ DynamicSetPatch DiffVisitorBase::diffSet(
   // add keys
   for (const auto& i : dst) {
     if (!src.contains(i)) {
-      patch.insert(i);
+      patch.add(i);
     }
   }
   if (dst.size() < patch.patchedElementCount(badge)) {

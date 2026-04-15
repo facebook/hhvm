@@ -377,7 +377,7 @@ TEST(DebugTreeTest, DynamicNestedStructPatch) {
 TEST(DebugTreeTest, DynamicContainerPatch) {
   MyStructPatch patch;
   patch.patchIfSet<ident::optListVal>().append(42);
-  patch.patchIfSet<ident::optSetVal>().insert("SetElem");
+  patch.patchIfSet<ident::optSetVal>().add("SetElem");
   patch.patchIfSet<ident::optMapVal>().patchByKey("Key").append("Suffix");
   auto dynPatch = protocol::DynamicPatch::fromObject(patch.toObject());
   // TODO(ytj): We knew it's a StructPatch, not UnknownPatch (from the Schema).
@@ -432,7 +432,7 @@ TEST(DebugTreeTest, DynamicComplexContainerPatch) {
 
   StructWithTypedefPatch patch;
   patch.patch<ident::list_field>().append(d);
-  patch.patch<ident::set_field>().insert(d);
+  patch.patch<ident::set_field>().add(d);
   patch.patch<ident::map_field>().patchByKey(42).patch<ident::field>() += 10;
 
   // FIXME: Map patch should print field name `field` instead of `FieldId(1)`.

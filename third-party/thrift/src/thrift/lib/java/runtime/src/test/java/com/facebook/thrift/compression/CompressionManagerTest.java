@@ -168,6 +168,23 @@ class CompressionManagerTest {
   }
 
   @Test
+  void decompressFromTransformLz4Roundtrip() {
+    byte[] original = "LZ4 roundtrip via CompressionManager".getBytes(StandardCharsets.UTF_8);
+    ByteBuf input = Unpooled.wrappedBuffer(original);
+
+    ByteBuf compressed = CompressionManager.compress(CompressionAlgorithm.LZ4, allocator, input);
+    ByteBuf decompressed =
+        CompressionManager.decompressFromTransform(
+            TTransform.LZ4.getValue(), allocator, compressed);
+
+    byte[] result = new byte[decompressed.readableBytes()];
+    decompressed.readBytes(result);
+    decompressed.release();
+
+    assertThat(result).isEqualTo(original);
+  }
+
+  @Test
   void decompressFromTransformNoneReturnsDataUnchanged() {
     ByteBuf data = Unpooled.wrappedBuffer("pass through".getBytes(StandardCharsets.UTF_8));
     ByteBuf result =

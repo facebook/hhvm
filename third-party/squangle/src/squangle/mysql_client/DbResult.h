@@ -358,6 +358,15 @@ class QueryResult {
     recv_gtid_ = recv_gtid;
   }
 
+  // Query did not use an index
+  bool noIndexUsed() const {
+    return no_index_used_;
+  }
+
+  void setNoIndexUsed(bool no_index_used) {
+    no_index_used_ = no_index_used;
+  }
+
   // Query was slow
   bool wasSlow() const {
     return was_slow_;
@@ -482,6 +491,7 @@ class QueryResult {
   std::shared_ptr<RowFields> row_fields_info_;
   int query_num_;
   bool partial_;
+  bool no_index_used_ = false;
   bool was_slow_ = false;
 
   uint64_t num_rows_;

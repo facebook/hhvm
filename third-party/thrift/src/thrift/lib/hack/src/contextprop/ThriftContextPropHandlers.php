@@ -101,6 +101,34 @@ final class ThriftContextPropHandlers {
           causes_the('MAPI Request priority handler')->to('not be set'),
         );
     }
+    // MMA Login Thrift service call logging
+    try {
+      if (
+        (
+          $context_prop_state->getRootProductId() ==
+            MCPOriginIDs::MMALOGINBUSINESSTOOLS ||
+          MCPContext::getGlobalOriginIdDirectly__UNSAFE() ==
+            MCPOriginIDs::MMALOGINBUSINESSTOOLS
+        ) &&
+        JustKnobs::evalString(
+          'business_user_platform/mma_login:thrift_logging_sample_rate',
+          $context_prop_state->getRequestId(),
+        )
+      ) {
+        $thrift_client_handler->addHandler(
+          'mma_thrift_service_call_logger',
+          new MMAThriftServiceCallLogger(
+            $instrumentation_params['service_name'] ?? null,
+          ),
+        );
+      }
+    } catch (Exception $e) {
+      ope(
+        $e,
+        causes_the('MMA Thrift logging handler')
+          ->to('not be registered for MMA login traffic'),
+      );
+    }
     if (JustKnobs::evalFast("servicerouter/thrift_context_prop", "enabled")) {
       $client_handler = new TContextPropV2ClientHandler(
         $headers_transport,

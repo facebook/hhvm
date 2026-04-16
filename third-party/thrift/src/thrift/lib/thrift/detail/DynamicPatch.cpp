@@ -1387,7 +1387,7 @@ void DiffVisitorBase::diffElement(
   }
 
   if (!inSrc && inDst) {
-    patch.insert_or_assign(key, dst.at(key));
+    patch.put(key, dst.at(key));
     return;
   }
 

@@ -545,6 +545,7 @@ let func_defn source_text fd decl_id fa =
         declaration = FunctionDeclaration.Id decl_id;
         signature;
         is_async = is_async elem.f_fun_kind;
+        is_closure = false;
         attributes = Build_fact.attributes source_text elem.f_user_attributes;
         type_params;
         readonly_ret;
@@ -567,6 +568,7 @@ let closure_defn source_text elem decl_id fa =
         declaration = FunctionDeclaration.Id decl_id;
         signature;
         is_async = is_async elem.f_fun_kind;
+        is_closure = true;
         attributes = Build_fact.attributes source_text elem.f_user_attributes;
         type_params = [];
         readonly_ret;
@@ -782,12 +784,7 @@ let container_decl decl_pred name fa =
 let file_package ~path package_ has_package_override fa =
   let json =
     FilePackage.(
-      {
-        file = File.Key path;
-        package_;
-        hasPackageOverride = has_package_override;
-      }
-      |> to_json_key)
+      { file = File.Key path; package_; has_package_override } |> to_json_key)
   in
   Fact_acc.add_fact Predicate.(Hack FilePackage) json fa
 

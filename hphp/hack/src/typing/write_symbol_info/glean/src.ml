@@ -146,6 +146,41 @@ end = struct
 
 end
 
+and FileContent: sig
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = File.t
+  [@@deriving ord]
+  and value = string
+  [@@deriving ord]
+
+  val to_json: t -> json
+
+  val to_json_key: key -> json
+  val to_json_value: value -> json
+
+end = struct
+  type t =
+    | Id of Fact_id.t
+    | Key of key
+  [@@deriving ord]
+
+  and key = File.t
+  [@@deriving ord]
+  and value = string
+  [@@deriving ord]
+
+  let rec to_json = function
+    | Id f -> Util.id f
+    | Key t -> Util.key (to_json_key t)
+
+  and to_json_key x = File.to_json x
+  and to_json_value x = JSON_String x
+end
+
 and ByteSpanContains: sig
   type t =
     | Id of Fact_id.t

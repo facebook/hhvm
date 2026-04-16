@@ -219,6 +219,29 @@ class FetchOperationImpl : virtual public OperationBase {
       std::string rowData,
       Millis elapsed) const;
 
+  // Helper: Render the query with any prefix callback and return
+  // success/failure. Both MySQL and Thrift impls call this at the start of
+  // specializedRun. Returns true on success, false if query parsing failed
+  // (error already set).
+  [[nodiscard]] bool renderQuery();
+
+  // Whether checksums are enabled for this operation.
+  // Thrift overrides this to return false until checksum support is complete.
+  virtual bool usingChecksums() const;
+
+  // Helper: Set up query attributes and checksum on the connection.
+  // Returns 0 on success, or error code on failure (error already set).
+  // The InternalConnection must be obtained from getInternalConnection() or
+  // protocol-specific connection class.
+  [[nodiscard]] int setupQueryAttributes(InternalConnection& internalConn);
+
+  // Helper: Log query completion (success or failure) and notify callbacks.
+  // Called from specializedCompleteOperation in both MySQL and Thrift impls.
+  void logQueryCompletion(
+      OperationResult result,
+      Duration maxThreadBlockTime = Duration(),
+      Duration totalThreadBlockTime = Duration());
+
   std::shared_ptr<folly::fbstring> rendered_query_;
 
   // Current query data

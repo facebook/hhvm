@@ -185,6 +185,87 @@ AttributeMap FetchOperationImpl::readResponseAttributes() {
   return conn().getResponseAttributes();
 }
 
+bool FetchOperationImpl::renderQuery() {
+  try {
+    folly::fbstring prefix;
+    if (callbacks_.render_prefix_callback_) {
+      prefix = callbacks_.render_prefix_callback_();
+    }
+    rendered_query_ = queries().renderQuery(&getInternalConnection(), prefix);
+    return true;
+  } catch (std::invalid_argument& e) {
+    getOp().setAsyncClientError(
+        static_cast<uint16_t>(SquangleErrno::SQ_INVALID_API_USAGE),
+        std::string("Unable to parse Query: ") + e.what());
+    return false;
+  }
+}
+
+bool FetchOperationImpl::usingChecksums() const {
+  return use_checksum_ || conn().getConnectionOptions().getUseChecksum();
+}
+
+int FetchOperationImpl::setupQueryAttributes(InternalConnection& internalConn) {
+  if (auto ret = internalConn.setQueryAttributes(getAttributes())) {
+    getOp().setAsyncClientError(ret, "Failed to set query attributes");
+    return ret;
+  }
+
+  if (usingChecksums()) {
+    static const std::string kQueryChecksumKey = "checksum";
+    if (auto ret = internalConn.setQueryAttribute(kQueryChecksumKey, "ON")) {
+      getOp().setAsyncClientError(ret, "Failed to set checksum = ON");
+      return ret;
+    }
+  }
+
+  return 0;
+}
+
+void FetchOperationImpl::logQueryCompletion(
+    OperationResult result,
+    Duration maxThreadBlockTime,
+    Duration totalThreadBlockTime) {
+  auto& connection = conn();
+
+  db::QueryLoggingData logging_data(
+      getOp().getOperationType(),
+      opElapsed(),
+      getTimeout(),
+      num_queries_executed_,
+      rendered_query_,
+      std::move(logging_funcs_),
+      rows_received_,
+      total_result_size_,
+      connection.serverInfo(),
+      no_index_used_,
+      usingChecksums(),
+      getAttributes(),
+      std::move(current_resp_attrs_),
+      maxThreadBlockTime,
+      totalThreadBlockTime,
+      was_slow_,
+      current_warnings_count_,
+      current_rows_matched_,
+      current_affected_rows_);
+
+  if (result == OperationResult::Succeeded) {
+    connection.setLastActivityTime(Clock::now());
+    client().logQuerySuccess(logging_data, connection);
+  } else {
+    auto reason = operationResultToFailureReason(result);
+    client().logQueryFailure(
+        logging_data, reason, mysql_errno(), mysql_error(), connection);
+  }
+
+  if (result != OperationResult::Succeeded) {
+    getOp().notifyFailure(result);
+  }
+
+  connection.notify();
+  getOp().notifyOperationCompleted(result);
+}
+
 FetchOperation& FetchOperationImpl::getOp() const {
   DCHECK(op_);
   return *(boost::polymorphic_downcast<FetchOperation*>(op_));

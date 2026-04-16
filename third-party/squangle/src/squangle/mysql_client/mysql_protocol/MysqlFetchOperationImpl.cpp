@@ -17,10 +17,6 @@
 #include "squangle/mysql_client/mysql_protocol/MysqlFetchOperationImpl.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlResult.h"
 
-namespace {
-const std::string kQueryChecksumKey = "checksum";
-}
-
 namespace facebook::common::mysql_client::mysql_protocol {
 
 bool MysqlFetchOperationImpl::isStreamAccessAllowed() const {
@@ -39,39 +35,23 @@ void MysqlFetchOperationImpl::specializedRun() {
 }
 
 void MysqlFetchOperationImpl::specializedRunImpl() {
-  try {
-    // Initialize EventHandler/AsyncTimeout now that we're in the event base
-    // thread
-    initializeFromConnection();
+  // Initialize EventHandler and AsyncTimeout now that we're in the EventBase
+  // thread. This must happen before any operations that use them.
+  initializeFromConnection();
 
-    folly::fbstring prefix;
-    if (callbacks_.render_prefix_callback_) {
-      prefix = callbacks_.render_prefix_callback_();
-    }
-    rendered_query_ = queries().renderQuery(&getInternalConnection(), prefix);
-
-    auto* mysql_conn = getMysqlConnection();
-    if (auto ret = mysql_conn->setQueryAttributes(getAttributes())) {
-      setAsyncClientError(ret, "Failed to set query attributes");
-      completeOperation(OperationResult::Failed);
-      return;
-    }
-
-    if ((use_checksum_ || conn().getConnectionOptions().getUseChecksum())) {
-      if (auto ret = mysql_conn->setQueryAttribute(kQueryChecksumKey, "ON")) {
-        setAsyncClientError(ret, "Failed to set checksum = ON");
-        completeOperation(OperationResult::Failed);
-        return;
-      }
-    }
-
-    actionable();
-  } catch (std::invalid_argument& e) {
-    setAsyncClientError(
-        static_cast<uint16_t>(SquangleErrno::SQ_INVALID_API_USAGE),
-        std::string("Unable to parse Query: ") + e.what());
+  // Render query and set up attributes using shared helpers
+  if (!renderQuery()) {
     completeOperation(OperationResult::Failed);
+    return;
   }
+
+  auto* mysql_conn = getMysqlConnection();
+  if (setupQueryAttributes(*mysql_conn)) {
+    completeOperation(OperationResult::Failed);
+    return;
+  }
+
+  actionable();
 }
 
 namespace {
@@ -397,50 +377,9 @@ void MysqlFetchOperationImpl::specializedTimeoutTriggered() {
 }
 
 void MysqlFetchOperationImpl::specializedCompleteOperation() {
-  FetchOperation& op = getOp();
-
-  auto& connection = conn();
-
-  // Get all logging information
-  db::QueryLoggingData logging_data(
-      getOp().getOperationType(),
-      opElapsed(),
-      getTimeout(),
-      num_queries_executed_,
-      rendered_query_,
-      std::move(logging_funcs_),
-      rows_received_,
-      total_result_size_,
-      connection.serverInfo(),
-      no_index_used_,
-      use_checksum_ || connection.getConnectionOptions().getUseChecksum(),
-      getAttributes(),
-      std::move(current_resp_attrs_),
-      getMaxThreadBlockTime(),
-      getTotalThreadBlockTime(),
-      was_slow_,
-      current_warnings_count_,
-      current_rows_matched_,
-      current_affected_rows_);
-
-  // Stats for query
-  if (result() == OperationResult::Succeeded) {
-    // set last successful query time to MysqlConnectionHolder
-    connection.setLastActivityTime(Clock::now());
-    client().logQuerySuccess(logging_data, connection);
-  } else {
-    auto reason = operationResultToFailureReason(result());
-    client().logQueryFailure(
-        logging_data, reason, mysql_errno(), mysql_error(), connection);
-  }
-
-  if (result() != OperationResult::Succeeded) {
-    op.notifyFailure(result());
-  }
-  // This frees the `Operation::wait()` call. We need to free it here because
-  // callback can stealConnection and we can't notify anymore.
-  connection.notify();
-  op.notifyOperationCompleted(result());
+  // Use the shared helper for logging and notification
+  logQueryCompletion(
+      result(), getMaxThreadBlockTime(), getTotalThreadBlockTime());
 }
 
 void MysqlFetchOperationImpl::killRunningQuery() {

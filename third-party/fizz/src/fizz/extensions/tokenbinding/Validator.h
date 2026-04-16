@@ -40,15 +40,22 @@ class Validator {
       TokenBinding tokenBinding,
       const Buf& ekm);
 
-  static void verify(
+  static Status verify(
+      Error& err,
       const TokenBindingKeyParameters& keyParams,
       const Buf& key,
       const Buf& signature,
       const Buf& message);
 
-  static folly::ssl::EcdsaSigUniquePtr constructECDSASig(const Buf& signature);
+  static Status constructECDSASig(
+      folly::ssl::EcdsaSigUniquePtr& ret,
+      Error& err,
+      const Buf& signature);
 
-  static folly::ssl::EcKeyUniquePtr constructEcKeyFromBuf(const Buf& key);
+  static Status constructEcKeyFromBuf(
+      folly::ssl::EcKeyUniquePtr& ret,
+      Error& err,
+      const Buf& key);
 };
 } // namespace extensions
 } // namespace fizz

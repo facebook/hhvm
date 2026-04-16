@@ -18,20 +18,22 @@ using namespace folly::ssl;
 namespace fizz {
 namespace extensions {
 
-TokenBinding TokenBindingConstructor::createTokenBinding(
+Status TokenBindingConstructor::createTokenBinding(
+    TokenBinding& ret,
+    Error& err,
     EVP_PKEY& keyPair,
     const Buf& ekm,
     TokenBindingKeyParameters negotiatedParameters,
     TokenBindingType type) {
   if (negotiatedParameters != TokenBindingKeyParameters::ecdsap256) {
-    throw std::runtime_error(
+    return err.error(
         folly::to<std::string>(
             "key params not implemented: ", negotiatedParameters));
   }
 
   EcKeyUniquePtr ecKey(EVP_PKEY_get1_EC_KEY(&keyPair));
   if (!ecKey) {
-    throw std::runtime_error("Unable to retrieve EC Key");
+    return err.error("Unable to retrieve EC Key");
   }
 
   TokenBinding binding;
@@ -40,16 +42,19 @@ TokenBinding TokenBindingConstructor::createTokenBinding(
 
   auto message =
       TokenBindingUtils::constructMessage(type, negotiatedParameters, ekm);
-  binding.signature = signWithEcKey(ecKey, message);
+  FIZZ_RETURN_ON_ERROR(signWithEcKey(binding.signature, err, ecKey, message));
 
   TokenBindingID id;
   id.key_parameters = negotiatedParameters;
-  id.key = encodeEcKey(ecKey);
+  FIZZ_RETURN_ON_ERROR(encodeEcKey(id.key, err, ecKey));
   binding.tokenbindingid = std::move(id);
-  return binding;
+  ret = std::move(binding);
+  return Status::Success;
 }
 
-Buf TokenBindingConstructor::signWithEcKey(
+Status TokenBindingConstructor::signWithEcKey(
+    Buf& ret,
+    Error& err,
     const EcKeyUniquePtr& key,
     const Buf& message) {
   std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
@@ -61,34 +66,38 @@ Buf TokenBindingConstructor::signWithEcKey(
   EcdsaSigUniquePtr ecSignature(
       ECDSA_do_sign(hashedMessage.data(), hashedMessage.size(), key.get()));
   if (!ecSignature.get()) {
-    throw std::runtime_error("Unable to sign message with EC Key");
+    return err.error("Unable to sign message with EC Key");
   }
 
-  return encodeEcdsaSignature(ecSignature);
+  return encodeEcdsaSignature(ret, err, ecSignature);
 }
 
-Buf TokenBindingConstructor::encodeEcdsaSignature(
+Status TokenBindingConstructor::encodeEcdsaSignature(
+    Buf& ret,
+    Error& err,
     const EcdsaSigUniquePtr& signature) {
   BIGNUM* r;
   BIGNUM* s;
   ECDSA_SIG_get0(signature.get(), (const BIGNUM**)&r, (const BIGNUM**)&s);
   if (!r || !s) {
-    throw std::runtime_error("Unable to retrieve Bignum from ECDSA sig");
+    return err.error("Unable to retrieve Bignum from ECDSA sig");
   }
 
   Buf encodedSignature =
       folly::IOBuf::create(TokenBindingUtils::kP256EcKeySize);
-  addBignumToSignature(encodedSignature, r);
-  addBignumToSignature(encodedSignature, s);
-  return encodedSignature;
+  FIZZ_RETURN_ON_ERROR(addBignumToSignature(err, encodedSignature, r));
+  FIZZ_RETURN_ON_ERROR(addBignumToSignature(err, encodedSignature, s));
+  ret = std::move(encodedSignature);
+  return Status::Success;
 }
 
-void TokenBindingConstructor::addBignumToSignature(
+Status TokenBindingConstructor::addBignumToSignature(
+    Error& err,
     const Buf& signature,
     BIGNUM* bigNum) {
   auto length = BN_num_bytes(bigNum);
   if (length > TokenBindingUtils::kP256EcKeySize / 2) {
-    throw std::runtime_error("ECDSA sig bignum is of incorrect size");
+    return err.error("ECDSA sig bignum is of incorrect size");
   }
   // if a bignum is less than 32 bytes long, it has a most significant byte
   // of 0, so we have to pad the buffer
@@ -99,18 +108,23 @@ void TokenBindingConstructor::addBignumToSignature(
   auto lenActual = BN_bn2bin(bigNum, signature->writableTail());
   signature->append(lenActual);
   if (lenActual != length) {
-    throw std::runtime_error("bn2bin returned unexpected value");
+    return err.error("bn2bin returned unexpected value");
   }
+  return Status::Success;
 }
 
-Buf TokenBindingConstructor::encodeEcKey(const EcKeyUniquePtr& ecKey) {
+Status TokenBindingConstructor::encodeEcKey(
+    Buf& ret,
+    Error& err,
+    const EcKeyUniquePtr& ecKey) {
   auto ecKeyBuf = openssl::detail::encodeECPublicKey(ecKey);
   if (ecKeyBuf->isChained() ||
       ecKeyBuf->length() != TokenBindingUtils::kP256EcKeySize + 1) {
-    throw std::runtime_error("Incorrect encoded EC Key Length");
+    return err.error("Incorrect encoded EC Key Length");
   }
   ecKeyBuf->writableData()[0] = TokenBindingUtils::kP256EcKeySize;
-  return ecKeyBuf;
+  ret = std::move(ecKeyBuf);
+  return Status::Success;
 }
 } // namespace extensions
 } // namespace fizz

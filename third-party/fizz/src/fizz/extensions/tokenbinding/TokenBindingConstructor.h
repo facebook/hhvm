@@ -16,23 +16,31 @@ namespace extensions {
 
 class TokenBindingConstructor {
  public:
-  static TokenBinding createTokenBinding(
+  static Status createTokenBinding(
+      TokenBinding& ret,
+      Error& err,
       EVP_PKEY& keyPair,
       const Buf& ekm,
       TokenBindingKeyParameters negotiatedParameters,
       TokenBindingType type);
 
  private:
-  static Buf encodeEcKey(const folly::ssl::EcKeyUniquePtr& ecKey);
+  static Status
+  encodeEcKey(Buf& ret, Error& err, const folly::ssl::EcKeyUniquePtr& ecKey);
 
-  static Buf encodeEcdsaSignature(
+  static Status encodeEcdsaSignature(
+      Buf& ret,
+      Error& err,
       const folly::ssl::EcdsaSigUniquePtr& signature);
 
-  static Buf signWithEcKey(
+  static Status signWithEcKey(
+      Buf& ret,
+      Error& err,
       const folly::ssl::EcKeyUniquePtr& key,
       const Buf& message);
 
-  static void addBignumToSignature(const Buf& signature, BIGNUM* bigNum);
+  static Status
+  addBignumToSignature(Error& err, const Buf& signature, BIGNUM* bigNum);
 };
 } // namespace extensions
 } // namespace fizz

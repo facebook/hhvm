@@ -51,11 +51,17 @@ class TokenBindingConstructorTest : public Test {
 
 TEST_F(TokenBindingConstructorTest, TestSignAndValidate) {
   auto ekmBuf = getBuf(ekm);
-  auto binding = TokenBindingConstructor::createTokenBinding(
-      *key_.get(),
-      ekmBuf,
-      TokenBindingKeyParameters::ecdsap256,
-      TokenBindingType::provided_token_binding);
+  TokenBinding binding;
+  Error err;
+  EXPECT_EQ(
+      TokenBindingConstructor::createTokenBinding(
+          binding,
+          err,
+          *key_.get(),
+          ekmBuf,
+          TokenBindingKeyParameters::ecdsap256,
+          TokenBindingType::provided_token_binding),
+      Status::Success);
   EXPECT_TRUE(
       Validator::validateTokenBinding(
           std::move(binding), ekmBuf, TokenBindingKeyParameters::ecdsap256)
@@ -65,12 +71,18 @@ TEST_F(TokenBindingConstructorTest, TestSignAndValidate) {
 TEST_F(TokenBindingConstructorTest, TestBadEcKey) {
   auto badKey = EvpPkeyUniquePtr(EVP_PKEY_new());
   auto ekmBuf = getBuf(ekm);
+  TokenBinding binding;
+  Error err;
   EXPECT_THROW(
-      TokenBindingConstructor::createTokenBinding(
-          *badKey.get(),
-          ekmBuf,
-          TokenBindingKeyParameters::ecdsap256,
-          TokenBindingType::provided_token_binding),
+      FIZZ_THROW_ON_ERROR(
+          TokenBindingConstructor::createTokenBinding(
+              binding,
+              err,
+              *badKey.get(),
+              ekmBuf,
+              TokenBindingKeyParameters::ecdsap256,
+              TokenBindingType::provided_token_binding),
+          err),
       std::runtime_error);
 }
 } // namespace test

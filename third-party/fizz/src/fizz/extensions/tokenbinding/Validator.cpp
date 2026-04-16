@@ -58,11 +58,16 @@ Optional<TokenBindingID> Validator::constructAndVerifyMessage(
         tokenBinding.tokenbinding_type,
         tokenBinding.tokenbindingid.key_parameters,
         ekm);
-    verify(
-        tokenBinding.tokenbindingid.key_parameters,
-        tokenBinding.tokenbindingid.key,
-        tokenBinding.signature,
-        message);
+    Error err;
+    if (verify(
+            err,
+            tokenBinding.tokenbindingid.key_parameters,
+            tokenBinding.tokenbindingid.key,
+            tokenBinding.signature,
+            message) == Status::Fail) {
+      FIZZ_VLOG(1) << "Token Binding Verification Failed: " << err.msg();
+      return folly::none;
+    }
     return std::move(tokenBinding.tokenbindingid);
   } catch (const std::exception& e) {
     FIZZ_VLOG(1) << "Token Binding Verification Failed: " << e.what();
@@ -70,22 +75,23 @@ Optional<TokenBindingID> Validator::constructAndVerifyMessage(
   }
 }
 
-void Validator::verify(
+Status Validator::verify(
+    Error& err,
     const TokenBindingKeyParameters& keyParams,
     const Buf& key,
     const Buf& signature,
     const Buf& message) {
   if (keyParams == TokenBindingKeyParameters::ecdsap256) {
-    auto pkey = constructEcKeyFromBuf(key);
-    auto ecdsa = constructECDSASig(signature);
+    EcKeyUniquePtr pkey;
+    FIZZ_RETURN_ON_ERROR(constructEcKeyFromBuf(pkey, err, key));
+    EcdsaSigUniquePtr ecdsa;
+    FIZZ_RETURN_ON_ERROR(constructECDSASig(ecdsa, err, signature));
 
     std::array<uint8_t, fizz::Sha256::HashLen> hashedMessage;
     const HasherFactoryWithMetadata* hasherFactory = nullptr;
-    Error err;
-    FIZZ_THROW_ON_ERROR(
+    FIZZ_RETURN_ON_ERROR(
         fizz::DefaultFactory().makeHasherFactory(
-            hasherFactory, err, fizz::HashFunction::Sha256),
-        err);
+            hasherFactory, err, fizz::HashFunction::Sha256));
     fizz::hash(
         hasherFactory,
         *message,
@@ -95,7 +101,7 @@ void Validator::verify(
             hashedMessage.size(),
             ecdsa.get(),
             pkey.get()) != 1) {
-      throw std::runtime_error(
+      return err.error(
           folly::to<std::string>(
               "Verification failed: ", openssl::detail::getOpenSSLError()));
     }
@@ -106,14 +112,14 @@ void Validator::verify(
 
     // Verify that the key size matches the size of an Ed25519 key
     if (keyLen != TokenBindingUtils::kEd25519KeySize) {
-      throw std::runtime_error(
+      return err.error(
           folly::to<std::string>("Incorrect key size for Ed25519: ", keyLen));
     }
 
     // Instantiate a EvpPkeyUniquePtr from the rest of the bytes
     auto keyRange = keyReader.peekBytes();
     if (keyRange.size() != keyLen) {
-      throw std::runtime_error(
+      return err.error(
           folly::to<std::string>(
               "Key string of length ",
               keyRange.size(),
@@ -128,21 +134,25 @@ void Validator::verify(
       fizz::openssl::detail::edVerify(
           message->coalesce(), signature->coalesce(), pkey);
     } catch (const std::exception&) {
-      throw std::runtime_error(
+      return err.error(
           folly::to<std::string>(
               "Verification failed: ", openssl::detail::getOpenSSLError()));
     }
   } else {
     // rsa_pss and rsa_pkcs
-    throw std::runtime_error(
+    return err.error(
         folly::to<std::string>("key params not implemented: ", keyParams));
   }
+  return Status::Success;
 }
 
-EcdsaSigUniquePtr Validator::constructECDSASig(const Buf& signature) {
+Status Validator::constructECDSASig(
+    EcdsaSigUniquePtr& ret,
+    Error& err,
+    const Buf& signature) {
   EcdsaSigUniquePtr ecdsaSignature(ECDSA_SIG_new());
   if (!ecdsaSignature) {
-    throw std::runtime_error("Unable to allocate ecdsaSignature");
+    return err.error("Unable to allocate ecdsaSignature");
   }
   Cursor signatureReader(signature.get());
   Buf rBytes = folly::IOBuf::create(TokenBindingUtils::kP256EcKeySize / 2);
@@ -157,18 +167,22 @@ EcdsaSigUniquePtr Validator::constructECDSASig(const Buf& signature) {
           rRange.data(), TokenBindingUtils::kP256EcKeySize / 2, r.get()) ||
       !BN_bin2bn(
           sRange.data(), TokenBindingUtils::kP256EcKeySize / 2, s.get())) {
-    throw std::runtime_error("unable to create bnum");
+    return err.error("unable to create bnum");
   }
 
   // ecdsaSignature will clean up Bignum ptrs,
   // so unique ptr needs to release them to avoid double delete
   if (ECDSA_SIG_set0(ecdsaSignature.get(), r.release(), s.release()) != 1) {
-    throw std::runtime_error("unable to set bnum on ecdsa_sig");
+    return err.error("unable to set bnum on ecdsa_sig");
   }
-  return ecdsaSignature;
+  ret = std::move(ecdsaSignature);
+  return Status::Success;
 }
 
-EcKeyUniquePtr Validator::constructEcKeyFromBuf(const Buf& key) {
+Status Validator::constructEcKeyFromBuf(
+    EcKeyUniquePtr& ret,
+    Error& err,
+    const Buf& key) {
   // EC_point_oct2point expects the format to match the one described here:
   // https://tlswg.github.io/tls13-spec/draft-ietf-tls-tls13.html#ecdhe-param
   Buf combinedKey = folly::IOBuf::create(TokenBindingUtils::kP256EcKeySize + 1);
@@ -182,8 +196,7 @@ EcKeyUniquePtr Validator::constructEcKeyFromBuf(const Buf& key) {
   Cursor keyReader(key.get());
   auto keyLen = keyReader.readBE<uint8_t>();
   if (keyLen != TokenBindingUtils::kP256EcKeySize) {
-    throw std::runtime_error(
-        folly::to<std::string>("incorrect key size: ", keyLen));
+    return err.error(folly::to<std::string>("incorrect key size: ", keyLen));
   }
   keyAppender.push(keyReader, keyLen);
   auto combinedRange = combinedKey->coalesce();
@@ -192,9 +205,10 @@ EcKeyUniquePtr Validator::constructEcKeyFromBuf(const Buf& key) {
       combinedRange, NID_X9_62_prime256v1);
   EcKeyUniquePtr publicKey(EVP_PKEY_get1_EC_KEY(evpKey.get()));
   if (!publicKey) {
-    throw std::runtime_error("Error getting EC_key");
+    return err.error("Error getting EC_key");
   }
-  return publicKey;
+  ret = std::move(publicKey);
+  return Status::Success;
 }
 } // namespace extensions
 } // namespace fizz

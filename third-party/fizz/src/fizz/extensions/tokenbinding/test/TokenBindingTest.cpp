@@ -115,7 +115,10 @@ TEST(ContextTest, TestDoubleNotSet) {
       TokenBindingProtocolVersion::token_binding_1_0};
   TokenBindingContext ctx;
   auto before = ctx.getSupportedVersions();
-  EXPECT_THROW(ctx.setSupportedVersions(two), std::runtime_error);
+  Error err;
+  EXPECT_THROW(
+      FIZZ_THROW_ON_ERROR(ctx.setSupportedVersions(err, two), err),
+      std::runtime_error);
   auto after = ctx.getSupportedVersions();
   EXPECT_EQ(before, after);
 }
@@ -123,7 +126,8 @@ TEST(ContextTest, TestDoubleNotSet) {
 TEST(ContextTest, TestEmptySet) {
   std::vector<TokenBindingProtocolVersion> empty;
   TokenBindingContext ctx;
-  ctx.setSupportedVersions(empty);
+  Error err;
+  EXPECT_EQ(ctx.setSupportedVersions(err, empty), Status::Success);
   auto after = ctx.getSupportedVersions();
   EXPECT_EQ(empty, after);
 }
@@ -132,7 +136,8 @@ TEST(ContextTest, TestSingleSet) {
   std::vector<TokenBindingProtocolVersion> single{
       TokenBindingProtocolVersion::token_binding_1_0};
   TokenBindingContext ctx;
-  ctx.setSupportedVersions(single);
+  Error err;
+  EXPECT_EQ(ctx.setSupportedVersions(err, single), Status::Success);
   auto after = ctx.getSupportedVersions();
   EXPECT_EQ(single, after);
 }

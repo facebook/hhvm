@@ -1,6 +1,0 @@
-{
-    "name": "FBThrift Python Build",
-    "build": {
-        "dockerfile": "Containerfile"
-    }
-}

@@ -1,0 +1,42 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+FROM ubuntu:jammy
+
+RUN apt update \
+    && apt upgrade -y \
+    && apt install -y --no-install-recommends \
+        build-essential \
+        git \
+        m4 \
+        python3-pip \
+        python3-dev \
+        patchelf \
+    && pip3 install --upgrade cython auditwheel \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY build/fbcode_builder /tmp/fbcode_builder
+COPY build/deps /tmp/deps
+
+RUN apt-get update \
+    && python3 /tmp/fbcode_builder/getdeps.py --allow-system-packages \
+        --scratch-path /tmp/fbthrift-scratch \
+        install-system-deps --recursive fbthrift \
+    && python3 /tmp/fbcode_builder/getdeps.py --allow-system-packages \
+        --scratch-path /tmp/fbthrift-scratch \
+        build --only-deps --no-tests fbthrift \
+    && rm -rf /tmp/fbcode_builder /tmp/deps /tmp/fbthrift-scratch \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*

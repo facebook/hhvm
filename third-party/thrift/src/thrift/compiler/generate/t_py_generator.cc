@@ -540,7 +540,7 @@ void t_py_generator::generate_json_container(
     indent_up();
     generate_json_collection_element(
         out,
-        list->elem_type().get_type(),
+        &list->elem_type().deref(),
         prefix_thrift,
         e,
         ".append(",
@@ -555,7 +555,7 @@ void t_py_generator::generate_json_container(
     indent_up();
     generate_json_collection_element(
         out,
-        set->elem_type().get_type(),
+        &set->elem_type().deref(),
         prefix_thrift,
         e,
         ".add(",
@@ -1224,7 +1224,7 @@ string t_py_generator::render_const_value(
       const t_type* field_type = nullptr;
       for (const t_field& f_iter : structured->fields()) {
         if (f_iter.name() == v_iter->first->get_string()) {
-          field_type = f_iter.type().get_type();
+          field_type = &f_iter.type().deref();
         }
       }
       if (field_type == nullptr) {
@@ -1262,11 +1262,9 @@ string t_py_generator::render_const_value(
   } else if (type->is<t_list>() || type->is<t_set>()) {
     const t_type* etype;
     if (const t_list* list = type->try_as<t_list>()) {
-      etype = list->elem_type().get_type();
+      etype = &list->elem_type().deref();
     } else {
-      etype = ((t_set*)type)->elem_type().get_type();
-    }
-    if (type->is<t_set>()) {
+      etype = &type->as<t_set>().elem_type().deref();
       out << "set(";
     }
     out << "[" << endl;
@@ -1432,7 +1430,7 @@ void t_py_generator::generate_py_union(
     if (is_hidden(*member)) {
       continue;
     }
-    auto t = type_to_enum(member->type().get_type());
+    auto t = type_to_enum(&member->type().deref());
     const auto& n = member->name();
     auto k = member->id();
     indent(out) << (first ? "" : "el") << "if fid == " << k << ":" << endl;
@@ -1472,7 +1470,7 @@ void t_py_generator::generate_py_union(
     if (is_hidden(*member)) {
       continue;
     }
-    auto t = type_to_enum(member->type().get_type());
+    auto t = type_to_enum(&member->type().deref());
     const auto& n = member->name();
     auto k = member->id();
 
@@ -1573,9 +1571,9 @@ void t_py_generator::generate_py_thrift_spec(
       continue;
     }
     indent(out) << "(" << (*m_iter)->id() << ", "
-                << type_to_enum((*m_iter)->type().get_type()) << ", " << "'"
+                << type_to_enum(&(*m_iter)->type().deref()) << ", " << "'"
                 << rename_reserved_keywords((*m_iter)->name()) << "'" << ", "
-                << type_to_spec_args((*m_iter)->type().get_type()) << ", "
+                << type_to_spec_args(&(*m_iter)->type().deref()) << ", "
                 << render_field_default_value(*m_iter) << ", "
                 << get_thrift_spec_req((*m_iter)->qualifier()) << ", ),"
                 << " # " << (*m_iter)->id() << endl;
@@ -1649,7 +1647,7 @@ void t_py_generator::generate_py_thrift_spec(
           continue;
         }
         // Initialize fields
-        const t_type* type = (*m_iter)->type().get_type();
+        const t_type* type = &(*m_iter)->type().deref();
         if (!type->is<t_primitive_type>() && !type->is<t_enum>() &&
             (*m_iter)->default_value() != nullptr) {
           indent(out) << "if " << rename_reserved_keywords((*m_iter)->name())
@@ -2087,8 +2085,8 @@ void t_py_generator::generate_py_struct_reader(
     }
     out << "fid == " << f_iter.id() << ":" << endl;
     indent_up();
-    indent(out) << "if ftype == " << type_to_enum(f_iter.type().get_type())
-                << ":" << endl;
+    indent(out) << "if ftype == " << type_to_enum(&f_iter.type().deref()) << ":"
+                << endl;
     indent_up();
     generate_deserialize_field(out, &f_iter, "self.");
     indent_down();
@@ -2143,7 +2141,7 @@ void t_py_generator::generate_py_struct_writer(
     out << ":" << endl;
     indent_up();
     indent(out) << "oprot.writeFieldBegin(" << "'" << (*f_iter)->name() << "', "
-                << type_to_enum((*f_iter)->type().get_type()) << ", "
+                << type_to_enum(&(*f_iter)->type().deref()) << ", "
                 << (*f_iter)->id() << ")" << endl;
 
     // Write field contents
@@ -2841,7 +2839,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
       if (fn->qualifier() == t_function_qualifier::oneway) {
         f_remote << "None, ";
       } else {
-        f_remote << "'" << thrift_type_name(fn->return_type().get_type())
+        f_remote << "'" << thrift_type_name(&fn->return_type().deref())
                  << "', ";
       }
 
@@ -2853,7 +2851,7 @@ void t_py_generator::generate_service_remote(const t_service* tservice) {
         } else {
           f_remote << ", ";
         }
-        f_remote << "('" << thrift_type_name(it_2.type().get_type()) << "', '"
+        f_remote << "('" << thrift_type_name(&it_2.type().deref()) << "', '"
                  << it_2.name() << "', '"
                  << thrift_type_name(it_2.type()->get_true_type()) << "')";
       }
@@ -3114,7 +3112,7 @@ void t_py_generator::generate_process_function(
         known_exceptions += "'";
         known_exceptions += rename_reserved_keywords(x.name());
         known_exceptions += "': ";
-        known_exceptions += type_name(x.type().get_type());
+        known_exceptions += type_name(&x.type().deref());
       }
       known_exceptions += "}";
 
@@ -3162,7 +3160,7 @@ void t_py_generator::generate_process_function(
     indent_down();
     int exc_num = 0;
     for (const t_field& x : get_elems(tfunction->exceptions())) {
-      f_service_ << indent() << "except " << type_name(x.type().get_type())
+      f_service_ << indent() << "except " << type_name(&x.type().deref())
                  << " as exc" << exc_num << ":" << endl;
       if (tfunction->qualifier() != t_function_qualifier::oneway) {
         indent_up();
@@ -3290,7 +3288,7 @@ void t_py_generator::generate_deserialize_field(
         tfield->name().c_str(),
         type->name().c_str());
   }
-  if (const auto* adapter = get_py_adapter(tfield->type().get_type())) {
+  if (const auto* adapter = get_py_adapter(&tfield->type().deref())) {
     indent(out) << name << " = " << *adapter << ".from_thrift(" << name << ")"
                 << endl;
   }
@@ -3453,7 +3451,7 @@ void t_py_generator::generate_serialize_field(
         tfield->name());
   }
   string name = prefix + rename_reserved_keywords(tfield->name());
-  if (const auto* adapter = get_py_adapter(tfield->type().get_type())) {
+  if (const auto* adapter = get_py_adapter(&tfield->type().deref())) {
     string real_name = std::move(name);
     name = tmp("adpt");
     indent(out) << name << " = " << *adapter << ".to_thrift(" << real_name
@@ -3539,11 +3537,11 @@ void t_py_generator::generate_serialize_container(
                 << prefix << "))" << endl;
   } else if (const t_set* set = ttype->try_as<t_set>()) {
     indent(out) << "oprot.writeSetBegin("
-                << type_to_enum(set->elem_type().get_type()) << ", " << "len("
+                << type_to_enum(&set->elem_type().deref()) << ", " << "len("
                 << prefix << "))" << endl;
   } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "oprot.writeListBegin("
-                << type_to_enum(list->elem_type().get_type()) << ", " << "len("
+                << type_to_enum(&list->elem_type().deref()) << ", " << "len("
                 << prefix << "))" << endl;
   }
 
@@ -3855,12 +3853,12 @@ string t_py_generator::type_to_spec_args(const t_type* ttype) {
         type_to_spec_args(&tmap->val_type().deref()) + ")";
 
   } else if (const t_set* set = ttype->try_as<t_set>()) {
-    return "(" + type_to_enum(set->elem_type().get_type()) + "," +
-        type_to_spec_args(set->elem_type().get_type()) + ")";
+    return "(" + type_to_enum(&set->elem_type().deref()) + "," +
+        type_to_spec_args(&set->elem_type().deref()) + ")";
 
   } else if (const t_list* list = ttype->try_as<t_list>()) {
-    return "(" + type_to_enum(list->elem_type().get_type()) + "," +
-        type_to_spec_args(list->elem_type().get_type()) + ")";
+    return "(" + type_to_enum(&list->elem_type().deref()) + "," +
+        type_to_spec_args(&list->elem_type().deref()) + ")";
   }
 
   throw std::runtime_error(

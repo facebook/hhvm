@@ -702,12 +702,12 @@ void t_cocoa_generator::generate_cocoa_struct_initializer_signature(
       out << " " << field.name();
     }
     out << ": (";
-    if (nullability_ && type_can_be_null((field.type().get_type()))) {
+    if (nullability_ && type_can_be_null(&field.type().deref())) {
       out
           << (field.qualifier() == t_field_qualifier::required ? "nonnull "
                                                                : "nullable ");
     }
-    out << type_name(field.type().get_type()) << ") " << field.name();
+    out << type_name(&field.type().deref()) << ") " << field.name();
     first = false;
   }
 }
@@ -727,14 +727,14 @@ void t_cocoa_generator::generate_cocoa_struct_field_accessor_declarations(
   for (const auto& field : tstruct->fields()) {
     // out << indent() << "#if !__has_feature(objc_arc)" << std::endl
     if (is_declare_getter) {
-      out << indent() << "- (" << type_name(field.type().get_type()) << ") "
+      out << indent() << "- (" << type_name(&field.type().deref()) << ") "
           << decapitalize(get_cocoa_property_name(&field)) << ";" << std::endl;
     }
 
     if (is_declare_setter) {
       out << indent() << "- (void) set"
           << capitalize(get_cocoa_property_name(&field)) << ": ("
-          << type_name(field.type().get_type()) << ") " << field.name() << ";"
+          << type_name(&field.type().deref()) << ") " << field.name() << ";"
           << std::endl;
     }
     // out << indent() << "#endif" << std::endl;
@@ -1112,7 +1112,7 @@ void t_cocoa_generator::generate_cocoa_struct_reader(
   for (const auto& field : tstruct->fields()) {
     indent(out) << "case " << field.id() << ":" << std::endl;
     indent_up();
-    indent(out) << "if (fieldType == " << type_to_enum(field.type().get_type())
+    indent(out) << "if (fieldType == " << type_to_enum(&field.type().deref())
                 << ") {" << std::endl;
     indent_up();
 
@@ -1120,7 +1120,7 @@ void t_cocoa_generator::generate_cocoa_struct_reader(
     indent(out) << call_field_setter(&field, "fieldValue") << std::endl;
     // if this is an allocated field, release it since the struct
     // is now retaining it
-    if (type_can_be_null(field.type().get_type())) {
+    if (type_can_be_null(&field.type().deref())) {
       // deserialized strings are autorelease, so don't release them
       if (!field.type()->get_true_type()->is_string_or_binary()) {
         indent(out) << "[fieldValue release_stub];" << std::endl;
@@ -1193,7 +1193,7 @@ void t_cocoa_generator::generate_cocoa_struct_writer(
     out << indent() << "if (" << kFieldPrefix << field.name() << kSetPostfix
         << ") {" << std::endl;
     indent_up();
-    bool null_allowed = type_can_be_null(field.type().get_type());
+    bool null_allowed = type_can_be_null(&field.type().deref());
     if (null_allowed) {
       out << indent() << "if (" << kFieldPrefix << field.name() << " != nil) {"
           << std::endl;
@@ -1201,7 +1201,7 @@ void t_cocoa_generator::generate_cocoa_struct_writer(
     }
 
     indent(out) << "[outProtocol writeFieldBeginWithName: @\"" << field.name()
-                << "\" type: " << type_to_enum(field.type().get_type())
+                << "\" type: " << type_to_enum(&field.type().deref())
                 << " fieldID: " << field.id() << "];" << std::endl;
 
     // Write field contents
@@ -1254,7 +1254,7 @@ void t_cocoa_generator::generate_cocoa_struct_result_writer(
         << std::endl;
     indent_up();
 
-    bool null_allowed = type_can_be_null(field.type().get_type());
+    bool null_allowed = type_can_be_null(&field.type().deref());
     if (null_allowed) {
       out << indent() << "if (" << kFieldPrefix << field.name() << " != nil) {"
           << std::endl;
@@ -1262,7 +1262,7 @@ void t_cocoa_generator::generate_cocoa_struct_result_writer(
     }
 
     indent(out) << "[outProtocol writeFieldBeginWithName: @\"" << field.name()
-                << "\" type: " << type_to_enum(field.type().get_type())
+                << "\" type: " << type_to_enum(&field.type().deref())
                 << " fieldID: " << field.id() << "];" << std::endl;
 
     // Write field contents
@@ -1420,7 +1420,7 @@ void t_cocoa_generator::generate_cocoa_struct_makeImmutable(
   indent_up();
 
   for (const auto& field : tstruct->fields()) {
-    const t_type* ttype = field.type().get_type();
+    const t_type* ttype = &field.type().deref();
     std::string field_name = kFieldPrefix + field.name();
     if (ttype->is<t_typedef>()) {
       ttype = ttype->get_true_type();
@@ -1502,7 +1502,7 @@ void t_cocoa_generator::generate_cocoa_struct_toDict(
               << "@\"" + tstruct->name() + "\";" << std::endl;
 
   for (const auto& field : tstruct->fields()) {
-    const t_type* ttype = field.type().get_type();
+    const t_type* ttype = &field.type().deref();
     std::string field_name = kFieldPrefix + field.name();
     std::string ret_equals = "ret[@\"" + field.name() + "\"] = ";
     if (ttype->is<t_typedef>()) {
@@ -1589,7 +1589,7 @@ void t_cocoa_generator::generate_cocoa_struct_mutableCopyWithZone(
       << " *newCopy = [[[self class] alloc] init];;" << std::endl;
 
   for (const auto& field : tstruct->fields()) {
-    const t_type* ttype = field.type().get_type();
+    const t_type* ttype = &field.type().deref();
     std::string field_name = kFieldPrefix + field.name();
     if (ttype->is<t_typedef>()) {
       ttype = ttype->get_true_type();
@@ -1711,7 +1711,7 @@ void t_cocoa_generator::generate_cocoa_service_protocol(
   for (const t_function& function : tservice->functions()) {
     out << "- " << function_signature(&function) << ";" << "  // throws ";
     for (const t_field& x : get_elems(function.exceptions())) {
-      out << type_name(x.type().get_type()) + ", ";
+      out << type_name(&x.type().deref()) + ", ";
     }
     out << "TException" << std::endl;
   }
@@ -1829,7 +1829,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
     // write out function parameters
     for (const auto& param : function.params().fields()) {
       const std::string& fieldName = param.name();
-      if (type_can_be_null(param.type().get_type())) {
+      if (type_can_be_null(&param.type().deref())) {
         out << indent() << "if (" << fieldName << " != nil)";
         scope_up(out);
       }
@@ -1837,14 +1837,14 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
           << fieldName
           << "\""
              " type: "
-          << type_to_enum(param.type().get_type()) << " fieldID: " << param.id()
+          << type_to_enum(&param.type().deref()) << " fieldID: " << param.id()
           << "];" << std::endl;
 
       generate_serialize_field(out, &param, fieldName);
 
       out << indent() << "[outProtocol writeFieldEnd];" << std::endl;
 
-      if (type_can_be_null(param.type().get_type())) {
+      if (type_can_be_null(&param.type().deref())) {
         scope_down(out);
       }
     }
@@ -2380,7 +2380,7 @@ void t_cocoa_generator::generate_deserialize_map_element(
 void t_cocoa_generator::generate_deserialize_set_element(
     std::ofstream& out, const t_set* tset, const std::string& fieldName) {
   std::string elem = tmp("_elem");
-  const t_type* type = tset->elem_type().get_type();
+  const t_type* type = &tset->elem_type().deref();
   t_field felem(*type, elem);
 
   generate_deserialize_field(out, &felem, elem);
@@ -2403,7 +2403,7 @@ void t_cocoa_generator::generate_deserialize_set_element(
 void t_cocoa_generator::generate_deserialize_list_element(
     std::ofstream& out, const t_list* tlist, const std::string& fieldName) {
   std::string elem = tmp("_elem");
-  const t_type* type = tlist->elem_type().get_type();
+  const t_type* type = &tlist->elem_type().deref();
   t_field felem(*type, elem);
 
   generate_deserialize_field(out, &felem, elem);
@@ -2518,11 +2518,11 @@ void t_cocoa_generator::generate_serialize_container(
                 << " size: (int)[" << fieldName << " count]];" << std::endl;
   } else if (const t_set* set = ttype->try_as<t_set>()) {
     indent(out) << "[outProtocol writeSetBeginWithElementType: "
-                << type_to_enum(set->elem_type().get_type()) << " size: (int)["
+                << type_to_enum(&set->elem_type().deref()) << " size: (int)["
                 << fieldName << " count]];" << std::endl;
   } else if (const t_list* list = ttype->try_as<t_list>()) {
     indent(out) << "[outProtocol writeListBeginWithElementType: "
-                << type_to_enum(list->elem_type().get_type()) << " size: (int)["
+                << type_to_enum(&list->elem_type().deref()) << " size: (int)["
                 << fieldName << " count]];" << std::endl;
   }
 
@@ -2761,7 +2761,7 @@ void t_cocoa_generator::print_const_value(
             entry.first->get_string());
       }
       std::string val =
-          render_const_value(out, field->type().get_type(), entry.second);
+          render_const_value(out, &field->type().deref(), entry.second);
       std::string cap_name = capitalize(entry.first->get_string());
       indent(out) << "[" << name << " set" << cap_name << ":" << val << "];"
                   << std::endl;
@@ -2792,7 +2792,7 @@ void t_cocoa_generator::print_const_value(
     }
     out << std::endl;
   } else if (const t_list* list = type->try_as<t_list>()) {
-    const t_type* etype = list->elem_type().get_type();
+    const t_type* etype = &list->elem_type().deref();
     const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
     if (defval) {
@@ -2812,7 +2812,7 @@ void t_cocoa_generator::print_const_value(
     }
     out << std::endl;
   } else if (const t_set* set = type->try_as<t_set>()) {
-    const t_type* etype = set->elem_type().get_type();
+    const t_type* etype = &set->elem_type().deref();
     const std::vector<t_const_value*>& value_list = value->get_list();
     std::vector<t_const_value*>::const_iterator v_iter;
     if (defval) {
@@ -2894,7 +2894,7 @@ std::string t_cocoa_generator::render_const_value(
  * @param ttype The type
  */
 std::string t_cocoa_generator::declare_field(const t_field* tfield) {
-  return type_name(tfield->type().get_type()) + " " + kFieldPrefix +
+  return type_name(&tfield->type().deref()) + " " + kFieldPrefix +
       tfield->name() + ";";
 }
 
@@ -2906,7 +2906,7 @@ std::string t_cocoa_generator::declare_field(const t_field* tfield) {
 std::string t_cocoa_generator::declare_property(const t_field* tfield) {
   std::ostringstream render;
   render << "@property (nonatomic";
-  if (type_can_be_null(tfield->type().get_type())) {
+  if (type_can_be_null(&tfield->type().deref())) {
     render << ", retain";
     if (nullability_) {
       render
@@ -2919,7 +2919,7 @@ std::string t_cocoa_generator::declare_property(const t_field* tfield) {
       // << ", getter=" << decapitalize(get_cocoa_property_name(tfield))
       // << ", setter=set" << capitalize(get_cocoa_property_name(tfield)) +
       // ":"
-      << ")" << " " << type_name(tfield->type().get_type()) << " "
+      << ")" << " " << type_name(&tfield->type().deref()) << " "
       << get_cocoa_property_name(tfield) << ";";
   return render.str();
 }
@@ -2955,7 +2955,7 @@ std::string t_cocoa_generator::argument_list(const t_paramlist& tparamlist) {
       argPrefix = field.name();
       result += " ";
     }
-    result += argPrefix + ": (" + type_name(field.type().get_type()) + ") " +
+    result += argPrefix + ": (" + type_name(&field.type().deref()) + ") " +
         field.name();
   }
   return result;

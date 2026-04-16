@@ -298,12 +298,11 @@ string t_json_generator::to_spec_args(const t_type* type) {
         to_string(&map->val_type().deref()) + R"(", "spec_args" : )" +
         to_spec_args(&map->val_type().deref()) + "} } ";
   } else if (const t_set* set = type->try_as<t_set>()) {
-    return R"({ "type_enum" : ")" + to_string(set->elem_type().get_type()) +
-        R"(", "spec_args" : )" + to_spec_args(set->elem_type().get_type()) +
-        "} ";
+    return R"({ "type_enum" : ")" + to_string(&set->elem_type().deref()) +
+        R"(", "spec_args" : )" + to_spec_args(&set->elem_type().deref()) + "} ";
   } else if (const t_list* list = type->try_as<t_list>()) {
-    return R"({ "type_enum" : ")" + to_string(list->elem_type().get_type()) +
-        R"(", "spec_args" : )" + to_spec_args(list->elem_type().get_type()) +
+    return R"({ "type_enum" : ")" + to_string(&list->elem_type().deref()) +
+        R"(", "spec_args" : )" + to_spec_args(&list->elem_type().deref()) +
         "} ";
   }
 
@@ -646,7 +645,7 @@ void t_json_generator::generate_struct(const t_structured* tstruct) {
     }
     indent(f_out_) << "\"" << (*mem_iter).name() << "\" : {" << endl;
     indent_up();
-    print_spec((*mem_iter).type().get_type());
+    print_spec(&(*mem_iter).type().deref());
     f_out_ << "," << endl
            << indent() << "\"required\" : "
            << ((*mem_iter).qualifier() != t_field_qualifier::optional
@@ -729,7 +728,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
     if (fun->is_interaction_constructor()) {
       print_spec(&fun->interaction()->as<t_interaction>());
     } else {
-      print_spec(fun->return_type().get_type());
+      print_spec(&fun->return_type().deref());
     }
     f_out_ << endl;
     indent_down();
@@ -748,7 +747,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
         indent(f_out_) << "{" << endl;
         indent_up();
         print_name((*arg_iter).name());
-        print_spec((*arg_iter).type().get_type());
+        print_spec(&(*arg_iter).type().deref());
         if ((*arg_iter).default_value() != nullptr) {
           f_out_ << "," << endl << indent() << "\"value\" : ";
           print_const_value((*arg_iter).default_value());
@@ -777,7 +776,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
         if (ex_iter != exceptions.begin()) {
           f_out_ << "," << endl;
         }
-        indent(f_out_) << to_spec_args((*ex_iter).type().get_type());
+        indent(f_out_) << to_spec_args(&(*ex_iter).type().deref());
       }
       f_out_ << endl;
       indent_down();

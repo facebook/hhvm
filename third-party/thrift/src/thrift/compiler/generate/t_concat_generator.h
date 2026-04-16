@@ -98,12 +98,12 @@ class t_concat_generator : public t_generator {
 
     if (ttype->is<t_container>()) {
       if (const t_map* tmap = ttype->try_as<t_map>()) {
-        return "map<" + thrift_type_name(tmap->key_type().get_type()) + ", " +
-            thrift_type_name(tmap->val_type().get_type()) + ">";
+        return "map<" + thrift_type_name(&tmap->key_type().deref()) + ", " +
+            thrift_type_name(&tmap->val_type().deref()) + ">";
       } else if (const t_set* tset = ttype->try_as<t_set>()) {
-        return "set<" + thrift_type_name(tset->elem_type().get_type()) + ">";
+        return "set<" + thrift_type_name(&tset->elem_type().deref()) + ">";
       } else if (const t_list* tlist = ttype->try_as<t_list>()) {
-        return "list<" + thrift_type_name(tlist->elem_type().get_type()) + ">";
+        return "list<" + thrift_type_name(&tlist->elem_type().deref()) + ">";
       }
     }
 

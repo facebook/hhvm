@@ -51,7 +51,7 @@ class Json5SerializerTest(unittest.TestCase):
                 json_str = serialize(
                     tc.example,
                     Protocol.JSON5,
-                    json5_options=Json5ProtocolWriterOptions(
+                    options=Json5ProtocolWriterOptions(
                         writer=JsonWriterOptions(indent_width=2)
                     ),
                 ).decode()
@@ -61,7 +61,7 @@ class Json5SerializerTest(unittest.TestCase):
         for tc in test_types.testCases:
             with self.subTest(tc.name):
                 json_str = serialize(
-                    tc.example, Protocol.JSON5, json5_options=JSON5_MODE
+                    tc.example, Protocol.JSON5, options=JSON5_MODE
                 ).decode()
                 self.assertEqual(json_str, tc.json5)
 
@@ -242,14 +242,14 @@ class Json5SerializerOptionTest(unittest.TestCase):
         options = Json5ProtocolWriterOptions(
             writer=JsonWriterOptions(object_trailing_comma=True)
         )
-        result = serialize(example, Protocol.JSON5, json5_options=options).decode()
+        result = serialize(example, Protocol.JSON5, options=options).decode()
         self.assertEqual(result, '{"i64Value":42,}')
 
     def test_serialize_json5_compact(self) -> None:
         """indent_width=0 produces compact output."""
         example = test_types.Example(i64Value=42, stringValue="hello")
         options = Json5ProtocolWriterOptions(writer=JsonWriterOptions(indent_width=0))
-        result = serialize(example, Protocol.JSON5, json5_options=options).decode()
+        result = serialize(example, Protocol.JSON5, options=options).decode()
         self.assertEqual(result, '{"i64Value":42,"stringValue":"hello"}')
 
     def test_serialize_json5_unquote_object_name(self) -> None:
@@ -257,7 +257,7 @@ class Json5SerializerOptionTest(unittest.TestCase):
         options = Json5ProtocolWriterOptions(
             writer=JsonWriterOptions(unquote_object_name=True)
         )
-        result = serialize(example, Protocol.JSON5, json5_options=options).decode()
+        result = serialize(example, Protocol.JSON5, options=options).decode()
         self.assertEqual(result, "{i64Value:42}")
 
     def test_serialize_json5_allow_nan_inf(self) -> None:
@@ -265,37 +265,35 @@ class Json5SerializerOptionTest(unittest.TestCase):
         options = Json5ProtocolWriterOptions(
             writer=JsonWriterOptions(allow_nan_inf=True)
         )
-        result = serialize(example, Protocol.JSON5, json5_options=options).decode()
+        result = serialize(example, Protocol.JSON5, options=options).decode()
         self.assertEqual(result, '{"infValue":Infinity}')
 
     def test_serialize_json5_iobuf(self) -> None:
-        """serialize_iobuf with json5_options returns an IOBuf with the same content."""
+        """serialize_iobuf with options returns an IOBuf with the same content."""
         example = test_types.Example(i64Value=42, stringValue="hello")
         options = Json5ProtocolWriterOptions()
-        iobuf_result = bytes(
-            serialize_iobuf(example, Protocol.JSON5, json5_options=options)
-        )
-        bytes_result = serialize(example, Protocol.JSON5, json5_options=options)
+        iobuf_result = bytes(serialize_iobuf(example, Protocol.JSON5, options=options))
+        bytes_result = serialize(example, Protocol.JSON5, options=options)
         self.assertEqual(iobuf_result, bytes_result)
 
     def test_serialize_json5_default_options_matches_no_options(self) -> None:
-        """Default json5_options produces the same output as no options."""
+        """Default options produces the same output as no options."""
         for tc in test_types.testCases:
             with self.subTest(tc.name):
                 without_options = serialize(tc.example, Protocol.JSON5)
                 with_options = serialize(
                     tc.example,
                     Protocol.JSON5,
-                    json5_options=Json5ProtocolWriterOptions(),
+                    options=Json5ProtocolWriterOptions(),
                 )
                 self.assertEqual(without_options, with_options)
 
     def test_json5_options_invalid_protocol(self) -> None:
-        """json5_options raises ValueError when protocol is not JSON5."""
+        """options raises ValueError when protocol is not JSON5."""
         example = test_types.Example(i64Value=42)
         with self.assertRaises(ValueError):
             serialize(
                 example,
                 Protocol.COMPACT,
-                json5_options=Json5ProtocolWriterOptions(),
+                options=Json5ProtocolWriterOptions(),
             )

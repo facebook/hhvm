@@ -91,19 +91,19 @@ cdef _serialize_json5_iobuf(strct, Json5ProtocolWriterOptions options):
     )
 
 
-def serialize_iobuf(strct, cProtocol protocol=cProtocol.COMPACT, json5_options=None):
-    if json5_options is not None and protocol != cProtocol.JSON5:
-        raise ValueError("json5_options only valid with Protocol.JSON5")
+def serialize_iobuf(strct, cProtocol protocol=cProtocol.COMPACT, options=None):
+    if options is not None and protocol != cProtocol.JSON5:
+        raise ValueError("options only valid with Protocol.JSON5")
     if not isinstance(strct, (StructOrUnion, GeneratedError)):
         raise TypeError("thrift-python serialization only supports thrift-python types")
-    if json5_options is not None:
-        return _serialize_json5_iobuf(strct, json5_options)
+    if options is not None:
+        return _serialize_json5_iobuf(strct, options)
     if isinstance(strct, StructOrUnion):
         return (<StructOrUnion>strct)._serialize(protocol)
     return (<GeneratedError>strct)._serialize(protocol)
 
-def serialize(struct, cProtocol protocol=cProtocol.COMPACT, json5_options=None):
-    return b''.join(serialize_iobuf(struct, protocol, json5_options))
+def serialize(struct, cProtocol protocol=cProtocol.COMPACT, options=None):
+    return b''.join(serialize_iobuf(struct, protocol, options))
 
 # some users define custom cpp extensions that implement buffer protocol
 cdef inline _is_buffer(object obj):

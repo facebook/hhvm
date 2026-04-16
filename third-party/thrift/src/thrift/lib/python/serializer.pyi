@@ -50,12 +50,12 @@ class Json5ProtocolWriterOptions:
 def serialize_iobuf(
     strct: sT,
     protocol: Protocol = Protocol.COMPACT,
-    json5_options: typing.Optional[Json5ProtocolWriterOptions] = None,
+    options: typing.Optional[Json5ProtocolWriterOptions] = None,
 ) -> IOBuf: ...
 def serialize(
     struct: sT,
     protocol: Protocol = Protocol.COMPACT,
-    json5_options: typing.Optional[Json5ProtocolWriterOptions] = None,
+    options: typing.Optional[Json5ProtocolWriterOptions] = None,
 ) -> bytes: ...
 def deserialize_with_length(
     klass: typing.Type[sT],

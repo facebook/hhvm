@@ -2814,7 +2814,7 @@ TEST_F(ClientProtocolTest, TestServerHelloExtensions) {
   setupExpectingEncryptedExtensions();
   auto ext = std::make_shared<MockClientExtensions>();
   state_.extensions() = ext;
-  EXPECT_CALL(*ext, onEncryptedExtensions(_));
+  EXPECT_CALL(*ext, _onEncryptedExtensions(_));
   fizz::Param param(TestMessages::encryptedExt());
   auto actions = detail::processEvent(state_, param);
   expectActions<MutateState>(actions);

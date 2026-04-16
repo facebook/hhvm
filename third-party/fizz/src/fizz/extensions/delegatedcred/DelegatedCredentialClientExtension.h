@@ -21,7 +21,9 @@ class DelegatedCredentialClientExtension : public ClientExtensions {
 
   std::vector<Extension> getClientHelloExtensions() const override;
 
-  void onEncryptedExtensions(const std::vector<Extension>& extensions) override;
+  Status onEncryptedExtensions(
+      Error& err,
+      const std::vector<Extension>& extensions) override;
   std::vector<SignatureScheme> supportedSchemes_;
 };
 } // namespace extensions

@@ -29,8 +29,11 @@ class ExampleClientExtension : public ClientExtensions {
     return exts;
   }
 
-  void onEncryptedExtensions(
-      const std::vector<Extension>& /* unused */) override {}
+  Status onEncryptedExtensions(
+      Error& /* err */,
+      const std::vector<Extension>& /* unused */) override {
+    return Status::Success;
+  }
 };
 
 class OtherExampleClientExtension : public ClientExtensions {
@@ -42,8 +45,11 @@ class OtherExampleClientExtension : public ClientExtensions {
     return exts;
   }
 
-  void onEncryptedExtensions(
-      const std::vector<Extension>& /* unused */) override {}
+  Status onEncryptedExtensions(
+      Error& /* err */,
+      const std::vector<Extension>& /* unused */) override {
+    return Status::Success;
+  }
 };
 
 TEST_F(MultiClientExtensionsTest, TestNoExtensions) {

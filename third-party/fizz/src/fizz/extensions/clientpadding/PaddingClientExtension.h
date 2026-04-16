@@ -22,8 +22,11 @@ class PaddingClientExtension : public ClientExtensions {
 
   std::vector<Extension> getClientHelloExtensions() const override;
 
-  void onEncryptedExtensions(
-      const std::vector<Extension>& /*extensions*/) override {}
+  Status onEncryptedExtensions(
+      Error& /*err*/,
+      const std::vector<Extension>& /*extensions*/) override {
+    return Status::Success;
+  }
 
  private:
   uint16_t paddingTotalBytes_;

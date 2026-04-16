@@ -30,7 +30,8 @@ class ClientExtensions {
   /**
    * Called with the extensions present in EncryptedExtensions.
    */
-  virtual void onEncryptedExtensions(
+  virtual Status onEncryptedExtensions(
+      Error& err,
       const std::vector<Extension>& extensions) = 0;
 };
 } // namespace fizz

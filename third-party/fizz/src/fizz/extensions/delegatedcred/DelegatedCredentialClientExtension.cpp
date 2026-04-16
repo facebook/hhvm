@@ -19,7 +19,10 @@ DelegatedCredentialClientExtension::getClientHelloExtensions() const {
   return clientExtensions;
 }
 
-void DelegatedCredentialClientExtension::onEncryptedExtensions(
-    const std::vector<Extension>& extensions) {}
+Status DelegatedCredentialClientExtension::onEncryptedExtensions(
+    Error& /* err */,
+    const std::vector<Extension>& /* extensions */) {
+  return Status::Success;
+}
 } // namespace extensions
 } // namespace fizz

@@ -2162,7 +2162,7 @@ Status EventHandler<
   }
 
   if (state.extensions()) {
-    state.extensions()->onEncryptedExtensions(ee.extensions);
+    TRY(state.extensions()->onEncryptedExtensions(ctx.err, ee.extensions));
   }
 
   Actions acts;

@@ -24,7 +24,9 @@ class TokenBindingClientExtension : public ClientExtensions {
 
   std::vector<Extension> getClientHelloExtensions() const override;
 
-  void onEncryptedExtensions(const std::vector<Extension>& extensions) override;
+  Status onEncryptedExtensions(
+      Error& err,
+      const std::vector<Extension>& extensions) override;
 
   const auto& getVersion() {
     return negotiatedVersion_;

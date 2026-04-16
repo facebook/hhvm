@@ -40,7 +40,10 @@ TEST_P(ThriftParametersExtensionStopTLSTest, testClientExtension) {
   paramsExt.params = params;
   serverExtensions.push_back(encodeThriftExtension(paramsExt));
 
-  extensions->onEncryptedExtensions(serverExtensions);
+  fizz::Error err;
+  EXPECT_EQ(
+      extensions->onEncryptedExtensions(err, serverExtensions),
+      fizz::Status::Success);
 
   if (clientSupport && serverSupport) {
     EXPECT_TRUE(extensions->getNegotiatedStopTLS());
@@ -94,7 +97,10 @@ TEST_P(ThriftParametersExtensionStopTLSTest, testClientExtensionStopTLSV2) {
   paramsExt.params = params;
   serverExtensions.push_back(encodeThriftExtension(paramsExt));
 
-  extensions->onEncryptedExtensions(serverExtensions);
+  fizz::Error err;
+  EXPECT_EQ(
+      extensions->onEncryptedExtensions(err, serverExtensions),
+      fizz::Status::Success);
 
   if (clientSupport && serverSupport) {
     EXPECT_TRUE(extensions->getNegotiatedStopTLSV2());
@@ -164,7 +170,10 @@ TEST_F(ThriftParametersExtensionStopTLSTest, testCombinedNegotiation) {
               paramsExt.params = params;
               serverExtensions.push_back(encodeThriftExtension(paramsExt));
 
-              extensions->onEncryptedExtensions(serverExtensions);
+              fizz::Error err;
+              EXPECT_EQ(
+                  extensions->onEncryptedExtensions(err, serverExtensions),
+                  fizz::Status::Success);
 
               // Check StopTLS negotiation
               EXPECT_EQ(

@@ -31,7 +31,9 @@ class MultiClientExtensions : public ClientExtensions {
   /**
    * Call each extension's implementation of onEncryptedExtensions.
    */
-  void onEncryptedExtensions(const std::vector<Extension>& extensions) override;
+  Status onEncryptedExtensions(
+      Error& err,
+      const std::vector<Extension>& extensions) override;
 
   /**
    * Get the underlying extensions.

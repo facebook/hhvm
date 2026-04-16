@@ -48,14 +48,14 @@ ThriftParametersClientExtension::getClientHelloExtensions() const {
   return clientExtensions;
 }
 
-void ThriftParametersClientExtension::onEncryptedExtensions(
-    const std::vector<fizz::Extension>& extensions) {
+fizz::Status ThriftParametersClientExtension::onEncryptedExtensions(
+    fizz::Error& /* err */, const std::vector<fizz::Extension>& extensions) {
   folly::Optional<ThriftParametersExt> serverParams =
       getThriftExtension(extensions);
 
   if (!serverParams.has_value()) {
     VLOG(6) << "Server did not negotiate thrift parameters";
-    return;
+    return fizz::Status::Success;
   }
   const auto& negotiatedParams = serverParams->params;
   if (auto serverCompressions = negotiatedParams.compressionAlgos()) {
@@ -83,6 +83,7 @@ void ThriftParametersClientExtension::onEncryptedExtensions(
   if (folly::popcount((serverPSPSelection & offerredPSP_)) == 1) {
     negotiatedPSP_ = serverPSPSelection;
   }
+  return fizz::Status::Success;
 }
 
 } // namespace apache::thrift

@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersClientExtension.h>
 
 #include <gtest/gtest.h>
+#include <fizz/util/Status.h>
 
 namespace apache::thrift {
 
@@ -50,14 +51,20 @@ class ThriftParametersClientExtensionTest : public testing::Test {
 
 TEST_F(ThriftParametersClientExtensionTest, ValidExtensions) {
   setUpServerHelloExtensions({CompressionAlgorithm::ZSTD});
-  extensions_->onEncryptedExtensions(serverExtensions_);
+  fizz::Error err;
+  EXPECT_EQ(
+      extensions_->onEncryptedExtensions(err, serverExtensions_),
+      fizz::Status::Success);
   EXPECT_TRUE(extensions_->getThriftCompressionAlgorithm().has_value());
   EXPECT_EQ(
       extensions_->getThriftCompressionAlgorithm(), CompressionAlgorithm::ZSTD);
 }
 
 TEST_F(ThriftParametersClientExtensionTest, NoExtensions) {
-  extensions_->onEncryptedExtensions(serverExtensions_);
+  fizz::Error err;
+  EXPECT_EQ(
+      extensions_->onEncryptedExtensions(err, serverExtensions_),
+      fizz::Status::Success);
   EXPECT_FALSE(extensions_->getThriftCompressionAlgorithm().has_value());
   EXPECT_EQ(
       extensions_->getNegotiatedPSPUpgrade(),
@@ -72,14 +79,20 @@ TEST_F(ThriftParametersClientExtensionTest, ServerMismatchCompressionAlgo) {
   auto nonExistingCompressionAlgorithm = 10;
   setUpServerHelloExtensions(
       {static_cast<CompressionAlgorithm>(nonExistingCompressionAlgorithm)});
-  extensions_->onEncryptedExtensions(serverExtensions_);
+  fizz::Error err;
+  EXPECT_EQ(
+      extensions_->onEncryptedExtensions(err, serverExtensions_),
+      fizz::Status::Success);
   EXPECT_FALSE(extensions_->getThriftCompressionAlgorithm().has_value());
 }
 
 TEST_F(ThriftParametersClientExtensionTest, ServerMultipleCompressionAlgo) {
   setUpServerHelloExtensions(
       {CompressionAlgorithm::ZSTD, CompressionAlgorithm::ZLIB});
-  extensions_->onEncryptedExtensions(serverExtensions_);
+  fizz::Error err;
+  EXPECT_EQ(
+      extensions_->onEncryptedExtensions(err, serverExtensions_),
+      fizz::Status::Success);
 
   EXPECT_TRUE(extensions_->getThriftCompressionAlgorithm().has_value());
   EXPECT_EQ(
@@ -105,7 +118,10 @@ class ThriftClientPSPNegotiationTest : public testing::Test {
     std::vector<fizz::Extension> serverExtensions;
     serverExtensions.push_back(std::move(encodedExtension));
 
-    extensions_->onEncryptedExtensions(serverExtensions);
+    fizz::Error err;
+    EXPECT_EQ(
+        extensions_->onEncryptedExtensions(err, serverExtensions),
+        fizz::Status::Success);
   }
 
   void clientOffers(uint64_t version) { clientOffers_ = version; }

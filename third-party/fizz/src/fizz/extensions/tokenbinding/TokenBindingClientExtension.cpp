@@ -29,23 +29,23 @@ std::vector<Extension> TokenBindingClientExtension::getClientHelloExtensions()
   return clientExtensions;
 }
 
-void TokenBindingClientExtension::onEncryptedExtensions(
+Status TokenBindingClientExtension::onEncryptedExtensions(
+    Error& err,
     const std::vector<Extension>& extensions) {
   folly::Optional<TokenBindingParameters> serverParams;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      getExtension<TokenBindingParameters>(serverParams, err, extensions), err);
+  FIZZ_RETURN_ON_ERROR(
+      getExtension<TokenBindingParameters>(serverParams, err, extensions));
   if (!serverParams.has_value()) {
     FIZZ_VLOG(6) << "Server did not negotiate token binding";
-    return;
+    return Status::Success;
   }
   if (serverParams->key_parameters_list.size() != 1) {
-    throw FizzException(
+    return err.error(
         "Incorrect number of key_parameters sent by server",
         AlertDescription::unsupported_extension);
   }
   if (serverParams->version > context_->getSupportedVersions().front()) {
-    throw FizzException(
+    return err.error(
         "Server sent higher tokbind version",
         AlertDescription::unsupported_extension);
   }
@@ -55,7 +55,7 @@ void TokenBindingClientExtension::onEncryptedExtensions(
       context_->getKeyParams().end(),
       serverParams->key_parameters_list.front());
   if (keyParam == context_->getKeyParams().end()) {
-    throw FizzException(
+    return err.error(
         "Unsupported key parameter sent by server",
         AlertDescription::unsupported_extension);
   }
@@ -66,10 +66,11 @@ void TokenBindingClientExtension::onEncryptedExtensions(
       serverParams->version);
   if (version == context_->getSupportedVersions().end()) {
     FIZZ_VLOG(6) << "Server sent lower, unsupported, token binding version";
-    return;
+    return Status::Success;
   }
   negotiatedVersion_ = *version;
   negotiatedKeyParam_ = *keyParam;
+  return Status::Success;
 }
 } // namespace extensions
 } // namespace fizz

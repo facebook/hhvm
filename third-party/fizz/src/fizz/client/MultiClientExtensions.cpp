@@ -31,11 +31,13 @@ std::vector<Extension> MultiClientExtensions::getClientHelloExtensions() const {
   return result;
 }
 
-void MultiClientExtensions::onEncryptedExtensions(
+Status MultiClientExtensions::onEncryptedExtensions(
+    Error& err,
     const std::vector<Extension>& extensions) {
   for (auto& ext : extensions_) {
-    ext->onEncryptedExtensions(extensions);
+    FIZZ_RETURN_ON_ERROR(ext->onEncryptedExtensions(err, extensions));
   }
+  return Status::Success;
 }
 
 } // namespace client

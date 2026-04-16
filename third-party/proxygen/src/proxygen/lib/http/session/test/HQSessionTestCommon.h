@@ -152,6 +152,7 @@ class HQSessionTest
     qpackCodec_.setEncoderHeaderTableSize(1024);
     qpackCodec_.setDecoderHeaderTableMaxSize(kQPACKTestDecoderMaxTableSize);
     hqSession_->setInfoCallback(&infoCb_);
+    hqSession_->startNow();
 
     socketDriver_->setMaxUniStreams(GetParam().unidirectionalStreamsCredit);
 

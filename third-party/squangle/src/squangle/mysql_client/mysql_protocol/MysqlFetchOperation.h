@@ -70,7 +70,8 @@ class MysqlMultiQueryStreamOperation : public MultiQueryStreamOperation {
   // Factory method that takes a ConnectionProxy directly (no wrapping needed)
   static std::shared_ptr<MysqlMultiQueryStreamOperation> create(
       std::unique_ptr<ConnectionProxy> conn,
-      MultiQuery&& multi_query);
+      MultiQuery&& multi_query,
+      LoggingFuncsPtr logging_funcs = nullptr);
 
  private:
   MysqlMultiQueryStreamOperation(

@@ -219,24 +219,29 @@ class FetchOperationImpl : virtual public OperationBase {
       std::string rowData,
       Millis elapsed) const;
 
-  // Helper: Render the query with any prefix callback and return
-  // success/failure. Both MySQL and Thrift impls call this at the start of
-  // specializedRun. Returns true on success, false if query parsing failed
-  // (error already set).
+  /// Renders the query using the prefix callback (if any) and stores the
+  /// result in rendered_query_. Call this at the start of specializedRun().
+  /// @return true on success, false if query parsing failed (error is set on
+  ///         the operation before returning)
   [[nodiscard]] bool renderQuery();
 
-  // Whether checksums are enabled for this operation.
-  // Thrift overrides this to return false until checksum support is complete.
+  /// Whether checksums are enabled for this operation.
+  /// Thrift overrides this to return false until checksum support is complete.
   virtual bool usingChecksums() const;
 
-  // Helper: Set up query attributes and checksum on the connection.
-  // Returns 0 on success, or error code on failure (error already set).
-  // The InternalConnection must be obtained from getInternalConnection() or
-  // protocol-specific connection class.
+  /// Sets up query attributes and checksum on the connection.
+  /// Call this after renderQuery() in specializedRun().
+  /// @param internalConn The InternalConnection to set attributes on
+  /// @return 0 on success, non-zero error code on failure (error is set on
+  ///         the operation before returning)
   [[nodiscard]] int setupQueryAttributes(InternalConnection& internalConn);
 
-  // Helper: Log query completion (success or failure) and notify callbacks.
-  // Called from specializedCompleteOperation in both MySQL and Thrift impls.
+  /// Logs query completion and notifies callbacks. Call this from
+  /// specializedCompleteOperation() in derived classes.
+  /// @param result The operation result (Succeeded, Failed, TimedOut, etc.)
+  /// @param maxThreadBlockTime Maximum time any thread was blocked (MySQL only)
+  /// @param totalThreadBlockTime Total thread block time across all blocks
+  /// (MySQL only)
   void logQueryCompletion(
       OperationResult result,
       Duration maxThreadBlockTime = Duration(),

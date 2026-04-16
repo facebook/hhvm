@@ -80,9 +80,12 @@ MysqlMultiQueryOperation::MysqlMultiQueryOperation(
 std::shared_ptr<MysqlMultiQueryStreamOperation>
 MysqlMultiQueryStreamOperation::create(
     std::unique_ptr<ConnectionProxy> conn,
-    MultiQuery&& multi_query) {
+    MultiQuery&& multi_query,
+    LoggingFuncsPtr logging_funcs) {
   auto impl = std::make_unique<MysqlFetchOperationImpl>(
-      std::move(conn), db::OperationType::MultiQueryStream, nullptr);
+      std::move(conn),
+      db::OperationType::MultiQueryStream,
+      std::move(logging_funcs));
   return std::shared_ptr<MysqlMultiQueryStreamOperation>(
       new MysqlMultiQueryStreamOperation(
           std::move(impl), std::move(multi_query)));

@@ -302,7 +302,7 @@ class AsyncMysqlClient : public MysqlClientBase {
       std::vector<Query>&& queries,
       LoggingFuncsPtr logging_funcs = nullptr) const override;
 
-  // Overloads for sync operations (with ConnectionProxy)
+  // Overloads that accept ConnectionProxy for sync operations (non-owning)
   std::shared_ptr<QueryOperation> createQueryOperation(
       std::unique_ptr<OperationBase::ConnectionProxy> conn_proxy,
       Query&& query,

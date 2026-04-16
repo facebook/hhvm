@@ -24,7 +24,7 @@ FetchOperation::FetchOperation(
     MultiQuery&& multi_query)
     : queries_(std::move(multi_query)), impl_(std::move(impl)) {
   if (!impl_) {
-    throw std::runtime_error("ConnectOperationImpl is null");
+    throw std::runtime_error("FetchOperationImpl is null");
   }
 
   impl_->setOperation(*this);

@@ -34,7 +34,7 @@ class JsonWriterOptions:
         object_trailing_comma: bool = False,
         unquote_object_name: bool = False,
         allow_nan_inf: bool = False,
-        indent_width: int = 0,
+        indent_width: int = 2,
     ) -> None: ...
 
 JSON5_MODE: Json5ProtocolWriterOptions

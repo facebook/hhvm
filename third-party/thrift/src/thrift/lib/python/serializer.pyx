@@ -41,7 +41,7 @@ cdef class JsonWriterOptions:
         object_trailing_comma=False,
         unquote_object_name=False,
         allow_nan_inf=False,
-        indent_width=0,
+        indent_width=2,
     ):
         self._c_writer.listTrailingComma = list_trailing_comma
         self._c_writer.objectTrailingComma = object_trailing_comma

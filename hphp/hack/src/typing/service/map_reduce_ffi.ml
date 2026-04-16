@@ -15,7 +15,6 @@ type t = {
   type_counter: Type_counter.t option; [@yojson.option]
   reason_collector: Reason_collector.t option; [@yojson.option]
   refinement_counter: Refinement_counter.t option; [@yojson.option]
-  truthiness_collector: Truthiness_collector.t option; [@yojson.option]
 }
 [@@deriving yojson_of]
 
@@ -26,5 +25,4 @@ let empty =
     type_counter = None;
     reason_collector = None;
     refinement_counter = None;
-    truthiness_collector = None;
   }

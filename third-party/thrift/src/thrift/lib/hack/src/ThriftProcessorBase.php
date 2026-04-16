@@ -144,22 +144,29 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
   }
 
   final protected async function genStream<TStreamType>(
-    TServerStream $server_stream,
+    mixed $server_stream,
     HH\AsyncGenerator<null, TStreamType, void> $payload_generator,
     (function(?TStreamType, ?Exception): (string, ?bool)) $payload_encode,
     string $request_name,
     mixed $handler_ctx,
   ): Awaitable<void> {
+    invariant(
+      $server_stream is TServerStream || $server_stream is TServerBiDiStream,
+      "Expected TServerStream or TServerBiDiStream, got %s",
+      print_type($server_stream),
+    );
     $should_continue = false;
     while ($should_continue !== null) {
       if ($should_continue === false) {
         // wait till stream resumes or credits are received;
+        // @lint-ignore AWAIT_IN_LOOP Intentional usage.
         $should_continue = await $server_stream->genIsStreamReady();
         continue;
       }
 
       try {
         // get next item from async generator
+        // @lint-ignore AWAIT_IN_LOOP Intentional usage.
         $item = await $payload_generator->next();
         if ($item === null) {
           // send stream complete and return.
@@ -176,16 +183,17 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
         // Invoke postPayloadWrite event handler
         $this->eventHandler_
           ->postStreamPayloadWrite($handler_ctx, $request_name, $pld);
-
+        // @lint-ignore AWAIT_IN_LOOP Intentional usage.
         $should_continue =
           await $server_stream->genSendStreamPayload($encoded_str);
       } catch (Exception $ex) {
         // If async generator throws any error,
         // exception should be encoded and sent to client before throwing
         list($encoded_ex, $is_application_ex) = $payload_encode(null, $ex);
+        $is_application_ex = $is_application_ex ?? false;
 
         // Invoke appropriate event handler based on exception type
-        if ($is_application_ex is nonnull && $is_application_ex) {
+        if ($is_application_ex) {
           $this->eventHandler_
             ->postStreamPayloadError($handler_ctx, $request_name, $ex);
         } else {
@@ -196,7 +204,7 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
           $encoded_ex,
           $ex->getMessage(),
           Classnames::get($ex) as nonnull,
-          !($is_application_ex is nonnull && $is_application_ex),
+          !$is_application_ex,
         );
         return;
       }
@@ -204,37 +212,52 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
   }
 
   private async function genSinkGenerator<TSinkType>(
-    TServerSink $server_sink,
+    mixed $server_sink,
     (function(?string, ?Exception): TSinkType) $payload_decoder,
   ): HH\AsyncGenerator<null, TSinkType, void> {
-    while (true) {
-      // @lint-ignore AWAIT_IN_LOOP Intentional usage.
-      $ready = await $server_sink->genIsSinkReady();
-      if ($ready !== true) {
-        // This will return false / null when sink is no longer active. This typically
-        // will be the case once the final payload is received from the user in
-        // $server_sink->getPayloads()
-        return;
-      }
+    invariant(
+      $server_sink is TServerSink || $server_sink is TServerBiDiStream,
+      "Expected TServerSink or TServerBiDiStream, got %s",
+      print_type($server_sink),
+    );
+    try {
+      while (true) {
+        // @lint-ignore AWAIT_IN_LOOP Intentional usage.
+        $ready = await $server_sink->genIsSinkReady();
+        if ($ready !== true) {
+          // This will return false / null when sink is no longer active. This typically
+          // will be the case once the final payload is received from the user in
+          // $server_sink->getPayloads()
+          return;
+        }
 
-      try {
-        // Exception can either be the last payload (declared) or an unknown exception
-        // returned as just the string $exception
-        list($payloads, $exception) = $server_sink->getPayloads();
-      } catch (Exception $ex) {
-        // will throw in $payload_decoder, throw clause for typechecker
-        $payload_decoder(null, $ex);
-        break;
-      }
+        try {
+          // Exception can either be the last payload (declared) or an unknown exception
+          // returned as just the string $exception
+          list($payloads, $exception) = $server_sink->getPayloads();
+        } catch (Exception $ex) {
+          // will throw in $payload_decoder, throw clause for typechecker
+          $payload_decoder(null, $ex);
+          break;
+        }
 
-      foreach ($payloads as $payload) {
-        // will throw if last payload is an exception
-        yield $payload_decoder($payload, null);
-      }
+        foreach ($payloads as $payload) {
+          // will throw if last payload is an exception
+          yield $payload_decoder($payload, null);
+        }
 
-      if ($exception !== null) {
-        // will process and throw the exception
-        $payload_decoder(null, new ThriftApplicationException($exception));
+        if ($exception !== null) {
+          // will process and throw the exception
+          $payload_decoder(null, new ThriftApplicationException($exception));
+        }
+      }
+    } finally {
+      // Close the sink bridge independently when the sink generator completes.
+      // This mirrors the C++ Cleanup destructor in ServerBiDiSinkBridge::getInput.
+      // Safe to call even if genExecuteBiDiStream's finally also calls it —
+      // sinkClose() is a no-op after the first call.
+      if ($server_sink is TServerBiDiStream) {
+        $server_sink->sinkClose();
       }
     }
   }
@@ -331,6 +354,105 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
         get_class($ex),
         !$is_tax,
       );
+    }
+  }
+
+  /**
+   * Execute a bidirectional stream method.
+   * Bidirectional streaming combines:
+   * - Stream pattern (server → client): Server sends payloads via AsyncGenerator
+   * - Sink pattern (client → server): Server receives payloads via AsyncGenerator
+   */
+  final protected async function genExecuteBiDiStream<
+    TStreamResponseType as IResultThriftStruct with {
+      type TResult = TStreamType },
+    TStreamType,
+    TSinkPayloadType as IResultThriftStruct with { type TResult = TSinkType },
+    TSinkType,
+  >(
+    (function(
+      HH\AsyncGenerator<null, TSinkType, void>,
+    ): HH\AsyncGenerator<null, TStreamType, void>) $bidi_handler,
+    class<TSinkPayloadType> $sink_payload_type,
+    class<TStreamResponseType> $stream_response_type,
+    TProtocol $input,
+    TProtocol $output,
+    string $request_name = '',
+    mixed $handler_ctx = null,
+  ): Awaitable<void> {
+    $transport = $output->getTransport();
+    invariant(
+      $transport is TMemoryBuffer,
+      "BiDi stream methods require TMemoryBuffer transport",
+    );
+    $encoded_first_response = $transport->getBuffer();
+    $transport->resetBuffer();
+    $bidi_stream =
+      await gen_start_thrift_bidi_stream($encoded_first_response, 100);
+
+    if ($bidi_stream === null) {
+      // Stream was cancelled by the client.
+      return;
+    }
+
+    PHP\hphp_set_error_page(
+      php_root().
+      '/flib/core/runtime/error/error_pages/thrift/handle_thrift_streaming_service_error.php',
+    );
+
+    try {
+      // Create sink payload decoder for reading client payloads
+      $sink_payload_decoder =
+        ThriftStreamingSerializationHelpers::decodeStreamHelper(
+          $sink_payload_type,
+          $request_name,
+          $this->copyProtocol($input),
+        );
+
+      // Create stream payload encoder for sending server payloads
+      $stream_payload_encoder =
+        ThriftStreamingSerializationHelpers::encodeStreamHelper(
+          $stream_response_type,
+          $output,
+        );
+
+      // Create the sink generator for receiving client payloads
+      $sink_generator =
+        $this->genSinkGenerator($bidi_stream, $sink_payload_decoder);
+
+      // Get the stream generator from the handler
+      $stream_generator = $bidi_handler($sink_generator);
+
+      // Process the stream (server → client)
+      await $this->genStream(
+        $bidi_stream,
+        $stream_generator,
+        $stream_payload_encoder,
+        $request_name,
+        $handler_ctx,
+      );
+    } catch (Exception $ex) {
+      if ($bidi_stream->isClientException()) {
+        return;
+      }
+      $payload_encoder =
+        ThriftStreamingSerializationHelpers::encodeStreamHelper(
+          $stream_response_type,
+          $output,
+        );
+      list($serialized_ex, $is_tax) = $payload_encoder(null, $ex);
+      $bidi_stream->sendServerException(
+        $serialized_ex,
+        $ex->getMessage(),
+        Classnames::get($ex) as nonnull,
+        !$is_tax,
+      );
+    } finally {
+      // Close the sink bridge. This mirrors the Cleanup destructor in
+      // ServerBiDiSinkBridge::getInput — it runs regardless of whether
+      // the sink generator was ever iterated (unlike a finally block
+      // inside the generator body, which would only run if entered).
+      $bidi_stream->sinkClose();
     }
   }
 

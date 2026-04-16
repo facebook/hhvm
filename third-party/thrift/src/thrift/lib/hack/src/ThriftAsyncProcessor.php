@@ -233,6 +233,68 @@ final class ThriftServiceSinkResponseMethod<
   }
 }
 
+final class ThriftServiceBiDiStreamingResponseMethod<
+  TThriftIf as IThriftAsyncIf,
+  TArgs as IThriftStruct,
+  TResultStruct as IResultThriftStruct with { type TResult = TRet },
+  TRet,
+  TSinkPayloadStruct as IResultThriftStruct with {
+    type TResult = TSinkPayloadType },
+  TSinkPayloadType,
+  TStreamResponseStruct as IResultThriftStruct with {
+    type TResult = TStreamResponseType },
+  TStreamResponseType,
+>
+  extends ThriftServiceMethod<
+    TThriftIf,
+    TArgs,
+    TResultStruct,
+    TRet,
+    ResponseAndStreamTransformation<
+      TRet,
+      TSinkPayloadType,
+      TStreamResponseType,
+    >,
+  > {
+
+  public function __construct(
+    protected class<TArgs> $args,
+    protected class<TResultStruct> $ret,
+    protected (function(TThriftIf, TArgs): Awaitable<
+      ResponseAndStreamTransformation<
+        TRet,
+        TSinkPayloadType,
+        TStreamResponseType,
+      >,
+    >) $handlerMethod,
+    protected class<TSinkPayloadStruct> $sinkPayload,
+    protected class<TStreamResponseStruct> $streamResponse,
+  )[] {
+    parent::__construct($args, $ret, $handlerMethod);
+  }
+
+  <<__Override>>
+  protected function getSuccessResponse(): TRet {
+    $res_and_sink = $this->result as nonnull;
+    return $res_and_sink->response as nonnull;
+  }
+
+  public function getBiDiStream()[]: (function(
+    AsyncGenerator<null, TSinkPayloadType, void>,
+  ): AsyncGenerator<null, TStreamResponseType, void>) {
+    $this->result as nonnull;
+    return $this->result->genBiDiStream;
+  }
+
+  public function getSinkPayloadClass()[]: class<TSinkPayloadStruct> {
+    return $this->sinkPayload;
+  }
+
+  public function getStreamPayloadClass()[]: class<TStreamResponseStruct> {
+    return $this->streamResponse;
+  }
+}
+
 // @oss-disable: <<Oncalls('thrift')>>
 abstract class ThriftAsyncProcessor
   extends ThriftProcessorBase
@@ -401,6 +463,19 @@ abstract class ThriftAsyncProcessor
           $method_metadata->getSink(),
           $method_metadata->getSinkPayloadClass(),
           $method_metadata->getFinalResponseClass(),
+          $input,
+          $output,
+          $fname,
+          $handler_ctx,
+        );
+      } else if (
+        $method_metadata
+          is ThriftServiceBiDiStreamingResponseMethod<_, _, _, _, _, _, _, _>
+      ) {
+        await $this->genExecuteBiDiStream(
+          $method_metadata->getBiDiStream(),
+          $method_metadata->getSinkPayloadClass(),
+          $method_metadata->getStreamPayloadClass(),
           $input,
           $output,
           $fname,

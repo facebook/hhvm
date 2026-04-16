@@ -17,14 +17,14 @@ namespace detail {
 void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::MyStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -38,14 +38,14 @@ namespace detail {
 void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyUnion>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::MyUnion>;
   static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -59,14 +59,14 @@ namespace detail {
 void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::MyStructWithCustomDefault>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -80,14 +80,14 @@ namespace detail {
 void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::StructLevelTerseStruct>;
   static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -101,14 +101,14 @@ namespace detail {
 void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::FieldLevelTerseStruct>;
   static const st::translate_field_name_hash_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -122,14 +122,14 @@ namespace detail {
 void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::AdaptedFields>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::AdaptedFields>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -143,14 +143,14 @@ namespace detail {
 void TccStructTraits<::facebook::thrift::test::fixtures::terse_write::TerseException>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::fixtures::terse_write::TerseException>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail

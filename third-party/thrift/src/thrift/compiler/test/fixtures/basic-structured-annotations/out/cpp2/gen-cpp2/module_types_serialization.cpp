@@ -17,14 +17,14 @@ namespace detail {
 void TccStructTraits<::test::fixtures::basic_structured_annotations::runtime_annotation>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::test::fixtures::basic_structured_annotations::runtime_annotation>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -38,14 +38,14 @@ namespace detail {
 void TccStructTraits<::test::fixtures::basic_structured_annotations::structured_annotation_inline>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_inline>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -59,14 +59,14 @@ namespace detail {
 void TccStructTraits<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_with_default>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -80,14 +80,14 @@ namespace detail {
 void TccStructTraits<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_recursive>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -101,14 +101,14 @@ namespace detail {
 void TccStructTraits<::test::fixtures::basic_structured_annotations::structured_annotation_forward>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_forward>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -122,14 +122,14 @@ namespace detail {
 void TccStructTraits<::test::fixtures::basic_structured_annotations::structured_annotation_nested>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::test::fixtures::basic_structured_annotations::structured_annotation_nested>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -143,14 +143,14 @@ namespace detail {
 void TccStructTraits<::test::fixtures::basic_structured_annotations::MyStruct>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::test::fixtures::basic_structured_annotations::MyStruct>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -164,14 +164,14 @@ namespace detail {
 void TccStructTraits<::test::fixtures::basic_structured_annotations::MyException>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::test::fixtures::basic_structured_annotations::MyException>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -185,14 +185,14 @@ namespace detail {
 void TccStructTraits<::test::fixtures::basic_structured_annotations::MyUnion>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<::test::fixtures::basic_structured_annotations::MyUnion>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail

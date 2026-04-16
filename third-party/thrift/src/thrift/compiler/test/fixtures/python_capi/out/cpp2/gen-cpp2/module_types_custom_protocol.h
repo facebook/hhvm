@@ -31,98 +31,98 @@ struct TccStructTraits<::test::fixtures::python_capi::MyStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::MyDataItem> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::TransitiveDoubler> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::detail::DoubledPair> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::StringPair> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::VapidStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::PrimitiveStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::AdaptedFields> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::ListStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::SetStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::MapStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::ComposeStruct> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::Shallot> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::test::fixtures::python_capi::SomeBinary> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 
 } // namespace detail

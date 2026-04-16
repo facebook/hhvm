@@ -29,28 +29,28 @@ struct TccStructTraits<::some::ns::ModuleA> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::some::ns::ModuleB> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::some::ns::detail::DirectlyAdapted> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::some::ns::CppRef> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 
 } // namespace detail

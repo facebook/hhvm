@@ -27,21 +27,21 @@ struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::detail
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyUnion> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::MyException> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 
 } // namespace detail

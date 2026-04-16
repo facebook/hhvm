@@ -27,49 +27,49 @@ struct TccStructTraits<::cpp2::InitialResponse> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::cpp2::FinalResponse> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::cpp2::SinkPayload> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::cpp2::CompatibleWithKeywordSink> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::cpp2::InitialException> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::cpp2::SinkException1> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 template <>
 struct TccStructTraits<::cpp2::SinkException2> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype) noexcept;
+      apache::thrift::protocol::TType& _ftype);
 };
 
 } // namespace detail

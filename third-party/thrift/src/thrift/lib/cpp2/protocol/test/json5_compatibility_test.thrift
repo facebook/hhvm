@@ -210,12 +210,25 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
     ],
     output = json5_test.Example{boolAsKey = {1: 1, 0: 0}},
   },
+  // ── Field Identifier Format Compatibility ────────────────────────────────────
+  // Accepts: "name", "name (id)", "(id)", "id".
+  CompatibilityTestCase{
+    name = "FieldIdentifierFormats",
+    inputs = [
+      "{\"boolValue\": true}",
+      "{\"boolValue (30)\": true}",
+      "{\"(30)\": true}",
+      "{\"30\": true}",
+    ],
+    output = json5_test.Example{boolValue = true},
+  },
   // ── Unknown Field Skipping Compatibility ────────────────────────────────────
   // Unknown fields should be silently skipped during deserialization.
   CompatibilityTestCase{
     name = "SkipUnknownFields",
     inputs = [
       "{\"i64Value\": 42, \"unknownStr\": \"hello\"}",
+      "{\"i64Value\": 42, \"unknownStr (123)\": \"hello\"}",
       "{\"unknownNum\": 123, \"i64Value\": 42}",
       "{\"unknownBool\": true, \"i64Value\": 42}",
       "{\"unknownNull\": null, \"i64Value\": 42}",

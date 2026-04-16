@@ -76,6 +76,8 @@ const list<NegativeTestCase> formatValidationNegativeCases = [
   NegativeTestCase{name = "ExtraComma", json = "{\"i64Value\": 42,,}"},
   NegativeTestCase{name = "EmptyInput", json = ""},
   NegativeTestCase{name = "ExtraContent", json = "{}garbage"},
+  NegativeTestCase{name = "FieldNameNotFound", json = "{\"NonExist (30)\": true}"},
+  NegativeTestCase{name = "FieldIdConflict", json = "{\"boolValue (31)\": true}"},
 ];
 
 const list<NegativeTestCase> overflowValidationNegativeCases = [

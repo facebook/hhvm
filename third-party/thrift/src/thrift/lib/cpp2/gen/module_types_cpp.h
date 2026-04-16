@@ -131,19 +131,22 @@ struct translate_field_name_hash_table {
       const protocol::TType* types);
 
   folly::F14FastMap<std::string_view, std::pair<int16_t, protocol::TType>> map;
+  folly::F14FastMap<int16_t, protocol::TType> idMap;
 };
 
-void translate_field_name(
-    std::string_view fname,
-    int16_t& fid,
-    protocol::TType& ftype,
-    const translate_field_name_table& table) noexcept;
+void checkFieldIdConflict(int16_t expected, int16_t actual);
 
-void translate_field_name(
+void translate_field_name_or_id(
     std::string_view fname,
     int16_t& fid,
     protocol::TType& ftype,
-    const translate_field_name_hash_table& table) noexcept;
+    const translate_field_name_table& table);
+
+void translate_field_name_or_id(
+    std::string_view fname,
+    int16_t& fid,
+    protocol::TType& ftype,
+    const translate_field_name_hash_table& table);
 
 namespace {
 

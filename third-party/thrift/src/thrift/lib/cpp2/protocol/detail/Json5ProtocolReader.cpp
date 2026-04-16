@@ -143,11 +143,10 @@ void Json5ProtocolReader::readFieldBegin(
     return;
   }
 
-  // Similar to SimpleJSONProtocol: assign dummy fieldId and fieldType since
-  // they are not available from JSON field names.
-  fieldId = std::numeric_limits<std::int16_t>::min();
   fieldType = protocol::T_VOID;
-  name = reader_.readObjectName();
+  auto parsed = parseIdentifierString<std::int16_t>(reader_.readObjectName());
+  name = std::move(parsed.name);
+  fieldId = parsed.value.value_or(std::numeric_limits<std::int16_t>::min());
 }
 
 void Json5ProtocolReader::readFieldEnd() {}
@@ -356,6 +355,8 @@ Json5ProtocolReader::parseIdentifierString(std::string s) {
 
 template Json5ProtocolReader::IdentifierReadResult<std::int32_t>
     Json5ProtocolReader::parseIdentifierString<std::int32_t>(std::string);
+template Json5ProtocolReader::IdentifierReadResult<std::int16_t>
+    Json5ProtocolReader::parseIdentifierString<std::int16_t>(std::string);
 
 // ============================================================================
 // Internal Value Reading Helpers

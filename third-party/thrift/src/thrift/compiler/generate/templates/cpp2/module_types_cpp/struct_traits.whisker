@@ -23,7 +23,7 @@ namespace detail {
 void TccStructTraits<{{struct.cpp_fullname}}>::translateFieldName(
     std::string_view _fname,
     int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
+    apache::thrift::protocol::TType& _ftype) {
   using data = apache::thrift::TStructDataStorage<{{struct.cpp_fullname}}>;
   {{! For small structs, linear scan is faster than hash table lookup. Threshold of 12 determined by benchmarking. }}
   static const {{#if (int.le? (array.len struct.fields) 12)}}st::translate_field_name_table{{#else}}st::translate_field_name_hash_table{{/if}} table{
@@ -31,7 +31,7 @@ void TccStructTraits<{{struct.cpp_fullname}}>::translateFieldName(
       data::fields_names.data(),
       data::fields_ids.data(),
       data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
+  st::translate_field_name_or_id(_fname, fid, _ftype, table);
 }
 
 } // namespace detail

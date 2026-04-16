@@ -21,6 +21,7 @@
 #include <folly/CppAttributes.h>
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
+#include <thrift/lib/cpp2/gen/module_types_cpp.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderStructReadState.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderWireTypeInfo.h>
 
@@ -90,11 +91,23 @@ const FieldInfo* findFieldInfo(
     const StructInfo& structInfo) {
   const FieldInfo* const end = structInfo.fieldInfos + structInfo.numFields;
   if (iprot->kUsesFieldNames()) {
-    const FieldInfo* found =
-        std::find_if(structInfo.fieldInfos, end, [&](const FieldInfo& val) {
-          return val.name == readState.fieldName();
-        });
-    if (found != end) {
+    const FieldInfo* found = nullptr;
+    if (readState.fieldName().empty()) {
+      // Only field ID provided (e.g., "(30)" or "30"). Look up by ID.
+      found = findFieldInfoById(structInfo, readState.fieldId);
+    } else {
+      // Field name provided. Look up by name.
+      found =
+          std::find_if(structInfo.fieldInfos, end, [&](const FieldInfo& val) {
+            return val.name == readState.fieldName();
+          });
+      if (found != end) {
+        st::checkFieldIdConflict(found->id, readState.fieldId);
+      } else if (findFieldInfoById(structInfo, readState.fieldId)) {
+        protocol::TProtocolException::throwInvalidFieldData();
+      }
+    }
+    if (found != nullptr && found != end) {
       readState.fieldId = found->id;
       readState.fieldType = found->typeInfo->type;
       if (readState.isCompatibleWithType(iprot, found->typeInfo->type)) {

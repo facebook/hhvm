@@ -128,7 +128,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = get_fiveCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -167,6 +168,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_five(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -241,7 +243,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = add_fiveCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -280,6 +283,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_add_five(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -354,7 +358,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = do_nothingCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -392,6 +397,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_do_nothing(returnState);
     if (returnState.ctx()) {
       auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -468,7 +474,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = concatCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -507,6 +514,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_concat(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -581,7 +589,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = get_valueCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -620,6 +629,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_value(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -694,7 +704,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = negateCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -733,6 +744,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_negate(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -807,7 +819,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = tinyCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -846,6 +859,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_tiny(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -920,7 +934,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = smallCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -959,6 +974,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_small(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1033,7 +1049,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = bigCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1072,6 +1089,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_big(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1146,7 +1164,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = twoCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1185,6 +1204,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_two(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1259,7 +1279,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = expected_exceptionCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1297,6 +1318,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_expected_exception(returnState);
     if (returnState.ctx()) {
       auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);
@@ -1373,7 +1395,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = unexpected_exceptionCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1412,6 +1435,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_unexpected_exception(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1486,7 +1510,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = sum_i16_listCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1525,6 +1550,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_i16_list(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1599,7 +1625,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = sum_i32_listCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1638,6 +1665,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_i32_list(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1712,7 +1740,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = sum_i64_listCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1751,6 +1780,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_i64_list(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1825,7 +1855,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = concat_manyCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1864,6 +1895,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_concat_many(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1938,7 +1970,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = count_structsCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -1977,6 +2010,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_count_structs(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2051,7 +2085,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = sum_setCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -2090,6 +2125,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_set(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2164,7 +2200,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = contains_wordCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -2203,6 +2240,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_contains_word(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2277,7 +2315,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = get_map_valueCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -2316,6 +2355,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_map_value(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2390,7 +2430,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = map_lengthCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -2429,6 +2470,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_map_length(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2503,7 +2545,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = sum_map_valuesCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -2542,6 +2585,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_sum_map_values(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2616,7 +2660,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = complex_sum_i32Ctx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -2655,6 +2700,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_complex_sum_i32(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2729,7 +2775,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = repeat_nameCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -2768,6 +2815,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_repeat_name(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2842,7 +2890,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = get_structCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -2881,6 +2930,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_struct(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2955,7 +3005,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = fibCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -2994,6 +3045,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_fib(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3068,7 +3120,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = unique_wordsCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -3107,6 +3160,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_unique_words(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3181,7 +3235,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = words_countCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -3220,6 +3275,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_words_count(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3294,7 +3350,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = set_enumCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -3333,6 +3390,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_set_enum(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3407,7 +3465,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = list_of_listsCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -3446,6 +3505,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_list_of_lists(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3520,7 +3580,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = word_character_frequencyCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -3559,6 +3620,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_word_character_frequency(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3633,7 +3695,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = list_of_setsCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -3672,6 +3735,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_list_of_sets(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3746,7 +3810,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = nested_map_argumentCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -3785,6 +3850,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_nested_map_argument(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3859,7 +3925,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = make_sentenceCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -3898,6 +3965,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_make_sentence(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3972,7 +4040,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = get_unionCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -4011,6 +4080,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_union(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -4085,7 +4155,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = get_keysCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -4124,6 +4195,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_keys(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -4198,7 +4270,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = lookup_doubleCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -4237,6 +4310,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_lookup_double(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -4311,7 +4385,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = retrieve_binaryCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -4350,6 +4425,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_retrieve_binary(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -4424,7 +4500,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = contain_binaryCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -4463,6 +4540,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_contain_binary(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -4537,7 +4615,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = contain_enumCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -4576,6 +4655,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_contain_enum(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -4650,7 +4730,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = get_binary_union_structCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -4689,6 +4770,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_binary_union_struct(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -4763,7 +4845,8 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = get_struct_hiddenCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -4802,6 +4885,7 @@ class Client<::py3::simple::SimpleService> : public apache::thrift::GeneratedAsy
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_get_struct_hidden(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();

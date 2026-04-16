@@ -76,6 +76,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::HeaderClientMet
 
 void apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnService>::fbthrift_serialize_and_send_echo(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::EchoRequest& p_request, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_echo(rpcOptions, *header, contextStack, p_request);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -116,7 +117,8 @@ void apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnService>::syn
 void apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnService>::sync_echo(apache::thrift::RpcOptions& rpcOptions, ::cpp2::EchoResponse& _return, const ::cpp2::EchoRequest& p_request) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = echoCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -138,6 +140,7 @@ void apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnService>::syn
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_echo(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -281,6 +284,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::HeaderClientMet
 
 void apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnService>::fbthrift_serialize_and_send_echo_2(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2::EchoRequest& p_request, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_echo_2(rpcOptions, *header, contextStack, p_request);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -321,7 +325,8 @@ void apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnService>::syn
 void apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnService>::sync_echo_2(apache::thrift::RpcOptions& rpcOptions, ::cpp2::EchoResponse& _return, const ::cpp2::EchoRequest& p_request) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = echo_2Ctx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -343,6 +348,7 @@ void apache::thrift::Client<::cpp2::HeaderClientMethodsAnnotationOnService>::syn
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_echo_2(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();

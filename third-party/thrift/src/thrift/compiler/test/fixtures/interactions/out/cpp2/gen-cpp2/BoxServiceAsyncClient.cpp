@@ -63,6 +63,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BoxService>::fb
 
 void apache::thrift::Client<::cpp2::BoxService>::fbthrift_serialize_and_send_getABoxSession(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const apache::thrift::InteractionHandle& handle, const ::cpp2::ShouldBeBoxed& p_req, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getABoxSession(rpcOptions, *header, contextStack, p_req);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -103,7 +104,8 @@ std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::
 std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::ShouldBeBoxed> apache::thrift::Client<::cpp2::BoxService>::sync_getABoxSession(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::ShouldBeBoxed& p_req) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getABoxSessionCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -126,6 +128,7 @@ std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     ::cpp2::ShouldBeBoxed _return;
     folly::exception_wrapper ew = recv_wrapped_getABoxSession(_return, returnState);
     if (contextStack != nullptr) {
@@ -272,6 +275,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BoxService>::Bo
 
 void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::fbthrift_serialize_and_send_getABox(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getABox(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -311,7 +315,8 @@ void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::sync_getABox(
 void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::sync_getABox(apache::thrift::RpcOptions& rpcOptions, ::cpp2::ShouldBeBoxed& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getABoxCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -333,6 +338,7 @@ void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::sync_getABox(
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getABox(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();

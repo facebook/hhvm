@@ -322,6 +322,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_noReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_noReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -362,7 +363,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_noReturn() {
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_noReturn(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = noReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -384,6 +386,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_noReturn(apa
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_noReturn(returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
@@ -510,6 +513,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_boolReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_boolReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -550,7 +554,8 @@ bool apache::thrift::Client<::some::valid::ns::ReturnService>::sync_boolReturn()
 bool apache::thrift::Client<::some::valid::ns::ReturnService>::sync_boolReturn(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = boolReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -572,6 +577,7 @@ bool apache::thrift::Client<::some::valid::ns::ReturnService>::sync_boolReturn(a
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     bool _return;
     folly::exception_wrapper ew = recv_wrapped_boolReturn(_return, returnState);
     if (contextStack != nullptr) {
@@ -702,6 +708,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_i16Return(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_i16Return(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -742,7 +749,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 ::std::int16_t apache::thrift::Client<::some::valid::ns::ReturnService>::sync_i16Return(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = i16ReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -764,6 +772,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     ::std::int16_t _return;
     folly::exception_wrapper ew = recv_wrapped_i16Return(_return, returnState);
     if (contextStack != nullptr) {
@@ -894,6 +903,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_i32Return(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_i32Return(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -934,7 +944,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 ::std::int32_t apache::thrift::Client<::some::valid::ns::ReturnService>::sync_i32Return(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = i32ReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -956,6 +967,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     ::std::int32_t _return;
     folly::exception_wrapper ew = recv_wrapped_i32Return(_return, returnState);
     if (contextStack != nullptr) {
@@ -1086,6 +1098,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_i64Return(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_i64Return(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1126,7 +1139,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 ::std::int64_t apache::thrift::Client<::some::valid::ns::ReturnService>::sync_i64Return(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = i64ReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1148,6 +1162,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     ::std::int64_t _return;
     folly::exception_wrapper ew = recv_wrapped_i64Return(_return, returnState);
     if (contextStack != nullptr) {
@@ -1278,6 +1293,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_floatReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_floatReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1318,7 +1334,8 @@ float apache::thrift::Client<::some::valid::ns::ReturnService>::sync_floatReturn
 float apache::thrift::Client<::some::valid::ns::ReturnService>::sync_floatReturn(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = floatReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1340,6 +1357,7 @@ float apache::thrift::Client<::some::valid::ns::ReturnService>::sync_floatReturn
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     float _return;
     folly::exception_wrapper ew = recv_wrapped_floatReturn(_return, returnState);
     if (contextStack != nullptr) {
@@ -1470,6 +1488,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_doubleReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_doubleReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1510,7 +1529,8 @@ double apache::thrift::Client<::some::valid::ns::ReturnService>::sync_doubleRetu
 double apache::thrift::Client<::some::valid::ns::ReturnService>::sync_doubleReturn(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = doubleReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1532,6 +1552,7 @@ double apache::thrift::Client<::some::valid::ns::ReturnService>::sync_doubleRetu
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     double _return;
     folly::exception_wrapper ew = recv_wrapped_doubleReturn(_return, returnState);
     if (contextStack != nullptr) {
@@ -1662,6 +1683,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_stringReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_stringReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1702,7 +1724,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_stringReturn
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_stringReturn(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = stringReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1724,6 +1747,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_stringReturn
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_stringReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1850,6 +1874,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_binaryReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_binaryReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1890,7 +1915,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_binaryReturn
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_binaryReturn(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = binaryReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1912,6 +1938,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_binaryReturn
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_binaryReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2038,6 +2065,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_mapReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_mapReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -2078,7 +2106,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_mapReturn(::
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_mapReturn(apache::thrift::RpcOptions& rpcOptions, ::std::map<::std::string, ::std::int64_t>& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = mapReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -2100,6 +2129,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_mapReturn(ap
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_mapReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2226,6 +2256,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_simpleTypedefReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_simpleTypedefReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -2266,7 +2297,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 ::some::valid::ns::simpleTypeDef apache::thrift::Client<::some::valid::ns::ReturnService>::sync_simpleTypedefReturn(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = simpleTypedefReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -2288,6 +2320,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     ::some::valid::ns::simpleTypeDef _return;
     folly::exception_wrapper ew = recv_wrapped_simpleTypedefReturn(_return, returnState);
     if (contextStack != nullptr) {
@@ -2418,6 +2451,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_complexTypedefReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_complexTypedefReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -2458,7 +2492,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_complexTyped
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_complexTypedefReturn(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::complexStructTypeDef& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = complexTypedefReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -2480,6 +2515,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_complexTyped
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_complexTypedefReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2606,6 +2642,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_list_mostComplexTypedefReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_list_mostComplexTypedefReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -2646,7 +2683,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_mostCom
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_mostComplexTypedefReturn(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::some::valid::ns::mostComplexTypeDef>& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = list_mostComplexTypedefReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -2668,6 +2706,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_mostCom
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_list_mostComplexTypedefReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -2794,6 +2833,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_enumReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_enumReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -2834,7 +2874,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 ::some::valid::ns::MyEnumA apache::thrift::Client<::some::valid::ns::ReturnService>::sync_enumReturn(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = enumReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -2856,6 +2897,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     ::some::valid::ns::MyEnumA _return;
     folly::exception_wrapper ew = recv_wrapped_enumReturn(_return, returnState);
     if (contextStack != nullptr) {
@@ -2986,6 +3028,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_list_EnumReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_list_EnumReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -3026,7 +3069,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_EnumRet
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_EnumReturn(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::some::valid::ns::MyEnumA>& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = list_EnumReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -3048,6 +3092,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_EnumRet
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_list_EnumReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3174,6 +3219,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_structReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_structReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -3214,7 +3260,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_structReturn
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_structReturn(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::MyStruct& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = structReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -3236,6 +3283,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_structReturn
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_structReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3362,6 +3410,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_set_StructReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_set_StructReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -3402,7 +3451,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_set_StructRe
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_set_StructReturn(apache::thrift::RpcOptions& rpcOptions, ::std::set<::some::valid::ns::MyStruct>& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = set_StructReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -3424,6 +3474,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_set_StructRe
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_set_StructReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3550,6 +3601,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_unionReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_unionReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -3590,7 +3642,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_unionReturn(
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_unionReturn(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::ComplexUnion& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = unionReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -3612,6 +3665,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_unionReturn(
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_unionReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3738,6 +3792,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_list_UnionReturn(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_list_UnionReturn(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -3778,7 +3833,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_UnionRe
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_UnionReturn(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::some::valid::ns::ComplexUnion>& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = list_UnionReturnCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -3800,6 +3856,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_list_UnionRe
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_list_UnionReturn(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -3927,6 +3984,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_readDataEb(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_size, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_readDataEb(rpcOptions, *header, contextStack, p_size);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -3967,7 +4025,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readDataEb(:
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readDataEb(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::IOBuf& _return, ::std::int64_t p_size) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = readDataEbCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -3989,6 +4048,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readDataEb(a
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_readDataEb(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -4116,6 +4176,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::some::valid::ns::Retu
 
 void apache::thrift::Client<::some::valid::ns::ReturnService>::fbthrift_serialize_and_send_readData(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_size, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_readData(rpcOptions, *header, contextStack, p_size);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -4156,7 +4217,8 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readData(::s
 void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readData(apache::thrift::RpcOptions& rpcOptions, ::some::valid::ns::IOBufPtr& _return, ::std::int64_t p_size) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = readDataCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -4178,6 +4240,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::sync_readData(apa
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_readData(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();

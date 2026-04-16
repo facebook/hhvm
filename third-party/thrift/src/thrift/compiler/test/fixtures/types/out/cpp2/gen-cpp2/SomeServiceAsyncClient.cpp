@@ -76,6 +76,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::apache::thrift::fixtu
 
 void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::fbthrift_serialize_and_send_bounce_map(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::apache::thrift::fixtures::types::SomeMap& p_m, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_bounce_map(rpcOptions, *header, contextStack, p_m);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -116,7 +117,8 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
 void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::sync_bounce_map(apache::thrift::RpcOptions& rpcOptions, ::apache::thrift::fixtures::types::SomeMap& _return, const ::apache::thrift::fixtures::types::SomeMap& p_m) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = bounce_mapCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -138,6 +140,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_bounce_map(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -265,6 +268,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::apache::thrift::fixtu
 
 void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::fbthrift_serialize_and_send_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_r, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_binary_keyed_map(rpcOptions, *header, contextStack, p_r);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -305,7 +309,8 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
 void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::sync_binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, ::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& _return, const ::std::vector<::std::int64_t>& p_r) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = binary_keyed_mapCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -327,6 +332,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::syn
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_binary_keyed_map(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();

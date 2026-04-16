@@ -17,6 +17,7 @@
 #pragma once
 
 #include <chrono>
+#include <functional>
 #include <map>
 #include <optional>
 #include <string>
@@ -292,6 +293,9 @@ class RequestCallback : public RequestClientCallback {
       folly::RequestContextScopeGuard rctx(std::move(context_));
       requestSentHelper();
       if (!thriftContext_->oneWay) {
+        if (thriftContext_->responseDecompressor) {
+          thriftContext_->responseDecompressor(state);
+        }
         try {
           replyReceived(std::move(state));
         } catch (...) {
@@ -339,6 +343,7 @@ class RequestCallback : public RequestClientCallback {
     bool oneWay{false};
     uint16_t protocolId;
     apache::thrift::ContextStack::UniquePtr ctx;
+    std::function<void(ClientReceiveState&)> responseDecompressor;
   };
 
  private:

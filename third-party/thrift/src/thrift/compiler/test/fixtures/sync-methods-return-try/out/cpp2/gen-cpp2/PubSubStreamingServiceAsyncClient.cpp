@@ -180,6 +180,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
 
 void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_serialize_and_send_returnstream(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, const ::cpp2::StreamItem& p_from, const ::cpp2::StreamItem& p_to, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_returnstream(rpcOptions, *header, contextStack, p_from, p_to);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -220,7 +221,8 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
 apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_returnstream(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_from, const ::cpp2::StreamItem& p_to) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = returnstreamCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -244,6 +246,7 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_returnstream(returnState);
     });
@@ -261,8 +264,9 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_returnstre
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = returnstreamCtx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -294,6 +298,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_returnstre
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_returnstream(tryResponse->response.value(), returnState);
     });
     if (ew) {
@@ -409,6 +414,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
 
 void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_serialize_and_send_streamthrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, const ::cpp2::StreamItem& p_foo, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_streamthrows(rpcOptions, *header, contextStack, p_foo);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -449,7 +455,8 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
 apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_streamthrows(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_foo) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = streamthrowsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -473,6 +480,7 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_streamthrows(returnState);
     });
@@ -490,8 +498,9 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_streamthro
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = streamthrowsCtx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -523,6 +532,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_streamthro
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_streamthrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
@@ -638,6 +648,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
 
 void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_serialize_and_send_servicethrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, const ::cpp2::StreamItem& p_foo, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_servicethrows(rpcOptions, *header, contextStack, p_foo);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -678,7 +689,8 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
 apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_servicethrows(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_foo) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = servicethrowsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -702,6 +714,7 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_servicethrows(returnState);
     });
@@ -719,8 +732,9 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_servicethr
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = servicethrowsCtx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -752,6 +766,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_servicethr
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_servicethrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
@@ -867,6 +882,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
 
 void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_serialize_and_send_servicethrows2(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, const ::cpp2::StreamItem& p_foo, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_servicethrows2(rpcOptions, *header, contextStack, p_foo);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -907,7 +923,8 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
 apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_servicethrows2(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_foo) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = servicethrows2Ctx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -931,6 +948,7 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_servicethrows2(returnState);
     });
@@ -948,8 +966,9 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_servicethr
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = servicethrows2Ctx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -981,6 +1000,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_servicethr
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_servicethrows2(tryResponse->response.value(), returnState);
     });
     if (ew) {
@@ -1096,6 +1116,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
 
 void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_serialize_and_send_boththrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, const ::cpp2::StreamItem& p_foo, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_boththrows(rpcOptions, *header, contextStack, p_foo);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1136,7 +1157,8 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
 apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_boththrows(apache::thrift::RpcOptions& rpcOptions, const ::cpp2::StreamItem& p_foo) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = boththrowsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -1160,6 +1182,7 @@ apache::thrift::ClientBufferedStream<::cpp2::StreamItem> apache::thrift::Client<
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_boththrows(returnState);
     });
@@ -1177,8 +1200,9 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_boththrows
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = boththrowsCtx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -1210,6 +1234,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_boththrows
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_boththrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
@@ -1325,6 +1350,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
 
 void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_serialize_and_send_responseandstreamstreamthrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_responseandstreamstreamthrows(rpcOptions, *header, contextStack, p_foo);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1365,7 +1391,8 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_
 apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t> apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_responseandstreamstreamthrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = responseandstreamstreamthrowsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -1389,6 +1416,7 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_responseandstreamstreamthrows(returnState);
     });
@@ -1406,8 +1434,9 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_responsean
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = responseandstreamstreamthrowsCtx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -1439,6 +1468,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_responsean
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_responseandstreamstreamthrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
@@ -1554,6 +1584,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
 
 void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_serialize_and_send_responseandstreamservicethrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_responseandstreamservicethrows(rpcOptions, *header, contextStack, p_foo);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1594,7 +1625,8 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_
 apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t> apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_responseandstreamservicethrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = responseandstreamservicethrowsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -1618,6 +1650,7 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_responseandstreamservicethrows(returnState);
     });
@@ -1635,8 +1668,9 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_responsean
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = responseandstreamservicethrowsCtx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -1668,6 +1702,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_responsean
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_responseandstreamservicethrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
@@ -1783,6 +1818,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::PubSubStreaming
 
 void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_serialize_and_send_responseandstreamboththrows(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_responseandstreamboththrows(rpcOptions, *header, contextStack, p_foo);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1823,7 +1859,8 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_
 apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_t> apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_responseandstreamboththrows(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = responseandstreamboththrowsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -1847,6 +1884,7 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2::StreamItem,::std::int32_
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_responseandstreamboththrows(returnState);
     });
@@ -1864,8 +1902,9 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_responsean
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = responseandstreamboththrowsCtx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -1897,6 +1936,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_responsean
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_responseandstreamboththrows(tryResponse->response.value(), returnState);
     });
     if (ew) {

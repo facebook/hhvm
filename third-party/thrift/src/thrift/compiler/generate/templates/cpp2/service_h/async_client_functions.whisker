@@ -104,7 +104,8 @@
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<{{#if function.oneway?}}true{{#else}}false{{/if}}> callback(&returnState, co_await folly::coro::co_current_executor);
     {{#if (not function.oneway?)}}
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     {{/if (not function.oneway?)}}
     auto [ctx, header] = {{function.cpp_name}}Ctx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<{{#if function.oneway?}}true{{#else}}false{{/if}}>;
@@ -156,6 +157,7 @@
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
       {{#if (or function.stream? (not function.return_type.void?))}}
     auto ew = recv_wrapped_{{function.cpp_name}}(_return, returnState);
     if (returnState.ctx()) {

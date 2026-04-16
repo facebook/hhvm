@@ -153,6 +153,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
 
 void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_method(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_method(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -279,6 +280,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
 
 void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodAndReponse(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_methodAndReponse(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -405,6 +407,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
 
 void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_methodThrow(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -531,6 +534,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
 
 void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodSinkThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_methodSinkThrow(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -657,6 +661,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
 
 void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodFinalThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_methodFinalThrow(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -783,6 +788,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
 
 void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodBothThrow(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_methodBothThrow(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -909,6 +915,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::SinkService>::f
 
 void apache::thrift::Client<::cpp2::SinkService>::fbthrift_serialize_and_send_methodFast(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_methodFast(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);

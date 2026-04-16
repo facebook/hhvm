@@ -66,6 +66,7 @@ apache::thrift::SerializedRequest {{#partial client.client_class_name service=in
 
 void {{#partial client.client_class_name service=interface parent_service=parent_service}}::fbthrift_serialize_and_send_{{function.cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{#partial client.callback_type function=function}} callback{{#if function.creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/if}}{{function_comma}}{{#partial client.function_param_list function=function}}, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_{{function.cpp_name}}(rpcOptions, *header, contextStack{{function_comma}}{{#partial rpc.param_list function=function}});
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);

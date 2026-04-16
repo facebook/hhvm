@@ -369,6 +369,22 @@ class THeader final {
     return c_.compressionConfig_;
   }
 
+  void setPreCompressedAlgorithm(CompressionAlgorithm algorithm) {
+    c_.preCompressedAlgorithm_ = algorithm;
+  }
+
+  CompressionAlgorithm getPreCompressedAlgorithm() const {
+    return c_.preCompressedAlgorithm_;
+  }
+
+  void setResponseCompressionAlgorithm(CompressionAlgorithm algorithm) {
+    c_.responseCompressionAlgorithm_ = algorithm;
+  }
+
+  CompressionAlgorithm getResponseCompressionAlgorithm() const {
+    return c_.responseCompressionAlgorithm_;
+  }
+
   void setProxiedPayloadMetadata(
       ProxiedPayloadMetadata proxiedPayloadMetadata) {
     c_.proxiedPayloadMetadata_ = proxiedPayloadMetadata;
@@ -588,6 +604,15 @@ class THeader final {
     std::optional<int64_t> grLoad_;
 
     std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata_;
+
+    // Pre-compressed request state: set by compressRequest() on the caller
+    // thread, consumed by sendThriftRequest() to skip re-compression.
+    CompressionAlgorithm preCompressedAlgorithm_{CompressionAlgorithm::NONE};
+
+    // Response compression state: set by the transport when skipping
+    // decompression, consumed by decompressResponse() on the caller thread.
+    CompressionAlgorithm responseCompressionAlgorithm_{
+        CompressionAlgorithm::NONE};
 
     // We make this field optional to differentiate SR calls v.s raw thrift
     // calls. This field will always be set by SR.

@@ -65,6 +65,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
 
 void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::Service>::fbthrift_serialize_and_send_func(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::fixtures::adapter::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::fixtures::adapter::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::fixtures::adapter::Foo& p_arg3, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_func(rpcOptions, *header, contextStack, p_arg1, p_arg2, p_arg3);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -105,7 +106,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 ::facebook::thrift::test::fixtures::adapter::MyI32_4873 apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::Service>::sync_func(apache::thrift::RpcOptions& rpcOptions, const ::facebook::thrift::test::fixtures::adapter::StringWithAdapter_7208& p_arg1, const ::facebook::thrift::test::fixtures::adapter::StringWithCppAdapter& p_arg2, const ::facebook::thrift::test::fixtures::adapter::Foo& p_arg3) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = funcCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -127,6 +129,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     ::facebook::thrift::test::fixtures::adapter::MyI32_4873 _return;
     folly::exception_wrapper ew = recv_wrapped_func(_return, returnState);
     if (contextStack != nullptr) {

@@ -63,6 +63,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::test::fixtures::basic
 
 void apache::thrift::Client<::test::fixtures::basic::FB303Service>::fbthrift_serialize_and_send_simple_rpc(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_int_parameter, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_simple_rpc(rpcOptions, *header, contextStack, p_int_parameter);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -103,7 +104,8 @@ void apache::thrift::Client<::test::fixtures::basic::FB303Service>::sync_simple_
 void apache::thrift::Client<::test::fixtures::basic::FB303Service>::sync_simple_rpc(apache::thrift::RpcOptions& rpcOptions, ::test::fixtures::basic::ReservedKeyword& _return, ::std::int32_t p_int_parameter) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = simple_rpcCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -125,6 +127,7 @@ void apache::thrift::Client<::test::fixtures::basic::FB303Service>::sync_simple_
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_simple_rpc(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();

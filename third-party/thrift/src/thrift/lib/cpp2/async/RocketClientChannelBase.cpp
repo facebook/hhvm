@@ -674,7 +674,8 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
       size_t requestWireSize,
       size_t requestMetadataAndPayloadSize,
       bool encodeMetadataUsingBinary,
-      rocket::RocketClient::DestructionGuardedClient guardedClient)
+      rocket::RocketClient::DestructionGuardedClient guardedClient,
+      bool skipDecompression)
       : cb_(std::move(cb)),
         protocolId_(protocolId),
         methodName_(std::move(methodName)),
@@ -683,7 +684,8 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
         requestMetadataAndPayloadSize_(requestMetadataAndPayloadSize),
         timeBeginSend_(clock::now()),
         encodeMetadataUsingBinary_(encodeMetadataUsingBinary),
-        guardedClient_(std::move(guardedClient)) {}
+        guardedClient_(std::move(guardedClient)),
+        skipDecompression_(skipDecompression) {}
 
   void onWriteSuccess() noexcept override { timeEndSend_ = clock::now(); }
 
@@ -728,9 +730,15 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
       stats.responseMetadataAndPayloadSizeBytes =
           payload->metadataAndDataSize();
 
-      response = guardedClient_.client->getPayloadSerializer()
-                     ->unpack<FirstResponsePayload>(
-                         std::move(*payload), encodeMetadataUsingBinary_);
+      if (skipDecompression_) {
+        response = guardedClient_.client->getPayloadSerializer()
+                       ->unpackAsCompressed<FirstResponsePayload>(
+                           std::move(*payload), encodeMetadataUsingBinary_);
+      } else {
+        response = guardedClient_.client->getPayloadSerializer()
+                       ->unpack<FirstResponsePayload>(
+                           std::move(*payload), encodeMetadataUsingBinary_);
+      }
       if (response.hasException()) {
         cb_.release()->onResponseError(std::move(response.exception()));
         return;
@@ -779,6 +787,13 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
     }
     apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
         response->metadata, *tHeader);
+    // If decompression was skipped, store the compression algorithm on THeader
+    // so the caller thread can decompress via decompressResponse().
+    if (skipDecompression_) {
+      if (auto compression = response->metadata.compression()) {
+        tHeader->setResponseCompressionAlgorithm(*compression);
+      }
+    }
     cb_.release()->onResponse(ClientReceiveState(
         protocolId_,
         handler.mtype,
@@ -799,6 +814,7 @@ class RocketClientChannelBase::SingleRequestSingleResponseCallback final
   std::chrono::time_point<clock> timeEndSend_;
   const bool encodeMetadataUsingBinary_;
   rocket::RocketClient::DestructionGuardedClient guardedClient_;
+  const bool skipDecompression_;
 };
 
 class RocketClientChannelBase::SingleRequestNoResponseCallback final
@@ -978,6 +994,16 @@ void RocketClientChannelBase::sendThriftRequest(
       std::move(frameworkMetadata),
       hasCustomCompressor());
 
+  // If the request was pre-compressed on the caller thread (via
+  // compressRequest in generated code), override the metadata compression
+  // and tell packWithFds to skip re-compression.
+  bool skipCompression = false;
+  auto preCompressedAlgorithm = header->getPreCompressedAlgorithm();
+  if (preCompressedAlgorithm != CompressionAlgorithm::NONE) {
+    metadata.compression() = preCompressedAlgorithm;
+    skipCompression = true;
+  }
+
   size_t requestSerializedSize;
   // Avoid unnecessary computation for streaming methods.
   if constexpr (std::is_same_v<Callback, RequestClientCallback::Ptr>) {
@@ -991,7 +1017,8 @@ void RocketClientChannelBase::sendThriftRequest(
         rpcOptions.copySocketFdsToSend(),
         encodeMetadataUsingBinary(),
         getRocketClientImpl().getTransportWrapper(),
-        getRocketClientImpl().getIOBufFactory());
+        getRocketClientImpl().getIOBufFactory(),
+        skipCompression);
     requestPayload.setDataFirstFieldAlignment(
         rpcOptions.getFrameRelativeDataAlignment());
     if (metadata.protocol()) {
@@ -1028,7 +1055,8 @@ void RocketClientChannelBase::sendThriftRequest(
             timeout.value_or(std::chrono::milliseconds(0)),
             requestSerializedSize,
             std::move(requestPayload),
-            std::move(clientCallback));
+            std::move(clientCallback),
+            /*skipDecompression=*/false);
         break;
 
       default:
@@ -1092,7 +1120,8 @@ void RocketClientChannelBase::sendSingleRequestSingleResponse(
     std::chrono::milliseconds timeout,
     size_t requestSerializedSize,
     rocket::Payload requestPayload,
-    RequestClientCallback::Ptr cb) {
+    RequestClientCallback::Ptr cb,
+    bool skipDecompression) {
   const auto requestWireSize = requestPayload.dataSize();
   const auto requestMetadataAndPayloadSize =
       requestPayload.metadataAndDataSize();
@@ -1107,7 +1136,8 @@ void RocketClientChannelBase::sendSingleRequestSingleResponse(
       requestWireSize,
       requestMetadataAndPayloadSize,
       encodeMetadataUsingBinary(),
-      rocket::RocketClient::DestructionGuardedClient(&getRocketClientImpl()));
+      rocket::RocketClient::DestructionGuardedClient(&getRocketClientImpl()),
+      skipDecompression);
 
   if (isSync && folly::fibers::onFiber()) {
     callback.onResponsePayload(

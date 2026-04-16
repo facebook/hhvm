@@ -75,6 +75,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
 
 void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::AdapterService>::fbthrift_serialize_and_send_count(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_count(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -115,7 +116,8 @@ void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::Adapter
 void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::AdapterService>::sync_count(apache::thrift::RpcOptions& rpcOptions, ::facebook::thrift::test::fixtures::adapter::CountingStruct& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = countCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -137,6 +139,7 @@ void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::Adapter
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_count(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -264,6 +267,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::facebook::thrift::tes
 
 void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::AdapterService>::fbthrift_serialize_and_send_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_adaptedTypes(rpcOptions, *header, contextStack, p_arg);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -304,7 +308,8 @@ void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::Adapter
 void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::AdapterService>::sync_adaptedTypes(apache::thrift::RpcOptions& rpcOptions, ::facebook::thrift::test::fixtures::adapter::HeapAllocated& _return, const ::facebook::thrift::test::fixtures::adapter::HeapAllocated& p_arg) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = adaptedTypesCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -326,6 +331,7 @@ void apache::thrift::Client<::facebook::thrift::test::fixtures::adapter::Adapter
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_adaptedTypes(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();

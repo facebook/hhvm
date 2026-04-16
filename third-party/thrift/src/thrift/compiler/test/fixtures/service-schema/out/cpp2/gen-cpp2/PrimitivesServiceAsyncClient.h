@@ -94,7 +94,8 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = initCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -133,6 +134,7 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_init(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -207,7 +209,8 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = method_that_throwsCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -246,6 +249,7 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_method_that_throws(_return, returnState);
     if (returnState.ctx()) {
       returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -320,7 +324,8 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
     const bool cancellable = cancelToken.canBeCancelled();
     apache::thrift::ClientReceiveState returnState;
     apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
-    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+    auto protocolId = channel->getProtocolId();
     auto [ctx, header] = return_void_methodCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
@@ -358,6 +363,7 @@ class Client<::facebook::thrift::test::fixtures::service_schema::PrimitivesServi
         rpcOptions->setRoutingData(rheader->releaseRoutingData());
       }
     };
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_return_void_method(returnState);
     if (returnState.ctx()) {
       auto tryObj = returnState.ctx()->processClientInterceptorsOnResponse(returnState.header(), ew);

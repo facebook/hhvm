@@ -76,6 +76,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::DbMixedStackArg
 
 void apache::thrift::Client<::cpp2::DbMixedStackArguments>::fbthrift_serialize_and_send_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey0(rpcOptions, *header, contextStack, p_key);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -116,7 +117,8 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey0(:
 void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey0(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::string& p_key) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getDataByKey0Ctx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -138,6 +140,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey0(a
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataByKey0(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -154,8 +157,9 @@ apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_complete_getDataByKe
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = getDataByKey0Ctx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   callback.waitUntilDone(
     evb,
@@ -185,6 +189,7 @@ apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_complete_getDataByKe
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_getDataByKey0(tryResponse->response.value(), returnState);
     });
     if (ew) {
@@ -310,6 +315,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::DbMixedStackArg
 
 void apache::thrift::Client<::cpp2::DbMixedStackArguments>::fbthrift_serialize_and_send_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_key, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey1(rpcOptions, *header, contextStack, p_key);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -350,7 +356,8 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey1(:
 void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey1(apache::thrift::RpcOptions& rpcOptions, ::std::string& _return, const ::std::string& p_key) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getDataByKey1Ctx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -372,6 +379,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_getDataByKey1(a
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getDataByKey1(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -388,8 +396,9 @@ apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_complete_getDataByKe
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = getDataByKey1Ctx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
   callback.waitUntilDone(
     evb,
@@ -419,6 +428,7 @@ apache::thrift::Client<::cpp2::DbMixedStackArguments>::sync_complete_getDataByKe
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
       return recv_wrapped_getDataByKey1(tryResponse->response.value(), returnState);
     });
     if (ew) {

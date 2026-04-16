@@ -113,6 +113,16 @@ class GeneratedAsyncClient : public TClientBase {
     RequestCallback::Context callbackContext;
     callbackContext.oneWay = IsOneWay;
     callbackContext.protocolId = this->getChannel()->getProtocolId();
+    if constexpr (!IsOneWay) {
+      // Capture a shared_ptr to the channel so it stays alive until the
+      // callback fires — the lambda may outlive *this.
+      auto channelShared = this->getChannelShared();
+      callbackContext.responseDecompressor =
+          [channelShared =
+               std::move(channelShared)](ClientReceiveState& state) {
+            channelShared->decompressResponse(state);
+          };
+    }
     auto* ctx = contextStack.get();
     if (callback) {
       callbackContext.ctx = std::move(contextStack);

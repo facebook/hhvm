@@ -38,7 +38,8 @@ void {{#partial client.client_class_name service=interface parent_service=parent
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<{{#if function.oneway?}}true{{#else}}false{{/if}}> callback(&returnState);
   {{#if (not function.oneway?)}}
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   {{/if (not function.oneway?)}}
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = {{function.cpp_name}}Ctx(&rpcOptions);
@@ -71,6 +72,7 @@ void {{#partial client.client_class_name service=interface parent_service=parent
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     {{#if (not function.sync_returns_by_outparam?)}}
     {{! Case 1: Stream functions }}
       {{#if function.stream?}}
@@ -138,8 +140,9 @@ folly::Try<apache::thrift::RpcResponseComplete<{{#partial client.return_type fun
   apache::thrift::ClientReceiveState returnState;
   auto ctxAndHeader = {{function.cpp_name}}Ctx(&rpcOptions);
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  const auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-  auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  const auto protocolId = channel->getProtocolId();
+  auto* const evb = channel->getEventBase();
     {{#if function.stream?}}
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
@@ -175,6 +178,7 @@ folly::Try<apache::thrift::RpcResponseComplete<{{#partial client.return_type fun
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
+      channel->decompressResponse(returnState);
     {{#if (and (not function.stream?) function.return_type.void?)}}
       return recv_wrapped_{{function.cpp_name}}(returnState);
     {{#else}}

@@ -196,6 +196,19 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       BiDiClientCallback* clientCallback,
       std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
+  // Called by clientSendT on the caller thread before sendRequestAsync.
+  // Override to compress the request payload before IO dispatch.
+  // Default implementation is a no-op.
+  virtual void compressRequest(
+      SerializedRequest& /* request */,
+      const RpcOptions& /* rpcOptions */,
+      transport::THeader& /* header */) {}
+
+  // Called by recv_wrapped on the caller thread before deserialization.
+  // Override to decompress the response payload on the caller thread.
+  // Default implementation is a no-op.
+  virtual void decompressResponse(ClientReceiveState& /* state */) {}
+
   virtual void setCloseCallback(CloseCallback*) = 0;
 
   virtual folly::EventBase* getEventBase() const = 0;

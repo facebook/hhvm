@@ -234,6 +234,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_processIOBuf(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2_struct_footprint::IOBuf& p_buf, const ::cpp2_struct_footprint::IOBufPtr& p_ptr, ::cpp2_struct_footprint::I32Alias p_alias, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_processIOBuf(rpcOptions, *header, contextStack, p_buf, p_ptr, p_alias);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -274,7 +275,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_processIOBuf(apache::thrift::RpcOptions& rpcOptions, const ::cpp2_struct_footprint::IOBuf& p_buf, const ::cpp2_struct_footprint::IOBufPtr& p_ptr, ::cpp2_struct_footprint::I32Alias p_alias) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = processIOBufCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -296,6 +298,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_processIOBuf(returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
@@ -422,6 +425,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_getStruct(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getStruct(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -462,7 +466,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_getStruct(apache::thrift::RpcOptions& rpcOptions, ::cpp2_struct_footprint::SimpleStruct& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getStructCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -484,6 +489,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getStruct(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -611,6 +617,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_setStruct(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::cpp2_struct_footprint::SimpleStruct& p_input, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_setStruct(rpcOptions, *header, contextStack, p_input);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -651,7 +658,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_setStruct(apache::thrift::RpcOptions& rpcOptions, const ::cpp2_struct_footprint::SimpleStruct& p_input) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = setStructCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -673,6 +681,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_setStruct(returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
@@ -800,6 +809,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_setStructList(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& p_items, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_setStructList(rpcOptions, *header, contextStack, p_items);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -840,7 +850,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_setStructList(apache::thrift::RpcOptions& rpcOptions, const ::std::vector<::cpp2_struct_footprint::SimpleStruct>& p_items) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = setStructListCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -862,6 +873,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_setStructList(returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
@@ -988,6 +1000,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_getStructList(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getStructList(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1028,7 +1041,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_getStructList(apache::thrift::RpcOptions& rpcOptions, ::std::vector<::cpp2_struct_footprint::SimpleStruct>& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getStructListCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1050,6 +1064,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getStructList(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1176,6 +1191,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_getNestedContainer(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getNestedContainer(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1216,7 +1232,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_getNestedContainer(apache::thrift::RpcOptions& rpcOptions, ::std::map<::std::string, ::std::vector<::cpp2_struct_footprint::SimpleStruct>>& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getNestedContainerCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1238,6 +1255,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getNestedContainer(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1364,6 +1382,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_getTypedefStruct(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getTypedefStruct(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1404,7 +1423,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_getTypedefStruct(apache::thrift::RpcOptions& rpcOptions, ::cpp2_struct_footprint::MyStruct& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getTypedefStructCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1426,6 +1446,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getTypedefStruct(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1552,6 +1573,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_getTypedefList(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getTypedefList(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1592,7 +1614,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_getTypedefList(apache::thrift::RpcOptions& rpcOptions, ::cpp2_struct_footprint::StructList& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getTypedefListCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1614,6 +1637,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getTypedefList(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1740,6 +1764,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_getUnion(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getUnion(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1780,7 +1805,8 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_getUnion(apache::thrift::RpcOptions& rpcOptions, ::cpp2_struct_footprint::TestUnion& _return) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getUnionCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1802,6 +1828,7 @@ void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     auto ew = recv_wrapped_getUnion(_return, returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew, _return).throwUnlessValue();
@@ -1924,6 +1951,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_getCalculator(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const apache::thrift::InteractionHandle& handle, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getCalculator(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -1964,7 +1992,8 @@ apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculato
 apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculator apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_getCalculator(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = getCalculatorCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -1987,6 +2016,7 @@ apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculato
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     folly::exception_wrapper ew = recv_wrapped_getCalculator(returnState);
     if (contextStack != nullptr) {
       contextStack->processClientInterceptorsOnResponse(returnState.header(), ew).throwUnlessValue();
@@ -2113,6 +2143,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_streamStructs(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_streamStructs(rpcOptions, *header, contextStack);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -2153,7 +2184,8 @@ apache::thrift::ClientBufferedStream<::cpp2_struct_footprint::SimpleStruct> apac
 apache::thrift::ClientBufferedStream<::cpp2_struct_footprint::SimpleStruct> apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_streamStructs(apache::thrift::RpcOptions& rpcOptions) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = streamStructsCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -2177,6 +2209,7 @@ apache::thrift::ClientBufferedStream<::cpp2_struct_footprint::SimpleStruct> apac
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_streamStructs(returnState);
     });
@@ -2295,6 +2328,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_streamWithSinkInitial(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_input, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_streamWithSinkInitial(rpcOptions, *header, contextStack, p_input);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -2335,7 +2369,8 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1
 apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct> apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_streamWithSinkInitial(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_input) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = streamWithSinkInitialCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -2359,6 +2394,7 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_streamWithSinkInitial(returnState);
     });
@@ -2477,6 +2513,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::fbthrift_serialize_and_send_streamWithSinkException(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_input, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_streamWithSinkException(rpcOptions, *header, contextStack, p_input);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -2517,7 +2554,8 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1
 apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1,::cpp2_struct_footprint::SimpleStruct> apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::sync_streamWithSinkException(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_input) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = streamWithSinkExceptionCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
@@ -2541,6 +2579,7 @@ apache::thrift::ResponseAndClientBufferedStream<::cpp2_struct_footprint::Struct1
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
 auto tryObj = folly::makeTryWith([&]() {
       return recv_streamWithSinkException(returnState);
     });
@@ -2677,6 +2716,7 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2_struct_footprint
 
 void apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculator::fbthrift_serialize_and_send_add(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_a, ::std::int32_t p_b, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_add(rpcOptions, *header, contextStack, p_a, p_b);
+  channel_->compressRequest(request, rpcOptions, *header);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
@@ -2716,7 +2756,8 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
 ::std::int32_t apache::thrift::Client<::cpp2_struct_footprint::FootprintTestService>::Calculator::sync_add(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_a, ::std::int32_t p_b) {
   apache::thrift::ClientReceiveState returnState;
   apache::thrift::ClientSyncCallback<false> callback(&returnState);
-  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto channel = apache::thrift::GeneratedAsyncClient::getChannelShared();
+  auto protocolId = channel->getProtocolId();
   auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
   auto ctxAndHeader = addCtx(&rpcOptions);
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
@@ -2738,6 +2779,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
     }
   };
   return folly::fibers::runInMainContext([&] {
+    channel->decompressResponse(returnState);
     ::std::int32_t _return;
     folly::exception_wrapper ew = recv_wrapped_add(_return, returnState);
     if (contextStack != nullptr) {

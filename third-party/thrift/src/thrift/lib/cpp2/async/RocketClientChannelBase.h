@@ -200,7 +200,8 @@ class RocketClientChannelBase : public ClientChannel {
       std::chrono::milliseconds timeout,
       size_t requestSerializedSize,
       rocket::Payload requestPayload,
-      RequestClientCallback::Ptr cb);
+      RequestClientCallback::Ptr cb,
+      bool skipDecompression);
 
   void sendStreamRequest(
       const RpcOptions& rpcOptions,

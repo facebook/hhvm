@@ -239,7 +239,8 @@ class HQSessionTest
   void unidirectionalReadCallback(quic::StreamId id,
                                   std::unique_ptr<folly::IOBuf> buf) override {
     // check for control streams
-    if (buf->empty()) {
+    const bool done = buf->empty() || wtStreams_.contains(id);
+    if (done) {
       return;
     }
 
@@ -273,6 +274,7 @@ class HQSessionTest
         }
           return;
         case proxygen::hq::UnidirectionalStreamType::WEBTRANSPORT:
+          wtStreams_.insert(id);
           return;
         default:
           CHECK(false) << "Unknown stream preface=" << preface->first;
@@ -420,6 +422,7 @@ class HQSessionTest
   proxygen::QPACKCodec qpackCodec_;
   std::map<quic::StreamId, proxygen::hq::UnidirectionalStreamType>
       controlStreams_;
+  std::unordered_set<quic::StreamId> wtStreams_;
   // Ingress Control Stream
   std::unique_ptr<proxygen::hq::HQControlCodec> ingressControlCodec_;
   folly::IOBufQueue ingressControlBuf_{folly::IOBufQueue::cacheChainLength()};

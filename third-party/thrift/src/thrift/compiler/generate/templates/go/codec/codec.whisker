@@ -184,10 +184,8 @@ if err := p.ReadMapEnd(); err != nil {
 result := mapResult
 {{/let partial}}
 {{! ACTUAL "decode" PARTIAL BELOW: }}
-{{#if (and type.typedef? type.defined_kind?)}}
+{{#if type.typedef?}}
 {{#partial decode_typedef typedef=type}}
-{{#else if type.typedef?}}
-{{#partial decode type=type.resolved}}
 {{#else if type.structured?}}
 {{#partial decode_struct struct=type}}
 {{#else if type.enum?}}
@@ -200,7 +198,7 @@ result := mapResult
 {{#partial decode_set type=type}}
 {{#else if type.map?}}
 {{#partial decode_map type=type}}
-{{/if (and type.typedef? type.defined_kind?)}}
+{{/if type.typedef?}}
 {{/let partial}}
 
 {{! Defines the encoding/write function for a given field type. }}
@@ -296,10 +294,8 @@ if err := p.WriteMapEnd(); err != nil {
 }
 {{/let partial}}
 {{! ACTUAL "encode" PARTIAL BELOW: }}
-{{#if (and type.typedef? type.defined_kind?)}}
+{{#if type.typedef?}}
 {{#partial encode_typedef typedef=type}}
-{{#else if type.typedef?}}
-{{#partial encode type=type.resolved}}
 {{#else if type.structured?}}
 {{#partial encode_struct}}
 {{#else if type.enum?}}
@@ -312,5 +308,5 @@ if err := p.WriteMapEnd(); err != nil {
 {{#partial encode_set type=type}}
 {{#else if type.map?}}
 {{#partial encode_map type=type}}
-{{/if (and type.typedef? type.defined_kind?)}}
+{{/if type.typedef?}}
 {{/let partial}}

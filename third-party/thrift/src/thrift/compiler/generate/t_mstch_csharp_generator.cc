@@ -142,25 +142,6 @@ class t_csharp_EXPERIMENTAL_generator : public t_whisker_generator {
     return std::move(def).make();
   }
 
-  prototype<t_typedef>::ptr make_prototype_for_typedef(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_typedef(proto);
-    auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
-
-    def.property("defined_kind?", [](const t_typedef& self) {
-      return self.typedef_kind() == t_typedef::kind::defined;
-    });
-
-    return std::move(def).make();
-  }
-
-  prototype<t_const>::ptr make_prototype_for_const(
-      const prototype_database& proto) const override {
-    auto base = t_whisker_generator::make_prototype_for_const(proto);
-    auto def = whisker::dsl::prototype_builder<h_const>::extends(base);
-    return std::move(def).make();
-  }
-
   prototype<t_const_value>::ptr make_prototype_for_const_value(
       const prototype_database& proto) const override {
     auto base = t_whisker_generator::make_prototype_for_const_value(proto);

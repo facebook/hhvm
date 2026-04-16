@@ -186,15 +186,6 @@ void codegen_data::add_to_thrift_metadata_types(
     return;
   }
 
-  // Skip over a chain of "non-defined" typedefs.
-  if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
-    if (typedef_->typedef_kind() != t_typedef::kind::defined) {
-      auto underlying_type = &typedef_->type().deref();
-      add_to_thrift_metadata_types(underlying_type, visited_type_names);
-      return;
-    }
-  }
-
   visited_type_names.insert(type_name);
 
   // The recursion below is equivalent to post-order tree traversal.

@@ -82,8 +82,7 @@ map[
 }}
 {{#let export partial natural_default_value |type| captures |go_type| }}
   {{#pragma ignore-newlines}}
-{{#if (and type.typedef? type.defined_kind?)}}{{type.go_qualified_new_func}}()
-{{#else if type.typedef?}}{{#partial natural_default_value type=type.resolved}}
+{{#if type.typedef?}}{{type.go_qualified_new_func}}()
 {{#else if type.string?}}""
 {{#else if type.binary?}}[]byte("")
 {{#else if type.bool?}}false
@@ -94,5 +93,5 @@ map[
 {{#else if (or type.list? type.set?)}}make({{#partial go_type type=type}}, 0)
 {{#else if type.map?}}make({{#partial go_type type=type}})
 {{#else if type.structured?}}{{type.true_type.go_qualified_new_func}}()
-{{/if (and type.typedef? type.defined_kind?)}}
+{{/if type.typedef?}}
 {{/let partial}}

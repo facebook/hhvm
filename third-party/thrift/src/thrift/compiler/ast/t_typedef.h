@@ -37,22 +37,11 @@ namespace apache::thrift::compiler {
  */
 class t_typedef final : public t_type {
  public:
-  // TODO(T244601847): Clean up usages and remove, as unresolved types are no
-  // longer represented using placeholder typedefs, so there is only one kind.
-  enum class kind {
-    defined,
-    placeholder,
-  };
-
   t_typedef(const t_program* program, std::string name, t_type_ref type)
       : t_type(program, std::move(name)), aliased_type_ref_(type) {}
 
   const t_type_ref& type() const { return aliased_type_ref_; }
   void set_type(t_type_ref type) { aliased_type_ref_ = type; }
-
-  // TODO(T244601847): Clean up usages and remove, as unresolved types are no
-  // longer represented using placeholder typedefs, so there is only one kind.
-  kind typedef_kind() const;
 
   // Returns the first type, in the typedef type hierarchy, matching the
   // given predicate or nullptr.

@@ -228,18 +228,13 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
   auto type_name = t_const_value::make_map();
   std::unique_ptr<t_const_value> params;
 
-  auto* resolved_type = &type;
-  while (auto* typedf = dynamic_cast<const t_typedef*>(resolved_type)) {
-    if (typedf->typedef_kind() != t_typedef::kind::defined) {
-      resolved_type = &*typedf->type();
-      continue;
-    }
-
-    type_name->add_map(val("typedefType"), type_uri(*resolved_type));
+  if (type.is<t_typedef>()) {
+    type_name->add_map(val("typedefType"), type_uri(type));
     schema->add_map(val("name"), std::move(type_name));
     return schema;
   }
 
+  auto* resolved_type = &type;
   resolved_type->visit(
       [&](const t_primitive_type& primitive) {
         switch (primitive.primitive_type()) {
@@ -341,16 +336,11 @@ void schematize_recursively(
     const t_program* program,
     t_const_value* defns_schema,
     const t_type& type) {
-  auto* resolved_type = &type;
-  while (auto* typedf = dynamic_cast<const t_typedef*>(resolved_type)) {
-    if (typedf->typedef_kind() != t_typedef::kind::defined) {
-      resolved_type = &*typedf->type();
-      continue;
-    }
+  if (type.is<t_typedef>()) {
     return;
   }
 
-  resolved_type->visit(
+  type.visit(
       [&](const t_primitive_type&) {
         // No action needed for primitive types
       },

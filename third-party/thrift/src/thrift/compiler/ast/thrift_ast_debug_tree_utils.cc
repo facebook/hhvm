@@ -249,7 +249,6 @@ scope& addChildForTypedef(
       "{} [t_typedef] @{:#x}", prefix, uintptr_t(&typedefAst));
   addChildForType("(base)", typedefAst, typedefScope);
   addChildForTypeRef("type", typedefAst.type(), typedefScope);
-  typedefScope.make_child("typedef_kind: {}", typedefAst.typedef_kind());
   return typedefScope;
 }
 

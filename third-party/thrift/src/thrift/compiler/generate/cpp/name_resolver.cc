@@ -459,18 +459,16 @@ const std::string* cpp_name_resolver::resolve_cpp_type_name(
     // correctly at all usage sites.
     // For adapted typedefs, fall through — the adapter traversal in
     // gen_standard_type handles them.
-    if (td && td->typedef_kind() == t_typedef::kind::defined &&
-        find_first_adapter(node) == nullptr) {
-      return &get_namespaced_name(node);
-    }
-    if (!td || td->typedef_kind() != t_typedef::kind::defined) {
+    if (td == nullptr) {
       return type;
+    }
+    if (find_first_adapter(node) == nullptr) {
+      return &get_namespaced_name(node);
     }
   }
   // For non-adapted user-defined typedefs with @cpp.Type{template = "..."},
   // use the typedef name instead of traversing (which would lose the override).
-  if (td && td->typedef_kind() == t_typedef::kind::defined &&
-      find_template(node) && find_first_adapter(node) == nullptr) {
+  if (td && find_template(node) && find_first_adapter(node) == nullptr) {
     return &get_namespaced_name(node);
   }
   return nullptr;

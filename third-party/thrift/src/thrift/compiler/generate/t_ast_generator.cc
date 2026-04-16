@@ -353,17 +353,12 @@ type::Schema t_ast_generator::gen_schema(
       if (!ref || !schema_opts.source_ranges_ || !is_root_program) {
         return;
       }
-      while (ref->is<t_typedef>() &&
-             static_cast<const t_typedef&>(*ref).typedef_kind() !=
-                 t_typedef::kind::defined) {
-        ref = static_cast<const t_typedef&>(*ref).type();
-      }
 
-      if (auto list_type = dynamic_cast<const t_list*>(ref.get_type())) {
+      if (const auto* list_type = ref->try_as<t_list>()) {
         recurse(list_type->elem_type(), recurse);
-      } else if (auto set_type = dynamic_cast<const t_set*>(ref.get_type())) {
+      } else if (const auto* set_type = ref->try_as<t_set>()) {
         recurse(set_type->elem_type(), recurse);
-      } else if (auto map_type = dynamic_cast<const t_map*>(ref.get_type())) {
+      } else if (const auto* map_type = ref->try_as<t_map>()) {
         recurse(map_type->key_type(), recurse);
         recurse(map_type->val_type(), recurse);
       } else if (ref->is<t_primitive_type>()) {

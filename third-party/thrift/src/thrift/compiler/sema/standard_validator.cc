@@ -1717,9 +1717,6 @@ bool owns_annotations(const t_type* type) {
   if (type->is<t_primitive_type>()) {
     return true;
   }
-  if (auto t = dynamic_cast<const t_typedef*>(type)) {
-    return t->typedef_kind() != t_typedef::kind::defined;
-  }
   return false;
 }
 bool owns_annotations(t_type_ref type) {
@@ -1735,8 +1732,7 @@ void validate_custom_cpp_type_annotations(
 
   // For user-defined typedefs, unstructured cpp.type/cpp.template is not
   // supported — only structured @cpp.Type is allowed.
-  if (auto t = dynamic_cast<const t_typedef*>(&node);
-      t && t->typedef_kind() == t_typedef::kind::defined && hasCppType) {
+  if (auto t = dynamic_cast<const t_typedef*>(&node); t && hasCppType) {
     ctx.warning(
         "Unstructured annotation cpp.type/cpp.template on typedef `{}` is "
         "ignored. Use @cpp.Type instead.",

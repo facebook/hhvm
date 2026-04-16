@@ -39,10 +39,6 @@ const t_const* t_typedef::get_first_structured_annotation_or_null(
   return result;
 }
 
-t_typedef::kind t_typedef::typedef_kind() const {
-  return kind::defined;
-}
-
 bool t_typedef::is_sealed() const {
   return aliased_type_ref_->is_sealed(); // Throws if unresolved
 }

@@ -35,7 +35,7 @@
 
 {{! Defines a codec spec instance for a Thrift type. }}
 {{#let export partial codec_type_spec_instance |type| captures |codec codec_primitive_type|}}
-{{#if (and type.typedef? type.defined_kind?)}}
+{{#if type.typedef?}}
 &thrift.CodecTypedefSpec{
     ScopedName:         "{{type.scoped_name}}",
     UnderlyingTypeSpec: {{type.resolved.codec_type_spec_getter}},
@@ -73,7 +73,7 @@
     ElementWireType: {{#partial codec.ttype type=type.elem_type}},
     ElementTypeSpec: {{type.elem_type.codec_type_spec_getter}},
 },
-{{/if (and type.typedef? type.defined_kind?)}}
+{{/if type.typedef?}}
 {{/let partial}}
 
 {{! Defines a spec for a Thrift struct field. }}
@@ -117,13 +117,12 @@
 {{! Defines the mapping from a Thrift type to a corresponding TypeSpec field name. }}
 {{#let export partial codec_type_spec_setter |type|}}
   {{#pragma ignore-newlines}}
-{{#if (and type.typedef? type.defined_kind?)}}CodecTypedefSpec
-{{#else if type.typedef?}}{{#partial codec_type_spec_setter type=type.resolved}}
+{{#if type.typedef?}}CodecTypedefSpec
 {{#else if type.metadata_primitive?}}CodecPrimitiveSpec
 {{#else if type.enum?}}CodecEnumSpec
 {{#else if type.structured?}}CodecStructSpec
 {{#else if type.list?}}CodecListSpec
 {{#else if type.map?}}CodecMapSpec
 {{#else if type.set?}}CodecSetSpec
-{{/if (and type.typedef? type.defined_kind?)}}
+{{/if type.typedef?}}
 {{/let partial}}

@@ -272,16 +272,6 @@ class t_mstch_go_generator : public t_whisker_generator {
     auto base = t_whisker_generator::make_prototype_for_typedef(proto);
     auto def = whisker::dsl::prototype_builder<h_typedef>::extends(base);
 
-    def.property("defined_kind?", [](const t_typedef& self) {
-      // NOTE: there are multiple typedef "kinds":
-      //  * defined - typedef actually defined in a Thrift schema by a human.
-      //  * unnamed - typedef used for unstructured annotations.
-      //  * placeholder - typedef used as a placeholder during AST parsing
-      //    when not all type are fully known yet. During generation, when we
-      //    encounter this kind fo typedef, we should skip it to the underlying
-      //    "real" type or "defined" typedef to ensure code correctness.
-      return self.typedef_kind() == t_typedef::kind::defined;
-    });
     def.property("go_qualified_new_func", [this](const t_typedef& self) {
       auto prefix = data_.go_package_alias_prefix(self.program());
       return fmt::format("{}New{}", prefix, go::go_name(self));

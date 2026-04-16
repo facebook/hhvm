@@ -140,15 +140,14 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │  ├─ full_name: ParseAndDebugPrint.int
    │  │     │  ╰─ true_type: [t_type*] 0xNORMALIZED_10
    │  │     │     ╰─ full_name: i32
-   │  │     ├─ type [t_type_ref]
-   │  │     │  ├─ empty? false
-   │  │     │  ├─ resolved? true
-   │  │     │  ├─ src_range [source_range]
-   │  │     │  │  ├─ begin (offset): 52
-   │  │     │  │  ╰─ end (offset): 55
-   │  │     │  ╰─ type: [t_type*] 0xNORMALIZED_10
-   │  │     │     ╰─ full_name: i32
-   │  │     ╰─ typedef_kind: 0
+   │  │     ╰─ type [t_type_ref]
+   │  │        ├─ empty? false
+   │  │        ├─ resolved? true
+   │  │        ├─ src_range [source_range]
+   │  │        │  ├─ begin (offset): 52
+   │  │        │  ╰─ end (offset): 55
+   │  │        ╰─ type: [t_type*] 0xNORMALIZED_10
+   │  │           ╰─ full_name: i32
    │  ├─ enums (size: 0)
    │  ├─ consts (size: 0)
    │  ├─ structs_and_unions (size: 1)

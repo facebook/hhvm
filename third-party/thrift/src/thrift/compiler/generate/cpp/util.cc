@@ -172,13 +172,6 @@ gen_dependency_graph(
         [&](const t_type* type,
             bool include_structured_types,
             bool force_complete_container) {
-          if (const auto* typedf = type->try_as<t_typedef>()) {
-            // Resolve unnamed typedefs
-            if (typedf->typedef_kind() != t_typedef::kind::defined) {
-              type = &typedf->type().deref();
-            }
-          }
-
           if (const auto* map = type->try_as<t_map>()) {
             bool supports_incomplete = !force_complete_container &&
                 container_supports_incomplete_params(*map);
@@ -215,8 +208,7 @@ gen_dependency_graph(
             // after removing annotation lowering). This ensures element types
             // are added as dependencies when the container template requires
             // complete types.
-            if (typedf->typedef_kind() == t_typedef::kind::defined &&
-                include_structured_types &&
+            if (include_structured_types &&
                 typedf->find_structured_annotation_or_null(kCppTypeUri) !=
                     nullptr) {
               const auto* true_type = typedf->get_true_type();

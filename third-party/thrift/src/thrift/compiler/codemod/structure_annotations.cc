@@ -73,10 +73,7 @@ class structure_annotations {
       std::map<std::string, std::string>* annotations_for_catch_all) {
     std::set<std::string> to_add;
     if (!type_ref.resolve() || type_ref->is<t_primitive_type>() ||
-        type_ref->is<t_container>() ||
-        (type_ref->is<t_typedef>() &&
-         static_cast<const t_typedef&>(*type_ref).typedef_kind() !=
-             t_typedef::kind::defined)) {
+        type_ref->is<t_container>()) {
       auto type = type_ref.get_type();
       std::vector<t_annotation> to_remove;
       bool has_cpp_type = node.has_structured_annotation(kCppTypeUri);

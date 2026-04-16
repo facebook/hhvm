@@ -331,7 +331,7 @@ TEST(ParserTest, unresolved_include_circular_references) {
 
 // Test that when a structured annotation is used BEFORE its include
 // (on the program itself), the URI lookup still works correctly.
-// This is the key bug case where a placeholder typedef is created.
+// This is the key bug case where the annotation type starts unresolved.
 TEST(ParserTest, structured_annotation_before_include_uri) {
   auto source_mgr = source_manager();
   source_mgr.add_virtual_file("annotation.thrift", R"(
@@ -342,7 +342,7 @@ TEST(ParserTest, structured_annotation_before_include_uri) {
   )");
 
   // The program annotation @annotation.MyAnnotation appears BEFORE the include.
-  // This creates a placeholder typedef that must be resolved correctly.
+  // This starts as an unresolved type ref that must resolve correctly.
   source_mgr.add_virtual_file("test.thrift", R"(
     @annotation.MyAnnotation{value="test"}
     package "facebook.com/thrift/test"

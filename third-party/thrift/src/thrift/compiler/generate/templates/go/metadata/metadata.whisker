@@ -34,8 +34,7 @@
 {{! Defines the mapping from an AST type to Thrift metadata type field name. }}
 {{#let export partial thrift_type_setter |type|}}
   {{#pragma ignore-newlines}}
-{{#if (and type.typedef? type.defined_kind?)}}TTypedef
-{{#else if type.typedef?}}{{#partial thrift_type_setter type=type.typedef_type}}
+{{#if type.typedef?}}TTypedef
 {{#else if type.metadata_primitive?}}TPrimitive
 {{#else if type.enum?}}TEnum
 {{#else if (and type.structured? type.union?)}}TUnion
@@ -43,7 +42,7 @@
 {{#else if type.list?}}TList
 {{#else if type.map?}}TMap
 {{#else if type.set?}}TSet
-{{/if (and type.typedef? type.defined_kind?)}}
+{{/if type.typedef?}}
 {{/let partial}}
 
 {{!
@@ -127,7 +126,6 @@
 {{! Defines the mapping from an AST type to Thrift metadata type. }}
 {{#let export partial thrift_type_instance |type| captures |thrift_primitive_type structured_annotation|}}
 {{#if type.typedef?}}
-{{#if type.defined_kind?}}
 &{{root_program.metadata_qualifier}}ThriftTypedefType{
     Name:           "{{type.scoped_name}}",
     UnderlyingType: {{type.resolved.metadata_thrift_type_getter}},
@@ -139,9 +137,6 @@
     },
     {{/if (not (array.empty? type.structured_annotations))}}
 },
-{{#else}}
-{{#partial thrift_type_instance type=type.resolved}}
-{{/if type.defined_kind?}}
 {{#else if type.metadata_primitive?}}
 new({{root_program.metadata_qualifier}}ThriftPrimitiveType_{{#partial thrift_primitive_type type=type}}),
 {{#else if type.enum?}}

@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
   for (int i = 0; i < FLAGS_num_clients; ++i) {
     auto evb = std::make_shared<folly::EventBase>();
     evbs.push_back(evb);
-    threads.emplace_back([&, evb = std::move(evb)]() {
+    threads.emplace_back([&, clientEvb = std::move(evb)]() {
       // Create Thrift Async Client
       folly::SocketAddress addr;
       if (!FLAGS_unix_socket_path.empty()) {
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
         addr.setFromHostPort(FLAGS_host, FLAGS_port);
       }
       auto client = newClient<StreamBenchmarkAsyncClient>(
-          evb.get(), addr, FLAGS_transport);
+          clientEvb.get(), addr, FLAGS_transport);
 
       // Create the Operations and their Discrete Distributions
       // Every time a new operation is added, the distribution needs to
@@ -116,16 +116,16 @@ int main(int argc, char** argv) {
           std::move(ops), std::move(distribution), FLAGS_max_outstanding_ops);
       r->run();
 
-      // Drain the evb before destructing the operations that might still be
-      // referenced by it.
+      // Drain the clientEvb before destructing the operations that might still
+      // be referenced by it.
       SCOPE_EXIT {
         LOG(INFO) << "Requesting thread exit";
-        r->loopUntilExit(evb.get());
+        r->loopUntilExit(clientEvb.get());
       };
 
       // Run eventbase loop for async operations
       if (!FLAGS_sync) {
-        evb->loopForever();
+        clientEvb->loopForever();
       }
     });
   }

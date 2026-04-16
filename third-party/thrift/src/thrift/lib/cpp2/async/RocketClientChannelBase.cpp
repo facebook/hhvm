@@ -994,9 +994,9 @@ void RocketClientChannelBase::sendThriftRequest(
       std::move(frameworkMetadata),
       hasCustomCompressor());
 
-  // If the request was pre-compressed on the caller thread (via
-  // compressRequest in generated code), override the metadata compression
-  // and tell packWithFds to skip re-compression.
+  // If the request was pre-compressed (via compressRequest() on the caller
+  // thread or by the CPU-thread fallback in SendMessageRouteHandle), override
+  // the metadata compression and tell packWithFds to skip re-compression.
   bool skipCompression = false;
   auto preCompressedAlgorithm = header->getPreCompressedAlgorithm();
   if (preCompressedAlgorithm != CompressionAlgorithm::NONE) {

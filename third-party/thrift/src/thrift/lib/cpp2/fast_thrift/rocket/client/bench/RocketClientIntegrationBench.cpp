@@ -43,6 +43,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/bench/BenchContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
@@ -91,67 +92,8 @@ HANDLER_TAG(rocket_client_stream_state_handler);
 
 namespace {
 
-// =============================================================================
-// Rocket Client App Adapter - Minimal adapter for benchmarks
-// =============================================================================
-
-class RocketClientAppAdapter {
- public:
-  using BytesPtr = apache::thrift::fast_thrift::channel_pipeline::BytesPtr;
-  using TypeErasedBox =
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox;
-
-  explicit RocketClientAppAdapter(folly::AsyncTransport::UniquePtr socket)
-      : transportHandler_(
-            apache::thrift::fast_thrift::transport::TransportHandler::create(
-                std::move(socket))) {}
-
-  ~RocketClientAppAdapter() {
-    if (transportHandler_) {
-      transportHandler_->onClose(folly::exception_wrapper{});
-    }
-  }
-
-  RocketClientAppAdapter(const RocketClientAppAdapter&) = delete;
-  RocketClientAppAdapter& operator=(const RocketClientAppAdapter&) = delete;
-  RocketClientAppAdapter(RocketClientAppAdapter&&) = delete;
-  RocketClientAppAdapter& operator=(RocketClientAppAdapter&&) = delete;
-
-  apache::thrift::fast_thrift::transport::TransportHandler* transportHandler()
-      const {
-    return transportHandler_.get();
-  }
-
-  void setPipeline(PipelineImpl::Ptr pipeline) {
-    pipeline_ = std::move(pipeline);
-    if (transportHandler_ && pipeline_) {
-      transportHandler_->setPipeline(*pipeline_);
-    }
-  }
-
-  Result send(RocketRequestMessage&& msg) {
-    if (!pipeline_) {
-      return Result::Error;
-    }
-    return pipeline_->fireWrite(erase_and_box(std::move(msg)));
-  }
-
-  Result onMessage(TypeErasedBox&& /*msg*/) noexcept {
-    responseCount_++;
-    return Result::Success;
-  }
-
-  void onException(folly::exception_wrapper&& /*e*/) noexcept {
-    exceptionReceived_ = true;
-  }
-
- private:
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler_;
-  PipelineImpl::Ptr pipeline_;
-  int responseCount_{0};
-  bool exceptionReceived_{false};
-};
+using AppAdapter =
+    apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter;
 
 // =============================================================================
 // Helper Functions
@@ -205,9 +147,23 @@ RocketRequestMessage createRocketRequest(size_t payloadSize) {
 // =============================================================================
 
 struct BenchmarkFixture {
+  BenchmarkFixture() = default;
+  ~BenchmarkFixture() {
+    pipeline.reset();
+    if (transportHandler) {
+      transportHandler->onClose(folly::exception_wrapper{});
+    }
+  }
+  BenchmarkFixture(const BenchmarkFixture&) = delete;
+  BenchmarkFixture& operator=(const BenchmarkFixture&) = delete;
+  BenchmarkFixture(BenchmarkFixture&&) = delete;
+  BenchmarkFixture& operator=(BenchmarkFixture&&) = delete;
+
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
-  std::unique_ptr<RocketClientAppAdapter> appAdapter;
+  AppAdapter::Ptr appAdapter{new AppAdapter()};
+  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
+      transportHandler;
   PipelineImpl::Ptr pipeline;
   TestAllocator allocator;
 
@@ -216,14 +172,22 @@ struct BenchmarkFixture {
         folly::AsyncTransport::UniquePtr(new BenchAsyncTransport(&evb));
     testTransport = static_cast<BenchAsyncTransport*>(transport.get());
 
-    appAdapter = std::make_unique<RocketClientAppAdapter>(std::move(transport));
+    transportHandler =
+        apache::thrift::fast_thrift::transport::TransportHandler::create(
+            std::move(transport));
+
+    appAdapter->setResponseHandlers(
+        [](TypeErasedBox&& /*msg*/) noexcept -> Result {
+          return Result::Success;
+        },
+        [](folly::exception_wrapper&& /*e*/) noexcept {});
 
     pipeline = PipelineBuilder<
-                   RocketClientAppAdapter,
+                   AppAdapter,
                    apache::thrift::fast_thrift::transport::TransportHandler,
                    TestAllocator>()
                    .setEventBase(&evb)
-                   .setTail(appAdapter->transportHandler())
+                   .setTail(transportHandler.get())
                    .setHead(appAdapter.get())
                    .setAllocator(&allocator)
                    .addNextInbound<FrameLengthParserHandler>(
@@ -247,8 +211,9 @@ struct BenchmarkFixture {
                        rocket_client_stream_state_handler_tag)
                    .build();
 
-    appAdapter->setPipeline(std::move(pipeline));
-    appAdapter->transportHandler()->onConnect();
+    appAdapter->setPipeline(pipeline.get());
+    transportHandler->setPipeline(*pipeline);
+    transportHandler->onConnect();
 
     // Drive event loop and discard SETUP frame
     evb.loopOnce();
@@ -278,7 +243,7 @@ BENCHMARK(Rocket_Request, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    (void)fixture.appAdapter->send(std::move(requests[i]));
+    (void)fixture.appAdapter->write(std::move(requests[i]));
     fixture.evb.loopOnce();
   }
 }
@@ -299,7 +264,7 @@ BENCHMARK(Rocket_Response_Payload, iters) {
   streamIds.reserve(iters);
   for (uint32_t i = 0; i < iters; ++i) {
     auto request = createRocketRequest(10);
-    (void)fixture.appAdapter->send(std::move(request));
+    (void)fixture.appAdapter->write(std::move(request));
     fixture.evb.loopOnce();
     streamIds.push_back(i * 2 + 1);
   }
@@ -331,7 +296,7 @@ BENCHMARK(Rocket_Response_StreamError, iters) {
   streamIds.reserve(iters);
   for (uint32_t i = 0; i < iters; ++i) {
     auto request = createRocketRequest(10);
-    (void)fixture.appAdapter->send(std::move(request));
+    (void)fixture.appAdapter->write(std::move(request));
     fixture.evb.loopOnce();
     streamIds.push_back(i * 2 + 1);
   }
@@ -374,16 +339,23 @@ BENCHMARK(Rocket_SetupFrame, iters) {
     auto transport =
         folly::AsyncTransport::UniquePtr(new BenchAsyncTransport(&fixture.evb));
     fixture.testTransport = static_cast<BenchAsyncTransport*>(transport.get());
-    fixture.appAdapter =
-        std::make_unique<RocketClientAppAdapter>(std::move(transport));
 
-    auto pipeline =
+    fixture.transportHandler =
+        apache::thrift::fast_thrift::transport::TransportHandler::create(
+            std::move(transport));
+    fixture.appAdapter->setResponseHandlers(
+        [](TypeErasedBox&& /*msg*/) noexcept -> Result {
+          return Result::Success;
+        },
+        [](folly::exception_wrapper&& /*e*/) noexcept {});
+
+    fixture.pipeline =
         PipelineBuilder<
-            RocketClientAppAdapter,
+            AppAdapter,
             apache::thrift::fast_thrift::transport::TransportHandler,
             TestAllocator>()
             .setEventBase(&fixture.evb)
-            .setTail(fixture.appAdapter->transportHandler())
+            .setTail(fixture.transportHandler.get())
             .setHead(fixture.appAdapter.get())
             .setAllocator(&fixture.allocator)
             .addNextInbound<FrameLengthParserHandler>(
@@ -407,12 +379,13 @@ BENCHMARK(Rocket_SetupFrame, iters) {
                 rocket_client_stream_state_handler_tag)
             .build();
 
-    fixture.appAdapter->setPipeline(std::move(pipeline));
+    fixture.appAdapter->setPipeline(fixture.pipeline.get());
+    fixture.transportHandler->setPipeline(*fixture.pipeline);
 
     innerSuspender.dismiss();
 
     // This triggers onConnect which sends SETUP frame
-    fixture.appAdapter->transportHandler()->onConnect();
+    fixture.transportHandler->onConnect();
     fixture.evb.loopOnce();
 
     folly::doNotOptimizeAway(fixture.testTransport->getWrittenData());

@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
@@ -76,91 +77,7 @@ HANDLER_TAG(rocket_client_request_response_frame_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 
-namespace {
-
-/**
- * RocketClientAppAdapter - Application adapter for rocket client integration
- * tests.
- *
- * This adapter owns the transport handler and pipeline, providing a minimal
- * interface for sending RocketRequestMessages and receiving
- * RocketResponseMessages.
- */
-class RocketClientAppAdapter {
- public:
-  using BytesPtr = apache::thrift::fast_thrift::channel_pipeline::BytesPtr;
-  using TypeErasedBox =
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox;
-
-  explicit RocketClientAppAdapter(folly::AsyncTransport::UniquePtr socket)
-      : transportHandler_(
-            apache::thrift::fast_thrift::transport::TransportHandler::create(
-                std::move(socket))) {}
-
-  ~RocketClientAppAdapter() {
-    if (transportHandler_) {
-      transportHandler_->onClose(folly::exception_wrapper{});
-    }
-  }
-
-  apache::thrift::fast_thrift::transport::TransportHandler* transportHandler()
-      const {
-    return transportHandler_.get();
-  }
-
-  void setPipeline(PipelineImpl::Ptr pipeline) {
-    pipeline_ = std::move(pipeline);
-    if (transportHandler_ && pipeline_) {
-      transportHandler_->setPipeline(*pipeline_);
-    }
-  }
-
-  Result send(RocketRequestMessage&& msg) {
-    if (!pipeline_) {
-      return Result::Error;
-    }
-    return pipeline_->fireWrite(
-        apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
-            std::move(msg)));
-  }
-
-  Result onMessage(TypeErasedBox&& msg) noexcept {
-    responseCount_++;
-    responses_.push_back(std::move(msg));
-    return Result::Success;
-  }
-
-  void onException(folly::exception_wrapper&& e) noexcept {
-    exceptionReceived_ = true;
-    exception_ = std::move(e);
-  }
-
-  int responseCount() const { return responseCount_; }
-
-  const std::vector<TypeErasedBox>& responses() const { return responses_; }
-
-  bool exceptionReceived() const { return exceptionReceived_; }
-
-  const folly::exception_wrapper& exception() const { return exception_; }
-
-  void reset() {
-    responseCount_ = 0;
-    responses_.clear();
-    exceptionReceived_ = false;
-    exception_ = folly::exception_wrapper{};
-  }
-
- private:
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler_;
-  PipelineImpl::Ptr pipeline_;
-  int responseCount_{0};
-  std::vector<TypeErasedBox> responses_;
-  bool exceptionReceived_{false};
-  folly::exception_wrapper exception_;
-};
-
-} // namespace
+using channel_pipeline::TypeErasedBox;
 
 class RocketClientIntegrationTest : public ::testing::Test {
  protected:
@@ -168,28 +85,44 @@ class RocketClientIntegrationTest : public ::testing::Test {
 
   void TearDown() override {
     pipeline_.reset();
-    appAdapter_.reset();
+    if (transportHandler_) {
+      transportHandler_->onClose(folly::exception_wrapper{});
+    }
     testTransport_ = nullptr;
   }
 
   /**
    * Set up the rocket-only pipeline with TestAsyncTransport.
    * No thrift handlers - just the rocket client handlers.
+   * The test treats the adapter as a black box: writes requests to
+   * appAdapter_ and validates responses via callbacks.
    */
   void setupPipeline() {
     auto transport =
         folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
     testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
 
-    appAdapter_ =
-        std::make_unique<RocketClientAppAdapter>(std::move(transport));
+    transportHandler_ =
+        apache::thrift::fast_thrift::transport::TransportHandler::create(
+            std::move(transport));
+
+    appAdapter_->setResponseHandlers(
+        [this](TypeErasedBox&& msg) noexcept -> Result {
+          responseCount_++;
+          responses_.push_back(std::move(msg));
+          return Result::Success;
+        },
+        [this](folly::exception_wrapper&& e) noexcept {
+          exceptionReceived_ = true;
+          exception_ = std::move(e);
+        });
 
     pipeline_ = PipelineBuilder<
-                    RocketClientAppAdapter,
+                    rocket::client::RocketClientAppAdapter,
                     apache::thrift::fast_thrift::transport::TransportHandler,
                     TestAllocator>()
                     .setEventBase(&evb_)
-                    .setTail(appAdapter_->transportHandler())
+                    .setTail(transportHandler_.get())
                     .setHead(appAdapter_.get())
                     .setAllocator(&allocator_)
                     .addNextInbound<apache::thrift::fast_thrift::frame::read::
@@ -215,8 +148,9 @@ class RocketClientIntegrationTest : public ::testing::Test {
                         rocket_client_stream_state_handler_tag)
                     .build();
 
-    appAdapter_->setPipeline(std::move(pipeline_));
-    appAdapter_->transportHandler()->onConnect();
+    appAdapter_->setPipeline(pipeline_.get());
+    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->onConnect();
 
     evb_.loopOnce();
 
@@ -280,9 +214,18 @@ class RocketClientIntegrationTest : public ::testing::Test {
 
   folly::EventBase evb_;
   TestAsyncTransport* testTransport_{nullptr};
-  std::unique_ptr<RocketClientAppAdapter> appAdapter_;
+  rocket::client::RocketClientAppAdapter::Ptr appAdapter_{
+      new rocket::client::RocketClientAppAdapter()};
+  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
+      transportHandler_;
   PipelineImpl::Ptr pipeline_;
   TestAllocator allocator_;
+
+  // Response tracking
+  int responseCount_{0};
+  std::vector<TypeErasedBox> responses_;
+  bool exceptionReceived_{false};
+  folly::exception_wrapper exception_;
 };
 
 // =============================================================================
@@ -293,7 +236,7 @@ TEST_F(RocketClientIntegrationTest, RequestFlowsThroughPipelineToSocket) {
   setupPipeline();
 
   auto request = createRocketRequest(folly::IOBuf::copyBuffer("test payload"));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
 
   evb_.loopOnce();
 
@@ -313,7 +256,7 @@ TEST_F(RocketClientIntegrationTest, MultipleRequestsGetDistinctStreamIds) {
   setupPipeline();
 
   auto request1 = createRocketRequest(folly::IOBuf::copyBuffer("payload1"));
-  (void)appAdapter_->send(std::move(request1));
+  (void)appAdapter_->write(std::move(request1));
   evb_.loopOnce();
   auto frame1 = getWrittenFrame();
   ASSERT_NE(frame1, nullptr);
@@ -322,7 +265,7 @@ TEST_F(RocketClientIntegrationTest, MultipleRequestsGetDistinctStreamIds) {
   EXPECT_EQ(parsed1.streamId(), 1u);
 
   auto request2 = createRocketRequest(folly::IOBuf::copyBuffer("payload2"));
-  (void)appAdapter_->send(std::move(request2));
+  (void)appAdapter_->write(std::move(request2));
   evb_.loopOnce();
   auto frame2 = getWrittenFrame();
   ASSERT_NE(frame2, nullptr);
@@ -336,7 +279,7 @@ TEST_F(RocketClientIntegrationTest, RequestWithMetadataAndData) {
 
   auto request = createRocketRequest(
       folly::IOBuf::copyBuffer("data"), folly::IOBuf::copyBuffer("metadata"));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
 
   evb_.loopOnce();
 
@@ -361,7 +304,7 @@ TEST_F(RocketClientIntegrationTest, ResponseFlowsFromSocketThroughPipeline) {
   setupPipeline();
 
   auto request = createRocketRequest(folly::IOBuf::copyBuffer("test"));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
 
   evb_.loopOnce();
 
@@ -381,11 +324,10 @@ TEST_F(RocketClientIntegrationTest, ResponseFlowsFromSocketThroughPipeline) {
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_EQ(appAdapter_->responseCount(), 1)
-      << "App adapter should have received response";
-  EXPECT_FALSE(appAdapter_->exceptionReceived());
+  EXPECT_EQ(responseCount_, 1) << "App adapter should have received response";
+  EXPECT_FALSE(exceptionReceived_);
 
-  auto& response = appAdapter_->responses()[0].get<RocketResponseMessage>();
+  auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(response.frame.streamId(), streamId);
   EXPECT_EQ(
       response.frame.type(),
@@ -398,14 +340,14 @@ TEST_F(
   setupPipeline();
 
   auto request1 = createRocketRequest(folly::IOBuf::copyBuffer("req1"));
-  (void)appAdapter_->send(std::move(request1));
+  (void)appAdapter_->write(std::move(request1));
   evb_.loopOnce();
   auto frame1 = getWrittenFrame();
   auto parsed1 = parseWrittenFrame(std::move(frame1));
   uint32_t streamId1 = parsed1.streamId();
 
   auto request2 = createRocketRequest(folly::IOBuf::copyBuffer("req2"));
-  (void)appAdapter_->send(std::move(request2));
+  (void)appAdapter_->write(std::move(request2));
   evb_.loopOnce();
   auto frame2 = getWrittenFrame();
   auto parsed2 = parseWrittenFrame(std::move(frame2));
@@ -417,8 +359,8 @@ TEST_F(
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_EQ(appAdapter_->responseCount(), 1);
-  auto& resp = appAdapter_->responses()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(responseCount_, 1);
+  auto& resp = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(resp.frame.streamId(), streamId2);
 
   auto response1 = createPayloadResponse(
@@ -427,7 +369,7 @@ TEST_F(
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_EQ(appAdapter_->responseCount(), 2);
+  EXPECT_EQ(responseCount_, 2);
 }
 
 // =============================================================================
@@ -438,7 +380,7 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithApplicationErrorCode) {
   setupPipeline();
 
   auto request = createRocketRequest(folly::IOBuf::copyBuffer("test"));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
   evb_.loopOnce();
 
   auto requestFrame = getWrittenFrame();
@@ -456,8 +398,8 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithApplicationErrorCode) {
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_EQ(appAdapter_->responseCount(), 1);
-  auto& response = appAdapter_->responses()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(responseCount_, 1);
+  auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(response.frame.streamId(), streamId);
   EXPECT_EQ(
       response.frame.type(),
@@ -468,7 +410,7 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithRejectedCode) {
   setupPipeline();
 
   auto request = createRocketRequest(folly::IOBuf::copyBuffer("test"));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
   evb_.loopOnce();
 
   auto requestFrame = getWrittenFrame();
@@ -486,8 +428,8 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithRejectedCode) {
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_EQ(appAdapter_->responseCount(), 1);
-  auto& response = appAdapter_->responses()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(responseCount_, 1);
+  auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(
       response.frame.type(),
       apache::thrift::fast_thrift::frame::FrameType::ERROR);
@@ -497,7 +439,7 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithCanceledCode) {
   setupPipeline();
 
   auto request = createRocketRequest(folly::IOBuf::copyBuffer("test"));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
   evb_.loopOnce();
 
   auto requestFrame = getWrittenFrame();
@@ -515,8 +457,8 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithCanceledCode) {
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_EQ(appAdapter_->responseCount(), 1);
-  auto& response = appAdapter_->responses()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(responseCount_, 1);
+  auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(
       response.frame.type(),
       apache::thrift::fast_thrift::frame::FrameType::ERROR);
@@ -526,7 +468,7 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithInvalidCode) {
   setupPipeline();
 
   auto request = createRocketRequest(folly::IOBuf::copyBuffer("test"));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
   evb_.loopOnce();
 
   auto requestFrame = getWrittenFrame();
@@ -544,8 +486,8 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithInvalidCode) {
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_EQ(appAdapter_->responseCount(), 1);
-  auto& response = appAdapter_->responses()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(responseCount_, 1);
+  auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(
       response.frame.type(),
       apache::thrift::fast_thrift::frame::FrameType::ERROR);
@@ -559,7 +501,7 @@ TEST_F(RocketClientIntegrationTest, ResponseWithEmptyPayload) {
   setupPipeline();
 
   auto request = createRocketRequest(folly::IOBuf::copyBuffer("test"));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
   evb_.loopOnce();
 
   auto requestFrame = getWrittenFrame();
@@ -573,8 +515,8 @@ TEST_F(RocketClientIntegrationTest, ResponseWithEmptyPayload) {
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_EQ(appAdapter_->responseCount(), 1);
-  auto& response = appAdapter_->responses()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(responseCount_, 1);
+  auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(response.frame.streamId(), streamId);
   EXPECT_EQ(
       response.frame.type(),
@@ -590,7 +532,7 @@ TEST_F(RocketClientIntegrationTest, LargePayloadRequest) {
   largeData->append(dataSize);
 
   auto request = createRocketRequest(std::move(largeData));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
 
   evb_.loopOnce();
 
@@ -609,7 +551,7 @@ TEST_F(RocketClientIntegrationTest, ResponseWithMetadata) {
   setupPipeline();
 
   auto request = createRocketRequest(folly::IOBuf::copyBuffer("test"));
-  (void)appAdapter_->send(std::move(request));
+  (void)appAdapter_->write(std::move(request));
   evb_.loopOnce();
 
   auto requestFrame = getWrittenFrame();
@@ -626,8 +568,8 @@ TEST_F(RocketClientIntegrationTest, ResponseWithMetadata) {
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_EQ(appAdapter_->responseCount(), 1);
-  auto& response = appAdapter_->responses()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(responseCount_, 1);
+  auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(response.frame.streamId(), streamId);
   EXPECT_TRUE(response.frame.hasMetadata());
   EXPECT_GT(response.frame.metadataSize(), 0u);

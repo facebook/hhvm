@@ -49,7 +49,7 @@
 {{!
   ====
   If we ever add a type here which may not have a Send or Sync impl, the
-  unsafe impls in structimpl.mustache need to be revisited.
+  unsafe impls in structimpl.whisker need to be revisited.
   ====
 
   Renders the inner return value type for client-side RPCs.

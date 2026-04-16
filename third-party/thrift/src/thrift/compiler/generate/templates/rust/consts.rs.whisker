@@ -19,7 +19,7 @@
 {{#import "lib/types" as types}}
   {{#let partial lazy_constant |constant| captures |constants types|}}
 {{#pragma ignore-newlines}}
-  {{! See type_adapter_read in lib/errors.mustache for why `type:` is used here. }}
+  {{! See type_adapter_read in lib/errors.whisker for why `type:` is used here. }}
 pub static {{constant.rust_name}}: ::std::sync::LazyLock<
 {{#if constant.type.type:has_adapter?}}{{constant.type.type:adapter_qualified}}::AdaptedType{{#else}}{{#partial types.type_name type=constant.type}}{{/if}}
 > = ::std::sync::LazyLock::new(|| {{!}}

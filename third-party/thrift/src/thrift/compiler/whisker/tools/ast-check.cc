@@ -36,7 +36,7 @@ Checks (pass or fail) that provided FILEs are syntactically valid Whisker templa
 At least one FILE must be specified.
 
 Examples:
-  ast-check template-1.mustache template-2.mustache)";
+  ast-check template-1.whisker template-2.whisker)";
   fmt::print(stderr, "{}\n", kUsageMessage);
   return 1;
 }

@@ -16,7 +16,7 @@
 
 }}
 {{! Serialize a function parameter, applying type-level adapter conversion
-    if needed. See type_adapter_read in lib/errors.mustache for why the `type:`
+    if needed. See type_adapter_read in lib/errors.whisker for why the `type:`
     prototype qualifier is used here. }}
   {{#let partial type_adapter_write_param |param| captures |types|}}
 {{#pragma ignore-newlines}}

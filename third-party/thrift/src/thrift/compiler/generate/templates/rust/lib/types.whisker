@@ -18,7 +18,7 @@
   Private implementation for type name partials, to encapsulate circular deps.
 
   If we ever add a type here which may not have a Send or Sync impl, the
-  unsafe impls in structimpl.mustache need to be revisited.
+  unsafe impls in structimpl.whisker need to be revisited.
 }}
 {{#let partial type_name_impl |type raw|}}
 {{#pragma ignore-newlines}}

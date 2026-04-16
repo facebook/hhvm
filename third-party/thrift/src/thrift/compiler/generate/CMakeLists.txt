@@ -23,7 +23,7 @@ file(
   TEMPLATE_FILES
   CONFIGURE_DEPENDS
   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/templates/**/*.mustache
+  ${CMAKE_CURRENT_SOURCE_DIR}/templates/**/*.whisker
 )
 add_custom_command(
   OUTPUT templates.cc

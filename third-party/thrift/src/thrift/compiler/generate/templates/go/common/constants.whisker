@@ -62,8 +62,8 @@ _{{value.enum_value.name}}
 
   The following templates have complete type parity:
     * common/constants:const_value (this partial)
-    * common/natural_default_value.mustache
-    * common/go_zero_value.mustache
+    * common/natural_default_value.whisker
+    * common/go_zero_value.whisker
 
   `root_const` is the constant value that is being rendered. It is used to detect
   if struct values can be emitted as references. `root_const` may be null when

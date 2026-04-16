@@ -51,7 +51,7 @@
         which is builtins.property. Once again, to avoid conflicts with user field
         named `builtins`, use a reserved identifier as follows.
 
-        Define (in define_reserved_property_identifier.mustache):
+        Define (in define_reserved_property_identifier.whisker):
         import builtins as _fbthrift_builtins
 
         Use:

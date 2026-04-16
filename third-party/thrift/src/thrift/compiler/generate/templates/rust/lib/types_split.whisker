@@ -33,7 +33,7 @@
 {{!
 ================================================================================
 }}
-{{! Allows lib/type.mustache to use `crate::types::Type` regardless of which crate it's called from }}
+{{! Allows lib/type.whisker to use `crate::types::Type` regardless of which crate it's called from }}
 #[allow(unused_imports)]
 pub(crate) use {{program.crate}} as types;
 {{!

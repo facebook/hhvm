@@ -47,9 +47,9 @@ map[
 {{! Defines a Go zero-value representation for a given Thrift type.
 
   The following templates have complete type parity:
-    * const/value.mustache
-    * common/natural_default_value.mustache
-    * common/type.mustache (go_zero_value partial)
+    * const/value.whisker
+    * common/natural_default_value.whisker
+    * common/type.whisker (go_zero_value partial)
 }}
 {{#let export partial go_zero_value |type|}}
   {{#pragma ignore-newlines}}
@@ -76,9 +76,9 @@ map[
   appropriately if needed.
 
   The following templates have complete type parity:
-    * const/value.mustache
-    * common/natural_default_value.mustache
-    * common/type.mustache (go_zero_value partial)
+    * const/value.whisker
+    * common/natural_default_value.whisker
+    * common/type.whisker (go_zero_value partial)
 }}
 {{#let export partial natural_default_value |type| captures |go_type| }}
   {{#pragma ignore-newlines}}

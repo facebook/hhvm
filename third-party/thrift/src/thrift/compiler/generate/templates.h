@@ -29,10 +29,10 @@ namespace detail {
 // Total number of templates
 extern const std::size_t templates_size;
 
-// Lengths of each template's name, e.g. `lang/xyz.mustache` -> 17
+// Lengths of each template's name, e.g. `lang/xyz.whisker` -> 16
 extern const std::size_t templates_name_sizes[];
 
-// Names of each template, e.g. `lang/xyz.mustache`
+// Names of each template, e.g. `lang/xyz.whisker`
 extern const char* const templates_name_datas[];
 
 // Lengths of each template's content, e.g. `...` -> 3

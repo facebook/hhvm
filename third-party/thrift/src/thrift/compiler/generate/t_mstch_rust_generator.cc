@@ -467,7 +467,7 @@ bool node_has_custom_rust_type(const t_named& node) {
       node.has_structured_annotation(kRustNewTypeUri);
 }
 
-// Compute the Rust type name string for a type, replicating `lib/type.mustache`
+// Compute the Rust type name string for a type, replicating `lib/type.whisker`
 // logic. This is needed for generic adapter type parameters.
 std::string compute_type_name(
     const t_type* type, const rust_codegen_options& options);
@@ -505,7 +505,7 @@ std::string resolve_adapter_annotation_name(
   return adapter_name;
 }
 
-// Compute the Rust raw type name (like lib/rawtype.mustache).
+// Compute the Rust raw type name (like lib/rawtype.whisker).
 std::string compute_rawtype_name(
     const t_type* type, const rust_codegen_options& options) {
   auto rust_type = get_type_annotation(type);
@@ -569,7 +569,7 @@ std::string compute_rawtype_name(
   return type_rust_name(type);
 }
 
-// Compute the full type name, handling typedefs (like lib/type.mustache).
+// Compute the full type name, handling typedefs (like lib/type.whisker).
 std::string compute_type_name(
     const t_type* type, const rust_codegen_options& options) {
   if (type->is<t_typedef>()) {
@@ -583,7 +583,7 @@ std::string compute_type_name(
 }
 
 // Compute the adapter name string. This replicates the logic of
-// `lib/adapter/name.mustache`.
+// `lib/adapter/name.whisker`.
 //
 // Parameters:
 // - adapter_annotation: the direct adapter annotation on the field/typedef
@@ -1168,7 +1168,7 @@ class t_mstch_rust_generator : public t_whisker_generator {
       return false;
     });
     def.property("rust_type", [](const t_typedef& self) {
-      // See 'typedef.mustache'. The context is writing a newtype: e.g. `pub
+      // See 'typedef.whisker'. The context is writing a newtype: e.g. `pub
       // struct T(pub X)`. If `X` has a `rust.Type` annotation `A` we should
       // write `struct T(pub A)` If it does not, we should write `pub struct T
       // (pub X)`.

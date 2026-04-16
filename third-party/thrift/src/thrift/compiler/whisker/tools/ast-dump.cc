@@ -40,8 +40,8 @@ Dump a human-readable representation of the AST for a Whisker template.
 With no FILE, of when FILE is -, read standard input.
 
 Examples:
-  ast-dump template.mustache
-  ast-dump < template.mustache)";
+  ast-dump template.whisker
+  ast-dump < template.whisker)";
   fmt::print(stderr, "{}\n", kUsageMessage);
   return 1;
 }

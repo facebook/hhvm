@@ -613,7 +613,7 @@ pub mod {{interface.snake}} {
         {{#if (and function.sink_or_stream? (not function.void_or_void_stream?))}}
                     ::fbthrift::Serialize::rs_thrift_write(_success, p);
         {{#else if (not function.sink_or_stream?)}}
-                    {{! See type_adapter_read in lib/errors.mustache for why `type:` is used here. }}
+                    {{! See type_adapter_read in lib/errors.whisker for why `type:` is used here. }}
                     ::fbthrift::Serialize::rs_thrift_write({{#if function.return_type.type:has_adapter?}}&{{function.return_type.type:adapter_qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0){{#else}}_success{{/if}}, p);
         {{/if (and function.sink_or_stream? (not function.void_or_void_stream?))}}
                     p.write_field_end();

@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
   std::map<std::string, std::string> templates;
   for (const auto& e : fs::recursive_directory_iterator(path)) {
     const auto& p = e.path();
-    if (p.extension() == ".mustache" && fs::is_regular_file(p)) {
+    if (p.extension() == ".whisker" && fs::is_regular_file(p)) {
       using buf_it = std::istreambuf_iterator<char>;
       auto mm = std::mismatch(p.begin(), p.end(), path.begin(), path.end());
       assert(mm.second == path.end());

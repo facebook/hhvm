@@ -490,7 +490,7 @@ oprot.writeDouble(_fbthriftVar{{depth}});
     Takes a field object (for adapter context), type object, and depth integer
     (suffix for _fbthriftVar variables). Handles typedefs, containers,
     structured types, enums, binary/string, and primitives.
-    Replaces the mstch ReadType.mustache and ReadTypeContainerNestedValue.mustache. }}
+    Replaces the mstch ReadType.whisker and ReadTypeContainerNestedValue.whisker. }}
 {{#let export partial read_type |field type depth| captures |resolved_boxed_type boxed_type thrift_type java_type thrift_field_type read_binary common|}}
   {{#let partial read_container |field type depth| captures |read_type resolved_boxed_type boxed_type thrift_type java_type read_binary|}}
     {{#if type.set?}}

@@ -34,7 +34,7 @@
     {{~ #if (not program.multifile?)}}, unused_crate_dependencies{{/if ~}}
     , unused_extern_crates, elided_lifetimes_in_paths, clippy::eq_op, clippy::nonminimal_bool, clippy::redundant_closure, clippy::type_complexity)]
 
-{{! Allows lib/type.mustache to use `crate::types::Type` regardless of which crate it's called from }}
+{{! Allows lib/type.whisker to use `crate::types::Type` regardless of which crate it's called from }}
 #[allow(unused_imports)]
 pub(crate) use {{program.crate}} as types;
 {{!

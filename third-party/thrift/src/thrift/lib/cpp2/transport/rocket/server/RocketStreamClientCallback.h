@@ -56,10 +56,6 @@ class RocketStreamClientCallback final : public StreamClientCallback,
 
   void resetServerCallback(StreamServerCallback&) override;
 
-  bool handle(RequestNFrame requestNFrame);
-  void handle(CancelFrame cancelFrame);
-  void handle(ExtFrame extFrame);
-
   // IConnectionStreamHandler overrides
   void handleFrame(RequestNFrame&&) override;
   void handleFrame(CancelFrame&&) override;

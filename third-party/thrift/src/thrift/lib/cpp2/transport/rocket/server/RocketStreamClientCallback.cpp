@@ -194,17 +194,6 @@ void RocketStreamClientCallback::resetServerCallback(
   }
 }
 
-bool RocketStreamClientCallback::handle(RequestNFrame requestNFrame) {
-  auto tokens = requestNFrame.requestN();
-  if (!tokens) {
-    return true;
-  }
-
-  cancelTimeout();
-  tokens_ += tokens;
-  return serverCallback()->onStreamRequestN(tokens);
-}
-
 void RocketStreamClientCallback::handleStreamHeadersPush(
     HeadersPayload&& payload) {
   if (UNLIKELY(!serverCallbackReady())) {
@@ -227,31 +216,6 @@ void RocketStreamClientCallback::handleResumedByConnection() {
     return;
   }
   serverCallback()->resumeStream();
-}
-
-void RocketStreamClientCallback::handle(CancelFrame /* cancelFrame */) {
-  if (!serverCallbackReady()) {
-    DCHECK(!serverCallback());
-    serverCallbackOrCancelled_ = kCancelledFlag;
-    return;
-  }
-  serverCallback()->onStreamCancel();
-  if (contextStack_) {
-    contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
-  }
-  connection_.freeStream(streamId_, true);
-}
-
-void RocketStreamClientCallback::handle(ExtFrame extFrame) {
-  if (!extFrame.hasIgnore()) {
-    connection_.close(
-        folly::make_exception_wrapper<RocketException>(
-            ErrorCode::INVALID,
-            fmt::format(
-                "Received unhandleable EXT frame type ({}) for stream (id {})",
-                static_cast<uint32_t>(extFrame.extFrameType()),
-                static_cast<uint32_t>(streamId_))));
-  }
 }
 
 namespace {
@@ -293,11 +257,26 @@ void RocketStreamClientCallback::handleFrame(RequestNFrame&& frame) {
                 static_cast<uint8_t>(FrameType::REQUEST_N))));
     return;
   }
-  handle(std::move(frame));
+  auto tokens = frame.requestN();
+  if (!tokens) {
+    return;
+  }
+  cancelTimeout();
+  tokens_ += tokens;
+  std::ignore = serverCallback()->onStreamRequestN(tokens);
 }
 
-void RocketStreamClientCallback::handleFrame(CancelFrame&& frame) {
-  handle(std::move(frame));
+void RocketStreamClientCallback::handleFrame(CancelFrame&&) {
+  if (!serverCallbackReady()) {
+    DCHECK(!serverCallback());
+    serverCallbackOrCancelled_ = kCancelledFlag;
+    return;
+  }
+  serverCallback()->onStreamCancel();
+  if (contextStack_) {
+    contextStack_->onStreamFinally(details::STREAM_ENDING_TYPES::CANCEL);
+  }
+  connection_.freeStream(streamId_, true);
 }
 
 void RocketStreamClientCallback::handleFrame(PayloadFrame&&) {
@@ -331,7 +310,15 @@ void RocketStreamClientCallback::handleFrame(ExtFrame&& frame) {
                 static_cast<uint8_t>(FrameType::EXT))));
     return;
   }
-  handle(std::move(frame));
+  if (!frame.hasIgnore()) {
+    connection_.close(
+        folly::make_exception_wrapper<RocketException>(
+            ErrorCode::INVALID,
+            fmt::format(
+                "Received unhandleable EXT frame type ({}) for stream (id {})",
+                static_cast<uint32_t>(frame.extFrameType()),
+                static_cast<uint32_t>(streamId_))));
+  }
 }
 
 void RocketStreamClientCallback::timeoutExpired() noexcept {

@@ -267,12 +267,12 @@ auto makePipeline(
     BenchAppHandler& app,
     BenchAllocator& allocator) {
   return PipelineBuilder<
-             BenchAppHandler,
              BenchTransportHandler,
+             BenchAppHandler,
              BenchAllocator>()
       .setEventBase(&evb)
-      .setTail(&transport)
-      .setHead(&app)
+      .setHead(&transport)
+      .setTail(&app)
       .setAllocator(&allocator)
       .build();
 }
@@ -639,10 +639,10 @@ BENCHMARK(Pipeline_FireRead_Swallow_1Handler, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<PassthroughHandler>(bench_passthrough_tag)
           .build();
@@ -674,10 +674,10 @@ BENCHMARK(Pipeline_FireWrite_Passthrough_1Handler, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<PassthroughHandler>(bench_passthrough_tag)
           .build();
@@ -715,10 +715,10 @@ BENCHMARK(Pipeline_FireRead_MultiFire_3x, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<MultiFireHandler<3>>(bench_multifire_tag)
           .build();
@@ -751,10 +751,10 @@ BENCHMARK(Pipeline_FireRead_MultiFire_10x, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<MultiFireHandler<10>>(bench_multifire_tag)
           .build();
@@ -793,10 +793,10 @@ BENCHMARK(Pipeline_FireRead_Passthrough_1Handler, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<PassthroughHandler>(bench_passthrough_tag)
           .build();
@@ -837,10 +837,10 @@ BENCHMARK(Pipeline_RoundTrip_Echo_1Handler, iters) {
 
   // Echo handler converts reads to writes
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<EchoHandler>(bench_echo_tag)
           .build();
@@ -882,10 +882,10 @@ BENCHMARK(Backpressure_RegisterUnregister_1Handler, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<BackpressureHandler>(bench_backpressure_tag)
           .build();
@@ -920,10 +920,10 @@ BENCHMARK(Backpressure_OnWriteReady_1Handler, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<BackpressureHandler>(bench_backpressure_tag)
           .build();
@@ -956,10 +956,10 @@ BENCHMARK(Backpressure_OnWriteReady_4Handlers, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<BackpressureHandler>(bench_backpressure_tag)
           .addNextDuplex<BackpressureHandler>(bench_backpressure2_tag)
@@ -995,10 +995,10 @@ BENCHMARK(Backpressure_FullCycle_1Handler, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<BackpressureHandler>(bench_backpressure_tag)
           .build();
@@ -1033,10 +1033,10 @@ BENCHMARK_RELATIVE(Backpressure_Baseline_Passthrough, iters) {
   BenchAllocator allocator;
 
   auto pipeline =
-      PipelineBuilder<BenchAppHandler, BenchTransportHandler, BenchAllocator>()
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
           .setEventBase(&evb)
-          .setTail(&transport)
-          .setHead(&app)
+          .setHead(&transport)
+          .setTail(&app)
           .setAllocator(&allocator)
           .addNextDuplex<PassthroughHandler>(bench_passthrough_tag)
           .build();

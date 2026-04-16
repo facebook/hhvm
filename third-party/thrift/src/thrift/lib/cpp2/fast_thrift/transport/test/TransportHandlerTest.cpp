@@ -40,7 +40,7 @@ namespace apache::thrift::fast_thrift::transport {
 
 using namespace apache::thrift::fast_thrift::channel_pipeline;
 using namespace apache::thrift::fast_thrift::channel_pipeline::test;
-using MockAppHandler = MockHeadHandler;
+using MockAppHandler = MockTailHandler; // App receives reads (Tail)
 using namespace testing;
 
 namespace {
@@ -71,12 +71,12 @@ class TransportHandlerTest : public ::testing::Test {
     auto handler = TransportHandler::create(std::move(socket), 256, 4096);
 
     auto pipeline = PipelineBuilder<
-                        MockAppHandler,
                         TransportHandler,
+                        MockAppHandler,
                         SimpleBufferAllocator>()
                         .setEventBase(&evb_)
-                        .setTail(handler.get())
-                        .setHead(&appHandler_)
+                        .setHead(handler.get())
+                        .setTail(&appHandler_)
                         .setAllocator(&allocator_)
                         .build();
 
@@ -101,12 +101,12 @@ class TransportHandlerTest : public ::testing::Test {
     auto* mockHandlerPtr = mockHandler.get();
 
     auto pipeline = PipelineBuilder<
-                        MockAppHandler,
                         TransportHandler,
+                        MockAppHandler,
                         SimpleBufferAllocator>()
                         .setEventBase(&evb_)
-                        .setTail(handler.get())
-                        .setHead(&appHandler_)
+                        .setHead(handler.get())
+                        .setTail(&appHandler_)
                         .setAllocator(&allocator_)
                         .addNextDuplex<MockHandler>(
                             exception_handler_tag, std::move(mockHandler))
@@ -587,10 +587,10 @@ TEST_F(TransportHandlerTest, SetPipelineWithoutResetDeath) {
   // Create a second pipeline
   MockAppHandler appHandler2;
   auto pipeline2 =
-      PipelineBuilder<MockAppHandler, TransportHandler, SimpleBufferAllocator>()
+      PipelineBuilder<TransportHandler, MockAppHandler, SimpleBufferAllocator>()
           .setEventBase(&evb_)
-          .setTail(handler.get())
-          .setHead(&appHandler2)
+          .setHead(handler.get())
+          .setTail(&appHandler2)
           .setAllocator(&allocator_)
           .build();
 
@@ -633,10 +633,10 @@ TEST_F(TransportHandlerTest, SetPipelineFiresConnectWhenSocketGood) {
   auto* mockHandlerPtr = mockHandler.get();
 
   auto pipeline =
-      PipelineBuilder<MockAppHandler, TransportHandler, SimpleBufferAllocator>()
+      PipelineBuilder<TransportHandler, MockAppHandler, SimpleBufferAllocator>()
           .setEventBase(&evb_)
-          .setTail(handler.get())
-          .setHead(&appHandler_)
+          .setHead(handler.get())
+          .setTail(&appHandler_)
           .setAllocator(&allocator_)
           .addNextDuplex<MockHandler>(
               exception_handler_tag, std::move(mockHandler))
@@ -667,10 +667,10 @@ TEST_F(TransportHandlerTest, SetPipelineDoesNotFireConnectWhenSocketNotGood) {
   auto* mockHandlerPtr = mockHandler.get();
 
   auto pipeline =
-      PipelineBuilder<MockAppHandler, TransportHandler, SimpleBufferAllocator>()
+      PipelineBuilder<TransportHandler, MockAppHandler, SimpleBufferAllocator>()
           .setEventBase(&evb_)
-          .setTail(handler.get())
-          .setHead(&appHandler_)
+          .setHead(handler.get())
+          .setTail(&appHandler_)
           .setAllocator(&allocator_)
           .addNextDuplex<MockHandler>(
               exception_handler_tag, std::move(mockHandler))

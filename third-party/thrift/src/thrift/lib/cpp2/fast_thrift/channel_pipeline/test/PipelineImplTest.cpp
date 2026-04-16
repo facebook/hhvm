@@ -44,8 +44,8 @@ class PipelineImplTest : public ::testing::Test {
   PipelineImpl::Ptr buildPipeline() {
     return PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
         .setEventBase(&evb_)
-        .setHead(&app_)
-        .setTail(&transport_)
+        .setHead(&transport_)
+        .setTail(&app_)
         .setAllocator(&allocator_)
         .addNextDuplex<MockHandler>(head_tag, std::move(head_handler_))
         .addNextDuplex<MockHandler>(middle_tag, std::move(middle_handler_))
@@ -63,8 +63,8 @@ class PipelineImplTest : public ::testing::Test {
   }
 
   folly::EventBase evb_;
-  MockTailHandler transport_;
-  MockHeadHandler app_;
+  MockHeadHandler transport_; // Head = writes (transport side)
+  MockTailHandler app_; // Tail = reads (app side)
   TestAllocator allocator_;
 
   std::unique_ptr<MockHandler> head_handler_;
@@ -94,7 +94,7 @@ TEST_F(PipelineImplTest, FireReadFlowsThroughAllHandlers) {
 TEST_F(PipelineImplTest, FireReadReachesApp) {
   createHandlers();
   bool app_received = false;
-  app_.setOnMessageCallback([&](TypeErasedBox&& msg) {
+  app_.setOnReadCallback([&](TypeErasedBox&& msg) {
     app_received = true;
     EXPECT_EQ(msg.get<int>(), 42);
     return Result::Success;
@@ -299,8 +299,8 @@ TEST_F(PipelineImplTest, FireExceptionToAppWithNoHandlers) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setTail(&app_)
+          .setHead(&transport_)
           .setAllocator(&allocator_)
           .build();
 
@@ -429,8 +429,8 @@ TEST_F(PipelineImplTest, FireConnectWithInboundOnlyHandler) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setTail(&app_)
+          .setHead(&transport_)
           .setAllocator(&allocator_)
           .addNextInbound<InboundOnlyHandler>(head_tag, std::move(inbound))
           .build();
@@ -576,8 +576,8 @@ TEST_F(PipelineImplTest, EmptyPipelineFireReadGoesToApp) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setHead(&app_)
-          .setTail(&transport_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .build();
 
@@ -593,8 +593,8 @@ TEST_F(PipelineImplTest, EmptyPipelineFireWriteGoesToTransport) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setHead(&app_)
-          .setTail(&transport_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .build();
 
@@ -615,8 +615,8 @@ TEST_F(PipelineImplTest, InboundOnlyHandlerPassthroughWrite) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setTail(&app_)
+          .setHead(&transport_)
           .setAllocator(&allocator_)
           .addNextInbound<InboundOnlyHandler>(head_tag, std::move(inbound))
           .build();
@@ -636,8 +636,8 @@ TEST_F(PipelineImplTest, OutboundOnlyHandlerPassthroughRead) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setTail(&app_)
+          .setHead(&transport_)
           .setAllocator(&allocator_)
           .addNextOutbound<OutboundOnlyHandler>(head_tag, std::move(outbound))
           .build();
@@ -860,8 +860,8 @@ class ContextCachingTest : public ::testing::Test {
   }
 
   folly::EventBase evb_;
-  MockTailHandler transport_;
-  MockHeadHandler app_;
+  MockHeadHandler transport_; // Head = writes (transport side)
+  MockTailHandler app_; // Tail = reads (app side)
   TestAllocator allocator_;
 };
 
@@ -873,8 +873,8 @@ TEST_F(ContextCachingTest, CacheTargetContextInHandlerAdded) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .addNextDuplex<ContextCachingHandler>(router_tag, std::move(router))
           .addNextDuplex<MockHandler>(target_tag, std::move(target))
@@ -906,8 +906,8 @@ TEST_F(ContextCachingTest, CachedContextEnablesSkipAheadRouting) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .addNextDuplex<ContextCachingHandler>(router_tag, std::move(router))
           .addNextDuplex<MockHandler>(middle_tag, std::move(middle))
@@ -948,8 +948,8 @@ TEST_F(ContextCachingTest, NormalForwardingWhenRouteConditionFails) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setTail(&app_)
+          .setHead(&transport_)
           .setAllocator(&allocator_)
           .addNextDuplex<ContextCachingHandler>(router_tag, std::move(router))
           .addNextDuplex<MockHandler>(middle_tag, std::move(middle))
@@ -978,8 +978,8 @@ TEST_F(ContextCachingTest, CacheNonExistentHandlerReturnsNull) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setTail(&app_)
+          .setHead(&transport_)
           .setAllocator(&allocator_)
           .addNextDuplex<ContextCachingHandler>(router_tag, std::move(router))
           .build();
@@ -1006,8 +1006,8 @@ TEST_F(ContextCachingTest, MixedRoutingAndForwarding) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setTail(&app_)
+          .setHead(&transport_)
           .setAllocator(&allocator_)
           .addNextDuplex<ContextCachingHandler>(router_tag, std::move(router))
           .addNextDuplex<MockHandler>(middle_tag, std::move(middle))
@@ -1047,8 +1047,8 @@ TEST_F(ContextCachingTest, CachedContextValidForPipelineLifetime) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setTail(&transport_)
-          .setHead(&app_)
+          .setTail(&app_)
+          .setHead(&transport_)
           .setAllocator(&allocator_)
           .addNextDuplex<ContextCachingHandler>(router_tag, std::move(router))
           .addNextDuplex<MockHandler>(target_tag, std::move(target))
@@ -1091,42 +1091,43 @@ TEST(HeadToTailOpTest, DefaultWriteDirection) {
   auto buf = folly::IOBuf::copyBuffer("write test");
   EXPECT_EQ(
       pipeline->fireWrite(TypeErasedBox(std::move(buf))), Result::Success);
-  EXPECT_EQ(tail.writeCount(), 1);
-  EXPECT_EQ(head.messageCount(), 0);
+  EXPECT_EQ(head.writeCount(), 1);
+  EXPECT_EQ(tail.messageCount(), 0);
 
   EXPECT_EQ(pipeline->fireRead(TypeErasedBox(42)), Result::Success);
-  EXPECT_EQ(head.messageCount(), 1);
-  EXPECT_EQ(tail.writeCount(), 1);
+  EXPECT_EQ(tail.messageCount(), 1);
+  EXPECT_EQ(head.writeCount(), 1);
 }
 
-TEST(HeadToTailOpTest, ReadDirectionReversesFlow) {
-  folly::EventBase evb;
-  MockHeadHandler head;
-  MockTailHandler tail;
-  TestAllocator allocator;
+// Note: ReadDirectionReversesFlow test was removed because direction reversal
+// via setHeadToTailOp is no longer supported for new-style endpoints.
+// HeadEndpointHandler always receives reads, TailEndpointHandler always
+// receives writes. Direction reversal only applies to legacy EndpointHandler.
 
-  auto pipeline =
-      PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
-          .setEventBase(&evb)
-          .setHead(&head)
-          .setTail(&tail)
-          .setAllocator(&allocator)
-          .setHeadToTailOp(HeadToTailOp::Read)
-          .build();
+// ==================== Endpoint Concept Tests ====================
 
-  auto buf = folly::IOBuf::copyBuffer("read reversed");
-  EXPECT_EQ(pipeline->fireRead(TypeErasedBox(std::move(buf))), Result::Success);
-  EXPECT_EQ(tail.writeCount(), 1);
-  EXPECT_EQ(head.messageCount(), 0);
+// Static assertions to verify concepts are satisfied
+static_assert(
+    HeadEndpointHandler<MockHeadHandler>,
+    "MockHeadHandler should satisfy HeadEndpointHandler concept");
+static_assert(
+    TailEndpointHandler<MockTailHandler>,
+    "MockTailHandler should satisfy TailEndpointHandler concept");
+static_assert(
+    ValidEndpointPair<MockHeadHandler, MockTailHandler>,
+    "MockHeadHandler+MockTailHandler should be a ValidEndpointPair");
 
-  EXPECT_EQ(pipeline->fireWrite(TypeErasedBox(42)), Result::Success);
-  EXPECT_EQ(head.messageCount(), 1);
-  EXPECT_EQ(tail.writeCount(), 1);
-}
+// Verify lifecycle concept is satisfied
+static_assert(
+    EndpointHandlerLifecycle<MockHeadHandler>,
+    "MockHeadHandler should satisfy EndpointHandlerLifecycle concept");
+static_assert(
+    EndpointHandlerLifecycle<MockTailHandler>,
+    "MockTailHandler should satisfy EndpointHandlerLifecycle concept");
 
-// ==================== EndpointLifecycleHook Tests ====================
+// ==================== EndpointLifecycle Tests ====================
 
-TEST(EndpointLifecycleHookTest, HeadHookCalledOnActivateDeactivate) {
+TEST(EndpointLifecycleTest, HeadHookCalledOnActivateDeactivate) {
   folly::EventBase evb;
   MockTailHandler tail;
   TestAllocator allocator;
@@ -1135,22 +1136,19 @@ TEST(EndpointLifecycleHookTest, HeadHookCalledOnActivateDeactivate) {
   int deactivated = 0;
 
   struct LifecycleHead {
-    EndpointLifecycleHook lifecycleHook_;
     int* activated_;
     int* deactivated_;
 
-    LifecycleHead(int* a, int* d) : activated_(a), deactivated_(d) {
-      lifecycleHook_.self = this;
-      lifecycleHook_.onActivated = [](void* s) noexcept {
-        ++(*static_cast<LifecycleHead*>(s)->activated_);
-      };
-      lifecycleHook_.onDeactivated = [](void* s) noexcept {
-        ++(*static_cast<LifecycleHead*>(s)->deactivated_);
-      };
-    }
+    LifecycleHead(int* a, int* d) : activated_(a), deactivated_(d) {}
 
-    Result onMessage(TypeErasedBox&&) noexcept { return Result::Success; }
-    void onException(folly::exception_wrapper&&) noexcept {}
+    // HeadEndpointHandler data method
+    Result onWrite(TypeErasedBox&&) noexcept { return Result::Success; }
+
+    // EndpointHandlerLifecycle methods
+    void handlerAdded() noexcept {}
+    void handlerRemoved() noexcept {}
+    void onPipelineActive() noexcept { ++(*activated_); }
+    void onPipelineInactive() noexcept { ++(*deactivated_); }
   };
 
   LifecycleHead head(&activated, &deactivated);
@@ -1172,12 +1170,14 @@ TEST(EndpointLifecycleHookTest, HeadHookCalledOnActivateDeactivate) {
   EXPECT_EQ(deactivated, 1);
 }
 
-TEST(EndpointLifecycleHookTest, NoHookIsNoop) {
+TEST(EndpointLifecycleTest, LifecycleMethodsCalledOnMockHandlers) {
   folly::EventBase evb;
   MockHeadHandler head;
   MockTailHandler tail;
   TestAllocator allocator;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb)
@@ -1185,9 +1185,46 @@ TEST(EndpointLifecycleHookTest, NoHookIsNoop) {
           .setTail(&tail)
           .setAllocator(&allocator)
           .build();
+#pragma GCC diagnostic pop
+
+  EXPECT_EQ(head.handlerAddedCount(), 1);
+  EXPECT_EQ(tail.handlerAddedCount(), 1);
+  EXPECT_EQ(head.pipelineActiveCount(), 0);
+  EXPECT_EQ(tail.pipelineActiveCount(), 0);
 
   pipeline->activate();
+  EXPECT_EQ(head.pipelineActiveCount(), 1);
+  EXPECT_EQ(tail.pipelineActiveCount(), 1);
+
   pipeline->deactivate();
+  EXPECT_EQ(head.pipelineInactiveCount(), 1);
+  EXPECT_EQ(tail.pipelineInactiveCount(), 1);
+}
+
+TEST(EndpointLifecycleTest, HandlerRemovedCalledOnClose) {
+  folly::EventBase evb;
+  MockHeadHandler head;
+  MockTailHandler tail;
+  TestAllocator allocator;
+
+  {
+    auto pipeline =
+        PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
+            .setEventBase(&evb)
+            .setHead(&head)
+            .setTail(&tail)
+            .setAllocator(&allocator)
+            .build();
+
+    EXPECT_EQ(head.handlerRemovedCount(), 0);
+    EXPECT_EQ(tail.handlerRemovedCount(), 0);
+
+    pipeline->close();
+  }
+
+  // handlerRemoved should be called for both endpoints on close
+  EXPECT_EQ(head.handlerRemovedCount(), 1);
+  EXPECT_EQ(tail.handlerRemovedCount(), 1);
 }
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline::test

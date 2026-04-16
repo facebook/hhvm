@@ -56,6 +56,24 @@ namespace apache::thrift::fast_thrift::channel_pipeline {
 
 PipelineImpl::~PipelineImpl() = default;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+PipelineImpl::PipelineImpl(
+    folly::EventBase* eventBase,
+    std::vector<detail::HandlerNode> handlers,
+    void* head,
+    void* tail,
+    void* allocator) noexcept
+    : eventBase_(eventBase),
+      handlers_(std::move(handlers)),
+      head_(head),
+      tail_(tail),
+      allocator_(allocator),
+      headToTailOp_(HeadToTailOp::Write) {
+  initializeContexts();
+}
+
 PipelineImpl::PipelineImpl(
     folly::EventBase* eventBase,
     std::vector<detail::HandlerNode> handlers,
@@ -71,6 +89,8 @@ PipelineImpl::PipelineImpl(
       headToTailOp_(headToTailOp) {
   initializeContexts();
 }
+
+#pragma GCC diagnostic pop
 
 void PipelineImpl::initializeContexts() noexcept {
   const auto N = handlers_.size();
@@ -160,6 +180,16 @@ void PipelineImpl::callHandlerRemovedImpl() noexcept {
     DCHECK(handlers_[idx].handlerRemovedFn);
     handlers_[idx].handlerRemovedFn(handlers_[idx].handlerPtr, contexts_[idx]);
   }
+
+  // Call endpoint handlerRemoved (new-style endpoints only)
+  // Each endpoint's lifecycle is wired independently for mixed endpoints.
+  // TODO: Remove if-checks once legacy EndpointHandler API is removed.
+  if (headHandlerRemovedFn_) {
+    headHandlerRemovedFn_(head_);
+  }
+  if (tailHandlerRemovedFn_) {
+    tailHandlerRemovedFn_(tail_);
+  }
 }
 
 void PipelineImpl::callHandlerRemoved() noexcept {
@@ -177,11 +207,12 @@ void PipelineImpl::activate() noexcept {
     DCHECK(handler.onPipelineActivatedFn);
     handler.onPipelineActivatedFn(handler.handlerPtr, contexts_[i]);
   }
-  if (headLifecycleHook_ && headLifecycleHook_->onActivated) {
-    headLifecycleHook_->onActivated(headLifecycleHook_->self);
+  // Call endpoint lifecycle (new-style endpoints)
+  if (headOnPipelineActiveFn_) {
+    headOnPipelineActiveFn_(head_);
   }
-  if (tailLifecycleHook_ && tailLifecycleHook_->onActivated) {
-    tailLifecycleHook_->onActivated(tailLifecycleHook_->self);
+  if (tailOnPipelineActiveFn_) {
+    tailOnPipelineActiveFn_(tail_);
   }
 }
 
@@ -190,11 +221,12 @@ void PipelineImpl::deactivate() noexcept {
   if (closed_) {
     return;
   }
-  if (headLifecycleHook_ && headLifecycleHook_->onDeactivated) {
-    headLifecycleHook_->onDeactivated(headLifecycleHook_->self);
+  // Call endpoint lifecycle (new-style endpoints)
+  if (headOnPipelineInactiveFn_) {
+    headOnPipelineInactiveFn_(head_);
   }
-  if (tailLifecycleHook_ && tailLifecycleHook_->onDeactivated) {
-    tailLifecycleHook_->onDeactivated(tailLifecycleHook_->self);
+  if (tailOnPipelineInactiveFn_) {
+    tailOnPipelineInactiveFn_(tail_);
   }
   if (!handlers_.empty()) {
     deactivateFromIndex(handlers_.size() - 1);

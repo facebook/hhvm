@@ -51,10 +51,16 @@ enum class [[nodiscard]] Result { Success, Backpressure, Error };
 template <typename T>
 using Task = folly::coro::Task<T>;
 
-// Direction of the head-to-tail data path.
-// Controls how reads and writes are routed through the handler chain.
-//   Write (default): reads flow 0→N→head, writes flow N→0→tail
-//   Read:            reads flow N→0→tail, writes flow 0→N→head
+/**
+ * HeadToTailOp — DEPRECATED, direction is now fixed based on endpoint types.
+ *
+ * With the new HeadEndpointHandler and TailEndpointHandler concepts:
+ * - fireRead() always exits at head's onRead()
+ * - fireWrite() always exits at tail's onWrite()
+ *
+ * This enum is only used for backward compatibility with legacy
+ * EndpointHandler implementations.
+ */
 enum class HeadToTailOp { Read, Write };
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

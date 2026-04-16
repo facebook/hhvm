@@ -55,9 +55,26 @@ class PipelineImpl : public folly::DelayedDestruction {
   using Ptr = folly::DelayedDestructionUniquePtr<PipelineImpl>;
 
   /**
-   * Creates a new PipelineImpl.
+   * Creates a new PipelineImpl with fixed direction.
    * Use PipelineBuilder for construction.
+   *
+   * Direction is fixed: reads exit at head, writes exit at tail.
+   * This is the preferred constructor for new-style endpoints.
    */
+  PipelineImpl(
+      folly::EventBase* event_base,
+      std::vector<detail::HandlerNode> handlers,
+      void* head,
+      void* tail,
+      void* allocator) noexcept;
+
+  /**
+   * @deprecated Use the constructor without HeadToTailOp instead.
+   *
+   * Creates a new PipelineImpl with configurable direction.
+   * Only use this for legacy EndpointHandler implementations.
+   */
+  [[deprecated("Use constructor without HeadToTailOp")]]
   PipelineImpl(
       folly::EventBase* event_base,
       std::vector<detail::HandlerNode> handlers,
@@ -288,8 +305,13 @@ class PipelineImpl : public folly::DelayedDestruction {
 
   BytesPtr (*allocateFn_)(void*, size_t) noexcept {nullptr};
 
-  EndpointLifecycleHook* headLifecycleHook_{nullptr};
-  EndpointLifecycleHook* tailLifecycleHook_{nullptr};
+  // Endpoint lifecycle function pointers (new-style only)
+  void (*headOnPipelineActiveFn_)(void*) noexcept {nullptr};
+  void (*headOnPipelineInactiveFn_)(void*) noexcept {nullptr};
+  void (*headHandlerRemovedFn_)(void*) noexcept {nullptr};
+  void (*tailOnPipelineActiveFn_)(void*) noexcept {nullptr};
+  void (*tailOnPipelineInactiveFn_)(void*) noexcept {nullptr};
+  void (*tailHandlerRemovedFn_)(void*) noexcept {nullptr};
 
   // Cached entry-point dispatch for fireRead/fireWrite hot paths.
   // Points directly to the read-entry/write-entry handler's function pointer,

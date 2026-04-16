@@ -54,8 +54,8 @@ class DelayedDestructionTest : public ::testing::Test {
     handler_ptr_ = handler.get();
     return PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
         .setEventBase(&evb_)
-        .setTail(&transport_)
-        .setHead(&app_)
+        .setHead(&transport_)
+        .setTail(&app_)
         .setAllocator(&allocator_)
         .addNextDuplex<MockHandler>(handler1_tag, std::move(handler))
         .build();
@@ -68,8 +68,8 @@ class DelayedDestructionTest : public ::testing::Test {
     handler2_ptr_ = handler2.get();
     return PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
         .setEventBase(&evb_)
-        .setTail(&transport_)
-        .setHead(&app_)
+        .setHead(&transport_)
+        .setTail(&app_)
         .setAllocator(&allocator_)
         .addNextDuplex<MockHandler>(handler1_tag, std::move(handler1))
         .addNextDuplex<MockHandler>(handler2_tag, std::move(handler2))
@@ -77,8 +77,8 @@ class DelayedDestructionTest : public ::testing::Test {
   }
 
   folly::EventBase evb_;
-  MockTailHandler transport_;
-  MockHeadHandler app_;
+  MockHeadHandler transport_; // Head = writes (transport side)
+  MockTailHandler app_; // Tail = reads (app side)
   TestAllocator allocator_;
 
   MockHandler* handler_ptr_{nullptr};

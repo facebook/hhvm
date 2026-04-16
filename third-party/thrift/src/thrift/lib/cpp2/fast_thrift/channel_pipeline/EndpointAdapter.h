@@ -22,12 +22,69 @@
 namespace apache::thrift::fast_thrift::channel_pipeline {
 
 /**
- * EndpointHandler concept — terminal of a pipeline (head or tail).
+ * EndpointHandlerLifecycle concept — base lifecycle methods for all endpoint
+ * handlers.
  *
- * Both endpoints receive messages via onMessage() and exceptions via
- * onException().  The pipeline routes reads and writes to whichever
- * endpoint sits at the exit of each direction, controlled by
- * HeadToTailOp.
+ * All endpoint handlers must implement these lifecycle methods:
+ * - handlerAdded(): Called when handler is added to the pipeline (build())
+ * - handlerRemoved(): Called when handler is removed (pipeline destroyed)
+ * - onPipelineActive(): Called when pipeline becomes active (connection ready)
+ * - onPipelineInactive(): Called when pipeline becomes inactive (closing)
+ */
+template <typename H>
+concept EndpointHandlerLifecycle = requires(H h) {
+  { h.handlerAdded() } noexcept -> std::same_as<void>;
+  { h.handlerRemoved() } noexcept -> std::same_as<void>;
+  { h.onPipelineActive() } noexcept -> std::same_as<void>;
+  { h.onPipelineInactive() } noexcept -> std::same_as<void>;
+};
+
+/**
+ * HeadEndpointHandler concept — endpoint at the head of the pipeline.
+ *
+ * The head receives data via onWrite().
+ *
+ * Flow: fireWrite() propagates through handlers and arrives at head's
+ * onWrite().
+ *
+ * Required methods:
+ * - onWrite(TypeErasedBox&&): Handle data exiting the pipeline
+ * - Plus all EndpointHandlerLifecycle methods
+ */
+template <typename H>
+concept HeadEndpointHandler =
+    EndpointHandlerLifecycle<H> && requires(H h, TypeErasedBox&& msg) {
+      { h.onWrite(std::move(msg)) } noexcept -> std::same_as<Result>;
+    };
+
+/**
+ * TailEndpointHandler concept — endpoint at the tail of the pipeline.
+ *
+ * The tail receives data via onRead() and exceptions via onException().
+ *
+ * Flow: fireRead() propagates through handlers and arrives at tail's onRead().
+ *
+ * Required methods:
+ * - onRead(TypeErasedBox&&): Handle data entering the pipeline
+ * - onException(exception_wrapper&&): Handle pipeline exceptions
+ * - Plus all EndpointHandlerLifecycle methods
+ */
+template <typename T>
+concept TailEndpointHandler = EndpointHandlerLifecycle<T> &&
+    requires(T t, TypeErasedBox&& msg, folly::exception_wrapper&& ex) {
+      { t.onRead(std::move(msg)) } noexcept -> std::same_as<Result>;
+      { t.onException(std::move(ex)) } noexcept -> std::same_as<void>;
+    };
+
+/**
+ * @deprecated Use HeadEndpointHandler or TailEndpointHandler instead.
+ *
+ * EndpointHandler concept — legacy concept for both head and tail endpoints.
+ * Direction was controlled by HeadToTailOp at runtime, which is error-prone.
+ *
+ * Migrate to:
+ * - HeadEndpointHandler (onWrite + lifecycle)
+ * - TailEndpointHandler (onRead + onException + lifecycle)
  */
 template <typename E>
 concept EndpointHandler =
@@ -37,35 +94,18 @@ concept EndpointHandler =
     };
 
 /**
- * EndpointLifecycleHook provides optional lifecycle notifications for
- * endpoint adapters.
+ * ValidEndpointPair concept — validates head/tail endpoint combination.
  *
- * Adapters that want to receive activate/deactivate notifications embed
- * this hook as a public member named `lifecycleHook_`.  The hook is
- * automatically detected at compile time when the endpoint adapter is set
- * in PipelineBuilder::build() via `if constexpr`.
+ * A valid pipeline requires each endpoint to satisfy EITHER the new-style
+ * concept OR the legacy EndpointHandler concept. Mix-and-match is allowed
+ * during migration.
  *
- * Usage:
- *   class MyAppHandler {
- *    public:
- *     EndpointLifecycleHook lifecycleHook_{
- *         .onActivated = [](void* s) noexcept {
- *             static_cast<MyAppHandler*>(s)->onActivated();
- *         },
- *         .onDeactivated = [](void* s) noexcept {
- *             static_cast<MyAppHandler*>(s)->onDeactivated();
- *         },
- *         .self = this,
- *     };
- *
- *     Result onMessage(TypeErasedBox&& msg) noexcept { ... }
- *     void onException(folly::exception_wrapper&& e) noexcept { ... }
- *   };
+ * TODO: Once all handlers are migrated to new-style endpoints, tighten this
+ * to require HeadEndpointHandler<Head> && TailEndpointHandler<Tail>.
  */
-struct EndpointLifecycleHook {
-  void (*onActivated)(void* self) noexcept {nullptr};
-  void (*onDeactivated)(void* self) noexcept {nullptr};
-  void* self{nullptr};
-};
+template <typename Head, typename Tail>
+concept ValidEndpointPair =
+    (HeadEndpointHandler<Head> || EndpointHandler<Head>) &&
+    (TailEndpointHandler<Tail> || EndpointHandler<Tail>);
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

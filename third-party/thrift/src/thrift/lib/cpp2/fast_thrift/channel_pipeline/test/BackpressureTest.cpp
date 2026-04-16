@@ -42,8 +42,8 @@ class BackpressureTest : public ::testing::Test {
   PipelineImpl::Ptr buildPipeline() {
     return PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
         .setEventBase(&evb_)
-        .setTail(&transport_)
         .setHead(&app_)
+        .setTail(&transport_)
         .setAllocator(&allocator_)
         .addNextDuplex<MockHandler>(head_tag, std::move(head_handler_))
         .addNextDuplex<MockHandler>(middle_tag, std::move(middle_handler_))

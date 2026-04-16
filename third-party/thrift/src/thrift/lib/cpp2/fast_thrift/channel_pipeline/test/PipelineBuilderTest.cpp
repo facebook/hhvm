@@ -41,8 +41,8 @@ class PipelineBuilderTest : public ::testing::Test {
   }
 
   folly::EventBase evb_;
-  MockTailHandler transport_;
-  MockHeadHandler app_;
+  MockHeadHandler transport_; // Head = transport (onWrite)
+  MockTailHandler app_; // Tail = app (onRead)
   TestAllocator allocator_;
 };
 
@@ -50,8 +50,8 @@ TEST_F(PipelineBuilderTest, BuildEmptyPipeline) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setHead(&app_)
-          .setTail(&transport_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .build();
 
@@ -67,8 +67,8 @@ TEST_F(PipelineBuilderTest, BuildSingleHandlerPipeline) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setHead(&app_)
-          .setTail(&transport_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .addNextDuplex<MockHandler>(codec_tag, std::move(handler))
           .build();
@@ -89,8 +89,8 @@ TEST_F(PipelineBuilderTest, BuildMultiHandlerPipeline) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setHead(&app_)
-          .setTail(&transport_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .addNextDuplex<MockHandler>(codec_tag, std::move(codec))
           .addNextDuplex<MockHandler>(thrift_tag, std::move(thrift))
@@ -117,8 +117,8 @@ TEST_F(PipelineBuilderTest, HandlerAddedCalledInOrder) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setHead(&app_)
-          .setTail(&transport_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .addNextDuplex<MockHandler>(codec_tag, std::move(codec))
           .addNextDuplex<MockHandler>(thrift_tag, std::move(thrift))
@@ -137,8 +137,8 @@ TEST_F(PipelineBuilderTest, ContextLookupByTag) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setHead(&app_)
-          .setTail(&transport_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .addNextDuplex<MockHandler>(codec_tag, std::move(codec))
           .build();
@@ -157,8 +157,8 @@ TEST_F(PipelineBuilderTest, BuildThrowsWithoutEventBase) {
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>;
   EXPECT_THROW(
       Builder()
-          .setHead(&app_)
-          .setTail(&transport_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .build(),
       std::runtime_error);
@@ -170,7 +170,7 @@ TEST_F(PipelineBuilderTest, BuildThrowsWithoutHead) {
   EXPECT_THROW(
       Builder()
           .setEventBase(&evb_)
-          .setTail(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .build(),
       std::runtime_error);
@@ -182,7 +182,7 @@ TEST_F(PipelineBuilderTest, BuildThrowsWithoutTail) {
   EXPECT_THROW(
       Builder()
           .setEventBase(&evb_)
-          .setHead(&app_)
+          .setHead(&transport_)
           .setAllocator(&allocator_)
           .build(),
       std::runtime_error);
@@ -192,7 +192,7 @@ TEST_F(PipelineBuilderTest, BuildThrowsWithoutAllocator) {
   using Builder =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>;
   EXPECT_THROW(
-      Builder().setEventBase(&evb_).setHead(&app_).setTail(&transport_).build(),
+      Builder().setEventBase(&evb_).setHead(&transport_).setTail(&app_).build(),
       std::runtime_error);
 }
 
@@ -224,8 +224,8 @@ TEST_F(PipelineBuilderTest, AddNextDuplexWithInPlaceConstruction) {
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb_)
-          .setHead(&app_)
-          .setTail(&transport_)
+          .setHead(&transport_)
+          .setTail(&app_)
           .setAllocator(&allocator_)
           .addNextDuplex<TestHandler>(codec_tag, "my_codec")
           .build();

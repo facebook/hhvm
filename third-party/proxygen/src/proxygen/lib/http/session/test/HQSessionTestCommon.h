@@ -22,8 +22,6 @@
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
 #include <proxygen/lib/http/session/test/TestUtils.h>
 
-#define ALPN_HQ (alpn.find("h3") == 0)
-
 namespace {
 constexpr unsigned int kTransactionTimeout = 500;
 constexpr unsigned int kConnectTimeout = 500;

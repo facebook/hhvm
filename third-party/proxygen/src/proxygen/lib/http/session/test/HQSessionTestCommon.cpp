@@ -102,11 +102,9 @@ folly::Optional<std::pair<UnidirectionalStreamType, size_t>> parseStreamPreface(
     case UnidirectionalStreamType::QPACK_ENCODER:
     case UnidirectionalStreamType::QPACK_DECODER:
     case UnidirectionalStreamType::WEBTRANSPORT:
-      if (ALPN_HQ) {
-        return std::make_pair(prefaceEnum, res->second);
-      } else {
-        return folly::none;
-      }
+      return alpn == kH3 ? folly::make_optional(
+                               std::make_pair(prefaceEnum, res->second))
+                         : folly::none;
     default:
       break;
   }

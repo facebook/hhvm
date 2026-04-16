@@ -583,7 +583,6 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_program>::extends(proto.of<t_named>());
   def.property("package", mem_fn(&t_program::package, proto.of<t_package>()));
-  def.property("doc", mem_fn(&t_program::doc));
   def.property("include_prefix", mem_fn(&t_program::include_prefix));
   def.property("includes", mem_fn(&t_program::includes, proto.of<t_include>()));
   def.property("includes_for_codegen", [&proto](const t_program& self) {

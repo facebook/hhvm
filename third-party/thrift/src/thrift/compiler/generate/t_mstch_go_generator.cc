@@ -116,7 +116,6 @@ class t_mstch_go_generator : public t_whisker_generator {
     def.property("go_package_alias", [this](const t_program& self) {
       return data_.get_go_package_alias(&self);
     });
-    def.property("thirft_source_path", mem_fn(&t_program::path));
     def.property("compat?", [this](const t_program&) { return data_.compat; });
     def.property("compat_setters?", [this](const t_program&) {
       return data_.compat_setters;

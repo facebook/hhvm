@@ -637,10 +637,6 @@ class t_mstch_java_generator : public t_whisker_generator {
     def.property("javaTFieldName", [](const t_field& self) {
       return java_constant_name(get_java_swift_name(&self)) + "_FIELD_DESC";
     });
-    def.property("typeFieldName", [](const t_field& self) {
-      auto type_name = self.type()->get_true_type()->get_full_name();
-      return java::mangle_java_name(type_name, true);
-    });
     def.property("java_strings_compat?", [this](const t_field& self) {
       if (self.has_structured_annotation(kStringsUri) ||
           t_typedef::get_first_structured_annotation_or_null(
@@ -749,24 +745,6 @@ class t_mstch_java_generator : public t_whisker_generator {
         batches.emplace_back(whisker::make::array(std::move(batch)));
       }
       return whisker::make::array(std::move(batches));
-    });
-
-    def.property("referenced_structs", [this, &proto](const t_interface& self) {
-      const auto& types = get_service_types(self);
-      whisker::array::raw result;
-      for (const auto* s : types.structs) {
-        result.emplace_back(proto.create<t_structured>(*s));
-      }
-      return whisker::make::array(std::move(result));
-    });
-
-    def.property("referenced_enums", [this, &proto](const t_interface& self) {
-      const auto& types = get_service_types(self);
-      whisker::array::raw result;
-      for (const auto* e : types.enums) {
-        result.emplace_back(proto.create<t_enum>(*e));
-      }
-      return whisker::make::array(std::move(result));
     });
 
     def.property(

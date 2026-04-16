@@ -861,11 +861,6 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
       return option.empty() ? whisker::make::string("thrift.python")
                             : whisker::make::string(option);
     });
-    def.property("root_module_prefix", [this](const t_program&) {
-      return root_module_prefix_.empty()
-          ? ""
-          : fmt::format("{}.", root_module_prefix_);
-    });
     def.property("has_streaming_types?", [](const t_program& self) {
       return std::any_of(
                  self.services().begin(),
@@ -983,9 +978,6 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
           });
     });
     def.property("legacy_api?", [](const t_structured&) { return true; });
-    def.property("num_fields", [](const t_structured& self) {
-      return whisker::i64(self.fields().size());
-    });
     def.property("allow_inheritance?", [](const t_structured& self) {
       // While inheritance is discouraged, there is limited support for py3
       // auto-migraters

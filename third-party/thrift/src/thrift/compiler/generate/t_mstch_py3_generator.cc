@@ -829,9 +829,6 @@ class t_mstch_py3_generator : public t_whisker_generator {
         "type_cppTemplate", [get_field_type_props](const t_field& self) {
           return get_field_type_props(self).cpp_template();
         });
-    def.property("type_flat_name", [get_field_type_props](const t_field& self) {
-      return get_field_type_props(self).flat_name();
-    });
     def.property(
         "type_need_cbinding_path?",
         [this, get_field_type_props](const t_field& self) {

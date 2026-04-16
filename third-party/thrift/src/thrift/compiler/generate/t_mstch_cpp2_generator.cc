@@ -1710,9 +1710,6 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
       return adapter == nullptr ? whisker::make::null
                                 : whisker::make::string(*adapter);
     });
-    def.property("name_hash", [](const t_field& field) {
-      return fmt::format("__fbthrift_hash_{}", cpp2::sha256_hex(field.name()));
-    });
     def.property("has_isset?", [](const t_field& field) {
       return cpp2::field_has_isset(&field);
     });
@@ -1831,11 +1828,6 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
           ? "private"
           : "public";
     });
-    def.property("metadata_name", [](const t_field& field) {
-      auto key = field.id();
-      auto suffix = key >= 0 ? std::to_string(key) : fmt::format("_{}", -key);
-      return fmt::format("{}_{}", field.name(), suffix);
-    });
     def.property(
         "lazy?", [](const t_field& field) { return cpp2::is_lazy(&field); });
     def.property("lazy_ref?", [](const t_field& field) {
@@ -1914,17 +1906,6 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
               !detail::is_initializer_default_value(
                      field.type().deref(), *field.default_value());
         });
-    // Not optional, terse, or deprecated terse.
-    def.property("fill?", [this](const t_field& field) {
-      bool is_deprecated_terse =
-          field.has_structured_annotation(kCppDeprecatedTerseWriteUri) ||
-          (has_compiler_option("deprecated_terse_writes") &&
-           cpp2::deprecated_terse_writes(&field));
-      return (field.qualifier() == t_field_qualifier::none ||
-              field.qualifier() == t_field_qualifier::required) &&
-          !is_deprecated_terse;
-    });
-
     return std::move(def).make();
   }
 
@@ -2005,9 +1986,6 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
     auto def =
         whisker::dsl::prototype_builder<h_interface>::extends(std::move(base));
     def.property("reduced_client?", &generate_reduced_client);
-    def.property("metadata_name", [](const t_interface& self) {
-      return fmt::format("{}_{}", self.program()->name(), self.name());
-    });
     return std::move(def).make();
   }
 

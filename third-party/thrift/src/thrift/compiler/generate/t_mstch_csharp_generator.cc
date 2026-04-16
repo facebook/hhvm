@@ -172,21 +172,6 @@ class t_csharp_EXPERIMENTAL_generator : public t_whisker_generator {
       return w::array(std::move(result));
     });
 
-    // Whisker's strict_printable_types only allows i64 and string to be
-    // printed via {{...}} interpolation. f64, bool, and null require
-    // explicit string conversion with language-specific formatting.
-    def.property("bool_string", [](const t_const_value& self) {
-      return self.kind() == t_const_value::CV_BOOL
-          ? w::string(self.get_bool() ? "true" : "false")
-          : w::null;
-    });
-
-    def.property("double_string", [](const t_const_value& self) {
-      return self.kind() == t_const_value::CV_DOUBLE
-          ? w::string(fmt::format("{}", self.get_double()))
-          : w::null;
-    });
-
     return std::move(def).make();
   }
 };

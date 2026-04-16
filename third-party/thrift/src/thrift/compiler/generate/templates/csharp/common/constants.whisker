@@ -31,9 +31,9 @@
   {{#else if value.type.i64?}}
 {{value.integer_value}}L
   {{#else if value.type.float?}}
-(float){{#if value.double?}}{{value.double_string}}{{#else}}{{value.integer_value}}.0{{/if}}
+(float){{#if value.double?}}{{(float_to_string value.double_value)}}{{#else}}{{value.integer_value}}.0{{/if}}
   {{#else if value.type.double?}}
-{{#if value.double?}}{{value.double_string}}{{#else}}{{value.integer_value}}.0{{/if}}
+{{#if value.double?}}{{(float_to_string value.double_value)}}{{#else}}{{value.integer_value}}.0{{/if}}
   {{#else if value.type.string?}}
 "{{value.string_value}}"
   {{#else if value.type.binary?}}

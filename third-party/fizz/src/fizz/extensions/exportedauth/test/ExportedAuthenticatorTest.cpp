@@ -47,22 +47,37 @@ TEST(ExportedAuthenticatorTest, TestAuthenticatorRequest) {
       getExtension<SignatureAlgorithms>(sigAlgs, err, cr.extensions),
       Status::Success);
   EXPECT_TRUE(sigAlgs.has_value());
-  auto encodedAuthRequest = ExportedAuthenticator::getAuthenticatorRequest(
-      std::move(cr.certificate_request_context), std::move(cr.extensions));
+  Buf encodedAuthRequest;
+  EXPECT_EQ(
+      ExportedAuthenticator::getAuthenticatorRequest(
+          encodedAuthRequest,
+          err,
+          std::move(cr.certificate_request_context),
+          std::move(cr.extensions)),
+      Status::Success);
   EXPECT_EQ(
       expected_auth_request,
       StringPiece(hexlify(encodedAuthRequest->coalesce())));
 }
 
 TEST(ExportedAuthenticatorTest, TestEmptyAuthenticatorRequest) {
+  Buf ret;
+  Error err;
   EXPECT_THROW(
-      ExportedAuthenticator::getAuthenticatorRequest(
-          nullptr, std::vector<fizz::Extension>()),
+      FIZZ_THROW_ON_ERROR(
+          ExportedAuthenticator::getAuthenticatorRequest(
+              ret, err, nullptr, std::vector<fizz::Extension>()),
+          err),
       FizzException);
   auto emptyContext = folly::IOBuf::create(0);
   EXPECT_THROW(
-      ExportedAuthenticator::getAuthenticatorRequest(
-          std::move(emptyContext), std::vector<fizz::Extension>()),
+      FIZZ_THROW_ON_ERROR(
+          ExportedAuthenticator::getAuthenticatorRequest(
+              ret,
+              err,
+              std::move(emptyContext),
+              std::vector<fizz::Extension>()),
+          err),
       FizzException);
 }
 
@@ -158,8 +173,12 @@ TEST(ExportedAuthenticatorTest, TestGetContext) {
   StringPiece authenticator = {
       "0b00020f14303132333435363738396162636465666768696a0001f70001f2308201ee30820195a003020102020900c569eec901ce86d9300a06082a8648ce3d0403023054310b3009060355040613025553310b300906035504080c024e59310b300906035504070c024e59310d300b060355040a0c0446697a7a310d300b060355040b0c0446697a7a310d300b06035504030c0446697a7a301e170d3137303430343138323930395a170d3431313132343138323930395a3054310b3009060355040613025553310b300906035504080c024e59310b300906035504070c024e59310d300b060355040a0c0446697a7a310d300b060355040b0c0446697a7a310d300b06035504030c0446697a7a3059301306072a8648ce3d020106082a8648ce3d030107034200049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0a350304e301d0603551d0e041604143c5b8ba954d9752faf3c8ad6d1a62449dccaa850301f0603551d230418301680143c5b8ba954d9752faf3c8ad6d1a62449dccaa850300c0603551d13040530030101ff300a06082a8648ce3d04030203470030440220349b7d34d7132fb2756576e0bfa36cbe1723337a7a6f5ef9c8d3bf1aa7efa4a5022025c50a91e0aa4272f1f52c3d5583a7d7cee14b178835273a0bd814303e62d71400000f00004a04030046304402204ee36706cefd7b5de1b87eef8a756b1f69365451cae050163e030d7cb7594fbc022040aaadc7770b0404c5deb6fd9d9a2161423fb993a0a5b9e38f2c0e0d9183a52d1400002001dd31f46369c46fe41712e83ae7c46d31fdae816024edbb3b58cc29e2234852"};
   auto buf = folly::IOBuf::copyBuffer(unhexlify(authenticator));
-  auto certRequestContext =
-      ExportedAuthenticator::getAuthenticatorContext(std::move(buf));
+  Buf certRequestContext;
+  Error err;
+  EXPECT_EQ(
+      ExportedAuthenticator::getAuthenticatorContext(
+          certRequestContext, err, std::move(buf)),
+      Status::Success);
   EXPECT_EQ(
       expected_cr_context,
       StringPiece(hexlify(certRequestContext->coalesce())));

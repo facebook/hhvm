@@ -36,8 +36,12 @@ SecondaryAuthManager::createAuthRequest(
   appender.writeBE<uint16_t>(requestId);
   contextQueue.append(std::move(certRequestContext));
   auto secureContext = contextQueue.move();
-  auto authRequest = fizz::ExportedAuthenticator::getAuthenticatorRequest(
-      std::move(secureContext), std::move(extensions));
+  std::unique_ptr<folly::IOBuf> authRequest;
+  fizz::Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::ExportedAuthenticator::getAuthenticatorRequest(
+          authRequest, err, std::move(secureContext), std::move(extensions)),
+      err);
   auto authRequestClone = authRequest->clone();
   outstandingRequests_.insert(
       std::make_pair(requestId, std::move(authRequest)));
@@ -111,9 +115,11 @@ bool SecondaryAuthManager::validateAuthenticator(
 folly::Optional<std::unique_ptr<folly::IOBuf>>
 SecondaryAuthManager::verifyContext(
     std::unique_ptr<folly::IOBuf> authenticator) {
-  auto certRequestContext =
-      fizz::ExportedAuthenticator::getAuthenticatorContext(
-          std::move(authenticator));
+  std::unique_ptr<folly::IOBuf> certRequestContext;
+  fizz::Error err;
+  FIZZ_THROW_ON_ERROR(fizz::ExportedAuthenticator::getAuthenticatorContext(
+                          certRequestContext, err, std::move(authenticator)),
+                      err);
   folly::io::Cursor cursor(certRequestContext.get());
   auto requestId = cursor.readBE<uint16_t>();
   if (outstandingRequests_.find(requestId) == outstandingRequests_.end()) {

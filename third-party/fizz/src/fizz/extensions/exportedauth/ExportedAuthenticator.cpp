@@ -16,11 +16,13 @@
 
 namespace fizz {
 
-Buf ExportedAuthenticator::getAuthenticatorRequest(
+Status ExportedAuthenticator::getAuthenticatorRequest(
+    Buf& ret,
+    Error& err,
     Buf certificateRequestContext,
     std::vector<fizz::Extension> extensions) {
   if (!certificateRequestContext || certificateRequestContext->empty()) {
-    throw FizzException(
+    return err.error(
         "certificate request context must not be empty",
         AlertDescription::illegal_parameter);
   }
@@ -28,11 +30,8 @@ Buf ExportedAuthenticator::getAuthenticatorRequest(
   CertificateRequest cr;
   cr.certificate_request_context = std::move(certificateRequestContext);
   cr.extensions = std::move(extensions);
-  Buf encoded;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      encode<CertificateRequest>(encoded, err, std::move(cr)), err);
-  return encoded;
+  FIZZ_RETURN_ON_ERROR(encode<CertificateRequest>(ret, err, std::move(cr)));
+  return Status::Success;
 }
 
 Buf ExportedAuthenticator::getAuthenticator(
@@ -75,19 +74,21 @@ Buf ExportedAuthenticator::getAuthenticator(
       CertificateVerifyContext::Authenticator);
 }
 
-Buf ExportedAuthenticator::getAuthenticatorContext(Buf authenticator) {
+Status ExportedAuthenticator::getAuthenticatorContext(
+    Buf& ret,
+    Error& err,
+    Buf authenticator) {
   folly::IOBufQueue authQueue{folly::IOBufQueue::cacheChainLength()};
   authQueue.append(std::move(authenticator));
   folly::Optional<Param> param;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      fizz::ReadRecordLayer::decodeHandshakeMessage(param, err, authQueue),
-      err);
+  FIZZ_RETURN_ON_ERROR(
+      fizz::ReadRecordLayer::decodeHandshakeMessage(param, err, authQueue));
   auto certMsgPtr = param->asCertificateMsg();
   if (!certMsgPtr) {
-    throw std::runtime_error("Param isn't cert msg");
+    return err.error("Param isn't cert msg");
   }
-  return std::move(certMsgPtr->certificate_request_context);
+  ret = std::move(certMsgPtr->certificate_request_context);
+  return Status::Success;
 }
 
 Status ExportedAuthenticator::validateAuthenticator(

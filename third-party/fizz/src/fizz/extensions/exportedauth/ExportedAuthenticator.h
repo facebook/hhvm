@@ -40,7 +40,9 @@ class ExportedAuthenticator {
    * |certificateRequestContext| is an arbitrary sequence of bytes
    * that should be used to prevent replays.
    */
-  static Buf getAuthenticatorRequest(
+  static Status getAuthenticatorRequest(
+      Buf& ret,
+      Error& err,
       Buf certificateRequestContext,
       std::vector<fizz::Extension> extensions);
 
@@ -71,7 +73,8 @@ class ExportedAuthenticator {
    *
    * Returns the certificate_request_context given an authenticator
    */
-  static Buf getAuthenticatorContext(Buf authenticator);
+  static Status
+  getAuthenticatorContext(Buf& ret, Error& err, Buf authenticator);
 
   /**
    * "validate" API

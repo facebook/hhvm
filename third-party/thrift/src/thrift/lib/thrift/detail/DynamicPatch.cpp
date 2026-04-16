@@ -1382,7 +1382,7 @@ void DiffVisitorBase::diffElement(
   }
 
   if (inSrc && !inDst) {
-    patch.erase(key);
+    patch.remove(key);
     return;
   }
 

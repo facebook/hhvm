@@ -37,11 +37,15 @@ void BatchSignaturePeerCert::batchSigVerify(
       message, decoded.getIndex(), std::move(pathBuf));
   auto toBeSigned =
       BatchSignature::encodeToBeSigned(std::move(rootValue), scheme);
-  verifier_->verify(
-      batchInfo.baseScheme,
-      context,
-      toBeSigned->coalesce(),
-      decoded.getSignature()->coalesce());
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      verifier_->verify(
+          err,
+          batchInfo.baseScheme,
+          context,
+          toBeSigned->coalesce(),
+          decoded.getSignature()->coalesce()),
+      err);
 }
 
 } // namespace fizz

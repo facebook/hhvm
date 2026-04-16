@@ -31,17 +31,20 @@ class BatchSignaturePeerCert : public PeerCert {
     return verifier_->getX509();
   }
 
-  void verify(
+  Status verify(
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange message,
       folly::ByteRange signature) const override {
     auto baseScheme = getBatchSchemeInfo(scheme);
     if (!baseScheme) {
-      verifier_->verify(scheme, context, message, signature);
-      return;
+      FIZZ_RETURN_ON_ERROR(
+          verifier_->verify(err, scheme, context, message, signature));
+      return Status::Success;
     }
     batchSigVerify(scheme, baseScheme.value(), context, message, signature);
+    return Status::Success;
   }
 
   /**

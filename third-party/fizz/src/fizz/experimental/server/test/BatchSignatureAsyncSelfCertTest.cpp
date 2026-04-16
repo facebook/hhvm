@@ -133,11 +133,15 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyP256) {
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
   openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256> peerCert(
       getCert(kP256Certificate));
-  peerCert.verify(
-      SignatureScheme::ecdsa_secp256r1_sha256,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("Message1")),
-      (*std::move(signature).get())->coalesce());
+  Error err;
+  EXPECT_EQ(
+      peerCert.verify(
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("Message1")),
+          (*std::move(signature).get())->coalesce()),
+      Status::Success);
 
   // thow when signing a signature scheme that is not supported by base SelfCert
   EXPECT_THROW(
@@ -172,11 +176,15 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyRSA) {
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
   openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA> peerCert(
       getCert(kRSACertificate));
-  peerCert.verify(
-      SignatureScheme::rsa_pss_sha256,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("Message1")),
-      (*std::move(signature).get())->coalesce());
+  Error err;
+  EXPECT_EQ(
+      peerCert.verify(
+          err,
+          SignatureScheme::rsa_pss_sha256,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("Message1")),
+          (*std::move(signature).get())->coalesce()),
+      Status::Success);
 
   // thow when signing a signature scheme that is not supported by base SelfCert
   EXPECT_THROW(

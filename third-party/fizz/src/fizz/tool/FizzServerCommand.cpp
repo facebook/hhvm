@@ -966,11 +966,15 @@ int fizzServerCommand(const std::vector<std::string>& args) {
             fizz::extensions::DelegatedCredentialUtils::prepareSignatureBuffer(
                 *cred, folly::ssl::OpenSSLCertUtils::derEncode(*leafCert));
         try {
-          leafPeer->verify(
-              cred->credential_scheme,
-              CertificateVerifyContext::ServerDelegatedCredential,
-              toSign->coalesce(),
-              cred->signature->coalesce());
+          Error err;
+          FIZZ_THROW_ON_ERROR(
+              leafPeer->verify(
+                  err,
+                  cred->credential_scheme,
+                  CertificateVerifyContext::ServerDelegatedCredential,
+                  toSign->coalesce(),
+                  cred->signature->coalesce()),
+              err);
           // Verification succeeded, so make the credential.
           auto pubKeyRange = cred->public_key->coalesce();
           auto addr = pubKeyRange.data();
@@ -990,56 +994,101 @@ int fizzServerCommand(const std::vector<std::string>& args) {
 
           std::unique_ptr<fizz::extensions::SelfDelegatedCredential> cert;
           switch (openssl::CertUtils::getKeyType(credPrivKey)) {
-            case openssl::KeyType::RSA:
-              cert = std::make_unique<
+            case openssl::KeyType::RSA: {
+              std::unique_ptr<fizz::extensions::SelfDelegatedCredentialImpl<
+                  openssl::KeyType::RSA>>
+                  certRSA;
+              FIZZ_THROW_ON_ERROR(
                   fizz::extensions::SelfDelegatedCredentialImpl<
-                      openssl::KeyType::RSA>>(
-                  fizz::extensions::DelegatedCredentialMode::Server,
-                  std::move(certs),
-                  std::move(credPrivKey),
-                  std::move(*cred),
-                  compressors);
+                      openssl::KeyType::RSA>::
+                      create(
+                          certRSA,
+                          err,
+                          fizz::extensions::DelegatedCredentialMode::Server,
+                          std::move(certs),
+                          std::move(credPrivKey),
+                          std::move(*cred),
+                          compressors),
+                  err);
+              cert = std::move(certRSA);
               break;
-            case openssl::KeyType::P256:
-              cert = std::make_unique<
+            }
+            case openssl::KeyType::P256: {
+              std::unique_ptr<fizz::extensions::SelfDelegatedCredentialImpl<
+                  openssl::KeyType::P256>>
+                  certP256;
+              FIZZ_THROW_ON_ERROR(
                   fizz::extensions::SelfDelegatedCredentialImpl<
-                      openssl::KeyType::P256>>(
-                  fizz::extensions::DelegatedCredentialMode::Server,
-                  std::move(certs),
-                  std::move(credPrivKey),
-                  std::move(*cred),
-                  compressors);
+                      openssl::KeyType::P256>::
+                      create(
+                          certP256,
+                          err,
+                          fizz::extensions::DelegatedCredentialMode::Server,
+                          std::move(certs),
+                          std::move(credPrivKey),
+                          std::move(*cred),
+                          compressors),
+                  err);
+              cert = std::move(certP256);
               break;
-            case openssl::KeyType::P384:
-              cert = std::make_unique<
+            }
+            case openssl::KeyType::P384: {
+              std::unique_ptr<fizz::extensions::SelfDelegatedCredentialImpl<
+                  openssl::KeyType::P384>>
+                  certP384;
+              FIZZ_THROW_ON_ERROR(
                   fizz::extensions::SelfDelegatedCredentialImpl<
-                      openssl::KeyType::P384>>(
-                  fizz::extensions::DelegatedCredentialMode::Server,
-                  std::move(certs),
-                  std::move(credPrivKey),
-                  std::move(*cred),
-                  compressors);
+                      openssl::KeyType::P384>::
+                      create(
+                          certP384,
+                          err,
+                          fizz::extensions::DelegatedCredentialMode::Server,
+                          std::move(certs),
+                          std::move(credPrivKey),
+                          std::move(*cred),
+                          compressors),
+                  err);
+              cert = std::move(certP384);
               break;
-            case openssl::KeyType::P521:
-              cert = std::make_unique<
+            }
+            case openssl::KeyType::P521: {
+              std::unique_ptr<fizz::extensions::SelfDelegatedCredentialImpl<
+                  openssl::KeyType::P521>>
+                  certP521;
+              FIZZ_THROW_ON_ERROR(
                   fizz::extensions::SelfDelegatedCredentialImpl<
-                      openssl::KeyType::P521>>(
-                  fizz::extensions::DelegatedCredentialMode::Server,
-                  std::move(certs),
-                  std::move(credPrivKey),
-                  std::move(*cred),
-                  compressors);
+                      openssl::KeyType::P521>::
+                      create(
+                          certP521,
+                          err,
+                          fizz::extensions::DelegatedCredentialMode::Server,
+                          std::move(certs),
+                          std::move(credPrivKey),
+                          std::move(*cred),
+                          compressors),
+                  err);
+              cert = std::move(certP521);
               break;
-            case openssl::KeyType::ED25519:
-              cert = std::make_unique<
+            }
+            case openssl::KeyType::ED25519: {
+              std::unique_ptr<fizz::extensions::SelfDelegatedCredentialImpl<
+                  openssl::KeyType::ED25519>>
+                  certED25519;
+              FIZZ_THROW_ON_ERROR(
                   fizz::extensions::SelfDelegatedCredentialImpl<
-                      openssl::KeyType::ED25519>>(
-                  fizz::extensions::DelegatedCredentialMode::Server,
-                  std::move(certs),
-                  std::move(credPrivKey),
-                  std::move(*cred),
-                  compressors);
+                      openssl::KeyType::ED25519>::
+                      create(
+                          certED25519,
+                          err,
+                          fizz::extensions::DelegatedCredentialMode::Server,
+                          std::move(certs),
+                          std::move(credPrivKey),
+                          std::move(*cred),
+                          compressors),
+                  err);
+              cert = std::move(certED25519);
               break;
+            }
           }
 
           certManager->addDelegatedCredential(std::move(cert));

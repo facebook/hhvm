@@ -77,18 +77,25 @@ bool SecondaryAuthManager::validateAuthenticator(
   }
   // Validate the authenticator with regard to the authenticator request.
   folly::Optional<std::vector<fizz::CertificateEntry>> certs;
+  fizz::Error err;
   if (dir == TransportDirection::UPSTREAM) {
-    certs = fizz::ExportedAuthenticator::validateAuthenticator(
-        transport,
-        fizz::Direction::DOWNSTREAM,
-        std::move(*authRequest),
-        std::move(authenticator));
+    FIZZ_THROW_ON_ERROR(fizz::ExportedAuthenticator::validateAuthenticator(
+                            certs,
+                            err,
+                            transport,
+                            fizz::Direction::DOWNSTREAM,
+                            std::move(*authRequest),
+                            std::move(authenticator)),
+                        err);
   } else {
-    certs = fizz::ExportedAuthenticator::validateAuthenticator(
-        transport,
-        fizz::Direction::UPSTREAM,
-        std::move(*authRequest),
-        std::move(authenticator));
+    FIZZ_THROW_ON_ERROR(fizz::ExportedAuthenticator::validateAuthenticator(
+                            certs,
+                            err,
+                            transport,
+                            fizz::Direction::UPSTREAM,
+                            std::move(*authRequest),
+                            std::move(authenticator)),
+                        err);
   }
   if (!certs) {
     return false;

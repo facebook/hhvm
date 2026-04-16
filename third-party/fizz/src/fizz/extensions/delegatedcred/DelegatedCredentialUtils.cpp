@@ -12,26 +12,28 @@
 namespace fizz {
 namespace extensions {
 
-void DelegatedCredentialUtils::checkExtensions(
+Status DelegatedCredentialUtils::checkExtensions(
+    Error& err,
     const folly::ssl::X509UniquePtr& cert) {
   if (!hasDelegatedExtension(cert)) {
-    throw FizzException(
+    return err.error(
         "cert is missing DelegationUsage extension",
         AlertDescription::illegal_parameter);
   }
 
   if ((X509_get_extension_flags(cert.get()) & EXFLAG_KUSAGE) != EXFLAG_KUSAGE) {
-    throw FizzException(
+    return err.error(
         "cert is missing KeyUsage extension",
         AlertDescription::illegal_parameter);
   }
 
   auto key_usage = X509_get_key_usage(cert.get());
   if ((key_usage & KU_DIGITAL_SIGNATURE) != KU_DIGITAL_SIGNATURE) {
-    throw FizzException(
+    return err.error(
         "cert lacks digital signature key usage",
         AlertDescription::illegal_parameter);
   }
+  return Status::Success;
 }
 
 namespace {
@@ -77,7 +79,9 @@ Buf DelegatedCredentialUtils::prepareSignatureBuffer(
   return toSign;
 }
 
-DelegatedCredential DelegatedCredentialUtils::generateCredential(
+Status DelegatedCredentialUtils::generateCredential(
+    DelegatedCredential& ret,
+    Error& err,
     std::shared_ptr<SelfCert> cert,
     const folly::ssl::EvpPkeyUniquePtr& certKey,
     const folly::ssl::EvpPkeyUniquePtr& credKey,
@@ -88,19 +92,16 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
   DelegatedCredential cred;
   if (verifyContext != CertificateVerifyContext::ServerDelegatedCredential &&
       verifyContext != CertificateVerifyContext::ClientDelegatedCredential) {
-    throw std::runtime_error(
-        "Requested credential with invalid verification context");
+    return err.error("Requested credential with invalid verification context");
   }
   if (validSeconds > std::chrono::hours(24 * 7)) {
-    // Can't be valid longer than a week!
-    throw std::runtime_error(
-        "Requested credential with exceedingly large validity");
+    return err.error("Requested credential with exceedingly large validity");
   }
 
-  checkExtensions(cert->getX509());
+  FIZZ_RETURN_ON_ERROR(checkExtensions(err, cert->getX509()));
 
   if (X509_check_private_key(cert->getX509().get(), certKey.get()) != 1) {
-    throw std::runtime_error("Cert does not match private key");
+    return err.error("Cert does not match private key");
   }
 
   std::vector<SignatureScheme> credKeySchemes;
@@ -129,15 +130,14 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
 
   if (std::find(credKeySchemes.begin(), credKeySchemes.end(), verifyScheme) ==
       credKeySchemes.end()) {
-    throw std::runtime_error(
+    return err.error(
         "selected verification scheme not supported by credential key");
   }
 
   auto certSchemes = cert->getSigSchemes();
   if (std::find(certSchemes.begin(), certSchemes.end(), signScheme) ==
       certSchemes.end()) {
-    throw std::runtime_error(
-        "credential signature scheme not valid for parent cert");
+    return err.error("credential signature scheme not valid for parent cert");
   }
 
   cred.credential_scheme = signScheme;
@@ -153,13 +153,13 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
 
   int sz = i2d_PUBKEY(credKey.get(), nullptr);
   if (sz < 0) {
-    throw std::runtime_error("failed to get delegated pkey size");
+    return err.error("failed to get delegated pkey size");
   }
   unsigned int uSz = static_cast<unsigned int>(sz);
   cred.public_key = folly::IOBuf::create(uSz);
   auto ptr = reinterpret_cast<unsigned char*>(cred.public_key->writableData());
   if (i2d_PUBKEY(credKey.get(), &ptr) < 0) {
-    throw std::runtime_error("failed to convert delegated key to der");
+    return err.error("failed to convert delegated key to der");
   }
   cred.public_key->append(uSz);
 
@@ -168,7 +168,8 @@ DelegatedCredential DelegatedCredentialUtils::generateCredential(
   cred.signature =
       cert->sign(cred.credential_scheme, verifyContext, toSign->coalesce());
 
-  return cred;
+  ret = std::move(cred);
+  return Status::Success;
 }
 
 std::chrono::system_clock::time_point

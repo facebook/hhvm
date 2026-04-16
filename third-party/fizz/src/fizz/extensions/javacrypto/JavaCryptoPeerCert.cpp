@@ -28,21 +28,24 @@ void JavaCryptoPeerCert::onLoad(JNIEnv* env) {
       jni::getMethodID(env, clazz, "verify", "(Ljava/lang/String;[B[B)V");
 }
 
-JavaCryptoPeerCert::JavaCryptoPeerCert(Buf certData) {
+/* static */ Status JavaCryptoPeerCert::create(
+    std::unique_ptr<JavaCryptoPeerCert>& ret,
+    Error& err,
+    Buf certData) {
   bool shouldDetach;
-  auto env = jni::getEnv(&shouldDetach);
-
+  auto env = jni::getEnv(shouldDetach);
   auto byteArray = jni::createByteArray(env, std::move(certData));
-  jobject_ = env->NewObject(clazz, constructor, byteArray);
+  ret.reset(
+      new JavaCryptoPeerCert(env->NewObject(clazz, constructor, byteArray)));
   env->DeleteLocalRef(byteArray);
-
-  jni::maybeThrowException(env, shouldDetach);
+  FIZZ_RETURN_ON_ERROR(jni::maybeReturnError(err, env, shouldDetach));
   jni::releaseEnv(shouldDetach);
+  return Status::Success;
 }
 
 std::string JavaCryptoPeerCert::getIdentity() const {
   bool shouldDetach;
-  auto env = jni::getEnv(&shouldDetach);
+  auto env = jni::getEnv(shouldDetach);
 
   auto jIdentity = (jstring)env->CallObjectMethod(jobject_, getIdentityMethod);
   auto cIdentity = jIdentity
@@ -52,19 +55,20 @@ std::string JavaCryptoPeerCert::getIdentity() const {
   if (jIdentity) {
     env->ReleaseStringUTFChars(jIdentity, cIdentity);
   }
-
-  jni::maybeThrowException(env, shouldDetach);
+  Error err;
+  FIZZ_THROW_ON_ERROR(jni::maybeReturnError(err, env, shouldDetach), err);
   jni::releaseEnv(shouldDetach);
   return identity;
 }
 
-void JavaCryptoPeerCert::verify(
+Status JavaCryptoPeerCert::verify(
+    Error& err,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
     folly::ByteRange signature) const {
   bool shouldDetach;
-  auto env = jni::getEnv(&shouldDetach);
+  auto env = jni::getEnv(shouldDetach);
 
   std::string algorithm;
   switch (scheme) {
@@ -72,7 +76,7 @@ void JavaCryptoPeerCert::verify(
       algorithm = "SHA256withECDSA";
       break;
     default:
-      throw std::runtime_error("Unsupported signature scheme");
+      return err.error("Unsupported signature scheme");
   }
   auto jAlgorithm = env->NewStringUTF(algorithm.c_str());
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
@@ -86,8 +90,9 @@ void JavaCryptoPeerCert::verify(
   env->DeleteLocalRef(jSignData);
   env->DeleteLocalRef(jAlgorithm);
 
-  jni::maybeThrowException(env, shouldDetach);
+  FIZZ_RETURN_ON_ERROR(jni::maybeReturnError(err, env, shouldDetach));
   jni::releaseEnv(shouldDetach);
+  return Status::Success;
 }
 
 folly::ssl::X509UniquePtr JavaCryptoPeerCert::getX509() const {

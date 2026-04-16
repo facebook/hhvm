@@ -152,7 +152,11 @@ StringPiece kP384ServerDelegatedCred = {
 TEST(SerializationTest, testValidReadFromPem) {
   auto combinedPem = kP256ServerDelegatedCred.toString() +
       kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
-  auto dc = loadDCFromPEM(combinedPem, DelegatedCredentialMode::Server);
+  std::unique_ptr<SelfDelegatedCredential> dc;
+  Error err;
+  EXPECT_EQ(
+      loadDCFromPEM(dc, err, combinedPem, DelegatedCredentialMode::Server),
+      Status::Success);
   EXPECT_NE(dc, nullptr);
   EXPECT_EQ(
       dc->getSigSchemes(),
@@ -162,8 +166,12 @@ TEST(SerializationTest, testValidReadFromPem) {
 TEST(SerializationTest, testReadFromPemWrongMode) {
   auto combinedPem = kP256ServerDelegatedCred.toString() +
       kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
+  std::unique_ptr<SelfDelegatedCredential> dc;
+  Error err;
   EXPECT_THROW(
-      loadDCFromPEM(combinedPem, DelegatedCredentialMode::Client),
+      FIZZ_THROW_ON_ERROR(
+          loadDCFromPEM(dc, err, combinedPem, DelegatedCredentialMode::Client),
+          err),
       std::runtime_error);
 }
 
@@ -172,8 +180,17 @@ TEST(SerializationTest, testReadClientAndServer) {
       kP256DelegatedCredKeyWClientLabel.toString() +
       kP256ServerDelegatedCred.toString() +
       kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
-  auto clientDC = loadDCFromPEM(combinedPem, DelegatedCredentialMode::Client);
-  auto serverDC = loadDCFromPEM(combinedPem, DelegatedCredentialMode::Server);
+  std::unique_ptr<SelfDelegatedCredential> clientDC;
+  Error err;
+  EXPECT_EQ(
+      loadDCFromPEM(
+          clientDC, err, combinedPem, DelegatedCredentialMode::Client),
+      Status::Success);
+  std::unique_ptr<SelfDelegatedCredential> serverDC;
+  EXPECT_EQ(
+      loadDCFromPEM(
+          serverDC, err, combinedPem, DelegatedCredentialMode::Server),
+      Status::Success);
   EXPECT_EQ(
       clientDC->getSigSchemes(),
       std::vector<SignatureScheme>{SignatureScheme::ecdsa_secp256r1_sha256});
@@ -185,16 +202,24 @@ TEST(SerializationTest, testReadClientAndServer) {
 TEST(SerializationTest, BadLabel) {
   auto combinedPem = kP256ServerDelegatedCredBadLabel.toString() +
       kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
+  std::unique_ptr<SelfDelegatedCredential> dc;
+  Error err;
   EXPECT_THROW(
-      loadDCFromPEM(combinedPem, DelegatedCredentialMode::Server),
+      FIZZ_THROW_ON_ERROR(
+          loadDCFromPEM(dc, err, combinedPem, DelegatedCredentialMode::Server),
+          err),
       std::runtime_error);
 }
 
 TEST(SerializationTest, P384DC) {
   auto combinedPem = kP384ServerDelegatedCred.toString() +
       kP384ServerDelegatedKey.toString() + kP256CredCert.toString();
+  std::unique_ptr<SelfDelegatedCredential> dc;
+  Error err;
   EXPECT_THROW(
-      loadDCFromPEM(combinedPem, DelegatedCredentialMode::Server),
+      FIZZ_THROW_ON_ERROR(
+          loadDCFromPEM(dc, err, combinedPem, DelegatedCredentialMode::Server),
+          err),
       std::runtime_error);
 }
 

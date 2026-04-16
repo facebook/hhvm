@@ -20,9 +20,11 @@ class DelegatedCredentialUtils {
  public:
   /**
    * Checks that the cert passed in has the extensions needed for delegated
-   * credentials. Throws an exception if it doesn't have them.
+   * credentials. Returns an error if it doesn't have them.
    */
-  static void checkExtensions(const folly::ssl::X509UniquePtr& cert);
+  static Status checkExtensions(
+      Error& err,
+      const folly::ssl::X509UniquePtr& cert);
 
   /**
    * Returns whether or not the delegated credential extension is present on
@@ -51,7 +53,9 @@ class DelegatedCredentialUtils {
    * Generates a delegated credential for a given cert, private key, and
    * delegated private key.
    */
-  static DelegatedCredential generateCredential(
+  static Status generateCredential(
+      DelegatedCredential& ret,
+      Error& err,
       std::shared_ptr<SelfCert> cert,
       const folly::ssl::EvpPkeyUniquePtr& certKey,
       const folly::ssl::EvpPkeyUniquePtr& credKey,

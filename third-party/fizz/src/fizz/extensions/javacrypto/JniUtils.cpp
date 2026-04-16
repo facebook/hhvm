@@ -37,8 +37,8 @@ void setVM(JavaVM* jvm) {
   vm = jvm;
 }
 
-JNIEnv* getEnv(bool* shouldDetach) {
-  *shouldDetach = false;
+JNIEnv* getEnv(bool& shouldDetach) {
+  shouldDetach = false;
 
   JNIEnv* env;
   auto status = vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
@@ -48,7 +48,7 @@ JNIEnv* getEnv(bool* shouldDetach) {
     status = vm->AttachCurrentThread(
         ATTACH_CURRENT_THREAD_ENV_ARG(env), nullptr /*args*/);
     FIZZ_CHECK_EQ(status, JNI_OK);
-    *shouldDetach = true;
+    shouldDetach = true;
   }
 
   return env;
@@ -77,13 +77,13 @@ jmethodID getMethodID(
   return methodId;
 }
 
-void maybeThrowException(JNIEnv* env, bool shouldDetach) {
+Status maybeReturnError(Error& err, JNIEnv* env, bool shouldDetach) {
   if (!env->ExceptionCheck()) {
-    return;
+    return Status::Success;
   }
   env->ExceptionDescribe();
   releaseEnv(shouldDetach);
-  throw std::runtime_error("JNI exception");
+  return err.error("JNI exception");
 }
 
 jbyteArray createByteArray(JNIEnv* env, folly::ByteRange byteRange) {

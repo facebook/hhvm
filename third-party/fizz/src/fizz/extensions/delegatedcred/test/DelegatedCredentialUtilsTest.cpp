@@ -146,8 +146,11 @@ class DelegatedCredentialUtilsTest : public Test {
 TEST_F(DelegatedCredentialUtilsTest, TestCredentialNoX509Extension) {
   expectThrows(
       [&]() {
-        DelegatedCredentialUtils::checkExtensions(
-            getCert(kCertNoDelegatedExtension));
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            DelegatedCredentialUtils::checkExtensions(
+                err, getCert(kCertNoDelegatedExtension)),
+            err);
       },
       "cert is missing DelegationUsage extension",
       AlertDescription::illegal_parameter);
@@ -156,7 +159,11 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialNoX509Extension) {
 TEST_F(DelegatedCredentialUtilsTest, TestCredentialNoKeyUsage) {
   expectThrows(
       [&]() {
-        DelegatedCredentialUtils::checkExtensions(getCert(kCertNoKeyUsage));
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            DelegatedCredentialUtils::checkExtensions(
+                err, getCert(kCertNoKeyUsage)),
+            err);
       },
       "cert is missing KeyUsage extension",
       AlertDescription::illegal_parameter);
@@ -165,7 +172,11 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialNoKeyUsage) {
 TEST_F(DelegatedCredentialUtilsTest, TestCredentialWrongKeyUsage) {
   expectThrows(
       [&]() {
-        DelegatedCredentialUtils::checkExtensions(getCert(kCertWrongKeyUsage));
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            DelegatedCredentialUtils::checkExtensions(
+                err, getCert(kCertWrongKeyUsage)),
+            err);
       },
       "cert lacks digital signature key usage",
       AlertDescription::illegal_parameter);

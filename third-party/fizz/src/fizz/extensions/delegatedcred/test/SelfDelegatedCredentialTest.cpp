@@ -215,23 +215,34 @@ class SelfDelegatedCredentialTest : public Test {
 TEST_F(SelfDelegatedCredentialTest, TestConstruction) {
   auto dcKey = generateDelegatedPrivkey();
   auto credential = makeCredential(dcKey);
-  auto credCert =
-      std::make_unique<SelfDelegatedCredentialImpl<openssl::KeyType::P256>>(
+  std::unique_ptr<SelfDelegatedCredentialImpl<openssl::KeyType::P256>> credCert;
+  Error err;
+  EXPECT_EQ(
+      SelfDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+          credCert,
+          err,
           fizz::extensions::DelegatedCredentialMode::Server,
           getCertVec(),
           std::move(dcKey),
-          std::move(credential));
+          std::move(credential)),
+      Status::Success);
 }
 
 TEST_F(SelfDelegatedCredentialTest, TestEd25519DCConstruction) {
   auto dcKey = generateEd25519PrivKey();
   auto credential = makeCredential(dcKey);
-  auto credCert =
-      std::make_unique<SelfDelegatedCredentialImpl<openssl::KeyType::ED25519>>(
+  std::unique_ptr<SelfDelegatedCredentialImpl<openssl::KeyType::ED25519>>
+      credCert;
+  Error err;
+  EXPECT_EQ(
+      SelfDelegatedCredentialImpl<openssl::KeyType::ED25519>::create(
+          credCert,
+          err,
           fizz::extensions::DelegatedCredentialMode::Server,
           getCertVec(),
           std::move(dcKey),
-          std::move(credential));
+          std::move(credential)),
+      Status::Success);
 }
 
 TEST_F(SelfDelegatedCredentialTest, TestConstructionFailureBadSignature) {
@@ -239,12 +250,18 @@ TEST_F(SelfDelegatedCredentialTest, TestConstructionFailureBadSignature) {
   auto credential = makeCredential(dcKey);
 
   credential.signature = IOBuf::copyBuffer("hash algorithm party");
+  std::unique_ptr<SelfDelegatedCredentialImpl<openssl::KeyType::P256>> cred;
+  Error err;
   EXPECT_THROW(
-      std::make_unique<SelfDelegatedCredentialImpl<openssl::KeyType::P256>>(
-          fizz::extensions::DelegatedCredentialMode::Server,
-          getCertVec(),
-          std::move(dcKey),
-          std::move(credential)),
+      FIZZ_THROW_ON_ERROR(
+          SelfDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+              cred,
+              err,
+              fizz::extensions::DelegatedCredentialMode::Server,
+              getCertVec(),
+              std::move(dcKey),
+              std::move(credential)),
+          err),
       std::runtime_error);
 }
 
@@ -253,12 +270,18 @@ TEST_F(SelfDelegatedCredentialTest, TestConstructionFailureKeyTypeMismatch) {
   auto credential = makeCredential(dcKey);
 
   // RSA key with EC cert should fail
+  std::unique_ptr<SelfDelegatedCredentialImpl<openssl::KeyType::P256>> cred;
+  Error err;
   EXPECT_THROW(
-      std::make_unique<SelfDelegatedCredentialImpl<openssl::KeyType::P256>>(
-          fizz::extensions::DelegatedCredentialMode::Server,
-          getCertVec(),
-          std::move(dcKey),
-          std::move(credential)),
+      FIZZ_THROW_ON_ERROR(
+          SelfDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+              cred,
+              err,
+              fizz::extensions::DelegatedCredentialMode::Server,
+              getCertVec(),
+              std::move(dcKey),
+              std::move(credential)),
+          err),
       std::runtime_error);
 }
 
@@ -270,25 +293,35 @@ TEST_F(
   // Set incompatible verify scheme
   credential.expected_verify_scheme = SignatureScheme::ecdsa_secp521r1_sha512;
   updateSignature(credential);
-
+  std::unique_ptr<SelfDelegatedCredentialImpl<openssl::KeyType::P256>> cred;
+  Error err;
   EXPECT_THROW(
-      std::make_unique<SelfDelegatedCredentialImpl<openssl::KeyType::P256>>(
-          fizz::extensions::DelegatedCredentialMode::Server,
-          getCertVec(),
-          std::move(dcKey),
-          std::move(credential)),
+      FIZZ_THROW_ON_ERROR(
+          SelfDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+              cred,
+              err,
+              fizz::extensions::DelegatedCredentialMode::Server,
+              getCertVec(),
+              std::move(dcKey),
+              std::move(credential)),
+          err),
       std::runtime_error);
 }
 
 TEST_F(SelfDelegatedCredentialTest, TestSignatureValidity) {
   auto dcKey = generateDelegatedPrivkey();
   auto credential = makeCredential(dcKey);
-  auto credCert =
-      std::make_unique<SelfDelegatedCredentialImpl<openssl::KeyType::P256>>(
+  std::unique_ptr<SelfDelegatedCredentialImpl<openssl::KeyType::P256>> credCert;
+  Error err;
+  EXPECT_EQ(
+      SelfDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+          credCert,
+          err,
           fizz::extensions::DelegatedCredentialMode::Server,
           getCertVec(),
           std::move(dcKey),
-          std::move(credential));
+          std::move(credential)),
+      Status::Success);
   Buf toSign = IOBuf::copyBuffer("signme");
 
   auto certSig = parentCert_->sign(
@@ -302,20 +335,25 @@ TEST_F(SelfDelegatedCredentialTest, TestSignatureValidity) {
 
   auto parentPeerCert =
       openssl::CertUtils::makePeerCert(parentCert_->getX509());
-
   EXPECT_THROW(
+      FIZZ_THROW_ON_ERROR(
+          parentPeerCert->verify(
+              err,
+              SignatureScheme::ecdsa_secp256r1_sha256,
+              CertificateVerifyContext::Server,
+              toSign->coalesce(),
+              dcSig->coalesce()),
+          err),
+      std::runtime_error);
+
+  EXPECT_EQ(
       parentPeerCert->verify(
+          err,
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           toSign->coalesce(),
-          dcSig->coalesce()),
-      std::runtime_error);
-
-  parentPeerCert->verify(
-      SignatureScheme::ecdsa_secp256r1_sha256,
-      CertificateVerifyContext::Server,
-      toSign->coalesce(),
-      certSig->coalesce());
+          certSig->coalesce()),
+      Status::Success);
 }
 
 } // namespace test

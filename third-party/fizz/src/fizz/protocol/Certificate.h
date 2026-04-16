@@ -101,7 +101,8 @@ class PeerCert : public PeerCertBase {
    * Verifies that signature is a valid signature of toBeSigned. Throws if it's
    * not.
    */
-  virtual void verify(
+  virtual Status verify(
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned,

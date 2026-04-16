@@ -79,13 +79,17 @@ class ExportedAuthenticator {
    * Returns the certificate chain and extensions. If the authenticator was
    * empty, the certificate chain will contain no certificates.
    **/
-  static folly::Optional<std::vector<CertificateEntry>> validateAuthenticator(
+  static Status validateAuthenticator(
+      folly::Optional<std::vector<CertificateEntry>>& ret,
+      Error& err,
       const fizz::AsyncFizzBase& transport,
       Direction dir,
       Buf authenticatorRequest,
       Buf authenticator);
 
-  static folly::Optional<std::vector<CertificateEntry>> validate(
+  static Status validate(
+      folly::Optional<std::vector<CertificateEntry>>& ret,
+      Error& err,
       const fizz::HasherFactoryWithMetadata* makeHasher,
       Buf authenticatorRequest,
       Buf authenticator,

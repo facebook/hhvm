@@ -4852,7 +4852,7 @@ TEST_F(ClientProtocolTest, TestCertificateVerifyFlow) {
       .InSequence(contextSeq);
   EXPECT_CALL(
       *mockLeaf_,
-      verify(
+      _verify(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("certcontext"),
@@ -4908,7 +4908,7 @@ TEST_F(ClientProtocolTest, TestCertificateVerifyFailure) {
   setupExpectingCertificateVerify();
   EXPECT_CALL(
       *mockLeaf_,
-      verify(
+      _verify(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("context"),

@@ -173,23 +173,34 @@ int fizzGenerateDelegatedCredentialCommand(
     }
     BIO_get_mem_ptr(bio.get(), &bptr);
     auto certPem = std::string(bptr->data, bptr->length);
-    auto clientCredential = DelegatedCredentialUtils::generateCredential(
-        cert,
-        certPrivKey,
-        credPrivKey,
-        *credSignScheme,
-        *credVerifScheme,
-        CertificateVerifyContext::ClientDelegatedCredential,
-        validSec);
+    DelegatedCredential clientCredential;
+    DelegatedCredential serverCredential;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        DelegatedCredentialUtils::generateCredential(
+            clientCredential,
+            err,
+            cert,
+            certPrivKey,
+            credPrivKey,
+            *credSignScheme,
+            *credVerifScheme,
+            CertificateVerifyContext::ClientDelegatedCredential,
+            validSec),
+        err);
 
-    auto serverCredential = DelegatedCredentialUtils::generateCredential(
-        std::move(cert),
-        certPrivKey,
-        credPrivKey,
-        *credSignScheme,
-        *credVerifScheme,
-        CertificateVerifyContext::ServerDelegatedCredential,
-        validSec);
+    FIZZ_THROW_ON_ERROR(
+        DelegatedCredentialUtils::generateCredential(
+            serverCredential,
+            err,
+            std::move(cert),
+            certPrivKey,
+            credPrivKey,
+            *credSignScheme,
+            *credVerifScheme,
+            CertificateVerifyContext::ServerDelegatedCredential,
+            validSec),
+        err);
 
     auto clientPem = fizz::extensions::generateDelegatedCredentialPEM(
         fizz::extensions::DelegatedCredentialMode::Client,

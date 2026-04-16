@@ -45,10 +45,26 @@ void testCertVerify(
   ASSERT_TRUE(retDer.has_value());
 
   ASSERT_EQ(memcmp(certDer.c_str(), retDer.value().c_str(), certDer.size()), 0);
-
+  Error err;
   if (!testCase.validSig) {
     EXPECT_THROW(
+        FIZZ_THROW_ON_ERROR(
+            peerCert->verify(
+                err,
+                testCase.sigScheme,
+                fizz::CertificateVerifyContext::Server,
+                folly::ByteRange(
+                    reinterpret_cast<const unsigned char*>(msg.c_str()),
+                    msg.size()),
+                folly::ByteRange(
+                    reinterpret_cast<const unsigned char*>(sig.c_str()),
+                    sig.size())),
+            err),
+        std::runtime_error);
+  } else {
+    EXPECT_NO_THROW(FIZZ_THROW_ON_ERROR(
         peerCert->verify(
+            err,
             testCase.sigScheme,
             fizz::CertificateVerifyContext::Server,
             folly::ByteRange(
@@ -57,15 +73,7 @@ void testCertVerify(
             folly::ByteRange(
                 reinterpret_cast<const unsigned char*>(sig.c_str()),
                 sig.size())),
-        std::runtime_error);
-  } else {
-    EXPECT_NO_THROW(peerCert->verify(
-        testCase.sigScheme,
-        fizz::CertificateVerifyContext::Server,
-        folly::ByteRange(
-            reinterpret_cast<const unsigned char*>(msg.c_str()), msg.size()),
-        folly::ByteRange(
-            reinterpret_cast<const unsigned char*>(sig.c_str()), sig.size())));
+        err));
   }
 }
 } // namespace test

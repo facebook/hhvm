@@ -25,20 +25,21 @@ PeerDelegatedCredentialImpl<T>::PeerDelegatedCredentialImpl(
 }
 
 template <openssl::KeyType T>
-void PeerDelegatedCredentialImpl<T>::verify(
+Status PeerDelegatedCredentialImpl<T>::verify(
+    Error& err,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
     folly::ByteRange signature) const {
   // Verify that scheme matches expected scheme.
   if (scheme != getExpectedScheme()) {
-    throw FizzException(
+    return err.error(
         "certificate verify didn't use credential's algorithm",
         AlertDescription::illegal_parameter);
   }
   auto x509 = peerCert_.getX509();
   // Check extensions on cert
-  DelegatedCredentialUtils::checkExtensions(x509);
+  FIZZ_RETURN_ON_ERROR(DelegatedCredentialUtils::checkExtensions(err, x509));
   DelegatedCredentialUtils::checkCredentialTimeValidity(
       x509, credential_, clock_);
 
@@ -47,15 +48,21 @@ void PeerDelegatedCredentialImpl<T>::verify(
       credential_, folly::ssl::OpenSSLCertUtils::derEncode(*x509));
 
   try {
-    peerCert_.verify(
-        credential_.credential_scheme,
-        context == CertificateVerifyContext::Server
-            ? CertificateVerifyContext::ServerDelegatedCredential
-            : CertificateVerifyContext::ClientDelegatedCredential,
-        credSignBuf->coalesce(),
-        credential_.signature->coalesce());
+    if (peerCert_.verify(
+            err,
+            credential_.credential_scheme,
+            context == CertificateVerifyContext::Server
+                ? CertificateVerifyContext::ServerDelegatedCredential
+                : CertificateVerifyContext::ClientDelegatedCredential,
+            credSignBuf->coalesce(),
+            credential_.signature->coalesce()) == Status::Fail) {
+      return err.error(
+          folly::to<std::string>(
+              "failed to verify signature on credential: ", err.msg()),
+          AlertDescription::illegal_parameter);
+    }
   } catch (const std::exception& e) {
-    throw FizzException(
+    return err.error(
         folly::to<std::string>(
             "failed to verify signature on credential: ", e.what()),
         AlertDescription::illegal_parameter);
@@ -68,6 +75,7 @@ void PeerDelegatedCredentialImpl<T>::verify(
       context,
       std::move(toBeSigned),
       std::move(signature));
+  return Status::Success;
 }
 
 template <openssl::KeyType T>

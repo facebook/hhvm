@@ -216,13 +216,19 @@ TEST_F(ValidateAuthenticatorTest, TestValidateValidAuthenticator) {
   authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
   handshakeContext = folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
-  auto decodedCerts = ExportedAuthenticator::validate(
-      hasher(),
-      std::move(authenticatorRequest),
-      std::move(authenticator),
-      std::move(handshakeContext),
-      std::move(finishedMacKey),
-      CertificateVerifyContext::Authenticator);
+  folly::Optional<std::vector<CertificateEntry>> decodedCerts;
+  Error err;
+  EXPECT_EQ(
+      ExportedAuthenticator::validate(
+          decodedCerts,
+          err,
+          hasher(),
+          std::move(authenticatorRequest),
+          std::move(authenticator),
+          std::move(handshakeContext),
+          std::move(finishedMacKey),
+          CertificateVerifyContext::Authenticator),
+      Status::Success);
   EXPECT_TRUE(decodedCerts.has_value());
   EXPECT_EQ((*decodedCerts).size(), 1);
   EXPECT_EQ(
@@ -254,13 +260,19 @@ TEST_F(ValidateAuthenticatorTest, TestValidateEmptyAuthenticator) {
   authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
   handshakeContext = folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
-  auto decodedCerts = ExportedAuthenticator::validate(
-      hasher(),
-      std::move(authenticatorRequest),
-      std::move(authenticator),
-      std::move(handshakeContext),
-      std::move(finishedMacKey),
-      CertificateVerifyContext::Authenticator);
+  folly::Optional<std::vector<CertificateEntry>> decodedCerts;
+  Error err;
+  EXPECT_EQ(
+      ExportedAuthenticator::validate(
+          decodedCerts,
+          err,
+          hasher(),
+          std::move(authenticatorRequest),
+          std::move(authenticator),
+          std::move(handshakeContext),
+          std::move(finishedMacKey),
+          CertificateVerifyContext::Authenticator),
+      Status::Success);
   EXPECT_TRUE(decodedCerts.has_value());
   EXPECT_EQ((*decodedCerts).size(), 0);
 }

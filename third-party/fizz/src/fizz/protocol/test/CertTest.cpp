@@ -181,11 +181,15 @@ TYPED_TEST(CertTestTyped, TestVerifyDecodedCert) {
   StringPiece tbs{"ToBeSigned"};
   auto sig =
       selfCert.sign(TypeParam::Scheme, CertificateVerifyContext::Server, tbs);
-  peerCert->verify(
-      TypeParam::Scheme,
-      CertificateVerifyContext::Server,
-      tbs,
-      sig->coalesce());
+  Error err;
+  EXPECT_EQ(
+      peerCert->verify(
+          err,
+          TypeParam::Scheme,
+          CertificateVerifyContext::Server,
+          tbs,
+          sig->coalesce()),
+      Status::Success);
 }
 
 TYPED_TEST(CertTestTyped, TestGetX509Chain) {

@@ -32,16 +32,49 @@ class SelfDelegatedCredential : public SelfCert {
 // implementation logic.
 template <openssl::KeyType T>
 class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
- public:
-  ~SelfDelegatedCredentialImpl() override = default;
+ private:
+  class InternalSelfCert : public openssl::OpenSSLSelfCertImpl<T> {
+   private:
+    InternalSelfCert(
+        std::vector<folly::ssl::X509UniquePtr> certs,
+        folly::ssl::EvpPkeyUniquePtr privateKey)
+        : openssl::OpenSSLSelfCertImpl<T>(std::move(certs)) {
+      signature_.setKey(std::move(privateKey));
+    }
+
+   public:
+    ~InternalSelfCert() override = default;
+
+    static Status create(
+        std::unique_ptr<SelfDelegatedCredentialImpl<T>::InternalSelfCert>& ret,
+        Error& err,
+        std::vector<folly::ssl::X509UniquePtr> certs,
+        folly::ssl::EvpPkeyUniquePtr privateKey);
+    using openssl::OpenSSLSelfCertImpl<T>::certs_;
+    using openssl::OpenSSLSelfCertImpl<T>::signature_;
+  };
 
   SelfDelegatedCredentialImpl(
+      std::unique_ptr<InternalSelfCert> selfCertImpl,
+      DelegatedCredential credential,
+      std::map<CertificateCompressionAlgorithm, CompressedCertificate>
+          compressedCerts)
+      : selfCertImpl_(std::move(selfCertImpl)),
+        credential_(std::move(credential)),
+        compressedCerts_(std::move(compressedCerts)) {}
+
+ public:
+  static Status create(
+      std::unique_ptr<SelfDelegatedCredentialImpl>& ret,
+      Error& err,
       DelegatedCredentialMode mode,
       std::vector<folly::ssl::X509UniquePtr> certs,
       folly::ssl::EvpPkeyUniquePtr privateKey,
       DelegatedCredential credential,
       const std::vector<std::shared_ptr<CertificateCompressor>>& compressors =
           {});
+
+  ~SelfDelegatedCredentialImpl() override = default;
 
   std::string getIdentity() const override;
 
@@ -65,17 +98,7 @@ class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
   const DelegatedCredential& getDelegatedCredential() const override;
 
  private:
-  class InternalSelfCert : public openssl::OpenSSLSelfCertImpl<T> {
-   public:
-    ~InternalSelfCert() override = default;
-
-    InternalSelfCert(
-        std::vector<folly::ssl::X509UniquePtr> certs,
-        folly::ssl::EvpPkeyUniquePtr privateKey);
-    using openssl::OpenSSLSelfCertImpl<T>::certs_;
-    using openssl::OpenSSLSelfCertImpl<T>::signature_;
-  };
-  InternalSelfCert selfCertImpl_;
+  std::unique_ptr<InternalSelfCert> selfCertImpl_;
   DelegatedCredential credential_;
   std::map<CertificateCompressionAlgorithm, CompressedCertificate>
       compressedCerts_;

@@ -36,7 +36,7 @@ TEST(BatchSignaturePeerCertTest, TestDecoratorLogicWithMockCert) {
   // verify
   int counter = 0;
   EXPECT_CALL(
-      *mockBaseCert, verify(SignatureScheme::ecdsa_secp256r1_sha256, _, _, _))
+      *mockBaseCert, _verify(SignatureScheme::ecdsa_secp256r1_sha256, _, _, _))
       .Times(1)
       .WillOnce(Invoke([&](SignatureScheme,
                            CertificateVerifyContext,
@@ -49,11 +49,15 @@ TEST(BatchSignaturePeerCertTest, TestDecoratorLogicWithMockCert) {
         }
         counter++;
       }));
-  batchCert.verify(
-      SignatureScheme::ecdsa_secp256r1_sha256,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("hello")),
-      folly::range(folly::StringPiece("fakeSignature")));
+  Error err;
+  EXPECT_EQ(
+      batchCert.verify(
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("hello")),
+          folly::range(folly::StringPiece("fakeSignature"))),
+      Status::Success);
 }
 
 TEST(BatchSignaturePeerCertTest, TestSignVerifyP256) {
@@ -78,22 +82,29 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyP256) {
       std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
           getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
-  batchPeerCert.verify(
-      SignatureScheme::ecdsa_secp256r1_sha256_batch,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("Message1")),
-      (*std::move(signature1).get())->coalesce());
+  Error err;
+  EXPECT_EQ(
+      batchPeerCert.verify(
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256_batch,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("Message1")),
+          (*std::move(signature1).get())->coalesce()),
+      Status::Success);
 
   // non-batch signature
   auto signature2 = batchSelfCert.signFuture(
       SignatureScheme::ecdsa_secp256r1_sha256,
       CertificateVerifyContext::Server,
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
-  batchPeerCert.verify(
-      SignatureScheme::ecdsa_secp256r1_sha256,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("Message1")),
-      (*std::move(signature2).get())->coalesce());
+  EXPECT_EQ(
+      batchPeerCert.verify(
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("Message1")),
+          (*std::move(signature2).get())->coalesce()),
+      Status::Success);
 }
 
 TEST(BatchSignaturePeerCertTest, TestSignVerifyRSA) {
@@ -118,22 +129,29 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyRSA) {
       std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
           getCert(kRSACertificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
-  batchPeerCert.verify(
-      SignatureScheme::rsa_pss_sha256_batch,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("Message1")),
-      (*std::move(signature1).get())->coalesce());
+  Error err;
+  EXPECT_EQ(
+      batchPeerCert.verify(
+          err,
+          SignatureScheme::rsa_pss_sha256_batch,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("Message1")),
+          (*std::move(signature1).get())->coalesce()),
+      Status::Success);
 
   // non-batch signature
   auto signature2 = batchSelfCert.signFuture(
       SignatureScheme::rsa_pss_sha256,
       CertificateVerifyContext::Server,
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
-  batchPeerCert.verify(
-      SignatureScheme::rsa_pss_sha256,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("Message1")),
-      (*std::move(signature2).get())->coalesce());
+  EXPECT_EQ(
+      batchPeerCert.verify(
+          err,
+          SignatureScheme::rsa_pss_sha256,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("Message1")),
+          (*std::move(signature2).get())->coalesce()),
+      Status::Success);
 }
 
 TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
@@ -159,11 +177,15 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
           getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   // normal verify
-  EXPECT_NO_THROW(batchPeerCert.verify(
-      SignatureScheme::ecdsa_secp256r1_sha256_batch,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("Message1")),
-      signatureBuf->coalesce()));
+  Error err;
+  EXPECT_NO_THROW(FIZZ_THROW_ON_ERROR(
+      batchPeerCert.verify(
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256_batch,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("Message1")),
+          signatureBuf->coalesce()),
+      err));
 
   // throw when signature's index is larger than 2^31
   folly::io::Cursor cursor(signatureBuf.get());
@@ -174,11 +196,14 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
       .path = decodedSig.getPath()};
   BatchSignature newSig1(std::move(newPath), decodedSig.getSignature());
   EXPECT_THROW(
-      batchPeerCert.verify(
-          SignatureScheme::ecdsa_secp256r1_sha256_batch,
-          CertificateVerifyContext::Server,
-          folly::range(folly::StringPiece("Message1")),
-          newSig1.encode()->coalesce()),
+      FIZZ_THROW_ON_ERROR(
+          batchPeerCert.verify(
+              err,
+              SignatureScheme::ecdsa_secp256r1_sha256_batch,
+              CertificateVerifyContext::Server,
+              folly::range(folly::StringPiece("Message1")),
+              newSig1.encode()->coalesce()),
+          err),
       std::runtime_error);
 
   // throw when signature's path length is larger than Sha256::HashLen
@@ -190,11 +215,14 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
   newPath2.path->append(badLength);
   BatchSignature newSig2(std::move(newPath2), decodedSig.getSignature());
   EXPECT_THROW(
-      batchPeerCert.verify(
-          SignatureScheme::ecdsa_secp256r1_sha256_batch,
-          CertificateVerifyContext::Server,
-          folly::range(folly::StringPiece("Message1")),
-          newSig2.encode()->coalesce()),
+      FIZZ_THROW_ON_ERROR(
+          batchPeerCert.verify(
+              err,
+              SignatureScheme::ecdsa_secp256r1_sha256_batch,
+              CertificateVerifyContext::Server,
+              folly::range(folly::StringPiece("Message1")),
+              newSig2.encode()->coalesce()),
+          err),
       std::runtime_error);
 }
 

@@ -2430,11 +2430,12 @@ Status EventHandler<
   CHECK(!state.unverifiedCertChain().empty());
   auto leaf = state.unverifiedCertChain().front();
 
-  leaf->verify(
+  TRY(leaf->verify(
+      ctx.err,
       certVerify.algorithm,
       CertificateVerifyContext::Server,
       state.handshakeContext()->getHandshakeContext()->coalesce(),
-      certVerify.signature->coalesce());
+      certVerify.signature->coalesce()));
 
   std::shared_ptr<const Cert> newCert;
 

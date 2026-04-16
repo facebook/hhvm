@@ -90,8 +90,9 @@ Buf ExportedAuthenticator::getAuthenticatorContext(Buf authenticator) {
   return std::move(certMsgPtr->certificate_request_context);
 }
 
-folly::Optional<std::vector<CertificateEntry>>
-ExportedAuthenticator::validateAuthenticator(
+Status ExportedAuthenticator::validateAuthenticator(
+    folly::Optional<std::vector<CertificateEntry>>& ret,
+    Error& err,
     const fizz::AsyncFizzBase& transport,
     Direction dir,
     Buf authenticatorRequest,
@@ -100,12 +101,11 @@ ExportedAuthenticator::validateAuthenticator(
   HashFunction hashFunction;
   size_t hashLength;
   const HasherFactoryWithMetadata* makeHasher = nullptr;
-  Error err;
-  FIZZ_THROW_ON_ERROR(getHashFunction(hashFunction, err, *cipher), err);
-  FIZZ_THROW_ON_ERROR(getHashSize(hashLength, err, hashFunction), err);
-  FIZZ_THROW_ON_ERROR(
-      ::fizz::DefaultFactory().makeHasherFactory(makeHasher, err, hashFunction),
-      err);
+  FIZZ_RETURN_ON_ERROR(getHashFunction(hashFunction, err, *cipher));
+  FIZZ_RETURN_ON_ERROR(getHashSize(hashLength, err, hashFunction));
+  FIZZ_RETURN_ON_ERROR(
+      ::fizz::DefaultFactory().makeHasherFactory(
+          makeHasher, err, hashFunction));
 
   Buf handshakeContext;
   Buf finishedMacKey;
@@ -120,14 +120,16 @@ ExportedAuthenticator::validateAuthenticator(
     finishedMacKey = transport.getExportedKeyingMaterial(
         "EXPORTER-client authenticator finished key", nullptr, hashLength);
   }
-  auto certs = validate(
+  FIZZ_RETURN_ON_ERROR(validate(
+      ret,
+      err,
       makeHasher,
       std::move(authenticatorRequest),
       std::move(authenticator),
       std::move(handshakeContext),
       std::move(finishedMacKey),
-      CertificateVerifyContext::Authenticator);
-  return certs;
+      CertificateVerifyContext::Authenticator));
+  return Status::Success;
 }
 
 Buf ExportedAuthenticator::makeAuthenticator(
@@ -189,14 +191,15 @@ Buf ExportedAuthenticator::makeAuthenticator(
       encodedCertMsg, encodedCertificateVerify, encodedFinished);
 }
 
-folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
+Status ExportedAuthenticator::validate(
+    folly::Optional<std::vector<CertificateEntry>>& ret,
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     Buf authenticatorRequest,
     Buf authenticator,
     Buf handshakeContext,
     Buf finishedMacKey,
     CertificateVerifyContext context) {
-  folly::Optional<std::vector<CertificateEntry>> certs;
   folly::IOBufQueue authQueue{folly::IOBufQueue::cacheChainLength()};
   constexpr uint16_t capacity = 256;
   // Clone the authenticator which is later compared to the re-calculated empty
@@ -204,12 +207,11 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   auto authClone = authenticator->clone();
   authQueue.append(std::move(authenticator));
   folly::Optional<Param> param;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      fizz::ReadRecordLayer::decodeHandshakeMessage(param, err, authQueue),
-      err);
+  FIZZ_RETURN_ON_ERROR(
+      fizz::ReadRecordLayer::decodeHandshakeMessage(param, err, authQueue));
   if (!param) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
   // First check if the authenticator is empty.
   auto finished = param->asFinished();
@@ -220,31 +222,33 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
         std::move(handshakeContext),
         std::move(finishedMacKey));
     if (CryptoUtils::equal(emptyAuth->coalesce(), authClone->coalesce())) {
-      return std::vector<CertificateEntry>();
+      ret = std::vector<CertificateEntry>();
     } else {
-      return folly::none;
+      ret = folly::none;
     }
+    return Status::Success;
   }
   folly::Optional<Param> param2;
-  FIZZ_THROW_ON_ERROR(
-      fizz::ReadRecordLayer::decodeHandshakeMessage(param2, err, authQueue),
-      err);
+  FIZZ_RETURN_ON_ERROR(
+      fizz::ReadRecordLayer::decodeHandshakeMessage(param2, err, authQueue));
   if (!param2) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
   folly::Optional<Param> param3;
-  FIZZ_THROW_ON_ERROR(
-      fizz::ReadRecordLayer::decodeHandshakeMessage(param3, err, authQueue),
-      err);
+  FIZZ_RETURN_ON_ERROR(
+      fizz::ReadRecordLayer::decodeHandshakeMessage(param3, err, authQueue));
   if (!param3) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
   auto certMsg = param->asCertificateMsg();
   auto certVerify = param2->asCertificateVerify();
   finished = param3->asFinished();
   if (!certMsg || !certVerify || !finished ||
       certMsg->certificate_list.empty()) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
 
   auto leafCert = folly::IOBuf::create(capacity);
@@ -252,24 +256,29 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
   detail::writeBuf(certMsg->certificate_list.front().cert_data, appender);
   auto peerCert = openssl::CertUtils::makePeerCert(std::move(leafCert));
   Buf encodedCertMsg;
-  FIZZ_THROW_ON_ERROR(
-      encodeHandshake(encodedCertMsg, err, std::move(*certMsg)), err);
+  FIZZ_RETURN_ON_ERROR(
+      encodeHandshake(encodedCertMsg, err, std::move(*certMsg)));
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);
   auto transcriptHash = detail::computeTranscriptHash(makeHasher, transcript);
   try {
-    peerCert->verify(
-        certVerify->algorithm,
-        context,
-        transcriptHash->coalesce(),
-        certVerify->signature->coalesce());
+    if (peerCert->verify(
+            err,
+            certVerify->algorithm,
+            context,
+            transcriptHash->coalesce(),
+            certVerify->signature->coalesce()) == Status::Fail) {
+      ret = folly::none;
+      return Status::Success;
+    }
   } catch (const std::runtime_error&) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
   // Verify if Finished message matches.
   Buf encodedCertVerify;
-  FIZZ_THROW_ON_ERROR(
-      encodeHandshake(encodedCertVerify, err, std::move(*certVerify)), err);
+  FIZZ_RETURN_ON_ERROR(
+      encodeHandshake(encodedCertVerify, err, std::move(*certVerify)));
   auto finishedTranscript =
       detail::computeFinishedTranscript(transcript, encodedCertVerify);
   auto finishedTranscriptHash =
@@ -279,11 +288,11 @@ folly::Optional<std::vector<CertificateEntry>> ExportedAuthenticator::validate(
 
   if (CryptoUtils::equal(
           finished->verify_data->coalesce(), verifyData->coalesce())) {
-    certs = std::move(certMsg->certificate_list);
-    return certs;
+    ret = std::move(certMsg->certificate_list);
   } else {
-    return folly::none;
+    ret = folly::none;
   }
+  return Status::Success;
 }
 
 namespace detail {

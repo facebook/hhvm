@@ -35,13 +35,15 @@ std::string OpenSSLPeerCertImpl<T>::getIdentity() const {
 }
 
 template <KeyType T>
-inline void OpenSSLPeerCertImpl<T>::verify(
+inline Status OpenSSLPeerCertImpl<T>::verify(
+    Error& /* err */,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
     folly::ByteRange signature) const {
   CertUtils::verify<T>(
       signature_, scheme, context, std::move(toBeSigned), std::move(signature));
+  return Status::Success;
 }
 
 template <KeyType T>

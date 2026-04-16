@@ -17,7 +17,7 @@ namespace jni {
 
 void setVM(JavaVM* vm);
 
-JNIEnv* getEnv(bool* shouldDetach);
+JNIEnv* getEnv(bool& shouldDetach);
 void releaseEnv(bool shouldDetach);
 
 jclass getClass(JNIEnv* env, const std::string& name);
@@ -28,7 +28,7 @@ jmethodID getMethodID(
     const std::string& name,
     const std::string& signature);
 
-void maybeThrowException(JNIEnv* env, bool shouldDetach);
+Status maybeReturnError(Error& err, JNIEnv* env, bool shouldDetach);
 
 jbyteArray createByteArray(JNIEnv* env, folly::ByteRange byteRange);
 jbyteArray createByteArray(JNIEnv* env, Buf buf);

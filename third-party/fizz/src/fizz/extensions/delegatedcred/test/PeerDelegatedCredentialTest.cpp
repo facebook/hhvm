@@ -188,11 +188,15 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerify) {
   // cert verifiation to fail
   EXPECT_THAT(
       [&]() {
-        peerCred->verify(
-            SignatureScheme::ecdsa_secp256r1_sha256,
-            CertificateVerifyContext::Server,
-            toBuf(kVerifyBuffer)->coalesce(),
-            toBuf(kP256Signature)->coalesce());
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            peerCred->verify(
+                err,
+                SignatureScheme::ecdsa_secp256r1_sha256,
+                CertificateVerifyContext::Server,
+                toBuf(kVerifyBuffer)->coalesce(),
+                toBuf(kP256Signature)->coalesce()),
+            err);
       },
       ThrowsMessage<std::runtime_error>("Signature verification failed"));
 }
@@ -210,11 +214,15 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyNoExtension) {
 
   expectThrows(
       [&]() {
-        peerCred->verify(
-            SignatureScheme::ecdsa_secp256r1_sha256,
-            CertificateVerifyContext::Server,
-            toBuf(kVerifyBuffer)->coalesce(),
-            toBuf(kP256Signature)->coalesce());
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            peerCred->verify(
+                err,
+                SignatureScheme::ecdsa_secp256r1_sha256,
+                CertificateVerifyContext::Server,
+                toBuf(kVerifyBuffer)->coalesce(),
+                toBuf(kP256Signature)->coalesce()),
+            err);
       },
       "cert is missing DelegationUsage extension");
 }
@@ -239,11 +247,15 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBadSignature) {
 
   expectThrows(
       [&]() {
-        peerCred->verify(
-            SignatureScheme::ecdsa_secp256r1_sha256,
-            CertificateVerifyContext::Server,
-            toBuf(kVerifyBuffer)->coalesce(),
-            toBuf(kP256Signature)->coalesce());
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            peerCred->verify(
+                err,
+                SignatureScheme::ecdsa_secp256r1_sha256,
+                CertificateVerifyContext::Server,
+                toBuf(kVerifyBuffer)->coalesce(),
+                toBuf(kP256Signature)->coalesce()),
+            err);
       },
       "failed to verify signature on credential");
 }
@@ -262,11 +274,15 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyWrongAlgo) {
   // Should fail early due to mismatch with credential
   expectThrows(
       [&]() {
-        peerCred->verify(
-            SignatureScheme::ecdsa_secp521r1_sha512,
-            CertificateVerifyContext::Server,
-            toBuf(kVerifyBuffer)->coalesce(),
-            toBuf(kP256Signature)->coalesce());
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            peerCred->verify(
+                err,
+                SignatureScheme::ecdsa_secp521r1_sha512,
+                CertificateVerifyContext::Server,
+                toBuf(kVerifyBuffer)->coalesce(),
+                toBuf(kP256Signature)->coalesce()),
+            err);
       },
       "certificate verify didn't use credential's algorithm");
 }
@@ -284,12 +300,16 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBitFlip) {
 
   auto sig = toBuf(kP256Signature);
   sig->writableData()[1] ^= 0x20;
+  Error err;
   EXPECT_THROW(
-      peerCred->verify(
-          SignatureScheme::ecdsa_secp256r1_sha256,
-          CertificateVerifyContext::Server,
-          toBuf(kVerifyBuffer)->coalesce(),
-          sig->coalesce()),
+      FIZZ_THROW_ON_ERROR(
+          peerCred->verify(
+              err,
+              SignatureScheme::ecdsa_secp256r1_sha256,
+              CertificateVerifyContext::Server,
+              toBuf(kVerifyBuffer)->coalesce(),
+              sig->coalesce()),
+          err),
       std::runtime_error);
 }
 
@@ -306,12 +326,16 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifySizeMismatch) {
 
   auto sig = toBuf(kP256Signature);
   sig->prependChain(IOBuf::copyBuffer("0"));
+  Error err;
   EXPECT_THROW(
-      peerCred->verify(
-          SignatureScheme::ecdsa_secp256r1_sha256,
-          CertificateVerifyContext::Server,
-          toBuf(kVerifyBuffer)->coalesce(),
-          sig->coalesce()),
+      FIZZ_THROW_ON_ERROR(
+          peerCred->verify(
+              err,
+              SignatureScheme::ecdsa_secp256r1_sha256,
+              CertificateVerifyContext::Server,
+              toBuf(kVerifyBuffer)->coalesce(),
+              sig->coalesce()),
+          err),
       std::runtime_error);
 }
 

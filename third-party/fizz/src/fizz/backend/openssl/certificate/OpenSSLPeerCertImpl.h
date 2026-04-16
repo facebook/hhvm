@@ -27,7 +27,8 @@ class OpenSSLPeerCertImpl : public fizz::PeerCert {
 
   [[nodiscard]] std::string getIdentity() const override;
 
-  void verify(
+  Status verify(
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned,

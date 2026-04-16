@@ -2568,11 +2568,15 @@ Status EventHandler<
 
   const auto& certs = *state.unverifiedCertChain();
   auto leafCert = certs.front();
-  leafCert->verify(
-      certVerify.algorithm,
-      CertificateVerifyContext::Client,
-      state.handshakeContext()->getHandshakeContext()->coalesce(),
-      certVerify.signature->coalesce());
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      leafCert->verify(
+          err,
+          certVerify.algorithm,
+          CertificateVerifyContext::Client,
+          state.handshakeContext()->getHandshakeContext()->coalesce(),
+          certVerify.signature->coalesce()),
+      err);
 
   std::shared_ptr<const Cert> newCert;
 

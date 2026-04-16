@@ -198,12 +198,20 @@ class MockPeerCert : public PeerCert {
   MOCK_METHOD(std::string, getIdentity, (), (const));
   MOCK_METHOD(
       void,
-      verify,
+      _verify,
       (SignatureScheme scheme,
        CertificateVerifyContext context,
        folly::ByteRange toBeSigned,
        folly::ByteRange signature),
       (const));
+  Status verify(
+      Error& err,
+      SignatureScheme scheme,
+      CertificateVerifyContext context,
+      folly::ByteRange toBeSigned,
+      folly::ByteRange signature) const override {
+    FIZZ_THROW_TO_ERROR(_verify(scheme, context, toBeSigned, signature));
+  }
   MOCK_METHOD(folly::ssl::X509UniquePtr, getX509, (), (const));
 };
 

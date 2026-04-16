@@ -35,7 +35,8 @@ class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
 
   ~PeerDelegatedCredentialImpl() override = default;
 
-  void verify(
+  Status verify(
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned,

@@ -7272,7 +7272,7 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyNoVerifier) {
 
   EXPECT_CALL(
       *clientLeafCert_,
-      verify(
+      _verify(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Client,
           RangeMatches("certcontext"),
@@ -7304,7 +7304,7 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyWithVerifier) {
 
   EXPECT_CALL(
       *clientLeafCert_,
-      verify(
+      _verify(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Client,
           RangeMatches("certcontext"),
@@ -7360,7 +7360,7 @@ TEST_F(ServerProtocolTest, TestCertificateVerifySignatureFailure) {
 
   EXPECT_CALL(
       *clientLeafCert_,
-      verify(
+      _verify(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Client,
           RangeMatches("certcontext"),
@@ -7386,7 +7386,7 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyVerifierFailure) {
 
   EXPECT_CALL(
       *clientLeafCert_,
-      verify(
+      _verify(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Client,
           RangeMatches("certcontext"),
@@ -7416,7 +7416,7 @@ TEST_F(ServerProtocolTest, TestOptionalCertificateVerifySignatureFailure) {
 
   EXPECT_CALL(
       *clientLeafCert_,
-      verify(
+      _verify(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Client,
           RangeMatches("certcontext"),
@@ -7443,7 +7443,7 @@ TEST_F(ServerProtocolTest, TestOptionalCertificateVerifyVerifierFailure) {
 
   EXPECT_CALL(
       *clientLeafCert_,
-      verify(
+      _verify(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Client,
           RangeMatches("certcontext"),
@@ -7472,7 +7472,7 @@ TEST_F(ServerProtocolTest, TestCertificateVerifyVerifierGenericFailure) {
 
   EXPECT_CALL(
       *clientLeafCert_,
-      verify(
+      _verify(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Client,
           RangeMatches("certcontext"),

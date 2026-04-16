@@ -28,8 +28,10 @@ class JavaCryptoFactory : public ::fizz::DefaultFactory {
     if (certEntry.cert_data->empty()) {
       return err.error("empty peer cert");
     }
-
-    ret = std::make_unique<JavaCryptoPeerCert>(std::move(certEntry.cert_data));
+    std::unique_ptr<JavaCryptoPeerCert> cert;
+    FIZZ_RETURN_ON_ERROR(
+        JavaCryptoPeerCert::create(cert, err, std::move(certEntry.cert_data)));
+    ret = std::move(cert);
     return Status::Success;
   }
 };

@@ -161,12 +161,16 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
       std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
           getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
+  Error err;
   for (size_t i = 0; i < results.size(); i++) {
-    batchPeerCert.verify(
-        SignatureScheme::ecdsa_secp256r1_sha256_batch,
-        CertificateVerifyContext::Server,
-        folly::range(folly::StringPiece("Message" + std::to_string(i))),
-        folly::range(results[i]));
+    EXPECT_EQ(
+        batchPeerCert.verify(
+            err,
+            SignatureScheme::ecdsa_secp256r1_sha256_batch,
+            CertificateVerifyContext::Server,
+            folly::range(folly::StringPiece("Message" + std::to_string(i))),
+            folly::range(results[i])),
+        Status::Success);
   }
 }
 
@@ -271,12 +275,16 @@ TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
       std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
           getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
+  Error err;
   for (size_t i = 0; i < results.size(); i++) {
-    batchPeerCert.verify(
-        SignatureScheme::ecdsa_secp256r1_sha256_batch,
-        CertificateVerifyContext::Server,
-        folly::range(folly::StringPiece("Message" + std::to_string(i))),
-        folly::range(results[i]));
+    EXPECT_EQ(
+        batchPeerCert.verify(
+            err,
+            SignatureScheme::ecdsa_secp256r1_sha256_batch,
+            CertificateVerifyContext::Server,
+            folly::range(folly::StringPiece("Message" + std::to_string(i))),
+            folly::range(results[i])),
+        Status::Success);
   }
 }
 

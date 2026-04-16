@@ -69,7 +69,9 @@ std::string generateDelegatedCredentialPEM(
   return pemData;
 }
 
-std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
+Status loadDCFromPEM(
+    std::unique_ptr<SelfDelegatedCredential>& ret,
+    Error& err,
     std::string combinedPemData,
     DelegatedCredentialMode mode) {
   auto certs = folly::ssl::OpenSSLCertUtils::readCertsFromBuffer(
@@ -86,7 +88,7 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
 
   if (!(keyHeaderPtr != std::string::npos &&
         keyFooderPtr != std::string::npos)) {
-    throw std::runtime_error(
+    return err.error(
         folly::sformat(
             "Failed to load delegated credential key from pem, expected label {} which was not found",
             dcKeyHeader));
@@ -113,7 +115,7 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
   auto credDataEndPtr = combinedPemData.find(dcFooter);
   if (!(credDataPtr != std::string::npos &&
         credDataEndPtr != std::string::npos)) {
-    throw std::runtime_error(
+    return err.error(
         folly::sformat(
             "Failed to load delegated credential from pem, expected label {} which was not found",
             dcHeader));
@@ -130,20 +132,28 @@ std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
         Extension{
             ExtensionType::delegated_credential,
             folly::IOBuf::copyBuffer(std::move(credData))});
-    Error err;
     FIZZ_THROW_ON_ERROR(
         getExtension<DelegatedCredential>(cred, err, credVec), err);
   } catch (const std::exception& e) {
-    throw std::runtime_error(
+    return err.error(
         folly::sformat(
             "Failed to decode delegated credential with exception {}",
             e.what()));
   }
   // Note we currently only support P256 this will throw if there is a mismatch
   // in the delegated creds expected verification aglorithm
-  return std::make_unique<
-      SelfDelegatedCredentialImpl<fizz::openssl::KeyType::P256>>(
-      mode, std::move(certs), std::move(privKey), std::move(*cred));
+  std::unique_ptr<SelfDelegatedCredentialImpl<fizz::openssl::KeyType::P256>>
+      selfDelegatedCred;
+  FIZZ_RETURN_ON_ERROR(
+      SelfDelegatedCredentialImpl<fizz::openssl::KeyType::P256>::create(
+          selfDelegatedCred,
+          err,
+          mode,
+          std::move(certs),
+          std::move(privKey),
+          std::move(*cred)));
+  ret = std::move(selfDelegatedCred);
+  return Status::Success;
 }
 } // namespace extensions
 } // namespace fizz

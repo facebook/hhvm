@@ -16,17 +16,21 @@
 namespace fizz {
 
 class JavaCryptoPeerCert : public PeerCert {
- public:
-  static void onLoad(JNIEnv* env);
+ private:
+  explicit JavaCryptoPeerCert(jobject obj) : jobject_(obj) {}
 
-  explicit JavaCryptoPeerCert(Buf certData);
+ public:
+  static Status
+  create(std::unique_ptr<JavaCryptoPeerCert>& ret, Error& err, Buf certData);
+  static void onLoad(JNIEnv* env);
 
   ~JavaCryptoPeerCert() override = default;
 
   // Returns the full Distinguished Name of the certificate
   std::string getIdentity() const override;
 
-  void verify(
+  Status verify(
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned,

@@ -33,7 +33,9 @@ std::string generateDelegatedCredentialPEM(
  * a valid delegated credentail this will throw, otherwise this will return
  * a valid non null ptr;
  */
-std::unique_ptr<SelfDelegatedCredential> loadDCFromPEM(
+Status loadDCFromPEM(
+    std::unique_ptr<SelfDelegatedCredential>& ret,
+    Error& err,
     std::string combinedPemData,
     DelegatedCredentialMode mode);
 } // namespace extensions

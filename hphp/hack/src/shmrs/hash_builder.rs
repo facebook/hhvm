@@ -17,5 +17,5 @@
 /// table is created.
 ///
 /// Furthermore, `ahash::RandomState` IS the base implementation for
-/// `hashbrown::hash_map::DefaultHashBuilder`, so we can use it directly.
+/// `hashbrown::DefaultHashBuilder`, so we can use it directly.
 pub type ShmrsHashBuilder = ahash::RandomState;

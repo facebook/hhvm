@@ -1167,6 +1167,7 @@ static int start_server(const std::string &username) {
     registrationComplete = true;
   }
   BootStats::start();
+  BootStats::set("config_id", RuntimeOption::ConfigId);
   HttpServer::CheckMemAndWait();
   InitFiniNode::ServerPreInit();
 

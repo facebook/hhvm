@@ -520,7 +520,6 @@ void retranslateAll(bool skipSerialize) {
     auto const uptime = HHVM_FN(server_uptime)();
     if (uptime > 0) {
       BootStats::set("jit_profile_and_optimize", uptime);
-      BootStats::set("config_id", RuntimeOption::ConfigId);
       BootStats::done(Cfg::Server::LogBootStats);
       Logger::FInfo("retranslateAll finished {} seconds after server started",
                     uptime);

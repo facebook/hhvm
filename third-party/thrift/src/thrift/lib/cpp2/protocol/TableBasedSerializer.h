@@ -383,21 +383,27 @@ struct EnumFieldExt final {
 
 template <typename EnumType>
 FOLLY_EXPORT const EnumFieldExt& getEnumFieldExt() {
-  using traits = TEnumTraits<EnumType>;
-  using metadata = typename st::enum_find<std::int32_t>::metadata;
-  static const folly::Indestructible<std::vector<std::int32_t>> values = [] {
-    std::vector<std::int32_t> v;
-    v.reserve(TEnumTraits<EnumType>::values.size());
-    for (EnumType e : TEnumTraits<EnumType>::values) {
-      v.push_back(static_cast<std::int32_t>(e));
-    }
-    return v;
-  }();
-  static const metadata meta{
-      traits::size, values->data(), TEnumTraits<EnumType>::names.data()};
-  static st::enum_find<std::int32_t> map{meta};
-  static const EnumFieldExt instance{map};
-  return instance;
+  if constexpr (std::
+                    is_same_v<std::underlying_type_t<EnumType>, std::int32_t>) {
+    static const EnumFieldExt instance{st::enum_find_instance<EnumType>()};
+    return instance;
+  } else {
+    using traits = TEnumTraits<EnumType>;
+    using metadata = typename st::enum_find<std::int32_t>::metadata;
+    static const folly::Indestructible<std::vector<std::int32_t>> values = [] {
+      std::vector<std::int32_t> v;
+      v.reserve(TEnumTraits<EnumType>::values.size());
+      for (EnumType e : TEnumTraits<EnumType>::values) {
+        v.push_back(static_cast<std::int32_t>(e));
+      }
+      return v;
+    }();
+    static const metadata meta{
+        traits::size, values->data(), TEnumTraits<EnumType>::names.data()};
+    static st::enum_find<std::int32_t> map{meta};
+    static const EnumFieldExt instance{map};
+    return instance;
+  }
 }
 
 template <typename ThriftUnion>

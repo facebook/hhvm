@@ -49,6 +49,16 @@ cdef class JsonWriterOptions:
         self._c_writer.allowNanInf = allow_nan_inf
         self._c_writer.indentWidth = indent_width
 
+JSON5_MODE = Json5ProtocolWriterOptions(
+    writer=JsonWriterOptions(
+        list_trailing_comma=True,
+        object_trailing_comma=True,
+        unquote_object_name=True,
+        allow_nan_inf=True,
+        indent_width=2,
+    )
+)
+
 
 cdef class Json5ProtocolWriterOptions:
     """Options for the JSON5 protocol writer that are passed to C++."""

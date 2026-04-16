@@ -37,6 +37,8 @@ class JsonWriterOptions:
         indent_width: int = 0,
     ) -> None: ...
 
+JSON5_MODE: Json5ProtocolWriterOptions
+
 class Json5ProtocolWriterOptions:
     writer: JsonWriterOptions
     def __init__(

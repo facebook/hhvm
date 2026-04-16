@@ -27,6 +27,7 @@ import facebook.thrift.json5.json5_test.thrift_types as test_types
 from thrift.python.exceptions import Error
 from thrift.python.serializer import (
     deserialize,
+    JSON5_MODE,
     Json5ProtocolWriterOptions,
     JsonWriterOptions,
     Protocol,
@@ -57,19 +58,10 @@ class Json5SerializerTest(unittest.TestCase):
                 self.assertEqual(json_str, tc.json)
 
     def test_serialize_json5(self) -> None:
-        options = Json5ProtocolWriterOptions(
-            writer=JsonWriterOptions(
-                list_trailing_comma=True,
-                object_trailing_comma=True,
-                unquote_object_name=True,
-                allow_nan_inf=True,
-                indent_width=2,
-            )
-        )
         for tc in test_types.testCases:
             with self.subTest(tc.name):
                 json_str = serialize(
-                    tc.example, Protocol.JSON5, json5_options=options
+                    tc.example, Protocol.JSON5, json5_options=JSON5_MODE
                 ).decode()
                 self.assertEqual(json_str, tc.json5)
 

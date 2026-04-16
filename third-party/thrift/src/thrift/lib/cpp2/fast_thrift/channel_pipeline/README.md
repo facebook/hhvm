@@ -452,8 +452,74 @@ Concepts for data flow between pipeline and application:
 
 | Concept | Direction | Purpose |
 |---------|-----------|---------|
-| `ClientInboundAppAdapter` | Pipeline → App | Receives decoded messages (`onMessage`) |
+| `ClientInboundAppAdapter` | Pipeline → App | Receives decoded messages (`onRead`) |
 | `ClientOutboundAppAdapter` | App → Pipeline | Sends messages to pipeline (`write`) |
+
+### Endpoint Handlers
+
+The pipeline endpoints use specialized handler concepts with fixed data flow direction:
+
+| Concept | Method | Direction | Purpose |
+|---------|--------|-----------|---------|
+| `HeadEndpointHandler` | `onWrite()` | Outbound | Transport-side endpoint, sends data to network |
+| `TailEndpointHandler` | `onRead()` | Inbound | Application-side endpoint, receives data from pipeline |
+
+**Pipeline Structure:**
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              Pipeline                                        │
+│                                                                              │
+│  ┌────────────────────┐                      ┌─────────────────────┐        │
+│  │  HeadEndpointHandler│  ◄── fireWrite() ── │  TailEndpointHandler │        │
+│  │  (TransportHandler) │  ── fireRead() ──►  │     (AppAdapter)     │        │
+│  └────────────────────┘                      └─────────────────────┘        │
+│         onWrite()                                  onRead()                  │
+│                                                    onException()             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**HeadEndpointHandler** (transport side):
+```cpp
+template <typename H>
+concept HeadEndpointHandler = requires(H& h, TypeErasedBox&& msg) {
+  { h.onWrite(std::move(msg)) } noexcept -> std::same_as<Result>;
+  // Lifecycle methods
+  { h.handlerAdded() } noexcept;
+  { h.handlerRemoved() } noexcept;
+  { h.onPipelineActive() } noexcept;
+  { h.onPipelineInactive() } noexcept;
+};
+```
+
+**TailEndpointHandler** (application side):
+```cpp
+template <typename T>
+concept TailEndpointHandler = requires(T& t, TypeErasedBox&& msg, folly::exception_wrapper&& e) {
+  { t.onRead(std::move(msg)) } noexcept -> std::same_as<Result>;
+  { t.onException(std::move(e)) } noexcept -> std::same_as<void>;
+  // Lifecycle methods
+  { t.handlerAdded() } noexcept;
+  { t.handlerRemoved() } noexcept;
+  { t.onPipelineActive() } noexcept;
+  { t.onPipelineInactive() } noexcept;
+};
+```
+
+**Example Usage with PipelineBuilder:**
+```cpp
+// Head = TransportHandler (sends requests via onWrite)
+// Tail = AppAdapter (receives responses via onRead)
+auto pipeline = PipelineBuilder<TransportHandler, AppAdapter, Allocator>()
+    .setEventBase(evb)
+    .setHead(&transportHandler)
+    .setTail(&appAdapter)
+    .setAllocator(&allocator)
+    .addNextInbound<CodecHandler>(codec_tag)
+    .addNextDuplex<FrameHandler>(frame_tag)
+    .build();
+```
+
+**Deprecated:** The old `EndpointHandler` concept (using `onMessage()`) is deprecated. New code should use `HeadEndpointHandler` or `TailEndpointHandler` with explicit direction.
 
 ---
 
@@ -533,23 +599,23 @@ Pipeline (owns) ──► Context (owns) ──► Handler
 │             │◄───│                                     │◄───│             │
 └─────────────┘    └─────────────────────────────────────┘    └─────────────┘
        │                         │                                   │
-       │   InboundTransportHandler                    ClientInboundAppAdapter
-       │   (on_read, on_error)                        (on_message)
+       │   InboundTransportHandler                    TailEndpointHandler
+       │   (on_read, on_error)                        (onRead)
        │                         │                                   │
-       │   OutboundTransportHandler                   ClientOutboundAppAdapter
-       │   (write, pause_read)                        (write)
+       │   HeadEndpointHandler                        ClientOutboundAppAdapter
+       │   (onWrite)                                  (write)
 ```
 
 **Inbound flow** (Network → Application):
 1. Transport receives bytes from socket
 2. Calls `InboundTransportHandler.on_read(bytes)`
-3. Pipeline head decodes, transforms, passes down
-4. Pipeline tail calls `ClientInboundAppAdapter.on_message(msg)`
+3. Pipeline handlers decode, transform, pass through
+4. Pipeline tail receives via `TailEndpointHandler.onRead(msg)`
 
 **Outbound flow** (Application → Network):
 1. Application calls `ClientOutboundAppAdapter.write(msg)`
-2. Pipeline tail encodes, transforms, passes up
-3. Pipeline head calls `OutboundTransportHandler.write(bytes)`
+2. Pipeline handlers encode, transform, pass through
+3. Pipeline head calls `HeadEndpointHandler.onWrite(bytes)`
 4. Transport sends bytes to socket
 
 ---
@@ -582,7 +648,8 @@ Handler methods return `Result` to signal the outcome of an operation:
 |---------|--------|--------|
 | `InboundHandler` | `onRead(ctx, msg)` | `Result` |
 | `OutboundHandler` | `onWrite(ctx, msg)` | `Result` |
-| `ClientInboundAppAdapter` | `onMessage(msg)` | `Result` |
+| `HeadEndpointHandler` | `onWrite(msg)` | `Result` |
+| `TailEndpointHandler` | `onRead(msg)` | `Result` |
 | `ClientOutboundAppAdapter` | `write(msg)` | `Result` |
 
 ### Methods That Return void

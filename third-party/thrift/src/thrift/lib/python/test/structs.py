@@ -26,6 +26,7 @@ import unittest
 from typing import Callable, cast as typing_cast, Type, TypeVar
 from unittest import mock
 
+import testing.dependency.thrift_types as dep_types
 import testing.thrift_mutable_types as mutable_test_types
 import testing.thrift_types as immutable_test_types
 import thrift.python.mutable_serializer as mutable_serializer
@@ -64,6 +65,7 @@ from testing.thrift_types import (
     Runtime,
     SimpleStruct,
     StringBucket,
+    StrList2D,
     StructDisabledFieldCache,
     StructuredAnnotation,
     StructWithMap,
@@ -91,6 +93,22 @@ ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
 MapKey = TypeVar("MapKey")
 MapValue = TypeVar("MapValue")
+
+
+def _get_nested_container_typedef_field(s: customized) -> StrList2D:
+    """Typing test: struct field typed as a nested container typedef should
+    return the typedef type, not the expanded ImmutableList[ImmutableList[str]].
+    This function must typecheck with pyre."""
+    return s.nested_container_typedef
+
+
+def _get_included_container_typedef_field(
+    s: customized,
+) -> dep_types.IncludedI32List:
+    """Typing test: struct field typed as a cross-module container typedef should
+    return the typedef type from the included module.
+    This function must typecheck with pyre."""
+    return s.included_container_typedef
 
 
 @parameterized_class(

@@ -470,6 +470,8 @@ struct customized {
   17: AdaptedList adapted_list;
   18: AdaptedSet adapted_set;
   19: AdaptedMap adapted_map;
+  20: StrList2D nested_container_typedef;
+  21: dependency.IncludedI32List included_container_typedef;
 }
 
 struct Reserved {

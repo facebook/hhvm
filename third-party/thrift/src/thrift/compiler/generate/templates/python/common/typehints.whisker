@@ -127,6 +127,8 @@ None
 {{#if type.need_module_path?}}{{type.module_mangle}}.{{/if}}
 {{#if (not (or type.need_module_path? type.true_type.has_adapter?))}}{{#partial m_common.private_alias_prefix}}{{/if}}
 {{#partial m_types.unadapted_name type=type.true_type}}
+  {{#else if (and type.typedef? python.generate_immutable_types? type.container?)}}
+{{#if type.owning_need_module_path?}}{{type.owning_module_mangle}}.{{/if}}{{type.py_name}}
   {{#else if type.list?}}
 {{#partial m_types.sequence_field_return}}[{{#partial pep484_field_return_type_impl type=type.true_type.elem_type unadapted=false}}]
   {{#else if type.set?}}

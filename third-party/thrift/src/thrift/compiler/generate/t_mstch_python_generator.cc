@@ -1046,6 +1046,17 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
     def.property("external_program?", [this](const t_type& self) {
       return get_true_type_program(self) != get_program();
     });
+    // Like need_module_path? but checks the type's own program (not the true
+    // type's). This is needed for container typedefs where the true type
+    // (t_list/t_set/t_map) doesn't have program() set.
+    def.property("owning_need_module_path?", [this](const t_type& self) {
+      return !python_context_->is_types_file() ||
+          get_owning_program(self) != get_program();
+    });
+    def.property("owning_module_mangle", [this](const t_type& self) {
+      return mangle_program_path(get_owning_program(self), root_module_prefix_)
+          .append(fmt::format("__{}", python_context_->types_import_path()));
+    });
     def.property("integer?", [](const t_type& self) {
       const t_type& true_type = *self.get_true_type();
       return true_type.is_any_int() || true_type.is_byte();
@@ -1154,6 +1165,17 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
     // always nullptr, but we can treat them as locally defined (e.g. don't
     // require imports/qualification)
     return get_program();
+  }
+
+  // Returns the program that directly owns this type (not resolving through
+  // typedefs). This is needed for container typedefs, where the true type
+  // (t_list/t_set/t_map) may not have program() set, but the typedef itself
+  // does.
+  const t_program* get_owning_program(const t_type& type) const {
+    if (const t_program* p = type.program()) {
+      return p;
+    }
+    return get_true_type_program(type);
   }
 };
 

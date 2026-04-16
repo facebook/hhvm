@@ -446,7 +446,9 @@ set_map_initializer: _typing.AbstractSet[builtins.int] = ...
 
 MyStringIdentifier = builtins.str
 MyIntIdentifier = builtins.int
-MyMapIdentifier = _fbthrift_python_types.ImmutableMap[builtins.str, builtins.str]
+class MyMapIdentifier(_fbthrift_python_types.ImmutableMap[builtins.str, builtins.str]):
+    def __init__(self, __items: _typing.Mapping[builtins.str, builtins.str] = ...) -> None: ...
+
 class CompanyLocationsMap(_fbthrift_python_types.ImmutableMap[_fbthrift_Company, _fbthrift_python_types.ImmutableList[_fbthrift_City]]):
     def __init__(self, __items: _typing.Mapping[_fbthrift_Company, _typing.Sequence[_fbthrift_City]] = ...) -> None: ...
 

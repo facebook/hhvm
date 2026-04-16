@@ -19,5 +19,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import c.thrift_types as _fbthrift__c__thrift_types
 
 
-B = _fbthrift_python_types.ImmutableList[_fbthrift__c__thrift_types.C]
+class B(_fbthrift_python_types.ImmutableList[_fbthrift__c__thrift_types.C]):
+    def __init__(self, __items: _typing.Sequence[_fbthrift__c__thrift_types.C] = ...) -> None: ...
+
 E = _fbthrift__c__thrift_types.E

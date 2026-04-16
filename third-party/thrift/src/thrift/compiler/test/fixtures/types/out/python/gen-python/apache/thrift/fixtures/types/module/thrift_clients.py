@@ -65,7 +65,7 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
             m: _typing.Mapping[builtins.int, builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_types.ImmutableMap[builtins.int, builtins.str]:
+        ) -> _fbthrift__apache__thrift__fixtures__types__included__thrift_types.SomeMap:
             _fbthrift_resp = await self._send_request(
                 "SomeService",
                 "bounce_map",
@@ -132,7 +132,7 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
             m: _typing.Mapping[builtins.int, builtins.str],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> _fbthrift_python_types.ImmutableMap[builtins.int, builtins.str]:
+        ) -> _fbthrift__apache__thrift__fixtures__types__included__thrift_types.SomeMap:
             _fbthrift_resp = self._send_request(
                 "SomeService",
                 "bounce_map",

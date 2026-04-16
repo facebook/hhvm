@@ -56,7 +56,7 @@ class SomeServiceInterface(
     async def bounce_map(
             self,
             m: _typing.Mapping[builtins.int, builtins.str]
-        ) -> _fbthrift_python_types.ImmutableMap[builtins.int, builtins.str]:
+        ) -> _fbthrift__apache__thrift__fixtures__types__included__thrift_types.SomeMap:
         raise NotImplementedError("async def bounce_map is not implemented")
 
     async def _fbthrift__handler_bounce_map(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

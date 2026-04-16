@@ -46,6 +46,9 @@ enum Status {
 
 typedef sub_dependency.IncludedColour ColourAlias
 
+@thrift.AllowLegacyTypedefUri
+typedef list<i32> IncludedI32List
+
 struct IncludedStruct {
   1: sub_dependency.Basic val;
   2: sub_dependency.IncludedColour color;

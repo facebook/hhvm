@@ -154,7 +154,17 @@ class {{#partial m_types.unadapted_name type=struct}}({{!
         {{#let adapter = typedef.adapter}}
 {{typedef.py_name}} = {{adapter.type_hint}}{{#if adapter.is_generic?}}[{{> types/typedef_pep484_type}}]{{/if}}
       {{#else}}
+        {{#if (and python.generate_immutable_types? (or typedef.list? typedef.set?) typedef.true_type.elem_type.container?)}}
+class {{typedef.py_name}}({{> types/typedef_pep484_type}}):
+    def __init__(self, __items: {{#partial typehints.pep484_type type=typedef.resolved}} = ...) -> None: ...
+
+        {{#else if (and python.generate_immutable_types? typedef.map? (or typedef.true_type.key_type.container? typedef.true_type.val_type.container?))}}
+class {{typedef.py_name}}({{> types/typedef_pep484_type}}):
+    def __init__(self, __items: {{#partial typehints.pep484_type type=typedef.resolved}} = ...) -> None: ...
+
+        {{#else}}
 {{typedef.py_name}} = {{> types/typedef_pep484_type}}
+        {{/if (and python.generate_immutable_types? (or typedef.list? typedef.set?) typedef.true_type.elem_type.container?)}}
       {{/if typedef.has_adapter?}}
     {{/if (not typedef.enum?)}}
   {{/each}}

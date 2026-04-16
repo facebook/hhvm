@@ -204,7 +204,9 @@ _fbthrift_IndirectionC = IndirectionC
 IOBuf = _fbthrift_iobuf.IOBuf
 small_vector_iobuf = _fbthrift_python_types.ImmutableList[_fbthrift_iobuf.IOBuf]
 fbvector_string = _fbthrift_python_types.ImmutableList[builtins.str]
-fbvector_fbvector_string = _fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableList[builtins.str]]
+class fbvector_fbvector_string(_fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableList[builtins.str]]):
+    def __init__(self, __items: _typing.Sequence[_typing.Sequence[builtins.str]] = ...) -> None: ...
+
 ListOfWrapped = _fbthrift_python_types.ImmutableList[_fbthrift_TWrapped]
 VecOfWrapped = _fbthrift_python_types.ImmutableList[_fbthrift_TWrapped]
 ListOfWrappedAlias = _fbthrift_python_types.ImmutableList[_fbthrift_TWrapped]

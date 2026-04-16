@@ -780,7 +780,9 @@ _fbthrift_StructWithDoubleUnderscores = StructWithDoubleUnderscores
 TBinary = builtins.bytes
 IntTypedef = builtins.int
 UintTypedef = builtins.int
-SomeListOfTypeMap_2468 = _fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableMap[builtins.int, builtins.str]]
+class SomeListOfTypeMap_2468(_fbthrift_python_types.ImmutableList[_fbthrift_python_types.ImmutableMap[builtins.int, builtins.str]]):
+    def __init__(self, __items: _typing.Sequence[_typing.Mapping[builtins.int, builtins.str]] = ...) -> None: ...
+
 TBinary_8623 = builtins.bytes
 i32_9314 = builtins.int
 list_i32_9187 = _fbthrift_python_types.ImmutableList[builtins.int]

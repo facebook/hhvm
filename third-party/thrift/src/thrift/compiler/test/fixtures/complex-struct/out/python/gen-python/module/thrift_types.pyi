@@ -739,5 +739,7 @@ floatTypedef = builtins.float
 FMap = _fbthrift_python_types.ImmutableMap[builtins.int, builtins.int]
 binary_4918 = builtins.bytes
 i32_1194 = builtins.int
-map_i32_FMap_6797 = _fbthrift_python_types.ImmutableMap[builtins.int, _fbthrift_python_types.ImmutableMap[builtins.int, builtins.int]]
+class map_i32_FMap_6797(_fbthrift_python_types.ImmutableMap[builtins.int, _fbthrift_python_types.ImmutableMap[builtins.int, builtins.int]]):
+    def __init__(self, __items: _typing.Mapping[builtins.int, _typing.Mapping[builtins.int, builtins.int]] = ...) -> None: ...
+
 map_i64_string_5732 = _fbthrift_python_types.ImmutableMap[builtins.int, builtins.str]

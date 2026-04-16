@@ -23,6 +23,8 @@ type TAsyncChannelResponse = (string, darray<string, string>);
 type TAsyncChannelStreamResponse =
   (string, darray<string, string>, TClientBufferedStream);
 type TAsyncChannelSinkResponse = (string, darray<string, string>, TClientSink);
+type TAsyncChannelBiDiStreamResponse =
+  (string, darray<string, string>, TClientSink, TClientBufferedStream);
 
 // @oss-disable: <<Oncalls('thrift')>>
 interface IThriftAsyncChannel {
@@ -45,4 +47,9 @@ interface IThriftAsyncChannel {
     \RpcOptions $options,
     string $msg,
   ): Awaitable<TAsyncChannelSinkResponse>;
+
+  public function genSendRequestBiDiStream(
+    RpcOptions $options,
+    string $msg,
+  ): Awaitable<TAsyncChannelBiDiStreamResponse>;
 }

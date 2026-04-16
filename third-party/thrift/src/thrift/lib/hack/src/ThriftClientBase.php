@@ -465,11 +465,12 @@ abstract class ThriftClientBase implements IThriftClient {
       $client_sink_func = async function(
         AsyncGenerator<null, TSinkType, void> $pld_generator,
       ) use ($sink, $payload_serializer, $final_response_deserializer) {
-        return await $sink->genSink<TSinkType, TSinkFinalType>(
+        $final_response = await $this->genSinkFunc<TSinkType>(
+          $sink,
           $pld_generator,
           $payload_serializer,
-          $final_response_deserializer,
         );
+        return $final_response_deserializer($final_response, null);
       };
 
       $in_transport->resetBuffer();
@@ -506,5 +507,177 @@ abstract class ThriftClientBase implements IThriftClient {
       $first_response,
       $client_sink_func,
     );
+  }
+
+  protected async function genAwaitBiDiStreamResponse<
+    TBiDiFirstResponseType as IResultThriftStruct with {
+      type TResult = TBiDiFirstType },
+    TBiDiFirstType,
+    TBiDiSinkPayloadType as IResultThriftStruct with {
+      type TResult = TBiDiSinkType },
+    TBiDiStreamResponseType as IResultThriftStruct with {
+      type TResult = TBiDiStreamType },
+    TBiDiStreamType,
+    TBiDiSinkType,
+  >(
+    classname<TBiDiFirstResponseType> $first_response_type,
+    class<TBiDiSinkPayloadType> $sink_payload_type,
+    class<TBiDiStreamResponseType> $stream_response_type,
+    string $name,
+    bool $is_first_response_null,
+    int $expectedsequenceid,
+    RpcOptions $rpc_options,
+    shape(?'read_options' => int) $options = shape(),
+  ): Awaitable<
+    ResponseAndBidirectionalStream<
+      TBiDiFirstType,
+      TBiDiSinkType,
+      TBiDiStreamType,
+    >,
+  > {
+
+    $channel = $this->channel_;
+    $out_transport = $this->output_->getTransport();
+    $in_transport = $this->input_->getTransport();
+    invariant(
+      $out_transport is TMemoryBuffer && $in_transport is TMemoryBuffer,
+      "BiDi stream methods require TMemoryBuffer transport",
+    );
+
+    $stream_decoder = ThriftStreamingSerializationHelpers::decodeStreamHelper(
+      $stream_response_type,
+      $name,
+      $this->input_,
+      $options,
+    );
+
+    $payload_serializer =
+      ThriftStreamingSerializationHelpers::encodeStreamHelper(
+        $sink_payload_type,
+        $this->output_,
+      );
+
+    invariant($channel !== null, "BiDi stream requires an async channel");
+
+    $msg = $out_transport->getBuffer();
+    $out_transport->resetBuffer();
+    list($result_msg, $_read_headers, $sink, $stream) =
+      await $channel->genSendRequestBiDiStream($rpc_options, $msg);
+
+    $disable16kblimit = $this->config_?->getStreamDisable16KBLimit() ?? false;
+    if ($disable16kblimit) {
+      $stream->disable16KBBufferingPolicy();
+    }
+
+    $stream_gen = $stream->gen<TBiDiStreamType>($stream_decoder);
+
+    $client_sink_func = async function(
+      AsyncGenerator<null, TBiDiSinkType, void> $pld_generator,
+    ) use ($sink, $payload_serializer) {
+      await $this->genSinkFunc<TBiDiSinkType>(
+        $sink,
+        $pld_generator,
+        $payload_serializer,
+        true, // Bidi: return after sink-complete, don't wait for final response
+      );
+    };
+
+    $in_transport->resetBuffer();
+    $in_transport->write($result_msg);
+
+    $first_response = $this->recvImplHelper(
+      $first_response_type,
+      $name,
+      $is_first_response_null,
+      $expectedsequenceid,
+      $options,
+    );
+
+    await $this->asyncHandler_
+      ->genAfter<TBiDiFirstType>($name, $first_response);
+    return new ResponseAndBidirectionalStream<
+      TBiDiFirstType,
+      TBiDiSinkType,
+      TBiDiStreamType,
+    >($first_response, $client_sink_func, $stream_gen);
+  }
+
+  protected async function genSinkFunc<TSinkType>(
+    TClientSink $sink,
+    HH\AsyncGenerator<null, TSinkType, void> $pld_generator,
+    (function(?TSinkType, ?Exception): (string, ?bool)) $payload_serializer,
+    bool $skip_final_response = false,
+  ): Awaitable<?string> {
+    $should_continue = true;
+    $gen_credits_or_final_response_helper = async () ==> {
+      list($credits, $final_response, $exception) = HH\FIXME\UNSAFE_CAST<
+        ?(int, ?string, ?string),
+        (?int, ?string, ?string),
+      >(await $sink->genCreditsOrFinalResponse());
+      if (
+        ($credits === null || $credits === 0) &&
+        $final_response === null &&
+        $exception === null
+      ) {
+        $exception = "No credits or final response received";
+      }
+      return tuple(
+        $credits,
+        $final_response,
+        $exception !== null
+          ? new TApplicationException(
+              $exception,
+              TApplicationException::UNKNOWN,
+            )
+          : null,
+      );
+    };
+    while (true) {
+      list($credits, $final_response, $exception) =
+        await $gen_credits_or_final_response_helper();
+      if ($final_response !== null || $exception !== null) {
+        break;
+      }
+      $credits = HH\FIXME\UNSAFE_CAST<?int, int>($credits);
+      if ($credits > 0 && $should_continue) {
+        try {
+          foreach ($pld_generator await as $pld) {
+            list($encoded_str, $_) = $payload_serializer($pld, null);
+            $should_continue = $sink->sendPayloadOrSinkComplete($encoded_str);
+            $credits--;
+            if ($credits === 0 || !$should_continue) {
+              break;
+            }
+          }
+        } catch (Exception $ex) {
+          // If async generator throws any error,
+          // exception should be encoded and sent to server before throwing
+          list($encoded_ex, $is_application_ex) =
+            $payload_serializer(null, $ex);
+          $sink->sendClientException(
+            $encoded_ex,
+            ($is_application_ex ?? false) ? $ex->getMessage() : null,
+          );
+          // send exception back to the client, don't wait for final response
+          throw $ex;
+        }
+        // If $credits > 0 and $should_continue = true,
+        // then that means async generator has finished
+        // and we should send sink complete.
+        if ($credits > 0 && $should_continue) {
+          $sink->sendPayloadOrSinkComplete(null);
+          $should_continue = false;
+          // For bidi, the server responds via the stream channel, not via
+          // a sink final response. Return immediately after sink-complete.
+          if ($skip_final_response) {
+            return null;
+          }
+        }
+      }
+    }
+    if ($exception !== null) {
+      throw $exception;
+    }
+    return $final_response;
   }
 }

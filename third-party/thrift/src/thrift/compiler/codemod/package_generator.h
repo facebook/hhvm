@@ -519,6 +519,11 @@ inline replacement_content get_replacement_content(
         "namespace py3 \"\" {}\n", kBackwardsCompatibleNamespaceComment);
   }
 
+  if (!namespaces.contains("java.swift")) {
+    content.namespace_content += fmt::format(
+        "namespace java.swift \"\" {}\n", kBackwardsCompatibleNamespaceComment);
+  }
+
   if (namespaces.empty()) {
     content.namespace_content += "\n";
   }

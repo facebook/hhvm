@@ -83,6 +83,7 @@ class ThriftPackageTest(unittest.TestCase):
             namespace cpp2 "cpp2" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
             namespace hack "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
             namespace py3 "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
+            namespace java.swift "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
 
             struct S {{
             }}
@@ -116,6 +117,7 @@ class ThriftPackageTest(unittest.TestCase):
 
                 namespace hack "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
                 namespace py3 "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
+                namespace java.swift "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
                 namespace cpp2 "thrift.annotation"
 
                 include "bar.thrift"
@@ -137,6 +139,7 @@ class ThriftPackageTest(unittest.TestCase):
             """\
                 package "meta.com/thrift/annotation"
 
+                namespace java.swift "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
                 namespace cpp2 "thrift.annotation"
                 namespace php "thrift.annotation"
                 namespace py3 "thrift.annotation.foo"
@@ -252,6 +255,7 @@ class ThriftPackageTest(unittest.TestCase):
 
                 namespace cpp2 "thrift.annotation.cpp2"
                 namespace hack "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
+                namespace java.swift "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
                 namespace py3  "thrift.annotation"
 
                 struct foo {}
@@ -272,6 +276,7 @@ class ThriftPackageTest(unittest.TestCase):
                 package "meta.com/thrift/annotation"
 
                 namespace cpp2 "thrift.annotation.cpp2"
+                namespace java.swift "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
                 namespace hack "thrift.annotation"
                 namespace py3  "thrift.annotation"
 
@@ -293,6 +298,7 @@ class ThriftPackageTest(unittest.TestCase):
                 package "meta.com/foo"
 
                 namespace cpp2 "cpp2" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
+                namespace java.swift "" // Maybe unused, see https://fburl.com/thrift-namespace-backwards-compatibility
                 namespace hack ""
                 namespace py3  ""
 

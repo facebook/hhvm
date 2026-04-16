@@ -82,7 +82,11 @@ class DelegatedCredentialFactoryTest : public Test {
 
 TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsing) {
   auto entry = generateEntry();
-  auto cert = factory_.makePeerCert(std::move(entry), true);
+  std::unique_ptr<PeerCert> cert;
+  Error err;
+  EXPECT_EQ(
+      factory_.makePeerCert(cert, err, std::move(entry), true),
+      Status::Success);
   EXPECT_TRUE(cert);
   EXPECT_TRUE(
       typeid(*cert) ==
@@ -91,7 +95,11 @@ TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsing) {
 
 TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsingNonLeaf) {
   auto entry = generateEntry();
-  auto cert = factory_.makePeerCert(std::move(entry), false);
+  std::unique_ptr<PeerCert> cert;
+  Error err;
+  EXPECT_EQ(
+      factory_.makePeerCert(cert, err, std::move(entry), false),
+      Status::Success);
   EXPECT_TRUE(cert);
   EXPECT_TRUE(
       typeid(*cert) ==
@@ -101,7 +109,11 @@ TEST_F(DelegatedCredentialFactoryTest, TestCredentialParsingNonLeaf) {
 TEST_F(DelegatedCredentialFactoryTest, TestCredentialNoCertEntryExtension) {
   auto entry = generateEntry();
   entry.extensions.clear();
-  auto cert = factory_.makePeerCert(std::move(entry), true);
+  std::unique_ptr<PeerCert> cert;
+  Error err;
+  EXPECT_EQ(
+      factory_.makePeerCert(cert, err, std::move(entry), true),
+      Status::Success);
   EXPECT_TRUE(cert);
   EXPECT_TRUE(
       typeid(*cert) ==

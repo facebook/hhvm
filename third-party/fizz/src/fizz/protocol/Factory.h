@@ -102,13 +102,21 @@ class Factory {
 
   virtual void makeRandomBytes(unsigned char* out, size_t count) const = 0;
 
-  virtual std::unique_ptr<PeerCert> makePeerCert(
+  virtual Status makePeerCert(
+      std::unique_ptr<PeerCert>& ret,
+      Error& err,
       CertificateEntry certEntry,
-      bool /*leaf*/) const = 0;
+      bool leaf) const = 0;
 
-  virtual std::unique_ptr<Cert> makePeerCertFromTicket(
+  virtual Status makePeerCertFromTicket(
+      std::unique_ptr<Cert>& ret,
+      Error& err,
       CertificateEntry certEntry) const {
-    return makePeerCert(std::move(certEntry), true);
+    std::unique_ptr<PeerCert> peerCert;
+    FIZZ_RETURN_ON_ERROR(
+        makePeerCert(peerCert, err, std::move(certEntry), true));
+    ret = std::move(peerCert);
+    return Status::Success;
   }
 
   /**

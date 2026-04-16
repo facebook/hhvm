@@ -2314,8 +2314,10 @@ static Status handleCertMsg(
       }
     }
 
-    serverCerts.emplace_back(state.context()->getFactory()->makePeerCert(
-        std::move(certEntry), leaf));
+    std::unique_ptr<PeerCert> peerCert;
+    FIZZ_RETURN_ON_ERROR(state.context()->getFactory()->makePeerCert(
+        peerCert, ctx.err, std::move(certEntry), leaf));
+    serverCerts.emplace_back(std::move(peerCert));
     leaf = false;
   }
 

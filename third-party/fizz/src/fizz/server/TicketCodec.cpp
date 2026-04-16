@@ -77,7 +77,11 @@ std::shared_ptr<const Cert> readClientCertificate(
     case CertificateStorage::X509: {
       CertificateEntry certEntry;
       fizz::detail::readBuf<uint16_t>(certEntry.cert_data, cursor);
-      return factory.makePeerCertFromTicket(std::move(certEntry));
+      std::unique_ptr<Cert> peerCert;
+      FIZZ_THROW_ON_ERROR(
+          factory.makePeerCertFromTicket(peerCert, err, std::move(certEntry)),
+          err);
+      return peerCert;
     }
     case CertificateStorage::IdentityOnly: {
       Buf ident;

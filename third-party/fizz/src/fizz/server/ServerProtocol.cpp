@@ -2510,8 +2510,12 @@ EventHandler<ServerTypes, StateEnum::ExpectingCertificate, Event::Certificate>::
         Protocol::checkAllowedExtensions(
             ctx.err, certEntry, certExtensionsSupported),
         ctx.err);
-    clientCerts.emplace_back(state.context()->getFactory()->makePeerCert(
-        std::move(certEntry), leaf));
+    std::unique_ptr<PeerCert> peerCert;
+    FIZZ_THROW_ON_ERROR(
+        state.context()->getFactory()->makePeerCert(
+            peerCert, ctx.err, std::move(certEntry), leaf),
+        ctx.err);
+    clientCerts.emplace_back(peerCert.release());
     leaf = false;
   }
 

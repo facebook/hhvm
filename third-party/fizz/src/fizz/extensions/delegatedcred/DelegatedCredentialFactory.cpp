@@ -81,10 +81,13 @@ std::unique_ptr<PeerCert> DelegatedCredentialFactory::makePeerCertStatic(
   return makeCredential(std::move(credential.value()), std::move(parentX509));
 }
 
-std::unique_ptr<PeerCert> DelegatedCredentialFactory::makePeerCert(
+Status DelegatedCredentialFactory::makePeerCert(
+    std::unique_ptr<PeerCert>& ret,
+    Error& /*err*/,
     CertificateEntry entry,
     bool leaf) const {
-  return makePeerCertStatic(std::move(entry), leaf);
+  ret = makePeerCertStatic(std::move(entry), leaf);
+  return Status::Success;
 }
 } // namespace extensions
 } // namespace fizz

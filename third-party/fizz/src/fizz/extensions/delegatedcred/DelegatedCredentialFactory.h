@@ -21,8 +21,11 @@ class DelegatedCredentialFactory : public ::fizz::DefaultFactory {
  public:
   ~DelegatedCredentialFactory() override = default;
 
-  std::unique_ptr<PeerCert> makePeerCert(CertificateEntry entry, bool leaf)
-      const override;
+  Status makePeerCert(
+      std::unique_ptr<PeerCert>& ret,
+      Error& err,
+      CertificateEntry entry,
+      bool leaf) const override;
 
   static std::unique_ptr<PeerCert> makePeerCertStatic(
       CertificateEntry entry,

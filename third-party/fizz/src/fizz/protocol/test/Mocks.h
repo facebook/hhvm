@@ -325,9 +325,12 @@ class MockFactory : public ::fizz::DefaultFactory {
       _makePeerCert,
       (CertificateEntry & entry, bool leaf),
       (const));
-  std::unique_ptr<PeerCert> makePeerCert(CertificateEntry entry, bool leaf)
-      const override {
-    return _makePeerCert(entry, leaf);
+  Status makePeerCert(
+      std::unique_ptr<PeerCert>& ret,
+      Error& err,
+      CertificateEntry entry,
+      bool leaf) const override {
+    FIZZ_THROW_TO_ERROR(ret, _makePeerCert(entry, leaf));
   }
 
   MOCK_CONST_METHOD1(

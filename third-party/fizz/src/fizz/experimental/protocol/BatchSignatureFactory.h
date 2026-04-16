@@ -98,13 +98,20 @@ class BatchSignatureFactory : public Factory {
    * Since batch signature is only for verifying the leaf of the certificate
    * chain, so BatchSignaturePeerCert is turned only when @param leaf is true.
    */
-  std::unique_ptr<PeerCert> makePeerCert(CertificateEntry certEntry, bool leaf)
-      const override {
+  Status makePeerCert(
+      std::unique_ptr<PeerCert>& ret,
+      Error& err,
+      CertificateEntry certEntry,
+      bool leaf) const override {
+    std::unique_ptr<PeerCert> peerCert;
+    FIZZ_RETURN_ON_ERROR(
+        original_->makePeerCert(peerCert, err, std::move(certEntry), leaf));
     if (leaf) {
-      return std::make_unique<BatchSignaturePeerCert>(
-          original_->makePeerCert(std::move(certEntry), leaf));
+      ret = std::make_unique<BatchSignaturePeerCert>(std::move(peerCert));
+    } else {
+      ret = std::move(peerCert);
     }
-    return original_->makePeerCert(std::move(certEntry), leaf);
+    return Status::Success;
   }
 
   std::shared_ptr<Cert> makeIdentityOnlyCert(std::string ident) const override {

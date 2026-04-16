@@ -31,9 +31,11 @@ class MultiBackendFactory : public Factory {
       Error& err,
       HashFunction digest) const override;
 
-  [[nodiscard]] std::unique_ptr<PeerCert> makePeerCert(
+  Status makePeerCert(
+      std::unique_ptr<PeerCert>& ret,
+      Error& err,
       CertificateEntry certEntry,
-      bool /*leaf*/) const override;
+      bool leaf) const override;
 
   void makeRandomBytes(unsigned char* out, size_t count) const override;
 };

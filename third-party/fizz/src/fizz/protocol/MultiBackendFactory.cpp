@@ -109,10 +109,16 @@ void MultiBackendFactory::makeRandomBytes(unsigned char* out, size_t count)
   libsodium::random(out, count);
 }
 
-std::unique_ptr<PeerCert> MultiBackendFactory::makePeerCert(
+Status MultiBackendFactory::makePeerCert(
+    std::unique_ptr<PeerCert>& ret,
+    Error& err,
     CertificateEntry certEntry,
     bool /*leaf*/) const {
-  return openssl::CertUtils::makePeerCert(std::move(certEntry.cert_data));
+  if (certEntry.cert_data->empty()) {
+    return err.error("empty peer cert");
+  }
+  ret = openssl::CertUtils::makePeerCert(std::move(certEntry.cert_data));
+  return Status::Success;
 }
 
 } // namespace fizz

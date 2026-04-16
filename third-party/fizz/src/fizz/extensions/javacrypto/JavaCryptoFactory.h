@@ -20,14 +20,17 @@ class JavaCryptoFactory : public ::fizz::DefaultFactory {
  public:
   ~JavaCryptoFactory() override = default;
 
-  std::unique_ptr<PeerCert> makePeerCert(
+  Status makePeerCert(
+      std::unique_ptr<PeerCert>& ret,
+      Error& err,
       CertificateEntry certEntry,
       bool /*leaf*/) const override {
     if (certEntry.cert_data->empty()) {
-      throw std::runtime_error("empty peer cert");
+      return err.error("empty peer cert");
     }
 
-    return std::make_unique<JavaCryptoPeerCert>(std::move(certEntry.cert_data));
+    ret = std::make_unique<JavaCryptoPeerCert>(std::move(certEntry.cert_data));
+    return Status::Success;
   }
 };
 } // namespace fizz

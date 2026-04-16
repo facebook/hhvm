@@ -109,9 +109,9 @@ bool container_needs_convert(const t_type* type) {
     return container_needs_convert(&map_type->key_type().deref()) ||
         container_needs_convert(&map_type->val_type().deref());
   } else if (const t_list* list_type = dynamic_cast<const t_list*>(true_type)) {
-    return container_needs_convert(list_type->elem_type().get_type());
+    return container_needs_convert(&list_type->elem_type().deref());
   } else if (const t_set* set_type = dynamic_cast<const t_set*>(true_type)) {
-    return container_needs_convert(set_type->elem_type().get_type());
+    return container_needs_convert(&set_type->elem_type().deref());
   } else if (true_type->is<t_structured>()) {
     return true;
   }

@@ -158,8 +158,8 @@ bool can_derive_ord(const t_type* type) {
     return true;
   }
   if (const t_list* list = type->try_as<t_list>()) {
-    auto elem_type = list->elem_type().get_type();
-    return elem_type && can_derive_ord(elem_type);
+    auto elem_type = &list->elem_type().deref();
+    return can_derive_ord(elem_type);
   }
   // We can implement Ord on BTreeMap (the default map type) if both the key and
   // value implement Eq.
@@ -406,10 +406,10 @@ bool type_has_transitive_adapter(
         &typedef_type->type().deref(), step_through_newtypes);
   } else if (const t_list* list_type = type->try_as<t_list>()) {
     return type_has_transitive_adapter(
-        list_type->elem_type().get_type(), step_through_newtypes);
+        &list_type->elem_type().deref(), step_through_newtypes);
   } else if (const t_set* set_type = type->try_as<t_set>()) {
     return type_has_transitive_adapter(
-        set_type->elem_type().get_type(), step_through_newtypes);
+        &set_type->elem_type().deref(), step_through_newtypes);
   } else if (const t_map* map_type = type->try_as<t_map>()) {
     return type_has_transitive_adapter(
                &map_type->key_type().deref(), step_through_newtypes) ||
@@ -555,11 +555,11 @@ std::string compute_rawtype_name(
   }
   if (const auto* list_type = type->try_as<t_list>()) {
     return "::std::vec::Vec<" +
-        compute_type_name(list_type->elem_type().get_type(), options) + ">";
+        compute_type_name(&list_type->elem_type().deref(), options) + ">";
   }
   if (const auto* set_type = type->try_as<t_set>()) {
     return "::std::collections::BTreeSet<" +
-        compute_type_name(set_type->elem_type().get_type(), options) + ">";
+        compute_type_name(&set_type->elem_type().deref(), options) + ">";
   }
   if (const auto* map_type = type->try_as<t_map>()) {
     return "::std::collections::BTreeMap<" +
@@ -670,7 +670,7 @@ std::string compute_transitive_adapter_name(
   }
 
   if (const auto* list_type = type->try_as<t_list>()) {
-    auto elem = list_type->elem_type().get_type();
+    auto elem = &list_type->elem_type().deref();
     std::string wrapper;
     if (field && has_type_annotation(field)) {
       wrapper = "::" + get_type_annotation(field);
@@ -684,7 +684,7 @@ std::string compute_transitive_adapter_name(
   }
 
   if (const auto* set_type = type->try_as<t_set>()) {
-    auto elem = set_type->elem_type().get_type();
+    auto elem = &set_type->elem_type().deref();
     std::string wrapper;
     if (field && has_type_annotation(field)) {
       wrapper = "::" + get_type_annotation(field);
@@ -1223,7 +1223,7 @@ class t_mstch_rust_generator : public t_whisker_generator {
     auto base = t_whisker_generator::make_prototype_for_field(proto);
     auto def = whisker::dsl::prototype_builder<h_field>::extends(base);
     def.property("primitive?", [](const t_field& self) {
-      auto type = self.type().get_type();
+      auto type = &self.type().deref();
       return type->is_bool() || type->is_any_int() || type->is_floating_point();
     });
     def.property("rename?", [](const t_field& self) {
@@ -1250,7 +1250,7 @@ class t_mstch_rust_generator : public t_whisker_generator {
     });
     def.property("has_adapter?", [](const t_field& self) {
       auto adapter_annotation = find_structured_adapter_annotation(self);
-      auto type = self.type().get_type();
+      auto type = &self.type().deref();
       const t_type* curr_type = step_through_typedefs(type, true);
       return adapter_annotation != nullptr ||
           type_has_transitive_adapter(curr_type, false);
@@ -1258,17 +1258,17 @@ class t_mstch_rust_generator : public t_whisker_generator {
     def.property("adapter_name", [this](const t_field& self) {
       auto adapter_annotation = find_structured_adapter_annotation(self);
       return compute_adapter_name(
-          adapter_annotation, self.type().get_type(), false, options_);
+          adapter_annotation, &self.type().deref(), false, options_);
     });
     def.property("adapter_qualified", [this](const t_field& self) {
       auto adapter_annotation = find_structured_adapter_annotation(self);
       return compute_adapter_qualified(
-          adapter_annotation, self.type().get_type(), false, options_);
+          adapter_annotation, &self.type().deref(), false, options_);
     });
     def.property("adapter_struct_qualified", [this](const t_field& self) {
       auto adapter_annotation = find_structured_adapter_annotation(self);
       return compute_adapter_struct_qualified(
-          adapter_annotation, self.type().get_type(), options_, &self);
+          adapter_annotation, &self.type().deref(), options_, &self);
     });
     return std::move(def).make();
   }
@@ -1282,12 +1282,12 @@ class t_mstch_rust_generator : public t_whisker_generator {
         return true;
       }
       for (const auto& field : self.fields()) {
-        if (!can_derive_ord(field.type().get_type())) {
+        if (!can_derive_ord(&field.type().deref())) {
           return false;
         }
         // Assume we cannot derive `Ord` on the adapted type.
         if (node_has_adapter(field) ||
-            type_has_transitive_adapter(field.type().get_type(), true)) {
+            type_has_transitive_adapter(&field.type().deref(), true)) {
           return false;
         }
         if (field.has_structured_annotation(kRustTypeUri)) {
@@ -1705,7 +1705,7 @@ class t_mstch_rust_generator : public t_whisker_generator {
       for (const t_structured* strct : self.structs_and_unions()) {
         for (const t_field& field : strct->fields()) {
           if (node_has_adapter(field) ||
-              type_has_transitive_adapter(field.type().get_type(), true)) {
+              type_has_transitive_adapter(&field.type().deref(), true)) {
             return true;
           }
         }
@@ -1762,7 +1762,7 @@ class t_mstch_rust_generator : public t_whisker_generator {
       for (const t_structured* strct : self.structs_and_unions()) {
         for (const t_field& field : strct->fields()) {
           if (node_has_adapter(field) ||
-              type_has_transitive_adapter(field.type().get_type(), true)) {
+              type_has_transitive_adapter(&field.type().deref(), true)) {
             structs.emplace_back(resolve_derived_t_type(proto, *strct));
             break;
           }

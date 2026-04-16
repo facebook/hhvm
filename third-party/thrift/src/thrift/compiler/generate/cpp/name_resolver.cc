@@ -164,14 +164,14 @@ const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
       if (!fun.has_void_initial_response()) {
         return detail::gen_template_type(
             "::apache::thrift::ResponseAndStreamTransformation",
-            {resolve(resolve_fn, *fun.return_type().get_type()),
+            {resolve(resolve_fn, *fun.return_type()),
              resolve(resolve_fn, *sink->elem_type()),
-             resolve(resolve_fn, *stream->elem_type().get_type())});
+             resolve(resolve_fn, *stream->elem_type())});
       }
       return detail::gen_template_type(
           "::apache::thrift::StreamTransformation",
           {resolve(resolve_fn, *sink->elem_type()),
-           resolve(resolve_fn, *stream->elem_type().get_type())});
+           resolve(resolve_fn, *stream->elem_type())});
     });
   }
 
@@ -180,7 +180,7 @@ const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
       if (!fun.has_void_initial_response()) {
         return detail::gen_template_type(
             "::apache::thrift::ResponseAndSinkConsumer",
-            {resolve(resolve_fn, *fun.return_type().get_type()),
+            {resolve(resolve_fn, *fun.return_type()),
              resolve(resolve_fn, *sink->elem_type()),
              resolve(resolve_fn, *sink->final_response_type())});
       }
@@ -196,12 +196,12 @@ const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
     if (!fun.has_void_initial_response()) {
       return detail::gen_template_type(
           "::apache::thrift::ResponseAndServerStream",
-          {resolve(resolve_fn, *fun.return_type().get_type()),
-           resolve(resolve_fn, *stream->elem_type().get_type())});
+          {resolve(resolve_fn, *fun.return_type()),
+           resolve(resolve_fn, *stream->elem_type())});
     }
     return detail::gen_template_type(
         "::apache::thrift::ServerStream",
-        {resolve(resolve_fn, *stream->elem_type().get_type())});
+        {resolve(resolve_fn, *stream->elem_type())});
   });
 }
 
@@ -224,13 +224,9 @@ const std::string& cpp_name_resolver::get_underlying_type_name(
 
 const std::string& cpp_name_resolver::get_underlying_type_name(
     const t_typedef& node) {
-  // `t_type_ref::deref` skips over placeholder typedefs. We need the immediate
-  // aliased node here so typedef-local annotations still control the generated
-  // using declaration.
-  const t_type* type = node.type().get_type();
-  if (type == nullptr) {
-    throw std::runtime_error("t_type_ref has no type.");
-  }
+  // Keep the immediate aliased node here so typedef-local annotations still
+  // control the generated using declaration.
+  const t_type& type = node.type().deref();
   const auto* type_name = find_type(node);
   const auto* tmpl = find_template(node);
   const bool has_typedef_cpp_type = type_name != nullptr || tmpl != nullptr;
@@ -239,14 +235,13 @@ const std::string& cpp_name_resolver::get_underlying_type_name(
       return *type_name;
     }
     if (tmpl != nullptr) {
-      if (const auto* container =
-              type->get_true_type()->try_as<t_container>()) {
+      if (const auto* container = type.get_true_type()->try_as<t_container>()) {
         return gen_container_type(
             *container, &cpp_name_resolver::get_native_type, tmpl);
       }
       return *tmpl;
     }
-    return get_native_type(*type);
+    return get_native_type(type);
   };
 
   if (auto* annotation = find_nontransitive_adapter(node)) {
@@ -266,7 +261,7 @@ const std::string& cpp_name_resolver::get_underlying_type_name(
       return gen_typedef_cpp_type();
     });
   }
-  return get_native_type(*type);
+  return get_native_type(type);
 }
 
 const std::string& cpp_name_resolver::get_underlying_namespaced_name(

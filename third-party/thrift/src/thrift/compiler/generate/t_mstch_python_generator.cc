@@ -162,9 +162,9 @@ bool is_invariant_container_type(const t_type* type) {
         is_invariant_adapter(
                find_structured_adapter_annotation(*val_type), val_type);
   } else if (const t_list* list = true_type->try_as<t_list>()) {
-    return is_invariant_container_type(list->elem_type().get_type());
+    return is_invariant_container_type(&list->elem_type().deref());
   } else if (const t_set* set = true_type->try_as<t_set>()) {
-    return is_invariant_container_type(set->elem_type().get_type());
+    return is_invariant_container_type(&set->elem_type().deref());
   }
 
   return false;
@@ -184,7 +184,7 @@ bool field_has_invariant_type(const t_field* field) {
   }
 
   return ::apache::thrift::compiler::is_invariant_container_type(
-      field->type().get_type());
+      &field->type().deref());
 }
 
 /**
@@ -368,7 +368,7 @@ class python_generator_context {
       if (&ctx.program() != root_program_) {
         return; // Skip visiting non-root (included) programs
       }
-      visit_type(&ctx.program(), *f.type().get_type());
+      visit_type(&ctx.program(), *f.type());
       visit_adapter_annotation(
           find_structured_adapter_annotation(f),
           /*add_type_hint_to_adapter_modules=*/false);

@@ -176,25 +176,25 @@ gen_dependency_graph(
             bool supports_incomplete = !force_complete_container &&
                 container_supports_incomplete_params(*map);
             add_dependency(
-                map->key_type().get_type(),
+                &map->key_type().deref(),
                 include_structured_types && !supports_incomplete,
                 false);
             return add_dependency(
-                map->val_type().get_type(),
+                &map->val_type().deref(),
                 include_structured_types && !supports_incomplete,
                 false);
           } else if (const auto* set = type->try_as<t_set>()) {
             bool supports_incomplete = !force_complete_container &&
                 container_supports_incomplete_params(*set);
             return add_dependency(
-                set->elem_type().get_type(),
+                &set->elem_type().deref(),
                 include_structured_types && !supports_incomplete,
                 false);
           } else if (const auto* list = type->try_as<t_list>()) {
             bool supports_incomplete = !force_complete_container &&
                 container_supports_incomplete_params(*list);
             return add_dependency(
-                list->elem_type().get_type(),
+                &list->elem_type().deref(),
                 include_structured_types && !supports_incomplete,
                 false);
           } else if (const auto* typedf = type->try_as<t_typedef>()) {
@@ -215,13 +215,12 @@ gen_dependency_graph(
               if (true_type->try_as<t_container>() != nullptr &&
                   !container_supports_incomplete_params(*typedf)) {
                 if (const auto* inner_map = true_type->try_as<t_map>()) {
-                  add_dependency(inner_map->key_type().get_type(), true, false);
-                  add_dependency(inner_map->val_type().get_type(), true, false);
+                  add_dependency(&inner_map->key_type().deref(), true, false);
+                  add_dependency(&inner_map->val_type().deref(), true, false);
                 } else if (const auto* inner_set = true_type->try_as<t_set>()) {
-                  add_dependency(
-                      inner_set->elem_type().get_type(), true, false);
+                  add_dependency(&inner_set->elem_type().deref(), true, false);
                 } else if (const auto* list_t = true_type->try_as<t_list>()) {
-                  add_dependency(list_t->elem_type().get_type(), true, false);
+                  add_dependency(&list_t->elem_type().deref(), true, false);
                 }
               } else {
                 add_dependency(
@@ -319,7 +318,7 @@ bool is_binary_iobuf_unique_ptr(const t_field& field) {
     }
   }
   // Fall back to type-level check (for typedef-level @cpp.Type).
-  return is_binary_iobuf_unique_ptr(field.type().get_type());
+  return is_binary_iobuf_unique_ptr(&field.type().deref());
 }
 
 bool field_transitively_refers_to_unique(const t_field* field) {
@@ -343,14 +342,14 @@ bool field_transitively_refers_to_unique(const t_field* field) {
   // Then walk container element types (type-only check).
   std::queue<const t_type*> queue;
   {
-    auto type = field->type().get_type()->get_true_type();
+    auto type = field->type()->get_true_type();
     if (const t_list* list = type->try_as<t_list>()) {
-      queue.push(list->elem_type().get_type());
+      queue.push(&list->elem_type().deref());
     } else if (const t_set* set = type->try_as<t_set>()) {
-      queue.push(set->elem_type().get_type());
+      queue.push(&set->elem_type().deref());
     } else if (const t_map* map = type->try_as<t_map>()) {
-      queue.push(map->key_type().get_type());
-      queue.push(map->val_type().get_type());
+      queue.push(&map->key_type().deref());
+      queue.push(&map->val_type().deref());
     }
   }
   while (!queue.empty()) {
@@ -361,12 +360,12 @@ bool field_transitively_refers_to_unique(const t_field* field) {
       return true;
     }
     if (const t_list* list = type->try_as<t_list>()) {
-      queue.push(list->elem_type().get_type());
+      queue.push(&list->elem_type().deref());
     } else if (const t_set* set = type->try_as<t_set>()) {
-      queue.push(set->elem_type().get_type());
+      queue.push(&set->elem_type().deref());
     } else if (const t_map* map = type->try_as<t_map>()) {
-      queue.push(map->key_type().get_type());
-      queue.push(map->val_type().get_type());
+      queue.push(&map->key_type().deref());
+      queue.push(&map->val_type().deref());
     }
   }
   return false;
@@ -413,7 +412,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
         result = eligible::no;
         return false;
       }
-      result = check(field->type().get_type());
+      result = check(&field->type().deref());
       if (result == eligible::no) {
         return false;
       } else if (is_explicit_ref(field) || is_lazy(field)) {

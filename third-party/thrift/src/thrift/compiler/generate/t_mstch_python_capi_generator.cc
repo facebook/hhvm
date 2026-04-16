@@ -74,7 +74,7 @@ const t_const* find_structured_annotation(const t_node& node, const char* uri) {
     const t_const* annotation = field->find_structured_annotation_or_null(uri);
     return annotation ? annotation
                       : t_typedef::get_first_structured_annotation_or_null(
-                            field->type().get_type(), uri);
+                            &field->type().deref(), uri);
   } else if (auto type = dynamic_cast<const t_type*>(&node)) {
     return t_typedef::get_first_structured_annotation_or_null(type, uri);
   }
@@ -91,7 +91,7 @@ const t_const_value* structured_type_override(
 
 const t_type* type_of_node(const t_node& node) {
   if (auto* field = dynamic_cast<const t_field*>(&node)) {
-    return field->type().get_type();
+    return &field->type().deref();
   } else if (auto* type = dynamic_cast<const t_type*>(&node)) {
     return type;
   }
@@ -276,10 +276,10 @@ std::string format_marshal_type_unadapted(
         gen_capi_module_prefix(true_type->program()));
 
   } else if (const t_list* list = true_type->try_as<t_list>()) {
-    const auto* elem_type = list->elem_type().get_type();
+    const auto* elem_type = &list->elem_type().deref();
     return format_unary_type(node, elem_type, "list", type_override);
   } else if (const t_set* set = true_type->try_as<t_set>()) {
-    const auto* elem_type = set->elem_type().get_type();
+    const auto* elem_type = &set->elem_type().deref();
     return format_unary_type(node, elem_type, "set", type_override);
   } else if (const t_map* map = true_type->try_as<t_map>()) {
     return format_map_type(
@@ -323,10 +323,10 @@ bool is_capi_eligible_type(const t_type* type, const t_field* field = nullptr) {
     return false;
   }
   if (const t_list* list = type->try_as<t_list>();
-      list != nullptr && !is_capi_eligible_type(list->elem_type().get_type())) {
+      list != nullptr && !is_capi_eligible_type(&list->elem_type().deref())) {
     return false;
   } else if (const t_set* set = type->try_as<t_set>(); set != nullptr &&
-             !is_capi_eligible_type(set->elem_type().get_type())) {
+             !is_capi_eligible_type(&set->elem_type().deref())) {
     return false;
   } else if (const t_map* map = type->try_as<t_map>(); map != nullptr &&
              (!is_capi_eligible_type(&map->key_type().deref()) ||

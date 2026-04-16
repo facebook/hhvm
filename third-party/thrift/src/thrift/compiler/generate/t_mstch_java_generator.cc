@@ -162,7 +162,7 @@ void collect_referenced_types(
       structs.push_back(strct);
       for (const auto& field : strct->fields()) {
         collect_referenced_types(
-            field.type().get_type(), visited, structs, enums);
+            &field.type().deref(), visited, structs, enums);
       }
     }
   }
@@ -178,15 +178,14 @@ void collect_types_from_service_functions(
       continue;
     }
     collect_referenced_types(
-        func.return_type().get_type(), visited, structs, enums);
+        &func.return_type().deref(), visited, structs, enums);
     for (const auto& field : func.params().fields()) {
-      collect_referenced_types(
-          field.type().get_type(), visited, structs, enums);
+      collect_referenced_types(&field.type().deref(), visited, structs, enums);
     }
     if (func.exceptions()) {
       for (const auto& field : func.exceptions()->fields()) {
         collect_referenced_types(
-            field.type().get_type(), visited, structs, enums);
+            &field.type().deref(), visited, structs, enums);
       }
     }
   }
@@ -611,7 +610,7 @@ class t_mstch_java_generator : public t_whisker_generator {
       if (self.has_structured_annotation(kJavaAdapterUri)) {
         return true;
       }
-      auto type = self.type().get_type();
+      auto type = &self.type().deref();
       return type->is<t_typedef>() &&
           t_typedef::get_first_structured_annotation_or_null(
               type, kJavaAdapterUri) != nullptr;
@@ -621,7 +620,7 @@ class t_mstch_java_generator : public t_whisker_generator {
           self.has_structured_annotation(kJavaWrapperUri)) {
         return true;
       }
-      auto type = self.type().get_type();
+      auto type = &self.type().deref();
       return type->is<t_typedef>() &&
           t_typedef::get_first_structured_annotation_or_null(
               type, kJavaAdapterUri) != nullptr;
@@ -640,7 +639,7 @@ class t_mstch_java_generator : public t_whisker_generator {
     def.property("java_strings_compat?", [this](const t_field& self) {
       if (self.has_structured_annotation(kStringsUri) ||
           t_typedef::get_first_structured_annotation_or_null(
-              self.type().get_type(), kStringsUri) != nullptr) {
+              &self.type().deref(), kStringsUri) != nullptr) {
         return true;
       }
       const t_structured* parent = context().get_field_parent(&self);
@@ -660,7 +659,7 @@ class t_mstch_java_generator : public t_whisker_generator {
           }
           if (const t_const* annotation =
                   t_typedef::get_first_structured_annotation_or_null(
-                      self.type().get_type(), kStringsUri)) {
+                      &self.type().deref(), kStringsUri)) {
             return is_annotation_map_field_equal(
                 annotation, kOnInvalidUtf8, kActionReport);
           }

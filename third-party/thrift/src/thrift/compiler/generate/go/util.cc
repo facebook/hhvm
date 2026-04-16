@@ -195,14 +195,14 @@ void codegen_data::add_to_thrift_metadata_types(
     auto underlying_type = &typedef_->type().deref();
     add_to_thrift_metadata_types(underlying_type, visited_type_names);
   } else if (const t_list* list_type = type->try_as<t_list>()) {
-    auto elem_type = list_type->elem_type().get_type();
+    auto elem_type = &list_type->elem_type().deref();
     add_to_thrift_metadata_types(elem_type, visited_type_names);
   } else if (const t_set* set_type = type->try_as<t_set>()) {
-    auto elem_type = set_type->elem_type().get_type();
+    auto elem_type = &set_type->elem_type().deref();
     add_to_thrift_metadata_types(elem_type, visited_type_names);
   } else if (const t_map* map_type = type->try_as<t_map>()) {
-    auto key_type = map_type->key_type().get_type();
-    auto val_type = map_type->val_type().get_type();
+    auto key_type = &map_type->key_type().deref();
+    auto val_type = &map_type->val_type().deref();
     add_to_thrift_metadata_types(key_type, visited_type_names);
     add_to_thrift_metadata_types(val_type, visited_type_names);
   }
@@ -227,7 +227,7 @@ void codegen_data::compute_thrift_metadata_types() {
   for (auto const& struct_ : current_program_->structs_and_unions()) {
     // Visit struct fields
     for (auto const& field : struct_->fields()) {
-      auto type = field.type().get_type();
+      auto type = &field.type().deref();
       add_to_thrift_metadata_types(type, visited_type_names);
     }
     // Visit struct itself
@@ -236,7 +236,7 @@ void codegen_data::compute_thrift_metadata_types() {
   for (auto const& exception : current_program_->exceptions()) {
     // Visit exception members
     for (auto const& field : exception->fields()) {
-      auto type = field.type().get_type();
+      auto type = &field.type().deref();
       add_to_thrift_metadata_types(type, visited_type_names);
     }
     // Visit exception itself
@@ -257,46 +257,46 @@ void codegen_data::compute_thrift_metadata_types() {
         continue; // Skip unsupported functions
       }
 
-      auto return_type = func.return_type().get_type();
+      auto return_type = &func.return_type().deref();
       add_to_thrift_metadata_types(return_type, visited_type_names);
 
       for (const auto& parameter : func.params().fields()) {
-        auto type = parameter.type().get_type();
+        auto type = &parameter.type().deref();
         add_to_thrift_metadata_types(type, visited_type_names);
       }
       if (func.exceptions() != nullptr) {
         for (const auto& exception : func.exceptions()->fields()) {
-          auto type = exception.type().get_type();
+          auto type = &exception.type().deref();
           add_to_thrift_metadata_types(type, visited_type_names);
         }
       }
       if (func.stream() != nullptr) {
         add_to_thrift_metadata_types(
-            func.stream()->elem_type().get_type(), visited_type_names);
+            &func.stream()->elem_type().deref(), visited_type_names);
         if (func.stream()->exceptions() != nullptr) {
           for (const auto& exception : func.stream()->exceptions()->fields()) {
-            auto type = exception.type().get_type();
+            auto type = &exception.type().deref();
             add_to_thrift_metadata_types(type, visited_type_names);
           }
         }
       }
       if (func.sink() != nullptr) {
         add_to_thrift_metadata_types(
-            func.sink()->elem_type().get_type(), visited_type_names);
+            &func.sink()->elem_type().deref(), visited_type_names);
         if (func.sink()->sink_exceptions() != nullptr) {
           for (const auto& exception :
                func.sink()->sink_exceptions()->fields()) {
-            auto type = exception.type().get_type();
+            auto type = &exception.type().deref();
             add_to_thrift_metadata_types(type, visited_type_names);
           }
         }
 
         add_to_thrift_metadata_types(
-            func.sink()->final_response_type().get_type(), visited_type_names);
+            &func.sink()->final_response_type().deref(), visited_type_names);
         if (func.sink()->final_response_exceptions() != nullptr) {
           for (const auto& exception :
                func.sink()->final_response_exceptions()->fields()) {
-            auto type = exception.type().get_type();
+            auto type = &exception.type().deref();
             add_to_thrift_metadata_types(type, visited_type_names);
           }
         }
@@ -593,7 +593,7 @@ bool is_type_go_comparable(
 
   if (const t_structured* as_struct = real_type->try_as<t_structured>()) {
     for (const auto& member : as_struct->fields()) {
-      auto member_type = member.type().get_type();
+      auto member_type = &member.type().deref();
       auto member_name = member_type->get_full_name();
       // Insert 0 if member_name is not yet in the map.
       auto emplace_pair = visited_type_names.emplace(member_name, 0);

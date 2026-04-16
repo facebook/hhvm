@@ -52,13 +52,13 @@ template <typename F>
 void visit_type(const t_type* type, F&& visitor) {
   visitor(type);
   const auto* true_type = type->get_true_type();
-  if (const auto* tmap = dynamic_cast<const t_map*>(true_type)) {
-    visit_type(tmap->key_type().get_type(), std::forward<F>(visitor));
-    visit_type(tmap->val_type().get_type(), std::forward<F>(visitor));
-  } else if (const auto* tlist = dynamic_cast<const t_list*>(true_type)) {
-    visit_type(tlist->elem_type().get_type(), std::forward<F>(visitor));
-  } else if (const auto* tset = dynamic_cast<const t_set*>(true_type)) {
-    visit_type(tset->elem_type().get_type(), std::forward<F>(visitor));
+  if (const auto* tmap = true_type->try_as<t_map>()) {
+    visit_type(&tmap->key_type().deref(), std::forward<F>(visitor));
+    visit_type(&tmap->val_type().deref(), std::forward<F>(visitor));
+  } else if (const auto* tlist = true_type->try_as<t_list>()) {
+    visit_type(&tlist->elem_type().deref(), std::forward<F>(visitor));
+  } else if (const auto* tset = true_type->try_as<t_set>()) {
+    visit_type(&tset->elem_type().deref(), std::forward<F>(visitor));
   }
 }
 

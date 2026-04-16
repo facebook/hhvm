@@ -137,7 +137,7 @@ const t_type* get_effective_type(const cpp2_rendered_const_value& value) {
     return value.expected_type;
   }
   if (!value.value->type().empty()) {
-    return value.value->type().get_type();
+    return &value.value->type().deref();
   }
   if (value.value->get_owner() != nullptr) {
     return value.value->get_owner()->type();
@@ -973,10 +973,7 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
                          proto.create<t_field>(*field))},
                     {"value",
                      make_rendered_const_value(
-                         proto,
-                         val_const_val,
-                         field->type().get_type(),
-                         field)},
+                         proto, val_const_val, &field->type().deref(), field)},
                 }));
           }
           return whisker::make::array(std::move(result));
@@ -990,10 +987,10 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
           const t_type* elem_type = nullptr;
           if (type != nullptr) {
             if (const auto* list = type->get_true_type()->try_as<t_list>()) {
-              elem_type = list->elem_type().get_type();
+              elem_type = &list->elem_type().deref();
             } else if (
                 const auto* set = type->get_true_type()->try_as<t_set>()) {
-              elem_type = set->elem_type().get_type();
+              elem_type = &set->elem_type().deref();
             }
           }
           whisker::array::raw result;
@@ -1012,8 +1009,8 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
           const t_type* val_type = nullptr;
           if (const t_type* type = get_effective_type(self); type != nullptr) {
             if (const auto* map = type->get_true_type()->try_as<t_map>()) {
-              key_type = map->key_type().get_type();
-              val_type = map->val_type().get_type();
+              key_type = &map->key_type().deref();
+              val_type = &map->val_type().deref();
             }
           }
           whisker::array::raw result;
@@ -1697,7 +1694,7 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
 
     def.property("default_value", [this, &proto](const t_field& self) {
       return make_rendered_const_value(
-          proto, self.default_value(), self.type().get_type(), &self);
+          proto, self.default_value(), &self.type().deref(), &self);
     });
     def.property("cpp_adapter", [](const t_field& self) {
       const std::string* adapter =

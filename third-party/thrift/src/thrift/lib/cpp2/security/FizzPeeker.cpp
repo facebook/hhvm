@@ -58,9 +58,13 @@ void ThriftFizzAcceptorHandshakeHelper::fizzHandshakeSuccess(
       std::chrono::steady_clock::now() - acceptTime_);
 
   auto* handshakeLogging = transport->getState().handshakeLogging();
-  if (handshakeLogging && handshakeLogging->clientSni) {
-    tinfo_.sslServerName =
-        std::make_shared<std::string>(*handshakeLogging->clientSni);
+  if (handshakeLogging) {
+    if (handshakeLogging->clientSni) {
+      tinfo_.sslServerName =
+          std::make_shared<std::string>(*handshakeLogging->clientSni);
+    }
+    tinfo_.clientAlpns = std::make_shared<std::vector<std::string>>(
+        handshakeLogging->clientAlpns);
   }
 
   if (transport != nullptr) {

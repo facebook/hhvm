@@ -30,13 +30,17 @@ class DelegatedCredentialUtils {
    * Returns whether or not the delegated credential extension is present on
    * the certificate passed in.
    */
-  static bool hasDelegatedExtension(const folly::ssl::X509UniquePtr& cert);
+  static Status hasDelegatedExtension(
+      bool& ret,
+      Error& err,
+      const folly::ssl::X509UniquePtr& cert);
 
   static std::chrono::system_clock::time_point getCredentialExpiresTime(
       const folly::ssl::X509UniquePtr& parentCert,
       const DelegatedCredential& credential);
 
-  static void checkCredentialTimeValidity(
+  static Status checkCredentialTimeValidity(
+      Error& err,
       const folly::ssl::X509UniquePtr& parentCert,
       const DelegatedCredential& credential,
       const std::shared_ptr<Clock>& clock);

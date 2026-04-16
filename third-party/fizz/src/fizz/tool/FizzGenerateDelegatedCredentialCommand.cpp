@@ -202,15 +202,25 @@ int fizzGenerateDelegatedCredentialCommand(
             validSec),
         err);
 
-    auto clientPem = fizz::extensions::generateDelegatedCredentialPEM(
-        fizz::extensions::DelegatedCredentialMode::Client,
-        std::move(clientCredential),
-        credKeyData);
+    std::string clientPem;
+    FIZZ_THROW_ON_ERROR(
+        fizz::extensions::generateDelegatedCredentialPEM(
+            clientPem,
+            err,
+            fizz::extensions::DelegatedCredentialMode::Client,
+            std::move(clientCredential),
+            credKeyData),
+        err);
 
-    auto serverPem = fizz::extensions::generateDelegatedCredentialPEM(
-        fizz::extensions::DelegatedCredentialMode::Server,
-        std::move(serverCredential),
-        credKeyData);
+    std::string serverPem;
+    FIZZ_THROW_ON_ERROR(
+        fizz::extensions::generateDelegatedCredentialPEM(
+            serverPem,
+            err,
+            fizz::extensions::DelegatedCredentialMode::Server,
+            std::move(serverCredential),
+            credKeyData),
+        err);
 
     // Create Combined PEM
     auto pem = clientPem + serverPem + certPem;

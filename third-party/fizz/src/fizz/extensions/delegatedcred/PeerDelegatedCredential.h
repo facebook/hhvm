@@ -27,8 +27,16 @@ class PeerDelegatedCredential : public PeerCert {
 
 template <openssl::KeyType T>
 class PeerDelegatedCredentialImpl : public PeerDelegatedCredential {
- public:
+ private:
   PeerDelegatedCredentialImpl(
+      folly::ssl::X509UniquePtr cert,
+      folly::ssl::EvpPkeyUniquePtr pubKey,
+      DelegatedCredential credential);
+
+ public:
+  static Status create(
+      std::unique_ptr<PeerDelegatedCredentialImpl>& ret,
+      Error& err,
       folly::ssl::X509UniquePtr cert,
       folly::ssl::EvpPkeyUniquePtr pubKey,
       DelegatedCredential credential);

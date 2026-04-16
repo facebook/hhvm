@@ -18,7 +18,9 @@ namespace extensions {
  * for client and server modes. This does not include the leaf cert that signed
  * the credential, the caller is expected to append that themselves.
  */
-std::string generateDelegatedCredentialPEM(
+Status generateDelegatedCredentialPEM(
+    std::string& ret,
+    Error& err,
     DelegatedCredentialMode mode,
     DelegatedCredential credential,
     std::string credKeyData);

@@ -7,6 +7,7 @@
  */
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
+#include <fizz/util/Logging.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 
 namespace fizz {
@@ -15,7 +16,9 @@ namespace extensions {
 Status DelegatedCredentialUtils::checkExtensions(
     Error& err,
     const folly::ssl::X509UniquePtr& cert) {
-  if (!hasDelegatedExtension(cert)) {
+  bool hasDelegated = false;
+  FIZZ_RETURN_ON_ERROR(hasDelegatedExtension(hasDelegated, err, cert));
+  if (!hasDelegated) {
     return err.error(
         "cert is missing DelegationUsage extension",
         AlertDescription::illegal_parameter);
@@ -40,26 +43,28 @@ namespace {
 static constexpr folly::StringPiece kDelegatedOid{"1.3.6.1.4.1.44363.44"};
 static const auto kMaxDelegatedCredentialLifetime = std::chrono::hours(24 * 7);
 
-ASN1_OBJECT* generateCredentialOid() {
-  auto oid = OBJ_txt2obj(kDelegatedOid.data(), 1);
+Status generateCredentialOid(const ASN1_OBJECT*& ret, Error& err) {
+  static const ASN1_OBJECT* oid = OBJ_txt2obj(kDelegatedOid.data(), 1);
   if (!oid) {
-    throw std::runtime_error("Couldn't create OID for delegated credential");
+    return err.error("Couldn't create OID for delegated credential");
   }
-  return oid;
+  ret = oid;
+  return Status::Success;
 }
 } // namespace
 
-bool DelegatedCredentialUtils::hasDelegatedExtension(
+Status DelegatedCredentialUtils::hasDelegatedExtension(
+    bool& ret,
+    Error& err,
     const folly::ssl::X509UniquePtr& cert) {
-  static const ASN1_OBJECT* credentialOid = generateCredentialOid();
+  const ASN1_OBJECT* credentialOid = nullptr;
+  FIZZ_RETURN_ON_ERROR(generateCredentialOid(credentialOid, err));
   // To be valid for a credential, it has to have the delegated credential
   // extension and the digitalSignature KeyUsage.
+  FIZZ_DCHECK_NE(credentialOid, nullptr);
   auto credentialIdx = X509_get_ext_by_OBJ(cert.get(), credentialOid, -1);
-  if (credentialIdx == -1) {
-    return false;
-  }
-
-  return true;
+  ret = (credentialIdx != -1);
+  return Status::Success;
 }
 
 Buf DelegatedCredentialUtils::prepareSignatureBuffer(
@@ -182,20 +187,21 @@ DelegatedCredentialUtils::getCredentialExpiresTime(
   return notBeforeTime + std::chrono::seconds(credential.valid_time);
 }
 
-void DelegatedCredentialUtils::checkCredentialTimeValidity(
+Status DelegatedCredentialUtils::checkCredentialTimeValidity(
+    Error& err,
     const folly::ssl::X509UniquePtr& parentCert,
     const DelegatedCredential& credential,
     const std::shared_ptr<Clock>& clock) {
   auto credentialExpiresTime = getCredentialExpiresTime(parentCert, credential);
   auto now = clock->getCurrentTime();
   if (now >= credentialExpiresTime) {
-    throw FizzException(
+    return err.error(
         "credential is no longer valid", AlertDescription::certificate_expired);
   }
 
   // Credentials may be valid for max 1 week according to spec
   if (credentialExpiresTime - now > kMaxDelegatedCredentialLifetime) {
-    throw FizzException(
+    return err.error(
         "credential validity is longer than a week from now",
         AlertDescription::illegal_parameter);
   }
@@ -205,10 +211,11 @@ void DelegatedCredentialUtils::checkCredentialTimeValidity(
       folly::ssl::OpenSSLCertUtils::asnTimeToTimepoint(notAfter);
   // Credential expiry time must be less than certificate's expiry time
   if (credentialExpiresTime >= notAfterTime) {
-    throw FizzException(
+    return err.error(
         "credential validity is longer than parent cert validity",
         AlertDescription::illegal_parameter);
   }
+  return Status::Success;
 }
 } // namespace extensions
 } // namespace fizz

@@ -239,12 +239,16 @@ TEST(SerializationTest, TestBuildServerOnlyPEM) {
   auto combinedPem = kP256ServerDelegatedCred.toString() +
       kP256DelegatedCredKeyWServerLabel.toString();
 
+  std::string generatedPem;
   EXPECT_EQ(
-      combinedPem,
       generateDelegatedCredentialPEM(
+          generatedPem,
+          err,
           DelegatedCredentialMode::Server,
           std::move(*serverCred),
-          kP256DelegatedCredKey.toString()));
+          kP256DelegatedCredKey.toString()),
+      Status::Success);
+  EXPECT_EQ(combinedPem, generatedPem);
 }
 
 TEST(SerializationTest, TestBuildClientOnlyPEM) {
@@ -263,12 +267,16 @@ TEST(SerializationTest, TestBuildClientOnlyPEM) {
   auto combinedPem = kP256ClientDelegatedCred.toString() +
       kP256DelegatedCredKeyWClientLabel.toString();
 
+  std::string generatedPem;
   EXPECT_EQ(
-      combinedPem,
       generateDelegatedCredentialPEM(
+          generatedPem,
+          err,
           DelegatedCredentialMode::Client,
           std::move(*clientCred),
-          kP256DelegatedCredKey.toString()));
+          kP256DelegatedCredKey.toString()),
+      Status::Success);
+  EXPECT_EQ(combinedPem, generatedPem);
 }
 
 TEST(SerializationTest, TestBuildMismatchedPEM) {
@@ -287,12 +295,16 @@ TEST(SerializationTest, TestBuildMismatchedPEM) {
   auto combinedPem = kP256ClientDelegatedCred.toString() +
       kP256DelegatedCredKeyWClientLabel.toString();
 
-  EXPECT_NE(
-      combinedPem,
+  std::string generatedPem;
+  EXPECT_EQ(
       generateDelegatedCredentialPEM(
+          generatedPem,
+          err,
           DelegatedCredentialMode::Server,
           std::move(*clientCred),
-          kP256DelegatedCredKey.toString()));
+          kP256DelegatedCredKey.toString()),
+      Status::Success);
+  EXPECT_NE(combinedPem, generatedPem);
 }
 
 TEST(SerializationTest, TestBuildCombinedClientAndServerPEM) {
@@ -324,17 +336,26 @@ TEST(SerializationTest, TestBuildCombinedClientAndServerPEM) {
       kP256DelegatedCredKeyWClientLabel.toString() +
       kP256ServerDelegatedCred.toString() +
       kP256DelegatedCredKeyWServerLabel.toString() + kP256CredCert.toString();
+
+  std::string clientPem;
   EXPECT_EQ(
-      combinedPem,
       generateDelegatedCredentialPEM(
+          clientPem,
+          err,
           DelegatedCredentialMode::Client,
           std::move(*clientCred),
-          kP256DelegatedCredKey.toString()) +
-          generateDelegatedCredentialPEM(
-              DelegatedCredentialMode::Server,
-              std::move(*serverCred),
-              kP256DelegatedCredKey.toString()) +
-          kP256CredCert.toString());
+          kP256DelegatedCredKey.toString()),
+      Status::Success);
+  std::string serverPem;
+  EXPECT_EQ(
+      generateDelegatedCredentialPEM(
+          serverPem,
+          err,
+          DelegatedCredentialMode::Server,
+          std::move(*serverCred),
+          kP256DelegatedCredKey.toString()),
+      Status::Success);
+  EXPECT_EQ(combinedPem, clientPem + serverPem + kP256CredCert.toString());
 }
 } // namespace test
 } // namespace extensions

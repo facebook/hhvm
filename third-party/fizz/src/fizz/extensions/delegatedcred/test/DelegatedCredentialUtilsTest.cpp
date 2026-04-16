@@ -209,8 +209,11 @@ TEST_F(DelegatedCredentialUtilsTest, TestCertExpiredCredential) {
   credential.valid_time = 0;
   expectThrows(
       [&]() {
-        DelegatedCredentialUtils::checkCredentialTimeValidity(
-            fizz::test::getCert(kCert), credential, clock_);
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            DelegatedCredentialUtils::checkCredentialTimeValidity(
+                err, fizz::test::getCert(kCert), credential, clock_),
+            err);
       },
       "credential is no longer valid",
       AlertDescription::certificate_expired);
@@ -222,8 +225,11 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialValidForTooLong) {
   credential.valid_time += 604800;
   expectThrows(
       [&]() {
-        DelegatedCredentialUtils::checkCredentialTimeValidity(
-            fizz::test::getCert(kCert), credential, clock_);
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            DelegatedCredentialUtils::checkCredentialTimeValidity(
+                err, fizz::test::getCert(kCert), credential, clock_),
+            err);
       },
       "credential validity is longer than a week from now",
       AlertDescription::illegal_parameter);
@@ -249,8 +255,11 @@ TEST_F(DelegatedCredentialUtilsTest, TestCertNotAfter) {
   credential.valid_time = credentialValidTime.count();
   expectThrows(
       [&]() {
-        DelegatedCredentialUtils::checkCredentialTimeValidity(
-            cert, credential, clock_);
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            DelegatedCredentialUtils::checkCredentialTimeValidity(
+                err, cert, credential, clock_),
+            err);
       },
       "credential validity is longer than parent cert validity",
       AlertDescription::illegal_parameter);

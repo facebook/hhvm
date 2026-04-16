@@ -179,16 +179,18 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerify) {
       .WillByDefault(Return(
           std::chrono::system_clock::time_point(
               std::chrono::seconds(1712700000))));
-  auto peerCred =
-      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
-          std::move(cert), std::move(pubKey), std::move(cred));
+  std::unique_ptr<PeerDelegatedCredentialImpl<openssl::KeyType::P256>> peerCred;
+  Error err;
+  EXPECT_EQ(
+      PeerDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+          peerCred, err, std::move(cert), std::move(pubKey), std::move(cred)),
+      Status::Success);
   peerCred->setClock(clock);
 
   // We expect all other verification steps to pass and only the final parent
   // cert verifiation to fail
   EXPECT_THAT(
       [&]() {
-        Error err;
         FIZZ_THROW_ON_ERROR(
             peerCred->verify(
                 err,
@@ -208,13 +210,15 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyNoExtension) {
   auto addr = pubKeyRange.data();
   folly::ssl::EvpPkeyUniquePtr pubKey(
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
-  auto peerCred =
-      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
-          std::move(cert), std::move(pubKey), std::move(cred));
+  std::unique_ptr<PeerDelegatedCredentialImpl<openssl::KeyType::P256>> peerCred;
+  Error err;
+  EXPECT_EQ(
+      PeerDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+          peerCred, err, std::move(cert), std::move(pubKey), std::move(cred)),
+      Status::Success);
 
   expectThrows(
       [&]() {
-        Error err;
         FIZZ_THROW_ON_ERROR(
             peerCred->verify(
                 err,
@@ -240,14 +244,16 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBadSignature) {
       .WillByDefault(Return(
           std::chrono::system_clock::time_point(
               std::chrono::seconds(1570400000))));
-  auto peerCred =
-      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
-          std::move(cert), std::move(pubKey), std::move(cred));
+  std::unique_ptr<PeerDelegatedCredentialImpl<openssl::KeyType::P256>> peerCred;
+  Error err;
+  EXPECT_EQ(
+      PeerDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+          peerCred, err, std::move(cert), std::move(pubKey), std::move(cred)),
+      Status::Success);
   peerCred->setClock(clock);
 
   expectThrows(
       [&]() {
-        Error err;
         FIZZ_THROW_ON_ERROR(
             peerCred->verify(
                 err,
@@ -267,14 +273,16 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyWrongAlgo) {
   auto addr = pubKeyRange.data();
   folly::ssl::EvpPkeyUniquePtr pubKey(
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
-  auto peerCred =
-      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
-          std::move(cert), std::move(pubKey), std::move(cred));
+  std::unique_ptr<PeerDelegatedCredentialImpl<openssl::KeyType::P256>> peerCred;
+  Error err;
+  EXPECT_EQ(
+      PeerDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+          peerCred, err, std::move(cert), std::move(pubKey), std::move(cred)),
+      Status::Success);
 
   // Should fail early due to mismatch with credential
   expectThrows(
       [&]() {
-        Error err;
         FIZZ_THROW_ON_ERROR(
             peerCred->verify(
                 err,
@@ -294,13 +302,15 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifyBitFlip) {
   auto addr = pubKeyRange.data();
   folly::ssl::EvpPkeyUniquePtr pubKey(
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
-  auto peerCred =
-      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
-          std::move(cert), std::move(pubKey), std::move(cred));
+  std::unique_ptr<PeerDelegatedCredentialImpl<openssl::KeyType::P256>> peerCred;
+  Error err;
+  EXPECT_EQ(
+      PeerDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+          peerCred, err, std::move(cert), std::move(pubKey), std::move(cred)),
+      Status::Success);
 
   auto sig = toBuf(kP256Signature);
   sig->writableData()[1] ^= 0x20;
-  Error err;
   EXPECT_THROW(
       FIZZ_THROW_ON_ERROR(
           peerCred->verify(
@@ -320,13 +330,15 @@ TEST_F(PeerDelegatedCredentialTest, TestCredentialVerifySizeMismatch) {
   auto addr = pubKeyRange.data();
   folly::ssl::EvpPkeyUniquePtr pubKey(
       d2i_PUBKEY(nullptr, &addr, pubKeyRange.size()));
-  auto peerCred =
-      std::make_shared<PeerDelegatedCredentialImpl<openssl::KeyType::P256>>(
-          std::move(cert), std::move(pubKey), std::move(cred));
+  std::unique_ptr<PeerDelegatedCredentialImpl<openssl::KeyType::P256>> peerCred;
+  Error err;
+  EXPECT_EQ(
+      PeerDelegatedCredentialImpl<openssl::KeyType::P256>::create(
+          peerCred, err, std::move(cert), std::move(pubKey), std::move(cred)),
+      Status::Success);
 
   auto sig = toBuf(kP256Signature);
   sig->prependChain(IOBuf::copyBuffer("0"));
-  Error err;
   EXPECT_THROW(
       FIZZ_THROW_ON_ERROR(
           peerCred->verify(

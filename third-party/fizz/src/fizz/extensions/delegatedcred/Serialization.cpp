@@ -37,7 +37,9 @@ static constexpr folly::StringPiece kPrivateKeyFooter =
     "-----END PRIVATE KEY-----\n";
 } // namespace
 
-std::string generateDelegatedCredentialPEM(
+Status generateDelegatedCredentialPEM(
+    std::string& ret,
+    Error& err,
     DelegatedCredentialMode mode,
     DelegatedCredential credential,
     std::string credKeyData) {
@@ -55,7 +57,7 @@ std::string generateDelegatedCredentialPEM(
   auto keyHeaderPtr = credKeyData.find(kPrivateKeyHeader);
   auto keyFooterPtr = credKeyData.find(kPrivateKeyFooter);
   if (keyHeaderPtr == std::string::npos || keyFooterPtr == std::string::npos) {
-    throw std::runtime_error("Invalid key data");
+    return err.error("Invalid key data");
   }
 
   auto header = mode == DelegatedCredentialMode::Client ? kClientDCKeyHeader
@@ -66,7 +68,8 @@ std::string generateDelegatedCredentialPEM(
   credKeyData.replace(0, kPrivateKeyHeader.size(), header);
   pemData += credKeyData;
 
-  return pemData;
+  ret = std::move(pemData);
+  return Status::Success;
 }
 
 Status loadDCFromPEM(

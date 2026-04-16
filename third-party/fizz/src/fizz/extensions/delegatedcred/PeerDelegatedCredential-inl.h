@@ -18,10 +18,23 @@ PeerDelegatedCredentialImpl<T>::PeerDelegatedCredentialImpl(
     folly::ssl::EvpPkeyUniquePtr pubKey,
     DelegatedCredential credential)
     : peerCert_(std::move(cert)), credential_(std::move(credential)) {
-  if (openssl::CertUtils::getKeyType(pubKey) != T) {
-    throw std::runtime_error("Key and credential type don't match");
-  }
   credentialSignature_.setKey(std::move(pubKey));
+}
+
+template <openssl::KeyType T>
+/* static */ Status PeerDelegatedCredentialImpl<T>::create(
+    std::unique_ptr<PeerDelegatedCredentialImpl>& ret,
+    Error& err,
+    folly::ssl::X509UniquePtr cert,
+    folly::ssl::EvpPkeyUniquePtr pubKey,
+    DelegatedCredential credential) {
+  if (openssl::CertUtils::getKeyType(pubKey) != T) {
+    return err.error("Key and credential type don't match");
+  }
+  ret = std::unique_ptr<PeerDelegatedCredentialImpl<T>>(
+      new PeerDelegatedCredentialImpl<T>(
+          std::move(cert), std::move(pubKey), std::move(credential)));
+  return Status::Success;
 }
 
 template <openssl::KeyType T>
@@ -40,8 +53,9 @@ Status PeerDelegatedCredentialImpl<T>::verify(
   auto x509 = peerCert_.getX509();
   // Check extensions on cert
   FIZZ_RETURN_ON_ERROR(DelegatedCredentialUtils::checkExtensions(err, x509));
-  DelegatedCredentialUtils::checkCredentialTimeValidity(
-      x509, credential_, clock_);
+  FIZZ_RETURN_ON_ERROR(
+      DelegatedCredentialUtils::checkCredentialTimeValidity(
+          err, x509, credential_, clock_));
 
   // Verify signature
   auto credSignBuf = DelegatedCredentialUtils::prepareSignatureBuffer(

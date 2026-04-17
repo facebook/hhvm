@@ -124,6 +124,8 @@ func (t *rpcClientConformanceTester) execute() {
 		err = t.SinkUndeclaredException(testCaseCtx)
 	case t.instruction.SinkInitialDeclaredException != nil:
 		err = t.SinkInitialDeclaredException(testCaseCtx)
+	case t.instruction.SinkServerDeclaredException != nil:
+		err = t.SinkServerDeclaredException(testCaseCtx)
 	case t.instruction.InteractionConstructor != nil:
 		err = t.InteractionConstructor(testCaseCtx)
 	case t.instruction.InteractionFactoryFunction != nil:
@@ -532,6 +534,24 @@ func (t *rpcClientConformanceTester) SinkInitialDeclaredException(ctx context.Co
 		SetSinkThrew(sinkThrew)
 	clientTestResult := rpc.NewClientTestResult().
 		SetSinkInitialDeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
+}
+
+func (t *rpcClientConformanceTester) SinkServerDeclaredException(ctx context.Context) error {
+	sinkCallback, err := t.client.SinkServerDeclaredException(ctx, t.instruction.SinkServerDeclaredException.Request)
+	if err != nil {
+		return err
+	}
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {}
+
+	_, sinkErr := sinkCallback(payloadSeq)
+	sinkThrew := (sinkErr != nil)
+
+	responseValue := rpc.NewSinkServerDeclaredExceptionClientTestResult().
+		SetSinkThrew(sinkThrew)
+	clientTestResult := rpc.NewClientTestResult().
+		SetSinkServerDeclaredException(responseValue)
 	return t.client.SendTestResult(ctx, clientTestResult)
 }
 

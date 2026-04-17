@@ -10,12 +10,7 @@ open Hh_prelude
 open Linting_visitors
 
 let untyped_linters =
-  [
-    Linter_clone.go;
-    Linter_foreach_shadow.go;
-    Linter_invariant_violation.go;
-    Linter_await_in_loop.go;
-  ]
+  [Linter_clone.go; Linter_foreach_shadow.go; Linter_invariant_violation.go]
   @ Linting_service.untyped_linters
 
 let typed_linters tcopt =
@@ -37,7 +32,6 @@ let typed_linters tcopt =
     Linter_redundant_generics.handler;
     Linter_class_overrides_trait.handler;
     Linter_expr_tree_types.handler;
-    Linter_loose_unsafe_cast.handler;
     Linter_redundant_cast.handler;
     Linter_pointless_booleans.handler;
     Linter_comparing_booleans.handler;
@@ -52,8 +46,7 @@ let typed_linters tcopt =
 let lint_tast ctx (tast : Tast.program) =
   (Tast_visitor.iter_with (typed_linters (Provider_context.get_tcopt ctx)))#go
     ctx
-    tast;
-  Linting_service.lint_tast ctx tast
+    tast
 
 (* Most lint rules are easier to write against the named AST. However, some
  * things that we want to lint for are discarded / simplified by the time we

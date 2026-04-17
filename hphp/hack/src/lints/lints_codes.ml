@@ -31,11 +31,7 @@ module Codes = struct
 
   let if_literal = 5581
 
-  (* 5582 reserved. *)
-
-  let await_in_loop = 5583
-
-  (* 5584 - 5607 reserved. *)
+  (* 5582 - 5607 reserved. *)
 
   let non_equatable_comparison = 5607
 
@@ -83,9 +79,7 @@ module Codes = struct
 
   let duplicate_property = 5635
 
-  let loose_unsafe_cast_lower_bound = 5636
-
-  let loose_unsafe_cast_upper_bound = 5637
+  (* 5636 - 5637 reserved. *)
 
   let invalid_disjointness_check = 5638
 
@@ -105,7 +99,7 @@ module Codes = struct
 
   let branch_return_same_value = 5646
 
-  let redundant_unsafe_cast = 5647
+  (* 5647 reserved. *)
 
   let redundant_cast = 5648
 

@@ -40,15 +40,6 @@ let include_use p msg = Lints.add Codes.include_use Lint_error p msg
 
 let if_literal p msg = Lints.add Codes.if_literal Lint_warning p msg
 
-let await_in_loop p =
-  Lints.add
-    Codes.await_in_loop
-    Lint_warning
-    p
-    ("Do not use `await` in a loop. It almost always incurs "
-    ^ "non-obvious serial fetching that is easy to miss. "
-    ^ "See https://fburl.com/awaitinloop for more information.")
-
 let loop_variable_shadows_local_variable p1 id p2 =
   Lints.add
     Codes.loop_variable_shadows_local_variable
@@ -194,28 +185,14 @@ let duplicate_property pos ~class_name ~prop_name ~class_names =
            class_names)
     ^ "): all instances will be aliased at runtime")
 
-let redundant_cast_common
-    ~can_be_captured
-    ?(check_status = None)
-    cast_type
-    cast
-    cast_pos
-    expr_pos
-    code
-    severity =
+let redundant_cast ~can_be_captured ~check_status cast cast_pos expr_pos =
   let msg =
     "This use of `"
     ^ cast
     ^ "` is redundant since the type of the expression is a subtype of the type being cast to."
     ^ " Please consider removing this cast."
-  in
-  let msg =
-    match cast_type with
-    | `UNSAFE_CAST -> msg
-    | `CAST ->
-      msg
-      ^ " This cast is runtime significant and types might occasionally lie."
-      ^ " Please be prudent when acting on this lint."
+    ^ " This cast is runtime significant and types might occasionally lie."
+    ^ " Please be prudent when acting on this lint."
   in
   let autofix =
     Some
@@ -226,51 +203,13 @@ let redundant_cast_common
            replacement_pos = expr_pos;
          })
   in
-  Lints.add ~check_status ~autofix code severity cast_pos msg
-
-let redundant_unsafe_cast ~can_be_captured hole_pos expr_pos =
-  let cast = "HH\\FIXME\\UNSAFE_CAST" in
-  let code = Codes.redundant_unsafe_cast in
-  redundant_cast_common
-    ~can_be_captured
-    `UNSAFE_CAST
-    cast
-    hole_pos
-    expr_pos
-    code
-    Lint_advice
-
-let redundant_cast ~can_be_captured ~check_status cast cast_pos expr_pos =
-  let code = Codes.redundant_cast in
-  redundant_cast_common
-    ~check_status:(Some check_status)
-    ~can_be_captured
-    `CAST
-    cast
-    cast_pos
-    expr_pos
-    code
-    Lint_advice
-
-let loose_unsafe_cast_lower_bound p ty_str_opt =
-  let msg =
-    "The input type to `HH\\FIXME\\UNSAFE_CAST` should be as specific as possible."
-  in
-  let (msg, autofix) =
-    match ty_str_opt with
-    | Some ty_str ->
-      ( msg ^ " Consider using " ^ Markdown_lite.md_codify ty_str ^ " instead.",
-        Some (ty_str, p) )
-    | None -> (msg, None)
-  in
-  Lints.add ~autofix Codes.loose_unsafe_cast_lower_bound Lint_advice p msg
-
-let loose_unsafe_cast_upper_bound p =
   Lints.add
-    Codes.loose_unsafe_cast_upper_bound
+    ~check_status:(Some check_status)
+    ~autofix
+    Codes.redundant_cast
     Lint_advice
-    p
-    "HH\\FIXME\\UNSAFE_CAST output type annotation is too loose, please use a more specific type."
+    cast_pos
+    msg
 
 let switch_nonexhaustive p =
   Lints.add

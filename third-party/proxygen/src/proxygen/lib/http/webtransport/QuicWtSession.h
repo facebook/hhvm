@@ -124,13 +124,6 @@ class QuicWtSessionBase
    */
   bool acquireIngressStream(uint64_t id) noexcept;
 
-  std::shared_ptr<quic::QuicSocket> quicSocket_{nullptr};
-  WtHandlerPtr wtHandler_;
-  std::unique_ptr<quic::HTTPPriorityQueue> priorityQueue_;
-  detail::WtStreamManager sm_;
-  H3ConnectStreamCallback* observer_{nullptr};
-
- private:
   /**
    * Returns true iff there is bidi/uni credit w.r.t both QuicSocket &
    * WtStreamManager. If this returns true, we can safely proceed to create
@@ -139,6 +132,13 @@ class QuicWtSessionBase
   bool hasEgressUniCredit() const noexcept;
   bool hasEgressBidiCredit() const noexcept;
 
+  std::shared_ptr<quic::QuicSocket> quicSocket_{nullptr};
+  WtHandlerPtr wtHandler_;
+  std::unique_ptr<quic::HTTPPriorityQueue> priorityQueue_;
+  detail::WtStreamManager sm_;
+  H3ConnectStreamCallback* observer_{nullptr};
+
+ private:
   BidiStreamHandle createWtEgressHandle(StreamId id) noexcept;
 
   // -- StreamWriteCallback overrides --
@@ -209,7 +209,7 @@ class QuicWtSession final : public QuicWtSessionBase {
  */
 struct H3ConnectStreamCallback {
   explicit H3ConnectStreamCallback(folly::IOBufQueue& writeBuf) noexcept
-      : visitor(writeBuf) {
+      : visitor{writeBuf} {
   }
   virtual ~H3ConnectStreamCallback() noexcept = default;
   virtual void onEvent(detail::WtStreamManager::Event&& ev) noexcept;

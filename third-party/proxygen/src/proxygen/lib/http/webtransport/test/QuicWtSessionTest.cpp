@@ -876,6 +876,27 @@ TEST_F(H3WtSessionTest, CreateUniBidiStream) {
     EXPECT_EQ(buf->data()[1], 0x41);
     EXPECT_EQ(buf->data()[2], 0x00); // connectStreamId = 0
 
+    // quic credit remains, but the default WT credit is exhausted
+    auto uniCredit = session_->awaitUniStreamCredit();
+    auto bidiCredit = session_->awaitBidiStreamCredit();
+    EXPECT_FALSE(uniCredit.isReady());
+    EXPECT_FALSE(bidiCredit.isReady());
+
+    auto uniRes = session_->createUniStream();
+    auto bidiRes = session_->createBidiStream();
+    EXPECT_FALSE(uniRes && bidiRes);
+    EXPECT_EQ(uniRes.error(), WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+    EXPECT_EQ(bidiRes.error(), WebTransport::ErrorCode::STREAM_CREATION_ERROR);
+
+    EXPECT_TRUE(
+        session_->onMaxStreams(detail::WtStreamManager::MaxStreamsUni{2}));
+    EXPECT_TRUE(
+        session_->onMaxStreams(detail::WtStreamManager::MaxStreamsBidi{2}));
+    EXPECT_TRUE(uniCredit.isReady());
+    EXPECT_TRUE(bidiCredit.isReady());
+    EXPECT_FALSE(std::move(uniCredit).getTry().hasException());
+    EXPECT_FALSE(std::move(bidiCredit).getTry().hasException());
+
     // validate ::closeSession issues a rst_stream for each id
     session_->closeSession(folly::none);
     EXPECT_TRUE(streams[uniId].writeState ==

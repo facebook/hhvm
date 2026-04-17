@@ -549,11 +549,21 @@ auto H3WtSession::onConnMaxData(WtStreamManager::MaxConnData mcd) noexcept
 }
 auto H3WtSession::onMaxStreams(WtStreamManager::MaxStreamsUni ms) noexcept
     -> WtSmResult {
-  return sm_.onMaxStreams(ms);
+  const bool wasAvail = hasEgressUniCredit();
+  auto res = sm_.onMaxStreams(ms);
+  if (!wasAvail && hasEgressUniCredit()) {
+    onUniStreamCreditAvail();
+  }
+  return res;
 }
 auto H3WtSession::onMaxStreams(WtStreamManager::MaxStreamsBidi ms) noexcept
     -> WtSmResult {
-  return sm_.onMaxStreams(ms);
+  const bool wasAvail = hasEgressBidiCredit();
+  auto res = sm_.onMaxStreams(ms);
+  if (!wasAvail && hasEgressBidiCredit()) {
+    onBidiStreamCreditAvail();
+  }
+  return res;
 }
 void H3WtSession::onDrainSession(WtStreamManager::DrainSession ds) noexcept {
   return sm_.onDrainSession(ds);

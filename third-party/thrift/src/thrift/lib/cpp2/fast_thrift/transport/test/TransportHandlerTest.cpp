@@ -141,7 +141,7 @@ TEST_F(TransportHandlerTest, WritePath) {
           })));
 
   auto bytes = folly::IOBuf::copyBuffer("test data");
-  Result result = handler->onMessage(TypeErasedBox(std::move(bytes)));
+  Result result = handler->onWrite(TypeErasedBox(std::move(bytes)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(handler->writePending_, 0);
@@ -251,7 +251,7 @@ TEST_F(TransportHandlerTest, WriteBackpressureWhenWritePending) {
       .WillRepeatedly(SaveArg<0>(&capturedCallback));
 
   auto bytes1 = folly::IOBuf::copyBuffer("first write");
-  Result result1 = handler->onMessage(
+  Result result1 = handler->onWrite(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
           std::move(bytes1)));
 
@@ -260,7 +260,7 @@ TEST_F(TransportHandlerTest, WriteBackpressureWhenWritePending) {
   EXPECT_EQ(handler->writePending_, 1);
 
   auto bytes2 = folly::IOBuf::copyBuffer("second write");
-  Result result2 = handler->onMessage(
+  Result result2 = handler->onWrite(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
           std::move(bytes2)));
 
@@ -280,7 +280,7 @@ TEST_F(TransportHandlerTest, WriteSuccessClearsPendingState) {
       .WillRepeatedly(SaveArg<0>(&capturedCallback));
 
   auto bytes1 = folly::IOBuf::copyBuffer("first write");
-  Result result1 = handler->onMessage(
+  Result result1 = handler->onWrite(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
           std::move(bytes1)));
 
@@ -292,7 +292,7 @@ TEST_F(TransportHandlerTest, WriteSuccessClearsPendingState) {
   EXPECT_EQ(handler->writePending_, 0);
 
   auto bytes2 = folly::IOBuf::copyBuffer("second write");
-  Result result2 = handler->onMessage(
+  Result result2 = handler->onWrite(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
           std::move(bytes2)));
 
@@ -312,7 +312,7 @@ TEST_F(TransportHandlerTest, WriteErrorClearsPendingState) {
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
   auto bytes = folly::IOBuf::copyBuffer("test write");
-  Result result = handler->onMessage(TypeErasedBox(std::move(bytes)));
+  Result result = handler->onWrite(TypeErasedBox(std::move(bytes)));
 
   EXPECT_EQ(result, Result::Backpressure);
   EXPECT_GT(handler->writePending_, 0);
@@ -336,7 +336,7 @@ TEST_F(TransportHandlerTest, MultipleWritesAfterCompletion) {
 
   for (int i = 0; i < 3; ++i) {
     auto bytes = folly::IOBuf::copyBuffer("write " + std::to_string(i));
-    Result result = handler->onMessage(TypeErasedBox(std::move(bytes)));
+    Result result = handler->onWrite(TypeErasedBox(std::move(bytes)));
     EXPECT_EQ(result, Result::Backpressure);
     EXPECT_GT(handler->writePending_, 0);
 
@@ -385,7 +385,7 @@ TEST_F(TransportHandlerTest, PipelineResetDuringPendingWriteCompletesSafely) {
 
   // Start a write operation
   auto bytes = folly::IOBuf::copyBuffer("test data");
-  Result result = handler->onMessage(TypeErasedBox(std::move(bytes)));
+  Result result = handler->onWrite(TypeErasedBox(std::move(bytes)));
   EXPECT_EQ(result, Result::Backpressure);
   EXPECT_GT(handler->writePending_, 0);
 
@@ -407,7 +407,7 @@ TEST_F(TransportHandlerTest, PipelineResetDuringReadCompletesSafely) {
   bool readCompleted = false;
 
   // Set up app handler to wait on a baton during onMessage
-  appHandler_.setOnMessageCallback([&](TypeErasedBox&&) {
+  appHandler_.setOnReadCallback([&](TypeErasedBox&&) {
     baton.wait();
     readCompleted = true;
     return Result::Success;
@@ -503,7 +503,7 @@ TEST_F(TransportHandlerTest, WriteErrCloseBehavior) {
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
   auto bytes = folly::IOBuf::copyBuffer("test write");
-  Result result = handler->onMessage(TypeErasedBox(std::move(bytes)));
+  Result result = handler->onWrite(TypeErasedBox(std::move(bytes)));
   EXPECT_EQ(result, Result::Backpressure);
 
   EXPECT_NE(handler->pipeline_, nullptr);
@@ -603,7 +603,7 @@ TEST_F(TransportHandlerTest, WriteWithNullBytesDeath) {
   auto [handler, pipeline] = createHandlerAndPipeline();
 
   EXPECT_DEBUG_DEATH(
-      (void)handler->onMessage(TypeErasedBox(BytesPtr{})), "bytes");
+      (void)handler->onWrite(TypeErasedBox(BytesPtr{})), "bytes");
 }
 
 // Test: isBufferMovable returns true
@@ -756,7 +756,7 @@ TEST_F(TransportHandlerTest, WriteErrFiresExceptionToPipeline) {
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
   auto bytes = folly::IOBuf::copyBuffer("test write");
-  Result result = handler->onMessage(TypeErasedBox(std::move(bytes)));
+  Result result = handler->onWrite(TypeErasedBox(std::move(bytes)));
   EXPECT_EQ(result, Result::Backpressure);
 
   folly::AsyncSocketException ex(
@@ -862,7 +862,7 @@ TEST_F(TransportHandlerTest, WriteErrFiresDisconnectToPipeline) {
   EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
 
   auto bytes = folly::IOBuf::copyBuffer("test write");
-  Result result = handler->onMessage(TypeErasedBox(std::move(bytes)));
+  Result result = handler->onWrite(TypeErasedBox(std::move(bytes)));
   EXPECT_EQ(result, Result::Backpressure);
 
   folly::AsyncSocketException ex(

@@ -150,7 +150,7 @@ ThriftServerRequestMessage makeStreamingRequestMessage(
   auto serializedMetadata = serializeRequestMetadata(metadata);
   auto payloadData = folly::IOBuf::copyBuffer("payload");
 
-  // Use REQUEST_RESPONSE frame (the only type onMessage accepts),
+  // Use REQUEST_RESPONSE frame (the only type onRead accepts),
   // but with streaming RPC kind in metadata
   auto frame = apache::thrift::fast_thrift::frame::write::serialize(
       apache::thrift::fast_thrift::frame::write::RequestResponseHeader{
@@ -218,9 +218,6 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
             .setHead(transportHandler.get())
             .setTail(adapter)
             .setAllocator(&allocator_)
-            .setHeadToTailOp(
-                apache::thrift::fast_thrift::channel_pipeline::HeadToTailOp::
-                    Read)
             .addNextDuplex<MockHandler>(test_handler_tag, std::move(handlerPtr))
             .build();
 
@@ -235,10 +232,10 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
 };
 
 // =============================================================================
-// onMessage Tests
+// onRead Tests
 // =============================================================================
 
-TEST_F(ThriftServerAppAdapterTest, OnMessageDispatchesToRegisteredHandler) {
+TEST_F(ThriftServerAppAdapterTest, OnReadDispatchesToRegisteredHandler) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   adapter->registerMethod(
@@ -255,14 +252,14 @@ TEST_F(ThriftServerAppAdapterTest, OnMessageDispatchesToRegisteredHandler) {
   auto built = buildPipeline(adapter.get());
 
   auto msg = makeRequestMessage(1, "testMethod");
-  auto result = adapter->onMessage(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(adapter->handlerCalled);
   EXPECT_EQ(adapter->capturedStreamId, 1u);
 }
 
-TEST_F(ThriftServerAppAdapterTest, OnMessageUnknownMethodSendsErrorResponse) {
+TEST_F(ThriftServerAppAdapterTest, OnReadUnknownMethodSendsErrorResponse) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   bool writeCalled = false;
@@ -276,13 +273,13 @@ TEST_F(ThriftServerAppAdapterTest, OnMessageUnknownMethodSendsErrorResponse) {
       });
 
   auto msg = makeRequestMessage(1, "nonExistentMethod");
-  auto result = adapter->onMessage(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled) << "Should send error response for unknown method";
 }
 
-TEST_F(ThriftServerAppAdapterTest, OnMessagePassesProtocolId) {
+TEST_F(ThriftServerAppAdapterTest, OnReadPassesProtocolId) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   adapter->registerMethod(
@@ -297,13 +294,13 @@ TEST_F(ThriftServerAppAdapterTest, OnMessagePassesProtocolId) {
   auto built = buildPipeline(adapter.get());
 
   auto msg = makeRequestMessage(1, "testMethod");
-  auto result = adapter->onMessage(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(adapter->capturedProtocol, apache::thrift::ProtocolId::BINARY);
 }
 
-TEST_F(ThriftServerAppAdapterTest, OnMessageMultipleMethodsDispatched) {
+TEST_F(ThriftServerAppAdapterTest, OnReadMultipleMethodsDispatched) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   adapter->registerMethod(
@@ -327,13 +324,13 @@ TEST_F(ThriftServerAppAdapterTest, OnMessageMultipleMethodsDispatched) {
   auto built = buildPipeline(adapter.get());
 
   auto msg1 = makeRequestMessage(1, "method1");
-  std::ignore = adapter->onMessage(erase_and_box(std::move(msg1)));
+  std::ignore = adapter->onRead(erase_and_box(std::move(msg1)));
 
   auto msg2 = makeRequestMessage(3, "method2");
-  std::ignore = adapter->onMessage(erase_and_box(std::move(msg2)));
+  std::ignore = adapter->onRead(erase_and_box(std::move(msg2)));
 
   auto msg3 = makeRequestMessage(5, "method1");
-  std::ignore = adapter->onMessage(erase_and_box(std::move(msg3)));
+  std::ignore = adapter->onRead(erase_and_box(std::move(msg3)));
 
   EXPECT_EQ(adapter->method1Count, 2);
   EXPECT_EQ(adapter->method2Count, 1);
@@ -455,11 +452,10 @@ TEST_F(ThriftServerAppAdapterTest, DestructorInvokesCloseCallback) {
 }
 
 // =============================================================================
-// onMessage Unsupported Frame Type Tests
+// onRead Unsupported Frame Type Tests
 // =============================================================================
 
-TEST_F(
-    ThriftServerAppAdapterTest, OnMessageUnsupportedFrameSendsErrorResponse) {
+TEST_F(ThriftServerAppAdapterTest, OnReadUnsupportedFrameSendsErrorResponse) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   bool writeCalled = false;
@@ -473,7 +469,7 @@ TEST_F(
 
   // FNF frame is not REQUEST_RESPONSE, so should trigger error response
   auto msg = makeFnfRequestMessage(1, "testMethod");
-  auto result = adapter->onMessage(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled) << "Should send error response for unsupported "
@@ -499,7 +495,7 @@ TEST_F(
       });
 
   auto msg = makeInvalidMetadataMessage(1);
-  auto result = adapter->onMessage(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled) << "Should send error response when metadata "
@@ -593,7 +589,7 @@ TEST_F(
 
   // Streaming RPC kind in a REQUEST_RESPONSE frame should be rejected
   auto msg = makeStreamingRequestMessage(1, "testMethod");
-  auto result = adapter->onMessage(erase_and_box(std::move(msg)));
+  auto result = adapter->onRead(erase_and_box(std::move(msg)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled)

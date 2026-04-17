@@ -62,9 +62,6 @@ void IntegrationTestFixture::SetUp() {
                     .setHead(transportHandler.get())
                     .setTail(&serverAppAdapter_)
                     .setAllocator(&serverAllocator_)
-                    .setHeadToTailOp(
-                        apache::thrift::fast_thrift::channel_pipeline::
-                            HeadToTailOp::Read)
                     .build();
             serverAppAdapter_.setPipeline(pipeline.get());
             transportHandler->setPipeline(*pipeline);
@@ -110,13 +107,13 @@ ClientConnection& IntegrationTestFixture::connectClient() {
 
     auto pipeline =
         apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
-            TestClientAppAdapter,
             ClientTransportHandler,
+            TestClientAppAdapter,
             apache::thrift::fast_thrift::channel_pipeline::
                 SimpleBufferAllocator>()
             .setEventBase(evb)
-            .setTail(transportHandler.get())
-            .setHead(&clientConnection_.appAdapter)
+            .setHead(transportHandler.get())
+            .setTail(&clientConnection_.appAdapter)
             .setAllocator(&clientAllocator_)
             .build();
 

@@ -48,7 +48,7 @@ using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
 using channel_pipeline::Result;
 using channel_pipeline::TypeErasedBox;
-using channel_pipeline::test::MockHeadHandler;
+using channel_pipeline::test::MockTailHandler;
 using channel_pipeline::test::TestAllocator;
 
 // =============================================================================
@@ -56,8 +56,8 @@ using channel_pipeline::test::TestAllocator;
 // =============================================================================
 
 static_assert(
-    channel_pipeline::EndpointHandler<ThriftClientTransportAdapter>,
-    "ThriftClientTransportAdapter must satisfy EndpointHandler");
+    channel_pipeline::HeadEndpointHandler<ThriftClientTransportAdapter>,
+    "ThriftClientTransportAdapter must satisfy HeadEndpointHandler");
 
 // =============================================================================
 // Helpers
@@ -101,7 +101,7 @@ TypeErasedBox makeRocketResponseBox(
 
 struct AdapterWithRocketPipeline {
   folly::EventBase evb;
-  MockHeadHandler rocketTail;
+  MockTailHandler rocketHead;
   TestAllocator allocator;
   std::unique_ptr<ThriftClientTransportAdapter> adapter;
 
@@ -111,12 +111,12 @@ struct AdapterWithRocketPipeline {
     auto* appAdapter = connection->appAdapter.get();
 
     auto rocketPipeline = PipelineBuilder<
+                              MockTailHandler,
                               rocket::client::RocketClientAppAdapter,
-                              MockHeadHandler,
                               TestAllocator>()
                               .setEventBase(&evb)
-                              .setHead(appAdapter)
-                              .setTail(&rocketTail)
+                              .setHead(&rocketHead)
+                              .setTail(appAdapter)
                               .setAllocator(&allocator)
                               .build();
 
@@ -134,24 +134,24 @@ struct AdapterWithRocketPipeline {
 // Unit tests
 // =============================================================================
 
-TEST(ThriftClientTransportAdapterTest, OnMessageConvertsAndWritesToRocket) {
+TEST(ThriftClientTransportAdapterTest, OnWriteConvertsAndWritesToRocket) {
   AdapterWithRocketPipeline fixture;
 
-  auto result = fixture.adapter->onMessage(makeThriftRequestBox());
+  auto result = fixture.adapter->onWrite(makeThriftRequestBox());
   EXPECT_EQ(result, Result::Success);
-  EXPECT_EQ(fixture.rocketTail.messageCount(), 1);
+  EXPECT_EQ(fixture.rocketHead.messageCount(), 1);
 }
 
-TEST(ThriftClientTransportAdapterTest, OnMessageConvertsRpcKindToFrameType) {
+TEST(ThriftClientTransportAdapterTest, OnWriteConvertsRpcKindToFrameType) {
   AdapterWithRocketPipeline fixture;
   TypeErasedBox capturedMsg;
 
-  fixture.rocketTail.setOnMessageCallback([&](TypeErasedBox&& msg) {
+  fixture.rocketHead.setOnMessageCallback([&](TypeErasedBox&& msg) {
     capturedMsg = std::move(msg);
     return Result::Success;
   });
 
-  auto result = fixture.adapter->onMessage(makeThriftRequestBox(
+  auto result = fixture.adapter->onWrite(makeThriftRequestBox(
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE));
   EXPECT_EQ(result, Result::Success);
 
@@ -165,16 +165,16 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
   auto* appAdapter = connection->appAdapter.get();
 
   folly::EventBase evb;
-  MockHeadHandler rocketTail;
+  MockTailHandler rocketHead;
   TestAllocator rocketAllocator;
 
   auto rocketPipeline = PipelineBuilder<
+                            MockTailHandler,
                             rocket::client::RocketClientAppAdapter,
-                            MockHeadHandler,
                             TestAllocator>()
                             .setEventBase(&evb)
-                            .setHead(appAdapter)
-                            .setTail(&rocketTail)
+                            .setHead(&rocketHead)
+                            .setTail(appAdapter)
                             .setAllocator(&rocketAllocator)
                             .build();
 
@@ -183,16 +183,16 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
 
   ThriftClientTransportAdapter adapter(std::move(connection));
 
-  MockHeadHandler thriftHead;
+  MockTailHandler thriftTail;
   TestAllocator thriftAllocator;
 
   auto thriftPipeline = PipelineBuilder<
-                            MockHeadHandler,
                             ThriftClientTransportAdapter,
+                            MockTailHandler,
                             TestAllocator>()
                             .setEventBase(&evb)
-                            .setHead(&thriftHead)
-                            .setTail(&adapter)
+                            .setHead(&adapter)
+                            .setTail(&thriftTail)
                             .setAllocator(&thriftAllocator)
                             .build();
 
@@ -200,10 +200,10 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
 
   auto responseBox =
       makeRocketResponseBox(42, frame::FrameType::REQUEST_RESPONSE);
-  auto result = appAdapter->onMessage(std::move(responseBox));
+  auto result = appAdapter->onRead(std::move(responseBox));
   EXPECT_EQ(result, Result::Success);
 
-  EXPECT_EQ(thriftHead.messageCount(), 1);
+  EXPECT_EQ(thriftTail.messageCount(), 1);
 }
 
 TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
@@ -211,16 +211,16 @@ TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
   auto* appAdapter = connection->appAdapter.get();
 
   folly::EventBase evb;
-  MockHeadHandler rocketTail;
+  MockTailHandler rocketHead;
   TestAllocator rocketAllocator;
 
   auto rocketPipeline = PipelineBuilder<
+                            MockTailHandler,
                             rocket::client::RocketClientAppAdapter,
-                            MockHeadHandler,
                             TestAllocator>()
                             .setEventBase(&evb)
-                            .setHead(appAdapter)
-                            .setTail(&rocketTail)
+                            .setHead(&rocketHead)
+                            .setTail(appAdapter)
                             .setAllocator(&rocketAllocator)
                             .build();
 
@@ -229,16 +229,16 @@ TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
 
   ThriftClientTransportAdapter adapter(std::move(connection));
 
-  MockHeadHandler thriftHead;
+  MockTailHandler thriftTail;
   TestAllocator thriftAllocator;
 
   auto thriftPipeline = PipelineBuilder<
-                            MockHeadHandler,
                             ThriftClientTransportAdapter,
+                            MockTailHandler,
                             TestAllocator>()
                             .setEventBase(&evb)
-                            .setHead(&thriftHead)
-                            .setTail(&adapter)
+                            .setHead(&adapter)
+                            .setTail(&thriftTail)
                             .setAllocator(&thriftAllocator)
                             .build();
 
@@ -247,7 +247,7 @@ TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
   adapter.onTransportError(
       folly::make_exception_wrapper<std::runtime_error>("connection lost"));
 
-  EXPECT_EQ(thriftHead.exceptionCount(), 1);
+  EXPECT_EQ(thriftTail.exceptionCount(), 1);
 }
 
 TEST(ThriftClientTransportAdapterTest, OnExceptionIsNoOp) {
@@ -255,16 +255,16 @@ TEST(ThriftClientTransportAdapterTest, OnExceptionIsNoOp) {
   ThriftClientTransportAdapter adapter(std::move(connection));
 
   folly::EventBase evb;
-  MockHeadHandler thriftHead;
+  MockTailHandler thriftTail;
   TestAllocator thriftAllocator;
 
   auto thriftPipeline = PipelineBuilder<
-                            MockHeadHandler,
                             ThriftClientTransportAdapter,
+                            MockTailHandler,
                             TestAllocator>()
                             .setEventBase(&evb)
-                            .setHead(&thriftHead)
-                            .setTail(&adapter)
+                            .setHead(&adapter)
+                            .setTail(&thriftTail)
                             .setAllocator(&thriftAllocator)
                             .build();
 
@@ -273,7 +273,7 @@ TEST(ThriftClientTransportAdapterTest, OnExceptionIsNoOp) {
   adapter.onException(
       folly::make_exception_wrapper<std::runtime_error>("test error"));
 
-  EXPECT_EQ(thriftHead.exceptionCount(), 0);
+  EXPECT_EQ(thriftTail.exceptionCount(), 0);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::client::test

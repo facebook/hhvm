@@ -42,6 +42,7 @@ using channel_pipeline::PipelineImpl;
 using channel_pipeline::Result;
 using channel_pipeline::TypeErasedBox;
 using channel_pipeline::test::MockHeadHandler;
+using channel_pipeline::test::MockTailHandler;
 using channel_pipeline::test::TestAllocator;
 
 // =============================================================================
@@ -53,8 +54,8 @@ static_assert(
     "RocketServerAppAdapter must satisfy RocketServerAppOutboundHandler");
 
 static_assert(
-    channel_pipeline::EndpointHandler<RocketServerAppAdapter>,
-    "RocketServerAppAdapter must satisfy EndpointHandler");
+    channel_pipeline::TailEndpointHandler<RocketServerAppAdapter>,
+    "RocketServerAppAdapter must satisfy TailEndpointHandler");
 
 static_assert(
     RocketServerAppInboundHandler<RocketServerAppAdapter>,
@@ -76,7 +77,7 @@ TEST(RocketServerAppAdapterTest, WriteWithoutPipelineReturnsError) {
   EXPECT_EQ(adapter->write(std::move(msg)), Result::Error);
 }
 
-TEST(RocketServerAppAdapterTest, OnMessageDelegatesToCallback) {
+TEST(RocketServerAppAdapterTest, OnReadDelegatesToCallback) {
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
   int requestCount = 0;
 
@@ -91,7 +92,7 @@ TEST(RocketServerAppAdapterTest, OnMessageDelegatesToCallback) {
       rocket::server::RocketRequestMessage{
           .frame = {}, .error = {}, .streamId = 1});
 
-  auto result = adapter->onMessage(std::move(box));
+  auto result = adapter->onRead(std::move(box));
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(requestCount, 1);
 }
@@ -110,13 +111,13 @@ TEST(RocketServerAppAdapterTest, OnExceptionDelegatesToCallback) {
   EXPECT_EQ(errorCount, 1);
 }
 
-TEST(RocketServerAppAdapterTest, OnMessageWithoutCallbackReturnsError) {
+TEST(RocketServerAppAdapterTest, OnReadWithoutCallbackReturnsError) {
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
   // No callback set
 
   auto box =
       channel_pipeline::erase_and_box(rocket::server::RocketRequestMessage{});
-  auto result = adapter->onMessage(std::move(box));
+  auto result = adapter->onRead(std::move(box));
   EXPECT_EQ(result, Result::Error);
 }
 
@@ -124,19 +125,17 @@ HANDLER_TAG(mock_head_tag);
 
 TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
   folly::EventBase evb;
-  MockHeadHandler head;
+  MockTailHandler head;
   TestAllocator allocator;
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
 
-  // Server pipeline: head=transport(MockHeadHandler), tail=app(adapter)
-  // HeadToTailOp::Read means reads flow head→tail
+  // Server pipeline: head=transport(mock), tail=app(adapter)
   auto pipeline =
-      PipelineBuilder<MockHeadHandler, RocketServerAppAdapter, TestAllocator>()
+      PipelineBuilder<MockTailHandler, RocketServerAppAdapter, TestAllocator>()
           .setEventBase(&evb)
           .setHead(&head)
           .setTail(adapter.get())
           .setAllocator(&allocator)
-          .setHeadToTailOp(HeadToTailOp::Read)
           .build();
 
   adapter->setPipeline(pipeline.get());
@@ -149,7 +148,7 @@ TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
 
   auto result = adapter->write(std::move(msg));
   EXPECT_EQ(result, Result::Success);
-  // Write goes from tail→head, so MockHeadHandler should receive it
+  // Write goes from tail→head, so mock head should receive it
   EXPECT_EQ(head.messageCount(), 1);
 }
 

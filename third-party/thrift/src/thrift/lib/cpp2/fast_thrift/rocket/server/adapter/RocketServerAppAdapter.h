@@ -32,11 +32,11 @@ namespace apache::thrift::fast_thrift::rocket::server {
  * Acts as the tail endpoint of a rocket-only server pipeline. Decouples the
  * rocket transport layer from any upper-layer protocol (Thrift, SR, etc.).
  *
- * Satisfies EndpointHandler (onMessage/onException) and
+ * Satisfies TailEndpointHandler (onRead/onException) and
  * RocketServerAppOutboundHandler (write).
  *
  * Inbound path (requests): The pipeline delivers messages to this adapter
- * via onMessage(). The adapter forwards them to the registered onRequest
+ * via onRead(). The adapter forwards them to the registered onRequest
  * callback.
  *
  * Outbound path (responses): The upper layer calls write() to push
@@ -100,13 +100,13 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
         channel_pipeline::erase_and_box(std::move(msg)));
   }
 
-  // === EndpointHandler interface (tail of rocket pipeline) ===
+  // === TailEndpointHandler interface ===
 
   /**
    * Called by the pipeline when a request message arrives (inbound path).
    * Forwards to the registered onRequest callback.
    */
-  channel_pipeline::Result onMessage(
+  channel_pipeline::Result onRead(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     if (FOLLY_UNLIKELY(!onRequest_)) {
       return channel_pipeline::Result::Error;
@@ -124,6 +124,11 @@ class RocketServerAppAdapter : public folly::DelayedDestruction {
     }
     onError_(std::move(e));
   }
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
 
  protected:
   ~RocketServerAppAdapter() override = default;

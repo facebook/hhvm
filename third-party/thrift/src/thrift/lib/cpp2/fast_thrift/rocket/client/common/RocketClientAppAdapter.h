@@ -25,7 +25,7 @@ namespace apache::thrift::fast_thrift::rocket::client {
 /**
  * RocketClientAppInboundHandler — pipeline-facing endpoint concept.
  *
- * Equivalent to channel_pipeline::EndpointHandler. Satisfied by
+ * Equivalent to channel_pipeline::TailEndpointHandler. Satisfied by
  * RocketClientAppAdapter, which bridges the pipeline to the consumer's
  * onResponse/onError callbacks.
  */
@@ -33,7 +33,7 @@ template <typename H>
 concept RocketClientAppInboundHandler = requires(
     H h, channel_pipeline::TypeErasedBox&& msg, folly::exception_wrapper&& e) {
   {
-    h.onMessage(std::move(msg))
+    h.onRead(std::move(msg))
   } noexcept -> std::same_as<channel_pipeline::Result>;
   { h.onException(std::move(e)) } noexcept -> std::same_as<void>;
 };

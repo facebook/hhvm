@@ -205,11 +205,18 @@ class TransportHandler : public folly::DelayedDestruction,
 
   bool isBufferMovable() noexcept override { return true; }
 
-  // --- Source interface (OutboundTransportHandler refines Source) ---
+  // --- TailEndpointHandler lifecycle ---
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+
+  // --- TailEndpointHandler interface (OutboundTransportHandler refines) ---
 
   /**
    * Write a message to the transport.
-   * Called by the pipeline head to send data to the socket.
+   * Called by the pipeline to push data toward the socket.
    *
    * The TypeErasedBox must contain a BytesPtr. The bytes are extracted and
    * written to the underlying socket.
@@ -218,7 +225,7 @@ class TransportHandler : public folly::DelayedDestruction,
    * returns Result::Backpressure. The caller should retry after the pending
    * write completes (signaled via writeSuccess()).
    */
-  Result onMessage(TypeErasedBox&& msg) noexcept {
+  Result onWrite(TypeErasedBox&& msg) noexcept {
     auto bytes = std::move(msg.get<BytesPtr>());
     DCHECK(bytes);
     folly::DelayedDestruction::DestructorGuard dg(this);

@@ -225,7 +225,7 @@ struct BenchTransportHandler {
   uint64_t write_count{0};
   uint64_t exception_count{0};
 
-  Result onMessage(TypeErasedBox&&) noexcept {
+  Result onWrite(TypeErasedBox&&) noexcept {
     ++write_count;
     return Result::Success;
   }
@@ -234,6 +234,11 @@ struct BenchTransportHandler {
 
   void pauseRead() noexcept {}
   void resumeRead() noexcept {}
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
 };
 
 // App handler (inbound end of pipeline)
@@ -241,12 +246,17 @@ struct BenchAppHandler {
   uint64_t read_count{0};
   uint64_t exception_count{0};
 
-  Result onMessage(TypeErasedBox&&) noexcept {
+  Result onRead(TypeErasedBox&&) noexcept {
     ++read_count;
     return Result::Success;
   }
 
   void onException(folly::exception_wrapper&&) noexcept { ++exception_count; }
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
 };
 
 // Simple buffer allocator
@@ -902,17 +912,14 @@ BENCHMARK(Backpressure_RegisterUnregister_1Handler, iters) {
 
   susp.dismiss();
 
-  // Each write registers, then onWriteReady unregisters
   for (size_t i = 0; i < iters; ++i) {
     (void)pipeline->fireWrite(std::move(messages[i]));
-    pipeline->onWriteReady(); // Triggers unregister
   }
 
   folly::doNotOptimizeAway(transport.write_count);
 }
 
-// Measures onWriteReady callback dispatch with 1 registered handler
-BENCHMARK(Backpressure_OnWriteReady_1Handler, iters) {
+BENCHMARK(Pipeline_FireWrite_Backpressure_ResumeWrite, iters) {
   folly::BenchmarkSuspender susp;
   folly::EventBase evb;
   BenchTransportHandler transport;

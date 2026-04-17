@@ -77,9 +77,15 @@ class ThriftServerChannel {
   // Must be called before processing requests to provide IOWorkerContext.
   void setWorker(std::shared_ptr<apache::thrift::Cpp2Worker> worker);
 
-  // === ServerInboundAppAdapter interface ===
+  // === TailEndpointHandler lifecycle ===
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+
+  // === TailEndpointHandler interface ===
   // Called by the pipeline when a request message arrives
-  apache::thrift::fast_thrift::channel_pipeline::Result onMessage(
+  apache::thrift::fast_thrift::channel_pipeline::Result onRead(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept;
 

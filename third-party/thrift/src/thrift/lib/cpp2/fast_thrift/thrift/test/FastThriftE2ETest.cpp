@@ -199,32 +199,29 @@ class FastThriftE2ETest : public ::testing::Test {
                       .setHead(transportHandler.get())
                       .setTail(conn.appAdapter.get())
                       .setAllocator(&serverRocketAllocator_)
-                      .setHeadToTailOp(
-                          apache::thrift::fast_thrift::channel_pipeline::
-                              HeadToTailOp::Read)
+                      .addNextInbound<apache::thrift::fast_thrift::frame::read::
+                                          handler::FrameLengthParserHandler>(
+                          server_frame_length_parser_handler_tag)
+                      .addNextOutbound<
+                          apache::thrift::fast_thrift::frame::write::handler::
+                              FrameLengthEncoderHandler>(
+                          server_frame_length_encoder_handler_tag)
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerStreamStateHandler>(
-                          rocket_server_stream_state_handler_tag)
-                      .addNextDuplex<
-                          apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerRequestResponseFrameHandler>(
-                          rocket_server_request_response_frame_handler_tag)
+                              RocketServerFrameCodecHandler>(
+                          rocket_server_frame_codec_handler_tag)
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
                               RocketServerSetupFrameHandler>(
                           rocket_server_setup_frame_handler_tag)
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerFrameCodecHandler>(
-                          rocket_server_frame_codec_handler_tag)
-                      .addNextOutbound<
-                          apache::thrift::fast_thrift::frame::write::handler::
-                              FrameLengthEncoderHandler>(
-                          server_frame_length_encoder_handler_tag)
-                      .addNextInbound<apache::thrift::fast_thrift::frame::read::
-                                          handler::FrameLengthParserHandler>(
-                          server_frame_length_parser_handler_tag)
+                              RocketServerRequestResponseFrameHandler>(
+                          rocket_server_request_response_frame_handler_tag)
+                      .addNextDuplex<
+                          apache::thrift::fast_thrift::rocket::server::handler::
+                              RocketServerStreamStateHandler>(
+                          rocket_server_stream_state_handler_tag)
                       .build();
 
               conn.appAdapter->setPipeline(rocketPipeline.get());
@@ -250,9 +247,6 @@ class FastThriftE2ETest : public ::testing::Test {
                       .setHead(transportAdapter.get())
                       .setTail(serverChannel.get())
                       .setAllocator(ctx.thriftAllocator.get())
-                      .setHeadToTailOp(
-                          apache::thrift::fast_thrift::channel_pipeline::
-                              HeadToTailOp::Read)
                       .build();
 
               transportAdapter->setPipeline(thriftPipeline.get());
@@ -365,13 +359,13 @@ class FastThriftE2ETest : public ::testing::Test {
 
       connection->pipeline =
           PipelineBuilder<
+              apache::thrift::fast_thrift::transport::TransportHandler,
               apache::thrift::fast_thrift::rocket::client::
                   RocketClientAppAdapter,
-              apache::thrift::fast_thrift::transport::TransportHandler,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setHead(connection->appAdapter.get())
-              .setTail(connection->transportHandler.get())
+              .setHead(connection->transportHandler.get())
+              .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
               .addNextInbound<apache::thrift::fast_thrift::frame::read::
                                   handler::FrameLengthParserHandler>(
@@ -409,12 +403,12 @@ class FastThriftE2ETest : public ::testing::Test {
 
       clientPipeline_ =
           PipelineBuilder<
-              thrift::ThriftClientChannel,
               thrift::client::ThriftClientTransportAdapter,
+              thrift::ThriftClientChannel,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setHead(channel.get())
-              .setTail(clientTransportAdapter_.get())
+              .setHead(clientTransportAdapter_.get())
+              .setTail(channel.get())
               .setAllocator(&clientAllocator_)
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
@@ -585,24 +579,23 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
               .setHead(transportHandler.get())
               .setTail(conn.appAdapter.get())
               .setAllocator(&serverRocketAllocator_)
-              .setHeadToTailOp(channel_pipeline::HeadToTailOp::Read)
+              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
+                  server_frame_length_parser_handler_tag)
+              .addNextOutbound<
+                  frame::write::handler::FrameLengthEncoderHandler>(
+                  server_frame_length_encoder_handler_tag)
               .addNextDuplex<
-                  rocket::server::handler::RocketServerStreamStateHandler>(
-                  rocket_server_stream_state_handler_tag)
+                  rocket::server::handler::RocketServerFrameCodecHandler>(
+                  rocket_server_frame_codec_handler_tag)
+              .addNextDuplex<
+                  rocket::server::handler::RocketServerSetupFrameHandler>(
+                  rocket_server_setup_frame_handler_tag)
               .addNextDuplex<rocket::server::handler::
                                  RocketServerRequestResponseFrameHandler>(
                   rocket_server_request_response_frame_handler_tag)
               .addNextDuplex<
-                  rocket::server::handler::RocketServerSetupFrameHandler>(
-                  rocket_server_setup_frame_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerFrameCodecHandler>(
-                  rocket_server_frame_codec_handler_tag)
-              .addNextOutbound<
-                  frame::write::handler::FrameLengthEncoderHandler>(
-                  server_frame_length_encoder_handler_tag)
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  server_frame_length_parser_handler_tag)
+                  rocket::server::handler::RocketServerStreamStateHandler>(
+                  rocket_server_stream_state_handler_tag)
               .build();
 
       conn.appAdapter->setPipeline(rocketPipeline.get());
@@ -619,17 +612,15 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
               *conn.appAdapter);
 
       ThriftConnectionContext ctx;
-      auto thriftPipeline =
-          PipelineBuilder<
-              thrift::server::ThriftServerTransportAdapter,
-              thrift::ThriftServerChannel,
-              SimpleBufferAllocator>()
-              .setEventBase(evb)
-              .setHead(transportAdapter.get())
-              .setTail(serverChannel.get())
-              .setAllocator(ctx.thriftAllocator.get())
-              .setHeadToTailOp(channel_pipeline::HeadToTailOp::Read)
-              .build();
+      auto thriftPipeline = PipelineBuilder<
+                                thrift::server::ThriftServerTransportAdapter,
+                                thrift::ThriftServerChannel,
+                                SimpleBufferAllocator>()
+                                .setEventBase(evb)
+                                .setHead(transportAdapter.get())
+                                .setTail(serverChannel.get())
+                                .setAllocator(ctx.thriftAllocator.get())
+                                .build();
 
       transportAdapter->setPipeline(thriftPipeline.get());
       serverChannel->setPipelineRef(*thriftPipeline);
@@ -740,12 +731,12 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
 
       connection->pipeline =
           PipelineBuilder<
-              rocket::client::RocketClientAppAdapter,
               transport::TransportHandler,
+              rocket::client::RocketClientAppAdapter,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setHead(connection->appAdapter.get())
-              .setTail(connection->transportHandler.get())
+              .setHead(connection->transportHandler.get())
+              .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
               .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
                   client_frame_length_parser_handler_tag)
@@ -779,12 +770,12 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
 
       clientPipeline_ =
           PipelineBuilder<
-              thrift::ThriftClientAppAdapter,
               thrift::client::ThriftClientTransportAdapter,
+              thrift::ThriftClientAppAdapter,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setHead(appAdapter.get())
-              .setTail(clientTransportAdapter_.get())
+              .setHead(clientTransportAdapter_.get())
+              .setTail(appAdapter.get())
               .setAllocator(&clientAllocator_)
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(

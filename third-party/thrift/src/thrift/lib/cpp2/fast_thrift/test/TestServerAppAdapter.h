@@ -46,7 +46,14 @@ class TestServerAppAdapter {
 
   TestServerAppAdapter() = default;
 
-  // --- ServerInboundAppAdapter Interface ---
+  // --- TailEndpointHandler lifecycle ---
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+
+  // --- TailEndpointHandler Interface ---
 
   /**
    * Called by the pipeline when a message reaches the application layer.
@@ -57,7 +64,7 @@ class TestServerAppAdapter {
     lastException_ = std::move(ew);
   }
 
-  Result onMessage(TypeErasedBox&& msg) noexcept {
+  Result onRead(TypeErasedBox&& msg) noexcept {
     std::lock_guard lock(messagesMutex_);
     messageCount_++;
     messages_.push_back(std::move(msg));
@@ -73,7 +80,7 @@ class TestServerAppAdapter {
       (void)pipeline_->fireWrite(std::move(responseBox));
     }
 
-    return onMessageResult_;
+    return onReadResult_;
   }
 
   // --- Configuration ---
@@ -87,9 +94,9 @@ class TestServerAppAdapter {
   }
 
   /**
-   * Set the result to return from onMessage.
+   * Set the result to return from onRead.
    */
-  void setOnMessageResult(Result result) { onMessageResult_ = result; }
+  void setOnReadResult(Result result) { onReadResult_ = result; }
 
   /**
    * Enable or disable echo-back behavior.
@@ -99,7 +106,7 @@ class TestServerAppAdapter {
   // --- Test Inspection ---
 
   /**
-   * Get the number of messages received via onMessage.
+   * Get the number of messages received via onRead.
    */
   int messageCount() const {
     std::lock_guard lock(messagesMutex_);
@@ -138,18 +145,18 @@ class TestServerAppAdapter {
     messages_.clear();
     batonPosted_ = false;
     messageBaton_.reset();
-    onMessageResult_ = Result::Success;
+    onReadResult_ = Result::Success;
     echoEnabled_ = false;
   }
 
  private:
-  // ServerInboundAppAdapter state
+  // TailEndpointHandler state
   mutable std::mutex messagesMutex_;
   int messageCount_{0};
   std::vector<TypeErasedBox> messages_;
   bool batonPosted_{false};
   folly::Baton<> messageBaton_;
-  Result onMessageResult_{Result::Success};
+  Result onReadResult_{Result::Success};
 
   // Exception state
   folly::exception_wrapper lastException_;

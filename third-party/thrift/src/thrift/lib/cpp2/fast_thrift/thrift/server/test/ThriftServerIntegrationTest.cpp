@@ -279,26 +279,25 @@ class ThriftServerIntegrationTest : public ::testing::Test {
             .setHead(transportHandler_.get())
             .setTail(appAdapter_.get())
             .setAllocator(&rocketAllocator_)
-            .setHeadToTailOp(HeadToTailOp::Read)
+            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
+                                FrameLengthParserHandler>(
+                frame_length_parser_handler_tag)
+            .addNextOutbound<apache::thrift::fast_thrift::frame::write::
+                                 handler::FrameLengthEncoderHandler>(
+                frame_length_encoder_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                               handler::RocketServerStreamStateHandler>(
-                server_stream_state_handler_tag)
+                               handler::RocketServerFrameCodecHandler>(
+                rocket_server_frame_codec_handler_tag)
+            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                               handler::RocketServerSetupFrameHandler>(
+                server_setup_frame_handler_tag)
             .addNextDuplex<
                 apache::thrift::fast_thrift::rocket::server::handler::
                     RocketServerRequestResponseFrameHandler>(
                 server_request_response_frame_handler_tag)
             .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                               handler::RocketServerSetupFrameHandler>(
-                server_setup_frame_handler_tag)
-            .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                               handler::RocketServerFrameCodecHandler>(
-                rocket_server_frame_codec_handler_tag)
-            .addNextOutbound<apache::thrift::fast_thrift::frame::write::
-                                 handler::FrameLengthEncoderHandler>(
-                frame_length_encoder_handler_tag)
-            .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
-                                FrameLengthParserHandler>(
-                frame_length_parser_handler_tag)
+                               handler::RocketServerStreamStateHandler>(
+                server_stream_state_handler_tag)
             .build();
 
     appAdapter_->setPipeline(rocketPipeline_.get());
@@ -316,7 +315,6 @@ class ThriftServerIntegrationTest : public ::testing::Test {
                           .setHead(transportAdapter_.get())
                           .setTail(serverChannel_.get())
                           .setAllocator(&thriftAllocator_)
-                          .setHeadToTailOp(HeadToTailOp::Read)
                           .build();
 
     transportAdapter_->setPipeline(thriftPipeline_.get());
@@ -710,30 +708,27 @@ class ThriftServerAppAdapterIntegrationTest : public ::testing::Test {
                     .setHead(transportHandler_.get())
                     .setTail(adapter_.get())
                     .setAllocator(&allocator_)
-                    .setHeadToTailOp(
-                        apache::thrift::fast_thrift::channel_pipeline::
-                            HeadToTailOp::Read)
-                    .addNextDuplex<RocketThriftServerInterfaceHandler>(
-                        rocket_thrift_interface_handler_tag)
+                    .addNextInbound<apache::thrift::fast_thrift::frame::read::
+                                        handler::FrameLengthParserHandler>(
+                        frame_length_parser_handler_tag)
+                    .addNextOutbound<apache::thrift::fast_thrift::frame::write::
+                                         handler::FrameLengthEncoderHandler>(
+                        frame_length_encoder_handler_tag)
                     .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                                       handler::RocketServerStreamStateHandler>(
-                        server_stream_state_handler_tag)
+                                       handler::RocketServerFrameCodecHandler>(
+                        rocket_server_frame_codec_handler_tag)
+                    .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
+                                       handler::RocketServerSetupFrameHandler>(
+                        server_setup_frame_handler_tag)
                     .addNextDuplex<
                         apache::thrift::fast_thrift::rocket::server::handler::
                             RocketServerRequestResponseFrameHandler>(
                         server_request_response_frame_handler_tag)
                     .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                                       handler::RocketServerSetupFrameHandler>(
-                        server_setup_frame_handler_tag)
-                    .addNextDuplex<apache::thrift::fast_thrift::rocket::server::
-                                       handler::RocketServerFrameCodecHandler>(
-                        rocket_server_frame_codec_handler_tag)
-                    .addNextOutbound<apache::thrift::fast_thrift::frame::write::
-                                         handler::FrameLengthEncoderHandler>(
-                        frame_length_encoder_handler_tag)
-                    .addNextInbound<apache::thrift::fast_thrift::frame::read::
-                                        handler::FrameLengthParserHandler>(
-                        frame_length_parser_handler_tag)
+                                       handler::RocketServerStreamStateHandler>(
+                        server_stream_state_handler_tag)
+                    .addNextDuplex<RocketThriftServerInterfaceHandler>(
+                        rocket_thrift_interface_handler_tag)
                     .build();
 
     adapter_->setPipeline(pipeline_.get());

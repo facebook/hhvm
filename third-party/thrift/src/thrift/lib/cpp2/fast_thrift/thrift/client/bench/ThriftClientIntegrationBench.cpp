@@ -285,12 +285,12 @@ std::unique_ptr<rocket::client::RocketClientConnection> createRocketConnection(
 
   connection->pipeline =
       PipelineBuilder<
-          apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter,
           apache::thrift::fast_thrift::transport::TransportHandler,
+          apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter,
           channel_pipeline::SimpleBufferAllocator>()
           .setEventBase(evb)
-          .setHead(connection->appAdapter.get())
-          .setTail(connection->transportHandler.get())
+          .setHead(connection->transportHandler.get())
+          .setTail(connection->appAdapter.get())
           .setAllocator(&connection->allocator)
           .addNextInbound<FrameLengthParserHandler>(
               frame_length_parser_handler_tag)
@@ -358,12 +358,12 @@ struct BenchmarkFixture {
     channel = ThriftClientChannel::newChannel(&evb);
 
     thriftPipeline = PipelineBuilder<
-                         ThriftClientChannel,
                          client::ThriftClientTransportAdapter,
+                         ThriftClientChannel,
                          SimpleBufferAllocator>()
                          .setEventBase(&evb)
-                         .setHead(channel.get())
-                         .setTail(transportAdapter.get())
+                         .setHead(transportAdapter.get())
+                         .setTail(channel.get())
                          .setAllocator(&thriftAllocator)
                          .addNextInbound<ThriftClientMetadataPushHandler>(
                              thrift_client_metadata_push_handler_tag)
@@ -434,12 +434,12 @@ struct AppAdapterBenchFixture {
 
     // Build thrift pipeline
     thriftPipeline = PipelineBuilder<
-                         ThriftClientAppAdapter,
                          client::ThriftClientTransportAdapter,
+                         ThriftClientAppAdapter,
                          TestAllocator>()
                          .setEventBase(&evb)
-                         .setHead(&client.adapter())
-                         .setTail(transportAdapter.get())
+                         .setHead(transportAdapter.get())
+                         .setTail(&client.adapter())
                          .setAllocator(&thriftAllocator)
                          .addNextInbound<ThriftClientMetadataPushHandler>(
                              thrift_client_metadata_push_handler_tag)

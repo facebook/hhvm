@@ -177,12 +177,12 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
 
     pipeline_ =
         PipelineBuilder<
-            ThriftClientChannel,
             apache::thrift::fast_thrift::transport::TransportHandler,
+            ThriftClientChannel,
             TestAllocator>()
             .setEventBase(&evb_)
-            .setTail(transportHandler_.get())
-            .setHead(channel_.get())
+            .setHead(transportHandler_.get())
+            .setTail(channel_.get())
             .setAllocator(&allocator_)
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
@@ -1005,13 +1005,13 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
 
     connection->pipeline =
         PipelineBuilder<
-            apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter,
             apache::thrift::fast_thrift::transport::TransportHandler,
+            apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter,
             apache::thrift::fast_thrift::channel_pipeline::
                 SimpleBufferAllocator>()
             .setEventBase(&evb_)
-            .setHead(connection->appAdapter.get())
-            .setTail(connection->transportHandler.get())
+            .setHead(connection->transportHandler.get())
+            .setTail(connection->appAdapter.get())
             .setAllocator(&connection->allocator)
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
@@ -1052,12 +1052,12 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
     // Build thrift pipeline
     pipeline_ =
         PipelineBuilder<
-            ThriftClientAppAdapter,
             client::ThriftClientTransportAdapter,
+            ThriftClientAppAdapter,
             TestAllocator>()
             .setEventBase(&evb_)
-            .setHead(&client_.adapter())
-            .setTail(transportAdapter_.get())
+            .setHead(transportAdapter_.get())
+            .setTail(&client_.adapter())
             .setAllocator(&allocator_)
             .addNextInbound<client::handler::ThriftClientMetadataPushHandler>(
                 thrift_client_metadata_push_handler_tag)

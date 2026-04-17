@@ -145,32 +145,29 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
                       .setHead(transportHandler.get())
                       .setTail(conn.appAdapter.get())
                       .setAllocator(&rocketAllocator_)
-                      .setHeadToTailOp(
-                          apache::thrift::fast_thrift::channel_pipeline::
-                              HeadToTailOp::Read)
+                      .addNextInbound<apache::thrift::fast_thrift::frame::read::
+                                          handler::FrameLengthParserHandler>(
+                          frame_length_parser_handler_tag)
+                      .addNextOutbound<
+                          apache::thrift::fast_thrift::frame::write::handler::
+                              FrameLengthEncoderHandler>(
+                          frame_length_encoder_handler_tag)
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerStreamStateHandler>(
-                          server_stream_state_handler_tag)
-                      .addNextDuplex<
-                          apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerRequestResponseFrameHandler>(
-                          server_request_response_frame_handler_tag)
+                              RocketServerFrameCodecHandler>(
+                          rocket_server_frame_codec_handler_tag)
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
                               RocketServerSetupFrameHandler>(
                           server_setup_frame_handler_tag)
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerFrameCodecHandler>(
-                          rocket_server_frame_codec_handler_tag)
-                      .addNextOutbound<
-                          apache::thrift::fast_thrift::frame::write::handler::
-                              FrameLengthEncoderHandler>(
-                          frame_length_encoder_handler_tag)
-                      .addNextInbound<apache::thrift::fast_thrift::frame::read::
-                                          handler::FrameLengthParserHandler>(
-                          frame_length_parser_handler_tag)
+                              RocketServerRequestResponseFrameHandler>(
+                          server_request_response_frame_handler_tag)
+                      .addNextDuplex<
+                          apache::thrift::fast_thrift::rocket::server::handler::
+                              RocketServerStreamStateHandler>(
+                          server_stream_state_handler_tag)
                       .build();
 
               conn.appAdapter->setPipeline(rocketPipeline.get());
@@ -196,9 +193,6 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
                       .setHead(transportAdapter.get())
                       .setTail(serverChannel.get())
                       .setAllocator(ctx.thriftAllocator.get())
-                      .setHeadToTailOp(
-                          apache::thrift::fast_thrift::channel_pipeline::
-                              HeadToTailOp::Read)
                       .build();
 
               transportAdapter->setPipeline(thriftPipeline.get());

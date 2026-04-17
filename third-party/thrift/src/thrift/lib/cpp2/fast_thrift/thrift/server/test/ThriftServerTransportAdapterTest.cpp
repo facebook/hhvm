@@ -48,6 +48,7 @@ using channel_pipeline::PipelineImpl;
 using channel_pipeline::Result;
 using channel_pipeline::TypeErasedBox;
 using channel_pipeline::test::MockHeadHandler;
+using channel_pipeline::test::MockTailHandler;
 using channel_pipeline::test::TestAllocator;
 
 // =============================================================================
@@ -55,8 +56,8 @@ using channel_pipeline::test::TestAllocator;
 // =============================================================================
 
 static_assert(
-    channel_pipeline::EndpointHandler<ThriftServerTransportAdapter>,
-    "ThriftServerTransportAdapter must satisfy EndpointHandler");
+    channel_pipeline::HeadEndpointHandler<ThriftServerTransportAdapter>,
+    "ThriftServerTransportAdapter must satisfy HeadEndpointHandler");
 
 // =============================================================================
 // Helpers
@@ -96,7 +97,7 @@ TypeErasedBox makeThriftResponseBox(uint32_t streamId = 1) {
 
 struct AdapterWithRocketPipeline {
   folly::EventBase evb;
-  MockHeadHandler rocketHead;
+  MockTailHandler rocketHead;
   TestAllocator allocator;
   rocket::server::RocketServerAppAdapter::Ptr appAdapter{
       new rocket::server::RocketServerAppAdapter()};
@@ -106,14 +107,13 @@ struct AdapterWithRocketPipeline {
     adapter = std::make_unique<ThriftServerTransportAdapter>(*appAdapter);
 
     auto rocketPipeline = PipelineBuilder<
-                              MockHeadHandler,
+                              MockTailHandler,
                               rocket::server::RocketServerAppAdapter,
                               TestAllocator>()
                               .setEventBase(&evb)
                               .setHead(&rocketHead)
                               .setTail(appAdapter.get())
                               .setAllocator(&allocator)
-                              .setHeadToTailOp(HeadToTailOp::Read)
                               .build();
 
     appAdapter->setPipeline(rocketPipeline.get());
@@ -130,15 +130,15 @@ struct AdapterWithRocketPipeline {
 // Unit tests
 // =============================================================================
 
-TEST(ThriftServerTransportAdapterTest, OnMessageConvertsAndWritesToRocket) {
+TEST(ThriftServerTransportAdapterTest, OnWriteConvertsAndWritesToRocket) {
   AdapterWithRocketPipeline fixture;
 
-  auto result = fixture.adapter->onMessage(makeThriftResponseBox());
+  auto result = fixture.adapter->onWrite(makeThriftResponseBox());
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(fixture.rocketHead.messageCount(), 1);
 }
 
-TEST(ThriftServerTransportAdapterTest, OnMessageConvertsResponseFields) {
+TEST(ThriftServerTransportAdapterTest, OnWriteConvertsResponseFields) {
   AdapterWithRocketPipeline fixture;
   TypeErasedBox capturedMsg;
 
@@ -147,7 +147,7 @@ TEST(ThriftServerTransportAdapterTest, OnMessageConvertsResponseFields) {
     return Result::Success;
   });
 
-  auto result = fixture.adapter->onMessage(makeThriftResponseBox(42));
+  auto result = fixture.adapter->onWrite(makeThriftResponseBox(42));
   EXPECT_EQ(result, Result::Success);
 
   auto& rocketMsg = capturedMsg.get<rocket::server::RocketResponseMessage>();
@@ -159,24 +159,23 @@ TEST(ThriftServerTransportAdapterTest, OnMessageConvertsResponseFields) {
 TEST(ThriftServerTransportAdapterTest, InboundRequestConvertedToThrift) {
   AdapterWithRocketPipeline fixture;
 
-  MockHeadHandler thriftTail;
+  MockTailHandler thriftTail;
   TestAllocator thriftAllocator;
 
   auto thriftPipeline = PipelineBuilder<
                             ThriftServerTransportAdapter,
-                            MockHeadHandler,
+                            MockTailHandler,
                             TestAllocator>()
                             .setEventBase(&fixture.evb)
                             .setHead(fixture.adapter.get())
                             .setTail(&thriftTail)
                             .setAllocator(&thriftAllocator)
-                            .setHeadToTailOp(HeadToTailOp::Read)
                             .build();
 
   fixture.adapter->setPipeline(thriftPipeline.get());
 
   auto requestBox = makeRocketRequestBox(7);
-  auto result = fixture.appAdapter->onMessage(std::move(requestBox));
+  auto result = fixture.appAdapter->onRead(std::move(requestBox));
   EXPECT_EQ(result, Result::Success);
 
   EXPECT_EQ(thriftTail.messageCount(), 1);
@@ -196,7 +195,6 @@ TEST(ThriftServerTransportAdapterTest, OnTransportErrorPropagatesException) {
                             .setHead(fixture.adapter.get())
                             .setTail(&thriftTail)
                             .setAllocator(&thriftAllocator)
-                            .setHeadToTailOp(HeadToTailOp::Read)
                             .build();
 
   fixture.adapter->setPipeline(thriftPipeline.get());
@@ -213,18 +211,17 @@ TEST(ThriftServerTransportAdapterTest, OnExceptionIsNoOp) {
   ThriftServerTransportAdapter adapter(*appAdapter);
 
   folly::EventBase evb;
-  MockHeadHandler thriftTail;
+  MockTailHandler thriftTail;
   TestAllocator thriftAllocator;
 
   auto thriftPipeline = PipelineBuilder<
                             ThriftServerTransportAdapter,
-                            MockHeadHandler,
+                            MockTailHandler,
                             TestAllocator>()
                             .setEventBase(&evb)
                             .setHead(&adapter)
                             .setTail(&thriftTail)
                             .setAllocator(&thriftAllocator)
-                            .setHeadToTailOp(HeadToTailOp::Read)
                             .build();
 
   adapter.setPipeline(thriftPipeline.get());

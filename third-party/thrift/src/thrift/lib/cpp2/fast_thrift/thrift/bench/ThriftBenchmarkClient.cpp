@@ -251,12 +251,12 @@ FastThriftClientState createFastThriftClient(const folly::SocketAddress& addr) {
 
     connection->pipeline =
         channel_pipeline::PipelineBuilder<
-            rocket::client::RocketClientAppAdapter,
             transport::TransportHandler,
+            rocket::client::RocketClientAppAdapter,
             channel_pipeline::SimpleBufferAllocator>()
             .setEventBase(evb)
-            .setHead(connection->appAdapter.get())
-            .setTail(connection->transportHandler.get())
+            .setHead(connection->transportHandler.get())
+            .setTail(connection->appAdapter.get())
             .setAllocator(&connection->allocator)
             .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
                 batching_frame_handler_tag)
@@ -291,12 +291,12 @@ FastThriftClientState createFastThriftClient(const folly::SocketAddress& addr) {
 
     // Build thrift pipeline
     state.thriftPipeline = channel_pipeline::PipelineBuilder<
-                               thrift::ThriftClientAppAdapter,
                                thrift::client::ThriftClientTransportAdapter,
+                               thrift::ThriftClientAppAdapter,
                                channel_pipeline::SimpleBufferAllocator>()
                                .setEventBase(evb)
-                               .setHead(adapter.get())
-                               .setTail(state.transportAdapter.get())
+                               .setHead(state.transportAdapter.get())
+                               .setTail(adapter.get())
                                .setAllocator(&state.thriftAllocator)
                                .build();
 

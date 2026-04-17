@@ -26,7 +26,7 @@
 namespace apache::thrift::fast_thrift::common::test {
 
 /**
- * MockTransportAdapter satisfies OutboundTransportHandler concept.
+ * MockTransportAdapter satisfies TailEndpointHandler concept.
  * Used for testing transport-side pipeline integration.
  */
 class MockTransportAdapter {
@@ -36,7 +36,14 @@ class MockTransportAdapter {
 
   MockTransportAdapter() = default;
 
-  channel_pipeline::Result onMessage(
+  // TailEndpointHandler lifecycle
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+
+  // TailEndpointHandler data method
+  channel_pipeline::Result onWrite(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     writeCount_++;
     auto bytes = std::move(msg.get<channel_pipeline::BytesPtr>());

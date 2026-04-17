@@ -127,7 +127,7 @@ class ThriftServerTransportAdapter {
     }
   }
 
-  // === EndpointHandler interface (head of thrift pipeline) ===
+  // === HeadEndpointHandler interface ===
 
   /**
    * Called when an outbound write reaches the head of the thrift pipeline.
@@ -135,7 +135,7 @@ class ThriftServerTransportAdapter {
    * Converts ThriftServerResponseMessage to RocketResponseMessage and writes
    * it into the rocket pipeline.
    */
-  channel_pipeline::Result onMessage(
+  channel_pipeline::Result onWrite(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto response = msg.take<ThriftServerResponseMessage>();
 
@@ -156,6 +156,11 @@ class ThriftServerTransportAdapter {
    * Per-request thrift errors do NOT close the transport connection.
    */
   void onException(folly::exception_wrapper&& /*e*/) noexcept {}
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
 
  private:
   channel_pipeline::PipelineImpl* pipeline_{nullptr};

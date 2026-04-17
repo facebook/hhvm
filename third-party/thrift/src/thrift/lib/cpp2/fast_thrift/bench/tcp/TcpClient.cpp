@@ -80,7 +80,7 @@ class TcpClient::AppAdapter {
    * Called by the pipeline when a response message is received.
    * Looks up the pending request and fulfills its promise.
    */
-  Result onMessage(TypeErasedBox&& msg) noexcept {
+  Result onRead(TypeErasedBox&& msg) noexcept {
     auto iobuf = std::move(msg).take<std::unique_ptr<folly::IOBuf>>();
 
     // Complete the oldest pending request
@@ -134,6 +134,12 @@ class TcpClient::AppAdapter {
     pendingRequests_.clear();
   }
 
+  // Lifecycle methods
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+
  private:
   folly::EventBase* evb_;
   apache::thrift::fast_thrift::transport::TransportHandler::Ptr
@@ -175,14 +181,14 @@ void TcpClient::connect(
 
   auto pipeline =
       apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder<
-          AppAdapter,
           apache::thrift::fast_thrift::transport::TransportHandler,
+          AppAdapter,
           apache::thrift::fast_thrift::channel_pipeline::
               SimpleBufferAllocator>()
           .setAllocator(appAdapter_->bufferAllocator())
           .setEventBase(evb)
-          .setTail(appAdapter_->transportHandler())
-          .setHead(appAdapter_.get())
+          .setHead(appAdapter_->transportHandler())
+          .setTail(appAdapter_.get())
           .build();
 
   appAdapter_->setPipeline(std::move(pipeline));

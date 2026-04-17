@@ -43,7 +43,7 @@ namespace apache::thrift::fast_thrift::thrift {
  * Non-owning: holds a raw PipelineImpl*, does NOT own the transport or
  * pipeline (the pipeline owner keeps those alive).
  *
- * Implements the ClientInboundAppAdapter concept (onMessage / onException).
+ * Implements the ClientInboundAppAdapter concept (onRead / onException).
  */
 class ThriftClientAppAdapter : public folly::DelayedDestruction,
                                public FastThriftAdapterBase {
@@ -116,9 +116,15 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
         });
   }
 
-  // === ClientInboundAppAdapter interface ===
+  // === TailEndpointHandler lifecycle ===
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
 
-  apache::thrift::fast_thrift::channel_pipeline::Result onMessage(
+  // === TailEndpointHandler interface ===
+
+  apache::thrift::fast_thrift::channel_pipeline::Result onRead(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
     auto response = msg.take<ThriftResponseMessage>();

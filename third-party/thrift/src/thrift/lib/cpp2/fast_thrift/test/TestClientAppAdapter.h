@@ -47,7 +47,14 @@ class TestClientAppAdapter {
 
   TestClientAppAdapter() = default;
 
-  // --- ClientInboundAppAdapter Interface ---
+  // --- TailEndpointHandler lifecycle ---
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+
+  // --- TailEndpointHandler Interface ---
 
   /**
    * Called by the pipeline when a response message is received from the server.
@@ -57,7 +64,7 @@ class TestClientAppAdapter {
     lastException_ = std::move(ew);
   }
 
-  Result onMessage(TypeErasedBox&& msg) noexcept {
+  Result onRead(TypeErasedBox&& msg) noexcept {
     std::lock_guard lock(responsesMutex_);
     responseCount_++;
     responses_.push_back(std::move(msg));
@@ -65,7 +72,7 @@ class TestClientAppAdapter {
       batonPosted_ = true;
       responseBaton_.post();
     }
-    return onMessageResult_;
+    return onReadResult_;
   }
 
   // --- Client Send API ---
@@ -114,9 +121,9 @@ class TestClientAppAdapter {
   void setEventBase(folly::EventBase* evb) { evb_ = evb; }
 
   /**
-   * Set the result to return from onMessage.
+   * Set the result to return from onRead.
    */
-  void setOnMessageResult(Result result) { onMessageResult_ = result; }
+  void setOnReadResult(Result result) { onReadResult_ = result; }
 
   // --- Test Inspection ---
 
@@ -169,7 +176,7 @@ class TestClientAppAdapter {
     responses_.clear();
     batonPosted_ = false;
     responseBaton_.reset();
-    onMessageResult_ = Result::Success;
+    onReadResult_ = Result::Success;
   }
 
  private:
@@ -184,7 +191,7 @@ class TestClientAppAdapter {
   folly::exception_wrapper lastException_;
   bool batonPosted_{false};
   folly::Baton<> responseBaton_;
-  Result onMessageResult_{Result::Success};
+  Result onReadResult_{Result::Success};
 };
 
 } // namespace apache::thrift::fast_thrift::test

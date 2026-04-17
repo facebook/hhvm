@@ -138,26 +138,25 @@ class FastThriftBenchmarkServer {
               .setHead(transportHandler.get())
               .setTail(serverChannel.get())
               .setAllocator(&allocator_)
-              .setHeadToTailOp(channel_pipeline::HeadToTailOp::Read)
+              .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
+                  batching_frame_handler_tag)
+              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
+                  frame_length_parser_handler_tag)
+              .addNextOutbound<
+                  frame::write::handler::FrameLengthEncoderHandler>(
+                  frame_length_encoder_handler_tag)
               .addNextDuplex<
-                  rocket::server::handler::RocketServerStreamStateHandler>(
-                  rocket_server_stream_state_handler_tag)
+                  rocket::server::handler::RocketServerFrameCodecHandler>(
+                  rocket_server_frame_codec_handler_tag)
+              .addNextDuplex<
+                  rocket::server::handler::RocketServerSetupFrameHandler>(
+                  rocket_server_setup_frame_handler_tag)
               .addNextDuplex<rocket::server::handler::
                                  RocketServerRequestResponseFrameHandler>(
                   rocket_server_request_response_frame_handler_tag)
               .addNextDuplex<
-                  rocket::server::handler::RocketServerSetupFrameHandler>(
-                  rocket_server_setup_frame_handler_tag)
-              .addNextDuplex<
-                  rocket::server::handler::RocketServerFrameCodecHandler>(
-                  rocket_server_frame_codec_handler_tag)
-              .addNextOutbound<
-                  frame::write::handler::FrameLengthEncoderHandler>(
-                  frame_length_encoder_handler_tag)
-              .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
-                  frame_length_parser_handler_tag)
-              .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
-                  batching_frame_handler_tag)
+                  rocket::server::handler::RocketServerStreamStateHandler>(
+                  rocket_server_stream_state_handler_tag)
               .build();
 
       serverChannel->setPipelineRef(*pipeline);

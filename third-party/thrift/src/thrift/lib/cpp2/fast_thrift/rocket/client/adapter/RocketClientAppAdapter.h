@@ -32,11 +32,11 @@ namespace apache::thrift::fast_thrift::rocket::client {
  * Acts as the head endpoint of a rocket-only client pipeline. Decouples the
  * rocket transport layer from any upper-layer protocol (Thrift, SR, etc.).
  *
- * Satisfies EndpointHandler (onMessage/onException) and
+ * Satisfies TailEndpointHandler (onRead/onException) and
  * RocketClientAppOutboundHandler (write).
  *
  * Inbound path (responses): The pipeline delivers messages to this adapter
- * via onMessage(). The adapter forwards them to the registered onResponse
+ * via onRead(). The adapter forwards them to the registered onResponse
  * callback.
  *
  * Outbound path (requests): The upper layer calls write() to push
@@ -48,11 +48,11 @@ namespace apache::thrift::fast_thrift::rocket::client {
  *   adapter.setOnResponse([&](TypeErasedBox&& msg) noexcept { ... });
  *   adapter.setOnError([&](exception_wrapper&& e) noexcept { ... });
  *
- *   // 2. Build rocket pipeline with adapter as head
+ *   // 2. Build rocket pipeline with adapter as tail
  *   auto pipeline = PipelineBuilder<
- *       RocketClientAppAdapter, TransportHandler, Allocator>()
- *       .setHead(&adapter)
- *       .setTail(transportHandler)
+ *       TransportHandler, RocketClientAppAdapter, Allocator>()
+ *       .setHead(transportHandler)
+ *       .setTail(&adapter)
  *       ...
  *       .build();
  *
@@ -100,13 +100,13 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
         channel_pipeline::erase_and_box(std::move(msg)));
   }
 
-  // === EndpointHandler interface (head of rocket pipeline) ===
+  // === TailEndpointHandler interface ===
 
   /**
    * Called by the pipeline when a response message arrives (inbound path).
    * Forwards to the registered onResponse callback.
    */
-  channel_pipeline::Result onMessage(
+  channel_pipeline::Result onRead(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     if (FOLLY_UNLIKELY(!onResponse_)) {
       return channel_pipeline::Result::Error;
@@ -124,6 +124,11 @@ class RocketClientAppAdapter : public folly::DelayedDestruction {
     }
     onError_(std::move(e));
   }
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
 
  protected:
   ~RocketClientAppAdapter() override = default;

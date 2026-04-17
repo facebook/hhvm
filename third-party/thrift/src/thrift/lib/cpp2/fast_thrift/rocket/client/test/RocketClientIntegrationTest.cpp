@@ -118,12 +118,12 @@ class RocketClientIntegrationTest : public ::testing::Test {
         });
 
     pipeline_ = PipelineBuilder<
-                    rocket::client::RocketClientAppAdapter,
                     apache::thrift::fast_thrift::transport::TransportHandler,
+                    rocket::client::RocketClientAppAdapter,
                     TestAllocator>()
                     .setEventBase(&evb_)
-                    .setTail(transportHandler_.get())
-                    .setHead(appAdapter_.get())
+                    .setHead(transportHandler_.get())
+                    .setTail(appAdapter_.get())
                     .setAllocator(&allocator_)
                     .addNextInbound<apache::thrift::fast_thrift::frame::read::
                                         handler::FrameLengthParserHandler>(

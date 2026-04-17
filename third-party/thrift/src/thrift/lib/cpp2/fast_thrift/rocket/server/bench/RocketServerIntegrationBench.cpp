@@ -174,19 +174,18 @@ struct BenchmarkFixture {
                    .setHead(transportHandler.get())
                    .setTail(appAdapter.get())
                    .setAllocator(&allocator)
-                   .setHeadToTailOp(HeadToTailOp::Read)
-                   .addNextDuplex<RocketServerStreamStateHandler>(
-                       rocket_server_stream_state_handler_tag)
-                   .addNextDuplex<RocketServerRequestResponseFrameHandler>(
-                       rocket_server_request_response_frame_handler_tag)
-                   .addNextDuplex<RocketServerSetupFrameHandler>(
-                       rocket_server_setup_handler_tag)
-                   .addNextDuplex<RocketServerFrameCodecHandler>(
-                       rocket_server_frame_codec_handler_tag)
-                   .addNextOutbound<FrameLengthEncoderHandler>(
-                       frame_length_encoder_handler_tag)
                    .addNextInbound<FrameLengthParserHandler>(
                        frame_length_parser_handler_tag)
+                   .addNextOutbound<FrameLengthEncoderHandler>(
+                       frame_length_encoder_handler_tag)
+                   .addNextDuplex<RocketServerFrameCodecHandler>(
+                       rocket_server_frame_codec_handler_tag)
+                   .addNextDuplex<RocketServerSetupFrameHandler>(
+                       rocket_server_setup_handler_tag)
+                   .addNextDuplex<RocketServerRequestResponseFrameHandler>(
+                       rocket_server_request_response_frame_handler_tag)
+                   .addNextDuplex<RocketServerStreamStateHandler>(
+                       rocket_server_stream_state_handler_tag)
                    .build();
 
     appAdapter->setPipeline(pipeline.get());
@@ -336,19 +335,18 @@ BENCHMARK(Rocket_Server_SetupFrame, iters) {
             .setHead(fixture.transportHandler.get())
             .setTail(fixture.appAdapter.get())
             .setAllocator(&fixture.allocator)
-            .setHeadToTailOp(HeadToTailOp::Read)
-            .addNextDuplex<RocketServerStreamStateHandler>(
-                rocket_server_stream_state_handler_tag)
-            .addNextDuplex<RocketServerRequestResponseFrameHandler>(
-                rocket_server_request_response_frame_handler_tag)
-            .addNextDuplex<RocketServerSetupFrameHandler>(
-                rocket_server_setup_handler_tag)
-            .addNextDuplex<RocketServerFrameCodecHandler>(
-                rocket_server_frame_codec_handler_tag)
-            .addNextOutbound<FrameLengthEncoderHandler>(
-                frame_length_encoder_handler_tag)
             .addNextInbound<FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
+            .addNextOutbound<FrameLengthEncoderHandler>(
+                frame_length_encoder_handler_tag)
+            .addNextDuplex<RocketServerFrameCodecHandler>(
+                rocket_server_frame_codec_handler_tag)
+            .addNextDuplex<RocketServerSetupFrameHandler>(
+                rocket_server_setup_handler_tag)
+            .addNextDuplex<RocketServerRequestResponseFrameHandler>(
+                rocket_server_request_response_frame_handler_tag)
+            .addNextDuplex<RocketServerStreamStateHandler>(
+                rocket_server_stream_state_handler_tag)
             .build();
 
     fixture.appAdapter->setPipeline(fixture.pipeline.get());

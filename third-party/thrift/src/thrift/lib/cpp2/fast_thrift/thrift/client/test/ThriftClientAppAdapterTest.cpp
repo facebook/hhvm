@@ -130,12 +130,12 @@ class ThriftClientAppAdapterTest : public ::testing::Test {
 
     auto pipeline =
         PipelineBuilder<
-            ThriftClientAppAdapter,
             apache::thrift::fast_thrift::transport::TransportHandler,
+            ThriftClientAppAdapter,
             TestAllocator>()
             .setEventBase(evb_)
-            .setTail(transportHandler.get())
-            .setHead(adapter)
+            .setHead(transportHandler.get())
+            .setTail(adapter)
             .setAllocator(&allocator_)
             .addNextDuplex<MockHandler>(test_handler_tag, std::move(handlerPtr))
             .build();
@@ -194,7 +194,7 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
   });
 
   auto response = makeResponse(0);
-  auto result = client.adapter().onMessage(erase_and_box(std::move(response)));
+  auto result = client.adapter().onRead(erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(handlerCalled);
@@ -206,7 +206,7 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageUnknownHandle) {
   auto built = buildPipeline(&client.adapter());
 
   auto response = makeResponse(99999);
-  auto result = client.adapter().onMessage(erase_and_box(std::move(response)));
+  auto result = client.adapter().onRead(erase_and_box(std::move(response)));
 
   // Unknown handle returns Success (logged warning, not an error)
   EXPECT_EQ(result, Result::Success);
@@ -230,7 +230,7 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageUnsupportedFrameType) {
   // Use REQUEST_STREAM instead of REQUEST_RESPONSE
   auto response = makeResponse(
       0, apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM);
-  auto result = client.adapter().onMessage(erase_and_box(std::move(response)));
+  auto result = client.adapter().onRead(erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Error);
   EXPECT_FALSE(handlerCalled);
@@ -293,7 +293,7 @@ TEST_F(ThriftClientAppAdapterTest, OnExceptionClearsPendingRequests) {
   // Subsequent onMessage for handle 0 should be a no-op
   // (handle was cleared by onException)
   auto response = makeResponse(0);
-  auto result = client.adapter().onMessage(erase_and_box(std::move(response)));
+  auto result = client.adapter().onRead(erase_and_box(std::move(response)));
   EXPECT_EQ(result, Result::Success); // Unknown handle -> Success
   EXPECT_EQ(errorCount, 1); // Handler not called again
 }

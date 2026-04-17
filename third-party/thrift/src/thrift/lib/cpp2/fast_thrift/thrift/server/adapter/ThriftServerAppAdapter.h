@@ -41,7 +41,7 @@ namespace apache::thrift::fast_thrift::thrift {
  * The generated FastHandler extends this class, inheriting pipeline
  * integration, metadata deserialization, and response writing.
  *
- * Satisfies ServerInboundAppAdapter concept (onMessage / onException).
+ * Satisfies TailEndpointHandler concept (onRead / onException).
  */
 class ThriftServerAppAdapter : public folly::DelayedDestruction {
  public:
@@ -67,9 +67,9 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
     return pipeline_;
   }
 
-  // === ServerInboundAppAdapter interface ===
+  // === TailEndpointHandler interface ===
 
-  channel_pipeline::Result onMessage(
+  channel_pipeline::Result onRead(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<ThriftServerRequestMessage>();
     DCHECK(request.streamId != 0) << "Invalid stream ID";
@@ -93,6 +93,11 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
       pipeline_->eventBase()->runInEventBaseThread(std::move(cb));
     }
   }
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
 
   void writeResponse(ThriftServerResponseMessage&& response) noexcept {
     if (FOLLY_UNLIKELY(!pipeline_)) {

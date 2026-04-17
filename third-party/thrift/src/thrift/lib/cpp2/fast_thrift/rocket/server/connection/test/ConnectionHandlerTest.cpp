@@ -36,7 +36,7 @@ namespace apache::thrift::fast_thrift::rocket::server::connection {
 
 using namespace apache::thrift::fast_thrift::channel_pipeline;
 using namespace apache::thrift::fast_thrift::channel_pipeline::test;
-using MockAppHandler = MockHeadHandler;
+using MockAppHandler = MockTailHandler; // App receives reads (Tail)
 using namespace testing;
 
 class ConnectionHandlerTest : public ::testing::Test {
@@ -66,7 +66,6 @@ class ConnectionHandlerTest : public ::testing::Test {
                               .setHead(transportHandler.get())
                               .setTail(&appHandler_)
                               .setAllocator(&allocator_)
-                              .setHeadToTailOp(HeadToTailOp::Read)
                               .build();
 
           transportHandler->setPipeline(*pipeline);

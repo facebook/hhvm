@@ -220,8 +220,6 @@ class ThriftServerChannelTest : public ::testing::Test {
         .setHead(&mockTransport_)
         .setTail(channel_.get())
         .setAllocator(&allocator_)
-        .setHeadToTailOp(
-            apache::thrift::fast_thrift::channel_pipeline::HeadToTailOp::Read)
         .addNextDuplex<MockHandler>(test_handler_tag, std::move(handler_))
         .build();
   }
@@ -297,7 +295,7 @@ TEST_F(ThriftServerChannelTest, OnMessageDispatchesToProcessor) {
   channel_->setPipeline(std::move(pipeline_));
 
   auto request = createRequestMessage(1, "testMethod", "request data");
-  auto result = channel_->onMessage(erase_and_box(std::move(request)));
+  auto result = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(mockProcessor_->requestCount(), 1);
@@ -319,7 +317,7 @@ TEST_F(ThriftServerChannelTest, OnMessageExtractsMethodName) {
   channel_->setPipeline(std::move(pipeline_));
 
   auto request = createRequestMessage(1, "myServiceMethod", "data");
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_EQ(mockProcessor_->lastMethodName(), "myServiceMethod");
 }
@@ -340,7 +338,7 @@ TEST_F(ThriftServerChannelTest, OnMessageExtractsProtocol) {
   channel_->setPipeline(std::move(pipeline_));
 
   auto request = createRequestMessage(1, "method", "data");
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_EQ(
       mockProcessor_->lastProtocolId(),
@@ -383,7 +381,7 @@ TEST_F(ThriftServerChannelTest, SendReplyPreservesResponsePayload) {
   channel_->setPipeline(std::move(pipeline_));
 
   auto request = createRequestMessage(1, "method", "data");
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_EQ(capturedPayload, "hello world");
 }
@@ -417,7 +415,7 @@ TEST_F(ThriftServerChannelTest, SendReplySetsResponseMetadata) {
   channel_->setPipeline(std::move(pipeline_));
 
   auto request = createRequestMessage(1, "method", "data");
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_EQ(
       capturedType, apache::thrift::PayloadMetadata::Type::responseMetadata);
@@ -476,7 +474,7 @@ TEST_F(ThriftServerChannelTest, SendErrorWrappedSetsExceptionMetadata) {
   channel_->setPipeline(std::move(pipeline_));
 
   auto request = createRequestMessage(1, "method", "data");
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_EQ(
       capturedPayloadType,
@@ -509,7 +507,7 @@ TEST_F(ThriftServerChannelTest, OnewayRequestDetected) {
       "onewayMethod",
       "data",
       apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE);
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_TRUE(isOnewayCaptured);
 }
@@ -536,7 +534,7 @@ TEST_F(ThriftServerChannelTest, RequestResponseIsNotOneway) {
       "method",
       "data",
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_FALSE(isOnewayCaptured);
 }
@@ -571,9 +569,9 @@ TEST_F(ThriftServerChannelTest, MultipleRequestsDispatchedCorrectly) {
   auto req2 = createRequestMessage(3, "method2", "data2");
   auto req3 = createRequestMessage(5, "method3", "data3");
 
-  std::ignore = channel_->onMessage(erase_and_box(std::move(req1)));
-  std::ignore = channel_->onMessage(erase_and_box(std::move(req2)));
-  std::ignore = channel_->onMessage(erase_and_box(std::move(req3)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(req1)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(req2)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(req3)));
 
   EXPECT_EQ(mockProcessor_->requestCount(), 3);
   ASSERT_EQ(capturedStreamIds.size(), 3u);
@@ -612,7 +610,7 @@ TEST_F(ThriftServerChannelTest, DoubleSendReplyIsIgnored) {
   channel_->setPipeline(std::move(pipeline_));
 
   auto request = createRequestMessage(1, "method", "data");
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_EQ(responseCount, 1);
 }

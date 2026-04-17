@@ -175,12 +175,12 @@ class RocketE2ETest : public ::testing::Test {
       // Build client pipeline
       clientPipeline_ =
           PipelineBuilder<
-              client::RocketClientAppAdapter,
               transport::TransportHandler,
+              client::RocketClientAppAdapter,
               TestAllocator>()
               .setEventBase(evb)
-              .setHead(clientAppAdapter_.get())
-              .setTail(clientTransport_.get())
+              .setHead(clientTransport_.get())
+              .setTail(clientAppAdapter_.get())
               .setAllocator(&clientAllocator_)
               .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
                   c_frame_length_parser_tag)
@@ -218,23 +218,22 @@ class RocketE2ETest : public ::testing::Test {
               .setHead(serverTransport_.get())
               .setTail(serverAppAdapter_.get())
               .setAllocator(&serverAllocator_)
-              .setHeadToTailOp(HeadToTailOp::Read)
-              .addNextDuplex<server::handler::RocketServerStreamStateHandler>(
-                  s_stream_state_tag)
-              .addNextDuplex<
-                  server::handler::RocketServerRequestResponseFrameHandler>(
-                  s_request_response_tag)
-              .addNextDuplex<server::handler::RocketServerSetupFrameHandler>(
-                  s_setup_tag)
-              .addNextDuplex<server::handler::RocketServerFrameCodecHandler>(
-                  s_frame_codec_tag)
-              .addNextOutbound<
-                  frame::write::handler::FrameLengthEncoderHandler>(
-                  s_frame_length_encoder_tag)
               .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
                   s_batching_tag)
               .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
                   s_frame_length_parser_tag)
+              .addNextOutbound<
+                  frame::write::handler::FrameLengthEncoderHandler>(
+                  s_frame_length_encoder_tag)
+              .addNextDuplex<server::handler::RocketServerFrameCodecHandler>(
+                  s_frame_codec_tag)
+              .addNextDuplex<server::handler::RocketServerSetupFrameHandler>(
+                  s_setup_tag)
+              .addNextDuplex<
+                  server::handler::RocketServerRequestResponseFrameHandler>(
+                  s_request_response_tag)
+              .addNextDuplex<server::handler::RocketServerStreamStateHandler>(
+                  s_stream_state_tag)
               .build();
 
       serverAppAdapter_->setPipeline(serverPipeline_.get());

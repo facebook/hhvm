@@ -40,7 +40,7 @@ namespace apache::thrift::fast_thrift::thrift {
  * channel pipeline. Only request-response is implemented.
  *
  * This class implements the ClientInboundAppAdapter concept to receive
- * responses from the pipeline via onMessage().
+ * responses from the pipeline via onRead().
  *
  * Usage:
  *   auto channel = ThriftClientChannel::newChannel(evb, pipeline);
@@ -125,9 +125,15 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
   folly::EventBase* getEventBase() const override { return evb_; }
   uint16_t getProtocolId() override { return protocolId_; }
 
-  // === ClientInboundAppAdapter interface ===
+  // === TailEndpointHandler lifecycle ===
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+
+  // === TailEndpointHandler interface ===
   // Called by the pipeline when a response message arrives
-  apache::thrift::fast_thrift::channel_pipeline::Result onMessage(
+  apache::thrift::fast_thrift::channel_pipeline::Result onRead(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept;
 

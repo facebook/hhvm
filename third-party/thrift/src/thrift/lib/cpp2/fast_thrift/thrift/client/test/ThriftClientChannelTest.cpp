@@ -136,12 +136,12 @@ class ThriftClientChannelTest : public ::testing::Test {
     handler_->setOnWrite(std::move(writeHandler));
 
     return PipelineBuilder<
-               ThriftClientChannel,
                MockTransportHandler,
+               ThriftClientChannel,
                TestAllocator>()
         .setEventBase(&evb_)
-        .setTail(&mockTransport_)
-        .setHead(channel)
+        .setHead(&mockTransport_)
+        .setTail(channel)
         .setAllocator(&allocator_)
         .addNextDuplex<MockHandler>(test_handler_tag, std::move(handler_))
         .build();
@@ -283,7 +283,7 @@ TEST_F(ThriftClientChannelTest, OnMessageInvokesCallbackWithCorrectState) {
       apache::thrift::MessageType::T_REPLY,
       "response payload");
 
-  auto result = channel->onMessage(erase_and_box(std::move(response)));
+  auto result = channel->onRead(erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(state->responseReceived);
@@ -329,7 +329,7 @@ TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
   errorResponse.requestFrameType =
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
 
-  std::ignore = channel->onMessage(erase_and_box(std::move(errorResponse)));
+  std::ignore = channel->onRead(erase_and_box(std::move(errorResponse)));
 
   EXPECT_FALSE(state->responseReceived);
   EXPECT_TRUE(state->errorReceived);
@@ -352,7 +352,7 @@ TEST_F(ThriftClientChannelTest, OnMessageWithUnknownRequestIdReturnsError) {
       apache::thrift::MessageType::T_REPLY,
       "orphan response");
 
-  auto result = channel->onMessage(erase_and_box(std::move(response)));
+  auto result = channel->onRead(erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Error);
 }
@@ -407,7 +407,7 @@ TEST_F(ThriftClientChannelTest, MultiplePendingCallbacksRoutedCorrectly) {
       apache::thrift::protocol::T_COMPACT_PROTOCOL,
       apache::thrift::MessageType::T_REPLY,
       "resp2");
-  std::ignore = channel->onMessage(erase_and_box(std::move(response2)));
+  std::ignore = channel->onRead(erase_and_box(std::move(response2)));
 
   EXPECT_FALSE(state1->responseReceived);
   EXPECT_TRUE(state2->responseReceived);
@@ -418,7 +418,7 @@ TEST_F(ThriftClientChannelTest, MultiplePendingCallbacksRoutedCorrectly) {
       apache::thrift::protocol::T_COMPACT_PROTOCOL,
       apache::thrift::MessageType::T_REPLY,
       "resp3");
-  std::ignore = channel->onMessage(erase_and_box(std::move(response3)));
+  std::ignore = channel->onRead(erase_and_box(std::move(response3)));
 
   EXPECT_FALSE(state1->responseReceived);
   EXPECT_TRUE(state2->responseReceived);
@@ -429,7 +429,7 @@ TEST_F(ThriftClientChannelTest, MultiplePendingCallbacksRoutedCorrectly) {
       apache::thrift::protocol::T_COMPACT_PROTOCOL,
       apache::thrift::MessageType::T_REPLY,
       "resp1");
-  std::ignore = channel->onMessage(erase_and_box(std::move(response1)));
+  std::ignore = channel->onRead(erase_and_box(std::move(response1)));
 
   EXPECT_TRUE(state1->responseReceived);
   EXPECT_TRUE(state2->responseReceived);
@@ -594,7 +594,7 @@ TEST_F(
     response.requestHandle = 0;
     response.requestFrameType = frameType;
 
-    auto result = channel->onMessage(erase_and_box(std::move(response)));
+    auto result = channel->onRead(erase_and_box(std::move(response)));
     EXPECT_EQ(result, Result::Error)
         << "Failed for frame type: " << static_cast<int>(frameType);
   }
@@ -729,7 +729,7 @@ TEST_F(ThriftClientChannelTest, OnExceptionAfterSomeResponsesReceived) {
       apache::thrift::protocol::T_COMPACT_PROTOCOL,
       apache::thrift::MessageType::T_REPLY,
       "resp2");
-  std::ignore = channel->onMessage(erase_and_box(std::move(response2)));
+  std::ignore = channel->onRead(erase_and_box(std::move(response2)));
 
   EXPECT_TRUE(state2->responseReceived);
   EXPECT_FALSE(state2->errorReceived);

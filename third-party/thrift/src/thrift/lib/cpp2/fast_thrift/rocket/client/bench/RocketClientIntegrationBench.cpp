@@ -183,12 +183,12 @@ struct BenchmarkFixture {
         [](folly::exception_wrapper&& /*e*/) noexcept {});
 
     pipeline = PipelineBuilder<
-                   AppAdapter,
                    apache::thrift::fast_thrift::transport::TransportHandler,
+                   AppAdapter,
                    TestAllocator>()
                    .setEventBase(&evb)
-                   .setTail(transportHandler.get())
-                   .setHead(appAdapter.get())
+                   .setHead(transportHandler.get())
+                   .setTail(appAdapter.get())
                    .setAllocator(&allocator)
                    .addNextInbound<FrameLengthParserHandler>(
                        frame_length_parser_handler_tag)
@@ -351,12 +351,12 @@ BENCHMARK(Rocket_SetupFrame, iters) {
 
     fixture.pipeline =
         PipelineBuilder<
-            AppAdapter,
             apache::thrift::fast_thrift::transport::TransportHandler,
+            AppAdapter,
             TestAllocator>()
             .setEventBase(&fixture.evb)
-            .setTail(fixture.transportHandler.get())
-            .setHead(fixture.appAdapter.get())
+            .setHead(fixture.transportHandler.get())
+            .setTail(fixture.appAdapter.get())
             .setAllocator(&fixture.allocator)
             .addNextInbound<FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)

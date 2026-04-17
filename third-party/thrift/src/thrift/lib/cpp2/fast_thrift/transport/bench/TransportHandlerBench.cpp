@@ -117,10 +117,16 @@ class BenchEndpointHandler {
  public:
   BenchEndpointHandler() = default;
 
-  // EndpointHandler interface
-  Result onMessage(TypeErasedBox&&) noexcept { return Result::Success; }
+  // TailEndpointHandler interface
+  Result onRead(TypeErasedBox&&) noexcept { return Result::Success; }
 
   void onException(folly::exception_wrapper&&) noexcept {}
+
+  // Lifecycle methods
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
 };
 
 class BenchAllocator {
@@ -143,12 +149,12 @@ auto createHandlerAndPipeline(
       fast_transport::TransportHandler::create(std::move(socket), 256, 4096);
 
   auto pipeline = PipelineBuilder<
-                      BenchEndpointHandler,
                       fast_transport::TransportHandler,
+                      BenchEndpointHandler,
                       BenchAllocator>()
                       .setEventBase(&evb)
-                      .setTail(handler.get())
-                      .setHead(&appHandler)
+                      .setHead(handler.get())
+                      .setTail(&appHandler)
                       .setAllocator(&allocator)
                       .build();
 
@@ -172,7 +178,7 @@ BENCHMARK(Write_TransportHandler_Small, iters) {
 
   susp.dismiss();
   for (size_t i = 0; i < iters; ++i) {
-    auto result = handler->onMessage(
+    auto result = handler->onWrite(
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
             bytes->clone()));
     doNotOptimizeAway(result);
@@ -193,7 +199,7 @@ BENCHMARK(Write_TransportHandler_Medium, iters) {
 
   susp.dismiss();
   for (size_t i = 0; i < iters; ++i) {
-    auto result = handler->onMessage(
+    auto result = handler->onWrite(
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
             bytes->clone()));
     doNotOptimizeAway(result);
@@ -214,7 +220,7 @@ BENCHMARK(Write_TransportHandler_Large, iters) {
 
   susp.dismiss();
   for (size_t i = 0; i < iters; ++i) {
-    auto result = handler->onMessage(
+    auto result = handler->onWrite(
         apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox(
             bytes->clone()));
     doNotOptimizeAway(result);

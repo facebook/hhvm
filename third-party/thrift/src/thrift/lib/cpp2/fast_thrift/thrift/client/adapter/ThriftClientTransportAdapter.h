@@ -36,7 +36,7 @@ namespace apache::thrift::fast_thrift::thrift::client {
  * which holds the rocket pipeline resources.
  *
  * Outbound path (requests):
- *   ThriftClientAppAdapter.write() → [thrift handlers] → this.onMessage()
+ *   ThriftClientAppAdapter.write() → [thrift handlers] → this.onWrite()
  *   → converts ThriftRequestMessage to RocketRequestMessage
  *   → RocketClientAppAdapter.write()
  *
@@ -53,11 +53,11 @@ namespace apache::thrift::fast_thrift::thrift::client {
  *   // 2. Create adapter with connection (takes ownership)
  *   ThriftClientTransportAdapter transportAdapter(std::move(connection));
  *
- *   // 3. Build thrift pipeline with this adapter as tail
+ *   // 3. Build thrift pipeline with this adapter as head
  *   auto thriftPipeline = PipelineBuilder<
- *       ThriftClientAppAdapter, ThriftClientTransportAdapter, Allocator>()
- *       .setHead(&appAdapter)
- *       .setTail(&transportAdapter)
+ *       ThriftClientTransportAdapter, ThriftClientAppAdapter, Allocator>()
+ *       .setHead(&transportAdapter)
+ *       .setTail(&appAdapter)
  *       ...
  *       .build();
  *
@@ -132,7 +132,7 @@ class ThriftClientTransportAdapter {
         folly::make_exception_wrapper<std::runtime_error>("Transport error"));
   }
 
-  // === EndpointHandler interface (tail of thrift pipeline) ===
+  // === HeadEndpointHandler interface ===
 
   /**
    * Called when an outbound write reaches the tail of the thrift pipeline.
@@ -140,7 +140,7 @@ class ThriftClientTransportAdapter {
    * Converts ThriftRequestMessage to RocketRequestMessage and writes it
    * into the rocket pipeline.
    */
-  channel_pipeline::Result onMessage(
+  channel_pipeline::Result onWrite(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<ThriftRequestMessage>();
 
@@ -168,6 +168,11 @@ class ThriftClientTransportAdapter {
    * Transport teardown is handled by TransportHandler's own lifecycle.
    */
   void onException(folly::exception_wrapper&& /*e*/) noexcept {}
+
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
 
  private:
   channel_pipeline::PipelineImpl* pipeline_{nullptr};

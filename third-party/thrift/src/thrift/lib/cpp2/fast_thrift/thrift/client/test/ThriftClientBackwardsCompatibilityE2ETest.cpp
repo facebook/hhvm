@@ -230,13 +230,13 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
 
       connection->pipeline =
           PipelineBuilder<
+              apache::thrift::fast_thrift::transport::TransportHandler,
               apache::thrift::fast_thrift::rocket::client::
                   RocketClientAppAdapter,
-              apache::thrift::fast_thrift::transport::TransportHandler,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setHead(connection->appAdapter.get())
-              .setTail(connection->transportHandler.get())
+              .setHead(connection->transportHandler.get())
+              .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
               .addNextInbound<apache::thrift::fast_thrift::frame::read::
                                   handler::FrameLengthParserHandler>(
@@ -274,12 +274,12 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
 
       clientPipeline_ =
           PipelineBuilder<
-              thrift::ThriftClientChannel,
               thrift::client::ThriftClientTransportAdapter,
+              thrift::ThriftClientChannel,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setHead(channel.get())
-              .setTail(clientTransportAdapter_.get())
+              .setHead(clientTransportAdapter_.get())
+              .setTail(channel.get())
               .setAllocator(&allocator_)
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
@@ -486,12 +486,12 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
 
       connection->pipeline =
           PipelineBuilder<
-              rocket::client::RocketClientAppAdapter,
               transport::TransportHandler,
+              rocket::client::RocketClientAppAdapter,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setHead(connection->appAdapter.get())
-              .setTail(connection->transportHandler.get())
+              .setHead(connection->transportHandler.get())
+              .setTail(connection->appAdapter.get())
               .setAllocator(&connection->allocator)
               .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
                   frame_length_parser_handler_tag)
@@ -525,12 +525,12 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
 
       thriftPipeline_ =
           PipelineBuilder<
-              thrift::ThriftClientAppAdapter,
               thrift::client::ThriftClientTransportAdapter,
+              thrift::ThriftClientAppAdapter,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setHead(adapter.get())
-              .setTail(transportAdapter_.get())
+              .setHead(transportAdapter_.get())
+              .setTail(adapter.get())
               .setAllocator(&allocator_)
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(

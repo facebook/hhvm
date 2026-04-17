@@ -289,23 +289,22 @@ struct RocketPipelineResources {
                    .setHead(transportHandler.get())
                    .setTail(appAdapter.get())
                    .setAllocator(&allocator)
-                   .setHeadToTailOp(HeadToTailOp::Read)
+                   .addNextInbound<FrameLengthParserHandler>(
+                       frame_length_parser_handler_tag)
+                   .addNextOutbound<FrameLengthEncoderHandler>(
+                       frame_length_encoder_handler_tag)
                    .addNextDuplex<
-                       rocket::server::handler::RocketServerStreamStateHandler>(
-                       server_stream_state_handler_tag)
+                       rocket::server::handler::RocketServerFrameCodecHandler>(
+                       rocket_server_frame_codec_handler_tag)
+                   .addNextDuplex<
+                       rocket::server::handler::RocketServerSetupFrameHandler>(
+                       server_setup_frame_handler_tag)
                    .addNextDuplex<rocket::server::handler::
                                       RocketServerRequestResponseFrameHandler>(
                        server_request_response_frame_handler_tag)
                    .addNextDuplex<
-                       rocket::server::handler::RocketServerSetupFrameHandler>(
-                       server_setup_frame_handler_tag)
-                   .addNextDuplex<
-                       rocket::server::handler::RocketServerFrameCodecHandler>(
-                       rocket_server_frame_codec_handler_tag)
-                   .addNextOutbound<FrameLengthEncoderHandler>(
-                       frame_length_encoder_handler_tag)
-                   .addNextInbound<FrameLengthParserHandler>(
-                       frame_length_parser_handler_tag)
+                       rocket::server::handler::RocketServerStreamStateHandler>(
+                       server_stream_state_handler_tag)
                    .build();
 
     appAdapter->setPipeline(pipeline.get());
@@ -359,7 +358,6 @@ struct ChannelBenchFixture {
                          .setHead(transportAdapter.get())
                          .setTail(serverChannel.get())
                          .setAllocator(&thriftAllocator)
-                         .setHeadToTailOp(HeadToTailOp::Read)
                          .build();
 
     transportAdapter->setPipeline(thriftPipeline.get());
@@ -444,7 +442,6 @@ struct AppAdapterBenchFixture {
                          .setHead(transportAdapter.get())
                          .setTail(adapter.get())
                          .setAllocator(&thriftAllocator)
-                         .setHeadToTailOp(HeadToTailOp::Read)
                          .build();
 
     transportAdapter->setPipeline(thriftPipeline.get());

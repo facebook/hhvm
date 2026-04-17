@@ -46,17 +46,23 @@ class TcpServer::ServerAppAdapter {
     pipeline_ = pipeline;
   }
 
+  // TailEndpointHandler lifecycle
+  void handlerAdded() noexcept {}
+  void handlerRemoved() noexcept {}
+  void onPipelineActive() noexcept {}
+  void onPipelineInactive() noexcept {}
+
   /**
    * Called by the pipeline when a message reaches the application layer.
    * Immediately echoes the message back.
    */
-  Result onMessage(TypeErasedBox&& msg) noexcept {
+  Result onRead(TypeErasedBox&& msg) noexcept {
     if (!pipeline_) {
-      XLOG(ERR) << "ServerAppAdapter::onMessage called with null pipeline";
+      XLOG(ERR) << "ServerAppAdapter::onRead called with null pipeline";
       return Result::Error;
     }
     if (msg.empty()) {
-      XLOG(ERR) << "ServerAppAdapter::onMessage called with empty message";
+      XLOG(ERR) << "ServerAppAdapter::onRead called with empty message";
       return Result::Error;
     }
 
@@ -99,9 +105,6 @@ TcpServer::TcpServer(
                     .setHead(transportHandler.get())
                     .setTail(adapter.get())
                     .setAllocator(&allocator_)
-                    .setHeadToTailOp(
-                        apache::thrift::fast_thrift::channel_pipeline::
-                            HeadToTailOp::Read)
                     .build();
 
             adapter->setPipeline(pipeline.get());

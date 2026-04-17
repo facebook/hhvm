@@ -1169,13 +1169,7 @@ class t_hack_generator : public t_concat_generator {
     if (func->is_interaction_constructor()) {
       return false;
     }
-    if (func->is_bidirectional_stream()) {
-      return false;
-    }
-    if (func->stream()) {
-      return server_stream_ && async;
-    }
-    if (func->sink()) {
+    if (func->stream() || func->sink()) {
       return server_stream_ && async;
     }
     return true;
@@ -6164,15 +6158,20 @@ void t_hack_generator::generate_method_metadata_inline(
                << indent() << "    " << long_name << "AsyncIf $handler,\n"
                << indent() << "    " << argsname << " $args,\n"
                << indent() << "  )[defaults] ==> {\n"
-               << indent() << "    return await $handler->" << fn_name << "(";
+               << indent() << "    $result = await $handler->" << fn_name
+               << "(";
 
     // Add function arguments
     generate_handler_call_args(tfunction);
-    f_service_ << ");\n"
-               << indent() << "  },\n"
-               << indent() << "  " << sink_payload_name << "::class,\n"
-               << indent() << "  " << stream_response_name << "::class,\n"
-               << indent() << ");\n";
+    f_service_
+        << ");\n"
+        << indent()
+        << "    return $result as ResponseAndStreamTransformation<_,_,_>;\n"
+        << indent() << "  },\n"
+        << indent() << "  " << sink_payload_name << "::class,\n"
+        << indent() << "  " << stream_response_name << "::class,\n"
+        << indent() << ");\n";
+
   } else if (is_stream) {
     // Streaming method
     std::string first_response_name = generate_function_helper_name(
@@ -6361,6 +6360,9 @@ void t_hack_generator::generate_process_function(
   f_service_ << ");\n";
 
   if (is_bidi_stream) {
+    f_service_
+        << indent()
+        << "$response_and_bidi_stream as ResponseAndStreamTransformation<_,_,_>;\n";
     if (!is_void) {
       f_service_ << indent()
                  << "$result->success = $response_and_bidi_stream->response;\n";

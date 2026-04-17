@@ -11,13 +11,6 @@
  * BiDiService
  */
 interface BiDiServiceAsyncIf extends \IThriftAsyncIf {
-}
-
-/**
- * Original thrift service:-
- * BiDiService
- */
-interface BiDiServiceAsyncClientIf extends BiDiServiceAsyncIf {
   /**
    * Original thrift definition:-
    * void, sink<i32>, stream<i16>
@@ -39,6 +32,13 @@ interface BiDiServiceAsyncClientIf extends BiDiServiceAsyncIf {
    *   throws (1: BiDiMethodException ex);
    */
   public function canThrow(): Awaitable<\IResponseAndBidirectionalStream<null, int, int>>;
+}
+
+/**
+ * Original thrift service:-
+ * BiDiService
+ */
+interface BiDiServiceAsyncClientIf extends BiDiServiceAsyncIf {
 }
 
 /**
@@ -150,11 +150,118 @@ abstract class BiDiServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BiDiServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_NAME;
 
+  protected async function process_simple(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('simple');
+    $reply_type = \TMessageType::REPLY;
+    $result = BiDiService_simple_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(BiDiService_simple_args::class, $input, 'simple', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'BiDiService', 'simple', $args);
+      $response_and_bidi_stream = await $this->handler->simple();
+      $response_and_bidi_stream as ResponseAndStreamTransformation<_,_,_>;
+      $this->eventHandler_->postExec($handler_ctx, 'simple', $result);
+      $this->writeHelper($result, 'simple', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteBiDiStream($response_and_bidi_stream->genBiDiStream, BiDiService_simple_SinkPayload::class, BiDiService_simple_StreamResponse::class, $input, $output, 'simple', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'simple', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'simple', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_response(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('response');
+    $reply_type = \TMessageType::REPLY;
+    $result = BiDiService_response_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(BiDiService_response_args::class, $input, 'response', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'BiDiService', 'response', $args);
+      $response_and_bidi_stream = await $this->handler->response();
+      $response_and_bidi_stream as ResponseAndStreamTransformation<_,_,_>;
+      $result->success = $response_and_bidi_stream->response;
+      $this->eventHandler_->postExec($handler_ctx, 'response', $result);
+      $this->writeHelper($result, 'response', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteBiDiStream($response_and_bidi_stream->genBiDiStream, BiDiService_response_SinkPayload::class, BiDiService_response_StreamResponse::class, $input, $output, 'response', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'response', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'response', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected async function process_canThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('canThrow');
+    $reply_type = \TMessageType::REPLY;
+    $result = BiDiService_canThrow_FirstResponse::withDefaultValues();
+    try {
+      $args = $this->readHelper(BiDiService_canThrow_args::class, $input, 'canThrow', $handler_ctx);
+      $this->eventHandler_->preExec($handler_ctx, 'BiDiService', 'canThrow', $args);
+      $response_and_bidi_stream = await $this->handler->canThrow();
+      $response_and_bidi_stream as ResponseAndStreamTransformation<_,_,_>;
+      $this->eventHandler_->postExec($handler_ctx, 'canThrow', $result);
+      $this->writeHelper($result, 'canThrow', $seqid, $handler_ctx, $output, $reply_type);
+      await $this->genExecuteBiDiStream($response_and_bidi_stream->genBiDiStream, BiDiService_canThrow_SinkPayload::class, BiDiService_canThrow_StreamResponse::class, $input, $output, 'canThrow', $handler_ctx);
+      return;
+    } catch (\Exception $ex) {
+      if ($result->setException($ex)) {
+        $this->eventHandler_->handlerException($handler_ctx, 'canThrow', $ex);
+      } else {
+        $reply_type = \TMessageType::EXCEPTION;
+        $this->eventHandler_->handlerError($handler_ctx, 'canThrow', $ex);
+        $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+      }
+    }
+    $this->writeHelper($result, 'canThrow', $seqid, $handler_ctx, $output, $reply_type);
+  }
   <<__Override>>
   protected static function getMethodMetadata(
     string $fn_name,
   ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
     switch ($fn_name) {
+      case 'simple':
+        return new \ThriftServiceBiDiStreamingResponseMethod(
+          BiDiService_simple_args::class,
+          BiDiService_simple_FirstResponse::class,
+          async (
+            BiDiServiceAsyncIf $handler,
+            BiDiService_simple_args $args,
+          )[defaults] ==> {
+            $result = await $handler->simple();
+            return $result as ResponseAndStreamTransformation<_,_,_>;
+          },
+          BiDiService_simple_SinkPayload::class,
+          BiDiService_simple_StreamResponse::class,
+        );
+      case 'response':
+        return new \ThriftServiceBiDiStreamingResponseMethod(
+          BiDiService_response_args::class,
+          BiDiService_response_FirstResponse::class,
+          async (
+            BiDiServiceAsyncIf $handler,
+            BiDiService_response_args $args,
+          )[defaults] ==> {
+            $result = await $handler->response();
+            return $result as ResponseAndStreamTransformation<_,_,_>;
+          },
+          BiDiService_response_SinkPayload::class,
+          BiDiService_response_StreamResponse::class,
+        );
+      case 'canThrow':
+        return new \ThriftServiceBiDiStreamingResponseMethod(
+          BiDiService_canThrow_args::class,
+          BiDiService_canThrow_FirstResponse::class,
+          async (
+            BiDiServiceAsyncIf $handler,
+            BiDiService_canThrow_args $args,
+          )[defaults] ==> {
+            $result = await $handler->canThrow();
+            return $result as ResponseAndStreamTransformation<_,_,_>;
+          },
+          BiDiService_canThrow_SinkPayload::class,
+          BiDiService_canThrow_StreamResponse::class,
+        );
       default:
         return null;
     }

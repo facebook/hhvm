@@ -28,6 +28,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
@@ -35,8 +37,8 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientRocketInterfaceHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestFastService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestFastServiceAsyncClient.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestService.h>
@@ -67,7 +69,6 @@ HANDLER_TAG(rocket_client_setup_handler);
 HANDLER_TAG(rocket_client_request_response_frame_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
-HANDLER_TAG(thrift_client_rocket_interface_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
 
 /**
@@ -163,7 +164,7 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
   void TearDown() override {
     clientThread_->getEventBase()->runInEventBaseThreadAndWait([&] {
       clientPipeline_.reset();
-      clientTransportHandler_.reset();
+      clientTransportAdapter_.reset();
     });
     channel_.reset();
     server_.reset();
@@ -188,27 +189,19 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
     folly::Baton<> connectBaton;
     bool connected = false;
 
-    // All socket and channel operations must happen on the EventBase thread
     evb->runInEventBaseThreadAndWait([&] {
-      // Create socket
       auto socket = folly::AsyncSocket::newSocket(evb);
       auto* socketPtr = socket.get();
 
-      // Create transport handler and channel separately
-      clientTransportHandler_ =
+      // 1. Build rocket pipeline inside RocketClientConnection
+      auto connection = std::make_unique<apache::thrift::fast_thrift::rocket::
+                                             client::RocketClientConnection>();
+
+      connection->transportHandler =
           apache::thrift::fast_thrift::transport::TransportHandler::create(
               std::move(socket));
-      channel = thrift::ThriftClientChannel::newChannel(evb);
 
-      // Create connect callback that will trigger onConnect when connection is
-      // established
-      connectCallback_ = std::make_unique<ConnectCallback>(
-          clientTransportHandler_.get(), connectBaton, connected);
-
-      socketPtr->connect(connectCallback_.get(), server_->getAddress(), 30000);
-
-      // Setup metadata factory - creates properly serialized
-      // RequestSetupMetadata
+      auto* transportHandlerPtr = connection->transportHandler.get();
       auto setupFactory = []() {
         apache::thrift::RequestSetupMetadata meta;
         // Set version info like RocketClientChannelBase does
@@ -235,15 +228,16 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
         return std::make_pair(result.move(), std::unique_ptr<folly::IOBuf>());
       };
 
-      clientPipeline_ =
+      connection->pipeline =
           PipelineBuilder<
-              thrift::ThriftClientChannel,
+              apache::thrift::fast_thrift::rocket::client::
+                  RocketClientAppAdapter,
               apache::thrift::fast_thrift::transport::TransportHandler,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setTail(clientTransportHandler_.get())
-              .setHead(channel.get())
-              .setAllocator(&allocator_)
+              .setHead(connection->appAdapter.get())
+              .setTail(connection->transportHandler.get())
+              .setAllocator(&connection->allocator)
               .addNextInbound<apache::thrift::fast_thrift::frame::read::
                                   handler::FrameLengthParserHandler>(
                   frame_length_parser_handler_tag)
@@ -266,16 +260,38 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
               .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                  handler::RocketClientStreamStateHandler>(
                   rocket_client_stream_state_handler_tag)
-              .addNextDuplex<
-                  thrift::client::handler::ThriftClientRocketInterfaceHandler>(
-                  thrift_client_rocket_interface_handler_tag)
+              .build();
+
+      connection->appAdapter->setPipeline(connection->pipeline.get());
+      connection->transportHandler->setPipeline(*connection->pipeline);
+
+      // 2. Build thrift pipeline: ThriftClientChannel → TransportAdapter
+      channel = thrift::ThriftClientChannel::newChannel(evb);
+
+      clientTransportAdapter_ =
+          std::make_unique<thrift::client::ThriftClientTransportAdapter>(
+              std::move(connection));
+
+      clientPipeline_ =
+          PipelineBuilder<
+              thrift::ThriftClientChannel,
+              thrift::client::ThriftClientTransportAdapter,
+              SimpleBufferAllocator>()
+              .setEventBase(evb)
+              .setHead(channel.get())
+              .setTail(clientTransportAdapter_.get())
+              .setAllocator(&allocator_)
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
                   thrift_client_metadata_push_handler_tag)
               .build();
 
       channel->setPipeline(clientPipeline_.get());
-      clientTransportHandler_->setPipeline(*clientPipeline_);
+      clientTransportAdapter_->setPipeline(clientPipeline_.get());
+
+      connectCallback_ = std::make_unique<ConnectCallback>(
+          transportHandlerPtr, connectBaton, connected);
+      socketPtr->connect(connectCallback_.get(), server_->getAddress(), 30000);
     });
 
     // Wait for connection to complete
@@ -292,8 +308,8 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
   std::unique_ptr<apache::thrift::ScopedServerInterfaceThread> server_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
   thrift::ThriftClientChannel::UniquePtr channel_;
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      clientTransportHandler_;
+  std::unique_ptr<thrift::client::ThriftClientTransportAdapter>
+      clientTransportAdapter_;
   PipelineImpl::Ptr clientPipeline_;
   SimpleBufferAllocator allocator_;
   std::unique_ptr<ConnectCallback> connectCallback_;
@@ -412,8 +428,8 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
 
   void TearDown() override {
     clientThread_->getEventBase()->runInEventBaseThreadAndWait([&] {
-      pipeline_.reset();
-      transportHandler_.reset();
+      thriftPipeline_.reset();
+      transportAdapter_.reset();
     });
     server_.reset();
     clientThread_.reset();
@@ -433,11 +449,17 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
       auto socket = folly::AsyncSocket::newSocket(evb);
       auto* socketPtr = socket.get();
 
-      transportHandler_ =
+      // 1. Build rocket pipeline inside RocketClientConnection
+      auto connection =
+          std::make_unique<rocket::client::RocketClientConnection>();
+
+      connection->transportHandler =
           transport::TransportHandler::create(std::move(socket));
 
+      auto* transportHandlerPtr = connection->transportHandler.get();
+
       connectCallback_ = std::make_unique<ConnectCallback>(
-          transportHandler_.get(), connectBaton, connected);
+          transportHandlerPtr, connectBaton, connected);
 
       socketPtr->connect(connectCallback_.get(), server_->getAddress(), 30000);
 
@@ -462,15 +484,15 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
         return std::make_pair(result.move(), std::unique_ptr<folly::IOBuf>());
       };
 
-      pipeline_ =
+      connection->pipeline =
           PipelineBuilder<
-              thrift::ThriftClientAppAdapter,
+              rocket::client::RocketClientAppAdapter,
               transport::TransportHandler,
               SimpleBufferAllocator>()
               .setEventBase(evb)
-              .setTail(transportHandler_.get())
-              .setHead(adapter.get())
-              .setAllocator(&allocator_)
+              .setHead(connection->appAdapter.get())
+              .setTail(connection->transportHandler.get())
+              .setAllocator(&connection->allocator)
               .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
                   frame_length_parser_handler_tag)
               .addNextOutbound<
@@ -491,16 +513,32 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
               .addNextDuplex<
                   rocket::client::handler::RocketClientStreamStateHandler>(
                   rocket_client_stream_state_handler_tag)
-              .addNextDuplex<
-                  thrift::client::handler::ThriftClientRocketInterfaceHandler>(
-                  thrift_client_rocket_interface_handler_tag)
+              .build();
+
+      connection->appAdapter->setPipeline(connection->pipeline.get());
+      connection->transportHandler->setPipeline(*connection->pipeline);
+
+      // 2. Build thrift pipeline: AppAdapter → TransportAdapter
+      transportAdapter_ =
+          std::make_unique<thrift::client::ThriftClientTransportAdapter>(
+              std::move(connection));
+
+      thriftPipeline_ =
+          PipelineBuilder<
+              thrift::ThriftClientAppAdapter,
+              thrift::client::ThriftClientTransportAdapter,
+              SimpleBufferAllocator>()
+              .setEventBase(evb)
+              .setHead(adapter.get())
+              .setTail(transportAdapter_.get())
+              .setAllocator(&allocator_)
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
                   thrift_client_metadata_push_handler_tag)
               .build();
 
-      transportHandler_->setPipeline(*pipeline_);
-      adapter->setPipeline(pipeline_.get());
+      adapter->setPipeline(thriftPipeline_.get());
+      transportAdapter_->setPipeline(thriftPipeline_.get());
     });
 
     connectBaton.wait();
@@ -514,8 +552,9 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
   std::shared_ptr<BackwardsCompatibilityTestFastHandler> handler_;
   std::unique_ptr<apache::thrift::ScopedServerInterfaceThread> server_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
-  transport::TransportHandler::Ptr transportHandler_;
-  channel_pipeline::PipelineImpl::Ptr pipeline_;
+  std::unique_ptr<thrift::client::ThriftClientTransportAdapter>
+      transportAdapter_;
+  channel_pipeline::PipelineImpl::Ptr thriftPipeline_;
   SimpleBufferAllocator allocator_;
   std::unique_ptr<ConnectCallback> connectCallback_;
 };

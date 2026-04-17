@@ -91,7 +91,11 @@ let trivial_check
     ~(never :
        Pos.t -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> Env.env -> unit) :
     unit =
-  if Env.is_sub_type env lhs_ty nothing_ty || has_tany env lhs_ty then
+  if
+    Env.is_sub_type env lhs_ty nothing_ty
+    || has_tany env lhs_ty
+    || has_tany env rhs_ty
+  then
     (* If we have a nothing or Tany in our hands, there was a bigger problem
        originating from earlier in the program. Don't flag it here, as it is
        merely a symptom. *)

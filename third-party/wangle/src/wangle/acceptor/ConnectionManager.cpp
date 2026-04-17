@@ -253,7 +253,8 @@ void ConnectionManager::DrainHelper::drainConnections() {
 
   CHECK(
       shutdownState_ == ShutdownState::NOTIFY_PENDING_SHUTDOWN ||
-      shutdownState_ == ShutdownState::CLOSE_WHEN_IDLE);
+      shutdownState_ == ShutdownState::CLOSE_WHEN_IDLE ||
+      shutdownState_ == ShutdownState::CLOSE_WHEN_IDLE_COMPLETE);
   while (it != manager_.conns_.end() && (numKept + numCleared) < 64) {
     ManagedConnection& conn = *it++;
     if (shutdownState_ == ShutdownState::NOTIFY_PENDING_SHUTDOWN) {
@@ -312,6 +313,7 @@ void ConnectionManager::DrainHelper::idleGracefulTimeoutExpired() {
 void ConnectionManager::stopDrainingForShutdown() {
   drainHelper_.setShutdownState(ShutdownState::CLOSE_WHEN_IDLE_COMPLETE);
   drainHelper_.cancelTimeout();
+  drainHelper_.cancelLoopCallback();
 }
 
 void ConnectionManager::dropAllConnections() {

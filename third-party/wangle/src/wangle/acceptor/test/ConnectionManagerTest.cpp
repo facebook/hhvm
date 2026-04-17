@@ -900,4 +900,31 @@ TEST(ConnectionManagerCallbackTest, testRemoveConnectionCalledTwice) {
   // Second call should be a no-op since connection is already unlinked
   cm->removeConnection(conn.get());
 }
+// Dropping connections while a graceful drain is in progress should not crash.
+// The drain processes connections in batches of 64, scheduling a loop callback
+// between batches. dropConnections() calls stopDrainingForShutdown() which must
+// cancel that pending callback to avoid drainConnections() being called with
+// shutdownState_ == CLOSE_WHEN_IDLE_COMPLETE.
+TEST_F(ConnectionManagerTest, testDropConnectionsDuringDrain) {
+  // Need >64 connections so draining requires multiple loop iterations.
+  setConns(100);
+  EXPECT_EQ(cm_->getNumConnections(), 100);
+
+  for (const auto& conn : conns_) {
+    EXPECT_CALL(*conn, closeWhenIdle()).Times(AtMost(1));
+    EXPECT_CALL(*conn, dropConnection(_)).Times(AtMost(1));
+  }
+
+  // Start drain without idle grace. This synchronously processes the first 64
+  // connections (fireCloseWhenIdle) and schedules a loop callback for the rest.
+  cm_->initiateGracefulShutdown(std::chrono::milliseconds(0));
+
+  // Before the loop callback fires, force-drop half the connections.
+  // dropConnections(size_t) calls stopDrainingForShutdown() which sets
+  // shutdownState_ to CLOSE_WHEN_IDLE_COMPLETE.
+  cm_->dropConnections(0.5);
+  EXPECT_EQ(cm_->getNumConnections(), 50);
+
+  eventBase_.loop();
+}
 } // namespace

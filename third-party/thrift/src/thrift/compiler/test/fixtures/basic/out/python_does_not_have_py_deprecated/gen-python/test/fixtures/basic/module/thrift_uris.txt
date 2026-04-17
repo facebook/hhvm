@@ -1,0 +1,10 @@
+test.dev/fixtures/basic/MyStruct
+test.dev/fixtures/basic/Containers
+test.dev/fixtures/basic/MyDataItem
+test.dev/fixtures/basic/MyUnion
+test.dev/fixtures/basic/MyException
+test.dev/fixtures/basic/MyExceptionWithMessage
+test.dev/fixtures/basic/ReservedKeyword
+test.dev/fixtures/basic/UnionToBeRenamed
+test.dev/fixtures/basic/MyEnum
+test.dev/fixtures/basic/HackEnum

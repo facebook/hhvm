@@ -1,0 +1,7 @@
+test.dev/fixtures/python_capi/TemplateLists
+test.dev/fixtures/python_capi/TemplateSets
+test.dev/fixtures/python_capi/TemplateMaps
+test.dev/fixtures/python_capi/TWrapped
+test.dev/fixtures/python_capi/IndirectionA
+test.dev/fixtures/python_capi/IndirectionB
+test.dev/fixtures/python_capi/IndirectionC

@@ -1,0 +1,2 @@
+facebook.com/thrift/test/User
+facebook.com/thrift/test/ExampleUnion

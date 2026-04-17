@@ -1,0 +1,16 @@
+test.dev/fixtures/python_capi/MyStruct
+test.dev/fixtures/python_capi/MyDataItem
+test.dev/fixtures/python_capi/TransitiveDoubler
+test.dev/fixtures/python_capi/DoubledPair
+test.dev/fixtures/python_capi/StringPair
+test.dev/fixtures/python_capi/EmptyStruct
+test.dev/fixtures/python_capi/PrimitiveStruct
+test.dev/fixtures/python_capi/AdaptedFields
+test.dev/fixtures/python_capi/ListStruct
+test.dev/fixtures/python_capi/SetStruct
+test.dev/fixtures/python_capi/MapStruct
+test.dev/fixtures/python_capi/ComposeStruct
+test.dev/fixtures/python_capi/Onion
+test.dev/fixtures/python_capi/SomeBinary
+test.dev/fixtures/python_capi/MyEnum
+test.dev/fixtures/python_capi/AnnoyingEnum

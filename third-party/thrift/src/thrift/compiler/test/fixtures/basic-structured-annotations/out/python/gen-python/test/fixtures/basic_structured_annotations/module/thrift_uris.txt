@@ -1,0 +1,10 @@
+test.dev/fixtures/basic_structured_annotations/runtime_annotation
+test.dev/fixtures/basic_structured_annotations/structured_annotation_inline
+test.dev/fixtures/basic_structured_annotations/structured_annotation_with_default
+test.dev/fixtures/basic_structured_annotations/structured_annotation_recursive
+test.dev/fixtures/basic_structured_annotations/structured_annotation_forward
+test.dev/fixtures/basic_structured_annotations/structured_annotation_nested
+test.dev/fixtures/basic_structured_annotations/MyStruct
+test.dev/fixtures/basic_structured_annotations/MyException
+test.dev/fixtures/basic_structured_annotations/MyUnion
+test.dev/fixtures/basic_structured_annotations/MyEnum

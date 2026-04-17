@@ -1,0 +1,3 @@
+test.dev/fixtures/basic/EchoRequest
+test.dev/fixtures/basic/EchoResponse
+test.dev/fixtures/basic/WhisperException

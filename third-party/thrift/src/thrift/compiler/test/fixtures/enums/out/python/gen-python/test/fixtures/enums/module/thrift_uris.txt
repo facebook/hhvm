@@ -1,0 +1,9 @@
+test.dev/fixtures/enums/SomeStruct
+test.dev/fixtures/enums/MyStruct
+test.dev/fixtures/enums/Metasyntactic
+test.dev/fixtures/enums/MyEnum1
+test.dev/fixtures/enums/MyEnum2
+test.dev/fixtures/enums/MyEnum3
+test.dev/fixtures/enums/MyEnum4
+test.dev/fixtures/enums/MyBitmaskEnum1
+test.dev/fixtures/enums/MyBitmaskEnum2

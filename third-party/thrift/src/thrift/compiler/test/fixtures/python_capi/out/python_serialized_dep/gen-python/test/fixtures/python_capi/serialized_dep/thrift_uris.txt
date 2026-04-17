@@ -1,0 +1,6 @@
+test.dev/fixtures/python_capi/SerializedStruct
+test.dev/fixtures/python_capi/SerializedUnion
+test.dev/fixtures/python_capi/SerializedError
+test.dev/fixtures/python_capi/MarshalStruct
+test.dev/fixtures/python_capi/MarshalUnion
+test.dev/fixtures/python_capi/MarshalError

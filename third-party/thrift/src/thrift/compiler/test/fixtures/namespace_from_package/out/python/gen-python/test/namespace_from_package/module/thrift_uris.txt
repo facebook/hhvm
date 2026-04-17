@@ -1,0 +1,1 @@
+test.dev/namespace_from_package/module/Foo

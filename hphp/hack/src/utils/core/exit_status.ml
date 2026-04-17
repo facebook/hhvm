@@ -57,6 +57,13 @@ type t =
       (** Similar to Watchman_fresh_instance (and some instances of Watchman_failed):
       Eden told us that it may have lost track of changes (e.g., due to an Eden restart),
       so we cannot be sure what files need to be re-checked. *)
+  | Distc_failed
+      (** hh_distc (the distributed type checker) failed in a way we cannot
+          recover from. Common causes: Remote Execution RESOURCE_EXHAUSTED
+          quota throttling, RE network errors, decl/typecheck phase failures.
+          Sub-classify by string-matching the logged error message in Scuba.
+          The log data is prefixed with [spawn] or [runtime] to identify
+          which phase of the distc run failed. *)
   | File_provider_stale
   | Hhconfig_deleted
   | Hhconfig_changed
@@ -201,6 +208,7 @@ let exit_code = function
   | Edenfs_watcher_lost_changes ->
     (* Zoncolan uses 226 and 227, skipping *)
     228
+  | Distc_failed -> 229
 
 let exit_code_to_string (code : int) : string =
   (* We will return the string "See Exit_status.ml for meaning of this code".
@@ -231,6 +239,7 @@ let exit_code_to_string (code : int) : string =
       Server_hung_up_should_abort None;
       Watchman_failed;
       Server_non_opt_build_mode;
+      Distc_failed;
     ]
   in
   let matches =

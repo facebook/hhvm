@@ -1031,6 +1031,29 @@ let rec event_loop
         ~hhdg_path
         ~warnings_saved_state
 
+(** Phase in which hh_distc failed. Used to tag log messages so Scuba queries
+    can sub-classify failures without parsing the underlying RE error string. *)
+type distc_failure_phase =
+  | Spawn
+  | Runtime
+
+let string_of_distc_failure_phase = function
+  | Spawn -> "spawn"
+  | Runtime -> "runtime"
+
+(** Log a hh_distc error and exit with the typed Distc_failed status.
+    [phase] identifies where the failure happened; it is prefixed onto the
+    logged message so Scuba queries can sub-classify failures by phase.
+    The full error message is preserved in logs and HackEventLogger so it can
+    be further sub-classified (e.g. RESOURCE_EXHAUSTED, USER_QUOTA) via Scuba. *)
+let exit_distc_failed ~(phase : distc_failure_phase) (msg : string) : 'a =
+  let tagged =
+    Printf.sprintf "[%s] %s" (string_of_distc_failure_phase phase) msg
+  in
+  Hh_logger.log "Error with hh_distc: %s" tagged;
+  HackEventLogger.invariant_violation_bug "hh_distc failure" ~data:tagged;
+  raise Exit_status.(Exit_with Distc_failed)
+
 (**
   This is the main process function that triggers a full init via hh_distc.
 
@@ -1043,8 +1066,9 @@ let rec event_loop
   the existing hh_server dep graph.
 
   We return a result where Ok represents a completed typecheck and Error represents
-  a cancelled typecheck. Any errors from hh_distc are considered fatal and results in
-  a call to failwith, which will terminate hh_server.
+  a cancelled typecheck. Any errors from hh_distc are considered fatal and result in
+  a clean exit with `Exit_status.Distc_failed`, which terminates hh_server with exit
+  code 229.
 *)
 let process_with_hh_distc
     ~(root : Path.t option)
@@ -1071,13 +1095,16 @@ let process_with_hh_distc
              | _ -> None))
   in
   let hh_distc_handle =
-    Hh_distc_ffi.spawn
-      ~root:(Path.to_string root)
-      ~ss_dir:(Path.to_string ss_dir)
-      ~hhdg_path
-      ~fanout
-      tcopt
-    |> Result.ok_or_failwith
+    match
+      Hh_distc_ffi.spawn
+        ~root:(Path.to_string root)
+        ~ss_dir:(Path.to_string ss_dir)
+        ~hhdg_path
+        ~fanout
+        tcopt
+    with
+    | Ok h -> h
+    | Error msg -> exit_distc_failed ~phase:Spawn msg
   in
   let re_session_id = Hh_distc_ffi.get_re_session_id hh_distc_handle in
   Hh_logger.log "hh_distc RE session id: %s" re_session_id;
@@ -1348,7 +1375,7 @@ let go_with_interrupt
       Server_progress.ErrorsWrite.telemetry
         (Telemetry.create ()
         |> Telemetry.bool_ ~key:"will_use_distc" ~value:will_use_distc);
-    if will_use_distc then (
+    if will_use_distc then
       (* TODO(ljw): time_first_error isn't properly calculated in this path *)
       (* distc doesn't yet give any profiling_info about how its workers fared *)
       let profiling_info = Telemetry.create () in
@@ -1383,13 +1410,8 @@ let go_with_interrupt
           env,
           Some (original_fnl, reason),
           None )
-      | DistCError msg ->
-        Hh_logger.log "Error with hh_distc: %s" msg;
-        HackEventLogger.invariant_violation_bug
-          "Unexpected hh_distc error"
-          ~data:msg;
-        failwith (Printf.sprintf "Distc failed with: %s" msg)
-    ) else (
+      | DistCError msg -> exit_distc_failed ~phase:Runtime msg
+    else (
       if check_info.log_errors then
         Server_progress.ErrorsWrite.telemetry
           (Telemetry.create ()

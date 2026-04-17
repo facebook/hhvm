@@ -11,6 +11,9 @@
 #include <proxygen/lib/http/webtransport/WtUtils.h>
 
 namespace {
+constexpr uint64_t kWtInitMaxData = std::numeric_limits<uint16_t>::max();
+constexpr uint64_t kWtInitMaxStreams = 10;
+
 static constexpr std::string_view kWtEventVisitor = "WtEventVisitor";
 using WtErrCode = proxygen::WebTransport::ErrorCode;
 using WtStreamManager = proxygen::detail::WtStreamManager;
@@ -39,10 +42,9 @@ folly::Promise<folly::Unit> resetPromise(
 namespace proxygen::detail {
 
 // sets default egress h2 wt http settings if ENABLE_CONNECT_PROTOCOL set
-void setEgressWtHttpSettings(HTTPSettings* settings) {
+void setEgressWtHttpSettings(HTTPSettings* settings) noexcept {
   if (supportsH2Wt({settings})) {
     // max data
-    constexpr uint64_t kWtInitMaxData = std::numeric_limits<uint16_t>::max();
     static constexpr auto kMaxDataSettings = {
         SettingsId::WT_INITIAL_MAX_DATA,
         SettingsId::WT_INITIAL_MAX_STREAM_DATA_UNI,
@@ -52,7 +54,6 @@ void setEgressWtHttpSettings(HTTPSettings* settings) {
     }
 
     // max streams
-    constexpr uint64_t kWtInitMaxStreams = 10;
     static constexpr auto kMaxStreamsSettings = {
         SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
         SettingsId::WT_INITIAL_MAX_STREAMS_BIDI,
@@ -60,6 +61,22 @@ void setEgressWtHttpSettings(HTTPSettings* settings) {
     for (auto maxStreams : kMaxStreamsSettings) {
       settings->setIfNotPresent(maxStreams, kWtInitMaxStreams);
     }
+  }
+}
+
+// sets default egress h3 wt http settings if ENABLE_CONNECT_PROTOCOL set
+void setEgressWtH3HttpSettings(HTTPSettings& settings) noexcept {
+  const bool supportsWt = settings.getSetting(SettingsId::WT_ENABLED,
+                                              /*defaultVal=*/0) &&
+                          settings.getSetting(SettingsId::WT_ENABLED,
+                                              /*defaultVal=*/0);
+
+  if (supportsWt) {
+    settings.setIfNotPresent(SettingsId::WT_INITIAL_MAX_DATA, kWtInitMaxData);
+    settings.setIfNotPresent(SettingsId::WT_INITIAL_MAX_STREAMS_UNI,
+                             kWtInitMaxStreams);
+    settings.setIfNotPresent(SettingsId::WT_INITIAL_MAX_STREAMS_BIDI,
+                             kWtInitMaxStreams);
   }
 }
 

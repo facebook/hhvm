@@ -11,27 +11,6 @@
  * BiDiService
  */
 interface BiDiServiceAsyncIf extends \IThriftAsyncIf {
-  /**
-   * Original thrift definition:-
-   * void, stream<i16>
-   *   simple();
-   */
-  public function simple(): Awaitable<\ResponseAndStream<null, int>>;
-
-  /**
-   * Original thrift definition:-
-   * string, stream<i16>
-   *   response();
-   */
-  public function response(): Awaitable<\ResponseAndStream<string, int>>;
-
-  /**
-   * Original thrift definition:-
-   * void, stream<i64, throws (1: BiDiStreamException ex)>
-   *   canThrow()
-   *   throws (1: BiDiMethodException ex);
-   */
-  public function canThrow(): Awaitable<\ResponseAndStream<null, int>>;
 }
 
 /**
@@ -39,6 +18,27 @@ interface BiDiServiceAsyncIf extends \IThriftAsyncIf {
  * BiDiService
  */
 interface BiDiServiceAsyncClientIf extends BiDiServiceAsyncIf {
+  /**
+   * Original thrift definition:-
+   * void, sink<i32>, stream<i16>
+   *   simple();
+   */
+  public function simple(): Awaitable<\IResponseAndBidirectionalStream<null, int, int>>;
+
+  /**
+   * Original thrift definition:-
+   * string, sink<i32>, stream<i16>
+   *   response();
+   */
+  public function response(): Awaitable<\IResponseAndBidirectionalStream<string, int, int>>;
+
+  /**
+   * Original thrift definition:-
+   * void, sink<i64, throws (1: BiDiSinkException ex)>, stream<i64, throws (1: BiDiStreamException ex)>
+   *   canThrow()
+   *   throws (1: BiDiMethodException ex);
+   */
+  public function canThrow(): Awaitable<\IResponseAndBidirectionalStream<null, int, int>>;
 }
 
 /**
@@ -48,25 +48,25 @@ interface BiDiServiceAsyncClientIf extends BiDiServiceAsyncIf {
 interface BiDiServiceClientIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
-   * void, stream<i16>
+   * void, sink<i32>, stream<i16>
    *   simple();
    */
-  public function simple(): Awaitable<\ResponseAndStream<null, int>>;
+  public function simple(): Awaitable<\IResponseAndBidirectionalStream<null, int, int>>;
 
   /**
    * Original thrift definition:-
-   * string, stream<i16>
+   * string, sink<i32>, stream<i16>
    *   response();
    */
-  public function response(): Awaitable<\ResponseAndStream<string, int>>;
+  public function response(): Awaitable<\IResponseAndBidirectionalStream<string, int, int>>;
 
   /**
    * Original thrift definition:-
-   * void, stream<i64, throws (1: BiDiStreamException ex)>
+   * void, sink<i64, throws (1: BiDiSinkException ex)>, stream<i64, throws (1: BiDiStreamException ex)>
    *   canThrow()
    *   throws (1: BiDiMethodException ex);
    */
-  public function canThrow(): Awaitable<\ResponseAndStream<null, int>>;
+  public function canThrow(): Awaitable<\IResponseAndBidirectionalStream<null, int, int>>;
 }
 
 /**
@@ -78,10 +78,10 @@ trait BiDiServiceClientBase {
 
   /**
    * Original thrift definition:-
-   * void, stream<i16>
+   * void, sink<i32>, stream<i16>
    *   simple();
    */
-  public async function simple(): Awaitable<\ResponseAndStream<null, int>> {
+  public async function simple(): Awaitable<\ResponseAndBidirectionalStream<null, int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -90,15 +90,15 @@ trait BiDiServiceClientBase {
     $args = BiDiService_simple_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("BiDiService", "simple", $args);
     $currentseqid = $this->sendImplHelper($args, "simple", false, BiDiServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitStreamResponse(BiDiService_simple_FirstResponse::class, BiDiService_simple_StreamResponse::class, "simple", true, $currentseqid, $rpc_options);
+    return await $this->genAwaitBiDiStreamResponse(BiDiService_simple_FirstResponse::class, BiDiService_simple_SinkPayload::class, BiDiService_simple_StreamResponse::class, "simple", true, $currentseqid, $rpc_options);
   }
 
   /**
    * Original thrift definition:-
-   * string, stream<i16>
+   * string, sink<i32>, stream<i16>
    *   response();
    */
-  public async function response(): Awaitable<\ResponseAndStream<string, int>> {
+  public async function response(): Awaitable<\ResponseAndBidirectionalStream<string, int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -107,16 +107,16 @@ trait BiDiServiceClientBase {
     $args = BiDiService_response_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("BiDiService", "response", $args);
     $currentseqid = $this->sendImplHelper($args, "response", false, BiDiServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitStreamResponse(BiDiService_response_FirstResponse::class, BiDiService_response_StreamResponse::class, "response", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitBiDiStreamResponse(BiDiService_response_FirstResponse::class, BiDiService_response_SinkPayload::class, BiDiService_response_StreamResponse::class, "response", false, $currentseqid, $rpc_options);
   }
 
   /**
    * Original thrift definition:-
-   * void, stream<i64, throws (1: BiDiStreamException ex)>
+   * void, sink<i64, throws (1: BiDiSinkException ex)>, stream<i64, throws (1: BiDiStreamException ex)>
    *   canThrow()
    *   throws (1: BiDiMethodException ex);
    */
-  public async function canThrow(): Awaitable<\ResponseAndStream<null, int>> {
+  public async function canThrow(): Awaitable<\ResponseAndBidirectionalStream<null, int, int>> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -125,7 +125,7 @@ trait BiDiServiceClientBase {
     $args = BiDiService_canThrow_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("BiDiService", "canThrow", $args);
     $currentseqid = $this->sendImplHelper($args, "canThrow", false, BiDiServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitStreamResponse(BiDiService_canThrow_FirstResponse::class, BiDiService_canThrow_StreamResponse::class, "canThrow", true, $currentseqid, $rpc_options);
+    return await $this->genAwaitBiDiStreamResponse(BiDiService_canThrow_FirstResponse::class, BiDiService_canThrow_SinkPayload::class, BiDiService_canThrow_StreamResponse::class, "canThrow", true, $currentseqid, $rpc_options);
   }
 
 }
@@ -150,109 +150,11 @@ abstract class BiDiServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   const class<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BiDiServiceStaticMetadata::class;
   const string THRIFT_SVC_NAME = BiDiServiceStaticMetadata::THRIFT_SVC_NAME;
 
-  protected async function process_simple(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('simple');
-    $reply_type = \TMessageType::REPLY;
-    $result = BiDiService_simple_FirstResponse::withDefaultValues();
-    try {
-      $args = $this->readHelper(BiDiService_simple_args::class, $input, 'simple', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'BiDiService', 'simple', $args);
-      $response_and_stream = await $this->handler->simple();
-      $this->eventHandler_->postExec($handler_ctx, 'simple', $result);
-      $this->writeHelper($result, 'simple', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteStream($response_and_stream->stream, BiDiService_simple_StreamResponse::class, $output, 'simple', $handler_ctx);
-      return;
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'simple', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'simple', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected async function process_response(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('response');
-    $reply_type = \TMessageType::REPLY;
-    $result = BiDiService_response_FirstResponse::withDefaultValues();
-    try {
-      $args = $this->readHelper(BiDiService_response_args::class, $input, 'response', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'BiDiService', 'response', $args);
-      $response_and_stream = await $this->handler->response();
-      $result->success = $response_and_stream->response;
-      $this->eventHandler_->postExec($handler_ctx, 'response', $result);
-      $this->writeHelper($result, 'response', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteStream($response_and_stream->stream, BiDiService_response_StreamResponse::class, $output, 'response', $handler_ctx);
-      return;
-    } catch (\Exception $ex) {
-      $reply_type = \TMessageType::EXCEPTION;
-      $this->eventHandler_->handlerError($handler_ctx, 'response', $ex);
-      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-    }
-    $this->writeHelper($result, 'response', $seqid, $handler_ctx, $output, $reply_type);
-  }
-  protected async function process_canThrow(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
-    $handler_ctx = $this->eventHandler_->getHandlerContext('canThrow');
-    $reply_type = \TMessageType::REPLY;
-    $result = BiDiService_canThrow_FirstResponse::withDefaultValues();
-    try {
-      $args = $this->readHelper(BiDiService_canThrow_args::class, $input, 'canThrow', $handler_ctx);
-      $this->eventHandler_->preExec($handler_ctx, 'BiDiService', 'canThrow', $args);
-      $response_and_stream = await $this->handler->canThrow();
-      $this->eventHandler_->postExec($handler_ctx, 'canThrow', $result);
-      $this->writeHelper($result, 'canThrow', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteStream($response_and_stream->stream, BiDiService_canThrow_StreamResponse::class, $output, 'canThrow', $handler_ctx);
-      return;
-    } catch (\Exception $ex) {
-      if ($result->setException($ex)) {
-        $this->eventHandler_->handlerException($handler_ctx, 'canThrow', $ex);
-      } else {
-        $reply_type = \TMessageType::EXCEPTION;
-        $this->eventHandler_->handlerError($handler_ctx, 'canThrow', $ex);
-        $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
-      }
-    }
-    $this->writeHelper($result, 'canThrow', $seqid, $handler_ctx, $output, $reply_type);
-  }
   <<__Override>>
   protected static function getMethodMetadata(
     string $fn_name,
   ): ?\IThriftServiceMethodMetadata<this::TThriftIf> {
     switch ($fn_name) {
-      case 'simple':
-        return new \ThriftServiceStreamingResponseMethod(
-          BiDiService_simple_args::class,
-          BiDiService_simple_FirstResponse::class,
-          async (
-            BiDiServiceAsyncIf $handler,
-            BiDiService_simple_args $args,
-          )[defaults] ==> {
-            return await $handler->simple();
-          },
-          BiDiService_simple_StreamResponse::class,
-        );
-      case 'response':
-        return new \ThriftServiceStreamingResponseMethod(
-          BiDiService_response_args::class,
-          BiDiService_response_FirstResponse::class,
-          async (
-            BiDiServiceAsyncIf $handler,
-            BiDiService_response_args $args,
-          )[defaults] ==> {
-            return await $handler->response();
-          },
-          BiDiService_response_StreamResponse::class,
-        );
-      case 'canThrow':
-        return new \ThriftServiceStreamingResponseMethod(
-          BiDiService_canThrow_args::class,
-          BiDiService_canThrow_FirstResponse::class,
-          async (
-            BiDiServiceAsyncIf $handler,
-            BiDiService_canThrow_args $args,
-          )[defaults] ==> {
-            return await $handler->canThrow();
-          },
-          BiDiService_canThrow_StreamResponse::class,
-        );
       default:
         return null;
     }
@@ -300,6 +202,134 @@ class BiDiService_simple_args implements \IThriftSyncStruct, \IThriftStructMetad
     return tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.simple_args",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class BiDiService_simple_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'BiDiService_simple_FirstResponse';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.BiDiService_simple_FirstResponse",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class BiDiService_simple_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const type TResult = int;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    0 => shape(
+      'var' => 'success',
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'success' => 0,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'success' => ?this::TResult,
+  );
+
+  const int STRUCTURAL_ID = 413702039226145291;
+  public ?this::TResult $success;
+
+  public function __construct(?this::TResult $success = null)[] {
+    $this->success = $success;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'success'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'BiDiService_simple_SinkPayload';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.BiDiService_simple_SinkPayload",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 0,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "success",
+            )
+          ),
+        ],
         "is_union" => false,
       )
     );
@@ -395,58 +425,6 @@ class BiDiService_simple_StreamResponse extends \ThriftSyncStructWithResult impl
 
 }
 
-class BiDiService_simple_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
-  use \ThriftSerializationTrait;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-  ];
-  const dict<string, int> FIELDMAP = dict[
-  ];
-
-  const type TConstructorShape = shape(
-  );
-
-  const int STRUCTURAL_ID = 957977401221134810;
-
-  public function __construct()[] {
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-    );
-  }
-
-  public function getName()[]: string {
-    return 'BiDiService_simple_FirstResponse';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "module.BiDiService_simple_FirstResponse",
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-}
-
 class BiDiService_response_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -480,82 +458,6 @@ class BiDiService_response_args implements \IThriftSyncStruct, \IThriftStructMet
     return tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "module.response_args",
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-}
-
-class BiDiService_response_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
-  use \ThriftSerializationTrait;
-
-  const type TResult = int;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-    0 => shape(
-      'var' => 'success',
-      'type' => \TType::I16,
-    ),
-  ];
-  const dict<string, int> FIELDMAP = dict[
-    'success' => 0,
-  ];
-
-  const type TConstructorShape = shape(
-    ?'success' => ?this::TResult,
-  );
-
-  const int STRUCTURAL_ID = 2773006428113853176;
-  public ?this::TResult $success;
-
-  public function __construct(?this::TResult $success = null)[] {
-    $this->success = $success;
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'success'),
-    );
-  }
-
-  public function getName()[]: string {
-    return 'BiDiService_response_StreamResponse';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "module.BiDiService_response_StreamResponse",
-        "fields" => vec[
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 0,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
-                )
-              ),
-              "name" => "success",
-            )
-          ),
-        ],
         "is_union" => false,
       )
     );
@@ -651,6 +553,158 @@ class BiDiService_response_FirstResponse extends \ThriftSyncStructWithResult imp
 
 }
 
+class BiDiService_response_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const type TResult = int;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    0 => shape(
+      'var' => 'success',
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'success' => 0,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'success' => ?this::TResult,
+  );
+
+  const int STRUCTURAL_ID = 413702039226145291;
+  public ?this::TResult $success;
+
+  public function __construct(?this::TResult $success = null)[] {
+    $this->success = $success;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'success'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'BiDiService_response_SinkPayload';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.BiDiService_response_SinkPayload",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 0,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "success",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class BiDiService_response_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const type TResult = int;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    0 => shape(
+      'var' => 'success',
+      'type' => \TType::I16,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'success' => 0,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'success' => ?this::TResult,
+  );
+
+  const int STRUCTURAL_ID = 2773006428113853176;
+  public ?this::TResult $success;
+
+  public function __construct(?this::TResult $success = null)[] {
+    $this->success = $success;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'success'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'BiDiService_response_StreamResponse';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.BiDiService_response_StreamResponse",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 0,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                )
+              ),
+              "name" => "success",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
 class BiDiService_canThrow_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
@@ -701,6 +755,214 @@ class BiDiService_canThrow_args implements \IThriftSyncStruct, \IThriftStructMet
     return \TCompactSerializer::serialize($this);
   }
 
+}
+
+class BiDiService_canThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'ex',
+      'type' => \TType::STRUCT,
+      'class' => BiDiMethodException::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'ex' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'ex' => ?BiDiMethodException,
+  );
+
+  const int STRUCTURAL_ID = 1812701231700189659;
+  public ?BiDiMethodException $ex;
+
+  public function __construct(?BiDiMethodException $ex = null)[] {
+    $this->ex = $ex;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'ex'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'BiDiService_canThrow_FirstResponse';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.BiDiService_canThrow_FirstResponse",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.BiDiMethodException",
+                    )
+                  ),
+                )
+              ),
+              "name" => "ex",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function checkForException(): ?\TException {
+    if ($this->ex !== null) {
+      return $this->ex;
+    }
+    return null;
+  }
+  
+  public function setException(\Exception $e): bool {
+    if ($e is BiDiMethodException) {
+      $this->ex = $e;
+      return true;
+    }
+    return false;
+  }
+}
+
+class BiDiService_canThrow_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const type TResult = int;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    0 => shape(
+      'var' => 'success',
+      'type' => \TType::I64,
+    ),
+    1 => shape(
+      'var' => 'ex',
+      'type' => \TType::STRUCT,
+      'class' => BiDiSinkException::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'success' => 0,
+    'ex' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'success' => ?this::TResult,
+    ?'ex' => ?BiDiSinkException,
+  );
+
+  const int STRUCTURAL_ID = 5939109015600007585;
+  public ?this::TResult $success;
+  public ?BiDiSinkException $ex;
+
+  public function __construct(?this::TResult $success = null, ?BiDiSinkException $ex = null)[] {
+    $this->success = $success;
+    $this->ex = $ex;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'success'),
+      Shapes::idx($shape, 'ex'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'BiDiService_canThrow_SinkPayload';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.BiDiService_canThrow_SinkPayload",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 0,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "success",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.BiDiSinkException",
+                    )
+                  ),
+                )
+              ),
+              "name" => "ex",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function checkForException(): ?\TException {
+    if ($this->ex !== null) {
+      return $this->ex;
+    }
+    return null;
+  }
+  
+  public function setException(\Exception $e): bool {
+    if ($e is BiDiSinkException) {
+      $this->ex = $e;
+      return true;
+    }
+    return false;
+  }
 }
 
 class BiDiService_canThrow_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
@@ -818,99 +1080,6 @@ class BiDiService_canThrow_StreamResponse extends \ThriftSyncStructWithResult im
   }
 }
 
-class BiDiService_canThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
-  use \ThriftSerializationTrait;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-    1 => shape(
-      'var' => 'ex',
-      'type' => \TType::STRUCT,
-      'class' => BiDiMethodException::class,
-    ),
-  ];
-  const dict<string, int> FIELDMAP = dict[
-    'ex' => 1,
-  ];
-
-  const type TConstructorShape = shape(
-    ?'ex' => ?BiDiMethodException,
-  );
-
-  const int STRUCTURAL_ID = 1812701231700189659;
-  public ?BiDiMethodException $ex;
-
-  public function __construct(?BiDiMethodException $ex = null)[] {
-    $this->ex = $ex;
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'ex'),
-    );
-  }
-
-  public function getName()[]: string {
-    return 'BiDiService_canThrow_FirstResponse';
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "module.BiDiService_canThrow_FirstResponse",
-        "fields" => vec[
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_struct" => tmeta_ThriftStructType::fromShape(
-                    shape(
-                      "name" => "module.BiDiMethodException",
-                    )
-                  ),
-                )
-              ),
-              "name" => "ex",
-            )
-          ),
-        ],
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-  public function checkForException(): ?\TException {
-    if ($this->ex !== null) {
-      return $this->ex;
-    }
-    return null;
-  }
-  
-  public function setException(\Exception $e): bool {
-    if ($e is BiDiMethodException) {
-      $this->ex = $e;
-      return true;
-    }
-    return false;
-  }
-}
-
 class BiDiServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'BiDiService';
 
@@ -924,17 +1093,21 @@ class BiDiServiceStaticMetadata implements \IThriftServiceStaticMetadata {
               "name" => "simple",
               "return_type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_sink" => tmeta_ThriftSinkType::fromShape(
+                  "t_bidi" => tmeta_ThriftBidiType::fromShape(
                     shape(
-                      "elemType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                        )
-                      ),
-                      "finalResponseType" => tmeta_ThriftType::withDefaultValues(),
                       "initialResponseType" => tmeta_ThriftType::fromShape(
                         shape(
                           "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
+                        )
+                      ),
+                      "streamElemType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                        )
+                      ),
+                      "sinkElemType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -948,17 +1121,21 @@ class BiDiServiceStaticMetadata implements \IThriftServiceStaticMetadata {
               "name" => "response",
               "return_type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_sink" => tmeta_ThriftSinkType::fromShape(
+                  "t_bidi" => tmeta_ThriftBidiType::fromShape(
                     shape(
-                      "elemType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                        )
-                      ),
-                      "finalResponseType" => tmeta_ThriftType::withDefaultValues(),
                       "initialResponseType" => tmeta_ThriftType::fromShape(
                         shape(
                           "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                      "streamElemType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                        )
+                      ),
+                      "sinkElemType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                     )
@@ -972,17 +1149,21 @@ class BiDiServiceStaticMetadata implements \IThriftServiceStaticMetadata {
               "name" => "canThrow",
               "return_type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_sink" => tmeta_ThriftSinkType::fromShape(
+                  "t_bidi" => tmeta_ThriftBidiType::fromShape(
                     shape(
-                      "elemType" => tmeta_ThriftType::fromShape(
+                      "initialResponseType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
+                        )
+                      ),
+                      "streamElemType" => tmeta_ThriftType::fromShape(
                         shape(
                           "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                         )
                       ),
-                      "finalResponseType" => tmeta_ThriftType::withDefaultValues(),
-                      "initialResponseType" => tmeta_ThriftType::fromShape(
+                      "sinkElemType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                         )
                       ),
                     )

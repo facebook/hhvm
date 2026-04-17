@@ -320,6 +320,8 @@ class t_hack_generator : public t_concat_generator {
       const t_function* tfunction, const std::string& prefix);
   void generate_php_sink_function_helpers(
       const t_function* tfunction, const std::string& prefix);
+  void generate_php_bidi_function_helpers(
+      const t_function* tfunction, const std::string& prefix);
   void generate_php_interaction_function_helpers(
       const t_service* tservice,
       const t_service* interaction,
@@ -552,6 +554,11 @@ class t_hack_generator : public t_concat_generator {
       const t_service* tservice,
       const t_function* tfunction,
       bool legacy_arrays = false);
+  void _generate_service_client_bidi_child_fn(
+      std::ofstream& out,
+      const t_service* tservice,
+      const t_function* tfunction,
+      bool legacy_arrays = false);
   void generate_service_processor(const t_service* tservice, bool mangle);
   void generate_get_method_metadata_function(
       const t_service* tservice, bool mangle);
@@ -679,6 +686,8 @@ class t_hack_generator : public t_concat_generator {
       const t_structured* parent_struct = nullptr);
   std::string get_stream_function_return_typehint(const t_function* function);
   std::string get_sink_function_return_typehint(const t_function* function);
+  std::string get_bidi_function_return_typehint(
+      const t_function* function, bool is_interface, bool is_client);
   std::string get_container_keyword(
       const t_type* ttype, std::map<TypeToTypehintVariations, bool> variations);
   std::string type_to_typehint(
@@ -1158,6 +1167,9 @@ class t_hack_generator : public t_concat_generator {
       return true;
     }
     if (func->is_interaction_constructor()) {
+      return false;
+    }
+    if (func->is_bidirectional_stream()) {
       return false;
     }
     if (func->stream()) {
@@ -2570,7 +2582,37 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
       std::make_unique<t_const_value>(find_hack_name(function)));
 
   auto return_tmeta = std::unique_ptr<t_const_value>();
-  if (const auto* sink = function->sink()) {
+
+  if (function->is_bidirectional_stream()) {
+    // Bidirectional streaming: include both sink and stream info
+    const auto* sink = function->sink();
+    const auto* stream = function->stream();
+    auto bidi_tmeta = t_const_value::make_map();
+    if (!function->has_void_initial_response()) {
+      bidi_tmeta->add_map(
+          std::make_unique<t_const_value>("initialResponseType"),
+          type_to_tmeta(function->return_type().get_type()));
+    } else {
+      auto first_response_type = t_const_value::make_map();
+      first_response_type->add_map(
+          std::make_unique<t_const_value>("t_primitive"),
+          std::make_unique<t_const_value>(
+              ThriftPrimitiveType::THRIFT_VOID_TYPE));
+      bidi_tmeta->add_map(
+          std::make_unique<t_const_value>("initialResponseType"),
+          std::move(first_response_type));
+    }
+    bidi_tmeta->add_map(
+        std::make_unique<t_const_value>("streamElemType"),
+        type_to_tmeta(stream->elem_type().get_type()));
+
+    bidi_tmeta->add_map(
+        std::make_unique<t_const_value>("sinkElemType"),
+        type_to_tmeta(sink->elem_type().get_type()));
+    return_tmeta = t_const_value::make_map();
+    return_tmeta->add_map(
+        std::make_unique<t_const_value>("t_bidi"), std::move(bidi_tmeta));
+  } else if (const auto* sink = function->sink()) {
     auto sink_tmeta = t_const_value::make_map();
     sink_tmeta->add_map(
         std::make_unique<t_const_value>("elemType"),
@@ -2749,6 +2791,7 @@ const t_type* t_hack_generator::tmeta_ThriftType_type() {
   static t_struct typedef_type(&empty_program, "tmeta_ThriftTypedefType");
   static t_struct stream_type(&empty_program, "tmeta_ThriftStreamType");
   static t_struct sink_type(&empty_program, "tmeta_ThriftSinkType");
+  static t_struct bidi_type(&empty_program, "tmeta_ThriftBidiType");
   if (type.has_fields()) {
     return &type;
   }
@@ -2802,6 +2845,9 @@ const t_type* t_hack_generator::tmeta_ThriftType_type() {
   sink_type.create_field(type, "elemType", 1);
   sink_type.create_field(type, "finalResponseType", 2);
   sink_type.create_field(type, "initialResponseType", 3);
+  bidi_type.create_field(type, "initialResponseType", 1);
+  bidi_type.create_field(type, "streamElemType", 2);
+  bidi_type.create_field(type, "sinkElemType", 3);
 
   type.create_field(primitive_type, "t_primitive", 1);
   type.create_field(list_type, "t_list", 2);
@@ -2813,6 +2859,7 @@ const t_type* t_hack_generator::tmeta_ThriftType_type() {
   type.create_field(typedef_type, "t_typedef", 8);
   type.create_field(stream_type, "t_stream", 9);
   type.create_field(sink_type, "t_sink", 10);
+  type.create_field(bidi_type, "t_bidi", 11);
   return &type;
 }
 
@@ -5219,7 +5266,13 @@ std::string t_hack_generator::render_service_metadata_response(
     } else if (const auto* ttypedef = dynamic_cast<const t_typedef*>(next)) {
       queue.push(&ttypedef->type().deref());
     } else if (const auto* fun = dynamic_cast<const t_function*>(next)) {
-      if (const t_sink* sink = fun->sink()) {
+      if (fun->is_bidirectional_stream()) {
+        const t_sink* sink = fun->sink();
+        const t_stream* stream = fun->stream();
+        queue.push(fun->return_type().get_type());
+        queue.push(sink->elem_type().get_type());
+        queue.push(stream->elem_type().get_type());
+      } else if (const t_sink* sink = fun->sink()) {
         queue.push(&sink->elem_type().deref());
         queue.push(&fun->return_type().deref());
         queue.push(unwrap_maybe_null_type_ref(sink->final_response_type()));
@@ -6089,12 +6142,38 @@ void t_hack_generator::generate_method_metadata_inline(
 
   auto is_stream = tfunction->stream() != nullptr;
   auto is_sink = tfunction->sink() != nullptr;
+  auto is_bidi = tfunction->is_bidirectional_stream();
   auto is_void = tfunction->return_type()->is_void();
 
   std::string argsname = generate_function_helper_name(
       tservice, tfunction, PhpFunctionNameSuffix::ARGS);
 
-  if (is_stream) {
+  if (is_bidi) {
+    std::string first_response_name = generate_function_helper_name(
+        tservice, tfunction, PhpFunctionNameSuffix::FIRST_RESPONSE);
+    std::string stream_response_name = generate_function_helper_name(
+        tservice, tfunction, PhpFunctionNameSuffix::STREAM_RESPONSE);
+    std::string sink_payload_name = generate_function_helper_name(
+        tservice, tfunction, PhpFunctionNameSuffix::SINK_PAYLOAD);
+
+    f_service_ << indent()
+               << "return new \\ThriftServiceBiDiStreamingResponseMethod(\n"
+               << indent() << "  " << argsname << "::class,\n"
+               << indent() << "  " << first_response_name << "::class,\n"
+               << indent() << "  async (\n"
+               << indent() << "    " << long_name << "AsyncIf $handler,\n"
+               << indent() << "    " << argsname << " $args,\n"
+               << indent() << "  )[defaults] ==> {\n"
+               << indent() << "    return await $handler->" << fn_name << "(";
+
+    // Add function arguments
+    generate_handler_call_args(tfunction);
+    f_service_ << ");\n"
+               << indent() << "  },\n"
+               << indent() << "  " << sink_payload_name << "::class,\n"
+               << indent() << "  " << stream_response_name << "::class,\n"
+               << indent() << ");\n";
+  } else if (is_stream) {
     // Streaming method
     std::string first_response_name = generate_function_helper_name(
         tservice, tfunction, PhpFunctionNameSuffix::FIRST_RESPONSE);
@@ -6225,6 +6304,7 @@ void t_hack_generator::generate_process_function(
       << (async ? "Awaitable<void>" : "void") << " {\n";
   indent_up();
 
+  auto is_bidi_stream = tfunction->is_bidirectional_stream();
   auto is_stream = tfunction->stream() != nullptr;
   auto is_sink = tfunction->sink() != nullptr;
 
@@ -6261,7 +6341,9 @@ void t_hack_generator::generate_process_function(
 
   f_service_ << indent();
   auto is_void = tfunction->return_type()->is_void();
-  if (is_stream) {
+  if (is_bidi_stream) {
+    f_service_ << "$response_and_bidi_stream = ";
+  } else if (is_stream) {
     f_service_ << "$response_and_stream = ";
   } else if (is_sink) {
     f_service_ << "$response_and_sink = ";
@@ -6278,7 +6360,26 @@ void t_hack_generator::generate_process_function(
   }
   f_service_ << ");\n";
 
-  if (is_stream) {
+  if (is_bidi_stream) {
+    if (!is_void) {
+      f_service_ << indent()
+                 << "$result->success = $response_and_bidi_stream->response;\n";
+    }
+    std::string stream_response_type = generate_function_helper_name(
+        tservice, tfunction, PhpFunctionNameSuffix::STREAM_RESPONSE);
+    std::string sink_payload_type = generate_function_helper_name(
+        tservice, tfunction, PhpFunctionNameSuffix::SINK_PAYLOAD);
+    f_service_
+        << indent() << "$this->eventHandler_->postExec($handler_ctx, '"
+        << fn_name << "', $result);\n"
+        << indent() << "$this->writeHelper($result, '" << fn_name
+        << "', $seqid, $handler_ctx, $output, $reply_type);\n"
+        << indent()
+        << "await $this->genExecuteBiDiStream($response_and_bidi_stream->genBiDiStream, "
+        << sink_payload_type << "::class, " << stream_response_type
+        << "::class, $input, $output, '" << fn_name << "', $handler_ctx);\n"
+        << indent() << "return;\n";
+  } else if (is_stream) {
     if (!is_void) {
       f_service_ << indent()
                  << "$result->success = $response_and_stream->response;\n";
@@ -6547,7 +6648,10 @@ void t_hack_generator::generate_service_interactions(
 void t_hack_generator::generate_php_function_helpers(
     const t_service* tservice, const t_function* tfunction) {
   const std::string& service_name = tservice->name();
-  if (tfunction->stream()) {
+  if (tfunction->is_bidirectional_stream()) {
+    generate_php_bidi_function_helpers(tfunction, service_name);
+    return;
+  } else if (tfunction->stream()) {
     generate_php_stream_function_helpers(tfunction, service_name);
     return;
   } else if (tfunction->sink()) {
@@ -6676,6 +6780,38 @@ void t_hack_generator::generate_php_sink_function_helpers(
       /* is_void */ false);
 }
 
+// Generates a struct and helpers for a bidi streaming function.
+void t_hack_generator::generate_php_bidi_function_helpers(
+    const t_function* function, const std::string& prefix) {
+  generate_php_function_args_helpers(function, prefix);
+
+  generate_php_function_result_helpers(
+      function,
+      function->return_type().get_type(),
+      function->exceptions(),
+      prefix,
+      "_FirstResponse",
+      function->has_void_initial_response());
+
+  const t_sink* sink = function->sink();
+  generate_php_function_result_helpers(
+      function,
+      sink->elem_type().get_type(),
+      sink->sink_exceptions(),
+      prefix,
+      "_SinkPayload",
+      /* is_void */ false);
+
+  const t_stream* stream = function->stream();
+  generate_php_function_result_helpers(
+      function,
+      stream->elem_type().get_type(),
+      stream->exceptions(),
+      prefix,
+      "_StreamResponse",
+      /* is_void */ false);
+}
+
 /**
  * Generates a struct and helpers for an interaction function
  */
@@ -6684,7 +6820,10 @@ void t_hack_generator::generate_php_interaction_function_helpers(
     const t_service* interaction,
     const t_function* tfunction) {
   const std::string& prefix = tservice->name() + "_" + interaction->name();
-  if (tfunction->stream()) {
+  if (tfunction->is_bidirectional_stream()) {
+    generate_php_bidi_function_helpers(tfunction, prefix);
+    return;
+  } else if (tfunction->stream()) {
     generate_php_stream_function_helpers(tfunction, prefix);
     return;
   } else if (tfunction->sink()) {
@@ -6756,7 +6895,21 @@ void t_hack_generator::generate_php_docstring(
   if (tfunction->qualifier() == t_function_qualifier::oneway) {
     out << "oneway ";
   }
-  if (const t_stream* stream = tfunction->stream()) {
+  if (tfunction->is_bidirectional_stream()) {
+    if (!tfunction->has_void_initial_response()) {
+      out << thrift_type_name(tfunction->return_type().get_type()) << ", ";
+    } else {
+      out << "void, ";
+    }
+    const t_sink* sink = tfunction->sink();
+    out << "sink<" << thrift_type_name(sink->elem_type().get_type());
+    generate_php_docstring_stream_exceptions(out, sink->sink_exceptions());
+    out << ">, ";
+    const t_stream* stream = tfunction->stream();
+    out << "stream<" << thrift_type_name(stream->elem_type().get_type());
+    generate_php_docstring_stream_exceptions(out, stream->exceptions());
+    out << ">\n";
+  } else if (const t_stream* stream = tfunction->stream()) {
     if (!tfunction->has_void_initial_response()) {
       out << thrift_type_name(&tfunction->return_type().deref()) << ", ";
     } else {
@@ -7209,6 +7362,29 @@ std::string t_hack_generator::get_sink_function_return_typehint(
   return "\\ResponseAndSink<" + first_response_type_hint + ", " +
       return_typehint;
 }
+
+std::string t_hack_generator::get_bidi_function_return_typehint(
+    const t_function* function, bool is_interface, bool is_client) {
+  const t_stream* stream = function->stream();
+  const t_sink* sink = function->sink();
+  std::string return_typehint = type_to_typehint(sink->elem_type().get_type()) +
+      ", " + type_to_typehint(stream->elem_type().get_type()) + ">";
+
+  std::string name = "\\IResponseAndBidirectionalStream<";
+  if (!is_interface) {
+    if (is_client) {
+      name = "\\ResponseAndBidirectionalStream<";
+    } else {
+      name = "\\ResponseAndStreamTransformation<";
+    }
+  }
+  if (function->has_void_initial_response()) {
+    return name + "null, " + return_typehint;
+  }
+  auto first_response_type_hint =
+      type_to_typehint(function->return_type().get_type());
+  return name + first_response_type_hint + ", " + return_typehint;
+}
 /**
  * Generate an appropriate string for a parameter typehint.
  * The difference from type_to_typehint() is for parameters we should accept
@@ -7296,7 +7472,10 @@ void t_hack_generator::generate_service_interface(
     // Finally, the function declaration.
     std::string return_typehint;
 
-    if (function->stream() != nullptr) {
+    if (function->is_bidirectional_stream()) {
+      return_typehint =
+          get_bidi_function_return_typehint(function, true, false);
+    } else if (function->stream() != nullptr) {
       return_typehint = get_stream_function_return_typehint(function);
     } else if (function->sink() != nullptr) {
       return_typehint = get_sink_function_return_typehint(function);
@@ -7633,6 +7812,12 @@ void t_hack_generator::_generate_service_client_child_fn(
     const t_service* tservice,
     const t_function* tfunction,
     bool legacy_arrays) {
+  if (tfunction->is_bidirectional_stream()) {
+    _generate_service_client_bidi_child_fn(
+        out, tservice, tfunction, legacy_arrays);
+    return;
+  }
+
   if (tfunction->stream()) {
     _generate_service_client_stream_child_fn(
         out, tservice, tfunction, legacy_arrays);
@@ -7865,6 +8050,69 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
       << first_response_type << "::class, " << sink_payload_type << "::class, "
       << final_response_type << "::class, " << "\"" << tfunction->name()
       << "\", " << (tfunction->has_void_initial_response() ? "true" : "false")
+      << ", $currentseqid, $rpc_options";
+  if (legacy_arrays) {
+    out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";
+  }
+  out << ");\n";
+  scope_down(out);
+  out << "\n";
+}
+
+void t_hack_generator::_generate_service_client_bidi_child_fn(
+    std::ofstream& out,
+    const t_service* tservice,
+    const t_function* tfunction,
+    bool legacy_arrays) {
+  std::string funname =
+      tfunction->name() + (legacy_arrays ? "__LEGACY_ARRAYS" : "");
+  const std::string& tservice_name =
+      (tservice->is<t_interaction>() ? service_name_ : tservice->name());
+
+  generate_php_docstring(out, tfunction);
+  std::string return_typehint =
+      get_bidi_function_return_typehint(tfunction, false, true);
+  indent(out) << "public async function " << funname << "("
+              << argument_list(
+                     tfunction->params(), "", true, nullable_everything_)
+              << "): Awaitable<" + return_typehint + "> {\n";
+
+  indent_up();
+
+  indent(out) << "$hh_frame_metadata = $this->getHHFrameMetadata();\n";
+  indent(out) << "if ($hh_frame_metadata !== null) {\n";
+  indent_up();
+  indent(out) << "\\HH\\set_frame_metadata($hh_frame_metadata);\n";
+  indent_down();
+  indent(out) << "}\n";
+
+  indent(out) << "$rpc_options = $this->getAndResetOptions() ?? "
+              << (tservice->is<t_interaction>()
+                      ? "new \\RpcOptions()"
+                      : "\\ThriftClientBase::defaultOptions()")
+              << ";\n";
+  if (tservice->is<t_interaction>()) {
+    indent(out) << "$rpc_options = "
+                   "$rpc_options->setInteractionId($this->interactionId);\n";
+  }
+
+  _generate_args(out, tservice, tfunction);
+  indent(out) << "await $this->asyncHandler_->genBefore(\"" << tservice_name
+              << "\", \"" << generate_rpc_function_name(tservice, tfunction)
+              << "\", $args);\n";
+  _generate_current_seq_id(out, tservice, tfunction);
+
+  std::string first_response_type = generate_function_helper_name(
+      tservice, tfunction, PhpFunctionNameSuffix::FIRST_RESPONSE);
+  std::string stream_response_type = generate_function_helper_name(
+      tservice, tfunction, PhpFunctionNameSuffix::STREAM_RESPONSE);
+  std::string sink_payload_type = generate_function_helper_name(
+      tservice, tfunction, PhpFunctionNameSuffix::SINK_PAYLOAD);
+  out << indent() << "return await $this->genAwaitBiDiStreamResponse("
+      << first_response_type << "::class, " << sink_payload_type << "::class, "
+      << stream_response_type << "::class, "
+      << "\"" << tfunction->name() << "\", "
+      << (tfunction->has_void_initial_response() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
     out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";

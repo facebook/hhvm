@@ -28,6 +28,7 @@
 
 #include <thrift/common/BaseType.h>
 #include <thrift/compiler/ast/t_field.h>
+#include <thrift/compiler/ast/t_interface.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/common.h>
@@ -245,26 +246,26 @@ int field_idl_type(const t_field& field) {
   return static_cast<std::underlying_type_t<BaseType>>(idl_type);
 }
 
-bool service_has_any_streaming_types(const t_service* service) {
+bool service_has_any_streaming_types(const t_interface* interface) {
   return std::any_of(
-      service->functions().begin(),
-      service->functions().end(),
+      interface->functions().begin(),
+      interface->functions().end(),
       [](const auto& fn_iter) -> bool {
         return fn_iter.sink_or_stream() || fn_iter.interaction();
       });
 }
 
-bool service_has_any_sink_types(const t_service* service) {
+bool service_has_any_sink_types(const t_interface* interface) {
   return std::any_of(
-      service->functions().begin(),
-      service->functions().end(),
+      interface->functions().begin(),
+      interface->functions().end(),
       [](const auto& fn_iter) -> bool { return fn_iter.sink(); });
 }
 
-bool service_has_any_bidi_types(const t_service* service) {
+bool service_has_any_bidi_types(const t_interface* interface) {
   return std::any_of(
-      service->functions().begin(),
-      service->functions().end(),
+      interface->functions().begin(),
+      interface->functions().end(),
       [](const auto& fn_iter) -> bool {
         return fn_iter.is_bidirectional_stream();
       });

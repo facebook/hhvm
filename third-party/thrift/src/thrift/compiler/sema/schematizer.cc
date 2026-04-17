@@ -29,6 +29,7 @@
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_global_scope.h>
+#include <thrift/compiler/ast/t_interface.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_service.h>
@@ -319,6 +320,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
         }
         type_name->add_map(val("exceptionType"), type_uri(*resolved_type));
       },
+      [&](const t_interaction&) { assert(false); },
       [&](const t_service&) { assert(false); },
       [&](const t_typedef&) {
         // This should not happen since we resolve typedefs above
@@ -375,6 +377,7 @@ void schematize_recursively(
         add_as_definition(
             *defns_schema, "exceptionDef", std::move(exception_schema));
       },
+      [&](const t_interaction&) { assert(false); },
       [&](const t_service&) { assert(false); },
       [&](const t_typedef&) {
         // This should not happen since we resolve typedefs above
@@ -507,7 +510,8 @@ std::unique_ptr<t_const_value> schematizer::gen_full_schema(
   return schema;
 }
 
-std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
+std::unique_ptr<t_const_value> schematizer::gen_schema(
+    const t_interface& node) {
   auto svc_schema = t_const_value::make_map();
   add_definition(*svc_schema, node, node.program(), opts_.intern_value);
 
@@ -637,6 +641,11 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
   }
   svc_schema->add_map(val("functions"), std::move(functions_schema));
 
+  return svc_schema;
+}
+
+std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
+  auto svc_schema = gen_schema(static_cast<const t_interface&>(node));
   if (auto parent = node.extends()) {
     auto ref = t_const_value::make_map();
     ref->add_map(val("uri"), type_uri(*parent));

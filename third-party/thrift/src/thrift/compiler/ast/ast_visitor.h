@@ -138,8 +138,8 @@ class basic_ast_visitor {
    * For example, visits: t_service and t_interaction.
    *
    * @param V `std::function<void(Args..., [const] NodeType&)>` where
-   *        NodeType is any ancestor type of t_service (included), i.e.:
-   *        t_service, t_interface, t_type, t_named, t_node
+   *        NodeType is any ancestor type of t_interface (included), i.e.:
+   *        t_interface, t_type, t_named, t_node
    */
   template <typename V>
   void add_interface_visitor(V&& visitor) {

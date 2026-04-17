@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <thrift/compiler/ast/t_service.h>
+#include <thrift/compiler/ast/t_interface.h>
 
 namespace apache::thrift::compiler {
 
@@ -26,11 +26,11 @@ class t_program;
  * Represents an interaction definition.
  *
  * An interaction is an interface with context.
- * TODO(T244602122): Inherit from t_interface directly.
  */
-class t_interaction : public t_service {
+class t_interaction : public t_interface {
  public:
-  using t_service::t_service;
+  t_interaction(const t_program* program, std::string name)
+      : t_interface(program, std::move(name)) {}
   ~t_interaction() override;
 };
 

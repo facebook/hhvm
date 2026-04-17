@@ -428,6 +428,16 @@ scope& addChildForService(
   return serviceScope;
 }
 
+scope& addChildForInteraction(
+    const std::string& prefix,
+    const t_interaction& interaction,
+    scope& parentScope) {
+  scope& interactionScope = parentScope.make_child(
+      "{} [t_interaction] @{:#x}", prefix, uintptr_t(&interaction));
+  addChildForInterface("(base)", interaction, interactionScope);
+  return interactionScope;
+}
+
 scope& addChildForPackage(
     const std::string& prefix, const t_package& package, scope& parentScope) {
   scope& packageScope = parentScope.make_child(
@@ -640,7 +650,7 @@ scope& addChildForProgram(
   scope& interactionsScope =
       programScope.make_child("interactions (size: {})", interactions.size());
   for (std::size_t i = 0; i < interactions.size(); ++i) {
-    addChildForService(
+    addChildForInteraction(
         fmt::format("interactions[{}]", i),
         *interactions[i],
         interactionsScope);

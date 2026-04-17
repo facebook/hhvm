@@ -21,6 +21,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include <thrift/compiler/ast/t_interface.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/detail/pluggable_functions.h>
@@ -381,7 +382,7 @@ void match_type_with_const_value(
     if (value->is_enum()) {
       value->set_enum_value(nullptr);
     }
-  } else if (type->is<t_service>()) {
+  } else if (type->is<t_interface>()) {
     assert(false);
   }
 
@@ -624,7 +625,7 @@ void normalize_return_type(
 
   // Check the (first) response type.
   const t_type* true_type = type->get_true_type();
-  if (true_type->is<t_service>()) {
+  if (true_type->is<t_interface>()) {
     ctx.error("Invalid first response type: {}", type->get_full_name());
   }
 }

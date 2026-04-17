@@ -19,6 +19,7 @@
 #include <utility>
 
 #include <thrift/compiler/ast/t_enum.h>
+#include <thrift/compiler/ast/t_interaction.h>
 #include <thrift/compiler/ast/t_list.h>
 #include <thrift/compiler/ast/t_map.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
@@ -53,10 +54,14 @@ decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors) {
     return std::invoke(f, *union_);
   } else if (const t_exception* exception = ty.try_as<t_exception>()) {
     return std::invoke(f, *exception);
-  } else if (ty.is<t_structured>()) {
-    throw std::logic_error("Missing visitor specialization for t_structured");
+  } else if (const t_interaction* interaction = ty.try_as<t_interaction>()) {
+    return std::invoke(f, *interaction);
   } else if (const t_service* service = ty.try_as<t_service>()) {
     return std::invoke(f, *service);
+  } else if (ty.is<t_structured>()) {
+    throw std::logic_error("Missing visitor specialization for t_structured");
+  } else if (ty.is<t_interface>()) {
+    throw std::logic_error("Missing visitor specialization for t_interface");
   }
   abort();
 }

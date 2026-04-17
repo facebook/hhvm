@@ -271,14 +271,13 @@ whisker::array::ptr build_user_type_footprint(
     }
 
     extract_type(&function.return_type().deref());
-    if (auto& type = function.interaction()) {
-      if (auto* srv_type =
-              dynamic_cast<const t_service*>(type->get_true_type())) {
-        for (const auto& intfunc : srv_type->functions()) {
-          pending.emplace_back(&intfunc);
-        }
-        continue;
+    if (!function.interaction().empty()) {
+      const auto& interaction =
+          function.interaction()->get_true_type()->as<t_interaction>();
+      for (const auto& intfunc : interaction.functions()) {
+        pending.emplace_back(&intfunc);
       }
+      continue;
     }
     if (function.sink()) {
       extract_type(&function.sink()->elem_type().deref());
@@ -2246,6 +2245,9 @@ size_t compute_alignment(
           }
         }
         return align;
+      },
+      [&](const t_interaction&) -> size_t {
+        throw std::logic_error("Computing alignment of interaction");
       },
       [&](const t_service&) -> size_t {
         throw std::logic_error("Computing alignment of service");

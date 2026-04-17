@@ -30,6 +30,7 @@ namespace apache::thrift::compiler {
 class t_enum;
 class t_program;
 class t_global_scope;
+class t_interface;
 class t_service;
 class t_structured;
 class t_typedef;
@@ -73,6 +74,7 @@ class schematizer {
   // Creates a constant of type schema.Struct describing the argument.
   // https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift
   std::unique_ptr<t_const_value> gen_schema(const t_structured& node);
+  std::unique_ptr<t_const_value> gen_schema(const t_interface& node);
   std::unique_ptr<t_const_value> gen_schema(const t_service& node);
   std::unique_ptr<t_const_value> gen_schema(const t_const& node);
   std::unique_ptr<t_const_value> gen_schema(const t_enum& node);

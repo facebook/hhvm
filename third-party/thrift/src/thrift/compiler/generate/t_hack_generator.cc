@@ -324,7 +324,7 @@ class t_hack_generator : public t_concat_generator {
       const t_function* tfunction, const std::string& prefix);
   void generate_php_interaction_function_helpers(
       const t_service* tservice,
-      const t_service* interaction,
+      const t_interaction* interaction,
       const t_function* tfunction);
 
   void generate_php_union_enum(
@@ -510,16 +510,16 @@ class t_hack_generator : public t_concat_generator {
 
   void _generate_args(
       std::ofstream& out,
-      const t_service* tservice,
+      const t_interface* tservice,
       const t_function* tfunction);
   void _generate_current_seq_id(
       std::ofstream& out,
-      const t_service* tservice,
+      const t_interface* tservice,
       const t_function* tfunction);
   void _generate_sendImplHelper(
       std::ofstream& out,
       const t_function* tfunction,
-      const t_service* tservice);
+      const t_interface* tservice);
   void generate_service(const t_service* tservice, bool mangle);
   void generate_service_helpers(const t_service* tservice, bool mangle);
   void generate_service_interactions(const t_service* tservice, bool mangle);
@@ -530,7 +530,7 @@ class t_hack_generator : public t_concat_generator {
       std::ofstream& out, const t_service* tservice, bool mangle);
   void _generate_sendImpl(
       std::ofstream& out,
-      const t_service* tservice,
+      const t_interface* tservice,
       const t_function* tfunction);
   void _generate_sendImpl_arg(
       std::ofstream& out,
@@ -541,22 +541,22 @@ class t_hack_generator : public t_concat_generator {
       std::ofstream& out, const t_service* tservice, bool mangle, bool async);
   void _generate_service_client_child_fn(
       std::ofstream& out,
-      const t_service* tservice,
+      const t_interface* tservice,
       const t_function* tfunction,
       bool legacy_arrays = false);
   void _generate_service_client_stream_child_fn(
       std::ofstream& out,
-      const t_service* tservice,
+      const t_interface* tservice,
       const t_function* tfunction,
       bool legacy_arrays = false);
   void _generate_service_client_sink_child_fn(
       std::ofstream& out,
-      const t_service* tservice,
+      const t_interface* tservice,
       const t_function* tfunction,
       bool legacy_arrays = false);
   void _generate_service_client_bidi_child_fn(
       std::ofstream& out,
-      const t_service* tservice,
+      const t_interface* tservice,
       const t_function* tfunction,
       bool legacy_arrays = false);
   void generate_service_processor(const t_service* tservice, bool mangle);
@@ -670,9 +670,9 @@ class t_hack_generator : public t_concat_generator {
       bool typehints = true,
       bool force_nullable = false);
   std::string generate_rpc_function_name(
-      const t_service* tservice, const t_function* tfunction) const;
+      const t_interface* tservice, const t_function* tfunction) const;
   std::string generate_function_helper_name(
-      const t_service* tservice,
+      const t_interface* tservice,
       const t_function* tfunction,
       PhpFunctionNameSuffix suffix);
   std::string type_to_enum(const t_type* ttype);
@@ -1021,7 +1021,7 @@ class t_hack_generator : public t_concat_generator {
   }
 
   std::tuple<std::string, HackThriftNamespaceType> get_namespace(
-      const t_service* s) const {
+      const t_interface* s) const {
     return get_namespace(s->program());
   }
 
@@ -1096,7 +1096,7 @@ class t_hack_generator : public t_concat_generator {
    */
   std::string php_servicename_mangle(
       bool mangle,
-      const t_service* svc,
+      const t_interface* svc,
       const std::string& name,
       bool extends = false) {
     auto [ns, ns_type] = get_namespace(svc);
@@ -1112,7 +1112,7 @@ class t_hack_generator : public t_concat_generator {
   }
 
   std::string php_servicename_mangle(
-      bool mangle, const t_service* svc, bool extends = false) {
+      bool mangle, const t_interface* svc, bool extends = false) {
     return php_servicename_mangle(mangle, svc, svc->name(), extends);
   }
 
@@ -1148,7 +1148,7 @@ class t_hack_generator : public t_concat_generator {
   }
 
   std::vector<const t_function*> get_supported_client_functions(
-      const t_service* tservice) {
+      const t_interface* tservice) {
     std::vector<const t_function*> funcs;
     for (const auto& func : tservice->functions()) {
       if (is_function_supported(&func, true)) {
@@ -1175,9 +1175,9 @@ class t_hack_generator : public t_concat_generator {
     return true;
   }
 
-  std::vector<const t_service*> get_interactions(
+  std::vector<const t_interaction*> get_interactions(
       const t_service* tservice) const {
-    std::vector<const t_service*> interactions;
+    std::vector<const t_interaction*> interactions;
     for (const auto& func : tservice->functions()) {
       if (func.is_interaction_constructor()) {
         interactions.push_back(&func.interaction()->as<t_interaction>());
@@ -5689,7 +5689,7 @@ void t_hack_generator::generate_php_struct_from_map(
 
 void t_hack_generator::_generate_args(
     std::ofstream& out,
-    const t_service* tservice,
+    const t_interface* tservice,
     const t_function* tfunction) {
   const std::string& argsname = generate_function_helper_name(
       tservice, tfunction, PhpFunctionNameSuffix::ARGS);
@@ -5914,7 +5914,7 @@ void t_hack_generator::generate_php_struct_async_struct_creation_method(
 void t_hack_generator::_generate_sendImplHelper(
     std::ofstream& out,
     const t_function* tfunction,
-    const t_service* tservice) {
+    const t_interface* tservice) {
   std::string long_name = php_servicename_mangle(mangled_services_, tservice);
   const std::string& tservice_name =
       (tservice->is<t_interaction>()
@@ -6581,7 +6581,7 @@ void t_hack_generator::generate_service_helpers(
 
 void t_hack_generator::generate_service_interactions(
     const t_service* tservice, bool mangle) {
-  const std::vector<const t_service*>& interactions =
+  const std::vector<const t_interaction*>& interactions =
       get_interactions(tservice);
   if (interactions.empty()) {
     return;
@@ -6819,7 +6819,7 @@ void t_hack_generator::generate_php_bidi_function_helpers(
  */
 void t_hack_generator::generate_php_interaction_function_helpers(
     const t_service* tservice,
-    const t_service* interaction,
+    const t_interaction* interaction,
     const t_function* tfunction) {
   const std::string& prefix = tservice->name() + "_" + interaction->name();
   if (tfunction->is_bidirectional_stream()) {
@@ -7532,7 +7532,7 @@ void t_hack_generator::_generate_service_client(
   indent_up();
 
   // Generate factory method for interactions
-  const std::vector<const t_service*>& interactions =
+  const std::vector<const t_interaction*>& interactions =
       get_interactions(tservice);
   if (!interactions.empty()) {
     out << indent() << "/* interaction handlers factory methods */\n";
@@ -7580,7 +7580,7 @@ void t_hack_generator::_generate_service_client(
 
 void t_hack_generator::_generate_current_seq_id(
     std::ofstream& out,
-    const t_service* tservice,
+    const t_interface* tservice,
     const t_function* tfunction) {
   if (tservice->is<t_interaction>()) {
     indent(out) << "$currentseqid = $this->sendImpl_" << tfunction->name()
@@ -7600,7 +7600,7 @@ void t_hack_generator::_generate_current_seq_id(
 
 void t_hack_generator::_generate_sendImpl(
     std::ofstream& out,
-    const t_service* tservice,
+    const t_interface* tservice,
     const t_function* tfunction) {
   const std::string& funname = tfunction->name();
   const std::string& rpc_function_name =
@@ -7811,7 +7811,7 @@ void t_hack_generator::_generate_service_client_children(
 
 void t_hack_generator::_generate_service_client_child_fn(
     std::ofstream& out,
-    const t_service* tservice,
+    const t_interface* tservice,
     const t_function* tfunction,
     bool legacy_arrays) {
   if (tfunction->is_bidirectional_stream()) {
@@ -7944,7 +7944,7 @@ void t_hack_generator::_generate_service_client_child_fn(
 
 void t_hack_generator::_generate_service_client_stream_child_fn(
     std::ofstream& out,
-    const t_service* tservice,
+    const t_interface* tservice,
     const t_function* tfunction,
     bool legacy_arrays) {
   std::string funname =
@@ -8003,7 +8003,7 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
 
 void t_hack_generator::_generate_service_client_sink_child_fn(
     std::ofstream& out,
-    const t_service* tservice,
+    const t_interface* tservice,
     const t_function* tfunction,
     bool legacy_arrays) {
   std::string funname =
@@ -8063,7 +8063,7 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
 
 void t_hack_generator::_generate_service_client_bidi_child_fn(
     std::ofstream& out,
-    const t_service* tservice,
+    const t_interface* tservice,
     const t_function* tfunction,
     bool legacy_arrays) {
   std::string funname =
@@ -8256,7 +8256,7 @@ std::string t_hack_generator::argument_list(
  * Renders the function name to be used in RPC
  */
 std::string t_hack_generator::generate_rpc_function_name(
-    const t_service* tservice, const t_function* tfunction) const {
+    const t_interface* tservice, const t_function* tfunction) const {
   std::string prefix =
       tservice->is<t_interaction>() ? tservice->name() + "." : "";
   return prefix + find_hack_name(tfunction);
@@ -8267,7 +8267,7 @@ std::string t_hack_generator::generate_rpc_function_name(
  * @param suffix defines the suffix
  */
 std::string t_hack_generator::generate_function_helper_name(
-    const t_service* tservice,
+    const t_interface* tservice,
     const t_function* tfunction,
     PhpFunctionNameSuffix suffix) {
   std::string prefix;

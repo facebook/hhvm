@@ -70,10 +70,10 @@ class t_json_generator : public t_concat_generator {
   void print_lineno(const t_node& node);
 
   string to_string(const t_type* type);
-  string to_string(const t_service* service);
+  string to_string(const t_interface* interface);
 
   string to_spec_args(const t_type* type);
-  string to_spec_args(const t_service* service);
+  string to_spec_args(const t_interface* interface);
   string to_spec_args_named(const t_named* named);
 
   string type_name(const t_type* ttype);
@@ -271,7 +271,7 @@ string t_json_generator::to_string(const t_type* type) {
   throw std::runtime_error("INVALID TYPE IN to_string: " + type->name());
 }
 
-string t_json_generator::to_string(const t_service*) {
+string t_json_generator::to_string(const t_interface*) {
   return "SERVICE";
 }
 
@@ -309,8 +309,8 @@ string t_json_generator::to_spec_args(const t_type* type) {
   throw std::runtime_error("INVALID TYPE IN to_spec_args: " + type->name());
 }
 
-string t_json_generator::to_spec_args(const t_service* service) {
-  return to_spec_args_named(service);
+string t_json_generator::to_spec_args(const t_interface* interface) {
+  return to_spec_args_named(interface);
 }
 
 string t_json_generator::to_spec_args_named(const t_named* named) {

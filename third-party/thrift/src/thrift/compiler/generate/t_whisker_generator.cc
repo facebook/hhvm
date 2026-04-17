@@ -162,11 +162,9 @@ object resolve_derived_t_type(
         // to Whisker to avoid additional tech debt.
         return object(proto.create<t_struct>(struct_));
       },
-      [](const t_service&) -> object {
-        // This is tech debt from a time before t_interaction was moved out of
-        // t_type (for return types). This case should no longer happen in
-        // practice.
-        throw whisker::eval_error("t_type -> t_service is not supported");
+      [](const auto&) -> object {
+        throw whisker::eval_error(
+            "Unexpected type passed to resolve_derived_t_type");
       });
 }
 

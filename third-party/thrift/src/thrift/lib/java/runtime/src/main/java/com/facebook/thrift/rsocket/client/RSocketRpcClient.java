@@ -40,8 +40,10 @@ import io.rsocket.RSocketErrorException;
 import io.rsocket.frame.ErrorFrameCodec;
 import io.rsocket.util.ByteBufPayload;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import org.apache.thrift.ClientPushMetadata;
+import org.apache.thrift.CompressionAlgorithm;
 import org.apache.thrift.ProtocolId;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.ResponseRpcError;
@@ -237,8 +239,16 @@ public final class RSocketRpcClient implements RpcClient {
                   clientRequestPayload.getRequestRpcMetadata().getProtocol();
               final TProtocolType protocolType = TProtocolType.fromProtocolId(protocol);
 
+              final AtomicBoolean isFirstPayload = new AtomicBoolean(true);
               final Flux<Payload> payloadFlux =
-                  flux.map(t -> clientRequestPayloadToRSocketPayload(t, protocolType, options))
+                  flux.map(
+                          t -> {
+                            if (isFirstPayload.compareAndSet(true, false)) {
+                              return clientRequestPayloadToRSocketPayload(t, protocolType, options);
+                            } else {
+                              return sinkPayloadToRSocketPayload(t, protocolType);
+                            }
+                          })
                       .doOnDiscard(Payload.class, ReferenceCountUtil::safeRelease);
 
               return rsocket
@@ -315,6 +325,47 @@ public final class RSocketRpcClient implements RpcClient {
         metadata.release();
       }
 
+      throw Exceptions.propagate(t);
+    }
+  }
+
+  private <T> Payload sinkPayloadToRSocketPayload(
+      ClientRequestPayload<T> payload, TProtocolType protocolType) {
+    ByteBuf data = null;
+    ByteBuf metadata = null;
+    try {
+      data = alloc.buffer();
+      metadata = alloc.buffer();
+
+      final ByteBufTProtocol in = protocolType.apply(data);
+      in.writeStructBegin(PARAMETERS_STRUCT);
+      final Writer writer = payload.getDataWriter();
+      writer.write(in);
+      in.writeFieldStop();
+      in.writeStructEnd();
+
+      // Subsequent sink payload frames must use StreamPayloadMetadata,
+      // not RequestRpcMetadata. The first frame (handled by
+      // clientRequestPayloadToRSocketPayload) uses RequestRpcMetadata
+      // to establish the RPC. The compression field must be set on
+      // StreamPayloadMetadata to match the actual compression applied
+      // by createPayload.
+      final CompressionAlgorithm compression = payload.getRequestRpcMetadata().getCompression();
+      final ByteBufTProtocol metadataProtocol = TProtocolType.TCompact.apply(metadata);
+      StreamPayloadMetadata.Builder streamMetadataBuilder = new StreamPayloadMetadata.Builder();
+      if (compression != null && compression != CompressionAlgorithm.NONE) {
+        streamMetadataBuilder.setCompression(compression);
+      }
+      streamMetadataBuilder.build().write0(metadataProtocol);
+
+      return createPayload(alloc, compression, data, metadata);
+    } catch (Throwable t) {
+      if (data != null && data.refCnt() > 0) {
+        data.release();
+      }
+      if (metadata != null && metadata.refCnt() > 0) {
+        metadata.release();
+      }
       throw Exceptions.propagate(t);
     }
   }

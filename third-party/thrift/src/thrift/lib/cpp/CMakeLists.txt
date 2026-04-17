@@ -86,7 +86,7 @@ target_link_libraries(
     # and libtransport.so are cyclic dependencies and libthriftcpp2.so
     # has libtransport.so dependency. We can't link to
     # libthriftcpp2.so from libtransport.so. It's not allowed.
-    $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:$<INSTALL_INTERFACE:FBThrift::thriftcpp2>>
+    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>,$<NOT:$<BOOL:${THRIFT_SERIALIZATION_ONLY}>>>:$<INSTALL_INTERFACE:FBThrift::thriftcpp2>>
     Folly::folly
     ZLIB::ZLIB
     ${OPENSSL_LIBRARIES}
@@ -104,6 +104,7 @@ target_link_libraries(
     Folly::folly
 )
 
+if (NOT THRIFT_SERIALIZATION_ONLY)
 add_library(
   async
 
@@ -152,6 +153,7 @@ target_link_libraries(
     Folly::folly
     ${GLOG_LIBRARIES}
 )
+endif () # NOT THRIFT_SERIALIZATION_ONLY
 
 set(THRIFT1_HEADER_DIRS
   async
@@ -169,9 +171,14 @@ endforeach()
 
 if (BUILD_SHARED_LIBS)
   # all but thrift since it's an interface
-  set_target_properties(thrift-core concurrency transport async
+  set_target_properties(thrift-core concurrency transport
     PROPERTIES VERSION ${PACKAGE_VERSION}
     )
+  if (NOT THRIFT_SERIALIZATION_ONLY)
+    set_target_properties(async
+      PROPERTIES VERSION ${PACKAGE_VERSION}
+      )
+  endif ()
 endif()
 
 install(
@@ -179,9 +186,16 @@ install(
     thrift-core
     concurrency
     transport
-    async
     runtime
-    thrift
   EXPORT fbthrift-exports
   DESTINATION ${LIB_INSTALL_DIR}
 )
+if (NOT THRIFT_SERIALIZATION_ONLY)
+  install(
+    TARGETS
+      async
+      thrift
+    EXPORT fbthrift-exports
+    DESTINATION ${LIB_INSTALL_DIR}
+  )
+endif ()

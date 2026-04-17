@@ -309,6 +309,7 @@ target_link_libraries(
     thrift-core
 )
 
+if (NOT THRIFT_SERIALIZATION_ONLY)
 bypass_source_check("${RocketUpgrade-cpp2-SOURCES}")
 add_library(
   thriftcpp2
@@ -543,6 +544,7 @@ target_link_libraries(
     thriftcpp2
     mvfst::mvfst_server_async_tran
 )
+endif () # NOT THRIFT_SERIALIZATION_ONLY
 
 # Install includes
 set(THRIFT2_HEADER_DIRS
@@ -562,10 +564,15 @@ install(
 
 if (BUILD_SHARED_LIBS)
   set_target_properties(rpcmetadata thriftannotation thriftmetadata thrift_path
-    thrift_dynamic_value thriftfrozen2 thriftprotocol thriftcpp2 thrifttyperep thrifttype
+    thrift_dynamic_value thriftfrozen2 thriftprotocol thrifttyperep thrifttype
     thriftanyrep serverdbginfo
     PROPERTIES VERSION ${PACKAGE_VERSION}
     )
+  if (NOT THRIFT_SERIALIZATION_ONLY)
+    set_target_properties(thriftcpp2
+      PROPERTIES VERSION ${PACKAGE_VERSION}
+      )
+  endif ()
 endif()
 
 install(
@@ -579,8 +586,15 @@ install(
     thrifttype
     thriftanyrep
     thriftprotocol
-    thriftcpp2
     serverdbginfo
   EXPORT fbthrift-exports
   DESTINATION ${LIB_INSTALL_DIR}
 )
+if (NOT THRIFT_SERIALIZATION_ONLY)
+  install(
+    TARGETS
+      thriftcpp2
+    EXPORT fbthrift-exports
+    DESTINATION ${LIB_INSTALL_DIR}
+  )
+endif ()

@@ -41,6 +41,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientRocketInterfaceHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -982,6 +983,7 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
 
   void TearDown() override {
     pipeline_.reset();
+    transportAdapter_.reset();
     testTransport_ = nullptr;
   }
 
@@ -990,19 +992,27 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
         folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
     testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
 
-    transportHandler_ =
+    // Build rocket pipeline inside a transport connection
+    auto connection =
+        std::make_unique<rocket::client::RocketClientConnection>();
+
+    connection->transportHandler =
         apache::thrift::fast_thrift::transport::TransportHandler::create(
             std::move(transport));
 
-    pipeline_ =
+    // Save raw pointer for onConnect() (called after ownership transfer)
+    auto* transportHandlerPtr = connection->transportHandler.get();
+
+    connection->pipeline =
         PipelineBuilder<
-            ThriftClientAppAdapter,
+            apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter,
             apache::thrift::fast_thrift::transport::TransportHandler,
-            TestAllocator>()
+            apache::thrift::fast_thrift::channel_pipeline::
+                SimpleBufferAllocator>()
             .setEventBase(&evb_)
-            .setTail(transportHandler_.get())
-            .setHead(&client_.adapter())
-            .setAllocator(&allocator_)
+            .setHead(connection->appAdapter.get())
+            .setTail(connection->transportHandler.get())
+            .setAllocator(&connection->allocator)
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
@@ -1030,15 +1040,32 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
             .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                handler::RocketClientStreamStateHandler>(
                 rocket_client_stream_state_handler_tag)
-            .addNextDuplex<client::handler::ThriftClientRocketInterfaceHandler>(
-                thrift_client_rocket_interface_handler_tag)
+            .build();
+
+    connection->appAdapter->setPipeline(connection->pipeline.get());
+    connection->transportHandler->setPipeline(*connection->pipeline);
+
+    // Create transport adapter (takes ownership of connection)
+    transportAdapter_ = std::make_unique<client::ThriftClientTransportAdapter>(
+        std::move(connection));
+
+    // Build thrift pipeline
+    pipeline_ =
+        PipelineBuilder<
+            ThriftClientAppAdapter,
+            client::ThriftClientTransportAdapter,
+            TestAllocator>()
+            .setEventBase(&evb_)
+            .setHead(&client_.adapter())
+            .setTail(transportAdapter_.get())
+            .setAllocator(&allocator_)
             .addNextInbound<client::handler::ThriftClientMetadataPushHandler>(
                 thrift_client_metadata_push_handler_tag)
             .build();
 
     client_.adapter().setPipeline(pipeline_.get());
-    transportHandler_->setPipeline(*pipeline_);
-    transportHandler_->onConnect();
+    transportAdapter_->setPipeline(pipeline_.get());
+    transportHandlerPtr->onConnect();
 
     evb_.loopOnce();
     discardSetupFrame();
@@ -1095,8 +1122,7 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
 
   folly::EventBase evb_;
   TestAsyncTransport* testTransport_{nullptr};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler_;
+  std::unique_ptr<client::ThriftClientTransportAdapter> transportAdapter_;
   IntegrationTestClient client_;
   PipelineImpl::Ptr pipeline_;
   TestAllocator allocator_;

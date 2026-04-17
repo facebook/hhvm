@@ -46,7 +46,6 @@
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
-#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -57,6 +56,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
@@ -66,8 +66,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/bench/if/gen-cpp2/BenchmarkService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/bench/if/gen-cpp2/BenchmarkServiceAsyncClient.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientRocketInterfaceHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
 DEFINE_string(host, "::1", "Server host");
@@ -90,8 +89,6 @@ HANDLER_TAG(rocket_client_setup_handler);
 HANDLER_TAG(rocket_client_request_response_frame_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
-HANDLER_TAG(thrift_client_rocket_interface_handler);
-HANDLER_TAG(thrift_client_metadata_push_handler);
 
 namespace {
 
@@ -215,9 +212,10 @@ using FastClient = apache::thrift::
 
 struct FastThriftClientState {
   std::unique_ptr<folly::ScopedEventBaseThread> thread;
-  transport::TransportHandler::Ptr transportHandler;
-  channel_pipeline::PipelineImpl::Ptr pipeline;
-  channel_pipeline::SimpleBufferAllocator allocator;
+  std::unique_ptr<thrift::client::ThriftClientTransportAdapter>
+      transportAdapter;
+  channel_pipeline::PipelineImpl::Ptr thriftPipeline;
+  channel_pipeline::SimpleBufferAllocator thriftAllocator;
   std::unique_ptr<ConnectCallback> connectCallback;
   std::unique_ptr<FastClient> client;
 };
@@ -237,22 +235,29 @@ FastThriftClientState createFastThriftClient(const folly::SocketAddress& addr) {
     auto socket = folly::AsyncSocket::newSocket(evb);
     auto* socketPtr = socket.get();
 
-    state.transportHandler =
+    // Build rocket pipeline inside a transport connection
+    auto connection =
+        std::make_unique<rocket::client::RocketClientConnection>();
+
+    connection->transportHandler =
         transport::TransportHandler::create(std::move(socket));
 
+    // Save raw pointer for ConnectCallback (before ownership transfer)
+    auto* transportHandlerPtr = connection->transportHandler.get();
+
     state.connectCallback = std::make_unique<ConnectCallback>(
-        state.transportHandler.get(), connectBaton, connected);
+        transportHandlerPtr, connectBaton, connected);
     socketPtr->connect(state.connectCallback.get(), addr, 30000);
 
-    state.pipeline =
+    connection->pipeline =
         channel_pipeline::PipelineBuilder<
-            thrift::ThriftClientAppAdapter,
+            rocket::client::RocketClientAppAdapter,
             transport::TransportHandler,
             channel_pipeline::SimpleBufferAllocator>()
             .setEventBase(evb)
-            .setHead(adapter.get())
-            .setTail(state.transportHandler.get())
-            .setAllocator(&state.allocator)
+            .setHead(connection->appAdapter.get())
+            .setTail(connection->transportHandler.get())
+            .setAllocator(&connection->allocator)
             .addNextOutbound<frame::write::handler::BatchingFrameHandler>(
                 batching_frame_handler_tag)
             .addNextInbound<frame::read::handler::FrameLengthParserHandler>(
@@ -274,16 +279,29 @@ FastThriftClientState createFastThriftClient(const folly::SocketAddress& addr) {
             .addNextDuplex<
                 rocket::client::handler::RocketClientStreamStateHandler>(
                 rocket_client_stream_state_handler_tag)
-            .addNextDuplex<
-                thrift::client::handler::ThriftClientRocketInterfaceHandler>(
-                thrift_client_rocket_interface_handler_tag)
-            .addNextInbound<
-                thrift::client::handler::ThriftClientMetadataPushHandler>(
-                thrift_client_metadata_push_handler_tag)
             .build();
 
-    state.transportHandler->setPipeline(*state.pipeline);
-    adapter->setPipeline(state.pipeline.get());
+    connection->appAdapter->setPipeline(connection->pipeline.get());
+    connection->transportHandler->setPipeline(*connection->pipeline);
+
+    // Create transport adapter (takes ownership of connection)
+    state.transportAdapter =
+        std::make_unique<thrift::client::ThriftClientTransportAdapter>(
+            std::move(connection));
+
+    // Build thrift pipeline
+    state.thriftPipeline = channel_pipeline::PipelineBuilder<
+                               thrift::ThriftClientAppAdapter,
+                               thrift::client::ThriftClientTransportAdapter,
+                               channel_pipeline::SimpleBufferAllocator>()
+                               .setEventBase(evb)
+                               .setHead(adapter.get())
+                               .setTail(state.transportAdapter.get())
+                               .setAllocator(&state.thriftAllocator)
+                               .build();
+
+    adapter->setPipeline(state.thriftPipeline.get());
+    state.transportAdapter->setPipeline(state.thriftPipeline.get());
   });
 
   connectBaton.wait();
@@ -446,8 +464,8 @@ int main(int argc, char* argv[]) {
         FLAGS_runtime_s);
     evb->runInEventBaseThreadAndWait([&] {
       state.client.reset();
-      state.pipeline.reset();
-      state.transportHandler.reset();
+      state.thriftPipeline.reset();
+      state.transportAdapter.reset();
     });
 
   } else {

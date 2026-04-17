@@ -44,6 +44,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
@@ -53,6 +54,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientRocketInterfaceHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -267,6 +269,58 @@ std::unique_ptr<folly::IOBuf> prependLengthPrefix(
 }
 
 // =============================================================================
+// Rocket connection builder
+// =============================================================================
+std::unique_ptr<rocket::client::RocketClientConnection> createRocketConnection(
+    BenchAsyncTransport* benchTransport, folly::EventBase* evb) {
+  auto transport = folly::AsyncTransport::UniquePtr(benchTransport);
+  auto connection = std::make_unique<rocket::client::RocketClientConnection>();
+  connection->transportHandler =
+      apache::thrift::fast_thrift::transport::TransportHandler::create(
+          std::move(transport));
+
+  connection->pipeline =
+      PipelineBuilder<
+          apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter,
+          apache::thrift::fast_thrift::transport::TransportHandler,
+          channel_pipeline::SimpleBufferAllocator>()
+          .setEventBase(evb)
+          .setHead(connection->appAdapter.get())
+          .setTail(connection->transportHandler.get())
+          .setAllocator(&connection->allocator)
+          .addNextInbound<FrameLengthParserHandler>(
+              frame_length_parser_handler_tag)
+          .addNextOutbound<FrameLengthEncoderHandler>(
+              frame_length_encoder_handler_tag)
+          .addNextDuplex<apache::thrift::fast_thrift::rocket::client::handler::
+                             RocketClientFrameCodecHandler>(
+              rocket_client_frame_codec_handler_tag)
+          .addNextDuplex<apache::thrift::fast_thrift::rocket::client::handler::
+                             RocketClientSetupFrameHandler>(
+              rocket_client_setup_handler_tag,
+              []() {
+                return std::make_pair(
+                    folly::IOBuf::copyBuffer("setup"),
+                    std::unique_ptr<folly::IOBuf>());
+              })
+          .addNextDuplex<apache::thrift::fast_thrift::rocket::client::handler::
+                             RocketClientRequestResponseFrameHandler>(
+              rocket_client_request_response_frame_handler_tag)
+          .addNextInbound<apache::thrift::fast_thrift::rocket::client::handler::
+                              RocketClientErrorFrameHandler>(
+              rocket_client_error_frame_handler_tag)
+          .addNextDuplex<apache::thrift::fast_thrift::rocket::client::handler::
+                             RocketClientStreamStateHandler>(
+              rocket_client_stream_state_handler_tag)
+          .build();
+
+  connection->appAdapter->setPipeline(connection->pipeline.get());
+  connection->transportHandler->setPipeline(*connection->pipeline);
+
+  return connection;
+}
+
+// =============================================================================
 // Benchmark Fixture
 // =============================================================================
 
@@ -369,71 +423,48 @@ class BenchAppAdapterClient {
 };
 
 // =============================================================================
-// AppAdapter Benchmark Fixture
+// AppAdapter Benchmark Fixture (two-pipeline mode)
+//
+// Rocket pipeline: RocketClientAppAdapter → [rocket handlers] →
+// TransportHandler Thrift pipeline: ThriftClientAppAdapter →
+// ThriftClientTransportAdapter
 // =============================================================================
 
 struct AppAdapterBenchFixture {
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler;
+
+  // Thrift pipeline (app adapter → transport adapter)
   BenchAppAdapterClient client;
-  PipelineImpl::Ptr pipeline;
-  TestAllocator allocator;
+  std::unique_ptr<client::ThriftClientTransportAdapter> transportAdapter;
+  PipelineImpl::Ptr thriftPipeline;
+  TestAllocator thriftAllocator;
 
   void setup() {
-    auto transport =
-        folly::AsyncTransport::UniquePtr(new BenchAsyncTransport(&evb));
-    testTransport = static_cast<BenchAsyncTransport*>(transport.get());
+    testTransport = new BenchAsyncTransport(&evb);
+    auto rocketConnection = createRocketConnection(testTransport, &evb);
 
-    transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+    // Create transport adapter (takes ownership of rocket connection)
+    transportAdapter = std::make_unique<client::ThriftClientTransportAdapter>(
+        std::move(rocketConnection));
 
-    pipeline = PipelineBuilder<
-                   ThriftClientAppAdapter,
-                   apache::thrift::fast_thrift::transport::TransportHandler,
-                   TestAllocator>()
-                   .setEventBase(&evb)
-                   .setTail(transportHandler.get())
-                   .setHead(&client.adapter())
-                   .setAllocator(&allocator)
-                   .addNextInbound<FrameLengthParserHandler>(
-                       frame_length_parser_handler_tag)
-                   .addNextOutbound<FrameLengthEncoderHandler>(
-                       frame_length_encoder_handler_tag)
-                   .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
-                                      handler::RocketClientFrameCodecHandler>(
-                       rocket_client_frame_codec_handler_tag)
-                   .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
-                                      handler::RocketClientSetupFrameHandler>(
-                       rocket_client_setup_handler_tag,
-                       []() {
-                         return std::make_pair(
-                             folly::IOBuf::copyBuffer("setup"),
-                             std::unique_ptr<folly::IOBuf>());
-                       })
-                   .addNextDuplex<
-                       apache::thrift::fast_thrift::rocket::client::handler::
-                           RocketClientRequestResponseFrameHandler>(
-                       rocket_client_request_response_frame_handler_tag)
-                   .addNextInbound<apache::thrift::fast_thrift::rocket::client::
-                                       handler::RocketClientErrorFrameHandler>(
-                       rocket_client_error_frame_handler_tag)
-                   .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
-                                      handler::RocketClientStreamStateHandler>(
-                       rocket_client_stream_state_handler_tag)
-                   .addNextDuplex<ThriftClientRocketInterfaceHandler>(
-                       thrift_client_rocket_interface_handler_tag)
-                   .addNextInbound<ThriftClientMetadataPushHandler>(
-                       thrift_client_metadata_push_handler_tag)
-                   .build();
+    // Build thrift pipeline
+    thriftPipeline = PipelineBuilder<
+                         ThriftClientAppAdapter,
+                         client::ThriftClientTransportAdapter,
+                         TestAllocator>()
+                         .setEventBase(&evb)
+                         .setHead(&client.adapter())
+                         .setTail(transportAdapter.get())
+                         .setAllocator(&thriftAllocator)
+                         .addNextInbound<ThriftClientMetadataPushHandler>(
+                             thrift_client_metadata_push_handler_tag)
+                         .build();
 
-    client.adapter().setPipeline(pipeline.get());
-    transportHandler->setPipeline(*pipeline);
-    transportHandler->onConnect();
+    client.adapter().setPipeline(thriftPipeline.get());
+    transportAdapter->setPipeline(thriftPipeline.get());
 
-    // Drive event loop and discard SETUP frame
+    // Connect transport and discard SETUP frame
     evb.loopOnce();
     testTransport->getWrittenData();
   }

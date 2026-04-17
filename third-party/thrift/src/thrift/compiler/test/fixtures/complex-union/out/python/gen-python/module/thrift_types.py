@@ -12,6 +12,10 @@ import folly.iobuf as _fbthrift_iobuf
 from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
+try:
+    import thrift.python.container_typedefs as _fbthrift_python_container_typedefs
+except ImportError:
+    _fbthrift_python_container_typedefs = None  # type: ignore
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
@@ -678,4 +682,10 @@ _fbthrift_all_structs = [
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
-containerTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)
+if _fbthrift_python_container_typedefs is not None:
+    class containerTypedef(_fbthrift_python_container_typedefs._MapTypedefBase):
+        __slots__ = ()
+        _fbthrift_map_key_type_info = _fbthrift_python_types.typeinfo_i16
+        _fbthrift_map_val_type_info = _fbthrift_python_types.typeinfo_string
+else:
+    containerTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)

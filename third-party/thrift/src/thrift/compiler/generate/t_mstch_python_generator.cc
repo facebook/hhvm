@@ -900,6 +900,16 @@ class t_mstch_python_prototypes_generator : public t_whisker_generator {
             return td->type()->get_true_type()->is<t_enum>();
           });
     });
+    def.property("has_container_typedefs?", [](const t_program& self) {
+      return std::any_of(
+          self.typedefs().begin(),
+          self.typedefs().end(),
+          [](const t_typedef* td) {
+            auto true_type = td->type()->get_true_type();
+            return true_type->is<t_list>() || true_type->is<t_set>() ||
+                true_type->is<t_map>();
+          });
+    });
     def.property("include_namespaces", [this, &proto](const t_program& self) {
       if (&self != program_) {
         throw whisker::eval_error(

@@ -12,6 +12,10 @@ import folly.iobuf as _fbthrift_iobuf
 from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
+try:
+    import thrift.python.container_typedefs as _fbthrift_python_container_typedefs
+except ImportError:
+    _fbthrift_python_container_typedefs = None  # type: ignore
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
@@ -2504,11 +2508,40 @@ constEnumUnion = MyUnion(myEnum=MyEnum.MyValue2)
 
 stringTypedef = str
 longTypeDef = int
-mapTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)
-listTypedef = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_double)
+if _fbthrift_python_container_typedefs is not None:
+    class mapTypedef(_fbthrift_python_container_typedefs._MapTypedefBase):
+        __slots__ = ()
+        _fbthrift_map_key_type_info = _fbthrift_python_types.typeinfo_i16
+        _fbthrift_map_val_type_info = _fbthrift_python_types.typeinfo_string
+else:
+    mapTypedef = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i16, _fbthrift_python_types.typeinfo_string)
+if _fbthrift_python_container_typedefs is not None:
+    class listTypedef(_fbthrift_python_container_typedefs._ListTypedefBase):
+        __slots__ = ()
+        _fbthrift_list_type_info = _fbthrift_python_types.typeinfo_double
+else:
+    listTypedef = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_double)
 floatTypedef = float
-FMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)
+if _fbthrift_python_container_typedefs is not None:
+    class FMap(_fbthrift_python_container_typedefs._MapTypedefBase):
+        __slots__ = ()
+        _fbthrift_map_key_type_info = _fbthrift_python_types.typeinfo_i32
+        _fbthrift_map_val_type_info = _fbthrift_python_types.typeinfo_i64
+else:
+    FMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)
 binary_4918 = bytes
 i32_1194 = int
-map_i32_FMap_6797 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64))
-map_i64_string_5732 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.typeinfo_string)
+if _fbthrift_python_container_typedefs is not None:
+    class map_i32_FMap_6797(_fbthrift_python_container_typedefs._MapTypedefBase):
+        __slots__ = ()
+        _fbthrift_map_key_type_info = _fbthrift_python_types.typeinfo_i32
+        _fbthrift_map_val_type_info = _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64)
+else:
+    map_i32_FMap_6797 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i64))
+if _fbthrift_python_container_typedefs is not None:
+    class map_i64_string_5732(_fbthrift_python_container_typedefs._MapTypedefBase):
+        __slots__ = ()
+        _fbthrift_map_key_type_info = _fbthrift_python_types.typeinfo_i64
+        _fbthrift_map_val_type_info = _fbthrift_python_types.typeinfo_string
+else:
+    map_i64_string_5732 = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i64, _fbthrift_python_types.typeinfo_string)

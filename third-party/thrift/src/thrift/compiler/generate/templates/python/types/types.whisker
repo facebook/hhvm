@@ -44,6 +44,12 @@ from thrift.python.protocol import RpcKind as _fbthrift__RpcKind
   {{/if program.has_sink_functions?}}
 import {{program.base_library_package}}.types as _fbthrift_python_types
   {{#if python.generate_immutable_types?}}
+    {{#if program.has_container_typedefs?}}
+try:
+    import {{program.base_library_package}}.container_typedefs as _fbthrift_python_container_typedefs
+except ImportError:
+    _fbthrift_python_container_typedefs = None  # type: ignore
+    {{/if program.has_container_typedefs?}}
 import {{program.base_library_package}}.exceptions as _fbthrift_python_exceptions
   {{/if python.generate_immutable_types?}}
   {{#if python.generate_mutable_types?}}

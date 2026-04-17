@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 import unittest
-from collections.abc import ItemsView, KeysView, ValuesView
+from collections.abc import ItemsView, KeysView, Mapping, ValuesView
 from enum import Enum, IntEnum
 from typing import Dict, Type, TypeVar
 
@@ -27,6 +27,7 @@ import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
 import python_test.maps.thrift_mutable_types as mutable_maps_types
 import python_test.maps.thrift_types as immutable_maps_types
+import thrift.python.types as _fbthrift_python_types
 from folly.iobuf import IOBuf
 from parameterized import parameterized_class
 from python_test.containers.thrift_types import (
@@ -36,6 +37,8 @@ from python_test.containers.thrift_types import (
     Maps as MapsType,
 )
 from python_test.maps.thrift_types import (
+    AnotherStrI32ListMap as AnotherStrI32ListMapType,
+    AnotherStrIntMap as AnotherStrIntMapType,
     constant_map,
     easy as easyType,
     F14MapFollyString as F14MapFollyStringType,
@@ -64,6 +67,28 @@ class MyStringEnum(str, Enum):
 
 
 class ImmutableMapTests(unittest.TestCase):
+    def test_typedef_isinstance(self) -> None:
+        int_map = StrIntMapType({"foo": 1, "bar": 2})
+        # StrIntMap and AnotherStrIntMap both resolve to map<string, i64>
+        self.assertIsInstance(int_map, StrIntMapType)
+        self.assertIsInstance(int_map, AnotherStrIntMapType)
+        self.assertIsInstance(int_map, _fbthrift_python_types.Map)
+        self.assertIsInstance(int_map, Mapping)
+        self.assertTrue(issubclass(StrIntMapType, Mapping))
+        self.assertTrue(issubclass(StrIntMapType, AnotherStrIntMapType))
+        self.assertTrue(issubclass(AnotherStrIntMapType, StrIntMapType))
+        self.assertTrue(issubclass(StrIntMapType, _fbthrift_python_types.Map))
+        # Different key/value types should not match
+        self.assertNotIsInstance(int_map, StrEasyMapType)
+        self.assertFalse(issubclass(StrIntMapType, StrEasyMapType))
+        # Nested container: StrI32ListMap is map<string, list<i32>>,
+        # AnotherStrI32ListMap is also map<string, list<i32>>
+        nested_map = StrI32ListMapType({"a": [1, 2], "b": [3, 4]})
+        self.assertIsInstance(nested_map, StrI32ListMapType)
+        self.assertIsInstance(nested_map, AnotherStrI32ListMapType)
+        self.assertTrue(issubclass(StrI32ListMapType, AnotherStrI32ListMapType))
+        self.assertTrue(issubclass(AnotherStrI32ListMapType, StrI32ListMapType))
+
     def test_hashability(self) -> None:
         hash(immutable_maps_types.StrI32ListMap())
         x = immutable_maps_types.StrStrIntListMapMap(
@@ -350,7 +375,11 @@ class MapTests(unittest.TestCase):
                 easy_map.__class__.__module__, "thrift.python.mutable_containers"
             )
         else:
-            self.assertEqual(easy_map.__class__.__module__, "thrift.python.types")
+            # Immutable container typedefs are now proper classes in the
+            # generated module, inheriting from thrift.python.types.Map
+            self.assertEqual(
+                easy_map.__class__.__module__, "python_test.maps.thrift_types"
+            )
 
 
 # TODO: Collapse these two test cases into parameterized test above

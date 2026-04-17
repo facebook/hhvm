@@ -24,7 +24,7 @@ void setEgressWtHttpSettings(HTTPSettings* settings) noexcept;
 
 // if ENABLE_CONNECT_PROTOCOL is set; applies default h3 wt settings on the
 // HttpSettings (e.g. MaxData, MaxStreams)
-void setEgressWtH3HttpSettings(HTTPSettings& settings) noexcept;
+void setEgressWtH3Settings(HTTPSettings& settings) noexcept;
 
 // derives the h2 WtConfig from the ingress & egress HttpSettings of HttpCodec
 WtStreamManager::WtConfig getWtConfig(const HTTPSettings* ingress,

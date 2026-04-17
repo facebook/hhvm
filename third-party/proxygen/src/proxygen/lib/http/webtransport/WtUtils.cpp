@@ -65,12 +65,11 @@ void setEgressWtHttpSettings(HTTPSettings* settings) noexcept {
 }
 
 // sets default egress h3 wt http settings if ENABLE_CONNECT_PROTOCOL set
-void setEgressWtH3HttpSettings(HTTPSettings& settings) noexcept {
-  const bool supportsWt = settings.getSetting(SettingsId::WT_ENABLED,
-                                              /*defaultVal=*/0) &&
-                          settings.getSetting(SettingsId::WT_ENABLED,
-                                              /*defaultVal=*/0);
-
+void setEgressWtH3Settings(HTTPSettings& settings) noexcept {
+  const bool supportsWt =
+      settings.getSetting(SettingsId::ENABLE_CONNECT_PROTOCOL,
+                          /*defaultVal=*/0) &&
+      settings.getSetting(SettingsId::WT_ENABLED, /*defaultVal=*/0);
   if (supportsWt) {
     settings.setIfNotPresent(SettingsId::WT_INITIAL_MAX_DATA, kWtInitMaxData);
     settings.setIfNotPresent(SettingsId::WT_INITIAL_MAX_STREAMS_UNI,

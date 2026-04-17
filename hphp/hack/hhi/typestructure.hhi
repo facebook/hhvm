@@ -78,6 +78,7 @@ namespace HH {
     ?'alias' => string,
     ?'exact' => bool,
     ?'like' => bool,
+    ?'with_refinements' => dict<string, shape('is_ctx' => bool, ?'equals' => mixed, ?'as' => mixed, ?'super' => mixed)>
   ) = shape(
     ?'nullable' => bool,
     'kind' => TypeStructureKind,
@@ -111,6 +112,8 @@ namespace HH {
     ?'exact' => bool,
     // if the type is a like-type
     ?'like' => bool,
+    // if the type is a with-refinement e.g. class C with { type T = int; }
+    ?'with_refinements' => dict<string, shape('is_ctx' => bool, ?'equals' => mixed, ?'as' => mixed, ?'super' => mixed)>
   );
 
   /*

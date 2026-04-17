@@ -1,6 +1,6 @@
 ERROR: File "classname_tyvar.php", line 14, characters 68-78:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-699:
+  File "typestructure.hhi", line 59, characters 31-819:
   The shape is defined here
 ERROR: File "classname_tyvar.php", line 15, characters 19-45:
 The two arguments to `HH\type_structure_classname()` must be:

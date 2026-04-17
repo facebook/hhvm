@@ -804,11 +804,11 @@ size_t HQSession::sendSettings() {
         case hq::SettingId::H3_DATAGRAM_RFC:
         case hq::SettingId::H3_WT_MAX_SESSIONS:
         case hq::SettingId::WT_INITIAL_MAX_DATA:
-        case hq::SettingId::WT_ENABLED:
           break;
+        case hq::SettingId::WT_ENABLED:
         case hq::SettingId::ENABLE_WEBTRANSPORT:
           if (setting.value) {
-            VLOG(4) << "enable_webtransport sess=" << *this;
+            VLOG(4) << "wt enabled sess=" << *this;
             supportsWebTransport_.set(
                 folly::to_underlying(SettingEnabled::SELF));
           }
@@ -1574,8 +1574,9 @@ void HQSession::applySettings(const SettingsList& settings) {
         case hq::SettingId::H3_DATAGRAM_RFC:
           datagram = static_cast<bool>(setting.value);
           break;
+        case hq::SettingId::WT_ENABLED:
         case hq::SettingId::ENABLE_WEBTRANSPORT:
-          VLOG(3) << "Peer sent ENABLE_WEBTRANSPORT=" << setting.value;
+          VLOG(3) << "Peer sent WT_ENABLED=" << setting.value;
           supportsWebTransport_.set(folly::to_underlying(SettingEnabled::PEER));
           break;
         case hq::SettingId::H3_WT_MAX_SESSIONS:
@@ -1585,11 +1586,6 @@ void HQSession::applySettings(const SettingsList& settings) {
         case hq::SettingId::WT_INITIAL_MAX_DATA:
           VLOG(3) << "Peer sent WT_INITIAL_MAX_DATA=" << setting.value;
           wtInitialSendWindow_ = setting.value;
-          break;
-        case hq::SettingId::WT_ENABLED:
-          // TODO: This part of the code needs a larger refactor. We shouldn't
-          // be setting supportsWebTransport_ unless: 1) WT_ENABLED =
-          // ENABLE_CONNECT_PROTOCOL = H3_DATAGRAM == 1 or 2) H3_DATAGRAM == 1
           break;
       }
     }

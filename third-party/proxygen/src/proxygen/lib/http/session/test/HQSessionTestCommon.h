@@ -126,6 +126,7 @@ class HQSessionTest
       egressSettings_.setSetting(proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL,
                                  1);
       egressSettings_.setSetting(proxygen::SettingsId::ENABLE_WEBTRANSPORT, 1);
+      egressSettings_.setSetting(proxygen::SettingsId::WT_ENABLED, 1);
       egressSettings_.setSetting(proxygen::SettingsId::WT_INITIAL_MAX_DATA,
                                  65536);
     }

@@ -975,7 +975,8 @@ class HTTPQuicCoroSession final
     , public quic::QuicSocket::PingCallback
     , public quic::QuicSocket::WriteCallback
     , public quic::QuicSocket::DatagramCallback
-    , public HQUniStreamDispatcher::Callback {
+    , public HQUniStreamDispatcher::Callback
+    , public HQBidiStreamDispatcher::Callback {
  public:
   HTTPQuicCoroSession(std::shared_ptr<quic::QuicSocket> sock,
                       std::unique_ptr<hq::HQMultiCodec> codec,
@@ -1013,6 +1014,9 @@ class HTTPQuicCoroSession final
     return hq::withType(preface, parse);
   }
 
+  folly::Optional<hq::BidirectionalStreamType> parseBidiStreamPreface(
+      uint64_t preface) override;
+
   void dispatchControlStream(quic::StreamId id,
                              hq::UnidirectionalStreamType streamType,
                              size_t toConsume) override;
@@ -1021,15 +1025,15 @@ class HTTPQuicCoroSession final
                           hq::PushId pushId,
                           size_t toConsume) override;
 
+  void dispatchRequestStream(quic::StreamId id) override;
+
   void dispatchUniWTStream(quic::StreamId streamId,
                            quic::StreamId /*sessionId*/,
-                           size_t /*toConsume*/) override {
-    // TODO: implement WebTransport for proxygen::coro
-    quicSocket_->stopSending(
-        streamId,
-        quic::ApplicationErrorCode(HTTPErrorCode::STREAM_CREATION_ERROR));
-    quicSocket_->setPeekCallback(streamId, nullptr);
-  }
+                           size_t /*toConsume*/) override;
+
+  void dispatchBidiWTStream(quic::StreamId streamId,
+                            quic::StreamId sessionId,
+                            size_t toConsume) override;
 
   std::shared_ptr<quic::QuicSocket> quicSocket_;
   hq::HQMultiCodec* multiCodec_{nullptr};
@@ -1039,6 +1043,7 @@ class HTTPQuicCoroSession final
   quic::StreamId qpackEncoderStreamID_{quic::kInvalidStreamId};
   quic::StreamId qpackDecoderStreamID_{quic::kInvalidStreamId};
   HQUniStreamDispatcher uniStreamDispatcher_;
+  HQBidiStreamDispatcher bidiStreamDispatcher_;
 
   void onError(HTTPCodec::StreamID streamID,
                const HTTPException& error,

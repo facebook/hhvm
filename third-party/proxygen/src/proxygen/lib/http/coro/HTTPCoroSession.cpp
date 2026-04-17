@@ -498,7 +498,8 @@ HTTPQuicCoroSession::HTTPQuicCoroSession(
       multiCodec_(static_cast<hq::HQMultiCodec*>(codec_.getChainEndPtr())),
       qpackEncoderCodec_(multiCodec_->getQPACKCodec(), *this),
       qpackDecoderCodec_(multiCodec_->getQPACKCodec(), *this),
-      uniStreamDispatcher_(*this, direction_) {
+      uniStreamDispatcher_(*this, direction_),
+      bidiStreamDispatcher_(*this, direction_) {
   start();
 }
 HTTPQuicCoroSession::~HTTPQuicCoroSession() = default;
@@ -2753,8 +2754,22 @@ void HTTPQuicCoroSession::rejectStream(quic::StreamId id) {
   quicSocket_->stopSending(
       id,
       (quic::ApplicationErrorCode)HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
+  quicSocket_->resetStream(
+      id,
+      (quic::ApplicationErrorCode)HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
   quicSocket_->setPeekCallback(id, nullptr);
-  // when adding bidi, invoke resetStream too
+}
+
+folly::Optional<hq::BidirectionalStreamType>
+HTTPQuicCoroSession::parseBidiStreamPreface(uint64_t preface) {
+  switch (preface) {
+    case folly::to_underlying(hq::BidirectionalStreamType::WEBTRANSPORT):
+      return hq::BidirectionalStreamType::WEBTRANSPORT;
+    case folly::to_underlying(hq::BidirectionalStreamType::REQUEST):
+      return hq::BidirectionalStreamType::REQUEST;
+    default:
+      return folly::none;
+  }
 }
 
 void HTTPQuicCoroSession::dispatchControlStream(
@@ -2883,6 +2898,22 @@ folly::coro::Task<void> HTTPQuicCoroSession::readControlStream(
     // Do I need to clear the read callback for this stream?
   }
   XLOG(DBG4) << __func__ << " complete, id=" << id << " sess=" << *this;
+}
+
+void HTTPQuicCoroSession::dispatchUniWTStream(quic::StreamId streamId,
+                                              quic::StreamId /*sessionId*/,
+                                              size_t /*toConsume*/) {
+  rejectStream(streamId);
+}
+
+void HTTPQuicCoroSession::dispatchBidiWTStream(quic::StreamId streamId,
+                                               quic::StreamId /*sessionId*/,
+                                               size_t /*toConsume*/) {
+  rejectStream(streamId);
+}
+
+void HTTPQuicCoroSession::dispatchRequestStream(quic::StreamId id) {
+  onNewBidirectionalStream(id);
 }
 
 void HTTPQuicCoroSession::StreamRCB::readAvailable(quic::StreamId id) noexcept {
@@ -3756,7 +3787,8 @@ void HTTPUniplexTransportSession::attachEvb(folly::EventBase* evb) {
 
 bool HTTPQuicCoroSession::isDetachable() const {
   return HTTPCoroSession::isDetachable() && quicSocket_->good() &&
-         uniStreamDispatcher_.numberOfStreams() == 0;
+         uniStreamDispatcher_.numberOfStreams() == 0 &&
+         bidiStreamDispatcher_.numberOfStreams() == 0;
 }
 
 void HTTPQuicCoroSession::detachEvb() {

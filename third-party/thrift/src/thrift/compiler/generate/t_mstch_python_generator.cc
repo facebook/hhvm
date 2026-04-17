@@ -16,7 +16,6 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <fstream>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -1312,24 +1311,6 @@ void t_mstch_python_generator::generate_types() {
 }
 
 void t_mstch_python_generator::generate_uris() {
-  auto has_uri = [](const auto* def) { return !def->uri().empty(); };
-  if (!std::any_of(
-          program_->structured_definitions().begin(),
-          program_->structured_definitions().end(),
-          has_uri) &&
-      !std::any_of(
-          program_->enums().begin(), program_->enums().end(), has_uri)) {
-    // Create an empty file when there are no URIs.
-    auto path = std::filesystem::path{get_out_dir()} / generate_root_path_ /
-        program_->name() / "thrift_uris.txt";
-    std::filesystem::create_directories(path.parent_path());
-    std::ofstream output{path};
-    if (!output) {
-      throw std::runtime_error(
-          fmt::format("Could not open '{}' for writing.", path.string()));
-    }
-    return;
-  }
   generate_file(
       "thrift_uris.txt",
       types_file_kind::not_a_types_file,

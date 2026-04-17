@@ -132,6 +132,22 @@ func (t *rpcClientConformanceTester) execute() {
 		err = t.InteractionPersistsState(testCaseCtx)
 	case t.instruction.InteractionTermination != nil:
 		err = t.InteractionTermination(testCaseCtx)
+	case t.instruction.BidiBasic != nil:
+		err = t.BidiBasic(testCaseCtx)
+	case t.instruction.BidiInitialResponse != nil:
+		err = t.BidiInitialResponse(testCaseCtx)
+	case t.instruction.BidiStreamDeclaredException != nil:
+		err = t.BidiStreamDeclaredException(testCaseCtx)
+	case t.instruction.BidiStreamUndeclaredException != nil:
+		err = t.BidiStreamUndeclaredException(testCaseCtx)
+	case t.instruction.BidiSinkDeclaredException != nil:
+		err = t.BidiSinkDeclaredException(testCaseCtx)
+	case t.instruction.BidiSinkUndeclaredException != nil:
+		err = t.BidiSinkUndeclaredException(testCaseCtx)
+	case t.instruction.BidiMethodDeclaredException != nil:
+		err = t.BidiMethodDeclaredException(testCaseCtx)
+	case t.instruction.BidiMethodUndeclaredException != nil:
+		err = t.BidiMethodUndeclaredException(testCaseCtx)
 	default:
 		glog.Exitf("unsupported test case")
 	}
@@ -576,4 +592,36 @@ func (t *rpcClientConformanceTester) InteractionTermination(ctx context.Context)
 	clientTestResult := rpc.NewClientTestResult().
 		SetInteractionTermination(responseValue)
 	return t.client.SendTestResult(ctx, clientTestResult)
+}
+
+func (t *rpcClientConformanceTester) BidiBasic(ctx context.Context) error {
+	return errors.New("not implemented")
+}
+
+func (t *rpcClientConformanceTester) BidiInitialResponse(ctx context.Context) error {
+	return errors.New("not implemented")
+}
+
+func (t *rpcClientConformanceTester) BidiStreamDeclaredException(ctx context.Context) error {
+	return errors.New("not implemented")
+}
+
+func (t *rpcClientConformanceTester) BidiStreamUndeclaredException(ctx context.Context) error {
+	return errors.New("not implemented")
+}
+
+func (t *rpcClientConformanceTester) BidiSinkDeclaredException(ctx context.Context) error {
+	return errors.New("not implemented")
+}
+
+func (t *rpcClientConformanceTester) BidiSinkUndeclaredException(ctx context.Context) error {
+	return errors.New("not implemented")
+}
+
+func (t *rpcClientConformanceTester) BidiMethodDeclaredException(ctx context.Context) error {
+	return errors.New("not implemented")
+}
+
+func (t *rpcClientConformanceTester) BidiMethodUndeclaredException(ctx context.Context) error {
+	return errors.New("not implemented")
 }

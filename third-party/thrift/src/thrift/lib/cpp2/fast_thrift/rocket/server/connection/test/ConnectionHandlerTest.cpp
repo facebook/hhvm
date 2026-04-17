@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
 #define private public
 #define protected public
@@ -37,74 +38,6 @@ using namespace apache::thrift::fast_thrift::channel_pipeline;
 using namespace apache::thrift::fast_thrift::channel_pipeline::test;
 using MockAppHandler = MockHeadHandler;
 using namespace testing;
-
-class MockTransportHandler : public folly::DelayedDestruction {
- public:
-  using Ptr = std::
-      unique_ptr<MockTransportHandler, folly::DelayedDestruction::Destructor>;
-
-  static Ptr create(folly::AsyncTransport::UniquePtr /* socket */) {
-    return Ptr(new MockTransportHandler());
-  }
-
-  void setPipeline(PipelineImpl& pipeline) { pipeline_ = &pipeline; }
-
-  void pauseRead() noexcept { readPaused_ = true; }
-
-  void resumeRead() noexcept { readPaused_ = false; }
-
-  // Test hook: called from onConnect() to signal that the server has
-  // accepted a connection. Used by connectAndWait() for synchronization.
-  static inline folly::Synchronized<std::function<void()>> onConnectHook_;
-
-  void onConnect() noexcept {
-    connectCalled_ = true;
-    resumeRead();
-    if (auto hook = onConnectHook_.rlock(); *hook) {
-      (*hook)();
-    }
-  }
-
-  bool readPaused() const { return readPaused_; }
-
-  bool connectCalled() const { return connectCalled_; }
-
-  apache::thrift::fast_thrift::channel_pipeline::Result onMessage(
-      apache::thrift::fast_thrift::channel_pipeline::
-          TypeErasedBox&& /* msg */) noexcept {
-    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
-  }
-
-  void onException(folly::exception_wrapper&&) noexcept {}
-
-  void onClose(folly::exception_wrapper&& /* ew */) noexcept {
-    closeCalled_ = true;
-    if (closeCallback_) {
-      closeCallback_();
-    }
-  }
-
-  void setCloseCallback(std::function<void()> callback) {
-    closeCallback_ = std::move(callback);
-  }
-
-  bool closeCalled() const { return closeCalled_; }
-
-  PipelineImpl* pipeline() const { return pipeline_; }
-
- private:
-  MockTransportHandler() = default;
-
-  PipelineImpl* pipeline_{nullptr};
-  bool readPaused_{true};
-  bool closeCalled_{false};
-  bool connectCalled_{false};
-  std::function<void()> closeCallback_;
-};
-
-using TestConnectionHandler = ConnectionHandler<MockTransportHandler>;
-using TestConnectionHandlerPtr = std::
-    unique_ptr<TestConnectionHandler, folly::DelayedDestruction::Destructor>;
 
 class ConnectionHandlerTest : public ::testing::Test {
  protected:
@@ -118,26 +51,41 @@ class ConnectionHandlerTest : public ::testing::Test {
     evbThread_.reset();
   }
 
-  PipelineFactory<MockTransportHandler> createPipelineFactory() {
-    return [this](
-               folly::EventBase* evb,
-               MockTransportHandler* transportHandler) -> PipelineImpl::Ptr {
-      return PipelineBuilder<
-                 MockTransportHandler,
-                 MockAppHandler,
-                 SimpleBufferAllocator>()
-          .setEventBase(evb)
-          .setHead(transportHandler)
-          .setTail(&appHandler_)
-          .setAllocator(&allocator_)
-          .setHeadToTailOp(HeadToTailOp::Read)
-          .build();
-    };
+  ConnectionFactory createConnectionFactory() {
+    return
+        [this](folly::AsyncSocket::UniquePtr socket) -> RocketServerConnection {
+          auto* evb = socket->getEventBase();
+          auto transportHandler =
+              transport::TransportHandler::create(std::move(socket));
+
+          auto pipeline = PipelineBuilder<
+                              transport::TransportHandler,
+                              MockAppHandler,
+                              SimpleBufferAllocator>()
+                              .setEventBase(evb)
+                              .setHead(transportHandler.get())
+                              .setTail(&appHandler_)
+                              .setAllocator(&allocator_)
+                              .setHeadToTailOp(HeadToTailOp::Read)
+                              .build();
+
+          transportHandler->setPipeline(*pipeline);
+
+          if (auto hook = onConnectionCreatedHook_.rlock(); *hook) {
+            (*hook)();
+          }
+
+          return RocketServerConnection{
+              .transportHandler = std::move(transportHandler),
+              .pipeline = std::move(pipeline),
+              .allocator = {},
+          };
+        };
   }
 
-  TestConnectionHandlerPtr createConnectionHandler() {
-    return TestConnectionHandlerPtr(
-        new TestConnectionHandler(*evb_, createPipelineFactory()));
+  ConnectionHandler::Ptr createConnectionHandler() {
+    return ConnectionHandler::Ptr(
+        new ConnectionHandler(*evb_, createConnectionFactory()));
   }
 
   std::pair<folly::NetworkSocket, folly::NetworkSocket> createSocketPair() {
@@ -170,7 +118,7 @@ class ConnectionHandlerTest : public ::testing::Test {
   };
 
   // Connects a client to the server and waits until the server's
-  // connectionAccepted() -> onConnect() has fired, using onConnectHook_.
+  // connectionAccepted() has fired and the connection factory has run.
   // The client socket and thread are stored in clientConnections_ and
   // cleaned up in TearDown.
   void connectAndWait(const folly::SocketAddress& address) {
@@ -185,9 +133,7 @@ class ConnectionHandlerTest : public ::testing::Test {
     ConnectCb cb(connected);
 
     folly::Baton<> accepted;
-    *MockTransportHandler::onConnectHook_.wlock() = [&accepted] {
-      accepted.post();
-    };
+    *onConnectionCreatedHook_.wlock() = [&accepted] { accepted.post(); };
 
     auto clientThread = std::make_unique<folly::ScopedEventBaseThread>();
     auto* clientEvb = clientThread->getEventBase();
@@ -199,7 +145,7 @@ class ConnectionHandlerTest : public ::testing::Test {
 
     connected.wait();
     accepted.wait();
-    *MockTransportHandler::onConnectHook_.wlock() = nullptr;
+    *onConnectionCreatedHook_.wlock() = nullptr;
 
     clientConnections_.emplace_back(
         std::move(clientSocket), std::move(clientThread));
@@ -210,7 +156,10 @@ class ConnectionHandlerTest : public ::testing::Test {
   MockAppHandler appHandler_;
   SimpleBufferAllocator allocator_;
   std::vector<ClientConnection> clientConnections_;
+  folly::Synchronized<std::function<void()>> onConnectionCreatedHook_;
 };
+
+using ConnectionHandlerPtr = ConnectionHandler::Ptr;
 
 TEST_F(ConnectionHandlerTest, ConstructWithSocketAndFactory) {
   auto handler = createConnectionHandler();
@@ -222,23 +171,21 @@ TEST_F(ConnectionHandlerTest, ConnectionAccepted) {
   auto handler = createConnectionHandler();
   auto [clientSocket, serverSocket] = createSocketPair();
 
-  handler->state_ = TestConnectionHandler::State::ACCEPTING;
+  handler->state_ = ConnectionHandler::State::ACCEPTING;
   evb_->runInEventBaseThreadAndWait([&] {
     handler->connectionAccepted(serverSocket, folly::SocketAddress(), {});
   });
 
   EXPECT_EQ(handler->connectionCount(), 1);
-  EXPECT_TRUE(handler->connections_[0].transportHandler->connectCalled());
-  EXPECT_FALSE(handler->connections_[0].transportHandler->readPaused());
 
-  handler->closeAllConnections();
-  handler->state_ = TestConnectionHandler::State::STOPPED;
+  evb_->runInEventBaseThreadAndWait([&] { handler->closeAllConnections(); });
+  handler->state_ = ConnectionHandler::State::STOPPED;
   close(clientSocket.toFd());
 }
 
 TEST_F(ConnectionHandlerTest, AcceptMultipleConnections) {
   auto handler = createConnectionHandler();
-  handler->state_ = TestConnectionHandler::State::ACCEPTING;
+  handler->state_ = ConnectionHandler::State::ACCEPTING;
 
   std::vector<folly::NetworkSocket> clientSockets;
   for (int i = 0; i < 3; ++i) {
@@ -251,8 +198,8 @@ TEST_F(ConnectionHandlerTest, AcceptMultipleConnections) {
 
   EXPECT_EQ(handler->connectionCount(), 3);
 
-  handler->closeAllConnections();
-  handler->state_ = TestConnectionHandler::State::STOPPED;
+  evb_->runInEventBaseThreadAndWait([&] { handler->closeAllConnections(); });
+  handler->state_ = ConnectionHandler::State::STOPPED;
   for (auto& socket : clientSockets) {
     close(socket.toFd());
   }
@@ -260,7 +207,7 @@ TEST_F(ConnectionHandlerTest, AcceptMultipleConnections) {
 
 TEST_F(ConnectionHandlerTest, CloseAllConnectionsClearsConnections) {
   auto handler = createConnectionHandler();
-  handler->state_ = TestConnectionHandler::State::ACCEPTING;
+  handler->state_ = ConnectionHandler::State::ACCEPTING;
 
   std::vector<folly::NetworkSocket> clientSockets;
   for (int i = 0; i < 3; ++i) {
@@ -272,10 +219,10 @@ TEST_F(ConnectionHandlerTest, CloseAllConnectionsClearsConnections) {
   }
 
   EXPECT_EQ(handler->connectionCount(), 3);
-  handler->closeAllConnections();
+  evb_->runInEventBaseThreadAndWait([&] { handler->closeAllConnections(); });
   EXPECT_EQ(handler->connectionCount(), 0);
 
-  handler->state_ = TestConnectionHandler::State::STOPPED;
+  handler->state_ = ConnectionHandler::State::STOPPED;
   for (auto& socket : clientSockets) {
     close(socket.toFd());
   }
@@ -283,7 +230,7 @@ TEST_F(ConnectionHandlerTest, CloseAllConnectionsClearsConnections) {
 
 TEST_F(ConnectionHandlerTest, CloseCallback) {
   auto handler = createConnectionHandler();
-  handler->state_ = TestConnectionHandler::State::ACCEPTING;
+  handler->state_ = ConnectionHandler::State::ACCEPTING;
 
   std::vector<folly::NetworkSocket> clientSockets;
   for (int i = 0; i < 3; ++i) {
@@ -296,17 +243,19 @@ TEST_F(ConnectionHandlerTest, CloseCallback) {
 
   EXPECT_EQ(handler->connectionCount(), 3);
 
-  auto transportHandler = handler->connections_[1].transportHandler.get();
-  transportHandler->onClose(folly::exception_wrapper{});
+  evb_->runInEventBaseThreadAndWait([&] {
+    auto* transportHandler = handler->connections_[1].transportHandler.get();
+    transportHandler->onClose(folly::exception_wrapper{});
 
-  EXPECT_EQ(handler->connectionCount(), 2);
-  for (auto& connection : handler->connections_) {
-    EXPECT_NE(connection.transportHandler.get(), transportHandler);
-  }
+    EXPECT_EQ(handler->connectionCount(), 2);
+    for (auto& connection : handler->connections_) {
+      EXPECT_NE(connection.transportHandler.get(), transportHandler);
+    }
 
-  handler->closeAllConnections();
+    handler->closeAllConnections();
+  });
   EXPECT_EQ(handler->connectionCount(), 0);
-  handler->state_ = TestConnectionHandler::State::STOPPED;
+  handler->state_ = ConnectionHandler::State::STOPPED;
 
   for (auto& socket : clientSockets) {
     close(socket.toFd());
@@ -372,7 +321,7 @@ TEST_F(ConnectionHandlerTest, AcceptMutlipleConnections) {
 
 TEST_F(ConnectionHandlerTest, DestroyInNoneState) {
   auto handler = createConnectionHandler();
-  EXPECT_EQ(handler->state_, TestConnectionHandler::State::NONE);
+  EXPECT_EQ(handler->state_, ConnectionHandler::State::NONE);
   handler.reset();
 }
 
@@ -387,7 +336,7 @@ TEST_F(ConnectionHandlerTest, DestroyInStoppedState) {
   // Drain the EVB to let acceptStopped() fire (see StopAccepting comment).
   evb_->runInEventBaseThreadAndWait([&] {});
 
-  EXPECT_EQ(handler->state_, TestConnectionHandler::State::STOPPED);
+  EXPECT_EQ(handler->state_, ConnectionHandler::State::STOPPED);
   handler.reset();
 }
 
@@ -416,14 +365,14 @@ TEST_F(ConnectionHandlerTest, ObjectStaysAliveUntilAcceptStopped) {
 
   evb_->runInEventBaseThreadAndWait([&] { handler->startAccepting(address); });
 
-  EXPECT_EQ(handler->state_, TestConnectionHandler::State::ACCEPTING);
+  EXPECT_EQ(handler->state_, ConnectionHandler::State::ACCEPTING);
 
   evb_->runInEventBaseThreadAndWait([&] { handler->stopAccepting(); });
   // Drain the EVB to let acceptStopped() fire (see StopAccepting comment).
   evb_->runInEventBaseThreadAndWait([&] {});
 
   evb_->runInEventBaseThreadAndWait([&] {
-    EXPECT_EQ(handler->state_, TestConnectionHandler::State::STOPPED);
+    EXPECT_EQ(handler->state_, ConnectionHandler::State::STOPPED);
     auto* rawHandler = handler.release();
     rawHandler->destroy();
   });

@@ -36,21 +36,13 @@ namespace apache::thrift::fast_thrift::rocket::server::connection {
  * ConnectionManager accepts connections using SO_REUSEPORT and delegates
  * connection handling to ConnectionHandler instances (one per EventBase).
  *
- * Users provide a PipelineFactory to customize how pipelines are constructed
- * for new connections.
- *
- * @tparam TransportHandlerType The transport handler type
+ * Users provide a ConnectionFactory to customize how connections are
+ * constructed for new accepted sockets.
  */
-template <typename TransportHandlerType>
 class ConnectionManager : public folly::DelayedDestruction {
  public:
-  using Ptr = std::unique_ptr<
-      ConnectionManager<TransportHandlerType>,
-      folly::DelayedDestruction::Destructor>;
-
-  using ConnectionHandlerType = ConnectionHandler<TransportHandlerType>;
-  using ConnectionHandlerPtr = std::
-      unique_ptr<ConnectionHandlerType, folly::DelayedDestruction::Destructor>;
+  using Ptr =
+      std::unique_ptr<ConnectionManager, folly::DelayedDestruction::Destructor>;
 
   /**
    * IOObserver handles EventBase registration/unregistration events from the
@@ -78,9 +70,9 @@ class ConnectionManager : public folly::DelayedDestruction {
   static Ptr create(
       folly::SocketAddress address,
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor,
-      PipelineFactory<TransportHandlerType> pipelineFactory) {
+      ConnectionFactory connectionFactory) {
     return Ptr(new ConnectionManager(
-        std::move(address), std::move(executor), std::move(pipelineFactory)));
+        std::move(address), std::move(executor), std::move(connectionFactory)));
   }
 
   void start() {
@@ -114,10 +106,10 @@ class ConnectionManager : public folly::DelayedDestruction {
   ConnectionManager(
       folly::SocketAddress address,
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor,
-      PipelineFactory<TransportHandlerType> pipelineFactory)
+      ConnectionFactory connectionFactory)
       : address_(std::move(address)),
         executor_(std::move(executor)),
-        pipelineFactory_(std::move(pipelineFactory)),
+        connectionFactory_(std::move(connectionFactory)),
         observer_(std::make_shared<IOObserver>(*this)) {}
 
   ~ConnectionManager() override = default;
@@ -139,8 +131,8 @@ class ConnectionManager : public folly::DelayedDestruction {
     DestructorGuard dg(this);
 
     connectionHandlers_.withWLock([&](auto& handlerMap) {
-      ConnectionHandlerPtr connectionHandler(
-          new ConnectionHandlerType(evb, pipelineFactory_));
+      ConnectionHandler::Ptr connectionHandler(
+          new ConnectionHandler(evb, connectionFactory_));
       auto [it, inserted] =
           handlerMap.emplace(&evb, std::move(connectionHandler));
       if (inserted) {
@@ -166,11 +158,11 @@ class ConnectionManager : public folly::DelayedDestruction {
   std::atomic<State> state_{State::NONE};
   folly::SocketAddress address_;
   folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor_;
-  PipelineFactory<TransportHandlerType> pipelineFactory_;
+  ConnectionFactory connectionFactory_;
   std::shared_ptr<IOObserver> observer_;
 
   folly::Synchronized<
-      folly::F14FastMap<folly::EventBase*, ConnectionHandlerPtr>>
+      folly::F14FastMap<folly::EventBase*, ConnectionHandler::Ptr>>
       connectionHandlers_;
 };
 

@@ -27,6 +27,7 @@
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
 #define private public
 #define protected public
@@ -39,71 +40,21 @@ using namespace apache::thrift::fast_thrift::channel_pipeline::test;
 using MockAppHandler = MockHeadHandler;
 using namespace testing;
 
-class MockTransportHandler : public folly::DelayedDestruction {
- public:
-  using Ptr = std::
-      unique_ptr<MockTransportHandler, folly::DelayedDestruction::Destructor>;
-
-  static Ptr create(folly::AsyncTransport::UniquePtr /* socket */) {
-    return Ptr(new MockTransportHandler());
-  }
-
-  void setPipeline(PipelineImpl& pipeline) { pipeline_ = &pipeline; }
-
-  void pauseRead() noexcept { readPaused_ = true; }
-
-  void resumeRead() noexcept { readPaused_ = false; }
-
-  // Test hook: called from onConnect() to signal that the server has
-  // accepted a connection. Used by connectAndWait() for synchronization.
-  static inline folly::Synchronized<std::function<void()>> onConnectHook_;
-
-  void onConnect() noexcept {
-    resumeRead();
-    if (auto hook = onConnectHook_.rlock(); *hook) {
-      (*hook)();
-    }
-  }
-
-  bool readPaused() const { return readPaused_; }
-
-  Result onMessage(TypeErasedBox&& /* msg */) noexcept {
-    return Result::Success;
-  }
-
-  void onException(folly::exception_wrapper&&) noexcept {}
-
-  void onClose(folly::exception_wrapper&& /* ew */) noexcept {}
-
-  void setCloseCallback(std::function<void()> callback) {
-    closeCallback_ = std::move(callback);
-  }
-
- private:
-  std::function<void()> closeCallback_;
-  MockTransportHandler() = default;
-
-  PipelineImpl* pipeline_{nullptr};
-  bool readPaused_{true};
-};
-
-using TestConnectionManager = ConnectionManager<MockTransportHandler>;
-
 class ConnectionManagerTest : public ::testing::Test {
  protected:
   static constexpr size_t kNumIOThreads = 10;
 
   void SetUp() override {
-    connectionManager_ = TestConnectionManager::create(
+    connectionManager_ = ConnectionManager::create(
         folly::SocketAddress("::1", 0),
         folly::getKeepAliveToken(executor_),
-        createPipelineFactory());
+        createConnectionFactory());
     connectionManager_->start();
   }
 
   void TearDown() override {
     if (connectionManager_ &&
-        connectionManager_->state_ == TestConnectionManager::State::STARTED) {
+        connectionManager_->state_ == ConnectionManager::State::STARTED) {
       connectionManager_->stop();
     }
     clientConnections_.clear();
@@ -111,21 +62,36 @@ class ConnectionManagerTest : public ::testing::Test {
     executor_.join();
   }
 
-  PipelineFactory<MockTransportHandler> createPipelineFactory() {
-    return [this](
-               folly::EventBase* evb,
-               MockTransportHandler* transportHandler) -> PipelineImpl::Ptr {
-      return PipelineBuilder<
-                 MockTransportHandler,
-                 MockAppHandler,
-                 SimpleBufferAllocator>()
-          .setEventBase(evb)
-          .setHead(transportHandler)
-          .setTail(&appHandler_)
-          .setAllocator(&allocator_)
-          .setHeadToTailOp(HeadToTailOp::Read)
-          .build();
-    };
+  ConnectionFactory createConnectionFactory() {
+    return
+        [this](folly::AsyncSocket::UniquePtr socket) -> RocketServerConnection {
+          auto* evb = socket->getEventBase();
+          auto transportHandler =
+              transport::TransportHandler::create(std::move(socket));
+
+          auto pipeline = PipelineBuilder<
+                              transport::TransportHandler,
+                              MockAppHandler,
+                              SimpleBufferAllocator>()
+                              .setEventBase(evb)
+                              .setHead(transportHandler.get())
+                              .setTail(&appHandler_)
+                              .setAllocator(&allocator_)
+                              .setHeadToTailOp(HeadToTailOp::Read)
+                              .build();
+
+          transportHandler->setPipeline(*pipeline);
+
+          if (auto hook = onConnectionCreatedHook_.rlock(); *hook) {
+            (*hook)();
+          }
+
+          return RocketServerConnection{
+              .transportHandler = std::move(transportHandler),
+              .pipeline = std::move(pipeline),
+              .allocator = {},
+          };
+        };
   }
 
   folly::SocketAddress getBoundAddress() {
@@ -140,7 +106,7 @@ class ConnectionManagerTest : public ::testing::Test {
     connectionManager_->connectionHandlers_.withRLock(
         [&count](const auto& handlerMap) {
           for (const auto& [evb, connHandler] : handlerMap) {
-            count += connHandler->connections_.size();
+            count += connHandler->connectionCount();
           }
         });
     return count;
@@ -169,7 +135,7 @@ class ConnectionManagerTest : public ::testing::Test {
   };
 
   // Connects a client to the server and waits until the server's
-  // connectionAccepted() -> onConnect() has fired, using onConnectHook_.
+  // connectionAccepted() has fired and the connection factory has run.
   // The client socket and thread are stored in clientConnections_ and
   // cleaned up in TearDown.
   void connectAndWait(const folly::SocketAddress& address) {
@@ -184,9 +150,7 @@ class ConnectionManagerTest : public ::testing::Test {
     ConnectCb cb(connected);
 
     folly::Baton<> accepted;
-    *MockTransportHandler::onConnectHook_.wlock() = [&accepted] {
-      accepted.post();
-    };
+    *onConnectionCreatedHook_.wlock() = [&accepted] { accepted.post(); };
 
     auto clientThread = std::make_unique<folly::ScopedEventBaseThread>();
     auto* clientEvb = clientThread->getEventBase();
@@ -198,17 +162,18 @@ class ConnectionManagerTest : public ::testing::Test {
 
     connected.wait();
     accepted.wait();
-    *MockTransportHandler::onConnectHook_.wlock() = nullptr;
+    *onConnectionCreatedHook_.wlock() = nullptr;
 
     clientConnections_.emplace_back(
         std::move(clientSocket), std::move(clientThread));
   }
 
-  TestConnectionManager::Ptr connectionManager_;
+  ConnectionManager::Ptr connectionManager_;
   MockAppHandler appHandler_;
   SimpleBufferAllocator allocator_;
   folly::IOThreadPoolExecutor executor_{kNumIOThreads};
   std::vector<ClientConnection> clientConnections_;
+  folly::Synchronized<std::function<void()>> onConnectionCreatedHook_;
 };
 
 TEST_F(ConnectionManagerTest, CreateAndDestroy) {
@@ -268,8 +233,8 @@ TEST_F(ConnectionManagerTest, StopClosesConnections) {
 
 TEST_F(ConnectionManagerTest, ConnectionHandlerRegistration) {
   folly::SocketAddress address("::1", 0);
-  connectionManager_ = TestConnectionManager::create(
-      address, folly::getKeepAliveToken(executor_), createPipelineFactory());
+  connectionManager_ = ConnectionManager::create(
+      address, folly::getKeepAliveToken(executor_), createConnectionFactory());
 
   // Before start, no handlers should be registered
   {
@@ -289,11 +254,9 @@ TEST_F(ConnectionManagerTest, ConnectionHandlerRegistration) {
 
 TEST_F(ConnectionManagerTest, DestructorStopsServer) {
   folly::SocketAddress address("::1", 0);
-  auto manager = TestConnectionManager::create(
-      address, folly::getKeepAliveToken(executor_), createPipelineFactory());
+  auto manager = ConnectionManager::create(
+      address, folly::getKeepAliveToken(executor_), createConnectionFactory());
   manager->start();
-
-  // Wait for server to be fully started
 
   // Verify handlers are registered
   {

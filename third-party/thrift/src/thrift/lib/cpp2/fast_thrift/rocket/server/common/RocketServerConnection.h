@@ -47,6 +47,11 @@ struct RocketServerConnection {
    */
   void close(folly::exception_wrapper&& e) noexcept {
     if (transportHandler) {
+      // Clear the close callback before calling onClose to prevent re-entry:
+      // onClose() triggers the callback, which would call removeConnection(),
+      // which calls close() again — causing double-close and iterator
+      // invalidation in closeAllConnections().
+      transportHandler->setCloseCallback(nullptr);
       transportHandler->onClose(std::move(e));
       transportHandler.reset();
     }

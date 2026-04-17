@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -40,7 +41,7 @@ using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
 using channel_pipeline::SimpleBufferAllocator;
 
-// Handler tags for pipeline construction
+// Handler tags for rocket pipeline construction
 HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(batching_frame_handler);
 HANDLER_TAG(frame_length_encoder_handler);
@@ -60,22 +61,25 @@ FastThriftServer::FastThriftServer(
   connectionManager_ = ServerConnectionManager::create(
       config_.address,
       folly::getKeepAliveToken(executor_.get()),
-      createPipelineFactory());
+      createConnectionFactory());
 }
 
-rocket::server::connection::PipelineFactory<
-    FastThriftServer::ServerTransportHandler>
-FastThriftServer::createPipelineFactory() {
-  return [this](
-             folly::EventBase* evb,
-             ServerTransportHandler* transportHandler) -> PipelineImpl::Ptr {
-    auto serverChannel =
-        std::make_shared<ThriftServerChannel>(processorFactory_);
+rocket::server::connection::ConnectionFactory
+FastThriftServer::createConnectionFactory() {
+  return [this](folly::AsyncSocket::UniquePtr socket)
+             -> rocket::server::connection::RocketServerConnection {
+    auto* evb = socket->getEventBase();
+    auto transportHandler =
+        transport::TransportHandler::create(std::move(socket));
 
-    auto pipeline = buildPipeline(evb, transportHandler, serverChannel.get());
+    // Build the RocketServerConnection with default appAdapter
+    rocket::server::connection::RocketServerConnection conn;
 
-    serverChannel->setPipelineRef(*pipeline);
-    serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
+    // 1. Build rocket pipeline: TransportHandler → ... → RocketServerAppAdapter
+    auto rocketPipeline =
+        buildRocketPipeline(evb, transportHandler.get(), conn.appAdapter.get());
+    conn.appAdapter->setPipeline(rocketPipeline.get());
+    transportHandler->setPipeline(*rocketPipeline);
 
     if (config_.zeroCopyThreshold > 0) {
       if (!transportHandler->setZeroCopy(true)) {
@@ -84,24 +88,56 @@ FastThriftServer::createPipelineFactory() {
       transportHandler->setZeroCopyEnableThreshold(config_.zeroCopyThreshold);
     }
 
-    registerChannel(std::move(serverChannel));
+    conn.transportHandler = std::move(transportHandler);
+    conn.pipeline = std::move(rocketPipeline);
 
-    return pipeline;
+    // 2. Build thrift pipeline: ThriftServerTransportAdapter →
+    // ThriftServerChannel
+    auto serverChannel =
+        std::make_shared<ThriftServerChannel>(processorFactory_);
+    auto transportAdapter =
+        std::make_unique<server::ThriftServerTransportAdapter>(
+            *conn.appAdapter);
+
+    ThriftConnectionContext ctx;
+    auto thriftPipeline =
+        PipelineBuilder<
+            server::ThriftServerTransportAdapter,
+            ThriftServerChannel,
+            SimpleBufferAllocator>()
+            .setEventBase(evb)
+            .setHead(transportAdapter.get())
+            .setTail(serverChannel.get())
+            .setAllocator(ctx.thriftAllocator.get())
+            .setHeadToTailOp(channel_pipeline::HeadToTailOp::Read)
+            .build();
+
+    transportAdapter->setPipeline(thriftPipeline.get());
+    serverChannel->setPipelineRef(*thriftPipeline);
+    serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(evb));
+
+    ctx.serverChannel = serverChannel;
+    ctx.transportAdapter = std::move(transportAdapter);
+    ctx.thriftPipeline = std::move(thriftPipeline);
+
+    registerConnection(serverChannel.get(), std::move(ctx));
+
+    return conn;
   };
 }
 
-PipelineImpl::Ptr FastThriftServer::buildPipeline(
+PipelineImpl::Ptr FastThriftServer::buildRocketPipeline(
     folly::EventBase* evb,
-    ServerTransportHandler* transportHandler,
-    ThriftServerChannel* serverChannel) {
+    transport::TransportHandler* transportHandler,
+    rocket::server::RocketServerAppAdapter* appAdapter) {
   return PipelineBuilder<
-             ServerTransportHandler,
-             ThriftServerChannel,
+             transport::TransportHandler,
+             rocket::server::RocketServerAppAdapter,
              SimpleBufferAllocator>()
       .setEventBase(evb)
       .setHead(transportHandler)
-      .setTail(serverChannel)
-      .setAllocator(&allocator_)
+      .setTail(appAdapter)
+      .setAllocator(&rocketAllocator_)
       .setHeadToTailOp(channel_pipeline::HeadToTailOp::Read)
       .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(
           server_stream_state_handler_tag)
@@ -121,18 +157,19 @@ PipelineImpl::Ptr FastThriftServer::buildPipeline(
       .build();
 }
 
-void FastThriftServer::registerChannel(
-    std::shared_ptr<ThriftServerChannel> channel) {
-  auto* rawPtr = channel.get();
+void FastThriftServer::registerConnection(
+    ThriftServerChannel* key, ThriftConnectionContext context) {
+  auto* rawPtr = key;
   // Close callback is invoked from ThriftServerChannel::onException when the
   // connection closes (pipeline exception propagation). This removes the
-  // channel from tracking, releasing the shared_ptr and destroying it.
-  channel->setCloseCallback([this, rawPtr]() {
-    serverChannels_.withWLock(
-        [rawPtr](auto& channels) { channels.erase(rawPtr); });
+  // context from tracking, releasing the shared_ptr and destroying the
+  // thrift pipeline + transport adapter.
+  context.serverChannel->setCloseCallback([this, rawPtr]() {
+    thriftConnections_.withWLock(
+        [rawPtr](auto& conns) { conns.erase(rawPtr); });
   });
-  serverChannels_.withWLock(
-      [&](auto& channels) { channels.emplace(rawPtr, std::move(channel)); });
+  thriftConnections_.withWLock(
+      [&](auto& conns) { conns.emplace(rawPtr, std::move(context)); });
 }
 
 FastThriftServer::~FastThriftServer() {
@@ -141,7 +178,7 @@ FastThriftServer::~FastThriftServer() {
   // Destroy the connection manager before joining the executor. This triggers
   // deferred ConnectionHandler destruction on the EventBase threads.
   // We must then join the executor so those deferred callbacks run while
-  // `this` (and all its members like allocator_, serverChannels_) is still
+  // `this` (and all its members like allocator_, thriftConnections_) is still
   // alive. Without this, member destruction order would destroy those members
   // before the executor joins, causing use-after-free in the pipeline factory
   // lambda that captures `this`.
@@ -191,16 +228,10 @@ void FastThriftServer::stop() {
   // Stop accepting new connections first
   connectionManager_->stop();
 
-  // Move channels out under the lock, then destroy them outside.
-  // Channel destructors invoke close callbacks that lock serverChannels_,
-  // so destroying inside withWLock would deadlock.
-  std::unordered_map<ThriftServerChannel*, std::shared_ptr<ThriftServerChannel>>
-      channels;
-  serverChannels_.withWLock([&](auto& ch) { channels = std::move(ch); });
-  for (auto& [_, ch] : channels) {
-    ch->setCloseCallback(nullptr);
-  }
-  channels.clear();
+  // Clear all thrift contexts under the lock. Any close callback racing from an
+  // EventBase thread will either complete before we acquire the write lock (and
+  // already erase its entry) or find the map empty after we clear it.
+  thriftConnections_.withWLock([&](auto& conns) { conns.clear(); });
 
   stopBaton_.post();
 }

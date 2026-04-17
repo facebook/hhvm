@@ -18,8 +18,11 @@
  * ThriftServer Integration Microbenchmarks
  *
  * Compares two fast_thrift server pipeline implementations:
- * 1. FastThrift with ThriftServerChannel — single pipeline:
- *    TransportHandler → [rocket handlers] → ThriftServerChannel (baseline)
+ * 1. FastThrift with ThriftServerChannel — two-pipeline via transport adapter:
+ *    Rocket pipeline: TransportHandler → [rocket handlers] →
+ *    RocketServerAppAdapter
+ *    Thrift pipeline: ThriftServerTransportAdapter → ThriftServerChannel
+ *    (baseline)
  * 2. FastThrift with ThriftServerAppAdapter — two-pipeline via transport
  *    adapter:
  *    Rocket pipeline: TransportHandler → [rocket handlers] →
@@ -314,68 +317,54 @@ struct RocketPipelineResources {
 };
 
 // =============================================================================
-// ThriftServerChannel Benchmark Fixture (single pipeline)
+// ThriftServerChannel Benchmark Fixture (two-pipeline)
 //
-// ThriftServerChannel consumes RocketRequestMessage directly, so it uses
-// a single combined pipeline: TransportHandler → [rocket handlers] → Channel.
+// ThriftServerChannel consumes ThriftServerRequestMessage, so it requires
+// the two-pipeline architecture with ThriftServerTransportAdapter bridging
+// between the rocket pipeline and the thrift pipeline.
 // =============================================================================
 
 template <typename ProcessorT>
 struct ChannelBenchFixture {
   folly::EventBase evb;
   BenchAsyncTransport* testTransport{nullptr};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler;
+
+  // Rocket pipeline
+  RocketPipelineResources rocketResources;
+
+  // Thrift pipeline
+  std::unique_ptr<thrift::server::ThriftServerTransportAdapter>
+      transportAdapter;
   std::shared_ptr<thrift::ThriftServerChannel> serverChannel;
   std::shared_ptr<BenchProcessorFactory<ProcessorT>> processorFactory;
-  PipelineImpl::Ptr pipeline;
-  SimpleBufferAllocator allocator;
+  PipelineImpl::Ptr thriftPipeline;
+  SimpleBufferAllocator thriftAllocator;
 
   void setup() {
-    auto transport =
-        folly::AsyncTransport::UniquePtr(new BenchAsyncTransport(&evb));
-    testTransport = static_cast<BenchAsyncTransport*>(transport.get());
-
-    transportHandler =
-        apache::thrift::fast_thrift::transport::TransportHandler::create(
-            std::move(transport));
+    testTransport = rocketResources.setup(&evb);
 
     processorFactory = std::make_shared<BenchProcessorFactory<ProcessorT>>();
     serverChannel =
         std::make_shared<thrift::ThriftServerChannel>(processorFactory);
 
-    pipeline = PipelineBuilder<
-                   apache::thrift::fast_thrift::transport::TransportHandler,
-                   thrift::ThriftServerChannel,
-                   SimpleBufferAllocator>()
-                   .setEventBase(&evb)
-                   .setHead(transportHandler.get())
-                   .setTail(serverChannel.get())
-                   .setAllocator(&allocator)
-                   .setHeadToTailOp(HeadToTailOp::Read)
-                   .addNextDuplex<
-                       rocket::server::handler::RocketServerStreamStateHandler>(
-                       server_stream_state_handler_tag)
-                   .addNextDuplex<rocket::server::handler::
-                                      RocketServerRequestResponseFrameHandler>(
-                       server_request_response_frame_handler_tag)
-                   .addNextDuplex<
-                       rocket::server::handler::RocketServerSetupFrameHandler>(
-                       server_setup_frame_handler_tag)
-                   .addNextDuplex<
-                       rocket::server::handler::RocketServerFrameCodecHandler>(
-                       rocket_server_frame_codec_handler_tag)
-                   .addNextOutbound<FrameLengthEncoderHandler>(
-                       frame_length_encoder_handler_tag)
-                   .addNextInbound<FrameLengthParserHandler>(
-                       frame_length_parser_handler_tag)
-                   .build();
+    transportAdapter =
+        std::make_unique<thrift::server::ThriftServerTransportAdapter>(
+            *rocketResources.appAdapter);
 
-    serverChannel->setPipelineRef(*pipeline);
+    thriftPipeline = PipelineBuilder<
+                         thrift::server::ThriftServerTransportAdapter,
+                         thrift::ThriftServerChannel,
+                         SimpleBufferAllocator>()
+                         .setEventBase(&evb)
+                         .setHead(transportAdapter.get())
+                         .setTail(serverChannel.get())
+                         .setAllocator(&thriftAllocator)
+                         .setHeadToTailOp(HeadToTailOp::Read)
+                         .build();
+
+    transportAdapter->setPipeline(thriftPipeline.get());
+    serverChannel->setPipelineRef(*thriftPipeline);
     serverChannel->setWorker(apache::thrift::Cpp2Worker::createDummy(&evb));
-
-    transportHandler->setPipeline(*pipeline);
-    transportHandler->onConnect();
 
     auto setupFrame = serialize(
         SetupHeader{

@@ -29,8 +29,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -54,7 +54,7 @@ namespace {
 /**
  * Deserialize ResponseRpcMetadata from a pre-serialized IOBuf.
  * Used by tests to inspect response metadata that ThriftServerChannel
- * pre-serializes into the RocketResponseMessage.
+ * pre-serializes into the ThriftServerResponseMessage.
  */
 apache::thrift::ResponseRpcMetadata deserializeResponseMetadata(
     const folly::IOBuf& buf) {
@@ -226,8 +226,9 @@ class ThriftServerChannelTest : public ::testing::Test {
         .build();
   }
 
-  // Helper to create a ServerRequestMessage with metadata baked into the frame
-  apache::thrift::fast_thrift::rocket::server::RocketRequestMessage
+  // Helper to create a ThriftServerRequestMessage with metadata baked into the
+  // frame
+  apache::thrift::fast_thrift::thrift::ThriftServerRequestMessage
   createRequestMessage(
       uint32_t streamId,
       const std::string& methodName,
@@ -262,14 +263,8 @@ class ThriftServerChannelTest : public ::testing::Test {
     auto parsedFrame =
         apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
 
-    return apache::thrift::fast_thrift::rocket::server::RocketRequestMessage{
-        .frame = std::move(parsedFrame), .error = {}, .streamId = streamId};
-  }
-
-  apache::thrift::fast_thrift::rocket::server::RocketRequestMessage
-  createErrorRequest(uint32_t streamId, folly::exception_wrapper error) {
-    return apache::thrift::fast_thrift::rocket::server::RocketRequestMessage{
-        .frame = {}, .error = std::move(error), .streamId = streamId};
+    return apache::thrift::fast_thrift::thrift::ThriftServerRequestMessage{
+        .frame = std::move(parsedFrame), .streamId = streamId};
   }
 
   std::unique_ptr<folly::EventBase> evb_;
@@ -356,72 +351,6 @@ TEST_F(ThriftServerChannelTest, OnMessageExtractsProtocol) {
 // onMessage - Error Handling
 // =============================================================================
 
-TEST_F(ThriftServerChannelTest, OnMessageWithErrorDoesNotDispatch) {
-  pipeline_ = buildPipelineWithHandler(
-      [](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-         TypeErasedBox&&) { return Result::Success; });
-  channel_->setPipeline(std::move(pipeline_));
-
-  auto request = createErrorRequest(
-      1, folly::make_exception_wrapper<std::runtime_error>("transport error"));
-
-  auto result = channel_->onMessage(erase_and_box(std::move(request)));
-
-  EXPECT_EQ(result, Result::Success);
-  EXPECT_EQ(mockProcessor_->requestCount(), 0);
-}
-
-TEST_F(ThriftServerChannelTest, OnMessageWithErrorSendsErrorResponse) {
-  bool responseSent = false;
-  uint32_t capturedStreamId = 0;
-  apache::thrift::PayloadMetadata::Type capturedType{};
-
-  pipeline_ = buildPipelineWithHandler(
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& msg) {
-        auto& response = msg.get<apache::thrift::fast_thrift::rocket::server::
-                                     RocketResponseMessage>();
-        capturedStreamId = response.streamId;
-        responseSent = true;
-        if (response.metadata) {
-          auto meta = deserializeResponseMetadata(*response.metadata);
-          auto ref = meta.payloadMetadata();
-          if (ref) {
-            capturedType = ref->getType();
-          }
-        }
-        return Result::Success;
-      });
-  channel_->setPipeline(std::move(pipeline_));
-
-  auto request = createErrorRequest(
-      5, folly::make_exception_wrapper<std::runtime_error>("transport error"));
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
-
-  EXPECT_TRUE(responseSent);
-  EXPECT_EQ(capturedStreamId, 5u);
-  EXPECT_EQ(
-      capturedType, apache::thrift::PayloadMetadata::Type::exceptionMetadata);
-}
-
-TEST_F(ThriftServerChannelTest, OnMessageErrorWithStreamIdZeroNoResponse) {
-  bool responseSent = false;
-
-  pipeline_ = buildPipelineWithHandler(
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
-        responseSent = true;
-        return Result::Success;
-      });
-  channel_->setPipeline(std::move(pipeline_));
-
-  auto request = createErrorRequest(
-      0, folly::make_exception_wrapper<std::runtime_error>("error"));
-  std::ignore = channel_->onMessage(erase_and_box(std::move(request)));
-
-  EXPECT_FALSE(responseSent);
-}
-
 // =============================================================================
 // sendReply - Response Path
 // =============================================================================
@@ -442,12 +371,12 @@ TEST_F(ThriftServerChannelTest, SendReplyPreservesResponsePayload) {
   pipeline_ = buildPipelineWithHandler(
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
-        auto& response = msg.get<apache::thrift::fast_thrift::rocket::server::
-                                     RocketResponseMessage>();
-        if (response.payload) {
-          folly::io::Cursor cursor(response.payload.get());
+        auto& response = msg.get<
+            apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage>();
+        if (response.payload.data) {
+          folly::io::Cursor cursor(response.payload.data.get());
           capturedPayload = cursor.readFixedString(
-              response.payload->computeChainDataLength());
+              response.payload.data->computeChainDataLength());
         }
         return Result::Success;
       });
@@ -474,10 +403,10 @@ TEST_F(ThriftServerChannelTest, SendReplySetsResponseMetadata) {
   pipeline_ = buildPipelineWithHandler(
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
-        auto& response = msg.get<apache::thrift::fast_thrift::rocket::server::
-                                     RocketResponseMessage>();
-        if (response.metadata) {
-          auto meta = deserializeResponseMetadata(*response.metadata);
+        auto& response = msg.get<
+            apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage>();
+        if (response.payload.metadata) {
+          auto meta = deserializeResponseMetadata(*response.payload.metadata);
           auto ref = meta.payloadMetadata();
           if (ref) {
             capturedType = ref->getType();
@@ -518,10 +447,10 @@ TEST_F(ThriftServerChannelTest, SendErrorWrappedSetsExceptionMetadata) {
   pipeline_ = buildPipelineWithHandler(
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
-        auto& response = msg.get<apache::thrift::fast_thrift::rocket::server::
-                                     RocketResponseMessage>();
-        if (response.metadata) {
-          auto meta = deserializeResponseMetadata(*response.metadata);
+        auto& response = msg.get<
+            apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage>();
+        if (response.payload.metadata) {
+          auto meta = deserializeResponseMetadata(*response.payload.metadata);
           auto ref = meta.payloadMetadata();
           if (ref) {
             capturedPayloadType = ref->getType();
@@ -631,8 +560,8 @@ TEST_F(ThriftServerChannelTest, MultipleRequestsDispatchedCorrectly) {
   pipeline_ = buildPipelineWithHandler(
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
-        auto& response = msg.get<apache::thrift::fast_thrift::rocket::server::
-                                     RocketResponseMessage>();
+        auto& response = msg.get<
+            apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage>();
         capturedStreamIds.push_back(response.streamId);
         return Result::Success;
       });

@@ -24,7 +24,7 @@
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -62,7 +62,7 @@ std::unique_ptr<folly::IOBuf> serializeResponseMetadata(
  * Build a RocketResponseMessage containing a serialized
  * TApplicationException with PayloadExceptionMetadata.
  */
-apache::thrift::fast_thrift::rocket::server::RocketResponseMessage
+apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage
 buildErrorResponseMessage(
     uint32_t streamId,
     apache::thrift::protocol::PROTOCOL_TYPES protocolId,
@@ -82,12 +82,15 @@ buildErrorResponseMessage(
   payloadMetadata.exceptionMetadata() = std::move(exBase);
   responseMetadata.payloadMetadata() = std::move(payloadMetadata);
 
-  return apache::thrift::fast_thrift::rocket::server::RocketResponseMessage{
-      .payload = std::move(buf),
-      .metadata = serializeResponseMetadata(responseMetadata),
+  return apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage{
+      .payload =
+          {
+              .data = std::move(buf),
+              .metadata = serializeResponseMetadata(responseMetadata),
+              .complete = true,
+          },
       .streamId = streamId,
-      .errorCode = 0,
-      .complete = true};
+      .errorCode = 0};
 }
 
 /**
@@ -139,12 +142,15 @@ class PipelineResponseChannelRequest
         apache::thrift::PayloadResponseMetadata();
     responseMetadata.payloadMetadata() = std::move(payloadMetadata);
 
-    apache::thrift::fast_thrift::rocket::server::RocketResponseMessage msg{
-        .payload = std::move(response).buffer(),
-        .metadata = serializeResponseMetadata(responseMetadata),
+    apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage msg{
+        .payload =
+            {
+                .data = std::move(response).buffer(),
+                .metadata = serializeResponseMetadata(responseMetadata),
+                .complete = true,
+            },
         .streamId = streamId_,
-        .errorCode = 0,
-        .complete = true};
+        .errorCode = 0};
 
     if (!pipelineAlive_->load()) {
       XLOG(WARN) << "Pipeline destroyed, cannot send reply for stream "
@@ -245,19 +251,7 @@ apache::thrift::fast_thrift::channel_pipeline::Result
 ThriftServerChannel::onMessage(
     apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
         msg) noexcept {
-  auto request = msg.take<
-      apache::thrift::fast_thrift::rocket::server::RocketRequestMessage>();
-
-  if (request.error) {
-    XLOG(ERR) << "Request error: " << request.error.what();
-    if (pipeline_ && request.streamId != 0) {
-      sendErrorResponse(
-          request.streamId,
-          apache::thrift::protocol::T_COMPACT_PROTOCOL,
-          request.error.what().toStdString());
-    }
-    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
-  }
+  auto request = msg.take<ThriftServerRequestMessage>();
 
   if (!pipeline_) {
     XLOG(ERR) << "Pipeline not set";

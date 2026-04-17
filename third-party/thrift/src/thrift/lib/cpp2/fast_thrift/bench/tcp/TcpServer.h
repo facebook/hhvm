@@ -29,11 +29,8 @@
 
 namespace apache::thrift::fast_thrift::bench {
 
-using ServerTransportHandler =
-    apache::thrift::fast_thrift::transport::TransportHandler;
 using TcpConnectionManager =
-    apache::thrift::fast_thrift::rocket::server::connection::ConnectionManager<
-        ServerTransportHandler>;
+    apache::thrift::fast_thrift::rocket::server::connection::ConnectionManager;
 
 /**
  * TcpServer owns all server infrastructure for TCP-based benchmarks.

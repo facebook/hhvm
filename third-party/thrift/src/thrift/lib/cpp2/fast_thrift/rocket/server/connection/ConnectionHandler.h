@@ -23,45 +23,39 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/logging/xlog.h>
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
 
 namespace apache::thrift::fast_thrift::rocket::server::connection {
 
+using RocketServerConnection = rocket::server::RocketServerConnection;
+
 /**
- * PipelineFactory is a function that creates a pipeline for a new connection.
- * Users provide this factory to customize how pipelines are constructed
- * and wire up different handlers.
- *
- * @tparam TransportHandlerType The transport handler type
- *
- * @param evb The EventBase for the connection
- * @param transportHandler The transport handler for the connection
- * @return A unique pointer to the created pipeline
+ * ConnectionFactory creates a fully-wired RocketServerConnection for a new
+ * accepted socket. The factory receives the socket (from which the EventBase
+ * can be obtained via getEventBase()) and returns a RocketServerConnection
+ * owning the transport handler and pipeline.
  */
-template <typename TransportHandlerType>
-using PipelineFactory = std::function<
-    apache::thrift::fast_thrift::channel_pipeline::PipelineImpl::Ptr(
-        folly::EventBase* evb, TransportHandlerType* transportHandler)>;
+using ConnectionFactory =
+    std::function<RocketServerConnection(folly::AsyncSocket::UniquePtr socket)>;
 
 /**
  * ConnectionHandler manages connections for a single EventBase.
  * It holds the server socket and all active connections for that EventBase.
- * It delegates pipeline creation to a user-provided PipelineFactory.
+ * It delegates connection creation to a user-provided ConnectionFactory.
  *
  * Implements AcceptCallback to handle accepted socket connections directly.
- *
- * @tparam TransportHandlerType The transport handler type
  */
-template <typename TransportHandlerType>
 class ConnectionHandler : public folly::DelayedDestruction,
                           public folly::AsyncServerSocket::AcceptCallback {
  public:
+  using Ptr =
+      std::unique_ptr<ConnectionHandler, folly::DelayedDestruction::Destructor>;
+
   explicit ConnectionHandler(
-      folly::EventBase& evb,
-      PipelineFactory<TransportHandlerType> pipelineFactory)
+      folly::EventBase& evb, ConnectionFactory connectionFactory)
       : evb_(folly::getKeepAliveToken(&evb)),
         socket_(new folly::AsyncServerSocket(evb_.get())),
-        pipelineFactory_(std::move(pipelineFactory)) {}
+        connectionFactory_(std::move(connectionFactory)) {}
 
   ConnectionHandler(const ConnectionHandler&) = delete;
   ConnectionHandler& operator=(const ConnectionHandler&) = delete;
@@ -74,7 +68,6 @@ class ConnectionHandler : public folly::DelayedDestruction,
       const folly::SocketAddress& clientAddr,
       AcceptInfo) noexcept override {
     if (state_ != State::ACCEPTING) {
-      // Not accepting connections, close the socket
       folly::netops::close(fd);
       return;
     }
@@ -82,19 +75,14 @@ class ConnectionHandler : public folly::DelayedDestruction,
     XLOG(DBG3) << "Connection accepted from " << clientAddr.describe();
 
     auto socket = folly::AsyncSocket::newSocket(evb_.get(), fd);
-    auto transportHandler = TransportHandlerType::create(std::move(socket));
+    auto conn = connectionFactory_(std::move(socket));
 
-    auto pipeline = pipelineFactory_(evb_.get(), transportHandler.get());
-
-    transportHandler->setPipeline(*pipeline);
-
-    auto* rawTransportHandler = transportHandler.get();
-    transportHandler->setCloseCallback([this, rawTransportHandler]() {
+    auto* rawTransportHandler = conn.transportHandler.get();
+    conn.transportHandler->setCloseCallback([this, rawTransportHandler]() {
       removeConnection(rawTransportHandler);
     });
 
-    connections_.emplace_back(
-        Connection{std::move(pipeline), std::move(transportHandler)});
+    connections_.emplace_back(std::move(conn));
 
     rawTransportHandler->onConnect();
   }
@@ -142,16 +130,17 @@ class ConnectionHandler : public folly::DelayedDestruction,
 
   void closeAllConnections() {
     for (auto& conn : connections_) {
-      // We need to clear the close callback before calling onClose, otherwise
-      // we'll get a double close.
-      conn.transportHandler->setCloseCallback(nullptr);
-      conn.transportHandler->onClose(folly::exception_wrapper{});
-      conn.pipeline->close();
+      conn.close(folly::exception_wrapper{});
     }
     connections_.clear();
   }
 
-  size_t connectionCount() const { return connections_.size(); }
+  size_t connectionCount() {
+    size_t count = 0;
+    evb_->runImmediatelyOrRunInEventBaseThreadAndWait(
+        [&count, this] { count = connections_.size(); });
+    return count;
+  }
 
   void getAddress(folly::SocketAddress* address) const {
     socket_->getAddress(address);
@@ -193,31 +182,26 @@ class ConnectionHandler : public folly::DelayedDestruction,
  private:
   enum class State { NONE, ACCEPTING, STOPPING, STOPPED };
 
-  void removeConnection(TransportHandlerType* transportHandler) {
+  void removeConnection(transport::TransportHandler* transportHandler) {
     DestructorGuard dg(this);
 
     auto it = std::find_if(
         connections_.begin(),
         connections_.end(),
-        [transportHandler](const Connection& conn) {
+        [transportHandler](const RocketServerConnection& conn) {
           return conn.transportHandler.get() == transportHandler;
         });
     if (it != connections_.end()) {
-      it->pipeline->close();
+      it->close(folly::exception_wrapper{});
       connections_.erase(it);
     }
   }
 
-  struct Connection {
-    apache::thrift::fast_thrift::channel_pipeline::PipelineImpl::Ptr pipeline;
-    typename TransportHandlerType::Ptr transportHandler;
-  };
-
   State state_{State::NONE};
   folly::Executor::KeepAlive<folly::EventBase> evb_;
   folly::AsyncServerSocket::UniquePtr socket_;
-  PipelineFactory<TransportHandlerType> pipelineFactory_;
-  std::vector<Connection> connections_;
+  ConnectionFactory connectionFactory_;
+  std::vector<RocketServerConnection> connections_;
   std::optional<folly::DelayedDestruction::DestructorGuard>
       stoppingDestroyGuard_;
   bool destroyPending_{false};

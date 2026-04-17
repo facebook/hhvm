@@ -39,8 +39,7 @@ using ClientTransportHandler =
     apache::thrift::fast_thrift::transport::TransportHandler;
 
 using TestConnectionManager =
-    apache::thrift::fast_thrift::rocket::server::connection::ConnectionManager<
-        ServerTransportHandler>;
+    apache::thrift::fast_thrift::rocket::server::connection::ConnectionManager;
 
 /**
  * ClientConnection holds all client-side resources.

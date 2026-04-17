@@ -25,9 +25,10 @@
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
-#include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -50,7 +51,9 @@ struct FastThriftServerConfig {
  * FastThriftServer - A standalone server that uses the fast_thrift pipeline
  * to serve Thrift RPCs.
  *
- * Wires up the full fast_thrift server pipeline:
+ * Uses a two-pipeline architecture:
+ *
+ * Rocket pipeline (owned by RocketServerConnection):
  *   TransportHandler
  *     -> FrameLengthParserHandler
  *     -> FrameLengthEncoderHandler
@@ -58,7 +61,13 @@ struct FastThriftServerConfig {
  *     -> RocketServerSetupFrameHandler
  *     -> RocketServerRequestResponseFrameHandler
  *     -> RocketServerStreamStateHandler
- *     -> ThriftServerChannel (dispatches to AsyncProcessor)
+ *     -> RocketServerAppAdapter
+ *
+ * Thrift pipeline (owned by ThriftConnectionContext):
+ *   ThriftServerTransportAdapter -> ThriftServerChannel
+ *
+ * The ThriftServerTransportAdapter bridges between the two pipelines,
+ * converting between rocket and thrift message types.
  *
  * Supports request-response and oneway RPCs. Streaming and sink RPCs are
  * not yet supported.
@@ -108,32 +117,39 @@ class FastThriftServer {
   folly::SocketAddress getAddress() const;
 
  private:
-  using ServerTransportHandler = transport::TransportHandler;
-  using ServerConnectionManager =
-      rocket::server::connection::ConnectionManager<ServerTransportHandler>;
+  using ServerConnectionManager = rocket::server::connection::ConnectionManager;
 
-  rocket::server::connection::PipelineFactory<ServerTransportHandler>
-  createPipelineFactory();
+  /**
+   * Per-connection thrift-layer context.
+   * Owns the thrift pipeline and transport adapter that bridges between
+   * the rocket and thrift pipelines.
+   */
+  struct ThriftConnectionContext {
+    std::shared_ptr<ThriftServerChannel> serverChannel;
+    std::unique_ptr<server::ThriftServerTransportAdapter> transportAdapter;
+    channel_pipeline::PipelineImpl::Ptr thriftPipeline;
+    std::unique_ptr<channel_pipeline::SimpleBufferAllocator> thriftAllocator =
+        std::make_unique<channel_pipeline::SimpleBufferAllocator>();
+  };
 
-  channel_pipeline::PipelineImpl::Ptr buildPipeline(
+  rocket::server::connection::ConnectionFactory createConnectionFactory();
+
+  channel_pipeline::PipelineImpl::Ptr buildRocketPipeline(
       folly::EventBase* evb,
-      ServerTransportHandler* transportHandler,
-      ThriftServerChannel* serverChannel);
+      transport::TransportHandler* transportHandler,
+      rocket::server::RocketServerAppAdapter* appAdapter);
 
-  void registerChannel(std::shared_ptr<ThriftServerChannel> channel);
+  void registerConnection(
+      ThriftServerChannel* key, ThriftConnectionContext context);
 
   const FastThriftServerConfig config_;
   std::shared_ptr<apache::thrift::AsyncProcessorFactory> processorFactory_;
   std::shared_ptr<folly::IOThreadPoolExecutor> executor_;
   ServerConnectionManager::Ptr connectionManager_;
-  channel_pipeline::SimpleBufferAllocator allocator_;
-  // Uses raw ThriftServerChannel* as key for O(1) lookup from close callbacks,
-  // which only have a raw pointer to the channel being closed. The shared_ptr
-  // value owns the channel lifetime.
-  folly::Synchronized<std::unordered_map<
-      ThriftServerChannel*,
-      std::shared_ptr<ThriftServerChannel>>>
-      serverChannels_;
+  channel_pipeline::SimpleBufferAllocator rocketAllocator_;
+  folly::Synchronized<
+      std::unordered_map<ThriftServerChannel*, ThriftConnectionContext>>
+      thriftConnections_;
   folly::Baton<> stopBaton_;
   std::atomic<bool> started_{false};
   std::atomic<bool> stopped_{false};

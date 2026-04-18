@@ -114,13 +114,17 @@ class GeneratedAsyncClient : public TClientBase {
     callbackContext.oneWay = IsOneWay;
     callbackContext.protocolId = this->getChannel()->getProtocolId();
     if constexpr (!IsOneWay) {
-      // Capture a shared_ptr to the channel so it stays alive until the
-      // callback fires — the lambda may outlive *this.
-      auto channelShared = this->getChannelShared();
+      // Use weak_ptr to avoid extending the channel's lifetime — extending it
+      // delays destruction and exposes SR singleton teardown ordering issues
+      // in tests. decompressResponse is a no-op for the base class, and for
+      // ServiceRouterClientChannel it only does work when the thrift flag is
+      // on, in which case the channel is still alive during normal operation.
+      std::weak_ptr<RequestChannel> channelWeak = this->getChannelShared();
       callbackContext.responseDecompressor =
-          [channelShared =
-               std::move(channelShared)](ClientReceiveState& state) {
-            channelShared->decompressResponse(state);
+          [channelWeak = std::move(channelWeak)](ClientReceiveState& state) {
+            if (auto channel = channelWeak.lock()) {
+              channel->decompressResponse(state);
+            }
           };
     }
     auto* ctx = contextStack.get();

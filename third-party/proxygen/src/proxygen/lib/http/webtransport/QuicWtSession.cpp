@@ -144,6 +144,7 @@ QuicWtSessionBase::createUniStream() noexcept {
   }
   auto id = quicSocket_->createUnidirectionalStream();
   XCHECK(id);
+  XLOG(DBG6) << __func__ << "; id=" << *id;
   return CHECK_NOTNULL(createWtEgressHandle(*id).writeHandle);
 }
 
@@ -157,6 +158,7 @@ QuicWtSessionBase::createBidiStream() noexcept {
   XCHECK(id);
   auto res = createWtEgressHandle(*id);
   XCHECK(res.readHandle && res.writeHandle);
+  XLOG(DBG6) << __func__ << "; id=" << *id;
   return res;
 }
 
@@ -240,13 +242,14 @@ void QuicWtSessionBase::QuicReadCallback::readAvailable(StreamId id) noexcept {
 
 void QuicWtSessionBase::QuicReadCallback::readError(StreamId id,
                                                     QuicError error) noexcept {
-  XLOG(ERR) << __func__ << "; id=" << id << "; err=" << error;
+  XLOG(DBG4) << __func__ << "; id=" << id << "; err=" << error;
   sess.sm_.onResetStream(detail::WtStreamManager::ResetStream{
       id, *error.code.asApplicationErrorCode()});
 }
 
 void QuicWtSessionBase::QuicStopSendingCallback::onStopSending(
     StreamId id, quic::ApplicationErrorCode ec) noexcept {
+  XLOG(DBG4) << __func__ << "; id=" << id << "; err=" << ec;
   sess.sm_.onStopSending(detail::WtStreamManager::StopSending{id, ec});
 }
 
@@ -267,9 +270,7 @@ void QuicWtSessionBase::StreamManagerCallback::eventsAvailable() noexcept {
   // then process writable streams
   while (!sess.priorityQueue_->empty()) {
     auto id = sess.priorityQueue_->getNextScheduledID(std::nullopt);
-    if (!id.isStreamID()) { // skip datagrams
-      break;
-    }
+    XCHECK(id.isStreamID());
     auto streamId = id.asStreamID();
     auto maxData = sess.quicSocket_->getMaxWritableOnStream(streamId);
     auto* wh = sess.sm_.getBidiHandle(streamId).writeHandle;
@@ -285,15 +286,14 @@ void QuicWtSessionBase::StreamManagerCallback::eventsAvailable() noexcept {
       continue;
     }
     auto streamData = sess.sm_.dequeue(*wh, *maxData);
-    if (streamData.data || streamData.fin) {
-      auto res = sess.quicSocket_->writeChain(streamId,
-                                              std::move(streamData.data),
-                                              streamData.fin,
-                                              streamData.deliveryCallback);
-      if (res.hasError()) {
-        XLOG(ERR) << "QuicSocket::writeChain err id=" << streamId;
-        wh->resetStream(WebTransport::kInternalError);
-      }
+    XCHECK(streamData.data || streamData.fin);
+    auto res = sess.quicSocket_->writeChain(streamId,
+                                            std::move(streamData.data),
+                                            streamData.fin,
+                                            streamData.deliveryCallback);
+    if (res.hasError()) {
+      XLOG(ERR) << "QuicSocket::writeChain err id=" << streamId;
+      wh->resetStream(WebTransport::kInternalError);
     }
   }
 }
@@ -305,8 +305,7 @@ void QuicWtSessionBase::StreamManagerCallback::onNewPeerStream(
 // -- StreamWriteCallback overrides --
 void QuicWtSessionBase::onStreamWriteReady(quic::StreamId streamId,
                                            uint64_t /*maxToSend*/) noexcept {
-  auto* wh = sm_.getBidiHandle(streamId).writeHandle;
-  if (wh) {
+  if (auto* wh = sm_.getBidiHandle(streamId).writeHandle) {
     priorityQueue_->insertOrUpdate(
         quic::PriorityQueue::Identifier::fromStreamID(wh->getID()),
         wh->getPriority());
@@ -351,6 +350,7 @@ bool QuicWtSessionBase::acquireIngressStream(uint64_t id) noexcept {
   auto handle = sm_.getOrCreateBidiHandle(id);
   const bool success = handle.readHandle;
   const bool bidi = success && handle.writeHandle;
+  XLOG(DBG6) << __func__ << "; id=" << id << "; ok=" << success;
   if (success) {
     sm_.setReadCb(*handle.readHandle, &smCb_);
     quicSocket_->setReadCallback(id, &readCb_);
@@ -486,7 +486,7 @@ folly::Expected<folly::Unit, WebTransport::ErrorCode> H3WtSession::closeSession(
     folly::Optional<uint32_t> error) noexcept {
   // we need to bidi reset all assoc quic streams (ss+rst_stream)
   auto streamIds = sm_.streamIds();
-  auto ec = error.value_or(0);
+  const uint32_t ec = error.value_or(0);
   // bidirectionally reset all assoc quic streams
   for (uint64_t id : streamIds) {
     quicSocket_->setReadCallback(id, nullptr, ec);

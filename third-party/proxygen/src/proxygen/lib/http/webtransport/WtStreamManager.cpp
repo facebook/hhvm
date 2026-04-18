@@ -646,6 +646,7 @@ void WtStreamManager::shutdown(CloseSession cs) noexcept {
     return;
   }
   shutdown_ = true;
+  XLOG(DBG4) << __func__ << "; ec=" << cs.err << "; err=" << cs.msg;
   auto ex = folly::make_exception_wrapper<WtException>(cs.err, cs.msg);
   auto streams = std::move(streams_);
   for (auto& [_, handle] : streams) {

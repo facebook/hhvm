@@ -82,11 +82,11 @@ folly::IoUringOptions getIoUringOptions() {
   }
 
   if (FLAGS_io_registers > 0) {
-    options.setUseRegisteredFds(static_cast<size_t>(FLAGS_io_registers));
+    options.setUseRegisteredFds(FLAGS_io_registers);
   }
 
   if (FLAGS_io_capacity > 0) {
-    options.setCapacity(static_cast<size_t>(FLAGS_io_capacity));
+    options.setCapacity(FLAGS_io_capacity);
   }
 
   if (FLAGS_io_submit_sqe > 0) {
@@ -94,11 +94,11 @@ folly::IoUringOptions getIoUringOptions() {
   }
 
   if (FLAGS_io_max_get > 0) {
-    options.setMaxGet(static_cast<size_t>(FLAGS_io_max_get));
+    options.setMaxGet(FLAGS_io_max_get);
   }
 
   if (FLAGS_io_max_submit > 0) {
-    options.setMaxSubmit(static_cast<size_t>(FLAGS_io_max_submit));
+    options.setMaxSubmit(FLAGS_io_max_submit);
   }
 
   if (FLAGS_set_iouring_defer_taskrun) {

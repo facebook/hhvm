@@ -30,9 +30,9 @@ std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackend() {
   if (FLAGS_pwt_io_uring_capacity > 0) {
     try {
       folly::IoUringOptions options;
-      options.setCapacity(static_cast<size_t>(FLAGS_pwt_io_uring_capacity))
-          .setMaxSubmit(static_cast<size_t>(FLAGS_pwt_io_uring_max_submit))
-          .setMaxGet(static_cast<size_t>(FLAGS_pwt_io_uring_max_get))
+      options.setCapacity(FLAGS_pwt_io_uring_capacity)
+          .setMaxSubmit(FLAGS_pwt_io_uring_max_submit)
+          .setMaxGet(FLAGS_pwt_io_uring_max_get)
           .setUseRegisteredFds(FLAGS_pwt_io_uring_use_registered_fds);
 
       auto ret = std::make_unique<folly::IoUringBackend>(std::move(options));

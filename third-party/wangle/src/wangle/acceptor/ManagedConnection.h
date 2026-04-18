@@ -130,9 +130,8 @@ class ManagedConnection : public folly::HHWheelTimer::Callback,
    * Called when the connection age timeout fires. The default implementation
    * removes the connection from the ConnectionManager (if
    * detachOnConnectionAgeTimeout is set) and then calls closeWhenIdle().
-   * Subclasses can override to customize behavior.
    */
-  virtual void onConnectionAgeTimeout();
+  void onConnectionAgeTimeout();
 
   /**
    * Dump the state of the connection to the log

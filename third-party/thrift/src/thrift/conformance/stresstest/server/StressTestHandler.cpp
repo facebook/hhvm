@@ -305,7 +305,10 @@ void StressTestHandler::async_tm_storageReadTm(
   auto response = std::make_unique<StorageReadResponse>();
   auto size = *request->responseBytes();
   if (size > 0) {
-    response->payload() = std::string(size, 'x');
+    auto buf = folly::IOBuf::create(size);
+    std::memset(buf->writableData(), 'x', size);
+    buf->append(size);
+    response->payload() = std::move(buf);
   }
   callback->result(std::move(response));
 }
@@ -316,7 +319,10 @@ void StressTestHandler::async_eb_storageReadEb(
   auto response = std::make_unique<StorageReadResponse>();
   auto size = *request->responseBytes();
   if (size > 0) {
-    response->payload() = std::string(size, 'x');
+    auto buf = folly::IOBuf::create(size);
+    std::memset(buf->writableData(), 'x', size);
+    buf->append(size);
+    response->payload() = std::move(buf);
   }
   callback->result(std::move(response));
 }

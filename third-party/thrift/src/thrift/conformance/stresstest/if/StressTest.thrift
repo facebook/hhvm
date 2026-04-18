@@ -95,11 +95,11 @@ struct StorageReadRequest {
 }
 
 struct StorageReadResponse {
-  1: binary payload;
+  1: IOBufPtr payload;
 }
 
 struct StorageWriteRequest {
-  1: binary payload;
+  1: IOBufPtr payload;
 }
 
 struct StorageWriteResponse {}

@@ -141,18 +141,7 @@ class RocketServerStreamStateHandler {
       activeStreams_.erase(it);
     }
 
-    auto result = ctx.fireWrite(std::move(msg));
-
-    // If the write failed, re-add the stream so the app can retry
-    // or the stream can be cleaned up via onException.
-    // Note: Backpressure means the write was accepted, so no rollback needed.
-    if (complete &&
-        result ==
-            apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
-      activeStreams_.emplace(streamId, std::monostate{});
-    }
-
-    return result;
+    return ctx.fireWrite(std::move(msg));
   }
 
   template <typename Context>

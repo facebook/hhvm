@@ -499,8 +499,8 @@ TEST_F(ServerStreamStateHandlerTest, ErrorFromDownstreamOnWrite) {
   auto result = callOnWrite(std::move(response));
 
   EXPECT_EQ(result, Result::Error);
-  // Stream should be re-added since write failed
-  EXPECT_TRUE(handler_.hasActiveStream(1));
+  // Stream is dropped on write failure — no retry
+  EXPECT_FALSE(handler_.hasActiveStream(1));
 }
 
 TEST_F(ServerStreamStateHandlerTest, BackpressureFromDownstreamOnWrite) {

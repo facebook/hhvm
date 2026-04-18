@@ -114,14 +114,16 @@ class ServerAcceptor : public Acceptor,
       }
     }
 
-    void closeWhenIdle() override {
-      dropConnection();
-    }
-
+    void closeWhenIdle() override {}
     void dropConnection(const std::string& /* errorMsg */ = "") override {
       auto ew = folly::make_exception_wrapper<AcceptorException>(
           AcceptorException::ExceptionType::DROPPED, "dropped");
       pipeline_->readException(ew);
+    }
+    void onConnectionAgeTimeout() override {
+      // ServerConnection has no graceful drain (closeWhenIdle is a no-op),
+      // so drop the connection immediately.
+      dropConnection();
     }
     void dumpConnectionState(uint8_t /* loglevel */) override {}
 

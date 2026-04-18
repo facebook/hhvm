@@ -27,6 +27,8 @@ from thrift.conformance.rpc.thrift_types import (
     RequestResponseTimeoutClientTestResult,
     RequestResponseUndeclaredExceptionClientTestResult,
     RpcTestCase,
+    SinkInitialDeclaredExceptionClientTestResult,
+    SinkServerDeclaredExceptionClientTestResult,
     StreamBasicClientTestResult,
     StreamChunkTimeoutClientTestResult,
     StreamCreditTimeoutClientTestResult,
@@ -66,6 +68,8 @@ class RpcTestClient:
             ClientInstruction.Type.streamInitialResponse: self.__stream_initial_response_test,
             ClientInstruction.Type.streamChunkTimeout: self.__stream_chunk_timeout_test,
             ClientInstruction.Type.streamCreditTimeout: self.__stream_credit_timeout_test,
+            ClientInstruction.Type.sinkInitialDeclaredException: self.__sink_initial_declared_exception_test,
+            ClientInstruction.Type.sinkServerDeclaredException: self.__sink_server_declared_exception_test,
         }
 
     async def __request_response_basic_test(
@@ -225,6 +229,38 @@ class RpcTestClient:
             StreamCreditTimeoutClientTestResult(
                 creditTimeoutException=receivedTimeoutException
             )
+        )
+        await client.sendTestResult(result=clientTestResult)
+
+    async def __sink_initial_declared_exception_test(
+        self, client, instruction: ClientInstruction
+    ) -> None:
+        sink_threw = False
+        try:
+            sink = await client.sinkInitialDeclaredException(
+                req=instruction.sinkInitialDeclaredException.request
+            )
+            await sink.aclose()
+        except Exception:
+            sink_threw = True
+        clientTestResult = ClientTestResult.fromValue(
+            SinkInitialDeclaredExceptionClientTestResult(sinkThrew=sink_threw)
+        )
+        await client.sendTestResult(result=clientTestResult)
+
+    async def __sink_server_declared_exception_test(
+        self, client, instruction: ClientInstruction
+    ) -> None:
+        sink_threw = False
+        try:
+            sink = await client.sinkServerDeclaredException(
+                req=instruction.sinkServerDeclaredException.request
+            )
+            await sink.aclose()
+        except Exception:
+            sink_threw = True
+        clientTestResult = ClientTestResult.fromValue(
+            SinkServerDeclaredExceptionClientTestResult(sinkThrew=sink_threw)
         )
         await client.sendTestResult(result=clientTestResult)
 

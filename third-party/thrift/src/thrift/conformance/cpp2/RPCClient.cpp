@@ -373,6 +373,40 @@ SinkUndeclaredExceptionClientTestResult sinkUndeclaredExceptionTest(
       }());
 }
 
+SinkInitialDeclaredExceptionClientTestResult sinkInitialDeclaredExceptionTest(
+    SinkInitialDeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<SinkInitialDeclaredExceptionClientTestResult> {
+        SinkInitialDeclaredExceptionClientTestResult result;
+        try {
+          co_await client->co_sinkInitialDeclaredException(
+              *instruction.request());
+        } catch (...) {
+          result.sinkThrew() = true;
+        }
+        co_return result;
+      }());
+}
+
+SinkServerDeclaredExceptionClientTestResult sinkServerDeclaredExceptionTest(
+    SinkServerDeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<SinkServerDeclaredExceptionClientTestResult> {
+        SinkServerDeclaredExceptionClientTestResult result;
+        try {
+          auto sink = co_await client->co_sinkServerDeclaredException(
+              *instruction.request());
+          co_await sink.sink(
+              []() -> folly::coro::AsyncGenerator<Request&&> { co_return; }());
+        } catch (...) {
+          result.sinkThrew() = true;
+        }
+        co_return result;
+      }());
+}
+
 // =================== Bidi ===================
 BidiBasicClientTestResult bidiBasicTest(
     BidiBasicClientInstruction& instruction) {
@@ -728,6 +762,14 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::sinkUndeclaredException:
       result.sinkUndeclaredException() = sinkUndeclaredExceptionTest(
           *clientInstruction.sinkUndeclaredException());
+      break;
+    case ClientInstruction::Type::sinkInitialDeclaredException:
+      result.sinkInitialDeclaredException() = sinkInitialDeclaredExceptionTest(
+          *clientInstruction.sinkInitialDeclaredException());
+      break;
+    case ClientInstruction::Type::sinkServerDeclaredException:
+      result.sinkServerDeclaredException() = sinkServerDeclaredExceptionTest(
+          *clientInstruction.sinkServerDeclaredException());
       break;
     case ClientInstruction::Type::interactionConstructor:
       result.interactionConstructor() = interactionConstructorTest(

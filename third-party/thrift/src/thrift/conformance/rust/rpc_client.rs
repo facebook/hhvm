@@ -28,8 +28,12 @@ use rpc::rpc::SinkChunkTimeoutClientInstruction;
 use rpc::rpc::SinkChunkTimeoutClientTestResult;
 use rpc::rpc::SinkDeclaredExceptionClientInstruction;
 use rpc::rpc::SinkDeclaredExceptionClientTestResult;
+use rpc::rpc::SinkInitialDeclaredExceptionClientInstruction;
+use rpc::rpc::SinkInitialDeclaredExceptionClientTestResult;
 use rpc::rpc::SinkInitialResponseClientInstruction;
 use rpc::rpc::SinkInitialResponseClientTestResult;
+use rpc::rpc::SinkServerDeclaredExceptionClientInstruction;
+use rpc::rpc::SinkServerDeclaredExceptionClientTestResult;
 use rpc::rpc::SinkUndeclaredExceptionClientInstruction;
 use rpc::rpc::SinkUndeclaredExceptionClientTestResult;
 use rpc::rpc::StreamBasicClientInstruction;
@@ -176,15 +180,9 @@ async fn test(client: &dyn RPCConformanceServiceExt<thriftclient::ThriftChannel>
         sinkBasic(i) => sink_basic(client, i).await,
         sinkChunkTimeout(i) => sink_chunk_timeout(client, i).await,
         sinkInitialResponse(i) => sink_initial_response(client, i).await,
-        sinkInitialDeclaredException(i) => Err(anyhow!(
-            "sinkInitialDeclaredException not implemented: {:?}",
-            i
-        )),
+        sinkInitialDeclaredException(i) => sink_initial_declared_exception(client, i).await,
         sinkDeclaredException(i) => sink_declared_exception(client, i).await,
-        sinkServerDeclaredException(i) => Err(anyhow!(
-            "sinkServerDeclaredException not implemented: {:?}",
-            i
-        )),
+        sinkServerDeclaredException(i) => sink_server_declared_exception(client, i).await,
         sinkUndeclaredException(i) => sink_undeclared_exception(client, i).await,
         bidiBasic(i) => Err(anyhow!("bidiBasic not implemented: {:?}", i)),
         bidiInitialResponse(i) => Err(anyhow!("bidiInitialResponse not implemented: {:?}", i)),
@@ -757,5 +755,48 @@ async fn sink_undeclared_exception(
         .sendTestResult(&ClientTestResult::sinkUndeclaredException(test_result))
         .await?;
 
+    Ok(())
+}
+async fn sink_initial_declared_exception(
+    client: &dyn RPCConformanceServiceExt<thriftclient::ThriftChannel>,
+    instr: &SinkInitialDeclaredExceptionClientInstruction,
+) -> Result<()> {
+    let result = client.sinkInitialDeclaredException(&instr.request).await;
+
+    let sink_threw = match result {
+        Err(_) => true,
+        Ok(sink_result) => {
+            // Server may have accepted the call but the error surfaces when
+            // we try to use the sink
+            let final_result = (sink_result.sink)(futures::stream::empty().boxed()).await;
+            final_result.is_err()
+        }
+    };
+
+    let test_result = SinkInitialDeclaredExceptionClientTestResult {
+        sinkThrew: sink_threw,
+        ..Default::default()
+    };
+    client
+        .sendTestResult(&ClientTestResult::sinkInitialDeclaredException(test_result))
+        .await?;
+    Ok(())
+}
+
+async fn sink_server_declared_exception(
+    client: &dyn RPCConformanceServiceExt<thriftclient::ThriftChannel>,
+    instr: &SinkServerDeclaredExceptionClientInstruction,
+) -> Result<()> {
+    let sink_result = client.sinkServerDeclaredException(&instr.request).await?;
+    let final_response = (sink_result.sink)(futures::stream::empty().boxed()).await;
+    let sink_threw = final_response.is_err();
+
+    let test_result = SinkServerDeclaredExceptionClientTestResult {
+        sinkThrew: sink_threw,
+        ..Default::default()
+    };
+    client
+        .sendTestResult(&ClientTestResult::sinkServerDeclaredException(test_result))
+        .await?;
     Ok(())
 }

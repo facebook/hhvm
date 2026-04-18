@@ -283,6 +283,35 @@ class ConformanceVerificationServer
                                    ->sinkUndeclaredException()
                                    ->bufferSize())};
   }
+
+  apache::thrift::SinkConsumer<Request, Response> sinkInitialDeclaredException(
+      std::unique_ptr<Request> req) override {
+    serverResult_.sinkInitialDeclaredException().emplace().request() = *req;
+    // TODO: use ->userException() once IDL change lands in generated code
+    UserException ex;
+    ex.msg() = "initial declared exception";
+    folly::throw_exception(std::move(ex));
+  }
+
+  apache::thrift::SinkConsumer<Request, Response> sinkServerDeclaredException(
+      std::unique_ptr<Request> req) override {
+    auto& result = serverResult_.sinkServerDeclaredException().emplace();
+    result.request() = *req;
+    return {
+        [&](folly::coro::AsyncGenerator<Request&&> gen)
+            -> folly::coro::Task<Response> {
+          while (auto item = co_await gen.next()) {
+            // consume sink payloads
+          }
+          // TODO: use ->userException() once IDL change lands in generated code
+          UserException ex;
+          ex.msg() = "server declared exception";
+          folly::throw_exception(std::move(ex));
+        },
+        static_cast<uint64_t>(*testCase_.serverInstruction()
+                                   ->sinkServerDeclaredException()
+                                   ->bufferSize())};
+  }
   // =================== BiDi Streaming ===================
   folly::coro::Task<apache::thrift::StreamTransformation<Request, Response>>
   co_bidiBasic(std::unique_ptr<Request> req) override {

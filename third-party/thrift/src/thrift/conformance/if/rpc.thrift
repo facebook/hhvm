@@ -246,6 +246,7 @@ struct BidiStreamUndeclaredExceptionServerTestResult {
 
 struct BidiSinkDeclaredExceptionServerTestResult {
   1: Request request;
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
   @thrift.Box
   2: optional UserException userException;
   3: list<Request> sinkPayloads;
@@ -376,6 +377,7 @@ struct BidiInitialResponseClientTestResult {
 }
 
 struct BidiStreamDeclaredExceptionClientTestResult {
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
   @thrift.Box
   1: optional UserException userException;
   2: list<Response> streamPayloads;
@@ -397,6 +399,7 @@ struct BidiSinkUndeclaredExceptionClientTestResult {
 }
 
 struct BidiMethodDeclaredExceptionClientTestResult {
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
   @thrift.Box
   1: optional UserException userException;
 }
@@ -610,6 +613,7 @@ struct BidiStreamUndeclaredExceptionClientInstruction {
 struct BidiSinkDeclaredExceptionClientInstruction {
   1: Request request;
   2: list<Request> sinkPayloads;
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
   @thrift.Box
   3: optional UserException userException;
 }
@@ -717,10 +721,16 @@ struct SinkUndeclaredExceptionServerInstruction {
 
 struct SinkInitialDeclaredExceptionServerInstruction {
   1: i64 bufferSize;
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
+  @thrift.Box
+  2: optional UserException userException;
 }
 
 struct SinkServerDeclaredExceptionServerInstruction {
   1: i64 bufferSize;
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
+  @thrift.Box
+  2: optional UserException userException;
 }
 
 struct InteractionConstructorServerInstruction {}
@@ -742,6 +752,7 @@ struct BidiInitialResponseServerInstruction {
 
 struct BidiStreamDeclaredExceptionServerInstruction {
   1: list<Response> streamPayloads;
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
   @thrift.Box
   2: optional UserException userException;
 }
@@ -760,6 +771,7 @@ struct BidiSinkUndeclaredExceptionServerInstruction {
 }
 
 struct BidiMethodDeclaredExceptionServerInstruction {
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
   @thrift.Box
   1: optional UserException userException;
 }

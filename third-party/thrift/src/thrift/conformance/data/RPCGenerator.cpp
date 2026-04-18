@@ -957,6 +957,98 @@ Test createSinkUndeclaredExceptionTest() {
   return ret;
 }
 
+Test createSinkInitialDeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "SinkInitialDeclaredExceptionTest";
+  ret.tags()->emplace(
+      "spec/protocol/interface/#sink-initial-declared-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "SinkInitialDeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  rpcTest.clientInstruction()
+      .emplace()
+      .sinkInitialDeclaredException()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .sinkInitialDeclaredException()
+      .emplace()
+      .sinkThrew() = true;
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .sinkInitialDeclaredException()
+      .emplace()
+      .bufferSize() = kDefaultBufferSize;
+  rpcTest.serverInstruction()
+      ->sinkInitialDeclaredException()
+      ->userException()
+      .emplace()
+      .msg() = "initial declared exception";
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .sinkInitialDeclaredException()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
+Test createSinkServerDeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "SinkServerDeclaredExceptionTest";
+  ret.tags()->emplace(
+      "spec/protocol/interface/#sink-server-declared-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "SinkServerDeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc().emplace();
+  rpcTest.clientInstruction()
+      .emplace()
+      .sinkServerDeclaredException()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .sinkServerDeclaredException()
+      .emplace()
+      .sinkThrew() = true;
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .sinkServerDeclaredException()
+      .emplace()
+      .bufferSize() = kDefaultBufferSize;
+  rpcTest.serverInstruction()
+      ->sinkServerDeclaredException()
+      ->userException()
+      .emplace()
+      .msg() = "server declared exception";
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .sinkServerDeclaredException()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
 // =================== BiDi Streaming ===================
 Test createBidiBasicTest() {
   Test ret;
@@ -1520,6 +1612,8 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createSinkInitialResponseTest());
   suite.tests()->push_back(createSinkDeclaredExceptionTest());
   suite.tests()->push_back(createSinkUndeclaredExceptionTest());
+  suite.tests()->push_back(createSinkInitialDeclaredExceptionTest());
+  suite.tests()->push_back(createSinkServerDeclaredExceptionTest());
   // =================== BiDi Streaming ===================
   suite.tests()->push_back(createBidiBasicTest());
   suite.tests()->push_back(createBidiInitialResponseTest());

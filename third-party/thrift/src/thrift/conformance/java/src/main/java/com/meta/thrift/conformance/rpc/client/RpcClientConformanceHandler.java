@@ -49,7 +49,11 @@ import org.apache.thrift.conformance.SinkBasicClientTestResult;
 import org.apache.thrift.conformance.SinkChunkTimeoutClientInstruction;
 import org.apache.thrift.conformance.SinkDeclaredExceptionClientInstruction;
 import org.apache.thrift.conformance.SinkDeclaredExceptionClientTestResult;
+import org.apache.thrift.conformance.SinkInitialDeclaredExceptionClientInstruction;
+import org.apache.thrift.conformance.SinkInitialDeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.SinkInitialResponseClientInstruction;
+import org.apache.thrift.conformance.SinkServerDeclaredExceptionClientInstruction;
+import org.apache.thrift.conformance.SinkServerDeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.SinkUndeclaredExceptionClientInstruction;
 import org.apache.thrift.conformance.SinkUndeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.StreamBasicClientInstruction;
@@ -317,6 +321,36 @@ public class RpcClientConformanceHandler {
   public Mono<ClientTestResult> testSinkInitialResponse(
       SinkInitialResponseClientInstruction instruction) {
     throw new RuntimeException("Not supported");
+  }
+
+  public Mono<ClientTestResult> testSinkInitialDeclaredException(
+      SinkInitialDeclaredExceptionClientInstruction instruction) {
+    return client
+        .sinkInitialDeclaredException(instruction.getRequest(), Flux.empty())
+        .map(
+            _r ->
+                ClientTestResult.fromSinkInitialDeclaredException(
+                    new SinkInitialDeclaredExceptionClientTestResult(false)))
+        .onErrorResume(
+            _e ->
+                Mono.just(
+                    ClientTestResult.fromSinkInitialDeclaredException(
+                        new SinkInitialDeclaredExceptionClientTestResult(true))));
+  }
+
+  public Mono<ClientTestResult> testSinkServerDeclaredException(
+      SinkServerDeclaredExceptionClientInstruction instruction) {
+    return client
+        .sinkServerDeclaredException(instruction.getRequest(), Flux.empty())
+        .map(
+            _r ->
+                ClientTestResult.fromSinkServerDeclaredException(
+                    new SinkServerDeclaredExceptionClientTestResult(false)))
+        .onErrorResume(
+            _e ->
+                Mono.just(
+                    ClientTestResult.fromSinkServerDeclaredException(
+                        new SinkServerDeclaredExceptionClientTestResult(true))));
   }
 
   public Mono<ClientTestResult> testSinkDeclaredException(

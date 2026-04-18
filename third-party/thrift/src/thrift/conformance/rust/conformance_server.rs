@@ -44,7 +44,7 @@ use tracing_subscriber::layer::SubscriberExt;
 struct Arguments {
     #[clap(short, long, default_value = "0")]
     port: u16,
-    #[clap(short, long, default_value = "info", use_value_delimiter = true)]
+    #[clap(short, long, default_value = "info", value_delimiter = ',')]
     log: Vec<tracing_subscriber::filter::Directive>,
 }
 

@@ -380,13 +380,22 @@ class HandlerCallbackBase {
   void sendReply(ResponseAndServerStreamFactory&& responseAndStream);
 
  private:
-  // Dispatches compression + reply to the CPU executor when sendReply is
+  // Returns an executor for compression offload when executor_ is null (EB
+  // mode). Walks the context chain to the server's handler executor, falling
+  // back to folly::getGlobalCPUExecutor() as a safety net.
+  folly::Executor::KeepAlive<> getCompressionExecutorFallback();
+
+  // Dispatches compression + reply to the given CPU executor when sendReply is
   // called on the IO thread. Moves all needed state into the lambda so
   // HandlerCallbackBase can be destroyed after this returns.
   void dispatchReplyToCpuThread(
-      SerializedResponse response, size_t payloadSize);
+      SerializedResponse response,
+      size_t payloadSize,
+      const folly::Executor::KeepAlive<>& compressionExecutor);
   void dispatchStreamReplyToCpuThread(
-      ResponseAndServerStreamFactory&& responseAndStream, size_t payloadSize);
+      ResponseAndServerStreamFactory&& responseAndStream,
+      size_t payloadSize,
+      const folly::Executor::KeepAlive<>& compressionExecutor);
 
   // Sets up stream factory with interaction, context stack, method name, and
   // interceptor context. Shared by sendReply and

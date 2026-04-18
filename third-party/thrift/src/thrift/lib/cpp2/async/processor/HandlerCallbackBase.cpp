@@ -16,6 +16,7 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Executor.h>
+#include <folly/executors/GlobalExecutor.h>
 #include <folly/stop_watch.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
@@ -149,6 +150,26 @@ void HandlerCallbackBase::doExceptionWrapped(folly::exception_wrapper ew) {
   }
 }
 
+folly::Executor::KeepAlive<>
+HandlerCallbackBase::getCompressionExecutorFallback() {
+  // Walk the context chain to the server's handler executor (defaultAsync pool
+  // in resource-pools mode, or the ThreadManager in legacy mode). Fall back to
+  // the global CPU executor as a safety net — it is always non-null.
+  if (reqCtx_) {
+    if (auto* connCtx = reqCtx_->getConnectionContext()) {
+      if (auto* workerCtx = connCtx->getWorkerContext()) {
+        if (auto* serverCtx = workerCtx->getServerContext()) {
+          auto exec = serverCtx->getHandlerExecutorKeepAlive();
+          if (exec) {
+            return exec;
+          }
+        }
+      }
+    }
+  }
+  return folly::getGlobalCPUExecutor();
+}
+
 void HandlerCallbackBase::sendReply(SerializedResponse response) {
   this->ctx_.reset();
 
@@ -161,9 +182,14 @@ void HandlerCallbackBase::sendReply(SerializedResponse response) {
     auto payloadSize =
         response.buffer ? response.buffer->computeChainDataLength() : 0;
     if (req_->shouldDispatchCompressionToCpu(payloadSize) && getEventBase() &&
-        getEventBase()->inRunningEventBaseThread() && executor_) {
-      dispatchReplyToCpuThread(std::move(response), payloadSize);
-      return;
+        getEventBase()->inRunningEventBaseThread()) {
+      auto compressionExec =
+          executor_ ? executor_ : getCompressionExecutorFallback();
+      if (compressionExec) {
+        dispatchReplyToCpuThread(
+            std::move(response), payloadSize, compressionExec);
+        return;
+      }
     }
     preCompressed = req_->compressResponse(response, reqCtx_, payloadSize);
   }
@@ -194,7 +220,9 @@ void HandlerCallbackBase::sendReply(SerializedResponse response) {
 }
 
 void HandlerCallbackBase::dispatchReplyToCpuThread(
-    SerializedResponse response, size_t payloadSize) {
+    SerializedResponse response,
+    size_t payloadSize,
+    const folly::Executor::KeepAlive<>& compressionExecutor) {
   // Capture all state needed on the CPU thread. After this method returns,
   // HandlerCallbackBase may be destroyed (req_ is moved out, so the
   // destructor's cleanup path will skip the active-request error).
@@ -204,13 +232,13 @@ void HandlerCallbackBase::dispatchReplyToCpuThread(
   auto writeTransforms = reqCtx->getHeader()->getWriteTTransforms();
   auto* replyQueue = &getReplyQueue();
 
-  executor_->add([req = std::move(req),
-                  reqCtx,
-                  protoSeqId,
-                  writeTransforms = std::move(writeTransforms),
-                  replyQueue,
-                  payloadSize,
-                  response = std::move(response)]() mutable {
+  compressionExecutor->add([req = std::move(req),
+                            reqCtx,
+                            protoSeqId,
+                            writeTransforms = std::move(writeTransforms),
+                            replyQueue,
+                            payloadSize,
+                            response = std::move(response)]() mutable {
     // On CPU thread: attempt compression.
     bool preCompressed = req->compressResponse(response, reqCtx, payloadSize);
 
@@ -252,9 +280,14 @@ void HandlerCallbackBase::sendReply(
         ? responseAndStream.response.buffer->computeChainDataLength()
         : 0;
     if (req_->shouldDispatchCompressionToCpu(payloadSize) && getEventBase() &&
-        getEventBase()->inRunningEventBaseThread() && executor_) {
-      dispatchStreamReplyToCpuThread(std::move(responseAndStream), payloadSize);
-      return;
+        getEventBase()->inRunningEventBaseThread()) {
+      auto compressionExec =
+          executor_ ? executor_ : getCompressionExecutorFallback();
+      if (compressionExec) {
+        dispatchStreamReplyToCpuThread(
+            std::move(responseAndStream), payloadSize, compressionExec);
+        return;
+      }
     }
     preCompressed = req_->compressResponse(
         responseAndStream.response, reqCtx_, payloadSize);
@@ -325,7 +358,9 @@ void HandlerCallbackBase::setupStreamFactory(
 }
 
 void HandlerCallbackBase::dispatchStreamReplyToCpuThread(
-    ResponseAndServerStreamFactory&& responseAndStream, size_t payloadSize) {
+    ResponseAndServerStreamFactory&& responseAndStream,
+    size_t payloadSize,
+    const folly::Executor::KeepAlive<>& compressionExecutor) {
   // Capture all state needed on the CPU thread. After this method returns,
   // HandlerCallbackBase may be destroyed (req_ is moved out).
   auto req = std::move(req_);
@@ -338,13 +373,14 @@ void HandlerCallbackBase::dispatchStreamReplyToCpuThread(
   auto& stream = responseAndStream.stream;
   setupStreamFactory(stream);
 
-  executor_->add([req = std::move(req),
-                  reqCtx,
-                  protoSeqId,
-                  writeTransforms = std::move(writeTransforms),
-                  replyQueue,
-                  payloadSize,
-                  responseAndStream = std::move(responseAndStream)]() mutable {
+  compressionExecutor->add([req = std::move(req),
+                            reqCtx,
+                            protoSeqId,
+                            writeTransforms = std::move(writeTransforms),
+                            replyQueue,
+                            payloadSize,
+                            responseAndStream =
+                                std::move(responseAndStream)]() mutable {
     // On CPU thread: attempt compression.
     bool preCompressed =
         req->compressResponse(responseAndStream.response, reqCtx, payloadSize);

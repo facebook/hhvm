@@ -32,6 +32,14 @@ THRIFT_FLAG_DECLARE_bool(allow_resource_pools_set_thread_manager_from_executor);
 
 THRIFT_FLAG_DECLARE_bool(thrift_server_compress_response_on_cpu);
 
+// This flag does not control whether compression happens — that is solely
+// determined by compressionSizeLimit. It only controls where compression runs:
+// payloads below this threshold are compressed inline on the IO thread
+// (skipping the thread-hop overhead), while larger payloads are dispatched to a
+// CPU thread. Only effective when thrift_server_compress_response_on_cpu is
+// enabled.
+THRIFT_FLAG_DECLARE_int64(thrift_server_min_cpu_compression_payload_size);
+
 // Use TokenBucketConcurrencyController as a standard concurrency controller in
 // ThriftServer
 FOLLY_GFLAGS_DECLARE_bool(thrift_use_token_bucket_concurrency_controller);

@@ -28,6 +28,7 @@
 THRIFT_FLAG_DEFINE_int64(queue_time_logging_threshold_ms, 5);
 THRIFT_FLAG_DEFINE_bool(enable_request_event_logging, true);
 THRIFT_FLAG_DECLARE_bool(thrift_server_compress_response_on_cpu);
+THRIFT_FLAG_DECLARE_int64(thrift_server_min_cpu_compression_payload_size);
 
 namespace apache::thrift {
 
@@ -521,6 +522,11 @@ ThriftRequestCore::getEligibleCompressionAlgorithm(size_t payloadSize) const {
 
 bool ThriftRequestCore::shouldDispatchCompressionToCpu(
     size_t payloadSize) const {
+  auto minSize = static_cast<size_t>(
+      THRIFT_FLAG(thrift_server_min_cpu_compression_payload_size));
+  if (payloadSize < minSize) {
+    return false;
+  }
   return getEligibleCompressionAlgorithm(payloadSize).has_value();
 }
 

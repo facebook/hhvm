@@ -39,6 +39,8 @@ THRIFT_FLAG_DEFINE_bool(
 
 THRIFT_FLAG_DEFINE_bool(thrift_server_compress_response_on_cpu, false);
 
+THRIFT_FLAG_DEFINE_int64(thrift_server_min_cpu_compression_payload_size, 1024);
+
 FOLLY_GFLAGS_DEFINE_bool(
     thrift_use_token_bucket_concurrency_controller,
     false,

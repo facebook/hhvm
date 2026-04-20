@@ -55,7 +55,7 @@ namespace {
     private function __construct() {}
     static public function setPoolsConnectionLimit(
       int $limit,
-    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    ): void {}
     static public function connect(
       string $host,
       int $port,
@@ -269,7 +269,7 @@ namespace {
      * implement the Iterable interface because mocks will complain they don't
      * implemplement the functions in the interface.
      **/
-    public function rowBlocks(): \HH\FIXME\MISSING_RETURN_TYPE {}
+    public function rowBlocks(): Vector<AsyncMysqlRowBlock> {}
     public function noIndexUsed(): bool {}
     public function recvGtid(): string {}
     public function responseAttributes(): Map<string, string> {}

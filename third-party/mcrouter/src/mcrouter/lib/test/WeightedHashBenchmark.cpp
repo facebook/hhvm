@@ -14,6 +14,9 @@
 
 constexpr folly::StringPiece kKey =
     "someKey_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+_sdkfjsdfksjdfasdfaksxxx";
+constexpr folly::StringPiece kLongKey =
+    "someKey_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+_sdkfjsdfksjdfasdfaksxxx"
+    "someKey_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+_sdkfjsdfksjdfasdfaksxxx";
 
 using facebook::memcache::WeightedCh3HashFunc;
 
@@ -67,6 +70,28 @@ BENCHMARK_NAMED_PARAM(weightedCh3Bench, size_100_short_05, 100, 0.5, 12)
 BENCHMARK_NAMED_PARAM(weightedCh3Bench, size_1000_short_05, 1000, 0.5, 12)
 
 BENCHMARK_NAMED_PARAM(weightedCh3Bench, size_10000_short_05, 10000, 0.5, 12)
+
+BENCHMARK_DRAW_LINE();
+
+void weightedCh3BenchLong(
+    size_t iters,
+    size_t size,
+    double weight,
+    size_t keyLen) {
+  std::vector<double> weights;
+  BENCHMARK_SUSPEND {
+    weights.resize(size, weight);
+  }
+  folly::StringPiece key = kLongKey.subpiece(0, keyLen);
+  WeightedCh3HashFunc func(std::move(weights));
+  for (size_t i = 0; i < iters; ++i) {
+    func(key);
+  }
+}
+
+BENCHMARK_NAMED_PARAM(weightedCh3BenchLong, size_100_long_05, 100, 0.5, 128)
+
+BENCHMARK_NAMED_PARAM(weightedCh3BenchLong, size_100_long_02, 100, 0.2, 128)
 
 BENCHMARK_DRAW_LINE();
 

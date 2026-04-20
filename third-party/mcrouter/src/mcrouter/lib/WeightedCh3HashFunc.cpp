@@ -26,8 +26,13 @@ size_t WeightedCh3HashFunc::hash(
   checkLogic(n && n <= furc_maximum_pool_size(), "Invalid pool size: {}", n);
   size_t salt = 0;
   size_t index = 0;
-  std::string saltedKey;
-  const auto originalKey = key;
+  const size_t keyLen = key.size();
+  constexpr size_t kMaxSaltLen = 20;
+  constexpr size_t kMaxStackKeyLen = 256;
+  constexpr size_t kStackBufSize = kMaxStackKeyLen + kMaxSaltLen;
+  char stackBuf[kStackBufSize];
+  std::string heapBuf;
+  char* buf = nullptr;
   for (size_t i = 0; i < retryCount; ++i) {
     index = furc_hash(key.data(), key.size(), n);
 
@@ -44,20 +49,24 @@ size_t WeightedCh3HashFunc::hash(
     }
 
     /* Change the key to rehash */
-    if (saltedKey.empty()) {
-      /* Reserve room for a few extra digits */
-      saltedKey.reserve(originalKey.size() + 2);
-      saltedKey = originalKey;
+    if (buf == nullptr) {
+      if (keyLen + kMaxSaltLen <= kStackBufSize) {
+        buf = stackBuf;
+      } else {
+        heapBuf.resize(keyLen + kMaxSaltLen);
+        buf = &heapBuf[0];
+      }
+      memcpy(buf, key.data(), keyLen);
     }
 
     auto s = salt++;
-    saltedKey.resize(originalKey.size());
+    size_t saltLen = 0;
     do {
-      saltedKey.push_back(char(s % 10) + '0');
+      buf[keyLen + saltLen++] = char(s % 10) + '0';
       s /= 10;
     } while (s > 0);
 
-    key = saltedKey;
+    key = folly::StringPiece(buf, keyLen + saltLen);
   }
 
   return index;

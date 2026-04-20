@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
@@ -43,7 +44,6 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientRocketInterfaceHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/test/TestAsyncTransport.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
@@ -73,7 +73,6 @@ HANDLER_TAG(rocket_client_setup_handler);
 HANDLER_TAG(rocket_client_request_response_frame_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
-HANDLER_TAG(thrift_client_rocket_interface_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
 
 namespace {
@@ -153,37 +152,44 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
   void TearDown() override {
     channel_.reset();
     pipeline_.reset();
-    transportHandler_.reset();
+    transportAdapter_.reset();
     testTransport_ = nullptr;
   }
 
   /**
-   * Set up the full pipeline with TestAsyncTransport.
+   * Set up the full two-pipeline architecture with TestAsyncTransport.
    *
    * Creates:
    * - TestAsyncTransport for in-memory testing
-   * - ThriftClientChannel owning the transport
-   * - Full pipeline with all client handlers
+   * - Rocket pipeline inside RocketClientConnection
+   * - Thrift pipeline with ThriftClientTransportAdapter as bridge
+   * - ThriftClientChannel as the tail endpoint
    */
   void setupPipeline() {
     auto transport =
         folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
     testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
 
-    transportHandler_ =
+    // 1. Build rocket pipeline inside RocketClientConnection
+    auto connection =
+        std::make_unique<rocket::client::RocketClientConnection>();
+
+    connection->transportHandler =
         apache::thrift::fast_thrift::transport::TransportHandler::create(
             std::move(transport));
-    channel_ = ThriftClientChannel::newChannel(&evb_);
 
-    pipeline_ =
+    auto* transportHandlerPtr = connection->transportHandler.get();
+
+    connection->pipeline =
         PipelineBuilder<
             apache::thrift::fast_thrift::transport::TransportHandler,
-            ThriftClientChannel,
-            TestAllocator>()
+            apache::thrift::fast_thrift::rocket::client::RocketClientAppAdapter,
+            apache::thrift::fast_thrift::channel_pipeline::
+                SimpleBufferAllocator>()
             .setEventBase(&evb_)
-            .setHead(transportHandler_.get())
-            .setTail(channel_.get())
-            .setAllocator(&allocator_)
+            .setHead(connection->transportHandler.get())
+            .setTail(connection->appAdapter.get())
+            .setAllocator(&connection->allocator)
             .addNextInbound<apache::thrift::fast_thrift::frame::read::handler::
                                 FrameLengthParserHandler>(
                 frame_length_parser_handler_tag)
@@ -197,7 +203,6 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
                                handler::RocketClientSetupFrameHandler>(
                 rocket_client_setup_handler_tag,
                 []() {
-                  // Simple setup metadata factory
                   return std::make_pair(
                       folly::IOBuf::copyBuffer("setup"),
                       std::unique_ptr<folly::IOBuf>());
@@ -212,14 +217,33 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
             .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                handler::RocketClientStreamStateHandler>(
                 rocket_client_stream_state_handler_tag)
-            .addNextDuplex<client::handler::ThriftClientRocketInterfaceHandler>(
-                thrift_client_rocket_interface_handler_tag)
+            .build();
+
+    connection->appAdapter->setPipeline(connection->pipeline.get());
+    connection->transportHandler->setPipeline(*connection->pipeline);
+
+    // 2. Build thrift pipeline: ThriftClientChannel → TransportAdapter
+    channel_ = ThriftClientChannel::newChannel(&evb_);
+
+    transportAdapter_ = std::make_unique<client::ThriftClientTransportAdapter>(
+        std::move(connection));
+
+    pipeline_ =
+        PipelineBuilder<
+            client::ThriftClientTransportAdapter,
+            ThriftClientChannel,
+            TestAllocator>()
+            .setEventBase(&evb_)
+            .setHead(transportAdapter_.get())
+            .setTail(channel_.get())
+            .setAllocator(&allocator_)
             .addNextInbound<client::handler::ThriftClientMetadataPushHandler>(
                 thrift_client_metadata_push_handler_tag)
             .build();
 
     channel_->setPipeline(pipeline_.get());
-    transportHandler_->setPipeline(*pipeline_);
+    transportAdapter_->setPipeline(pipeline_.get());
+    transportHandlerPtr->onConnect();
 
     // Drive event loop to process the SETUP frame write callback
     evb_.loopOnce();
@@ -326,8 +350,7 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
 
   folly::EventBase evb_;
   TestAsyncTransport* testTransport_{nullptr};
-  apache::thrift::fast_thrift::transport::TransportHandler::Ptr
-      transportHandler_;
+  std::unique_ptr<client::ThriftClientTransportAdapter> transportAdapter_;
   ThriftClientChannel::UniquePtr channel_;
   PipelineImpl::Ptr pipeline_;
   TestAllocator allocator_;

@@ -21,49 +21,49 @@ const int FILEINFO_RAW;
 <<__PHPStdLib>>
 function finfo_open(
   int $options = FILEINFO_NONE,
-  HH\FIXME\MISSING_PARAM_TYPE $magic_file = null,
+  ?string $magic_file = null,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function finfo_close(resource $finfo): HH\FIXME\MISSING_RETURN_TYPE;
+function finfo_close(resource $finfo): bool;
 <<__PHPStdLib>>
 function finfo_set_flags(
   resource $finfo,
   int $options,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+): bool {}
 <<__PHPStdLib>>
 function finfo_file(
   resource $finfo,
-  HH\FIXME\MISSING_PARAM_TYPE $file_name,
+  ?string $file_name,
   int $options = FILEINFO_NONE,
-  HH\FIXME\MISSING_PARAM_TYPE $context = null,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+  ?resource $context = null,
+): string {}
 <<__PHPStdLib>>
 function finfo_buffer(
   resource $finfo,
-  HH\FIXME\MISSING_PARAM_TYPE $string,
+  ?string $string,
   int $options = FILEINFO_NONE,
-  HH\FIXME\MISSING_PARAM_TYPE $context = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+  ?resource $context = null,
+): string;
 <<__PHPStdLib>>
 function mime_content_type(
   HH\FIXME\MISSING_PARAM_TYPE $filename,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+): string {}
 
 class finfo {
   // Methods
   public function __construct(
     int $options = FILEINFO_NONE,
-    HH\FIXME\MISSING_PARAM_TYPE $magic_file = null,
+    ?string $magic_file = null,
   );
   public function buffer(
-    HH\FIXME\MISSING_PARAM_TYPE $string = null,
+    ?string $string = null,
     int $options = FILEINFO_NONE,
-    HH\FIXME\MISSING_PARAM_TYPE $context = null,
+    ?resource $context = null,
   ): string;
   public function file(
-    HH\FIXME\MISSING_PARAM_TYPE $file_name = null,
+    ?string $file_name = null,
     int $options = FILEINFO_NONE,
-    HH\FIXME\MISSING_PARAM_TYPE $context = null,
+    ?resource $context = null,
   ): string;
   public function set_flags(int $options): bool;
 

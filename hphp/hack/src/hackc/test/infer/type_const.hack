@@ -14,7 +14,7 @@ abstract class C {
   // TEST-CHECK-BAL: define C$static.check2
   // CHECK: define C$static.check2($this: .notnull *C$static, $a: *HackMixed) : .notnull *HackBool {
   // CHECK: #b0:
-  // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("self"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
+  // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("HH\\this"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
   // CHECK: // .column 12
   // CHECK:   n1: *HackMixed = load &$a
   // CHECK: // .column 12
@@ -23,7 +23,7 @@ abstract class C {
   // CHECK:   ret n2
   // CHECK: }
   public static function check2(mixed $a): bool {
-    return $a is self::TMyShape;
+    return $a is this::TMyShape;
   }
 }
 

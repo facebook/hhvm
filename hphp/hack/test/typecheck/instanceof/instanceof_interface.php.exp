@@ -1,5 +1,5 @@
 File "instanceof_interface.php", line 15, characters 5-15:
-  J<T#2> where T#2 super C
+  J<T#3> where T#3 super C
 File "instanceof_interface.php", line 16, characters 5-18:
   I<C>
 File "instanceof_interface.php", line 19, characters 5-15:

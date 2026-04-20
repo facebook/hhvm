@@ -2313,11 +2313,15 @@ let refine_and_simplify_intersection env p reason ivar_pos ty hint_ty =
     ty
     hint_ty
 
-let refine_for_hint ~expr_pos ~refinement_reason env tparamet ty hint =
+(* Set report_errors to false if you've already localized the hint previously
+   e.g. as is the case for `is` *)
+let refine_for_hint
+    ~expr_pos ~refinement_reason ~report_errors env tparamet ty hint =
   let ((env, ty_err_opt), hint_ty) =
     Phase.localize_hint_for_refinement env hint
   in
-  Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+  if report_errors then
+    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   let (_, env, hint_ty) = Typing_utils.strip_supportdyn env hint_ty in
   let (env, hint_ty) =
     if not tparamet then
@@ -2343,6 +2347,7 @@ let refine_for_is env tparamet ivar refinement_reason hint =
       refine_for_hint
         ~expr_pos:(fst locl_ivar)
         ~refinement_reason
+        ~report_errors:false
         env
         tparamet
         (fst3 ivar)
@@ -2362,6 +2367,7 @@ let refine_for_pattern ~expr_pos env tparamet ty = function
       refine_for_hint
         ~expr_pos
         ~refinement_reason:(Reason.pattern p)
+        ~report_errors:true
         env
         tparamet
         ty
@@ -4649,6 +4655,10 @@ end = struct
           env
           e
       in
+      let ((env, ty_err_opt), _hint_ty) =
+        Phase.localize_hint_for_refinement env hint
+      in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       make_result env p (Aast.Is (te, hint)) (MakeType.bool (Reason.witness p))
     | As { expr = e; hint; is_nullable; enforce_deep } ->
       let refine_type env lpos lty rty =

@@ -1,0 +1,24 @@
+ERROR: File "invalid_is_rhs_bad.php", line 10, characters 8-19:
+Invalid type hint (Typing[4062])
+  File "invalid_is_rhs_bad.php", line 10, characters 16-19:
+  You are trying to access the type constant `ZERO` but this is an int
+  File "invalid_is_rhs_bad.php", line 3, characters 21-23:
+  Definition is here
+ERROR: File "invalid_is_rhs_bad.php", line 11, characters 9-20:
+Invalid type hint (Typing[4062])
+  File "invalid_is_rhs_bad.php", line 11, characters 17-20:
+  You are trying to access the type constant `ZERO` but this is an int
+  File "invalid_is_rhs_bad.php", line 3, characters 21-23:
+  Definition is here
+ERROR: File "invalid_is_rhs_bad.php", line 12, characters 9-22:
+Invalid type hint (Typing[4090])
+  File "invalid_is_rhs_bad.php", line 12, characters 18-22:
+  No type constant `class` in `MyClass`
+  File "invalid_is_rhs_bad.php", line 7, characters 13-19:
+  Declaration of `MyClass` is here
+ERROR: File "invalid_is_rhs_bad.php", line 13, characters 18-29:
+Invalid type hint (Typing[4062])
+  File "invalid_is_rhs_bad.php", line 13, characters 26-29:
+  You are trying to access the type constant `ZERO` but this is an int
+  File "invalid_is_rhs_bad.php", line 3, characters 21-23:
+  Definition is here

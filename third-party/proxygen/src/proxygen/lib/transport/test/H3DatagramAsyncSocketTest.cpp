@@ -72,8 +72,8 @@ void H3DatagramAsyncSocketTest::TearDown() {
 }
 
 folly::SocketAddress& H3DatagramAsyncSocketTest::getLocalAddress() {
-  static folly::SocketAddress localAddr("::", 0);
-  return localAddr;
+  static folly::SocketAddress localAddress("::", 0);
+  return localAddress;
 }
 
 folly::SocketAddress& H3DatagramAsyncSocketTest::getRemoteAddress() {

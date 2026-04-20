@@ -1,0 +1,4 @@
+string(104) "Warning: Value returned from method Derived1::foo() must be of inherited type @HH\classname, class given"
+string(1) "C"
+string(109) "Warning: Value returned from method Derived2::foo() must be of inherited type @HH\classname, lazy class given"
+string(1) "C"

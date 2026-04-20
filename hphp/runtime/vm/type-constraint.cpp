@@ -1291,12 +1291,20 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val,
           return false;
         case AnnotAction::WarnClassname:
           if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate, threadLocalRng64())) {
-            raise_notice(Strings::CLASS_TO_CLASSNAME);
+            raise_notice(
+              isInherited()
+                ? Strings::CLASS_TO_CLASSNAME_INHERITED
+                : Strings::CLASS_TO_CLASSNAME
+            );
           }
           return true;
         case AnnotAction::WarnClass:
           if (folly::Random::oneIn(Cfg::Eval::ClassNoticesSampleRate, threadLocalRng64())) {
-            raise_notice(Strings::STRING_TO_CLASS);
+            raise_notice(
+              isInherited()
+                ? Strings::STRING_TO_CLASS_INHERITED
+                : Strings::STRING_TO_CLASS
+            );
           }
           return true;
         default:
@@ -1527,12 +1535,20 @@ bool TypeConstraint::checkImpl(tv_rval val,
       return false;
     case AnnotAction::WarnClassname:
       if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate, threadLocalRng64())) {
-        raise_notice(Strings::CLASS_TO_CLASSNAME);
+        raise_notice(
+          isInherited()
+            ? Strings::CLASS_TO_CLASSNAME_INHERITED
+            : Strings::CLASS_TO_CLASSNAME
+        );
       }
       return true;
     case AnnotAction::WarnClass:
       if (folly::Random::oneIn(Cfg::Eval::ClassNoticesSampleRate, threadLocalRng64())) {
-        raise_notice(Strings::STRING_TO_CLASS);
+        raise_notice(
+          isInherited()
+            ? Strings::STRING_TO_CLASS_INHERITED
+            : Strings::STRING_TO_CLASS
+        );
       }
       return true;
     default:
@@ -1819,8 +1835,14 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
   if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
       checkStringCompatible()) {
     if (folly::Random::oneIn(Cfg::Eval::ClassStringHintNoticesSampleRate, threadLocalRng64())) {
-      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, tcInfo().c_str());
+      raise_notice(
+        isInherited() && isSoft()
+          ? Strings::CLASS_TO_STRING_IMPLICIT_INHERITED
+          : Strings::CLASS_TO_STRING_IMPLICIT,
+        tcInfo().c_str()
+      );
     }
+    if (isInherited() && isSoft()) return true;
     val.val().pstr = isClassType(val.type()) ?
       const_cast<StringData*>(val.val().pclass->name()) :
       const_cast<StringData*>(val.val().plazyclass.name());

@@ -120,9 +120,15 @@ constexpr char FUNC_TO_STRING_IMPLICIT[] =
 constexpr char FUNC_TO_STRING[] = "Func to string conversion";
 constexpr char CLASS_TO_STRING_IMPLICIT[] =
   "Implicit Class to string conversion for %s";
+constexpr char CLASS_TO_STRING_IMPLICIT_INHERITED[] =
+  "Inherited type-hint may cause implicit Class to string conversion for %s";
 constexpr char CLASS_TO_MEMOKEY[] = "Class to memo key conversion";
 constexpr char CLASS_TO_CLASSNAME[] = "Class passed to classname type-hint";
+constexpr char CLASS_TO_CLASSNAME_INHERITED[] =
+  "Class passed to inherited type-hint classname";
 constexpr char STRING_TO_CLASS[] = "String passed to class type-hint";
+constexpr char STRING_TO_CLASS_INHERITED[] =
+  "String passed to inherited type-hint class";
 constexpr char ARRAY_MARK_LEGACY_VEC[] = "array_mark_legacy() called on vec";
 constexpr char ARRAY_MARK_LEGACY_DICT[] = "array_mark_legacy() called on dict";
 constexpr char NONEXHAUSTIVE_SWITCH[] =

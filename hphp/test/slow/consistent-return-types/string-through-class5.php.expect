@@ -1,0 +1,1 @@
+string(97) "Error: Value returned from method Derived::foo() must be of inherited type HH\class, string given"

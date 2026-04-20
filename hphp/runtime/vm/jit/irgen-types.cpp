@@ -48,7 +48,9 @@ const StaticString
   s_StringishObject("StringishObject"),
   s_Awaitable("HH\\Awaitable"),
   s_CLASS_TO_CLASSNAME(Strings::CLASS_TO_CLASSNAME),
-  s_STRING_TO_CLASS(Strings::STRING_TO_CLASS);
+  s_CLASS_TO_CLASSNAME_INHERITED(Strings::CLASS_TO_CLASSNAME_INHERITED),
+  s_STRING_TO_CLASS(Strings::STRING_TO_CLASS),
+  s_STRING_TO_CLASS_INHERITED(Strings::STRING_TO_CLASS_INHERITED);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -202,6 +204,23 @@ SSATmp* verifyTypeImpl(IRGS& env,
   auto const checkOneType = [&](SSATmp* val, AnnotAction result) -> SSATmp* {
     assertx(val->type().isKnownDataType());
 
+    auto const emitClassToStringNotice = [&] {
+      std::string msg;
+      string_printf(
+        msg,
+        tc.isInherited() && tc.isSoft()
+          ? Strings::CLASS_TO_STRING_IMPLICIT_INHERITED
+          : Strings::CLASS_TO_STRING_IMPLICIT,
+        getTcInfo().c_str()
+      );
+      gen(
+        env,
+        RaiseNotice,
+        SampleRateData { Cfg::Eval::ClassStringHintNoticesSampleRate },
+        cns(env, makeStaticString(msg))
+      );
+    };
+
     switch (result) {
       case AnnotAction::Pass:
         return val;
@@ -226,52 +245,48 @@ SSATmp* verifyTypeImpl(IRGS& env,
         // We'll check objects next.
         break;
 
-      case AnnotAction::WarnClassToString:
+      case AnnotAction::WarnClassToString: {
+        assertx(val->type() <= TCls);
+        emitClassToStringNotice();
+        if (tc.isInherited() && tc.isSoft()) return val;
+        [[fallthrough]];
+      }
       case AnnotAction::ConvertClassToString:
         assertx(val->type() <= TCls);
-        if (result == AnnotAction::WarnClassToString) {
-          std::string msg;
-          string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
-            getTcInfo().c_str());
-          gen(
-            env,
-            RaiseNotice,
-            SampleRateData { Cfg::Eval::ClassStringHintNoticesSampleRate },
-            cns(env, makeStaticString(msg))
-          );
-        }
         return gen(env, LdClsName, val);
 
-      case AnnotAction::WarnLazyClassToString:
+      case AnnotAction::WarnLazyClassToString: {
+        assertx(val->type() <= TLazyCls);
+        emitClassToStringNotice();
+        if (tc.isInherited() && tc.isSoft()) return val;
+        [[fallthrough]];
+      }
       case AnnotAction::ConvertLazyClassToString:
         assertx(val->type() <= TLazyCls);
-        if (result == AnnotAction::WarnLazyClassToString) {
-          std::string msg;
-          string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
-            getTcInfo().c_str());
-          gen(
-            env,
-            RaiseNotice,
-            SampleRateData { Cfg::Eval::ClassStringHintNoticesSampleRate },
-            cns(env, makeStaticString(msg))
-          );
-        }
         return gen(env, LdLazyClsName, val);
 
-      case AnnotAction::WarnClassname:
+      case AnnotAction::WarnClassname: {
         assertx(val->type() <= TCls || val->type() <= TLazyCls);
         gen(env,
-            RaiseNotice,
-            SampleRateData { Cfg::Eval::ClassnameNoticesSampleRate },
-            cns(env, s_CLASS_TO_CLASSNAME.get()));
+          RaiseNotice,
+          SampleRateData { Cfg::Eval::ClassnameNoticesSampleRate },
+          cns(env, tc.isInherited()
+            ? s_CLASS_TO_CLASSNAME_INHERITED.get()
+            : s_CLASS_TO_CLASSNAME.get())
+        );
         return val;
-      case AnnotAction::WarnClass:
+      }
+      case AnnotAction::WarnClass: {
         assertx(val->type() <= TStr);
         gen(env,
-            RaiseNotice,
-            SampleRateData { Cfg::Eval::ClassNoticesSampleRate },
-            cns(env, s_STRING_TO_CLASS.get()));
+          RaiseNotice,
+          SampleRateData { Cfg::Eval::ClassNoticesSampleRate },
+          cns(env, tc.isInherited()
+            ? s_STRING_TO_CLASS_INHERITED.get()
+            : s_STRING_TO_CLASS.get())
+        );
         return val;
+      }
     }
     assertx(result == AnnotAction::ObjectCheck);
     assertx(val->type() <= TObj);

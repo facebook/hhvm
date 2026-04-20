@@ -1,0 +1,3 @@
+--inputs=__DIR__/class-through-classname.inc
+-vRuntime.Eval.ClassnameNoticesSampleRate=1
+-vRuntime.Eval.EnforceOverriddenReturnTypes=2

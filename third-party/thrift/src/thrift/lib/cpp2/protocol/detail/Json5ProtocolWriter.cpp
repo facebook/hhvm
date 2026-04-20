@@ -28,7 +28,7 @@ namespace apache::thrift::json5::detail {
 
 namespace {
 
-bool isValidUtf8(std::string_view str) {
+bool isPrintableUtf8(std::string_view str) {
   auto p = reinterpret_cast<const unsigned char*>(str.data());
   auto end = p + str.size();
 
@@ -39,6 +39,22 @@ bool isValidUtf8(std::string_view str) {
     // A legitimate U+FFFD in the input would advance by 3 bytes.
     if (cp == U'\ufffd' && p == prev + 1) {
       return false;
+    }
+    // C0 control characters (U+0000-U+001F), DEL (U+007F),
+    // and C1 control characters (U+0080-U+009F) are not printable.
+    // Exception: characters with dedicated JSON escape sequences
+    // (\b, \t, \n, \f, \r) are considered printable.
+    if (cp <= 0x1F || (cp >= 0x7F && cp <= 0x9F)) {
+      switch (cp) {
+        case '\b':
+        case '\t':
+        case '\n':
+        case '\f':
+        case '\r':
+          break;
+        default:
+          return false;
+      }
     }
   }
   return true;
@@ -297,7 +313,7 @@ std::uint32_t Json5ProtocolWriter::writeString(folly::StringPiece str) {
 std::uint32_t Json5ProtocolWriter::writeBinary(folly::StringPiece str) {
   std::uint32_t xfer = beginWriteValue();
   xfer += writer_.writeObjectBegin();
-  if (isValidUtf8(str)) {
+  if (isPrintableUtf8(str)) {
     xfer += writer_.writeObjectName("utf-8");
     xfer += writer_.writeString(str);
   } else {

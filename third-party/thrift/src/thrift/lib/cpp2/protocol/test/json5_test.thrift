@@ -479,6 +479,34 @@ const list<TestCase> testCases = [
 }",
   },
   TestCase{
+    name = "BinaryUnprintableUtf8",
+    example = Example{binaryValue = "hello\x01"},
+    json = "{
+  \"binaryValue\": {
+    \"base64url\": \"aGVsbG8B\"
+  }
+}",
+    json5 = "{
+  binaryValue: {
+    base64url: \"aGVsbG8B\",
+  },
+}",
+  },
+  TestCase{
+    name = "BinaryJsonEscapable",
+    example = Example{binaryValue = "a\tb\nc"},
+    json = "{
+  \"binaryValue\": {
+    \"utf-8\": \"a\\tb\\nc\"
+  }
+}",
+    json5 = "{
+  binaryValue: {
+    \"utf-8\": \"a\\tb\\nc\",
+  },
+}",
+  },
+  TestCase{
     name = "OutOfOrderFields",
     example = Example{
       outOfOrderFieldsInSet = [

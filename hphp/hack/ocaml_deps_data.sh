@@ -10,11 +10,11 @@ export HACK_OPAM_DEPS=(
   core_kernel.v0.16.0
   core_unix.v0.16.0
   dtoa.0.3.2
-  dune.3.6.0
+  dune.3.20.1
   fileutils.0.6.4
   fmt.0.9.0
   iomux.0.3
-  landmarks-ppx.1.4
+  landmarks-ppx.1.5
   lru.0.3.1
   lwt.5.7.0
   lwt_log.1.1.2

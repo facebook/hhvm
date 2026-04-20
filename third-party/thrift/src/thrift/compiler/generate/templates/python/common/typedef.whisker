@@ -66,7 +66,10 @@ else:
     {{typedef.py_name}} = _fbthrift_python_types.ListTypeFactory({{#partial m_types.typeinfo type=resolved.true_type.elem_type}})
         {{/if python.generate_immutable_types?}}
         {{#if python.generate_mutable_types?}}
-{{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}
+          {{#let resolved = typedef.resolved}}
+class {{typedef.py_name}}(_fbthrift_python_mutable_containers._MutableListTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_list_type_info = {{#partial m_types.typeinfo type=resolved.true_type.elem_type}}
         {{/if python.generate_mutable_types?}}
       {{#else if typedef.set?}}
         {{#if python.generate_immutable_types?}}
@@ -79,7 +82,10 @@ else:
     {{typedef.py_name}} = _fbthrift_python_types.SetTypeFactory({{#partial m_types.typeinfo type=resolved.true_type.elem_type}})
         {{/if python.generate_immutable_types?}}
         {{#if python.generate_mutable_types?}}
-{{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}
+          {{#let resolved = typedef.resolved}}
+class {{typedef.py_name}}(_fbthrift_python_mutable_containers._MutableSetTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_set_type_info = {{#partial m_types.typeinfo type=resolved.true_type.elem_type}}
         {{/if python.generate_mutable_types?}}
       {{#else if typedef.map?}}
         {{#if python.generate_immutable_types?}}
@@ -94,7 +100,12 @@ else:
     {{typedef.py_name}} = _fbthrift_python_types.MapTypeFactory({{#partial m_types.typeinfo type=map.key_type}}, {{#partial m_types.typeinfo type=map.val_type}})
         {{/if python.generate_immutable_types?}}
         {{#if python.generate_mutable_types?}}
-{{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}
+          {{#let resolved = typedef.resolved}}
+          {{#let map = resolved.true_type}}
+class {{typedef.py_name}}(_fbthrift_python_mutable_containers._MutableMapTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_map_key_type_info = {{#partial m_types.typeinfo type=map.key_type}}
+    _fbthrift_mutable_map_val_type_info = {{#partial m_types.typeinfo type=map.val_type}}
         {{/if python.generate_mutable_types?}}
       {{#else}}
 {{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}

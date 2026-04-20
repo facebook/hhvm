@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import itertools
 import unittest
-from collections.abc import Sequence
+from collections.abc import MutableSequence, Sequence
 from typing import List, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
@@ -42,6 +42,7 @@ from python_test.lists.thrift_types import (
     StrList2D,
 )
 from thrift.lib.python.test.testing_utils import Untruthy
+from thrift.python.mutable_containers import MutableList
 from thrift.python.mutable_types import _ThriftListWrapper, to_thrift_list
 from thrift.python.test_helpers import round_thrift_to_float32
 
@@ -49,36 +50,6 @@ ListT = TypeVar("ListT")
 
 
 class ImmutableListTests(unittest.TestCase):
-    def test_typedef_isinstance(self) -> None:
-        int_list = I32List([1, 2, 3])
-        # I32List is list<i32>, IdList is list<Id> where Id = i32
-        # They resolve to the same container type, so isinstance/issubclass should work
-        self.assertIsInstance(int_list, I32List)
-        self.assertIsInstance(int_list, IdList)
-        self.assertIsInstance(int_list, _fbthrift_python_types.List)
-        self.assertIsInstance(int_list, Sequence)
-        self.assertTrue(issubclass(I32List, Sequence))
-        self.assertTrue(issubclass(I32List, IdList))
-        self.assertTrue(issubclass(IdList, I32List))
-        self.assertTrue(issubclass(I32List, _fbthrift_python_types.List))
-        # Different element types should not match
-        self.assertNotIsInstance(int_list, StringList)
-        self.assertFalse(issubclass(I32List, StringList))
-        # Struct fields typed as list<i32> should also pass isinstance
-        # checks against typedef classes for list<i32>
-        self.assertIsInstance(easy().val_list, I32List)
-        self.assertIsInstance(easy().val_list, IdList)
-        self.assertIsInstance(easy(val_list=[1, 2]).val_list, IdList)
-        # Nested container: StrList2D and AnotherStrList2D both resolve to list<list<string>>
-        nested_list = StrList2D([["a", "b"], ["c", "d"]])
-        self.assertIsInstance(nested_list, StrList2D)
-        self.assertIsInstance(nested_list, AnotherStrList2D)
-        self.assertTrue(issubclass(StrList2D, AnotherStrList2D))
-        self.assertTrue(issubclass(AnotherStrList2D, StrList2D))
-        # list<list<string>> should not match list<i32>
-        self.assertNotIsInstance(nested_list, I32List)
-        self.assertFalse(issubclass(StrList2D, I32List))
-
     def test_hashability(self) -> None:
         hash(easy().val_list)
         hash(I32List(range(10)))
@@ -116,7 +87,11 @@ class ListTests(unittest.TestCase):
         self.EasyList: Type[EasyList] = self.lists_types.EasyList
         self.int_list: List[int] = self.lists_types.int_list
         self.I32List: Type[I32List] = self.lists_types.I32List
+        self.IdList: Type[IdList] = self.lists_types.IdList
         self.StrList2D: Type[StrList2D] = self.lists_types.StrList2D
+        self.AnotherStrList2D: Type[AnotherStrList2D] = (
+            self.lists_types.AnotherStrList2D
+        )
         self.StringList: Type[StringList] = self.lists_types.StringList
         self.AtoIValueList: Type[AtoIValueList] = self.lists_types.AtoIValueList
         # pyre-ignore[16]: has no attribute `containers_types`
@@ -126,10 +101,53 @@ class ListTests(unittest.TestCase):
         self.is_mutable_run: bool = self.containers_types.__name__.endswith(
             "thrift_mutable_types"
         )
+        self.ListBaseType = (
+            MutableList if self.is_mutable_run else _fbthrift_python_types.List
+        )
         self.unicode_list: list[str] = self.lists_types.unicode_list
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
+
+    def test_typedef_isinstance(self) -> None:
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        int_list = self.I32List(self.to_list([1, 2, 3]))
+        # I32List and IdList both resolve to list<i32>
+        self.assertIsInstance(int_list, self.I32List)
+        self.assertIsInstance(int_list, self.IdList)
+        self.assertTrue(issubclass(self.I32List, self.IdList))
+        self.assertTrue(issubclass(self.IdList, self.I32List))
+        # Different element types should not match
+        self.assertNotIsInstance(int_list, self.StringList)
+        self.assertFalse(issubclass(self.I32List, self.StringList))
+        self.assertIsInstance(int_list, self.ListBaseType)
+        self.assertTrue(issubclass(self.I32List, self.ListBaseType))
+        # Struct fields typed as list<i32> pass isinstance checks
+        self.assertIsInstance(self.easy().val_list, self.I32List)
+        self.assertIsInstance(self.easy().val_list, self.IdList)
+        self.assertIsInstance(
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            self.easy(val_list=self.to_list([1, 2])).val_list,
+            self.IdList,
+        )
+        expected_abc = MutableSequence if self.is_mutable_run else Sequence
+        self.assertIsInstance(int_list, expected_abc)
+        self.assertTrue(issubclass(self.I32List, expected_abc))
+        # StrList2D and AnotherStrList2D both resolve to list<list<string>>
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        nested_list = self.StrList2D(self.to_list([["a", "b"], ["c", "d"]]))
+        self.assertIsInstance(nested_list, self.StrList2D)
+        self.assertIsInstance(nested_list, self.AnotherStrList2D)
+        self.assertTrue(issubclass(self.StrList2D, self.AnotherStrList2D))
+        self.assertTrue(issubclass(self.AnotherStrList2D, self.StrList2D))
+        # list<list<string>> should not match list<i32>
+        self.assertNotIsInstance(nested_list, self.I32List)
+        self.assertFalse(issubclass(self.StrList2D, self.I32List))
+
+    def test_typedef_default_constructor(self) -> None:
+        empty = self.I32List()
+        self.assertEqual(len(empty), 0)
+        self.assertIsInstance(empty, self.I32List)
 
     def test_negative_indexes(self) -> None:
         length = len(self.int_list)
@@ -343,12 +361,13 @@ class ListTests(unittest.TestCase):
         # pyre-ignore[6]: TODO: Thrift-Container init
         easy_list = self.EasyList(self.to_list([self.easy()]))
         if self.is_mutable_run:
+            # Mutable container typedefs are proper classes in the generated module
             self.assertEqual(
-                easy_list.__class__.__module__, "thrift.python.mutable_containers"
+                easy_list.__class__.__module__,
+                "python_test.lists.thrift_mutable_types",
             )
         else:
-            # Immutable container typedefs are now proper classes in the
-            # generated module, inheriting from thrift.python.types.List
+            # Immutable container typedefs are proper classes in the generated module
             self.assertEqual(
                 easy_list.__class__.__module__, "python_test.lists.thrift_types"
             )

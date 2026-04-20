@@ -2349,14 +2349,28 @@ _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 TBinary = bytes
 IntTypedef = int
 UintTypedef = int
-SomeListOfTypeMap_2468 = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string))
+class SomeListOfTypeMap_2468(_fbthrift_python_mutable_containers._MutableListTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_list_type_info = _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string)
 TBinary_8623 = bytes
 i32_9314 = int
-list_i32_9187 = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_types.typeinfo_i32)
-map_i32_i32_9565 = _fbthrift_python_mutable_containers.MutableMapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
-map_i32_string_1261 = _fbthrift_python_mutable_containers.MutableMapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_string)
-set_i32_7070 = _fbthrift_python_mutable_containers.MutableSetTypeFactory(_fbthrift_python_types.typeinfo_i32)
-set_i32_7194 = _fbthrift_python_mutable_containers.MutableSetTypeFactory(_fbthrift_python_types.typeinfo_i32)
+class list_i32_9187(_fbthrift_python_mutable_containers._MutableListTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_list_type_info = _fbthrift_python_types.typeinfo_i32
+class map_i32_i32_9565(_fbthrift_python_mutable_containers._MutableMapTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_map_key_type_info = _fbthrift_python_types.typeinfo_i32
+    _fbthrift_mutable_map_val_type_info = _fbthrift_python_types.typeinfo_i32
+class map_i32_string_1261(_fbthrift_python_mutable_containers._MutableMapTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_map_key_type_info = _fbthrift_python_types.typeinfo_i32
+    _fbthrift_mutable_map_val_type_info = _fbthrift_python_types.typeinfo_string
+class set_i32_7070(_fbthrift_python_mutable_containers._MutableSetTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_set_type_info = _fbthrift_python_types.typeinfo_i32
+class set_i32_7194(_fbthrift_python_mutable_containers._MutableSetTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_set_type_info = _fbthrift_python_types.typeinfo_i32
 string_5252 = str
 
 

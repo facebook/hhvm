@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 import unittest
-from collections.abc import ItemsView, KeysView, Mapping, ValuesView
+from collections.abc import ItemsView, KeysView, Mapping, MutableMapping, ValuesView
 from enum import Enum, IntEnum
 from typing import Dict, Type, TypeVar
 
@@ -49,6 +49,7 @@ from python_test.maps.thrift_types import (
     StrStrIntListMapMap as StrStrIntListMapMapType,
     StrStrMap as StrStrMapType,
 )
+from thrift.python.mutable_containers import MutableMap
 from thrift.python.mutable_types import (
     _ThriftListWrapper,
     _ThriftMapWrapper,
@@ -67,28 +68,6 @@ class MyStringEnum(str, Enum):
 
 
 class ImmutableMapTests(unittest.TestCase):
-    def test_typedef_isinstance(self) -> None:
-        int_map = StrIntMapType({"foo": 1, "bar": 2})
-        # StrIntMap and AnotherStrIntMap both resolve to map<string, i64>
-        self.assertIsInstance(int_map, StrIntMapType)
-        self.assertIsInstance(int_map, AnotherStrIntMapType)
-        self.assertIsInstance(int_map, _fbthrift_python_types.Map)
-        self.assertIsInstance(int_map, Mapping)
-        self.assertTrue(issubclass(StrIntMapType, Mapping))
-        self.assertTrue(issubclass(StrIntMapType, AnotherStrIntMapType))
-        self.assertTrue(issubclass(AnotherStrIntMapType, StrIntMapType))
-        self.assertTrue(issubclass(StrIntMapType, _fbthrift_python_types.Map))
-        # Different key/value types should not match
-        self.assertNotIsInstance(int_map, StrEasyMapType)
-        self.assertFalse(issubclass(StrIntMapType, StrEasyMapType))
-        # Nested container: StrI32ListMap is map<string, list<i32>>,
-        # AnotherStrI32ListMap is also map<string, list<i32>>
-        nested_map = StrI32ListMapType({"a": [1, 2], "b": [3, 4]})
-        self.assertIsInstance(nested_map, StrI32ListMapType)
-        self.assertIsInstance(nested_map, AnotherStrI32ListMapType)
-        self.assertTrue(issubclass(StrI32ListMapType, AnotherStrI32ListMapType))
-        self.assertTrue(issubclass(AnotherStrI32ListMapType, StrI32ListMapType))
-
     def test_hashability(self) -> None:
         hash(immutable_maps_types.StrI32ListMap())
         x = immutable_maps_types.StrStrIntListMapMap(
@@ -126,11 +105,17 @@ class MapTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `sets_types`
         self.LocationMap: Dict[int, Dict[int, int]] = self.maps_types.LocationMap
         self.StrIntMap: Type[StrIntMapType] = self.maps_types.StrIntMap
+        self.AnotherStrIntMap: Type[AnotherStrIntMapType] = (
+            self.maps_types.AnotherStrIntMap
+        )
         self.StrStrIntListMapMap: Type[StrStrIntListMapMapType] = (
             self.maps_types.StrStrIntListMapMap
         )
         self.StrStrMap: Type[StrStrMapType] = self.maps_types.StrStrMap
         self.StrI32ListMap: Type[StrI32ListMapType] = self.maps_types.StrI32ListMap
+        self.AnotherStrI32ListMap: Type[AnotherStrI32ListMapType] = (
+            self.maps_types.AnotherStrI32ListMap
+        )
         self.StrAtoIValueMap: Type[StrAtoIValueMapType] = (
             self.maps_types.StrAtoIValueMap
         )
@@ -146,6 +131,9 @@ class MapTests(unittest.TestCase):
         self.is_mutable_run: bool = self.containers_types.__name__.endswith(
             "thrift_mutable_types"
         )
+        self.MapBaseType = (
+            MutableMap if self.is_mutable_run else _fbthrift_python_types.Map
+        )
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
@@ -154,6 +142,35 @@ class MapTests(unittest.TestCase):
         self, map_data: dict[MapKey, MapValue]
     ) -> dict[MapKey, MapValue] | _ThriftMapWrapper:
         return to_thrift_map(map_data) if self.is_mutable_run else map_data
+
+    def test_typedef_isinstance(self) -> None:
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        int_map = self.StrIntMap(self.to_map({"foo": 1, "bar": 2}))
+        # StrIntMap and AnotherStrIntMap both resolve to map<string, i64>
+        self.assertIsInstance(int_map, self.StrIntMap)
+        self.assertIsInstance(int_map, self.AnotherStrIntMap)
+        self.assertTrue(issubclass(self.StrIntMap, self.AnotherStrIntMap))
+        self.assertTrue(issubclass(self.AnotherStrIntMap, self.StrIntMap))
+        # Different key/value types should not match
+        self.assertNotIsInstance(int_map, self.StrEasyMap)
+        self.assertFalse(issubclass(self.StrIntMap, self.StrEasyMap))
+        self.assertIsInstance(int_map, self.MapBaseType)
+        self.assertTrue(issubclass(self.StrIntMap, self.MapBaseType))
+        expected_abc = MutableMapping if self.is_mutable_run else Mapping
+        self.assertIsInstance(int_map, expected_abc)
+        self.assertTrue(issubclass(self.StrIntMap, expected_abc))
+        # StrI32ListMap and AnotherStrI32ListMap both resolve to map<string, list<i32>>
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        nested_map = self.StrI32ListMap(self.to_map({"a": [1, 2], "b": [3, 4]}))
+        self.assertIsInstance(nested_map, self.StrI32ListMap)
+        self.assertIsInstance(nested_map, self.AnotherStrI32ListMap)
+        self.assertTrue(issubclass(self.StrI32ListMap, self.AnotherStrI32ListMap))
+        self.assertTrue(issubclass(self.AnotherStrI32ListMap, self.StrI32ListMap))
+
+    def test_typedef_default_constructor(self) -> None:
+        empty = self.StrIntMap()
+        self.assertEqual(len(empty), 0)
+        self.assertIsInstance(empty, self.StrIntMap)
 
     def test_recursive_const_map(self) -> None:
         self.assertEqual(self.LocationMap[1][1], 1)
@@ -371,12 +388,13 @@ class MapTests(unittest.TestCase):
         # pyre-ignore[6]: TODO: Thrift-Container init
         easy_map = self.StrEasyMap(self.to_map({"a": self.easy()}))
         if self.is_mutable_run:
+            # Mutable container typedefs are proper classes in the generated module
             self.assertEqual(
-                easy_map.__class__.__module__, "thrift.python.mutable_containers"
+                easy_map.__class__.__module__,
+                "python_test.maps.thrift_mutable_types",
             )
         else:
-            # Immutable container typedefs are now proper classes in the
-            # generated module, inheriting from thrift.python.types.Map
+            # Immutable container typedefs are proper classes in the generated module
             self.assertEqual(
                 easy_map.__class__.__module__, "python_test.maps.thrift_types"
             )

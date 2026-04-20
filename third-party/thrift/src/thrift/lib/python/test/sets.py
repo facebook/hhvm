@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import copy
 import unittest
-from collections.abc import Set as AbstractSetABC
+from collections.abc import MutableSet as MutableSetABC, Set as AbstractSetABC
 from typing import AbstractSet, Sequence, Tuple, Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
@@ -43,6 +43,7 @@ from python_test.sets.thrift_types import (
     SetSetI32Lists,
 )
 from thrift.lib.python.test.testing_utils import Untruthy
+from thrift.python.mutable_containers import MutableSet
 from thrift.python.mutable_types import _ThriftSetWrapper, to_thrift_set
 from thrift.python.test_helpers import round_thrift_to_float32
 
@@ -62,8 +63,12 @@ class SetTests(unittest.TestCase):
         self.easy: Type[easy] = self.sets_types.easy
         self.EasySet: Type[EasySet] = self.sets_types.EasySet
         self.SetI32: Type[SetI32] = self.sets_types.SetI32
+        self.AnotherSetI32: Type[AnotherSetI32] = self.sets_types.AnotherSetI32
         self.SetAtoIValue: Type[SetAtoIValue] = self.sets_types.SetAtoIValue
         self.SetI32Lists: Type[SetI32Lists] = self.sets_types.SetI32Lists
+        self.AnotherSetI32Lists: Type[AnotherSetI32Lists] = (
+            self.sets_types.AnotherSetI32Lists
+        )
         self.SetSetI32Lists: Type[SetSetI32Lists] = self.sets_types.SetSetI32Lists
         # pyre-ignore[16]: has no attribute `containers_types`
         self.Foo: Type[Foo] = self.containers_types.Foo
@@ -72,9 +77,52 @@ class SetTests(unittest.TestCase):
         self.is_mutable_run: bool = self.containers_types.__name__.endswith(
             "thrift_mutable_types"
         )
+        self.SetBaseType = (
+            MutableSet if self.is_mutable_run else _fbthrift_python_types.Set
+        )
 
     def to_set(self, set_data: set[SetT]) -> set[SetT] | _ThriftSetWrapper:
         return to_thrift_set(set_data) if self.is_mutable_run else set_data
+
+    def test_typedef_isinstance(self) -> None:
+        # pyre-ignore[6]: TODO: Thrift-Container init
+        int_set = self.SetI32(self.to_set({1, 2, 3}))
+        # SetI32 and AnotherSetI32 both resolve to set<i32>
+        self.assertIsInstance(int_set, self.SetI32)
+        self.assertIsInstance(int_set, self.AnotherSetI32)
+        self.assertTrue(issubclass(self.SetI32, self.AnotherSetI32))
+        self.assertTrue(issubclass(self.AnotherSetI32, self.SetI32))
+        # Different element types should not match
+        self.assertNotIsInstance(int_set, self.EasySet)
+        self.assertFalse(issubclass(self.SetI32, self.EasySet))
+        self.assertIsInstance(int_set, self.SetBaseType)
+        self.assertTrue(issubclass(self.SetI32, self.SetBaseType))
+        expected_abc = MutableSetABC if self.is_mutable_run else AbstractSetABC
+        self.assertIsInstance(int_set, expected_abc)
+        self.assertTrue(issubclass(self.SetI32, expected_abc))
+        # Struct fields typed as set<i32> should also pass isinstance
+        self.assertIsInstance(
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            self.Sets(i32Set=self.to_set({1, 2})).i32Set,
+            self.SetI32,
+        )
+        self.assertIsInstance(
+            # pyre-ignore[6]: TODO: Thrift-Container init
+            self.Sets(i32Set=self.to_set({1, 2})).i32Set,
+            self.AnotherSetI32,
+        )
+        if not self.is_mutable_run:
+            # Mutable sets cannot contain nested containers (unhashable)
+            nested_set = SetI32Lists({(1, 2), (3, 4)})
+            self.assertIsInstance(nested_set, self.SetI32Lists)
+            self.assertIsInstance(nested_set, self.AnotherSetI32Lists)
+            self.assertTrue(issubclass(self.SetI32Lists, self.AnotherSetI32Lists))
+            self.assertTrue(issubclass(self.AnotherSetI32Lists, self.SetI32Lists))
+
+    def test_typedef_default_constructor(self) -> None:
+        empty = self.SetI32()
+        self.assertEqual(len(empty), 0)
+        self.assertIsInstance(empty, self.SetI32)
 
     def test_and(self) -> None:
         # pyre-ignore[6]: TODO: Thrift-Container init
@@ -282,31 +330,6 @@ class ImmutableSetTests(unittest.TestCase):
     These tests run only for immutable types because mutable types are not
     hashable.
     """
-
-    def test_typedef_isinstance(self) -> None:
-        int_set = SetI32({1, 2, 3})
-        # SetI32 and AnotherSetI32 both resolve to set<i32>
-        self.assertIsInstance(int_set, SetI32)
-        self.assertIsInstance(int_set, AnotherSetI32)
-        self.assertIsInstance(int_set, _fbthrift_python_types.Set)
-        self.assertIsInstance(int_set, AbstractSetABC)
-        self.assertTrue(issubclass(SetI32, AbstractSetABC))
-        self.assertTrue(issubclass(SetI32, AnotherSetI32))
-        self.assertTrue(issubclass(AnotherSetI32, SetI32))
-        self.assertTrue(issubclass(SetI32, _fbthrift_python_types.Set))
-        # Different element types should not match
-        self.assertNotIsInstance(int_set, EasySet)
-        self.assertFalse(issubclass(SetI32, EasySet))
-        # Struct fields typed as set<i32> should also pass isinstance
-        # checks against typedef classes for set<i32>
-        self.assertIsInstance(Sets(i32Set={1, 2}).i32Set, SetI32)
-        self.assertIsInstance(Sets(i32Set={1, 2}).i32Set, AnotherSetI32)
-        # Nested container: SetI32Lists is set<list<i32>>, AnotherSetI32Lists is also set<list<i32>>
-        nested_set = SetI32Lists({(1, 2), (3, 4)})
-        self.assertIsInstance(nested_set, SetI32Lists)
-        self.assertIsInstance(nested_set, AnotherSetI32Lists)
-        self.assertTrue(issubclass(SetI32Lists, AnotherSetI32Lists))
-        self.assertTrue(issubclass(AnotherSetI32Lists, SetI32Lists))
 
     def test_empty(self) -> None:
         SetI32Lists(set())

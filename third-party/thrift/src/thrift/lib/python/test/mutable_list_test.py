@@ -536,7 +536,7 @@ class MutableListTypedefTest(unittest.TestCase):
             # pyre-fixme[20]: Argument `list_data` expected.
             _ = I32List([1, 2, 3])
 
-        # Initialize with `to_thrift_python()` and verify that the initial
+        # Initialize with `to_thrift_list()` and verify that the initial
         # Python list `lst` and the MutableList `i32list` are separate lists.
         lst = [1, 2, 3]
         # pyre-fixme[20]: Argument `list_data` expected.
@@ -558,7 +558,7 @@ class MutableListTypedefTest(unittest.TestCase):
             # pyre-fixme[20]: Argument `list_data` expected.
             _ = StrList2D([["a", "b"], ["c", "d"]])
 
-        # Initialize with `to_thrift_python()` and verify that the initial
+        # Initialize with `to_thrift_list()` and verify that the initial
         # Python list `lst` and the MutableList `strlist2d` are separate lists.
         lst = [["a", "b"], ["c", "d"]]
         # pyre-fixme[20]: Argument `list_data` expected.

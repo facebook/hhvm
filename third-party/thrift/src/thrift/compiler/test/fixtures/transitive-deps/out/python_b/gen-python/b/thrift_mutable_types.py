@@ -30,5 +30,7 @@ _fbthrift_all_enums = [
 _fbthrift_all_structs = [
 ]
 
-B = _fbthrift_python_mutable_containers.MutableListTypeFactory(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__c__thrift_mutable_types.C))
+class B(_fbthrift_python_mutable_containers._MutableListTypedefBase):
+    __slots__ = ()
+    _fbthrift_mutable_list_type_info = _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__c__thrift_mutable_types.C)
 E = _fbthrift__c__thrift_mutable_types.E

@@ -511,8 +511,8 @@ class ConfigPreprocessor::BuiltIns {
       }
       throwLogic("Import '{}':\n{}", pathStr, e.what());
     }
-    p.importCache_.emplace(pathStr, result);
-    return result;
+    auto [iter, inserted] = p.importCache_.emplace(pathStr, std::move(result));
+    return iter->second;
   }
 
   /**

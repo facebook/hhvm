@@ -26,7 +26,10 @@ class MultiServerExtensions : public ServerExtensions {
    * For each extension in the provided list, get the associated Extensions
    * and combine into one vector.
    */
-  std::vector<Extension> getExtensions(const ClientHello& chlo) override;
+  Status getExtensions(
+      std::vector<Extension>& ret,
+      Error& err,
+      const ClientHello& chlo) override;
 
   /**
    * Get the underlying extensions.

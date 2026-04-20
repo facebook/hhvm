@@ -82,7 +82,9 @@ class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
 
   std::vector<SignatureScheme> getSigSchemes() const override;
 
-  CertificateMsg getCertMessage(
+  Status getCertMessage(
+      CertificateMsg& ret,
+      Error& err,
       Buf certificateRequestContext = nullptr) const override;
 
   CompressedCertificate getCompressedCert(

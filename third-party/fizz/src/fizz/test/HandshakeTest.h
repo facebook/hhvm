@@ -64,8 +64,12 @@ class AsyncSelfCertWrapper : public AsyncSelfCert {
     return cert_->getSigSchemes();
   }
 
-  CertificateMsg getCertMessage(Buf certificateRequestContext) const override {
-    return cert_->getCertMessage(std::move(certificateRequestContext));
+  Status getCertMessage(
+      CertificateMsg& ret,
+      Error& err,
+      Buf certificateRequestContext = nullptr) const override {
+    return cert_->getCertMessage(
+        ret, err, std::move(certificateRequestContext));
   }
 
   CompressedCertificate getCompressedCert(

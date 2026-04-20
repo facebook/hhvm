@@ -12,29 +12,34 @@
 namespace fizz {
 namespace extensions {
 
-CertMatch DelegatedCredentialClientCertManager::getCert(
+Status DelegatedCredentialClientCertManager::getCert(
+    CertMatch& ret,
+    Error& err,
     const folly::Optional<std::string>& sni,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,
     const std::vector<Extension>& peerExtensions) const {
   folly::Optional<DelegatedCredentialSupport> credential;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      getExtension<DelegatedCredentialSupport>(credential, err, peerExtensions),
-      err);
+  FIZZ_RETURN_ON_ERROR(
+      getExtension<DelegatedCredentialSupport>(
+          credential, err, peerExtensions));
 
   if (credential) {
-    auto dcRes = dcMgr_.getCert(
+    CertMatch dcRes;
+    FIZZ_RETURN_ON_ERROR(dcMgr_.getCert(
+        dcRes,
+        err,
         sni,
         supportedSigSchemes,
         credential->supported_signature_algorithms,
-        peerExtensions);
+        peerExtensions));
     if (dcRes) {
-      return dcRes;
+      ret = std::move(dcRes);
+      return Status::Success;
     }
   }
   return CertManager::getCert(
-      sni, supportedSigSchemes, peerSigSchemes, peerExtensions);
+      ret, err, sni, supportedSigSchemes, peerSigSchemes, peerExtensions);
 }
 
 void DelegatedCredentialClientCertManager::addDelegatedCredential(

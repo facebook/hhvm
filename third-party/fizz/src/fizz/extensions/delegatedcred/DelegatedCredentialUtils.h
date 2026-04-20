@@ -49,7 +49,9 @@ class DelegatedCredentialUtils {
    * Constructs the buffer used for verifying the signature on the
    * delegated credential.
    */
-  static Buf prepareSignatureBuffer(
+  static Status prepareSignatureBuffer(
+      Buf& ret,
+      Error& err,
       const DelegatedCredential& cred,
       Buf certData);
 

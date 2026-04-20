@@ -58,8 +58,13 @@ Status PeerDelegatedCredentialImpl<T>::verify(
           err, x509, credential_, clock_));
 
   // Verify signature
-  auto credSignBuf = DelegatedCredentialUtils::prepareSignatureBuffer(
-      credential_, folly::ssl::OpenSSLCertUtils::derEncode(*x509));
+  Buf credSignBuf;
+  FIZZ_RETURN_ON_ERROR(
+      DelegatedCredentialUtils::prepareSignatureBuffer(
+          credSignBuf,
+          err,
+          credential_,
+          folly::ssl::OpenSSLCertUtils::derEncode(*x509)));
 
   try {
     if (peerCert_.verify(

@@ -40,8 +40,10 @@ Status TokenBindingConstructor::createTokenBinding(
   binding.tokenbinding_type = type;
   binding.extensions = folly::IOBuf::create(0);
 
-  auto message =
-      TokenBindingUtils::constructMessage(type, negotiatedParameters, ekm);
+  Buf message;
+  FIZZ_RETURN_ON_ERROR(
+      TokenBindingUtils::constructMessage(
+          message, err, type, negotiatedParameters, ekm));
   FIZZ_RETURN_ON_ERROR(signWithEcKey(binding.signature, err, ecKey, message));
 
   TokenBindingID id;

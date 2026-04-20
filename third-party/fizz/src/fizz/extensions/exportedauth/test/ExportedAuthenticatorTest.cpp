@@ -136,14 +136,20 @@ TEST_F(AuthenticatorTest, TestValidAuthenticator) {
       .WillOnce(
           InvokeWithoutArgs([]() { return IOBuf::copyBuffer("signature"); }));
 
-  auto reencodedAuthenticator = ExportedAuthenticator::makeAuthenticator(
-      hasher(),
-      schemes_,
-      *mockCert,
-      std::move(authrequest_),
-      std::move(handshakeContext_),
-      std::move(finishedKey_),
-      CertificateVerifyContext::Authenticator);
+  Buf reencodedAuthenticator;
+  Error err;
+  EXPECT_EQ(
+      ExportedAuthenticator::makeAuthenticator(
+          reencodedAuthenticator,
+          err,
+          hasher(),
+          schemes_,
+          *mockCert,
+          std::move(authrequest_),
+          std::move(handshakeContext_),
+          std::move(finishedKey_),
+          CertificateVerifyContext::Authenticator),
+      Status::Success);
   EXPECT_EQ(
       expected_authenticator,
       (StringPiece(hexlify(reencodedAuthenticator->coalesce()))));
@@ -156,14 +162,20 @@ TEST_F(AuthenticatorTest, TestEmptyAuthenticator) {
           std::vector<SignatureScheme>(
               1, SignatureScheme::ecdsa_secp256r1_sha256)));
   schemes_.clear();
-  auto reencodedAuthenticator = ExportedAuthenticator::makeAuthenticator(
-      hasher(),
-      schemes_,
-      *mockCert,
-      std::move(authrequest_),
-      std::move(handshakeContext_),
-      std::move(finishedKey_),
-      CertificateVerifyContext::Authenticator);
+  Buf reencodedAuthenticator;
+  Error err;
+  EXPECT_EQ(
+      ExportedAuthenticator::makeAuthenticator(
+          reencodedAuthenticator,
+          err,
+          hasher(),
+          schemes_,
+          *mockCert,
+          std::move(authrequest_),
+          std::move(handshakeContext_),
+          std::move(finishedKey_),
+          CertificateVerifyContext::Authenticator),
+      Status::Success);
   EXPECT_EQ(
       expected_empty_authenticator,
       StringPiece(hexlify(reencodedAuthenticator->coalesce())));
@@ -223,20 +235,25 @@ TEST_F(ValidateAuthenticatorTest, TestValidateValidAuthenticator) {
   auto handshakeContext =
       folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   auto finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
-  auto authenticator = ExportedAuthenticator::makeAuthenticator(
-      hasher(),
-      schemes_,
-      certificate,
-      std::move(authenticatorRequest),
-      std::move(handshakeContext),
-      std::move(finishedMacKey),
-      CertificateVerifyContext::Authenticator);
+  Buf authenticator;
+  Error err;
+  EXPECT_EQ(
+      ExportedAuthenticator::makeAuthenticator(
+          authenticator,
+          err,
+          hasher(),
+          schemes_,
+          certificate,
+          std::move(authenticatorRequest),
+          std::move(handshakeContext),
+          std::move(finishedMacKey),
+          CertificateVerifyContext::Authenticator),
+      Status::Success);
 
   authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
   handshakeContext = folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
   folly::Optional<std::vector<CertificateEntry>> decodedCerts;
-  Error err;
   EXPECT_EQ(
       ExportedAuthenticator::validate(
           decodedCerts,
@@ -267,20 +284,25 @@ TEST_F(ValidateAuthenticatorTest, TestValidateEmptyAuthenticator) {
   auto handshakeContext =
       folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   auto finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
-  auto authenticator = ExportedAuthenticator::makeAuthenticator(
-      hasher(),
-      schemes_,
-      certificate,
-      std::move(authenticatorRequest),
-      std::move(handshakeContext),
-      std::move(finishedMacKey),
-      CertificateVerifyContext::Authenticator);
+  Buf authenticator;
+  Error err;
+  EXPECT_EQ(
+      ExportedAuthenticator::makeAuthenticator(
+          authenticator,
+          err,
+          hasher(),
+          schemes_,
+          certificate,
+          std::move(authenticatorRequest),
+          std::move(handshakeContext),
+          std::move(finishedMacKey),
+          CertificateVerifyContext::Authenticator),
+      Status::Success);
 
   authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
   handshakeContext = folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
   folly::Optional<std::vector<CertificateEntry>> decodedCerts;
-  Error err;
   EXPECT_EQ(
       ExportedAuthenticator::validate(
           decodedCerts,

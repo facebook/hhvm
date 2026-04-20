@@ -55,7 +55,7 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
     clock_ = std::make_shared<MockClock>();
     context_->setClock(clock_);
 
-    ON_CALL(*certManager_, getCert(_, _, _, _))
+    ON_CALL(*certManager_, _getCert(_, _, _, _))
         .WillByDefault(Return(CertMatch(
             CertMatchStruct{
                 cert_,
@@ -742,7 +742,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
             folly::IOBuf::copyBuffer("clientkey"),
             folly::IOBuf::copyBuffer("clientiv")};
       }));
-  EXPECT_CALL(*extensions_, getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(*extensions_, _getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
     Extension ext;
     ext.extension_type = ExtensionType::token_binding;
     ext.extension_data = folly::IOBuf::copyBuffer("someextension");
@@ -795,7 +795,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
       &appwrl, &appwaead, folly::StringPiece("sat"), nullptr, &recSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
-  EXPECT_CALL(*certManager_, getCert(_, _, _, _))
+  EXPECT_CALL(*certManager_, _getCert(_, _, _, _))
       .WillOnce(Invoke(
           [=, this](
               const folly::Optional<std::string>& sni,
@@ -1033,7 +1033,7 @@ TEST_F(ServerProtocolTest, TestClientHelloAsyncCertFullHandshakeFlow) {
             folly::IOBuf::copyBuffer("clientkey"),
             folly::IOBuf::copyBuffer("clientiv")};
       }));
-  EXPECT_CALL(*extensions_, getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(*extensions_, _getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
     Extension ext;
     ext.extension_type = ExtensionType::token_binding;
     ext.extension_data = folly::IOBuf::copyBuffer("someextension");
@@ -1086,7 +1086,7 @@ TEST_F(ServerProtocolTest, TestClientHelloAsyncCertFullHandshakeFlow) {
       &appwrl, &appwaead, folly::StringPiece("sat"), nullptr, &recSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
-  EXPECT_CALL(*certManager_, getCert(_, _, _, _))
+  EXPECT_CALL(*certManager_, _getCert(_, _, _, _))
       .WillOnce(Invoke(
           [=](const folly::Optional<std::string>& sni,
               const std::vector<SignatureScheme>& /* supportedSigSchemes */,
@@ -1341,7 +1341,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
             folly::IOBuf::copyBuffer("clientkey"),
             folly::IOBuf::copyBuffer("clientiv")};
       }));
-  EXPECT_CALL(*extensions_, getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(*extensions_, _getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
     Extension ext;
     ext.extension_type = ExtensionType::token_binding;
     ext.extension_data = folly::IOBuf::copyBuffer("someextension");
@@ -1394,7 +1394,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
       &appwrl, &appwaead, folly::StringPiece("sat"), nullptr, &recSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
-  EXPECT_CALL(*certManager_, getCert(_, _, _, _))
+  EXPECT_CALL(*certManager_, _getCert(_, _, _, _))
       .WillOnce(Invoke(
           [=, this](
               const folly::Optional<std::string>& sni,
@@ -1685,7 +1685,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
             folly::IOBuf::copyBuffer("clientkey"),
             folly::IOBuf::copyBuffer("clientiv")};
       }));
-  EXPECT_CALL(*extensions_, getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(*extensions_, _getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
     Extension ext;
     ext.extension_type = ExtensionType::token_binding;
     ext.extension_data = folly::IOBuf::copyBuffer("someextension");
@@ -1751,7 +1751,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
-  EXPECT_CALL(*certManager_, getCert(_, _, _, _))
+  EXPECT_CALL(*certManager_, _getCert(_, _, _, _))
       .WillOnce(Invoke(
           [=, this](
               const folly::Optional<std::string>& sni,
@@ -2030,7 +2030,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
             folly::IOBuf::copyBuffer("clientkey"),
             folly::IOBuf::copyBuffer("clientiv")};
       }));
-  EXPECT_CALL(*extensions_, getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(*extensions_, _getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
     Extension ext;
     ext.extension_type = ExtensionType::token_binding;
     ext.extension_data = folly::IOBuf::copyBuffer("someextension");
@@ -2109,7 +2109,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
-  EXPECT_CALL(*certManager_, getCert(_, _, _, _))
+  EXPECT_CALL(*certManager_, _getCert(_, _, _, _))
       .WillOnce(Invoke(
           [=, this](
               const folly::Optional<std::string>& sni,
@@ -2349,7 +2349,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
             folly::IOBuf::copyBuffer("clientkey"),
             folly::IOBuf::copyBuffer("clientiv")};
       }));
-  EXPECT_CALL(*extensions_, getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
+  EXPECT_CALL(*extensions_, _getExtensions(_)).WillOnce(InvokeWithoutArgs([]() {
     Extension ext;
     ext.extension_type = ExtensionType::token_binding;
     ext.extension_data = folly::IOBuf::copyBuffer("someextension");
@@ -2404,7 +2404,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
-  EXPECT_CALL(*certManager_, getCert(_, _, _, _))
+  EXPECT_CALL(*certManager_, _getCert(_, _, _, _))
       .WillOnce(Invoke(
           [=, this](
               const folly::Optional<std::string>& sni,
@@ -3239,7 +3239,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
       &appwrl, &appwaead, folly::StringPiece("sat"), nullptr, &recSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
-  EXPECT_CALL(*certManager_, getCert(_, _, _, _))
+  EXPECT_CALL(*certManager_, _getCert(_, _, _, _))
       .WillOnce(Invoke(
           [=, this](
               const folly::Optional<std::string>& sni,
@@ -3798,7 +3798,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
       &appwrl, &appwaead, folly::StringPiece("sat"), nullptr, &recSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
-  EXPECT_CALL(*certManager_, getCert(_, _, _, _))
+  EXPECT_CALL(*certManager_, _getCert(_, _, _, _))
       .WillOnce(Invoke(
           [=, this](
               const folly::Optional<std::string>& sni,
@@ -4113,7 +4113,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
       &appwrl, &appwaead, folly::StringPiece("sat"), nullptr, &recSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);
-  EXPECT_CALL(*certManager_, getCert(_, _, _, _))
+  EXPECT_CALL(*certManager_, _getCert(_, _, _, _))
       .WillOnce(Invoke(
           [=, this](
               const folly::Optional<std::string>& sni,
@@ -4868,7 +4868,7 @@ TEST_F(ServerProtocolTest, TestClientHelloNullExtensions) {
   auto actions = getActions(detail::processEvent(state_, param));
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
   processStateMutations(actions);
-  EXPECT_CALL(*extensions_, getExtensions(_)).Times(0);
+  EXPECT_CALL(*extensions_, _getExtensions(_)).Times(0);
 }
 
 TEST_F(ServerProtocolTest, TestClientHelloLegacySessionId) {

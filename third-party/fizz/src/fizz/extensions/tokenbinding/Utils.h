@@ -18,7 +18,9 @@ class TokenBindingUtils {
   static constexpr uint8_t kP256EcKeySize = 64;
   static constexpr uint8_t kEd25519KeySize = 32;
 
-  static Buf constructMessage(
+  static Status constructMessage(
+      Buf& ret,
+      Error& err,
       const TokenBindingType& type,
       const TokenBindingKeyParameters& keyParams,
       const Buf& ekm) {
@@ -27,11 +29,11 @@ class TokenBindingUtils {
         sizeof(TokenBindingType));
     folly::io::Appender appender(concatenatedBuf.get(), 20);
 
-    Error err;
-    FIZZ_THROW_ON_ERROR(detail::write(err, type, appender), err);
-    FIZZ_THROW_ON_ERROR(detail::write(err, keyParams, appender), err);
+    FIZZ_RETURN_ON_ERROR(detail::write(err, type, appender));
+    FIZZ_RETURN_ON_ERROR(detail::write(err, keyParams, appender));
     appender.push(ekm->coalesce());
-    return concatenatedBuf;
+    ret = std::move(concatenatedBuf);
+    return Status::Success;
   }
 };
 } // namespace extensions

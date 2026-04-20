@@ -26,8 +26,10 @@ AsyncSelfCert::getCertificateAndSign(
         encodeHandshake(encodedCertificate, err, getCompressedCert(*algo)),
         err);
   } else {
+    CertificateMsg certMsg;
+    FIZZ_THROW_ON_ERROR(getCertMessage(certMsg, err), err);
     FIZZ_THROW_ON_ERROR(
-        encodeHandshake(encodedCertificate, err, getCertMessage()), err);
+        encodeHandshake(encodedCertificate, err, std::move(certMsg)), err);
   }
   handshakeContext->appendToTranscript(encodedCertificate);
 

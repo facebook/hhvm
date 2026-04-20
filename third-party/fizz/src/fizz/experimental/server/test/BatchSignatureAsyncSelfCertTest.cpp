@@ -44,7 +44,11 @@ TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockCert) {
   EXPECT_EQ(altIdentities[1], "1");
   // getCertMessage
   EXPECT_CALL(*mockBaseCert, _getCertMessage(_)).Times(1);
-  auto certMessage = batchCert.getCertMessage();
+  CertificateMsg certMessage;
+  Error certMsgErr;
+  EXPECT_EQ(
+      batchCert.getCertMessage(certMessage, certMsgErr, nullptr),
+      Status::Success);
   // getSigSchemes
   auto returnedSchemes = batchCert.getSigSchemes();
   EXPECT_EQ(returnedSchemes.size(), 2);

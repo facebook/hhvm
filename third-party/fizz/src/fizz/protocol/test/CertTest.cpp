@@ -83,7 +83,9 @@ TEST(CertTest, GetCertMessage) {
   certs.push_back(std::move(cert));
   openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> certificate(
       std::move(key), std::move(certs));
-  auto msg = certificate.getCertMessage();
+  CertificateMsg msg;
+  Error err;
+  EXPECT_EQ(certificate.getCertMessage(msg, err, nullptr), Status::Success);
   ASSERT_EQ(msg.certificate_list.size(), 1);
   auto& firstCertEntry = msg.certificate_list[0];
   auto firstCertData = firstCertEntry.cert_data->coalesce();
@@ -171,7 +173,11 @@ TYPED_TEST(CertTestTyped, SigSchemes) {
 TYPED_TEST(CertTestTyped, TestVerifyDecodedCert) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  auto msg = openssl::CertUtils::getCertMessage(certs, nullptr);
+  CertificateMsg msg;
+  Error certMsgErr;
+  EXPECT_EQ(
+      openssl::CertUtils::getCertMessage(msg, certMsgErr, certs, nullptr),
+      Status::Success);
   openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
       getKey<TypeParam>(), std::move(certs));
 

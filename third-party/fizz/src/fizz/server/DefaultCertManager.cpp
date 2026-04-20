@@ -38,7 +38,9 @@ CertMatch DefaultCertManager::findCert(
   return none;
 }
 
-CertMatch DefaultCertManager::getCert(
+Status DefaultCertManager::getCert(
+    CertMatch& ret,
+    Error& /* err */,
     const Optional<std::string>& sni,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,
@@ -47,33 +49,37 @@ CertMatch DefaultCertManager::getCert(
     auto key = *sni;
     toLowerAscii(key);
 
-    auto ret = findCert(key, supportedSigSchemes, peerSigSchemes);
-    if (ret) {
+    auto result = findCert(key, supportedSigSchemes, peerSigSchemes);
+    if (result) {
       FIZZ_VLOG(8) << "Found exact SNI match for: " << key;
-      return ret;
+      ret = std::move(result);
+      return Status::Success;
     }
 
     auto dot = key.find_first_of('.');
     if (dot != std::string::npos) {
       std::string wildcardKey(key, dot);
-      ret = findCert(wildcardKey, supportedSigSchemes, peerSigSchemes);
-      if (ret) {
+      result = findCert(wildcardKey, supportedSigSchemes, peerSigSchemes);
+      if (result) {
         FIZZ_VLOG(8) << "Found wildcard SNI match for: " << key;
-        return ret;
+        ret = std::move(result);
+        return Status::Success;
       }
     }
 
     FIZZ_VLOG(8) << "Did not find match for SNI: " << key;
   }
 
-  auto ret = findCert(default_, supportedSigSchemes, peerSigSchemes);
-  if (ret) {
-    ret->type = MatchType::Default;
-    return ret;
+  auto result = findCert(default_, supportedSigSchemes, peerSigSchemes);
+  if (result) {
+    result->type = MatchType::Default;
+    ret = std::move(result);
+    return Status::Success;
   }
 
   FIZZ_VLOG(8) << "No matching cert for client sig schemes found";
-  return folly::none;
+  ret = folly::none;
+  return Status::Success;
 }
 
 std::shared_ptr<SelfCert> DefaultCertManager::getCert(

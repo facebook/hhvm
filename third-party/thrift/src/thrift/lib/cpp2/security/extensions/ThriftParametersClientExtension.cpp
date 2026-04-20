@@ -26,9 +26,8 @@ ThriftParametersClientExtension::ThriftParametersClientExtension(
   // throughout the lifetime of the connection.
   offerredPSP_ = context_->getSupportedPSPNegotiations();
 }
-std::vector<fizz::Extension>
-ThriftParametersClientExtension::getClientHelloExtensions() const {
-  std::vector<fizz::Extension> clientExtensions;
+fizz::Status ThriftParametersClientExtension::getClientHelloExtensions(
+    std::vector<fizz::Extension>& ret, fizz::Error& /* err */) const {
   NegotiationParameters params;
   uint64_t compressionAlgorithms = 0;
   for (const auto& comp : context_->getSupportedCompressionAlgorithms()) {
@@ -44,8 +43,8 @@ ThriftParametersClientExtension::getClientHelloExtensions() const {
 
   ThriftParametersExt paramsExt;
   paramsExt.params = params;
-  clientExtensions.push_back(encodeThriftExtension(paramsExt));
-  return clientExtensions;
+  ret.push_back(encodeThriftExtension(paramsExt));
+  return fizz::Status::Success;
 }
 
 fizz::Status ThriftParametersClientExtension::onEncryptedExtensions(

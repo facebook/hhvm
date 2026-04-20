@@ -81,7 +81,9 @@ class SelfCert : public SelfCertBase {
    */
   virtual std::vector<SignatureScheme> getSigSchemes() const = 0;
 
-  virtual CertificateMsg getCertMessage(
+  virtual Status getCertMessage(
+      CertificateMsg& ret,
+      Error& err,
       Buf certificateRequestContext = nullptr) const = 0;
 
   virtual CompressedCertificate getCompressedCert(

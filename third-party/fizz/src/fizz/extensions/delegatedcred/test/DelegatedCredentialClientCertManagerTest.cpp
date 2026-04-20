@@ -27,7 +27,10 @@ std::vector<Extension> getDelegatedExt(
   std::vector<Extension> exts;
   DelegatedCredentialSupport supp;
   supp.supported_signature_algorithms = schemes;
-  exts.push_back(encodeExtension(supp));
+  Extension ext;
+  Error err;
+  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, supp), err);
+  exts.push_back(std::move(ext));
   return exts;
 }
 
@@ -42,7 +45,10 @@ class DelegatedClientCertManagerTest : public Test {
 };
 
 TEST_F(DelegatedClientCertManagerTest, TestNoCert) {
-  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, kRsa, {}), Status::Success);
   EXPECT_FALSE(res.hasValue());
 }
 
@@ -50,7 +56,10 @@ TEST_F(DelegatedClientCertManagerTest, TestBasicMatch) {
   // Only non dc cert must be returned
   auto cert = getCert(kRsa);
   manager_.addCertAndOverride(cert);
-  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert);
   EXPECT_FALSE(manager_.hasDelegatedCredential());
 }
@@ -63,11 +72,19 @@ TEST_F(DelegatedClientCertManagerTest, TestBasicMatchNoExt) {
   manager_.addDelegatedCredentialAndOverride(cert2);
   EXPECT_TRUE(manager_.hasDelegatedCredential());
   {
-    auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+    CertMatch res;
+    Error err;
+    EXPECT_EQ(
+        manager_.getCert(res, err, folly::none, kRsa, kRsa, {}),
+        Status::Success);
     EXPECT_EQ(res->cert, cert1);
   }
   {
-    auto res = manager_.getCert(folly::none, kRsa, kRsa, getDelegatedExt());
+    CertMatch res;
+    Error err;
+    EXPECT_EQ(
+        manager_.getCert(res, err, folly::none, kRsa, kRsa, getDelegatedExt()),
+        Status::Success);
     EXPECT_EQ(res->cert, cert2);
   }
 }
@@ -80,50 +97,80 @@ TEST_F(DelegatedClientCertManagerTest, TestSigSchemes) {
   EXPECT_TRUE(manager_.hasDelegatedCredential());
 
   {
-    auto res = manager_.getCert(
-        folly::none,
-        {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-        {SignatureScheme::rsa_pss_sha256},
-        {});
+    CertMatch res;
+    Error err;
+    EXPECT_EQ(
+        manager_.getCert(
+            res,
+            err,
+            folly::none,
+            {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+            {SignatureScheme::rsa_pss_sha256},
+            {}),
+        Status::Success);
     // Only non dc cert supports sig schemes
     EXPECT_EQ(res->cert, cert);
     EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha256);
   }
   {
-    auto res = manager_.getCert(
-        folly::none,
-        {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-        {SignatureScheme::rsa_pss_sha256},
-        getDelegatedExt());
+    CertMatch res;
+    Error err;
+    EXPECT_EQ(
+        manager_.getCert(
+            res,
+            err,
+            folly::none,
+            {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+            {SignatureScheme::rsa_pss_sha256},
+            getDelegatedExt()),
+        Status::Success);
     // Only non dc cert supports sig schemes
     EXPECT_EQ(res->cert, cert);
     EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha256);
   }
 
   {
-    auto res = manager_.getCert(
-        folly::none,
-        {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
-        {SignatureScheme::rsa_pss_sha512},
-        {});
+    CertMatch res;
+    Error err;
+    EXPECT_EQ(
+        manager_.getCert(
+            res,
+            err,
+            folly::none,
+            {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
+            {SignatureScheme::rsa_pss_sha512},
+            {}),
+        Status::Success);
     // Dc doesn't match due to no ext
     EXPECT_FALSE(res.hasValue());
   }
   {
-    auto res = manager_.getCert(
-        folly::none,
-        {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
-        {SignatureScheme::rsa_pss_sha512},
-        getDelegatedExt());
+    CertMatch res;
+    Error err;
+    EXPECT_EQ(
+        manager_.getCert(
+            res,
+            err,
+            folly::none,
+            {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
+            {SignatureScheme::rsa_pss_sha512},
+            getDelegatedExt()),
+        Status::Success);
     // Dc still doesn't match since the ext doesn't support 512
     EXPECT_FALSE(res.hasValue());
   }
   {
-    auto res = manager_.getCert(
-        folly::none,
-        {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
-        {SignatureScheme::rsa_pss_sha512},
-        getDelegatedExt({SignatureScheme::rsa_pss_sha512}));
+    CertMatch res;
+    Error err;
+    EXPECT_EQ(
+        manager_.getCert(
+            res,
+            err,
+            folly::none,
+            {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
+            {SignatureScheme::rsa_pss_sha512},
+            getDelegatedExt({SignatureScheme::rsa_pss_sha512})),
+        Status::Success);
     EXPECT_EQ(res->cert, dcCert);
     EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha512);
   }
@@ -132,11 +179,17 @@ TEST_F(DelegatedClientCertManagerTest, TestSigSchemes) {
 TEST_F(DelegatedClientCertManagerTest, TestNoSigSchemeMatch) {
   auto cert = getCert({SignatureScheme::rsa_pss_sha256});
   manager_.addCertAndOverride(cert);
-  auto res = manager_.getCert(
-      folly::none,
-      {SignatureScheme::rsa_pss_sha256},
-      {SignatureScheme::rsa_pss_sha512},
-      {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          folly::none,
+          {SignatureScheme::rsa_pss_sha256},
+          {SignatureScheme::rsa_pss_sha512},
+          {}),
+      Status::Success);
   EXPECT_FALSE(res);
 }
 } // namespace test

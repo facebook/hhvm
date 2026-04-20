@@ -56,12 +56,25 @@ SecondaryAuthManager::getAuthenticator(
     std::unique_ptr<folly::IOBuf> authRequest) {
   uint16_t certId = certIdCounter_++;
   std::unique_ptr<folly::IOBuf> authenticator;
+  fizz::Error err;
   if (dir == TransportDirection::UPSTREAM) {
-    authenticator = fizz::ExportedAuthenticator::getAuthenticator(
-        transport, fizz::Direction::UPSTREAM, *cert_, std::move(authRequest));
+    FIZZ_THROW_ON_ERROR(
+        fizz::ExportedAuthenticator::getAuthenticator(authenticator,
+                                                      err,
+                                                      transport,
+                                                      fizz::Direction::UPSTREAM,
+                                                      *cert_,
+                                                      std::move(authRequest)),
+        err);
   } else {
-    authenticator = fizz::ExportedAuthenticator::getAuthenticator(
-        transport, fizz::Direction::DOWNSTREAM, *cert_, std::move(authRequest));
+    FIZZ_THROW_ON_ERROR(fizz::ExportedAuthenticator::getAuthenticator(
+                            authenticator,
+                            err,
+                            transport,
+                            fizz::Direction::DOWNSTREAM,
+                            *cert_,
+                            std::move(authRequest)),
+                        err);
   }
   requestCertMap_.insert(std::make_pair(requestId, certId));
   return std::make_pair(certId, std::move(authenticator));

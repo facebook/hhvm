@@ -22,11 +22,12 @@ class MultiClientExtensionsTest : public Test {};
 // Example classes to provide other types of ClientExtensions for testing.
 class ExampleClientExtension : public ClientExtensions {
  public:
-  std::vector<Extension> getClientHelloExtensions() const override {
-    std::vector<Extension> exts;
+  Status getClientHelloExtensions(std::vector<Extension>& ret, Error& /* err */)
+      const override {
+    ret.clear();
     Extension ext;
-    exts.push_back(std::move(ext));
-    return exts;
+    ret.push_back(std::move(ext));
+    return Status::Success;
   }
 
   Status onEncryptedExtensions(
@@ -38,11 +39,12 @@ class ExampleClientExtension : public ClientExtensions {
 
 class OtherExampleClientExtension : public ClientExtensions {
  public:
-  std::vector<Extension> getClientHelloExtensions() const override {
-    std::vector<Extension> exts;
+  Status getClientHelloExtensions(std::vector<Extension>& ret, Error& /* err */)
+      const override {
+    ret.clear();
     Extension ext;
-    exts.push_back(std::move(ext));
-    return exts;
+    ret.push_back(std::move(ext));
+    return Status::Success;
   }
 
   Status onEncryptedExtensions(
@@ -54,14 +56,18 @@ class OtherExampleClientExtension : public ClientExtensions {
 
 TEST_F(MultiClientExtensionsTest, TestNoExtensions) {
   MultiClientExtensions multi(std::vector<std::shared_ptr<ClientExtensions>>{});
-  auto exts = multi.getClientHelloExtensions();
+  std::vector<Extension> exts;
+  Error err;
+  FIZZ_THROW_ON_ERROR(multi.getClientHelloExtensions(exts, err), err);
   EXPECT_TRUE(exts.empty());
 }
 
 TEST_F(MultiClientExtensionsTest, TestSingleExtension) {
   auto firstExtension = std::make_shared<ExampleClientExtension>();
   MultiClientExtensions multi({firstExtension});
-  auto exts = multi.getClientHelloExtensions();
+  std::vector<Extension> exts;
+  Error err;
+  FIZZ_THROW_ON_ERROR(multi.getClientHelloExtensions(exts, err), err);
   EXPECT_EQ(exts.size(), 1);
 }
 
@@ -69,7 +75,9 @@ TEST_F(MultiClientExtensionsTest, TestDuplicateExtensions) {
   auto firstExtension = std::make_shared<ExampleClientExtension>();
   auto secondExtension = std::make_shared<ExampleClientExtension>();
   MultiClientExtensions multi({firstExtension, secondExtension});
-  auto exts = multi.getClientHelloExtensions();
+  std::vector<Extension> exts;
+  Error err;
+  FIZZ_THROW_ON_ERROR(multi.getClientHelloExtensions(exts, err), err);
   EXPECT_EQ(exts.size(), 2);
 }
 
@@ -77,7 +85,9 @@ TEST_F(MultiClientExtensionsTest, TestDifferentTypeExtensions) {
   auto firstExtension = std::make_shared<ExampleClientExtension>();
   auto secondExtension = std::make_shared<OtherExampleClientExtension>();
   MultiClientExtensions multi({firstExtension, secondExtension});
-  auto exts = multi.getClientHelloExtensions();
+  std::vector<Extension> exts;
+  Error err;
+  FIZZ_THROW_ON_ERROR(multi.getClientHelloExtensions(exts, err), err);
   EXPECT_EQ(exts.size(), 2);
 }
 

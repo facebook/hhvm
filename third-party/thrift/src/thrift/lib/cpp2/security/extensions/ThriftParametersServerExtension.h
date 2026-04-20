@@ -28,14 +28,17 @@ class ThriftParametersServerExtension : public fizz::ServerExtensions {
       const std::shared_ptr<ThriftParametersContext>& context)
       : context_(context) {}
 
-  std::vector<fizz::Extension> getExtensions(
+  fizz::Status getExtensions(
+      std::vector<fizz::Extension>& ret,
+      fizz::Error& /*err*/,
       const fizz::ClientHello& chlo) override {
     std::vector<fizz::Extension> serverExtensions;
     // get the client extensions from ClientHello
     auto params = getThriftExtension(chlo.extensions);
     if (!params) {
       VLOG(6) << "Client did not negotiate thrift parameters";
-      return serverExtensions;
+      ret = std::move(serverExtensions);
+      return fizz::Status::Success;
     }
     clientExtensions_ = std::move(params);
 
@@ -51,7 +54,8 @@ class ThriftParametersServerExtension : public fizz::ServerExtensions {
     ThriftParametersExt paramsExt;
     paramsExt.params = negotiatedParams;
     serverExtensions.push_back(encodeThriftExtension(paramsExt));
-    return serverExtensions;
+    ret = std::move(serverExtensions);
+    return fizz::Status::Success;
   }
 
   /**

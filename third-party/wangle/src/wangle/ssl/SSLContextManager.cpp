@@ -254,16 +254,27 @@ static std::vector<std::shared_ptr<fizz::SelfCert>> getCertsToInstall(
     const fizz::server::CertManager& certManager,
     const fizz::ClientHello& chlo) {
   auto sni = getSNI(chlo);
-  auto maybeRsa = certManager.getCert(
-      sni,
-      {fizz::SignatureScheme::rsa_pss_sha256},
-      {fizz::SignatureScheme::rsa_pss_sha256},
-      chlo);
-  auto maybeEc = certManager.getCert(
-      sni,
-      {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
-      {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
-      chlo);
+  fizz::Error err;
+  fizz::CertMatch maybeRsa;
+  FIZZ_THROW_ON_ERROR(
+      certManager.getCert(
+          maybeRsa,
+          err,
+          sni,
+          {fizz::SignatureScheme::rsa_pss_sha256},
+          {fizz::SignatureScheme::rsa_pss_sha256},
+          chlo),
+      err);
+  fizz::CertMatch maybeEc;
+  FIZZ_THROW_ON_ERROR(
+      certManager.getCert(
+          maybeEc,
+          err,
+          sni,
+          {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
+          {fizz::SignatureScheme::ecdsa_secp256r1_sha256},
+          chlo),
+      err);
 
   // We should only use direct matches if there are direct matches, regardless
   // of any default matches. We will only use default matches in the case that

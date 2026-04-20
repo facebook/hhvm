@@ -67,7 +67,9 @@ TEST_P(ThriftParametersExtensionStopTLSTest, testServerExtension) {
   fizz::ClientHello chlo;
   chlo.extensions.push_back(encodeThriftExtension(clientThriftParams));
 
-  auto exts = extensions->getExtensions(chlo);
+  std::vector<fizz::Extension> exts;
+  fizz::Error err;
+  EXPECT_EQ(extensions->getExtensions(exts, err, chlo), fizz::Status::Success);
   EXPECT_EQ(exts.size(), 1);
 
   auto thriftParametersExtension = getThriftExtension(exts);
@@ -125,7 +127,9 @@ TEST_P(ThriftParametersExtensionStopTLSTest, testServerExtensionStopTLSV2) {
   fizz::ClientHello chlo;
   chlo.extensions.push_back(encodeThriftExtension(clientThriftParams));
 
-  auto exts = extensions->getExtensions(chlo);
+  std::vector<fizz::Extension> exts;
+  fizz::Error err;
+  EXPECT_EQ(extensions->getExtensions(exts, err, chlo), fizz::Status::Success);
   EXPECT_EQ(exts.size(), 1);
 
   auto thriftParametersExtension = getThriftExtension(exts);

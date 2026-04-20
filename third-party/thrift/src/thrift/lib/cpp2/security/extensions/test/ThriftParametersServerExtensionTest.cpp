@@ -48,7 +48,10 @@ class ThriftParametersServerExtensionTest : public testing::Test {
 TEST_F(ThriftParametersServerExtensionTest, ServerNegotiation) {
   setUpClientThriftParameters(
       {CompressionAlgorithm::ZSTD, CompressionAlgorithm::ZLIB});
-  auto exts = extensions_->getExtensions(chlo_);
+  std::vector<fizz::Extension> exts;
+  fizz::Error err;
+  EXPECT_EQ(
+      extensions_->getExtensions(exts, err, chlo_), fizz::Status::Success);
   EXPECT_EQ(exts.size(), 1);
 
   auto thriftParametersExtension = getThriftExtension(exts);
@@ -63,7 +66,10 @@ TEST_F(ThriftParametersServerExtensionTest, ServerNegotiation) {
 }
 
 TEST_F(ThriftParametersServerExtensionTest, NoExtensions) {
-  auto exts = extensions_->getExtensions(chlo_);
+  std::vector<fizz::Extension> exts;
+  fizz::Error err;
+  EXPECT_EQ(
+      extensions_->getExtensions(exts, err, chlo_), fizz::Status::Success);
   EXPECT_EQ(exts.size(), 0);
 }
 
@@ -77,7 +83,10 @@ TEST_F(ThriftParametersServerExtensionTest, IncompatibleCompressionAlgorithms) {
   setUpClientThriftParameters(
       {static_cast<CompressionAlgorithm>(nonExistingCompressionAlgorithm)});
 
-  auto exts = extensions_->getExtensions(chlo_);
+  auto exts = std::vector<fizz::Extension>{};
+  fizz::Error err;
+  EXPECT_EQ(
+      extensions_->getExtensions(exts, err, chlo_), fizz::Status::Success);
   EXPECT_EQ(exts.size(), 1);
 
   auto thriftParametersExtension = getThriftExtension(exts);
@@ -115,7 +124,11 @@ class ThriftServerPSPNegotiationTest : public testing::Test {
 
     fizz::ClientHello chlo;
     chlo.extensions.push_back(encodeThriftExtension(clientExt));
-    auto sentExtensions = serverExt->getExtensions(chlo);
+    std::vector<fizz::Extension> sentExtensions;
+    fizz::Error err;
+    EXPECT_EQ(
+        serverExt->getExtensions(sentExtensions, err, chlo),
+        fizz::Status::Success);
 
     EXPECT_EQ(sentExtensions.size(), 1);
 

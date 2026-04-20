@@ -217,8 +217,12 @@ class FizzServerContext {
     if (!certManager_) {
       return folly::none;
     }
-    auto result =
-        certManager_->getCert(sni, supportedSigSchemes_, peerSigSchemes, chlo);
+    CertMatch result;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        certManager_->getCert(
+            result, err, sni, supportedSigSchemes_, peerSigSchemes, chlo),
+        err);
     if (result) {
       return std::make_pair(result->cert, result->scheme);
     } else {

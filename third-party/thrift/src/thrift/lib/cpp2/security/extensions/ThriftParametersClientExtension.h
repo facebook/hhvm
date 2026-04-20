@@ -27,7 +27,8 @@ class ThriftParametersClientExtension : public fizz::ClientExtensions {
   explicit ThriftParametersClientExtension(
       const std::shared_ptr<ThriftParametersContext>& context);
 
-  std::vector<fizz::Extension> getClientHelloExtensions() const override;
+  fizz::Status getClientHelloExtensions(
+      std::vector<fizz::Extension>& ret, fizz::Error& err) const override;
 
   fizz::Status onEncryptedExtensions(
       fizz::Error& err,

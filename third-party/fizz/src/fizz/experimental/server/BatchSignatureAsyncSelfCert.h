@@ -41,9 +41,12 @@ class BatchSignatureAsyncSelfCert : public AsyncSelfCert {
     return signer_->getAltIdentities();
   }
 
-  fizz::CertificateMsg getCertMessage(
+  Status getCertMessage(
+      fizz::CertificateMsg& ret,
+      Error& err,
       fizz::Buf certificateRequestContext = nullptr) const override {
-    return signer_->getCertMessage(std::move(certificateRequestContext));
+    return signer_->getCertMessage(
+        ret, err, std::move(certificateRequestContext));
   }
 
   std::vector<SignatureScheme> getSigSchemes() const override {

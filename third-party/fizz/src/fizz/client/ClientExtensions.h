@@ -25,7 +25,9 @@ class ClientExtensions {
    * can be called multiple times on a single connection (if a HelloRetryRequest
    * is received).
    */
-  virtual std::vector<Extension> getClientHelloExtensions() const = 0;
+  virtual Status getClientHelloExtensions(
+      std::vector<Extension>& ret,
+      Error& err) const = 0;
 
   /**
    * Called with the extensions present in EncryptedExtensions.

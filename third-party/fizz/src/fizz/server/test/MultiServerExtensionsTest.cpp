@@ -20,23 +20,25 @@ namespace test {
 // Example classes to provide other types of ServerExtensions for testing.
 class ExampleServerExtension : public ServerExtensions {
  public:
-  std::vector<Extension> getExtensions(
+  Status getExtensions(
+      std::vector<Extension>& ret,
+      Error& /* err */,
       const ClientHello& /* unused */) override {
-    std::vector<Extension> exts;
     Extension ext;
-    exts.push_back(std::move(ext));
-    return exts;
+    ret.push_back(std::move(ext));
+    return Status::Success;
   }
 };
 
 class OtherExampleServerExtension : public ServerExtensions {
  public:
-  std::vector<Extension> getExtensions(
+  Status getExtensions(
+      std::vector<Extension>& ret,
+      Error& /* err */,
       const ClientHello& /* unused */) override {
-    std::vector<Extension> exts;
     Extension ext;
-    exts.push_back(std::move(ext));
-    return exts;
+    ret.push_back(std::move(ext));
+    return Status::Success;
   }
 };
 
@@ -47,14 +49,18 @@ class MultiServerExtensionTest : public Test {
 
 TEST_F(MultiServerExtensionTest, TestNoExtensions) {
   MultiServerExtensions multi(std::vector<std::shared_ptr<ServerExtensions>>{});
-  auto exts = multi.getExtensions(chlo_);
+  std::vector<Extension> exts;
+  Error err;
+  EXPECT_EQ(multi.getExtensions(exts, err, chlo_), Status::Success);
   EXPECT_EQ(exts.size(), 0);
 }
 
 TEST_F(MultiServerExtensionTest, TestSingleExtension) {
   auto firstExtension = std::make_shared<ExampleServerExtension>();
   MultiServerExtensions multi({firstExtension});
-  auto exts = multi.getExtensions(chlo_);
+  std::vector<Extension> exts;
+  Error err;
+  EXPECT_EQ(multi.getExtensions(exts, err, chlo_), Status::Success);
   EXPECT_EQ(exts.size(), 1);
 }
 
@@ -62,7 +68,9 @@ TEST_F(MultiServerExtensionTest, TestDuplicateExtensions) {
   auto firstExtension = std::make_shared<ExampleServerExtension>();
   auto secondExtension = std::make_shared<ExampleServerExtension>();
   MultiServerExtensions multi({firstExtension, secondExtension});
-  auto exts = multi.getExtensions(chlo_);
+  std::vector<Extension> exts;
+  Error err;
+  EXPECT_EQ(multi.getExtensions(exts, err, chlo_), Status::Success);
   EXPECT_EQ(exts.size(), 2);
 }
 
@@ -70,7 +78,9 @@ TEST_F(MultiServerExtensionTest, TestDifferentTypeExtensions) {
   auto firstExtension = std::make_shared<ExampleServerExtension>();
   auto secondExtension = std::make_shared<OtherExampleServerExtension>();
   MultiServerExtensions multi({firstExtension, secondExtension});
-  auto exts = multi.getExtensions(chlo_);
+  std::vector<Extension> exts;
+  Error err;
+  EXPECT_EQ(multi.getExtensions(exts, err, chlo_), Status::Success);
   EXPECT_EQ(exts.size(), 2);
 }
 

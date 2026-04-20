@@ -53,13 +53,17 @@ class ExportedAuthenticator {
    * request given in |authenticatorRequest|, conveying the identity
    * in |cert|.
    */
-  static Buf getAuthenticator(
+  static Status getAuthenticator(
+      Buf& ret,
+      Error& err,
       const fizz::AsyncFizzBase& transport,
       Direction dir,
       const SelfCert& cert,
       Buf authenticatorRequest);
 
-  static Buf makeAuthenticator(
+  static Status makeAuthenticator(
+      Buf& ret,
+      Error& err,
       const fizz::HasherFactoryWithMetadata* makeHasher,
       std::vector<SignatureScheme> supportedSchemes,
       const SelfCert& cert,

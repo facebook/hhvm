@@ -22,13 +22,13 @@ class TokenBindingServerExtension : public ServerExtensions {
       const std::shared_ptr<TokenBindingContext>& tokenBindingContext)
       : tokenBindingContext_(tokenBindingContext) {}
 
-  std::vector<Extension> getExtensions(const ClientHello& chlo) override {
-    std::vector<Extension> serverExtensions;
+  Status getExtensions(
+      std::vector<Extension>& ret,
+      Error& err,
+      const ClientHello& chlo) override {
     folly::Optional<TokenBindingParameters> params;
-    Error err;
-    FIZZ_THROW_ON_ERROR(
-        getExtension<TokenBindingParameters>(params, err, chlo.extensions),
-        err);
+    FIZZ_RETURN_ON_ERROR(
+        getExtension<TokenBindingParameters>(params, err, chlo.extensions));
     if (params) {
       auto negotiatedVersion = negotiateVersion(params->version);
       auto negotiatedKeyParam = server::negotiate(
@@ -38,12 +38,12 @@ class TokenBindingServerExtension : public ServerExtensions {
         negotiatedParams.version = *negotiatedVersion;
         negotiatedParams.key_parameters_list.push_back(*negotiatedKeyParam);
         Extension ext;
-        FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, negotiatedParams), err);
-        serverExtensions.push_back(std::move(ext));
+        FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, negotiatedParams));
+        ret.push_back(std::move(ext));
         negotiatedKeyParam_ = std::move(negotiatedKeyParam);
       }
     }
-    return serverExtensions;
+    return Status::Success;
   }
   const auto& getNegotiatedKeyParam() {
     return negotiatedKeyParam_;

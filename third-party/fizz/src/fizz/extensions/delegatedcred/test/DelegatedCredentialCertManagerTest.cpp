@@ -74,7 +74,10 @@ struct DelegatedMode {
     std::vector<Extension> exts;
     DelegatedCredentialSupport supp;
     supp.supported_signature_algorithms = schemes;
-    exts.push_back(encodeExtension(supp));
+    Extension ext;
+    Error err;
+    FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, supp), err);
+    exts.push_back(std::move(ext));
     return exts;
   }
 };
@@ -100,16 +103,29 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoMatchDefault) {
   // It should always return the undelegated default cert if an exact
   // match can't be found..
   DelegatedCredentialCertManagerTest::manager_.addCertAndSetDefault(cert2);
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("test.com"), kRsa, kRsa, getChlo(TypeParam::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("test.com"),
+          kRsa,
+          kRsa,
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert1);
 }
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoSniDefault) {
   auto cert = DelegatedCredentialCertManagerTest::getCert("blah.com", {}, kRsa);
   DelegatedCredentialCertManagerTest::manager_.addCertAndSetDefault(cert);
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      folly::none, kRsa, kRsa, getChlo(TypeParam::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res, err, folly::none, kRsa, kRsa, getChlo(TypeParam::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
 }
 
@@ -117,25 +133,40 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestWildcardDefault) {
   auto cert =
       DelegatedCredentialCertManagerTest::getCert("*.blah.com", {}, kRsa);
   DelegatedCredentialCertManagerTest::manager_.addCertAndSetDefault(cert);
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      folly::none, kRsa, kRsa, getChlo(TypeParam::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res, err, folly::none, kRsa, kRsa, getChlo(TypeParam::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
 }
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestUppercaseDefault) {
   auto cert = DelegatedCredentialCertManagerTest::getCert("BLAH.com", {}, kRsa);
   DelegatedCredentialCertManagerTest::manager_.addCertAndSetDefault(cert);
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      folly::none, kRsa, kRsa, getChlo(TypeParam::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res, err, folly::none, kRsa, kRsa, getChlo(TypeParam::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
 }
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoDefault) {
-  EXPECT_FALSE(
-      DelegatedCredentialCertManagerTest::manager_
-          .getCert(
-              std::string("blah.com"), {}, {}, getChlo(TypeParam::Extensions()))
-          .hasValue());
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("blah.com"),
+          {},
+          {},
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
+  EXPECT_FALSE(res.hasValue());
 }
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestSigSchemesServerPref) {
@@ -159,25 +190,35 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestSigSchemesServerPref) {
         DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("www.test.com"),
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      getChlo(
-          TypeParam::Extensions(
-              {SignatureScheme::rsa_pss_sha256,
-               SignatureScheme::rsa_pss_sha512})));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("www.test.com"),
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          getChlo(
+              TypeParam::Extensions(
+                  {SignatureScheme::rsa_pss_sha256,
+                   SignatureScheme::rsa_pss_sha512}))),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha256);
 
-  res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("www.test.com"),
-      {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      getChlo(
-          TypeParam::Extensions(
-              {SignatureScheme::rsa_pss_sha256,
-               SignatureScheme::rsa_pss_sha512})));
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("www.test.com"),
+          {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          getChlo(
+              TypeParam::Extensions(
+                  {SignatureScheme::rsa_pss_sha256,
+                   SignatureScheme::rsa_pss_sha512}))),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha512);
 }
@@ -206,11 +247,17 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestClientSigScheme) {
         DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("www.test.com"),
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {SignatureScheme::rsa_pss_sha256},
-      getChlo(TypeParam::Extensions({SignatureScheme::rsa_pss_sha512})));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("www.test.com"),
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          {SignatureScheme::rsa_pss_sha256},
+          getChlo(TypeParam::Extensions({SignatureScheme::rsa_pss_sha512}))),
+      Status::Success);
   // Matching differs; for delegated, source of truth is the extension.
   // For non-delegated, it's client signature scheme list.
   if (TypeParam::Delegated) {
@@ -248,11 +295,17 @@ TYPED_TEST(
         DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("www.test.com"),
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {SignatureScheme::rsa_pss_sha256},
-      getChlo(TypeParam::Extensions({SignatureScheme::rsa_pss_sha512})));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("www.test.com"),
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          {SignatureScheme::rsa_pss_sha256},
+          getChlo(TypeParam::Extensions({SignatureScheme::rsa_pss_sha512}))),
+      Status::Success);
   // Match should check based on whether it's delegated or not.
   if (TypeParam::Delegated) {
     EXPECT_EQ(res->cert, cert2);
@@ -284,25 +337,39 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestAlts) {
         DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("www.test.com"),
-      kRsa,
-      kRsa,
-      getChlo(TypeParam::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("www.test.com"),
+          kRsa,
+          kRsa,
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
 
-  res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("www.example.com"),
-      kRsa,
-      kRsa,
-      getChlo(TypeParam::Extensions()));
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("www.example.com"),
+          kRsa,
+          kRsa,
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
 
-  res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("foo.example.com"),
-      kRsa,
-      kRsa,
-      getChlo(TypeParam::Extensions()));
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("foo.example.com"),
+          kRsa,
+          kRsa,
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
 }
 
@@ -322,21 +389,29 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestWildcard) {
         DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("bar.test.com"),
-      kRsa,
-      kRsa,
-      getChlo(TypeParam::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("bar.test.com"),
+          kRsa,
+          kRsa,
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
 
-  EXPECT_FALSE(
-      DelegatedCredentialCertManagerTest::manager_
-          .getCert(
-              std::string("foo.bar.test.com"),
-              kRsa,
-              kRsa,
-              getChlo(TypeParam::Extensions()))
-          .hasValue());
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("foo.bar.test.com"),
+          kRsa,
+          kRsa,
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
+  EXPECT_FALSE(res.hasValue());
 }
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestExactMatch) {
@@ -363,11 +438,17 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestExactMatch) {
         DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
-  auto res = DelegatedCredentialCertManagerTest::manager_.getCert(
-      std::string("foo.test.com"),
-      kRsa,
-      kRsa,
-      getChlo(TypeParam::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("foo.test.com"),
+          kRsa,
+          kRsa,
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, ref);
 }
 
@@ -385,22 +466,29 @@ TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestNoWildcard) {
         DelegatedCredentialCertManagerTest::manager_.hasDelegatedCredential());
   }
 
-  EXPECT_FALSE(
-      DelegatedCredentialCertManagerTest::manager_
-          .getCert(
-              std::string("blah.test.com"),
-              kRsa,
-              kRsa,
-              getChlo(TypeParam::Extensions()))
-          .hasValue());
-  EXPECT_FALSE(
-      DelegatedCredentialCertManagerTest::manager_
-          .getCert(
-              std::string("test.com"),
-              kRsa,
-              kRsa,
-              getChlo(TypeParam::Extensions()))
-          .hasValue());
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("blah.test.com"),
+          kRsa,
+          kRsa,
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
+  EXPECT_FALSE(res.hasValue());
+
+  EXPECT_EQ(
+      DelegatedCredentialCertManagerTest::manager_.getCert(
+          res,
+          err,
+          std::string("test.com"),
+          kRsa,
+          kRsa,
+          getChlo(TypeParam::Extensions())),
+      Status::Success);
+  EXPECT_FALSE(res.hasValue());
 }
 
 TYPED_TEST(DelegatedCredentialCertManagerTestTyped, TestGetByIdentity) {
@@ -440,11 +528,18 @@ TEST_F(DelegatedCredentialCertManagerTest, TestDelegatedMatchPreferred) {
   manager_.addDelegatedCredential(cert2);
   EXPECT_TRUE(manager_.hasDelegatedCredential());
 
-  auto res = manager_.getCert(
-      std::string("foo.test.com"),
-      kRsa,
-      kRsa,
-      getChlo(DelegatedMode::Extensions({SignatureScheme::rsa_pss_sha256})));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          std::string("foo.test.com"),
+          kRsa,
+          kRsa,
+          getChlo(
+              DelegatedMode::Extensions({SignatureScheme::rsa_pss_sha256}))),
+      Status::Success);
   EXPECT_EQ(res->cert, cert2);
 }
 
@@ -466,50 +561,57 @@ TEST_F(DelegatedCredentialCertManagerTest, TestUndelegatedNeverGetsCredential) {
   manager_.addDelegatedCredential(cert5);
   manager_.addDelegatedCredential(cert6);
   EXPECT_TRUE(manager_.hasDelegatedCredential());
-  auto res = manager_.getCert(host1, kRsa, kRsa, {});
+
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(manager_.getCert(res, err, host1, kRsa, kRsa, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host1, kRsa, {}, {});
+  EXPECT_EQ(manager_.getCert(res, err, host1, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host2, kRsa, kRsa, {});
+  EXPECT_EQ(manager_.getCert(res, err, host2, kRsa, kRsa, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host2, kRsa, {}, {});
+  EXPECT_EQ(manager_.getCert(res, err, host2, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host3, kRsa, kRsa, {});
+  EXPECT_EQ(manager_.getCert(res, err, host3, kRsa, kRsa, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host3, kRsa, {}, {});
+  EXPECT_EQ(manager_.getCert(res, err, host3, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host4, kRsa, kRsa, {});
+  EXPECT_EQ(manager_.getCert(res, err, host4, kRsa, kRsa, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host4, kRsa, {}, {});
+  EXPECT_EQ(manager_.getCert(res, err, host4, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, kRsa, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(folly::none, kRsa, {}, {});
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
 
   manager_.addCert(cert1);
   manager_.addCert(cert2);
   manager_.addCertAndSetDefault(cert3);
 
-  res = manager_.getCert(host1, kRsa, kRsa, {});
+  EXPECT_EQ(manager_.getCert(res, err, host1, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert1);
-  res = manager_.getCert(host1, kRsa, {}, {});
+  EXPECT_EQ(manager_.getCert(res, err, host1, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host2, kRsa, kRsa, {});
+  EXPECT_EQ(manager_.getCert(res, err, host2, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert2);
-  res = manager_.getCert(host2, kRsa, {}, {});
+  EXPECT_EQ(manager_.getCert(res, err, host2, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host3, kRsa, kRsa, {});
+  EXPECT_EQ(manager_.getCert(res, err, host3, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert3);
-  res = manager_.getCert(host3, kRsa, {}, {});
+  EXPECT_EQ(manager_.getCert(res, err, host3, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(host4, kRsa, kRsa, {});
+  EXPECT_EQ(manager_.getCert(res, err, host4, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert3);
-  res = manager_.getCert(host4, kRsa, {}, {});
+  EXPECT_EQ(manager_.getCert(res, err, host4, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert3);
-  res = manager_.getCert(folly::none, kRsa, {}, {});
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, {}, {}), Status::Success);
   EXPECT_FALSE(res);
 }
 
@@ -529,31 +631,67 @@ TEST_F(
   manager_.addCert(cert2);
   manager_.addCertAndSetDefault(cert3);
 
-  auto res =
-      manager_.getCert(host1, kRsa, kRsa, getChlo(DelegatedMode::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(
+          res, err, host1, kRsa, kRsa, getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert1);
-  res = manager_.getCert(host1, kRsa, {}, getChlo(DelegatedMode::Extensions()));
+  EXPECT_EQ(
+      manager_.getCert(
+          res, err, host1, kRsa, {}, getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_FALSE(res);
-  res =
-      manager_.getCert(host2, kRsa, kRsa, getChlo(DelegatedMode::Extensions()));
+  EXPECT_EQ(
+      manager_.getCert(
+          res, err, host2, kRsa, kRsa, getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert2);
-  res = manager_.getCert(host2, kRsa, {}, getChlo(DelegatedMode::Extensions()));
+  EXPECT_EQ(
+      manager_.getCert(
+          res, err, host2, kRsa, {}, getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_FALSE(res);
-  res =
-      manager_.getCert(host3, kRsa, kRsa, getChlo(DelegatedMode::Extensions()));
+  EXPECT_EQ(
+      manager_.getCert(
+          res, err, host3, kRsa, kRsa, getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert3);
-  res = manager_.getCert(host3, kRsa, {}, getChlo(DelegatedMode::Extensions()));
+  EXPECT_EQ(
+      manager_.getCert(
+          res, err, host3, kRsa, {}, getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_FALSE(res);
-  res =
-      manager_.getCert(host4, kRsa, kRsa, getChlo(DelegatedMode::Extensions()));
+  EXPECT_EQ(
+      manager_.getCert(
+          res, err, host4, kRsa, kRsa, getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert3);
-  res = manager_.getCert(host4, kRsa, {}, getChlo(DelegatedMode::Extensions()));
+  EXPECT_EQ(
+      manager_.getCert(
+          res, err, host4, kRsa, {}, getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_FALSE(res);
-  res = manager_.getCert(
-      folly::none, kRsa, kRsa, getChlo(DelegatedMode::Extensions()));
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          folly::none,
+          kRsa,
+          kRsa,
+          getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert3);
-  res = manager_.getCert(
-      folly::none, kRsa, {}, getChlo(DelegatedMode::Extensions()));
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          folly::none,
+          kRsa,
+          {},
+          getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_FALSE(res);
 }
 
@@ -570,11 +708,18 @@ TEST_F(
   manager_.addDelegatedCredential(cert2);
   EXPECT_TRUE(manager_.hasDelegatedCredential());
 
-  auto res = manager_.getCert(
-      host,
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {SignatureScheme::rsa_pss_sha512},
-      getChlo(DelegatedMode::Extensions({SignatureScheme::rsa_pss_sha512})));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          host,
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          {SignatureScheme::rsa_pss_sha512},
+          getChlo(
+              DelegatedMode::Extensions({SignatureScheme::rsa_pss_sha512}))),
+      Status::Success);
   EXPECT_EQ(res->cert, cert1);
 }
 
@@ -585,11 +730,17 @@ TEST_F(DelegatedCredentialCertManagerTest, TestDelegatedMatchWithDefaultSet) {
   manager_.addDelegatedCredentialAndSetDefault(cert2);
   EXPECT_TRUE(manager_.hasDelegatedCredential());
 
-  auto res = manager_.getCert(
-      std::string("foo_blah"),
-      kRsa,
-      kRsa,
-      getChlo(DelegatedMode::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          std::string("foo_blah"),
+          kRsa,
+          kRsa,
+          getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert2);
 }
 
@@ -602,11 +753,17 @@ TEST_F(
   manager_.addDelegatedCredential(cert2);
   EXPECT_TRUE(manager_.hasDelegatedCredential());
 
-  auto res = manager_.getCert(
-      std::string("foo_blah"),
-      kRsa,
-      kRsa,
-      getChlo(DelegatedMode::Extensions()));
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          std::string("foo_blah"),
+          kRsa,
+          kRsa,
+          getChlo(DelegatedMode::Extensions())),
+      Status::Success);
   EXPECT_EQ(res->cert, cert1);
 }
 } // namespace test

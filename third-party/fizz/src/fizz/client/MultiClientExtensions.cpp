@@ -19,16 +19,18 @@ MultiClientExtensions::MultiClientExtensions(
  * For each extension in the provided list, get the associated Extensions
  * and combine into one vector.
  */
-std::vector<Extension> MultiClientExtensions::getClientHelloExtensions() const {
-  std::vector<Extension> result;
+Status MultiClientExtensions::getClientHelloExtensions(
+    std::vector<Extension>& ret,
+    Error& err) const {
+  ret.clear();
   for (const auto& ext : extensions_) {
-    auto next = ext->getClientHelloExtensions();
-    result.insert(
-        result.end(),
-        std::make_move_iterator(next.begin()),
-        std::make_move_iterator(next.end()));
+    std::vector<Extension> tmp;
+    FIZZ_RETURN_ON_ERROR(ext->getClientHelloExtensions(tmp, err));
+    for (auto& e : tmp) {
+      ret.push_back(std::move(e));
+    }
   }
-  return result;
+  return Status::Success;
 }
 
 Status MultiClientExtensions::onEncryptedExtensions(

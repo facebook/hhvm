@@ -6,17 +6,21 @@
  *  LICENSE file in the root directory of this source tree.
  */
 #include <fizz/extensions/delegatedcred/DelegatedCredentialClientExtension.h>
+#include <fizz/extensions/delegatedcred/Types.h>
 
 namespace fizz {
 namespace extensions {
 
-std::vector<Extension>
-DelegatedCredentialClientExtension::getClientHelloExtensions() const {
-  std::vector<Extension> clientExtensions;
+Status DelegatedCredentialClientExtension::getClientHelloExtensions(
+    std::vector<Extension>& ret,
+    Error& err) const {
+  ret.clear();
   DelegatedCredentialSupport supp;
   supp.supported_signature_algorithms = supportedSchemes_;
-  clientExtensions.push_back(encodeExtension(std::move(supp)));
-  return clientExtensions;
+  Extension ext;
+  FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, supp));
+  ret.push_back(std::move(ext));
+  return Status::Success;
 }
 
 Status DelegatedCredentialClientExtension::onEncryptedExtensions(

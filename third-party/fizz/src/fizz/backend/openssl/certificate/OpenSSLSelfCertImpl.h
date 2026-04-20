@@ -43,7 +43,9 @@ class OpenSSLSelfCertImpl : public SelfCert,
 
   [[nodiscard]] std::vector<SignatureScheme> getSigSchemes() const override;
 
-  [[nodiscard]] CertificateMsg getCertMessage(
+  [[nodiscard]] Status getCertMessage(
+      CertificateMsg& ret,
+      Error& err,
       Buf certificateRequestContext = nullptr) const override;
 
   [[nodiscard]] CompressedCertificate getCompressedCert(

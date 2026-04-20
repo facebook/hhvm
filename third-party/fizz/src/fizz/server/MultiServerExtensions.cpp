@@ -18,15 +18,18 @@ MultiServerExtensions::MultiServerExtensions(
  * For each extension in the provided list, get the associated Extensions
  * and combine into one vector.
  */
-std::vector<fizz::Extension> MultiServerExtensions::getExtensions(
+fizz::Status MultiServerExtensions::getExtensions(
+    std::vector<fizz::Extension>& ret,
+    fizz::Error& err,
     const ClientHello& chlo) {
-  std::vector<fizz::Extension> result;
+  ret.clear();
   for (auto& ext : extensions_) {
-    auto next = ext->getExtensions(chlo);
-    result.insert(
-        result.end(),
+    std::vector<fizz::Extension> next;
+    FIZZ_RETURN_ON_ERROR(ext->getExtensions(next, err, chlo));
+    ret.insert(
+        ret.end(),
         std::make_move_iterator(next.begin()),
         std::make_move_iterator(next.end()));
   }
-  return result;
+  return fizz::Status::Success;
 }

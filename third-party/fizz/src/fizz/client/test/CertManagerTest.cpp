@@ -34,13 +34,20 @@ class CertManagerTest : public Test {
 TEST_F(CertManagerTest, TestBasicMatch) {
   auto cert = getCert(kRsa);
   manager_.addCertAndOverride(cert);
-  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert);
   EXPECT_TRUE(manager_.hasCerts());
 }
 
 TEST_F(CertManagerTest, TestNoCertsInMgr) {
-  EXPECT_FALSE(manager_.getCert(folly::none, {}, {}, {}).hasValue());
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, {}, {}, {}), Status::Success);
+  EXPECT_FALSE(res.hasValue());
   EXPECT_FALSE(manager_.hasCerts());
 }
 
@@ -49,19 +56,29 @@ TEST_F(CertManagerTest, TestSigSchemesPref) {
       {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512});
   manager_.addCertAndOverride(cert);
 
-  auto res = manager_.getCert(
-      folly::none,
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          folly::none,
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          {}),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha256);
 
-  res = manager_.getCert(
-      folly::none,
-      {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {});
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          folly::none,
+          {SignatureScheme::rsa_pss_sha512, SignatureScheme::rsa_pss_sha256},
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          {}),
+      Status::Success);
   EXPECT_EQ(res->cert, cert);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha512);
 }
@@ -72,11 +89,17 @@ TEST_F(CertManagerTest, TestServerSigScheme) {
   manager_.addCertAndOverride(cert1);
   manager_.addCertAndOverride(cert2);
 
-  auto res = manager_.getCert(
-      folly::none,
-      {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
-      {SignatureScheme::rsa_pss_sha512},
-      {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          folly::none,
+          {SignatureScheme::rsa_pss_sha256, SignatureScheme::rsa_pss_sha512},
+          {SignatureScheme::rsa_pss_sha512},
+          {}),
+      Status::Success);
   EXPECT_EQ(res->cert, cert2);
   EXPECT_EQ(res->scheme, SignatureScheme::rsa_pss_sha512);
 }
@@ -84,18 +107,27 @@ TEST_F(CertManagerTest, TestServerSigScheme) {
 TEST_F(CertManagerTest, TestNoSigSchemeMatch) {
   auto cert = getCert({SignatureScheme::rsa_pss_sha256});
   manager_.addCertAndOverride(cert);
-  auto res = manager_.getCert(
-      folly::none,
-      {SignatureScheme::rsa_pss_sha256},
-      {SignatureScheme::rsa_pss_sha512},
-      {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(
+          res,
+          err,
+          folly::none,
+          {SignatureScheme::rsa_pss_sha256},
+          {SignatureScheme::rsa_pss_sha512},
+          {}),
+      Status::Success);
   EXPECT_FALSE(res);
 }
 
 TEST_F(CertManagerTest, TestBasicMatchNoneOverride) {
   auto cert = getCert(kRsa);
   manager_.addCert(cert);
-  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert);
 }
 
@@ -104,7 +136,10 @@ TEST_F(CertManagerTest, TestSameSigSchemeNoOverride) {
   auto cert2 = getCert(kRsa);
   manager_.addCert(cert);
   manager_.addCert(cert2);
-  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert);
 }
 
@@ -113,7 +148,10 @@ TEST_F(CertManagerTest, TestSameSigSchemeOverride) {
   auto cert2 = getCert(kRsa);
   manager_.addCertAndOverride(cert);
   manager_.addCertAndOverride(cert2);
-  auto res = manager_.getCert(folly::none, kRsa, kRsa, {});
+  CertMatch res;
+  Error err;
+  EXPECT_EQ(
+      manager_.getCert(res, err, folly::none, kRsa, kRsa, {}), Status::Success);
   EXPECT_EQ(res->cert, cert2);
 }
 } // namespace test

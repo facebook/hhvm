@@ -24,7 +24,9 @@ namespace openssl {
 
 class CertUtils {
  public:
-  static CertificateMsg getCertMessage(
+  static Status getCertMessage(
+      CertificateMsg& ret,
+      Error& err,
       const std::vector<folly::ssl::X509UniquePtr>& certs,
       Buf certificateRequestContext);
 

@@ -58,35 +58,37 @@ Status getExtension(
 }
 
 namespace extensions {
-Extension encodeExtension(const DelegatedCredential& cred) {
+Status
+encodeExtension(Extension& ret, Error& err, const DelegatedCredential& cred) {
   Extension ext;
   ext.extension_type = ExtensionType::delegated_credential;
   ext.extension_data = folly::IOBuf::create(10);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  Error err;
-  FIZZ_THROW_ON_ERROR(detail::write(err, cred.valid_time, appender), err);
-  FIZZ_THROW_ON_ERROR(
-      detail::write(err, cred.expected_verify_scheme, appender), err);
-  FIZZ_THROW_ON_ERROR(
-      detail::writeBuf<detail::bits24>(err, cred.public_key, appender), err);
-  FIZZ_THROW_ON_ERROR(
-      detail::write(err, cred.credential_scheme, appender), err);
-  FIZZ_THROW_ON_ERROR(
-      detail::writeBuf<uint16_t>(err, cred.signature, appender), err);
-  return ext;
+  FIZZ_RETURN_ON_ERROR(detail::write(err, cred.valid_time, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::write(err, cred.expected_verify_scheme, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<detail::bits24>(err, cred.public_key, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, cred.credential_scheme, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<uint16_t>(err, cred.signature, appender));
+  ret = std::move(ext);
+  return Status::Success;
 }
 
-Extension encodeExtension(const DelegatedCredentialSupport& supp) {
+Status encodeExtension(
+    Extension& ret,
+    Error& err,
+    const DelegatedCredentialSupport& supp) {
   Extension ext;
   ext.extension_type = ExtensionType::delegated_credential;
   ext.extension_data = folly::IOBuf::create(10);
   folly::io::Appender appender(ext.extension_data.get(), 10);
-  Error err;
-  FIZZ_THROW_ON_ERROR(
+  FIZZ_RETURN_ON_ERROR(
       detail::writeVector<uint16_t>(
-          err, supp.supported_signature_algorithms, appender),
-      err);
-  return ext;
+          err, supp.supported_signature_algorithms, appender));
+  ret = std::move(ext);
+  return Status::Success;
 }
 } // namespace extensions
 

@@ -32,9 +32,15 @@ struct DelegatedCredentialSupport {
 
 enum class DelegatedCredentialMode { Client, Server };
 
-Extension encodeExtension(const extensions::DelegatedCredential& cred);
+Status encodeExtension(
+    Extension& ret,
+    Error& err,
+    const extensions::DelegatedCredential& cred);
 
-Extension encodeExtension(const extensions::DelegatedCredentialSupport& cs);
+Status encodeExtension(
+    Extension& ret,
+    Error& err,
+    const extensions::DelegatedCredentialSupport& cs);
 } // namespace extensions
 
 template <>

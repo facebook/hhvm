@@ -26,7 +26,8 @@ class MultiClientExtensions : public ClientExtensions {
    * For each extension in the provided list, get the associated Extensions
    * and combine into one vector.
    */
-  std::vector<Extension> getClientHelloExtensions() const override;
+  Status getClientHelloExtensions(std::vector<Extension>& ret, Error& err)
+      const override;
 
   /**
    * Call each extension's implementation of onEncryptedExtensions.

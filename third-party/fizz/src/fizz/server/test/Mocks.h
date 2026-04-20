@@ -223,12 +223,22 @@ class MockCertManager : public CertManager {
  public:
   MOCK_METHOD(
       CertMatch,
-      getCert,
+      _getCert,
       (const folly::Optional<std::string>& sni,
        const std::vector<SignatureScheme>& supportedSigSchemes,
        const std::vector<SignatureScheme>& peerSigSchemes,
        const ClientHello& chlo),
       (const));
+  Status getCert(
+      CertMatch& ret,
+      Error& err,
+      const folly::Optional<std::string>& sni,
+      const std::vector<SignatureScheme>& supportedSigSchemes,
+      const std::vector<SignatureScheme>& peerSigSchemes,
+      const ClientHello& chlo) const override {
+    FIZZ_THROW_TO_ERROR(
+        ret, _getCert(sni, supportedSigSchemes, peerSigSchemes, chlo));
+  }
   MOCK_METHOD(
       std::shared_ptr<SelfCert>,
       getCert,
@@ -238,7 +248,16 @@ class MockCertManager : public CertManager {
 
 class MockServerExtensions : public ServerExtensions {
  public:
-  MOCK_METHOD(std::vector<Extension>, getExtensions, (const ClientHello& chlo));
+  MOCK_METHOD(
+      std::vector<Extension>,
+      _getExtensions,
+      (const ClientHello& chlo));
+  Status getExtensions(
+      std::vector<Extension>& ret,
+      Error& err,
+      const ClientHello& chlo) override {
+    FIZZ_THROW_TO_ERROR(ret, _getExtensions(chlo));
+  }
 };
 
 class MockReplayCache : public ReplayCache {
@@ -261,8 +280,9 @@ class MockAsyncSelfCert : public AsyncSelfCert {
   MOCK_METHOD(std::vector<SignatureScheme>, getSigSchemes, (), (const));
 
   MOCK_METHOD(CertificateMsg, _getCertMessage, (Buf&), (const));
-  CertificateMsg getCertMessage(Buf buf) const override {
-    return _getCertMessage(buf);
+  Status getCertMessage(CertificateMsg& ret, Error& err, Buf buf)
+      const override {
+    FIZZ_THROW_TO_ERROR(ret, _getCertMessage(buf));
   }
   MOCK_METHOD(
       CompressedCertificate,

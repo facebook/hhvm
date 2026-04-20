@@ -34,7 +34,9 @@ Status ExportedAuthenticator::getAuthenticatorRequest(
   return Status::Success;
 }
 
-Buf ExportedAuthenticator::getAuthenticator(
+Status ExportedAuthenticator::getAuthenticator(
+    Buf& ret,
+    Error& err,
     const fizz::AsyncFizzBase& transport,
     Direction dir,
     const SelfCert& cert,
@@ -43,12 +45,12 @@ Buf ExportedAuthenticator::getAuthenticator(
   HashFunction hashFunction;
   size_t hashLength;
   const HasherFactoryWithMetadata* makeHasher = nullptr;
-  Error err;
-  FIZZ_THROW_ON_ERROR(getHashFunction(hashFunction, err, *cipher), err);
-  FIZZ_THROW_ON_ERROR(getHashSize(hashLength, err, hashFunction), err);
-  FIZZ_THROW_ON_ERROR(
-      ::fizz::DefaultFactory().makeHasherFactory(makeHasher, err, hashFunction),
-      err);
+  FIZZ_RETURN_ON_ERROR(getHashFunction(hashFunction, err, *cipher));
+  FIZZ_RETURN_ON_ERROR(getHashSize(hashLength, err, hashFunction));
+  FIZZ_RETURN_ON_ERROR(
+      ::fizz::DefaultFactory().makeHasherFactory(
+          makeHasher, err, hashFunction));
+  FIZZ_DCHECK_NE(makeHasher, nullptr);
 
   auto supportedSchemes = transport.getSupportedSigSchemes();
   Buf handshakeContext;
@@ -65,6 +67,8 @@ Buf ExportedAuthenticator::getAuthenticator(
         "EXPORTER-server authenticator finished key", nullptr, hashLength);
   }
   return makeAuthenticator(
+      ret,
+      err,
       makeHasher,
       supportedSchemes,
       cert,
@@ -133,7 +137,9 @@ Status ExportedAuthenticator::validateAuthenticator(
   return Status::Success;
 }
 
-Buf ExportedAuthenticator::makeAuthenticator(
+Status ExportedAuthenticator::makeAuthenticator(
+    Buf& ret,
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     std::vector<SignatureScheme> supportedSchemes,
     const SelfCert& cert,
@@ -143,27 +149,33 @@ Buf ExportedAuthenticator::makeAuthenticator(
     CertificateVerifyContext context) {
   Buf certificateRequestContext;
   std::vector<fizz::Extension> extensions;
-  std::tie(certificateRequestContext, extensions) =
-      detail::decodeAuthRequest(authenticatorRequest);
-  folly::Optional<SignatureScheme> scheme =
-      detail::getSignatureScheme(supportedSchemes, cert, extensions);
+  FIZZ_RETURN_ON_ERROR(
+      detail::decodeAuthRequest(
+          certificateRequestContext, extensions, err, authenticatorRequest));
+  folly::Optional<SignatureScheme> scheme;
+  FIZZ_RETURN_ON_ERROR(
+      detail::getSignatureScheme(
+          scheme, err, supportedSchemes, cert, extensions));
   // No proper signature scheme could be selected, return an empty
   // authenticator.
   if (!scheme) {
-    auto emptyAuth = detail::getEmptyAuthenticator(
-        makeHasher,
-        std::move(authenticatorRequest),
-        std::move(handshakeContext),
-        std::move(finishedMacKey));
-    return emptyAuth;
+    FIZZ_RETURN_ON_ERROR(
+        detail::getEmptyAuthenticator(
+            ret,
+            err,
+            makeHasher,
+            std::move(authenticatorRequest),
+            std::move(handshakeContext),
+            std::move(finishedMacKey)));
+    return Status::Success;
   }
   // Compute CertificateMsg.
-  CertificateMsg certificate =
-      cert.getCertMessage(std::move(certificateRequestContext));
+  CertificateMsg certificate;
+  FIZZ_RETURN_ON_ERROR(cert.getCertMessage(
+      certificate, err, std::move(certificateRequestContext)));
   Buf encodedCertMsg;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      encodeHandshake(encodedCertMsg, err, std::move(certificate)), err);
+  FIZZ_RETURN_ON_ERROR(
+      encodeHandshake(encodedCertMsg, err, std::move(certificate)));
   // Compute CertificateVerify.
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);
@@ -173,8 +185,8 @@ Buf ExportedAuthenticator::makeAuthenticator(
   verify.algorithm = *scheme;
   verify.signature = std::move(sig);
   Buf encodedCertificateVerify;
-  FIZZ_THROW_ON_ERROR(
-      encodeHandshake(encodedCertificateVerify, err, std::move(verify)), err);
+  FIZZ_RETURN_ON_ERROR(
+      encodeHandshake(encodedCertificateVerify, err, std::move(verify)));
   // Compute Finished.
   auto finishedTranscript =
       detail::computeFinishedTranscript(transcript, encodedCertificateVerify);
@@ -185,11 +197,12 @@ Buf ExportedAuthenticator::makeAuthenticator(
   Finished finished;
   finished.verify_data = std::move(verifyData);
   Buf encodedFinished;
-  FIZZ_THROW_ON_ERROR(
-      encodeHandshake(encodedFinished, err, std::move(finished)), err);
+  FIZZ_RETURN_ON_ERROR(
+      encodeHandshake(encodedFinished, err, std::move(finished)));
 
-  return detail::computeTranscript(
+  ret = detail::computeTranscript(
       encodedCertMsg, encodedCertificateVerify, encodedFinished);
+  return Status::Success;
 }
 
 Status ExportedAuthenticator::validate(
@@ -217,11 +230,15 @@ Status ExportedAuthenticator::validate(
   // First check if the authenticator is empty.
   auto finished = param->asFinished();
   if (finished) {
-    auto emptyAuth = detail::getEmptyAuthenticator(
-        makeHasher,
-        std::move(authenticatorRequest),
-        std::move(handshakeContext),
-        std::move(finishedMacKey));
+    Buf emptyAuth;
+    FIZZ_RETURN_ON_ERROR(
+        detail::getEmptyAuthenticator(
+            emptyAuth,
+            err,
+            makeHasher,
+            std::move(authenticatorRequest),
+            std::move(handshakeContext),
+            std::move(finishedMacKey)));
     if (CryptoUtils::equal(emptyAuth->coalesce(), authClone->coalesce())) {
       ret = std::vector<CertificateEntry>();
     } else {
@@ -298,23 +315,24 @@ Status ExportedAuthenticator::validate(
 
 namespace detail {
 
-std::tuple<Buf, std::vector<fizz::Extension>> decodeAuthRequest(
+Status decodeAuthRequest(
+    Buf& certRequestContext,
+    std::vector<fizz::Extension>& extensions,
+    Error& err,
     const Buf& authRequest) {
-  Buf certRequestContext;
-  std::vector<fizz::Extension> exts;
   if (authRequest && !(authRequest->empty())) {
     folly::io::Cursor cursor(authRequest.get());
     CertificateRequest decodedCertRequest;
-    Error err;
-    FIZZ_THROW_ON_ERROR(
-        decode<CertificateRequest>(decodedCertRequest, err, cursor), err);
+    FIZZ_RETURN_ON_ERROR(
+        decode<CertificateRequest>(decodedCertRequest, err, cursor));
     certRequestContext =
         std::move(decodedCertRequest.certificate_request_context);
-    exts = std::move(decodedCertRequest.extensions);
+    extensions = std::move(decodedCertRequest.extensions);
   } else {
     certRequestContext = folly::IOBuf::copyBuffer("");
+    extensions.clear();
   }
-  return std::make_tuple(std::move(certRequestContext), std::move(exts));
+  return Status::Success;
 }
 
 Buf computeTranscriptHash(
@@ -378,34 +396,37 @@ Buf getFinishedData(
   return data;
 }
 
-folly::Optional<std::vector<SignatureScheme>> getRequestedSchemes(
+Status getRequestedSchemes(
+    folly::Optional<std::vector<SignatureScheme>>& ret,
+    Error& err,
     const std::vector<fizz::Extension>& authRequestExtensions) {
   if (!(authRequestExtensions.empty())) {
     folly::Optional<SignatureAlgorithms> sigAlgsExtension;
-    Error err;
-    FIZZ_THROW_ON_ERROR(
+    FIZZ_RETURN_ON_ERROR(
         getExtension<SignatureAlgorithms>(
-            sigAlgsExtension, err, authRequestExtensions),
-        err);
+            sigAlgsExtension, err, authRequestExtensions));
     if (sigAlgsExtension) {
-      auto requestedSchemes = sigAlgsExtension->supported_signature_algorithms;
-      return requestedSchemes;
+      ret = sigAlgsExtension->supported_signature_algorithms;
     } else {
-      return folly::none;
+      ret = folly::none;
     }
   } else {
-    return folly::none;
+    ret = folly::none;
   }
+  return Status::Success;
 }
 
-folly::Optional<SignatureScheme> getSignatureScheme(
+Status getSignatureScheme(
+    folly::Optional<SignatureScheme>& ret,
+    Error& err,
     const std::vector<SignatureScheme>& supportedSchemes,
     const SelfCert& cert,
     const std::vector<fizz::Extension>& authRequestExtensions) {
   folly::Optional<SignatureScheme> selectedScheme;
   const auto certSchemes = cert.getSigSchemes();
-  folly::Optional<std::vector<SignatureScheme>> requestedSchemes =
-      getRequestedSchemes(authRequestExtensions);
+  folly::Optional<std::vector<SignatureScheme>> requestedSchemes;
+  FIZZ_RETURN_ON_ERROR(
+      getRequestedSchemes(requestedSchemes, err, authRequestExtensions));
   if (requestedSchemes) {
     for (const auto& scheme : supportedSchemes) {
       if (std::find(certSchemes.begin(), certSchemes.end(), scheme) !=
@@ -429,21 +450,28 @@ folly::Optional<SignatureScheme> getSignatureScheme(
       }
     }
   }
-  return selectedScheme;
+  ret = selectedScheme;
+  return Status::Success;
 }
 
-Buf getEmptyAuthenticator(
+Status getEmptyAuthenticator(
+    Buf& ret,
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     Buf authRequest,
     Buf handshakeContext,
     Buf finishedMacKey) {
   CertificateMsg emptyCertMsg;
-  emptyCertMsg.certificate_request_context =
-      std::get<0>(detail::decodeAuthRequest(authRequest));
+  std::vector<fizz::Extension> unusedExtensions;
+  FIZZ_RETURN_ON_ERROR(
+      detail::decodeAuthRequest(
+          emptyCertMsg.certificate_request_context,
+          unusedExtensions,
+          err,
+          authRequest));
   Buf encodedEmptyCertMsg;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      encodeHandshake(encodedEmptyCertMsg, err, std::move(emptyCertMsg)), err);
+  FIZZ_RETURN_ON_ERROR(
+      encodeHandshake(encodedEmptyCertMsg, err, std::move(emptyCertMsg)));
   auto emptyAuthTranscript = detail::computeTranscript(
       handshakeContext, authRequest, encodedEmptyCertMsg);
   auto emptyAuthTranscriptHash =
@@ -452,10 +480,8 @@ Buf getEmptyAuthenticator(
       makeHasher, finishedMacKey, emptyAuthTranscriptHash);
   Finished emptyAuth;
   emptyAuth.verify_data = std::move(finVerify);
-  Buf encodedEmptyAuth;
-  FIZZ_THROW_ON_ERROR(
-      encodeHandshake(encodedEmptyAuth, err, std::move(emptyAuth)), err);
-  return encodedEmptyAuth;
+  FIZZ_RETURN_ON_ERROR(encodeHandshake(ret, err, std::move(emptyAuth)));
+  return Status::Success;
 }
 
 } // namespace detail

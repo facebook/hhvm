@@ -41,8 +41,11 @@ OpenSSLSelfCertImpl<T>::OpenSSLSelfCertImpl(
   signature_.setKey(std::move(pkey));
   certs_ = std::move(certs);
   for (const auto& compressor : compressors) {
+    CertificateMsg certMsg;
+    Error err;
+    FIZZ_THROW_ON_ERROR(getCertMessage(certMsg, err, nullptr), err);
     compressedCerts_[compressor->getAlgorithm()] =
-        compressor->compress(getCertMessage());
+        compressor->compress(certMsg);
   }
 }
 
@@ -57,10 +60,12 @@ std::vector<std::string> OpenSSLSelfCertImpl<T>::getAltIdentities() const {
 }
 
 template <KeyType T>
-CertificateMsg OpenSSLSelfCertImpl<T>::getCertMessage(
+Status OpenSSLSelfCertImpl<T>::getCertMessage(
+    CertificateMsg& ret,
+    Error& err,
     Buf certificateRequestContext) const {
   return CertUtils::getCertMessage(
-      certs_, std::move(certificateRequestContext));
+      ret, err, certs_, std::move(certificateRequestContext));
 }
 
 template <KeyType T>

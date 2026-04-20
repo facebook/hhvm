@@ -31,8 +31,9 @@ class MockSelfDelegatedCredential : public SelfDelegatedCredential {
   }
 
   MOCK_METHOD(CertificateMsg, _getCertMessage, (Buf&), (const));
-  CertificateMsg getCertMessage(Buf buf) const override {
-    return _getCertMessage(buf);
+  Status getCertMessage(CertificateMsg& ret, Error& err, Buf buf)
+      const override {
+    FIZZ_THROW_TO_ERROR(ret, _getCertMessage(buf));
   }
   MOCK_METHOD(
       CompressedCertificate,

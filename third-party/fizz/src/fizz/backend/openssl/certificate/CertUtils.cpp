@@ -39,7 +39,9 @@ folly::Optional<std::string> getIdentityFromX509(X509* x) {
 }
 } // namespace detail
 
-CertificateMsg CertUtils::getCertMessage(
+Status CertUtils::getCertMessage(
+    CertificateMsg& ret,
+    Error& err,
     const std::vector<folly::ssl::X509UniquePtr>& certs,
     Buf certificateRequestContext) {
   // compose the cert entry list
@@ -48,13 +50,13 @@ CertificateMsg CertUtils::getCertMessage(
     CertificateEntry entry;
     int len = i2d_X509(cert.get(), nullptr);
     if (len < 0) {
-      throw std::runtime_error("Error computing length");
+      return err.error("Error computing length");
     }
     entry.cert_data = folly::IOBuf::create(len);
     auto dataPtr = entry.cert_data->writableData();
     len = i2d_X509(cert.get(), &dataPtr);
     if (len < 0) {
-      throw std::runtime_error("Error converting cert to DER");
+      return err.error("Error converting cert to DER");
     }
     entry.cert_data->append(len);
     // TODO: add any extensions.
@@ -64,7 +66,8 @@ CertificateMsg CertUtils::getCertMessage(
   CertificateMsg msg;
   msg.certificate_request_context = std::move(certificateRequestContext);
   msg.certificate_list = std::move(entries);
-  return msg;
+  ret = std::move(msg);
+  return Status::Success;
 }
 
 std::unique_ptr<PeerCert> CertUtils::makePeerCert(folly::ByteRange range) {

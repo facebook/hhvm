@@ -57,9 +57,13 @@ template <openssl::KeyType T>
   }
 
   // Verify credential signature.
-  auto signBuffer = DelegatedCredentialUtils::prepareSignatureBuffer(
-      credential,
-      folly::ssl::OpenSSLCertUtils::derEncode(*selfCert->getX509()));
+  Buf signBuffer;
+  FIZZ_RETURN_ON_ERROR(
+      DelegatedCredentialUtils::prepareSignatureBuffer(
+          signBuffer,
+          err,
+          credential,
+          folly::ssl::OpenSSLCertUtils::derEncode(*selfCert->getX509())));
   auto parentCert = openssl::CertUtils::makePeerCert(selfCert->getX509());
   FIZZ_RETURN_ON_ERROR(parentCert->verify(
       err,
@@ -74,11 +78,12 @@ template <openssl::KeyType T>
   std::map<CertificateCompressionAlgorithm, CompressedCertificate>
       compressedCerts;
   for (const auto& compressor : compressors) {
-    auto msg = selfCert->getCertMessage();
-    msg.certificate_list.at(0).extensions.push_back(
-        encodeExtension(credential));
-    compressedCerts[compressor->getAlgorithm()] =
-        compressor->compress(std::move(msg));
+    CertificateMsg certMsg;
+    FIZZ_RETURN_ON_ERROR(selfCert->getCertMessage(certMsg, err, nullptr));
+    Extension ext;
+    FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, credential));
+    certMsg.certificate_list.at(0).extensions.push_back(std::move(ext));
+    compressedCerts[compressor->getAlgorithm()] = compressor->compress(certMsg);
   }
 
   ret = std::unique_ptr<SelfDelegatedCredentialImpl<T>>(
@@ -107,12 +112,18 @@ std::vector<SignatureScheme> SelfDelegatedCredentialImpl<T>::getSigSchemes()
 }
 
 template <openssl::KeyType T>
-CertificateMsg SelfDelegatedCredentialImpl<T>::getCertMessage(
+Status SelfDelegatedCredentialImpl<T>::getCertMessage(
+    CertificateMsg& ret,
+    Error& err,
     Buf certificateRequestContext) const {
-  auto msg =
-      selfCertImpl_->getCertMessage(std::move(certificateRequestContext));
-  msg.certificate_list.at(0).extensions.push_back(encodeExtension(credential_));
-  return msg;
+  CertificateMsg msg;
+  FIZZ_RETURN_ON_ERROR(selfCertImpl_->getCertMessage(
+      msg, err, std::move(certificateRequestContext)));
+  Extension ext;
+  FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, credential_));
+  msg.certificate_list.at(0).extensions.push_back(std::move(ext));
+  ret = std::move(msg);
+  return Status::Success;
 }
 
 template <openssl::KeyType T>

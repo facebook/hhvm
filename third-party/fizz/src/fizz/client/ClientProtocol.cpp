@@ -628,7 +628,8 @@ static Status getClientHello(
   }
 
   if (extensions) {
-    auto additionalExtensions = extensions->getClientHelloExtensions();
+    std::vector<Extension> additionalExtensions;
+    TRY(extensions->getClientHelloExtensions(additionalExtensions, ctx.err));
     for (auto& ext : additionalExtensions) {
       chlo.extensions.push_back(std::move(ext));
     }
@@ -2190,28 +2191,33 @@ Status EventHandler<
   return Status::Success;
 }
 
-static folly::Optional<
-    std::pair<std::shared_ptr<const SelfCert>, SignatureScheme>>
-getClientCert(
+static Status getClientCert(
+    folly::Optional<
+        std::pair<std::shared_ptr<const SelfCert>, SignatureScheme>>& ret,
+    Error& err,
     const State& state,
     const std::vector<SignatureScheme>& schemes,
     const std::vector<Extension>& peerExtensions) {
   auto certManager = state.context()->getCertManager();
   if (certManager == nullptr) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
   const auto& supportedSchemes = state.context()->getSupportedSigSchemes();
-  auto result = certManager->getCert(
-      state.sni(), supportedSchemes, schemes, peerExtensions);
+  CertMatch result;
+  TRY(certManager->getCert(
+      result, err, state.sni(), supportedSchemes, schemes, peerExtensions));
   if (!result) {
     FIZZ_VLOG(1)
         << "client cert/context doesn't support any signature algorithms "
         << "specified by the server";
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
 
   std::shared_ptr<const SelfCert> cert = result->cert;
-  return std::make_pair(cert, result->scheme);
+  ret = std::make_pair(cert, result->scheme);
+  return Status::Success;
 }
 
 Status EventHandler<
@@ -2246,10 +2252,14 @@ Status EventHandler<
         AlertDescription::illegal_parameter);
   }
 
-  auto certAndScheme = getClientCert(
+  folly::Optional<std::pair<std::shared_ptr<const SelfCert>, SignatureScheme>>
+      certAndScheme;
+  TRY(getClientCert(
+      certAndScheme,
+      ctx.err,
       state,
       sigAlgsExtension->supported_signature_algorithms,
-      certRequest.extensions);
+      certRequest.extensions));
 
   folly::Optional<SignatureScheme> scheme;
   std::shared_ptr<const SelfCert> cert;
@@ -2291,7 +2301,9 @@ static Status handleCertMsg(
   for (auto& certEntry : certMsg.certificate_list) {
     if (state.extensions()) {
       // Check that these extensions correspond to ones we requested.
-      auto sentExtensions = state.extensions()->getClientHelloExtensions();
+      std::vector<Extension> sentExtensions;
+      TRY(state.extensions()->getClientHelloExtensions(
+          sentExtensions, ctx.err));
       for (auto& ext : certEntry.extensions) {
         auto extIt = std::find_if(
             sentExtensions.begin(),
@@ -2533,8 +2545,10 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
     }
     case ClientAuthType::Sent: {
       auto selectedCert = state.selectedClientCert();
+      CertificateMsg certMsgContent;
+      TRY(selectedCert->getCertMessage(certMsgContent, ctx.err, nullptr));
       Buf certMsg;
-      TRY(encodeHandshake(certMsg, ctx.err, selectedCert->getCertMessage()));
+      TRY(encodeHandshake(certMsg, ctx.err, std::move(certMsgContent)));
       encodedCertMessage = std::move(certMsg);
       state.handshakeContext()->appendToTranscript(*encodedCertMessage);
 

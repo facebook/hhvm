@@ -96,7 +96,9 @@ TEST_F(ZstdCertificateCompressorTest, TestCompressDecompress) {
   certs.push_back(std::move(certAndKey.cert));
   auto cert = openssl::CertUtils::makeSelfCert(
       std::move(certs), std::move(certAndKey.key));
-  auto certMsg = cert->getCertMessage();
+  CertificateMsg certMsg;
+  Error certErr;
+  EXPECT_EQ(cert->getCertMessage(certMsg, certErr, nullptr), Status::Success);
 
   // Add extension
   CertificateAuthorities auth;

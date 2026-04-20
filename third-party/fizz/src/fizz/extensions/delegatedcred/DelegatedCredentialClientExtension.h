@@ -19,7 +19,8 @@ class DelegatedCredentialClientExtension : public ClientExtensions {
       std::vector<SignatureScheme> schemes)
       : supportedSchemes_(std::move(schemes)) {}
 
-  std::vector<Extension> getClientHelloExtensions() const override;
+  Status getClientHelloExtensions(std::vector<Extension>& ret, Error& err)
+      const override;
 
   Status onEncryptedExtensions(
       Error& err,

@@ -25,6 +25,9 @@ class ServerExtensions {
    * Returns a list of extensions to be added to EncryptedExtensions, given a
    * ClientHello.
    */
-  virtual std::vector<Extension> getExtensions(const ClientHello& chlo) = 0;
+  virtual Status getExtensions(
+      std::vector<Extension>& ret,
+      Error& err,
+      const ClientHello& chlo) = 0;
 };
 } // namespace fizz

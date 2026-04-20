@@ -12,21 +12,21 @@
 namespace fizz {
 namespace extensions {
 
-std::vector<Extension> TokenBindingClientExtension::getClientHelloExtensions()
-    const {
-  std::vector<Extension> clientExtensions;
+Status TokenBindingClientExtension::getClientHelloExtensions(
+    std::vector<Extension>& ret,
+    Error& err) const {
+  ret.clear();
   if (context_->getSupportedVersions().empty() ||
       context_->getKeyParams().empty()) {
-    return clientExtensions;
+    return Status::Success;
   }
   TokenBindingParameters clientParams;
   clientParams.version = context_->getSupportedVersions().front();
   clientParams.key_parameters_list = context_->getKeyParams();
   Extension ext;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, clientParams), err);
-  clientExtensions.push_back(std::move(ext));
-  return clientExtensions;
+  FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, clientParams));
+  ret.push_back(std::move(ext));
+  return Status::Success;
 }
 
 Status TokenBindingClientExtension::onEncryptedExtensions(

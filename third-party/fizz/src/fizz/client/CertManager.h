@@ -22,7 +22,9 @@ class CertManager {
    * Select a cert given the servers sig schemes, our own supported sig schemes
    * and peer extensions. The sni value is ignored
    */
-  virtual CertMatch getCert(
+  virtual Status getCert(
+      CertMatch& ret,
+      Error& err,
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& supportedSigSchemes,
       const std::vector<SignatureScheme>& peerSigSchemes,

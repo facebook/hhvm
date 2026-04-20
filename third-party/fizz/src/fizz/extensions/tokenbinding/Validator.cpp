@@ -54,12 +54,15 @@ Optional<TokenBindingID> Validator::constructAndVerifyMessage(
     TokenBinding tokenBinding,
     const Buf& ekm) {
   try {
-    auto message = TokenBindingUtils::constructMessage(
-        tokenBinding.tokenbinding_type,
-        tokenBinding.tokenbindingid.key_parameters,
-        ekm);
+    Buf message;
     Error err;
-    if (verify(
+    if (TokenBindingUtils::constructMessage(
+            message,
+            err,
+            tokenBinding.tokenbinding_type,
+            tokenBinding.tokenbindingid.key_parameters,
+            ekm) == Status::Fail ||
+        verify(
             err,
             tokenBinding.tokenbindingid.key_parameters,
             tokenBinding.tokenbindingid.key,

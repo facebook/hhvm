@@ -149,7 +149,11 @@ class MockECHPolicy : public fizz::client::ECHPolicy {
 
 class MockClientExtensions : public ClientExtensions {
  public:
-  MOCK_METHOD(std::vector<Extension>, getClientHelloExtensions, (), (const));
+  MOCK_METHOD(std::vector<Extension>, _getClientHelloExtensions, (), (const));
+  Status getClientHelloExtensions(std::vector<Extension>& ret, Error& err)
+      const override {
+    FIZZ_THROW_TO_ERROR(ret, _getClientHelloExtensions());
+  }
   MOCK_METHOD(void, _onEncryptedExtensions, (const std::vector<Extension>&));
   Status onEncryptedExtensions(
       Error& err,

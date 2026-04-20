@@ -858,7 +858,7 @@ TEST_F(ClientProtocolTest, TestConnectExtension) {
   connect.sni = "www.hostname.com";
   auto extensions = std::make_shared<MockClientExtensions>();
   connect.extensions = extensions;
-  EXPECT_CALL(*extensions, getClientHelloExtensions())
+  EXPECT_CALL(*extensions, _getClientHelloExtensions())
       .WillOnce(InvokeWithoutArgs([]() {
         Extension ext;
         ext.extension_type = ExtensionType::token_binding;
@@ -4602,7 +4602,7 @@ TEST_F(ClientProtocolTest, TestCertificateExtensions) {
   entry.extensions.push_back(std::move(certExt));
   certificate.certificate_list.push_back(std::move(entry));
   auto ext = std::make_shared<MockClientExtensions>();
-  EXPECT_CALL(*ext, getClientHelloExtensions())
+  EXPECT_CALL(*ext, _getClientHelloExtensions())
       .WillOnce(InvokeWithoutArgs([]() {
         Extension extension;
         extension.extension_type = static_cast<fizz::ExtensionType>(0xbeef);
@@ -4632,7 +4632,7 @@ TEST_F(ClientProtocolTest, TestCertificateUnrequestedExtensions) {
   entry.extensions.push_back(std::move(certExt));
   certificate.certificate_list.push_back(std::move(entry));
   auto ext = std::make_shared<MockClientExtensions>();
-  EXPECT_CALL(*ext, getClientHelloExtensions())
+  EXPECT_CALL(*ext, _getClientHelloExtensions())
       .WillOnce(InvokeWithoutArgs([]() {
         Extension extension;
         // Different type here

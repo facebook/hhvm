@@ -19,7 +19,9 @@ namespace extensions {
 // non-delegated certs.
 class DelegatedCredentialCertManager : public server::DefaultCertManager {
  public:
-  CertMatch getCert(
+  Status getCert(
+      CertMatch& ret,
+      Error& err,
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& supportedSigSchemes,
       const std::vector<SignatureScheme>& peerSigSchemes,

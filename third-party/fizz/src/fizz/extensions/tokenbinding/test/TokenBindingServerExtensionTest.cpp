@@ -59,11 +59,12 @@ TEST_F(TokenBindingServerExtensionTest, TestFullNegotiationFlow) {
   setUpTokenBindingWithParameters(
       TokenBindingProtocolVersion::token_binding_1_0,
       TokenBindingKeyParameters::ecdsap256);
-  auto exts = extensions_->getExtensions(chlo_);
+  std::vector<Extension> exts;
+  Error err;
+  EXPECT_EQ(extensions_->getExtensions(exts, err, chlo_), Status::Success);
   EXPECT_EQ(exts.size(), 1);
 
   folly::Optional<TokenBindingParameters> tokenBindingExtension;
-  Error err;
   EXPECT_EQ(
       getExtension<TokenBindingParameters>(tokenBindingExtension, err, exts),
       Status::Success);
@@ -74,7 +75,9 @@ TEST_F(TokenBindingServerExtensionTest, TestFullNegotiationFlow) {
 }
 
 TEST_F(TokenBindingServerExtensionTest, TestNoExtensions) {
-  auto exts = extensions_->getExtensions(chlo_);
+  std::vector<Extension> exts;
+  Error err;
+  EXPECT_EQ(extensions_->getExtensions(exts, err, chlo_), Status::Success);
   EXPECT_EQ(exts.size(), 0);
 }
 
@@ -86,7 +89,9 @@ TEST_F(TokenBindingServerExtensionTest, TestIncompatibleKeyParam) {
       TokenBindingKeyParameters::rsa2048_pss};
 
   tokenBindingContext_->setSupportedKeyParameters(std::move(keyParams));
-  auto exts = extensions_->getExtensions(chlo_);
+  std::vector<Extension> exts;
+  Error err;
+  EXPECT_EQ(extensions_->getExtensions(exts, err, chlo_), Status::Success);
   EXPECT_EQ(exts.size(), 0);
 }
 

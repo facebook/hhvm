@@ -1163,9 +1163,10 @@ static Buf getCertificate(
             encodedCertificate, err, serverCert->getCompressedCert(*algo)),
         err);
   } else {
+    CertificateMsg certMsg;
+    FIZZ_THROW_ON_ERROR(serverCert->getCertMessage(certMsg, err, nullptr), err);
     FIZZ_THROW_ON_ERROR(
-        encodeHandshake(encodedCertificate, err, serverCert->getCertMessage()),
-        err);
+        encodeHandshake(encodedCertificate, err, std::move(certMsg)), err);
   }
   handshakeContext.appendToTranscript(encodedCertificate);
   return encodedCertificate;
@@ -1802,7 +1803,10 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
               }
               std::vector<Extension> additionalExtensions;
               if (state.extensions()) {
-                additionalExtensions = state.extensions()->getExtensions(chlo);
+                FIZZ_THROW_ON_ERROR(
+                    state.extensions()->getExtensions(
+                        additionalExtensions, err, chlo),
+                    err);
               }
 
               if (state.group().has_value() &&

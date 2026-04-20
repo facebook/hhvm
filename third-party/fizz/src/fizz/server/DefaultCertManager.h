@@ -20,7 +20,9 @@ namespace server {
 
 class DefaultCertManager : public CertManager {
  public:
-  virtual CertMatch getCert(
+  virtual Status getCert(
+      CertMatch& ret,
+      Error& err,
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& supportedSigSchemes,
       const std::vector<SignatureScheme>& peerSigSchemes,

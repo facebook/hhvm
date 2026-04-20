@@ -67,21 +67,22 @@ Status DelegatedCredentialUtils::hasDelegatedExtension(
   return Status::Success;
 }
 
-Buf DelegatedCredentialUtils::prepareSignatureBuffer(
+Status DelegatedCredentialUtils::prepareSignatureBuffer(
+    Buf& ret,
+    Error& err,
     const DelegatedCredential& cred,
     Buf certData) {
   auto toSign = folly::IOBuf::create(0);
   folly::io::Appender appender(toSign.get(), 10);
   appender.pushAtMost(certData->data(), certData->length());
-  Error err;
-  FIZZ_THROW_ON_ERROR(detail::write(err, cred.valid_time, appender), err);
-  FIZZ_THROW_ON_ERROR(
-      detail::write(err, cred.expected_verify_scheme, appender), err);
-  FIZZ_THROW_ON_ERROR(
-      detail::writeBuf<detail::bits24>(err, cred.public_key, appender), err);
-  FIZZ_THROW_ON_ERROR(
-      detail::write(err, cred.credential_scheme, appender), err);
-  return toSign;
+  FIZZ_RETURN_ON_ERROR(detail::write(err, cred.valid_time, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::write(err, cred.expected_verify_scheme, appender));
+  FIZZ_RETURN_ON_ERROR(
+      detail::writeBuf<detail::bits24>(err, cred.public_key, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, cred.credential_scheme, appender));
+  ret = std::move(toSign);
+  return Status::Success;
 }
 
 Status DelegatedCredentialUtils::generateCredential(
@@ -168,8 +169,12 @@ Status DelegatedCredentialUtils::generateCredential(
   }
   cred.public_key->append(uSz);
 
-  auto toSign = prepareSignatureBuffer(
-      cred, folly::ssl::OpenSSLCertUtils::derEncode(*cert->getX509()));
+  Buf toSign;
+  FIZZ_RETURN_ON_ERROR(prepareSignatureBuffer(
+      toSign,
+      err,
+      cred,
+      folly::ssl::OpenSSLCertUtils::derEncode(*cert->getX509())));
   cred.signature =
       cert->sign(cred.credential_scheme, verifyContext, toSign->coalesce());
 

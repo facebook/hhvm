@@ -15,7 +15,10 @@
 namespace fizz {
 namespace detail {
 
-std::tuple<Buf, std::vector<fizz::Extension>> decodeAuthRequest(
+Status decodeAuthRequest(
+    Buf& certRequestContext,
+    std::vector<fizz::Extension>& extensions,
+    Error& err,
     const Buf& authRequest);
 
 Buf computeTranscriptHash(
@@ -36,15 +39,21 @@ Buf getFinishedData(
     Buf& finishedMacKey,
     const Buf& finishedTranscript);
 
-folly::Optional<std::vector<SignatureScheme>> getRequestedSchemes(
+Status getRequestedSchemes(
+    folly::Optional<std::vector<SignatureScheme>>& ret,
+    Error& err,
     const std::vector<fizz::Extension>& authRequestExtensions);
 
-folly::Optional<SignatureScheme> getSignatureScheme(
+Status getSignatureScheme(
+    folly::Optional<SignatureScheme>& ret,
+    Error& err,
     const std::vector<SignatureScheme>& supportedSchemes,
     const SelfCert& cert,
     const std::vector<fizz::Extension>& authRequestExtensions);
 
-Buf getEmptyAuthenticator(
+Status getEmptyAuthenticator(
+    Buf& ret,
+    Error& err,
     const HasherFactoryWithMetadata* makeHasher,
     Buf authRequest,
     Buf handshakeContext,

@@ -23,7 +23,9 @@ class DelegatedCredentialClientCertManager : public fizz::client::CertManager {
    * makes use of the peer extensions to pick a delegated credential or a x509
    * cert
    */
-  CertMatch getCert(
+  Status getCert(
+      CertMatch& ret,
+      Error& err,
       const folly::Optional<std::string>& sni,
       const std::vector<SignatureScheme>& supportedSigSchemes,
       const std::vector<SignatureScheme>& peerSigSchemes,

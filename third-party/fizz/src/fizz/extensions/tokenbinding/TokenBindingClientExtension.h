@@ -22,7 +22,8 @@ class TokenBindingClientExtension : public ClientExtensions {
       const std::shared_ptr<TokenBindingContext>& context)
       : context_(context) {}
 
-  std::vector<Extension> getClientHelloExtensions() const override;
+  Status getClientHelloExtensions(std::vector<Extension>& ret, Error& err)
+      const override;
 
   Status onEncryptedExtensions(
       Error& err,

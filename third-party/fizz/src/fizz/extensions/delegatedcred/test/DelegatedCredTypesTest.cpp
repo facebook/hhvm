@@ -47,7 +47,9 @@ TEST(DelegatedCredTypesTest, TestEncodeCredentialSupportExtension) {
       SignatureScheme::ed25519,
       SignatureScheme::ecdsa_secp256r1_sha256};
 
-  auto encoded = encodeExtension(supp);
+  Extension encoded;
+  Error err;
+  EXPECT_EQ(encodeExtension(encoded, err, supp), Status::Success);
   EXPECT_EQ(encoded.extension_type, ExtensionType::delegated_credential);
   EXPECT_TRUE(
       IOBufEqualTo()(
@@ -127,7 +129,9 @@ TEST(DelegatedCredTypesTest, TestEncodeCredentialExtension) {
   cred.public_key = IOBuf::copyBuffer("pubkey");
   cred.signature = IOBuf::copyBuffer("sign");
 
-  auto encoded = encodeExtension(cred);
+  Extension encoded;
+  Error err;
+  EXPECT_EQ(encodeExtension(encoded, err, cred), Status::Success);
   EXPECT_EQ(encoded.extension_type, ExtensionType::delegated_credential);
   EXPECT_TRUE(
       IOBufEqualTo()(

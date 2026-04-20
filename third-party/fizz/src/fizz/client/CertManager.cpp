@@ -14,7 +14,9 @@ using namespace folly;
 namespace fizz {
 namespace client {
 
-CertMatch CertManager::getCert(
+Status CertManager::getCert(
+    CertMatch& ret,
+    Error& /* err */,
     const folly::Optional<std::string>& /* sni */,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,
@@ -26,10 +28,12 @@ CertMatch CertManager::getCert(
     }
     if (std::find(peerSigSchemes.begin(), peerSigSchemes.end(), scheme) !=
         peerSigSchemes.end()) {
-      return CertMatchStruct{cert->second, scheme, MatchType::Default};
+      ret = CertMatchStruct{cert->second, scheme, MatchType::Default};
+      return Status::Success;
     }
   }
-  return none;
+  ret = none;
+  return Status::Success;
 }
 
 void CertManager::addCert(std::shared_ptr<SelfCert> cert) {

@@ -23,10 +23,12 @@ class PaddingClientExtensionTest : public ::fizz::test::ExtensionsTest {
   void checkWrite(
       const PaddingClientExtension& padding,
       folly::StringPiece expectedHex) {
-    auto ext = padding.getClientHelloExtensions()[0].clone();
+    std::vector<Extension> exts;
+    Error err;
+    FIZZ_THROW_ON_ERROR(padding.getClientHelloExtensions(exts, err), err);
+    auto ext = exts[0].clone();
     auto buf = folly::IOBuf::create(0);
     folly::io::Appender appender(buf.get(), 10);
-    Error err;
     FIZZ_THROW_ON_ERROR(detail::write(err, ext, appender), err);
     EXPECT_EQ(hexlify(buf->coalesce()), expectedHex);
   }

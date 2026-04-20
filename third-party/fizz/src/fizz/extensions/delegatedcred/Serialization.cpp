@@ -45,7 +45,9 @@ Status generateDelegatedCredentialPEM(
     std::string credKeyData) {
   std::string pemData;
   // Append credential
-  auto encodedCred = fizz::extensions::encodeExtension(credential);
+  Extension encodedCred;
+  FIZZ_RETURN_ON_ERROR(
+      fizz::extensions::encodeExtension(encodedCred, err, credential));
   pemData += mode == DelegatedCredentialMode::Client ? kClientDCHeader
                                                      : kServerDCHeader;
   pemData += folly::base64Encode(encodedCred.extension_data->to<std::string>());
@@ -135,8 +137,7 @@ Status loadDCFromPEM(
         Extension{
             ExtensionType::delegated_credential,
             folly::IOBuf::copyBuffer(std::move(credData))});
-    FIZZ_THROW_ON_ERROR(
-        getExtension<DelegatedCredential>(cred, err, credVec), err);
+    FIZZ_RETURN_ON_ERROR(getExtension<DelegatedCredential>(cred, err, credVec));
   } catch (const std::exception& e) {
     return err.error(
         folly::sformat(

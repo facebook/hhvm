@@ -962,9 +962,15 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         }
         auto leafPeer = openssl::CertUtils::makePeerCert(
             folly::ssl::X509UniquePtr(leafCert));
-        auto toSign =
+        Buf toSign;
+        Error signBufErr;
+        FIZZ_THROW_ON_ERROR(
             fizz::extensions::DelegatedCredentialUtils::prepareSignatureBuffer(
-                *cred, folly::ssl::OpenSSLCertUtils::derEncode(*leafCert));
+                toSign,
+                signBufErr,
+                *cred,
+                folly::ssl::OpenSSLCertUtils::derEncode(*leafCert)),
+            signBufErr);
         try {
           Error err;
           FIZZ_THROW_ON_ERROR(

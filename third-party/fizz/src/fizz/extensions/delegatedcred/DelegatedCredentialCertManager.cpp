@@ -13,30 +13,34 @@ using namespace fizz::server;
 namespace fizz {
 namespace extensions {
 
-CertMatch DelegatedCredentialCertManager::getCert(
+Status DelegatedCredentialCertManager::getCert(
+    CertMatch& ret,
+    Error& err,
     const folly::Optional<std::string>& sni,
     const std::vector<SignatureScheme>& supportedSigSchemes,
     const std::vector<SignatureScheme>& peerSigSchemes,
     const ClientHello& chlo) const {
-  Error err;
   folly::Optional<DelegatedCredentialSupport> credential;
-  FIZZ_THROW_ON_ERROR(
+  FIZZ_RETURN_ON_ERROR(
       getExtension<DelegatedCredentialSupport>(
-          credential, err, chlo.extensions),
-      err);
+          credential, err, chlo.extensions));
 
   if (credential) {
-    auto dcRes = dcMgr_.getCert(
+    CertMatch dcRes;
+    FIZZ_RETURN_ON_ERROR(dcMgr_.getCert(
+        dcRes,
+        err,
         sni,
         supportedSigSchemes,
         credential->supported_signature_algorithms,
-        chlo);
+        chlo));
     if (dcRes) {
-      return dcRes;
+      ret = std::move(dcRes);
+      return Status::Success;
     }
   }
   return DefaultCertManager::getCert(
-      sni, supportedSigSchemes, peerSigSchemes, chlo);
+      ret, err, sni, supportedSigSchemes, peerSigSchemes, chlo);
 }
 
 // Falls back to non-delegated if no match.

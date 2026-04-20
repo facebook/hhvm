@@ -15,16 +15,16 @@ namespace extensions {
 PaddingClientExtension::PaddingClientExtension(uint16_t paddingTotalBytes)
     : paddingTotalBytes_(paddingTotalBytes) {}
 
-std::vector<Extension> PaddingClientExtension::getClientHelloExtensions()
-    const {
+Status PaddingClientExtension::getClientHelloExtensions(
+    std::vector<Extension>& ret,
+    Error& err) const {
+  ret.clear();
   extensions::Padding padding{paddingTotalBytes_};
 
-  std::vector<Extension> extensions;
   Extension ext;
-  Error err;
-  FIZZ_THROW_ON_ERROR(encodeExtension(ext, err, padding), err);
-  extensions.push_back(std::move(ext));
-  return extensions;
+  FIZZ_RETURN_ON_ERROR(encodeExtension(ext, err, padding));
+  ret.push_back(std::move(ext));
+  return Status::Success;
 }
 
 } // namespace extensions

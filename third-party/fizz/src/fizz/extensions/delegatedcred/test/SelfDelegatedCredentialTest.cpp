@@ -184,8 +184,15 @@ class SelfDelegatedCredentialTest : public Test {
   }
 
   void updateSignature(DelegatedCredential& cred) {
-    auto toSign = DelegatedCredentialUtils::prepareSignatureBuffer(
-        cred, folly::ssl::OpenSSLCertUtils::derEncode(*parentCert_->getX509()));
+    Buf toSign;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        DelegatedCredentialUtils::prepareSignatureBuffer(
+            toSign,
+            err,
+            cred,
+            folly::ssl::OpenSSLCertUtils::derEncode(*parentCert_->getX509())),
+        err);
     cred.signature = parentCert_->sign(
         cred.credential_scheme,
         CertificateVerifyContext::ServerDelegatedCredential,

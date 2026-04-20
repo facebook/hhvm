@@ -177,9 +177,7 @@ uint32_t furc_hash(const char* const key, const size_t len, const uint32_t m) {
   }
 
   furc_get_bit(NULL, 0, 0, hash, &old_ord);
-  for (d = 0; m > (1ul << d); d++) {
-    ;
-  }
+  d = 32u - (uint32_t)__builtin_clz(m - 1u);
 
   a = d;
   for (try = 0; try < MAX_TRIES; try++) {

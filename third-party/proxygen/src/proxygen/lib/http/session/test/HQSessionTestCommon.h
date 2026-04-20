@@ -235,11 +235,13 @@ class HQSessionTest
   }
 
   void readCallback(quic::StreamId id,
-                    std::unique_ptr<folly::IOBuf> buf) override {
+                    std::unique_ptr<folly::IOBuf> buf,
+                    bool) override {
   }
 
   void unidirectionalReadCallback(quic::StreamId id,
-                                  std::unique_ptr<folly::IOBuf> buf) override {
+                                  std::unique_ptr<folly::IOBuf> buf,
+                                  bool) override {
     // check for control streams
     const bool done = buf->empty() || wtStreams_.contains(id);
     if (done) {

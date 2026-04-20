@@ -15,13 +15,13 @@ function mail(
   string $message,
   string $additional_headers = "",
   string $additional_parameters = "",
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
-function ezmlm_hash(string $addr): HH\FIXME\MISSING_RETURN_TYPE;
+function ezmlm_hash(string $addr): int;
 <<__PHPStdLib>>
-function mailparse_msg_create(): HH\FIXME\MISSING_RETURN_TYPE;
+function mailparse_msg_create(): resource;
 <<__PHPStdLib>>
-function mailparse_msg_free(resource $mimemail): HH\FIXME\MISSING_RETURN_TYPE;
+function mailparse_msg_free(resource $mimemail): bool;
 <<__PHPStdLib>>
 function mailparse_msg_parse_file(
   string $filename,
@@ -30,7 +30,7 @@ function mailparse_msg_parse_file(
 function mailparse_msg_parse(
   resource $mimemail,
   string $data,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function mailparse_msg_extract_part_file(
   resource $mimemail,
@@ -71,7 +71,7 @@ function mailparse_stream_encode(
   resource $sourcefp,
   resource $destfp,
   string $encoding,
-): HH\FIXME\MISSING_RETURN_TYPE;
+): bool;
 <<__PHPStdLib>>
 function mailparse_uudecode_all(resource $fp): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

@@ -316,4 +316,65 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
       );
     }
   }
+
+  private function getFieldInfo(): (bool, int) {
+    $num_field_count = 0;
+    $set_field_ids = keyset[];
+    foreach ($this::SPEC as $field_id => $field) {
+      $field_name = $field['var'];
+      /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
+      $field_value = $this->$field_name;
+      /* HH_FIXME[4016] Field value may not exist*/
+      if (isset($field_value)) {
+        $num_field_count++;
+        $set_field_ids[] = $field_id;
+      }
+    }
+
+    /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
+    $type = HH_FIXME::dynamicCastForMissingMember($this)->_type;
+
+    $correct_field_set = $type is nonnull && C\contains($set_field_ids, $type);
+
+    return tuple($correct_field_set, $num_field_count);
+  }
+
+  final public function __sleep()[]: vec<string> {
+    try {
+      HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
+        ()[defaults] ==> {
+          if (
+            $this is IThriftStrictUnion<_> || $this is IThriftProtectedUnion<_>
+          ) {
+            return;
+          }
+
+          if (!JustKnobs::eval('thrift/hack:log_union_php_serialization')) {
+            return;
+          }
+
+          list($correct_field_set, $num_field_count) = $this->getFieldInfo();
+          signal_log_in_psp(
+            SignalDynamicLoggerDataset::THRIFT_SIGNAL_DYNAMIC_LOGGER,
+            SignalDynamicLoggerProject::THRIFT_UNION_PHP_SERIALIZATION,
+            nameof static,
+            Str\format(
+              "CorrectFieldSet: %s, Fields: %d",
+              $correct_field_set ? "true" : "false",
+              $num_field_count,
+            ),
+          );
+        },
+        'Operational logging of class and field counts',
+      );
+    // @lint-ignore EMPTY_CATCH
+    } catch (Exception $_e) {
+    }
+
+    $all_props = vec[];
+    foreach (HH\object_prop_array($this) as $prop_name => $_) {
+      $all_props[] = $prop_name as string;
+    }
+    return $all_props;
+  }
 }

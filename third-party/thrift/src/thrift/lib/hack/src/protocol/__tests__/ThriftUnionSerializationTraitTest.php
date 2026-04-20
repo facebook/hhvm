@@ -16,6 +16,13 @@
  *
  */
 
+// Test helper: extends a thrift union with an extra property to verify
+// __sleep preserves subclass fields during PHP serialization.
+final class ThriftUnionSerializationTraitTestExtendedUnion
+  extends SerializerTestUnion {
+  public string $extraField = '';
+}
+
 <<Oncalls('thrift')>>
 final class ThriftUnionSerializationTraitTest extends WWWTest {
 
@@ -113,5 +120,101 @@ final class ThriftUnionSerializationTraitTest extends WWWTest {
       ),
     )
       ->toThrow(TProtocolException::class, 'Union field already set');
+  }
+
+  public static function providePhpSerializeRoundTrip(): dict<string, shape(
+    'union' => SerializerTestUnion,
+    'expected_type' => SerializerTestUnionEnum,
+  )> {
+    return dict[
+      'int_value' => shape(
+        'union' => SerializerTestUnion::fromShape(shape('int_value' => 42)),
+        'expected_type' => SerializerTestUnionEnum::int_value,
+      ),
+      'str_value' => shape(
+        'union' =>
+          SerializerTestUnion::fromShape(shape('str_value' => 'hello')),
+        'expected_type' => SerializerTestUnionEnum::str_value,
+      ),
+      'list_of_strings' => shape(
+        'union' => SerializerTestUnion::fromShape(
+          shape('list_of_strings' => vec['a', 'b', 'c']),
+        ),
+        'expected_type' => SerializerTestUnionEnum::list_of_strings,
+      ),
+      'struct_value' => shape(
+        'union' => SerializerTestUnion::fromShape(shape(
+          'test_struct' =>
+            CompactTestStructSmall::fromShape(shape('ints' => vec[1, 2, 3])),
+        )),
+        'expected_type' => SerializerTestUnionEnum::test_struct,
+      ),
+    ];
+  }
+
+  <<DataProvider('providePhpSerializeRoundTrip')>>
+  public function testPhpSerializeDeserializeRoundTrip(
+    SerializerTestUnion $union,
+    SerializerTestUnionEnum $expected_type,
+  ): void {
+    // @lint-ignore DEPRECATED_FUNCTION15
+    $serialized = PHP\serialize($union);
+    // @lint-ignore DEPRECATED_FUNCTION16
+    $deserialized = PHP\unserialize($serialized);
+
+    expect($deserialized)->toBeInstanceOf(SerializerTestUnion::class);
+    $deserialized as SerializerTestUnion;
+    expect($deserialized->getType())->toEqual($expected_type);
+
+    // Verify the value round-trips by re-serializing via Thrift
+    expect(JSONThriftSerializer::serialize($deserialized))->toEqual(
+      JSONThriftSerializer::serialize($union),
+    );
+  }
+
+  public function testPhpSerializeDeserializeStrictUnion(): void {
+    $union = SerializerTestStrictUnion::fromShape(shape('int_value' => 99));
+
+    // @lint-ignore DEPRECATED_FUNCTION15
+    $serialized = PHP\serialize($union);
+    // @lint-ignore DEPRECATED_FUNCTION16
+    $deserialized = PHP\unserialize($serialized);
+
+    expect($deserialized)->toBeInstanceOf(SerializerTestStrictUnion::class);
+    $deserialized as SerializerTestStrictUnion;
+    expect($deserialized->getType())->toEqual(
+      SerializerTestStrictUnionEnum::int_value,
+    );
+    expect($deserialized->get_int_value())->toEqual(99);
+  }
+
+  public function testPhpSerializeDeserializeEmptyUnion(): void {
+    $union = SerializerTestUnion::withDefaultValues();
+
+    // @lint-ignore DEPRECATED_FUNCTION15
+    $serialized = PHP\serialize($union);
+    // @lint-ignore DEPRECATED_FUNCTION16
+    $deserialized = PHP\unserialize($serialized);
+
+    expect($deserialized)->toBeInstanceOf(SerializerTestUnion::class);
+    $deserialized as SerializerTestUnion;
+    expect($deserialized->getType())->toEqual(SerializerTestUnionEnum::_EMPTY_);
+  }
+
+  public function testPhpSerializeDeserializeExtendedUnion(): void {
+    $union = new ThriftUnionSerializationTraitTestExtendedUnion(42);
+    $union->extraField = 'extra_data';
+
+    // @lint-ignore DEPRECATED_FUNCTION15
+    $serialized = PHP\serialize($union);
+    // @lint-ignore DEPRECATED_FUNCTION16
+    $deserialized = PHP\unserialize($serialized);
+
+    expect($deserialized)->toBeInstanceOf(
+      ThriftUnionSerializationTraitTestExtendedUnion::class,
+    );
+    $deserialized as ThriftUnionSerializationTraitTestExtendedUnion;
+    expect($deserialized->get_int_value())->toEqual(42);
+    expect($deserialized->extraField)->toEqual('extra_data');
   }
 }

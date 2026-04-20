@@ -19,52 +19,11 @@
 #include <memory>
 #include <string>
 
-#include <fmt/format.h>
-
-#include <thrift/compiler/ast/t_enum.h>
-#include <thrift/compiler/ast/t_function.h>
-#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_program.h>
-#include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/parse/parse_ast.h>
 #include <thrift/compiler/sema/sema_context.h>
 
-#include <thrift/compiler/test/parser_test_helpers-inl.h>
-
-/**
- * Helper function to instantiate fake t_functions of the form:
- * f = create_fake_function<type(param, ...)>("function_name")
- */
-template <typename T>
-std::unique_ptr<t_function> create_fake_function(
-    std::string name, t_program* program = nullptr) {
-  using signature = func_signature<T>;
-  std::unique_ptr<t_paramlist> args(new t_paramlist(program));
-
-  std::size_t index = 0;
-  for (auto& arg : signature::args_types()) {
-    args->create_field(arg.release(), fmt::format("arg_{}", index++));
-  }
-
-  return std::make_unique<t_function>(
-      signature::return_type().release(), std::move(name), std::move(args));
-}
-
-/**
- * Helper function to instantiate fake t_services
- */
-inline std::unique_ptr<t_service> create_fake_service(
-    std::string name, t_program* program = nullptr) {
-  return std::make_unique<t_service>(program, std::move(name));
-}
-
-/**
- * Helper function to instantiate fake t_enums
- */
-inline std::unique_ptr<t_enum> create_fake_enum(
-    std::string name, t_program* program = nullptr) {
-  return std::make_unique<t_enum>(program, std::move(name));
-}
+namespace apache::thrift::compiler {
 
 /**
  * Helper function to parse thrift content to t_program
@@ -74,3 +33,5 @@ std::shared_ptr<t_program> dedent_and_parse_to_program(
     std::string source,
     const parsing_params& params,
     sema_params sparams);
+
+} // namespace apache::thrift::compiler

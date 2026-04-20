@@ -24,6 +24,8 @@
 #include <folly/testing/TestUtil.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 
+namespace apache::thrift::compiler {
+
 std::shared_ptr<t_program> dedent_and_parse_to_program(
     source_manager& sm,
     std::string source,
@@ -37,3 +39,5 @@ std::shared_ptr<t_program> dedent_and_parse_to_program(
       apache::thrift::compiler::parse_ast(sm, diags, path, params, &sparams));
   return {bundle->root_program(), [bundle, temp_file](auto) {}};
 }
+
+} // namespace apache::thrift::compiler

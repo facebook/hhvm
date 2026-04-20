@@ -334,6 +334,18 @@ build_cxx_bridge(
  EXTRA_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.cpp"
 )
 
+set(HH_FANOUT_EXECUTABLE "${HACK_BUILD_ROOT}/target/hh_fanout_oss/${PROFILE}/hh_fanout")
+add_custom_command(
+  OUTPUT ${HH_FANOUT_EXECUTABLE}
+  COMMAND
+   . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+    ${INVOKE_CARGO} hh_fanout_oss hh_fanout_oss --exe
+  DEPENDS opam_setup rustc cargo
+  COMMENT "Building hh_fanout"
+)
+
+add_custom_target(hh_fanout DEPENDS ${HH_FANOUT_EXECUTABLE})
+
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)
   add_dependencies(hack_dune_debug lz4)
@@ -363,5 +375,9 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hackfmt
   COMPONENT dev)
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hh_parse
+  DESTINATION bin
+  COMPONENT dev)
+
+install(PROGRAMS ${HH_FANOUT_EXECUTABLE}
   DESTINATION bin
   COMPONENT dev)

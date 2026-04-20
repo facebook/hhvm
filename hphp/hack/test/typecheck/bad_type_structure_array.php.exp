@@ -44,7 +44,7 @@ File "bad_type_structure_array.php", line 36, characters 3-22:
   TypeStructureKind
 ERROR: File "bad_type_structure_array.php", line 10, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-819:
+  File "typestructure.hhi", line 59, characters 31-829:
   The shape is defined here
 ERROR: File "bad_type_structure_array.php", line 11, characters 15-24:
 The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
@@ -56,7 +56,7 @@ The field `elem_types` may not be present in this shape. Use `??` or `Shapes::id
   This is where the field was declared as optional.
 ERROR: File "bad_type_structure_array.php", line 13, characters 15-22:
 This shape doesn't have a field `fields` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-819:
+  File "typestructure.hhi", line 59, characters 31-829:
   The shape is defined here
 ERROR: File "bad_type_structure_array.php", line 14, characters 15-27:
 The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
@@ -68,7 +68,7 @@ The field `return_type` may not be present in this shape. Use `??` or `Shapes::i
   This is where the field was declared as optional.
 ERROR: File "bad_type_structure_array.php", line 28, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-819:
+  File "typestructure.hhi", line 59, characters 31-829:
   The shape is defined here
 ERROR: File "bad_type_structure_array.php", line 29, characters 15-24:
 The field `nullable` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])
@@ -80,7 +80,7 @@ The field `elem_types` may not be present in this shape. Use `??` or `Shapes::id
   This is where the field was declared as optional.
 ERROR: File "bad_type_structure_array.php", line 31, characters 15-22:
 This shape doesn't have a field `fields` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-819:
+  File "typestructure.hhi", line 59, characters 31-829:
   The shape is defined here
 ERROR: File "bad_type_structure_array.php", line 32, characters 15-27:
 The field `param_types` may not be present in this shape. Use `??` or `Shapes::idx()` instead. (Typing[4165])

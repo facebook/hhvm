@@ -4,7 +4,7 @@ Indexing into a value of type `dynamic` (Warn[12040])
   This expression has type `dynamic` because the type of this return is implicitly a like-type due to unenforced class pointer type
 ERROR: File "classname_tyvar.php", line 14, characters 68-78:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 59, characters 31-819:
+  File "typestructure.hhi", line 59, characters 31-829:
   The shape is defined here
 ERROR: File "classname_tyvar.php", line 15, characters 19-45:
 The two arguments to `HH\type_structure_classname()` must be:

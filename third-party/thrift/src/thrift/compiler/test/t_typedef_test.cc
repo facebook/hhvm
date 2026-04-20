@@ -50,9 +50,8 @@ TEST(TypedefTest, bad_true_type) {
   const t_field* first_field = my_struct->get_field_by_id(1);
   ASSERT_NE(first_field, nullptr);
   EXPECT_EQ(first_field->name(), "first");
-  const t_type* first_field_type = first_field->type().get_type();
-  ASSERT_NE(first_field_type, nullptr);
-  EXPECT_NE(first_field_type->get_true_type(), nullptr);
+  ASSERT_TRUE(first_field->type().resolved());
+  EXPECT_NE(first_field->type()->get_true_type(), nullptr);
 
   // Missing type case
   const t_field* second_field = my_struct->get_field_by_id(2);
@@ -183,7 +182,7 @@ TEST(TypedefTest, duva_annotations_are_exposed_through_t_node_accessors) {
   const auto& alias = *typedefs[1];
   EXPECT_EQ(
       t_typedef::get_first_unstructured_annotation(
-          alias.type().get_type(), {"foo"}),
+          &alias.type().deref(), {"foo"}),
       "bar");
 
   const auto& fields = program->structs_and_unions()[0]->fields();

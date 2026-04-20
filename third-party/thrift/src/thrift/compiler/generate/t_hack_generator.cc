@@ -2585,7 +2585,7 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     if (!function->has_void_initial_response()) {
       bidi_tmeta->add_map(
           std::make_unique<t_const_value>("initialResponseType"),
-          type_to_tmeta(function->return_type().get_type()));
+          type_to_tmeta(&function->return_type().deref()));
     } else {
       auto first_response_type = t_const_value::make_map();
       first_response_type->add_map(
@@ -2598,11 +2598,11 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     }
     bidi_tmeta->add_map(
         std::make_unique<t_const_value>("streamElemType"),
-        type_to_tmeta(stream->elem_type().get_type()));
+        type_to_tmeta(&stream->elem_type().deref()));
 
     bidi_tmeta->add_map(
         std::make_unique<t_const_value>("sinkElemType"),
-        type_to_tmeta(sink->elem_type().get_type()));
+        type_to_tmeta(&sink->elem_type().deref()));
     return_tmeta = t_const_value::make_map();
     return_tmeta->add_map(
         std::make_unique<t_const_value>("t_bidi"), std::move(bidi_tmeta));
@@ -5205,10 +5205,9 @@ std::string t_hack_generator::render_service_metadata_response(
     auto next = queue.front();
     queue.pop();
 
-    if (next == nullptr || visited.find(next) != visited.end()) {
+    if (next == nullptr || !visited.insert(next).second) {
       continue;
     }
-    visited.emplace(next);
 
     if (const t_type* type = dynamic_cast<const t_type*>(next)) {
       next = type->get_true_type();
@@ -5263,9 +5262,9 @@ std::string t_hack_generator::render_service_metadata_response(
       if (fun->is_bidirectional_stream()) {
         const t_sink* sink = fun->sink();
         const t_stream* stream = fun->stream();
-        queue.push(fun->return_type().get_type());
-        queue.push(sink->elem_type().get_type());
-        queue.push(stream->elem_type().get_type());
+        queue.push(&fun->return_type().deref());
+        queue.push(&sink->elem_type().deref());
+        queue.push(&stream->elem_type().deref());
       } else if (const t_sink* sink = fun->sink()) {
         queue.push(&sink->elem_type().deref());
         queue.push(&fun->return_type().deref());
@@ -6789,7 +6788,7 @@ void t_hack_generator::generate_php_bidi_function_helpers(
 
   generate_php_function_result_helpers(
       function,
-      function->return_type().get_type(),
+      &function->return_type().deref(),
       function->exceptions(),
       prefix,
       "_FirstResponse",
@@ -6798,7 +6797,7 @@ void t_hack_generator::generate_php_bidi_function_helpers(
   const t_sink* sink = function->sink();
   generate_php_function_result_helpers(
       function,
-      sink->elem_type().get_type(),
+      &sink->elem_type().deref(),
       sink->sink_exceptions(),
       prefix,
       "_SinkPayload",
@@ -6807,7 +6806,7 @@ void t_hack_generator::generate_php_bidi_function_helpers(
   const t_stream* stream = function->stream();
   generate_php_function_result_helpers(
       function,
-      stream->elem_type().get_type(),
+      &stream->elem_type().deref(),
       stream->exceptions(),
       prefix,
       "_StreamResponse",
@@ -6899,16 +6898,16 @@ void t_hack_generator::generate_php_docstring(
   }
   if (tfunction->is_bidirectional_stream()) {
     if (!tfunction->has_void_initial_response()) {
-      out << thrift_type_name(tfunction->return_type().get_type()) << ", ";
+      out << thrift_type_name(&tfunction->return_type().deref()) << ", ";
     } else {
       out << "void, ";
     }
     const t_sink* sink = tfunction->sink();
-    out << "sink<" << thrift_type_name(sink->elem_type().get_type());
+    out << "sink<" << thrift_type_name(&sink->elem_type().deref());
     generate_php_docstring_stream_exceptions(out, sink->sink_exceptions());
     out << ">, ";
     const t_stream* stream = tfunction->stream();
-    out << "stream<" << thrift_type_name(stream->elem_type().get_type());
+    out << "stream<" << thrift_type_name(&stream->elem_type().deref());
     generate_php_docstring_stream_exceptions(out, stream->exceptions());
     out << ">\n";
   } else if (const t_stream* stream = tfunction->stream()) {
@@ -7369,8 +7368,8 @@ std::string t_hack_generator::get_bidi_function_return_typehint(
     const t_function* function, bool is_interface, bool is_client) {
   const t_stream* stream = function->stream();
   const t_sink* sink = function->sink();
-  std::string return_typehint = type_to_typehint(sink->elem_type().get_type()) +
-      ", " + type_to_typehint(stream->elem_type().get_type()) + ">";
+  std::string return_typehint = type_to_typehint(&sink->elem_type().deref()) +
+      ", " + type_to_typehint(&stream->elem_type().deref()) + ">";
 
   std::string name = "\\IResponseAndBidirectionalStream<";
   if (!is_interface) {
@@ -7384,7 +7383,7 @@ std::string t_hack_generator::get_bidi_function_return_typehint(
     return name + "null, " + return_typehint;
   }
   auto first_response_type_hint =
-      type_to_typehint(function->return_type().get_type());
+      type_to_typehint(&function->return_type().deref());
   return name + first_response_type_hint + ", " + return_typehint;
 }
 /**

@@ -361,11 +361,6 @@ class t_type_ref final {
    * exception.
    */
   const t_type& deref_or_throw() const;
-
- public:
-  // TODO(T244601847): Remove get_type() once usages are removed and replaced
-  // with empty/deref.
-  const t_type* get_type() const { return type_; }
 };
 
 bool is_scalar(const t_type& type);

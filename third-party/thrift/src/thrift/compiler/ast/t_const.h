@@ -60,7 +60,9 @@ class t_const final : public t_named {
 
   ~t_const() override;
 
-  const t_type* type() const { return type_ref_.get_type(); }
+  const t_type* type() const {
+    return type_ref_.resolved() ? &type_ref_.deref() : nullptr;
+  }
 
   t_type_ref type_ref() const { return type_ref_; }
   t_type_ref& type_ref() { return type_ref_; }

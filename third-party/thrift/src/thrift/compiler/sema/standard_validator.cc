@@ -244,7 +244,7 @@ class adapter_or_wrapper_checker {
     if (!field.type().resolved()) {
       return;
     }
-    auto type = field.type().get_type();
+    const t_type* type = &field.type().deref();
 
     bool structured_annotation_on_field =
         field.has_structured_annotation(structured_adapter_annotation);
@@ -280,9 +280,9 @@ class adapter_or_wrapper_checker {
       if (!field->type().resolved()) {
         return;
       }
-      type = field->type().get_type();
+      type = &field->type().deref();
     } else if (const auto* typdef = dynamic_cast<const t_typedef*>(&node)) {
-      type = typdef->type().get_type();
+      type = &typdef->type().deref();
     } else {
       return;
     }
@@ -295,12 +295,12 @@ class adapter_or_wrapper_checker {
         has_wrapper = inner_typedf->has_structured_annotation(
             structured_wrapper_annotation);
         typedef_name = inner_typedf->name();
-        type = inner_typedf->type().get_type();
+        type = &inner_typedf->type().deref();
       } else if (type->is<t_container>()) {
         if (const auto* map = type->try_as<t_map>()) {
           type = &map->val_type().deref();
         } else if (const auto* list = type->try_as<t_list>()) {
-          type = list->elem_type().get_type();
+          type = &list->elem_type().deref();
         } else {
           break;
         }
@@ -1247,7 +1247,7 @@ void validate_exception_message_annotation(
   }
   if (field) {
     ctx.check(
-        field->type().get_type()->is_string_or_binary(),
+        field->type()->is_string_or_binary(),
         "member specified as exception 'message' should be of type "
         "STRING, '{}' in '{}' is not",
         field->name(),
@@ -1298,7 +1298,7 @@ void validate_cpp_deprecated_terse_write_annotation(
   if (gen::cpp::find_ref_type(field) == gen::cpp::reference_type::unique) {
     return;
   }
-  const t_type* type = field.type().get_type()->get_true_type();
+  const t_type* type = field.type()->get_true_type();
   if (type->is<t_structured>()) {
     ctx.error(
         field,
@@ -1719,8 +1719,8 @@ bool owns_annotations(const t_type* type) {
   }
   return false;
 }
-bool owns_annotations(t_type_ref type) {
-  return owns_annotations(type.get_type());
+bool owns_annotations(const t_type_ref& type) {
+  return type.resolved() ? owns_annotations(&type.deref()) : false;
 }
 
 void validate_custom_cpp_type_annotations(
@@ -1751,8 +1751,7 @@ void validate_custom_cpp_type_annotations(
     }
     std::set<std::string> names{
         "cpp.type", "cpp2.type", "cpp.template", "cpp2.template"};
-    for (const auto& [k, v] :
-         node.type().get_type()->unstructured_annotations()) {
+    for (const auto& [k, v] : node.type()->unstructured_annotations()) {
       if (names.count(k) && v.src_range.begin != source_location{}) {
         return true;
       }

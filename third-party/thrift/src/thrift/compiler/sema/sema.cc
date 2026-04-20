@@ -361,8 +361,7 @@ void match_type_with_const_value(
           // TODO(sadroeck) - Deprecate this behavior
           map_key->convert_identifier_to_string();
         }
-        match_type_with_const_value(
-            ctx, mctx, field->type().get_type(), map_val);
+        match_type_with_const_value(ctx, mctx, &field->type().deref(), map_val);
       }
     }
   } else if (const t_enum* enm = type->try_as<t_enum>()) {
@@ -487,7 +486,7 @@ void match_field_type_with_default_value(
   maybe_match_type_with_const_value(
       ctx,
       mctx,
-      field_node.type().get_type(),
+      field_node.type().resolved() ? &field_node.type().deref() : nullptr,
       const_cast<t_const_value*>(field_node.default_value()));
 }
 

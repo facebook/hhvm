@@ -74,14 +74,13 @@ class structure_annotations {
     std::set<std::string> to_add;
     if (!type_ref.resolve() || type_ref->is<t_primitive_type>() ||
         type_ref->is<t_container>()) {
-      auto type = type_ref.get_type();
       std::vector<t_annotation> to_remove;
       bool has_cpp_type = node.has_structured_annotation(kCppTypeUri);
-      for (const auto& [name, data] : type->unstructured_annotations()) {
+      for (const auto& [name, data] : type_ref->unstructured_annotations()) {
         // cpp type
         if (name == "cpp.template" || name == "cpp2.template") {
           to_remove.emplace_back(name, data);
-          if (is_container(*type) && !std::exchange(has_cpp_type, true)) {
+          if (is_container(*type_ref) && !std::exchange(has_cpp_type, true)) {
             to_add.insert(
                 fmt::format("@cpp.Type{{template = \"{}\"}}", data.value));
             fm_.add_include("thrift/annotation/cpp.thrift");
@@ -118,8 +117,8 @@ class structure_annotations {
       }
 
       if (!to_remove.empty() &&
-          to_remove.size() == type->unstructured_annotations().size()) {
-        fm_.remove_all_annotations(*type);
+          to_remove.size() == type_ref->unstructured_annotations().size()) {
+        fm_.remove_all_annotations(*type_ref);
       } else {
         for (const auto& annot : to_remove) {
           fm_.remove(annot);
@@ -145,8 +144,7 @@ class structure_annotations {
     if (name == "cpp.template" || name == "cpp2.template") {
       to_remove.emplace_back(name, data);
       if (is_typedef &&
-          is_container(
-              *static_cast<const t_typedef&>(node).type().get_type()) &&
+          is_container(*static_cast<const t_typedef&>(node).type()) &&
           !std::exchange(has_cpp_type, true)) {
         to_add.insert(
             fmt::format("@cpp.Type{{template = \"{}\"}}", data.value));

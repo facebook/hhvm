@@ -54,8 +54,9 @@ class t_typedef final : public t_type {
       if (pred(type)) {
         return type;
       }
-      if (const t_typedef* as_typedef = type->try_as<t_typedef>()) {
-        type = as_typedef->type().get_type();
+      if (const t_typedef* as_typedef = type->try_as<t_typedef>();
+          as_typedef != nullptr && as_typedef->type().resolved()) {
+        type = &as_typedef->type().deref();
       } else {
         return nullptr;
       }

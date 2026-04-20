@@ -551,7 +551,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
     }
     if (!func.has_void_initial_response() ||
         (!func.sink_or_stream() && !func.interaction())) {
-      const t_type* type = func.return_type().get_type();
+      const t_type* type = &func.return_type().deref();
       func_schema->add_map(val("returnType"), gen_type(*type, node.program()));
       // Double write of return type for backwards compatibility (T161963504).
       if (opts_.double_writes) {
@@ -793,14 +793,14 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
             key.kind() == t_const_value::CV_STRING &&
             "A struct only has named fields");
         const auto* field = strct.get_field_by_name(key.get_string());
-        return protocol_value_builder{*field->type().get_type()};
+        return protocol_value_builder{*field->type()};
       },
       [&](const t_union& union_) {
         assert(
             key.kind() == t_const_value::CV_STRING &&
             "A union only has named fields");
         const auto* field = union_.get_field_by_name(key.get_string());
-        return protocol_value_builder{*field->type().get_type()};
+        return protocol_value_builder{*field->type()};
       },
       [&](auto&&) -> protocol_value_builder {
         throw std::logic_error(

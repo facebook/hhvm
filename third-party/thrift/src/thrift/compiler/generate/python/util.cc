@@ -57,7 +57,7 @@ bool is_type_iobuf(const t_field& field) {
     }
   }
   // Fall back to type-level check.
-  return is_type_iobuf(field.type().get_type());
+  return is_type_iobuf(&field.type().deref());
 }
 
 bool is_patch_program(const t_program* prog) {
@@ -105,8 +105,7 @@ static void get_needed_includes_by_patch_impl(
       return;
     }
     for (auto& field : asStructured->fields()) {
-      get_needed_includes_by_patch_impl(
-          root, *field.type().get_type(), seen, result);
+      get_needed_includes_by_patch_impl(root, *field.type(), seen, result);
     }
   }
 }
@@ -140,11 +139,11 @@ bool type_contains_patch(const t_type* type) {
   }
 
   if (const auto* set = type->try_as<t_set>()) {
-    return type_contains_patch(set->elem_type().get_type());
+    return type_contains_patch(&set->elem_type().deref());
   }
 
   if (const auto* list = type->try_as<t_list>()) {
-    return type_contains_patch(list->elem_type().get_type());
+    return type_contains_patch(&list->elem_type().deref());
   }
 
   return is_patch_program(type->program());

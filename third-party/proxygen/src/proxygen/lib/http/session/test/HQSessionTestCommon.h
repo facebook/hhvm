@@ -58,7 +58,10 @@ size_t generateStreamPreface(folly::IOBufQueue& writeBuf,
                              proxygen::hq::UnidirectionalStreamType type);
 
 folly::Optional<std::pair<proxygen::hq::UnidirectionalStreamType, size_t>>
-parseStreamPreface(folly::io::Cursor& cursor, std::string alpn);
+parseUniStreamPreface(folly::io::Cursor& cursor, std::string alpn);
+
+folly::Optional<std::pair<proxygen::hq::BidirectionalStreamType, size_t>>
+parseBidiStreamPreface(folly::io::Cursor& cursor, std::string alpn);
 
 void parseReadData(proxygen::hq::HQUnidirectionalCodec* codec,
                    folly::IOBufQueue& readBuf,
@@ -236,22 +239,38 @@ class HQSessionTest
 
   void readCallback(quic::StreamId id,
                     std::unique_ptr<folly::IOBuf> buf,
-                    bool) override {
+                    bool eof) override {
+    CHECK(buf);
+    if (wtStreams_.streamExists(id)) {
+      wtStreams_.appendData(id, std::move(buf), eof);
+      return;
+    }
+
+    folly::io::Cursor cursor(buf.get());
+    auto preface = parseBidiStreamPreface(cursor, getProtocolString());
+    if (preface &&
+        preface->first == proxygen::hq::BidirectionalStreamType::WEBTRANSPORT) {
+      buf->trimStart(preface->second);
+      wtStreams_.appendData(id, std::move(buf), eof);
+    }
   }
 
   void unidirectionalReadCallback(quic::StreamId id,
                                   std::unique_ptr<folly::IOBuf> buf,
-                                  bool) override {
+                                  bool eof) override {
     // check for control streams
-    const bool done = buf->empty() || wtStreams_.contains(id);
-    if (done) {
+    if (buf->empty()) {
+      return;
+    }
+    if (wtStreams_.streamExists(id)) {
+      wtStreams_.appendData(id, std::move(buf), eof);
       return;
     }
 
     auto it = controlStreams_.find(id);
     if (it == controlStreams_.end()) {
       folly::io::Cursor cursor(buf.get());
-      auto preface = parseStreamPreface(cursor, getProtocolString());
+      auto preface = parseUniStreamPreface(cursor, getProtocolString());
       CHECK(preface) << "Preface can not be parsed protocolString="
                      << getProtocolString();
       switch (preface->first) {
@@ -278,7 +297,8 @@ class HQSessionTest
         }
           return;
         case proxygen::hq::UnidirectionalStreamType::WEBTRANSPORT:
-          wtStreams_.insert(id);
+          buf->trimStart(preface->second);
+          wtStreams_.appendData(id, std::move(buf), eof);
           return;
         default:
           CHECK(false) << "Unknown stream preface=" << preface->first;
@@ -426,7 +446,6 @@ class HQSessionTest
   proxygen::QPACKCodec qpackCodec_;
   std::map<quic::StreamId, proxygen::hq::UnidirectionalStreamType>
       controlStreams_;
-  std::unordered_set<quic::StreamId> wtStreams_;
   // Ingress Control Stream
   std::unique_ptr<proxygen::hq::HQControlCodec> ingressControlCodec_;
   folly::IOBufQueue ingressControlBuf_{folly::IOBufQueue::cacheChainLength()};
@@ -444,4 +463,37 @@ class HQSessionTest
   std::unique_ptr<proxygen::hq::HQControlCodec> egressControlCodec_;
   folly::F14FastMap<quic::StreamId, proxygen::hq::PushId> pushes_;
   uint64_t onTransactionSymmetricCounter{0};
+
+  struct WtStreams {
+    // checks if stream exists
+    bool streamExists(quic::StreamId id) const noexcept;
+
+    // creates a new stream
+    void addStream(quic::StreamId id) noexcept;
+
+    // loops evb until a webtransport stream is created
+    void waitForWtStream(folly::EventBase& evb, quic::StreamId id) noexcept;
+
+    // loops evb until *new* data is received on a stream
+    void waitForWtStreamData(folly::EventBase& evb, quic::StreamId id) noexcept;
+
+    // appends data to a wt stream (creates stream if doesn't already exist)
+    void appendData(quic::StreamId id,
+                    std::unique_ptr<folly::IOBuf> buf,
+                    bool eof) noexcept;
+
+    // moves all data in a wt stream
+    struct BufferedData {
+      std::unique_ptr<folly::IOBuf> data;
+      bool eom;
+    };
+    BufferedData moveData(quic::StreamId id) noexcept;
+
+   private:
+    struct Ctx {
+      folly::IOBufQueue bufferedData{folly::IOBufQueue::cacheChainLength()};
+      bool eom{false};
+    };
+    std::unordered_map<quic::StreamId, Ctx> streams_;
+  } wtStreams_;
 };

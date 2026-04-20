@@ -89,8 +89,26 @@ std::string paramsToTestName(const testing::TestParamInfo<TestParams>& info) {
   return folly::join("", paramsV);
 }
 
-folly::Optional<std::pair<UnidirectionalStreamType, size_t>> parseStreamPreface(
-    folly::io::Cursor& cursor, std::string alpn) {
+folly::Optional<std::pair<BidirectionalStreamType, size_t>>
+parseBidiStreamPreface(folly::io::Cursor& cursor, std::string alpn) {
+  auto res = quic::follyutils::decodeQuicInteger(cursor);
+  if (!res) {
+    return folly::none;
+  }
+  auto prefaceEnum = BidirectionalStreamType(res->first);
+  switch (prefaceEnum) {
+    case proxygen::hq::BidirectionalStreamType::REQUEST:
+    case proxygen::hq::BidirectionalStreamType::WEBTRANSPORT:
+      return alpn == kH3 ? folly::make_optional(
+                               std::make_pair(prefaceEnum, res->second))
+                         : folly::none;
+    default:
+      return folly::none;
+  }
+}
+
+folly::Optional<std::pair<UnidirectionalStreamType, size_t>>
+parseUniStreamPreface(folly::io::Cursor& cursor, std::string alpn) {
   auto res = quic::follyutils::decodeQuicInteger(cursor);
   if (!res) {
     return folly::none;
@@ -106,9 +124,8 @@ folly::Optional<std::pair<UnidirectionalStreamType, size_t>> parseStreamPreface(
                                std::make_pair(prefaceEnum, res->second))
                          : folly::none;
     default:
-      break;
+      return folly::none;
   }
-  return folly::none;
 }
 
 void parseReadData(HQUnidirectionalCodec* codec,
@@ -130,4 +147,53 @@ void createControlStream(quic::MockQuicSocketDriver* socketDriver,
     socketDriver->addReadEvent(
         id, writeBuf.splitAtMost(1), std::chrono::milliseconds(0));
   }
+}
+
+bool HQSessionTest::WtStreams::streamExists(quic::StreamId id) const noexcept {
+  return streams_.contains(id);
+}
+
+void HQSessionTest::WtStreams::addStream(quic::StreamId id) noexcept {
+  CHECK(!streamExists(id));
+  streams_.emplace(id, Ctx{});
+}
+
+// loops evb until a webtransport stream is created
+void HQSessionTest::WtStreams::waitForWtStream(folly::EventBase& evb,
+                                               quic::StreamId id) noexcept {
+  while (!streamExists(id)) {
+    evb.loopOnce();
+  }
+}
+
+// loops evb until *new* data is received by a stream
+void HQSessionTest::WtStreams::waitForWtStreamData(folly::EventBase& evb,
+                                                   quic::StreamId id) noexcept {
+  CHECK(streamExists(id));
+  auto& stream = streams_[id];
+  auto computeBytesFn = [&stream]() {
+    return stream.bufferedData.chainLength() + stream.eom;
+  };
+  const uint64_t curBytes = computeBytesFn();
+  while (computeBytesFn() == curBytes) {
+    evb.loopOnce();
+  }
+}
+
+void HQSessionTest::WtStreams::appendData(quic::StreamId id,
+                                          std::unique_ptr<folly::IOBuf> buf,
+                                          bool eof) noexcept {
+  if (!streamExists(id)) {
+    addStream(id);
+  }
+  auto& stream = streams_[id];
+  stream.bufferedData.append(std::move(buf));
+  stream.eom = eof;
+}
+
+auto HQSessionTest::WtStreams::moveData(quic::StreamId id) noexcept
+    -> BufferedData {
+  CHECK(streamExists(id));
+  auto& stream = streams_[id];
+  return {stream.bufferedData.move(), stream.eom};
 }

@@ -315,7 +315,7 @@ void cgEqFuncId(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  #ifdef USE_LOWPTR
+  #ifdef USE_PACKEDPTR
     assertx(Cfg::Repo::Authoritative);
     v << cmpq{func, v.cns(funcPtr), sf};
   #else

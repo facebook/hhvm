@@ -121,12 +121,12 @@ const StaticString s_Traversable("HH\\Traversable");
 
 // HHBBC consumes a LOT of memory, so we keep representation types small.
 static_assert(CheckSize<php::Block, 24>(), "");
-static_assert(CheckSize<php::Local, use_lowptr ? 12 : 16>(), "");
-static_assert(CheckSize<php::Param, use_lowptr ? 56: 88>(), "");
-static_assert(CheckSize<php::Func, use_lowptr ? 176: 224>(), "");
+static_assert(CheckSize<php::Local, use_packedptr ? 12 : 16>(), "");
+static_assert(CheckSize<php::Param, use_packedptr ? 56: 88>(), "");
+static_assert(CheckSize<php::Func, use_packedptr ? 176: 224>(), "");
 
 // Likewise, we also keep the bytecode and immediate types small.
-static_assert(CheckSize<Bytecode, use_lowptr ? 32 : 40>(), "");
+static_assert(CheckSize<Bytecode, use_packedptr ? 32 : 40>(), "");
 static_assert(CheckSize<MKey, 16>(), "");
 static_assert(CheckSize<IterArgs, 8>(), "");
 static_assert(CheckSize<FCallArgs, 8>(), "");

@@ -125,7 +125,7 @@ struct c_Closure final : ObjectData {
   }
   void setThis(ObjectData* od) { hdr()->ctx_this = od; }
   bool hasThis() const {
-    if (use_lowptr) return !is_low_mem(hdr()->ctx);
+    if (use_packedptr) return !is_low_mem(hdr()->ctx);
     return
       getInvokeFunc() && getInvokeFunc()->cls() && !getInvokeFunc()->isStatic();
   }
@@ -138,7 +138,7 @@ struct c_Closure final : ObjectData {
     hdr()->ctx_class = cls;
   }
   bool hasClass() const {
-    if (use_lowptr) return hdr()->ctx && is_low_mem(hdr()->ctx);
+    if (use_packedptr) return hdr()->ctx && is_low_mem(hdr()->ctx);
     return
       getInvokeFunc() && getInvokeFunc()->cls() && getInvokeFunc()->isStatic();
   }

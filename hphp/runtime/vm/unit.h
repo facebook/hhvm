@@ -631,7 +631,7 @@ private:
   const Extension* m_extension{nullptr};
 };
 
-static_assert(CheckSize<Unit, use_lowptr ? 224 : 232>(), "");
+static_assert(CheckSize<Unit, use_packedptr ? 224 : 232>(), "");
 
 struct UnitExtended : Unit {
   friend struct Unit;
@@ -655,7 +655,7 @@ struct UnitExtended : Unit {
   std::atomic<Unit*> m_nextCachedByHash{nullptr};
 };
 
-static_assert(CheckSize<UnitExtended, use_lowptr ? 280 : 288>(), "");
+static_assert(CheckSize<UnitExtended, use_packedptr ? 280 : 288>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

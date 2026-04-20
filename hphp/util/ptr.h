@@ -21,13 +21,7 @@
 
 namespace HPHP {
 
-#ifdef USE_LOWPTR
-constexpr bool use_lowptr = true;
-#else
-constexpr bool use_lowptr = false;
-#endif
-
-#if defined(USE_PACKEDPTR) && defined(USE_LOWPTR)
+#ifdef USE_PACKEDPTR
 constexpr bool use_packedptr = true;
 #else
 constexpr bool use_packedptr = false;
@@ -53,8 +47,6 @@ using UninitFullPtr = ptrimpl::PtrImpl<T, ptrimpl::Normal, ptrimpl::UInt64, fals
 template <typename T>
 using AtomicFullPtr = ptrimpl::PtrImpl<T, ptrimpl::Atomic, ptrimpl::UInt64>;
 
-#ifdef USE_LOWPTR
-
 #ifdef USE_PACKEDPTR
 
 template <typename T>
@@ -65,19 +57,6 @@ using UninitPackedPtr = ptrimpl::PtrImpl<T, ptrimpl::Normal, ptrimpl::UInt32Pack
 
 template <typename T>
 using AtomicPackedPtr = ptrimpl::PtrImpl<T, ptrimpl::Atomic, ptrimpl::UInt32Packed>;
-
-#else
-
-template <typename T>
-using PackedPtr = SmallPtr<T>;
-
-template <typename T>
-using UninitPackedPtr = UninitSmallPtr<T>;
-
-template <typename T>
-using AtomicPackedPtr = AtomicSmallPtr<T>;
-
-#endif
 
 #else
 

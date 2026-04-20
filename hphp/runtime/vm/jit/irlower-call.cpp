@@ -249,16 +249,11 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
     auto dest = v.makeReg();
     auto const funcEntryOff = safe_cast<int32_t>(Func::funcEntryOff());
     v << loadzlq{callee[funcEntryOff], dest};
-    // We have to use an ifdef instead of `if (use_lowptr)` here due to
-    // funcIdOffset only being defined in non-lowptr mode.
-#ifdef USE_LOWPTR
-    // TFuncs are identified with their func ids in lowptr mode.
+    // We have to use an ifdef instead of `if (use_packedptr)` here due to
+    // funcIdOffset only being defined in non-packedptr mode.
 #ifdef USE_PACKEDPTR
     // Funcs are identified with their PackedPtr representation in packedptr mode.
     v << shrqi{3, callee, r_func_entry_callee_id(), v.makeReg()};
-#else
-    v << copy{callee, r_func_entry_callee_id()};
-#endif
 #else
     v << load{callee[Func::funcIdOffset()], r_func_entry_callee_id()};
 #endif

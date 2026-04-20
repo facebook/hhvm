@@ -114,12 +114,12 @@ struct ConstModifiers {
 
   union {
     uint32_t u_coeffectsData;
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
     UninitPackedPtr<const StringData> u_clsName;
 #endif
   };
 
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
   const StringData* getPointedClsName() const {
     return u_clsName;
   }

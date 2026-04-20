@@ -274,42 +274,30 @@ void cgLdClsFromClsMeth(IRLS& env, const IRInstruction* inst) {
   auto const clsMethDataRef = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  if (use_lowptr) {
-#ifdef USE_LOWPTR
-    static_assert(ClsMethData::clsOffset() == 0, "Class offset must be 0");
-#endif
-    auto const truncated = v.makeReg();
-    v << movtql{clsMethDataRef, truncated};
 #ifdef USE_PACKEDPTR
-    auto const packed = v.makeReg();
-    v << movzlq{truncated, packed};
-    v << lea{baseless(packed * 8 + 0), dst};
+  static_assert(ClsMethData::clsOffset() == 0, "Class offset must be 0");
+  auto const truncated = v.makeReg();
+  v << movtql{clsMethDataRef, truncated};
+  auto const packed = v.makeReg();
+  v << movzlq{truncated, packed};
+  v << lea{baseless(packed * 8 + 0), dst};
 #else
-    v << movzlq{truncated, dst};
+  v << load{clsMethDataRef[ClsMethData::clsOffset()], dst};
 #endif
-  } else {
-    v << load{clsMethDataRef[ClsMethData::clsOffset()], dst};
-  }
 }
 
 void cgLdFuncFromClsMeth(IRLS& env, const IRInstruction* inst) {
   auto const clsMethDataRef = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  if (use_lowptr) {
-#ifdef USE_LOWPTR
-    static_assert(ClsMethData::funcOffset() == 4, "Func offset must be 4");
-#endif
 #ifdef USE_PACKEDPTR
-    auto packed = v.makeReg();
-    v << shrqi{32, clsMethDataRef, packed, v.makeReg()};
-    v << lea{baseless(packed * 8 + 0), dst};
+  static_assert(ClsMethData::funcOffset() == 4, "Func offset must be 4");
+  auto packed = v.makeReg();
+  v << shrqi{32, clsMethDataRef, packed, v.makeReg()};
+  v << lea{baseless(packed * 8 + 0), dst};
 #else
-    v << shrqi{32, clsMethDataRef, dst, v.makeReg()};
+  v << load{clsMethDataRef[ClsMethData::funcOffset()], dst};
 #endif
-  } else {
-    v << load{clsMethDataRef[ClsMethData::funcOffset()], dst};
-  }
 }
 
 void cgNewClsMeth(IRLS& env, const IRInstruction* inst) {

@@ -61,7 +61,7 @@ be done manually with `StringData::Make()` rather than a `bool copy` parameter
 to the mutator function.
 
 Most `StringData`s store their data in space allocated immediately after the
-`StringData`. This layout is required in `USE_LOWPTR`, so `StringData::m_data`
+`StringData`. This layout is required in `USE_PACKEDPTR`, so `StringData::m_data`
 is [conditionally
 defined](https://github.com/facebook/hhvm/blob/e05d2041a598ff655f594c4fec7e5f1708d9466b/hphp/runtime/base/string-data.h#L539-L542).
 For normal builds, `m_data` will usually point right after the `StringData`, but
@@ -137,8 +137,8 @@ unlike `Func*`.
 mechanisms to avoid the work of actually redefining everything in every request
 when possible.
 
-<b id="f2">2:</b> HHVM also has a `USE_LOWPTR` build mode that allocates certain
-data structures, including `Func`s, in the lower 4GiB of address space, allowing
-us to store 32-bit pointers using `HPHP::LowPtr<T>`. However, `LowPtr<T>` is 64
-bits in non-`USE_LOWPTR` builds, and some uses of `FuncId` rely on it being 32
-bits in all build modes.
+<b id="f2">2:</b> HHVM also has a `USE_PACKEDPTR` build mode that allocates
+certain data structures, including `Func`s, in the lower 32GiB of address space,
+allowing us to store 32-bit pointers using `HPHP::PackedPtr<T>`. However,
+`PackedPtr<T>` is 64 bits in non-`USE_PACKEDPTR` builds, and some uses of
+`FuncId` rely on it being 32 bits in all build modes.

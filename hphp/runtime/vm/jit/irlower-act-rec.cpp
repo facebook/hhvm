@@ -93,7 +93,7 @@ void cgConvFuncPrologueFlagsToARFlags(IRLS& env, const IRInstruction* inst) {
   auto const prologueFlagsLow32 = v.makeReg();
   if (func->hasNamedParams()) {
     // HasNamedArguments clashes with the LocalsDecRefd bit, so explicitly
-    // zero if it may exist. 
+    // zero if it may exist.
     int32_t constexpr namedArgMask = ~(1 << PrologueFlags::Flags::HasNamedArguments);
     v << andli{namedArgMask, src, prologueFlagsLow32, v.makeReg()};
     v << shrli{flagsDelta, prologueFlagsLow32, dst, v.makeReg()};
@@ -210,7 +210,7 @@ const Func* funcFromActRecHelper(const ActRec* fp) { return fp->func(); }
 
 void cgLdARFunc(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  if (use_lowptr) {
+  if (use_packedptr) {
     auto const fp = srcLoc(env, inst, 0).reg();
     auto const dst = dstLoc(env, inst, 0).reg();
     emitLdPackedPtr<Func>(v, fp[AROFF(m_funcId)], dst);

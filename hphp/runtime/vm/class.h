@@ -283,7 +283,7 @@ struct Class : AtomicCountable {
     PackedStringPtr name;
     TypedValueAux val;
     const PreClass::Const* preConst;
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
     StringData* pointedClsName;
 #endif
 
@@ -305,7 +305,7 @@ struct Class : AtomicCountable {
     ConstModifierFlags::Kind kind() const { return val.constModifierFlags().kind; }
 
     const StringData* getPointedClsName() const {
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
       return pointedClsName;
 #else
       return val.constModifiers().getPointedClsName();
@@ -313,7 +313,7 @@ struct Class : AtomicCountable {
     }
 
     void setPointedClsName(StringData* pClsName) {
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
       pointedClsName = pClsName;
 #else
       val.constModifiers().setPointedClsName(pClsName);

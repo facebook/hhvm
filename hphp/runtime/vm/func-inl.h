@@ -132,7 +132,7 @@ inline bool Func::validate() const {
 // FuncId manipulation.
 
 inline FuncId Func::getFuncId() const {
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
   assertx(fromFuncId(FuncId{this}) == this);
   return FuncId{this};
 #else

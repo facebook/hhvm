@@ -28,7 +28,7 @@ struct Func;
 struct String;
 
 struct ClsMethData {
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
   using cls_meth_t = ClsMethData;
 #else
   using cls_meth_t = ClsMethData*;
@@ -70,9 +70,9 @@ private:
 };
 
 static_assert(std::is_trivial_v<ClsMethData>);
-static_assert(CheckSize<ClsMethData, use_lowptr ? 8 : 16>(), "");
+static_assert(CheckSize<ClsMethData, use_packedptr ? 8 : 16>(), "");
 
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
 static_assert(ClsMethData::clsOffset() == 0, "Class offset must be 0");
 static_assert(ClsMethData::funcOffset() == 4, "Func offset must be 4");
 #endif

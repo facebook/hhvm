@@ -128,7 +128,7 @@ struct TypeConstraint {
     void init(AnnotType type);
   };
 
-  static_assert(CheckSize<ClassConstraint, use_lowptr ? 12 : 24>(), "");
+  static_assert(CheckSize<ClassConstraint, use_packedptr ? 12 : 24>(), "");
 
   using UnionTypeMask = uint16_t;
   // These are ordered such that the "simplest" ones (in terms of default value)
@@ -188,7 +188,7 @@ struct TypeConstraint {
     static PackedPtr<const UnionClassList> allocObjects(UnionClassList objects);
   };
 
-  static_assert(CheckSize<UnionConstraint, use_lowptr ? 12 : 24>(), "");
+  static_assert(CheckSize<UnionConstraint, use_packedptr ? 12 : 24>(), "");
 
   TypeConstraint();
   TypeConstraint(const StringData* typeName, TypeConstraintFlags flags);
@@ -619,7 +619,7 @@ private:
   void validForPropFail(const Class*, const StringData*) const;
 
 private:
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
 #pragma pack(push, 2)
 #else
 #pragma pack(push, 4)
@@ -687,8 +687,8 @@ struct TypeConstraintHasher {
   }
 };
 
-static_assert(CheckSize<TypeConstraint, use_lowptr ? 16 : 32>(), "");
-static_assert(CheckSize<VMFixedVector<TypeConstraint>, use_lowptr ? 8 : 8>(), "");
+static_assert(CheckSize<TypeConstraint, use_packedptr ? 16 : 32>(), "");
+static_assert(CheckSize<VMFixedVector<TypeConstraint>, use_packedptr ? 8 : 8>(), "");
 
 /// This is an iterator for TypeConstraint - see eachTypeConstraintInUnion().
 struct TcUnionPieceIterator {
@@ -1060,7 +1060,7 @@ struct TypeIntersectionConstraint {
   } m_u;
 };
 
-static_assert(CheckSize<TypeIntersectionConstraint, use_lowptr ? 16 : 32>(), "");
+static_assert(CheckSize<TypeIntersectionConstraint, use_packedptr ? 16 : 32>(), "");
 
 static_assert(
     TypeConstraint::flagsOff() == VMFixedVector<TypeConstraint>::implOff(),

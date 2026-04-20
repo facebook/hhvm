@@ -24,7 +24,7 @@ namespace HPHP {
 FuncId FuncId::Invalid = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max());
 FuncId FuncId::Dummy   = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max() - 1);
 
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
 FuncId::Int FuncId::toStableInt() const { return getFunc()->getStableId(); }
 #endif
 

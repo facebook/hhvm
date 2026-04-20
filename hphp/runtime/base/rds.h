@@ -38,7 +38,7 @@
 #ifndef incl_HPHP_UTIL_ALLOC_H_
 #error "please include alloc.h before determining RDS implementation!"
 #endif
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
 #define RDS_FIXED_PERSISTENT_BASE 1
 #endif
 #endif

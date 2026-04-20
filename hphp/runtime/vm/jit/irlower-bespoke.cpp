@@ -1257,9 +1257,9 @@ void cgLdStructDictKey(IRLS& env, const IRInstruction* inst) {
   auto constexpr offset = StructLayout::fieldsOffset() +
                           offsetof(StructLayout::Field, key);
   auto constexpr size = sizeof(StructLayout::Field);
-  static_assert(!use_lowptr || size == 8);
-  static_assert(use_lowptr || size == 16);
-  if constexpr (use_lowptr) {
+  static_assert(!use_packedptr || size == 8);
+  static_assert(use_packedptr || size == 16);
+  if constexpr (use_packedptr) {
     emitLdPackedPtr<const StringData>(v, layout[rslot * 8 + offset], rdst);
   } else {
     auto const rslot_scaled = v.makeReg();

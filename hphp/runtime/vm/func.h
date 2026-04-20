@@ -124,7 +124,7 @@ struct Func final {
   friend struct FuncEmitter;
   friend struct UnitEmitter;
 
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
   // DO NOT access it directly, instead use Func::getFuncVec()
   // Exposed in the header file for gdb python macros
   static AtomicPackedPtrVector<const Func> s_funcVec;
@@ -271,7 +271,7 @@ struct Func final {
    */
   uint32_t getStableId() const;
 
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
   static constexpr size_t funcIdOffset() {
     return offsetof(Func, m_funcId);
   }
@@ -1545,7 +1545,7 @@ private:
     mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
     mutable LockFreePtrWrapper<LineTablePtr> m_lineTable;
   };
-  static_assert(CheckSize<SharedData, use_lowptr ? 160 : 184>(), "");
+  static_assert(CheckSize<SharedData, use_packedptr ? 160 : 184>(), "");
 
   /*
    * If this Func represents a native function or is exceptionally large
@@ -1581,7 +1581,7 @@ private:
     // `m_localNames[0 : m_namedParamCount - 1]`.
     uint32_t m_namedParamCount;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 232 : 264>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_packedptr ? 232 : 264>(), "");
 
   /*
    * SharedData accessors for internal use.
@@ -1853,7 +1853,7 @@ private:
   int m_magic;
 #endif
   jit::AtomicLowTCA m_funcEntry{nullptr};
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
   FuncId m_funcId{FuncId::Invalid};
 #endif
   mutable AtomicPackedPtr<const StringData> m_fullName{nullptr};
@@ -1959,8 +1959,8 @@ private:
   // should not be inherited from.
   jit::AtomicLowTCA m_prologueTable[1];
 };
-static constexpr size_t kFuncSize = debug ? (use_lowptr ? 72 : 96)
-                                          : (use_lowptr ? 64 : 88);
+static constexpr size_t kFuncSize = debug ? (use_packedptr ? 72 : 96)
+                                          : (use_packedptr ? 64 : 88);
 static_assert(CheckSize<Func, kFuncSize>(), "");
 
 ///////////////////////////////////////////////////////////////////////////////

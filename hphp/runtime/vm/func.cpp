@@ -78,7 +78,7 @@ Mutex g_funcsMutex;
  * in TreadHashMap
  */
 static std::atomic<FuncId::Int> s_nextFuncId{1};
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
 AtomicPackedPtrVector<const Func> Func::s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
   UnsafeReinitEmptyAtomicPackedPtrVector(
@@ -169,7 +169,7 @@ void Func::destroy(Func* func) {
     func->deregisterInDataMap();
   }
 
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
   if (!func->m_funcId.isInvalid()) {
     assertx(s_funcVec.get(func->m_funcId.toInt()) == func);
     s_funcVec.set(func->m_funcId.toInt(), nullptr);
@@ -207,7 +207,7 @@ void Func::freeClone() {
     m_attrs = static_cast<Attr>(m_attrs & ~AttrHasInheritedReturnTypes);
   }
 
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
   if (!m_funcId.isInvalid()) {
     assertx(s_funcVec.get(m_funcId.toInt()) == this);
     s_funcVec.set(m_funcId.toInt(), nullptr);
@@ -247,7 +247,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   // context of the class it was cloned into, so unset it for the new clone.
   f->m_attrs = Attr(f->m_attrs & ~AttrHasInheritedReturnTypes);
 
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
   f->m_funcId = {FuncId::Invalid};
 #endif
   f->setNewFuncId();
@@ -347,7 +347,7 @@ void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
 }
 
 void Func::registerInDataMap() {
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
   assertx(!m_funcId.isInvalid());
 #endif
   assertx((!m_allFlags.m_isPreFunc || m_cloned.flag.test_and_set()));
@@ -360,7 +360,7 @@ void Func::registerInDataMap() {
 void Func::deregisterInDataMap() {
   assertx(m_allFlags.m_registeredInDataMap);
   assertx((!m_allFlags.m_isPreFunc || m_cloned.flag.test_and_set()));
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
   assertx(!m_funcId.isInvalid());
 #endif
   data_map::deregister(this);
@@ -395,7 +395,7 @@ FuncId::Int Func::maxFuncIdNum() {
   return s_nextFuncId.load(std::memory_order_acquire);
 }
 
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
 void Func::setNewFuncId() {
   auto const id = s_nextFuncId.fetch_add(1, std::memory_order_acq_rel);
   s_funcid_counter->increment();

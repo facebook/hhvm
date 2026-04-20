@@ -23,7 +23,7 @@ namespace HPHP {
 
 namespace {
 
-#ifndef USE_LOWPTR
+#ifndef USE_PACKEDPTR
 
 using ClsMethDataKey = std::pair<Class*, Func*>;
 
@@ -45,7 +45,7 @@ ClsMethData::ClsMethData(Class* cls, Func* func)
 }
 
 ClsMethData::cls_meth_t ClsMethData::make(Class* cls, Func* func) {
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
   return ClsMethData(cls, func);
 #else
   auto const key = ClsMethDataKey { cls, func };

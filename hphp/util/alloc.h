@@ -76,9 +76,7 @@ uintptr_t tc_start_address();
 //   want to make full use of the huge pages there (if present). low and low
 //   cold arenas prefer addresses between 2G and 4G, to conserve space in the
 //   lower range. These are just preferences, all these arenas are able to use
-//   spare space in the 1G to 4G region, when the preferred range is used up. In
-//   LOWPTR builds, running out of space in any of the low arenas will cause a
-//   crash (we hope).
+//   spare space in the 1G to 4G region, when the preferred range is used up.
 //
 // - high arena and high cold arena span addresses from 4G to kHighArenaMaxAddr.
 //   It is currently used for some VM metadata and APC (the table, and all

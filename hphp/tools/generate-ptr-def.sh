@@ -9,8 +9,17 @@ EOF
 
 if [[ $1 == "--low" ]] ; then
     cat <<EOF >> "${INSTALL_DIR}/ptr-def.h"
-#ifndef USE_LOWPTR
-#define USE_LOWPTR 1
+#ifndef USE_PACKEDPTR
+#define USE_PACKEDPTR 1
+#endif
+
+EOF
+fi
+
+if [[ $1 == "--packed" ]] ; then
+    cat <<EOF >> "${INSTALL_DIR}/ptr-def.h"
+#ifndef USE_PACKEDPTR
+#define USE_PACKEDPTR 1
 #endif
 
 EOF
@@ -19,29 +28,15 @@ fi
 cat <<EOF >> "${INSTALL_DIR}/ptr-def.h"
 #ifdef __has_feature
  #if __has_feature(address_sanitizer) || __has_feature(thread_sanitizer)
-  #ifdef USE_LOWPTR
-   #error "USE_LOWPTR is incompatible with sanitizer builds"
+  #ifdef USE_PACKEDPTR
+   #error "USE_PACKEDPTR is incompatible with sanitizer builds"
   #endif
  #endif
 #endif
 
 #if __SANITIZE_ADDRESS__ || __SANITIZE_THREAD__
- #ifdef USE_LOWPTR
-  #error "USE_LOWPTR is incompatible with sanitizer builds"
+ #ifdef USE_PACKEDPTR
+  #error "USE_PACKEDPTR is incompatible with sanitizer builds"
  #endif
 #endif
-
-#ifndef USE_LOWPTR
- #undef USE_PACKEDPTR
-#endif
-
 EOF
-
-if [[ $2 == "--packed" ]] ; then
-    cat <<EOF >> "${INSTALL_DIR}/ptr-def.h"
-#ifdef USE_LOWPTR
-#define USE_PACKEDPTR 1
-#endif
-
-EOF
-fi

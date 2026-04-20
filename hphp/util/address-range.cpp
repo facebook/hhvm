@@ -30,22 +30,8 @@ namespace HPHP {
 uintptr_t lowArenaMinAddr() {
   const char* str = getenv("HHVM_LOW_ARENA_START");
   if (str == nullptr) {
-    // 2GB if we are not low-mem constrained.
-    if (use_packedptr || !use_lowptr) return 2ull << 30;
-
-#if defined(INSTRUMENTED_BUILD)
-    // 2GB if instrumented build due to large text size.
+    // 2GB
     return 2ull << 30;
-#endif
-
-#if !defined(NDEBUG) || defined(DEBUG)
-    // 2GB if debug build due to larger text size
-    return 2ull << 30;
-#endif
-
-    // 1GB for pure low-mem, steal extra 128MB for roar.
-    if (use_roar) return (1ull << 30) + (128ull << 20); // 1GB + 128MB
-    return 1ull << 30; // 1GB
   }
 
   uintptr_t start = 0;

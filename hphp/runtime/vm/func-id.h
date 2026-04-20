@@ -37,7 +37,7 @@ struct FuncId {
   static FuncId Dummy;
   using Int = uint32_t;
 
-#ifdef USE_LOWPTR
+#ifdef USE_PACKEDPTR
   using Id = PackedPtr<const Func>;
   Int toInt() const {
     return m_id.getRaw();

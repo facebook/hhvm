@@ -99,7 +99,7 @@ uint32_t EvalLoader::MaxLowMemHugePagesDefault() {
 }
 
 bool EvalLoader::LowStaticArraysDefault() {
-  return !use_lowptr || !Cfg::Server::Mode;
+  return !use_packedptr || !Cfg::Server::Mode;
 }
 
 bool EvalLoader::VerifyDefault() {

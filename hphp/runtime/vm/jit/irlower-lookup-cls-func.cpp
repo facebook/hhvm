@@ -134,16 +134,12 @@ void implLdOrLookupCls(IRLS& env, const IRInstruction* inst, bool lookup,
   auto const mask = static_cast<int8_t>(StringData::kIsSymbolMask);
   v << testbim{mask, src[StringData::isSymbolOffset()], sf1};
   fwdJcc(v, env, CC_E, sf1, then);
-  if (use_lowptr) {
+  if (use_packedptr) {
     auto const low = v.makeReg();
     v << loadzlq{src[StringData::cachedClassOffset()], low};
     v << testq{low, low, sf2};
     fwdJcc(v, env, CC_E, sf2, then);
-    if (use_packedptr) {
-      v << lea{baseless(low * 8 + 0), cls1};
-    } else {
-      v << copy{low, cls1};
-    }
+    v << lea{baseless(low * 8 + 0), cls1};
   } else {
     v << load{src[StringData::cachedClassOffset()], cls1};
     v << testq{cls1, cls1, sf2};

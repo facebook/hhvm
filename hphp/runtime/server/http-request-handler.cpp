@@ -559,7 +559,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     tl_heap->recordStats(*entry);
     entry->setInt("uptime", HHVM_FN(server_uptime)());
     entry->setInt("rss", ProcStatus::adjustedRssKb());
-    if (use_lowptr) {
+    if (use_packedptr) {
       entry->setInt("low_mem", alloc::getLowMapped());
       entry->setInt("mid_mem", alloc::getMidMapped());
     }

@@ -33,8 +33,8 @@
 #  endif
 #endif
 
-#if defined(USE_LOWPTR) && !defined(USE_JEMALLOC)
-#  error "USE_LOWPTR requires USE_JEMALLOC (jemalloc arenas constrain allocation addresses)"
+#if defined(USE_PACKEDPTR) && !defined(USE_JEMALLOC)
+#  error "USE_PACKEDPTR requires USE_JEMALLOC (jemalloc arenas constrain allocation addresses)"
 #endif
 
 #ifdef USE_JEMALLOC

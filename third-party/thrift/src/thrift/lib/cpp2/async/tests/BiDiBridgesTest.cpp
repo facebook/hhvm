@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+#include <condition_variable>
+#include <mutex>
+
 #include <gtest/gtest.h>
 
 #include <folly/coro/Sleep.h>
 #include <folly/coro/Task.h>
+#include <folly/executors/GlobalExecutor.h>
+#include <folly/io/async/ScopedEventBaseThread.h>
 
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
+#include <thrift/lib/cpp2/async/ServerBiDiStreamBridge.h>
 #include <thrift/lib/cpp2/async/ServerBiDiStreamFactory.h>
 #include <thrift/lib/cpp2/async/ServerCallbackStapler.h>
 #include <thrift/lib/cpp2/async/Sink.h>
@@ -411,6 +417,152 @@ TEST_F(BiDiBridgesTest, BasicWithBiDiCallback) {
             });
       },
       true);
+}
+
+// ==========================================================================
+// Direct bridge-level tests for Pause/Resume support
+// ==========================================================================
+
+namespace {
+
+/// Minimal StreamClientCallback that counts received items and supports
+/// condition-variable-based waiting for a target count.
+class CountingStreamClientCallback : public StreamClientCallback {
+ public:
+  bool onFirstResponse(
+      FirstResponsePayload&&,
+      folly::EventBase*,
+      StreamServerCallback*) override {
+    return true;
+  }
+  void onFirstResponseError(folly::exception_wrapper) override {}
+  bool onStreamNext(StreamPayload&&) override {
+    received.fetch_add(1, std::memory_order_relaxed);
+    cv_.notify_one();
+    return true;
+  }
+  void onStreamError(folly::exception_wrapper) override {}
+  void onStreamComplete() override {}
+  void resetServerCallback(StreamServerCallback&) override {}
+
+  /// Block until received count reaches \p target, or fail after 5s.
+  void waitForCount(int32_t target) {
+    std::unique_lock lock(mu_);
+    ASSERT_TRUE(cv_.wait_for(
+        lock,
+        std::chrono::seconds(5),
+        [&] { return received.load(std::memory_order_relaxed) >= target; }))
+        << "Timed out waiting for count " << target;
+  }
+
+  std::atomic<int32_t> received{0};
+
+ private:
+  std::mutex mu_;
+  std::condition_variable cv_;
+};
+
+} // namespace
+
+TEST(ServerBiDiStreamBridgePauseTest, PauseResumeSuspendsAndResumesStream) {
+  folly::ScopedEventBaseThread evbThread;
+  auto* evb = evbThread.getEventBase();
+
+  CountingStreamClientCallback clientCb;
+  auto* bridge =
+      new apache::thrift::detail::ServerBiDiStreamBridge(&clientCb, evb);
+
+  IdentityEncoder encoder;
+
+  auto gen = []() -> folly::coro::AsyncGenerator<StreamPayload&&> {
+    for (int i = 0;; ++i) {
+      co_yield StreamPayload(
+          apache::thrift::detail::test::makeResponse(std::to_string(i)), {});
+    }
+  }();
+
+  auto taskSF = folly::coro::co_withExecutor(
+                    folly::getGlobalCPUExecutor(),
+                    apache::thrift::detail::ServerBiDiStreamBridge::getTask(
+                        bridge->copy(), std::move(gen), &encoder))
+                    .start();
+
+  // Register the client-side consumer on the evb.
+  evb->runInEventBaseThreadAndWait([&] { bridge->processClientMessages(); });
+
+  // Grant credits to start the stream.  All bridge calls are dispatched on the
+  // evb to mirror the transport-layer threading model and avoid data races with
+  // processClientMessages().
+  evb->runInEventBaseThreadAndWait([&] { bridge->onStreamRequestN(1000); });
+
+  // Wait for some items to flow.
+  clientCb.waitForCount(10);
+
+  // Pause the stream.
+  evb->runInEventBaseThreadAndWait([&] { bridge->pauseStream(); });
+
+  // Allow time for the coroutine to observe the Pause message.
+  std::this_thread::sleep_for(std::chrono::milliseconds(100)); // sleep override
+  int32_t countAfterPause = clientCb.received.load();
+
+  // Verify no more items arrive while paused.
+  std::this_thread::sleep_for(std::chrono::milliseconds(200)); // sleep override
+  EXPECT_EQ(clientCb.received.load(), countAfterPause)
+      << "Stream must not produce items while paused";
+
+  // Resume the stream.
+  evb->runInEventBaseThreadAndWait([&] { bridge->resumeStream(); });
+
+  // Wait for more items to arrive.
+  clientCb.waitForCount(countAfterPause + 5);
+  EXPECT_GT(clientCb.received.load(), countAfterPause)
+      << "Stream should resume producing items after Resume";
+
+  // Tear down.
+  evb->runInEventBaseThreadAndWait([&] { bridge->onStreamCancel(); });
+  std::move(taskSF).get();
+}
+
+TEST(ServerBiDiStreamBridgePauseTest, PauseThenCancelTerminatesCleanly) {
+  folly::ScopedEventBaseThread evbThread;
+  auto* evb = evbThread.getEventBase();
+
+  CountingStreamClientCallback clientCb;
+  auto* bridge =
+      new apache::thrift::detail::ServerBiDiStreamBridge(&clientCb, evb);
+
+  IdentityEncoder encoder;
+
+  auto gen = []() -> folly::coro::AsyncGenerator<StreamPayload&&> {
+    for (int i = 0;; ++i) {
+      co_yield StreamPayload(
+          apache::thrift::detail::test::makeResponse(std::to_string(i)), {});
+    }
+  }();
+
+  auto taskSF = folly::coro::co_withExecutor(
+                    folly::getGlobalCPUExecutor(),
+                    apache::thrift::detail::ServerBiDiStreamBridge::getTask(
+                        bridge->copy(), std::move(gen), &encoder))
+                    .start();
+
+  evb->runInEventBaseThreadAndWait([&] { bridge->processClientMessages(); });
+
+  // All bridge calls are dispatched on the evb to mirror the transport-layer
+  // threading model and avoid data races with processClientMessages().
+  evb->runInEventBaseThreadAndWait([&] { bridge->onStreamRequestN(100); });
+
+  // Wait for some items.
+  clientCb.waitForCount(5);
+
+  // Pause, then immediately cancel.
+  evb->runInEventBaseThreadAndWait([&] {
+    bridge->pauseStream();
+    bridge->onStreamCancel();
+  });
+
+  // The coroutine must exit cleanly.
+  ASSERT_NO_THROW(std::move(taskSF).get());
 }
 
 } // namespace apache::thrift

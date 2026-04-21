@@ -39,9 +39,12 @@ namespace apache::thrift::detail {
 using ServerBiDiStreamMessageServerToClient =
     std::variant<StreamMessage::PayloadOrError, StreamMessage::Complete>;
 
-// Client to Server: RequestN (credits) or Cancel
-using ServerBiDiStreamMessageClientToServer =
-    std::variant<StreamMessage::RequestN, StreamMessage::Cancel>;
+// Client to Server: RequestN (credits), Cancel, Pause, or Resume
+using ServerBiDiStreamMessageClientToServer = std::variant<
+    StreamMessage::RequestN,
+    StreamMessage::Cancel,
+    StreamMessage::Pause,
+    StreamMessage::Resume>;
 
 class ServerBiDiStreamBridge : public TwoWayBridge<
                                    ServerBiDiStreamBridge,
@@ -77,6 +80,13 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
     clientClose();
   }
 
+  /// Pauses the stream coroutine. Called by the transport layer when
+  /// egress buffer backpressure is detected.
+  void pauseStream() override { clientPush(StreamMessage::Pause{}); }
+
+  /// Resumes the stream coroutine after a pause.
+  void resumeStream() override { clientPush(StreamMessage::Resume{}); }
+
   void resetClientCallback(StreamClientCallback& clientCb) override {
     clientCb_ = &clientCb;
   }
@@ -110,9 +120,10 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
       bridge->serverClose();
     };
 
+    bool isPaused = false;
     int64_t credits{0};
     while (true) {
-      if (credits == 0) {
+      if (credits == 0 || isPaused) {
         CoroConsumer c;
         if (bridge->serverWait(&c)) {
           co_await c.wait();
@@ -136,21 +147,32 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
               credits += requestN.n;
               return false;
             },
-            [](StreamMessage::Cancel) { return true; });
+            [](StreamMessage::Cancel) { return true; },
+            [&](StreamMessage::Pause) {
+              notifyBiDiStreamPause(
+                  bridge->contextStack_.get(),
+                  details::StreamPauseReason::EXPLICIT_PAUSE);
+              if (bridge->biDiLog_) {
+                bridge->biDiLog_->log(
+                    detail::BiDiStreamPauseEvent{
+                        detail::StreamPauseReason::EXPLICIT_PAUSE});
+              }
+              isPaused = true;
+              return false;
+            },
+            [&](StreamMessage::Resume) {
+              // TODO(T252289282): Add BiDiStreamResumeEvent and
+              // onBiDiStreamResume to ContextStack for observability parity
+              // with ServerGeneratorStreamBridge's resume handling.
+              isPaused = false;
+              return false;
+            });
         if (cancelled) {
           co_return;
         }
       }
 
-      if (credits == 0) {
-        notifyBiDiStreamPause(
-            bridge->contextStack_.get(),
-            details::StreamPauseReason::NO_CREDITS);
-        if (bridge->biDiLog_) {
-          bridge->biDiLog_->log(
-              detail::BiDiStreamPauseEvent{
-                  detail::StreamPauseReason::NO_CREDITS});
-        }
+      if (UNLIKELY(isPaused || credits == 0)) {
         continue;
       }
 

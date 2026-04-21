@@ -25,6 +25,11 @@ DEFINE_int32(
     4,
     "Thread count for ExternalCarbonConnectionImpl");
 
+DEFINE_uint32(
+    cacheclient_external_fiber_stack_size,
+    65536,
+    "Fiber stack size for ExternalCarbonConnectionImpl");
+
 ClientBase::ClientBase(
     facebook::memcache::ConnectionOptions connOpts,
     ExternalCarbonConnectionImplOptions opts)
@@ -52,7 +57,12 @@ size_t ClientBase::limitRequests(size_t requestsCount) {
 
 ThreadInfo::ThreadInfo()
     : fiberManager_(
-          std::make_unique<folly::fibers::EventBaseLoopController>()) {
+          std::make_unique<folly::fibers::EventBaseLoopController>(),
+          [] {
+            folly::fibers::FiberManager::Options opts;
+            opts.stackSize = FLAGS_cacheclient_external_fiber_stack_size;
+            return opts;
+          }()) {
   folly::Baton<> baton;
 
   thread_ = std::thread([this, &baton] {

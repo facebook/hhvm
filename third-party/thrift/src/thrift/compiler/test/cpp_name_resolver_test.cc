@@ -368,8 +368,7 @@ TEST_F(CppNameResolverTest, typedefs_adapter) {
   EXPECT_EQ(*resolver_.find_first_adapter(ttypedef2), "TypeDefAdapter");
 
   // Structured annotation
-  t_primitive_type booll(t_primitive_type::t_bool());
-  t_typedef typedef1(&program_, "MyBool", booll);
+  t_typedef typedef1(&program_, "MyBool", t_primitive_type::t_bool());
   typedef1.add_structured_annotation(
       gen::adapter_builder(program_, "cpp").make("MyAdapter"));
   t_typedef typedef2(&program_, "DoubleBool", typedef1);
@@ -378,8 +377,8 @@ TEST_F(CppNameResolverTest, typedefs_adapter) {
 }
 
 TEST_F(CppNameResolverTest, custom_type) {
-  t_primitive_type tui64(t_primitive_type::t_i64());
-  tui64.set_name("ui64");
+  t_typedef tui64(nullptr, "ui64", t_primitive_type::t_i64());
+  tui64.set_unstructured_annotation("cpp.name", "::std::uint64_t");
   tui64.add_structured_annotation(
       gen::type_builder(program_, "cpp").make("::std::uint64_t"));
   EXPECT_EQ(get_native_type(tui64), "::std::uint64_t");
@@ -428,7 +427,8 @@ TEST_F(CppNameResolverTest, custom_type) {
 }
 
 TEST_F(CppNameResolverTest, stream) {
-  t_primitive_type ui64(t_primitive_type::t_i64());
+  t_typedef ui64(nullptr, "ui64", t_primitive_type::t_i64());
+  ui64.set_unstructured_annotation("cpp.name", "uint64_t");
   ui64.add_structured_annotation(
       gen::type_builder(program_, "cpp").make("uint64_t"));
 
@@ -557,7 +557,7 @@ TEST_F(CppNameResolverTest, typedef_cpptype) {
 }
 
 TEST_F(CppNameResolverTest, adapted_field_type) {
-  auto i64 = t_primitive_type::t_i64();
+  const auto& i64 = t_primitive_type::t_i64();
   auto field = t_field(i64, "n", 42);
   field.add_structured_annotation(
       gen::adapter_builder(program_, "cpp").make("MyAdapter"));
@@ -573,7 +573,7 @@ TEST_F(CppNameResolverTest, adapted_field_type) {
 }
 
 TEST_F(CppNameResolverTest, adapted_field_storage_type) {
-  auto i64 = t_primitive_type::t_i64();
+  const auto& i64 = t_primitive_type::t_i64();
   auto cpp_ref = gen::cpp_ref_builder(program_);
   auto adapter = gen::adapter_builder(program_, "cpp");
 
@@ -636,7 +636,7 @@ TEST_F(CppNameResolverTest, transitively_adapted_field_type) {
   annotation.add_structured_annotation(
       std::make_unique<t_const>(&program_, transitive, "", nullptr));
 
-  auto i64 = t_primitive_type::t_i64();
+  const auto& i64 = t_primitive_type::t_i64();
   auto field1 = t_field(i64, "field1", 1);
   field1.add_structured_annotation(
       std::make_unique<t_const>(&program_, annotation, "", nullptr));
@@ -655,8 +655,8 @@ TEST_F(CppNameResolverTest, transitively_adapted_field_type) {
 }
 
 TEST_F(CppNameResolverTest, gen_type_tag_container) {
-  auto i16 = t_primitive_type::t_i16();
-  auto i32 = t_primitive_type::t_i32();
+  const auto& i16 = t_primitive_type::t_i16();
+  const auto& i32 = t_primitive_type::t_i32();
   t_list i32_list(i32);
   t_set i32_set(i32);
   t_map i32_i16_map(i32, i16);

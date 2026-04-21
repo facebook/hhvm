@@ -49,7 +49,7 @@ TEST(UtilTest, is_eligible_for_constexpr) {
   auto is_eligible_for_constexpr = [](const t_type* t) {
     return cpp2::is_eligible_for_constexpr()(t);
   };
-  auto i32 = t_primitive_type::t_i32();
+  const auto& i32 = t_primitive_type::t_i32();
   EXPECT_TRUE(is_eligible_for_constexpr(&i32));
   EXPECT_TRUE(is_eligible_for_constexpr(&t_primitive_type::t_double()));
   EXPECT_TRUE(is_eligible_for_constexpr(&t_primitive_type::t_bool()));
@@ -64,12 +64,6 @@ TEST(UtilTest, is_eligible_for_constexpr) {
 
   auto map = t_map(i32, t_primitive_type::t_double());
   EXPECT_FALSE(is_eligible_for_constexpr(&map));
-
-  for (auto a : {"cpp.template", "cpp2.template", "cpp.type", "cpp2.type"}) {
-    auto type = i32;
-    type.set_unstructured_annotation(a, "custom_int");
-    EXPECT_TRUE(is_eligible_for_constexpr(&type)) << a;
-  }
 
   auto program = t_program("path/to/program.thrift", "path/to/program.thrift");
   {
@@ -125,7 +119,7 @@ TEST(UtilTest, for_each_transitive_field) {
   //        d   e
   //             \
   //              f
-  auto i32 = t_primitive_type::t_i32();
+  const auto& i32 = t_primitive_type::t_i32();
   auto a = t_struct(&program, "a");
   auto b = t_struct(&program, "b");
   auto e = t_struct(&program, "e");
@@ -169,7 +163,7 @@ TEST(UtilTest, for_each_transitive_field) {
 TEST(UtilTest, field_transitively_refers_to_unique) {
   t_program program("path/to/program.thrift", "path/to/program.thrift");
 
-  auto i = t_primitive_type::t_i32();
+  const auto& i = t_primitive_type::t_i32();
   auto li = t_list(i);
   auto lli = t_list(t_list(i));
   auto si = t_set(i);
@@ -184,7 +178,7 @@ TEST(UtilTest, field_transitively_refers_to_unique) {
   }
 
   // typedef binary (cpp.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr;
-  auto p = t_primitive_type::t_binary();
+  t_typedef p(&program, "IOBufPtr", t_primitive_type::t_binary());
   p.add_structured_annotation(
       gen::type_builder(program, "cpp").make("std::unique_ptr<folly::IOBuf>"));
 
@@ -230,16 +224,15 @@ TEST(UtilTest, is_custom_type) {
   auto builder = gen::type_builder(p, "cpp");
 
   {
-    auto cppType = t_primitive_type::t_string();
+    const auto& cppType = t_primitive_type::t_string();
     auto typeDef = t_typedef(&p, "Type", cppType);
     EXPECT_FALSE(cpp2::is_custom_type(cppType));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
-    cppType.add_structured_annotation(builder.make("folly::fbstring"));
-    EXPECT_TRUE(cpp2::is_custom_type(cppType));
+    typeDef.add_structured_annotation(builder.make("folly::fbstring"));
     EXPECT_TRUE(cpp2::is_custom_type(typeDef));
   }
 
-  const auto i32 = t_primitive_type::t_i32();
+  const auto& i32 = t_primitive_type::t_i32();
   {
     auto cppTemplate = t_list(i32);
     auto typeDef = t_typedef(&p, "Type", cppTemplate);

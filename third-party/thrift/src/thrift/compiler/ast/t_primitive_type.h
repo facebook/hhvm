@@ -55,9 +55,10 @@ class t_primitive_type final : public t_type {
 
   type primitive_type() const { return primitive_type_; }
 
-  // TODO(afuller): Disable copy constructor, and use
-  // 'anonymous' typedefs instead.
-  // t_primitive_type(const t_primitive_type&) = delete;
+  t_primitive_type(const t_primitive_type&) = delete;
+  t_primitive_type& operator=(const t_primitive_type&) = delete;
+  t_primitive_type(t_primitive_type&&) = delete;
+  t_primitive_type& operator=(t_primitive_type&&) = delete;
 
   std::string get_full_name() const override { return name(); }
 

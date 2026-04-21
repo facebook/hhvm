@@ -236,6 +236,7 @@ let get_defs (ast : program) : defs =
             let st = (FileInfo.pos_full (pos, id, None, None), st) in
             ({ defs with stmts = st :: defs.stmts }, stmt_count + 1)
           | Namespace (_, ds) -> get_defs ds (defs, stmt_count)
+          | ClassAlias _
           | NamespaceUse _
           | SetNamespaceEnv _
           | SetModule _ ->
@@ -1256,6 +1257,7 @@ module Visitor_DEPRECATED = struct
         | Typedef t -> this#on_typedef acc t
         | Constant g -> this#on_gconst acc g
         | Namespace (_, p) -> this#on_program acc p
+        | ClassAlias _
         | NamespaceUse _
         | SetNamespaceEnv _
         | FileAttributes _

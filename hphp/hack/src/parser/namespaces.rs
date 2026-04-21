@@ -322,6 +322,12 @@ pub mod toplevel_elaborator {
                 c.namespace = Arc::clone(nsenv);
                 acc.push(Def::Constant(x));
             }
+            D::ClassAlias(mut x) => {
+                let cr = x.as_mut();
+                elaborate_defined_id(nsenv, &mut cr.name);
+                elaborate_defined_id(nsenv, &mut cr.original);
+                acc.push(Def::ClassAlias(x));
+            }
             D::FileAttributes(mut f) => {
                 f.as_mut().namespace = Arc::clone(nsenv);
                 acc.push(Def::FileAttributes(f));
@@ -358,7 +364,8 @@ pub mod toplevel_elaborator {
             Def::Constant(c) => {
                 c.module = module_name.clone();
             }
-            Def::Stmt(_)
+            Def::ClassAlias(_)
+            | Def::Stmt(_)
             | Def::Namespace(_)
             | Def::NamespaceUse(_)
             | Def::SetNamespaceEnv(_)

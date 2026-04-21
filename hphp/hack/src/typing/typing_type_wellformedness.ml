@@ -842,6 +842,7 @@ let _toplevel_def tenv = function
   | Constant gc -> global_constant tenv gc
   | Typedef td -> typedef tenv td
   | Class c -> class_ tenv c
+  | ClassAlias _
   | Stmt _
   | Namespace _
   | NamespaceUse _

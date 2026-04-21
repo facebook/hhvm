@@ -195,6 +195,7 @@ let program_by_names (program : program Tast_with_dynamic.t) : by_names =
             acc with
             module_tasts = SMap.add (snd m.md_name) def acc.module_tasts;
           }
+        | ClassAlias _
         | Stmt _
         | Namespace _
         | NamespaceUse _

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a3578c73c09f22912fd6c9188cb1fd39>>
+// @generated SignedSource<<37551fc166c0400a63bae094a6bc5a25>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2482,10 +2482,35 @@ pub struct ModuleDef<Ex, En> {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "ca_")]
+#[repr(C)]
+pub struct ClassAlias<Ex, En> {
+    pub name: ClassName,
+    pub tparams: Vec<Tparam<Ex, En>>,
+    pub original: ClassName,
+    pub original_tparams: Vec<Tparam<Ex, En>>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Def<Ex, En> {
     Fun(Box<FunDef<Ex, En>>),
     Class(Box<Class_<Ex, En>>),
+    ClassAlias(Box<ClassAlias<Ex, En>>),
     Stmt(Box<Stmt<Ex, En>>),
     Typedef(Box<Typedef<Ex, En>>),
     Constant(Box<Gconst<Ex, En>>),

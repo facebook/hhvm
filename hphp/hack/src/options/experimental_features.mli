@@ -75,6 +75,7 @@ type feature_name =
   | AllowConditionalAwaitSyntax
   | ShapeFieldPunning
   | RepresentableAs
+  | ClassAliasesEverywhere
   | TestFeature
   | WithRefinementAlias
 [@@deriving eq, ord, show]

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ece9ee3db15cd9dc6f09d9b3869995ae>>
+// @generated SignedSource<<7ea6560e665f55a3461e9e64717bb96c>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -70,5 +70,6 @@ pub type Typedef = aast_defs::Typedef<Ex, En>;
 pub type Gconst = aast_defs::Gconst<Ex, En>;
 pub type FunDef = aast_defs::FunDef<Ex, En>;
 pub type ModuleDef = aast_defs::ModuleDef<Ex, En>;
+pub type ClassAlias = aast_defs::ClassAlias<Ex, En>;
 pub type Def = aast_defs::Def<Ex, En>;
 pub type UserAttributes = aast_defs::UserAttributes<Ex, En>;

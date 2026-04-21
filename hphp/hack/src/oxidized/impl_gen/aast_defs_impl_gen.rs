@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3401f737df83cb26ace2dd8e6fa15da2>>
+// @generated SignedSource<<67b823353cde3535e514f0eba714e87b>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -3192,6 +3192,9 @@ impl<Ex, En> Def<Ex, En> {
     pub fn mk_class(p0: Class_<Ex, En>) -> Self {
         Def::Class(Box::new(p0))
     }
+    pub fn mk_class_alias(p0: ClassAlias<Ex, En>) -> Self {
+        Def::ClassAlias(Box::new(p0))
+    }
     pub fn mk_stmt(p0: Stmt<Ex, En>) -> Self {
         Def::Stmt(Box::new(p0))
     }
@@ -3228,6 +3231,12 @@ impl<Ex, En> Def<Ex, En> {
     pub fn is_class(&self) -> bool {
         match self {
             Def::Class(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_class_alias(&self) -> bool {
+        match self {
+            Def::ClassAlias(..) => true,
             _ => false,
         }
     }
@@ -3297,6 +3306,12 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_class_alias(&self) -> Option<&ClassAlias<Ex, En>> {
+        match self {
+            Def::ClassAlias(p0) => Some(&p0),
+            _ => None,
+        }
+    }
     pub fn as_stmt(&self) -> Option<&Stmt<Ex, En>> {
         match self {
             Def::Stmt(p0) => Some(&p0),
@@ -3363,6 +3378,12 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_class_alias_mut(&mut self) -> Option<&mut ClassAlias<Ex, En>> {
+        match self {
+            Def::ClassAlias(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
     pub fn as_stmt_mut(&mut self) -> Option<&mut Stmt<Ex, En>> {
         match self {
             Def::Stmt(p0) => Some(p0.as_mut()),
@@ -3426,6 +3447,12 @@ impl<Ex, En> Def<Ex, En> {
     pub fn as_class_into(self) -> Option<Class_<Ex, En>> {
         match self {
             Def::Class(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_class_alias_into(self) -> Option<ClassAlias<Ex, En>> {
+        match self {
+            Def::ClassAlias(p0) => Some(*p0),
             _ => None,
         }
     }

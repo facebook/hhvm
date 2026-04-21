@@ -1,0 +1,2 @@
+ERROR: File "basic_alias.php", line 10, characters 7-11:
+Unbound name: `Alias` (an object type) (Naming[2049])

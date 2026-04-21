@@ -1532,7 +1532,8 @@ fn prepare_defs(defs: &mut [Def]) -> usize {
                 // This should have already been flattened by rewrite_program.
                 unreachable!()
             }
-            Def::FileAttributes(_)
+            Def::ClassAlias(_)
+            | Def::FileAttributes(_)
             | Def::Fun(_)
             | Def::Module(_)
             | Def::SetModule(_)
@@ -1572,6 +1573,7 @@ pub fn convert_toplevel_prog(
                 visitor.state_mut().set_namespace(Arc::clone(&*x));
             }
             Def::Class(_)
+            | Def::ClassAlias(_)
             | Def::Constant(_)
             | Def::FileAttributes(_)
             | Def::Fun(_)

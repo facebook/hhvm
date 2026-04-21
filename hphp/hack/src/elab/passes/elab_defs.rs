@@ -32,6 +32,7 @@ impl Pass for ElabDefsPass {
                 // Retain the following top-level definitions
                 Def::Fun(_)
                 | Def::Class(_)
+                | Def::ClassAlias(_)
                 | Def::Typedef(_)
                 | Def::Constant(_)
                 | Def::Module(_)

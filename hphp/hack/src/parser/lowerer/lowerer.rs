@@ -6051,6 +6051,18 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 package: get_current_package(env, node),
             })])
         }
+        ClassAliasDeclaration(c) => {
+            let name = pos_name(&c.name, env)?;
+            let tparams = p_tparam_l(true, &c.type_parameters, env)?;
+            let original = pos_name(&c.original_name, env)?;
+            let original_tparams = p_tparam_l(true, &c.original_type_parameters, env)?;
+            Ok(vec![ast::Def::mk_class_alias(ast::ClassAlias {
+                name,
+                tparams,
+                original,
+                original_tparams,
+            })])
+        }
         ClassishDeclaration(c) if contains_class_body(c) => {
             let mut env = Env::clone_and_unset_toplevel_if_toplevel(env);
             let env = env.as_mut();

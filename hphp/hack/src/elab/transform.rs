@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c1f19be164eb403c4d110753416c1a6d>>
+// @generated SignedSource<<ac494b234cb6aedd5b594f8ec04eb838>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -2284,6 +2284,37 @@ impl Transform for ModuleDef {
         }
     }
 }
+impl Transform for ClassAlias {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_class_alias_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        let _ = in_pass.on_ty_class_alias_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            ClassAlias {
+                name: ref mut __binding_0,
+                tparams: ref mut __binding_1,
+                original: ref mut __binding_2,
+                original_tparams: ref mut __binding_3,
+            } => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_1.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_2.transform(env, &mut pass.clone())
+                }
+                { __binding_3.transform(env, &mut pass.clone()) }
+            }
+        }
+    }
+}
 impl Transform for Def {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
@@ -2297,6 +2328,7 @@ impl Transform for Def {
         match self {
             Def::Fun(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Def::Class(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
+            Def::ClassAlias(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Def::Stmt(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Def::Typedef(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Def::Constant(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),

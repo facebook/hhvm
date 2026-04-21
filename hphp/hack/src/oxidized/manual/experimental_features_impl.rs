@@ -60,6 +60,7 @@ impl FeatureName {
             AllowConditionalAwaitSyntax => Unstable,
             ShapeFieldPunning => Unstable,
             RepresentableAs => Unstable,
+            ClassAliasesEverywhere => Unstable,
             TestFeature => Unstable,
             WithRefinementAlias => Preview,
         }

@@ -1216,9 +1216,17 @@ and ('ex, 'en) module_def = {
   md_doc_comment: doc_comment option;
 }
 
+and ('ex, 'en) class_alias = {
+  ca_name: class_name;
+  ca_tparams: ('ex, 'en) tparam list;
+  ca_original: class_name;
+  ca_original_tparams: ('ex, 'en) tparam list;
+}
+
 and ('ex, 'en) def =
   | Fun of ('ex, 'en) fun_def
   | Class of ('ex, 'en) class_
+  | ClassAlias of ('ex, 'en) class_alias
   | Stmt of ('ex, 'en) stmt
   | Typedef of ('ex, 'en) typedef
   | Constant of ('ex, 'en) gconst

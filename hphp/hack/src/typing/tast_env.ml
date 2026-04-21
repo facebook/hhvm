@@ -484,6 +484,7 @@ let def_env ctx d =
    * However, we need to return an env here so for now create an empty env using
    * the default typechecker options.
    *)
+  | ClassAlias _
   | Stmt _
   | Namespace _
   | NamespaceUse _

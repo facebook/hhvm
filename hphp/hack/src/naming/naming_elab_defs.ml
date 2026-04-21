@@ -25,6 +25,7 @@ let on_program program ~ctx =
     | Aast.Stmt _
     | Aast.Fun _
     | Aast.Class _
+    | Aast.ClassAlias _
     | Aast.Typedef _
     | Aast.Constant _
     | Aast.Module _

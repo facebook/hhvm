@@ -486,6 +486,16 @@ let nast_to_tast ~(do_tast_checks : bool) (ctx : Provider_context.t) nast :
         (Tast_with_dynamic.mk_without_dynamic @@ Aast.Module (module_def ctx md))
     | SetModule sm ->
       Some (Tast_with_dynamic.mk_without_dynamic @@ Aast.SetModule sm)
+    | ClassAlias cr ->
+      (* TODO(T264548072) *)
+      let dummy_ty = MakeType.nothing Reason.none in
+      let cr =
+        Aast.map_class_alias
+          (fun _ -> dummy_ty)
+          (fun _ -> Tast.dummy_saved_env)
+          cr
+      in
+      Some (Tast_with_dynamic.mk_without_dynamic @@ Aast.ClassAlias cr)
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _

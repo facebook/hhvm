@@ -480,6 +480,7 @@ let outline_ast ast ~(source_text : string option) =
         | Class c -> Some (summarize_class ~source_text c ~no_children:false)
         | Typedef t -> Some (summarize_typedef ~source_text t)
         | Constant c -> Some (summarize_gconst ~source_text c)
+        | ClassAlias _
         | Namespace _
         | NamespaceUse _
         | SetNamespaceEnv _

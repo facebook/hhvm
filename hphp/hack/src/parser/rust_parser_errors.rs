@@ -5742,6 +5742,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             MatchStatement(_) => {
                 self.check_can_use_feature(node, &FeatureName::MatchStatements);
             }
+            ClassAliasDeclaration(_) => {
+                self.check_can_use_feature(node, &FeatureName::ClassAliasesEverywhere);
+            }
             _ => {}
         }
 

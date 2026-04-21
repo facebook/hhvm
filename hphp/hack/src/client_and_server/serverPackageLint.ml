@@ -20,6 +20,7 @@ let go_fast _genv env file =
           DepSet.add deps (Dep.make (Dep.Fun name))
         | Constant { cst_name = (_, name); _ } ->
           DepSet.add deps (Dep.make (Dep.GConst name))
+        | ClassAlias _
         | Stmt _
         | Namespace _
         | FileAttributes _
@@ -53,6 +54,7 @@ let go genv env file =
       Some (ServerCommandTypes.Find_refs.Function name)
     | Constant { cst_name = (_, name); _ } ->
       Some (ServerCommandTypes.Find_refs.GConst name)
+    | ClassAlias _
     | Stmt _
     | Namespace _
     | FileAttributes _

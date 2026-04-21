@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<91fa421e7a2015b637f065dbc19aae8e>>
+// @generated SignedSource<<ae50252c2bc9426de129f366fc62e13a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -298,6 +298,25 @@ impl<P: Params> Node<P> for ClassAbstractTypeconst {
         self.as_constraint.accept(c, v)?;
         self.super_constraint.accept(c, v)?;
         self.default.accept(c, v)
+    }
+}
+impl<P: Params> Node<P> for ClassAlias<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_alias(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.name.accept(c, v)?;
+        self.tparams.accept(c, v)?;
+        self.original.accept(c, v)?;
+        self.original_tparams.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for ClassConcreteTypeconst {
@@ -688,6 +707,7 @@ impl<P: Params> Node<P> for Def<P::Ex, P::En> {
         match self {
             Def::Fun(a0) => a0.accept(c, v),
             Def::Class(a0) => a0.accept(c, v),
+            Def::ClassAlias(a0) => a0.accept(c, v),
             Def::Stmt(a0) => a0.accept(c, v),
             Def::Typedef(a0) => a0.accept(c, v),
             Def::Constant(a0) => a0.accept(c, v),

@@ -224,7 +224,7 @@ let ast_to_toplevels (ast : Nast.program) :
       | Aast.Class { Aast_defs.c_name; _ } -> Some (FileInfo.Class, c_name)
       | Aast.Module { Aast_defs.md_name; _ } -> Some (FileInfo.Module, md_name)
       | Aast.(
-          ( Stmt _ | SetModule _ | Namespace _ | NamespaceUse _
+          ( ClassAlias _ | Stmt _ | SetModule _ | Namespace _ | NamespaceUse _
           | SetNamespaceEnv _ | FileAttributes _ )) ->
         None)
 

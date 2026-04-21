@@ -72,6 +72,7 @@ fn check_module_declaration_first(checker: &mut Checker, program: &aast::Program
             | aast::Def::SetNamespaceEnv(_)
             | aast::Def::NamespaceUse(_)
             | aast::Def::Constant(_)
+            | aast::Def::ClassAlias(_)
            => past_first_def = true,
         }
     }

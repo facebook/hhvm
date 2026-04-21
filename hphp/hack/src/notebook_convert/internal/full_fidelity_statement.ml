@@ -70,6 +70,7 @@ let is_statement =
     | MethodishDeclaration _
     | MethodishTraitResolution _
     | ClassishDeclaration _
+    | ClassAliasDeclaration _
     | ClassishBody _
     | TraitUse _
     | RequireClause _
@@ -192,6 +193,5 @@ let is_statement =
     | ModuleDeclaration _
     | ModuleMembershipDeclaration _
     | PackageExpression _
-    | NamedArgument _
-    | ClassAliasDeclaration _ ->
+    | NamedArgument _ ->
       false)

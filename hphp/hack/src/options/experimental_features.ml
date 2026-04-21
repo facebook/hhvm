@@ -75,6 +75,7 @@ type feature_name =
   | AllowConditionalAwaitSyntax
   | ShapeFieldPunning
   | RepresentableAs
+  | ClassAliasesEverywhere
   | TestFeature
   | WithRefinementAlias
 [@@deriving eq, ord, show]
@@ -128,6 +129,7 @@ let feature_name_map =
       ("allow_conditional_await_syntax", AllowConditionalAwaitSyntax);
       ("shape_field_punning", ShapeFieldPunning);
       ("representable_as", RepresentableAs);
+      ("class_aliases_everywhere", ClassAliasesEverywhere);
       ("test_feature", TestFeature);
       ("with_refinement_alias", WithRefinementAlias);
     ]

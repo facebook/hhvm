@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<69a17999a33da04d20f3633f25dc837d>>
+// @generated SignedSource<<c9e86226488a28d795b3da7aa862e2e4>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -298,6 +298,25 @@ impl<P: Params> NodeMut<P> for ClassAbstractTypeconst {
         self.as_constraint.accept(c, v)?;
         self.super_constraint.accept(c, v)?;
         self.default.accept(c, v)
+    }
+}
+impl<P: Params> NodeMut<P> for ClassAlias<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_alias(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.name.accept(c, v)?;
+        self.tparams.accept(c, v)?;
+        self.original.accept(c, v)?;
+        self.original_tparams.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for ClassConcreteTypeconst {
@@ -688,6 +707,7 @@ impl<P: Params> NodeMut<P> for Def<P::Ex, P::En> {
         match self {
             Def::Fun(a0) => a0.accept(c, v),
             Def::Class(a0) => a0.accept(c, v),
+            Def::ClassAlias(a0) => a0.accept(c, v),
             Def::Stmt(a0) => a0.accept(c, v),
             Def::Typedef(a0) => a0.accept(c, v),
             Def::Constant(a0) => a0.accept(c, v),

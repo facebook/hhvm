@@ -188,6 +188,7 @@ impl<Ex, En> Program<Ex, En> {
         self.iter().find_map(|def| match def {
             Def::Fun(fd) => Some(fd.name.pos()),
             Def::Class(class) => Some(class.name.pos()),
+            Def::ClassAlias(cr) => Some(cr.name.pos()),
             Def::Stmt(stmt) => Some(&stmt.0),
             Def::Typedef(td) => Some(td.name.pos()),
             Def::Constant(gc) => Some(gc.name.pos()),
@@ -223,7 +224,11 @@ impl<'a, Ex, En> Iterator for DefsIterator<'a, Ex, En> {
                 }
             };
             match def {
-                def @ (Def::Fun(_) | Def::Class(_) | Def::Typedef(_) | Def::Constant(_)) => {
+                def @ (Def::Fun(_)
+                | Def::Class(_)
+                | Def::ClassAlias(_)
+                | Def::Typedef(_)
+                | Def::Constant(_)) => {
                     return Some(def);
                 }
                 Def::Namespace(defs) => self.stack.push(defs.1.iter()),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<80aa049dd4a66b44616e6c9d9df84171>>
+// @generated SignedSource<<da8e8b4660b3909a8e98480a70028872>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -1108,6 +1108,22 @@ pub trait Pass: PassClone {
         &mut self,
         env: &Env,
         elem: &mut ModuleDef<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_alias_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut ClassAlias<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_alias_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut ClassAlias<Ex, En>,
     ) -> ControlFlow<()> {
         Continue(())
     }
@@ -2992,6 +3008,28 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_module_def_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_alias_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut ClassAlias<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_class_alias_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_alias_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut ClassAlias<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_class_alias_bottom_up(env, elem)?;
         }
         Continue(())
     }

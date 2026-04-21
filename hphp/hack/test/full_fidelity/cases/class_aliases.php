@@ -1,5 +1,7 @@
 <?hh
 
+<<file:__EnableUnstableFeatures('class_aliases_everywhere')>>
+
 class C = D;
 
 class C<T> = D<T>;

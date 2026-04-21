@@ -59,7 +59,6 @@
 
 namespace apache::thrift::fast_thrift::rocket::test {
 
-using channel_pipeline::HeadToTailOp;
 using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
 using channel_pipeline::Result;

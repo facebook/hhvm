@@ -44,7 +44,7 @@ using apache::thrift::fast_thrift::channel_pipeline::Result;
 using apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox;
 using apache::thrift::fast_thrift::channel_pipeline::test::MockHandler;
 using MockTransportHandler =
-    apache::thrift::fast_thrift::channel_pipeline::test::MockTailHandler;
+    apache::thrift::fast_thrift::channel_pipeline::test::MockHeadHandler;
 using apache::thrift::fast_thrift::channel_pipeline::test::TestAllocator;
 
 HANDLER_TAG(test_handler);
@@ -183,6 +183,8 @@ class ThriftServerChannelTest : public ::testing::Test {
     mockProcessor_ = std::make_shared<MockAsyncProcessor>();
     auto factory = std::make_shared<MockAsyncProcessorFactory>(mockProcessor_);
     channel_ = std::make_unique<ThriftServerChannel>(std::move(factory));
+    mockTransport_.setOnWriteCallback(
+        [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
   }
 
   void TearDown() override {

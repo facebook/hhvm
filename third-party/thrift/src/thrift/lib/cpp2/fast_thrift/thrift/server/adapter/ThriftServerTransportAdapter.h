@@ -38,7 +38,7 @@ namespace apache::thrift::fast_thrift::thrift::server {
  *   → pipeline_->fireRead() → [thrift handlers] → ThriftServerChannel
  *
  * Outbound path (responses):
- *   ThriftServerChannel → [thrift handlers] → this.onMessage()
+ *   ThriftServerChannel → [thrift handlers] → this.onWrite()
  *   → converts ThriftServerResponseMessage to RocketResponseMessage
  *   → RocketServerAppAdapter.write()
  *

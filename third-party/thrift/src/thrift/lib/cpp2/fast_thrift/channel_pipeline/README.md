@@ -519,8 +519,6 @@ auto pipeline = PipelineBuilder<TransportHandler, AppAdapter, Allocator>()
     .build();
 ```
 
-**Deprecated:** The old `EndpointHandler` concept (using `onMessage()`) is deprecated. New code should use `HeadEndpointHandler` or `TailEndpointHandler` with explicit direction.
-
 ---
 
 ## Message Types

@@ -41,7 +41,7 @@ concept InboundTransportHandler = requires(
 };
 
 /**
- * OutboundTransportHandler concept — refines TailEndpointHandler with
+ * OutboundTransportHandler concept — refines HeadEndpointHandler with
  * backpressure control.
  *
  * The pipeline calls onWrite() to push data toward the transport.
@@ -52,7 +52,7 @@ concept InboundTransportHandler = requires(
  */
 template <typename T>
 concept OutboundTransportHandler =
-    channel_pipeline::TailEndpointHandler<T> && requires(T t) {
+    channel_pipeline::HeadEndpointHandler<T> && requires(T t) {
       { t.pauseRead() } noexcept -> std::same_as<void>;
       { t.resumeRead() } noexcept -> std::same_as<void>;
     };

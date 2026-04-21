@@ -77,35 +77,13 @@ concept TailEndpointHandler = EndpointHandlerLifecycle<T> &&
     };
 
 /**
- * @deprecated Use HeadEndpointHandler or TailEndpointHandler instead.
- *
- * EndpointHandler concept — legacy concept for both head and tail endpoints.
- * Direction was controlled by HeadToTailOp at runtime, which is error-prone.
- *
- * Migrate to:
- * - HeadEndpointHandler (onWrite + lifecycle)
- * - TailEndpointHandler (onRead + onException + lifecycle)
- */
-template <typename E>
-concept EndpointHandler =
-    requires(E e, TypeErasedBox&& msg, folly::exception_wrapper&& ex) {
-      { e.onMessage(std::move(msg)) } noexcept -> std::same_as<Result>;
-      { e.onException(std::move(ex)) } noexcept -> std::same_as<void>;
-    };
-
-/**
  * ValidEndpointPair concept — validates head/tail endpoint combination.
  *
- * A valid pipeline requires each endpoint to satisfy EITHER the new-style
- * concept OR the legacy EndpointHandler concept. Mix-and-match is allowed
- * during migration.
- *
- * TODO: Once all handlers are migrated to new-style endpoints, tighten this
- * to require HeadEndpointHandler<Head> && TailEndpointHandler<Tail>.
+ * A valid pipeline requires a HeadEndpointHandler at the head and
+ * a TailEndpointHandler at the tail.
  */
 template <typename Head, typename Tail>
 concept ValidEndpointPair =
-    (HeadEndpointHandler<Head> || EndpointHandler<Head>) &&
-    (TailEndpointHandler<Tail> || EndpointHandler<Tail>);
+    HeadEndpointHandler<Head> && TailEndpointHandler<Tail>;
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

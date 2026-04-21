@@ -25,14 +25,10 @@ namespace apache::thrift::fast_thrift::thrift {
 /**
  * ClientInboundAppAdapter — client-side inbound endpoint concept.
  *
- * Accepts TailEndpointHandler (onRead + onException + lifecycle) or legacy
- * EndpointHandler (onMessage) for backward compatibility during migration.
- *
- * TODO: Once all adapters are migrated, tighten to TailEndpointHandler only.
+ * Must satisfy TailEndpointHandler (onRead + onException + lifecycle).
  */
 template <typename A>
-concept ClientInboundAppAdapter = channel_pipeline::TailEndpointHandler<A> ||
-    channel_pipeline::EndpointHandler<A>;
+concept ClientInboundAppAdapter = channel_pipeline::TailEndpointHandler<A>;
 
 /**
  * ClientOutboundAppAdapter concept — sends messages from client application

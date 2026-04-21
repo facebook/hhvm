@@ -208,7 +208,7 @@ class ThriftServerAppAdapterTest : public ::testing::Test {
     }
 
     // Thrift pipeline: adapter (tail) ← handler → transport (head)
-    // HeadToTailOp::Read: reads go from head → tail (transport → adapter)
+    // Reads go from head → tail (transport → adapter)
     auto pipeline =
         PipelineBuilder<
             apache::thrift::fast_thrift::transport::TransportHandler,

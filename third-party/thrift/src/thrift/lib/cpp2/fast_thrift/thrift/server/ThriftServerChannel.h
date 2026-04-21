@@ -39,7 +39,7 @@ namespace apache::thrift::fast_thrift::thrift {
  * AsyncProcessor API. Supports request-response and oneway RPCs.
  *
  * This class implements the ServerInboundAppAdapter concept to receive
- * requests from the pipeline via onMessage().
+ * requests from the pipeline via onRead().
  *
  * Usage:
  *   auto channel = std::make_unique<ThriftServerChannel>(processorFactory);

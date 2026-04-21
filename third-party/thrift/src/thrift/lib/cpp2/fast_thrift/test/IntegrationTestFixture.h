@@ -62,7 +62,7 @@ struct ClientConnection {
  *
  *   Socket -> TransportHandler (ReadCallback)
  *          -> Pipeline::fireRead
- *          -> TestAppAdapter::onMessage
+ *          -> TestAppAdapter::onRead
  */
 class IntegrationTestFixture : public ::testing::Test {
  protected:

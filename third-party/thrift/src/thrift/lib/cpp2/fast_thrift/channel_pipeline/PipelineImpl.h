@@ -55,11 +55,10 @@ class PipelineImpl : public folly::DelayedDestruction {
   using Ptr = folly::DelayedDestructionUniquePtr<PipelineImpl>;
 
   /**
-   * Creates a new PipelineImpl with fixed direction.
+   * Creates a new PipelineImpl.
    * Use PipelineBuilder for construction.
    *
-   * Direction is fixed: reads exit at head, writes exit at tail.
-   * This is the preferred constructor for new-style endpoints.
+   * Direction is fixed: reads flow head→tail, writes flow tail→head.
    */
   PipelineImpl(
       folly::EventBase* event_base,
@@ -68,22 +67,7 @@ class PipelineImpl : public folly::DelayedDestruction {
       void* tail,
       void* allocator) noexcept;
 
-  /**
-   * @deprecated Use the constructor without HeadToTailOp instead.
-   *
-   * Creates a new PipelineImpl with configurable direction.
-   * Only use this for legacy EndpointHandler implementations.
-   */
-  [[deprecated("Use constructor without HeadToTailOp")]]
-  PipelineImpl(
-      folly::EventBase* event_base,
-      std::vector<detail::HandlerNode> handlers,
-      void* head,
-      void* tail,
-      void* allocator,
-      HeadToTailOp headToTailOp) noexcept;
-
-  // Non-copyable, non-movable
+  // Non-copyable
   PipelineImpl(const PipelineImpl&) = delete;
   PipelineImpl& operator=(const PipelineImpl&) = delete;
   PipelineImpl(PipelineImpl&&) = delete;
@@ -290,7 +274,7 @@ class PipelineImpl : public folly::DelayedDestruction {
   void* tail_; // TailHandler*
   void* allocator_; // BufferAllocator*
 
-  HeadToTailOp headToTailOp_;
+  // Read-exit terminal
 
   // Read-exit terminal (whichever endpoint reads exit at)
   Result (*readTerminalOnMessageFn_)(void*, TypeErasedBox&&) noexcept {nullptr};

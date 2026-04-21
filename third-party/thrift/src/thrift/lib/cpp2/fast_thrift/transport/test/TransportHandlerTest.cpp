@@ -351,13 +351,13 @@ TEST_F(TransportHandlerTest, MultipleWritesAfterCompletion) {
 TEST_F(TransportHandlerTest, ReadBufferAvailableForwardsToPipeline) {
   auto [handler, pipeline] = createHandlerAndPipeline();
 
-  EXPECT_EQ(appHandler_.messageCount(), 0);
+  EXPECT_EQ(appHandler_.readCount(), 0);
 
   // Build raw bytes (no frame parsing - just raw data)
   auto data = buildTestData(20);
   handler->readBufferAvailable(std::move(data));
 
-  EXPECT_EQ(appHandler_.messageCount(), 1);
+  EXPECT_EQ(appHandler_.readCount(), 1);
 }
 
 // Test: Multiple readBufferAvailable calls
@@ -369,7 +369,7 @@ TEST_F(TransportHandlerTest, MultipleReadBufferAvailableCalls) {
     handler->readBufferAvailable(std::move(data));
   }
 
-  EXPECT_EQ(appHandler_.messageCount(), 5);
+  EXPECT_EQ(appHandler_.readCount(), 5);
 }
 
 // --- Lifecycle Tests ---
@@ -436,7 +436,7 @@ TEST_F(TransportHandlerTest, PipelineResetDuringReadCompletesSafely) {
 
   // Verify the read completed successfully
   EXPECT_TRUE(readCompleted);
-  EXPECT_EQ(appHandler_.messageCount(), 1);
+  EXPECT_EQ(appHandler_.readCount(), 1);
 }
 
 // --- Close Behavior Tests ---

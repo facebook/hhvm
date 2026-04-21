@@ -70,7 +70,6 @@
 
 namespace apache::thrift::fast_thrift::thrift::server::test {
 
-using apache::thrift::fast_thrift::channel_pipeline::HeadToTailOp;
 using apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder;
 using apache::thrift::fast_thrift::channel_pipeline::PipelineImpl;
 using apache::thrift::fast_thrift::channel_pipeline::Result;

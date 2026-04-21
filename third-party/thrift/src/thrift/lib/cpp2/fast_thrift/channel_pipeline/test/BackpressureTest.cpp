@@ -260,7 +260,7 @@ TEST_F(BackpressureTest, HandlerCanResumeWritingAfterWriteReady) {
   auto result1 = pipeline->fireWrite(TypeErasedBox(std::move(buf1)));
   EXPECT_EQ(result1, Result::Backpressure);
   EXPECT_EQ(successful_writes, 0);
-  EXPECT_EQ(transport_.writeCount(), 0);
+  EXPECT_EQ(app_.writeCount(), 0);
 
   backpressure_active = false;
   pipeline->onWriteReady();

@@ -69,20 +69,10 @@ class PipelineBuilder {
   static_assert(
       ValidEndpointPair<HeadHandler, TailHandler>,
       "Pipeline requires Head to satisfy HeadEndpointHandler (onWrite) "
-      "or EndpointHandler, and Tail to satisfy "
-      "TailEndpointHandler (onRead + onException) or EndpointHandler");
+      "and Tail to satisfy TailEndpointHandler (onRead + onException)");
   static_assert(
       BufferAllocator<Allocator>,
       "Allocator must satisfy BufferAllocator concept");
-
-  // Compile-time detection: which style is each endpoint?
-  static constexpr bool kHeadIsNewStyle = HeadEndpointHandler<HeadHandler>;
-  static constexpr bool kTailIsNewStyle = TailEndpointHandler<TailHandler>;
-  static constexpr bool kUsingNewEndpoints = kHeadIsNewStyle && kTailIsNewStyle;
-  static constexpr bool kUsingLegacyEndpoints =
-      !kHeadIsNewStyle && !kTailIsNewStyle;
-  static constexpr bool kUsingMixedEndpoints =
-      !kUsingNewEndpoints && !kUsingLegacyEndpoints;
 
  public:
   PipelineBuilder() = default;
@@ -129,22 +119,6 @@ class PipelineBuilder {
     allocator_ = allocator;
     return *this;
   }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  /**
-   * Set the head-to-tail operation direction.
-   * DEPRECATED: Only needed for legacy EndpointHandler implementations.
-   * For new code, use HeadEndpointHandler and TailEndpointHandler concepts
-   * and the direction will be inferred automatically.
-   */
-  [[deprecated(
-      "Please use new HeadEndpointHandler/TailEndpointHandler version")]]
-  PipelineBuilder& setHeadToTailOp(HeadToTailOp op) noexcept {
-    headToTailOp_ = op;
-    return *this;
-  }
-#pragma GCC diagnostic pop
 
   /**
    * Add the next inbound handler in head-to-tail order.
@@ -246,7 +220,7 @@ class PipelineBuilder {
   }
 
   /**
-   * Build the pipeline (new-style endpoints).
+   * Build the pipeline.
    *
    * Validates all required components are set, creates the PipelineImpl,
    * initializes contexts, and calls lifecycle methods.
@@ -254,12 +228,9 @@ class PipelineBuilder {
    * @return Unique pointer to the constructed pipeline
    * @throws std::runtime_error if required components are missing
    */
-  PipelineImpl::Ptr build()
-    requires kUsingNewEndpoints
-  {
+  PipelineImpl::Ptr build() {
     validateRequired();
 
-    // Use new constructor without direction - direction is fixed
     auto pipeline = PipelineImpl::Ptr(new PipelineImpl(
         eventBase_,
         std::move(handlers_),
@@ -267,125 +238,18 @@ class PipelineBuilder {
         static_cast<void*>(tailHandler_),
         static_cast<void*>(allocator_)));
 
-    // Wire terminal function pointers (fixed direction)
-    // Head handles writes (data exits), Tail handles reads (data enters)
     wireWriteTerminal(pipeline.get(), headHandler_);
     wireReadTerminal(pipeline.get(), tailHandler_);
 
-    // Wire lifecycle function pointers
     wireEndpointLifecycle(pipeline.get());
 
     pipeline->allocateFn_ = [](void* alloc, size_t size) noexcept -> BytesPtr {
       return static_cast<Allocator*>(alloc)->allocate(size);
     };
 
-    // Call handlerAdded for handlers and endpoints
     pipeline->callHandlerAdded();
     headHandler_->handlerAdded();
     tailHandler_->handlerAdded();
-
-    return pipeline;
-  }
-
-  /**
-   * Build the pipeline (legacy endpoints).
-   *
-   * @deprecated Use HeadEndpointHandler and TailEndpointHandler instead.
-   */
-  [[deprecated("Use HeadEndpointHandler/TailEndpointHandler concepts")]]
-  PipelineImpl::Ptr build()
-    requires(kUsingLegacyEndpoints)
-  {
-    validateRequired();
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    auto pipeline = PipelineImpl::Ptr(new PipelineImpl(
-        eventBase_,
-        std::move(handlers_),
-        static_cast<void*>(headHandler_),
-        static_cast<void*>(tailHandler_),
-        static_cast<void*>(allocator_),
-        headToTailOp_));
-
-    // Wire terminals based on runtime direction
-    if (headToTailOp_ == HeadToTailOp::Write) {
-      wireLegacyReadTerminal(pipeline.get(), headHandler_);
-      wireLegacyWriteTerminal(pipeline.get(), tailHandler_);
-    } else {
-      wireLegacyReadTerminal(pipeline.get(), tailHandler_);
-      wireLegacyWriteTerminal(pipeline.get(), headHandler_);
-    }
-#pragma GCC diagnostic pop
-
-    pipeline->allocateFn_ = [](void* alloc, size_t size) noexcept -> BytesPtr {
-      return static_cast<Allocator*>(alloc)->allocate(size);
-    };
-
-    pipeline->callHandlerAdded();
-
-    return pipeline;
-  }
-
-  /**
-   * Build the pipeline (mixed endpoints - one new-style, one legacy).
-   *
-   * Direction is fixed: reads exit at head, writes exit at tail.
-   * Uses appropriate method (onRead/onMessage, onWrite/onMessage) based
-   * on each endpoint's type.
-   *
-   * @deprecated Migrate all endpoints to
-   * HeadEndpointHandler/TailEndpointHandler.
-   */
-  [[deprecated(
-      "Migrate all endpoints to HeadEndpointHandler/TailEndpointHandler")]]
-  PipelineImpl::Ptr build()
-    requires(kUsingMixedEndpoints)
-  {
-    validateRequired();
-
-    auto pipeline = PipelineImpl::Ptr(new PipelineImpl(
-        eventBase_,
-        std::move(handlers_),
-        static_cast<void*>(headHandler_),
-        static_cast<void*>(tailHandler_),
-        static_cast<void*>(allocator_)));
-
-    // Wire write terminal based on head's type
-    if constexpr (kHeadIsNewStyle) {
-      wireWriteTerminal(pipeline.get(), headHandler_);
-    } else {
-      wireLegacyWriteTerminal(pipeline.get(), headHandler_);
-    }
-
-    // Wire read terminal based on tail's type
-    if constexpr (kTailIsNewStyle) {
-      wireReadTerminal(pipeline.get(), tailHandler_);
-    } else {
-      wireLegacyReadTerminal(pipeline.get(), tailHandler_);
-    }
-
-    // Wire lifecycle for new-style endpoints only
-    if constexpr (kHeadIsNewStyle) {
-      wireHeadLifecycle(pipeline.get());
-    }
-    if constexpr (kTailIsNewStyle) {
-      wireTailLifecycle(pipeline.get());
-    }
-
-    pipeline->allocateFn_ = [](void* alloc, size_t size) noexcept -> BytesPtr {
-      return static_cast<Allocator*>(alloc)->allocate(size);
-    };
-
-    pipeline->callHandlerAdded();
-
-    // Call handlerAdded for new-style endpoints
-    if constexpr (kHeadIsNewStyle) {
-      headHandler_->handlerAdded();
-    }
-    if constexpr (kTailIsNewStyle) {
-      tailHandler_->handlerAdded();
-    }
 
     return pipeline;
   }
@@ -406,10 +270,6 @@ class PipelineBuilder {
     }
   }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
-  // Wire write terminal for new-style HeadEndpointHandler
   void wireWriteTerminal(PipelineImpl* pipeline, HeadHandler* handler) {
     pipeline->writeTerminal_ = static_cast<void*>(handler);
     pipeline->writeTerminalOnMessageFn_ =
@@ -418,7 +278,6 @@ class PipelineBuilder {
     };
   }
 
-  // Wire read terminal for new-style TailEndpointHandler
   void wireReadTerminal(PipelineImpl* pipeline, TailHandler* handler) {
     pipeline->readTerminal_ = static_cast<void*>(handler);
     pipeline->readTerminalOnMessageFn_ =
@@ -429,30 +288,6 @@ class PipelineBuilder {
         [](void* h, folly::exception_wrapper&& e) noexcept {
           static_cast<TailHandler*>(h)->onException(std::move(e));
         };
-  }
-
-  // Wire read terminal for legacy EndpointHandler (deprecated)
-  template <typename Handler>
-  void wireLegacyReadTerminal(PipelineImpl* pipeline, Handler* handler) {
-    pipeline->readTerminal_ = static_cast<void*>(handler);
-    pipeline->readTerminalOnMessageFn_ =
-        [](void* h, TypeErasedBox&& msg) noexcept -> Result {
-      return static_cast<Handler*>(h)->onMessage(std::move(msg));
-    };
-    pipeline->readTerminalOnExceptionFn_ =
-        [](void* h, folly::exception_wrapper&& e) noexcept {
-          static_cast<Handler*>(h)->onException(std::move(e));
-        };
-  }
-
-  // Wire write terminal for legacy EndpointHandler (deprecated)
-  template <typename Handler>
-  void wireLegacyWriteTerminal(PipelineImpl* pipeline, Handler* handler) {
-    pipeline->writeTerminal_ = static_cast<void*>(handler);
-    pipeline->writeTerminalOnMessageFn_ =
-        [](void* h, TypeErasedBox&& msg) noexcept -> Result {
-      return static_cast<Handler*>(h)->onMessage(std::move(msg));
-    };
   }
 
   void wireEndpointLifecycle(PipelineImpl* pipeline) {
@@ -483,7 +318,6 @@ class PipelineBuilder {
       static_cast<TailHandler*>(t)->handlerRemoved();
     };
   }
-#pragma GCC diagnostic pop
 
   template <typename H, typename... Args>
   PipelineBuilder& addHandler(HandlerId id, Args&&... args) {
@@ -502,10 +336,6 @@ class PipelineBuilder {
   HeadHandler* headHandler_{nullptr};
   TailHandler* tailHandler_{nullptr};
   Allocator* allocator_{nullptr};
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  HeadToTailOp headToTailOp_{HeadToTailOp::Write};
-#pragma GCC diagnostic pop
   std::vector<detail::HandlerNode> handlers_;
 };
 

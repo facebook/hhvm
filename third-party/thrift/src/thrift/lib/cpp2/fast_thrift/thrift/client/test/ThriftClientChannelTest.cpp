@@ -45,7 +45,7 @@ using apache::thrift::fast_thrift::channel_pipeline::Result;
 using apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox;
 using apache::thrift::fast_thrift::channel_pipeline::test::MockHandler;
 using MockTransportHandler =
-    apache::thrift::fast_thrift::channel_pipeline::test::MockTailHandler;
+    apache::thrift::fast_thrift::channel_pipeline::test::MockHeadHandler;
 using apache::thrift::fast_thrift::channel_pipeline::test::TestAllocator;
 
 HANDLER_TAG(test_handler);
@@ -116,6 +116,8 @@ class ThriftClientChannelTest : public ::testing::Test {
   void SetUp() override {
     MockHandler::resetOrderCounter();
     allocator_.reset();
+    mockTransport_.setOnWriteCallback(
+        [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
   }
 
   ThriftClientChannel::UniquePtr createChannel() {

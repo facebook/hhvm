@@ -36,7 +36,6 @@
 
 namespace apache::thrift::fast_thrift::rocket::server::test {
 
-using channel_pipeline::HeadToTailOp;
 using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
 using channel_pipeline::Result;
@@ -125,13 +124,15 @@ HANDLER_TAG(mock_head_tag);
 
 TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
   folly::EventBase evb;
-  MockTailHandler head;
+  MockHeadHandler head;
+  head.setOnWriteCallback(
+      [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
   TestAllocator allocator;
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
 
   // Server pipeline: head=transport(mock), tail=app(adapter)
   auto pipeline =
-      PipelineBuilder<MockTailHandler, RocketServerAppAdapter, TestAllocator>()
+      PipelineBuilder<MockHeadHandler, RocketServerAppAdapter, TestAllocator>()
           .setEventBase(&evb)
           .setHead(&head)
           .setTail(adapter.get())
@@ -149,7 +150,7 @@ TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
   auto result = adapter->write(std::move(msg));
   EXPECT_EQ(result, Result::Success);
   // Write goes from tail→head, so mock head should receive it
-  EXPECT_EQ(head.messageCount(), 1);
+  EXPECT_EQ(head.writeCount(), 1);
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::server::test

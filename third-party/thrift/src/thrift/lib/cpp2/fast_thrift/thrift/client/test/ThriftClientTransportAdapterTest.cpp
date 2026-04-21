@@ -48,6 +48,7 @@ using channel_pipeline::PipelineBuilder;
 using channel_pipeline::PipelineImpl;
 using channel_pipeline::Result;
 using channel_pipeline::TypeErasedBox;
+using channel_pipeline::test::MockHeadHandler;
 using channel_pipeline::test::MockTailHandler;
 using channel_pipeline::test::TestAllocator;
 
@@ -101,7 +102,7 @@ TypeErasedBox makeRocketResponseBox(
 
 struct AdapterWithRocketPipeline {
   folly::EventBase evb;
-  MockTailHandler rocketHead;
+  MockHeadHandler rocketHead;
   TestAllocator allocator;
   std::unique_ptr<ThriftClientTransportAdapter> adapter;
 
@@ -110,8 +111,11 @@ struct AdapterWithRocketPipeline {
         std::make_unique<rocket::client::RocketClientConnection>();
     auto* appAdapter = connection->appAdapter.get();
 
+    rocketHead.setOnWriteCallback(
+        [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
+
     auto rocketPipeline = PipelineBuilder<
-                              MockTailHandler,
+                              MockHeadHandler,
                               rocket::client::RocketClientAppAdapter,
                               TestAllocator>()
                               .setEventBase(&evb)
@@ -139,14 +143,14 @@ TEST(ThriftClientTransportAdapterTest, OnWriteConvertsAndWritesToRocket) {
 
   auto result = fixture.adapter->onWrite(makeThriftRequestBox());
   EXPECT_EQ(result, Result::Success);
-  EXPECT_EQ(fixture.rocketHead.messageCount(), 1);
+  EXPECT_EQ(fixture.rocketHead.writeCount(), 1);
 }
 
 TEST(ThriftClientTransportAdapterTest, OnWriteConvertsRpcKindToFrameType) {
   AdapterWithRocketPipeline fixture;
   TypeErasedBox capturedMsg;
 
-  fixture.rocketHead.setOnMessageCallback([&](TypeErasedBox&& msg) {
+  fixture.rocketHead.setOnWriteCallback([&](TypeErasedBox&& msg) {
     capturedMsg = std::move(msg);
     return Result::Success;
   });
@@ -165,11 +169,13 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
   auto* appAdapter = connection->appAdapter.get();
 
   folly::EventBase evb;
-  MockTailHandler rocketHead;
+  MockHeadHandler rocketHead;
+  rocketHead.setOnWriteCallback(
+      [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
   TestAllocator rocketAllocator;
 
   auto rocketPipeline = PipelineBuilder<
-                            MockTailHandler,
+                            MockHeadHandler,
                             rocket::client::RocketClientAppAdapter,
                             TestAllocator>()
                             .setEventBase(&evb)
@@ -203,7 +209,7 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
   auto result = appAdapter->onRead(std::move(responseBox));
   EXPECT_EQ(result, Result::Success);
 
-  EXPECT_EQ(thriftTail.messageCount(), 1);
+  EXPECT_EQ(thriftTail.readCount(), 1);
 }
 
 TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
@@ -211,11 +217,13 @@ TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
   auto* appAdapter = connection->appAdapter.get();
 
   folly::EventBase evb;
-  MockTailHandler rocketHead;
+  MockHeadHandler rocketHead;
+  rocketHead.setOnWriteCallback(
+      [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
   TestAllocator rocketAllocator;
 
   auto rocketPipeline = PipelineBuilder<
-                            MockTailHandler,
+                            MockHeadHandler,
                             rocket::client::RocketClientAppAdapter,
                             TestAllocator>()
                             .setEventBase(&evb)

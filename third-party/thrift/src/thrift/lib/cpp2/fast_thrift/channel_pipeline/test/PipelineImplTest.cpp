@@ -88,7 +88,7 @@ TEST_F(PipelineImplTest, FireReadFlowsThroughAllHandlers) {
   EXPECT_EQ(head_ptr_->readCount(), 1);
   EXPECT_EQ(middle_ptr_->readCount(), 1);
   EXPECT_EQ(tail_ptr_->readCount(), 1);
-  EXPECT_EQ(app_.messageCount(), 1);
+  EXPECT_EQ(app_.readCount(), 1);
 }
 
 TEST_F(PipelineImplTest, FireReadReachesApp) {
@@ -124,7 +124,7 @@ TEST_F(PipelineImplTest, FireReadStopsOnBackpressure) {
   EXPECT_EQ(head_ptr_->readCount(), 1);
   EXPECT_EQ(middle_ptr_->readCount(), 1);
   EXPECT_EQ(tail_ptr_->readCount(), 0); // Should not reach tail
-  EXPECT_EQ(app_.messageCount(), 0); // Should not reach app
+  EXPECT_EQ(app_.readCount(), 0); // Should not reach app
 }
 
 TEST_F(PipelineImplTest, FireReadStopsOnError) {
@@ -214,7 +214,7 @@ TEST_F(PipelineImplTest, SendReadToSpecificHandler) {
   EXPECT_EQ(head_ptr_->readCount(), 0); // Skipped
   EXPECT_EQ(middle_ptr_->readCount(), 1);
   EXPECT_EQ(tail_ptr_->readCount(), 1);
-  EXPECT_EQ(app_.messageCount(), 1);
+  EXPECT_EQ(app_.readCount(), 1);
 }
 
 TEST_F(PipelineImplTest, SendWriteToSpecificHandler) {
@@ -586,7 +586,7 @@ TEST_F(PipelineImplTest, EmptyPipelineFireReadGoesToApp) {
   auto result = pipeline->fireRead(std::move(msg));
 
   EXPECT_EQ(result, Result::Success);
-  EXPECT_EQ(app_.messageCount(), 1);
+  EXPECT_EQ(app_.readCount(), 1);
 }
 
 TEST_F(PipelineImplTest, EmptyPipelineFireWriteGoesToTransport) {
@@ -647,10 +647,10 @@ TEST_F(PipelineImplTest, OutboundOnlyHandlerPassthroughRead) {
   auto result = pipeline->fireRead(std::move(msg));
 
   EXPECT_EQ(result, Result::Success);
-  EXPECT_EQ(app_.messageCount(), 1);
+  EXPECT_EQ(app_.readCount(), 1);
 }
 
-// ==================== Handler Behavior Tests ====================
+// ==================== Handler Behavior Tests
 
 TEST_F(PipelineImplTest, HandlerSwallowsMessage) {
   createHandlers();
@@ -667,7 +667,7 @@ TEST_F(PipelineImplTest, HandlerSwallowsMessage) {
   EXPECT_EQ(head_ptr_->readCount(), 1);
   EXPECT_EQ(middle_ptr_->readCount(), 1);
   EXPECT_EQ(tail_ptr_->readCount(), 0); // Never reached
-  EXPECT_EQ(app_.messageCount(), 0); // Never reached
+  EXPECT_EQ(app_.readCount(), 0); // Never reached
 }
 
 TEST_F(PipelineImplTest, HandlerSwallowsWrite) {
@@ -707,7 +707,7 @@ TEST_F(PipelineImplTest, HandlerFiresMultipleTimes) {
   EXPECT_EQ(head_ptr_->readCount(), 1);
   EXPECT_EQ(middle_ptr_->readCount(), 3); // 3 messages
   EXPECT_EQ(tail_ptr_->readCount(), 3);
-  EXPECT_EQ(app_.messageCount(), 3);
+  EXPECT_EQ(app_.readCount(), 3);
 }
 
 TEST_F(PipelineImplTest, HandlerConvertsReadToWrite) {
@@ -727,7 +727,7 @@ TEST_F(PipelineImplTest, HandlerConvertsReadToWrite) {
   EXPECT_EQ(head_ptr_->readCount(), 1);
   EXPECT_EQ(middle_ptr_->readCount(), 1);
   EXPECT_EQ(tail_ptr_->readCount(), 0); // Read not forwarded
-  EXPECT_EQ(app_.messageCount(), 0); // Read not forwarded
+  EXPECT_EQ(app_.readCount(), 0); // Read not forwarded
   EXPECT_EQ(head_ptr_->writeCount(), 1); // Write came back through head
   EXPECT_EQ(transport_.writeCount(), 1); // Write reached transport
 }
@@ -751,7 +751,7 @@ TEST_F(PipelineImplTest, RoundTripEcho) {
   EXPECT_EQ(head_ptr_->readCount(), 1);
   EXPECT_EQ(middle_ptr_->readCount(), 1);
   EXPECT_EQ(tail_ptr_->readCount(), 1);
-  EXPECT_EQ(app_.messageCount(), 0); // Echo swallows read
+  EXPECT_EQ(app_.readCount(), 0); // Echo swallows read
 
   // Write path: tail -> middle -> head -> transport
   EXPECT_EQ(tail_ptr_->writeCount(), 0); // Write starts at middle
@@ -930,7 +930,7 @@ TEST_F(ContextCachingTest, CachedContextEnablesSkipAheadRouting) {
   EXPECT_EQ(targetPtr->readCount(), 0);
 
   // App received the message directly
-  EXPECT_EQ(app_.messageCount(), 1);
+  EXPECT_EQ(app_.readCount(), 1);
 }
 
 TEST_F(ContextCachingTest, NormalForwardingWhenRouteConditionFails) {
@@ -967,7 +967,7 @@ TEST_F(ContextCachingTest, NormalForwardingWhenRouteConditionFails) {
   // Both middle and target received via normal forwarding
   EXPECT_EQ(middlePtr->readCount(), 1);
   EXPECT_EQ(targetPtr->readCount(), 1);
-  EXPECT_EQ(app_.messageCount(), 1);
+  EXPECT_EQ(app_.readCount(), 1);
 }
 
 TEST_F(ContextCachingTest, CacheNonExistentHandlerReturnsNull) {
@@ -1034,7 +1034,7 @@ TEST_F(ContextCachingTest, MixedRoutingAndForwarding) {
   EXPECT_EQ(targetPtr->readCount(), 3);
 
   // All 5 reached the app (3 via normal path, 2 via skip-ahead)
-  EXPECT_EQ(app_.messageCount(), 5);
+  EXPECT_EQ(app_.readCount(), 5);
 }
 
 TEST_F(ContextCachingTest, CachedContextValidForPipelineLifetime) {
@@ -1069,42 +1069,10 @@ TEST_F(ContextCachingTest, CachedContextValidForPipelineLifetime) {
   EXPECT_EQ(routerPtr->routedCount(), 100);
 
   // All reached app (via skip-ahead since target is last handler)
-  EXPECT_EQ(app_.messageCount(), 100);
+  EXPECT_EQ(app_.readCount(), 100);
 }
 
-// ==================== HeadToTailOp Direction Tests ====================
-
-TEST(HeadToTailOpTest, DefaultWriteDirection) {
-  folly::EventBase evb;
-  MockHeadHandler head;
-  MockTailHandler tail;
-  TestAllocator allocator;
-
-  auto pipeline =
-      PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
-          .setEventBase(&evb)
-          .setHead(&head)
-          .setTail(&tail)
-          .setAllocator(&allocator)
-          .build();
-
-  auto buf = folly::IOBuf::copyBuffer("write test");
-  EXPECT_EQ(
-      pipeline->fireWrite(TypeErasedBox(std::move(buf))), Result::Success);
-  EXPECT_EQ(head.writeCount(), 1);
-  EXPECT_EQ(tail.messageCount(), 0);
-
-  EXPECT_EQ(pipeline->fireRead(TypeErasedBox(42)), Result::Success);
-  EXPECT_EQ(tail.messageCount(), 1);
-  EXPECT_EQ(head.writeCount(), 1);
-}
-
-// Note: ReadDirectionReversesFlow test was removed because direction reversal
-// via setHeadToTailOp is no longer supported for new-style endpoints.
-// HeadEndpointHandler always receives reads, TailEndpointHandler always
-// receives writes. Direction reversal only applies to legacy EndpointHandler.
-
-// ==================== Endpoint Concept Tests ====================
+// ==================== Endpoint Concept Tests
 
 // Static assertions to verify concepts are satisfied
 static_assert(
@@ -1176,8 +1144,6 @@ TEST(EndpointLifecycleTest, LifecycleMethodsCalledOnMockHandlers) {
   MockTailHandler tail;
   TestAllocator allocator;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   auto pipeline =
       PipelineBuilder<MockHeadHandler, MockTailHandler, TestAllocator>()
           .setEventBase(&evb)
@@ -1185,7 +1151,6 @@ TEST(EndpointLifecycleTest, LifecycleMethodsCalledOnMockHandlers) {
           .setTail(&tail)
           .setAllocator(&allocator)
           .build();
-#pragma GCC diagnostic pop
 
   EXPECT_EQ(head.handlerAddedCount(), 1);
   EXPECT_EQ(tail.handlerAddedCount(), 1);

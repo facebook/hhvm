@@ -284,7 +284,7 @@ TEST_F(DelayedDestructionTest, MultipleFiresAfterCloseAreSafe) {
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(fireReadAttempts, 3);
   // After close, messages are forwarded directly to app (handlers bypassed)
-  EXPECT_EQ(app_.messageCount(), 3);
+  EXPECT_EQ(app_.readCount(), 3);
   EXPECT_EQ(handlerRemovedCount, 1);
 }
 
@@ -470,7 +470,7 @@ TEST_F(DelayedDestructionTest, PipelineOperationAfterCloseReturnsEarly) {
   EXPECT_EQ(handler_ptr_->writeCount(), 0);
 
   // Results go directly to app/transport since handlers are bypassed
-  EXPECT_EQ(app_.messageCount(), 1);
+  EXPECT_EQ(app_.readCount(), 1);
   EXPECT_EQ(transport_.writeCount(), 1);
 }
 

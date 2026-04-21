@@ -56,9 +56,6 @@ namespace apache::thrift::fast_thrift::channel_pipeline {
 
 PipelineImpl::~PipelineImpl() = default;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 PipelineImpl::PipelineImpl(
     folly::EventBase* eventBase,
     std::vector<detail::HandlerNode> handlers,
@@ -69,28 +66,9 @@ PipelineImpl::PipelineImpl(
       handlers_(std::move(handlers)),
       head_(head),
       tail_(tail),
-      allocator_(allocator),
-      headToTailOp_(HeadToTailOp::Write) {
+      allocator_(allocator) {
   initializeContexts();
 }
-
-PipelineImpl::PipelineImpl(
-    folly::EventBase* eventBase,
-    std::vector<detail::HandlerNode> handlers,
-    void* head,
-    void* tail,
-    void* allocator,
-    HeadToTailOp headToTailOp) noexcept
-    : eventBase_(eventBase),
-      handlers_(std::move(handlers)),
-      head_(head),
-      tail_(tail),
-      allocator_(allocator),
-      headToTailOp_(headToTailOp) {
-  initializeContexts();
-}
-
-#pragma GCC diagnostic pop
 
 void PipelineImpl::initializeContexts() noexcept {
   const auto N = handlers_.size();
@@ -111,22 +89,16 @@ void PipelineImpl::initializeContexts() noexcept {
   // Each context caches direct function pointers to the next/prev handler,
   // eliminating the per-hop round-trip through PipelineImpl on the hot path.
   //
-  // Step direction for read and write chains.
-  // Write (default): reads flow 0→N→terminal, writes flow N→0→terminal
-  // Read:            reads flow N→0→terminal, writes flow 0→N→terminal
-  const int readStep = (headToTailOp_ == HeadToTailOp::Write) ? 1 : -1;
-  const int writeStep = -readStep;
-
+  // Fixed direction: reads flow 0→N→terminal, writes flow N→0→terminal
   for (size_t i = 0; i < N; ++i) {
     auto& ctx = contexts_[i];
 
-    // Read/exception direction
-    const int readNextIdx = static_cast<int>(i) + readStep;
-    if (readNextIdx >= 0 && readNextIdx < static_cast<int>(N)) {
-      ctx.nextReadFn_ = handlers_[readNextIdx].onReadFn;
-      ctx.nextExceptionFn_ = handlers_[readNextIdx].onExceptionFn;
-      ctx.nextHandler_ = handlers_[readNextIdx].handlerPtr;
-      ctx.nextCtx_ = &contexts_[readNextIdx];
+    // Read/exception: forward direction (i+1)
+    if (i + 1 < N) {
+      ctx.nextReadFn_ = handlers_[i + 1].onReadFn;
+      ctx.nextExceptionFn_ = handlers_[i + 1].onExceptionFn;
+      ctx.nextHandler_ = handlers_[i + 1].handlerPtr;
+      ctx.nextCtx_ = &contexts_[i + 1];
     } else {
       ctx.nextReadFn_ = &terminalRead;
       ctx.nextExceptionFn_ = &terminalException;
@@ -134,12 +106,11 @@ void PipelineImpl::initializeContexts() noexcept {
       ctx.nextCtx_ = &ctx; // unused by terminal functions
     }
 
-    // Write direction
-    const int writeNextIdx = static_cast<int>(i) + writeStep;
-    if (writeNextIdx >= 0 && writeNextIdx < static_cast<int>(N)) {
-      ctx.prevWriteFn_ = handlers_[writeNextIdx].onWriteFn;
-      ctx.prevHandler_ = handlers_[writeNextIdx].handlerPtr;
-      ctx.prevCtx_ = &contexts_[writeNextIdx];
+    // Write: reverse direction (i-1)
+    if (i > 0) {
+      ctx.prevWriteFn_ = handlers_[i - 1].onWriteFn;
+      ctx.prevHandler_ = handlers_[i - 1].handlerPtr;
+      ctx.prevCtx_ = &contexts_[i - 1];
     } else {
       ctx.prevWriteFn_ = &terminalWrite;
       ctx.prevHandler_ = this;
@@ -150,18 +121,14 @@ void PipelineImpl::initializeContexts() noexcept {
   // Cache entry-point dispatch pointers for fireRead/fireWrite.
   // Eliminates vector indexing on the hot path entry.
   if (!handlers_.empty()) {
-    const size_t readEntry = (headToTailOp_ == HeadToTailOp::Write) ? 0 : N - 1;
-    const size_t writeEntry =
-        (headToTailOp_ == HeadToTailOp::Write) ? N - 1 : 0;
+    firstReadFn_ = handlers_[0].onReadFn;
+    firstExceptionFn_ = handlers_[0].onExceptionFn;
+    firstHandler_ = handlers_[0].handlerPtr;
+    firstCtx_ = &contexts_[0];
 
-    firstReadFn_ = handlers_[readEntry].onReadFn;
-    firstExceptionFn_ = handlers_[readEntry].onExceptionFn;
-    firstHandler_ = handlers_[readEntry].handlerPtr;
-    firstCtx_ = &contexts_[readEntry];
-
-    lastWriteFn_ = handlers_[writeEntry].onWriteFn;
-    lastHandler_ = handlers_[writeEntry].handlerPtr;
-    lastCtx_ = &contexts_[writeEntry];
+    lastWriteFn_ = handlers_[N - 1].onWriteFn;
+    lastHandler_ = handlers_[N - 1].handlerPtr;
+    lastCtx_ = &contexts_[N - 1];
   }
 }
 
@@ -181,15 +148,9 @@ void PipelineImpl::callHandlerRemovedImpl() noexcept {
     handlers_[idx].handlerRemovedFn(handlers_[idx].handlerPtr, contexts_[idx]);
   }
 
-  // Call endpoint handlerRemoved (new-style endpoints only)
-  // Each endpoint's lifecycle is wired independently for mixed endpoints.
-  // TODO: Remove if-checks once legacy EndpointHandler API is removed.
-  if (headHandlerRemovedFn_) {
-    headHandlerRemovedFn_(head_);
-  }
-  if (tailHandlerRemovedFn_) {
-    tailHandlerRemovedFn_(tail_);
-  }
+  // Call endpoint handlerRemoved
+  headHandlerRemovedFn_(head_);
+  tailHandlerRemovedFn_(tail_);
 }
 
 void PipelineImpl::callHandlerRemoved() noexcept {
@@ -207,13 +168,9 @@ void PipelineImpl::activate() noexcept {
     DCHECK(handler.onPipelineActivatedFn);
     handler.onPipelineActivatedFn(handler.handlerPtr, contexts_[i]);
   }
-  // Call endpoint lifecycle (new-style endpoints)
-  if (headOnPipelineActiveFn_) {
-    headOnPipelineActiveFn_(head_);
-  }
-  if (tailOnPipelineActiveFn_) {
-    tailOnPipelineActiveFn_(tail_);
-  }
+  // Call endpoint lifecycle
+  headOnPipelineActiveFn_(head_);
+  tailOnPipelineActiveFn_(tail_);
 }
 
 void PipelineImpl::deactivate() noexcept {
@@ -221,13 +178,9 @@ void PipelineImpl::deactivate() noexcept {
   if (closed_) {
     return;
   }
-  // Call endpoint lifecycle (new-style endpoints)
-  if (headOnPipelineInactiveFn_) {
-    headOnPipelineInactiveFn_(head_);
-  }
-  if (tailOnPipelineInactiveFn_) {
-    tailOnPipelineInactiveFn_(tail_);
-  }
+  // Call endpoint lifecycle
+  headOnPipelineInactiveFn_(head_);
+  tailOnPipelineInactiveFn_(tail_);
   if (!handlers_.empty()) {
     deactivateFromIndex(handlers_.size() - 1);
   }

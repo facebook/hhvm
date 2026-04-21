@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/logging/ThriftBiDiLog.h>
 
+#include <algorithm>
 #include <utility>
 
 namespace apache::thrift {
@@ -80,6 +81,8 @@ void ThriftBiDiLog::log(const detail::BiDiStreamNextEvent& /*event*/) {
   } else {
     auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(
         now - lastChunkGeneratedTime_);
+    intervalMs -= pauseDurationSinceLastChunk_;
+    intervalMs = std::max(intervalMs, std::chrono::milliseconds{0});
     if (counters_) {
       counters_->onBiDiStreamGenerationInterval(methodName_, intervalMs);
     }
@@ -87,18 +90,45 @@ void ThriftBiDiLog::log(const detail::BiDiStreamNextEvent& /*event*/) {
 
   streamTotalChunks_.fetch_add(1, std::memory_order_relaxed);
   lastChunkGeneratedTime_ = now;
+  pauseDurationSinceLastChunk_ = std::chrono::milliseconds{0};
 }
 
 void ThriftBiDiLog::log(const detail::BiDiStreamCreditEvent& /*event*/) {
   // No metric to collect for stream credit currently
 }
 
-void ThriftBiDiLog::log(const detail::BiDiStreamPauseEvent& /*event*/) {
-  // No metric to collect for stream pause currently
+void ThriftBiDiLog::log(const detail::BiDiStreamPauseEvent& event) {
+  if (!isPaused_) {
+    isPaused_ = true;
+    pauseReason_ = event.reason;
+    pauseStartTime_ = std::chrono::steady_clock::now();
+    if (counters_) {
+      counters_->onBiDiStreamPause(methodName_, event.reason);
+    }
+  }
+}
+
+void ThriftBiDiLog::log(const detail::BiDiStreamResumeEvent& /*event*/) {
+  handleResume();
 }
 
 void ThriftBiDiLog::log(const detail::BiDiFinallyEvent& event) {
   finish(event.reason);
+}
+
+void ThriftBiDiLog::handleResume() {
+  if (!isPaused_) {
+    return;
+  }
+
+  auto pauseDuration = std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::steady_clock::now() - pauseStartTime_);
+  pauseDurationSinceLastChunk_ += pauseDuration;
+  isPaused_ = false;
+
+  if (counters_) {
+    counters_->onBiDiStreamResume(methodName_, pauseReason_, pauseDuration);
+  }
 }
 
 void ThriftBiDiLog::finish(detail::BiDiEndReason reason) {
@@ -109,6 +139,12 @@ void ThriftBiDiLog::finish(detail::BiDiEndReason reason) {
   if (!wasSubscribed_.load(std::memory_order_acquire)) {
     return;
   }
+
+  // Note: we intentionally do NOT call handleResume() here. finish() runs on
+  // the IO thread (via ServerCallbackStapler destructor) while pause-tracking
+  // fields are non-atomic and accessed from the executor thread. Calling
+  // handleResume() here would be a data race. The lost final-pause metric is
+  // acceptable since it only affects streams that are paused at termination.
 
   auto durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now() -

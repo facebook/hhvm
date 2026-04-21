@@ -61,9 +61,11 @@ class ThriftBiDiLog {
   void log(const detail::BiDiStreamNextEvent& event);
   void log(const detail::BiDiStreamCreditEvent& event);
   void log(const detail::BiDiStreamPauseEvent& event);
+  void log(const detail::BiDiStreamResumeEvent& event);
   void log(const detail::BiDiFinallyEvent& event);
 
  private:
+  void handleResume();
   void finish(detail::BiDiEndReason reason);
 
   std::string_view methodName_;
@@ -84,12 +86,20 @@ class ThriftBiDiLog {
   std::atomic<bool> isSinkFirstChunk_{true};
   std::atomic<uint32_t> sinkTotalChunks_{0};
 
-  // Stream (server -> client) tracking — these two are only accessed from the
+  // Stream (server -> client) tracking — these are only accessed from the
   // executor thread (inside the stream generation coroutine), so no atomic.
   bool isStreamFirstChunk_{true};
   std::chrono::steady_clock::time_point lastChunkGeneratedTime_;
   // Written on executor, read in finish() from IO thread — must be atomic.
   std::atomic<uint32_t> streamTotalChunks_{0};
+
+  // Stream pause tracking — accessed from the executor thread only (inside the
+  // stream generation coroutine). finish() must NOT touch these fields because
+  // it runs on the IO thread.
+  bool isPaused_{false};
+  detail::StreamPauseReason pauseReason_{};
+  std::chrono::steady_clock::time_point pauseStartTime_;
+  std::chrono::milliseconds pauseDurationSinceLastChunk_{0};
 };
 
 } // namespace apache::thrift

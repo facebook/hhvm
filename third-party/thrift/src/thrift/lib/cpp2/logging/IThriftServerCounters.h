@@ -119,6 +119,14 @@ class IThriftServerCounters {
   virtual void onBiDiStreamFirstChunkLatency(
       std::string_view /*methodName*/, std::chrono::milliseconds /*latency*/) {}
 
+  virtual void onBiDiStreamPause(
+      std::string_view /*methodName*/, detail::StreamPauseReason /*reason*/) {}
+
+  virtual void onBiDiStreamResume(
+      std::string_view /*methodName*/,
+      detail::StreamPauseReason /*reason*/,
+      std::chrono::milliseconds /*pauseDuration*/) {}
+
   virtual void onBiDiStreamGenerationInterval(
       std::string_view /*methodName*/, std::chrono::milliseconds /*interval*/) {
   }

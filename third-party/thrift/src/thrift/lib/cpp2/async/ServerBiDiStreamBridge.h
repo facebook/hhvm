@@ -161,9 +161,12 @@ class ServerBiDiStreamBridge : public TwoWayBridge<
               return false;
             },
             [&](StreamMessage::Resume) {
-              // TODO(T252289282): Add BiDiStreamResumeEvent and
-              // onBiDiStreamResume to ContextStack for observability parity
-              // with ServerGeneratorStreamBridge's resume handling.
+              // TODO(T252289282): Add onBiDiStreamResume to ContextStack
+              // for observability parity with
+              // ServerGeneratorStreamBridge's resume handling.
+              if (bridge->biDiLog_) {
+                bridge->biDiLog_->log(detail::BiDiStreamResumeEvent{});
+              }
               isPaused = false;
               return false;
             });

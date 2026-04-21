@@ -140,6 +140,8 @@ struct BiDiStreamPauseEvent {
   StreamPauseReason reason;
 };
 
+struct BiDiStreamResumeEvent {};
+
 enum class BiDiEndReason {
   COMPLETE,
   CANCEL,

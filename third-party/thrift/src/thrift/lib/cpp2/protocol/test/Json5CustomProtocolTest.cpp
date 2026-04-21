@@ -16,7 +16,7 @@
 
 #include <thrift/lib/cpp2/protocol/Json5Protocol.h>
 
-#include <limits>
+#include <cmath>
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/json5_test_constants.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/json5_test_types.h>
@@ -97,5 +97,24 @@ INSTANTIATE_TEST_SUITE_P(
     Json5CustomProtocolEncodeTest,
     ::testing::ValuesIn(testCases()),
     [](const auto& info) { return *info.param.name(); });
+
+// ── Round-trip test for -0.0 (no existing decode coverage for sign bit) ─────
+
+TEST(Json5CustomProtocolExtraTest, NegativeZeroRoundTrip) {
+  Example example;
+  example.doubleValue() = -0.0;
+
+  auto json = writeExample(example, {.writer = {.indentWidth = 2}});
+  auto d1 = readExample(json);
+  EXPECT_TRUE(std::signbit(*d1.doubleValue()));
+  EXPECT_EQ(*d1.doubleValue(), 0.0);
+
+  auto opts = kJson5Options;
+  opts.indentWidth = 2;
+  auto json5 = writeExample(example, {.writer = opts});
+  auto d2 = readExample(json5);
+  EXPECT_TRUE(std::signbit(*d2.doubleValue()));
+  EXPECT_EQ(*d2.doubleValue(), 0.0);
+}
 
 } // namespace apache::thrift

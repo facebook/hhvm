@@ -355,7 +355,7 @@ module Primary = struct
       | Case_type -> "case type"
       | Reified_generic -> "reified generic"
       | Generic -> "generic"
-      | As_expression -> "runtime-verified type"
+      | As_expression -> "asserted type"
 
     type t =
       | Cross_pkg_access of {

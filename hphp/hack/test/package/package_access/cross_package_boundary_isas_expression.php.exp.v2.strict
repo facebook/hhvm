@@ -1,4 +1,4 @@
-error: Typing[4472] Cannot access runtime-verified type C defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access asserted type C defined in package pkg2 which may not be available [1]
 -> C is defined in cross_package_boundary_isas_expression.php--foo.php [2]
 -> C belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
@@ -26,7 +26,7 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access runtime-verified type C defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access asserted type C defined in package pkg2 which may not be available [1]
 -> C is defined in cross_package_boundary_isas_expression.php--foo.php [2]
 -> C belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
@@ -54,7 +54,7 @@ PACKAGES.toml:3:11
     4 | include_paths=["//"]
     5 | 
 
-error: Typing[4472] Cannot access runtime-verified type G defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access asserted type G defined in package pkg2 which may not be available [1]
 -> G is defined in cross_package_boundary_isas_expression.php--foo.php [2]
 -> G belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
@@ -83,7 +83,7 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access runtime-verified type G defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access asserted type G defined in package pkg2 which may not be available [1]
 -> G is defined in cross_package_boundary_isas_expression.php--foo.php [2]
 -> G belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
@@ -112,7 +112,7 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access runtime-verified type C defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access asserted type C defined in package pkg2 which may not be available [1]
 -> C is defined in cross_package_boundary_isas_expression.php--foo.php [2]
 -> C belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
@@ -140,7 +140,7 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access runtime-verified type C defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access asserted type C defined in package pkg2 which may not be available [1]
 -> C is defined in cross_package_boundary_isas_expression.php--foo.php [2]
 -> C belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
@@ -168,7 +168,7 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access runtime-verified type T defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access asserted type T defined in package pkg2 which may not be available [1]
 -> T is defined in cross_package_boundary_isas_expression.php--foo.php [2]
 -> T belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
@@ -198,7 +198,7 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-error: Typing[4472] Cannot access runtime-verified type T defined in package pkg2 which may not be available [1]
+error: Typing[4472] Cannot access asserted type T defined in package pkg2 which may not be available [1]
 -> T is defined in cross_package_boundary_isas_expression.php--foo.php [2]
 -> T belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]

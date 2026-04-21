@@ -272,6 +272,34 @@ TEST_F(ValidateAuthenticatorTest, TestValidateValidAuthenticator) {
       StringPiece(hexlify(((*decodedCerts)[0].cert_data)->coalesce())));
 }
 
+TEST_F(ValidateAuthenticatorTest, TestValidateRejectsEmptyCertificateList) {
+  // An authenticator carrying a CertificateMsg whose certificate_list is empty
+  // (followed by CertificateVerify + Finished) must be rejected with
+  // folly::none rather than reaching an out-of-bounds read on the leaf cert.
+  // `expected_authenticator` encodes exactly this shape: 0b 000004 00 000000
+  // is a Certificate handshake with a zero-length certificate_list.
+  auto authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
+  auto handshakeContext =
+      folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
+  auto finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
+  auto authenticator =
+      folly::IOBuf::copyBuffer(unhexlify(expected_authenticator));
+  folly::Optional<std::vector<CertificateEntry>> decodedCerts;
+  Error err;
+  EXPECT_EQ(
+      ExportedAuthenticator::validate(
+          decodedCerts,
+          err,
+          hasher(),
+          std::move(authenticatorRequest),
+          std::move(authenticator),
+          std::move(handshakeContext),
+          std::move(finishedMacKey),
+          CertificateVerifyContext::Authenticator),
+      Status::Success);
+  EXPECT_FALSE(decodedCerts.has_value());
+}
+
 TEST_F(ValidateAuthenticatorTest, TestValidateEmptyAuthenticator) {
   auto cert = fizz::test::getCert(kP256Certificate);
   auto key = fizz::test::getPrivateKey(kP256Key);

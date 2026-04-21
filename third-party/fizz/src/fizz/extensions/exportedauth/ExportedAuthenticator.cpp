@@ -271,7 +271,10 @@ Status ExportedAuthenticator::validate(
 
   auto leafCert = folly::IOBuf::create(capacity);
   folly::io::Appender appender(leafCert.get(), capacity);
-  detail::writeBuf(certMsg->certificate_list.front().cert_data, appender);
+  // Defense-in-depth for T259277714: .at(0) throws std::out_of_range on
+  // empty list rather than UB. Guarded by .empty() check above, but .at()
+  // ensures bounds safety survives future refactors.
+  detail::writeBuf(certMsg->certificate_list.at(0).cert_data, appender);
   auto peerCert = openssl::CertUtils::makePeerCert(std::move(leafCert));
   Buf encodedCertMsg;
   FIZZ_RETURN_ON_ERROR(

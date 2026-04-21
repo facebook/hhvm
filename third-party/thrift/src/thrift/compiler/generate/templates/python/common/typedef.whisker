@@ -24,26 +24,20 @@
 {{#else if type.string?}}str
   {{#else if type.binary?}}
 {{#if type.iobuf?}}_fbthrift_iobuf.IOBuf{{#else}}bytes{{/if}}
-  {{#else if type.structured?}}
-    {{#let structured = type.true_type}}
-{{#if structured.need_module_path?}}{{structured.module_mangle}}.{{#else}}{{#partial m_common.private_alias_prefix}}{{/if}}
-{{structured.py_name}}
+  {{#else if (or type.structured? type.enum?)}}
+    {{#let t = type.true_type}}
+{{#if t.need_module_path?}}{{t.module_mangle}}.{{#else}}{{#partial m_common.private_alias_prefix}}{{/if}}
+{{t.py_name}}
   {{#else if type.list?}}
-{{#if python.generate_immutable_types?}}_fbthrift_python_types.ListTypeFactory{{/if}}
-{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableListTypeFactory{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.ListTypeFactory{{#else if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableListTypeFactory{{/if}}
 ({{#partial m_types.typeinfo type=type.true_type.elem_type}})
   {{#else if type.set?}}
-{{#if python.generate_immutable_types?}}_fbthrift_python_types.SetTypeFactory{{/if}}
-{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableSetTypeFactory{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.SetTypeFactory{{#else if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableSetTypeFactory{{/if}}
 ({{#partial m_types.typeinfo type=type.true_type.elem_type}})
   {{#else if type.map?}}
     {{#let map = type.true_type}}
-{{#if python.generate_immutable_types?}}_fbthrift_python_types.MapTypeFactory{{/if}}
-{{#if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableMapTypeFactory{{/if}}
+{{#if python.generate_immutable_types?}}_fbthrift_python_types.MapTypeFactory{{#else if python.generate_mutable_types?}}_fbthrift_python_mutable_containers.MutableMapTypeFactory{{/if}}
 ({{#partial m_types.typeinfo type=map.key_type}}, {{#partial m_types.typeinfo type=map.val_type}})
-  {{#else if type.enum?}}
-    {{#let enum = type.true_type}}
-{{#if enum.need_module_path?}}{{enum.module_mangle}}.{{#else}}{{#partial m_common.private_alias_prefix}}{{/if}}{{enum.py_name}}
   {{/if type.void?}}
 {{/let partial}}
 {{#if program.typedefs?}}
@@ -56,41 +50,37 @@
       {{#else if (and typedef.binary? typedef.iobuf?)}}
 {{typedef.py_name}} = _fbthrift_iobuf.IOBuf
       {{#else if typedef.list?}}
-        {{#if python.generate_immutable_types?}}
           {{#let resolved = typedef.resolved}}
+        {{#if python.generate_immutable_types?}}
 if _fbthrift_python_container_typedefs is not None:
     class {{typedef.py_name}}(_fbthrift_python_container_typedefs._ListTypedefBase):
         __slots__ = ()
         _fbthrift_list_type_info = {{#partial m_types.typeinfo type=resolved.true_type.elem_type}}
 else:
     {{typedef.py_name}} = _fbthrift_python_types.ListTypeFactory({{#partial m_types.typeinfo type=resolved.true_type.elem_type}})
-        {{/if python.generate_immutable_types?}}
-        {{#if python.generate_mutable_types?}}
-          {{#let resolved = typedef.resolved}}
+        {{#else if python.generate_mutable_types?}}
 class {{typedef.py_name}}(_fbthrift_python_mutable_containers._MutableListTypedefBase):
     __slots__ = ()
     _fbthrift_mutable_list_type_info = {{#partial m_types.typeinfo type=resolved.true_type.elem_type}}
-        {{/if python.generate_mutable_types?}}
+        {{/if python.generate_immutable_types?}}
       {{#else if typedef.set?}}
-        {{#if python.generate_immutable_types?}}
           {{#let resolved = typedef.resolved}}
+        {{#if python.generate_immutable_types?}}
 if _fbthrift_python_container_typedefs is not None:
     class {{typedef.py_name}}(_fbthrift_python_container_typedefs._SetTypedefBase):
         __slots__ = ()
         _fbthrift_set_type_info = {{#partial m_types.typeinfo type=resolved.true_type.elem_type}}
 else:
     {{typedef.py_name}} = _fbthrift_python_types.SetTypeFactory({{#partial m_types.typeinfo type=resolved.true_type.elem_type}})
-        {{/if python.generate_immutable_types?}}
-        {{#if python.generate_mutable_types?}}
-          {{#let resolved = typedef.resolved}}
+        {{#else if python.generate_mutable_types?}}
 class {{typedef.py_name}}(_fbthrift_python_mutable_containers._MutableSetTypedefBase):
     __slots__ = ()
     _fbthrift_mutable_set_type_info = {{#partial m_types.typeinfo type=resolved.true_type.elem_type}}
-        {{/if python.generate_mutable_types?}}
+        {{/if python.generate_immutable_types?}}
       {{#else if typedef.map?}}
-        {{#if python.generate_immutable_types?}}
           {{#let resolved = typedef.resolved}}
           {{#let map = resolved.true_type}}
+        {{#if python.generate_immutable_types?}}
 if _fbthrift_python_container_typedefs is not None:
     class {{typedef.py_name}}(_fbthrift_python_container_typedefs._MapTypedefBase):
         __slots__ = ()
@@ -98,15 +88,12 @@ if _fbthrift_python_container_typedefs is not None:
         _fbthrift_map_val_type_info = {{#partial m_types.typeinfo type=map.val_type}}
 else:
     {{typedef.py_name}} = _fbthrift_python_types.MapTypeFactory({{#partial m_types.typeinfo type=map.key_type}}, {{#partial m_types.typeinfo type=map.val_type}})
-        {{/if python.generate_immutable_types?}}
-        {{#if python.generate_mutable_types?}}
-          {{#let resolved = typedef.resolved}}
-          {{#let map = resolved.true_type}}
+        {{#else if python.generate_mutable_types?}}
 class {{typedef.py_name}}(_fbthrift_python_mutable_containers._MutableMapTypedefBase):
     __slots__ = ()
     _fbthrift_mutable_map_key_type_info = {{#partial m_types.typeinfo type=map.key_type}}
     _fbthrift_mutable_map_val_type_info = {{#partial m_types.typeinfo type=map.val_type}}
-        {{/if python.generate_mutable_types?}}
+        {{/if python.generate_immutable_types?}}
       {{#else}}
 {{typedef.py_name}} = {{#partial python_type type=typedef.resolved}}
       {{/if typedef.has_adapter?}}

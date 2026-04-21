@@ -287,6 +287,8 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
     TProtocol $output,
     string $request_name = '',
     mixed $_handler_ctx = null,
+    int $buffer_size = 100,
+    int $chunk_timeout_ms = 1000,
   ): Awaitable<void> {
     $server_sink = null;
     try {
@@ -297,7 +299,11 @@ abstract class ThriftProcessorBase implements IThriftProcessor {
       );
       $encoded_first_response = $transport->getBuffer();
       $transport->resetBuffer();
-      $server_sink = await gen_start_thrift_sink($encoded_first_response);
+      $server_sink = await gen_start_thrift_sink(
+        $encoded_first_response,
+        $buffer_size,
+        $chunk_timeout_ms,
+      );
 
       if ($server_sink === null) {
         // Sink was cancelled by the client.

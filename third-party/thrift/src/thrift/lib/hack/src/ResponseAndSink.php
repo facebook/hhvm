@@ -22,6 +22,8 @@ final class ResponseAndSink<TFirstResponse, TSinkType, TFinalResponseType> {
     public (function(
       AsyncGenerator<null, TSinkType, void>,
     ): Awaitable<TFinalResponseType>) $genSink,
+    public int $bufferSize = 100,
+    public int $chunkTimeoutMs = 1000,
   ) {}
 }
 

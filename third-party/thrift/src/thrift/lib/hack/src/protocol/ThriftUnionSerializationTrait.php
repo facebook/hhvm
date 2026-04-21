@@ -334,7 +334,11 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
     /* HH_FIXME[2011] dynamic method is allowed on non dynamic types */
     $type = HH_FIXME::dynamicCastForMissingMember($this)->_type;
 
-    $correct_field_set = $type is nonnull && C\contains($set_field_ids, $type);
+    $correct_field_set = $type is nonnull &&
+      (
+        C\contains($set_field_ids, $type) ||
+        ($num_field_count === 0 && $type === 0)
+      );
 
     return tuple($correct_field_set, $num_field_count);
   }

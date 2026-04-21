@@ -65,6 +65,10 @@ bool RocketBiDiClientCallback::onFirstResponse(
   sendPayload(std::move(firstResponse), /* next= */ true);
   state_.onFirstResponseSent();
 
+  if (UNLIKELY(connection_.areStreamsPaused())) {
+    handlePausedByConnection();
+  }
+
   if (initialTokens_ > 0) {
     onStreamRequestN(initialTokens_);
   }
@@ -428,6 +432,22 @@ void RocketBiDiClientCallback::handleFrame(ExtFrame&& extFrame) {
                 static_cast<uint32_t>(extFrame.extFrameType()),
                 static_cast<uint32_t>(streamId_))));
   }
+}
+
+void RocketBiDiClientCallback::handlePausedByConnection() {
+  DCHECK(connection_.areStreamsPaused());
+  if (UNLIKELY(!serverCallbackReady())) {
+    return;
+  }
+  serverCallback_->pauseStream();
+}
+
+void RocketBiDiClientCallback::handleResumedByConnection() {
+  DCHECK(!connection_.areStreamsPaused());
+  if (UNLIKELY(!serverCallbackReady())) {
+    return;
+  }
+  serverCallback_->resumeStream();
 }
 
 void RocketBiDiClientCallback::handleConnectionClose() {

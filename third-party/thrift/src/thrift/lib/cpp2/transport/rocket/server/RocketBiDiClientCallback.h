@@ -46,6 +46,9 @@ class RocketBiDiClientCallback final : public BiDiClientCallback,
 
   void resetServerCallback(BiDiServerCallback& serverCallback) override {
     serverCallback_ = &serverCallback;
+    if (UNLIKELY(connection_.areStreamsPaused())) {
+      handlePausedByConnection();
+    }
   }
 
   //
@@ -101,6 +104,8 @@ class RocketBiDiClientCallback final : public BiDiClientCallback,
   void handleFrame(ErrorFrame&&) override;
   void handleFrame(ExtFrame&&) override;
   void handleConnectionClose() override;
+  void handlePausedByConnection() override;
+  void handleResumedByConnection() override;
 
   void timeoutExpired() noexcept;
   void sinkChunkTimeoutExpired() noexcept;

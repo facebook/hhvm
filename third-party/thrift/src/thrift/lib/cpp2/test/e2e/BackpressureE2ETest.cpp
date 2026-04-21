@@ -320,6 +320,46 @@ CO_TEST_F(BackpressureE2ETest, StreamExpireTimeWithSlowConsumer) {
 
 // ==================== BiDi backpressure ====================
 
+CO_TEST_F(BackpressureE2ETest, BiDiStreamPausesUnderEgressBackpressure) {
+  // Configure the server with a low egress buffer backpressure threshold.
+  // The bidi transformation produces large payloads rapidly. The client
+  // consumes slowly. Backpressure should throttle the server — all items
+  // arrive in order and nothing is dropped.
+  struct Handler : public ServiceHandler_ {
+    folly::coro::Task<StreamTransformation<std::string, std::string>>
+    co_bidiEcho() override {
+      co_return StreamTransformation<std::string, std::string>{
+          [](folly::coro::AsyncGenerator<std::string&&> input)
+              -> folly::coro::AsyncGenerator<std::string&&> {
+            // Ignore input — just produce large payloads rapidly.
+            for (int i = 0; i < 30; ++i) {
+              // ~4KB payload to fill the buffer quickly.
+              co_yield std::string(4096, static_cast<char>('a' + (i % 26)));
+            }
+          }};
+    }
+  };
+
+  startServer(std::make_shared<Handler>(), [](ThriftServer& server) {
+    // Low threshold so that a few large payloads trigger backpressure.
+    server.setEgressBufferBackpressureThreshold(2048);
+  });
+  auto client = makeClient();
+  auto bidi = co_await client->co_bidiEcho();
+
+  // Consume stream items slowly.
+  auto streamGen = std::move(bidi.stream).toAsyncGenerator();
+  int received = 0;
+  while (auto item = co_await streamGen.next()) {
+    ++received;
+    // Slow consumer — gives the server time to fill the egress buffer.
+    co_await folly::coro::sleep(std::chrono::milliseconds(20));
+  }
+
+  // All 30 items must arrive — backpressure throttles, never drops.
+  EXPECT_EQ(received, 30);
+}
+
 CO_TEST_F(BackpressureE2ETest, BiDiSlowSinkDoesNotBlockStream) {
   // BiDi echo where the client sends sink items slowly. The stream
   // output (echoed items) should arrive as each sink item is processed.

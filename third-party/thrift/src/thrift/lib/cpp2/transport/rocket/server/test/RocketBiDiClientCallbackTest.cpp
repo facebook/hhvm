@@ -34,6 +34,8 @@ class MockBiDiServerCallback : public BiDiServerCallback {
   MOCK_METHOD(bool, onStreamRequestN, (int32_t), (override));
   MOCK_METHOD(bool, onStreamCancel, (), (override));
   MOCK_METHOD(void, resetClientCallback, (BiDiClientCallback&), (override));
+  MOCK_METHOD(void, pauseStream, (), (override));
+  MOCK_METHOD(void, resumeStream, (), (override));
 };
 
 class RocketBiDiClientCallbackTest : public ::testing::Test {
@@ -235,16 +237,48 @@ TEST_F(RocketBiDiClientCallbackTest, HandlePayloadFragmentReassembly) {
   callback_->handleFrame(std::move(fragment2));
 }
 
-TEST_F(RocketBiDiClientCallbackTest, HandlePausedByConnectionIsNoop) {
+TEST_F(RocketBiDiClientCallbackTest, HandlePausedByConnectionForwardsPause) {
   makeReady();
-  EXPECT_CALL(connection_, close(_)).Times(0);
+  EXPECT_CALL(connection_, areStreamsPaused()).WillRepeatedly(Return(true));
+  EXPECT_CALL(serverCallback_, pauseStream()).Times(1);
   callback_->handlePausedByConnection();
 }
 
-TEST_F(RocketBiDiClientCallbackTest, HandleResumedByConnectionIsNoop) {
+TEST_F(RocketBiDiClientCallbackTest, HandleResumedByConnectionForwardsResume) {
   makeReady();
-  EXPECT_CALL(connection_, close(_)).Times(0);
+  EXPECT_CALL(connection_, areStreamsPaused()).WillRepeatedly(Return(false));
+  EXPECT_CALL(serverCallback_, resumeStream()).Times(1);
   callback_->handleResumedByConnection();
+}
+
+TEST_F(RocketBiDiClientCallbackTest, HandlePausedByConnectionPreReady) {
+  EXPECT_CALL(connection_, areStreamsPaused()).WillRepeatedly(Return(true));
+  EXPECT_CALL(serverCallback_, pauseStream()).Times(0);
+  callback_->handlePausedByConnection();
+}
+
+TEST_F(RocketBiDiClientCallbackTest, HandleResumedByConnectionPreReady) {
+  EXPECT_CALL(connection_, areStreamsPaused()).WillRepeatedly(Return(false));
+  EXPECT_CALL(serverCallback_, resumeStream()).Times(0);
+  callback_->handleResumedByConnection();
+}
+
+TEST_F(
+    RocketBiDiClientCallbackTest,
+    OnFirstResponsePausesIfConnectionAlreadyPaused) {
+  EXPECT_CALL(connection_, areStreamsPaused()).WillRepeatedly(Return(true));
+  EXPECT_CALL(serverCallback_, pauseStream()).Times(1);
+  makeReady();
+}
+
+TEST_F(
+    RocketBiDiClientCallbackTest,
+    ResetServerCallbackPausesIfConnectionAlreadyPaused) {
+  makeReady();
+  NiceMock<MockBiDiServerCallback> newServerCallback;
+  EXPECT_CALL(connection_, areStreamsPaused()).WillRepeatedly(Return(true));
+  EXPECT_CALL(newServerCallback, pauseStream()).Times(1);
+  callback_->resetServerCallback(newServerCallback);
 }
 
 TEST_F(RocketBiDiClientCallbackTest, HandleStreamHeadersPushIsNoop) {

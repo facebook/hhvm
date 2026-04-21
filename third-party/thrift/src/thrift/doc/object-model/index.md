@@ -269,7 +269,7 @@ When there is no ambiguity, the specification henceforth uses these terms interc
     * `NaN` is excluded — there is no such <KW>datum</KW> in the <KW>dataset</KW> of Thrift floating point numbers.
     * Zero is not signed — there is exactly one <KW>datum</KW> that represents the [additive identity](https://en.wikipedia.org/wiki/Additive_identity).
 * **<Bookmark id="text-type">Unicode text</Bookmark>**
-  * An unbounded sequence of Unicode code points.
+  * An unbounded sequence of [Unicode scalar values](https://unicode.org/glossary/#unicode_scalar_value) (i.e. Unicode code points excluding surrogates U+D800 to U+DFFF).
 * **<Bookmark id="byte-array-type">Byte array</Bookmark>**
   * An unbounded sequence of (8-bit) bytes.
 * **<Bookmark id="any-type">Any</Bookmark>**
@@ -278,7 +278,7 @@ When there is no ambiguity, the specification henceforth uses these terms interc
     * A non-empty Any is defined by:
       * A [<KW>typeid</KW>](#type-identifiers-typeid) — identifies the <KW>type</KW> of the contained <KW>value</KW>.
       * A [<KW>cipher<sub>P</sub></KW>](#cipher) — an opaque representation of the <KW>datum</KW> of the contained <KW>value</KW>.
-      * A descriptor of a [<KW>protocol</KW>](#serialization-protocols) `P` — describes how to obtain the <KW>value</KW> from the aforementioned <KW>cipher<sub>P</sub></KW>.
+      * A [<KW>protocol</KW>](#serialization-protocols) `P` — describes how to obtain the <KW>value</KW> from the aforementioned <KW>cipher<sub>P</sub></KW>.
 
 :::info Primitive <KW>typeid names</KW>
 *Primitive types* shall henceforth be referred to by their [<KW>typeid names</KW>](#typeid-names) (which match the [Thrift IDL](/idl/index.md) where applicable):
@@ -601,7 +601,7 @@ Examples:
 
 #### Text
 
-A **`Text`-kind <KW>record</KW>** represents a finite sequence of [Unicode code points](https://en.wikipedia.org/wiki/List_of_Unicode_characters), which is the <KW>datum</KW> for the Thrift [<KW>Unicode text type</KW>](#text-type).
+A **`Text`-kind <KW>record</KW>** represents a finite sequence of [Unicode scalar values](https://unicode.org/glossary/#unicode_scalar_value), which is the <KW>datum</KW> for the Thrift [<KW>Unicode text type</KW>](#text-type).
 
 Examples:
 ```python
@@ -679,24 +679,62 @@ An **`Any`-kind <KW>record</KW>** is a “box” that contains a dynamically-typ
 It represents the <KW>datum</KW> for the Thrift [<KW>Any type</KW>](#any-type).
 
 The box may be *empty*.
-A non-empty box contains:
-* a `Text`-kind record that holds the [<KW>type identifier name</KW>](#typeid-names) for the enclosed value.
-* a `ByteArray`-kind record: the opaque descriptor of a [<KW>protocol</KW>](#serialization-protocols) `P`.
-* a `ByteArray`-kind record, the [<KW>`P`-cipher</KW>](#cipher).
+
+A **non-empty** box contains the following attributes:
+* `type` — a `Text`-kind record that holds the [<KW>type identifier name</KW>](#typeid-names) for the enclosed value.
+* `protocol` — a `FieldSet`-kind record: the <KW>protocol descriptor</KW> (see below).
+* `cipher` — a `ByteArray`-kind record, the [<KW>`P`-cipher</KW>](#cipher) of the enclosed value according to `protocol`.
+
+##### Protocol Descriptor
+
+The <KW>protocol descriptor</KW> is a `FieldSet`-kind <KW>record</KW> that identifies a specific [<KW>protocol</KW>](#serialization-protocols).
+
+**Invariants:**
+* Must contain **exactly one** <KW>field value</KW>.
+* **Semantic equality:** <KW>record</KW>-equal descriptors identify the same <KW>protocol</KW>.
+  * The converse does not necessarily hold - the same <KW>protocol</KW> may have multiple valid <KW>descriptors</KW>.
+* **Protocol resolution:** a compatible runtime environment must be able to determine a specific Thrift [<KW>protocol</KW>](#serialization-protocols) (i.e., a concrete [`serialize`](#operation-serialize)/[`deserialize`](#operation-deserialize) pair) from the descriptor.
+
+**Reserved fields:**
+* fields defined by the <KW>structured type</KW> `facebook.com/thrift/type/Protocol` are **reserved** - if present, their <KW>identities</KW>, <KW>types</KW> and semantics must conform to that <KW>type</KW>'s schema definitions.
+* The set of valid fields is open - additional fields beyond the reserved ones are permitted, provided the invariants above are preserved.
+
+:::note **Reference Implementation**
+The standard reference implementation of the `facebook.com/thrift/type/Protocol` type can be found in [`lib/thrift/type_rep.thrift`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/type_rep.thrift).
+:::
 
 Examples:
 ```python
 ✅ Any() # empty
 ✅ Any(
      type=Text("i32"),
-     protocol=ByteArray(<binary protocol>),
+     protocol=FieldSet(
+        (Int16(1), Text("standard")) → Int32(1)
+     ),
      cipher=ByteArray(...)
    )
 ✅ Any(
      type=Text("meta.com/foo/Bar"),
-     protocol=ByteArray(<custom protocol>),
+     protocol=FieldSet(
+        (Int16(2), Text("custom")) → Text("my_custom_protocol")
+     ),
      cipher=ByteArray(...)
    )
+❌ Any(
+     type=Text("meta.com/foo/Bar"),
+     protocol=FieldSet(
+        (Int16(1), Text("standard")) → Int32(1),
+        (Int16(2), Text("custom")) → Text("my_custom_protocol")
+     ),
+     cipher=ByteArray(...)
+   ) # invalid protocol: MUST have exactly 1 field
+❌ Any(
+     type=Text("i32"),
+     protocol=FieldSet(
+        (Int16(1), Text("standard")) → Text("compact"),
+     ),
+     cipher=ByteArray(...)
+   ) # invalid protocol: field "standard" is reserved but does not match schema
 ```
 
 #### Equality
@@ -940,7 +978,7 @@ export const RecordOfNotationMapRecordDescription = () => {
 export const RecordOfNotationAnyDatumDescription = () => {
   return (
     <>
-      (<KW><b>typeid name</b></KW>, <KW><b>cipher</b></KW>, <b><KW>protocol</KW> descriptor</b>)
+      (<KW><b>typeid name</b></KW>, <KW><b>cipher</b></KW>, <b><KW>protocol</KW></b>)
     </>
   );
 };
@@ -954,7 +992,7 @@ export const RecordOfNotationAnyRecordDescription = () => {
       typeid=Text(<KW><b>typeid name</b></KW>),
       <br />
       <Indent />
-      protocol=ByteArray(<b><KW>protocol</KW> descriptor</b>),
+      protocol=FieldSet(<b><KW>protocol descriptor</KW></b>),
       <br />
       <Indent />
       cipher=ByteArray(<KW><b>cipher</b></KW>)
@@ -1111,14 +1149,160 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 * If `L` is not the same as `R`, i.e. the input values do not have the same type, produces `False`.
 * if the <KW>type</KW> of `lhs` and `rhs` is not `any`...
   * Produces `True` if `record-of(lhs)` [equals](#equality) `record-of(rhs)`, otherwise `False`.
-  * if the <KW>type</KW> of `lhs` and `rhs` is `any`...
+* if the <KW>type</KW> of `lhs` and `rhs` is `any`...
   * Produces `True` if `lhs` and `rhs` are both empty.
   * Produces `False` if only one of `lhs` or `rhs` is empty.
   * Produces `False` if `lhs.typeid` and `rhs.typeid` are not equal.
-  * Otherwise, given <code>v<sub>lhs</sub></code> = <code>anyUnpack<sub>S</sub>(lhs)</code>, <code>v<sub>rhs</sub></code> = <code>anyUnpack<sub>S</sub>(rhs)</code>...
+* Otherwise, given <code>v<sub>lhs</sub></code> = <code>anyUnpack<sub>S</sub>(lhs)</code>, <code>v<sub>rhs</sub></code> = <code>anyUnpack<sub>S</sub>(rhs)</code>...
     * FAILS if the aforementioned [<code>anyUnpack<sub>S</sub></code>](#operation-anyunpack) fails.
       * Otherwise, produces <code>areEqual<sub>S</sub>(v<sub>lhs</sub>, v<sub>rhs</sub>)</code>.
     * Note how comparison of `any` values may succeed even if the unpacking of the underlying value would have failed: for example, if the `typeid`s are different, or only one of the values is not empty, `areEqual` can return `False` even if the current <KW>type system</KW> did not have the corresponding <KW>type</KW> (which would have caused `anyUnpack` to fail).
+
+</Operation>
+
+#### Operation: `isStableLessThan`
+
+<Operation>
+
+> **<code>isStableLessThan<sub>S</sub>(lhs, rhs) → Value(bool, ?)</code>**
+>
+> Defines a **strict, partial, weak, stable order** on all Thrift <KW>values</KW>.
+> * **strict** because it is irreflexive (i.e., it can never be the case that `isStableLessThan(a, a)` produces `True`)
+> * **partial** because not every pair of values can be compared (e.g. if they have different <KW>types</KW>).
+> * **weak** because two elements may compare "equivalent" (i.e., neither is "less than" the other) and yet not be identical and substitutable.
+>   * For example, two `any` <KW>values</KW> enclosing the same <KW>datum</KW> but using different <KW>protocols</KW>.
+> * **stable** because the result of this operation for any two input values is always the same — regardless of language or environment.
+>   * This is in contrast to the unstable ordering provided by implementations in most Thrift target languages, which may rely on arbitrary and implementation-dependent behavior (typically, related to unordered collections).
+
+**Environment**:
+* `S` — a <KW>type system</KW>
+
+**Inputs**:
+* <code>lhs = Value(L<sub>S</sub>, l)</code> — a <KW>value</KW> whose <KW>type</KW> <code>L</code> exists in <code>S</code>, with <KW>datum</KW> <code>l</code>.
+* <code>rhs = Value(R<sub>S</sub>, r)</code> — a <KW>value</KW> whose <KW>type</KW> <code>R</code> exists in <code>S</code>, with <KW>datum</KW> <code>r</code>.
+
+**Outputs**:
+* a boolean <KW>value</KW>
+
+**Outcome**:
+* If `L` is not the same as `R`, i.e. the input values do not have the same <KW>type</KW>, FAILS.
+* Otherwise, produces <code><a href="#operation-isrecordstablelessthan">isRecordStableLessThan</a>(record-of(lhs), record-of(rhs))</code>.
+
+</Operation>
+
+#### Operation: `isRecordStableLessThan`
+
+<Operation>
+
+> **<code>isRecordStableLessThan(lhs, rhs) → Bool(?)</code>**
+>
+> Similarly to <code><a href="#operation-isstablelessthan">isStableLessThan</a></code>, defines a **strict, partial, weak, stable order** for <KW>records</KW> (instead of Thrift <KW>values</KW>).
+
+**Inputs**:
+* `lhs`, `rhs` — <KW>records</KW>
+
+**Outputs**:
+* a `Bool`-kind <KW>record</KW>
+
+**Outcome**:
+* If the <KW>record kinds</KW> of `lhs` and `rhs` are not the same, FAILS.
+* Otherwise, if the <KW>record kind</KW> of `lhs` and `rhs` is...
+  * **`Bool`**: "`False` is less than `True`"
+    * Produces `lhs == False && rhs == True`.
+  * **`Int8`**, **`Int16`**, **`Int32`**, **`Int64`**: natural arithmetic order
+    * Produces `lhs < rhs`.
+  * **`Float32`**, **`Float64`**: [IEEE 754 total order](https://en.wikipedia.org/wiki/IEEE_754#Total-ordering_predicate) (with merged NaN variants)
+    * First, if the sign of `lhs` is negative (including `-0.0`, `-Infinity` and `-NaN`) and the sign of `rhs` is positive (including `+0.0`, `+Infinity` and `+NaN`) ⇒ produces `True`.
+    * If the sign of `lhs` is positive and the sign of `rhs` is negative ⇒ produces `False`.
+    * Otherwise, if either side is -NaN:
+        * If `lhs` is -NaN and `rhs` is -NaN ⇒ produces `False`.
+        * If `lhs` is -NaN ⇒ produces `True`.
+        * If `rhs` is -NaN ⇒ produces `False`.
+    * Otherwise, if either side is +NaN:
+        * If `lhs` is +NaN and `rhs` is +NaN ⇒ produces `False`.
+        * If `lhs` is +NaN ⇒ produces `False`.
+        * If `rhs` is +NaN ⇒ produces `True`.
+    * Otherwise, produces `lhs < rhs`.
+  * **`Text`**: lexicographical code point order
+    * Produces `isRecordStableLessThan(TextToUtf8ByteArray(lhs), TextToUtf8ByteArray(rhs))`.
+    * Notes:
+      * Unicode Code Point ≠ Unicode *character*, so two Unicode strings that "look" identical may compare differently:
+        * Precomposed: é can be one character: U+00E9.
+        * Decomposed: é can be two characters: e (U+0065) + combining acute accent (U+0301).
+      * If the sequence of Unicode code points is encoded using UTF-8, this order is equivalent to the binary order (i.e., byte-wise order) of the corresponding byte array, hence the definition above.
+      * Provides strong ordering (at the code point level).
+  * **`ByteArray`**: bitwise lexicographical (i.e., memcmp) order
+    * Produces `isRecordStableLessThan(List(Int8(lhs[0]), ...), List(Int8(rhs[0]), ...))`.
+  * **`List`**: lexicographical order of the sequence of elements
+    * For `i` in `0 ... min(len(lhs), len(rhs))`:
+      * If `lhs[i]` and `rhs[i]` are not [equal](#equality):
+        * Produces `isRecordStableLessThan(lhs[i], rhs[i])`.
+    * Produces `len(lhs) < len(rhs)`.
+  * **`Set`**: lexicographical order of the sequence formed by sorting the elements of the set.
+    * Produces `isRecordStableLessThan(SortedList(lhs[0], ...), SortedList(rhs[0], ...))`.
+  * **`Map`**: lexicographical order of the sequence formed by sorting the (key, value) pairs of the map.
+    * Produces:
+      ```
+      isRecordStableLessThan(
+        List(FieldSet((Int16(1), Text("key")) → k, (Int16(2), Text("value")) → v) for k, v in lhs),
+        List(FieldSet((Int16(1), Text("key")) → k, (Int16(2), Text("value")) → v) for k, v in rhs),
+      )
+      ```
+  * **`FieldSet`**: For each <KW>field identity</KW> `f` in the **union of field identities in `lhs` and `rhs`**, ordered by <KW>field id</KW>:
+    * If `f` is not in `lhs` ⇒ produces `False`.
+    * If `f` is not in `rhs` ⇒ produces `True`.
+    * Let `lf`, `rf` be the <KW>records</KW> corresponding to field `f` in `lhs`, `rhs` respectively.
+      * If `lf` and `rf` are not [equal](#equality):
+        * Produces `isRecordStableLessThan(lf, rf)`.
+    * Finally, produces `False` (`lhs` and `rhs` are equal).
+  * **`Any`**:
+    * If `lhs` is empty and `rhs` is empty ⇒ produces `False`.
+    * If `lhs` is empty ⇒ produces `False`.
+    * If `rhs` is empty ⇒ produces `True`.
+    * If `lhs.typeid` and `rhs.typeid` are not [equal](#equality):
+      * Produces `isRecordStableLessThan(lhs.typeid, rhs.typeid)`.
+    * Otherwise, produces <code>isRecordStableLessThan(<a href="#operation-anyunpack">anyUnpack</a>(lhs), <a href="#operation-anyunpack">anyUnpack</a>(rhs))</code>.
+      * FAILS if the aforementioned `anyUnpack` fails.
+
+:::note **Implementation Detail** — <KW>FieldSet</KW> Comparison
+The default comparison for <KW>FieldSet</KW> in C++, Python, and likely other languages differs from the one described in this document: it is based on field declaration order rather than <KW>field id</KW> order.
+:::
+
+</Operation>
+
+### Runtime Resolution
+
+:::info Thrift <Bookmark id="runtime-environment">**<KW>runtime environment</KW>**</Bookmark>
+
+A <KW>runtime environment</KW> captures the set of capabilities provided by a specific target Thrift environment that are outside of, but complementary to, the Thrift type system - such as the ability to resolve <KW>protocol descriptors</KW> to concrete <KW>protocol</KW> implementations.
+
+This is distinct from the <KW>type system</KW> `S`, which captures <KW>type</KW> definitions and <KW>schemas</KW> independently of any specific target environment.
+
+In practice, this corresponds to the set of *runtime libraries* that are provided by supported Thrift environments and languages (C++. Python, etc.)
+:::
+
+#### Operation: `resolveProtocol`
+
+<Operation>
+
+> **<code>resolveProtocol<sub>E</sub>(descriptor) → P</code>**
+>
+> Resolves a [<KW>protocol descriptor</KW>](#protocol-descriptor) into a concrete Thrift [<KW>protocol</KW>](#serialization-protocols).
+
+**Environment**:
+* `E` — a <KW>Thrift Runtime Environment</KW>
+
+
+**Inputs**:
+* `descriptor` — a `FieldSet`-kind <KW>record</KW> that conforms to the [<KW>protocol descriptor</KW>](#protocol-descriptor) invariants
+
+**Outputs**:
+* `P` — a [<KW>protocol</KW>](#serialization-protocols) (i.e., a concrete [`serialize`](#operation-serialize)/[`deserialize`](#operation-deserialize) pair)
+
+**Outcome**:
+* If the runtime environment `E` can resolve `descriptor` to a <KW>protocol</KW> `P`, produces `P`.
+  * Remember: for any two <KW>protocol descriptors</KW> `d1`, `d2`: if `d1` and `d2` are [<KW>record</KW>-equal](#equality), then `resolveProtocol`<sub>`E`</sub>`(d1)` and `resolveProtocol`<sub>`E`</sub>`(d2)` MUST produce the same <KW>protocol</KW>.
+* FAILS otherwise.
 
 </Operation>
 
@@ -1128,21 +1312,24 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 
 <Operation>
 
-> **<code>anyUnpack<sub>S</sub>(a) → Value(?, ?)</code>**
+> **<code>anyUnpack<sub>S, E</sub>(a) → Value(?, ?)</code>**
 >
 > “Unpacks” the <KW>cipher</KW> stored inside an `Any` into a <KW>value</KW> of the <KW>type</KW> corresponding to the enclosed <KW>typeid</KW> in the given <KW>type system</KW>.
 
 **Environment**:
 * `S` — a <KW>type system</KW>
+* `E` — a <KW>runtime environment</KW>
 
 **Inputs**:
-* `a` — a [non-empty `Any` <KW>value</KW>](#any-type) with components (`typeid`, <KW>protocol</KW> `P`, <code>cipher<sub>P</sub></code>)
+* `a` — a [non-empty `Any` <KW>value</KW>](#any-type) with components (`typeid`, `protocol`, <code>cipher</code>)
 
 **Outputs**:
-* <KW>value</KW> — of <KW>type</KW> matching the <KW>typeid</KW> of <code>v</code>
+* <KW>value</KW> — of <KW>type</KW> matching the <KW>typeid</KW> of <code>a</code>
 
 **Outcome**:
-* if `typeid` exists in `S`, then produces [`deserialize`](#operation-deserialize) (`P`, `S`, `typeid`, <code>cipher<sub>P</sub></code>).
+* Let `P` = <code><a href="#operation-resolveprotocol">resolveProtocol</a><sub>E</sub>(a.protocol)</code>.
+  * FAILS if the aforementioned `resolveProtocol` fails.
+* If `typeid` exists in `S`, then produces [`deserialize`](#operation-deserialize) (`P`, `S`, `typeid`, <code>cipher</code>).
   * FAILS if the aforementioned `deserialize` fails.
 * FAILS otherwise.
 
@@ -1829,6 +2016,7 @@ Equivalent to **<code><a href="#operation-materialize">materialize<sub>S,P</sub>
 | June 16, 2025     | 1.1.0   | [`MINOR`](#versioning-minor):<ol><li>Added [<KW>Annotation Map</KW>](#annotation-maps) concept, and updated <KW>user-specified properties</KW> to include annotations.</li></ol>[`PATCH`](#versioning-patch): <ol><li>Changed [<KW>presence qualifiers</KW>](#presence-qualifier): renamed <KW>unqualified</KW> to <KW>always-present</KW>.<br />Rationale: the term "unqualified" conflates a Thrift IDL concept (i.e., the lack of a qualifier in the `.thrift` source) with a semantic one in the object model (of a field always having a value). Indeed, the lack of a qualifier in IDL may actually correspond to different *semantic presence qualifiers*: in a <KW>struct</KW>, it corresponds to <KW>always-present</KW>, whereas in a <KW>union</KW> it corresponds to <KW>optional</KW>.</li><li>Various typos and style fixes.</li></ol>
 | November 10, 2025 | 1.1.1   | [`PATCH`](#versioning-patch): <ol><li>Reworded [Common Field Preservation](#common-field-preservation) and added [Example](#example-common-field-preserving-change).</li><li>Fixed indentation of `embed` operation details, some typos and nits.</li></ol>
 | February 24, 2026 | 1.2.0   | [`MINOR`](#versioning-minor):<ol><li>Added [Thrift identifier](#thrift-identifier) definition, applied to enum names and field names.</li><li>Allow `NaN` and signed zero <KW>datums</KW> for [`Float{N}`-kind records](#floatn).</li></ol>[`PATCH`](#versioning-patch): <ol><li>[Sealed types](#sealed-types): added formal definition.</li><li>Minor header changes.</li></ol>
+| April 21, 2026    | 1.3.0   | [`MINOR`](#versioning-minor):<ol><li>Added [`isStableLessThan`](#operation-isstablelessthan) and [`isRecordStableLessThan`](#operation-isrecordstablelessthan) operations.</li><li>`Any`-kind records: defined <KW>protocol descriptor</KW> invariants and operations.</li><li>Defined <KW>Thrift Runtime Environment</KW> and added [`resolveProtocol`](#operation-resolveprotocol) for resolving protocol descriptors to concrete protocols.</li></ol>[`PATCH`](#versioning-patch): <ol><li>Clarified `string` and `Text`-kind records as sequences of Unicode scalar values (excluding surrogates).</li></ol>
 
 ### Versioning
 
@@ -1846,4 +2034,3 @@ Releases use [Semantic Versioning](https://semver.org/), with a 3-component vers
   * They are typically non-semantic changes to the document, such as examples, clarifications, typographical fixes, etc.
   * All previous assumptions and semantics remain unchanged.
   * Such changes are extremely common.
-

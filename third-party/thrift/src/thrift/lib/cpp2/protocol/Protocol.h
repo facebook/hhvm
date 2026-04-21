@@ -192,39 +192,39 @@ void skip(Protocol_& prot, WireType arg_type, int depth = 0) {
 
   switch (arg_type) {
     case TType::T_BOOL: {
-      bool boolv;
+      bool boolv = false;
       prot.readBool(boolv);
       return;
     }
     // case TType::T_I08: // same numeric value as T_BYTE
     case TType::T_BYTE: {
-      int8_t bytev;
+      int8_t bytev = 0;
       prot.readByte(bytev);
       return;
     }
     case TType::T_I16: {
-      int16_t i16;
+      int16_t i16 = 0;
       prot.readI16(i16);
       return;
     }
     case TType::T_I32: {
-      int32_t i32;
+      int32_t i32 = 0;
       prot.readI32(i32);
       return;
     }
     case TType::T_U64:
     case TType::T_I64: {
-      int64_t i64;
+      int64_t i64 = 0;
       prot.readI64(i64);
       return;
     }
     case TType::T_DOUBLE: {
-      double dub;
+      double dub = 0.0;
       prot.readDouble(dub);
       return;
     }
     case TType::T_FLOAT: {
-      float flt;
+      float flt = 0.0f;
       prot.readFloat(flt);
       return;
     }
@@ -238,8 +238,8 @@ void skip(Protocol_& prot, WireType arg_type, int depth = 0) {
     }
     case TType::T_STRUCT: {
       std::string name;
-      int16_t fid;
-      TType ftype;
+      int16_t fid = 0;
+      TType ftype = TType::T_STOP;
       prot.readStructBegin(name);
       while (true) {
         prot.readFieldBegin(name, ftype, fid);
@@ -253,25 +253,25 @@ void skip(Protocol_& prot, WireType arg_type, int depth = 0) {
       return;
     }
     case TType::T_MAP: {
-      TType keyType;
-      TType valType;
-      uint32_t size;
+      TType keyType = TType::T_STOP;
+      TType valType = TType::T_STOP;
+      uint32_t size = 0;
       prot.readMapBegin(keyType, valType, size);
       skip_n(prot, size, {keyType, valType}, depth + 1);
       prot.readMapEnd();
       return;
     }
     case TType::T_SET: {
-      TType elemType;
-      uint32_t size;
+      TType elemType = TType::T_STOP;
+      uint32_t size = 0;
       prot.readSetBegin(elemType, size);
       skip_n(prot, size, {elemType}, depth + 1);
       prot.readSetEnd();
       return;
     }
     case TType::T_LIST: {
-      TType elemType;
-      uint32_t size;
+      TType elemType = TType::T_STOP;
+      uint32_t size = 0;
       prot.readListBegin(elemType, size);
       skip_n(prot, size, {elemType}, depth + 1);
       prot.readListEnd();

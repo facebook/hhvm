@@ -538,6 +538,23 @@ pub mod pseudo_consts {
     pub static g__FUNCTION_CREDENTIAL__: Lazy<ConstName> =
         lazy!(sn::pseudo_consts::G__FUNCTION_CREDENTIAL__);
     pub static exit: Lazy<ConstName> = lazy!(sn::pseudo_consts::EXIT);
+
+    pub fn iter() -> impl Iterator<Item = ConstName> {
+        [
+            *g__LINE__,
+            *g__CLASS__,
+            *g__TRAIT__,
+            *g__FILE__,
+            *g__DIR__,
+            *g__FUNCTION__,
+            *g__METHOD__,
+            *g__NAMESPACE__,
+            *g__COMPILER_FRONTEND__,
+            *g__FUNCTION_CREDENTIAL__,
+            *exit,
+        ]
+        .into_iter()
+    }
 }
 
 pub mod fb {

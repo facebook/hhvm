@@ -56,6 +56,12 @@ std::optional<w_string> findFileInDirTree(
   }
 }
 
+w_string SCM::translateCommitToLocal(
+    w_string_piece commitId,
+    const std::optional<w_string>& /*requestId*/) const {
+  return commitId.asWString();
+}
+
 std::unique_ptr<SCM> SCM::scmForPath(w_string_piece rootPath) {
   auto scmRoot = findFileInDirTree(rootPath, {kHg, kGit});
   if (!scmRoot) {

@@ -35,6 +35,9 @@ class Mercurial : public SCM {
       w_string_piece commitId,
       int numCommits,
       const std::optional<w_string>& requestId = std::nullopt) const override;
+  w_string translateCommitToLocal(
+      w_string_piece commitId,
+      const std::optional<w_string>& requestId = std::nullopt) const override;
 
  private:
   std::string dirStatePath_;

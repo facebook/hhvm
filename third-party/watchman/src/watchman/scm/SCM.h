@@ -86,6 +86,13 @@ class SCM {
       int numCommits,
       const std::optional<w_string>& requestId = std::nullopt) const = 0;
 
+  // Translate a commit hash from a different repo to the equivalent local
+  // commit using cross-repo lookup. Returns the original commitId if
+  // translation is not supported or fails.
+  virtual w_string translateCommitToLocal(
+      w_string_piece commitId,
+      const std::optional<w_string>& requestId = std::nullopt) const;
+
  private:
   w_string rootPath_;
   w_string scmRoot_;

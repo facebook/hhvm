@@ -321,4 +321,28 @@ std::vector<w_string> Mercurial::getCommitsPriorToAndIncluding(
       ->value();
 }
 
+w_string Mercurial::translateCommitToLocal(
+    w_string_piece commitId,
+    const std::optional<w_string>& requestId) const {
+  auto commitCopy = std::string{commitId.view()};
+  auto result = runMercurial(
+      {hgExecutablePath(),
+       "--traceback",
+       "log",
+       "-T",
+       "{node}",
+       "-r",
+       commitCopy,
+       "--config",
+       "megarepo.cross-repo-lookup-behavior=equivalent"},
+      makeHgOptions(requestId),
+      "translate commit to local equivalent");
+
+  if (result.output.empty()) {
+    return commitId.asWString();
+  }
+
+  return result.output;
+}
+
 } // namespace watchman

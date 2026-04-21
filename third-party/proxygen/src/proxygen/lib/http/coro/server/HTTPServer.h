@@ -14,6 +14,7 @@
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/io/async/AsyncSignalHandler.h>
 #include <folly/logging/xlog.h>
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 #include <proxygen/lib/sampling/Sampling.h>
 #include <quic/server/QuicHandshakeSocketHolder.h>
 #include <quic/server/QuicServer.h>
@@ -119,6 +120,10 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
 
   const Config& getConfig() const {
     return config_;
+  }
+
+  H3EarlyDataHandler& getH3EarlyDataHandler() {
+    return h3EarlyDataHandler_;
   }
 
   /**
@@ -276,6 +281,7 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
   std::atomic<State> state_{State::UNINIT};
   std::atomic<size_t> nRunningAcceptors_{0};
   uint32_t hostId_{0};
+  H3EarlyDataHandler h3EarlyDataHandler_;
   friend std::ostream& operator<<(std::ostream& os,
                                   const HTTPServer::State& state);
 

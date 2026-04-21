@@ -44,6 +44,7 @@ class QuicAcceptorTransportFactory : public quic::QuicServerTransportFactory {
     for (auto* quicObserver : quicConfig->observers) {
       transport->addObserver(quicObserver);
     }
+    transport->setEarlyDataAppParamsHandler(&server_.getH3EarlyDataHandler());
     return transport;
   }
 
@@ -254,6 +255,8 @@ void HTTPServer::run(std::function<void()> onSuccess) {
 }
 
 void HTTPServer::createQuicServer(const std::vector<folly::EventBase*>& evbs) {
+  h3EarlyDataHandler_.setCurrentSettings(config_.sessionConfig.settings);
+
   std::shared_ptr<fizz::server::FizzServerContext> fizzCtx;
   auto acceptorConfig = toAcceptorConfig(config_);
   for (auto evb : evbs) {

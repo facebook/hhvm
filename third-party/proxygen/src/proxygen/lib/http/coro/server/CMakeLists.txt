@@ -35,6 +35,7 @@ proxygen_add_library(proxygen_http_coro_server_coro_httpserver
     Folly::folly_io_async_event_base_manager
     Folly::folly_system_hardware_concurrency
   EXPORTED_DEPS
+    proxygen_http_codec_h3_early_data_handler
     proxygen_http_coro_filters_ServerFilterFactory
     proxygen_http_coro_server_coro_acceptor
     proxygen_sampling

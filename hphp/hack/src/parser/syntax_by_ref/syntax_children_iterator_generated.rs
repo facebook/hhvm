@@ -425,6 +425,22 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ClassAliasDeclaration(x) => {
+                get_index(10).and_then(|index| { match index {
+                        0 => Some(&x.attribute),
+                    1 => Some(&x.modifiers),
+                    2 => Some(&x.xhp),
+                    3 => Some(&x.keyword),
+                    4 => Some(&x.name),
+                    5 => Some(&x.type_parameters),
+                    6 => Some(&x.equal),
+                    7 => Some(&x.original_name),
+                    8 => Some(&x.original_type_parameters),
+                    9 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
             ClassishBody(x) => {
                 get_index(3).and_then(|index| { match index {
                         0 => Some(&x.left_brace),

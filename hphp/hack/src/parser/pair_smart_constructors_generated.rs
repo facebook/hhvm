@@ -228,6 +228,10 @@ where
         Node(self.0.make_classish_declaration(attribute.0, modifiers.0, xhp.0, keyword.0, name.0, type_parameters.0, extends_keyword.0, extends_list.0, implements_keyword.0, implements_list.0, body.0), self.1.make_classish_declaration(attribute.1, modifiers.1, xhp.1, keyword.1, name.1, type_parameters.1, extends_keyword.1, extends_list.1, implements_keyword.1, implements_list.1, body.1))
     }
 
+    fn make_class_alias_declaration(&mut self, attribute: Self::Output, modifiers: Self::Output, xhp: Self::Output, keyword: Self::Output, name: Self::Output, type_parameters: Self::Output, equal: Self::Output, original_name: Self::Output, original_type_parameters: Self::Output, semicolon: Self::Output) -> Self::Output {
+        Node(self.0.make_class_alias_declaration(attribute.0, modifiers.0, xhp.0, keyword.0, name.0, type_parameters.0, equal.0, original_name.0, original_type_parameters.0, semicolon.0), self.1.make_class_alias_declaration(attribute.1, modifiers.1, xhp.1, keyword.1, name.1, type_parameters.1, equal.1, original_name.1, original_type_parameters.1, semicolon.1))
+    }
+
     fn make_classish_body(&mut self, left_brace: Self::Output, elements: Self::Output, right_brace: Self::Output) -> Self::Output {
         Node(self.0.make_classish_body(left_brace.0, elements.0, right_brace.0), self.1.make_classish_body(left_brace.1, elements.1, right_brace.1))
     }

@@ -58,6 +58,7 @@ type t =
   | MethodishDeclaration
   | MethodishTraitResolution
   | ClassishDeclaration
+  | ClassAliasDeclaration
   | ClassishBody
   | TraitUse
   | RequireClause
@@ -245,6 +246,7 @@ let to_string kind =
   | MethodishDeclaration -> "methodish_declaration"
   | MethodishTraitResolution -> "methodish_trait_resolution"
   | ClassishDeclaration -> "classish_declaration"
+  | ClassAliasDeclaration -> "class_alias_declaration"
   | ClassishBody -> "classish_body"
   | TraitUse -> "trait_use"
   | RequireClause -> "require_clause"

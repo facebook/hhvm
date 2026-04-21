@@ -214,6 +214,10 @@ impl<'o, 't> SmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         <Self as FlattenSmartConstructors>::make_classish_declaration(self, attribute, modifiers, xhp, keyword, name, type_parameters, extends_keyword, extends_list, implements_keyword, implements_list, body)
     }
 
+    fn make_class_alias_declaration(&mut self, attribute: Self::Output, modifiers: Self::Output, xhp: Self::Output, keyword: Self::Output, name: Self::Output, type_parameters: Self::Output, equal: Self::Output, original_name: Self::Output, original_type_parameters: Self::Output, semicolon: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_class_alias_declaration(self, attribute, modifiers, xhp, keyword, name, type_parameters, equal, original_name, original_type_parameters, semicolon)
+    }
+
     fn make_classish_body(&mut self, left_brace: Self::Output, elements: Self::Output, right_brace: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_classish_body(self, left_brace, elements, right_brace)
     }

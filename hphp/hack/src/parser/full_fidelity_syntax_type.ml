@@ -388,6 +388,18 @@ struct
         classish_implements_list: t;
         classish_body: t;
       }
+    | ClassAliasDeclaration of {
+        class_alias_attribute: t;
+        class_alias_modifiers: t;
+        class_alias_xhp: t;
+        class_alias_keyword: t;
+        class_alias_name: t;
+        class_alias_type_parameters: t;
+        class_alias_equal: t;
+        class_alias_original_name: t;
+        class_alias_original_type_parameters: t;
+        class_alias_semicolon: t;
+      }
     | ClassishBody of {
         classish_body_left_brace: t;
         classish_body_elements: t;

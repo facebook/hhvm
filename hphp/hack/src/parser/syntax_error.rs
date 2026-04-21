@@ -1358,3 +1358,9 @@ pub const polymorphic_function_hint_reified: Error = Cow::Borrowed(
 pub const polymorphic_function_hint_variance: Error = Cow::Borrowed(
     "Variance annotation are not allowed on generics in polymorphic function hints or polymorphic lambda signatures.",
 );
+
+pub const trait_aliasing_not_supported: Error = Cow::Borrowed("Trait aliasing is not supported.");
+pub const no_modifiers_on_class_alias: Error =
+    Cow::Borrowed("Modifiers on class alias declarations are not allowed.");
+pub const no_attributes_on_class_alias: Error =
+    Cow::Borrowed("Attributes on class alias declarations are not allowed.");

@@ -605,7 +605,9 @@ where
     pub fn parse_classish_declaration(&mut self, attribute_spec: S::Output) -> S::Output {
         let modifiers = self.parse_classish_modifiers();
 
-        if self.peek_token_kind() == TokenKind::Enum {
+        let token_kind = self.peek_token_kind();
+
+        if token_kind == TokenKind::Enum {
             return self.parse_enum_or_enum_class_declaration(attribute_spec, modifiers);
         }
 
@@ -622,9 +624,45 @@ where
         } else {
             self.require_maybe_xhp_class_name()
         };
+
         let generic_type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
             p.parse_generic_type_parameter_list_opt()
         });
+
+        // class alias declaration:
+        //  class name generic-parameter-list-opt  =  name generic-parameter-list-opt
+        //  interface name generic-parameter-list-opt  =  name generic-parameter-list-opt
+        if self.peek_token_kind() == TokenKind::Equal {
+            let equal = self.assert_token(TokenKind::Equal);
+            if !attribute_spec.is_missing() {
+                self.with_error(Errors::no_attributes_on_class_alias, Vec::new());
+            }
+            if !modifiers.is_missing() {
+                self.with_error(Errors::no_modifiers_on_class_alias, Vec::new());
+            }
+            if token_kind == TokenKind::Trait {
+                self.with_error(Errors::trait_aliasing_not_supported, Vec::new());
+            }
+            let original_name = self.require_maybe_xhp_class_name();
+            let original_generic_type_parameter_list =
+                self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+                    p.parse_generic_type_parameter_list_opt()
+                });
+            let semicolon = self.require_semicolon();
+            return self.sc_mut().make_class_alias_declaration(
+                attribute_spec,
+                modifiers,
+                xhp,
+                token,
+                name,
+                generic_type_parameter_list,
+                equal,
+                original_name,
+                original_generic_type_parameter_list,
+                semicolon,
+            );
+        }
+
         let (classish_extends, classish_extends_list) = self.parse_extends_opt();
         let (classish_implements, classish_implements_list) = self.parse_classish_implements_opt();
         let body = self.parse_classish_body();

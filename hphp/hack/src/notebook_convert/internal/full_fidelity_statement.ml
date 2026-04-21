@@ -192,5 +192,6 @@ let is_statement =
     | ModuleDeclaration _
     | ModuleMembershipDeclaration _
     | PackageExpression _
-    | NamedArgument _ ->
+    | NamedArgument _
+    | ClassAliasDeclaration _ ->
       false)

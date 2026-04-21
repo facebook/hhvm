@@ -575,6 +575,27 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "ClassAliasDeclaration";
+      type_name = "class_alias_declaration";
+      func_name = "class_alias_declaration";
+      description = "class_alias_declaration";
+      prefix = "class_alias";
+      aggregates = [TopLevelDeclaration];
+      fields =
+        [
+          ("attribute", ZeroOrOne (Just "OldAttributeSpecification"));
+          ("modifiers", ZeroOrMore Token);
+          ("xhp", ZeroOrOne Token);
+          ("keyword", Token);
+          ("name", Token);
+          ("type_parameters", ZeroOrOne (Just "TypeParameters"));
+          ("equal", Token);
+          ("original_name", Token);
+          ("original_type_parameters", ZeroOrOne (Just "TypeParameters"));
+          ("semicolon", Token);
+        ];
+    };
+    {
       kind_name = "ClassishBody";
       type_name = "classish_body";
       func_name = "classish_body";

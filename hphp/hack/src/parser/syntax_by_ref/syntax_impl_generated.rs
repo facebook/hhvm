@@ -62,6 +62,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::MethodishDeclaration {..} => SyntaxKind::MethodishDeclaration,
             SyntaxVariant::MethodishTraitResolution {..} => SyntaxKind::MethodishTraitResolution,
             SyntaxVariant::ClassishDeclaration {..} => SyntaxKind::ClassishDeclaration,
+            SyntaxVariant::ClassAliasDeclaration {..} => SyntaxKind::ClassAliasDeclaration,
             SyntaxVariant::ClassishBody {..} => SyntaxKind::ClassishBody,
             SyntaxVariant::TraitUse {..} => SyntaxKind::TraitUse,
             SyntaxVariant::RequireClause {..} => SyntaxKind::RequireClause,

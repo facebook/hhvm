@@ -235,6 +235,11 @@ where
         Self::Output::make_classish_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
     }
 
+    fn make_class_alias_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output, arg8 : Self::Output, arg9 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9]);
+        Self::Output::make_class_alias_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    }
+
     fn make_classish_body(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0, &arg1, &arg2]);
         Self::Output::make_classish_body(self.state_mut(), arg0, arg1, arg2)

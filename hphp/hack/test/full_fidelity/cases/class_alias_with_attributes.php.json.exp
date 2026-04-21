@@ -1,0 +1,234 @@
+{
+  "kind": "script",
+  "script_declarations": {
+    "kind": "list",
+    "elements": [
+      {
+        "kind": "markup_section",
+        "markup_suffix": {
+          "kind": "markup_suffix",
+          "markup_suffix_less_than_question": {
+            "kind": "token",
+            "token": {
+              "kind": "<?",
+              "text": "<?",
+              "offset": 0,
+              "leading_width": 0,
+              "width": 2,
+              "trailing_width": 0,
+              "leading": [],
+              "trailing": [],
+              "line_number": 1
+            }
+          },
+          "markup_suffix_name": {
+            "kind": "token",
+            "token": {
+              "kind": "name",
+              "text": "hh",
+              "offset": 2,
+              "leading_width": 0,
+              "width": 2,
+              "trailing_width": 1,
+              "leading": [],
+              "trailing": [
+                {
+                  "kind": "end_of_line",
+                  "text": "\n",
+                  "offset": 4,
+                  "width": 1
+                }
+              ],
+              "line_number": 1
+            }
+          }
+        }
+      },
+      {
+        "kind": "class_alias_declaration",
+        "class_alias_attribute": {
+          "kind": "old_attribute_specification",
+          "old_attribute_specification_left_double_angle": {
+            "kind": "token",
+            "token": {
+              "kind": "<<",
+              "text": "<<",
+              "offset": 5,
+              "leading_width": 56,
+              "width": 2,
+              "trailing_width": 0,
+              "leading": [
+                {
+                  "kind": "end_of_line",
+                  "text": "\n",
+                  "offset": 5,
+                  "width": 1
+                },
+                {
+                  "kind": "single_line_comment",
+                  "text": "// syntax error: attributes not allowed on class alias",
+                  "offset": 6,
+                  "width": 54
+                },
+                {
+                  "kind": "end_of_line",
+                  "text": "\n",
+                  "offset": 60,
+                  "width": 1
+                }
+              ],
+              "trailing": [],
+              "line_number": 4
+            }
+          },
+          "old_attribute_specification_attributes": {
+            "kind": "list",
+            "elements": [
+              {
+                "kind": "list_item",
+                "list_item": {
+                  "kind": "constructor_call",
+                  "constructor_call_type": {
+                    "kind": "token",
+                    "token": {
+                      "kind": "name",
+                      "text": "MyAttribute",
+                      "offset": 63,
+                      "leading_width": 0,
+                      "width": 11,
+                      "trailing_width": 0,
+                      "leading": [],
+                      "trailing": [],
+                      "line_number": 4
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "old_attribute_specification_right_double_angle": {
+            "kind": "token",
+            "token": {
+              "kind": ">>",
+              "text": ">>",
+              "offset": 74,
+              "leading_width": 0,
+              "width": 2,
+              "trailing_width": 1,
+              "leading": [],
+              "trailing": [
+                {
+                  "kind": "end_of_line",
+                  "text": "\n",
+                  "offset": 76,
+                  "width": 1
+                }
+              ],
+              "line_number": 4
+            }
+          }
+        },
+        "class_alias_keyword": {
+          "kind": "token",
+          "token": {
+            "kind": "class",
+            "text": "class",
+            "offset": 77,
+            "leading_width": 0,
+            "width": 5,
+            "trailing_width": 1,
+            "leading": [],
+            "trailing": [
+              { "kind": "whitespace", "text": " ", "offset": 82, "width": 1 }
+            ],
+            "line_number": 5
+          }
+        },
+        "class_alias_name": {
+          "kind": "token",
+          "token": {
+            "kind": "name",
+            "text": "C",
+            "offset": 83,
+            "leading_width": 0,
+            "width": 1,
+            "trailing_width": 1,
+            "leading": [],
+            "trailing": [
+              { "kind": "whitespace", "text": " ", "offset": 84, "width": 1 }
+            ],
+            "line_number": 5
+          }
+        },
+        "class_alias_equal": {
+          "kind": "token",
+          "token": {
+            "kind": "=",
+            "text": "=",
+            "offset": 85,
+            "leading_width": 0,
+            "width": 1,
+            "trailing_width": 1,
+            "leading": [],
+            "trailing": [
+              { "kind": "whitespace", "text": " ", "offset": 86, "width": 1 }
+            ],
+            "line_number": 5
+          }
+        },
+        "class_alias_original_name": {
+          "kind": "token",
+          "token": {
+            "kind": "name",
+            "text": "D",
+            "offset": 87,
+            "leading_width": 0,
+            "width": 1,
+            "trailing_width": 0,
+            "leading": [],
+            "trailing": [],
+            "line_number": 5
+          }
+        },
+        "class_alias_semicolon": {
+          "kind": "token",
+          "token": {
+            "kind": ";",
+            "text": ";",
+            "offset": 88,
+            "leading_width": 0,
+            "width": 1,
+            "trailing_width": 1,
+            "leading": [],
+            "trailing": [
+              {
+                "kind": "end_of_line",
+                "text": "\n",
+                "offset": 89,
+                "width": 1
+              }
+            ],
+            "line_number": 5
+          }
+        }
+      },
+      {
+        "kind": "end_of_file",
+        "end_of_file_token": {
+          "kind": "token",
+          "token": {
+            "kind": "end_of_file",
+            "text": "",
+            "offset": 90,
+            "leading_width": 0,
+            "width": 0,
+            "trailing_width": 0,
+            "leading": [],
+            "trailing": [],
+            "line_number": 6
+          }
+        }
+      }
+    ]
+  }
+}

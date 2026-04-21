@@ -451,6 +451,23 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_class_alias_declaration(ctx: &C, attribute: Self, modifiers: Self, xhp: Self, keyword: Self, name: Self, type_parameters: Self, equal: Self, original_name: Self, original_type_parameters: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::ClassAliasDeclaration(ctx.get_arena().alloc(ClassAliasDeclarationChildren {
+            attribute,
+            modifiers,
+            xhp,
+            keyword,
+            name,
+            type_parameters,
+            equal,
+            original_name,
+            original_type_parameters,
+            semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_classish_body(ctx: &C, left_brace: Self, elements: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::ClassishBody(ctx.get_arena().alloc(ClassishBodyChildren {
             left_brace,

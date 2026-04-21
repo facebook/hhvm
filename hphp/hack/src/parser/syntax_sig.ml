@@ -253,6 +253,18 @@ module type Syntax_S = sig
         classish_implements_list: t;
         classish_body: t;
       }
+    | ClassAliasDeclaration of {
+        class_alias_attribute: t;
+        class_alias_modifiers: t;
+        class_alias_xhp: t;
+        class_alias_keyword: t;
+        class_alias_name: t;
+        class_alias_type_parameters: t;
+        class_alias_equal: t;
+        class_alias_original_name: t;
+        class_alias_original_type_parameters: t;
+        class_alias_semicolon: t;
+      }
     | ClassishBody of {
         classish_body_left_brace: t;
         classish_body_elements: t;
@@ -1230,6 +1242,9 @@ module type Syntax_S = sig
   val make_classish_declaration :
     t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
 
+  val make_class_alias_declaration :
+    t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+
   val make_classish_body : t -> t -> t -> t
 
   val make_trait_use : t -> t -> t -> t
@@ -1605,6 +1620,8 @@ module type Syntax_S = sig
   val is_methodish_trait_resolution : t -> bool
 
   val is_classish_declaration : t -> bool
+
+  val is_class_alias_declaration : t -> bool
 
   val is_classish_body : t -> bool
 

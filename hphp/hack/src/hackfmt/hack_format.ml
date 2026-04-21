@@ -698,6 +698,37 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env semi;
           Newline;
         ]
+    | Syntax.ClassAliasDeclaration
+        {
+          class_alias_attribute = attr;
+          class_alias_modifiers = modifiers;
+          class_alias_xhp = xhp;
+          class_alias_keyword = kw;
+          class_alias_name = name;
+          class_alias_type_parameters = type_params;
+          class_alias_equal = eq;
+          class_alias_original_name = orig;
+          class_alias_original_type_parameters = orig_type_params;
+          class_alias_semicolon = semi;
+        } ->
+      Concat
+        [
+          t env attr;
+          when_present attr newline;
+          handle_possible_list env modifiers;
+          t env xhp;
+          t env kw;
+          Space;
+          t env name;
+          t env type_params;
+          Space;
+          t env eq;
+          Space;
+          t env orig;
+          t env orig_type_params;
+          t env semi;
+          Newline;
+        ]
     | Syntax.ClassishDeclaration
         {
           classish_attribute = attr;

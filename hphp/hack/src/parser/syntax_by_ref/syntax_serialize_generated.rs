@@ -387,6 +387,21 @@ ss.serialize_field("classish_implements_list", &self.with(implements_list))?;
 ss.serialize_field("classish_body", &self.with(body))?;
       ss.end()
 } 
+SyntaxVariant::ClassAliasDeclaration (ClassAliasDeclarationChildren{attribute,modifiers,xhp,keyword,name,type_parameters,equal,original_name,original_type_parameters,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 11)?;
+      ss.serialize_field("kind", "class_alias_declaration")?;
+      ss.serialize_field("class_alias_attribute", &self.with(attribute))?;
+ss.serialize_field("class_alias_modifiers", &self.with(modifiers))?;
+ss.serialize_field("class_alias_xhp", &self.with(xhp))?;
+ss.serialize_field("class_alias_keyword", &self.with(keyword))?;
+ss.serialize_field("class_alias_name", &self.with(name))?;
+ss.serialize_field("class_alias_type_parameters", &self.with(type_parameters))?;
+ss.serialize_field("class_alias_equal", &self.with(equal))?;
+ss.serialize_field("class_alias_original_name", &self.with(original_name))?;
+ss.serialize_field("class_alias_original_type_parameters", &self.with(original_type_parameters))?;
+ss.serialize_field("class_alias_semicolon", &self.with(semicolon))?;
+      ss.end()
+} 
 SyntaxVariant::ClassishBody (ClassishBodyChildren{left_brace,elements,right_brace} ) => {
       let mut ss = s.serialize_struct("", 4)?;
       ss.serialize_field("kind", "classish_body")?;

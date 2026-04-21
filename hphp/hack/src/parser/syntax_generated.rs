@@ -445,6 +445,23 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_class_alias_declaration(_: &C, class_alias_attribute: Self, class_alias_modifiers: Self, class_alias_xhp: Self, class_alias_keyword: Self, class_alias_name: Self, class_alias_type_parameters: Self, class_alias_equal: Self, class_alias_original_name: Self, class_alias_original_type_parameters: Self, class_alias_semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::ClassAliasDeclaration(Box::new(ClassAliasDeclarationChildren {
+            class_alias_attribute,
+            class_alias_modifiers,
+            class_alias_xhp,
+            class_alias_keyword,
+            class_alias_name,
+            class_alias_type_parameters,
+            class_alias_equal,
+            class_alias_original_name,
+            class_alias_original_type_parameters,
+            class_alias_semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_classish_body(_: &C, classish_body_left_brace: Self, classish_body_elements: Self, classish_body_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::ClassishBody(Box::new(ClassishBodyChildren {
             classish_body_left_brace,
@@ -2337,6 +2354,20 @@ where
                 let acc = f(classish_body, acc);
                 acc
             },
+            SyntaxVariant::ClassAliasDeclaration(x) => {
+                let ClassAliasDeclarationChildren { class_alias_attribute, class_alias_modifiers, class_alias_xhp, class_alias_keyword, class_alias_name, class_alias_type_parameters, class_alias_equal, class_alias_original_name, class_alias_original_type_parameters, class_alias_semicolon } = *x;
+                let acc = f(class_alias_attribute, acc);
+                let acc = f(class_alias_modifiers, acc);
+                let acc = f(class_alias_xhp, acc);
+                let acc = f(class_alias_keyword, acc);
+                let acc = f(class_alias_name, acc);
+                let acc = f(class_alias_type_parameters, acc);
+                let acc = f(class_alias_equal, acc);
+                let acc = f(class_alias_original_name, acc);
+                let acc = f(class_alias_original_type_parameters, acc);
+                let acc = f(class_alias_semicolon, acc);
+                acc
+            },
             SyntaxVariant::ClassishBody(x) => {
                 let ClassishBodyChildren { classish_body_left_brace, classish_body_elements, classish_body_right_brace } = *x;
                 let acc = f(classish_body_left_brace, acc);
@@ -3516,6 +3547,7 @@ where
             SyntaxVariant::MethodishDeclaration {..} => SyntaxKind::MethodishDeclaration,
             SyntaxVariant::MethodishTraitResolution {..} => SyntaxKind::MethodishTraitResolution,
             SyntaxVariant::ClassishDeclaration {..} => SyntaxKind::ClassishDeclaration,
+            SyntaxVariant::ClassAliasDeclaration {..} => SyntaxKind::ClassAliasDeclaration,
             SyntaxVariant::ClassishBody {..} => SyntaxKind::ClassishBody,
             SyntaxVariant::TraitUse {..} => SyntaxKind::TraitUse,
             SyntaxVariant::RequireClause {..} => SyntaxKind::RequireClause,
@@ -3934,6 +3966,19 @@ where
                  classish_xhp: ts.pop().unwrap(),
                  classish_modifiers: ts.pop().unwrap(),
                  classish_attribute: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ClassAliasDeclaration, 10) => SyntaxVariant::ClassAliasDeclaration(Box::new(ClassAliasDeclarationChildren {
+                 class_alias_semicolon: ts.pop().unwrap(),
+                 class_alias_original_type_parameters: ts.pop().unwrap(),
+                 class_alias_original_name: ts.pop().unwrap(),
+                 class_alias_equal: ts.pop().unwrap(),
+                 class_alias_type_parameters: ts.pop().unwrap(),
+                 class_alias_name: ts.pop().unwrap(),
+                 class_alias_keyword: ts.pop().unwrap(),
+                 class_alias_xhp: ts.pop().unwrap(),
+                 class_alias_modifiers: ts.pop().unwrap(),
+                 class_alias_attribute: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ClassishBody, 3) => SyntaxVariant::ClassishBody(Box::new(ClassishBodyChildren {
@@ -4972,6 +5017,7 @@ where
             SyntaxVariant::MethodishDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.methodish_attribute, 4) },
             SyntaxVariant::MethodishTraitResolution(x) => unsafe { std::slice::from_raw_parts(&x.methodish_trait_attribute, 5) },
             SyntaxVariant::ClassishDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.classish_attribute, 11) },
+            SyntaxVariant::ClassAliasDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.class_alias_attribute, 10) },
             SyntaxVariant::ClassishBody(x) => unsafe { std::slice::from_raw_parts(&x.classish_body_left_brace, 3) },
             SyntaxVariant::TraitUse(x) => unsafe { std::slice::from_raw_parts(&x.trait_use_keyword, 3) },
             SyntaxVariant::RequireClause(x) => unsafe { std::slice::from_raw_parts(&x.require_keyword, 4) },
@@ -5160,6 +5206,7 @@ where
             SyntaxVariant::MethodishDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.methodish_attribute, 4) },
             SyntaxVariant::MethodishTraitResolution(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.methodish_trait_attribute, 5) },
             SyntaxVariant::ClassishDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classish_attribute, 11) },
+            SyntaxVariant::ClassAliasDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.class_alias_attribute, 10) },
             SyntaxVariant::ClassishBody(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classish_body_left_brace, 3) },
             SyntaxVariant::TraitUse(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.trait_use_keyword, 3) },
             SyntaxVariant::RequireClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.require_keyword, 4) },
@@ -5649,6 +5696,21 @@ pub struct ClassishDeclarationChildren<T, V> {
     pub classish_implements_keyword: Syntax<T, V>,
     pub classish_implements_list: Syntax<T, V>,
     pub classish_body: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct ClassAliasDeclarationChildren<T, V> {
+    pub class_alias_attribute: Syntax<T, V>,
+    pub class_alias_modifiers: Syntax<T, V>,
+    pub class_alias_xhp: Syntax<T, V>,
+    pub class_alias_keyword: Syntax<T, V>,
+    pub class_alias_name: Syntax<T, V>,
+    pub class_alias_type_parameters: Syntax<T, V>,
+    pub class_alias_equal: Syntax<T, V>,
+    pub class_alias_original_name: Syntax<T, V>,
+    pub class_alias_original_type_parameters: Syntax<T, V>,
+    pub class_alias_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6970,6 +7032,7 @@ pub enum SyntaxVariant<T, V> {
     MethodishDeclaration(Box<MethodishDeclarationChildren<T, V>>),
     MethodishTraitResolution(Box<MethodishTraitResolutionChildren<T, V>>),
     ClassishDeclaration(Box<ClassishDeclarationChildren<T, V>>),
+    ClassAliasDeclaration(Box<ClassAliasDeclarationChildren<T, V>>),
     ClassishBody(Box<ClassishBodyChildren<T, V>>),
     TraitUse(Box<TraitUseChildren<T, V>>),
     RequireClause(Box<RequireClauseChildren<T, V>>),
@@ -7514,6 +7577,22 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     8 => Some(&x.classish_implements_keyword),
                     9 => Some(&x.classish_implements_list),
                     10 => Some(&x.classish_body),
+                        _ => None,
+                    }
+                })
+            },
+            ClassAliasDeclaration(x) => {
+                get_index(10).and_then(|index| { match index {
+                        0 => Some(&x.class_alias_attribute),
+                    1 => Some(&x.class_alias_modifiers),
+                    2 => Some(&x.class_alias_xhp),
+                    3 => Some(&x.class_alias_keyword),
+                    4 => Some(&x.class_alias_name),
+                    5 => Some(&x.class_alias_type_parameters),
+                    6 => Some(&x.class_alias_equal),
+                    7 => Some(&x.class_alias_original_name),
+                    8 => Some(&x.class_alias_original_type_parameters),
+                    9 => Some(&x.class_alias_semicolon),
                         _ => None,
                     }
                 })

@@ -63,6 +63,7 @@ pub enum SyntaxVariant<'a, T, V> {
     MethodishDeclaration(&'a MethodishDeclarationChildren<'a, T, V>),
     MethodishTraitResolution(&'a MethodishTraitResolutionChildren<'a, T, V>),
     ClassishDeclaration(&'a ClassishDeclarationChildren<'a, T, V>),
+    ClassAliasDeclaration(&'a ClassAliasDeclarationChildren<'a, T, V>),
     ClassishBody(&'a ClassishBodyChildren<'a, T, V>),
     TraitUse(&'a TraitUseChildren<'a, T, V>),
     RequireClause(&'a RequireClauseChildren<'a, T, V>),
@@ -513,6 +514,20 @@ pub struct ClassishDeclarationChildren<'a, T, V> {
     pub implements_keyword: Syntax<'a, T, V>,
     pub implements_list: Syntax<'a, T, V>,
     pub body: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ClassAliasDeclarationChildren<'a, T, V> {
+    pub attribute: Syntax<'a, T, V>,
+    pub modifiers: Syntax<'a, T, V>,
+    pub xhp: Syntax<'a, T, V>,
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub type_parameters: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub original_name: Syntax<'a, T, V>,
+    pub original_type_parameters: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

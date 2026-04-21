@@ -94,6 +94,7 @@ module WithToken (Token : TokenType) = struct
       | MethodishDeclaration _ -> SyntaxKind.MethodishDeclaration
       | MethodishTraitResolution _ -> SyntaxKind.MethodishTraitResolution
       | ClassishDeclaration _ -> SyntaxKind.ClassishDeclaration
+      | ClassAliasDeclaration _ -> SyntaxKind.ClassAliasDeclaration
       | ClassishBody _ -> SyntaxKind.ClassishBody
       | TraitUse _ -> SyntaxKind.TraitUse
       | RequireClause _ -> SyntaxKind.RequireClause
@@ -341,6 +342,8 @@ module WithToken (Token : TokenType) = struct
       has_kind SyntaxKind.MethodishTraitResolution
 
     let is_classish_declaration = has_kind SyntaxKind.ClassishDeclaration
+
+    let is_class_alias_declaration = has_kind SyntaxKind.ClassAliasDeclaration
 
     let is_classish_body = has_kind SyntaxKind.ClassishBody
 
@@ -1162,6 +1165,30 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc classish_implements_keyword in
         let acc = f acc classish_implements_list in
         let acc = f acc classish_body in
+        acc
+      | ClassAliasDeclaration
+          {
+            class_alias_attribute;
+            class_alias_modifiers;
+            class_alias_xhp;
+            class_alias_keyword;
+            class_alias_name;
+            class_alias_type_parameters;
+            class_alias_equal;
+            class_alias_original_name;
+            class_alias_original_type_parameters;
+            class_alias_semicolon;
+          } ->
+        let acc = f acc class_alias_attribute in
+        let acc = f acc class_alias_modifiers in
+        let acc = f acc class_alias_xhp in
+        let acc = f acc class_alias_keyword in
+        let acc = f acc class_alias_name in
+        let acc = f acc class_alias_type_parameters in
+        let acc = f acc class_alias_equal in
+        let acc = f acc class_alias_original_name in
+        let acc = f acc class_alias_original_type_parameters in
+        let acc = f acc class_alias_semicolon in
         acc
       | ClassishBody
           {
@@ -3022,6 +3049,31 @@ module WithToken (Token : TokenType) = struct
           classish_implements_list;
           classish_body;
         ]
+      | ClassAliasDeclaration
+          {
+            class_alias_attribute;
+            class_alias_modifiers;
+            class_alias_xhp;
+            class_alias_keyword;
+            class_alias_name;
+            class_alias_type_parameters;
+            class_alias_equal;
+            class_alias_original_name;
+            class_alias_original_type_parameters;
+            class_alias_semicolon;
+          } ->
+        [
+          class_alias_attribute;
+          class_alias_modifiers;
+          class_alias_xhp;
+          class_alias_keyword;
+          class_alias_name;
+          class_alias_type_parameters;
+          class_alias_equal;
+          class_alias_original_name;
+          class_alias_original_type_parameters;
+          class_alias_semicolon;
+        ]
       | ClassishBody
           {
             classish_body_left_brace;
@@ -4802,6 +4854,31 @@ module WithToken (Token : TokenType) = struct
           "classish_implements_keyword";
           "classish_implements_list";
           "classish_body";
+        ]
+      | ClassAliasDeclaration
+          {
+            class_alias_attribute;
+            class_alias_modifiers;
+            class_alias_xhp;
+            class_alias_keyword;
+            class_alias_name;
+            class_alias_type_parameters;
+            class_alias_equal;
+            class_alias_original_name;
+            class_alias_original_type_parameters;
+            class_alias_semicolon;
+          } ->
+        [
+          "class_alias_attribute";
+          "class_alias_modifiers";
+          "class_alias_xhp";
+          "class_alias_keyword";
+          "class_alias_name";
+          "class_alias_type_parameters";
+          "class_alias_equal";
+          "class_alias_original_name";
+          "class_alias_original_type_parameters";
+          "class_alias_semicolon";
         ]
       | ClassishBody
           {
@@ -6721,6 +6798,32 @@ module WithToken (Token : TokenType) = struct
             classish_implements_keyword;
             classish_implements_list;
             classish_body;
+          }
+      | ( SyntaxKind.ClassAliasDeclaration,
+          [
+            class_alias_attribute;
+            class_alias_modifiers;
+            class_alias_xhp;
+            class_alias_keyword;
+            class_alias_name;
+            class_alias_type_parameters;
+            class_alias_equal;
+            class_alias_original_name;
+            class_alias_original_type_parameters;
+            class_alias_semicolon;
+          ] ) ->
+        ClassAliasDeclaration
+          {
+            class_alias_attribute;
+            class_alias_modifiers;
+            class_alias_xhp;
+            class_alias_keyword;
+            class_alias_name;
+            class_alias_type_parameters;
+            class_alias_equal;
+            class_alias_original_name;
+            class_alias_original_type_parameters;
+            class_alias_semicolon;
           }
       | ( SyntaxKind.ClassishBody,
           [
@@ -8828,6 +8931,35 @@ module WithToken (Token : TokenType) = struct
               classish_implements_keyword;
               classish_implements_list;
               classish_body;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_class_alias_declaration
+          class_alias_attribute
+          class_alias_modifiers
+          class_alias_xhp
+          class_alias_keyword
+          class_alias_name
+          class_alias_type_parameters
+          class_alias_equal
+          class_alias_original_name
+          class_alias_original_type_parameters
+          class_alias_semicolon =
+        let syntax =
+          ClassAliasDeclaration
+            {
+              class_alias_attribute;
+              class_alias_modifiers;
+              class_alias_xhp;
+              class_alias_keyword;
+              class_alias_name;
+              class_alias_type_parameters;
+              class_alias_equal;
+              class_alias_original_name;
+              class_alias_original_type_parameters;
+              class_alias_semicolon;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

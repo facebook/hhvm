@@ -6406,16 +6406,17 @@ void t_hack_generator::generate_process_function(
         tservice, tfunction, PhpFunctionNameSuffix::SINK_PAYLOAD);
     std::string sink_final_response_type = generate_function_helper_name(
         tservice, tfunction, PhpFunctionNameSuffix::SINK_FINAL_RESPONSE);
-    f_service_ << indent() << "$this->eventHandler_->postExec($handler_ctx, '"
-               << fn_name << "', $result);\n"
-               << indent() << "$this->writeHelper($result, '" << fn_name
-               << "', $seqid, $handler_ctx, $output, $reply_type);\n"
-               << indent()
-               << "await $this->genExecuteSink($response_and_sink->genSink, "
-               << sink_payload_type << "::class, " << sink_final_response_type
-               << "::class, $input, $output, '" << fn_name
-               << "', $handler_ctx);\n"
-               << indent() << "return;\n";
+    f_service_
+        << indent() << "$this->eventHandler_->postExec($handler_ctx, '"
+        << fn_name << "', $result);\n"
+        << indent() << "$this->writeHelper($result, '" << fn_name
+        << "', $seqid, $handler_ctx, $output, $reply_type);\n"
+        << indent()
+        << "await $this->genExecuteSink($response_and_sink->genSink, "
+        << sink_payload_type << "::class, " << sink_final_response_type
+        << "::class, $input, $output, '" << fn_name
+        << "', $handler_ctx, $response_and_sink->bufferSize, $response_and_sink->chunkTimeoutMs);\n"
+        << indent() << "return;\n";
   } else if (tfunction->qualifier() != t_function_qualifier::oneway) {
     indent(f_service_) << "$this->eventHandler_->postExec($handler_ctx, '"
                        << fn_name << "', $result);\n";

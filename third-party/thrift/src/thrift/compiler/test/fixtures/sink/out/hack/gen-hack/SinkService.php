@@ -284,7 +284,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $response_and_sink = await $this->handler->method();
       $this->eventHandler_->postExec($handler_ctx, 'method', $result);
       $this->writeHelper($result, 'method', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteSink($response_and_sink->genSink, SinkService_method_SinkPayload::class, SinkService_method_FinalResponse::class, $input, $output, 'method', $handler_ctx);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_method_SinkPayload::class, SinkService_method_FinalResponse::class, $input, $output, 'method', $handler_ctx, $response_and_sink->bufferSize, $response_and_sink->chunkTimeoutMs);
       return;
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
@@ -304,7 +304,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $result->success = $response_and_sink->response;
       $this->eventHandler_->postExec($handler_ctx, 'methodAndReponse', $result);
       $this->writeHelper($result, 'methodAndReponse', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodAndReponse_SinkPayload::class, SinkService_methodAndReponse_FinalResponse::class, $input, $output, 'methodAndReponse', $handler_ctx);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodAndReponse_SinkPayload::class, SinkService_methodAndReponse_FinalResponse::class, $input, $output, 'methodAndReponse', $handler_ctx, $response_and_sink->bufferSize, $response_and_sink->chunkTimeoutMs);
       return;
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
@@ -323,7 +323,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $response_and_sink = await $this->handler->methodThrow();
       $this->eventHandler_->postExec($handler_ctx, 'methodThrow', $result);
       $this->writeHelper($result, 'methodThrow', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodThrow_SinkPayload::class, SinkService_methodThrow_FinalResponse::class, $input, $output, 'methodThrow', $handler_ctx);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodThrow_SinkPayload::class, SinkService_methodThrow_FinalResponse::class, $input, $output, 'methodThrow', $handler_ctx, $response_and_sink->bufferSize, $response_and_sink->chunkTimeoutMs);
       return;
     } catch (\Exception $ex) {
       if ($result->setException($ex)) {
@@ -346,7 +346,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $response_and_sink = await $this->handler->methodSinkThrow();
       $this->eventHandler_->postExec($handler_ctx, 'methodSinkThrow', $result);
       $this->writeHelper($result, 'methodSinkThrow', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodSinkThrow_SinkPayload::class, SinkService_methodSinkThrow_FinalResponse::class, $input, $output, 'methodSinkThrow', $handler_ctx);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodSinkThrow_SinkPayload::class, SinkService_methodSinkThrow_FinalResponse::class, $input, $output, 'methodSinkThrow', $handler_ctx, $response_and_sink->bufferSize, $response_and_sink->chunkTimeoutMs);
       return;
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
@@ -365,7 +365,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $response_and_sink = await $this->handler->methodFinalThrow();
       $this->eventHandler_->postExec($handler_ctx, 'methodFinalThrow', $result);
       $this->writeHelper($result, 'methodFinalThrow', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodFinalThrow_SinkPayload::class, SinkService_methodFinalThrow_FinalResponse::class, $input, $output, 'methodFinalThrow', $handler_ctx);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodFinalThrow_SinkPayload::class, SinkService_methodFinalThrow_FinalResponse::class, $input, $output, 'methodFinalThrow', $handler_ctx, $response_and_sink->bufferSize, $response_and_sink->chunkTimeoutMs);
       return;
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
@@ -384,7 +384,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $response_and_sink = await $this->handler->methodBothThrow();
       $this->eventHandler_->postExec($handler_ctx, 'methodBothThrow', $result);
       $this->writeHelper($result, 'methodBothThrow', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodBothThrow_SinkPayload::class, SinkService_methodBothThrow_FinalResponse::class, $input, $output, 'methodBothThrow', $handler_ctx);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodBothThrow_SinkPayload::class, SinkService_methodBothThrow_FinalResponse::class, $input, $output, 'methodBothThrow', $handler_ctx, $response_and_sink->bufferSize, $response_and_sink->chunkTimeoutMs);
       return;
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;
@@ -403,7 +403,7 @@ abstract class SinkServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
       $response_and_sink = await $this->handler->methodFast();
       $this->eventHandler_->postExec($handler_ctx, 'methodFast', $result);
       $this->writeHelper($result, 'methodFast', $seqid, $handler_ctx, $output, $reply_type);
-      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodFast_SinkPayload::class, SinkService_methodFast_FinalResponse::class, $input, $output, 'methodFast', $handler_ctx);
+      await $this->genExecuteSink($response_and_sink->genSink, SinkService_methodFast_SinkPayload::class, SinkService_methodFast_FinalResponse::class, $input, $output, 'methodFast', $handler_ctx, $response_and_sink->bufferSize, $response_and_sink->chunkTimeoutMs);
       return;
     } catch (\Exception $ex) {
       $reply_type = \TMessageType::EXCEPTION;

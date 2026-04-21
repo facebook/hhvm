@@ -116,6 +116,20 @@ class ServerCallbackStapler : public BiDiServerCallback,
     clientCb_ = &clientCb;
   }
 
+  // No DeletionGuard needed: these are non-terminating advisory signals
+  // that do not modify sink_ or stream_, so they cannot trigger self-deletion.
+  void pauseStream() override {
+    if (stream_) {
+      stream_->pauseStream();
+    }
+  }
+
+  void resumeStream() override {
+    if (stream_) {
+      stream_->resumeStream();
+    }
+  }
+
   //
   // end of BiDiServerCallback methods
   //

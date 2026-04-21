@@ -337,6 +337,10 @@ using SinkServerCallbackPtr =
  * onFirstResponseError is the only unconditionally terminating method.
  * Otherwise, after onFirstResponse the contract splits into two streams in
  * opposite directions each one of which can be independently terminated.
+ *
+ * pauseStream() and resumeStream() are non-terminating advisory signals for
+ * egress backpressure. Unlike the on* methods, they do not affect the
+ * alive/dead state of either half of the channel.
  */
 struct BiDiChannelState {
  private:
@@ -418,6 +422,13 @@ class BiDiServerCallback {
   [[nodiscard]] virtual bool onSinkComplete() = 0;
 
   virtual void resetClientCallback(BiDiClientCallback&) = 0;
+
+  /// Pauses the stream half of the bidi channel. Called by the transport
+  /// layer when egress buffer backpressure is detected.
+  virtual void pauseStream() {}
+
+  /// Resumes the stream half of the bidi channel after a pause.
+  virtual void resumeStream() {}
 };
 
 class BiDiClientCallback {

@@ -425,6 +425,19 @@ TEST_F(BiDiBridgesTest, BasicWithBiDiCallback) {
 
 namespace {
 
+/// StreamServerCallback that records pauseStream/resumeStream calls.
+class RecordingStreamServerCallback : public StreamServerCallback {
+ public:
+  bool onStreamRequestN(int32_t) override { return true; }
+  void onStreamCancel() override {}
+  void resetClientCallback(StreamClientCallback&) override {}
+  void pauseStream() override { pauseCount.fetch_add(1); }
+  void resumeStream() override { resumeCount.fetch_add(1); }
+
+  std::atomic<int32_t> pauseCount{0};
+  std::atomic<int32_t> resumeCount{0};
+};
+
 /// Minimal StreamClientCallback that counts received items and supports
 /// condition-variable-based waiting for a target count.
 class CountingStreamClientCallback : public StreamClientCallback {
@@ -521,6 +534,39 @@ TEST(ServerBiDiStreamBridgePauseTest, PauseResumeSuspendsAndResumesStream) {
   // Tear down.
   evb->runInEventBaseThreadAndWait([&] { bridge->onStreamCancel(); });
   std::move(taskSF).get();
+}
+
+TEST(ServerCallbackStaplerPauseTest, PauseResumeNoOpWithoutStreamCallback) {
+  auto* stapler = new apache::thrift::detail::ServerCallbackStapler();
+  // No setStreamServerCallback call -- stream_ is nullptr.
+  stapler->pauseStream();
+  stapler->resumeStream();
+  delete stapler;
+}
+
+TEST(ServerCallbackStaplerPauseTest, PauseResumeForwardedToStreamBridge) {
+  RecordingStreamServerCallback streamCb;
+  auto* stapler = new apache::thrift::detail::ServerCallbackStapler();
+  stapler->setStreamServerCallback(&streamCb);
+
+  EXPECT_EQ(streamCb.pauseCount.load(), 0);
+  EXPECT_EQ(streamCb.resumeCount.load(), 0);
+
+  stapler->pauseStream();
+  EXPECT_EQ(streamCb.pauseCount.load(), 1);
+  EXPECT_EQ(streamCb.resumeCount.load(), 0);
+
+  stapler->resumeStream();
+  EXPECT_EQ(streamCb.pauseCount.load(), 1);
+  EXPECT_EQ(streamCb.resumeCount.load(), 1);
+
+  // Multiple pause/resume cycles.
+  stapler->pauseStream();
+  stapler->resumeStream();
+  EXPECT_EQ(streamCb.pauseCount.load(), 2);
+  EXPECT_EQ(streamCb.resumeCount.load(), 2);
+
+  delete stapler;
 }
 
 TEST(ServerBiDiStreamBridgePauseTest, PauseThenCancelTerminatesCleanly) {

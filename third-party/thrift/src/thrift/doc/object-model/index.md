@@ -1131,12 +1131,13 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 
 <Operation>
 
-> **<code>areEqual<sub>S</sub>(lhs, rhs) → Value(bool, ?)</code>**
+> **<code>areEqual<sub>S, E</sub>(lhs, rhs) → Value(bool, ?)</code>**
 >
 > Checks whether two Thrift <KW>values</KW> are **<KW>equal</KW>**.
 
 **Environment**:
 * `S` — a <KW>type system</KW>
+* `E` — a <KW>runtime environment</KW>
 
 **Inputs**:
 * <code>lhs = Value(L<sub>S</sub>, l)</code> — a <KW>value</KW> whose <KW>type</KW> <code>L</code> exists in <code>S</code>, with <KW>datum</KW> <code>l</code>.
@@ -1153,9 +1154,9 @@ export const CreateStandardDefaultFieldSetDescription = () => {
   * Produces `True` if `lhs` and `rhs` are both empty.
   * Produces `False` if only one of `lhs` or `rhs` is empty.
   * Produces `False` if `lhs.typeid` and `rhs.typeid` are not equal.
-* Otherwise, given <code>v<sub>lhs</sub></code> = <code>anyUnpack<sub>S</sub>(lhs)</code>, <code>v<sub>rhs</sub></code> = <code>anyUnpack<sub>S</sub>(rhs)</code>...
-    * FAILS if the aforementioned [<code>anyUnpack<sub>S</sub></code>](#operation-anyunpack) fails.
-      * Otherwise, produces <code>areEqual<sub>S</sub>(v<sub>lhs</sub>, v<sub>rhs</sub>)</code>.
+* Otherwise, given <code>v<sub>lhs</sub></code> = <code>anyUnpack<sub>S, E</sub>(lhs)</code>, <code>v<sub>rhs</sub></code> = <code>anyUnpack<sub>S, E</sub>(rhs)</code>...
+    * FAILS if the aforementioned [<code>anyUnpack<sub>S, E</sub></code>](#operation-anyunpack) fails.
+      * Otherwise, produces <code>areEqual<sub>S, E</sub>(v<sub>lhs</sub>, v<sub>rhs</sub>)</code>.
     * Note how comparison of `any` values may succeed even if the unpacking of the underlying value would have failed: for example, if the `typeid`s are different, or only one of the values is not empty, `areEqual` can return `False` even if the current <KW>type system</KW> did not have the corresponding <KW>type</KW> (which would have caused `anyUnpack` to fail).
 
 </Operation>
@@ -1164,7 +1165,7 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 
 <Operation>
 
-> **<code>isStableLessThan<sub>S</sub>(lhs, rhs) → Value(bool, ?)</code>**
+> **<code>isStableLessThan<sub>S, E</sub>(lhs, rhs) → Value(bool, ?)</code>**
 >
 > Defines a **strict, partial, weak, stable order** on all Thrift <KW>values</KW>.
 > * **strict** because it is irreflexive (i.e., it can never be the case that `isStableLessThan(a, a)` produces `True`)
@@ -1176,6 +1177,7 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 
 **Environment**:
 * `S` — a <KW>type system</KW>
+* `E` — a <KW>runtime environment</KW>
 
 **Inputs**:
 * <code>lhs = Value(L<sub>S</sub>, l)</code> — a <KW>value</KW> whose <KW>type</KW> <code>L</code> exists in <code>S</code>, with <KW>datum</KW> <code>l</code>.
@@ -1186,7 +1188,7 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 
 **Outcome**:
 * If `L` is not the same as `R`, i.e. the input values do not have the same <KW>type</KW>, FAILS.
-* Otherwise, produces <code><a href="#operation-isrecordstablelessthan">isRecordStableLessThan</a>(record-of(lhs), record-of(rhs))</code>.
+* Otherwise, produces <code><a href="#operation-isrecordstablelessthan">isRecordStableLessThan<sub>S, E</sub></a>(record-of(lhs), record-of(rhs))</code>.
 
 </Operation>
 
@@ -1194,9 +1196,13 @@ export const CreateStandardDefaultFieldSetDescription = () => {
 
 <Operation>
 
-> **<code>isRecordStableLessThan(lhs, rhs) → Bool(?)</code>**
+> **<code>isRecordStableLessThan<sub>S, E</sub>(lhs, rhs) → Bool(?)</code>**
 >
 > Similarly to <code><a href="#operation-isstablelessthan">isStableLessThan</a></code>, defines a **strict, partial, weak, stable order** for <KW>records</KW> (instead of Thrift <KW>values</KW>).
+
+**Environment**:
+* `S` — a <KW>type system</KW>
+* `E` — a <KW>runtime environment</KW>
 
 **Inputs**:
 * `lhs`, `rhs` — <KW>records</KW>
@@ -1261,7 +1267,7 @@ export const CreateStandardDefaultFieldSetDescription = () => {
     * If `rhs` is empty ⇒ produces `True`.
     * If `lhs.typeid` and `rhs.typeid` are not [equal](#equality):
       * Produces `isRecordStableLessThan(lhs.typeid, rhs.typeid)`.
-    * Otherwise, produces <code>isRecordStableLessThan(<a href="#operation-anyunpack">anyUnpack</a>(lhs), <a href="#operation-anyunpack">anyUnpack</a>(rhs))</code>.
+    * Otherwise, produces <code>isRecordStableLessThan<sub>S, E</sub>(<a href="#operation-anyunpack">anyUnpack<sub>S, E</sub></a>(lhs), <a href="#operation-anyunpack">anyUnpack<sub>S, E</sub></a>(rhs))</code>.
       * FAILS if the aforementioned `anyUnpack` fails.
 
 :::note **Implementation Detail** — <KW>FieldSet</KW> Comparison
@@ -2017,6 +2023,7 @@ Equivalent to **<code><a href="#operation-materialize">materialize<sub>S,P</sub>
 | November 10, 2025 | 1.1.1   | [`PATCH`](#versioning-patch): <ol><li>Reworded [Common Field Preservation](#common-field-preservation) and added [Example](#example-common-field-preserving-change).</li><li>Fixed indentation of `embed` operation details, some typos and nits.</li></ol>
 | February 24, 2026 | 1.2.0   | [`MINOR`](#versioning-minor):<ol><li>Added [Thrift identifier](#thrift-identifier) definition, applied to enum names and field names.</li><li>Allow `NaN` and signed zero <KW>datums</KW> for [`Float{N}`-kind records](#floatn).</li></ol>[`PATCH`](#versioning-patch): <ol><li>[Sealed types](#sealed-types): added formal definition.</li><li>Minor header changes.</li></ol>
 | April 21, 2026    | 1.3.0   | [`MINOR`](#versioning-minor):<ol><li>Added [`isStableLessThan`](#operation-isstablelessthan) and [`isRecordStableLessThan`](#operation-isrecordstablelessthan) operations.</li><li>`Any`-kind records: defined <KW>protocol descriptor</KW> invariants and operations.</li><li>Defined <KW>Thrift Runtime Environment</KW> and added [`resolveProtocol`](#operation-resolveprotocol) for resolving protocol descriptors to concrete protocols.</li></ol>[`PATCH`](#versioning-patch): <ol><li>Clarified `string` and `Text`-kind records as sequences of Unicode scalar values (excluding surrogates).</li></ol>
+| April 21, 2026    | 1.3.1   | [`PATCH`](#versioning-patch): <ol><li>Threaded <KW>runtime environment</KW> `E` through [`areEqual`](#operation-areequal), [`isStableLessThan`](#operation-isstablelessthan), and [`isRecordStableLessThan`](#operation-isrecordstablelessthan) operations, and their [`anyUnpack`](#operation-anyunpack) calls.</li></ol>
 
 ### Versioning
 

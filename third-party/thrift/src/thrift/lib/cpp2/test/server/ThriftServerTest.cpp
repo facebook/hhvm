@@ -4091,30 +4091,33 @@ TEST(ThriftServer, GetSetMaxRequests) {
         }
         {
           // Test set after setupThreadManager
-          ThriftServer server;
-          server.setInterface(std::make_shared<TestHandler>());
+          ThriftServer postSetupServer;
+          postSetupServer.setInterface(std::make_shared<TestHandler>());
           // Make the thrift server simple to create
-          server.setThreadManagerType(
+          postSetupServer.setThreadManagerType(
               apache::thrift::ThriftServer::ThreadManagerType::SIMPLE);
-          server.setNumCPUWorkerThreads(1);
-          server.setupThreadManager();
-          server.setMaxRequests(maxRequests);
-          EXPECT_EQ(maxRequests, server.getMaxRequests());
-          if (server.useResourcePools()) {
+          postSetupServer.setNumCPUWorkerThreads(1);
+          postSetupServer.setupThreadManager();
+          postSetupServer.setMaxRequests(maxRequests);
+          EXPECT_EQ(maxRequests, postSetupServer.getMaxRequests());
+          if (postSetupServer.useResourcePools()) {
             if (THRIFT_FLAG(default_sync_max_requests_to_concurrency_limit)) {
-              EXPECT_EQ(maxRequests, getExecutionLimitRequests(server));
+              EXPECT_EQ(
+                  maxRequests, getExecutionLimitRequests(postSetupServer));
             } else {
-              EXPECT_NE(maxRequests, getExecutionLimitRequests(server));
+              EXPECT_NE(
+                  maxRequests, getExecutionLimitRequests(postSetupServer));
             }
 
             // Also test that setting concurrencyLimit unsyncs the resource pool
             // from maxRequests.
             auto concurrencyLimit = maxRequests + 1;
-            server.setConcurrencyLimit(concurrencyLimit);
-            EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
+            postSetupServer.setConcurrencyLimit(concurrencyLimit);
+            EXPECT_EQ(
+                concurrencyLimit, getExecutionLimitRequests(postSetupServer));
 
-            server.setMaxRequests(maxRequests);
-            EXPECT_NE(maxRequests, getExecutionLimitRequests(server));
+            postSetupServer.setMaxRequests(maxRequests);
+            EXPECT_NE(maxRequests, getExecutionLimitRequests(postSetupServer));
           }
         }
       }
@@ -4436,8 +4439,8 @@ TEST_P(HeaderOrRocket, OnStartStopServingTest) {
 
   class TestEventHandler : public server::TServerEventHandler {
    public:
-    void preStart(const folly::SocketAddress* address) override {
-      this->address = *address;
+    void preStart(const folly::SocketAddress* listenAddress) override {
+      address = *listenAddress;
       preStartEnter.post();
       preStartExit.wait();
     }
@@ -4548,8 +4551,8 @@ TEST_P(HeaderOrRocket, StatusOnStartingAndStopping) {
   // processing user requests.
   class TestEventHandler : public server::TServerEventHandler {
    public:
-    void preStart(const folly::SocketAddress* address) override {
-      this->address = *address;
+    void preStart(const folly::SocketAddress* listenAddress) override {
+      address = *listenAddress;
       preStartDone.post();
     }
     folly::Baton<> preStartDone;

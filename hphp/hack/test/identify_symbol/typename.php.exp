@@ -1,11 +1,11 @@
-name: \HH\string, kind: class, span: line 6, characters 28-28, is_declaration: false
+name: \T, kind: class, span: line 6, characters 28-28, is_declaration: false
 affects_prod_build: false
 definition:
- HH\string
-   kind: class
-   id: type_id::HH\string
-   position: line 6, characters 15-20
-   span: line 5, character 3 - line 10, character 3
-   modifiers: final 
+ T
+   kind: typedef
+   id: type_id::T
+   position: line 3, characters 6-6
+   span: line 3, character 6 - line 3, character 12
+   modifiers: 
 
 

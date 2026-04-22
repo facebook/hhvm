@@ -535,7 +535,7 @@ let visitor =
            instance when refactoring class names, because we want to avoid
            refactoring `self`, `static`, and `parent` class ids. *)
         typed_class_id ~class_id_type:Other env ty p
-      | Aast.CI _ ->
+      | Aast.CI sid ->
         let affects_prod_build =
           if !in_nameof || !in_attribute then
             false
@@ -554,7 +554,7 @@ let visitor =
           else
             true
         in
-        typed_class_id ~affects_prod_build env ty p
+        process_class_id ~affects_prod_build sid
       | Aast.CIreified (id_pos, _) ->
         (* TODO(T259578698) causes bug where reified generic identifies to its bounds *)
         typed_class_id env ty id_pos

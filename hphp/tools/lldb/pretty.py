@@ -166,6 +166,15 @@ def pp_PackedPtr(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     return pretty_ptr(val_obj)
 
 
+@format("^HPHP::FuncId$", regex=True)
+def pp_FuncId(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
+    m_id = utils.get(val_obj, "m_id")
+    m_s = m_id.GetChildMemberWithName("m_s")
+    if m_s.IsValid():
+        return str(m_s.unsigned)
+    return str(m_id.unsigned)
+
+
 # ------------------------------------------------------------------------------
 # Resource
 

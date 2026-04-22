@@ -211,7 +211,6 @@ class t_const_value {
       default:
         return false;
     }
-    return false;
   }
 
   void set_owner(t_const* owner) { owner_ = owner; }

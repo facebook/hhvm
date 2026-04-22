@@ -74,7 +74,8 @@ hpke::KEMId DHKEM::getKEMId() const {
 DHKEM::EncapResult DHKEM::encap(folly::ByteRange pkR) {
   Error err;
   FIZZ_THROW_ON_ERROR(kex_->generateKeyPair(err), err);
-  std::unique_ptr<folly::IOBuf> dh = kex_->generateSharedSecret(pkR);
+  std::unique_ptr<folly::IOBuf> dh;
+  FIZZ_THROW_ON_ERROR(kex_->generateSharedSecret(dh, err, pkR), err);
   std::unique_ptr<folly::IOBuf> enc = kex_->getKeyShare();
 
   std::unique_ptr<folly::IOBuf> kemContext = enc->clone();
@@ -91,8 +92,12 @@ DHKEM::EncapResult DHKEM::authEncap(folly::ByteRange pkR) {
   }
   Error authErr;
   FIZZ_THROW_ON_ERROR(kex_->generateKeyPair(authErr), authErr);
-  std::unique_ptr<folly::IOBuf> dh = kex_->generateSharedSecret(pkR);
-  dh->prependChain(authKex_->generateSharedSecret(pkR));
+  std::unique_ptr<folly::IOBuf> dh;
+  FIZZ_THROW_ON_ERROR(kex_->generateSharedSecret(dh, authErr, pkR), authErr);
+  std::unique_ptr<folly::IOBuf> authDh;
+  FIZZ_THROW_ON_ERROR(
+      authKex_->generateSharedSecret(authDh, authErr, pkR), authErr);
+  dh->prependChain(std::move(authDh));
   std::unique_ptr<folly::IOBuf> enc = kex_->getKeyShare();
 
   std::unique_ptr<folly::IOBuf> kemContext = enc->clone();
@@ -106,7 +111,9 @@ DHKEM::EncapResult DHKEM::authEncap(folly::ByteRange pkR) {
 }
 
 std::unique_ptr<folly::IOBuf> DHKEM::decap(folly::ByteRange enc) {
-  std::unique_ptr<folly::IOBuf> dh = kex_->generateSharedSecret(enc);
+  std::unique_ptr<folly::IOBuf> dh;
+  Error err;
+  FIZZ_THROW_ON_ERROR(kex_->generateSharedSecret(dh, err, enc), err);
   std::unique_ptr<folly::IOBuf> pkRm = kex_->getKeyShare();
 
   std::unique_ptr<folly::IOBuf> kemContext = folly::IOBuf::copyBuffer(enc);
@@ -120,8 +127,12 @@ std::unique_ptr<folly::IOBuf> DHKEM::decap(folly::ByteRange enc) {
 std::unique_ptr<folly::IOBuf> DHKEM::authDecap(
     folly::ByteRange enc,
     folly::ByteRange pkS) {
-  std::unique_ptr<folly::IOBuf> dh = kex_->generateSharedSecret(enc);
-  dh->prependChain(kex_->generateSharedSecret(pkS));
+  std::unique_ptr<folly::IOBuf> dh;
+  Error err;
+  FIZZ_THROW_ON_ERROR(kex_->generateSharedSecret(dh, err, enc), err);
+  std::unique_ptr<folly::IOBuf> authDh;
+  FIZZ_THROW_ON_ERROR(kex_->generateSharedSecret(authDh, err, pkS), err);
+  dh->prependChain(std::move(authDh));
   std::unique_ptr<folly::IOBuf> pkRm = kex_->getKeyShare();
 
   std::unique_ptr<folly::IOBuf> kemContext = folly::IOBuf::copyBuffer(enc);

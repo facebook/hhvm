@@ -57,7 +57,9 @@ class OQSKeyExchange : public KeyExchange {
    * server or client.
    */
   std::unique_ptr<folly::IOBuf> getKeyShare() const override = 0;
-  std::unique_ptr<folly::IOBuf> generateSharedSecret(
+  Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       folly::ByteRange keyShare) const override = 0;
   std::unique_ptr<KeyExchange> clone() const override = 0;
   std::size_t getExpectedKeyShareSize() const override = 0;
@@ -75,7 +77,9 @@ class OQSClientKeyExchange : public OQSKeyExchange {
   ~OQSClientKeyExchange() override = default;
   Status generateKeyPair(Error& err) override;
   std::unique_ptr<folly::IOBuf> getKeyShare() const override;
-  std::unique_ptr<folly::IOBuf> generateSharedSecret(
+  Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       folly::ByteRange keyShare) const override;
   std::unique_ptr<KeyExchange> clone() const override;
   std::size_t getExpectedKeyShareSize() const override;
@@ -102,7 +106,9 @@ class OQSServerKeyExchange : public OQSKeyExchange {
     return Status::Success;
   }
   std::unique_ptr<folly::IOBuf> getKeyShare() const override;
-  std::unique_ptr<folly::IOBuf> generateSharedSecret(
+  Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       folly::ByteRange keyShare) const override;
   std::unique_ptr<KeyExchange> clone() const override;
   std::size_t getExpectedKeyShareSize() const override;

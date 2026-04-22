@@ -24,7 +24,9 @@ class X25519KeyExchange : public KeyExchange {
   ~X25519KeyExchange() override = default;
   Status generateKeyPair(Error& err) override;
   std::unique_ptr<folly::IOBuf> getKeyShare() const override;
-  std::unique_ptr<folly::IOBuf> generateSharedSecret(
+  Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       folly::ByteRange keyShare) const override;
   std::unique_ptr<KeyExchange> clone() const override;
   std::size_t getExpectedKeyShareSize() const override;

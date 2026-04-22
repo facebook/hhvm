@@ -31,9 +31,11 @@ class MockKeyExchange : public KeyExchange {
     return actualKex_->getKeyShare();
   }
 
-  std::unique_ptr<folly::IOBuf> generateSharedSecret(
+  Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       folly::ByteRange keyShare) const override {
-    return actualKex_->generateSharedSecret(keyShare);
+    return actualKex_->generateSharedSecret(ret, err, keyShare);
   }
 
   std::unique_ptr<KeyExchange> clone() const override {

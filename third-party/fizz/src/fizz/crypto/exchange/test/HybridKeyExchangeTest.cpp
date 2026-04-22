@@ -59,12 +59,22 @@ TEST_F(HybridKeyExchangeTest, SharedSecretGenerationTest) {
   auto secondKexKey = mockKex.getKeyShare();
   combinedKey->appendToChain(std::move(secondKexKey));
   // Calculate the shared secret using HybridKeyExchange::generateSharedSecret()
-  auto sharedSecret = kex->generateSharedSecret(combinedKey->coalesce());
+  std::unique_ptr<folly::IOBuf> sharedSecret;
+  EXPECT_EQ(
+      kex->generateSharedSecret(sharedSecret, err, combinedKey->coalesce()),
+      Status::Success);
   // Calculate the shared secret individually
-  auto combinedSharedSecret =
-      mockKex.generateSharedSecret(mockKex.getKeyShare()->coalesce());
-  combinedSharedSecret->appendToChain(
-      mockKex.generateSharedSecret(mockKex.getKeyShare()->coalesce()));
+  std::unique_ptr<folly::IOBuf> combinedSharedSecret;
+  EXPECT_EQ(
+      mockKex.generateSharedSecret(
+          combinedSharedSecret, err, mockKex.getKeyShare()->coalesce()),
+      Status::Success);
+  std::unique_ptr<folly::IOBuf> secondSharedSecret;
+  EXPECT_EQ(
+      mockKex.generateSharedSecret(
+          secondSharedSecret, err, mockKex.getKeyShare()->coalesce()),
+      Status::Success);
+  combinedSharedSecret->appendToChain(std::move(secondSharedSecret));
   // They should be of the same value
   EXPECT_TRUE(folly::IOBufEqualTo()(combinedSharedSecret, sharedSecret));
 }
@@ -76,7 +86,13 @@ TEST_F(HybridKeyExchangeTest, SharedSecretGenerationOnIllegalInputTest) {
   // Get the truncated public key
   auto publicKey = mockKex.getKeyShare();
   EXPECT_THROW(
-      kex->generateSharedSecret(publicKey->coalesce()), std::runtime_error);
+      {
+        std::unique_ptr<folly::IOBuf> sharedSecret;
+        FIZZ_THROW_ON_ERROR(
+            kex->generateSharedSecret(sharedSecret, err, publicKey->coalesce()),
+            err);
+      },
+      std::runtime_error);
 }
 
 TEST_F(HybridKeyExchangeTest, CloneTest) {
@@ -108,15 +124,12 @@ TEST_F(HybridKeyExchangeTest, ZeroKeyLengthTest) {
   secondKex->setReturnZeroKeyLength();
   std::unique_ptr<HybridKeyExchange> kex1;
   Error err;
-  FIZZ_THROW_ON_ERROR(
+  EXPECT_EQ(
       HybridKeyExchange::create(
           kex1, err, std::move(firstKex), std::move(secondKex)),
-      err);
+      Status::Success);
   EXPECT_THROW(
-      {
-        Error generateErr;
-        FIZZ_THROW_ON_ERROR(kex1->generateKeyPair(generateErr), generateErr);
-      },
+      { FIZZ_THROW_ON_ERROR(kex1->generateKeyPair(err), err); },
       std::runtime_error);
 }
 

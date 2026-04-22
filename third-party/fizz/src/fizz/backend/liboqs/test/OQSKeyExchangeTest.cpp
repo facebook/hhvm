@@ -25,20 +25,22 @@ TEST(OQSKeyExchangeTest, SuccessKeyExchangeTest) {
   auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_ml_kem_768);
   auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_ml_kem_768);
 
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(clientKex.generateKeyPair(err), err);
-  }
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(serverKex.generateKeyPair(err), err);
-  }
+  Error err;
+  EXPECT_EQ(clientKex.generateKeyPair(err), Status::Success);
+  EXPECT_EQ(serverKex.generateKeyPair(err), Status::Success);
 
   auto pubKey = clientKex.getKeyShare();
-  auto serverSharedSecret = serverKex.generateSharedSecret(pubKey->coalesce());
+  std::unique_ptr<folly::IOBuf> serverSharedSecret;
+  EXPECT_EQ(
+      serverKex.generateSharedSecret(
+          serverSharedSecret, err, pubKey->coalesce()),
+      Status::Success);
   auto cipherText = serverKex.getKeyShare();
-  auto clientSharedSecret =
-      clientKex.generateSharedSecret(cipherText->coalesce());
+  std::unique_ptr<folly::IOBuf> clientSharedSecret;
+  EXPECT_EQ(
+      clientKex.generateSharedSecret(
+          clientSharedSecret, err, cipherText->coalesce()),
+      Status::Success);
 
   EXPECT_TRUE(folly::IOBufEqualTo()(serverSharedSecret, clientSharedSecret));
 }
@@ -56,32 +58,37 @@ TEST(OQSKeyExchangeTest, InvalidExternalInputTest) {
   auto wrongClientKex = OQSClientKeyExchange(OQS_KEM_alg_ml_kem_768);
   auto wrongServerKex = OQSServerKeyExchange(OQS_KEM_alg_ml_kem_768);
 
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(clientKex.generateKeyPair(err), err);
-  }
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(serverKex.generateKeyPair(err), err);
-  }
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(wrongClientKex.generateKeyPair(err), err);
-  }
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(wrongServerKex.generateKeyPair(err), err);
-  }
+  Error err;
+  EXPECT_EQ(clientKex.generateKeyPair(err), Status::Success);
+  EXPECT_EQ(serverKex.generateKeyPair(err), Status::Success);
+  EXPECT_EQ(wrongClientKex.generateKeyPair(err), Status::Success);
+  EXPECT_EQ(wrongServerKex.generateKeyPair(err), Status::Success);
 
   auto pubKey = clientKex.getKeyShare();
   EXPECT_THROW(
-      wrongServerKex.generateSharedSecret(pubKey->coalesce()),
+      {
+        std::unique_ptr<folly::IOBuf> sharedSecret;
+        FIZZ_THROW_ON_ERROR(
+            wrongServerKex.generateSharedSecret(
+                sharedSecret, err, pubKey->coalesce()),
+            err);
+      },
       std::runtime_error);
 
-  serverKex.generateSharedSecret(pubKey->coalesce());
+  std::unique_ptr<folly::IOBuf> serverSharedSecret;
+  EXPECT_EQ(
+      serverKex.generateSharedSecret(
+          serverSharedSecret, err, pubKey->coalesce()),
+      Status::Success);
   auto cipherText = serverKex.getKeyShare();
   EXPECT_THROW(
-      wrongClientKex.generateSharedSecret(cipherText->coalesce()),
+      {
+        std::unique_ptr<folly::IOBuf> sharedSecret;
+        FIZZ_THROW_ON_ERROR(
+            wrongClientKex.generateSharedSecret(
+                sharedSecret, err, cipherText->coalesce()),
+            err);
+      },
       std::runtime_error);
 }
 
@@ -89,20 +96,22 @@ TEST(OQSKeyExchangeTest, CloneTest) {
   auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_ml_kem_512);
   auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_ml_kem_512);
 
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(clientKex.generateKeyPair(err), err);
-  }
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(serverKex.generateKeyPair(err), err);
-  }
+  Error err;
+  EXPECT_EQ(clientKex.generateKeyPair(err), Status::Success);
+  EXPECT_EQ(serverKex.generateKeyPair(err), Status::Success);
 
   auto pubKey = clientKex.getKeyShare();
-  auto serverSharedSecret = serverKex.generateSharedSecret(pubKey->coalesce());
+  std::unique_ptr<folly::IOBuf> serverSharedSecret;
+  EXPECT_EQ(
+      serverKex.generateSharedSecret(
+          serverSharedSecret, err, pubKey->coalesce()),
+      Status::Success);
   auto cipherText = serverKex.getKeyShare();
-  auto clientSharedSecret =
-      clientKex.generateSharedSecret(cipherText->coalesce());
+  std::unique_ptr<folly::IOBuf> clientSharedSecret;
+  EXPECT_EQ(
+      clientKex.generateSharedSecret(
+          clientSharedSecret, err, cipherText->coalesce()),
+      Status::Success);
 
   auto clientKexCopy = clientKex.clone();
   auto serverKexCopy = serverKex.clone();
@@ -114,10 +123,17 @@ TEST(OQSKeyExchangeTest, CloneTest) {
       folly::IOBufEqualTo()(clientKeyShare, clientKexCopy->getKeyShare()));
   EXPECT_TRUE(
       folly::IOBufEqualTo()(serverKeyShare, serverKexCopy->getKeyShare()));
-  EXPECT_TRUE(
-      folly::IOBufEqualTo()(
-          clientKex.generateSharedSecret(serverKeyShare->coalesce()),
-          clientKexCopy->generateSharedSecret(serverKeyShare->coalesce())));
+  std::unique_ptr<folly::IOBuf> originalSharedSecret;
+  std::unique_ptr<folly::IOBuf> copySharedSecret;
+  EXPECT_EQ(
+      clientKex.generateSharedSecret(
+          originalSharedSecret, err, serverKeyShare->coalesce()),
+      Status::Success);
+  EXPECT_EQ(
+      clientKexCopy->generateSharedSecret(
+          copySharedSecret, err, serverKeyShare->coalesce()),
+      Status::Success);
+  EXPECT_TRUE(folly::IOBufEqualTo()(originalSharedSecret, copySharedSecret));
 }
 
 TEST(OQSKeyExchangeTest, FailedCloneTest) {

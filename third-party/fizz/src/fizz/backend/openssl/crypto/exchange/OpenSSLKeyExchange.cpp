@@ -37,10 +37,13 @@ std::unique_ptr<folly::IOBuf> OpenSSLECKeyExchange::getKeyShare() const {
   return detail::OpenSSLECKeyEncoder::encode(key_);
 }
 
-std::unique_ptr<folly::IOBuf> OpenSSLECKeyExchange::generateSharedSecret(
+Status OpenSSLECKeyExchange::generateSharedSecret(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& /*err*/,
     folly::ByteRange keyShare) const {
   auto peerKey = detail::OpenSSLECKeyDecoder::decode(keyShare, nid_);
-  return generateSharedSecret(peerKey);
+  ret = generateSharedSecret(peerKey);
+  return Status::Success;
 }
 
 std::unique_ptr<folly::IOBuf> OpenSSLECKeyExchange::generateSharedSecret(

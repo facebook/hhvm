@@ -32,7 +32,9 @@ class HybridKeyExchange : public KeyExchange {
 
   std::unique_ptr<folly::IOBuf> getKeyShare() const override;
 
-  std::unique_ptr<folly::IOBuf> generateSharedSecret(
+  Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       folly::ByteRange keyShare) const override;
 
   std::unique_ptr<KeyExchange> clone() const override;

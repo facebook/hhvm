@@ -59,22 +59,25 @@ std::unique_ptr<IOBuf> X25519KeyExchange::getKeyShare() const {
   return IOBuf::copyBuffer(pubKey_->data(), pubKey_->size());
 }
 
-std::unique_ptr<folly::IOBuf> X25519KeyExchange::generateSharedSecret(
+Status X25519KeyExchange::generateSharedSecret(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange keyShare) const {
   if (!privKey_ || !pubKey_) {
-    throw std::runtime_error("Key not generated");
+    return err.error("Key not generated");
   }
   if (keyShare.size() != crypto_scalarmult_BYTES) {
-    throw std::runtime_error("Invalid external public key");
+    return err.error("Invalid external public key");
   }
   auto key = IOBuf::create(crypto_scalarmult_BYTES);
   key->append(crypto_scalarmult_BYTES);
-  int err =
+  int cryptoErr =
       crypto_scalarmult(key->writableData(), privKey_->data(), keyShare.data());
-  if (err != 0) {
-    throw std::runtime_error("Invalid point");
+  if (cryptoErr != 0) {
+    return err.error("Invalid point");
   }
-  return key;
+  ret = std::move(key);
+  return Status::Success;
 }
 
 std::unique_ptr<KeyExchange> X25519KeyExchange::clone() const {

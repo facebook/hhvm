@@ -841,7 +841,9 @@ static SemiFuture<Optional<AsyncKeyExchange::DoKexResult>> doKexSyncFuture(
   AsyncKeyExchange::DoKexResult res;
   Error err;
   FIZZ_THROW_ON_ERROR(kex->generateKeyPair(err), err);
-  res.sharedSecret = kex->generateSharedSecret(clientShare->coalesce());
+  FIZZ_THROW_ON_ERROR(
+      kex->generateSharedSecret(res.sharedSecret, err, clientShare->coalesce()),
+      err);
   res.ourKeyShare = kex->getKeyShare();
   return folly::makeSemiFuture(Optional(std::move(res)));
   // Everything completed and clientShare can be safely freed now.

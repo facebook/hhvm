@@ -26,7 +26,10 @@ TEST(X25519KeyExchange, KeyExchange) {
   X25519KeyExchange kex;
   Error err;
   EXPECT_EQ(kex.generateKeyPair(err), Status::Success);
-  auto out = kex.generateSharedSecret(folly::range(keyShare));
+  std::unique_ptr<folly::IOBuf> out;
+  EXPECT_EQ(
+      kex.generateSharedSecret(out, err, folly::range(keyShare)),
+      Status::Success);
 }
 
 TEST(X25519KeyExchange, SmallKeyExchange) {
@@ -36,7 +39,12 @@ TEST(X25519KeyExchange, SmallKeyExchange) {
   Error err;
   EXPECT_EQ(kex.generateKeyPair(err), Status::Success);
   EXPECT_THROW(
-      kex.generateSharedSecret(folly::range(keyShare)), std::runtime_error);
+      {
+        std::unique_ptr<folly::IOBuf> out;
+        FIZZ_THROW_ON_ERROR(
+            kex.generateSharedSecret(out, err, folly::range(keyShare)), err);
+      },
+      std::runtime_error);
 }
 
 TEST(X25519KeyExchange, KeyExchangeClone) {
@@ -47,12 +55,18 @@ TEST(X25519KeyExchange, KeyExchangeClone) {
   Error err;
   EXPECT_EQ(kex.generateKeyPair(err), Status::Success);
 
-  auto sharedSecret = kex.generateSharedSecret(folly::range(keyShare));
+  std::unique_ptr<folly::IOBuf> sharedSecret;
+  EXPECT_EQ(
+      kex.generateSharedSecret(sharedSecret, err, folly::range(keyShare)),
+      Status::Success);
 
   // Copy current key exchange
   auto kexCopy = kex.clone();
-  auto sharedSecretOfCopy =
-      kexCopy->generateSharedSecret(folly::range(keyShare));
+  std::unique_ptr<folly::IOBuf> sharedSecretOfCopy;
+  EXPECT_EQ(
+      kexCopy->generateSharedSecret(
+          sharedSecretOfCopy, err, folly::range(keyShare)),
+      Status::Success);
 
   EXPECT_TRUE(folly::IOBufEqualTo()(sharedSecret, sharedSecretOfCopy));
 }

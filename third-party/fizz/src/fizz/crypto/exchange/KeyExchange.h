@@ -36,12 +36,14 @@ class KeyExchange {
   /**
    * Generate a shared secret with our key pair and a peer's public key share.
    *
-   * Performs all necessary validation of the public key share and throws on
-   * error.
+   * Performs all necessary validation of the public key share and returns
+   * Status::Fail on error.
    *
    * generateKeyPair() must be called before.
    */
-  virtual std::unique_ptr<folly::IOBuf> generateSharedSecret(
+  virtual Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       folly::ByteRange keyShare) const = 0;
 
   /**

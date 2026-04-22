@@ -53,23 +53,30 @@ std::unique_ptr<folly::IOBuf> HybridKeyExchange::getKeyShare() const {
   return keyShare;
 }
 
-std::unique_ptr<folly::IOBuf> HybridKeyExchange::generateSharedSecret(
+Status HybridKeyExchange::generateSharedSecret(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange keyShare) const {
   if (keyShare.size() !=
       firstKex_->getExpectedKeyShareSize() +
           secondKex_->getExpectedKeyShareSize()) {
-    throw std::runtime_error("Invalid external public key combination ");
+    return err.error("Invalid external public key combination ");
   }
   // keyShare.size() should be >= 2 now
   auto firstKeyShare = folly::ByteRange(
       keyShare.begin(),
       keyShare.begin() + firstKex_->getExpectedKeyShareSize());
-  auto sharedSecret = firstKex_->generateSharedSecret(std::move(firstKeyShare));
+  std::unique_ptr<folly::IOBuf> sharedSecret;
+  FIZZ_RETURN_ON_ERROR(
+      firstKex_->generateSharedSecret(sharedSecret, err, firstKeyShare));
   auto secondKeyShare = folly::ByteRange(
       keyShare.end() - secondKex_->getExpectedKeyShareSize(), keyShare.end());
-  sharedSecret->appendToChain(
-      secondKex_->generateSharedSecret(std::move(secondKeyShare)));
-  return sharedSecret;
+  std::unique_ptr<folly::IOBuf> secondSharedSecret;
+  FIZZ_RETURN_ON_ERROR(secondKex_->generateSharedSecret(
+      secondSharedSecret, err, secondKeyShare));
+  sharedSecret->appendToChain(std::move(secondSharedSecret));
+  ret = std::move(sharedSecret);
+  return Status::Success;
 }
 
 /**

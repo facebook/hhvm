@@ -85,38 +85,42 @@ std::unique_ptr<folly::IOBuf> OQSServerKeyExchange::getKeyShare() const {
   return folly::IOBuf::copyBuffer(cipherText_->data(), cipherText_->length());
 }
 
-std::unique_ptr<folly::IOBuf> OQSClientKeyExchange::generateSharedSecret(
+Status OQSClientKeyExchange::generateSharedSecret(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange keyShare) const {
   if (!isInitiated()) {
-    throw std::runtime_error(
+    return err.error(
         "OQSClientKeyExchange::generateSharedSecret(): keys not generated!");
   }
   if (keyShare.size() != getExpectedKeyShareSize()) {
-    throw std::runtime_error(
+    return err.error(
         "OQSClientKeyExchange::generateSharedSecret(): Invalid external cipher text!");
   }
   checkChained();
-  auto sharedKeyLength = kem_->length_shared_secret;
   // Note here we can't use the safe deleter due to constraints on return type.
+  auto sharedKeyLength = kem_->length_shared_secret;
   auto sharedSecret = folly::IOBuf::create(sharedKeyLength);
   sharedSecret->append(sharedKeyLength);
   if (kem_->decaps(
           sharedSecret->writableData(), keyShare.data(), secretKey_->data())) {
-    throw std::runtime_error(
+    return err.error(
         "OQSClientKeyExchange::generateSharedSecret(): cannot generate the shared secret!");
   }
-  return sharedSecret;
+  ret = std::move(sharedSecret);
+  return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> OQSServerKeyExchange::generateSharedSecret(
+Status OQSServerKeyExchange::generateSharedSecret(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange keyShare) const {
   if (keyShare.size() != getExpectedKeyShareSize()) {
-    throw std::runtime_error(
+    return err.error(
         "OQSServerKeyExchange::generateSharedSecret(): Invalid external public key!");
   }
   checkChained();
   auto sharedKeyLength = kem_->length_shared_secret;
-  // Note here we can't use the safe deleter due to constraints on return type.
   auto sharedSecret = folly::IOBuf::create(sharedKeyLength);
   sharedSecret->append(sharedKeyLength);
   // We allow regeneration of the cipher text.
@@ -124,14 +128,15 @@ std::unique_ptr<folly::IOBuf> OQSServerKeyExchange::generateSharedSecret(
           cipherText_->writableData(),
           sharedSecret->writableData(),
           keyShare.data())) {
-    throw std::runtime_error(
+    return err.error(
         "OQSServerKeyExchange::generateSharedSecret(): cannot generate the shared secret!");
   } else {
     if (!isInitiated()) {
       cipherText_->append(kem_->length_ciphertext);
     }
   }
-  return sharedSecret;
+  ret = std::move(sharedSecret);
+  return Status::Success;
 }
 
 std::unique_ptr<KeyExchange> OQSClientKeyExchange::clone() const {

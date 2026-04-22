@@ -40,15 +40,13 @@ TYPED_TEST_SUITE(Key, KeyTypes);
 TYPED_TEST(Key, GenerateKey) {
   auto kex = TestFixture::makeKex();
   Error err;
-  FIZZ_THROW_ON_ERROR(kex->generateKeyPair(err), err);
+  EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
 }
 
 TYPED_TEST(Key, SharedSecret) {
   auto kex = TestFixture::makeKex();
-  {
-    Error err;
-    FIZZ_THROW_ON_ERROR(kex->generateKeyPair(err), err);
-  }
+  Error err;
+  EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
   auto shared = kex->generateSharedSecret(kex->getPrivateKey());
   EXPECT_TRUE(shared);
 }
@@ -240,7 +238,11 @@ TEST_P(ECDHTest, TestKexClone) {
     }
 
     auto encodedPubKey = detail::encodeECPublicKey(pkeyPeerKey);
-    auto shared = chosenKex->generateSharedSecret(encodedPubKey->coalesce());
+    std::unique_ptr<folly::IOBuf> shared;
+    Error err;
+    EXPECT_EQ(
+        chosenKex->generateSharedSecret(shared, err, encodedPubKey->coalesce()),
+        Status::Success);
 
     checkShared(std::move(shared), GetParam());
   } catch (const std::runtime_error& ex) {

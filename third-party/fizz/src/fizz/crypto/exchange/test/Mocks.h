@@ -26,9 +26,15 @@ class MockKeyExchange : public KeyExchange {
   MOCK_METHOD(std::unique_ptr<folly::IOBuf>, getKeyShare, (), (const));
   MOCK_METHOD(
       std::unique_ptr<folly::IOBuf>,
-      generateSharedSecret,
+      _generateSharedSecret,
       (folly::ByteRange keyShare),
       (const));
+  Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
+      folly::ByteRange keyShare) const override {
+    FIZZ_THROW_TO_ERROR(ret, _generateSharedSecret(keyShare));
+  }
   MOCK_METHOD(std::unique_ptr<KeyExchange>, clone, (), (const));
   MOCK_METHOD(std::size_t, getExpectedKeyShareSize, (), (const));
   int keyGenerated = 0;
@@ -37,7 +43,7 @@ class MockKeyExchange : public KeyExchange {
     ON_CALL(*this, getKeyShare()).WillByDefault(InvokeWithoutArgs([]() {
       return folly::IOBuf::copyBuffer("keyshare");
     }));
-    ON_CALL(*this, generateSharedSecret(_))
+    ON_CALL(*this, _generateSharedSecret(_))
         .WillByDefault(InvokeWithoutArgs(
             []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
     // Excluding \n
@@ -54,7 +60,7 @@ class MockKeyExchange : public KeyExchange {
       }
       return folly::IOBuf::copyBuffer("keyshare");
     }));
-    ON_CALL(*this, generateSharedSecret(_))
+    ON_CALL(*this, _generateSharedSecret(_))
         .WillByDefault(InvokeWithoutArgs([this]() {
           if (!keyGenerated) {
             throw std::runtime_error("Key not generated");
@@ -86,9 +92,15 @@ class MockAsyncKeyExchange : public AsyncKeyExchange {
   MOCK_METHOD(std::unique_ptr<folly::IOBuf>, getKeyShare, (), (const));
   MOCK_METHOD(
       std::unique_ptr<folly::IOBuf>,
-      generateSharedSecret,
+      _generateSharedSecret,
       (folly::ByteRange keyShare),
       (const));
+  Status generateSharedSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
+      folly::ByteRange keyShare) const override {
+    FIZZ_THROW_TO_ERROR(ret, _generateSharedSecret(keyShare));
+  }
   MOCK_METHOD(std::unique_ptr<KeyExchange>, clone, (), (const));
   MOCK_METHOD(std::size_t, getExpectedKeyShareSize, (), (const));
   MOCK_METHOD(

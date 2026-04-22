@@ -1513,7 +1513,9 @@ Status sm::EventHandler<
     Buf serverShare;
     const KeyExchange* kex;
     std::tie(group, serverShare, kex) = std::move(*exchange);
-    auto sharedSecret = kex->generateSharedSecret(serverShare->coalesce());
+    auto sharedSecret = std::unique_ptr<folly::IOBuf>();
+    TRY(kex->generateSharedSecret(
+        sharedSecret, ctx.err, serverShare->coalesce()));
     FOLLY_POP_WARNING
     scheduler->deriveHandshakeSecret(sharedSecret->coalesce());
   } else {
@@ -1559,15 +1561,12 @@ Status sm::EventHandler<
     TRY(echScheduler->deriveEarlySecret(
         ctx.err, folly::range(state.echState()->random)));
     bool acceptedECH = false;
-    Error echErr;
-    FIZZ_THROW_ON_ERROR(
-        ech::checkECHAccepted(
-            acceptedECH,
-            echErr,
-            shlo,
-            echHandshakeContext->clone(),
-            std::move(echScheduler)),
-        echErr);
+    TRY(ech::checkECHAccepted(
+        acceptedECH,
+        ctx.err,
+        shlo,
+        echHandshakeContext->clone(),
+        std::move(echScheduler)));
     if (state.echState()->status != ECHStatus::Requested &&
         acceptedECH != (state.echState()->status == ECHStatus::Accepted)) {
       // ECH acceptance mismatch with hrr
@@ -1907,15 +1906,12 @@ Status EventHandler<
     TRY(echScheduler->deriveEarlySecret(
         ctx.err, folly::range(state.echState()->random)));
     bool echAccepted = false;
-    Error echErr;
-    FIZZ_THROW_ON_ERROR(
-        ech::checkECHAccepted(
-            echAccepted,
-            echErr,
-            hrr,
-            echHandshakeContext->clone(),
-            std::move(echScheduler)),
-        echErr);
+    TRY(ech::checkECHAccepted(
+        echAccepted,
+        ctx.err,
+        hrr,
+        echHandshakeContext->clone(),
+        std::move(echScheduler)));
     if (echAccepted) {
       echStatus = ECHStatus::Accepted;
     } else {

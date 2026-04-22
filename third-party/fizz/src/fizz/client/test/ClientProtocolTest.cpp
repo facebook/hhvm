@@ -1575,7 +1575,7 @@ TEST_F(ClientProtocolTest, TestServerHelloFlow) {
       .InSequence(contextSeq)
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
-  EXPECT_CALL(*mockKex_, generateSharedSecret(RangeMatches("servershare")))
+  EXPECT_CALL(*mockKex_, _generateSharedSecret(RangeMatches("servershare")))
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
   EXPECT_CALL(
@@ -1754,7 +1754,7 @@ TEST_F(ClientProtocolTest, TestServerHelloECHFlow) {
       .InSequence(contextSeq)
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
-  EXPECT_CALL(*mockKex_, generateSharedSecret(RangeMatches("servershare")))
+  EXPECT_CALL(*mockKex_, _generateSharedSecret(RangeMatches("servershare")))
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
   EXPECT_CALL(
@@ -1935,7 +1935,7 @@ TEST_F(ClientProtocolTest, TestServerHelloECHRejectedFlow) {
       .InSequence(contextSeq)
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
-  EXPECT_CALL(*mockKex_, generateSharedSecret(RangeMatches("servershare")))
+  EXPECT_CALL(*mockKex_, _generateSharedSecret(RangeMatches("servershare")))
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
   EXPECT_CALL(
@@ -2039,7 +2039,7 @@ TEST_F(ClientProtocolTest, TestServerHelloAfterHrrFlow) {
       .InSequence(contextSeq)
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
-  EXPECT_CALL(*mockKex_, generateSharedSecret(RangeMatches("servershare")))
+  EXPECT_CALL(*mockKex_, _generateSharedSecret(RangeMatches("servershare")))
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
   EXPECT_CALL(
@@ -2148,7 +2148,7 @@ TEST_F(ClientProtocolTest, TestServerHelloPskFlow) {
       .InSequence(contextSeq)
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
-  EXPECT_CALL(*mockKex_, generateSharedSecret(RangeMatches("servershare")))
+  EXPECT_CALL(*mockKex_, _generateSharedSecret(RangeMatches("servershare")))
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
   EXPECT_CALL(
@@ -2368,7 +2368,7 @@ TEST_F(ClientProtocolTest, TestServerHelloPskAfterHrrFlow) {
       .InSequence(contextSeq)
       .WillRepeatedly(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shlo"); }));
-  EXPECT_CALL(*mockKex_, generateSharedSecret(RangeMatches("servershare")))
+  EXPECT_CALL(*mockKex_, _generateSharedSecret(RangeMatches("servershare")))
       .WillOnce(InvokeWithoutArgs(
           []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
   EXPECT_CALL(

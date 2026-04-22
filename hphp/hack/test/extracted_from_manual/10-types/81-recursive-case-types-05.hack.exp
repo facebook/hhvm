@@ -1,0 +1,16 @@
+ERROR: File "81-recursive-case-types-05.hack", line 9, characters 10-22:
+You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
+  File "81-recursive-case-types-05.hack", line 3, characters 11-14:
+  This is what makes me believe it can be `null`
+ERROR: File "81-recursive-case-types-05.hack", line 12, characters 1-143:
+This function can exit with and without returning a value (Typing[4421])
+  File "81-recursive-case-types-05.hack", line 14, characters 5-25:
+  Returning a value here.
+  File "81-recursive-case-types-05.hack", line 12, characters 1-143:
+  This function does not always return a value
+ERROR: File "81-recursive-case-types-05.hack", line 12, characters 10-22:
+Invalid return type (Typing[4336])
+  File "81-recursive-case-types-05.hack", line 12, characters 43-43:
+  Expected `T`
+  File "81-recursive-case-types-05.hack", line 12, characters 10-22:
+  But got `void` because this function does not always return a value

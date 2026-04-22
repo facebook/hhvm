@@ -32,7 +32,7 @@ cdef extern from "<Python.h>":
 
 cdef class JsonWriterOptions:
     """Options for the JSON writer that are passed to C++."""
-    cdef cJsonWriterOptions _c_writer
+    cdef cJsonWriterOptions _writer_options
 
     def __init__(
         self,
@@ -43,11 +43,11 @@ cdef class JsonWriterOptions:
         allow_nan_inf=False,
         indent_width=2,
     ):
-        self._c_writer.listTrailingComma = list_trailing_comma
-        self._c_writer.objectTrailingComma = object_trailing_comma
-        self._c_writer.unquoteObjectName = unquote_object_name
-        self._c_writer.allowNanInf = allow_nan_inf
-        self._c_writer.indentWidth = indent_width
+        self._writer_options.listTrailingComma = list_trailing_comma
+        self._writer_options.objectTrailingComma = object_trailing_comma
+        self._writer_options.unquoteObjectName = unquote_object_name
+        self._writer_options.allowNanInf = allow_nan_inf
+        self._writer_options.indentWidth = indent_width
 
 JSON5_MODE = Json5ProtocolWriterOptions(
     writer=JsonWriterOptions(
@@ -70,7 +70,7 @@ cdef class Json5ProtocolWriterOptions:
 
 cdef cJson5ProtocolWriterOptions _to_c_options(Json5ProtocolWriterOptions options):
     cdef cJson5ProtocolWriterOptions c_options
-    c_options.writer = options.writer._c_writer
+    c_options.writer = cmove(options.writer._writer_options)
     return c_options
 
 

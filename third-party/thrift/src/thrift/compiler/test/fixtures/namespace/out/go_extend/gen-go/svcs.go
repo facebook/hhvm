@@ -112,7 +112,6 @@ func (p *ExtendTestServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadat
     return GetThriftMetadataForService("extend.ExtendTestService")
 }
 
-
 type procFuncExtendTestServiceCheck struct {
     handler ExtendTestService
 }
@@ -136,4 +135,5 @@ func (p *procFuncExtendTestServiceCheck) RunContext(ctx context.Context, reqStru
     result.Success = &retval
     return result, nil
 }
+
 

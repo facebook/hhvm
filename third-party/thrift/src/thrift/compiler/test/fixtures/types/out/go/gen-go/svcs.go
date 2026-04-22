@@ -149,7 +149,6 @@ func (p *SomeServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.SomeService")
 }
 
-
 type procFuncSomeServiceBounceMap struct {
     handler SomeService
 }
@@ -197,4 +196,5 @@ func (p *procFuncSomeServiceBinaryKeyedMap) RunContext(ctx context.Context, reqS
     result.Success = retval
     return result, nil
 }
+
 

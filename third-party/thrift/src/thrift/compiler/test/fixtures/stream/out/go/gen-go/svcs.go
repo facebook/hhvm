@@ -540,7 +540,6 @@ func (p *PubSubStreamingServiceProcessor) GetThriftMetadata() *metadata.ThriftMe
     return GetThriftMetadataForService("module.PubSubStreamingService")
 }
 
-
 type procFuncPubSubStreamingServiceReturnstream struct {
     handler PubSubStreamingService
 }
@@ -1135,4 +1134,5 @@ func (p *procFuncPubSubStreamingServiceReturnstreamFast) RunStreamContext(
     }
     onStreamComplete()
 }
+
 

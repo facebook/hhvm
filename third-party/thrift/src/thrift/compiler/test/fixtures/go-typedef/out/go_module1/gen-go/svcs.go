@@ -173,7 +173,6 @@ func (p *FinderProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module1.Finder")
 }
 
-
 type procFuncFinderByPlate struct {
     handler Finder
 }
@@ -245,4 +244,5 @@ func (p *procFuncFinderPreviousPlate) RunContext(ctx context.Context, reqStruct 
     result.Success = &retval
     return result, nil
 }
+
 

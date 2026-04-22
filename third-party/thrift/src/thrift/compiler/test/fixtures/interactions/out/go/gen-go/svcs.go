@@ -231,7 +231,6 @@ func (p *MyInteractionProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyInteraction")
 }
 
-
 type procFuncMyInteractionFrobnicate struct {
     handler MyInteraction
 }
@@ -404,6 +403,7 @@ func (p *procFuncMyInteractionEncode) RunSinkContext(
     finalResponse.Success = finalResult
     onFinalResponse(finalResponse)
 }
+
 
 func (p *MyInteractionProcessor) OnTermination() {
     // If the underlying handler implements OnTermination()
@@ -612,7 +612,6 @@ func (p *MyInteractionFastProcessor) GetThriftMetadata() *metadata.ThriftMetadat
     return GetThriftMetadataForService("module.MyInteractionFast")
 }
 
-
 type procFuncMyInteractionFastFrobnicate struct {
     handler MyInteractionFast
 }
@@ -780,6 +779,7 @@ func (p *procFuncMyInteractionFastEncode) RunSinkContext(
     onFinalResponse(finalResponse)
 }
 
+
 func (p *MyInteractionFastProcessor) OnTermination() {
     // If the underlying handler implements OnTermination()
     if terminable, ok := p.handler.(thrift.Terminable); ok {
@@ -881,7 +881,6 @@ func (p *SerialInteractionProcessor) GetThriftMetadata() *metadata.ThriftMetadat
     return GetThriftMetadataForService("module.SerialInteraction")
 }
 
-
 type procFuncSerialInteractionFrobnicate struct {
     handler SerialInteraction
 }
@@ -903,6 +902,7 @@ func (p *procFuncSerialInteractionFrobnicate) RunContext(ctx context.Context, re
 
     return result, nil
 }
+
 
 func (p *SerialInteractionProcessor) OnTermination() {
     // If the underlying handler implements OnTermination()
@@ -1005,7 +1005,6 @@ func (p *BoxedInteractionProcessor) GetThriftMetadata() *metadata.ThriftMetadata
     return GetThriftMetadataForService("module.BoxedInteraction")
 }
 
-
 type procFuncBoxedInteractionGetABox struct {
     handler BoxedInteraction
 }
@@ -1028,6 +1027,7 @@ func (p *procFuncBoxedInteractionGetABox) RunContext(ctx context.Context, reqStr
     result.Success = retval
     return result, nil
 }
+
 
 func (p *BoxedInteractionProcessor) OnTermination() {
     // If the underlying handler implements OnTermination()
@@ -1229,7 +1229,6 @@ func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyService")
 }
 
-
 type procFuncMyServiceFoo struct {
     handler MyService
 }
@@ -1359,6 +1358,7 @@ func (p *procFuncMyServiceSerialize) RunStreamContext(
     }
     onStreamComplete()
 }
+
 
 type Factories interface {
     Foo(ctx context.Context) (error)
@@ -1552,7 +1552,6 @@ func (p *FactoriesProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.Factories")
 }
 
-
 type procFuncFactoriesFoo struct {
     handler Factories
 }
@@ -1683,6 +1682,7 @@ func (p *procFuncFactoriesSerialize) RunStreamContext(
     onStreamComplete()
 }
 
+
 type Perform interface {
     Foo(ctx context.Context) (error)
 }
@@ -1781,7 +1781,6 @@ func (p *PerformProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.Perform")
 }
 
-
 type procFuncPerformFoo struct {
     handler Perform
 }
@@ -1803,6 +1802,7 @@ func (p *procFuncPerformFoo) RunContext(ctx context.Context, reqStruct thrift.Re
 
     return result, nil
 }
+
 
 type InteractWithShared interface {
     DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error)
@@ -1901,7 +1901,6 @@ func (p *InteractWithSharedProcessor) GetThriftMetadata() *metadata.ThriftMetada
     return GetThriftMetadataForService("module.InteractWithShared")
 }
 
-
 type procFuncInteractWithSharedDoSomeSimilarThings struct {
     handler InteractWithShared
 }
@@ -1924,6 +1923,7 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
     result.Success = retval
     return result, nil
 }
+
 
 type BoxService interface {
     GetABoxSession(ctx context.Context, req *ShouldBeBoxed) (*BoxedInteractionProcessor, *ShouldBeBoxed, error)
@@ -2023,7 +2023,6 @@ func (p *BoxServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.BoxService")
 }
 
-
 type procFuncBoxServiceGetABoxSession struct {
     handler BoxService
 }
@@ -2048,4 +2047,5 @@ func (p *procFuncBoxServiceGetABoxSession) RunContext(ctx context.Context, reqSt
     result.Success = retval
     return result, nil
 }
+
 

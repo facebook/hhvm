@@ -213,7 +213,6 @@ func (p *NestedContainersProcessor) GetThriftMetadata() *metadata.ThriftMetadata
     return GetThriftMetadataForService("module.NestedContainers")
 }
 
-
 type procFuncNestedContainersMapList struct {
     handler NestedContainers
 }
@@ -328,4 +327,5 @@ func (p *procFuncNestedContainersTurtles) RunContext(ctx context.Context, reqStr
 
     return result, nil
 }
+
 

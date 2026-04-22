@@ -197,7 +197,6 @@ func (p *CProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.C")
 }
 
-
 type procFuncCF struct {
     handler C
 }
@@ -307,4 +306,5 @@ func (p *procFuncCThing) RunContext(ctx context.Context, reqStruct thrift.Readab
     result.Success = &retval
     return result, nil
 }
+
 

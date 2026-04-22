@@ -125,7 +125,6 @@ func (p *HsTestServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("hsmodule.HsTestService")
 }
 
-
 type procFuncHsTestServiceInit struct {
     handler HsTestService
 }
@@ -149,4 +148,5 @@ func (p *procFuncHsTestServiceInit) RunContext(ctx context.Context, reqStruct th
     result.Success = &retval
     return result, nil
 }
+
 

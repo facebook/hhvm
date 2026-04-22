@@ -127,7 +127,6 @@ func (p *ServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.Service")
 }
 
-
 type procFuncServiceFunc struct {
     handler Service
 }
@@ -151,6 +150,7 @@ func (p *procFuncServiceFunc) RunContext(ctx context.Context, reqStruct thrift.R
     result.Success = &retval
     return result, nil
 }
+
 
 type AdapterService interface {
     Count(ctx context.Context) (*CountingStruct, error)
@@ -268,7 +268,6 @@ func (p *AdapterServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.AdapterService")
 }
 
-
 type procFuncAdapterServiceCount struct {
     handler AdapterService
 }
@@ -315,4 +314,5 @@ func (p *procFuncAdapterServiceAdaptedTypes) RunContext(ctx context.Context, req
     result.Success = retval
     return result, nil
 }
+
 

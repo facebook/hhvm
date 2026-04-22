@@ -124,7 +124,6 @@ func (p *MyRootProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyRoot")
 }
 
-
 type procFuncMyRootDoRoot struct {
     handler MyRoot
 }
@@ -146,6 +145,7 @@ func (p *procFuncMyRootDoRoot) RunContext(ctx context.Context, reqStruct thrift.
 
     return result, nil
 }
+
 
 type MyNode interface {
     // Inherited/extended service
@@ -226,7 +226,6 @@ func (p *MyNodeProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyNode")
 }
 
-
 type procFuncMyNodeDoMid struct {
     handler MyNode
 }
@@ -248,6 +247,7 @@ func (p *procFuncMyNodeDoMid) RunContext(ctx context.Context, reqStruct thrift.R
 
     return result, nil
 }
+
 
 type MyLeaf interface {
     // Inherited/extended service
@@ -328,7 +328,6 @@ func (p *MyLeafProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyLeaf")
 }
 
-
 type procFuncMyLeafDoLeaf struct {
     handler MyLeaf
 }
@@ -350,4 +349,5 @@ func (p *procFuncMyLeafDoLeaf) RunContext(ctx context.Context, reqStruct thrift.
 
     return result, nil
 }
+
 

@@ -25,8 +25,8 @@
 }}{{#if svc.interaction?}}{{svc.name}}.{{/if svc.interaction?}}{{func.name}}{{!
 }}{{/let partial}}
 
-{{#let export partial server_func_stream |func svc| captures |types|}}{{!
-}}func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
+{{#let export partial server_func_stream |func svc| captures |types|}}
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunStreamContext(
     ctx context.Context,
     reqStruct thrift.ReadableStruct,
     onFirstResponse func(thrift.WritableStruct),
@@ -112,11 +112,11 @@
         {{/if (not func.stream_exceptions?)}}
     }
     onStreamComplete()
-}{{!
-}}{{/let partial}}
+}
+{{/let partial}}
 
-{{#let export partial server_func_response |func svc| captures |types|}}{{!
-}}func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+{{#let export partial server_func_response |func svc| captures |types|}}
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     {{#if func.params.fields?}}
     args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
     {{/if func.params.fields?}}
@@ -161,8 +161,8 @@
     {{#if (not func.oneway?)}}
     return result, nil
     {{/if (not func.oneway?)}}
-}{{!
-}}{{/let partial}}
+}
+{{/let partial}}
 
 {{#let export partial server_func_sink |func svc| captures |types|}}
 func (p *procFunc{{svc.go_name}}{{func.go_name}}) NewSinkElem() thrift.ReadableResult {
@@ -258,11 +258,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
     finalResponse.{{func.retval_field_name}} = {{#if (not func.sink.final_response_type.nilable?)}}&{{/if (not func.sink.final_response_type.nilable?)}}finalResult
     {{/if func.sink.final_response_type}}
     onFinalResponse(finalResponse)
-}{{!
-}}{{/let partial}}
+}
+{{/let partial}}
 
-{{#let export partial processor_function |func svc| captures |server_func_stream server_func_response server_func_sink|}}{{!
-}}type procFunc{{svc.go_name}}{{func.go_name}} struct {
+{{#let export partial processor_function |func svc| captures |server_func_stream server_func_response server_func_sink|}}
+type procFunc{{svc.go_name}}{{func.go_name}} struct {
     handler {{svc.go_name}}
 }
 // Compile time interface enforcer
@@ -286,11 +286,11 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
 {{#partial server_func_sink func=func svc=svc}}
 {{#else}}
 {{#partial server_func_response func=func svc=svc}}
-{{/if func.stream?}}{{!
-}}{{/let partial}}
+{{/if func.stream?}}
+{{/let partial}}
 
-{{#let export partial processor |svc| captures |func_rpc_name processor_function|}}{{!
-}}type {{svc.go_name}}Processor struct {
+{{#let export partial processor |svc| captures |func_rpc_name processor_function|}}
+type {{svc.go_name}}Processor struct {
     {{#if (and (not svc.interaction?) svc.extends)}}
     // Inherited/extended processor
     *{{svc.extends.go_qualified_name}}Processor
@@ -368,7 +368,6 @@ func (p *{{svc.go_name}}Processor) GetThriftMetadata() *{{svc.program.metadata_q
 
 {{#each svc.functions as |func|}}
 {{#if func.go_server_supported?}}
-
 {{#partial processor_function func=func svc=svc}}
 
 {{/if func.go_server_supported?}}

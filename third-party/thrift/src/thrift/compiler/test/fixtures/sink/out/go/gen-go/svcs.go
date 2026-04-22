@@ -452,7 +452,6 @@ func (p *SinkServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.SinkService")
 }
 
-
 type procFuncSinkServiceMethod struct {
     handler SinkService
 }
@@ -919,4 +918,5 @@ func (p *procFuncSinkServiceMethodFast) RunSinkContext(
     finalResponse.Success = finalResult
     onFinalResponse(finalResponse)
 }
+
 

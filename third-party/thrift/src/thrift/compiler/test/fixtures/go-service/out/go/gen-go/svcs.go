@@ -605,7 +605,6 @@ func (p *GetEntityProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.GetEntity")
 }
 
-
 type procFuncGetEntityGetEntity struct {
     handler GetEntity
 }
@@ -1145,4 +1144,5 @@ func (p *procFuncGetEntityMyMethodWithConflictingParamAccessors) RunContext(ctx 
 
     return result, nil
 }
+
 

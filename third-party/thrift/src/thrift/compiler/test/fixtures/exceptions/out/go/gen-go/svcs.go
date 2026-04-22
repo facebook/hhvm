@@ -187,7 +187,6 @@ func (p *RaiserProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.Raiser")
 }
 
-
 type procFuncRaiserDoBland struct {
     handler Raiser
 }
@@ -301,4 +300,5 @@ func (p *procFuncRaiserGet500) RunContext(ctx context.Context, reqStruct thrift.
     result.Success = &retval
     return result, nil
 }
+
 

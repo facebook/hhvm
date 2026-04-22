@@ -35,8 +35,8 @@
 {{/if func.oneway?}}
 {{/let partial}}
 
-{{#let export partial client_interface |svc| captures |client_func_signature|}}{{!
-}}type {{svc.go_name}}Client interface {
+{{#let export partial client_interface |svc| captures |client_func_signature|}}
+type {{svc.go_name}}Client interface {
     io.Closer
     {{#if (and (not svc.interaction?) svc.extends)}}
     // Inherited/extended service
@@ -49,11 +49,11 @@
 
     {{/if func.go_client_supported?}}
     {{/each}}
-}{{!
-}}{{/let partial}}
+}
+{{/let partial}}
 
-{{#let export partial client_func_request_sink |func svc| captures |types client_func_signature|}}{{!
-}}func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
+{{#let export partial client_func_request_sink |func svc| captures |types client_func_signature|}}
+func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
     {{#if func.sink_has_first_response?}}
     var fbthriftFirstRespZero {{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}
     {{/if func.sink_has_first_response?}}
@@ -119,11 +119,11 @@
     }
 
     return {{#if func.creates_interaction?}}fbthriftInteractionClient, {{/if}}{{#if func.sink_has_first_response?}}fbthriftFirstResp.Get{{func.retval_field_name}}(), {{/if}}fbthriftSinkCallback, nil
-}{{!
-}}{{/let partial}}
+}
+{{/let partial}}
 
-{{#let export partial client_func_request_response |func svc| captures |types client_func_signature|}}{{!
-}}func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
+{{#let export partial client_func_request_response |func svc| captures |types client_func_signature|}}
+func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
     fbthriftReq := &req{{svc.go_name}}{{func.go_name}}{
         {{#each func.params.fields as |field|}}
         {{field.go_name}}: {{field.go_arg_name}},
@@ -146,22 +146,22 @@
         return {{#if func.creates_interaction?}}nil, {{/if}}{{#if (not func.return_type.void?)}}{{#partial types.go_zero_value type=func.return_type}}, {{/if}}fbthriftErr
     }
     return {{#if func.creates_interaction?}}fbthriftInteractionClient, {{/if}}{{#if (not func.return_type.void?)}}fbthriftResp.Get{{func.retval_field_name}}(), {{/if}}nil
-}{{!
-}}{{/let partial}}
+}
+{{/let partial}}
 
-{{#let export partial client_func_request_no_response |func svc| captures |client_func_signature|}}{{!
-}}func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
+{{#let export partial client_func_request_no_response |func svc| captures |client_func_signature|}}
+func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
     fbthriftReq := &req{{svc.go_name}}{{func.go_name}}{
         {{#each func.params.fields as |field|}}
         {{field.go_name}}: {{field.go_arg_name}},
         {{/each}}
     }
     return c.ch.SendRequestNoResponse({{func.ctx_arg_name}}, "{{#if svc.interaction?}}{{svc.name}}.{{/if}}{{func.name}}", fbthriftReq)
-}{{!
-}}{{/let partial}}
+}
+{{/let partial}}
 
-{{#let export partial client_func_request_stream |func svc| captures |types client_func_signature|}}{{!
-}}func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
+{{#let export partial client_func_request_stream |func svc| captures |types client_func_signature|}}
+func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
     {{#if func.stream_has_first_response?}}
     var fbthriftRespZero {{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}
     {{/if func.stream_has_first_response?}}
@@ -213,11 +213,11 @@
         }
     }
     return {{#if func.creates_interaction?}}fbthriftInteractionClient, {{/if}}{{#if func.stream_has_first_response?}}fbthriftResp.Get{{func.retval_field_name}}(), {{/if}}fbthriftStreamSeqAdapter, nil
-}{{!
-}}{{/let partial}}
+}
+{{/let partial}}
 
-{{#let export partial client |svc| captures |types client_interface client_func_signature client_func_request_sink client_func_request_response client_func_request_no_response client_func_request_stream|}}{{!
-}}{{#partial client_interface svc=svc}}
+{{#let export partial client |svc| captures |types client_interface client_func_signature client_func_request_sink client_func_request_response client_func_request_no_response client_func_request_stream|}}
+{{#partial client_interface svc=svc}}
 
 type {{svc.go_client_name}} struct {
     {{#if (and (not svc.interaction?) svc.extends)}}
@@ -257,8 +257,6 @@ func (c *{{svc.go_client_name}}) Close() error {
 {{#else}}
 {{#partial client_func_request_response func=func svc=svc}}
 {{/if func.oneway?}}
-{{!newline}}
-
 
 {{/if func.go_client_supported?}}
 {{/each}}

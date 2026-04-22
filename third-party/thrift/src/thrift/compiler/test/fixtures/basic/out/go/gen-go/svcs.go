@@ -124,7 +124,6 @@ func (p *FooServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.FooService")
 }
 
-
 type procFuncFooServiceSimpleRPC struct {
     handler FooService
 }
@@ -146,6 +145,7 @@ func (p *procFuncFooServiceSimpleRPC) RunContext(ctx context.Context, reqStruct 
 
     return result, nil
 }
+
 
 type FB303Service interface {
     SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
@@ -242,7 +242,6 @@ func (p *FB303ServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.FB303Service")
 }
 
-
 type procFuncFB303ServiceSimpleRPC struct {
     handler FB303Service
 }
@@ -266,6 +265,7 @@ func (p *procFuncFB303ServiceSimpleRPC) RunContext(ctx context.Context, reqStruc
     result.Success = retval
     return result, nil
 }
+
 
 type MyService interface {
     Ping(ctx context.Context) (error)
@@ -547,7 +547,6 @@ func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyService")
 }
 
-
 type procFuncMyServicePing struct {
     handler MyService
 }
@@ -777,6 +776,7 @@ func (p *procFuncMyServiceRpcSkippedCodegen) RunContext(ctx context.Context, req
     return result, nil
 }
 
+
 type DbMixedStackArguments interface {
     GetDataByKey0(ctx context.Context, key string) ([]byte, error)
     GetDataByKey1(ctx context.Context, key string) ([]byte, error)
@@ -894,7 +894,6 @@ func (p *DbMixedStackArgumentsProcessor) GetThriftMetadata() *metadata.ThriftMet
     return GetThriftMetadataForService("module.DbMixedStackArguments")
 }
 
-
 type procFuncDbMixedStackArgumentsGetDataByKey0 struct {
     handler DbMixedStackArguments
 }
@@ -942,4 +941,5 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey1) RunContext(ctx context.Cont
     result.Success = retval
     return result, nil
 }
+
 

@@ -123,7 +123,6 @@ func (p *BadInteractionProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.BadInteraction")
 }
 
-
 type procFuncBadInteractionFoo struct {
     handler BadInteraction
 }
@@ -145,6 +144,7 @@ func (p *procFuncBadInteractionFoo) RunContext(ctx context.Context, reqStruct th
 
     return result, nil
 }
+
 
 func (p *BadInteractionProcessor) OnTermination() {
     // If the underlying handler implements OnTermination()
@@ -369,7 +369,6 @@ func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.MyService")
 }
 
-
 type procFuncMyServicePing struct {
     handler MyService
 }
@@ -536,6 +535,7 @@ func (p *procFuncMyServiceGoDoNothing) RunContext(ctx context.Context, reqStruct
     return result, nil
 }
 
+
 type MyServicePrioParent interface {
     Ping(ctx context.Context) (error)
     Pong(ctx context.Context) (error)
@@ -651,7 +651,6 @@ func (p *MyServicePrioParentProcessor) GetThriftMetadata() *metadata.ThriftMetad
     return GetThriftMetadataForService("module.MyServicePrioParent")
 }
 
-
 type procFuncMyServicePrioParentPing struct {
     handler MyServicePrioParent
 }
@@ -695,6 +694,7 @@ func (p *procFuncMyServicePrioParentPong) RunContext(ctx context.Context, reqStr
 
     return result, nil
 }
+
 
 type MyServicePrioChild interface {
     // Inherited/extended service
@@ -775,7 +775,6 @@ func (p *MyServicePrioChildProcessor) GetThriftMetadata() *metadata.ThriftMetada
     return GetThriftMetadataForService("module.MyServicePrioChild")
 }
 
-
 type procFuncMyServicePrioChildPang struct {
     handler MyServicePrioChild
 }
@@ -797,6 +796,7 @@ func (p *procFuncMyServicePrioChildPang) RunContext(ctx context.Context, reqStru
 
     return result, nil
 }
+
 
 type BadService interface {
     Bar(ctx context.Context) (int32, error)
@@ -894,7 +894,6 @@ func (p *BadServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.BadService")
 }
 
-
 type procFuncBadServiceBar struct {
     handler BadService
 }
@@ -917,6 +916,7 @@ func (p *procFuncBadServiceBar) RunContext(ctx context.Context, reqStruct thrift
     result.Success = &retval
     return result, nil
 }
+
 
 type FooBarBazService interface {
     FooStructured(ctx context.Context) (error)
@@ -1054,7 +1054,6 @@ func (p *FooBarBazServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata
     return GetThriftMetadataForService("module.FooBarBazService")
 }
 
-
 type procFuncFooBarBazServiceFooStructured struct {
     handler FooBarBazService
 }
@@ -1120,4 +1119,5 @@ func (p *procFuncFooBarBazServiceBaz) RunContext(ctx context.Context, reqStruct 
 
     return result, nil
 }
+
 

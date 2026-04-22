@@ -153,7 +153,6 @@ func (p *MyServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("service.MyService")
 }
 
-
 type procFuncMyServiceQuery struct {
     handler MyService
 }
@@ -199,4 +198,5 @@ func (p *procFuncMyServiceHasArgDocs) RunContext(ctx context.Context, reqStruct 
 
     return result, nil
 }
+
 

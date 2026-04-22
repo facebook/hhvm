@@ -690,7 +690,7 @@ struct SetEncode {
       for (auto it = set.begin(); it != set.end(); ++it) {
         iters.push_back(it);
       }
-      auto compare = [](auto a, auto b) {
+      auto compare = [=](auto a, auto b) {
         if constexpr (kKeyOrder == KeyOrder::StableAscending) {
           return StableLessThan<Tag>{}(*a, *b);
         } else {
@@ -743,7 +743,7 @@ struct MapEncode {
       for (auto it = map.begin(); it != map.end(); ++it) {
         iters.push_back(it);
       }
-      auto compare = [](auto a, auto b) {
+      auto compare = [=](auto a, auto b) {
         if constexpr (kKeyOrder == KeyOrder::StableAscending) {
           return StableLessThan<Key>{}((*a).first, (*b).first);
         } else {

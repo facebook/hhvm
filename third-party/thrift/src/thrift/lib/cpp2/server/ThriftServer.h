@@ -243,6 +243,15 @@ class ThriftServerAsyncProcessorFactory : public AsyncProcessorFactory {
     return {svIf_.get()};
   }
 
+  std::optional<schema::DefinitionsSchema> getServiceSchema() override {
+    return svIf_->T::getServiceSchema();
+  }
+
+  std::vector<folly::not_null<const syntax_graph::ServiceNode*>>
+  getServiceSchemaNodes() override {
+    return svIf_->T::getServiceSchemaNodes();
+  }
+
  private:
   std::shared_ptr<T> svIf_;
 };

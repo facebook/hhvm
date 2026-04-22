@@ -785,4 +785,22 @@ TEST(AsyncProcessorFactoryTest, ThriftGenerated) {
   EXPECT_FALSE(notGenerated.isThriftGenerated());
 }
 
+TEST(AsyncProcessorFactoryTest, ThriftServerAsyncProcessorFactorySchema) {
+  auto handler = std::make_shared<ServiceHandler<Parent>>();
+  auto handlerSchema = handler->getServiceSchema();
+
+  ThriftServerAsyncProcessorFactory<ServiceHandler<Parent>> factory(handler);
+  auto factorySchema = factory.getServiceSchema();
+  auto factoryNodes = factory.getServiceSchemaNodes();
+
+  // ThriftServerAsyncProcessorFactory must delegate getServiceSchema() and
+  // getServiceSchemaNodes() so that MultiplexAsyncProcessorFactory can
+  // discover all services when composing multiple factories.
+  ASSERT_EQ(handlerSchema.has_value(), factorySchema.has_value());
+  if (handlerSchema.has_value()) {
+    EXPECT_EQ(handlerSchema->definitions, factorySchema->definitions);
+  }
+  EXPECT_EQ(handler->getServiceSchemaNodes().size(), factoryNodes.size());
+}
+
 } // namespace apache::thrift::test

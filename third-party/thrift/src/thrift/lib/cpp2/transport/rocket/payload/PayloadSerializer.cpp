@@ -19,36 +19,32 @@
 namespace apache::thrift::rocket {
 
 PayloadSerializer::PayloadSerializerHolder::~PayloadSerializerHolder() {
-  if (auto s = serializer_.load(std::memory_order_acquire)) {
-    s->retire();
-  }
+  reset();
 }
 
 PayloadSerializer::Ptr PayloadSerializer::PayloadSerializerHolder::get() {
-  PayloadSerializer::Ptr ptr(serializer_);
-  if (FOLLY_UNLIKELY(ptr == nullptr)) {
-    auto* newSerializer =
-        new PayloadSerializer(DefaultPayloadSerializerStrategy());
-
-    // Try to initialize the serializer
-    if (!serializer_.compare_exchange_strong(
-            ptr.serializer_,
-            newSerializer,
-            std::memory_order_release,
-            std::memory_order_relaxed)) {
-      // The serializer is already initialized, clean up.
-      delete newSerializer;
-    }
-    // Call get() again to get the initialized serializer.
-    return get();
-  } else {
-    return ptr;
+  auto* serializer = serializer_.load(std::memory_order_acquire);
+  if (FOLLY_LIKELY(serializer != nullptr)) {
+    return Ptr(*serializer);
   }
+  auto* newSerializer =
+      new PayloadSerializer(DefaultPayloadSerializerStrategy());
+  if (serializer_.compare_exchange_strong(
+          serializer,
+          newSerializer,
+          std::memory_order_acq_rel,
+          std::memory_order_acquire)) {
+    return Ptr(*newSerializer);
+  }
+  delete newSerializer;
+  return Ptr(*serializer);
 }
 
 void PayloadSerializer::PayloadSerializerHolder::reset() {
-  if (auto s = serializer_.exchange(nullptr, std::memory_order_acquire)) {
-    s->retire();
+  for (auto* serializer =
+           serializer_.exchange(nullptr, std::memory_order_acquire);
+       serializer != nullptr;) {
+    delete std::exchange(serializer, serializer->nextRetired_);
   }
 }
 

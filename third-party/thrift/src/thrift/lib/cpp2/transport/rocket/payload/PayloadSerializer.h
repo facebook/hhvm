@@ -30,11 +30,11 @@ namespace apache::thrift::rocket {
  * Its to make changing the strategy easier in the future / safe. Hides the
  * strategy from the rest of the code (provides type-erasure) with exposing.
  *
- * For reaons with the existing code this class is accessed as a singleton. It
+ * For reasons with the existing code this class is accessed as a singleton. It
  * can be overridden by calling the initialize() method if you want to use a
  * different strategy.
  */
-class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
+class PayloadSerializer {
  public:
   class Ptr {
    public:
@@ -57,21 +57,12 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
 
    private:
     friend struct PayloadSerializerHolder;
-
-    // Used for shared global instance. Co-owns the instance.
-    explicit Ptr(std::atomic<PayloadSerializer*>& cell)
-        : holder_(folly::make_hazard_pointer()),
-          serializer_(holder_.protect(cell)) {}
-
-    // Does not own the instance.
-    explicit Ptr(PayloadSerializer& payloadSerializer)
-        : holder_(folly::make_hazard_pointer()),
-          serializer_(&payloadSerializer) {}
-
-    folly::hazptr_holder<> holder_;
-    PayloadSerializer* serializer_;
-
     friend class PayloadSerializer;
+
+    explicit Ptr(PayloadSerializer& payloadSerializer)
+        : serializer_(&payloadSerializer) {}
+
+    PayloadSerializer* serializer_;
   };
 
   struct PayloadSerializerHolder {
@@ -80,14 +71,16 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
 
     PayloadSerializer::Ptr get();
 
+    // Expected to be called at most once per call-site, at startup, to
+    // override the default strategy. Takes effect even if get() has already
+    // been called. Superseded objects are retained in the intrusive list
+    // until reset(); this is called a bounded number of times by contract.
     template <typename Strategy>
     void initialize(Strategy&& strategy) {
       auto* serializer =
           new PayloadSerializer(std::forward<Strategy>(strategy));
-      if (auto s =
-              serializer_.exchange(serializer, std::memory_order_acq_rel)) {
-        s->retire();
-      }
+      serializer->nextRetired_ =
+          serializer_.exchange(serializer, std::memory_order_acq_rel);
     }
 
     void reset();
@@ -104,6 +97,7 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
       CustomCompressionPayloadSerializerStrategy<
           DefaultPayloadSerializerStrategy>>
       strategy_;
+  PayloadSerializer* nextRetired_{nullptr};
 
   /**
    * Visits the strategy and calls the delegate function with the strategy as
@@ -135,9 +129,9 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
   explicit PayloadSerializer(Strategy s) : strategy_(std::move(s)) {}
 
   /**
-   * Lets you override the strategy to one of the supported strategies instead
-   * of the default. Must be called before the getInstance() method is called
-   * for the first time to take effect. Otherwise, it will be ignored.
+   * Overrides the strategy used by getInstance(). Each call-site is expected to
+   * call this at most once, at startup. Takes effect immediately: later calls
+   * to getInstance() reflect the new strategy.
    */
   template <typename Strategy>
   static void initialize(Strategy&& strategy) {

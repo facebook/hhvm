@@ -32,6 +32,10 @@
 #include <thrift/lib/cpp2/dynamic/SerializableTypeSystemBuilder.h>
 #include <thrift/lib/cpp2/dynamic/TypeSystemBuilder.h>
 #include <thrift/lib/cpp2/dynamic/test/gen-cpp2/digest_expected_values_constants.h>
+#include <thrift/lib/cpp2/dynamic/test/gen-cpp2/digest_fixture_enum_types.h>
+#include <thrift/lib/cpp2/dynamic/test/gen-cpp2/digest_fixture_multiple_types_types.h>
+#include <thrift/lib/cpp2/dynamic/test/gen-cpp2/digest_fixture_single_empty_struct_types.h>
+#include <thrift/lib/cpp2/dynamic/test/gen-cpp2/digest_fixture_struct_with_fields_types.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 #include <thrift/lib/cpp2/schema/SyntaxGraph.h>

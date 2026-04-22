@@ -141,7 +141,11 @@ std::unique_ptr<folly::IOBuf> evpEncrypt(
             return EVP_EncryptFinal_ex(encryptCtx, cipher, outLen) == 1;
           }
         };
-        encFuncBlocks(EVPEncImpl{encryptCtx}, plaintext, ciphertext, 16);
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            encFuncBlocks(
+                err, EVPEncImpl{encryptCtx}, plaintext, ciphertext, 16),
+            err);
       } else {
         encFunc(encryptCtx, plaintext, ciphertext);
       }
@@ -154,14 +158,21 @@ std::unique_ptr<folly::IOBuf> evpEncrypt(
       }
     }
   };
-  return encryptHelper(
-      AeadImpl{encryptCtx, useBlockOps},
-      std::move(plaintext),
-      associatedData,
-      iv,
-      tagLen,
-      headroom,
-      options);
+  std::unique_ptr<folly::IOBuf> encryptResult;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encryptHelper(
+          encryptResult,
+          err,
+          AeadImpl{encryptCtx, useBlockOps},
+          std::move(plaintext),
+          associatedData,
+          iv,
+          tagLen,
+          headroom,
+          options),
+      err);
+  return encryptResult;
 }
 
 folly::Optional<std::unique_ptr<folly::IOBuf>> evpDecrypt(
@@ -237,8 +248,19 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> evpDecrypt(
             return EVP_DecryptFinal_ex(decryptCtx, outm, outLen) == 1;
           }
         };
-        return decFuncBlocks(
-            EVPDecImpl{decryptCtx}, ciphertext, plaintext, tagOut, 16);
+        bool decResult;
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            decFuncBlocks(
+                decResult,
+                err,
+                EVPDecImpl{decryptCtx},
+                ciphertext,
+                plaintext,
+                tagOut,
+                16),
+            err);
+        return decResult;
       } else {
         return decFunc(decryptCtx, ciphertext, plaintext, tagOut);
       }

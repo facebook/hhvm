@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fizz/util/Logging.h>
+#include <fizz/util/Status.h>
 #include <folly/Range.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
@@ -84,7 +85,9 @@ void transformBuffer(const folly::IOBuf& in, folly::IOBuf& out, Func func) {
  */
 constexpr size_t kTransformBufferBlocksMaxBlocksize = 128;
 template <typename Func>
-folly::io::RWPrivateCursor transformBufferBlocks(
+Status transformBufferBlocks(
+    folly::io::RWPrivateCursor& ret,
+    Error& err,
     const folly::IOBuf& in,
     folly::IOBuf& out,
     Func func,
@@ -93,7 +96,10 @@ folly::io::RWPrivateCursor transformBufferBlocks(
   // context of ciphertext transformation, which operates on blocks size less
   // than 128 bytes.
   if (blockSize == 0 || blockSize > kTransformBufferBlocksMaxBlocksize) {
-    throw std::out_of_range("invalid transformBufferBlocks blockSize");
+    return err.error(
+        "invalid transformBufferBlocks blockSize",
+        folly::none,
+        Error::Category::StdOutOfRange);
   }
 
   size_t internallyBuffered = 0;
@@ -113,7 +119,9 @@ folly::io::RWPrivateCursor transformBufferBlocks(
       // internally buffer.
       // This should be safe to just internally buffer since we took into
       // account what was existing in the internal buffer already
-      auto numWritten = func(blockBuffer.data(), inputRange.data(), inputLen);
+      size_t numWritten;
+      FIZZ_RETURN_ON_ERROR(func(
+          numWritten, err, blockBuffer.data(), inputRange.data(), inputLen));
       FIZZ_DCHECK_EQ(numWritten, 0UL)
           << "expected buffering. wrote " << numWritten;
       // only update input offsets
@@ -123,11 +131,14 @@ folly::io::RWPrivateCursor transformBufferBlocks(
       // we have at least a block to write from input + internal buffer, so
       // output didn't have enough room in this case
       // copy a block from input in temp and then push onto output
-      auto numWritten = func(
+      size_t numWritten;
+      FIZZ_RETURN_ON_ERROR(func(
+          numWritten,
+          err,
           blockBuffer.data(),
           inputRange.data(),
           // only provide it the amount needed for one block
-          blockSize - internallyBuffered);
+          blockSize - internallyBuffered));
       FIZZ_DCHECK_EQ(static_cast<size_t>(numWritten), blockSize)
           << "did not write full block bs=" << blockSize
           << " wrote=" << numWritten;
@@ -149,8 +160,13 @@ folly::io::RWPrivateCursor transformBufferBlocks(
       // try to grab as much from input - we can grab up to BlockSize - 1 more
       auto maxToTake = (numBlockBytes - internallyBuffered) + (blockSize - 1);
       auto numToTake = std::min(inputLen, maxToTake);
-      auto numWritten =
-          func(output.writableData(), inputRange.data(), numToTake);
+      size_t numWritten;
+      FIZZ_RETURN_ON_ERROR(func(
+          numWritten,
+          err,
+          output.writableData(),
+          inputRange.data(),
+          numToTake));
 
       FIZZ_DCHECK_EQ(static_cast<size_t>(numWritten), numBlockBytes);
 
@@ -161,6 +177,7 @@ folly::io::RWPrivateCursor transformBufferBlocks(
       internallyBuffered = (internallyBuffered + numToTake) % blockSize;
     }
   }
-  return output;
+  ret = output;
+  return Status::Success;
 }
 } // namespace fizz

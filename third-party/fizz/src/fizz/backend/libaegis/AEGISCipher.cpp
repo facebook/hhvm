@@ -244,8 +244,11 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
           return ret == 0;
         }
       };
-      encFuncBlocks(
-          EVPEncImpl(self, tagTemp), plaintext, ciphertext, self.mms_);
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          encFuncBlocks(
+              err, EVPEncImpl(self, tagTemp), plaintext, ciphertext, self.mms_),
+          err);
     }
 
     void final(int tagLen, void* tagOut) {
@@ -253,14 +256,21 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
     }
   };
 
-  return encryptHelper(
-      AeadImpl{*this},
-      std::move(plaintext),
-      associatedData,
-      iv,
-      kTagLength,
-      headroom_,
-      options);
+  std::unique_ptr<folly::IOBuf> encryptResult;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      encryptHelper(
+          encryptResult,
+          err,
+          AeadImpl{*this},
+          std::move(plaintext),
+          associatedData,
+          iv,
+          kTagLength,
+          headroom_,
+          options),
+      err);
+  return encryptResult;
 }
 
 folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
@@ -334,8 +344,19 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
         }
       };
 
-      return decFuncBlocks(
-          EVPDecImpl(self), ciphertext, plaintext, tagOut, self.mms_);
+      bool decResult = false;
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          decFuncBlocks(
+              decResult,
+              err,
+              EVPDecImpl(self),
+              ciphertext,
+              plaintext,
+              tagOut,
+              self.mms_),
+          err);
+      return decResult;
     }
   };
   return decryptHelper(

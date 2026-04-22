@@ -38,7 +38,9 @@ createIV(uint64_t seqNum, size_t ivLength, folly::ByteRange trafficIvKey) {
  * successfully
  */
 template <class EVPDecImpl>
-bool decFuncBlocks(
+Status decFuncBlocks(
+    bool& ret,
+    Error& err,
     EVPDecImpl&& impl,
     const folly::IOBuf& ciphertext,
     folly::IOBuf& output,
@@ -47,40 +49,52 @@ bool decFuncBlocks(
   size_t totalWritten = 0;
   size_t totalInput = 0;
   int outLen = 0;
-  auto outputCursor = transformBufferBlocks(
+  folly::io::RWPrivateCursor outputCursor(&output);
+  FIZZ_RETURN_ON_ERROR(transformBufferBlocks(
+      outputCursor,
+      err,
       ciphertext,
       output,
-      [&](uint8_t* plain, const uint8_t* cipher, size_t len) {
+      [&impl, &outLen, &totalWritten, &totalInput](
+          size_t& written,
+          Error& err,
+          uint8_t* plain,
+          const uint8_t* cipher,
+          size_t len) -> Status {
         if (len > std::numeric_limits<int>::max()) {
-          throw std::runtime_error("Decryption error: too much cipher text");
+          return err.error("Decryption error: too much cipher text");
         }
         if (!impl.decryptUpdate(plain, cipher, len, &outLen)) {
-          throw std::runtime_error("Decryption error");
+          return err.error("Decryption error");
         }
         totalWritten += outLen;
         totalInput += len;
-        return static_cast<size_t>(outLen);
+        written = static_cast<size_t>(outLen);
+        return Status::Success;
       },
-      blockSize);
+      blockSize));
 
   if (!impl.setExpectedTag(tagOut.size(), tagOut.begin())) {
-    throw std::runtime_error("Decryption error");
+    return err.error("Decryption error");
   }
 
   // We might end up needing to write more in the final encrypt stage
   auto numBuffered = totalInput - totalWritten;
   auto numLeftInOutput = outputCursor.length();
   if (numBuffered <= numLeftInOutput) {
-    return impl.decryptFinal(outputCursor.writableData(), &outLen);
+    ret = impl.decryptFinal(outputCursor.writableData(), &outLen);
+    return Status::Success;
   } else {
     // we need to copy nicely - this should be at most one block
     std::array<uint8_t, kTransformBufferBlocksMaxBlocksize> block = {};
     auto res = impl.decryptFinal(block.data(), &outLen);
     if (!res) {
-      return false;
+      ret = false;
+      return Status::Success;
     }
     outputCursor.push(block.data(), outLen);
-    return true;
+    ret = true;
+    return Status::Success;
   }
 }
 
@@ -92,7 +106,8 @@ bool decFuncBlocks(
  * successfully
  */
 template <class EVPEncImpl>
-void encFuncBlocks(
+Status encFuncBlocks(
+    Error& err,
     EVPEncImpl&& impl,
     const folly::IOBuf& plaintext,
     folly::IOBuf& output,
@@ -100,42 +115,53 @@ void encFuncBlocks(
   size_t totalWritten = 0;
   size_t totalInput = 0;
   int outLen = 0;
-  auto outputCursor = transformBufferBlocks(
+  folly::io::RWPrivateCursor outputCursor(&output);
+  FIZZ_RETURN_ON_ERROR(transformBufferBlocks(
+      outputCursor,
+      err,
       plaintext,
       output,
-      [&](uint8_t* cipher, const uint8_t* plain, size_t len) {
+      [&impl, &outLen, &totalWritten, &totalInput](
+          size_t& written,
+          Error& err,
+          uint8_t* cipher,
+          const uint8_t* plain,
+          size_t len) -> Status {
         if (len > std::numeric_limits<int>::max()) {
-          throw std::runtime_error("Encryption error: too much plain text");
+          return err.error("Encryption error: too much plain text");
         }
         if (len == 0) {
-          return static_cast<size_t>(0);
+          written = 0;
+          return Status::Success;
         }
         if (!impl.encryptUpdate(
                 cipher, &outLen, plain, static_cast<int>(len)) ||
             outLen < 0) {
-          throw std::runtime_error("Encryption error");
+          return err.error("Encryption error");
         }
         totalWritten += outLen;
         totalInput += len;
-        return static_cast<size_t>(outLen);
+        written = static_cast<size_t>(outLen);
+        return Status::Success;
       },
-      blockSize);
+      blockSize));
 
   // We might end up needing to write more in the final encrypt stage
   auto numBuffered = totalInput - totalWritten;
   auto numLeftInOutput = outputCursor.length();
   if (numBuffered <= numLeftInOutput) {
     if (!impl.encryptFinal(outputCursor.writableData(), &outLen)) {
-      throw std::runtime_error("Encryption error");
+      return err.error("Encryption error");
     }
   } else {
     // we need to copy nicely - this should be at most one block
     std::array<uint8_t, kTransformBufferBlocksMaxBlocksize> block = {};
     if (!impl.encryptFinal(block.data(), &outLen)) {
-      throw std::runtime_error("Encryption error");
+      return err.error("Encryption error");
     }
     outputCursor.push(block.data(), outLen);
   }
+  return Status::Success;
 }
 
 /**
@@ -156,7 +182,9 @@ void encFuncBlocks(
  * `tagOut` which is guaranteed to be at least `taglen` bytes.
  */
 template <class AeadImpl>
-std::unique_ptr<folly::IOBuf> encryptHelper(
+Status encryptHelper(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     AeadImpl&& impl,
     std::unique_ptr<folly::IOBuf>&& plaintext,
     const folly::IOBuf* associatedData,
@@ -189,8 +217,7 @@ std::unique_ptr<folly::IOBuf> encryptHelper(
   bool allowAlloc = allocOption == Aead::AllocationOption::Allow;
 
   if (!allowInplaceEdit && !allowAlloc) {
-    throw std::runtime_error(
-        "Cannot encrypt (must be in-place or allow allocation)");
+    return err.error("Cannot encrypt (must be in-place or allow allocation)");
   }
 
   if (allowInplaceEdit) {
@@ -201,7 +228,8 @@ std::unique_ptr<folly::IOBuf> encryptHelper(
     size_t totalSize{0};
     if (!folly::checked_add<size_t>(
             &totalSize, headroom, inputLength, tagLen)) {
-      throw std::overflow_error("Output buffer size");
+      return err.error(
+          "Output buffer size", folly::none, Error::Category::StdOverFlow);
     }
     output = folly::IOBuf::create(totalSize);
     output->advance(headroom);
@@ -215,7 +243,7 @@ std::unique_ptr<folly::IOBuf> encryptHelper(
   auto tailRoom = output->prev()->tailroom();
   if (tailRoom < tagLen || !allowGrowth) {
     if (!allowAlloc) {
-      throw std::runtime_error("Cannot encrypt (insufficient space for tag)");
+      return err.error("Cannot encrypt (insufficient space for tag)");
     }
     std::unique_ptr<folly::IOBuf> tag = folly::IOBuf::create(tagLen);
     tag->append(tagLen);
@@ -227,7 +255,8 @@ std::unique_ptr<folly::IOBuf> encryptHelper(
     // we can copy into output directly
     impl.final(tagLen, lastBuf->writableTail() - tagLen);
   }
-  return output;
+  ret = std::move(output);
+  return Status::Success;
 }
 
 /**

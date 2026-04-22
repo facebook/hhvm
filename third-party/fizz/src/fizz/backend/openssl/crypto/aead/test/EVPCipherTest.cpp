@@ -99,11 +99,17 @@ std::unique_ptr<IOBuf> callDecrypt(
   }
   try {
     auto origLength = ciphertext->computeChainDataLength();
-    auto out = cipher->decrypt(
-        std::move(ciphertext),
-        aad.get(),
-        params.seqNum,
-        {buffOption, allocOption});
+    std::unique_ptr<IOBuf> out;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        cipher->decrypt(
+            out,
+            err,
+            std::move(ciphertext),
+            aad.get(),
+            params.seqNum,
+            {buffOption, allocOption}),
+        err);
     EXPECT_TRUE(params.valid);
     EXPECT_TRUE(IOBufEqualTo()(toIOBuf(params.plaintext), out));
     EXPECT_EQ(

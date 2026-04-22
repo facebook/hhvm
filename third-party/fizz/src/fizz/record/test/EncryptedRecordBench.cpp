@@ -164,8 +164,10 @@ void decryptGCMNoRecord(uint32_t n, size_t size) {
   }
 
   std::unique_ptr<folly::IOBuf> in;
+  fizz::Error err;
   for (auto& buf : contents) {
-    in = readAead->decrypt(std::move(buf), aad.get(), 0);
+    FIZZ_THROW_ON_ERROR(
+        readAead->decrypt(in, err, std::move(buf), aad.get(), 0), err);
   }
   folly::doNotOptimizeAway(in);
 }

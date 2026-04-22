@@ -329,8 +329,14 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
   EXPECT_EQ(
       encode(clientHelloOuterAad, err, clientHelloOuter), Status::Success);
 
-  std::unique_ptr<folly::IOBuf> gotClientHelloInner =
-      context->open(clientHelloOuterAad.get(), std::move(clientECH.payload));
+  std::unique_ptr<folly::IOBuf> gotClientHelloInner;
+  EXPECT_EQ(
+      context->open(
+          gotClientHelloInner,
+          err,
+          clientHelloOuterAad.get(),
+          std::move(clientECH.payload)),
+      Status::Success);
 
   folly::io::Cursor encodedECHInnerCursor(gotClientHelloInner.get());
   ClientHello gotChlo;

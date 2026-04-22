@@ -2141,7 +2141,12 @@ TEST(HpkeTest, TestSetup) {
     auto expectedCiphertext = testParam.ciphertext;
     EXPECT_TRUE(folly::IOBufEqualTo()(ciphertext, toIOBuf(expectedCiphertext)));
 
-    auto gotPlaintext = decryptContext->open(aad.get(), std::move(ciphertext));
+    std::unique_ptr<folly::IOBuf> gotPlaintext;
+    Error err;
+    EXPECT_EQ(
+        decryptContext->open(
+            gotPlaintext, err, aad.get(), std::move(ciphertext)),
+        Status::Success);
     EXPECT_TRUE(folly::IOBufEqualTo()(gotPlaintext, plaintext));
 
     // Test exporter secret

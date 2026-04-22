@@ -71,8 +71,15 @@ TEST_P(HpkeContextTest, TestContext) {
           prefix07, openssl::hasherFactory<Sha256>())),
       std::move(suiteId),
       fizz::hpke::HpkeContext::Role::Receiver);
-  auto gotPlaintext = decryptContext.open(
-      toIOBuf(testParam.aad).get(), std::move(gotCiphertext));
+  std::unique_ptr<folly::IOBuf> gotPlaintext;
+  Error err;
+  EXPECT_EQ(
+      decryptContext.open(
+          gotPlaintext,
+          err,
+          toIOBuf(testParam.aad).get(),
+          std::move(gotCiphertext)),
+      Status::Success);
   EXPECT_TRUE(
       folly::IOBufEqualTo()(gotPlaintext, toIOBuf(testParam.plaintext)));
 }
@@ -112,10 +119,12 @@ TEST_P(HpkeContextTest, TestContextRoles) {
       decryptContext.seal(
           toIOBuf(testParam.aad).get(), toIOBuf(testParam.plaintext)),
       std::logic_error);
-  EXPECT_THROW(
+  std::unique_ptr<folly::IOBuf> openRet;
+  Error err;
+  EXPECT_EQ(
       encryptContext.open(
-          toIOBuf(testParam.aad).get(), std::move(gotCiphertext)),
-      std::logic_error);
+          openRet, err, toIOBuf(testParam.aad).get(), std::move(gotCiphertext)),
+      Status::Fail);
 }
 
 TEST_P(HpkeContextTest, TestExportSecret) {

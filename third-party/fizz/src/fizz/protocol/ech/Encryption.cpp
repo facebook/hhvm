@@ -67,7 +67,8 @@ Status extractEncodedClientHelloInner(
       std::unique_ptr<folly::IOBuf> aadCH;
       FIZZ_RETURN_ON_ERROR(
           makeClientHelloOuterForAad(aadCH, err, clientHelloOuter));
-      ret = context->open(aadCH.get(), std::move(encryptedCh));
+      FIZZ_RETURN_ON_ERROR(
+          context->open(ret, err, aadCH.get(), std::move(encryptedCh)));
     }
   }
   return Status::Success;
@@ -851,8 +852,13 @@ Status substituteOuterExtensions(
       OuterExtensions outerExtensions;
       try {
         folly::io::Cursor cursor(ext.extension_data.get());
-        FIZZ_RETURN_ON_ERROR(
-            getExtension<OuterExtensions>(outerExtensions, err, cursor));
+        if (getExtension<OuterExtensions>(outerExtensions, err, cursor) ==
+            Status::Fail) {
+          return err.error(
+              "ech_outer_extensions malformed",
+              folly::none,
+              Error::Category::OuterExtensions);
+        }
       } catch (...) {
         return err.error(
             "ech_outer_extensions malformed",

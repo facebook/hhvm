@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/util/Status.h>
 #include <folly/Optional.h>
 #include <folly/io/IOBuf.h>
 
@@ -155,11 +156,15 @@ class Aead {
    * Uses BufferOption::RespectSharedPolicy and AllocationOption::Allow by
    * default.
    */
-  std::unique_ptr<folly::IOBuf> decrypt(
+  Status decrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum) const {
     return decrypt(
+        ret,
+        err,
         std::forward<std::unique_ptr<folly::IOBuf>>(ciphertext),
         associatedData,
         seqNum,
@@ -177,18 +182,24 @@ class Aead {
    * Uses BufferOption::RespectSharedPolicy and AllocationOption::Allow by
    * default.
    */
-  std::unique_ptr<folly::IOBuf> decrypt(
+  Status decrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce) const {
     return decrypt(
+        ret,
+        err,
         std::move(ciphertext),
         associatedData,
         nonce,
         {BufferOption::RespectSharedPolicy, AllocationOption::Allow});
   }
 
-  virtual std::unique_ptr<folly::IOBuf> decrypt(
+  virtual Status decrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
@@ -199,12 +210,15 @@ class Aead {
         seqNum,
         options);
     if (!plaintext) {
-      throw std::runtime_error("decryption failed");
+      return err.error("decryption failed");
     }
-    return std::move(*plaintext);
+    ret = std::move(*plaintext);
+    return Status::Success;
   }
 
-  virtual std::unique_ptr<folly::IOBuf> decrypt(
+  virtual Status decrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
@@ -215,9 +229,10 @@ class Aead {
         nonce,
         options);
     if (!plaintext) {
-      throw std::runtime_error("decryption failed");
+      return err.error("decryption failed");
     }
-    return std::move(*plaintext);
+    ret = std::move(*plaintext);
+    return Status::Success;
   }
 
   /**

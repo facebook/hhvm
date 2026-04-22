@@ -83,12 +83,15 @@ class MockAead : public Aead {
        uint64_t seqNum,
        Aead::AeadOptions options),
       (const));
-  std::unique_ptr<folly::IOBuf> decrypt(
+  Status decrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       Aead::AeadOptions options) const override {
-    return _decrypt(ciphertext, associatedData, seqNum, options);
+    FIZZ_THROW_TO_ERROR(
+        ret, _decrypt(ciphertext, associatedData, seqNum, options));
   }
 
   MOCK_METHOD(

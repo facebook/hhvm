@@ -105,11 +105,15 @@ Status EncryptedReadRecordLayer::getDecryptedBuf(
         continue;
       }
     } else {
-      ret = ReadResult<Buf>::from(aead_->decrypt(
+      std::unique_ptr<folly::IOBuf> decrypted;
+      FIZZ_RETURN_ON_ERROR(aead_->decrypt(
+          decrypted,
+          err,
           std::move(encrypted),
           useAdditionalData_ ? &adBuf : nullptr,
           seqNum_++,
           options));
+      ret = ReadResult<Buf>::from(std::move(decrypted));
       return Status::Success;
     }
   }

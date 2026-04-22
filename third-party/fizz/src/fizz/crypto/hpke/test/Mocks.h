@@ -67,22 +67,26 @@ class MockAeadCipher : public Aead {
     return actualCipher_->setEncryptedBufferHeadroom(headroom);
   }
 
-  std::unique_ptr<folly::IOBuf> decrypt(
+  Status decrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       AeadOptions options) const override {
     return actualCipher_->decrypt(
-        std::move(ciphertext), associatedData, seqNum, options);
+        ret, err, std::move(ciphertext), associatedData, seqNum, options);
   }
 
-  std::unique_ptr<folly::IOBuf> decrypt(
+  Status decrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
       AeadOptions options) const override {
     return actualCipher_->decrypt(
-        std::move(ciphertext), associatedData, nonce, options);
+        ret, err, std::move(ciphertext), associatedData, nonce, options);
   }
 
   folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
@@ -129,10 +133,12 @@ class MockHpkeContext : public HpkeContext {
       std::unique_ptr<folly::IOBuf>(
           const folly::IOBuf* aad,
           std::unique_ptr<folly::IOBuf>& ct));
-  std::unique_ptr<folly::IOBuf> open(
+  Status open(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       const folly::IOBuf* aad,
-      std::unique_ptr<folly::IOBuf> pt) override {
-    return _open(aad, pt);
+      std::unique_ptr<folly::IOBuf> ct) override {
+    FIZZ_THROW_TO_ERROR(ret, _open(aad, ct));
   }
 
   MOCK_CONST_METHOD2(

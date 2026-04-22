@@ -40,12 +40,12 @@ HpkeContextImpl::HpkeContextImpl(
           0,
           role) {}
 
-void HpkeContextImpl::incrementSeq() {
+Status HpkeContextImpl::incrementSeq(Error& err) {
   if (seqNum_ >= (UINT64_MAX - 1)) {
-    throw std::runtime_error(
-        "MessageLimitReachedError: When incrementing seqNum");
+    return err.error("MessageLimitReachedError: When incrementing seqNum");
   }
   seqNum_ += 1;
+  return Status::Success;
 }
 
 std::unique_ptr<folly::IOBuf> HpkeContextImpl::seal(
@@ -56,20 +56,25 @@ std::unique_ptr<folly::IOBuf> HpkeContextImpl::seal(
   }
   std::unique_ptr<folly::IOBuf> ct =
       cipher_->encrypt(std::move(pt), aad, seqNum_);
-  incrementSeq();
+  Error err;
+  FIZZ_THROW_ON_ERROR(incrementSeq(err), err);
   return ct;
 }
 
-std::unique_ptr<folly::IOBuf> HpkeContextImpl::open(
+Status HpkeContextImpl::open(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const folly::IOBuf* aad,
     std::unique_ptr<folly::IOBuf> ct) {
   if (role_ != Role::Receiver) {
-    throw std::logic_error("opening can only be done from a receiver context");
+    return err.error(
+        "opening can only be done from a receiver context",
+        folly::none,
+        Error::Category::StdLogic);
   }
-  std::unique_ptr<folly::IOBuf> pt =
-      cipher_->decrypt(std::move(ct), aad, seqNum_);
-  incrementSeq();
-  return pt;
+  FIZZ_RETURN_ON_ERROR(cipher_->decrypt(ret, err, std::move(ct), aad, seqNum_));
+  FIZZ_RETURN_ON_ERROR(incrementSeq(err));
+  return Status::Success;
 }
 
 std::unique_ptr<folly::IOBuf> HpkeContextImpl::exportSecret(

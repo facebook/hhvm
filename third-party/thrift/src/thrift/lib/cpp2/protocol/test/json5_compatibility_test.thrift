@@ -238,4 +238,24 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
     ],
     output = json5_test.Example{i64Value = 42},
   },
+  // ── String as Map Key Compatibility ────────────────────────────────────────
+  // String-keyed maps should accept both object form and array form.
+  CompatibilityTestCase{
+    name = "StringAsKeyObjectForm",
+    inputs = [
+      "{\"stringAsKey\": {\"hello\": \"world\"}}",
+      "{\"stringAsKey\": [{\"key\": \"hello\", \"value\": \"world\"}]}",
+    ],
+    output = json5_test.Example{stringAsKey = {"hello": "world"}},
+  },
+  // ── I64 as Map Key Compatibility ─────────────────────────────────────────────
+  // I64-keyed maps should accept both array form and object form with string keys.
+  CompatibilityTestCase{
+    name = "I64AsKeyArrayForm",
+    inputs = [
+      "{\"i64AsKey\": [{\"key\": 42, \"value\": 1}]}",
+      "{\"i64AsKey\": {\"42\": 1}}",
+    ],
+    output = json5_test.Example{i64AsKey = {42: 1}},
+  },
 ];

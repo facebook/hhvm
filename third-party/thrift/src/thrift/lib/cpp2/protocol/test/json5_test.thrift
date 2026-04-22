@@ -73,6 +73,8 @@ struct Example {
   20: optional set<OutOfOrderFields> outOfOrderFieldsInSet;
   // @lint-ignore THRIFTCHECKS bad-key-type
   21: optional map<OutOfOrderFields, i32> outOfOrderFieldsInMap;
+  22: optional map<string, string> stringAsKey;
+  23: optional map<i64, i64> i64AsKey;
 }
 
 // --
@@ -784,6 +786,134 @@ const list<TestCase> testCases = [
         Three: 1,
       },
       value: 1,
+    },
+  ],
+}",
+  },
+  // ── Small integer types (bool, byte, i16) ─────────────────────────────────
+  TestCase{
+    name = "SmallIntegers",
+    example = Example{boolValue = true, byteValue = 42, i16Value = 1000},
+    json = "{
+  \"boolValue\": true,
+  \"byteValue\": 42,
+  \"i16Value\": 1000
+}",
+    json5 = "{
+  boolValue: true,
+  byteValue: 42,
+  i16Value: 1000,
+}",
+  },
+  // ── Large I64 boundary ──────────────────────────────────────────────────────
+  TestCase{
+    name = "I64Max",
+    example = Example{i64Value = 9223372036854775807},
+    json = "{
+  \"i64Value\": 9223372036854775807
+}",
+    json5 = "{
+  i64Value: 9223372036854775807,
+}",
+  },
+  // ── Empty struct ────────────────────────────────────────────────────────────
+  TestCase{name = "EmptyStruct",example = Example{},json = "{}",json5 = "{}",},
+  // ── Empty values ────────────────────────────────────────────────────────────
+  TestCase{
+    name = "EmptyValues",
+    example = Example{stringValue = "", binaryValue = "", listValue = []},
+    json = "{
+  \"stringValue\": \"\",
+  \"binaryValue\": {
+    \"utf-8\": \"\"
+  },
+  \"listValue\": []
+}",
+    json5 = "{
+  stringValue: \"\",
+  binaryValue: {
+    \"utf-8\": \"\",
+  },
+  listValue: [],
+}",
+  },
+  // ── String as map key ───────────────────────────────────────────────────────
+  TestCase{
+    name = "StringAsKey",
+    example = Example{stringAsKey = {"hello": "world"}},
+    json = "{
+  \"stringAsKey\": {
+    \"hello\": \"world\"
+  }
+}",
+    json5 = "{
+  stringAsKey: {
+    hello: \"world\",
+  },
+}",
+  },
+  TestCase{
+    name = "MultiEntryStringAsKey",
+    example = Example{stringAsKey = {"b": "2", "a": "1"}},
+    json = "{
+  \"stringAsKey\": {
+    \"a\": \"1\",
+    \"b\": \"2\"
+  }
+}",
+    json5 = "{
+  stringAsKey: {
+    a: \"1\",
+    b: \"2\",
+  },
+}",
+  },
+  // ── I64 as map key ──────────────────────────────────────────────────────────
+  TestCase{
+    name = "I64AsKey",
+    example = Example{i64AsKey = {42: 1}},
+    json = "{
+  \"i64AsKey\": [
+    {
+      \"key\": 42,
+      \"value\": 1
+    }
+  ]
+}",
+    json5 = "{
+  i64AsKey: [
+    {
+      key: 42,
+      value: 1,
+    },
+  ],
+}",
+  },
+  // ── Multiple entries in non-enum maps ───────────────────────────────────────
+  TestCase{
+    name = "MultiEntryI32AsKey",
+    example = Example{i32AsKey = {3: 4, 1: 2}},
+    json = "{
+  \"i32AsKey\": [
+    {
+      \"key\": 1,
+      \"value\": 2
+    },
+    {
+      \"key\": 3,
+      \"value\": 4
+    }
+  ]
+}",
+    json5 = "{
+  i32AsKey: [
+    {
+      key: 1,
+      value: 2,
+    },
+    {
+      key: 3,
+      value: 4,
     },
   ],
 }",

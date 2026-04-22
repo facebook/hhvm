@@ -397,7 +397,8 @@ int main(int argc, char** argv) {
 
   folly::gflags::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
-  CryptoUtils::init();
+  Error err;
+  FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
 
   if (FLAGS_port == 0) {
     throw std::runtime_error("must specify port");

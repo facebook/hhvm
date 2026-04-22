@@ -47,7 +47,8 @@ static const std::string tooLargeCompressedCertificate =
 class BrotliCertificateCompressorTest : public testing::Test {
  public:
   void SetUp() override {
-    CryptoUtils::init();
+    Error err;
+    FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
     compressor_ = std::make_unique<BrotliCertificateCompressor>();
     decompressor_ = std::make_unique<BrotliCertificateDecompressor>();
   }

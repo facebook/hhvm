@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/util/Status.h>
 #include <folly/Range.h>
 
 namespace fizz {
@@ -29,6 +30,6 @@ struct CryptoUtils {
   /**
    * Initialize all required crypto libraries.
    */
-  static void init();
+  static Status init(Error& err);
 };
 } // namespace fizz

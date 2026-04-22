@@ -372,7 +372,8 @@ BENCHMARK_NAMED_PARAM(
 
 int main(int argc, char** argv) {
   const folly::Init init(&argc, &argv);
-  CryptoUtils::init();
+  Error err;
+  FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
   folly::runBenchmarks();
   return 0;
 }

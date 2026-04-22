@@ -88,7 +88,8 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherSingleThread) {
 
 TEST(BatchSignatureTest, TestSynchronizedBatcherMultiThread) {
   useMockRandom();
-  CryptoUtils::init();
+  Error err;
+  FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
 
   size_t numMsgThreshold = 3;
   std::vector<folly::ssl::X509UniquePtr> certs;
@@ -124,7 +125,8 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherMultiThread) {
 }
 
 TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
-  CryptoUtils::init();
+  Error err;
+  FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
   size_t numMsgThreshold = 3;
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
@@ -161,7 +163,6 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
       std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
           getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
-  Error err;
   for (size_t i = 0; i < results.size(); i++) {
     EXPECT_EQ(
         batchPeerCert.verify(
@@ -176,7 +177,8 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
 
 TEST(BatchSignatureTest, TestThreadLocalBatcher) {
   useMockRandom();
-  CryptoUtils::init();
+  Error err;
+  FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
 
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
@@ -215,7 +217,8 @@ TEST(BatchSignatureTest, TestThreadLocalBatcher) {
 }
 
 TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
-  CryptoUtils::init();
+  Error err;
+  FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
   auto certificate =
@@ -275,7 +278,6 @@ TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
       std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
           getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
-  Error err;
   for (size_t i = 0; i < results.size(); i++) {
     EXPECT_EQ(
         batchPeerCert.verify(

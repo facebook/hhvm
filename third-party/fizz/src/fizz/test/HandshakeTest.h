@@ -121,7 +121,8 @@ struct ExpectedParameters {
 class HandshakeTest : public Test {
  public:
   void SetUp() override {
-    CryptoUtils::init();
+    Error err;
+    FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
 
     clientContext_ = std::make_shared<FizzClientContext>();
     serverContext_ = std::make_shared<FizzServerContext>();

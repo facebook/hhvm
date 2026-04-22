@@ -98,7 +98,8 @@ wNMYE5qiSvpfGd77lw==
 class DelegatedCredentialUtilsTest : public Test {
  public:
   void SetUp() override {
-    CryptoUtils::init();
+    Error err;
+    FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
     clock_ = std::make_shared<MockClock>();
     // Default return time to June 10, 2019 6:08:58 PM
     ON_CALL(*clock_, getCurrentTime())

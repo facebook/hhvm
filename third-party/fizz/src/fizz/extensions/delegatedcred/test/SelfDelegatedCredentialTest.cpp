@@ -52,7 +52,8 @@ StringPiece kDelegatedKey{
 class SelfDelegatedCredentialTest : public Test {
  public:
   void SetUp() override {
-    CryptoUtils::init();
+    Error err;
+    FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
     parentCert_ =
         std::make_unique<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
             getKey(), getCertVec());

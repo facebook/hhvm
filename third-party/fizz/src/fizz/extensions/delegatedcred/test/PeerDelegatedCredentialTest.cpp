@@ -133,7 +133,8 @@ StringPiece kP256Signature{
 class PeerDelegatedCredentialTest : public Test {
  public:
   void SetUp() override {
-    CryptoUtils::init();
+    Error err;
+    FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
   }
 
   Buf toBuf(const StringPiece hex) {

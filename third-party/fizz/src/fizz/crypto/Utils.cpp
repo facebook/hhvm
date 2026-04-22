@@ -8,6 +8,7 @@
 
 #include <fizz/crypto/Utils.h>
 #include <fizz/fizz-config.h>
+#include <fizz/util/Status.h>
 
 #if FIZZ_HAVE_SODIUM
 #include <sodium.h>
@@ -65,11 +66,17 @@ namespace {
 
 class InitFizz {
  public:
-  InitFizz() {
-    if (fizz_crypto_init() == -1) {
-      throw std::runtime_error("Couldn't init libsodium");
+  InitFizz() : initResult_(fizz_crypto_init()) {}
+
+  fizz::Status check(fizz::Error& err) const {
+    if (initResult_ == -1) {
+      return err.error("Couldn't init libsodium");
     }
+    return fizz::Status::Success;
   }
+
+ private:
+  int initResult_;
 };
 } // namespace
 
@@ -86,8 +93,9 @@ void CryptoUtils::clean(folly::MutableByteRange range) {
   fizz_secure_memzero(range.data(), range.size());
 }
 
-void CryptoUtils::init() {
+Status CryptoUtils::init(Error& err) {
   static InitFizz initFizz;
+  return initFizz.check(err);
 }
 
 } // namespace fizz

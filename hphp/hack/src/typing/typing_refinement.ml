@@ -980,6 +980,9 @@ and split_ty
       partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Shape)
     | Tlabel _ ->
       partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Label)
+    | Tnewtype (name, _, _)
+      when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
+      partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Label)
     | Tclass ((_, name), _, args) ->
       partition_f
         DataType.(of_ty ~safe_for_are_disjoint:true env @@ Class (name, args))

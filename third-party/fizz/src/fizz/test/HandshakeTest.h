@@ -33,6 +33,7 @@
 #include <fizz/server/TicketTypes.h>
 #include <fizz/server/test/Mocks.h>
 #include <fizz/test/LocalTransport.h>
+#include <fizz/util/Status.h>
 
 namespace fizz {
 namespace test {
@@ -481,7 +482,10 @@ class HandshakeTest : public Test {
 
   void setupECH() {
     auto kex = std::make_unique<libsodium::X25519KeyExchange>();
-    kex->generateKeyPair();
+    {
+      Error err;
+      FIZZ_THROW_ON_ERROR(kex->generateKeyPair(err), err);
+    }
     auto echPublicKey = kex->getKeyShare();
 
     ech::ParsedECHConfig echConfig;

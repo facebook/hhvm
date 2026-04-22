@@ -22,7 +22,7 @@ namespace fizz::libsodium {
 class X25519KeyExchange : public KeyExchange {
  public:
   ~X25519KeyExchange() override = default;
-  void generateKeyPair() override;
+  Status generateKeyPair(Error& err) override;
   std::unique_ptr<folly::IOBuf> getKeyShare() const override;
   std::unique_ptr<folly::IOBuf> generateSharedSecret(
       folly::ByteRange keyShare) const override;

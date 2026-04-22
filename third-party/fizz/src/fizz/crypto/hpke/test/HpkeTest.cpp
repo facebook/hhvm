@@ -1886,14 +1886,22 @@ MATCHER_P(TrafficKeyMatcher, expectedKey, "") {
 
 class HpkeMockX25519KeyExchange : public libsodium::X25519KeyExchange {
  public:
-  MOCK_METHOD(void, generateKeyPair, ());
+  MOCK_METHOD(void, _generateKeyPair, ());
+  Status generateKeyPair(Error& /*err*/) override {
+    _generateKeyPair();
+    return Status::Success;
+  }
 };
 
 class HpkeMockOpenSSLECKeyExchange : public openssl::OpenSSLECKeyExchange {
  public:
   using OpenSSLECKeyExchange::OpenSSLECKeyExchange;
 
-  MOCK_METHOD0(generateKeyPair, void());
+  MOCK_METHOD(void, _generateKeyPair, ());
+  Status generateKeyPair(Error& /*err*/) override {
+    _generateKeyPair();
+    return Status::Success;
+  }
 
   template <typename T>
   static std::unique_ptr<HpkeMockOpenSSLECKeyExchange> makeMockKeyExchange() {
@@ -2036,28 +2044,28 @@ TEST(HpkeTest, TestSetup) {
     switch (testParam.group) {
       case NamedGroup::x25519: {
         auto kex = std::make_unique<HpkeMockX25519KeyExchange>();
-        EXPECT_CALL(*kex, generateKeyPair()).Times(1);
+        EXPECT_CALL(*kex, _generateKeyPair()).Times(1);
         encapKex = std::move(kex);
         break;
       }
       case NamedGroup::secp256r1: {
         auto kex =
             HpkeMockOpenSSLECKeyExchange::makeMockKeyExchange<fizz::P256>();
-        EXPECT_CALL(*kex, generateKeyPair()).Times(1);
+        EXPECT_CALL(*kex, _generateKeyPair()).Times(1);
         encapKex = std::move(kex);
         break;
       }
       case NamedGroup::secp384r1: {
         auto kex =
             HpkeMockOpenSSLECKeyExchange::makeMockKeyExchange<fizz::P384>();
-        EXPECT_CALL(*kex, generateKeyPair()).Times(1);
+        EXPECT_CALL(*kex, _generateKeyPair()).Times(1);
         encapKex = std::move(kex);
         break;
       }
       case NamedGroup::secp521r1: {
         auto kex =
             HpkeMockOpenSSLECKeyExchange::makeMockKeyExchange<fizz::P521>();
-        EXPECT_CALL(*kex, generateKeyPair()).Times(1);
+        EXPECT_CALL(*kex, _generateKeyPair()).Times(1);
         encapKex = std::move(kex);
         break;
       }

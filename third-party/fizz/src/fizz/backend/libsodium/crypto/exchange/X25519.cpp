@@ -33,7 +33,7 @@ void X25519KeyExchange::setPrivateKey(
   pubKey_ = pubKey;
 }
 
-void X25519KeyExchange::generateKeyPair() {
+Status X25519KeyExchange::generateKeyPair(Error& err) {
   auto privKey = PrivKey();
   auto pubKey = PubKey();
   static_assert(
@@ -42,13 +42,14 @@ void X25519KeyExchange::generateKeyPair() {
   static_assert(
       X25519KeyExchange::PubKey().size() == crypto_scalarmult_BYTES,
       "Incorrect size of the public key");
-  auto err = crypto_box_curve25519xsalsa20poly1305_keypair(
+  auto cryptoErr = crypto_box_curve25519xsalsa20poly1305_keypair(
       pubKey.data(), privKey.data());
-  if (err != 0) {
-    throw std::runtime_error(to<std::string>("Could not generate keys ", err));
+  if (cryptoErr != 0) {
+    return err.error(to<std::string>("Could not generate keys ", cryptoErr));
   }
   privKey_ = std::move(privKey);
   pubKey_ = std::move(pubKey);
+  return Status::Success;
 }
 
 std::unique_ptr<IOBuf> X25519KeyExchange::getKeyShare() const {

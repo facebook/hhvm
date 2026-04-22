@@ -52,18 +52,19 @@ inline bool OQSServerKeyExchange::isInitiated() const {
   return !cipherText_->empty();
 }
 
-void OQSClientKeyExchange::generateKeyPair() {
+Status OQSClientKeyExchange::generateKeyPair(Error& err) {
   // We allow regeneration of key pairs as in clone() we deep-copied the buffer
   // instead of just sharing the buf.
   checkChained();
   if (kem_->keypair(publicKey_->writableData(), secretKey_->writableData())) {
-    throw std::runtime_error(
+    return err.error(
         "OQSClientKeyExchange::generateKeyPair(): keypair generation error!");
   }
   if (!isInitiated()) {
     publicKey_->append(kem_->length_public_key);
     secretKey_->append(kem_->length_secret_key);
   }
+  return Status::Success;
 }
 
 std::unique_ptr<folly::IOBuf> OQSClientKeyExchange::getKeyShare() const {

@@ -9,6 +9,7 @@
 #include <fizz/backend/liboqs/OQSKeyExchange.h>
 
 #if FIZZ_HAVE_OQS
+#include <fizz/util/Status.h>
 #include <folly/portability/GTest.h>
 
 using namespace fizz;
@@ -24,8 +25,14 @@ TEST(OQSKeyExchangeTest, SuccessKeyExchangeTest) {
   auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_ml_kem_768);
   auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_ml_kem_768);
 
-  clientKex.generateKeyPair();
-  serverKex.generateKeyPair();
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(clientKex.generateKeyPair(err), err);
+  }
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(serverKex.generateKeyPair(err), err);
+  }
 
   auto pubKey = clientKex.getKeyShare();
   auto serverSharedSecret = serverKex.generateSharedSecret(pubKey->coalesce());
@@ -49,10 +56,22 @@ TEST(OQSKeyExchangeTest, InvalidExternalInputTest) {
   auto wrongClientKex = OQSClientKeyExchange(OQS_KEM_alg_ml_kem_768);
   auto wrongServerKex = OQSServerKeyExchange(OQS_KEM_alg_ml_kem_768);
 
-  clientKex.generateKeyPair();
-  serverKex.generateKeyPair();
-  wrongClientKex.generateKeyPair();
-  wrongServerKex.generateKeyPair();
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(clientKex.generateKeyPair(err), err);
+  }
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(serverKex.generateKeyPair(err), err);
+  }
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(wrongClientKex.generateKeyPair(err), err);
+  }
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(wrongServerKex.generateKeyPair(err), err);
+  }
 
   auto pubKey = clientKex.getKeyShare();
   EXPECT_THROW(
@@ -70,8 +89,14 @@ TEST(OQSKeyExchangeTest, CloneTest) {
   auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_ml_kem_512);
   auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_ml_kem_512);
 
-  clientKex.generateKeyPair();
-  serverKex.generateKeyPair();
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(clientKex.generateKeyPair(err), err);
+  }
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(serverKex.generateKeyPair(err), err);
+  }
 
   auto pubKey = clientKex.getKeyShare();
   auto serverSharedSecret = serverKex.generateSharedSecret(pubKey->coalesce());

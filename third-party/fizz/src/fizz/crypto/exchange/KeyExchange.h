@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fizz/util/Status.h>
 #include <folly/Range.h>
 #include <folly/io/IOBuf.h>
 
@@ -23,7 +24,7 @@ class KeyExchange {
   /**
    * Generates an ephemeral key pair.
    */
-  virtual void generateKeyPair() = 0;
+  virtual Status generateKeyPair(Error& err) = 0;
 
   /**
    * Returns the public key to share with peers.

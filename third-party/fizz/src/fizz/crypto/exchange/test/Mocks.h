@@ -19,7 +19,10 @@ using namespace testing;
 
 class MockKeyExchange : public KeyExchange {
  public:
-  MOCK_METHOD(void, generateKeyPair, ());
+  MOCK_METHOD(void, _generateKeyPair, ());
+  Status generateKeyPair(Error& err) override {
+    FIZZ_THROW_TO_ERROR(_generateKeyPair());
+  }
   MOCK_METHOD(std::unique_ptr<folly::IOBuf>, getKeyShare, (), (const));
   MOCK_METHOD(
       std::unique_ptr<folly::IOBuf>,
@@ -43,9 +46,8 @@ class MockKeyExchange : public KeyExchange {
   }
 
   void setForHybridKeyExchange() {
-    ON_CALL(*this, generateKeyPair()).WillByDefault(InvokeWithoutArgs([this]() {
-      keyGenerated = 1;
-    }));
+    ON_CALL(*this, _generateKeyPair())
+        .WillByDefault(InvokeWithoutArgs([this]() { keyGenerated = 1; }));
     ON_CALL(*this, getKeyShare()).WillByDefault(InvokeWithoutArgs([this]() {
       if (!keyGenerated) {
         throw std::runtime_error("Key not generated");
@@ -77,7 +79,10 @@ class MockKeyExchange : public KeyExchange {
 
 class MockAsyncKeyExchange : public AsyncKeyExchange {
  public:
-  MOCK_METHOD(void, generateKeyPair, ());
+  MOCK_METHOD(void, _generateKeyPair, ());
+  Status generateKeyPair(Error& err) override {
+    FIZZ_THROW_TO_ERROR(_generateKeyPair());
+  }
   MOCK_METHOD(std::unique_ptr<folly::IOBuf>, getKeyShare, (), (const));
   MOCK_METHOD(
       std::unique_ptr<folly::IOBuf>,

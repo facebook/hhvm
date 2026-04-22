@@ -25,8 +25,9 @@ std::unique_ptr<folly::IOBuf> OpenSSLECKeyEncoder::encode(
 }
 } // namespace detail
 
-void OpenSSLECKeyExchange::generateKeyPair() {
+Status OpenSSLECKeyExchange::generateKeyPair(Error& /*err*/) {
   key_ = detail::generateECKeyPair(nid_);
+  return Status::Success;
 }
 
 std::unique_ptr<folly::IOBuf> OpenSSLECKeyExchange::getKeyShare() const {

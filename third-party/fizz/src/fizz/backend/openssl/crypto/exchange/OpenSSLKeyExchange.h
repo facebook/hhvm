@@ -42,7 +42,7 @@ class OpenSSLECKeyExchange : public KeyExchange {
 
   ~OpenSSLECKeyExchange() override = default;
 
-  void generateKeyPair() override;
+  Status generateKeyPair(Error& err) override;
 
   std::unique_ptr<folly::IOBuf> getKeyShare() const override;
 

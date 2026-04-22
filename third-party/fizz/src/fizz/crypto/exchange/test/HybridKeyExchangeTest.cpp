@@ -40,8 +40,9 @@ TEST_F(HybridKeyExchangeTest, KeyShareRetrievalBeforeGenerationTest) {
 }
 
 TEST_F(HybridKeyExchangeTest, KeyShareGenerationTest) {
-  kex->generateKeyPair();
-  mockKex.generateKeyPair();
+  Error err;
+  EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
+  EXPECT_EQ(mockKex.generateKeyPair(err), Status::Success);
   auto combinedKey = mockKex.getKeyShare();
   auto secondKexKey = mockKex.getKeyShare();
   combinedKey->appendToChain(std::move(secondKexKey));
@@ -50,8 +51,9 @@ TEST_F(HybridKeyExchangeTest, KeyShareGenerationTest) {
 }
 
 TEST_F(HybridKeyExchangeTest, SharedSecretGenerationTest) {
-  kex->generateKeyPair();
-  mockKex.generateKeyPair();
+  Error err;
+  EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
+  EXPECT_EQ(mockKex.generateKeyPair(err), Status::Success);
   // Get the combined public key
   auto combinedKey = mockKex.getKeyShare();
   auto secondKexKey = mockKex.getKeyShare();
@@ -68,8 +70,9 @@ TEST_F(HybridKeyExchangeTest, SharedSecretGenerationTest) {
 }
 
 TEST_F(HybridKeyExchangeTest, SharedSecretGenerationOnIllegalInputTest) {
-  kex->generateKeyPair();
-  mockKex.generateKeyPair();
+  Error err;
+  EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
+  EXPECT_EQ(mockKex.generateKeyPair(err), Status::Success);
   // Get the truncated public key
   auto publicKey = mockKex.getKeyShare();
   EXPECT_THROW(
@@ -77,7 +80,8 @@ TEST_F(HybridKeyExchangeTest, SharedSecretGenerationOnIllegalInputTest) {
 }
 
 TEST_F(HybridKeyExchangeTest, CloneTest) {
-  kex->generateKeyPair();
+  Error err;
+  EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
   auto kexCopy = kex->clone();
   auto keyShare = kex->getKeyShare();
   auto keyShareCopy = kexCopy->getKeyShare();
@@ -108,7 +112,12 @@ TEST_F(HybridKeyExchangeTest, ZeroKeyLengthTest) {
       HybridKeyExchange::create(
           kex1, err, std::move(firstKex), std::move(secondKex)),
       err);
-  EXPECT_THROW(kex1->generateKeyPair(), std::runtime_error);
+  EXPECT_THROW(
+      {
+        Error generateErr;
+        FIZZ_THROW_ON_ERROR(kex1->generateKeyPair(generateErr), generateErr);
+      },
+      std::runtime_error);
 }
 
 } // namespace test

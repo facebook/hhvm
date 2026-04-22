@@ -28,7 +28,7 @@ class HybridKeyExchange : public KeyExchange {
 
   ~HybridKeyExchange() override = default;
 
-  void generateKeyPair() override;
+  Status generateKeyPair(Error& err) override;
 
   std::unique_ptr<folly::IOBuf> getKeyShare() const override;
 

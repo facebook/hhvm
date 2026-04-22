@@ -9,6 +9,7 @@
 #include <folly/portability/GTest.h>
 
 #include <fizz/backend/libsodium/crypto/exchange/X25519.h>
+#include <fizz/util/Status.h>
 #include <folly/Range.h>
 #include <folly/String.h>
 
@@ -23,7 +24,8 @@ TEST(X25519KeyExchange, KeyExchange) {
       "c81e57c7485ba417280bc2d48d864afd3966ff77b684bfaf85f418f9b4583347";
   auto keyShare = unhexlify(keyShareHex);
   X25519KeyExchange kex;
-  kex.generateKeyPair();
+  Error err;
+  EXPECT_EQ(kex.generateKeyPair(err), Status::Success);
   auto out = kex.generateSharedSecret(folly::range(keyShare));
 }
 
@@ -31,7 +33,8 @@ TEST(X25519KeyExchange, SmallKeyExchange) {
   static constexpr StringPiece keyShareHex = "c81e57c7485ba4";
   auto keyShare = unhexlify(keyShareHex);
   X25519KeyExchange kex;
-  kex.generateKeyPair();
+  Error err;
+  EXPECT_EQ(kex.generateKeyPair(err), Status::Success);
   EXPECT_THROW(
       kex.generateSharedSecret(folly::range(keyShare)), std::runtime_error);
 }
@@ -41,7 +44,8 @@ TEST(X25519KeyExchange, KeyExchangeClone) {
       "c81e57c7485ba417280bc2d48d864afd3966ff77b684bfaf85f418f9b4583347";
   auto keyShare = unhexlify(keyShareHex);
   X25519KeyExchange kex;
-  kex.generateKeyPair();
+  Error err;
+  EXPECT_EQ(kex.generateKeyPair(err), Status::Success);
 
   auto sharedSecret = kex.generateSharedSecret(folly::range(keyShare));
 

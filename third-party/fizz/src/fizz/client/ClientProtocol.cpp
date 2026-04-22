@@ -516,7 +516,7 @@ static Status getKeyExchangers(
   for (auto group : groups) {
     std::unique_ptr<KeyExchange> kex;
     TRY(factory.makeKeyExchange(kex, err, group, KeyExchangeRole::Client));
-    kex->generateKeyPair();
+    TRY(kex->generateKeyPair(err));
     keyExchangers.emplace(group, std::move(kex));
   }
   return Status::Success;

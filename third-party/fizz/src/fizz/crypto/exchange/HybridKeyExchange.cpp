@@ -27,13 +27,14 @@ Status HybridKeyExchange::create(
   return Status::Success;
 }
 
-void HybridKeyExchange::generateKeyPair() {
-  firstKex_->generateKeyPair();
-  secondKex_->generateKeyPair();
+Status HybridKeyExchange::generateKeyPair(Error& err) {
+  FIZZ_RETURN_ON_ERROR(firstKex_->generateKeyPair(err));
+  FIZZ_RETURN_ON_ERROR(secondKex_->generateKeyPair(err));
   if (firstKex_->getExpectedKeyShareSize() == 0 ||
       secondKex_->getExpectedKeyShareSize() == 0) {
-    throw std::runtime_error("expected key share size is 0!");
+    return err.error("expected key share size is 0!");
   }
+  return Status::Success;
 }
 
 /**

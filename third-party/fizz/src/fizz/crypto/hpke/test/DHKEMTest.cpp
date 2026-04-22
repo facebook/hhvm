@@ -23,7 +23,9 @@ class MockKeyExchange : public KeyExchange {
  public:
   explicit MockKeyExchange(std::unique_ptr<KeyExchange> actualKex)
       : actualKex_(std::move(actualKex)) {}
-  void generateKeyPair() override {}
+  Status generateKeyPair(Error& /*err*/) override {
+    return Status::Success;
+  }
 
   std::unique_ptr<folly::IOBuf> getKeyShare() const override {
     return actualKex_->getKeyShare();

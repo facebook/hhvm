@@ -49,7 +49,11 @@ class MockOpenSSLECKeyExchange256 : public openssl::OpenSSLECKeyExchange {
 
   ~MockOpenSSLECKeyExchange256() = default;
 
-  MOCK_METHOD(void, generateKeyPair, ());
+  MOCK_METHOD(void, _generateKeyPair, ());
+  Status generateKeyPair(Error& /*err*/) override {
+    _generateKeyPair();
+    return Status::Success;
+  }
 };
 
 void checkExtensions(
@@ -87,7 +91,7 @@ hpke::SetupResult constructSetupResult(
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
   auto privateKey = getPrivateKey(kP256Key);
   kex->setPrivateKey(std::move(privateKey));
-  EXPECT_CALL(*kex, generateKeyPair()).Times(1);
+  EXPECT_CALL(*kex, _generateKeyPair()).Times(1);
 
   hpke::SetupResult ret;
   Error err;

@@ -12,6 +12,7 @@
 #include <fizz/backend/openssl/crypto/exchange/OpenSSLKeyExchange.h>
 #include <fizz/crypto/test/TestKeys.h>
 #include <fizz/crypto/test/TestUtil.h>
+#include <fizz/util/Status.h>
 #include <folly/String.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 
@@ -38,12 +39,16 @@ TYPED_TEST_SUITE(Key, KeyTypes);
 
 TYPED_TEST(Key, GenerateKey) {
   auto kex = TestFixture::makeKex();
-  kex->generateKeyPair();
+  Error err;
+  FIZZ_THROW_ON_ERROR(kex->generateKeyPair(err), err);
 }
 
 TYPED_TEST(Key, SharedSecret) {
   auto kex = TestFixture::makeKex();
-  kex->generateKeyPair();
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(kex->generateKeyPair(err), err);
+  }
   auto shared = kex->generateSharedSecret(kex->getPrivateKey());
   EXPECT_TRUE(shared);
 }

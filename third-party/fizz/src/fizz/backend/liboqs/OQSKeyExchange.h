@@ -48,7 +48,7 @@ class OQSKeyExchange : public KeyExchange {
    * algorithm: one of the macro defined in oqs/kem.h
    */
   explicit OQSKeyExchange(const std::string& algorithm);
-  void generateKeyPair() override = 0;
+  Status generateKeyPair(Error& err) override = 0;
   /**
    * The Fizz API is not compatible with KEM APIs as in KEM the server and
    * client call different routine (encap() vs. decap()), but in ECDH both call
@@ -73,7 +73,7 @@ class OQSClientKeyExchange : public OQSKeyExchange {
  public:
   explicit OQSClientKeyExchange(const std::string& algorithm);
   ~OQSClientKeyExchange() override = default;
-  void generateKeyPair() override;
+  Status generateKeyPair(Error& err) override;
   std::unique_ptr<folly::IOBuf> getKeyShare() const override;
   std::unique_ptr<folly::IOBuf> generateSharedSecret(
       folly::ByteRange keyShare) const override;
@@ -98,7 +98,9 @@ class OQSServerKeyExchange : public OQSKeyExchange {
    * the server to generate the key pair as well. See
    * https://www.ietf.org/id/draft-celi-wiggers-tls-authkem-01.html
    */
-  void generateKeyPair() override {}
+  Status generateKeyPair(Error& /*err*/) override {
+    return Status::Success;
+  }
   std::unique_ptr<folly::IOBuf> getKeyShare() const override;
   std::unique_ptr<folly::IOBuf> generateSharedSecret(
       folly::ByteRange keyShare) const override;

@@ -72,7 +72,8 @@ hpke::KEMId DHKEM::getKEMId() const {
 }
 
 DHKEM::EncapResult DHKEM::encap(folly::ByteRange pkR) {
-  kex_->generateKeyPair();
+  Error err;
+  FIZZ_THROW_ON_ERROR(kex_->generateKeyPair(err), err);
   std::unique_ptr<folly::IOBuf> dh = kex_->generateSharedSecret(pkR);
   std::unique_ptr<folly::IOBuf> enc = kex_->getKeyShare();
 
@@ -88,7 +89,8 @@ DHKEM::EncapResult DHKEM::authEncap(folly::ByteRange pkR) {
   if (!authKex_) {
     throw std::runtime_error("DHKEM has no sender key exchange set up");
   }
-  kex_->generateKeyPair();
+  Error authErr;
+  FIZZ_THROW_ON_ERROR(kex_->generateKeyPair(authErr), authErr);
   std::unique_ptr<folly::IOBuf> dh = kex_->generateSharedSecret(pkR);
   dh->prependChain(authKex_->generateSharedSecret(pkR));
   std::unique_ptr<folly::IOBuf> enc = kex_->getKeyShare();

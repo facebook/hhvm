@@ -272,6 +272,7 @@ module Dynamic_call = struct
     | Function_call
     | Array_index
     | Array_append
+    | Property_access
 
   type t = {
     kind: kind;

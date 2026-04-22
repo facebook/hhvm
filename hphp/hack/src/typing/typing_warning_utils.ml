@@ -928,6 +928,7 @@ module Dynamic_call_warning = struct
       Codes.DynamicMethodCall;
       Codes.DynamicFunctionCall;
       Codes.DynamicArrayAccess;
+      Codes.DynamicPropertyAccess;
     ]
 
   let code { Typing_warning.Dynamic_call.kind; _ } =
@@ -936,6 +937,7 @@ module Dynamic_call_warning = struct
     | Typing_warning.Dynamic_call.Function_call -> Codes.DynamicFunctionCall
     | Typing_warning.Dynamic_call.Array_index -> Codes.DynamicArrayAccess
     | Typing_warning.Dynamic_call.Array_append -> Codes.DynamicArrayAccess
+    | Typing_warning.Dynamic_call.Property_access -> Codes.DynamicPropertyAccess
 
   let claim { Typing_warning.Dynamic_call.kind; actual_type; _ } =
     let ty_str = Markdown_lite.md_codify actual_type in
@@ -948,6 +950,8 @@ module Dynamic_call_warning = struct
       Printf.sprintf "Indexing into a value of type %s" ty_str
     | Typing_warning.Dynamic_call.Array_append ->
       Printf.sprintf "Appending to a value of type %s" ty_str
+    | Typing_warning.Dynamic_call.Property_access ->
+      Printf.sprintf "Property accessed on a value of type %s" ty_str
 
   let reasons
       { Typing_warning.Dynamic_call.dynamic_reason_pos; dynamic_reason_msg; _ }

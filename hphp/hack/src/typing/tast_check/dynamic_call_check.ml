@@ -85,6 +85,12 @@ let handler ~as_lint:_ =
           method_pos
           Typing_warning.Dynamic_call.Method_invocation
           receiver_ty
+      | Obj_get ((receiver_ty, _, _), (_, prop_pos, _), _, Aast.Is_prop) ->
+        check_dynamic_call
+          env
+          prop_pos
+          Typing_warning.Dynamic_call.Property_access
+          receiver_ty
       | Call { func = (fty, fpos, _); _ } ->
         check_dynamic_call
           env

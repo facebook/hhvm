@@ -1,3 +1,7 @@
+WARN: File "enumbox.bad.php", line 18, characters 8-11:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "enumbox.bad.php", line 17, characters 19-25:
+  This expression has type `dynamic`
 ERROR: File "enumbox.bad.php", line 11, characters 40-44:
 Class `EBox` cannot support dynamic because property `item` does not have an enforceable type (Typing[4402])
   File "enumbox.bad.php", line 11, characters 38-38:

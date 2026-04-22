@@ -6,12 +6,28 @@ WARN: File "nonsense_member_access.php", line 9, characters 16-18:
 Method invoked on a value of type `dynamic` (Warn[12038])
   File "nonsense_member_access.php", line 9, characters 5-13:
   This expression has type `dynamic`, the result of accessing a property of a `dynamic` type
+WARN: File "nonsense_member_access.php", line 13, characters 9-13:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "nonsense_member_access.php", line 12, characters 29-35:
+  This expression has type `dynamic`
+WARN: File "nonsense_member_access.php", line 14, characters 9-13:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "nonsense_member_access.php", line 12, characters 29-35:
+  This expression has type `dynamic`
 WARN: File "nonsense_member_access.php", line 14, characters 16-18:
 Method invoked on a value of type `dynamic` (Warn[12038])
   File "nonsense_member_access.php", line 14, characters 5-13:
   This expression has type `dynamic`, the result of accessing a property of a `dynamic` type
 WARN: File "nonsense_member_access.php", line 15, characters 9-13:
 Method invoked on a value of type `dynamic` (Warn[12038])
+  File "nonsense_member_access.php", line 12, characters 29-35:
+  This expression has type `dynamic`
+WARN: File "nonsense_member_access.php", line 16, characters 9-10:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "nonsense_member_access.php", line 12, characters 29-35:
+  This expression has type `dynamic`
+WARN: File "nonsense_member_access.php", line 17, characters 9-10:
+Property accessed on a value of type `dynamic` (Warn[12042])
   File "nonsense_member_access.php", line 12, characters 29-35:
   This expression has type `dynamic`
 WARN: File "nonsense_member_access.php", line 17, characters 13-15:

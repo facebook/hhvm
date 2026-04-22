@@ -1,3 +1,19 @@
+WARN: File "private_dynamic.bad.php", line 25, characters 9-13:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "private_dynamic.bad.php", line 23, characters 25-31:
+  This expression has type `dynamic`
+WARN: File "private_dynamic.bad.php", line 36, characters 16-19:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "private_dynamic.bad.php", line 34, characters 25-31:
+  This expression has type `dynamic`
+WARN: File "private_dynamic.bad.php", line 45, characters 9-13:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "private_dynamic.bad.php", line 44, characters 24-30:
+  This expression has type `dynamic`
+WARN: File "private_dynamic.bad.php", line 48, characters 16-20:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "private_dynamic.bad.php", line 47, characters 24-30:
+  This expression has type `dynamic`
 WARN: File "private_dynamic.bad.php", line 62, characters 7-10:
 Method invoked on a value of type `dynamic` (Warn[12038])
   File "private_dynamic.bad.php", line 61, characters 25-31:

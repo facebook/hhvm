@@ -48,6 +48,12 @@ function test_array_index_through_intersection(dynamic $x): void {
   }
 }
 
+function test_property_access_through_intersection(dynamic $x): void {
+  if ($x is C) {
+    $y = $x->bar;
+  }
+}
+
 function test_no_array_warn_on_non_dynamic(vec<int> $x): void {
   $y = $x[0];
 }

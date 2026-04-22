@@ -6,6 +6,10 @@ WARN: File "dynamic_call_warning.php", line 8, characters 4-5:
 Value of type `dynamic` called as a function (Warn[12039])
   File "dynamic_call_warning.php", line 7, characters 40-46:
   This expression has type `dynamic`
+WARN: File "dynamic_call_warning.php", line 12, characters 12-14:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "dynamic_call_warning.php", line 11, characters 42-48:
+  This expression has type `dynamic`
 WARN: File "dynamic_call_warning.php", line 17, characters 9-11:
 Method invoked on a value of type `(dynamic & C)` (Warn[12038])
   File "dynamic_call_warning.php", line 15, characters 48-54:
@@ -29,6 +33,10 @@ Appending to a value of type `dynamic` (Warn[12040])
 WARN: File "dynamic_call_warning.php", line 47, characters 10-11:
 Indexing into a value of type `(dynamic & C)` (Warn[12040])
   File "dynamic_call_warning.php", line 45, characters 48-54:
+  This expression has type `dynamic`
+WARN: File "dynamic_call_warning.php", line 53, characters 14-16:
+Property accessed on a value of type `(dynamic & C)` (Warn[12042])
+  File "dynamic_call_warning.php", line 51, characters 52-58:
   This expression has type `dynamic`
 ERROR: File "dynamic_call_warning.php", line 17, characters 5-13:
 Typing error (Typing[4110])

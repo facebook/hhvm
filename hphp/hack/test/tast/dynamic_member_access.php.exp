@@ -1,3 +1,10 @@
+Errors:
+  [7:7-10] Property accessed on a value of type `dynamic`
+  [5:15-22] This expression has type `dynamic`
+  [8:7-11] Property accessed on a value of type `dynamic`
+  [5:15-22] This expression has type `dynamic`
+  [9:8-29] Property accessed on a value of type `dynamic`
+  [5:15-22] This expression has type `dynamic`
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

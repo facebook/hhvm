@@ -1,3 +1,11 @@
+WARN: File "no_isset_in_strict_mode.php", line 14, characters 34-40:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "no_isset_in_strict_mode.php", line 14, characters 24-30:
+  This expression has type `dynamic`
+WARN: File "no_isset_in_strict_mode.php", line 19, characters 23-26:
+Property accessed on a value of type `dynamic` (Warn[12042])
+  File "no_isset_in_strict_mode.php", line 18, characters 26-32:
+  This expression has type `dynamic`
 ERROR: File "no_isset_in_strict_mode.php", line 13, characters 8-27:
 `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])
 ERROR: File "no_isset_in_strict_mode.php", line 15, characters 8-16:

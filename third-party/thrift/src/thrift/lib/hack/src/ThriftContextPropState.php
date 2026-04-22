@@ -861,12 +861,35 @@ final class ThriftContextPropState {
     $this->setBaggageFlags1($flags1);
   }
 
-  // agent_id getter
-  public readonly function getAgentId()[leak_safe]: ?string {
+  public readonly function getAgentId_DIRECTLY_WITHOUT_LOOKASIDE_DO_NOT_CALL_THIS_UNLESS_YOU_ARE_AGENT_DOT_PHP(
+  )[leak_safe]: ?string {
     if ($this->storage->baggage?->agent_id is null) {
       return null;
     }
     return ($this->storage->baggage?->agent_id as string);
+  }
+
+  // agent_id getter
+  public function getAgentId()[leak_safe]: ?string {
+    $private_agent = $this
+      ->getAgentId_DIRECTLY_WITHOUT_LOOKASIDE_DO_NOT_CALL_THIS_UNLESS_YOU_ARE_AGENT_DOT_PHP();
+    if ($private_agent is nonnull) {
+      return $private_agent;
+    }
+
+    // try reading the existing identity from Agent::getAgentIdentity
+    $private_agent = HH\Coeffects\fb\backdoor_from_leak_safe__DO_NOT_USE(
+      ()[defaults] ==> {
+        $private_agent = Agent::getAgentIdentity();
+        if ($private_agent is nonnull) {
+          $private_agent = 'AGENT:'.$private_agent;
+          $this->setAgentId($private_agent);
+        }
+        return $private_agent;
+      },
+      'Agent identity detection reads globals but does not leak sensitive data',
+    );
+    return $private_agent;
   }
 
   // agent_id setter

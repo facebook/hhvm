@@ -2820,38 +2820,63 @@ TEST_P(HQUpstreamSessionTestWebTransport, ReceiveWTDataBlockedCapsule) {
   auto* wtImpl = dynamic_cast<WebTransportImpl*>(wt_);
   ASSERT_NE(wtImpl, nullptr);
 
-  // Set flow control limits where recv window is set to initial value
-  // bytesRead_ is 0, recvFlowController maxOffset is kDefaultWTReceiveWindow
-  // shouldGrantFlowControl will return true since bufferedBytes = 0
+  // Keep the window just above the grant threshold.
+  constexpr quic::StreamId kPeerUniStreamId = 15;
+  constexpr uint64_t kBytesToRead = 101;
+  constexpr uint64_t kRecvWindow =
+      kDefaultWTReceiveWindow / 2 + kBytesToRead - 1;
   wtImpl->setFlowControlLimits(
       /*sendWindow=*/std::numeric_limits<size_t>::max(),
-      /*recvWindow=*/kDefaultWTReceiveWindow);
+      /*recvWindow=*/kRecvWindow);
 
-  // Verify we should grant flow control before receiving WT_DATA_BLOCKED
-  EXPECT_TRUE(wtImpl->shouldGrantFlowControl());
+  // Open a peer uni stream and buffer data before the app reads it.
+  WebTransport::StreamReadHandle* readHandle{nullptr};
+  EXPECT_CALL(*handler_, onWebTransportUniStream(_, _))
+      .WillOnce(SaveArg<1>(&readHandle));
+  folly::IOBufQueue buf(folly::IOBufQueue::cacheChainLength());
+  hq::writeWTStreamPreface(buf, hq::WebTransportStreamType::UNI, sessionId_);
+  socketDriver_->addReadEvent(kPeerUniStreamId, buf.move(), milliseconds(0));
+  flushAndLoopN(2);
+  ASSERT_NE(readHandle, nullptr);
+  EXPECT_EQ(readHandle->getID(), kPeerUniStreamId);
 
-  uint64_t currentMaxData = kDefaultWTReceiveWindow;
-  // Create and send a WT_DATA_BLOCKED capsule from server to client
+  socketDriver_->addReadEvent(
+      kPeerUniStreamId, makeBuf(kBytesToRead), milliseconds(0));
+  flushAndLoopN(2);
+
+  auto lenBefore = socketDriver_->streams_[sessionId_].writeBuf.chainLength();
+  bool dataRead = false;
+  readHandle->awaitNextRead(&eventBase_, [&](auto, auto, auto streamData) {
+    ASSERT_TRUE(streamData.hasValue());
+    ASSERT_NE(streamData->data, nullptr);
+    EXPECT_EQ(streamData->data->computeChainDataLength(), kBytesToRead);
+    EXPECT_FALSE(streamData->fin);
+    dataRead = true;
+  });
+  eventBase_.loopOnce();
+  EXPECT_TRUE(dataRead);
+  eventBase_.loopOnce();
+
+  // Reading the buffered data sends the WT_MAX_DATA grant.
+  auto lenAfterGrant =
+      socketDriver_->streams_[sessionId_].writeBuf.chainLength();
+  EXPECT_GT(lenAfterGrant, lenBefore);
+  EXPECT_FALSE(wtImpl->shouldGrantFlowControl());
+
   folly::IOBufQueue capsuleQueue;
-  WTDataBlockedCapsule capsule{.maximumData = currentMaxData};
+  // This WT_DATA_BLOCKED is now stale, so it should not add another grant.
+  WTDataBlockedCapsule capsule{.maximumData =
+                                   kBytesToRead + kDefaultWTReceiveWindow};
   auto writeResult = writeWTDataBlocked(capsuleQueue, capsule);
   EXPECT_TRUE(writeResult.has_value());
   auto capsuleData = capsuleQueue.move();
-  EXPECT_GT(capsuleData->computeChainDataLength(), 0);
 
   sendPartialBody(sessionId_, std::move(capsuleData), false);
-
-  // Process the capsule. This should trigger onDataBlocked
-  // which should grant credit and send a WT_MAX_DATA capsule back
   flushAndLoopN(2);
 
-  // Verify that a WT_MAX_DATA capsule was sent in the response
-  // by checking that the write buffer contains data
-  EXPECT_GT(socketDriver_->streams_[sessionId_].writeBuf.chainLength(), 0);
-
-  // After granting credit, shouldGrantFlowControl should still return true
-  // because we haven't consumed any data yet (bytesRead_ is still 0)
-  EXPECT_TRUE(wtImpl->shouldGrantFlowControl());
+  EXPECT_EQ(socketDriver_->streams_[sessionId_].writeBuf.chainLength(),
+            lenAfterGrant);
+  EXPECT_FALSE(wtImpl->shouldGrantFlowControl());
 
   closeWTSession();
 }

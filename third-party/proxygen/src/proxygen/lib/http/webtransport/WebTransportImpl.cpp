@@ -555,8 +555,9 @@ void WebTransportImpl::maybeGrantFlowControl(uint64_t bytesRead) {
   bytesRead_ += bytesRead;
   if (bytesRead && shouldGrantFlowControl()) {
     auto newMaxData = bytesRead_ + kDefaultWTReceiveWindow;
-    recvFlowController_.grant(newMaxData);
-    tp_.sendWTMaxData(newMaxData);
+    if (recvFlowController_.grant(newMaxData)) {
+      tp_.sendWTMaxData(newMaxData);
+    }
   }
 }
 
@@ -590,8 +591,8 @@ void WebTransportImpl::maybeGrantStreamCredit(HTTPCodec::StreamID id,
 }
 
 bool WebTransportImpl::shouldGrantFlowControl() const {
-  auto bufferedBytes = recvFlowController_.getCurrentOffset() - bytesRead_;
-  return bufferedBytes < kDefaultWTReceiveWindow / 2;
+  return recvFlowController_.getMaxOffset() - bytesRead_ <
+         kDefaultWTReceiveWindow / 2;
 }
 
 bool WebTransportImpl::shouldGrantStreamCredit(bool isBidi) const {

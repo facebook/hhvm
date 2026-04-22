@@ -228,8 +228,6 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
                  });
   EXPECT_FALSE(fut.isReady());
 
-  EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow + 10))
-      .WillOnce(Return(folly::unit));
   implHandle->dataAvailable(makeBuf(10), false);
   EXPECT_FALSE(fut.isReady());
   eventBase_.loopOnce();
@@ -243,8 +241,6 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
   EXPECT_CALL(transport_, readWebTransportData(_, _)).WillOnce(Invoke([] {
     return std::make_pair(makeBuf(32768), false);
   }));
-  EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow + 10 + 65536))
-      .WillOnce(Return(folly::unit));
   implHandle->readAvailable(0);
   EXPECT_CALL(transport_, resumeWebTransportIngress(0));
   fut = readHandle->readStreamData()
@@ -624,8 +620,6 @@ TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
   EXPECT_CALL(transport_, readWebTransportData(_, _)).WillOnce(Invoke([] {
     return std::make_pair(makeBuf(10), false);
   }));
-  EXPECT_CALL(transport_, sendWTMaxData(kDefaultWTReceiveWindow + 10))
-      .WillOnce(Return(folly::unit));
   quicReadCallback->readAvailable(id);
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
@@ -1328,17 +1322,19 @@ TEST_F(HTTPTransactionWebTransportTest, ReceiveWTDataBlockedCapsule) {
       dynamic_cast<WebTransportImpl::StreamReadHandle*>(readHandle);
   ASSERT_NE(implHandle, nullptr);
 
-  // Deliver data close to our window limit to put peer in blocked state.
-  // We'll deliver (kDefaultWTReceiveWindow - 100) bytes.
-  EXPECT_CALL(
-      transport_,
-      sendWTMaxData(kDefaultWTReceiveWindow + kDefaultWTReceiveWindow - 100))
-      .WillOnce(Return(folly::unit));
+  // Deliver (kDefaultWTReceiveWindow - 100) bytes — fills the window.
+  // No grant fires yet: no pending readStreamData() promise.
   auto fcState =
       implHandle->dataAvailable(makeBuf(kDefaultWTReceiveWindow - 100), false);
   EXPECT_EQ(fcState, WebTransport::FCState::BLOCKED);
 
-  // Read the data to consume it, making room in our flow control window.
+  // Read the data. maybeGrantFlowControl fires here because
+  // getMaxOffset() - bytesRead_ = 100 < kDefaultWTReceiveWindow/2.
+  // newMaxData = (kDefaultWTReceiveWindow - 100) + kDefaultWTReceiveWindow.
+  EXPECT_CALL(
+      transport_,
+      sendWTMaxData(kDefaultWTReceiveWindow + kDefaultWTReceiveWindow - 100))
+      .WillOnce(Return(folly::unit));
   EXPECT_CALL(transport_, resumeWebTransportIngress(0));
   auto fut = readHandle->readStreamData()
                  .via(&eventBase_)
@@ -1351,20 +1347,47 @@ TEST_F(HTTPTransactionWebTransportTest, ReceiveWTDataBlockedCapsule) {
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
 
-  // Now buffered bytes should be low enough (< kDefaultWTReceiveWindow / 2)
-  // for shouldGrantFlowControl() to return true.
-  EXPECT_TRUE(wtImpl->shouldGrantFlowControl());
+  // After the grant, maxOffset_ = 2*kDefaultWTReceiveWindow - 100.
+  // maxOffset_ - bytesRead_ = kDefaultWTReceiveWindow > window/2: no more
+  // grants.
+  EXPECT_FALSE(wtImpl->shouldGrantFlowControl());
 
-  // When we receive a WT_DATA_BLOCKED capsule with maxData matching our current
-  // limit (which is now kDefaultWTReceiveWindow + kDefaultWTReceiveWindow -
-  // 100), we should send WT_MAX_DATA with increased limit newMaxData = (2 *
-  // kDefaultWTReceiveWindow - 100) + kDefaultWTReceiveWindow
+  // onDataBlocked with the current maxData: shouldGrantFlowControl() is false,
+  // so no redundant WT_MAX_DATA is sent.
   const uint64_t currentMaxData = 2 * kDefaultWTReceiveWindow - 100;
-  EXPECT_CALL(transport_,
-              sendWTMaxData(currentMaxData + kDefaultWTReceiveWindow))
-      .WillOnce(Return(folly::unit));
-
   wtImpl->onDataBlocked(currentMaxData);
+
+  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, _))
+      .WillRepeatedly(Return(folly::unit));
+}
+
+TEST_F(HTTPTransactionWebTransportTest, FrequentFlowControlGrants) {
+  // shouldGrantFlowControl() should only send WT_MAX_DATA when the app has
+  // consumed at least half the granted window (getMaxOffset() - bytesRead_ <
+  // window/2). Reading 500 bytes out of a 1 MB window leaves the peer with
+  // ~1 MB of headroom, so no grant should be sent.
+  WebTransport::StreamReadHandle* readHandle{nullptr};
+  EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
+      .WillOnce(SaveArg<1>(&readHandle));
+  txn_->onWebTransportUniStream(0);
+  ASSERT_NE(readHandle, nullptr);
+  auto* implHandle =
+      dynamic_cast<WebTransportImpl::StreamReadHandle*>(readHandle);
+  ASSERT_NE(implHandle, nullptr);
+
+  // 5 x 100 bytes = 500 bytes consumed, far below kDefaultWTReceiveWindow/2
+  // (512 KB). sendWTMaxData must not fire — the peer has ample window left.
+  constexpr uint64_t kReadSize = 100;
+  constexpr int kNumReads = 5;
+  EXPECT_CALL(transport_, sendWTMaxData(_)).Times(0);
+  for (int i = 0; i < kNumReads; i++) {
+    auto fut =
+        readHandle->readStreamData().via(&eventBase_).thenTry([](auto) {});
+    EXPECT_FALSE(fut.isReady());
+    implHandle->dataAvailable(makeBuf(kReadSize), false);
+    eventBase_.loopOnce();
+    EXPECT_TRUE(fut.isReady());
+  }
 
   EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, _))
       .WillRepeatedly(Return(folly::unit));

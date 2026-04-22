@@ -1901,7 +1901,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   number of callsites to be discounted too much.
 
 - uint32_t HHIR.InliningMaxReturnDecRefs = 24, UNKNOWN
-- uint32_t HHIR.InliningMaxReturnLocals = 40, UNKNOWN
 - uint32_t HHIR.InliningMaxInitObjProps = 12, UNKNOWN
 - bool HHIR.InliningIgnoreHints, UNKNOWN
 - bool HHIR.InliningUseStackedCost = false, UNKNOWN

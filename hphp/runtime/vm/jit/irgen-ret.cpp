@@ -53,15 +53,15 @@ void retSurpriseCheck(IRGS& env, SSATmp* retVal, AH afterHook) {
 }
 
 void freeLocalsAndThis(IRGS& env) {
+  // GenericRetDecRefs below doesn't work in inlined frames.
+  assertx(!isInlining(env));
+
   auto const localCount = curFunc(env)->numLocals();
 
   auto const shouldFreeInline = [&]() -> bool {
     // We don't want to specialize on arg types for builtins
     if (curFunc(env)->arFuncPtr()) return false;
 
-    if (localCount > Cfg::HHIR::InliningMaxReturnLocals) {
-      return false;
-    }
     auto numRefCounted = int{0};
     for (auto i = uint32_t{0}; i < localCount; ++i) {
       if (env.irb->local(i, DataTypeGeneric).type.maybe(TCounted)) {

@@ -129,7 +129,9 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
 
 void doTailAwaitDecRefs(IRGS& env, const std::vector<Type>& locals) {
   auto const shouldFreeInline = [&]{
-    if (locals.size() > Cfg::HHIR::InliningMaxReturnLocals) return false;
+    // GenericRetDecRefs doesn't work in inlined frames.
+    if (isInlining(env)) return true;
+
     auto numRefCounted = 0;
     for (auto i = 0; i < locals.size(); i++) {
       if (locals[i].maybe(TCounted)) numRefCounted++;
@@ -149,6 +151,8 @@ void doTailAwaitDecRefs(IRGS& env, const std::vector<Type>& locals) {
       );
     }
   } else {
+    // GenericRetDecRefs doesn't work in inlined frames.
+    assertx(!isInlining(env));
     gen(env, GenericRetDecRefs, fp(env));
   }
   decRefThis(env);

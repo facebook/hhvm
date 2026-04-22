@@ -592,7 +592,7 @@ bool registerClassConstant(const StringData *clsName,
                            TypedValue cns) {
   assertx(tvIsPlausible(cns));
   auto &cls = s_class_constant_map[clsName];
-  assertx(cls.find(cnsName) == cls.end());
+  assertx(!cls.contains(cnsName));
   *static_cast<TypedValue*>(&cls[cnsName]) = cns;
   return true;
 }

@@ -26,6 +26,8 @@
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
+#include "hphp/util/immed.h"
+
 #include <folly/portability/GTest.h>
 
 namespace HPHP::jit {
@@ -38,18 +40,18 @@ std::string stripWhitespace(std::string str) {
     str.erase(0, 2);
   }
   size_t spc, pos = 0;
-  while((spc = str.find("  ", pos)) != std::string::npos) {
+  while ((spc = str.find("  ", pos)) != std::string::npos) {
     str.erase(spc, 1);
     pos = spc;
   }
   pos = 0;
-  while((spc = str.find(" \n", pos)) != std::string::npos) {
+  while ((spc = str.find(" \n", pos)) != std::string::npos) {
     str.erase(spc, 1);
     pos = spc;
   }
   pos = 0;
-  while((spc = str.find("\n ", pos)) != std::string::npos) {
-    str.erase(spc+1, 1);
+  while ((spc = str.find("\n ", pos)) != std::string::npos) {
+    str.erase(spc + 1, 1);
     pos = spc;
   }
   return str;
@@ -317,6 +319,103 @@ void testPostRACopyFold() {
   });
 }
 
+void testSinkDefsMovesIntoMergeAfterPhidef() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const pred = unit.makeBlock(AreaIndex::Main, 1);
+    auto const merge = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vp(unit, pred);
+    Vout vm(unit, merge);
+
+    auto const cand = Vreg64{v.makeReg()};
+    auto const phiIn = Vreg64{vp.makeReg()};
+    auto const phi = Vreg64{vm.makeReg()};
+    auto const out = Vreg64{vm.makeReg()};
+
+    v << ldimmq{Immed64{42}, cand};
+    v << jmp{pred};
+
+    vp << ldimmq{Immed64{1}, phiIn};
+    vp << phijmp{merge, vp.makeTuple({phiIn})};
+
+    vm << phidef{vm.makeTuple({phi})};
+    vm << copy{cand, out};
+    vm << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    auto const& entryCode = unit.blocks[unit.entry].code;
+    ASSERT_EQ(entryCode.size(), 1);
+    ASSERT_EQ(entryCode[0].op, Vinstr::jmp);
+    EXPECT_EQ(entryCode[0].jmp_.target, pred);
+
+    auto const& mergeCode = unit.blocks[merge].code;
+    ASSERT_EQ(mergeCode.size(), 4);
+    ASSERT_EQ(mergeCode[0].op, Vinstr::phidef);
+    ASSERT_EQ(mergeCode[1].op, Vinstr::ldimmq);
+    EXPECT_EQ(static_cast<uint64_t>(mergeCode[1].ldimmq_.s.q()), 42);
+    EXPECT_EQ(mergeCode[1].ldimmq_.d, cand);
+    ASSERT_EQ(mergeCode[2].op, Vinstr::copy);
+    EXPECT_EQ(mergeCode[2].copy_.s, Vreg{cand});
+    EXPECT_EQ(mergeCode[2].copy_.d, Vreg{out});
+    ASSERT_EQ(mergeCode[3].op, Vinstr::ret);
+  }
+}
+
+void testSinkDefsKeepsJoinPointDefsInPlace() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const left = unit.makeBlock(AreaIndex::Main, 1);
+    auto const right = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vl(unit, left);
+    Vout vr(unit, right);
+
+    auto const cand = Vreg64{v.makeReg()};
+    auto const sf = v.makeReg();
+    auto const leftUse = Vreg64{vl.makeReg()};
+    auto const rightUse = Vreg64{vr.makeReg()};
+
+    v << ldimmq{Immed64{42}, cand};
+    v << cmpqi{Immed{0}, Vreg64{Reg64{0}}, sf, Vflags{}};
+    v << jcc{CC_E, sf, {left, right}, StringTag{}};
+
+    vl << copy{cand, leftUse};
+    vl << ret{};
+
+    vr << copy{cand, rightUse};
+    vr << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    auto const& entryCode = unit.blocks[unit.entry].code;
+    ASSERT_EQ(entryCode.size(), 3);
+    ASSERT_EQ(entryCode[0].op, Vinstr::ldimmq);
+    EXPECT_EQ(static_cast<uint64_t>(entryCode[0].ldimmq_.s.q()), 42);
+    EXPECT_EQ(entryCode[0].ldimmq_.d, cand);
+    ASSERT_EQ(entryCode[2].op, Vinstr::jcc);
+
+    auto const& leftCode = unit.blocks[left].code;
+    ASSERT_EQ(leftCode.size(), 2);
+    ASSERT_EQ(leftCode[0].op, Vinstr::copy);
+    EXPECT_EQ(leftCode[0].copy_.s, Vreg{cand});
+
+    auto const& rightCode = unit.blocks[right].code;
+    ASSERT_EQ(rightCode.size(), 2);
+    ASSERT_EQ(rightCode[0].op, Vinstr::copy);
+    EXPECT_EQ(rightCode[0].copy_.s, Vreg{cand});
+  }
+}
+
 void testArmLeaLowering() {
 #ifndef __aarch64__
   GTEST_SKIP() << "ARM-specific lea lowering test";
@@ -355,6 +454,8 @@ void testArmLeaLowering() {
 TEST(Vasm, Simplifier) {
   testSetccXor();
   testPostRACopyFold();
+  testSinkDefsMovesIntoMergeAfterPhidef();
+  testSinkDefsKeepsJoinPointDefsInPlace();
 }
 
 TEST(Vasm, ArmLeaLowering) {

@@ -2270,6 +2270,7 @@ void optimize(Vunit& unit, const Abi& abi, bool regalloc) {
     foldImms<arm::ImmFolder>(unit);
   }
   reuseImmq(unit);
+  sinkDefs(unit, abi);
 
   optimizeCopies(unit, abi);
 

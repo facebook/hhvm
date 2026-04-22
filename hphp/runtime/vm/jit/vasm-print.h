@@ -19,9 +19,10 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
-#include <vector>
+#include <cstdint>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,6 +63,7 @@ constexpr int kVasmExitsLevel = 4;
 constexpr int kVasmHoistFbccsLevel = 4;
 constexpr int kVasmDCELevel = 4;
 constexpr int kVasmLowerLevel = 4;
+constexpr int kVasmSinkDefsLevel = 4;
 constexpr int kVasmUnreachableLevel = 6;
 constexpr int kVasmBlockCountLevel = 5;
 

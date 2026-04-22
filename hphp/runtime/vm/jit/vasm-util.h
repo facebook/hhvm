@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include <algorithm>
+#include <cstdint>
 
 namespace HPHP::jit {
 
@@ -52,6 +53,18 @@ VIdomVector findDominators(const Vunit&, const jit::vector<Vlabel>& rpo);
  * Test if b1 dominates b2
  */
 bool dominates(Vlabel b1, Vlabel b2, const VIdomVector&);
+
+/*
+ * Compute the nearest common dominator of b1 and b2.
+ *
+ * `rpoOrder` should map each reachable block to a non-negative index in the
+ * same reverse post-order used to compute `idoms`; unreachable blocks should
+ * remain `-1`.
+ */
+Vlabel commonDominator(Vlabel b1,
+                       Vlabel b2,
+                       const VIdomVector& idoms,
+                       const jit::vector<int32_t>& rpoOrder);
 
 ///////////////////////////////////////////////////////////////////////////////
 

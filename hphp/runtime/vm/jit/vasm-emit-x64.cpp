@@ -1318,6 +1318,7 @@ void optimize(Vunit& unit, const Abi& abi, bool regalloc) {
     doPass("VOPT_FOLD_IMM", foldImms<x64::ImmFolder>);
   }
 
+  doPass("VOPT_SINK",   [&] (Vunit& u) { sinkDefs(u, abi); });
   doPass("VOPT_COPY",   [&] (Vunit& u) { optimizeCopies(u, abi); });
   doPass("VOPT_DCE",    removeDeadCode);
   doPass("VOPT_BRANCH", fuseBranches);

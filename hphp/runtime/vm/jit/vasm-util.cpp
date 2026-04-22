@@ -177,6 +177,22 @@ bool dominates(Vlabel b1, Vlabel b2, const VIdomVector& idoms) {
   return false;
 }
 
+Vlabel commonDominator(Vlabel b1,
+                       Vlabel b2,
+                       const VIdomVector& idoms,
+                       const jit::vector<int32_t>& rpoOrder) {
+  if (!b1.isValid()) return b2;
+  if (!b2.isValid()) return b1;
+  assertx(rpoOrder[b1] >= 0);
+  assertx(rpoOrder[b2] >= 0);
+
+  while (b1 != b2) {
+    while (rpoOrder[b1] > rpoOrder[b2]) b1 = idoms[b1];
+    while (rpoOrder[b2] > rpoOrder[b1]) b2 = idoms[b2];
+  }
+  return b1;
+}
+
 VIdomVector findDominators(const Vunit& unit,
                            const jit::vector<Vlabel>& rpo) {
   assertx(!rpo.empty() && rpo[0] == unit.entry);

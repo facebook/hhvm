@@ -72,49 +72,49 @@ class Memcached {
   const int RES_PAYLOAD_FAILURE;
 
   public function __construct(
-    HH\FIXME\MISSING_PARAM_TYPE $persistent_id = null,
+    ?string $persistent_id = null,
   );
   public function add(
     HH\FIXME\MISSING_PARAM_TYPE $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function addByKey(
     string $server_key,
     string $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function addServer(
     string $host,
     int $port,
     int $weight = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function addServers(
     HH\FIXME\MISSING_PARAM_TYPE $servers,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function append(
     HH\FIXME\MISSING_PARAM_TYPE $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function appendByKey(
     string $server_key,
     string $key,
     string $value,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function cas(
     float $cas_token,
     string $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function casByKey(
     float $cas_token,
     string $server_key,
     string $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function decrement(
     string $key,
     int $offset = 1,
@@ -122,12 +122,12 @@ class Memcached {
   public function delete(
     string $key,
     int $time = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function deleteByKey(
     string $server_key,
     string $key,
     int $time = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function deleteMulti(varray<string> $keys, int $time = 0): mixed;
   public function deleteMultiByKey(
     string $server_key,
@@ -136,7 +136,7 @@ class Memcached {
   ): mixed;
   public function fetch(): HH\FIXME\MISSING_RETURN_TYPE;
   public function fetchAll(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function flush(int $delay = 0): HH\FIXME\MISSING_RETURN_TYPE;
+  public function flush(int $delay = 0): bool;
   public function get(
     HH\FIXME\MISSING_PARAM_TYPE $key,
     HH\FIXME\MISSING_PARAM_TYPE $cache_cb = null,
@@ -161,13 +161,13 @@ class Memcached {
     HH\FIXME\MISSING_PARAM_TYPE $keys,
     HH\FIXME\MISSING_PARAM_TYPE $with_cas = false,
     HH\FIXME\MISSING_PARAM_TYPE $value_cb = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function getDelayedByKey(
     string $server_key,
     HH\FIXME\MISSING_PARAM_TYPE $keys,
     bool $with_cas = false,
     HH\FIXME\MISSING_PARAM_TYPE $value_cb = null,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function getMulti(
     HH\FIXME\MISSING_PARAM_TYPE $keys,
     int $flags = 0,
@@ -189,8 +189,8 @@ class Memcached {
     int $flags = 0,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getOption(int $option): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getResultCode(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getResultMessage(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getResultCode(): int;
+  public function getResultMessage(): string;
   public function getServerByKey(
     string $server_key,
   ): HH\FIXME\MISSING_RETURN_TYPE;
@@ -204,47 +204,47 @@ class Memcached {
   public function prepend(
     HH\FIXME\MISSING_PARAM_TYPE $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function prependByKey(
     string $server_key,
     string $key,
     string $value,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function replace(
     HH\FIXME\MISSING_PARAM_TYPE $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function replaceByKey(
     string $server_key,
     string $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function set(
     HH\FIXME\MISSING_PARAM_TYPE $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function setByKey(
     string $server_key,
     string $key,
     HH\FIXME\MISSING_PARAM_TYPE $value,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function setMulti(
     HH\FIXME\MISSING_PARAM_TYPE $items,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function setMultiByKey(
     string $server_key,
     HH\FIXME\MISSING_PARAM_TYPE $items,
     int $expiration = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function setOption(
     int $option,
     HH\FIXME\MISSING_PARAM_TYPE $value,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  ): bool;
   public function touch(string $key, int $expiration = 0): bool;
   public function touchByKey(
     string $server_key,

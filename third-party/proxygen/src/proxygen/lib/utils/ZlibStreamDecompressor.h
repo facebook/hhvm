@@ -8,7 +8,9 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
+#include <optional>
 #include <proxygen/lib/utils/StreamDecompressor.h>
 #include <zlib.h>
 
@@ -33,11 +35,13 @@ constexpr int DEFLATE_WINDOW_BITS = 15;
 
 class ZlibStreamDecompressor : public StreamDecompressor {
  public:
-  explicit ZlibStreamDecompressor(CompressionType type,
-                                  uint64_t zlib_decompressor_buffer_growth =
-                                      kZlibDecompressorBufferGrowthDefault,
-                                  uint64_t zlib_decompressor_buffer_minsize =
-                                      kZlibDecompressorBufferMinsizeDefault);
+  explicit ZlibStreamDecompressor(
+      CompressionType type,
+      uint64_t zlib_decompressor_buffer_growth =
+          kZlibDecompressorBufferGrowthDefault,
+      uint64_t zlib_decompressor_buffer_minsize =
+          kZlibDecompressorBufferMinsizeDefault,
+      std::optional<uint64_t> maxDecompressionRatio = std::nullopt);
 
   ZlibStreamDecompressor() = default;
 
@@ -65,5 +69,9 @@ class ZlibStreamDecompressor : public StreamDecompressor {
   uint64_t decompressor_buffer_minsize_{kZlibDecompressorBufferMinsizeDefault};
   z_stream zlibStream_;
   int status_{-1};
+
+  std::optional<uint64_t> maxDecompressionRatio_;
+  uint64_t totalInputBytes_{0};
+  uint64_t totalOutputBytes_{0};
 };
 } // namespace proxygen

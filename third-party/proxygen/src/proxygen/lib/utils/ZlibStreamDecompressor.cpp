@@ -9,6 +9,7 @@
 #include <proxygen/lib/utils/ZlibStreamDecompressor.h>
 
 #include <folly/io/Cursor.h>
+#include <limits>
 
 using folly::IOBuf;
 
@@ -36,11 +37,13 @@ void ZlibStreamDecompressor::init(CompressionType type) {
 ZlibStreamDecompressor::ZlibStreamDecompressor(
     CompressionType type,
     uint64_t zlib_decompressor_buffer_growth,
-    uint64_t zlib_decompressor_buffer_minsize)
+    uint64_t zlib_decompressor_buffer_minsize,
+    std::optional<uint64_t> maxDecompressionRatio)
     : type_(CompressionType::NONE),
       decompressor_buffer_growth_(zlib_decompressor_buffer_growth),
       decompressor_buffer_minsize_(zlib_decompressor_buffer_minsize),
-      status_(Z_OK) {
+      status_(Z_OK),
+      maxDecompressionRatio_(maxDecompressionRatio) {
   init(type);
 }
 
@@ -98,6 +101,20 @@ std::unique_ptr<IOBuf> ZlibStreamDecompressor::decompress(const IOBuf* in) {
     // Move output buffer ahead
     auto outMove = appender.length() - zlibStream_.avail_out;
     appender.append(outMove);
+
+    // Track cumulative bytes for ratio enforcement.
+    totalInputBytes_ += inConsumed;
+    totalOutputBytes_ += outMove;
+
+    auto maxDecompressionRatio =
+        maxDecompressionRatio_.value_or(std::numeric_limits<uint64_t>::max());
+    bool exceeded =
+        totalInputBytes_ > 0 &&
+        totalOutputBytes_ / totalInputBytes_ > maxDecompressionRatio;
+    if (exceeded) {
+      status_ = Z_STREAM_ERROR;
+      return nullptr;
+    }
   }
 
   return out;

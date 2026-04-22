@@ -56,7 +56,7 @@ proxygen_add_library(proxygen_utils_logging
   SRCS
     Logging.cpp
   DEPS
-    Folly::folly_experimental_symbolizer_symbolizer
+    Folly::folly_debugging_symbolizer_symbolizer
     Folly::folly_format
     Folly::folly_singleton
     Folly::folly_string

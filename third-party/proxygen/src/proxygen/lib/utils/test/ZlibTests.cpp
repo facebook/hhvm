@@ -6,6 +6,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <cstddef>
+#include <cstring>
 #include <folly/Random.h>
 #include <folly/ScopeGuard.h>
 #include <folly/io/Cursor.h>
@@ -144,4 +146,113 @@ TEST_F(ZlibTests, CompressDecompressSmallBuffer) {
     FLAGS_zlib_compressor_buffer_growth = 10;
     compressThenDecompress(CompressionType::GZIP, 4, makeBuf(127));
   });
+}
+
+// ---- maxDecompressionRatio tests ----
+
+namespace {
+
+// Helper: create a highly compressible buffer (all zeros).
+std::unique_ptr<folly::IOBuf> makeCompressibleBuf(size_t size) {
+  auto buf = folly::IOBuf::create(size);
+  buf->append(size);
+  ::memset(buf->writableData(), 0, size);
+  return buf;
+}
+
+std::unique_ptr<folly::IOBuf> compressBuf(CompressionType type,
+                                          std::unique_ptr<folly::IOBuf>& buf) {
+  auto zc = std::make_unique<ZlibStreamCompressor>(type, /*level=*/6);
+  auto compressed = zc->compress(buf.get(), /*trailer=*/true);
+  return compressed;
+}
+
+} // namespace
+
+TEST_F(ZlibTests, MaxDecompressionRatio_FailsWhenRatioTooSmall) {
+  // 1 MB of zeros compresses extremely well; a ratio of 10 should be exceeded.
+  constexpr size_t kOrigSize =
+      static_cast<const size_t>(static_cast<long>(1024) * 1024);
+  auto original = makeCompressibleBuf(kOrigSize);
+  auto compressed = compressBuf(CompressionType::GZIP, original);
+  ASSERT_NE(compressed, nullptr);
+
+  auto zd = std::make_unique<ZlibStreamDecompressor>(
+      CompressionType::GZIP,
+      kZlibDecompressorBufferGrowthDefault,
+      kZlibDecompressorBufferMinsizeDefault,
+      /*maxDecompressionRatio=*/10);
+
+  auto decompressed = zd->decompress(compressed.get());
+  EXPECT_TRUE(zd->hasError());
+  EXPECT_EQ(decompressed, nullptr);
+}
+
+TEST_F(ZlibTests, MaxDecompressionRatio_PassesWhenRatioLargeEnough) {
+  constexpr size_t kOrigSize =
+      static_cast<const size_t>(static_cast<long>(1024) * 1024);
+  auto original = makeCompressibleBuf(kOrigSize);
+  auto compressed = compressBuf(CompressionType::GZIP, original);
+  ASSERT_NE(compressed, nullptr);
+
+  // Use a very large ratio so decompression succeeds.
+  auto zd = std::make_unique<ZlibStreamDecompressor>(
+      CompressionType::GZIP,
+      kZlibDecompressorBufferGrowthDefault,
+      kZlibDecompressorBufferMinsizeDefault,
+      /*maxDecompressionRatio=*/1000000);
+
+  auto decompressed = zd->decompress(compressed.get());
+  EXPECT_FALSE(zd->hasError());
+  EXPECT_NE(decompressed, nullptr);
+  EXPECT_EQ(decompressed->computeChainDataLength(), kOrigSize);
+}
+
+TEST_F(ZlibTests, MaxDecompressionRatio_PassesWhenUnspecified) {
+  constexpr auto kOrigSize =
+      static_cast<const size_t>(static_cast<long>(1024) * 1024);
+  auto original = makeCompressibleBuf(kOrigSize);
+  auto compressed = compressBuf(CompressionType::GZIP, original);
+  ASSERT_NE(compressed, nullptr);
+
+  // Default: no ratio limit.
+  auto zd = std::make_unique<ZlibStreamDecompressor>(CompressionType::GZIP);
+
+  auto decompressed = zd->decompress(compressed.get());
+  EXPECT_FALSE(zd->hasError());
+  EXPECT_NE(decompressed, nullptr);
+  EXPECT_EQ(decompressed->computeChainDataLength(), kOrigSize);
+}
+
+TEST_F(ZlibTests, MaxDecompressionRatio_StreamingChunksFailure) {
+  // Feed compressed data in small pieces; cumulative ratio should still
+  // trigger.
+  constexpr auto kOrigSize =
+      static_cast<const size_t>(static_cast<long>(1024) * 1024);
+  auto original = makeCompressibleBuf(kOrigSize);
+  auto compressed = compressBuf(CompressionType::GZIP, original);
+  ASSERT_NE(compressed, nullptr);
+
+  auto zd = std::make_unique<ZlibStreamDecompressor>(
+      CompressionType::GZIP,
+      kZlibDecompressorBufferGrowthDefault,
+      kZlibDecompressorBufferMinsizeDefault,
+      /*maxDecompressionRatio=*/10);
+
+  // Split compressed data into small chunks.
+  auto coalesced = compressed->coalesce();
+  auto totalLen = compressed->computeChainDataLength();
+  constexpr size_t kChunkSize = 128;
+
+  bool errorDetected = false;
+  for (size_t offset = 0; offset < totalLen; offset += kChunkSize) {
+    auto chunkLen = std::min(kChunkSize, totalLen - offset);
+    auto chunk = folly::IOBuf::wrapBuffer(coalesced.data() + offset, chunkLen);
+    zd->decompress(chunk.get());
+    if (zd->hasError()) {
+      errorDetected = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(errorDetected);
 }

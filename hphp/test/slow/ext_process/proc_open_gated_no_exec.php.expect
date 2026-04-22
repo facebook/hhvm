@@ -1,1 +1,3 @@
-RuntimeException: Process execution is disabled by the Server.AllowExec configuration
+proc_open: RuntimeException: Process execution is disabled by the Server.AllowExec configuration
+popen: RuntimeException: Process execution is disabled by the Server.AllowExec configuration
+pclose: RuntimeException: Process execution is disabled by the Server.AllowExec configuration

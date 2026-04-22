@@ -1,9 +1,9 @@
 <?hh
 
 /**
- * Test that shell_exec, exec, passthru, and system are rejected even when the
- * caller is listed in the Eval.ProcOpenGatedApprovedCallers allowlist.
- * Only proc_open should be permitted for approved callers.
+ * Test that shell_exec, exec, passthru, system, popen, and pclose are rejected
+ * even when the caller is listed in the Eval.ProcOpenGatedApprovedCallers
+ * allowlist. Only proc_open should be permitted for approved callers.
  */
 <<__EntryPoint>>
 function test_ungated_apis_rejected(): void {
@@ -41,6 +41,22 @@ function test_ungated_apis_rejected(): void {
     echo "FAIL: system did not throw\n";
   } catch (Exception $e) {
     echo "system: ".get_class($e).': '.$e->getMessage()."\n";
+  }
+
+  // popen should be rejected
+  try {
+    popen('echo should_not_run', 'r');
+    echo "FAIL: popen did not throw\n";
+  } catch (Exception $e) {
+    echo "popen: ".get_class($e).': '.$e->getMessage()."\n";
+  }
+
+  // pclose should be rejected
+  try {
+    pclose(null);
+    echo "FAIL: pclose did not throw\n";
+  } catch (Exception $e) {
+    echo "pclose: ".get_class($e).': '.$e->getMessage()."\n";
   }
 
   // proc_open should succeed for this approved caller

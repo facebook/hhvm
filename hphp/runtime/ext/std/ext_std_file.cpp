@@ -43,6 +43,8 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/user-info.h"
@@ -313,6 +315,17 @@ Variant HHVM_FUNCTION(fopen,
 Variant HHVM_FUNCTION(popen,
                       const String& command,
                       const String& mode) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
+  if (!Cfg::Eval::AllowUngatedExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Ungated process execution is disabled by the "
+      "Eval.AllowUngatedExec configuration"
+    );
+  }
   CHECK_PATH_FALSE(command, 1);
   auto file = req::make<Pipe>();
   bool ret = CHECK_ERROR(file->open(File::TranslateCommand(command), mode));
@@ -331,6 +344,17 @@ bool HHVM_FUNCTION(fclose, const OptResource& handle) {
 
 Variant HHVM_FUNCTION(pclose,
                       const Variant& handle) {
+  if (!Cfg::Server::AllowExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Process execution is disabled by the Server.AllowExec configuration"
+    );
+  }
+  if (!Cfg::Eval::AllowUngatedExec) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Ungated process execution is disabled by the "
+      "Eval.AllowUngatedExec configuration"
+    );
+  }
   CHECK_HANDLE(handle.toResource(), f);
   int pclose_ret = 0;
   CHECK_ERROR(f->close(&pclose_ret));

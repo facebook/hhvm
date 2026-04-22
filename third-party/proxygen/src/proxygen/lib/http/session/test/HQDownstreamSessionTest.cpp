@@ -3497,6 +3497,70 @@ INSTANTIATE_TEST_SUITE_P(HQDownstreamSessionTest,
 
 class HQDownstreamSessionTestWebTransport : public HQDownstreamSessionTest {};
 
+// Verifies the crash window from the moxygen bug report (SIGSEGV in
+// MoQServer::Handler::onWebTransportUniStream after clientSession_ was nulled).
+//
+// Real-world sequence (two separate QUIC looper passes):
+//   Pass 1 – ReadLooper: processes an error/reset on the WT CONNECT stream.
+//     onError fires on the handler.  MoQServer::Handler resets clientSession_
+//     here.  The QUIC machinery begins teardown but the transaction is not yet
+//     fully detached (detached_=false) because onDelayedDestroy still has to
+//     run.
+//   Pass 2 – PeekLooper: a WT uni-stream that was already buffered in QUIC
+// Once the client closes the session stream (FIN), ingress is complete and
+// any WT uni-stream that arrives afterward must be rejected rather than
+// delivered to the handler.  Without the isIngressComplete() guard in
+// HTTPTransaction::onWebTransportUniStream such a stream would reach the
+// handler while the session is already torn down — the production crash path.
+TEST_P(HQDownstreamSessionTestWebTransport,
+       WTUniStreamRejectedAfterSessionEnd) {
+  // Establish a WebTransport session.
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setURL("/webtransport");
+  req.getHeaders().set(HTTP_HEADER_HOST, "www.facebook.com");
+  auto sessionId = sendRequest(req, /*eom=*/false);
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  flushRequestsAndLoopN(3);
+
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  handler->txn_->sendHeaders(resp);
+  EXPECT_NE(handler->txn_->getWebTransport(), nullptr);
+  flushRequestsAndLoopN(1);
+
+  // Client closes the session stream — marks ingress complete.  Server has
+  // not sent EOM so the transaction stays alive with egress still open.
+  handler->expectEOM();
+  socketDriver_->addReadEOF(sessionId, std::chrono::milliseconds(0));
+  flushRequestsAndLoopN(1);
+
+  // Build a WT uni-stream: [0x54 (WEBTRANSPORT type)][sessionId as QUIC int].
+  // Use stream 14 — the next available client-unidirectional ID after the
+  // pre-allocated control/QPACK streams (2, 6, 10).
+  const quic::StreamId wtStreamId = 14;
+  folly::IOBufQueue wtStreamBuf{folly::IOBufQueue::cacheChainLength()};
+  generateStreamPreface(wtStreamBuf,
+                        hq::UnidirectionalStreamType::WEBTRANSPORT);
+  folly::io::QueueAppender appender(&wtStreamBuf, 8);
+  encodeQuicIntegerWithAtLeast(sessionId, 1, appender);
+
+  // WT uni-stream arrives after session end.  The isIngressComplete() guard
+  // must block delivery — onWebTransportUniStream must NOT reach the handler.
+  socketDriver_->addReadEvent(
+      wtStreamId, wtStreamBuf.move(), std::chrono::milliseconds(0));
+  flushRequestsAndLoopN(1);
+
+  // Close server side to finish teardown.
+  handler->expectDetachTransaction();
+  handler->txn_->sendAbort();
+  hqSession_->closeWhenIdle();
+  flushRequestsAndLoop();
+}
+
 TEST_P(HQDownstreamSessionTestWebTransport, WTRequestNegotiates) {
   HTTPMessage req;
   req.setHTTPVersion(1, 1);

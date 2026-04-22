@@ -1844,7 +1844,7 @@ void HTTPTransaction::onDatagram(
 
 WebTransportImpl::BidiStreamHandle HTTPTransaction::onWebTransportBidiStream(
     HTTPCodec::StreamID id) {
-  if (!handler_) {
+  if (!handler_ || isIngressComplete()) {
     wtTransportProvider_->resetWebTransportEgress(id,
                                                   WebTransport::kInternalError);
     wtTransportProvider_->stopReadingWebTransportIngress(
@@ -1861,8 +1861,7 @@ WebTransportImpl::BidiStreamHandle HTTPTransaction::onWebTransportBidiStream(
 
 WebTransportImpl::StreamReadHandle* HTTPTransaction::onWebTransportUniStream(
     HTTPCodec::StreamID id) {
-  if (!handler_) {
-    LOG(ERROR) << "Handler not set";
+  if (!handler_ || isIngressComplete()) {
     wtTransportProvider_->stopReadingWebTransportIngress(
         id, WebTransport::kInternalError);
     return nullptr;

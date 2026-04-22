@@ -36,7 +36,7 @@ AsyncConnectionPool::AsyncConnectionPool(
   if (!mysql_client_->runInThread([this]() {
         cleanup_timer_.scheduleTimeout(PoolOptions::kCleanUpTimeout);
       })) {
-    LOG(DFATAL) << "Unable to schedule timeout due Thrift event issue";
+    LOG(DFATAL) << "Unable to schedule timeout due to event base issue";
   }
 }
 

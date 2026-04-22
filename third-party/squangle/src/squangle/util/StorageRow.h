@@ -18,7 +18,7 @@ namespace facebook::common::mysql_client {
 /**
 The StorageRow class is an attempt to store MySQL row data in a space efficient
 manner that works for both the MySQL protocol (data always returned as strings)
-and the Thrift protocol (data returned in native format).
+and other protocols that may return data in native format.
 
 Each entry has at minimum an entry in `offset_`.  The high bit of the offset is
 set if the column is null.  Otherwise the other 31 bits are the offset into

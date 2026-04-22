@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fizz/crypto/exchange/KeyExchange.h>
+#include <fizz/util/Status.h>
 
 namespace fizz {
 /**
@@ -19,7 +20,9 @@ namespace fizz {
  */
 class HybridKeyExchange : public KeyExchange {
  public:
-  HybridKeyExchange(
+  static Status create(
+      std::unique_ptr<HybridKeyExchange>& ret,
+      Error& err,
       std::unique_ptr<KeyExchange> first,
       std::unique_ptr<KeyExchange> second);
 
@@ -37,6 +40,10 @@ class HybridKeyExchange : public KeyExchange {
   std::size_t getExpectedKeyShareSize() const override;
 
  private:
+  HybridKeyExchange(
+      std::unique_ptr<KeyExchange> first,
+      std::unique_ptr<KeyExchange> second);
+
   std::unique_ptr<KeyExchange> firstKex_;
   std::unique_ptr<KeyExchange> secondKex_;
 };

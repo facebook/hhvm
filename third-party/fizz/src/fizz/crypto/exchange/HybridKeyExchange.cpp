@@ -11,12 +11,20 @@ namespace fizz {
 
 HybridKeyExchange::HybridKeyExchange(
     std::unique_ptr<KeyExchange> first,
+    std::unique_ptr<KeyExchange> second)
+    : firstKex_(std::move(first)), secondKex_(std::move(second)) {}
+
+Status HybridKeyExchange::create(
+    std::unique_ptr<HybridKeyExchange>& ret,
+    Error& err,
+    std::unique_ptr<KeyExchange> first,
     std::unique_ptr<KeyExchange> second) {
   if (first == nullptr || second == nullptr) {
-    throw std::runtime_error("Passing null KeyExchange Object!");
+    return err.error("Passing null KeyExchange Object!");
   }
-  this->firstKex_ = std::move(first);
-  this->secondKex_ = std::move(second);
+  ret = std::unique_ptr<HybridKeyExchange>(
+      new HybridKeyExchange(std::move(first), std::move(second)));
+  return Status::Success;
 }
 
 void HybridKeyExchange::generateKeyPair() {
@@ -67,8 +75,12 @@ std::unique_ptr<folly::IOBuf> HybridKeyExchange::generateSharedSecret(
  * Deep copy of first and second.
  */
 std::unique_ptr<KeyExchange> HybridKeyExchange::clone() const {
-  auto kexCopy = std::make_unique<HybridKeyExchange>(
-      firstKex_->clone(), secondKex_->clone());
+  std::unique_ptr<HybridKeyExchange> kexCopy;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      HybridKeyExchange::create(
+          kexCopy, err, firstKex_->clone(), secondKex_->clone()),
+      err);
   return kexCopy;
 }
 

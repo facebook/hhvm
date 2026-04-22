@@ -39,16 +39,28 @@ Status MultiBackendFactory::makeKeyExchange(
       ret = fizz::libsodium::makeKeyExchange<fizz::X25519>();
       return Status::Success;
 #if FIZZ_HAVE_OQS
-    case NamedGroup::X25519MLKEM768:
-      ret = std::make_unique<HybridKeyExchange>(
-          fizz::liboqs::makeKeyExchange<MLKEM768>(role),
-          fizz::libsodium::makeKeyExchange<fizz::X25519>());
+    case NamedGroup::X25519MLKEM768: {
+      std::unique_ptr<HybridKeyExchange> hybridKex;
+      FIZZ_RETURN_ON_ERROR(
+          HybridKeyExchange::create(
+              hybridKex,
+              err,
+              fizz::liboqs::makeKeyExchange<MLKEM768>(role),
+              fizz::libsodium::makeKeyExchange<fizz::X25519>()));
+      ret = std::move(hybridKex);
       return Status::Success;
-    case NamedGroup::X25519MLKEM512_FB:
-      ret = std::make_unique<HybridKeyExchange>(
-          fizz::liboqs::makeKeyExchange<MLKEM512>(role),
-          fizz::libsodium::makeKeyExchange<fizz::X25519>());
+    }
+    case NamedGroup::X25519MLKEM512_FB: {
+      std::unique_ptr<HybridKeyExchange> hybridKex;
+      FIZZ_RETURN_ON_ERROR(
+          HybridKeyExchange::create(
+              hybridKex,
+              err,
+              fizz::liboqs::makeKeyExchange<MLKEM512>(role),
+              fizz::libsodium::makeKeyExchange<fizz::X25519>()));
+      ret = std::move(hybridKex);
       return Status::Success;
+    }
 #endif
     default:
       return err.error("ke: not implemented");

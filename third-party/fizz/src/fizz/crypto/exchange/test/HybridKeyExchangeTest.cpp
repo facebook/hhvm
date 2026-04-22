@@ -8,6 +8,7 @@
 
 #include <fizz/crypto/exchange/HybridKeyExchange.h>
 #include <fizz/crypto/exchange/test/Mocks.h>
+#include <fizz/util/Status.h>
 #include <folly/portability/GTest.h>
 
 using namespace fizz;
@@ -25,8 +26,11 @@ class HybridKeyExchangeTest : public testing::Test {
     firstKex->setForHybridKeyExchange();
     auto secondKex = std::make_unique<MockKeyExchange>();
     secondKex->setForHybridKeyExchange();
-    kex = std::make_unique<HybridKeyExchange>(
-        std::move(firstKex), std::move(secondKex));
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        HybridKeyExchange::create(
+            kex, err, std::move(firstKex), std::move(secondKex)),
+        err);
   }
 };
 
@@ -81,7 +85,14 @@ TEST_F(HybridKeyExchangeTest, CloneTest) {
 }
 
 TEST_F(HybridKeyExchangeTest, InstantiationUsingNullPointerTest) {
-  EXPECT_THROW(HybridKeyExchange(nullptr, nullptr), std::runtime_error);
+  EXPECT_THROW(
+      {
+        std::unique_ptr<HybridKeyExchange> hybridKex;
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            HybridKeyExchange::create(hybridKex, err, nullptr, nullptr), err);
+      },
+      std::runtime_error);
 }
 
 TEST_F(HybridKeyExchangeTest, ZeroKeyLengthTest) {
@@ -91,8 +102,12 @@ TEST_F(HybridKeyExchangeTest, ZeroKeyLengthTest) {
   auto secondKex = std::make_unique<MockKeyExchange>();
   secondKex->setForHybridKeyExchange();
   secondKex->setReturnZeroKeyLength();
-  auto kex1 = std::make_unique<HybridKeyExchange>(
-      std::move(firstKex), std::move(secondKex));
+  std::unique_ptr<HybridKeyExchange> kex1;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      HybridKeyExchange::create(
+          kex1, err, std::move(firstKex), std::move(secondKex)),
+      err);
   EXPECT_THROW(kex1->generateKeyPair(), std::runtime_error);
 }
 

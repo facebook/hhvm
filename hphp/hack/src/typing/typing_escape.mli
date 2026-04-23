@@ -12,3 +12,6 @@ val escaping_from_snapshot :
 
 val refresh_env_and_type :
   remove:escaping_rigid_tvars -> pos:Pos.t -> env -> locl_ty -> env * locl_ty
+
+val with_expr_dep_cleanup :
+  env -> (env -> env * locl_ty * 'a) -> env * locl_ty * 'a

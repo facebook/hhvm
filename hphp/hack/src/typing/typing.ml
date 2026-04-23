@@ -4517,24 +4517,27 @@ end = struct
         | _ -> ()
       end;
       let env = might_throw ~join_pos:p env in
-      (* Await is permitted in a using clause e.g. using (await make_handle()) *)
-      let (env, te, rty) =
-        expr
-          ~expected:None
-          ~ctxt:
-            Context.
-              {
-                default with
-                attribute_check_policy = ctxt.attribute_check_policy;
-                is_using_clause = ctxt.is_using_clause;
-                in_await = Some (Reason.witness p);
-                accept_using_var = false;
-                check_defined = ctxt.check_defined;
-              }
-          env
-          e
+      let (env, ty, te) =
+        Typing_escape.with_expr_dep_cleanup env @@ fun env ->
+        let (env, te, rty) =
+          expr
+            ~expected:None
+            ~ctxt:
+              Context.
+                {
+                  default with
+                  attribute_check_policy = ctxt.attribute_check_policy;
+                  is_using_clause = ctxt.is_using_clause;
+                  in_await = Some (Reason.witness p);
+                  accept_using_var = false;
+                  check_defined = ctxt.check_defined;
+                }
+            env
+            e
+        in
+        let (env, ty) = Async.overload_extract_from_awaitable env ~p rty in
+        (env, ty, te)
       in
-      let (env, ty) = Async.overload_extract_from_awaitable env ~p rty in
       make_result env p (Aast.Await te) ty
     | Delay e ->
       let (env, te, rty) =

@@ -558,6 +558,105 @@ let refresh_locals renv =
     locals
     renv
 
+(* Remove escaping expression-dependent types from the global tpenv.
+       Without this cleanup, expression-dependent types introduced inside
+       one scope leak into subsequent scopes via the global tpenv.
+       typing_taccess expands type constants on a Tgeneric by iterating
+       over all its upper bounds and intersecting the results. With the
+       recursive `with` refinement pattern (e.g.,
+         abstract const type TCB as IRepBuilder
+           with { type TCB = this::TCB };
+       ), each scope adds a distinct `with` upper bound to the mangled
+       generic, so typing_taccess produces a growing intersection,
+       causing exponential blowup.
+
+       After the refresh steps above have replaced escaping types in
+       locals, the return type, and unsolved tyvar bounds, we:
+       1. Build a substitution mapping each deleted expr-dep generic
+          to its upper bound (read before deletion)
+       2. Delete the expr-dep entries from the tpenv
+       3. Apply the substitution to remaining tpenv entries' bounds
+          (cleaning stale `with` refinements that reference deleted types)
+       4. Apply the substitution to solved tyvar solutions (which the
+          refresh steps expanded inline but did not write back) *)
+let remove_expr_dep_types_from_tpenv types env =
+  let pre_deletion_tpenv = Env.get_global_tpenv env in
+
+  (* Build substitution map: deleted name -> upper bound *)
+  let subst =
+    List.fold_left types ~init:SMap.empty ~f:(fun acc name ->
+        if Typing_defs.DependentKind.is_expr_dep_ty name then
+          match
+            TySet.elements
+              (Type_parameter_env.get_upper_bounds pre_deletion_tpenv name)
+          with
+          | [ub] -> SMap.add name ub acc
+          | _ -> acc
+        else
+          acc)
+  in
+  let subst_ty ty =
+    Typing_defs_core.Locl_subst.apply
+      ty
+      ~subst
+      ~combine_reasons:(fun ~src ~dest:_ -> src)
+  in
+
+  (* Delete expr-dep entries from the tpenv *)
+  let global_tpenv =
+    List.fold_left types ~init:pre_deletion_tpenv ~f:(fun tpenv name ->
+        if
+          Typing_defs.DependentKind.is_expr_dep_ty name
+          && Type_parameter_env.mem name tpenv
+        then
+          Type_parameter_env.remove tpenv name
+        else
+          tpenv)
+  in
+
+  (* Substitute in remaining entries bounds *)
+  let global_tpenv =
+    if SMap.is_empty subst then
+      global_tpenv
+    else
+      List.fold_left
+        (Type_parameter_env.get_tparam_names global_tpenv)
+        ~init:global_tpenv
+        ~f:(fun tpenv name ->
+          match Type_parameter_env.get_with_pos name tpenv with
+          | None -> tpenv
+          | Some (def_pos, tparam_info) ->
+            let ubs = TySet.map subst_ty tparam_info.upper_bounds in
+            let lbs = TySet.map subst_ty tparam_info.lower_bounds in
+            if
+              TySet.equal ubs tparam_info.upper_bounds
+              && TySet.equal lbs tparam_info.lower_bounds
+            then
+              tpenv
+            else
+              Type_parameter_env.add
+                ~def_pos
+                name
+                { tparam_info with upper_bounds = ubs; lower_bounds = lbs }
+                tpenv)
+  in
+  let env = Env.env_with_global_tpenv env global_tpenv in
+
+  (* Substitute in solved tyvar solutions *)
+  if SMap.is_empty subst then
+    env
+  else
+    List.fold_left (Env.get_all_tyvars env) ~init:env ~f:(fun env tv ->
+        if Env.tyvar_is_solved env tv then
+          let (env, solution) = Env.get_type env Typing_reason.none tv in
+          let solution' = subst_ty solution in
+          if phys_equal solution solution' then
+            env
+          else
+            Env.add env tv solution'
+        else
+          env)
+
 let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
   if List.is_empty types then
     (* nothing to clear, just return the inputs *)
@@ -594,105 +693,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
     let (renv, ty, _) = refresh_type renv Ast_defs.Covariant ty in
     let env = refresh_tvars Tvid.Set.empty renv in
 
-    (* Remove escaping expression-dependent types from the global tpenv.
-       Without this cleanup, expression-dependent types introduced inside
-       one lambda leak into subsequent lambdas via the global tpenv.
-       typing_taccess expands type constants on a Tgeneric by iterating
-       over all its upper bounds and intersecting the results. With the
-       recursive `with` refinement pattern (e.g.,
-         abstract const type TCB as IRepBuilder
-           with { type TCB = this::TCB };
-       ), each lambda adds a distinct `with` upper bound to the mangled
-       generic, so typing_taccess produces a growing intersection,
-       causing exponential blowup.
-
-       After the refresh steps above have replaced escaping types in
-       locals, the return type, and unsolved tyvar bounds, we:
-       1. Build a substitution mapping each deleted expr-dep generic
-          to its upper bound (read before deletion)
-       2. Delete the expr-dep entries from the tpenv
-       3. Apply the substitution to remaining tpenv entries' bounds
-          (cleaning stale `with` refinements that reference deleted types)
-       4. Apply the substitution to solved tyvar solutions (which the
-          refresh steps expanded inline but did not write back) *)
-    let pre_deletion_tpenv = Env.get_global_tpenv env in
-
-    (* Build substitution map: deleted name -> upper bound *)
-    let subst =
-      List.fold_left types ~init:SMap.empty ~f:(fun acc name ->
-          if Typing_defs.DependentKind.is_expr_dep_ty name then
-            match
-              TySet.elements
-                (Type_parameter_env.get_upper_bounds pre_deletion_tpenv name)
-            with
-            | [ub] -> SMap.add name ub acc
-            | _ -> acc
-          else
-            acc)
-    in
-    let subst_ty ty =
-      Typing_defs_core.Locl_subst.apply
-        ty
-        ~subst
-        ~combine_reasons:(fun ~src ~dest:_ -> src)
-    in
-
-    (* Delete expr-dep entries from the tpenv *)
-    let global_tpenv =
-      List.fold_left types ~init:pre_deletion_tpenv ~f:(fun tpenv name ->
-          if
-            Typing_defs.DependentKind.is_expr_dep_ty name
-            && Type_parameter_env.mem name tpenv
-          then
-            Type_parameter_env.remove tpenv name
-          else
-            tpenv)
-    in
-
-    (* Substitute in remaining entries bounds *)
-    let global_tpenv =
-      if SMap.is_empty subst then
-        global_tpenv
-      else
-        List.fold_left
-          (Type_parameter_env.get_tparam_names global_tpenv)
-          ~init:global_tpenv
-          ~f:(fun tpenv name ->
-            match Type_parameter_env.get_with_pos name tpenv with
-            | None -> tpenv
-            | Some (def_pos, tparam_info) ->
-              let ubs = TySet.map subst_ty tparam_info.upper_bounds in
-              let lbs = TySet.map subst_ty tparam_info.lower_bounds in
-              if
-                TySet.equal ubs tparam_info.upper_bounds
-                && TySet.equal lbs tparam_info.lower_bounds
-              then
-                tpenv
-              else
-                Type_parameter_env.add
-                  ~def_pos
-                  name
-                  { tparam_info with upper_bounds = ubs; lower_bounds = lbs }
-                  tpenv)
-    in
-    let env = Env.env_with_global_tpenv env global_tpenv in
-
-    (* Substitute in solved tyvar solutions *)
-    let env =
-      if SMap.is_empty subst then
-        env
-      else
-        List.fold_left (Env.get_all_tyvars env) ~init:env ~f:(fun env tv ->
-            if Env.tyvar_is_solved env tv then
-              let (env, solution) = Env.get_type env Typing_reason.none tv in
-              let solution' = subst_ty solution in
-              if phys_equal solution solution' then
-                env
-              else
-                Env.add env tv solution'
-            else
-              env)
-    in
+    let env = remove_expr_dep_types_from_tpenv types env in
     (env, ty)
   )
 
@@ -710,10 +711,55 @@ type snapshot = {
 
 type escaping_rigid_tvars = string list * remove_map
 
+(* Extract the Expression_id.t from a tpenv entry name like "<expr#3>::TFoo". *)
+let extract_expr_id name =
+  let rec atoi s i acc =
+    if Char.(s.[i] = '>') then
+      acc
+    else
+      atoi s (i + 1) ((10 * acc) + Char.(to_int s.[i] - to_int '0'))
+  in
+  Expression_id.dodgy_from_int @@ atoi name 6 0
+
+let has_tvar_or_expr_dep_types env result_ty =
+  let (_env, result_ty) = Env.expand_type env result_ty in
+  Option.is_some
+    (find_locl_ty result_ty ~p:(fun ty ->
+         match get_node ty with
+         | Tvar _
+         | Tdependent (DTexpr _, _) ->
+           true
+         | Tgeneric name -> DependentKind.is_expr_dep_ty name
+         | _ -> false))
+
+let cleanup_expr_dep_types snap env result_ty =
+  if has_tvar_or_expr_dep_types env result_ty then
+    env
+  else
+    let { nextid; _ } = snap in
+    let current_names =
+      Type_parameter_env.get_tparam_names (Env.get_global_tpenv env)
+    in
+    let new_expr_dep_types =
+      List.filter current_names ~f:(fun name ->
+          Typing_defs.DependentKind.is_expr_dep_ty name
+          && Expression_id.compare (extract_expr_id name) nextid >= 0)
+    in
+    if List.is_empty new_expr_dep_types then
+      env
+    else
+      remove_expr_dep_types_from_tpenv new_expr_dep_types env
+
 let snapshot_env env =
   let gtp = Type_parameter_env.get_tparams (Env.get_global_tpenv env) in
   let ltp = Type_parameter_env.get_tparams (Env.get_tpenv env) in
   { tpmap = SMap.union gtp ltp; nextid = Env.make_expression_id env }
+
+let with_expr_dep_cleanup env f =
+  let snap = snapshot_env env in
+  let (env, ty, x) = f env in
+  let env = cleanup_expr_dep_types snap env ty in
+  (env, ty, x)
 
 let escaping_from_snapshot snap env quants :
     string list * (rigid_tvar -> elim_info option) =
@@ -723,19 +769,9 @@ let escaping_from_snapshot snap env quants :
   in
   let { nextid; _ } = snap in
   let is_old_dep_expr tp =
-    (* but it gets better! *)
-    let extract_id tp_name =
-      let rec atoi s i acc =
-        if Char.(s.[i] = '>') then
-          acc
-        else
-          atoi s (i + 1) ((10 * acc) + Char.(to_int s.[i] - to_int '0'))
-      in
-      Expression_id.dodgy_from_int @@ atoi tp_name 6 0
-    in
     String.length tp > 6
     && String.(sub ~pos:0 ~len:6 tp = "<expr#")
-    && Expression_id.compare (extract_id tp) nextid < 0
+    && Expression_id.compare (extract_expr_id tp) nextid < 0
   in
   let tpmap =
     Type_parameter_env.get_tparams (Env.get_global_tpenv env)

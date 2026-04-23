@@ -565,6 +565,11 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     return enableServerEarlyResponse_;
   }
 
+  // whether the session supports webtransport
+  virtual bool supportsWebTransport() const noexcept {
+    return false;
+  }
+
  protected:
   bool notifyEgressBodyBuffered(int64_t bytes, bool update);
 

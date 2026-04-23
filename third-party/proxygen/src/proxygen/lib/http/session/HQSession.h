@@ -347,7 +347,7 @@ class HQSession
     }
   }
 
-  [[nodiscard]] bool supportsWebTransport() const {
+  [[nodiscard]] bool supportsWebTransport() const noexcept final {
     return supportsWebTransport_.all();
   }
 

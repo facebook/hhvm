@@ -464,7 +464,10 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 )
                 entry = transcript[transcript_id]
                 error_description = self._render_telemetry_rage(
-                    debug_request=message, result=entry.received["result"]
+                    # pyrefly: ignore [bad-index, unsupported-operation]
+                    debug_request=message,
+                    # pyrefly: ignore [bad-index, unsupported-operation]
+                    result=entry.received["result"],
                 )
                 yield error_description
             elif isinstance(message, _NotificationSpec):
@@ -500,7 +503,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         entry: TranscriptEntry,
         request: "_RequestSpec",
     ) -> Optional["_ErrorDescription"]:
+        # pyrefly: ignore [missing-attribute]
         actual_result = entry.received.get("result")
+        # pyrefly: ignore [missing-attribute]
         actual_powered_by = entry.received.get("powered_by")
         if request.comment is not None:
             request_description = (
@@ -538,6 +543,7 @@ This was the associated request:
             return _ErrorDescription(
                 description=description, context=context, remediation=remediation
             )
+        # pyrefly: ignore [missing-attribute]
         elif entry.received.get("powered_by") != request.powered_by:
             description = f"""\
 {request_description} had an incorrect value for the `powered_by` field
@@ -632,8 +638,11 @@ This was the associated request:
         method = request.method
         params = request.params
         result = uninterpolate_variables(
-            payload=actual_response.get("result"), variables=variables
+            # pyrefly: ignore [missing-attribute]
+            payload=actual_response.get("result"),
+            variables=variables,
         )
+        # pyrefly: ignore [missing-attribute]
         powered_by = actual_response.get("powered_by")
 
         request_snippet = """\
@@ -670,19 +679,26 @@ make it match:
         for transcript_id, entry in transcript.items():
             if (
                 entry.received is not None
+                # pyrefly: ignore [not-iterable]
                 and "id" not in entry.received
+                # pyrefly: ignore [missing-attribute]
                 and entry.received.get("method") in self._ignored_notification_methods
             ):
                 yield transcript_id
 
             if (
                 entry.received is not None
+                # pyrefly: ignore [not-iterable]
                 and "id" in entry.received
+                # pyrefly: ignore [not-iterable]
                 and "method" in entry.received
+                # pyrefly: ignore [not-iterable]
                 and "params" in entry.received
                 and (
+                    # pyrefly: ignore [bad-index]
                     (entry.received["method"], entry.received["params"])
                     in self._ignored_requests
+                    # pyrefly: ignore [bad-index]
                     or (entry.received["method"], None) in self._ignored_requests
                 )
             ):
@@ -707,9 +723,12 @@ make it match:
                 # We received a request and responded to it.
                 continue
 
+            # pyrefly: ignore [bad-index]
             method = received["method"]
+            # pyrefly: ignore [bad-index]
             params = received["params"]
             payload = self._pretty_print_snippet(received)
+            # pyrefly: ignore [not-iterable]
             if "id" in received:
                 description = f"""\
 An unexpected request of type {method!r} was sent by the language server.
@@ -828,10 +847,13 @@ received the notification:
         self, debug_request: "_DebugRequestSpec", result: Json
     ) -> "_ErrorDescription":
         sections = []
+        # pyrefly: ignore [not-iterable]
         for row in result:
+            # pyrefly: ignore [bad-index]
             title = row["title"]
             if title is None:
                 title = "<none>"
+            # pyrefly: ignore [missing-attribute]
             data = row.get("data")
             sections.append(
                 f"""\

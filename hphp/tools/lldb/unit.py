@@ -19,6 +19,7 @@ except ModuleNotFoundError:
 cur_unit: lldb.SBValue | None = None
 
 
+# pyrefly: ignore [invalid-inheritance]
 class UnitCommand(utils.Command):
     command = "unit"
     description = "Set the current translation unit"

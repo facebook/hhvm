@@ -182,6 +182,7 @@ def create_php(
         # pyre-fixme[16]: Optional type has no attribute `split`.
         func_name = func_name.split(";")[0]
 
+    # pyrefly: ignore [bad-argument-type]
     if len(func_name) == 0:
         func_name = "<pseudomain>"
 

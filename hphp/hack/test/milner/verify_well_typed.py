@@ -124,6 +124,7 @@ def verify_well_typed(
         exit_code = 0
         smallest_res = None
         for future in as_completed(futures):
+            # pyrefly: ignore [bad-assignment]
             res: Failure = future.result()
             if res is not None:
                 exit_code = 1

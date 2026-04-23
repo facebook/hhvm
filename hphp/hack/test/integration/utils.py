@@ -59,6 +59,7 @@ def ensure_output_contains(f: BinaryIO, s: str, timeout: int = 20) -> None:
         )
 
     try:
+        # pyrefly: ignore [bad-argument-type]
         signal.signal(signal.SIGALRM, handler)
         signal.alarm(timeout)
         while True:

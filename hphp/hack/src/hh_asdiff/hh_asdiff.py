@@ -97,7 +97,13 @@ class DiffHandler:
 
         def unified_diff():
             return difflib.unified_diff(
-                exp_lines, act_lines, fromfile=exp_filename, tofile=act_filename
+                # pyrefly: ignore [bad-argument-type]
+                exp_lines,
+                act_lines,
+                # pyrefly: ignore [bad-argument-type]
+                fromfile=exp_filename,
+                # pyrefly: ignore [bad-argument-type]
+                tofile=act_filename,
             )
 
         if self._opts.diff_smallest:
@@ -206,6 +212,7 @@ def main(args: List[str]) -> int:
                     break
                 continue
 
+            # pyrefly: ignore [bad-argument-type]
             if diff.equal_lines(exp_lines, act_lines):
                 if opts.report_identical_files:
                     print("identical:", exp_filename)

@@ -20,6 +20,7 @@ except ModuleNotFoundError:
 # `nameof` command.
 
 
+# pyrefly: ignore [invalid-inheritance]
 class NameOfCommand(utils.Command):
     command = "nameof"
     description = (

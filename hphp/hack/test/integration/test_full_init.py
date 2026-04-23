@@ -12,6 +12,7 @@ from hphp.hack.test.integration.hh_paths import hh_client
 
 
 class FreshInitTestDriver(common_tests.CommonTestDriver):
+    # pyrefly: ignore [bad-override]
     def write_load_config(
         self, use_serverless_ide: bool = False, use_saved_state: bool = False
     ) -> None:
@@ -19,6 +20,7 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
         # just use the default .hhconfig in the template repo
         pass
 
+    # pyrefly: ignore [bad-override]
     def check_cmd(
         self,
         expected_output: Optional[List[str]],

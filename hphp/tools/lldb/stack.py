@@ -59,6 +59,7 @@ def address_type(arg: str) -> int:
         )
 
 
+# pyrefly: ignore [invalid-inheritance]
 class WalkstkCommand(utils.Command):
     command = "walkstk"
     description = "Traverse the interleaved VM and native stacks"
@@ -239,6 +240,7 @@ The output backtrace has the following format:
                             frame.create_native(
                                 idx=i,
                                 fp="{inline frame}",
+                                # pyrefly: ignore [bad-argument-type]
                                 rip=native_frame.pc,
                                 native_frame=native_frame,
                             )
@@ -287,6 +289,7 @@ The output backtrace has the following format:
                 break
 
 
+# pyrefly: ignore [invalid-inheritance]
 class WalkfpCommand(utils.Command):
     command = "walkfp"
     description = "Traverse the interleaved VM and native stacks"

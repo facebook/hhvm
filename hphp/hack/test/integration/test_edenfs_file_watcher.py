@@ -516,6 +516,7 @@ class EdenfsWatcherTests(common_tests.CommonTests):
         return EdenfsWatcherTestDriver()
 
     # Need to duplicate this here from TestCase to make pyre happy
+    # pyrefly: ignore [bad-override]
     _test_driver: Optional[EdenfsWatcherTestDriver] = None
 
     # Need to duplicate this here from TestCase to make pyre happy

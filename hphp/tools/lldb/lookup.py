@@ -143,6 +143,7 @@ def lookup_array(array_id: lldb.SBValue) -> lldb.SBValue:
     raise NotImplementedError
 
 
+# pyrefly: ignore [invalid-inheritance]
 class LookupCommand(utils.Command):
     command = "lookup"
     description = "Look up HHVM runtime objects by ID"

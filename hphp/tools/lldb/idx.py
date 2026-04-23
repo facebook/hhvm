@@ -244,6 +244,7 @@ def dict_at(base: lldb.SBValue, idx: int) -> (str, lldb.SBValue):
         print(f"Failed to get dictionary key with error: {str(e)}", file=sys.stderr)
         rawkey = key = "<invalid>"
 
+    # pyrefly: ignore [missing-attribute]
     utils._Current_key = rawkey
 
     try:
@@ -260,6 +261,7 @@ def dict_at(base: lldb.SBValue, idx: int) -> (str, lldb.SBValue):
         print(f"Failed to get dictionary value with error: {str(e)}", file=sys.stderr)
         data = None
     finally:
+        # pyrefly: ignore [missing-attribute]
         utils._Current_key = None
 
     return data
@@ -292,6 +294,7 @@ def keyset_at(base: lldb.SBValue, idx: int) -> typing.Optional[lldb.SBValue]:
         print(f"Failed to get keyset entry with error: {str(e)}", file=sys.stderr)
         key = None
 
+    # pyrefly: ignore [bad-return]
     return key
 
 
@@ -317,6 +320,7 @@ def idx(
     return value
 
 
+# pyrefly: ignore [invalid-inheritance]
 class IdxCommand(utils.Command):
     command = "idx"
     description = "Index into an arbitrary container"

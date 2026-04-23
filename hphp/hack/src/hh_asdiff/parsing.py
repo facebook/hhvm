@@ -53,6 +53,7 @@ def split_lines(
             hhas_active = True
         elif _MARKER_END_RE.match(line):
             hhas_active = False
+            # pyrefly: ignore [unbound-name]
             yield filename, hhas_lines
             hhas_lines = []
         elif hhas_active:

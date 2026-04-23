@@ -60,6 +60,7 @@ def patch(path, patches, explanation):
     # later in the file.
     for line, codes in sorted(patches.items(), reverse=True):
         target_line = file_lines[line]
+        # pyrefly: ignore [missing-attribute]
         whitespace = WHITESPACE_PATTERN.match(target_line).group()
 
         for code in codes:

@@ -79,6 +79,7 @@ def sizeof(container: lldb.SBValue) -> int | None:
 # `sizeof` command.
 
 
+# pyrefly: ignore [invalid-inheritance]
 class SizeOfCommand(utils.Command):
     command = "sizeof"
     description = "Print the semantic size a container"

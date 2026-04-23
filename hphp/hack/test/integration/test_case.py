@@ -51,12 +51,15 @@ class TestCase(unittest.TestCase, Generic[T]):
     @classmethod
     def setUpClass(cls) -> None:
         print("running TestCase.setUpClass")
+        # pyrefly: ignore [no-access]
         cls._test_driver = cls.get_test_driver()
+        # pyrefly: ignore [missing-attribute]
         cls._test_driver.setUpClass(cls.get_template_repo())
 
     @classmethod
     def tearDownClass(cls) -> None:
         print("running TestCase.tearDownClass")
+        # pyrefly: ignore [missing-attribute]
         test_driver = cls._test_driver
         assert test_driver is not None
         test_driver.tearDownClass()

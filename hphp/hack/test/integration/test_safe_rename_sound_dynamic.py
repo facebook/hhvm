@@ -6,6 +6,7 @@ import hphp.hack.test.integration.common_tests as common_tests
 
 class TestSafeRenameSoundDynamic(common_tests.CommonTestDriver):
     @classmethod
+    # pyrefly: ignore [bad-override]
     def setUpClass(cls):
         super().setUpClass(
             template_repo="hphp/hack/test/integration/data/lsp_exchanges/"

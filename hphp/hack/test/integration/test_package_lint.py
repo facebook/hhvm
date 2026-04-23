@@ -11,6 +11,7 @@ from hphp.hack.test.integration.test_case import TestCase
 class PackageLintDriver(CommonTestDriver):
     repo_dir = "hphp/hack/test/integration/data/packages"
 
+    # pyrefly: ignore [bad-override]
     def write_load_config(
         self, use_serverless_ide: bool = False, use_saved_state: bool = False
     ) -> None:

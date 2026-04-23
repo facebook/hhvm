@@ -183,13 +183,16 @@ def subop_to_name(
         "HPHP::SpecialClsRef": ("SpecialClsRef", "SelfCls"),
         "HPHP::ReadonlyOp": ("ReadonlyOp", "Any"),
     }
+    # pyrefly: ignore [bad-typed-dict-key]
     enum_name, member = subop_names_and_table_starting_indices[enum_type_name]
     ix = (
         subop.unsigned - utils.Enum("HPHP::" + enum_name, member, subop.target).unsigned
     )
+    # pyrefly: ignore [unsupported-operation]
     table = utils.Value(enum_type_name + "_names", subop.target)
     assert table.type.IsArrayType()
     s = idx.at(table, ix)
+    # pyrefly: ignore [bad-argument-type]
     return utils.read_cstring(s, 32, subop.process)
 
 
@@ -209,9 +212,12 @@ def uints_by_size() -> typing.Dict[int, str]:
 def imm_to_str(imm: typing.Union[str, lldb.SBValue]) -> str:
     if type(imm) is str:
         pass
+    # pyrefly: ignore [missing-attribute]
     elif utils.rawtype(imm.type).name == "char *":
+        # pyrefly: ignore [missing-attribute]
         imm = imm.summary
     else:
+        # pyrefly: ignore [missing-attribute]
         imm = str(imm.signed)
     return imm
 
@@ -273,6 +279,7 @@ class HHBC:
         if small.unsigned & 0x80:  # i.e int8_t(*pc) < 0
             utils.debug_print("decode_iva(): large IVA immediate")
             large = pc.Cast(utils.Type("uint32_t", pc.target).GetPointerType()).deref
+            # pyrefly: ignore [no-matching-overload]
             info["value"] = large.CreateValueFromExpression(
                 "tmp",
                 # pyre-fixme[6]: LLDB auto-converts int expression to str
@@ -316,6 +323,7 @@ class HHBC:
         info = {}
         v = pc.Cast(utils.Type("uint32_t", pc.target).GetPointerType()).deref
         info["value"] = v
+        # pyrefly: ignore [unsupported-operation]
         info["size"] = 4
 
         utils.debug_print(f"decode_ba(pc=0x{pc.unsigned:x}): info={info}")
@@ -507,7 +515,9 @@ class HHBC:
             info["size"] = 1 + imm_info["size"] + int(get_readonly_op)
             info["value"] = "%s:%s %s" % (
                 mcode.value[1:],  # Drop leading 'M'
+                # pyrefly: ignore [bad-argument-type]
                 imm_to_str(imm_info["value"]),
+                # pyrefly: ignore [unbound-name]
                 readonly_op.value,
             )
 
@@ -778,6 +788,7 @@ class HHBC:
         return InstrInfo(op=op, len=instrlen, imms=imms)
 
 
+# pyrefly: ignore [invalid-inheritance]
 class HhxCommand(utils.Command):
     command = "hhx"
     description = "Print an HHBC stream"

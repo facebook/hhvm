@@ -109,7 +109,9 @@ class LspTestBase(TestCase[LspTestDriver]):
     def write_observed(self, test_name: str, observed_transcript: Json) -> None:
         file = os.path.join(self.test_driver.template_repo, test_name + ".observed.log")
         text = json.dumps(
-            list(self.get_important_received_items(observed_transcript)), indent=2
+            # pyrefly: ignore [bad-argument-type]
+            list(self.get_important_received_items(observed_transcript)),
+            indent=2,
         )
         with open(file, "w") as f:
             f.write(text)
@@ -156,6 +158,7 @@ class LspTestBase(TestCase[LspTestDriver]):
             received = entry.received or None
             if received is None:
                 continue
+            # pyrefly: ignore [missing-attribute]
             method = received.get("method") or ""
             if method in [
                 "window/progress",
@@ -185,12 +188,15 @@ class LspTestBase(TestCase[LspTestDriver]):
         with LspCommandProcessor.create(
             self.test_driver.test_env, lsp_args, self.test_driver.repo_dir
         ) as lsp:
+            # pyrefly: ignore [bad-argument-type]
             observed_transcript = lsp.communicate(test)
 
         self.write_observed(test_name, observed_transcript)
 
+        # pyrefly: ignore [bad-argument-type]
         expected_items = self.prepare_responses(expected)
         observed_items = self.prepare_responses(
+            # pyrefly: ignore [no-matching-overload]
             list(self.get_important_received_items(observed_transcript))
         )
 
@@ -230,7 +236,9 @@ class LspTestBase(TestCase[LspTestDriver]):
             received = entry.received
             if received is None:
                 continue
+            # pyrefly: ignore [missing-attribute]
             if received.get("error"):
+                # pyrefly: ignore [bad-index]
                 message = received["error"]["message"]
                 for failure_message in failure_messages:
                     if failure_message in message:

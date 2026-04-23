@@ -20,6 +20,7 @@ except ModuleNotFoundError:
 # `extract` command.
 
 
+# pyrefly: ignore [invalid-inheritance]
 class ExtractCommand(utils.Command):
     command = "extract"
     description = (

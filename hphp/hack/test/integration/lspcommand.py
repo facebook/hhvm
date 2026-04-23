@@ -85,6 +85,7 @@ class LspCommandProcessor:
         # of these streams sometimes cause deadlocks when accessed from multiple
         # threads.
         stdin = proc.stdin.detach()  # pyre-ignore
+        # pyrefly: ignore [missing-attribute]
         stdout = proc.stdout.detach()
         try:
             reader = JsonRpcStreamReader(stdout)
@@ -122,6 +123,7 @@ class LspCommandProcessor:
     ) -> Transcript:
         processed_transcript_ids = set()
         for command in commands:
+            # pyrefly: ignore [bad-index, unsupported-operation]
             if command["method"] == "$test/waitForRequest":
                 (transcript, processed_transcript_ids) = self._wait_for_request(
                     transcript,
@@ -130,7 +132,10 @@ class LspCommandProcessor:
                 )
             elif command["method"] == "$test/waitForResponse":
                 transcript = self._wait_for_response(
-                    transcript, command["params"]["id"]
+                    # pyrefly: ignore [bad-index, unsupported-operation]
+                    transcript,
+                    # pyrefly: ignore [bad-index, unsupported-operation]
+                    command["params"]["id"],
                 )
             elif command["method"] == "$test/waitForNotification":
                 (transcript, processed_transcript_ids) = self._wait_for_notification(
@@ -162,11 +167,14 @@ class LspCommandProcessor:
         def has_error_message(entry: TranscriptEntry, message: str) -> bool:
             if (
                 entry.received is None
+                # pyrefly: ignore [missing-attribute]
                 or entry.received.get("error") is None
+                # pyrefly: ignore [bad-index]
                 or entry.received["error"].get("message") is None
             ):
                 return False
             else:
+                # pyrefly: ignore [bad-index]
                 return message in entry.received["error"]["message"]
 
         while True:
@@ -187,6 +195,7 @@ class LspCommandProcessor:
         shutdown_commands = [
             v.sent
             for v in transcript.values()
+            # pyrefly: ignore [missing-attribute]
             if v.sent is not None and v.sent.get("method") == "shutdown"
         ]
         num_shutdown_commands = len(shutdown_commands)
@@ -201,6 +210,7 @@ class LspCommandProcessor:
             + f"Here are the shutdown commands I saw: {shutdown_commands}"
         )
         [shutdown_command] = shutdown_commands
+        # pyrefly: ignore [bad-index]
         return self._wait_for_response(transcript, shutdown_command["id"])
 
     def _wait_for_response(
@@ -220,7 +230,9 @@ class LspCommandProcessor:
         return transcript
 
     def _remove_diagnostic_data(self, params: Json) -> Json:
+        # pyrefly: ignore [not-iterable]
         if "diagnostics" in params:
+            # pyrefly: ignore [bad-index, unsupported-operation]
             diagnostics = params["diagnostics"]
             if isinstance(diagnostics, list):
                 for diagnostic in diagnostics:
@@ -240,7 +252,9 @@ class LspCommandProcessor:
             return (
                 transcript_id not in processed_transcript_ids
                 and entry.received is not None
+                # pyrefly: ignore [missing-attribute]
                 and entry.received.get("method") == method
+                # pyrefly: ignore [missing-attribute]
                 and self._remove_diagnostic_data(entry.received.get("params")) == params
             )
 
@@ -273,8 +287,11 @@ Transcript of all the messages we saw:
     def _wait_for_request(
         self, transcript: Transcript, command: Json, processed_transcript_ids: Set[str]
     ) -> Tuple[Transcript, Set[str]]:
+        # pyrefly: ignore [bad-index, unsupported-operation]
         comment = command["comment"]
+        # pyrefly: ignore [bad-index, unsupported-operation]
         method = command["params"]["method"]
+        # pyrefly: ignore [bad-index, unsupported-operation]
         params = command["params"]["params"]
         (transcript, transcript_id, message) = self._wait_for_message_from_server(
             transcript,
@@ -290,16 +307,20 @@ Transcript of all the messages we saw:
         processed_transcript_ids = set(processed_transcript_ids)
         processed_transcript_ids.add(transcript_id)
 
+        # pyrefly: ignore [bad-index, unsupported-operation]
         if "result" in command["params"]:
             response = {
                 "jsonrpc": 2.0,
+                # pyrefly: ignore [bad-index, unsupported-operation]
                 "id": message["id"],
+                # pyrefly: ignore [bad-index, unsupported-operation]
                 "result": command["params"]["result"],
             }
             self.writer.write(response)
         else:
             response = {
                 "jsonrpc": 2.0,
+                # pyrefly: ignore [bad-index, unsupported-operation]
                 "id": message["id"],
                 "result": "<acknowledged this message, but did not send a response>",
             }
@@ -313,8 +334,11 @@ Transcript of all the messages we saw:
     def _wait_for_notification(
         self, transcript: Transcript, command: Json, processed_transcript_ids: Set[str]
     ) -> Tuple[Transcript, Set[str]]:
+        # pyrefly: ignore [bad-index, unsupported-operation]
         comment = command["comment"]
+        # pyrefly: ignore [bad-index, unsupported-operation]
         method = command["params"]["method"]
+        # pyrefly: ignore [bad-index, unsupported-operation]
         params = command["params"]["params"]
         (transcript, transcript_id, _message) = self._wait_for_message_from_server(
             transcript,
@@ -329,6 +353,7 @@ Transcript of all the messages we saw:
         return (transcript, processed_transcript_ids)
 
     def _write_to_disk(self, command: Json) -> None:
+        # pyrefly: ignore [bad-index, unsupported-operation]
         params = command["params"]
         path = urllib.parse.urlparse(params["uri"]).path
         contents = params["contents"]
@@ -381,8 +406,10 @@ Transcript of all the messages we saw:
         ) -> str:
             if LspCommandProcessor._has_id(json):
                 if is_client_request:
+                    # pyrefly: ignore [bad-index, unsupported-operation]
                     return LspCommandProcessor._client_request_id(json["id"])
                 else:
+                    # pyrefly: ignore [bad-index, unsupported-operation]
                     return LspCommandProcessor._server_request_id(json["id"])
             else:
                 return idgen()
@@ -409,10 +436,12 @@ Transcript of all the messages we saw:
 
     @staticmethod
     def _has_id(json: Json) -> bool:
+        # pyrefly: ignore [not-iterable]
         return "id" in json
 
     @staticmethod
     def _is_request(json: Json) -> bool:
+        # pyrefly: ignore [not-iterable]
         return "id" in json and "method" in json
 
     @staticmethod

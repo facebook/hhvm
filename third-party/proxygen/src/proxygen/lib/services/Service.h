@@ -42,7 +42,7 @@ class Service {
    *
    * The return value indicates if the service is enabled or not.  Return true
    * if the service is enabled and was initialized successfully, and false if
-   * the service is disabled or is intialized successfully.  Throw an exception
+   * the service is disabled or is initialized successfully.  Throw an exception
    * if an error occurred initializing it.
    */
   virtual void init(folly::EventBase* mainEventBase,

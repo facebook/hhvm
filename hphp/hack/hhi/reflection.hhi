@@ -14,11 +14,11 @@ interface Reflector extends IPureStringishObject {
 
 class Reflection {
   public static function getModifierNames(
-    HH\FIXME\MISSING_PARAM_TYPE $modifiers,
-  )[]: HH\FIXME\MISSING_RETURN_TYPE;
+    int $modifiers,
+  )[]: vec<string>;
   public static function export(
     Reflector $reflector,
-    HH\FIXME\MISSING_PARAM_TYPE $return = false,
+    bool $return = false,
   ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
@@ -192,7 +192,7 @@ class ReflectionFunction
     HH\FIXME\MISSING_PARAM_TYPE $name,
     HH\FIXME\MISSING_PARAM_TYPE $return = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function isDisabled()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function isDisabled()[]: bool;
   public function invoke(mixed ...$args): HH\FIXME\MISSING_RETURN_TYPE;
   public function invokeArgs(vec<mixed> $args): HH\FIXME\MISSING_RETURN_TYPE;
   public function getClosure(): HH\FIXME\MISSING_RETURN_TYPE;
@@ -349,18 +349,18 @@ class ReflectionProperty implements Reflector {
     HH\FIXME\MISSING_PARAM_TYPE $obj,
     HH\FIXME\MISSING_PARAM_TYPE $value = null,
   )[globals, write_props]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isPublic()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isPrivate()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isProtected()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isStatic()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isReadonly()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function isDefault()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function getModifiers()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function getDeclaringClass()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function isPublic()[]: bool;
+  public function isPrivate()[]: bool;
+  public function isProtected()[]: bool;
+  public function isStatic()[]: bool;
+  public function isReadonly()[]: bool;
+  public function isDefault()[]: bool;
+  public function getModifiers()[]: int;
+  public function getDeclaringClass()[]: ReflectionClass;
   public function getDocComment()[]: HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>
   public function setAccessible(bool $accessible)[write_props]: void;
-  public function getTypeText()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function getTypeText()[]: string;
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;

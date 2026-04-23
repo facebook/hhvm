@@ -5,6 +5,7 @@
 #  @generated
 #
 from service.thrift_types import (
+    IncludedConstant2,
     IncludesIncluded,
     IncludesTransitiveFoo,
 )

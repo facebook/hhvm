@@ -14,9 +14,12 @@ namespace cpp2 {
 /** Glean {"file": "thrift/compiler/test/fixtures/includes/src/service.thrift"} */
 namespace service_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_341a2bea9a07de96();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_341a2bea9a07de96_includes();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_341a2bea9a07de96_uris();
+  /** Glean {"constant": "IncludedConstant2"} */
+  ::cpp2::Included const& IncludedConstant2();
+
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_73bb65f39cae2410();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_73bb65f39cae2410_includes();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_73bb65f39cae2410_uris();
 
 } // namespace service_constants
 } // namespace cpp2

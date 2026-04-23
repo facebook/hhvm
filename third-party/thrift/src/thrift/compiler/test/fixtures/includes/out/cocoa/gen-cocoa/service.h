@@ -48,4 +48,7 @@ typedef TransitiveFoo IncludesTransitiveFoo;
 - (id<MyService>) service;
 @end
 
-
+@interface serviceConstants : TBaseStruct {
+}
++ (Included *) IncludedConstant2;
+@end

@@ -33,3 +33,9 @@ service MyService {
 typedef includes.Included IncludesIncluded
 // Typedef-of-typedef, cross-module.
 typedef includes.TransitiveFoo IncludesTransitiveFoo
+
+// Regression test for D102067835: a const of a struct type defined in an
+// included program, initialized via field assignments. The Go generator
+// must emit the simple, undisambiguated setter names (e.g. SetMyIntField)
+// for fields whose parent struct is in another program.
+const includes.Included IncludedConstant2 = includes.Included{MyIntField = 7};

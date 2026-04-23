@@ -15,14 +15,19 @@
 namespace cpp2 {
 namespace service_constants {
 
+::cpp2::Included const& IncludedConstant2() {
+  static folly::Indestructible<::cpp2::Included> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::Included>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::MyIntField>(static_cast<::std::int64_t>(7))) };
+  return *instance;
+}
 
-::std::string_view _fbthrift_schema_341a2bea9a07de96() {
+
+::std::string_view _fbthrift_schema_73bb65f39cae2410() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_341a2bea9a07de96_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_73bb65f39cae2410_includes() {
   return {};
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_341a2bea9a07de96_uris() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_73bb65f39cae2410_uris() {
   return {};
 }
 

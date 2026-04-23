@@ -6,6 +6,7 @@
 #
 _fbthrift__py3_module_name = "service.types"
 from service.thrift_types import (
+    IncludedConstant2,
     IncludesIncluded,
     IncludesTransitiveFoo,
 )

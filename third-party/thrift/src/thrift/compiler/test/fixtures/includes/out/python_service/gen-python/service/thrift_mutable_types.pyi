@@ -25,6 +25,9 @@ import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
 import transitive.thrift_mutable_types as _fbthrift__transitive__thrift_mutable_types
 
 
+
+IncludedConstant2: _fbthrift__includes__thrift_mutable_types.Included = ...
+
 IncludesIncluded = _fbthrift__includes__thrift_mutable_types.Included
 IncludesTransitiveFoo = _fbthrift__transitive__thrift_mutable_types.Foo
 

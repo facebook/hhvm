@@ -21,5 +21,6 @@ import service.thrift_types
 
 
 
+IncludedConstant2: _includes_types.Included = ...
 IncludesIncluded = _includes_types.Included
 IncludesTransitiveFoo = _transitive_types.Foo

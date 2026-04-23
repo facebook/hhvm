@@ -36,6 +36,9 @@ _fbthrift_all_enums = [
 _fbthrift_all_structs = [
 ]
 
+
+IncludedConstant2 = includes.thrift_mutable_types.Included(MyIntField=7)
+
 IncludesIncluded = _fbthrift__includes__thrift_mutable_types.Included
 IncludesTransitiveFoo = _fbthrift__transitive__thrift_mutable_types.Foo
 

@@ -379,10 +379,13 @@ class t_mstch_go_generator : public t_whisker_generator {
           it != data_.field_setter_names.end()) {
         return it->second;
       }
-      throw whisker::eval_error(
-          fmt::format(
-              "field_setter_names not initialized with setter name for field {}",
-              self.name()));
+      // Fields belonging to structs from included programs are not registered
+      // by the current-program structured-definition visitor. Each program
+      // performs its own setter-name disambiguation when emitting the struct's
+      // own setter methods, so call sites in const initializers that reference
+      // an external struct must use the simple, undisambiguated form to match
+      // the include's generated setters.
+      return "Set" + go::get_go_field_name(&self);
     });
     def.property("key_str", [](const t_field& self) {
       // Legacy schemas may have negative tags - replace minus with an

@@ -1,6 +1,24 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "service",
+  "constants" : {
+    "IncludedConstant2" : {
+      "lineno" : 41,
+      "value" : { "MyIntField" : 7 },
+      "type_enum" : "STRUCT",
+      "spec_args" : "includes.Included",
+      "source_range" : {
+        "begin" : {
+          "line" : 41,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 41,
+          "column" : 79
+        }
+      }
+    }
+  },
   "includes": {
     "module" : {
       "path" : "module.thrift"

@@ -68,5 +68,6 @@ cdef object get_types_reflection():
     )
 
 
+IncludedConstant2 = _includes_types.Included._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_service_cbindings.cIncludedConstant2()))
 IncludesIncluded = _includes_types.Included
 IncludesTransitiveFoo = _transitive_types.Foo

@@ -18,3 +18,7 @@ import includes.ttypes
 
 from .ttypes import UTF8STRINGS, IncludesIncluded, IncludesTransitiveFoo
 
+IncludedConstant2 = includes.ttypes.Included(**{
+  "MyIntField" : 7,
+})
+

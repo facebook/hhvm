@@ -18,3 +18,5 @@ var _ = thrift.VOID
 
 var GoUnusedProtection__ int
 
+var IncludedConstant2 *includes.Included = includes.NewIncluded().
+    SetMyIntFieldNonCompat(int64(7))

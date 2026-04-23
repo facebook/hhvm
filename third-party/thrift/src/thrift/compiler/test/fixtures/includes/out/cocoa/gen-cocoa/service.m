@@ -25,6 +25,20 @@
 
 #import "service.h"
 
+static Included * IncludedConstant2;
+
+@implementation serviceConstants
++ (void) initialize {
+  IncludedConstant2 = [[Included alloc] init];
+  [IncludedConstant2 setMyIntField:7];
+
+;
+}
++ (Included *) IncludedConstant2{
+  return IncludedConstant2;
+}
+@end
+
 @interface query_args : TBaseStruct <TBase, NSCoding> {
   MyStruct * __thrift_s;
   Included * __thrift_i;

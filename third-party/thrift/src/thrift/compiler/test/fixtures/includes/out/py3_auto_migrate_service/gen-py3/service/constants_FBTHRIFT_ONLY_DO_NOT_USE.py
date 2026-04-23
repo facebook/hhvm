@@ -4,3 +4,12 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+import thrift.py3.types
+
+import service.types
+import includes.types
+import module.types
+import transitive.types
+
+
+IncludedConstant2 = includes.types.Included(MyIntField=7)

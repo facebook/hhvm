@@ -38,3 +38,5 @@ cimport module.cbindings as _module_cbindings
 cimport transitive.cbindings as _transitive_cbindings
 
 
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-cpp2/service_constants.h" namespace "::cpp2":
+    cdef _includes_cbindings.cIncluded cIncludedConstant2 "::cpp2::service_constants::IncludedConstant2"()

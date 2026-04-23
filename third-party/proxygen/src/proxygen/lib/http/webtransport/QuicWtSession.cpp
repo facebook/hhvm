@@ -98,8 +98,8 @@ QuicWtSessionBase::QuicWtSessionBase(
       wtHandler_(std::move(wtHandler)),
       priorityQueue_(std::make_unique<quic::HTTPPriorityQueue>()),
       sm_{quicSocket_->getNodeType() == quic::QuicNodeType::Server
-              ? detail::WtDir::Server
-              : detail::WtDir::Client,
+              ? WtDir::Server
+              : WtDir::Client,
           wtConfig,
           smCb_,
           smCb_,
@@ -234,7 +234,7 @@ void QuicWtSessionBase::QuicReadCallback::readAvailable(StreamId id) noexcept {
   auto& [data, eof] = readRes.value();
   auto res = sm.enqueue(
       *rh, WebTransport::StreamData{.data = std::move(data), .fin = eof});
-  XCHECK_NE(res, detail::WtStreamManager::Result::Fail);
+  XCHECK_NE(res, WtStreamManager::Result::Fail);
   if (!eof) { // ::enqueue w/ eof=true may deallocate rh
     sess.maybePauseIngress(*rh);
   }
@@ -243,19 +243,19 @@ void QuicWtSessionBase::QuicReadCallback::readAvailable(StreamId id) noexcept {
 void QuicWtSessionBase::QuicReadCallback::readError(StreamId id,
                                                     QuicError error) noexcept {
   XLOG(DBG4) << __func__ << "; id=" << id << "; err=" << error;
-  sess.sm_.onResetStream(detail::WtStreamManager::ResetStream{
-      id, *error.code.asApplicationErrorCode()});
+  sess.sm_.onResetStream(
+      WtStreamManager::ResetStream{id, getQuicAppErrCode(error)});
 }
 
 void QuicWtSessionBase::QuicStopSendingCallback::onStopSending(
     StreamId id, quic::ApplicationErrorCode ec) noexcept {
   XLOG(DBG4) << __func__ << "; id=" << id << "; err=" << ec;
-  sess.sm_.onStopSending(detail::WtStreamManager::StopSending{id, ec});
+  sess.sm_.onStopSending(WtStreamManager::StopSending{id, ec});
 }
 
 // -- StreamManagerCallback overrides --
 void QuicWtSessionBase::StreamManagerCallback::readReady(
-    detail::WtStreamManager::WtReadHandle& rh) noexcept {
+    WtStreamManager::WtReadHandle& rh) noexcept {
   sess.maybeResumeIngress(rh);
 }
 
@@ -322,7 +322,7 @@ void QuicWtSessionBase::onStreamWriteError(quic::StreamId id,
 }
 
 void QuicWtSessionBase::maybePauseIngress(
-    detail::WtStreamManager::WtReadHandle& handle) noexcept {
+    WtStreamManager::WtReadHandle& handle) noexcept {
   XCHECK(quicSocket_);
   const auto id = handle.getID();
   if (sm_.recvBytesAvail(handle) == 0) {
@@ -333,7 +333,7 @@ void QuicWtSessionBase::maybePauseIngress(
 }
 
 void QuicWtSessionBase::maybeResumeIngress(
-    detail::WtStreamManager::WtReadHandle& handle) noexcept {
+    WtStreamManager::WtReadHandle& handle) noexcept {
   XCHECK(quicSocket_);
   const auto id = handle.getID();
   if (sm_.recvBytesAvail(handle) > 0) {
@@ -579,8 +579,7 @@ void H3WtSession::onCloseSession(WtStreamManager::CloseSession&& cs) noexcept {
   closeSession(cs.err);
 }
 
-void H3ConnectStreamCallback::onEvent(
-    detail::WtStreamManager::Event&& ev) noexcept {
+void H3ConnectStreamCallback::onEvent(WtStreamManager::Event&& ev) noexcept {
   std::visit(visitor, ev);
 }
 

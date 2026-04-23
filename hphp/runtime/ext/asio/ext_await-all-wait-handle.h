@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
@@ -37,9 +39,28 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle,
 
   static void instanceDtor(ObjectData* obj, const Class*) {
     auto wh = wait_handle<c_AwaitAllWaitHandle>(obj);
-    auto const sz = wh->heapSize();
-    wh->~c_AwaitAllWaitHandle();
-    tl_heap->objFree(obj, sz);
+
+    std::vector<c_AwaitAllWaitHandle*> queue = {wh};
+    for (std::size_t i = 0; i < queue.size(); i++) {
+      auto cur = queue[i];
+      for (int32_t j = 0; j < cur->m_cap; j++) {
+        auto cur_child = cur->m_children[j].m_child;
+        assertx(isFailed() || cur_child->isFinished());
+
+        if (cur_child->getKind() == Kind::AwaitAll) {
+          if (cur_child->decReleaseCheck()) {
+            queue.push_back(cur_child->asAwaitAll());
+          }
+        } else {
+          decRefObj(cur_child);
+        } 
+      }
+    }
+
+    for (auto& cur : queue) {
+      auto const sz = cur->heapSize();
+      tl_heap->objFree(cur, sz);
+    }
   }
 
   explicit c_AwaitAllWaitHandle(unsigned cap = 0)
@@ -79,8 +100,8 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle,
       return getChildIdx() == getWaitHandle()->m_unfinished;
     }
 
-    void onUnblocked() {
-      getWaitHandle()->onUnblocked(getChildIdx());
+    void onUnblocked(std::vector<AsioBlockableChain>& worklist) {
+      getWaitHandle()->onUnblocked(getChildIdx(), worklist);
     }
 
     AsioBlockable m_blockable;
@@ -93,7 +114,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle,
   }
 
   String getName();
-  void onUnblocked(uint32_t idx);
+  void onUnblocked(uint32_t idx, std::vector<AsioBlockableChain>& worklist);
   c_WaitableWaitHandle* getChild();
   template<typename T> void forEachChild(T fn);
 
@@ -108,8 +129,8 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle,
   static Object Create(Iter iter);
   static req::ptr<c_AwaitAllWaitHandle> Alloc(int32_t cnt);
   void initialize(ContextStateIndex ctxStateIdx);
-  void markAsFinished(void);
-  void markAsFailed(const Object& exception);
+  void markAsFinished(std::vector<AsioBlockableChain>& worklist);
+  void markAsFailed(const Object& exception, std::vector<AsioBlockableChain>& worklist);
   void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
 
   // Construct an AAWH from an array-like without making layout assumptions.

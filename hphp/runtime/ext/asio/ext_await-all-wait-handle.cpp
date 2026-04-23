@@ -149,7 +149,7 @@ void c_AwaitAllWaitHandle::initialize(ContextStateIndex ctxStateIdx) {
   }
 }
 
-void c_AwaitAllWaitHandle::onUnblocked(uint32_t idx) {
+void c_AwaitAllWaitHandle::onUnblocked(uint32_t idx, std::vector<AsioBlockableChain>& worklist) {
   assertx(idx <= m_unfinished);
   assertx(getState() == STATE_BLOCKED);
 
@@ -166,25 +166,25 @@ void c_AwaitAllWaitHandle::onUnblocked(uint32_t idx) {
         } catch (const Object& cycle_exception) {
           assertx(cycle_exception->instanceof(SystemLib::getThrowableClass()));
           throwable_recompute_backtrace_from_wh(cycle_exception.get(), this);
-          markAsFailed(cycle_exception);
+          markAsFailed(cycle_exception, worklist);
         }
         return;
       }
     }
     // All children finished.
-    markAsFinished();
+    markAsFinished(worklist);
   }
 }
 
-void c_AwaitAllWaitHandle::markAsFinished() {
+void c_AwaitAllWaitHandle::markAsFinished(std::vector<AsioBlockableChain>& worklist) {
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   tvWriteNull(m_resultOrException);
-  parentChain.unblock();
+  worklist.emplace_back(std::move(parentChain));
   decRefObj(this);
 }
 
-void c_AwaitAllWaitHandle::markAsFailed(const Object& exception) {
+void c_AwaitAllWaitHandle::markAsFailed(const Object& exception, std::vector<AsioBlockableChain>& worklist) {
   for (uint32_t idx = 0; idx < m_cap; idx++) {
     auto const child = m_children[idx].m_child;
     if (!child->isFinished()) {
@@ -196,7 +196,7 @@ void c_AwaitAllWaitHandle::markAsFailed(const Object& exception) {
   auto parentChain = getParentChain();
   setState(STATE_FAILED);
   tvWriteObject(exception.get(), &m_resultOrException);
-  parentChain.unblock();
+  worklist.emplace_back(std::move(parentChain));
   decRefObj(this);
 }
 

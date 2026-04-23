@@ -44,6 +44,14 @@ class MultiQueryStreamOperation : public FetchOperation {
     return db::OperationType::MultiQueryStream;
   }
 
+  const Query& getQuery(int index) const {
+    return queries_.getQuery(index);
+  }
+
+  const std::vector<Query>& getQueries() const {
+    return queries_.getQueries();
+  }
+
   void setCallback(StreamCallback cb) {
     stream_callback_ = std::move(cb);
   }

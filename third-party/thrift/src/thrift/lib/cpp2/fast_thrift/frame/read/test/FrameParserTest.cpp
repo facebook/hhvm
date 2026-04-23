@@ -668,3 +668,160 @@ TEST(FrameParserTest, StreamFrameHasNonZeroStreamId) {
   EXPECT_FALSE(frame.metadata.isConnectionFrame());
   EXPECT_EQ(frame.streamId(), 100);
 }
+
+// ============================================================================
+// METADATA_PUSH Special Handling Tests
+// ============================================================================
+
+// METADATA_PUSH frames have the M flag set but do NOT have a 3-byte metadata
+// length prefix. The entire payload is metadata directly after the header.
+// This is different from other frames where M flag means a 3-byte prefix
+// exists.
+TEST(FrameParserTest, MetadataPushFrameHasNoMetadataLengthPrefix) {
+  std::vector<uint8_t> data;
+
+  // Stream ID = 0 (connection-level)
+  writeU32BE(data, 0);
+
+  // TypeAndFlags: METADATA_PUSH (0x0C), metadata flag always set
+  uint16_t flags = 1 << 8;
+  writeU16BE(data, makeTypeAndFlags(FrameType::METADATA_PUSH, flags));
+
+  // Metadata content directly (NO 3-byte size prefix)
+  const std::string metadata = "ServerPushMetadataContent";
+  data.insert(data.end(), metadata.begin(), metadata.end());
+
+  auto frame = parseFrame(makeFrameBuffer(data));
+
+  EXPECT_TRUE(frame.isValid());
+  EXPECT_EQ(frame.type(), FrameType::METADATA_PUSH);
+  EXPECT_EQ(frame.streamId(), 0);
+
+  // payloadOffset should be 6 (just the header, no metadata size prefix read)
+  EXPECT_EQ(frame.metadata.payloadOffset, 6);
+
+  // payloadSize should equal the metadata content length
+  EXPECT_EQ(frame.payloadSize(), metadata.size());
+
+  // metadataSize should equal payloadSize for METADATA_PUSH
+  EXPECT_EQ(frame.metadataSize(), metadata.size());
+
+  // Verify we can read the content correctly via payloadCursor
+  auto cursor = frame.payloadCursor();
+  std::string result;
+  result.resize(frame.payloadSize());
+  cursor.pull(result.data(), result.size());
+
+  EXPECT_EQ(result, metadata);
+}
+
+TEST(FrameParserTest, MetadataPushPayloadCursorStartsAtCorrectPosition) {
+  std::vector<uint8_t> data;
+
+  // Stream ID = 0
+  writeU32BE(data, 0);
+
+  // TypeAndFlags: METADATA_PUSH (0x0C), metadata flag
+  uint16_t flags = 1 << 8;
+  writeU16BE(data, makeTypeAndFlags(FrameType::METADATA_PUSH, flags));
+
+  // Simulate compact-serialized ServerPushMetadata:
+  // First byte is the Thrift struct header - we'll use some recognizable bytes
+  const std::vector<uint8_t> metadata = {0x12, 0x34, 0x56, 0x78, 0x9A};
+  data.insert(data.end(), metadata.begin(), metadata.end());
+
+  auto frame = parseFrame(makeFrameBuffer(data));
+
+  // Get cursor - should point at byte 0x12 (the first metadata byte)
+  auto cursor = frame.payloadCursor();
+
+  // First byte should be 0x12, NOT something from a misread 3-byte size prefix
+  EXPECT_EQ(cursor.read<uint8_t>(), 0x12);
+  EXPECT_EQ(cursor.read<uint8_t>(), 0x34);
+  EXPECT_EQ(cursor.read<uint8_t>(), 0x56);
+}
+
+TEST(FrameParserTest, MetadataPushEmptyMetadata) {
+  std::vector<uint8_t> data;
+
+  // Stream ID = 0
+  writeU32BE(data, 0);
+
+  // TypeAndFlags: METADATA_PUSH (0x0C), metadata flag
+  uint16_t flags = 1 << 8;
+  writeU16BE(data, makeTypeAndFlags(FrameType::METADATA_PUSH, flags));
+
+  // No metadata content
+
+  auto frame = parseFrame(makeFrameBuffer(data));
+
+  EXPECT_TRUE(frame.isValid());
+  EXPECT_EQ(frame.type(), FrameType::METADATA_PUSH);
+  EXPECT_EQ(frame.payloadSize(), 0);
+  EXPECT_EQ(frame.metadataSize(), 0);
+  EXPECT_EQ(frame.metadata.payloadOffset, 6);
+}
+
+TEST(FrameParserTest, MetadataPushWithMFlagNotSet) {
+  std::vector<uint8_t> data;
+
+  // Stream ID = 0
+  writeU32BE(data, 0);
+
+  // TypeAndFlags: METADATA_PUSH (0x0C), NO metadata flag (flags = 0)
+  writeU16BE(data, makeTypeAndFlags(FrameType::METADATA_PUSH, 0));
+
+  // Metadata content directly (no 3-byte prefix, same as M-flag-set case)
+  const std::string metadata = "NoMFlagMetadata";
+  data.insert(data.end(), metadata.begin(), metadata.end());
+
+  auto frame = parseFrame(makeFrameBuffer(data));
+
+  EXPECT_TRUE(frame.isValid());
+  EXPECT_EQ(frame.type(), FrameType::METADATA_PUSH);
+  EXPECT_EQ(frame.streamId(), 0);
+  EXPECT_EQ(frame.metadata.payloadOffset, 6);
+  EXPECT_EQ(frame.payloadSize(), metadata.size());
+  EXPECT_EQ(frame.metadataSize(), metadata.size());
+
+  auto cursor = frame.payloadCursor();
+  std::string result;
+  result.resize(frame.payloadSize());
+  cursor.pull(result.data(), result.size());
+  EXPECT_EQ(result, metadata);
+}
+
+// Contrast test: Regular frame WITH metadata flag DOES read 3-byte prefix
+TEST(FrameParserTest, RegularFrameWithMetadataFlagReadsLengthPrefix) {
+  std::vector<uint8_t> data;
+
+  // Stream ID = 1
+  writeU32BE(data, 1);
+
+  // TypeAndFlags: REQUEST_RESPONSE (0x04), metadata flag (bit 8)
+  uint16_t flags = 1 << 8;
+  writeU16BE(data, makeTypeAndFlags(FrameType::REQUEST_RESPONSE, flags));
+
+  // 3-byte metadata size = 5
+  writeU24BE(data, 5);
+
+  // Metadata: "meta1"
+  const std::string metadata = "meta1";
+  data.insert(data.end(), metadata.begin(), metadata.end());
+
+  // Data: "data1"
+  const std::string payload = "data1";
+  data.insert(data.end(), payload.begin(), payload.end());
+
+  auto frame = parseFrame(makeFrameBuffer(data));
+
+  EXPECT_TRUE(frame.isValid());
+  EXPECT_EQ(frame.type(), FrameType::REQUEST_RESPONSE);
+
+  // payloadOffset should be 9 (6 header + 3 metadata length)
+  EXPECT_EQ(frame.metadata.payloadOffset, 9);
+
+  // metadataSize read from the 3-byte prefix
+  EXPECT_EQ(frame.metadataSize(), 5);
+  EXPECT_EQ(frame.dataSize(), 5);
+}

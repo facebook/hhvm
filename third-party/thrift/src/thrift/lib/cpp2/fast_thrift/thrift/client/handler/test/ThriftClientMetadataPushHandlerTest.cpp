@@ -471,4 +471,132 @@ TEST_F(ThriftClientMetadataPushHandlerTest, ErrorPropagatedOnPassThrough) {
   EXPECT_EQ(result, Result::Error);
 }
 
+// =============================================================================
+// Rocket-Server-Style Frame Tests (M flag set, no 3-byte metadata prefix)
+// =============================================================================
+// These tests construct METADATA_PUSH frames with the M flag set, exactly
+// as the Rocket server produces them. This exercises the code path that
+// previously caused the parser to misread the first 3 bytes of metadata
+// as a length prefix.
+
+namespace {
+
+void writeU32BE(std::vector<uint8_t>& buf, uint32_t value) {
+  buf.push_back(static_cast<uint8_t>(value >> 24));
+  buf.push_back(static_cast<uint8_t>(value >> 16));
+  buf.push_back(static_cast<uint8_t>(value >> 8));
+  buf.push_back(static_cast<uint8_t>(value));
+}
+
+void writeU16BE(std::vector<uint8_t>& buf, uint16_t value) {
+  buf.push_back(static_cast<uint8_t>(value >> 8));
+  buf.push_back(static_cast<uint8_t>(value));
+}
+
+uint16_t makeTypeAndFlags(
+    apache::thrift::fast_thrift::frame::FrameType type, uint16_t flags) {
+  return (static_cast<uint16_t>(type) << 10) | (flags & 0x3FF);
+}
+
+} // namespace
+
+class RocketStyleMetadataPushTest : public ThriftClientMetadataPushHandlerTest {
+ protected:
+  apache::thrift::fast_thrift::frame::read::ParsedFrame
+  createRocketStyleMetadataPushFrame(
+      const apache::thrift::ServerPushMetadata& meta) {
+    auto serialized = serializeServerPushMetadata(meta);
+
+    std::vector<uint8_t> header;
+    writeU32BE(header, 0); // Stream ID = 0
+    writeU16BE(
+        header,
+        makeTypeAndFlags(
+            apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH,
+            apache::thrift::fast_thrift::frame::detail::kMetadataBit));
+
+    auto headerBuf = folly::IOBuf::copyBuffer(header.data(), header.size());
+    headerBuf->appendToChain(std::move(serialized));
+    return apache::thrift::fast_thrift::frame::read::parseFrame(
+        std::move(headerBuf));
+  }
+};
+
+TEST_F(RocketStyleMetadataPushTest, SetupResponseFromRocketServerStyleFrame) {
+  apache::thrift::ServerPushMetadata serverMeta;
+  serverMeta.set_setupResponse();
+  serverMeta.setupResponse()->version() = 8;
+  serverMeta.setupResponse()->zstdSupported() = true;
+
+  auto response = makeFrameResponse(
+      createRocketStyleMetadataPushFrame(serverMeta),
+      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+
+  auto result = callOnRead(erase_and_box(std::move(response)));
+
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(handler_.serverVersion(), 8);
+  EXPECT_TRUE(handler_.serverSupportsZstd());
+  EXPECT_TRUE(handler_.isSetupComplete());
+  EXPECT_EQ(ctx_.readMessages().size(), 0);
+}
+
+TEST_F(RocketStyleMetadataPushTest, DrainCompleteFromRocketServerStyleFrame) {
+  apache::thrift::ServerPushMetadata serverMeta;
+  serverMeta.set_drainCompletePush();
+  serverMeta.drainCompletePush()->drainCompleteCode() =
+      apache::thrift::DrainCompleteCode::EXCEEDED_INGRESS_MEM_LIMIT;
+
+  auto response = makeFrameResponse(
+      createRocketStyleMetadataPushFrame(serverMeta),
+      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+
+  auto result = callOnRead(erase_and_box(std::move(response)));
+
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(ctx_.readMessages().size(), 0);
+  ASSERT_EQ(ctx_.exceptions().size(), 1);
+
+  auto* appEx = ctx_.exceptions()[0]
+                    .get_exception<apache::thrift::TApplicationException>();
+  ASSERT_NE(appEx, nullptr);
+  EXPECT_NE(std::string(appEx->what()).find("memory limit"), std::string::npos);
+}
+
+TEST_F(RocketStyleMetadataPushTest, SetupResponseWorksBothFrameStyles) {
+  apache::thrift::ServerPushMetadata serverMeta;
+  serverMeta.set_setupResponse();
+  serverMeta.setupResponse()->version() = 10;
+  serverMeta.setupResponse()->zstdSupported() = false;
+
+  // Rocket-style (M flag set)
+  {
+    auto response = makeFrameResponse(
+        createRocketStyleMetadataPushFrame(serverMeta),
+        apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+    auto result = callOnRead(erase_and_box(std::move(response)));
+
+    EXPECT_EQ(result, Result::Success);
+    EXPECT_EQ(handler_.serverVersion(), 10);
+    EXPECT_FALSE(handler_.serverSupportsZstd());
+    EXPECT_TRUE(handler_.isSetupComplete());
+  }
+
+  // Reset handler state
+  SetUp();
+
+  // FrameWriter-style (now also M flag set after the fix)
+  {
+    auto response = makeFrameResponse(
+        createMetadataPushFrame(serverMeta),
+        apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+    auto result = callOnRead(erase_and_box(std::move(response)));
+
+    EXPECT_EQ(result, Result::Success);
+    EXPECT_EQ(handler_.serverVersion(), 10);
+    EXPECT_FALSE(handler_.serverSupportsZstd());
+    EXPECT_TRUE(handler_.isSetupComplete());
+  }
+}
+
 } // namespace apache::thrift::fast_thrift::thrift::client::handler

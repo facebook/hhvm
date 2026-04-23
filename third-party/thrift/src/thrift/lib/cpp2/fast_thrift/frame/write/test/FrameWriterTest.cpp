@@ -437,8 +437,16 @@ TEST(FrameWriterTest, SerializeMetadataPush) {
 
   EXPECT_EQ(parsed.type(), FrameType::METADATA_PUSH);
   EXPECT_EQ(parsed.streamId(), 0u);
-  // Note: METADATA_PUSH doesn't use the metadata flag - entire payload is
-  // metadata
+  EXPECT_TRUE(parsed.hasMetadata());
+  EXPECT_EQ(parsed.metadataSize(), 23);
+  EXPECT_EQ(parsed.payloadSize(), 23);
+  EXPECT_EQ(parsed.dataSize(), 0);
+
+  auto cursor = parsed.payloadCursor();
+  std::string result;
+  result.resize(parsed.payloadSize());
+  cursor.pull(result.data(), result.size());
+  EXPECT_EQ(result, "pushed metadata content");
 }
 
 // ============================================================================

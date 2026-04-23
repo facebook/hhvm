@@ -473,14 +473,15 @@ std::unique_ptr<folly::IOBuf> serialize(
     const MetadataPushHeader& /* header */,
     std::unique_ptr<folly::IOBuf> metadata) {
   // METADATA_PUSH is special - the entire payload is metadata
-  // No metadata flag or length prefix needed
+  // M flag is always set per RSocket spec (no 3-byte metadata length prefix)
 
   folly::IOBufQueue queue;
   queue.append(folly::IOBuf::create(kBaseHeaderSize));
   folly::io::QueueAppender appender(&queue, 0);
 
   appender.writeBE<uint32_t>(0); // Stream ID always 0
-  detail::writeTypeAndFlags(appender, FrameType::METADATA_PUSH, 0);
+  detail::writeTypeAndFlags(
+      appender, FrameType::METADATA_PUSH, detail::kMetadataBit);
 
   if (metadata != nullptr) {
     queue.append(std::move(metadata));

@@ -106,8 +106,12 @@ inline ParsedFrame parseFrame(std::unique_ptr<folly::IOBuf> buffer) {
   cursor.skip(extraHeaderBytes);
 
   // Parse metadata size if present (3-byte big-endian)
+  // Note: METADATA_PUSH frames have the M flag set but do NOT have a 3-byte
+  // metadata length prefix. The entire payload is metadata, so we skip reading
+  // the size and calculate it from the payload size instead.
   uint16_t metadataSize = 0;
-  if (flags & ::apache::thrift::fast_thrift::frame::detail::kMetadataBit) {
+  if ((flags & ::apache::thrift::fast_thrift::frame::detail::kMetadataBit) &&
+      frameType != FrameType::METADATA_PUSH) {
     metadataSize =
         static_cast<uint16_t>(detail::readFrameOrMetadataSize(cursor));
   }
@@ -120,6 +124,11 @@ inline ParsedFrame parseFrame(std::unique_ptr<folly::IOBuf> buffer) {
   auto payloadOffset = static_cast<uint32_t>(cursor.getCurrentPosition());
   auto totalSize = static_cast<uint32_t>(buffer->computeChainDataLength());
   uint32_t payloadSize = totalSize - payloadOffset;
+
+  // For METADATA_PUSH frames, the entire payload is metadata (no data portion)
+  if (frameType == FrameType::METADATA_PUSH) {
+    metadataSize = static_cast<uint16_t>(payloadSize);
+  }
 
   return ParsedFrame{
       .metadata =

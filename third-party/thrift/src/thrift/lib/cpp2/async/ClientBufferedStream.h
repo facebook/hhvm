@@ -74,6 +74,8 @@ class ClientBufferedStream {
 
     int32_t outstanding = bufferOptions_.chunkSize;
     size_t payloadDataSize = 0;
+    const int32_t replenishThreshold = computeReplenishThreshold(
+        bufferOptions_.chunkSize, bufferOptions_.bufferReplenishThreshold);
 
     apache::thrift::detail::ClientStreamBridge::ClientQueue queue;
     class ReadyCallback : public apache::thrift::detail::QueueConsumer {
@@ -134,7 +136,7 @@ class ClientBufferedStream {
         }
       }
 
-      if ((--outstanding <= bufferOptions_.chunkSize / 2) ||
+      if ((--outstanding <= bufferOptions_.chunkSize - replenishThreshold) ||
           (payloadDataSize >= kRequestCreditPayloadSize)) {
         streamBridge->requestN(bufferOptions_.chunkSize - outstanding);
         outstanding = bufferOptions_.chunkSize;
@@ -150,18 +152,24 @@ class ClientBufferedStream {
   [[clang::annotate("not_coroutine")]] folly::coro::AsyncGenerator<T&&>
   toAsyncGenerator() && {
     FOLLY_POP_WARNING
-    return bufferOptions_.memSize ? toAsyncGeneratorWithSizeTarget(
-                                        std::move(streamBridge_),
-                                        bufferOptions_.chunkSize,
-                                        decode_,
-                                        bufferOptions_.memSize,
-                                        bufferOptions_.maxChunkSize,
-                                        std::move(interceptorContext_))
-                                  : toAsyncGeneratorImpl<false>(
-                                        std::move(streamBridge_),
-                                        bufferOptions_.chunkSize,
-                                        decode_,
-                                        std::move(interceptorContext_));
+    if (bufferOptions_.memSize) {
+      DCHECK_EQ(bufferOptions_.bufferReplenishThreshold, 0)
+          << "bufferReplenishThreshold is ignored when memSize is set";
+      return toAsyncGeneratorWithSizeTarget(
+          std::move(streamBridge_),
+          bufferOptions_.chunkSize,
+          decode_,
+          bufferOptions_.memSize,
+          bufferOptions_.maxChunkSize,
+          std::move(interceptorContext_));
+    } else {
+      return toAsyncGeneratorImpl<false>(
+          std::move(streamBridge_),
+          bufferOptions_.chunkSize,
+          decode_,
+          std::move(interceptorContext_),
+          bufferOptions_.bufferReplenishThreshold);
+    }
   }
 
   struct RichPayloadReceived { // sent as `RichPayloadToSend` from server
@@ -182,7 +190,11 @@ class ClientBufferedStream {
     CHECK_EQ(bufferOptions_.memSize, 0)
         << "MemoryBufferSize not supported by toAsyncGeneratorWithHeader()";
     return toAsyncGeneratorImpl<true>(
-        std::move(streamBridge_), bufferOptions_.chunkSize, decode_);
+        std::move(streamBridge_),
+        bufferOptions_.chunkSize,
+        decode_,
+        nullptr,
+        bufferOptions_.bufferReplenishThreshold);
   }
 #endif // FOLLY_HAS_COROUTINES
 
@@ -200,7 +212,8 @@ class ClientBufferedStream {
         std::forward<Callback>(onNextTry),
         std::move(streamBridge_),
         decode_,
-        bufferOptions_.chunkSize);
+        bufferOptions_.chunkSize,
+        bufferOptions_.bufferReplenishThreshold);
     Subscription sub(c->state_);
     e->add([c]() { (*c)(); });
     return sub;
@@ -215,7 +228,8 @@ class ClientBufferedStream {
       apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge,
       int32_t chunkBufferSize,
       folly::Try<T> (*decode)(folly::Try<StreamPayload>&&),
-      std::shared_ptr<ClientStreamInterceptorContext> ctx = nullptr) {
+      std::shared_ptr<ClientStreamInterceptorContext> ctx = nullptr,
+      int32_t bufferReplenishThreshold = 0) {
     if (chunkBufferSize == 0) {
       streamBridge->requestN(1);
       ++chunkBufferSize;
@@ -223,9 +237,11 @@ class ClientBufferedStream {
 
     int32_t outstanding = chunkBufferSize;
     size_t payloadDataSize = 0;
+    const int32_t replenishThreshold =
+        computeReplenishThreshold(chunkBufferSize, bufferReplenishThreshold);
 
     auto updateCredits = [&] {
-      if ((--outstanding <= chunkBufferSize / 2) ||
+      if ((--outstanding <= chunkBufferSize - replenishThreshold) ||
           (payloadDataSize >= kRequestCreditPayloadSize)) {
         streamBridge->requestN(chunkBufferSize - outstanding);
         outstanding = chunkBufferSize;
@@ -574,11 +590,14 @@ class ClientBufferedStream {
         OnNextTry onNextTry,
         apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge,
         folly::Try<T> (*decode)(folly::Try<StreamPayload>&&),
-        int32_t chunkBufferSize)
+        int32_t chunkBufferSize,
+        int32_t bufferReplenishThreshold = 0)
         : e_(std::move(e)),
           onNextTry_(std::move(onNextTry)),
           decode_(decode),
           chunkBufferSize_(chunkBufferSize),
+          replenishThreshold_(computeReplenishThreshold(
+              chunkBufferSize, bufferReplenishThreshold)),
           state_(std::make_shared<SharedState>(std::move(streamBridge))) {
       outstanding_ = chunkBufferSize_;
     }
@@ -654,7 +673,7 @@ class ClientBufferedStream {
           }
         }
 
-        if ((--outstanding_ <= chunkBufferSize_ / 2) ||
+        if ((--outstanding_ <= chunkBufferSize_ - replenishThreshold_) ||
             (payloadDataSize_ >= kRequestCreditPayloadSize)) {
           state_->streamBridge->requestN(chunkBufferSize_ - outstanding_);
           outstanding_ = chunkBufferSize_;
@@ -668,11 +687,33 @@ class ClientBufferedStream {
     OnNextTry onNextTry_;
     folly::Try<T> (*decode_)(folly::Try<StreamPayload>&&);
     int32_t chunkBufferSize_;
+    int32_t replenishThreshold_;
     int32_t outstanding_;
     size_t payloadDataSize_{0};
     std::shared_ptr<SharedState> state_;
     friend class ClientBufferedStream;
   };
+
+  /**
+   * Computes the effective replenish threshold given a buffer size and a
+   * user-provided threshold. Returns the number of items that must be consumed
+   * before credits are replenished.
+   *
+   * A threshold of 0 resolves to the default of bufferSize / 2. Values
+   * exceeding bufferSize are clamped.
+   */
+  static int32_t computeReplenishThreshold(
+      int32_t bufferSize, int32_t bufferReplenishThreshold) {
+    CHECK_GE(bufferReplenishThreshold, 0)
+        << "bufferReplenishThreshold must not be negative";
+    if (bufferReplenishThreshold == 0) {
+      return bufferSize - bufferSize / 2;
+    }
+    DCHECK_LE(bufferReplenishThreshold, bufferSize)
+        << "bufferReplenishThreshold (" << bufferReplenishThreshold
+        << ") must not exceed chunkSize (" << bufferSize << ")";
+    return std::min(bufferReplenishThreshold, bufferSize);
+  }
 
   apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge_;
   folly::Try<T> (*decode_)(folly::Try<StreamPayload>&&) = nullptr;

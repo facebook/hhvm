@@ -36,6 +36,9 @@ struct BufferOptions {
   // enough buffer. Useful when we expect sudden spikes of large
   // message payloads.
   int32_t maxChunkSize{std::numeric_limits<int32_t>::max()};
+  // Number of items that must be consumed before requesting more credits.
+  // 0 means use the default (chunkSize / 2). Must not exceed chunkSize.
+  int32_t bufferReplenishThreshold{0};
 };
 
 namespace detail {

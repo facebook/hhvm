@@ -157,6 +157,38 @@ TEST_F(ClientBufferedStreamTest, RefillByCount) {
   std::move(task).get();
 }
 
+TEST_F(ClientBufferedStreamTest, RefillByCountCustomThreshold) {
+  // bufferReplenishThreshold=3 means replenish after consuming 3 items
+  // (when outstanding drops to chunkSize - 3 = 7).
+  ClientBufferedStream<int> stream(
+      std::move(firstResponseCb.ptr),
+      decode,
+      {.chunkSize = 10, .bufferReplenishThreshold = 3});
+
+  auto task = co_withExecutor(
+                  ebt.getEventBase(),
+                  folly::coro::co_invoke([&]() -> folly::coro::Task<void> {
+                    auto gen = std::move(stream).toAsyncGenerator();
+                    int i = 0;
+                    while (auto val = co_await gen.next()) {
+                      EXPECT_EQ(*val, ++i);
+                      if (i >= 4) {
+                        co_await serverCb.requested;
+                      } else {
+                        EXPECT_FALSE(serverCb.requested.ready());
+                      }
+                    }
+                  }))
+                  .start();
+  for (int i = 1; i <= 10; ++i) {
+    ebt.getEventBase()->runInEventBaseThreadAndWait(
+        [&] { std::ignore = client->onStreamNext(*encode(folly::Try(i))); });
+  }
+  ebt.getEventBase()->runInEventBaseThreadAndWait(
+      [&] { client->onStreamComplete(); });
+  std::move(task).get();
+}
+
 TEST_F(ClientBufferedStreamTest, RefillByCumulativeSize) {
   ClientBufferedStream<int> stream(
       std::move(firstResponseCb.ptr), decode, {100, 0});

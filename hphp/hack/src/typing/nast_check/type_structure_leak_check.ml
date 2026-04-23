@@ -14,16 +14,6 @@ let visitor =
   object (_this)
     inherit [_] Nast_visitor.iter_with_state as super
 
-    method! on_expr (env, ancestor) ((_, _p, expr) as e) =
-      let ancestor =
-        match expr with
-        | Is (_, _h) -> Some "an is-expression"
-        | As { expr = _; hint = _; is_nullable = _; enforce_deep = _ } ->
-          Some "an as-expression"
-        | _ -> ancestor
-      in
-      super#on_expr (env, ancestor) e
-
     method! on_hint (env, ancestor) ((pos, h_) as h) =
       match h_ with
       | Hrefinement _ ->
@@ -36,7 +26,7 @@ let visitor =
       | _ -> super#on_hint (env, ancestor) h
   end
 
-let handler with_refinement_alias_enabled =
+let handler =
   object
     inherit Nast_visitor.handler_base
 
@@ -46,8 +36,7 @@ let handler with_refinement_alias_enabled =
       List.iter class_.c_typeconsts ~f:(fun tc ->
           match tc.c_tconst_kind with
           | TCAbstract { c_atc_default = Some hint; _ }
-          | TCConcrete { c_tc_type = hint; _ }
-            when not with_refinement_alias_enabled ->
+          | TCConcrete { c_tc_type = hint; _ } ->
             let ancestor =
               Some
                 (if tc.c_tconst_is_ctx then
@@ -59,11 +48,10 @@ let handler with_refinement_alias_enabled =
           | _ -> ())
 
     method! at_typedef env td =
-      if not with_refinement_alias_enabled then
-        match td.t_assignment with
-        | SimpleTypeDef { tvh_vis = _; tvh_hint = hint } ->
-          visitor#on_hint (env, Some "a type alias") hint
-        | CaseType (variant, variants) ->
-          List.iter (variant :: variants) ~f:(fun variant ->
-              visitor#on_hint (env, Some "a case type") variant.Aast.tctv_hint)
+      match td.t_assignment with
+      | SimpleTypeDef { tvh_vis = _; tvh_hint = hint } ->
+        visitor#on_hint (env, Some "a type alias") hint
+      | CaseType (variant, variants) ->
+        List.iter (variant :: variants) ~f:(fun variant ->
+            visitor#on_hint (env, Some "a case type") variant.Aast.tctv_hint)
   end

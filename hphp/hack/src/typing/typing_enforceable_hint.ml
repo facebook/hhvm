@@ -145,6 +145,8 @@ let validator =
           r
           "a type with generics, because generics are erased at runtime"
 
+    method! on_trefinement acc r _ty _ = this#invalid acc r "type refinement"
+
     method! on_tunion acc r tyl =
       match tyl with
       | [] -> this#invalid acc r "the `nothing` type"

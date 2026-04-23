@@ -36,7 +36,6 @@ let visitor ctx =
       List_rvalue_check.handler;
       Private_final_check.handler;
       Well_formed_internal_trait.handler;
-      Type_structure_leak_check.handler with_refinement_alias_enabled;
       Package_expression_check.handler;
     ]
   in
@@ -45,6 +44,13 @@ let visitor ctx =
       Pessimisation_node_recording.handler :: handlers
     else
       handlers
+  in
+
+  let handlers =
+    if with_refinement_alias_enabled then
+      handlers
+    else
+      Type_structure_leak_check.handler :: handlers
   in
 
   let handlers =

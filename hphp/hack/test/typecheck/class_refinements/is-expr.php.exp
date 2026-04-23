@@ -1,4 +1,8 @@
 ERROR: File "is-expr.php", line 11, characters 17-44:
-Type refinements cannot appear on the right-hand side of an is-expression. (NastCheck[3101])
-ERROR: File "is-expr.php", line 13, characters 27-51:
-Type refinements cannot appear on the right-hand side of an is-expression. (NastCheck[3101])
+Invalid `is` expression hint (Typing[4195])
+  File "is-expr.php", line 11, characters 17-44:
+  The `is` operator cannot be used with type refinement
+ERROR: File "is-expr.php", line 13, characters 12-52:
+Invalid `is` expression hint (Typing[4195])
+  File "is-expr.php", line 13, characters 27-51:
+  The `is` operator cannot be used with type refinement

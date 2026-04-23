@@ -1,0 +1,16 @@
+ERROR: File "is-expr-alias.php", line 19, characters 17-29:
+Invalid `is` expression hint (Typing[4195])
+  File "is-expr-alias.php", line 9, characters 22-50:
+  The `is` operator cannot be used with type refinement
+ERROR: File "is-expr-alias.php", line 21, characters 12-37:
+Invalid `is` expression hint (Typing[4195])
+  File "is-expr-alias.php", line 10, characters 19-44:
+  The `is` operator cannot be used with type refinement
+ERROR: File "is-expr-alias.php", line 24, characters 17-21:
+Invalid `is` expression hint (Typing[4195])
+  File "is-expr-alias.php", line 12, characters 19-47:
+  The `is` operator cannot be used with type refinement
+ERROR: File "is-expr-alias.php", line 26, characters 12-32:
+Invalid `is` expression hint (Typing[4195])
+  File "is-expr-alias.php", line 13, characters 19-44:
+  The `is` operator cannot be used with type refinement

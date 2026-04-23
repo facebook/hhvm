@@ -1,0 +1,18 @@
+ERROR: File "reified-generics-alias.php", line 18, characters 5-11:
+Invalid reified hint (Typing[4305])
+  File "reified-generics-alias.php", line 13, characters 16-40:
+  This is type refinement, it cannot be used as a reified type argument
+  File "reified-generics-alias.php", line 11, characters 18-18:
+  `T` is reified
+ERROR: File "reified-generics-alias.php", line 21, characters 5-18:
+Invalid reified hint (Typing[4305])
+  File "reified-generics-alias.php", line 13, characters 16-40:
+  This is type refinement, it cannot be used as a reified type argument
+  File "reified-generics-alias.php", line 11, characters 18-18:
+  `T` is reified
+ERROR: File "reified-generics-alias.php", line 27, characters 19-32:
+Invalid reified hint (Typing[4305])
+  File "reified-generics-alias.php", line 13, characters 16-40:
+  This is type refinement, it cannot be used as a reified type argument
+  File "reified-generics-alias.php", line 24, characters 15-15:
+  `T` is reified

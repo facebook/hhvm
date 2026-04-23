@@ -1,10 +1,10 @@
-WARN: File "as-expr.php", line 12, characters 8-45:
+WARN: File "as-expr-alias.php", line 13, characters 8-30:
 This `as` assertion will always fail and lead to an exception at runtime. The expression on the left has type `Box` which shares no values with `(Box with { type T = int }, int)`. (Warn[12012])
-ERROR: File "as-expr.php", line 11, characters 14-41:
+ERROR: File "as-expr-alias.php", line 12, characters 14-26:
 Invalid `as` expression hint (Typing[4195])
-  File "as-expr.php", line 11, characters 14-41:
+  File "as-expr-alias.php", line 9, characters 22-50:
   The `as` operator cannot be used with type refinement
-ERROR: File "as-expr.php", line 12, characters 14-45:
+ERROR: File "as-expr-alias.php", line 13, characters 14-30:
 Invalid `as` expression hint (Typing[4195])
-  File "as-expr.php", line 12, characters 15-39:
+  File "as-expr-alias.php", line 10, characters 19-44:
   The `as` operator cannot be used with type refinement

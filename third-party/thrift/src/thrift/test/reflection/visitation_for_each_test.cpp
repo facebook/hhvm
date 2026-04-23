@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include <thrift/test/reflection/gen-cpp2/reflection_for_each_field.h>
-#include <thrift/test/reflection/gen-cpp2/reflection_visit_by_thrift_field_metadata.h> // @manual
+#include <thrift/test/reflection/gen-cpp2/reflection_types.h>
 
 #include <gtest/gtest.h>
 #include <folly/Overload.h>
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
+#include <thrift/lib/cpp2/op/Get.h>
 
 #include <typeindex>
 
@@ -35,38 +36,64 @@ namespace test_cpp2::cpp_reflection {
 namespace {
 
 struct ForEachFieldAdapter {
-  template <class... Args>
-  void operator()(Args&&... args) const {
-    apache::thrift::for_each_field(std::forward<Args>(args)...);
+  template <class T, class F>
+  void operator()(T&& t, F f) const {
+    using Type = std::decay_t<T>;
+    const auto& meta = apache::thrift::get_struct_metadata<Type>();
+    size_t idx = 0;
+    apache::thrift::op::for_each_field_id<Type>([&]<class Id>(Id) {
+      f((*meta.fields_ref())[idx],
+        apache::thrift::op::get<Id>(std::forward<T>(t)));
+      ++idx;
+    });
+  }
+
+  template <class T, class F>
+  void operator()(T&& t1, T&& t2, F f) const {
+    using Type = std::decay_t<T>;
+    const auto& meta = apache::thrift::get_struct_metadata<Type>();
+    size_t idx = 0;
+    apache::thrift::op::for_each_field_id<Type>([&]<class Id>(Id) {
+      f((*meta.fields_ref())[idx],
+        apache::thrift::op::get<Id>(std::forward<T>(t1)),
+        apache::thrift::op::get<Id>(std::forward<T>(t2)));
+      ++idx;
+    });
   }
 };
 
 struct VisitByThriftIdAdapter {
   template <class T, class F>
   void operator()(T&& t, F f) const {
-    for (auto&& meta : *::apache::thrift::get_struct_metadata<std::decay_t<T>>()
-                            .fields_ref()) {
-      apache::thrift::visit_by_thrift_field_metadata(
-          std::forward<T>(t), meta, [&](auto&& ref) { f(meta, ref); });
+    using Type = std::decay_t<T>;
+    for (auto&& meta :
+         *::apache::thrift::get_struct_metadata<Type>().fields_ref()) {
+      apache::thrift::op::invoke_by_field_id<Type>(
+          static_cast<apache::thrift::FieldId>(*meta.id_ref()),
+          [&]<class Id>(Id) {
+            f(meta, apache::thrift::op::get<Id>(std::forward<T>(t)));
+          },
+          []() {});
     }
   }
 
   template <class T, class F>
   void operator()(T&& t1, T&& t2, F f) const {
-    using namespace apache::thrift;
-    for (auto&& meta : *get_struct_metadata<std::decay_t<T>>().fields_ref()) {
-      visit_by_thrift_field_metadata(
-          std::forward<T>(t1), meta, [&](auto&& ref1) {
-            visit_by_thrift_field_metadata(
-                std::forward<T>(t2), meta, [&](auto&& ref2) {
-                  if constexpr (std::
-                                    is_same_v<decltype(ref1), decltype(ref2)>) {
-                    f(meta, ref1, ref2);
-                  } else {
-                    ASSERT_TRUE(false);
-                  }
-                });
-          });
+    using Type = std::decay_t<T>;
+    for (auto&& meta :
+         *apache::thrift::get_struct_metadata<Type>().fields_ref()) {
+      apache::thrift::op::invoke_by_field_id<Type>(
+          static_cast<apache::thrift::FieldId>(*meta.id_ref()),
+          [&]<class Id>(Id) {
+            auto ref1 = apache::thrift::op::get<Id>(std::forward<T>(t1));
+            auto ref2 = apache::thrift::op::get<Id>(std::forward<T>(t2));
+            if constexpr (std::is_same_v<decltype(ref1), decltype(ref2)>) {
+              f(meta, ref1, ref2);
+            } else {
+              ASSERT_TRUE(false);
+            }
+          },
+          []() {});
     }
   }
 };

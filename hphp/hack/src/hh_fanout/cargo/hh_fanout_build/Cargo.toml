@@ -25,4 +25,4 @@ memmap2 = "0.9.10"
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }
 parking_lot = { version = "0.12.1", features = ["send_guard"] }
 rayon = "1.11.0"
-smallvec = { version = "1.15", features = ["impl_bincode", "serde", "specialization", "union"] }
+smallvec = { version = "1.15", features = ["impl_bincode", "serde", "specialization", "union", "write"] }

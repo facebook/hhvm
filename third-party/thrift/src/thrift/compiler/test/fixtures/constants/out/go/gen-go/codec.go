@@ -14,30 +14,6 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module_EmptyEnum = &thrift.TypeSpec{
-        FullName: "module.EmptyEnum",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.EmptyEnum",
-                NewFunc:    func() any { return EmptyEnum(0) },
-            },
-    }
-    premadeCodecTypeSpec_module_City = &thrift.TypeSpec{
-        FullName: "module.City",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.City",
-                NewFunc:    func() any { return City(0) },
-            },
-    }
-    premadeCodecTypeSpec_module_Company = &thrift.TypeSpec{
-        FullName: "module.Company",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.Company",
-                NewFunc:    func() any { return Company(0) },
-            },
-    }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
         FullName: "i32",
         CodecPrimitiveSpec:
@@ -50,6 +26,14 @@ var (
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
                 PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
+    }
+    premadeCodecTypeSpec_module_Company = &thrift.TypeSpec{
+        FullName: "module.Company",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.Company",
+                NewFunc:    func() any { return Company(0) },
             },
     }
     premadeCodecTypeSpec_double = &thrift.TypeSpec{
@@ -192,6 +176,14 @@ var (
                 NewFunc:            func() any { return NewMyMapIdentifier() },
             },
     }
+    premadeCodecTypeSpec_module_City = &thrift.TypeSpec{
+        FullName: "module.City",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.City",
+                NewFunc:    func() any { return City(0) },
+            },
+    }
     premadeCodecTypeSpec_list_module_City = &thrift.TypeSpec{
         FullName: "list<module.City>",
         CodecListSpec:
@@ -217,6 +209,14 @@ var (
                 ScopedName:         "module.CompanyLocationsMap",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_map_module_Company_list_module_City,
                 NewFunc:            func() any { return NewCompanyLocationsMap() },
+            },
+    }
+    premadeCodecTypeSpec_module_EmptyEnum = &thrift.TypeSpec{
+        FullName: "module.EmptyEnum",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.EmptyEnum",
+                NewFunc:    func() any { return EmptyEnum(0) },
             },
     }
 )
@@ -606,11 +606,9 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_EmptyEnum.FullName] = premadeCodecTypeSpec_module_EmptyEnum
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_City.FullName] = premadeCodecTypeSpec_module_City
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Company.FullName] = premadeCodecTypeSpec_module_Company
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Company.FullName] = premadeCodecTypeSpec_module_Company
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Internship.FullName] = premadeCodecTypeSpec_module_Internship
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Range.FullName] = premadeCodecTypeSpec_module_Range
@@ -625,7 +623,9 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStringIdentifier.FullName] = premadeCodecTypeSpec_module_MyStringIdentifier
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyIntIdentifier.FullName] = premadeCodecTypeSpec_module_MyIntIdentifier
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyMapIdentifier.FullName] = premadeCodecTypeSpec_module_MyMapIdentifier
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_City.FullName] = premadeCodecTypeSpec_module_City
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompanyLocationsMap.FullName] = premadeCodecTypeSpec_module_CompanyLocationsMap
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_EmptyEnum.FullName] = premadeCodecTypeSpec_module_EmptyEnum
     return fbthriftTypeSpecsMap
 }()
 

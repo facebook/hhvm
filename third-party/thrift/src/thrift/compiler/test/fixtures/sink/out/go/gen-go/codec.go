@@ -14,29 +14,11 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
-            },
-    }
-    premadeCodecTypeSpec_module_InitialResponse = &thrift.TypeSpec{
-        FullName: "module.InitialResponse",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.InitialResponse",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewInitialResponse() },
-            },
-    }
-    premadeCodecTypeSpec_module_FinalResponse = &thrift.TypeSpec{
-        FullName: "module.FinalResponse",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.FinalResponse",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewFinalResponse() },
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
             },
     }
     premadeCodecTypeSpec_module_SinkPayload = &thrift.TypeSpec{
@@ -48,13 +30,22 @@ var (
                 NewFunc:    func() thrift.Struct { return NewSinkPayload() },
             },
     }
-    premadeCodecTypeSpec_module_CompatibleWithKeywordSink = &thrift.TypeSpec{
-        FullName: "module.CompatibleWithKeywordSink",
+    premadeCodecTypeSpec_module_FinalResponse = &thrift.TypeSpec{
+        FullName: "module.FinalResponse",
         CodecStructSpec:
             &thrift.CodecStructSpec{
-                ScopedName: "module.CompatibleWithKeywordSink",
+                ScopedName: "module.FinalResponse",
                 IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewCompatibleWithKeywordSink() },
+                NewFunc:    func() thrift.Struct { return NewFinalResponse() },
+            },
+    }
+    premadeCodecTypeSpec_module_InitialResponse = &thrift.TypeSpec{
+        FullName: "module.InitialResponse",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.InitialResponse",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewInitialResponse() },
             },
     }
     premadeCodecTypeSpec_module_InitialException = &thrift.TypeSpec{
@@ -75,13 +66,6 @@ var (
                 NewFunc:    func() thrift.Struct { return NewSinkException1() },
             },
     }
-    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
-        FullName: "i64",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
-            },
-    }
     premadeCodecTypeSpec_module_SinkException2 = &thrift.TypeSpec{
         FullName: "module.SinkException2",
         CodecStructSpec:
@@ -91,11 +75,27 @@ var (
                 NewFunc:    func() thrift.Struct { return NewSinkException2() },
             },
     }
-    premadeCodecTypeSpec_void = &thrift.TypeSpec{
-        FullName: "void",
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
+    }
+    premadeCodecTypeSpec_module_CompatibleWithKeywordSink = &thrift.TypeSpec{
+        FullName: "module.CompatibleWithKeywordSink",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.CompatibleWithKeywordSink",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewCompatibleWithKeywordSink() },
+            },
+    }
+    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
             },
     }
 )
@@ -858,16 +858,16 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_InitialResponse.FullName] = premadeCodecTypeSpec_module_InitialResponse
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FinalResponse.FullName] = premadeCodecTypeSpec_module_FinalResponse
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SinkPayload.FullName] = premadeCodecTypeSpec_module_SinkPayload
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompatibleWithKeywordSink.FullName] = premadeCodecTypeSpec_module_CompatibleWithKeywordSink
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FinalResponse.FullName] = premadeCodecTypeSpec_module_FinalResponse
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_InitialResponse.FullName] = premadeCodecTypeSpec_module_InitialResponse
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_InitialException.FullName] = premadeCodecTypeSpec_module_InitialException
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SinkException1.FullName] = premadeCodecTypeSpec_module_SinkException1
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SinkException2.FullName] = premadeCodecTypeSpec_module_SinkException2
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompatibleWithKeywordSink.FullName] = premadeCodecTypeSpec_module_CompatibleWithKeywordSink
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
     return fbthriftTypeSpecsMap
 }()
 

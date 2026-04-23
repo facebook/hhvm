@@ -128,40 +128,89 @@ std::string codegen_data::make_go_package_name_unique(const std::string& name) {
   return unique_name;
 }
 
-void codegen_data::compute_go_package_aliases() {
-  for (auto include : current_program_->get_includes_for_codegen()) {
-    auto package = go::get_go_package_name(include);
-    auto package_base_name = go::get_go_package_base_name(include);
-    auto unique_package_name = make_go_package_name_unique(
-        go::munge_ident(package_base_name, /*exported*/ false));
+void codegen_data::register_visitors(
+    basic_ast_visitor<true, const_visitor_context&>& visitor) {
+  // Populate package aliases and package name collisions
+  visitor.add_program_visitor(
+      [this](const const_visitor_context&, const t_program& node) {
+        if (&node != current_program_) {
+          return;
+        }
+        for (const t_program* include : node.get_includes_for_codegen()) {
+          std::string unique_package_name = make_go_package_name_unique(
+              go::munge_ident(
+                  go::get_go_package_base_name(include), /*exported=*/false));
+          go_package_map_.emplace(
+              go::get_go_package_name(include), std::move(unique_package_name));
+        }
+      });
 
-    go_package_map_.emplace(package, unique_package_name);
-  }
-}
+  // Populate disambiguated field setter names
+  visitor.add_structured_definition_visitor(
+      [this](const const_visitor_context& ctx, const t_structured& node) {
+        if (&ctx.program() == current_program_) {
+          add_struct_go_field_setter_names(node);
+        }
+      });
 
-void codegen_data::compute_struct_to_field_names() {
-  for (t_structured* struct_ : current_program_->structs_and_unions()) {
-    struct_to_field_names[struct_] = go::get_struct_go_field_names(struct_);
-  }
-}
+  // Populate metadata types
+  visitor.add_enum_visitor(
+      [this](const const_visitor_context& ctx, const t_enum& node) {
+        if (&ctx.program() == current_program_) {
+          add_to_thrift_metadata_types(node);
+        }
+      });
+  visitor.add_typedef_visitor(
+      [this](const const_visitor_context& ctx, const t_typedef& node) {
+        if (&ctx.program() == current_program_) {
+          add_to_thrift_metadata_types(*node.type());
+          add_to_thrift_metadata_types(node);
+        }
+      });
+  visitor.add_structured_definition_visitor(
+      [this](const const_visitor_context& ctx, const t_structured& node) {
+        if (&ctx.program() == current_program_) {
+          // Iterate fields here instead of using a field visitor so field type
+          // metadata is ordered before the enclosing structured type.
+          for (const auto& field : node.fields()) {
+            add_to_thrift_metadata_types(*field.type());
+          }
+          add_to_thrift_metadata_types(node);
+        }
+      });
 
-void codegen_data::compute_req_resp_structs() {
-  for (auto service : current_program_->services()) {
-    auto svcGoName = go::munge_ident(service->name());
-    for (const auto& func : service->functions()) {
-      make_func_req_resp_structs(&func, svcGoName, req_resp_structs);
-    }
-  }
-  for (auto interaction : current_program_->interactions()) {
-    auto interactionGoName = go::munge_ident(interaction->name());
-    for (const auto& func : interaction->functions()) {
-      make_func_req_resp_structs(&func, interactionGoName, req_resp_structs);
-    }
-  }
+  // Populate function metadata for supported functions, including ephemeral
+  // request/response structs and their metadata.
+  visitor.add_function_visitor(
+      [this](const const_visitor_context& ctx, const t_function& node) {
+        // Process supported service and interaction functions in the current
+        // program.
+        if (&ctx.program() != current_program_ ||
+            (!go::is_func_go_client_supported(&node) &&
+             !go::is_func_go_server_supported(&node))) {
+          return;
+        }
+        const auto* parent = static_cast<const t_interface*>(ctx.parent());
+        size_t initial_size = req_resp_structs.size();
 
-  for (auto struct_ : req_resp_structs) {
-    struct_to_field_names[struct_] = go::get_struct_go_field_names(struct_);
-  }
+        make_func_req_resp_structs(
+            &node, go::munge_ident(parent->name()), req_resp_structs);
+
+        // `make_func_req_resp_structs` doesn't always generate a field on the
+        // response struct for the return type (specifically for void
+        // responses), but we need to ensure the metadata is always present
+        add_to_thrift_metadata_types(*node.return_type());
+
+        // Populate metadata for newly generated structs. The fields contain
+        // params, exceptions, etc.
+        for (size_t i = initial_size; i < req_resp_structs.size(); i++) {
+          const t_struct* strct = req_resp_structs[i];
+          for (const auto& field : strct->fields()) {
+            add_to_thrift_metadata_types(*field.type());
+          }
+          add_struct_go_field_setter_names(*strct);
+        }
+      });
 }
 
 bool codegen_data::is_req_resp_struct(const t_structured& structured) const {
@@ -171,138 +220,33 @@ bool codegen_data::is_req_resp_struct(const t_structured& structured) const {
       req_resp_structs.end();
 }
 
-void codegen_data::add_to_thrift_metadata_types(
-    const t_type* type, std::set<std::string>& visited_type_names) {
-  // Check if we have already visited this type.
-  auto type_name = type->get_full_name();
-  if (visited_type_names.count(type_name) > 0) {
-    return;
-  }
-
+void codegen_data::add_to_thrift_metadata_types(const t_type& type) {
   // Filter out external types (i.e. types defined in other programs).
   // Primitive (base) types should be treated as internal and kept.
   // For those types - 'program' will be null, so account for that.
-  if (type->program() != nullptr && !is_current_program(type->program())) {
+  if (type.program() != nullptr && !is_current_program(type.program())) {
     return;
   }
 
-  visited_type_names.insert(type_name);
+  if (!metadata_visited_types_.insert(type.get_full_name()).second) {
+    // We have already visited this type.
+    return;
+  }
 
   // The recursion below is equivalent to post-order tree traversal.
   // It ensures that the types are recorded in the dependency order.
-
-  if (const t_typedef* typedef_ = type->try_as<t_typedef>()) {
-    auto underlying_type = &typedef_->type().deref();
-    add_to_thrift_metadata_types(underlying_type, visited_type_names);
-  } else if (const t_list* list_type = type->try_as<t_list>()) {
-    auto elem_type = &list_type->elem_type().deref();
-    add_to_thrift_metadata_types(elem_type, visited_type_names);
-  } else if (const t_set* set_type = type->try_as<t_set>()) {
-    auto elem_type = &set_type->elem_type().deref();
-    add_to_thrift_metadata_types(elem_type, visited_type_names);
-  } else if (const t_map* map_type = type->try_as<t_map>()) {
-    auto key_type = &map_type->key_type().deref();
-    auto val_type = &map_type->val_type().deref();
-    add_to_thrift_metadata_types(key_type, visited_type_names);
-    add_to_thrift_metadata_types(val_type, visited_type_names);
+  if (const t_typedef* typedef_ = type.try_as<t_typedef>()) {
+    add_to_thrift_metadata_types(*typedef_->type());
+  } else if (const t_list* list_type = type.try_as<t_list>()) {
+    add_to_thrift_metadata_types(*list_type->elem_type());
+  } else if (const t_set* set_type = type.try_as<t_set>()) {
+    add_to_thrift_metadata_types(*set_type->elem_type());
+  } else if (const t_map* map_type = type.try_as<t_map>()) {
+    add_to_thrift_metadata_types(*map_type->key_type());
+    add_to_thrift_metadata_types(*map_type->val_type());
   }
 
-  thrift_metadata_types.push_back(type);
-}
-
-void codegen_data::compute_thrift_metadata_types() {
-  // The following items need metadata generated for them:
-  //   * Struct/union/exception field types
-  //   * Typedef underlying types
-  //   * Function return types
-  //   * Function argument types
-  //   * Function exception types
-
-  std::set<std::string> visited_type_names;
-
-  for (auto const& enum_ : current_program_->enums()) {
-    // Visit each enum
-    add_to_thrift_metadata_types(enum_, visited_type_names);
-  }
-  for (auto const& struct_ : current_program_->structs_and_unions()) {
-    // Visit struct fields
-    for (auto const& field : struct_->fields()) {
-      auto type = &field.type().deref();
-      add_to_thrift_metadata_types(type, visited_type_names);
-    }
-    // Visit struct itself
-    add_to_thrift_metadata_types(struct_, visited_type_names);
-  }
-  for (auto const& exception : current_program_->exceptions()) {
-    // Visit exception members
-    for (auto const& field : exception->fields()) {
-      auto type = &field.type().deref();
-      add_to_thrift_metadata_types(type, visited_type_names);
-    }
-    // Visit exception itself
-    add_to_thrift_metadata_types(exception, visited_type_names);
-  }
-  for (auto const& typedef_ : current_program_->typedefs()) {
-    auto type = &typedef_->type().deref();
-    // Visit the underlying type
-    add_to_thrift_metadata_types(type, visited_type_names);
-    // Visit the typedef itself
-    add_to_thrift_metadata_types(typedef_, visited_type_names);
-  }
-
-  for (auto const& service : current_program_->services()) {
-    for (const auto& func : service->functions()) {
-      if (!go::is_func_go_client_supported(&func) &&
-          !go::is_func_go_server_supported(&func)) {
-        continue; // Skip unsupported functions
-      }
-
-      auto return_type = &func.return_type().deref();
-      add_to_thrift_metadata_types(return_type, visited_type_names);
-
-      for (const auto& parameter : func.params().fields()) {
-        auto type = &parameter.type().deref();
-        add_to_thrift_metadata_types(type, visited_type_names);
-      }
-      if (func.exceptions() != nullptr) {
-        for (const auto& exception : func.exceptions()->fields()) {
-          auto type = &exception.type().deref();
-          add_to_thrift_metadata_types(type, visited_type_names);
-        }
-      }
-      if (func.stream() != nullptr) {
-        add_to_thrift_metadata_types(
-            &func.stream()->elem_type().deref(), visited_type_names);
-        if (func.stream()->exceptions() != nullptr) {
-          for (const auto& exception : func.stream()->exceptions()->fields()) {
-            auto type = &exception.type().deref();
-            add_to_thrift_metadata_types(type, visited_type_names);
-          }
-        }
-      }
-      if (func.sink() != nullptr) {
-        add_to_thrift_metadata_types(
-            &func.sink()->elem_type().deref(), visited_type_names);
-        if (func.sink()->sink_exceptions() != nullptr) {
-          for (const auto& exception :
-               func.sink()->sink_exceptions()->fields()) {
-            auto type = &exception.type().deref();
-            add_to_thrift_metadata_types(type, visited_type_names);
-          }
-        }
-
-        add_to_thrift_metadata_types(
-            &func.sink()->final_response_type().deref(), visited_type_names);
-        if (func.sink()->final_response_exceptions() != nullptr) {
-          for (const auto& exception :
-               func.sink()->final_response_exceptions()->fields()) {
-            auto type = &exception.type().deref();
-            add_to_thrift_metadata_types(type, visited_type_names);
-          }
-        }
-      }
-    }
-  }
+  thrift_metadata_types.push_back(&type);
 }
 
 bool codegen_data::is_current_program(const t_program* program) const {
@@ -663,13 +607,28 @@ std::string get_go_type_codec_type_spec_name(const t_type& type) {
       "premadeCodecTypeSpec_{}", get_go_type_sanitized_full_name(type));
 }
 
-std::set<std::string> get_struct_go_field_names(const t_structured* tstruct) {
-  // Returns a set of Go field names from the given struct.
-  std::set<std::string> field_names;
-  for (const t_field& field : tstruct->fields()) {
-    field_names.insert(go::get_go_field_name(&field));
+void codegen_data::add_struct_go_field_setter_names(
+    const t_structured& tstruct) {
+  std::set<std::string> collisions;
+  for (const t_field& field : tstruct.fields()) {
+    // Pre-populate all field names, as they are definite collisions
+    collisions.insert(go::get_go_field_name(&field));
   }
-  return field_names;
+
+  for (const t_field& field : tstruct.fields()) {
+    // Determine unique setter names for each field, disambiguating any
+    // collisions with fields or other setters
+    std::string setter_name =
+        fmt::format("Set{}", go::get_go_field_name(&field));
+    // Keep adding `_` to the end until the name is unique. If the name is
+    // already unique, the first insert succeeds and aborts the loop before any
+    // appends
+    while (!collisions.insert(setter_name).second) {
+      setter_name += "_";
+    }
+
+    field_setter_names[&field] = setter_name;
+  }
 }
 
 std::string get_go_func_unique_arg_name(
@@ -693,11 +652,6 @@ void make_func_req_resp_structs(
     const t_function* func,
     const std::string& prefix,
     std::vector<const t_struct*>& req_resp_structs) {
-  if (!go::is_func_go_client_supported(func) &&
-      !go::is_func_go_server_supported(func)) {
-    return;
-  }
-
   auto funcGoName = go::get_go_func_name(func);
 
   auto req_struct_name = go::munge_ident("req" + prefix + funcGoName, false);

@@ -19,27 +19,6 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_EmptyEnum =
-        &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.EmptyEnum",
-                },
-        }
-    premadeThriftType_module_City =
-        &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.City",
-                },
-        }
-    premadeThriftType_module_Company =
-        &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.Company",
-                },
-        }
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
@@ -49,6 +28,13 @@ var (
         &metadata.ThriftType{
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_module_Company =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.Company",
+                },
         }
     premadeThriftType_double =
         &metadata.ThriftType{
@@ -163,6 +149,13 @@ var (
                     UnderlyingType: premadeThriftType_map_string_string,
                 },
         }
+    premadeThriftType_module_City =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.City",
+                },
+        }
     premadeThriftType_list_module_City =
         &metadata.ThriftType{
             TList:
@@ -184,6 +177,13 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module.CompanyLocationsMap",
                     UnderlyingType: premadeThriftType_map_module_Company_list_module_City,
+                },
+        }
+    premadeThriftType_module_EmptyEnum =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.EmptyEnum",
                 },
         }
 )
@@ -400,11 +400,9 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["module.EmptyEnum"] = premadeThriftType_module_EmptyEnum
-    fbthriftThriftTypesMap["module.City"] = premadeThriftType_module_City
-    fbthriftThriftTypesMap["module.Company"] = premadeThriftType_module_Company
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module.Company"] = premadeThriftType_module_Company
     fbthriftThriftTypesMap["double"] = premadeThriftType_double
     fbthriftThriftTypesMap["module.Internship"] = premadeThriftType_module_Internship
     fbthriftThriftTypesMap["module.Range"] = premadeThriftType_module_Range
@@ -419,7 +417,9 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.MyStringIdentifier"] = premadeThriftType_module_MyStringIdentifier
     fbthriftThriftTypesMap["module.MyIntIdentifier"] = premadeThriftType_module_MyIntIdentifier
     fbthriftThriftTypesMap["module.MyMapIdentifier"] = premadeThriftType_module_MyMapIdentifier
+    fbthriftThriftTypesMap["module.City"] = premadeThriftType_module_City
     fbthriftThriftTypesMap["module.CompanyLocationsMap"] = premadeThriftType_module_CompanyLocationsMap
+    fbthriftThriftTypesMap["module.EmptyEnum"] = premadeThriftType_module_EmptyEnum
     return fbthriftThriftTypesMap
 }()
 

@@ -19,51 +19,15 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_B =
+    premadeThriftType_void =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.B",
-                },
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         }
     premadeThriftType_i32 =
         &metadata.ThriftType{
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        }
-    premadeThriftType_module_A =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.A",
-                },
-        }
-    premadeThriftType_string =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-        }
-    premadeThriftType_module_U =
-        &metadata.ThriftType{
-            TUnion:
-                &metadata.ThriftUnionType{
-                    Name: "module.U",
-                },
-        }
-    premadeThriftType_module_Bang =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.Bang",
-                },
-        }
-    premadeThriftType_module_lanyard =
-        &metadata.ThriftType{
-            TTypedef:
-                &metadata.ThriftTypedefType{
-                    Name:           "module.lanyard",
-                    UnderlyingType: premadeThriftType_string,
-                },
         }
     premadeThriftType_module_number =
         &metadata.ThriftType{
@@ -82,16 +46,52 @@ var (
                     },
                 },
         }
-    premadeThriftType_void =
+    premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_set_i32 =
         &metadata.ThriftType{
             TSet:
                 &metadata.ThriftSetType{
                     ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_module_Bang =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.Bang",
+                },
+        }
+    premadeThriftType_module_A =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.A",
+                },
+        }
+    premadeThriftType_module_U =
+        &metadata.ThriftType{
+            TUnion:
+                &metadata.ThriftUnionType{
+                    Name: "module.U",
+                },
+        }
+    premadeThriftType_module_lanyard =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.lanyard",
+                    UnderlyingType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_module_B =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.B",
                 },
         }
 )
@@ -146,15 +146,15 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["module.B"] = premadeThriftType_module_B
-    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
-    fbthriftThriftTypesMap["module.A"] = premadeThriftType_module_A
-    fbthriftThriftTypesMap["string"] = premadeThriftType_string
-    fbthriftThriftTypesMap["module.U"] = premadeThriftType_module_U
-    fbthriftThriftTypesMap["module.Bang"] = premadeThriftType_module_Bang
-    fbthriftThriftTypesMap["module.lanyard"] = premadeThriftType_module_lanyard
-    fbthriftThriftTypesMap["module.number"] = premadeThriftType_module_number
     fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module.number"] = premadeThriftType_module_number
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module.Bang"] = premadeThriftType_module_Bang
+    fbthriftThriftTypesMap["module.A"] = premadeThriftType_module_A
+    fbthriftThriftTypesMap["module.U"] = premadeThriftType_module_U
+    fbthriftThriftTypesMap["module.lanyard"] = premadeThriftType_module_lanyard
+    fbthriftThriftTypesMap["module.B"] = premadeThriftType_module_B
     return fbthriftThriftTypesMap
 }()
 

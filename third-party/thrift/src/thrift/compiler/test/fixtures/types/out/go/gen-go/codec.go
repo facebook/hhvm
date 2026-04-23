@@ -16,28 +16,45 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module_has_bitwise_ops = &thrift.TypeSpec{
-        FullName: "module.has_bitwise_ops",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.has_bitwise_ops",
-                NewFunc:    func() any { return HasBitwiseOps(0) },
+    premadeCodecTypeSpec_binary = &thrift.TypeSpec{
+        FullName: "binary",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BINARY,
             },
     }
-    premadeCodecTypeSpec_module_is_unscoped = &thrift.TypeSpec{
-        FullName: "module.is_unscoped",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.is_unscoped",
-                NewFunc:    func() any { return IsUnscoped(0) },
+    premadeCodecTypeSpec_module_TBinary = &thrift.TypeSpec{
+        FullName: "module.TBinary",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.TBinary",
+                UnderlyingTypeSpec: premadeCodecTypeSpec_binary,
+                NewFunc:            func() any { return NewTBinary() },
             },
     }
-    premadeCodecTypeSpec_module_MyForwardRefEnum = &thrift.TypeSpec{
-        FullName: "module.MyForwardRefEnum",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.MyForwardRefEnum",
-                NewFunc:    func() any { return MyForwardRefEnum(0) },
+    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
+            },
+    }
+    premadeCodecTypeSpec_map_module_TBinary_i64 = &thrift.TypeSpec{
+        FullName: "map<module.TBinary, i64>",
+        CodecMapSpec:
+            &thrift.CodecMapSpec{
+                KeyTypeSpec:   premadeCodecTypeSpec_module_TBinary,
+                ValueTypeSpec: premadeCodecTypeSpec_i64,
+                KeyWireType:   thrift.STRING,
+                ValueWireType: thrift.I64,
+            },
+    }
+    premadeCodecTypeSpec_list_i64 = &thrift.TypeSpec{
+        FullName: "list<i64>",
+        CodecListSpec:
+            &thrift.CodecListSpec{
+                ElementWireType: thrift.I64,
+                ElementTypeSpec: premadeCodecTypeSpec_i64,
             },
     }
     premadeCodecTypeSpec_module_empty_struct = &thrift.TypeSpec{
@@ -134,13 +151,6 @@ var (
                 NewFunc:    func() thrift.Struct { return NewCppTypeStruct() },
             },
     }
-    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
-        FullName: "i64",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
-            },
-    }
     premadeCodecTypeSpec_module_VirtualStruct = &thrift.TypeSpec{
         FullName: "module.VirtualStruct",
         CodecStructSpec:
@@ -148,6 +158,14 @@ var (
                 ScopedName: "module.VirtualStruct",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewVirtualStruct() },
+            },
+    }
+    premadeCodecTypeSpec_module_MyForwardRefEnum = &thrift.TypeSpec{
+        FullName: "module.MyForwardRefEnum",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.MyForwardRefEnum",
+                NewFunc:    func() any { return MyForwardRefEnum(0) },
             },
     }
     premadeCodecTypeSpec_module_MyStructWithForwardRefEnum = &thrift.TypeSpec{
@@ -269,22 +287,6 @@ var (
                 ScopedName: "module.Renaming",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewRenaming() },
-            },
-    }
-    premadeCodecTypeSpec_binary = &thrift.TypeSpec{
-        FullName: "binary",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BINARY,
-            },
-    }
-    premadeCodecTypeSpec_module_TBinary = &thrift.TypeSpec{
-        FullName: "module.TBinary",
-        CodecTypedefSpec:
-            &thrift.CodecTypedefSpec{
-                ScopedName:         "module.TBinary",
-                UnderlyingTypeSpec: premadeCodecTypeSpec_binary,
-                NewFunc:            func() any { return NewTBinary() },
             },
     }
     premadeCodecTypeSpec_module_TBinary_8623 = &thrift.TypeSpec{
@@ -610,22 +612,20 @@ var (
                 NewFunc:    func() thrift.Struct { return NewStructWithDoubleUnderscores() },
             },
     }
-    premadeCodecTypeSpec_map_module_TBinary_i64 = &thrift.TypeSpec{
-        FullName: "map<module.TBinary, i64>",
-        CodecMapSpec:
-            &thrift.CodecMapSpec{
-                KeyTypeSpec:   premadeCodecTypeSpec_module_TBinary,
-                ValueTypeSpec: premadeCodecTypeSpec_i64,
-                KeyWireType:   thrift.STRING,
-                ValueWireType: thrift.I64,
+    premadeCodecTypeSpec_module_has_bitwise_ops = &thrift.TypeSpec{
+        FullName: "module.has_bitwise_ops",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.has_bitwise_ops",
+                NewFunc:    func() any { return HasBitwiseOps(0) },
             },
     }
-    premadeCodecTypeSpec_list_i64 = &thrift.TypeSpec{
-        FullName: "list<i64>",
-        CodecListSpec:
-            &thrift.CodecListSpec{
-                ElementWireType: thrift.I64,
-                ElementTypeSpec: premadeCodecTypeSpec_i64,
+    premadeCodecTypeSpec_module_is_unscoped = &thrift.TypeSpec{
+        FullName: "module.is_unscoped",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.is_unscoped",
+                NewFunc:    func() any { return IsUnscoped(0) },
             },
     }
 )
@@ -1880,9 +1880,9 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_has_bitwise_ops.FullName] = premadeCodecTypeSpec_module_has_bitwise_ops
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_is_unscoped.FullName] = premadeCodecTypeSpec_module_is_unscoped
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyForwardRefEnum.FullName] = premadeCodecTypeSpec_module_MyForwardRefEnum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TBinary.FullName] = premadeCodecTypeSpec_module_TBinary
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_empty_struct.FullName] = premadeCodecTypeSpec_module_empty_struct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_decorated_struct.FullName] = premadeCodecTypeSpec_module_decorated_struct
@@ -1891,8 +1891,8 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_map_i32_string_1261.FullName] = premadeCodecTypeSpec_module_map_i32_string_1261
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ContainerStruct.FullName] = premadeCodecTypeSpec_module_ContainerStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CppTypeStruct.FullName] = premadeCodecTypeSpec_module_CppTypeStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_VirtualStruct.FullName] = premadeCodecTypeSpec_module_VirtualStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyForwardRefEnum.FullName] = premadeCodecTypeSpec_module_MyForwardRefEnum
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStructWithForwardRefEnum.FullName] = premadeCodecTypeSpec_module_MyStructWithForwardRefEnum
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TrivialNumeric.FullName] = premadeCodecTypeSpec_module_TrivialNumeric
@@ -1906,8 +1906,6 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyDataItem.FullName] = premadeCodecTypeSpec_module_MyDataItem
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Renaming.FullName] = premadeCodecTypeSpec_module_Renaming
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TBinary.FullName] = premadeCodecTypeSpec_module_TBinary
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TBinary_8623.FullName] = premadeCodecTypeSpec_module_TBinary_8623
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SomeListOfTypeMap_2468.FullName] = premadeCodecTypeSpec_module_SomeListOfTypeMap_2468
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AnnotatedTypes.FullName] = premadeCodecTypeSpec_module_AnnotatedTypes
@@ -1937,6 +1935,8 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_UintTypedef.FullName] = premadeCodecTypeSpec_module_UintTypedef
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TypedefStruct.FullName] = premadeCodecTypeSpec_module_TypedefStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithDoubleUnderscores.FullName] = premadeCodecTypeSpec_module_StructWithDoubleUnderscores
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_has_bitwise_ops.FullName] = premadeCodecTypeSpec_module_has_bitwise_ops
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_is_unscoped.FullName] = premadeCodecTypeSpec_module_is_unscoped
     return fbthriftTypeSpecsMap
 }()
 

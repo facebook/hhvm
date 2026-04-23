@@ -14,6 +14,20 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
+            },
+    }
     premadeCodecTypeSpec_module_FooStreamEx = &thrift.TypeSpec{
         FullName: "module.FooStreamEx",
         CodecStructSpec:
@@ -39,20 +53,6 @@ var (
                 ScopedName: "module.FooEx2",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewFooEx2() },
-            },
-    }
-    premadeCodecTypeSpec_void = &thrift.TypeSpec{
-        FullName: "void",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
-            },
-    }
-    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
-        FullName: "i32",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
             },
     }
 )
@@ -816,11 +816,11 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooStreamEx.FullName] = premadeCodecTypeSpec_module_FooStreamEx
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooEx.FullName] = premadeCodecTypeSpec_module_FooEx
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooEx2.FullName] = premadeCodecTypeSpec_module_FooEx2
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     return fbthriftTypeSpecsMap
 }()
 

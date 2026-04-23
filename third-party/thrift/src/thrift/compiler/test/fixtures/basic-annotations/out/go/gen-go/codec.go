@@ -14,12 +14,20 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module_MyEnum = &thrift.TypeSpec{
-        FullName: "module.MyEnum",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.MyEnum",
-                NewFunc:    func() any { return MyEnum(0) },
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
+    premadeCodecTypeSpec_module_MyException = &thrift.TypeSpec{
+        FullName: "module.MyException",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.MyException",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewMyException() },
             },
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
@@ -27,6 +35,27 @@ var (
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
                 PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
+    }
+    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
+            },
+    }
+    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
+            },
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
             },
     }
     premadeCodecTypeSpec_module_MyStructNestedAnnotation = &thrift.TypeSpec{
@@ -47,11 +76,12 @@ var (
                 NewFunc:    func() thrift.Struct { return NewMyUnion() },
             },
     }
-    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
-        FullName: "i64",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
+    premadeCodecTypeSpec_module_MyEnum = &thrift.TypeSpec{
+        FullName: "module.MyEnum",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.MyEnum",
+                NewFunc:    func() any { return MyEnum(0) },
             },
     }
     premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
@@ -89,15 +119,6 @@ var (
                 NewFunc:    func() thrift.Struct { return NewSecretStruct() },
             },
     }
-    premadeCodecTypeSpec_module_MyException = &thrift.TypeSpec{
-        FullName: "module.MyException",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.MyException",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewMyException() },
-            },
-    }
     premadeCodecTypeSpec_module_AwesomeStruct = &thrift.TypeSpec{
         FullName: "module.AwesomeStruct",
         CodecTypedefSpec:
@@ -114,27 +135,6 @@ var (
                 ScopedName:         "module.FantasticStruct",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyStruct,
                 NewFunc:            func() any { return NewBrilliantStruct() },
-            },
-    }
-    premadeCodecTypeSpec_void = &thrift.TypeSpec{
-        FullName: "void",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
-            },
-    }
-    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
-        FullName: "bool",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
-            },
-    }
-    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
-        FullName: "i32",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
             },
     }
 )
@@ -853,20 +853,20 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyEnum.FullName] = premadeCodecTypeSpec_module_MyEnum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyException.FullName] = premadeCodecTypeSpec_module_MyException
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStructNestedAnnotation.FullName] = premadeCodecTypeSpec_module_MyStructNestedAnnotation
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyUnion.FullName] = premadeCodecTypeSpec_module_MyUnion
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyEnum.FullName] = premadeCodecTypeSpec_module_MyEnum
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_list_string_6884.FullName] = premadeCodecTypeSpec_module_list_string_6884
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SecretStruct.FullName] = premadeCodecTypeSpec_module_SecretStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyException.FullName] = premadeCodecTypeSpec_module_MyException
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AwesomeStruct.FullName] = premadeCodecTypeSpec_module_AwesomeStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FantasticStruct.FullName] = premadeCodecTypeSpec_module_FantasticStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     return fbthriftTypeSpecsMap
 }()
 

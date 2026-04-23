@@ -19,13 +19,6 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_Animal =
-        &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.Animal",
-                },
-        }
     premadeThriftType_double =
         &metadata.ThriftType{
             TPrimitive:
@@ -78,6 +71,13 @@ var (
             TSet:
                 &metadata.ThriftSetType{
                     ValueType: premadeThriftType_module_PersonID,
+                },
+        }
+    premadeThriftType_module_Animal =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.Animal",
                 },
         }
     premadeThriftType_map_module_Animal_string =
@@ -245,7 +245,6 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["module.Animal"] = premadeThriftType_module_Animal
     fbthriftThriftTypesMap["double"] = premadeThriftType_double
     fbthriftThriftTypesMap["module.Color"] = premadeThriftType_module_Color
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
@@ -254,6 +253,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     fbthriftThriftTypesMap["module.PersonID"] = premadeThriftType_module_PersonID
     fbthriftThriftTypesMap["i16"] = premadeThriftType_i16
+    fbthriftThriftTypesMap["module.Animal"] = premadeThriftType_module_Animal
     fbthriftThriftTypesMap["module.Person"] = premadeThriftType_module_Person
     return fbthriftThriftTypesMap
 }()

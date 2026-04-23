@@ -19,13 +19,6 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_terse_write_MyEnum =
-        &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "terse_write.MyEnum",
-                },
-        }
     premadeThriftType_terse_write_MyStruct =
         &metadata.ThriftType{
             TStruct:
@@ -77,6 +70,13 @@ var (
         &metadata.ThriftType{
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+        }
+    premadeThriftType_terse_write_MyEnum =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "terse_write.MyEnum",
+                },
         }
     premadeThriftType_list_i16 =
         &metadata.ThriftType{
@@ -648,7 +648,6 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["terse_write.MyEnum"] = premadeThriftType_terse_write_MyEnum
     fbthriftThriftTypesMap["terse_write.MyStruct"] = premadeThriftType_terse_write_MyStruct
     fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
     fbthriftThriftTypesMap["byte"] = premadeThriftType_byte
@@ -659,6 +658,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["double"] = premadeThriftType_double
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
     fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
+    fbthriftThriftTypesMap["terse_write.MyEnum"] = premadeThriftType_terse_write_MyEnum
     fbthriftThriftTypesMap["terse_write.MyUnion"] = premadeThriftType_terse_write_MyUnion
     fbthriftThriftTypesMap["terse_write.MyStructWithCustomDefault"] = premadeThriftType_terse_write_MyStructWithCustomDefault
     fbthriftThriftTypesMap["terse_write.StructLevelTerseStruct"] = premadeThriftType_terse_write_StructLevelTerseStruct

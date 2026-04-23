@@ -18,6 +18,15 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
+    premadeCodecTypeSpec_module1_Automobile = &thrift.TypeSpec{
+        FullName: "module1.Automobile",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module1.Automobile",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewAutomobile() },
+            },
+    }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
         FullName: "string",
         CodecPrimitiveSpec:
@@ -32,6 +41,15 @@ var (
                 ScopedName:         "module1.Plate",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_string,
                 NewFunc:            func() any { return NewPlate() },
+            },
+    }
+    premadeCodecTypeSpec_module1_Car = &thrift.TypeSpec{
+        FullName: "module1.Car",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module1.Car",
+                UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
+                NewFunc:            func() any { return NewCar() },
             },
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
@@ -103,15 +121,6 @@ var (
                 ValueWireType: thrift.STRUCT,
             },
     }
-    premadeCodecTypeSpec_module1_Automobile = &thrift.TypeSpec{
-        FullName: "module1.Automobile",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module1.Automobile",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewAutomobile() },
-            },
-    }
     premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
         FullName: "i64",
         CodecPrimitiveSpec:
@@ -145,15 +154,6 @@ var (
                 ScopedName: "module1.MapContainer",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewMapContainer() },
-            },
-    }
-    premadeCodecTypeSpec_module1_Car = &thrift.TypeSpec{
-        FullName: "module1.Car",
-        CodecTypedefSpec:
-            &thrift.CodecTypedefSpec{
-                ScopedName:         "module1.Car",
-                UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
-                NewFunc:            func() any { return NewCar() },
             },
     }
     premadeCodecTypeSpec_module1_Pair = &thrift.TypeSpec{
@@ -579,18 +579,18 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Automobile.FullName] = premadeCodecTypeSpec_module1_Automobile
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Plate.FullName] = premadeCodecTypeSpec_module1_Plate
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Car.FullName] = premadeCodecTypeSpec_module1_Car
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Year.FullName] = premadeCodecTypeSpec_module1_Year
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Drivers.FullName] = premadeCodecTypeSpec_module1_Drivers
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Accessory.FullName] = premadeCodecTypeSpec_module1_Accessory
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_PartName.FullName] = premadeCodecTypeSpec_module1_PartName
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Automobile.FullName] = premadeCodecTypeSpec_module1_Automobile
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_MapKey.FullName] = premadeCodecTypeSpec_module1_MapKey
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_MapContainer.FullName] = premadeCodecTypeSpec_module1_MapContainer
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Car.FullName] = premadeCodecTypeSpec_module1_Car
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Pair.FullName] = premadeCodecTypeSpec_module1_Pair
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Collection.FullName] = premadeCodecTypeSpec_module1_Collection
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_State.FullName] = premadeCodecTypeSpec_module1_State

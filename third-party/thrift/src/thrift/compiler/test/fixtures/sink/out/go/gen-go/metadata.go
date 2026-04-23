@@ -19,16 +19,16 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string =
+    premadeThriftType_void =
         &metadata.ThriftType{
             TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         }
-    premadeThriftType_module_InitialResponse =
+    premadeThriftType_module_SinkPayload =
         &metadata.ThriftType{
             TStruct:
                 &metadata.ThriftStructType{
-                    Name: "module.InitialResponse",
+                    Name: "module.SinkPayload",
                 },
         }
     premadeThriftType_module_FinalResponse =
@@ -38,18 +38,11 @@ var (
                     Name: "module.FinalResponse",
                 },
         }
-    premadeThriftType_module_SinkPayload =
+    premadeThriftType_module_InitialResponse =
         &metadata.ThriftType{
             TStruct:
                 &metadata.ThriftStructType{
-                    Name: "module.SinkPayload",
-                },
-        }
-    premadeThriftType_module_CompatibleWithKeywordSink =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.CompatibleWithKeywordSink",
+                    Name: "module.InitialResponse",
                 },
         }
     premadeThriftType_module_InitialException =
@@ -66,11 +59,6 @@ var (
                     Name: "module.SinkException1",
                 },
         }
-    premadeThriftType_i64 =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-        }
     premadeThriftType_module_SinkException2 =
         &metadata.ThriftType{
             TStruct:
@@ -78,10 +66,22 @@ var (
                     Name: "module.SinkException2",
                 },
         }
-    premadeThriftType_void =
+    premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_module_CompatibleWithKeywordSink =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.CompatibleWithKeywordSink",
+                },
+        }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
 )
 
@@ -179,16 +179,16 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["string"] = premadeThriftType_string
-    fbthriftThriftTypesMap["module.InitialResponse"] = premadeThriftType_module_InitialResponse
-    fbthriftThriftTypesMap["module.FinalResponse"] = premadeThriftType_module_FinalResponse
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
     fbthriftThriftTypesMap["module.SinkPayload"] = premadeThriftType_module_SinkPayload
-    fbthriftThriftTypesMap["module.CompatibleWithKeywordSink"] = premadeThriftType_module_CompatibleWithKeywordSink
+    fbthriftThriftTypesMap["module.FinalResponse"] = premadeThriftType_module_FinalResponse
+    fbthriftThriftTypesMap["module.InitialResponse"] = premadeThriftType_module_InitialResponse
     fbthriftThriftTypesMap["module.InitialException"] = premadeThriftType_module_InitialException
     fbthriftThriftTypesMap["module.SinkException1"] = premadeThriftType_module_SinkException1
-    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     fbthriftThriftTypesMap["module.SinkException2"] = premadeThriftType_module_SinkException2
-    fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module.CompatibleWithKeywordSink"] = premadeThriftType_module_CompatibleWithKeywordSink
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     return fbthriftThriftTypesMap
 }()
 

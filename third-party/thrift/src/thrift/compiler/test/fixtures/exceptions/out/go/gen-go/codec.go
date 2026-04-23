@@ -14,11 +14,20 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
+    premadeCodecTypeSpec_module_Banal = &thrift.TypeSpec{
+        FullName: "module.Banal",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.Banal",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewBanal() },
             },
     }
     premadeCodecTypeSpec_module_Fiery = &thrift.TypeSpec{
@@ -37,6 +46,13 @@ var (
                 ScopedName: "module.Serious",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewSerious() },
+            },
+    }
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
             },
     }
     premadeCodecTypeSpec_module_ComplexFieldNames = &thrift.TypeSpec{
@@ -80,22 +96,6 @@ var (
                 ScopedName: "module.ExceptionWithStructuredAnnotation",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewExceptionWithStructuredAnnotation() },
-            },
-    }
-    premadeCodecTypeSpec_module_Banal = &thrift.TypeSpec{
-        FullName: "module.Banal",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.Banal",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewBanal() },
-            },
-    }
-    premadeCodecTypeSpec_void = &thrift.TypeSpec{
-        FullName: "void",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
             },
     }
 )
@@ -499,16 +499,16 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Banal.FullName] = premadeCodecTypeSpec_module_Banal
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Fiery.FullName] = premadeCodecTypeSpec_module_Fiery
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Serious.FullName] = premadeCodecTypeSpec_module_Serious
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ComplexFieldNames.FullName] = premadeCodecTypeSpec_module_ComplexFieldNames
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CustomFieldNames.FullName] = premadeCodecTypeSpec_module_CustomFieldNames
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ExceptionWithPrimitiveField.FullName] = premadeCodecTypeSpec_module_ExceptionWithPrimitiveField
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation.FullName] = premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Banal.FullName] = premadeCodecTypeSpec_module_Banal
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
     return fbthriftTypeSpecsMap
 }()
 

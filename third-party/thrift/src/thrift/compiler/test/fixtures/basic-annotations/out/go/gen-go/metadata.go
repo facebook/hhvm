@@ -19,17 +19,37 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_MyEnum =
+    premadeThriftType_void =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.MyEnum",
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_module_MyException =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyException",
                 },
         }
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_bool =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+        }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_module_MyStructNestedAnnotation =
         &metadata.ThriftType{
@@ -45,10 +65,12 @@ var (
                     Name: "module.MyUnion",
                 },
         }
-    premadeThriftType_i64 =
+    premadeThriftType_module_MyEnum =
         &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyEnum",
+                },
         }
     premadeThriftType_list_string =
         &metadata.ThriftType{
@@ -92,13 +114,6 @@ var (
                     Name: "module.SecretStruct",
                 },
         }
-    premadeThriftType_module_MyException =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.MyException",
-                },
-        }
     premadeThriftType_module_AwesomeStruct =
         &metadata.ThriftType{
             TTypedef:
@@ -140,21 +155,6 @@ var (
                         },
                     },
                 },
-        }
-    premadeThriftType_void =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-        }
-    premadeThriftType_bool =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-        }
-    premadeThriftType_i32 =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
 )
 
@@ -390,20 +390,20 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["module.MyEnum"] = premadeThriftType_module_MyEnum
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["module.MyException"] = premadeThriftType_module_MyException
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["module.MyStructNestedAnnotation"] = premadeThriftType_module_MyStructNestedAnnotation
     fbthriftThriftTypesMap["module.MyUnion"] = premadeThriftType_module_MyUnion
-    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["module.MyEnum"] = premadeThriftType_module_MyEnum
     fbthriftThriftTypesMap["module.list_string_6884"] = premadeThriftType_module_list_string_6884
     fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
     fbthriftThriftTypesMap["module.SecretStruct"] = premadeThriftType_module_SecretStruct
-    fbthriftThriftTypesMap["module.MyException"] = premadeThriftType_module_MyException
     fbthriftThriftTypesMap["module.AwesomeStruct"] = premadeThriftType_module_AwesomeStruct
     fbthriftThriftTypesMap["module.FantasticStruct"] = premadeThriftType_module_FantasticStruct
-    fbthriftThriftTypesMap["void"] = premadeThriftType_void
-    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
-    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     return fbthriftThriftTypesMap
 }()
 

@@ -28,11 +28,23 @@ var (
                     Name: "module.Metasyntactic",
                 },
         }
-    premadeThriftType_module_MyEnum1 =
+    premadeThriftType_i32 =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.MyEnum1",
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_set_i32 =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_module_SomeStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.SomeStruct",
                 },
         }
     premadeThriftType_module_MyEnum2 =
@@ -47,6 +59,28 @@ var (
             TEnum:
                 &metadata.ThriftEnumType{
                     Name: "module.MyEnum3",
+                },
+        }
+    premadeThriftType_module_MyEnum1 =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyEnum1",
+                },
+        }
+    premadeThriftType_module_MyStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.MyStruct",
+                },
+        }
+    premadeThriftType_module_IncludedEnumAlias =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.IncludedEnumAlias",
+                    UnderlyingType: includedEnum.GetMetadataThriftType("included_enum.IncludedEnum"),
                 },
         }
     premadeThriftType_module_MyEnum4 =
@@ -68,40 +102,6 @@ var (
             TEnum:
                 &metadata.ThriftEnumType{
                     Name: "module.MyBitmaskEnum2",
-                },
-        }
-    premadeThriftType_i32 =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
-        }
-    premadeThriftType_set_i32 =
-        &metadata.ThriftType{
-            TSet:
-                &metadata.ThriftSetType{
-                    ValueType: premadeThriftType_i32,
-                },
-        }
-    premadeThriftType_module_SomeStruct =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.SomeStruct",
-                },
-        }
-    premadeThriftType_module_MyStruct =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.MyStruct",
-                },
-        }
-    premadeThriftType_module_IncludedEnumAlias =
-        &metadata.ThriftType{
-            TTypedef:
-                &metadata.ThriftTypedefType{
-                    Name:           "module.IncludedEnumAlias",
-                    UnderlyingType: includedEnum.GetMetadataThriftType("included_enum.IncludedEnum"),
                 },
         }
 )
@@ -175,16 +175,16 @@ var (
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
     fbthriftThriftTypesMap["module.Metasyntactic"] = premadeThriftType_module_Metasyntactic
-    fbthriftThriftTypesMap["module.MyEnum1"] = premadeThriftType_module_MyEnum1
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module.SomeStruct"] = premadeThriftType_module_SomeStruct
     fbthriftThriftTypesMap["module.MyEnum2"] = premadeThriftType_module_MyEnum2
     fbthriftThriftTypesMap["module.MyEnum3"] = premadeThriftType_module_MyEnum3
+    fbthriftThriftTypesMap["module.MyEnum1"] = premadeThriftType_module_MyEnum1
+    fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
+    fbthriftThriftTypesMap["module.IncludedEnumAlias"] = premadeThriftType_module_IncludedEnumAlias
     fbthriftThriftTypesMap["module.MyEnum4"] = premadeThriftType_module_MyEnum4
     fbthriftThriftTypesMap["module.MyBitmaskEnum1"] = premadeThriftType_module_MyBitmaskEnum1
     fbthriftThriftTypesMap["module.MyBitmaskEnum2"] = premadeThriftType_module_MyBitmaskEnum2
-    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
-    fbthriftThriftTypesMap["module.SomeStruct"] = premadeThriftType_module_SomeStruct
-    fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
-    fbthriftThriftTypesMap["module.IncludedEnumAlias"] = premadeThriftType_module_IncludedEnumAlias
     return fbthriftThriftTypesMap
 }()
 

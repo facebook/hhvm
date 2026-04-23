@@ -18,6 +18,13 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
     premadeCodecTypeSpec_service_IncludesIncluded = &thrift.TypeSpec{
         FullName: "service.IncludesIncluded",
         CodecTypedefSpec:
@@ -34,13 +41,6 @@ var (
                 ScopedName:         "service.IncludesTransitiveFoo",
                 UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.TransitiveFoo"),
                 NewFunc:            func() any { return NewIncludesTransitiveFoo() },
-            },
-    }
-    premadeCodecTypeSpec_void = &thrift.TypeSpec{
-        FullName: "void",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
             },
     }
 )
@@ -147,9 +147,9 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_service_IncludesIncluded.FullName] = premadeCodecTypeSpec_service_IncludesIncluded
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_service_IncludesTransitiveFoo.FullName] = premadeCodecTypeSpec_service_IncludesTransitiveFoo
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
     return fbthriftTypeSpecsMap
 }()
 

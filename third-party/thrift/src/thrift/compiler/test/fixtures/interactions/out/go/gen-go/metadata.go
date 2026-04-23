@@ -21,10 +21,15 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string =
+    premadeThriftType_void =
         &metadata.ThriftType{
             TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_module_ShouldBeBoxed =
         &metadata.ThriftType{
@@ -40,15 +45,27 @@ var (
                     Name: "module.CustomException",
                 },
         }
-    premadeThriftType_void =
+    premadeThriftType_bool =
         &metadata.ThriftType{
             TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
         }
-    premadeThriftType_i32 =
+    premadeThriftType_set_i32 =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_i32,
+                },
+        }
+    premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+        }
+    premadeThriftType_binary =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
         }
 )
 
@@ -83,11 +100,13 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["string"] = premadeThriftType_string
-    fbthriftThriftTypesMap["module.ShouldBeBoxed"] = premadeThriftType_module_ShouldBeBoxed
-    fbthriftThriftTypesMap["module.CustomException"] = premadeThriftType_module_CustomException
     fbthriftThriftTypesMap["void"] = premadeThriftType_void
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module.ShouldBeBoxed"] = premadeThriftType_module_ShouldBeBoxed
+    fbthriftThriftTypesMap["module.CustomException"] = premadeThriftType_module_CustomException
+    fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
     return fbthriftThriftTypesMap
 }()
 

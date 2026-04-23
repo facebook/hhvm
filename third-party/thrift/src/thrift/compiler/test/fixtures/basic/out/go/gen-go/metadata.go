@@ -19,29 +19,54 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_MyEnum =
+    premadeThriftType_void =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.MyEnum",
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_module_ReservedKeyword =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.ReservedKeyword",
                 },
         }
-    premadeThriftType_module_HackEnum =
+    premadeThriftType_i32 =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.HackEnum",
-                },
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_i64 =
         &metadata.ThriftType{
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
-    premadeThriftType_string =
+    premadeThriftType_bool =
         &metadata.ThriftType{
             TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
+        }
+    premadeThriftType_float =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
+        }
+    premadeThriftType_set_float =
+        &metadata.ThriftType{
+            TSet:
+                &metadata.ThriftSetType{
+                    ValueType: premadeThriftType_float,
+                },
+        }
+    premadeThriftType_binary =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
         }
     premadeThriftType_module_MyDataItem =
         &metadata.ThriftType{
@@ -67,21 +92,11 @@ var (
                     },
                 },
         }
-    premadeThriftType_bool =
+    premadeThriftType_module_MyEnum =
         &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
-        }
-    premadeThriftType_float =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_FLOAT_TYPE),
-        }
-    premadeThriftType_set_float =
-        &metadata.ThriftType{
-            TSet:
-                &metadata.ThriftSetType{
-                    ValueType: premadeThriftType_float,
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyEnum",
                 },
         }
     premadeThriftType_module_MyStruct =
@@ -90,11 +105,6 @@ var (
                 &metadata.ThriftStructType{
                     Name: "module.MyStruct",
                 },
-        }
-    premadeThriftType_i32 =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_list_i32 =
         &metadata.ThriftType{
@@ -149,13 +159,6 @@ var (
                     Name: "module.MyUnion",
                 },
         }
-    premadeThriftType_module_ReservedKeyword =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.ReservedKeyword",
-                },
-        }
     premadeThriftType_module_UnionToBeRenamed =
         &metadata.ThriftType{
             TUnion:
@@ -177,15 +180,12 @@ var (
                     Name: "module.MyExceptionWithMessage",
                 },
         }
-    premadeThriftType_void =
+    premadeThriftType_module_HackEnum =
         &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-        }
-    premadeThriftType_binary =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.HackEnum",
+                },
         }
 )
 
@@ -431,25 +431,25 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["module.MyEnum"] = premadeThriftType_module_MyEnum
-    fbthriftThriftTypesMap["module.HackEnum"] = premadeThriftType_module_HackEnum
-    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["module.ReservedKeyword"] = premadeThriftType_module_ReservedKeyword
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
-    fbthriftThriftTypesMap["module.MyDataItem"] = premadeThriftType_module_MyDataItem
-    fbthriftThriftTypesMap["module.MyDataItemAlias"] = premadeThriftType_module_MyDataItemAlias
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
     fbthriftThriftTypesMap["float"] = premadeThriftType_float
+    fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
+    fbthriftThriftTypesMap["module.MyDataItem"] = premadeThriftType_module_MyDataItem
+    fbthriftThriftTypesMap["module.MyDataItemAlias"] = premadeThriftType_module_MyDataItemAlias
+    fbthriftThriftTypesMap["module.MyEnum"] = premadeThriftType_module_MyEnum
     fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
-    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["module.Containers"] = premadeThriftType_module_Containers
     fbthriftThriftTypesMap["module.MyEnumAlias"] = premadeThriftType_module_MyEnumAlias
     fbthriftThriftTypesMap["module.MyUnion"] = premadeThriftType_module_MyUnion
-    fbthriftThriftTypesMap["module.ReservedKeyword"] = premadeThriftType_module_ReservedKeyword
     fbthriftThriftTypesMap["module.UnionToBeRenamed"] = premadeThriftType_module_UnionToBeRenamed
     fbthriftThriftTypesMap["module.MyException"] = premadeThriftType_module_MyException
     fbthriftThriftTypesMap["module.MyExceptionWithMessage"] = premadeThriftType_module_MyExceptionWithMessage
-    fbthriftThriftTypesMap["void"] = premadeThriftType_void
-    fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
+    fbthriftThriftTypesMap["module.HackEnum"] = premadeThriftType_module_HackEnum
     return fbthriftThriftTypesMap
 }()
 

@@ -24,54 +24,6 @@ var (
                 NewFunc:    func() any { return Metasyntactic(0) },
             },
     }
-    premadeCodecTypeSpec_module_MyEnum1 = &thrift.TypeSpec{
-        FullName: "module.MyEnum1",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.MyEnum1",
-                NewFunc:    func() any { return MyEnum1(0) },
-            },
-    }
-    premadeCodecTypeSpec_module_MyEnum2 = &thrift.TypeSpec{
-        FullName: "module.MyEnum2",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.MyEnum2",
-                NewFunc:    func() any { return MyEnum2(0) },
-            },
-    }
-    premadeCodecTypeSpec_module_MyEnum3 = &thrift.TypeSpec{
-        FullName: "module.MyEnum3",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.MyEnum3",
-                NewFunc:    func() any { return MyEnum3(0) },
-            },
-    }
-    premadeCodecTypeSpec_module_MyEnum4 = &thrift.TypeSpec{
-        FullName: "module.MyEnum4",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.MyEnum4",
-                NewFunc:    func() any { return MyEnum4(0) },
-            },
-    }
-    premadeCodecTypeSpec_module_MyBitmaskEnum1 = &thrift.TypeSpec{
-        FullName: "module.MyBitmaskEnum1",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.MyBitmaskEnum1",
-                NewFunc:    func() any { return MyBitmaskEnum1(0) },
-            },
-    }
-    premadeCodecTypeSpec_module_MyBitmaskEnum2 = &thrift.TypeSpec{
-        FullName: "module.MyBitmaskEnum2",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.MyBitmaskEnum2",
-                NewFunc:    func() any { return MyBitmaskEnum2(0) },
-            },
-    }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
         FullName: "i32",
         CodecPrimitiveSpec:
@@ -96,6 +48,30 @@ var (
                 NewFunc:    func() thrift.Struct { return NewSomeStruct() },
             },
     }
+    premadeCodecTypeSpec_module_MyEnum2 = &thrift.TypeSpec{
+        FullName: "module.MyEnum2",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.MyEnum2",
+                NewFunc:    func() any { return MyEnum2(0) },
+            },
+    }
+    premadeCodecTypeSpec_module_MyEnum3 = &thrift.TypeSpec{
+        FullName: "module.MyEnum3",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.MyEnum3",
+                NewFunc:    func() any { return MyEnum3(0) },
+            },
+    }
+    premadeCodecTypeSpec_module_MyEnum1 = &thrift.TypeSpec{
+        FullName: "module.MyEnum1",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.MyEnum1",
+                NewFunc:    func() any { return MyEnum1(0) },
+            },
+    }
     premadeCodecTypeSpec_module_MyStruct = &thrift.TypeSpec{
         FullName: "module.MyStruct",
         CodecStructSpec:
@@ -112,6 +88,30 @@ var (
                 ScopedName:         "module.IncludedEnumAlias",
                 UnderlyingTypeSpec: includedEnum.GetCodecTypeSpec("included_enum.IncludedEnum"),
                 NewFunc:            func() any { return NewIncludedEnumAlias() },
+            },
+    }
+    premadeCodecTypeSpec_module_MyEnum4 = &thrift.TypeSpec{
+        FullName: "module.MyEnum4",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.MyEnum4",
+                NewFunc:    func() any { return MyEnum4(0) },
+            },
+    }
+    premadeCodecTypeSpec_module_MyBitmaskEnum1 = &thrift.TypeSpec{
+        FullName: "module.MyBitmaskEnum1",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.MyBitmaskEnum1",
+                NewFunc:    func() any { return MyBitmaskEnum1(0) },
+            },
+    }
+    premadeCodecTypeSpec_module_MyBitmaskEnum2 = &thrift.TypeSpec{
+        FullName: "module.MyBitmaskEnum2",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.MyBitmaskEnum2",
+                NewFunc:    func() any { return MyBitmaskEnum2(0) },
             },
     }
 )
@@ -237,16 +237,16 @@ var (
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Metasyntactic.FullName] = premadeCodecTypeSpec_module_Metasyntactic
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyEnum1.FullName] = premadeCodecTypeSpec_module_MyEnum1
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SomeStruct.FullName] = premadeCodecTypeSpec_module_SomeStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyEnum2.FullName] = premadeCodecTypeSpec_module_MyEnum2
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyEnum3.FullName] = premadeCodecTypeSpec_module_MyEnum3
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyEnum1.FullName] = premadeCodecTypeSpec_module_MyEnum1
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncludedEnumAlias.FullName] = premadeCodecTypeSpec_module_IncludedEnumAlias
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyEnum4.FullName] = premadeCodecTypeSpec_module_MyEnum4
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyBitmaskEnum1.FullName] = premadeCodecTypeSpec_module_MyBitmaskEnum1
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyBitmaskEnum2.FullName] = premadeCodecTypeSpec_module_MyBitmaskEnum2
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SomeStruct.FullName] = premadeCodecTypeSpec_module_SomeStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncludedEnumAlias.FullName] = premadeCodecTypeSpec_module_IncludedEnumAlias
     return fbthriftTypeSpecsMap
 }()
 

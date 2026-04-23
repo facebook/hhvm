@@ -19,18 +19,106 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_Color =
+    premadeThriftType_i32 =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.Color",
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
+    premadeThriftType_module_MyI32 =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.MyI32",
+                    UnderlyingType: premadeThriftType_i32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "hack.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("\\Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("::my::Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "rust.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("::my::Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "java.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "adapterClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("com.facebook.thrift.my.Adapter1"),
+                                    },
+                                "typeClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("com.facebook.thrift.my.AdaptedI32_1"),
+                                    },
+                            },
+                        },
+                    },
                 },
         }
-    premadeThriftType_module_ThriftAdaptedEnum =
+    premadeThriftType_module_MyI32_4873 =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.ThriftAdaptedEnum",
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.MyI32_4873",
+                    UnderlyingType: premadeThriftType_module_MyI32,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "python.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("my.Adapter1"),
+                                    },
+                                "typeHint":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("my.AdaptedMyI32[]"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
     premadeThriftType_string =
@@ -38,17 +126,180 @@ var (
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
+    premadeThriftType_module_StringWithAdapter =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.StringWithAdapter",
+                    UnderlyingType: premadeThriftType_string,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "python.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("my.Adapter1"),
+                                    },
+                                "typeHint":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("my.AdaptedString[]"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "hack.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("\\Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("::my::Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "rust.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("::my::Adapter1"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "java.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "adapterClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("com.facebook.thrift.my.Adapter1"),
+                                    },
+                                "typeClassName":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("com.facebook.thrift.my.AdaptedString_1"),
+                                    },
+                            },
+                        },
+                    },
+                },
+        }
+    premadeThriftType_module_StringWithAdapter_7208 =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.StringWithAdapter_7208",
+                    UnderlyingType: premadeThriftType_module_StringWithAdapter,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "python.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("my.Adapter2"),
+                                    },
+                                "typeHint":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("my.AdaptedStringWithAdapter[]"),
+                                    },
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
+                },
+        }
+    premadeThriftType_module_StringWithCppAdapter =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.StringWithCppAdapter",
+                    UnderlyingType: premadeThriftType_string,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "cpp.Adapter",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                                "name":
+                                    &metadata.ThriftConstValue{
+                                        CvString: new("::my::Adapter2"),
+                                    },
+                            },
+                        },
+                    },
+                },
+        }
+    premadeThriftType_module_Foo =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.Foo",
+                },
+        }
+    premadeThriftType_module_CountingStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.CountingStruct",
+                },
+        }
+    premadeThriftType_module_HeapAllocated =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.HeapAllocated",
+                },
+        }
+    premadeThriftType_module_Color =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.Color",
+                },
+        }
     premadeThriftType_module_MyAnnotation =
         &metadata.ThriftType{
             TStruct:
                 &metadata.ThriftStructType{
                     Name: "module.MyAnnotation",
                 },
-        }
-    premadeThriftType_i32 =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
     premadeThriftType_module_i32_5137 =
         &metadata.ThriftType{
@@ -163,86 +414,6 @@ var (
                                 "typeClassName":
                                     &metadata.ThriftConstValue{
                                         CvString: new("com.facebook.thrift.my.AdaptedSet_2"),
-                                    },
-                            },
-                        },
-                    },
-                },
-        }
-    premadeThriftType_module_StringWithAdapter =
-        &metadata.ThriftType{
-            TTypedef:
-                &metadata.ThriftTypedefType{
-                    Name:           "module.StringWithAdapter",
-                    UnderlyingType: premadeThriftType_string,
-                    StructuredAnnotations: []*metadata.ThriftConstStruct{
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "python.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("my.Adapter1"),
-                                    },
-                                "typeHint":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("my.AdaptedString[]"),
-                                    },
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "thrift.AllowLegacyTypedefUri",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "hack.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("\\Adapter1"),
-                                    },
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "cpp.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("::my::Adapter1"),
-                                    },
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "rust.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("::my::Adapter1"),
-                                    },
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "java.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "adapterClassName":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("com.facebook.thrift.my.Adapter1"),
-                                    },
-                                "typeClassName":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("com.facebook.thrift.my.AdaptedString_1"),
                                     },
                             },
                         },
@@ -579,13 +750,6 @@ var (
             TList:
                 &metadata.ThriftListType{
                     ValueType: premadeThriftType_list_map_i32_i32,
-                },
-        }
-    premadeThriftType_module_Foo =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.Foo",
                 },
         }
     premadeThriftType_module_Baz =
@@ -1258,6 +1422,13 @@ var (
                     ValueType: premadeThriftType_i64,
                 },
         }
+    premadeThriftType_module_ThriftAdaptedEnum =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.ThriftAdaptedEnum",
+                },
+        }
     premadeThriftType_module_AdaptedEnum =
         &metadata.ThriftType{
             TTypedef:
@@ -1464,13 +1635,6 @@ var (
                     Name: "module.SameNamespaceStruct",
                 },
         }
-    premadeThriftType_module_HeapAllocated =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.HeapAllocated",
-                },
-        }
     premadeThriftType_module_MoveOnly =
         &metadata.ThriftType{
             TStruct:
@@ -1527,13 +1691,6 @@ var (
                     },
                 },
         }
-    premadeThriftType_module_CountingStruct =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.CountingStruct",
-                },
-        }
     premadeThriftType_module_Person =
         &metadata.ThriftType{
             TStruct:
@@ -1553,71 +1710,6 @@ var (
             TStruct:
                 &metadata.ThriftStructType{
                     Name: "module.RenamedStructWithStructAdapterAndFieldAdapter",
-                },
-        }
-    premadeThriftType_module_MyI32 =
-        &metadata.ThriftType{
-            TTypedef:
-                &metadata.ThriftTypedefType{
-                    Name:           "module.MyI32",
-                    UnderlyingType: premadeThriftType_i32,
-                    StructuredAnnotations: []*metadata.ThriftConstStruct{
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "thrift.AllowLegacyTypedefUri",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "hack.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("\\Adapter1"),
-                                    },
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "cpp.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("::my::Adapter1"),
-                                    },
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "rust.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("::my::Adapter1"),
-                                    },
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "java.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "adapterClassName":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("com.facebook.thrift.my.Adapter1"),
-                                    },
-                                "typeClassName":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("com.facebook.thrift.my.AdaptedI32_1"),
-                                    },
-                            },
-                        },
-                    },
                 },
         }
     premadeThriftType_module_StructWithAdapter =
@@ -1723,98 +1815,6 @@ var (
                                     &metadata.ThriftConstValue{
                                         CvString: new("::my::Adapter2"),
                                     },
-                            },
-                        },
-                    },
-                },
-        }
-    premadeThriftType_module_StringWithCppAdapter =
-        &metadata.ThriftType{
-            TTypedef:
-                &metadata.ThriftTypedefType{
-                    Name:           "module.StringWithCppAdapter",
-                    UnderlyingType: premadeThriftType_string,
-                    StructuredAnnotations: []*metadata.ThriftConstStruct{
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "thrift.AllowLegacyTypedefUri",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "cpp.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("::my::Adapter2"),
-                                    },
-                            },
-                        },
-                    },
-                },
-        }
-    premadeThriftType_module_MyI32_4873 =
-        &metadata.ThriftType{
-            TTypedef:
-                &metadata.ThriftTypedefType{
-                    Name:           "module.MyI32_4873",
-                    UnderlyingType: premadeThriftType_module_MyI32,
-                    StructuredAnnotations: []*metadata.ThriftConstStruct{
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "python.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("my.Adapter1"),
-                                    },
-                                "typeHint":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("my.AdaptedMyI32[]"),
-                                    },
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "thrift.AllowLegacyTypedefUri",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                            },
-                        },
-                    },
-                },
-        }
-    premadeThriftType_module_StringWithAdapter_7208 =
-        &metadata.ThriftType{
-            TTypedef:
-                &metadata.ThriftTypedefType{
-                    Name:           "module.StringWithAdapter_7208",
-                    UnderlyingType: premadeThriftType_module_StringWithAdapter,
-                    StructuredAnnotations: []*metadata.ThriftConstStruct{
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "python.Adapter",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                                "name":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("my.Adapter2"),
-                                    },
-                                "typeHint":
-                                    &metadata.ThriftConstValue{
-                                        CvString: new("my.AdaptedStringWithAdapter[]"),
-                                    },
-                            },
-                        },
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "thrift.AllowLegacyTypedefUri",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
                             },
                         },
                     },
@@ -2970,14 +2970,20 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["module.Color"] = premadeThriftType_module_Color
-    fbthriftThriftTypesMap["module.ThriftAdaptedEnum"] = premadeThriftType_module_ThriftAdaptedEnum
-    fbthriftThriftTypesMap["string"] = premadeThriftType_string
-    fbthriftThriftTypesMap["module.MyAnnotation"] = premadeThriftType_module_MyAnnotation
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["module.MyI32"] = premadeThriftType_module_MyI32
+    fbthriftThriftTypesMap["module.MyI32_4873"] = premadeThriftType_module_MyI32_4873
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["module.StringWithAdapter"] = premadeThriftType_module_StringWithAdapter
+    fbthriftThriftTypesMap["module.StringWithAdapter_7208"] = premadeThriftType_module_StringWithAdapter_7208
+    fbthriftThriftTypesMap["module.StringWithCppAdapter"] = premadeThriftType_module_StringWithCppAdapter
+    fbthriftThriftTypesMap["module.Foo"] = premadeThriftType_module_Foo
+    fbthriftThriftTypesMap["module.CountingStruct"] = premadeThriftType_module_CountingStruct
+    fbthriftThriftTypesMap["module.HeapAllocated"] = premadeThriftType_module_HeapAllocated
+    fbthriftThriftTypesMap["module.Color"] = premadeThriftType_module_Color
+    fbthriftThriftTypesMap["module.MyAnnotation"] = premadeThriftType_module_MyAnnotation
     fbthriftThriftTypesMap["module.i32_5137"] = premadeThriftType_module_i32_5137
     fbthriftThriftTypesMap["module.SetWithAdapter"] = premadeThriftType_module_SetWithAdapter
-    fbthriftThriftTypesMap["module.StringWithAdapter"] = premadeThriftType_module_StringWithAdapter
     fbthriftThriftTypesMap["module.ListWithElemAdapter"] = premadeThriftType_module_ListWithElemAdapter
     fbthriftThriftTypesMap["module.ListWithElemAdapter_withAdapter"] = premadeThriftType_module_ListWithElemAdapter_withAdapter
     fbthriftThriftTypesMap["module.ListWithElemAdapter_withAdapter_2312"] = premadeThriftType_module_ListWithElemAdapter_withAdapter_2312
@@ -2987,7 +2993,6 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     fbthriftThriftTypesMap["module.MyI64"] = premadeThriftType_module_MyI64
     fbthriftThriftTypesMap["module.DoubleTypedefI64"] = premadeThriftType_module_DoubleTypedefI64
-    fbthriftThriftTypesMap["module.Foo"] = premadeThriftType_module_Foo
     fbthriftThriftTypesMap["module.Baz"] = premadeThriftType_module_Baz
     fbthriftThriftTypesMap["module.Foo_6868"] = premadeThriftType_module_Foo_6868
     fbthriftThriftTypesMap["module.Foo_3943"] = premadeThriftType_module_Foo_3943
@@ -3021,6 +3026,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["double"] = premadeThriftType_double
     fbthriftThriftTypesMap["module.AdaptedDouble"] = premadeThriftType_module_AdaptedDouble
     fbthriftThriftTypesMap["module.AdaptedString"] = premadeThriftType_module_AdaptedString
+    fbthriftThriftTypesMap["module.ThriftAdaptedEnum"] = premadeThriftType_module_ThriftAdaptedEnum
     fbthriftThriftTypesMap["module.AdaptedEnum"] = premadeThriftType_module_AdaptedEnum
     fbthriftThriftTypesMap["module.DoubleTypedefBool"] = premadeThriftType_module_DoubleTypedefBool
     fbthriftThriftTypesMap["module.AdaptTemplatedTestStruct"] = premadeThriftType_module_AdaptTemplatedTestStruct
@@ -3038,22 +3044,16 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.ReorderedStruct"] = premadeThriftType_module_ReorderedStruct
     fbthriftThriftTypesMap["module.RenamedStruct"] = premadeThriftType_module_RenamedStruct
     fbthriftThriftTypesMap["module.SameNamespaceStruct"] = premadeThriftType_module_SameNamespaceStruct
-    fbthriftThriftTypesMap["module.HeapAllocated"] = premadeThriftType_module_HeapAllocated
     fbthriftThriftTypesMap["module.MoveOnly"] = premadeThriftType_module_MoveOnly
     fbthriftThriftTypesMap["module.AlsoMoveOnly"] = premadeThriftType_module_AlsoMoveOnly
     fbthriftThriftTypesMap["module.ApplyAdapter"] = premadeThriftType_module_ApplyAdapter
     fbthriftThriftTypesMap["module.TransitiveAdapted"] = premadeThriftType_module_TransitiveAdapted
     fbthriftThriftTypesMap["module.CountingInt"] = premadeThriftType_module_CountingInt
-    fbthriftThriftTypesMap["module.CountingStruct"] = premadeThriftType_module_CountingStruct
     fbthriftThriftTypesMap["module.Person"] = premadeThriftType_module_Person
     fbthriftThriftTypesMap["module.Person2"] = premadeThriftType_module_Person2
     fbthriftThriftTypesMap["module.RenamedStructWithStructAdapterAndFieldAdapter"] = premadeThriftType_module_RenamedStructWithStructAdapterAndFieldAdapter
-    fbthriftThriftTypesMap["module.MyI32"] = premadeThriftType_module_MyI32
     fbthriftThriftTypesMap["module.StructWithAdapter"] = premadeThriftType_module_StructWithAdapter
     fbthriftThriftTypesMap["module.UnionWithAdapter"] = premadeThriftType_module_UnionWithAdapter
-    fbthriftThriftTypesMap["module.StringWithCppAdapter"] = premadeThriftType_module_StringWithCppAdapter
-    fbthriftThriftTypesMap["module.MyI32_4873"] = premadeThriftType_module_MyI32_4873
-    fbthriftThriftTypesMap["module.StringWithAdapter_7208"] = premadeThriftType_module_StringWithAdapter_7208
     return fbthriftThriftTypesMap
 }()
 

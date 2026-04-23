@@ -14,14 +14,6 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module_Animal = &thrift.TypeSpec{
-        FullName: "module.Animal",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.Animal",
-                NewFunc:    func() any { return Animal(0) },
-            },
-    }
     premadeCodecTypeSpec_double = &thrift.TypeSpec{
         FullName: "double",
         CodecPrimitiveSpec:
@@ -90,6 +82,14 @@ var (
             &thrift.CodecSetSpec{
                 ElementWireType: thrift.I64,
                 ElementTypeSpec: premadeCodecTypeSpec_module_PersonID,
+            },
+    }
+    premadeCodecTypeSpec_module_Animal = &thrift.TypeSpec{
+        FullName: "module.Animal",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.Animal",
+                NewFunc:    func() any { return Animal(0) },
             },
     }
     premadeCodecTypeSpec_map_module_Animal_string = &thrift.TypeSpec{
@@ -375,7 +375,6 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Animal.FullName] = premadeCodecTypeSpec_module_Animal
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Color.FullName] = premadeCodecTypeSpec_module_Color
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
@@ -384,6 +383,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_PersonID.FullName] = premadeCodecTypeSpec_module_PersonID
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Animal.FullName] = premadeCodecTypeSpec_module_Animal
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Person.FullName] = premadeCodecTypeSpec_module_Person
     return fbthriftTypeSpecsMap
 }()

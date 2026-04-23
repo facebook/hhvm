@@ -19,18 +19,6 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
-        }
-    premadeThriftType_module_GetEntityRequest =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.GetEntityRequest",
-                },
-        }
     premadeThriftType_module_GetEntityResponse =
         &metadata.ThriftType{
             TStruct:
@@ -38,31 +26,11 @@ var (
                     Name: "module.GetEntityResponse",
                 },
         }
-    premadeThriftType_list_string =
-        &metadata.ThriftType{
-            TList:
-                &metadata.ThriftListType{
-                    ValueType: premadeThriftType_string,
-                },
-        }
-    premadeThriftType_module_NonComparableStruct =
+    premadeThriftType_module_GetEntityRequest =
         &metadata.ThriftType{
             TStruct:
                 &metadata.ThriftStructType{
-                    Name: "module.NonComparableStruct",
-                },
-        }
-    premadeThriftType_i64 =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-        }
-    premadeThriftType_map_module_NonComparableStruct_i64 =
-        &metadata.ThriftType{
-            TMap:
-                &metadata.ThriftMapType{
-                    KeyType:   premadeThriftType_module_NonComparableStruct,
-                    ValueType: premadeThriftType_i64,
+                    Name: "module.GetEntityRequest",
                 },
         }
     premadeThriftType_bool =
@@ -85,10 +53,20 @@ var (
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
     premadeThriftType_double =
         &metadata.ThriftType{
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_DOUBLE_TYPE),
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_binary =
         &metadata.ThriftType{
@@ -110,10 +88,32 @@ var (
                     ValueType: premadeThriftType_string,
                 },
         }
+    premadeThriftType_list_string =
+        &metadata.ThriftType{
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_string,
+                },
+        }
     premadeThriftType_void =
         &metadata.ThriftType{
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_module_NonComparableStruct =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.NonComparableStruct",
+                },
+        }
+    premadeThriftType_map_module_NonComparableStruct_i64 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_module_NonComparableStruct,
+                    ValueType: premadeThriftType_i64,
+                },
         }
 )
 
@@ -174,18 +174,18 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["string"] = premadeThriftType_string
-    fbthriftThriftTypesMap["module.GetEntityRequest"] = premadeThriftType_module_GetEntityRequest
     fbthriftThriftTypesMap["module.GetEntityResponse"] = premadeThriftType_module_GetEntityResponse
-    fbthriftThriftTypesMap["module.NonComparableStruct"] = premadeThriftType_module_NonComparableStruct
-    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["module.GetEntityRequest"] = premadeThriftType_module_GetEntityRequest
     fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
     fbthriftThriftTypesMap["byte"] = premadeThriftType_byte
     fbthriftThriftTypesMap["i16"] = premadeThriftType_i16
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     fbthriftThriftTypesMap["double"] = premadeThriftType_double
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
     fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
     fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["module.NonComparableStruct"] = premadeThriftType_module_NonComparableStruct
     return fbthriftThriftTypesMap
 }()
 

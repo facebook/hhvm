@@ -14,22 +14,6 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
-            },
-    }
-    premadeCodecTypeSpec_module_GetEntityRequest = &thrift.TypeSpec{
-        FullName: "module.GetEntityRequest",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.GetEntityRequest",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewGetEntityRequest() },
-            },
-    }
     premadeCodecTypeSpec_module_GetEntityResponse = &thrift.TypeSpec{
         FullName: "module.GetEntityResponse",
         CodecStructSpec:
@@ -39,38 +23,13 @@ var (
                 NewFunc:    func() thrift.Struct { return NewGetEntityResponse() },
             },
     }
-    premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
-        FullName: "list<string>",
-        CodecListSpec:
-            &thrift.CodecListSpec{
-                ElementWireType: thrift.STRING,
-                ElementTypeSpec: premadeCodecTypeSpec_string,
-            },
-    }
-    premadeCodecTypeSpec_module_NonComparableStruct = &thrift.TypeSpec{
-        FullName: "module.NonComparableStruct",
+    premadeCodecTypeSpec_module_GetEntityRequest = &thrift.TypeSpec{
+        FullName: "module.GetEntityRequest",
         CodecStructSpec:
             &thrift.CodecStructSpec{
-                ScopedName: "module.NonComparableStruct",
+                ScopedName: "module.GetEntityRequest",
                 IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewNonComparableStruct() },
-            },
-    }
-    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
-        FullName: "i64",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
-            },
-    }
-    premadeCodecTypeSpec_map_module_NonComparableStruct_i64 = &thrift.TypeSpec{
-        FullName: "map<module.NonComparableStruct, i64>",
-        CodecMapSpec:
-            &thrift.CodecMapSpec{
-                KeyTypeSpec:   premadeCodecTypeSpec_module_NonComparableStruct,
-                ValueTypeSpec: premadeCodecTypeSpec_i64,
-                KeyWireType:   thrift.STRUCT,
-                ValueWireType: thrift.I64,
+                NewFunc:    func() thrift.Struct { return NewGetEntityRequest() },
             },
     }
     premadeCodecTypeSpec_bool = &thrift.TypeSpec{
@@ -101,11 +60,25 @@ var (
                 PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
             },
     }
+    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
+            },
+    }
     premadeCodecTypeSpec_double = &thrift.TypeSpec{
         FullName: "double",
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
                 PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_DOUBLE,
+            },
+    }
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
             },
     }
     premadeCodecTypeSpec_binary = &thrift.TypeSpec{
@@ -133,11 +106,38 @@ var (
                 ElementTypeSpec: premadeCodecTypeSpec_string,
             },
     }
+    premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
+        FullName: "list<string>",
+        CodecListSpec:
+            &thrift.CodecListSpec{
+                ElementWireType: thrift.STRING,
+                ElementTypeSpec: premadeCodecTypeSpec_string,
+            },
+    }
     premadeCodecTypeSpec_void = &thrift.TypeSpec{
         FullName: "void",
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
                 PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
+    premadeCodecTypeSpec_module_NonComparableStruct = &thrift.TypeSpec{
+        FullName: "module.NonComparableStruct",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.NonComparableStruct",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewNonComparableStruct() },
+            },
+    }
+    premadeCodecTypeSpec_map_module_NonComparableStruct_i64 = &thrift.TypeSpec{
+        FullName: "map<module.NonComparableStruct, i64>",
+        CodecMapSpec:
+            &thrift.CodecMapSpec{
+                KeyTypeSpec:   premadeCodecTypeSpec_module_NonComparableStruct,
+                ValueTypeSpec: premadeCodecTypeSpec_i64,
+                KeyWireType:   thrift.STRUCT,
+                ValueWireType: thrift.I64,
             },
     }
 )
@@ -1291,18 +1291,18 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_GetEntityRequest.FullName] = premadeCodecTypeSpec_module_GetEntityRequest
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_GetEntityResponse.FullName] = premadeCodecTypeSpec_module_GetEntityResponse
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_NonComparableStruct.FullName] = premadeCodecTypeSpec_module_NonComparableStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_GetEntityRequest.FullName] = premadeCodecTypeSpec_module_GetEntityRequest
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_byte.FullName] = premadeCodecTypeSpec_byte
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_NonComparableStruct.FullName] = premadeCodecTypeSpec_module_NonComparableStruct
     return fbthriftTypeSpecsMap
 }()
 

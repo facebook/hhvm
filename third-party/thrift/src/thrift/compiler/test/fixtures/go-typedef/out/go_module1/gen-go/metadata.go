@@ -23,6 +23,13 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_module1_Automobile =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module1.Automobile",
+                },
+        }
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
@@ -34,6 +41,14 @@ var (
                 &metadata.ThriftTypedefType{
                     Name:           "module1.Plate",
                     UnderlyingType: premadeThriftType_string,
+                },
+        }
+    premadeThriftType_module1_Car =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module1.Car",
+                    UnderlyingType: premadeThriftType_module1_Automobile,
                 },
         }
     premadeThriftType_i32 =
@@ -108,13 +123,6 @@ var (
                     ValueType: premadeThriftType_module1_PartName,
                 },
         }
-    premadeThriftType_module1_Automobile =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module1.Automobile",
-                },
-        }
     premadeThriftType_i64 =
         &metadata.ThriftType{
             TPrimitive:
@@ -140,14 +148,6 @@ var (
             TStruct:
                 &metadata.ThriftStructType{
                     Name: "module1.MapContainer",
-                },
-        }
-    premadeThriftType_module1_Car =
-        &metadata.ThriftType{
-            TTypedef:
-                &metadata.ThriftTypedefType{
-                    Name:           "module1.Car",
-                    UnderlyingType: premadeThriftType_module1_Automobile,
                 },
         }
     premadeThriftType_module1_Pair =
@@ -321,18 +321,18 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["module1.Automobile"] = premadeThriftType_module1_Automobile
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
     fbthriftThriftTypesMap["module1.Plate"] = premadeThriftType_module1_Plate
+    fbthriftThriftTypesMap["module1.Car"] = premadeThriftType_module1_Car
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["module1.Year"] = premadeThriftType_module1_Year
     fbthriftThriftTypesMap["module1.Drivers"] = premadeThriftType_module1_Drivers
     fbthriftThriftTypesMap["module1.Accessory"] = premadeThriftType_module1_Accessory
     fbthriftThriftTypesMap["module1.PartName"] = premadeThriftType_module1_PartName
-    fbthriftThriftTypesMap["module1.Automobile"] = premadeThriftType_module1_Automobile
     fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     fbthriftThriftTypesMap["module1.MapKey"] = premadeThriftType_module1_MapKey
     fbthriftThriftTypesMap["module1.MapContainer"] = premadeThriftType_module1_MapContainer
-    fbthriftThriftTypesMap["module1.Car"] = premadeThriftType_module1_Car
     fbthriftThriftTypesMap["module1.Pair"] = premadeThriftType_module1_Pair
     fbthriftThriftTypesMap["module1.Collection"] = premadeThriftType_module1_Collection
     fbthriftThriftTypesMap["module1.State"] = premadeThriftType_module1_State

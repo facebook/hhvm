@@ -23,6 +23,11 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
     premadeThriftType_service_IncludesIncluded =
         &metadata.ThriftType{
             TTypedef:
@@ -39,11 +44,6 @@ var (
                     UnderlyingType: includes.GetMetadataThriftType("includes.TransitiveFoo"),
                 },
         }
-    premadeThriftType_void =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
-        }
 )
 
 // Premade struct metadatas
@@ -52,9 +52,9 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
     fbthriftThriftTypesMap["service.IncludesIncluded"] = premadeThriftType_service_IncludesIncluded
     fbthriftThriftTypesMap["service.IncludesTransitiveFoo"] = premadeThriftType_service_IncludesTransitiveFoo
-    fbthriftThriftTypesMap["void"] = premadeThriftType_void
     return fbthriftThriftTypesMap
 }()
 

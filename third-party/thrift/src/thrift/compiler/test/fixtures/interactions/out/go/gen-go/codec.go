@@ -16,11 +16,18 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
             },
     }
     premadeCodecTypeSpec_module_ShouldBeBoxed = &thrift.TypeSpec{
@@ -41,18 +48,33 @@ var (
                 NewFunc:    func() thrift.Struct { return NewCustomException() },
             },
     }
-    premadeCodecTypeSpec_void = &thrift.TypeSpec{
-        FullName: "void",
+    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
+        FullName: "bool",
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
             },
     }
-    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
-        FullName: "i32",
+    premadeCodecTypeSpec_set_i32 = &thrift.TypeSpec{
+        FullName: "set<i32>",
+        CodecSetSpec:
+            &thrift.CodecSetSpec{
+                ElementWireType: thrift.I32,
+                ElementTypeSpec: premadeCodecTypeSpec_i32,
+            },
+    }
+    premadeCodecTypeSpec_string = &thrift.TypeSpec{
+        FullName: "string",
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+            },
+    }
+    premadeCodecTypeSpec_binary = &thrift.TypeSpec{
+        FullName: "binary",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BINARY,
             },
     }
 )
@@ -1014,11 +1036,13 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ShouldBeBoxed.FullName] = premadeCodecTypeSpec_module_ShouldBeBoxed
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CustomException.FullName] = premadeCodecTypeSpec_module_CustomException
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ShouldBeBoxed.FullName] = premadeCodecTypeSpec_module_ShouldBeBoxed
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CustomException.FullName] = premadeCodecTypeSpec_module_CustomException
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
     return fbthriftTypeSpecsMap
 }()
 

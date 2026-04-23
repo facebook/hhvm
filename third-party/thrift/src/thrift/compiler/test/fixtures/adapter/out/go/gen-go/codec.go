@@ -14,20 +14,29 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module_Color = &thrift.TypeSpec{
-        FullName: "module.Color",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.Color",
-                NewFunc:    func() any { return Color(0) },
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
             },
     }
-    premadeCodecTypeSpec_module_ThriftAdaptedEnum = &thrift.TypeSpec{
-        FullName: "module.ThriftAdaptedEnum",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "module.ThriftAdaptedEnum",
-                NewFunc:    func() any { return ThriftAdaptedEnum(0) },
+    premadeCodecTypeSpec_module_MyI32 = &thrift.TypeSpec{
+        FullName: "module.MyI32",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.MyI32",
+                UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
+                NewFunc:            func() any { return NewMyI32() },
+            },
+    }
+    premadeCodecTypeSpec_module_MyI32_4873 = &thrift.TypeSpec{
+        FullName: "module.MyI32_4873",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.MyI32_4873",
+                UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyI32,
+                NewFunc:            func() any { return NewMyI32_4873() },
             },
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
@@ -37,6 +46,68 @@ var (
                 PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
             },
     }
+    premadeCodecTypeSpec_module_StringWithAdapter = &thrift.TypeSpec{
+        FullName: "module.StringWithAdapter",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.StringWithAdapter",
+                UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewStringWithAdapter() },
+            },
+    }
+    premadeCodecTypeSpec_module_StringWithAdapter_7208 = &thrift.TypeSpec{
+        FullName: "module.StringWithAdapter_7208",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.StringWithAdapter_7208",
+                UnderlyingTypeSpec: premadeCodecTypeSpec_module_StringWithAdapter,
+                NewFunc:            func() any { return NewStringWithAdapter_7208() },
+            },
+    }
+    premadeCodecTypeSpec_module_StringWithCppAdapter = &thrift.TypeSpec{
+        FullName: "module.StringWithCppAdapter",
+        CodecTypedefSpec:
+            &thrift.CodecTypedefSpec{
+                ScopedName:         "module.StringWithCppAdapter",
+                UnderlyingTypeSpec: premadeCodecTypeSpec_string,
+                NewFunc:            func() any { return NewStringWithCppAdapter() },
+            },
+    }
+    premadeCodecTypeSpec_module_Foo = &thrift.TypeSpec{
+        FullName: "module.Foo",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.Foo",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewFoo() },
+            },
+    }
+    premadeCodecTypeSpec_module_CountingStruct = &thrift.TypeSpec{
+        FullName: "module.CountingStruct",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.CountingStruct",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewCountingStruct() },
+            },
+    }
+    premadeCodecTypeSpec_module_HeapAllocated = &thrift.TypeSpec{
+        FullName: "module.HeapAllocated",
+        CodecStructSpec:
+            &thrift.CodecStructSpec{
+                ScopedName: "module.HeapAllocated",
+                IsUnion:    false,
+                NewFunc:    func() thrift.Struct { return NewHeapAllocated() },
+            },
+    }
+    premadeCodecTypeSpec_module_Color = &thrift.TypeSpec{
+        FullName: "module.Color",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.Color",
+                NewFunc:    func() any { return Color(0) },
+            },
+    }
     premadeCodecTypeSpec_module_MyAnnotation = &thrift.TypeSpec{
         FullName: "module.MyAnnotation",
         CodecStructSpec:
@@ -44,13 +115,6 @@ var (
                 ScopedName: "module.MyAnnotation",
                 IsUnion:    false,
                 NewFunc:    func() thrift.Struct { return NewMyAnnotation() },
-            },
-    }
-    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
-        FullName: "i32",
-        CodecPrimitiveSpec:
-            &thrift.CodecPrimitiveSpec{
-                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
             },
     }
     premadeCodecTypeSpec_module_i32_5137 = &thrift.TypeSpec{
@@ -77,15 +141,6 @@ var (
                 ScopedName:         "module.SetWithAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_set_string,
                 NewFunc:            func() any { return NewSetWithAdapter() },
-            },
-    }
-    premadeCodecTypeSpec_module_StringWithAdapter = &thrift.TypeSpec{
-        FullName: "module.StringWithAdapter",
-        CodecTypedefSpec:
-            &thrift.CodecTypedefSpec{
-                ScopedName:         "module.StringWithAdapter",
-                UnderlyingTypeSpec: premadeCodecTypeSpec_string,
-                NewFunc:            func() any { return NewStringWithAdapter() },
             },
     }
     premadeCodecTypeSpec_list_module_StringWithAdapter = &thrift.TypeSpec{
@@ -233,15 +288,6 @@ var (
             &thrift.CodecListSpec{
                 ElementWireType: thrift.LIST,
                 ElementTypeSpec: premadeCodecTypeSpec_list_map_i32_i32,
-            },
-    }
-    premadeCodecTypeSpec_module_Foo = &thrift.TypeSpec{
-        FullName: "module.Foo",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.Foo",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewFoo() },
             },
     }
     premadeCodecTypeSpec_module_Baz = &thrift.TypeSpec{
@@ -575,6 +621,14 @@ var (
                 ValueWireType: thrift.I64,
             },
     }
+    premadeCodecTypeSpec_module_ThriftAdaptedEnum = &thrift.TypeSpec{
+        FullName: "module.ThriftAdaptedEnum",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "module.ThriftAdaptedEnum",
+                NewFunc:    func() any { return ThriftAdaptedEnum(0) },
+            },
+    }
     premadeCodecTypeSpec_module_AdaptedEnum = &thrift.TypeSpec{
         FullName: "module.AdaptedEnum",
         CodecTypedefSpec:
@@ -728,15 +782,6 @@ var (
                 NewFunc:    func() thrift.Struct { return NewSameNamespaceStruct() },
             },
     }
-    premadeCodecTypeSpec_module_HeapAllocated = &thrift.TypeSpec{
-        FullName: "module.HeapAllocated",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.HeapAllocated",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewHeapAllocated() },
-            },
-    }
     premadeCodecTypeSpec_module_MoveOnly = &thrift.TypeSpec{
         FullName: "module.MoveOnly",
         CodecStructSpec:
@@ -782,15 +827,6 @@ var (
                 NewFunc:            func() any { return NewCountingInt() },
             },
     }
-    premadeCodecTypeSpec_module_CountingStruct = &thrift.TypeSpec{
-        FullName: "module.CountingStruct",
-        CodecStructSpec:
-            &thrift.CodecStructSpec{
-                ScopedName: "module.CountingStruct",
-                IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewCountingStruct() },
-            },
-    }
     premadeCodecTypeSpec_module_Person = &thrift.TypeSpec{
         FullName: "module.Person",
         CodecStructSpec:
@@ -818,15 +854,6 @@ var (
                 NewFunc:    func() thrift.Struct { return NewRenamedStructWithStructAdapterAndFieldAdapter() },
             },
     }
-    premadeCodecTypeSpec_module_MyI32 = &thrift.TypeSpec{
-        FullName: "module.MyI32",
-        CodecTypedefSpec:
-            &thrift.CodecTypedefSpec{
-                ScopedName:         "module.MyI32",
-                UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
-                NewFunc:            func() any { return NewMyI32() },
-            },
-    }
     premadeCodecTypeSpec_module_StructWithAdapter = &thrift.TypeSpec{
         FullName: "module.StructWithAdapter",
         CodecTypedefSpec:
@@ -843,33 +870,6 @@ var (
                 ScopedName:         "module.UnionWithAdapter",
                 UnderlyingTypeSpec: premadeCodecTypeSpec_module_Baz,
                 NewFunc:            func() any { return NewUnionWithAdapter() },
-            },
-    }
-    premadeCodecTypeSpec_module_StringWithCppAdapter = &thrift.TypeSpec{
-        FullName: "module.StringWithCppAdapter",
-        CodecTypedefSpec:
-            &thrift.CodecTypedefSpec{
-                ScopedName:         "module.StringWithCppAdapter",
-                UnderlyingTypeSpec: premadeCodecTypeSpec_string,
-                NewFunc:            func() any { return NewStringWithCppAdapter() },
-            },
-    }
-    premadeCodecTypeSpec_module_MyI32_4873 = &thrift.TypeSpec{
-        FullName: "module.MyI32_4873",
-        CodecTypedefSpec:
-            &thrift.CodecTypedefSpec{
-                ScopedName:         "module.MyI32_4873",
-                UnderlyingTypeSpec: premadeCodecTypeSpec_module_MyI32,
-                NewFunc:            func() any { return NewMyI32_4873() },
-            },
-    }
-    premadeCodecTypeSpec_module_StringWithAdapter_7208 = &thrift.TypeSpec{
-        FullName: "module.StringWithAdapter_7208",
-        CodecTypedefSpec:
-            &thrift.CodecTypedefSpec{
-                ScopedName:         "module.StringWithAdapter_7208",
-                UnderlyingTypeSpec: premadeCodecTypeSpec_module_StringWithAdapter,
-                NewFunc:            func() any { return NewStringWithAdapter_7208() },
             },
     }
 )
@@ -2544,14 +2544,20 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Color.FullName] = premadeCodecTypeSpec_module_Color
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ThriftAdaptedEnum.FullName] = premadeCodecTypeSpec_module_ThriftAdaptedEnum
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyAnnotation.FullName] = premadeCodecTypeSpec_module_MyAnnotation
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32.FullName] = premadeCodecTypeSpec_module_MyI32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32_4873.FullName] = premadeCodecTypeSpec_module_MyI32_4873
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithAdapter.FullName] = premadeCodecTypeSpec_module_StringWithAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithAdapter_7208.FullName] = premadeCodecTypeSpec_module_StringWithAdapter_7208
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithCppAdapter.FullName] = premadeCodecTypeSpec_module_StringWithCppAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo.FullName] = premadeCodecTypeSpec_module_Foo
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CountingStruct.FullName] = premadeCodecTypeSpec_module_CountingStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_HeapAllocated.FullName] = premadeCodecTypeSpec_module_HeapAllocated
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Color.FullName] = premadeCodecTypeSpec_module_Color
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyAnnotation.FullName] = premadeCodecTypeSpec_module_MyAnnotation
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_i32_5137.FullName] = premadeCodecTypeSpec_module_i32_5137
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SetWithAdapter.FullName] = premadeCodecTypeSpec_module_SetWithAdapter
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithAdapter.FullName] = premadeCodecTypeSpec_module_StringWithAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListWithElemAdapter.FullName] = premadeCodecTypeSpec_module_ListWithElemAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter.FullName] = premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter_2312.FullName] = premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter_2312
@@ -2561,7 +2567,6 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI64.FullName] = premadeCodecTypeSpec_module_MyI64
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DoubleTypedefI64.FullName] = premadeCodecTypeSpec_module_DoubleTypedefI64
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo.FullName] = premadeCodecTypeSpec_module_Foo
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Baz.FullName] = premadeCodecTypeSpec_module_Baz
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo_6868.FullName] = premadeCodecTypeSpec_module_Foo_6868
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo_3943.FullName] = premadeCodecTypeSpec_module_Foo_3943
@@ -2595,6 +2600,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedDouble.FullName] = premadeCodecTypeSpec_module_AdaptedDouble
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedString.FullName] = premadeCodecTypeSpec_module_AdaptedString
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ThriftAdaptedEnum.FullName] = premadeCodecTypeSpec_module_ThriftAdaptedEnum
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedEnum.FullName] = premadeCodecTypeSpec_module_AdaptedEnum
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DoubleTypedefBool.FullName] = premadeCodecTypeSpec_module_DoubleTypedefBool
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptTemplatedTestStruct.FullName] = premadeCodecTypeSpec_module_AdaptTemplatedTestStruct
@@ -2612,22 +2618,16 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ReorderedStruct.FullName] = premadeCodecTypeSpec_module_ReorderedStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_RenamedStruct.FullName] = premadeCodecTypeSpec_module_RenamedStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SameNamespaceStruct.FullName] = premadeCodecTypeSpec_module_SameNamespaceStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_HeapAllocated.FullName] = premadeCodecTypeSpec_module_HeapAllocated
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MoveOnly.FullName] = premadeCodecTypeSpec_module_MoveOnly
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AlsoMoveOnly.FullName] = premadeCodecTypeSpec_module_AlsoMoveOnly
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ApplyAdapter.FullName] = premadeCodecTypeSpec_module_ApplyAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TransitiveAdapted.FullName] = premadeCodecTypeSpec_module_TransitiveAdapted
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CountingInt.FullName] = premadeCodecTypeSpec_module_CountingInt
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CountingStruct.FullName] = premadeCodecTypeSpec_module_CountingStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Person.FullName] = premadeCodecTypeSpec_module_Person
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Person2.FullName] = premadeCodecTypeSpec_module_Person2
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_RenamedStructWithStructAdapterAndFieldAdapter.FullName] = premadeCodecTypeSpec_module_RenamedStructWithStructAdapterAndFieldAdapter
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32.FullName] = premadeCodecTypeSpec_module_MyI32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithAdapter.FullName] = premadeCodecTypeSpec_module_StructWithAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_UnionWithAdapter.FullName] = premadeCodecTypeSpec_module_UnionWithAdapter
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithCppAdapter.FullName] = premadeCodecTypeSpec_module_StringWithCppAdapter
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32_4873.FullName] = premadeCodecTypeSpec_module_MyI32_4873
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithAdapter_7208.FullName] = premadeCodecTypeSpec_module_StringWithAdapter_7208
     return fbthriftTypeSpecsMap
 }()
 

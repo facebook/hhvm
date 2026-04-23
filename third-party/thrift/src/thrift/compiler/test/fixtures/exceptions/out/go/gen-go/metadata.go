@@ -19,10 +19,17 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string =
+    premadeThriftType_void =
         &metadata.ThriftType{
             TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_module_Banal =
+        &metadata.ThriftType{
+            TStruct:
+                &metadata.ThriftStructType{
+                    Name: "module.Banal",
+                },
         }
     premadeThriftType_module_Fiery =
         &metadata.ThriftType{
@@ -37,6 +44,11 @@ var (
                 &metadata.ThriftStructType{
                     Name: "module.Serious",
                 },
+        }
+    premadeThriftType_string =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
     premadeThriftType_module_ComplexFieldNames =
         &metadata.ThriftType{
@@ -70,18 +82,6 @@ var (
                 &metadata.ThriftStructType{
                     Name: "module.ExceptionWithStructuredAnnotation",
                 },
-        }
-    premadeThriftType_module_Banal =
-        &metadata.ThriftType{
-            TStruct:
-                &metadata.ThriftStructType{
-                    Name: "module.Banal",
-                },
-        }
-    premadeThriftType_void =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         }
 )
 
@@ -193,16 +193,16 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["string"] = premadeThriftType_string
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["module.Banal"] = premadeThriftType_module_Banal
     fbthriftThriftTypesMap["module.Fiery"] = premadeThriftType_module_Fiery
     fbthriftThriftTypesMap["module.Serious"] = premadeThriftType_module_Serious
+    fbthriftThriftTypesMap["string"] = premadeThriftType_string
     fbthriftThriftTypesMap["module.ComplexFieldNames"] = premadeThriftType_module_ComplexFieldNames
     fbthriftThriftTypesMap["module.CustomFieldNames"] = premadeThriftType_module_CustomFieldNames
     fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["module.ExceptionWithPrimitiveField"] = premadeThriftType_module_ExceptionWithPrimitiveField
     fbthriftThriftTypesMap["module.ExceptionWithStructuredAnnotation"] = premadeThriftType_module_ExceptionWithStructuredAnnotation
-    fbthriftThriftTypesMap["module.Banal"] = premadeThriftType_module_Banal
-    fbthriftThriftTypesMap["void"] = premadeThriftType_void
     return fbthriftThriftTypesMap
 }()
 

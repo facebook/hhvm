@@ -14,14 +14,6 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_terse_write_MyEnum = &thrift.TypeSpec{
-        FullName: "terse_write.MyEnum",
-        CodecEnumSpec:
-            &thrift.CodecEnumSpec{
-                ScopedName: "terse_write.MyEnum",
-                NewFunc:    func() any { return MyEnum(0) },
-            },
-    }
     premadeCodecTypeSpec_terse_write_MyStruct = &thrift.TypeSpec{
         FullName: "terse_write.MyStruct",
         CodecStructSpec:
@@ -92,6 +84,14 @@ var (
         CodecPrimitiveSpec:
             &thrift.CodecPrimitiveSpec{
                 PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BINARY,
+            },
+    }
+    premadeCodecTypeSpec_terse_write_MyEnum = &thrift.TypeSpec{
+        FullName: "terse_write.MyEnum",
+        CodecEnumSpec:
+            &thrift.CodecEnumSpec{
+                ScopedName: "terse_write.MyEnum",
+                NewFunc:    func() any { return MyEnum(0) },
             },
     }
     premadeCodecTypeSpec_list_i16 = &thrift.TypeSpec{
@@ -986,7 +986,6 @@ var (
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyEnum.FullName] = premadeCodecTypeSpec_terse_write_MyEnum
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyStruct.FullName] = premadeCodecTypeSpec_terse_write_MyStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_byte.FullName] = premadeCodecTypeSpec_byte
@@ -997,6 +996,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyEnum.FullName] = premadeCodecTypeSpec_terse_write_MyEnum
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyUnion.FullName] = premadeCodecTypeSpec_terse_write_MyUnion
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault.FullName] = premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_StructLevelTerseStruct.FullName] = premadeCodecTypeSpec_terse_write_StructLevelTerseStruct

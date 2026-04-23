@@ -21,25 +21,46 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_has_bitwise_ops =
+    premadeThriftType_binary =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.has_bitwise_ops",
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
+        }
+    premadeThriftType_module_TBinary =
+        &metadata.ThriftType{
+            TTypedef:
+                &metadata.ThriftTypedefType{
+                    Name:           "module.TBinary",
+                    UnderlyingType: premadeThriftType_binary,
+                    StructuredAnnotations: []*metadata.ThriftConstStruct{
+                        &metadata.ThriftConstStruct{
+                            Type: &metadata.ThriftStructType{
+                                Name: "thrift.AllowLegacyTypedefUri",
+                            },
+                            Fields: map[string]*metadata.ThriftConstValue{
+                            },
+                        },
+                    },
                 },
         }
-    premadeThriftType_module_is_unscoped =
+    premadeThriftType_i64 =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.is_unscoped",
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
+        }
+    premadeThriftType_map_module_TBinary_i64 =
+        &metadata.ThriftType{
+            TMap:
+                &metadata.ThriftMapType{
+                    KeyType:   premadeThriftType_module_TBinary,
+                    ValueType: premadeThriftType_i64,
                 },
         }
-    premadeThriftType_module_MyForwardRefEnum =
+    premadeThriftType_list_i64 =
         &metadata.ThriftType{
-            TEnum:
-                &metadata.ThriftEnumType{
-                    Name: "module.MyForwardRefEnum",
+            TList:
+                &metadata.ThriftListType{
+                    ValueType: premadeThriftType_i64,
                 },
         }
     premadeThriftType_module_empty_struct =
@@ -169,16 +190,18 @@ var (
                     Name: "module.CppTypeStruct",
                 },
         }
-    premadeThriftType_i64 =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
-        }
     premadeThriftType_module_VirtualStruct =
         &metadata.ThriftType{
             TStruct:
                 &metadata.ThriftStructType{
                     Name: "module.VirtualStruct",
+                },
+        }
+    premadeThriftType_module_MyForwardRefEnum =
+        &metadata.ThriftType{
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.MyForwardRefEnum",
                 },
         }
     premadeThriftType_module_MyStructWithForwardRefEnum =
@@ -272,28 +295,6 @@ var (
             TStruct:
                 &metadata.ThriftStructType{
                     Name: "module.Renaming",
-                },
-        }
-    premadeThriftType_binary =
-        &metadata.ThriftType{
-            TPrimitive:
-                new(metadata.ThriftPrimitiveType_THRIFT_BINARY_TYPE),
-        }
-    premadeThriftType_module_TBinary =
-        &metadata.ThriftType{
-            TTypedef:
-                &metadata.ThriftTypedefType{
-                    Name:           "module.TBinary",
-                    UnderlyingType: premadeThriftType_binary,
-                    StructuredAnnotations: []*metadata.ThriftConstStruct{
-                        &metadata.ThriftConstStruct{
-                            Type: &metadata.ThriftStructType{
-                                Name: "thrift.AllowLegacyTypedefUri",
-                            },
-                            Fields: map[string]*metadata.ThriftConstValue{
-                            },
-                        },
-                    },
                 },
         }
     premadeThriftType_module_TBinary_8623 =
@@ -806,19 +807,18 @@ var (
                     Name: "module.StructWithDoubleUnderscores",
                 },
         }
-    premadeThriftType_map_module_TBinary_i64 =
+    premadeThriftType_module_has_bitwise_ops =
         &metadata.ThriftType{
-            TMap:
-                &metadata.ThriftMapType{
-                    KeyType:   premadeThriftType_module_TBinary,
-                    ValueType: premadeThriftType_i64,
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.has_bitwise_ops",
                 },
         }
-    premadeThriftType_list_i64 =
+    premadeThriftType_module_is_unscoped =
         &metadata.ThriftType{
-            TList:
-                &metadata.ThriftListType{
-                    ValueType: premadeThriftType_i64,
+            TEnum:
+                &metadata.ThriftEnumType{
+                    Name: "module.is_unscoped",
                 },
         }
 )
@@ -1690,9 +1690,9 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
-    fbthriftThriftTypesMap["module.has_bitwise_ops"] = premadeThriftType_module_has_bitwise_ops
-    fbthriftThriftTypesMap["module.is_unscoped"] = premadeThriftType_module_is_unscoped
-    fbthriftThriftTypesMap["module.MyForwardRefEnum"] = premadeThriftType_module_MyForwardRefEnum
+    fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
+    fbthriftThriftTypesMap["module.TBinary"] = premadeThriftType_module_TBinary
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     fbthriftThriftTypesMap["module.empty_struct"] = premadeThriftType_module_empty_struct
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
     fbthriftThriftTypesMap["module.decorated_struct"] = premadeThriftType_module_decorated_struct
@@ -1701,8 +1701,8 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.map_i32_string_1261"] = premadeThriftType_module_map_i32_string_1261
     fbthriftThriftTypesMap["module.ContainerStruct"] = premadeThriftType_module_ContainerStruct
     fbthriftThriftTypesMap["module.CppTypeStruct"] = premadeThriftType_module_CppTypeStruct
-    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
     fbthriftThriftTypesMap["module.VirtualStruct"] = premadeThriftType_module_VirtualStruct
+    fbthriftThriftTypesMap["module.MyForwardRefEnum"] = premadeThriftType_module_MyForwardRefEnum
     fbthriftThriftTypesMap["module.MyStructWithForwardRefEnum"] = premadeThriftType_module_MyStructWithForwardRefEnum
     fbthriftThriftTypesMap["bool"] = premadeThriftType_bool
     fbthriftThriftTypesMap["module.TrivialNumeric"] = premadeThriftType_module_TrivialNumeric
@@ -1716,8 +1716,6 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.MyDataItem"] = premadeThriftType_module_MyDataItem
     fbthriftThriftTypesMap["module.MyStruct"] = premadeThriftType_module_MyStruct
     fbthriftThriftTypesMap["module.Renaming"] = premadeThriftType_module_Renaming
-    fbthriftThriftTypesMap["binary"] = premadeThriftType_binary
-    fbthriftThriftTypesMap["module.TBinary"] = premadeThriftType_module_TBinary
     fbthriftThriftTypesMap["module.TBinary_8623"] = premadeThriftType_module_TBinary_8623
     fbthriftThriftTypesMap["module.SomeListOfTypeMap_2468"] = premadeThriftType_module_SomeListOfTypeMap_2468
     fbthriftThriftTypesMap["module.AnnotatedTypes"] = premadeThriftType_module_AnnotatedTypes
@@ -1747,6 +1745,8 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap["module.UintTypedef"] = premadeThriftType_module_UintTypedef
     fbthriftThriftTypesMap["module.TypedefStruct"] = premadeThriftType_module_TypedefStruct
     fbthriftThriftTypesMap["module.StructWithDoubleUnderscores"] = premadeThriftType_module_StructWithDoubleUnderscores
+    fbthriftThriftTypesMap["module.has_bitwise_ops"] = premadeThriftType_module_has_bitwise_ops
+    fbthriftThriftTypesMap["module.is_unscoped"] = premadeThriftType_module_is_unscoped
     return fbthriftThriftTypesMap
 }()
 

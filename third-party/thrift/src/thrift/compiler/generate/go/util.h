@@ -19,6 +19,7 @@
 #include <set>
 #include <string>
 
+#include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program.h>
 
 namespace apache::thrift::compiler::go {
@@ -38,10 +39,13 @@ class codegen_data {
   // whether to use reflect codec
   bool use_reflect_codec = false;
 
-  // Records field names for every structured definition in the program.
-  // This is needed to resolve some edge case name collisions.
-  std::map<const t_structured*, std::set<std::string>> struct_to_field_names =
-      {};
+  /**
+   * Computed setter function names for each field. A field's setter name could
+   * collide with existing field names. This is needed to resolve some edge case
+   * name collisions. E.g. a field `Foo` can't have a setter named `SetFoo` if
+   * the struct already has another field named `SetFoo`.
+   */
+  std::map<const t_field*, std::string> field_setter_names{};
   /**
    * Req/resp structs in the program.
    *
@@ -73,11 +77,8 @@ class codegen_data {
   std::vector<const t_type*> thrift_metadata_types = {};
 
   void set_current_program(const t_program* program);
-
-  void compute_go_package_aliases();
-  void compute_struct_to_field_names();
-  void compute_req_resp_structs();
-  void compute_thrift_metadata_types();
+  void register_visitors(
+      basic_ast_visitor<true, const_visitor_context&>& visitor);
 
   bool is_current_program(const t_program* program) const;
 
@@ -91,11 +92,17 @@ class codegen_data {
 
  private:
   std::string make_go_package_name_unique(const std::string& name);
-  void add_to_thrift_metadata_types(
-      const t_type* type, std::set<std::string>& visited_type_names);
+  void add_to_thrift_metadata_types(const t_type& type);
+
+  /**
+   * Setters which collide with existing field names need to be disambiguated to
+   * resolve some edge case name collisions.
+   */
+  void add_struct_go_field_setter_names(const t_structured& strct);
 
   // The current program being generated.
-  const t_program* current_program_;
+  const t_program* current_program_ = nullptr;
+  std::set<std::string> metadata_visited_types_{};
   // Key: package name according to Thrift.
   // Value: package name to use in generated code.
   std::map<std::string, std::string> go_package_map_;
@@ -169,8 +176,6 @@ std::string get_go_func_name(const t_function* func);
 std::string get_go_type_sanitized_full_name(const t_type& type);
 std::string get_go_type_metadata_name(const t_type& type);
 std::string get_go_type_codec_type_spec_name(const t_type& type);
-
-std::set<std::string> get_struct_go_field_names(const t_structured* tstruct);
 
 std::string get_go_func_unique_arg_name(
     const t_function* func, std::string const& desired_arg_name);

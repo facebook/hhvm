@@ -21,8 +21,14 @@ namespace apache::thrift::detail {
 ServerBiDiStreamFactory::ServerBiDiStreamFactory() : startFunction_{nullptr} {}
 
 ServerBiDiStreamFactory::ServerBiDiStreamFactory(
-    ServerBiDiCallback* biDiCallback, uint64_t bufferSize) {
-  startFunction_ = [biDiCallback, bufferSize](
+    ServerBiDiCallback* biDiCallback, uint64_t bufferSize)
+    : ServerBiDiStreamFactory(biDiCallback, bufferSize, 0) {}
+
+ServerBiDiStreamFactory::ServerBiDiStreamFactory(
+    ServerBiDiCallback* biDiCallback,
+    uint64_t bufferSize,
+    uint64_t bufferReplenishThreshold) {
+  startFunction_ = [biDiCallback, bufferSize, bufferReplenishThreshold](
                        std::shared_ptr<ContextStack> contextStack,
                        TilePtr&& /* interaction */,
                        FirstResponsePayload&& payload,
@@ -48,6 +54,7 @@ ServerBiDiStreamFactory::ServerBiDiStreamFactory(
     stapled->resetClientCallback(*clientCb);
 
     sinkBridge->setBufferSize(bufferSize);
+    sinkBridge->setBufferReplenishThreshold(bufferReplenishThreshold);
 
     // Provide bridges to the callback
     if (biDiCallback) {

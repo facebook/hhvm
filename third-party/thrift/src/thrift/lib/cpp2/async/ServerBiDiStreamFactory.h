@@ -64,6 +64,11 @@ class ServerBiDiStreamFactory {
   explicit ServerBiDiStreamFactory(
       ServerBiDiCallback* biDiCallback, uint64_t bufferSize);
 
+  explicit ServerBiDiStreamFactory(
+      ServerBiDiCallback* biDiCallback,
+      uint64_t bufferSize,
+      uint64_t bufferReplenishThreshold);
+
   template <typename InputType, typename OutputType>
   explicit ServerBiDiStreamFactory(
       StreamTransformation<InputType, OutputType> streamTransformation,
@@ -75,6 +80,7 @@ class ServerBiDiStreamFactory {
     startFunction_ =
         [transformFn = std::move(streamTransformation.func),
          sinkBufferSize = streamTransformation.bufferSize,
+         sinkReplenishThreshold = streamTransformation.bufferReplenishThreshold,
          &decoder,
          &encoder,
          serverExecutor = std::move(serverExecutor)](
@@ -106,6 +112,7 @@ class ServerBiDiStreamFactory {
 
       DCHECK_GT(sinkBufferSize, 0);
       sinkBridge->setBufferSize(sinkBufferSize);
+      sinkBridge->setBufferReplenishThreshold(sinkReplenishThreshold);
 
       auto task = ServerBiDiStreamBridge::getTask(
           streamBridge->copy(),

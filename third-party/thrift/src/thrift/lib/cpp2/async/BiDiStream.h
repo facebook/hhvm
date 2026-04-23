@@ -78,6 +78,10 @@ struct StreamTransformation {
   // Maximum number of sink-direction (client-to-server) items that can be
   // in-flight before the server grants additional credits.
   int32_t bufferSize{100};
+  // Number of items that must be consumed before granting more credits to the
+  // client. 0 means use the default (bufferSize / 2). Must not exceed
+  // bufferSize.
+  uint64_t bufferReplenishThreshold{0};
   // Maximum time the server waits for the client to send the next sink payload
   // after credits have been granted. A value of 0 (default) disables the
   // timeout.

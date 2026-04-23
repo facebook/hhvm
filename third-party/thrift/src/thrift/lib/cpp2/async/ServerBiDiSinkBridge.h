@@ -172,6 +172,19 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
             ServerBiDiSinkBridge::Ptr bridge,
             SinkElementDecoder<In>* decode) mutable
             -> folly::coro::AsyncGenerator<In&&> {
+          const auto effectiveThreshold = [&] {
+            auto t = bridge->bufferReplenishThreshold_;
+            if (t == 0) {
+              return bridge->bufferSize_ / 2;
+            }
+            CHECK_GT(t, 0) << "bufferReplenishThreshold must not be negative";
+            CHECK_LT(t, bridge->bufferSize_)
+                << "bufferReplenishThreshold (" << t
+                << ") must be strictly less than bufferSize ("
+                << bridge->bufferSize_ << ")";
+            return t;
+          }();
+
           uint64_t creditsUsed{0};
           while (true) {
             CoroConsumer c;
@@ -198,7 +211,7 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
               co_yield folly::coro::co_result(
                   (*decode)(std::move(payloadOrError.streamPayloadTry)));
 
-              if (++creditsUsed > bridge->bufferSize_ / 2) {
+              if (++creditsUsed > effectiveThreshold) {
                 notifyBiDiSinkCredit(bridge->contextStack_.get(), creditsUsed);
                 if (bridge->biDiLog_) {
                   bridge->biDiLog_->log(
@@ -248,6 +261,10 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
   void setBufferSize(uint64_t bufferSize) { bufferSize_ = bufferSize; }
   uint64_t getBufferSize() { return bufferSize_; }
 
+  void setBufferReplenishThreshold(uint64_t threshold) {
+    bufferReplenishThreshold_ = threshold;
+  }
+
   using TwoWayBridge::clientClose;
   using TwoWayBridge::isClientClosed;
   using TwoWayBridge::isServerClosed;
@@ -296,6 +313,7 @@ class ServerBiDiSinkBridge : public TwoWayBridge<
   std::shared_ptr<ThriftBiDiLog> biDiLog_;
 
   uint64_t bufferSize_{0};
+  uint64_t bufferReplenishThreshold_{0};
 };
 
 } // namespace apache::thrift::detail

@@ -253,6 +253,7 @@ void MysqlFetchOperationImpl::actionable() {
           rows_received_ += current_row_stream_->numRows();
           total_result_size_ += current_row_stream_->queryResultSize();
         }
+        appendCurrentQueryStats();
         ++num_queries_executed_;
         no_index_used_ |= mysql_conn->getNoIndexUsed();
         was_slow_ |= mysql_conn->wasSlow();

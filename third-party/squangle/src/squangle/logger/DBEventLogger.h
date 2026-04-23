@@ -213,6 +213,15 @@ struct QueryLoggingData : CommonLoggingData {
   std::optional<int> thrift_rpc_priority;
   std::optional<uint64_t> rows_matched;
   uint64_t rows_affected;
+
+  // Per-statement stats for multi-queries. One entry per successfully
+  // completed statement (so on a mid-multi-query failure, length is
+  // number-of-statements-that-succeeded-before-the-failing-one, matching
+  // queries_executed). All vectors run parallel — index i is statement i.
+  std::vector<uint64_t> per_query_rows_received;
+  std::vector<uint64_t> per_query_rows_affected;
+  std::vector<uint64_t> per_query_last_insert_id;
+  std::vector<std::optional<uint64_t>> per_query_rows_matched;
 };
 
 // Base class for logging events of db client apis. This should be used as an

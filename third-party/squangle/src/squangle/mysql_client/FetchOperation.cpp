@@ -248,6 +248,10 @@ void FetchOperationImpl::logQueryCompletion(
       current_warnings_count_,
       current_rows_matched_,
       current_affected_rows_);
+  logging_data.per_query_rows_received = std::move(per_query_rows_received_);
+  logging_data.per_query_rows_affected = std::move(per_query_rows_affected_);
+  logging_data.per_query_last_insert_id = std::move(per_query_last_insert_id_);
+  logging_data.per_query_rows_matched = std::move(per_query_rows_matched_);
 
   if (result == OperationResult::Succeeded) {
     connection.setLastActivityTime(Clock::now());

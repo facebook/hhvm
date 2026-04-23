@@ -275,6 +275,26 @@ class FetchOperationImpl : virtual public OperationBase {
   std::optional<uint64_t> current_rows_matched_;
   RespAttrs current_resp_attrs_;
 
+  // Per-statement stats, appended once per successfully completed statement.
+  // For a single-statement query these will have length 1; for a multi-query
+  // of N statements where the Kth fails, they will have length K-1 (the loop
+  // bails out of CompleteQuery before appending on failure). The vectors run
+  // parallel — entry i describes the i-th statement.
+  std::vector<uint64_t> per_query_rows_received_;
+  std::vector<uint64_t> per_query_rows_affected_;
+  std::vector<uint64_t> per_query_last_insert_id_;
+  std::vector<std::optional<uint64_t>> per_query_rows_matched_;
+
+  // Snapshot the current_* values plus the current row stream's rowcount
+  // into the per-query vectors. Call from CompleteQuery's success branch.
+  void appendCurrentQueryStats() {
+    per_query_rows_received_.push_back(
+        current_row_stream_ ? current_row_stream_->numRows() : 0);
+    per_query_rows_affected_.push_back(current_affected_rows_);
+    per_query_last_insert_id_.push_back(current_last_insert_id_);
+    per_query_rows_matched_.push_back(current_rows_matched_);
+  }
+
   // When the Fetch gets paused, active fetch action moves to `WaitForConsumer`
   // and the action that got paused gets saved so that `resume` can set it
   // properly afterwards.

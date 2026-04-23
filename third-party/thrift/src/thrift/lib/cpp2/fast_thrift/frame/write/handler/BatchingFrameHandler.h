@@ -50,7 +50,7 @@ namespace apache::thrift::fast_thrift::frame::write::handler {
  */
 class BatchingFrameHandler : public folly::EventBase::LoopCallback {
  public:
-  apache::thrift::fast_thrift::channel_pipeline::WriteReadyHook writeReadyHook;
+  apache::thrift::fast_thrift::channel_pipeline::WriteReadyHook writeReadyHook_;
 
   explicit BatchingFrameHandler(BatchingHandlerConfig config = {}) noexcept
       : config_(config) {}
@@ -98,9 +98,15 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
 
     // Append to batch chain (zero-copy)
     appendToBatch(std::move(frame));
-
     pendingBytes_ += frameSize;
     ++pendingFrames_;
+
+    // Downstream is backpressured: buffer and propagate backpressure upstream.
+    // Do not attempt to flush until onWriteReady is called.
+    if (backpressured_) {
+      return apache::thrift::fast_thrift::channel_pipeline::Result::
+          Backpressure;
+    }
 
     // Check flush thresholds
     if (pendingBytes_ >= config_.maxPendingBytes ||
@@ -120,6 +126,7 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
 
   template <typename Context>
   void onWriteReady(Context& ctx) noexcept {
+    backpressured_ = false;
     ctx.cancelAwaitWriteReady();
     (void)doFlush(ctx);
   }
@@ -143,6 +150,7 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
   size_t pendingFrames() const noexcept { return pendingFrames_; }
   bool isScheduled() const noexcept { return isScheduled_; }
   bool hasPendingData() const noexcept { return batch_ != nullptr; }
+  bool isBackpressured() const noexcept { return backpressured_; }
 
  private:
   /**
@@ -162,7 +170,7 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
 
   void scheduleFlushIfNeeded() noexcept {
     if (!isScheduled_ && eventBase_) {
-      eventBase_->runInLoop(this);
+      eventBase_->runInLoop(this, true);
       isScheduled_ = true;
     }
   }
@@ -179,6 +187,7 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
     batch_.reset();
     pendingBytes_ = 0;
     pendingFrames_ = 0;
+    backpressured_ = false;
   }
 
   template <typename Context>
@@ -206,6 +215,7 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
 
     if (result ==
         apache::thrift::fast_thrift::channel_pipeline::Result::Backpressure) {
+      backpressured_ = true;
       ctx.awaitWriteReady();
     }
 
@@ -216,6 +226,7 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
   folly::EventBase* eventBase_{nullptr};
 
   bool isScheduled_{false};
+  bool backpressured_{false};
 
   size_t pendingBytes_{0};
   size_t pendingFrames_{0};

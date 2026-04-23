@@ -490,6 +490,7 @@ folly::Expected<folly::Unit, WebTransport::ErrorCode> H3WtSession::closeSession(
     folly::Optional<uint32_t> error) noexcept {
   // we need to bidi reset all assoc quic streams (ss+rst_stream)
   auto streamIds = sm_.streamIds();
+  XLOG(DBG4) << __func__ << "; nStreams=" << streamIds.size();
   const uint32_t ec = error.value_or(0);
   // bidirectionally reset all assoc quic streams
   for (uint64_t id : streamIds) {
@@ -573,7 +574,9 @@ void H3WtSession::onDrainSession(WtStreamManager::DrainSession ds) noexcept {
   return sm_.onDrainSession(ds);
 }
 void H3WtSession::onCloseSession(WtStreamManager::CloseSession&& cs) noexcept {
-  return sm_.onCloseSession(std::move(cs));
+  // TODO(@damlaj): change WebTransport::closeSession to take a std::string msg?
+  XLOG(DBG4) << __func__ << "; cs=" << cs.err << "; msg=" << cs.msg;
+  closeSession(cs.err);
 }
 
 void H3ConnectStreamCallback::onEvent(

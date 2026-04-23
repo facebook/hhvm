@@ -897,8 +897,9 @@ TEST_F(H3WtSessionTest, CreateUniBidiStream) {
     EXPECT_FALSE(std::move(uniCredit).getTry().hasException());
     EXPECT_FALSE(std::move(bidiCredit).getTry().hasException());
 
-    // validate ::closeSession issues a rst_stream for each id
-    session_->closeSession(folly::none);
+    // validate ::onCloseSession issues a rst_stream for each id
+    expectedWtHandlerErr_ = 0x00;
+    session_->onCloseSession({0x00, "::closeSession"});
     EXPECT_TRUE(streams[uniId].writeState ==
                 MockQuicSocketDriver::StateEnum::ERROR);
     EXPECT_TRUE(streams[bidiId].writeState ==

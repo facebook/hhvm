@@ -19,9 +19,7 @@
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/test/util/TrackingTProcessorEventHandler.h>
 
-namespace apache::thrift {
-
-namespace test {
+namespace apache::thrift::test {
 
 using EventHandlerList = std::vector<std::shared_ptr<TProcessorEventHandler>>;
 
@@ -134,6 +132,4 @@ TEST(ContextStack, ClientHeaders) {
   }
 }
 
-} // namespace test
-
-} // namespace apache::thrift
+} // namespace apache::thrift::test

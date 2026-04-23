@@ -348,7 +348,9 @@ pub(crate) fn happly_decl_has_reified_generics<'a>(
                     // The DeclProvider has no idea what `id` is.
                     true
                 }
-                Err(decl_provider::Error::Bincode(_)) => {
+                Err(
+                    decl_provider::Error::BincodeEncode(_) | decl_provider::Error::BincodeDecode(_),
+                ) => {
                     // Infra error while handling serialized decls
                     true
                 }

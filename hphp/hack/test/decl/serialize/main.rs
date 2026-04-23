@@ -13,8 +13,8 @@ use ::anyhow::Result;
 use clap::Parser;
 use oxidized::direct_decl_parser::Decls;
 use relative_path::RelativePath;
-use serde::Deserialize;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 use walkdir::WalkDir;
 
 #[derive(Parser, Clone, Debug)]
@@ -100,9 +100,9 @@ fn read_file(filepath: &Path) -> Result<Vec<u8>> {
     Ok(text)
 }
 
-fn round_trip<'a, X, P>(filepath: &Path, x: X) -> Result<Profile, Error>
+fn round_trip<X, P>(filepath: &Path, x: X) -> Result<Profile, Error>
 where
-    X: Deserialize<'a> + Serialize + Eq + std::fmt::Debug,
+    X: DeserializeOwned + Serialize + Eq + std::fmt::Debug,
     P: Provider,
 {
     use std::time::SystemTime;
@@ -161,7 +161,7 @@ trait Provider {
     type Data;
 
     fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String>;
-    fn de<'a, X: serde::Deserialize<'a>>(data: Self::Data) -> Result<X, String>;
+    fn de<X: DeserializeOwned>(data: Self::Data) -> Result<X, String>;
     fn name() -> &'static str;
     fn get_bytes(data: &Self::Data) -> &[u8];
 }
@@ -176,16 +176,13 @@ impl Provider for Bincode {
     }
 
     fn se<X: serde::Serialize>(x: &X) -> Result<Self::Data, String> {
-        use bincode::Options;
-        let op = bincode::config::Options::with_native_endian(bincode::options());
-        op.serialize(x)
+        bincode::serde::encode_to_vec(x, bincode::config::standard())
             .map_err(|e| format!("{} failed to serialize, error: {}", Self::name(), e))
     }
 
-    fn de<'a, X: serde::Deserialize<'a>>(data: Self::Data) -> Result<X, String> {
-        let op = bincode::config::Options::with_native_endian(bincode::options());
-        let mut de = bincode::de::Deserializer::with_reader(&data[..], op);
-        X::deserialize(&mut de)
+    fn de<X: DeserializeOwned>(data: Self::Data) -> Result<X, String> {
+        bincode::serde::decode_from_slice(&data, bincode::config::standard())
+            .map(|(v, _)| v)
             .map_err(|e| format!("{} failed to deserialize, error: {}", Self::name(), e))
     }
 
@@ -210,7 +207,7 @@ impl Provider for Cbor {
         Ok(data)
     }
 
-    fn de<'a, X: serde::Deserialize<'a>>(data: Self::Data) -> Result<X, String> {
+    fn de<X: DeserializeOwned>(data: Self::Data) -> Result<X, String> {
         let mut de = serde_cbor::de::Deserializer::from_reader(data.as_slice());
 
         X::deserialize(&mut de)

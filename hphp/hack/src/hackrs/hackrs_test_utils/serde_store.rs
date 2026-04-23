@@ -128,13 +128,15 @@ where
 }
 
 fn serialize<T: Serialize>(val: &T) -> Result<Vec<u8>> {
-    let mut serialized = Vec::new();
-    bincode::serialize_into(&mut serialized, &intern::WithIntern(val))?;
+    let serialized =
+        bincode::serde::encode_to_vec(intern::WithIntern(val), bincode::config::standard())?;
     Ok(serialized)
 }
 
 fn deserialize<T: DeserializeOwned>(serialized: &[u8]) -> Result<T> {
-    Ok(intern::WithIntern::strip(bincode::deserialize(serialized))?)
+    Ok(intern::WithIntern::strip(
+        bincode::serde::decode_from_slice(serialized, bincode::config::standard()).map(|(v, _)| v),
+    )?)
 }
 
 fn zstd_compress(mut bytes: &[u8]) -> Result<Vec<u8>> {

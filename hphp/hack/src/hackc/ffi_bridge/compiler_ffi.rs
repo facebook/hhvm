@@ -30,7 +30,6 @@ use oxidized::experimental_features::FeatureStatus;
 use parser_core_types::source_text::SourceText;
 use relative_path::Prefix;
 use relative_path::RelativePath;
-use serde::Deserialize;
 use sha1::Digest;
 use sha1::Sha1;
 
@@ -585,12 +584,15 @@ impl ffi::NativeEnv {
 }
 
 fn hash_unit(UnitWrapper(unit): &UnitWrapper) -> [u8; 20] {
-    use bincode::Options;
     let mut hasher = Sha1::new();
-    let w = std::io::BufWriter::new(&mut hasher);
-    bincode::options()
-        .serialize_into(w, &intern::WithIntern(unit))
-        .unwrap();
+    let mut w = std::io::BufWriter::new(&mut hasher);
+    bincode::serde::encode_into_std_write(
+        intern::WithIntern(unit),
+        &mut w,
+        bincode::config::standard(),
+    )
+    .unwrap();
+    drop(w);
     hasher.finalize().into()
 }
 
@@ -738,36 +740,33 @@ fn decls_to_symbols(holder: &DeclsHolder) -> ffi::FileSymbols {
 }
 
 fn decls_to_facts_binary(decls: &DeclsHolder, sha1sum: &CxxString) -> Result<Vec<u8>> {
-    use bincode::Options;
     let facts = facts::Facts::from_decls(&decls.parsed_file);
     let file_facts = ffi::FileFacts::from_facts(facts, sha1sum.to_string_lossy().into_owned());
-    let mut buf = Vec::new();
-    bincode::options().serialize_into(&mut buf, &file_facts)?;
+    let buf = bincode::serde::encode_to_vec(&file_facts, bincode::config::standard())?;
     Ok(buf)
 }
 
-fn binary_to_facts(blob: &CxxString) -> bincode::Result<ffi::FileFacts> {
-    use bincode::Options;
-    bincode::options().deserialize_from(blob.as_bytes())
+fn binary_to_facts(blob: &CxxString) -> Result<ffi::FileFacts, bincode::error::DecodeError> {
+    bincode::serde::decode_from_slice(blob.as_bytes(), bincode::config::standard()).map(|(v, _)| v)
 }
 
-fn decls_holder_to_binary(decls: &DeclsHolder) -> bincode::Result<Vec<u8>> {
-    use bincode::Options;
-    let mut buf = Vec::new();
-    bincode::options().serialize_into(&mut buf, &decls.parsed_file)?;
+fn decls_holder_to_binary(decls: &DeclsHolder) -> Result<Vec<u8>, bincode::error::EncodeError> {
+    let buf = bincode::serde::encode_to_vec(&decls.parsed_file, bincode::config::standard())?;
     Ok(buf)
 }
 
-fn binary_to_decls_holder(blob: &CxxString) -> bincode::Result<Box<DeclsHolder>> {
-    use bincode::Options;
+fn binary_to_decls_holder(
+    blob: &CxxString,
+) -> Result<Box<DeclsHolder>, bincode::error::DecodeError> {
     let data = blob.as_bytes();
-    let op = bincode::options().with_native_endian();
-    let mut de = bincode::de::Deserializer::from_slice(data, op);
-    let parsed_file = ParsedFile::deserialize(&mut de)?;
+    let (parsed_file, _) =
+        bincode::serde::decode_from_slice::<ParsedFile, _>(data, bincode::config::standard())?;
     Ok(Box::new(DeclsHolder { parsed_file }))
 }
 
-fn binary_to_decls_and_blob(blob: &CxxString) -> bincode::Result<ffi::DeclsAndBlob> {
+fn binary_to_decls_and_blob(
+    blob: &CxxString,
+) -> Result<ffi::DeclsAndBlob, bincode::error::DecodeError> {
     let decls = binary_to_decls_holder(blob)?;
     let serialized = decl_provider::serialize_decls(&decls.parsed_file.decls).unwrap();
     let has_errors = decls.parsed_file.has_first_pass_parse_errors;
@@ -784,8 +783,9 @@ fn facts_debug(facts: &ffi::FileFacts) -> String {
 
 fn hash_facts(facts: &ffi::FileFacts) -> [u8; 20] {
     let mut hasher = Sha1::new();
-    let w = std::io::BufWriter::new(&mut hasher);
-    bincode::serialize_into(w, facts).unwrap();
+    let mut w = std::io::BufWriter::new(&mut hasher);
+    bincode::serde::encode_into_std_write(facts, &mut w, bincode::config::standard()).unwrap();
+    drop(w);
     hasher.finalize().into()
 }
 

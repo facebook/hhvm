@@ -12,8 +12,6 @@ use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
 
-use arena_deserializer::serde::Deserialize;
-use bincode::Options;
 use direct_decl_parser::Decls;
 use direct_decl_parser::ParsedFile;
 use hash::IndexMap;
@@ -37,7 +35,10 @@ pub enum Error {
     NotFound,
 
     #[error(transparent)]
-    Bincode(#[from] bincode::Error),
+    BincodeEncode(#[from] bincode::error::EncodeError),
+
+    #[error(transparent)]
+    BincodeDecode(#[from] bincode::error::DecodeError),
 }
 
 #[derive(Debug, Clone)]
@@ -99,28 +100,23 @@ pub trait DeclProvider: std::fmt::Debug {
 }
 
 /// Serialize decls into an opaque blob suffixed with a Sha1 content hash.
-pub fn serialize_decls(decls: &Decls) -> Result<Vec<u8>, bincode::Error> {
-    let mut blob = Vec::new();
-    bincode::options()
-        .with_native_endian()
-        .serialize_into(&mut blob, decls)?;
+pub fn serialize_decls(decls: &Decls) -> Result<Vec<u8>, bincode::error::EncodeError> {
+    let mut blob = bincode::serde::encode_to_vec(decls, bincode::config::standard())?;
     let mut digest = Sha1::new();
     digest.update(&blob);
-    blob.write_all(&digest.finalize())?;
+    blob.extend_from_slice(&digest.finalize());
     Ok(blob)
 }
 
 /// Deserialize decls. Panic in cfg(debug) if the content hash is wrong.
-pub fn deserialize_decls(data: &[u8]) -> Result<Decls, bincode::Error> {
+pub fn deserialize_decls(data: &[u8]) -> Result<Decls, bincode::error::DecodeError> {
     let (data, hash) = split_serialized_decls(data);
     debug_assert!({
         let mut digest = Sha1::new();
         digest.update(data);
         digest.finalize().to_vec() == hash
     });
-    let op = bincode::options().with_native_endian();
-    let mut de = bincode::de::Deserializer::from_slice(data, op);
-    Decls::deserialize(&mut de)
+    bincode::serde::decode_from_slice(data, bincode::config::standard()).map(|(v, _)| v)
 }
 
 /// Separate the raw serialized decls from the content hash suffixed by serialize_decls().
@@ -192,17 +188,15 @@ pub fn find_module_decl(decls: &Decls, needle: &str) -> Result<ModuleDecl> {
 pub fn serialize_batch_decls(
     w: impl Write,
     parsed_files: &IndexMap<PathBuf, ParsedFile>,
-) -> Result<(), bincode::Error> {
+) -> Result<(), bincode::error::EncodeError> {
     let mut w = BufWriter::new(w);
-    bincode::options()
-        .with_native_endian()
-        .serialize_into(&mut w, &parsed_files)
+    bincode::serde::encode_into_std_write(parsed_files, &mut w, bincode::config::standard())?;
+    Ok(())
 }
 
 pub fn deserialize_batch_decls(
     r: impl Read,
-) -> Result<IndexMap<PathBuf, ParsedFile>, bincode::Error> {
-    let r = BufReader::new(r);
-    let mut de = bincode::de::Deserializer::with_reader(r, bincode::options().with_native_endian());
-    IndexMap::deserialize(&mut de)
+) -> Result<IndexMap<PathBuf, ParsedFile>, bincode::error::DecodeError> {
+    let mut r = BufReader::new(r);
+    bincode::serde::decode_from_std_read(&mut r, bincode::config::standard())
 }

@@ -271,15 +271,13 @@ mod tests {
 
     #[test]
     fn round_trip_bincode() -> anyhow::Result<()> {
-        use bincode::Options;
         let (f1, sha1sum) = fake_facts();
         let f1 = ffi::FileFacts::from_facts(f1, sha1sum);
-        let mut buf1 = Vec::new();
-        bincode::options().serialize_into(&mut buf1, &f1)?;
-        let f2: ffi::FileFacts = bincode::options().deserialize_from(&buf1[..])?;
+        let buf1 = bincode::serde::encode_to_vec(&f1, bincode::config::standard())?;
+        let (f2, _): (ffi::FileFacts, _) =
+            bincode::serde::decode_from_slice(&buf1, bincode::config::standard())?;
         assert_eq!(f1, f2);
-        let mut buf2 = Vec::new();
-        bincode::options().serialize_into(&mut buf2, &f2)?;
+        let buf2 = bincode::serde::encode_to_vec(&f2, bincode::config::standard())?;
         assert_eq!(buf1, buf2);
         Ok(())
     }

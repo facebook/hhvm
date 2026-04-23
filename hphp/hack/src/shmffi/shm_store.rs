@@ -229,19 +229,25 @@ where
 }
 
 fn serialize<T: Serialize>(val: &T) -> Result<Vec<u8>> {
-    let mut serialized = Vec::new();
-    bincode::serialize_into(&mut serialized, &intern::WithIntern(val))?;
+    let serialized =
+        bincode::serde::encode_to_vec(intern::WithIntern(val), bincode::config::standard())?;
     Ok(serialized)
 }
 
 fn deserialize<T: DeserializeOwned>(serialized: &[u8]) -> Result<T> {
-    Ok(intern::WithIntern::strip(bincode::deserialize(serialized))?)
+    Ok(intern::WithIntern::strip(
+        bincode::serde::decode_from_slice(serialized, bincode::config::standard()).map(|(v, _)| v),
+    )?)
 }
 
 fn serialize_and_lz4_compress<T: Serialize>(val: &T, level: u32) -> Result<Vec<u8>> {
     let encoder = lz4::EncoderBuilder::new().level(level).build(vec![])?;
     let mut w = std::io::BufWriter::new(encoder);
-    bincode::serialize_into(&mut w, &intern::WithIntern(val))?;
+    bincode::serde::encode_into_std_write(
+        intern::WithIntern(val),
+        &mut w,
+        bincode::config::standard(),
+    )?;
     w.flush()?;
     let encoder = w.into_inner().expect("into_inner returned Err after flush");
     let (compressed, result) = encoder.finish();
@@ -252,16 +258,20 @@ fn serialize_and_lz4_compress<T: Serialize>(val: &T, level: u32) -> Result<Vec<u
 fn lz4_decompress_and_deserialize<R: Read, T: DeserializeOwned>(r: R) -> Result<T> {
     let r = lz4::Decoder::new(r)?;
     let mut r = std::io::BufReader::new(r);
-    Ok(intern::WithIntern::strip(bincode::deserialize_from(
-        &mut r,
-    ))?)
+    Ok(intern::WithIntern::strip(
+        bincode::serde::decode_from_std_read(&mut r, bincode::config::standard()).map(|v| v),
+    )?)
 }
 
 fn serialize_and_zstd_compress<T: Serialize>(val: &T, level: i32) -> Result<Vec<u8>> {
     let mut compressed = vec![];
     let w = zstd::Encoder::new(&mut compressed, level)?.auto_finish();
     let mut w = std::io::BufWriter::new(w);
-    bincode::serialize_into(&mut w, &intern::WithIntern(val))?;
+    bincode::serde::encode_into_std_write(
+        intern::WithIntern(val),
+        &mut w,
+        bincode::config::standard(),
+    )?;
     drop(w);
     Ok(compressed)
 }
@@ -269,9 +279,9 @@ fn serialize_and_zstd_compress<T: Serialize>(val: &T, level: i32) -> Result<Vec<
 fn zstd_decompress_and_deserialize<R: Read, T: DeserializeOwned>(r: R) -> Result<T> {
     let r = zstd::Decoder::new(r)?;
     let mut r = std::io::BufReader::new(r);
-    Ok(intern::WithIntern::strip(bincode::deserialize_from(
-        &mut r,
-    ))?)
+    Ok(intern::WithIntern::strip(
+        bincode::serde::decode_from_std_read(&mut r, bincode::config::standard()).map(|v| v),
+    )?)
 }
 
 impl<K, V> std::fmt::Debug for ShmStore<K, V> {

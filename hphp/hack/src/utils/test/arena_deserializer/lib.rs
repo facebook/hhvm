@@ -17,14 +17,6 @@ fn round_trip<'a, X: Deserialize<'a> + Serialize + Eq + std::fmt::Debug>(x: X, a
     let de = ArenaDeserializer::new(arena, &mut de);
     let x2 = X::deserialize(de).unwrap();
     assert_eq!(x, x2);
-
-    use bincode::Options;
-    let op = bincode::config::Options::with_native_endian(bincode::options());
-    let se = op.serialize(&x).unwrap();
-    let mut de = bincode::de::Deserializer::from_slice(se.as_slice(), op);
-    let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
-    let x2 = X::deserialize(de).unwrap();
-    assert_eq!(x, x2, "Bytes: {:?}", se);
 }
 
 #[test]

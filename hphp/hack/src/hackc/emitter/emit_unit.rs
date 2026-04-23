@@ -110,7 +110,7 @@ fn record_error(
         decl_provider::Error::NotFound => {
             missing.push(sym);
         }
-        decl_provider::Error::Bincode(_) => {
+        decl_provider::Error::BincodeEncode(_) | decl_provider::Error::BincodeDecode(_) => {
             error.push(sym);
         }
     }

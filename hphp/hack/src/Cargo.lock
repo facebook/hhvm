@@ -225,7 +225,6 @@ name = "arena_deserializer_tests"
 version = "0.0.0"
 dependencies = [
  "arena_deserializer",
- "bincode 1.3.3",
  "bstr",
  "bumpalo",
  "relative_path",
@@ -372,7 +371,18 @@ version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36eaf5d7b090263e8150820482d5d93cd964a81e4019913c972f4edcc6edb740"
 dependencies = [
+ "bincode_derive",
+ "serde",
  "unty",
+]
+
+[[package]]
+name = "bincode_derive"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf95709a440f45e986983918d0e8a1f30a9b1df04918fc828670606804ac3c09"
+dependencies = [
+ "virtue",
 ]
 
 [[package]]
@@ -781,7 +791,7 @@ name = "compiler_ffi"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bincode 1.3.3",
+ "bincode 2.0.1",
  "compile",
  "cxx",
  "cxx-build",
@@ -1132,8 +1142,7 @@ dependencies = [
 name = "decl_provider"
 version = "0.0.0"
 dependencies = [
- "arena_deserializer",
- "bincode 1.3.3",
+ "bincode 2.0.1",
  "direct_decl_parser",
  "hash",
  "oxidized",
@@ -2096,7 +2105,7 @@ name = "hackrs_test_utils"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bincode 1.3.3",
+ "bincode 2.0.1",
  "datastore",
  "decl_parser",
  "folded_decl_provider",
@@ -2574,7 +2583,7 @@ dependencies = [
 name = "intern"
 version = "0.1.0"
 dependencies = [
- "bincode 1.3.3",
+ "bincode 2.0.1",
  "fnv",
  "hashbrown 0.17.0",
  "indexmap 2.13.0",
@@ -5473,6 +5482,12 @@ name = "vint64"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e0b3dd7987b5df43ec8f5a1050d608b4d9c78a5785c70549635870b9cad9442c"
+
+[[package]]
+name = "virtue"
+version = "0.0.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "051eb1abcf10076295e815102942cc58f9d5e3b4560e46e53c21e8ff6f3af7b1"
 
 [[package]]
 name = "vob"

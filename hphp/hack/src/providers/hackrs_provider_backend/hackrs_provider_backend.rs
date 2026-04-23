@@ -188,7 +188,7 @@ impl HhServerProviderBackend {
 ocamlrep_ocamlpool::ocaml_ffi! {
     fn hh_server_provider_backend_register() {
         rust_provider_backend_ffi_trait::DESERIALIZE.set(|data| {
-            let config: Config = bincode::deserialize(data).unwrap();
+            let config: Config = bincode::serde::decode_from_slice(data, bincode::config::standard()).map(|(v, _)| v).unwrap();
             Arc::new(HhServerProviderBackend::new(config).unwrap())
         }).unwrap();
     }
@@ -226,7 +226,7 @@ impl rust_provider_backend_ffi::ProviderBackendFfi for HhServerProviderBackend {
     }
 
     fn serialize(&self) -> Vec<u8> {
-        bincode::serialize(&self.config()).unwrap()
+        bincode::serde::encode_to_vec(self.config(), bincode::config::standard()).unwrap()
     }
 
     fn push_local_changes(&self) {

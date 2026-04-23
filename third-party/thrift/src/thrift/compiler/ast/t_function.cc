@@ -40,7 +40,7 @@ t_function::t_function(
     return_type_ = t_type_ref::from_ptr(&t_primitive_type::t_void());
   }
   if (!params_) {
-    params_ = std::make_unique<t_paramlist>(program);
+    params_ = std::make_unique<t_paramlist>();
   }
 }
 

@@ -302,7 +302,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │     │  │     │  │  │  │  ╰─ end (offset): 0
    │  │     │     │  │     │  │  │  ╰─ unstructured_annotations (size: 0)
    │  │     │     │  │     │  │  ├─ name: func1_args
-   │  │     │     │  │     │  │  ├─ scoped_name: ParseAndDebugPrint.func1_args
+   │  │     │     │  │     │  │  ├─ scoped_name: func1_args
    │  │     │     │  │     │  │  ├─ uri: 
    │  │     │     │  │     │  │  ├─ explicit_uri? false
    │  │     │     │  │     │  │  ├─ generated? false
@@ -312,9 +312,9 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │     │  │     │  │  │  ├─ begin (offset): 0
    │  │     │     │  │     │  │  │  ╰─ end (offset): 0
    │  │     │     │  │     │  │  ╰─ name_range: <absent>
-   │  │     │     │  │     │  ├─ full_name: ParseAndDebugPrint.func1_args
+   │  │     │     │  │     │  ├─ full_name: func1_args
    │  │     │     │  │     │  ╰─ true_type: [t_type*] 0xNORMALIZED_19
-   │  │     │     │  │     │     ╰─ full_name: ParseAndDebugPrint.func1_args
+   │  │     │     │  │     │     ╰─ full_name: func1_args
    │  │     │     │  │     ╰─ fields (size: 0)
    │  │     │     │  ├─ exceptions: N/A
    │  │     │     │  ├─ qualifier: 0
@@ -364,7 +364,7 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │        │     │  │  │  │  ╰─ end (offset): 0
    │  │     │        │     │  │  │  ╰─ unstructured_annotations (size: 0)
    │  │     │        │     │  │  ├─ name: func2_args
-   │  │     │        │     │  │  ├─ scoped_name: ParseAndDebugPrint.func2_args
+   │  │     │        │     │  │  ├─ scoped_name: func2_args
    │  │     │        │     │  │  ├─ uri: 
    │  │     │        │     │  │  ├─ explicit_uri? false
    │  │     │        │     │  │  ├─ generated? false
@@ -374,9 +374,9 @@ constexpr auto kParseAndDebugPrintExpected = R"([t_program_bundle]
    │  │     │        │     │  │  │  ├─ begin (offset): 0
    │  │     │        │     │  │  │  ╰─ end (offset): 0
    │  │     │        │     │  │  ╰─ name_range: <absent>
-   │  │     │        │     │  ├─ full_name: ParseAndDebugPrint.func2_args
+   │  │     │        │     │  ├─ full_name: func2_args
    │  │     │        │     │  ╰─ true_type: [t_type*] 0xNORMALIZED_21
-   │  │     │        │     │     ╰─ full_name: ParseAndDebugPrint.func2_args
+   │  │     │        │     │     ╰─ full_name: func2_args
    │  │     │        │     ╰─ fields (size: 1)
    │  │     │        │        ╰─ fields[0] [t_field] @0xNORMALIZED_22
    │  │     │        │           ├─ (base) [t_named] @0xNORMALIZED_22

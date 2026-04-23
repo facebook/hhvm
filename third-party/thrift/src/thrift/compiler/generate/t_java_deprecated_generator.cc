@@ -2557,7 +2557,7 @@ void t_java_deprecated_generator::generate_service_client(
                          << function_signature(
                                 /*name=*/func.name(),
                                 /*return_type=*/func.return_type(),
-                                /*params=*/t_paramlist{program_},
+                                /*params=*/t_paramlist{},
                                 /*exceptions=*/func.exceptions(),
                                 /*prefix=*/"recv_")
                          << endl;

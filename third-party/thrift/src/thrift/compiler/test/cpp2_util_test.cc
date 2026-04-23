@@ -147,9 +147,9 @@ TEST(UtilTest, for_each_transitive_field) {
   auto depth = 1'000'000;
   auto structs = std::vector<std::unique_ptr<t_structured>>();
   structs.reserve(depth);
-  structs.push_back(std::make_unique<t_paramlist>(&program));
+  structs.push_back(std::make_unique<t_paramlist>());
   for (int i = 1; i < depth; ++i) {
-    structs.push_back(std::make_unique<t_paramlist>(&program));
+    structs.push_back(std::make_unique<t_paramlist>());
     structs[i - 1]->create_field(*structs[i], "field", 1);
   }
   auto count = 0;

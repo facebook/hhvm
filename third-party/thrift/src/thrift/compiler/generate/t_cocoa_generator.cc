@@ -1864,7 +1864,7 @@ void t_cocoa_generator::generate_cocoa_service_client_implementation(
       indent(out) << "- "
                   << function_signature(/*name=*/"recv_" + function.name(),
                                         /*return_type=*/function.return_type(),
-                                        /*params=*/t_paramlist{program_})
+                                        /*params=*/t_paramlist{})
                   << std::endl;
       scope_up(out);
 

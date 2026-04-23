@@ -283,6 +283,8 @@ class t_hack_generator : public t_concat_generator {
   };
 
   bool is_async_struct(const t_structured* tstruct);
+  const t_program* get_paramlist_program(const t_paramlist& params) const;
+  std::string get_paramlist_scoped_name(const t_paramlist& params) const;
 
   // Only use this to determine if struct uses IThriftShapishAsyncStruct
   bool is_async_shapish_struct(const t_structured* tstruct);
@@ -1040,7 +1042,11 @@ class t_hack_generator : public t_concat_generator {
   }
 
   std::string hack_name(const t_type* t, bool decl = false) {
-    return hack_name(find_hack_name(t), t->program(), decl);
+    const t_program* program = t->program();
+    if (const auto* params = t->try_as<t_paramlist>()) {
+      program = get_paramlist_program(*params);
+    }
+    return hack_name(find_hack_name(t), program, decl);
   }
 
   std::string hack_wrapped_type_name(
@@ -1342,6 +1348,7 @@ class t_hack_generator : public t_concat_generator {
   bool skip_constants_;
 
   std::map<std::string, ThriftShapishStructType> struct_async_type_;
+  std::unordered_map<const t_paramlist*, const t_program*> paramlist_programs_;
 
   /**
    * When to start emitting UNSAFE_CAST in $_TSPEC shape initializers.
@@ -2745,10 +2752,14 @@ std::unique_ptr<t_const_value> t_hack_generator::enum_to_tmeta(
 std::unique_ptr<t_const_value> t_hack_generator::struct_to_tmeta(
     const t_structured* tstruct, bool is_exception) {
   auto tmeta = t_const_value::make_map();
+  std::string scoped_name = tstruct->get_scoped_name();
+  if (const auto* params = tstruct->try_as<t_paramlist>()) {
+    scoped_name = get_paramlist_scoped_name(*params);
+  }
 
   tmeta->add_map(
       std::make_unique<t_const_value>("name"),
-      std::make_unique<t_const_value>(tstruct->get_scoped_name()));
+      std::make_unique<t_const_value>(std::move(scoped_name)));
 
   auto fields = tstruct->fields();
   if (!fields.empty()) {
@@ -3227,12 +3238,16 @@ void t_hack_generator::generate_php_struct_struct_trait(
   std::string traitName;
   auto struct_trait = find_hack_struct_trait(tstruct);
   if (struct_trait.first) {
+    const t_program* program = tstruct->program();
+    if (const auto* params = tstruct->try_as<t_paramlist>()) {
+      program = get_paramlist_program(*params);
+    }
     if (struct_trait.second.empty()) {
-      traitName = hack_name(name, tstruct->program()) + "Trait";
+      traitName = hack_name(name, program) + "Trait";
     } else {
       traitName = unescape(struct_trait.second);
       if (struct_trait.second.find('\\') == std::string::npos) {
-        traitName = hack_name(traitName, tstruct->program());
+        traitName = hack_name(traitName, program);
       }
     }
   }
@@ -4279,6 +4294,22 @@ void t_hack_generator::generate_php_structural_id(
   }
 }
 
+const t_program* t_hack_generator::get_paramlist_program(
+    const t_paramlist& params) const {
+  auto itr = paramlist_programs_.find(&params);
+  if (itr != paramlist_programs_.end()) {
+    return itr->second;
+  }
+  throw std::runtime_error(
+      "missing t_paramlist program for Hack code generation");
+}
+
+std::string t_hack_generator::get_paramlist_scoped_name(
+    const t_paramlist& params) const {
+  return fmt::format(
+      "{}.{}", get_paramlist_program(params)->name(), params.name());
+}
+
 bool t_hack_generator::is_async_struct(const t_structured* tstruct) {
   for (const auto& field : tstruct->fields()) {
     if (!skip_codegen(&field)) {
@@ -4291,7 +4322,11 @@ bool t_hack_generator::is_async_struct(const t_structured* tstruct) {
 }
 
 bool t_hack_generator::is_async_shapish_struct(const t_structured* tstruct) {
-  std::string parent_struct_name = hack_name(tstruct);
+  std::string parent_struct_name = tstruct->is<t_paramlist>()
+      ? hack_name(
+            find_hack_name(tstruct),
+            get_paramlist_program(tstruct->as<t_paramlist>()))
+      : hack_name(tstruct);
   switch (struct_async_type_[parent_struct_name]) {
     case ThriftShapishStructType::ASYNC:
       return true;
@@ -5512,8 +5547,12 @@ void t_hack_generator::_generate_php_struct_definition(
     struct_hack_name_with_ns = hack_wrapped_type_name(underlying_name, ns);
     struct_hack_decl = *underlying_name;
   } else {
-    struct_hack_name_with_ns = hack_name(name, tstruct->program());
-    struct_hack_decl = hack_name(name, tstruct->program(), true);
+    const t_program* program = tstruct->program();
+    if (const auto* params = tstruct->try_as<t_paramlist>()) {
+      program = get_paramlist_program(*params);
+    }
+    struct_hack_name_with_ns = hack_name(name, program);
+    struct_hack_decl = hack_name(name, program, true);
   }
 
   out << (generateAsTrait ? "trait " : "class ") << struct_hack_decl;
@@ -6717,6 +6756,7 @@ void t_hack_generator::generate_php_struct_definition_result_helpers(
 void t_hack_generator::generate_php_function_args_helpers(
     const t_function* tfunction, const std::string& prefix) {
   const t_paramlist& params = tfunction->params();
+  paramlist_programs_[&params] = tfunction->program();
   std::string params_name =
       prefix + "_" + find_hack_name(tfunction, params.name());
   generate_php_struct_definition(

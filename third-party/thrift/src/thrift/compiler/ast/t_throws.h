@@ -27,7 +27,8 @@ class t_program;
  */
 class t_throws : public t_structured {
  public:
-  t_throws() : t_structured(nullptr, "") {}
+  // A throws clause is unnamed and not associated with a program
+  t_throws() : t_structured() {}
 
   // A helper that returns true if value contains now exceptions, either because
   // it is not set, or because it is empty.

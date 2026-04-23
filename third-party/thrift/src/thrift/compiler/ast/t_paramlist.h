@@ -25,10 +25,8 @@ class t_program;
 
 class t_paramlist final : public t_structured {
  public:
-  // Param lists are unnamed.
-  // TODO(afuller): The program should always be null, because this is an
-  // 'unnamed' t_type (or more accurately, not a type at all).
-  explicit t_paramlist(const t_program* program) : t_structured(program, "") {}
+  // Param lists are unnamed and not associated with a program
+  explicit t_paramlist() : t_structured() {}
 };
 
 } // namespace apache::thrift::compiler

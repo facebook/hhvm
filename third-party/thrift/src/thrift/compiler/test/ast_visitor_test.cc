@@ -266,7 +266,7 @@ TYPED_TEST(AstVisitorTest, service) {
   auto throws = std::make_unique<t_throws>();
   t_field* thrownptr = &throws->create_field(*exn, "ex", 1);
   func1->set_exceptions(std::move(throws));
-  auto params = std::make_unique<t_paramlist>(nullptr);
+  auto params = std::make_unique<t_paramlist>();
   t_field* fieldptr =
       &params->create_field(t_primitive_type::t_i32(), "field", 1);
   auto func2 = std::make_unique<t_function>(

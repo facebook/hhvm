@@ -45,7 +45,9 @@ let validator =
                (Cls.get_typeconst_enforceability
                   class_
                   (snd typeconst.ttc_name)) ->
-        super#on_typeconst acc class_ typeconst
+        (* We don't need to look further into the abstract type constant, as it's guaranteed to be enforceable.
+         * In particular, it doesn't matter if its as-bound isn't enforceable *)
+        acc
       | TCAbstract _ ->
         let (pos, tconst) = typeconst.ttc_name in
         let r = Reason.witness_from_decl pos in

@@ -202,6 +202,12 @@ proxygen_add_library(proxygen_http_codec_http_binary_codec
     proxygen_http_message
 )
 
+proxygen_add_library(proxygen_http_codec_varint_utils
+  EXPORTED_DEPS
+    mvfst::mvfst_codec_types
+    Folly::folly_io_iobuf
+)
+
 proxygen_add_library(proxygen_http_codec_capsule_codec
   SRCS
     CapsuleCodec.cpp

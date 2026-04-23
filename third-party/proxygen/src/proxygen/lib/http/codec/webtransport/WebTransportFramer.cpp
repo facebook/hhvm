@@ -13,13 +13,14 @@
 #include <folly/Utility.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
+#include <proxygen/lib/http/codec/VarintUtils.h>
 
 #include <quic/codec/QuicInteger.h>
 #include <quic/folly_utils/Utils.h>
 
-namespace {
-const size_t kDefaultBufferGrowth = 32;
+using proxygen::writeVarint;
 
+namespace {
 // Logical frame type index into kFrameTypeMap.
 enum class FrameType : uint8_t {
   RESET_STREAM,
@@ -265,26 +266,6 @@ parseDrainWebTransportSession(size_t length) {
 }
 
 namespace {
-// Helper to write a variable-length integer
-void writeVarint(folly::IOBufQueue& buf,
-                 uint64_t value,
-                 size_t& size,
-                 bool& error) noexcept {
-  if (error) {
-    return;
-  }
-  folly::io::QueueAppender appender(&buf, kDefaultBufferGrowth);
-  auto appenderOp = [&](auto val) mutable {
-    appender.writeBE(folly::tag<decltype(val)>, val);
-  };
-  auto res = quic::encodeQuicInteger(value, appenderOp);
-  if (res.hasError()) {
-    error = true;
-  } else {
-    size += *res;
-  }
-}
-
 // Helper to write the capsule type and length
 void writeCapsuleHeader(folly::IOBufQueue& queue,
                         CapsuleType capsuleType,

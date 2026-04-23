@@ -81,6 +81,8 @@ proxygen_add_library(proxygen_transport_async_udp_socket_factory
     Folly::folly_network_address
 )
 
+add_subdirectory(qmux)
+
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()

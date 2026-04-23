@@ -43,10 +43,12 @@ enum class CapsuleType : uint32_t {
 // QMUX frame types from draft-ietf-quic-qmux, matching QUIC frame type values.
 // Names match CapsuleType (minus WT_ prefix) for use with the WT_QMUX macro.
 enum class QmuxFrameType : uint64_t {
+  PADDING = 0x00,
   RESET_STREAM = 0x04,
   STOP_SENDING = 0x05,
-  STREAM = 0x0a,          // QUIC STREAM | LEN
-  STREAM_WITH_FIN = 0x0b, // QUIC STREAM | LEN | FIN
+  STREAM_BASE = 0x08,     // 0x08..0x0f with flag bits
+  STREAM = 0x0a,          // STREAM_BASE | LEN
+  STREAM_WITH_FIN = 0x0b, // STREAM_BASE | LEN | FIN
   MAX_DATA = 0x10,
   MAX_STREAM_DATA = 0x11,
   MAX_STREAMS_BIDI = 0x12,
@@ -55,7 +57,14 @@ enum class QmuxFrameType : uint64_t {
   STREAM_DATA_BLOCKED = 0x15,
   STREAMS_BLOCKED_BIDI = 0x16,
   STREAMS_BLOCKED_UNI = 0x17,
+  CONNECTION_CLOSE = 0x1c,
+  CONNECTION_CLOSE_APP = 0x1d,
+  DATAGRAM_NO_LEN = 0x30,
   DATAGRAM = 0x31, // QUIC DATAGRAM with length
+  // QMUX extensions
+  QX_TRANSPORT_PARAMS = 0x3f5153300d0a0d0a,
+  QX_PING = 0x15228c06, // placeholder, TBD in draft
+  QX_PONG = 0x15228c07, // placeholder, TBD in draft
 };
 
 struct PaddingCapsule {

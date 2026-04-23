@@ -19,6 +19,9 @@ class CapsuleCodec {
   enum class ErrorCode : uint32_t {
     PARSE_UNDERFLOW = 0x0,
     PARSE_ERROR = 0x1,
+    PROTOCOL_VIOLATION = 0x2,
+    FRAME_ENCODING_ERROR = 0x3,
+    TRANSPORT_PARAMETER_ERROR = 0x4,
   };
 
   class Callback {

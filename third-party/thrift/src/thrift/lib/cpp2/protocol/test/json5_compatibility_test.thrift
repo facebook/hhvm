@@ -109,6 +109,7 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
     name = "EnumOne",
     inputs = [
       "{\"enumValue\": \"ONE (1)\"}",
+      "{\"enumValue\": \"ONE(1)\"}",
       "{\"enumValue\": \"ONE \\t (1)\"}",
       "{\"enumValue\": \"ONE\"}",
       "{\"enumValue\": \"(1)\"}",

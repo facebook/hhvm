@@ -94,7 +94,12 @@ public class PingServer {
     LOG.info("starting server using {} transport", type);
     ServerTransport transport =
         RpcServerUtils.createServerTransport(
-                new ThriftServerConfig().setPort(config.getPort()), type, handler)
+                new ThriftServerConfig()
+                    .setPort(config.getPort())
+                    .setSslEnabled(false)
+                    .setEnableJdkSsl(false),
+                type,
+                handler)
             .block();
     LOG.info("server started at -> " + transport.getAddress());
     transport.onClose().block();

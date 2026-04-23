@@ -191,8 +191,9 @@ public final class RpcClientUtils {
       return null;
     }
     try {
-      final SslProvider sslProvider;
+      final SslProvider sslProvider = enableJdkSsl ? SslProvider.JDK : SslProvider.OPENSSL;
       final ApplicationProtocolConfig applicationProtocolConfig;
+
       if (enableJdkSsl) {
         applicationProtocolConfig =
             new ApplicationProtocolConfig(
@@ -200,8 +201,6 @@ public final class RpcClientUtils {
                 ApplicationProtocolConfig.SelectorFailureBehavior.FATAL_ALERT,
                 ApplicationProtocolConfig.SelectedListenerFailureBehavior.FATAL_ALERT,
                 type.protocol());
-
-        sslProvider = SslProvider.JDK;
       } else {
         applicationProtocolConfig =
             new ApplicationProtocolConfig(
@@ -209,8 +208,6 @@ public final class RpcClientUtils {
                 ApplicationProtocolConfig.SelectorFailureBehavior.CHOOSE_MY_LAST_PROTOCOL,
                 ApplicationProtocolConfig.SelectedListenerFailureBehavior.CHOOSE_MY_LAST_PROTOCOL,
                 type.protocol());
-
-        sslProvider = SslProvider.OPENSSL;
       }
 
       return SslContextBuilder.forClient()

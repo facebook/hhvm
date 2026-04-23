@@ -55,7 +55,8 @@ public class RSocketThriftClientTest {
 
     System.out.println("starting server");
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory.createServerTransport(serverHandler).block();
     InetSocketAddress address = (InetSocketAddress) transport.getAddress();
@@ -90,7 +91,8 @@ public class RSocketThriftClientTest {
 
     System.out.println("starting server");
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory.createServerTransport(serverHandler).block();
     InetSocketAddress address = (InetSocketAddress) transport.getAddress();
@@ -119,7 +121,8 @@ public class RSocketThriftClientTest {
         new PingServiceRpcServerHandler(new BlockingPingService(), Collections.emptyList());
 
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory
             .createServerTransport(new InetSocketAddress(0), serverHandler, new SPINiftyMetrics())
@@ -150,7 +153,8 @@ public class RSocketThriftClientTest {
 
     System.out.println("starting server");
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory.createServerTransport(serverHandler).block();
     InetSocketAddress address = (InetSocketAddress) transport.getAddress();
@@ -180,7 +184,8 @@ public class RSocketThriftClientTest {
 
     System.out.println("starting server");
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory.createServerTransport(serverHandler).block();
     InetSocketAddress address = (InetSocketAddress) transport.getAddress();
@@ -216,7 +221,8 @@ public class RSocketThriftClientTest {
 
     System.out.println("starting server");
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory.createServerTransport(serverHandler).block();
     InetSocketAddress address = (InetSocketAddress) transport.getAddress();
@@ -276,7 +282,8 @@ public class RSocketThriftClientTest {
 
     System.out.println("starting server");
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory.createServerTransport(serverHandler).block();
     address = (InetSocketAddress) transport.getAddress();
@@ -415,7 +422,8 @@ public class RSocketThriftClientTest {
 
     System.out.println("starting server");
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory.createServerTransport(serverHandler).block();
     InetSocketAddress address = (InetSocketAddress) transport.getAddress();
@@ -474,7 +482,8 @@ public class RSocketThriftClientTest {
 
     System.out.println("starting server");
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory.createServerTransport(serverHandler).block();
     InetSocketAddress address = (InetSocketAddress) transport.getAddress();

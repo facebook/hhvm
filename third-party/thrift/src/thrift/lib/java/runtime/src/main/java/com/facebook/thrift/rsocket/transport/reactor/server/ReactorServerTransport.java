@@ -71,9 +71,9 @@ public class ReactorServerTransport implements ServerTransport<ReactorServerClos
 
     if (config.isSslEnabled() && !config.isEnableUDS()) {
       SslContext sslContext = RpcServerUtils.getSslContext(config);
-      tcpServer.secure(SslProvider.builder().sslContext(sslContext).build());
+      tcpServer = tcpServer.secure(SslProvider.builder().sslContext(sslContext).build());
     } else {
-      tcpServer.noSSL();
+      tcpServer = tcpServer.noSSL();
     }
 
     return tcpServer.bindAddress(() -> socketAddress).bind().map(this::handleBind);

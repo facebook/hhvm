@@ -122,7 +122,8 @@ public class TestThriftEventHandlerCallback {
     RpcServerHandler serverHandler = initializePingRpcServerHandler(testDoneThriftEventHandler);
 
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport rSocketTransport =
         transportFactory.createServerTransport(serverHandler).block();
 
@@ -173,7 +174,8 @@ public class TestThriftEventHandlerCallback {
         new PingServiceRpcServerHandler(new BlockingPingService(), ImmutableList.of(handler));
 
     RSocketServerTransportFactory transportFactory =
-        new RSocketServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+        new RSocketServerTransportFactory(
+            new ThriftServerConfig().setSslEnabled(false).setEnableJdkSsl(false));
     RSocketServerTransport transport =
         transportFactory.createServerTransport(serverHandler).block();
 

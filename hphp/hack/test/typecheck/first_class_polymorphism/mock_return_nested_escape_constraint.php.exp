@@ -1,0 +1,10 @@
+ERROR: File "mock_return_nested_escape_constraint.php", line 34, characters 42-51:
+A `where` type constraint is violated here (Typing[4323])
+  File "mock_return_nested_escape_constraint.php", line 22, characters 19-28:
+  This is the method with `where` type constraints
+  File "mock_return_nested_escape_constraint.php", line 29, characters 32-63:
+  Expected a first-class polymorphic function type.
+  File "mock_return_nested_escape_constraint.php", line 29, characters 26-26:
+  A higher rank generic `T#2` will escape its scope where `T#2` corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "mock_return_nested_escape_constraint.php", line 34, characters 42-51:
+  Please make this type explicit

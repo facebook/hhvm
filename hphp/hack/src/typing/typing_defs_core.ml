@@ -1547,8 +1547,10 @@ module Find_locl = struct
   and find_first_ty tys ~p =
     match tys with
     | [] -> None
-    | ty :: _ when p ty -> Some ty
-    | _ :: tys -> find_first_ty tys ~p
+    | ty :: tys ->
+      (match find_ty ty ~p with
+      | None -> find_first_ty tys ~p
+      | res -> res)
 
   and find_tuple { t_required; t_optional; t_extra } ~p =
     match find_first_ty t_required ~p with
@@ -1604,14 +1606,18 @@ module Find_locl = struct
   and find_first_constraint cstrs ~p =
     match cstrs with
     | [] -> None
-    | (_, ty) :: _ when p ty -> Some ty
-    | _ :: cstrs -> find_first_constraint cstrs ~p
+    | (_, ty) :: cstrs ->
+      (match find_ty ty ~p with
+      | None -> find_first_constraint cstrs ~p
+      | res -> res)
 
   and find_first_fun_param fun_params ~p =
     match fun_params with
     | [] -> None
-    | { fp_type; _ } :: _ when p fp_type -> Some fp_type
-    | _ :: cstrs -> find_first_fun_param cstrs ~p
+    | { fp_type; _ } :: cstrs ->
+      (match find_ty fp_type ~p with
+      | None -> find_first_fun_param cstrs ~p
+      | res -> res)
 
   and find_implicit_params { capability } ~p =
     match capability with

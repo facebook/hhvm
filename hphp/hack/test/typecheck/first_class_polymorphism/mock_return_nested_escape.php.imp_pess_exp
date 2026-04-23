@@ -1,0 +1,36 @@
+ERROR: File "mock_return_nested_escape.php", line 33, characters 39-48:
+A `where` type constraint is violated here (Typing[4323])
+  File "mock_return_nested_escape.php", line 18, characters 19-28:
+  This is the method with `where` type constraints
+  File "mock_return_nested_escape.php", line 28, characters 10-21:
+  Expected `dynamic` because method or function was called on dynamic or like-type
+  File "mock_return_nested_escape.php", line 20, characters 16-50:
+  But got `(readonly function(mixed...)[]: ~_)`
+ERROR: File "mock_return_nested_escape.php", line 33, characters 39-48:
+A `where` type constraint is violated here (Typing[4323])
+  File "mock_return_nested_escape.php", line 18, characters 19-28:
+  This is the method with `where` type constraints
+  File "mock_return_nested_escape.php", line 28, characters 10-21:
+  Expected `~(readonly function<T>(T $value): ~Awaitable<Box<T>>)` because method or function was called on dynamic or like-type
+  File "mock_return_nested_escape.php", line 20, characters 16-50:
+  But got `(readonly function(mixed...)[]: ~_)`
+ERROR: File "mock_return_nested_escape.php", line 33, characters 39-48:
+A `where` type constraint is violated here (Typing[4323])
+  File "mock_return_nested_escape.php", line 18, characters 19-28:
+  This is the method with `where` type constraints
+  File "mock_return_nested_escape.php", line 28, characters 37-53:
+  Expected a first-class polymorphic function type.
+  File "mock_return_nested_escape.php", line 28, characters 23-23:
+  A higher rank generic `T#3` will escape its scope where `T#3` corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "mock_return_nested_escape.php", line 33, characters 39-48:
+  Please make this type explicit
+ERROR: File "mock_return_nested_escape.php", line 33, characters 39-48:
+A `where` type constraint is violated here (Typing[4323])
+  File "mock_return_nested_escape.php", line 18, characters 19-28:
+  This is the method with `where` type constraints
+  File "mock_return_nested_escape.php", line 28, characters 37-53:
+  Expected a first-class polymorphic function type.
+  File "mock_return_nested_escape.php", line 28, characters 23-23:
+  A higher rank generic `T#4` will escape its scope where `T#4` corresponds to the rank-2 type parameter `T` in the polymorphic function
+  File "mock_return_nested_escape.php", line 33, characters 39-48:
+  Please make this type explicit

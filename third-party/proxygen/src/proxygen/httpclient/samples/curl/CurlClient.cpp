@@ -213,7 +213,11 @@ void CurlClient::sendBodyFromFile() {
     txn_->sendBody(std::move(buf));
   }
   if (!egressPaused_) {
-    txn_->sendEOM();
+    if (delayStreamFIN_) {
+      evb_->runAfterDelay([this]() { txn_->sendEOM(); }, 1);
+    } else {
+      txn_->sendEOM();
+    }
   }
 }
 

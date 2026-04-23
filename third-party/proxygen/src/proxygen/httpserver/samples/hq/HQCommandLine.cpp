@@ -163,6 +163,10 @@ DEFINE_bool(read_ecn,
             "Whether to read and echo ecn marking from ingress packets");
 DEFINE_uint32(dscp, 0, "DSCP value to use for outgoing packets");
 DEFINE_uint32(client_cid_length, 0, "Client Connection ID length in bytes");
+DEFINE_bool(
+    delay_stream_fin,
+    false,
+    "(HQClient) Send stream FIN in a separate QUIC packet from body data");
 
 namespace quic::samples {
 
@@ -404,6 +408,7 @@ void initializeHttpClientSettings(HQToolClientParams& hqParams) {
   hqParams.earlyData = FLAGS_early_data;
   hqParams.verifyServerCert = FLAGS_verify_server_cert;
   hqParams.migrateClient = FLAGS_migrate_client;
+  hqParams.delayStreamFIN = FLAGS_delay_stream_fin;
   hqParams.txnTimeout = std::chrono::milliseconds(FLAGS_txn_timeout);
   hqParams.httpVersion.parse(FLAGS_httpversion);
 } // initializeHttpClientSettings

@@ -132,6 +132,10 @@ class CurlClient
     headersLoggingEnabled_ = enabled;
   }
 
+  void setDelayStreamFIN(bool delay) {
+    delayStreamFIN_ = delay;
+  }
+
   void setEOMFunc(std::function<void()> eomFunc) {
     eomFunc_ = eomFunc;
   }
@@ -165,6 +169,7 @@ class CurlClient
   unsigned short httpMajor_;
   unsigned short httpMinor_;
   bool egressPaused_{false};
+  bool delayStreamFIN_{false};
   std::unique_ptr<std::ifstream> inputFile_;
   std::unique_ptr<std::ofstream> outputFile_;
   std::unique_ptr<std::ostream> outputStream_;

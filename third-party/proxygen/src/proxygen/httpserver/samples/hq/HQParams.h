@@ -94,6 +94,8 @@ struct HQClientParams : public HQBaseParams {
 
   std::string pskFilePath;
   std::shared_ptr<quic::QuicPskCache> pskCache;
+
+  bool delayStreamFIN{false};
 };
 
 struct HQInvalidParam {

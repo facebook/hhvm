@@ -107,6 +107,7 @@ HQClient::sendRequest(const proxygen::URL& requestUrl) {
 
   client->setLogging(params_.logResponse);
   client->setHeadersLogging(params_.logResponseHeaders);
+  client->setDelayStreamFIN(params_.delayStreamFIN);
   auto txn = newTransaction(client.get());
   if (!txn) {
     return nullptr;

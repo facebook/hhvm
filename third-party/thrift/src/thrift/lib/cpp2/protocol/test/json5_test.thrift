@@ -93,6 +93,7 @@ const list<TestCase> testCases = [
   TestCase{
     name = "Primitive",
     example = Example{
+      boolValue = true,
       i64Value = 42,
       stringValue = "hello",
       binaryValue = "?~",
@@ -108,7 +109,8 @@ const list<TestCase> testCases = [
   },
   \"floatValue\": 0.10000001,
   \"doubleValue\": 0.10000000000000002,
-  \"enumValue\": \"ONE (1)\"
+  \"enumValue\": \"ONE (1)\",
+  \"boolValue\": true
 }",
     json5 = "{
   i64Value: 42,
@@ -119,6 +121,7 @@ const list<TestCase> testCases = [
   floatValue: 0.10000001,
   doubleValue: 0.10000000000000002,
   enumValue: \"ONE (1)\",
+  boolValue: true,
 }",
   },
   TestCase{
@@ -793,14 +796,14 @@ const list<TestCase> testCases = [
   // ── Small integer types (bool, byte, i16) ─────────────────────────────────
   TestCase{
     name = "SmallIntegers",
-    example = Example{boolValue = true, byteValue = 42, i16Value = 1000},
+    example = Example{boolValue = false, byteValue = 42, i16Value = 1000},
     json = "{
-  \"boolValue\": true,
+  \"boolValue\": false,
   \"byteValue\": 42,
   \"i16Value\": 1000
 }",
     json5 = "{
-  boolValue: true,
+  boolValue: false,
   byteValue: 42,
   i16Value: 1000,
 }",

@@ -484,16 +484,20 @@ void OmniClient::sendImpl(
           nullptr);
       break;
     }
-    case RpcKind::BIDIRECTIONAL_STREAM:
+    case RpcKind::BIDIRECTIONAL_STREAM: {
+      BufferOptions bufferOptions = rpcOptions.getBufferOptions();
       channel_->sendRequestAsync<RpcKind::BIDIRECTIONAL_STREAM>(
           std::move(rpcOptions),
           apache::thrift::MethodMetadata(metadata),
           std::move(serializedRequest),
           std::move(header),
-          createBiDiClientCallback(toRequestClientCallbackPtr(
-              std::move(callback), std::move(callbackContext))),
+          createBiDiClientCallback(
+              toRequestClientCallbackPtr(
+                  std::move(callback), std::move(callbackContext)),
+              bufferOptions),
           nullptr);
       break;
+    }
   }
 }
 

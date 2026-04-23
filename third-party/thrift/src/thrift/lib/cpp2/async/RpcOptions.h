@@ -103,6 +103,14 @@ class RpcOptions {
   int32_t getChunkBufferSize() const;
   const BufferOptions& getBufferOptions() const;
 
+  /**
+   * Set the number of items that must be consumed before requesting more
+   * credits from the server. 0 means use the default (chunkSize / 2). Must
+   * not exceed chunkSize.
+   */
+  RpcOptions& setBufferReplenishThreshold(int32_t bufferReplenishThreshold);
+  int32_t getBufferReplenishThreshold() const;
+
   RpcOptions& setQueueTimeout(std::chrono::milliseconds queueTimeout);
   std::chrono::milliseconds getQueueTimeout() const;
 

@@ -276,7 +276,8 @@ SinkClientCallback* createSinkClientCallback(
 }
 
 BiDiClientCallback* createBiDiClientCallback(
-    RequestClientCallback::Ptr requestCallback) {
+    RequestClientCallback::Ptr requestCallback,
+    const BufferOptions& bufferOptions) {
   DCHECK(requestCallback->isInlineSafe())
       << "Bidirectional streaming methods do not support the callback client "
          "method flavor. "
@@ -284,7 +285,7 @@ BiDiClientCallback* createBiDiClientCallback(
 
   return apache::thrift::detail::ClientBiDiBridge::create(
       new RequestClientCallbackWrapper<apache::thrift::ClientBridgePtrPair>(
-          std::move(requestCallback)));
+          std::move(requestCallback), bufferOptions));
 }
 
 template class ClientBatonCallback<true, true>;

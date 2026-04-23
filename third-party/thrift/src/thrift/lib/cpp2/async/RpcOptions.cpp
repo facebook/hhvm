@@ -102,6 +102,18 @@ const BufferOptions& RpcOptions::getBufferOptions() const {
   return bufferOptions_;
 }
 
+RpcOptions& RpcOptions::setBufferReplenishThreshold(
+    int32_t bufferReplenishThreshold) {
+  CHECK_GE(bufferReplenishThreshold, 0)
+      << "bufferReplenishThreshold must not be negative";
+  bufferOptions_.bufferReplenishThreshold = bufferReplenishThreshold;
+  return *this;
+}
+
+int32_t RpcOptions::getBufferReplenishThreshold() const {
+  return bufferOptions_.bufferReplenishThreshold;
+}
+
 RpcOptions& RpcOptions::setQueueTimeout(
     std::chrono::milliseconds queueTimeout) {
   queueTimeout_ = validateTimeout(queueTimeout);

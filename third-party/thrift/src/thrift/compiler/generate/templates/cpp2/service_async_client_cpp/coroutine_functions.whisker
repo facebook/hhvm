@@ -36,8 +36,10 @@ folly::coro::Task<{{#partial client.return_type function=function service=interf
   auto [ctx, header] = {{function.cpp_name}}Ctx(&rpcOptions);
   using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
   auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-  auto wrappedCallback = {{#if function.stream?}}apache::thrift::createBiDiClientCallback{{#else}}apache::thrift::createSinkClientCallback{{/if}}(
-    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
+  auto wrappedCallback = {{#if function.stream?}}apache::thrift::createBiDiClientCallback(
+    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)),
+    rpcOptions.getBufferOptions()){{#else}}apache::thrift::createSinkClientCallback(
+    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback))){{/if function.stream?}};
     {{#if function.creates_interaction?}}
   {{function.created_interaction.cpp_name}} interactionHandle(channel_, "{{function.created_interaction.cpp_name}}", interceptors_);
     {{/if function.creates_interaction?}}

@@ -1026,4 +1026,63 @@ CO_TEST_F(BiDiServiceE2ETest, CustomBufferReplenishThreshold) {
   co_await folly::coro::collectAll(std::move(sinkTask), std::move(streamTask));
 }
 
+/**
+ * Verify that RpcOptions::setBufferReplenishThreshold flows through to the
+ * client-side stream in a BiDi method.
+ */
+CO_TEST_F(BiDiServiceE2ETest, ClientStreamCustomBufferReplenishThreshold) {
+  constexpr int64_t kNumItems = 50;
+
+  struct Handler : public ServiceHandler<detail::test::TestBiDiService> {
+    folly::coro::Task<StreamTransformation<int64_t, int64_t>> co_intStream()
+        override {
+      co_return StreamTransformation<int64_t, int64_t>{
+          .func = [](folly::coro::AsyncGenerator<int64_t&&> input)
+              -> folly::coro::AsyncGenerator<int64_t&&> {
+            while (auto item = co_await input.next()) {
+              co_yield std::move(*item);
+            }
+          },
+          .bufferSize = 100};
+    }
+  };
+
+  testConfig({std::make_shared<Handler>()});
+
+  auto client = makeClient<detail::test::TestBiDiService>();
+
+  apache::thrift::RpcOptions rpcOptions;
+  rpcOptions.setChunkBufferSize(10);
+  rpcOptions.setBufferReplenishThreshold(3);
+
+  BidirectionalStream<int64_t, int64_t> stream =
+      co_await client->co_intStream(rpcOptions);
+
+  auto sinkGen =
+      folly::coro::co_invoke([&]() -> folly::coro::AsyncGenerator<int64_t&&> {
+        for (int64_t i = 0; i < kNumItems; ++i) {
+          co_yield int64_t(i);
+        }
+      });
+
+  auto sinkTask = folly::coro::co_invoke(
+      [clientSink = std::move(stream.sink),
+       sinkGen = std::move(sinkGen)]() mutable -> folly::coro::Task<void> {
+        co_await std::move(clientSink).sink(std::move(sinkGen));
+      });
+
+  auto streamTask = folly::coro::co_invoke(
+      [streamGen = std::move(stream.stream).toAsyncGenerator()]() mutable
+          -> folly::coro::Task<void> {
+        for (int64_t i = 0; i < kNumItems; ++i) {
+          auto next = co_await streamGen.next();
+          EXPECT_TRUE(next.has_value());
+          EXPECT_EQ(*next, i);
+        }
+        EXPECT_FALSE(co_await streamGen.next());
+      });
+
+  co_await folly::coro::collectAll(std::move(sinkTask), std::move(streamTask));
+}
+
 } // namespace apache::thrift

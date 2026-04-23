@@ -135,7 +135,8 @@ folly::coro::Task<apache::thrift::BidirectionalStream<::std::int32_t, ::std::int
   using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
   auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
   auto wrappedCallback = apache::thrift::createBiDiClientCallback(
-    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
+    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)),
+    rpcOptions.getBufferOptions());
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
@@ -255,7 +256,8 @@ folly::coro::Task<apache::thrift::ResponseAndBidirectionalStream<::std::string, 
   using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
   auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
   auto wrappedCallback = apache::thrift::createBiDiClientCallback(
-    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
+    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)),
+    rpcOptions.getBufferOptions());
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
@@ -375,7 +377,8 @@ folly::coro::Task<apache::thrift::BidirectionalStream<::std::int64_t, ::std::int
   using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
   auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
   auto wrappedCallback = apache::thrift::createBiDiClientCallback(
-    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)));
+    apache::thrift::RequestClientCallback::Ptr(apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback)),
+    rpcOptions.getBufferOptions());
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();

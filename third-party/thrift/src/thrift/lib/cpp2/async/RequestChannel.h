@@ -314,7 +314,8 @@ SinkClientCallback* createSinkClientCallback(
     RequestClientCallback::Ptr requestCallback);
 
 BiDiClientCallback* createBiDiClientCallback(
-    RequestClientCallback::Ptr requestCallback);
+    RequestClientCallback::Ptr requestCallback,
+    const BufferOptions& bufferOptions);
 
 template <class Protocol>
 SerializedRequest preprocessSendT(

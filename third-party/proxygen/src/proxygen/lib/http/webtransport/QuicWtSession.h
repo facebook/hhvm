@@ -226,9 +226,6 @@ class H3WtSession final : public QuicWtSessionBase {
 
   ~H3WtSession() noexcept override;
 
-  folly::Expected<folly::Unit, ErrorCode> closeSession(
-      folly::Optional<uint32_t> error) noexcept override;
-
   /**
    * H3WtSession::acquireIngressStream should be invoked by the backing http/3
    * when an ingress wt stream (for the given connect stream) has been received.
@@ -269,6 +266,18 @@ class H3WtSession final : public QuicWtSessionBase {
    */
   folly::Expected<folly::Unit, ErrorCode> sendDatagram(
       IoBufPtr datagram) noexcept override;
+
+  /**
+   * Bidirectionally closes all associated webtransport streams. Notifies the
+   * WtHandler of session end and aborts all open Read&Write handles
+   */
+  folly::Expected<folly::Unit, ErrorCode> closeSession(
+      folly::Optional<uint32_t> error) noexcept override;
+
+  /**
+   * Simply invokes WebTransportHandler::onWtSession
+   */
+  void onWtSession(std::shared_ptr<WebTransport>) noexcept;
 
   /**
    * The backing http/3 session should invoke these functions when the

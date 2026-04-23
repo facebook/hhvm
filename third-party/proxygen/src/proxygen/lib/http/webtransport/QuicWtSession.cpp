@@ -482,6 +482,10 @@ H3WtSession::~H3WtSession() noexcept {
   H3WtSession::closeSession(folly::none);
 }
 
+void H3WtSession::onWtSession(std::shared_ptr<WebTransport> wt) noexcept {
+  CHECK_NOTNULL(wtHandler_.get())->onWebTransportSession(std::move(wt));
+}
+
 folly::Expected<folly::Unit, WebTransport::ErrorCode> H3WtSession::closeSession(
     folly::Optional<uint32_t> error) noexcept {
   // we need to bidi reset all assoc quic streams (ss+rst_stream)

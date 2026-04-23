@@ -35,15 +35,11 @@ When combined, operators evaluate according to their associativity. For more inf
 * [String Concatenation](/hack/expressions-and-operators/string-concatenation) (`.`)
 * [Unpack Types](/hack/expressions-and-operators/list) (`list`)
 
-## Error Control Operators
+## Other Operators
 * [Check / Assert an invariant](/hack/expressions-and-operators/invariant) (`invariant`)
-* [Suppress Errors](/hack/expressions-and-operators/error-control) (`@`)
-
-## Other Function Operators
 * [Async: Suspend Execution](/hack/expressions-and-operators/await) (`await`)
 * [Coalesce: Non-Null Evaluation](/hack/expressions-and-operators/coalesce) (`??`)
 * [Echo: Write to Standard Output](/hack/expressions-and-operators/echo) (`echo`)
-* [Exit: Terminate a Function](/hack/expressions-and-operators/exit) (`exit`)
 * [Pipe: Chain Function Calls](/hack/expressions-and-operators/pipe) (`|>` then stored in `$$`)
 * [Ternary: Alternative `If` Evaluation](/hack/expressions-and-operators/ternary) (`? :`, `?:`)
 * [Yield: Define a Generator](/hack/expressions-and-operators/yield) (`yield`)

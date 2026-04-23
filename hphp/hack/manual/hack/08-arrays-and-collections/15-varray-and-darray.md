@@ -160,5 +160,3 @@ The available runtime options change frequently; to get an up-to-date list, sear
 - `2` means a recoverable error is raised
 
 The `hhvm.hack_arr_compat_notices` option must be set to true for any of the `hhvm.hack_arr_` options to have an effect.
-
-Individual runtime settings are documented [here](/hack/built-in-types/darray-varray-runtime-options).

@@ -33,6 +33,7 @@ class ServerSinkFactory {
  public:
   using StartFunction = folly::Function<void(
       uint64_t,
+      uint64_t,
       std::chrono::milliseconds,
       folly::EventBase*,
       TilePtr&&,
@@ -56,11 +57,13 @@ class ServerSinkFactory {
       SinkConsumerImpl::Consumer&& consumer,
       folly::Executor::KeepAlive<> serverExecutor,
       uint64_t bufferSize,
+      uint64_t bufferReplenishThreshold,
       std::chrono::milliseconds timeout);
 
   explicit ServerSinkFactory(
       ConsumerCallback* consumerCallback,
       uint64_t bufferSize,
+      uint64_t bufferReplenishThreshold,
       std::chrono::milliseconds timeout);
 
   void start(
@@ -89,6 +92,7 @@ class ServerSinkFactory {
  private:
   StartFunction startFunction_{nullptr};
   uint64_t bufferSize_{};
+  uint64_t bufferReplenishThreshold_{};
   std::chrono::milliseconds chunkTimeout_{};
   TilePtr interaction_{};
   ContextStack::UniquePtr contextStack_{nullptr};

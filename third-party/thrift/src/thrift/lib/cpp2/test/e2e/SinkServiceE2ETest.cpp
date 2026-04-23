@@ -196,4 +196,38 @@ CO_TEST_F(SinkServiceE2ETest, EmptySink) {
   EXPECT_EQ(finalResponse, "empty");
 }
 
+CO_TEST_F(SinkServiceE2ETest, CustomBufferReplenishThreshold) {
+  constexpr int32_t kBufferSize = 10;
+  constexpr int32_t kNumItems = 20;
+
+  struct Handler : public ServiceHandler<detail::test::TestSinkE2EService> {
+    SinkConsumer<int32_t, std::string> echo(int32_t count) override {
+      return SinkConsumer<int32_t, std::string>{
+          [count](folly::coro::AsyncGenerator<int32_t&&> gen)
+              -> folly::coro::Task<std::string> {
+            int32_t received = 0;
+            while (auto item = co_await gen.next()) {
+              EXPECT_EQ(*item, received);
+              ++received;
+            }
+            EXPECT_EQ(received, count);
+            co_return fmt::format("received {}", received);
+          },
+          kBufferSize}
+          .setBufferReplenishThreshold(3);
+    }
+  };
+
+  testConfig({std::make_shared<Handler>()});
+  auto client = makeClient<detail::test::TestSinkE2EService>();
+  auto sink = co_await client->co_echo(kNumItems);
+  auto finalResponse =
+      co_await sink.sink([&]() -> folly::coro::AsyncGenerator<int32_t&&> {
+        for (int32_t i = 0; i < kNumItems; ++i) {
+          co_yield int32_t(i);
+        }
+      }());
+  EXPECT_EQ(finalResponse, fmt::format("received {}", kNumItems));
+}
+
 } // namespace apache::thrift

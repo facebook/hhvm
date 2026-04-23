@@ -42,6 +42,7 @@ struct SinkConsumerImpl {
       folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>)>;
   Consumer consumer;
   uint64_t bufferSize{};
+  uint64_t bufferReplenishThreshold{};
   std::chrono::milliseconds chunkTimeout{};
   folly::Executor::KeepAlive<> executor;
   TilePtr interaction{};

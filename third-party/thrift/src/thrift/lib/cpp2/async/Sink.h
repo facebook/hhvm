@@ -133,6 +133,10 @@ struct SinkConsumer {
       folly::coro::AsyncGenerator<SinkElement&&>)>;
   Consumer consumer;
   uint64_t bufferSize{100};
+  // Number of items that must be consumed before granting more credits to the
+  // client. 0 means use the default (bufferSize / 2). Must not exceed
+  // bufferSize.
+  uint64_t bufferReplenishThreshold{0};
   SinkOptions sinkOptions{std::chrono::milliseconds(0)};
   SinkConsumer&& setChunkTimeout(const std::chrono::milliseconds& timeout) && {
     sinkOptions.chunkTimeout = timeout;
@@ -140,6 +144,14 @@ struct SinkConsumer {
   }
   SinkConsumer& setChunkTimeout(const std::chrono::milliseconds& timeout) & {
     sinkOptions.chunkTimeout = timeout;
+    return *this;
+  }
+  SinkConsumer&& setBufferReplenishThreshold(uint64_t threshold) && {
+    bufferReplenishThreshold = threshold;
+    return std::move(*this);
+  }
+  SinkConsumer& setBufferReplenishThreshold(uint64_t threshold) & {
+    bufferReplenishThreshold = threshold;
     return *this;
   }
 #endif

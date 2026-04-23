@@ -31,11 +31,15 @@ ServerSinkFactory::ServerSinkFactory(
     SinkConsumerImpl::Consumer&& consumer,
     folly::Executor::KeepAlive<> serverExecutor,
     uint64_t bufferSize,
+    uint64_t bufferReplenishThreshold,
     std::chrono::milliseconds timeout)
-    : bufferSize_{bufferSize}, chunkTimeout_{timeout} {
+    : bufferSize_{bufferSize},
+      bufferReplenishThreshold_{bufferReplenishThreshold},
+      chunkTimeout_{timeout} {
   startFunction_ = [consumer = std::move(consumer),
                     serverExecutor = std::move(serverExecutor)](
                        uint64_t bufferSize,
+                       uint64_t bufferReplenishThreshold,
                        std::chrono::milliseconds chunkTimeout,
                        folly::EventBase* evb,
                        TilePtr&& interaction,
@@ -47,6 +51,7 @@ ServerSinkFactory::ServerSinkFactory(
     SinkConsumerImpl sinkConsumer;
     sinkConsumer.consumer = std::move(consumer);
     sinkConsumer.bufferSize = bufferSize;
+    sinkConsumer.bufferReplenishThreshold = bufferReplenishThreshold;
     sinkConsumer.chunkTimeout = chunkTimeout;
     sinkConsumer.executor = serverExecutor;
     sinkConsumer.interaction = std::move(interaction);
@@ -72,6 +77,7 @@ void ServerSinkFactory::start(
     folly::EventBase* evb) {
   startFunction_(
       bufferSize_,
+      bufferReplenishThreshold_,
       chunkTimeout_,
       evb,
       std::move(interaction_),
@@ -100,10 +106,14 @@ void ServerSinkFactory::setContextStack(ContextStack::UniquePtr contextStack) {
 ServerSinkFactory::ServerSinkFactory(
     ConsumerCallback* consumerCallback,
     uint64_t bufferSize,
+    uint64_t bufferReplenishThreshold,
     std::chrono::milliseconds chunkTimeout)
-    : bufferSize_{bufferSize}, chunkTimeout_{chunkTimeout} {
+    : bufferSize_{bufferSize},
+      bufferReplenishThreshold_{bufferReplenishThreshold},
+      chunkTimeout_{chunkTimeout} {
   startFunction_ = [consumerCallback](
                        uint64_t bufferSize,
+                       uint64_t bufferReplenishThreshold,
                        std::chrono::milliseconds chunkTimeout,
                        folly::EventBase* evb,
                        TilePtr&& interaction,
@@ -114,6 +124,7 @@ ServerSinkFactory::ServerSinkFactory(
     DCHECK(evb->isInEventBaseThread());
     SinkConsumerImpl sinkConsumer;
     sinkConsumer.bufferSize = bufferSize;
+    sinkConsumer.bufferReplenishThreshold = bufferReplenishThreshold;
     sinkConsumer.chunkTimeout = chunkTimeout;
     sinkConsumer.interaction = std::move(interaction);
     sinkConsumer.contextStack = std::move(contextStack);

@@ -116,6 +116,19 @@ folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>
 ServerSinkBridge::makeGenerator() {
   notifySinkSubscribe();
 
+  const auto effectiveThreshold = [&] {
+    auto t = consumer_.bufferReplenishThreshold;
+    if (t == 0) {
+      return consumer_.bufferSize / 2;
+    }
+    CHECK_GT(t, 0) << "bufferReplenishThreshold must not be negative";
+    CHECK_LT(t, consumer_.bufferSize)
+        << "bufferReplenishThreshold (" << t
+        << ") must be strictly less than bufferSize (" << consumer_.bufferSize
+        << ")";
+    return t;
+  }();
+
   int32_t counter = 0;
   while (true) {
     CoroConsumer consumer;
@@ -148,7 +161,7 @@ ServerSinkBridge::makeGenerator() {
       co_yield std::move(payload);
       notifySinkConsumed();
       counter++;
-      if (counter > static_cast<int32_t>(consumer_.bufferSize) / 2) {
+      if (counter > static_cast<int32_t>(effectiveThreshold)) {
         serverPush(StreamMessage::RequestN{counter});
         counter = 0;
       }

@@ -163,6 +163,7 @@ apache::thrift::detail::ServerSinkFactory toServerSinkFactory(
       std::move(consumer),
       std::move(executor),
       sinkConsumer.bufferSize,
+      sinkConsumer.bufferReplenishThreshold,
       sinkConsumer.sinkOptions.chunkTimeout};
   return sinkFactory;
 #else

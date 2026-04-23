@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -436,12 +437,14 @@ TEST_F(ThriftServerChannelTest, SendErrorWrappedSetsExceptionMetadata) {
          apache::thrift::SerializedCompressedRequest&&,
          apache::thrift::protocol::PROTOCOL_TYPES,
          apache::thrift::Cpp2RequestContext*) {
+        // Use an app-level exCode ("23" = kAppClientErrorCode) which
+        // should produce a PAYLOAD frame with exception metadata.
         req->sendErrorWrapped(
             folly::make_exception_wrapper<
                 apache::thrift::TApplicationException>(
                 apache::thrift::TApplicationException::INTERNAL_ERROR,
                 "something broke"),
-            "1");
+            "23");
       });
 
   pipeline_ = buildPipelineWithHandler(
@@ -482,6 +485,245 @@ TEST_F(ThriftServerChannelTest, SendErrorWrappedSetsExceptionMetadata) {
       capturedPayloadType,
       apache::thrift::PayloadMetadata::Type::exceptionMetadata);
   EXPECT_NE(capturedWhat.find("something broke"), std::string::npos);
+}
+
+TEST_F(ThriftServerChannelTest, SendReplyPreservesDeclaredExceptionMetadata) {
+  apache::thrift::PayloadMetadata::Type capturedPayloadType{};
+  std::string capturedName;
+  std::string capturedWhat;
+  bool hasDeclaredEx = false;
+
+  mockProcessor_->setOnRequest(
+      [this](
+          apache::thrift::ResponseChannelRequest::UniquePtr req,
+          apache::thrift::SerializedCompressedRequest&&,
+          apache::thrift::protocol::PROTOCOL_TYPES,
+          apache::thrift::Cpp2RequestContext* ctx) {
+        // Simulate what generated code does for declared exceptions:
+        // set isException + uex/uexw headers on the request context.
+        ctx->setException();
+        ctx->getHeader()->setHeader("uex", "MyException");
+        ctx->getHeader()->setHeader("uexw", "something went wrong");
+
+        req->sendReply(
+            apache::thrift::ResponsePayload(this->copyBuffer("ex data")));
+      });
+
+  pipeline_ = buildPipelineWithHandler(
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& msg) {
+        auto& response = msg.get<ThriftServerResponseMessage>();
+        if (response.payload.metadata) {
+          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+          auto ref = meta.payloadMetadata();
+          if (ref) {
+            capturedPayloadType = ref->getType();
+            if (capturedPayloadType ==
+                apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
+              auto& exBase = ref->get_exceptionMetadata();
+              if (exBase.name_utf8()) {
+                capturedName = *exBase.name_utf8();
+              }
+              if (exBase.what_utf8()) {
+                capturedWhat = *exBase.what_utf8();
+              }
+              auto metaRef = exBase.metadata();
+              if (metaRef) {
+                hasDeclaredEx =
+                    (metaRef->getType() ==
+                     apache::thrift::PayloadExceptionMetadata::Type::
+                         declaredException);
+              }
+            }
+          }
+        }
+        return Result::Success;
+      });
+  channel_->setPipeline(std::move(pipeline_));
+
+  auto request = createRequestMessage(1, "method", "data");
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
+
+  EXPECT_EQ(
+      capturedPayloadType,
+      apache::thrift::PayloadMetadata::Type::exceptionMetadata);
+  EXPECT_TRUE(hasDeclaredEx);
+  EXPECT_EQ(capturedName, "MyException");
+  EXPECT_EQ(capturedWhat, "something went wrong");
+}
+
+TEST_F(ThriftServerChannelTest, SendErrorWrappedSetsClientBlame) {
+  apache::thrift::ErrorBlame capturedBlame{};
+  bool hasBlame = false;
+
+  mockProcessor_->setOnRequest(
+      [](apache::thrift::ResponseChannelRequest::UniquePtr req,
+         apache::thrift::SerializedCompressedRequest&&,
+         apache::thrift::protocol::PROTOCOL_TYPES,
+         apache::thrift::Cpp2RequestContext*) {
+        req->sendErrorWrapped(
+            folly::make_exception_wrapper<
+                apache::thrift::TApplicationException>(
+                apache::thrift::TApplicationException::INTERNAL_ERROR,
+                "client did bad"),
+            "23");
+      });
+
+  pipeline_ = buildPipelineWithHandler(
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& msg) {
+        auto& response = msg.get<ThriftServerResponseMessage>();
+        if (response.payload.metadata) {
+          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+          auto ref = meta.payloadMetadata();
+          if (ref &&
+              ref->getType() ==
+                  apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
+            auto& exBase = ref->get_exceptionMetadata();
+            auto metaRef = exBase.metadata();
+            if (metaRef &&
+                metaRef->getType() ==
+                    apache::thrift::PayloadExceptionMetadata::Type::
+                        appUnknownException) {
+              auto& appEx = metaRef->get_appUnknownException();
+              if (auto ec = appEx.errorClassification()) {
+                if (auto b = ec->blame()) {
+                  hasBlame = true;
+                  capturedBlame = *b;
+                }
+              }
+            }
+          }
+        }
+        return Result::Success;
+      });
+  channel_->setPipeline(std::move(pipeline_));
+
+  auto request = createRequestMessage(1, "method", "data");
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
+
+  EXPECT_TRUE(hasBlame);
+  EXPECT_EQ(capturedBlame, apache::thrift::ErrorBlame::CLIENT);
+}
+
+TEST_F(ThriftServerChannelTest, SendErrorWrappedSetsServerBlame) {
+  apache::thrift::ErrorBlame capturedBlame{};
+  bool hasBlame = false;
+
+  mockProcessor_->setOnRequest(
+      [](apache::thrift::ResponseChannelRequest::UniquePtr req,
+         apache::thrift::SerializedCompressedRequest&&,
+         apache::thrift::protocol::PROTOCOL_TYPES,
+         apache::thrift::Cpp2RequestContext*) {
+        req->sendErrorWrapped(
+            folly::make_exception_wrapper<
+                apache::thrift::TApplicationException>(
+                apache::thrift::TApplicationException::INTERNAL_ERROR,
+                "server error"),
+            "24");
+      });
+
+  pipeline_ = buildPipelineWithHandler(
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& msg) {
+        auto& response = msg.get<ThriftServerResponseMessage>();
+        if (response.payload.metadata) {
+          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+          auto ref = meta.payloadMetadata();
+          if (ref &&
+              ref->getType() ==
+                  apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
+            auto& exBase = ref->get_exceptionMetadata();
+            auto metaRef = exBase.metadata();
+            if (metaRef &&
+                metaRef->getType() ==
+                    apache::thrift::PayloadExceptionMetadata::Type::
+                        appUnknownException) {
+              auto& appEx = metaRef->get_appUnknownException();
+              if (auto ec = appEx.errorClassification()) {
+                if (auto b = ec->blame()) {
+                  hasBlame = true;
+                  capturedBlame = *b;
+                }
+              }
+            }
+          }
+        }
+        return Result::Success;
+      });
+  channel_->setPipeline(std::move(pipeline_));
+
+  auto request = createRequestMessage(1, "method", "data");
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
+
+  EXPECT_TRUE(hasBlame);
+  EXPECT_EQ(capturedBlame, apache::thrift::ErrorBlame::SERVER);
+}
+
+TEST_F(ThriftServerChannelTest, SendErrorWrappedReadsUexHeaderAsExceptionName) {
+  // Legacy parity: when the handler sets the "uex" header, name_utf8 in the
+  // PAYLOAD frame's appUnknownException metadata should come from the header,
+  // not from the C++ exception class name. The uex/uexw/ex headers should
+  // also be erased after consumption to avoid leaking into the response.
+  std::string capturedName;
+  bool hasName = false;
+  bool uexErased = false;
+  bool uexwErased = false;
+  bool exErased = false;
+
+  mockProcessor_->setOnRequest(
+      [&](apache::thrift::ResponseChannelRequest::UniquePtr req,
+          apache::thrift::SerializedCompressedRequest&&,
+          apache::thrift::protocol::PROTOCOL_TYPES,
+          apache::thrift::Cpp2RequestContext* ctx) {
+        // Simulate handler setting cross-language exception name via header,
+        // plus uexw and ex headers that legacy also consumes/erases.
+        ctx->getHeader()->setHeader("uex", "my.thrift.MyAppError");
+        ctx->getHeader()->setHeader("uexw", "boom message");
+        ctx->getHeader()->setHeader("ex", "23");
+        req->sendErrorWrapped(
+            folly::make_exception_wrapper<
+                apache::thrift::TApplicationException>(
+                apache::thrift::TApplicationException::INTERNAL_ERROR, "boom"),
+            "23");
+
+        // Verify headers were consumed (erased) after sendErrorWrapped.
+        // Context is still alive in this lambda scope.
+        const auto& headers = ctx->getHeader()->getWriteHeaders();
+        uexErased = headers.find("uex") == headers.end();
+        uexwErased = headers.find("uexw") == headers.end();
+        exErased = headers.find("ex") == headers.end();
+      });
+
+  pipeline_ = buildPipelineWithHandler(
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& msg) {
+        auto& response = msg.get<ThriftServerResponseMessage>();
+        if (response.payload.metadata) {
+          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+          auto ref = meta.payloadMetadata();
+          if (ref &&
+              ref->getType() ==
+                  apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
+            auto& exBase = ref->get_exceptionMetadata();
+            if (auto n = exBase.name_utf8()) {
+              hasName = true;
+              capturedName = *n;
+            }
+          }
+        }
+        return Result::Success;
+      });
+  channel_->setPipeline(std::move(pipeline_));
+
+  auto request = createRequestMessage(1, "method", "data");
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
+
+  EXPECT_TRUE(hasName);
+  EXPECT_EQ(capturedName, "my.thrift.MyAppError");
+  EXPECT_TRUE(uexErased) << "uex header must be erased after consumption";
+  EXPECT_TRUE(uexwErased) << "uexw header must be erased after consumption";
+  EXPECT_TRUE(exErased) << "ex header must be erased after consumption";
 }
 
 // =============================================================================
@@ -615,6 +857,92 @@ TEST_F(ThriftServerChannelTest, DoubleSendReplyIsIgnored) {
   std::ignore = channel_->onRead(erase_and_box(std::move(request)));
 
   EXPECT_EQ(responseCount, 1);
+}
+
+// =============================================================================
+// sendErrorWrapped - SHUTDOWN Refinement
+// =============================================================================
+
+TEST_F(
+    ThriftServerChannelTest, SendErrorWrappedShutdownOverridesQueueOverloaded) {
+  uint32_t capturedErrorCode = 0;
+  apache::thrift::ResponseRpcErrorCode capturedRpcErrorCode{};
+
+  mockProcessor_->setOnRequest(
+      [](apache::thrift::ResponseChannelRequest::UniquePtr req,
+         apache::thrift::SerializedCompressedRequest&&,
+         apache::thrift::protocol::PROTOCOL_TYPES,
+         apache::thrift::Cpp2RequestContext*) {
+        // exCode "5" = QUEUE_OVERLOADED, but LOADSHEDDING exception
+        // should refine it to SHUTDOWN.
+        req->sendErrorWrapped(
+            folly::make_exception_wrapper<
+                apache::thrift::TApplicationException>(
+                apache::thrift::TApplicationException::LOADSHEDDING,
+                "shutting down"),
+            "5");
+      });
+
+  pipeline_ = buildPipelineWithHandler(
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& msg) {
+        auto& response = msg.get<ThriftServerResponseMessage>();
+        capturedErrorCode = response.errorCode;
+        // Deserialize ResponseRpcError from data to check the code
+        if (response.payload.data) {
+          apache::thrift::ResponseRpcError rpcError;
+          apache::thrift::CompactProtocolReader reader;
+          reader.setInput(response.payload.data.get());
+          rpcError.read(&reader);
+          capturedRpcErrorCode = *rpcError.code();
+        }
+        return Result::Success;
+      });
+  channel_->setPipeline(std::move(pipeline_));
+
+  auto request = createRequestMessage(1, "method", "data");
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
+
+  // ERROR frame (errorCode != 0)
+  EXPECT_NE(capturedErrorCode, 0u);
+  // Should be SHUTDOWN, not QUEUE_OVERLOADED
+  EXPECT_EQ(
+      capturedRpcErrorCode, apache::thrift::ResponseRpcErrorCode::SHUTDOWN);
+}
+
+// =============================================================================
+// sendErrorWrapped - Connection Closing
+// =============================================================================
+
+TEST_F(ThriftServerChannelTest, SendErrorWrappedConnectionClosingSendsNothing) {
+  int writeCount = 0;
+
+  mockProcessor_->setOnRequest(
+      [](apache::thrift::ResponseChannelRequest::UniquePtr req,
+         apache::thrift::SerializedCompressedRequest&&,
+         apache::thrift::protocol::PROTOCOL_TYPES,
+         apache::thrift::Cpp2RequestContext*) {
+        // exCode "-1" means connection closing — should not send anything.
+        req->sendErrorWrapped(
+            folly::make_exception_wrapper<
+                apache::thrift::TApplicationException>(
+                apache::thrift::TApplicationException::INTERNAL_ERROR,
+                "closing"),
+            "-1");
+      });
+
+  pipeline_ = buildPipelineWithHandler(
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&&) {
+        writeCount++;
+        return Result::Success;
+      });
+  channel_->setPipeline(std::move(pipeline_));
+
+  auto request = createRequestMessage(1, "method", "data");
+  std::ignore = channel_->onRead(erase_and_box(std::move(request)));
+
+  EXPECT_EQ(writeCount, 0) << "Connection closing should not write anything";
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

@@ -34,6 +34,7 @@
  * send results and call evb_.loopOnce() to drain deferred callbacks.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <folly/io/Cursor.h>
@@ -48,6 +49,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockAdapters.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/handler/FrameLengthParserHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
@@ -62,10 +64,13 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/test/TestAsyncTransport.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift::server::test {
@@ -131,12 +136,13 @@ class MockAsyncProcessor : public apache::thrift::AsyncProcessor {
     }
   }
 
-  void sendError(size_t idx, const std::string& message) {
+  void sendError(
+      size_t idx, const std::string& message, std::string exCode = "0") {
     if (idx < requests_.size() && requests_[idx].request) {
       requests_[idx].request->sendErrorWrapped(
           folly::make_exception_wrapper<apache::thrift::TApplicationException>(
               apache::thrift::TApplicationException::INTERNAL_ERROR, message),
-          "kInternalError");
+          std::move(exCode));
     }
   }
 
@@ -497,14 +503,54 @@ TEST_F(ThriftServerIntegrationTest, ResponseFlowsFromProcessorToSocket) {
   EXPECT_GT(parsed.dataSize(), 0u);
 }
 
-TEST_F(ThriftServerIntegrationTest, ErrorResponseFlowsFromProcessorToSocket) {
+TEST_F(ThriftServerIntegrationTest, ThriftErrorProducesErrorFrame) {
   setupPipelineWithSetup();
 
   auto rpcMeta = createMinimalRequestMetadata("testMethod");
   injectFrame(createRequestFrame(1, rpcMeta, folly::IOBuf::copyBuffer("req")));
   ASSERT_EQ(processor_->requests().size(), 1u);
 
-  processor_->sendError(0, "internal server error");
+  // exCode "5" = kQueueOverloadedErrorCode → should produce ERROR frame
+  processor_->sendError(0, "server overloaded", "5");
+  evb_.loopOnce();
+
+  auto responseFrame = getWrittenFrame();
+  ASSERT_NE(responseFrame, nullptr) << "Expected error response frame";
+
+  auto parsed = parseWrittenFrame(std::move(responseFrame));
+  ASSERT_TRUE(parsed.isValid());
+  EXPECT_EQ(
+      parsed.type(), apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(parsed.streamId(), 1u);
+
+  // Verify the error code is REJECTED (0x202) for loadshedding
+  apache::thrift::fast_thrift::frame::read::ErrorView errorView(parsed);
+  EXPECT_EQ(
+      errorView.errorCode(),
+      static_cast<uint32_t>(apache::thrift::rocket::ErrorCode::REJECTED));
+
+  // Verify the payload contains a valid ResponseRpcError
+  ASSERT_GT(parsed.dataSize(), 0u);
+  auto dataBuf = std::move(parsed).extractData();
+  ASSERT_NE(dataBuf, nullptr);
+  apache::thrift::ResponseRpcError rpcError;
+  apache::thrift::CompactProtocolReader reader;
+  reader.setInput(dataBuf.get());
+  rpcError.read(&reader);
+  EXPECT_EQ(
+      *rpcError.code(), apache::thrift::ResponseRpcErrorCode::QUEUE_OVERLOADED);
+  EXPECT_THAT(*rpcError.what_utf8(), ::testing::HasSubstr("server overloaded"));
+}
+
+TEST_F(ThriftServerIntegrationTest, AppErrorProducesPayloadFrame) {
+  setupPipelineWithSetup();
+
+  auto rpcMeta = createMinimalRequestMetadata("testMethod");
+  injectFrame(createRequestFrame(1, rpcMeta, folly::IOBuf::copyBuffer("req")));
+  ASSERT_EQ(processor_->requests().size(), 1u);
+
+  // exCode "23" = kAppClientErrorCode → no mapping → PAYLOAD frame
+  processor_->sendError(0, "application error", "23");
   evb_.loopOnce();
 
   auto responseFrame = getWrittenFrame();
@@ -516,6 +562,70 @@ TEST_F(ThriftServerIntegrationTest, ErrorResponseFlowsFromProcessorToSocket) {
       parsed.type(), apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
   EXPECT_EQ(parsed.streamId(), 1u);
   EXPECT_TRUE(parsed.hasMetadata());
+}
+
+TEST_F(ThriftServerIntegrationTest, BadMetadataProducesErrorFrame) {
+  setupPipelineWithSetup();
+
+  // Create a request with garbage metadata to trigger deserialization failure
+  auto garbageMetadata = folly::IOBuf::copyBuffer("not valid thrift metadata");
+  auto requestFrame = apache::thrift::fast_thrift::frame::write::serialize(
+      apache::thrift::fast_thrift::frame::write::RequestResponseHeader{
+          .streamId = 1},
+      std::move(garbageMetadata),
+      folly::IOBuf::copyBuffer("payload"));
+  injectFrame(std::move(requestFrame));
+
+  // Should not dispatch to processor
+  EXPECT_EQ(processor_->requests().size(), 0u);
+
+  evb_.loopOnce();
+
+  auto responseFrame = getWrittenFrame();
+  ASSERT_NE(responseFrame, nullptr)
+      << "Expected error response for bad metadata";
+
+  auto parsed = parseWrittenFrame(std::move(responseFrame));
+  ASSERT_TRUE(parsed.isValid());
+  EXPECT_EQ(
+      parsed.type(), apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(parsed.streamId(), 1u);
+
+  apache::thrift::fast_thrift::frame::read::ErrorView errorView(parsed);
+  EXPECT_EQ(
+      errorView.errorCode(),
+      static_cast<uint32_t>(apache::thrift::rocket::ErrorCode::INVALID));
+}
+
+TEST_F(ThriftServerIntegrationTest, UnsupportedRpcKindProducesErrorFrame) {
+  setupPipelineWithSetup();
+
+  apache::thrift::RequestRpcMetadata rpcMeta;
+  rpcMeta.name() = "streamMethod";
+  rpcMeta.kind() = apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE;
+  rpcMeta.protocol() = apache::thrift::ProtocolId::BINARY;
+
+  injectFrame(createRequestFrame(1, rpcMeta, folly::IOBuf::copyBuffer("req")));
+
+  // Should not dispatch to processor
+  EXPECT_EQ(processor_->requests().size(), 0u);
+
+  evb_.loopOnce();
+
+  auto responseFrame = getWrittenFrame();
+  ASSERT_NE(responseFrame, nullptr)
+      << "Expected error response for unsupported RPC kind";
+
+  auto parsed = parseWrittenFrame(std::move(responseFrame));
+  ASSERT_TRUE(parsed.isValid());
+  EXPECT_EQ(
+      parsed.type(), apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(parsed.streamId(), 1u);
+
+  apache::thrift::fast_thrift::frame::read::ErrorView errorView(parsed);
+  EXPECT_EQ(
+      errorView.errorCode(),
+      static_cast<uint32_t>(apache::thrift::rocket::ErrorCode::INVALID));
 }
 
 TEST_F(ThriftServerIntegrationTest, MultipleResponsesForDifferentStreams) {

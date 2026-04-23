@@ -21,13 +21,13 @@
 #include <memory>
 #include <folly/ExceptionWrapper.h>
 #include <folly/Synchronized.h>
-#include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -93,10 +93,10 @@ class ThriftServerChannel {
   void onException(folly::exception_wrapper&& e) noexcept;
 
  private:
-  // Send an error response for a given stream
-  void sendErrorResponse(
+  // Send a Thrift RPC infrastructure error as an ERROR frame.
+  void sendThriftError(
       uint32_t streamId,
-      apache::thrift::protocol::PROTOCOL_TYPES protocolId,
+      apache::thrift::ResponseRpcErrorCode errorCode,
       const std::string& errorMessage);
 
   std::shared_ptr<apache::thrift::AsyncProcessorFactory> processorFactory_;

@@ -85,4 +85,74 @@ TEST(ResponseMetadataTest, ErrorMetadataIsAppUnknownException) {
       apache::thrift::PayloadExceptionMetadata::Type::appUnknownException);
 }
 
+TEST(ResponseMetadataTest, MakeAppErrorResponseMetadataHasBlame) {
+  auto buf = makeAppErrorResponseMetadata(
+      "SomeException", "error occurred", apache::thrift::ErrorBlame::CLIENT);
+  ASSERT_NE(buf, nullptr);
+
+  apache::thrift::BinaryProtocolReader reader;
+  reader.setInput(buf.get());
+  apache::thrift::ResponseRpcMetadata result;
+  result.read(&reader);
+
+  ASSERT_TRUE(result.payloadMetadata().has_value());
+  EXPECT_EQ(
+      result.payloadMetadata()->getType(),
+      apache::thrift::PayloadMetadata::Type::exceptionMetadata);
+
+  auto& exBase = result.payloadMetadata()->get_exceptionMetadata();
+  ASSERT_TRUE(exBase.name_utf8().has_value());
+  EXPECT_EQ(*exBase.name_utf8(), "SomeException");
+  ASSERT_TRUE(exBase.what_utf8().has_value());
+  EXPECT_EQ(*exBase.what_utf8(), "error occurred");
+
+  ASSERT_TRUE(exBase.metadata().has_value());
+  EXPECT_EQ(
+      exBase.metadata()->getType(),
+      apache::thrift::PayloadExceptionMetadata::Type::appUnknownException);
+  auto& appEx = exBase.metadata()->get_appUnknownException();
+  ASSERT_TRUE(appEx.errorClassification().has_value());
+  ASSERT_TRUE(appEx.errorClassification()->blame().has_value());
+  EXPECT_EQ(
+      *appEx.errorClassification()->blame(),
+      apache::thrift::ErrorBlame::CLIENT);
+}
+
+TEST(ResponseMetadataTest, MakeDeclaredExceptionMetadataHasCorrectType) {
+  apache::thrift::ErrorClassification classification;
+  classification.blame() = apache::thrift::ErrorBlame::CLIENT;
+
+  auto buf = makeDeclaredExceptionMetadata(
+      "MyException", "something went wrong", classification);
+  ASSERT_NE(buf, nullptr);
+
+  apache::thrift::BinaryProtocolReader reader;
+  reader.setInput(buf.get());
+  apache::thrift::ResponseRpcMetadata result;
+  result.read(&reader);
+
+  ASSERT_TRUE(result.payloadMetadata().has_value());
+  EXPECT_EQ(
+      result.payloadMetadata()->getType(),
+      apache::thrift::PayloadMetadata::Type::exceptionMetadata);
+
+  auto& exBase = result.payloadMetadata()->get_exceptionMetadata();
+  ASSERT_TRUE(exBase.name_utf8().has_value());
+  EXPECT_EQ(*exBase.name_utf8(), "MyException");
+  ASSERT_TRUE(exBase.what_utf8().has_value());
+  EXPECT_EQ(*exBase.what_utf8(), "something went wrong");
+
+  ASSERT_TRUE(exBase.metadata().has_value());
+  EXPECT_EQ(
+      exBase.metadata()->getType(),
+      apache::thrift::PayloadExceptionMetadata::Type::declaredException);
+
+  auto& declaredEx = exBase.metadata()->get_declaredException();
+  ASSERT_TRUE(declaredEx.errorClassification().has_value());
+  ASSERT_TRUE(declaredEx.errorClassification()->blame().has_value());
+  EXPECT_EQ(
+      *declaredEx.errorClassification()->blame(),
+      apache::thrift::ErrorBlame::CLIENT);
+}
+
 } // namespace apache::thrift::fast_thrift::thrift

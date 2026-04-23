@@ -17,80 +17,61 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 
 #include <folly/ExceptionString.h>
-#include <folly/io/IOBufQueue.h>
 #include <folly/logging/xlog.h>
-#include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
-#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
 namespace {
 
-// Headroom reserved for downstream frame header serialization.
-// The framing layer needs up to 9 bytes (6B base header + 3B metadata
-// length). 16 bytes provides alignment margin.
-constexpr size_t kMetadataHeadroomBytes = 16;
-
 /**
- * Serialize ResponseRpcMetadata into IOBuf using Binary protocol.
- *
- * Pre-computes the serialized size to allocate a right-sized buffer,
- * and reserves headroom for downstream frame header serialization
- * (enabling the zero-alloc fast path in FrameWriter).
+ * Build PayloadMetadata from request context.
+ * For declared exceptions: reads uex/uexw/exMeta headers and delegates to
+ * the shared buildDeclaredExceptionPayloadMetadata helper.
+ * For normal responses: returns PayloadResponseMetadata.
  */
-std::unique_ptr<folly::IOBuf> serializeResponseMetadata(
-    const apache::thrift::ResponseRpcMetadata& metadata) {
-  apache::thrift::BinaryProtocolWriter writer;
-  auto serializedSize = metadata.serializedSizeZC(&writer);
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-  auto buf = folly::IOBuf::create(kMetadataHeadroomBytes + serializedSize);
-  buf->advance(kMetadataHeadroomBytes);
-  queue.append(std::move(buf));
-  writer.setOutput(&queue);
-  metadata.write(&writer);
-  return queue.move();
-}
+apache::thrift::PayloadMetadata buildPayloadMetadataFromContext(
+    apache::thrift::Cpp2RequestContext& ctx) {
+  if (!ctx.isException()) {
+    apache::thrift::PayloadMetadata payloadMetadata;
+    payloadMetadata.responseMetadata() =
+        apache::thrift::PayloadResponseMetadata();
+    return payloadMetadata;
+  }
 
-/**
- * Build a RocketResponseMessage containing a serialized
- * TApplicationException with PayloadExceptionMetadata.
- */
-apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage
-buildErrorResponseMessage(
-    uint32_t streamId,
-    apache::thrift::protocol::PROTOCOL_TYPES protocolId,
-    std::string errorMessage) {
-  apache::thrift::TApplicationException tae(
-      apache::thrift::TApplicationException::INTERNAL_ERROR, errorMessage);
-  auto buf = apache::thrift::serializeErrorStruct(protocolId, tae);
+  std::string exName;
+  std::string exWhat;
+  std::optional<apache::thrift::ErrorClassification> classification;
+  auto* writeHeaders = &ctx.getHeader()->mutableWriteHeaders();
 
-  apache::thrift::ResponseRpcMetadata responseMetadata;
-  apache::thrift::PayloadMetadata payloadMetadata;
-  apache::thrift::PayloadExceptionMetadataBase exBase;
-  apache::thrift::PayloadExceptionMetadata exMeta;
-  exMeta.appUnknownException() =
-      apache::thrift::PayloadAppUnknownExceptionMetdata();
-  exBase.metadata() = std::move(exMeta);
-  exBase.what_utf8() = std::move(errorMessage);
-  payloadMetadata.exceptionMetadata() = std::move(exBase);
-  responseMetadata.payloadMetadata() = std::move(payloadMetadata);
+  static const auto uex = std::string(apache::thrift::detail::kHeaderUex);
+  if (auto uexPtr = folly::get_ptr(*writeHeaders, uex)) {
+    exName = std::move(*uexPtr);
+    writeHeaders->erase(uex);
+  }
+  static const auto uexw = std::string(apache::thrift::detail::kHeaderUexw);
+  if (auto uexwPtr = folly::get_ptr(*writeHeaders, uexw)) {
+    exWhat = std::move(*uexwPtr);
+    writeHeaders->erase(uexw);
+  }
+  static const auto exMeta = std::string(apache::thrift::detail::kHeaderExMeta);
+  if (auto metaPtr = folly::get_ptr(*writeHeaders, exMeta)) {
+    classification =
+        apache::thrift::detail::deserializeErrorClassification(*metaPtr);
+    writeHeaders->erase(exMeta);
+  }
 
-  return apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage{
-      .payload =
-          {
-              .data = std::move(buf),
-              .metadata = serializeResponseMetadata(responseMetadata),
-              .complete = true,
-          },
-      .streamId = streamId,
-      .errorCode = 0};
+  return buildDeclaredExceptionPayloadMetadata(
+      std::move(exName), std::move(exWhat), classification);
 }
 
 /**
@@ -112,14 +93,12 @@ class PipelineResponseChannelRequest
       apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline,
       std::shared_ptr<std::atomic<bool>> pipelineAlive,
       bool isOneway,
-      apache::thrift::protocol::PROTOCOL_TYPES protocolId,
       apache::thrift::Cpp2ConnContext* connContext,
       std::string methodName)
       : streamId_(streamId),
         pipeline_(pipeline),
         pipelineAlive_(std::move(pipelineAlive)),
         isOneway_(isOneway),
-        protocolId_(protocolId),
         reqCtx_(connContext, &header_, std::move(methodName)) {}
 
   bool isActive() const override { return active_.load(); }
@@ -137,16 +116,14 @@ class PipelineResponseChannelRequest
     }
 
     apache::thrift::ResponseRpcMetadata responseMetadata;
-    apache::thrift::PayloadMetadata payloadMetadata;
-    payloadMetadata.responseMetadata() =
-        apache::thrift::PayloadResponseMetadata();
-    responseMetadata.payloadMetadata() = std::move(payloadMetadata);
+    responseMetadata.payloadMetadata() =
+        buildPayloadMetadataFromContext(reqCtx_);
 
     apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage msg{
         .payload =
             {
                 .data = std::move(response).buffer(),
-                .metadata = serializeResponseMetadata(responseMetadata),
+                .metadata = detail::serializeResponseMetadata(responseMetadata),
                 .complete = true,
             },
         .streamId = streamId_,
@@ -167,19 +144,80 @@ class PipelineResponseChannelRequest
   }
 
   void sendErrorWrapped(
-      folly::exception_wrapper ex, std::string /*exCode*/) override {
+      folly::exception_wrapper ex, std::string exCode) override {
     if (!active_.exchange(false)) {
       return;
     }
 
-    auto msg = buildErrorResponseMessage(
-        streamId_, protocolId_, ex.what().toStdString());
+    // Connection closing — silently drop (legacy Rocket behavior).
+    if (exCode == "-1") {
+      XLOG(INFO) << "Connection closing for stream " << streamId_;
+      return;
+    }
 
     if (!pipelineAlive_->load()) {
       XLOG(WARN) << "Pipeline destroyed, cannot send error for stream "
                  << streamId_;
       return;
     }
+
+    // Check if this is an infrastructure error that should be sent as
+    // an ERROR frame (matching the legacy Rocket server's behavior).
+    auto errorCode = mapExCodeToErrorCode(exCode);
+    if (errorCode) {
+      // Refine QUEUE_OVERLOADED → SHUTDOWN for LOADSHEDDING exceptions.
+      *errorCode = refineErrorCode(*errorCode, ex);
+
+      auto error =
+          serializeResponseRpcError(*errorCode, ex.what().toStdString());
+      ThriftServerResponseMessage msg{
+          .payload =
+              ThriftServerResponsePayload{
+                  .data = std::move(error.data),
+                  .metadata = nullptr,
+                  .complete = true},
+          .streamId = streamId_,
+          .errorCode = static_cast<uint32_t>(error.rocketErrorCode)};
+
+      auto result = pipeline_->fireWrite(
+          apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+              std::move(msg)));
+      if (result !=
+          apache::thrift::fast_thrift::channel_pipeline::Result::Success) {
+        XLOG(WARN) << "Pipeline write failed for error on stream " << streamId_;
+      }
+      return;
+    }
+
+    // App-level error: send as PAYLOAD frame with exception metadata.
+    apache::thrift::ErrorBlame blame = (exCode == kAppClientErrorCode)
+        ? apache::thrift::ErrorBlame::CLIENT
+        : apache::thrift::ErrorBlame::SERVER;
+
+    std::string exName;
+    auto* writeHeaders = &reqCtx_.getHeader()->mutableWriteHeaders();
+    static const auto uexHeader =
+        std::string(apache::thrift::detail::kHeaderUex);
+    if (auto uexPtr = folly::get_ptr(*writeHeaders, uexHeader)) {
+      exName = std::move(*uexPtr);
+      writeHeaders->erase(uexHeader);
+    }
+    static const auto uexwHeader =
+        std::string(apache::thrift::detail::kHeaderUexw);
+    writeHeaders->erase(uexwHeader);
+    static const auto exHeader = std::string(apache::thrift::detail::kHeaderEx);
+    writeHeaders->erase(exHeader);
+
+    ThriftServerResponseMessage msg{
+        .payload =
+            ThriftServerResponsePayload{
+                .data = nullptr,
+                .metadata = makeAppErrorResponseMetadata(
+                    std::move(exName), ex.what().toStdString(), blame),
+                .complete = true},
+        .streamId = streamId_,
+        .errorCode = 0};
+
     auto result = pipeline_->fireWrite(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
             std::move(msg)));
@@ -199,7 +237,6 @@ class PipelineResponseChannelRequest
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_;
   std::shared_ptr<std::atomic<bool>> pipelineAlive_;
   bool isOneway_;
-  apache::thrift::protocol::PROTOCOL_TYPES protocolId_;
   std::atomic<bool> active_{true};
   apache::thrift::transport::THeader header_;
   apache::thrift::Cpp2RequestContext reqCtx_;
@@ -268,9 +305,9 @@ ThriftServerChannel::onRead(
     } catch (...) {
       XLOG(ERR) << "Failed to deserialize request metadata: "
                 << folly::exceptionStr(std::current_exception());
-      sendErrorResponse(
+      sendThriftError(
           request.streamId,
-          apache::thrift::protocol::T_COMPACT_PROTOCOL,
+          apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
           "Failed to deserialize request metadata");
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
@@ -283,12 +320,10 @@ ThriftServerChannel::onRead(
       *kindRef != apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE) {
     XLOG(ERR) << "Unsupported RPC kind: " << static_cast<int>(*kindRef);
     if (request.streamId != 0) {
-      auto protocolId = apache::thrift::protocol::T_COMPACT_PROTOCOL;
-      if (metadata.protocol().has_value()) {
-        protocolId = static_cast<apache::thrift::protocol::PROTOCOL_TYPES>(
-            *metadata.protocol());
-      }
-      sendErrorResponse(request.streamId, protocolId, "Unsupported RPC kind");
+      sendThriftError(
+          request.streamId,
+          apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND,
+          "Unsupported RPC kind");
     }
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
@@ -327,7 +362,6 @@ ThriftServerChannel::onRead(
           pipeline_,
           pipelineAlive_,
           isOneway,
-          protocolId,
           &connContext_,
           std::move(methodName)));
 
@@ -352,11 +386,19 @@ ThriftServerChannel::onRead(
   return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
 
-void ThriftServerChannel::sendErrorResponse(
+void ThriftServerChannel::sendThriftError(
     uint32_t streamId,
-    apache::thrift::protocol::PROTOCOL_TYPES protocolId,
+    apache::thrift::ResponseRpcErrorCode errorCode,
     const std::string& errorMessage) {
-  auto msg = buildErrorResponseMessage(streamId, protocolId, errorMessage);
+  auto error = serializeResponseRpcError(errorCode, std::string(errorMessage));
+  ThriftServerResponseMessage msg{
+      .payload =
+          ThriftServerResponsePayload{
+              .data = std::move(error.data),
+              .metadata = nullptr,
+              .complete = true},
+      .streamId = streamId,
+      .errorCode = static_cast<uint32_t>(error.rocketErrorCode)};
 
   auto result = pipeline_->fireWrite(
       apache::thrift::fast_thrift::channel_pipeline::erase_and_box(

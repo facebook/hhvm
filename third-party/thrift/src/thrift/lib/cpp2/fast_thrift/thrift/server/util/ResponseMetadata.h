@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
@@ -69,6 +71,7 @@ inline std::unique_ptr<folly::IOBuf> getDefaultSuccessMetadata() {
 
 /**
  * Build serialized error metadata for an exception response.
+ * Legacy version without ErrorBlame — prefer makeAppErrorResponseMetadata().
  */
 inline std::unique_ptr<folly::IOBuf> makeErrorResponseMetadata(
     std::string errorMessage) {
@@ -82,6 +85,78 @@ inline std::unique_ptr<folly::IOBuf> makeErrorResponseMetadata(
   exBase.what_utf8() = std::move(errorMessage);
   payloadMetadata.exceptionMetadata() = std::move(exBase);
   responseMetadata.payloadMetadata() = std::move(payloadMetadata);
+  return detail::serializeResponseMetadata(responseMetadata);
+}
+
+/**
+ * Build serialized app error metadata with ErrorBlame.
+ * Used by sendErrorWrapped for app-level errors (PAYLOAD frame).
+ */
+inline std::unique_ptr<folly::IOBuf> makeAppErrorResponseMetadata(
+    std::string exName,
+    std::string errorMessage,
+    apache::thrift::ErrorBlame blame = apache::thrift::ErrorBlame::SERVER) {
+  apache::thrift::ResponseRpcMetadata responseMetadata;
+  apache::thrift::PayloadMetadata payloadMetadata;
+  apache::thrift::PayloadExceptionMetadataBase exBase;
+  apache::thrift::PayloadExceptionMetadata exMeta;
+
+  apache::thrift::PayloadAppUnknownExceptionMetdata appUnknown;
+  apache::thrift::ErrorClassification errorClassification;
+  errorClassification.blame() = blame;
+  appUnknown.errorClassification() = errorClassification;
+  exMeta.appUnknownException() = appUnknown;
+
+  if (!exName.empty()) {
+    exBase.name_utf8() = std::move(exName);
+  }
+  exBase.what_utf8() = std::move(errorMessage);
+  exBase.metadata() = std::move(exMeta);
+  payloadMetadata.exceptionMetadata() = std::move(exBase);
+  responseMetadata.payloadMetadata() = std::move(payloadMetadata);
+  return detail::serializeResponseMetadata(responseMetadata);
+}
+
+/**
+ * Build the inner PayloadMetadata for a declared exception (IDL `throws`).
+ */
+inline apache::thrift::PayloadMetadata buildDeclaredExceptionPayloadMetadata(
+    std::string exName,
+    std::string exWhat,
+    std::optional<apache::thrift::ErrorClassification> classification) {
+  apache::thrift::PayloadMetadata payloadMetadata;
+  apache::thrift::PayloadExceptionMetadataBase exBase;
+  apache::thrift::PayloadExceptionMetadata exMeta;
+
+  apache::thrift::PayloadDeclaredExceptionMetadata declaredEx;
+  if (classification) {
+    declaredEx.errorClassification() = *classification;
+  }
+  exMeta.declaredException() = declaredEx;
+
+  if (!exName.empty()) {
+    exBase.name_utf8() = std::move(exName);
+  }
+  if (!exWhat.empty()) {
+    exBase.what_utf8() = std::move(exWhat);
+  }
+  exBase.metadata() = std::move(exMeta);
+  payloadMetadata.exceptionMetadata() = std::move(exBase);
+  return payloadMetadata;
+}
+
+/**
+ * Build serialized declared exception metadata with optional
+ * ErrorClassification. Used by sendReply when isException is set.
+ */
+inline std::unique_ptr<folly::IOBuf> makeDeclaredExceptionMetadata(
+    std::string exName,
+    std::string exWhat,
+    std::optional<apache::thrift::ErrorClassification> classification =
+        std::nullopt) {
+  apache::thrift::ResponseRpcMetadata responseMetadata;
+  responseMetadata.payloadMetadata() = buildDeclaredExceptionPayloadMetadata(
+      std::move(exName), std::move(exWhat), classification);
   return detail::serializeResponseMetadata(responseMetadata);
 }
 

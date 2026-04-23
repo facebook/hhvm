@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -73,6 +74,24 @@ std::unique_ptr<folly::IOBuf> serializeRequestMetadata(
   writer.setOutput(&queue);
   metadata.write(&writer);
   return queue.move();
+}
+
+apache::thrift::ResponseRpcError deserializeResponseRpcError(
+    const folly::IOBuf& buf) {
+  apache::thrift::ResponseRpcError error;
+  apache::thrift::CompactProtocolReader reader;
+  reader.setInput(&buf);
+  error.read(&reader);
+  return error;
+}
+
+apache::thrift::ResponseRpcMetadata deserializeResponseMetadata(
+    const folly::IOBuf& buf) {
+  apache::thrift::ResponseRpcMetadata metadata;
+  apache::thrift::BinaryProtocolReader reader;
+  reader.setInput(&buf);
+  metadata.read(&reader);
+  return metadata;
 }
 
 ThriftServerRequestMessage makeRequestMessage(
@@ -263,12 +282,20 @@ TEST_F(ThriftServerAppAdapterTest, OnReadUnknownMethodSendsErrorResponse) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   bool writeCalled = false;
+  uint32_t capturedErrorCode = 0;
+  apache::thrift::ResponseRpcErrorCode capturedRpcErrorCode{};
 
   auto built = buildPipeline(
       adapter.get(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
+          TypeErasedBox&& box) {
         writeCalled = true;
+        auto& resp = box.get<ThriftServerResponseMessage>();
+        capturedErrorCode = resp.errorCode;
+        if (resp.payload.data) {
+          auto rpcError = deserializeResponseRpcError(*resp.payload.data);
+          capturedRpcErrorCode = *rpcError.code();
+        }
         return Result::Success;
       });
 
@@ -277,6 +304,10 @@ TEST_F(ThriftServerAppAdapterTest, OnReadUnknownMethodSendsErrorResponse) {
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled) << "Should send error response for unknown method";
+  EXPECT_NE(capturedErrorCode, 0u) << "Should be ERROR frame (errorCode != 0)";
+  EXPECT_EQ(
+      capturedRpcErrorCode,
+      apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD);
 }
 
 TEST_F(ThriftServerAppAdapterTest, OnReadPassesProtocolId) {
@@ -459,11 +490,20 @@ TEST_F(ThriftServerAppAdapterTest, OnReadUnsupportedFrameSendsErrorResponse) {
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   bool writeCalled = false;
+  uint32_t capturedErrorCode = 0;
+  apache::thrift::ResponseRpcErrorCode capturedRpcErrorCode{};
+
   auto built = buildPipeline(
       adapter.get(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
+          TypeErasedBox&& box) {
         writeCalled = true;
+        auto& resp = box.get<ThriftServerResponseMessage>();
+        capturedErrorCode = resp.errorCode;
+        if (resp.payload.data) {
+          auto rpcError = deserializeResponseRpcError(*resp.payload.data);
+          capturedRpcErrorCode = *rpcError.code();
+        }
         return Result::Success;
       });
 
@@ -474,6 +514,136 @@ TEST_F(ThriftServerAppAdapterTest, OnReadUnsupportedFrameSendsErrorResponse) {
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled) << "Should send error response for unsupported "
                               "frame type (not silently drop)";
+  EXPECT_NE(capturedErrorCode, 0u) << "Should be ERROR frame (errorCode != 0)";
+  EXPECT_EQ(
+      capturedRpcErrorCode,
+      apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND);
+}
+
+// =============================================================================
+// writeAppError Tests
+// =============================================================================
+
+namespace {
+
+// Captured fields from a writeAppError invocation, used for assertions.
+struct CapturedAppError {
+  bool writeCalled{false};
+  uint32_t errorCode{0};
+  std::string name;
+  std::string what;
+  bool hasBlame{false};
+  apache::thrift::ErrorBlame blame{};
+};
+
+} // namespace
+
+TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithClientBlame) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+
+  CapturedAppError captured;
+  auto built = buildPipeline(
+      adapter.get(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& box) {
+        captured.writeCalled = true;
+        auto& resp = box.get<ThriftServerResponseMessage>();
+        captured.errorCode = resp.errorCode;
+        if (resp.payload.metadata) {
+          auto meta = deserializeResponseMetadata(*resp.payload.metadata);
+          if (auto pmRef = meta.payloadMetadata(); pmRef &&
+              pmRef->getType() ==
+                  apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
+            auto& exBase = pmRef->get_exceptionMetadata();
+            if (auto n = exBase.name_utf8()) {
+              captured.name = *n;
+            }
+            if (auto w = exBase.what_utf8()) {
+              captured.what = *w;
+            }
+            if (auto metaRef = exBase.metadata(); metaRef &&
+                metaRef->getType() ==
+                    apache::thrift::PayloadExceptionMetadata::Type::
+                        appUnknownException) {
+              auto& appEx = metaRef->get_appUnknownException();
+              if (auto ec = appEx.errorClassification()) {
+                if (auto b = ec->blame()) {
+                  captured.hasBlame = true;
+                  captured.blame = *b;
+                }
+              }
+            }
+          }
+        }
+        return Result::Success;
+      });
+
+  adapter->writeAppError(
+      7,
+      "my.thrift.MyAppError",
+      "client did bad",
+      apache::thrift::ErrorBlame::CLIENT);
+
+  EXPECT_TRUE(captured.writeCalled);
+  EXPECT_EQ(captured.errorCode, 0u) << "Should be PAYLOAD frame";
+  EXPECT_EQ(captured.name, "my.thrift.MyAppError");
+  EXPECT_EQ(captured.what, "client did bad");
+  EXPECT_TRUE(captured.hasBlame);
+  EXPECT_EQ(captured.blame, apache::thrift::ErrorBlame::CLIENT);
+}
+
+TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+
+  CapturedAppError captured;
+  auto built = buildPipeline(
+      adapter.get(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& box) {
+        captured.writeCalled = true;
+        auto& resp = box.get<ThriftServerResponseMessage>();
+        captured.errorCode = resp.errorCode;
+        if (resp.payload.metadata) {
+          auto meta = deserializeResponseMetadata(*resp.payload.metadata);
+          if (auto pmRef = meta.payloadMetadata(); pmRef &&
+              pmRef->getType() ==
+                  apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
+            auto& exBase = pmRef->get_exceptionMetadata();
+            if (auto n = exBase.name_utf8()) {
+              captured.name = *n;
+            }
+            if (auto w = exBase.what_utf8()) {
+              captured.what = *w;
+            }
+            if (auto metaRef = exBase.metadata(); metaRef &&
+                metaRef->getType() ==
+                    apache::thrift::PayloadExceptionMetadata::Type::
+                        appUnknownException) {
+              auto& appEx = metaRef->get_appUnknownException();
+              if (auto ec = appEx.errorClassification()) {
+                if (auto b = ec->blame()) {
+                  captured.hasBlame = true;
+                  captured.blame = *b;
+                }
+              }
+            }
+          }
+        }
+        return Result::Success;
+      });
+
+  adapter->writeAppError(
+      7,
+      "my.thrift.MyAppError",
+      "server bug",
+      apache::thrift::ErrorBlame::SERVER);
+
+  EXPECT_TRUE(captured.writeCalled);
+  EXPECT_EQ(captured.errorCode, 0u) << "Should be PAYLOAD frame";
+  EXPECT_EQ(captured.name, "my.thrift.MyAppError");
+  EXPECT_EQ(captured.what, "server bug");
+  EXPECT_TRUE(captured.hasBlame);
+  EXPECT_EQ(captured.blame, apache::thrift::ErrorBlame::SERVER);
 }
 
 // =============================================================================
@@ -486,11 +656,20 @@ TEST_F(
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   bool writeCalled = false;
+  uint32_t capturedErrorCode = 0;
+  apache::thrift::ResponseRpcErrorCode capturedRpcErrorCode{};
+
   auto built = buildPipeline(
       adapter.get(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
+          TypeErasedBox&& box) {
         writeCalled = true;
+        auto& resp = box.get<ThriftServerResponseMessage>();
+        capturedErrorCode = resp.errorCode;
+        if (resp.payload.data) {
+          auto rpcError = deserializeResponseRpcError(*resp.payload.data);
+          capturedRpcErrorCode = *rpcError.code();
+        }
         return Result::Success;
       });
 
@@ -500,6 +679,10 @@ TEST_F(
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled) << "Should send error response when metadata "
                               "deserialization fails (not silently drop)";
+  EXPECT_NE(capturedErrorCode, 0u) << "Should be ERROR frame (errorCode != 0)";
+  EXPECT_EQ(
+      capturedRpcErrorCode,
+      apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE);
 }
 
 // =============================================================================
@@ -531,45 +714,6 @@ TEST_F(
 }
 
 // =============================================================================
-// writeErr Tests
-// =============================================================================
-
-TEST_F(ThriftServerAppAdapterTest, WriteErrSendsErrorResponse) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-
-  bool writeCalled = false;
-  uint32_t capturedStreamId = 0;
-
-  auto built = buildPipeline(
-      adapter.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& box) {
-        writeCalled = true;
-        auto& resp = box.get<ThriftServerResponseMessage>();
-        capturedStreamId = resp.streamId;
-        // Verify the response has serialized data (the TApplicationException)
-        EXPECT_NE(resp.payload.data, nullptr);
-        EXPECT_NE(resp.payload.metadata, nullptr);
-        return Result::Success;
-      });
-
-  adapter->writeErr<apache::thrift::BinaryProtocolWriter>(
-      7, folly::make_exception_wrapper<std::runtime_error>("something broke"));
-
-  EXPECT_TRUE(writeCalled) << "writeErr should send error response";
-  EXPECT_EQ(capturedStreamId, 7u);
-}
-
-TEST_F(ThriftServerAppAdapterTest, WriteErrWithNoPipelineDoesNotCrash) {
-  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
-  // No pipeline set
-
-  adapter->writeErr<apache::thrift::BinaryProtocolWriter>(
-      1, folly::make_exception_wrapper<std::runtime_error>("error"));
-  // Should not crash
-}
-
-// =============================================================================
 // Unsupported RPC Kind Tests
 // =============================================================================
 
@@ -579,11 +723,20 @@ TEST_F(
   TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
 
   bool writeCalled = false;
+  uint32_t capturedErrorCode = 0;
+  apache::thrift::ResponseRpcErrorCode capturedRpcErrorCode{};
+
   auto built = buildPipeline(
       adapter.get(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
+          TypeErasedBox&& box) {
         writeCalled = true;
+        auto& resp = box.get<ThriftServerResponseMessage>();
+        capturedErrorCode = resp.errorCode;
+        if (resp.payload.data) {
+          auto rpcError = deserializeResponseRpcError(*resp.payload.data);
+          capturedRpcErrorCode = *rpcError.code();
+        }
         return Result::Success;
       });
 
@@ -594,6 +747,84 @@ TEST_F(
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(writeCalled)
       << "Should send error response for unsupported RPC kind";
+  EXPECT_NE(capturedErrorCode, 0u) << "Should be ERROR frame (errorCode != 0)";
+  EXPECT_EQ(
+      capturedRpcErrorCode,
+      apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND);
+}
+
+TEST_F(
+    ThriftServerAppAdapterTest, WriteResponseErrorProducesDeclaredException) {
+  TestServerAppAdapter::Ptr adapter{new TestServerAppAdapter()};
+
+  bool writeCalled = false;
+  uint32_t capturedErrorCode = 0;
+  std::string capturedName;
+  std::string capturedWhat;
+  bool hasDeclaredException = false;
+  bool hasClassification = false;
+  apache::thrift::ErrorBlame capturedBlame{};
+  std::string capturedData;
+
+  auto built = buildPipeline(
+      adapter.get(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& box) {
+        writeCalled = true;
+        auto& resp = box.get<ThriftServerResponseMessage>();
+        capturedErrorCode = resp.errorCode;
+        if (resp.payload.data) {
+          capturedData = resp.payload.data->moveToFbString().toStdString();
+        }
+        if (resp.payload.metadata) {
+          auto meta = deserializeResponseMetadata(*resp.payload.metadata);
+          if (auto pmRef = meta.payloadMetadata(); pmRef &&
+              pmRef->getType() ==
+                  apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
+            auto& exBase = pmRef->get_exceptionMetadata();
+            if (auto n = exBase.name_utf8()) {
+              capturedName = *n;
+            }
+            if (auto w = exBase.what_utf8()) {
+              capturedWhat = *w;
+            }
+            if (auto metaRef = exBase.metadata(); metaRef &&
+                metaRef->getType() ==
+                    apache::thrift::PayloadExceptionMetadata::Type::
+                        declaredException) {
+              hasDeclaredException = true;
+              auto& declared = metaRef->get_declaredException();
+              if (auto ec = declared.errorClassification()) {
+                if (auto b = ec->blame()) {
+                  hasClassification = true;
+                  capturedBlame = *b;
+                }
+              }
+            }
+          }
+        }
+        return Result::Success;
+      });
+
+  apache::thrift::ErrorClassification classification;
+  classification.blame() = apache::thrift::ErrorBlame::CLIENT;
+
+  adapter->writeResponseError(
+      7,
+      folly::IOBuf::copyBuffer("serialized exception struct"),
+      "my.thrift.MyDeclaredException",
+      "expected failure",
+      classification);
+
+  EXPECT_TRUE(writeCalled);
+  EXPECT_EQ(capturedErrorCode, 0u) << "Should be PAYLOAD frame";
+  EXPECT_EQ(capturedData, "serialized exception struct")
+      << "Exception data should be carried in payload.data";
+  EXPECT_EQ(capturedName, "my.thrift.MyDeclaredException");
+  EXPECT_EQ(capturedWhat, "expected failure");
+  EXPECT_TRUE(hasDeclaredException);
+  EXPECT_TRUE(hasClassification);
+  EXPECT_EQ(capturedBlame, apache::thrift::ErrorBlame::CLIENT);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

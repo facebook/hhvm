@@ -25,8 +25,8 @@ import traceback
 import types
 import unittest
 
-from testing.clients import TestingService
-from testing.types import easy, I32List
+from test_thrift.clients import TestingService
+from test_thrift.types import easy, I32List
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 from thrift.lib.python.client.test.client_event_handler.helper import (
     TestHelper as ClientEventHandlerTestHelper,

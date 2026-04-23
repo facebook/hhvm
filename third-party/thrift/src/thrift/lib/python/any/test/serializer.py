@@ -24,7 +24,7 @@ import unittest
 from apache.thrift.type.standard.thrift_types import TypeName, Void
 from apache.thrift.type.type.thrift_types import Type
 from folly.iobuf import IOBuf
-from testing.thrift_types import Color
+from test_thrift.thrift_types import Color
 from thrift.lib.python.any.typestub import PrimitiveType, SerializableType, TKey, TValue
 from thrift.python.any.serializer import (
     deserialize_list,

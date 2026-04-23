@@ -23,12 +23,12 @@ import types
 import unittest
 from typing import Any, Type, TypeVar
 
-import testing.thrift_mutable_types as mutable_types
-import testing.thrift_types as immutable_types
+import test_thrift.thrift_mutable_types as mutable_types
+import test_thrift.thrift_types as immutable_types
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 from parameterized import parameterized_class
-from testing.thrift_types import ComplexUnion, Digits, Integers, ReservedUnion
+from test_thrift.thrift_types import ComplexUnion, Digits, Integers, ReservedUnion
 from thrift.python.mutable_types import _ThriftListWrapper, MutableUnion, to_thrift_list
 from thrift.python.serializer import deserialize, serialize_iobuf
 from thrift.python.types import Union

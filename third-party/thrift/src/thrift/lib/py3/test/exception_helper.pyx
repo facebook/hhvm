@@ -15,13 +15,13 @@
 from cython.operator cimport dereference as deref
 from libc.stdint cimport int32_t
 from libcpp.memory cimport shared_ptr, make_shared
-from testing.cbindings cimport cHardError, cUnusedError
-from testing.converter cimport (
+from test_thrift.cbindings cimport cHardError, cUnusedError
+from test_thrift.converter cimport (
     HardError_from_cpp,
     UnusedError_from_cpp,
 )
 
-import testing.types
+import test_thrift.types
 
 def simulate_HardError(str errortext, int32_t code):
     cdef shared_ptr[cHardError] c_inst = make_shared[cHardError]()

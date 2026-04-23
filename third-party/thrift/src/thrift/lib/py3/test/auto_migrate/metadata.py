@@ -17,21 +17,21 @@
 
 import unittest
 
-# pyre-fixme[21]: Could not find module `testing.metadata`.
-import testing.metadata
+# pyre-fixme[21]: Could not find module `test_thrift.metadata`.
+import test_thrift.metadata
 from apache.thrift.metadata.types import ThriftPrimitiveType
-from testing.clients import TestingService, TestingServiceChild
-from testing.services import TestingServiceInterface
-from testing.types import hard, HardError, mixed, Perm
+from test_thrift.clients import TestingService, TestingServiceChild
+from test_thrift.services import TestingServiceInterface
+from test_thrift.types import hard, HardError, mixed, Perm
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 from thrift.py3.metadata import gen_metadata, ThriftKind
 
 
 class MetadataTests(unittest.TestCase):
     def test_metadata_enums(self) -> None:
-        # pyre-fixme[16]: Module `testing` has no attribute `metadata`.
-        meta = gen_metadata(testing.metadata)
-        enumName = "testing.Perm"
+        # pyre-fixme[16]: Module `test_thrift` has no attribute `metadata`.
+        meta = gen_metadata(test_thrift.metadata)
+        enumName = "test_thrift.Perm"
         self.assertIsNotNone(meta)
         permEnum = meta.enums[enumName]
         self.assertEqual(permEnum.name, enumName)
@@ -44,9 +44,9 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(permEnum, gen_metadata(Perm(1)))
 
     def test_metadata_structs(self) -> None:
-        # pyre-fixme[16]: Module `testing` has no attribute `metadata`.
-        meta = gen_metadata(testing.metadata)
-        structName = "testing.hard"
+        # pyre-fixme[16]: Module `test_thrift` has no attribute `metadata`.
+        meta = gen_metadata(test_thrift.metadata)
+        structName = "test_thrift.hard"
         self.assertIsNotNone(meta)
         hardStruct = meta.structs[structName]
         hardStructClass = gen_metadata(hard)
@@ -77,7 +77,7 @@ class MetadataTests(unittest.TestCase):
             ThriftPrimitiveType.THRIFT_STRING_TYPE,
         )
 
-        self.assertEqual(meta.structs["testing.EmptyUnion"].is_union, True)
+        self.assertEqual(meta.structs["test_thrift.EmptyUnion"].is_union, True)
 
         mixedStruct = gen_metadata(mixed)
         _, _, _, _, field, *rest = mixedStruct.fields
@@ -122,7 +122,7 @@ class MetadataTests(unittest.TestCase):
 
         # Test a few fields on the struct
         integers = an_int.type.as_union()
-        self.assertEqual(integers.name, "testing.Integers")
+        self.assertEqual(integers.name, "test_thrift.Integers")
         self.assertEqual(integers.is_union, True)
 
         # Grab type on field, treat as struct (for type checking), grab fields
@@ -151,9 +151,9 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(other_integers.is_union, integers.is_union)
 
     def test_metadata_exceptions(self) -> None:
-        # pyre-fixme[16]: Module `testing` has no attribute `metadata`.
-        meta = gen_metadata(testing.metadata)
-        errorName = "testing.HardError"
+        # pyre-fixme[16]: Module `test_thrift` has no attribute `metadata`.
+        meta = gen_metadata(test_thrift.metadata)
+        errorName = "test_thrift.HardError"
         self.assertIsNotNone(meta)
         hardError = meta.exceptions[errorName]
         hardErrorClass = gen_metadata(HardError)
@@ -174,9 +174,9 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(field.type.value, ThriftPrimitiveType.THRIFT_I32_TYPE)
 
     def test_metadata_services(self) -> None:
-        # pyre-fixme[16]: Module `testing` has no attribute `metadata`.
-        meta = gen_metadata(testing.metadata)
-        serviceName = "testing.TestingService"
+        # pyre-fixme[16]: Module `test_thrift` has no attribute `metadata`.
+        meta = gen_metadata(test_thrift.metadata)
+        serviceName = "test_thrift.TestingService"
         self.assertIsNotNone(meta)
         testingService = meta.services[serviceName]
         testingServiceClass = gen_metadata(TestingService)
@@ -231,16 +231,16 @@ class MetadataTests(unittest.TestCase):
         annotation = arg.structured_annotations[0]
         second = annotation.fields["second"]
         self.assertEqual(len(arg.structured_annotations), 1)
-        self.assertEqual(annotation.type.name, "testing.StructuredAnnotation")
+        self.assertEqual(annotation.type.name, "test_thrift.StructuredAnnotation")
         self.assertEqual(len(annotation.fields), 1)
         self.assertEqual(second.type, second.Type.cv_integer)
         self.assertEqual(second.cv_integer, 42)
 
         serv2 = gen_metadata(TestingServiceChild)
-        self.assertEqual(serv2.name, "testing.TestingServiceChild")
+        self.assertEqual(serv2.name, "test_thrift.TestingServiceChild")
         parent = serv2.parent
         self.assertIsNotNone(parent)
-        self.assertEqual(parent.name, "testing.TestingService")
+        self.assertEqual(parent.name, "test_thrift.TestingService")
 
         streamFunc, *rest = serv2.functions
         self.assertEqual(
@@ -264,10 +264,10 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual("yes", items_map["fun_times"].as_string())
         self.assertEqual("'", items_map["single_quote"].as_string())
 
-        name = "testing.StructuredAnnotation"
+        name = "test_thrift.StructuredAnnotation"
         annotation = next((a for a in annotations if a.name == name))
 
-        self.assertEqual(annotation.name, "testing.StructuredAnnotation")
+        self.assertEqual(annotation.name, "test_thrift.StructuredAnnotation")
         self.assertEqual(len(list(annotation.fields)), 4)
 
         first = annotation.fields["first"]

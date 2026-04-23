@@ -25,8 +25,8 @@ import unittest
 from contextlib import contextmanager
 from typing import Iterator, Optional, Sequence
 
-from testing.thrift_services import TestingServiceInterface
-from testing.thrift_types import Color, easy
+from test_thrift.thrift_services import TestingServiceInterface
+from test_thrift.thrift_types import Color, easy
 from thrift.py3.server import SocketAddress
 from thrift.python.server import ThriftServer
 

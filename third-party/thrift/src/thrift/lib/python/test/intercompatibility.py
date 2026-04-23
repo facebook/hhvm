@@ -18,8 +18,8 @@
 import unittest
 from typing import Generator, Type
 
-import testing.thrift_types as python_types
-import testing.types as py3_types
+import test_thrift.thrift_types as python_types
+import test_thrift.types as py3_types
 from thrift.py3.serializer import serialize as py3_serialize
 from thrift.python.serializer import deserialize, Protocol
 

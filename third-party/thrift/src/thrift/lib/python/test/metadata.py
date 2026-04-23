@@ -21,15 +21,15 @@ from __future__ import annotations
 import typing
 import unittest
 
-import testing.thrift_metadata
+import test_thrift.thrift_metadata
 from apache.thrift.metadata.thrift_types import ThriftMetadata, ThriftPrimitiveType
-from testing.thrift_clients import (
+from test_thrift.thrift_clients import (
     ExtendServiceWithNoTypes,
     TestingService,
     TestingServiceChild,
 )
-from testing.thrift_services import TestingServiceInterface
-from testing.thrift_types import Complex, hard, HardError, mixed, NestedError, Perm
+from test_thrift.thrift_services import TestingServiceInterface
+from test_thrift.thrift_types import Complex, hard, HardError, mixed, NestedError, Perm
 from thrift.python.bidi_service.thrift_clients import TestBidiService
 from thrift.python.metadata import (
     gen_metadata,
@@ -43,8 +43,8 @@ T = typing.TypeVar("T")
 
 class MetadataTests(unittest.TestCase):
     def test_metadata_enums(self) -> None:
-        meta = gen_metadata(testing.thrift_metadata)
-        enumName = "testing.Perm"
+        meta = gen_metadata(test_thrift.thrift_metadata)
+        enumName = "test_thrift.Perm"
         self.assertIsNotNone(meta)
         permEnum = meta.enums[enumName]
         self.assertEqual(permEnum.name, enumName)
@@ -58,8 +58,8 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(permEnum, gen_metadata(Perm(1)))
 
     def test_metadata_structs(self) -> None:
-        meta = gen_metadata(testing.thrift_metadata)
-        structName = "testing.hard"
+        meta = gen_metadata(test_thrift.thrift_metadata)
+        structName = "test_thrift.hard"
         self.assertIsNotNone(meta)
         hardStruct = meta.structs[structName]
         hardStructClass = gen_metadata(hard)
@@ -94,7 +94,7 @@ class MetadataTests(unittest.TestCase):
         # self.assertEqual(typedef.type.kind, ThriftKind.TYPEDEF)
         # self.assertEqual(typedef.type.as_typedef().underlyingType.kind, ThriftKind.LIST)
 
-        self.assertEqual(meta.structs["testing.EmptyUnion"].is_union, True)
+        self.assertEqual(meta.structs["test_thrift.EmptyUnion"].is_union, True)
 
         mixedStruct = gen_metadata(mixed)
         optional, non_optional, _, _, field, *rest = mixedStruct.fields
@@ -115,7 +115,7 @@ class MetadataTests(unittest.TestCase):
 
         # Test a few fields on the struct
         integers = an_int.type.as_union()
-        self.assertEqual(integers.name, "testing.Integers")
+        self.assertEqual(integers.name, "test_thrift.Integers")
         self.assertEqual(integers.is_union, True)
 
         # Grab type on field, treat as struct (for type checking), grab fields
@@ -144,8 +144,8 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(other_integers.is_union, integers.is_union)
 
     def test_metadata_exceptions(self) -> None:
-        meta = gen_metadata(testing.thrift_metadata)
-        errorName = "testing.HardError"
+        meta = gen_metadata(test_thrift.thrift_metadata)
+        errorName = "test_thrift.HardError"
         self.assertIsNotNone(meta)
         hardError = meta.exceptions[errorName]
         hardErrorClass = gen_metadata(HardError)
@@ -167,7 +167,7 @@ class MetadataTests(unittest.TestCase):
 
     def test_metadata_nested_exception(self) -> None:
         meta = gen_metadata(NestedError)
-        self.assertEqual("testing.NestedError", meta.name)
+        self.assertEqual("test_thrift.NestedError", meta.name)
         self.assertFalse(meta.is_union)
         fields = list(meta.fields)
         self.assertEqual(1, len(fields))
@@ -176,11 +176,11 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual("val_error", field.name)
         self.assertIsInstance(field.type, ThriftExceptionProxy)
         field_type = typing.cast(ThriftExceptionProxy, field.type)
-        self.assertEqual(field_type.name, "testing.HardError")
+        self.assertEqual(field_type.name, "test_thrift.HardError")
 
     def test_metadata_services(self) -> None:
-        meta = gen_metadata(testing.thrift_metadata)
-        serviceName = "testing.TestingService"
+        meta = gen_metadata(test_thrift.thrift_metadata)
+        serviceName = "test_thrift.TestingService"
         self.assertIsNotNone(meta)
         testingService = meta.services[serviceName]
         testingServiceClass = gen_metadata(TestingService)
@@ -235,16 +235,16 @@ class MetadataTests(unittest.TestCase):
         annotation = arg.structured_annotations[0]
         second = annotation.fields["second"]
         self.assertEqual(len(arg.structured_annotations), 1)
-        self.assertEqual(annotation.type.name, "testing.StructuredAnnotation")
+        self.assertEqual(annotation.type.name, "test_thrift.StructuredAnnotation")
         self.assertEqual(len(annotation.fields), 1)
         self.assertEqual(second.type, second.Type.cv_integer)
         self.assertEqual(second.cv_integer, 42)
 
         serv2 = gen_metadata(TestingServiceChild)
-        self.assertEqual(serv2.name, "testing.TestingServiceChild")
+        self.assertEqual(serv2.name, "test_thrift.TestingServiceChild")
         parent = serv2.parent
         self.assertIsNotNone(parent)
-        self.assertEqual(parent.name, "testing.TestingService")
+        self.assertEqual(parent.name, "test_thrift.TestingService")
 
         streamFunc, *rest = serv2.functions
         self.assertEqual(
@@ -253,7 +253,7 @@ class MetadataTests(unittest.TestCase):
         )
 
         extend_service = gen_metadata(ExtendServiceWithNoTypes)
-        self.assertEqual(extend_service.name, "testing.ExtendServiceWithNoTypes")
+        self.assertEqual(extend_service.name, "test_thrift.ExtendServiceWithNoTypes")
         base_service = extend_service.parent
         # Assert not None so pyre doesn't complain that
         # Optional type has no attribute `name`
@@ -275,7 +275,7 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual("'", items_map["single_quote"].as_string())
 
         annotation = annotations[1]
-        self.assertEqual(annotation.name, "testing.StructuredAnnotation")
+        self.assertEqual(annotation.name, "test_thrift.StructuredAnnotation")
         self.assertEqual(len(list(annotation.fields)), 4)
 
         first = annotation.fields["first"]
@@ -338,7 +338,7 @@ class MetadataTests(unittest.TestCase):
             | ThriftExceptionProxy
             | ThriftServiceProxy
             | ThriftMetadata
-        ) = gen_metadata(testing.thrift_metadata)
+        ) = gen_metadata(test_thrift.thrift_metadata)
         self.assertIsNotNone(meta.enums)
         self.assertIsNotNone(meta.structs)
         self.assertIsNotNone(meta.services)

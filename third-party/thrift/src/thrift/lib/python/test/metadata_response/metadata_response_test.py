@@ -22,8 +22,8 @@ import unittest
 from typing import Sequence
 
 from apache.thrift.metadata.thrift_types import ThriftServiceMetadataResponse
-from testing.thrift_services import TestingServiceInterface
-from testing.thrift_types import Color, easy, SimpleError
+from test_thrift.thrift_services import TestingServiceInterface
+from test_thrift.thrift_types import Color, easy, SimpleError
 from thrift.lib.python.test.test_server import TestServer
 from thrift.py3.server import get_context
 from thrift.python.serializer import deserialize, Protocol

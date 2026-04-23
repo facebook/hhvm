@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-include "thrift/lib/python/test/testing.thrift"
+include "thrift/lib/python/test/test_thrift.thrift"
 
-service DerivedTestingService extends testing.TestingService {
-  testing.Color derived_pick_a_color(1: testing.Color color);
+service DerivedTestingService extends test_thrift.TestingService {
+  test_thrift.Color derived_pick_a_color(1: test_thrift.Color color);
 }

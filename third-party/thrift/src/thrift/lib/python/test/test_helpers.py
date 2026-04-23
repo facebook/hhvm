@@ -20,8 +20,8 @@ import unittest
 from dataclasses import dataclass
 from typing import Any, Type
 
-import testing.thrift_mutable_types as mutable_test_types
-import testing.thrift_types as immutable_test_types
+import test_thrift.thrift_mutable_types as mutable_test_types
+import test_thrift.thrift_types as immutable_test_types
 from parameterized import parameterized, parameterized_class
 from thrift.python.test_helpers import (
     assert_thrift_almost_equal,

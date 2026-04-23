@@ -20,8 +20,8 @@ import types
 import unittest
 from typing import Sequence
 
-from testing.services import TestingServiceInterface
-from testing.types import Color, easy
+from test_thrift.services import TestingServiceInterface
+from test_thrift.types import Color, easy
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.server import SocketAddress, ThriftServer
 from thrift.py3.test.is_overload.helper import OverloadTestHelper

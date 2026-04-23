@@ -17,7 +17,7 @@
 
 import unittest
 
-from testing.types import customized
+from test_thrift.types import customized
 from thrift.py3.serializer import deserialize, serialize
 
 

@@ -19,8 +19,8 @@ import unittest
 # deliberately importing .containers before .types
 # this validates we can handle some unfortunate pickling behavior
 # please always import containers from .types
-from testing.containers_FBTHRIFT_ONLY_DO_NOT_USE import List__i32
-from testing.types import I32List
+from test_thrift.containers_FBTHRIFT_ONLY_DO_NOT_USE import List__i32
+from test_thrift.types import I32List
 
 
 class Import(unittest.TestCase):

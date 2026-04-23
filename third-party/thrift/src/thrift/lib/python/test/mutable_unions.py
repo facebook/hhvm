@@ -17,7 +17,7 @@
 import copy
 import unittest
 
-from testing.thrift_mutable_types import Digits, Integers
+from test_thrift.thrift_mutable_types import Digits, Integers
 from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
 from thrift.test.thrift_python.union_test.thrift_mutable_types import (
     TestStruct,

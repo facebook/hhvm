@@ -23,12 +23,12 @@ import types
 import unittest
 from typing import Type
 
-import testing.thrift_mutable_types as mutable_test_types
-import testing.thrift_types as immutable_test_types
+import test_thrift.thrift_mutable_types as mutable_test_types
+import test_thrift.thrift_types as immutable_test_types
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 from parameterized import parameterized_class
-from testing.thrift_types import (
+from test_thrift.thrift_types import (
     Color as ColorType,
     EmptyError as EmptyErrorType,
     HardError as HardErrorType,

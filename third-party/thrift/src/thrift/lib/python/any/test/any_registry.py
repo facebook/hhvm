@@ -20,7 +20,7 @@ from __future__ import annotations
 import typing
 import unittest
 
-import testing.thrift_types
+import test_thrift.thrift_types
 from apache.thrift.type.standard.thrift_types import StandardProtocol, TypeName
 from apache.thrift.type.type.thrift_types import Protocol
 from folly.iobuf import IOBuf
@@ -44,7 +44,7 @@ TEST_PRIMITIVES: typing.List[PrimitiveType] = [
     123456.789,
     "thrift-python",
     b"raw bytes",
-    testing.thrift_types.Color.blue,
+    test_thrift.thrift_types.Color.blue,
 ]
 TEST_CONTAINERS: typing.List[
     typing.Union[
@@ -54,7 +54,7 @@ TEST_CONTAINERS: typing.List[
     ]
 ] = [
     [1, 1, 2, 3, 5],
-    list(testing.thrift_types.Color),
+    list(test_thrift.thrift_types.Color),
     [TEST_STRUCT, TEST_STRUCT],
     {b"hello", b"world"},
     {TEST_UNION},
@@ -160,7 +160,7 @@ class AnyRegistryTest(unittest.TestCase):
     def test_primitive_round_trip(self) -> None:
         registry = AnyRegistry()
         registry.register_module(thrift_types)
-        registry.register_module(testing.thrift_types)
+        registry.register_module(test_thrift.thrift_types)
 
         for standard_protocol in [
             StandardProtocol.Binary,
@@ -187,7 +187,7 @@ class AnyRegistryTest(unittest.TestCase):
     def test_containers_round_trip(self) -> None:
         registry = AnyRegistry()
         registry.register_module(thrift_types)
-        registry.register_module(testing.thrift_types)
+        registry.register_module(test_thrift.thrift_types)
 
         for standard_protocol in [
             StandardProtocol.Binary,

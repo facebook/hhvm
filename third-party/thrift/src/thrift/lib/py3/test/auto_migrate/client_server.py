@@ -29,12 +29,12 @@ from folly.iobuf import IOBuf
 from stack_args.clients import StackService
 from stack_args.services import StackServiceInterface
 from stack_args.types import simple
-from testing.clients import ClientMetadataTestingService, TestingService
-from testing.services import (
+from test_thrift.clients import ClientMetadataTestingService, TestingService
+from test_thrift.services import (
     ClientMetadataTestingServiceInterface,
     TestingServiceInterface,
 )
-from testing.types import Color, easy, HardError
+from test_thrift.types import Color, easy, HardError
 from thrift.py3.client import ClientType, get_client
 from thrift.py3.common import Priority, Protocol, RpcOptions
 from thrift.py3.exceptions import ApplicationError

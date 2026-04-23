@@ -18,7 +18,7 @@
 import typing
 import unittest
 
-from testing.types import (
+from test_thrift.types import (
     Color,
     easy,
     EasyList,

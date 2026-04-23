@@ -21,9 +21,7 @@ import sys
 import types
 import unittest
 
-from testing.dependency.types import IncludedStruct
-from testing.sub_dependency.types import Basic, IncludedColour
-from testing.types import (
+from test_thrift.types import (
     Color,
     easy,
     FANCY_CONST,
@@ -48,6 +46,8 @@ from testing.types import (
     StructWithEnumFields,
     UnusedError,
 )
+from testing.dependency.types import IncludedStruct
+from testing.sub_dependency.types import Basic, IncludedColour
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
     brokenInAutoMigrate,
     is_auto_migrated,
@@ -285,7 +285,7 @@ class StructTests(unittest.TestCase):
 
     def test_struct_module_name(self) -> None:
         variant_prefix = "thrift_" if is_auto_migrated() else ""
-        expected = f"testing.{variant_prefix}types"
+        expected = f"test_thrift.{variant_prefix}types"
 
         self.assertEqual(easy.__module__, expected)
         self.assertEqual(easy().__class__.__module__, expected)

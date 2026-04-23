@@ -18,7 +18,7 @@
 import unittest
 from typing import Dict, List
 
-from testing.types import (
+from test_thrift.types import (
     Color,
     ColorGroups,
     F14MapFollyString,
@@ -163,10 +163,10 @@ class MapTests(unittest.TestCase):
     # in thrift-python, these are MapTypeFactory
     @brokenInAutoMigrate()
     def test_module_name(self) -> None:
-        self.assertEqual(StrI32ListMap.__module__, "testing.types")
-        self.assertEqual(StrIntMap.__module__, "testing.types")
-        self.assertEqual(StrStrIntListMapMap.__module__, "testing.types")
-        self.assertEqual(StrStrMap.__module__, "testing.types")
+        self.assertEqual(StrI32ListMap.__module__, "test_thrift.types")
+        self.assertEqual(StrIntMap.__module__, "test_thrift.types")
+        self.assertEqual(StrStrIntListMapMap.__module__, "test_thrift.types")
+        self.assertEqual(StrStrMap.__module__, "test_thrift.types")
 
     def test_hashability(self) -> None:
         hash(StrI32ListMap())

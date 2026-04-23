@@ -17,7 +17,7 @@
 
 import unittest
 
-from testing.types import ComplexRef
+from test_thrift.types import ComplexRef
 
 
 class RefTest(unittest.TestCase):

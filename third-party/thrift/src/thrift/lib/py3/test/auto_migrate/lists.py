@@ -18,7 +18,7 @@
 import itertools
 import unittest
 
-from testing.types import (
+from test_thrift.types import (
     binary_list,
     Color,
     ColorGroups,
@@ -285,6 +285,6 @@ class ListTests(unittest.TestCase):
     def test_list_module(self) -> None:
         # typedefs are ListTypeFactory in auto-migrate
         if not is_auto_migrated():
-            self.assertEqual(I32List.__module__, "testing.types")
+            self.assertEqual(I32List.__module__, "test_thrift.types")
         # flat name containers are always .types
-        self.assertEqual(List__i32.__module__, "testing.types")
+        self.assertEqual(List__i32.__module__, "test_thrift.types")

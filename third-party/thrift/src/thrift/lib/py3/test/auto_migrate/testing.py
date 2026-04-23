@@ -18,8 +18,8 @@ from unittest import IsolatedAsyncioTestCase, TestCase
 from unittest.mock import Mock, patch
 
 import thrift.py3  # @manual
-from testing.clients import TestingService
-from testing.types import ListNode
+from test_thrift.clients import TestingService
+from test_thrift.types import ListNode
 from thrift.py3.testing import mock_client
 
 

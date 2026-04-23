@@ -28,9 +28,9 @@ from folly.iobuf import IOBuf
 from stack_args.thrift_clients import StackService
 from stack_args.thrift_services import StackServiceInterface
 from stack_args.thrift_types import simple
-from testing.thrift_clients import TestingService
-from testing.thrift_services import TestingServiceInterface
-from testing.thrift_types import Color, easy, SimpleError
+from test_thrift.thrift_clients import TestingService
+from test_thrift.thrift_services import TestingServiceInterface
+from test_thrift.thrift_types import Color, easy, SimpleError
 from thrift.lib.python.test.event_handlers.helper import ThrowHelper, ThrowHelperHandler
 from thrift.lib.python.test.test_server import TestServer
 from thrift.py3.server import get_context

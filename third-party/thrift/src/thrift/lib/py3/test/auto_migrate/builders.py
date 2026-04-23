@@ -17,8 +17,8 @@
 
 import unittest
 
-import testing.types as _types
-from testing.builders import (
+import test_thrift.types as _types
+from test_thrift.builders import (
     ColorGroups_Builder,
     Digits_Builder,
     easy_Builder,

@@ -15,7 +15,7 @@
 # pyre-unsafe
 
 from convertible.types import Nested, Simple, Union
-from testing.types import NonCopyable
+from test_thrift.types import NonCopyable
 
 def echo_simple(strucc: Simple) -> Simple: ...
 def echo_nested(strucc: Nested) -> Nested: ...

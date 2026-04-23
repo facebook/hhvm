@@ -23,11 +23,11 @@ import convertible.thrift_mutable_types as python_mutable_types
 import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
+import test_thrift.thrift_types as testing_types
 import testing.py_deprecated_asyncio_fallback_test.thrift_types
 import testing.py_deprecated_asyncio_fallback_test.ttypes
 import testing.py_deprecated_asyncio_test.thrift_types
 import testing.py_deprecated_asyncio_test.ttypes
-import testing.thrift_types as testing_types
 from thrift.python.converter import to_python_struct
 from thrift.python.mutable_converter import to_mutable_python_struct_or_union
 from thrift.python.types import BadEnum

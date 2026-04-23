@@ -17,11 +17,11 @@
 import timeit
 
 SETUP1 = """
-from testing.types import Color
+from test_thrift.types import Color
 """
 
 SETUP2 = """
-from testing.types import Color
+from test_thrift.types import Color
 Color.red
 """
 

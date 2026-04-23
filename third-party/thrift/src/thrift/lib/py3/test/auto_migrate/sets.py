@@ -20,7 +20,7 @@ import unittest
 from typing import AbstractSet, Sequence, Tuple
 
 import thrift.python.types as python_types
-from testing.types import (
+from test_thrift.types import (
     Color,
     ColorGroups,
     Set__Color,

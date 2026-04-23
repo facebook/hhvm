@@ -17,9 +17,9 @@ from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
 from convertible.cbindings cimport cSimple, cNested, cUnion
-from testing.cbindings cimport cNonCopyable
+from test_thrift.cbindings cimport cNonCopyable
 cimport convertible.converter as converter
-cimport testing.converter as testing_converter
+cimport test_thrift.converter as testing_converter
 
 cdef extern from *:
     """

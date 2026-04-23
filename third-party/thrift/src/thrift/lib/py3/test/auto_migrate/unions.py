@@ -20,7 +20,7 @@ import types
 import unittest
 
 from folly.iobuf import IOBuf
-from testing.types import (
+from test_thrift.types import (
     _UnderscoreUnion,
     Color,
     ComplexUnion,
@@ -110,7 +110,7 @@ class UnionTests(unittest.TestCase):
 
     def test_union_module_name(self) -> None:
         variant_prefix = "thrift_" if is_auto_migrated() else ""
-        expected = f"testing.{variant_prefix}types"
+        expected = f"test_thrift.{variant_prefix}types"
 
         self.assertEqual(Integers.__module__, expected)
         self.assertEqual(Integers().__class__.__module__, expected)

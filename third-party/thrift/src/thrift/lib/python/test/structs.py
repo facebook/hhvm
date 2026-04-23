@@ -26,20 +26,20 @@ import unittest
 from typing import Callable, cast as typing_cast, Type, TypeVar
 from unittest import mock
 
+import test_thrift.thrift_mutable_types as mutable_test_types
+import test_thrift.thrift_types as immutable_test_types
 import testing.dependency.thrift_types as dep_types
-import testing.thrift_mutable_types as mutable_test_types
-import testing.thrift_types as immutable_test_types
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 import thrift.python.types
 from folly.iobuf import IOBuf
 from parameterized import parameterized_class
-from testing.thrift_mutable_types import (
+from test_thrift.thrift_mutable_types import (
     _Reserved as _ReservedMutable,
     DefaultedFields as MutableDefaultedFields,
     LatLon as MutableLatLon,
 )
-from testing.thrift_types import (
+from test_thrift.thrift_types import (
     _Reserved,
     Color,
     ComplexRef,

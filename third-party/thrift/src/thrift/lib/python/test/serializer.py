@@ -28,8 +28,8 @@ from typing import Any, Iterable, Mapping, Type, TypeVar, Union
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
-import testing.thrift_mutable_types as mutable_types
-import testing.thrift_types as immutable_types
+import test_thrift.thrift_mutable_types as mutable_types
+import test_thrift.thrift_types as immutable_types
 import thrift.python.mutable_serializer as mutable_serializer
 import thrift.python.serializer as immutable_serializer
 import thrift.test.terse_write.thrift_mutable_types as mutable_terse_types
@@ -43,11 +43,11 @@ from python_test.containers.thrift_types import (
     Sets,
     UnicodeContainers,
 )
-from testing.thrift_mutable_types import (
+from test_thrift.thrift_mutable_types import (
     SortedMaps as MutableSortedMaps,
     SortedSets as MutableSortedSets,
 )
-from testing.thrift_types import (
+from test_thrift.thrift_types import (
     Color,
     ColorGroups,
     Complex,

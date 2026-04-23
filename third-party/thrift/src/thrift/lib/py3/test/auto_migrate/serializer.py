@@ -20,8 +20,8 @@ import pickle
 import unittest
 from typing import Hashable, Mapping, Union
 
-from testing.thrift_types import easy as python_easy, hard as python_hard
-from testing.types import (
+from test_thrift.thrift_types import easy as python_easy, hard as python_hard
+from test_thrift.types import (
     Digits,
     easy,
     hard,
@@ -217,13 +217,11 @@ class SerializerTests(SerializerTestBase):
 
     def test_unpickle_stored_easy_struct(self) -> None:
         control = easy(val=0, val_list=[5, 6, 7])
-        # string produced with pickle.dumps(control, protocol=pickle.HIGHEST_PROTOCOL)
-        # when run in normal mode (auto-migrate off)
         stored = (
-            b"\x80\x05\x95U\x00\x00\x00\x00\x00\x00\x00\x8c\x15thrift.py3."
-            b"serializer\x94\x8c\x0bdeserialize\x94\x93\x94\x8c\rtesting.types"
-            b"\x94\x8c\x04easy\x94\x93\x94C\x0c\x15\x00\x195\n\x0c\x0e,\x00\x16"
-            b"\x00\x00\x94\x86\x94R\x94."
+            b"\x80\x05\x95Y\x00\x00\x00\x00\x00\x00\x00\x8c\x15thrift.py3."
+            b"serializer\x94\x8c\x0bdeserialize\x94\x93\x94\x8c\x11test_thrift"
+            b".types\x94\x8c\x04easy\x94\x93\x94C\x0c\x15\x00\x195\n\x0c\x0e"
+            b",\x00\x16\x00\x00\x94\x86\x94R\x94."
         )
         self.assert_unpickle_compat(stored, control)
 
@@ -270,10 +268,10 @@ class SerializerTests(SerializerTestBase):
     def test_unpickle_stored_Integers_union(self) -> None:
         control = Integers(large=2**32)
         stored = (
-            b"\x80\x05\x95T\x00\x00\x00\x00\x00\x00\x00\x8c\x15thrift.py3."
-            b"serializer\x94\x8c\x0bdeserialize\x94\x93\x94\x8c\rtesting.types"
-            b"\x94\x8c\x08Integers\x94\x93\x94C\x07F\x80\x80\x80\x80 \x00\x94"
-            b"\x86\x94R\x94."
+            b"\x80\x05\x95X\x00\x00\x00\x00\x00\x00\x00\x8c\x15thrift.py3."
+            b"serializer\x94\x8c\x0bdeserialize\x94\x93\x94\x8c\x11test_thrift"
+            b".types\x94\x8c\x08Integers\x94\x93\x94C\x07F\x80\x80\x80\x80"
+            b" \x00\x94\x86\x94R\x94."
         )
         self.assert_unpickle_compat(stored, control)
 
@@ -301,9 +299,9 @@ class SerializerTests(SerializerTestBase):
     def test_unpickle_stored_sequence(self) -> None:
         control = I32List([1, 2, 3, 4])
         stored = (
-            b"\x80\x05\x95/\x00\x00\x00\x00\x00\x00\x00\x8c\rtesting.types"
-            b"\x94\x8c\tList__i32\x94\x93\x94]\x94(K\x01K\x02K\x03K\x04e"
-            b"\x85\x94R\x94."
+            b"\x80\x05\x953\x00\x00\x00\x00\x00\x00\x00\x8c\x11test_thrift."
+            b"types\x94\x8c\tList__i32\x94\x93\x94]\x94(K\x01K\x02K\x03K\x04"
+            b"e\x85\x94R\x94."
         )
         self.assert_unpickle_compat(stored, control)
 
@@ -314,9 +312,9 @@ class SerializerTests(SerializerTestBase):
     def test_unpickle_stored_set(self) -> None:
         control = SetI32({1, 2, 3, 4})
         stored = (
-            b"\x80\x05\x95.\x00\x00\x00\x00\x00\x00\x00\x8c\rtesting.types"
-            b"\x94\x8c\x08Set__i32\x94\x93\x94\x8f\x94(K\x01K\x02K\x03K\x04"
-            b"\x90\x85\x94R\x94."
+            b"\x80\x05\x952\x00\x00\x00\x00\x00\x00\x00\x8c\x11test_thrift."
+            b"types\x94\x8c\x08Set__i32\x94\x93\x94\x8f\x94(K\x01K\x02K\x03"
+            b"K\x04\x90\x85\x94R\x94."
         )
         self.assert_unpickle_compat(stored, control)
 
@@ -327,9 +325,9 @@ class SerializerTests(SerializerTestBase):
     def test_unpickle_stored_mapping(self) -> None:
         control = StrStrMap({"test": "test", "foo": "bar"})
         stored = (
-            b"\x80\x05\x95E\x00\x00\x00\x00\x00\x00\x00\x8c\rtesting.types"
-            b"\x94\x8c\x12Map__string_string\x94\x93\x94}\x94(\x8c\x04test"
-            b"\x94h\x04\x8c\x03foo\x94\x8c\x03bar\x94u\x85\x94R\x94."
+            b"\x80\x05\x95I\x00\x00\x00\x00\x00\x00\x00\x8c\x11test_thrift."
+            b"types\x94\x8c\x12Map__string_string\x94\x93\x94}\x94(\x8c\x04"
+            b"test\x94h\x04\x8c\x03foo\x94\x8c\x03bar\x94u\x85\x94R\x94."
         )
         self.assert_unpickle_compat(stored, control)
 

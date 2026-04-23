@@ -258,7 +258,7 @@ void HQDownstreamSession::HQEgressPushStream::sendPushPromise(
 size_t HQDownstreamSession::HQEgressPushStream::generateStreamPushId() {
   // reserve space for max quic interger len
   auto result = hq::writeStreamPreface(writeBuf_, pushId_);
-  CHECK(!result.hasError())
+  CHECK(result.has_value())
       << __func__ << " QUIC integer encoding error value=" << pushId_;
 
   return *result;

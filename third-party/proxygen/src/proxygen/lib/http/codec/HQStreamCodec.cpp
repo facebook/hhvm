@@ -345,10 +345,8 @@ void HQStreamCodec::generateHeaderImpl(
     }
   }();
 
-  if (res.hasError()) {
-    LOG(ERROR) << __func__ << ": failed to write "
-               << ((pushId) ? "push promise: " : "headers: ") << res.error();
-  }
+  LOG_IF(ERROR, !res) << __func__ << ": failed to write "
+                      << ((pushId) ? "push promise" : "headers");
 }
 
 size_t HQStreamCodec::generateBodyImpl(folly::IOBufQueue& writeBuf,
@@ -402,8 +400,8 @@ size_t HQStreamCodec::generateTrailers(folly::IOBufQueue& writeBuf,
     return hq::writeHeaders(writeBuf, std::move(encodeRes.stream));
   }();
 
-  if (res.hasError()) {
-    LOG(ERROR) << __func__ << ": failed to write trailers: " << res.error();
+  if (!res) {
+    LOG(ERROR) << __func__ << ": failed to write trailers";
     return 0;
   }
   return *res;
@@ -415,8 +413,8 @@ size_t HQStreamCodec::generatePadding(folly::IOBufQueue& writeBuf,
   DCHECK_EQ(stream, streamId_);
   auto buf = CodecUtil::zeroedBuffer(padding);
   auto res = hq::writePadding(writeBuf, std::move(buf));
-  if (res.hasError()) {
-    LOG(ERROR) << __func__ << ": failed to write padding: " << res.error();
+  if (!res) {
+    LOG(ERROR) << __func__ << ": failed to write padding";
     return 0;
   }
   return *res;

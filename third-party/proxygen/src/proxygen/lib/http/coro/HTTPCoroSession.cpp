@@ -706,8 +706,7 @@ bool HTTPQuicCoroSession::createControlStream(
   auto newId = quicSocket_->createUnidirectionalStream();
   if (!newId.hasError()) {
     id = *newId;
-    auto res = hq::writeStreamPreface(writeBuf, uint64_t(streamType));
-    if (!res.hasError()) {
+    if (auto res = hq::writeStreamPreface(writeBuf, uint64_t(streamType))) {
       quicSocket_->setControlStream(id);
       writeEvent_.signal();
       return true;

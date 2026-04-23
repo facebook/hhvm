@@ -140,7 +140,7 @@ uint32_t writeWTStreamPrefaceToSock(
     LOG(ERROR) << "Failed to write stream preface to socket";
     return 0;
   }
-  return res.value();
+  return *res;
 }
 } // namespace
 
@@ -219,11 +219,8 @@ void HQSession::dispatchRequestStreamImpl(quic::StreamId id) {
   }
   if (id == 0 && version_ == HQVersion::HQ) {
     // generate grease frame
-    auto writeGreaseFrameResult = hq::writeGreaseFrame(hqStream->writeBuf_);
-    if (writeGreaseFrameResult.hasError()) {
-      VLOG(2) << __func__ << " failed to create grease frame: " << *this
-              << ". Error = " << writeGreaseFrameResult.error();
-    }
+    auto res = hq::writeGreaseFrame(hqStream->writeBuf_);
+    VLOG_IF(2, !res) << __func__ << " ::writeGreaseFrame err " << *this;
   }
 }
 
@@ -2343,9 +2340,8 @@ HQSession::newTransaction(HTTPTransaction::Handler* handler) {
   if (quicStreamId.value() == 0 && version_ == HQVersion::HQ) {
     // generate grease frame
     auto writeGreaseFrameResult = hq::writeGreaseFrame(hqStream->writeBuf_);
-    if (writeGreaseFrameResult.hasError()) {
-      VLOG(2) << __func__ << " failed to create grease frame: " << *this
-              << ". Error = " << writeGreaseFrameResult.error();
+    if (!writeGreaseFrameResult) {
+      VLOG(2) << __func__ << " failed to create grease frame: " << *this;
       return nullptr;
     }
   }

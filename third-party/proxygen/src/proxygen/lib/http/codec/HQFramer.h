@@ -12,6 +12,7 @@
 #include <folly/Optional.h>
 #include <folly/Range.h>
 #include <folly/io/Cursor.h>
+#include <optional>
 
 #include <proxygen/lib/http/HTTP3ErrorCode.h>
 #include <proxygen/lib/http/codec/CodecUtil.h>
@@ -36,7 +37,7 @@ const size_t kUnframedDataFrameLen = 0;
 using PushId = uint64_t;
 
 using ParseResult = folly::Optional<HTTP3::ErrorCode>;
-using WriteResult = folly::Expected<size_t, quic::QuicError>;
+using WriteResult = std::optional<size_t>;
 
 enum class UnidirectionalStreamType : uint64_t {
   CONTROL = 0x00,
@@ -256,7 +257,7 @@ WriteResult writeFrameHeader(folly::IOBufQueue& queue,
  * @param writeBuf The output queue to write to. It may grow or add
  *                 underlying buffers inside this function.
  * @param data The body data to write out, cannot be nullptr
- * @return The number of bytes written to writeBuf if successful, a quic error
+ * @return The number of bytes written to writeBuf if successful, std::nullopt
  * otherwise
  */
 WriteResult writeData(folly::IOBufQueue& writeBuf,
@@ -269,7 +270,7 @@ WriteResult writeData(folly::IOBufQueue& writeBuf,
  * @param writeBuf The output queue to write to. It may grow or add
  *                 underlying buffers inside this function.
  * @param data The padding data to write out, cannot be nullptr
- * @return The number of bytes written to writeBuf if successful, a quic error
+ * @return The number of bytes written to writeBuf if successful, std::nullopt
  * otherwise
  */
 WriteResult writePadding(folly::IOBufQueue& writeBuf,
@@ -281,7 +282,7 @@ WriteResult writePadding(folly::IOBufQueue& writeBuf,
  * @param writeBuf The output queue to write to. It may grow or add
  *                 underlying buffers inside this function.
  * @param data The body data to write out, cannot be nullptr
- * @return The number of bytes written to writeBuf if successful, a quic error
+ * @return The number of bytes written to writeBuf if successful, std::nullopt
  * otherwise
  */
 WriteResult writeHeaders(folly::IOBufQueue& writeBuf,
@@ -294,7 +295,7 @@ WriteResult writeHeaders(folly::IOBufQueue& writeBuf,
  * @param writeBuf The output queue to write to. It may grow or add
  *                 underlying buffers inside this function.
  * @param pushId The identifier of the  the server push that is being cancelled.
- * @return The number of bytes written to writeBuf if successful, a quic error
+ * @return The number of bytes written to writeBuf if successful, std::nullopt
  * otherwise
  */
 WriteResult writeCancelPush(folly::IOBufQueue& writeBuf,
@@ -307,7 +308,7 @@ WriteResult writeCancelPush(folly::IOBufQueue& writeBuf,
  * @param writeBuf The output queue to write to. It may grow or add
  *                 underlying buffers inside this function.
  * @param settings The settings to send
- * @return The number of bytes written to writeBuf if successful, a quic error
+ * @return The number of bytes written to writeBuf if successful, std::nullopt
  * otherwise
  */
 WriteResult writeSettings(folly::IOBufQueue& writeBuf,
@@ -320,7 +321,7 @@ WriteResult writeSettings(folly::IOBufQueue& writeBuf,
  *                 underlying buffers inside this function.
  * @param pushId the identifier of the server push request
  * @param data The body data to write out, cannot be nullptr
- * @return The number of bytes written to writeBuf if successful, a quic error
+ * @return The number of bytes written to writeBuf if successful, std::nullopt
  * otherwise
  */
 WriteResult writePushPromise(folly::IOBufQueue& writeBuf,
@@ -334,7 +335,7 @@ WriteResult writePushPromise(folly::IOBufQueue& writeBuf,
  * @param writeBuf The output queue to write to. It may grow or add
  *                 underlying buffers inside this function.
  * @param lastStreamId The identifier of the last stream accepted.
- * @return The number of bytes written to writeBuf if successful, a quic error
+ * @return The number of bytes written to writeBuf if successful, std::nullopt
  * otherwise
  */
 WriteResult writeGoaway(folly::IOBufQueue& writeBuf,
@@ -348,7 +349,7 @@ WriteResult writeGoaway(folly::IOBufQueue& writeBuf,
  *                 underlying buffers inside this function.
  * @param maxPushId The identifier of the maximum value for a Push ID that the
  * server can use.
- * @return The number of bytes written to writeBuf if successful, a quic error
+ * @return The number of bytes written to writeBuf if successful, std::nullopt
  * otherwise
  */
 WriteResult writeMaxPushId(folly::IOBufQueue& writeBuf,
@@ -380,7 +381,7 @@ WriteResult writeWTStreamPreface(folly::IOBufQueue& writeBuf,
  *
  * @param writeBuf The output queue to write to. It may grow or add
  *                 underlying buffers inside this function.
- * @return The number of bytes written to writeBuf if successful, a quic error
+ * @return The number of bytes written to writeBuf if successful, std::nullopt
  * otherwise
  */
 WriteResult writeGreaseFrame(folly::IOBufQueue& writeBuf) noexcept;

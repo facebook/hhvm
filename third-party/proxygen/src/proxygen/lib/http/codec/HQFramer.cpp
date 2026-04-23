@@ -17,6 +17,13 @@
 using namespace folly::io;
 using namespace folly;
 
+#define ret_if_err(res)     \
+  do {                      \
+    if ((res).hasError()) { \
+      return std::nullopt;  \
+    }                       \
+  } while (0);
+
 namespace proxygen::hq {
 
 bool isGreaseId(uint64_t id) {
@@ -203,13 +210,9 @@ WriteResult writeFrameHeader(IOBufQueue& queue,
   };
   auto typeRes =
       quic::encodeQuicInteger(static_cast<uint64_t>(type), appenderOp);
-  if (typeRes.hasError()) {
-    return folly::makeUnexpected(quic::QuicError(typeRes.error()));
-  }
+  ret_if_err(typeRes);
   auto lengthRes = quic::encodeQuicInteger(length, appenderOp);
-  if (lengthRes.hasError()) {
-    return folly::makeUnexpected(quic::QuicError(lengthRes.error()));
-  }
+  ret_if_err(lengthRes);
   return *typeRes + *lengthRes;
 }
 
@@ -219,8 +222,8 @@ WriteResult writeSimpleFrame(IOBufQueue& queue,
   DCHECK(data);
   auto payloadSize = data->computeChainDataLength();
   auto headerSize = writeFrameHeader(queue, type, payloadSize);
-  if (headerSize.hasError()) {
-    return headerSize;
+  if (!headerSize) {
+    return std::nullopt;
   }
   queue.append(std::move(data));
   return *headerSize + payloadSize;
@@ -244,18 +247,14 @@ WriteResult writeHeaders(IOBufQueue& queue,
 WriteResult writeCancelPush(folly::IOBufQueue& writeBuf,
                             PushId pushId) noexcept {
   auto pushIdSize = quic::getQuicIntegerSize(pushId);
-  if (pushIdSize.hasError()) {
-    return folly::makeUnexpected(pushIdSize.error());
-  }
+  ret_if_err(pushIdSize);
   IOBufQueue queue{IOBufQueue::cacheChainLength()};
   QueueAppender appender(&queue, *pushIdSize);
   auto encodeResult = quic::encodeQuicInteger(
       pushId, [appender = std::move(appender)](auto val) mutable {
         appender.writeBE(folly::tag<decltype(val)>, val);
       });
-  if (encodeResult.hasError()) {
-    return folly::makeUnexpected(quic::QuicError(encodeResult.error()));
-  }
+  ret_if_err(encodeResult);
   return writeSimpleFrame(writeBuf, FrameType::CANCEL_PUSH, queue.move());
 }
 
@@ -266,19 +265,15 @@ WriteResult writeSettings(IOBufQueue& queue,
   for (const auto& setting : settings) {
     auto idSize =
         quic::getQuicIntegerSize(static_cast<uint64_t>(setting.first));
-    if (idSize.hasError()) {
-      return folly::makeUnexpected(idSize.error());
-    }
+    ret_if_err(idSize);
     auto valueSize = quic::getQuicIntegerSize(setting.second);
-    if (valueSize.hasError()) {
-      return folly::makeUnexpected(valueSize.error());
-    }
+    ret_if_err(valueSize);
     settingsSize += *idSize + *valueSize;
   }
   // write the frame header
   auto headerSize = writeFrameHeader(queue, FrameType::SETTINGS, settingsSize);
-  if (headerSize.hasError()) {
-    return headerSize;
+  if (!headerSize) {
+    return std::nullopt;
   }
   // write the frame payload
   QueueAppender appender(&queue, settingsSize);
@@ -288,13 +283,9 @@ WriteResult writeSettings(IOBufQueue& queue,
   for (const auto& setting : settings) {
     auto idResult = quic::encodeQuicInteger(
         static_cast<uint64_t>(setting.first), appenderOp);
-    if (idResult.hasError()) {
-      return folly::makeUnexpected(quic::QuicError(idResult.error()));
-    }
+    ret_if_err(idResult);
     auto valueResult = quic::encodeQuicInteger(setting.second, appenderOp);
-    if (valueResult.hasError()) {
-      return folly::makeUnexpected(quic::QuicError(valueResult.error()));
-    }
+    ret_if_err(valueResult);
   }
   return *headerSize + settingsSize;
 }
@@ -304,22 +295,18 @@ WriteResult writePushPromise(IOBufQueue& queue,
                              std::unique_ptr<folly::IOBuf> data) noexcept {
   DCHECK(data);
   auto pushIdSize = quic::getQuicIntegerSize(pushId);
-  if (pushIdSize.hasError()) {
-    return folly::makeUnexpected(pushIdSize.error());
-  }
+  ret_if_err(pushIdSize);
   size_t payloadSize = *pushIdSize + data->computeChainDataLength();
   auto headerSize =
       writeFrameHeader(queue, FrameType::PUSH_PROMISE, payloadSize);
-  if (headerSize.hasError()) {
-    return headerSize;
+  if (!headerSize) {
+    return std::nullopt;
   }
   QueueAppender appender(&queue, payloadSize);
   auto encodeResult = quic::encodeQuicInteger(pushId, [&](auto val) {
     appender.writeBE(folly::tag<decltype(val)>, val);
   });
-  if (encodeResult.hasError()) {
-    return folly::makeUnexpected(quic::QuicError(encodeResult.error()));
-  }
+  ret_if_err(encodeResult);
   appender.insert(std::move(data));
   return *headerSize + payloadSize;
 }
@@ -327,36 +314,28 @@ WriteResult writePushPromise(IOBufQueue& queue,
 WriteResult writeGoaway(folly::IOBufQueue& writeBuf,
                         quic::StreamId lastStreamId) noexcept {
   auto lastStreamIdSize = quic::getQuicIntegerSize(lastStreamId);
-  if (lastStreamIdSize.hasError()) {
-    return folly::makeUnexpected(lastStreamIdSize.error());
-  }
+  ret_if_err(lastStreamIdSize);
   IOBufQueue queue{IOBufQueue::cacheChainLength()};
   QueueAppender appender(&queue, *lastStreamIdSize);
   auto encodeResult = quic::encodeQuicInteger(
       lastStreamId, [appender = std::move(appender)](auto val) mutable {
         appender.writeBE(folly::tag<decltype(val)>, val);
       });
-  if (encodeResult.hasError()) {
-    return folly::makeUnexpected(quic::QuicError(encodeResult.error()));
-  }
+  ret_if_err(encodeResult);
   return writeSimpleFrame(writeBuf, FrameType::GOAWAY, queue.move());
 }
 
 WriteResult writeMaxPushId(folly::IOBufQueue& writeBuf,
                            PushId maxPushId) noexcept {
   auto maxPushIdSize = quic::getQuicIntegerSize(maxPushId);
-  if (maxPushIdSize.hasError()) {
-    return folly::makeUnexpected(maxPushIdSize.error());
-  }
+  ret_if_err(maxPushIdSize);
   IOBufQueue queue{IOBufQueue::cacheChainLength()};
   QueueAppender appender(&queue, *maxPushIdSize);
   auto encodeResult = quic::encodeQuicInteger(
       maxPushId, [appender = std::move(appender)](auto val) mutable {
         appender.writeBE(folly::tag<decltype(val)>, val);
       });
-  if (encodeResult.hasError()) {
-    return folly::makeUnexpected(quic::QuicError(encodeResult.error()));
-  }
+  ret_if_err(encodeResult);
   return writeSimpleFrame(writeBuf, FrameType::MAX_PUSH_ID, queue.move());
 }
 
@@ -365,17 +344,13 @@ WriteResult writePriorityUpdate(folly::IOBufQueue& writeBuf,
                                 folly::StringPiece priorityUpdate) noexcept {
   auto type = FrameType::FB_PRIORITY_UPDATE;
   auto streamIdSize = quic::getQuicIntegerSize(streamId);
-  if (streamIdSize.hasError()) {
-    return folly::makeUnexpected(streamIdSize.error());
-  }
+  ret_if_err(streamIdSize);
   IOBufQueue queue(IOBufQueue::cacheChainLength());
   QueueAppender appender(&queue, *streamIdSize);
   auto encodeResult = quic::encodeQuicInteger(streamId, [&appender](auto val) {
     appender.writeBE(folly::tag<decltype(val)>, val);
   });
-  if (encodeResult.hasError()) {
-    return folly::makeUnexpected(quic::QuicError(encodeResult.error()));
-  }
+  ret_if_err(encodeResult);
   appender.pushAtMost((const uint8_t*)(priorityUpdate.data()),
                       priorityUpdate.size());
   return writeSimpleFrame(writeBuf, type, queue.move());
@@ -387,17 +362,13 @@ WriteResult writePushPriorityUpdate(
     folly::StringPiece priorityUpdate) noexcept {
   auto type = FrameType::FB_PUSH_PRIORITY_UPDATE;
   auto streamIdSize = quic::getQuicIntegerSize(pushId);
-  if (streamIdSize.hasError()) {
-    return folly::makeUnexpected(streamIdSize.error());
-  }
+  ret_if_err(streamIdSize);
   IOBufQueue queue(IOBufQueue::cacheChainLength());
   QueueAppender appender(&queue, *streamIdSize);
   auto encodeResult = quic::encodeQuicInteger(pushId, [&appender](auto val) {
     appender.writeBE(folly::tag<decltype(val)>, val);
   });
-  if (encodeResult.hasError()) {
-    return folly::makeUnexpected(quic::QuicError(encodeResult.error()));
-  }
+  ret_if_err(encodeResult);
   appender.pushAtMost((const uint8_t*)(priorityUpdate.data()),
                       priorityUpdate.size());
   return writeSimpleFrame(writeBuf, type, queue.move());
@@ -406,17 +377,13 @@ WriteResult writePushPriorityUpdate(
 WriteResult writeStreamPreface(folly::IOBufQueue& writeBuf,
                                uint64_t streamPreface) noexcept {
   auto streamPrefaceSize = quic::getQuicIntegerSize(streamPreface);
-  if (streamPrefaceSize.hasError()) {
-    return folly::makeUnexpected(streamPrefaceSize.error());
-  }
+  ret_if_err(streamPrefaceSize);
   QueueAppender appender(&writeBuf, *streamPrefaceSize);
   auto encodeResult =
       quic::encodeQuicInteger(streamPreface, [&appender](auto val) {
         appender.writeBE(folly::tag<decltype(val)>, val);
       });
-  if (encodeResult.hasError()) {
-    return folly::makeUnexpected(quic::QuicError(encodeResult.error()));
-  }
+  ret_if_err(encodeResult);
   return *streamPrefaceSize;
 }
 
@@ -460,14 +427,11 @@ std::ostream& operator<<(std::ostream& os, FrameType type) {
 WriteResult writeGreaseFrame(folly::IOBufQueue& writeBuf) noexcept {
   auto greaseId = getGreaseId(folly::Random::rand32(16));
   if (!greaseId) {
-    return folly::makeUnexpected(quic::QuicError(
-        quic::TransportErrorCode::INTERNAL_ERROR, "Invalid grease id"));
+    return std::nullopt;
   }
   uint64_t uiFrameType = *greaseId;
   auto frameTypeSize = quic::getQuicIntegerSize(uiFrameType);
-  if (frameTypeSize.hasError()) {
-    return folly::makeUnexpected(frameTypeSize.error());
-  }
+  ret_if_err(frameTypeSize);
   return writeFrameHeader(writeBuf, static_cast<FrameType>(uiFrameType), 0);
 }
 
@@ -485,16 +449,12 @@ WriteResult writeWTStreamPreface(folly::IOBufQueue& writeBuf,
   auto res = quic::encodeQuicInteger(streamTypes[idx], [&appender](auto val) {
     appender.writeBE(folly::tag<decltype(val)>, val);
   });
-  if (!res) {
-    return folly::makeUnexpected(quic::QuicError(res.error()));
-  }
+  ret_if_err(res);
   prefaceSize += res.value();
   res = quic::encodeQuicInteger(wtSessionId, [&appender](auto val) {
     appender.writeBE(folly::tag<decltype(val)>, val);
   });
-  if (!res) {
-    return folly::makeUnexpected(quic::QuicError(res.error()));
-  }
+  ret_if_err(res);
   prefaceSize += res.value();
   return prefaceSize;
 }

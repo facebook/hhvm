@@ -209,9 +209,7 @@ size_t HQControlCodec::generateGoaway(
   DCHECK_GE(egressGoawayAck_, minUnseenId);
   egressGoawayAck_ = minUnseenId;
   auto writeRes = hq::writeGoaway(writeBuf, minUnseenId);
-  if (writeRes.hasError()) {
-    LOG(FATAL) << "error writing goaway with minUnseenId=" << minUnseenId;
-  }
+  LOG_IF(FATAL, !writeRes) << "::writeGoaway err minUnseenId=" << minUnseenId;
   sentGoaway_ = true;
   return *writeRes;
 }
@@ -246,9 +244,7 @@ size_t HQControlCodec::generateSettings(folly::IOBufQueue& writeBuf) {
       static_cast<SettingId>(*getGreaseId(folly::Random::rand32(16))),
       static_cast<SettingValue>(0xFACEB00C));
   auto writeRes = writeSettings(writeBuf, settings);
-  if (writeRes.hasError()) {
-    LOG(FATAL) << "error writing settings frame";
-  }
+  LOG_IF(FATAL, !writeRes) << "error writing settings frame";
   return *writeRes;
 }
 
@@ -263,7 +259,7 @@ size_t HQControlCodec::generatePriority(folly::IOBufQueue& writeBuf,
   auto updateString = folly::to<std::string>(
       "u=", priority.urgency, (priority.incremental ? ",i" : ""));
   auto writeRet = hq::writePriorityUpdate(writeBuf, stream, updateString);
-  if (writeRet.hasError()) {
+  if (!writeRet) {
     LOG(ERROR) << "error writing priority update, stream=" << stream
                << ", priority=" << updateString;
     return 0;
@@ -283,7 +279,7 @@ size_t HQControlCodec::generatePushPriority(folly::IOBufQueue& writeBuf,
   auto updateString = folly::to<std::string>(
       "u=", priority.urgency, (priority.incremental ? ",i" : ""));
   auto writeRet = hq::writePushPriorityUpdate(writeBuf, pushId, updateString);
-  if (writeRet.hasError()) {
+  if (!writeRet) {
     LOG(ERROR) << "error writing push priority update, pushId=" << pushId
                << ", priority=" << updateString;
     return 0;

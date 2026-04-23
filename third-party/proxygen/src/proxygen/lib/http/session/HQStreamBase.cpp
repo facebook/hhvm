@@ -100,7 +100,7 @@ size_t HQStreamBase::generateStreamPreface() {
           << " stream streamID=" << getEgressStreamId() << " sess=" << session_;
   auto res = hq::writeStreamPreface(
       writeBuf_, static_cast<hq::StreamTypeType>(type_.value()));
-  CHECK(!res.hasError());
+  CHECK(res.has_value());
   return res.value();
 }
 } // namespace proxygen

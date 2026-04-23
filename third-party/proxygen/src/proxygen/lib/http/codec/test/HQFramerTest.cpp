@@ -133,7 +133,7 @@ TEST_F(HQFramerTest, DataFrameZeroLength) {
 
 TEST_F(HQFramerTest, TestWriteGreaseFrame) {
   auto res = writeGreaseFrame(queue_);
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res.has_value());
 
   Cursor cursor(queue_.front());
   auto type = quic::follyutils::decodeQuicInteger(cursor);
@@ -149,7 +149,7 @@ TEST_F(HQFramerTest, TestWriteWebTransportStreamPreface) {
   auto streamType = hq::WebTransportStreamType::UNI;
   auto wtSessionId = 1977;
   auto res = writeWTStreamPreface(queue_, streamType, wtSessionId);
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res.has_value());
 
   Cursor cursor(queue_.front());
   auto type = quic::follyutils::decodeQuicInteger(cursor);
@@ -183,7 +183,7 @@ TEST_P(HQFramerTestDataOnlyFrames, TestDataOnlyFrame) {
   // Test writing and parsing a valid frame
   auto data = makeBuf(500);
   auto res = GetParam().writeFn(queue_, data->clone());
-  EXPECT_FALSE(res.hasError());
+  EXPECT_TRUE(res.has_value());
   FrameHeader header;
   std::unique_ptr<IOBuf> outBuf;
   parse(folly::none, GetParam().parseFn, header, outBuf);
@@ -206,7 +206,7 @@ TEST_F(HQFramerTest, ParsePushPromiseFrameOK) {
   auto data = makeBuf(1000);
   PushId inPushId = 4563;
   auto result = writePushPromise(queue_, inPushId, data->clone());
-  EXPECT_FALSE(result.hasError());
+  EXPECT_TRUE(result.has_value());
 
   FrameHeader outHeader;
   PushId outPushId;
@@ -232,7 +232,7 @@ TEST_P(HQFramerTestIdOnlyFrames, TestIdOnlyFrame) {
     queue_.move();
     uint64_t validVarLenInt = 123456;
     auto result = GetParam().writeFn(queue_, validVarLenInt);
-    EXPECT_FALSE(result.hasError());
+    EXPECT_TRUE(result.has_value());
 
     FrameHeader header;
     uint64_t outId;
@@ -246,7 +246,7 @@ TEST_P(HQFramerTestIdOnlyFrames, TestIdOnlyFrame) {
     queue_.move();
     uint64_t invalidVarLenInt = std::numeric_limits<uint64_t>::max();
     auto result = GetParam().writeFn(queue_, invalidVarLenInt);
-    EXPECT_TRUE(result.hasError());
+    EXPECT_FALSE(result.has_value());
   }
   // test writing a valid ID, then modifying to make the parser try to read
   // too much data
@@ -254,7 +254,7 @@ TEST_P(HQFramerTestIdOnlyFrames, TestIdOnlyFrame) {
     queue_.move();
     uint64_t validVarLenInt = 63; // requires just 1 byte
     auto result = GetParam().writeFn(queue_, validVarLenInt);
-    EXPECT_FALSE(result.hasError());
+    EXPECT_TRUE(result.has_value());
 
     // modify one byte in the buf
     auto buf = queue_.move();
@@ -275,7 +275,7 @@ TEST_P(HQFramerTestIdOnlyFrames, TestIdOnlyFrame) {
     queue_.move();
     uint64_t id = 3; // requires just 1 byte
     auto result = GetParam().writeFn(queue_, id);
-    EXPECT_FALSE(result.hasError());
+    EXPECT_TRUE(result.has_value());
 
     // Trim the frame header off
     queue_.trimStart(2);
@@ -364,7 +364,7 @@ TEST_F(HQFramerTest, MaxPushIdTooLarge) {
   PushId maxPushId = (quic::kEightByteLimit + 1);
   auto res = writeMaxPushId(queue_, maxPushId);
 
-  ASSERT_TRUE(res.hasError());
+  ASSERT_FALSE(res.has_value());
 }
 
 struct SettingsValuesParams {
@@ -454,7 +454,7 @@ TEST_F(HQFramerTest, SettingsFrameWriteError) {
       {(hq::SettingId)*getGreaseId(54321),
        SettingValue(std::numeric_limits<uint64_t>::max())}};
   auto res = writeSettings(queue_, settings);
-  ASSERT_TRUE(res.hasError());
+  ASSERT_FALSE(res.has_value());
 }
 
 TEST_F(HQFramerTest, SettingsFrameUnknownId) {

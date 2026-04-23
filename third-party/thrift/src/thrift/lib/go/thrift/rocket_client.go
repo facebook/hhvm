@@ -197,7 +197,7 @@ func (p *rocketClient) SendRequestSink(
 	}
 
 	headers := p.getWriteHeaders(ctx)
-	respHeaders, resultData, sinkCallback, resultErr := p.client.RequestChannel(ctx, messageName, headers, dataBytes)
+	respHeaders, resultData, sinkCallback, resultErr := p.client.RequestSink(ctx, messageName, headers, dataBytes)
 	if resultErr != nil {
 		return nil, resultErr
 	}

@@ -60,7 +60,7 @@ type RSocketClient interface {
 		dataBytes []byte,
 		newStreamElemFn func() ReadableResult,
 	) (map[string]string, []byte, iter.Seq2[ReadableStruct, error], error)
-	RequestChannel(
+	RequestSink(
 		ctx context.Context,
 		messageName string,
 		headers map[string]string,
@@ -321,7 +321,7 @@ func (r *rsocketClient) MetadataPush(_ context.Context, metadata *rpcmetadata.Cl
 	return nil
 }
 
-func (r *rsocketClient) RequestChannel(
+func (r *rsocketClient) RequestSink(
 	ctx context.Context,
 	messageName string,
 	headers map[string]string,

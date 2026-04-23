@@ -1695,7 +1695,7 @@ TEST_F(MockHTTP2UpstreamTest, ParseErrorNoTxn) {
 
 TEST_F(MockHTTPUpstreamTest, 0MaxOutgoingTxns) {
   // Test where an upstream session gets a SETTINGS frame with 0 max
-  // outgoing transactions. In our implementation, we jsut send a GOAWAY
+  // outgoing transactions. In our implementation, we just send a GOAWAY
   // and close the connection.
 
   codecCb_->onSettings({{SettingsId::MAX_CONCURRENT_STREAMS, 0}});
@@ -1742,7 +1742,7 @@ TEST_F(MockHTTPUpstreamTest, IngressGoawayDrain) {
   // Receive GOAWAY frame with last good stream as 1
   codecCb_->onGoaway(1, ErrorCode::NO_ERROR);
 
-  // New transactions cannot be created afrer goaway
+  // New transactions cannot be created after goaway
   EXPECT_FALSE(httpSession_->isReusable());
   EXPECT_EQ(httpSession_->newTransaction(handler.get()), nullptr);
 
@@ -2807,7 +2807,7 @@ TEST_F(HTTP2UpstreamSessionTest, Observer_RequestStarted) {
   httpSession_->destroy();
 }
 
-// Register and instantiate all our type-paramterized tests
+// Register and instantiate all our type-parameterized tests
 REGISTER_TYPED_TEST_SUITE_P(HTTPUpstreamTest, ImmediateEof);
 
 using AllTypes = ::testing::Types<HTTP1xCodecPair, HTTP2CodecPair>;

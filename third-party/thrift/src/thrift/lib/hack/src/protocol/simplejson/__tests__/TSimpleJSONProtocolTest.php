@@ -300,6 +300,94 @@ final class TSimpleJSONProtocolTest extends WWWTest {
     );
   }
 
+  public static function provideFullPrecisionDoubles(
+  ): dict<string, shape('value' => float)> {
+    return dict[
+      'large integer double from CPEntity bug' =>
+        shape('value' => 510496816387046.0),
+      'large integer double 2' => shape('value' => 2382955428659291.0),
+      'large integer double 3' => shape('value' => 2369881746625508.0),
+      'smallest increment above 1.0' => shape('value' => 1.0000000000000002),
+      'value needing 17 digits' => shape('value' => 0.12345678901234568),
+      'simple value' => shape('value' => 1.5),
+      'classic fp rounding' => shape('value' => 0.1 + 0.2),
+      'very large double' => shape('value' => 1.7976931348623157e+308),
+      'very small double' => shape('value' => 1.23e-5),
+      'negative large double' => shape('value' => -1.23e+20),
+    ];
+  }
+
+  <<DataProvider('provideFullPrecisionDoubles')>>
+  public function testFullPrecisionDoubleRoundtrip(float $value): void {
+    $this->assertFullPrecisionRoundtrip($value, false);
+  }
+
+  <<DataProvider('provideFullPrecisionDoubles')>>
+  public function testFullPrecisionFloatRoundtrip(float $value): void {
+    $this->assertFullPrecisionRoundtrip($value, true);
+  }
+
+  private function assertFullPrecisionRoundtrip(
+    float $value,
+    bool $use_float,
+  ): void {
+    $transport = new TMemoryBuffer();
+    $protocol = (new TSimpleJSONProtocol($transport))
+      ->setFullPrecisionFloats(true);
+    if ($use_float) {
+      $protocol->writeFloat($value);
+    } else {
+      $protocol->writeDouble($value);
+    }
+
+    $read_transport = new TMemoryBuffer($transport->getBuffer());
+    $read_protocol = (new TSimpleJSONProtocol($read_transport))
+      ->setSpecialHandlingForNumber(true);
+    $read_value = 0.0;
+    if ($use_float) {
+      $read_protocol->readFloat(inout $read_value);
+    } else {
+      $read_protocol->readDouble(inout $read_value);
+    }
+    /* @lint-ignore FLOATING_POINT_COMPARISON */
+    expect($read_value)->toEqual(
+      $value,
+      'Roundtrip failed: wrote %s, read %s',
+      (string)$value,
+      (string)$read_value,
+    );
+  }
+
+  public function testFullPrecisionSerializerIntegration(): void {
+    $obj = TSimpleJSONProtocolTest_NumVals::fromShape(shape(
+      'f' => 100.000056,
+    ));
+
+    $serialized = JSONThriftSerializer::serializeWithFullPrecisionFloats($obj);
+
+    $deserialized = JSONThriftSerializer::deserialize(
+      $serialized,
+      TSimpleJSONProtocolTest_NumVals::withDefaultValues(),
+    );
+    expect($deserialized->f)->toEqual($obj->f);
+  }
+
+  public function testFullPrecisionSpecialValuesUnchanged(): void {
+    $transport = new TMemoryBuffer();
+    $protocol = (new TSimpleJSONProtocol($transport))
+      ->setFullPrecisionFloats(true);
+    $protocol->writeStructBegin('test');
+    $protocol->writeFieldBegin('inf', TType::DOUBLE, 1);
+    $protocol->writeDouble(INF);
+    $protocol->writeFieldEnd();
+    $protocol->writeFieldBegin('nan', TType::DOUBLE, 2);
+    $protocol->writeDouble(Math\NAN);
+    $protocol->writeFieldEnd();
+    $protocol->writeFieldStop();
+    $protocol->writeStructEnd();
+    expect($transport->getBuffer())->toEqual('{"inf":"Infinity","nan":"NaN"}');
+  }
+
   public function testQuoteString(): void {
     // Test with a simple string
     $input = '{"s": "Hello, World!"}';

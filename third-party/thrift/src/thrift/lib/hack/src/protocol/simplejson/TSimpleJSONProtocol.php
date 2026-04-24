@@ -36,6 +36,7 @@ class TSimpleJSONProtocol extends TProtocol {
   protected TMemoryBuffer $buffer;
   private Vector<TSimpleJSONProtocolContext> $contexts;
   private bool $binaryAsBase64;
+  private bool $fullPrecisionFloats = false;
 
   // If the serialized data has just the number,
   // then deserialization breaks as it reaches the end of the string.
@@ -59,6 +60,11 @@ class TSimpleJSONProtocol extends TProtocol {
 
   public function setBinaryAsBase64(bool $value)[write_props]: this {
     $this->binaryAsBase64 = $value;
+    return $this;
+  }
+
+  public function setFullPrecisionFloats(bool $value)[write_props]: this {
+    $this->fullPrecisionFloats = $value;
     return $this;
   }
 
@@ -255,6 +261,8 @@ class TSimpleJSONProtocol extends TProtocol {
       $str = self::THRIFT_NEGATIVE_INFINITY;
     } else if (Math\is_nan($value)) {
       $str = self::THRIFT_NAN;
+    } else if ($this->fullPrecisionFloats) {
+      return $this->writeNumStr(Str\format('%.17g', $value));
     } else {
       return $this->writeNum($value);
     }
@@ -262,15 +270,18 @@ class TSimpleJSONProtocol extends TProtocol {
     return $this->writeString($str);
   }
 
-  protected function writeNum(num $value)[write_props]: int {
+  private function writeNumStr(string $value)[write_props]: int {
     $ctx = $this->getContext();
     $ret = $ctx->writeSeparator();
-    $value = (string)$value;
     if ($ctx->escapeNum()) {
       $value = '"'.$value.'"';
     }
     $this->buffer->write($value);
     return $ret + Str\length($value);
+  }
+
+  protected function writeNum(num $value)[write_props]: int {
+    return $this->writeNumStr((string)$value);
   }
 
   <<TestsBypassVisibility>>

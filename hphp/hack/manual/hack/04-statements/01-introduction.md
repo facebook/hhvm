@@ -4,6 +4,7 @@
 
 * [break/continue](/hack/statements/break-and-continue)
 * [do/while](/hack/statements/do)
+* [echo](/hack/statements/echo)
 * [for](/hack/statements/for)
 * [foreach](/hack/statements/foreach)
 * [if/else if/else](/hack/statements/if)

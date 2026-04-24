@@ -1,6 +1,6 @@
 # Echo
 
-This intrinsic function converts the value of an expression to `string` (if necessary) and writes the string to standard output.  For example:
+`echo` converts the value of an expression to `string` (if necessary) and writes the string to standard output.
 
 ```hack
 $v1 = 23;

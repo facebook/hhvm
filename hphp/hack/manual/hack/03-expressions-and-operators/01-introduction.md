@@ -39,7 +39,6 @@ When combined, operators evaluate according to their associativity. For more inf
 * [Check / Assert an invariant](/hack/expressions-and-operators/invariant) (`invariant`)
 * [Async: Suspend Execution](/hack/expressions-and-operators/await) (`await`)
 * [Coalesce: Non-Null Evaluation](/hack/expressions-and-operators/coalesce) (`??`)
-* [Echo: Write to Standard Output](/hack/expressions-and-operators/echo) (`echo`)
 * [Pipe: Chain Function Calls](/hack/expressions-and-operators/pipe) (`|>` then stored in `$$`)
 * [Ternary: Alternative `If` Evaluation](/hack/expressions-and-operators/ternary) (`? :`, `?:`)
 * [Yield: Define a Generator](/hack/expressions-and-operators/yield) (`yield`)

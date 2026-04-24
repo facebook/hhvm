@@ -55,56 +55,105 @@ namespace NS3\Sub1 {
   // __NAMESPACE__ is "NS3\Sub1"
 }
 ```
-## Importing from other Namespaces
-With the `use` keyword, a namespace can import one or more member names into a scope, optionally giving them each an alias.
+## The `use` Statement
 
-When importing many names, use `{ ... }`.
+The `use` statement introduces names defined in one namespace into another, so they can be referenced by their simple name rather than their fully qualified name. The `use` statement can only be present at the top level.
+
+There are four forms: `use const`, `use function`, `use type`, and `use namespace`.
+
+When importing many names of the same kind, use `{ ... }`:
 
 ```hack no-extract
-use namespace NS1\{C, I, T}; // instead of `NS1\C, NS1\I, NS1\T`
+use type NS1\{C, I, T}; // instead of three separate use statements
 ```
 
-Imported names can designate a namespace, a sub-namespace, a class or interface or trait, a function, or any built-in type.
+Names in `use` statements are always fully qualified — they don't need to be prefixed with `\`.
 
-If an imported name introduces ambiguity, you can refer to name `foo` with `namespace\foo`—using the the actual word `namespace`. For example, if you're importing a function `bar()`, but also want to call the `bar()` function from within your own namespace, refer to the one native to your namespace with `namespace\bar()`.
+If an imported name introduces ambiguity, you can refer to name `foo` with `namespace\foo`—using the actual word `namespace`. For example, if you're importing a function `bar()`, but also want to call the `bar()` function from within your own namespace, refer to the one native to your namespace with `namespace\bar()`.
 
+```hack file:use.hack
+namespace UseNS {
 
-```hack
-namespace NS1 {
-  const int CON1 = 100;
+  const int CON = 100;
+
   function f(): void {
-    echo "In ".__FUNCTION__."\n";
+    echo "In function ".__FUNCTION__."\n";
   }
 
   class C {
-    const int C_CON = 200;
     public function f(): void {
-      echo "In ".__NAMESPACE__."...".__METHOD__."\n";
+      echo "In method ".__METHOD__."\n";
     }
   }
 
-  interface I {
-    const int I_CON = 300;
-  }
+  class D {}
+  class E {}
+}
 
-  trait T {
-    public function f(): void {
-      echo "In ".__TRAIT__."...".__NAMESPACE__."...".__METHOD__."\n";
-    }
+namespace Hack\UserDocumentation\Statements\use\Examples\XXX {
+
+  const int CON2 = 500;
+
+  function f(): void {
+    echo "In function ".__FUNCTION__."\n";
   }
 }
 
-namespace NS2 {
-  use type NS1\{C, I, T};
+namespace Hack\UserDocumentation\Statements\use\Examples\test {
 
-  class D extends C implements I {
-    use T;
-  }
+  use const UseNS\CON;
+  use function UseNS\f;
+  //use function Hack\UserDocumentation\Statements\use\Examples\XXX\f;  // Error: name f already declared
+  use type UseNS\C;
+  use type UseNS\{D, E};
+  use namespace Hack\UserDocumentation\Statements\use\Examples\XXX;
 
-  function f(): void {
+  <<__EntryPoint>>
+  function main(): void {
+
+    // access const CON by fully qualified and abbreviated names
+
+    echo "CON = ".\UseNS\CON."\n";
+    echo "CON = ".CON."\n";
+
+    // access function f by fully qualified and abbreviated names
+
+    \UseNS\f();
+    f();
+
+    // access type C by fully qualified and abbreviated names
+
+    $c = new \UseNS\C();
+    $c->f();
+    $c = new C();
+    $c->f();
+
+    // access type D by fully qualified and abbreviated names
+
+    $d = new \UseNS\D();
     $d = new D();
-    echo "CON1 = ".\NS1\CON1."\n";
-    \NS1\f();
+
+    // access name f by fully qualified and abbreviated names
+
+    \Hack\UserDocumentation\Statements\use\Examples\XXX\f();
+    XXX\f();
+
+    // access name CON2 by fully qualified and abbreviated names
+
+    echo "XXX\CON2 = ".
+      \Hack\UserDocumentation\Statements\use\Examples\XXX\CON2.
+      "\n";
+    echo "XXX\\CON2 = ".XXX\CON2."\n";
   }
 }
 ```
+
+In the case of `use namespace`, we can reference names inside the given namespace by using a prefix that is the right-most part of the fully qualified name:
+
+```hack file:use.hack
+namespace {
+  use namespace Hack\UserDocumentation\Statements\use\Examples\XXX;
+}
+```
+
+Once this is seen, we can access `CON2` via the abbreviated `XXX\CON2`.

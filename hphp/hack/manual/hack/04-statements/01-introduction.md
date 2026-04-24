@@ -10,6 +10,5 @@
 * [return](/hack/statements/return)
 * [switch](/hack/statements/switch)
 * [throw/try/catch/finally](/hack/statements/try)
-* [use](/hack/statements/use)
 * [using](/hack/statements/using)
 * [while](/hack/statements/while)

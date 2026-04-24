@@ -293,7 +293,8 @@ and check_type_integrity
              w.current_package
              w.target_package
              w.target_package_before_override
-             w.classptr_reference_warning);
+             w.classptr_reference_warning
+             w.caller_has_package_override);
        List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
       (* Note: class gating via __GatedByFeatureFlag is not yet supported
          because folded classes don't carry user attributes. If needed,
@@ -319,7 +320,8 @@ and check_type_integrity
              w.current_package
              w.target_package
              w.target_package_before_override
-             w.classptr_reference_warning);
+             w.classptr_reference_warning
+             w.caller_has_package_override);
        List.iter errs ~f:(Typing_error_utils.add_typing_error ~env));
       Typing_visibility.check_gated_by_feature_flag
         env

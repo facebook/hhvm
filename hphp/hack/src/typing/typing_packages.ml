@@ -37,6 +37,7 @@ type package_warning_info = {
   target_package: Package.pos_id option;
   target_package_before_override: string option;
   classptr_reference_warning: bool;
+  caller_has_package_override: bool;
 }
 
 type package_error_info = {
@@ -157,6 +158,7 @@ let can_access_ignoring_package_override
         target_package;
         target_package_before_override;
         classptr_reference_warning;
+        caller_has_package_override = false;
       }
     in
     `YesWarning warn_info

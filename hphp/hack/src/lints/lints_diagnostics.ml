@@ -323,7 +323,10 @@ let package_into_override
     )
 
 let crosspackage_classptr_reference
-    pos current_package target_package_before_override =
+    pos
+    current_package
+    target_package_before_override
+    caller_has_package_override =
   let current_package_name =
     Option.value_map current_package ~default:"<none>" ~f:snd
   in
@@ -334,18 +337,27 @@ let crosspackage_classptr_reference
     Codes.crosspackage_classptr_reference
     Lint_error
     pos
-    ("This is a potential cross-boundary edge from package "
+    ("This is a cross-boundary edge from package "
     ^ current_package_name
     ^ " into package "
     ^ target_package_before_override_name
-    ^ ". If this value isn't used to load the class "
-    ^ "via new $cls(), $cls::meth(), etc, please change this to a `nameof` expression. "
-    ^ "Otherwise, move the callee into the caller's package via hg mv, "
-    ^ "use `__RequirePackage` (if the whole function should only be invoked from "
+    ^ ". Consider one of the following:\n"
+    ^ "  (1) if this value isn't used to load the class via new $cls(), $cls::meth(), etc, change this to a `nameof` expression;\n"
+    ^ "  (2) use `__RequirePackage` (if the function should only be invoked from "
     ^ target_package_before_override_name
-    ^ ") or gate this reference via a `package` check "
-    ^ "(if this portion of the function is meant to be gated by an environment check)."
-    )
+    ^ ");\n"
+    ^ "  (3) gate this reference via a `package` check (if this portion of the function is meant to be gated by an environment check).\n"
+    ^ "Alternatively, move the callee into the caller's package via `sl mv`.\n"
+    ^ "See https://docs.hhvm.com/hack/packages/cross-package-calls for examples."
+    ^
+    if caller_has_package_override then
+      "\nYou may also consider adding `<<file: __PackageOverride('"
+      ^ current_package_name
+      ^ "')>>` to the target file to include it in the "
+      ^ current_package_name
+      ^ " package for safety."
+    else
+      "")
 
 (* wrapper around crosspackage_classconst_reference and package_into_override *)
 let crosspackage_linter
@@ -353,12 +365,14 @@ let crosspackage_linter
     current_package
     target_package
     target_package_before_override
-    classptr_reference_warning =
+    classptr_reference_warning
+    caller_has_package_override =
   if classptr_reference_warning then
     crosspackage_classptr_reference
       pos
       current_package
       target_package_before_override
+      caller_has_package_override
   else
     package_into_override
       pos

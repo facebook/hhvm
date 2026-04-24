@@ -1289,7 +1289,8 @@ end = struct
           w.current_package
           w.target_package
           w.target_package_before_override
-          w.classptr_reference_warning);
+          w.classptr_reference_warning
+          w.caller_has_package_override);
     Option.iter
       ~f:(Typing_error_utils.add_typing_error ~env)
       (Typing_error.multiple_opt (other_errs @ access_errs));
@@ -3592,6 +3593,7 @@ end = struct
             w.target_package
             w.target_package_before_override
             w.classptr_reference_warning
+            w.caller_has_package_override
         | TVis.Package_access_ok -> ());
         let ((env, ty_err_opt), ty) =
           Phase.localize_no_subst env ~ignore_errors:true const.cd_type
@@ -5057,6 +5059,7 @@ end = struct
                 w.target_package
                 w.target_package_before_override
                 w.classptr_reference_warning
+                w.caller_has_package_override
             | TVis.Package_access_ok -> ())
           | Decl_entry.DoesNotExist
           | Decl_entry.NotYetAvailable ->
@@ -11706,7 +11709,8 @@ end = struct
                 w.current_package
                 w.target_package
                 w.target_package_before_override
-                w.classptr_reference_warning);
+                w.classptr_reference_warning
+                w.caller_has_package_override);
           List.iter ~f:(Typing_error_utils.add_typing_error ~env) access_errs);
 
         (* Don't add Exact superfluously to class type if it's final *)

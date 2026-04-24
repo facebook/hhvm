@@ -802,6 +802,7 @@ let check_consistent_enum_inclusion
       w.target_package
       w.target_package_before_override
       w.classptr_reference_warning
+      w.caller_has_package_override
   | Typing_visibility.Package_access_ok -> ());
   match (Cls.enum_type included_cls, Cls.enum_type dest_cls) with
   | (Some included_e, Some dest_e) ->

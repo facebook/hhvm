@@ -285,7 +285,11 @@ let check_package_access
         | _ ->
           (* Target has no override, or overrides to a different package.
              Check if source's override package includes target's original package. *)
-          check_classptr_access ())
+          (match check_classptr_access () with
+          | Package_access_linter_error (pos, w) ->
+            Package_access_linter_error
+              (pos, { w with caller_has_package_override = true })
+          | other -> other))
       | None -> Package_access_ok)
 
 let is_visible_for_obj ~is_method ~is_receiver_interface env vis =

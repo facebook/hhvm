@@ -11,6 +11,7 @@ type package_warning_info = {
   target_package: Package.pos_id option;
   target_package_before_override: string option;
   classptr_reference_warning: bool;
+  caller_has_package_override: bool;
 }
 
 type package_error_info = {

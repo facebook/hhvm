@@ -1320,6 +1320,7 @@ CO_TEST(HybridSourceTest, StopReading) {
 
   auto hybridSource = new HTTPHybridSource(std::move(headers.headers), nullptr);
   hybridSource->setHeapAllocated();
+  EXPECT_EQ(hybridSource->getStreamID(), folly::none);
   HTTPSourceHolder combinedSourceHolder(hybridSource);
 
   EXPECT_TRUE(bool(combinedSourceHolder));

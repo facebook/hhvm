@@ -53,6 +53,10 @@ class HTTPHybridSource : public HTTPSourceFilter {
     }
   }
 
+  folly::Optional<uint64_t> getStreamID() const noexcept override {
+    return readable() ? HTTPSourceFilter::getStreamID() : folly::none;
+  }
+
  private:
   bool headerEventAvailable_{true};
   HTTPHeaderEvent headerEvent_;

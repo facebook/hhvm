@@ -138,7 +138,7 @@ class ClientSetupFrameHandlerTest : public ::testing::Test {
 TEST_F(ClientSetupFrameHandlerTest, OnConnectWritesSetupFrame) {
   RocketClientSetupFrameHandler handler(makeDefaultFactory());
 
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
@@ -151,7 +151,7 @@ TEST_F(ClientSetupFrameHandlerTest, OnConnectClosesOnWriteFailure) {
   RocketClientSetupFrameHandler handler(makeDefaultFactory());
   ctx_.setWriteResult(Result::Error);
 
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
 
   EXPECT_TRUE(ctx_.closeCalled());
 }
@@ -160,15 +160,15 @@ TEST_F(ClientSetupFrameHandlerTest, OnConnectIsIdempotent) {
   RocketClientSetupFrameHandler handler(makeDefaultFactory());
 
   // First call should send setup frame
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
 
   // Second call should not send another frame
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
   EXPECT_EQ(ctx_.writeMessages().size(), 1);
 
   // Third call should also be a no-op
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
   EXPECT_EQ(ctx_.writeMessages().size(), 1);
 }
 
@@ -181,7 +181,7 @@ TEST_F(ClientSetupFrameHandlerTest, FactoryIsCalledOnConnect) {
   });
 
   EXPECT_FALSE(factoryCalled);
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
   EXPECT_TRUE(factoryCalled);
 }
 
@@ -192,7 +192,7 @@ TEST_F(ClientSetupFrameHandlerTest, FactoryIsCalledOnConnect) {
 TEST_F(ClientSetupFrameHandlerTest, SetupFrameHasCorrectHeaderFormat) {
   RocketClientSetupFrameHandler handler(makeDefaultFactory());
 
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
@@ -253,7 +253,7 @@ TEST_F(ClientSetupFrameHandlerTest, SetupFrameIncludesMetadataAndData) {
         folly::IOBuf::copyBuffer(testData));
   });
 
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
@@ -309,7 +309,7 @@ TEST_F(ClientSetupFrameHandlerTest, NullMetadataStillSendsFrame) {
     return std::make_pair(nullptr, folly::IOBuf::copyBuffer("data only"));
   });
 
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
@@ -321,7 +321,7 @@ TEST_F(ClientSetupFrameHandlerTest, NullDataStillSendsFrame) {
     return std::make_pair(folly::IOBuf::copyBuffer("metadata only"), nullptr);
   });
 
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
@@ -332,7 +332,7 @@ TEST_F(ClientSetupFrameHandlerTest, NullMetadataAndDataStillSendsFrame) {
   RocketClientSetupFrameHandler handler(
       []() { return std::make_pair(nullptr, nullptr); });
 
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
@@ -345,7 +345,7 @@ TEST_F(ClientSetupFrameHandlerTest, EmptyMetadataStillSendsFrame) {
         folly::IOBuf::create(0), folly::IOBuf::copyBuffer("data"));
   });
 
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
 }
@@ -356,7 +356,7 @@ TEST_F(ClientSetupFrameHandlerTest, EmptyDataStillSendsFrame) {
         folly::IOBuf::copyBuffer("metadata"), folly::IOBuf::create(0));
   });
 
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
 }
@@ -387,18 +387,18 @@ TEST_F(ClientSetupFrameHandlerTest, OnDisconnectResetsSetupState) {
   RocketClientSetupFrameHandler handler(makeDefaultFactory());
 
   // First connect sends setup
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
 
   // Second connect should be no-op (idempotent)
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
   EXPECT_EQ(ctx_.writeMessages().size(), 1);
 
   // Disconnect resets state
-  handler.onPipelineDeactivated(ctx_);
+  handler.onPipelineInactive(ctx_);
 
   // After disconnect, next connect should send setup again
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
   EXPECT_EQ(ctx_.writeMessages().size(), 2);
 }
 
@@ -407,8 +407,8 @@ TEST_F(ClientSetupFrameHandlerTest, OnDisconnectAllowsMultipleReconnections) {
 
   // Simulate multiple connect/disconnect cycles
   for (int i = 0; i < 3; ++i) {
-    handler.onPipelineActivated(ctx_);
-    handler.onPipelineDeactivated(ctx_);
+    handler.onPipelineActive(ctx_);
+    handler.onPipelineInactive(ctx_);
   }
 
   // Should have sent 3 setup frames
@@ -427,10 +427,10 @@ TEST_F(ClientSetupFrameHandlerTest, OnDisconnectBeforeConnectIsNoOp) {
   RocketClientSetupFrameHandler handler(makeDefaultFactory());
 
   // Disconnect before any connect should not crash
-  handler.onPipelineDeactivated(ctx_);
+  handler.onPipelineInactive(ctx_);
 
   // First connect should still work
-  handler.onPipelineActivated(ctx_);
+  handler.onPipelineActive(ctx_);
   EXPECT_EQ(ctx_.writeMessages().size(), 1);
 }
 

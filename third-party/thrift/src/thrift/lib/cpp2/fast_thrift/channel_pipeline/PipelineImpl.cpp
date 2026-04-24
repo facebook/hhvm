@@ -31,23 +31,24 @@ using apache::thrift::fast_thrift::channel_pipeline::Result;
 using apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox;
 using apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl;
 
-Result terminalRead(
+Result tailHandlerReadFn(
     void* pipeline, ContextImpl& /*ctx*/, TypeErasedBox&& msg) noexcept {
-  return static_cast<PipelineImpl*>(pipeline)->fireReadToTerminal(
+  return static_cast<PipelineImpl*>(pipeline)->fireReadToTailHandler(
       std::move(msg));
 }
 
-Result terminalWrite(
+Result headHandlerWriteFn(
     void* pipeline, ContextImpl& /*ctx*/, TypeErasedBox&& msg) noexcept {
-  return static_cast<PipelineImpl*>(pipeline)->fireWriteToTerminal(
+  return static_cast<PipelineImpl*>(pipeline)->fireWriteToHeadHandler(
       std::move(msg));
 }
 
-void terminalException(
+void tailHandlerExceptionFn(
     void* pipeline,
     ContextImpl& /*ctx*/,
     folly::exception_wrapper&& e) noexcept {
-  static_cast<PipelineImpl*>(pipeline)->fireExceptionToTerminal(std::move(e));
+  static_cast<PipelineImpl*>(pipeline)->fireExceptionToTailHandler(
+      std::move(e));
 }
 
 } // namespace
@@ -59,13 +60,13 @@ PipelineImpl::~PipelineImpl() = default;
 PipelineImpl::PipelineImpl(
     folly::EventBase* eventBase,
     std::vector<detail::HandlerNode> handlers,
-    void* head,
-    void* tail,
+    void* headHandler,
+    void* tailHandler,
     void* allocator) noexcept
     : eventBase_(eventBase),
       handlers_(std::move(handlers)),
-      head_(head),
-      tail_(tail),
+      headHandler_(headHandler),
+      tailHandler_(tailHandler),
       allocator_(allocator) {
   initializeContexts();
 }
@@ -103,8 +104,8 @@ void PipelineImpl::initializeContexts() noexcept {
       ctx.nextHandler_ = handlers_[i + 1].handlerPtr;
       ctx.nextCtx_ = &contexts_[i + 1];
     } else {
-      ctx.nextReadFn_ = &terminalRead;
-      ctx.nextExceptionFn_ = &terminalException;
+      ctx.nextReadFn_ = &tailHandlerReadFn;
+      ctx.nextExceptionFn_ = &tailHandlerExceptionFn;
       ctx.nextHandler_ = this;
       ctx.nextCtx_ = &ctx; // unused by terminal functions
     }
@@ -115,7 +116,7 @@ void PipelineImpl::initializeContexts() noexcept {
       ctx.prevHandler_ = handlers_[i - 1].handlerPtr;
       ctx.prevCtx_ = &contexts_[i - 1];
     } else {
-      ctx.prevWriteFn_ = &terminalWrite;
+      ctx.prevWriteFn_ = &headHandlerWriteFn;
       ctx.prevHandler_ = this;
       ctx.prevCtx_ = &ctx; // unused by terminal function
     }
@@ -137,23 +138,23 @@ void PipelineImpl::initializeContexts() noexcept {
 
 void PipelineImpl::callHandlerAdded() noexcept {
   DestructorGuard dg(this);
+  headHandlerAddedFn_(headHandler_);
   for (size_t i = 0; i < handlers_.size(); ++i) {
     DCHECK(handlers_[i].handlerAddedFn);
     handlers_[i].handlerAddedFn(handlers_[i].handlerPtr, contexts_[i]);
   }
+  tailHandlerAddedFn_(tailHandler_);
 }
 
 void PipelineImpl::callHandlerRemovedImpl() noexcept {
   // Call in reverse order (LIFO)
+  tailHandlerRemovedFn_(tailHandler_);
   for (size_t i = handlers_.size(); i > 0; --i) {
     size_t idx = i - 1;
     DCHECK(handlers_[idx].handlerRemovedFn);
     handlers_[idx].handlerRemovedFn(handlers_[idx].handlerPtr, contexts_[idx]);
   }
-
-  // Call endpoint handlerRemoved
-  headHandlerRemovedFn_(head_);
-  tailHandlerRemovedFn_(tail_);
+  headHandlerRemovedFn_(headHandler_);
 }
 
 void PipelineImpl::callHandlerRemoved() noexcept {
@@ -166,14 +167,14 @@ void PipelineImpl::activate() noexcept {
   if (closed_) {
     return;
   }
+
+  headOnPipelineActiveFn_(headHandler_);
   for (size_t i = 0; i < handlers_.size(); ++i) {
     auto& handler = handlers_[i];
-    DCHECK(handler.onPipelineActivatedFn);
-    handler.onPipelineActivatedFn(handler.handlerPtr, contexts_[i]);
+    DCHECK(handler.onPipelineActiveFn);
+    handler.onPipelineActiveFn(handler.handlerPtr, contexts_[i]);
   }
-  // Call endpoint lifecycle
-  headOnPipelineActiveFn_(head_);
-  tailOnPipelineActiveFn_(tail_);
+  tailOnPipelineActiveFn_(tailHandler_);
 }
 
 void PipelineImpl::deactivate() noexcept {
@@ -181,35 +182,45 @@ void PipelineImpl::deactivate() noexcept {
   if (closed_) {
     return;
   }
-  // Call endpoint lifecycle
-  headOnPipelineInactiveFn_(head_);
-  tailOnPipelineInactiveFn_(tail_);
+
+  // Call in reverse order (LIFO)
+  tailOnPipelineInactiveFn_(tailHandler_);
   if (!handlers_.empty()) {
     deactivateFromIndex(handlers_.size() - 1);
   }
+  headOnPipelineInactiveFn_(headHandler_);
 }
 
 void PipelineImpl::deactivateFromIndex(size_t index) noexcept {
   for (size_t i = index + 1; i > 0; --i) {
     size_t idx = i - 1;
     auto& handler = handlers_[idx];
-    DCHECK(handler.onPipelineDeactivatedFn);
-    handler.onPipelineDeactivatedFn(handler.handlerPtr, contexts_[idx]);
+    DCHECK(handler.onPipelineInactiveFn);
+    handler.onPipelineInactiveFn(handler.handlerPtr, contexts_[idx]);
   }
 }
 
 PIPELINE_HOT_PATH Result PipelineImpl::fireRead(TypeErasedBox&& msg) noexcept {
   if (FOLLY_UNLIKELY(closed_ || !firstReadFn_)) {
-    return fireReadToTerminal(std::move(msg));
+    return fireReadToTailHandler(std::move(msg));
   }
   return firstReadFn_(firstHandler_, *firstCtx_, std::move(msg));
 }
 
 PIPELINE_HOT_PATH Result PipelineImpl::fireWrite(TypeErasedBox&& msg) noexcept {
   if (FOLLY_UNLIKELY(closed_ || !lastWriteFn_)) {
-    return fireWriteToTerminal(std::move(msg));
+    return fireWriteToHeadHandler(std::move(msg));
   }
   return lastWriteFn_(lastHandler_, *lastCtx_, std::move(msg));
+}
+
+PIPELINE_HOT_PATH void PipelineImpl::fireException(
+    folly::exception_wrapper&& e) noexcept {
+  if (FOLLY_UNLIKELY(closed_ || !firstExceptionFn_)) {
+    fireExceptionToTailHandler(std::move(e));
+    return;
+  }
+  firstExceptionFn_(firstHandler_, *firstCtx_, std::move(e));
 }
 
 Result PipelineImpl::sendRead(
@@ -268,7 +279,7 @@ void PipelineImpl::close() noexcept {
 PIPELINE_HOT_PATH Result
 PipelineImpl::fireReadFromIndex(size_t index, TypeErasedBox&& msg) noexcept {
   if (index >= handlers_.size()) {
-    return fireReadToTerminal(std::move(msg));
+    return fireReadToTailHandler(std::move(msg));
   }
   auto& handler = handlers_[index];
   DCHECK(handler.onReadFn);
@@ -286,7 +297,7 @@ PipelineImpl::fireWriteFromIndex(size_t index, TypeErasedBox&& msg) noexcept {
 PIPELINE_HOT_PATH void PipelineImpl::fireExceptionFromIndex(
     size_t index, folly::exception_wrapper&& e) noexcept {
   if (index >= handlers_.size()) {
-    fireExceptionToTerminal(std::move(e));
+    fireExceptionToTailHandler(std::move(e));
     return;
   }
   auto& handler = handlers_[index];
@@ -294,26 +305,26 @@ PIPELINE_HOT_PATH void PipelineImpl::fireExceptionFromIndex(
   handler.onExceptionFn(handler.handlerPtr, contexts_[index], std::move(e));
 }
 
-Result PipelineImpl::fireReadToTerminal(TypeErasedBox&& msg) noexcept {
-  if (!readTerminalOnMessageFn_ || !readTerminal_) {
+Result PipelineImpl::fireReadToTailHandler(TypeErasedBox&& msg) noexcept {
+  if (!tailOnReadFn_ || !tailHandler_) {
     return Result::Error;
   }
-  return readTerminalOnMessageFn_(readTerminal_, std::move(msg));
+  return tailOnReadFn_(tailHandler_, std::move(msg));
 }
 
-Result PipelineImpl::fireWriteToTerminal(TypeErasedBox&& msg) noexcept {
-  if (!writeTerminalOnMessageFn_ || !writeTerminal_) {
+Result PipelineImpl::fireWriteToHeadHandler(TypeErasedBox&& msg) noexcept {
+  if (!headOnWriteFn_ || !headHandler_) {
     return Result::Error;
   }
-  return writeTerminalOnMessageFn_(writeTerminal_, std::move(msg));
+  return headOnWriteFn_(headHandler_, std::move(msg));
 }
 
-void PipelineImpl::fireExceptionToTerminal(
+void PipelineImpl::fireExceptionToTailHandler(
     folly::exception_wrapper&& e) noexcept {
-  if (!readTerminalOnExceptionFn_ || !readTerminal_) {
+  if (!tailOnExceptionFn_ || !tailHandler_) {
     return;
   }
-  readTerminalOnExceptionFn_(readTerminal_, std::move(e));
+  tailOnExceptionFn_(tailHandler_, std::move(e));
 }
 
 BytesPtr PipelineImpl::allocate(size_t size) noexcept {
@@ -351,7 +362,7 @@ PIPELINE_HOT_PATH void PipelineImpl::onWriteReady() noexcept {
 
   // Notify the tail endpoint that writes can resume.
   DCHECK(tailOnWriteReadyFn_);
-  tailOnWriteReadyFn_(tail_);
+  tailOnWriteReadyFn_(tailHandler_);
 }
 
 void PipelineImpl::onReadReady() noexcept {
@@ -375,7 +386,7 @@ void PipelineImpl::onReadReady() noexcept {
 
   // Notify the head endpoint that reads can resume.
   DCHECK(headOnReadReadyFn_);
-  headOnReadReadyFn_(head_);
+  headOnReadReadyFn_(headHandler_);
 }
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

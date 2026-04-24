@@ -120,7 +120,7 @@ class BatchingFrameHandler : public folly::EventBase::LoopCallback {
   }
 
   template <typename Context>
-  void onPipelineDeactivated(Context& /*ctx*/) noexcept {
+  void onPipelineInactive(Context& /*ctx*/) noexcept {
     clearPendingState();
   }
 

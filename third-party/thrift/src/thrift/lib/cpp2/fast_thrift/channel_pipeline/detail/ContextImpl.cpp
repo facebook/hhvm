@@ -33,7 +33,7 @@ ContextImpl::ContextImpl(
       handlerId_(handlerId) {}
 
 void ContextImpl::activate() noexcept {
-  // onPipelineActivated is propagated via PipelineImpl::activate() which
+  // onPipelineActive is propagated via PipelineImpl::activate() which
   // iterates through all handlers. No-op here as handlers don't chain
   // activation.
 }

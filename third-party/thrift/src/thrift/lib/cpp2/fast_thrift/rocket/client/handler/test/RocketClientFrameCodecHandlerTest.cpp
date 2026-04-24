@@ -391,7 +391,7 @@ TEST_F(RocketClientFrameCodecHandlerTest, HandlerRemovedNoOp) {
 
 TEST_F(RocketClientFrameCodecHandlerTest, OnConnectNoOp) {
   // onConnect should be a no-op for this handler
-  handler_.onPipelineActivated(ctx_);
+  handler_.onPipelineActive(ctx_);
 
   EXPECT_EQ(ctx_.readMessages().size(), 0);
   EXPECT_FALSE(ctx_.hasException());

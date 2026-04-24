@@ -48,12 +48,12 @@ TEST_F(HandlerNodeTest, FunctionPointersAreSet) {
       test_handler_tag.id, std::move(handler));
 
   // All function pointers should be set for MockHandler (duplex handler)
-  EXPECT_NE(node.onPipelineActivatedFn, nullptr);
+  EXPECT_NE(node.onPipelineActiveFn, nullptr);
   EXPECT_NE(node.onReadFn, nullptr);
   EXPECT_NE(node.onWriteFn, nullptr);
   EXPECT_NE(node.onExceptionFn, nullptr);
   EXPECT_NE(node.onWriteReadyFn, nullptr);
-  EXPECT_NE(node.onPipelineDeactivatedFn, nullptr);
+  EXPECT_NE(node.onPipelineInactiveFn, nullptr);
   EXPECT_NE(node.handlerAddedFn, nullptr);
   EXPECT_NE(node.handlerRemovedFn, nullptr);
 }
@@ -64,14 +64,14 @@ TEST_F(HandlerNodeTest, InboundOnlyHandlerHasPassthroughOutbound) {
       test_handler_tag.id, std::move(handler));
 
   // Inbound function pointers should be set
-  EXPECT_NE(node.onPipelineActivatedFn, nullptr);
+  EXPECT_NE(node.onPipelineActiveFn, nullptr);
   EXPECT_NE(node.onReadFn, nullptr);
   EXPECT_NE(node.onExceptionFn, nullptr);
 
   // Outbound function pointers should still be set (passthrough)
   EXPECT_NE(node.onWriteFn, nullptr);
   EXPECT_NE(node.onWriteReadyFn, nullptr);
-  EXPECT_NE(node.onPipelineDeactivatedFn, nullptr);
+  EXPECT_NE(node.onPipelineInactiveFn, nullptr);
 }
 
 TEST_F(HandlerNodeTest, OutboundOnlyHandlerHasPassthroughInbound) {
@@ -82,10 +82,10 @@ TEST_F(HandlerNodeTest, OutboundOnlyHandlerHasPassthroughInbound) {
   // Outbound function pointers should be set
   EXPECT_NE(node.onWriteFn, nullptr);
   EXPECT_NE(node.onWriteReadyFn, nullptr);
-  EXPECT_NE(node.onPipelineDeactivatedFn, nullptr);
+  EXPECT_NE(node.onPipelineInactiveFn, nullptr);
 
   // Inbound function pointers should still be set (passthrough)
-  EXPECT_NE(node.onPipelineActivatedFn, nullptr);
+  EXPECT_NE(node.onPipelineActiveFn, nullptr);
   EXPECT_NE(node.onReadFn, nullptr);
   EXPECT_NE(node.onExceptionFn, nullptr);
 }

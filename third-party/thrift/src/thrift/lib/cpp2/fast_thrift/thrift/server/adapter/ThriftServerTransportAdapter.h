@@ -123,7 +123,7 @@ class ThriftServerTransportAdapter {
    */
   void onTransportError(folly::exception_wrapper&& e) noexcept {
     if (pipeline_) {
-      (void)pipeline_->fireExceptionFromIndex(0, std::move(e));
+      pipeline_->fireException(std::move(e));
     }
   }
 

@@ -234,7 +234,7 @@ TEST_F(LoopBatchingFrameHandlerTest, DeactivateDrainsPendingData) {
   EXPECT_FALSE(handler.empty());
   EXPECT_TRUE(handler.isScheduled());
 
-  handler.onPipelineDeactivated(*ctx_);
+  handler.onPipelineInactive(*ctx_);
 
   EXPECT_TRUE(handler.empty());
   EXPECT_FALSE(handler.isScheduled());

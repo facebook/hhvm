@@ -126,7 +126,7 @@ class ThriftClientTransportAdapter {
    */
   void onTransportError(folly::exception_wrapper&& e) noexcept {
     if (pipeline_) {
-      (void)pipeline_->fireExceptionFromIndex(0, std::move(e));
+      pipeline_->fireException(std::move(e));
     }
     connection_->close(
         folly::make_exception_wrapper<std::runtime_error>("Transport error"));

@@ -698,10 +698,10 @@ class RocketThriftServerInterfaceHandler {
   void handlerRemoved(Context&) noexcept {}
 
   template <typename Context>
-  void onPipelineActivated(Context&) noexcept {}
+  void onPipelineActive(Context&) noexcept {}
 
   template <typename Context>
-  void onPipelineDeactivated(Context&) noexcept {}
+  void onPipelineInactive(Context&) noexcept {}
 
   template <typename Context>
   void onWriteReady(Context&) noexcept {}

@@ -585,7 +585,7 @@ TEST_F(
   registerStream(3);
   EXPECT_EQ(handler_.pendingRequestResponseCount(), 2);
 
-  handler_.onPipelineDeactivated(ctx_);
+  handler_.onPipelineInactive(ctx_);
 
   EXPECT_EQ(handler_.pendingRequestResponseCount(), 0);
 }
@@ -618,7 +618,7 @@ TEST_F(
 // =============================================================================
 
 TEST_F(ServerRequestResponseFrameHandlerTest, Lifecycle_DisconnectIsNoOp) {
-  handler_.onPipelineDeactivated(ctx_);
+  handler_.onPipelineInactive(ctx_);
   EXPECT_FALSE(ctx_.disconnectCalled());
 }
 

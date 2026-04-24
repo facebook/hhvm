@@ -209,14 +209,14 @@ TEST_F(PipelineBuilderTest, AddNextDuplexWithInPlaceConstruction) {
         detail::ContextImpl& ctx, folly::exception_wrapper e) noexcept {
       ctx.fireException(std::move(e));
     }
-    void onPipelineActivated(detail::ContextImpl&) noexcept {}
+    void onPipelineActive(detail::ContextImpl&) noexcept {}
     void onReadReady(detail::ContextImpl&) noexcept {}
 
     Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
       return ctx.fireWrite(std::move(msg));
     }
     void onWriteReady(detail::ContextImpl&) noexcept {}
-    void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
+    void onPipelineInactive(detail::ContextImpl&) noexcept {}
 
     void handlerAdded(detail::ContextImpl&) noexcept {}
     void handlerRemoved(detail::ContextImpl&) noexcept {}

@@ -82,7 +82,7 @@ class RocketServerSetupFrameHandler {
   // === InboundHandler ===
 
   template <typename Context>
-  void onPipelineActivated(Context& /*ctx*/) noexcept {}
+  void onPipelineActive(Context& /*ctx*/) noexcept {}
 
   template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}
@@ -125,7 +125,7 @@ class RocketServerSetupFrameHandler {
   }
 
   template <typename Context>
-  void onPipelineDeactivated(Context& /*ctx*/) noexcept {}
+  void onPipelineInactive(Context& /*ctx*/) noexcept {}
 
   template <typename Context>
   void onWriteReady(Context& /*ctx*/) noexcept {}

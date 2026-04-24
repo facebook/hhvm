@@ -238,19 +238,14 @@ class PipelineBuilder {
         static_cast<void*>(tailHandler_),
         static_cast<void*>(allocator_)));
 
-    wireWriteTerminal(pipeline.get(), headHandler_);
-    wireReadTerminal(pipeline.get(), tailHandler_);
-
-    wireEndpointLifecycle(pipeline.get());
+    wireHeadHandler(pipeline.get());
+    wireTailHandler(pipeline.get());
 
     pipeline->allocateFn_ = [](void* alloc, size_t size) noexcept -> BytesPtr {
       return static_cast<Allocator*>(alloc)->allocate(size);
     };
 
     pipeline->callHandlerAdded();
-    headHandler_->handlerAdded();
-    tailHandler_->handlerAdded();
-
     return pipeline;
   }
 
@@ -270,55 +265,52 @@ class PipelineBuilder {
     }
   }
 
-  void wireWriteTerminal(PipelineImpl* pipeline, HeadHandler* handler) {
-    pipeline->writeTerminal_ = static_cast<void*>(handler);
-    pipeline->writeTerminalOnMessageFn_ =
-        [](void* h, TypeErasedBox&& msg) noexcept -> Result {
+  void wireHeadHandler(PipelineImpl* pipeline) {
+    pipeline->headOnWriteFn_ = [](void* h,
+                                  TypeErasedBox&& msg) noexcept -> Result {
       return static_cast<HeadHandler*>(h)->onWrite(std::move(msg));
     };
     pipeline->headOnReadReadyFn_ = [](void* h) noexcept {
       static_cast<HeadHandler*>(h)->onReadReady();
     };
-  }
 
-  void wireReadTerminal(PipelineImpl* pipeline, TailHandler* handler) {
-    pipeline->readTerminal_ = static_cast<void*>(handler);
-    pipeline->readTerminalOnMessageFn_ =
-        [](void* h, TypeErasedBox&& msg) noexcept -> Result {
-      return static_cast<TailHandler*>(h)->onRead(std::move(msg));
-    };
-    pipeline->readTerminalOnExceptionFn_ =
-        [](void* h, folly::exception_wrapper&& e) noexcept {
-          static_cast<TailHandler*>(h)->onException(std::move(e));
-        };
-    pipeline->tailOnWriteReadyFn_ = [](void* t) noexcept {
-      static_cast<TailHandler*>(t)->onWriteReady();
-    };
-  }
-
-  void wireEndpointLifecycle(PipelineImpl* pipeline) {
-    wireHeadLifecycle(pipeline);
-    wireTailLifecycle(pipeline);
-  }
-
-  void wireHeadLifecycle(PipelineImpl* pipeline) {
+    // Lifecycle methods
     pipeline->headOnPipelineActiveFn_ = [](void* h) noexcept {
       static_cast<HeadHandler*>(h)->onPipelineActive();
     };
     pipeline->headOnPipelineInactiveFn_ = [](void* h) noexcept {
       static_cast<HeadHandler*>(h)->onPipelineInactive();
     };
+    pipeline->headHandlerAddedFn_ = [](void* h) noexcept {
+      static_cast<HeadHandler*>(h)->handlerAdded();
+    };
     pipeline->headHandlerRemovedFn_ = [](void* h) noexcept {
       static_cast<HeadHandler*>(h)->handlerRemoved();
     };
   }
 
-  void wireTailLifecycle(PipelineImpl* pipeline) {
+  void wireTailHandler(PipelineImpl* pipeline) {
+    pipeline->tailOnReadFn_ = [](void* h,
+                                 TypeErasedBox&& msg) noexcept -> Result {
+      return static_cast<TailHandler*>(h)->onRead(std::move(msg));
+    };
+    pipeline->tailOnExceptionFn_ = [](void* h,
+                                      folly::exception_wrapper&& e) noexcept {
+      static_cast<TailHandler*>(h)->onException(std::move(e));
+    };
+    pipeline->tailOnWriteReadyFn_ = [](void* t) noexcept {
+      static_cast<TailHandler*>(t)->onWriteReady();
+    };
+
+    // Lifecycle methods
     pipeline->tailOnPipelineActiveFn_ = [](void* t) noexcept {
       static_cast<TailHandler*>(t)->onPipelineActive();
     };
     pipeline->tailOnPipelineInactiveFn_ = [](void* t) noexcept {
       static_cast<TailHandler*>(t)->onPipelineInactive();
+    };
+    pipeline->tailHandlerAddedFn_ = [](void* t) noexcept {
+      static_cast<TailHandler*>(t)->handlerAdded();
     };
     pipeline->tailHandlerRemovedFn_ = [](void* t) noexcept {
       static_cast<TailHandler*>(t)->handlerRemoved();

@@ -227,14 +227,14 @@ TEST_F(FrameLengthEncoderHandlerTest, PayloadDataPreserved) {
 
 TEST_F(FrameLengthEncoderHandlerTest, HandlerLifecycle) {
   handler_.handlerAdded(ctx_);
-  handler_.onPipelineActivated(ctx_);
+  handler_.onPipelineActive(ctx_);
   handler_.onWriteReady(ctx_);
 
   auto result = callOnWrite(buildPayload(20));
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(ctx_.writtenFrames().size(), 1);
 
-  handler_.onPipelineDeactivated(ctx_);
+  handler_.onPipelineInactive(ctx_);
   handler_.handlerRemoved(ctx_);
 }
 

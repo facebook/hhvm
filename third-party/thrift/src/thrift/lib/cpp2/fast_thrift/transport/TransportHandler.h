@@ -339,7 +339,7 @@ class TransportHandler : public folly::DelayedDestruction,
 
     if (pipeline_) {
       if (ex) {
-        (void)pipeline_->fireExceptionFromIndex(0, std::move(ex));
+        pipeline_->fireException(std::move(ex));
       }
       pipeline_->deactivate();
     }

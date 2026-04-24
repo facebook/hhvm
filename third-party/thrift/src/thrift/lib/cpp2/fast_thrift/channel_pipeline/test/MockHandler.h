@@ -64,10 +64,10 @@ class MockHandler {
 
   // === InboundHandler methods ===
 
-  void onPipelineActivated(detail::ContextImpl& ctx) noexcept {
+  void onPipelineActive(detail::ContextImpl& ctx) noexcept {
     pipelineActivatedCount_++;
-    if (onPipelineActivatedCallback_) {
-      onPipelineActivatedCallback_(ctx);
+    if (onPipelineActiveCallback_) {
+      onPipelineActiveCallback_(ctx);
     }
   }
 
@@ -113,10 +113,10 @@ class MockHandler {
     }
   }
 
-  void onPipelineDeactivated(detail::ContextImpl& ctx) noexcept {
+  void onPipelineInactive(detail::ContextImpl& ctx) noexcept {
     pipelineDeactivatedCount_++;
-    if (onPipelineDeactivatedCallback_) {
-      onPipelineDeactivatedCallback_(ctx);
+    if (onPipelineInactiveCallback_) {
+      onPipelineInactiveCallback_(ctx);
     }
   }
 
@@ -142,7 +142,7 @@ class MockHandler {
 
   void setOnRead(OnReadCallback cb) { onReadCallback_ = std::move(cb); }
   void setOnPipelineActivated(LifecycleCallback cb) {
-    onPipelineActivatedCallback_ = std::move(cb);
+    onPipelineActiveCallback_ = std::move(cb);
   }
   void setOnWrite(OnWriteCallback cb) { onWriteCallback_ = std::move(cb); }
   void setOnException(OnExceptionCallback cb) {
@@ -155,7 +155,7 @@ class MockHandler {
     onReadReadyCallback_ = std::move(cb);
   }
   void setOnPipelineDeactivated(LifecycleCallback cb) {
-    onPipelineDeactivatedCallback_ = std::move(cb);
+    onPipelineInactiveCallback_ = std::move(cb);
   }
   void setHandlerAdded(LifecycleCallback cb) {
     handlerAddedCallback_ = std::move(cb);
@@ -197,10 +197,10 @@ class MockHandler {
   OnReadCallback onReadCallback_;
   OnWriteCallback onWriteCallback_;
   OnExceptionCallback onExceptionCallback_;
-  LifecycleCallback onPipelineActivatedCallback_;
+  LifecycleCallback onPipelineActiveCallback_;
   LifecycleCallback onWriteReadyCallback_;
   LifecycleCallback onReadReadyCallback_;
-  LifecycleCallback onPipelineDeactivatedCallback_;
+  LifecycleCallback onPipelineInactiveCallback_;
   LifecycleCallback handlerAddedCallback_;
   LifecycleCallback handlerRemovedCallback_;
 
@@ -213,7 +213,7 @@ class MockHandler {
  */
 class InboundOnlyHandler {
  public:
-  void onPipelineActivated(detail::ContextImpl& /*ctx*/) noexcept {
+  void onPipelineActive(detail::ContextImpl& /*ctx*/) noexcept {
     pipelineActivatedCount_++;
   }
 
@@ -261,7 +261,7 @@ class OutboundOnlyHandler {
 
   void onWriteReady(detail::ContextImpl&) noexcept { writeReadyCount_++; }
 
-  void onPipelineDeactivated(detail::ContextImpl&) noexcept {
+  void onPipelineInactive(detail::ContextImpl&) noexcept {
     pipelineDeactivatedCount_++;
   }
 

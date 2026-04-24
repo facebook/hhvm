@@ -166,7 +166,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, HandlerAddedAndRemovedNoOp) {
 
 TEST_F(RocketClientErrorFrameHandlerTest, OnConnectNoOp) {
   // onConnect should be a no-op
-  handler_.onPipelineActivated(ctx_);
+  handler_.onPipelineActive(ctx_);
   EXPECT_FALSE(ctx_.hasException());
   EXPECT_EQ(ctx_.readMessages().size(), 0);
 }

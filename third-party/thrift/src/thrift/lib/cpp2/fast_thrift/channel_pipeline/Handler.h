@@ -49,7 +49,7 @@ concept HandlerLifecycle = requires(H h, Ctx& ctx) {
  * - onRead: Incoming data/messages
  * - onReadReady: Notification that reads can resume
  * - onException: Notification of an exception
- * - onPipelineActivated: Notification that pipeline is activated
+ * - onPipelineActive: Notification that pipeline is activated
  *
  * Handlers return Result to signal backpressure:
  * - Result::Success — continue processing
@@ -74,7 +74,7 @@ concept InboundHandler =
       // Notifications — must always be handled
       { h.onReadReady(ctx) } noexcept -> std::same_as<void>;
       { h.onException(ctx, std::move(e)) } noexcept -> std::same_as<void>;
-      { h.onPipelineActivated(ctx) } noexcept -> std::same_as<void>;
+      { h.onPipelineActive(ctx) } noexcept -> std::same_as<void>;
     };
 
 /**
@@ -83,7 +83,7 @@ concept InboundHandler =
  * Outbound handlers process:
  * - onWrite: Outgoing data/messages
  * - onWriteReady: Notification that more data can be written
- * - onPipelineDeactivated: Notification that pipeline is deactivated
+ * - onPipelineInactive: Notification that pipeline is deactivated
  *
  * Handlers return Result to signal backpressure:
  * - Result::Success — continue processing
@@ -97,7 +97,7 @@ concept OutboundHandler = HandlerLifecycle<H, Ctx> &&
       { h.onWrite(ctx, std::move(message)) } noexcept -> std::same_as<Result>;
       // Notifications — must always be handled
       { h.onWriteReady(ctx) } noexcept -> std::same_as<void>;
-      { h.onPipelineDeactivated(ctx) } noexcept -> std::same_as<void>;
+      { h.onPipelineInactive(ctx) } noexcept -> std::same_as<void>;
     };
 
 /**

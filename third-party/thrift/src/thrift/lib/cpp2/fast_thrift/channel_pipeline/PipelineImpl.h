@@ -28,7 +28,6 @@
 
 #include <folly/sorted_vector_types.h>
 
-#include <memory>
 #include <vector>
 
 namespace apache::thrift::fast_thrift::channel_pipeline {
@@ -63,8 +62,8 @@ class PipelineImpl : public folly::DelayedDestruction {
   PipelineImpl(
       folly::EventBase* event_base,
       std::vector<detail::HandlerNode> handlers,
-      void* head,
-      void* tail,
+      void* headHandler,
+      void* tailHandler,
       void* allocator) noexcept;
 
   // Non-copyable
@@ -73,7 +72,7 @@ class PipelineImpl : public folly::DelayedDestruction {
   PipelineImpl(PipelineImpl&&) = delete;
   PipelineImpl& operator=(PipelineImpl&&) = delete;
 
-  // === Fire from head/tail ===
+  // === Fire from head/tail handler ===
 
   /**
    * Activate the pipeline, notifying all handlers.
@@ -100,6 +99,11 @@ class PipelineImpl : public folly::DelayedDestruction {
    * Fire a write event starting from the write-entry handler.
    */
   Result fireWrite(TypeErasedBox&& msg) noexcept;
+
+  /**
+   * Fire an exception event starting from the read-entry handler.
+   */
+  void fireException(folly::exception_wrapper&& e) noexcept;
 
   // === Fire to specific handler ===
 
@@ -163,22 +167,22 @@ class PipelineImpl : public folly::DelayedDestruction {
   void deactivateFromIndex(size_t index) noexcept;
 
   /**
-   * Fire read to the terminal endpoint.
-   * Called when fireRead passes the last handler in the read chain.
+   * Fire read to the tail handler.
+   * Called when fireRead passes the last internal handler.
    */
-  Result fireReadToTerminal(TypeErasedBox&& msg) noexcept;
+  Result fireReadToTailHandler(TypeErasedBox&& msg) noexcept;
 
   /**
-   * Fire write to the terminal endpoint.
-   * Called when fireWrite passes the last handler in the write chain.
+   * Fire write to the head handler.
+   * Called when fireWrite passes the first internal handler.
    */
-  Result fireWriteToTerminal(TypeErasedBox&& msg) noexcept;
+  Result fireWriteToHeadHandler(TypeErasedBox&& msg) noexcept;
 
   /**
-   * Fire exception to the terminal endpoint.
-   * Called when fireException passes the last handler in the read chain.
+   * Fire exception to the tail handler.
+   * Called when fireException passes the last internal handler.
    */
-  void fireExceptionToTerminal(folly::exception_wrapper&& e) noexcept;
+  void fireExceptionToTailHandler(folly::exception_wrapper&& e) noexcept;
 
   /**
    * Allocate a buffer using the pipeline's allocator.
@@ -295,34 +299,32 @@ class PipelineImpl : public folly::DelayedDestruction {
   std::vector<detail::ContextImpl> contexts_;
 
   // Type-erased endpoint adapters
-  void* head_; // HeadHandler*
-  void* tail_; // TailHandler*
+  void* headHandler_; // HeadHandler*
+  void* tailHandler_; // TailHandler*
   void* allocator_; // BufferAllocator*
 
-  // Read-exit terminal
-
-  // Read-exit terminal (whichever endpoint reads exit at)
-  Result (*readTerminalOnMessageFn_)(void*, TypeErasedBox&&) noexcept {nullptr};
-  void (*readTerminalOnExceptionFn_)(
-      void*, folly::exception_wrapper&&) noexcept {nullptr};
-  void* readTerminal_{nullptr};
-
-  // Write-exit terminal (whichever endpoint writes exit at)
-  Result (*writeTerminalOnMessageFn_)(void*, TypeErasedBox&&) noexcept {
+  // Tail handler callbacks
+  Result (*tailOnReadFn_)(void*, TypeErasedBox&&) noexcept {nullptr};
+  void (*tailOnExceptionFn_)(void*, folly::exception_wrapper&&) noexcept {
       nullptr};
-  void* writeTerminal_{nullptr};
-
-  BytesPtr (*allocateFn_)(void*, size_t) noexcept {nullptr};
-
-  // Endpoint lifecycle function pointers (new-style only)
-  void (*headOnPipelineActiveFn_)(void*) noexcept {nullptr};
-  void (*headOnPipelineInactiveFn_)(void*) noexcept {nullptr};
-  void (*headHandlerRemovedFn_)(void*) noexcept {nullptr};
-  void (*headOnReadReadyFn_)(void*) noexcept {nullptr};
+  void (*tailOnWriteReadyFn_)(void*) noexcept {nullptr};
+  // Tail handler lifecycle callbacks
   void (*tailOnPipelineActiveFn_)(void*) noexcept {nullptr};
   void (*tailOnPipelineInactiveFn_)(void*) noexcept {nullptr};
+  void (*tailHandlerAddedFn_)(void*) noexcept {nullptr};
   void (*tailHandlerRemovedFn_)(void*) noexcept {nullptr};
-  void (*tailOnWriteReadyFn_)(void*) noexcept {nullptr};
+
+  // Head handler callbacks
+  Result (*headOnWriteFn_)(void*, TypeErasedBox&&) noexcept {nullptr};
+  void (*headOnReadReadyFn_)(void*) noexcept {nullptr};
+  // Head handler lifecycle callbacks
+  void (*headOnPipelineActiveFn_)(void*) noexcept {nullptr};
+  void (*headOnPipelineInactiveFn_)(void*) noexcept {nullptr};
+  void (*headHandlerAddedFn_)(void*) noexcept {nullptr};
+  void (*headHandlerRemovedFn_)(void*) noexcept {nullptr};
+
+  // Allocator callbacks
+  BytesPtr (*allocateFn_)(void*, size_t) noexcept {nullptr};
 
   // Cached entry-point dispatch for fireRead/fireWrite hot paths.
   // Points directly to the read-entry/write-entry handler's function pointer,

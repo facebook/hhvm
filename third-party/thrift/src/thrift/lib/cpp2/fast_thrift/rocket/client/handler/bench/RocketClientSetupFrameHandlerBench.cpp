@@ -86,7 +86,7 @@ BENCHMARK(Connect_SetupHandler_MinimalMetadata, iters) {
 
   for (size_t i = 0; i < iters; ++i) {
     RocketClientSetupFrameHandler handler(minimalSetupFactory());
-    handler.onPipelineActivated(ctx);
+    handler.onPipelineActive(ctx);
   }
 }
 
@@ -95,7 +95,7 @@ BENCHMARK(Connect_SetupHandler_WithData, iters) {
 
   for (size_t i = 0; i < iters; ++i) {
     RocketClientSetupFrameHandler handler(setupWithDataFactory());
-    handler.onPipelineActivated(ctx);
+    handler.onPipelineActive(ctx);
   }
 }
 
@@ -104,7 +104,7 @@ BENCHMARK(Connect_SetupHandler_NoMetadata, iters) {
 
   for (size_t i = 0; i < iters; ++i) {
     RocketClientSetupFrameHandler handler(noMetadataSetupFactory());
-    handler.onPipelineActivated(ctx);
+    handler.onPipelineActive(ctx);
   }
 }
 

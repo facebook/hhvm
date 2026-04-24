@@ -420,7 +420,7 @@ TEST_F(ServerSetupFrameHandlerTest, HandlerRemovedResetsState) {
 }
 
 TEST_F(ServerSetupFrameHandlerTest, OnDisconnectIsNoOp) {
-  handler_.onPipelineDeactivated(ctx_);
+  handler_.onPipelineInactive(ctx_);
   EXPECT_FALSE(ctx_.disconnectCalled());
 }
 

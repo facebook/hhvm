@@ -465,7 +465,7 @@ TEST_F(
   sendRequest(3);
   EXPECT_EQ(handler_.pendingRequestResponseCount(), 2);
 
-  handler_.onPipelineDeactivated(ctx_);
+  handler_.onPipelineInactive(ctx_);
 
   EXPECT_EQ(handler_.pendingRequestResponseCount(), 0);
 }

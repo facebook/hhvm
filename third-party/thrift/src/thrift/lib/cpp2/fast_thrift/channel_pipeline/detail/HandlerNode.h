@@ -55,13 +55,13 @@ struct HandlerNode {
       void (*)(void*, ContextImpl&, folly::exception_wrapper&&) noexcept;
   using OnWriteReadyFn = void (*)(void*, ContextImpl&) noexcept;
   using OnReadReadyFn = void (*)(void*, ContextImpl&) noexcept;
-  using OnPipelineDeactivatedFn = void (*)(void*, ContextImpl&) noexcept;
-  using OnPipelineActivatedFn = void (*)(void*, ContextImpl&) noexcept;
+  using OnPipelineInactiveFn = void (*)(void*, ContextImpl&) noexcept;
+  using OnPipelineActiveFn = void (*)(void*, ContextImpl&) noexcept;
   using HandlerAddedFn = void (*)(void*, ContextImpl&) noexcept;
   using HandlerRemovedFn = void (*)(void*, ContextImpl&) noexcept;
 
   // Inbound handler methods
-  OnPipelineActivatedFn onPipelineActivatedFn{nullptr};
+  OnPipelineActiveFn onPipelineActiveFn{nullptr};
   OnReadFn onReadFn{nullptr};
   OnExceptionFn onExceptionFn{nullptr};
 
@@ -69,7 +69,7 @@ struct HandlerNode {
   OnWriteFn onWriteFn{nullptr};
   OnWriteReadyFn onWriteReadyFn{nullptr};
   OnReadReadyFn onReadReadyFn{nullptr};
-  OnPipelineDeactivatedFn onPipelineDeactivatedFn{nullptr};
+  OnPipelineInactiveFn onPipelineInactiveFn{nullptr};
 
   // Lifecycle methods
   HandlerAddedFn handlerAddedFn{nullptr};
@@ -88,26 +88,26 @@ struct HandlerNode {
       : handlerId(other.handlerId),
         handlerPtr(other.handlerPtr),
         owner(std::move(other.owner)),
-        onPipelineActivatedFn(other.onPipelineActivatedFn),
+        onPipelineActiveFn(other.onPipelineActiveFn),
         onReadFn(other.onReadFn),
         onExceptionFn(other.onExceptionFn),
         onWriteFn(other.onWriteFn),
         onWriteReadyFn(other.onWriteReadyFn),
         onReadReadyFn(other.onReadReadyFn),
-        onPipelineDeactivatedFn(other.onPipelineDeactivatedFn),
+        onPipelineInactiveFn(other.onPipelineInactiveFn),
         handlerAddedFn(other.handlerAddedFn),
         handlerRemovedFn(other.handlerRemovedFn),
         writeReadyHook_(other.writeReadyHook_),
         readReadyHook_(other.readReadyHook_) {
     other.handlerId = 0;
     other.handlerPtr = nullptr;
-    other.onPipelineActivatedFn = nullptr;
+    other.onPipelineActiveFn = nullptr;
     other.onReadFn = nullptr;
     other.onExceptionFn = nullptr;
     other.onWriteFn = nullptr;
     other.onWriteReadyFn = nullptr;
     other.onReadReadyFn = nullptr;
-    other.onPipelineDeactivatedFn = nullptr;
+    other.onPipelineInactiveFn = nullptr;
     other.handlerAddedFn = nullptr;
     other.handlerRemovedFn = nullptr;
     other.writeReadyHook_ = nullptr;
@@ -119,13 +119,13 @@ struct HandlerNode {
       handlerId = other.handlerId;
       handlerPtr = other.handlerPtr;
       owner = std::move(other.owner);
-      onPipelineActivatedFn = other.onPipelineActivatedFn;
+      onPipelineActiveFn = other.onPipelineActiveFn;
       onReadFn = other.onReadFn;
       onExceptionFn = other.onExceptionFn;
       onWriteFn = other.onWriteFn;
       onWriteReadyFn = other.onWriteReadyFn;
       onReadReadyFn = other.onReadReadyFn;
-      onPipelineDeactivatedFn = other.onPipelineDeactivatedFn;
+      onPipelineInactiveFn = other.onPipelineInactiveFn;
       handlerAddedFn = other.handlerAddedFn;
       handlerRemovedFn = other.handlerRemovedFn;
       writeReadyHook_ = other.writeReadyHook_;
@@ -133,13 +133,13 @@ struct HandlerNode {
 
       other.handlerId = 0;
       other.handlerPtr = nullptr;
-      other.onPipelineActivatedFn = nullptr;
+      other.onPipelineActiveFn = nullptr;
       other.onReadFn = nullptr;
       other.onExceptionFn = nullptr;
       other.onWriteFn = nullptr;
       other.onWriteReadyFn = nullptr;
       other.onReadReadyFn = nullptr;
-      other.onPipelineDeactivatedFn = nullptr;
+      other.onPipelineInactiveFn = nullptr;
       other.handlerAddedFn = nullptr;
       other.handlerRemovedFn = nullptr;
       other.writeReadyHook_ = nullptr;
@@ -197,8 +197,8 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
 
   // Inbound methods - check if handler satisfies InboundHandler
   if constexpr (InboundHandler<H, ContextImpl>) {
-    node.onPipelineActivatedFn = [](void* h, ContextImpl& ctx) noexcept {
-      static_cast<H*>(h)->onPipelineActivated(ctx);
+    node.onPipelineActiveFn = [](void* h, ContextImpl& ctx) noexcept {
+      static_cast<H*>(h)->onPipelineActive(ctx);
     };
 
     node.onReadFn =
@@ -216,7 +216,7 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
         };
   } else {
     // Passthrough for non-inbound handlers
-    node.onPipelineActivatedFn = [](void*, ContextImpl&) noexcept {
+    node.onPipelineActiveFn = [](void*, ContextImpl&) noexcept {
       // No-op for non-inbound handlers (activation already propagates to all)
     };
 
@@ -246,8 +246,8 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
       static_cast<H*>(h)->onWriteReady(ctx);
     };
 
-    node.onPipelineDeactivatedFn = [](void* h, ContextImpl& ctx) noexcept {
-      static_cast<H*>(h)->onPipelineDeactivated(ctx);
+    node.onPipelineInactiveFn = [](void* h, ContextImpl& ctx) noexcept {
+      static_cast<H*>(h)->onPipelineInactive(ctx);
     };
   } else {
     // Passthrough for non-outbound handlers
@@ -260,7 +260,7 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
       // No-op for non-outbound handlers
     };
 
-    node.onPipelineDeactivatedFn = [](void*, ContextImpl&) noexcept {
+    node.onPipelineInactiveFn = [](void*, ContextImpl&) noexcept {
       // No-op for non-outbound handlers
     };
   }

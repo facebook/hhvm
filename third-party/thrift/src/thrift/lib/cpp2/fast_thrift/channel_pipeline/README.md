@@ -322,7 +322,7 @@ public:
         ctx.fireException(std::move(e));
     }
 
-    void onPipelineActivated(Context& ctx) noexcept {}
+    void onPipelineActive(Context& ctx) noexcept {}
 
     // === Outbound (application → transport) ===
 
@@ -333,7 +333,7 @@ public:
     }
 
     void onWriteReady(Context& ctx) noexcept {}
-    void onPipelineDeactivated(Context& ctx) noexcept {}
+    void onPipelineInactive(Context& ctx) noexcept {}
 
 private:
     Context* processorCtx_ = nullptr;
@@ -409,8 +409,8 @@ A handler's view into the pipeline.
 
 | Concept | Direction | Methods |
 |---------|-----------|--------|
-| `InboundHandler` | Transport → App | `onRead`, `onException`, `onPipelineActivated` |
-| `OutboundHandler` | App → Transport | `onWrite`, `onPipelineDeactivated`, `onWriteReady` |
+| `InboundHandler` | Transport → App | `onRead`, `onException`, `onPipelineActive` |
+| `OutboundHandler` | App → Transport | `onWrite`, `onPipelineInactive`, `onWriteReady` |
 | `HandlerLifecycle` | Setup/Teardown | `handlerAdded`, `handlerRemoved` |
 
 ### Handler IDs
@@ -809,7 +809,7 @@ class WriteBufferingHandler {
   void onException(Context& ctx, folly::exception_wrapper&& e) noexcept {
     ctx.fireException(std::move(e));
   }
-  void onPipelineDeactivated(Context&) noexcept {}
+  void onPipelineInactive(Context&) noexcept {}
 
  private:
   std::deque<TypeErasedBox> pending_;
@@ -986,7 +986,7 @@ class AuthHandler {
 ```cpp
   // === OutboundHandler ===
 
-  void onPipelineDeactivated(Context& ctx) noexcept {}
+  void onPipelineInactive(Context& ctx) noexcept {}
   void onWriteReady(Context& ctx) noexcept {}
 
   // Public accessor for other handlers that need user info
@@ -1080,7 +1080,7 @@ class SetupHandler {
     return ctx.fireWrite(std::move(msg));
   }
 
-  void onPipelineDeactivated(Context& ctx) noexcept {}
+  void onPipelineInactive(Context& ctx) noexcept {}
   void onWriteReady(Context& ctx) noexcept {}
 
   // Accessors for negotiated parameters
@@ -1132,7 +1132,7 @@ class RSocketHandler {
     return ctx.fireWrite(std::move(msg));
   }
 
-  void onPipelineDeactivated(Context& ctx) noexcept {}
+  void onPipelineInactive(Context& ctx) noexcept {}
   void onWriteReady(Context& ctx) noexcept {}
 
  private:

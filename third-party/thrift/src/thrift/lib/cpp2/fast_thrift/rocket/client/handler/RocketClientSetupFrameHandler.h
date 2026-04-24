@@ -78,7 +78,7 @@ class RocketClientSetupFrameHandler {
   // === InboundHandler ===
 
   template <typename Context>
-  void onPipelineActivated(Context& ctx) noexcept {
+  void onPipelineActive(Context& ctx) noexcept {
     if (setupSent_) {
       return;
     }
@@ -124,7 +124,7 @@ class RocketClientSetupFrameHandler {
   }
 
   template <typename Context>
-  void onPipelineDeactivated(Context& /*ctx*/) noexcept {
+  void onPipelineInactive(Context& /*ctx*/) noexcept {
     setupSent_ = false;
   }
 

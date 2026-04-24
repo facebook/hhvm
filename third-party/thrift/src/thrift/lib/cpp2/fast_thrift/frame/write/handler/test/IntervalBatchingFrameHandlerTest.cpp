@@ -288,7 +288,7 @@ TEST_F(IntervalBatchingFrameHandlerTest, DeactivateDrainsPendingData) {
   (void)handler.onWrite(*ctx_, wrapFrame(makePayload(100)));
   EXPECT_FALSE(handler.empty());
 
-  handler.onPipelineDeactivated(*ctx_);
+  handler.onPipelineInactive(*ctx_);
 
   EXPECT_TRUE(handler.empty());
   EXPECT_EQ(handler.pendingBytes(), 0);

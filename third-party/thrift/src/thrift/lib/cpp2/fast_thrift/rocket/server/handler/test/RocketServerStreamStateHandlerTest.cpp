@@ -398,7 +398,7 @@ TEST_F(ServerStreamStateHandlerTest, HandlerRemovedClearsState) {
 }
 
 TEST_F(ServerStreamStateHandlerTest, OnDisconnectIsNoOp) {
-  handler_.onPipelineDeactivated(ctx_);
+  handler_.onPipelineInactive(ctx_);
   EXPECT_FALSE(ctx_.disconnectCalled());
 }
 

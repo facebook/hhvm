@@ -37,14 +37,14 @@ All reads pass through unchanged.
 The `RocketClientSetupFrameHandler` is an **inbound handler** responsible for
 sending the RSocket SETUP frame when a client connection is established.
 
-The setup frame is sent immediately via the `onPipelineActivated` event, before any
+The setup frame is sent immediately via the `onPipelineActive` event, before any
 application requests.
 
 ## Key Responsibilities
 
 1. **Setup Frame Serialization**: Serializes and sends the SETUP frame with
    protocol version and connection parameters on connect
-2. **Immediate Send**: Sends the SETUP frame immediately when `onPipelineActivated` is
+2. **Immediate Send**: Sends the SETUP frame immediately when `onPipelineActive` is
    called (correct RSocket semantics)
 3. **Factory Support**: Accepts a factory function for dynamic metadata
    creation at connection time
@@ -94,7 +94,7 @@ RocketClientSetupFrameHandler handler(
           │
           ▼
 ┌─────────────────────────────────────┐
-│ RocketClientSetupFrameHandler::onPipelineActivated  │
+│ RocketClientSetupFrameHandler::onPipelineActive  │
 │ 1. Fire connect to next handler     │
 │ 2. Call factory to create metadata  │
 │ 3. Serialize SETUP frame            │

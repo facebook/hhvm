@@ -343,7 +343,7 @@ TEST_F(BatchingFrameHandlerTest, DeactivateCleansPendingData) {
   EXPECT_TRUE(handler.isScheduled());
 
   // Deactivate
-  handler.onPipelineDeactivated(*ctx_);
+  handler.onPipelineInactive(*ctx_);
 
   // Should have cleared everything
   EXPECT_FALSE(handler.hasPendingData());

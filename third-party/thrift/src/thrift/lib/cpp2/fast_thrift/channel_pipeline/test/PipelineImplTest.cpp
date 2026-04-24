@@ -288,8 +288,9 @@ TEST_F(PipelineImplTest, FireExceptionReachesApp) {
   EXPECT_EQ(app_.exceptionCount(), 1);
 }
 
-TEST_F(PipelineImplTest, FireExceptionToAppWithNoHandlers) {
-  // Build a pipeline with no handlers - exception should go directly to app
+TEST_F(PipelineImplTest, FireExceptionTopLevelToAppWithNoHandlers) {
+  // Build a pipeline with no handlers - exception should go directly to tail
+  // app handler.
   bool app_received = false;
   app_.setOnExceptionCallback([&](folly::exception_wrapper&& e) {
     app_received = true;
@@ -304,15 +305,47 @@ TEST_F(PipelineImplTest, FireExceptionToAppWithNoHandlers) {
           .setAllocator(&allocator_)
           .build();
 
-  // Fire exception directly - should go to app since no handlers
-  // Use fireExceptionFromIndex indirectly via context
-  // Since there are no handlers, we need to verify via different means
-  EXPECT_EQ(app_.exceptionCount(), 0);
+  pipeline->fireException(
+      folly::make_exception_wrapper<std::runtime_error>("test error"));
 
-  // Pipeline with no handlers doesn't have contexts to call fireException
-  // But we can verify the concept works by checking that the app handler
-  // is properly wired to receive exceptions
-  EXPECT_FALSE(app_received);
+  EXPECT_TRUE(app_received);
+  EXPECT_EQ(app_.exceptionCount(), 1);
+}
+
+TEST_F(PipelineImplTest, FireExceptionTopLevelPassthroughReachesApp) {
+  createHandlers();
+
+  // Configure all handlers to passthrough exceptions.
+  head_handler_->setOnException(
+      [](detail::ContextImpl& ctx, folly::exception_wrapper&& e) {
+        ctx.fireException(std::move(e));
+      });
+  middle_handler_->setOnException(
+      [](detail::ContextImpl& ctx, folly::exception_wrapper&& e) {
+        ctx.fireException(std::move(e));
+      });
+  tail_handler_->setOnException(
+      [](detail::ContextImpl& ctx, folly::exception_wrapper&& e) {
+        ctx.fireException(std::move(e));
+      });
+
+  bool app_received = false;
+  app_.setOnExceptionCallback([&](folly::exception_wrapper&& e) {
+    app_received = true;
+    EXPECT_TRUE(e.is_compatible_with<std::logic_error>());
+  });
+
+  auto pipeline = buildPipeline();
+
+  // Fire from the new top-level API.
+  pipeline->fireException(
+      folly::make_exception_wrapper<std::logic_error>("logic error"));
+
+  EXPECT_TRUE(app_received);
+  EXPECT_EQ(app_.exceptionCount(), 1);
+  EXPECT_EQ(head_ptr_->exceptionCount(), 1);
+  EXPECT_EQ(middle_ptr_->exceptionCount(), 1);
+  EXPECT_EQ(tail_ptr_->exceptionCount(), 1);
 }
 
 TEST_F(PipelineImplTest, FireExceptionPassthroughReachesApp) {
@@ -388,7 +421,7 @@ TEST_F(PipelineImplTest, FireConnectCallsAllHandlers) {
   // Fire connect event
   pipeline->activate();
 
-  // All handlers should receive onPipelineActivated
+  // All handlers should receive onPipelineActive
   EXPECT_EQ(head_ptr_->pipelineActivatedCount(), 1);
   EXPECT_EQ(middle_ptr_->pipelineActivatedCount(), 1);
   EXPECT_EQ(tail_ptr_->pipelineActivatedCount(), 1);
@@ -403,7 +436,7 @@ TEST_F(PipelineImplTest, FireConnectIsIdempotent) {
   pipeline->activate();
   pipeline->activate();
 
-  // Each handler should receive onPipelineActivated each time
+  // Each handler should receive onPipelineActive each time
   EXPECT_EQ(head_ptr_->pipelineActivatedCount(), 3);
   EXPECT_EQ(middle_ptr_->pipelineActivatedCount(), 3);
   EXPECT_EQ(tail_ptr_->pipelineActivatedCount(), 3);
@@ -416,7 +449,7 @@ TEST_F(PipelineImplTest, FireConnectAfterCloseIsNoop) {
   pipeline->close();
   pipeline->activate();
 
-  // Should not call onPipelineActivated after close
+  // Should not call onPipelineActive after close
   EXPECT_EQ(head_ptr_->pipelineActivatedCount(), 0);
   EXPECT_EQ(middle_ptr_->pipelineActivatedCount(), 0);
   EXPECT_EQ(tail_ptr_->pipelineActivatedCount(), 0);
@@ -790,7 +823,7 @@ class ContextCachingHandler {
     cachedTargetCtx_ = nullptr;
   }
 
-  void onPipelineActivated(detail::ContextImpl&) noexcept {}
+  void onPipelineActive(detail::ContextImpl&) noexcept {}
 
   Result onRead(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
     ++readCount_;
@@ -816,7 +849,7 @@ class ContextCachingHandler {
 
   void onReadReady(detail::ContextImpl&) noexcept {}
   void onWriteReady(detail::ContextImpl&) noexcept {}
-  void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
+  void onPipelineInactive(detail::ContextImpl&) noexcept {}
 
   // Test accessors
   bool handlerAddedCalled() const { return handlerAddedCalled_; }

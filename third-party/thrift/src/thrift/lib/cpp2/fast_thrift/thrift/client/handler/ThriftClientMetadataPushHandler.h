@@ -61,7 +61,7 @@ class ThriftClientMetadataPushHandler {
   // === InboundHandler ===
 
   template <typename Context>
-  void onPipelineActivated(Context& /*ctx*/) noexcept {}
+  void onPipelineActive(Context& /*ctx*/) noexcept {}
 
   template <typename Context>
   void onReadReady(Context& /*ctx*/) noexcept {}

@@ -63,7 +63,7 @@ struct PassthroughHandler {
     ctx.fireException(std::move(e));
   }
 
-  void onPipelineActivated(detail::ContextImpl&) noexcept {}
+  void onPipelineActive(detail::ContextImpl&) noexcept {}
   void onReadReady(detail::ContextImpl&) noexcept {}
 
   Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
@@ -71,7 +71,7 @@ struct PassthroughHandler {
   }
 
   void onWriteReady(detail::ContextImpl&) noexcept {}
-  void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
+  void onPipelineInactive(detail::ContextImpl&) noexcept {}
 
   void handlerAdded(detail::ContextImpl&) noexcept {}
   void handlerRemoved(detail::ContextImpl&) noexcept {}
@@ -92,7 +92,7 @@ struct SwallowingHandler {
     // Swallowed, don't forward
   }
 
-  void onPipelineActivated(detail::ContextImpl&) noexcept {}
+  void onPipelineActive(detail::ContextImpl&) noexcept {}
   void onReadReady(detail::ContextImpl&) noexcept {}
 
   Result onWrite(detail::ContextImpl&, TypeErasedBox&&) noexcept {
@@ -101,7 +101,7 @@ struct SwallowingHandler {
   }
 
   void onWriteReady(detail::ContextImpl&) noexcept {}
-  void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
+  void onPipelineInactive(detail::ContextImpl&) noexcept {}
 
   void handlerAdded(detail::ContextImpl&) noexcept {}
   void handlerRemoved(detail::ContextImpl&) noexcept {}
@@ -129,7 +129,7 @@ struct MultiFireHandler {
     ctx.fireException(std::move(e));
   }
 
-  void onPipelineActivated(detail::ContextImpl&) noexcept {}
+  void onPipelineActive(detail::ContextImpl&) noexcept {}
   void onReadReady(detail::ContextImpl&) noexcept {}
 
   Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&&) noexcept {
@@ -142,7 +142,7 @@ struct MultiFireHandler {
   }
 
   void onWriteReady(detail::ContextImpl&) noexcept {}
-  void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
+  void onPipelineInactive(detail::ContextImpl&) noexcept {}
 
   void handlerAdded(detail::ContextImpl&) noexcept {}
   void handlerRemoved(detail::ContextImpl&) noexcept {}
@@ -177,8 +177,8 @@ struct EchoHandler {
   }
 
   void onWriteReady(detail::ContextImpl&) noexcept {}
-  void onPipelineActivated(detail::ContextImpl&) noexcept {}
-  void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
+  void onPipelineActive(detail::ContextImpl&) noexcept {}
+  void onPipelineInactive(detail::ContextImpl&) noexcept {}
 
   void handlerAdded(detail::ContextImpl&) noexcept {}
   void handlerRemoved(detail::ContextImpl&) noexcept {}
@@ -218,8 +218,8 @@ struct BackpressureHandler {
     ctx.cancelAwaitWriteReady(); // Unregister
   }
 
-  void onPipelineActivated(detail::ContextImpl&) noexcept {}
-  void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
+  void onPipelineActive(detail::ContextImpl&) noexcept {}
+  void onPipelineInactive(detail::ContextImpl&) noexcept {}
 
   void handlerAdded(detail::ContextImpl&) noexcept {}
   void handlerRemoved(detail::ContextImpl&) noexcept {}
@@ -256,8 +256,8 @@ struct ReadBackpressureHandler {
   }
 
   void onWriteReady(detail::ContextImpl&) noexcept {}
-  void onPipelineActivated(detail::ContextImpl&) noexcept {}
-  void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
+  void onPipelineActive(detail::ContextImpl&) noexcept {}
+  void onPipelineInactive(detail::ContextImpl&) noexcept {}
 
   void handlerAdded(detail::ContextImpl&) noexcept {}
   void handlerRemoved(detail::ContextImpl&) noexcept {}

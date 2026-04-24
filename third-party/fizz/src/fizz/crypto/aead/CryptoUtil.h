@@ -57,15 +57,15 @@ Status decFuncBlocks(
       output,
       [&impl, &outLen, &totalWritten, &totalInput](
           size_t& written,
-          Error& err,
+          Error& innerErr,
           uint8_t* plain,
           const uint8_t* cipher,
           size_t len) -> Status {
         if (len > std::numeric_limits<int>::max()) {
-          return err.error("Decryption error: too much cipher text");
+          return innerErr.error("Decryption error: too much cipher text");
         }
         if (!impl.decryptUpdate(plain, cipher, len, &outLen)) {
-          return err.error("Decryption error");
+          return innerErr.error("Decryption error");
         }
         totalWritten += outLen;
         totalInput += len;
@@ -123,12 +123,12 @@ Status encFuncBlocks(
       output,
       [&impl, &outLen, &totalWritten, &totalInput](
           size_t& written,
-          Error& err,
+          Error& innerErr,
           uint8_t* cipher,
           const uint8_t* plain,
           size_t len) -> Status {
         if (len > std::numeric_limits<int>::max()) {
-          return err.error("Encryption error: too much plain text");
+          return innerErr.error("Encryption error: too much plain text");
         }
         if (len == 0) {
           written = 0;
@@ -137,7 +137,7 @@ Status encFuncBlocks(
         if (!impl.encryptUpdate(
                 cipher, &outLen, plain, static_cast<int>(len)) ||
             outLen < 0) {
-          return err.error("Encryption error");
+          return innerErr.error("Encryption error");
         }
         totalWritten += outLen;
         totalInput += len;

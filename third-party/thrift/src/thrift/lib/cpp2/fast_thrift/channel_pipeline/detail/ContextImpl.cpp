@@ -72,4 +72,23 @@ bool ContextImpl::isAwaitingWriteReady() const noexcept {
   return hook && hook->hook.is_linked();
 }
 
+void ContextImpl::awaitReadReady() noexcept {
+  auto* hook = pipeline_->handlerReadReadyHook(handlerIndex_);
+  if (hook && !hook->hook.is_linked()) {
+    pipeline_->readReadyList().push_back(*hook);
+  }
+}
+
+void ContextImpl::cancelAwaitReadReady() noexcept {
+  auto* hook = pipeline_->handlerReadReadyHook(handlerIndex_);
+  if (hook && hook->hook.is_linked()) {
+    hook->hook.unlink();
+  }
+}
+
+bool ContextImpl::isAwaitingReadReady() const noexcept {
+  auto* hook = pipeline_->handlerReadReadyHook(handlerIndex_);
+  return hook && hook->hook.is_linked();
+}
+
 } // namespace apache::thrift::fast_thrift::channel_pipeline::detail

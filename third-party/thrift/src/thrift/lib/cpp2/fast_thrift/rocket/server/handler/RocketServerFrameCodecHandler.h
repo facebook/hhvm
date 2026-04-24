@@ -66,6 +66,9 @@ class RocketServerFrameCodecHandler {
   void onPipelineActivated(Context& /*ctx*/) noexcept {}
 
   template <typename Context>
+  void onReadReady(Context& /*ctx*/) noexcept {}
+
+  template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result onRead(
       Context& ctx,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&

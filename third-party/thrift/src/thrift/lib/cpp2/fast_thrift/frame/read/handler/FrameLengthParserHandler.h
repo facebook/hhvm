@@ -75,6 +75,9 @@ class FrameLengthParserHandler {
   void onPipelineActivated(Context& /*ctx*/) noexcept {}
 
   template <typename Context>
+  void onReadReady(Context& /*ctx*/) noexcept {}
+
+  template <typename Context>
   FOLLY_ALWAYS_INLINE apache::thrift::fast_thrift::channel_pipeline::Result
   onRead(
       Context& ctx,

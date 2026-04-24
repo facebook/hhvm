@@ -707,6 +707,9 @@ class RocketThriftServerInterfaceHandler {
   void onWriteReady(Context&) noexcept {}
 
   template <typename Context>
+  void onReadReady(Context&) noexcept {}
+
+  template <typename Context>
   Result onRead(
       Context& ctx,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&

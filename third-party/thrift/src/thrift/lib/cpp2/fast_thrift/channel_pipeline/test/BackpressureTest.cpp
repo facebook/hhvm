@@ -386,6 +386,8 @@ TEST_F(BackpressureTest, ClosedPipelineIgnoresWriteReady) {
 
   pipeline->close();
 
+  EXPECT_FALSE(pipeline->hasPendingWriteReady());
+
   pipeline->onWriteReady();
 
   EXPECT_EQ(middle_ptr_->writeReadyCount(), 0);
@@ -571,6 +573,169 @@ TEST_F(BackpressureTest, HandlerCanReturnErrorOnBackpressure) {
   EXPECT_EQ(result, Result::Error);
   EXPECT_EQ(error_count, 1);
   EXPECT_FALSE(pipeline->hasPendingWriteReady()); // No registration
+}
+
+// ==================== Read Ready Tests ====================
+
+TEST_F(BackpressureTest, AwaitReadReadyRegistersHandler) {
+  createHandlers();
+
+  middle_handler_->setOnRead([](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+    ctx.awaitReadReady();
+    return ctx.fireRead(std::move(msg));
+  });
+
+  auto pipeline = buildPipeline();
+
+  EXPECT_FALSE(pipeline->hasPendingReadReady());
+
+  auto buf = folly::IOBuf::create(64);
+  (void)pipeline->fireRead(TypeErasedBox(std::move(buf)));
+
+  EXPECT_TRUE(pipeline->hasPendingReadReady());
+}
+
+TEST_F(BackpressureTest, CancelAwaitReadReadyUnregistersHandler) {
+  createHandlers();
+
+  middle_handler_->setOnRead([](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+    ctx.awaitReadReady();
+    return ctx.fireRead(std::move(msg));
+  });
+  middle_handler_->setOnReadReady(
+      [](detail::ContextImpl& ctx) { ctx.cancelAwaitReadReady(); });
+
+  auto pipeline = buildPipeline();
+
+  auto buf = folly::IOBuf::create(64);
+  (void)pipeline->fireRead(TypeErasedBox(std::move(buf)));
+
+  EXPECT_TRUE(pipeline->hasPendingReadReady());
+
+  pipeline->onReadReady();
+
+  EXPECT_FALSE(pipeline->hasPendingReadReady());
+}
+
+TEST_F(BackpressureTest, HandlerReceivesReadReadyAfterAwait) {
+  createHandlers();
+
+  middle_handler_->setOnRead([](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+    ctx.awaitReadReady();
+    return ctx.fireRead(std::move(msg));
+  });
+  middle_handler_->setOnReadReady(
+      [](detail::ContextImpl& ctx) { ctx.cancelAwaitReadReady(); });
+
+  auto pipeline = buildPipeline();
+
+  auto buf = folly::IOBuf::create(64);
+  (void)pipeline->fireRead(TypeErasedBox(std::move(buf)));
+
+  EXPECT_EQ(middle_ptr_->readReadyCount(), 0);
+  pipeline->onReadReady();
+  EXPECT_EQ(middle_ptr_->readReadyCount(), 1);
+}
+
+TEST_F(BackpressureTest, MultipleHandlersCanRegisterForReadReady) {
+  createHandlers();
+
+  auto registerAwait = [](auto* h) {
+    h->setOnRead([](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+      ctx.awaitReadReady();
+      return ctx.fireRead(std::move(msg));
+    });
+    h->setOnReadReady(
+        [](detail::ContextImpl& ctx) { ctx.cancelAwaitReadReady(); });
+  };
+  registerAwait(head_handler_.get());
+  registerAwait(middle_handler_.get());
+
+  auto pipeline = buildPipeline();
+
+  auto buf = folly::IOBuf::create(64);
+  (void)pipeline->fireRead(TypeErasedBox(std::move(buf)));
+
+  EXPECT_TRUE(pipeline->hasPendingReadReady());
+
+  pipeline->onReadReady();
+
+  EXPECT_EQ(head_ptr_->readReadyCount(), 1);
+  EXPECT_EQ(middle_ptr_->readReadyCount(), 1);
+  EXPECT_EQ(tail_ptr_->readReadyCount(), 0);
+}
+
+TEST_F(BackpressureTest, AwaitReadReadyIsIdempotent) {
+  createHandlers();
+
+  middle_handler_->setOnRead([](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+    ctx.awaitReadReady();
+    ctx.awaitReadReady();
+    ctx.awaitReadReady();
+    return ctx.fireRead(std::move(msg));
+  });
+  middle_handler_->setOnReadReady(
+      [](detail::ContextImpl& ctx) { ctx.cancelAwaitReadReady(); });
+
+  auto pipeline = buildPipeline();
+
+  auto buf = folly::IOBuf::create(64);
+  (void)pipeline->fireRead(TypeErasedBox(std::move(buf)));
+  pipeline->onReadReady();
+
+  // Handler should only receive one callback despite multiple await calls.
+  EXPECT_EQ(middle_ptr_->readReadyCount(), 1);
+}
+
+TEST_F(BackpressureTest, HandlerCanUnlinkDuringOnReadReady) {
+  createHandlers();
+
+  auto registerAwait = [](auto* h) {
+    h->setOnRead([](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+      ctx.awaitReadReady();
+      return ctx.fireRead(std::move(msg));
+    });
+    h->setOnReadReady(
+        [](detail::ContextImpl& ctx) { ctx.cancelAwaitReadReady(); });
+  };
+  registerAwait(head_handler_.get());
+  registerAwait(middle_handler_.get());
+
+  auto pipeline = buildPipeline();
+
+  auto buf = folly::IOBuf::create(64);
+  (void)pipeline->fireRead(TypeErasedBox(std::move(buf)));
+
+  // Should not crash — safe iteration even when handlers unlink themselves.
+  pipeline->onReadReady();
+
+  EXPECT_EQ(head_ptr_->readReadyCount(), 1);
+  EXPECT_EQ(middle_ptr_->readReadyCount(), 1);
+  EXPECT_FALSE(pipeline->hasPendingReadReady());
+}
+
+TEST_F(BackpressureTest, ClosedPipelineIgnoresReadReady) {
+  createHandlers();
+
+  middle_handler_->setOnRead([](detail::ContextImpl& ctx, TypeErasedBox&& msg) {
+    ctx.awaitReadReady();
+    return ctx.fireRead(std::move(msg));
+  });
+
+  auto pipeline = buildPipeline();
+
+  auto buf = folly::IOBuf::create(64);
+  (void)pipeline->fireRead(TypeErasedBox(std::move(buf)));
+
+  EXPECT_TRUE(pipeline->hasPendingReadReady());
+
+  pipeline->close();
+
+  EXPECT_FALSE(pipeline->hasPendingReadReady());
+
+  pipeline->onReadReady();
+
+  EXPECT_EQ(middle_ptr_->readReadyCount(), 0);
 }
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline::test

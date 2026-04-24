@@ -67,6 +67,9 @@ class RocketServerStreamStateHandler {
   template <typename Context>
   void onPipelineActivated(Context& /*ctx*/) noexcept {}
 
+  template <typename Context>
+  void onReadReady(Context& /*ctx*/) noexcept {}
+
   /**
    * Handle inbound frames from FrameHandler.
    *

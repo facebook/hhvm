@@ -83,6 +83,9 @@ void PipelineImpl::initializeContexts() noexcept {
     if (handlers_[i].writeReadyHook_) {
       handlers_[i].writeReadyHook_->handlerIndex = i;
     }
+    if (handlers_[i].readReadyHook_) {
+      handlers_[i].readReadyHook_->handlerIndex = i;
+    }
   }
 
   // Second pass: wire up cached dispatch pointers.
@@ -255,8 +258,9 @@ void PipelineImpl::close() noexcept {
   }
   closed_ = true;
 
-  // Clear write ready list - handlers should not receive callbacks after close
+  // Clear ready lists - handlers should not receive callbacks after close
   writeReadyList_.clear();
+  readReadyList_.clear();
 
   callHandlerRemoved();
 }
@@ -341,7 +345,28 @@ PIPELINE_HOT_PATH void PipelineImpl::onWriteReady() noexcept {
     // O(1) lookup using handlerIndex stored in hook
     size_t i = hook.handlerIndex;
     DCHECK(handlers_[i].onWriteReadyFn);
+    DCHECK_LT(i, contexts_.size());
     handlers_[i].onWriteReadyFn(handlers_[i].handlerPtr, contexts_[i]);
+  }
+}
+
+void PipelineImpl::onReadReady() noexcept {
+  DestructorGuard dg(this);
+  if (closed_) {
+    return;
+  }
+
+  // Walk the intrusive list and notify each handler.
+  // Use safe iteration since handlers may unlink themselves during callback.
+  auto it = readReadyList_.begin();
+  while (it != readReadyList_.end()) {
+    auto& hook = *it;
+    ++it;
+
+    size_t i = hook.handlerIndex;
+    DCHECK(handlers_[i].onReadReadyFn);
+    DCHECK_LT(i, contexts_.size());
+    handlers_[i].onReadReadyFn(handlers_[i].handlerPtr, contexts_[i]);
   }
 }
 

@@ -312,7 +312,7 @@ TEST_F(PipelineImplTest, FireExceptionToAppWithNoHandlers) {
   // Pipeline with no handlers doesn't have contexts to call fireException
   // But we can verify the concept works by checking that the app handler
   // is properly wired to receive exceptions
-  EXPECT_TRUE(app_received == false);
+  EXPECT_FALSE(app_received);
 }
 
 TEST_F(PipelineImplTest, FireExceptionPassthroughReachesApp) {
@@ -774,8 +774,9 @@ TEST_F(PipelineImplTest, RoundTripEcho) {
  */
 class ContextCachingHandler {
  public:
-  // Intrusive hook for write backpressure (required by pipeline)
+  // Intrusive hooks for backpressure signaling (required by pipeline)
   WriteReadyHook writeReadyHook_;
+  ReadReadyHook readReadyHook_;
 
   explicit ContextCachingHandler(HandlerId targetId) : targetId_(targetId) {}
 

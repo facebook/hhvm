@@ -54,6 +54,7 @@ struct HandlerNode {
   using OnExceptionFn =
       void (*)(void*, ContextImpl&, folly::exception_wrapper&&) noexcept;
   using OnWriteReadyFn = void (*)(void*, ContextImpl&) noexcept;
+  using OnReadReadyFn = void (*)(void*, ContextImpl&) noexcept;
   using OnPipelineDeactivatedFn = void (*)(void*, ContextImpl&) noexcept;
   using OnPipelineActivatedFn = void (*)(void*, ContextImpl&) noexcept;
   using HandlerAddedFn = void (*)(void*, ContextImpl&) noexcept;
@@ -67,16 +68,17 @@ struct HandlerNode {
   // Outbound handler methods
   OnWriteFn onWriteFn{nullptr};
   OnWriteReadyFn onWriteReadyFn{nullptr};
+  OnReadReadyFn onReadReadyFn{nullptr};
   OnPipelineDeactivatedFn onPipelineDeactivatedFn{nullptr};
 
   // Lifecycle methods
   HandlerAddedFn handlerAddedFn{nullptr};
   HandlerRemovedFn handlerRemovedFn{nullptr};
 
-  // Hook pointer for write backpressure registration (nullptr if handler
-  // doesn't have hook). Detected at compile time by makeHandlerNode. Note: Read
-  // backpressure is handled at transport level via TCP flow control.
+  // Hook pointers for backpressure/ready registration (nullptr if handler
+  // doesn't have hook). Detected at compile time by makeHandlerNode.
   WriteReadyHook* writeReadyHook_{nullptr};
+  ReadReadyHook* readReadyHook_{nullptr};
 
   // Move-only with explicit move constructor to nullify moved-from object
   HandlerNode() = default;
@@ -91,10 +93,12 @@ struct HandlerNode {
         onExceptionFn(other.onExceptionFn),
         onWriteFn(other.onWriteFn),
         onWriteReadyFn(other.onWriteReadyFn),
+        onReadReadyFn(other.onReadReadyFn),
         onPipelineDeactivatedFn(other.onPipelineDeactivatedFn),
         handlerAddedFn(other.handlerAddedFn),
         handlerRemovedFn(other.handlerRemovedFn),
-        writeReadyHook_(other.writeReadyHook_) {
+        writeReadyHook_(other.writeReadyHook_),
+        readReadyHook_(other.readReadyHook_) {
     other.handlerId = 0;
     other.handlerPtr = nullptr;
     other.onPipelineActivatedFn = nullptr;
@@ -102,10 +106,12 @@ struct HandlerNode {
     other.onExceptionFn = nullptr;
     other.onWriteFn = nullptr;
     other.onWriteReadyFn = nullptr;
+    other.onReadReadyFn = nullptr;
     other.onPipelineDeactivatedFn = nullptr;
     other.handlerAddedFn = nullptr;
     other.handlerRemovedFn = nullptr;
     other.writeReadyHook_ = nullptr;
+    other.readReadyHook_ = nullptr;
   }
 
   HandlerNode& operator=(HandlerNode&& other) noexcept {
@@ -118,10 +124,12 @@ struct HandlerNode {
       onExceptionFn = other.onExceptionFn;
       onWriteFn = other.onWriteFn;
       onWriteReadyFn = other.onWriteReadyFn;
+      onReadReadyFn = other.onReadReadyFn;
       onPipelineDeactivatedFn = other.onPipelineDeactivatedFn;
       handlerAddedFn = other.handlerAddedFn;
       handlerRemovedFn = other.handlerRemovedFn;
       writeReadyHook_ = other.writeReadyHook_;
+      readReadyHook_ = other.readReadyHook_;
 
       other.handlerId = 0;
       other.handlerPtr = nullptr;
@@ -130,10 +138,12 @@ struct HandlerNode {
       other.onExceptionFn = nullptr;
       other.onWriteFn = nullptr;
       other.onWriteReadyFn = nullptr;
+      other.onReadReadyFn = nullptr;
       other.onPipelineDeactivatedFn = nullptr;
       other.handlerAddedFn = nullptr;
       other.handlerRemovedFn = nullptr;
       other.writeReadyHook_ = nullptr;
+      other.readReadyHook_ = nullptr;
     }
     return *this;
   }
@@ -167,9 +177,13 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
   node.owner = std::unique_ptr<void, void (*)(void*)>(
       handler.release(), [](void* p) { delete static_cast<H*>(p); });
 
-  // Capture write hook pointer at compile time if handler has it
+  // Capture hook pointers at compile time if handler has them.
   if constexpr (requires(H& h) { h.writeReadyHook_; }) {
     node.writeReadyHook_ = &static_cast<H*>(node.handlerPtr)->writeReadyHook_;
+  }
+
+  if constexpr (requires(H& h) { h.readReadyHook_; }) {
+    node.readReadyHook_ = &static_cast<H*>(node.handlerPtr)->readReadyHook_;
   }
 
   // Lifecycle methods - always present (required by HandlerLifecycle concept)
@@ -192,6 +206,10 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
       return static_cast<H*>(h)->onRead(ctx, std::move(msg));
     };
 
+    node.onReadReadyFn = [](void* h, ContextImpl& ctx) noexcept {
+      static_cast<H*>(h)->onReadReady(ctx);
+    };
+
     node.onExceptionFn =
         [](void* h, ContextImpl& ctx, folly::exception_wrapper&& e) noexcept {
           static_cast<H*>(h)->onException(ctx, std::move(e));
@@ -205,6 +223,10 @@ HandlerNode makeHandlerNode(HandlerId handlerId, std::unique_ptr<H> handler) {
     node.onReadFn =
         [](void*, ContextImpl& ctx, TypeErasedBox&& msg) noexcept -> Result {
       return ctx.fireRead(std::move(msg));
+    };
+
+    node.onReadReadyFn = [](void*, ContextImpl&) noexcept {
+      // No-op for non-inbound handlers
     };
 
     node.onExceptionFn =

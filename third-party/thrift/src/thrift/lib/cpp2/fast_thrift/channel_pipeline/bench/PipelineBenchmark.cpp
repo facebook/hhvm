@@ -64,6 +64,7 @@ struct PassthroughHandler {
   }
 
   void onPipelineActivated(detail::ContextImpl&) noexcept {}
+  void onReadReady(detail::ContextImpl&) noexcept {}
 
   Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
     return ctx.fireWrite(std::move(msg));
@@ -92,6 +93,7 @@ struct SwallowingHandler {
   }
 
   void onPipelineActivated(detail::ContextImpl&) noexcept {}
+  void onReadReady(detail::ContextImpl&) noexcept {}
 
   Result onWrite(detail::ContextImpl&, TypeErasedBox&&) noexcept {
     ++swallowed_count;
@@ -128,6 +130,7 @@ struct MultiFireHandler {
   }
 
   void onPipelineActivated(detail::ContextImpl&) noexcept {}
+  void onReadReady(detail::ContextImpl&) noexcept {}
 
   Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&&) noexcept {
     for (int i = 0; i < N; ++i) {
@@ -186,7 +189,7 @@ struct EchoHandler {
 // Backpressure handler - has hook for intrusive list registration
 // Simulates a handler that registers for write ready notifications
 struct BackpressureHandler {
-  WriteReadyHook write_ready_hook_;
+  WriteReadyHook writeReadyHook_;
   uint64_t write_count{0};
   uint64_t write_ready_count{0};
   bool register_on_write{true};
@@ -194,6 +197,8 @@ struct BackpressureHandler {
   Result onRead(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
     return ctx.fireRead(std::move(msg));
   }
+
+  void onReadReady(detail::ContextImpl&) noexcept {}
 
   void onException(
       detail::ContextImpl& ctx, folly::exception_wrapper&& e) noexcept {
@@ -213,6 +218,44 @@ struct BackpressureHandler {
     ctx.cancelAwaitWriteReady(); // Unregister
   }
 
+  void onPipelineActivated(detail::ContextImpl&) noexcept {}
+  void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
+
+  void handlerAdded(detail::ContextImpl&) noexcept {}
+  void handlerRemoved(detail::ContextImpl&) noexcept {}
+};
+
+// Read backpressure handler - has hook for intrusive list registration
+// Simulates a handler that registers for read ready notifications
+struct ReadBackpressureHandler {
+  ReadReadyHook readReadyHook_;
+  uint64_t read_count{0};
+  uint64_t read_ready_count{0};
+  bool register_on_read{true};
+
+  Result onRead(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
+    ++read_count;
+    if (register_on_read) {
+      ctx.awaitReadReady(); // Register for callback
+    }
+    return ctx.fireRead(std::move(msg));
+  }
+
+  void onReadReady(detail::ContextImpl& ctx) noexcept {
+    ++read_ready_count;
+    ctx.cancelAwaitReadReady(); // Unregister
+  }
+
+  void onException(
+      detail::ContextImpl& ctx, folly::exception_wrapper&& e) noexcept {
+    ctx.fireException(std::move(e));
+  }
+
+  Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
+    return ctx.fireWrite(std::move(msg));
+  }
+
+  void onWriteReady(detail::ContextImpl&) noexcept {}
   void onPipelineActivated(detail::ContextImpl&) noexcept {}
   void onPipelineDeactivated(detail::ContextImpl&) noexcept {}
 
@@ -1066,6 +1109,165 @@ BENCHMARK_RELATIVE(Backpressure_Baseline_Passthrough, iters) {
   }
 
   folly::doNotOptimizeAway(transport.write_count);
+}
+
+// =============================================================================
+// Read Backpressure Benchmarks
+// Measures overhead of awaitReadReady/onReadReady callback path
+// =============================================================================
+
+BENCHMARK(Backpressure_RegisterUnregisterRead_1Handler, iters) {
+  folly::BenchmarkSuspender susp;
+  folly::EventBase evb;
+  BenchTransportHandler transport;
+  BenchAppHandler app;
+  BenchAllocator allocator;
+
+  auto pipeline =
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
+          .setEventBase(&evb)
+          .setHead(&transport)
+          .setTail(&app)
+          .setAllocator(&allocator)
+          .addNextDuplex<ReadBackpressureHandler>(bench_backpressure_tag)
+          .build();
+
+  std::vector<TypeErasedBox> messages;
+  messages.reserve(iters);
+  for (size_t i = 0; i < iters; ++i) {
+    messages.emplace_back(static_cast<int>(i));
+  }
+
+  susp.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    (void)pipeline->fireRead(std::move(messages[i]));
+  }
+
+  folly::doNotOptimizeAway(app.read_count);
+}
+
+BENCHMARK(Pipeline_FireRead_Backpressure_ResumeRead, iters) {
+  folly::BenchmarkSuspender susp;
+  folly::EventBase evb;
+  BenchTransportHandler transport;
+  BenchAppHandler app;
+  BenchAllocator allocator;
+
+  auto pipeline =
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
+          .setEventBase(&evb)
+          .setHead(&transport)
+          .setTail(&app)
+          .setAllocator(&allocator)
+          .addNextDuplex<ReadBackpressureHandler>(bench_backpressure_tag)
+          .build();
+
+  // Register once.
+  (void)pipeline->fireRead(TypeErasedBox(0));
+
+  susp.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    pipeline->onReadReady(); // Calls callback, handler unlinks
+    (void)pipeline->fireRead(TypeErasedBox(static_cast<int>(i))); // Re-register
+  }
+
+  folly::doNotOptimizeAway(app.read_count);
+}
+
+BENCHMARK(Backpressure_OnReadReady_4Handlers, iters) {
+  folly::BenchmarkSuspender susp;
+  folly::EventBase evb;
+  BenchTransportHandler transport;
+  BenchAppHandler app;
+  BenchAllocator allocator;
+
+  auto pipeline =
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
+          .setEventBase(&evb)
+          .setHead(&transport)
+          .setTail(&app)
+          .setAllocator(&allocator)
+          .addNextDuplex<ReadBackpressureHandler>(bench_backpressure_tag)
+          .addNextDuplex<ReadBackpressureHandler>(bench_backpressure2_tag)
+          .addNextDuplex<ReadBackpressureHandler>(bench_backpressure3_tag)
+          .addNextDuplex<ReadBackpressureHandler>(bench_backpressure4_tag)
+          .build();
+
+  (void)pipeline->fireRead(TypeErasedBox(0)); // Register all handlers
+
+  susp.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    pipeline->onReadReady(); // Calls 4 callbacks
+    (void)pipeline->fireRead(TypeErasedBox(static_cast<int>(i))); // Re-register
+  }
+
+  folly::doNotOptimizeAway(app.read_count);
+}
+
+BENCHMARK(Backpressure_FullCycle_Read_1Handler, iters) {
+  folly::BenchmarkSuspender susp;
+  folly::EventBase evb;
+  BenchTransportHandler transport;
+  BenchAppHandler app;
+  BenchAllocator allocator;
+
+  auto pipeline =
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
+          .setEventBase(&evb)
+          .setHead(&transport)
+          .setTail(&app)
+          .setAllocator(&allocator)
+          .addNextDuplex<ReadBackpressureHandler>(bench_backpressure_tag)
+          .build();
+
+  std::vector<TypeErasedBox> messages;
+  messages.reserve(iters);
+  for (size_t i = 0; i < iters; ++i) {
+    messages.emplace_back(static_cast<int>(i));
+  }
+
+  susp.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    (void)pipeline->fireRead(std::move(messages[i]));
+    pipeline->onReadReady();
+  }
+
+  folly::doNotOptimizeAway(app.read_count);
+}
+
+BENCHMARK_RELATIVE(Backpressure_Baseline_PassthroughRead, iters) {
+  folly::BenchmarkSuspender susp;
+  folly::EventBase evb;
+  BenchTransportHandler transport;
+  BenchAppHandler app;
+  BenchAllocator allocator;
+
+  auto pipeline =
+      PipelineBuilder<BenchTransportHandler, BenchAppHandler, BenchAllocator>()
+          .setEventBase(&evb)
+          .setHead(&transport)
+          .setTail(&app)
+          .setAllocator(&allocator)
+          .addNextDuplex<PassthroughHandler>(bench_passthrough_tag)
+          .build();
+
+  std::vector<TypeErasedBox> messages;
+  messages.reserve(iters);
+  for (size_t i = 0; i < iters; ++i) {
+    messages.emplace_back(static_cast<int>(i));
+  }
+
+  susp.dismiss();
+
+  for (size_t i = 0; i < iters; ++i) {
+    (void)pipeline->fireRead(std::move(messages[i]));
+  }
+
+  folly::doNotOptimizeAway(app.read_count);
 }
 
 // =============================================================================

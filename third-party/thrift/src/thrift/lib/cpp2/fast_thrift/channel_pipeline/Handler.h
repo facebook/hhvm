@@ -47,6 +47,7 @@ concept HandlerLifecycle = requires(H h, Ctx& ctx) {
  *
  * Inbound handlers process:
  * - onRead: Incoming data/messages
+ * - onReadReady: Notification that reads can resume
  * - onException: Notification of an exception
  * - onPipelineActivated: Notification that pipeline is activated
  *
@@ -71,6 +72,7 @@ concept InboundHandler =
       // Returns Result to propagate backpressure
       { h.onRead(ctx, std::move(message)) } noexcept -> std::same_as<Result>;
       // Notifications — must always be handled
+      { h.onReadReady(ctx) } noexcept -> std::same_as<void>;
       { h.onException(ctx, std::move(e)) } noexcept -> std::same_as<void>;
       { h.onPipelineActivated(ctx) } noexcept -> std::same_as<void>;
     };

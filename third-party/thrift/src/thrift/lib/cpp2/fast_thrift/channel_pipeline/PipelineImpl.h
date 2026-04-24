@@ -198,7 +198,7 @@ class PipelineImpl : public folly::DelayedDestruction {
   // === Backpressure / Ready Notifications ===
 
   /**
-   * Called by endpoint when socket becomes writable.
+   * Called by tail when it can accept more writes.
    * Propagates onWriteReady() to all handlers with pending write
    * backpressure.
    */
@@ -210,6 +210,18 @@ class PipelineImpl : public folly::DelayedDestruction {
   bool hasPendingWriteReady() const noexcept {
     return !writeReadyList_.empty();
   }
+
+  /**
+   * Called by head when it can accept more reads.
+   * Propagates onReadReady() to all handlers with pending read
+   * backpressure.
+   */
+  void onReadReady() noexcept;
+
+  /**
+   * Check if any handlers have pending read ready notifications.
+   */
+  bool hasPendingReadReady() const noexcept { return !readReadyList_.empty(); }
 
   // === Internal: Hook accessors for ContextImpl ===
 
@@ -225,6 +237,19 @@ class PipelineImpl : public folly::DelayedDestruction {
    * Get the write ready list for registration.
    */
   WriteReadyList& writeReadyList() noexcept { return writeReadyList_; }
+
+  /**
+   * Get the read ready hook for a handler by index.
+   * Returns nullptr if handler doesn't have a hook.
+   */
+  ReadReadyHook* handlerReadReadyHook(size_t index) noexcept {
+    return handlers_[index].readReadyHook_;
+  }
+
+  /**
+   * Get the read ready list for registration.
+   */
+  ReadReadyList& readReadyList() noexcept { return readReadyList_; }
 
  protected:
   // Protected destructor - must use destroy() or Ptr for cleanup.
@@ -311,10 +336,10 @@ class PipelineImpl : public folly::DelayedDestruction {
 
   bool closed_{false};
 
-  // Intrusive list tracking handlers awaiting write ready notifications.
-  // Handlers self-register via ctx.awaitWriteReady()
-  // Note: Read backpressure is handled at transport level (TCP flow control).
+  // Intrusive lists tracking handlers awaiting write/read ready notifications.
+  // Handlers self-register via ctx.awaitWriteReady()/ctx.awaitReadReady().
   WriteReadyList writeReadyList_;
+  ReadReadyList readReadyList_;
 
   // PipelineBuilder needs access to set up the pipeline
   template <typename HeadHandler, typename TailHandler, typename Allocator>

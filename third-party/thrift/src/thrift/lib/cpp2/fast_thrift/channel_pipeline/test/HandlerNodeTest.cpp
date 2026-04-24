@@ -124,6 +124,7 @@ TEST_F(HandlerNodeTest, HandlerIsDestroyedWhenNodeIsDestroyed) {
 
     void handlerAdded(detail::ContextImpl&) noexcept {}
     void handlerRemoved(detail::ContextImpl&) noexcept {}
+    void onReadReady(detail::ContextImpl&) noexcept {}
   };
 
   {

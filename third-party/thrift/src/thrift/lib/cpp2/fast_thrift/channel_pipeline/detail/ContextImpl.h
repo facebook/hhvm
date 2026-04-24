@@ -196,6 +196,24 @@ class ContextImpl {
    */
   bool isAwaitingWriteReady() const noexcept;
 
+  /**
+   * Register this handler to receive onReadReady() callback.
+   *
+   * Use this when an inbound handler needs to be notified to resume processing
+   * after it returned Result::Backpressure from onRead().
+   */
+  void awaitReadReady() noexcept;
+
+  /**
+   * Cancel pending await for read ready.
+   */
+  void cancelAwaitReadReady() noexcept;
+
+  /**
+   * Check if this handler is currently awaiting read ready.
+   */
+  bool isAwaitingReadReady() const noexcept;
+
   // === Internal (used by PipelineImpl) ===
 
   /**

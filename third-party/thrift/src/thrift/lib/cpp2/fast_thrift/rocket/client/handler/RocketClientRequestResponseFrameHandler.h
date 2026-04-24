@@ -65,6 +65,9 @@ class RocketClientRequestResponseFrameHandler {
 
   // === InboundHandler ===
 
+  template <typename Context>
+  void onReadReady(Context& /*ctx*/) noexcept {}
+
   /**
    * Handle inbound frames.
    *

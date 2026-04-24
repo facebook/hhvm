@@ -49,12 +49,19 @@ namespace apache::thrift::fast_thrift::channel_pipeline {
  *     }
  *   };
  *
- * Note: Read backpressure is handled at the transport level via TCP flow
- * control. When the read path returns Result::Backpressure, the transport
- * adapter should call pauseRead() on the socket. There is no handler-to-handler
- * read backpressure signaling - this follows the Netty model.
  */
 struct WriteReadyHook {
+  folly::IntrusiveListHook hook;
+  size_t handlerIndex{0}; // Set by PipelineImpl during initialization
+};
+
+/**
+ * ReadReadyHook provides intrusive list membership for read-ready notification.
+ *
+ * Handlers that want to receive onReadReady() notifications embed this hook
+ * as a public member named `readReadyHook_`.
+ */
+struct ReadReadyHook {
   folly::IntrusiveListHook hook;
   size_t handlerIndex{0}; // Set by PipelineImpl during initialization
 };
@@ -65,5 +72,11 @@ struct WriteReadyHook {
  */
 using WriteReadyList =
     folly::IntrusiveList<WriteReadyHook, &WriteReadyHook::hook>;
+
+/**
+ * List of handlers awaiting read ready notifications.
+ * Maintained by PipelineImpl, walked when onReadReady() is called.
+ */
+using ReadReadyList = folly::IntrusiveList<ReadReadyHook, &ReadReadyHook::hook>;
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

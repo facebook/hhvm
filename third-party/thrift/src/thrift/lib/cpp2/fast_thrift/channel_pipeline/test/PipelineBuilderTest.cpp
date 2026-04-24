@@ -210,6 +210,7 @@ TEST_F(PipelineBuilderTest, AddNextDuplexWithInPlaceConstruction) {
       ctx.fireException(std::move(e));
     }
     void onPipelineActivated(detail::ContextImpl&) noexcept {}
+    void onReadReady(detail::ContextImpl&) noexcept {}
 
     Result onWrite(detail::ContextImpl& ctx, TypeErasedBox&& msg) noexcept {
       return ctx.fireWrite(std::move(msg));

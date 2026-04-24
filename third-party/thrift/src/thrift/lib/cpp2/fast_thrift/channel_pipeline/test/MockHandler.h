@@ -31,15 +31,14 @@ namespace apache::thrift::fast_thrift::channel_pipeline::test {
  * It records all method calls and allows customization of behavior
  * via callbacks. By default, it passes through to the next handler.
  *
- * Includes writeReadyHook_ for explicit write backpressure support.
- * This hook is automatically detected by makeHandlerNode.
- *
- * Note: Read backpressure is handled at transport level (TCP flow control).
+ * Includes writeReadyHook_ and readReadyHook_ for explicit ready signaling.
+ * Hooks are automatically detected by makeHandlerNode.
  */
 class MockHandler {
  public:
-  // Hook for explicit write backpressure (detected by makeHandlerNode)
+  // Hooks for explicit ready signaling (detected by makeHandlerNode)
   WriteReadyHook writeReadyHook_;
+  ReadReadyHook readReadyHook_;
 
   // Recorded call types
   struct ReadCall {
@@ -222,6 +221,8 @@ class InboundOnlyHandler {
     readCount_++;
     return ctx.fireRead(std::move(msg));
   }
+
+  void onReadReady(detail::ContextImpl&) noexcept {}
 
   void onException(
       detail::ContextImpl& ctx, folly::exception_wrapper&& e) noexcept {

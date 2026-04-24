@@ -49,8 +49,7 @@ struct ProfCounters {
   T* getAddr(uint32_t id) {
     // allocate a new chunk of counters if necessary
     while (id >= m_chunks.size() * kCountersPerChunk) {
-      uint32_t size = sizeof(T) * kCountersPerChunk;
-      auto const chunk = new T[size];
+      auto const chunk = new T[kCountersPerChunk];
       std::fill_n(chunk, kCountersPerChunk, m_initVal);
       m_chunks.emplace_back(chunk);
     }

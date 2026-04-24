@@ -249,6 +249,19 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
     ],
     output = json5_test.Example{stringAsKey = {"hello": "world"}},
   },
+  // ── String Line Continuation Compatibility ──────────────────────────────────
+  // A backslash followed by a literal newline (LF, CR, or CRLF) is a line
+  // continuation: the backslash and newline are stripped from the result.
+  CompatibilityTestCase{
+    name = "StringLineContinuation",
+    inputs = [
+      "{\"stringValue\": \"hello, world\"}",
+      "{\"stringValue\": \"hello, \\\nworld\"}",
+      "{\"stringValue\": \"hello, \\\rworld\"}",
+      "{\"stringValue\": \"hello, \\\r\nworld\"}",
+    ],
+    output = json5_test.Example{stringValue = "hello, world"},
+  },
   // ── I64 as Map Key Compatibility ─────────────────────────────────────────────
   // I64-keyed maps should accept both array form and object form with string keys.
   CompatibilityTestCase{

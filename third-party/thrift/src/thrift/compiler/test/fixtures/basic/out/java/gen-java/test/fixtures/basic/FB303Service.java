@@ -37,9 +37,9 @@ public interface FB303Service extends java.io.Closeable, com.facebook.thrift.uti
     static com.facebook.thrift.client.ClientBuilder<FB303Service> clientBuilder() {
         return new ClientBuilder<FB303Service>() {
             @java.lang.Override
-            public FB303Service build(Mono<RpcClient> rpcClientMono) {
+            public FB303Service build(RpcClientSource rpcClientSource) {
                 FB303Service.Reactive _delegate =
-                    new FB303ServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new FB303ServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new FB303ServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface FB303Service extends java.io.Closeable, com.facebook.thrift.uti
         static com.facebook.thrift.client.ClientBuilder<FB303Service.Async> clientBuilder() {
             return new ClientBuilder<FB303Service.Async>() {
                 @java.lang.Override
-                public FB303Service.Async build(Mono<RpcClient> rpcClientMono) {
+                public FB303Service.Async build(RpcClientSource rpcClientSource) {
                     FB303Service.Reactive _delegate =
-                        new FB303ServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new FB303ServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new FB303ServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -117,8 +117,8 @@ public interface FB303Service extends java.io.Closeable, com.facebook.thrift.uti
         static com.facebook.thrift.client.ClientBuilder<FB303Service.Reactive> clientBuilder() {
             return new ClientBuilder<FB303Service.Reactive>() {
                 @java.lang.Override
-                public FB303Service.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new FB303ServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public FB303Service.Reactive build(RpcClientSource rpcClientSource) {
+                    return new FB303ServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

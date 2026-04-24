@@ -51,9 +51,9 @@ public interface {{service.javaCapitalName}} extends java.io.Closeable, com.face
     static com.facebook.thrift.client.ClientBuilder<{{service.javaCapitalName}}> clientBuilder() {
         return new ClientBuilder<{{service.javaCapitalName}}>() {
             @java.lang.Override
-            public {{service.javaCapitalName}} build(Mono<RpcClient> rpcClientMono) {
+            public {{service.javaCapitalName}} build(RpcClientSource rpcClientSource) {
                 {{service.javaCapitalName}}.Reactive _delegate =
-                    new {{service.javaCapitalName}}ReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new {{service.javaCapitalName}}ReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new {{service.javaCapitalName}}ReactiveBlockingWrapper(_delegate);
             }
         };
@@ -73,9 +73,9 @@ public interface {{service.javaCapitalName}} extends java.io.Closeable, com.face
         static com.facebook.thrift.client.ClientBuilder<{{service.javaCapitalName}}.Async> clientBuilder() {
             return new ClientBuilder<{{service.javaCapitalName}}.Async>() {
                 @java.lang.Override
-                public {{service.javaCapitalName}}.Async build(Mono<RpcClient> rpcClientMono) {
+                public {{service.javaCapitalName}}.Async build(RpcClientSource rpcClientSource) {
                     {{service.javaCapitalName}}.Reactive _delegate =
-                        new {{service.javaCapitalName}}ReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new {{service.javaCapitalName}}ReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new {{service.javaCapitalName}}ReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -179,8 +179,8 @@ public interface {{service.javaCapitalName}} extends java.io.Closeable, com.face
         static com.facebook.thrift.client.ClientBuilder<{{service.javaCapitalName}}.Reactive> clientBuilder() {
             return new ClientBuilder<{{service.javaCapitalName}}.Reactive>() {
                 @java.lang.Override
-                public {{service.javaCapitalName}}.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new {{service.javaCapitalName}}ReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public {{service.javaCapitalName}}.Reactive build(RpcClientSource rpcClientSource) {
+                    return new {{service.javaCapitalName}}ReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

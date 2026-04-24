@@ -37,9 +37,9 @@ public interface MyServicePrioParent extends java.io.Closeable, com.facebook.thr
     static com.facebook.thrift.client.ClientBuilder<MyServicePrioParent> clientBuilder() {
         return new ClientBuilder<MyServicePrioParent>() {
             @java.lang.Override
-            public MyServicePrioParent build(Mono<RpcClient> rpcClientMono) {
+            public MyServicePrioParent build(RpcClientSource rpcClientSource) {
                 MyServicePrioParent.Reactive _delegate =
-                    new MyServicePrioParentReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new MyServicePrioParentReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new MyServicePrioParentReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface MyServicePrioParent extends java.io.Closeable, com.facebook.thr
         static com.facebook.thrift.client.ClientBuilder<MyServicePrioParent.Async> clientBuilder() {
             return new ClientBuilder<MyServicePrioParent.Async>() {
                 @java.lang.Override
-                public MyServicePrioParent.Async build(Mono<RpcClient> rpcClientMono) {
+                public MyServicePrioParent.Async build(RpcClientSource rpcClientSource) {
                     MyServicePrioParent.Reactive _delegate =
-                        new MyServicePrioParentReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new MyServicePrioParentReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new MyServicePrioParentReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -137,8 +137,8 @@ public interface MyServicePrioParent extends java.io.Closeable, com.facebook.thr
         static com.facebook.thrift.client.ClientBuilder<MyServicePrioParent.Reactive> clientBuilder() {
             return new ClientBuilder<MyServicePrioParent.Reactive>() {
                 @java.lang.Override
-                public MyServicePrioParent.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new MyServicePrioParentReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public MyServicePrioParent.Reactive build(RpcClientSource rpcClientSource) {
+                    return new MyServicePrioParentReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

@@ -37,9 +37,9 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
     static com.facebook.thrift.client.ClientBuilder<AdapterService> clientBuilder() {
         return new ClientBuilder<AdapterService>() {
             @java.lang.Override
-            public AdapterService build(Mono<RpcClient> rpcClientMono) {
+            public AdapterService build(RpcClientSource rpcClientSource) {
                 AdapterService.Reactive _delegate =
-                    new AdapterServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new AdapterServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new AdapterServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
         static com.facebook.thrift.client.ClientBuilder<AdapterService.Async> clientBuilder() {
             return new ClientBuilder<AdapterService.Async>() {
                 @java.lang.Override
-                public AdapterService.Async build(Mono<RpcClient> rpcClientMono) {
+                public AdapterService.Async build(RpcClientSource rpcClientSource) {
                     AdapterService.Reactive _delegate =
-                        new AdapterServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new AdapterServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new AdapterServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -143,8 +143,8 @@ public interface AdapterService extends java.io.Closeable, com.facebook.thrift.u
         static com.facebook.thrift.client.ClientBuilder<AdapterService.Reactive> clientBuilder() {
             return new ClientBuilder<AdapterService.Reactive>() {
                 @java.lang.Override
-                public AdapterService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new AdapterServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public AdapterService.Reactive build(RpcClientSource rpcClientSource) {
+                    return new AdapterServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

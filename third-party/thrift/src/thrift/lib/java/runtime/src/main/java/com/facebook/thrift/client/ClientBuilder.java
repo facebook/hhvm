@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.thrift.ProtocolId;
 import reactor.core.publisher.Mono;
 
+/** Abstract builder for typed Thrift service clients. */
 public abstract class ClientBuilder<T> {
   protected ProtocolId protocolId = ProtocolId.COMPACT;
   protected Mono<Map<String, String>> headersMono = Mono.empty();
@@ -54,8 +55,12 @@ public abstract class ClientBuilder<T> {
   }
 
   public T build(RpcClientFactory factory, SocketAddress address) {
-    return build(factory.createRpcClient(address));
+    return build(factory.createRpcClientSource(address));
   }
 
-  public abstract T build(Mono<RpcClient> rpcClientMono);
+  public T build(Mono<? extends RpcClient> rpcClientMono) {
+    return build(new LegacyRpcClientSource(rpcClientMono));
+  }
+
+  public abstract T build(RpcClientSource rpcClientSource);
 }

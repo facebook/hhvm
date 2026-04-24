@@ -37,9 +37,9 @@ public interface MyRoot extends java.io.Closeable, com.facebook.thrift.util.Bloc
     static com.facebook.thrift.client.ClientBuilder<MyRoot> clientBuilder() {
         return new ClientBuilder<MyRoot>() {
             @java.lang.Override
-            public MyRoot build(Mono<RpcClient> rpcClientMono) {
+            public MyRoot build(RpcClientSource rpcClientSource) {
                 MyRoot.Reactive _delegate =
-                    new MyRootReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new MyRootReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new MyRootReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface MyRoot extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<MyRoot.Async> clientBuilder() {
             return new ClientBuilder<MyRoot.Async>() {
                 @java.lang.Override
-                public MyRoot.Async build(Mono<RpcClient> rpcClientMono) {
+                public MyRoot.Async build(RpcClientSource rpcClientSource) {
                     MyRoot.Reactive _delegate =
-                        new MyRootReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new MyRootReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new MyRootReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -111,8 +111,8 @@ public interface MyRoot extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<MyRoot.Reactive> clientBuilder() {
             return new ClientBuilder<MyRoot.Reactive>() {
                 @java.lang.Override
-                public MyRoot.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new MyRootReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public MyRoot.Reactive build(RpcClientSource rpcClientSource) {
+                    return new MyRootReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

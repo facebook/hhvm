@@ -37,9 +37,9 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
     static com.facebook.thrift.client.ClientBuilder<MyLeaf> clientBuilder() {
         return new ClientBuilder<MyLeaf>() {
             @java.lang.Override
-            public MyLeaf build(Mono<RpcClient> rpcClientMono) {
+            public MyLeaf build(RpcClientSource rpcClientSource) {
                 MyLeaf.Reactive _delegate =
-                    new MyLeafReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new MyLeafReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new MyLeafReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<MyLeaf.Async> clientBuilder() {
             return new ClientBuilder<MyLeaf.Async>() {
                 @java.lang.Override
-                public MyLeaf.Async build(Mono<RpcClient> rpcClientMono) {
+                public MyLeaf.Async build(RpcClientSource rpcClientSource) {
                     MyLeaf.Reactive _delegate =
-                        new MyLeafReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new MyLeafReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new MyLeafReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -111,8 +111,8 @@ public interface MyLeaf extends java.io.Closeable, com.facebook.thrift.util.Bloc
         static com.facebook.thrift.client.ClientBuilder<MyLeaf.Reactive> clientBuilder() {
             return new ClientBuilder<MyLeaf.Reactive>() {
                 @java.lang.Override
-                public MyLeaf.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new MyLeafReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public MyLeaf.Reactive build(RpcClientSource rpcClientSource) {
+                    return new MyLeafReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

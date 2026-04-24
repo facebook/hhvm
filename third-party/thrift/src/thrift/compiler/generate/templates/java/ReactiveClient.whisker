@@ -31,7 +31,9 @@ import org.apache.thrift.protocol.*;
 import org.apache.thrift.ClientPushMetadata;
 import org.apache.thrift.InteractionCreate;
 import org.apache.thrift.InteractionTerminate;
+import com.facebook.thrift.client.LegacyRpcClientSource;
 import com.facebook.thrift.client.ResponseWrapper;
+import com.facebook.thrift.client.RpcClientSource;
 import com.facebook.thrift.client.RpcOptions;
 import com.facebook.thrift.util.Readers;
 
@@ -41,7 +43,7 @@ public class {{service.javaCapitalName}}ReactiveClient {{#if (object.notnull? se
   {{#if (not (object.notnull? service.extends))}}
 
   protected final org.apache.thrift.ProtocolId _protocolId;
-  protected final reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient;
+  protected final RpcClientSource _clientSource;
   protected final reactor.core.publisher.Mono<Map<String, String>> _headersMono;
   protected final reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono;
   protected final Set<Long> _activeInteractions;
@@ -124,44 +126,75 @@ public class {{service.javaCapitalName}}ReactiveClient {{#if (object.notnull? se
     {{/each}}{{/each}}
   }
 
-  public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
+  private static RpcClientSource _clientSourceFromMono(reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
+    return new LegacyRpcClientSource(_rpcClient);
+  }
+
+  public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource) {
     {{#if (object.notnull? service.extends)}}
-    super(_protocolId, _rpcClient);
+    super(_protocolId, _clientSource);
     {{#else}}
     this._protocolId = _protocolId;
-    this._rpcClient = _rpcClient;
+    this._clientSource = _clientSource;
     this._headersMono = reactor.core.publisher.Mono.empty();
     this._persistentHeadersMono = reactor.core.publisher.Mono.empty();
     this._activeInteractions = ConcurrentHashMap.newKeySet();
     {{/if (object.notnull? service.extends)}}
   }
 
+  public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
+    this(_protocolId, _clientSourceFromMono(_rpcClient));
+  }
+
+  public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
+    this(_protocolId, _clientSource, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
+  }
+
   public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(_protocolId, _rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
+    this(_protocolId, _clientSourceFromMono(_rpcClient), _headers, _persistentHeaders);
+  }
+
+  public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
+    this(_protocolId, _clientSource, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
   }
 
   public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
-    this(_protocolId, _rpcClient, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
+    this(_protocolId, _clientSourceFromMono(_rpcClient), _headersMono, _persistentHeadersMono);
+  }
+
+  public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+    this(_protocolId,_clientSource, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
   }
 
   public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    this(_protocolId,_rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
+    this(_protocolId, _clientSourceFromMono(_rpcClient), _headers, _persistentHeaders, interactionCounter, activeInteractions);
   }
 
-  public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+  public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
     {{#if (object.notnull? service.extends)}}
-    super(_protocolId, _rpcClient, _headersMono, _persistentHeadersMono, interactionCounter, activeInteractions);
+    super(_protocolId, _clientSource, _headersMono, _persistentHeadersMono, interactionCounter, activeInteractions);
     {{#else}}
     this._protocolId = _protocolId;
-    this._rpcClient = _rpcClient;
+    this._clientSource = _clientSource;
     this._headersMono = _headersMono;
     this._persistentHeadersMono = _persistentHeadersMono;
     this._activeInteractions = activeInteractions;
     {{/if (object.notnull? service.extends)}}
   }
 
+  public {{service.javaCapitalName}}ReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+    this(_protocolId, _clientSourceFromMono(_rpcClient), _headersMono, _persistentHeadersMono, interactionCounter, activeInteractions);
+  }
+
   @java.lang.Override
-  public void dispose() {}
+  public void dispose() {
+    _clientSource.dispose();
+  }
+
+  @java.lang.Override
+  public boolean isDisposed() {
+    return _clientSource.isDisposed();
+  }
 
   {{#each service.single_request_functions as |func|}}
   private com.facebook.thrift.payload.Writer _create{{func.java_name}}Writer({{#each (array.enumerate func.params.fields with_last=true) as |i field last?|}}final {{#partial types.java_type type=field.type has_adapter_override=field.hasAdapter?}} {{field.javaName}}{{#if (not last?)}}, {{/if (not last?)}}{{/each}}) {
@@ -192,7 +225,7 @@ public class {{service.javaCapitalName}}ReactiveClient {{#if (object.notnull? se
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<{{#partial types.boxed_type type=func.return_type field_hasAdapter=false}}>> {{func.java_name}}Wrapper({{#each func.params.fields as |field|}}final {{#partial types.java_type type=field.type has_adapter_override=field.hasAdapter?}} {{field.javaName}}, {{/each}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return _rpcClient
+    return _clientSource.acquire()
       .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("{{func.name}}")
@@ -262,7 +295,7 @@ public class {{service.javaCapitalName}}ReactiveClient {{#if (object.notnull? se
 
   @java.lang.Override
   public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<{{#partial types.stream_return_type function=func}}>> {{func.java_name}}Wrapper({{#each func.params.fields as |field|}}final {{#partial types.java_type type=field.type has_adapter_override=field.hasAdapter?}} {{field.javaName}}, {{/each}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return _rpcClient
+    return _clientSource.acquire()
       .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("{{func.name}}")
@@ -350,7 +383,7 @@ public class {{service.javaCapitalName}}ReactiveClient {{#if (object.notnull? se
 
   @java.lang.Override
   public {{#partial types.sink_wrapper_return_type function=func}} {{func.java_name}}Wrapper({{#each func.params.fields as |field|}}final {{#partial types.java_type type=field.type has_adapter_override=field.hasAdapter?}} {{field.javaName}}, {{/each}} org.reactivestreams.Publisher<{{#partial types.boxed_type type=func.sink.elem_type field_hasAdapter=false}}> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return _rpcClient
+    return _clientSource.acquire()
       .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("{{func.name}}")
@@ -461,7 +494,7 @@ public class {{service.javaCapitalName}}ReactiveClient {{#if (object.notnull? se
 
     @java.lang.Override
     public reactor.core.publisher.Mono<ResponseWrapper<{{#partial types.boxed_type type=func.return_type field_hasAdapter=false}}>> {{func.java_name}}Wrapper({{#each func.params.fields as |field|}}final {{#partial types.java_type type=field.type has_adapter_override=field.hasAdapter?}} {{field.javaName}}, {{/each}}RpcOptions rpcOptions)  {
-      return _rpcClient
+      return _clientSource.acquire()
         .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "{{interaction.name}}.{{func.name}}";
@@ -534,7 +567,7 @@ public class {{service.javaCapitalName}}ReactiveClient {{#if (object.notnull? se
 
     @java.lang.Override
     public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<{{#partial types.stream_return_type function=func}}>> {{func.java_name}}Wrapper({{#each func.params.fields as |field|}}final {{#partial types.java_type type=field.type has_adapter_override=field.hasAdapter?}} {{field.javaName}}, {{/each}} final com.facebook.thrift.client.RpcOptions rpcOptions) {
-      return _rpcClient
+      return _clientSource.acquire()
         .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
           String interactionName = "{{interaction.name}}.{{func.name}}";
@@ -592,7 +625,7 @@ public class {{service.javaCapitalName}}ReactiveClient {{#if (object.notnull? se
     public void dispose() {
       com.facebook.thrift.client.ThriftClientStatsHolder.getThriftClientStats().interactionDisposed("{{interaction.name}}");
       _activeInteractions.remove(interactionId);
-      _rpcClient
+      _clientSource.acquire()
         .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> {
           InteractionTerminate term = new InteractionTerminate.Builder().setInteractionId(interactionId).build();

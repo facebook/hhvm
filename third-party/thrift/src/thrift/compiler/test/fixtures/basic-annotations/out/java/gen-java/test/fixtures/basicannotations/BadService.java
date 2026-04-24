@@ -37,9 +37,9 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
     static com.facebook.thrift.client.ClientBuilder<BadService> clientBuilder() {
         return new ClientBuilder<BadService>() {
             @java.lang.Override
-            public BadService build(Mono<RpcClient> rpcClientMono) {
+            public BadService build(RpcClientSource rpcClientSource) {
                 BadService.Reactive _delegate =
-                    new BadServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new BadServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new BadServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
         static com.facebook.thrift.client.ClientBuilder<BadService.Async> clientBuilder() {
             return new ClientBuilder<BadService.Async>() {
                 @java.lang.Override
-                public BadService.Async build(Mono<RpcClient> rpcClientMono) {
+                public BadService.Async build(RpcClientSource rpcClientSource) {
                     BadService.Reactive _delegate =
-                        new BadServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new BadServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new BadServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -128,8 +128,8 @@ public interface BadService extends java.io.Closeable, com.facebook.thrift.util.
         static com.facebook.thrift.client.ClientBuilder<BadService.Reactive> clientBuilder() {
             return new ClientBuilder<BadService.Reactive>() {
                 @java.lang.Override
-                public BadService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new BadServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public BadService.Reactive build(RpcClientSource rpcClientSource) {
+                    return new BadServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

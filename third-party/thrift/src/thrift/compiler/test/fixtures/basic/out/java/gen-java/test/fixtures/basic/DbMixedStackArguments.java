@@ -37,9 +37,9 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
     static com.facebook.thrift.client.ClientBuilder<DbMixedStackArguments> clientBuilder() {
         return new ClientBuilder<DbMixedStackArguments>() {
             @java.lang.Override
-            public DbMixedStackArguments build(Mono<RpcClient> rpcClientMono) {
+            public DbMixedStackArguments build(RpcClientSource rpcClientSource) {
                 DbMixedStackArguments.Reactive _delegate =
-                    new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new DbMixedStackArgumentsReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
         static com.facebook.thrift.client.ClientBuilder<DbMixedStackArguments.Async> clientBuilder() {
             return new ClientBuilder<DbMixedStackArguments.Async>() {
                 @java.lang.Override
-                public DbMixedStackArguments.Async build(Mono<RpcClient> rpcClientMono) {
+                public DbMixedStackArguments.Async build(RpcClientSource rpcClientSource) {
                     DbMixedStackArguments.Reactive _delegate =
-                        new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new DbMixedStackArgumentsReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -149,8 +149,8 @@ public interface DbMixedStackArguments extends java.io.Closeable, com.facebook.t
         static com.facebook.thrift.client.ClientBuilder<DbMixedStackArguments.Reactive> clientBuilder() {
             return new ClientBuilder<DbMixedStackArguments.Reactive>() {
                 @java.lang.Override
-                public DbMixedStackArguments.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public DbMixedStackArguments.Reactive build(RpcClientSource rpcClientSource) {
+                    return new DbMixedStackArgumentsReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

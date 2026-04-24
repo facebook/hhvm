@@ -37,9 +37,9 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
     static com.facebook.thrift.client.ClientBuilder<Perform> clientBuilder() {
         return new ClientBuilder<Perform>() {
             @java.lang.Override
-            public Perform build(Mono<RpcClient> rpcClientMono) {
+            public Perform build(RpcClientSource rpcClientSource) {
                 Perform.Reactive _delegate =
-                    new PerformReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new PerformReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new PerformReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
         static com.facebook.thrift.client.ClientBuilder<Perform.Async> clientBuilder() {
             return new ClientBuilder<Perform.Async>() {
                 @java.lang.Override
-                public Perform.Async build(Mono<RpcClient> rpcClientMono) {
+                public Perform.Async build(RpcClientSource rpcClientSource) {
                     Perform.Reactive _delegate =
-                        new PerformReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new PerformReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new PerformReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -183,8 +183,8 @@ public interface Perform extends java.io.Closeable, com.facebook.thrift.util.Blo
         static com.facebook.thrift.client.ClientBuilder<Perform.Reactive> clientBuilder() {
             return new ClientBuilder<Perform.Reactive>() {
                 @java.lang.Override
-                public Perform.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new PerformReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public Perform.Reactive build(RpcClientSource rpcClientSource) {
+                    return new PerformReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

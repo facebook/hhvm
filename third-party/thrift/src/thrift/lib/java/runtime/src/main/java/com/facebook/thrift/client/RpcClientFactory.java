@@ -34,6 +34,10 @@ import reactor.core.publisher.Mono;
 public interface RpcClientFactory {
   Mono<RpcClient> createRpcClient(SocketAddress socketAddress);
 
+  default RpcClientSource createRpcClientSource(SocketAddress socketAddress) {
+    return new LegacyRpcClientSource(createRpcClient(socketAddress));
+  }
+
   /**
    * Builder to create an RpcClientFactory. By default it creates an RpcClientFactory with RSocket
    * disabled, stats enabled, reconnecting client enabled, and simple load balancing enabled.

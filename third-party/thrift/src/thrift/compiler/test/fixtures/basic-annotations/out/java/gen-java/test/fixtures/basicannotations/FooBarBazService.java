@@ -37,9 +37,9 @@ public interface FooBarBazService extends java.io.Closeable, com.facebook.thrift
     static com.facebook.thrift.client.ClientBuilder<FooBarBazService> clientBuilder() {
         return new ClientBuilder<FooBarBazService>() {
             @java.lang.Override
-            public FooBarBazService build(Mono<RpcClient> rpcClientMono) {
+            public FooBarBazService build(RpcClientSource rpcClientSource) {
                 FooBarBazService.Reactive _delegate =
-                    new FooBarBazServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new FooBarBazServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new FooBarBazServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface FooBarBazService extends java.io.Closeable, com.facebook.thrift
         static com.facebook.thrift.client.ClientBuilder<FooBarBazService.Async> clientBuilder() {
             return new ClientBuilder<FooBarBazService.Async>() {
                 @java.lang.Override
-                public FooBarBazService.Async build(Mono<RpcClient> rpcClientMono) {
+                public FooBarBazService.Async build(RpcClientSource rpcClientSource) {
                     FooBarBazService.Reactive _delegate =
-                        new FooBarBazServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new FooBarBazServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new FooBarBazServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -163,8 +163,8 @@ public interface FooBarBazService extends java.io.Closeable, com.facebook.thrift
         static com.facebook.thrift.client.ClientBuilder<FooBarBazService.Reactive> clientBuilder() {
             return new ClientBuilder<FooBarBazService.Reactive>() {
                 @java.lang.Override
-                public FooBarBazService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new FooBarBazServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public FooBarBazService.Reactive build(RpcClientSource rpcClientSource) {
+                    return new FooBarBazServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

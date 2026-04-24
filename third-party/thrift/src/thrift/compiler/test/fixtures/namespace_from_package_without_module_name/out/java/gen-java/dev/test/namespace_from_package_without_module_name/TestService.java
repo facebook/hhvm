@@ -37,9 +37,9 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
     static com.facebook.thrift.client.ClientBuilder<TestService> clientBuilder() {
         return new ClientBuilder<TestService>() {
             @java.lang.Override
-            public TestService build(Mono<RpcClient> rpcClientMono) {
+            public TestService build(RpcClientSource rpcClientSource) {
                 TestService.Reactive _delegate =
-                    new TestServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new TestServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new TestServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
         static com.facebook.thrift.client.ClientBuilder<TestService.Async> clientBuilder() {
             return new ClientBuilder<TestService.Async>() {
                 @java.lang.Override
-                public TestService.Async build(Mono<RpcClient> rpcClientMono) {
+                public TestService.Async build(RpcClientSource rpcClientSource) {
                     TestService.Reactive _delegate =
-                        new TestServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new TestServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new TestServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -117,8 +117,8 @@ public interface TestService extends java.io.Closeable, com.facebook.thrift.util
         static com.facebook.thrift.client.ClientBuilder<TestService.Reactive> clientBuilder() {
             return new ClientBuilder<TestService.Reactive>() {
                 @java.lang.Override
-                public TestService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new TestServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public TestService.Reactive build(RpcClientSource rpcClientSource) {
+                    return new TestServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

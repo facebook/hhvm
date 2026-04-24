@@ -16,7 +16,9 @@ import org.apache.thrift.protocol.*;
 import org.apache.thrift.ClientPushMetadata;
 import org.apache.thrift.InteractionCreate;
 import org.apache.thrift.InteractionTerminate;
+import com.facebook.thrift.client.LegacyRpcClientSource;
 import com.facebook.thrift.client.ResponseWrapper;
+import com.facebook.thrift.client.RpcClientSource;
 import com.facebook.thrift.client.RpcOptions;
 import com.facebook.thrift.util.Readers;
 
@@ -25,7 +27,7 @@ public class BadServiceReactiveClient
   private static final AtomicLong _interactionCounter = new AtomicLong(0);
 
   protected final org.apache.thrift.ProtocolId _protocolId;
-  protected final reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient;
+  protected final RpcClientSource _clientSource;
   protected final reactor.core.publisher.Mono<Map<String, String>> _headersMono;
   protected final reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono;
   protected final Set<Long> _activeInteractions;
@@ -36,36 +38,67 @@ public class BadServiceReactiveClient
   static {
   }
 
-  public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
+  private static RpcClientSource _clientSourceFromMono(reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
+    return new LegacyRpcClientSource(_rpcClient);
+  }
+
+  public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource) {
     this._protocolId = _protocolId;
-    this._rpcClient = _rpcClient;
+    this._clientSource = _clientSource;
     this._headersMono = reactor.core.publisher.Mono.empty();
     this._persistentHeadersMono = reactor.core.publisher.Mono.empty();
     this._activeInteractions = ConcurrentHashMap.newKeySet();
   }
 
+  public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
+    this(_protocolId, _clientSourceFromMono(_rpcClient));
+  }
+
+  public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
+    this(_protocolId, _clientSource, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
+  }
+
   public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders) {
-    this(_protocolId, _rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), new AtomicLong(), ConcurrentHashMap.newKeySet());
+    this(_protocolId, _clientSourceFromMono(_rpcClient), _headers, _persistentHeaders);
+  }
+
+  public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
+    this(_protocolId, _clientSource, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
   }
 
   public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono) {
-    this(_protocolId, _rpcClient, _headersMono, _persistentHeadersMono, new AtomicLong(), ConcurrentHashMap.newKeySet());
+    this(_protocolId, _clientSourceFromMono(_rpcClient), _headersMono, _persistentHeadersMono);
+  }
+
+  public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+    this(_protocolId,_clientSource, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
   }
 
   public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, Map<String, String> _headers, Map<String, String> _persistentHeaders, AtomicLong interactionCounter, Set<Long> activeInteractions) {
-    this(_protocolId,_rpcClient, reactor.core.publisher.Mono.just(_headers != null ? _headers : java.util.Collections.emptyMap()), reactor.core.publisher.Mono.just(_persistentHeaders != null ? _persistentHeaders : java.util.Collections.emptyMap()), interactionCounter, activeInteractions);
+    this(_protocolId, _clientSourceFromMono(_rpcClient), _headers, _persistentHeaders, interactionCounter, activeInteractions);
   }
 
-  public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+  public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
     this._protocolId = _protocolId;
-    this._rpcClient = _rpcClient;
+    this._clientSource = _clientSource;
     this._headersMono = _headersMono;
     this._persistentHeadersMono = _persistentHeadersMono;
     this._activeInteractions = activeInteractions;
   }
 
+  public BadServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient, reactor.core.publisher.Mono<Map<String, String>> _headersMono, reactor.core.publisher.Mono<Map<String, String>> _persistentHeadersMono, AtomicLong interactionCounter, Set<Long> activeInteractions) {
+    this(_protocolId, _clientSourceFromMono(_rpcClient), _headersMono, _persistentHeadersMono, interactionCounter, activeInteractions);
+  }
+
   @java.lang.Override
-  public void dispose() {}
+  public void dispose() {
+    _clientSource.dispose();
+  }
+
+  @java.lang.Override
+  public boolean isDisposed() {
+    return _clientSource.isDisposed();
+  }
 
   private com.facebook.thrift.payload.Writer _createbarWriter() {
     return oprot -> {
@@ -82,7 +115,7 @@ public class BadServiceReactiveClient
 
   @java.lang.Override
   public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<Integer>> barWrapper( final com.facebook.thrift.client.RpcOptions rpcOptions) {
-    return _rpcClient
+    return _clientSource.acquire()
       .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
                 .setName("bar")
@@ -150,7 +183,7 @@ public class BadServiceReactiveClient
 
     @java.lang.Override
     public reactor.core.publisher.Mono<ResponseWrapper<Void>> fooWrapper(RpcOptions rpcOptions)  {
-      return _rpcClient
+      return _clientSource.acquire()
         .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> getHeaders(rpcOptions).flatMap(headers -> {
           String interactionName = "BadInteraction.foo";
@@ -192,7 +225,7 @@ public class BadServiceReactiveClient
     public void dispose() {
       com.facebook.thrift.client.ThriftClientStatsHolder.getThriftClientStats().interactionDisposed("BadInteraction");
       _activeInteractions.remove(interactionId);
-      _rpcClient
+      _clientSource.acquire()
         .contextWrite(ctx -> ctx.put(STICKY_HASH_KEY, interactionId))
         .flatMap(_rpc -> {
           InteractionTerminate term = new InteractionTerminate.Builder().setInteractionId(interactionId).build();

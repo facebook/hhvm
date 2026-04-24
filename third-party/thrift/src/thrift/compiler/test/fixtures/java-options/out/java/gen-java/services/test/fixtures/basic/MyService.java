@@ -37,9 +37,9 @@ public interface MyService extends java.io.Closeable, com.facebook.thrift.util.B
     static com.facebook.thrift.client.ClientBuilder<MyService> clientBuilder() {
         return new ClientBuilder<MyService>() {
             @java.lang.Override
-            public MyService build(Mono<RpcClient> rpcClientMono) {
+            public MyService build(RpcClientSource rpcClientSource) {
                 MyService.Reactive _delegate =
-                    new MyServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new MyServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new MyServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface MyService extends java.io.Closeable, com.facebook.thrift.util.B
         static com.facebook.thrift.client.ClientBuilder<MyService.Async> clientBuilder() {
             return new ClientBuilder<MyService.Async>() {
                 @java.lang.Override
-                public MyService.Async build(Mono<RpcClient> rpcClientMono) {
+                public MyService.Async build(RpcClientSource rpcClientSource) {
                     MyService.Reactive _delegate =
-                        new MyServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new MyServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new MyServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -169,8 +169,8 @@ public interface MyService extends java.io.Closeable, com.facebook.thrift.util.B
         static com.facebook.thrift.client.ClientBuilder<MyService.Reactive> clientBuilder() {
             return new ClientBuilder<MyService.Reactive>() {
                 @java.lang.Override
-                public MyService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new MyServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public MyService.Reactive build(RpcClientSource rpcClientSource) {
+                    return new MyServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

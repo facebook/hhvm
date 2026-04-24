@@ -37,9 +37,9 @@ public interface PubSubStreamingService extends java.io.Closeable, com.facebook.
     static com.facebook.thrift.client.ClientBuilder<PubSubStreamingService> clientBuilder() {
         return new ClientBuilder<PubSubStreamingService>() {
             @java.lang.Override
-            public PubSubStreamingService build(Mono<RpcClient> rpcClientMono) {
+            public PubSubStreamingService build(RpcClientSource rpcClientSource) {
                 PubSubStreamingService.Reactive _delegate =
-                    new PubSubStreamingServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new PubSubStreamingServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new PubSubStreamingServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface PubSubStreamingService extends java.io.Closeable, com.facebook.
         static com.facebook.thrift.client.ClientBuilder<PubSubStreamingService.Async> clientBuilder() {
             return new ClientBuilder<PubSubStreamingService.Async>() {
                 @java.lang.Override
-                public PubSubStreamingService.Async build(Mono<RpcClient> rpcClientMono) {
+                public PubSubStreamingService.Async build(RpcClientSource rpcClientSource) {
                     PubSubStreamingService.Reactive _delegate =
-                        new PubSubStreamingServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new PubSubStreamingServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new PubSubStreamingServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -86,8 +86,8 @@ public interface PubSubStreamingService extends java.io.Closeable, com.facebook.
         static com.facebook.thrift.client.ClientBuilder<PubSubStreamingService.Reactive> clientBuilder() {
             return new ClientBuilder<PubSubStreamingService.Reactive>() {
                 @java.lang.Override
-                public PubSubStreamingService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new PubSubStreamingServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public PubSubStreamingService.Reactive build(RpcClientSource rpcClientSource) {
+                    return new PubSubStreamingServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

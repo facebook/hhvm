@@ -37,9 +37,9 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
     static com.facebook.thrift.client.ClientBuilder<PrimitivesService> clientBuilder() {
         return new ClientBuilder<PrimitivesService>() {
             @java.lang.Override
-            public PrimitivesService build(Mono<RpcClient> rpcClientMono) {
+            public PrimitivesService build(RpcClientSource rpcClientSource) {
                 PrimitivesService.Reactive _delegate =
-                    new PrimitivesServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new PrimitivesServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new PrimitivesServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
         static com.facebook.thrift.client.ClientBuilder<PrimitivesService.Async> clientBuilder() {
             return new ClientBuilder<PrimitivesService.Async>() {
                 @java.lang.Override
-                public PrimitivesService.Async build(Mono<RpcClient> rpcClientMono) {
+                public PrimitivesService.Async build(RpcClientSource rpcClientSource) {
                     PrimitivesService.Reactive _delegate =
-                        new PrimitivesServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new PrimitivesServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new PrimitivesServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -193,8 +193,8 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
         static com.facebook.thrift.client.ClientBuilder<PrimitivesService.Reactive> clientBuilder() {
             return new ClientBuilder<PrimitivesService.Reactive>() {
                 @java.lang.Override
-                public PrimitivesService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new PrimitivesServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public PrimitivesService.Reactive build(RpcClientSource rpcClientSource) {
+                    return new PrimitivesServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

@@ -37,9 +37,9 @@ public interface SinkService extends java.io.Closeable, com.facebook.thrift.util
     static com.facebook.thrift.client.ClientBuilder<SinkService> clientBuilder() {
         return new ClientBuilder<SinkService>() {
             @java.lang.Override
-            public SinkService build(Mono<RpcClient> rpcClientMono) {
+            public SinkService build(RpcClientSource rpcClientSource) {
                 SinkService.Reactive _delegate =
-                    new SinkServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new SinkServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new SinkServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface SinkService extends java.io.Closeable, com.facebook.thrift.util
         static com.facebook.thrift.client.ClientBuilder<SinkService.Async> clientBuilder() {
             return new ClientBuilder<SinkService.Async>() {
                 @java.lang.Override
-                public SinkService.Async build(Mono<RpcClient> rpcClientMono) {
+                public SinkService.Async build(RpcClientSource rpcClientSource) {
                     SinkService.Reactive _delegate =
-                        new SinkServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new SinkServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new SinkServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -86,8 +86,8 @@ public interface SinkService extends java.io.Closeable, com.facebook.thrift.util
         static com.facebook.thrift.client.ClientBuilder<SinkService.Reactive> clientBuilder() {
             return new ClientBuilder<SinkService.Reactive>() {
                 @java.lang.Override
-                public SinkService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new SinkServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public SinkService.Reactive build(RpcClientSource rpcClientSource) {
+                    return new SinkServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

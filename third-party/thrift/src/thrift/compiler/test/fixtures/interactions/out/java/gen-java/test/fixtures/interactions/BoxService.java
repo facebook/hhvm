@@ -37,9 +37,9 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
     static com.facebook.thrift.client.ClientBuilder<BoxService> clientBuilder() {
         return new ClientBuilder<BoxService>() {
             @java.lang.Override
-            public BoxService build(Mono<RpcClient> rpcClientMono) {
+            public BoxService build(RpcClientSource rpcClientSource) {
                 BoxService.Reactive _delegate =
-                    new BoxServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new BoxServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new BoxServiceReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
         static com.facebook.thrift.client.ClientBuilder<BoxService.Async> clientBuilder() {
             return new ClientBuilder<BoxService.Async>() {
                 @java.lang.Override
-                public BoxService.Async build(Mono<RpcClient> rpcClientMono) {
+                public BoxService.Async build(RpcClientSource rpcClientSource) {
                     BoxService.Reactive _delegate =
-                        new BoxServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new BoxServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new BoxServiceReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -134,8 +134,8 @@ public interface BoxService extends java.io.Closeable, com.facebook.thrift.util.
         static com.facebook.thrift.client.ClientBuilder<BoxService.Reactive> clientBuilder() {
             return new ClientBuilder<BoxService.Reactive>() {
                 @java.lang.Override
-                public BoxService.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new BoxServiceReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public BoxService.Reactive build(RpcClientSource rpcClientSource) {
+                    return new BoxServiceReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

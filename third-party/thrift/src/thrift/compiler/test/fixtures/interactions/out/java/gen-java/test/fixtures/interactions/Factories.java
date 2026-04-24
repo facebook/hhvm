@@ -37,9 +37,9 @@ public interface Factories extends java.io.Closeable, com.facebook.thrift.util.B
     static com.facebook.thrift.client.ClientBuilder<Factories> clientBuilder() {
         return new ClientBuilder<Factories>() {
             @java.lang.Override
-            public Factories build(Mono<RpcClient> rpcClientMono) {
+            public Factories build(RpcClientSource rpcClientSource) {
                 Factories.Reactive _delegate =
-                    new FactoriesReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                    new FactoriesReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 return new FactoriesReactiveBlockingWrapper(_delegate);
             }
         };
@@ -59,9 +59,9 @@ public interface Factories extends java.io.Closeable, com.facebook.thrift.util.B
         static com.facebook.thrift.client.ClientBuilder<Factories.Async> clientBuilder() {
             return new ClientBuilder<Factories.Async>() {
                 @java.lang.Override
-                public Factories.Async build(Mono<RpcClient> rpcClientMono) {
+                public Factories.Async build(RpcClientSource rpcClientSource) {
                     Factories.Reactive _delegate =
-                        new FactoriesReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                        new FactoriesReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                     return new FactoriesReactiveAsyncWrapper(_delegate);
                 }
             };
@@ -241,8 +241,8 @@ public interface Factories extends java.io.Closeable, com.facebook.thrift.util.B
         static com.facebook.thrift.client.ClientBuilder<Factories.Reactive> clientBuilder() {
             return new ClientBuilder<Factories.Reactive>() {
                 @java.lang.Override
-                public Factories.Reactive build(Mono<RpcClient> rpcClientMono) {
-                    return new FactoriesReactiveClient(protocolId, rpcClientMono, headersMono, persistentHeadersMono);
+                public Factories.Reactive build(RpcClientSource rpcClientSource) {
+                    return new FactoriesReactiveClient(protocolId, rpcClientSource, headersMono, persistentHeadersMono);
                 }
             };
         }

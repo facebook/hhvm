@@ -16,7 +16,7 @@ import org.apache.thrift.protocol.*;
 import org.apache.thrift.ClientPushMetadata;
 import org.apache.thrift.InteractionCreate;
 import org.apache.thrift.InteractionTerminate;
-import com.facebook.thrift.client.LegacyRpcClientSource;
+import com.facebook.thrift.client.ClientRuntimeSelector;
 import com.facebook.thrift.client.ResponseWrapper;
 import com.facebook.thrift.client.RpcClientSource;
 import com.facebook.thrift.client.RpcOptions;
@@ -52,8 +52,10 @@ public class MyServiceReactiveClient
   static {
   }
 
+  // Cutover shim: generated clients stay agnostic to whether acquisition comes from the
+  // legacy Mono<RpcClient> path or the v2 manager-backed path.
   private static RpcClientSource _clientSourceFromMono(reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
-    return new LegacyRpcClientSource(_rpcClient);
+    return ClientRuntimeSelector.createSource(_rpcClient);
   }
 
   public MyServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, RpcClientSource _clientSource) {

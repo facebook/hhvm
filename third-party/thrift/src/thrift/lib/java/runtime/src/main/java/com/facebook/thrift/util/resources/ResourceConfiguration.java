@@ -16,6 +16,7 @@
 
 package com.facebook.thrift.util.resources;
 
+import com.facebook.thrift.client.ClientRuntimeMode;
 import reactor.util.concurrent.Queues;
 
 final class ResourceConfiguration {
@@ -119,4 +120,8 @@ final class ResourceConfiguration {
 
   static final boolean separateOffLoopScheduler =
       System.getProperty("thrift.separate-offloop-scheduler", "false").equalsIgnoreCase("true");
+
+  static ClientRuntimeMode getClientRuntimeMode() {
+    return ClientRuntimeMode.fromString(System.getProperty("thrift.client.runtime", "legacy"));
+  }
 }

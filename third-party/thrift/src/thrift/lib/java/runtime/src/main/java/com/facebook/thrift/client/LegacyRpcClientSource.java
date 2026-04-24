@@ -22,8 +22,8 @@ import reactor.core.publisher.Mono;
 /**
  * Legacy typed-client source.
  *
- * <p>Acquisition delegates directly to the historical {@code Mono<RpcClient>} surface and {@link
- * #dispose()} intentionally remains a no-op.
+ * <p>This preserves pre-v2 semantics: acquiring delegates directly to the historical {@code
+ * Mono<RpcClient>} and {@link #dispose()} is a no-op.
  */
 public final class LegacyRpcClientSource implements RpcClientSource {
   private final Mono<RpcClient> rpcClientMono;

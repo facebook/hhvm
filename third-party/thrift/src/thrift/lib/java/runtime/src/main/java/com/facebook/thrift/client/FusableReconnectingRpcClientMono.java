@@ -337,6 +337,7 @@ final class FusableReconnectingRpcClientMono extends Mono<RpcClient> implements 
     }
 
     tryDrain();
+
     return true;
   }
 

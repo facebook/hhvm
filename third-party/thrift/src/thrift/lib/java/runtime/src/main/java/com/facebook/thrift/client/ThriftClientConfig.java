@@ -52,6 +52,7 @@ public class ThriftClientConfig {
   private String keyFile = "/var/facebook/x509_identities/server.pem";
   private String caFile = "/var/facebook/rootcanal/ca.pem";
   private long sessionCacheSize = 10_000;
+  private ClientRuntimeMode clientRuntimeMode;
 
   @NotNull
   public LegacyTransportType getTransport() {
@@ -178,6 +179,17 @@ public class ThriftClientConfig {
   @Config("thrift.server.ssl.session-cache-size")
   public ThriftClientConfig setSessionCacheSize(long sessionCacheSize) {
     this.sessionCacheSize = sessionCacheSize;
+    return this;
+  }
+
+  public ClientRuntimeMode getClientRuntimeMode() {
+    return clientRuntimeMode;
+  }
+
+  @Config("thrift.client.runtime")
+  @ConfigDescription("Select thrift Java client runtime: legacy or v2")
+  public ThriftClientConfig setClientRuntimeMode(ClientRuntimeMode clientRuntimeMode) {
+    this.clientRuntimeMode = clientRuntimeMode;
     return this;
   }
 

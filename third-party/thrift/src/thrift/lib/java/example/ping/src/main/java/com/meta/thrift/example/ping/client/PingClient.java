@@ -21,8 +21,6 @@ import com.facebook.thrift.client.ThriftClientConfig;
 import com.facebook.thrift.example.ping.PingRequest;
 import com.facebook.thrift.example.ping.PingResponse;
 import com.facebook.thrift.example.ping.PingService;
-import com.facebook.thrift.legacy.client.LegacyRpcClientFactory;
-import com.facebook.thrift.rsocket.client.RSocketRpcClientFactory;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import java.net.InetSocketAddress;
@@ -125,12 +123,13 @@ public class PingClient {
 
     boolean useHeader = "header".equals(config.getTransport());
     final RpcClientFactory clientFactory =
-        useHeader
-            ? new LegacyRpcClientFactory(new ThriftClientConfig().setDisableSSL(true))
-            : new RSocketRpcClientFactory(new ThriftClientConfig().setDisableSSL(true));
+        RpcClientFactory.builder()
+            .setDisableLoadBalancing(true)
+            .setDisableRSocket(useHeader)
+            .setThriftClientConfig(new ThriftClientConfig().setDisableSSL(true))
+            .build();
     SocketAddress address = InetSocketAddress.createUnresolved(config.getHost(), config.getPort());
 
-    // NOTE: the follow code can be simplified after a better api is introduced
     final PingService client =
         PingService.clientBuilder()
             .setProtocolId(ProtocolId.BINARY)

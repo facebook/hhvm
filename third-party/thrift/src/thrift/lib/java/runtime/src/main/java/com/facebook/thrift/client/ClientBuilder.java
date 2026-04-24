@@ -22,7 +22,17 @@ import java.util.Map;
 import org.apache.thrift.ProtocolId;
 import reactor.core.publisher.Mono;
 
-/** Abstract builder for typed Thrift service clients. */
+/**
+ * Abstract builder for typed Thrift service clients.
+ *
+ * <p>Generated service interfaces expose a static {@code clientBuilder()} method that returns a
+ * concrete subclass. Callers configure protocol and headers, then choose a {@code build()} overload
+ * to create the client.
+ *
+ * <p>The builder delegates to {@link RpcClientSource} so that the same generated code works with
+ * both the legacy {@code Mono<RpcClient>} runtime and the v2 manager-backed runtime. The runtime is
+ * selected transparently by {@link ClientRuntimeSelector}.
+ */
 public abstract class ClientBuilder<T> {
   protected ProtocolId protocolId = ProtocolId.COMPACT;
   protected Mono<Map<String, String>> headersMono = Mono.empty();
@@ -54,13 +64,26 @@ public abstract class ClientBuilder<T> {
     return this;
   }
 
+  /**
+   * Builds a typed client from a factory and address. The factory's {@link
+   * RpcClientFactory#createRpcClientSource} determines whether the legacy or v2 runtime is used.
+   */
   public T build(RpcClientFactory factory, SocketAddress address) {
     return build(factory.createRpcClientSource(address));
   }
 
+  /**
+   * Builds a typed client from a raw {@code Mono<RpcClient>}. Runtime selection (legacy vs v2) is
+   * determined by the global {@link ClientRuntimeMode} setting. Prefer {@link
+   * #build(RpcClientFactory, SocketAddress)} for new code.
+   */
   public T build(Mono<? extends RpcClient> rpcClientMono) {
-    return build(new LegacyRpcClientSource(rpcClientMono));
+    return build(ClientRuntimeSelector.createSource(rpcClientMono));
   }
 
+  /**
+   * Builds a typed client from a pre-constructed {@link RpcClientSource}. This is the abstract
+   * method that generated service builders implement.
+   */
   public abstract T build(RpcClientSource rpcClientSource);
 }

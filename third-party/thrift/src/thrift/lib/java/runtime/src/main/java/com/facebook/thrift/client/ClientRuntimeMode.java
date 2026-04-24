@@ -16,15 +16,24 @@
 
 package com.facebook.thrift.client;
 
-import reactor.core.Disposable;
-import reactor.core.publisher.Mono;
+/** Selects which Java client runtime backs generated typed clients. */
+public enum ClientRuntimeMode {
+  LEGACY,
+  V2;
 
-/**
- * Neutral acquisition surface used by generated typed clients during the legacy-to-v2 cutover.
- *
- * <p>Legacy implementations hand back the historical {@code Mono<RpcClient>} view. V2
- * implementations hand back a manager-backed view with explicit close semantics.
- */
-public interface RpcClientSource extends Disposable {
-  Mono<RpcClient> acquire();
+  public static ClientRuntimeMode fromString(String value) {
+    if (value == null || value.isEmpty()) {
+      return LEGACY;
+    }
+
+    switch (value.trim().toLowerCase()) {
+      case "legacy":
+        return LEGACY;
+      case "v2":
+        return V2;
+      default:
+        throw new IllegalArgumentException(
+            "Unsupported thrift Java client runtime: " + value + ". Expected legacy or v2.");
+    }
+  }
 }

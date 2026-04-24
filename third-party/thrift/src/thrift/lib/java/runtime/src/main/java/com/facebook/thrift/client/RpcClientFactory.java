@@ -18,6 +18,7 @@ package com.facebook.thrift.client;
 
 import com.facebook.swift.service.ThriftClientEventHandler;
 import com.facebook.swift.service.ThriftClientStats;
+import com.facebook.thrift.client.v2.transport.RpcClientFactoryV2;
 import com.facebook.thrift.legacy.client.LegacyRpcClientFactory;
 import com.facebook.thrift.metadata.ClientInfo;
 import com.facebook.thrift.rsocket.client.HeaderAwareRpcClientFactory;
@@ -121,6 +122,13 @@ public interface RpcClientFactory {
       Objects.requireNonNull(thriftClientConfig, "ThriftClientConfig is required");
       Objects.requireNonNull(thriftClientStats, "thriftClientStats is required");
 
+      if (ClientRuntimeSelector.resolve(thriftClientConfig) == ClientRuntimeMode.V2) {
+        return buildV2Factory();
+      }
+      return buildLegacyFactory();
+    }
+
+    private RpcClientFactory buildLegacyFactory() {
       RpcClientFactory rpcClientFactory;
       if (disableRSocket) {
         if (handleHeaderResponse) {
@@ -174,6 +182,22 @@ public interface RpcClientFactory {
       }
 
       return rpcClientFactory;
+    }
+
+    private RpcClientFactory buildV2Factory() {
+      return RpcClientFactoryV2.builder()
+          .setDisableRSocket(disableRSocket)
+          .setEnableHandleHeaderResponse(handleHeaderResponse)
+          .setDisableStats(disableStats)
+          .setDisableReconnectingClient(disableReconnectingClient)
+          .setDisableTimeout(disableTimeout)
+          .setHeaderTokens(headerTokens)
+          .setClientEventHandlers(clientEventHandlers)
+          .setConnectionPoolSize(connectionPoolSize)
+          .setCacheClient(cacheClient)
+          .setThriftClientConfig(thriftClientConfig)
+          .setThriftClientStats(thriftClientStats)
+          .build();
     }
   }
 

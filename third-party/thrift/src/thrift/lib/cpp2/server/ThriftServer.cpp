@@ -111,7 +111,6 @@ THRIFT_FLAG_DEFINE_bool(enable_io_queue_lag_detection, true);
 
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_aegis, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_prefer_psk_ke, false);
-THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_presenting_dc, false);
 THRIFT_FLAG_DEFINE_bool(default_sync_max_requests_to_concurrency_limit, false);
 THRIFT_FLAG_DEFINE_bool(default_sync_max_qps_to_execution_rate, false);
@@ -2347,10 +2346,6 @@ folly::observer::Observer<bool> ThriftServer::enableStopTLS() {
 
 folly::observer::Observer<bool> ThriftServer::enableStopTLSV2() {
   return THRIFT_FLAG_OBSERVE(server_enable_stoptlsv2);
-}
-
-folly::observer::Observer<bool> ThriftServer::enableReceivingDelegatedCreds() {
-  return THRIFT_FLAG_OBSERVE(server_fizz_enable_receiving_dc);
 }
 
 static folly::Optional<PSPUpgradePolicy> parsePSPPolicy(std::string_view s) {

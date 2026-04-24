@@ -2540,11 +2540,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         [observer = std::move(contextObserver),
          aegisObserver = enableAegis(),
          pskModeObserver = preferPskKe(),
-         dcReceiveObserver = enableReceivingDelegatedCreds(),
          dcObserver = enablePresentingDelegatedCredentials()]() {
           (void)**aegisObserver;
           (void)**pskModeObserver;
-          (void)**dcReceiveObserver;
           (void)**dcObserver;
           auto context = **observer;
           context.isDefault = true;
@@ -2753,8 +2751,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   static folly::observer::Observer<bool> enableStopTLSV2();
 
   static folly::observer::Observer<PSPUpgradePolicy> pspUpgradePolicy();
-
-  static folly::observer::Observer<bool> enableReceivingDelegatedCreds();
 
 #if FOLLY_HAS_COROUTINES
   /**

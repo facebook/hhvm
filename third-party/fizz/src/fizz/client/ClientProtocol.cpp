@@ -587,6 +587,7 @@ static Status getClientHello(
 
   if (!supportedAlpns.empty()) {
     ProtocolNameList alpn;
+    alpn.protocol_name_list.reserve(supportedAlpns.size());
     for (const auto& protoName : supportedAlpns) {
       ProtocolName proto;
       proto.name = folly::IOBuf::copyBuffer(protoName);

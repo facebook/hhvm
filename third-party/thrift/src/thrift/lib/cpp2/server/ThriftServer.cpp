@@ -90,6 +90,12 @@ FOLLY_GFLAGS_DEFINE_bool(
     disable_legacy_header_routing_handler,
     false,
     "Do not register a TransportRoutingHandler that can handle the legacy transports: header, framed, and unframed (default: false)");
+FOLLY_GFLAGS_DEFINE_bool(
+    thrift_enable_shared_event_handlers,
+    false,
+    "Build a pre-merged [global + module] event handler vector at server startup "
+    "and share it (zero-copy) across all processors on all connections, "
+    "eliminating per-connection handler vector copies (default: false)");
 
 THRIFT_FLAG_DEFINE_bool(server_enable_stoptls, false);
 THRIFT_FLAG_DEFINE_bool(server_enable_stoptlsv2, false);
@@ -2695,6 +2701,31 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
     serviceInterceptorsCollector.addModule(info);
 
     result.modules.emplace_back(std::move(info));
+  }
+  // Build the pre-merged shared handler vector: [global handlers] + [module
+  // handlers]. This complete set is shared (zero-copy) across all processors
+  // on all connections, eliminating per-connection vector copies entirely.
+  if (FLAGS_thrift_enable_shared_event_handlers) {
+    std::vector<std::shared_ptr<TProcessorEventHandler>> allHandlers;
+    {
+      std::shared_lock lock{TProcessorBase::getRWMutex()};
+      const auto& globalHandlers = TProcessorBase::getHandlers();
+      allHandlers.reserve(
+          globalHandlers.size() + result.coalescedLegacyEventHandlers.size());
+      for (const auto& handler : globalHandlers) {
+        allHandlers.emplace_back(
+            std::shared_ptr<TProcessorEventHandler>(handler));
+      }
+    }
+    allHandlers.insert(
+        allHandlers.end(),
+        result.coalescedLegacyEventHandlers.begin(),
+        result.coalescedLegacyEventHandlers.end());
+    if (!allHandlers.empty()) {
+      result.coalescedLegacyEventHandlersShared = std::make_shared<
+          const std::vector<std::shared_ptr<TProcessorEventHandler>>>(
+          std::move(allHandlers));
+    }
   }
   result.coalescedServiceInterceptors =
       std::move(serviceInterceptorsCollector).coalesce();

@@ -25,15 +25,33 @@
 #include <folly/memory/not_null.h>
 
 #include <thrift/lib/cpp/ContextStack.h>
+#include <thrift/lib/cpp2/PluggableFunction.h>
 
 namespace apache::thrift {
+
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_DECLARE(void, onEventHandlerShared);
+THRIFT_PLUGGABLE_FUNC_DECLARE(void, onEventHandlerCowTriggered);
+} // namespace detail
 
 class EventHandlerBase {
  public:
   virtual void addEventHandler(
       const std::shared_ptr<TProcessorEventHandler>& handler);
 
-  void clearEventHandlers() { handlers_.reset(); }
+  /**
+   * Share an existing handler list without copying. The vector is treated as
+   * immutable while shared. If addEventHandler() is called later, a private
+   * copy is made first (copy-on-write).
+   */
+  virtual void setSharedEventHandlers(
+      std::shared_ptr<
+          const std::vector<std::shared_ptr<TProcessorEventHandler>>> handlers);
+
+  void clearEventHandlers() {
+    handlers_.reset();
+    handlersShared_ = false;
+  }
 
   folly::Range<std::shared_ptr<TProcessorEventHandler>*> getEventHandlers()
       const;
@@ -46,6 +64,7 @@ class EventHandlerBase {
 
   std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>
       handlers_;
+  bool handlersShared_ = false;
 };
 
 /**

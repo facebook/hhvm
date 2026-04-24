@@ -2238,6 +2238,12 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
      */
     std::vector<std::shared_ptr<TProcessorEventHandler>>
         coalescedLegacyEventHandlers;
+    /**
+     * Shared pointer to the pre-merged [global + module] event handlers for
+     * zero-copy sharing across all processors on all connections.
+     */
+    std::shared_ptr<const std::vector<std::shared_ptr<TProcessorEventHandler>>>
+        coalescedLegacyEventHandlersShared;
     std::vector<std::shared_ptr<server::TServerEventHandler>>
         coalescedLegacyServerEventHandlers;
     std::vector<std::shared_ptr<ServiceInterceptorBase>>
@@ -3042,6 +3048,14 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     CHECK(processedServiceDescription_)
         << "Server must be set up before calling this method";
     return processedServiceDescription_->modules.coalescedLegacyEventHandlers;
+  }
+
+  std::shared_ptr<const std::vector<std::shared_ptr<TProcessorEventHandler>>>
+  getSharedLegacyEventHandlers() const override {
+    CHECK(processedServiceDescription_)
+        << "Server must be set up before calling this method";
+    return processedServiceDescription_->modules
+        .coalescedLegacyEventHandlersShared;
   }
 
   /**

@@ -244,6 +244,12 @@ class ServerConfigs {
     return kEmpty;
   }
 
+  virtual std::shared_ptr<
+      const std::vector<std::shared_ptr<TProcessorEventHandler>>>
+  getSharedLegacyEventHandlers() const {
+    return nullptr;
+  }
+
   virtual const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
   getServiceInterceptors() const {
     static const folly::Indestructible<

@@ -178,3 +178,177 @@ TEST_F(TProcessorEventHandlerTest, RuntimeInitClientHandlers) {
   EXPECT_EQ(TClientTester::countOf(h1), 1);
   EXPECT_EQ(TClientTester::countOf(h2), 1);
 }
+
+class EventHandlerSharingTest : public testing::Test {
+ protected:
+  // Concrete subclass to test EventHandlerBase methods.
+  class TestProcessor : public TProcessorBase {
+   public:
+    TestProcessor() : TProcessorBase(IgnoreGlobalEventHandlers{}) {}
+    using EventHandlerBase::getEventHandlers;
+    using EventHandlerBase::getEventHandlersSharedPtr;
+  };
+
+  static std::shared_ptr<
+      const std::vector<std::shared_ptr<TProcessorEventHandler>>>
+  makeSharedHandlers(
+      std::initializer_list<std::shared_ptr<TProcessorEventHandler>> handlers) {
+    return std::make_shared<
+        const std::vector<std::shared_ptr<TProcessorEventHandler>>>(handlers);
+  }
+};
+
+TEST_F(EventHandlerSharingTest, SetSharedEventHandlers) {
+  auto h1 = std::make_shared<EventHandler>();
+  auto h2 = std::make_shared<EventHandler>();
+  auto shared = makeSharedHandlers({h1, h2});
+
+  TestProcessor proc;
+  proc.setSharedEventHandlers(shared);
+
+  EXPECT_EQ(proc.getEventHandlers().size(), 2);
+  EXPECT_EQ(proc.getEventHandlers()[0], h1);
+  EXPECT_EQ(proc.getEventHandlers()[1], h2);
+}
+
+TEST_F(EventHandlerSharingTest, SharedHandlersShareSamePointer) {
+  auto h1 = std::make_shared<EventHandler>();
+  auto shared = makeSharedHandlers({h1});
+
+  TestProcessor proc1;
+  TestProcessor proc2;
+  proc1.setSharedEventHandlers(shared);
+  proc2.setSharedEventHandlers(shared);
+
+  // Both processors should share the same underlying vector.
+  EXPECT_EQ(
+      proc1.getEventHandlersSharedPtr().get(),
+      proc2.getEventHandlersSharedPtr().get());
+}
+
+TEST_F(EventHandlerSharingTest, CopyOnWriteAfterSharing) {
+  auto h1 = std::make_shared<EventHandler>();
+  auto h2 = std::make_shared<EventHandler>();
+  auto shared = makeSharedHandlers({h1});
+
+  TestProcessor proc1;
+  TestProcessor proc2;
+  proc1.setSharedEventHandlers(shared);
+  proc2.setSharedEventHandlers(shared);
+
+  // Adding a handler to proc1 should trigger COW — proc1 gets a private copy.
+  proc1.addEventHandler(h2);
+
+  // proc1 now has 2 handlers in its own copy.
+  EXPECT_EQ(proc1.getEventHandlers().size(), 2);
+  EXPECT_EQ(proc1.getEventHandlers()[0], h1);
+  EXPECT_EQ(proc1.getEventHandlers()[1], h2);
+
+  // proc2 still has the original shared vector with 1 handler.
+  EXPECT_EQ(proc2.getEventHandlers().size(), 1);
+  EXPECT_EQ(proc2.getEventHandlers()[0], h1);
+
+  // The underlying pointers should now be different.
+  EXPECT_NE(
+      proc1.getEventHandlersSharedPtr().get(),
+      proc2.getEventHandlersSharedPtr().get());
+}
+
+TEST_F(EventHandlerSharingTest, CopyOnWritePreservesOriginal) {
+  auto h1 = std::make_shared<EventHandler>();
+  auto h2 = std::make_shared<EventHandler>();
+  auto shared = makeSharedHandlers({h1});
+
+  // Keep a reference to the original shared vector.
+  auto originalPtr = shared.get();
+
+  TestProcessor proc;
+  proc.setSharedEventHandlers(shared);
+  proc.addEventHandler(h2);
+
+  // The original shared vector should be unchanged.
+  EXPECT_EQ(shared->size(), 1);
+  EXPECT_EQ((*shared)[0], h1);
+  EXPECT_EQ(shared.get(), originalPtr);
+}
+
+TEST_F(EventHandlerSharingTest, ClearEventHandlersResetsSharing) {
+  auto h1 = std::make_shared<EventHandler>();
+  auto shared = makeSharedHandlers({h1});
+
+  TestProcessor proc;
+  proc.setSharedEventHandlers(shared);
+  EXPECT_EQ(proc.getEventHandlers().size(), 1);
+
+  proc.clearEventHandlers();
+  EXPECT_EQ(proc.getEventHandlers().size(), 0);
+
+  // After clear, adding a handler should create a fresh vector, not COW.
+  auto h2 = std::make_shared<EventHandler>();
+  proc.addEventHandler(h2);
+  EXPECT_EQ(proc.getEventHandlers().size(), 1);
+  EXPECT_EQ(proc.getEventHandlers()[0], h2);
+}
+
+TEST_F(EventHandlerSharingTest, SetSharedReplacesExistingHandlers) {
+  auto h1 = std::make_shared<EventHandler>();
+  auto h2 = std::make_shared<EventHandler>();
+
+  TestProcessor proc;
+  proc.addEventHandler(h1);
+  EXPECT_EQ(proc.getEventHandlers().size(), 1);
+
+  // setSharedEventHandlers replaces the entire handler list.
+  auto shared = makeSharedHandlers({h2});
+  proc.setSharedEventHandlers(shared);
+  EXPECT_EQ(proc.getEventHandlers().size(), 1);
+  EXPECT_EQ(proc.getEventHandlers()[0], h2);
+  // The underlying vector is the shared one (h1 is gone).
+  EXPECT_EQ(proc.getEventHandlersSharedPtr().get(), shared.get());
+}
+
+TEST_F(EventHandlerSharingTest, SetSharedOnEmptyProcessorShares) {
+  auto h1 = std::make_shared<EventHandler>();
+  auto shared = makeSharedHandlers({h1});
+
+  TestProcessor proc;
+  proc.setSharedEventHandlers(shared);
+
+  // Empty processor should share the vector directly.
+  EXPECT_EQ(proc.getEventHandlers().size(), 1);
+  EXPECT_EQ(proc.getEventHandlersSharedPtr().get(), shared.get());
+}
+
+TEST_F(EventHandlerSharingTest, PreMergedVectorSharedAcrossProcessors) {
+  // Simulates the real flow: processors start with global handlers from
+  // constructor, then setSharedEventHandlers replaces with a pre-merged
+  // [globals + server-scoped] vector. All processors should share the same
+  // underlying vector.
+  auto globalH = std::make_shared<EventHandler>();
+  auto serverH = std::make_shared<EventHandler>();
+  auto preMerged = makeSharedHandlers({globalH, serverH});
+
+  // Create multiple processors with pre-existing handlers (simulating
+  // constructor-installed global handlers).
+  TestProcessor proc1;
+  TestProcessor proc2;
+  TestProcessor proc3;
+  proc1.addEventHandler(globalH);
+  proc2.addEventHandler(globalH);
+  proc3.addEventHandler(globalH);
+
+  // setSharedEventHandlers replaces — all processors share the same vector.
+  proc1.setSharedEventHandlers(preMerged);
+  proc2.setSharedEventHandlers(preMerged);
+  proc3.setSharedEventHandlers(preMerged);
+
+  auto* underlying = preMerged.get();
+  EXPECT_EQ(proc1.getEventHandlersSharedPtr().get(), underlying);
+  EXPECT_EQ(proc2.getEventHandlersSharedPtr().get(), underlying);
+  EXPECT_EQ(proc3.getEventHandlersSharedPtr().get(), underlying);
+
+  // All have the complete pre-merged set.
+  EXPECT_EQ(proc1.getEventHandlers().size(), 2);
+  EXPECT_EQ(proc2.getEventHandlers().size(), 2);
+  EXPECT_EQ(proc3.getEventHandlers().size(), 2);
+}

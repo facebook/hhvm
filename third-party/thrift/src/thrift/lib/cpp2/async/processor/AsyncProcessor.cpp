@@ -37,6 +37,12 @@ void AsyncProcessor::executeRequest(
 
 void AsyncProcessor::coalesceWithServerScopedLegacyEventHandlers(
     const apache::thrift::server::ServerConfigs& server) {
+  auto sharedHandlers = server.getSharedLegacyEventHandlers();
+  if (sharedHandlers && !sharedHandlers->empty()) {
+    setSharedEventHandlers(std::move(sharedHandlers));
+    return;
+  }
+  // Fallback for servers that don't provide shared handlers.
   const auto& serverScopedEventHandlers = server.getLegacyEventHandlers();
   if (!serverScopedEventHandlers.empty()) {
     std::shared_lock lock{getRWMutex()};

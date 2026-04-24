@@ -25,13 +25,47 @@ using std::vector;
 
 namespace apache::thrift {
 
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_REGISTER(void, onEventHandlerShared) {}
+THRIFT_PLUGGABLE_FUNC_REGISTER(void, onEventHandlerCowTriggered) {}
+} // namespace detail
+
 void EventHandlerBase::addEventHandler(
     const std::shared_ptr<TProcessorEventHandler>& handler) {
   if (!handlers_) {
     handlers_ = std::make_shared<
         std::vector<std::shared_ptr<TProcessorEventHandler>>>();
+  } else if (handlersShared_) {
+    // Copy-on-write: make a private mutable copy before mutating.
+    // This should not happen in steady state — shared handler vectors are
+    // built once at server startup and should not be mutated per-connection.
+    // If this fires, a code change is adding handlers after coalesce,
+    // silently undoing the sharing optimization.
+    FB_LOG_EVERY_MS(WARNING, 30000)
+        << "Copy-on-write triggered on shared event handler vector. "
+        << "A handler is being added after setSharedEventHandlers() — "
+        << "this creates a per-connection copy and defeats sharing. "
+        << "handlers_.size()=" << handlers_->size();
+    handlers_ =
+        std::make_shared<std::vector<std::shared_ptr<TProcessorEventHandler>>>(
+            *handlers_);
+    handlersShared_ = false;
+    detail::onEventHandlerCowTriggered();
   }
   handlers_->push_back(handler);
+}
+
+void EventHandlerBase::setSharedEventHandlers(
+    std::shared_ptr<const std::vector<std::shared_ptr<TProcessorEventHandler>>>
+        handlers) {
+  // Replace any existing handlers with the shared vector. The caller is
+  // responsible for providing the complete handler set. The vector is treated
+  // as immutable while shared; addEventHandler() will COW if needed later.
+  handlers_ = std::const_pointer_cast<
+      std::vector<std::shared_ptr<TProcessorEventHandler>>>(
+      std::move(handlers));
+  handlersShared_ = true;
+  detail::onEventHandlerShared();
 }
 
 folly::Range<std::shared_ptr<TProcessorEventHandler>*>

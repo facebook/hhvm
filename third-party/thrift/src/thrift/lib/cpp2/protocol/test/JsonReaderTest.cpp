@@ -44,10 +44,10 @@ TEST_F(Json5ReaderTest, Bool) {
 
 TEST_F(Json5ReaderTest, StringWithEscapes) {
   auto r = reader(R"("line1\n\"line2\"\
-line3")");
+same_line")");
   EXPECT_EQ(
       std::get<std::string>(r.readPrimitive(Double)),
-      "line1\n\"line2\"\nline3");
+      "line1\n\"line2\"same_line");
 }
 
 TEST_F(Json5ReaderTest, EmptyContainers) {
@@ -428,10 +428,12 @@ TEST_F(Json5ReaderTest, CommentsInStringsAndContainers) {
     // a comment
     "/* comment inside string */" /* inline */: /* before value */ [
       // first element
-      "/* multi-line \
-      string1 */",
-      "// multi-line \
-      string2"
+      "/* multi-line \n string1 */",
+      "// multi-line \n string2",
+      "/* single-line \
+          string3 */",
+      "// single-line \
+          string4"
     ]
     // trailing
   })");
@@ -440,10 +442,16 @@ TEST_F(Json5ReaderTest, CommentsInStringsAndContainers) {
   r.readListBegin();
   EXPECT_EQ(
       std::get<std::string>(r.readPrimitive(Double)),
-      "/* multi-line \n      string1 */");
+      "/* multi-line \n string1 */");
   EXPECT_EQ(
       std::get<std::string>(r.readPrimitive(Double)),
-      "// multi-line \n      string2");
+      "// multi-line \n string2");
+  EXPECT_EQ(
+      std::get<std::string>(r.readPrimitive(Double)),
+      "/* single-line           string3 */");
+  EXPECT_EQ(
+      std::get<std::string>(r.readPrimitive(Double)),
+      "// single-line           string4");
   r.readListEnd();
   r.readObjectEnd();
 }

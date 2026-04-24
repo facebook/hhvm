@@ -204,10 +204,12 @@ std::string Json5Reader::parseString(char quote) {
       case '\\':
       case '\n':
       case '\r':
-        result.push_back(esc);
+        if (esc != '\n' && esc != '\r') {
+          result.push_back(esc);
+        }
         if (esc == '\r' && peekChar() == '\n') {
           // handles "\r\n" (CRLF)
-          result.push_back(readChar());
+          cursor().skip(1);
         }
         break;
       case 'b':

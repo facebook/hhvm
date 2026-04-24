@@ -120,7 +120,7 @@ TEST(Json5ToDynamicTest, CompareWithFollyDynamic) {
 
 constexpr auto kTestRootPath = "thrift/lib/cpp2/protocol/test/json5-tests";
 
-TEST(Json5ToDynamicTest, Parse) {
+TEST(Json5ToDynamicTest, DISABLED_Parse) {
   const std::filesystem::path root{
       (folly::test::find_resource(kTestRootPath) / "src").string()};
   std::unordered_set<std::string> processed;

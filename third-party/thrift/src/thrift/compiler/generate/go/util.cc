@@ -147,10 +147,8 @@ void codegen_data::register_visitors(
 
   // Populate disambiguated field setter names
   visitor.add_structured_definition_visitor(
-      [this](const const_visitor_context& ctx, const t_structured& node) {
-        if (&ctx.program() == current_program_) {
-          add_struct_go_field_setter_names(node);
-        }
+      [this](const const_visitor_context&, const t_structured& node) {
+        add_struct_go_field_setter_names(node);
       });
 
   // Populate metadata types

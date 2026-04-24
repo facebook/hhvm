@@ -28,6 +28,7 @@
 #include <gflags/gflags.h>
 #include <gtest/gtest.h>
 
+#include <folly/Portability.h>
 #include <folly/Try.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -55,6 +56,9 @@ using namespace apache::thrift::transport;
 using namespace apache::thrift::concurrency;
 using namespace std::literals;
 using folly::test::find_resource;
+
+static constexpr int kSanitizerTimeoutMultiplier =
+    folly::kIsSanitizeThread ? 10 : 1;
 
 class RocketClientTest : public testing::Test {
  public:
@@ -118,7 +122,7 @@ class RocketClientTest : public testing::Test {
 TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
   // Increase this if test is flaky.
   size_t payloadSize = /*40MB*/ 40 * 1024 * 1024;
-  metadata_.keepAliveTimeoutMs() = 25;
+  metadata_.keepAliveTimeoutMs() = 25 * kSanitizerTimeoutMultiplier;
 
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);
@@ -170,7 +174,7 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeRequestTest) {
 // process the request, however KeepAlive will be blocked during the response,
 // and close the connection.
 TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
-  metadata_.keepAliveTimeoutMs() = 100;
+  metadata_.keepAliveTimeoutMs() = 100 * kSanitizerTimeoutMultiplier;
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);
 
@@ -238,7 +242,7 @@ TEST_F(RocketClientTest, KeepAliveWatcherLargeResponseTest) {
 TEST_F(RocketClientTest, KeepAliveEvbDetachAttachTest) {
   // Increase this if test is flaky.
   size_t payloadSize = /*40MB*/ 40 * 1024 * 1024;
-  metadata_.keepAliveTimeoutMs() = 25;
+  metadata_.keepAliveTimeoutMs() = 25 * kSanitizerTimeoutMultiplier;
 
   auto testInterface = std::make_shared<TestInterface>();
   ScopedServerInterfaceThread runner(testInterface);

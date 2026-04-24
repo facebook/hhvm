@@ -61,7 +61,7 @@ public final class RpcClientBinding implements Disposable {
 
   /**
    * Closes this binding. For OWNED bindings, also disposes the underlying manager (shutting down
-   * transports). For BORROWED bindings, only marks this handle as closed - the shared manager and
+   * transports). For BORROWED bindings, only marks this handle as closed — the shared manager and
    * its transports remain alive for other borrowers.
    */
   @Override

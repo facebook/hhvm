@@ -25,6 +25,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface RpcClient extends Disposable {
+  /**
+   * Observes terminal client shutdown.
+   *
+   * <p>Implementations are expected to replay terminal completion or error to late subscribers.
+   * Manager-backed client runtimes subscribe to this signal to invalidate cached transports, and
+   * that subscription can race transport shutdown.
+   */
   Mono<Void> onClose();
 
   default <T> Mono<ClientResponsePayload<T>> singleRequestSingleResponse(

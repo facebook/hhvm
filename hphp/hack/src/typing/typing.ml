@@ -4687,7 +4687,9 @@ end = struct
       in
       let env = might_throw ~join_pos:p env in
       let should_check_package_boundary =
-        if Env.package_allow_as_expression_violations env then
+        if is_nullable then
+          `No
+        else if Env.package_allow_as_expression_violations env then
           `LintOnly
         else
           `Yes Typing_error.Primary.Package.As_expression

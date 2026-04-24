@@ -19,12 +19,12 @@ class WithReifiable {
 
 class TestClass {
   public function bar(mixed $x): void {
-    // as expression — should trigger Lint[5655]
-    $x as MyInternType;
-    // ?as expression — should trigger Lint[5655]
-    $x ?as MyInternType;
     // is expression — should NOT trigger Lint[5655]
     $x is MyInternType;
+    // ?as expression — should NOT trigger Lint[5655]
+    $x ?as MyInternType;
+    // as expression — should trigger Lint[5655]
+    $x as MyInternType;
   }
 }
 

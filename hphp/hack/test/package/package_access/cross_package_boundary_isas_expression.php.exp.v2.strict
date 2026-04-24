@@ -3,34 +3,6 @@ error: Typing[4472] Cannot access asserted type C defined in package pkg2 which 
 -> C belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
 
-cross_package_boundary_isas_expression.php--bar.php:7:12
-    5 |   public function test1(mixed $m): void {
-    6 |     $m is C;
-[1] 7 |     $m ?as C;
-    8 |     $m as C;
-    9 |   }
-
-cross_package_boundary_isas_expression.php--foo.php:5:7
-    1 | <?hh
-    2 | // package pkg2
-[3] 3 | <<file: __PackageOverride('pkg2')>>
-    4 | 
-[2] 5 | class C {}
-    6 | class G<T> {}
-    7 | enum E : int {
-
-PACKAGES.toml:3:11
-    1 | [packages]
-    2 | 
-[4] 3 | [packages.pkg1]
-    4 | include_paths=["//"]
-    5 | 
-
-error: Typing[4472] Cannot access asserted type C defined in package pkg2 which may not be available [1]
--> C is defined in cross_package_boundary_isas_expression.php--foo.php [2]
--> C belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
-
 cross_package_boundary_isas_expression.php--bar.php:8:11
     6 |     $m is C;
     7 |     $m ?as C;
@@ -59,35 +31,6 @@ error: Typing[4472] Cannot access asserted type G defined in package pkg2 which 
 -> G belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
 
-cross_package_boundary_isas_expression.php--bar.php:12:12
-    10 |   public function test2(mixed $m): void {
-    11 |     $m is G<_>;
-[1] 12 |     $m ?as G<_>;
-    13 |     $m as G<_>;
-    14 |   }
-
-cross_package_boundary_isas_expression.php--foo.php:6:7
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | 
-     5 | class C {}
-[2]  6 | class G<T> {}
-     7 | enum E : int {
-     8 |   X = 1;
-
-PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
-
-error: Typing[4472] Cannot access asserted type G defined in package pkg2 which may not be available [1]
--> G is defined in cross_package_boundary_isas_expression.php--foo.php [2]
--> G belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
-
 cross_package_boundary_isas_expression.php--bar.php:13:11
     11 |     $m is G<_>;
     12 |     $m ?as G<_>;
@@ -104,34 +47,6 @@ cross_package_boundary_isas_expression.php--foo.php:6:7
 [2]  6 | class G<T> {}
      7 | enum E : int {
      8 |   X = 1;
-
-PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
-
-error: Typing[4472] Cannot access asserted type C defined in package pkg2 which may not be available [1]
--> C is defined in cross_package_boundary_isas_expression.php--foo.php [2]
--> C belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
-
-cross_package_boundary_isas_expression.php--bar.php:17:13
-    15 |   public function test3(mixed $m): void {
-    16 |     $m is (C, int);
-[1] 17 |     $m ?as (C, int);
-    18 |     $m as (C, int);
-    19 |   }
-
-cross_package_boundary_isas_expression.php--foo.php:5:7
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | 
-[2]  5 | class C {}
-     6 | class G<T> {}
-     7 | enum E : int {
 
 PACKAGES.toml:3:11
      1 | [packages]
@@ -173,36 +88,6 @@ error: Typing[4472] Cannot access asserted type T defined in package pkg2 which 
 -> T belongs to package pkg2 by this package override [3]
 -> package pkg1 is available because the current file belongs to it by this package definition [4]
 
-cross_package_boundary_isas_expression.php--bar.php:22:12
-    20 |   public function test4(mixed $m): void {
-    21 |     $m is T;
-[1] 22 |     $m ?as T;
-    23 |     $m as T;
-    24 |   }
-
-cross_package_boundary_isas_expression.php--foo.php:10:6
-     1 | <?hh
-     2 | // package pkg2
-[3]  3 | <<file: __PackageOverride('pkg2')>>
-     4 | 
-     5 | class C {}
-       :
-     8 |   X = 1;
-     9 | }
-[2] 10 | type T = int;
-
-PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[4]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
-
-error: Typing[4472] Cannot access asserted type T defined in package pkg2 which may not be available [1]
--> T is defined in cross_package_boundary_isas_expression.php--foo.php [2]
--> T belongs to package pkg2 by this package override [3]
--> package pkg1 is available because the current file belongs to it by this package definition [4]
-
 cross_package_boundary_isas_expression.php--bar.php:23:11
     21 |     $m is T;
     22 |     $m ?as T;
@@ -228,4 +113,4 @@ PACKAGES.toml:3:11
      4 | include_paths=["//"]
      5 | 
 
-8 errors found
+4 errors found

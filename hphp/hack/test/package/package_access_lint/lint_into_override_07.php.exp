@@ -10,50 +10,20 @@ lint_into_override_07.php--bar.php:6:24
 
 warning: Lint[5808] This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through as. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. [1]
 
-lint_into_override_07.php--bar.php:12:5
-    10 |   public function bar(mixed $x): void {
-    11 |     // as expression — should trigger Lint[5655]
-[1] 12 |     $x as MyInternType;
-    13 |     // ?as expression — should trigger Lint[5655]
-    14 |     $x ?as MyInternType;
-
-
-warning: Lint[5655] This is a cross-boundary edge. Although the callee is already in the caller package pkg1 via __PackageOverride('pkg1'), cross-boundary edges contribute to the bloating of pkg1 and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
-
-lint_into_override_07.php--bar.php:12:11
-    10 |   public function bar(mixed $x): void {
-    11 |     // as expression — should trigger Lint[5655]
-[1] 12 |     $x as MyInternType;
-    13 |     // ?as expression — should trigger Lint[5655]
-    14 |     $x ?as MyInternType;
-
-
-warning: Lint[5628] This as assertion will always succeed and hence is redundant. The expression on the left has a type MyInternType which is a subtype of MyInternType. [1]
-
-lint_into_override_07.php--bar.php:14:5
-    12 |     $x as MyInternType;
-    13 |     // ?as expression — should trigger Lint[5655]
-[1] 14 |     $x ?as MyInternType;
-    15 |     // is expression — should NOT trigger Lint[5655]
-    16 |     $x is MyInternType;
-
-
-warning: Lint[5655] This is a cross-boundary edge. Although the callee is already in the caller package pkg1 via __PackageOverride('pkg1'), cross-boundary edges contribute to the bloating of pkg1 and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
-
-lint_into_override_07.php--bar.php:14:12
-    12 |     $x as MyInternType;
-    13 |     // ?as expression — should trigger Lint[5655]
-[1] 14 |     $x ?as MyInternType;
-    15 |     // is expression — should NOT trigger Lint[5655]
-    16 |     $x is MyInternType;
-
-
-warning: Lint[5609] This is check is always true. The expression on the left has type MyInternType which is a subtype of MyInternType. [1]
-
 lint_into_override_07.php--bar.php:16:5
     14 |     $x ?as MyInternType;
-    15 |     // is expression — should NOT trigger Lint[5655]
-[1] 16 |     $x is MyInternType;
+    15 |     // as expression — should trigger Lint[5655]
+[1] 16 |     $x as MyInternType;
+    17 |   }
+    18 | }
+
+
+warning: Lint[5655] This is a cross-boundary edge. Although the callee is already in the caller package pkg1 via __PackageOverride('pkg1'), cross-boundary edges contribute to the bloating of pkg1 and SHOULD BE REMOVED. Either move the callee into the caller's package via hg mv, use __RequirePackage (if the whole function should only be invoked from pkg2) or gate this reference via a package check (if this portion of the function is meant to be gated by an environment check). [1]
+
+lint_into_override_07.php--bar.php:16:11
+    14 |     $x ?as MyInternType;
+    15 |     // as expression — should trigger Lint[5655]
+[1] 16 |     $x as MyInternType;
     17 |   }
     18 | }
 

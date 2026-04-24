@@ -750,33 +750,37 @@ void make_func_req_resp_structs(
     }
     req_resp_structs.push_back(sink_struct);
 
-    auto final_response_struct_name =
-        go::munge_ident("respFinal" + prefix + funcGoName, false);
-    auto final_response_struct =
-        new t_struct(func->program(), final_response_struct_name);
-    final_response_struct->set_generated();
-    auto final_response_field = std::make_unique<t_field>(
-        func->sink()->final_response_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
-    final_response_field->set_qualifier(t_field_qualifier::optional);
-    final_response_struct->append_field(std::move(final_response_field));
-    if (func->sink()->final_response_exceptions() != nullptr) {
-      for (const auto& xs :
-           func->sink()->final_response_exceptions()->fields()) {
-        // TODO(T244354071): Second unique_ptr over the same underlying object.
-        // See explanation on go::codegen_data::req_resp_structs
-        auto xc_ptr = std::unique_ptr<t_field>(const_cast<t_field*>(&xs));
+    // Bidi functions have no final_response_type on the sink
+    // (the response comes as a stream instead).
+    if (!func->is_bidirectional_stream()) {
+      auto final_response_struct_name =
+          go::munge_ident("respFinal" + prefix + funcGoName, false);
+      auto final_response_struct =
+          new t_struct(func->program(), final_response_struct_name);
+      final_response_struct->set_generated();
+      auto final_response_field = std::make_unique<t_field>(
+          func->sink()->final_response_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
+      final_response_field->set_qualifier(t_field_qualifier::optional);
+      final_response_struct->append_field(std::move(final_response_field));
+      if (func->sink()->final_response_exceptions() != nullptr) {
+        for (const auto& xs :
+             func->sink()->final_response_exceptions()->fields()) {
+          // TODO(T244354071): Second unique_ptr over the same underlying
+          // object. See explanation on go::codegen_data::req_resp_structs
+          auto xc_ptr = std::unique_ptr<t_field>(const_cast<t_field*>(&xs));
 
-        // TODO(T244354071): This is a mutation of `xs` (which is const, from a
-        // const t_function), since the mutable unique_ptr xc_ptr is pointing to
-        // the same object. It mutates the original field to force it to be
-        // optional, and the code-generator relies on this behaviour. The
-        // template/code-gen should be refactored to generate optional fields
-        // for exceptions rather than mutating the AST.
-        xc_ptr->set_qualifier(t_field_qualifier::optional);
-        final_response_struct->append_field(std::move(xc_ptr));
+          // TODO(T244354071): This is a mutation of `xs` (which is const, from
+          // a const t_function), since the mutable unique_ptr xc_ptr is
+          // pointing to the same object. It mutates the original field to force
+          // it to be optional, and the code-generator relies on this behaviour.
+          // The template/code-gen should be refactored to generate optional
+          // fields for exceptions rather than mutating the AST.
+          xc_ptr->set_qualifier(t_field_qualifier::optional);
+          final_response_struct->append_field(std::move(xc_ptr));
+        }
       }
+      req_resp_structs.push_back(final_response_struct);
     }
-    req_resp_structs.push_back(final_response_struct);
   }
 }
 

@@ -276,6 +276,9 @@ class PipelineBuilder {
         [](void* h, TypeErasedBox&& msg) noexcept -> Result {
       return static_cast<HeadHandler*>(h)->onWrite(std::move(msg));
     };
+    pipeline->headOnReadReadyFn_ = [](void* h) noexcept {
+      static_cast<HeadHandler*>(h)->onReadReady();
+    };
   }
 
   void wireReadTerminal(PipelineImpl* pipeline, TailHandler* handler) {
@@ -288,6 +291,9 @@ class PipelineBuilder {
         [](void* h, folly::exception_wrapper&& e) noexcept {
           static_cast<TailHandler*>(h)->onException(std::move(e));
         };
+    pipeline->tailOnWriteReadyFn_ = [](void* t) noexcept {
+      static_cast<TailHandler*>(t)->onWriteReady();
+    };
   }
 
   void wireEndpointLifecycle(PipelineImpl* pipeline) {

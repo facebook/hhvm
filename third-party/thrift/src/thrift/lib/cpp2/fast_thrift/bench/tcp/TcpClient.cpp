@@ -139,6 +139,7 @@ class TcpClient::AppAdapter {
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
+  void onWriteReady() noexcept {}
 
  private:
   folly::EventBase* evb_;

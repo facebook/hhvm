@@ -173,6 +173,7 @@ class ThriftClientTransportAdapter {
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
+  void onReadReady() noexcept {}
 
  private:
   channel_pipeline::PipelineImpl* pipeline_{nullptr};

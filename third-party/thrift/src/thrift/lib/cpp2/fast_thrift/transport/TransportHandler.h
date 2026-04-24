@@ -212,6 +212,12 @@ class TransportHandler : public folly::DelayedDestruction,
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
 
+  /**
+   * Called by the pipeline when downstream backpressure releases and reads
+   * can resume. Resumes reads on the underlying socket.
+   */
+  void onReadReady() noexcept { resumeRead(); }
+
   // --- TailEndpointHandler interface (OutboundTransportHandler refines) ---
 
   /**

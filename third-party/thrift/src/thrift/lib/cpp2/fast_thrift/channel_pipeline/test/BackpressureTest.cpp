@@ -169,6 +169,17 @@ TEST_F(BackpressureTest, HandlerReceivesWriteReadyAfterBackpressure) {
   EXPECT_EQ(middle_ptr_->writeReadyCount(), 1);
 }
 
+TEST_F(BackpressureTest, OnWriteReadyCallsTailOnWriteReady) {
+  createHandlers();
+  auto pipeline = buildPipeline();
+
+  EXPECT_EQ(transport_.onWriteReadyCount(), 0);
+
+  pipeline->onWriteReady();
+
+  EXPECT_EQ(transport_.onWriteReadyCount(), 1);
+}
+
 TEST_F(BackpressureTest, OnlyRegisteredHandlerReceivesWriteReady) {
   createHandlers();
 
@@ -391,6 +402,7 @@ TEST_F(BackpressureTest, ClosedPipelineIgnoresWriteReady) {
   pipeline->onWriteReady();
 
   EXPECT_EQ(middle_ptr_->writeReadyCount(), 0);
+  EXPECT_EQ(transport_.onWriteReadyCount(), 0);
 }
 
 TEST_F(BackpressureTest, NoBackpressureDoesNotMarkPending) {
@@ -637,6 +649,17 @@ TEST_F(BackpressureTest, HandlerReceivesReadReadyAfterAwait) {
   EXPECT_EQ(middle_ptr_->readReadyCount(), 1);
 }
 
+TEST_F(BackpressureTest, OnReadReadyCallsHeadOnReadReady) {
+  createHandlers();
+  auto pipeline = buildPipeline();
+
+  EXPECT_EQ(app_.onReadReadyCount(), 0);
+
+  pipeline->onReadReady();
+
+  EXPECT_EQ(app_.onReadReadyCount(), 1);
+}
+
 TEST_F(BackpressureTest, MultipleHandlersCanRegisterForReadReady) {
   createHandlers();
 
@@ -736,6 +759,7 @@ TEST_F(BackpressureTest, ClosedPipelineIgnoresReadReady) {
   pipeline->onReadReady();
 
   EXPECT_EQ(middle_ptr_->readReadyCount(), 0);
+  EXPECT_EQ(app_.onReadReadyCount(), 0);
 }
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline::test

@@ -1118,6 +1118,7 @@ TEST(EndpointLifecycleTest, HeadHookCalledOnActivateDeactivate) {
     void handlerRemoved() noexcept {}
     void onPipelineActive() noexcept { ++(*activated_); }
     void onPipelineInactive() noexcept { ++(*deactivated_); }
+    void onReadReady() noexcept {}
   };
 
   LifecycleHead head(&activated, &deactivated);

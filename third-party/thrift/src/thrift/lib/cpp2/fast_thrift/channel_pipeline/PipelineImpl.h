@@ -318,9 +318,11 @@ class PipelineImpl : public folly::DelayedDestruction {
   void (*headOnPipelineActiveFn_)(void*) noexcept {nullptr};
   void (*headOnPipelineInactiveFn_)(void*) noexcept {nullptr};
   void (*headHandlerRemovedFn_)(void*) noexcept {nullptr};
+  void (*headOnReadReadyFn_)(void*) noexcept {nullptr};
   void (*tailOnPipelineActiveFn_)(void*) noexcept {nullptr};
   void (*tailOnPipelineInactiveFn_)(void*) noexcept {nullptr};
   void (*tailHandlerRemovedFn_)(void*) noexcept {nullptr};
+  void (*tailOnWriteReadyFn_)(void*) noexcept {nullptr};
 
   // Cached entry-point dispatch for fireRead/fireWrite hot paths.
   // Points directly to the read-entry/write-entry handler's function pointer,

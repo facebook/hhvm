@@ -348,6 +348,10 @@ PIPELINE_HOT_PATH void PipelineImpl::onWriteReady() noexcept {
     DCHECK_LT(i, contexts_.size());
     handlers_[i].onWriteReadyFn(handlers_[i].handlerPtr, contexts_[i]);
   }
+
+  // Notify the tail endpoint that writes can resume.
+  DCHECK(tailOnWriteReadyFn_);
+  tailOnWriteReadyFn_(tail_);
 }
 
 void PipelineImpl::onReadReady() noexcept {
@@ -368,6 +372,10 @@ void PipelineImpl::onReadReady() noexcept {
     DCHECK_LT(i, contexts_.size());
     handlers_[i].onReadReadyFn(handlers_[i].handlerPtr, contexts_[i]);
   }
+
+  // Notify the head endpoint that reads can resume.
+  DCHECK(headOnReadReadyFn_);
+  headOnReadReadyFn_(head_);
 }
 
 } // namespace apache::thrift::fast_thrift::channel_pipeline

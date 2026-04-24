@@ -127,6 +127,7 @@ class BenchEndpointHandler {
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
+  void onWriteReady() noexcept {}
 };
 
 class BenchAllocator {

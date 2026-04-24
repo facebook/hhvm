@@ -52,6 +52,7 @@ class TestServerAppAdapter {
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
+  void onWriteReady() noexcept {}
 
   // --- TailEndpointHandler Interface ---
 

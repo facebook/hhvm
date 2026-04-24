@@ -42,31 +42,39 @@ concept EndpointHandlerLifecycle = requires(H h) {
 /**
  * HeadEndpointHandler concept — endpoint at the head of the pipeline.
  *
- * The head receives data via onWrite().
+ * The head receives data via onWrite() and read-ready notifications via
+ * onReadReady().
  *
  * Flow: fireWrite() propagates through handlers and arrives at head's
- * onWrite().
+ * onWrite(). When downstream backpressure releases, the pipeline propagates
+ * onReadReady() to the head so the transport can resume reads.
  *
  * Required methods:
  * - onWrite(TypeErasedBox&&): Handle data exiting the pipeline
+ * - onReadReady(): Handle read-ready notification (resume transport reads)
  * - Plus all EndpointHandlerLifecycle methods
  */
 template <typename H>
 concept HeadEndpointHandler =
     EndpointHandlerLifecycle<H> && requires(H h, TypeErasedBox&& msg) {
       { h.onWrite(std::move(msg)) } noexcept -> std::same_as<Result>;
+      { h.onReadReady() } noexcept -> std::same_as<void>;
     };
 
 /**
  * TailEndpointHandler concept — endpoint at the tail of the pipeline.
  *
- * The tail receives data via onRead() and exceptions via onException().
+ * The tail receives data via onRead(), exceptions via onException(), and
+ * write-ready notifications via onWriteReady().
  *
  * Flow: fireRead() propagates through handlers and arrives at tail's onRead().
+ * When upstream backpressure releases, the pipeline propagates onWriteReady()
+ * to the tail so the app can produce more outbound messages.
  *
  * Required methods:
  * - onRead(TypeErasedBox&&): Handle data entering the pipeline
  * - onException(exception_wrapper&&): Handle pipeline exceptions
+ * - onWriteReady(): Handle write-ready notification (resume producing writes)
  * - Plus all EndpointHandlerLifecycle methods
  */
 template <typename T>
@@ -74,6 +82,7 @@ concept TailEndpointHandler = EndpointHandlerLifecycle<T> &&
     requires(T t, TypeErasedBox&& msg, folly::exception_wrapper&& ex) {
       { t.onRead(std::move(msg)) } noexcept -> std::same_as<Result>;
       { t.onException(std::move(ex)) } noexcept -> std::same_as<void>;
+      { t.onWriteReady() } noexcept -> std::same_as<void>;
     };
 
 /**

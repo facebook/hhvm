@@ -116,6 +116,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
+  void onWriteReady() noexcept {}
 
   // === TailEndpointHandler interface ===
 

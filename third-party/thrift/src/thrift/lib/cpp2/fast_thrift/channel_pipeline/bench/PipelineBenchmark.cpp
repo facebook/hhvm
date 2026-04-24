@@ -277,6 +277,7 @@ struct BenchTransportHandler {
 
   void pauseRead() noexcept {}
   void resumeRead() noexcept {}
+  void onReadReady() noexcept {}
 
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}
@@ -300,6 +301,7 @@ struct BenchAppHandler {
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
+  void onWriteReady() noexcept {}
 };
 
 // Simple buffer allocator

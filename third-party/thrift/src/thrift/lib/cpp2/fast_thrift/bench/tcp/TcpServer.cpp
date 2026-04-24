@@ -51,6 +51,7 @@ class TcpServer::ServerAppAdapter {
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
+  void onWriteReady() noexcept {}
 
   /**
    * Called by the pipeline when a message reaches the application layer.

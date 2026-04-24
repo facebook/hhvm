@@ -82,6 +82,7 @@ class ThriftServerChannel {
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
+  void onWriteReady() noexcept {}
 
   // === TailEndpointHandler interface ===
   // Called by the pipeline when a request message arrives

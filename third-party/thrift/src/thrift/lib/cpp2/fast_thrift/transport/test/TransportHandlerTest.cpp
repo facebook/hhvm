@@ -218,6 +218,49 @@ TEST_F(TransportHandlerTest, ResumeReadIdempotent) {
   EXPECT_FALSE(handler->readPaused_);
 }
 
+TEST_F(TransportHandlerTest, OnReadReadyResumesRead) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+
+  EXPECT_TRUE(handler->readPaused_);
+
+  EXPECT_CALL(*mockSocket_, setReadCB(handler.get())).Times(1);
+  handler->onReadReady();
+
+  EXPECT_FALSE(handler->readPaused_);
+
+  EXPECT_CALL(*mockSocket_, setReadCB(nullptr)).Times(1);
+  EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
+}
+
+TEST_F(
+    TransportHandlerTest,
+    ReadBackpressureThenPipelineReadReadyResumesSocketRead) {
+  auto [handler, pipeline] = createHandlerAndPipeline();
+
+  appHandler_.setOnReadCallback(
+      [&](TypeErasedBox&&) { return Result::Backpressure; });
+
+  {
+    InSequence seq;
+    EXPECT_CALL(*mockSocket_, setReadCB(handler.get())).Times(1);
+    EXPECT_CALL(*mockSocket_, setReadCB(nullptr)).Times(1);
+    EXPECT_CALL(*mockSocket_, setReadCB(handler.get())).Times(1);
+  }
+
+  handler->resumeRead();
+  EXPECT_FALSE(handler->readPaused_);
+
+  auto data = buildTestData(32);
+  handler->readBufferAvailable(std::move(data));
+  EXPECT_TRUE(handler->readPaused_);
+
+  pipeline->onReadReady();
+  EXPECT_FALSE(handler->readPaused_);
+
+  EXPECT_CALL(*mockSocket_, setReadCB(nullptr)).Times(1);
+  EXPECT_CALL(*mockSocket_, closeNow()).Times(1);
+}
+
 // Test: onConnect resumes reading and fires connect event to pipeline
 TEST_F(TransportHandlerTest, OnConnectResumesReadAndFiresConnect) {
   auto [handler, pipeline, mockHandler] =

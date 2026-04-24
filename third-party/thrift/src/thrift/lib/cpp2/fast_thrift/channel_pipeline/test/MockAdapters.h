@@ -65,6 +65,9 @@ class MockHeadHandler {
   void onPipelineActive() noexcept { pipelineActiveCount_++; }
   void onPipelineInactive() noexcept { pipelineInactiveCount_++; }
 
+  // HeadEndpointHandler ready notification
+  void onReadReady() noexcept { onReadReadyCount_++; }
+
   // Configuration
   void setWriteResult(Result result) { writeResult_ = result; }
   void setWriteCallback(WriteCallback cb) { writeCallback_ = std::move(cb); }
@@ -86,6 +89,7 @@ class MockHeadHandler {
   int handlerRemovedCount() const { return handlerRemovedCount_; }
   int pipelineActiveCount() const { return pipelineActiveCount_; }
   int pipelineInactiveCount() const { return pipelineInactiveCount_; }
+  int onReadReadyCount() const { return onReadReadyCount_; }
 
   void reset() {
     writeCount_ = 0;
@@ -99,6 +103,7 @@ class MockHeadHandler {
     handlerRemovedCount_ = 0;
     pipelineActiveCount_ = 0;
     pipelineInactiveCount_ = 0;
+    onReadReadyCount_ = 0;
   }
 
  private:
@@ -113,6 +118,7 @@ class MockHeadHandler {
   int handlerRemovedCount_{0};
   int pipelineActiveCount_{0};
   int pipelineInactiveCount_{0};
+  int onReadReadyCount_{0};
 };
 
 /**
@@ -149,6 +155,9 @@ class MockTailHandler {
   void onPipelineActive() noexcept { pipelineActiveCount_++; }
   void onPipelineInactive() noexcept { pipelineInactiveCount_++; }
 
+  // TailEndpointHandler ready notification
+  void onWriteReady() noexcept { onWriteReadyCount_++; }
+
   // Configuration
   void setReadResult(Result result) { readResult_ = result; }
 
@@ -166,6 +175,7 @@ class MockTailHandler {
   int handlerRemovedCount() const { return handlerRemovedCount_; }
   int pipelineActiveCount() const { return pipelineActiveCount_; }
   int pipelineInactiveCount() const { return pipelineInactiveCount_; }
+  int onWriteReadyCount() const { return onWriteReadyCount_; }
 
   void reset() {
     readCount_ = 0;
@@ -177,6 +187,7 @@ class MockTailHandler {
     handlerRemovedCount_ = 0;
     pipelineActiveCount_ = 0;
     pipelineInactiveCount_ = 0;
+    onWriteReadyCount_ = 0;
   }
 
  private:
@@ -189,6 +200,7 @@ class MockTailHandler {
   int handlerRemovedCount_{0};
   int pipelineActiveCount_{0};
   int pipelineInactiveCount_{0};
+  int onWriteReadyCount_{0};
 };
 
 /**

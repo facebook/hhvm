@@ -101,6 +101,7 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
+  void onWriteReady() noexcept {}
 
   void writeResponse(ThriftServerResponseMessage&& response) noexcept {
     if (FOLLY_UNLIKELY(!pipeline_)) {

@@ -54,6 +54,8 @@ enum class ErrorCode : uint32_t {
   CANCELED = 0x00000203,
   // Invalid request (stream ID MUST be > 0)
   INVALID = 0x00000204,
+  // Reserved for extension use
+  RESERVED_EXT = 0xFFFFFFFF,
 };
 
 inline folly::StringPiece toString(ErrorCode ec) {
@@ -80,6 +82,8 @@ inline folly::StringPiece toString(ErrorCode ec) {
       return "CANCELED";
     case ErrorCode::INVALID:
       return "INVALID";
+    case ErrorCode::RESERVED_EXT:
+      return "RESERVED_EXT";
   }
   return "UNKNOWN";
 }

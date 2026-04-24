@@ -35,8 +35,7 @@ using apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox;
 namespace {
 
 /**
- * MockErrorContext for testing RocketClientErrorFrameHandler.
- *
+ * Mock context for testing RocketClientErrorFrameHandler.
  * Captures frames fired via fireRead() and exceptions via fireException().
  */
 class MockErrorContext {
@@ -270,17 +269,14 @@ TEST_F(RocketClientErrorFrameHandlerTest, ConnectionCloseFiresException) {
                                     CONNECTION_CLOSE))));
 
   EXPECT_EQ(result, Result::Error);
-  EXPECT_EQ(ctx_.readMessages().size(), 0); // Frame consumed
+  EXPECT_EQ(ctx_.readMessages().size(), 0);
   EXPECT_TRUE(ctx_.hasException());
-
   auto* ex =
       ctx_.exception()
           .get_exception<apache::thrift::transport::TTransportException>();
   ASSERT_NE(ex, nullptr);
   EXPECT_EQ(
       ex->getType(), apache::thrift::transport::TTransportException::NOT_OPEN);
-  EXPECT_NE(
-      std::string(ex->what()).find("closed by server"), std::string::npos);
 }
 
 TEST_F(RocketClientErrorFrameHandlerTest, ConnectionErrorFiresException) {
@@ -326,7 +322,7 @@ TEST_F(RocketClientErrorFrameHandlerTest, InvalidSetupFiresException) {
   ASSERT_NE(ex, nullptr);
   EXPECT_EQ(
       ex->getType(),
-      apache::thrift::transport::TTransportException::INVALID_STATE);
+      apache::thrift::transport::TTransportException::INVALID_SETUP);
   EXPECT_NE(std::string(ex->what()).find("invalid setup"), std::string::npos);
 }
 
@@ -600,6 +596,9 @@ TEST_F(RocketClientErrorFrameHandlerTest, ToStringReturnsCorrectValues) {
   EXPECT_EQ(
       toString(apache::thrift::fast_thrift::frame::ErrorCode::INVALID),
       "INVALID");
+  EXPECT_EQ(
+      toString(apache::thrift::fast_thrift::frame::ErrorCode::RESERVED_EXT),
+      "RESERVED_EXT");
 }
 
 TEST_F(
@@ -615,7 +614,7 @@ TEST_F(
 
 TEST_F(
     RocketClientErrorFrameHandlerTest, ErrorFrameWithMessageExtractsMessage) {
-  std::string_view errorMsg = "Server is shutting down";
+  std::string_view errorMsg = "Connection failed";
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -623,7 +622,7 @@ TEST_F(
           0, // connection-level
           0,
           static_cast<uint32_t>(
-              apache::thrift::fast_thrift::frame::ErrorCode::CONNECTION_CLOSE),
+              apache::thrift::fast_thrift::frame::ErrorCode::CONNECTION_ERROR),
           errorMsg)));
 
   EXPECT_EQ(result, Result::Error);
@@ -634,11 +633,11 @@ TEST_F(
           .get_exception<apache::thrift::transport::TTransportException>();
   ASSERT_NE(ex, nullptr);
   EXPECT_EQ(
-      ex->getType(), apache::thrift::transport::TTransportException::NOT_OPEN);
+      ex->getType(),
+      apache::thrift::transport::TTransportException::END_OF_FILE);
   // Verify the error message from the frame is included in the exception
   EXPECT_NE(
-      std::string(ex->what()).find("Server is shutting down"),
-      std::string::npos);
+      std::string(ex->what()).find("Connection failed"), std::string::npos);
 }
 
 TEST_F(RocketClientErrorFrameHandlerTest, ErrorFrameWithEmptyMessageWorks) {

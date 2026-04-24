@@ -20,7 +20,7 @@
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
-#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
@@ -135,7 +135,6 @@ class RocketClientErrorFrameHandler {
     folly::exception_wrapper ew;
     switch (errorCode) {
       case ErrorCode::CONNECTION_CLOSE:
-        // Server is gracefully closing the connection
         ew = folly::make_exception_wrapper<TTransportException>(
             TTransportException::NOT_OPEN,
             makeExceptionMessage("Connection closed by server"));
@@ -143,7 +142,7 @@ class RocketClientErrorFrameHandler {
 
       case ErrorCode::INVALID_SETUP:
         ew = folly::make_exception_wrapper<TTransportException>(
-            TTransportException::INVALID_STATE,
+            TTransportException::INVALID_SETUP,
             makeExceptionMessage("Connection setup failed: invalid setup"));
         break;
 
@@ -179,6 +178,7 @@ class RocketClientErrorFrameHandler {
       case ErrorCode::REJECTED:
       case ErrorCode::CANCELED:
       case ErrorCode::INVALID:
+      case ErrorCode::RESERVED_EXT:
       default:
         ew = folly::make_exception_wrapper<TTransportException>(
             TTransportException::END_OF_FILE,

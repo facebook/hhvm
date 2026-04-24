@@ -277,5 +277,230 @@ TEST(ErrorDecodingTest, RejectedWithUnknownErrorCodeReturnsUnknown) {
   });
 }
 
+// =============================================================================
+// INTERACTION_LOADSHEDDED Tests
+// =============================================================================
+
+TEST(ErrorDecodingTest, RejectedWithInteractionLoadsheddedReturnsLoadshedding) {
+  apache::thrift::ResponseRpcError responseError;
+  responseError.code() =
+      apache::thrift::ResponseRpcErrorCode::INTERACTION_LOADSHEDDED;
+  responseError.what_utf8() = "Interaction loadshedded";
+
+  auto frame =
+      makeErrorFrame(1, kRejected, serializeResponseRpcError(responseError));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto error = decodeErrorFrame(parsed);
+
+  EXPECT_TRUE(
+      error.is_compatible_with<apache::thrift::TApplicationException>());
+  error.handle([](const apache::thrift::TApplicationException& ex) {
+    EXPECT_EQ(
+        ex.getType(), apache::thrift::TApplicationException::LOADSHEDDING);
+    EXPECT_EQ(std::string(ex.what()), "Interaction loadshedded");
+  });
+}
+
+TEST(
+    ErrorDecodingTest,
+    RejectedWithInteractionLoadsheddedOverloadReturnsLoadshedding) {
+  apache::thrift::ResponseRpcError responseError;
+  responseError.code() =
+      apache::thrift::ResponseRpcErrorCode::INTERACTION_LOADSHEDDED_OVERLOAD;
+  responseError.what_utf8() = "Interaction loadshedded overload";
+
+  auto frame =
+      makeErrorFrame(1, kRejected, serializeResponseRpcError(responseError));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto error = decodeErrorFrame(parsed);
+
+  EXPECT_TRUE(
+      error.is_compatible_with<apache::thrift::TApplicationException>());
+  error.handle([](const apache::thrift::TApplicationException& ex) {
+    EXPECT_EQ(
+        ex.getType(), apache::thrift::TApplicationException::LOADSHEDDING);
+    EXPECT_EQ(std::string(ex.what()), "Interaction loadshedded overload");
+  });
+}
+
+TEST(
+    ErrorDecodingTest,
+    RejectedWithInteractionLoadsheddedAppOverloadReturnsLoadshedding) {
+  apache::thrift::ResponseRpcError responseError;
+  responseError.code() = apache::thrift::ResponseRpcErrorCode::
+      INTERACTION_LOADSHEDDED_APP_OVERLOAD;
+  responseError.what_utf8() = "Interaction loadshedded app overload";
+
+  auto frame =
+      makeErrorFrame(1, kRejected, serializeResponseRpcError(responseError));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto error = decodeErrorFrame(parsed);
+
+  EXPECT_TRUE(
+      error.is_compatible_with<apache::thrift::TApplicationException>());
+  error.handle([](const apache::thrift::TApplicationException& ex) {
+    EXPECT_EQ(
+        ex.getType(), apache::thrift::TApplicationException::LOADSHEDDING);
+    EXPECT_EQ(std::string(ex.what()), "Interaction loadshedded app overload");
+  });
+}
+
+TEST(
+    ErrorDecodingTest,
+    RejectedWithInteractionLoadsheddedQueueTimeoutReturnsLoadshedding) {
+  apache::thrift::ResponseRpcError responseError;
+  responseError.code() = apache::thrift::ResponseRpcErrorCode::
+      INTERACTION_LOADSHEDDED_QUEUE_TIMEOUT;
+  responseError.what_utf8() = "Interaction loadshedded queue timeout";
+
+  auto frame =
+      makeErrorFrame(1, kRejected, serializeResponseRpcError(responseError));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto error = decodeErrorFrame(parsed);
+
+  EXPECT_TRUE(
+      error.is_compatible_with<apache::thrift::TApplicationException>());
+  error.handle([](const apache::thrift::TApplicationException& ex) {
+    EXPECT_EQ(
+        ex.getType(), apache::thrift::TApplicationException::LOADSHEDDING);
+    EXPECT_EQ(std::string(ex.what()), "Interaction loadshedded queue timeout");
+  });
+}
+
+// =============================================================================
+// decodeErrorFrameAsResponse Tests
+// =============================================================================
+
+TEST(ErrorDecodingTest, AsResponseReturnsExCodeAndExType) {
+  apache::thrift::ResponseRpcError responseError;
+  responseError.code() = apache::thrift::ResponseRpcErrorCode::OVERLOAD;
+  responseError.what_utf8() = "Server overloaded";
+
+  auto frame =
+      makeErrorFrame(1, kRejected, serializeResponseRpcError(responseError));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto result = decodeErrorFrameAsResponse(parsed);
+
+  ASSERT_TRUE(result.hasValue());
+  EXPECT_EQ(
+      result->exType, apache::thrift::TApplicationException::LOADSHEDDING);
+  ASSERT_TRUE(result->exCode.has_value());
+  EXPECT_EQ(*result->exCode, "1"); // kOverloadedErrorCode
+  EXPECT_EQ(result->what, "Server overloaded");
+  EXPECT_FALSE(result->load.has_value());
+}
+
+TEST(ErrorDecodingTest, AsResponseReturnsLoadMetadata) {
+  apache::thrift::ResponseRpcError responseError;
+  responseError.code() = apache::thrift::ResponseRpcErrorCode::TASK_EXPIRED;
+  responseError.what_utf8() = "Task expired";
+  responseError.load() = 42;
+
+  auto frame =
+      makeErrorFrame(1, kRejected, serializeResponseRpcError(responseError));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto result = decodeErrorFrameAsResponse(parsed);
+
+  ASSERT_TRUE(result.hasValue());
+  EXPECT_EQ(result->exType, apache::thrift::TApplicationException::TIMEOUT);
+  ASSERT_TRUE(result->exCode.has_value());
+  EXPECT_EQ(*result->exCode, "2"); // kTaskExpiredErrorCode
+  EXPECT_EQ(result->what, "Task expired");
+  ASSERT_TRUE(result->load.has_value());
+  EXPECT_EQ(*result->load, 42);
+}
+
+TEST(
+    ErrorDecodingTest, AsResponseWithInteractionLoadsheddedReturnsCorrectCode) {
+  apache::thrift::ResponseRpcError responseError;
+  responseError.code() =
+      apache::thrift::ResponseRpcErrorCode::INTERACTION_LOADSHEDDED;
+  responseError.what_utf8() = "Interaction loadshedded";
+
+  auto frame =
+      makeErrorFrame(1, kRejected, serializeResponseRpcError(responseError));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto result = decodeErrorFrameAsResponse(parsed);
+
+  ASSERT_TRUE(result.hasValue());
+  EXPECT_EQ(
+      result->exType, apache::thrift::TApplicationException::LOADSHEDDING);
+  ASSERT_TRUE(result->exCode.has_value());
+  EXPECT_EQ(*result->exCode, "34"); // kInteractionLoadsheddedErrorCode
+}
+
+TEST(ErrorDecodingTest, AsResponseWithCanceledErrorCode) {
+  apache::thrift::ResponseRpcError responseError;
+  responseError.code() = apache::thrift::ResponseRpcErrorCode::INTERRUPTION;
+  responseError.what_utf8() = "Cancelled";
+
+  auto frame =
+      makeErrorFrame(1, kCanceled, serializeResponseRpcError(responseError));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto result = decodeErrorFrameAsResponse(parsed);
+
+  ASSERT_TRUE(result.hasValue());
+  EXPECT_EQ(
+      result->exType, apache::thrift::TApplicationException::INTERRUPTION);
+  EXPECT_FALSE(result->exCode.has_value());
+  EXPECT_EQ(result->what, "Cancelled");
+}
+
+TEST(ErrorDecodingTest, AsResponseWithApplicationErrorReturnsError) {
+  auto frame = makeErrorFrame(
+      1, kApplicationError, folly::IOBuf::copyBuffer("app error"));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto result = decodeErrorFrameAsResponse(parsed);
+
+  EXPECT_TRUE(result.hasError());
+  EXPECT_TRUE(result.error()
+                  .is_compatible_with<apache::thrift::TApplicationException>());
+}
+
+TEST(ErrorDecodingTest, AsResponseWithEmptyPayloadReturnsDefaultExCode) {
+  auto frame = makeErrorFrame(1, kRejected, nullptr);
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto result = decodeErrorFrameAsResponse(parsed);
+
+  ASSERT_TRUE(result.hasValue());
+  EXPECT_EQ(result->exType, apache::thrift::TApplicationException::UNKNOWN);
+  ASSERT_TRUE(result->exCode.has_value());
+  EXPECT_EQ(*result->exCode, "0"); // kUnknownErrorCode
+  EXPECT_EQ(result->what, "");
+}
+
+TEST(ErrorDecodingTest, AsResponseWithMalformedPayloadReturnsError) {
+  auto frame = makeErrorFrame(
+      1, kRejected, folly::IOBuf::copyBuffer("not valid thrift"));
+  auto parsed =
+      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+
+  auto result = decodeErrorFrameAsResponse(parsed);
+
+  EXPECT_TRUE(result.hasError());
+  EXPECT_TRUE(result.error()
+                  .is_compatible_with<apache::thrift::TApplicationException>());
+}
+
 } // namespace
 } // namespace apache::thrift::fast_thrift::thrift

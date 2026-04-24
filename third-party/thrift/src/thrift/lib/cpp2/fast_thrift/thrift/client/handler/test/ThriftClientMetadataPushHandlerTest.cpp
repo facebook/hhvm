@@ -19,6 +19,7 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
@@ -354,7 +355,9 @@ TEST_F(ThriftClientMetadataPushHandlerTest, StreamHeadersPushLogsAndIgnores) {
 // Drain Complete Handling Tests
 // =============================================================================
 
-TEST_F(ThriftClientMetadataPushHandlerTest, DrainCompleteFiresException) {
+TEST_F(ThriftClientMetadataPushHandlerTest, DrainCompleteGenericIsSilent) {
+  // Generic drain (no code) is informational — server tearing down via
+  // CONNECTION_CLOSE drives the actual close. No exception expected.
   apache::thrift::ServerPushMetadata serverMeta;
   serverMeta.set_drainCompletePush();
 
@@ -366,9 +369,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, DrainCompleteFiresException) {
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(ctx_.readMessages().size(), 0);
-  ASSERT_EQ(ctx_.exceptions().size(), 1);
-  EXPECT_TRUE(ctx_.exceptions()[0]
-                  .is_compatible_with<apache::thrift::TApplicationException>());
+  EXPECT_EQ(ctx_.exceptions().size(), 0);
 }
 
 TEST_F(
@@ -390,6 +391,8 @@ TEST_F(
   auto* appEx = ctx_.exceptions()[0]
                     .get_exception<apache::thrift::TApplicationException>();
   ASSERT_NE(appEx, nullptr);
+  EXPECT_EQ(
+      appEx->getType(), apache::thrift::TApplicationException::LOADSHEDDING);
   EXPECT_NE(std::string(appEx->what()).find("memory limit"), std::string::npos);
 }
 
@@ -409,8 +412,13 @@ TEST_F(ThriftClientMetadataPushHandlerTest, MalformedMetadataReturnsError) {
 
   EXPECT_EQ(result, Result::Error);
   ASSERT_EQ(ctx_.exceptions().size(), 1);
-  EXPECT_TRUE(ctx_.exceptions()[0]
-                  .is_compatible_with<apache::thrift::TApplicationException>());
+  auto* tex =
+      ctx_.exceptions()[0]
+          .get_exception<apache::thrift::transport::TTransportException>();
+  ASSERT_NE(tex, nullptr);
+  EXPECT_EQ(
+      tex->getType(),
+      apache::thrift::transport::TTransportException::CORRUPTED_DATA);
 }
 
 TEST_F(ThriftClientMetadataPushHandlerTest, EmptyMetadataReturnsError) {
@@ -424,6 +432,13 @@ TEST_F(ThriftClientMetadataPushHandlerTest, EmptyMetadataReturnsError) {
   // Empty metadata will fail to deserialize
   EXPECT_EQ(result, Result::Error);
   ASSERT_EQ(ctx_.exceptions().size(), 1);
+  auto* tex =
+      ctx_.exceptions()[0]
+          .get_exception<apache::thrift::transport::TTransportException>();
+  ASSERT_NE(tex, nullptr);
+  EXPECT_EQ(
+      tex->getType(),
+      apache::thrift::transport::TTransportException::CORRUPTED_DATA);
 }
 
 // =============================================================================

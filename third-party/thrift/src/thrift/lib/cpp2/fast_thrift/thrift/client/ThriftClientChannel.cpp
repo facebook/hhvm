@@ -19,13 +19,16 @@
 #include <fmt/core.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ResponseMetadata.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/ThriftClientResponseProcessor.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/ErrorDecoding.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -53,12 +56,25 @@ void ThriftClientChannel::sendRequestInternal(
     std::shared_ptr<apache::thrift::transport::THeader> /*header*/,
     apache::thrift::RequestClientCallback::Ptr callbackPtr,
     std::unique_ptr<folly::IOBuf> /*frameworkMetadata*/) {
-  // Check pipeline is set
-  if (!pipeline_) {
+  evb_->dcheckIsInEventBaseThread();
+
+  if (FOLLY_UNLIKELY(!pipeline_)) {
     callbackPtr.release()->onResponseError(
         folly::make_exception_wrapper<apache::thrift::TApplicationException>(
             apache::thrift::TApplicationException::INTERNAL_ERROR,
             "Pipeline not set"));
+    return;
+  }
+
+  if (FOLLY_UNLIKELY(state_ != State::Open)) {
+    callbackPtr.release()->onResponseError(
+        folly::make_exception_wrapper<
+            apache::thrift::transport::TTransportException>(
+            apache::thrift::transport::TTransportException::NOT_OPEN,
+            lastError_ ? fmt::format(
+                             "Connection not open: {}",
+                             lastError_.what().toStdString())
+                       : "Connection not open"));
     return;
   }
 
@@ -171,10 +187,9 @@ void ThriftClientChannel::handleRequestResponse(
     return;
   }
 
-  if (auto result = processRequestResponseFrame(frame);
-      FOLLY_UNLIKELY(result.hasError())) {
-    callback.release()->onResponseError(std::move(result.error()));
-  } else {
+  if (FOLLY_LIKELY(
+          frame.type() ==
+          apache::thrift::fast_thrift::frame::FrameType::PAYLOAD)) {
     auto tHeader = std::make_unique<apache::thrift::transport::THeader>();
     tHeader->setClientType(THRIFT_ROCKET_CLIENT_TYPE);
     apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
@@ -183,10 +198,51 @@ void ThriftClientChannel::handleRequestResponse(
         apache::thrift::ClientReceiveState(
             protocolId_,
             apache::thrift::MessageType::T_REPLY,
-            apache::thrift::SerializedResponse(std::move(result.value())),
+            apache::thrift::SerializedResponse(std::move(frame).extractData()),
             std::move(tHeader),
             nullptr,
             apache::thrift::RpcTransportStats{}));
+  } else if (
+      frame.type() == apache::thrift::fast_thrift::frame::FrameType::ERROR) {
+    auto decoded = decodeErrorFrameAsResponse(frame);
+    if (decoded.hasValue()) {
+      auto& resp = decoded.value();
+      apache::thrift::TApplicationException tae(resp.exType, resp.what);
+      auto serialized = apache::thrift::serializeErrorStruct(
+          static_cast<apache::thrift::protocol::PROTOCOL_TYPES>(protocolId_),
+          tae);
+
+      apache::thrift::ResponseRpcMetadata errorMetadata;
+      if (resp.exCode) {
+        errorMetadata.otherMetadata().emplace();
+        (*errorMetadata.otherMetadata())[std::string(
+            apache::thrift::detail::kHeaderEx)] = *resp.exCode;
+      }
+      if (resp.load) {
+        errorMetadata.load() = *resp.load;
+      }
+
+      auto tHeader = std::make_unique<apache::thrift::transport::THeader>();
+      tHeader->setClientType(THRIFT_ROCKET_CLIENT_TYPE);
+      apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
+          errorMetadata, *tHeader);
+      callback.release()->onResponse(
+          apache::thrift::ClientReceiveState(
+              protocolId_,
+              apache::thrift::MessageType::T_EXCEPTION,
+              apache::thrift::SerializedResponse(std::move(serialized)),
+              std::move(tHeader),
+              nullptr,
+              apache::thrift::RpcTransportStats{}));
+    } else {
+      callback.release()->onResponseError(std::move(decoded.error()));
+    }
+  } else {
+    callback.release()->onResponseError(
+        folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+            apache::thrift::TApplicationException::PROTOCOL_ERROR,
+            fmt::format(
+                "Unexpected frame type: {}", static_cast<int>(frame.type()))));
   }
 }
 
@@ -197,36 +253,43 @@ ThriftClientChannel::onRead(
   auto response = msg.take<ThriftResponseMessage>();
   auto it = pendingCallbacks_.find(response.requestHandle);
   if (it == pendingCallbacks_.end()) {
-    return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
+    XLOG(WARN) << "Response for unknown handle: " << response.requestHandle;
+    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
   auto callback = std::move(it->second);
   pendingCallbacks_.erase(it);
 
-  // NOLINTNEXTLINE(clang-diagnostic-switch-enum)
-  switch (response.requestFrameType) {
-    case apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE:
-      handleRequestResponse(std::move(response), std::move(callback));
-      break;
-    default:
-      XLOG(ERR) << "Unsupported frame type: "
-                << static_cast<int>(response.requestFrameType);
-      callback.release()->onResponseError(
-          folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-              apache::thrift::TApplicationException::INTERNAL_ERROR,
-              fmt::format(
-                  "Unsupported frame type: {}",
-                  static_cast<int>(response.requestFrameType))));
-      if (pipeline_) {
-        pipeline_->close();
-      }
-      break;
-  }
+  DCHECK(
+      response.requestFrameType ==
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE)
+      << "Unsupported frame type: "
+      << static_cast<int>(response.requestFrameType);
 
+  handleRequestResponse(std::move(response), std::move(callback));
   return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
 
 void ThriftClientChannel::onException(folly::exception_wrapper&& e) noexcept {
   XLOG(ERR) << "Pipeline exception: " << e.what();
+  if (state_ == State::Closed) {
+    return;
+  }
+
+  if (state_ == State::Open) {
+    lastError_ = e;
+  }
+
+  auto* tex = e.get_exception<apache::thrift::transport::TTransportException>();
+  if (tex &&
+      tex->getType() ==
+          apache::thrift::transport::TTransportException::NOT_OPEN) {
+    // CONNECTION_CLOSE: graceful drain — reject new writes, let inflight
+    // responses complete
+    state_ = State::Closing;
+    return;
+  }
+
+  state_ = State::Closed;
 
   // Fail all pending callbacks with the exception
   pendingCallbacks_.forEach(

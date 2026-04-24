@@ -206,6 +206,101 @@ the complete Thrift client pipeline works correctly with actual request-response
 These tests exercise the full handler chain from `ThriftClientChannel` through the
 metadata and request-response handlers to the Rocket layer.
 
+## Error Handling Architecture
+
+The client layer handles errors at multiple levels. Two client adapters exist:
+- **ThriftClientChannel** — legacy `RequestChannel` compatibility shim (uses THeader)
+- **ThriftClientAppAdapter** — native fast_thrift path (no THeader)
+
+Both share ERROR-frame decoding logic via `decodeErrorFrameAsResponse()` from
+`client/util/ErrorDecoding.h`. Pre-send validation and connection-state
+management are handled per-adapter (see below).
+
+### Error Flow
+
+```
+Server
+  │
+  ├─ Application exception ──► PAYLOAD frame (exceptionMetadata in metadata)
+  │                              │
+  │                              ▼
+  │                           Thrift adapter onRead()
+  │                              │
+  │                              ▼
+  │                           Delivered as T_EXCEPTION response
+  │
+  ├─ Rejection (overload,   ──► ERROR frame (streamId > 0, REJECTED code)
+  │   queue timeout, etc.)       │
+  │                              ▼
+  │                           decodeErrorFrameAsResponse()
+  │                              │
+  │                              ├─ Extracts: exType, exCode (kHeaderEx), load, what
+  │                              ▼
+  │                           ThriftClientChannel: serialized TApplicationException
+  │                              via ClientReceiveState(T_EXCEPTION)
+  │                           ThriftClientAppAdapter: exception_wrapper
+  │
+  ├─ CONNECTION_CLOSE        ──► ERROR frame (streamId 0)
+  │   (graceful shutdown)        │
+  │                              ▼
+  │                           RocketClientErrorFrameHandler
+  │                              │
+  │                              ▼
+  │                           TTransportException(NOT_OPEN)
+  │                              │
+  │                              ▼
+  │                           Thrift adapter onException()
+  │                              └─ state_ = State::Closing
+  │                              └─ New writes rejected, inflight completes
+  │                              └─ TCP EOF later → state_ = State::Closed, fail remaining
+  │
+  └─ CONNECTION_ERROR,       ──► ERROR frame (streamId 0)
+     INVALID_SETUP, etc.         │
+                                 ▼
+                              RocketClientErrorFrameHandler
+                                 │
+                                 ▼
+                              TTransportException (type varies)
+                                 │
+                                 ▼
+                              Thrift adapter onException()
+                                 └─ state_ = State::Closed
+                                 └─ Fails all pending requests
+                                 └─ Closes pipeline
+```
+
+### Connection State
+
+Each adapter tracks its own connection lifecycle via a private
+`enum class State { Open, Closing, Closed }`:
+
+| State | Behavior |
+|-------|----------|
+| `Open` | Normal operation |
+| `Closing` | Reject new writes, allow inflight responses to complete |
+| `Closed` | Reject everything, pipeline closed |
+
+State is managed in the Thrift adapters (not the pipeline), since `PipelineImpl` is
+a transport-level abstraction that shouldn't track application-level connection lifecycle.
+
+### Pre-Send Validation
+
+Each adapter validates inline before writing:
+- `pipeline_ == nullptr` → `TApplicationException(INTERNAL_ERROR, "Pipeline not set")`
+- `state_ != State::Open` → `TTransportException(NOT_OPEN, "Connection not open")`
+
+### ERROR Frame Decoding
+
+Stream-level ERROR frames (server rejections) are decoded by `decodeErrorFrameAsResponse()`
+which extracts rich metadata from the `ResponseRpcError` payload:
+
+| Field | Source | Usage |
+|-------|--------|-------|
+| `exType` | `ResponseRpcError::exceptionWhat` | `TApplicationException` type (e.g., `LOADSHEDDING`) |
+| `exCode` | `ResponseRpcError::code` | Maps to `kHeaderEx` for `ClientReceiveState` |
+| `load` | `ResponseRpcError::load` | Server load feedback |
+| `what` | `ResponseRpcError::what` | Human-readable error message |
+
 ## Dependencies
 
 - **channel_pipeline** - Pipeline framework (`PipelineImpl`, `TypeErasedBox`, `Result`)

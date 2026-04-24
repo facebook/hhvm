@@ -19,6 +19,7 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
@@ -122,10 +123,11 @@ class ThriftClientMetadataPushHandler {
     } catch (const std::exception& ex) {
       XLOG(ERR) << "Failed to deserialize METADATA_PUSH frame: " << ex.what();
       ctx.fireException(
-          folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-              apache::thrift::TApplicationException::PROTOCOL_ERROR,
+          folly::make_exception_wrapper<
+              apache::thrift::transport::TTransportException>(
+              apache::thrift::transport::TTransportException::CORRUPTED_DATA,
               fmt::format(
-                  "Failed to deserialize METADATA_PUSH: {}", ex.what())));
+                  "Failed to deserialize metadata push frame: {}", ex.what())));
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
 
@@ -165,23 +167,25 @@ class ThriftClientMetadataPushHandler {
 
   /**
    * Handle drainCompletePush from the server.
-   * Fires an exception to trigger connection close.
+   *
+   * Generic drain is informational — the actual close is driven separately
+   * (CONNECTION_CLOSE error frame). EXCEEDED_INGRESS_MEM_LIMIT is the
+   * exception: the server is loadshedding and pending requests should be
+   * failed with LOADSHEDDING semantics so callers can back off / retry.
    */
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result handleDrainComplete(
       Context& ctx,
       const apache::thrift::DrainCompletePush& drainPush) noexcept {
     auto drainCode = drainPush.drainCompleteCode();
-    std::string reason = "Server initiated drain";
     if (drainCode &&
         *drainCode ==
             apache::thrift::DrainCompleteCode::EXCEEDED_INGRESS_MEM_LIMIT) {
-      reason = "Server exceeded ingress memory limit";
+      ctx.fireException(
+          folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+              apache::thrift::TApplicationException::LOADSHEDDING,
+              "Server exceeded ingress memory limit"));
     }
-
-    ctx.fireException(
-        folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-            apache::thrift::TApplicationException::INTERRUPTION, reason));
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 

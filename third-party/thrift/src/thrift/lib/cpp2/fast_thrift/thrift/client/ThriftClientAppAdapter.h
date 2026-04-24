@@ -16,11 +16,14 @@
 
 #pragma once
 
+#include <fmt/core.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/Expected.h>
 #include <folly/Function.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/logging/xlog.h>
+#include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
@@ -28,6 +31,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/FastThriftAdapterBase.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/common/ClientAppAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/ErrorDecoding.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -86,34 +90,25 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
       ResponseHandler handler,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    if (!pipeline_) {
-      (void)handler(
+    if (FOLLY_UNLIKELY(!pipeline_)) {
+      handler(
           folly::makeUnexpected(
-              folly::make_exception_wrapper<std::runtime_error>(
+              folly::make_exception_wrapper<
+                  apache::thrift::TApplicationException>(
+                  apache::thrift::TApplicationException::INTERNAL_ERROR,
                   "Pipeline not set")));
       return;
     }
 
-    pipeline_->eventBase()->runImmediatelyOrRunInEventBaseThread(
-        [this, msg = std::move(msg), handler = std::move(handler)]() mutable {
-          auto requestId = nextRequestId_++;
-          auto it =
-              pendingRequests_.emplace(requestId, std::move(handler)).first;
-          ThriftRequestMessage& reqMsg = msg.get<ThriftRequestMessage>();
-          reqMsg.requestHandle = requestId;
-          auto result = pipeline_->fireWrite(std::move(msg));
-          if (FOLLY_UNLIKELY(
-                  result ==
-                  apache::thrift::fast_thrift::channel_pipeline::Result::
-                      Error)) {
-            auto respHandler = std::move(it->second);
-            (void)respHandler(
-                folly::makeUnexpected(
-                    folly::make_exception_wrapper<std::runtime_error>(
-                        "Pipeline write failed")));
-            pendingRequests_.erase(it);
-          }
-        });
+    auto* eb = pipeline_->eventBase();
+    if (eb->isInEventBaseThread()) {
+      writeOnEventBase(std::move(handler), std::move(msg));
+    } else {
+      eb->runInEventBaseThread(
+          [this, msg = std::move(msg), handler = std::move(handler)]() mutable {
+            writeOnEventBase(std::move(handler), std::move(msg));
+          });
+    }
   }
 
   // === TailEndpointHandler lifecycle ===
@@ -136,12 +131,11 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
     auto handler = std::move(it->second);
     pendingRequests_.erase(it);
 
-    if (response.requestFrameType !=
-        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE) {
-      XLOG(ERR) << "Unsupported frame type: "
-                << static_cast<int>(response.requestFrameType);
-      return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
-    }
+    DCHECK(
+        response.requestFrameType ==
+        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE)
+        << "Unsupported frame type: "
+        << static_cast<int>(response.requestFrameType);
 
     handler(handleRequestResponse(std::move(response)));
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
@@ -149,17 +143,77 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
 
   void onException(folly::exception_wrapper&& e) noexcept {
     XLOG(ERR) << "Pipeline exception: " << e.what();
+    if (state_ == State::Closed) {
+      return;
+    }
+    if (state_ == State::Open) {
+      lastError_ = e;
+    }
+
+    auto* tex =
+        e.get_exception<apache::thrift::transport::TTransportException>();
+    if (tex &&
+        tex->getType() ==
+            apache::thrift::transport::TTransportException::NOT_OPEN) {
+      // CONNECTION_CLOSE: graceful drain — reject new writes, let inflight
+      // responses complete
+      state_ = State::Closing;
+      return;
+    }
+
+    state_ = State::Closed;
 
     pendingRequests_.forEach([&](uint64_t, ResponseHandler& handler) {
-      (void)handler(folly::makeUnexpected(e));
+      handler(folly::makeUnexpected(e));
     });
     pendingRequests_.clear();
+
+    if (pipeline_) {
+      pipeline_->close();
+    }
   }
 
  protected:
   ~ThriftClientAppAdapter() override = default;
 
  private:
+  enum class State { Open, Closing, Closed };
+
+  void writeOnEventBase(
+      ResponseHandler handler,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
+          msg) noexcept {
+    if (FOLLY_UNLIKELY(state_ != State::Open)) {
+      handler(
+          folly::makeUnexpected(
+              folly::make_exception_wrapper<
+                  apache::thrift::transport::TTransportException>(
+                  apache::thrift::transport::TTransportException::NOT_OPEN,
+                  lastError_ ? fmt::format(
+                                   "Connection not open: {}",
+                                   lastError_.what().toStdString())
+                             : "Connection not open")));
+      return;
+    }
+    auto requestId = nextRequestId_++;
+    auto it = pendingRequests_.emplace(requestId, std::move(handler)).first;
+    ThriftRequestMessage& reqMsg = msg.get<ThriftRequestMessage>();
+    reqMsg.requestHandle = requestId;
+    auto result = pipeline_->fireWrite(std::move(msg));
+    if (FOLLY_UNLIKELY(
+            result ==
+            apache::thrift::fast_thrift::channel_pipeline::Result::Error)) {
+      auto respHandler = std::move(it->second);
+      respHandler(
+          folly::makeUnexpected(
+              folly::make_exception_wrapper<
+                  apache::thrift::TApplicationException>(
+                  apache::thrift::TApplicationException::INTERNAL_ERROR,
+                  "Pipeline write failed")));
+      pendingRequests_.erase(it);
+    }
+  }
+
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_{
       nullptr};
   uint16_t protocolId_{0};
@@ -169,6 +223,8 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
       apache::thrift::fast_thrift::frame::read::SequentialIndex>
       pendingRequests_;
   uint32_t nextRequestId_{0};
+  State state_{State::Open};
+  folly::exception_wrapper lastError_;
 };
 
 static_assert(

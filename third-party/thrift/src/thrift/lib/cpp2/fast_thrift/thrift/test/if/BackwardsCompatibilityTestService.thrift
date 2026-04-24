@@ -30,4 +30,7 @@ service BackwardsCompatibilityTestService {
 
   // Void response for simple connectivity test
   void ping();
+
+  // Throws TApplicationException for error handling tests
+  void throwError(1: string message);
 }

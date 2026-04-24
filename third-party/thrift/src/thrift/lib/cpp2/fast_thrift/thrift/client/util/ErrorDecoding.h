@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 #include <fmt/core.h>
@@ -29,11 +30,6 @@
 namespace apache::thrift::fast_thrift::thrift {
 
 namespace detail {
-
-// Error codes from RSocket protocol
-constexpr uint32_t kErrorCodeCanceled = 0x00000203;
-constexpr uint32_t kErrorCodeInvalid = 0x00000204;
-constexpr uint32_t kErrorCodeRejected = 0x00000202;
 
 /**
  * Maps ResponseRpcErrorCode to TApplicationException type.
@@ -81,6 +77,18 @@ mapErrorCodeToException(apache::thrift::ResponseRpcErrorCode code) {
       return {ExType::UNKNOWN_METHOD, kUnimplementedMethodErrorCode};
     case apache::thrift::ResponseRpcErrorCode::TENANT_QUOTA_EXCEEDED:
       return {ExType::LOADSHEDDING, kTenantQuotaExceededErrorCode};
+    case apache::thrift::ResponseRpcErrorCode::INTERACTION_LOADSHEDDED:
+      return {ExType::LOADSHEDDING, kInteractionLoadsheddedErrorCode};
+    case apache::thrift::ResponseRpcErrorCode::INTERACTION_LOADSHEDDED_OVERLOAD:
+      return {ExType::LOADSHEDDING, kInteractionLoadsheddedOverloadErrorCode};
+    case apache::thrift::ResponseRpcErrorCode::
+        INTERACTION_LOADSHEDDED_APP_OVERLOAD:
+      return {
+          ExType::LOADSHEDDING, kInteractionLoadsheddedAppOverloadErrorCode};
+    case apache::thrift::ResponseRpcErrorCode::
+        INTERACTION_LOADSHEDDED_QUEUE_TIMEOUT:
+      return {
+          ExType::LOADSHEDDING, kInteractionLoadsheddedQueueTimeoutErrorCode};
     default:
       return {ExType::UNKNOWN, kUnknownErrorCode};
   }
@@ -89,32 +97,40 @@ mapErrorCodeToException(apache::thrift::ResponseRpcErrorCode code) {
 } // namespace detail
 
 /**
- * Decodes an ERROR frame into an exception wrapper.
+ * Decoded error frame result with full metadata for ThriftClientChannel.
+ */
+struct DecodedErrorResponse {
+  apache::thrift::TApplicationException::TApplicationExceptionType exType{
+      apache::thrift::TApplicationException::UNKNOWN};
+  std::optional<std::string> exCode;
+  std::optional<int64_t> load;
+  std::string what;
+};
+
+/**
+ * Decodes an ERROR frame into structured data with metadata.
  *
  * For error codes CANCELED/INVALID/REJECTED: parses the payload as
- * ResponseRpcError and converts to TApplicationException with the
- * appropriate type.
+ * ResponseRpcError and returns a DecodedErrorResponse with exType, exCode,
+ * what, and load metadata.
  *
  * For other error codes (APPLICATION_ERROR, CONNECTION_ERROR, etc.):
- * creates a generic TApplicationException.
+ * returns an exception_wrapper containing a generic TApplicationException.
  *
  * This mirrors the logic in RocketClientChannelBase::decodeResponseError().
- *
- * @param frame The parsed ERROR frame
- * @return An exception wrapper containing the appropriate exception
  */
-inline folly::exception_wrapper decodeErrorFrame(
+inline folly::Expected<DecodedErrorResponse, folly::exception_wrapper>
+decodeErrorFrameAsResponse(
     const apache::thrift::fast_thrift::frame::read::ParsedFrame& frame) {
   DCHECK(frame.type() == apache::thrift::fast_thrift::frame::FrameType::ERROR);
 
   apache::thrift::fast_thrift::frame::read::ErrorView errorView(frame);
-  uint32_t errorCode = errorView.errorCode();
+  auto errorCode =
+      static_cast<apache::thrift::rocket::ErrorCode>(errorView.errorCode());
 
-  // For CANCELED, INVALID, REJECTED: parse payload as ResponseRpcError
-  if (errorCode == detail::kErrorCodeCanceled ||
-      errorCode == detail::kErrorCodeInvalid ||
-      errorCode == detail::kErrorCodeRejected) {
-    // Try to parse the payload as ResponseRpcError
+  if (errorCode == apache::thrift::rocket::ErrorCode::CANCELED ||
+      errorCode == apache::thrift::rocket::ErrorCode::INVALID ||
+      errorCode == apache::thrift::rocket::ErrorCode::REJECTED) {
     apache::thrift::ResponseRpcError responseError;
     try {
       if (frame.dataSize() > 0) {
@@ -124,26 +140,49 @@ inline folly::exception_wrapper decodeErrorFrame(
         responseError.read(&reader);
       }
     } catch (...) {
-      return folly::make_exception_wrapper<
-          apache::thrift::TApplicationException>(
-          apache::thrift::TApplicationException::UNKNOWN,
-          fmt::format(
-              "Error parsing error frame: {}",
-              folly::exceptionStr(folly::current_exception()).toStdString()));
+      return folly::makeUnexpected(
+          folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+              apache::thrift::TApplicationException::UNKNOWN,
+              fmt::format(
+                  "Error parsing error frame: {}",
+                  folly::exceptionStr(folly::current_exception())
+                      .toStdString())));
     }
 
     auto [exType, exCode] =
         detail::mapErrorCodeToException(responseError.code().value_or(
             apache::thrift::ResponseRpcErrorCode::UNKNOWN));
 
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-        exType, responseError.what_utf8().value_or(""));
+    DecodedErrorResponse result;
+    result.exType = exType;
+    result.exCode = std::move(exCode);
+    result.what = responseError.what_utf8().value_or("");
+    if (auto loadRef = responseError.load()) {
+      result.load = *loadRef;
+    }
+    return result;
   }
 
-  // For other error codes: create generic TApplicationException
-  return folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-      apache::thrift::TApplicationException::UNKNOWN,
-      fmt::format("Unexpected error frame type: {}", errorCode));
+  return folly::makeUnexpected(
+      folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+          apache::thrift::TApplicationException::UNKNOWN,
+          fmt::format(
+              "Unexpected error frame type: {}",
+              static_cast<uint32_t>(errorCode))));
+}
+
+/**
+ * Decodes an ERROR frame into an exception wrapper, discarding exCode and
+ * load metadata. Use decodeErrorFrameAsResponse() if those are needed.
+ */
+inline folly::exception_wrapper decodeErrorFrame(
+    const apache::thrift::fast_thrift::frame::read::ParsedFrame& frame) {
+  auto result = decodeErrorFrameAsResponse(frame);
+  if (result.hasValue()) {
+    return folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+        result->exType, std::move(result->what));
+  }
+  return std::move(result.error());
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

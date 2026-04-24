@@ -339,7 +339,7 @@ TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
       state->error.is_compatible_with<apache::thrift::TApplicationException>());
 }
 
-TEST_F(ThriftClientChannelTest, OnMessageWithUnknownRequestIdReturnsError) {
+TEST_F(ThriftClientChannelTest, OnReadWithUnknownRequestIdIsDropped) {
   auto channel = createChannel();
 
   auto pipeline = buildPipelineWithHandler(
@@ -356,7 +356,7 @@ TEST_F(ThriftClientChannelTest, OnMessageWithUnknownRequestIdReturnsError) {
 
   auto result = channel->onRead(erase_and_box(std::move(response)));
 
-  EXPECT_EQ(result, Result::Error);
+  EXPECT_EQ(result, Result::Success);
 }
 
 TEST_F(ThriftClientChannelTest, MultiplePendingCallbacksRoutedCorrectly) {
@@ -576,33 +576,6 @@ TEST_F(ThriftClientChannelTest, SendRequestPassesCorrectMessageContent) {
 }
 
 // =============================================================================
-// onMessage - Non-REQUEST_RESPONSE Frame Types
-// =============================================================================
-
-TEST_F(
-    ThriftClientChannelTest, OnMessageWithUnsupportedFrameTypesReturnsError) {
-  auto channel = createChannel();
-
-  std::vector<apache::thrift::fast_thrift::frame::FrameType> unsupportedTypes =
-      {
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM,
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_CHANNEL,
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_FNF,
-      };
-
-  for (auto frameType : unsupportedTypes) {
-    ThriftResponseMessage response;
-    response.frame = apache::thrift::fast_thrift::frame::read::ParsedFrame{};
-    response.requestHandle = 0;
-    response.requestFrameType = frameType;
-
-    auto result = channel->onRead(erase_and_box(std::move(response)));
-    EXPECT_EQ(result, Result::Error)
-        << "Failed for frame type: " << static_cast<int>(frameType);
-  }
-}
-
-// =============================================================================
 // onException - Pipeline Exception Handling
 // =============================================================================
 
@@ -748,6 +721,42 @@ TEST_F(ThriftClientChannelTest, OnExceptionAfterSomeResponsesReceived) {
   // callback2 should still have response, not error
   EXPECT_TRUE(state2->responseReceived);
   EXPECT_FALSE(state2->errorReceived);
+}
+
+TEST_F(ThriftClientChannelTest, ClosingThenClosedDrainsPending) {
+  // Open → Closing (NOT_OPEN) leaves pending intact;
+  // Closing → Closed (any other exception) drains them.
+  auto channel = createChannel();
+
+  auto pipeline = buildPipelineWithHandler(
+      channel.get(),
+      [](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+         TypeErasedBox&&) { return Result::Success; });
+  channel->setPipeline(pipeline.get());
+
+  auto [cb, state] = makeCallback();
+  channel->sendRequestResponse(
+      apache::thrift::RpcOptions(),
+      createMethodMetadata("inflight"),
+      createSerializedRequest("req"),
+      createHeader(),
+      std::move(cb),
+      nullptr);
+
+  // Open → Closing must NOT touch pending.
+  channel->onException(
+      folly::make_exception_wrapper<
+          apache::thrift::transport::TTransportException>(
+          apache::thrift::transport::TTransportException::NOT_OPEN,
+          "Connection closed by server"));
+  EXPECT_FALSE(state->errorReceived);
+  EXPECT_FALSE(state->responseReceived);
+
+  // Closing → Closed must drain pending with the new exception.
+  channel->onException(
+      folly::make_exception_wrapper<std::runtime_error>("EOF"));
+  EXPECT_TRUE(state->errorReceived);
+  EXPECT_TRUE(state->error.is_compatible_with<std::runtime_error>());
 }
 
 TEST_F(ThriftClientChannelTest, OnExceptionClearsPendingCallbacks) {

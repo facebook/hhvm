@@ -23,6 +23,7 @@
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
@@ -48,6 +49,7 @@
 #include <thrift/lib/cpp2/fast_thrift/transport/test/TestAsyncTransport.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -85,6 +87,7 @@ struct CallbackState {
   uint16_t protocolId{0};
   apache::thrift::MessageType messageType{apache::thrift::MessageType::T_CALL};
   std::unique_ptr<folly::IOBuf> responseBuffer;
+  apache::thrift::transport::THeader::StringToStringMap responseHeaders;
 
   std::string errorMessage() const {
     std::string msg;
@@ -105,6 +108,9 @@ class MockRequestCallback : public apache::thrift::RequestClientCallback {
     state_->responseReceived = true;
     state_->protocolId = state.protocolId();
     state_->messageType = state.messageType();
+    if (state.header()) {
+      state_->responseHeaders = state.header()->getHeaders();
+    }
     if (state.hasResponseBuffer()) {
       state_->responseBuffer =
           std::move(state).extractSerializedResponse().buffer;
@@ -639,9 +645,16 @@ TEST_F(ThriftClientChannelIntegrationTest, ErrorFrameWithRejectedCode) {
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_TRUE(state->errorReceived);
-  EXPECT_FALSE(state->responseReceived);
-  EXPECT_EQ(state->errorMessage(), "Server overloaded");
+  // ERROR frames with parseable ResponseRpcError are delivered via
+  // onResponse(T_EXCEPTION) with THeader containing kHeaderEx
+  EXPECT_TRUE(state->responseReceived);
+  EXPECT_FALSE(state->errorReceived);
+  EXPECT_EQ(state->messageType, apache::thrift::MessageType::T_EXCEPTION);
+
+  auto& headers = state->responseHeaders;
+  auto it = headers.find(std::string(apache::thrift::detail::kHeaderEx));
+  ASSERT_NE(it, headers.end());
+  EXPECT_EQ(it->second, "1"); // kOverloadedErrorCode
 }
 
 TEST_F(ThriftClientChannelIntegrationTest, ErrorFrameWithCanceledCode) {
@@ -678,9 +691,14 @@ TEST_F(ThriftClientChannelIntegrationTest, ErrorFrameWithCanceledCode) {
   evb_.loopOnce();
   evb_.loopOnce();
 
-  EXPECT_TRUE(state->errorReceived);
-  EXPECT_FALSE(state->responseReceived);
-  EXPECT_EQ(state->errorMessage(), "Request canceled");
+  EXPECT_TRUE(state->responseReceived);
+  EXPECT_FALSE(state->errorReceived);
+  EXPECT_EQ(state->messageType, apache::thrift::MessageType::T_EXCEPTION);
+
+  auto& headers = state->responseHeaders;
+  auto it = headers.find(std::string(apache::thrift::detail::kHeaderEx));
+  ASSERT_NE(it, headers.end());
+  EXPECT_EQ(it->second, "2"); // kTaskExpiredErrorCode
 }
 
 TEST_F(ThriftClientChannelIntegrationTest, ErrorFrameWithInvalidCode) {
@@ -717,9 +735,168 @@ TEST_F(ThriftClientChannelIntegrationTest, ErrorFrameWithInvalidCode) {
   evb_.loopOnce();
   evb_.loopOnce();
 
+  EXPECT_TRUE(state->responseReceived);
+  EXPECT_FALSE(state->errorReceived);
+  EXPECT_EQ(state->messageType, apache::thrift::MessageType::T_EXCEPTION);
+
+  auto& headers = state->responseHeaders;
+  auto it = headers.find(std::string(apache::thrift::detail::kHeaderEx));
+  ASSERT_NE(it, headers.end());
+  EXPECT_EQ(it->second, "25"); // kMethodUnknownErrorCode
+}
+
+// =============================================================================
+// ERROR Frame with Load Metadata
+// =============================================================================
+
+std::unique_ptr<folly::IOBuf> serializeResponseRpcErrorWithLoad(
+    apache::thrift::ResponseRpcErrorCode code,
+    const std::string& message,
+    int64_t load) {
+  apache::thrift::ResponseRpcError error;
+  error.code() = code;
+  error.what_utf8() = message;
+  error.load() = load;
+
+  apache::thrift::CompactProtocolWriter writer;
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+  writer.setOutput(&queue);
+  error.write(&writer);
+  return queue.move();
+}
+
+TEST_F(
+    ThriftClientChannelIntegrationTest,
+    ErrorFrameWithLoadMetadataPopulatesTHeader) {
+  setupPipeline();
+
+  auto [cb, state] = makeCallback();
+
+  channel_->sendRequestResponse(
+      apache::thrift::RpcOptions(),
+      createMethodMetadata("testMethod"),
+      createSerializedRequest("test"),
+      createHeader(),
+      std::move(cb),
+      nullptr);
+
+  evb_.loopOnce();
+
+  auto requestFrame = getWrittenFrame();
+  auto parsedRequest = parseWrittenFrame(std::move(requestFrame));
+  uint32_t streamId = parsedRequest.streamId();
+
+  auto errorPayload = serializeResponseRpcErrorWithLoad(
+      apache::thrift::ResponseRpcErrorCode::OVERLOAD, "Server overloaded", 42);
+
+  auto errorFrame = apache::thrift::fast_thrift::frame::write::serialize(
+      apache::thrift::fast_thrift::frame::write::ErrorHeader{
+          .streamId = streamId, .errorCode = kErrorCodeRejected},
+      nullptr,
+      std::move(errorPayload));
+
+  injectFrame(std::move(errorFrame));
+
+  evb_.loopOnce();
+  evb_.loopOnce();
+
+  EXPECT_TRUE(state->responseReceived);
+  EXPECT_EQ(state->messageType, apache::thrift::MessageType::T_EXCEPTION);
+
+  auto& headers = state->responseHeaders;
+  auto it = headers.find(std::string(apache::thrift::detail::kHeaderEx));
+  ASSERT_NE(it, headers.end());
+  EXPECT_EQ(it->second, "1"); // kOverloadedErrorCode
+}
+
+// =============================================================================
+// Pre-send Validation Tests
+// =============================================================================
+
+TEST_F(
+    ThriftClientChannelIntegrationTest,
+    SendOnClosedChannelReturnsTransportError) {
+  setupPipeline();
+
+  // Simulate fatal connection error that closes the channel
+  channel_->onException(
+      folly::make_exception_wrapper<
+          apache::thrift::transport::TTransportException>(
+          apache::thrift::transport::TTransportException::END_OF_FILE,
+          "Connection error"));
+
+  auto [cb, state] = makeCallback();
+  channel_->sendRequestResponse(
+      apache::thrift::RpcOptions(),
+      createMethodMetadata("testMethod"),
+      createSerializedRequest("test"),
+      createHeader(),
+      std::move(cb),
+      nullptr);
+
   EXPECT_TRUE(state->errorReceived);
   EXPECT_FALSE(state->responseReceived);
-  EXPECT_EQ(state->errorMessage(), "Method not found");
+  auto* ex =
+      state->error
+          .get_exception<apache::thrift::transport::TTransportException>();
+  ASSERT_NE(ex, nullptr);
+  EXPECT_EQ(
+      ex->getType(), apache::thrift::transport::TTransportException::NOT_OPEN);
+  // Pre-send error message should embed the underlying lastError_ text.
+  EXPECT_NE(
+      std::string(ex->what()).find("Connection error"), std::string::npos);
+}
+
+TEST_F(
+    ThriftClientChannelIntegrationTest,
+    SendOnClosingChannelReturnsTransportError) {
+  setupPipeline();
+
+  // Send a request first — it should remain pending after the Closing
+  // transition (graceful drain semantics).
+  auto [pendingCb, pendingState] = makeCallback();
+  channel_->sendRequestResponse(
+      apache::thrift::RpcOptions(),
+      createMethodMetadata("inflightMethod"),
+      createSerializedRequest("inflight"),
+      createHeader(),
+      std::move(pendingCb),
+      nullptr);
+  evb_.loopOnce();
+
+  // Simulate CONNECTION_CLOSE: fires NOT_OPEN exception which transitions
+  // state_ to State::Closing
+  channel_->onException(
+      folly::make_exception_wrapper<
+          apache::thrift::transport::TTransportException>(
+          apache::thrift::transport::TTransportException::NOT_OPEN,
+          "Connection closed by server"));
+
+  // Open → Closing must NOT drain inflight requests.
+  EXPECT_FALSE(pendingState->responseReceived);
+  EXPECT_FALSE(pendingState->errorReceived);
+
+  auto [cb, state] = makeCallback();
+  channel_->sendRequestResponse(
+      apache::thrift::RpcOptions(),
+      createMethodMetadata("testMethod"),
+      createSerializedRequest("test"),
+      createHeader(),
+      std::move(cb),
+      nullptr);
+
+  EXPECT_TRUE(state->errorReceived);
+  EXPECT_FALSE(state->responseReceived);
+  auto* ex =
+      state->error
+          .get_exception<apache::thrift::transport::TTransportException>();
+  ASSERT_NE(ex, nullptr);
+  EXPECT_EQ(
+      ex->getType(), apache::thrift::transport::TTransportException::NOT_OPEN);
+  // Pre-send error message should embed the underlying lastError_ text.
+  EXPECT_NE(
+      std::string(ex->what()).find("Connection closed by server"),
+      std::string::npos);
 }
 
 // =============================================================================
@@ -1273,6 +1450,71 @@ TEST_F(
   ASSERT_TRUE(future2.isReady());
   EXPECT_TRUE(future1.result().hasException());
   EXPECT_TRUE(future2.result().hasException());
+}
+
+TEST_F(
+    ThriftClientAppAdapterIntegrationTest, WriteOnClosedAdapterReturnsError) {
+  setupPipeline();
+
+  // Simulate fatal connection error that closes the adapter
+  client_.adapter().onException(
+      folly::make_exception_wrapper<
+          apache::thrift::transport::TTransportException>(
+          apache::thrift::transport::TTransportException::END_OF_FILE,
+          "Connection error"));
+
+  auto metadata = createBasicResponseMetadata();
+  auto future = client_.sendBenchRequest(
+      serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("test"));
+
+  ASSERT_TRUE(future.isReady());
+  EXPECT_TRUE(future.result().hasException());
+  EXPECT_TRUE(future.result()
+                  .exception()
+                  .is_compatible_with<
+                      apache::thrift::transport::TTransportException>());
+}
+
+TEST_F(
+    ThriftClientAppAdapterIntegrationTest, WriteOnClosingAdapterReturnsError) {
+  setupPipeline();
+
+  // Send a request first — it should remain pending after the Closing
+  // transition (graceful drain semantics).
+  auto metadata = createBasicResponseMetadata();
+  auto inflightFuture = client_.sendBenchRequest(
+      serializeResponseMetadata(metadata),
+      folly::IOBuf::copyBuffer("inflight"));
+  evb_.loopOnce();
+  getWrittenFrame();
+
+  // Simulate CONNECTION_CLOSE: fires NOT_OPEN exception which transitions
+  // state_ to State::Closing
+  client_.adapter().onException(
+      folly::make_exception_wrapper<
+          apache::thrift::transport::TTransportException>(
+          apache::thrift::transport::TTransportException::NOT_OPEN,
+          "Connection closed by server"));
+
+  // Open → Closing must NOT drain the inflight request.
+  EXPECT_FALSE(inflightFuture.isReady());
+
+  auto future = client_.sendBenchRequest(
+      serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("test"));
+
+  ASSERT_TRUE(future.isReady());
+  EXPECT_TRUE(future.result().hasException());
+  auto* ex =
+      future.result()
+          .exception()
+          .get_exception<apache::thrift::transport::TTransportException>();
+  ASSERT_NE(ex, nullptr);
+  EXPECT_EQ(
+      ex->getType(), apache::thrift::transport::TTransportException::NOT_OPEN);
+  // Pre-send error message should embed the underlying lastError_ text.
+  EXPECT_NE(
+      std::string(ex->what()).find("Connection closed by server"),
+      std::string::npos);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

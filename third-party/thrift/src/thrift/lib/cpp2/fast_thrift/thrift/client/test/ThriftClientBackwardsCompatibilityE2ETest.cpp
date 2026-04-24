@@ -16,12 +16,17 @@
 
 #include <gtest/gtest.h>
 
+#include <atomic>
+#include <memory>
+
 #include <folly/coro/BlockingWait.h>
 #include <folly/coro/Collect.h>
 #include <folly/coro/Task.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/Baton.h>
+#include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
@@ -46,6 +51,9 @@
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/server/PreprocessParams.h>
+#include <thrift/lib/cpp2/server/PreprocessResult.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -125,6 +133,11 @@ class BackwardsCompatibilityTestHandler
   }
 
   void ping() override {}
+
+  void throwError(std::unique_ptr<std::string> message) override {
+    throw apache::thrift::TApplicationException(
+        apache::thrift::TApplicationException::UNKNOWN, *message);
+  }
 };
 
 class BackwardsCompatibilityTestFastHandler
@@ -143,6 +156,11 @@ class BackwardsCompatibilityTestFastHandler
   }
 
   void ping() override {}
+
+  void throwError(std::unique_ptr<std::string> message) override {
+    throw apache::thrift::TApplicationException(
+        apache::thrift::TApplicationException::UNKNOWN, *message);
+  }
 };
 
 /**
@@ -410,6 +428,177 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, LargeResponse) {
 }
 
 // =============================================================================
+// Error Handling E2E Tests
+// =============================================================================
+
+TEST_F(
+    ThriftClientBackwardsCompatibilityE2ETest,
+    ServerThrowsAppExceptionDeliveredAsException) {
+  channel_ = createFastThriftChannel();
+
+  auto client = std::make_unique<
+      apache::thrift::Client<BackwardsCompatibilityTestService>>(
+      std::move(channel_));
+
+  try {
+    folly::coro::blockingWait(
+        folly::coro::co_withExecutor(
+            clientThread_->getEventBase(),
+            client->co_throwError("server error message")));
+    FAIL() << "Expected TApplicationException";
+  } catch (const apache::thrift::TApplicationException& ex) {
+    EXPECT_NE(
+        std::string(ex.what()).find("server error message"), std::string::npos);
+  }
+
+  // Destroy the client in the EventBase thread
+  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
+      [&] { client.reset(); });
+}
+
+TEST_F(
+    ThriftClientBackwardsCompatibilityE2ETest,
+    ServerShutdownCausesTransportError) {
+  channel_ = createFastThriftChannel();
+
+  auto client = std::make_unique<
+      apache::thrift::Client<BackwardsCompatibilityTestService>>(
+      std::move(channel_));
+
+  // Verify connection works first
+  folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_ping()));
+
+  // Stop the server
+  server_.reset();
+
+  // Next request should fail with a transport or app exception
+  EXPECT_THROW(
+      folly::coro::blockingWait(
+          folly::coro::co_withExecutor(
+              clientThread_->getEventBase(),
+              client->co_echo("after shutdown"))),
+      std::exception);
+
+  // Destroy the client in the EventBase thread
+  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
+      [&] { client.reset(); });
+}
+
+TEST_F(ThriftClientBackwardsCompatibilityE2ETest, RequestAfterThrowStillWorks) {
+  channel_ = createFastThriftChannel();
+
+  auto client = std::make_unique<
+      apache::thrift::Client<BackwardsCompatibilityTestService>>(
+      std::move(channel_));
+
+  // First request throws
+  EXPECT_THROW(
+      folly::coro::blockingWait(
+          folly::coro::co_withExecutor(
+              clientThread_->getEventBase(),
+              client->co_throwError("first error"))),
+      apache::thrift::TApplicationException);
+
+  // Connection should still work for subsequent requests
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_echo("still alive")));
+  EXPECT_EQ(result, "still alive");
+
+  // Destroy the client in the EventBase thread
+  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
+      [&] { client.reset(); });
+}
+
+TEST_F(
+    ThriftClientBackwardsCompatibilityE2ETest,
+    ServerOverloadRejectsWithLoadshedding) {
+  channel_ = createFastThriftChannel();
+
+  auto client = std::make_unique<
+      apache::thrift::Client<BackwardsCompatibilityTestService>>(
+      std::move(channel_));
+
+  // Verify connection works first
+  folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_ping()));
+
+  // Make server reject all requests as overloaded.
+  // Server will send ERROR frame with REJECTED +
+  // ResponseRpcError{APP_OVERLOAD}. This exercises decodeErrorFrameAsResponse()
+  // → onResponse(T_EXCEPTION) path.
+  server_->getThriftServer().addPreprocessFunc(
+      "overload_test",
+      [](const apache::thrift::server::PreprocessParams&)
+          -> apache::thrift::PreprocessResult {
+        return apache::thrift::AppOverloadedException(
+            "test", "server overloaded");
+      });
+
+  try {
+    folly::coro::blockingWait(
+        folly::coro::co_withExecutor(
+            clientThread_->getEventBase(),
+            client->co_echo("should be rejected")));
+    FAIL() << "Expected TApplicationException";
+  } catch (const apache::thrift::TApplicationException& ex) {
+    EXPECT_EQ(ex.getType(), apache::thrift::TApplicationException::LOADSHEDDING)
+        << "Overload rejection should map to LOADSHEDDING, got: "
+        << ex.getType();
+  }
+
+  // Destroy the client in the EventBase thread
+  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
+      [&] { client.reset(); });
+}
+
+TEST_F(
+    ThriftClientBackwardsCompatibilityE2ETest,
+    OverloadRecoveryAfterServerUnblocks) {
+  channel_ = createFastThriftChannel();
+
+  auto client = std::make_unique<
+      apache::thrift::Client<BackwardsCompatibilityTestService>>(
+      std::move(channel_));
+
+  // Set overloaded via a togglable flag
+  auto overloaded = std::make_shared<std::atomic<bool>>(true);
+  server_->getThriftServer().addPreprocessFunc(
+      "overload_test",
+      [overloaded](const apache::thrift::server::PreprocessParams&)
+          -> apache::thrift::PreprocessResult {
+        if (overloaded->load()) {
+          return apache::thrift::AppOverloadedException(
+              "test", "server overloaded");
+        }
+        return {};
+      });
+
+  // Request should be rejected
+  EXPECT_THROW(
+      folly::coro::blockingWait(
+          folly::coro::co_withExecutor(
+              clientThread_->getEventBase(), client->co_echo("rejected"))),
+      apache::thrift::TApplicationException);
+
+  // Unblock the server
+  overloaded->store(false);
+
+  // Connection should still work after overload clears
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_echo("recovered")));
+  EXPECT_EQ(result, "recovered");
+
+  // Destroy the client in the EventBase thread
+  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
+      [&] { client.reset(); });
+}
+
+// =============================================================================
 // FastClient E2E Tests (using ThriftClientAppAdapter + generated FastClient)
 // =============================================================================
 
@@ -611,6 +800,110 @@ TEST_F(BackwardsCompatibilityFastClientE2ETest, LargeResponse) {
           client->co_sendResponse(kResponseSize)));
   EXPECT_EQ(result.size(), kResponseSize);
   EXPECT_EQ(result, std::string(kResponseSize, 'x'));
+}
+
+// =============================================================================
+// FastClient Error Handling E2E Tests
+// =============================================================================
+
+TEST_F(
+    BackwardsCompatibilityFastClientE2ETest,
+    ServerThrowsAppExceptionDeliveredAsException) {
+  auto client = createFastClient();
+
+  try {
+    folly::coro::blockingWait(
+        folly::coro::co_withExecutor(
+            clientThread_->getEventBase(),
+            client->co_throwError("fast client error")));
+    FAIL() << "Expected exception";
+  } catch (const apache::thrift::TApplicationException& ex) {
+    EXPECT_NE(
+        std::string(ex.what()).find("fast client error"), std::string::npos);
+  }
+}
+
+TEST_F(BackwardsCompatibilityFastClientE2ETest, RequestAfterThrowStillWorks) {
+  auto client = createFastClient();
+
+  EXPECT_THROW(
+      folly::coro::blockingWait(
+          folly::coro::co_withExecutor(
+              clientThread_->getEventBase(),
+              client->co_throwError("first error"))),
+      apache::thrift::TApplicationException);
+
+  // Connection should still work
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_echo("still alive")));
+  EXPECT_EQ(result, "still alive");
+}
+
+TEST_F(
+    BackwardsCompatibilityFastClientE2ETest,
+    ServerOverloadRejectsWithLoadshedding) {
+  auto client = createFastClient();
+
+  // Verify connection works first
+  folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_ping()));
+
+  // Make server reject all requests as overloaded
+  server_->getThriftServer().addPreprocessFunc(
+      "overload_test",
+      [](const apache::thrift::server::PreprocessParams&)
+          -> apache::thrift::PreprocessResult {
+        return apache::thrift::AppOverloadedException(
+            "test", "server overloaded");
+      });
+
+  try {
+    folly::coro::blockingWait(
+        folly::coro::co_withExecutor(
+            clientThread_->getEventBase(),
+            client->co_echo("should be rejected")));
+    FAIL() << "Expected TApplicationException";
+  } catch (const apache::thrift::TApplicationException& ex) {
+    EXPECT_EQ(ex.getType(), apache::thrift::TApplicationException::LOADSHEDDING)
+        << "Overload rejection should map to LOADSHEDDING, got: "
+        << ex.getType();
+  }
+}
+
+TEST_F(
+    BackwardsCompatibilityFastClientE2ETest,
+    OverloadRecoveryAfterServerUnblocks) {
+  auto client = createFastClient();
+
+  // Set overloaded via a togglable flag
+  auto overloaded = std::make_shared<std::atomic<bool>>(true);
+  server_->getThriftServer().addPreprocessFunc(
+      "overload_test",
+      [overloaded](const apache::thrift::server::PreprocessParams&)
+          -> apache::thrift::PreprocessResult {
+        if (overloaded->load()) {
+          return apache::thrift::AppOverloadedException(
+              "test", "server overloaded");
+        }
+        return {};
+      });
+
+  EXPECT_THROW(
+      folly::coro::blockingWait(
+          folly::coro::co_withExecutor(
+              clientThread_->getEventBase(), client->co_echo("rejected"))),
+      apache::thrift::TApplicationException);
+
+  // Unblock
+  overloaded->store(false);
+
+  // Connection should still work
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_echo("recovered")));
+  EXPECT_EQ(result, "recovered");
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::client::test

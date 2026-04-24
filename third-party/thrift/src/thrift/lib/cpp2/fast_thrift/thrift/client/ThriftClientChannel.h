@@ -145,6 +145,8 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
   ~ThriftClientChannel() override;
 
  private:
+  enum class State { Open, Closing, Closed };
+
   // Common implementation for sending thrift requests
   void sendRequestInternal(
       const apache::thrift::RpcOptions& options,
@@ -169,6 +171,8 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
       apache::thrift::fast_thrift::frame::read::SequentialIndex>
       pendingCallbacks_;
   uint32_t nextRequestId_{0};
+  State state_{State::Open};
+  folly::exception_wrapper lastError_;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

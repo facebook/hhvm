@@ -212,30 +212,6 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageUnknownHandle) {
   EXPECT_EQ(result, Result::Success);
 }
 
-TEST_F(ThriftClientAppAdapterTest, OnMessageUnsupportedFrameType) {
-  TestAppAdapterClient client;
-  auto built = buildPipeline(
-      &client.adapter(), [](auto&, auto&&) { return Result::Success; });
-
-  bool handlerCalled = false;
-
-  evb_->runInEventBaseThreadAndWait([&] {
-    client.adapter().write(
-        [&](folly::Expected<
-            ThriftResponseMessage,
-            folly::exception_wrapper>&&) noexcept { handlerCalled = true; },
-        makeRequestBox());
-  });
-
-  // Use REQUEST_STREAM instead of REQUEST_RESPONSE
-  auto response = makeResponse(
-      0, apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM);
-  auto result = client.adapter().onRead(erase_and_box(std::move(response)));
-
-  EXPECT_EQ(result, Result::Error);
-  EXPECT_FALSE(handlerCalled);
-}
-
 // =============================================================================
 // onException Tests
 // =============================================================================
@@ -325,6 +301,51 @@ TEST_F(ThriftClientAppAdapterTest, WriteSetsRequestHandle) {
   });
 
   EXPECT_EQ(capturedHandle, 1u);
+}
+
+TEST_F(ThriftClientAppAdapterTest, WriteWithoutPipelineReturnsInternalError) {
+  // No setPipeline() call — pre-send must reject with INTERNAL_ERROR.
+  ThriftClientAppAdapter::Ptr adapter{new ThriftClientAppAdapter()};
+
+  bool errorReceived = false;
+  folly::exception_wrapper capturedError;
+
+  adapter->write(
+      [&](folly::Expected<ThriftResponseMessage, folly::exception_wrapper>&&
+              result) noexcept {
+        ASSERT_TRUE(result.hasError());
+        errorReceived = true;
+        capturedError = std::move(result.error());
+      },
+      makeRequestBox());
+
+  EXPECT_TRUE(errorReceived);
+  auto* ex =
+      capturedError.get_exception<apache::thrift::TApplicationException>();
+  ASSERT_NE(ex, nullptr);
+  EXPECT_EQ(
+      ex->getType(), apache::thrift::TApplicationException::INTERNAL_ERROR);
+  EXPECT_EQ(std::string(ex->what()), "Pipeline not set");
+}
+
+TEST_F(ThriftClientAppAdapterTest, WriteFromOffEventBaseThreadCompletes) {
+  // Caller is the test thread (not evb_'s thread). write() must take the
+  // slow path and schedule onto the EventBase before invoking the handler.
+  TestAppAdapterClient client;
+  bool writeCalled = false;
+  auto built = buildPipeline(
+      &client.adapter(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&&) {
+        writeCalled = true;
+        return Result::Success;
+      });
+
+  client.adapter().write([](auto&&) noexcept {}, makeRequestBox());
+
+  // Drain the EB to let the scheduled lambda run.
+  evb_->runInEventBaseThreadAndWait([] {});
+  EXPECT_TRUE(writeCalled);
 }
 
 TEST_F(ThriftClientAppAdapterTest, WriteFiresWrite) {

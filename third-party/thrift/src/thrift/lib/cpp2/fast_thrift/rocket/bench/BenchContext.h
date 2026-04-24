@@ -36,6 +36,17 @@ class BenchContext {
   using TypeErasedBox = channel_pipeline::TypeErasedBox;
   using BytesPtr = channel_pipeline::BytesPtr;
 
+  struct MockPipeline {
+    void setClosing() noexcept { closing_ = true; }
+    bool isClosing() const noexcept { return closing_; }
+    bool isClosed() const noexcept { return false; }
+
+   private:
+    bool closing_{false};
+  };
+
+  MockPipeline* pipeline() noexcept { return &pipeline_; }
+
   Result fireRead(TypeErasedBox&& msg) noexcept {
     lastReadMsg_ = std::move(msg);
     return Result::Success;
@@ -69,6 +80,7 @@ class BenchContext {
   TypeErasedBox lastReadMsg_;
   TypeErasedBox lastWriteMsg_;
   folly::exception_wrapper lastException_;
+  MockPipeline pipeline_;
 };
 
 } // namespace apache::thrift::fast_thrift::rocket::bench

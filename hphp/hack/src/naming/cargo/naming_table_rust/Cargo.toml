@@ -20,7 +20,7 @@ names = { version = "0.0.0", path = "../../names_rust" }
 naming_provider = { version = "0.0.0", path = "../../../hackrs/naming_provider/cargo/naming_provider" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
-parking_lot = { version = "0.12.1", features = ["send_guard"] }
+parking_lot = { version = "0.12.1", features = ["arc_lock", "send_guard"] }
 pos = { version = "0.0.0", path = "../../../hackrs/pos/cargo/pos" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 shm_store = { version = "0.0.0", path = "../../../shmffi/cargo/shm_store" }

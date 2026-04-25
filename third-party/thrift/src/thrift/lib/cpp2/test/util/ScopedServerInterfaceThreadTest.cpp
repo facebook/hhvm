@@ -932,48 +932,6 @@ TYPED_TEST(ScopedServerInterfaceThreadTest, joinRequestsCancel) {
   schedulerThread.join();
 }
 
-TYPED_TEST(ScopedServerInterfaceThreadTest, SetMaxRequestsJoinWrites) {
-  if (this->isHeaderTransport() || this->isH2Transport()) {
-    return; // Joining writes is not implemented for Header/H2 transport.
-  }
-  THRIFT_OMIT_TEST_WITH_RESOURCE_POOLS(/* maxRequests limit with resourcePools does not include response IO time */);
-
-  std::string message(10000000, 'a');
-
-  auto serviceImpl = this->newService();
-
-  ScopedServerInterfaceThread ssit(
-      serviceImpl, "::1", 0, [](auto& thriftServer) {
-        thriftServer.setMaxRequests(1);
-      });
-
-  folly::ScopedEventBaseThread evbThread1, evbThread2;
-  auto cli1 = this->template newRawClient<SimpleServiceAsyncClient>(
-      evbThread1.getEventBase(), ssit);
-  auto cli2 = this->template newRawClient<SimpleServiceAsyncClient>(
-      evbThread2.getEventBase(), ssit);
-  SCOPE_EXIT {
-    folly::via(evbThread1.getEventBase(), [cli1 = std::move(cli1)] {});
-    folly::via(evbThread2.getEventBase(), [cli2 = std::move(cli2)] {});
-  };
-
-  auto future = cli1->semifuture_echoSlow(message, 1000);
-
-  serviceImpl->waitForRequest();
-
-  folly::stop_watch<std::chrono::milliseconds> timer;
-
-  // Block the receiving thread so that write can't complete on the server side.
-  evbThread1.add([] { std::this_thread::sleep_for(std::chrono::seconds{5}); });
-
-  while (true) {
-    try {
-      EXPECT_EQ(43, cli2->semifuture_add(42, 1).get());
-      EXPECT_GE(timer.elapsed(), std::chrono::seconds{5});
-      break;
-    } catch (...) {
-    }
-  }
-
-  std::move(future).get();
-}
+// SetMaxRequestsJoinWrites removed: tested ThreadManager-specific behavior
+// where maxRequests limit includes response IO time, which doesn't apply to
+// ResourcePools.

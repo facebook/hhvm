@@ -494,52 +494,9 @@ TEST_F(RequestInstrumentationTest, threadSnapshot) {
   }
 }
 
-TEST_F(RequestInstrumentationTest, PendingTaskCount) {
-  THRIFT_OMIT_TEST_WITH_RESOURCE_POOLS(
-      /* pendingTaskCounts in thread manager don't apply to resource pools */);
-  auto client = makeRocketClient();
-  folly::Baton baton;
-  folly::Baton baton2;
-  handler()->setCallback([&](TestInterface* ti) {
-    ti->getThreadManager()->add([] {});
-    ti->getThreadManager()->add([] {});
-    ti->getThreadManager()->add([] {});
-    auto& baton2_ = baton2; // avoid data-race on lambda storage in wait below
-    baton.post();
-    baton2_.wait();
-  });
-  auto firstReq = client->semifuture_runCallback();
-  baton.wait();
-  EXPECT_EQ(
-      3, thriftServer()->getThreadManager_deprecated()->pendingTaskCount());
-  EXPECT_EQ(
-      0,
-      thriftServer()
-          ->getThreadManager_deprecated()
-          ->pendingUpstreamTaskCount());
-
-  handler()->setCallback([&](TestInterface*) {});
-  auto secondReq = client->semifuture_runCallback();
-
-  auto expire = std::chrono::steady_clock::now() + 5s;
-  while (thriftServer()
-                 ->getThreadManager_deprecated()
-                 ->pendingUpstreamTaskCount() < 1 &&
-         std::chrono::steady_clock::now() < expire) {
-    std::this_thread::yield();
-  }
-  EXPECT_EQ(
-      4, thriftServer()->getThreadManager_deprecated()->pendingTaskCount());
-  EXPECT_EQ(
-      1,
-      thriftServer()
-          ->getThreadManager_deprecated()
-          ->pendingUpstreamTaskCount());
-
-  baton2.post();
-  std::move(firstReq).get();
-  std::move(secondReq).get();
-}
+// PendingTaskCount test removed: tested ThreadManager-specific
+// pendingTaskCount/pendingUpstreamTaskCount APIs that don't apply to
+// ResourcePools.
 
 TEST_F(RequestInstrumentationTest, threadSnapshotWithShallowRC) {
   auto client = makeRocketClient();
@@ -1182,33 +1139,8 @@ TEST(RegistryTests, ManyRegistriesDeathTest) {
       "");
 }
 
-class MaxRequestsTest : public RequestInstrumentationTest,
-                        public ::testing::WithParamInterface<bool> {
- protected:
-  bool rocket;
-  void SetUp() override {
-    rocket = GetParam();
-    impl_ = std::make_unique<Impl>([&](auto& ts) {
-      ts.setMaxRequests(1);
-      ts.setMethodsBypassMaxRequestsLimit({"runCallback2"});
-    });
-  }
-};
-
-TEST_P(MaxRequestsTest, Bypass) {
-  THRIFT_OMIT_TEST_WITH_RESOURCE_POOLS(/* max requests bypass not supported */);
-  auto client = rocket ? makeRocketClient() : makeHeaderClient();
-
-  client->semifuture_sendRequest();
-  handler()->waitForRequests(1);
-
-  EXPECT_ANY_THROW(client->sync_runCallback());
-  EXPECT_NO_THROW(client->sync_runCallback2());
-  handler()->stopRequests();
-}
-
-INSTANTIATE_TEST_CASE_P(
-    MaxRequestsTestsSequence, MaxRequestsTest, ::testing::Values(true, false));
+// MaxRequestsTest::Bypass removed: tested setMethodsBypassMaxRequestsLimit
+// which is not supported under ResourcePools.
 
 class TimestampsTest
     : public RequestInstrumentationTest,

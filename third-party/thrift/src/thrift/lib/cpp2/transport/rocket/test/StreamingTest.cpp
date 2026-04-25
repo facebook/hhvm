@@ -1002,45 +1002,9 @@ TEST_F(StreamingTest, CloseClientWithMultipleActiveStreams) {
   });
 }
 
-TEST_F(StreamingTest, SetMaxRequests) {
-  THRIFT_OMIT_TEST_WITH_RESOURCE_POOLS(/* setMaxRequests concurency controller doesn't extend to stream end yet */);
-  server_->setMaxRequests(2);
-  connectToServer([&](std::unique_ptr<StreamServiceAsyncClient> client) {
-    apache::thrift::RpcOptions rpcOptions;
-    rpcOptions.setChunkBufferSize(0);
-    auto stream1 = client->sync_range(rpcOptions, 0, 10);
-    auto stream2 = client->sync_range(rpcOptions, 0, 10);
-
-    EXPECT_ANY_THROW(client->sync_range(rpcOptions, 0, 10));
-
-    std::move(stream2).subscribeInline([](auto&&) {});
-
-    auto stream3 = client->sync_range(rpcOptions, 0, 10);
-
-    EXPECT_ANY_THROW(client->sync_range(rpcOptions, 0, 10));
-  });
-}
-
-TEST_F(StreamingTest, SetMaxRequestsStreamCancel) {
-  THRIFT_OMIT_TEST_WITH_RESOURCE_POOLS(/* setMaxRequests concurency controller doesn't extend to stream end yet */);
-  server_->setMaxRequests(2);
-  connectToServer([](std::unique_ptr<StreamServiceAsyncClient> client) {
-    apache::thrift::RpcOptions rpcOptions;
-    rpcOptions.setChunkBufferSize(0);
-    auto stream1 = client->sync_range(rpcOptions, 0, 10);
-    auto stream2 = client->sync_range(rpcOptions, 0, 10);
-
-    EXPECT_ANY_THROW(client->sync_range(rpcOptions, 0, 10));
-
-    {
-      auto _ = std::move(stream2);
-    }
-
-    auto stream3 = client->sync_range(rpcOptions, 0, 10);
-
-    EXPECT_ANY_THROW(client->sync_range(rpcOptions, 0, 10));
-  });
-}
+// SetMaxRequests and SetMaxRequestsStreamCancel removed: tested
+// ThreadManager-specific behavior where active streams count against
+// maxRequests, which doesn't apply to ResourcePools concurrency controller.
 
 TEST_F(StreamingTest, LeakCallback) {
   connectToServer([](std::unique_ptr<StreamServiceAsyncClient> client) {

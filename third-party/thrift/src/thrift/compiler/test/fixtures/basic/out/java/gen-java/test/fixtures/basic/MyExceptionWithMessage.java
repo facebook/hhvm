@@ -66,6 +66,7 @@ public final class MyExceptionWithMessage extends org.apache.thrift.TBaseExcepti
         @com.facebook.swift.codec.ThriftField(value=3, name="myStruct", requiredness=Requiredness.NONE) final test.fixtures.basic.MyStruct myStruct,
         @com.facebook.swift.codec.ThriftField(value=4, name="myUnion", requiredness=Requiredness.NONE) final test.fixtures.basic.MyUnion myUnion
     ) {
+        super(myStringField);
         this.myIntField = myIntField;
         this.myStringField = myStringField;
         this.myStruct = myStruct;

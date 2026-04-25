@@ -45,6 +45,7 @@ public final class TerseException extends org.apache.thrift.TBaseException imple
     public TerseException(
         @com.facebook.swift.codec.ThriftField(value=1, name="msg", requiredness=Requiredness.TERSE) final String msg
     ) {
+        super(msg);
         this.msg = msg;
     }
 

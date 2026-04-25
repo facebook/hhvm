@@ -49,6 +49,7 @@ public final class ExceptionWithPrimitiveField extends org.apache.thrift.TBaseEx
         @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.NONE) final String message,
         @com.facebook.swift.codec.ThriftField(value=2, name="error_code", requiredness=Requiredness.NONE) final int errorCode
     ) {
+        super(message);
         this.message = message;
         this.errorCode = errorCode;
     }

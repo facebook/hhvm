@@ -42,6 +42,7 @@ public final class Serious extends org.apache.thrift.TBaseException implements c
     public Serious(
         @com.facebook.swift.codec.ThriftField(value=1, name="sonnet", requiredness=Requiredness.OPTIONAL) final String sonnet
     ) {
+        super(sonnet);
         this.sonnet = sonnet;
     }
 

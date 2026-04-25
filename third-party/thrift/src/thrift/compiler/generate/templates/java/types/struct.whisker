@@ -64,6 +64,9 @@ public {{struct.javaCapitalName}}(
     {{#partial field_helpers.thrift_field_annotation field=field}} final {{#partial types.field_type field=field}} {{field.javaName}}{{#if (not last?)}},{{/if (not last?)}}
     {{/each}}
 ) {
+    {{#if (and struct.exception? (object.notnull? struct.message_field))}}
+    super({{struct.message_field.javaName}});
+    {{/if (and struct.exception? (object.notnull? struct.message_field))}}
     {{#each struct.fields as |field|}}
     this.{{field.javaName}} = {{field.javaName}};
     {{/each}}

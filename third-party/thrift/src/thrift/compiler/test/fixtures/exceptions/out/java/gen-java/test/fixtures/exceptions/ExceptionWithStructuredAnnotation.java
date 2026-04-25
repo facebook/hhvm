@@ -49,6 +49,7 @@ public final class ExceptionWithStructuredAnnotation extends org.apache.thrift.T
         @com.facebook.swift.codec.ThriftField(value=1, name="message_field", requiredness=Requiredness.NONE) final String messageField,
         @com.facebook.swift.codec.ThriftField(value=2, name="error_code", requiredness=Requiredness.NONE) final int errorCode
     ) {
+        super(messageField);
         this.messageField = messageField;
         this.errorCode = errorCode;
     }

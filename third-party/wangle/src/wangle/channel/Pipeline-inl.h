@@ -153,12 +153,13 @@ template <class Context>
 PipelineBase& PipelineBase::addHelper(
     std::shared_ptr<Context>&& ctx,
     bool front) {
-  ctxs_.insert(front ? ctxs_.begin() : ctxs_.end(), ctx);
+  auto* ctxPtr = ctx.get();
+  ctxs_.insert(front ? ctxs_.begin() : ctxs_.end(), std::move(ctx));
   if (Context::dir == HandlerDir::BOTH || Context::dir == HandlerDir::IN) {
-    inCtxs_.insert(front ? inCtxs_.begin() : inCtxs_.end(), ctx.get());
+    inCtxs_.insert(front ? inCtxs_.begin() : inCtxs_.end(), ctxPtr);
   }
   if (Context::dir == HandlerDir::BOTH || Context::dir == HandlerDir::OUT) {
-    outCtxs_.insert(front ? outCtxs_.begin() : outCtxs_.end(), ctx.get());
+    outCtxs_.insert(front ? outCtxs_.begin() : outCtxs_.end(), ctxPtr);
   }
   return *this;
 }

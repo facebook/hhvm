@@ -18,8 +18,10 @@ package com.facebook.thrift.rsocket.server;
 
 import com.facebook.thrift.model.StreamResponse;
 import com.facebook.thrift.test.rocket.InitialTestResponse;
+import com.facebook.thrift.test.rocket.TestAnnotatedMessageException;
 import com.facebook.thrift.test.rocket.TestException;
 import com.facebook.thrift.test.rocket.TestFunctionException;
+import com.facebook.thrift.test.rocket.TestMessageException;
 import com.facebook.thrift.test.rocket.TestRequest;
 import com.facebook.thrift.test.rocket.TestRequest2;
 import com.facebook.thrift.test.rocket.TestResponse;
@@ -109,6 +111,16 @@ public class TestServiceHandler implements TestService.Reactive {
   @Override
   public Flux<TestResponse> streamDeclaredException2(TestRequest testRequest) {
     throw new TestException("exc");
+  }
+
+  @Override
+  public Flux<TestResponse> streamDeclaredMessageFieldException(TestRequest testRequest) {
+    return Flux.error(new TestMessageException("exc"));
+  }
+
+  @Override
+  public Flux<TestResponse> streamDeclaredAnnotatedMessageException(TestRequest testRequest) {
+    return Flux.error(new TestAnnotatedMessageException("exc"));
   }
 
   @Override

@@ -53,6 +53,11 @@ public final class FooEx2 extends org.apache.thrift.TBaseException implements co
     }
 
 
+    @java.lang.Override
+    public String getMessage() {
+      return getClass().getName();
+    }
+
     public static com.facebook.thrift.payload.Reader<FooEx2> asReader() {
       return FooEx2::read0;
     }

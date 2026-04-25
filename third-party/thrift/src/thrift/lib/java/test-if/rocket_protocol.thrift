@@ -18,6 +18,8 @@ package "test.dev/thrift/lib/java/test/rocket"
 
 namespace java.swift com.facebook.thrift.test.rocket
 
+include "thrift/annotation/thrift.thrift"
+
 struct TestRequest {
   1: i32 int_field;
   2: optional string str_field;
@@ -45,6 +47,15 @@ exception TestFunctionException {
   9: string msg;
 }
 
+exception TestMessageException {
+  1: string message;
+}
+
+exception TestAnnotatedMessageException {
+  @thrift.ExceptionMessage
+  1: string msg;
+}
+
 service TestService {
   void requestResponseVoid(1: TestRequest request);
   TestResponse requestResponse(1: TestRequest request);
@@ -62,6 +73,12 @@ service TestService {
   stream<TestResponse throws (2: TestException e)> streamDeclaredException2(
     1: TestRequest request,
   );
+  stream<
+    TestResponse throws (18: TestMessageException e)
+  > streamDeclaredMessageFieldException(1: TestRequest request);
+  stream<
+    TestResponse throws (19: TestAnnotatedMessageException e)
+  > streamDeclaredAnnotatedMessageException(1: TestRequest request);
   stream<
     TestResponse throws (3: TestException e)
   > streamDeclaredAndFunctionException(1: TestRequest request) throws (

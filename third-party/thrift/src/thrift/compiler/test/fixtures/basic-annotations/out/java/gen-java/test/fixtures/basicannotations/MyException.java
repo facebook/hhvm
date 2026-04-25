@@ -53,6 +53,11 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
     }
 
 
+    @java.lang.Override
+    public String getMessage() {
+      return getClass().getName();
+    }
+
     public static com.facebook.thrift.payload.Reader<MyException> asReader() {
       return MyException::read0;
     }

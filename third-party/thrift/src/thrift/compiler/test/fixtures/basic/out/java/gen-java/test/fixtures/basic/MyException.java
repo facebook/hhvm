@@ -147,6 +147,11 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
     @com.facebook.swift.codec.ThriftField(value=4, name="myUnion", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyUnion getMyUnion() { return myUnion; }
 
+    @java.lang.Override
+    public String getMessage() {
+      return getClass().getName();
+    }
+
     public static com.facebook.thrift.payload.Reader<MyException> asReader() {
       return MyException::read0;
     }

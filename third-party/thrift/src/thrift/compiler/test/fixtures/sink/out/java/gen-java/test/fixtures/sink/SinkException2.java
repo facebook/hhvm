@@ -78,6 +78,11 @@ public final class SinkException2 extends org.apache.thrift.TBaseException imple
     @com.facebook.swift.codec.ThriftField(value=1, name="reason", requiredness=Requiredness.NONE)
     public long getReason() { return reason; }
 
+    @java.lang.Override
+    public String getMessage() {
+      return getClass().getName();
+    }
+
     public static com.facebook.thrift.payload.Reader<SinkException2> asReader() {
       return SinkException2::read0;
     }

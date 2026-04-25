@@ -103,6 +103,11 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
     @com.facebook.swift.codec.ThriftField(value=2, name="result", requiredness=Requiredness.NONE)
     public test.fixtures.service_schema.Result getResult() { return result; }
 
+    @java.lang.Override
+    public String getMessage() {
+      return getClass().getName();
+    }
+
     public static com.facebook.thrift.payload.Reader<CustomException> asReader() {
       return CustomException::read0;
     }

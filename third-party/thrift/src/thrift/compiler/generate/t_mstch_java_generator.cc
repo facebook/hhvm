@@ -928,15 +928,16 @@ class t_mstch_java_generator : public t_whisker_generator {
 
     def.property("needsExceptionMessage?", [](const t_structured& self) {
       return self.is<t_exception>() &&
-          dynamic_cast<const t_exception&>(self).get_message_field() !=
-          nullptr &&
           self.get_field_by_name("message") == nullptr;
     });
     def.property(
         "exceptionMessage", [](const t_structured& self) -> std::string {
           const auto* message_field =
               dynamic_cast<const t_exception&>(self).get_message_field();
-          return get_java_swift_name(message_field);
+          if (message_field != nullptr) {
+            return get_java_swift_name(message_field);
+          }
+          return "getClass().getName()";
         });
 
     return std::move(def).make();

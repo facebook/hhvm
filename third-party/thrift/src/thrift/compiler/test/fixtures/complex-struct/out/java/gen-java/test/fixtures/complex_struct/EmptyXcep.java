@@ -53,6 +53,11 @@ public final class EmptyXcep extends org.apache.thrift.TBaseException implements
     }
 
 
+    @java.lang.Override
+    public String getMessage() {
+      return getClass().getName();
+    }
+
     public static com.facebook.thrift.payload.Reader<EmptyXcep> asReader() {
       return EmptyXcep::read0;
     }

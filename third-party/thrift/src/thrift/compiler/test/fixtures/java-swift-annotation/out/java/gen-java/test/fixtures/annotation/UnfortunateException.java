@@ -100,6 +100,11 @@ public final class UnfortunateException extends org.apache.thrift.TBaseException
     @com.facebook.swift.codec.ThriftField(value=2, name="aCamelI32", requiredness=Requiredness.NONE)
     public int getACamelI32() { return aCamelI32; }
 
+    @java.lang.Override
+    public String getMessage() {
+      return getClass().getName();
+    }
+
     public static com.facebook.thrift.payload.Reader<UnfortunateException> asReader() {
       return UnfortunateException::read0;
     }

@@ -22,8 +22,10 @@ import com.facebook.thrift.protocol.TProtocolType;
 import com.facebook.thrift.rsocket.util.PayloadUtil;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.test.rocket.InitialTestResponse;
+import com.facebook.thrift.test.rocket.TestAnnotatedMessageException;
 import com.facebook.thrift.test.rocket.TestException;
 import com.facebook.thrift.test.rocket.TestFunctionException;
+import com.facebook.thrift.test.rocket.TestMessageException;
 import com.facebook.thrift.test.rocket.TestRequest;
 import com.facebook.thrift.test.rocket.TestRequest2;
 import com.facebook.thrift.test.rocket.TestResponse;
@@ -33,6 +35,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.Payload;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import org.apache.thrift.ErrorBlame;
 import org.apache.thrift.PayloadExceptionMetadataBase;
@@ -180,6 +183,7 @@ public class ThriftServerRSocketTest {
     TestException exc = TestException.read0(protocol);
     protocol.readStructEnd();
     assertEquals("exc", exc.getMsg());
+    assertEquals(TestException.class.getName(), exc.getMessage());
   }
 
   private void assertDataIsFunctionException(ProtocolId protocolId, Payload payload, int id) {
@@ -191,6 +195,31 @@ public class ThriftServerRSocketTest {
     TestFunctionException exc = TestFunctionException.read0(protocol);
     protocol.readStructEnd();
     assertEquals("exc", exc.getMsg());
+    assertEquals(TestFunctionException.class.getName(), exc.getMessage());
+  }
+
+  private void assertDataIsMessageException(ProtocolId protocolId, Payload payload, int id) {
+    TProtocol protocol = TProtocolType.fromProtocolId(protocolId).apply(payload.data());
+    TField field = protocol.readFieldBegin();
+    assertEquals(id, field.id);
+    assertEquals(TType.STRUCT, field.type);
+    protocol.readStructBegin();
+    TestMessageException exc = TestMessageException.read0(protocol);
+    protocol.readStructEnd();
+    assertEquals("exc", exc.getMessage());
+  }
+
+  private void assertDataIsAnnotatedMessageException(
+      ProtocolId protocolId, Payload payload, int id) {
+    TProtocol protocol = TProtocolType.fromProtocolId(protocolId).apply(payload.data());
+    TField field = protocol.readFieldBegin();
+    assertEquals(id, field.id);
+    assertEquals(TType.STRUCT, field.type);
+    protocol.readStructBegin();
+    TestAnnotatedMessageException exc = TestAnnotatedMessageException.read0(protocol);
+    protocol.readStructEnd();
+    assertEquals("exc", exc.getMsg());
+    assertEquals("exc", exc.getMessage());
   }
 
   private Payload createPayload(RequestRpcMetadata requestMetadata, int intField, String strField) {
@@ -380,7 +409,11 @@ public class ThriftServerRSocketTest {
         .verifyComplete();
   }
 
-  private void checkDeclaredException(String funcName) {
+  private void checkDeclaredException(
+      String funcName,
+      String expectedName,
+      String expectedWhat,
+      BiConsumer<ProtocolId, Payload> payloadAssertion) {
     RequestRpcMetadata requestMetadata =
         createRequestRpcMetadata(funcName, RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
     Payload request = createPayload(requestMetadata, 0, "foo");
@@ -393,8 +426,8 @@ public class ThriftServerRSocketTest {
             })
         .assertNext(
             response -> {
-              assertStreamMedatadataHasDeclaredException(response);
-              assertDataIsTestException(requestMetadata.getProtocol(), response, 1);
+              assertStreamMedatadataHasDeclaredException(response, expectedName, expectedWhat);
+              payloadAssertion.accept(requestMetadata.getProtocol(), response);
             })
         .verifyComplete();
   }
@@ -403,7 +436,33 @@ public class ThriftServerRSocketTest {
   @MethodSource("data")
   public void testStreamDeclaredException(ProtocolId protocolId) {
     this.protocolId = protocolId;
-    checkDeclaredException("streamDeclaredException");
+    checkDeclaredException(
+        "streamDeclaredException",
+        TestException.class.getName(),
+        TestException.class.getName(),
+        (protocol, payload) -> assertDataIsTestException(protocol, payload, 1));
+  }
+
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamDeclaredMessageFieldException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
+    checkDeclaredException(
+        "streamDeclaredMessageFieldException",
+        TestMessageException.class.getName(),
+        "exc",
+        (protocol, payload) -> assertDataIsMessageException(protocol, payload, 18));
+  }
+
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamDeclaredAnnotatedMessageException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
+    checkDeclaredException(
+        "streamDeclaredAnnotatedMessageException",
+        TestAnnotatedMessageException.class.getName(),
+        "exc",
+        (protocol, payload) -> assertDataIsAnnotatedMessageException(protocol, payload, 19));
   }
 
   @ParameterizedTest
@@ -414,7 +473,7 @@ public class ThriftServerRSocketTest {
     // A sync throw happens before firstResponseProcessed=true, so it is checked
     // against functionExceptions (empty) and treated as undeclared.
     checkUndeclaredExceptionNoStream(
-        "streamDeclaredException2", TestException.class.getName(), null);
+        "streamDeclaredException2", TestException.class.getName(), TestException.class.getName());
   }
 
   @ParameterizedTest
@@ -426,7 +485,9 @@ public class ThriftServerRSocketTest {
     // (firstResponseProcessed=true), it is checked against streamExceptions
     // which does not contain TestFunctionException, so it is treated as undeclared.
     checkUndeclaredException(
-        "streamDeclaredAndFunctionException", TestFunctionException.class.getName(), null);
+        "streamDeclaredAndFunctionException",
+        TestFunctionException.class.getName(),
+        TestFunctionException.class.getName());
   }
 
   private void checkUndeclaredException(String funcName, String excName, String msg) {
@@ -492,33 +553,33 @@ public class ThriftServerRSocketTest {
     // not at function level. When thrown before the stream starts (firstResponseProcessed=false),
     // it is correctly treated as undeclared, matching C++ behavior.
     checkUndeclaredExceptionNoStream(
-        "streamInitialResponseDeclaredException", TestException.class.getName(), null);
+        "streamInitialResponseDeclaredException",
+        TestException.class.getName(),
+        TestException.class.getName());
   }
 
-  private void assertRpcMedatadataHasDeclaredException(Payload payload) {
+  private void assertRpcMedatadataHasDeclaredException(
+      Payload payload, String expectedName, String expectedWhat) {
     ResponseRpcMetadata responseMetadata = getResponseMetadata(payload);
+    PayloadExceptionMetadataBase expMetadata =
+        responseMetadata.getPayloadMetadata().getExceptionMetadata();
     assertEquals(
         ErrorBlame.SERVER,
-        responseMetadata
-            .getPayloadMetadata()
-            .getExceptionMetadata()
-            .getMetadata()
-            .getDeclaredException()
-            .getErrorClassification()
-            .getBlame());
+        expMetadata.getMetadata().getDeclaredException().getErrorClassification().getBlame());
+    assertEquals(expectedName, expMetadata.getNameUtf8());
+    assertEquals(expectedWhat, expMetadata.getWhatUtf8());
   }
 
-  private void assertStreamMedatadataHasDeclaredException(Payload payload) {
+  private void assertStreamMedatadataHasDeclaredException(
+      Payload payload, String expectedName, String expectedWhat) {
     StreamPayloadMetadata responseMetadata = getStreamMetadata(payload);
+    PayloadExceptionMetadataBase expMetadata =
+        responseMetadata.getPayloadMetadata().getExceptionMetadata();
     assertEquals(
         ErrorBlame.SERVER,
-        responseMetadata
-            .getPayloadMetadata()
-            .getExceptionMetadata()
-            .getMetadata()
-            .getDeclaredException()
-            .getErrorClassification()
-            .getBlame());
+        expMetadata.getMetadata().getDeclaredException().getErrorClassification().getBlame());
+    assertEquals(expectedName, expMetadata.getNameUtf8());
+    assertEquals(expectedWhat, expMetadata.getWhatUtf8());
   }
 
   @ParameterizedTest
@@ -534,7 +595,8 @@ public class ThriftServerRSocketTest {
         .expectNextCount(5)
         .assertNext(
             response -> {
-              assertStreamMedatadataHasDeclaredException(response);
+              assertStreamMedatadataHasDeclaredException(
+                  response, TestException.class.getName(), TestException.class.getName());
               assertDataIsTestException(requestMetadata.getProtocol(), response, 7);
             })
         .verifyComplete();
@@ -596,7 +658,8 @@ public class ThriftServerRSocketTest {
             })
         .assertNext(
             response -> {
-              assertStreamMedatadataHasDeclaredException(response);
+              assertStreamMedatadataHasDeclaredException(
+                  response, TestException.class.getName(), TestException.class.getName());
               assertDataIsTestException(requestMetadata.getProtocol(), response, 14);
             })
         .verifyComplete();
@@ -619,7 +682,10 @@ public class ThriftServerRSocketTest {
     StepVerifier.create(rocket.requestStream(request))
         .assertNext(
             response -> {
-              assertRpcMedatadataHasDeclaredException(response);
+              assertRpcMedatadataHasDeclaredException(
+                  response,
+                  TestFunctionException.class.getName(),
+                  TestFunctionException.class.getName());
               assertDataIsFunctionException(requestMetadata.getProtocol(), response, 13);
             })
         .verifyComplete();
@@ -640,7 +706,10 @@ public class ThriftServerRSocketTest {
     StepVerifier.create(rocket.requestStream(request))
         .assertNext(
             response -> {
-              assertRpcMedatadataHasDeclaredException(response);
+              assertRpcMedatadataHasDeclaredException(
+                  response,
+                  TestFunctionException.class.getName(),
+                  TestFunctionException.class.getName());
               assertDataIsFunctionException(requestMetadata.getProtocol(), response, 17);
             })
         .verifyComplete();

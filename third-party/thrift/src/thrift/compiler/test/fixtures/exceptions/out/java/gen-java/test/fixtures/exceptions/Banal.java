@@ -53,6 +53,11 @@ public final class Banal extends org.apache.thrift.TBaseException implements com
     }
 
 
+    @java.lang.Override
+    public String getMessage() {
+      return getClass().getName();
+    }
+
     public static com.facebook.thrift.payload.Reader<Banal> asReader() {
       return Banal::read0;
     }

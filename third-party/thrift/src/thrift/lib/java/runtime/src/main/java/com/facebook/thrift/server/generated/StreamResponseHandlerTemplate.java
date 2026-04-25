@@ -177,17 +177,23 @@ abstract class StreamResponseHandlerTemplate<T> {
       int fieldId,
       boolean streamException) {
     Writer knownExceptionWriter = createKnownExceptionWriter(throwable, chain, fieldId);
+    String exceptionName = throwable.getClass().getName();
+    String exceptionMessage = throwable.getMessage();
     if (streamException) {
       return Flux.just(
           ServerResponsePayload.createWithTApplicationException(
               knownExceptionWriter,
               null,
-              createStreamMetadataDeclaredException(requestPayload),
+              createStreamMetadataDeclaredException(
+                  requestPayload, exceptionName, exceptionMessage),
               true));
     }
     return Flux.just(
         ServerResponsePayload.createWithTApplicationException(
-            knownExceptionWriter, createRpcMetadataDeclaredException(requestPayload), null, false));
+            knownExceptionWriter,
+            createRpcMetadataDeclaredException(requestPayload, exceptionName, exceptionMessage),
+            null,
+            false));
   }
 
   protected static ResponseRpcMetadata createResponseRpcMetadata(
@@ -281,13 +287,15 @@ abstract class StreamResponseHandlerTemplate<T> {
   }
 
   private static StreamPayloadMetadata createStreamMetadataDeclaredException(
-      ServerRequestPayload requestPayload) {
+      ServerRequestPayload requestPayload, String name, String msg) {
     return new StreamPayloadMetadata.Builder()
         .setOtherMetadata(
             convertOtherData(requestPayload.getRequestRpcMetadata().getOtherMetadata()))
         .setPayloadMetadata(
             PayloadMetadata.fromExceptionMetadata(
                 new PayloadExceptionMetadataBase.Builder()
+                    .setNameUtf8(name)
+                    .setWhatUtf8(msg)
                     .setMetadata(
                         PayloadExceptionMetadata.fromDeclaredException(
                             new PayloadDeclaredExceptionMetadata.Builder()
@@ -323,12 +331,14 @@ abstract class StreamResponseHandlerTemplate<T> {
   }
 
   private static ResponseRpcMetadata createRpcMetadataDeclaredException(
-      ServerRequestPayload requestPayload) {
+      ServerRequestPayload requestPayload, String name, String msg) {
     return new ResponseRpcMetadata.Builder()
         .setOtherMetadata(requestPayload.getRequestRpcMetadata().getOtherMetadata())
         .setPayloadMetadata(
             PayloadMetadata.fromExceptionMetadata(
                 new PayloadExceptionMetadataBase.Builder()
+                    .setNameUtf8(name)
+                    .setWhatUtf8(msg)
                     .setMetadata(
                         PayloadExceptionMetadata.fromDeclaredException(
                             new PayloadDeclaredExceptionMetadata.Builder()

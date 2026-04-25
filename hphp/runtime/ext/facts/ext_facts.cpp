@@ -306,7 +306,7 @@ struct SqliteAutoloadMapFactory final : public FactsFactory {
 };
 
 struct FactsExtension final : Extension {
-  FactsExtension() : Extension("facts", "1.0", "hphp_hphpi") {}
+  FactsExtension() : Extension("facts", "1.0", "sandbox_infra") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     // Why are we using TRACE/Logger in moduleLoad instead of XLOG?  Because of

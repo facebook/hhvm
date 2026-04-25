@@ -92,6 +92,7 @@ namespace Trace {
       TM(tprefix)     /* Meta: prefix with string */  \
       TM(traceAsync)  /* Meta: lazy writes to disk */ \
       TM(apc)           \
+      TM(apc_warmup)    \
       TM(asmx64)        \
       TM(async_jit)     \
       TM(atomicvector)  \

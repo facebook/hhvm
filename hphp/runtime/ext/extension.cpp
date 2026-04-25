@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/trace.h"
 #include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -144,10 +145,12 @@ void Extension::deserialize(BlobDecoder& sd) {
     [&](VecInit& v) {
       std::string_view sv;
       sd(sv);
+      FTRACE_MOD(Trace::apc_warmup, 1, "Extension::deserialize [{}]: key '{}'\n", m_name, sv);
       auto sd = StringData::MakeUncounted(sv);
       v.append(make_tv<KindOfPersistentString>(sd));
     });
   auto d = init.toArray();
+  FTRACE_MOD(Trace::apc_warmup, 1, "Extension::deserialize [{}]: {} warmup keys\n", m_name, d.size());
   MakeUncountedEnv env {nullptr, nullptr};
   setWarmupData(d->makeUncounted(env, false));
 }

@@ -57,9 +57,9 @@ public class TestResourcesHolder {
   }
 
   @Test
-  public void testResourceLeakDisabled() {
+  public void testResourceLeakDefaultLevel() {
     new ResourcesHolder();
-    assertEquals(ResourceLeakDetector.Level.DISABLED, ResourceLeakDetector.getLevel());
+    assertEquals(ResourceLeakDetector.Level.SIMPLE, ResourceLeakDetector.getLevel());
   }
 
   @Test

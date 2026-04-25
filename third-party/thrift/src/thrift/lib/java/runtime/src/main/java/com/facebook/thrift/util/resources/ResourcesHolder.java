@@ -33,7 +33,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SingleThreadEventLoop;
 import io.netty.util.HashedWheelTimer;
-import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.internal.PlatformDependent;
 import io.rsocket.Closeable;
@@ -67,11 +66,6 @@ class ResourcesHolder implements Closeable {
     this.offLoopScheduler = createServerOffLoopScheduler();
     this.clientOffLoopScheduler =
         separateOffLoopScheduler ? createClientOffLoopScheduler() : offLoopScheduler;
-
-    // If system properties does not contain leak detection, disable it
-    if (!System.getProperties().containsKey("io.netty.leakDetectionLevel")) {
-      ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
-    }
   }
 
   public HashedWheelTimer getTimer() {

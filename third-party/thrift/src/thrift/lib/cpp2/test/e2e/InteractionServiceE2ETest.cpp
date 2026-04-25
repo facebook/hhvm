@@ -143,8 +143,6 @@ class InteractionServiceE2ETest : public test::E2ETestFixture {};
 // --- E2ETestFixture-based tests ---
 
 TEST_F(InteractionServiceE2ETest, PrioritizedInteractionRequest) {
-  gflags::FlagSaver flag_saver;
-  FLAGS_thrift_experimental_use_resource_pools = true;
   struct BlockingCalculatorHandler : public SemiCalculatorHandler {
     folly::Baton<> blockBlocker, blockNormal, startedBlocker;
 
@@ -985,18 +983,12 @@ TEST_F(InteractionServiceE2ETest, ReuseIdDuringConstructor) {
 }
 
 TEST_F(InteractionServiceE2ETest, ResourcePoolsGeneratedFactory) {
-  if (!FLAGS_thrift_experimental_use_resource_pools) {
-    return;
-  }
   auto handler = std::make_shared<SemiCalculatorHandler>();
   ScopedServerInterfaceThread server(handler);
   EXPECT_TRUE(server.getThriftServer().resourcePoolEnabled());
 }
 
 TEST_F(InteractionServiceE2ETest, ResourcePoolsCustomFactory) {
-  if (!FLAGS_thrift_experimental_use_resource_pools) {
-    return;
-  }
   class CustomAsyncProcessorFactory : public AsyncProcessorFactory {
    public:
     std::unique_ptr<AsyncProcessor> getProcessor() override {
@@ -1664,9 +1656,6 @@ class InternalPriorityE2ETest : public ::testing::Test {
          folly::Executor::MID_PRI}};
   };
   void SetUp() override {
-    if (!FLAGS_thrift_experimental_use_resource_pools) {
-      return;
-    }
     auto pile = std::make_unique<TestRequestPile>();
     auto cc = std::make_unique<ParallelConcurrencyController>(
         *pile.get(), *folly::getGlobalCPUExecutor().get());
@@ -1687,9 +1676,6 @@ class InternalPriorityE2ETest : public ::testing::Test {
 };
 
 CO_TEST_F(InternalPriorityE2ETest, FactoryFunction) {
-  if (!FLAGS_thrift_experimental_use_resource_pools) {
-    co_return;
-  }
   auto client = server_->newClient<Client<Calculator>>();
   auto [addition, _] = co_await client->co_initializedAddition(0);
   co_await addition.co_getPrimitive();
@@ -1697,9 +1683,6 @@ CO_TEST_F(InternalPriorityE2ETest, FactoryFunction) {
 }
 
 CO_TEST_F(InternalPriorityE2ETest, Constructor) {
-  if (!FLAGS_thrift_experimental_use_resource_pools) {
-    co_return;
-  }
   auto client = server_->newClient<Client<Calculator>>();
   auto addition = client->createAddition();
   co_await addition.co_getPrimitive();

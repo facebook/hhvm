@@ -32,7 +32,6 @@ import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.protocol.TProtocolType;
 import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
@@ -356,7 +355,7 @@ public final class RpcClientUtils {
                   // TODO: (vishwagayasen) Revert this to directly using ex when RSocket is released
                   ByteBuf byteBuf = null;
                   try {
-                    byteBuf = PooledByteBufAllocator.DEFAULT.buffer();
+                    byteBuf = RpcResources.getByteBufAllocator().buffer();
                     ByteBufTProtocol protocol = TProtocolType.TBinary.apply(byteBuf);
                     new TApplicationException(exceptionMetadata.getWhatUtf8()).write(protocol);
                     return TApplicationException.read(protocol);

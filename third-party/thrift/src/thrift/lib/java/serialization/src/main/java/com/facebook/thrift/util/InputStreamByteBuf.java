@@ -236,20 +236,9 @@ final class InputStreamByteBuf extends ByteBuf {
 
   @Override
   public ByteBuf readBytes(int length) {
-    ByteBuf dst = Unpooled.buffer(length);
-    try {
-      for (int i = 0, b; i < length; i++) {
-        b = inputStream.read();
-        if (b == -1) {
-          break;
-        }
-        dst.writeByte(b);
-      }
-    } catch (IOException e) {
-      throw Exceptions.propagate(e);
-    }
-
-    return dst;
+    byte[] bytes = new byte[length];
+    readIntoBuffer(bytes, 0, length);
+    return Unpooled.wrappedBuffer(bytes);
   }
 
   @Override
@@ -351,12 +340,12 @@ final class InputStreamByteBuf extends ByteBuf {
 
   @Override
   public ByteBuf readSlice(int length) {
-    return Unpooled.wrappedBuffer(readBytes(length));
+    return readBytes(length);
   }
 
   @Override
   public ByteBuf readRetainedSlice(int length) {
-    return Unpooled.wrappedBuffer(readBytes(length));
+    return readBytes(length);
   }
 
   // -- Unsupported methods;

@@ -19,6 +19,9 @@ package com.facebook.thrift.util;
 import com.facebook.thrift.test.EveryLayout;
 import com.facebook.thrift.test.universalname.TestRequest;
 import com.facebook.thrift.util.resources.ChunkedInputStream;
+import com.facebook.thrift.util.resources.RpcResources;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -186,6 +189,69 @@ public class SerializerUtilTest {
         SerializerUtil.fromBase64(
             EveryLayout.asReader(), base64, true, SerializationProtocol.TBinary);
     Assertions.assertEquals(this.everyLayout, everyLayout);
+  }
+
+  @Test
+  public void testToByteBufferDoesNotLeakMemory() {
+    UnpooledByteBufAllocator unpooled = UnpooledByteBufAllocator.DEFAULT;
+    long before = unpooled.metric().usedHeapMemory();
+
+    for (int i = 0; i < 100; i++) {
+      ByteBuffer bb = SerializerUtil.toByteBuffer(everyLayout, SerializationProtocol.TBinary);
+      Assertions.assertNotNull(bb);
+    }
+
+    long after = unpooled.metric().usedHeapMemory();
+    Assertions.assertEquals(before, after, "toByteBuffer should not leak unpooled heap memory");
+  }
+
+  @Test
+  public void testToByteBufferIsHeapBacked() {
+    ByteBuffer bb = SerializerUtil.toByteBuffer(everyLayout, SerializationProtocol.TBinary);
+    Assertions.assertTrue(bb.hasArray(), "toByteBuffer must return heap-backed buffer");
+  }
+
+  @Test
+  public void testToInputStreamReleasesMemoryOnClose() throws Exception {
+    UnpooledByteBufAllocator unpooled = RpcResources.getUnpooledByteBufAllocator();
+    long beforeHeap = unpooled.metric().usedHeapMemory();
+    long beforeDirect = unpooled.metric().usedDirectMemory();
+
+    ByteBufInputStream stream =
+        SerializerUtil.toInputStream(everyLayout, SerializationProtocol.TBinary);
+
+    long duringHeap = unpooled.metric().usedHeapMemory();
+    long duringDirect = unpooled.metric().usedDirectMemory();
+    Assertions.assertTrue(
+        duringHeap > beforeHeap || duringDirect > beforeDirect, "buffer should be allocated");
+
+    stream.close();
+
+    long afterHeap = unpooled.metric().usedHeapMemory();
+    long afterDirect = unpooled.metric().usedDirectMemory();
+    Assertions.assertEquals(beforeHeap, afterHeap, "closing stream should release heap memory");
+    Assertions.assertEquals(
+        beforeDirect, afterDirect, "closing stream should release direct memory");
+  }
+
+  @Test
+  public void testFromInputStreamDoesNotLeakHeapCounter() {
+    UnpooledByteBufAllocator unpooled = UnpooledByteBufAllocator.DEFAULT;
+    long before = unpooled.metric().usedHeapMemory();
+
+    for (int i = 0; i < 100; i++) {
+      byte[] bytes = SerializerUtil.toByteArray(everyLayout, SerializationProtocol.TCompact);
+      EveryLayout result =
+          SerializerUtil.fromInputStream(
+              EveryLayout.asReader(),
+              new ByteArrayInputStream(bytes),
+              SerializationProtocol.TCompact);
+      Assertions.assertEquals(everyLayout, result);
+    }
+
+    long after = unpooled.metric().usedHeapMemory();
+    Assertions.assertEquals(
+        before, after, "fromInputStream should not leak unpooled heap memory counter");
   }
 
   @Test

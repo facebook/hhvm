@@ -170,9 +170,7 @@ public final class SerializerUtil {
   }
 
   private static ByteBuffer doToByteBuffer(Writer writer, SerializationProtocol protocol) {
-    ByteBuf dst = Unpooled.buffer();
-    writer.write(toByteBufProtocol(protocol, dst));
-    return dst.nioBuffer();
+    return ByteBuffer.wrap(doToByteArray(writer, protocol));
   }
 
   /**
@@ -228,7 +226,7 @@ public final class SerializerUtil {
   private static ByteBufInputStream doToInputStream(Writer writer, SerializationProtocol protocol) {
     ByteBuf dst = UnpooledByteBufAllocator.DEFAULT.buffer();
     writer.write(toByteBufProtocol(protocol, dst));
-    return new ByteBufInputStream(dst);
+    return new ByteBufInputStream(dst, true);
   }
 
   public static void toOutStream(Writer writer, OutputStream os, SerializationProtocol protocol) {

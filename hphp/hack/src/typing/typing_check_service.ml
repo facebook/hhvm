@@ -244,6 +244,8 @@ end = struct
     | None -> fn ()
     | Some interval ->
       let start_time = Unix.gettimeofday () in
+      let prev_cpu_time = ref (Sys.time ()) in
+      let prev_counters = ref (Counters.get_counters ()) in
       let timer_id = ref None in
       let rec schedule () =
         timer_id :=
@@ -254,10 +256,20 @@ end = struct
                  let elapsed =
                    Unix.gettimeofday () -. start_time |> Float.to_int
                  in
+                 let cpu_time = Sys.time () in
+                 let cpu_delta = cpu_time -. !prev_cpu_time in
+                 prev_cpu_time := cpu_time;
+                 let counters = Counters.get_counters () in
+                 let counters_delta =
+                   Telemetry.diff ~all:false ~prev:!prev_counters counters
+                 in
+                 prev_counters := counters;
                  Hh_logger.log
-                   "[heartbeat] Still checking %s after %ds"
+                   "[heartbeat] Still checking %s after %ds (cpu=%.1fs, counters=%s)"
                    (Relative_path.suffix (path_of_workitem workitem))
-                   elapsed;
+                   elapsed
+                   cpu_delta
+                   (Telemetry.to_string counters_delta);
                  HackEventLogger.client_check_heartbeat
                    ~path:(path_of_workitem workitem)
                    ~start_time;

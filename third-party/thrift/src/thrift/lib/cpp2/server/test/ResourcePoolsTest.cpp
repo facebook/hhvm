@@ -18,7 +18,6 @@
 
 #include <folly/futures/Future.h>
 
-#include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
@@ -39,11 +38,6 @@ class BlockingCallTestService : public ServiceHandler<TestService> {
 class ResourcePoolsTest : public Test {
  protected:
   void SetUp() override {
-    THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, true);
-    if (!apache::thrift::useResourcePoolsFlagsSet()) {
-      GTEST_SKIP() << "Invalid resource pools mode";
-    }
-
     runner_ = std::make_unique<ScopedServerInterfaceThread>(
         std::make_shared<BlockingCallTestService>());
 

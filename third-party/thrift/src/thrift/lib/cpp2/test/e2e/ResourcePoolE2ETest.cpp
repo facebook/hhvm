@@ -290,7 +290,6 @@ TEST_F(ResourcePoolE2ETest, PriorityBasedRouting) {
       handlerBlocked, proceed, executionOrder, orderMutex);
 
   startServer(handler, [](ThriftServer& server) {
-    server.requireResourcePools();
     server.setThreadManagerType(
         ThriftServer::ThreadManagerType::PRIORITY_QUEUE);
     server.setNumCPUWorkerThreads(1);

@@ -641,7 +641,6 @@ TEST(ParallelConcurrencyControllerTest, FinishCallbackExceptionSafe) {
   auto fac = std::make_shared<BadAsyncProcessorFactory>(baton);
 
   auto config = [&](apache::thrift::ThriftServer& server) mutable {
-    server.requireResourcePools();
     server.setInterface(fac);
   };
 

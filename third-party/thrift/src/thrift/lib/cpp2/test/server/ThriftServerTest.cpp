@@ -4642,8 +4642,6 @@ TEST(ThriftServerTest, getResourcePoolServerDbgInfo) {
   auto server = std::make_shared<ScopedServerInterfaceThread>(
       handler, [](ThriftServer& server) {
         {
-          server.requireResourcePools();
-
           auto rrOptions = RoundRobinRequestPile::Options();
           rrOptions.setNumMaxRequests(123);
           rrOptions.setNumPriorities(3);

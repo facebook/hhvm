@@ -80,8 +80,6 @@ TEST(
       handler, "::1", 0, [](ThriftServer& server) {
         // Set up thrift server with 2 RPs none of them is "default"
         {
-          server.requireResourcePools();
-
           auto requestPile = std::make_unique<RoundRobinRequestPile>(
               RoundRobinRequestPile::Options());
           auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(1);

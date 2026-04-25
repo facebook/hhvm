@@ -122,7 +122,6 @@ struct CalculatorHandler : public ServiceHandler<test::Calculator> {
 CO_TEST(InternalPriorityTest, IntegrationTest) {
   auto handler = std::make_shared<CalculatorHandler>();
   ScopedServerInterfaceThread server(handler, [](ThriftServer& thriftServer) {
-    thriftServer.requireResourcePools();
     // This will create 5 priorities within a single RoundRobinRequestPile, we
     // expect this to double to 10 due to internal priority
     thriftServer.setThreadManagerType(

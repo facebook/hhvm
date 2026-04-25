@@ -24,6 +24,8 @@ import com.facebook.thrift.test.rocket.TestRequest;
 import com.facebook.thrift.test.rocket.TestRequest2;
 import com.facebook.thrift.test.rocket.TestResponse;
 import com.facebook.thrift.test.rocket.TestService;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -157,4 +159,41 @@ public class TestServiceHandler implements TestService.Reactive {
 
   @Override
   public void dispose() {}
+
+  @Override
+  public Flux<StreamResponse<InitialTestResponse, TestResponse>>
+      streamInitialResponseDeclaredExceptionAfterFirst(TestRequest testRequest) {
+    Flux<StreamResponse<InitialTestResponse, TestResponse>> first =
+        Flux.just(
+            StreamResponse.fromFirstResponse(
+                new InitialTestResponse.Builder().setIntField(100).build()));
+    return first.concatWith(Flux.error(new TestException("exc")));
+  }
+
+  @Override
+  public Flux<TestResponse> streamFunctionExceptionSyncThrow(TestRequest testRequest) {
+    throw new TestFunctionException("exc");
+  }
+
+  @Override
+  public Flux<StreamResponse<InitialTestResponse, TestResponse>>
+      streamInitialResponseInvalidFirstResponse(TestRequest testRequest) {
+    return Flux.just(createInvalidFirstResponse());
+  }
+
+  @SuppressWarnings("unchecked")
+  private static StreamResponse<InitialTestResponse, TestResponse> createInvalidFirstResponse() {
+    try {
+      Constructor<StreamResponse> constructor = StreamResponse.class.getDeclaredConstructor();
+      constructor.setAccessible(true);
+      StreamResponse<InitialTestResponse, TestResponse> response = constructor.newInstance();
+
+      Field isFirstResponseField = StreamResponse.class.getDeclaredField("isFirstResponse");
+      isFirstResponseField.setAccessible(true);
+      isFirstResponseField.setBoolean(response, true);
+      return response;
+    } catch (ReflectiveOperationException e) {
+      throw new AssertionError("Failed to create invalid first response", e);
+    }
+  }
 }

@@ -421,6 +421,9 @@ public final class RSocketRpcClient implements RpcClient {
         }
 
         Optional<? extends TException> undeclaredException = getUndeclaredException(rpcMetadata);
+        if (!undeclaredException.isPresent() && !isFirstPayload) {
+          undeclaredException = getUndeclaredException(streamPayloadMetadata);
+        }
         if (undeclaredException.isPresent()) {
           return ClientResponsePayload.createException(
               undeclaredException.get(), rpcMetadata, streamPayloadMetadata, true);

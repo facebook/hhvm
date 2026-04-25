@@ -399,20 +399,6 @@ public class ThriftServerRSocketTest {
         .verifyComplete();
   }
 
-  private void checkDeclaredExceptionNoStream(String funcName) {
-    RequestRpcMetadata requestMetadata =
-        createRequestRpcMetadata(funcName, RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
-    Payload request = createPayload(requestMetadata, 0, "foo");
-
-    StepVerifier.create(rocket.requestStream(request))
-        .assertNext(
-            response -> {
-              assertRpcMedatadataHasDeclaredException(response);
-              assertDataIsTestException(requestMetadata.getProtocol(), response, 2);
-            })
-        .verifyComplete();
-  }
-
   @ParameterizedTest
   @MethodSource("data")
   public void testStreamDeclaredException(ProtocolId protocolId) {
@@ -422,32 +408,25 @@ public class ThriftServerRSocketTest {
 
   @ParameterizedTest
   @MethodSource("data")
-  public void testStreamDeclaredException2(ProtocolId protocolId) {
+  public void testStreamDeclaredException2SyncThrowIsUndeclared(ProtocolId protocolId) {
     this.protocolId = protocolId;
-    checkDeclaredExceptionNoStream("streamDeclaredException2");
+    // TestException is only declared at stream level, not function level.
+    // A sync throw happens before firstResponseProcessed=true, so it is checked
+    // against functionExceptions (empty) and treated as undeclared.
+    checkUndeclaredExceptionNoStream(
+        "streamDeclaredException2", TestException.class.getName(), null);
   }
 
   @ParameterizedTest
   @MethodSource("data")
-  public void testDeclaredFunctionException(ProtocolId protocolId) {
+  public void testFunctionOnlyExceptionInStreamIsUndeclared(ProtocolId protocolId) {
     this.protocolId = protocolId;
-    RequestRpcMetadata requestMetadata =
-        createRequestRpcMetadata(
-            "streamDeclaredAndFunctionException", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
-    Payload request = createPayload(requestMetadata, 0, "foo");
-
-    StepVerifier.create(rocket.requestStream(request))
-        .assertNext(
-            response -> {
-              assertRpcMetadataIsDefault(response);
-              assertEmptyResponse(response);
-            })
-        .assertNext(
-            response -> {
-              assertStreamMedatadataHasDeclaredException(response);
-              assertDataIsFunctionException(requestMetadata.getProtocol(), response, 6);
-            })
-        .verifyComplete();
+    // TestFunctionException is declared at function level only (throws clause),
+    // not at stream level (stream<T throws>). When thrown during the stream
+    // (firstResponseProcessed=true), it is checked against streamExceptions
+    // which does not contain TestFunctionException, so it is treated as undeclared.
+    checkUndeclaredException(
+        "streamDeclaredAndFunctionException", TestFunctionException.class.getName(), null);
   }
 
   private void checkUndeclaredException(String funcName, String excName, String msg) {
@@ -507,19 +486,13 @@ public class ThriftServerRSocketTest {
 
   @ParameterizedTest
   @MethodSource("data")
-  public void testInitialResponseDeclaredException(ProtocolId protocolId) {
+  public void testInitialResponseStreamOnlyExceptionIsUndeclared(ProtocolId protocolId) {
     this.protocolId = protocolId;
-    RequestRpcMetadata requestMetadata =
-        createRequestRpcMetadata(
-            "streamInitialResponseDeclaredException", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
-    Payload request = createPayload(requestMetadata, 0, "foo");
-
-    StepVerifier.create(rocket.requestStream(request))
-        .assertNext(
-            response -> {
-              assertRpcMedatadataHasDeclaredException(response);
-            })
-        .verifyComplete();
+    // TestException is only declared at stream level (stream<T throws (11: TestException)>),
+    // not at function level. When thrown before the stream starts (firstResponseProcessed=false),
+    // it is correctly treated as undeclared, matching C++ behavior.
+    checkUndeclaredExceptionNoStream(
+        "streamInitialResponseDeclaredException", TestException.class.getName(), null);
   }
 
   private void assertRpcMedatadataHasDeclaredException(Payload payload) {
@@ -598,5 +571,91 @@ public class ThriftServerRSocketTest {
               assertEquals("foobar7", result.getStrField());
             })
         .verifyComplete();
+  }
+
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testStreamDeclaredExceptionAfterFirstResponse(ProtocolId protocolId) {
+    this.protocolId = protocolId;
+    // Stream-declared exception thrown AFTER the first response is sent.
+    // firstResponseProcessed=true, so isKnownException checks streamExceptions,
+    // finds TestException, and treats it as a declared stream exception.
+    RequestRpcMetadata requestMetadata =
+        createRequestRpcMetadata(
+            "streamInitialResponseDeclaredExceptionAfterFirst",
+            RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
+    Payload request = createPayload(requestMetadata, 0, "foo");
+
+    StepVerifier.create(rocket.requestStream(request))
+        .assertNext(
+            response -> {
+              assertRpcMetadataIsDefault(response);
+              InitialTestResponse initialResponse =
+                  getInitialTestResponse(requestMetadata.getProtocol(), response);
+              assertEquals(100, initialResponse.getIntField());
+            })
+        .assertNext(
+            response -> {
+              assertStreamMedatadataHasDeclaredException(response);
+              assertDataIsTestException(requestMetadata.getProtocol(), response, 14);
+            })
+        .verifyComplete();
+  }
+
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testFunctionDeclaredExceptionBeforeStream(ProtocolId protocolId) {
+    this.protocolId = protocolId;
+    // TestFunctionException is declared at function level for this method.
+    // When thrown via Flux.error() before firstResponseProcessed=true
+    // (StreamWithFirstResponseHandler), it is checked against functionExceptions,
+    // found, and treated as a declared function exception.
+    RequestRpcMetadata requestMetadata =
+        createRequestRpcMetadata(
+            "streamInitialResponseDeclaredAndFunctionException",
+            RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
+    Payload request = createPayload(requestMetadata, 0, "foo");
+
+    StepVerifier.create(rocket.requestStream(request))
+        .assertNext(
+            response -> {
+              assertRpcMedatadataHasDeclaredException(response);
+              assertDataIsFunctionException(requestMetadata.getProtocol(), response, 13);
+            })
+        .verifyComplete();
+  }
+
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testFunctionDeclaredExceptionSyncThrow(ProtocolId protocolId) {
+    this.protocolId = protocolId;
+    // TestFunctionException is declared at function level. Thrown synchronously
+    // (before firstResponseProcessed=true), checked against functionExceptions,
+    // found, and treated as a declared function exception.
+    RequestRpcMetadata requestMetadata =
+        createRequestRpcMetadata(
+            "streamFunctionExceptionSyncThrow", RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE);
+    Payload request = createPayload(requestMetadata, 0, "foo");
+
+    StepVerifier.create(rocket.requestStream(request))
+        .assertNext(
+            response -> {
+              assertRpcMedatadataHasDeclaredException(response);
+              assertDataIsFunctionException(requestMetadata.getProtocol(), response, 17);
+            })
+        .verifyComplete();
+  }
+
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testInvalidFirstResponseDoesNotEstablishStream(ProtocolId protocolId) {
+    this.protocolId = protocolId;
+    // A malformed first response must be treated as a pre-stream failure.
+    // The server should send an undeclared exception in ResponseRpcMetadata
+    // and must not establish the stream.
+    checkUndeclaredExceptionNoStream(
+        "streamInitialResponseInvalidFirstResponse",
+        NullPointerException.class.getName(),
+        "the first response must not be null");
   }
 }

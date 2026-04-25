@@ -86,10 +86,9 @@ public final class StreamWithFirstResponseHandler<T, K>
         StreamResponse<T, K> streamResponse, SynchronousSink<ServerResponsePayload> sink) {
       if (firstResponseProcessed) {
         handle(streamResponse, sink);
-      } else {
-        handleFirst(streamResponse, sink);
+        return;
       }
-      firstResponseProcessed = true;
+      handleFirst(streamResponse, sink);
     }
 
     private void handleFirst(
@@ -101,6 +100,7 @@ public final class StreamWithFirstResponseHandler<T, K>
         Writer writer =
             firstResponseWriterFactory.createResponseWriter(firstResponse, chain, requestPayload);
         doHandle(writer, sink);
+        firstResponseProcessed = true;
       }
     }
 

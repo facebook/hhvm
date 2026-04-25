@@ -119,17 +119,34 @@ abstract class StreamResponseHandlerTemplate<T> {
     }
   }
 
-  private int isKnownException(Throwable t) {
+  /**
+   * Check if an exception is a known (declared) exception.
+   *
+   * <p>Per Thrift IDL specification: - Function-level exceptions (throws clause): only declared at
+   * initial response level - Stream-level exceptions (stream<T throws>): only declared within the
+   * stream
+   *
+   * @param t the exception to check
+   * @param checkStreamExceptions if true, check stream exceptions; if false, check function
+   *     exceptions
+   * @return the field ID if known, -1 if unknown
+   */
+  private int isKnownException(Throwable t, boolean checkStreamExceptions) {
     if (t instanceof ThriftSerializable) {
       Class<? extends Throwable> aClass = t.getClass();
-      for (int i = 0; i < functionExceptions.length; i++) {
-        if (aClass == functionExceptions[i]) {
-          return functionExceptionIds[i];
+      if (checkStreamExceptions) {
+        // We're in the stream - only stream-declared exceptions are known
+        for (int i = 0; i < streamExceptions.length; i++) {
+          if (aClass == streamExceptions[i]) {
+            return streamExceptionIds[i];
+          }
         }
-      }
-      for (int i = 0; i < streamExceptions.length; i++) {
-        if (aClass == streamExceptions[i]) {
-          return streamExceptionIds[i];
+      } else {
+        // We're at function level - only function-declared exceptions are known
+        for (int i = 0; i < functionExceptions.length; i++) {
+          if (aClass == functionExceptions[i]) {
+            return functionExceptionIds[i];
+          }
         }
       }
     }
@@ -142,13 +159,15 @@ abstract class StreamResponseHandlerTemplate<T> {
       ServerRequestPayload requestPayload,
       ContextChain chain,
       StreamHandler handler) {
-    int fieldId = isKnownException(throwable);
+    // Determine if we're in the stream or at function level
+    boolean inStream = handler.isFirstResponseProcessed();
+
+    // Check if this is a known exception based on context
+    int fieldId = isKnownException(throwable, inStream);
     if (fieldId == -1) {
-      return handleUnknownException(
-          throwable, name, requestPayload, chain, handler.isFirstResponseProcessed());
+      return handleUnknownException(throwable, name, requestPayload, chain, inStream);
     }
-    return handleKnownException(
-        throwable, requestPayload, chain, fieldId, handler.isFirstResponseProcessed());
+    return handleKnownException(throwable, requestPayload, chain, fieldId, inStream);
   }
 
   private Flux<ServerResponsePayload> handleKnownException(

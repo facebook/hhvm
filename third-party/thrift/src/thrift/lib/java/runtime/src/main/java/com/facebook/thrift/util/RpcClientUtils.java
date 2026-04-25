@@ -61,6 +61,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import javax.validation.constraints.NotNull;
 import org.apache.thrift.PayloadExceptionMetadata;
 import org.apache.thrift.PayloadMetadata;
@@ -276,7 +277,7 @@ public final class RpcClientUtils {
       // Parse undefined exception as TApplicationException
       if (exceptionReader == null) {
         exception =
-            new TTransportException(
+            new TApplicationException(
                 field.type == TType.STRING ? protocol.readString() : payload.getDataUtf8());
       } else {
         exception = (Exception) exceptionReader.read(protocol);
@@ -341,7 +342,24 @@ public final class RpcClientUtils {
    */
   public static Optional<? extends TException> getUndeclaredException(
       ResponseRpcMetadata rpcMetadata) {
-    return Optional.ofNullable(rpcMetadata.getPayloadMetadata())
+    return getUndeclaredException(rpcMetadata::getPayloadMetadata);
+  }
+
+  /**
+   * Checks if there is undeclared exception from stream payload metadata. If yes, return the
+   * exception, or else, return Optional.empty().
+   *
+   * @param streamPayloadMetadata: StreamPayloadMetadata
+   * @return Undeclared Exception if there is one.
+   */
+  public static Optional<? extends TException> getUndeclaredException(
+      StreamPayloadMetadata streamPayloadMetadata) {
+    return getUndeclaredException(streamPayloadMetadata::getPayloadMetadata);
+  }
+
+  private static Optional<? extends TException> getUndeclaredException(
+      Supplier<PayloadMetadata> payloadMetadata) {
+    return Optional.ofNullable(payloadMetadata.get())
         .filter(PayloadMetadata::isSetExceptionMetadata)
         .map(PayloadMetadata::getExceptionMetadata)
         .map(

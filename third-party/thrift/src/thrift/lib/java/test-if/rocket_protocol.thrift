@@ -98,4 +98,21 @@ service TestService {
   > streamInitialResponseDeclaredAndFunctionException(
     1: TestRequest request,
   ) throws (13: TestFunctionException e1);
+
+  // Test: stream-declared exception thrown AFTER first response is sent
+  InitialTestResponse, stream<
+    TestResponse throws (14: TestException e)
+  > streamInitialResponseDeclaredExceptionAfterFirst(1: TestRequest request);
+
+  // Test: function-declared exception thrown synchronously (before stream starts)
+  stream<
+    TestResponse throws (16: TestException e)
+  > streamFunctionExceptionSyncThrow(1: TestRequest request) throws (
+    17: TestFunctionException e1,
+  );
+
+  // Test: invalid first response must not establish the stream
+  InitialTestResponse, stream<
+    TestResponse
+  > streamInitialResponseInvalidFirstResponse(1: TestRequest request);
 }

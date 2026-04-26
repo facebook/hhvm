@@ -430,6 +430,9 @@ class HTTPTransactionTransportCallback {
 };
 
 class HTTPSessionBase;
+struct HttpWtClientCallbackIf;
+using HttpWtClientCallbackPtr = std::unique_ptr<HttpWtClientCallbackIf>;
+
 class HTTPTransaction
     : public folly::HHWheelTimer::Callback
     , public folly::DelayedDestructionBase
@@ -1171,6 +1174,26 @@ class HTTPTransaction
   virtual void sendHeadersWithOptionalEOM(const HTTPMessage& headers, bool eom);
 
   /**
+   * Variant of send headers specifically for webtransport requests/responses
+   *
+   * This api will terminate WebTransport. If 200/ok resp is
+   * sent, the existing application's HTTPTransactionHandler will be detached
+   * and replaced internally. Applications should solely interact with the
+   * WebTransport session via the WebTransportHandler & WebTransportSession
+   * (passed into WebTransportHandler::onWebTransportSession) pair.
+   *
+   * If an endpoint/proxy wants to bypass parsing WebTransport bits (e.g. to
+   * enable http/2 end-to-end CONNECT tunneling), it can use the non-wt
+   * HttpTxn::sendHeaders
+   *
+   * HttpWtCallbackPtr is solely for upstream -- it's a mechanism to be notified
+   * of ingress headers/error (whichever occurs first).
+   */
+  void sendWtHeaders(const HTTPMessage& headers,
+                     WebTransportHandler::Ptr wtHandler,
+                     HttpWtClientCallbackPtr wtClientCb = nullptr) noexcept;
+
+  /**
    * Send part or all of the egress message body to the Transport. If flow
    * control is enabled, the chunk boundaries may not be respected.
    * This method does not actually write the message out on the wire
@@ -1576,7 +1599,7 @@ class HTTPTransaction
 
   folly::Optional<ConnectionToken> getConnectionToken() const noexcept;
 
-  bool isWebTransportConnectStream() {
+  bool isWebTransportConnectStream() const {
     return transport_.supportsWebTransport() && wtConnectStream_;
   }
 
@@ -1633,6 +1656,29 @@ class HTTPTransaction
   HTTPTransactionObserverAccessor* getObserverAccessor() {
     return &txnObserverAccessor_;
   }
+
+  // only for consumption by the backing sessions (e.g. HTTPSession, HQSession)
+  // avoids applications messing with wt state
+  struct WtCtx {
+    friend class HTTPTransaction;
+    friend class HTTPSession;
+    friend class HQSession;
+
+   private:
+    bool hasWtHandler() const noexcept {
+      return bool(wtHandler_);
+    }
+    WebTransportHandler::Ptr moveWtHandler() noexcept {
+      return std::move(wtHandler_);
+    }
+
+    HttpWtClientCallbackPtr moveWtCallback() noexcept {
+      return std::move(upstreamWtCb_);
+    }
+
+    WebTransportHandler::Ptr wtHandler_;
+    HttpWtClientCallbackPtr upstreamWtCb_;
+  } wtCtx_;
 
  private:
   HTTPTransaction(const HTTPTransaction&) = delete;
@@ -2011,6 +2057,14 @@ class HTTPTransaction
   // can inspect any session state available through public methods
   // when destruction of the session begins.
   HTTPTransactionObserverContainer txnObserverContainer_;
+};
+
+struct HttpWtClientCallbackIf {
+  virtual ~HttpWtClientCallbackIf() noexcept = default;
+  virtual void onHeaders(std::unique_ptr<HTTPMessage>) noexcept {
+  }
+  virtual void onErr(const HTTPException&) noexcept {
+  }
 };
 
 /**

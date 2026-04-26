@@ -501,6 +501,7 @@ class HTTPSession
   const HTTPCodec& getCodec() const noexcept override {
     return codec_.getChainEnd();
   }
+  bool supportsWebTransport() const noexcept final;
 
   /**
    * Returns the underlying AsyncTransport.

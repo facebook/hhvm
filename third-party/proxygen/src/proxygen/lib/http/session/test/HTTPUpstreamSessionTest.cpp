@@ -15,19 +15,30 @@
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/http/codec/test/MockHTTPCodec.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
+#include <proxygen/lib/http/codec/webtransport/WebTransportCapsuleCodec.h>
 #include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPSessionTest.h>
 #include <proxygen/lib/http/session/test/MockByteEventTracker.h>
 #include <proxygen/lib/http/session/test/MockSessionObserver.h>
 #include <proxygen/lib/http/session/test/TestUtils.h>
+#include <proxygen/lib/http/webtransport/WtUtils.h>
+#include <proxygen/lib/http/webtransport/test/Mocks.h>
 #include <proxygen/lib/test/TestAsyncTransport.h>
 #include <wangle/acceptor/ConnectionManager.h>
 
 using folly::test::MockAsyncTransport;
 
 using namespace proxygen;
+using namespace proxygen::test;
 using namespace testing;
+
+namespace {
+
+void initSelfCodec(HTTPCodec&) {
+}
+
+} // namespace
 
 using std::string;
 using std::unique_ptr;
@@ -150,11 +161,12 @@ class HTTPUpstreamTest
       }
     }
 
-    auto rawCodec = codec.get();
-    if (dynamic_cast<HTTP1xCodec*>(rawCodec) != nullptr) {
-      dynamic_cast<HTTP1xCodec*>(rawCodec)->setStrictValidation(true);
-    } else if (dynamic_cast<HTTP2Codec*>(rawCodec) != nullptr) {
-      dynamic_cast<HTTP2Codec*>(rawCodec)->setStrictValidation(true);
+    pCodec_ = codec.get();
+    initSelfCodec_(*pCodec_);
+    if (auto* c = dynamic_cast<HTTP1xCodec*>(pCodec_)) {
+      c->setStrictValidation(true);
+    } else if (auto* c = dynamic_cast<HTTP2Codec*>(pCodec_)) {
+      c->setStrictValidation(true);
     }
 
     httpSession_ = new HTTPUpstreamSession(
@@ -324,6 +336,10 @@ class HTTPUpstreamTest
   folly::SocketAddress localAddr_{"127.0.0.1", 80};
   folly::SocketAddress peerAddr_{"127.0.0.1", 12345};
   HTTPUpstreamSession* httpSession_{nullptr};
+  // allows derived tests (e.g. WebTransport tests) to hook into codec before
+  // installation
+  std::function<void(HTTPCodec&)> initSelfCodec_{initSelfCodec};
+  HTTPCodec* pCodec_{nullptr};
   folly::IOBufQueue writes_{folly::IOBufQueue::cacheChainLength()};
   std::vector<folly::AsyncTransport::WriteCallback*> cbs_;
   bool failWrites_{false};
@@ -2805,6 +2821,614 @@ TEST_F(HTTP2UpstreamSessionTest, Observer_RequestStarted) {
   readAndLoop(input->data(), input->length());
   EXPECT_EQ(actualTxnObserverAccessor, handler->txn_->getObserverAccessor());
   httpSession_->destroy();
+}
+
+TEST_F(HTTP2UpstreamSessionTest, InvalidWtReq) {
+  auto msg = getGetRequest("/");
+  {
+    // msg is an invalid WebTransport request
+    auto req = httpSession_->sendWebTransportRequest(
+        msg, std::make_unique<DummyWtHandler>());
+    EXPECT_TRUE(req.isReady());
+    auto& res = req.result();
+    EXPECT_TRUE(res.hasException());
+    std::string what = std::string(res.exception().what());
+    // implementation detail but fine to test here
+    EXPECT_TRUE(what.find("Invalid") != std::string::npos);
+  }
+  {
+    // msg will be valid but settings sent/received do not contain the necessary
+    // http/2 settings
+    msg.setMethod(HTTPMethod::CONNECT);
+    msg.setUpgradeProtocol("webtransport");
+    auto req = httpSession_->sendWebTransportRequest(
+        msg, std::make_unique<DummyWtHandler>());
+    EXPECT_TRUE(req.isReady());
+    auto& res = req.result();
+    EXPECT_TRUE(res.hasException());
+    std::string what = std::string(res.exception().what());
+    // implementation detail but fine to test here
+    EXPECT_TRUE(what.find("supported") != std::string::npos);
+  }
+
+  {
+    // simulate http2 settings support for wt
+    enableCodecWtSettings(*pCodec_);
+    // request not expected to be ready & yield an exc
+    auto req = httpSession_->sendWebTransportRequest(
+        msg, std::make_unique<DummyWtHandler>());
+    // timeout will eventually trigger fulfillment
+    EXPECT_FALSE(req.isReady());
+  }
+  eventBase_.loop();
+  httpSession_->dropConnection();
+}
+
+template <class T>
+folly::Try<T> blockingWait(folly::SemiFuture<T> fut, folly::EventBase* evb) {
+  while (!fut.isReady()) {
+    evb->loopOnce();
+  }
+  return std::move(fut).result();
+}
+
+struct WtCapsuleCodecCallback : public WebTransportCapsuleCodec::Callback {
+  ~WtCapsuleCodecCallback() override = default;
+  void onWTResetStreamCapsule(WTResetStreamCapsule capsule) noexcept override {
+    rst.emplace(capsule);
+    signal();
+  }
+  void onWTStopSendingCapsule(WTStopSendingCapsule capsule) noexcept override {
+    ss.emplace(capsule);
+    signal();
+  }
+  void onWTStreamCapsule(WTStreamCapsule capsule) noexcept override {
+    VLOG(4)
+        << __func__ << "; id=" << capsule.streamId << "; len="
+        << (capsule.streamData ? capsule.streamData->computeChainDataLength()
+                               : 0);
+    stream.emplace(std::move(capsule));
+    signal();
+  }
+  void onWTMaxDataCapsule(WTMaxDataCapsule capsule) noexcept override {
+    md.emplace(capsule);
+    signal();
+  }
+  void onWTMaxStreamDataCapsule(
+      WTMaxStreamDataCapsule capsule) noexcept override {
+    msd.emplace(capsule);
+    signal();
+  }
+  void onWTMaxStreamsBidiCapsule(
+      WTMaxStreamsCapsule capsule) noexcept override {
+    bidiMaxStreams.emplace(capsule);
+    signal();
+  }
+  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule capsule) noexcept override {
+    uniMaxStreams.emplace(capsule);
+    signal();
+  }
+
+  void onWTDataBlockedCapsule(WTDataBlockedCapsule) noexcept override {
+  }
+  void onWTStreamDataBlockedCapsule(
+      WTStreamDataBlockedCapsule) noexcept override {
+  }
+  void onPaddingCapsule(PaddingCapsule) noexcept override {
+  }
+  void onWTStreamsBlockedBidiCapsule(
+      WTStreamsBlockedCapsule) noexcept override {
+  }
+  void onWTStreamsBlockedUniCapsule(WTStreamsBlockedCapsule) noexcept override {
+  }
+  void onDatagramCapsule(DatagramCapsule) noexcept override {
+  }
+  void onCloseWTSessionCapsule(
+      CloseWebTransportSessionCapsule) noexcept override {
+  }
+  void onDrainWTSessionCapsule(
+      DrainWebTransportSessionCapsule) noexcept override {
+  }
+  void onConnectionError(
+      WebTransportCapsuleCodec::ErrorCode) noexcept override {
+    LOG(FATAL) << "conn error";
+  }
+  void onCapsule(uint64_t capsuleType,
+                 uint64_t capsuleLength) noexcept override {
+    VLOG(4) << __func__ << "; capsuleType=" << capsuleType
+            << "; capsuleLength=" << capsuleLength;
+  }
+
+  // signals by fulfilling the promise and resetting it
+  void signal() {
+    event.promise.setValue();
+    event = folly::makePromiseContract<folly::Unit>();
+  }
+
+  // waits until a WebTransport event of interest is ready
+  void waitForEvent(folly::EventBase* evb) {
+    blockingWait(std::move(event.future), evb);
+    event = folly::makePromiseContract<folly::Unit>();
+  }
+
+  std::optional<CloseWebTransportSessionCapsule> close;
+  std::optional<DrainWebTransportSessionCapsule> drain;
+  std::optional<WTResetStreamCapsule> rst;
+  std::optional<WTStopSendingCapsule> ss;
+  std::optional<WTStreamCapsule> stream;
+  std::optional<WTMaxDataCapsule> md;
+  std::optional<WTMaxStreamDataCapsule> msd;
+  std::optional<WTMaxStreamsCapsule> bidiMaxStreams;
+  std::optional<WTMaxStreamsCapsule> uniMaxStreams;
+
+ private:
+  folly::SemiPromiseContract<folly::Unit> event{
+      folly::makePromiseContract<folly::Unit>()};
+};
+
+class H2WtUpstreamTest : public HTTPUpstreamTest<HTTP2CodecPair> {
+ public:
+  void SetUp() override {
+    // hook to set http/2 settings support for wt
+    initSelfCodec_ = enableCodecWtSettings;
+
+    // create http/2 server code and serialize initial connection frames
+    server.codec = makeServerCodec();
+    server.codec->setCallback(&server.codecCb);
+    server.codec->generateConnectionPreface(server.writeBuf);
+    server.codec->generateSettings(server.writeBuf);
+
+    // HTTPUpstreamTest::SetUp() here since it will trigger
+    // InfoCallback::onWrite
+    HTTPUpstreamTest::SetUp();
+
+    // deliver data to session
+    readAndLoop(server.writeBuf.move().get());
+
+    // establish wt session
+    establishWtSession();
+
+    // pipe every http/2 ingress data on the CONNECT stream to WtCapsuleCodec
+    EXPECT_CALL(server.codecCb, onBody(1, _, _))
+        .WillRepeatedly([this](auto id, auto buf, auto pad) {
+          VLOG(5) << "::onBody len=" << buf->computeChainDataLength();
+          server.wtCodec.onIngress(buf->clone(), false);
+        });
+    EXPECT_CALL(server.codecCb, onMessageComplete(1, _))
+        .WillRepeatedly([this]() {
+          VLOG(5) << "::onMessageComplete";
+          server.wtCodec.onIngress(nullptr, true);
+        });
+  }
+
+  void TearDown() override {
+    httpSession_->dropConnection();
+  }
+
+  void establishWtSession() {
+    // establish http/2 webtransport session
+    HTTPMessage req;
+    req.setMethod(HTTPMethod::CONNECT);
+    req.setUpgradeProtocol("webtransport");
+    auto wtHandler = std::make_unique<DummyWtHandler>();
+    wt.handlerCtx = wtHandler->ctx;
+    auto wtReq =
+        httpSession_->sendWebTransportRequest(req, std::move(wtHandler));
+    // serialize request
+    eventBase_.loopOnce();
+
+    // serialize final 2xx
+    deliverRespHeaders(/*id=*/1, makeResponse(200), /*eom=*/false);
+    auto res = blockingWait(std::move(wtReq), &eventBase_);
+    CHECK(res.hasValue());
+    EXPECT_EQ(res.value()->getStatusCode(), 200);
+    CHECK(wt.handlerCtx->wtSession);
+    wt.sess = std::move(wt.handlerCtx->wtSession);
+
+    constexpr uint32_t kWindowUpdate = 1 << 20; // 1MiB
+    // unblock both http/2 conn&stream egress fc
+    server.codec->generateWindowUpdate(server.writeBuf, 0, kWindowUpdate);
+    server.codec->generateWindowUpdate(server.writeBuf, 1, kWindowUpdate);
+    readAndLoop(server.writeBuf.move().get());
+  }
+
+  HTTPMessage makeResponse(uint16_t statusCode) {
+    HTTPMessage resp;
+    resp.setHTTPVersion(1, 1);
+    resp.setStatusCode(statusCode);
+    return resp;
+  }
+
+  void deliverRespHeaders(HTTPCodec::StreamID id,
+                          const HTTPMessage& resp,
+                          bool eom = true) {
+    server.codec->generateHeader(server.writeBuf, id, resp, eom);
+    readCallback_->readBufferAvailable(server.writeBuf.move());
+  }
+
+  void deliverRstStream(HTTPCodec::StreamID id) {
+    server.codec->generateRstStream(server.writeBuf, id, ErrorCode::CANCEL);
+    readCallback_->readBufferAvailable(server.writeBuf.move());
+  }
+
+  /**
+   * delivers the serialized WebTransport capsules to the upstream session
+   */
+  void deliverWtData(std::unique_ptr<folly::IOBuf> wtData, bool eom = false) {
+    server.codec->generateBody(server.writeBuf,
+                               1,
+                               std::move(wtData),
+                               /*padding=*/folly::none,
+                               /*eom=*/eom);
+    readCallback_->readBufferAvailable(server.writeBuf.move());
+  }
+
+  /**
+   * serializes WtMaxData or WtMaxStreamData (depending on streamId) and
+   * delivers it to the upstream session
+   */
+  void grantMaxData(uint64_t streamId, uint64_t offset) {
+    if (streamId == detail::kInvalidVarint) {
+      writeWTMaxData(server.wtBuf, {offset});
+    } else {
+      writeWTMaxStreamData(server.wtBuf,
+                           {.streamId = streamId, .maximumStreamData = offset});
+    }
+    deliverWtData(server.wtBuf.move());
+  }
+
+  // pipe every session write into the peer's codec, which then pipes everything
+  // into peer's wt codec
+  void onWrite(const HTTPSessionBase&, size_t) override {
+    CHECK(!writes_.empty());
+    server.codec->onIngress(*writes_.move());
+  }
+
+  void loopN(uint8_t loops) {
+    while (loops--) {
+      eventBase_.loopOnce(EVLOOP_NONBLOCK);
+    }
+  }
+
+  // peer context
+  struct {
+    // codec & codecCb are used for parsing http/2 frames; simulating a peer
+    // receiving http/2 data from client
+    std::unique_ptr<HTTPCodec> codec;
+    NiceMock<MockHTTPCodecCallback> codecCb;
+    // wtCodec & wtCodecCb are used for parsing WebTransport capsules;
+    // simulating a peer receiving WebTransport data from client
+    WtCapsuleCodecCallback wtCodecCb;
+    WebTransportCapsuleCodec wtCodec{&wtCodecCb, CodecVersion::H2};
+    // http/2 write buffer - contains the serialized http/2 frames
+    folly::IOBufQueue writeBuf{folly::IOBufQueue::cacheChainLength()};
+    // webtransport write buffer - contains the serialize wt capsules;
+    // simulating a peer sending data to client
+    folly::IOBufQueue wtBuf{folly::IOBufQueue::cacheChainLength()};
+  } server;
+
+  struct {
+    // webtransport session
+    std::shared_ptr<WebTransport> sess;
+    std::shared_ptr<DummyWtHandler::Ctx> handlerCtx;
+  } wt;
+};
+
+/**
+ * Tests are ported over from proxygen::coro http/2 webtransport
+ */
+TEST_F(H2WtUpstreamTest, SimpleUniEgress) {
+  // no available uni/bidi streams
+  auto createStream = wt.sess->createUniStream();
+  EXPECT_TRUE(createStream.hasError());
+
+  // asynchronously advertise max_streams
+  eventBase_.runInLoop([&]() {
+    writeWTMaxStreams(server.wtBuf, /*capsule=*/{1}, /*isBidi=*/false);
+    deliverWtData(server.wtBuf.move());
+  });
+
+  // wait for client to parse max_streams
+  blockingWait(wt.sess->awaitUniStreamCredit(), &eventBase_);
+  // next awaitUniStreamCredit should be synchronously available
+  wt.sess->awaitUniStreamCredit().isReady();
+  // peer advertised uni credit => ::createUniStream now yields handle
+  createStream = wt.sess->createUniStream();
+  CHECK(createStream.hasValue());
+  auto* wh = createStream.value();
+  auto id = wh->getID();
+
+  // fill up egress buffer => writes blocked
+  constexpr uint16_t kBufLen = 65'535;
+  auto writeRes =
+      wt.sess->writeStreamData(id, makeBuf(kBufLen), /*fin=*/false, nullptr);
+  EXPECT_EQ(writeRes.value(), WebTransport::FCState::BLOCKED);
+
+  // awaitWritable is only resolved after the data has been dequeued from
+  // WtStreamManager
+  auto awaitWritable = wt.sess->awaitWritable(id);
+  EXPECT_FALSE(awaitWritable->isReady());
+
+  // asynchronously advertise max_data (default peer value when not present in
+  // http settings is assumed to be 0)
+  eventBase_.runInLoop([&]() {
+    // grant conn- and stream-level fc
+    grantMaxData(detail::kInvalidVarint, kBufLen);
+    grantMaxData(id, kBufLen);
+  });
+
+  // wait for wt capsule codec callback to fire
+  server.wtCodecCb.waitForEvent(&eventBase_);
+
+  // validate we've rx'd a wt_stream capsule with expected values
+  auto streamEvent = std::exchange(server.wtCodecCb.stream, {});
+  CHECK(streamEvent.has_value());
+  EXPECT_EQ(streamEvent->streamId, id);
+  EXPECT_EQ(streamEvent->streamData->computeChainDataLength(), kBufLen);
+
+  // when WtStreamManager dequeued the buffered data, awaitWritable is
+  // resolved
+  EXPECT_TRUE(awaitWritable->isReady() && awaitWritable->value() == kBufLen);
+
+  // blocked on both connection- and stream-level fc; buffered data will not be
+  // dequeued from WtStreamManager
+  wt.sess->writeStreamData(
+      id, makeBuf(1), /*fin=*/false, /*deliveryCallback=*/nullptr);
+
+  loopN(5);
+  EXPECT_FALSE(server.wtCodecCb.stream.has_value()); // no data has been written
+
+  // release 1 byte of stream-level wt fc; buffered data will still not be
+  // dequeued from WtStreamManager as we're still blocked on connection-level fc
+  grantMaxData(id, kBufLen + 1);
+  loopN(5);
+  EXPECT_FALSE(server.wtCodecCb.stream.has_value()); // no data has been written
+
+  // release 1 byte of connection-level wt fc; buffered data will be dequeued
+  // from WtStreamManager
+  grantMaxData(detail::kInvalidVarint, kBufLen + 1);
+  server.wtCodecCb.waitForEvent(&eventBase_);
+  streamEvent = std::exchange(server.wtCodecCb.stream, {});
+  CHECK(streamEvent.has_value());
+  EXPECT_EQ(streamEvent->streamId, id);
+  EXPECT_EQ(streamEvent->streamData->computeChainDataLength(), 1);
+
+  // blocked on both connection- and stream-level fc; however if just fin=true,
+  // this should be dequeued regardless of peer fc credit
+  wt.sess->writeStreamData(
+      id, nullptr, /*fin=*/true, /*deliveryCallback=*/nullptr);
+
+  server.wtCodecCb.waitForEvent(&eventBase_);
+  streamEvent = std::exchange(server.wtCodecCb.stream, {});
+  CHECK(streamEvent.has_value());
+  EXPECT_EQ(streamEvent->streamId, id);
+  EXPECT_EQ(streamEvent->streamData->computeChainDataLength(), 0);
+  EXPECT_EQ(streamEvent->fin, true);
+}
+
+TEST_F(H2WtUpstreamTest, SimpleUniIngress) {
+  constexpr uint16_t kBufLen = 65'535;
+  constexpr uint16_t kIngressId = 3;
+
+  // send kBufLen / 2 bytes of data, ensure client is able to read
+  writeWTStream(server.wtBuf,
+                WTStreamCapsule{.streamId = kIngressId,
+                                .streamData = makeBuf(kBufLen / 2 + 1),
+                                .fin = false});
+  deliverWtData(server.wtBuf.move());
+
+  // wait until we get a peer stream
+  while (wt.handlerCtx->peerStreams.empty()) {
+    loopN(1);
+  }
+  // ingress only => writeHandle == nullptr
+  auto handle = wt.handlerCtx->peerStreams.at(0);
+  EXPECT_FALSE(handle.writeHandle);
+  EXPECT_TRUE(handle.readHandle);
+
+  auto read = wt.sess->readStreamData(kIngressId);
+  EXPECT_TRUE(read->isReady());
+  EXPECT_EQ(read->value().fin, false);
+  EXPECT_EQ(read->value().data->computeChainDataLength(), kBufLen / 2 + 1);
+
+  // consuming half of advertised rwnd issues MaxData & MaxStreamData to peer
+  server.wtCodecCb.waitForEvent(&eventBase_);
+  EXPECT_TRUE(server.wtCodecCb.md.has_value() &&
+              server.wtCodecCb.msd.has_value());
+
+  // when receiving a rst_stream, read should resolve an exc
+  read = wt.sess->readStreamData(kIngressId);
+  EXPECT_TRUE(read.hasValue());
+
+  // asynchronously deliver reset stream
+  eventBase_.runInLoop([&]() {
+    writeWTResetStream(server.wtBuf,
+                       {/*streamId=*/.streamId = kIngressId,
+                        .appProtocolErrorCode = 0,
+                        .reliableSize = 0});
+    deliverWtData(server.wtBuf.move());
+  });
+
+  // expect read resolves with exception due to rst above
+  auto readRes = blockingWait(std::move(read.value()), &eventBase_);
+  EXPECT_TRUE(readRes.hasException());
+}
+
+TEST_F(H2WtUpstreamTest, SimpleBidiEcho) {
+  constexpr uint16_t kBufLen = 65'535;
+
+  // no available bidi streams
+  auto createStream = wt.sess->createBidiStream();
+  EXPECT_TRUE(createStream.hasError());
+
+  // asynchronously advertise max_streams
+  eventBase_.runInLoop([&]() {
+    writeWTMaxStreams(server.wtBuf, /*capsule=*/{1}, /*isBidi=*/true);
+    deliverWtData(server.wtBuf.move());
+  });
+
+  blockingWait(wt.sess->awaitBidiStreamCredit(), &eventBase_);
+
+  // next awaitBidiStreamCredit should be synchronously available
+  EXPECT_TRUE(wt.sess->awaitBidiStreamCredit().isReady());
+
+  // peer advertised bidi credit => ::createBidiStream now yields handle
+  createStream = wt.sess->createBidiStream();
+  CHECK(createStream.hasValue());
+  auto handle = createStream.value();
+  auto id = handle.readHandle->getID();
+
+  // asynchronously advertise MaxData & MaxStreamData
+  eventBase_.runInLoop([&]() {
+    grantMaxData(detail::kInvalidVarint, kBufLen);
+    grantMaxData(id, kBufLen);
+  });
+
+  // asynchronously deliver various wt frames to exercise codepaths
+  eventBase_.runInLoop([&]() {
+    writeWTDataBlocked(server.wtBuf, {kBufLen});
+    writeWTStreamDataBlocked(
+        server.wtBuf,
+        {/*streamId=*/.streamId = 0, .maximumStreamData = kBufLen});
+    writeWTStreamsBlocked(server.wtBuf, {10}, /*isBidi=*/false);
+    writeWTStreamsBlocked(server.wtBuf, {10}, /*isBidi=*/true);
+    writePadding(server.wtBuf, {10});
+    writeDrainWebTransportSession(server.wtBuf);
+    deliverWtData(server.wtBuf.move());
+  });
+
+  /**
+   * in a loop – write one byte, wait for peer codec to parse byte, send the
+   * byte back, and finally read the byte.
+   */
+  for (uint8_t idx = 0; idx < std::numeric_limits<uint8_t>::max(); idx++) {
+    // write idx to stream
+    auto buf = folly::IOBuf::copyBuffer(&idx, sizeof(idx));
+    wt.sess->writeStreamData(
+        id, buf->clone(), /*fin=*/false, /*deliveryCallback=*/nullptr);
+
+    // wait for peer codec to receive event
+    server.wtCodecCb.waitForEvent(&eventBase_);
+
+    // validate we've rx'd a wt_stream capsule with val idx
+    auto streamEvent = std::exchange(server.wtCodecCb.stream, {});
+    CHECK(streamEvent.has_value());
+    EXPECT_EQ(streamEvent->streamId, id);
+    EXPECT_EQ(streamEvent->streamData->length(), 1);
+    EXPECT_EQ(*streamEvent->streamData->data(), idx);
+
+    // send the same byte back to client
+    writeWTStream(server.wtBuf,
+                  WTStreamCapsule{.streamId = id,
+                                  .streamData = buf->clone(),
+                                  .fin = false});
+    deliverWtData(server.wtBuf.move());
+
+    // expect to client to rx same byte
+    auto read = blockingWait(wt.sess->readStreamData(id).value(), &eventBase_);
+    CHECK(read.hasValue());
+    EXPECT_EQ(*read->data->data(), idx);
+  }
+
+  // deliver both stop_sending & rst_stream, which should bidirectionally reset
+  // the stream (tbd – should we wait for app to specifically invoke
+  // ::resetStream before reaping state)
+  eventBase_.runInLoop([&]() {
+    writeWTStopSending(server.wtBuf, {.streamId = id});
+    writeWTResetStream(
+        server.wtBuf,
+        {.streamId = id, .appProtocolErrorCode = 0, .reliableSize = 0});
+    writeCloseWebTransportSession(
+        server.wtBuf,
+        {.applicationErrorCode = 0, .applicationErrorMessage = "close wt"});
+    deliverWtData(server.wtBuf.move());
+  });
+
+  // stream is reset, ::read will return an exception
+  auto read = blockingWait(wt.sess->readStreamData(id).value(), &eventBase_);
+  EXPECT_TRUE(read.hasException());
+
+  wt.sess->closeSession();
+}
+
+TEST_F(H2WtUpstreamTest, TestErrConditions) {
+  // default no uni credit
+  auto uniRes = wt.sess->createUniStream();
+  EXPECT_TRUE(uniRes.hasError());
+  // default no bidi credit
+  auto bidiRes = wt.sess->createBidiStream();
+  EXPECT_TRUE(bidiRes.hasError());
+
+  // advertise one uni&bidi stream credit to client
+  writeWTMaxStreams(server.wtBuf, /*capsule=*/{1}, /*isBidi=*/false);
+  writeWTMaxStreams(server.wtBuf, /*capsule=*/{1}, /*isBidi=*/true);
+  deliverWtData(server.wtBuf.move());
+  loopN(2);
+
+  /**
+   * stream 0 doesn't exist; all ops expected to fail (e.g. write, read, reset,
+   * stop_sending)
+   */
+  constexpr uint64_t streamId = 0;
+  auto read = wt.sess->readStreamData(streamId);
+  auto write = wt.sess->writeStreamData(
+      streamId, /*data=*/nullptr, /*fin=*/false, /*deliveryCallback=*/nullptr);
+  auto reset = wt.sess->resetStream(streamId, /*error=*/0);
+  auto ss = wt.sess->stopSending(streamId, /*error=*/0);
+  auto await = wt.sess->awaitWritable(streamId);
+
+  EXPECT_TRUE(read.hasError() && write.hasError() && reset.hasError() &&
+              ss.hasError() && await.hasError());
+
+  // quic transport info is defaulted
+  std::ignore = wt.sess->getTransportInfo();
+
+  // local & peer addr sanity checks
+  const auto& localAddr = wt.sess->getLocalAddress();
+  const auto& peerAddr = wt.sess->getPeerAddress();
+  EXPECT_EQ(localAddr.getIPAddress(), peerAddr.getIPAddress());
+}
+
+TEST_F(H2WtUpstreamTest, PeerBidiAndTransportEom) {
+  // Deliver a peer-initiated bidi stream, followed by a transport eom (http/2
+  // stream eom). This should trigger shutdown of WebTransport
+  constexpr uint16_t kBufLen = 65'535;
+  constexpr uint16_t kIngressId = 1;
+
+  // deliver a peer-initiated bidi stream of len=kBufLen & eom=false
+  writeWTStream(server.wtBuf,
+                WTStreamCapsule{.streamId = kIngressId,
+                                .streamData = makeBuf(kBufLen),
+                                .fin = false});
+  deliverWtData(server.wtBuf.move());
+
+  // wait until client receives stream
+  while (wt.handlerCtx->peerStreams.empty()) {
+    loopN(1);
+  }
+
+  // ensure it's recognized as bidi stream
+  auto& handle = wt.handlerCtx->peerStreams.at(0);
+  EXPECT_TRUE(handle.readHandle && handle.writeHandle);
+
+  // data should be available synchronously
+  auto read = wt.sess->readStreamData(kIngressId);
+  EXPECT_TRUE(read->isReady() && read->value().data &&
+              read->value().fin == false);
+
+  // next read will resolve with an error after http/2 stream eom is parsed
+  read = wt.sess->readStreamData(kIngressId);
+
+  // deliver http/2 stream eom
+  deliverWtData(/*wtData=*/nullptr, /*eom=*/true);
+
+  // wait until WebTransportHandler::onSessionEnd is invoked
+  while (!wt.handlerCtx->err.has_value()) {
+    loopN(1);
+  }
+
+  // read should have an exception now
+  EXPECT_TRUE(read->hasException());
 }
 
 // Register and instantiate all our type-parameterized tests

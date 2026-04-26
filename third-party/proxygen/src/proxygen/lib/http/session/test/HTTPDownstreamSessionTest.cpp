@@ -19,6 +19,7 @@
 #include <proxygen/lib/http/codec/DirectErrorsRateLimitFilter.h>
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
+#include <proxygen/lib/http/codec/webtransport/WebTransportFramer.h>
 #include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
 #include <proxygen/lib/http/session/HTTPDirectResponseHandler.h>
 #include <proxygen/lib/http/session/HTTPDownstreamSession.h>
@@ -31,24 +32,30 @@
 #include <proxygen/lib/http/session/test/MockHTTPSessionStats.h>
 #include <proxygen/lib/http/session/test/MockSessionObserver.h>
 #include <proxygen/lib/http/session/test/TestUtils.h>
+#include <proxygen/lib/http/webtransport/test/Mocks.h>
 #include <proxygen/lib/test/TestAsyncTransport.h>
 #include <wangle/acceptor/ConnectionManager.h>
 
 using namespace proxygen;
+using namespace proxygen::test;
 using namespace std;
 using namespace testing;
 using namespace std::chrono;
 using folly::Promise;
 
+using InitCodecFnT = std::function<void(HTTPCodec&)>;
+
 template <typename C>
 class HTTPDownstreamTest : public testing::Test {
  public:
   explicit HTTPDownstreamTest(std::vector<int64_t> flowControl = {-1, -1, -1},
-                              bool startImmediately = true)
+                              bool startImmediately = true,
+                              InitCodecFnT initCodec = nullptr)
       : eventBase_(),
         transport_(new TestAsyncTransport(&eventBase_)),
         transactionTimeouts_(makeTimeoutSet(&eventBase_)),
-        flowControl_(flowControl) {
+        flowControl_(flowControl),
+        initCodec_(std::move(initCodec)) {
     EXPECT_CALL(mockController_, getGracefulShutdownTimeout())
         .WillRepeatedly(Return(std::chrono::milliseconds(0)));
     EXPECT_CALL(mockController_, getHeaderIndexingStrategy())
@@ -75,6 +82,10 @@ class HTTPDownstreamTest : public testing::Test {
     if (rawCodec_->getProtocol() == CodecProtocol::HTTP_2) {
       EXPECT_CALL(mockController_, getHeaderIndexingStrategy())
           .WillOnce(Return(&testH2IndexingStrat_));
+    }
+
+    if (initCodec_) {
+      initCodec_(*rawCodec_);
     }
 
     httpSession_ = new HTTPDownstreamSession(
@@ -452,6 +463,7 @@ class HTTPDownstreamTest : public testing::Test {
   folly::IOBufQueue parseOutputStream_{folly::IOBufQueue::cacheChainLength()};
   bool breakParseOutput_{false};
   typename C::Codec* rawCodec_{nullptr};
+  std::function<void(HTTPCodec&)> initCodec_{nullptr};
   HeaderIndexingStrategy testH2IndexingStrat_;
   testing::NiceMock<proxygen::MockHTTPSessionInfoCallback> infoCb_;
   uint64_t onTransactionSymmetricCounter{0};
@@ -467,9 +479,6 @@ class HTTP2DownstreamSessionTest : public HTTPDownstreamTest<HTTP2CodecPair> {
 
   void SetUp() override {
     HTTPDownstreamTest<HTTP2CodecPair>::SetUp();
-  }
-
-  void TearDown() override {
   }
 };
 } // namespace
@@ -4313,5 +4322,92 @@ TEST_F(HTTP2DownstreamSessionTest, ZeroContentLengthTest) {
   clientCodec_->generateEOM(requests_, id);
   flushRequestsAndLoopN(2);
 
+  gracefulShutdown();
+}
+
+// simple server-side specific h2 webtransport flow tests, comprehensive tests
+// are located in proxygen/lib/http/session/test/HTTPDownstreamSessionTest.cpp
+class H2WtDownstreamSessionTest : public HTTPDownstreamTest<HTTP2CodecPair> {
+ public:
+  H2WtDownstreamSessionTest()
+      : HTTPDownstreamTest(
+            /*flowControl=*/{-1, -1, -1},
+            /*startImmediately=*/true,
+            /*initCodec=*/enableCodecWtSettings) {
+  }
+
+  void SetUp() override {
+    HTTPDownstreamTest::SetUp();
+  }
+};
+
+TEST_F(H2WtDownstreamSessionTest, BypassWebTransportTermination) {
+  constexpr std::string_view kBody{"abcdefjklmnopqrstuvwxyz"};
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders([&]() {
+    // ::sendHeaders vs ::sendWtHeaders allows bypassing wt parsing (e.g. to
+    // implement e2e CONNECT tunnel)
+    handler->txn_->sendHeadersWithEOM(getResponse(200, /*bodyLen=*/0));
+  });
+  handler->expectBody([&](uint64_t, std::shared_ptr<folly::IOBuf> buf) {
+    auto body = buf->toString();
+    EXPECT_EQ(body, kBody);
+  });
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+
+  // serialize and send
+  auto req = getGetRequest("/");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setUpgradeProtocol("webtransport");
+
+  auto id = sendRequest(req, /*eom=*/false);
+  clientCodec_->generateBody(requests_,
+                             id,
+                             folly::IOBuf::copyBuffer(kBody),
+                             HTTPCodec::NoPadding,
+                             false);
+  clientCodec_->generateEOM(requests_, id);
+  flushRequestsAndLoopN(2);
+  gracefulShutdown();
+}
+
+TEST_F(H2WtDownstreamSessionTest, WebTransportTest) {
+  /**
+   * Verifies that if we pass in a non-null WebTransportHandler, we terminate
+   * WebTransport. WebTransportHandler will be called into when WebTransport
+   * events are parsed on the CONNECT stream.
+   */
+  auto wtHandler = proxygen::test::DummyWtHandler::make();
+  auto wtHandlerCtx = wtHandler->ctx;
+
+  // the handler the user installs is immediately detached after
+  // ::sendHeaders(200)
+  auto txnHandler = addSimpleStrictHandler();
+  txnHandler->expectHeaders([&]() {
+    txnHandler->txn_->sendWtHeaders(getResponse(200, /*bodyLen=*/0),
+                                    std::move(wtHandler));
+  });
+  txnHandler->expectDetachTransaction();
+
+  // serialize and send
+  auto req = getGetRequest("/");
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setUpgradeProtocol("webtransport");
+
+  // serialize one wt stream w/ fin
+  auto id = sendRequest(req, /*eom=*/false);
+  folly::IOBufQueue wtEgress{folly::IOBufQueue::cacheChainLength()};
+  writeWTStream(wtEgress, {/*streamId=*/0, makeBuf(100), /*fin=*/false});
+  clientCodec_->generateBody(
+      requests_, id, wtEgress.move(), HTTPCodec::NoPadding, false);
+  clientCodec_->generateEOM(requests_, id);
+
+  // wait for wt session to parse
+  flushRequestsAndLoopN(4);
+  EXPECT_FALSE(wtHandlerCtx->peerStreams.empty());
+
+  wtHandlerCtx->wtSession->closeSession();
+  evbLoopNonBlockN(2);
   gracefulShutdown();
 }

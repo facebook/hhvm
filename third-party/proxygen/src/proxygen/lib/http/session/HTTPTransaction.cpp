@@ -47,6 +47,11 @@ inline ErrorCode getDefaultAbortErrorCode(bool isUpstream) {
   return isUpstream ? ErrorCode::CANCEL : ErrorCode::INTERNAL_ERROR;
 }
 
+bool isConnectUdp(const HTTPMessage& msg) noexcept {
+  return msg.getMethod() == HTTPMethod::CONNECT && msg.getUpgradeProtocol() &&
+         *msg.getUpgradeProtocol() == "connect-udp";
+}
+
 } // namespace
 
 #define INVARIANT_RETURN(X, Y)                                            \
@@ -217,9 +222,7 @@ void HTTPTransaction::onIngressHeadersComplete(
     headRequest_ = (method == HTTPMethod::HEAD);
     upgraded_ = (method == HTTPMethod::CONNECT);
     wtConnectStream_ = HTTPWebTransport::isConnectMessage(*msg);
-    connectUdpStream_ = msg->getMethod() == HTTPMethod::CONNECT &&
-                        msg->getUpgradeProtocol() &&
-                        *msg->getUpgradeProtocol() == "connect-udp";
+    connectUdpStream_ = isConnectUdp(*msg);
   }
 
   if ((msg->isRequest() && msg->getMethod() != HTTPMethod::CONNECT) ||
@@ -1026,12 +1029,11 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   if (!headers.isRequest() && !isPushed()) {
     lastResponseStatus_ = headers.getStatusCode();
   }
+
   if (headers.isRequest()) {
     headRequest_ = (headers.getMethod() == HTTPMethod::HEAD);
     wtConnectStream_ = HTTPWebTransport::isConnectMessage(headers);
-    connectUdpStream_ = headers.getMethod() == HTTPMethod::CONNECT &&
-                        headers.getUpgradeProtocol() &&
-                        *headers.getUpgradeProtocol() == "connect-udp";
+    connectUdpStream_ = isConnectUdp(headers);
   } else {
     has1xxResponse_ = headers.is1xxResponse();
   }
@@ -1099,6 +1101,16 @@ void HTTPTransaction::sendHeadersWithEOM(const HTTPMessage& header) {
 
 void HTTPTransaction::sendHeaders(const HTTPMessage& header) {
   sendHeadersWithOptionalEOM(header, false);
+}
+
+void HTTPTransaction::sendWtHeaders(
+    const HTTPMessage& headers,
+    WebTransportHandler::Ptr wtHandler,
+    HttpWtClientCallbackPtr wtClientCb) noexcept {
+  wtCtx_.wtHandler_ = std::move(wtHandler);
+  wtCtx_.upstreamWtCb_ = std::move(wtClientCb);
+  CHECK(wtCtx_.wtHandler_);
+  sendHeadersWithOptionalEOM(headers, /*eom=*/false);
 }
 
 void HTTPTransaction::sendBody(std::unique_ptr<folly::IOBuf> body) {

@@ -72,7 +72,7 @@ class MockCodecDownstreamTest : public testing::Test {
         .WillRepeatedly(Return(true));
     EXPECT_CALL(*codec_, getTransportDirection())
         .WillRepeatedly(Return(TransportDirection::DOWNSTREAM));
-    EXPECT_CALL(*codec_, getEgressSettings());
+    EXPECT_CALL(*codec_, getEgressSettings()).Times(AtLeast(1));
     EXPECT_CALL(*codec_, supportsStreamFlowControl())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(*codec_, getProtocol())

@@ -13,6 +13,7 @@ proxygen_add_library(proxygen_http_session_session
   DEPS
     proxygen_http_codec_http1x_codec
     proxygen_http_session_stats
+    proxygen_http_webtransport_webtransport_session
     fizz::fizz
     Folly::folly_conv
     Folly::folly_cpp_attributes
@@ -184,6 +185,8 @@ proxygen_add_library(proxygen_http_session_http_upstream_session
   SRCS
     HTTPUpstreamSession.cpp
   DEPS
+    proxygen_http_webtransport_httpwebtransport
+    proxygen_http_webtransport_wt_util
     wangle::wangle_acceptor_managed
     Folly::folly_io_async_async_ssl_socket
   EXPORTED_DEPS

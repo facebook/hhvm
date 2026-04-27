@@ -57,10 +57,10 @@ NamedType<CTag> make_named(CTag, std::string&& name) noexcept {
   return {std::move(name)};
 }
 
-// A paramaterized type (a.k.a template, generic, whatever you want to call
+// A parameterized type (a.k.a template, generic, whatever you want to call
 // it), with N type parameters
 //
-// CTag is the type class for the parametrized type (list_c, set_c, etc).
+// CTag is the type class for the parameterized type (list_c, set_c, etc).
 //
 // Since this is used to hold a dynamic type, all the parameter types are
 // stored using an AnyType.

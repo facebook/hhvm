@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-// Test whether it works if we include for_each.h first.
-#include <thrift/lib/cpp2/visitation/for_each.h>
-
-#include <thrift/test/reflection/gen-cpp2/reflection_for_each_field.h>
+// Test for_each_field_id with modern always-on reflection.
+#include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/test/reflection/gen-cpp2/reflection_types.h>
 
 #include <gtest/gtest.h>
 
@@ -28,7 +27,8 @@ TEST(structA, test) {
   structA s;
   s.a() = 1;
   s.b() = "1";
-  for_each_field(s, [](auto&&, auto ref) {
+  apache::thrift::op::for_each_field_id<structA>([&]<class Id>(Id) {
+    auto ref = apache::thrift::op::get<Id>(s);
     EXPECT_EQ(folly::to<std::string>(*ref), "1");
     ref = folly::to<typename decltype(ref)::value_type>(2);
   });

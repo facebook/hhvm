@@ -89,7 +89,8 @@ void WtHttpSession::readsDone() noexcept {
 }
 
 void WtHttpSession::onHttpError(const HTTPException&) noexcept {
-  auto self = this->self; // keep self alive until end of ::onError scope
+  auto selfKeepAlive =
+      this->self; // keep self alive until end of ::onError scope
   readsDone();
   writesDone();
 }

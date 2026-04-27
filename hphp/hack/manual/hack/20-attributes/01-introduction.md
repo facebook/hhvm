@@ -48,9 +48,29 @@ class MyClass {}
 class YourClass {}
 ```
 
-Other common attribute interfaces are `HH\FunctionAttribute`,
-`HH\MethodAttribute` and `HH\PropertyAttribute`, but see [the Hack
-interface reference](/apis/Interfaces/) for the full list.
+The full set of attribute interfaces is shown below. Each interface
+restricts where the attribute may be attached.
+
+| Interface | Applies to |
+| --- | --- |
+| `HH\ClassAttribute` | a class |
+| `HH\ClassConstantAttribute` | a constant of a class |
+| `HH\EnumAttribute` | an enum |
+| `HH\EnumClassAttribute` | an enum class |
+| `HH\TypeAliasAttribute` | a type, newtype or case type |
+| `HH\FunctionAttribute` | a function |
+| `HH\MethodAttribute` | a method |
+| `HH\InstancePropertyAttribute` | an instance property |
+| `HH\StaticPropertyAttribute` | a static property |
+| `HH\ParameterAttribute` | a parameter |
+| `HH\TypeParameterAttribute` | a type parameter |
+| `HH\TypeConstantAttribute` | a type constant |
+| `HH\FileAttribute` | a file |
+| `HH\LambdaAttribute` | a lambda expression |
+| `HH\ModuleAttribute` | a module |
+
+See [the Hack interface reference](/apis/Interfaces/) for the full
+signature of each interface.
 
 
 ## Accessing attribute arguments

@@ -70,6 +70,8 @@ class McVersionRequest;
 namespace facebook {
 namespace memcache {
 
+struct MemcacheRouterInfo;
+
 namespace detail {
 
 using MemcacheRoutableRequests = carbon::List<

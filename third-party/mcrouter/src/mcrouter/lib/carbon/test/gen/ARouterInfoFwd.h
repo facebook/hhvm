@@ -38,6 +38,8 @@ namespace carbon {
 namespace test {
 namespace A {
 
+struct ARouterInfo;
+
 namespace detail {
 
 using ARoutableRequests = carbon::List<

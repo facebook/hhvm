@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "CarbonThriftTestMessages.h"
+#include "mcrouter/lib/carbon/test/gen/CarbonThriftTestMessages.h"
 
 namespace carbon {
 namespace test {

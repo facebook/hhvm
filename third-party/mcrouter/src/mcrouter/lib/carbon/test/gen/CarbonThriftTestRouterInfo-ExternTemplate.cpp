@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "CarbonThriftTestRouterInfo.h"
+#include "mcrouter/lib/carbon/test/gen/CarbonThriftTestRouterInfo.h"
 
 #include <folly/dynamic.h>
 

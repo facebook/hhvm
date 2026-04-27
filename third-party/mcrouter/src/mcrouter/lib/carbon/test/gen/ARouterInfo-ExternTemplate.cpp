@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "ARouterInfo.h"
+#include "mcrouter/lib/carbon/test/gen/ARouterInfo.h"
 
 #include <folly/dynamic.h>
 

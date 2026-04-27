@@ -38,6 +38,8 @@ namespace carbon {
 namespace test {
 namespace B {
 
+struct BRouterInfo;
+
 namespace detail {
 
 using BRoutableRequests = carbon::List<

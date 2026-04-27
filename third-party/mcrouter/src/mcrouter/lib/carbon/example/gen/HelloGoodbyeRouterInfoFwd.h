@@ -38,6 +38,8 @@ class HelloRequest;
 
 namespace hellogoodbye {
 
+struct HelloGoodbyeRouterInfo;
+
 namespace detail {
 
 using HelloGoodbyeRoutableRequests = carbon::List<

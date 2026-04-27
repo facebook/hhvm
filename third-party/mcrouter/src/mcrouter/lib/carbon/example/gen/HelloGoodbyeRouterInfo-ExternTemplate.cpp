@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "HelloGoodbyeRouterInfo.h"
+#include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouterInfo.h"
 
 #include <folly/dynamic.h>
 

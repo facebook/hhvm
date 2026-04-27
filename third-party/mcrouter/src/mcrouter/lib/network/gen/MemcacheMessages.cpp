@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "MemcacheMessages.h"
+#include "mcrouter/lib/network/gen/MemcacheMessages.h"
 
 namespace facebook {
 namespace memcache {

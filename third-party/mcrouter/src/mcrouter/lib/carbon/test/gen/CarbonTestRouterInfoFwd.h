@@ -39,6 +39,8 @@ class McVersionRequest;
 namespace carbon {
 namespace test {
 
+struct CarbonTestRouterInfo;
+
 namespace detail {
 
 using CarbonTestRoutableRequests = carbon::List<

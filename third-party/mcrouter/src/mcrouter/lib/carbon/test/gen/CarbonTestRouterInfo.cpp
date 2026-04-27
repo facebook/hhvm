@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "CarbonTestRouterInfo.h"
+#include "mcrouter/lib/carbon/test/gen/CarbonTestRouterInfo.h"
 
 #include <unordered_map>
 

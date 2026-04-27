@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "CarbonTestMessages.h"
+#include "mcrouter/lib/network/test/gen/CarbonTestMessages.h"
 
 namespace facebook {
 namespace memcache {

@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "HelloGoodbyeMessages.h"
+#include "mcrouter/lib/carbon/example/gen/HelloGoodbyeMessages.h"
 
 namespace hellogoodbye {
 

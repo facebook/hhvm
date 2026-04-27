@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "MemcacheRouterInfo.h"
+#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 
 #include <mcrouter/routes/AllFastestRouteFactory.h>
 

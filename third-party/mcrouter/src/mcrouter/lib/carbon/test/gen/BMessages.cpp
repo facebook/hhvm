@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "BMessages.h"
+#include "mcrouter/lib/carbon/test/gen/BMessages.h"
 
 namespace carbon {
 namespace test {

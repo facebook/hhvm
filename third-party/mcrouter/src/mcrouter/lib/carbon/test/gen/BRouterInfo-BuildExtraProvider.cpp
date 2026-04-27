@@ -12,7 +12,7 @@
  *
  *  @generated
  */
-#include "BRouterInfo.h"
+#include "mcrouter/lib/carbon/test/gen/BRouterInfo.h"
 
 #include <mcrouter/routes/McExtraRouteHandleProvider.h>
 

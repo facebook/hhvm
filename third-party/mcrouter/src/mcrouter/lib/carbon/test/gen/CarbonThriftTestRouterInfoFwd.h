@@ -41,6 +41,8 @@ class McVersionRequest;
 namespace carbon {
 namespace test {
 
+struct CarbonThriftTestRouterInfo;
+
 namespace detail {
 
 using CarbonThriftTestRoutableRequests = carbon::List<

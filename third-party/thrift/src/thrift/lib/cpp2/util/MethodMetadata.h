@@ -22,7 +22,6 @@
 #include <folly/Range.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/util/ManagedStringView.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift {
 

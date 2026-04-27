@@ -19,7 +19,7 @@ namespace {
 // isHeaderNameInTableWithNonEmptyValue as well
 //
 // From https://github.com/quicwg/base-drafts/wiki/QPACK-Static-Table
-const char* s_tableEntries[][2] = {
+const char* s_tableEntries[][2] = { // NOLINT(facebook-hte-CArray)
     {":authority", ""},
     {":path", "/"},
     {"age", "0"},

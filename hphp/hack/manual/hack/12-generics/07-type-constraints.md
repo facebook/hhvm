@@ -82,3 +82,7 @@ class SomeClass<T> {
 
 If a method overrides another method that has declared `where` constraints, it's necessary to redeclare
 those constraints, but only if they are actually used by the overriding method. (It's valid, and reasonable, to require less of the overriding method.)
+
+## Runtime Enforcement
+
+Runtime behavior for generic constraints (including `as` constraints on erased and reified generics) is described in [Type Enforcement](../05-functions/03-type-enforcement.md). `where` clause constraints are checked by the typechecker, but are not enforced at runtime.

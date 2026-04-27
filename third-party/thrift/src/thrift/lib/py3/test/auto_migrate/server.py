@@ -28,12 +28,12 @@ from thrift.py3.test.is_overload.helper import OverloadTestHelper
 
 
 class Handler(TestingServiceInterface):
-    initalized = False
+    initialized = False
     on_start_serving_called = False
     on_stop_requested_called = False
 
     async def __aenter__(self) -> "Handler":
-        self.initalized = True
+        self.initialized = True
         return self
 
     async def onStartServing(self) -> None:
@@ -90,7 +90,7 @@ class Handler(TestingServiceInterface):
 class ServicesTests(unittest.IsolatedAsyncioTestCase):
     async def test_handler_acontext(self) -> None:
         async with Handler() as h:
-            self.assertTrue(h.initalized)
+            self.assertTrue(h.initialized)
 
     async def test_get_address(self) -> None:
         server = ThriftServer(Handler(), port=0)

@@ -346,6 +346,7 @@ endif()
 add_custom_target(hack ALL DEPENDS hack_dune "${OPCODE_DATA}")
 add_custom_target(hack_test DEPENDS hack_dune_test "${OPCODE_DATA}")
 
+configure_file(hack_oss_dune_invoke.sh.in hack_oss_dune_invoke.sh ESCAPE_QUOTES @ONLY)
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
 configure_file(dev_env_common.sh.in dev_env_common.sh ESCAPE_QUOTES @ONLY)
 configure_file(dev_env_rust_only.sh.in dev_env_rust_only.sh ESCAPE_QUOTES @ONLY)

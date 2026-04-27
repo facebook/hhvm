@@ -3,9 +3,8 @@
 
 import re
 from dataclasses import dataclass
+from enum import Enum
 from typing import IO, List, Tuple
-
-from python.migrations.py310 import StrEnum310
 
 
 @dataclass
@@ -28,9 +27,11 @@ class PositionedMessage:
     message: str
 
 
-class Severity(StrEnum310):
+class Severity(Enum):
     ERROR = "ERROR"
     WARNING = "WARN"
+    def __format__(self, spec) -> str:
+        return str.__format__(str(self.name), spec)
 
 
 @dataclass

@@ -4283,7 +4283,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
 void t_hack_generator::generate_php_structural_id(
     std::ofstream& out, const t_structured* tstruct, bool asFunction) {
   if (asFunction) {
-    indent(out) << "static function getStructuralID()[]: int {\n";
+    indent(out) << "public static function getStructuralID()[]: int {\n";
     indent_up();
     indent(out) << "return " << generate_structural_id(tstruct) << ";\n";
     indent_down();

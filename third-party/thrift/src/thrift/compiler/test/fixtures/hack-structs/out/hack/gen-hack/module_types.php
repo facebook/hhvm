@@ -468,7 +468,7 @@ trait MySixthStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
     ?'foo' => ?string,
   );
 
-  static function getStructuralID()[]: int {
+  public static function getStructuralID()[]: int {
     return 2543313131770479784;
   }
   /**
@@ -550,7 +550,7 @@ trait MySeventhStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'foo' => ?string,
   );
 
-  static function getStructuralID()[]: int {
+  public static function getStructuralID()[]: int {
     return 2543313131770479784;
   }
   /**

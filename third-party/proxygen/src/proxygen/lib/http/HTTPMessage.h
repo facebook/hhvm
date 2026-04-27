@@ -14,7 +14,6 @@
 #include <folly/io/IOBufQueue.h>
 #include <glog/logging.h>
 #include <map>
-#include <mutex>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/HTTPHeaders.h>
 #include <proxygen/lib/http/HTTPMethod.h>
@@ -1155,9 +1154,6 @@ class HTTPMessage {
   bool trailersAllowed_ : 1;
 
   Scheme scheme_{Scheme::HTTP};
-
-  // used by atomicDumpMessage
-  static std::mutex mutexDump_;
 };
 
 std::ostream& operator<<(std::ostream& os, const HTTPMessage& msg);

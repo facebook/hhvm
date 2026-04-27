@@ -12,6 +12,7 @@
 #include <folly/Range.h>
 #include <folly/SingletonThreadLocal.h>
 #include <folly/String.h>
+#include <mutex>
 
 using folly::StringPiece;
 using std::pair;
@@ -29,8 +30,6 @@ std::string httpPriorityToString(const HTTPPriority& pri) {
       pri.requiredBps > 0 ? folly::to<std::string>(",r=", pri.requiredBps)
                           : "");
 }
-
-std::mutex HTTPMessage::mutexDump_;
 
 const pair<uint8_t, uint8_t> HTTPMessage::kHTTPVersion09(0, 9);
 const pair<uint8_t, uint8_t> HTTPMessage::kHTTPVersion10(1, 0);
@@ -831,7 +830,8 @@ void HTTPMessage::describe(std::ostream& os) const {
 }
 
 void HTTPMessage::atomicDumpMessage(int vlogLevel) const {
-  std::lock_guard<std::mutex> g(mutexDump_);
+  static std::mutex mutexDump;
+  std::lock_guard<std::mutex> g(mutexDump);
   dumpMessage(vlogLevel);
 }
 

@@ -882,7 +882,9 @@ final class ThriftContextPropState {
       ()[defaults] ==> {
         $private_agent = Agent::getAgentIdentity();
         if ($private_agent is nonnull) {
-          $private_agent = 'AGENT:'.$private_agent;
+          if (!Str\starts_with($private_agent, 'AGENT:')) {
+            $private_agent = 'AGENT:'.$private_agent;
+          }
           $this->setAgentId($private_agent);
         }
         return $private_agent;

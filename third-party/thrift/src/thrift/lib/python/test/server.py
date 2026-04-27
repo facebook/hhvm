@@ -50,14 +50,14 @@ def event_loop() -> Iterator[asyncio.AbstractEventLoop]:
 
 
 class Handler(TestingServiceInterface):
-    initalized = False
+    initialized = False
 
     def __init__(self) -> None:
         self.on_start_serving = False
         self.on_stop_requested = False
 
     async def __aenter__(self) -> "Handler":
-        self.initalized = True
+        self.initialized = True
         return self
 
     async def onStartServing(self) -> None:
@@ -109,7 +109,7 @@ class ServicesTests(unittest.TestCase):
     def test_handler_acontext(self) -> None:
         async def inner() -> None:
             async with Handler() as h:
-                self.assertTrue(h.initalized)
+                self.assertTrue(h.initialized)
 
         asyncio.run(inner())
 

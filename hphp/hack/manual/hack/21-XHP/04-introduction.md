@@ -207,3 +207,10 @@ async function intro_examples_avoid_xss_main(): Awaitable<void> {
   await intro_examples_avoid_xss_run('<blink>Ugh</blink>');
 }
 ```
+
+## Further Resources
+
+Besides our documentation, here are some other useful resources to enhance your experience with XHP:
+
+* [XHP Library](https://github.com/facebook/xhp-lib): The class libraries for XHP.
+* [XHP Announcement](https://www.facebook.com/notes/facebook-engineering/xhp-a-new-way-to-write-php/294003943919): The original XHP announcement from 2010.

@@ -39,3 +39,9 @@ To call a static method, use `::`.
 ```hack file:person2.hack
 echo Person::typicalGreeting();
 ```
+
+## Where Clauses
+
+For generic methods, one can add `where` clauses to constrain the method's type
+parameters, or a class type parameter used by that method.  For the full syntax
+and examples, see [type constraints](/hack/generics/type-constraints).

@@ -109,6 +109,10 @@ target_link_libraries(
     Folly::folly
     thriftprotocol
 )
+if(Xxhash_FOUND)
+  target_link_libraries(thriftmetadata PUBLIC ${Xxhash_LIBRARY})
+  target_include_directories(thriftmetadata PUBLIC ${Xxhash_INCLUDE_DIR})
+endif()
 # SerializableRecord.cpp includes F14Map and instantiates PrimitiveDatum for
 # every primitive type; on MSVC this exceeds the default COFF section limit.
 if (MSVC)

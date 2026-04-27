@@ -89,7 +89,7 @@ const { fbContent } = require('docusaurus-plugin-internaldocs-fb/internal');
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
-        enableEditor: true,
+        enableEditor: false,
       }),
     ],
   ],

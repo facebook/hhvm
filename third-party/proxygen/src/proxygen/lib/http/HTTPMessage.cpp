@@ -835,10 +835,6 @@ void HTTPMessage::atomicDumpMessage(int vlogLevel) const {
   dumpMessage(vlogLevel);
 }
 
-void HTTPMessage::dumpMessageToSink(google::LogSink* logSink) const {
-  LOG_TO_SINK(logSink, INFO) << *this;
-}
-
 bool HTTPMessage::computeKeepalive() const {
   if (version_.first < 1) {
     return false;

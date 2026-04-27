@@ -660,11 +660,6 @@ class HTTPMessage {
   void atomicDumpMessage(int verbosity) const;
 
   /**
-   * Print the message out to logSink.
-   */
-  void dumpMessageToSink(google::LogSink* logSink) const;
-
-  /**
    * Interact with headers that are defined to be per-hop.
    *
    * It is expected that during request processing, stripPerHopHeaders() will

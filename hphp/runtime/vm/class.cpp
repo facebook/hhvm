@@ -5262,6 +5262,12 @@ std::vector<Class*> prioritySerializeClasses() {
   return ret;
 }
 
+Optional<OptObjReleaseFunc> Class::optReleaseFunc() const {
+  if (m_releaseFunc == ObjectData::release)
+    return ObjectData::release2;
+  return std::nullopt;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

@@ -38,7 +38,6 @@ function test(Foo $f): void {
 If your function has the `ReadGlobals` capability but not the `AccessGlobals` capability (i.e. is marked `read_globals` or `leak_safe`), it can only access class static variables if they are wrapped in a readonly expression:
 
 ```hack
-<<file:__EnableUnstableFeatures("readonly")>>
 class Bar {}
 class Foo {
   public static readonly ?Bar $bar = null;

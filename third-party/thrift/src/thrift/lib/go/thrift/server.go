@@ -40,6 +40,28 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
 
+type processorFunctionStream interface {
+	RunStreamContext(
+		ctx context.Context,
+		args ReadableStruct,
+		onFirstResponse func(WritableStruct),
+		onStreamNext func(WritableStruct),
+		onStreamComplete func(),
+	)
+}
+
+type processorFunctionSink interface {
+	RunSinkContext(
+		ctx context.Context,
+		reqStruct ReadableStruct,
+		onFirstResponse func(WritableStruct),
+		onFinalResponse func(WritableStruct),
+		onSinkError func(error),
+		sinkSeq iter.Seq2[ReadableStruct, error],
+	)
+	NewSinkElem() ReadableResult
+}
+
 var loadSheddingError = NewApplicationException(
 	LOADSHEDDING,
 	"load shedding due to max request limit",
@@ -507,16 +529,7 @@ func (s *rocketServerSocket) requestStream(msg payload.Payload) flux.Flux {
 		return flux.Error(fmt.Errorf("no such function: %q", rpcFuncName))
 	}
 
-	type ProcessorFunctionStream interface {
-		RunStreamContext(
-			ctx context.Context,
-			args ReadableStruct,
-			onFirstResponse func(WritableStruct),
-			onStreamNext func(WritableStruct),
-			onStreamComplete func(),
-		)
-	}
-	pfuncStream, ok := pfunc.(ProcessorFunctionStream)
+	pfuncStream, ok := pfunc.(processorFunctionStream)
 	if !ok {
 		return flux.Error(fmt.Errorf("not a streaming function: %q", rpcFuncName))
 	}
@@ -652,18 +665,6 @@ func (s *rocketServerSocket) requestChannel(request payload.Payload, requests fl
 	// released by the underlying rsocket layer before we are done with it.
 	request = payload.Clone(request)
 
-	type ProcessorFunctionSink interface {
-		RunSinkContext(
-			ctx context.Context,
-			reqStruct ReadableStruct,
-			onFirstResponse func(WritableStruct),
-			onFinalResponse func(WritableStruct),
-			onSinkError func(error),
-			sinkSeq iter.Seq2[ReadableStruct, error],
-		)
-		NewSinkElem() ReadableResult
-	}
-
 	// Decode initial request metadata
 	metadata := rpcmetadata.NewRequestRpcMetadata()
 	if err := rocket.DecodePayloadMetadata(request, metadata); err != nil {
@@ -691,7 +692,7 @@ func (s *rocketServerSocket) requestChannel(request payload.Payload, requests fl
 		return flux.Error(fmt.Errorf("no such function: %q", rpcFuncName))
 	}
 
-	pfuncSink, ok := pfunc.(ProcessorFunctionSink)
+	pfuncSink, ok := pfunc.(processorFunctionSink)
 	if !ok {
 		return flux.Error(fmt.Errorf("not a sink function: %q", rpcFuncName))
 	}

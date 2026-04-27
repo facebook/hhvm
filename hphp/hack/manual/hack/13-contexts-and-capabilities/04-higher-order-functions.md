@@ -1,12 +1,5 @@
 # Higher Order Functions
 
-:::note
-
-Context and capabilities are enabled by default since
-[HHVM 4.93](https://hhvm.com/blog/2021/01/19/hhvm-4.93.html).
-
-:::
-
 One may define a higher order function whose context depends on the dynamic context of one or more passed in function arguments.
 
 ```hack
@@ -19,45 +12,34 @@ function has_dependent_fn_arg(
 }
 ```
 
-One may reference the dependent context of a function argument in later arguments as well as in the return type.
-
-```hack no-extract
-function has_double_dependent_fn_arg(
-  (function()[_]: void) $f1,
-  (function()[ctx $f1]: void) $f2,
-)[rand, ctx $f1]: void {
-  $f1();
-  $f2();
-}
-
-function has_dependent_return(
-  (function()[_]: void) $f,
-)[ctx $f, io]: (function()[ctx $f]: void) {
-  $f();
-  return $f;
-}
-```
-
 The semantics of the argument-dependent-context are such that the higher order function's type is specialized per invocation.
 
-```hack no-extract
-function callee(
-  (function()[_]: void) $f,
-)[rand, ctx $f]: void {
+```hack error
+final class Box {
+  public static ?Box $global = null;
+  public function __construct(public mixed $value)[] {}
+}
+
+function callee((function(Box)[_]: void) $f, Box $b)[globals, ctx $f]: void {
   /* some code */
-  $f();
+  $f($b);
+  Box::$global = $b;
   /* more code */
 }
 
-function caller()[io, rand]: void {
-  // pass pure closure
-  callee(()[] ==> {/* some fn body */}); // specialized callee is {Rand}
+function caller()[globals]: void {
+  callee(
+    ($_) ==> {}, // implicitly [globals]
+    new Box(null),
+  ); // invoke requires context [globals]
 
-  // pass {IO} closure
-  callee(()[io] ==> {echo "output"; }); // specialized callee is {Rand, IO}
-  // pass {IO, Rand} closure
-  callee(() ==> {/* some fn body */}); // callee is {Rand, IO}
+  callee(
+    ($box)[write_props] ==> {
+      $box->value = 0;
+    },
+    new Box(null),
+  ); // ERROR because invoke requires context [globals, write_props]
 }
 ```
 
-Note that this suggests and requires that all other statements within `callee` require only the Rand capability, as the actual capabilities of the passed argument cannot be depended upon to be any specific capability.
+Note that this suggests and requires that all other code within `callee` requires only the `globals` context's capabilities, as the actual capabilities provided via the passed argument cannot be depended upon to be any specific capabilities.

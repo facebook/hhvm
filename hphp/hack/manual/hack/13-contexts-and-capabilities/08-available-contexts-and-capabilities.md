@@ -1,12 +1,5 @@
 # Available Contexts & Capabilities
 
-:::note
-
-Context and capabilities are enabled by default since
-[HHVM 4.93](https://hhvm.com/blog/2021/01/19/hhvm-4.93.html).
-
-:::
-
 The following contexts and capabilities are implemented at present.
 
 ## Capabilities
@@ -14,7 +7,6 @@ The following contexts and capabilities are implemented at present.
 ### IO
 
 This gates the ability to use the `echo` and `print` intrinsics within function bodies.
-Additionally, built-in functions that perform output operations such as file writes and DB reads will require this capablity.
 
 ```hack
 function does_echo_and_print(): void {
@@ -26,9 +18,8 @@ function does_echo_and_print(): void {
 ### WriteProperty
 
 This gates the ability to modify objects within function bodies.
-Built-in functions that modify their inputs or methods that modify `$this` will require this capability.
 
-At present, all constructors have the ability to modify `$this`. Note that this does *not* imply that constructors can call functions requiring the WriteProperty capability.
+At present, all constructors have the ability to modify `$this`. Note that this does *not* imply that constructors can call functions requiring the `WriteProperty` capability.
 
 ```hack
 // Valid example
@@ -47,18 +38,18 @@ function can_write_props(SomeClass $sc)[write_props]: void {
 }
 ```
 
-```hack error
+```hack
 // Invalid example
 
 class SomeClass {
   public string $s = '';
   public function modifyThis()[]: void {  // pure (empty context list)
-    $this->s = 'this applies as well';
+    $this->s = 'this applies as well'; // ERROR
   }
 }
 
 function pure_function(SomeClass $sc)[]: void {
-  $sc->s = 'like this';
+  $sc->s = 'like this'; // ERROR
 }
 ```
 
@@ -73,50 +64,119 @@ function modify_collection()[write_props]: void {
 }
 ```
 
-### AccessGlobals
+### ReadGlobals
 
-This gates the ability to access static variables and globals.
-Built-in functions that make use of mutable global state or expose the php-style superglobals will require this capability.
+This gates the ability to read static variables and globals.
+Built-in functions that read from mutable global state will require this capability.
+
+Note that references to static properties from a `read_globals` context must use the `readonly` keyword.
 
 ```hack
-// Valid example
+class HasStatic {
+  public static int $count = 0;
+}
 
+function read_static()[read_globals]: readonly int {
+  return readonly HasStatic::$count;
+}
+```
+
+### AccessGlobals
+
+This gates the ability to read and write static variables and globals.
+Built-in functions that make use of mutable global state or expose the php-style superglobals will require this capability.
+
+The `AccessGlobals` capability includes the `ReadGlobals` capability, so a function providing the `globals` context can call a function requiring the `read_globals` context.
+
+```hack
 class SomeClass {
   public static string $s = '';
-  public function accessStatic()[globals]: void {
-    self::$s; // like this
-  }
 }
 
 function access_static()[globals]: void {
-  SomeClass::$s; // or like this
+  SomeClass::$s; // OK
 }
 ```
 
-```hack error
-// Invalid example
+### System, SystemShallow, and SystemLocal
 
-class SomeClass {
-  public static string $s = '';
-  public function pureMethod()[]: void {
-    self::$s; // like this
-  }
-}
+These capabilities are for Meta-internal uses.
+<FbInternalOnly>See internal documentation here: https://www.internalfb.com/wiki/HackTutorials/LanguageBasics/Contexts_and_Capabilities/</FbInternalOnly>
 
-function pure_function()[]: void {
-  SomeClass::$s; // or like this
-}
-```
+### ImplicitPolicy, ImplicitPolicyShallow, ImplicitPolicyLocal, and ImplicitPolicyOf\<T>
 
+These capabilities are for Meta-internal uses.
+<FbInternalOnly>See internal documentation here: https://www.internalfb.com/wiki/HackTutorials/LanguageBasics/Contexts_and_Capabilities/</FbInternalOnly>
+
+### Rx, RxShallow, and RxLocal
+
+These capabilites are deprecated and unused.
+<FbInternalOnly>See internal documentation here: https://www.internalfb.com/wiki/HackTutorials/LanguageBasics/Contexts_and_Capabilities/</FbInternalOnly>
 
 ## Contexts
 
-- `defaults` represents the capability set `{IO, WriteProperty, AccessGlobals}`.
-- `write_props` represents the capability set `{WriteProperty}`.
-- `globals` represents the capability set `{AccessGlobals}`.
+### `defaults`
 
-### The Empty List
+The `defaults` context has the capability set `{IO, WriteProperty, AccessGlobals, SystemLocal, ImplicitPolicyLocal, Codegen, RxLocal}`.
 
-The empty context list, `[]`, has no capabilities. A function with no capabilities is the closest thing Hack has to 'pure' functions. As additional capabilities are added to Hack in the future, the restriction on these functions will increase.
+A function or method that doesn't specify a context list in its declaration has the `defaults` context. For example, this:
+
+```hack
+function f(): void {
+  // ...
+}
+```
+
+is equivalent to:
+
+```hack
+function f()[defaults]: void {
+  // ...
+}
+```
+
+Note that the capability set of `defaults` is not the universal set of capabilities.
+A function with an unknown and unbounded (polymorphic) context cannot be called from an only `[defaults]` context.
+There is no context from which any function can be called.
+
+### The "Pure" Context
+
+The empty context list, `[]`, has no capabilities. A function with no capabilities is the closest thing Hack has to 'pure' functions. As additional capabilities are added to Hack in the future, the restriction on these functions may increase.
 
 As such, this is sometimes referred to as the 'pure context'.
+
+A function or method with a pure context has limited capabilities:
+
+- A function with this context can read object properties and constants (including class constants).
+- A function with this context can only call functions or methods that also have a pure context.
+- A function with this context cannot read or write static properties (it has neither `ReadGlobals` nor `AccessGlobals`).
+- A function with this context cannot use `print` or `echo` (it does not have `IO`).
+- A function with this context cannot change an object's properties (it does not have `WriteProperty`).
+- Any function or method with a context can call a function or method with this context.
+
+### `write_props`
+
+The `write_props` context has the capability set `{WriteProperty}`.
+
+### `read_globals`
+
+The `read_globals` context has the `ReadGlobals` capability.
+
+### `globals`
+
+The `globals` context has the `AccessGlobals` capability.
+
+### `zoned`, `zoned_shallow`, `zoned_local`, and `zoned_with<T>`
+
+These capabilities are for Meta-internal uses.
+<FbInternalOnly>See internal documentation here: https://www.internalfb.com/wiki/HackTutorials/LanguageBasics/Contexts_and_Capabilities/</FbInternalOnly>
+
+### `leak_safe`, `leak_safe_shallow`, and `leak_safe_local`
+
+These capabilities are for Meta-internal uses.
+<FbInternalOnly>See internal documentation here: https://www.internalfb.com/wiki/HackTutorials/LanguageBasics/Contexts_and_Capabilities/</FbInternalOnly>
+
+### `rx`, `rx_shallow`, and `rx_local`
+
+These contexts are deprecated and unused.
+<FbInternalOnly>See internal documentation here: https://www.internalfb.com/wiki/HackTutorials/LanguageBasics/Contexts_and_Capabilities/</FbInternalOnly>

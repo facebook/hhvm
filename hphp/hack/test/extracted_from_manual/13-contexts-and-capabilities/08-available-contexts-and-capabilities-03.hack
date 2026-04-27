@@ -5,10 +5,10 @@
 class SomeClass {
   public string $s = '';
   public function modifyThis()[]: void {  // pure (empty context list)
-    $this->s = 'this applies as well';
+    $this->s = 'this applies as well'; // ERROR
   }
 }
 
 function pure_function(SomeClass $sc)[]: void {
-  $sc->s = 'like this';
+  $sc->s = 'like this'; // ERROR
 }

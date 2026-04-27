@@ -1,0 +1,14 @@
+ERROR: File "08-available-contexts-and-capabilities-03.hack", line 8, characters 5-37:
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
+ERROR: File "08-available-contexts-and-capabilities-03.hack", line 13, characters 3-22:
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
+ERROR: File "08-available-contexts-and-capabilities-03.hack", line 8, characters 5-12:
+This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "08-available-contexts-and-capabilities-03.hack", line 7, characters 31-32:
+  The local (enclosing) context provides the capability set {}
+ERROR: File "08-available-contexts-and-capabilities-03.hack", line 13, characters 3-8:
+This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "08-available-contexts-and-capabilities-03.hack", line 12, characters 38-39:
+  The local (enclosing) context provides the capability set {}

@@ -1,4 +1,4 @@
-cpp2: mstch_cpp2:json,deprecated_terse_writes src/module.thrift
+cpp2: mstch_cpp2:json src/module.thrift
 cpp2_includes: mstch_cpp2:json src/includes.thrift
 cpp2_enums: mstch_cpp2:json,reflection src/enums.thrift
 cpp2_reflection: mstch_cpp2:json,reflection src/reflection.thrift

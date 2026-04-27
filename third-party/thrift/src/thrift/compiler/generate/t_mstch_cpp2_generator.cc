@@ -1425,21 +1425,14 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
     });
     def.property("legacy_api?", [](const t_structured&) { return true; });
     def.property(
-        "has_non_optional_and_non_terse_field?",
-        [this](const t_structured& strct) {
+        "has_non_optional_and_non_terse_field?", [](const t_structured& strct) {
           const auto& fields = strct.fields();
-          return std::any_of(
-              fields.begin(),
-              fields.end(),
-              [enabled_terse_write = has_compiler_option(
-                   "deprecated_terse_writes")](auto& field) {
-                return (!enabled_terse_write ||
-                        !cpp2::deprecated_terse_writes(&field)) &&
-                    !field.has_structured_annotation(
-                        kCppDeprecatedTerseWriteUri) &&
-                    field.qualifier() != t_field_qualifier::optional &&
-                    field.qualifier() != t_field_qualifier::terse;
-              });
+          return std::any_of(fields.begin(), fields.end(), [](auto& field) {
+            return !field.has_structured_annotation(
+                       kCppDeprecatedTerseWriteUri) &&
+                field.qualifier() != t_field_qualifier::optional &&
+                field.qualifier() != t_field_qualifier::terse;
+          });
         });
     def.property(
         "fields_with_runtime_annotation?", [](const t_structured& strct) {
@@ -1886,19 +1879,14 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
       assert(field_context != nullptr);
       return proto.create_nullable<t_field>(field_context->serialization_next);
     });
-    def.property("deprecated_terse_writes?", [this](const t_field& field) {
-      return field.has_structured_annotation(kCppDeprecatedTerseWriteUri) ||
-          (has_compiler_option("deprecated_terse_writes") &&
-           cpp2::deprecated_terse_writes(&field));
+    def.property("deprecated_terse_writes?", [](const t_field& field) {
+      return field.has_structured_annotation(kCppDeprecatedTerseWriteUri);
     });
     def.property(
         "deprecated_terse_writes_with_non_redundant_custom_default?",
-        [this](const t_field& field) {
-          bool is_deprecated_terse =
-              field.has_structured_annotation(kCppDeprecatedTerseWriteUri) ||
-              (has_compiler_option("deprecated_terse_writes") &&
-               cpp2::deprecated_terse_writes(&field));
-          return is_deprecated_terse && field.default_value() &&
+        [](const t_field& field) {
+          return field.has_structured_annotation(kCppDeprecatedTerseWriteUri) &&
+              field.default_value() &&
               !detail::is_initializer_default_value(
                      field.type().deref(), *field.default_value());
         });
@@ -2631,16 +2619,13 @@ class validate_splits {
 };
 
 void forbid_deprecated_terse_writes_ref(
-    sema_context& ctx,
-    const t_structured& strct,
-    const compiler_options_map& options) {
+    sema_context& ctx, const t_structured& strct) {
   for (auto& field : strct.fields()) {
     const bool isUniqueRef =
         gen::cpp::find_ref_type(field) == gen::cpp::reference_type::unique;
     const bool isDeprecatedTerseWrites =
         field.qualifier() == t_field_qualifier::none &&
-        (options.count("deprecated_terse_writes") ||
-         field.has_structured_annotation(kCppDeprecatedTerseWriteUri));
+        field.has_structured_annotation(kCppDeprecatedTerseWriteUri);
 
     if (field.has_structured_annotation(
             kCppAllowLegacyDeprecatedTerseWritesRefUri)) {
@@ -2699,19 +2684,6 @@ void validate_lazy_fields(sema_context& ctx, const t_field& field) {
   }
 }
 
-// TODO(dokwon): Remove this validation once `deprecated_terse_writes` cpp2
-// options are completely removed.
-void validate_deprecated_terse_writes(
-    sema_context& ctx,
-    const t_field& field,
-    const compiler_options_map& options) {
-  if (options.count("deprecated_terse_writes") != 0 &&
-      field.has_structured_annotation(kCppDeprecatedTerseWriteUri)) {
-    ctx.error(
-        "Cannot use thrift_cpp2_options `deprecated_terse_writes` with @cpp.DeprecatedTerseWrite.");
-  }
-}
-
 void t_mstch_cpp2_generator::fill_validator_visitors(
     ast_validator& validator) const {
   validator.add_structured_definition_visitor(
@@ -2720,21 +2692,10 @@ void t_mstch_cpp2_generator::fill_validator_visitors(
           std::placeholders::_1,
           std::placeholders::_2,
           compiler_options()));
-  validator.add_struct_visitor(
-      std::bind(
-          forbid_deprecated_terse_writes_ref,
-          std::placeholders::_1,
-          std::placeholders::_2,
-          compiler_options()));
+  validator.add_struct_visitor(forbid_deprecated_terse_writes_ref);
   validator.add_program_visitor(validate_splits(
       get_split_count(compiler_options()), client_name_to_split_count_));
   validator.add_field_visitor(validate_lazy_fields);
-  validator.add_field_visitor(
-      std::bind(
-          validate_deprecated_terse_writes,
-          std::placeholders::_1,
-          std::placeholders::_2,
-          compiler_options()));
 }
 
 THRIFT_REGISTER_GENERATOR(
@@ -2757,10 +2718,6 @@ THRIFT_REGISTER_GENERATOR(
       private. In addition to exposing directly the field (which is unsafe to
       begin with), this prevents the generation of the reference accessors
       that do not have the _ref() suffix.
-    deprecated_terse_writes
-      Enable deprecated terse writes, which are discouraged in favor of
-      @thrift.TerseWrite. See:
-      https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/field-qualifiers.md#terse-writes-compiler-option
     disable_custom_type_ordering_if_structure_has_uri (IGNORED - ALWAYS SET)
       Without this option, custom set/map are considered orderable if parent structure has uri.
     frozen[=packed]

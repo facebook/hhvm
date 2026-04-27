@@ -191,7 +191,7 @@ void ASimpleStruct::__fbthrift_clear() {
 }
 
 bool ASimpleStruct::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_boolField != ::std::int64_t());
+  return false;
 }
 
 bool ASimpleStruct::operator==([[maybe_unused]] const ASimpleStruct& rhs) const {
@@ -241,7 +241,7 @@ void ASimpleStructNoexcept::__fbthrift_clear() {
 }
 
 bool ASimpleStructNoexcept::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_boolField != ::std::int64_t());
+  return false;
 }
 
 bool ASimpleStructNoexcept::operator==([[maybe_unused]] const ASimpleStructNoexcept& rhs) const {
@@ -2863,8 +2863,7 @@ void ComplexContainerStruct::__fbthrift_clear() {
 }
 
 bool ComplexContainerStruct::__fbthrift_is_empty() const {
-  return !(!::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_map_of_iobufs)) &&
- !(!::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_map_of_iobuf_ptrs));
+  return false;
 }
 
 bool ComplexContainerStruct::operator==([[maybe_unused]] const ComplexContainerStruct& rhs) const {
@@ -2929,8 +2928,7 @@ void FloatStruct::__fbthrift_clear() {
 }
 
 bool FloatStruct::__fbthrift_is_empty() const {
-  return !(this->__fbthrift_field_floatField != float()) &&
- !(this->__fbthrift_field_doubleField != double());
+  return false;
 }
 
 bool FloatStruct::operator==([[maybe_unused]] const FloatStruct& rhs) const {

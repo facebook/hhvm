@@ -547,14 +547,6 @@ std::string sha256_hex(std::string const& in) {
   return out;
 }
 
-bool deprecated_terse_writes(const t_field* field) {
-  // Add terse writes for unqualified fields when comparison is cheap:
-  // (e.g. i32/i64, empty strings/list/map)
-  auto t = field->type()->get_true_type();
-  return field->qualifier() == t_field_qualifier::none &&
-      (cpp2::is_unique_ref(field) || (!t->is<t_structured>()));
-}
-
 t_field_id get_internal_injected_field_id(t_field_id id) {
   t_field_id internal_id = kInjectMetadataFieldsStartId - id;
   if (internal_id > kInjectMetadataFieldsStartId ||

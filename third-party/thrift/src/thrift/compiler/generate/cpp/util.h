@@ -226,8 +226,6 @@ std::string get_gen_type_class(const t_type& type);
 
 std::string sha256_hex(const std::string& in);
 
-bool deprecated_terse_writes(const t_field* field);
-
 namespace detail {
 template <typename T>
 decltype(std::declval<T>()->name()) stringify(const T& t) {

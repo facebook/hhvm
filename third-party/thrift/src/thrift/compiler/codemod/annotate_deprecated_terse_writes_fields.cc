@@ -22,7 +22,7 @@
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/codemod/codemod.h>
 #include <thrift/compiler/codemod/file_manager.h>
-#include <thrift/compiler/generate/cpp/util.h>
+#include <thrift/compiler/generate/cpp/reference_type.h>
 
 using apache::thrift::compiler::source_manager;
 using apache::thrift::compiler::t_program_bundle;
@@ -42,7 +42,9 @@ bool should_annotate_field(const t_field& field) {
     return false;
   }
 
-  if (cpp2::deprecated_terse_writes(&field)) {
+  auto t = field.type()->get_true_type();
+  if (gen::cpp::find_ref_type(field) == gen::cpp::reference_type::unique ||
+      !t->is<t_structured>()) {
     return true;
   }
 

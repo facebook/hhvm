@@ -275,7 +275,6 @@ struct MyIncludedStruct {
   2: AStruct MyIncludedStruct;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  @cpp.AllowLegacyDeprecatedTerseWritesRef
   3: AStruct ARefField;
   @thrift.AllowUnsafeRequiredFieldQualifier
   4: required AStruct ARequiredField;
@@ -312,15 +311,12 @@ struct AnnotatedStruct {
   1: ContainerStruct no_annotation;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  @cpp.AllowLegacyDeprecatedTerseWritesRef
   2: ContainerStruct cpp_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  @cpp.AllowLegacyDeprecatedTerseWritesRef
   3: ContainerStruct cpp2_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
-  @cpp.AllowLegacyDeprecatedTerseWritesRef
   4: map<i32, list<string>> container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
@@ -341,7 +337,6 @@ struct AnnotatedStruct {
   @cpp.Ref{type = cpp.RefType.Unique}
   10: optional set<i32> opt_container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
-  @cpp.AllowLegacyDeprecatedTerseWritesRef
   @cpp.AllowLegacyNonOptionalRef
   11: ContainerStruct ref_type_unique;
   @cpp.Ref{type = cpp.RefType.SharedMutable}

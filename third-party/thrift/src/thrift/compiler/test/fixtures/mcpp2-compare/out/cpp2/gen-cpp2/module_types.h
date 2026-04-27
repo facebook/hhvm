@@ -1048,32 +1048,6 @@ namespace apache::thrift::detail::annotation {
 
 namespace apache::thrift::detail::qualifier {
 template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::MyStruct,::apache::thrift::type::field_id<2>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::MyStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::MyStruct,::apache::thrift::type::field_id<9>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::AnException,::apache::thrift::type::field_id<3>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::ContainerStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::ContainerStruct,::apache::thrift::type::field_id<5>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::ContainerStruct,::apache::thrift::type::field_id<6>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::ContainerStruct,::apache::thrift::type::field_id<9>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::ContainerStruct,::apache::thrift::type::field_id<10>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::ContainerStruct,::apache::thrift::type::field_id<18>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::ContainerStruct,::apache::thrift::type::field_id<19>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::ContainerStruct,::apache::thrift::type::field_id<22>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::MyIncludedStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
-template<>
 struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<8>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<9>> : std::true_type{};
@@ -1085,10 +1059,6 @@ template<>
 struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<18>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<19>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<38>> : std::true_type{};
-template<>
-struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<39>> : std::true_type{};
 } // namespace apache::thrift::detail::qualifier
 
 // BEGIN hash_and_equal_to
@@ -1351,10 +1321,6 @@ class ASimpleStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::boolField>) const {
-    return this->__fbthrift_field_boolField != ::std::int64_t();
-  }
-
   friend class ::apache::thrift::Cpp2Ops<ASimpleStruct>;
   friend void swap(ASimpleStruct& a, ASimpleStruct& b);
 };
@@ -1483,10 +1449,6 @@ class ASimpleStructNoexcept final  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::boolField>) const {
-    return this->__fbthrift_field_boolField != ::std::int64_t();
-  }
 
   friend class ::apache::thrift::Cpp2Ops<ASimpleStructNoexcept>;
   friend void swap(ASimpleStructNoexcept& a, ASimpleStructNoexcept& b);
@@ -2157,38 +2119,6 @@ class MyStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBoolField>) const {
-    return this->__fbthrift_field_MyBoolField != bool();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyIntField>) const {
-    return this->__fbthrift_field_MyIntField != static_cast<::std::int64_t>(12);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyStringField>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_MyStringField);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyStringField2>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_MyStringField2);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryField>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_MyBinaryField);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryListField4>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::binary_t>>(this->__fbthrift_field_MyBinaryListField4);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyMapEnumAndInt>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>, ::apache::thrift::type::string_t>>(this->__fbthrift_field_MyMapEnumAndInt);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyCustomField>) const {
-    return !::apache::thrift::op::equal<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_MyCustomField, ::some::valid::ns::CustomProtocolType());
-  }
-
   friend class ::apache::thrift::Cpp2Ops<MyStruct>;
   friend void swap(MyStruct& a, MyStruct& b);
 };
@@ -2483,14 +2413,6 @@ class SimpleUnion  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::intValue>) const {
-    return value_.intValue != ::std::int64_t();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::stringValue>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(value_.stringValue);
-  }
 
   friend class ::apache::thrift::Cpp2Ops<SimpleUnion>;
   friend void swap(SimpleUnion& a, SimpleUnion& b);
@@ -3489,54 +3411,6 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::code>) const {
-    return this->__fbthrift_field_code != ::std::int32_t();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::message2>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_message2);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::exception_list>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(this->__fbthrift_field_exception_list);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::exception_set>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i64_t>>(this->__fbthrift_field_exception_set);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::exception_map>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>(this->__fbthrift_field_exception_map);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_field>) const {
-    return this->__fbthrift_field_enum_field != ::some::valid::ns::MyEnumA();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_container>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>(this->__fbthrift_field_enum_container);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_set_struct>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>(this->__fbthrift_field_a_set_struct);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_list>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(this->__fbthrift_field_a_union_list);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::union_typedef>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(this->__fbthrift_field_union_typedef);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_typedef_list>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>(this->__fbthrift_field_a_union_typedef_list);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyCustomField>) const {
-    return !::apache::thrift::op::equal<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_MyCustomField, ::some::valid::ns::CustomProtocolType());
-  }
 
   friend class ::apache::thrift::Cpp2Ops<AnException>;
   friend void swap(AnException& a, AnException& b);
@@ -6163,94 +6037,6 @@ class ComplexUnion final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::intValue>) const {
-    return value_.intValue != ::std::int64_t();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::opt_intValue>) const {
-    return value_.opt_intValue != ::std::int64_t();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::stringValue>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(value_.stringValue);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::opt_stringValue>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(value_.opt_stringValue);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::intValue2>) const {
-    return value_.intValue2 != ::std::int16_t();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::intValue3>) const {
-    return value_.intValue3 != ::std::int32_t();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::doubelValue>) const {
-    return value_.doubelValue != double();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::boolValue>) const {
-    return value_.boolValue != bool();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::union_list>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i32_t>>(value_.union_list);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::union_set>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i64_t>>(value_.union_set);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::union_map>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>(value_.union_map);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::opt_union_map>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>(value_.opt_union_map);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_field>) const {
-    return value_.enum_field != ::some::valid::ns::MyEnumA();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::enum_container>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>(value_.enum_container);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_set_struct>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>(value_.a_set_struct);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_list>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(value_.a_union_list);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_typedef>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(value_.a_union_typedef);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::a_union_typedef_list>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>(value_.a_union_typedef_list);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryField>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(value_.MyBinaryField);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryField2>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(value_.MyBinaryField2);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyBinaryListField4>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::binary_t>>(value_.MyBinaryListField4);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyCustomField>) const {
-    return !::apache::thrift::op::equal<::apache::thrift::type::adapted<::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>>(value_.MyCustomField, ::some::valid::ns::CustomProtocolType());
-  }
-
   friend class ::apache::thrift::Cpp2Ops<ComplexUnion>;
   friend void swap(ComplexUnion& a, ComplexUnion& b);
 };
@@ -6499,14 +6285,6 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::code>) const {
-    return this->__fbthrift_field_code != ::std::int32_t();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::message>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_message);
-  }
 
   friend class ::apache::thrift::Cpp2Ops<AnotherException>;
   friend void swap(AnotherException& a, AnotherException& b);
@@ -8991,118 +8769,6 @@ class ContainerStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldA>) const {
-    return this->__fbthrift_field_fieldA != bool();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldB>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::bool_t>>(this->__fbthrift_field_fieldB);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldC>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i32_t>>(this->__fbthrift_field_fieldC);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldD>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_fieldD);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldE>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_fieldE);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldF>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>(this->__fbthrift_field_fieldF);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldG>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>>>(this->__fbthrift_field_fieldG);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldH>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::i32_t>>>(this->__fbthrift_field_fieldH);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldI>) const {
-    return this->__fbthrift_field_fieldI != true;
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldJ>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>(this->__fbthrift_field_fieldJ);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldK>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::i32_t>>>>>(this->__fbthrift_field_fieldK);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldL>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::set<::apache::thrift::type::bool_t>>>>(this->__fbthrift_field_fieldL);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldM>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::set<::apache::thrift::type::list<::apache::thrift::type::i32_t>>, ::apache::thrift::type::map<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::string_t>>, ::apache::thrift::type::string_t>>>(this->__fbthrift_field_fieldM);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldN>) const {
-    return this->__fbthrift_field_fieldN != ::some::valid::ns::simpleTypeDef();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldO>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::struct_t<::some::valid::ns::Empty>, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>>(this->__fbthrift_field_fieldO);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldP>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::struct_t<::some::valid::ns::Empty>, ::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>>>>(this->__fbthrift_field_fieldP);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldQ>) const {
-    return this->__fbthrift_field_fieldQ != ::some::valid::ns::MyEnumA();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldR>) const {
-    return this->__fbthrift_field_fieldR !=  ::some::valid::ns::MyEnumA::fieldB;
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldS>) const {
-    return this->__fbthrift_field_fieldS !=  ::some::valid::ns::MyEnumA::fieldB;
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldT>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>(this->__fbthrift_field_fieldT);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldU>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::enum_t<::some::valid::ns::MyEnumA>>>(this->__fbthrift_field_fieldU);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldW>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::struct_t<::some::valid::ns::MyStruct>>>(this->__fbthrift_field_fieldW);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldY>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::union_t<::some::valid::ns::ComplexUnion>>>(this->__fbthrift_field_fieldY);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldZ>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>(this->__fbthrift_field_fieldZ);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldAA>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::set<::apache::thrift::type::union_t<::some::valid::ns::SimpleUnion>>>>(this->__fbthrift_field_fieldAA);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldAC>) const {
-    return this->__fbthrift_field_fieldAC != ::some::valid::ns::MyEnumB();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldAD>) const {
-    return this->__fbthrift_field_fieldAD != ::a::different::ns::AnEnum();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::fieldAE>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>(this->__fbthrift_field_fieldAE);
-  }
-
   friend class ::apache::thrift::Cpp2Ops<ContainerStruct>;
   friend void swap(ContainerStruct& a, ContainerStruct& b);
 };
@@ -9388,10 +9054,6 @@ class MyIncludedStruct final  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::MyIncludedInt>) const {
-    return this->__fbthrift_field_MyIncludedInt != static_cast<::a::different::ns::IncludedInt64>(42);
-  }
 
   friend class ::apache::thrift::Cpp2Ops<MyIncludedStruct>;
   friend void swap(MyIncludedStruct& a, MyIncludedStruct& b);
@@ -11320,82 +10982,6 @@ class AnnotatedStruct  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::container_with_ref>) const {
-    return this->__fbthrift_field_container_with_ref && !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>(*this->__fbthrift_field_container_with_ref);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::ref_type_const>) const {
-    return this->__fbthrift_field_ref_type_const && !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>(*this->__fbthrift_field_ref_type_const);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::base_type>) const {
-    return this->__fbthrift_field_base_type != ::some::valid::ns::CppFakeI32();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_type>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::FollySmallVectorI64, ::apache::thrift::type::list<::apache::thrift::type::i64_t>>>(this->__fbthrift_field_list_type);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::set_type>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::SortedVectorSetString, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>(this->__fbthrift_field_set_type);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_type>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::FakeMap, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::double_t>>>(this->__fbthrift_field_map_type);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_struct_type>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::UnorderedMapStruct, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::struct_t<::some::valid::ns::ContainerStruct>>>>(this->__fbthrift_field_map_struct_type);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::iobuf_type>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_iobuf_type);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::iobuf_ptr>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_iobuf_ptr);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_i32_template>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::list<::std::int32_t>, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>(this->__fbthrift_field_list_i32_template);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::list_string_template>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<std::deque<::std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>(this->__fbthrift_field_list_string_template);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::set_template>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::sorted_vector_set<::std::string>, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>(this->__fbthrift_field_set_template);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_template>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::sorted_vector_map<::std::int64_t, ::std::string>, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>>>(this->__fbthrift_field_map_template);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::typedef_list_template>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::std_list, ::apache::thrift::type::list<::apache::thrift::type::i32_t>>>(this->__fbthrift_field_typedef_list_template);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::typedef_deque_template>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::std_deque, ::apache::thrift::type::list<::apache::thrift::type::string_t>>>(this->__fbthrift_field_typedef_deque_template);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::typedef_set_template>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::folly_set, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>(this->__fbthrift_field_typedef_set_template);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::typedef_map_template>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::folly_map, ::apache::thrift::type::map<::apache::thrift::type::i64_t, ::apache::thrift::type::string_t>>>(this->__fbthrift_field_typedef_map_template);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::iobuf_type_val>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_iobuf_type_val);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::iobuf_ptr_val>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_iobuf_ptr_val);
-  }
-
   friend class ::apache::thrift::Cpp2Ops<AnnotatedStruct>;
   friend void swap(AnnotatedStruct& a, AnnotatedStruct& b);
 };
@@ -11591,14 +11177,6 @@ class ComplexContainerStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_of_iobufs>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBuf, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_map_of_iobufs);
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::map_of_iobuf_ptrs>) const {
-    return !::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::cpp_type<::some::valid::ns::IOBufPtr, ::apache::thrift::type::binary_t>>>(this->__fbthrift_field_map_of_iobuf_ptrs);
-  }
-
   friend class ::apache::thrift::Cpp2Ops<ComplexContainerStruct>;
   friend void swap(ComplexContainerStruct& a, ComplexContainerStruct& b);
 };
@@ -11776,14 +11354,6 @@ class FloatStruct final  {
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::floatField>) const {
-    return this->__fbthrift_field_floatField != float();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::doubleField>) const {
-    return this->__fbthrift_field_doubleField != double();
-  }
 
   friend class ::apache::thrift::Cpp2Ops<FloatStruct>;
   friend void swap(FloatStruct& a, FloatStruct& b);
@@ -12058,14 +11628,6 @@ class FloatUnion final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::floatSide>) const {
-    return value_.floatSide != float();
-  }
-
-  bool __fbthrift_should_write_deprecated_terse_field(::folly::tag_t<::apache::thrift::ident::doubleSide>) const {
-    return value_.doubleSide != double();
-  }
-
   friend class ::apache::thrift::Cpp2Ops<FloatUnion>;
   friend void swap(FloatUnion& a, FloatUnion& b);
 };
@@ -12279,97 +11841,97 @@ template <> struct TEnumTraits<::some::valid::ns::FloatUnion::Type> {
 namespace apache::thrift::detail {
 template <> struct TSchemaAssociation<::some::valid::ns::Empty, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x83\x70\xb4\xd3\x79\x38\x50\x29\x69\xa0\xb2\x58\x09\xb6\x28\xb5", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x83\x68\xd7\x30\x75\xd1\xc3\xfb\xc9\xec\x24\xd2\x86\xff\x74\x3d", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ASimpleStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\xec\xf6\xa8\x28\x10\x13\x25\x4c\x6d\x5a\x6f\x5d\xa8\x86\xff\x7b", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x6f\x88\xfd\xe5\xdc\x17\x03\x00\x87\xf3\x9c\x63\x41\x88\x09\x64", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ASimpleStructNoexcept, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x9c\x7d\xe9\x07\x2e\xeb\x5c\x73\x32\xae\xee\x8f\x7d\x8e\x80\x69", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x66\x4b\x57\x94\x3f\x52\x1e\xa9\x22\xab\xc0\x5c\xa8\x54\x37\x97", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::MyStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x94\x22\x56\x6b\x1d\x03\xb3\xe1\x49\xdb\x3f\xf1\x44\x66\x51\x4c", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\xbe\x4c\xcd\x11\xbd\x32\x52\x27\x5e\x5d\x89\x39\x67\xdd\x8c\x17", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::SimpleUnion, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x54\x87\xaa\x87\xf9\x7c\x23\x19\xf7\x7c\x57\x42\x6a\xd7\x44\x77", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x59\x68\x22\x0f\x4e\x5f\xf1\x35\x3e\x57\xef\x2f\x6c\x39\x4c\x69", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ComplexUnion, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\xd1\x01\xd2\xa1\xb0\x12\xf2\x06\x92\x5d\x31\xb4\xda\x98\xf5\x11", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\xc6\x03\xdb\x04\xf8\x96\x96\x7c\xba\x60\xc2\xbd\xb6\x9b\xe3\x22", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::AnException, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x6c\x06\x50\x6c\xd3\xe9\xfe\x70\x2f\xf7\x49\xdf\x21\x92\x52\xca", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\xba\x26\x8f\xc5\x10\xc3\x61\x41\x13\xea\x52\x75\xf8\x43\x49\x72", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::AnotherException, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x4a\xfc\x85\x34\xb7\x6b\x02\x08\x95\x20\x7c\xa1\x74\x42\x7d\x6e", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x5f\xd4\x23\x0e\x3a\x81\xda\xcf\x3c\x00\xbf\x39\xb2\x78\xda\x6a", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ContainerStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x12\xef\x39\x94\xc9\xe4\x42\x50\x7d\xca\xab\x67\xe7\x1e\x9e\x5f", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x08\x4c\xb7\xc7\xfe\x57\x97\x86\xed\x50\xac\x62\x4c\xc1\xcd\xe4", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::MyIncludedStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\xe9\xc7\x3f\x7a\xe2\xfd\xdb\x2f\xc2\xb8\x61\x2f\x8f\xd2\xf0\x60", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x6a\x58\xd4\x21\xf6\x05\xeb\x85\xd5\xe4\x80\xe9\x2a\xaf\xd9\x60", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::AnnotatedStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x2a\x33\xf7\x56\x3b\xe7\xef\xc3\x87\xb0\x50\x3b\x38\x7d\xaa\xf7", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x10\x80\x70\x44\x4a\x07\x6d\xc7\x64\xab\x8d\x60\x8a\x2d\x9b\x15", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::ComplexContainerStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\xca\x7d\x44\x59\x78\x3f\x1f\xfd\xb1\x24\x02\x2b\x4c\x42\x41\xe2", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x37\xc7\x21\xc3\x5f\xee\xaf\xf2\xfd\x2f\x07\x42\xe7\x7d\xb9\x43", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::FloatStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x70\x47\x5d\x97\x56\xd1\x19\x98\xa5\xe7\x80\x04\x3c\x1e\xc8\x62", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x63\x3e\xf1\xf8\x14\x3c\x8e\x54\x03\x2c\x98\xab\xfa\x25\x93\x36", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::FloatUnion, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\xa6\x5b\x49\xee\xc9\x7c\x45\xf1\xad\x4a\x79\x9f\x24\xdb\xae\xc8", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x56\x87\xc6\xc0\x3c\x98\x6f\x69\x1d\x11\xbb\xbc\x4e\xe8\x43\xf6", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x89\x35\x43\xde\x18\x10\xfa\x01\x97\xce\x30\x1e\x19\x1d\x7e\xa8", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x0c\xa2\x71\x72\x55\xfe\xe0\x13\xe4\xef\xdc\xf4\xa3\x43\xca\x69", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::MyEnumA, true> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\xd6\xb0\x9b\xda\xf9\x64\x68\xfc\x65\xaa\x9b\x53\x4d\xba\xdb\x27", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x98\x2d\x02\xcc\xff\x72\xb3\xa6\x20\x9d\x9c\x0a\xfd\xf1\xd9\x06", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::AnnotatedEnum, true> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x73\x95\x68\x3a\x25\x14\xf7\x3d\xce\x04\x73\xd7\x96\x2b\x71\x17", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\xe6\x9f\x53\x0e\xf0\x39\xd5\xfe\x72\x88\x35\x9d\xc2\x07\x6b\xfc", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::AnnotatedEnum2, true> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\xd0\x5e\xdc\x6a\x5f\x98\x00\x60\x5d\x4e\xff\x8e\xb7\x9b\x12\xeb", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\xbc\xae\x3b\xf2\x32\x5b\x69\x82\x02\xa3\x2a\x74\x8c\xe7\x6d\xac", 16};
 };
 template <> struct TSchemaAssociation<::some::valid::ns::MyEnumB, true> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -8569778003692923315;
-  static constexpr ::std::string_view definitionKey = {"\x95\xd9\x41\x7b\xba\x71\x67\x4a\xd9\x83\x14\xc7\x36\x7f\x3b\xbe", 16};
+  static constexpr int64_t programId = -8295770962734868183;
+  static constexpr ::std::string_view definitionKey = {"\x6d\x5e\x3d\x53\x85\x25\x25\x23\x6b\x23\xe4\x14\xc2\x24\xc1\x73", 16};
 };
 } // namespace apache::thrift::detail

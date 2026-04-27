@@ -25,6 +25,8 @@ let init_fake () = ()
 
 let disable_logging _ = ()
 
+let set_sandcastle_logging_enabled _ = ()
+
 let log _ = ()
 
 let log_subsampling

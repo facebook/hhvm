@@ -29,7 +29,6 @@
 #include <thrift/lib/cpp2/async/ClientChannel.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketClient.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace folly {
 class EventBase;

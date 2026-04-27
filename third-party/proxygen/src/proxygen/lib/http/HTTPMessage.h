@@ -518,13 +518,6 @@ class HTTPMessage {
   }
 
   /**
-   * Access the push status code
-   */
-  void setPushStatusCode(const uint16_t status);
-  std::string getPushStatusStr() const;
-  uint16_t getPushStatusCode() const;
-
-  /**
    * Fill in the fields for a response message header that the server will
    * send directly to the client.
    *
@@ -960,8 +953,6 @@ class HTTPMessage {
     mutable std::unique_ptr<std::string> queryStr_;
     std::string url_;
 
-    uint16_t pushStatus_;
-
     Request() = default;
 
     Request(const Request& req)
@@ -970,8 +961,7 @@ class HTTPMessage {
           query_(req.query_),
           pathStr_(nullptr),
           queryStr_(nullptr),
-          url_(req.url_),
-          pushStatus_(req.pushStatus_) {
+          url_(req.url_) {
       if (req.method_.index() == 1) {
         method_ = std::make_unique<std::string>(
             *std::get<std::unique_ptr<std::string>>(req.method_));

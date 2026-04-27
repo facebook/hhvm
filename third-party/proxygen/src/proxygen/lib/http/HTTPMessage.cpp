@@ -378,18 +378,6 @@ uint16_t HTTPMessage::getStatusCode() const {
   return response().status_;
 }
 
-void HTTPMessage::setPushStatusCode(uint16_t status) {
-  request().pushStatus_ = status;
-}
-
-std::string HTTPMessage::getPushStatusStr() const {
-  return folly::to<string>(request().pushStatus_);
-}
-
-uint16_t HTTPMessage::getPushStatusCode() const {
-  return request().pushStatus_;
-}
-
 void HTTPMessage::constructDirectResponse(const pair<uint8_t, uint8_t>& version,
                                           const int statusCode,
                                           const string& statusMsg,
@@ -777,11 +765,9 @@ void HTTPMessage::describe(std::ostream& os) const {
       {"dst_port", dstPort_},
   }};
 
-  std::string pushStatusMessage;
   if (isRequest()) {
     // Request fields.
     const Request& req = request();
-    pushStatusMessage = getPushStatusStr();
     fields.insert(fields.end(),
                   {{"client_ip",
                     req.clientIPPort_ ? req.clientIPPort_->ip : empty_string},
@@ -790,8 +776,7 @@ void HTTPMessage::describe(std::ostream& os) const {
                    {"method", getMethodString()},
                    {"path", req.path_},
                    {"query", req.query_},
-                   {"url", req.url_},
-                   {"push_status", pushStatusMessage}});
+                   {"url", req.url_}});
 
   } else if (isResponse()) {
     // Response fields.

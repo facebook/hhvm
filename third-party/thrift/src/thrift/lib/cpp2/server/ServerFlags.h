@@ -44,6 +44,9 @@ THRIFT_FLAG_DECLARE_int64(thrift_server_min_cpu_compression_payload_size);
 // ThriftServer
 FOLLY_GFLAGS_DECLARE_bool(thrift_use_token_bucket_concurrency_controller);
 
+// Use StripedPriorityUnboundedBlockingQueue in worker CPUThreadPoolExecutors
+THRIFT_FLAG_DECLARE_bool(use_striped_executor_queue);
+
 // Enforce QPS limit in ThriftServer::checkOverload
 FOLLY_GFLAGS_DECLARE_bool(thrift_server_enforces_qps_limit);
 

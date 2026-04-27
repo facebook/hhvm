@@ -38,6 +38,7 @@
 #include <folly/concurrency/memory/PrimaryPtr.h>
 #include <folly/coro/AsyncScope.h>
 #include <folly/dynamic.h>
+#include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/executors/VirtualExecutor.h>
 #include <folly/io/ShutdownSocketSet.h>
@@ -112,6 +113,7 @@ THRIFT_FLAG_DECLARE_bool(server_check_unimplemented_extra_interfaces);
 THRIFT_FLAG_DECLARE_bool(enable_io_queue_lag_detection);
 THRIFT_FLAG_DECLARE_bool(default_sync_max_requests_to_concurrency_limit);
 THRIFT_FLAG_DECLARE_bool(default_sync_max_qps_to_execution_rate);
+THRIFT_FLAG_DECLARE_bool(use_striped_executor_queue);
 
 namespace wangle {
 class ConnectionManager;
@@ -648,6 +650,11 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       return;
     }
     runtimeServerActions_.resourcePoolRuntimeRequested = true;
+  }
+
+  void requireStripedExecutorQueue() {
+    CHECK(configMutable());
+    useStripedExecutorQueue_ = true;
   }
 
   bool useResourcePools() {
@@ -2095,6 +2102,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   bool setupThreadManagerCalled_ = false;
 
+  bool useStripedExecutorQueue_ = false;
+  folly::once_flag loggedStripedExecutorQueue_;
+
  protected:
   folly::observer::CallbackHandle getSSLCallbackHandle();
   folly::observer::CallbackHandle setConcurrencyLimitCallbackHandle{};
@@ -2377,6 +2387,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   std::unique_ptr<RequestPileInterface> makeStandardRequestPile(
       RoundRobinRequestPile::Options options);
+
+  std::unique_ptr<folly::BlockingQueue<folly::CPUThreadPoolExecutor::CPUTask>>
+  makeExecutorQueue();
 
   void scheduleInMemoryTicketSeeds();
 

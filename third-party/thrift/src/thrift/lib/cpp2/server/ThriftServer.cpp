@@ -38,8 +38,8 @@
 #include <folly/coro/Collect.h>
 #include <folly/coro/CurrentExecutor.h>
 #include <folly/coro/Invoke.h>
-#include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/IOThreadPoolDeadlockDetectorObserver.h>
+#include <folly/executors/task_queue/StripedPriorityUnboundedBlockingQueue.h>
 #include <folly/executors/thread_factory/InitThreadFactory.h>
 #include <folly/executors/thread_factory/NamedThreadFactory.h>
 #include <folly/executors/thread_factory/PriorityThreadFactory.h>
@@ -114,6 +114,7 @@ THRIFT_FLAG_DEFINE_bool(server_fizz_prefer_psk_ke, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_presenting_dc, false);
 THRIFT_FLAG_DEFINE_bool(default_sync_max_requests_to_concurrency_limit, false);
 THRIFT_FLAG_DEFINE_bool(default_sync_max_qps_to_execution_rate, false);
+THRIFT_FLAG_DEFINE_bool(use_striped_executor_queue, false);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -1153,7 +1154,21 @@ std::string getThreadNameForPriority(
   return fmt::format(
       "{}.{}", cpuWorkerThreadName, kPoolNames.at(priority).suffix);
 }
+
 } // namespace
+
+std::unique_ptr<folly::BlockingQueue<folly::CPUThreadPoolExecutor::CPUTask>>
+ThriftServer::makeExecutorQueue() {
+  constexpr auto kNumPriorities = ResourcePool::kPreferredExecutorNumPriorities;
+  if (useStripedExecutorQueue_ || THRIFT_FLAG(use_striped_executor_queue)) {
+    folly::call_once(loggedStripedExecutorQueue_, [this] {
+      THRIFT_SERVER_EVENT(striped_executor_queue).log(*this);
+    });
+    return folly::StripedPriorityUnboundedBlockingQueue<
+        folly::CPUThreadPoolExecutor::CPUTask>::create(kNumPriorities);
+  }
+  return folly::CPUThreadPoolExecutor::makeDefaultPriorityQueue(kNumPriorities);
+}
 
 void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
     std::vector<concurrency::PRIORITY> allocated) {
@@ -1174,7 +1189,7 @@ void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
           std::make_shared<folly::NamedThreadFactory>(name);
       // 2 is the default for the priorities other than NORMAL.
       auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-          2, ResourcePool::kPreferredExecutorNumPriorities, std::move(factory));
+          2, makeExecutorQueue(), std::move(factory));
       apache::thrift::RoundRobinRequestPile::Options options;
       auto requestPile = makeStandardRequestPile(std::move(options));
       auto concurrencyController = makeStandardConcurrencyController(
@@ -1343,9 +1358,7 @@ void ThriftServer::ensureResourcePools() {
           makeStandardRequestPile(RoundRobinRequestPile::Options());
 
       auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-          getNumCPUWorkerThreads(),
-          ResourcePool::kPreferredExecutorNumPriorities,
-          threadFactory());
+          getNumCPUWorkerThreads(), makeExecutorQueue(), threadFactory());
 
       auto concurrencyController = makeStandardConcurrencyController(
           *requestPile.get(), *executor.get());
@@ -1385,7 +1398,7 @@ void ThriftServer::ensureResourcePools() {
         executor = std::make_shared<folly::CPUThreadPoolExecutor>(
             i == concurrency::PRIORITY::NORMAL ? folly::available_concurrency()
                                                : 2,
-            ResourcePool::kPreferredExecutorNumPriorities);
+            makeExecutorQueue());
       }
       apache::thrift::RoundRobinRequestPile::Options options;
       auto requestPile = makeStandardRequestPile(std::move(options));
@@ -1504,9 +1517,7 @@ void ThriftServer::ensureResourcePools() {
             std::move(threadFinalizer_));
       }
       auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-          pool.numThreads,
-          ResourcePool::kPreferredExecutorNumPriorities,
-          std::move(factory));
+          pool.numThreads, makeExecutorQueue(), std::move(factory));
       apache::thrift::RoundRobinRequestPile::Options options;
       if (threadManagerType_ == ThreadManagerType::PRIORITY_QUEUE) {
         options.setNumPriorities(concurrency::N_PRIORITIES);

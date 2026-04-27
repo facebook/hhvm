@@ -18,7 +18,6 @@
 
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift {
 

@@ -44,7 +44,6 @@
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/util/Checksum.h>
 #include <thrift/lib/cpp2/util/MethodMetadata.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 THRIFT_FLAG_DECLARE_int64(thrift_client_checksum_sampling_rate);
 

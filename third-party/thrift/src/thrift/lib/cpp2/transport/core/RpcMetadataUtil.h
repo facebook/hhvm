@@ -22,7 +22,6 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/util/ManagedStringView.h>
 #include <thrift/lib/cpp2/util/MethodMetadata.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift {
 

@@ -605,25 +605,71 @@ See [object disposal](/hack/classes/object-disposal) for an example of its use.
 
 ## __Sealed
 
-A class that is *sealed* can be extended directly only by the classes named in the attribute value list. Similarly, an interface that is sealed
-can be implemented directly only by the classes named in the attribute value list. Classes named in the attribute value list can themselves be
-extended arbitrarily unless they are final or also sealed. In this way, sealing provides a single-level restraint on inheritance.
-For example:
+The `__Sealed` attribute can be used on classes/interfaces/traits and methods.
+
+#### Sealed classes, interfaces and traits
+
+A class that is *sealed* can be **extended** directly only by the classes named in the attribute value list. Classes named in the attribute value list can themselves be
+extended arbitrarily unless they are final or also sealed. In this way, sealing provides a single-level restraint on inheritance.  For example:
 
 ```hack
 <<__Sealed(X::class, Y::class)>>
 abstract class A {}
 
 class X extends A {}
+
+<<__Sealed(J::class)>>
 class Y extends A {}
 
-<<__Sealed(Z::class)>>
-interface I {}
-
-class Z implements I {}
+class J extends Y {}
 ```
 
-Only classes `X` and `Y` can directly extend class `A`, and only class `Z` can directly implement interface `I`.
+Only classes `X` and `Y` can directly extend class `A`, and only class `J` can directly extend class `Y`.  Class `X` can be extended by any other class.
+
+Similarly, an interface that is sealed
+can be **implemented** directly only by the classes named in the attribute value list, and a trait that is sealed can be **used** directly only by the classes or traits named in the attribute value list.
+
+#### Sealed methods
+
+A method that is sealed can be **overridden** only by methods defined in classes or traits named in the attribute value list. Overriding methods in classes/traits in the attribute value list can themselves be extended arbitrarily unless they are final or also sealed.  For example, given:
+
+```hack
+class C {
+  <<__Sealed(D::class)>>
+  public function foo(): void {  echo "I am foo in C\n"; }
+}
+
+class D extends C {
+  <<__Override>>
+  public function foo(): void { echo "I am foo in D\n"; }
+}
+```
+
+only class `D` can define a method `foo` that overrides method `foo` in `C`.
+
+Typical use case are methods that ought to be `final` except for a few specialised implementations in traits that need to override them.  This situation can be enforced with this pattern:
+
+```hack
+class C {
+  <<__Sealed(T::class)>>
+  public function foo(): void { echo "I am foo in C\n"; }
+}
+
+trait T {
+  require extends C;
+
+  <<__Override>>
+  public function foo(): void { echo "I am foo in T\n"; }
+}
+
+class D extends C {
+  // D cannot override directly foo, the following raises an error
+  // public function foo(): void { echo "I am foo in D\n" }
+
+  // however D can use trait T which overrides `foo`
+  use T;
+}
+```
 
 ## __Soft
 

@@ -86,6 +86,13 @@ struct AutoloadDBVault {
    */
   std::shared_ptr<AutoloadDB> get() const;
 
+  /**
+   * Drop all cached DB connections. The next get() on each thread will call
+   * the opener to create a fresh connection. Use this after the underlying DB
+   * file has been swapped on disk.
+   */
+  void closeAll();
+
  private:
   AutoloadDB::Opener m_dbOpener;
   // Holds one AutoloadDB per thread. Creates an AutoloadDB on the first access.
@@ -442,6 +449,22 @@ struct SymbolMap {
    * This token originated from Watchman.
    */
   Clock dbClock() const; // throws(SQLiteExc)
+
+  /**
+   * Reset all in-memory state (clock, symbol maps, hashes, etc.) back to the
+   * initial empty state, as if this SymbolMap was freshly constructed.
+   *
+   * This method:
+   *   1. Drains any in-flight DB writes (waits for m_updateDBFuture).
+   *   2. Under a single write lock: closes all cached DB connections
+   *      (so they reopen fresh against the potentially swapped DB
+   *      file), then replaces all synced data with a fresh Data().
+   *
+   * After reset, lazy readOrUpdate() calls will re-populate in-memory
+   * data from the DB on demand, and the next update() will re-read the
+   * clock from the DB.
+   */
+  void resetInMemoryState();
 
   /**
    * Return the one and only path where `symbol` is defined.

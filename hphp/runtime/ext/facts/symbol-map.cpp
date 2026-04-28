@@ -129,6 +129,10 @@ getPathSymMap(typename SymbolMap::Data& data) {
 AutoloadDBVault::AutoloadDBVault(AutoloadDB::Opener dbOpener)
     : m_dbOpener{std::move(dbOpener)} {}
 
+void AutoloadDBVault::closeAll() {
+  m_dbs.withWLock([](auto& dbs) { dbs.clear(); });
+}
+
 std::shared_ptr<AutoloadDB> AutoloadDBVault::get() const {
   return m_dbs.withULockPtr([this](auto ulock) {
     auto it = ulock->find(std::this_thread::get_id());
@@ -1398,6 +1402,27 @@ void SymbolMap::validate(const std::set<std::string>& types_to_ignore) {
 
 Clock SymbolMap::dbClock() const {
   return getDB()->getClock();
+}
+
+void SymbolMap::resetInMemoryState() {
+  // 1. Drain any in-flight DB writes before resetting.
+  {
+    auto updateDBFuture = m_syncedData.withWLock(
+        [](Data& data) { return data.m_updateDBFuture.getFuture(); });
+    if (updateDBFuture.valid()) {
+      updateDBFuture.wait();
+    }
+  }
+  // 2. Close DB connections and clear in-memory state atomically.
+  //    closeAll() first so any getDB() call that follows opens a
+  //    fresh connection. Holding the wlock prevents readers from
+  //    seeing cleared state before connections are invalidated.
+  //    Lock order (m_syncedData → m_dbs) matches readOrUpdate().
+  {
+    auto wlock = m_syncedData.wlock();
+    m_dbVault.closeAll();
+    *wlock = Data();
+  }
 }
 
 hphp_fast_map<std::string, SHA1> SymbolMap::getAllPathsWithHashes() const {

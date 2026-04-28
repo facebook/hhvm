@@ -1124,6 +1124,48 @@ struct FactsStoreImpl final
                 m_lastWatchmanQueryStart = std::chrono::steady_clock::now();
                 return m_watcher->getChanges(getClock());
               })
+              .thenTry(
+                  [this](folly::Try<Watcher::Delta>&& delta)
+                      -> folly::SemiFuture<Watcher::Delta> {
+                    // On watchman failure or fresh instance, check
+                    // whether an external tool updated the DB behind
+                    // our back. If the DB clock differs from our
+                    // in-memory clock, reset all in-memory state and
+                    // re-query watchman with the DB clock.
+                    auto inMemClock = m_symbolMap.getClock();
+                    bool shouldValidate = !inMemClock.isInitial() &&
+                        (delta.hasException() || delta.value().m_fresh);
+                    if (shouldValidate) {
+                      try {
+                        // Drain any in-flight async DB writes so dbClock()
+                        // reflects the authoritative on-disk state. Without
+                        // this, a pending writeback can leave dbClock stale
+                        // and trigger a spurious reset.
+                        m_symbolMap.waitForDBUpdate();
+                        auto dbClock = m_symbolMap.dbClock();
+                        if (dbClock != inMemClock) {
+                          XLOGF(
+                              INFO,
+                              "Stale in-memory state detected. "
+                              "DB clock differs from in-memory "
+                              "clock (in-memory: {}, DB: {}). "
+                              "Resetting and re-querying.",
+                              inMemClock,
+                              dbClock);
+                          m_symbolMap.resetInMemoryState();
+                          return m_watcher->getChanges(dbClock);
+                        }
+                      } catch (const std::exception& e) {
+                        XLOGF(
+                            WARN,
+                            "Failed to read DB clock for stale "
+                            "detection: {}",
+                            e.what());
+                      }
+                    }
+                    delta.throwUnlessValue();
+                    return folly::makeSemiFuture(std::move(delta.value()));
+                  })
               .thenTry([this](folly::Try<Watcher::Delta>&& delta) {
                 if (delta.hasException()) {
                   auto msg = folly::sformat(

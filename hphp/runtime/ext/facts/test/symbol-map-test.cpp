@@ -2419,5 +2419,72 @@ TEST_F(SymbolMapTest, ConcurrentFillsFromDB) {
   folly::collect(futures);
 }
 
+TEST_F(SymbolMapTest, ResetClearsClockAndInMemoryState) {
+  auto db = std::make_shared<NiceMock<MockAutoloadDB>>();
+  db->DelegateToFake();
+
+  auto m = make("/var/www", db);
+
+  FileFacts ff{.types = {{.name = "SomeClass", .kind = TypeKind::Class}}};
+  update(m, "", "clock1", {"some/path.php"}, {}, {ff});
+
+  EXPECT_EQ(m.getClock().m_clock, "clock1");
+  EXPECT_EQ(m.getTypeFile("SomeClass"), std::string{"some/path.php"});
+
+  m.resetInMemoryState();
+
+  // Clock should be back to initial after reset.
+  EXPECT_TRUE(m.getClock().isInitial());
+}
+
+TEST_F(SymbolMapTest, ResetDrainsDBWritesBeforeClearing) {
+  auto db = std::make_shared<NiceMock<MockAutoloadDB>>();
+  db->DelegateToFake();
+
+  auto m = make("/var/www", db);
+
+  // Track whether the DB write ran to completion.
+  bool dbWriteCompleted = false;
+  ON_CALL(*db, insertClock(_)).WillByDefault([&](const Clock&) {
+    dbWriteCompleted = true;
+  });
+  update(m, "", "clock1", {}, {}, {});
+
+  // resetInMemoryState() drains in-flight DB writes before clearing.
+  // If the drain is broken, the DB write may not have run yet.
+  m.resetInMemoryState();
+  EXPECT_TRUE(dbWriteCompleted);
+  EXPECT_TRUE(m.getClock().isInitial());
+}
+
+TEST_F(SymbolMapTest, DBQueriesWorkAfterReset) {
+  auto db = std::make_shared<NiceMock<MockAutoloadDB>>();
+  db->DelegateToFake();
+
+  // Track how many times the dbOpener is called. Each call means a
+  // fresh DB connection is being created.
+  int openCount = 0;
+  auto dbOpener = [&]() -> std::shared_ptr<AutoloadDB> {
+    ++openCount;
+    return db;
+  };
+  auto m = make("/var/www", dbOpener, false, {});
+
+  FileFacts ff{.types = {{.name = "MyClass", .kind = TypeKind::Class}}};
+  update(m, "", "clock1", {"a.php"}, {}, {ff});
+  m.waitForDBUpdate();
+
+  int opensBeforeReset = openCount;
+  m.resetInMemoryState();
+
+  // After reset, in-memory is empty. A query triggers readOrUpdate()
+  // which calls getDB() — that must call the opener again since
+  // closeAll() cleared the cached connections.
+  EXPECT_CALL(*db, getTypePath("MyClass"))
+      .WillOnce(Return(std::vector<fs::path>{"a.php"}));
+  EXPECT_EQ(m.getTypeFile("MyClass"), std::string{"a.php"});
+  EXPECT_GT(openCount, opensBeforeReset);
+}
+
 } // namespace Facts
 } // namespace HPHP

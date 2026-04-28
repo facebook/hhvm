@@ -5,7 +5,6 @@
 """Pretty printers for HPHP types"""
 
 import re
-import sys
 import traceback
 import typing
 
@@ -29,6 +28,31 @@ except ModuleNotFoundError:
 Formatters: typing.List[typing.Callable[[str], str]] = []
 
 
+class FormatError(Exception):
+    """Raised by a pretty-printer when it cannot produce a useful summary.
+
+    The @format wrapper catches this and falls back to the unformatted display.
+    """
+
+    pass
+
+
+def _default_summary(val: lldb.SBValue) -> str:
+    """Reconstruct the default LLDB display for a value whose formatter failed."""
+    v = val.GetNonSyntheticValue()
+    if v.value is not None:
+        return v.value
+    parts = []
+    for i in range(v.num_children):
+        child = v.GetChildAtIndex(i)
+        child_repr = child.summary or child.value or ""
+        parts.append(f"{child.name} = {child_repr}")
+    if parts:
+        return "(" + ", ".join(parts) + ")"
+    return ""
+
+
+# noqa: C901
 def format(
     datatype: str,
     regex: bool = False,
@@ -95,14 +119,19 @@ def format(
                 # When the pretty printer for this value fails for some reason,
                 # just show the unformatted version.
                 try:
-                    return func_or_class(val_obj, internal_dict)
+                    result = func_or_class(val_obj, internal_dict)
+                    if result is None:
+                        raise FormatError("formatter returned None")
+                    return result
+                except FormatError:
+                    pass
                 except Exception:
                     utils.debug_print(
                         f"Failed to pretty print '{val_obj.name}' in {func_or_class.__name__}()"
                     )
                     if utils._Debug:
                         traceback.print_exc()
-                    return val_obj.value
+                return _default_summary(val_obj)
 
             return wrapper
 
@@ -119,7 +148,9 @@ def format(
 #              internal_dict: an LLDB support object not to be used
 #
 #          Returns:
-#              A string representing the <TypeName>, or None if there was an error.
+#              A string representing the <TypeName>.
+#          Raises:
+#              FormatError if the value cannot be formatted.
 #      """
 
 # ------------------------------------------------------------------------------
@@ -127,9 +158,12 @@ def format(
 
 
 @format("^HPHP::((Unaligned)?TypedValue|Variant|VarNR)$", regex=True)
-def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    m_type = utils.get(val_obj, "m_type")
-    m_data = utils.get(val_obj, "m_data")
+def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> str:
+    try:
+        m_type = utils.get(val_obj, "m_type")
+        m_data = utils.get(val_obj, "m_data")
+    except AssertionError as e:
+        raise FormatError(str(e))
     return utils.pretty_tv(m_type, m_data)
 
 
@@ -137,38 +171,47 @@ def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]
 # Pointers
 
 
-def pretty_ptr(val: lldb.SBValue) -> typing.Optional[str]:
+def pretty_ptr(val: lldb.SBValue) -> str:
     utils.debug_print(f"pretty_ptr(val=0x{val.unsigned:x})")
 
     ptr = utils.rawptr(val)
 
-    if ptr is None or utils.is_nullptr(ptr):
-        return None
+    if ptr is None:
+        raise FormatError("rawptr returned None")
+    if utils.is_nullptr(ptr):
+        return "0x0"
 
     inner = utils.deref(ptr)
     inner_type = utils.rawtype(inner.type)
 
-    if inner_type.name == "HPHP::StringData":
-        s = utils.string_data_val(inner)
-    else:
-        s = utils.nameof(inner)
-    # pyre-fixme[58]: `+` is not supported for operand types `str` and `Optional[str]`.
+    try:
+        if inner_type.name == "HPHP::StringData":
+            s = utils.string_data_val(inner)
+        else:
+            s = utils.nameof(inner)
+    except AssertionError as e:
+        raise FormatError(str(e))
+    if s is None:
+        raise FormatError("nameof returned None")
     return '"' + s + '"'
 
 
 @format("^HPHP::req::ptr<.*>$", regex=True)
-def pp_ReqPtr(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
+def pp_ReqPtr(val_obj: lldb.SBValue, _internal_dict) -> str:
     return pretty_ptr(val_obj)
 
 
 @format("^HPHP::(PackedPtr<.*>|ptrimpl::PtrImpl<.*>)$", regex=True)
-def pp_PackedPtr(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
+def pp_PackedPtr(val_obj: lldb.SBValue, _internal_dict) -> str:
     return pretty_ptr(val_obj)
 
 
 @format("^HPHP::FuncId$", regex=True)
-def pp_FuncId(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    m_id = utils.get(val_obj, "m_id")
+def pp_FuncId(val_obj: lldb.SBValue, _internal_dict) -> str:
+    try:
+        m_id = utils.get(val_obj, "m_id")
+    except AssertionError as e:
+        raise FormatError(str(e))
     m_s = m_id.GetChildMemberWithName("m_s")
     if m_s.IsValid():
         return str(m_s.unsigned)
@@ -180,10 +223,18 @@ def pp_FuncId(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
 
 
 @format("^HPHP::OptResource$", regex=True)
-def pp_Resource(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    val = utils.rawptr(utils.get(val_obj, "m_res"))
-    assert val is not None
-    return utils.pretty_resource_header(val)
+def pp_Resource(val_obj: lldb.SBValue, _internal_dict) -> str:
+    try:
+        inner = utils.get(val_obj, "m_res")
+    except AssertionError as e:
+        raise FormatError(str(e))
+    val = utils.rawptr(inner)
+    if val is None:
+        raise FormatError("rawptr returned None for OptResource")
+    try:
+        return utils.pretty_resource_header(val)
+    except AssertionError as e:
+        raise FormatError(str(e))
 
 
 # ------------------------------------------------------------------------------
@@ -191,24 +242,40 @@ def pp_Resource(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
 
 
 @format("^HPHP::StringData$", regex=True)
-def pp_StringData(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    # Note: string_data_val() will dereference a pointer value, if given
-    return '"' + utils.string_data_val(val_obj) + '"'
+def pp_StringData(val_obj: lldb.SBValue, _internal_dict) -> str:
+    try:
+        return '"' + utils.string_data_val(val_obj) + '"'
+    except AssertionError as e:
+        raise FormatError(str(e))
 
 
 @format("^HPHP::(Static)?String$", regex=True)
-def pp_String(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
+def pp_String(val_obj: lldb.SBValue, _internal_dict) -> str:
     # Note: SBValue.GetChildMemberWithName(), used by utils.get(),
     # will get the members of both pointers and the pointed-to values themselves
-    val = utils.rawptr(utils.get(val_obj, "m_str"))
-    assert val is not None
-    return '"' + utils.string_data_val(val) + '"'
+    try:
+        inner = utils.get(val_obj, "m_str")
+    except AssertionError as e:
+        raise FormatError(str(e))
+    val = utils.rawptr(inner)
+    if val is None:
+        raise FormatError("rawptr returned None for String")
+    try:
+        return '"' + utils.string_data_val(val) + '"'
+    except AssertionError as e:
+        raise FormatError(str(e))
 
 
 @format("^HPHP::StrNR$", regex=True)
-def pp_StrNR(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
-    val = utils.get(val_obj, "m_px")
-    return '"' + utils.string_data_val(val) + '"'
+def pp_StrNR(val_obj: lldb.SBValue, _internal_dict) -> str:
+    try:
+        val = utils.get(val_obj, "m_px")
+    except AssertionError as e:
+        raise FormatError(str(e))
+    try:
+        return '"' + utils.string_data_val(val) + '"'
+    except AssertionError as e:
+        raise FormatError(str(e))
 
 
 # ------------------------------------------------------------------------------
@@ -216,12 +283,15 @@ def pp_StrNR(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
 
 
 @format("^HPHP(::req)?::Optional<.*>$", regex=True)
-def pp_Optional(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
+def pp_Optional(val_obj: lldb.SBValue, _internal_dict) -> str:
     """See:
     * hphp/runtime/base/req-optional.h
     * hphp/util/optional.h
     """
-    val = utils.get(val_obj, "m_opt")
+    try:
+        val = utils.get(val_obj, "m_opt")
+    except AssertionError as e:
+        raise FormatError(str(e))
     val = val.children[0] if val.children else None
     return str(val)
 
@@ -280,9 +350,15 @@ class pp_ArrayData:
         if index >= self.num_children():
             return None
         if self.at_func is None:
-            print("Invalid array type!", file=sys.stderr)
+            utils.debug_print("Invalid array type!")
             return None
-        return self.at_func(index)
+        try:
+            return self.at_func(index)
+        except Exception:
+            utils.debug_print(f"Exception in get_child_at_index for index {index}")
+            if utils._Debug:
+                traceback.print_exc()
+            return None
 
     def update(self) -> bool:
         try:
@@ -335,7 +411,13 @@ class pp_Array(pp_ArrayData):
             )
             return
 
-        val = utils.deref(utils.get(val_obj, "m_arr"))
+        try:
+            val = utils.deref(utils.get(val_obj, "m_arr"))
+        except Exception:
+            utils.debug_print("Exception getting m_arr from Array")
+            if utils._Debug:
+                traceback.print_exc()
+            return
         super().__init__(val, _internal_dict)
 
 
@@ -345,15 +427,22 @@ class pp_Array(pp_ArrayData):
 
 @format("^HPHP::(Class|LazyClassData|Func|ObjectData)$", regex=True)
 def pp_NamedValue(val_obj: lldb.SBValue, _internal_dict) -> str:
-    # pyre-fixme[58]: `+` is not supported for operand types `str` and `Optional[str]`.
-    return '"' + utils.nameof(val_obj) + '"'
+    s = utils.nameof(val_obj)
+    if s is None:
+        raise FormatError("nameof returned None")
+    return '"' + s + '"'
 
 
 @format("^HPHP::Object$", regex=True)
 def pp_Object(val_obj: lldb.SBValue, _internal_dict) -> str:
-    val = utils.get(val_obj, "m_obj")
-    # pyre-fixme[58]: `+` is not supported for operand types `str` and `Optional[str]`.
-    return '"' + utils.nameof(val) + '"'
+    try:
+        val = utils.get(val_obj, "m_obj")
+    except AssertionError as e:
+        raise FormatError(str(e))
+    s = utils.nameof(val)
+    if s is None:
+        raise FormatError("nameof returned None for Object")
+    return '"' + s + '"'
 
 
 # ------------------------------------------------------------------------------
@@ -367,9 +456,12 @@ def pp_Extension(val_obj: lldb.SBValue, _internal_dict) -> str:
     def cstr(v: lldb.SBValue) -> str:
         return utils.read_cstring(v, 256, val.process)
 
-    name = cstr(utils.deref(utils.get(val, "m_name")))
-    version = cstr(utils.deref(utils.get(val, "m_version")))
-    oncall = cstr(utils.deref(utils.get(val, "m_oncall")))
+    try:
+        name = cstr(utils.deref(utils.get(val, "m_name")))
+        version = cstr(utils.deref(utils.get(val, "m_version")))
+        oncall = cstr(utils.deref(utils.get(val, "m_oncall")))
+    except Exception as e:
+        raise FormatError(str(e))
     return f"{name} (version: {version}, oncall: {oncall})"
 
 
@@ -379,8 +471,13 @@ def pp_Extension(val_obj: lldb.SBValue, _internal_dict) -> str:
 
 @format("^HPHP::HHBBC::Bytecode$", regex=True)
 def pp_HhbbcBytecode(val_obj: lldb.SBValue, _internal_dict) -> str:
-    op = utils.get(val_obj, "op").value
-    val = str(utils.get(val_obj, op))
+    try:
+        op = utils.get(val_obj, "op").value
+        if op is None:
+            raise FormatError("op field has no value")
+        val = str(utils.get(val_obj, op))
+    except AssertionError as e:
+        raise FormatError(str(e))
     val = re.sub(r"\(HPHP::HHBBC::bc::.*\) ", "", val)
     return "bc::%s { %s }" % (op, val)
 

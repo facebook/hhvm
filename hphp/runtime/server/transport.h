@@ -165,7 +165,7 @@ public:
   /**
    * Request URI.
    */
-  virtual const char *getUrl() = 0;
+  virtual const char *getUrl() override = 0;
   virtual const char *getRemoteHost() = 0;
   virtual uint16_t getRemotePort() = 0;
   // The transport can override REMOTE_ADDR if it has one
@@ -220,7 +220,7 @@ public:
   /**
    * POST request's data.
    */
-  virtual const void *getPostData(size_t &size) = 0;
+  virtual const void *getPostData(size_t &size) override = 0;
   virtual bool hasMorePostData() { return false; }
   virtual const void *getMorePostData(size_t &size) { size = 0;return nullptr; }
   virtual bool getFiles(std::string& /*files*/) { return false; }
@@ -235,7 +235,7 @@ public:
   /**
    * Is this a GET, POST or anything?
    */
-  virtual Method getMethod() = 0;
+  virtual Method getMethod() override = 0;
   virtual const char *getExtendedMethod() { return nullptr;}
   const char *getMethodName() override;
 
@@ -394,7 +394,7 @@ public:
    *   foo/bar?x=1   command is "foo/bar"
    *   /foo/bar?x=1  command is "foo/bar"
    */
-  std::string getCommand();
+  std::string getCommand() override;
 
   /**
    * Get value of a parameter. Returns empty string is not present.

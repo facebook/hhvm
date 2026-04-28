@@ -60,6 +60,16 @@ service TestService {
   void requestResponseVoid(1: TestRequest request);
   TestResponse requestResponse(1: TestRequest request);
 
+  TestResponse requestResponseDeclaredException(1: TestRequest request) throws (
+    1: TestException e,
+  );
+  TestResponse requestResponseDeclaredMessageFieldException(
+    1: TestRequest request,
+  ) throws (1: TestMessageException e);
+  TestResponse requestResponseDeclaredAnnotatedMessageException(
+    1: TestRequest request,
+  ) throws (1: TestAnnotatedMessageException e);
+
   stream<TestResponse> streamResponse(1: TestRequest request);
   InitialTestResponse, stream<TestResponse> streamInitialResponse(
     1: TestRequest request,

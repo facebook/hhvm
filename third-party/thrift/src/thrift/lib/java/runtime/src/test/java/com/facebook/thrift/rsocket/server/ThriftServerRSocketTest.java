@@ -261,6 +261,57 @@ public class ThriftServerRSocketTest {
         .verifyComplete();
   }
 
+  private void checkRequestResponseDeclaredException(
+      String funcName,
+      String expectedName,
+      String expectedWhat,
+      BiConsumer<ProtocolId, Payload> payloadAssertion) {
+    RequestRpcMetadata requestMetadata =
+        createRequestRpcMetadata(funcName, RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE);
+    Payload request = createPayload(requestMetadata, 0, "foo");
+
+    StepVerifier.create(rocket.requestResponse(request))
+        .assertNext(
+            response -> {
+              assertRpcMedatadataHasDeclaredException(response, expectedName, expectedWhat);
+              payloadAssertion.accept(requestMetadata.getProtocol(), response);
+            })
+        .verifyComplete();
+  }
+
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testRequestResponseDeclaredException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
+    checkRequestResponseDeclaredException(
+        "requestResponseDeclaredException",
+        TestException.class.getName(),
+        TestException.class.getName(),
+        (protocol, payload) -> assertDataIsTestException(protocol, payload, 1));
+  }
+
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testRequestResponseDeclaredMessageFieldException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
+    checkRequestResponseDeclaredException(
+        "requestResponseDeclaredMessageFieldException",
+        TestMessageException.class.getName(),
+        "exc",
+        (protocol, payload) -> assertDataIsMessageException(protocol, payload, 1));
+  }
+
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testRequestResponseDeclaredAnnotatedMessageException(ProtocolId protocolId) {
+    this.protocolId = protocolId;
+    checkRequestResponseDeclaredException(
+        "requestResponseDeclaredAnnotatedMessageException",
+        TestAnnotatedMessageException.class.getName(),
+        "exc",
+        (protocol, payload) -> assertDataIsAnnotatedMessageException(protocol, payload, 1));
+  }
+
   @ParameterizedTest
   @MethodSource("data")
   public void testRequestResponseVoid(ProtocolId protocolId) {

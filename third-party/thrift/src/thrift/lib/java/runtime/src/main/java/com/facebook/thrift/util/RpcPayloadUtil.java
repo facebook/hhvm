@@ -128,11 +128,17 @@ public final class RpcPayloadUtil {
 
   public static ServerResponsePayload createServerResponsePayload(
       final ServerRequestPayload payload, final Writer writer, String what) {
+    return createServerResponsePayload(payload, writer, null, what);
+  }
+
+  public static ServerResponsePayload createServerResponsePayload(
+      final ServerRequestPayload payload, final Writer writer, String name, String what) {
 
     PayloadExceptionMetadataBase base = null;
-    if (what != null) {
+    if (name != null || what != null) {
       base =
           new PayloadExceptionMetadataBase.Builder()
+              .setNameUtf8(name)
               .setWhatUtf8(what)
               .setMetadata(createDeclaredPayloadException())
               .build();

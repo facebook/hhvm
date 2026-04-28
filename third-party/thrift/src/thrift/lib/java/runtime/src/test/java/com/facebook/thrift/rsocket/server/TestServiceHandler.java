@@ -64,6 +64,22 @@ public class TestServiceHandler implements TestService.Reactive {
   }
 
   @Override
+  public Mono<TestResponse> requestResponseDeclaredException(TestRequest testRequest) {
+    return Mono.error(new TestException("exc"));
+  }
+
+  @Override
+  public Mono<TestResponse> requestResponseDeclaredMessageFieldException(TestRequest testRequest) {
+    return Mono.error(new TestMessageException("exc"));
+  }
+
+  @Override
+  public Mono<TestResponse> requestResponseDeclaredAnnotatedMessageException(
+      TestRequest testRequest) {
+    return Mono.error(new TestAnnotatedMessageException("exc"));
+  }
+
+  @Override
   public Flux<TestResponse> streamResponse(TestRequest testRequest) {
     return Flux.range(0, 10)
         .map(

@@ -177,3 +177,14 @@ func (c *serialChannel) SendRequestSink(
 ) (func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error) {
 	return nil, fmt.Errorf("not implemented")
 }
+
+// SendRequestBiDi performs a request-bidi call.
+func (c *serialChannel) SendRequestBiDi(
+	ctx context.Context,
+	method string,
+	request WritableStruct,
+	firstResponse ReadableResult,
+	newStreamElemFn func() ReadableResult,
+) (func(sinkSeq iter.Seq2[WritableResult, error]), iter.Seq2[ReadableStruct, error], error) {
+	return nil, nil, fmt.Errorf("not implemented")
+}

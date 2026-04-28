@@ -131,6 +131,17 @@ func (p *upgradeToRocketClient) SendRequestSink(
 	return p.actualChannel.SendRequestSink(ctx, method, request, firstResponse)
 }
 
+func (p *upgradeToRocketClient) SendRequestBiDi(
+	ctx context.Context,
+	method string,
+	request WritableStruct,
+	firstResponse ReadableResult,
+	newStreamElemFn func() ReadableResult,
+) (func(sinkSeq iter.Seq2[WritableResult, error]), iter.Seq2[ReadableStruct, error], error) {
+	p.maybeUpgrade(ctx)
+	return p.actualChannel.SendRequestBiDi(ctx, method, request, firstResponse, newStreamElemFn)
+}
+
 func (p *upgradeToRocketClient) Close() error {
 	if p.actualChannel == nil {
 		// Upgrade was never atttempted or never succeeded,

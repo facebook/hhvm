@@ -217,6 +217,16 @@ func (p *rocketClient) SendRequestSink(
 	return sinkCallback, nil
 }
 
+func (p *rocketClient) SendRequestBiDi(
+	ctx context.Context,
+	messageName string,
+	request WritableStruct,
+	firstResponse ReadableResult,
+	newStreamElemFn func() ReadableResult,
+) (func(sinkSeq iter.Seq2[WritableResult, error]), iter.Seq2[ReadableStruct, error], error) {
+	return nil, nil, errors.New("not implemented")
+}
+
 func (p *rocketClient) TerminateInteraction(interactionID int64) error {
 	interactionTerminate := rpcmetadata.NewInteractionTerminate().
 		SetInteractionId(interactionID)

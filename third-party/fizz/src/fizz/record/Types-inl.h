@@ -334,8 +334,8 @@ struct ReadVector {
     size_t consumed = 0;
     size_t lenRead;
     while (consumed < len) {
-      out.push_back(T());
-      FIZZ_RETURN_ON_ERROR(read(lenRead, err, *out.rbegin(), cursor));
+      out.emplace_back();
+      FIZZ_RETURN_ON_ERROR(read(lenRead, err, out.back(), cursor));
       consumed += lenRead;
     }
     if (consumed != len) {
@@ -362,8 +362,8 @@ struct ReadVector<bits24, T> {
     size_t consumed = 0;
     size_t lenRead;
     while (consumed < len) {
-      out.push_back(T());
-      FIZZ_RETURN_ON_ERROR(read(lenRead, err, *out.rbegin(), cursor));
+      out.emplace_back();
+      FIZZ_RETURN_ON_ERROR(read(lenRead, err, out.back(), cursor));
       consumed += lenRead;
     }
     if (consumed != len) {

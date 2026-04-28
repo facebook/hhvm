@@ -53,9 +53,83 @@ type {{svc.go_name}}Client interface {
 }
 {{/let partial}}
 
-{{#let export partial client_func_request_bidi |func svc| captures |client_func_signature|}}
+{{#let export partial client_func_request_bidi |func svc| captures |types client_func_signature|}}
 func (c *{{svc.go_client_name}}) {{#partial client_func_signature func=func}} {
-    panic("bidi not implemented")
+    {{#if func.stream_has_first_response?}}
+    var fbthriftFirstRespZero {{#if func.return_type.structured?}}*{{/if}}{{#partial types.go_type type=func.return_type}}
+    {{/if func.stream_has_first_response?}}
+    if {{func.ctx_arg_name}}.Done() == nil {
+		return {{#if func.creates_interaction?}}nil, {{/if}}{{#if func.stream_has_first_response?}}fbthriftFirstRespZero, {{/if}}nil, nil, errors.New("context does not support cancellation")
+	}
+    fbthriftReq := &req{{svc.go_name}}{{func.go_name}}{
+        {{#each func.params.fields as |field|}}
+        {{field.go_name}}: {{field.go_arg_name}},
+        {{/each}}
+    }
+    fbthriftFirstResp := newResp{{svc.go_name}}{{func.go_name}}()
+
+    {{#if func.creates_interaction?}}
+    fbthriftChannel := thrift.NewInteractionChannel(c.ch, "{{func.created_interaction.name}}")
+    fbthriftInteractionClient := New{{func.created_interaction.go_name}}ChannelClient(fbthriftChannel)
+    {{#else}}
+    fbthriftChannel := c.ch
+    {{/if func.creates_interaction?}}
+
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStream{{svc.go_name}}{{func.go_name}}()
+    }
+    fbthriftSinkFn, fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestBiDi(
+        {{func.ctx_arg_name}},
+        "{{#if svc.interaction?}}{{svc.name}}.{{/if}}{{func.name}}",
+        fbthriftReq,
+        fbthriftFirstResp,
+        fbthriftNewStreamElemFn,
+    )
+    if fbthriftErr != nil {
+        return {{#if func.creates_interaction?}}nil, {{/if}}{{#if func.stream_has_first_response?}}fbthriftFirstRespZero, {{/if}}nil, nil, fbthriftErr
+    }
+    fbthriftSinkCallback := func(sinkSeq iter.Seq2[{{#if func.sink.elem_type.structured?}}*{{/if}}{{#partial types.go_type type=func.sink.elem_type}}, error]) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range sinkSeq {
+                sinkPayload := newSink{{svc.go_name}}{{func.go_name}}()
+                if err != nil {
+                    {{#if func.sink_exceptions?}}
+                    switch v := err.(type) {
+                    {{#each func.sink.exceptions as |ex|}}
+                    case *{{#partial types.go_type type=ex.type}}:
+                        sinkPayload.{{ex.go_name}} = v
+                        yield(sinkPayload, nil)
+                    {{/each}}
+                    default:
+                        yield(nil, err)
+                    }
+                    {{/if func.sink_exceptions?}}
+                    {{#if (not func.sink_exceptions?)}}
+                    yield(nil, err)
+                    {{/if (not func.sink_exceptions?)}}
+                    return
+                }
+                sinkPayload.{{func.retval_field_name}} = {{#if (not func.sink.elem_type.nilable?)}}&{{/if}}elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        go fbthriftSinkFn(sinkPayloadSeq)
+    }
+    fbthriftStreamSeqAdapter := func(yield func({{#if func.stream.elem_type.structured?}}*{{/if}}{{#partial types.go_type type=func.stream.elem_type}}, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield({{#partial types.go_zero_value type=func.stream.elem_type}}, err)
+                return
+            }
+            fbthriftRes := elem.(*stream{{svc.go_name}}{{func.go_name}})
+            if !yield(fbthriftRes.Get{{func.retval_field_name}}(), nil) {
+                return
+            }
+        }
+    }
+    return {{#if func.creates_interaction?}}fbthriftInteractionClient, {{/if}}{{#if func.stream_has_first_response?}}fbthriftFirstResp.Get{{func.retval_field_name}}(), {{/if}}fbthriftSinkCallback, fbthriftStreamSeqAdapter, nil
 }
 {{/let partial}}
 

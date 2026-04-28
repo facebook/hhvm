@@ -66,6 +66,13 @@ type RSocketClient interface {
 		headers map[string]string,
 		dataBytes []byte,
 	) (map[string]string, []byte, func(sinkSeq iter.Seq2[WritableResult, error], finalResponse ReadableStruct) error, error)
+	RequestBiDiStream(
+		ctx context.Context,
+		messageName string,
+		headers map[string]string,
+		dataBytes []byte,
+		newStreamElemFn func() ReadableResult,
+	) (map[string]string, []byte, func(sinkSeq iter.Seq2[WritableResult, error]), iter.Seq2[ReadableStruct, error], error)
 	MetadataPush(
 		ctx context.Context,
 		metadata *rpcmetadata.ClientPushMetadata,
@@ -478,6 +485,187 @@ func (r *rsocketClient) RequestSink(
 	}
 
 	return firstResponse.Headers(), firstResponse.Data(), sinkCallback, nil
+}
+
+func (r *rsocketClient) RequestBiDiStream(
+	ctx context.Context,
+	messageName string,
+	headers map[string]string,
+	dataBytes []byte,
+	newStreamElemFn func() ReadableResult,
+) (map[string]string, []byte, func(sinkSeq iter.Seq2[WritableResult, error]), iter.Seq2[ReadableStruct, error], error) {
+	r.resetDeadline()
+
+	request, err := rocket.EncodeRequestPayload(
+		ctx,
+		messageName,
+		r.protoID,
+		rpcmetadata.RpcKind_BIDIRECTIONAL_STREAM,
+		headers,
+		rpcmetadata.CompressionAlgorithm_NONE,
+		dataBytes,
+	)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	// Create a flux for sending sink items to the server
+	sinkPayloadChan := make(chan payload.Payload, types.DefaultStreamBufferSize)
+	sendingDoneChan := make(chan struct{}, 1)
+	sendingFlux := flux.Create(func(fluxCtx context.Context, sink flux.Sink) {
+		defer close(sendingDoneChan)
+
+		// Send payloads from the sink channel until it's closed or context is done
+		for {
+			select {
+			case p, ok := <-sinkPayloadChan:
+				if !ok {
+					// Channel closed, complete the flux
+					sink.Complete()
+					return
+				}
+				sink.Next(p)
+			case <-fluxCtx.Done():
+				sink.Error(fluxCtx.Err())
+				return
+			}
+		}
+	})
+
+	receivingFlux := r.client.RequestChannel(request, sendingFlux)
+
+	channelCtx, channelCancel := context.WithCancel(ctx)
+	receivingPayloadChan, receivingErrChan := receivingFlux.ToChan(channelCtx, types.DefaultStreamBufferSize)
+
+	// Receive the first response payload
+	firstPayload, err := recvStreamNext(channelCtx, receivingPayloadChan, receivingErrChan)
+	if err != nil {
+		channelCancel()
+		close(sinkPayloadChan)
+		return nil, nil, nil, nil, err
+	}
+	firstResponse, err := rocket.DecodeResponsePayload(firstPayload)
+	if err != nil {
+		channelCancel()
+		close(sinkPayloadChan)
+		return nil, nil, nil, nil, err
+	}
+
+	// Create sink callback for sending items to the server (no final response in BiDi)
+	sinkCallback := func(sinkSeq iter.Seq2[WritableResult, error]) {
+		defer func() {
+			close(sinkPayloadChan)
+			<-sendingDoneChan
+		}()
+
+		for item, itemErr := range sinkSeq {
+			var finalErr error
+			payloadMetadata := rpcmetadata.NewPayloadMetadata()
+			if itemErr != nil {
+				exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBase(
+					"ApplicationException",
+					itemErr.Error(),
+					rocket.RocketExceptionAppUnknown,
+					rpcmetadata.ErrorKind_UNSPECIFIED,
+					rpcmetadata.ErrorBlame_UNSPECIFIED,
+					rpcmetadata.ErrorSafety_UNSPECIFIED,
+				)
+				payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
+				finalErr = itemErr
+			} else if declaredException := item.Exception(); declaredException != nil {
+				exceptionMetadataBase := rocket.NewPayloadExceptionMetadataBase(
+					declaredException.TypeName(),
+					declaredException.Error(),
+					rocket.RocketExceptionDeclared,
+					rpcmetadata.ErrorKind_UNSPECIFIED,
+					rpcmetadata.ErrorBlame_UNSPECIFIED,
+					rpcmetadata.ErrorSafety_UNSPECIFIED,
+				)
+				payloadMetadata.SetExceptionMetadata(exceptionMetadataBase)
+				finalErr = declaredException
+			} else {
+				responseMetadata := rpcmetadata.NewPayloadResponseMetadata()
+				payloadMetadata.SetResponseMetadata(responseMetadata)
+			}
+
+			metadata := rpcmetadata.NewStreamPayloadMetadata().
+				SetCompression(Pointerize(rpcmetadata.CompressionAlgorithm_NONE)).
+				SetPayloadMetadata(payloadMetadata)
+
+			// Encode the sink item
+			var itemBytes []byte
+			if item != nil {
+				itemBytes, err = encodeRequest(r.thriftProtoID, item)
+				if err != nil {
+					return
+				}
+			}
+
+			sinkPayload, err := rocket.EncodePayloadMetadataAndData(metadata, itemBytes, rpcmetadata.CompressionAlgorithm_NONE)
+			if err != nil {
+				return
+			}
+
+		select {
+			case sinkPayloadChan <- sinkPayload:
+			case <-channelCtx.Done():
+				return
+			}
+
+			if finalErr != nil {
+				return
+			}
+		}
+	}
+
+	// Create stream iterator for receiving items from the server
+	streamSeq := func(yield func(ReadableStruct, error) bool) {
+		defer channelCancel()
+
+		for {
+			streamPayload, streamErr := recvStreamNext(channelCtx, receivingPayloadChan, receivingErrChan)
+			if streamErr != nil {
+				yield(nil, streamErr)
+				return
+			} else if streamPayload != nil {
+				streamResponse, err := rocket.DecodeStreamPayload(streamPayload)
+				if err != nil {
+					yield(nil, err)
+					return
+				}
+				data := streamResponse.Data()
+				reader := bytes.NewBuffer(data)
+				var decoder types.Decoder
+				switch r.protoID {
+				case rpcmetadata.ProtocolId_BINARY:
+					decoder = format.NewBinaryDecoder(reader)
+				case rpcmetadata.ProtocolId_COMPACT:
+					decoder = format.NewCompactDecoder(reader)
+				default:
+					yield(nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", r.protoID)))
+					return
+				}
+				destStruct := newStreamElemFn()
+				err = destStruct.Read(decoder)
+				if err != nil {
+					yield(nil, err)
+					return
+				} else if destEx := destStruct.Exception(); destEx != nil {
+					yield(nil, destEx)
+					return
+				}
+
+				if !yield(destStruct, nil) {
+					return
+				}
+			} else {
+				// Stream completion
+				return
+			}
+		}
+	}
+
+	return firstResponse.Headers(), firstResponse.Data(), sinkCallback, streamSeq, nil
 }
 
 func (r *rsocketClient) Close() error {

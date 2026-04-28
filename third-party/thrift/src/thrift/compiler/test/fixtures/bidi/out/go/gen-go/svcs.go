@@ -64,15 +64,172 @@ func (c *biDiServiceClientImpl) Close() error {
 }
 
 func (c *biDiServiceClientImpl) Simple(ctx context.Context) (func(iter.Seq2[int32, error]), iter.Seq2[int16, error], error) {
-    panic("bidi not implemented")
+    if ctx.Done() == nil {
+		return nil, nil, errors.New("context does not support cancellation")
+	}
+    fbthriftReq := &reqBiDiServiceSimple{
+    }
+    fbthriftFirstResp := newRespBiDiServiceSimple()
+
+    fbthriftChannel := c.ch
+
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamBiDiServiceSimple()
+    }
+    fbthriftSinkFn, fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestBiDi(
+        ctx,
+        "simple",
+        fbthriftReq,
+        fbthriftFirstResp,
+        fbthriftNewStreamElemFn,
+    )
+    if fbthriftErr != nil {
+        return nil, nil, fbthriftErr
+    }
+    fbthriftSinkCallback := func(sinkSeq iter.Seq2[int32, error]) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range sinkSeq {
+                sinkPayload := newSinkBiDiServiceSimple()
+                if err != nil {
+                    yield(nil, err)
+                    return
+                }
+                sinkPayload.Success = &elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        go fbthriftSinkFn(sinkPayloadSeq)
+    }
+    fbthriftStreamSeqAdapter := func(yield func(int16, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamBiDiServiceSimple)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftSinkCallback, fbthriftStreamSeqAdapter, nil
 }
 
 func (c *biDiServiceClientImpl) Response(ctx context.Context) (string, func(iter.Seq2[int32, error]), iter.Seq2[int16, error], error) {
-    panic("bidi not implemented")
+    var fbthriftFirstRespZero string
+    if ctx.Done() == nil {
+		return fbthriftFirstRespZero, nil, nil, errors.New("context does not support cancellation")
+	}
+    fbthriftReq := &reqBiDiServiceResponse{
+    }
+    fbthriftFirstResp := newRespBiDiServiceResponse()
+
+    fbthriftChannel := c.ch
+
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamBiDiServiceResponse()
+    }
+    fbthriftSinkFn, fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestBiDi(
+        ctx,
+        "response",
+        fbthriftReq,
+        fbthriftFirstResp,
+        fbthriftNewStreamElemFn,
+    )
+    if fbthriftErr != nil {
+        return fbthriftFirstRespZero, nil, nil, fbthriftErr
+    }
+    fbthriftSinkCallback := func(sinkSeq iter.Seq2[int32, error]) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range sinkSeq {
+                sinkPayload := newSinkBiDiServiceResponse()
+                if err != nil {
+                    yield(nil, err)
+                    return
+                }
+                sinkPayload.Success = &elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        go fbthriftSinkFn(sinkPayloadSeq)
+    }
+    fbthriftStreamSeqAdapter := func(yield func(int16, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamBiDiServiceResponse)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftFirstResp.GetSuccess(), fbthriftSinkCallback, fbthriftStreamSeqAdapter, nil
 }
 
 func (c *biDiServiceClientImpl) CanThrow(ctx context.Context) (func(iter.Seq2[int64, error]), iter.Seq2[int64, error], error) {
-    panic("bidi not implemented")
+    if ctx.Done() == nil {
+		return nil, nil, errors.New("context does not support cancellation")
+	}
+    fbthriftReq := &reqBiDiServiceCanThrow{
+    }
+    fbthriftFirstResp := newRespBiDiServiceCanThrow()
+
+    fbthriftChannel := c.ch
+
+    fbthriftNewStreamElemFn := func() thrift.ReadableResult {
+        return newStreamBiDiServiceCanThrow()
+    }
+    fbthriftSinkFn, fbthriftStreamSeq, fbthriftErr := fbthriftChannel.SendRequestBiDi(
+        ctx,
+        "canThrow",
+        fbthriftReq,
+        fbthriftFirstResp,
+        fbthriftNewStreamElemFn,
+    )
+    if fbthriftErr != nil {
+        return nil, nil, fbthriftErr
+    }
+    fbthriftSinkCallback := func(sinkSeq iter.Seq2[int64, error]) {
+        sinkPayloadSeq := func(yield func(thrift.WritableResult, error) bool) {
+            for elem, err := range sinkSeq {
+                sinkPayload := newSinkBiDiServiceCanThrow()
+                if err != nil {
+                    switch v := err.(type) {
+                    case *BiDiSinkException:
+                        sinkPayload.Ex = v
+                        yield(sinkPayload, nil)
+                    default:
+                        yield(nil, err)
+                    }
+                    return
+                }
+                sinkPayload.Success = &elem
+                if !yield(sinkPayload, nil) {
+                    return
+                }
+            }
+        }
+        go fbthriftSinkFn(sinkPayloadSeq)
+    }
+    fbthriftStreamSeqAdapter := func(yield func(int64, error) bool) {
+        for elem, err := range fbthriftStreamSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            fbthriftRes := elem.(*streamBiDiServiceCanThrow)
+            if !yield(fbthriftRes.GetSuccess(), nil) {
+                return
+            }
+        }
+    }
+    return fbthriftSinkCallback, fbthriftStreamSeqAdapter, nil
 }
 
 

@@ -224,7 +224,40 @@ func (p *rocketClient) SendRequestBiDi(
 	firstResponse ReadableResult,
 	newStreamElemFn func() ReadableResult,
 ) (func(sinkSeq iter.Seq2[WritableResult, error]), iter.Seq2[ReadableStruct, error], error) {
-	return nil, nil, errors.New("not implemented")
+	if ctx.Done() == nil {
+		// We require that the context is cancellable, to prevent goroutine leaks.
+		return nil, nil, errors.New("context does not support cancellation")
+	}
+
+	dataBytes, err := encodeRequest(p.protoID, request)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = p.client.SendSetup(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	headers := p.getWriteHeaders(ctx)
+	respHeaders, resultData, sinkCallback, streamSeq, resultErr := p.client.RequestBiDiStream(ctx, messageName, headers, dataBytes, newStreamElemFn)
+	if resultErr != nil {
+		return nil, nil, resultErr
+	}
+
+	rpcOpts := GetRPCOptions(ctx)
+	if rpcOpts != nil {
+		rpcOpts.SetReadHeaders(respHeaders)
+	}
+	err = decodeResponse(p.protoID, resultData, firstResponse)
+	if err != nil {
+		return nil, nil, err
+	}
+	// Declared exception (inside the response)
+	if exception := firstResponse.Exception(); exception != nil {
+		return nil, nil, exception
+	}
+	return sinkCallback, streamSeq, nil
 }
 
 func (p *rocketClient) TerminateInteraction(interactionID int64) error {

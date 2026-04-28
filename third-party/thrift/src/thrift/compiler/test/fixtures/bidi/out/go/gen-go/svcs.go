@@ -31,6 +31,9 @@ var _ = metadata.GoUnusedProtection__
 
 
 type BiDiService interface {
+    Simple(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) error, func(context.Context, chan<- int16) error, error)
+    Response(ctx context.Context) (string, func(context.Context, iter.Seq2[int32, error]) error, func(context.Context, chan<- int16) error, error)
+    CanThrow(ctx context.Context) (func(context.Context, iter.Seq2[int64, error]) error, func(context.Context, chan<- int64) error, error)
 }
 
 type BiDiServiceClient interface {
@@ -85,6 +88,12 @@ func NewBiDiServiceProcessor(handler BiDiService) *BiDiServiceProcessor {
         processorFunctionMap: make(map[string]thrift.ProcessorFunction),
         functionServiceMap:   make(map[string]string),
     }
+    p.AddToProcessorFunctionMap("simple", &procFuncBiDiServiceSimple{handler: handler})
+    p.AddToProcessorFunctionMap("response", &procFuncBiDiServiceResponse{handler: handler})
+    p.AddToProcessorFunctionMap("canThrow", &procFuncBiDiServiceCanThrow{handler: handler})
+    p.AddToFunctionServiceMap("simple", "BiDiService")
+    p.AddToFunctionServiceMap("response", "BiDiService")
+    p.AddToFunctionServiceMap("canThrow", "BiDiService")
 
     return p
 }
@@ -116,6 +125,60 @@ func (p *BiDiServiceProcessor) GetInteractionProcessors() []thrift.Processor {
 
 func (p *BiDiServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
     return GetThriftMetadataForService("module.BiDiService")
+}
+
+type procFuncBiDiServiceSimple struct {
+    handler BiDiService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncBiDiServiceSimple)(nil)
+
+func (p *procFuncBiDiServiceSimple) NewReqArgs() thrift.ReadableStruct {
+    return newReqBiDiServiceSimple()
+}
+
+func (p *procFuncBiDiServiceSimple) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncBiDiServiceSimple) RunBiDiContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+
+type procFuncBiDiServiceResponse struct {
+    handler BiDiService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncBiDiServiceResponse)(nil)
+
+func (p *procFuncBiDiServiceResponse) NewReqArgs() thrift.ReadableStruct {
+    return newReqBiDiServiceResponse()
+}
+
+func (p *procFuncBiDiServiceResponse) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncBiDiServiceResponse) RunBiDiContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+
+type procFuncBiDiServiceCanThrow struct {
+    handler BiDiService
+}
+// Compile time interface enforcer
+var _ thrift.ProcessorFunction = (*procFuncBiDiServiceCanThrow)(nil)
+
+func (p *procFuncBiDiServiceCanThrow) NewReqArgs() thrift.ReadableStruct {
+    return newReqBiDiServiceCanThrow()
+}
+
+func (p *procFuncBiDiServiceCanThrow) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(ctx context.Context) {
+    // NOT IMPLEMENTED
 }
 
 

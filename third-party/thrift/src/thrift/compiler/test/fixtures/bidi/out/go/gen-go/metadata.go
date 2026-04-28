@@ -144,6 +144,42 @@ var serviceMetadatas = func() []*metadata.ThriftService {
         &metadata.ThriftService{
             Name:      "module.BiDiService",
             Functions: []*metadata.ThriftFunction{
+                &metadata.ThriftFunction{
+                    Name:       "simple",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i16,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "response",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i16,
+                            InitialResponseType: premadeThriftType_string,
+                        },
+                    },
+                },
+                &metadata.ThriftFunction{
+                    Name:       "canThrow",
+                    IsOneway:   false,
+                    ReturnType: &metadata.ThriftType{
+                        TStream: &metadata.ThriftStreamType{
+                            ElemType: premadeThriftType_i64,
+                        },
+                    },
+                    Exceptions: []*metadata.ThriftField{
+                        &metadata.ThriftField{
+                            Id:         1,
+                            Name:       "ex",
+                            IsOptional: true,
+                            Type:       premadeThriftType_module_BiDiMethodException,
+                        },
+                    },
+                },
             },
         },
     )

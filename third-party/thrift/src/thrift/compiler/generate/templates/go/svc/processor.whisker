@@ -272,7 +272,15 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) NewReqArgs() thrift.ReadableSt
     return newReq{{svc.go_name}}{{func.go_name}}()
 }
 
-{{#if func.stream?}}
+{{#if func.bidirectional_stream?}}
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
+    return nil, errors.New("not supported")
+}
+
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(ctx context.Context) {
+    // NOT IMPLEMENTED
+}
+{{#else if func.stream?}}
 func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     return nil, errors.New("not supported")
 }
@@ -286,7 +294,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
 {{#partial server_func_sink func=func svc=svc}}
 {{#else}}
 {{#partial server_func_response func=func svc=svc}}
-{{/if func.stream?}}
+{{/if func.bidirectional_stream?}}
 {{/let partial}}
 
 {{#let export partial processor |svc| captures |func_rpc_name processor_function|}}

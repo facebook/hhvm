@@ -301,6 +301,184 @@ func (h *rpcConformanceServiceHandler) SinkChunkTimeout(ctx context.Context, req
 	return nil, errors.New("not supported")
 }
 
+func (h *rpcConformanceServiceHandler) BidiBasic(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) error, func(context.Context, chan<- *rpc.Response) error, error) {
+	requestValue := rpc.NewBidiBasicServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetBidiBasic(requestValue)
+
+	sinkConsumer := func(ctx context.Context, sinkSeq iter.Seq2[*rpc.Request, error]) error {
+		for elem, err := range sinkSeq {
+			if err != nil {
+				return err
+			}
+			requestValue.SinkPayloads = append(requestValue.SinkPayloads, elem)
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, streamChan chan<- *rpc.Response) error {
+		for _, resp := range h.instruction.BidiBasic.StreamPayloads {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case streamChan <- resp:
+			}
+		}
+		return nil
+	}
+	return sinkConsumer, streamProducer, nil
+}
+
+func (h *rpcConformanceServiceHandler) BidiInitialResponse(ctx context.Context, request *rpc.Request) (*rpc.Response, func(context.Context, iter.Seq2[*rpc.Request, error]) error, func(context.Context, chan<- *rpc.Response) error, error) {
+	requestValue := rpc.NewBidiInitialResponseServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetBidiInitialResponse(requestValue)
+
+	sinkConsumer := func(ctx context.Context, sinkSeq iter.Seq2[*rpc.Request, error]) error {
+		for elem, err := range sinkSeq {
+			if err != nil {
+				return err
+			}
+			requestValue.SinkPayloads = append(requestValue.SinkPayloads, elem)
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, streamChan chan<- *rpc.Response) error {
+		for _, resp := range h.instruction.BidiInitialResponse.StreamPayloads {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case streamChan <- resp:
+			}
+		}
+		return nil
+	}
+	return h.instruction.BidiInitialResponse.InitialResponse, sinkConsumer, streamProducer, nil
+}
+
+func (h *rpcConformanceServiceHandler) BidiStreamDeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) error, func(context.Context, chan<- *rpc.Response) error, error) {
+	requestValue := rpc.NewBidiStreamDeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetBidiStreamDeclaredException(requestValue)
+
+	sinkConsumer := func(ctx context.Context, sinkSeq iter.Seq2[*rpc.Request, error]) error {
+		for elem, err := range sinkSeq {
+			if err != nil {
+				return err
+			}
+			requestValue.SinkPayloads = append(requestValue.SinkPayloads, elem)
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, streamChan chan<- *rpc.Response) error {
+		for _, resp := range h.instruction.BidiStreamDeclaredException.StreamPayloads {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case streamChan <- resp:
+			}
+		}
+		return h.instruction.BidiStreamDeclaredException.UserException
+	}
+	return sinkConsumer, streamProducer, nil
+}
+
+func (h *rpcConformanceServiceHandler) BidiStreamUndeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) error, func(context.Context, chan<- *rpc.Response) error, error) {
+	requestValue := rpc.NewBidiStreamUndeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetBidiStreamUndeclaredException(requestValue)
+
+	sinkConsumer := func(ctx context.Context, sinkSeq iter.Seq2[*rpc.Request, error]) error {
+		for elem, err := range sinkSeq {
+			if err != nil {
+				return err
+			}
+			requestValue.SinkPayloads = append(requestValue.SinkPayloads, elem)
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, streamChan chan<- *rpc.Response) error {
+		for _, resp := range h.instruction.BidiStreamUndeclaredException.StreamPayloads {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case streamChan <- resp:
+			}
+		}
+		return errors.New(h.instruction.BidiStreamUndeclaredException.ExceptionMessage)
+	}
+	return sinkConsumer, streamProducer, nil
+}
+
+func (h *rpcConformanceServiceHandler) BidiSinkDeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) error, func(context.Context, chan<- *rpc.Response) error, error) {
+	requestValue := rpc.NewBidiSinkDeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetBidiSinkDeclaredException(requestValue)
+
+	sinkConsumer := func(ctx context.Context, sinkSeq iter.Seq2[*rpc.Request, error]) error {
+		for elem, err := range sinkSeq {
+			if err != nil {
+				requestValue.UserException = err.(*rpc.UserException)
+				return nil
+			}
+			requestValue.SinkPayloads = append(requestValue.SinkPayloads, elem)
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, streamChan chan<- *rpc.Response) error {
+		for _, resp := range h.instruction.BidiSinkDeclaredException.StreamPayloads {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case streamChan <- resp:
+			}
+		}
+		return nil
+	}
+	return sinkConsumer, streamProducer, nil
+}
+
+func (h *rpcConformanceServiceHandler) BidiSinkUndeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) error, func(context.Context, chan<- *rpc.Response) error, error) {
+	requestValue := rpc.NewBidiSinkUndeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetBidiSinkUndeclaredException(requestValue)
+
+	sinkConsumer := func(ctx context.Context, sinkSeq iter.Seq2[*rpc.Request, error]) error {
+		for elem, err := range sinkSeq {
+			if err != nil {
+				requestValue.ExceptionMessage = thrift.Pointerize(err.Error())
+				return nil
+			}
+			requestValue.SinkPayloads = append(requestValue.SinkPayloads, elem)
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, streamChan chan<- *rpc.Response) error {
+		for _, resp := range h.instruction.BidiSinkUndeclaredException.StreamPayloads {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case streamChan <- resp:
+			}
+		}
+		return nil
+	}
+	return sinkConsumer, streamProducer, nil
+}
+
+func (h *rpcConformanceServiceHandler) BidiMethodDeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) error, func(context.Context, chan<- *rpc.Response) error, error) {
+	requestValue := rpc.NewBidiMethodDeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetBidiMethodDeclaredException(requestValue)
+	return nil, nil, h.instruction.BidiMethodDeclaredException.UserException
+}
+
+func (h *rpcConformanceServiceHandler) BidiMethodUndeclaredException(ctx context.Context, request *rpc.Request) (func(context.Context, iter.Seq2[*rpc.Request, error]) error, func(context.Context, chan<- *rpc.Response) error, error) {
+	requestValue := rpc.NewBidiMethodUndeclaredExceptionServerTestResult().SetRequest(request)
+	h.result = rpc.NewServerTestResult().
+		SetBidiMethodUndeclaredException(requestValue)
+	return nil, nil, errors.New(h.instruction.BidiMethodUndeclaredException.ExceptionMessage)
+}
+
 func (h *rpcConformanceServiceHandler) BasicInteractionFactoryFunction(ctx context.Context, initialSum int32) (*rpc.BasicInteractionProcessor, error) {
 	if h.instruction.InteractionFactoryFunction != nil {
 		requestValue := rpc.NewInteractionFactoryFunctionServerTestResult().SetInitialSum(initialSum)

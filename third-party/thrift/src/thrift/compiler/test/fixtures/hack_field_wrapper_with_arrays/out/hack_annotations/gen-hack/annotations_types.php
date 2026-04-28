@@ -200,6 +200,15 @@ class structured_annotation_with_default implements \IThriftSyncStruct, \IThrift
 
 }
 
+type structured_annotation_recursiveTShape = shape(
+  'name' => string,
+  ?'recurse' => ?structured_annotation_recursiveTShapeRec,
+  ?'default' => ?structured_annotation_with_default::TShape,
+  'recurse_map' => dict<arraykey, structured_annotation_recursiveTShapeRec>,
+  'int_field' => \thrift_adapted_types\i64WithWrapper,
+);
+case type structured_annotation_recursiveTShapeRec = structured_annotation_recursiveTShape;
+
 /**
  * Original thrift struct:-
  * structured_annotation_recursive
@@ -259,13 +268,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
     ?'int_field' => ?\thrift_adapted_types\i64WithWrapper,
   );
 
-  const type TShape = shape(
-    'name' => string,
-    ?'recurse' => ?mixed,
-    ?'default' => ?structured_annotation_with_default::TShape,
-    'recurse_map' => dict<arraykey, mixed>,
-    'int_field' => \thrift_adapted_types\i64WithWrapper,
-  );
+  const type TShape = structured_annotation_recursiveTShape;
   const int STRUCTURAL_ID = 7765278923274777933;
   /**
    * Original thrift field:-
@@ -505,7 +508,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
     $obj->name = $shape['name'];
     $recurse = Shapes::idx($shape, 'recurse');
     if ($recurse !== null) {
-      $recurse = await structured_annotation_recursive::__genFromShape(HH\FIXME\UNSAFE_CAST<mixed, structured_annotation_recursive::TShape>($recurse, 'recursive thrift shape'));
+      $recurse = await structured_annotation_recursive::__genFromShape($recurse as shape(...));
       await $obj->get_recurse()->genWrap($recurse);
     }
     $default = Shapes::idx($shape, 'default');
@@ -516,7 +519,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
       await Dict\map_async(
         $shape['recurse_map'],
         async $val0 ==> 
-          await structured_annotation_recursive::__genFromShape(HH\FIXME\UNSAFE_CAST<mixed, structured_annotation_recursive::TShape>($val0, 'recursive thrift shape'))
+          await structured_annotation_recursive::__genFromShape(HH\FIXME\UNSAFE_CAST<structured_annotation_recursiveTShapeRec, structured_annotation_recursive::TShape>($val0, 'recursive thrift shape'))
       )
     );
     $obj->int_field = await \MyTypeIntWrapper::genFromThrift<\thrift_adapted_types\i64WithWrapper>($shape['int_field']);

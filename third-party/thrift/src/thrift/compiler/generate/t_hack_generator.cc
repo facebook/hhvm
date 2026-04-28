@@ -400,8 +400,13 @@ class t_hack_generator : public t_concat_generator {
       std::set<const t_type*>* visiting = nullptr);
   std::string type_to_recursive_shape_typehint(
       const t_type* ttype, const t_structured* root_shape_struct);
-  std::string recursive_shape_cast(
-      const t_type* ttype, const std::string& expr);
+  bool struct_has_recursive_shape(const t_structured* tstruct);
+  std::string recursive_shape_case_type_name(
+      const t_structured* tstruct, bool decl = false);
+  std::string recursive_shape_type_alias_name(
+      const t_structured* tstruct, bool decl = false);
+  void generate_php_recursive_shape_case_type(
+      std::ofstream& out, const t_structured* tstruct);
   void generate_hack_array_from_shape_lambda(
       std::ostream& out,
       t_name_generator& namer,
@@ -459,7 +464,8 @@ class t_hack_generator : public t_concat_generator {
       const std::string& val,
       bool is_shape_method,
       bool uses_thrift_only_methods = false,
-      const t_structured* root_shape_struct = nullptr);
+      const t_structured* root_shape_struct = nullptr,
+      bool is_inside_container = false);
 
   bool type_has_nested_struct(const t_type* t);
   bool field_is_nullable(const t_structured* tstruct, const t_field* field);
@@ -3261,6 +3267,11 @@ void t_hack_generator::generate_php_struct_shape_spec(
     std::ofstream& out,
     const t_structured* tstruct,
     bool is_constructor_shape) {
+  if (!is_constructor_shape && struct_has_recursive_shape(tstruct)) {
+    indent(out) << "const type TShape = "
+                << recursive_shape_type_alias_name(tstruct) << ";\n";
+    return;
+  }
   indent(out) << "const type "
               << (is_constructor_shape ? "TConstructorShape" : "TShape")
               << " = shape(\n";
@@ -3441,8 +3452,8 @@ std::string t_hack_generator::type_to_recursive_shape_typehint(
   }
 
   ttype = ttype->get_true_type();
-  if (ttype->is<t_structured>()) {
-    return "mixed";
+  if (const auto* structured = ttype->try_as<t_structured>()) {
+    return recursive_shape_case_type_name(structured);
   } else if (const auto* list = ttype->try_as<t_list>()) {
     return get_container_keyword(ttype, shape_variations) + "<" +
         type_to_recursive_shape_typehint(
@@ -3477,16 +3488,57 @@ std::string t_hack_generator::type_to_recursive_shape_typehint(
   return type_to_typehint(ttype, shape_variations);
 }
 
-std::string t_hack_generator::recursive_shape_cast(
-    const t_type* ttype, const std::string& expr) {
-  return "HH\\FIXME\\UNSAFE_CAST<mixed, " +
-      type_to_typehint(
-             ttype,
-             {{TypeToTypehintVariations::IS_SHAPE, true},
-              {TypeToTypehintVariations::IS_ANY_SHAPE, true},
-              {TypeToTypehintVariations::IGNORE_WRAPPER, true},
-              {TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, true}}) +
-      ">(" + expr + ", 'recursive thrift shape')";
+bool t_hack_generator::struct_has_recursive_shape(const t_structured* tstruct) {
+  for (const auto& field : tstruct->fields()) {
+    if (skip_codegen(&field)) {
+      continue;
+    }
+    if (type_uses_recursive_shape(&field.type().deref(), tstruct)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+std::string t_hack_generator::recursive_shape_case_type_name(
+    const t_structured* tstruct, bool decl) {
+  return hack_name(
+      find_hack_name(tstruct) + "TShapeRec", tstruct->program(), decl);
+}
+
+std::string t_hack_generator::recursive_shape_type_alias_name(
+    const t_structured* tstruct, bool decl) {
+  return hack_name(
+      find_hack_name(tstruct) + "TShape", tstruct->program(), decl);
+}
+
+void t_hack_generator::generate_php_recursive_shape_case_type(
+    std::ofstream& out, const t_structured* tstruct) {
+  std::string alias_name = recursive_shape_type_alias_name(tstruct, true);
+  std::string case_type_name = recursive_shape_case_type_name(tstruct, true);
+  out << "type " << alias_name << " = shape(\n";
+  for (const auto& field : tstruct->fields()) {
+    if (skip_codegen(&field)) {
+      continue;
+    }
+    const t_type* t = &field.type().deref();
+    std::string typehint;
+    if (const auto field_adapter = find_hack_field_adapter(field)) {
+      typehint = *field_adapter + "::THackType";
+    } else {
+      typehint = type_to_recursive_shape_typehint(t, tstruct);
+    }
+    bool nullable = nullable_everything_ || field_is_nullable(tstruct, &field);
+    std::string prefix = nullable ? "?" : "";
+    out << "  " << prefix << "'" << field.name() << "' => " << prefix
+        << typehint << ",\n";
+  }
+  if (shapes_allow_unknown_fields_) {
+    out << "  ...\n";
+  }
+  out << ");\n";
+  out << "case type " << case_type_name << " = "
+      << recursive_shape_type_alias_name(tstruct) << ";\n\n";
 }
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
@@ -3593,7 +3645,10 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
   std::string type = hack_name(t);
   std::string source = "$$";
   if (type_uses_recursive_shape(t, root_shape_struct)) {
-    source = recursive_shape_cast(t, source);
+    // Inside container lambdas the case type flows through Vec\map/Dict\map
+    // generics, so `as shape(...)` can't narrow it (erased generic args).
+    source = "HH\\FIXME\\UNSAFE_CAST<" + recursive_shape_case_type_name(t) +
+        ", " + type + "::TShape>($$, 'recursive thrift shape')";
   }
   out << type << "::__fromShape(" << source << ")";
   indent_down();
@@ -3767,7 +3822,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
       std::string type = hack_name(t);
       std::string source_str = source.str();
       if (type_uses_recursive_shape(t, tstruct)) {
-        source_str = recursive_shape_cast(t, source_str);
+        source_str += " as shape(...)";
       }
       inner << type << "::__fromShape(" << source_str << ")";
     } else {
@@ -3910,7 +3965,8 @@ bool t_hack_generator::
         const std::string& val,
         bool is_shape_method,
         bool uses_thrift_only_methods,
-        const t_structured* root_shape_struct) {
+        const t_structured* root_shape_struct,
+        bool is_inside_container) {
   if (std::optional<std::string> adapter = find_hack_adapter(ttype)) {
     out << val;
     return false;
@@ -3927,7 +3983,13 @@ bool t_hack_generator::
       }
       std::string source = val;
       if (type_uses_recursive_shape(tstruct, root_shape_struct)) {
-        source = recursive_shape_cast(tstruct, source);
+        if (is_inside_container) {
+          source = "HH\\FIXME\\UNSAFE_CAST<" +
+              recursive_shape_case_type_name(tstruct) + ", " + struct_name +
+              "::TShape>(" + val + ", 'recursive thrift shape')";
+        } else {
+          source = val + " as shape(...)";
+        }
       }
       if (is_async) {
         out << "await " << struct_name << "::__genFromShape(" << source << ")";
@@ -3990,7 +4052,8 @@ bool t_hack_generator::
             inner_val,
             is_shape_method,
             uses_thrift_only_methods,
-            root_shape_struct);
+            root_shape_struct,
+            true);
     indent_down();
     auto inner_str = inner.str();
     if (!wrapper && inner_val == inner_str) {
@@ -4397,6 +4460,11 @@ void t_hack_generator::generate_php_struct_definition(
     ThriftStructType type,
     const std::string& name) {
   const std::string& real_name = !name.empty() ? name : find_hack_name(tstruct);
+  bool gen_shapes = shapes_ && !tstruct->generated() &&
+      type != ThriftStructType::EXCEPTION && type != ThriftStructType::RESULT;
+  if (gen_shapes && struct_has_recursive_shape(tstruct)) {
+    generate_php_recursive_shape_case_type(out, tstruct);
+  }
   if (tstruct->is<t_union>()) {
     // Generate enum for union before the actual class
     generate_php_union_enum(out, tstruct, real_name);

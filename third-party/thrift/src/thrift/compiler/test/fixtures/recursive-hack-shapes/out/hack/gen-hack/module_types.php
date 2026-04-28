@@ -8,6 +8,13 @@
 
 namespace facebook\thrift\test\fixtures\recursive_shapes;
 
+type RecursiveNodeTShape = shape(
+  ?'parent' => ?\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShapeRec,
+  'children' => vec<\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShapeRec>,
+  ?'wrapper' => ?\facebook\thrift\test\fixtures\recursive_shapes\RecursiveWrapperTShapeRec,
+);
+case type RecursiveNodeTShapeRec = \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShape;
+
 /**
  * Original thrift struct:-
  * RecursiveNode
@@ -50,11 +57,7 @@ class RecursiveNode implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
     ?'wrapper' => ?\facebook\thrift\test\fixtures\recursive_shapes\RecursiveWrapper,
   );
 
-  const type TShape = shape(
-    ?'parent' => ?mixed,
-    'children' => vec<mixed>,
-    ?'wrapper' => ?mixed,
-  );
+  const type TShape = \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShape;
   const int STRUCTURAL_ID = 3339021600582386497;
   /**
    * Original thrift field:-
@@ -182,14 +185,14 @@ class RecursiveNode implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'parent') |> $$ === null ? null : (\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::TShape>($$, 'recursive thrift shape'))),
+      Shapes::idx($shape, 'parent') |> $$ === null ? null : (\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape($$ as shape(...))),
       $shape['children']
         |> Vec\map(
           $$,
           $_val0 ==> $_val0
-            |> \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::TShape>($$, 'recursive thrift shape')),
+            |> \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape(HH\FIXME\UNSAFE_CAST<\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShapeRec, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::TShape>($$, 'recursive thrift shape')),
         ) |> new Vector($$),
-      Shapes::idx($shape, 'wrapper') |> $$ === null ? null : (\facebook\thrift\test\fixtures\recursive_shapes\RecursiveWrapper::__fromShape(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveWrapper::TShape>($$, 'recursive thrift shape'))),
+      Shapes::idx($shape, 'wrapper') |> $$ === null ? null : (\facebook\thrift\test\fixtures\recursive_shapes\RecursiveWrapper::__fromShape($$ as shape(...))),
     );
   }
 
@@ -208,6 +211,13 @@ class RecursiveNode implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   }
 
 }
+
+type RecursiveWrapperTShape = shape(
+  ?'node' => ?\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShapeRec,
+  'node_list' => vec<\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShapeRec>,
+  'node_map' => dict<string, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShapeRec>,
+);
+case type RecursiveWrapperTShapeRec = \facebook\thrift\test\fixtures\recursive_shapes\RecursiveWrapperTShape;
 
 /**
  * Original thrift struct:-
@@ -260,11 +270,7 @@ class RecursiveWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \I
     ?'node_map' => ?Map<string, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode>,
   );
 
-  const type TShape = shape(
-    ?'node' => ?mixed,
-    'node_list' => vec<mixed>,
-    'node_map' => dict<string, mixed>,
-  );
+  const type TShape = \facebook\thrift\test\fixtures\recursive_shapes\RecursiveWrapperTShape;
   const int STRUCTURAL_ID = 77816894427382673;
   /**
    * Original thrift field:-
@@ -398,18 +404,18 @@ class RecursiveWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \I
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'node') |> $$ === null ? null : (\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::TShape>($$, 'recursive thrift shape'))),
+      Shapes::idx($shape, 'node') |> $$ === null ? null : (\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape($$ as shape(...))),
       $shape['node_list']
         |> Vec\map(
           $$,
           $_val0 ==> $_val0
-            |> \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::TShape>($$, 'recursive thrift shape')),
+            |> \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape(HH\FIXME\UNSAFE_CAST<\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShapeRec, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::TShape>($$, 'recursive thrift shape')),
         ) |> new Vector($$),
       $shape['node_map']
         |> Dict\map(
           $$,
           $_val1 ==> $_val1
-            |> \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape(HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::TShape>($$, 'recursive thrift shape')),
+            |> \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::__fromShape(HH\FIXME\UNSAFE_CAST<\facebook\thrift\test\fixtures\recursive_shapes\RecursiveNodeTShapeRec, \facebook\thrift\test\fixtures\recursive_shapes\RecursiveNode::TShape>($$, 'recursive thrift shape')),
         ) |> new Map($$),
     );
   }

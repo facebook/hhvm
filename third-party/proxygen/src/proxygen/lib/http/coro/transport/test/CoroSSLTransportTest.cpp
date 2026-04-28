@@ -925,6 +925,53 @@ TEST_F(CoroSSLTransportFakeTest, WriteFromSSLRead) {
   });
 }
 
+// Verify that when the underlying transport read throws (e.g., timeout),
+// the readsBlocked_ baton is properly signaled so that subsequent reads
+// don't wait indefinitely on the baton.
+TEST_F(CoroSSLTransportFakeTest, ReadAfterTransportReadException) {
+  run([&]() -> Task<> {
+    auto cs = co_await connect();
+    co_await sslAccept_;
+
+    // First read: inject a timeout error on the underlying transport.
+    // This will cause CoroSSLTransport::transportRead() to throw.
+    testTransport_->addReadError(
+        folly::coro::TransportIf::ErrorCode::TIMED_OUT);
+
+    std::array<uint8_t, 1024> rcvBuf{};
+    EXPECT_THROW(
+        co_await cs->read(
+            MutableByteRange(rcvBuf.data(), (rcvBuf.data() + rcvBuf.size())),
+            50ms),
+        AsyncSocketException);
+
+    // Second read: without the fix, the readsBlocked_ baton is left locked
+    // and this read would block on the baton until the SSL timeout fires,
+    // then throw. With the fix, the baton was properly signaled on exception
+    // so the read proceeds to the transport layer immediately.
+    //
+    // Write TLS data from the "server" side so the read can succeed.
+    const char* msg = "hello";
+    SSL_write(ssl_.get(), msg, static_cast<int>(strlen(msg)));
+
+    // With the fix: read completes immediately with data.
+    // Without the fix: read blocks on baton, times out, throws.
+    auto readResult = co_await co_awaitTry(cs->read(
+        MutableByteRange(rcvBuf.data(), (rcvBuf.data() + rcvBuf.size())),
+        200ms));
+
+    EXPECT_TRUE(readResult.hasValue())
+        << "Second read failed (baton likely stuck): "
+        << (readResult.hasException()
+                ? readResult.exception().what().toStdString()
+                : "unknown");
+    if (readResult.hasValue()) {
+      EXPECT_EQ(*readResult, strlen(msg));
+      EXPECT_EQ(0, memcmp(rcvBuf.data(), msg, strlen(msg)));
+    }
+  });
+}
+
 } // namespace proxygen::coro
 
 // timeout when computing timeout

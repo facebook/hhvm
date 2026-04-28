@@ -515,12 +515,19 @@ folly::coro::Task<CoroSSLTransport::IOResult> CoroSSLTransport::transportRead(
     // this flavor or read should have a max read size - it's implicitly
     // AsyncSocket maxReadsPerEvent_ * kMaxReadSize
     readsBlocked_.reset();
-    auto rc = co_await transport_->read(transportReadBuf_,
-                                        kMinReadSize,
-                                        kMaxReadSize,
-                                        timeoutFromDeadline(deadline));
-    readsBlocked_.signal();
-    co_return rc == 0 ? IOResult::EndOfFile : IOResult::Success;
+    try {
+      auto rc = co_await transport_->read(transportReadBuf_,
+                                          kMinReadSize,
+                                          kMaxReadSize,
+                                          timeoutFromDeadline(deadline));
+      readsBlocked_.signal();
+      co_return rc == 0 ? IOResult::EndOfFile : IOResult::Success;
+    } catch (...) {
+      // Signal baton on exception to avoid leaving it locked, which would cause
+      // subsequent reads to wait indefinitely on the baton.
+      readsBlocked_.signal();
+      throw;
+    }
   }
 }
 

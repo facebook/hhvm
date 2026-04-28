@@ -44,29 +44,15 @@ class TCompactProtocolAccelerated extends TCompactProtocolBase {
     int $seq_id,
     bool $is_one_way = false,
   ): void {
-    if (ThriftSerializationHelper::useStructToStringRPCHelpers()) {
-      // This should not be reset, but for backwards compatibility
-      // using what the client/processor already uses.
-      $this->version = TCompactProtocolBase::VERSION;
-      parent::writeRPCMessage(
-        $fname,
-        $type,
-        $message_struct,
-        $seq_id,
-        $is_one_way,
-      );
-      return;
-    }
-    thrift_protocol_write_compact2(
-      $this,
+    // This should not be reset, but for backwards compatibility
+    // using what the client/processor already uses.
+    $this->version = TCompactProtocolBase::VERSION;
+    parent::writeRPCMessage(
       $fname,
       $type,
       $message_struct,
       $seq_id,
       $is_one_way,
-      // This should be `$this->version`, but for backwards compatibility
-      // using what the client/processor already uses.
-      TCompactProtocolBase::VERSION,
     );
   }
 
@@ -78,10 +64,7 @@ class TCompactProtocolAccelerated extends TCompactProtocolBase {
     int $options = 0,
     bool $_compare_seq_id = false,
   ): TMessageStruct {
-    if (
-      ThriftSerializationHelper::useStructToStringRPCHelpers() &&
-      $this->trans_ is TMemoryBuffer
-    ) {
+    if ($this->trans_ is TMemoryBuffer) {
       return parent::readRPCMessage(
         $message_struct_class,
         $fname,
@@ -103,10 +86,7 @@ class TCompactProtocolAccelerated extends TCompactProtocolBase {
     int $options = 0,
   ): TStruct {
 
-    if (
-      ThriftSerializationHelper::useStructToStringRPCHelpers() &&
-      $this->trans_ is TMemoryBuffer
-    ) {
+    if ($this->trans_ is TMemoryBuffer) {
       $buffer = $this->trans_->getBuffer();
       // This is necessary for concurrent requests to work with the same client
       // Extension does this at the end by calling putBack()
@@ -131,12 +111,8 @@ class TCompactProtocolAccelerated extends TCompactProtocolBase {
 
   <<__Override>>
   public function writeRPCStruct(IThriftStruct $struct): void {
-    if (ThriftSerializationHelper::useStructToStringRPCHelpers()) {
-      $buffer =
-        thrift_protocol_write_compact_struct_to_string($struct, $this->version);
-      $this->trans_->write($buffer);
-      return;
-    }
-    thrift_protocol_write_compact_struct($this, $struct, $this->version);
+    $this->trans_->write(
+      thrift_protocol_write_compact_struct_to_string($struct, $this->version),
+    );
   }
 }

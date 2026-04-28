@@ -42,35 +42,6 @@ class TBinaryProtocolAccelerated extends TBinaryProtocolBase {
   }
 
   <<__Override>>
-  public function writeRPCMessage(
-    string $fname,
-    TMessageType $type,
-    IThriftStruct $message_struct,
-    int $seq_id,
-    bool $is_one_way = false,
-  ): void {
-    if (ThriftSerializationHelper::useStructToStringRPCHelpers()) {
-      parent::writeRPCMessage(
-        $fname,
-        $type,
-        $message_struct,
-        $seq_id,
-        $is_one_way,
-      );
-      return;
-    }
-    thrift_protocol_write_binary(
-      $this,
-      $fname,
-      $type,
-      $message_struct,
-      $seq_id,
-      $this->isStrictWrite(),
-      $is_one_way,
-    );
-  }
-
-  <<__Override>>
   public function readRPCMessage<TMessageStruct as IThriftStruct>(
     classname<TMessageStruct> $message_struct_class,
     string $fname,
@@ -78,10 +49,7 @@ class TBinaryProtocolAccelerated extends TBinaryProtocolBase {
     int $options = 0,
     bool $_compare_seq_id = false,
   ): TMessageStruct {
-    if (
-      ThriftSerializationHelper::useStructToStringRPCHelpers() &&
-      $this->trans_ is TMemoryBuffer
-    ) {
+    if ($this->trans_ is TMemoryBuffer) {
       return parent::readRPCMessage(
         $message_struct_class,
         $fname,
@@ -107,10 +75,7 @@ class TBinaryProtocolAccelerated extends TBinaryProtocolBase {
     classname<TStruct> $struct_class,
     int $options = 0,
   ): TStruct {
-    if (
-      ThriftSerializationHelper::useStructToStringRPCHelpers() &&
-      $this->trans_ is TMemoryBuffer
-    ) {
+    if ($this->trans_ is TMemoryBuffer) {
       $buffer = $this->trans_->getBuffer();
       // This is necessary for concurrent requests to work with the same client
       // Extension does this at the end by calling putBack()
@@ -131,11 +96,7 @@ class TBinaryProtocolAccelerated extends TBinaryProtocolBase {
 
   <<__Override>>
   public function writeRPCStruct(IThriftStruct $struct): void {
-    if (ThriftSerializationHelper::useStructToStringRPCHelpers()) {
-      $buffer = thrift_protocol_write_binary_struct_to_string($struct);
-      $this->trans_->write($buffer);
-      return;
-    }
-    thrift_protocol_write_binary_struct($this, $struct);
+    $this->trans_
+      ->write(thrift_protocol_write_binary_struct_to_string($struct));
   }
 }

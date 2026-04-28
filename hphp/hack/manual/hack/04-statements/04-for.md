@@ -24,21 +24,20 @@ for (; ; ) {
 ```
 
 In the first `for` loop above, let's call `$i = 1` the *for-initializer*, `$i <= 10` the *for-control*, and `++$i` the *for-end-of-loop-action*.
-Each of these three parts can contain a comma-separated list of expressions.  For example:
+The *for-initializer*  and *for-end-of-loop-action*  can contain a comma-separated list of expressions.  For example:
 
-```hack no-extract
-for ($i = 1, $j = 10; f($i), $i <= 10; $i = $i + 2, --$j) {
+```hack
+for ($i = 1, $j = 10; $i <= 10; $i = $i + 2, --$j) {
   // ...
 }
 ```
 
-The group of expressions in *for-initializer* is evaluated once, left-to-right, for their side-effects only. Then the group of expressions
-in *for-control* is evaluated left-to-right (with all but the right-most one for their side-effects only), with the right-most expression's
-value being tested. If that tests `true`, the loop body is executed, and the group of expressions in *for-end-of-loop-action* is evaluated
-left-to-right, for their side-effects only. Then the process is repeated starting with *for-control*. If the right-most expression in
+The group of expressions in *for-initializer* is evaluated once, left-to-right, for their side-effects only. Then the *for-control* expression is evaluated.
+If that tests `true`, the loop body is executed, and the group of expressions in *for-end-of-loop-action* is evaluated
+left-to-right, for their side-effects only. Then the process is repeated starting with *for-control*. If
 *for-control* tests `false`, control transfers to the point immediately following the end of the for statement. The loop body is executed zero or more times.
 
-The controlling expression&mdash;the right-most expression in *for-control*---must have type `bool` or be implicitly convertible to that type.
+The *for-control* expression must have type `bool` (or [`dynamic`](/hack/built-in-types/dynamic)).
 
 Any or all of the three parts of the first line of a for statement can be omitted, as shown. If *for-initializer* is omitted, no action
 is taken at the start of the loop processing. If *for-control* is omitted, this is treated as if *for-control* was an expression with the

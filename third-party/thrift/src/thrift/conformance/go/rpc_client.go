@@ -615,33 +615,258 @@ func (t *rpcClientConformanceTester) InteractionTermination(ctx context.Context)
 }
 
 func (t *rpcClientConformanceTester) BidiBasic(ctx context.Context) error {
-	return errors.New("not implemented")
+	bidiCtx, bidiCancel := context.WithCancel(ctx)
+	defer bidiCancel()
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		for _, payload := range t.instruction.BidiBasic.SinkPayloads {
+			if !yield(payload, nil) {
+				return
+			}
+		}
+	}
+
+	sinkCallback, streamSeq, err := t.client.BidiBasic(bidiCtx, t.instruction.BidiBasic.Request)
+	if err != nil {
+		return err
+	}
+	go sinkCallback(payloadSeq)
+
+	responses := make([]*rpc.Response, 0)
+	for elem, err := range streamSeq {
+		if err != nil {
+			return err
+		}
+		responses = append(responses, elem)
+	}
+
+	responseValue := rpc.NewBidiBasicClientTestResult().
+		SetStreamPayloads(responses)
+	clientTestResult := rpc.NewClientTestResult().
+		SetBidiBasic(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) BidiInitialResponse(ctx context.Context) error {
-	return errors.New("not implemented")
+	bidiCtx, bidiCancel := context.WithCancel(ctx)
+	defer bidiCancel()
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		for _, payload := range t.instruction.BidiInitialResponse.SinkPayloads {
+			if !yield(payload, nil) {
+				return
+			}
+		}
+	}
+
+	initialResponse, sinkCallback, streamSeq, err := t.client.BidiInitialResponse(
+		bidiCtx, t.instruction.BidiInitialResponse.Request,
+	)
+	if err != nil {
+		return err
+	}
+	go sinkCallback(payloadSeq)
+
+	responses := make([]*rpc.Response, 0)
+	for elem, err := range streamSeq {
+		if err != nil {
+			return err
+		}
+		responses = append(responses, elem)
+	}
+
+	responseValue := rpc.NewBidiInitialResponseClientTestResult().
+		SetInitialResponse(initialResponse).
+		SetStreamPayloads(responses)
+	clientTestResult := rpc.NewClientTestResult().
+		SetBidiInitialResponse(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) BidiStreamDeclaredException(ctx context.Context) error {
-	return errors.New("not implemented")
+	bidiCtx, bidiCancel := context.WithCancel(ctx)
+	defer bidiCancel()
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		for _, payload := range t.instruction.BidiStreamDeclaredException.SinkPayloads {
+			if !yield(payload, nil) {
+				return
+			}
+		}
+	}
+
+	sinkCallback, streamSeq, err := t.client.BidiStreamDeclaredException(
+		bidiCtx, t.instruction.BidiStreamDeclaredException.Request,
+	)
+	if err != nil {
+		return err
+	}
+	go sinkCallback(payloadSeq)
+
+	responses := make([]*rpc.Response, 0)
+	var streamErr error
+	for elem, err := range streamSeq {
+		if err != nil {
+			streamErr = err
+			break
+		}
+		responses = append(responses, elem)
+	}
+
+	responseValue := rpc.NewBidiStreamDeclaredExceptionClientTestResult().
+		SetUserException(streamErr.(*rpc.UserException)).
+		SetStreamPayloads(responses)
+	clientTestResult := rpc.NewClientTestResult().
+		SetBidiStreamDeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) BidiStreamUndeclaredException(ctx context.Context) error {
-	return errors.New("not implemented")
+	bidiCtx, bidiCancel := context.WithCancel(ctx)
+	defer bidiCancel()
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		for _, payload := range t.instruction.BidiStreamUndeclaredException.SinkPayloads {
+			if !yield(payload, nil) {
+				return
+			}
+		}
+	}
+
+	sinkCallback, streamSeq, err := t.client.BidiStreamUndeclaredException(
+		bidiCtx, t.instruction.BidiStreamUndeclaredException.Request,
+	)
+	if err != nil {
+		return err
+	}
+	go sinkCallback(payloadSeq)
+
+	responses := make([]*rpc.Response, 0)
+	var streamErr error
+	for elem, err := range streamSeq {
+		if err != nil {
+			streamErr = err
+			break
+		}
+		responses = append(responses, elem)
+	}
+
+	responseValue := rpc.NewBidiStreamUndeclaredExceptionClientTestResult().
+		SetExceptionMessage(streamErr.Error()).
+		SetStreamPayloads(responses)
+	clientTestResult := rpc.NewClientTestResult().
+		SetBidiStreamUndeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) BidiSinkDeclaredException(ctx context.Context) error {
-	return errors.New("not implemented")
+	bidiCtx, bidiCancel := context.WithCancel(ctx)
+	defer bidiCancel()
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		for _, payload := range t.instruction.BidiSinkDeclaredException.SinkPayloads {
+			if !yield(payload, nil) {
+				return
+			}
+		}
+		if t.instruction.BidiSinkDeclaredException.UserException != nil {
+			yield(nil, t.instruction.BidiSinkDeclaredException.UserException)
+		}
+	}
+
+	sinkCallback, streamSeq, err := t.client.BidiSinkDeclaredException(
+		bidiCtx, t.instruction.BidiSinkDeclaredException.Request,
+	)
+	if err != nil {
+		return err
+	}
+	go sinkCallback(payloadSeq)
+
+	responses := make([]*rpc.Response, 0)
+	for elem, err := range streamSeq {
+		if err != nil {
+			break
+		}
+		responses = append(responses, elem)
+	}
+
+	sinkThrew := t.instruction.BidiSinkDeclaredException.UserException != nil
+
+	responseValue := rpc.NewBidiSinkDeclaredExceptionClientTestResult().
+		SetStreamPayloads(responses).
+		SetSinkThrew(sinkThrew)
+	clientTestResult := rpc.NewClientTestResult().
+		SetBidiSinkDeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) BidiSinkUndeclaredException(ctx context.Context) error {
-	return errors.New("not implemented")
+	bidiCtx, bidiCancel := context.WithCancel(ctx)
+	defer bidiCancel()
+
+	payloadSeq := func(yield func(*rpc.Request, error) bool) {
+		for _, payload := range t.instruction.BidiSinkUndeclaredException.SinkPayloads {
+			if !yield(payload, nil) {
+				return
+			}
+		}
+		if t.instruction.BidiSinkUndeclaredException.ExceptionMessage != nil {
+			yield(nil, errors.New(*t.instruction.BidiSinkUndeclaredException.ExceptionMessage))
+		}
+	}
+
+	sinkCallback, streamSeq, err := t.client.BidiSinkUndeclaredException(
+		bidiCtx, t.instruction.BidiSinkUndeclaredException.Request,
+	)
+	if err != nil {
+		return err
+	}
+	go sinkCallback(payloadSeq)
+
+	responses := make([]*rpc.Response, 0)
+	for elem, err := range streamSeq {
+		if err != nil {
+			break
+		}
+		responses = append(responses, elem)
+	}
+
+	sinkThrew := t.instruction.BidiSinkUndeclaredException.ExceptionMessage != nil
+
+	responseValue := rpc.NewBidiSinkUndeclaredExceptionClientTestResult().
+		SetStreamPayloads(responses).
+		SetSinkThrew(sinkThrew)
+	clientTestResult := rpc.NewClientTestResult().
+		SetBidiSinkUndeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) BidiMethodDeclaredException(ctx context.Context) error {
-	return errors.New("not implemented")
+	bidiCtx, bidiCancel := context.WithCancel(ctx)
+	defer bidiCancel()
+
+	_, _, err := t.client.BidiMethodDeclaredException(
+		bidiCtx, t.instruction.BidiMethodDeclaredException.Request,
+	)
+
+	responseValue := rpc.NewBidiMethodDeclaredExceptionClientTestResult().
+		SetUserException(err.(*rpc.UserException))
+	clientTestResult := rpc.NewClientTestResult().
+		SetBidiMethodDeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) BidiMethodUndeclaredException(ctx context.Context) error {
-	return errors.New("not implemented")
+	bidiCtx, bidiCancel := context.WithCancel(ctx)
+	defer bidiCancel()
+
+	_, _, err := t.client.BidiMethodUndeclaredException(
+		bidiCtx, t.instruction.BidiMethodUndeclaredException.Request,
+	)
+
+	responseValue := rpc.NewBidiMethodUndeclaredExceptionClientTestResult().
+		SetExceptionMessage(err.Error())
+	clientTestResult := rpc.NewClientTestResult().
+		SetBidiMethodUndeclaredException(responseValue)
+	return t.client.SendTestResult(ctx, clientTestResult)
 }

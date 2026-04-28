@@ -35,6 +35,9 @@ type BiDiService interface {
 
 type BiDiServiceClient interface {
     io.Closer
+    Simple(ctx context.Context) (func(iter.Seq2[int32, error]), iter.Seq2[int16, error], error)
+    Response(ctx context.Context) (string, func(iter.Seq2[int32, error]), iter.Seq2[int16, error], error)
+    CanThrow(ctx context.Context) (func(iter.Seq2[int64, error]), iter.Seq2[int64, error], error)
 }
 
 type biDiServiceClientImpl struct {
@@ -55,6 +58,18 @@ func init() {
 
 func (c *biDiServiceClientImpl) Close() error {
     return c.ch.Close()
+}
+
+func (c *biDiServiceClientImpl) Simple(ctx context.Context) (func(iter.Seq2[int32, error]), iter.Seq2[int16, error], error) {
+    panic("bidi not implemented")
+}
+
+func (c *biDiServiceClientImpl) Response(ctx context.Context) (string, func(iter.Seq2[int32, error]), iter.Seq2[int16, error], error) {
+    panic("bidi not implemented")
+}
+
+func (c *biDiServiceClientImpl) CanThrow(ctx context.Context) (func(iter.Seq2[int64, error]), iter.Seq2[int64, error], error) {
+    panic("bidi not implemented")
 }
 
 

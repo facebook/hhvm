@@ -14,6 +14,27 @@ var _ = thrift.VOID
 
 // Premade codec specs
 var (
+    premadeCodecTypeSpec_void = &thrift.TypeSpec{
+        FullName: "void",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
+            },
+    }
+    premadeCodecTypeSpec_i16 = &thrift.TypeSpec{
+        FullName: "i16",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I16,
+            },
+    }
+    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
+        FullName: "i32",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
+            },
+    }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
         FullName: "string",
         CodecPrimitiveSpec:
@@ -21,13 +42,20 @@ var (
                 PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
             },
     }
-    premadeCodecTypeSpec_module_BiDiSinkException = &thrift.TypeSpec{
-        FullName: "module.BiDiSinkException",
+    premadeCodecTypeSpec_module_BiDiMethodException = &thrift.TypeSpec{
+        FullName: "module.BiDiMethodException",
         CodecStructSpec:
             &thrift.CodecStructSpec{
-                ScopedName: "module.BiDiSinkException",
+                ScopedName: "module.BiDiMethodException",
                 IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewBiDiSinkException() },
+                NewFunc:    func() thrift.Struct { return NewBiDiMethodException() },
+            },
+    }
+    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
+        FullName: "i64",
+        CodecPrimitiveSpec:
+            &thrift.CodecPrimitiveSpec{
+                PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
             },
     }
     premadeCodecTypeSpec_module_BiDiStreamException = &thrift.TypeSpec{
@@ -39,13 +67,13 @@ var (
                 NewFunc:    func() thrift.Struct { return NewBiDiStreamException() },
             },
     }
-    premadeCodecTypeSpec_module_BiDiMethodException = &thrift.TypeSpec{
-        FullName: "module.BiDiMethodException",
+    premadeCodecTypeSpec_module_BiDiSinkException = &thrift.TypeSpec{
+        FullName: "module.BiDiSinkException",
         CodecStructSpec:
             &thrift.CodecStructSpec{
-                ScopedName: "module.BiDiMethodException",
+                ScopedName: "module.BiDiSinkException",
                 IsUnion:    false,
-                NewFunc:    func() thrift.Struct { return NewBiDiMethodException() },
+                NewFunc:    func() thrift.Struct { return NewBiDiSinkException() },
             },
     }
 )
@@ -124,14 +152,284 @@ var (
                 "message": 0,
             },
         }
+    premadeStructSpec_reqBiDiServiceSimple =
+        &thrift.StructSpec{
+            Name:                 "reqBiDiServiceSimple",
+            ScopedName:           "module.reqBiDiServiceSimple",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respBiDiServiceSimple =
+        &thrift.StructSpec{
+            Name:                 "respBiDiServiceSimple",
+            ScopedName:           "module.respBiDiServiceSimple",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_streamBiDiServiceSimple =
+        &thrift.StructSpec{
+            Name:                 "streamBiDiServiceSimple",
+            ScopedName:           "module.streamBiDiServiceSimple",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I16,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i16,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_sinkBiDiServiceSimple =
+        &thrift.StructSpec{
+            Name:                 "sinkBiDiServiceSimple",
+            ScopedName:           "module.sinkBiDiServiceSimple",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqBiDiServiceResponse =
+        &thrift.StructSpec{
+            Name:                 "reqBiDiServiceResponse",
+            ScopedName:           "module.reqBiDiServiceResponse",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respBiDiServiceResponse =
+        &thrift.StructSpec{
+            Name:                 "respBiDiServiceResponse",
+            ScopedName:           "module.respBiDiServiceResponse",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.STRING,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_string,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_streamBiDiServiceResponse =
+        &thrift.StructSpec{
+            Name:                 "streamBiDiServiceResponse",
+            ScopedName:           "module.streamBiDiServiceResponse",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I16,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i16,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_sinkBiDiServiceResponse =
+        &thrift.StructSpec{
+            Name:                 "sinkBiDiServiceResponse",
+            ScopedName:           "module.sinkBiDiServiceResponse",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I32,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i32,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+            },
+        }
+    premadeStructSpec_reqBiDiServiceCanThrow =
+        &thrift.StructSpec{
+            Name:                 "reqBiDiServiceCanThrow",
+            ScopedName:           "module.reqBiDiServiceCanThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+            },
+            FieldSpecNameToIndex: map[string]int{
+            },
+        }
+    premadeStructSpec_respBiDiServiceCanThrow =
+        &thrift.StructSpec{
+            Name:                 "respBiDiServiceCanThrow",
+            ScopedName:           "module.respBiDiServiceCanThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "ex",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_BiDiMethodException,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                1: 0,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "ex": 0,
+            },
+        }
+    premadeStructSpec_streamBiDiServiceCanThrow =
+        &thrift.StructSpec{
+            Name:                 "streamBiDiServiceCanThrow",
+            ScopedName:           "module.streamBiDiServiceCanThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I64,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i64,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "ex",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_BiDiStreamException,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "ex": 1,
+            },
+        }
+    premadeStructSpec_sinkBiDiServiceCanThrow =
+        &thrift.StructSpec{
+            Name:                 "sinkBiDiServiceCanThrow",
+            ScopedName:           "module.sinkBiDiServiceCanThrow",
+            IsUnion:              false,
+            IsException:          false,
+            FieldSpecs:           []thrift.FieldSpec{
+                {
+                    ID:                   0,
+                    WireType:             thrift.I64,
+                    Name:                 "success",
+                    ReflectIndex:         0,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_i64,
+                    MustBeSetToSerialize: true,
+                },
+                {
+                    ID:                   1,
+                    WireType:             thrift.STRUCT,
+                    Name:                 "ex",
+                    ReflectIndex:         1,
+                    IsOptional:           true,
+                    ValueTypeSpec:        premadeCodecTypeSpec_module_BiDiSinkException,
+                    MustBeSetToSerialize: true,
+                },
+            },
+            FieldSpecIDToIndex:   map[int16]int{
+                0: 0,
+                1: 1,
+            },
+            FieldSpecNameToIndex: map[string]int{
+                "success": 0,
+                "ex": 1,
+            },
+        }
 )
 
 var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_BiDiSinkException.FullName] = premadeCodecTypeSpec_module_BiDiSinkException
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_BiDiStreamException.FullName] = premadeCodecTypeSpec_module_BiDiStreamException
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_BiDiMethodException.FullName] = premadeCodecTypeSpec_module_BiDiMethodException
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_BiDiStreamException.FullName] = premadeCodecTypeSpec_module_BiDiStreamException
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_BiDiSinkException.FullName] = premadeCodecTypeSpec_module_BiDiSinkException
     return fbthriftTypeSpecsMap
 }()
 

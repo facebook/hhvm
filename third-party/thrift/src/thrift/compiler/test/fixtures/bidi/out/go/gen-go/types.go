@@ -424,6 +424,1555 @@ func (x *BiDiMethodException) TypeName() string {
     return "BiDiMethodException"
 }
 
+type reqBiDiServiceSimple struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqBiDiServiceSimple)(nil)
+
+// Deprecated: BiDiServiceSimpleArgsDeprecated is deprecated, since it is supposed to be internal.
+type BiDiServiceSimpleArgsDeprecated = reqBiDiServiceSimple
+
+func newReqBiDiServiceSimple() *reqBiDiServiceSimple {
+    return (&reqBiDiServiceSimple{}).setDefaults()
+}
+
+
+
+
+func (x *reqBiDiServiceSimple) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqBiDiServiceSimple"); err != nil {
+        return thrift.PrependError("reqBiDiServiceSimple write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqBiDiServiceSimple write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqBiDiServiceSimple write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqBiDiServiceSimple) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqBiDiServiceSimple read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqBiDiServiceSimple field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqBiDiServiceSimple read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqBiDiServiceSimple) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqBiDiServiceSimple) setDefaults() *reqBiDiServiceSimple {
+    return x
+}
+
+type respBiDiServiceSimple struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respBiDiServiceSimple)(nil)
+var _ thrift.WritableResult = (*respBiDiServiceSimple)(nil)
+
+// Deprecated: BiDiServiceSimpleResultDeprecated is deprecated, since it is supposed to be internal.
+type BiDiServiceSimpleResultDeprecated = respBiDiServiceSimple
+
+func newRespBiDiServiceSimple() *respBiDiServiceSimple {
+    return (&respBiDiServiceSimple{}).setDefaults()
+}
+
+
+
+
+func (x *respBiDiServiceSimple) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respBiDiServiceSimple) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respBiDiServiceSimple"); err != nil {
+        return thrift.PrependError("respBiDiServiceSimple write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respBiDiServiceSimple write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respBiDiServiceSimple write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respBiDiServiceSimple) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respBiDiServiceSimple read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respBiDiServiceSimple field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respBiDiServiceSimple read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respBiDiServiceSimple) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respBiDiServiceSimple) setDefaults() *respBiDiServiceSimple {
+    return x
+}
+
+type streamBiDiServiceSimple struct {
+    Success *int16 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamBiDiServiceSimple)(nil)
+var _ thrift.WritableResult = (*streamBiDiServiceSimple)(nil)
+
+// Deprecated: streamBiDiServiceSimpleResultDeprecated is deprecated, since it is supposed to be internal.
+type streamBiDiServiceSimpleResultDeprecated = streamBiDiServiceSimple
+
+func newStreamBiDiServiceSimple() *streamBiDiServiceSimple {
+    return (&streamBiDiServiceSimple{}).setDefaults()
+}
+
+func (x *streamBiDiServiceSimple) GetSuccess() int16 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamBiDiServiceSimple) SetSuccessNonCompat(value int16) *streamBiDiServiceSimple {
+    x.Success = &value
+    return x
+}
+
+func (x *streamBiDiServiceSimple) SetSuccess(value *int16) *streamBiDiServiceSimple {
+    x.Success = value
+    return x
+}
+
+func (x *streamBiDiServiceSimple) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamBiDiServiceSimple) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I16, 0); err != nil {
+        return thrift.PrependError("streamBiDiServiceSimple write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI16(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceSimple write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamBiDiServiceSimple) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI16()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+
+func (x *streamBiDiServiceSimple) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamBiDiServiceSimple) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamBiDiServiceSimple"); err != nil {
+        return thrift.PrependError("streamBiDiServiceSimple write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamBiDiServiceSimple write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceSimple write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamBiDiServiceSimple) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamBiDiServiceSimple read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamBiDiServiceSimple field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I16) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceSimple read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamBiDiServiceSimple) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamBiDiServiceSimple) setDefaults() *streamBiDiServiceSimple {
+    return x
+}
+
+type sinkBiDiServiceSimple struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkBiDiServiceSimple)(nil)
+var _ thrift.WritableResult = (*sinkBiDiServiceSimple)(nil)
+
+// Deprecated: sinkBiDiServiceSimpleResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkBiDiServiceSimpleResultDeprecated = sinkBiDiServiceSimple
+
+func newSinkBiDiServiceSimple() *sinkBiDiServiceSimple {
+    return (&sinkBiDiServiceSimple{}).setDefaults()
+}
+
+func (x *sinkBiDiServiceSimple) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *sinkBiDiServiceSimple) SetSuccessNonCompat(value int32) *sinkBiDiServiceSimple {
+    x.Success = &value
+    return x
+}
+
+func (x *sinkBiDiServiceSimple) SetSuccess(value *int32) *sinkBiDiServiceSimple {
+    x.Success = value
+    return x
+}
+
+func (x *sinkBiDiServiceSimple) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkBiDiServiceSimple) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("sinkBiDiServiceSimple write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceSimple write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkBiDiServiceSimple) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+
+func (x *sinkBiDiServiceSimple) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *sinkBiDiServiceSimple) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkBiDiServiceSimple"); err != nil {
+        return thrift.PrependError("sinkBiDiServiceSimple write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceSimple write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceSimple write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkBiDiServiceSimple) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceSimple read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkBiDiServiceSimple field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceSimple read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkBiDiServiceSimple) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkBiDiServiceSimple) setDefaults() *sinkBiDiServiceSimple {
+    return x
+}
+
+type reqBiDiServiceResponse struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqBiDiServiceResponse)(nil)
+
+// Deprecated: BiDiServiceResponseArgsDeprecated is deprecated, since it is supposed to be internal.
+type BiDiServiceResponseArgsDeprecated = reqBiDiServiceResponse
+
+func newReqBiDiServiceResponse() *reqBiDiServiceResponse {
+    return (&reqBiDiServiceResponse{}).setDefaults()
+}
+
+
+
+
+func (x *reqBiDiServiceResponse) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqBiDiServiceResponse"); err != nil {
+        return thrift.PrependError("reqBiDiServiceResponse write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqBiDiServiceResponse write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqBiDiServiceResponse write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqBiDiServiceResponse) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqBiDiServiceResponse read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqBiDiServiceResponse field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqBiDiServiceResponse read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqBiDiServiceResponse) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqBiDiServiceResponse) setDefaults() *reqBiDiServiceResponse {
+    return x
+}
+
+type respBiDiServiceResponse struct {
+    Success *string `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respBiDiServiceResponse)(nil)
+var _ thrift.WritableResult = (*respBiDiServiceResponse)(nil)
+
+// Deprecated: BiDiServiceResponseResultDeprecated is deprecated, since it is supposed to be internal.
+type BiDiServiceResponseResultDeprecated = respBiDiServiceResponse
+
+func newRespBiDiServiceResponse() *respBiDiServiceResponse {
+    return (&respBiDiServiceResponse{}).setDefaults()
+}
+
+func (x *respBiDiServiceResponse) GetSuccess() string {
+    if !x.IsSetSuccess() {
+        return ""
+    }
+    return *x.Success
+}
+
+func (x *respBiDiServiceResponse) SetSuccessNonCompat(value string) *respBiDiServiceResponse {
+    x.Success = &value
+    return x
+}
+
+func (x *respBiDiServiceResponse) SetSuccess(value *string) *respBiDiServiceResponse {
+    x.Success = value
+    return x
+}
+
+func (x *respBiDiServiceResponse) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *respBiDiServiceResponse) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.STRING, 0); err != nil {
+        return thrift.PrependError("respBiDiServiceResponse write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respBiDiServiceResponse write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respBiDiServiceResponse) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+
+func (x *respBiDiServiceResponse) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *respBiDiServiceResponse) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respBiDiServiceResponse"); err != nil {
+        return thrift.PrependError("respBiDiServiceResponse write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respBiDiServiceResponse write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respBiDiServiceResponse write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respBiDiServiceResponse) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respBiDiServiceResponse read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respBiDiServiceResponse field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respBiDiServiceResponse read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respBiDiServiceResponse) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respBiDiServiceResponse) setDefaults() *respBiDiServiceResponse {
+    return x
+}
+
+type streamBiDiServiceResponse struct {
+    Success *int16 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamBiDiServiceResponse)(nil)
+var _ thrift.WritableResult = (*streamBiDiServiceResponse)(nil)
+
+// Deprecated: streamBiDiServiceResponseResultDeprecated is deprecated, since it is supposed to be internal.
+type streamBiDiServiceResponseResultDeprecated = streamBiDiServiceResponse
+
+func newStreamBiDiServiceResponse() *streamBiDiServiceResponse {
+    return (&streamBiDiServiceResponse{}).setDefaults()
+}
+
+func (x *streamBiDiServiceResponse) GetSuccess() int16 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamBiDiServiceResponse) SetSuccessNonCompat(value int16) *streamBiDiServiceResponse {
+    x.Success = &value
+    return x
+}
+
+func (x *streamBiDiServiceResponse) SetSuccess(value *int16) *streamBiDiServiceResponse {
+    x.Success = value
+    return x
+}
+
+func (x *streamBiDiServiceResponse) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamBiDiServiceResponse) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I16, 0); err != nil {
+        return thrift.PrependError("streamBiDiServiceResponse write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI16(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceResponse write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamBiDiServiceResponse) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI16()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+
+func (x *streamBiDiServiceResponse) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *streamBiDiServiceResponse) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamBiDiServiceResponse"); err != nil {
+        return thrift.PrependError("streamBiDiServiceResponse write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamBiDiServiceResponse write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceResponse write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamBiDiServiceResponse) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamBiDiServiceResponse read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamBiDiServiceResponse field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I16) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceResponse read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamBiDiServiceResponse) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamBiDiServiceResponse) setDefaults() *streamBiDiServiceResponse {
+    return x
+}
+
+type sinkBiDiServiceResponse struct {
+    Success *int32 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkBiDiServiceResponse)(nil)
+var _ thrift.WritableResult = (*sinkBiDiServiceResponse)(nil)
+
+// Deprecated: sinkBiDiServiceResponseResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkBiDiServiceResponseResultDeprecated = sinkBiDiServiceResponse
+
+func newSinkBiDiServiceResponse() *sinkBiDiServiceResponse {
+    return (&sinkBiDiServiceResponse{}).setDefaults()
+}
+
+func (x *sinkBiDiServiceResponse) GetSuccess() int32 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *sinkBiDiServiceResponse) SetSuccessNonCompat(value int32) *sinkBiDiServiceResponse {
+    x.Success = &value
+    return x
+}
+
+func (x *sinkBiDiServiceResponse) SetSuccess(value *int32) *sinkBiDiServiceResponse {
+    x.Success = value
+    return x
+}
+
+func (x *sinkBiDiServiceResponse) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkBiDiServiceResponse) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+        return thrift.PrependError("sinkBiDiServiceResponse write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI32(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceResponse write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkBiDiServiceResponse) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI32()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+
+
+
+func (x *sinkBiDiServiceResponse) Exception() thrift.WritableException {
+    return nil
+}
+
+func (x *sinkBiDiServiceResponse) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkBiDiServiceResponse"); err != nil {
+        return thrift.PrependError("sinkBiDiServiceResponse write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceResponse write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceResponse write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkBiDiServiceResponse) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceResponse read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkBiDiServiceResponse field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceResponse read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkBiDiServiceResponse) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkBiDiServiceResponse) setDefaults() *sinkBiDiServiceResponse {
+    return x
+}
+
+type reqBiDiServiceCanThrow struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*reqBiDiServiceCanThrow)(nil)
+
+// Deprecated: BiDiServiceCanThrowArgsDeprecated is deprecated, since it is supposed to be internal.
+type BiDiServiceCanThrowArgsDeprecated = reqBiDiServiceCanThrow
+
+func newReqBiDiServiceCanThrow() *reqBiDiServiceCanThrow {
+    return (&reqBiDiServiceCanThrow{}).setDefaults()
+}
+
+
+
+
+func (x *reqBiDiServiceCanThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("reqBiDiServiceCanThrow"); err != nil {
+        return thrift.PrependError("reqBiDiServiceCanThrow write struct begin error: ", err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("reqBiDiServiceCanThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("reqBiDiServiceCanThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *reqBiDiServiceCanThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("reqBiDiServiceCanThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("reqBiDiServiceCanThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("reqBiDiServiceCanThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *reqBiDiServiceCanThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *reqBiDiServiceCanThrow) setDefaults() *reqBiDiServiceCanThrow {
+    return x
+}
+
+type respBiDiServiceCanThrow struct {
+    Ex *BiDiMethodException `thrift:"ex,1,optional" json:"ex,omitempty" db:"ex"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*respBiDiServiceCanThrow)(nil)
+var _ thrift.WritableResult = (*respBiDiServiceCanThrow)(nil)
+
+// Deprecated: BiDiServiceCanThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type BiDiServiceCanThrowResultDeprecated = respBiDiServiceCanThrow
+
+func newRespBiDiServiceCanThrow() *respBiDiServiceCanThrow {
+    return (&respBiDiServiceCanThrow{}).setDefaults()
+}
+
+func (x *respBiDiServiceCanThrow) GetEx() *BiDiMethodException {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *respBiDiServiceCanThrow) SetExNonCompat(value *BiDiMethodException) *respBiDiServiceCanThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respBiDiServiceCanThrow) SetEx(value *BiDiMethodException) *respBiDiServiceCanThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *respBiDiServiceCanThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
+func (x *respBiDiServiceCanThrow) writeField1(p thrift.Encoder) error {  // Ex
+    if !x.IsSetEx() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("respBiDiServiceCanThrow write field begin error: ", err)
+    }
+
+    item := x.Ex
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("respBiDiServiceCanThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *respBiDiServiceCanThrow) readField1(p thrift.Decoder) error {  // Ex
+    result := NewBiDiMethodException()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Ex = result
+    return nil
+}
+
+
+
+
+
+func (x *respBiDiServiceCanThrow) Exception() thrift.WritableException {
+    if x.Ex != nil {
+        return x.Ex
+    }
+    return nil
+}
+
+func (x *respBiDiServiceCanThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("respBiDiServiceCanThrow"); err != nil {
+        return thrift.PrependError("respBiDiServiceCanThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("respBiDiServiceCanThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("respBiDiServiceCanThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *respBiDiServiceCanThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("respBiDiServiceCanThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("respBiDiServiceCanThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "ex")):  // ex
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("respBiDiServiceCanThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *respBiDiServiceCanThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *respBiDiServiceCanThrow) setDefaults() *respBiDiServiceCanThrow {
+    return x
+}
+
+type streamBiDiServiceCanThrow struct {
+    Success *int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    Ex *BiDiStreamException `thrift:"ex,1,optional" json:"ex,omitempty" db:"ex"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*streamBiDiServiceCanThrow)(nil)
+var _ thrift.WritableResult = (*streamBiDiServiceCanThrow)(nil)
+
+// Deprecated: streamBiDiServiceCanThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type streamBiDiServiceCanThrowResultDeprecated = streamBiDiServiceCanThrow
+
+func newStreamBiDiServiceCanThrow() *streamBiDiServiceCanThrow {
+    return (&streamBiDiServiceCanThrow{}).setDefaults()
+}
+
+func (x *streamBiDiServiceCanThrow) GetSuccess() int64 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *streamBiDiServiceCanThrow) SetSuccessNonCompat(value int64) *streamBiDiServiceCanThrow {
+    x.Success = &value
+    return x
+}
+
+func (x *streamBiDiServiceCanThrow) SetSuccess(value *int64) *streamBiDiServiceCanThrow {
+    x.Success = value
+    return x
+}
+
+func (x *streamBiDiServiceCanThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *streamBiDiServiceCanThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I64, 0); err != nil {
+        return thrift.PrependError("streamBiDiServiceCanThrow write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceCanThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamBiDiServiceCanThrow) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI64()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *streamBiDiServiceCanThrow) GetEx() *BiDiStreamException {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *streamBiDiServiceCanThrow) SetExNonCompat(value *BiDiStreamException) *streamBiDiServiceCanThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *streamBiDiServiceCanThrow) SetEx(value *BiDiStreamException) *streamBiDiServiceCanThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *streamBiDiServiceCanThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
+func (x *streamBiDiServiceCanThrow) writeField1(p thrift.Encoder) error {  // Ex
+    if !x.IsSetEx() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("streamBiDiServiceCanThrow write field begin error: ", err)
+    }
+
+    item := x.Ex
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceCanThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamBiDiServiceCanThrow) readField1(p thrift.Decoder) error {  // Ex
+    result := NewBiDiStreamException()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Ex = result
+    return nil
+}
+
+
+
+
+
+func (x *streamBiDiServiceCanThrow) Exception() thrift.WritableException {
+    if x.Ex != nil {
+        return x.Ex
+    }
+    return nil
+}
+
+func (x *streamBiDiServiceCanThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("streamBiDiServiceCanThrow"); err != nil {
+        return thrift.PrependError("streamBiDiServiceCanThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("streamBiDiServiceCanThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceCanThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *streamBiDiServiceCanThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("streamBiDiServiceCanThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("streamBiDiServiceCanThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I64) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "ex")):  // ex
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("streamBiDiServiceCanThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *streamBiDiServiceCanThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *streamBiDiServiceCanThrow) setDefaults() *streamBiDiServiceCanThrow {
+    return x
+}
+
+type sinkBiDiServiceCanThrow struct {
+    Success *int64 `thrift:"success,0,optional" json:"success,omitempty" db:"success"`
+    Ex *BiDiSinkException `thrift:"ex,1,optional" json:"ex,omitempty" db:"ex"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*sinkBiDiServiceCanThrow)(nil)
+var _ thrift.WritableResult = (*sinkBiDiServiceCanThrow)(nil)
+
+// Deprecated: sinkBiDiServiceCanThrowResultDeprecated is deprecated, since it is supposed to be internal.
+type sinkBiDiServiceCanThrowResultDeprecated = sinkBiDiServiceCanThrow
+
+func newSinkBiDiServiceCanThrow() *sinkBiDiServiceCanThrow {
+    return (&sinkBiDiServiceCanThrow{}).setDefaults()
+}
+
+func (x *sinkBiDiServiceCanThrow) GetSuccess() int64 {
+    if !x.IsSetSuccess() {
+        return 0
+    }
+    return *x.Success
+}
+
+func (x *sinkBiDiServiceCanThrow) SetSuccessNonCompat(value int64) *sinkBiDiServiceCanThrow {
+    x.Success = &value
+    return x
+}
+
+func (x *sinkBiDiServiceCanThrow) SetSuccess(value *int64) *sinkBiDiServiceCanThrow {
+    x.Success = value
+    return x
+}
+
+func (x *sinkBiDiServiceCanThrow) IsSetSuccess() bool {
+    return x != nil && x.Success != nil
+}
+
+func (x *sinkBiDiServiceCanThrow) writeField0(p thrift.Encoder) error {  // Success
+    if !x.IsSetSuccess() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("success", thrift.I64, 0); err != nil {
+        return thrift.PrependError("sinkBiDiServiceCanThrow write field begin error: ", err)
+    }
+
+    item := *x.Success
+    if err := p.WriteI64(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceCanThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkBiDiServiceCanThrow) readField0(p thrift.Decoder) error {  // Success
+    result, err := p.ReadI64()
+    if err != nil {
+        return err
+    }
+
+    x.Success = &result
+    return nil
+}
+
+
+func (x *sinkBiDiServiceCanThrow) GetEx() *BiDiSinkException {
+    if !x.IsSetEx() {
+        return nil
+    }
+    return x.Ex
+}
+
+func (x *sinkBiDiServiceCanThrow) SetExNonCompat(value *BiDiSinkException) *sinkBiDiServiceCanThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkBiDiServiceCanThrow) SetEx(value *BiDiSinkException) *sinkBiDiServiceCanThrow {
+    x.Ex = value
+    return x
+}
+
+func (x *sinkBiDiServiceCanThrow) IsSetEx() bool {
+    return x != nil && x.Ex != nil
+}
+
+func (x *sinkBiDiServiceCanThrow) writeField1(p thrift.Encoder) error {  // Ex
+    if !x.IsSetEx() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("ex", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError("sinkBiDiServiceCanThrow write field begin error: ", err)
+    }
+
+    item := x.Ex
+    if err := item.Write(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceCanThrow write field end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkBiDiServiceCanThrow) readField1(p thrift.Decoder) error {  // Ex
+    result := NewBiDiSinkException()
+    err := result.Read(p)
+    if err != nil {
+        return err
+    }
+
+    x.Ex = result
+    return nil
+}
+
+
+
+
+
+func (x *sinkBiDiServiceCanThrow) Exception() thrift.WritableException {
+    if x.Ex != nil {
+        return x.Ex
+    }
+    return nil
+}
+
+func (x *sinkBiDiServiceCanThrow) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("sinkBiDiServiceCanThrow"); err != nil {
+        return thrift.PrependError("sinkBiDiServiceCanThrow write struct begin error: ", err)
+    }
+
+    if err := x.writeField0(p); err != nil {
+        return err
+    }
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceCanThrow write field stop error: ", err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceCanThrow write struct end error: ", err)
+    }
+    return nil
+}
+
+func (x *sinkBiDiServiceCanThrow) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceCanThrow read error: ", err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("sinkBiDiServiceCanThrow field %d ('%s') read error: ", id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 0 && wireType == thrift.I64) || (id == thrift.NO_FIELD_ID && fieldName == "success")):  // success
+            fieldReadErr = x.readField0(p)
+        case ((id == 1 && wireType == thrift.STRUCT) || (id == thrift.NO_FIELD_ID && fieldName == "ex")):  // ex
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError("sinkBiDiServiceCanThrow read struct end error: ", err)
+    }
+
+    return nil
+}
+
+func (x *sinkBiDiServiceCanThrow) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *sinkBiDiServiceCanThrow) setDefaults() *sinkBiDiServiceCanThrow {
+    return x
+}
+
 
 func init() {
 }

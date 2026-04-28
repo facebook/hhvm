@@ -19,17 +19,37 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
+    premadeThriftType_void =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
+        }
+    premadeThriftType_i16 =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I16_TYPE),
+        }
+    premadeThriftType_i32 =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
+        }
     premadeThriftType_string =
         &metadata.ThriftType{
             TPrimitive:
                 new(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         }
-    premadeThriftType_module_BiDiSinkException =
+    premadeThriftType_module_BiDiMethodException =
         &metadata.ThriftType{
             TStruct:
                 &metadata.ThriftStructType{
-                    Name: "module.BiDiSinkException",
+                    Name: "module.BiDiMethodException",
                 },
+        }
+    premadeThriftType_i64 =
+        &metadata.ThriftType{
+            TPrimitive:
+                new(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         }
     premadeThriftType_module_BiDiStreamException =
         &metadata.ThriftType{
@@ -38,11 +58,11 @@ var (
                     Name: "module.BiDiStreamException",
                 },
         }
-    premadeThriftType_module_BiDiMethodException =
+    premadeThriftType_module_BiDiSinkException =
         &metadata.ThriftType{
             TStruct:
                 &metadata.ThriftStructType{
-                    Name: "module.BiDiMethodException",
+                    Name: "module.BiDiSinkException",
                 },
         }
 )
@@ -89,10 +109,14 @@ var (
 
 var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType)
+    fbthriftThriftTypesMap["void"] = premadeThriftType_void
+    fbthriftThriftTypesMap["i16"] = premadeThriftType_i16
+    fbthriftThriftTypesMap["i32"] = premadeThriftType_i32
     fbthriftThriftTypesMap["string"] = premadeThriftType_string
-    fbthriftThriftTypesMap["module.BiDiSinkException"] = premadeThriftType_module_BiDiSinkException
-    fbthriftThriftTypesMap["module.BiDiStreamException"] = premadeThriftType_module_BiDiStreamException
     fbthriftThriftTypesMap["module.BiDiMethodException"] = premadeThriftType_module_BiDiMethodException
+    fbthriftThriftTypesMap["i64"] = premadeThriftType_i64
+    fbthriftThriftTypesMap["module.BiDiStreamException"] = premadeThriftType_module_BiDiStreamException
+    fbthriftThriftTypesMap["module.BiDiSinkException"] = premadeThriftType_module_BiDiSinkException
     return fbthriftThriftTypesMap
 }()
 

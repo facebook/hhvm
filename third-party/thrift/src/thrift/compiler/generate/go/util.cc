@@ -475,8 +475,7 @@ std::string snakecase(const std::string& name) {
 
 bool is_func_go_client_supported(const t_function* func) {
   // "Interaction constructor" is a legacy API, which we will not support.
-  return !func->is_interaction_constructor() &&
-      !func->is_bidirectional_stream();
+  return !func->is_interaction_constructor();
 }
 
 bool is_func_go_server_supported(const t_function* func) {

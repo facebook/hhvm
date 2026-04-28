@@ -1,104 +1,97 @@
 # Introduction
 
-:::note
-
-Context and capabilities are enabled by default since
-[HHVM 4.93](https://hhvm.com/blog/2021/01/19/hhvm-4.93.html).
-
-:::
-
-Contexts and capabilities provide a way to specify a set of capabilities for a function's implementation and a permission system for its callers. These capabilities may be in terms of what functions may be used in the implementation (e.g. a pure function cannot call non-pure functions), or in terms of other language features (e.g. a pure function can not write properties on `$this`).
-
-Capabilities are permissions or descriptions of a permission. For example, one might consider the ability to do IO or access globals as capabilities. Contexts are a higher level representation of a set of capabilities. A function may be comprised of one or more contexts which represent the set union of the underlying capabilities.
-
-## Defining contexts and capabilities
-
-At present, all declarations of contexts and capabilities live within the typechecker and runtime. There are no plans to change this in the immediate future.
+Contexts and capabilities provide a way to control what operations a function may perform. A **capability** is a permission: for example, the permission to do IO, to mutate object properties, or to access global state. A **context** is a named set of capabilities that you attach to a function declaration. The typechecker enforces that a function only performs operations allowed by its capabilities, and that it only calls other functions whose required capabilities are a subset of its own.
 
 ## Basic Declarations
 
-A function or method may optionally choose to list one or more contexts:
+A function or method may optionally declare a context list in square brackets after its parameter list:
 
 ```hack no-extract
-function no_listed_contexts(): void {/* some fn body */}
-function empty_context()[]: void {/* some fn body */}
-function one_context()[C]: void {/* some fn body */}
-function many_context()[C1, C2, Cn]: void {/* some fn body */}
+function no_listed_contexts(): void {/* ... */}
+function empty_context()[]: void {/* ... */}
+function one_context()[write_props]: void {/* ... */}
+function many_contexts()[read_globals, write_props]: void {/* ... */}
 ```
 
-There exists a context named `defaults` that represents the set of capabilities present in a function prior to the introduction of this feature. When a function is not annotated with a context list, it implicitly received a list containing only the default context.
+There exists a context named `defaults` that represents the set of capabilities present in a function without an explicit context list. When a function is not annotated with a context list, it implicitly receives a list containing only the `defaults` context.
 
 The above declaration of `no_listed_contexts` is fully equivalent to the following:
 
 ```hack
-function no_listed_contexts()[defaults]: void {/* some fn body */}
+function no_listed_contexts()[defaults]: void {/* ... */}
 ```
 
 Additionally, the context list may appear in function types:
 
-```hack no-extract
+```hack
 function has_fn_args(
   (function (): void) $no_list,
-  (function ()[io, rand]: void) $list,
+  (function ()[globals, write_props]: void) $list,
   (function ()[]: void) $empty_list,
-): void {/* some fn body */}
-
+): void {/* ... */}
 ```
+
+## Local Operations
+
+Capabilities control what operations a function may perform in its own body. For example, a function without the `WriteProperty` capability cannot mutate object properties, and a function without `IO` cannot use `echo` or `print`:
+
+```hack error
+function cannot_do_io()[]: void {
+  echo "Hello world\n"; // error: IO capability required
+}
+
+class Foo {
+  public int $x = 0;
+}
+
+function cannot_write_props(Foo $f)[]: void {
+  $f->x = 1; // error: WriteProperty capability required
+}
+```
+
+See [Available Contexts & Capabilities](/hack/contexts-and-capabilities/available-contexts-and-capabilities) for the full list of capabilities and what they gate.
 
 ## Interaction of Contextful Functions
 
-In order to invoke a function, one must have access to all capabilities required by the callee. However, the caller may have more capabilities than is required by the callee, in which case simply not all capabilities are "passed" to the callee.
+In order to invoke a function, the caller must have all of the capabilities required by the callee. A caller may have more capabilities than the callee requires.
 
-In the following example, assume the existence of a `rand` context representing the capability set `{Rand}`, an `io` context representing the capability set `{IO}`, and that the `defaults` contexts represents the capability set `{Rand, IO}`.
+```hack
+class Counter {
+  public static int $count = 0;
+}
 
-```hack no-extract
-/* has {} capability set */
 function pure_fun()[]: void {
   return;
 }
 
-function rand_int()[rand]: int {
-  return HH\Lib\PseudoRandom\int();
+function read_count()[read_globals]: void {
+  $_ = readonly Counter::$count;
 }
 
-function rand_fun()[rand]: void {
-  pure_fun(); // fine: {} ⊆ {Rand}
-  rand_int(); // fine: {Rand} ⊆ {Rand}
+function increment_count()[globals]: void {
+  Counter::$count++;
+  read_count();  // ok: AccessGlobals includes ReadGlobals
+  pure_fun();    // ok: pure requires no capabilities
 }
 
- // recall that this has the `defaults` context
 function unannotated_fun(): void {
-  rand_fun(); // fine: {Rand} ⊆ {IO, Rand,}
+  increment_count(); // ok: defaults includes AccessGlobals
+  read_count();      // ok: defaults includes ReadGlobals
+  pure_fun();        // ok: pure requires no capabilities
 }
 ```
 
-## Parameterized Contexts
-
-While most contexts and capabilities represent the binary options of existence and lack thereof, it is also possible for either/both to be parameterized.
-
-In the following example, assume the existence of a `throws<T>` context representing the capability set `{Throws<T>}`. Rather than describing that a function *can* throw, this would describe which classes of exceptions a function may throw. In that scenario, the context would require a parameter representing the exception class: `throws<-T as Exception>`.
+If the caller lacks a capability the callee requires, the typechecker reports an error:
 
 ```hack no-extract
-function throws_foo_exception()[throws<FooException>]: void { // {Throws<FooException>}
-  throw new FooException();
-}
-
-function throws_bar_exception()[throws<BarException>]: void { // {Throws<BarException>}
-  throw new BarException();
-}
-
-function throws_foo_or_bar_exception(bool $cond)[
-  throws<FooException>, throws<BarException> // {Throws<FooException>, Throws<BarException>}
-]: void {
-  if ($cond) {
-    throws_foo_exception();
-  } else {
-    throws_bar_exception();
-  }
+function only_writes_props()[write_props]: void {
+  increment_count(); // error: WriteProperty does not include AccessGlobals
 }
 ```
 
-The above would indicate that throws_foo_or_bar_exception may throw any of the listed exception classes.
+## Dependent Contexts
+
+While the contexts shown above are fixed, Hack also supports **dependent contexts** where a function's context is determined by its arguments or by class constants. These are covered in the [Higher Order Functions](/hack/contexts-and-capabilities/higher-order-functions) and [Context Constants](/hack/contexts-and-capabilities/context-constants) sections.
 
 ## Implications for Backwards Compatibility
 

@@ -1,62 +1,54 @@
 # Contexts & Subtyping
 
-:::note
+Capabilities are contravariant: a closure that requires *fewer* capabilities may be passed where a closure requiring *more* capabilities is expected.
 
-Context and capabilities are enabled by default since
-[HHVM 4.93](https://hhvm.com/blog/2021/01/19/hhvm-4.93.html).
-
-:::
-
-Capabilities are contravariant.
-
-This implies that a closure that requires a set of capabilities S<sub>a</sub> may be passed where the expected type is a function that requires S<sub>b</sub> as long as S<sub>a</sub> ⊆ S<sub>b</sub>.
-
-For the following example, assume that the default context includes *at least* `{Rand, IO}`
-
-```hack no-extract
-function requires_rand_io_arg((function()[rand, io]: void) $f): void {
+```hack
+function requires_globals_arg((function()[globals]: void) $f): void {
   $f();
 }
 
 function caller(): void {
-  // passing a function that requires fewer capabilities
-  requires_rand_io_arg(()[rand] ==> {/* some fn body */});
-  // passing a function that requires no capabilities
-  requires_rand_io_arg(()[] ==> {/* some fn body */});
+  // ok: passing a function that requires fewer capabilities
+  requires_globals_arg(()[read_globals] ==> {});
+  // ok: passing a function that requires no capabilities
+  requires_globals_arg(()[] ==> {});
 }
 ```
 
-Additionally, this has the standard implication on inheritance hierarchies. Note that if S<sub>a</sub> ⊆ S<sub>b</sub> it is the case that S<sub>b</sub> is a subtype of S<sub>a</sub>.
+This has the standard implication on inheritance hierarchies. A child class may override a method with a context that requires the same or fewer capabilities than the parent.
 
-For the following, assume the default set contains `{IO, Rand, Throws<mixed>}`.
-
-```hack no-extract
+```hack
 class Parent_ {
-  public function maybeRand()[rand]: void {/* some fn body */} // {Rand}
-  public function maybePure(): void {/* some fn body */} // {Throws<mixed>, IO, Rand}
+  public function maybeGlobals()[globals]: void {} // {AccessGlobals}
+  public function maybePure(): void {}             // defaults
 }
 
 class Mid extends Parent_ {
-  public function maybeRand()[rand]: void {/* some fn body */} // {Rand} -> fine {Rand} ⊆ {Rand}
-  public function maybePure()[io]: void {/* some fn body */} // {IO} -> fine {IO} ⊆ {Throws<mixed>, IO, Rand}
+  // ok: {ReadGlobals} ⊆ {AccessGlobals}
+  public function maybeGlobals()[read_globals]: void {}
+  // ok: {WriteProperty} ⊆ defaults
+  public function maybePure()[write_props]: void {}
 }
 
 class Child extends Mid {
-  public function maybeRand()[]: void {/* some fn body */} // {} -> fine {} ⊆ {Rand}
-  public function maybePure()[]: void {/* some fn body */} // {} -> fine {} ⊆ {IO}
+  // ok: {} ⊆ {ReadGlobals}
+  public function maybeGlobals()[]: void {}
+  // ok: {} ⊆ {WriteProperty}
+  public function maybePure()[]: void {}
 }
 ```
 
 ### Capability subtyping
 
-In reality, there may also exist a subtyping relationship between capabilities. Thus, whenever some capability B that is subtype of capability A is available, any function or operation that requires A may be called or performed, respectively. This works identically to standard type subtyping.
+There may also exist a subtyping relationship between capabilities themselves. When a capability B is a subtype of capability A, any function or operation that requires A may be called from a context providing B.
 
-For the following, assume that the following contexts and capabilities exist: `Rand, ReadFile <: Rand, rand: {Rand}, readfile: {Readfile}`
+For example, `AccessGlobals` includes `ReadGlobals`, so a function with the `globals` context can call functions requiring `read_globals`:
 
-```hack no-extract
-function requires_rand()[rand]: void {/* some fn body */}
+```hack
+function requires_read_globals()[read_globals]: void {}
 
-function has_readfile()[readfile]: void {
-  requires_rand(); // fine {readfile} ⊆ {Rand} since readfile <: rand
+function has_globals()[globals]: void {
+  // ok: AccessGlobals includes ReadGlobals
+  requires_read_globals();
 }
 ```

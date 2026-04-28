@@ -1,19 +1,17 @@
 # Dependent Contexts Continued
 
-:::note
-
-Context and capabilities are enabled by default since
-[HHVM 4.93](https://hhvm.com/blog/2021/01/19/hhvm-4.93.html).
-
-:::
-
 Dependent contexts may be accessed off of nullable parameters. If the dynamic value of the parameter is null, then the capability set required by that parameter is empty.
 
-```hack no-extract
+```hack
+abstract class HasCtx {
+  abstract const ctx C;
+  public function work()[this::C]: void {}
+}
+
 function type_const(
-  ?SomeClassWithConstant $t,
+  ?HasCtx $t,
 )[$t::C]: void {
-  $t?->foo();
+  $t?->work();
 }
 
 function fn_arg(
@@ -25,27 +23,25 @@ function fn_arg(
 }
 ```
 
-Parameters used for accessing a dependent context may not be reassigned.
+Parameters used for accessing a context constant may not be reassigned.
 
 ```hack no-extract
-function nope(SomeClassWithConstant $t, (function()[_]: void) $f)[$t::C, ctx $f]: void {
-  // both disallowed
+function nope(HasCtx $t)[$t::C]: void {
   $t = get_some_other_value();
-  $f = get_some_other_value();
 }
 ```
 
-Dependent contexts may not be referenced within the body of a function. This restriction may be relaxed in a future version.
+Explicit closure contexts may not be reference dependent contexts.
 
 ```hack no-extract
 function f(
-  (function()[_]: void $f,
-  SomeClassWithConstant $t,
-)[rand, ctx $f, $t::C]: void {
-  (()[ctx $f] ==> 1)(); // Disallowed
-  (()[$t::C] ==> 1)();  // Disallowed
-  (()[rand] ==> 1)();   // Allowed, not a dependent context
-  (()[] ==> 1)();       // Allowed
-  (() ==> 1)();         // Allowed. Note that this is logically equivalent to [rand, ctx $f, $t::C]
+  (function()[_]: void) $f,
+  HasCtx $t,
+)[write_props, ctx $f, $t::C]: void {
+  (()[ctx $f] ==> 1)(); // disallowed
+  (()[$t::C] ==> 1)();  // disallowed
+  (()[write_props] ==> 1)();   // allowed: not a dependent context
+  (()[] ==> 1)();       // allowed
+  (() ==> 1)();         // allowed: inherits [write_props, ctx $f, $t::C]
 }
 ```

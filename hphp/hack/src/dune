@@ -84,6 +84,7 @@
  (libraries
   default_injector_config
   file_content
+  folly_stubs
   hh_single_common
   hhi
   search

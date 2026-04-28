@@ -37,6 +37,7 @@ build-hack$(2):
 		src/hh_client.$(1) \
 		src/hh_single_ide_format.$(1) \
 		src/hh_single_type_check.$(1) \
+		src/hh_single_complete.$(1) \
 		src/hackfmt.$(1) \
 		src/hh_parse.$(1) \
 		src/generate_full_fidelity.$(1)

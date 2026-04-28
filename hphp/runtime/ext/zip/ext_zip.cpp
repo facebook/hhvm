@@ -14,6 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include <limits>
 #include <zip.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -907,7 +908,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
   FAIL_IF_INVALID_ZIPARCHIVE(getFromIndex, zipDir);
   FAIL_IF_INVALID_INDEX(index);
 
-  if (length < 0) {
+  if (length < 0 || length > std::numeric_limits<int32_t>::max()) {
     return empty_string_variant();
   }
 
@@ -916,7 +917,8 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
     return Variant{Variant::NullInit{}};
   }
 
-  if (zipStat.size < 1) {
+  if (zipStat.size < 1 ||
+      zipStat.size > std::numeric_limits<int32_t>::max()) {
     return empty_string_variant();
   }
 
@@ -945,7 +947,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
   FAIL_IF_INVALID_ZIPARCHIVE(getFromName, zipDir);
   FAIL_IF_EMPTY_STRING_ZIPARCHIVE(getFromName, name);
 
-  if (length < 0) {
+  if (length < 0 || length > std::numeric_limits<int32_t>::max()) {
     return empty_string_variant();
   }
 
@@ -954,7 +956,8 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
     return false;
   }
 
-  if (zipStat.size < 1) {
+  if (zipStat.size < 1 ||
+      zipStat.size > std::numeric_limits<int32_t>::max()) {
     return empty_string_variant();
   }
 

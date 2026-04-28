@@ -88,8 +88,6 @@ type rsocketClient struct {
 
 	initGroup singleflight.Group
 
-	useZstd bool
-
 	protoID       rpcmetadata.ProtocolId
 	thriftProtoID types.ProtocolID
 }
@@ -154,15 +152,9 @@ func (r *rsocketClient) SendSetup(_ context.Context) error {
 }
 
 func (r *rsocketClient) onServerMetadataPush(pay payload.Payload) {
-	metadata, err := rocket.DecodeServerMetadataPush(pay)
+	_, err := rocket.DecodeServerMetadataPush(pay)
 	if err != nil {
 		panic(err)
-	}
-	if metadata.SetupResponse != nil {
-		setupResponse := metadata.SetupResponse
-		serverSupportsZstd := (setupResponse.ZstdSupported != nil && *setupResponse.ZstdSupported)
-		// zstd is only supported if both the client and the server support it.
-		r.useZstd = r.useZstd && serverSupportsZstd
 	}
 }
 

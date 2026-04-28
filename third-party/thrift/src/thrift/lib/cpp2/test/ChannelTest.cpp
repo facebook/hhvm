@@ -854,15 +854,17 @@ class OptionsTimeoutTest
     TestRequestCallback::reset();
     channel1_->setCallback(this);
     channel0_->setTimeout(1000);
-    RpcOptions options;
-    options.setTimeout(std::chrono::milliseconds(25));
-    channel0_->sendRequestResponse(
-        options,
-        "test",
-        makeTestSerializedRequest(len_),
-        std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new TestRequestCallback()),
-        /* frameworkMetadata */ nullptr);
+    {
+      RpcOptions options;
+      options.setTimeout(std::chrono::milliseconds(25));
+      channel0_->sendRequestResponse(
+          options,
+          "test",
+          makeTestSerializedRequest(len_),
+          std::unique_ptr<THeader>(new THeader),
+          RequestClientCallback::Ptr(new TestRequestCallback()),
+          /* frameworkMetadata */ nullptr);
+    }
     // Verify the timeout worked within 10ms
     channel0_->getEventBase()->tryRunAfterDelay(
         [&]() { EXPECT_EQ(replyError_, 1); }, 35);

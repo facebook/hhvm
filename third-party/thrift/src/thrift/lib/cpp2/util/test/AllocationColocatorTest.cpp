@@ -49,14 +49,14 @@ TEST(AllocationColocatorTest, Basic) {
 
   {
     AllocationColocator<Foo>::Ptr foo = alloc.allocate([&](auto make) mutable {
-      Foo foo(10);
-      foo.b = make(std::move(b), 12);
-      foo.c = make(std::move(c));
-      foo.c[0] = 50;
-      foo.c[1] = 60;
-      foo.e = make(std::move(e), 18);
-      foo.d = make(std::move(d), kStr);
-      return foo;
+      Foo result(10);
+      result.b = make(std::move(b), 12);
+      result.c = make(std::move(c));
+      result.c[0] = 50;
+      result.c[1] = 60;
+      result.e = make(std::move(e), 18);
+      result.d = make(std::move(d), kStr);
+      return result;
     });
 
     {
@@ -209,10 +209,10 @@ TEST(AllocationColocatorTest, NonTrivialDestructor) {
   AllocationColocator<Foo> alloc;
   auto foo = alloc.allocate(
       [&, nonTrivial = alloc.object<Foo::NonTrivial>()](auto make) mutable {
-        Foo foo;
-        foo.value = 24;
-        foo.nonTrivial = make(std::move(nonTrivial), ref);
-        return foo;
+        Foo result;
+        result.value = 24;
+        result.nonTrivial = make(std::move(nonTrivial), ref);
+        return result;
       });
 
   EXPECT_EQ(foo->value, 24);
@@ -245,11 +245,11 @@ TEST(AllocationColocatorTest, NonTrivialDestructorArray) {
   AllocationColocator<Foo> alloc;
   auto foo = alloc.allocate(
       [&, nonTrivial = alloc.array<Foo::NonTrivial>(2)](auto make) mutable {
-        Foo foo;
-        foo.nonTrivials = make(std::move(nonTrivial), [&] {
+        Foo result;
+        result.nonTrivials = make(std::move(nonTrivial), [&] {
           return Foo::NonTrivial(constructorCount, destructorCount);
         });
-        return foo;
+        return result;
       });
 
   EXPECT_EQ(constructorCount, 2);
@@ -318,13 +318,13 @@ TEST(AllocationColocatorTest, ArrayZeroSize) {
       alloc.allocate([&,
                       array1 = alloc.array<std::string>(0),
                       array2 = alloc.array<std::string>(0)](auto make) mutable {
-        Foo foo;
+        Foo result;
         auto generator = []() -> std::string {
           throw std::runtime_error("Should never be called!");
         };
-        foo.array1 = make(std::move(array1), generator);
-        foo.array2 = make(std::move(array2), generator);
-        return foo;
+        result.array1 = make(std::move(array1), generator);
+        result.array2 = make(std::move(array2), generator);
+        return result;
       });
 
   EXPECT_NE(foo->array1.get(), nullptr);

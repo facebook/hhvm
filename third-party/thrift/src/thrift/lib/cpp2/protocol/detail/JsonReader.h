@@ -118,7 +118,8 @@ class Json5Reader final {
    *                  used when the next value is a floating-point number.
    */
   enum class FloatingPointPrecision { Single, Double };
-  Primitive readPrimitive(FloatingPointPrecision precision);
+  Primitive readPrimitive(
+      FloatingPointPrecision precision = FloatingPointPrecision::Double);
 
   /** Reads and returns the next object key name. */
   std::string readObjectName();

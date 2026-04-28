@@ -285,7 +285,7 @@ void Json5ProtocolReader::skip(protocol::TType /*type*/, int depth) {
       break;
     }
     case Json5Reader::Token::Primitive: {
-      reader_.readPrimitive(Json5Reader::FloatingPointPrecision::Double);
+      reader_.readPrimitive();
       break;
     }
     case Json5Reader::Token::ObjectEnd:
@@ -312,8 +312,7 @@ Json5ProtocolReader::readEnumImpl() {
   }
 
   beginReadValue();
-  auto primitive =
-      reader_.readPrimitive(Json5Reader::FloatingPointPrecision::Double);
+  auto primitive = reader_.readPrimitive();
   endReadValue();
 
   if (auto* i = std::get_if<std::int64_t>(&primitive)) {
@@ -368,8 +367,7 @@ std::string Json5ProtocolReader::readStringValue() {
   }
 
   beginReadValue();
-  auto primitive =
-      reader_.readPrimitive(Json5Reader::FloatingPointPrecision::Double);
+  auto primitive = reader_.readPrimitive();
   endReadValue();
 
   return std::get<std::string>(std::move(primitive));
@@ -381,15 +379,13 @@ std::string Json5ProtocolReader::readBinaryValue() {
   if (reader_.peekToken() == Json5Reader::Token::ObjectBegin) {
     reader_.readObjectBegin();
     name = reader_.readObjectName();
-    auto primitive =
-        reader_.readPrimitive(Json5Reader::FloatingPointPrecision::Double);
+    auto primitive = reader_.readPrimitive();
     value = std::get<std::string>(std::move(primitive));
     reader_.readObjectEnd();
   } else {
     // folly::base64URLDecode accepts both standard and url-safe base64 string.
     name = "base64url";
-    auto primitive =
-        reader_.readPrimitive(Json5Reader::FloatingPointPrecision::Double);
+    auto primitive = reader_.readPrimitive();
     value = std::get<std::string>(std::move(primitive));
   }
   endReadValue();
@@ -433,8 +429,7 @@ std::int64_t Json5ProtocolReader::readIntegralValue() {
   }
 
   beginReadValue();
-  auto primitive =
-      reader_.readPrimitive(Json5Reader::FloatingPointPrecision::Double);
+  auto primitive = reader_.readPrimitive();
   endReadValue();
 
   if (auto i = tryParseI64(primitive)) {
@@ -491,8 +486,7 @@ void Json5ProtocolReader::readBool(bool& value) {
   }
 
   beginReadValue();
-  auto primitive =
-      reader_.readPrimitive(Json5Reader::FloatingPointPrecision::Double);
+  auto primitive = reader_.readPrimitive();
   endReadValue();
 
   if (auto* b = std::get_if<bool>(&primitive)) {

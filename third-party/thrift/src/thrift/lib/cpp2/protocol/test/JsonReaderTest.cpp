@@ -39,15 +39,14 @@ class Json5ReaderTest : public ::testing::Test {
 
 TEST_F(Json5ReaderTest, Bool) {
   auto r = reader("true");
-  EXPECT_TRUE(std::get<bool>(r.readPrimitive(Double)));
+  EXPECT_TRUE(std::get<bool>(r.readPrimitive()));
 }
 
 TEST_F(Json5ReaderTest, StringWithEscapes) {
   auto r = reader(R"("line1\n\"line2\"\
 same_line")");
   EXPECT_EQ(
-      std::get<std::string>(r.readPrimitive(Double)),
-      "line1\n\"line2\"same_line");
+      std::get<std::string>(r.readPrimitive()), "line1\n\"line2\"same_line");
 }
 
 TEST_F(Json5ReaderTest, EmptyContainers) {
@@ -56,7 +55,7 @@ TEST_F(Json5ReaderTest, EmptyContainers) {
     r.readObjectBegin();
 
     EXPECT_EQ(r.readObjectName(), "empty");
-    EXPECT_EQ(std::get<std::string>(r.readPrimitive(Double)), "");
+    EXPECT_EQ(std::get<std::string>(r.readPrimitive()), "");
 
     EXPECT_EQ(r.readObjectName(), "emptyObj");
     r.readObjectBegin();
@@ -90,13 +89,13 @@ TEST_F(Json5ReaderTest, PrimitiveTypes) {
     r.readObjectBegin();
 
     EXPECT_EQ(r.readObjectName(), "bool");
-    EXPECT_FALSE(std::get<bool>(r.readPrimitive(Double)));
+    EXPECT_FALSE(std::get<bool>(r.readPrimitive()));
 
     EXPECT_EQ(r.readObjectName(), "integer");
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 42);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 42);
 
     EXPECT_EQ(r.readObjectName(), "$float");
-    EXPECT_DOUBLE_EQ(std::get<double>(r.readPrimitive(Double)), 3.14);
+    EXPECT_DOUBLE_EQ(std::get<double>(r.readPrimitive()), 3.14);
 
     r.readObjectEnd();
   };
@@ -161,17 +160,17 @@ TEST_F(Json5ReaderTest, Containers) {
 
     EXPECT_EQ(r.readObjectName(), "list");
     r.readListBegin();
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 1);
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 3);
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 2);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 1);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 3);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 2);
     r.readListEnd();
 
     EXPECT_EQ(r.readObjectName(), "object");
     r.readObjectBegin();
     EXPECT_EQ(r.readObjectName(), "1");
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 3);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 3);
     EXPECT_EQ(r.readObjectName(), "2");
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 4);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 4);
     r.readObjectEnd();
 
     r.readObjectEnd();
@@ -208,8 +207,8 @@ TEST_F(Json5ReaderTest, CompactList) {
   auto verify = [this](std::string_view input) {
     auto r = reader(input);
     r.readListBegin();
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 1);
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 2);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 1);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 2);
     r.readListEnd();
   };
 
@@ -225,7 +224,7 @@ TEST_F(Json5ReaderTest, CompactObject) {
     auto r = reader(input);
     r.readObjectBegin();
     EXPECT_EQ(r.readObjectName(), "name");
-    EXPECT_EQ(std::get<std::string>(r.readPrimitive(Double)), "Alice");
+    EXPECT_EQ(std::get<std::string>(r.readPrimitive()), "Alice");
     r.readObjectEnd();
   };
 
@@ -273,7 +272,7 @@ TEST_F(Json5ReaderTest, NanInf) {
 
 TEST_F(Json5ReaderTest, HexNumbers) {
   auto readInt = [this](std::string_view input) {
-    return std::get<std::int64_t>(reader(input).readPrimitive(Double));
+    return std::get<std::int64_t>(reader(input).readPrimitive());
   };
 
   EXPECT_EQ(readInt("0x0"), 0x0);
@@ -299,11 +298,11 @@ TEST_F(Json5ReaderTest, HexNumbers) {
     // In array/object
     auto r = reader("[0x1, 0xA, {color: 0xFF00FF}]");
     r.readListBegin();
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 1);
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 0xA);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 1);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 0xA);
     r.readObjectBegin();
     r.readObjectName();
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 0xFF00FF);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 0xFF00FF);
     r.readObjectEnd();
     r.readListEnd();
   }
@@ -335,7 +334,7 @@ TEST_F(Json5ReaderTest, ScientificNotation) {
 
 TEST_F(Json5ReaderTest, UnicodeEscape) {
   auto readStr = [this](std::string_view input) {
-    return std::get<std::string>(reader(input).readPrimitive(Double));
+    return std::get<std::string>(reader(input).readPrimitive());
   };
 
   EXPECT_EQ(readStr(R"("\u20ac")"), "€");
@@ -364,18 +363,18 @@ TEST_F(Json5ReaderTest, PeekToken) {
     // string value
     EXPECT_EQ(r.readObjectName(), "string");
     EXPECT_EQ(r.peekToken(), Token::Primitive);
-    EXPECT_EQ(std::get<std::string>(r.readPrimitive(Double)), "hello");
+    EXPECT_EQ(std::get<std::string>(r.readPrimitive()), "hello");
 
     // array value
     EXPECT_EQ(r.readObjectName(), "array");
     EXPECT_EQ(r.peekToken(), Token::ListBegin);
     r.readListBegin();
     EXPECT_EQ(r.peekToken(), Token::Primitive);
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), -1);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), -1);
     EXPECT_EQ(r.peekToken(), Token::Primitive);
-    EXPECT_EQ(std::get<std::string>(r.readPrimitive(Double)), "two");
+    EXPECT_EQ(std::get<std::string>(r.readPrimitive()), "two");
     EXPECT_EQ(r.peekToken(), Token::Primitive);
-    EXPECT_FALSE(std::get<bool>(r.readPrimitive(Double)));
+    EXPECT_FALSE(std::get<bool>(r.readPrimitive()));
     EXPECT_EQ(r.peekToken(), Token::ListEnd);
     r.readListEnd();
 
@@ -385,7 +384,7 @@ TEST_F(Json5ReaderTest, PeekToken) {
     r.readObjectBegin();
     EXPECT_EQ(r.readObjectName(), "inner");
     EXPECT_EQ(r.peekToken(), Token::Primitive);
-    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 99);
+    EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 99);
     EXPECT_EQ(r.peekToken(), Token::ObjectEnd);
     r.readObjectEnd();
 
@@ -419,7 +418,7 @@ TEST_F(Json5ReaderTest, Comments) {
            "// line\n/* block */42",
            "/*/* stars inside */42",
        }) {
-    EXPECT_EQ(std::get<std::int64_t>(reader(s).readPrimitive(Double)), 42);
+    EXPECT_EQ(std::get<std::int64_t>(reader(s).readPrimitive()), 42);
   }
 }
 
@@ -441,11 +440,9 @@ TEST_F(Json5ReaderTest, CommentsInStringsAndContainers) {
   EXPECT_EQ(r.readObjectName(), "/* comment inside string */");
   r.readListBegin();
   EXPECT_EQ(
-      std::get<std::string>(r.readPrimitive(Double)),
-      "/* multi-line \n string1 */");
+      std::get<std::string>(r.readPrimitive()), "/* multi-line \n string1 */");
   EXPECT_EQ(
-      std::get<std::string>(r.readPrimitive(Double)),
-      "// multi-line \n string2");
+      std::get<std::string>(r.readPrimitive()), "// multi-line \n string2");
   EXPECT_EQ(
       std::get<std::string>(r.readPrimitive(Double)),
       "/* single-line           string3 */");
@@ -458,7 +455,7 @@ TEST_F(Json5ReaderTest, CommentsInStringsAndContainers) {
 
 TEST_F(Json5ReaderTest, PeekTokenAfterEOF) {
   auto r = reader("42");
-  EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive(Double)), 42);
+  EXPECT_EQ(std::get<std::int64_t>(r.readPrimitive()), 42);
   EXPECT_THROW((void)r.peekToken(), std::runtime_error);
 }
 
@@ -486,7 +483,7 @@ TEST_F(Json5ReaderTest, ErrorHandling) {
     auto r = reader("{\"a\": 1");
     r.readObjectBegin();
     r.readObjectName();
-    r.readPrimitive(Double);
+    r.readPrimitive();
     EXPECT_THROW(r.readObjectEnd(), std::runtime_error);
   }
 
@@ -494,8 +491,8 @@ TEST_F(Json5ReaderTest, ErrorHandling) {
   {
     auto r = reader("[1, 2");
     r.readListBegin();
-    r.readPrimitive(Double);
-    r.readPrimitive(Double);
+    r.readPrimitive();
+    r.readPrimitive();
     EXPECT_THROW(r.readListEnd(), std::runtime_error);
   }
 
@@ -503,14 +500,14 @@ TEST_F(Json5ReaderTest, ErrorHandling) {
   {
     auto r = reader("[1,,2]");
     r.readListBegin();
-    EXPECT_THROW(r.readPrimitive(Double), std::runtime_error);
+    EXPECT_THROW(r.readPrimitive(), std::runtime_error);
   }
 
   // Missing comma between elements
   {
     auto r = reader("[1 2]");
     r.readListBegin();
-    EXPECT_THROW(r.readPrimitive(Double), std::runtime_error);
+    EXPECT_THROW(r.readPrimitive(), std::runtime_error);
   }
 
   // Missing comma between containers
@@ -528,19 +525,19 @@ TEST_F(Json5ReaderTest, ErrorHandling) {
   // Unknown escape sequence in string
   {
     auto r = reader(R"("\q")");
-    EXPECT_THROW(r.readPrimitive(Double), std::runtime_error);
+    EXPECT_THROW(r.readPrimitive(), std::runtime_error);
   }
 
   // Unescaped newline in string
   {
     auto r = reader("\"hello\nworld\"");
-    EXPECT_THROW(r.readPrimitive(Double), std::runtime_error);
+    EXPECT_THROW(r.readPrimitive(), std::runtime_error);
   }
 
   // Unexpected identifier
   {
     auto r = reader("undefined");
-    EXPECT_THROW(r.readPrimitive(Double), std::runtime_error);
+    EXPECT_THROW(r.readPrimitive(), std::runtime_error);
   }
 
   // Invalid object name (starts with digit)
@@ -560,31 +557,31 @@ TEST_F(Json5ReaderTest, ErrorHandling) {
   // Invalid number (just a sign)
   {
     auto r = reader("+");
-    EXPECT_THROW(r.readPrimitive(Double), std::runtime_error);
+    EXPECT_THROW(r.readPrimitive(), std::runtime_error);
   }
 
   // Invalid Infinity/NaN spelling
   {
     auto r = reader("Inf");
-    EXPECT_THROW(r.readPrimitive(Double), std::runtime_error);
+    EXPECT_THROW(r.readPrimitive(), std::runtime_error);
   }
 
   // Missing digits after exponent
   {
     auto r = reader("1e");
-    EXPECT_THROW(r.readPrimitive(Double), std::exception);
+    EXPECT_THROW(r.readPrimitive(), std::exception);
   }
 
   // Missing digits after exponent sign
   {
     auto r = reader("1e+");
-    EXPECT_THROW(r.readPrimitive(Double), std::exception);
+    EXPECT_THROW(r.readPrimitive(), std::exception);
   }
 
   // Missing digits after negative exponent sign
   {
     auto r = reader("2.5E-");
-    EXPECT_THROW(r.readPrimitive(Double), std::exception);
+    EXPECT_THROW(r.readPrimitive(), std::exception);
   }
 
   // No cursor set
@@ -596,7 +593,7 @@ TEST_F(Json5ReaderTest, ErrorHandling) {
   // Unterminated block comment
   {
     auto r = reader("42/* unterminated");
-    EXPECT_THROW((void)r.readPrimitive(Double), std::exception);
+    EXPECT_THROW((void)r.readPrimitive(), std::exception);
   }
 
   // Comment-only input
@@ -607,10 +604,10 @@ TEST_F(Json5ReaderTest, ErrorHandling) {
 
   // Leading zeroes are not valid (not valid JSON or JSON5)
   {
-    EXPECT_THROW(reader("00").readPrimitive(Double), std::exception);
-    EXPECT_THROW(reader("01").readPrimitive(Double), std::exception);
-    EXPECT_THROW(reader("007").readPrimitive(Double), std::exception);
-    EXPECT_THROW(reader("0123").readPrimitive(Double), std::exception);
+    EXPECT_THROW(reader("00").readPrimitive(), std::exception);
+    EXPECT_THROW(reader("01").readPrimitive(), std::exception);
+    EXPECT_THROW(reader("007").readPrimitive(), std::exception);
+    EXPECT_THROW(reader("0123").readPrimitive(), std::exception);
   }
 }
 

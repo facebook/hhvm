@@ -552,6 +552,17 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   free functions). The caller is identified via stack inspection and checked
   against this list using exact matching.
 
+- std::set<std::string> Eval.ProcOpenGatedSkipCallers = {}, flameeyes
+
+  Set of callers to skip during stack inspection for proc_open gating.
+  When the stack walk encounters a frame whose function name is in this set,
+  it continues to the next frame instead of treating it as the caller.
+  This is useful for transparent wrappers (e.g. FlibSL\PHP\proc_open) that
+  sit between user code and the native proc_open — without skipping them,
+  the gating logic would attribute the call to the wrapper instead of the
+  actual calling function. Uses the same naming format as
+  Eval.ProcOpenGatedApprovedCallers.
+
 - bool Eval.EnableXHP = true, UNKNOWN, unitcacheflag|compileroption(EnableXHP)
 
 - bool Eval.TimeoutsUseWallTime = true, UNKNOWN

@@ -134,8 +134,10 @@ private:
  *
  * Always checks Cfg::Server::AllowExec first. When allowGated is true
  * (proc_open), callers listed in Cfg::Eval::ProcOpenGatedApprovedCallers
- * are permitted even when Cfg::Eval::AllowUngatedExec is false. When
- * allowGated is false (shell_exec, exec, passthru, system), ungated
+ * are permitted even when Cfg::Eval::AllowUngatedExec is false. Callers
+ * in Cfg::Eval::ProcOpenGatedSkipCallers are skipped during stack
+ * inspection so that transparent wrappers don't mask the real caller.
+ * When allowGated is false (shell_exec, exec, passthru, system), ungated
  * execution is unconditionally denied.
  *
  * Keep the non-gated path in sync with checkExecAllowed in
@@ -151,7 +153,11 @@ void checkExecAllowed(bool allowGated) {
 
   if (allowGated) {
     auto const caller = fromCaller(
-      [] (const BTFrame& frm) { return frm.func(); }
+      [] (const BTFrame& frm) { return frm.func(); },
+      [] (const BTFrame& frm) {
+        auto const name = frm.func()->fullName()->slice();
+        return !Cfg::Eval::ProcOpenGatedSkipCallers.count(std::string(name));
+      }
     );
 
     if (caller) {

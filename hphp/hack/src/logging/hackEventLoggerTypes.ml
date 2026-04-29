@@ -87,8 +87,6 @@ type rollout_flags = {
       (** POC: @hverr, evictability cache size, -1 if evictability disabled *)
   use_manifold_cython_client: bool;
       (** POC: @nzthomas, Required for Hedwig support for saved state downloads *)
-  disable_naming_table_fallback_loading: bool;
-      (** POC: @nzthomas, Stop falling back to OCaml marshalled naming table when sqlite table is missing *)
   rust_provider_backend: bool;
       (** POC: @jakebailey, started Dec 2022.
           Use Provider_backend.Rust_provider_backend as the global provider

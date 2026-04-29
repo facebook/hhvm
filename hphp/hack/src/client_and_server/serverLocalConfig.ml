@@ -333,8 +333,6 @@ type t = {
   specify_manifold_api_key: bool;
   cache_remote_decls: bool;
       (** Configure whether fetch and cache remote decls *)
-  disable_naming_table_fallback_loading: bool;
-      (** Stop loading from OCaml marshalled naming table if sqlite table is missing. *)
   use_distc: bool;
       (** use remote type-checking (hh_distc) rather than only local type-checking *)
   enable_fanout_aware_distc: bool;

@@ -518,9 +518,6 @@ module Hhconf = struct
   let defer_class_declaration_threshold =
     hhconf_key "defer_class_declaration_threshold"
 
-  let disable_naming_table_fallback_loading =
-    hhconf_key "disable_naming_table_fallback_loading"
-
   let enable_fuzzy_search = hhconf_key "enable_fuzzy_search"
 
   let enable_global_access_check = hhconf_key "enable_global_access_check"

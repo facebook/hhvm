@@ -471,8 +471,6 @@ module Hhconf : sig
 
   val defer_class_declaration_threshold : string
 
-  val disable_naming_table_fallback_loading : string
-
   val enable_fuzzy_search : string
 
   val enable_global_access_check : string

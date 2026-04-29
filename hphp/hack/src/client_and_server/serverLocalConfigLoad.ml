@@ -93,7 +93,6 @@ let default =
     rollout_group = None;
     specify_manifold_api_key = false;
     cache_remote_decls = false;
-    disable_naming_table_fallback_loading = false;
     use_compressed_dep_graph = true;
     use_distc = true;
     enable_fanout_aware_distc = false;
@@ -824,13 +823,6 @@ let load_
       ~current_version
       config
   in
-  let disable_naming_table_fallback_loading =
-    bool_if_min_version
-      Config_keys.Hhconf.disable_naming_table_fallback_loading
-      ~default:default.disable_naming_table_fallback_loading
-      ~current_version
-      config
-  in
   let use_distc =
     bool_if_min_version
       Config_keys.Hhconf.use_distc
@@ -1121,7 +1113,6 @@ let load_
     rollout_group;
     specify_manifold_api_key;
     cache_remote_decls;
-    disable_naming_table_fallback_loading;
     use_compressed_dep_graph;
     use_distc;
     enable_fanout_aware_distc;
@@ -1194,8 +1185,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       shm_cache_size = options.shm_cache_size;
       use_manifold_cython_client =
         GlobalOptions.(options.saved_state.loading.use_manifold_cython_client);
-      disable_naming_table_fallback_loading =
-        options.disable_naming_table_fallback_loading;
       load_state_natively_v4 = options.load_state_natively;
       rust_provider_backend = options.rust_provider_backend;
       use_distc = options.use_distc;

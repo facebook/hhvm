@@ -122,10 +122,7 @@ func (p *rocketClient) SendRequestResponse(ctx context.Context, messageName stri
 		return resultErr
 	}
 
-	rpcOpts := GetRPCOptions(ctx)
-	if rpcOpts != nil {
-		rpcOpts.SetReadHeaders(respHeaders)
-	}
+	setReadHeaders(ctx, respHeaders)
 	err = decodeResponse(p.protoID, resultData, response)
 	if err != nil {
 		return err
@@ -165,10 +162,7 @@ func (p *rocketClient) SendRequestStream(
 		return nil, resultErr
 	}
 
-	rpcOpts := GetRPCOptions(ctx)
-	if rpcOpts != nil {
-		rpcOpts.SetReadHeaders(respHeaders)
-	}
+	setReadHeaders(ctx, respHeaders)
 	err = decodeResponse(p.protoID, resultData, response)
 	if err != nil {
 		return nil, err
@@ -202,10 +196,7 @@ func (p *rocketClient) SendRequestSink(
 		return nil, resultErr
 	}
 
-	rpcOpts := GetRPCOptions(ctx)
-	if rpcOpts != nil {
-		rpcOpts.SetReadHeaders(respHeaders)
-	}
+	setReadHeaders(ctx, respHeaders)
 	err = decodeResponse(p.protoID, resultData, firstResponse)
 	if err != nil {
 		return nil, err
@@ -245,10 +236,7 @@ func (p *rocketClient) SendRequestBiDi(
 		return nil, nil, resultErr
 	}
 
-	rpcOpts := GetRPCOptions(ctx)
-	if rpcOpts != nil {
-		rpcOpts.SetReadHeaders(respHeaders)
-	}
+	setReadHeaders(ctx, respHeaders)
 	err = decodeResponse(p.protoID, resultData, firstResponse)
 	if err != nil {
 		return nil, nil, err
@@ -275,6 +263,13 @@ func (p *rocketClient) getWriteHeaders(ctx context.Context) map[string]string {
 		writeHeaders = rpcOpts.GetWriteHeaders()
 	}
 	return unionMaps(writeHeaders, p.persistentHeaders)
+}
+
+func setReadHeaders(ctx context.Context, headers map[string]string) {
+	rpcOpts := GetRPCOptions(ctx)
+	if rpcOpts != nil {
+		rpcOpts.SetReadHeaders(headers)
+	}
 }
 
 func encodeRequest(protoID types.ProtocolID, request WritableStruct) ([]byte, error) {

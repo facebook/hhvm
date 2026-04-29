@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<773a20c0869a56c76bf89a0bb12c68bf>>
+// @generated SignedSource<<790c05a3cdce59ceed857fca7b419db6>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -204,8 +204,6 @@ pub struct GlobalOptions {
     pub allowed_fixme_codes_strict: i_set::ISet,
     /// Initial hh_log_level settings
     pub log_levels: s_map::SMap<isize>,
-    /// Flag to fetch old decls from remote decl store
-    pub tco_remote_old_decls_no_limit: bool,
     /// Fetch old decls from CAS instead of memcache/manifold
     pub tco_fetch_remote_old_decls: bool,
     /// Populate the member signature heaps.

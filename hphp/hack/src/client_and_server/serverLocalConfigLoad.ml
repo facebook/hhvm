@@ -92,7 +92,6 @@ let default =
     workload_quantile = None;
     rollout_group = None;
     specify_manifold_api_key = false;
-    remote_old_decls_no_limit = false;
     cache_remote_decls = false;
     disable_naming_table_fallback_loading = false;
     use_compressed_dep_graph = true;
@@ -786,13 +785,6 @@ let load_
       ~current_version
       config
   in
-  let remote_old_decls_no_limit =
-    bool_if_min_version
-      Config_keys.Hhconf.remote_old_decls_no_limit
-      ~default:default.remote_old_decls_no_limit
-      ~current_version
-      config
-  in
   let saved_state_manifold_api_key =
     (* overriding the local_config value so consumers of saved_state_manifold_api_key
        * don't need to explicitly check for specify_manifold_api_key.
@@ -1128,7 +1120,6 @@ let load_
     workload_quantile;
     rollout_group;
     specify_manifold_api_key;
-    remote_old_decls_no_limit;
     cache_remote_decls;
     disable_naming_table_fallback_loading;
     use_compressed_dep_graph;
@@ -1198,7 +1189,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
           options.saved_state.loading.log_saved_state_age_and_distance);
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       specify_manifold_api_key = options.specify_manifold_api_key;
-      remote_old_decls_no_limit = options.remote_old_decls_no_limit;
       populate_member_heaps = options.populate_member_heaps;
       shm_use_sharded_hashtbl = options.shm_use_sharded_hashtbl;
       shm_cache_size = options.shm_cache_size;

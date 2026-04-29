@@ -527,8 +527,6 @@ module Hhconf : sig
 
   val produce_streaming_errors : string
 
-  val remote_old_decls_no_limit : string
-
   val search_chunk_size : string
 
   val shm_dirs : string

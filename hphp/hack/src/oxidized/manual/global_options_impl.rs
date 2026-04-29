@@ -59,7 +59,6 @@ impl Default for GlobalOptions {
             code_agnostic_fixme: false,
             allowed_fixme_codes_strict: i_set::ISet::new(),
             log_levels: s_map::SMap::new(),
-            tco_remote_old_decls_no_limit: false,
             tco_fetch_remote_old_decls: true,
             tco_populate_member_heaps: true,
             tco_skip_hierarchy_checks: false,

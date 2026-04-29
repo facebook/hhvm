@@ -331,8 +331,6 @@ type t = {
        Intended meaning: what class of user is running hh_server, hence what experiments
        should they be subject to. *)
   specify_manifold_api_key: bool;
-  remote_old_decls_no_limit: bool;
-      (**  Remove remote old decl fetching limit *)
   cache_remote_decls: bool;
       (** Configure whether fetch and cache remote decls *)
   disable_naming_table_fallback_loading: bool;

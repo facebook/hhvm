@@ -581,8 +581,6 @@ module Hhconf = struct
 
   let produce_streaming_errors = hhconf_key "produce_streaming_errors"
 
-  let remote_old_decls_no_limit = hhconf_key "remote_old_decls_no_limit"
-
   let search_chunk_size = hhconf_key "search_chunk_size"
 
   let shm_dirs = hhconf_key "shm_dirs"

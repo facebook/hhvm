@@ -85,8 +85,6 @@ type rollout_flags = {
   shm_use_sharded_hashtbl: bool;  (** POC: @hverr, new shared memory backend. *)
   shm_cache_size: int;
       (** POC: @hverr, evictability cache size, -1 if evictability disabled *)
-  remote_old_decls_no_limit: bool;
-      (** POC: @bobren, Remove remote old decl fetching limit *)
   use_manifold_cython_client: bool;
       (** POC: @nzthomas, Required for Hedwig support for saved state downloads *)
   disable_naming_table_fallback_loading: bool;

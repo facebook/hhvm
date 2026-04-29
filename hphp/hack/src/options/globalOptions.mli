@@ -108,8 +108,6 @@ type t = {
   allowed_fixme_codes_strict: ISet.t;
       (** Error codes for which we allow HH_FIXMEs in strict mode *)
   log_levels: int SMap.t;  (** Initial hh_log_level settings *)
-  tco_remote_old_decls_no_limit: bool;
-      (** Flag to fetch old decls from remote decl store *)
   tco_fetch_remote_old_decls: bool;
       (** Fetch old decls from CAS instead of memcache/manifold *)
   tco_populate_member_heaps: bool;
@@ -321,7 +319,6 @@ val set :
   ?code_agnostic_fixme:bool ->
   ?allowed_fixme_codes_strict:ISet.t ->
   ?log_levels:int SMap.t ->
-  ?tco_remote_old_decls_no_limit:bool ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->

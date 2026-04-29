@@ -109,7 +109,6 @@ type t = {
   code_agnostic_fixme: bool;
   allowed_fixme_codes_strict: ISet.t;
   log_levels: int SMap.t;
-  tco_remote_old_decls_no_limit: bool;
   tco_fetch_remote_old_decls: bool;
   tco_populate_member_heaps: bool;
   tco_skip_hierarchy_checks: bool;
@@ -224,7 +223,6 @@ let default =
     code_agnostic_fixme = false;
     allowed_fixme_codes_strict = ISet.empty;
     log_levels = SMap.empty;
-    tco_remote_old_decls_no_limit = false;
     tco_fetch_remote_old_decls = true;
     tco_populate_member_heaps = true;
     tco_skip_hierarchy_checks = false;
@@ -338,7 +336,6 @@ let set
     ?code_agnostic_fixme
     ?allowed_fixme_codes_strict
     ?log_levels
-    ?tco_remote_old_decls_no_limit
     ?tco_fetch_remote_old_decls
     ?tco_populate_member_heaps
     ?tco_skip_hierarchy_checks
@@ -489,10 +486,6 @@ let set
     tco_constraint_method_call =
       setting tco_constraint_method_call options.tco_constraint_method_call;
     log_levels = setting log_levels options.log_levels;
-    tco_remote_old_decls_no_limit =
-      setting
-        tco_remote_old_decls_no_limit
-        options.tco_remote_old_decls_no_limit;
     tco_fetch_remote_old_decls =
       setting tco_fetch_remote_old_decls options.tco_fetch_remote_old_decls;
     tco_populate_member_heaps =

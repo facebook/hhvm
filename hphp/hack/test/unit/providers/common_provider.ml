@@ -77,12 +77,7 @@ irritatingly slow to have to write hhi to disk. Instead it just sets up Hhi
 to point to the same place as root, and none of the hhi are present. *)
 let run_test (repo : (Relative_path.t * string) list) ~(f : env -> unit) : unit
     =
-  let tcopt =
-    GlobalOptions.set
-      ~tco_sticky_quarantine:true
-      ~tco_lsp_invalidation:true
-      GlobalOptions.default
-  in
+  let tcopt = GlobalOptions.default in
   Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let local_memory =
     match Provider_backend.get () with

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<27316952400a13b8b1418b31545cb41a>>
+// @generated SignedSource<<773a20c0869a56c76bf89a0bb12c68bf>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -336,10 +336,6 @@ pub struct GlobalOptions {
     pub dump_tasts: Vec<String>,
     /// Are we running in autocomplete mode ?
     pub tco_autocomplete_mode: bool,
-    /// Controls behavior of [Provider_utils.respect_but_quarantine_unsaved_changes]
-    pub tco_sticky_quarantine: bool,
-    /// Controls how [Provicer_utils.respect_but_quarantine_unsaved_changes] invalidates folded decls
-    pub tco_lsp_invalidation: bool,
     pub tco_autocomplete_sort_text: bool,
     /// Controls whether we retain the full path for reasons or only simple witnesses
     pub tco_extended_reasons: Option<ExtendedReasonsConfig>,

@@ -427,10 +427,6 @@ module Hhconf = struct
   let ide_symbolindex_search_provider =
     hhconf_key "ide_symbolindex_search_provider"
 
-  let lsp_invalidation = hhconf_key "lsp_invalidation"
-
-  let lsp_sticky_quarantine = hhconf_key "lsp_sticky_quarantine"
-
   let symbolindex_quiet = hhconf_key "symbolindex_quiet"
 
   (* misc *)

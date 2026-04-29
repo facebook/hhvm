@@ -106,8 +106,6 @@ let default =
     ide_naming_table_update_threshold = 1000;
     dump_tast_hashes = false;
     dump_tasts = [];
-    lsp_sticky_quarantine = false;
-    lsp_invalidation = false;
     autocomplete_sort_text = false;
     hack_warnings = true;
     warnings_default_all = false;
@@ -913,18 +911,6 @@ let load_
     | None -> default.dump_tasts
     | Some path -> In_channel.read_lines path
   in
-  let lsp_sticky_quarantine =
-    bool_
-      Config_keys.Hhconf.lsp_sticky_quarantine
-      ~default:default.lsp_sticky_quarantine
-      config
-  in
-  let lsp_invalidation =
-    bool_
-      Config_keys.Hhconf.lsp_invalidation
-      ~default:default.lsp_invalidation
-      config
-  in
   let autocomplete_sort_text =
     bool_
       Config_keys.Hhconf.autocomplete_sort_text
@@ -1164,8 +1150,6 @@ let load_
     ide_naming_table_update_threshold;
     dump_tast_hashes;
     dump_tasts;
-    lsp_sticky_quarantine;
-    lsp_invalidation;
     autocomplete_sort_text;
     hack_warnings;
     warnings_default_all;
@@ -1247,8 +1231,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       saved_state_rollouts = options.saved_state.GlobalOptions.rollouts;
       zstd_decompress_by_file =
         GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
-      lsp_sticky_quarantine = options.lsp_sticky_quarantine;
-      lsp_invalidation = options.lsp_invalidation;
       autocomplete_sort_text = options.autocomplete_sort_text;
       warnings_default_all = options.warnings_default_all;
       edenfs_file_watcher_enabled = options.edenfs_file_watcher.enabled;

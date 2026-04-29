@@ -232,10 +232,6 @@ type t = {
   dump_tasts: string list;
       (** List of paths whose TASTs to be dumped in /tmp/hh_server/tasts *)
   tco_autocomplete_mode: bool;  (** Are we running in autocomplete mode ? *)
-  tco_sticky_quarantine: bool;
-      (** Controls behavior of [Provider_utils.respect_but_quarantine_unsaved_changes] *)
-  tco_lsp_invalidation: bool;
-      (** Controls how [Provicer_utils.respect_but_quarantine_unsaved_changes] invalidates folded decls *)
   tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
       (** Controls whether we retain the full path for reasons or only simple witnesses *)
@@ -384,8 +380,6 @@ val set :
   ?dump_tast_hashes:bool ->
   ?dump_tasts:string list ->
   ?tco_autocomplete_mode:bool ->
-  ?tco_sticky_quarantine:bool ->
-  ?tco_lsp_invalidation:bool ->
   ?tco_autocomplete_sort_text:bool ->
   ?tco_extended_reasons:extended_reasons_config ->
   ?tco_disable_physical_equality:bool ->

@@ -90,7 +90,7 @@ let f =
           ~entries
       in
       String_asserter.assert_equals
-        "[Shallow]B,C,D,E [Folded]C [Decl]C,fa,fb,fc,fd,fe,test"
+        "[Shallow]B,C,D,E [Folded] [Decl]fa,fb,fc,fd,fe,test"
         (show_env env)
         "After invalidate A, expected these items in cache";
       (* B *)
@@ -154,12 +154,12 @@ let f =
       let (ctx, _entry_b) = make_entry_ctx env path contents in
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           String_asserter.assert_equals
-            "[Shallow]A,B,C,D,E [Folded]A,B,C,D,E [Decl]A,B,C,D,E,fa,fb,fc,fd,fe,test"
+            "[Shallow]A,C,D,E [Folded]A,C,D,E [Decl]A,C,D,E,fa,fc,fd,fe,test"
             (show_env env)
             "After quarantine with original B, expected these items in cache";
           let _ = Tast_provider.compute_tast_unquarantined ~ctx ~entry in
           String_asserter.assert_equals
-            "[Shallow]A,B,C,D,E [Folded]A,B,C,D,E [Decl]A,B,C,D,E,fa,fb,fc,fd,fe,test"
+            "[Shallow]A,C,D,E [Folded]A,C,D,E [Decl]A,C,D,E,fa,fc,fd,fe,test"
             (show_env env)
             "After quarantine typecheck a.php with original B, expected these items in cache");
       (* Change class B from "implements A" to "implements AA" *)
@@ -171,12 +171,12 @@ let f =
       in
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           String_asserter.assert_equals
-            "[Shallow]A,B,C,D,E [Folded]A [Decl]A,fa,fb,fc,fd,fe,test"
+            "[Shallow]A,C,D,E [Folded]A,C,D,E [Decl]A,C,D,E,fa,fc,fd,fe,test"
             (show_env env)
             "After quarantine with modified B, expected these items in cache";
           let _ = Tast_provider.compute_tast_unquarantined ~ctx ~entry in
           String_asserter.assert_equals
-            "[Shallow]A,B,C,D,E [Folded]A [Decl]A,fa,fb,fc,fd,fe,test"
+            "[Shallow]A,C,D,E [Folded]A,C,D,E [Decl]A,C,D,E,fa,fc,fd,fe,test"
             (show_env env)
             "After quarantine typecheck with modified B, expected these items in cache");
       (* Save that modified "class B implements AA" and see what gets invalidated from cache *)
@@ -188,7 +188,7 @@ let f =
           ~entries
       in
       String_asserter.assert_equals
-        "[Shallow]A,C,D,E [Folded]A [Decl]A,fa,fb,fc,fd,fe,test"
+        "[Shallow]A,C,D,E [Folded]A [Decl]A,fa,fc,fd,fe,test"
         (show_env env)
         "After saving modified B, expected these items in cache";
       let _ = Tast_provider.compute_tast_unquarantined ~ctx ~entry in
@@ -196,12 +196,12 @@ let f =
       let (ctx, _entry_b) = make_entry_ctx env path contents in
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           String_asserter.assert_equals
-            "[Shallow]A,B,C,D,E [Folded]A [Decl]A,fa,fb,fc,fd,fe,test"
+            "[Shallow]A,C,D,E [Folded]A,C,D,E [Decl]A,C,D,E,fa,fc,fd,fe,test"
             (show_env env)
             "After quarantine with restored B, expected these items in cache";
           let _ = Tast_provider.compute_tast_unquarantined ~ctx ~entry in
           String_asserter.assert_equals
-            "[Shallow]A,B,C,D,E [Folded]A [Decl]A,fa,fb,fc,fd,fe,test"
+            "[Shallow]A,C,D,E [Folded]A,C,D,E [Decl]A,C,D,E,fa,fc,fd,fe,test"
             (show_env env)
             "After quarantine typecheck with restored B, expected these items in cache");
       (* Save that restored "class B implements A" and see what gets invalidated from cache *)
@@ -213,7 +213,7 @@ let f =
           ~entries
       in
       String_asserter.assert_equals
-        "[Shallow]A,C,D,E [Folded]A [Decl]A,fa,fb,fc,fd,fe,test"
+        "[Shallow]A,C,D,E [Folded]A [Decl]A,fa,fc,fd,fe,test"
         (show_env env)
         "After saving restored B, expected these items in cache";
 

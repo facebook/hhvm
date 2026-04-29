@@ -117,8 +117,6 @@ impl Default for GlobalOptions {
             dump_tast_hashes: false,
             dump_tasts: vec![],
             tco_autocomplete_mode: false,
-            tco_sticky_quarantine: false,
-            tco_lsp_invalidation: false,
             tco_autocomplete_sort_text: false,
             tco_extended_reasons: None,
             tco_disable_physical_equality: false,

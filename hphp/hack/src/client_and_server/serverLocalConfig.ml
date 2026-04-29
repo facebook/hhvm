@@ -358,10 +358,6 @@ type t = {
       (** List of files whose TASTs to be dumped in /tmp/hh_server/tasts. *)
   use_compressed_dep_graph: bool;
       (** POC: @bobren, use new fancy compressed dep graph that is 25% the size of the old one *)
-  lsp_sticky_quarantine: bool;
-      (** POC: @ljw - if true, only exit quarantine when entering a new one *)
-  lsp_invalidation: bool;
-      (** POC: @ljw - controls how quarantine invalidates folded decls *)
   autocomplete_sort_text: bool;
       (** POC: @mckenzie - if true, autocomplete sorts using sort text attribute *)
   hack_warnings: bool;  (** POC: @catg - turn on hack warnings. *)

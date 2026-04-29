@@ -234,10 +234,6 @@ let set_tco_autocomplete_mode t =
 
 let package_info t = t.GlobalOptions.po.ParserOptions.package_info
 
-let tco_sticky_quarantine t = t.GlobalOptions.tco_sticky_quarantine
-
-let tco_lsp_invalidation t = t.GlobalOptions.tco_lsp_invalidation
-
 let tco_extended_reasons t = t.GlobalOptions.tco_extended_reasons
 
 let disable_physical_equality t = t.GlobalOptions.tco_disable_physical_equality

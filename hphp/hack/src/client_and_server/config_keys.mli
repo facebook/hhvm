@@ -387,10 +387,6 @@ module Hhconf : sig
 
   val ide_symbolindex_search_provider : string
 
-  val lsp_invalidation : string
-
-  val lsp_sticky_quarantine : string
-
   val symbolindex_quiet : string
 
   (* misc *)

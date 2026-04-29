@@ -119,10 +119,6 @@ type rollout_flags = {
   saved_state_rollouts: Saved_state_rollouts.t;
   zstd_decompress_by_file: bool;
       (** POC: @nzthomas, if true then saved state loading will only pass specific files to zstd shellout *)
-  lsp_sticky_quarantine: bool;
-      (** POC: @ljw - if true, only exit quarantine when entering a new one *)
-  lsp_invalidation: bool;
-      (** POC: @ljw - relates to how we invalidate folded decls for quarantine *)
   autocomplete_sort_text: bool;
       (** POC: @mckenzie - if true, autocomplete results will be sorted using sort text attribute *)
   warnings_default_all: bool;

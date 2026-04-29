@@ -29,6 +29,11 @@ struct OutOfOrderFields {
   2: i32 Two;
 }
 
+union ExampleUnion {
+  1: i64 intValue;
+  2: string stringValue;
+}
+
 enum Enum {
   NEGATIVE_ONE = -1,
   DEFAULT = 0,
@@ -75,6 +80,8 @@ struct Example {
   21: optional map<OutOfOrderFields, i32> outOfOrderFieldsInMap;
   22: optional map<string, string> stringAsKey;
   23: optional map<i64, i64> i64AsKey;
+  24: optional set<i32> i32SetValue;
+  25: optional ExampleUnion unionValue;
 }
 
 // --
@@ -919,6 +926,54 @@ const list<TestCase> testCases = [
       value: 4,
     },
   ],
+}",
+  },
+  // ── Set of integers ─────────────────────────────────────────────────────────
+  TestCase{
+    name = "I32Set",
+    example = Example{i32SetValue = [3, 1, 2]},
+    json = "{
+  \"i32SetValue\": [
+    1,
+    2,
+    3
+  ]
+}",
+    json5 = "{
+  i32SetValue: [
+    1,
+    2,
+    3,
+  ],
+}",
+  },
+  // ── Union types ─────────────────────────────────────────────────────────────
+  TestCase{
+    name = "UnionInt",
+    example = Example{unionValue = ExampleUnion{intValue = 42}},
+    json = "{
+  \"unionValue\": {
+    \"intValue\": 42
+  }
+}",
+    json5 = "{
+  unionValue: {
+    intValue: 42,
+  },
+}",
+  },
+  TestCase{
+    name = "UnionString",
+    example = Example{unionValue = ExampleUnion{stringValue = "hello"}},
+    json = "{
+  \"unionValue\": {
+    \"stringValue\": \"hello\"
+  }
+}",
+    json5 = "{
+  unionValue: {
+    stringValue: \"hello\",
+  },
 }",
   },
 ];

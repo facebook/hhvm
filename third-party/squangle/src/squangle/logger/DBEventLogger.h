@@ -38,7 +38,6 @@ enum class OperationType {
   TestDatabase,
   Reset,
   ChangeUser,
-  ThriftQuery,
 };
 
 class EnumHelper {
@@ -83,8 +82,6 @@ class EnumHelper {
         return "Reset";
       case OperationType::ChangeUser:
         return "ChangeUser";
-      case OperationType::ThriftQuery:
-        return "ThriftQuery";
       default:
         return "(should not happen)";
     }
@@ -210,7 +207,8 @@ struct QueryLoggingData : CommonLoggingData {
   AttributeMap response_attributes;
   bool was_slow;
   unsigned int warnings_count;
-  std::optional<int> thrift_rpc_priority;
+  // Optional custom RPC priority (for protocol-specific logging)
+  std::optional<int> rpc_priority;
   std::optional<uint64_t> rows_matched;
   uint64_t rows_affected;
 

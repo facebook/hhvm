@@ -5614,6 +5614,10 @@ void t_hack_generator::_generate_php_struct_definition(
   if (wrapper && underlying_name.has_value()) {
     struct_hack_name_with_ns = hack_wrapped_type_name(underlying_name, ns);
     struct_hack_decl = *underlying_name;
+  } else if (
+      type == ThriftStructType::ARGS || type == ThriftStructType::RESULT) {
+    struct_hack_name_with_ns = name;
+    struct_hack_decl = name;
   } else {
     const t_program* program = tstruct->program();
     if (const auto* params = tstruct->try_as<t_paramlist>()) {
@@ -6756,7 +6760,8 @@ void t_hack_generator::generate_service_interactions(
  */
 void t_hack_generator::generate_php_function_helpers(
     const t_service* tservice, const t_function* tfunction) {
-  const std::string& service_name = tservice->name();
+  const std::string service_name =
+      php_servicename_mangle(mangled_services_, tservice);
   if (tfunction->is_bidirectional_stream()) {
     generate_php_bidi_function_helpers(tfunction, service_name);
     return;
@@ -6929,7 +6934,9 @@ void t_hack_generator::generate_php_interaction_function_helpers(
     const t_service* tservice,
     const t_interaction* interaction,
     const t_function* tfunction) {
-  const std::string& prefix = tservice->name() + "_" + interaction->name();
+  const std::string prefix =
+      php_servicename_mangle(mangled_services_, tservice) + "_" +
+      interaction->name();
   if (tfunction->is_bidirectional_stream()) {
     generate_php_bidi_function_helpers(tfunction, prefix);
     return;
@@ -8380,9 +8387,13 @@ std::string t_hack_generator::generate_function_helper_name(
     PhpFunctionNameSuffix suffix) {
   std::string prefix;
   if (tservice->is<t_interaction>()) {
-    prefix = hack_name(service_name_, program_) + "_" + tservice->name();
+    auto [ns, ns_type] = get_namespace(tservice);
+    prefix =
+        (mangled_services_ && ns_type == HackThriftNamespaceType::PHP ? ns
+                                                                      : "") +
+        service_name_ + "_" + tservice->name();
   } else {
-    prefix = hack_name(tservice);
+    prefix = php_servicename_mangle(mangled_services_, tservice);
   }
   std::string fname = find_hack_name(tfunction);
   switch (suffix) {

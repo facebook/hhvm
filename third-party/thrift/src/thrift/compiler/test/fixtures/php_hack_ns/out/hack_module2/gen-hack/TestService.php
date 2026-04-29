@@ -58,12 +58,12 @@ trait TestServiceClientBase {
    */
   public async function ping(string $str_arg): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack_ns2\TestService_ping_args::fromShape(shape(
+    $args = TestService_ping_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
     await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
   }
 
 }
@@ -287,8 +287,10 @@ class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
         'metadata' => \tmeta_ThriftMetadata::fromShape(
           shape(
             'enums' => dict[
+              'module.Status' => \foo_php_ns_Status_TEnumStaticMetadata::getEnumMetadata(),
             ],
             'structs' => dict[
+              'module.TestStruct' => \foo_php_ns_TestStruct::getStructMetadata(),
             ],
             'exceptions' => dict[
             ],

@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package "test.dev/foo/php/ns"
-
 namespace php foo.php.ns
 
-enum Status {
-  Unknown = 0,
+package "facebook.com/thrift/test/fixtures/interaction_namespaces/module"
+
+interaction PhpInteraction {
+  string ping(1: string msg);
 }
 
-struct TestStruct {
-  1: string str_value;
-}
-
-service FooHackService {
-  Status fetchStatus(1: TestStruct request);
+service PhpInteractionService {
+  performs PhpInteraction;
+  void noop();
 }

@@ -12,6 +12,12 @@
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/FooHackService'))>>
 interface FooHackServiceAsyncIf extends \IThriftAsyncIf {
+  /**
+   * Original thrift definition:-
+   * Status
+   *   fetchStatus(1: TestStruct request);
+   */
+  public function fetchStatus(?foo_php_ns_TestStruct $request): Awaitable<foo_php_ns_Status>;
 }
 
 /**
@@ -28,6 +34,12 @@ interface FooHackServiceAsyncClientIf extends FooHackServiceAsyncIf {
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/FooHackService'))>>
 interface FooHackServiceClientIf extends \IThriftSyncIf {
+  /**
+   * Original thrift definition:-
+   * Status
+   *   fetchStatus(1: TestStruct request);
+   */
+  public function fetchStatus(?foo_php_ns_TestStruct $request): Awaitable<foo_php_ns_Status>;
 }
 
 /**
@@ -36,6 +48,21 @@ interface FooHackServiceClientIf extends \IThriftSyncIf {
  */
 trait FooHackServiceClientBase {
   require extends \ThriftClientBase;
+
+  /**
+   * Original thrift definition:-
+   * Status
+   *   fetchStatus(1: TestStruct request);
+   */
+  public async function fetchStatus(?foo_php_ns_TestStruct $request): Awaitable<foo_php_ns_Status> {
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = FooHackService_fetchStatus_args::fromShape(shape(
+      'request' => $request,
+    ));
+    await $this->asyncHandler_->genBefore(FooHackServiceStaticMetadata::THRIFT_SVC_NAME, "fetchStatus", $args);
+    $currentseqid = $this->sendImplHelper($args, "fetchStatus", false, FooHackServiceStaticMetadata::THRIFT_SVC_NAME );
+    return (await $this->genAwaitResponse(FooHackService_fetchStatus_result::class, "fetchStatus", false, $currentseqid, $rpc_options))[0];
+  }
 
 }
 
@@ -55,6 +82,166 @@ class FooHackServiceClient extends \ThriftClientBase implements FooHackServiceCl
 
 // HELPER FUNCTIONS AND STRUCTURES
 
+class FooHackService_fetchStatus_args implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'request',
+      'type' => \TType::STRUCT,
+      'class' => foo_php_ns_TestStruct::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'request' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'request' => ?foo_php_ns_TestStruct,
+  );
+
+  const int STRUCTURAL_ID = 8833886197915097673;
+  public ?foo_php_ns_TestStruct $request;
+
+  public function __construct(?foo_php_ns_TestStruct $request = null)[] {
+    $this->request = $request;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'request'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'FooHackService_fetchStatus_args';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.fetchStatus_args",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.TestStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "request",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class FooHackService_fetchStatus_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const type TResult = foo_php_ns_Status;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    0 => shape(
+      'var' => 'success',
+      'type' => \TType::I32,
+      'enum' => foo_php_ns_Status::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'success' => 0,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'success' => ?this::TResult,
+  );
+
+  const int STRUCTURAL_ID = 2751447700302829869;
+  public ?this::TResult $success;
+
+  public function __construct(?this::TResult $success = null)[] {
+    $this->success = $success;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'success'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'FooHackService_fetchStatus_result';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.FooHackService_fetchStatus_result",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 0,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "module.Status",
+                    )
+                  ),
+                )
+              ),
+              "name" => "success",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
 class FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'FooHackService';
 
@@ -62,6 +249,39 @@ class FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
     return tmeta_ThriftService::fromShape(
       shape(
         "name" => "module.FooHackService",
+        "functions" => vec[
+          tmeta_ThriftFunction::fromShape(
+            shape(
+              "name" => "fetchStatus",
+              "return_type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "module.Status",
+                    )
+                  ),
+                )
+              ),
+              "arguments" => vec[
+                tmeta_ThriftField::fromShape(
+                  shape(
+                    "id" => 1,
+                    "type" => tmeta_ThriftType::fromShape(
+                      shape(
+                        "t_struct" => tmeta_ThriftStructType::fromShape(
+                          shape(
+                            "name" => "module.TestStruct",
+                          )
+                        ),
+                      )
+                    ),
+                    "name" => "request",
+                  )
+                ),
+              ],
+            )
+          ),
+        ],
       )
     );
   }
@@ -82,8 +302,10 @@ class FooHackServiceStaticMetadata implements \IThriftServiceStaticMetadata {
         'metadata' => \tmeta_ThriftMetadata::fromShape(
           shape(
             'enums' => dict[
+              'module.Status' => foo_php_ns_Status_TEnumStaticMetadata::getEnumMetadata(),
             ],
             'structs' => dict[
+              'module.TestStruct' => foo_php_ns_TestStruct::getStructMetadata(),
             ],
             'exceptions' => dict[
             ],

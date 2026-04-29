@@ -70,10 +70,10 @@ internal trait TestServiceWithMethodAnnotationClientBase {
    */
   internal async function testMethodWithAnnotation(): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
+    $args = TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithAnnotation", $args);
     $currentseqid = $this->sendImplHelper($args, "testMethodWithAnnotation", false, TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -83,10 +83,10 @@ internal trait TestServiceWithMethodAnnotationClientBase {
    */
   public async function testMethodWithoutAnnotation(): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
+    $args = TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithoutAnnotation", $args);
     $currentseqid = $this->sendImplHelper($args, "testMethodWithoutAnnotation", false, TestServiceWithMethodAnnotationStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result::class, "testMethodWithoutAnnotation", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(TestServiceWithMethodAnnotation_testMethodWithoutAnnotation_result::class, "testMethodWithoutAnnotation", true, $currentseqid, $rpc_options);
   }
 
 }

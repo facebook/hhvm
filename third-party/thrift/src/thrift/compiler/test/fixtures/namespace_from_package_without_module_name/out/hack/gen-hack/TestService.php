@@ -58,12 +58,12 @@ trait TestServiceClientBase {
    */
   public async function init(int $int1): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\namespace_from_package_without_module_name\TestService_init_args::fromShape(shape(
+    $args = TestService_init_args::fromShape(shape(
       'int1' => $int1,
     ));
     await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\test\namespace_from_package_without_module_name\TestService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(TestService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
 }
@@ -91,9 +91,9 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_init(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('init');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\namespace_from_package_without_module_name\TestService_init_result::withDefaultValues();
+    $result = TestService_init_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\namespace_from_package_without_module_name\TestService_init_args::class, $input, 'init', $handler_ctx);
+      $args = $this->readHelper(TestService_init_args::class, $input, 'init', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\namespace_from_package_without_module_name\TestService', 'init', $args);
       $result->success = await $this->handler->init($args->int1);
       $this->eventHandler_->postExec($handler_ctx, 'init', $result);
@@ -111,11 +111,11 @@ abstract class TestServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     switch ($fn_name) {
       case 'init':
         return new \ThriftServiceRequestResponseMethod(
-          \test\namespace_from_package_without_module_name\TestService_init_args::class,
-          \test\namespace_from_package_without_module_name\TestService_init_result::class,
+          TestService_init_args::class,
+          TestService_init_result::class,
           async (
             TestServiceAsyncIf $handler,
-            \test\namespace_from_package_without_module_name\TestService_init_args $args,
+            TestService_init_args $args,
           )[defaults] ==> {
             return await $handler->init($args->int1);
           },

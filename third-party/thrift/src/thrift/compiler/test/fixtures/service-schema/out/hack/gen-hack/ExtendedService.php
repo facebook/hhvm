@@ -61,13 +61,13 @@ trait ExtendedServiceClientBase {
    */
   public async function init(int $param0, int $param1): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\fixtures\service_schema\ExtendedService_init_args::fromShape(shape(
+    $args = ExtendedService_init_args::fromShape(shape(
       'param0' => $param0,
       'param1' => $param1,
     ));
     await $this->asyncHandler_->genBefore(ExtendedServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false, ExtendedServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\ExtendedService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(ExtendedService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
 }

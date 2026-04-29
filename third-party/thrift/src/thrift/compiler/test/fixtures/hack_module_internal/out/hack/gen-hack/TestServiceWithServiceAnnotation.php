@@ -70,10 +70,10 @@ internal trait TestServiceWithServiceAnnotationClientBase {
    */
   internal async function testMethodWithServiceAnnotation(): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args::withDefaultValues();
+    $args = TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithServiceAnnotation", $args);
     $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation", false, TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result::class, "testMethodWithServiceAnnotation", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result::class, "testMethodWithServiceAnnotation", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -83,10 +83,10 @@ internal trait TestServiceWithServiceAnnotationClientBase {
    */
   internal async function testMethodWithServiceAnnotation2(): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args::withDefaultValues();
+    $args = TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME, "testMethodWithServiceAnnotation2", $args);
     $currentseqid = $this->sendImplHelper($args, "testMethodWithServiceAnnotation2", false, TestServiceWithServiceAnnotationStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result::class, "testMethodWithServiceAnnotation2", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result::class, "testMethodWithServiceAnnotation2", true, $currentseqid, $rpc_options);
   }
 
 }

@@ -59,10 +59,10 @@ internal trait RenamedServiceClientBase {
    */
   public async function simple_rpc(): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
+    $args = RenamedService_simple_rpc_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RenamedServiceStaticMetadata::THRIFT_SVC_NAME, "simple_rpc", $args);
     $currentseqid = $this->sendImplHelper($args, "simple_rpc", false, RenamedServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\test\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(RenamedService_simple_rpc_result::class, "simple_rpc", true, $currentseqid, $rpc_options);
   }
 
 }
@@ -90,9 +90,9 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('simple_rpc');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\fixtures\basic\RenamedService_simple_rpc_result::withDefaultValues();
+    $result = RenamedService_simple_rpc_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\fixtures\basic\RenamedService_simple_rpc_args::class, $input, 'simple_rpc', $handler_ctx);
+      $args = $this->readHelper(RenamedService_simple_rpc_args::class, $input, 'simple_rpc', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\RenamedService', 'simple_rpc', $args);
       await $this->handler->simple_rpc();
       $this->eventHandler_->postExec($handler_ctx, 'simple_rpc', $result);
@@ -110,11 +110,11 @@ abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     switch ($fn_name) {
       case 'simple_rpc':
         return new \ThriftServiceRequestResponseMethod(
-          \test\fixtures\basic\RenamedService_simple_rpc_args::class,
-          \test\fixtures\basic\RenamedService_simple_rpc_result::class,
+          RenamedService_simple_rpc_args::class,
+          RenamedService_simple_rpc_result::class,
           async (
             RenamedServiceAsyncIf $handler,
-            \test\fixtures\basic\RenamedService_simple_rpc_args $args,
+            RenamedService_simple_rpc_args $args,
           )[defaults] ==> {
             await $handler->simple_rpc();
             return null;
@@ -134,7 +134,7 @@ class RenamedServiceAsyncProcessor extends RenamedServiceAsyncProcessorBase {
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class FooService_simple_rpc_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class RenamedService_simple_rpc_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -163,7 +163,7 @@ class FooService_simple_rpc_args implements \IThriftSyncStruct, \IThriftStructMe
   }
 
   public function getName()[]: string {
-    return 'FooService_simple_rpc_args';
+    return 'RenamedService_simple_rpc_args';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -207,7 +207,7 @@ class FooService_simple_rpc_args implements \IThriftSyncStruct, \IThriftStructMe
 
 }
 
-class FooService_simple_rpc_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
+class RenamedService_simple_rpc_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -233,13 +233,13 @@ class FooService_simple_rpc_result extends \ThriftSyncStructWithoutResult implem
   }
 
   public function getName()[]: string {
-    return 'FooService_simple_rpc_result';
+    return 'RenamedService_simple_rpc_result';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module.FooService_simple_rpc_result",
+        "name" => "module.RenamedService_simple_rpc_result",
         "is_union" => false,
       )
     );

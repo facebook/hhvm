@@ -59,12 +59,12 @@ internal trait FB303ServiceClientBase {
    */
   public async function renamed_rpc(int $renamed_parameter): Awaitable<\test\fixtures\basic\MyRenamedStruct> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\FB303Service_renamed_rpc_args::fromShape(shape(
+    $args = FB303Service_renamed_rpc_args::fromShape(shape(
       'int_parameter' => $int_parameter,
     ));
     await $this->asyncHandler_->genBefore(FB303ServiceStaticMetadata::THRIFT_SVC_NAME, "renamed_rpc", $args);
     $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false, FB303ServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options))[0];
   }
 
 }
@@ -92,9 +92,9 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\fixtures\basic\FB303Service_renamed_rpc_result::withDefaultValues();
+    $result = FB303Service_renamed_rpc_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\fixtures\basic\FB303Service_renamed_rpc_args::class, $input, 'renamed_rpc', $handler_ctx);
+      $args = $this->readHelper(FB303Service_renamed_rpc_args::class, $input, 'renamed_rpc', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\FB303Service', 'renamed_rpc', $args);
       $result->success = await $this->handler->renamed_rpc($args->int_parameter);
       $this->eventHandler_->postExec($handler_ctx, 'renamed_rpc', $result);
@@ -112,11 +112,11 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     switch ($fn_name) {
       case 'renamed_rpc':
         return new \ThriftServiceRequestResponseMethod(
-          \test\fixtures\basic\FB303Service_renamed_rpc_args::class,
-          \test\fixtures\basic\FB303Service_renamed_rpc_result::class,
+          FB303Service_renamed_rpc_args::class,
+          FB303Service_renamed_rpc_result::class,
           async (
             FB303ServiceAsyncIf $handler,
-            \test\fixtures\basic\FB303Service_renamed_rpc_args $args,
+            FB303Service_renamed_rpc_args $args,
           )[defaults] ==> {
             return await $handler->renamed_rpc($args->int_parameter);
           },

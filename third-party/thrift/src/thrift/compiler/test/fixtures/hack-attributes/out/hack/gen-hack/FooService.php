@@ -55,12 +55,12 @@ trait FooServiceClientBase {
    */
   public async function ping(string $str_arg): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\jsenum\FooService_ping_args::fromShape(shape(
+    $args = FooService_ping_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
     await $this->asyncHandler_->genBefore(FooServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, FooServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\test\fixtures\jsenum\FooService_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(FooService_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
   }
 
 }

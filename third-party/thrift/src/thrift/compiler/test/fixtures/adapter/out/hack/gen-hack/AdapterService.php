@@ -72,10 +72,10 @@ trait AdapterServiceClientBase {
    */
   public async function count(): Awaitable<\facebook\thrift\test\fixtures\adapter\CountingStruct> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\fixtures\adapter\AdapterService_count_args::withDefaultValues();
+    $args = AdapterService_count_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "count", $args);
     $currentseqid = $this->sendImplHelper($args, "count", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\adapter\AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -85,12 +85,12 @@ trait AdapterServiceClientBase {
    */
   public async function adaptedTypes(?\facebook\thrift\test\fixtures\adapter\HeapAllocated $arg): Awaitable<\facebook\thrift\test\fixtures\adapter\HeapAllocated> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\fixtures\adapter\AdapterService_adaptedTypes_args::fromShape(shape(
+    $args = AdapterService_adaptedTypes_args::fromShape(shape(
       'arg' => $arg,
     ));
     await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "adaptedTypes", $args);
     $currentseqid = $this->sendImplHelper($args, "adaptedTypes", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\adapter\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options))[0];
   }
 
 }

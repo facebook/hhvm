@@ -61,12 +61,12 @@ trait TestServiceClientBase {
    */
   public async function ping(string $str_arg): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \hack_ns2\TestService_ping_args::fromShape(shape(
+    $args = TestService_ping_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
     await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
   }
 
 }
@@ -94,9 +94,9 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-    $result = \hack_ns2\TestService_ping_result::withDefaultValues();
+    $result = TestService_ping_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\hack_ns2\TestService_ping_args::class, $input, 'ping', $handler_ctx);
+      $args = $this->readHelper(TestService_ping_args::class, $input, 'ping', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'ping', $args);
       $result->success = await $this->handler->ping($args->str_arg);
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
@@ -118,11 +118,11 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
     switch ($fn_name) {
       case 'ping':
         return new \ThriftServiceRequestResponseMethod(
-          \hack_ns2\TestService_ping_args::class,
-          \hack_ns2\TestService_ping_result::class,
+          TestService_ping_args::class,
+          TestService_ping_result::class,
           async (
             TestServiceAsyncIf $handler,
-            \hack_ns2\TestService_ping_args $args,
+            TestService_ping_args $args,
           )[defaults] ==> {
             return await $handler->ping($args->str_arg);
           },

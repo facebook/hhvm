@@ -64,14 +64,14 @@ trait ServiceClientBase {
    */
   public async function func(\facebook\thrift\test\fixtures\adapter\StringWithAdapter_7208 $arg1, \facebook\thrift\test\fixtures\adapter\StringWithCppAdapter $arg2, ?\facebook\thrift\test\fixtures\adapter\Foo $arg3): Awaitable<\facebook\thrift\test\fixtures\adapter\MyI32_4873> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\fixtures\adapter\Service_func_args::fromShape(shape(
+    $args = Service_func_args::fromShape(shape(
       'arg1' => $arg1,
       'arg2' => $arg2,
       'arg3' => $arg3,
     ));
     await $this->asyncHandler_->genBefore(ServiceStaticMetadata::THRIFT_SVC_NAME, "func", $args);
     $currentseqid = $this->sendImplHelper($args, "func", false, ServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\adapter\Service_func_result::class, "func", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(Service_func_result::class, "func", false, $currentseqid, $rpc_options))[0];
   }
 
 }

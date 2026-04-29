@@ -72,10 +72,10 @@ trait MyServiceClientBase {
    */
   public async function first(): Awaitable<string> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic_structured_annotations\MyService_first_args::withDefaultValues();
+    $args = MyService_first_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "first", $args);
     $currentseqid = $this->sendImplHelper($args, "first", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\test\fixtures\basic_structured_annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_first_result::class, "first", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -85,12 +85,12 @@ trait MyServiceClientBase {
    */
   public async function second(int $count): Awaitable<bool> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic_structured_annotations\MyService_second_args::fromShape(shape(
+    $args = MyService_second_args::fromShape(shape(
       'count' => $count,
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "second", $args);
     $currentseqid = $this->sendImplHelper($args, "second", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\test\fixtures\basic_structured_annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_second_result::class, "second", false, $currentseqid, $rpc_options))[0];
   }
 
 }

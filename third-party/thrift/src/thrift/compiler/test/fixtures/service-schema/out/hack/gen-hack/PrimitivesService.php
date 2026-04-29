@@ -93,13 +93,13 @@ trait PrimitivesServiceClientBase {
    */
   public async function init(int $param0, int $param1): Awaitable<int> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\fixtures\service_schema\PrimitivesService_init_args::fromShape(shape(
+    $args = PrimitivesService_init_args::fromShape(shape(
       'param0' => $param0,
       'param1' => $param1,
     ));
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -110,10 +110,10 @@ trait PrimitivesServiceClientBase {
    */
   public async function method_that_throws(): Awaitable<\facebook\thrift\test\fixtures\service_schema\Result> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\fixtures\service_schema\PrimitivesService_method_that_throws_args::withDefaultValues();
+    $args = PrimitivesService_method_that_throws_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "method_that_throws", $args);
     $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -124,13 +124,13 @@ trait PrimitivesServiceClientBase {
    */
   public async function return_void_method(int $id, ?\I $i): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\fixtures\service_schema\PrimitivesService_return_void_method_args::fromShape(shape(
+    $args = PrimitivesService_return_void_method_args::fromShape(shape(
       'id' => $id,
       'i' => $i,
     ));
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "return_void_method", $args);
     $currentseqid = $this->sendImplHelper($args, "return_void_method", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
   }
 
 }

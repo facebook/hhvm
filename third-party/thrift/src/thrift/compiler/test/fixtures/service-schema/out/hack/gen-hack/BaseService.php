@@ -58,10 +58,10 @@ trait BaseServiceClientBase {
    */
   public async function base_method(): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \facebook\thrift\test\fixtures\service_schema\BaseService_base_method_args::withDefaultValues();
+    $args = BaseService_base_method_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(BaseServiceStaticMetadata::THRIFT_SVC_NAME, "base_method", $args);
     $currentseqid = $this->sendImplHelper($args, "base_method", false, BaseServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\facebook\thrift\test\fixtures\service_schema\BaseService_base_method_result::class, "base_method", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(BaseService_base_method_result::class, "base_method", true, $currentseqid, $rpc_options);
   }
 
 }

@@ -161,10 +161,10 @@ internal trait MyServiceClientBase {
    */
   public async function ping(): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_ping_args::withDefaultValues();
+    $args = MyService_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -174,10 +174,10 @@ internal trait MyServiceClientBase {
    */
   public async function getRandomData(): Awaitable<string> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_getRandomData_args::withDefaultValues();
+    $args = MyService_getRandomData_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "getRandomData", $args);
     $currentseqid = $this->sendImplHelper($args, "getRandomData", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\test\fixtures\basic\MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -187,12 +187,12 @@ internal trait MyServiceClientBase {
    */
   public async function sink(int $sink): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_sink_args::fromShape(shape(
+    $args = MyService_sink_args::fromShape(shape(
       'sink' => $sink,
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "sink", $args);
     $currentseqid = $this->sendImplHelper($args, "sink", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(MyService_sink_result::class, "sink", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -203,13 +203,13 @@ internal trait MyServiceClientBase {
    */
   public async function putDataById(int $id, string $data): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_putDataById_args::fromShape(shape(
+    $args = MyService_putDataById_args::fromShape(shape(
       'id' => $id,
       'data' => $data,
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "putDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "putDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -219,12 +219,12 @@ internal trait MyServiceClientBase {
    */
   public async function hasDataById(int $id): Awaitable<bool> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_hasDataById_args::fromShape(shape(
+    $args = MyService_hasDataById_args::fromShape(shape(
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "hasDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "hasDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\test\fixtures\basic\MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -234,12 +234,12 @@ internal trait MyServiceClientBase {
    */
   public async function getDataById(int $id): Awaitable<string> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_getDataById_args::fromShape(shape(
+    $args = MyService_getDataById_args::fromShape(shape(
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "getDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(\test\fixtures\basic\MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -249,12 +249,12 @@ internal trait MyServiceClientBase {
    */
   public async function deleteDataById(int $id): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_deleteDataById_args::fromShape(shape(
+    $args = MyService_deleteDataById_args::fromShape(shape(
       'id' => $id,
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "deleteDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "deleteDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\test\fixtures\basic\MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(MyService_deleteDataById_result::class, "deleteDataById", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -265,7 +265,7 @@ internal trait MyServiceClientBase {
    */
   public async function lobDataById(int $id, string $data): Awaitable<void> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = \test\fixtures\basic\MyService_lobDataById_args::fromShape(shape(
+    $args = MyService_lobDataById_args::fromShape(shape(
       'id' => $id,
       'data' => $data,
     ));
@@ -299,9 +299,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\fixtures\basic\MyService_ping_result::withDefaultValues();
+    $result = MyService_ping_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\fixtures\basic\MyService_ping_args::class, $input, 'ping', $handler_ctx);
+      $args = $this->readHelper(MyService_ping_args::class, $input, 'ping', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'ping', $args);
       await $this->handler->ping();
       $this->eventHandler_->postExec($handler_ctx, 'ping', $result);
@@ -315,9 +315,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_getRandomData(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getRandomData');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\fixtures\basic\MyService_getRandomData_result::withDefaultValues();
+    $result = MyService_getRandomData_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\fixtures\basic\MyService_getRandomData_args::class, $input, 'getRandomData', $handler_ctx);
+      $args = $this->readHelper(MyService_getRandomData_args::class, $input, 'getRandomData', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getRandomData', $args);
       $result->success = await $this->handler->getRandomData();
       $this->eventHandler_->postExec($handler_ctx, 'getRandomData', $result);
@@ -331,9 +331,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_sink(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('sink');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\fixtures\basic\MyService_sink_result::withDefaultValues();
+    $result = MyService_sink_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\fixtures\basic\MyService_sink_args::class, $input, 'sink', $handler_ctx);
+      $args = $this->readHelper(MyService_sink_args::class, $input, 'sink', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'sink', $args);
       await $this->handler->sink($args->sink);
       $this->eventHandler_->postExec($handler_ctx, 'sink', $result);
@@ -347,9 +347,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_putDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('putDataById');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\fixtures\basic\MyService_putDataById_result::withDefaultValues();
+    $result = MyService_putDataById_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\fixtures\basic\MyService_putDataById_args::class, $input, 'putDataById', $handler_ctx);
+      $args = $this->readHelper(MyService_putDataById_args::class, $input, 'putDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'putDataById', $args);
       await $this->handler->putDataById($args->id, $args->data);
       $this->eventHandler_->postExec($handler_ctx, 'putDataById', $result);
@@ -363,9 +363,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_hasDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('hasDataById');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\fixtures\basic\MyService_hasDataById_result::withDefaultValues();
+    $result = MyService_hasDataById_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\fixtures\basic\MyService_hasDataById_args::class, $input, 'hasDataById', $handler_ctx);
+      $args = $this->readHelper(MyService_hasDataById_args::class, $input, 'hasDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'hasDataById', $args);
       $result->success = await $this->handler->hasDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'hasDataById', $result);
@@ -379,9 +379,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_getDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataById');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\fixtures\basic\MyService_getDataById_result::withDefaultValues();
+    $result = MyService_getDataById_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\fixtures\basic\MyService_getDataById_args::class, $input, 'getDataById', $handler_ctx);
+      $args = $this->readHelper(MyService_getDataById_args::class, $input, 'getDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'getDataById', $args);
       $result->success = await $this->handler->getDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'getDataById', $result);
@@ -395,9 +395,9 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   protected async function process_deleteDataById(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('deleteDataById');
     $reply_type = \TMessageType::REPLY;
-    $result = \test\fixtures\basic\MyService_deleteDataById_result::withDefaultValues();
+    $result = MyService_deleteDataById_result::withDefaultValues();
     try {
-      $args = $this->readHelper(\test\fixtures\basic\MyService_deleteDataById_args::class, $input, 'deleteDataById', $handler_ctx);
+      $args = $this->readHelper(MyService_deleteDataById_args::class, $input, 'deleteDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'deleteDataById', $args);
       await $this->handler->deleteDataById($args->id);
       $this->eventHandler_->postExec($handler_ctx, 'deleteDataById', $result);
@@ -412,7 +412,7 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     $handler_ctx = $this->eventHandler_->getHandlerContext('lobDataById');
     $reply_type = \TMessageType::REPLY;
     try {
-      $args = $this->readHelper(\test\fixtures\basic\MyService_lobDataById_args::class, $input, 'lobDataById', $handler_ctx);
+      $args = $this->readHelper(MyService_lobDataById_args::class, $input, 'lobDataById', $handler_ctx);
       $this->eventHandler_->preExec($handler_ctx, '\test\fixtures\basic\MyService', 'lobDataById', $args);
       await $this->handler->lobDataById($args->id, $args->data);
     } catch (\Exception $ex) {
@@ -429,11 +429,11 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     switch ($fn_name) {
       case 'ping':
         return new \ThriftServiceRequestResponseMethod(
-          \test\fixtures\basic\MyService_ping_args::class,
-          \test\fixtures\basic\MyService_ping_result::class,
+          MyService_ping_args::class,
+          MyService_ping_result::class,
           async (
             MyServiceAsyncIf $handler,
-            \test\fixtures\basic\MyService_ping_args $args,
+            MyService_ping_args $args,
           )[defaults] ==> {
             await $handler->ping();
             return null;
@@ -441,22 +441,22 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
         );
       case 'getRandomData':
         return new \ThriftServiceRequestResponseMethod(
-          \test\fixtures\basic\MyService_getRandomData_args::class,
-          \test\fixtures\basic\MyService_getRandomData_result::class,
+          MyService_getRandomData_args::class,
+          MyService_getRandomData_result::class,
           async (
             MyServiceAsyncIf $handler,
-            \test\fixtures\basic\MyService_getRandomData_args $args,
+            MyService_getRandomData_args $args,
           )[defaults] ==> {
             return await $handler->getRandomData();
           },
         );
       case 'sink':
         return new \ThriftServiceRequestResponseMethod(
-          \test\fixtures\basic\MyService_sink_args::class,
-          \test\fixtures\basic\MyService_sink_result::class,
+          MyService_sink_args::class,
+          MyService_sink_result::class,
           async (
             MyServiceAsyncIf $handler,
-            \test\fixtures\basic\MyService_sink_args $args,
+            MyService_sink_args $args,
           )[defaults] ==> {
             await $handler->sink($args->sink);
             return null;
@@ -464,11 +464,11 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
         );
       case 'putDataById':
         return new \ThriftServiceRequestResponseMethod(
-          \test\fixtures\basic\MyService_putDataById_args::class,
-          \test\fixtures\basic\MyService_putDataById_result::class,
+          MyService_putDataById_args::class,
+          MyService_putDataById_result::class,
           async (
             MyServiceAsyncIf $handler,
-            \test\fixtures\basic\MyService_putDataById_args $args,
+            MyService_putDataById_args $args,
           )[defaults] ==> {
             await $handler->putDataById($args->id, $args->data);
             return null;
@@ -476,33 +476,33 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
         );
       case 'hasDataById':
         return new \ThriftServiceRequestResponseMethod(
-          \test\fixtures\basic\MyService_hasDataById_args::class,
-          \test\fixtures\basic\MyService_hasDataById_result::class,
+          MyService_hasDataById_args::class,
+          MyService_hasDataById_result::class,
           async (
             MyServiceAsyncIf $handler,
-            \test\fixtures\basic\MyService_hasDataById_args $args,
+            MyService_hasDataById_args $args,
           )[defaults] ==> {
             return await $handler->hasDataById($args->id);
           },
         );
       case 'getDataById':
         return new \ThriftServiceRequestResponseMethod(
-          \test\fixtures\basic\MyService_getDataById_args::class,
-          \test\fixtures\basic\MyService_getDataById_result::class,
+          MyService_getDataById_args::class,
+          MyService_getDataById_result::class,
           async (
             MyServiceAsyncIf $handler,
-            \test\fixtures\basic\MyService_getDataById_args $args,
+            MyService_getDataById_args $args,
           )[defaults] ==> {
             return await $handler->getDataById($args->id);
           },
         );
       case 'deleteDataById':
         return new \ThriftServiceRequestResponseMethod(
-          \test\fixtures\basic\MyService_deleteDataById_args::class,
-          \test\fixtures\basic\MyService_deleteDataById_result::class,
+          MyService_deleteDataById_args::class,
+          MyService_deleteDataById_result::class,
           async (
             MyServiceAsyncIf $handler,
-            \test\fixtures\basic\MyService_deleteDataById_args $args,
+            MyService_deleteDataById_args $args,
           )[defaults] ==> {
             await $handler->deleteDataById($args->id);
             return null;
@@ -510,10 +510,10 @@ abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
         );
       case 'lobDataById':
         return new \ThriftServiceOnewayMethod(
-          \test\fixtures\basic\MyService_lobDataById_args::class,
+          MyService_lobDataById_args::class,
           async (
             MyServiceAsyncIf $handler,
-            \test\fixtures\basic\MyService_lobDataById_args $args,
+            MyService_lobDataById_args $args,
           )[defaults] ==> {
             await $handler->lobDataById($args->id, $args->data);
           },

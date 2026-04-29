@@ -147,6 +147,15 @@ void Json5ProtocolReader::readFieldBegin(
   auto parsed = parseIdentifierString<std::int16_t>(reader_.readObjectName());
   name = std::move(parsed.name);
   fieldId = parsed.value.value_or(std::numeric_limits<std::int16_t>::min());
+
+  if (reader_.peekToken() == Json5Reader::Token::Primitive &&
+      folly::io::Cursor(reader_.getCursor()).read<char>() == 'n') {
+    // Skip fields with null value
+    [[maybe_unused]] bool isNull =
+        std::holds_alternative<std::monostate>(reader_.readPrimitive());
+    DCHECK(isNull);
+    readFieldBegin(name, fieldType, fieldId);
+  }
 }
 
 void Json5ProtocolReader::readFieldEnd() {}

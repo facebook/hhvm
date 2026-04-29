@@ -272,4 +272,13 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
     ],
     output = json5_test.Example{i64AsKey = {42: 1}},
   },
+  // ── Null Field Handling ──────────────────────────────────────────────────────
+  // Null field values should be treated as absent (field not set).
+  CompatibilityTestCase{
+    name = "NullFieldsSkipped",
+    inputs = [
+      "{\"i64Value\": null, \"boolValue\": true, \"stringValue\": null}",
+    ],
+    output = json5_test.Example{boolValue = true},
+  },
 ];

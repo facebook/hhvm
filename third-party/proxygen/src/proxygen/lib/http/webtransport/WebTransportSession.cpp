@@ -350,4 +350,26 @@ auto WebTransportTxnHandler::moveBufferedIngress() noexcept -> BufferedIngress {
   return {ingress_.data.empty() ? nullptr : ingress_.data.pop(), ingress_.eom};
 }
 
+WtClientCallback::WtClientCallback(WtReqResultPromise p) noexcept
+    : promise(std::move(p)) {
+}
+
+auto WtClientCallback::resetPromise() noexcept -> WtReqResultPromise {
+  return std::exchange(promise, folly::Promise<WtReqResult>::makeEmpty());
+}
+
+void WtClientCallback::onHeaders(std::unique_ptr<HTTPMessage> msg) noexcept {
+  if (msg->isFinal()) {
+    auto p = resetPromise();
+    CHECK(p.valid());
+    p.setValue(std::move(msg));
+  }
+}
+
+void WtClientCallback::onErr(const HTTPException& ex) noexcept {
+  auto p = resetPromise();
+  CHECK(p.valid());
+  p.setException(ex);
+}
+
 } // namespace proxygen::detail

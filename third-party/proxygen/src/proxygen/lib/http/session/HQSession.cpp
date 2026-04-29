@@ -22,6 +22,8 @@
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/session/WebTransportFilter.h>
 #include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
+#include <proxygen/lib/http/webtransport/HqWtSession.h>
+#include <proxygen/lib/http/webtransport/WtUtils.h>
 
 #include <folly/CppAttributes.h>
 #include <folly/ScopeGuard.h>
@@ -1376,9 +1378,7 @@ void HQSession::rejectStream(quic::StreamId id) {
   // the transport, or the transport to detect if the peer has sent everything.
   VLOG(4) << "rejectStream id=" << id;
   sock_->stopSending(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
-  if (sock_->isBidirectionalStream(id)) {
-    sock_->resetStream(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
-  }
+  sock_->resetStream(id, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
   sock_->setReadCallback(id, nullptr, std::nullopt);
   sock_->setPeekCallback(id, nullptr);
 }
@@ -2379,6 +2379,7 @@ void HQSession::startNow() {
   peerAddr_ = sock_->getPeerAddress();
   // TODO: invoke socket.start() here
   resetTimeout();
+  detail::setEgressWtH3Settings(egressSettings_);
 }
 
 void HQSession::HQStreamTransportBase::checkForDetach() {
@@ -2598,17 +2599,14 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
       session_.supportsWebTransport_.set(
           folly::to_underlying(SettingEnabled::PEER));
     }
-  } else {
-    if (msg->isResponse() && msg->getStatusCode() == 200 &&
-        txn_.isWebTransportConnectStream()) {
-      if (!session_.wtFilter_) {
-        VLOG(4) << "Received a 200 resp for a WT connect req";
-        session_.wtFilter_ = WebTransportFilter::make(&txn_, CodecVersion::H3);
-        session_.wtFilter_->setWebTransportImpl(txn_.getWebTransport());
-      }
+  } else if (msg->isResponse() && msg->getStatusCode() == 200 &&
+             txn_.isWebTransportConnectStream() && !wtSess_) {
+    if (!session_.wtFilter_) {
+      VLOG(4) << "Received a 200 resp for a WT connect req";
+      session_.wtFilter_ = WebTransportFilter::make(&txn_, CodecVersion::H3);
+      session_.wtFilter_->setWebTransportImpl(txn_.getWebTransport());
     }
   }
-
   if (!txn_.getHandler()) {
     txn_.sendAbort();
     return;
@@ -2896,7 +2894,8 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
 
   // If this is a client sending request headers to upstream
   // invoke requestStarted event for attached observers.
-  if (isUpstream(session_.direction_)) {
+  const bool upstream = isUpstream(session_.direction_);
+  if (upstream) {
     const auto event =
         HTTPSessionObserverInterface::RequestStartedEvent::Builder()
             .setTimestamp(HTTPSessionObserverInterface::Clock::now())
@@ -2909,6 +2908,36 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
           observer->requestStarted(observed, event);
         });
   }
+
+  auto& wtCtx = txn->wtCtx_;
+  const bool upgraded = txn->isWebTransportConnectStream() &&
+                        (headers.isRequest() || headers.is2xxResponse());
+  const bool makeWtSession =
+      sock && !includeEOM && upgraded && wtCtx.hasWtHandler();
+  VLOG(6) << "sock=" << bool(sock) << "; eom=" << includeEOM
+          << "; upgraded=" << upgraded
+          << "; wtConnect=" << txn->isWebTransportConnectStream()
+          << "; supportsWebTransport=" << supportsWebTransport()
+          << "; wtHandler=" << wtCtx.hasWtHandler();
+  if (!makeWtSession) {
+    return;
+  }
+
+  // detach existing handler
+  if (auto* prevHandler = txn->getHandler()) {
+    prevHandler->detachTransaction();
+  }
+  txn->setHandler(nullptr);
+  // make wt session
+  auto wtConfig = detail::getH3WtConfig(&session_.ingressSettings_,
+                                        &session_.egressSettings_);
+  auto wtSess = detail::HqWtSession::make(
+      session_.getEventBase(), wtConfig, wtCtx.moveWtHandler(), sock, streamId);
+  wtSess->init(wtSess, upstream ? wtCtx.moveWtCallback() : nullptr);
+  txn->setHandler(&wtSess->txnHandler_);
+
+  // alias shared_ptr
+  wtSess_ = std::shared_ptr<H3WtSession>(wtSess, &wtSess->getH3WtSession());
 }
 
 size_t HQSession::HQStreamTransportBase::sendEOM(
@@ -3484,17 +3513,19 @@ void HQSession::HQStreamTransportBase::onPushMessageBegin(
 HQSession::HQStreamTransportBase* HQSession::findWTSessionOrAbort(
     quic::StreamId sessionID, quic::StreamId streamID) {
   CHECK(supportsWebTransport());
-  auto wtSession = findNonDetachedStream(sessionID);
-  if (!wtSession || !wtSession->txn_.isWebTransportConnectStream()) {
-    LOG(ERROR) << "Missing or invalid webtransport connect stream id="
-               << sessionID << " for peer initiated stream id=" << streamID;
+  auto* connectStream = findNonDetachedStream(sessionID);
+  const bool ok =
+      connectStream && connectStream->txn_.isWebTransportConnectStream();
+  if (!ok) {
+    LOG(ERROR) << "invalid wt connect id=" << sessionID
+               << " stream id=" << streamID;
     // need to error stopSending/reset this stream
     abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
                 streamID,
                 HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR);
     return nullptr;
   }
-  return wtSession;
+  return connectStream;
 }
 
 // Peer initiated Uni WT streams
@@ -3506,19 +3537,18 @@ void HQSession::dispatchUniWTStream(quic::StreamId streamID,
   CHECK(!consumeRes.hasError()) << "Unexpected error consuming bytes";
   VLOG(6) << __func__ << " sess=" << *this << " id=" << streamID
           << " wt-sess-id=" << sessionID;
-
-  // Notify the read callback
-  if (infoCallback_) {
-    infoCallback_->onRead(
-        *this, toConsume, static_cast<HTTPCodec::StreamID>(streamID));
-  }
-
-  auto parent = findWTSessionOrAbort(sessionID, streamID);
-  if (!parent) {
+  auto* connectStream = findWTSessionOrAbort(sessionID, streamID);
+  if (!connectStream) {
     return;
   }
-  auto handle = parent->txn_.onWebTransportUniStream(streamID);
-  sock_->setReadCallback(streamID, handle);
+  if (connectStream->wtSess_) {
+    if (!connectStream->wtSess_->acquireIngressStream(streamID)) {
+      rejectStream(streamID);
+    }
+  } else {
+    auto* handle = connectStream->txn_.onWebTransportUniStream(streamID);
+    sock_->setReadCallback(streamID, handle);
+  }
 }
 
 // Peer initiated Bidi WT streams
@@ -3530,14 +3560,18 @@ void HQSession::dispatchBidiWTStream(HTTPCodec::StreamID streamID,
   CHECK(!consumeRes.hasError()) << "Unexpected error consuming bytes";
   VLOG(6) << __func__ << " sess=" << *this << " id=" << streamID
           << " wt-sess-id=" << sessionID;
-
-  auto parent = findWTSessionOrAbort(sessionID, streamID);
-  if (!parent) {
+  auto* connectStream = findWTSessionOrAbort(sessionID, streamID);
+  if (!connectStream) {
     return;
   }
-
-  auto handle = parent->txn_.onWebTransportBidiStream(streamID);
-  sock_->setReadCallback(streamID, handle.readHandle);
+  if (connectStream->wtSess_) {
+    if (!connectStream->wtSess_->acquireIngressStream(streamID)) {
+      rejectStream(streamID);
+    }
+  } else {
+    auto handle = connectStream->txn_.onWebTransportBidiStream(streamID);
+    sock_->setReadCallback(streamID, handle.readHandle);
+  }
 }
 
 // Methods specific to StreamTransport subclasses
@@ -3702,7 +3736,11 @@ void HQSession::onDatagramsAvailable() noexcept {
     VLOG(4) << "Received datagram for streamId=" << streamId << " ctx="
             << (ctxId ? folly::to<std::string>(ctxId->first) : std::string())
             << " len=" << datagramQ.chainLength() << " sess=" << *this;
-    stream->txn_.onDatagram(datagramQ.move());
+    if (stream->wtSess_) {
+      stream->wtSess_->onDatagram(datagramQ.move());
+    } else {
+      stream->txn_.onDatagram(datagramQ.move());
+    }
   }
 }
 

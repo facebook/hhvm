@@ -2864,108 +2864,6 @@ TEST_F(HTTP2UpstreamSessionTest, InvalidWtReq) {
   httpSession_->dropConnection();
 }
 
-template <class T>
-folly::Try<T> blockingWait(folly::SemiFuture<T> fut, folly::EventBase* evb) {
-  while (!fut.isReady()) {
-    evb->loopOnce();
-  }
-  return std::move(fut).result();
-}
-
-struct WtCapsuleCodecCallback : public WebTransportCapsuleCodec::Callback {
-  ~WtCapsuleCodecCallback() override = default;
-  void onWTResetStreamCapsule(WTResetStreamCapsule capsule) noexcept override {
-    rst.emplace(capsule);
-    signal();
-  }
-  void onWTStopSendingCapsule(WTStopSendingCapsule capsule) noexcept override {
-    ss.emplace(capsule);
-    signal();
-  }
-  void onWTStreamCapsule(WTStreamCapsule capsule) noexcept override {
-    VLOG(4)
-        << __func__ << "; id=" << capsule.streamId << "; len="
-        << (capsule.streamData ? capsule.streamData->computeChainDataLength()
-                               : 0);
-    stream.emplace(std::move(capsule));
-    signal();
-  }
-  void onWTMaxDataCapsule(WTMaxDataCapsule capsule) noexcept override {
-    md.emplace(capsule);
-    signal();
-  }
-  void onWTMaxStreamDataCapsule(
-      WTMaxStreamDataCapsule capsule) noexcept override {
-    msd.emplace(capsule);
-    signal();
-  }
-  void onWTMaxStreamsBidiCapsule(
-      WTMaxStreamsCapsule capsule) noexcept override {
-    bidiMaxStreams.emplace(capsule);
-    signal();
-  }
-  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule capsule) noexcept override {
-    uniMaxStreams.emplace(capsule);
-    signal();
-  }
-
-  void onWTDataBlockedCapsule(WTDataBlockedCapsule) noexcept override {
-  }
-  void onWTStreamDataBlockedCapsule(
-      WTStreamDataBlockedCapsule) noexcept override {
-  }
-  void onPaddingCapsule(PaddingCapsule) noexcept override {
-  }
-  void onWTStreamsBlockedBidiCapsule(
-      WTStreamsBlockedCapsule) noexcept override {
-  }
-  void onWTStreamsBlockedUniCapsule(WTStreamsBlockedCapsule) noexcept override {
-  }
-  void onDatagramCapsule(DatagramCapsule) noexcept override {
-  }
-  void onCloseWTSessionCapsule(
-      CloseWebTransportSessionCapsule) noexcept override {
-  }
-  void onDrainWTSessionCapsule(
-      DrainWebTransportSessionCapsule) noexcept override {
-  }
-  void onConnectionError(
-      WebTransportCapsuleCodec::ErrorCode) noexcept override {
-    LOG(FATAL) << "conn error";
-  }
-  void onCapsule(uint64_t capsuleType,
-                 uint64_t capsuleLength) noexcept override {
-    VLOG(4) << __func__ << "; capsuleType=" << capsuleType
-            << "; capsuleLength=" << capsuleLength;
-  }
-
-  // signals by fulfilling the promise and resetting it
-  void signal() {
-    event.promise.setValue();
-    event = folly::makePromiseContract<folly::Unit>();
-  }
-
-  // waits until a WebTransport event of interest is ready
-  void waitForEvent(folly::EventBase* evb) {
-    blockingWait(std::move(event.future), evb);
-    event = folly::makePromiseContract<folly::Unit>();
-  }
-
-  std::optional<CloseWebTransportSessionCapsule> close;
-  std::optional<DrainWebTransportSessionCapsule> drain;
-  std::optional<WTResetStreamCapsule> rst;
-  std::optional<WTStopSendingCapsule> ss;
-  std::optional<WTStreamCapsule> stream;
-  std::optional<WTMaxDataCapsule> md;
-  std::optional<WTMaxStreamDataCapsule> msd;
-  std::optional<WTMaxStreamsCapsule> bidiMaxStreams;
-  std::optional<WTMaxStreamsCapsule> uniMaxStreams;
-
- private:
-  folly::SemiPromiseContract<folly::Unit> event{
-      folly::makePromiseContract<folly::Unit>()};
-};
-
 class H2WtUpstreamTest : public HTTPUpstreamTest<HTTP2CodecPair> {
  public:
   void SetUp() override {
@@ -3019,7 +2917,7 @@ class H2WtUpstreamTest : public HTTPUpstreamTest<HTTP2CodecPair> {
 
     // serialize final 2xx
     deliverRespHeaders(/*id=*/1, makeResponse(200), /*eom=*/false);
-    auto res = blockingWait(std::move(wtReq), &eventBase_);
+    auto res = waitForFut(std::move(wtReq), eventBase_);
     CHECK(res.hasValue());
     EXPECT_EQ(res.value()->getStatusCode(), 200);
     CHECK(wt.handlerCtx->wtSession);
@@ -3129,7 +3027,7 @@ TEST_F(H2WtUpstreamTest, SimpleUniEgress) {
   });
 
   // wait for client to parse max_streams
-  blockingWait(wt.sess->awaitUniStreamCredit(), &eventBase_);
+  waitForFut(wt.sess->awaitUniStreamCredit(), eventBase_);
   // next awaitUniStreamCredit should be synchronously available
   wt.sess->awaitUniStreamCredit().isReady();
   // peer advertised uni credit => ::createUniStream now yields handle
@@ -3158,7 +3056,7 @@ TEST_F(H2WtUpstreamTest, SimpleUniEgress) {
   });
 
   // wait for wt capsule codec callback to fire
-  server.wtCodecCb.waitForEvent(&eventBase_);
+  server.wtCodecCb.waitForEvent(eventBase_);
 
   // validate we've rx'd a wt_stream capsule with expected values
   auto streamEvent = std::exchange(server.wtCodecCb.stream, {});
@@ -3187,7 +3085,7 @@ TEST_F(H2WtUpstreamTest, SimpleUniEgress) {
   // release 1 byte of connection-level wt fc; buffered data will be dequeued
   // from WtStreamManager
   grantMaxData(detail::kInvalidVarint, kBufLen + 1);
-  server.wtCodecCb.waitForEvent(&eventBase_);
+  server.wtCodecCb.waitForEvent(eventBase_);
   streamEvent = std::exchange(server.wtCodecCb.stream, {});
   CHECK(streamEvent.has_value());
   EXPECT_EQ(streamEvent->streamId, id);
@@ -3198,7 +3096,7 @@ TEST_F(H2WtUpstreamTest, SimpleUniEgress) {
   wt.sess->writeStreamData(
       id, nullptr, /*fin=*/true, /*deliveryCallback=*/nullptr);
 
-  server.wtCodecCb.waitForEvent(&eventBase_);
+  server.wtCodecCb.waitForEvent(eventBase_);
   streamEvent = std::exchange(server.wtCodecCb.stream, {});
   CHECK(streamEvent.has_value());
   EXPECT_EQ(streamEvent->streamId, id);
@@ -3232,7 +3130,7 @@ TEST_F(H2WtUpstreamTest, SimpleUniIngress) {
   EXPECT_EQ(read->value().data->computeChainDataLength(), kBufLen / 2 + 1);
 
   // consuming half of advertised rwnd issues MaxData & MaxStreamData to peer
-  server.wtCodecCb.waitForEvent(&eventBase_);
+  server.wtCodecCb.waitForEvent(eventBase_);
   EXPECT_TRUE(server.wtCodecCb.md.has_value() &&
               server.wtCodecCb.msd.has_value());
 
@@ -3250,7 +3148,7 @@ TEST_F(H2WtUpstreamTest, SimpleUniIngress) {
   });
 
   // expect read resolves with exception due to rst above
-  auto readRes = blockingWait(std::move(read.value()), &eventBase_);
+  auto readRes = waitForFut(std::move(read.value()), eventBase_);
   EXPECT_TRUE(readRes.hasException());
 }
 
@@ -3267,7 +3165,7 @@ TEST_F(H2WtUpstreamTest, SimpleBidiEcho) {
     deliverWtData(server.wtBuf.move());
   });
 
-  blockingWait(wt.sess->awaitBidiStreamCredit(), &eventBase_);
+  waitForFut(wt.sess->awaitBidiStreamCredit(), eventBase_);
 
   // next awaitBidiStreamCredit should be synchronously available
   EXPECT_TRUE(wt.sess->awaitBidiStreamCredit().isReady());
@@ -3308,7 +3206,7 @@ TEST_F(H2WtUpstreamTest, SimpleBidiEcho) {
         id, buf->clone(), /*fin=*/false, /*deliveryCallback=*/nullptr);
 
     // wait for peer codec to receive event
-    server.wtCodecCb.waitForEvent(&eventBase_);
+    server.wtCodecCb.waitForEvent(eventBase_);
 
     // validate we've rx'd a wt_stream capsule with val idx
     auto streamEvent = std::exchange(server.wtCodecCb.stream, {});
@@ -3325,7 +3223,7 @@ TEST_F(H2WtUpstreamTest, SimpleBidiEcho) {
     deliverWtData(server.wtBuf.move());
 
     // expect to client to rx same byte
-    auto read = blockingWait(wt.sess->readStreamData(id).value(), &eventBase_);
+    auto read = waitForFut(wt.sess->readStreamData(id).value(), eventBase_);
     CHECK(read.hasValue());
     EXPECT_EQ(*read->data->data(), idx);
   }
@@ -3345,7 +3243,7 @@ TEST_F(H2WtUpstreamTest, SimpleBidiEcho) {
   });
 
   // stream is reset, ::read will return an exception
-  auto read = blockingWait(wt.sess->readStreamData(id).value(), &eventBase_);
+  auto read = waitForFut(wt.sess->readStreamData(id).value(), eventBase_);
   EXPECT_TRUE(read.hasException());
 
   wt.sess->closeSession();

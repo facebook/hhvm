@@ -8,9 +8,6 @@
 
 #include <proxygen/lib/http/session/HTTPUpstreamSession.h>
 
-#include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
-#include <proxygen/lib/http/webtransport/WtUtils.h>
-
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <wangle/acceptor/ConnectionManager.h>
 
@@ -222,109 +219,6 @@ void HTTPUpstreamSession::detachThreadLocals(bool detachSSLContext) {
   if (cm) {
     cm->removeConnection(this);
   }
-}
-
-namespace {
-
-constexpr std::string_view kWtNotSupported = "WebTransport not supported";
-constexpr std::string_view kInvalidWtReq = "Invalid WebTransport request";
-constexpr std::string_view kStreamFailed = "Failed to create stream";
-
-folly::exception_wrapper makeHttpEx(const std::string& err) noexcept {
-  constexpr auto kExDir = HTTPException::Direction::INGRESS_AND_EGRESS;
-  return folly::make_exception_wrapper<HTTPException>(kExDir, err);
-}
-
-using WtReqResult = std::unique_ptr<HTTPMessage>;
-using WtReqResultPromise = folly::Promise<WtReqResult>;
-folly::Promise<WtReqResult> emptyWtReqPromise() noexcept {
-  return folly::Promise<WtReqResult>::makeEmpty();
-}
-
-class WtClientCallback final
-    : public HttpWtClientCallbackIf
-    , public HTTPTransactionHandler {
- private:
-  folly::Promise<WtReqResult> promise{emptyWtReqPromise()};
-
- public:
-  explicit WtClientCallback(WtReqResultPromise p) noexcept
-      : promise(std::move(p)) {
-  }
-  ~WtClientCallback() noexcept override = default;
-  folly::Promise<WtReqResult> resetPromise() noexcept {
-    return std::exchange(promise, emptyWtReqPromise());
-  }
-  /**
-   * Either ::onHeaders or ::onErr can be invoked first
-   *
-   * When ::onHeadersComplete is invoked, resolve the promise with the non-final
-   * http headers
-   *
-   * When ::onError is invoked, resolve the promise with HTTPException
-   */
-  void onHeaders(std::unique_ptr<HTTPMessage> msg) noexcept override {
-    if (msg->isFinal()) {
-      auto p = resetPromise();
-      CHECK(p.valid());
-      p.setValue(std::move(msg));
-    }
-  }
-  void onErr(const HTTPException& ex) noexcept override {
-    auto p = resetPromise();
-    CHECK(p.valid());
-    p.setException(ex);
-  }
-
-  // **ignored**
-  void onHeadersComplete(std::unique_ptr<HTTPMessage>) noexcept override {
-  }
-  void onError(const HTTPException&) noexcept override {
-  }
-  void detachTransaction() noexcept override {
-  }
-  void setTransaction(HTTPTransaction*) noexcept override {
-  }
-  void onBody(std::unique_ptr<folly::IOBuf>) noexcept override {
-  }
-  void onTrailers(std::unique_ptr<HTTPHeaders>) noexcept override {
-  }
-  void onEOM() noexcept override {
-  }
-  void onUpgrade(UpgradeProtocol) noexcept override {
-  }
-  void onEgressPaused() noexcept override {
-  }
-  void onEgressResumed() noexcept override {
-  }
-};
-
-} // namespace
-
-folly::SemiFuture<WtReqResult> HTTPUpstreamSession::sendWebTransportRequest(
-    const HTTPMessage& req, WebTransportHandler::Ptr wtHandler) noexcept {
-  // both self and peer must indicate support for WebTransport
-  const bool supportsWt = proxygen::detail::supportsH2Wt(
-      {codec_->getIngressSettings(), codec_->getEgressSettings()});
-  const bool validWtReq = HTTPWebTransport::isConnectMessage(req);
-  if (!(supportsWt && validWtReq)) {
-    auto err = !validWtReq ? kInvalidWtReq : kWtNotSupported;
-    VLOG(6) << __func__ << " err=" << err << "; sess=" << *this;
-    return makeHttpEx(std::string(err));
-  }
-
-  auto [p, f] = folly::makePromiseContract<WtReqResult>();
-  auto wtClientCb = std::make_unique<WtClientCallback>(std::move(p));
-
-  auto* txn = newTransaction(wtClientCb.get());
-  if (!txn) {
-    return makeHttpEx(std::string(kStreamFailed));
-  }
-
-  // send wt upgrade req
-  txn->setHandler(nullptr); // clear handler, will be replaced by sendWtHeaders
-  txn->sendWtHeaders(req, std::move(wtHandler), std::move(wtClientCb));
-  return std::move(f);
 }
 
 void HTTPUpstreamSession::maybeDetachSSLContext() const {

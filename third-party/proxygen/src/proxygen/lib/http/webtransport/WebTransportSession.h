@@ -152,4 +152,51 @@ class H2WtSession
   WebTransportHandler::Ptr& wtHandler_;
 };
 
+/**
+ * WtClientCallback is used by upstream sessions (i.e. HTTPUpstreamSession &
+ * HQUpstreamSession) to implement ::sendWebTransportRequest.
+ * ::sendWebTransportRequest returns a handle to the WebTransport::Ptr and a
+ * SemiFuture<HTTPMessage> that is resolved asynchronously via this helper
+ * class.
+ */
+class WtClientCallback final
+    : public HttpWtClientCallbackIf
+    , public HTTPTransactionHandler {
+ public:
+  using WtReqResult = std::unique_ptr<HTTPMessage>;
+  using WtReqResultPromise = folly::Promise<WtReqResult>;
+
+  explicit WtClientCallback(WtReqResultPromise p) noexcept;
+  ~WtClientCallback() noexcept override = default;
+
+  void onHeaders(std::unique_ptr<HTTPMessage> msg) noexcept override;
+  void onErr(const HTTPException& ex) noexcept override;
+  WtReqResultPromise resetPromise() noexcept;
+
+  // **ignored**
+  void onHeadersComplete(std::unique_ptr<HTTPMessage>) noexcept override {
+  }
+  void onError(const HTTPException&) noexcept override {
+  }
+  void detachTransaction() noexcept override {
+  }
+  void setTransaction(HTTPTransaction*) noexcept override {
+  }
+  void onBody(std::unique_ptr<folly::IOBuf>) noexcept override {
+  }
+  void onTrailers(std::unique_ptr<HTTPHeaders>) noexcept override {
+  }
+  void onEOM() noexcept override {
+  }
+  void onUpgrade(UpgradeProtocol) noexcept override {
+  }
+  void onEgressPaused() noexcept override {
+  }
+  void onEgressResumed() noexcept override {
+  }
+
+ private:
+  WtReqResultPromise promise{folly::Promise<WtReqResult>::makeEmpty()};
+};
+
 } // namespace proxygen::detail

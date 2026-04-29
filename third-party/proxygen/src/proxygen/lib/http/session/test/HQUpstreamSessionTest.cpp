@@ -10,6 +10,7 @@
 
 #include <proxygen/lib/http/codec/CodecUtil.h>
 #include <proxygen/lib/http/session/HQUpstreamSession.h>
+#include <proxygen/lib/http/webtransport/test/Mocks.h>
 
 #include <folly/portability/GTest.h>
 #include <limits>
@@ -28,6 +29,7 @@
 #include <quic/priority/HTTPPriorityQueue.h>
 
 using namespace proxygen;
+using namespace proxygen::test;
 using namespace proxygen::hq;
 using namespace quic;
 using namespace testing;
@@ -2881,6 +2883,384 @@ TEST_P(HQUpstreamSessionTestWebTransport, ReceiveWTDataBlockedCapsule) {
   closeWTSession();
 }
 
+class H3WtUpstreamTest : public HQUpstreamSessionTest {
+ public:
+  static constexpr uint64_t kConnectStreamId = 0;
+  static constexpr auto kLargeFc = std::numeric_limits<uint32_t>::max();
+
+  void SetUp() override {
+    HQUpstreamSessionTest::SetUp();
+    socketDriver_->setMaxBidiStreams(2);
+    socketDriver_->setMaxUniStreams(4);
+    socketDriver_->setConnectionFlowControlWindow(kLargeFc);
+
+    // pipe all client writes to stream 0 into peer http/3 codec
+    EXPECT_CALL(infoCb_, onWrite(_, _)).WillRepeatedly([&]() {
+      socketDriver_->flushWrites(kConnectStreamId); // assume all writes flushed
+      auto& quicStreams = socketDriver_->streams_;
+      auto& httpStreams = streams_;
+      const bool streamExists = quicStreams.contains(kConnectStreamId) &&
+                                httpStreams.contains(kConnectStreamId);
+      if (streamExists && !quicStreams.at(kConnectStreamId).writeBuf.empty()) {
+        auto& codec = httpStreams.at(kConnectStreamId).codec;
+        codec->setCallback(&server.codecCb);
+        codec->onIngress(*quicStreams.at(kConnectStreamId).writeBuf.move());
+      }
+    });
+
+    // pipe all http/3 DATA frames for connect stream into peer wt codec
+    EXPECT_CALL(server.codecCb, onBody(_, _, _))
+        .WillRepeatedly(
+            [&](uint64_t id, std::shared_ptr<folly::IOBuf> buf, uint8_t) {
+              server.wtCodec.onIngress(buf ? buf->clone() : nullptr,
+                                       /*eom=*/false);
+            });
+  }
+
+  void TearDown() override {
+    if (wt.sess) {
+      wt.sess->closeSession();
+    }
+    HQUpstreamSessionTest::TearDown();
+  }
+
+  HQUpstreamSession* upstreamSession() {
+    return dynamic_cast<HQUpstreamSession*>(hqSession_);
+  }
+
+  /**
+   * delivers the serialized WebTransport capsules to the client's CONNECT wt
+   * request stream
+   */
+  void deliverWtData(std::unique_ptr<folly::IOBuf> wtData, bool eom = false) {
+    auto& stream = streams_.at(kConnectStreamId);
+    stream.codec->generateBody(stream.buf,
+                               kConnectStreamId,
+                               std::move(wtData),
+                               /*padding=*/folly::none,
+                               /*eom=*/eom);
+    socketDriver_->addReadEvent(kConnectStreamId, stream.buf.move());
+    flush();
+  }
+
+  // serializes WtMaxData and delivers it to the upstream session
+  void grantMaxData(uint64_t offset) {
+    writeWTMaxData(server.wtBuf, {offset});
+    deliverWtData(server.wtBuf.move());
+  }
+
+  void loopN(uint8_t loops) {
+    while (loops--) {
+      eventBase_.loopOnce(EVLOOP_NONBLOCK);
+    }
+  }
+
+  void establishWtSession() {
+    auto req = getWtReq();
+    auto wtHandler = DummyWtHandler::make();
+    wt.handlerCtx = wtHandler->ctx;
+    auto wtReq =
+        upstreamSession()->sendWebTransportRequest(req, std::move(wtHandler));
+    CHECK(!wtReq.isReady());
+    loopN(2);
+
+    sendResponse(kConnectStreamId, getResponse(200), nullptr, false);
+    flush();
+
+    auto res = waitForFut(std::move(wtReq), eventBase_);
+    CHECK(res.hasValue());
+    EXPECT_EQ(res.value()->getStatusCode(), 200);
+    CHECK(wt.handlerCtx->wtSession);
+    wt.sess = std::move(wt.handlerCtx->wtSession);
+  }
+
+  // peer context
+  struct {
+    // codecCb used for parsing http/3 frames; simulating a peer
+    // receiving http/3 data from client
+    NiceMock<MockHTTPCodecCallback> codecCb;
+    // wtCodec & wtCodecCb are used for parsing WebTransport capsules;
+    // simulating a peer receiving WebTransport data from client
+    WtCapsuleCodecCallback wtCodecCb;
+    WebTransportCapsuleCodec wtCodec{&wtCodecCb, CodecVersion::H3};
+    // webtransport write buffer - contains the serialize wt capsules;
+    // simulating a peer sending data to client
+    folly::IOBufQueue wtBuf{folly::IOBufQueue::cacheChainLength()};
+  } server;
+
+  struct {
+    std::shared_ptr<WebTransport> sess;
+    std::shared_ptr<DummyWtHandler::Ctx> handlerCtx;
+  } wt;
+};
+
+TEST_P(H3WtUpstreamTest, InvalidWtReq) {
+  // msg is an invalid WebTransport request
+  auto msg = getGetRequest("/");
+  auto req = upstreamSession()->sendWebTransportRequest(
+      msg, std::make_unique<DummyWtHandler>());
+  EXPECT_TRUE(req.isReady() && req.hasException());
+  // meh grepping exception string kinda sucks but w/e
+  std::string what = std::string(req.result().exception().what());
+  EXPECT_TRUE(what.find("Invalid") != std::string::npos);
+  eventBase_.loop();
+  hqSession_->dropConnection();
+}
+
+TEST_P(H3WtUpstreamTest, SimpleUniEgress) {
+  establishWtSession();
+
+  // no available uni/bidi streams
+  auto createStream = wt.sess->createUniStream();
+  EXPECT_TRUE(createStream.hasError());
+
+  // asynchronously advertise max_streams
+  eventBase_.runInLoop([&]() {
+    writeWTMaxStreams(server.wtBuf, /*capsule=*/{1}, /*isBidi=*/false);
+    deliverWtData(server.wtBuf.move());
+  });
+
+  // wait for client to parse max_streams
+  waitForFut(wt.sess->awaitUniStreamCredit(), eventBase_);
+  // next awaitUniStreamCredit should be synchronously available
+  EXPECT_TRUE(wt.sess->awaitUniStreamCredit().isReady());
+  // peer advertised uni credit => ::createUniStream now yields handle
+  createStream = wt.sess->createUniStream();
+  CHECK(createStream.hasValue());
+  auto* wh = createStream.value();
+  auto id = wh->getID();
+  socketDriver_->setStreamFlowControlWindow(id, kLargeFc);
+
+  // fill up egress buffer => writes blocked
+  constexpr uint32_t kBufLen = 65'536;
+  const uint8_t wtPrefixSize = 3; // varint 0x54 + varint stream id
+  auto writeRes =
+      wt.sess->writeStreamData(id, makeBuf(kBufLen), /*fin=*/false, nullptr);
+  EXPECT_EQ(writeRes.value(), WebTransport::FCState::BLOCKED);
+  // data written to underlying quic socket
+  const auto& quicStream = socketDriver_->streams_.at(id);
+  EXPECT_EQ(quicStream.nextWriteOffset, kBufLen + wtPrefixSize);
+
+  // blocked on connection-level fc; buffered data will not be dequeued from
+  // WtStreamManager
+  wt.sess->writeStreamData(
+      id, makeBuf(1), /*fin=*/false, /*deliveryCallback=*/nullptr);
+  loopN(2);
+
+  // still kBufLen+wtPrefixSize write offset
+  EXPECT_EQ(quicStream.nextWriteOffset, kBufLen + wtPrefixSize);
+
+  // release 1 byte of connection-level wt fc; buffered data will be dequeued
+  // from WtStreamManager
+  grantMaxData(kBufLen + 1);
+  loopN(2);
+
+  // now prevSize + 1 write offset
+  EXPECT_EQ(quicStream.nextWriteOffset, kBufLen + wtPrefixSize + 1);
+
+  // blocked on both connection- and stream-level fc; however if just fin=true,
+  // this should be dequeued regardless of peer fc credit
+  wt.sess->writeStreamData(
+      id, nullptr, /*fin=*/true, /*deliveryCallback=*/nullptr);
+
+  EXPECT_TRUE(quicStream.writeEOF);
+  hqSession_->dropConnection();
+}
+
+TEST_P(H3WtUpstreamTest, SimpleUniIngress) {
+  establishWtSession();
+
+  // write wt stream prefix + kBufLen bytes
+  constexpr uint16_t kBufLen = 65'535;
+  writeWTStreamPreface(
+      server.wtBuf, WebTransportStreamType::UNI, kConnectStreamId);
+  server.wtBuf.append(makeBuf(kBufLen));
+
+  constexpr uint8_t kServerUniId =
+      15; // accounting for 3 prior h3 control streams
+  socketDriver_->addReadEvent(/*streamId=*/kServerUniId, server.wtBuf.move());
+
+  // wait until we get a peer stream
+  while (wt.handlerCtx->peerStreams.empty()) {
+    loopN(1);
+  }
+
+  // ingress only => writeHandle == nullptr
+  auto handle = wt.handlerCtx->peerStreams.at(0);
+  EXPECT_FALSE(handle.writeHandle);
+  EXPECT_TRUE(handle.readHandle);
+
+  auto read = wt.sess->readStreamData(kServerUniId);
+  EXPECT_TRUE(read->isReady());
+  EXPECT_EQ(read->value().data->computeChainDataLength(), kBufLen);
+  EXPECT_FALSE(read->value().fin);
+
+  // consuming half of advertised rwnd issues MaxData & MaxStreamData to peer
+  server.wtCodecCb.waitForEvent(eventBase_);
+  EXPECT_TRUE(server.wtCodecCb.md.has_value());
+
+  // when receiving a rst_stream, read should resolve an exc
+  read = wt.sess->readStreamData(kServerUniId);
+  EXPECT_TRUE(read.hasValue() && !read->isReady());
+
+  socketDriver_->addReadError(kServerUniId, quic::ApplicationErrorCode{0x00});
+  loopN(1);
+  EXPECT_TRUE(read->isReady() && read->hasException());
+
+  hqSession_->dropConnection();
+}
+
+TEST_P(H3WtUpstreamTest, SimpleBidiEcho) {
+  establishWtSession();
+
+  // no available bidi streams
+  auto createStream = wt.sess->createBidiStream();
+  EXPECT_TRUE(createStream.hasError());
+
+  // asynchronously advertise max_streams
+  eventBase_.runInLoop([&]() {
+    writeWTMaxStreams(server.wtBuf, /*capsule=*/{1}, /*isBidi=*/true);
+    deliverWtData(server.wtBuf.move());
+  });
+
+  waitForFut(wt.sess->awaitBidiStreamCredit(), eventBase_);
+
+  // next awaitBidiStreamCredit should be synchronously available
+  EXPECT_TRUE(wt.sess->awaitBidiStreamCredit().isReady());
+
+  // peer advertised bidi credit => ::createBidiStream now yields handle
+  createStream = wt.sess->createBidiStream();
+  CHECK(createStream.hasValue());
+  auto handle = createStream.value();
+  auto id = handle.readHandle->getID();
+
+  wtStreams_.waitForWtStream(eventBase_, id);
+  wtStreams_.moveData(id); // discard wt prefix data (e.g. connect stream id)
+
+  /**
+   * in a loop – write one byte, wait for peer codec to parse byte, send the
+   * byte back, and finally read the byte.
+   */
+  for (uint8_t idx = 0; idx < std::numeric_limits<uint8_t>::max(); idx++) {
+    // write idx to stream
+    auto buf = folly::IOBuf::copyBuffer(&idx, sizeof(idx));
+
+    // deliver data in the next loop
+    eventBase_.runInLoop([&]() {
+      wt.sess->writeStreamData(
+          id, buf->clone(), /*fin=*/false, /*deliveryCallback=*/nullptr);
+    });
+    wtStreams_.waitForWtStreamData(eventBase_, id);
+
+    auto [data, eom] = wtStreams_.moveData(id);
+    EXPECT_TRUE(folly::IOBufEqualTo{}(buf, data));
+    EXPECT_FALSE(eom);
+
+    // send the same byte back to client
+    socketDriver_->addReadEvent(id, buf->clone());
+    // expect to client to rx same bytes
+    auto read = waitForFut(wt.sess->readStreamData(id).value(), eventBase_);
+    CHECK(read.hasValue());
+    EXPECT_EQ(*read->data->data(), idx);
+  }
+
+  wt.sess->closeSession();
+  hqSession_->dropConnection();
+}
+
+TEST_P(H3WtUpstreamTest, ConnectStreamResetErr) {
+  establishWtSession();
+  // rst_stream triggers handler notif
+  socketDriver_->addReadError(kConnectStreamId, ApplicationErrorCode{0x00});
+  loopN(2);
+  EXPECT_TRUE(wt.handlerCtx->err.has_value());
+  hqSession_->dropConnection();
+}
+
+TEST_P(H3WtUpstreamTest, ConnectStreamStopSendingErr) {
+  establishWtSession();
+  // stop_seding triggers handler notif
+  socketDriver_->addStopSending(kConnectStreamId, ApplicationErrorCode{0x00});
+  loopN(2);
+  EXPECT_TRUE(wt.handlerCtx->err.has_value());
+  hqSession_->dropConnection();
+}
+
+/**
+ * connect stream termination (i.e. fin) should trigger bidi reset for all assoc
+ * wt/quic streams
+ */
+TEST_P(H3WtUpstreamTest, ConnectStreamEom) {
+  establishWtSession();
+
+  { // advertise uni&bidi stream credit
+    writeWTMaxStreams(server.wtBuf, /*capsule=*/{1}, /*isBidi=*/false);
+    writeWTMaxStreams(server.wtBuf, /*capsule=*/{1}, /*isBidi=*/true);
+    deliverWtData(server.wtBuf.move());
+    loopN(2);
+  }
+
+  auto uni = wt.sess->createUniStream();
+  auto bidi = wt.sess->createBidiStream();
+  CHECK(uni && bidi);
+  uint64_t uniId = uni.value()->getID(), bidiId = bidi->writeHandle->getID();
+
+  // ingress eom on connect stream => close
+  socketDriver_->addReadEOF(kConnectStreamId);
+  loopN(4);
+
+  EXPECT_TRUE(wt.handlerCtx->err);
+
+  // all assoc wt streams are bidi reset
+  auto& streams = socketDriver_->streams_;
+  using DriverState = MockQuicSocketDriver::StateEnum;
+  EXPECT_TRUE(streams[uniId].writeState == DriverState::ERROR);
+  EXPECT_TRUE(streams[bidiId].writeState == DriverState::ERROR);
+
+  hqSession_->dropConnection();
+}
+
+TEST_P(H3WtUpstreamTest, IngressStreamLimitExceeded) {
+  establishWtSession();
+
+  // write wt stream prefix + kBufLen bytes
+  constexpr uint16_t kBufLen = 1'000;
+  writeWTStreamPreface(
+      server.wtBuf, WebTransportStreamType::UNI, kConnectStreamId);
+  server.wtBuf.append(makeBuf(kBufLen));
+
+  // accounting for 3 prior h3 control streams
+  constexpr uint8_t kServerUniId = 15;
+  constexpr uint8_t kNumStreams = 10;
+  for (uint8_t idx = 0; idx < kNumStreams; idx++) {
+    uint64_t id = kServerUniId + (4 * idx);
+    socketDriver_->addReadEvent(/*streamId=*/id, server.wtBuf.front()->clone());
+  }
+
+  // wait until we get the peer streams
+  while (wt.handlerCtx->peerStreams.empty()) {
+    loopN(1);
+  }
+  EXPECT_EQ(wt.handlerCtx->peerStreams.size(), kNumStreams);
+  // all read state should be open
+  for (auto handle : wt.handlerCtx->peerStreams) {
+    auto id = handle.readHandle->getID();
+    auto& stream = socketDriver_->streams_[id];
+    EXPECT_FALSE(stream.error);
+  }
+
+  {
+    // rx'ing an additional uni stream should trigger bidi reset (well in this
+    // case a stop sending as it's a peer unidirectional stream)
+    const uint64_t id = kServerUniId * (kNumStreams * 4);
+    socketDriver_->addReadEvent(/*streamId=*/id, server.wtBuf.front()->clone());
+    auto& stream = socketDriver_->streams_[id];
+    EXPECT_FALSE(stream.error);
+  }
+
+  hqSession_->dropConnection();
+}
+
 /**
  * Instantiate the Parametrized test cases
  */
@@ -2937,6 +3317,15 @@ INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
 // Instantiate h3 webtransport tests
 INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
                          HQUpstreamSessionTestWebTransport,
+                         Values([] {
+                           TestParams tp;
+                           tp.alpn_ = "h3";
+                           tp.webTransport_ = true;
+                           return tp;
+                         }()),
+                         paramsToTestName);
+INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
+                         H3WtUpstreamTest,
                          Values([] {
                            TestParams tp;
                            tp.alpn_ = "h3";

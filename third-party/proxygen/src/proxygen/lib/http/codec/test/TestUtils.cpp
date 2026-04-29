@@ -13,6 +13,7 @@
 
 #include <folly/Random.h>
 #include <folly/io/Cursor.h>
+#include <folly/io/async/EventBase.h>
 
 using namespace folly::io;
 using namespace std;
@@ -123,6 +124,7 @@ HTTPMessage getPubRequest(const std::string& url) {
 
 HTTPMessage getResponse(uint32_t code, uint32_t bodyLen) {
   HTTPMessage resp;
+  resp.setHTTPVersion(1, 1);
   resp.setStatusCode(code);
   if (bodyLen > 0) {
     resp.getHeaders().set(HTTP_HEADER_CONTENT_LENGTH,
@@ -164,6 +166,14 @@ HTTPMessage getResponseWithInvalidBodyLength() {
   auto bodyLen = "invalid";
   resp.getHeaders().set(HTTP_HEADER_CONTENT_LENGTH, bodyLen);
   return resp;
+}
+
+HTTPMessage getWtReq() {
+  HTTPMessage req;
+  req.setHTTPVersion(1, 1);
+  req.setUpgradeProtocol("webtransport");
+  req.setMethod(HTTPMethod::CONNECT);
+  return req;
 }
 
 bool isH3GreaseId(uint64_t id) {
@@ -293,4 +303,101 @@ void fakeMockCodec(MockHTTPCodec& codec) {
         return 6;
       }));
 }
+
+void WtCapsuleCodecCallback::onWTResetStreamCapsule(
+    WTResetStreamCapsule capsule) noexcept {
+  rst.emplace(capsule);
+  signal();
+}
+
+void WtCapsuleCodecCallback::onWTStopSendingCapsule(
+    WTStopSendingCapsule capsule) noexcept {
+  ss.emplace(capsule);
+  signal();
+}
+
+void WtCapsuleCodecCallback::onWTStreamCapsule(
+    WTStreamCapsule capsule) noexcept {
+  VLOG(4) << __func__ << "; id=" << capsule.streamId << "; len="
+          << (capsule.streamData ? capsule.streamData->computeChainDataLength()
+                                 : 0);
+  stream.emplace(std::move(capsule));
+  signal();
+}
+
+void WtCapsuleCodecCallback::onWTMaxDataCapsule(
+    WTMaxDataCapsule capsule) noexcept {
+  md.emplace(capsule);
+  signal();
+}
+
+void WtCapsuleCodecCallback::onWTMaxStreamDataCapsule(
+    WTMaxStreamDataCapsule capsule) noexcept {
+  msd.emplace(capsule);
+  signal();
+}
+
+void WtCapsuleCodecCallback::onWTMaxStreamsBidiCapsule(
+    WTMaxStreamsCapsule capsule) noexcept {
+  bidiMaxStreams.emplace(capsule);
+  signal();
+}
+
+void WtCapsuleCodecCallback::onWTMaxStreamsUniCapsule(
+    WTMaxStreamsCapsule capsule) noexcept {
+  uniMaxStreams.emplace(capsule);
+  signal();
+}
+
+void WtCapsuleCodecCallback::onWTDataBlockedCapsule(
+    WTDataBlockedCapsule) noexcept {
+}
+
+void WtCapsuleCodecCallback::onWTStreamDataBlockedCapsule(
+    WTStreamDataBlockedCapsule) noexcept {
+}
+
+void WtCapsuleCodecCallback::onPaddingCapsule(PaddingCapsule) noexcept {
+}
+
+void WtCapsuleCodecCallback::onWTStreamsBlockedBidiCapsule(
+    WTStreamsBlockedCapsule) noexcept {
+}
+
+void WtCapsuleCodecCallback::onWTStreamsBlockedUniCapsule(
+    WTStreamsBlockedCapsule) noexcept {
+}
+
+void WtCapsuleCodecCallback::onDatagramCapsule(DatagramCapsule) noexcept {
+}
+
+void WtCapsuleCodecCallback::onCloseWTSessionCapsule(
+    CloseWebTransportSessionCapsule) noexcept {
+}
+
+void WtCapsuleCodecCallback::onDrainWTSessionCapsule(
+    DrainWebTransportSessionCapsule) noexcept {
+}
+
+void WtCapsuleCodecCallback::onConnectionError(
+    WebTransportCapsuleCodec::ErrorCode) noexcept {
+  LOG(FATAL) << "conn error";
+}
+
+void WtCapsuleCodecCallback::onCapsule(uint64_t capsuleType,
+                                       uint64_t capsuleLength) noexcept {
+  VLOG(4) << __func__ << "; capsuleType=" << capsuleType
+          << "; capsuleLength=" << capsuleLength;
+}
+
+void WtCapsuleCodecCallback::signal() {
+  event.promise.setValue();
+  event = folly::makePromiseContract<folly::Unit>();
+}
+
+void WtCapsuleCodecCallback::waitForEvent(folly::EventBase& evb) {
+  waitForFut(std::move(event.future), evb);
+  event = folly::makePromiseContract<folly::Unit>();
+}
+
 } // namespace proxygen

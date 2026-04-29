@@ -70,20 +70,6 @@ class HTTPUpstreamSession : public HTTPSession {
   HTTPTransaction* newTransaction(HTTPTransaction::Handler* handler) override;
 
   /**
-   * Sends a WebTransport request to the peer. If this is sent on a session that
-   * does not support WebTransport (e.g. ENABLE_CONNECT setting is false, or
-   * underlying transport is http/1.1), the future will yield an error
-   * synchronously.
-   *
-   * The promise/future is resolved when we either receive the http headers from
-   * the peer or an error occurs, whichever occurs first. The client can
-   * optimistically begin sending WebTransport data prior to the peer responding
-   * with a 2xx via the WebTransportHandler::onWebTransportSession callback
-   */
-  folly::SemiFuture<std::unique_ptr<HTTPMessage>> sendWebTransportRequest(
-      const HTTPMessage& req, WebTransportHandler::Ptr wtHandler) noexcept;
-
-  /**
    * Returns true if the underlying transport has completed full handshake.
    */
   bool isReplaySafe() const override;

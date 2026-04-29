@@ -10,6 +10,8 @@
 
 #include <proxygen/lib/http/session/ByteEventTracker.h>
 #include <proxygen/lib/http/session/HTTPSessionController.h>
+#include <proxygen/lib/http/webtransport/HTTPWebTransport.h>
+#include <proxygen/lib/http/webtransport/WebTransportSession.h>
 
 using folly::SocketAddress;
 using wangle::TransportInfo;
@@ -238,6 +240,47 @@ void HTTPSessionBase::handleLastByteEvents(ByteEventTracker* byteEventTracker,
   if (byteEventTracker && (encodedSize > 0)) {
     byteEventTracker->addLastByteEvent(txn, byteOffset);
   }
+}
+
+namespace {
+
+constexpr std::string_view kWtNotSupported = "WebTransport not supported";
+constexpr std::string_view kInvalidWtReq = "Invalid WebTransport request";
+constexpr std::string_view kStreamFailed = "Failed to create stream";
+
+folly::exception_wrapper makeHttpEx(const std::string& err) noexcept {
+  constexpr auto kExDir = HTTPException::Direction::INGRESS_AND_EGRESS;
+  return folly::make_exception_wrapper<HTTPException>(kExDir, err);
+}
+
+using WtReqResult = std::unique_ptr<HTTPMessage>;
+
+} // namespace
+
+folly::SemiFuture<std::unique_ptr<HTTPMessage>>
+HTTPSessionBase::sendWebTransportRequest(
+    const HTTPMessage& req, WebTransportHandler::Ptr wtHandler) noexcept {
+  CHECK(isUpstream(codec_->getTransportDirection()));
+  bool supportsWt = supportsWebTransport();
+  bool validWtReq = HTTPWebTransport::isConnectMessage(req);
+  if (!(supportsWt && validWtReq)) {
+    auto err = !validWtReq ? kInvalidWtReq : kWtNotSupported;
+    VLOG(4) << __func__ << " err=" << err << "; sess=" << *this;
+    return makeHttpEx(std::string(err));
+  }
+
+  auto [p, f] = folly::makePromiseContract<WtReqResult>();
+  auto wtClientCb = std::make_unique<detail::WtClientCallback>(std::move(p));
+
+  auto* txn = newTransaction(wtClientCb.get());
+  if (!txn) {
+    return makeHttpEx(std::string(kStreamFailed));
+  }
+
+  // send wt upgrade req
+  txn->setHandler(nullptr); // clear handler, will be replaced by sendWtHeaders
+  txn->sendWtHeaders(req, std::move(wtHandler), std::move(wtClientCb));
+  return std::move(f);
 }
 
 } // namespace proxygen

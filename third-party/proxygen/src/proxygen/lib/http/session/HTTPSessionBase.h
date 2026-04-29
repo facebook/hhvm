@@ -570,6 +570,21 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     return false;
   }
 
+  /**
+   * NOTE: client-only api
+   *
+   * Sends a WebTransport request to the peer. If this is sent on a session that
+   * does not support WebTransport (e.g. missing http settings, http/1.1, etc.),
+   * the future will yield an error synchronously.
+   *
+   * The promise/future is resolved when we either receive the http headers from
+   * the peer or an error occurs, whichever occurs first. The client can
+   * optimistically begin sending WebTransport data prior to the peer responding
+   * with a 2xx via the WebTransportHandler::onWebTransportSession callback
+   */
+  folly::SemiFuture<std::unique_ptr<HTTPMessage>> sendWebTransportRequest(
+      const HTTPMessage& req, WebTransportHandler::Ptr wtHandler) noexcept;
+
  protected:
   bool notifyEgressBodyBuffered(int64_t bytes, bool update);
 

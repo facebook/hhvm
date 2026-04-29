@@ -45,6 +45,7 @@ namespace proxygen {
 
 class HTTPSessionController;
 class HQSession;
+class H3WtSession;
 
 namespace hq {
 class HQStreamCodec;
@@ -1699,6 +1700,9 @@ class HQSession
 
     // Stream + session protocol info
     std::shared_ptr<QuicStreamProtocolInfo> quicStreamProtocolInfo_;
+
+    // wt session
+    std::shared_ptr<H3WtSession> wtSess_;
 
     void armStreamByteEventCb(uint64_t streamOffset,
                               quic::ByteEvent::Type type);

@@ -8,8 +8,11 @@
 
 #pragma once
 
+#include <folly/futures/Future.h>
+#include <folly/io/async/EventBase.h>
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/codec/test/MockHTTPCodec.h>
+#include <proxygen/lib/http/codec/webtransport/WebTransportCapsuleCodec.h>
 #include <proxygen/lib/utils/TestUtils.h>
 
 namespace proxygen {
@@ -461,5 +464,58 @@ makeResponse(uint16_t statusCode, size_t len);
 
 // Takes a MockHTTPCodec and fakes out its interface
 void fakeMockCodec(MockHTTPCodec& codec);
+
+// webtransport helpers
+HTTPMessage getWtReq();
+struct WtCapsuleCodecCallback : public WebTransportCapsuleCodec::Callback {
+  ~WtCapsuleCodecCallback() override = default;
+  void onWTResetStreamCapsule(WTResetStreamCapsule capsule) noexcept override;
+  void onWTStopSendingCapsule(WTStopSendingCapsule capsule) noexcept override;
+  void onWTStreamCapsule(WTStreamCapsule capsule) noexcept override;
+  void onWTMaxDataCapsule(WTMaxDataCapsule capsule) noexcept override;
+  void onWTMaxStreamDataCapsule(
+      WTMaxStreamDataCapsule capsule) noexcept override;
+  void onWTMaxStreamsBidiCapsule(WTMaxStreamsCapsule capsule) noexcept override;
+  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule capsule) noexcept override;
+  void onWTDataBlockedCapsule(WTDataBlockedCapsule) noexcept override;
+  void onWTStreamDataBlockedCapsule(
+      WTStreamDataBlockedCapsule) noexcept override;
+  void onPaddingCapsule(PaddingCapsule) noexcept override;
+  void onWTStreamsBlockedBidiCapsule(WTStreamsBlockedCapsule) noexcept override;
+  void onWTStreamsBlockedUniCapsule(WTStreamsBlockedCapsule) noexcept override;
+  void onDatagramCapsule(DatagramCapsule) noexcept override;
+  void onCloseWTSessionCapsule(
+      CloseWebTransportSessionCapsule) noexcept override;
+  void onDrainWTSessionCapsule(
+      DrainWebTransportSessionCapsule) noexcept override;
+  void onConnectionError(WebTransportCapsuleCodec::ErrorCode) noexcept override;
+  void onCapsule(uint64_t capsuleType,
+                 uint64_t capsuleLength) noexcept override;
+  void signal();
+  void waitForEvent(folly::EventBase& evb);
+
+  std::optional<CloseWebTransportSessionCapsule> close;
+  std::optional<DrainWebTransportSessionCapsule> drain;
+  std::optional<WTResetStreamCapsule> rst;
+  std::optional<WTStopSendingCapsule> ss;
+  std::optional<WTStreamCapsule> stream;
+  std::optional<WTMaxDataCapsule> md;
+  std::optional<WTMaxStreamDataCapsule> msd;
+  std::optional<WTMaxStreamsCapsule> bidiMaxStreams;
+  std::optional<WTMaxStreamsCapsule> uniMaxStreams;
+
+ private:
+  folly::SemiPromiseContract<folly::Unit> event{
+      folly::makePromiseContract<folly::Unit>()};
+};
+
+// helper to loop evb until future is fulfilled
+template <class T>
+folly::Try<T> waitForFut(folly::SemiFuture<T> fut, folly::EventBase& evb) {
+  while (!fut.isReady()) {
+    evb.loopOnce();
+  }
+  return std::move(fut).result();
+}
 
 } // namespace proxygen

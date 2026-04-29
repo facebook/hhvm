@@ -23,7 +23,7 @@ impl FeatureName {
             ContextAliasDeclaration => Unstable,
             ContextAliasDeclarationShort => Preview,
             TypeConstMultipleBounds => Preview,
-            TypeConstSuperBound => Preview,
+            TypeConstSuperBound => OngoingRelease,
             ClassConstDefault => Migration,
             UpcastExpression => Unstable,
             RequireConstraint => OngoingRelease,

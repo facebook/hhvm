@@ -109,7 +109,7 @@
 				//
 				// keywords cannot be preceded by "->"
 				// the complex lookbehind means `(?<!(?:->|::)\s*)`
-				pattern: /((?:^|[^\s>:]|(?:^|[^-])>|(?:^|[^:]):)\s*)\b(?:abstract|and|array|as|attribute|break|callable|case|catch|category|children|classname|clone|const|continue|declare|default|die|do|echo|else|elseif|empty|enddeclare|endfor|endforeach|endif|endswitch|endwhile|enum|eval|exit|extends|final|finally|fn|for|foreach|function|global|goto|if|implements|include|include_once|inout|instanceof|insteadof|interface|internal|invariant|isset|list|match|namespace|module|never|new|newtype|noreturn|or|parent|print|private|protected|public|readonly|record|require|required|require_once|return|self|shape|static|switch|throw|trait|try|type|unset|use|using|var|where|while|xor|yield|__halt_compiler)\b/i,
+				pattern: /((?:^|[^\s>:]|(?:^|[^-])>|(?:^|[^:]):)\s*)\b(?:abstract|and|array|as|attribute|break|callable|case|catch|category|children|classname|clone|const|continue|declare|default|die|do|echo|else|elseif|empty|enddeclare|endfor|endforeach|endif|endswitch|endwhile|enum|eval|exit|extends|final|finally|fn|for|foreach|function|global|goto|if|implements|include|include_once|inout|instanceof|insteadof|interface|internal|invariant|isset|list|match|named|namespace|module|never|new|newtype|noreturn|or|parent|print|private|protected|public|readonly|record|require|required|require_once|return|self|shape|static|switch|throw|trait|try|type|unset|use|using|var|where|while|xor|yield|__halt_compiler)\b/i,
 				lookbehind: true
 			}
 		],

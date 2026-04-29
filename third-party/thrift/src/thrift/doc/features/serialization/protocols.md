@@ -281,11 +281,65 @@ Rejects any invalid JSON5 strings.
 
 #### BINARY
 
-TODO
+**Serialization**: JSON object with one encoding key:
+
+| Key | Used When | Example |
+| :---- | :---- | :---- |
+| `utf-8` | The binary data is printable; see criteria below; | `{"utf-8": "hello"}` |
+| `base64url` ([RFC 4648 §5](https://datatracker.ietf.org/doc/html/rfc4648#section-5)) | Otherwise | `{"base64url": "3q2-7w"}` |
+
+Binary data is considered printable if and only if all of the following are true:
+
+1. Bytes form valid UTF-8.
+2. No C0 control characters (U+0000–U+001F) except `\b`, `\f`, `\n`, `\r`, `\t` which have JSON escape sequences.
+3. No C1 control characters (U+0080–U+009F).
+
+**Deserialization**: Accepts `utf-8`, `base64`, and `base64url` encoding keys (with or without padding).
+
+For bare strings: if the string contains `-` or `_`, it is treated as base64url; if it contains `+` or `/`, it is treated as standard base64; if it contains neither (i.e., only characters common to both alphabets), it is decoded as standard base64.
+
+For example:
+
+| Input | Result |
+| :---- | :---- |
+| `{"utf-8": "hello"}` | "hello" |
+| `{"base64url": "3q2-7w"}` | 0xDEADBEEF (base64url decoded) |
+| `{"base64": "3q2+7w=="}` | 0xDEADBEEF (standard base64 decoded accepted, never emitted) |
+| `"3q2-7w"` | 0xDEADBEEF |
+
+Rejects:
+
+* Invalid base64 as bare strings (e.g., `"Not Valid!"`).
+* Base64 with invalid padding (e.g., `"3q2+7w==="`).
+* Unsupported encoding keys (e.g., `{"invalid": "3q2-7w"}`).
+* Multiple encoding keys (e.g., `{"utf-8": "hi", "base64": "aGk="}`).
+
+:::caution
+
+Bare strings that happen to be valid base64 are base64-decoded, not UTF-8. Example: `"aGk="` → bytes `hi`, not four characters. Use `{"utf-8": "..."}` to avoid ambiguity.
+
+:::
 
 #### ENUM
 
-TODO
+**Serialization**: `"NAME (value)"` (e.g., `"ONE (1)"`). Unknown values: `"(value)"` (e.g., `"(42)"`).
+
+**Deserialization**: Accepts
+
+* `"enum-name"` (e.g., `"ONE"`).
+* `"enum-name (enum-value)"` (e.g., `"ONE (1)"`).
+* `"(enum-value)"` (e.g., `"(1)"`).
+* `enum-value` (e.g., `1`, `"1"`).
+
+Note that for enum-value, we use the same rules as integral types, thus `"ONE (0x1)"` is also supported. Unknown integer values are accepted (consistent with Binary/Compact).
+
+Rejects:
+
+* Name-value mismatch (e.g., `"ONE (2)"`).
+  * Note that if both `enum-name` and `enum-value` don't exist in the local schema, it's accepted since it's not considered a mismatch.
+* Bare unknown name (e.g., `"VALUE_NOT_IN_SCHEMA"`).
+* Floats (e.g., `"ONE (1.0)"`).
+* I32 overflow (e.g., `2147483648`).
 
 #### LIST/SET
 

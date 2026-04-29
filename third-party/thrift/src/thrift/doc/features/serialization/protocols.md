@@ -192,9 +192,128 @@ Signed integers could be treated the same as unsigned, but it would result in al
 Or more generally: `(x << 1) ^ (x >>> (bits-1))` where `bits` is the size of the value in bits, and `>>>` is an arithmetic (sign-extending) shift.
 Reversing this is `(x >> 1) ^ -(x & 1)`.
 
+### JSON5 Protocol
+
+#### Conventions
+
+* **Encoding:** Input must be UTF-8 encoded; behavior is undefined for non-UTF-8 input.
+* **Format:** Input must be valid JSON5 data; invalid input is rejected.
+* **Whitespace:** Leading/trailing whitespace are accepted; JSON5 comments (`//`, `/* ... */`) allowed anywhere whitespace is permitted (per JSON5 spec). UTF-8 BOM (byte sequence `EF BB BF` at start of input) is rejected.
+* **Case sensitivity:** All matching is case-sensitive (booleans, enum names, field names).
+* **Null handling:** Struct/union field `null` → treated as absent (a field with value `null` and an absent field are equivalent after deserialization); `null` elsewhere is treated as type mismatch.
+* **Type mismatch:** Rejected (e.g., `true` for integer field). Note: This differs from Binary/Compact protocols, where type-mismatched fields are skipped silently. Since JSON5 input can be created by hand, silently skipping type-mismatched data is error-prone.
+* **Rejection:** Causes a deserialization exception; no partial values returned.
+
+#### BOOL
+
+**Serialization**: `true` or `false` as JSON literal.
+
+**Deserialization**: Accepts `true`, `false`, `"true"`, `"false"` (case-sensitive). Rejects numeric values (`0`, `1`), case variants (`TRUE`), alternative strings (`"yes"`).
+
+#### INTEGRAL (byte, i16, i32, i64)
+
+**Serialization**: Decimal integer literal.
+
+**Deserialization**: Accepts
+
+* Any valid JSON5 integer, which includes
+  * Decimal integer literals.
+  * Leading `+`.
+  * Hex literals (`0x` prefix; prefix and digits are both case-insensitive, e.g., `0x2a`, `0X2A`, `0x2A` all accepted).
+    * Note: Hex literals may have leading zeros after the prefix, e.g., `0x007` is valid.
+  * Signed hex: `-0x2A` yields \-42; `+0x2A` yields 42\.
+* Quoted numeric strings (same rules as above, e.g., `"0x2A"`).
+
+| Input | Result |
+| :---- | :---- |
+| `42`, `+42`, `"42"`, `0x2A`, `0X2a`, `"0x2A"` | 42 |
+
+Rejects:
+
+* Overflow (e.g., `128` for byte, `32768` for i16).
+* Non-integers (e.g., `0.0`, `Infinity`, `"abc"`, `""`).
+* Exponent notation (e.g., `1e3`, `"1e3"`) (rejected to avoid ambiguity with floating-point values).
+* Leading zeros in decimal literals (any leading zero except bare `0` itself, e.g., `007`, `"007"`, `00`, `01` are rejected, whether bare or quoted).
+* Binary/octal literals (e.g., `0b101010`, `0o10`).
+
+#### FLOAT/DOUBLE
+
+**Serialization**:
+
+* Finite values: shortest round-trip decimal representation.
+* `-0.0`: always written as `-0.0` (with explicit decimal point, not `-0`).
+* Special values:
+
+| Value | JSON output | JSON5 output |
+| :---- | :---- | :---- |
+| NaN | `"NaN"` | `NaN` |
+| \-NaN | `"-NaN"` | `-NaN` |
+| Infinity | `"Infinity"` | `Infinity` |
+| \-Infinity | `"-Infinity"` | `-Infinity` |
+
+**Deserialization**: Accepts
+
+* JSON5 numeric literals.
+* Special float literals.
+* Integers if and only if converting to the target IEEE 754 type and back to integer yields the original value (bounds: \[-2²⁴, 2²⁴\] (`±16,777,216`) inclusive for float, \[-2⁵³, 2⁵³\] (`±9,007,199,254,740,992`) inclusive for double).
+* Quoted numeric strings (same rules as above, e.g., `"3.14"`).
+
+Rejects:
+
+* Non-numeric strings (e.g., `"abc"`, `""`).
+* Integers with precision loss (e.g., `11122233344455566`).
+
+#### STRING
+
+**Serialization**: JSON double-quoted strings with standard escape sequences (`\"`, `\\`, `\/`, `\b`, `\f`, `\n`, `\r`, `\t`, `\uXXXX`).
+
+**Deserialization**: Accepts any valid JSON5 strings. For example:
+
+| Input | Result |
+| :---- | :---- |
+| "hello, world" | hello, world |
+| 'hello, world' (single-quoted) | hello, world |
+| "hello, \\<br/> world" (line continuation) | hello, world |
+| "hello, \\nworld" | hello, <br/>world |
+| "\\u0041" | A |
+
+Rejects any invalid JSON5 strings.
+
+#### BINARY
+
+TODO
+
+#### ENUM
+
+TODO
+
+#### LIST/SET
+
+**Serialization**: JSON arrays (with trailing commas per Output Formatting). List order preserved. Set order: [stable ascending](https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/object-model-draft/#operation-isstablelessthan).
+
+**Deserialization**: Accepts JSON arrays. Elements inside the array are decoded recursively. List order preserved. Set order not significant.
+
+Rejects:
+
+* Null elements.
+* Type mismatch (e.g., quoted `"[1,2]"` is rejected since it's a JSON string, not a JSON array).
+* Set duplicates (detected after full deserialization of all elements to their target type, e.g., `["1", "0x1"]` for `set<i32>`).
+
+#### MAP
+
+TODO
+
+#### STRUCT/UNION
+
+TODO
+
+#### Output Formatting
+
+TODO
+
 ### Handling Unknown Fields
 
-If a decoder encounters an unknown field id while decoding a struct/union, it can continue by skipping that value and resuming with the rest of the stream. To allow this, fields and containers (map, set, list) contain the type code of the unknown type.
+If a decoder encounters an unknown field id or field name while decoding a struct/union, it can continue by skipping that value and resuming with the rest of the stream. To allow this, fields and containers (map, set, list) contain the type code or token of the unknown type.
 For non-compound types, skipping the value is trivial.
 For compound types (struct/union and containers), skipping the value is a matter of skipping each field/entry; if a field/entry is also compound then the process is recursive.
 

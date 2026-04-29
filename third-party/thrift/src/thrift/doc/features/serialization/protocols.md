@@ -435,7 +435,18 @@ Rejects:
 
 #### Output Formatting
 
-TODO
+Serialization output uses 2-space indentation with the following rules:
+
+* Newlines after opening / before closing brackets, and between elements.
+* Comma + newline between entries.
+* Colon + single space between keys and values.
+* Empty containers (`[]`, `{}`) on single line.
+
+By default output is standard JSON ([RFC 8259](https://datatracker.ietf.org/doc/html/rfc8259)); the serializer should provide an option to output [JSON5](https://spec.json5.org/) with the following changes:
+
+* Trailing comma after last entry.
+* Unquoted object keys when valid JSON5 IdentifierNames.
+* Special floating values should be unquoted (see FLOAT/DOUBLE section above).
 
 ### Handling Unknown Fields
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<89e5a1154c54eb94c3ce0ee9686be6b5>>
+// @generated SignedSource<<d23c1c401c57c811d0afe22367fc9b59>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -114,8 +114,6 @@ pub enum NastCheckError {
     },
     #[rust_to_ocaml(name = "Multiple_xhp_category")]
     MultipleXhpCategory(pos::Pos),
-    #[rust_to_ocaml(name = "Return_in_gen")]
-    ReturnInGen(pos::Pos),
     #[rust_to_ocaml(name = "Return_in_finally")]
     ReturnInFinally(pos::Pos),
     #[rust_to_ocaml(name = "Toplevel_break")]

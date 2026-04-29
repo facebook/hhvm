@@ -482,7 +482,6 @@ fn emit_fatal_nast_check_error(err: &NastCheckError) -> Result<Unit, Error> {
         NastCheckError::PartiallyAbstractTypeconstDefinition(_) => todo!(),
         NastCheckError::RefinementInTypestruct { .. } => todo!(),
         NastCheckError::MultipleXhpCategory(_) => todo!(),
-        NastCheckError::ReturnInGen(_) => todo!(),
         NastCheckError::ReturnInFinally(_) => todo!(),
         NastCheckError::ToplevelBreak(_) => todo!(),
         NastCheckError::ToplevelContinue(_) => todo!(),

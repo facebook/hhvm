@@ -196,7 +196,7 @@ module NastCheck = struct
     (* | NotPublicInterfaceDEPRECATED [@value 3016] *)
     | RequiresNonClass [@value 3017]
     | ReturnInFinally [@value 3018]
-    | ReturnInGen [@value 3019]
+    (* | ReturnInGenDEPRECATED [@value 3019] *)
     | ToStringReturnsString [@value 3020]
     | ToStringVisibility [@value 3021]
     | ToplevelBreak [@value 3022]

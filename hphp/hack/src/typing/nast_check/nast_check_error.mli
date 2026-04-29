@@ -49,7 +49,6 @@ type t =
       kind: string;
     }
   | Multiple_xhp_category of Pos.t
-  | Return_in_gen of Pos.t
   | Return_in_finally of Pos.t
   | Toplevel_break of Pos.t
   | Toplevel_continue of Pos.t

@@ -50,7 +50,6 @@ type t =
       kind: string;
     }
   | Multiple_xhp_category of Pos.t
-  | Return_in_gen of Pos.t
   | Return_in_finally of Pos.t
   | Toplevel_break of Pos.t
   | Toplevel_continue of Pos.t
@@ -361,14 +360,6 @@ let multiple_xhp_category pos =
   User_diagnostic.make_err
     Error_code.(to_enum MultipleXhpCategory)
     (pos, "XHP classes can only contain one category declaration")
-    []
-
-let return_in_gen pos =
-  User_diagnostic.make_err
-    Error_code.(to_enum ReturnInGen)
-    ( pos,
-      "You cannot return a value in a generator (a generator"
-      ^ " is a function that uses `yield`)" )
     []
 
 let return_in_finally pos =
@@ -963,7 +954,6 @@ let to_user_diagnostic t =
     | Refinement_in_typestruct { pos; kind } ->
       refinement_in_typestruct kind pos
     | Multiple_xhp_category pos -> multiple_xhp_category pos
-    | Return_in_gen pos -> return_in_gen pos
     | Return_in_finally pos -> return_in_finally pos
     | Toplevel_break pos -> toplevel_break pos
     | Toplevel_continue pos -> toplevel_continue pos

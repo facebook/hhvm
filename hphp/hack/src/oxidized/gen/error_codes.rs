@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<62e5d755832ffb683e4fbf2cd5a66070>>
+// @generated SignedSource<<a9671aa8aab1601250ac4c6eb568c120>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -183,7 +183,6 @@ pub enum NastCheck {
     NotInitialized = 3015,
     RequiresNonClass = 3017,
     ReturnInFinally = 3018,
-    ReturnInGen = 3019,
     ToStringReturnsString = 3020,
     ToStringVisibility = 3021,
     ToplevelBreak = 3022,

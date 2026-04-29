@@ -11,14 +11,6 @@ open Hh_prelude
 open Aast
 open Nast_check_env
 
-let is_generator env =
-  let fun_kind = env.function_kind in
-  Option.equal Ast_defs.equal_fun_kind fun_kind (Some Ast_defs.FGenerator)
-  || Option.equal
-       Ast_defs.equal_fun_kind
-       fun_kind
-       (Some Ast_defs.FAsyncGenerator)
-
 let is_sync env =
   let fun_kind = env.function_kind in
   Option.equal Ast_defs.equal_fun_kind fun_kind (Some Ast_defs.FGenerator)
@@ -69,8 +61,5 @@ let handler =
             to_user_diagnostic
             @@ Await_in_sync_function
                  { pos = p; func_pos = None; keyword = "await" })
-      | (p, Return (Some _)) when is_generator env ->
-        Diagnostics.add_diagnostic
-          Nast_check_error.(to_user_diagnostic @@ Return_in_gen p)
       | _ -> ()
   end

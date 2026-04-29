@@ -797,6 +797,9 @@ pub const shape_type_ellipsis_without_trailing_comma: Error =
     Cow::Borrowed("A comma is required before the `...` in a shape type");
 pub const yield_in_magic_methods: Error =
     Cow::Borrowed("`yield` is not allowed in constructors or magic methods");
+pub const return_in_generator: Error = Cow::Borrowed(
+    "You cannot return a value in a generator (a generator is a function that uses `yield`)",
+);
 pub const yield_outside_function: Error =
     Cow::Borrowed("`yield` can only be used inside a function");
 pub const coloncolonclass_on_dynamic: Error =

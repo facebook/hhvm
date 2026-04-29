@@ -27,7 +27,6 @@ bitflags! {
     #[derive(Default, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Copy)]
     struct Flags: u8 {
         const IS_SYNC = 1 << 0;
-        const IS_GENERATOR = 1 << 1;
     }
 }
 
@@ -37,18 +36,10 @@ impl ValidateCoroutinePass {
             Flags::IS_SYNC,
             [FunKind::FGenerator, FunKind::FSync].contains(&fun_kind),
         );
-        self.flags.set(
-            Flags::IS_GENERATOR,
-            [FunKind::FGenerator, FunKind::FAsyncGenerator].contains(&fun_kind),
-        );
     }
 
     fn is_sync(&self) -> bool {
         self.flags.contains(Flags::IS_SYNC)
-    }
-
-    fn is_generator(&self) -> bool {
-        self.flags.contains(Flags::IS_GENERATOR)
     }
 }
 
@@ -79,9 +70,6 @@ impl Pass for ValidateCoroutinePass {
                     func_pos: None,
                     keyword: "await".into(),
                 })
-            }
-            Stmt_::Return(box Some(_)) if self.is_generator() => {
-                env.emit_error(NastCheckError::ReturnInGen(elem.0.clone()))
             }
             _ => (),
         }

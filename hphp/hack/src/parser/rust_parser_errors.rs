@@ -180,6 +180,7 @@ struct Context<'a> {
     pub active_callable_attr_spec: Option<S<'a>>,
     pub active_const: Option<S<'a>>,
     pub active_enum_class: Option<S<'a>>,
+    pub active_callable_is_generator: bool,
     pub pipe_variable_state: PipeVariableState,
     active_experimental_features: HashSet<FeatureName>,
 }
@@ -5578,6 +5579,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             | ForStatement(_)
             | CaseLabel(_)
             | DefaultLabel(_) => self.statement_errors(node),
+            ReturnStatement(x)
+                if !x.expression.is_missing() && self.env.context.active_callable_is_generator =>
+            {
+                self.errors
+                    .push(make_error_from_node(node, errors::return_in_generator))
+            }
             MethodishDeclaration(_) | FunctionDeclaration(_) | FunctionDeclarationHeader(_) => {
                 self.reified_parameter_errors(node);
                 self.redeclaration_errors(node);
@@ -5793,6 +5800,29 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
+    fn node_contains_yield(node: S<'a>) -> bool {
+        match &node.children {
+            YieldExpression(_) => true,
+            AnonymousFunction(_)
+            | LambdaExpression(_)
+            | AwaitableCreationExpression(_)
+            | FunctionDeclaration(_)
+            | MethodishDeclaration(_) => false,
+            _ => node.iter_children().any(Self::node_contains_yield),
+        }
+    }
+
+    fn callable_body_is_generator(node: S<'a>) -> bool {
+        match &node.children {
+            FunctionDeclaration(x) => Self::node_contains_yield(&x.body),
+            MethodishDeclaration(x) => Self::node_contains_yield(&x.function_body),
+            AnonymousFunction(x) => Self::node_contains_yield(&x.body),
+            LambdaExpression(x) => Self::node_contains_yield(&x.body),
+            AwaitableCreationExpression(x) => Self::node_contains_yield(&x.compound_statement),
+            _ => false,
+        }
+    }
+
     fn named_function_context(
         &mut self,
         node: S<'a>,
@@ -5804,6 +5834,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.env.context.active_methodish = Some(node);
         self.env.context.active_callable = Some(node);
         self.env.context.active_callable_attr_spec = Some(s);
+        self.env.context.active_callable_is_generator = Self::callable_body_is_generator(node);
     }
 
     fn lambda_context(&mut self, node: S<'a>, s: S<'a>, prev_context: &mut Option<Context<'a>>) {
@@ -5811,6 +5842,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         // preserve context when entering lambdas (and anonymous functions)
         self.env.context.active_callable = Some(node);
         self.env.context.active_callable_attr_spec = Some(s);
+        self.env.context.active_callable_is_generator = Self::callable_body_is_generator(node);
 
         // ExpressionTrees don't support pipe expressions but if a pipe-variable
         // is captured by an expression tree it can always be used in any lambdas
@@ -6000,6 +6032,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 active_callable_attr_spec: None,
                 active_const: None,
                 active_enum_class: None,
+                active_callable_is_generator: false,
                 pipe_variable_state: PipeVariableState::Unavailable,
                 active_experimental_features: default_experimental_features,
             },

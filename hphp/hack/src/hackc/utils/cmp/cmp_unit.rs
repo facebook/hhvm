@@ -7,6 +7,7 @@ use ffi::Maybe;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
+use hhbc::ClassAlias;
 use hhbc::Constant;
 use hhbc::Fatal;
 use hhbc::Function;
@@ -388,6 +389,20 @@ fn cmp_param(a: &ParamEntry, b: &ParamEntry) -> Result {
         |a, b| cmp_eq(&a.expr, &b.expr),
     )
     .qualified("default_value")?;
+    Ok(())
+}
+
+fn cmp_class_aliases(a: &ClassAlias, b: &ClassAlias) -> Result {
+    let ClassAlias {
+        name: a_name,
+        orig: a_orig,
+    } = a;
+    let ClassAlias {
+        name: b_name,
+        orig: b_orig,
+    } = b;
+    cmp_eq(a_name, b_name).qualified("name")?;
+    cmp_eq(a_orig, b_orig).qualified("orig")?;
     Ok(())
 }
 
@@ -842,10 +857,7 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
 
     cmp_map_t(a_functions, b_functions, cmp_function).qualified("functions")?;
     cmp_map_t(a_classes, b_classes, cmp_class).qualified("classes")?;
-    cmp_map_t(a_class_aliases, b_class_aliases, |a, b| {
-        cmp_eq(&a.orig, &b.orig).qualified("orig")
-    })
-    .qualified("class_aliases")?;
+    cmp_map_t(a_class_aliases, b_class_aliases, cmp_class_aliases).qualified("class_aliases")?;
 
     Ok(())
 }

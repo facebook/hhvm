@@ -18,6 +18,7 @@
 
 #include <folly/Executor.h>
 #include <folly/executors/ThreadPoolExecutor.h>
+#include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp2/server/ResourcePoolSet.h>
 
 namespace apache::thrift {
@@ -99,6 +100,16 @@ void ResourcePoolSet::lock() {
   // Use release semantics to ensure all prior writes to resourcePools_ are
   // visible to readers that acquire locked_ with acquire semantics.
   locked_.store(true, std::memory_order_release);
+
+  threadManagers_.reserve(resourcePools_.size());
+  for (auto& pool : resourcePools_) {
+    if (pool && pool->executor()) {
+      threadManagers_.push_back(
+          dynamic_cast<concurrency::ThreadManager*>(&pool->executor()->get()));
+    } else {
+      threadManagers_.push_back(nullptr);
+    }
+  }
 }
 
 size_t ResourcePoolSet::numQueued() const {
@@ -106,15 +117,13 @@ size_t ResourcePoolSet::numQueued() const {
     return 0;
   }
   size_t sum = 0;
-  for (auto& pool : resourcePools_) {
+  for (size_t i = 0; i < resourcePools_.size(); ++i) {
+    auto& pool = resourcePools_[i];
     if (auto rp = pool->requestPile()) {
       sum += rp.value().get().requestCount();
     }
-    if (pool->executor()) {
-      if (auto* tm = dynamic_cast<concurrency::ThreadManager*>(
-              &pool->executor()->get())) {
-        sum += tm->pendingUpstreamTaskCount();
-      }
+    if (auto* tm = threadManagers_[i]) {
+      sum += tm->pendingUpstreamTaskCount();
     }
   }
   return sum;

@@ -26,6 +26,11 @@
 #include <thrift/lib/cpp2/server/ResourcePool.h>
 
 namespace apache::thrift {
+
+namespace concurrency {
+class ThreadManager;
+} // namespace concurrency
+
 // A set of ResourcePools - typically used by a service to select different
 // resource pools but can also be used elsewhere, for example, resources to run
 // requests on special connections.
@@ -140,6 +145,7 @@ class ResourcePoolSet {
   std::atomic<bool> locked_{false};
   std::vector<std::optional<concurrency::PRIORITY>> priorities_;
   std::array<std::size_t, concurrency::N_PRIORITIES> poolByPriority_;
+  std::vector<concurrency::ThreadManager*> threadManagers_;
   PoolSelectionFunction poolSelectionFunction_{
       [](const ServerRequest&) -> SelectPoolResult {
         return SelectPoolResult{};

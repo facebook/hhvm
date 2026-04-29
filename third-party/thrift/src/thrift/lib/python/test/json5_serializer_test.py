@@ -282,9 +282,7 @@ class Json5SerializerOptionTest(unittest.TestCase):
                 with_options = serialize(
                     tc.example,
                     Protocol.JSON5,
-                    options=Json5ProtocolWriterOptions(
-                        writer=JsonWriterOptions(indent_width=0)
-                    ),
+                    options=Json5ProtocolWriterOptions(),
                 )
                 self.assertEqual(without_options, with_options)
 

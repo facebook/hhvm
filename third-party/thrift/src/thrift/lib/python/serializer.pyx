@@ -17,7 +17,7 @@ from cython.view cimport memoryview
 from folly.iobuf cimport IOBuf
 from libcpp.utility cimport move as cmove
 from thrift.python.exceptions cimport Error, GeneratedError
-from thrift.python.types cimport Struct, StructOrUnion, StructInfo, Union
+from thrift.python.types cimport Struct, StructOrUnion, StructInfo, Union, UnionInfo
 from thrift.python.protocol import Protocol
 from thrift.python.serializer cimport cJsonWriterOptions, cJson5ProtocolWriterOptions
 
@@ -70,25 +70,34 @@ cdef class Json5ProtocolWriterOptions:
 
 cdef cJson5ProtocolWriterOptions _to_c_options(Json5ProtocolWriterOptions options):
     cdef cJson5ProtocolWriterOptions c_options
-    c_options.writer = cmove(options.writer._writer_options)
-    return c_options
+    c_options.writer = options.writer._writer_options
+    return cmove(c_options)
 
 
-cdef _serialize_json5_iobuf(strct, Json5ProtocolWriterOptions options):
+cdef _serialize_json5_iobuf(strct, Json5ProtocolWriterOptions options=None):
+    if options is None:
+        options = Json5ProtocolWriterOptions()
     cdef cJson5ProtocolWriterOptions c_options = _to_c_options(options)
-    cdef StructInfo info
+    cdef StructInfo struct_info
+    cdef UnionInfo union_info
     if isinstance(strct, Struct):
-        info = (<Struct>strct)._fbthrift_struct_info
+        struct_info = (<Struct>strct)._fbthrift_struct_info
         data = (<Struct>strct)._fbthrift_data
+        return folly.iobuf.from_unique_ptr(
+            cmove(cserializeJson5(deref(struct_info.cpp_obj), data, c_options))
+        )
     elif isinstance(strct, Union):
-        info = (<Union>strct)._fbthrift_struct_info
+        union_info = (<Union>strct)._fbthrift_struct_info
         data = (<Union>strct)._fbthrift_data
+        return folly.iobuf.from_unique_ptr(
+            cmove(cserializeJson5(deref(union_info.cpp_obj), data, c_options))
+        )
     else:
-        info = (<GeneratedError>strct)._fbthrift_struct_info
+        struct_info = (<GeneratedError>strct)._fbthrift_struct_info
         data = (<GeneratedError>strct)._fbthrift_data
-    return folly.iobuf.from_unique_ptr(
-        cmove(cserializeJson5(deref(info.cpp_obj), data, c_options))
-    )
+        return folly.iobuf.from_unique_ptr(
+            cmove(cserializeJson5(deref(struct_info.cpp_obj), data, c_options))
+        )
 
 
 def serialize_iobuf(strct, cProtocol protocol=cProtocol.COMPACT, options=None):
@@ -96,7 +105,7 @@ def serialize_iobuf(strct, cProtocol protocol=cProtocol.COMPACT, options=None):
         raise ValueError("options only valid with Protocol.JSON5")
     if not isinstance(strct, (StructOrUnion, GeneratedError)):
         raise TypeError("thrift-python serialization only supports thrift-python types")
-    if options is not None:
+    if protocol == cProtocol.JSON5:
         return _serialize_json5_iobuf(strct, options)
     if isinstance(strct, StructOrUnion):
         return (<StructOrUnion>strct)._serialize(protocol)

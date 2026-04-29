@@ -1272,7 +1272,7 @@ TEST_F(RocketNetworkTest, SinkCloseClient) {
           co_await response.getFirstThriftResponse();
         }));
 
-    auto sink = ClientSink<int, int>(
+    auto clientSink = ClientSink<int, int>(
         std::move(response.sinkBridge_),
         &encode,
         [](folly::Try<StreamPayload>&& payload) -> folly::Try<int> {
@@ -1288,7 +1288,8 @@ TEST_F(RocketNetworkTest, SinkCloseClient) {
     bool exceptionThrows = false;
     folly::coro::blockingWait(
         folly::coro::co_invoke(
-            [&, sink = std::move(sink)]() mutable -> folly::coro::Task<void> {
+            [&, sink = std::move(clientSink)]() mutable
+                -> folly::coro::Task<void> {
               try {
                 co_await sink.sink(
                     folly::coro::co_invoke(

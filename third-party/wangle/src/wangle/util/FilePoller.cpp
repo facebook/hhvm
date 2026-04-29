@@ -70,7 +70,7 @@ FilePoller::~FilePoller() {
 void FilePoller::init(std::chrono::milliseconds pollInterval) {
   auto context = contextSingleton.try_get();
   if (!context) {
-    LOG(ERROR) << "Poller context requested after destruction.";
+    // Poller context requested after destruction, bail
     return;
   }
   pollerId_ = context->getNextId();

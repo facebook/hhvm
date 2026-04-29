@@ -2909,35 +2909,7 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
         });
   }
 
-  auto& wtCtx = txn->wtCtx_;
-  const bool upgraded = txn->isWebTransportConnectStream() &&
-                        (headers.isRequest() || headers.is2xxResponse());
-  const bool makeWtSession =
-      sock && !includeEOM && upgraded && wtCtx.hasWtHandler();
-  VLOG(6) << "sock=" << bool(sock) << "; eom=" << includeEOM
-          << "; upgraded=" << upgraded
-          << "; wtConnect=" << txn->isWebTransportConnectStream()
-          << "; supportsWebTransport=" << supportsWebTransport()
-          << "; wtHandler=" << wtCtx.hasWtHandler();
-  if (!makeWtSession) {
-    return;
-  }
-
-  // detach existing handler
-  if (auto* prevHandler = txn->getHandler()) {
-    prevHandler->detachTransaction();
-  }
-  txn->setHandler(nullptr);
-  // make wt session
-  auto wtConfig = detail::getH3WtConfig(&session_.ingressSettings_,
-                                        &session_.egressSettings_);
-  auto wtSess = detail::HqWtSession::make(
-      session_.getEventBase(), wtConfig, wtCtx.moveWtHandler(), sock, streamId);
-  wtSess->init(wtSess, upstream ? wtCtx.moveWtCallback() : nullptr);
-  txn->setHandler(&wtSess->txnHandler_);
-
-  // alias shared_ptr
-  wtSess_ = std::shared_ptr<H3WtSession>(wtSess, &wtSess->getH3WtSession());
+  tryWtSession(*txn, headers, includeEOM);
 }
 
 size_t HQSession::HQStreamTransportBase::sendEOM(
@@ -3958,6 +3930,46 @@ HQSession::HQStreamTransport::stopReadingWebTransportIngress(
     }
   }
   return folly::unit;
+}
+
+// if this was a wt upgrade, installs the wt handler on txn
+bool HQSession::HQStreamTransportBase::tryWtSession(HTTPTransaction& txn,
+                                                    const HTTPMessage& msg,
+                                                    bool eom) noexcept {
+  auto& wtCtx = txn.wtCtx_;
+  auto sock = session_.sock_;
+  const bool upstream = isUpstream(session_.direction_);
+  const bool upgraded = txn.isWebTransportConnectStream() &&
+                        (msg.isRequest() || msg.is2xxResponse());
+  const bool makeWtSession = sock && !eom && upgraded && wtCtx.hasWtHandler();
+  VLOG(6) << "sock=" << bool(sock) << "; eom=" << eom
+          << "; upgraded=" << upgraded
+          << "; wtConnect=" << txn.isWebTransportConnectStream()
+          << "; supportsWebTransport=" << supportsWebTransport()
+          << "; wtHandler=" << wtCtx.hasWtHandler();
+  if (!makeWtSession) {
+    return false;
+  }
+
+  // detach existing handler
+  if (auto* prevHandler = txn.getHandler()) {
+    prevHandler->detachTransaction();
+  }
+  txn.setHandler(nullptr);
+  // make wt session
+  auto wtConfig = detail::getH3WtConfig(&session_.ingressSettings_,
+                                        &session_.egressSettings_);
+  auto wtSess = detail::HqWtSession::make(session_.getEventBase(),
+                                          wtConfig,
+                                          wtCtx.moveWtHandler(),
+                                          sock,
+                                          getStreamId());
+  wtSess->init(wtSess, upstream ? wtCtx.moveWtCallback() : nullptr);
+  txn.setHandler(&wtSess->txnHandler_);
+
+  // alias shared_ptr
+  wtSess_ = std::shared_ptr<H3WtSession>(wtSess, &wtSess->getH3WtSession());
+  return true;
 }
 
 std::ostream& operator<<(std::ostream& os, const HQSession& session) {

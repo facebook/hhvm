@@ -1454,44 +1454,7 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
           observer->requestStarted(observed, event);
         });
   }
-  // terminate WebTransport if connect stream, wtHandler_ set and upstream or
-  // 2xx resp
-  auto& wtCtx = txn->wtCtx_;
-  const bool upgraded = txn->isWebTransportConnectStream() &&
-                        (headers.isRequest() || headers.is2xxResponse());
-  const bool makeWtSession = !includeEOM && upgraded && wtCtx.hasWtHandler();
-  VLOG(6) << "eom=" << includeEOM << "; upgraded=" << upgraded
-          << "; wtConnect=" << txn->isWebTransportConnectStream()
-          << "; supportsWebTransport=" << supportsWebTransport()
-          << "; wtHandler=" << wtCtx.hasWtHandler();
-  if (!makeWtSession) {
-    return;
-  }
-  /**
-   * for downstream:
-   *     Detach existing txn handler with a custom WtHandler to transparently
-   *     enable wt.
-   *
-   * for upstream:
-   *     Implementation detail, but all wt requests should go thru
-   *     HTTPUpstreamSession::sendWtReq. The existing handler still needs to be
-   *     notified of ::onHeadersComplete or ::onError (whichever happens first)
-   *     to resolve the Promise/Future returned to the application.
-   */
-  if (auto* prevHandler = txn->getHandler()) {
-    prevHandler->detachTransaction();
-  }
-  txn->setHandler(nullptr); // clear existing handler
-  // make wt session
-  detail::WtDir dir =
-      isUpstream() ? detail::WtDir::Client : detail::WtDir::Server;
-  auto wtConfig = detail::getWtConfig(codec_->getIngressSettings(),
-                                      codec_->getEgressSettings());
-  auto wtSession = detail::H2WtSession::make(
-      getEventBase(), dir, wtConfig, wtCtx.moveWtHandler());
-  // ::init notifies WtHandler of WtSession
-  wtSession->init(wtSession, isUpstream() ? wtCtx.moveWtCallback() : nullptr);
-  txn->setHandler(&wtSession->getTxnHandler());
+  tryWtSession(*txn, headers, includeEOM);
 }
 
 void HTTPSession::commonEom(HTTPTransaction* txn,
@@ -2993,6 +2956,50 @@ bool HTTPSession::supportsWebTransport() const noexcept {
   const auto& codec = getCodec();
   return detail::supportsH2Wt(
       {codec.getIngressSettings(), codec.getEgressSettings()});
+}
+
+bool HTTPSession::tryWtSession(HTTPTransaction& txn,
+                               const HTTPMessage& msg,
+                               bool eom) const noexcept {
+  // terminate WebTransport if connect stream, wtHandler_ set and upstream or
+  // 2xx resp
+  auto& wtCtx = txn.wtCtx_;
+  const bool upgraded = txn.isWebTransportConnectStream() &&
+                        (msg.isRequest() || msg.is2xxResponse());
+  const bool makeWtSession = !eom && upgraded && wtCtx.hasWtHandler();
+  VLOG(6) << "eom=" << eom << "; upgraded=" << upgraded
+          << "; wtConnect=" << txn.isWebTransportConnectStream()
+          << "; supportsWebTransport=" << supportsWebTransport()
+          << "; wtHandler=" << wtCtx.hasWtHandler();
+  if (!makeWtSession) {
+    return false;
+  }
+  /**
+   * for downstream:
+   *     Detach existing txn handler with a custom WtHandler to transparently
+   *     enable wt.
+   *
+   * for upstream:
+   *     Implementation detail, but all wt requests should go thru
+   *     HTTPUpstreamSession::sendWtReq. The existing handler still needs to be
+   *     notified of ::onHeadersComplete or ::onError (whichever happens first)
+   *     to resolve the Promise/Future returned to the application.
+   */
+  if (auto* prevHandler = txn.getHandler()) {
+    prevHandler->detachTransaction();
+  }
+  txn.setHandler(nullptr); // clear existing handler
+  // make wt session
+  detail::WtDir dir =
+      isUpstream() ? detail::WtDir::Client : detail::WtDir::Server;
+  auto wtConfig = detail::getWtConfig(codec_->getIngressSettings(),
+                                      codec_->getEgressSettings());
+  auto wtSession = detail::H2WtSession::make(
+      getEventBase(), dir, wtConfig, wtCtx.moveWtHandler());
+  // ::init notifies WtHandler of WtSession
+  wtSession->init(wtSession, isUpstream() ? wtCtx.moveWtCallback() : nullptr);
+  txn.setHandler(&wtSession->getTxnHandler());
+  return true;
 }
 
 } // namespace proxygen

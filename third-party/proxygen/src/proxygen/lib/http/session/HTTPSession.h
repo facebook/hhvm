@@ -1104,6 +1104,11 @@ class HTTPSession
     return const_cast<HTTPSessionObserverContainer*>(
         &sessionObserverContainer_);
   }
+
+  // if this was a wt upgrade, installs the wt handler on txn
+  bool tryWtSession(HTTPTransaction&,
+                    const HTTPMessage&,
+                    bool eom) const noexcept;
 };
 
 } // namespace proxygen

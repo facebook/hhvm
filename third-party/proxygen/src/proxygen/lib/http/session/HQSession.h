@@ -1734,6 +1734,8 @@ class HQSession
 
    private:
     void updatePriority(const HTTPMessage& headers) noexcept;
+    // if this was a wt upgrade, installs the wt handler on txn
+    bool tryWtSession(HTTPTransaction&, const HTTPMessage&, bool eom) noexcept;
 
     // Return the old and new offset of the stream
     std::pair<uint64_t, uint64_t> generateHeadersCommon(

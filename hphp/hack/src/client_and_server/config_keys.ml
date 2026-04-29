@@ -472,8 +472,6 @@ module Hhconf = struct
 
   let cache_remote_decls = hhconf_key "cache_remote_decls"
 
-  let rust_elab = hhconf_key "rust_elab"
-
   let rust_provider_backend = hhconf_key "rust_provider_backend"
 
   (* saved state *)

@@ -429,8 +429,6 @@ module Hhconf : sig
 
   val cache_remote_decls : string
 
-  val rust_elab : string
-
   val rust_provider_backend : string
 
   (* saved state *)

@@ -307,8 +307,6 @@ type t = {
       (** Use Provider_backend.Rust_provider_backend as the global provider
        * backend, servicing File_provider, Naming_provider, and Decl_provider
        * using the hackrs implementation. *)
-  rust_elab: bool;
-      (** Use the Rust implementation of naming elaboration and NAST checks. *)
   naming_sqlite_path: string option;
       (** Enables the reverse naming table to fall back to SQLite for queries. *)
   enable_naming_table_fallback: bool;

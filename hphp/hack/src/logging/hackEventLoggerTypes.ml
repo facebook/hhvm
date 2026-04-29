@@ -106,8 +106,6 @@ type rollout_flags = {
       (** POC: @bobren - fanout threshold where we trigger hh_distc *)
   hh_distc_fanout_full_init_threshold: int;
       (** POC: @fzn - fanout threshold where we trigger fanout-aware hh_distc *)
-  rust_elab: bool;
-      (** POC: @mjt, use unified-elaboration rather than hh naming/nast checks *)
   ide_load_naming_table_on_disk: bool;
       (** POC: @nzthomas - allow ClientIdeDaemon to grab any naming table from disk before trying Watchman / Manifold *)
   ide_naming_table_update_threshold: int;

@@ -76,7 +76,6 @@ let default =
     heartbeat_interval = None;
     produce_streaming_errors = true;
     consume_streaming_errors = false;
-    rust_elab = false;
     rust_provider_backend = false;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
@@ -803,13 +802,6 @@ let load_
     else
       None
   in
-  let rust_elab =
-    bool_if_min_version
-      Config_keys.Hhconf.rust_elab
-      ~default:default.rust_elab
-      ~current_version
-      config
-  in
   let rust_provider_backend =
     bool_if_min_version
       Config_keys.Hhconf.rust_provider_backend
@@ -1111,7 +1103,6 @@ let load_
     heartbeat_interval;
     produce_streaming_errors;
     consume_streaming_errors;
-    rust_elab;
     rust_provider_backend;
     naming_sqlite_path;
     enable_naming_table_fallback;
@@ -1224,7 +1215,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
       hh_distc_fanout_full_init_threshold =
         options.hh_distc_fanout_full_init_threshold;
-      rust_elab = options.rust_elab;
       ide_load_naming_table_on_disk = options.ide_load_naming_table_on_disk;
       ide_naming_table_update_threshold =
         options.ide_naming_table_update_threshold;

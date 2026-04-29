@@ -59,7 +59,7 @@ impl FeatureName {
             AllowExtendedAwaitSyntax => Unstable,
             AllowConditionalAwaitSyntax => Unstable,
             ShapeFieldPunning => Unstable,
-            RepresentableAs => Unstable,
+            RepresentableAs => Preview,
             ClassAliasesEverywhere => Unstable,
             TestFeature => Unstable,
             WithRefinementAlias => Preview,

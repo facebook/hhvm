@@ -54,6 +54,12 @@ INSTANTIATE_TEST_SUITE_P(
     [](const auto& info) { return std::string(*info.param.name()); });
 
 INSTANTIATE_TEST_SUITE_P(
+    TypeMismatch,
+    JsonDecoderNegativeTest,
+    ::testing::ValuesIn(typeMismatchNegativeCases()),
+    [](const auto& info) { return std::string(*info.param.name()); });
+
+INSTANTIATE_TEST_SUITE_P(
     FormatValidation,
     JsonDecoderNegativeTest,
     ::testing::ValuesIn(formatValidationNegativeCases()),

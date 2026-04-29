@@ -68,6 +68,18 @@ const list<NegativeTestCase> typeValidationNegativeCases = [
   NegativeTestCase{name = "BoolKeyNumericString", json = "{\"boolAsKey\": {\"1\": 42}}"},
 ];
 
+const list<NegativeTestCase> typeMismatchNegativeCases = [
+  NegativeTestCase{name = "BoolCaseVariant", json = "{\"boolValue\": \"TRUE\"}"},
+  NegativeTestCase{name = "BoolAlternativeString", json = "{\"boolValue\": \"yes\"}"},
+  NegativeTestCase{name = "NullListElement", json = "{\"listValue\": [{\"nested\": \"a\"}, null]}"},
+  NegativeTestCase{name = "NullMapValue", json = "{\"i32AsKey\": [{\"key\": 1, \"value\": null}]}"},
+  NegativeTestCase{name = "NullMapKey", json = "{\"i32AsKey\": [{\"key\": null, \"value\": 1}]}"},
+  NegativeTestCase{name = "BinaryMultipleKeys", json = "{\"binaryValue\": {\"utf-8\": \"hi\", \"base64\": \"aGk=\"}}"},
+  NegativeTestCase{name = "BinaryInvalidBareString", json = "{\"binaryValue\": \"Not Valid!\"}"},
+  NegativeTestCase{name = "IntegerInvalidArray", json = "{\"i64Value\": [42]}"},
+  NegativeTestCase{name = "IntegerExponentNotationQuoted", json = "{\"i64Value\": \"1e3\"}"},
+];
+
 const list<NegativeTestCase> formatValidationNegativeCases = [
   NegativeTestCase{name = "MapMissingKey", json = "{\"i32AsKey\": [{\"value\": 2}]}"},
   NegativeTestCase{name = "MapMissingValue", json = "{\"i32AsKey\": [{\"key\": 1}]}"},
@@ -78,6 +90,9 @@ const list<NegativeTestCase> formatValidationNegativeCases = [
   NegativeTestCase{name = "ExtraContent", json = "{}garbage"},
   NegativeTestCase{name = "FieldNameNotFound", json = "{\"NonExist (30)\": true}"},
   NegativeTestCase{name = "FieldIdConflict", json = "{\"boolValue (31)\": true}"},
+  NegativeTestCase{name = "TopLevelNull", json = "null"},
+  NegativeTestCase{name = "FieldIdOverflowI16Positive", json = "{\"(32768)\": true}"},
+  NegativeTestCase{name = "FieldIdOverflowI16Negative", json = "{\"(-32769)\": true}"},
 ];
 
 const list<NegativeTestCase> overflowValidationNegativeCases = [

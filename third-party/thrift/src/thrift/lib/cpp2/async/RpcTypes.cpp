@@ -246,7 +246,7 @@ LegacySerializedResponse::extractPayload(
     bool includeEnvelope, int16_t protocolId, int32_t seqId) && {
   int32_t _;
   std::string methodName;
-  MessageType mtype;
+  MessageType mtype = MessageType::T_CALL;
 
   size_t headerSize{0};
   try {

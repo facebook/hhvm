@@ -281,4 +281,40 @@ const list<CompatibilityTestCase> compatibilityTestCases = [
     ],
     output = json5_test.Example{boolValue = true},
   },
+  // ── Single-Quoted String Compatibility ──────────────────────────────────────
+  CompatibilityTestCase{
+    name = "SingleQuotedString",
+    inputs = [
+      "{\"stringValue\": 'hello'}",
+      "{'stringValue': 'hello'}",
+    ],
+    output = json5_test.Example{stringValue = "hello"},
+  },
+  // ── JSON5 Comments Compatibility ────────────────────────────────────────────
+  CompatibilityTestCase{
+    name = "Json5Comments",
+    inputs = [
+      "{/* comment */\"i64Value\": 42}",
+      "{\"i64Value\": /* inline */ 42}",
+      "{\"i64Value\": 42 // line comment\n}",
+    ],
+    output = json5_test.Example{i64Value = 42},
+  },
+  // ── Double from Integer Compatibility ───────────────────────────────────────
+  CompatibilityTestCase{
+    name = "DoubleFromInteger",
+    inputs = [
+      "{\"doubleValue\": 42}",
+      "{\"doubleValue\": \"42\"}",
+    ],
+    output = json5_test.Example{doubleValue = 42.0},
+  },
+  // ── Union Compatibility ─────────────────────────────────────────────────────
+  CompatibilityTestCase{
+    name = "UnionEmpty",
+    inputs = [
+      "{\"unionValue\": {}}",
+    ],
+    output = json5_test.Example{unionValue = json5_test.ExampleUnion{}},
+  },
 ];

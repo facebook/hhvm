@@ -80,7 +80,7 @@ macro(thrift_py3_test filename services)
 endmacro()
 
 include_directories(${PYTHON_INCLUDE_DIRS})
-thrift_py3_test("testing" "TestingService")
+thrift_py3_test("test_thrift" "TestingService")
 thrift_py3_test("iobuf" "IobufTestService")
 thrift_py3_test("stack_args" "StackService")
 thrift_py3_test("binary" "BinaryService")

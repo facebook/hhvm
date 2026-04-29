@@ -323,7 +323,7 @@ thrift_python_library_for_test(
   NAMESPACE ""
 )
 
-# derived.thrift - no py3 namespace, includes testing.thrift
+# derived.thrift - no py3 namespace, includes test_thrift.thrift
 thrift_python_library_for_test(
   "derived"
   "DerivedTestingService"
@@ -371,13 +371,13 @@ thrift_python_library_for_test(
   NAMESPACE ""
 )
 
-# testing.thrift has namespace py3 "" (empty) - uses filename as package
+# test_thrift.thrift has namespace py3 "" (empty) - uses filename as package
 # Build service list separately to avoid long lines
 set(_testing_services
   "TestingService;TestingServiceChild;ExtendServiceWithNoTypes")
 string(APPEND _testing_services ";ClientMetadataTestingService")
 thrift_python_library_for_test(
-  "testing"
+  "test_thrift"
   "${_testing_services}"
   ""
   "${TEST_THRIFT_DIR}"
@@ -777,7 +777,7 @@ set(_gen_python "${CMAKE_CURRENT_BINARY_DIR}/gen-python")
 #    (provides folly.iobuf, etc.)
 #
 # TEST_PYTHONPATH only needs:
-# - _gen_python: generated test thrift code (testing.thrift_types, etc.)
+# - _gen_python: generated test thrift code (test_thrift.thrift_types, etc.)
 # ==========================================================================
 
 # Install thrift wheel before running tests
@@ -807,7 +807,7 @@ add_custom_target(install_thrift_wheel ALL
 # With wheel-based approach for thrift, we need paths for:
 # - Thrift wheel install directory
 #   (thrift.python.*, thrift.py3.*, folly.*, etc.)
-# - Generated test thrift code (testing.thrift_types, etc.)
+# - Generated test thrift code (test_thrift.thrift_types, etc.)
 # Note: Folly Python bindings are now bundled into the thrift wheel
 # Note: Test modules are NOT in the wheel (removed by commit 1d87cfcfed).
 # - _cybld: Cython test extensions (.so files)
@@ -857,7 +857,7 @@ set(THRIFT_PYTHON_TEST_FILES
   exceptions.py
   exceptions_ft.py
   iobuf.py
-  # intercompatibility.py - SKIPPED: requires testing.types
+  # intercompatibility.py - SKIPPED: requires test_thrift.types
   # from py3 codegen (not built)
   lists.py
   maps.py
@@ -927,7 +927,7 @@ add_custom_target(thrift_python_test_package ALL
 # Add dependencies on thrift generation targets
 add_dependencies(thrift_python_test_package
   # Core test types (no namespace or namespace "testing")
-  testing-python-target
+  test_thrift-python-target
   dependency-python-target
   sub_dependency-python-target
   base_service_only-python-target
@@ -1135,7 +1135,7 @@ register_python_tests(thrift_python_client fbthrift_client_test
 # Requires:
 # - metadata_response.pyx Cython extension (added to setup.py)
 # - thrift.lib.python.test.test_server helper
-# - testing.thrift_services and testing.thrift_types (generated)
+# - test_thrift.thrift_services and test_thrift.thrift_types (generated)
 # - apache.thrift.metadata.thrift_types (generated)
 #####
 add_test(

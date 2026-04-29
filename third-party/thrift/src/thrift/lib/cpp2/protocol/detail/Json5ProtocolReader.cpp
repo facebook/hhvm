@@ -143,10 +143,12 @@ void Json5ProtocolReader::readFieldBegin(
     return;
   }
 
-  fieldType = protocol::T_VOID;
-  auto parsed = parseIdentifierString<std::int16_t>(reader_.readObjectName());
-  name = std::move(parsed.name);
-  fieldId = parsed.value.value_or(std::numeric_limits<std::int16_t>::min());
+  {
+    auto parsed = parseIdentifierString<std::int16_t>(reader_.readObjectName());
+    name = std::move(parsed.name);
+    fieldId = parsed.value.value_or(std::numeric_limits<std::int16_t>::min());
+    fieldType = protocol::T_VOID;
+  }
 
   if (reader_.peekToken() == Json5Reader::Token::Primitive &&
       folly::io::Cursor(reader_.getCursor()).read<char>() == 'n') {
@@ -154,7 +156,7 @@ void Json5ProtocolReader::readFieldBegin(
     [[maybe_unused]] bool isNull =
         std::holds_alternative<std::monostate>(reader_.readPrimitive());
     DCHECK(isNull);
-    readFieldBegin(name, fieldType, fieldId);
+    FOLLY_ATTR_MUSTTAIL return readFieldBegin(name, fieldType, fieldId);
   }
 }
 

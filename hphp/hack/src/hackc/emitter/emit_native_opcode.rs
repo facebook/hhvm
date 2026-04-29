@@ -121,7 +121,6 @@ fn emit_generator_method(name: &str, params: &[ast::FunParam]) -> Result<InstrSe
         "valid" => instr::cont_valid(),
         "current" => instr::cont_current(),
         "key" => instr::cont_key(),
-        "getReturn" => instr::cont_get_return(),
         _ => {
             return Err(Error::fatal_runtime(
                 &Pos::NONE,

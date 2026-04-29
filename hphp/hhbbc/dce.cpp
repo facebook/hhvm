@@ -1649,7 +1649,6 @@ void dce(Env& env, const bc::CnsE& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContCheck& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContCurrent& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContEnter& op) { no_dce(env, op); }
-void dce(Env& env, const bc::ContGetReturn& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContKey& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContRaise& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContValid& op) { no_dce(env, op); }

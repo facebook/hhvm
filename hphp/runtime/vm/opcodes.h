@@ -242,7 +242,6 @@ namespace HPHP {
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
-  O(ContGetReturn,   NA,               NOV,             ONE(CV),    NF) \
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(SetImplicitContextByValue,                                          \
                      NA,               ONE(CV),         ONE(CV),    NF) \

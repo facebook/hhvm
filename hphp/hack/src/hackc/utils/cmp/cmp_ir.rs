@@ -788,7 +788,6 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::ConsumeL(_, _), _)
         | (Hhbc::ContCurrent(_), _)
         | (Hhbc::ContEnter(_, _), _)
-        | (Hhbc::ContGetReturn(_), _)
         | (Hhbc::ContKey(_), _)
         | (Hhbc::ContRaise(_, _), _)
         | (Hhbc::ContValid(_), _)

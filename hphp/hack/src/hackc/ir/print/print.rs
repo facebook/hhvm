@@ -840,9 +840,6 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
         Hhbc::ContEnter(vid, _) => {
             write!(w, "cont_enter {}", FmtVid(func, vid, verbose))?;
         }
-        Hhbc::ContGetReturn(_) => {
-            write!(w, "cont_get_return")?;
-        }
         Hhbc::ContKey(_) => {
             write!(w, "cont_key")?;
         }

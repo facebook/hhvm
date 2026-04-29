@@ -222,7 +222,7 @@ interpOutputLocals(IRGS& env,
       always_assert_flog(
         false, "Unknown local-modifying op {}", opcodeToName(sk.op())
       );
-  }  
+  }
 
   return locals;
 }
@@ -317,7 +317,6 @@ void emitReqDoc(IRGS& env)                    { interpOne(env); }
 void emitReqOnce(IRGS& env)                   { interpOne(env); }
 void emitEval(IRGS& env)                      { interpOne(env); }
 void emitChainFaults(IRGS& env)               { interpOne(env); }
-void emitContGetReturn(IRGS& env)             { interpOne(env); }
 //////////////////////////////////////////////////////////////////////
 
 }

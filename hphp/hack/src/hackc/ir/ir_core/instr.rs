@@ -463,7 +463,6 @@ pub enum Hhbc {
     ConsumeL(LocalId, LocId),
     ContCurrent(LocId),
     ContEnter(ValueId, LocId),
-    ContGetReturn(LocId),
     ContKey(LocId),
     ContRaise(ValueId, LocId),
     ContValid(LocId),

@@ -943,7 +943,6 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::ContCheck => simple!(Hhbc::ContCheck),
         Opcode::ContCurrent => simple!(Hhbc::ContCurrent),
         Opcode::ContEnter => simple!(Hhbc::ContEnter),
-        Opcode::ContGetReturn => simple!(Hhbc::ContGetReturn),
         Opcode::ContKey => simple!(Hhbc::ContKey),
         Opcode::ContRaise => simple!(Hhbc::ContRaise),
         Opcode::ContValid => simple!(Hhbc::ContValid),

@@ -2153,7 +2153,8 @@ OPTBLD_INLINE JitResumeAddr ret(PC& pc) {
     }
   } else if (func->isNonAsyncGenerator()) {
     // Mark the generator as finished and store the return value.
-    frame_generator(fp)->ret(retval);
+    assertx(isNullType(retval.m_type));
+    frame_generator(fp)->ret();
 
     // Push return value of next()/send()/raise().
     vmStack().pushNull();
@@ -4895,18 +4896,6 @@ OPTBLD_INLINE void iopContCurrent() {
   } else {
     tvDup(cont->m_value, *vmStack().allocC());
   }
-}
-
-OPTBLD_INLINE void iopContGetReturn() {
-  Generator* cont = this_generator(vmfp());
-  cont->startedCheck();
-
-  if(!cont->successfullyFinishedExecuting()) {
-    SystemLib::throwExceptionObject("Cannot get return value of a generator "
-                                    "that hasn't returned");
-  }
-
-  tvDup(cont->m_value, *vmStack().allocC());
 }
 
 template <bool lowPri>

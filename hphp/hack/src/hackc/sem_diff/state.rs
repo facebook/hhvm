@@ -1343,7 +1343,6 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::ContCheck(..)
             | Opcode::ContCurrent
             | Opcode::ContEnter
-            | Opcode::ContGetReturn
             | Opcode::ContKey
             | Opcode::ContRaise
             | Opcode::ContValid
@@ -1533,7 +1532,6 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::Concat
         | Opcode::ContCurrent
         | Opcode::ContEnter
-        | Opcode::ContGetReturn
         | Opcode::ContKey
         | Opcode::ContRaise
         | Opcode::ContValid

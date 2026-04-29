@@ -1354,7 +1354,6 @@ impl FunctionParser<'_> {
             "consume_local" => I::Hhbc(H::ConsumeL(self.lid(tok)?, loc)),
             "cont_current" => I::Hhbc(H::ContCurrent(loc)),
             "cont_enter" => I::Hhbc(H::ContEnter(self.vid(tok)?, loc)),
-            "cont_get_return" => I::Hhbc(H::ContGetReturn(loc)),
             "cont_key" => I::Hhbc(H::ContKey(loc)),
             "cont_raise" => I::Hhbc(H::ContRaise(self.vid(tok)?, loc)),
             "cont_valid" => I::Hhbc(H::ContValid(loc)),

@@ -316,7 +316,6 @@ bool CodeCoverage::isCoverable(Op op) {
     case Op::ContValid:
     case Op::ContKey:
     case Op::ContCurrent:
-    case Op::ContGetReturn:
     case Op::GetMemoAgnosticImplicitContext:
     case Op::GetWholeImplicitContext:
     case Op::Idx:

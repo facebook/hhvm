@@ -176,15 +176,14 @@ struct Generator final : BaseGenerator, SystemLib::ClassLoader<"Generator"> {
 
   void yield(Offset suspendOffset, const TypedValue* key, TypedValue value);
   void copyVars(const ActRec *fp);
-  void ret(TypedValue tv) { done(tv); }
-  void fail() { done(make_tv<KindOfUninit>()); }
-  bool successfullyFinishedExecuting();
+  void ret() { done(); }
+  void fail() { done(); }
   ObjectData* toObject() {
     return Native::object<Generator>(this);
   }
 
 private:
-  void done(TypedValue tv);
+  void done();
 
 public:
   int64_t m_index;

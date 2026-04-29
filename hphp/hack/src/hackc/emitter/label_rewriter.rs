@@ -234,7 +234,6 @@ where
             | Opcode::ContCheck(..)
             | Opcode::ContCurrent
             | Opcode::ContEnter
-            | Opcode::ContGetReturn
             | Opcode::ContKey
             | Opcode::ContRaise
             | Opcode::ContValid

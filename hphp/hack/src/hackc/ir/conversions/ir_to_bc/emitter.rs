@@ -465,7 +465,6 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::ContCheck(kind, _) => Opcode::ContCheck(kind),
             Hhbc::ContCurrent(_) => Opcode::ContCurrent,
             Hhbc::ContEnter(..) => Opcode::ContEnter,
-            Hhbc::ContGetReturn(_) => Opcode::ContGetReturn,
             Hhbc::ContKey(_) => Opcode::ContKey,
             Hhbc::ContRaise(..) => Opcode::ContRaise,
             Hhbc::ContValid(_) => Opcode::ContValid,

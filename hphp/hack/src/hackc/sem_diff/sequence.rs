@@ -309,7 +309,6 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::ContCheck(..)
             | Opcode::ContCurrent
             | Opcode::ContEnter
-            | Opcode::ContGetReturn
             | Opcode::ContKey
             | Opcode::ContRaise
             | Opcode::ContValid

@@ -111,7 +111,6 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::ConsumeL(..)
             | Hhbc::ContCurrent(_)
             | Hhbc::ContEnter(..)
-            | Hhbc::ContGetReturn(_)
             | Hhbc::ContKey(_)
             | Hhbc::ContRaise(..)
             | Hhbc::ContValid(_)

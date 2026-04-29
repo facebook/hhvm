@@ -29,9 +29,6 @@ final class Generator implements HH\KeyedIterator {
   <<__Native("OpCodeImpl"), __NEVER_INLINE>>
   public function raise(mixed $v)[/* gen $this */]: mixed;
 
-  <<__Native("OpCodeImpl")>>
-  public function getReturn()[]: mixed;
-
   <<__Native>>
   public function getOrigFuncName()[]: string;
 

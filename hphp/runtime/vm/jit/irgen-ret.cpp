@@ -154,6 +154,7 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal, bool suspended) {
 void generatorReturn(IRGS& env, SSATmp* retval) {
   assertx(curFunc(env)->isGenerator());
   assertx(!isInlining(env));
+  assertx(retval->isA(TInitNull));
 
   retSurpriseCheck(env, retval, []{});
 
@@ -168,14 +169,13 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
     gen(env, StContArKey, fp(env), cns(env, TInitNull));
     decRef(env, oldKey, DecRefProfileId::GeneratorReturnOldKey);
 
-    // Populate the generator's value with retval to support `getReturn`
+    // Clear generator's value.
     auto const oldValue = gen(env, LdContArValue, TInitCell, fp(env));
-    gen(env, StContArValue, fp(env), retval);
+    gen(env, StContArValue, fp(env), cns(env, TInitNull));
     decRef(env, oldValue, DecRefProfileId::GeneratorReturnOldValue);
+
     retval = cns(env, TInitNull);
   } else {
-    assertx(retval->isA(TInitNull));
-
     if (resumeMode(env) == ResumeMode::Async) {
       auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
       gen(env, AsyncGenRetR, IRSPRelOffsetData { spAdjust }, sp(env), fp(env));

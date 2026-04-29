@@ -1,7 +1,7 @@
 # Tuples
 
 Suppose we wish to have a function return multiple values. We can do that by using a tuple containing two or more elements. A
-tuple is an *ordered* set of one or more elements, which can have different types. The number of elements in a particular tuple is fixed
+tuple is an *ordered* sequence of zero or more elements, which can have different types. The number of elements in a particular tuple is fixed
 when that tuple is created. After a tuple has been created, no elements can be added or removed. A tuple is a mutable value type.
 This means that when you hand a tuple to a function or assign it to a local variable a logical copy is made.
 You can change the values at a given index by assigning using the subscript notation. This will change the type
@@ -33,7 +33,7 @@ echo "\$t[2] = >" . (string)$t[2] . "<";  // outputs "$t[2] = >2.3<"
 $t[0] = 99;                       // change 10 to 99
 ```
 
-Here is a more exotic example of a type involve a tuple:
+Here is a more exotic example of a type involving a tuple:
 
 ```hack no-extract
 ?(int, (string, float))
@@ -57,3 +57,30 @@ function distance(Point $p1, Point $p2): float {
   return sqrt($dx * $dx + $dy * $dy);
 }
 ```
+Sometimes it's useful to declare that a tuple element is *optional*, and such elements
+can be accessed using the `??` operator. In this example, values with type `Point` have either two
+or three elements of type `float`.
+```hack
+type Point = (float, float, optional float);
+
+function get_height(Point $p): float {
+  return $p[2] ?? 0.0;
+}
+```
+Optional elements in tuple types must not precede non-optional elements.
+
+You can also write *open* tuple types, representing tuples whose length is unbounded. For example,
+here is a function that accepts tuples whose first element is an integer, second element is a string, and
+the remaining elements are of type `arraykey`.
+```hack
+function select_first_and_second((int,string,arraykey...) $tup): (int,string) {
+  return tuple($tup[0], $tup[1]);
+}
+function use_it():void {
+  // Two elements
+  $t1 = select_first_and_second(tuple(3, "A"));
+  // Three elements, also accepted
+  $t2 = select_first_and_second(tuple(4, "B", 23));
+}
+```
+These are most useful in conjunction with [type splats](/hack/functions/type-splat).

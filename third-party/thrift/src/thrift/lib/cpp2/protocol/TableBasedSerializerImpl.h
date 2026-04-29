@@ -208,7 +208,7 @@ void readThriftValue(
                       iprot->readEnum(temp, m);
                     }) {
         if (auto* ext = static_cast<const EnumFieldExt*>(typeInfo.typeExt)) {
-          iprot->readEnum(temp, ext->map);
+          std::visit([&](auto* p) { iprot->readEnum(temp, *p); }, ext->map);
         } else {
           iprot->readI32(temp);
         }
@@ -477,8 +477,16 @@ size_t writeThriftValue(
                       iprot->writeEnum(std::string_view{}, std::int32_t{});
                     }) {
         if (auto* ext = static_cast<const EnumFieldExt*>(typeInfo.typeExt)) {
-          auto r = ext->map.find_name(value.int32Value, ext->map);
-          return iprot->writeEnum(r.result, value.int32Value);
+          return std::visit(
+              [&](auto* p) {
+                using map_t = std::remove_pointer_t<decltype(p)>;
+                using int_type = std::remove_const_t<
+                    std::remove_pointer_t<decltype(p->meta.values)>>;
+                auto r = map_t::find_name(
+                    static_cast<int_type>(value.int32Value), *p);
+                return iprot->writeEnum(r.result, value.int32Value);
+              },
+              ext->map);
         }
       }
       return iprot->writeI32(value.int32Value);

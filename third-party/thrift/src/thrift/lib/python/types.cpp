@@ -1258,7 +1258,7 @@ EnumTypeInfo::EnumTypeInfo(
       values_(std::move(values)),
       meta_{values_.size(), values_.data(), names_.data()},
       find_(meta_),
-      ext_{find_},
+      ext_{{&find_}},
       typeinfo_{
           /* .type */ protocol::TType::T_I32,
           /* .get */ i32TypeInfo.get,

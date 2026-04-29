@@ -40,6 +40,12 @@ impl MapName for hhbc::Class {
     }
 }
 
+impl MapName for hhbc::ClassAlias {
+    fn get_name(&self) -> String {
+        self.name.into_string()
+    }
+}
+
 impl MapName for hhbc::Constant {
     fn get_name(&self) -> String {
         self.name.into_string()
@@ -784,6 +790,7 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     let Unit {
         functions: a_functions,
         classes: a_classes,
+        class_aliases: a_class_aliases,
         modules: a_modules,
         typedefs: a_typedefs,
         file_attributes: a_file_attributes,
@@ -797,6 +804,7 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     let Unit {
         functions: b_functions,
         classes: b_classes,
+        class_aliases: b_class_aliases,
         modules: b_modules,
         typedefs: b_typedefs,
         file_attributes: b_file_attributes,
@@ -834,6 +842,10 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
 
     cmp_map_t(a_functions, b_functions, cmp_function).qualified("functions")?;
     cmp_map_t(a_classes, b_classes, cmp_class).qualified("classes")?;
+    cmp_map_t(a_class_aliases, b_class_aliases, |a, b| {
+        cmp_eq(&a.orig, &b.orig).qualified("orig")
+    })
+    .qualified("class_aliases")?;
 
     Ok(())
 }

@@ -9,6 +9,7 @@ mod emit_adata;
 mod emit_attribute;
 mod emit_body;
 mod emit_class;
+mod emit_class_alias;
 mod emit_constant;
 mod emit_expression;
 mod emit_fatal;
@@ -39,6 +40,7 @@ use std::sync::Arc;
 use decl_provider::DeclProvider;
 use decl_provider::TypeDecl;
 use emit_class::emit_classes_from_program;
+use emit_class_alias::emit_class_aliases_from_program;
 use emit_constant::emit_constants_from_program;
 use emit_file_attributes::emit_file_attributes_from_program;
 use emit_function::emit_functions_from_program;
@@ -73,6 +75,7 @@ pub fn emit_fatal_unit(op: FatalOp, pos: Pos, msg: impl Into<String>) -> Result<
         }),
         functions: Default::default(),
         classes: Default::default(),
+        class_aliases: Default::default(),
         modules: Default::default(),
         typedefs: Default::default(),
         file_attributes: Default::default(),
@@ -160,6 +163,7 @@ fn emit_unit_(
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter, prog)?;
+    let class_aliases = emit_class_aliases_from_program(emitter, prog)?;
     let modules = emit_modules_from_program(emitter, prog)?;
     let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {
@@ -208,6 +212,9 @@ fn emit_unit_(
                     .iter()
                     .for_each(|r| q.push_back((r.name.as_string_id(), 0u64)));
             });
+            class_aliases.iter().for_each(|ca| {
+                q.push_back((ca.orig.as_string_id(), 0u64));
+            });
             scan_types(
                 p.borrow(),
                 &mut q,
@@ -220,6 +227,7 @@ fn emit_unit_(
 
     Ok(Unit {
         classes: classes.into(),
+        class_aliases: class_aliases.into(),
         modules: modules.into(),
         functions: functions.into(),
         typedefs: typedefs.into(),

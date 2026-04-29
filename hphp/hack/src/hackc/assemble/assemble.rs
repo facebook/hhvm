@@ -86,6 +86,7 @@ fn assemble_from_toks(token_iter: &mut Lexer<'_>) -> Result<(hhbc::Unit, PathBuf
 #[derive(Default)]
 pub(crate) struct UnitBuilder {
     adata: AdataMap,
+    class_aliases: Vec<hhbc::ClassAlias>,
     class_refs: Option<Vec<hhbc::ClassName>>,
     classes: Vec<hhbc::Class>,
     constant_refs: Option<Vec<hhbc::ConstName>>,
@@ -106,6 +107,7 @@ impl UnitBuilder {
         hhbc::Unit {
             functions: self.funcs.into(),
             classes: self.classes.into(),
+            class_aliases: self.class_aliases.into(),
             typedefs: self.typedefs.into(),
             file_attributes: self.file_attributes.into(),
             modules: self.modules.into(),
@@ -172,6 +174,9 @@ impl UnitBuilder {
                     };
                     Ok(hhbc::IncludePath::Absolute(hhbc::intern_bytes(path_str)))
                 })?)
+            }
+            b".class_alias" => {
+                self.class_aliases.push(assemble_class_alias(token_iter)?);
             }
             b".alias" => {
                 self.typedefs.push(assemble_typedef(token_iter, false)?);
@@ -626,6 +631,14 @@ fn assemble_property_initial_value(token_iter: &mut Lexer<'_>) -> Result<Maybe<h
 fn assemble_class_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::ClassName> {
     parse!(token_iter, <id:id>);
     Ok(hhbc::ClassName::intern(id.as_str()?))
+}
+
+fn assemble_class_alias(token_iter: &mut Lexer<'_>) -> Result<hhbc::ClassAlias> {
+    parse!(token_iter, ".class_alias" <name:id> "=" <orig:id> ";");
+    Ok(hhbc::ClassAlias {
+        name: hhbc::ClassName::intern(name.as_str()?),
+        orig: hhbc::ClassName::intern(orig.as_str()?),
+    })
 }
 
 fn assemble_module_name(token_iter: &mut Lexer<'_>) -> Result<hhbc::ModuleName> {

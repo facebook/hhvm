@@ -17,6 +17,12 @@ impl MapName for hhbc::Class {
     }
 }
 
+impl MapName for hhbc::ClassAlias {
+    fn get_name(&self) -> &str {
+        self.name.as_str()
+    }
+}
+
 impl MapName for hhbc::Constant {
     fn get_name(&self) -> &str {
         self.name.as_str()

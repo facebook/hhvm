@@ -15,6 +15,7 @@ pub fn bc_to_ir(unit: Unit) -> ir::Unit {
         classes: (unit.classes.into_iter())
             .map(crate::class::convert_class)
             .collect(),
+        class_aliases: unit.class_aliases,
         constants: unit.constants,
         fatal: unit.fatal,
         file_attributes: unit.file_attributes,

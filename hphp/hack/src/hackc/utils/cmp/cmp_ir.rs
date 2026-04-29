@@ -1536,6 +1536,7 @@ fn cmp_typedef(a: &Typedef, b: &Typedef) -> Result {
 fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     let Unit {
         classes: a_classes,
+        class_aliases: a_class_aliases,
         constants: a_constants,
         file_attributes: a_file_attributes,
         functions: a_functions,
@@ -1549,6 +1550,7 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     } = a_unit;
     let Unit {
         classes: b_classes,
+        class_aliases: b_class_aliases,
         constants: b_constants,
         file_attributes: b_file_attributes,
         functions: b_functions,
@@ -1562,6 +1564,10 @@ fn cmp_unit(a_unit: &Unit, b_unit: &Unit) -> Result {
     } = b_unit;
 
     cmp_map_t(a_classes, b_classes, cmp_class).qualified("classes")?;
+    cmp_map_t(a_class_aliases, b_class_aliases, |a, b| {
+        cmp_eq(&a.orig, &b.orig).qualified("orig")
+    })
+    .qualified("class_aliases")?;
     cmp_map_t(a_constants, b_constants, cmp_constant).qualified("constants")?;
     cmp_attributes(a_file_attributes, b_file_attributes).qualified("file_attributes")?;
     cmp_map_t(a_functions, b_functions, cmp_function).qualified("functions")?;

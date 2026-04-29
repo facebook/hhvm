@@ -18,6 +18,7 @@ use hhbc::AdataState;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
+use hhbc::ClassAlias;
 use hhbc::ClassName;
 use hhbc::Coeffects;
 use hhbc::ConstName;
@@ -200,6 +201,7 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit) -> Result<()> 
     concat(w, &prog.classes, |w, _, cd| {
         print_class_def(ctx, w, cd, &adata)
     })?;
+    concat(w, &prog.class_aliases, |w, _, ca| print_class_alias(w, ca))?;
     concat(w, &prog.modules, |w, _, cd| print_module_def(ctx, w, cd))?;
     concat(w, &prog.constants, |w, _, c| print_constant(ctx, w, c))?;
     concat(w, &prog.typedefs, |w, _, td| print_typedef(ctx, w, td))?;
@@ -478,6 +480,16 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &Property) -> 
         })?;
         w.write_all(b";")
     }
+}
+
+fn print_class_alias(w: &mut dyn Write, ca: &ClassAlias) -> Result<()> {
+    newline(w)?;
+    write_bytes!(
+        w,
+        ".class_alias {} = {};",
+        ca.name.as_bstr(),
+        ca.orig.as_bstr()
+    )
 }
 
 fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &Constant) -> Result<()> {

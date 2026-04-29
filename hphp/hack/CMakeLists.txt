@@ -136,6 +136,7 @@ set(HHBC_AST_SRCS
   "${HHBC_PREFIX}/hhbc/attribute.rs"
   "${HHBC_PREFIX}/hhbc/body.rs"
   "${HHBC_PREFIX}/hhbc/class.rs"
+  "${HHBC_PREFIX}/hhbc/class_alias.rs"
   "${HHBC_PREFIX}/hhbc/coeffects.rs"
   "${HHBC_PREFIX}/hhbc/constant.rs"
   "${HHBC_PREFIX}/hhbc/function.rs"

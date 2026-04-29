@@ -7,6 +7,7 @@ use anyhow::Result;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
+use hhbc::ClassAlias;
 use hhbc::Constant;
 use hhbc::Fatal;
 use hhbc::Function;
@@ -44,6 +45,7 @@ pub fn sem_diff_unit(a_unit: &Unit, b_unit: &Unit) -> Result<()> {
     let Unit {
         functions: a_functions,
         classes: a_classes,
+        class_aliases: a_class_aliases,
         modules: a_modules,
         typedefs: a_typedefs,
         file_attributes: a_file_attributes,
@@ -57,6 +59,7 @@ pub fn sem_diff_unit(a_unit: &Unit, b_unit: &Unit) -> Result<()> {
     let Unit {
         functions: b_functions,
         classes: b_classes,
+        class_aliases: b_class_aliases,
         modules: b_modules,
         typedefs: b_typedefs,
         file_attributes: b_file_attributes,
@@ -127,6 +130,27 @@ pub fn sem_diff_unit(a_unit: &Unit, b_unit: &Unit) -> Result<()> {
         sem_diff_class,
     )?;
 
+    sem_diff_map_t(
+        &path.qualified("class_aliases"),
+        a_class_aliases,
+        b_class_aliases,
+        sem_diff_class_alias,
+    )?;
+
+    Ok(())
+}
+
+fn sem_diff_class_alias(path: &CodePath<'_>, a: &ClassAlias, b: &ClassAlias) -> Result<()> {
+    let ClassAlias {
+        name: a_name,
+        orig: a_orig,
+    } = a;
+    let ClassAlias {
+        name: b_name,
+        orig: b_orig,
+    } = b;
+    sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
+    sem_diff_eq(&path.qualified("orig"), a_orig, b_orig)?;
     Ok(())
 }
 

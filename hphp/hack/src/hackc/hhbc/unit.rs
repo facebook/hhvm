@@ -8,6 +8,7 @@ use ffi::Vector;
 use serde::Serialize;
 
 use crate::Attribute;
+use crate::ClassAlias;
 use crate::ClassImpl;
 use crate::Constant;
 use crate::FatalOp;
@@ -41,6 +42,13 @@ pub struct UnitImpl<R> {
     /// class MyClass { ... }
     /// ```
     pub classes: Vector<ClassImpl<R>>,
+
+    /// The list of class aliases defined in this Unit.
+    ///
+    /// ```
+    /// class C = D;
+    /// ```
+    pub class_aliases: Vector<ClassAlias>,
 
     /// What modules are defined in this unit
     pub modules: Vector<Module>,

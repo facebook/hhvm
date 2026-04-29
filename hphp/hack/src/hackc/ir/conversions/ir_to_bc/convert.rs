@@ -25,6 +25,7 @@ pub fn ir_to_bc(ir_unit: ir::Unit) -> hhbc::Unit {
     hhbc::Unit {
         functions: unit.functions.into(),
         classes: unit.classes.into(),
+        class_aliases: ir_unit.class_aliases,
         file_attributes: ir_unit.file_attributes,
         typedefs: ir_unit.typedefs,
         constants: ir_unit.constants,

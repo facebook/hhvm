@@ -355,11 +355,83 @@ Rejects:
 
 #### MAP
 
-TODO
+**Serialization**: Format depends on key type:
+
+| Key Type | Format | Example |
+| :---- | :---- | :---- |
+| String or enum | JSON Object `{"my_key": "my_value"}`. | `{"ONE (1)": 1}` (for `map<Enum, i32>`) |
+| All others | Array of `{"key": ..., "value": ...}` objects | `[{"key": "3q2-7w", "value": 1}]` (for `map<Binary, i32>`) |
+
+Order: [stable ascending](https://www.internalfb.com/intern/staticdocs/thrift/docs/fb/object-model-draft/#operation-isstablelessthan).
+**Deserialization**:
+
+* The decoder accepts both Object and Array forms for compatibility:
+  * if the JSON value is an object, object form is used;
+  * if an array, array form is used.
+* Object-form keys are decoded using map key type's full rules (e.g., for `map<Enum, V>`, both `"ONE (1)"` and `"1"` are accepted; see ENUM section above)
+* Keys and values inside the Object or Array are decoded recursively.
+
+For example:
+
+| Input | Notes |
+| :---- | :---- |
+| `{"ONE (1)": 1}`| Object form, `map<Enum, i32>` |
+| `[{"key": "ONE (1)", "value": 1}]`| Array form, `map<Enum, i32>` |
+| `{"3q2-7w": 1}` | Object form, `map<binary, i32>` |
+| `[{"key": "3q2-7w", "value": 1}]` | Array form, `map<binary, i32>` |
+| `[{"key": [1, 2], "value": 3}]` | Array form, `map<list<i32>, i32>` |
+
+:::caution
+
+In `map<binary, V>`, object keys are base64-decoded as bytes. Use array form with `{"utf-8": "..."}` to avoid ambiguity.
+
+:::
+
+Rejects:
+
+* Missing/extra fields in array entries. e.g., all the following data are rejected
+  * `[{"key": 1}]`
+  * `[{"key": 1, "value": 2, "extra": 3}]`
+* Duplicate keys (after decoding, e.g., `{"1": 10, "0x1": 20}` for `map<i32, i32>`).
+* Object form, but map's key type can not decode from a string (e.g., `{"[1,2]": 3}` for `map<list<i32>, i32>` -- `"[1,2]"` is rejected for `list<i32>`; see LIST section above).
+* Null keys/values (e.g., `{"1": null}`).
 
 #### STRUCT/UNION
 
-TODO
+**Serialization**: Written as JSON objects with field names as keys, in ascending field ID order. Unions have at most one field.
+**Deserialization**: Accepts a JSON object with the following key formats
+
+* `"field-name"` (e.g., `"myField"`)
+* `"field-name (field-id)"` (e.g., `"myField (30)"`)
+* `"(field-id)"` (e.g., `"(30)"`)
+* `"field-id"` (e.g., `"30"`)
+
+Note that for field-id, we use the same rules as integral types, thus `"myField (0x1E)"` is also supported.
+
+Behavior:
+
+* Unknown fields: silently skipped (This is important for forward compatibility).
+* Null field values: silently skipped.
+* Unions: multiple fields → rejected; empty `{}` → unset (valid).
+* Duplicate keys: rejected (includes keys resolving to same field ID).
+
+For example:
+
+| Input | Result |
+| :---- | :---- |
+| `{"myField": 1}` | Matched by field name |
+| `{"myField (30)": 1}` | Matched by name and field ID |
+| `{"(30)": 1}` | Matched by field ID only |
+| `{"30": 1}` | Matched by field ID (bare integer string) |
+| `{"field_1": null, "field_2": 2}` | Identical to parsing `{"field_2": 2}` |
+| `{"unknown_field (42)": [1,2,3]}` | Unknown fields are skipped |
+
+Rejects:
+
+* Name/ID conflicts (e.g., `"fieldA (30)"` where fieldA actually has ID 20).
+* Duplicate keys.
+* Top-level null.
+* Field ID that overflows i16 (e.g., `"field (32768)"`).
 
 #### Output Formatting
 

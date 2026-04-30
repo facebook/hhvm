@@ -26,7 +26,6 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/logging/ThriftStreamLog.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::detail {
 

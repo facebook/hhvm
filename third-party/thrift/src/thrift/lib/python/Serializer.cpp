@@ -62,6 +62,11 @@ std::unique_ptr<folly::IOBuf> serialize(
     // Deprecated, remove as soon as thrift-python migration complete
     case PROTOCOL_TYPES::T_JSON_PROTOCOL:
       return serializeWithWriter<JSONProtocolWriter>(dynamicStructInfo, object);
+#ifdef THRIFT_HAS_JSON5_PROTOCOL
+    case PROTOCOL_TYPES::T_JSON5_PROTOCOL:
+      return serializeJson5(
+          dynamicStructInfo, object, {.writer = {.indentWidth = 2}});
+#endif
     default:
       throw TProtocolException(
           TProtocolException::NOT_IMPLEMENTED, "protocol not supported yet");

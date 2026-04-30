@@ -298,8 +298,75 @@ func (p *procFuncBiDiServiceSimple) RunContext(ctx context.Context, reqStruct th
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncBiDiServiceSimple) RunBiDiContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncBiDiServiceSimple) NewSinkElem() thrift.ReadableResult {
+    return newSinkBiDiServiceSimple()
+}
+
+func (p *procFuncBiDiServiceSimple) RunBiDiContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespBiDiServiceSimple()
+    sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.Simple(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Simple: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSinkSeq := func(yield func(int32, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkBiDiServiceSimple)
+            if !yield(*sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    fbthriftStreamChan := make(chan int16, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftStreamChan {
+            streamWrapStruct := newStreamBiDiServiceSimple()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    // Run sink consumer and stream producer concurrently.
+    var sinkWg sync.WaitGroup
+    sinkWg.Add(1)
+    go func() {
+        defer sinkWg.Done()
+        sinkConsumerFunc(ctx, fbthriftTypedSinkSeq)
+    }()
+
+    streamErr := streamProducerFunc(ctx, fbthriftStreamChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftStreamChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Simple: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    // Wait for sink consumer to finish before completing the stream.
+    sinkWg.Wait()
+    onStreamComplete()
 }
 
 type procFuncBiDiServiceResponse struct {
@@ -316,8 +383,76 @@ func (p *procFuncBiDiServiceResponse) RunContext(ctx context.Context, reqStruct 
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncBiDiServiceResponse) RunBiDiContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncBiDiServiceResponse) NewSinkElem() thrift.ReadableResult {
+    return newSinkBiDiServiceResponse()
+}
+
+func (p *procFuncBiDiServiceResponse) RunBiDiContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespBiDiServiceResponse()
+    retval, sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.Response(ctx)
+    if initialErr != nil {
+        internalErr := fmt.Errorf("Internal error processing Response: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        onStreamComplete()
+        return
+    }
+
+    firstResponse.Success = &retval
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSinkSeq := func(yield func(int32, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkBiDiServiceResponse)
+            if !yield(*sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    fbthriftStreamChan := make(chan int16, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftStreamChan {
+            streamWrapStruct := newStreamBiDiServiceResponse()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    // Run sink consumer and stream producer concurrently.
+    var sinkWg sync.WaitGroup
+    sinkWg.Add(1)
+    go func() {
+        defer sinkWg.Done()
+        sinkConsumerFunc(ctx, fbthriftTypedSinkSeq)
+    }()
+
+    streamErr := streamProducerFunc(ctx, fbthriftStreamChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftStreamChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        internalErr := fmt.Errorf("Internal stream handler error Response: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+    }
+    // Wait for sink consumer to finish before completing the stream.
+    sinkWg.Wait()
+    onStreamComplete()
 }
 
 type procFuncBiDiServiceCanThrow struct {
@@ -334,8 +469,88 @@ func (p *procFuncBiDiServiceCanThrow) RunContext(ctx context.Context, reqStruct 
     return nil, errors.New("not supported")
 }
 
-func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(ctx context.Context) {
-    // NOT IMPLEMENTED
+func (p *procFuncBiDiServiceCanThrow) NewSinkElem() thrift.ReadableResult {
+    return newSinkBiDiServiceCanThrow()
+}
+
+func (p *procFuncBiDiServiceCanThrow) RunBiDiContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    firstResponse := newRespBiDiServiceCanThrow()
+    sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.CanThrow(ctx)
+    if initialErr != nil {
+        switch v := initialErr.(type) {
+        case *BiDiMethodException:
+            firstResponse.Ex = v
+            onFirstResponse(firstResponse)
+        default:
+            internalErr := fmt.Errorf("Internal error processing CanThrow: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        onStreamComplete()
+        return
+    }
+
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSinkSeq := func(yield func(int64, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield(0, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sinkBiDiServiceCanThrow)
+            if !yield(*sinkWrapStruct.Success, nil) {
+                return
+            }
+        }
+    }
+
+    fbthriftStreamChan := make(chan int64, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftStreamChan {
+            streamWrapStruct := newStreamBiDiServiceCanThrow()
+            streamWrapStruct.Success = &elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    // Run sink consumer and stream producer concurrently.
+    var sinkWg sync.WaitGroup
+    sinkWg.Add(1)
+    go func() {
+        defer sinkWg.Done()
+        sinkConsumerFunc(ctx, fbthriftTypedSinkSeq)
+    }()
+
+    streamErr := streamProducerFunc(ctx, fbthriftStreamChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftStreamChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        streamWrapStruct := newStreamBiDiServiceCanThrow()
+        switch v := streamErr.(type) {
+        case *BiDiStreamException:
+            streamWrapStruct.Ex = v
+            onStreamNext(streamWrapStruct)
+        default:
+            internalErr := fmt.Errorf("Internal stream handler error CanThrow: %w", streamErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onStreamNext(x)
+        }
+    }
+    // Wait for sink consumer to finish before completing the stream.
+    sinkWg.Wait()
+    onStreamComplete()
 }
 
 

@@ -261,7 +261,124 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunSinkContext(
 }
 {{/let partial}}
 
-{{#let export partial processor_function |func svc| captures |server_func_stream server_func_response server_func_sink|}}
+{{#let export partial server_func_bidi |func svc| captures |types|}}
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) NewSinkElem() thrift.ReadableResult {
+    return newSink{{svc.go_name}}{{func.go_name}}()
+}
+
+func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(
+    ctx context.Context,
+    reqStruct thrift.ReadableStruct,
+    onFirstResponse func(thrift.WritableStruct),
+    onStreamNext func(thrift.WritableStruct),
+    onStreamComplete func(),
+    sinkSeq iter.Seq2[thrift.ReadableStruct, error],
+) {
+    {{#if func.params.fields?}}
+    args := reqStruct.(*req{{svc.go_name}}{{func.go_name}})
+    {{/if func.params.fields?}}
+    firstResponse := newResp{{svc.go_name}}{{func.go_name}}()
+    {{#if func.creates_interaction?}}fbthriftInteraction, {{/if func.creates_interaction?}}{{#if func.stream_has_first_response?}}retval, {{/if func.stream_has_first_response?}}sinkConsumerFunc, streamProducerFunc, initialErr := p.handler.{{func.go_name}}(
+        {{~ ! }}ctx{{#if func.params.fields?}}, {{/if ~}}
+        {{#each func.params.fields as |field| separator=", " ~}}
+          args.{{field.go_name}}
+        {{~ /each}})
+    if initialErr != nil {
+        {{#if func.exceptions?}}
+        switch v := initialErr.(type) {
+        {{#each func.exceptions as |ex|}}
+        case *{{#partial types.go_type type=ex.type}}:
+            firstResponse.{{ex.go_name}} = v
+            onFirstResponse(firstResponse)
+        {{/each}}
+        default:
+            internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onFirstResponse(x)
+        }
+        {{/if func.exceptions?}}
+        {{#if (not func.exceptions?)}}
+        internalErr := fmt.Errorf("Internal error processing {{func.go_name}}: %w", initialErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onFirstResponse(x)
+        {{/if (not func.exceptions?)}}
+        onStreamComplete()
+        return
+    }
+
+    {{#if func.creates_interaction?}}
+    thrift.SetInteractionCreateProcessor(ctx, fbthriftInteraction)
+    {{/if func.creates_interaction?}}
+    {{#if func.stream_has_first_response?}}
+    firstResponse.{{func.retval_field_name}} = {{#if (not func.return_type.nilable?)}}&{{/if (not func.return_type.nilable?)}}retval
+    {{/if func.stream_has_first_response?}}
+    onFirstResponse(firstResponse)
+
+    fbthriftTypedSinkSeq := func(yield func({{#if func.sink.elem_type.structured?}}*{{/if func.sink.elem_type.structured?}}{{#partial types.go_type type=func.sink.elem_type}}, error) bool) {
+        for elem, err := range sinkSeq {
+            if err != nil {
+                yield({{#if func.sink.elem_type.structured?}}nil{{#else}}{{#partial types.go_zero_value type=func.sink.elem_type}}{{/if func.sink.elem_type.structured?}}, err)
+                return
+            }
+            sinkWrapStruct := elem.(*sink{{svc.go_name}}{{func.go_name}})
+            if !yield({{#if (not func.sink.elem_type.nilable?)}}*{{/if (not func.sink.elem_type.nilable?)}}sinkWrapStruct.{{func.retval_field_name}}, nil) {
+                return
+            }
+        }
+    }
+
+    fbthriftStreamChan := make(chan {{#if func.stream.elem_type.structured?}}*{{/if func.stream.elem_type.structured?}}{{#partial types.go_type type=func.stream.elem_type}}, thrift.DefaultStreamBufferSize)
+    var senderWg sync.WaitGroup
+    senderWg.Add(1)
+    go func() {
+        defer senderWg.Done()
+        for elem := range fbthriftStreamChan {
+            streamWrapStruct := newStream{{svc.go_name}}{{func.go_name}}()
+            streamWrapStruct.{{func.retval_field_name}} = {{#if (not func.stream.elem_type.nilable?)}}&{{/if (not func.stream.elem_type.nilable?)}}elem
+            onStreamNext(streamWrapStruct)
+        }
+    }()
+
+    // Run sink consumer and stream producer concurrently.
+    var sinkWg sync.WaitGroup
+    sinkWg.Add(1)
+    go func() {
+        defer sinkWg.Done()
+        sinkConsumerFunc(ctx, fbthriftTypedSinkSeq)
+    }()
+
+    streamErr := streamProducerFunc(ctx, fbthriftStreamChan)
+    // Stream is complete. Close the channel and wait for the sender goroutine to finish.
+    close(fbthriftStreamChan)
+    senderWg.Wait()
+    if streamErr != nil {
+        {{#if func.stream_exceptions?}}
+        streamWrapStruct := newStream{{svc.go_name}}{{func.go_name}}()
+        switch v := streamErr.(type) {
+        {{#each func.stream.exceptions as |ex|}}
+        case *{{#partial types.go_type type=ex.type}}:
+            streamWrapStruct.{{ex.go_name}} = v
+            onStreamNext(streamWrapStruct)
+        {{/each}}
+        default:
+            internalErr := fmt.Errorf("Internal stream handler error {{func.go_name}}: %w", streamErr)
+            x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+            onStreamNext(x)
+        }
+        {{/if func.stream_exceptions?}}
+        {{#if (not func.stream_exceptions?)}}
+        internalErr := fmt.Errorf("Internal stream handler error {{func.go_name}}: %w", streamErr)
+        x := thrift.NewApplicationException(thrift.INTERNAL_ERROR, internalErr.Error())
+        onStreamNext(x)
+        {{/if (not func.stream_exceptions?)}}
+    }
+    // Wait for sink consumer to finish before completing the stream.
+    sinkWg.Wait()
+    onStreamComplete()
+}
+{{/let partial}}
+
+{{#let export partial processor_function |func svc| captures |server_func_stream server_func_response server_func_sink server_func_bidi|}}
 type procFunc{{svc.go_name}}{{func.go_name}} struct {
     handler {{svc.go_name}}
 }
@@ -277,9 +394,7 @@ func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context
     return nil, errors.New("not supported")
 }
 
-func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunBiDiContext(ctx context.Context) {
-    // NOT IMPLEMENTED
-}
+{{#partial server_func_bidi func=func svc=svc}}
 {{#else if func.stream?}}
 func (p *procFunc{{svc.go_name}}{{func.go_name}}) RunContext(ctx context.Context, reqStruct thrift.ReadableStruct) (thrift.WritableStruct, error) {
     return nil, errors.New("not supported")

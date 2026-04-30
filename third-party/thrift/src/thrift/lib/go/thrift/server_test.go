@@ -973,6 +973,123 @@ func TestProcessorScenarios(t *testing.T) {
 		require.Error(t, err)
 		require.ErrorContains(t, err, "undeclared exception")
 	})
+
+	t.Run("bidi_basic", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		bidiCtx, bidiCancel := context.WithCancel(context.Background())
+		defer bidiCancel()
+		sinkCallback, streamSeq, err := client.BiDiBasic(bidiCtx)
+		require.NoError(t, err)
+
+		sinkSeq := func(yield func(int32, error) bool) {
+			for i := int32(1); i <= 5; i++ {
+				if !yield(i, nil) {
+					return
+				}
+			}
+		}
+		go sinkCallback(sinkSeq)
+
+		var streamElems []int32
+		for elem, err := range streamSeq {
+			require.NoError(t, err)
+			streamElems = append(streamElems, elem)
+		}
+		require.Equal(t, []int32{1, 2, 3, 4, 5}, streamElems)
+	})
+
+	t.Run("bidi_with_initial_response", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		bidiCtx, bidiCancel := context.WithCancel(context.Background())
+		defer bidiCancel()
+		initialResponse, sinkCallback, streamSeq, err := client.BiDiWithInitialResponse(bidiCtx)
+		require.NoError(t, err)
+		require.EqualValues(t, 42, initialResponse)
+
+		sinkSeq := func(yield func(int32, error) bool) {
+			for i := int32(1); i <= 5; i++ {
+				if !yield(i, nil) {
+					return
+				}
+			}
+		}
+		go sinkCallback(sinkSeq)
+
+		var streamElems []int32
+		for elem, err := range streamSeq {
+			require.NoError(t, err)
+			streamElems = append(streamElems, elem)
+		}
+		require.Equal(t, []int32{1, 2, 3, 4, 5}, streamElems)
+	})
+
+	t.Run("bidi_with_stream_declared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		bidiCtx, bidiCancel := context.WithCancel(context.Background())
+		defer bidiCancel()
+		sinkCallback, streamSeq, err := client.BiDiWithStreamDeclaredException(bidiCtx)
+		require.NoError(t, err)
+
+		sinkSeq := func(yield func(int32, error) bool) {
+			for i := int32(1); i <= 5; i++ {
+				if !yield(i, nil) {
+					return
+				}
+			}
+		}
+		go sinkCallback(sinkSeq)
+
+		var streamElems []int32
+		var streamErr error
+		for elem, err := range streamSeq {
+			if err != nil {
+				streamErr = err
+				break
+			}
+			streamElems = append(streamElems, elem)
+		}
+		require.Equal(t, []int32{1, 2, 3}, streamElems)
+		require.Error(t, streamErr)
+	})
+
+	t.Run("bidi_with_stream_undeclared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		bidiCtx, bidiCancel := context.WithCancel(context.Background())
+		defer bidiCancel()
+		sinkCallback, streamSeq, err := client.BiDiWithStreamUndeclaredException(bidiCtx)
+		require.NoError(t, err)
+
+		sinkSeq := func(yield func(int32, error) bool) {
+			for i := int32(1); i <= 5; i++ {
+				if !yield(i, nil) {
+					return
+				}
+			}
+		}
+		go sinkCallback(sinkSeq)
+
+		var streamElems []int32
+		var streamErr error
+		for elem, err := range streamSeq {
+			if err != nil {
+				streamErr = err
+				break
+			}
+			streamElems = append(streamElems, elem)
+		}
+		require.Equal(t, []int32{1, 2, 3}, streamElems)
+		require.Error(t, streamErr)
+		require.ErrorContains(t, streamErr, "undeclared stream exception")
+	})
+
+	t.Run("bidi_with_method_declared_exception", func(t *testing.T) {
+		client := dummyif.NewDummyChannelClient(channel)
+		bidiCtx, bidiCancel := context.WithCancel(context.Background())
+		defer bidiCancel()
+		_, _, err := client.BiDiWithMethodDeclaredException(bidiCtx)
+		require.Error(t, err)
+		require.IsType(t, &dummyif.DummyException{}, err)
+	})
 }
 
 // TestRocketServerFallbackToHeader tests that when a Rocket server receives a header

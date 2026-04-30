@@ -83,6 +83,18 @@ service Dummy {
   i32, sink<i32, i32> ResponseAndSinkWithUndeclaredException();
   sink<i32, i32 throws (1: DummyException ex)> SinkWithDeclaredFinalException();
   sink<i32, i32> SinkWithUndeclaredFinalException();
+
+  // BiDi streaming
+  sink<i32>, stream<i32> BiDiBasic();
+  i32, sink<i32>, stream<i32> BiDiWithInitialResponse();
+  sink<i32>, stream<i32> BiDiWithStreamDeclaredException() throws (
+    1: DummyException ex,
+  );
+  sink<i32>, stream<i32> BiDiWithStreamUndeclaredException();
+  sink<i32 throws (1: DummyException ex)>, stream<i32> BiDiWithSinkDeclaredException();
+  sink<i32>, stream<i32> BiDiWithMethodDeclaredException() throws (
+    1: DummyException ex,
+  );
 }
 
 service DummyTwo {

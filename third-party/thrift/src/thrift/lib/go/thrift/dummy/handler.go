@@ -254,3 +254,117 @@ func (h *DummyHandler) SinkWithUndeclaredFinalException(ctx context.Context) (fu
 	}
 	return elemConsumerFunc, nil
 }
+
+func (h *DummyHandler) BiDiBasic(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) error, func(context.Context, chan<- int32) error, error) {
+	sinkConsumer := func(ctx context.Context, seq iter.Seq2[int32, error]) error {
+		for _, err := range seq {
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, ch chan<- int32) error {
+		for i := int32(1); i <= 5; i++ {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case ch <- i:
+			}
+		}
+		return nil
+	}
+	return sinkConsumer, streamProducer, nil
+}
+
+func (h *DummyHandler) BiDiWithInitialResponse(ctx context.Context) (int32, func(context.Context, iter.Seq2[int32, error]) error, func(context.Context, chan<- int32) error, error) {
+	sinkConsumer := func(ctx context.Context, seq iter.Seq2[int32, error]) error {
+		for _, err := range seq {
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, ch chan<- int32) error {
+		for i := int32(1); i <= 5; i++ {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case ch <- i:
+			}
+		}
+		return nil
+	}
+	return 42, sinkConsumer, streamProducer, nil
+}
+
+func (h *DummyHandler) BiDiWithStreamDeclaredException(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) error, func(context.Context, chan<- int32) error, error) {
+	sinkConsumer := func(ctx context.Context, seq iter.Seq2[int32, error]) error {
+		for _, err := range seq {
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, ch chan<- int32) error {
+		for i := int32(1); i <= 3; i++ {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case ch <- i:
+			}
+		}
+		return dummy.NewDummyException().SetMessage("stream exception")
+	}
+	return sinkConsumer, streamProducer, nil
+}
+
+func (h *DummyHandler) BiDiWithStreamUndeclaredException(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) error, func(context.Context, chan<- int32) error, error) {
+	sinkConsumer := func(ctx context.Context, seq iter.Seq2[int32, error]) error {
+		for _, err := range seq {
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, ch chan<- int32) error {
+		for i := int32(1); i <= 3; i++ {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case ch <- i:
+			}
+		}
+		return errors.New("undeclared stream exception")
+	}
+	return sinkConsumer, streamProducer, nil
+}
+
+func (h *DummyHandler) BiDiWithSinkDeclaredException(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) error, func(context.Context, chan<- int32) error, error) {
+	sinkConsumer := func(ctx context.Context, seq iter.Seq2[int32, error]) error {
+		for _, err := range seq {
+			if err != nil {
+				return nil // swallow error, just stop consuming
+			}
+		}
+		return nil
+	}
+	streamProducer := func(ctx context.Context, ch chan<- int32) error {
+		for i := int32(1); i <= 5; i++ {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case ch <- i:
+			}
+		}
+		return nil
+	}
+	return sinkConsumer, streamProducer, nil
+}
+
+func (h *DummyHandler) BiDiWithMethodDeclaredException(ctx context.Context) (func(context.Context, iter.Seq2[int32, error]) error, func(context.Context, chan<- int32) error, error) {
+	return nil, nil, dummy.NewDummyException().SetMessage("method exception")
+}

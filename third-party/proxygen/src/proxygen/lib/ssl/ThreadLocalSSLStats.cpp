@@ -63,6 +63,10 @@ TLSSLStats::TLSSLStats(const std::string& prefix)
       fizzHandshakeErrors_(prefix + "_fizz_handshake_errors", SUM, PERCENT),
       fizzHandshakeProtocolErrors_(prefix + "_fizz_handshake_protocol_errors",
                                    SUM),
+      fizzHandshakeServerRejectsClientCertErrors_(
+          prefix + "_fizz_handshake_server_rejects_client_cert", SUM),
+      fizzHandshakeClientRejectsServerCertErrors_(
+          prefix + "_fizz_handshake_client_rejects_server_cert", SUM),
       fizzHandshakeSuccesses_(prefix + "_fizz_handshake_successes", SUM),
       tfoSuccess_(prefix + "_tfo_success", SUM),
       sslServerCertExpiring_(prefix + "_ssl_server_cert_expiring", SUM),
@@ -183,21 +187,34 @@ void TLSSLStats::recordSSLHandshake(bool success) {
   }
 }
 
-void TLSSLStats::recordFizzHandshake(bool success) {
-  if (success) {
-    fizzHandshakeSuccesses_.add(1);
-    fizzHandshakeErrors_.add(0);
-  } else {
-    fizzHandshakeErrors_.add(1);
+void TLSSLStats::recordFizzHandshake(FizzHandshakeErrorType errorType) {
+  switch (errorType) {
+    case FizzHandshakeErrorType::None:
+      fizzHandshakeSuccesses_.add(1);
+      fizzHandshakeErrors_.add(0);
+      fizzHandshakeServerRejectsClientCertErrors_.add(0);
+      fizzHandshakeClientRejectsServerCertErrors_.add(0);
+      break;
+    case FizzHandshakeErrorType::ServerRejectsClientCert:
+      fizzHandshakeServerRejectsClientCertErrors_.add(1);
+      fizzHandshakeProtocolErrors_.add(1);
+      break;
+    case FizzHandshakeErrorType::ClientRejectsServerCert:
+      fizzHandshakeClientRejectsServerCertErrors_.add(1);
+      fizzHandshakeProtocolErrors_.add(1);
+      break;
+    case FizzHandshakeErrorType::Protocol:
+      fizzHandshakeErrors_.add(1);
+      fizzHandshakeProtocolErrors_.add(1);
+      break;
+    case FizzHandshakeErrorType::Unclassified:
+      fizzHandshakeErrors_.add(1);
+      break;
   }
 }
 
 void TLSSLStats::recordSSLConnectionReuse() {
   sslResumptions_.add(1);
-}
-
-void TLSSLStats::recordFizzHandshakeProtocolError() {
-  fizzHandshakeProtocolErrors_.add(1);
 }
 
 void TLSSLStats::recordTFOSuccess() {

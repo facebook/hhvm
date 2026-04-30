@@ -11,3 +11,13 @@ proxygen_add_library(proxygen_ssl
     Folly::folly_portability_openssl
     glog::glog
 )
+
+proxygen_add_library(proxygen_ssl_fizz_handshake_error_type
+  SRCS
+    FizzHandshakeErrorType.cpp
+  DEPS
+    wangle::wangle_acceptor
+    fizz::fizz
+  EXPORTED_DEPS
+    Folly::folly_exception_wrapper
+)

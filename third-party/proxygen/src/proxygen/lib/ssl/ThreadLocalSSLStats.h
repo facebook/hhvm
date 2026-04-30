@@ -10,6 +10,7 @@
 
 #include <fizz/protocol/Types.h>
 #include <folly/ThreadLocal.h>
+#include <proxygen/lib/ssl/FizzHandshakeErrorType.h>
 #include <proxygen/lib/stats/StatsWrapper.h>
 #include <string>
 #include <wangle/ssl/SSLStats.h>
@@ -33,12 +34,9 @@ class ProxygenSSLStats : public wangle::SSLStats {
    */
   virtual void recordSSLHandshake(bool success) = 0;
 
-  virtual void recordFizzHandshake(bool success) = 0;
+  virtual void recordFizzHandshake(FizzHandshakeErrorType errorType) = 0;
 
   virtual void recordSSLConnectionReuse() = 0;
-
-  // Protocol level errors only
-  virtual void recordFizzHandshakeProtocolError() = 0;
 
   virtual void recordTFOSuccess() = 0;
 
@@ -89,11 +87,9 @@ class TLSSLStats : public ProxygenSSLStats {
    */
   void recordSSLHandshake(bool success) override;
 
-  void recordFizzHandshake(bool success) override;
+  void recordFizzHandshake(FizzHandshakeErrorType errorType) override;
 
   void recordSSLConnectionReuse() override;
-
-  void recordFizzHandshakeProtocolError() override;
 
   void recordTFOSuccess() override;
 
@@ -146,6 +142,8 @@ class TLSSLStats : public ProxygenSSLStats {
   StatsWrapper::TLTimeseries sslResumptions_;
   StatsWrapper::TLTimeseries fizzHandshakeErrors_;
   StatsWrapper::TLTimeseries fizzHandshakeProtocolErrors_;
+  StatsWrapper::TLTimeseries fizzHandshakeServerRejectsClientCertErrors_;
+  StatsWrapper::TLTimeseries fizzHandshakeClientRejectsServerCertErrors_;
   StatsWrapper::TLTimeseries fizzHandshakeSuccesses_;
   StatsWrapper::TLTimeseries tfoSuccess_;
   StatsWrapper::TLTimeseries sslServerCertExpiring_;

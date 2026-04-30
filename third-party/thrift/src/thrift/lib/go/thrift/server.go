@@ -734,19 +734,18 @@ func (s *rocketServerSocket) requestChannelSink(
 	sinkErrChan := make(chan error, 1)
 
 	sinkSeq := func(yield func(ReadableStruct, error) bool) {
-		for {
-			select {
-			case elem, ok := <-sinkElemChan:
-				if !ok {
-					return
-				}
-				if !yield(elem, nil) {
-					return
-				}
-			case err := <-sinkErrChan:
-				yield(nil, err)
+		// Drain all buffered sink elements first, then surface any error.
+		// DoOnComplete/DoOnError closes sinkElemChan after the last
+		// DoOnNext, so this loop terminates after the queue is drained.
+		for elem := range sinkElemChan {
+			if !yield(elem, nil) {
 				return
 			}
+		}
+		select {
+		case err := <-sinkErrChan:
+			yield(nil, err)
+		default:
 		}
 	}
 

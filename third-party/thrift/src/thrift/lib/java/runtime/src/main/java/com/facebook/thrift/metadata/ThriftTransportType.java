@@ -19,9 +19,10 @@ package com.facebook.thrift.metadata;
 public enum ThriftTransportType {
   HEADER("thrift"),
   FRAMED("thrift"),
-  HTTP("http"),
+  HTTP("http/1.1"),
   HTTP_2("h2"),
-  RSOCKET("rs");
+  RSOCKET("rs"),
+  UNKNOWN("unknown");
 
   final String protocol;
 
@@ -34,19 +35,25 @@ public enum ThriftTransportType {
   }
 
   public static ThriftTransportType fromProtocol(String protocol) {
+    if (protocol == null) {
+      return UNKNOWN;
+    }
+
     switch (protocol) {
-      case "header":
-        return HEADER;
-      case "framed":
-        return FRAMED;
-      case "HTTP":
-        return HTTP;
-      case "HTTP_2":
-        return HTTP_2;
       case "rs":
         return RSOCKET;
+      case "thrift":
+        return HEADER;
+      case "h2":
+        return HTTP_2;
+      // technically "thrift" but deprecated so must be called with "framed" to produce enum value
+      case "framed":
+        return FRAMED;
+      case "http/1.1":
+      case "http":
+        return HTTP;
       default:
-        throw new IllegalArgumentException("unknown protocol " + protocol);
+        return UNKNOWN;
     }
   }
 }

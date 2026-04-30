@@ -18,5 +18,6 @@ package com.facebook.thrift.util;
 
 public enum TransportType {
   THEADER,
-  RSOCKET
+  RSOCKET,
+  UNIFIED,
 }

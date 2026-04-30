@@ -36,7 +36,7 @@ public class SPINiftyMetrics implements NiftyMetrics {
   private final DecayCounter droppedConnectionsOneHour;
   private final AtomicLong acceptedConnections;
   private final DecayCounter acceptedConnectionsOneMin;
-  private final DecayCounter acceptedConnectionsOnHour;
+  private final DecayCounter acceptedConnectionsOneHour;
 
   public SPINiftyMetrics() {
     channelCount = new AtomicInteger();
@@ -50,7 +50,7 @@ public class SPINiftyMetrics implements NiftyMetrics {
     droppedConnectionsOneHour = new DecayCounter(ExponentialDecay.seconds(3600));
     acceptedConnections = new AtomicLong();
     acceptedConnectionsOneMin = new DecayCounter(ExponentialDecay.oneMinute());
-    acceptedConnectionsOnHour = new DecayCounter(ExponentialDecay.oneMinute());
+    acceptedConnectionsOneHour = new DecayCounter(ExponentialDecay.seconds(3600));
   }
 
   @Override
@@ -129,7 +129,7 @@ public class SPINiftyMetrics implements NiftyMetrics {
   public void incrementAcceptedConnections() {
     acceptedConnections.incrementAndGet();
     acceptedConnectionsOneMin.add(1L);
-    acceptedConnectionsOnHour.add(1L);
+    acceptedConnectionsOneHour.add(1L);
   }
 
   @Override
@@ -144,6 +144,6 @@ public class SPINiftyMetrics implements NiftyMetrics {
 
   @Override
   public long getAcceptedConnectionsOneHour() {
-    return Math.round(acceptedConnectionsOnHour.getCount());
+    return Math.round(acceptedConnectionsOneHour.getCount());
   }
 }

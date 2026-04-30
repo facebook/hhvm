@@ -52,6 +52,7 @@ public class MetricsChannelDuplexHandler extends ChannelDuplexHandler {
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
     spiNiftyMetrics.incrementChannelCount();
+    spiNiftyMetrics.incrementAcceptedConnections();
     ctx.fireChannelActive();
   }
 

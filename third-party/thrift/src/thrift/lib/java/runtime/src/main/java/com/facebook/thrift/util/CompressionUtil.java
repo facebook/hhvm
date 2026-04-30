@@ -70,11 +70,11 @@ public class CompressionUtil {
     Objects.requireNonNull(alloc);
     Objects.requireNonNull(in);
 
-    try {
-      if (!in.isReadable()) {
-        return in;
-      }
+    if (!in.isReadable()) {
+      return in;
+    }
 
+    try {
       Inflater inflater = new Inflater();
 
       if (supportsByteBuffer()) {

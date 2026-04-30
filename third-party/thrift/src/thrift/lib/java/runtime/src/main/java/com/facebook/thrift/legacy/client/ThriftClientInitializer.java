@@ -24,6 +24,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.ssl.SslContext;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Optional;
 
@@ -33,18 +34,21 @@ final class ThriftClientInitializer extends ChannelInitializer<Channel> {
   private final TProtocolType protocol;
   private final DataSize maxFrameSize;
   private final SocketAddress socksProxyAddress;
+  private final SocketAddress remoteAddress;
 
   ThriftClientInitializer(
       SslContext sslContext,
       LegacyTransportType transport,
       TProtocolType protocol,
       DataSize maxFrameSize,
-      SocketAddress socksProxyAddress) {
+      SocketAddress socksProxyAddress,
+      SocketAddress remoteAddress) {
     this.sslContext = sslContext;
     this.transport = transport;
     this.protocol = protocol;
     this.maxFrameSize = maxFrameSize;
     this.socksProxyAddress = socksProxyAddress;
+    this.remoteAddress = remoteAddress;
   }
 
   @Override
@@ -52,7 +56,13 @@ final class ThriftClientInitializer extends ChannelInitializer<Channel> {
     ChannelPipeline pipeline = channel.pipeline();
 
     if (sslContext != null) {
-      pipeline.addLast(sslContext.newHandler(channel.alloc()));
+      if (remoteAddress instanceof InetSocketAddress) {
+        InetSocketAddress inetAddr = (InetSocketAddress) remoteAddress;
+        pipeline.addLast(
+            sslContext.newHandler(channel.alloc(), inetAddr.getHostString(), inetAddr.getPort()));
+      } else {
+        pipeline.addLast(sslContext.newHandler(channel.alloc()));
+      }
     }
 
     if (socksProxyAddress != null) {

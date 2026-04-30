@@ -27,6 +27,7 @@ import com.facebook.thrift.rsocket.server.RSocketServerTransportFactory;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.server.ServerTransport;
 import com.facebook.thrift.server.ServerTransportFactory;
+import com.facebook.thrift.transport.unified.UnifiedServerTransportFactory;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
@@ -50,6 +51,7 @@ import java.net.ServerSocket;
 import java.net.SocketAddress;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,8 +154,7 @@ public final class RpcServerUtils {
                     : ApplicationProtocolConfig.SelectedListenerFailureBehavior
                         .CHOOSE_MY_LAST_PROTOCOL,
                 ThriftTransportType.RSOCKET.protocol(),
-                ThriftTransportType.HEADER.protocol(),
-                ThriftTransportType.FRAMED.protocol()));
+                ThriftTransportType.HEADER.protocol()));
       }
 
       if (config.getClientAuth() != null) {
@@ -210,6 +211,9 @@ public final class RpcServerUtils {
       case THEADER:
         transportFactory = createTHeaderTransport(config);
         break;
+      case UNIFIED:
+        transportFactory = createUnifiedTransport(config);
+        break;
       default:
         throw new IllegalArgumentException("unknown transport type: " + transportType);
     }
@@ -227,6 +231,11 @@ public final class RpcServerUtils {
       return transportFactory.createServerTransport(
           new InetSocketAddress("localhost", port), rpcServerHandler, serverMetrics);
     }
+  }
+
+  private static ServerTransportFactory<? extends ServerTransport> createUnifiedTransport(
+      ThriftServerConfig config) {
+    return new UnifiedServerTransportFactory(config);
   }
 
   private static ServerTransportFactory<? extends ServerTransport> createTHeaderTransport(
@@ -255,5 +264,22 @@ public final class RpcServerUtils {
   public static <T> Flux<T> decorateWithRequestContext(
       com.facebook.nifty.core.RequestContext requestContext, Flux<T> flux) {
     return flux.contextWrite(context -> RequestContext.toContext(context, requestContext));
+  }
+
+  /**
+   * Returns true if the throwable is a TLS close_notify alert. This is a normal graceful TLS
+   * shutdown signal sent by the peer to cleanly close the connection, not an error condition.
+   */
+  public static boolean isSslCloseNotify(Throwable throwable) {
+    Throwable cause = throwable;
+    while (cause != null) {
+      if (cause instanceof SSLException
+          && cause.getMessage() != null
+          && cause.getMessage().contains("CLOSE_NOTIFY")) {
+        return true;
+      }
+      cause = cause.getCause();
+    }
+    return false;
   }
 }

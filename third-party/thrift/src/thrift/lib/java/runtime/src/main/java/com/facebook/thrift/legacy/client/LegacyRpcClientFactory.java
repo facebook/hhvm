@@ -66,7 +66,8 @@ public final class LegacyRpcClientFactory implements RpcClientFactory {
                     nettyConfig.getTransport(),
                     TProtocolType.fromProtocolId(nettyConfig.getProtocol()),
                     nettyConfig.getMaxFrameSize(),
-                    nettyConfig.getSocksProxy()));
+                    nettyConfig.getSocksProxy(),
+                    socketAddress));
 
             final ChannelFuture channelFuture = bootstrap.connect(socketAddress);
             final Channel channel = channelFuture.channel();

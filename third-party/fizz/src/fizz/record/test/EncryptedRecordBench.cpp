@@ -213,7 +213,10 @@ BENCHMARK_NAMED_PARAM(decryptGCM, 8000, 8000, IOBufAllocation::Default);
 
 BENCHMARK_PARAM(decryptGCMNoRecord, 10);
 BENCHMARK_PARAM(decryptGCMNoRecord, 1000);
+BENCHMARK_PARAM(decryptGCMNoRecord, 4000);
 BENCHMARK_PARAM(decryptGCMNoRecord, 8000);
+BENCHMARK_PARAM(decryptGCMNoRecord, 16384);
+BENCHMARK_PARAM(decryptGCMNoRecord, 1048576);
 
 BENCHMARK_PARAM(touchEveryByte, 10);
 BENCHMARK_PARAM(touchEveryByte, 1000);
@@ -323,6 +326,39 @@ BENCHMARK_PARAM(encryptAEGIS, 8000);
 BENCHMARK_PARAM(decryptAEGIS, 10);
 BENCHMARK_PARAM(decryptAEGIS, 1000);
 BENCHMARK_PARAM(decryptAEGIS, 8000);
+
+BENCHMARK_DRAW_LINE();
+
+void decryptAEGISNoRecord(uint32_t n, size_t size) {
+  std::unique_ptr<Aead> readAead;
+  std::vector<std::unique_ptr<folly::IOBuf>> contents;
+  auto aad = folly::IOBuf::copyBuffer("aad");
+  BENCHMARK_SUSPEND {
+    auto writeAead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
+    readAead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
+    writeAead->setKey(getAegisKey());
+    readAead->setKey(getAegisKey());
+    for (size_t i = 0; i < n; ++i) {
+      auto out = writeAead->encrypt(makeRandom(size), aad.get(), 0);
+      contents.push_back(std::move(out));
+    }
+  }
+
+  std::unique_ptr<folly::IOBuf> in;
+  fizz::Error err;
+  for (auto& buf : contents) {
+    FIZZ_THROW_ON_ERROR(
+        readAead->decrypt(in, err, std::move(buf), aad.get(), 0), err);
+  }
+  folly::doNotOptimizeAway(in);
+}
+
+BENCHMARK_PARAM(decryptAEGISNoRecord, 1000);
+BENCHMARK_PARAM(decryptAEGISNoRecord, 4000);
+BENCHMARK_PARAM(decryptAEGISNoRecord, 8000);
+BENCHMARK_PARAM(decryptAEGISNoRecord, 16384);
+BENCHMARK_PARAM(decryptAEGISNoRecord, 1048576);
+
 #endif
 
 BENCHMARK_NAMED_PARAM(

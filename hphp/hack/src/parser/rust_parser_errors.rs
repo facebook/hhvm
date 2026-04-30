@@ -5801,15 +5801,19 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn node_contains_yield(node: S<'a>) -> bool {
-        match &node.children {
-            YieldExpression(_) => true,
-            AnonymousFunction(_)
-            | LambdaExpression(_)
-            | AwaitableCreationExpression(_)
-            | FunctionDeclaration(_)
-            | MethodishDeclaration(_) => false,
-            _ => node.iter_children().any(Self::node_contains_yield),
+        let mut worklist: Vec<S<'a>> = vec![node];
+        while let Some(n) = worklist.pop() {
+            match &n.children {
+                YieldExpression(_) => return true,
+                AnonymousFunction(_)
+                | LambdaExpression(_)
+                | AwaitableCreationExpression(_)
+                | FunctionDeclaration(_)
+                | MethodishDeclaration(_) => {}
+                _ => worklist.extend(n.iter_children()),
+            }
         }
+        false
     }
 
     fn callable_body_is_generator(node: S<'a>) -> bool {

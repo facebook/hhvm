@@ -83,14 +83,14 @@ fn main(fb: fbinit::FacebookInit) -> Result<()> {
         )
         .build();
 
-    let mut svc_framework = srserver::service_framework::ServiceFramework::from_server(
+    let mut svc_framework = srserver_service_framework_light::ServiceFramework::from_server(
         "conformance_server",
         thrift_server,
     )
     .context("Failed to create service framework server")?;
-    svc_framework.add_module(srserver::service_framework::BuildModule)?;
-    svc_framework.add_module(srserver::service_framework::ThriftStatsModule)?;
-    svc_framework.add_module(srserver::service_framework::Fb303Module)?;
+    svc_framework.add_module(srserver_service_framework_light::BuildModule)?;
+    svc_framework.add_module(srserver_service_framework_light::ThriftStatsModule)?;
+    svc_framework.add_module(srserver_service_framework_light::Fb303Module)?;
 
     let thrift_service_handle = runtime.spawn(async move {
         use signal_hook::consts::signal::SIGINT;

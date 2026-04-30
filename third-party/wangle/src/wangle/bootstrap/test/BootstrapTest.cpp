@@ -437,3 +437,19 @@ TEST(Bootstrap, ServerBindFailure) {
         << ex.code().message();
   }
 }
+
+TEST(Bootstrap, ConcurrentStopSharedPool) {
+  for (int i = 0; i < 50; ++i) {
+    auto pool = std::make_shared<IOThreadPoolExecutor>(4);
+
+    TestServer s1;
+    s1.childPipeline(std::make_shared<TestPipelineFactory>());
+    s1.group(nullptr, pool);
+    s1.bind(0);
+
+    std::thread t1([&] { s1.stop(); });
+    std::thread t2([&] { pool->setNumThreads(0); });
+    t1.join();
+    t2.join();
+  }
+}

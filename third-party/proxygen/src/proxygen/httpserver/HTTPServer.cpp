@@ -246,7 +246,7 @@ const std::vector<const folly::AsyncSocketBase*> HTTPServer::getSockets()
 
   std::vector<const folly::AsyncSocketBase*> sockets;
   FOR_EACH_RANGE(i, 0, bootstrap_.size()) {
-    auto& bootstrapSockets = bootstrap_[i].getSockets();
+    auto bootstrapSockets = bootstrap_[i].getSockets();
     FOR_EACH_RANGE(j, 0, bootstrapSockets.size()) {
       sockets.push_back(bootstrapSockets[j].get());
     }
@@ -260,7 +260,7 @@ int HTTPServer::getListenSocket() const {
     return -1;
   }
 
-  auto& bootstrapSockets = bootstrap_[0].getSockets();
+  auto bootstrapSockets = bootstrap_[0].getSockets();
   if (bootstrapSockets.size() == 0) {
     return -1;
   }

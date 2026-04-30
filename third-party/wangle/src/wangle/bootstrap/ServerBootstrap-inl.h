@@ -18,6 +18,7 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/SharedMutex.h>
+#include <folly/Synchronized.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBaseManager.h>
@@ -385,8 +386,8 @@ class ServerWorkerPool : public folly::IOThreadPoolExecutorBase::IOObserver {
  public:
   explicit ServerWorkerPool(
       std::shared_ptr<AcceptorFactory> acceptorFactory,
-      std::shared_ptr<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>
-          sockets,
+      std::shared_ptr<folly::Synchronized<
+          std::vector<std::shared_ptr<folly::AsyncSocketBase>>>> sockets,
       std::shared_ptr<ServerSocketFactory> socketFactory)
       : workers_(std::make_shared<WorkerMap>()),
         acceptorFactory_(acceptorFactory),
@@ -402,6 +403,10 @@ class ServerWorkerPool : public folly::IOThreadPoolExecutorBase::IOObserver {
   void registerEventBase(folly::EventBase& evb) noexcept override;
   void unregisterEventBase(folly::EventBase& evb) noexcept override;
 
+  void clearSockets() {
+    sockets_->wlock()->clear();
+  }
+
  private:
   using WorkerMap =
       std::vector<std::pair<folly::EventBase*, std::shared_ptr<Acceptor>>>;
@@ -410,7 +415,8 @@ class ServerWorkerPool : public folly::IOThreadPoolExecutorBase::IOObserver {
   std::shared_ptr<WorkerMap> workers_;
   mutable Mutex workersMutex_;
   std::shared_ptr<AcceptorFactory> acceptorFactory_;
-  std::shared_ptr<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>
+  std::shared_ptr<
+      folly::Synchronized<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>>
       sockets_;
   std::shared_ptr<ServerSocketFactory> socketFactory_;
   std::exception_ptr initException_;

@@ -33,12 +33,15 @@ void ServerWorkerPool::registerEventBase(folly::EventBase& evb) noexcept {
     workers_->emplace_back(&evb, worker);
   }
 
-  for (const auto& socket : *sockets_) {
-    socket->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
-        [this, worker, socket]() {
-          socketFactory_->addAcceptCB(
-              socket, worker.get(), worker->getEventBase());
-        });
+  {
+    auto lockedSockets = sockets_->rlock();
+    for (const auto& socket : *lockedSockets) {
+      socket->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
+          [this, worker, socket]() {
+            socketFactory_->addAcceptCB(
+                socket, worker.get(), worker->getEventBase());
+          });
+    }
   }
 }
 
@@ -62,10 +65,14 @@ void ServerWorkerPool::unregisterEventBase(folly::EventBase& evb) noexcept {
     return;
   }
 
-  for (auto socket : *sockets_) {
-    socket->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait([&]() {
-      socketFactory_->removeAcceptCB(socket, worker.get(), nullptr);
-    });
+  {
+    auto lockedSockets = sockets_->rlock();
+    for (auto socket : *lockedSockets) {
+      socket->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
+          [&]() {
+            socketFactory_->removeAcceptCB(socket, worker.get(), nullptr);
+          });
+    }
   }
 
   auto workerEvb = worker->getEventBase();

@@ -209,7 +209,7 @@ class ServerBootstrap {
           });
     });
 
-    sockets_->push_back(socket);
+    sockets_->wlock()->push_back(socket);
   }
 
   void bind(folly::SocketAddress& address) {
@@ -289,7 +289,7 @@ class ServerBootstrap {
             });
       });
 
-      sockets_->push_back(socket);
+      sockets_->wlock()->push_back(socket);
     }
   }
 
@@ -297,9 +297,10 @@ class ServerBootstrap {
    * Stop listening on all sockets.
    */
   void stop() {
-    // sockets_ may be null if ServerBootstrap has been std::move'd
-    if (sockets_) {
-      sockets_->clear();
+    if (workerFactory_) {
+      workerFactory_->clearSockets();
+    } else if (sockets_) {
+      sockets_->wlock()->clear();
     }
     if (!stopped_) {
       stopped_ = true;
@@ -330,9 +331,8 @@ class ServerBootstrap {
   /*
    * Get the list of listening sockets
    */
-  const std::vector<std::shared_ptr<folly::AsyncSocketBase>>& getSockets()
-      const {
-    return *sockets_;
+  std::vector<std::shared_ptr<folly::AsyncSocketBase>> getSockets() const {
+    return *sockets_->rlock();
   }
 
   std::shared_ptr<SharedSSLContextManager> getSharedSSLContextManager() const {
@@ -381,9 +381,10 @@ class ServerBootstrap {
   std::shared_ptr<SharedSSLContextManager> sharedSSLContextManager_;
 
   std::shared_ptr<ServerWorkerPool> workerFactory_;
-  std::shared_ptr<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>
-      sockets_{std::make_shared<
-          std::vector<std::shared_ptr<folly::AsyncSocketBase>>>()};
+  std::shared_ptr<
+      folly::Synchronized<std::vector<std::shared_ptr<folly::AsyncSocketBase>>>>
+      sockets_{std::make_shared<folly::Synchronized<
+          std::vector<std::shared_ptr<folly::AsyncSocketBase>>>>()};
 
   std::shared_ptr<AcceptorFactory> acceptorFactory_;
   std::shared_ptr<PipelineFactory<Pipeline>> childPipelineFactory_;

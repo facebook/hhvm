@@ -40,8 +40,8 @@ HTTPTransactionSink::getPeerCertificate() const {
 
 quic::QuicSocket* HTTPTransactionSink::getQUICTransport() const {
   auto session = httpTransaction_->getTransport().getHTTPSessionBase();
-  if (auto hqSession = dynamic_cast<HQSession*>(session)) {
-    return hqSession->getQuicSocket();
+  if (session && session->getType() == HTTPTransaction::Transport::Type::QUIC) {
+    return static_cast<HQSession*>(session)->getQuicSocket();
   }
   return nullptr;
 }

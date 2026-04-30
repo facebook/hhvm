@@ -36,22 +36,9 @@ class Hkdf {
       const folly::IOBuf& info,
       size_t outputBytes) const;
 
-  // Deprecated and wil be removed
-  std::unique_ptr<folly::IOBuf> expand(
-      folly::ByteRange extractedKey,
-      const folly::IOBuf& info,
-      size_t outputBytes) const;
-
   Status hkdf(
       std::unique_ptr<folly::IOBuf>& ret,
       Error& err,
-      folly::ByteRange ikm,
-      folly::ByteRange salt,
-      const folly::IOBuf& info,
-      size_t outputBytes) const;
-
-  // Deprecated and wil be removed
-  std::unique_ptr<folly::IOBuf> hkdf(
       folly::ByteRange ikm,
       folly::ByteRange salt,
       const folly::IOBuf& info,

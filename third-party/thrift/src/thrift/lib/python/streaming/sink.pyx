@@ -176,21 +176,9 @@ cdef void sink_final_resp_callback(
     except Exception as ex:
         future.set_exception(ex)
 
-async def fallibleClose(generator):
-    try:
-        await generator.aclose()
-    # The above will raise:
-    #   - if cancellation results from throw in generator, or
-    #   - if the generator has already completed but the callback hasn't
-    #     yet returned at time of cancellation, the above will raise.
-    # There's now need to propagate; just suppress it.
-    except Exception as ex:
-        pass
-
-
 cdef public api void cancelAsyncGenerator(object generator):
     asyncio.get_event_loop().create_task(
-        fallibleClose(generator)
+        generator.aclose()
     )
 
 

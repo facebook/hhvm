@@ -354,3 +354,92 @@ TEST(StandardValidatorTest, ValidateFunctionParamId) {
     }
   )");
 }
+
+TEST(StandardValidatorTest, CppTypeIntegerWidthMismatch) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/cpp.thrift"
+
+    struct S {
+      @cpp.Type{name = "std::int64_t"}
+      1: i32 field1;
+      # expected-error@-2: `@cpp.Type{name="std::int64_t"}` specifies a 64-bit integer, but the Thrift type `i32` is 32-bit on `field1`.
+
+      @cpp.Type{name = "uint16_t"}
+      2: i64 field2;
+      # expected-error@-2: `@cpp.Type{name="uint16_t"}` specifies a 16-bit integer, but the Thrift type `i64` is 64-bit on `field2`.
+
+      @cpp.Type{name = "int8_t"}
+      3: i32 field3;
+      # expected-error@-2: `@cpp.Type{name="int8_t"}` specifies a 8-bit integer, but the Thrift type `i32` is 32-bit on `field3`.
+    }
+
+    @cpp.Type{name = "int64_t"}
+    typedef i16 BadTypedef
+    # expected-error@-2: `@cpp.Type{name="int64_t"}` specifies a 64-bit integer, but the Thrift type `i16` is 16-bit on `BadTypedef`.
+  )");
+}
+
+TEST(StandardValidatorTest, CppTypeIntegerWidthMatch) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/cpp.thrift"
+
+    struct S {
+      @cpp.Type{name = "std::uint32_t"}
+      1: i32 field1;
+
+      @cpp.Type{name = "int64_t"}
+      2: i64 field2;
+
+      @cpp.Type{name = "uint8_t"}
+      3: byte field3;
+
+      @cpp.Type{name = "std::int16_t"}
+      4: i16 field4;
+    }
+
+    @cpp.Type{name = "uint64_t"}
+    typedef i64 GoodTypedef
+  )");
+}
+
+TEST(StandardValidatorTest, CppTypeExtendedIntegerFamilies) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/cpp.thrift"
+
+    struct S {
+      @cpp.Type{name = "std::int_least32_t"}
+      1: i64 least32_mismatch;
+      # expected-error@-2: `@cpp.Type{name="std::int_least32_t"}` specifies a 32-bit integer, but the Thrift type `i64` is 64-bit on `least32_mismatch`.
+
+      @cpp.Type{name = "std::uintmax_t"}
+      2: i32 uintmax_mismatch;
+      # expected-error@-2: `@cpp.Type{name="std::uintmax_t"}` specifies a 64-bit integer, but the Thrift type `i32` is 32-bit on `uintmax_mismatch`.
+
+      @cpp.Type{name = "size_t"}
+      3: i16 size_t_mismatch;
+      # expected-error@-2: `@cpp.Type{name="size_t"}` specifies a 64-bit integer, but the Thrift type `i16` is 16-bit on `size_t_mismatch`.
+
+      @cpp.Type{name = "std::ptrdiff_t"}
+      4: i32 ptrdiff_t_mismatch;
+      # expected-error@-2: `@cpp.Type{name="std::ptrdiff_t"}` specifies a 64-bit integer, but the Thrift type `i32` is 32-bit on `ptrdiff_t_mismatch`.
+    }
+  )");
+}
+
+TEST(StandardValidatorTest, CppTypeNonIntegerSkipped) {
+  check_compile(R"(
+    package "facebook.com/thrift/test"
+    include "thrift/annotation/cpp.thrift"
+
+    struct S {
+      @cpp.Type{name = "folly::fbstring"}
+      1: string field1;
+
+      @cpp.Type{name = "std::deque<int>"}
+      2: list<i32> field2;
+    }
+  )");
+}

@@ -17,6 +17,7 @@
 #include <thrift/compiler/sema/standard_validator.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <set>
@@ -38,6 +39,7 @@
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_namespace.h>
 #include <thrift/compiler/ast/t_node.h>
+#include <thrift/compiler/ast/t_primitive_type.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/ast/t_structured.h>
@@ -1809,6 +1811,113 @@ void validate_cpp_type_annotation(sema_context& ctx, const Node& node) {
   }
 }
 
+template <typename T>
+constexpr int cpp_integer_type_bit_width() {
+  return std::numeric_limits<T>::digits + std::numeric_limits<T>::is_signed;
+}
+
+// Returns the expected bit width of a known cstdint/cstddef integer type,
+// or 0 if the type is not a recognized integer type.
+int cpp_integer_bit_width(std::string_view type_name) {
+  // Strip optional global and std namespace qualifiers.
+  if (type_name.starts_with("::")) {
+    type_name.remove_prefix(2);
+  }
+  if (type_name.starts_with("std::")) {
+    type_name.remove_prefix(5);
+  }
+
+  static const std::unordered_map<std::string_view, int> kCppIntegerBitWidths =
+      {
+          {"int8_t", cpp_integer_type_bit_width<std::int8_t>()},
+          {"uint8_t", cpp_integer_type_bit_width<std::uint8_t>()},
+          {"int16_t", cpp_integer_type_bit_width<std::int16_t>()},
+          {"uint16_t", cpp_integer_type_bit_width<std::uint16_t>()},
+          {"int32_t", cpp_integer_type_bit_width<std::int32_t>()},
+          {"uint32_t", cpp_integer_type_bit_width<std::uint32_t>()},
+          {"int64_t", cpp_integer_type_bit_width<std::int64_t>()},
+          {"uint64_t", cpp_integer_type_bit_width<std::uint64_t>()},
+          {"int_least8_t", cpp_integer_type_bit_width<std::int_least8_t>()},
+          {"uint_least8_t", cpp_integer_type_bit_width<std::uint_least8_t>()},
+          {"int_least16_t", cpp_integer_type_bit_width<std::int_least16_t>()},
+          {"uint_least16_t", cpp_integer_type_bit_width<std::uint_least16_t>()},
+          {"int_least32_t", cpp_integer_type_bit_width<std::int_least32_t>()},
+          {"uint_least32_t", cpp_integer_type_bit_width<std::uint_least32_t>()},
+          {"int_least64_t", cpp_integer_type_bit_width<std::int_least64_t>()},
+          {"uint_least64_t", cpp_integer_type_bit_width<std::uint_least64_t>()},
+          {"int_fast8_t", cpp_integer_type_bit_width<std::int_fast8_t>()},
+          {"uint_fast8_t", cpp_integer_type_bit_width<std::uint_fast8_t>()},
+          {"int_fast16_t", cpp_integer_type_bit_width<std::int_fast16_t>()},
+          {"uint_fast16_t", cpp_integer_type_bit_width<std::uint_fast16_t>()},
+          {"int_fast32_t", cpp_integer_type_bit_width<std::int_fast32_t>()},
+          {"uint_fast32_t", cpp_integer_type_bit_width<std::uint_fast32_t>()},
+          {"int_fast64_t", cpp_integer_type_bit_width<std::int_fast64_t>()},
+          {"uint_fast64_t", cpp_integer_type_bit_width<std::uint_fast64_t>()},
+          {"intmax_t", cpp_integer_type_bit_width<std::intmax_t>()},
+          {"uintmax_t", cpp_integer_type_bit_width<std::uintmax_t>()},
+          {"intptr_t", cpp_integer_type_bit_width<std::intptr_t>()},
+          {"uintptr_t", cpp_integer_type_bit_width<std::uintptr_t>()},
+          {"size_t", cpp_integer_type_bit_width<std::size_t>()},
+          {"ptrdiff_t", cpp_integer_type_bit_width<std::ptrdiff_t>()},
+      };
+  if (auto it = kCppIntegerBitWidths.find(type_name);
+      it != kCppIntegerBitWidths.end()) {
+    return it->second;
+  }
+  return 0;
+}
+
+// Returns the bit width of a Thrift integer type, or 0 if not an integer.
+int thrift_integer_bit_width(const t_type* type) {
+  const auto* primitive = type ? type->try_as<t_primitive_type>() : nullptr;
+  if (!primitive) {
+    return 0;
+  }
+  switch (primitive->primitive_type()) {
+    case t_primitive_type::type::t_byte:
+      return 8;
+    case t_primitive_type::type::t_i16:
+      return 16;
+    case t_primitive_type::type::t_i32:
+      return 32;
+    case t_primitive_type::type::t_i64:
+      return 64;
+    default:
+      return 0;
+  }
+}
+
+template <typename Node>
+void validate_cpp_type_integer_width(sema_context& ctx, const Node& node) {
+  const t_const* annot = node.find_structured_annotation_or_null(kCppTypeUri);
+  if (!annot) {
+    return;
+  }
+  auto name_val = annot->get_value_from_structured_annotation_or_null("name");
+  if (!name_val) {
+    return;
+  }
+  const auto& cpp_type_name = name_val->get_string();
+  int cpp_width = cpp_integer_bit_width(cpp_type_name);
+  if (cpp_width == 0) {
+    return;
+  }
+  const t_type* true_type = node.type()->get_true_type();
+  int thrift_width = thrift_integer_bit_width(true_type);
+  if (thrift_width == 0) {
+    return;
+  }
+  ctx.check(
+      cpp_width == thrift_width,
+      "`@cpp.Type{{name=\"{}\"}}` specifies a {}-bit integer, but the Thrift "
+      "type `{}` is {}-bit on `{}`.",
+      cpp_type_name,
+      cpp_width,
+      true_type->name(),
+      thrift_width,
+      node.name());
+}
+
 /**
  * Checks that any @thrift.AllowUnsafeOptionalCustomDefaultValue and
  * @thrift.AllowUnsafeUnionFieldCustomDefaultValue annotation on the given
@@ -2346,6 +2455,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_cpp_deprecated_terse_write_annotation);
   validator.add_field_visitor(&validate_required_field);
   validator.add_field_visitor(&validate_cpp_type_annotation<t_field>);
+  validator.add_field_visitor(&validate_cpp_type_integer_width<t_field>);
   validator.add_field_visitor(&validate_field_name);
   validator.add_field_visitor(ValidateAnnotationPositions{});
   validator.add_field_visitor(&detail::validate_annotation_scopes<>);
@@ -2376,6 +2486,7 @@ ast_validator standard_validator() {
   validator.add_function_param_visitor(&validate_function_param_id);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
+  validator.add_typedef_visitor(&validate_cpp_type_integer_width<t_typedef>);
   validator.add_typedef_visitor(&validate_py3_enable_cpp_adapter);
   validator.add_typedef_visitor(&deprecate_typedef_type_annotations);
   validator.add_typedef_visitor(ValidateAnnotationPositions());

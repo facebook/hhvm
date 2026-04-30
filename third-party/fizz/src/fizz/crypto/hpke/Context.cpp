@@ -104,27 +104,5 @@ std::unique_ptr<folly::IOBuf> HpkeContextImpl::getExporterSecret() {
   return exporterSecret_->clone();
 }
 
-// Deprecated throwing wrappers — to be removed once all call sites are
-// migrated.
-
-std::unique_ptr<folly::IOBuf> HpkeContext::seal(
-    const folly::IOBuf* aad,
-    std::unique_ptr<folly::IOBuf> pt) {
-  std::unique_ptr<folly::IOBuf> ret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(seal(ret, err, aad, std::move(pt)), err);
-  return ret;
-}
-
-std::unique_ptr<folly::IOBuf> HpkeContext::exportSecret(
-    std::unique_ptr<folly::IOBuf> exporterContext,
-    size_t desiredLength) const {
-  std::unique_ptr<folly::IOBuf> ret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      exportSecret(ret, err, std::move(exporterContext), desiredLength), err);
-  return ret;
-}
-
 } // namespace hpke
 } // namespace fizz

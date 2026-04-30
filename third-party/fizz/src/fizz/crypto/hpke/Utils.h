@@ -78,9 +78,6 @@ folly::Optional<KEMId> tryGetKEMId(NamedGroup group);
  */
 Status getKEMId(KEMId& ret, Error& err, NamedGroup group);
 
-// Deprecated: Use the Status-returning overload instead. Will be removed.
-KEMId getKEMId(NamedGroup group);
-
 /**
  * fizz::hpke::getKexGroup converts an HPKE KDF code point to a
  * `fizz::NamedGroup` code point
@@ -90,9 +87,6 @@ KEMId getKEMId(NamedGroup group);
  */
 Status getKexGroup(NamedGroup& ret, Error& err, KEMId kemId);
 
-// Deprecated: Use the Status-returning overload instead. Will be removed.
-NamedGroup getKexGroup(KEMId kemId);
-
 /**
  * fizz::hpke::getHashFunctionForKEM converts an HPKE KEM code point to a
  * `fizz::HashFunction` code point
@@ -101,9 +95,6 @@ NamedGroup getKexGroup(KEMId kemId);
  * @return The corresponding `fizz::HashFunction` code point.
  */
 Status getHashFunctionForKEM(HashFunction& ret, Error& err, KEMId kemId);
-
-// Deprecated: Use the Status-returning overload instead. Will be removed.
-HashFunction getHashFunctionForKEM(KEMId kemId);
 
 /**
  * fizz::hpke::nenc returns the size of the serialized public component (`enc`)
@@ -115,9 +106,6 @@ HashFunction getHashFunctionForKEM(KEMId kemId);
  *         given KEM.
  */
 Status nenc(size_t& ret, Error& err, KEMId kemId);
-
-// Deprecated: Use the Status-returning overload instead. Will be removed.
-size_t nenc(KEMId kemId);
 
 /*****************************
  *                           *
@@ -134,9 +122,6 @@ size_t nenc(KEMId kemId);
  */
 Status getHashFunction(HashFunction& ret, Error& err, KDFId kdfId);
 
-// Deprecated: Use the Status-returning overload instead. Will be removed.
-HashFunction getHashFunction(KDFId kdfId);
-
 /**
  * fizz::hpke::getKDFId converts a `fizz::HashFunction` code point to the
  * corresponding HPKE KDF code point.
@@ -145,9 +130,6 @@ HashFunction getHashFunction(KDFId kdfId);
  * @return The corresponding HPKE code point.
  */
 Status getKDFId(KDFId& ret, Error& err, HashFunction hash);
-
-// Deprecated: Use the Status-returning overload instead. Will be removed.
-KDFId getKDFId(HashFunction hash);
 
 /*****************************
  *                           *
@@ -175,9 +157,6 @@ folly::Optional<AeadId> tryGetAeadId(CipherSuite suite);
  */
 Status getAeadId(AeadId& ret, Error& err, CipherSuite suite);
 
-// Deprecated: Use the Status-returning overload instead. Will be removed.
-AeadId getAeadId(CipherSuite suite);
-
 /**
  * fizz::hpke::getCipherSuite converts an HPKE AEAD code point to a TLS
  * CipherSuite code point.
@@ -187,9 +166,6 @@ AeadId getAeadId(CipherSuite suite);
  * @return The corresponding TLS CipherSuite code point.
  */
 Status getCipherSuite(CipherSuite& ret, Error& err, AeadId aeadId);
-
-// Deprecated: Use the Status-returning overload instead. Will be removed.
-CipherSuite getCipherSuite(AeadId aeadId);
 
 /**
  * fizz::hpke::getCipherOverhead returns the number of additional bytes
@@ -209,19 +185,6 @@ inline Status getCipherOverhead(size_t& ret, Error& err, AeadId aeadId) {
       return Status::Success;
   }
   return err.error("invalid aead");
-}
-
-// Deprecated: Use the Status-returning overload instead. Will be removed.
-inline size_t getCipherOverhead(AeadId aeadId) {
-  switch (aeadId) {
-    case AeadId::TLS_AES_128_GCM_SHA256:
-      return AESGCM128::kTagLength;
-    case AeadId::TLS_AES_256_GCM_SHA384:
-      return AESGCM256::kTagLength;
-    case AeadId::TLS_CHACHA20_POLY1305_SHA256:
-      return ChaCha20Poly1305::kTagLength;
-  }
-  throw std::runtime_error("invalid aead");
 }
 } // namespace hpke
 } // namespace fizz

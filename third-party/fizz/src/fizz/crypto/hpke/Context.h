@@ -38,13 +38,6 @@ class HpkeContext {
       std::unique_ptr<folly::IOBuf> exporterContext,
       size_t desiredLength) const = 0;
 
-  // Deprecated: Use the Status-returning overloads instead. Will be removed.
-  virtual std::unique_ptr<folly::IOBuf> seal(
-      const folly::IOBuf* aad,
-      std::unique_ptr<folly::IOBuf> pt);
-  virtual std::unique_ptr<folly::IOBuf> exportSecret(
-      std::unique_ptr<folly::IOBuf> exporterContext,
-      size_t desiredLength) const;
   // NOTE: This should only be used for testing.
   virtual std::unique_ptr<folly::IOBuf> getExporterSecret() = 0;
 };

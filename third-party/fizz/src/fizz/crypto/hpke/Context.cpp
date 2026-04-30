@@ -48,17 +48,20 @@ Status HpkeContextImpl::incrementSeq(Error& err) {
   return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> HpkeContextImpl::seal(
+Status HpkeContextImpl::seal(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     const folly::IOBuf* aad,
     std::unique_ptr<folly::IOBuf> pt) {
   if (role_ != Role::Sender) {
-    throw std::logic_error("sealing can only be done from a sender context");
+    return err.error(
+        "sealing can only be done from a sender context",
+        folly::none,
+        Error::Category::StdLogic);
   }
-  std::unique_ptr<folly::IOBuf> ct =
-      cipher_->encrypt(std::move(pt), aad, seqNum_);
-  Error err;
-  FIZZ_THROW_ON_ERROR(incrementSeq(err), err);
-  return ct;
+  ret = cipher_->encrypt(std::move(pt), aad, seqNum_);
+  FIZZ_RETURN_ON_ERROR(incrementSeq(err));
+  return Status::Success;
 }
 
 Status HpkeContextImpl::open(
@@ -77,31 +80,50 @@ Status HpkeContextImpl::open(
   return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> HpkeContextImpl::exportSecret(
+Status HpkeContextImpl::exportSecret(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     std::unique_ptr<folly::IOBuf> exporterContext,
     size_t desiredLength) const {
   auto maxL = 255 * hkdf_->hashLength();
   if (desiredLength > maxL) {
-    throw std::runtime_error(
-        "desired length for exported secret exceeds maximum");
+    return err.error("desired length for exported secret exceeds maximum");
   }
-  std::unique_ptr<folly::IOBuf> ret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      hkdf_->labeledExpand(
-          ret,
-          err,
-          exporterSecret_->coalesce(),
-          folly::ByteRange(folly::StringPiece("sec")),
-          std::move(exporterContext),
-          desiredLength,
-          suiteId_->clone()),
-      err);
-  return ret;
+  FIZZ_RETURN_ON_ERROR(hkdf_->labeledExpand(
+      ret,
+      err,
+      exporterSecret_->coalesce(),
+      folly::ByteRange(folly::StringPiece("sec")),
+      std::move(exporterContext),
+      desiredLength,
+      suiteId_->clone()));
+  return Status::Success;
 }
 
 std::unique_ptr<folly::IOBuf> HpkeContextImpl::getExporterSecret() {
   return exporterSecret_->clone();
+}
+
+// Deprecated throwing wrappers — to be removed once all call sites are
+// migrated.
+
+std::unique_ptr<folly::IOBuf> HpkeContext::seal(
+    const folly::IOBuf* aad,
+    std::unique_ptr<folly::IOBuf> pt) {
+  std::unique_ptr<folly::IOBuf> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(seal(ret, err, aad, std::move(pt)), err);
+  return ret;
+}
+
+std::unique_ptr<folly::IOBuf> HpkeContext::exportSecret(
+    std::unique_ptr<folly::IOBuf> exporterContext,
+    size_t desiredLength) const {
+  std::unique_ptr<folly::IOBuf> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      exportSecret(ret, err, std::move(exporterContext), desiredLength), err);
+  return ret;
 }
 
 } // namespace hpke

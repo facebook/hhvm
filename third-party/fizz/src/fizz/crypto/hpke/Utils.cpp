@@ -13,7 +13,14 @@ namespace hpke {
 
 HpkeSuiteId
 generateHpkeSuiteId(NamedGroup group, HashFunction hash, CipherSuite suite) {
-  return generateHpkeSuiteId(getKEMId(group), getKDFId(hash), getAeadId(suite));
+  KEMId kemId;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getKEMId(kemId, err, group), err);
+  KDFId kdfId;
+  FIZZ_THROW_ON_ERROR(getKDFId(kdfId, err, hash), err);
+  AeadId aeadId;
+  FIZZ_THROW_ON_ERROR(getAeadId(aeadId, err, suite), err);
+  return generateHpkeSuiteId(kemId, kdfId, aeadId);
 }
 
 HpkeSuiteId generateHpkeSuiteId(KEMId kem, KDFId kdf, AeadId aead) {
@@ -41,24 +48,28 @@ folly::Optional<KEMId> tryGetKEMId(NamedGroup group) {
   }
 }
 
-KEMId getKEMId(NamedGroup group) {
+Status getKEMId(KEMId& ret, Error& err, NamedGroup group) {
   const auto kemId = tryGetKEMId(group);
   if (!kemId.has_value()) {
-    throw std::runtime_error("ke: not implemented");
+    return err.error("ke: not implemented");
   }
-  return *kemId;
+  ret = *kemId;
+  return Status::Success;
 }
 
-KDFId getKDFId(HashFunction hash) {
+Status getKDFId(KDFId& ret, Error& err, HashFunction hash) {
   switch (hash) {
     case HashFunction::Sha256:
-      return KDFId::Sha256;
+      ret = KDFId::Sha256;
+      return Status::Success;
     case HashFunction::Sha384:
-      return KDFId::Sha384;
+      ret = KDFId::Sha384;
+      return Status::Success;
     case HashFunction::Sha512:
-      return KDFId::Sha512;
+      ret = KDFId::Sha512;
+      return Status::Success;
     default:
-      throw std::runtime_error("kdf: not implemented");
+      return err.error("kdf: not implemented");
   }
 }
 
@@ -75,84 +86,162 @@ folly::Optional<AeadId> tryGetAeadId(CipherSuite suite) {
   }
 }
 
-AeadId getAeadId(CipherSuite suite) {
+Status getAeadId(AeadId& ret, Error& err, CipherSuite suite) {
   const auto aeadId = tryGetAeadId(suite);
   if (!aeadId.has_value()) {
-    throw std::runtime_error("ciphersuite: not implemented");
+    return err.error("ciphersuite: not implemented");
   }
-  return *aeadId;
+  ret = *aeadId;
+  return Status::Success;
 }
 
-NamedGroup getKexGroup(KEMId kemId) {
+Status getKexGroup(NamedGroup& ret, Error& err, KEMId kemId) {
   switch (kemId) {
     case KEMId::secp256r1:
-      return NamedGroup::secp256r1;
+      ret = NamedGroup::secp256r1;
+      return Status::Success;
     case KEMId::secp384r1:
-      return NamedGroup::secp384r1;
+      ret = NamedGroup::secp384r1;
+      return Status::Success;
     case KEMId::secp521r1:
-      return NamedGroup::secp521r1;
+      ret = NamedGroup::secp521r1;
+      return Status::Success;
     case KEMId::x25519:
-      return NamedGroup::x25519;
+      ret = NamedGroup::x25519;
+      return Status::Success;
     default:
-      throw std::runtime_error("can't make key exchange: not implemented");
+      return err.error("can't make key exchange: not implemented");
   }
 }
 
-HashFunction getHashFunctionForKEM(KEMId kemId) {
+Status getHashFunctionForKEM(HashFunction& ret, Error& err, KEMId kemId) {
   switch (kemId) {
     case KEMId::secp256r1:
-      return HashFunction::Sha256;
+      ret = HashFunction::Sha256;
+      return Status::Success;
     case KEMId::secp384r1:
-      return HashFunction::Sha384;
+      ret = HashFunction::Sha384;
+      return Status::Success;
     case KEMId::secp521r1:
-      return HashFunction::Sha512;
+      ret = HashFunction::Sha512;
+      return Status::Success;
     case KEMId::x25519:
-      return HashFunction::Sha256;
+      ret = HashFunction::Sha256;
+      return Status::Success;
     default:
-      throw std::runtime_error("can't make KEM hash function: not implemented");
+      return err.error("can't make KEM hash function: not implemented");
   }
 }
 
-HashFunction getHashFunction(KDFId kdfId) {
+Status getHashFunction(HashFunction& ret, Error& err, KDFId kdfId) {
   switch (kdfId) {
     case KDFId::Sha256:
-      return HashFunction::Sha256;
+      ret = HashFunction::Sha256;
+      return Status::Success;
     case KDFId::Sha384:
-      return HashFunction::Sha384;
+      ret = HashFunction::Sha384;
+      return Status::Success;
     case KDFId::Sha512:
-      return HashFunction::Sha512;
+      ret = HashFunction::Sha512;
+      return Status::Success;
     default:
-      throw std::runtime_error("kdf: not implemented");
+      return err.error("kdf: not implemented");
   }
 }
 
-CipherSuite getCipherSuite(AeadId aeadId) {
+Status getCipherSuite(CipherSuite& ret, Error& err, AeadId aeadId) {
   switch (aeadId) {
     case AeadId::TLS_AES_128_GCM_SHA256:
-      return CipherSuite::TLS_AES_128_GCM_SHA256;
+      ret = CipherSuite::TLS_AES_128_GCM_SHA256;
+      return Status::Success;
     case AeadId::TLS_AES_256_GCM_SHA384:
-      return CipherSuite::TLS_AES_256_GCM_SHA384;
+      ret = CipherSuite::TLS_AES_256_GCM_SHA384;
+      return Status::Success;
     case AeadId::TLS_CHACHA20_POLY1305_SHA256:
-      return CipherSuite::TLS_CHACHA20_POLY1305_SHA256;
+      ret = CipherSuite::TLS_CHACHA20_POLY1305_SHA256;
+      return Status::Success;
     default:
-      throw std::runtime_error("ciphersuite: not implemented");
+      return err.error("ciphersuite: not implemented");
   }
 }
 
-size_t nenc(KEMId kemId) {
+Status nenc(size_t& ret, Error& err, KEMId kemId) {
   // Refer to Table 2 in 7.1.  Key Encapsulation Mechanisms (KEMs)
   switch (kemId) {
     case KEMId::secp256r1:
-      return 65;
+      ret = 65;
+      return Status::Success;
     case KEMId::secp384r1:
-      return 97;
+      ret = 97;
+      return Status::Success;
     case KEMId::secp521r1:
-      return 133;
+      ret = 133;
+      return Status::Success;
     case KEMId::x25519:
-      return 32;
+      ret = 32;
+      return Status::Success;
     default:
-      throw std::runtime_error("unknown or invalid kem");
+      return err.error("unknown or invalid kem");
   }
+}
+
+// Deprecated throwing wrappers — to be removed once all call sites are
+// migrated.
+
+KEMId getKEMId(NamedGroup group) {
+  KEMId ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getKEMId(ret, err, group), err);
+  return ret;
+}
+
+KDFId getKDFId(HashFunction hash) {
+  KDFId ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getKDFId(ret, err, hash), err);
+  return ret;
+}
+
+AeadId getAeadId(CipherSuite suite) {
+  AeadId ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getAeadId(ret, err, suite), err);
+  return ret;
+}
+
+NamedGroup getKexGroup(KEMId kemId) {
+  NamedGroup ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getKexGroup(ret, err, kemId), err);
+  return ret;
+}
+
+HashFunction getHashFunctionForKEM(KEMId kemId) {
+  HashFunction ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getHashFunctionForKEM(ret, err, kemId), err);
+  return ret;
+}
+
+HashFunction getHashFunction(KDFId kdfId) {
+  HashFunction ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getHashFunction(ret, err, kdfId), err);
+  return ret;
+}
+
+CipherSuite getCipherSuite(AeadId aeadId) {
+  CipherSuite ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getCipherSuite(ret, err, aeadId), err);
+  return ret;
+}
+
+size_t nenc(KEMId kemId) {
+  size_t ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(nenc(ret, err, kemId), err);
+  return ret;
 }
 } // namespace hpke
 } // namespace fizz

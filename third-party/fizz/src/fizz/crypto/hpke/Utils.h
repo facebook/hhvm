@@ -75,8 +75,10 @@ folly::Optional<KEMId> tryGetKEMId(NamedGroup group);
  *
  * @param group A `fizz::NamedGroup` code point
  * @return The corresponding HPKE KEM code point
- * @throws std::runtime_error On invalid code points.
  */
+Status getKEMId(KEMId& ret, Error& err, NamedGroup group);
+
+// Deprecated: Use the Status-returning overload instead. Will be removed.
 KEMId getKEMId(NamedGroup group);
 
 /**
@@ -85,8 +87,10 @@ KEMId getKEMId(NamedGroup group);
  *
  * @param kdfId  An HPKE KDF code point.
  * @return The corresponding `fizz::NamedGroup` code point.
- * @throws std::runtime_error On invalid code points.
  */
+Status getKexGroup(NamedGroup& ret, Error& err, KEMId kemId);
+
+// Deprecated: Use the Status-returning overload instead. Will be removed.
 NamedGroup getKexGroup(KEMId kemId);
 
 /**
@@ -95,8 +99,10 @@ NamedGroup getKexGroup(KEMId kemId);
  *
  * @param kemId  An HPKE KEM code point.
  * @return The corresponding `fizz::HashFunction` code point.
- * @throws std::runtime_error On invalid code points.
  */
+Status getHashFunctionForKEM(HashFunction& ret, Error& err, KEMId kemId);
+
+// Deprecated: Use the Status-returning overload instead. Will be removed.
 HashFunction getHashFunctionForKEM(KEMId kemId);
 
 /**
@@ -107,8 +113,10 @@ HashFunction getHashFunctionForKEM(KEMId kemId);
  *
  * @return A non zero value indicating the size of the public component for the
  *         given KEM.
- * @throws std::runtime_error   On invalid code points.
  */
+Status nenc(size_t& ret, Error& err, KEMId kemId);
+
+// Deprecated: Use the Status-returning overload instead. Will be removed.
 size_t nenc(KEMId kemId);
 
 /*****************************
@@ -123,8 +131,10 @@ size_t nenc(KEMId kemId);
  *
  * @param kdfId  An HPKE KDF code point.
  * @return The corresponding `fizz::HashFunction` code point.
- * @throws std::runtime_error On invalid code points.
  */
+Status getHashFunction(HashFunction& ret, Error& err, KDFId kdfId);
+
+// Deprecated: Use the Status-returning overload instead. Will be removed.
 HashFunction getHashFunction(KDFId kdfId);
 
 /**
@@ -133,8 +143,10 @@ HashFunction getHashFunction(KDFId kdfId);
  *
  * @param hash  A `fizz::HashFunction` code point.
  * @return The corresponding HPKE code point.
- * @throws std::runtime_error On invalid code points
  */
+Status getKDFId(KDFId& ret, Error& err, HashFunction hash);
+
+// Deprecated: Use the Status-returning overload instead. Will be removed.
 KDFId getKDFId(HashFunction hash);
 
 /*****************************
@@ -160,8 +172,10 @@ folly::Optional<AeadId> tryGetAeadId(CipherSuite suite);
  * @param suite  The TLS cipher suite
  * @return The corresponding HPKE AEAD code point. The digest portion of the
  *         TLS ciphersuite is dropped.
- * @throws std::runtime_error On invalid code points.
  */
+Status getAeadId(AeadId& ret, Error& err, CipherSuite suite);
+
+// Deprecated: Use the Status-returning overload instead. Will be removed.
 AeadId getAeadId(CipherSuite suite);
 
 /**
@@ -171,8 +185,10 @@ AeadId getAeadId(CipherSuite suite);
  * @param  aeadId  An HPKE AEAD code point
  *
  * @return The corresponding TLS CipherSuite code point.
- * @throws std::runtime_error On invalid code points.
  */
+Status getCipherSuite(CipherSuite& ret, Error& err, AeadId aeadId);
+
+// Deprecated: Use the Status-returning overload instead. Will be removed.
 CipherSuite getCipherSuite(AeadId aeadId);
 
 /**
@@ -180,6 +196,22 @@ CipherSuite getCipherSuite(AeadId aeadId);
  * is required to express the ciphertext of a plaintext of a given
  * AeadId
  */
+inline Status getCipherOverhead(size_t& ret, Error& err, AeadId aeadId) {
+  switch (aeadId) {
+    case AeadId::TLS_AES_128_GCM_SHA256:
+      ret = AESGCM128::kTagLength;
+      return Status::Success;
+    case AeadId::TLS_AES_256_GCM_SHA384:
+      ret = AESGCM256::kTagLength;
+      return Status::Success;
+    case AeadId::TLS_CHACHA20_POLY1305_SHA256:
+      ret = ChaCha20Poly1305::kTagLength;
+      return Status::Success;
+  }
+  return err.error("invalid aead");
+}
+
+// Deprecated: Use the Status-returning overload instead. Will be removed.
 inline size_t getCipherOverhead(AeadId aeadId) {
   switch (aeadId) {
     case AeadId::TLS_AES_128_GCM_SHA256:

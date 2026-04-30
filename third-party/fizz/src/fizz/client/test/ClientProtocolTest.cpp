@@ -1517,9 +1517,13 @@ TEST_F(ClientProtocolTest, TestConnectWithComputedGreaseECH) {
   EXPECT_EQ(
       encodeExtension(encodedEch, echErr, *echExtension), Status::Success);
   auto echOverhead = encodedEch.extension_data->computeChainDataLength() + 4;
-  size_t expectedPayloadSize = encodedChloSize +
-      hpke::getCipherOverhead(echExtension->cipher_suite.aead_id) + 100 -
-      echOverhead;
+  size_t cipherOverhead;
+  EXPECT_EQ(
+      hpke::getCipherOverhead(
+          cipherOverhead, echErr, echExtension->cipher_suite.aead_id),
+      Status::Success);
+  size_t expectedPayloadSize =
+      encodedChloSize + cipherOverhead + 100 - echOverhead;
   EXPECT_EQ(
       expectedPayloadSize, echExtension->payload->computeChainDataLength());
   EXPECT_TRUE(
@@ -3410,8 +3414,13 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   echExtension.enc = folly::IOBuf::create(0);
 
   // Make dummy payload.
-  size_t payloadSize = encodedClientHelloInnerAad->computeChainDataLength() +
-      hpke::getCipherOverhead(echExtension.cipher_suite.aead_id);
+  size_t cipherOverhead;
+  EXPECT_EQ(
+      hpke::getCipherOverhead(
+          cipherOverhead, err, echExtension.cipher_suite.aead_id),
+      Status::Success);
+  size_t payloadSize =
+      encodedClientHelloInnerAad->computeChainDataLength() + cipherOverhead;
   echExtension.payload = folly::IOBuf::create(payloadSize);
   memset(echExtension.payload->writableData(), 0, payloadSize);
   echExtension.payload->append(payloadSize);
@@ -3737,8 +3746,13 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   echExtension.enc = folly::IOBuf::create(0);
 
   // Make dummy payload.
-  size_t payloadSize = encodedClientHelloInnerAad->computeChainDataLength() +
-      hpke::getCipherOverhead(echExtension.cipher_suite.aead_id);
+  size_t cipherOverhead;
+  EXPECT_EQ(
+      hpke::getCipherOverhead(
+          cipherOverhead, err, echExtension.cipher_suite.aead_id),
+      Status::Success);
+  size_t payloadSize =
+      encodedClientHelloInnerAad->computeChainDataLength() + cipherOverhead;
   echExtension.payload = folly::IOBuf::create(payloadSize);
   memset(echExtension.payload->writableData(), 0, payloadSize);
   echExtension.payload->append(payloadSize);

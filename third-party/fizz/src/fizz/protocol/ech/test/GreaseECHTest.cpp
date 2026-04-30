@@ -89,8 +89,12 @@ TEST(GreaseECHTest, TestGenerateComputedGreaseECH) {
       hpke::AeadId::TLS_AES_128_GCM_SHA256, greaseEch.cipher_suite.aead_id);
   EXPECT_EQ(32, greaseEch.enc->computeChainDataLength());
 
-  size_t expectedPayloadSize = encodedChloSize +
-      hpke::getCipherOverhead(greaseEch.cipher_suite.aead_id) + 100;
+  size_t cipherOverhead;
+  EXPECT_EQ(
+      hpke::getCipherOverhead(
+          cipherOverhead, err, greaseEch.cipher_suite.aead_id),
+      Status::Success);
+  size_t expectedPayloadSize = encodedChloSize + cipherOverhead + 100;
   EXPECT_EQ(expectedPayloadSize, greaseEch.payload->computeChainDataLength());
 }
 } // namespace test

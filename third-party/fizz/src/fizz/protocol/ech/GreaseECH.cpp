@@ -79,8 +79,15 @@ OuterECHClientHello generateGreaseECH(
   size_t payloadSize =
       selector.genNumber(setting.minPayloadSize, setting.maxPayloadSize);
   if (setting.payloadStrategy == PayloadGenerationStrategy::Computed) {
-    payloadSize += encodedChloSize +
-        hpke::getCipherOverhead(echExtension.cipher_suite.aead_id);
+    size_t cipherOverhead;
+    Error cipherOverheadErr;
+    FIZZ_THROW_ON_ERROR(
+        hpke::getCipherOverhead(
+            cipherOverhead,
+            cipherOverheadErr,
+            echExtension.cipher_suite.aead_id),
+        cipherOverheadErr);
+    payloadSize += encodedChloSize + cipherOverhead;
   }
   echExtension.payload = factory.makeRandomIOBuf(payloadSize);
   return echExtension;

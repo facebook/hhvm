@@ -56,8 +56,15 @@ TEST_P(HpkeContextTest, TestContext) {
           prefix07, openssl::hasherFactory<Sha256>())),
       suiteId->clone(),
       fizz::hpke::HpkeContext::Role::Sender);
-  auto gotCiphertext = encryptContext.seal(
-      toIOBuf(testParam.aad).get(), toIOBuf(testParam.plaintext));
+  std::unique_ptr<folly::IOBuf> gotCiphertext;
+  Error err;
+  EXPECT_EQ(
+      encryptContext.seal(
+          gotCiphertext,
+          err,
+          toIOBuf(testParam.aad).get(),
+          toIOBuf(testParam.plaintext)),
+      Status::Success);
   EXPECT_TRUE(
       folly::IOBufEqualTo()(gotCiphertext, toIOBuf(testParam.ciphertext)));
 
@@ -72,7 +79,6 @@ TEST_P(HpkeContextTest, TestContext) {
       std::move(suiteId),
       fizz::hpke::HpkeContext::Role::Receiver);
   std::unique_ptr<folly::IOBuf> gotPlaintext;
-  Error err;
   EXPECT_EQ(
       decryptContext.open(
           gotPlaintext,
@@ -111,16 +117,30 @@ TEST_P(HpkeContextTest, TestContextRoles) {
       std::move(suiteId),
       fizz::hpke::HpkeContext::Role::Receiver);
 
-  auto gotCiphertext = encryptContext.seal(
-      toIOBuf(testParam.aad).get(), toIOBuf(testParam.plaintext));
+  std::unique_ptr<folly::IOBuf> gotCiphertext;
+  Error err;
+  EXPECT_EQ(
+      encryptContext.seal(
+          gotCiphertext,
+          err,
+          toIOBuf(testParam.aad).get(),
+          toIOBuf(testParam.plaintext)),
+      Status::Success);
 
   // Check that encrypting/decrypting from the wrong role errors
   EXPECT_THROW(
-      decryptContext.seal(
-          toIOBuf(testParam.aad).get(), toIOBuf(testParam.plaintext)),
+      {
+        std::unique_ptr<folly::IOBuf> sealRet;
+        FIZZ_THROW_ON_ERROR(
+            decryptContext.seal(
+                sealRet,
+                err,
+                toIOBuf(testParam.aad).get(),
+                toIOBuf(testParam.plaintext)),
+            err);
+      },
       std::logic_error);
   std::unique_ptr<folly::IOBuf> openRet;
-  Error err;
   EXPECT_EQ(
       encryptContext.open(
           openRet, err, toIOBuf(testParam.aad).get(), std::move(gotCiphertext)),
@@ -143,7 +163,11 @@ TEST_P(HpkeContextTest, TestExportSecret) {
             prefix07, openssl::hasherFactory<Sha256>())),
         std::move(suiteId),
         role);
-    auto secret = context.exportSecret(std::move(exporterContext), 32);
+    std::unique_ptr<folly::IOBuf> secret;
+    Error err;
+    EXPECT_EQ(
+        context.exportSecret(secret, err, std::move(exporterContext), 32),
+        Status::Success);
 
     auto expectedValue = folly::unhexlify(testParam.expectedExportValue);
     EXPECT_TRUE(
@@ -170,8 +194,15 @@ TEST_P(HpkeContextTest, TestExportSecretThrow) {
         std::move(suiteId),
         role);
 
+    Error err;
     EXPECT_THROW(
-        context.exportSecret(std::move(exporterContext), SIZE_MAX),
+        {
+          std::unique_ptr<folly::IOBuf> secret;
+          FIZZ_THROW_ON_ERROR(
+              context.exportSecret(
+                  secret, err, std::move(exporterContext), SIZE_MAX),
+              err);
+        },
         std::runtime_error);
   }
 }

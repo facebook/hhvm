@@ -122,10 +122,12 @@ class MockHpkeContext : public HpkeContext {
       std::unique_ptr<folly::IOBuf>(
           const folly::IOBuf* aad,
           std::unique_ptr<folly::IOBuf>& pt));
-  std::unique_ptr<folly::IOBuf> seal(
+  Status seal(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       const folly::IOBuf* aad,
       std::unique_ptr<folly::IOBuf> pt) override {
-    return _seal(aad, pt);
+    FIZZ_THROW_TO_ERROR(ret, _seal(aad, pt));
   }
 
   MOCK_METHOD2(
@@ -146,10 +148,12 @@ class MockHpkeContext : public HpkeContext {
       std::unique_ptr<folly::IOBuf>(
           std::unique_ptr<folly::IOBuf>& exporterContext,
           size_t desiredLength));
-  std::unique_ptr<folly::IOBuf> exportSecret(
+  Status exportSecret(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf> exporterContext,
       size_t desiredLength) const override {
-    return _exportSecret(exporterContext, desiredLength);
+    FIZZ_THROW_TO_ERROR(ret, _exportSecret(exporterContext, desiredLength));
   }
 
   MOCK_METHOD0(getExporterSecret, std::unique_ptr<folly::IOBuf>());

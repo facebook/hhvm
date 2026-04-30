@@ -118,9 +118,11 @@ SetupResult setupWithEncap(
   DHKEM::EncapResult encapResult;
   switch (mode) {
     case Mode::Auth:
-    case Mode::AuthPsk:
-      encapResult = param.dhkem->authEncap(pkR);
-      break;
+    case Mode::AuthPsk: {
+      Error authEncapErr;
+      FIZZ_THROW_ON_ERROR(
+          param.dhkem->authEncap(encapResult, authEncapErr, pkR), authEncapErr);
+    } break;
     case Mode::Base:
     case Mode::Psk:
       encapResult = param.dhkem->encap(pkR);

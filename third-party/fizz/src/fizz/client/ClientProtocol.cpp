@@ -828,8 +828,9 @@ static Status setupECH(
   auto fakeSni = negotiatedECHConfig.config.public_name;
   auto kemId = negotiatedECHConfig.config.key_config.kem_id;
   std::unique_ptr<KeyExchange> kex;
-  TRY(factory.makeKeyExchange(
-      kex, ctx.err, getKexGroup(kemId), KeyExchangeRole::Client));
+  NamedGroup group;
+  TRY(hpke::getKexGroup(group, ctx.err, kemId));
+  TRY(factory.makeKeyExchange(kex, ctx.err, group, KeyExchangeRole::Client));
   hpke::SetupResult setupResult;
   TRY(constructHpkeSetupResult(
       setupResult, ctx.err, factory, std::move(kex), negotiatedECHConfig));

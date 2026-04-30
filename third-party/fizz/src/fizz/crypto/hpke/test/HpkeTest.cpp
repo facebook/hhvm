@@ -1868,11 +1868,15 @@ void testExportValues(
       "", "00", "54657374436f6e74657874"};
   ASSERT_EQ(exportValues.size(), contexts.size());
 
+  Error err;
   for (size_t testNum = 0; testNum < contexts.size(); ++testNum) {
     std::unique_ptr<folly::IOBuf> exporterContext =
         toIOBuf(contexts.at(testNum));
-    auto secret =
-        context->exportSecret(std::move(exporterContext), exportLength);
+    std::unique_ptr<folly::IOBuf> secret;
+    EXPECT_EQ(
+        context->exportSecret(
+            secret, err, std::move(exporterContext), exportLength),
+        Status::Success);
     auto expectedSecret = toIOBuf(exportValues.at(testNum));
 
     EXPECT_TRUE(folly::IOBufEqualTo()(secret, expectedSecret));
@@ -2014,12 +2018,19 @@ SetupParam getSetupParam(
   std::unique_ptr<folly::IOBuf> suiteId =
       generateHpkeSuiteId(group, func, suite);
 
+  KEMId kemId;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getKEMId(kemId, err, group), err);
+
+  HashFunction hashFunc;
+  FIZZ_THROW_ON_ERROR(getHashFunctionForKEM(hashFunc, err, kemId), err);
+
   return SetupParam{
       std::make_unique<DHKEM>(
           std::move(kex),
           generateAuthKex(group, authPrivateKey, authPublicKey),
           group,
-          genHKDF(getHashFunctionForKEM(getKEMId(group)))),
+          genHKDF(hashFunc)),
       std::move(cipher),
       genHKDF(func),
       std::move(suiteId),
@@ -2073,12 +2084,21 @@ TEST(HpkeTest, TestSetup) {
         throw std::runtime_error("not supported");
     }
 
+    folly::Optional<PskInputs> encapPskInputs;
+    Error err;
+    EXPECT_EQ(
+        PskInputs::create(
+            encapPskInputs,
+            err,
+            testParam.mode,
+            toIOBuf(testParam.psk),
+            toIOBuf(testParam.pskId)),
+        Status::Success);
     SetupResult setupResult = setupWithEncap(
         testParam.mode,
         pkR->coalesce(),
         info->clone(),
-        PskInputs(
-            testParam.mode, toIOBuf(testParam.psk), toIOBuf(testParam.pskId)),
+        std::move(encapPskInputs),
         getSetupParam(
             std::move(encapKex),
             testParam.group,
@@ -2122,13 +2142,21 @@ TEST(HpkeTest, TestSetup) {
         throw std::runtime_error("unsupported");
     }
 
+    folly::Optional<PskInputs> decapPskInputs;
+    EXPECT_EQ(
+        PskInputs::create(
+            decapPskInputs,
+            err,
+            testParam.mode,
+            toIOBuf(testParam.psk),
+            toIOBuf(testParam.pskId)),
+        Status::Success);
     auto decryptContext = setupWithDecap(
         testParam.mode,
         enc->coalesce(),
         pkS->coalesce(),
         std::move(info),
-        PskInputs(
-            testParam.mode, toIOBuf(testParam.psk), toIOBuf(testParam.pskId)),
+        std::move(decapPskInputs),
         getSetupParam(
             std::move(decapKex),
             testParam.group,
@@ -2145,12 +2173,14 @@ TEST(HpkeTest, TestSetup) {
     std::unique_ptr<folly::IOBuf> plaintext =
         toIOBuf("4265617574792069732074727574682c20747275746820626561757479");
 
-    auto ciphertext = encryptContext->seal(aad.get(), plaintext->clone());
+    std::unique_ptr<folly::IOBuf> ciphertext;
+    EXPECT_EQ(
+        encryptContext->seal(ciphertext, err, aad.get(), plaintext->clone()),
+        Status::Success);
     auto expectedCiphertext = testParam.ciphertext;
     EXPECT_TRUE(folly::IOBufEqualTo()(ciphertext, toIOBuf(expectedCiphertext)));
 
     std::unique_ptr<folly::IOBuf> gotPlaintext;
-    Error err;
     EXPECT_EQ(
         decryptContext->open(
             gotPlaintext, err, aad.get(), std::move(ciphertext)),
@@ -2185,12 +2215,22 @@ TEST(HpkeTest, TestKeySchedule) {
     EXPECT_CALL(*cipher, _setKey(TrafficKeyMatcher(&expectedTrafficKey)))
         .Times(1);
 
+    folly::Optional<PskInputs> pskInputs;
+    Error err;
+    EXPECT_EQ(
+        PskInputs::create(
+            pskInputs,
+            err,
+            testParam.mode,
+            toIOBuf(testParam.psk),
+            toIOBuf(testParam.pskId)),
+        Status::Success);
+
     struct KeyScheduleParams keyScheduleParams{
         testParam.mode,
         toIOBuf(testParam.sharedSecret),
         toIOBuf(testParam.info),
-        PskInputs(
-            testParam.mode, toIOBuf(testParam.psk), toIOBuf(testParam.pskId)),
+        std::move(pskInputs),
         std::move(cipher),
         std::move(hkdf),
         std::move(suiteId),

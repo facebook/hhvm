@@ -182,9 +182,12 @@ Status negotiateECHConfig(
           supportedAeads.end();
       if (isCipherSupported) {
         HashFunction hashFunc;
+        CipherSuite cs;
+        FIZZ_RETURN_ON_ERROR(hpke::getCipherSuite(cs, err, suite.aead_id));
+        FIZZ_RETURN_ON_ERROR(getHashFunction(hashFunc, err, cs));
+        hpke::KDFId associatedCipherKdf;
         FIZZ_RETURN_ON_ERROR(
-            getHashFunction(hashFunc, err, getCipherSuite(suite.aead_id)));
-        auto associatedCipherKdf = hpke::getKDFId(hashFunc);
+            hpke::getKDFId(associatedCipherKdf, err, hashFunc));
         if (suite.kdf_id == associatedCipherKdf) {
           auto negotiatedECHConfig = config;
           auto configId = config.key_config.config_id;
@@ -208,9 +211,12 @@ static Status getSetupParam(
     hpke::KEMId kemId,
     const HpkeSymmetricCipherSuite& cipherSuite) {
   // Get suite id
-  auto group = getKexGroup(kemId);
-  auto hash = getHashFunction(cipherSuite.kdf_id);
-  auto suite = getCipherSuite(cipherSuite.aead_id);
+  NamedGroup group;
+  FIZZ_RETURN_ON_ERROR(hpke::getKexGroup(group, err, kemId));
+  HashFunction hash;
+  FIZZ_RETURN_ON_ERROR(hpke::getHashFunction(hash, err, cipherSuite.kdf_id));
+  CipherSuite suite;
+  FIZZ_RETURN_ON_ERROR(hpke::getCipherSuite(suite, err, cipherSuite.aead_id));
   auto suiteId = hpke::generateHpkeSuiteId(group, hash, suite);
 
   const HasherFactoryWithMetadata* hasherFactory = nullptr;
@@ -219,8 +225,7 @@ static Status getSetupParam(
       std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasherFactory));
 
   std::unique_ptr<Aead> aead;
-  FIZZ_RETURN_ON_ERROR(
-      factory.makeAead(aead, err, getCipherSuite(cipherSuite.aead_id)));
+  FIZZ_RETURN_ON_ERROR(factory.makeAead(aead, err, suite));
 
   ret = hpke::SetupParam{
       std::move(dhkem),
@@ -239,17 +244,19 @@ Status constructHpkeSetupResult(
     const NegotiatedECHConfig& negotiatedECHConfig) {
   const auto& echConfigContent = negotiatedECHConfig.config;
   auto cipherSuite = negotiatedECHConfig.cipherSuite;
-  auto hash = getHashFunction(cipherSuite.kdf_id);
+  HashFunction hash;
+  FIZZ_RETURN_ON_ERROR(hpke::getHashFunction(hash, err, cipherSuite.kdf_id));
 
   // Get shared secret
   const HasherFactoryWithMetadata* hasherFactory = nullptr;
   FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash));
   auto hkdf =
       std::make_unique<fizz::hpke::Hkdf>(fizz::hpke::Hkdf::v1(hasherFactory));
-  std::unique_ptr<DHKEM> dhkem = std::make_unique<DHKEM>(
-      std::move(kex),
-      getKexGroup(echConfigContent.key_config.kem_id),
-      std::move(hkdf));
+  NamedGroup group;
+  FIZZ_RETURN_ON_ERROR(
+      hpke::getKexGroup(group, err, echConfigContent.key_config.kem_id));
+  std::unique_ptr<DHKEM> dhkem =
+      std::make_unique<DHKEM>(std::move(kex), group, std::move(hkdf));
 
   // Get context
   std::unique_ptr<folly::IOBuf> info;
@@ -635,8 +642,12 @@ Status encryptClientHelloImpl(
   auto chloOuterForAAD = clientHelloOuter.clone();
 
   // Get cipher overhead
-  size_t dummyPayloadSize = encodedClientHelloInner->computeChainDataLength() +
-      hpke::getCipherOverhead(echExtension.cipher_suite.aead_id);
+  size_t cipherOverhead;
+  FIZZ_RETURN_ON_ERROR(
+      hpke::getCipherOverhead(
+          cipherOverhead, err, echExtension.cipher_suite.aead_id));
+  size_t dummyPayloadSize =
+      encodedClientHelloInner->computeChainDataLength() + cipherOverhead;
 
   // Make dummy payload.
   echExtension.payload = folly::IOBuf::create(dummyPayloadSize);
@@ -658,8 +669,11 @@ Status encryptClientHelloImpl(
   FIZZ_RETURN_ON_ERROR(encode(clientHelloOuterAad, err, chloOuterForAAD));
 
   // Encrypt inner client hello
-  echExtension.payload = setupResult.context->seal(
-      clientHelloOuterAad.get(), std::move(encodedClientHelloInner));
+  FIZZ_RETURN_ON_ERROR(setupResult.context->seal(
+      echExtension.payload,
+      err,
+      clientHelloOuterAad.get(),
+      std::move(encodedClientHelloInner)));
   return Status::Success;
 }
 
@@ -782,10 +796,11 @@ Status setupDecryptionContext(
     std::unique_ptr<KeyExchange> kex,
     uint64_t seqNum) {
   // Get crypto primitive types used for decrypting
-  hpke::KDFId kdfId = cipherSuite.kdf_id;
   auto kemId = echConfig.key_config.kem_id;
-  NamedGroup group = hpke::getKexGroup(kemId);
-  auto hash = getHashFunction(cipherSuite.kdf_id);
+  NamedGroup group;
+  FIZZ_RETURN_ON_ERROR(hpke::getKexGroup(group, err, kemId));
+  HashFunction hash;
+  FIZZ_RETURN_ON_ERROR(hpke::getHashFunction(hash, err, cipherSuite.kdf_id));
   const HasherFactoryWithMetadata* hasherFactory = nullptr;
   FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash));
   auto hkdf =
@@ -793,11 +808,12 @@ Status setupDecryptionContext(
 
   auto dhkem = std::make_unique<DHKEM>(std::move(kex), group, std::move(hkdf));
   auto aeadId = cipherSuite.aead_id;
-  auto suiteId = hpke::generateHpkeSuiteId(
-      group, hpke::getHashFunction(kdfId), hpke::getCipherSuite(aeadId));
+  CipherSuite cs;
+  FIZZ_RETURN_ON_ERROR(hpke::getCipherSuite(cs, err, aeadId));
+  auto suiteId = hpke::generateHpkeSuiteId(group, hash, cs);
 
   std::unique_ptr<Aead> aead;
-  FIZZ_RETURN_ON_ERROR(factory.makeAead(aead, err, getCipherSuite(aeadId)));
+  FIZZ_RETURN_ON_ERROR(factory.makeAead(aead, err, cs));
 
   const HasherFactoryWithMetadata* hasherFactory2 = nullptr;
   FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory2, err, hash));

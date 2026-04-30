@@ -20,25 +20,28 @@ struct PskInputs {
   std::unique_ptr<folly::IOBuf> psk;
   std::unique_ptr<folly::IOBuf> id;
 
-  PskInputs(
+  static Status create(
+      folly::Optional<PskInputs>& ret,
+      Error& err,
       Mode givenMode,
       std::unique_ptr<folly::IOBuf> givenPsk,
-      std::unique_ptr<folly::IOBuf> givenId)
-      : mode(givenMode), psk(std::move(givenPsk)), id(std::move(givenId)) {
-    bool gotPsk = folly::IOBufNotEqualTo()(psk, getDefaultPsk());
-    bool gotPskId = folly::IOBufNotEqualTo()(id, getDefaultId());
+      std::unique_ptr<folly::IOBuf> givenId) {
+    bool gotPsk = folly::IOBufNotEqualTo()(givenPsk, getDefaultPsk());
+    bool gotPskId = folly::IOBufNotEqualTo()(givenId, getDefaultId());
 
     if (gotPsk != gotPskId) {
-      throw std::runtime_error("Inconsistent PSK inputs");
+      return err.error("Inconsistent PSK inputs");
     }
 
-    if (gotPsk && (mode == Mode::Base || mode == Mode::Auth)) {
-      throw std::runtime_error("PSK input provided when not needed");
+    if (gotPsk && (givenMode == Mode::Base || givenMode == Mode::Auth)) {
+      return err.error("PSK input provided when not needed");
     }
 
-    if (!gotPsk && (mode == Mode::Psk || mode == Mode::AuthPsk)) {
-      throw std::runtime_error("Missing required PSK input");
+    if (!gotPsk && (givenMode == Mode::Psk || givenMode == Mode::AuthPsk)) {
+      return err.error("Missing required PSK input");
     }
+    ret = PskInputs(givenMode, std::move(givenPsk), std::move(givenId));
+    return Status::Success;
   }
 
   static std::unique_ptr<folly::IOBuf> getDefaultPsk() {
@@ -48,6 +51,13 @@ struct PskInputs {
   static std::unique_ptr<folly::IOBuf> getDefaultId() {
     return folly::IOBuf::copyBuffer("");
   }
+
+ private:
+  PskInputs(
+      Mode givenMode,
+      std::unique_ptr<folly::IOBuf> givenPsk,
+      std::unique_ptr<folly::IOBuf> givenId)
+      : mode(givenMode), psk(std::move(givenPsk)), id(std::move(givenId)) {}
 };
 
 struct KeyScheduleParams {

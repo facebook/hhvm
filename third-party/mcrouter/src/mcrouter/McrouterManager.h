@@ -86,7 +86,10 @@ class McrouterManager {
     std::lock_guard<std::mutex> lg(mutex_);
     auto mcrouterBase =
         folly::get_default(mcrouters_, persistenceId.str(), nullptr).get();
-    return dynamic_cast<CarbonRouterInstance<RouterInfo>*>(mcrouterBase);
+    if (mcrouterBase && mcrouterBase->routerInfoName() == RouterInfo::name) {
+      return static_cast<CarbonRouterInstance<RouterInfo>*>(mcrouterBase);
+    }
+    return nullptr;
   }
 
   static std::shared_ptr<McrouterManager> getSingletonInstance();

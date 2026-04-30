@@ -35,4 +35,21 @@ class Bar {
     $m ?as T;
     $m as T;
   }
+  public function test5(mixed $m): void {
+    $m is shape('k' => C);
+    $m ?as shape('k' => C);
+    $m as shape('k' => C);
+  }
+  public function test6(mixed $m): void {
+    $m as shape('k' => shape('inner' => C));
+  }
+  public function test7(mixed $m): void {
+    $m as (shape('k' => C), int);
+  }
+  public function test8(mixed $m): void {
+    $m as (int, C);
+  }
+  public function test9(mixed $m): void {
+    $m as (int, int, C);
+  }
 }

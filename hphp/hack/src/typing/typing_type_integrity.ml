@@ -262,8 +262,18 @@ and check_type_integrity
     check ty;
     Class_refinement.iter check rs
   | Tshape { s_fields = map; _ } ->
+    (* Shape field types are runtime-enforced under `as` (modulo `enforce_deep`),
+       so propagate the boundary reason for as-expression contexts. Other
+       contexts continue to skip field-type checking to preserve prior behavior. *)
+    let should_check_package_boundary =
+      match should_check_package_boundary with
+      | `Yes Typing_error.Primary.Package.As_expression
+      | `LintOnly ->
+        should_check_package_boundary
+      | _ -> `No
+    in
     TShapeMap.iter
-      (fun _ sft -> check ~should_check_package_boundary:`No sft.sft_ty)
+      (fun _ sft -> check ~should_check_package_boundary sft.sft_ty)
       map
   | Tfun ({ ft_params; ft_ret; _ } : _ fun_type) ->
     (* FIXME shall we inspect tparams and where_constraints? *)

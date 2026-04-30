@@ -8,7 +8,7 @@
 from __future__ import absolute_import
 import sys
 from thrift.util.Recursive import fix_spec
-from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
+from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef, warn_thrift_py_deprecated
 from thrift.protocol.TProtocol import TProtocolException
 
 
@@ -51,6 +51,7 @@ all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
 __all__ = ['UTF8STRINGS', 'has_bitwise_ops', 'is_unscoped', 'MyForwardRefEnum', 'empty_struct', 'decorated_struct', 'ContainerStruct', 'CppTypeStruct', 'VirtualStruct', 'MyStructWithForwardRefEnum', 'TrivialNumeric', 'TrivialNestedWithDefault', 'ComplexString', 'ComplexNestedWithDefault', 'MinPadding', 'MinPaddingWithCustomType', 'MyStruct', 'MyDataItem', 'Renaming', 'AnnotatedTypes', 'ForwardUsageRoot', 'ForwardUsageStruct', 'ForwardUsageByRef', 'IncompleteMap', 'IncompleteMapDep', 'CompleteMap', 'CompleteMapDep', 'IncompleteList', 'IncompleteListDep', 'CompleteList', 'CompleteListDep', 'AdaptedList', 'AdaptedListDep', 'DependentAdaptedList', 'DependentAdaptedListDep', 'AllocatorAware', 'AllocatorAware2', 'TypedefStruct', 'StructWithDoubleUnderscores', 'TBinary', 'IntTypedef', 'UintTypedef', 'SomeListOfTypeMap_2468', 'TBinary_8623', 'i32_9314', 'list_i32_9187', 'map_i32_i32_9565', 'map_i32_string_1261', 'set_i32_7070', 'set_i32_7194', 'string_5252']
+warn_thrift_py_deprecated(__name__)
 
 class has_bitwise_ops:
   def __getattr__(self, name): raise AttributeError(name)

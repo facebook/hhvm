@@ -8,7 +8,7 @@
 from __future__ import absolute_import
 import sys
 from thrift.util.Recursive import fix_spec
-from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
+from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef, warn_thrift_py_deprecated
 from thrift.protocol.TProtocol import TProtocolException
 
 from json import loads
@@ -53,6 +53,7 @@ all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
 __all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'Containers', 'MyDataItem', 'MyUnion', 'MyException', 'MyExceptionWithMessage', 'ReservedKeyword', 'UnionToBeRenamed', 'MyEnumAlias', 'MyDataItemAlias']
+warn_thrift_py_deprecated(__name__)
 
 class MyEnum:
   def __getattr__(self, name): raise AttributeError(name)

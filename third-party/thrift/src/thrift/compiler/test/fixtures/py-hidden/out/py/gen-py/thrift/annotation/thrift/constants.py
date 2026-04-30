@@ -8,7 +8,7 @@
 from __future__ import absolute_import
 import sys
 from thrift.util.Recursive import fix_spec
-from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
+from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef, warn_thrift_py_deprecated
 from thrift.protocol.TProtocol import TProtocolException
 
 from json import loads

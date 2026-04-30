@@ -8,7 +8,7 @@
 from __future__ import absolute_import
 import sys
 from thrift.util.Recursive import fix_spec
-from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
+from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef, warn_thrift_py_deprecated
 from thrift.protocol.TProtocol import TProtocolException
 
 from json import loads
@@ -53,6 +53,7 @@ all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
 __all__ = ['UTF8STRINGS', 'Color', 'ThriftAdaptedEnum', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'IndependentDirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'AdaptTestStruct', 'AdaptTemplatedTestStruct', 'AdaptTemplatedNestedTestStruct', 'AdaptTestUnion', 'AdaptedStruct', 'DirectlyAdaptedStruct', 'StructFieldAdaptedStruct', 'CircularAdaptee', 'CircularStruct', 'ReorderedStruct', 'DeclaredAfterStruct', 'RenamedStruct', 'SameNamespaceStruct', 'HeapAllocated', 'MoveOnly', 'AlsoMoveOnly', 'ApplyAdapter', 'TransitiveAdapted', 'CountingStruct', 'Person', 'Person2', 'RenamedStructWithStructAdapterAndFieldAdapter', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'ListOfFooTypedef', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA', 'StringWithCppAdapter', 'DurationMs', 'AdaptedBool', 'AdaptedByte', 'AdaptedShort', 'AdaptedInteger', 'AdaptedLong', 'AdaptedDouble', 'AdaptedString', 'DoubleTypedefBool', 'IOBuf', 'CustomProtocolType', 'IndirectionString', 'AdaptedEnum', 'AdaptedTypedef', 'TypedefOfDirect', 'AdaptedCircularAdaptee', 'CountingInt', 'FooWithAdapter_9317', 'ListWithElemAdapter_withAdapter_2312', 'MyI32_4873', 'StringWithAdapter_7208', 'Baz_7352', 'Foo_3943', 'Foo_6868', 'binary_5673', 'i32_5137', 'map_string_ListWithElemAdapter_withAdapter_8454']
+warn_thrift_py_deprecated(__name__)
 
 class Color:
   def __getattr__(self, name): raise AttributeError(name)

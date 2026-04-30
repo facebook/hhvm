@@ -8,7 +8,7 @@
 from __future__ import absolute_import
 import sys
 from thrift.util.Recursive import fix_spec
-from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
+from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef, warn_thrift_py_deprecated
 from thrift.protocol.TProtocol import TProtocolException
 
 
@@ -52,6 +52,7 @@ all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
 __all__ = ['UTF8STRINGS', 'IncludesIncluded', 'IncludesTransitiveFoo']
+warn_thrift_py_deprecated(__name__)
 
 IncludesIncluded = includes.ttypes.Included
 IncludesTransitiveFoo = includes.ttypes.TransitiveFoo

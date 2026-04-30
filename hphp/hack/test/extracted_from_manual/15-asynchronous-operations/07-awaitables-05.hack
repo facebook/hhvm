@@ -4,11 +4,16 @@ async function quads(float $n): Awaitable<float> {
   return $n * 4.0;
 }
 
-<<__EntryPoint>>
-async function quads_m(): Awaitable<void> {
-  $awaitables = dict['five' => quads(5.0), 'nine' => quads(9.0)];
-  $results = await Dict\from_async($awaitables);
+async function quads_static(): Awaitable<void> {
+  concurrent {
+    $five = await quads(5.0);
+    $nine = await quads(9.0);
+  }
+  \var_dump($five); // float(20)
+  \var_dump($nine); // float(36)
+}
 
-  \var_dump($results['five']); // float(20)
-  \var_dump($results['nine']); // float(36)
+async function quads_dynamic(vec<float> $input): Awaitable<void> {
+  $results = await Vec\map_async($input, quads<>);
+  \var_dump($results); // vec<float>
 }

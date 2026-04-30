@@ -73,15 +73,14 @@ async function do_sleep(): Awaitable<void> {
   print("End sleep\n");
 }
 
-async function run(): Awaitable<void> {
-  print("Start of main()\n");
-  await Vec\from_async(vec[do_cpu_work(), do_sleep()]);
-  print("End of main()\n");
-}
-
 <<__EntryPoint>>
-function main(): void {
-  \HH\Asio\join(run());
+async function main(): Awaitable<void> {
+  print("Start of main()\n");
+  concurrent {
+    await do_cpu_work();
+    await do_sleep();
+  }
+  print("End of main()\n");
 }
 ```
 
@@ -141,16 +140,15 @@ async function curl_B(): Awaitable<string> {
   return $y;
 }
 
+<<__EntryPoint>>
 async function async_curl(): Awaitable<void> {
   $start = \microtime(true);
-  list($a, $b) = await Vec\from_async(vec[curl_A(), curl_B()]);
+  concurrent {
+    $a = await curl_A();
+    $b = await curl_B();
+  }
   $end = \microtime(true);
   echo "Total time taken: ".\strval($end - $start)." seconds\n";
-}
-
-<<__EntryPoint>>
-function main(): void {
-  \HH\Asio\join(async_curl());
 }
 ```
 

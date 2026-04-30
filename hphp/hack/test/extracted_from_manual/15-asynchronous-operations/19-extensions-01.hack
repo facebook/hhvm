@@ -16,10 +16,10 @@ async function write_all(vec<resource> $resources): Awaitable<void> {
     }
   };
   // You will get 3 shuffled strings, each on a separate line.
-  await Vec\from_async(\array_map($write_single_resource, $resources));
+  await Vec\map_async($resources, $write_single_resource);
 }
 
 <<__EntryPoint>>
-function main(): void {
-  HH\Asio\join(write_all(get_resources()));
+async function main(): Awaitable<void> {
+  await write_all(get_resources());
 }

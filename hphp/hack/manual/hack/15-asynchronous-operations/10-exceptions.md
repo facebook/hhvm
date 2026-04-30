@@ -16,6 +16,7 @@ async function exception_thrower(): Awaitable<void> {
   throw new \Exception("Return exception handle");
 }
 
+<<__EntryPoint>>
 async function basic_exception(): Awaitable<void> {
   // the handle does not throw, but result will be an Exception objection.
   // Remember, this is the same as:
@@ -23,18 +24,13 @@ async function basic_exception(): Awaitable<void> {
   //   await $handle;
   await exception_thrower();
 }
-
-<<__EntryPoint>>
-function main(): void {
-  HH\Asio\join(basic_exception());
-}
 ```
 
-The use of `from_async` ignores any successful awaitable results and just throw an exception of one of the
-awaitable results, if one of the results was an exception.
+The use of `concurrent` ignores any successful awaitable results and just throws an exception of one of the
+failed Awaitables, if there was any.
 
 ```hack
-async function exception_thrower(): Awaitable<void> {
+async function exception_thrower(): Awaitable<int> {
   throw new \Exception("Return exception handle");
 }
 
@@ -42,21 +38,20 @@ async function non_exception_thrower(): Awaitable<int> {
   return 2;
 }
 
-async function multiple_waithandle_exception(): Awaitable<void> {
-  $handles = vec[exception_thrower(), non_exception_thrower()];
-  // You will get a fatal error here with the exception thrown
-  $results = await Vec\from_async($handles);
-  // This won't happen
-  var_dump($results);
-}
-
 <<__EntryPoint>>
-function main(): void {
-  HH\Asio\join(multiple_waithandle_exception());
+async function multiple_waithandle_exception(): Awaitable<void> {
+  // You will get a fatal error here with the exception thrown
+  concurrent {
+    $r1 = await exception_thrower();
+    $r2 = await non_exception_thrower();
+  }
+
+  // This won't happen
+  var_dump($r1, $r2);
 }
 ```
 
-To get around this, and get the successful results as well, we can use the [utility function](/hack/asynchronous-operations/utility-functions)
+If it is desirable to recover from a partial failure, we can use the [utility function](/hack/asynchronous-operations/utility-functions)
 [`HH\Asio\wrap`](/apis/Functions/HH.Asio/wrap/). It takes an awaitable and returns the expected result or the exception
 if one was thrown. The exception it gives back is of the type [`ResultOrExceptionWrapper`](/apis/Interfaces/HH.Asio/ResultOrExceptionWrapper/).
 
@@ -82,20 +77,15 @@ async function non_exception_thrower(): Awaitable<int> {
   return 2;
 }
 
-async function wrapping_exceptions(): Awaitable<void> {
-  $handles = vec[
-    HH\Asio\wrap(exception_thrower()),
-    HH\Asio\wrap(non_exception_thrower()),
-  ];
-  // Since we wrapped, the results will contain both the exception and the
-  // integer result
-  $results = await Vec\from_async($handles);
-  var_dump($results);
-}
-
 <<__EntryPoint>>
-function main(): void {
-  HH\Asio\join(wrapping_exceptions());
+async function wrapping_exceptions(): Awaitable<void> {
+  concurrent {
+    $r1 = await HH\Asio\wrap(exception_thrower());
+    $r2 = await HH\Asio\wrap(non_exception_thrower());
+  }
+  // Since we wrapped, $r1 and $r2 will contain the exception and the
+  // integer result
+  var_dump($r1, $r2);
 }
 ```
 

@@ -5,7 +5,7 @@ async function get_raw(string $url): Awaitable<string> {
 }
 
 <<__EntryPoint>>
-function non_async_function(): void {
-  $result = \HH\Asio\join(get_raw("http://www.example.com"));
+async function main(): Awaitable<void> {
+  $result = await get_raw("http://www.example.com");
   \var_dump(\substr($result, 0, 10));
 }

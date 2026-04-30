@@ -80,11 +80,11 @@ async function use_async_block_2(): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-function main(): void {
-  \HH\Asio\join(use_async_lambda());
-  \HH\Asio\join(use_async_block());
-  \HH\Asio\join(call_async_function());
-  \HH\Asio\join(use_async_block_2());
+async function main(): Awaitable<void> {
+  await use_async_lambda();
+  await use_async_block();
+  await call_async_function();
+  await use_async_block_2();
 }
 ```
 

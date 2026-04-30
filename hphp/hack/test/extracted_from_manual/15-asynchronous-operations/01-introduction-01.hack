@@ -24,13 +24,12 @@ async function do_sleep(): Awaitable<void> {
   print("End sleep\n");
 }
 
-async function run(): Awaitable<void> {
-  print("Start of main()\n");
-  await Vec\from_async(vec[do_cpu_work(), do_sleep()]);
-  print("End of main()\n");
-}
-
 <<__EntryPoint>>
-function main(): void {
-  \HH\Asio\join(run());
+async function main(): Awaitable<void> {
+  print("Start of main()\n");
+  concurrent {
+    await do_cpu_work();
+    await do_sleep();
+  }
+  print("End of main()\n");
 }

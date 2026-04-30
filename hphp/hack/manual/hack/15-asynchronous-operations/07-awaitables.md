@@ -19,8 +19,8 @@ are the most common case of this.
 
 ## `Awaitable`
 
-Awaitables are represented by the interface called `Awaitable`. While there are several classes that implement `Awaitable`, there is no
-need to concern ourselves with their implementation details. `Awaitable` is the only interface we need.
+Awaitables are represented by the base class called `Awaitable`. While there are several subclasses that inherit `Awaitable`, there is no
+need to concern ourselves with their implementation details. `Awaitable` is the only type we need.
 
 The type returned from an async function is `Awaitable<T>`, where `T` is the final result type (e.g., `int`) of the awaited value.
 
@@ -41,28 +41,26 @@ async function f(): Awaitable<int> {
 }
 
 // We call f() and get back an Awaitable<int>
-// Once the function is finished executing and we await the awaitable (or in
-// this case, explicitly join since this call is not in an async function) to get
+// Once the function is finished executing and we await the awaitable to get
 // the explicit result of the function call, we will get back 2.
 
-<<__EntryPoint>>
-function join_main(): void {
-  var_dump(\HH\Asio\join(f()));
+async function use_f(): Awaitable<void> {
+  var_dump(await f());
 }
 ```
 
-All `async` functions must return an `Awaitable<T>`. Calling an `async` function will therefore yield an object implementing the `Awaitable`
-interface, and we must `await` or `join` it to obtain an end result from the operation. When we `await`, we are pausing the current task until
+All `async` functions must return an `Awaitable<T>`. Calling an `async` function will therefore yield an object of the `Awaitable` class,
+and we must `await` or `join` it to obtain an end result from the operation. When we `await`, we are pausing the current task until
 the operation associated with the `Awaitable` handle is complete, leaving other tasks free to continue executing. `join` is similar; however it
-blocks all other operations from completing until the `Awaitable` has returned.
+blocks all other operations from completing until the `Awaitable` has returned. It waits for the result synchronously.
 
 ## Awaiting
 
 In most cases, we will prefer to `await` an `Awaitable`, so that other tasks can execute while our blocking operation completes.  Note however,
 that only `async` functions can yield control to other asyncs, so `await` may therefore only be used in an `async` function.  For other locations,
-such as a `main` block, we will need to use `join`, as will be shown below.
+we will need to use `join`, as will be shown below.
 
-### Batching Awaitables
+### Concurrent evaluation of `async` functions
 
 Many times, we will `await` on one `Awaitable`, get the result, and move on. For example:
 
@@ -82,24 +80,26 @@ async function single_awaitable_main(): Awaitable<void> {
 We will normally see something like `await f();` which combines the retrieval of the awaitable with the waiting and retrieving of the result
 of that awaitable. The example above separates it out for illustration purposes.
 
-At other times, we will gather a bunch of awaitables and `await` them all before moving on.
-
-Here we are using one of the library helper-functions in order to batch a bunch of awaitables together to then `await` upon:
-* `HH\Lib\Vec\from_async`: vec of awaitables with consecutive integer keys
-* `HH\Lib\Dict\from_async`: dict of awaitables with integer or string keys
+At other times, we will want to evaluate a bunch of `async` functions concurrently. This could be achieved using the `concurrent` keyword if
+all async tasks are known statically, or using a library helper functions for dynamic number of same tasks:
 
 ```hack
 async function quads(float $n): Awaitable<float> {
   return $n * 4.0;
 }
 
-<<__EntryPoint>>
-async function quads_m(): Awaitable<void> {
-  $awaitables = dict['five' => quads(5.0), 'nine' => quads(9.0)];
-  $results = await Dict\from_async($awaitables);
+async function quads_static(): Awaitable<void> {
+  concurrent {
+    $five = await quads(5.0);
+    $nine = await quads(9.0);
+  }
+  \var_dump($five); // float(20)
+  \var_dump($nine); // float(36)
+}
 
-  \var_dump($results['five']); // float(20)
-  \var_dump($results['nine']); // float(36)
+async function quads_dynamic(vec<float> $input): Awaitable<void> {
+  $results = await Vec\map_async($input, quads<>);
+  \var_dump($results); // vec<float>
 }
 ```
 
@@ -108,15 +108,13 @@ async function quads_m(): Awaitable<void> {
 Sometimes we want to get a result out of an awaitable when the function we are in is *not* `async`. For this there is `HH\Asio\join`, which
 takes an `Awaitable` and blocks until it resolves to a result.
 
-This means that invocations of async functions from the top-level scope cannot be awaited, and must be joined.
-
 ```hack
 async function get_raw(string $url): Awaitable<string> {
   return await \HH\Asio\curl_exec($url);
 }
 
 <<__EntryPoint>>
-function join_main(): void {
+function non_async_function(): void {
   $result = \HH\Asio\join(get_raw("http://www.example.com"));
   \var_dump(\substr($result, 0, 10));
 }
@@ -124,3 +122,19 @@ function join_main(): void {
 
 We should **not** call `join` inside an `async` function. This would defeat the purpose of `async`, as the awaitable and any dependencies will
 run to completion synchronously, stopping any other awaitables from running.
+
+## Entry point
+
+Entry points can be declared as async, in which case HHVM will join the entry point implicitly.
+
+```hack
+async function get_raw(string $url): Awaitable<string> {
+  return await \HH\Asio\curl_exec($url);
+}
+
+<<__EntryPoint>>
+async function main(): Awaitable<void> {
+  $result = await get_raw("http://www.example.com");
+  \var_dump(\substr($result, 0, 10));
+}
+```

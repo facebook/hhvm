@@ -28,15 +28,13 @@ async function fetch_page_data(
 ): Awaitable<vec<(PostData, int)>> {
 
   $all_post_ids = await fetch_all_post_ids_for_author($author_id);
-  // An async closure that will turn a post ID into a tuple of
+  // An async lambda that will turn a post ID into a tuple of
   // post data and comment count
-  $post_fetcher = async function(int $post_id): Awaitable<(PostData, int)> {
-    list($post_data, $comment_count) = await Vec\from_async(vec[
-      fetch_post_data($post_id),
-      fetch_comment_count($post_id),
-    ]);
-    invariant($post_data is PostData, "This is good");
-    invariant($comment_count is int, "This is good");
+  $post_fetcher = async (int $post_id) ==> {
+    concurrent {
+      $post_data = await fetch_post_data($post_id);
+      $comment_count = await fetch_comment_count($post_id);
+    }
     return tuple($post_data, $comment_count);
   };
 
@@ -58,6 +56,6 @@ async function generate_page(int $author_id): Awaitable<string> {
 }
 
 <<__EntryPoint>>
-function main(): void {
-  print \HH\Asio\join(generate_page(13324)); // just made up a user id
+async function main(): Awaitable<void> {
+  print await generate_page(13324); // just made up a user id
 }

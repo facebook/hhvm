@@ -6,6 +6,5 @@ async function get_hello(): Awaitable<string> {
 
 <<__EntryPoint>>
 async function run_a_hello(): Awaitable<void> {
-  $x = await get_hello();
-  \var_dump($x);
+  \var_dump(await get_hello());
 }

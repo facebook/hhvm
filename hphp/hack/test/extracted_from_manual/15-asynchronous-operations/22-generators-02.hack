@@ -32,7 +32,7 @@ async function associate_ids_to_names(vec<int> $ids): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-function run(): void {
+async function run(): Awaitable<void> {
   $ids = vec[1, 2, 3, 4];
-  \HH\Asio\join(associate_ids_to_names($ids));
+  await associate_ids_to_names($ids);
 }

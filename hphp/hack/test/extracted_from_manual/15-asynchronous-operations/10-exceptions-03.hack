@@ -8,18 +8,13 @@ async function non_exception_thrower(): Awaitable<int> {
   return 2;
 }
 
-async function wrapping_exceptions(): Awaitable<void> {
-  $handles = vec[
-    HH\Asio\wrap(exception_thrower()),
-    HH\Asio\wrap(non_exception_thrower()),
-  ];
-  // Since we wrapped, the results will contain both the exception and the
-  // integer result
-  $results = await Vec\from_async($handles);
-  var_dump($results);
-}
-
 <<__EntryPoint>>
-function main(): void {
-  HH\Asio\join(wrapping_exceptions());
+async function wrapping_exceptions(): Awaitable<void> {
+  concurrent {
+    $r1 = await HH\Asio\wrap(exception_thrower());
+    $r2 = await HH\Asio\wrap(non_exception_thrower());
+  }
+  // Since we wrapped, $r1 and $r2 will contain the exception and the
+  // integer result
+  var_dump($r1, $r2);
 }

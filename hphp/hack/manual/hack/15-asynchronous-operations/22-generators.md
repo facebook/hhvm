@@ -42,8 +42,8 @@ async function happy_new_year(int $start): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-function run(): void {
-  \HH\Asio\join(happy_new_year(5)); // 5 second countdown
+async function run(): Awaitable<void> {
+  await happy_new_year(5); // 5 second countdown
 }
 ```
 
@@ -96,9 +96,9 @@ async function associate_ids_to_names(vec<int> $ids): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-function run(): void {
+async function run(): Awaitable<void> {
   $ids = vec[1, 2, 3, 4];
-  \HH\Asio\join(associate_ids_to_names($ids));
+  await associate_ids_to_names($ids);
 }
 ```
 
@@ -148,8 +148,8 @@ async function associate_ids_to_names(vec<int> $ids): Awaitable<void> {
 }
 
 <<__EntryPoint>>
-function run(): void {
+async function run(): Awaitable<void> {
   $ids = vec[1, 2, 3, 4];
-  \HH\Asio\join(associate_ids_to_names($ids));
+  await associate_ids_to_names($ids);
 }
 ```

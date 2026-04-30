@@ -29,26 +29,6 @@ async function call_trivial(): Awaitable<void> {
 }
 ```
 
-## Joining
-
-To get the result of an awaitable in a non-async function, use `join`:
-
-```hack
-async function join_async(): Awaitable<string> {
-  return "Hello";
-}
-
-// In an async function, you would await an awaitable.
-// In a non-async function, or the global scope, you can
-// use `join` to force the the awaitable to run to its completion.
-
-<<__EntryPoint>>
-function main(): void {
-  $s = \HH\Asio\join(join_async());
-  \var_dump($s);
-}
-```
-
 ## Async Closures and Lambdas
 
 Closure and lambda expressions can involve async functions:
@@ -113,7 +93,7 @@ async function fetch_page_data(
     }
     return tuple($post_data, $comment_count);
     // alternatively:
-    $_return = tuple(
+    return tuple(
       await fetch_post_data($post_id),
       await fetch_comment_count($post_id),
     );
@@ -137,127 +117,7 @@ async function generate_page(int $author_id): Awaitable<string> {
 }
 
 <<__EntryPoint>>
-function main(): void {
-  print \HH\Asio\join(generate_page(13324)); // just made up a user id
-}
-```
-
-## Batching
-
-Use rescheduling (via `HH\Asio\later`) to batch up operations to send multiple keys in a single request over a high latency network (for
-example purposes, the network isn't high latency, but just returns something random):
-
-```hack
-async function b_one(string $key): Awaitable<string> {
-  $subkey = await Batcher::lookup($key);
-  return await Batcher::lookup($subkey);
-}
-
-async function b_two(string $key): Awaitable<string> {
-  return await Batcher::lookup($key);
-}
-
-async function batching(): Awaitable<void> {
-  $results = await Vec\from_async(vec[b_one('hello'), b_two('world')]);
-  \printf("%s\n%s\n", $results[0], $results[1]);
-}
-
-<<__EntryPoint>>
-function main(): void {
-  \HH\Asio\join(batching());
-}
-
-class Batcher {
-  private static vec<string> $pendingKeys = vec[];
-  private static ?Awaitable<dict<string, string>> $aw = null;
-
-  public static async function lookup(string $key): Awaitable<string> {
-    // Add this key to the pending batch
-    self::$pendingKeys[] = $key;
-    // If there's no awaitable about to start, create a new one
-    if (self::$aw === null) {
-      self::$aw = self::go();
-    }
-    // Wait for the batch to complete, and get our result from it
-    $results = await self::$aw;
-    return $results[$key];
-  }
-
-  private static async function go(): Awaitable<dict<string, string>> {
-    // Let other awaitables get into this batch
-    await \HH\Asio\later();
-    // Now this batch has started; clear the shared state
-    $keys = self::$pendingKeys;
-    self::$pendingKeys = vec[];
-    self::$aw = null;
-    // Do the multi-key roundtrip
-    return await multi_key_lookup($keys);
-  }
-}
-
-async function multi_key_lookup(
-  vec<string> $keys,
-): Awaitable<dict<string, string>> {
-
-  // lookup multiple keys, but, for now, return something random
-  $r = dict[];
-  foreach ($keys as $key) {
-    $r[$key] = \str_shuffle("ABCDEF");
-  }
-  return $r;
-}
-```
-
-## Polling
-
-We can use rescheduling in a polling loop to allow other awaitables to run. A polling loop may be needed where a service does not have
-an async function to add to the scheduler:
-
-```hack
-// Of course, this is all made up :)
-class Polling {
-  private int $count = 0;
-  public function isReady(): bool {
-    $this->count++;
-    if ($this->count > 10) {
-      return true;
-    }
-    return false;
-  }
-  public function getResult(): int {
-    return 23;
-  }
-}
-
-async function do_polling(Polling $p): Awaitable<int> {
-  echo "do polling 1".\PHP_EOL;
-  // No async function in Polling, so loop until we are ready, but let
-  // other awaitables go via later()
-  while (!$p->isReady()) {
-    await \HH\Asio\later();
-  }
-  echo "\ndo polling 2".\PHP_EOL;
-  return $p->getResult();
-}
-
-async function no_polling(): Awaitable<string> {
-  echo '.';
-  return \str_shuffle("ABCDEFGH");
-}
-
-async function polling_example(): Awaitable<void> {
-  $handles = vec[do_polling(new Polling())];
-  // To make this semi-realistic, call no_polling a bunch of times to show
-  // that do_polling is waiting.
-  for ($i = 0; $i < 50; $i++) {
-    $handles[] = no_polling();
-  }
-
-  $results = await Vec\from_async($handles);
-}
-
-<<__EntryPoint>>
-function main(): void {
-  \HH\Asio\join(polling_example());
+async function main(): Awaitable<void> {
+  print await generate_page(13324); // just made up a user id
 }
 ```

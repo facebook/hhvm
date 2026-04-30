@@ -28,7 +28,7 @@ class X25519KeyExchange : public KeyExchange {
       std::unique_ptr<folly::IOBuf>& ret,
       Error& err,
       folly::ByteRange keyShare) const override;
-  std::unique_ptr<KeyExchange> clone() const override;
+  Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override;
   std::size_t getExpectedKeyShareSize() const override;
 
   void setPrivateKey(std::unique_ptr<folly::IOBuf> gotPrivKey);

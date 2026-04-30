@@ -113,8 +113,10 @@ TEST(OQSKeyExchangeTest, CloneTest) {
           clientSharedSecret, err, cipherText->coalesce()),
       Status::Success);
 
-  auto clientKexCopy = clientKex.clone();
-  auto serverKexCopy = serverKex.clone();
+  std::unique_ptr<KeyExchange> clientKexCopy;
+  EXPECT_EQ(clientKex.clone(clientKexCopy, err), Status::Success);
+  std::unique_ptr<KeyExchange> serverKexCopy;
+  EXPECT_EQ(serverKex.clone(serverKexCopy, err), Status::Success);
 
   auto clientKeyShare = clientKex.getKeyShare();
   auto serverKeyShare = serverKex.getKeyShare();
@@ -139,8 +141,14 @@ TEST(OQSKeyExchangeTest, CloneTest) {
 TEST(OQSKeyExchangeTest, FailedCloneTest) {
   auto clientKex = OQSClientKeyExchange(OQS_KEM_alg_ml_kem_768);
   auto serverKex = OQSServerKeyExchange(OQS_KEM_alg_ml_kem_768);
-  EXPECT_THROW(clientKex.clone(), std::runtime_error);
-  EXPECT_THROW(serverKex.clone(), std::runtime_error);
+  std::unique_ptr<KeyExchange> kexClone;
+  Error err;
+  EXPECT_THROW(
+      { FIZZ_THROW_ON_ERROR(clientKex.clone(kexClone, err), err); },
+      std::runtime_error);
+  EXPECT_THROW(
+      { FIZZ_THROW_ON_ERROR(serverKex.clone(kexClone, err), err); },
+      std::runtime_error);
 }
 } // namespace fizz::test
 #endif

@@ -205,26 +205,27 @@ TEST_P(ECDHTest, TestKexClone) {
     auto pkeyPeerKey = createPublicKey(GetParam());
 
     std::unique_ptr<KeyExchange> chosenKex;
+    Error err;
     switch (GetParam().key) {
       case fizz::KeyType::P256: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P256>();
         kex->setPrivateKey(std::move(privateKey));
 
-        chosenKex = kex->clone();
+        FIZZ_THROW_ON_ERROR(kex->clone(chosenKex, err), err);
         break;
       }
       case fizz::KeyType::P384: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P384>();
         kex->setPrivateKey(std::move(privateKey));
 
-        chosenKex = kex->clone();
+        FIZZ_THROW_ON_ERROR(kex->clone(chosenKex, err), err);
         break;
       }
       case fizz::KeyType::P521: {
         auto kex = makeOpenSSLECKeyExchange<fizz::P521>();
         kex->setPrivateKey(std::move(privateKey));
 
-        chosenKex = kex->clone();
+        FIZZ_THROW_ON_ERROR(kex->clone(chosenKex, err), err);
         break;
       }
       default:
@@ -239,7 +240,7 @@ TEST_P(ECDHTest, TestKexClone) {
 
     auto encodedPubKey = detail::encodeECPublicKey(pkeyPeerKey);
     std::unique_ptr<folly::IOBuf> shared;
-    Error err;
+
     EXPECT_EQ(
         chosenKex->generateSharedSecret(shared, err, encodedPubKey->coalesce()),
         Status::Success);

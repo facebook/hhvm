@@ -82,14 +82,18 @@ Status HybridKeyExchange::generateSharedSecret(
 /**
  * Deep copy of first and second.
  */
-std::unique_ptr<KeyExchange> HybridKeyExchange::clone() const {
+Status HybridKeyExchange::clone(std::unique_ptr<KeyExchange>& ret, Error& err)
+    const {
+  std::unique_ptr<KeyExchange> firstClone;
+  FIZZ_RETURN_ON_ERROR(firstKex_->clone(firstClone, err));
+  std::unique_ptr<KeyExchange> secondClone;
+  FIZZ_RETURN_ON_ERROR(secondKex_->clone(secondClone, err));
   std::unique_ptr<HybridKeyExchange> kexCopy;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
+  FIZZ_RETURN_ON_ERROR(
       HybridKeyExchange::create(
-          kexCopy, err, firstKex_->clone(), secondKex_->clone()),
-      err);
-  return kexCopy;
+          kexCopy, err, std::move(firstClone), std::move(secondClone)));
+  ret = std::move(kexCopy);
+  return Status::Success;
 }
 
 std::size_t HybridKeyExchange::getExpectedKeyShareSize() const {

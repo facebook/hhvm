@@ -66,6 +66,9 @@ Status tryToDecodeECH(
 
   try {
     std::unique_ptr<hpke::HpkeContext> context;
+    std::unique_ptr<KeyExchange> kexClone;
+    FIZZ_THROW_ON_ERROR(
+        configIdResult->matchingParam.kex->clone(kexClone, err), err);
     FIZZ_THROW_ON_ERROR(
         setupDecryptionContext(
             context,
@@ -74,7 +77,7 @@ Status tryToDecodeECH(
             configIdResult->matchingParam.echConfig,
             configIdResult->echExtension.cipher_suite,
             configIdResult->echExtension.enc,
-            configIdResult->matchingParam.kex->clone(),
+            std::move(kexClone),
             0),
         err);
     ClientHello chlo;
@@ -148,6 +151,9 @@ Status decodeClientHelloHRR(
       return Status::Success;
     } else {
       std::unique_ptr<hpke::HpkeContext> recreatedContext;
+      std::unique_ptr<KeyExchange> kexClone;
+      FIZZ_THROW_ON_ERROR(
+          configIdResult->matchingParam.kex->clone(kexClone, err), err);
       FIZZ_THROW_ON_ERROR(
           setupDecryptionContext(
               recreatedContext,
@@ -156,7 +162,7 @@ Status decodeClientHelloHRR(
               configIdResult->matchingParam.echConfig,
               configIdResult->echExtension.cipher_suite,
               encapsulatedKey,
-              configIdResult->matchingParam.kex->clone(),
+              std::move(kexClone),
               1),
           err);
       FIZZ_THROW_ON_ERROR(

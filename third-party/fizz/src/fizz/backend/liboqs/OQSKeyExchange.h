@@ -61,7 +61,8 @@ class OQSKeyExchange : public KeyExchange {
       std::unique_ptr<folly::IOBuf>& ret,
       Error& err,
       folly::ByteRange keyShare) const override = 0;
-  std::unique_ptr<KeyExchange> clone() const override = 0;
+  Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override =
+      0;
   std::size_t getExpectedKeyShareSize() const override = 0;
   virtual bool isInitiated() const = 0;
   virtual void checkChained() const = 0;
@@ -81,7 +82,7 @@ class OQSClientKeyExchange : public OQSKeyExchange {
       std::unique_ptr<folly::IOBuf>& ret,
       Error& err,
       folly::ByteRange keyShare) const override;
-  std::unique_ptr<KeyExchange> clone() const override;
+  Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override;
   std::size_t getExpectedKeyShareSize() const override;
   bool isInitiated() const override;
   void checkChained() const override;
@@ -110,7 +111,7 @@ class OQSServerKeyExchange : public OQSKeyExchange {
       std::unique_ptr<folly::IOBuf>& ret,
       Error& err,
       folly::ByteRange keyShare) const override;
-  std::unique_ptr<KeyExchange> clone() const override;
+  Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override;
   std::size_t getExpectedKeyShareSize() const override;
   bool isInitiated() const override;
   void checkChained() const override;

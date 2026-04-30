@@ -61,7 +61,8 @@ TEST(X25519KeyExchange, KeyExchangeClone) {
       Status::Success);
 
   // Copy current key exchange
-  auto kexCopy = kex.clone();
+  std::unique_ptr<KeyExchange> kexCopy;
+  EXPECT_EQ(kex.clone(kexCopy, err), Status::Success);
   std::unique_ptr<folly::IOBuf> sharedSecretOfCopy;
   EXPECT_EQ(
       kexCopy->generateSharedSecret(

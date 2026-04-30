@@ -80,15 +80,17 @@ Status X25519KeyExchange::generateSharedSecret(
   return Status::Success;
 }
 
-std::unique_ptr<KeyExchange> X25519KeyExchange::clone() const {
+Status X25519KeyExchange::clone(std::unique_ptr<KeyExchange>& ret, Error& err)
+    const {
   if (!privKey_ || !pubKey_) {
-    throw std::runtime_error("Key not generated");
+    return err.error("Key not generated");
   }
 
   auto kexCopy = std::make_unique<X25519KeyExchange>();
   kexCopy->privKey_ = privKey_;
   kexCopy->pubKey_ = pubKey_;
-  return kexCopy;
+  ret = std::move(kexCopy);
+  return Status::Success;
 }
 
 std::size_t X25519KeyExchange::getExpectedKeyShareSize() const {

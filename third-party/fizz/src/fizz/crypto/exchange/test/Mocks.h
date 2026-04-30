@@ -35,7 +35,12 @@ class MockKeyExchange : public KeyExchange {
       folly::ByteRange keyShare) const override {
     FIZZ_THROW_TO_ERROR(ret, _generateSharedSecret(keyShare));
   }
-  MOCK_METHOD(std::unique_ptr<KeyExchange>, clone, (), (const));
+  MOCK_METHOD(std::unique_ptr<KeyExchange>, _clone, (), (const));
+  Status clone(std::unique_ptr<KeyExchange>& ret, Error& /*err*/)
+      const override {
+    ret = _clone();
+    return Status::Success;
+  }
   MOCK_METHOD(std::size_t, getExpectedKeyShareSize, (), (const));
   int keyGenerated = 0;
 
@@ -70,7 +75,7 @@ class MockKeyExchange : public KeyExchange {
     // Excluding \n
     ON_CALL(*this, getExpectedKeyShareSize())
         .WillByDefault(Return(sizeof("keyshare") - 1));
-    ON_CALL(*this, clone()).WillByDefault(InvokeWithoutArgs([this]() {
+    ON_CALL(*this, _clone()).WillByDefault(InvokeWithoutArgs([this]() {
       auto copy = std::make_unique<MockKeyExchange>();
       copy->setDefaults();
       copy->keyGenerated = keyGenerated;
@@ -101,7 +106,12 @@ class MockAsyncKeyExchange : public AsyncKeyExchange {
       folly::ByteRange keyShare) const override {
     FIZZ_THROW_TO_ERROR(ret, _generateSharedSecret(keyShare));
   }
-  MOCK_METHOD(std::unique_ptr<KeyExchange>, clone, (), (const));
+  MOCK_METHOD(std::unique_ptr<KeyExchange>, _clone, (), (const));
+  Status clone(std::unique_ptr<KeyExchange>& ret, Error& /*err*/)
+      const override {
+    ret = _clone();
+    return Status::Success;
+  }
   MOCK_METHOD(std::size_t, getExpectedKeyShareSize, (), (const));
   MOCK_METHOD(
       folly::SemiFuture<DoKexResult>,

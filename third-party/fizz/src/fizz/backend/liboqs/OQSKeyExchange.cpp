@@ -139,10 +139,11 @@ Status OQSServerKeyExchange::generateSharedSecret(
   return Status::Success;
 }
 
-std::unique_ptr<KeyExchange> OQSClientKeyExchange::clone() const {
+Status OQSClientKeyExchange::clone(
+    std::unique_ptr<KeyExchange>& ret,
+    Error& err) const {
   if (!isInitiated()) {
-    throw std::runtime_error(
-        "OQSClientKeyExchange::clone(): keys not generated!");
+    return err.error("OQSClientKeyExchange::clone(): keys not generated!");
   }
   checkChained();
   auto copy = std::make_unique<OQSClientKeyExchange>(kem_->method_name);
@@ -152,15 +153,17 @@ std::unique_ptr<KeyExchange> OQSClientKeyExchange::clone() const {
   secretKey_->cloneInto(*(copy->secretKey_));
   copy->secretKey_->unshare();
 
-  return copy;
+  ret = std::move(copy);
+  return Status::Success;
 }
 
-std::unique_ptr<KeyExchange> OQSServerKeyExchange::clone() const {
+Status OQSServerKeyExchange::clone(
+    std::unique_ptr<KeyExchange>& ret,
+    Error& err) const {
   // We have to break the requirements that the keys are generated as the server
   // side is not required to generate the key. We check cipher text instead.
   if (!isInitiated()) {
-    throw std::runtime_error(
-        "OQSServerKeyExchange::clone(): cipher not generated!");
+    return err.error("OQSServerKeyExchange::clone(): cipher not generated!");
   }
   checkChained();
   auto copy = std::make_unique<OQSServerKeyExchange>(kem_->method_name);
@@ -168,7 +171,8 @@ std::unique_ptr<KeyExchange> OQSServerKeyExchange::clone() const {
   cipherText_->cloneInto(*(copy->cipherText_));
   copy->cipherText_->unshare();
 
-  return copy;
+  ret = std::move(copy);
+  return Status::Success;
 }
 
 inline std::size_t OQSClientKeyExchange::getExpectedKeyShareSize() const {

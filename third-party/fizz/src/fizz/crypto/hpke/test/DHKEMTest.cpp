@@ -38,8 +38,10 @@ class MockKeyExchange : public KeyExchange {
     return actualKex_->generateSharedSecret(ret, err, keyShare);
   }
 
-  std::unique_ptr<KeyExchange> clone() const override {
-    return nullptr;
+  Status clone(std::unique_ptr<KeyExchange>& ret, Error& /*err*/)
+      const override {
+    ret = nullptr;
+    return Status::Success;
   }
 
   size_t getExpectedKeyShareSize() const override {

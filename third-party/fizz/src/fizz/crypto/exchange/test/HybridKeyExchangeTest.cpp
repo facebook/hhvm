@@ -98,7 +98,8 @@ TEST_F(HybridKeyExchangeTest, SharedSecretGenerationOnIllegalInputTest) {
 TEST_F(HybridKeyExchangeTest, CloneTest) {
   Error err;
   EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
-  auto kexCopy = kex->clone();
+  std::unique_ptr<KeyExchange> kexCopy;
+  EXPECT_EQ(kex->clone(kexCopy, err), Status::Success);
   auto keyShare = kex->getKeyShare();
   auto keyShareCopy = kexCopy->getKeyShare();
   EXPECT_TRUE(folly::IOBufEqualTo()(keyShare, keyShareCopy));

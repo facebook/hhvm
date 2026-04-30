@@ -65,9 +65,11 @@ const folly::ssl::EvpPkeyUniquePtr& OpenSSLECKeyExchange::getPrivateKey()
   return key_;
 }
 
-std::unique_ptr<KeyExchange> OpenSSLECKeyExchange::clone() const {
+Status OpenSSLECKeyExchange::clone(
+    std::unique_ptr<KeyExchange>& ret,
+    Error& err) const {
   if (!key_) {
-    throw std::runtime_error("Key not initialized");
+    return err.error("Key not initialized");
   }
 
   // Increment the reference for the current key
@@ -79,7 +81,8 @@ std::unique_ptr<KeyExchange> OpenSSLECKeyExchange::clone() const {
   auto copyKex = std::make_unique<OpenSSLECKeyExchange>(nid_, keyShareLength_);
   copyKex->setPrivateKey(std::move(keyCopy));
 
-  return copyKex;
+  ret = std::move(copyKex);
+  return Status::Success;
 }
 
 std::size_t OpenSSLECKeyExchange::getExpectedKeyShareSize() const {

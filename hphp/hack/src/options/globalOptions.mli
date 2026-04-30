@@ -268,6 +268,14 @@ type t = {
       (** Option for package support to bypass package boundary violation errors on type aliases
           used at enforceable positions (parameters, properties, return types) when the underlying
           type is not a class or interface *)
+  tco_package_allow_enforceable_type_alias_class_like_violations: bool;
+      (** Backup carve-out for the enforceable type alias check on aliases
+          that resolve to a name-enforced type (class / interface / enum /
+          enum class). Default [false] — by default the check fires on
+          class-like aliases too. Set to [true] to suppress those errors and
+          rely on the existing [Cross_pkg_access] check at the class-name
+          use-site instead. Intended as a fallback if shipping with
+          enforcement on class-like aliases turns out not to be viable. *)
   re_no_cache: bool;
       (** Disable RE cache when calling hh_distc. Useful for performance testing.
         Corresponds to the `--no-cache` options of hh_distc. *)
@@ -397,6 +405,7 @@ val set :
   ?tco_package_allow_all_generics_violations:bool ->
   ?tco_package_allow_as_expression_violations:bool ->
   ?tco_package_allow_enforceable_type_alias_violations:bool ->
+  ?tco_package_allow_enforceable_type_alias_class_like_violations:bool ->
   ?re_no_cache:bool ->
   ?hh_distc_should_disable_trace_store:bool ->
   ?hh_distc_exponential_backoff_num_retries:int ->

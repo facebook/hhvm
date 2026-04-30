@@ -197,6 +197,9 @@ module Hhconfig = struct
   let package_allow_enforceable_type_alias_violations =
     key "package_allow_enforceable_type_alias_violations"
 
+  let package_allow_enforceable_type_alias_class_like_violations =
+    key "package_allow_enforceable_type_alias_class_like_violations"
+
   let package_allow_all_tconst_violations =
     key "package_allow_all_tconst_violations"
 

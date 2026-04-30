@@ -1,0 +1,325 @@
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TShape defined in package pkg2 which may not be available [1]
+-> TShape is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TShape belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:13:17
+    11 | // method generic upper bounds: all enforceable, non-class aliases should error.
+    12 | class WithMethods {
+[1] 13 |   public static TShape $static_prop_shape = shape('x' => 1);
+    14 |   public static TInt $static_prop_int = 0;
+    15 | 
+
+cross_package_enforceable_type_alias_methods.php--foo.php:4:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | type TShape = shape('x' => int);
+     5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TInt defined in package pkg2 which may not be available [1]
+-> TInt is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TInt belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:14:17
+    12 | class WithMethods {
+    13 |   public static TShape $static_prop_shape = shape('x' => 1);
+[1] 14 |   public static TInt $static_prop_int = 0;
+    15 | 
+    16 |   public function __construct(public TShape $promoted_shape, public TInt $promoted_int) {}
+
+cross_package_enforceable_type_alias_methods.php--foo.php:5:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TShape = shape('x' => int);
+[2]  5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TShape defined in package pkg2 which may not be available [1]
+-> TShape is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TShape belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:16:38
+    14 |   public static TInt $static_prop_int = 0;
+    15 | 
+[1] 16 |   public function __construct(public TShape $promoted_shape, public TInt $promoted_int) {}
+    17 | 
+    18 |   public function instance_method(TShape $_): TInt { return 0; }
+
+cross_package_enforceable_type_alias_methods.php--foo.php:4:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | type TShape = shape('x' => int);
+     5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TInt defined in package pkg2 which may not be available [1]
+-> TInt is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TInt belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:16:69
+    14 |   public static TInt $static_prop_int = 0;
+    15 | 
+[1] 16 |   public function __construct(public TShape $promoted_shape, public TInt $promoted_int) {}
+    17 | 
+    18 |   public function instance_method(TShape $_): TInt { return 0; }
+
+cross_package_enforceable_type_alias_methods.php--foo.php:5:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TShape = shape('x' => int);
+[2]  5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TShape defined in package pkg2 which may not be available [1]
+-> TShape is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TShape belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:18:35
+    16 |   public function __construct(public TShape $promoted_shape, public TInt $promoted_int) {}
+    17 | 
+[1] 18 |   public function instance_method(TShape $_): TInt { return 0; }
+    19 |   public static function static_method(TShape $_): TInt { return 0; }
+    20 | 
+
+cross_package_enforceable_type_alias_methods.php--foo.php:4:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | type TShape = shape('x' => int);
+     5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TInt defined in package pkg2 which may not be available [1]
+-> TInt is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TInt belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:18:47
+    16 |   public function __construct(public TShape $promoted_shape, public TInt $promoted_int) {}
+    17 | 
+[1] 18 |   public function instance_method(TShape $_): TInt { return 0; }
+    19 |   public static function static_method(TShape $_): TInt { return 0; }
+    20 | 
+
+cross_package_enforceable_type_alias_methods.php--foo.php:5:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TShape = shape('x' => int);
+[2]  5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TShape defined in package pkg2 which may not be available [1]
+-> TShape is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TShape belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:19:40
+    17 | 
+    18 |   public function instance_method(TShape $_): TInt { return 0; }
+[1] 19 |   public static function static_method(TShape $_): TInt { return 0; }
+    20 | 
+    21 |   public function method_generic_as_shape<T as TShape>(T $_): void {}
+
+cross_package_enforceable_type_alias_methods.php--foo.php:4:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | type TShape = shape('x' => int);
+     5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TInt defined in package pkg2 which may not be available [1]
+-> TInt is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TInt belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:19:52
+    17 | 
+    18 |   public function instance_method(TShape $_): TInt { return 0; }
+[1] 19 |   public static function static_method(TShape $_): TInt { return 0; }
+    20 | 
+    21 |   public function method_generic_as_shape<T as TShape>(T $_): void {}
+
+cross_package_enforceable_type_alias_methods.php--foo.php:5:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TShape = shape('x' => int);
+[2]  5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TShape defined in package pkg2 which may not be available [1]
+-> TShape is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TShape belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:21:48
+    19 |   public static function static_method(TShape $_): TInt { return 0; }
+    20 | 
+[1] 21 |   public function method_generic_as_shape<T as TShape>(T $_): void {}
+    22 |   public function method_generic_as_int<T as TInt>(T $_): void {}
+    23 |   // Class alias in method generic: should NOT error
+
+cross_package_enforceable_type_alias_methods.php--foo.php:4:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | type TShape = shape('x' => int);
+     5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TInt defined in package pkg2 which may not be available [1]
+-> TInt is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TInt belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:22:46
+    20 | 
+    21 |   public function method_generic_as_shape<T as TShape>(T $_): void {}
+[1] 22 |   public function method_generic_as_int<T as TInt>(T $_): void {}
+    23 |   // Class alias in method generic: should NOT error
+    24 |   public function method_generic_as_class<T as TClassAlias>(T $_): void {}
+
+cross_package_enforceable_type_alias_methods.php--foo.php:5:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TShape = shape('x' => int);
+[2]  5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TShape defined in package pkg2 which may not be available [1]
+-> TShape is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TShape belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:30:44
+    28 | // the hint and is invoked at runtime.
+    29 | abstract class WithAbstract {
+[1] 30 |   abstract public function abstract_method(TShape $_): TInt;
+    31 | }
+    32 | 
+
+cross_package_enforceable_type_alias_methods.php--foo.php:4:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | type TShape = shape('x' => int);
+     5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access type alias used as an enforceable type hint TInt defined in package pkg2 which may not be available [1]
+-> TInt is defined in cross_package_enforceable_type_alias_methods.php--foo.php [2]
+-> TInt belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_methods.php--bar.php:30:56
+    28 | // the hint and is invoked at runtime.
+    29 | abstract class WithAbstract {
+[1] 30 |   abstract public function abstract_method(TShape $_): TInt;
+    31 | }
+    32 | 
+
+cross_package_enforceable_type_alias_methods.php--foo.php:5:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TShape = shape('x' => int);
+[2]  5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+12 errors found

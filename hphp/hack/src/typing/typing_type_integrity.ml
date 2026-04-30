@@ -152,6 +152,35 @@ module Locl_Inst = struct
       Tsplat t_splat
 end
 
+(** True iff the typedef ultimately resolves to a name-enforced type — a
+    class or interface — whose name HHVM looks up at runtime. False for
+    structural types (shape, tuple, primitive, vec<...>) that unfold and
+    are enforced by shape, for traits (not legal in type positions), for
+    regular enums (HHVM enforces the underlying base type, not the enum
+    name), and for enum classes (cannot appear as typehints directly). *)
+let rec typedef_resolves_to_class_like
+    env ?(seen = SSet.empty) (typedef : typedef_type) : bool =
+  match typedef.td_type_assignment with
+  | CaseType _ -> false
+  | SimpleTypeDef (_, ty) ->
+    let (_r, ty_) = Typing_defs.deref ty in
+    (match ty_ with
+    | Tapply ((_pos, name), _argl) ->
+      if SSet.mem name seen then
+        false
+      else
+        let seen = SSet.add name seen in
+        (match Env.get_class_or_typedef env name with
+        | Decl_entry.Found (Env.ClassResult cls) ->
+          let kind = Cls.kind cls in
+          Ast_defs.is_c_class kind || Ast_defs.is_c_interface kind
+        | Decl_entry.Found (Env.TypedefResult nested_typedef) ->
+          typedef_resolves_to_class_like env ~seen nested_typedef
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          false)
+    | _ -> false)
+
 (** Check for arity mismatch between type params and type arguments
   then check that each type argument is well-formed. *)
 let rec check_targs_integrity
@@ -297,6 +326,14 @@ and check_type_integrity
   | Tapply ((_p, cid), argl) -> begin
     match Env.get_class_or_typedef env cid with
     | Decl_entry.Found (Env.ClassResult class_info) ->
+      let should_check_package_boundary =
+        match should_check_package_boundary with
+        | `Yes Typing_error.Primary.Package.Enforceable_type_alias
+          when Env.package_allow_enforceable_type_alias_class_like_violations
+                 env ->
+          `No
+        | other -> other
+      in
       (let (errs, linter_errs) =
          Typing_visibility.check_top_level_access
            ~should_check_package_boundary
@@ -324,6 +361,15 @@ and check_type_integrity
       let tparams = Cls.tparams class_info in
       check_targs_integrity ~in_signature (Cls.pos class_info) argl tparams
     | Decl_entry.Found (Env.TypedefResult typedef) ->
+      let should_check_package_boundary =
+        match should_check_package_boundary with
+        | `Yes Typing_error.Primary.Package.Enforceable_type_alias
+          when Env.package_allow_enforceable_type_alias_class_like_violations
+                 env
+               && typedef_resolves_to_class_like env typedef ->
+          `No
+        | other -> other
+      in
       (let (errs, linter_errs) =
          Typing_visibility.check_top_level_access
            ~should_check_package_boundary

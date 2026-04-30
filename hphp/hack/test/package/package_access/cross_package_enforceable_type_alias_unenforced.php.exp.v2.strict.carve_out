@@ -1,0 +1,52 @@
+error: Typing[4472] Cannot access asserted type TShape defined in package pkg2 which may not be available [1]
+-> TShape is defined in cross_package_enforceable_type_alias_unenforced.php--foo.php [2]
+-> TShape belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_unenforced.php--bar.php:13:14
+    11 | // Params are `mixed` so the as/?as assertions aren't redundant (Warn[12011]).
+    12 | function non_enforceable_local(mixed $a, mixed $b): void {
+[1] 13 |   $y = $a as TShape;
+    14 |   $z = $b ?as TShape;
+    15 | }
+
+cross_package_enforceable_type_alias_unenforced.php--foo.php:4:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | type TShape = shape('x' => int);
+     5 | type TInt = int;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+error: Typing[4472] Cannot access TShape defined in package pkg2, which may not be available, within a type constant [1]
+-> TShape is defined in cross_package_enforceable_type_alias_unenforced.php--foo.php [2]
+-> TShape belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_unenforced.php--bar.php:45:28
+    43 | class WithConstants {
+    44 |   const TShape SHAPE_CONST = shape('x' => 1);
+[1] 45 |   const type ALIAS_CONST = TShape;
+    46 | }
+
+cross_package_enforceable_type_alias_unenforced.php--foo.php:4:6
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+[2]  4 | type TShape = shape('x' => int);
+     5 | type TInt = int;
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+2 errors found

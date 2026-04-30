@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<36589f6b09ab527534f14073dc77671e>>
+// @generated SignedSource<<6b226fc9e6136da79c21c31dc18160b9>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -373,6 +373,14 @@ pub struct GlobalOptions {
     /// used at enforceable positions (parameters, properties, return types) when the underlying
     /// type is not a class or interface
     pub tco_package_allow_enforceable_type_alias_violations: bool,
+    /// Backup carve-out for the enforceable type alias check on aliases
+    /// that resolve to a name-enforced type (class / interface / enum /
+    /// enum class). Default [false] — by default the check fires on
+    /// class-like aliases too. Set to [true] to suppress those errors and
+    /// rely on the existing [Cross_pkg_access] check at the class-name
+    /// use-site instead. Intended as a fallback if shipping with
+    /// enforcement on class-like aliases turns out not to be viable.
+    pub tco_package_allow_enforceable_type_alias_class_like_violations: bool,
     /// Disable RE cache when calling hh_distc. Useful for performance testing.
     /// Corresponds to the `--no-cache` options of hh_distc.
     pub re_no_cache: bool,

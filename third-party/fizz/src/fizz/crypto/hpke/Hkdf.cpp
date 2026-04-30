@@ -48,6 +48,33 @@ std::vector<uint8_t> Hkdf::extract(Buf salt, Buf ikm) {
   return hkdf_.extract(salt->coalesce(), ikm->coalesce());
 }
 
+Status Hkdf::labeledExpand(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
+    folly::ByteRange prk,
+    folly::ByteRange label,
+    Buf info,
+    size_t L,
+    std::unique_ptr<folly::IOBuf> suiteId) {
+  Buf labeledInfo = folly::IOBuf::create(
+      2 + prefix_.size() + suiteId->computeChainDataLength() + label.size() +
+      info->computeChainDataLength());
+  folly::io::Appender appender(labeledInfo.get(), 0);
+
+  if (L > (1 << 16) - 1) {
+    return err.error("This is greater than the maximum length allowed");
+  }
+  appender.writeBE<uint16_t>(static_cast<uint16_t>(L));
+  appender.push(prefix_);
+  writeBufWithoutLength(suiteId, appender);
+  writeBufWithoutLength(folly::IOBuf::wrapBuffer(label), appender);
+  writeBufWithoutLength(info, appender);
+
+  FIZZ_RETURN_ON_ERROR(hkdf_.expand(ret, err, prk, *labeledInfo, L));
+  return Status::Success;
+}
+
+// Deprecated and wil be removed
 std::unique_ptr<folly::IOBuf> Hkdf::labeledExpand(
     folly::ByteRange prk,
     folly::ByteRange label,
@@ -71,6 +98,17 @@ std::unique_ptr<folly::IOBuf> Hkdf::labeledExpand(
   return hkdf_.expand(prk, *labeledInfo, L);
 }
 
+Status Hkdf::expand(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
+    folly::ByteRange prk,
+    std::unique_ptr<folly::IOBuf> label,
+    size_t L) {
+  FIZZ_RETURN_ON_ERROR(hkdf_.expand(ret, err, prk, *label, L));
+  return Status::Success;
+}
+
+// Deprecated and wil be removed
 std::unique_ptr<folly::IOBuf> Hkdf::expand(
     folly::ByteRange prk,
     std::unique_ptr<folly::IOBuf> label,

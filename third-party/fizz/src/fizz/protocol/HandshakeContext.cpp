@@ -30,9 +30,18 @@ Buf HandshakeContextImpl::getHandshakeContext() const {
 Buf HandshakeContextImpl::getFinishedData(folly::ByteRange baseKey) const {
   auto context = getHandshakeContext();
   auto hashLen = makeHasher_->hashLength();
-  auto finishedKey =
+  Buf finishedKey;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
       KeyDerivationImpl(makeHasher_)
-          .expandLabel(baseKey, "finished", folly::IOBuf::create(0), hashLen);
+          .expandLabel(
+              finishedKey,
+              err,
+              baseKey,
+              "finished",
+              folly::IOBuf::create(0),
+              hashLen),
+      err);
   auto data = folly::IOBuf::create(hashLen);
   data->append(hashLen);
   auto outRange = folly::MutableByteRange(data->writableData(), data->length());

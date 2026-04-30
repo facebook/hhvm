@@ -33,9 +33,18 @@ TEST_P(HkdfTest, TestHkdfSha256Expand) {
   auto expectedOkm = toIOBuf(GetParam().okm);
   FIZZ_CHECK_EQ(outputBytes, expectedOkm->length());
 
-  auto actualOkm =
+  std::unique_ptr<folly::IOBuf> actualOkm;
+  Error err;
+  EXPECT_EQ(
       Hkdf(openssl::hasherFactory<fizz::Sha256>())
-          .hkdf(ikm->coalesce(), salt->coalesce(), *info, outputBytes);
+          .hkdf(
+              actualOkm,
+              err,
+              ikm->coalesce(),
+              salt->coalesce(),
+              *info,
+              outputBytes),
+      Status::Success);
   EXPECT_FALSE(actualOkm->isChained());
   EXPECT_EQ(outputBytes, actualOkm->length());
   EXPECT_FALSE(memcmp(actualOkm->data(), expectedOkm->data(), outputBytes));

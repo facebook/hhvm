@@ -85,12 +85,19 @@ std::unique_ptr<folly::IOBuf> HpkeContextImpl::exportSecret(
     throw std::runtime_error(
         "desired length for exported secret exceeds maximum");
   }
-  return hkdf_->labeledExpand(
-      exporterSecret_->coalesce(),
-      folly::ByteRange(folly::StringPiece("sec")),
-      std::move(exporterContext),
-      desiredLength,
-      suiteId_->clone());
+  std::unique_ptr<folly::IOBuf> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      hkdf_->labeledExpand(
+          ret,
+          err,
+          exporterSecret_->coalesce(),
+          folly::ByteRange(folly::StringPiece("sec")),
+          std::move(exporterContext),
+          desiredLength,
+          suiteId_->clone()),
+      err);
+  return ret;
 }
 
 std::unique_ptr<folly::IOBuf> HpkeContextImpl::getExporterSecret() {

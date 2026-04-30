@@ -49,15 +49,22 @@ class MockKeyDerivation : public KeyDerivation {
       Buf,
       _hkdfExpand,
       (folly::ByteRange secret, Buf& info, uint16_t length));
-  Buf expandLabel(
+  Status expandLabel(
+      Buf& ret,
+      Error& err,
       folly::ByteRange secret,
       folly::StringPiece label,
       Buf hashValue,
       uint16_t length) override {
-    return _expandLabel(secret, label, hashValue, length);
+    FIZZ_THROW_TO_ERROR(ret, _expandLabel(secret, label, hashValue, length));
   }
-  Buf hkdfExpand(folly::ByteRange secret, Buf info, uint16_t length) override {
-    return _hkdfExpand(secret, info, length);
+  Status hkdfExpand(
+      Buf& ret,
+      Error& err,
+      folly::ByteRange secret,
+      Buf info,
+      uint16_t length) override {
+    FIZZ_THROW_TO_ERROR(ret, _hkdfExpand(secret, info, length));
   }
   MOCK_METHOD(
       std::vector<uint8_t>,

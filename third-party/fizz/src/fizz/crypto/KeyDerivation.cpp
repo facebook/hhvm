@@ -11,7 +11,9 @@
 
 namespace fizz {
 
-Buf KeyDerivationImpl::expandLabel(
+Status KeyDerivationImpl::expandLabel(
+    Buf& ret,
+    Error& err,
     folly::ByteRange secret,
     folly::StringPiece label,
     Buf hashValue,
@@ -19,18 +21,20 @@ Buf KeyDerivationImpl::expandLabel(
   HkdfLabel hkdfLabel = {
       length, std::string(label.begin(), label.end()), std::move(hashValue)};
   Buf encoded;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      encodeHkdfLabel(encoded, err, std::move(hkdfLabel), kHkdfLabelPrefix),
-      err);
-  return hkdf_.expand(secret, *encoded, length);
+  FIZZ_RETURN_ON_ERROR(
+      encodeHkdfLabel(encoded, err, std::move(hkdfLabel), kHkdfLabelPrefix));
+  FIZZ_RETURN_ON_ERROR(hkdf_.expand(ret, err, secret, *encoded, length));
+  return Status::Success;
 }
 
-Buf KeyDerivationImpl::hkdfExpand(
+Status KeyDerivationImpl::hkdfExpand(
+    Buf& ret,
+    Error& err,
     folly::ByteRange secret,
     Buf info,
     uint16_t length) {
-  return hkdf_.expand(secret, *info, length);
+  FIZZ_RETURN_ON_ERROR(hkdf_.expand(ret, err, secret, *info, length));
+  return Status::Success;
 }
 
 std::vector<uint8_t> KeyDerivationImpl::deriveSecret(
@@ -44,7 +48,10 @@ std::vector<uint8_t> KeyDerivationImpl::deriveSecret(
   FIZZ_CHECK_GT(length, 0);
   // Copying the buffer to avoid violating constness of the data.
   auto hashBuf = folly::IOBuf::copyBuffer(messageHash);
-  auto out = expandLabel(secret, label, std::move(hashBuf), length);
+  Buf out;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      expandLabel(out, err, secret, label, std::move(hashBuf), length), err);
   std::vector<uint8_t> prk(length);
   size_t offset = 0;
   for (auto buf : *out) {

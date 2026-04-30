@@ -27,6 +27,49 @@ std::vector<uint8_t> Hkdf::extract(folly::ByteRange salt, folly::ByteRange ikm)
   return extractedKey;
 }
 
+Status Hkdf::expand(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
+    folly::ByteRange extractedKey,
+    const folly::IOBuf& info,
+    size_t outputBytes) const {
+  auto hlen = hashLength();
+  FIZZ_CHECK_EQ(extractedKey.size(), hlen);
+  if (UNLIKELY(outputBytes > 255 * hlen)) {
+    return err.error("Output too long");
+  }
+  // HDKF expansion step.
+  size_t numRounds = (outputBytes + hlen - 1) / hlen;
+  auto expanded = folly::IOBuf::create(numRounds * hlen);
+
+  auto in = folly::IOBuf::create(0);
+  for (size_t round = 1; round <= numRounds; ++round) {
+    in->prependChain(info.clone());
+    // We're guaranteed that the round num will fit in
+    // one byte because of the check at the beginning of
+    // the method.
+    auto roundNum = folly::IOBuf::create(1);
+    roundNum->append(1);
+    roundNum->writableData()[0] = round;
+    in->prependChain(std::move(roundNum));
+
+    size_t outputStartIdx = (round - 1) * hlen;
+    hmac(
+        makeHasher_,
+        folly::range(extractedKey),
+        *in,
+        {expanded->writableData() + outputStartIdx, hlen});
+    expanded->append(hlen);
+
+    in = expanded->clone();
+    in->trimStart(outputStartIdx);
+  }
+  expanded->trimEnd(numRounds * hlen - outputBytes);
+  ret = std::move(expanded);
+  return Status::Success;
+}
+
+// Deprecated and wil be removed
 std::unique_ptr<folly::IOBuf> Hkdf::expand(
     folly::ByteRange extractedKey,
     const folly::IOBuf& info,
@@ -66,6 +109,19 @@ std::unique_ptr<folly::IOBuf> Hkdf::expand(
   return expanded;
 }
 
+Status Hkdf::hkdf(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
+    folly::ByteRange ikm,
+    folly::ByteRange salt,
+    const folly::IOBuf& info,
+    size_t outputBytes) const {
+  FIZZ_RETURN_ON_ERROR(
+      expand(ret, err, folly::range(extract(salt, ikm)), info, outputBytes));
+  return Status::Success;
+}
+
+// Deprecated and wil be removed
 std::unique_ptr<folly::IOBuf> Hkdf::hkdf(
     folly::ByteRange ikm,
     folly::ByteRange salt,

@@ -40,12 +40,31 @@ class Hkdf {
   std::vector<uint8_t> extract(
       std::unique_ptr<folly::IOBuf> salt,
       std::unique_ptr<folly::IOBuf> ikm);
+  Status labeledExpand(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
+      folly::ByteRange prk,
+      folly::ByteRange label,
+      std::unique_ptr<folly::IOBuf> info,
+      size_t L,
+      std::unique_ptr<folly::IOBuf> suiteId);
+
+  // Deprecated and wil be removed
   std::unique_ptr<folly::IOBuf> labeledExpand(
       folly::ByteRange prk,
       folly::ByteRange label,
       std::unique_ptr<folly::IOBuf> info,
       size_t L,
       std::unique_ptr<folly::IOBuf> suiteId);
+
+  Status expand(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
+      folly::ByteRange prk,
+      std::unique_ptr<folly::IOBuf> label,
+      size_t L);
+
+  // Deprecated and wil be removed
   std::unique_ptr<folly::IOBuf>
   expand(folly::ByteRange prk, std::unique_ptr<folly::IOBuf> label, size_t L);
   size_t hashLength();

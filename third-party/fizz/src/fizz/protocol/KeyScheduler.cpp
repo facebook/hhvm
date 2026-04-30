@@ -114,11 +114,17 @@ Status KeyScheduler::clearMasterSecret(Error& err) {
 
 uint32_t KeyScheduler::clientKeyUpdate() {
   auto& appTrafficSecret = *appTrafficSecret_;
-  auto buf = deriver_->expandLabel(
-      folly::range(appTrafficSecret.client),
-      kTrafficKeyUpdate,
-      folly::IOBuf::create(0),
-      deriver_->hashLength());
+  Buf buf;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      deriver_->expandLabel(
+          buf,
+          err,
+          folly::range(appTrafficSecret.client),
+          kTrafficKeyUpdate,
+          folly::IOBuf::create(0),
+          deriver_->hashLength()),
+      err);
   buf->coalesce();
   appTrafficSecret.client = std::vector<uint8_t>(buf->data(), buf->tail());
   return ++appTrafficSecret.clientGeneration;
@@ -126,11 +132,17 @@ uint32_t KeyScheduler::clientKeyUpdate() {
 
 uint32_t KeyScheduler::serverKeyUpdate() {
   auto& appTrafficSecret = *appTrafficSecret_;
-  auto buf = deriver_->expandLabel(
-      folly::range(appTrafficSecret.server),
-      kTrafficKeyUpdate,
-      folly::IOBuf::create(0),
-      deriver_->hashLength());
+  Buf buf;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      deriver_->expandLabel(
+          buf,
+          err,
+          folly::range(appTrafficSecret.server),
+          kTrafficKeyUpdate,
+          folly::IOBuf::create(0),
+          deriver_->hashLength()),
+      err);
   buf->coalesce();
   appTrafficSecret.server = std::vector<uint8_t>(buf->data(), buf->tail());
   return ++appTrafficSecret.serverGeneration;
@@ -259,21 +271,43 @@ TrafficKey KeyScheduler::getTrafficKeyWithLabel(
     size_t keyLength,
     size_t ivLength) const {
   TrafficKey trafficKey;
-  trafficKey.key = deriver_->expandLabel(
-      trafficSecret, keyLabel, folly::IOBuf::create(0), keyLength);
-  trafficKey.iv = deriver_->expandLabel(
-      trafficSecret, ivLabel, folly::IOBuf::create(0), ivLength);
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      deriver_->expandLabel(
+          trafficKey.key,
+          err,
+          trafficSecret,
+          keyLabel,
+          folly::IOBuf::create(0),
+          keyLength),
+      err);
+  FIZZ_THROW_ON_ERROR(
+      deriver_->expandLabel(
+          trafficKey.iv,
+          err,
+          trafficSecret,
+          ivLabel,
+          folly::IOBuf::create(0),
+          ivLength),
+      err);
   return trafficKey;
 }
 
 Buf KeyScheduler::getResumptionSecret(
     folly::ByteRange resumptionMasterSecret,
     folly::ByteRange ticketNonce) const {
-  return deriver_->expandLabel(
-      resumptionMasterSecret,
-      kResumption,
-      folly::IOBuf::wrapBuffer(ticketNonce),
-      deriver_->hashLength());
+  Buf ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      deriver_->expandLabel(
+          ret,
+          err,
+          resumptionMasterSecret,
+          kResumption,
+          folly::IOBuf::wrapBuffer(ticketNonce),
+          deriver_->hashLength()),
+      err);
+  return ret;
 }
 
 std::unique_ptr<KeyScheduler> KeyScheduler::clone() const {

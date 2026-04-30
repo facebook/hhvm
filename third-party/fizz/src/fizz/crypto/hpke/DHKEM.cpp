@@ -58,12 +58,18 @@ std::unique_ptr<folly::IOBuf> DHKEM::extractAndExpand(
       std::move(dh),
       generateSuiteId(group_));
   folly::ByteRange eaePrk(eae_prkVec.data(), eae_prkVec.size());
-  std::unique_ptr<folly::IOBuf> sharedSecret = hkdf_->labeledExpand(
-      eaePrk,
-      folly::ByteRange(folly::StringPiece("shared_secret")),
-      std::move(kemContext),
-      hkdf_->hashLength(),
-      generateSuiteId(group_));
+  std::unique_ptr<folly::IOBuf> sharedSecret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      hkdf_->labeledExpand(
+          sharedSecret,
+          err,
+          eaePrk,
+          folly::ByteRange(folly::StringPiece("shared_secret")),
+          std::move(kemContext),
+          hkdf_->hashLength(),
+          generateSuiteId(group_)),
+      err);
   return sharedSecret;
 }
 

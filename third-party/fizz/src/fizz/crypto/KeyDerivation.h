@@ -28,7 +28,9 @@ class KeyDerivation {
    */
   virtual folly::ByteRange blankHash() const = 0;
 
-  virtual Buf expandLabel(
+  virtual Status expandLabel(
+      Buf& ret,
+      Error& err,
       folly::ByteRange secret,
       folly::StringPiece label,
       Buf hashValue,
@@ -43,8 +45,12 @@ class KeyDerivation {
   /**
    * Performs HDKF expansion.
    */
-  virtual Buf
-  hkdfExpand(folly::ByteRange secret, Buf info, uint16_t length) = 0;
+  virtual Status hkdfExpand(
+      Buf& ret,
+      Error& err,
+      folly::ByteRange secret,
+      Buf info,
+      uint16_t length) = 0;
 
   virtual std::vector<uint8_t> hkdfExtract(
       folly::ByteRange salt,
@@ -65,7 +71,9 @@ class KeyDerivationImpl : public KeyDerivation {
     return hkdf_.hasher()->blankHash();
   }
 
-  Buf expandLabel(
+  Status expandLabel(
+      Buf& ret,
+      Error& err,
       folly::ByteRange secret,
       folly::StringPiece label,
       Buf hashValue,
@@ -77,8 +85,12 @@ class KeyDerivationImpl : public KeyDerivation {
       folly::ByteRange messageHash,
       uint16_t length) override;
 
-  virtual Buf hkdfExpand(folly::ByteRange secret, Buf info, uint16_t length)
-      override;
+  Status hkdfExpand(
+      Buf& ret,
+      Error& err,
+      folly::ByteRange secret,
+      Buf info,
+      uint16_t length) override;
 
   std::vector<uint8_t> hkdfExtract(folly::ByteRange salt, folly::ByteRange ikm)
       override {

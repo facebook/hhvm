@@ -37,11 +37,13 @@ Status Exporter::getExportedKeyingMaterial(
 
   auto secret = deriver->deriveSecret(
       exporterMaster, label, deriver->blankHash(), deriver->hashLength());
-  ret = deriver->expandLabel(
+  FIZZ_RETURN_ON_ERROR(deriver->expandLabel(
+      ret,
+      err,
       folly::range(secret),
       "exporter",
       folly::IOBuf::wrapBuffer(hashedContext),
-      length);
+      length));
   return Status::Success;
 }
 } // namespace fizz

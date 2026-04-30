@@ -59,24 +59,40 @@ std::unique_ptr<HpkeContext> keySchedule(KeyScheduleParams params) {
       params.suiteId->clone());
 
   // Generate additional values needed for contructing context
-  std::unique_ptr<folly::IOBuf> key = hkdf->labeledExpand(
-      secret,
-      folly::ByteRange(folly::StringPiece("key")),
-      keyScheduleContext->clone(),
-      params.cipher->keyLength(),
-      params.suiteId->clone());
-  std::unique_ptr<folly::IOBuf> nonce = hkdf->labeledExpand(
-      secret,
-      folly::ByteRange(folly::StringPiece("base_nonce")),
-      keyScheduleContext->clone(),
-      params.cipher->ivLength(),
-      params.suiteId->clone());
-  std::unique_ptr<folly::IOBuf> exporterSecret = hkdf->labeledExpand(
-      secret,
-      folly::ByteRange(folly::StringPiece("exp")),
-      std::move(keyScheduleContext),
-      hkdf->hashLength(),
-      params.suiteId->clone());
+  std::unique_ptr<folly::IOBuf> key;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      hkdf->labeledExpand(
+          key,
+          err,
+          secret,
+          folly::ByteRange(folly::StringPiece("key")),
+          keyScheduleContext->clone(),
+          params.cipher->keyLength(),
+          params.suiteId->clone()),
+      err);
+  std::unique_ptr<folly::IOBuf> nonce;
+  FIZZ_THROW_ON_ERROR(
+      hkdf->labeledExpand(
+          nonce,
+          err,
+          secret,
+          folly::ByteRange(folly::StringPiece("base_nonce")),
+          keyScheduleContext->clone(),
+          params.cipher->ivLength(),
+          params.suiteId->clone()),
+      err);
+  std::unique_ptr<folly::IOBuf> exporterSecret;
+  FIZZ_THROW_ON_ERROR(
+      hkdf->labeledExpand(
+          exporterSecret,
+          err,
+          secret,
+          folly::ByteRange(folly::StringPiece("exp")),
+          std::move(keyScheduleContext),
+          hkdf->hashLength(),
+          params.suiteId->clone()),
+      err);
 
   // Configure cipher to use our generated key
   TrafficKey trafficKey;

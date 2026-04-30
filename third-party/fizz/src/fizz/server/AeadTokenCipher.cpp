@@ -112,8 +112,13 @@ std::unique_ptr<Aead> Aead128GCMTokenCipher::createAead(
     folly::ByteRange salt) const {
   auto aead = AeadType::makeCipher<CipherType>();
   std::unique_ptr<folly::IOBuf> info = folly::IOBuf::wrapBuffer(salt);
-  auto keys = Hkdf(openssl::hasherFactory<HashType>())
-                  .expand(secret, *info, aead->keyLength() + aead->ivLength());
+  std::unique_ptr<folly::IOBuf> keys;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      Hkdf(openssl::hasherFactory<HashType>())
+          .expand(
+              keys, err, secret, *info, aead->keyLength() + aead->ivLength()),
+      err);
   folly::io::Cursor cursor(keys.get());
   TrafficKey key;
   cursor.clone(key.key, aead->keyLength());

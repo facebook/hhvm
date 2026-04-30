@@ -41,11 +41,17 @@ TEST_P(KeyDerivationTest, ExpandLabel) {
   auto secret = std::vector<uint8_t>(prk.begin(), prk.end());
 
   auto deriver = createKeyDerivationImpl<Sha256>();
-  auto out = deriver.expandLabel(
-      range(secret),
-      GetParam().label,
-      hash->clone(),
-      GetParam().result.size() / 2);
+  Buf out;
+  Error err;
+  EXPECT_EQ(
+      deriver.expandLabel(
+          out,
+          err,
+          range(secret),
+          GetParam().label,
+          hash->clone(),
+          GetParam().result.size() / 2),
+      Status::Success);
   std::string hexOut = hexlify(out->coalesce());
   EXPECT_EQ(GetParam().result, hexOut);
 }

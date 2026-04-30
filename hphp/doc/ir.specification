@@ -1600,12 +1600,12 @@ To string conversions:
 
   Allocate a new ClsMethDataRef.
 
-| NewRClsMeth, D(RClsMeth), S(Cls) S(Func) S(Vec), LA|PRc
+| NewRClsMeth, D(RClsMeth), S(Cls) S(Func) S(Vec,MR), LA|PRc
 
   Allocate a new reified class method by storing the Class in S0,
   the Func in S1 and the reified generics in S2.
 
-| NewRFunc, D(RFunc), S(Func) S(Vec), LA|PRc
+| NewRFunc, D(RFunc), S(Func) S(Vec,MR), LA|PRc
 
   Allocate a new reified function pointer given the Func pointer in S0
   and reified generics in S1.

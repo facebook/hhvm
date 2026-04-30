@@ -265,6 +265,9 @@ let package_allow_all_generics_violations t =
 let package_allow_as_expression_violations t =
   t.GlobalOptions.tco_package_allow_as_expression_violations
 
+let package_allow_enforceable_type_alias_violations t =
+  t.GlobalOptions.tco_package_allow_enforceable_type_alias_violations
+
 let package_exclude_patterns t = t.GlobalOptions.tco_package_exclude_patterns
 
 let class_sub_classname t = t.GlobalOptions.class_sub_classname

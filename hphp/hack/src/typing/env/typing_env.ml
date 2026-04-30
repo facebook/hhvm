@@ -747,6 +747,10 @@ module M = struct
   let package_allow_as_expression_violations env =
     TypecheckerOptions.package_allow_as_expression_violations @@ get_tcopt env
 
+  let package_allow_enforceable_type_alias_violations env =
+    TypecheckerOptions.package_allow_enforceable_type_alias_violations
+    @@ get_tcopt env
+
   let assert_packages_loaded_from_attr env attr =
     match
       Naming_attributes.find

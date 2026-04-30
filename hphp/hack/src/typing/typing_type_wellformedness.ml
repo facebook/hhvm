@@ -23,6 +23,7 @@ module Subst = Decl_subst
 type env = {
   typedef_tparams: Nast.tparam list;
   tenv: Typing_env_types.env;
+  in_interface: bool;  (** True while traversing an interface declaration. *)
 }
 
 let check_tparams_constraints env use_pos tparams targs =
@@ -314,20 +315,49 @@ let hint_opt ?in_signature ?should_check_package_boundary env =
 
 let hints ?in_signature env = List.concat_map ~f:(hint ?in_signature env)
 
-let type_hint env th =
+(* [should_check_package_boundary] for a type hint given whether this position
+   is runtime-enforced. *)
+let enforceable_type_alias_check env ~is_enforceable =
+  if
+    Env.package_allow_enforceable_type_alias_violations env.tenv
+    || (not is_enforceable)
+    || env.in_interface
+  then
+    `No
+  else
+    Typing_error.Primary.Package.(`Yes Enforceable_type_alias)
+
+let type_hint ~is_enforceable env th =
+  let should_check_package_boundary =
+    enforceable_type_alias_check env ~is_enforceable
+  in
   Option.value_map
     ~default:[]
-    ~f:(hint ~should_check_package_boundary:`No env)
+    ~f:(hint ~should_check_package_boundary env)
     (hint_of_type_hint th)
 
-let fun_param env param = type_hint env param.param_type_hint
+let fun_param env param =
+  (* Variadic typehints (`T ...$args`) are not enforced at runtime. *)
+  let is_enforceable =
+    match param.param_info with
+    | Aast.Param_variadic -> false
+    | Aast.Param_optional _
+    | Aast.Param_required ->
+      true
+  in
+  type_hint ~is_enforceable env param.param_type_hint
 
 let fun_params env = List.concat_map ~f:(fun_param env)
 
 let tparam env t =
-  List.concat_map t.Aast.tp_constraints ~f:(fun (_, h) ->
-      (* ignore package checks on tparam constraints *)
-      hint ~should_check_package_boundary:`No env h)
+  List.concat_map t.Aast.tp_constraints ~f:(fun (ck, h) ->
+      let should_check_package_boundary =
+        match ck with
+        | Ast_defs.Constraint_as ->
+          enforceable_type_alias_check env ~is_enforceable:true
+        | _ -> `No
+      in
+      hint ~should_check_package_boundary env h)
 
 let tparams env = List.concat_map ~f:(tparam env)
 
@@ -404,13 +434,13 @@ let fun_ tenv f =
       []
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) ty_err_opt;
-  let env = { typedef_tparams = []; tenv } in
+  let env = { typedef_tparams = []; tenv; in_interface = false } in
   let errs =
     FunUtils.check_params ~from_abstract_method:false f.f_params
     @ check_splat_is_tuple env f.f_params
   in
   List.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) errs;
-  type_hint env f.f_ret @ fun_params env f.f_params
+  type_hint ~is_enforceable:true env f.f_ret @ fun_params env f.f_params
 
 let fun_def tenv fd =
   (* Add type parameters to typing environment and localize the bounds
@@ -423,14 +453,20 @@ let fun_def tenv fd =
       fd.fd_where_constraints
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env:tenv) ty_err_opt;
-  let env = { typedef_tparams = []; tenv } in
+  let env = { typedef_tparams = []; tenv; in_interface = false } in
   tparams env fd.fd_tparams
   @ fun_ tenv fd.fd_fun
   @ where_constrs env fd.fd_where_constraints
 
-let enum_opt env =
+let enum_opt ?(base_is_enforceable = false) env =
   let f { e_base; e_constraint; _ } =
-    hint ~should_check_package_boundary:`No env e_base
+    let base_check =
+      if base_is_enforceable then
+        enforceable_type_alias_check env ~is_enforceable:true
+      else
+        `No
+    in
+    hint ~should_check_package_boundary:base_check env e_base
     @ hint_opt ~should_check_package_boundary:`No env e_constraint
   in
   Option.value_map ~default:[] ~f
@@ -496,16 +532,21 @@ let class_vars env cvs =
   let f cv =
     let tenv = Env.set_internal env.tenv (at_least_internal cv.cv_visibility) in
     let env = { env with tenv } in
-    type_hint env cv.cv_type
+    type_hint ~is_enforceable:true env cv.cv_type
   in
   List.concat_map ~f cvs
 
 let method_ env m =
+  (* `__RequirePackage` on a method grants signature-time access to its
+     packages, mirroring what `Typing_class` does for the method body. *)
+  let tenv =
+    Env.assert_packages_loaded_from_attr env.tenv m.m_user_attributes
+  in
   (* Add method type parameters to environment and localize the bounds
      and where constraints *)
   let (tenv, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      env.tenv
+      tenv
       ~ignore_errors:true
       m.m_tparams
       m.m_where_constraints
@@ -523,7 +564,7 @@ let method_ env m =
   @ fun_params env m.m_params
   @ tparams env m.m_tparams
   @ where_constrs env m.m_where_constraints
-  @ type_hint env m.m_ret
+  @ type_hint ~is_enforceable:true env m.m_ret
 
 let methods env = List.concat_map ~f:(method_ env)
 
@@ -532,7 +573,13 @@ let method_opt env = Option.value_map ~default:[] ~f:(method_ env)
 let hint_no_kind_check env (p, h) = hint_ ~in_signature:true env p h
 
 let class_ tenv c =
-  let env = { typedef_tparams = []; tenv } in
+  let env =
+    {
+      typedef_tparams = [];
+      tenv;
+      in_interface = Ast_defs.is_c_interface c.c_kind;
+    }
+  in
   let {
     c_span = _;
     c_annotation = _;
@@ -611,7 +658,8 @@ let class_ tenv c =
       consts env c_consts;
       methods env c_statics;
       methods env c_methods;
-      enum_opt env c_enum;
+      (* Regular enums enforce the base at runtime; enum classes do not. *)
+      enum_opt ~base_is_enforceable:(Ast_defs.is_c_enum c_kind) env c_enum;
     ]
 
 let typedef tenv (t : (_, _) typedef) =
@@ -706,7 +754,7 @@ let typedef tenv (t : (_, _) typedef) =
         ~should_check_package_boundary
         tenv_with_typedef_tparams
         hint);
-  let env = { typedef_tparams; tenv } in
+  let env = { typedef_tparams; tenv; in_interface = false } in
   (* We checked the kinds already above.  *)
   Option.value_map ~default:[] ~f:(hint_no_kind_check env) t.t_as_constraint
   @ Option.value_map
@@ -723,11 +771,11 @@ let typedef tenv (t : (_, _) typedef) =
                t_name
                constraints)
         in
-        let env = { typedef_tparams; tenv } in
+        let env = { typedef_tparams; tenv; in_interface = false } in
         hint_no_kind_check env hint @ where_constrs env constraints)
 
 let global_constant tenv gconst =
-  let env = { typedef_tparams = []; tenv } in
+  let env = { typedef_tparams = []; tenv; in_interface = false } in
   let {
     cst_annotation = _;
     cst_mode = _;
@@ -749,7 +797,7 @@ let hint
       Typing_error.Primary.Package.(`Yes Symbol))
     tenv
     h =
-  let env = { typedef_tparams = []; tenv } in
+  let env = { typedef_tparams = []; tenv; in_interface = false } in
   hint ~in_signature:false ~should_check_package_boundary env h
 
 (** Check well-formedness of type hints. See .mli file for more. *)

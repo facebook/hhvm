@@ -340,6 +340,7 @@ module Primary = struct
       | Reified_generic
       | Generic
       | As_expression
+      | Enforceable_type_alias
     [@@deriving show]
 
     let target_symbol_spec_to_string = function
@@ -356,6 +357,7 @@ module Primary = struct
       | Reified_generic -> "reified generic"
       | Generic -> "generic"
       | As_expression -> "asserted type"
+      | Enforceable_type_alias -> "type alias used as an enforceable type hint"
 
     type t =
       | Cross_pkg_access of {

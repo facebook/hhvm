@@ -1,0 +1,30 @@
+error: Typing[4472] Cannot access class Box defined in package pkg2 which may not be available [1]
+-> Box is defined in cross_package_enforceable_type_alias_generics.php--foo.php [2]
+-> Box belongs to package pkg2 by this package override [3]
+-> package pkg1 is available because the current file belongs to it by this package definition [4]
+
+cross_package_enforceable_type_alias_generics.php--bar.php:40:49
+    38 | // `Box`, not the type argument. Inner `TShape` should NOT trigger.
+    39 | function box_param(Box<TShape> $_): void {}
+[1] 40 | function box_return(): Box<TShape> { return new Box(shape('x' => 1)); }
+    41 | class WithBoxProp {
+    42 |   public ?Box<TShape> $box_of_shape = null;
+
+cross_package_enforceable_type_alias_generics.php--foo.php:8:7
+     1 | <?hh
+     2 | // package pkg2
+[3]  3 | <<file: __PackageOverride('pkg2')>>
+     4 | type TShape = shape('x' => int);
+     5 | type TInt = int;
+     6 | type TClassAlias = Exception;
+     7 | class Foo {}
+[2]  8 | class Box<T> { public function __construct(public T $v) {} }
+
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+
+1 error found

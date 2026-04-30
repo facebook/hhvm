@@ -589,6 +589,10 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
       (bool_opt
          Config_keys.Hhconfig.package_allow_as_expression_violations
          config)
+    ?tco_package_allow_enforceable_type_alias_violations:
+      (bool_opt
+         Config_keys.Hhconfig.package_allow_enforceable_type_alias_violations
+         config)
     ?tco_package_exclude_patterns:
       (string_list_opt Config_keys.Hhconfig.package_exclude_patterns config)
     ?tco_extended_reasons:(reasons_config_opt config)

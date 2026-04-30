@@ -243,6 +243,15 @@ and check_type_integrity
   | Toption ty ->
     check ty
   | Ttuple { t_required; t_optional; t_extra = Tvariadic t_vs | Tsplat t_vs } ->
+    (* HHVM enforces a tuple hint structurally as a vec of the right arity, but
+       does not enforce the element types. So skip the enforceable_type_alias
+       check on tuple elements. *)
+    let should_check_package_boundary =
+      match should_check_package_boundary with
+      | `Yes Typing_error.Primary.Package.Enforceable_type_alias -> `No
+      | other -> other
+    in
+    let check = check ~should_check_package_boundary in
     List.iter t_required ~f:check;
     List.iter t_optional ~f:check;
     check t_vs
@@ -260,7 +269,10 @@ and check_type_integrity
       ty
   | Trefinement (ty, rs) ->
     check ty;
-    Class_refinement.iter check rs
+    (* Refinement bodies (`Foo with {type TC = X}`) are typechecker-only;
+       HHVM enforces only the base class at runtime. Skip package checks on
+       the refinement members entirely. *)
+    Class_refinement.iter (check ~should_check_package_boundary:`No) rs
   | Tshape { s_fields = map; _ } ->
     (* Shape field types are runtime-enforced under `as` (modulo `enforce_deep`),
        so propagate the boundary reason for as-expression contexts. Other

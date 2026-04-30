@@ -72,8 +72,8 @@ bool ConfigApi::ensureConfigDirectoryExists(
     if (!result.hasError()) {
       return true;
     }
-    LOG(WARNING) << "Failed to create directory '" << directory
-                 << "': " << result.error().what();
+    VLOG(1) << "Failed to create directory '" << directory
+            << "': " << result.error().what();
   } else {
     VLOG(1) << "Parent directory '" << directory.parent_path()
             << "' does not exist.";

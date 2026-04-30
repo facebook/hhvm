@@ -425,12 +425,243 @@ class pp_Array(pp_ArrayData):
 # Classes, Functions, and Objects
 
 
-@format("^HPHP::(Class|LazyClassData|Func|ObjectData)$", regex=True)
+@format("^HPHP::(Class|LazyClassData|ObjectData)$", regex=True)
 def pp_NamedValue(val_obj: lldb.SBValue, _internal_dict) -> str:
     s = utils.nameof(val_obj)
     if s is None:
         raise FormatError("nameof returned None")
     return '"' + s + '"'
+
+
+_FUNC_ATTRS: typing.List[typing.Tuple[int, str]] = [
+    (0x1, "HasInheritedReturnTypes"),
+    (0x2, "Public"),
+    (0x4, "Protected"),
+    (0x8, "Private"),
+    (0x10, "Static"),
+    (0x20, "Abstract"),
+    (0x40, "Final"),
+    (0x80, "SupportsAsyncEagerReturn"),
+    (0x100, "Trait"),
+    (0x200, "NoInjection"),
+    (0x800, "Interceptable"),
+    (0x1000, "SplatParam"),
+    (0x2000, "NoOverride"),
+    (0x4000, "ReadonlyThis"),
+    (0x8000, "ReadonlyReturn"),
+    (0x10000, "Internal"),
+    (0x20000, "InternalSoft"),
+    (0x40000, "Persistent"),
+    (0x80000, "DynamicallyCallable"),
+    (0x100000, "Builtin"),
+    (0x200000, "HasAttributionData"),
+    (0x1000000, "IsMethCaller"),
+    (0x2000000, "HasCoeffectRules"),
+    (0x4000000, "IsFoldable"),
+    (0x8000000, "NoFCallBuiltin"),
+    (0x10000000, "VariadicParam"),
+    (0x20000000, "ProvenanceSkipFrame"),
+    (0x40000000, "NoRecording"),
+]
+
+_FUNC_ATOMIC_FLAGS: typing.List[typing.Tuple[int, str]] = [
+    (0x01, "Optimized"),
+    (0x02, "Locked"),
+    (0x04, "MaybeIntercepted"),
+    (0x08, "LockedForPrologueGen"),
+    (0x10, "Zombie"),
+    (0x20, "LockedForAsyncJit"),
+]
+
+_FUNC_ALL_FLAGS: typing.List[typing.Tuple[int, str]] = [
+    (0x01, "isPreFunc"),
+    (0x02, "hasPrivateAncestor"),
+    (0x04, "shouldSampleJit"),
+    (0x08, "hasForeignThis"),
+    (0x10, "registeredInDataMap"),
+    (0x20, "hasNamedParams"),
+]
+
+
+def _decode_flags(val: int, flag_defs: typing.List[typing.Tuple[int, str]]) -> str:
+    names = []
+    remaining = val
+    for bit, name in flag_defs:
+        if val & bit:
+            names.append(name)
+            remaining &= ~bit
+    if remaining:
+        names.append(f"0x{remaining:x}")
+    return "|".join(names) if names else "None"
+
+
+def _read_atomic(val: lldb.SBValue) -> int:
+    try:
+        return utils.atomic_get(val).unsigned
+    except Exception:
+        pass
+    m_i = val.GetChildMemberWithName("_M_i")
+    if m_i.IsValid() and m_i.value is not None:
+        return m_i.unsigned
+    if val.num_children > 0:
+        return _read_atomic(val.GetChildAtIndex(0))
+    if val.value is not None:
+        return val.unsigned
+    raise FormatError("Cannot read atomic value")
+
+
+# Keyed by uint16_t RuntimeCoeffects::m_data; at most ~15 distinct values in practice.
+_coeffect_cache: typing.Dict[int, str] = {}
+
+
+def _coeffect_str(raw: int, target: lldb.SBTarget) -> str:
+    if raw in _coeffect_cache:
+        return _coeffect_cache[raw]
+    if raw == 0:
+        _coeffect_cache[0] = "pure"
+        return "pure"
+    try:
+        result = target.EvaluateExpression(
+            f"HPHP::RuntimeCoeffects::fromValue({raw}).toString()"
+        )
+        if result.error.Success() and result.summary:
+            s = result.summary.strip('"')
+            if s:
+                _coeffect_cache[raw] = s
+                return s
+    except Exception:
+        pass
+    fallback = f"0x{raw:x}"
+    _coeffect_cache[raw] = fallback
+    return fallback
+
+
+def _rawptr_hex(val: lldb.SBValue) -> str:
+    ptr = utils.rawptr(val)
+    if ptr is None or utils.is_nullptr(ptr):
+        return "0x0"
+    return f"0x{ptr.unsigned:x}"
+
+
+@format("^HPHP::Func$", regex=True)
+def pp_Func(val_obj: lldb.SBValue, _internal_dict) -> str:
+    try:
+        name = utils.nameof(val_obj)
+    except Exception:
+        name = None
+
+    parts: typing.List[str] = []
+
+    def _add(label: str, fn: typing.Callable[[], str]) -> None:
+        try:
+            parts.append(f"{label}={fn()}")
+        except Exception:
+            pass
+
+    _add("funcEntry", lambda: _rawptr_hex(utils.get(val_obj, "m_funcEntry")))
+
+    def _fmt_func_id() -> str:
+        func_id = utils.get(val_obj, "m_funcId")
+        m_id = utils.get(func_id, "m_id")
+        m_s = m_id.GetChildMemberWithName("m_s")
+        if m_s.IsValid():
+            return str(m_s.unsigned)
+        return str(m_id.unsigned)
+
+    _add("funcId", _fmt_func_id)
+
+    def _fmt_string_ptr(field: str) -> str:
+        ptr = utils.rawptr(utils.get(val_obj, field))
+        if ptr is None or utils.is_nullptr(ptr):
+            return "null"
+        if ptr.unsigned <= 1:
+            return "<pending>"
+        return f'"{utils.string_data_val(utils.deref(ptr))}"'
+
+    _add("fullName", lambda: _fmt_string_ptr("m_fullName"))
+    _add("name", lambda: _fmt_string_ptr("m_name"))
+
+    def _fmt_cls() -> str:
+        m_u = utils.get(val_obj, "m_u")
+        cls_ptr = utils.rawptr(utils.get(m_u, "m_cls", "m_base"))
+        if cls_ptr is None or utils.is_nullptr(cls_ptr):
+            return "null"
+        cls_name = utils.nameof(utils.deref(cls_ptr))
+        return f'"{cls_name}"' if cls_name else f"0x{cls_ptr.unsigned:x}"
+
+    _add("cls", _fmt_cls)
+
+    _add("methodSlot", lambda: str(utils.get(val_obj, "m_methodSlot").unsigned))
+    _add(
+        "cloned",
+        lambda: str(bool(_read_atomic(utils.get(val_obj, "m_cloned")))).lower(),
+    )
+
+    _add(
+        "atomicFlags",
+        lambda: _decode_flags(
+            _read_atomic(utils.get(val_obj, "m_atomicFlags", "m_flags")),
+            _FUNC_ATOMIC_FLAGS,
+        ),
+    )
+    # Func::m_allFlags is an AllFlags union; AllFlags::m_allFlags is its uint8_t member.
+    _add(
+        "allFlags",
+        lambda: _decode_flags(
+            utils.get(val_obj, "m_allFlags", "m_allFlags").unsigned,
+            _FUNC_ALL_FLAGS,
+        ),
+    )
+
+    _add("jitReqCount", lambda: str(_read_atomic(utils.get(val_obj, "m_jitReqCount"))))
+
+    def _fmt_coeffects() -> str:
+        coeffects = utils.get(val_obj, "m_requiredCoeffects")
+        m_data = coeffects.GetChildMemberWithName("m_data")
+        if m_data.IsValid() and m_data.value is not None:
+            raw = m_data.unsigned
+        else:
+            raw = _read_atomic(coeffects)
+        return _coeffect_str(raw, val_obj.target)
+
+    _add("coeffects", _fmt_coeffects)
+
+    _add("maxStack", lambda: str(utils.get(val_obj, "m_maxStackCells").signed))
+    _add("unit", lambda: f"0x{utils.get(val_obj, 'm_unit').unsigned:x}")
+    _add("shared", lambda: _rawptr_hex(utils.get(val_obj, "m_shared")))
+    _add("inoutBits", lambda: f"0x{utils.get(val_obj, 'm_inoutBits').unsigned:x}")
+
+    def _fmt_params() -> str:
+        raw = utils.get(val_obj, "m_paramCounts").unsigned
+        num = raw >> 1
+        variadic = not (raw & 1)
+        return f"{num} (variadic)" if variadic else str(num)
+
+    _add("params", _fmt_params)
+
+    _add(
+        "attrs",
+        lambda: _decode_flags(
+            _read_atomic(utils.get(val_obj, "m_attrs", "m_attrs")),
+            _FUNC_ATTRS,
+        ),
+    )
+
+    def _fmt_prologue() -> str:
+        table = utils.get(val_obj, "m_prologueTable")
+        first = table.GetChildAtIndex(0)
+        if first.IsValid():
+            return _rawptr_hex(first)
+        return "?"
+
+    _add("prologue[0]", _fmt_prologue)
+
+    if not parts:
+        raise FormatError("no fields could be extracted")
+
+    detail = ", ".join(parts)
+    headline = f'"{name}" ' if name else ""
+    return f"{headline}{{{detail}}}"
 
 
 @format("^HPHP::Object$", regex=True)

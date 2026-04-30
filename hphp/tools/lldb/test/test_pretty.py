@@ -57,7 +57,7 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
             "Boolean": r"\(HPHP::TypedValue\) tv = \{ Boolean, True \}",
             "Int64": r"\(HPHP::TypedValue\) tv = \{ Int64, 42 \}",
             "Double": r"\(HPHP::TypedValue\) tv = \{ Double, 3.1415 \}",
-            "Func": r'\(HPHP::TypedValue\) tv = \{ Func, \(const HPHP::Func \*\) pfunc = 0x.* "Exception::__construct" \}',
+            "Func": r'\(HPHP::TypedValue\) tv = \{ Func, \(const HPHP::Func \*\) pfunc = 0x.* "Exception::__construct".* \}',
             "Class": r'\(HPHP::TypedValue\) tv = \{ Class, \(HPHP::Class \*\) pclass = 0x.* "InvalidArgumentException" \}',
             "LazyClass": r'\(HPHP::TypedValue\) tv = \{ LazyClass, \(HPHP::LazyClassData\) plazyclass = "SpecialLazyClass" \}',
             "Uninit": r"\(HPHP::TypedValue\) tv = \{ Uninit \}",

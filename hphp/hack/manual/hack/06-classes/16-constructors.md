@@ -1,7 +1,8 @@
 # Constructors
 
-A constructor is a specially named instance method that is used to initialize the instance immediately after it has been created.  A
-constructor is called by the [`new` operator](/hack/expressions-and-operators/new).  For example:
+A constructor is a specially named instance method that is used to initialize
+the instance immediately after it has been created.  A constructor is called by
+the [`new` operator](/hack/expressions-and-operators/new).  For example:
 
 ```hack
 class Point {
@@ -21,13 +22,16 @@ function demo(): void {
 }
 ```
 
-A constructor has the name `__construct`.  As such, a class can have only one constructor.  (Hack does *not* support method overloading.)
+A constructor has the name `__construct`.  As such, a class can have only one
+constructor &mdash; Hack does *not* support method overloading.
 
-When `new Point` causes the constructor to be called, the argument 2.3 maps to the parameter `$x`, and the default value 0 is mapped to
-the parameter `$y`.  The constructor body is then executed, which results in the instance properties being initialized and the Point count
-being incremented.  Note that a constructor may call any *private* method in its class, but no public methods.
+When `new Point` causes the constructor to be called, the argument 2.3 maps to
+the parameter `$x`, and the default value 0 is mapped to the parameter `$y`.
+The constructor body is then executed, which results in the instance properties
+being initialized and the `Point` count being incremented.
 
-A constructor does not require a return type, but if one is included, it must be `void`.
+A constructor does not require a return type, but if one is included, it must
+be `void`.
 
 ## Constructor parameter promotion
 
@@ -76,7 +80,8 @@ floating-point values can be passed in.
 
 Don't hesitate to &ldquo;un-promote&rdquo; a constructor parameter if it later
 turns out that a different internal data representation would be better. For
-example, if we later decided to store `$name` in a structured form instead of a string, we could easily make that change while keeping the public-facing
+example, if we later decided to store `$name` in a structured form instead of
+a string, we could easily make that change while keeping the public-facing
 constructor parameters unchanged (and therefore backwards-compatible).
 
 ```hack no-extract

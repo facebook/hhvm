@@ -90,3 +90,30 @@ function getTextFileLines(string $filename): Generator<int, string, void> {
   }
 }
 ```
+
+## Terminating a Generator
+
+To end the execution of a generator early, use a `return` statement with no value, just as you would in any regular function returning `void`. Returning a value from a generator is not permitted.
+
+```hack
+function positive_even_numbers_up_to(int $limit): Generator<int, int, void> {
+  for ($i = 2; $i <= $limit; $i += 2) {
+    if ($i > 100) {
+      return; // stop generating values
+    }
+    yield $i;
+  }
+}
+```
+
+The `yield break` statement is equivalent to `return` in a generator, but its use is not preferred when the generator already contains other `yield` expressions. Use `yield break` only when a function has no other `yield` statements, since a function must contain at least one `yield` to be recognized as a generator.
+
+```hack
+function empty_generator(): Generator<nothing, nothing, void> {
+  yield break;
+}
+```
+
+## Async Generators
+
+Generators can also be `async`. An async generator yields `Awaitable` values and is consumed using `await as` in a `foreach` loop. For details and examples, see [Async Generators](/hack/asynchronous-operations/generators).

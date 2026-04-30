@@ -5,6 +5,8 @@
 generator and the calling code. Instead of returning once or requiring something that could be memory-intensive like an array, generators
 yield values to the calling code as many times as necessary in order to provide the values being iterated over.
 
+For an introduction to generators and the `yield` operator, see [Yield](/hack/expressions-and-operators/yield).
+
 Generators can be `async` functions; an async generator behaves similarly to a normal generator except that each yielded value is an
 `Awaitable` that is `await`ed upon.
 

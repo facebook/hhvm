@@ -379,12 +379,12 @@ class HandlerCallbackBase {
   void sendReply(SerializedResponse response);
   void sendReply(ResponseAndServerStreamFactory&& responseAndStream);
 
- private:
   // Returns an executor for compression offload when executor_ is null (EB
   // mode). Walks the context chain to the server's handler executor, falling
   // back to folly::getGlobalCPUExecutor() as a safety net.
   folly::Executor::KeepAlive<> getCompressionExecutorFallback();
 
+ private:
   // Dispatches compression + reply to the given CPU executor when sendReply is
   // called on the IO thread. Moves all needed state into the lambda so
   // HandlerCallbackBase can be destroyed after this returns.

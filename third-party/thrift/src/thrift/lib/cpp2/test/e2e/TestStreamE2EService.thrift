@@ -16,6 +16,7 @@
 
 namespace cpp2 apache.thrift.detail.test
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
 package "facebook.com/thrift/test/e2e/stream"
@@ -35,4 +36,11 @@ service TestStreamE2EService {
   stream<string> stringRange(1: i32 from, 2: i32 to);
   string, stream<string> stringRangeWithResponse(1: i32 from, 2: i32 to);
   stream<i32> publisherRange(1: i32 from, 2: i32 to);
+
+  // EB-mode variant: the @cpp.ProcessInEbThreadUnsafe annotation forces
+  // dispatch on the IO thread so the handler must override
+  // async_eb_stringRangeEb. Used to exercise the compression-offload code
+  // path in HandlerCallback::doResult() when executor_ is null.
+  @cpp.ProcessInEbThreadUnsafe
+  stream<string> stringRangeEb(1: i32 from, 2: i32 to);
 }

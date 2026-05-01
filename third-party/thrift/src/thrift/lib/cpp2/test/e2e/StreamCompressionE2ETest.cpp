@@ -69,6 +69,63 @@ CO_TEST_F(StreamCompressionE2ETest, BasicStreamWithCpuCompression) {
   EXPECT_FALSE((co_await gen.next()).has_value());
 }
 
+// Verifies that a basic stream round-trips correctly with CPU-thread
+// compression enabled when the method is dispatched in EB mode (via the
+// @cpp.ProcessInEbThreadUnsafe annotation, which forces async_eb_*
+// dispatch on the IO thread). In EB mode, executor_ is null in
+// HandlerCallback, so this exercises the getCompressionExecutorFallback()
+// path in doResult() that ensures stream subsequent items are compressed
+// off the IO thread.
+CO_TEST_F(StreamCompressionE2ETest, BasicStreamWithCpuCompressionEBMode) {
+  THRIFT_FLAG_SET_MOCK(thrift_server_compress_response_on_cpu, true);
+
+  struct Handler : public ServiceHandler<detail::test::TestStreamE2EService> {
+    void async_eb_stringRangeEb(
+        HandlerCallbackPtr<ServerStream<std::string>> callback,
+        int32_t from,
+        int32_t to) override {
+      // Sanity check: if this assertion fires, the @cpp.ProcessInEbThreadUnsafe
+      // annotation did not produce EB-mode dispatch and the test is no longer
+      // exercising the code path it intends to cover.
+      auto* evb = callback->getEventBase();
+      EXPECT_TRUE(evb->inRunningEventBaseThread());
+      auto stream = folly::coro::co_invoke(
+          [from, to, evb]() -> folly::coro::AsyncGenerator<std::string&&> {
+            for (int32_t i = from; i <= to; ++i) {
+              // The generator must run on a CPU executor, NOT on the IO
+              // EventBase thread. This proves the compression offload in
+              // doResult() is working — without the fix, this assertion
+              // would fire because the stream would run on eb_.
+              EXPECT_FALSE(evb->inRunningEventBaseThread());
+              co_yield std::string(256, 'a' + (i % 26));
+            }
+          });
+      callback->result(std::move(stream));
+    }
+  };
+
+  testConfig(
+      {std::make_shared<Handler>(),
+       /* serverConfigCb */ {},
+       [](folly::AsyncSocket::UniquePtr socket) -> RequestChannel::Ptr {
+         auto channel = RocketClientChannel::newChannel(std::move(socket));
+         CompressionConfig compressionConfig;
+         compressionConfig.codecConfig().ensure().set_zstdConfig();
+         channel->setDesiredCompressionConfig(compressionConfig);
+         return channel;
+       }});
+
+  auto client = makeClient<detail::test::TestStreamE2EService>();
+  auto gen = (co_await client->co_stringRangeEb(0, 9)).toAsyncGenerator();
+
+  for (int32_t expected = 0; expected <= 9; ++expected) {
+    auto item = co_await gen.next();
+    EXPECT_TRUE(item.has_value());
+    EXPECT_EQ(*item, std::string(256, 'a' + (expected % 26)));
+  }
+  EXPECT_FALSE((co_await gen.next()).has_value());
+}
+
 // Verifies that a stream with a first response also works correctly with
 // CPU-thread compression enabled.
 CO_TEST_F(StreamCompressionE2ETest, StreamWithResponseAndCpuCompression) {

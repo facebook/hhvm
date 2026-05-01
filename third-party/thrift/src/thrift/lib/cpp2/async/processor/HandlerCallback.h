@@ -544,11 +544,19 @@ void HandlerCallback<T>::complete(folly::Try<T>&& r) {
 template <typename T>
 void HandlerCallback<T>::doResult(InputType r) {
   assert(cp_ != nullptr);
-  auto reply = Helper::call(
-      cp_,
-      this->ctx_.get(),
-      executor_ ? executor_.get() : eb_,
-      std::forward<InputType>(r));
+  // In EB mode, use a CPU executor for compression offload instead of eb_.
+  folly::Executor::KeepAlive<> compressionExecutor;
+  folly::Executor* execPtr = nullptr;
+  if (executor_) {
+    execPtr = executor_.get();
+  } else if (req_ && req_->isCpuCompressionEnabled()) {
+    compressionExecutor = getCompressionExecutorFallback();
+    execPtr = compressionExecutor.get();
+  } else {
+    execPtr = eb_;
+  }
+  auto reply =
+      Helper::call(cp_, this->ctx_.get(), execPtr, std::forward<InputType>(r));
   sendReply(std::move(reply));
 }
 

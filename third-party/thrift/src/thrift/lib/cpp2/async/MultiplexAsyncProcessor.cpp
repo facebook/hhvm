@@ -419,6 +419,39 @@ MultiplexAsyncProcessorFactory::flattenProcessorFactories(
   return result;
 }
 
+namespace {
+// When a factory wrapper doesn't forward getServiceSchema() or
+// getServiceSchemaNodes(), try the underlying service handlers directly.
+// Generated ServiceHandler<T> implements both methods but custom wrapper
+// factories often only forward getProcessor()/getServiceHandlers().
+void tryHandlerSchemaFallback(
+    AsyncProcessorFactory& factory,
+    std::vector<type::Schema>& allSchemas,
+    std::set<type::DefinitionKey>& allKeys) {
+  for (auto* handler : factory.getServiceHandlers()) {
+    if (auto* handlerFactory = dynamic_cast<AsyncProcessorFactory*>(handler)) {
+      if (auto handlerSchema = handlerFactory->getServiceSchema()) {
+        allSchemas.insert(allSchemas.end(), std::move(handlerSchema->schema));
+        allKeys.insert(
+            std::make_move_iterator(handlerSchema->definitions.begin()),
+            std::make_move_iterator(handlerSchema->definitions.end()));
+      }
+    }
+  }
+}
+
+void tryHandlerSchemaNodesFallback(
+    AsyncProcessorFactory& factory,
+    std::vector<folly::not_null<const syntax_graph::ServiceNode*>>& result) {
+  for (auto* handler : factory.getServiceHandlers()) {
+    if (auto* handlerFactory = dynamic_cast<AsyncProcessorFactory*>(handler)) {
+      auto nodes = handlerFactory->getServiceSchemaNodes();
+      result.insert(result.end(), nodes.begin(), nodes.end());
+    }
+  }
+}
+} // namespace
+
 std::optional<schema::DefinitionsSchema>
 MultiplexAsyncProcessorFactory::getServiceSchema() {
   std::vector<type::Schema> allSchemas;
@@ -430,6 +463,8 @@ MultiplexAsyncProcessorFactory::getServiceSchema() {
       allKeys.insert(
           std::make_move_iterator(schema->definitions.begin()),
           std::make_move_iterator(schema->definitions.end()));
+    } else {
+      tryHandlerSchemaFallback(*processorFactory, allSchemas, allKeys);
     }
   }
   schema::DefinitionsSchema result;
@@ -447,7 +482,11 @@ MultiplexAsyncProcessorFactory::getServiceSchemaNodes() {
   result.reserve(processorFactories_.size());
   for (auto& processorFactory : processorFactories_) {
     auto nodes = processorFactory->getServiceSchemaNodes();
-    result.insert(result.end(), nodes.begin(), nodes.end());
+    if (nodes.empty()) {
+      tryHandlerSchemaNodesFallback(*processorFactory, result);
+    } else {
+      result.insert(result.end(), nodes.begin(), nodes.end());
+    }
   }
   return result;
 }

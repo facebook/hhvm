@@ -20,6 +20,7 @@ wangle_add_library(wangle_acceptor_acceptor_core
     TransportInfo.cpp
   DEPS
     Folly::folly_io_async_async_socket
+    ${GLOG_LIBRARIES}
   EXPORTED_DEPS
     wangle_acceptor_managed
     wangle_ssl_ssl_util
@@ -54,6 +55,7 @@ wangle_add_library(wangle_acceptor
     Folly::folly_portability_openssl
     Folly::folly_portability_sockets
     Folly::folly_portability_unistd
+    fmt::fmt
   EXPORTED_DEPS
     wangle_acceptor_acceptor_core
     wangle_ssl
@@ -73,6 +75,7 @@ wangle_add_library(wangle_acceptor
     Folly::folly_random
     Folly::folly_range
     Folly::folly_string
+    ${GLOG_LIBRARIES}
 )
 
 wangle_add_library(wangle_acceptor_accept_observer
@@ -89,6 +92,8 @@ wangle_add_library(wangle_acceptor_managed
   SRCS
     ConnectionManager.cpp
     ManagedConnection.cpp
+  DEPS
+    ${GLOG_LIBRARIES}
   EXPORTED_DEPS
     Folly::folly_constexpr_math
     Folly::folly_intrusive_list

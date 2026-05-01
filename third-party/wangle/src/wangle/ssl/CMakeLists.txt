@@ -23,6 +23,7 @@ wangle_add_library(wangle_ssl_ssl_util
     Folly::folly_io_async_async_ssl_socket
     Folly::folly_memory
     Folly::folly_portability_openssl
+    fmt::fmt
   EXPORTED_DEPS
     Folly::folly_ssl_openssl_ptr_types
     Folly::folly_ssl_password_collector
@@ -81,6 +82,7 @@ wangle_add_library(wangle_ssl
     Folly::folly_shared_mutex
     Folly::folly_ssl_openssl_ticket_handler
     Folly::folly_synchronized
+    ${GLOG_LIBRARIES}
 )
 
 wangle_add_library(wangle_ssl_client_hello_ext_stats

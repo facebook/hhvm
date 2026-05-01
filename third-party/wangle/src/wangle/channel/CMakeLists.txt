@@ -39,6 +39,8 @@ wangle_add_library(wangle_channel
     Folly::folly_optional
     Folly::folly_singleton
     Folly::folly_unit
+    ${GLOG_LIBRARIES}
+    fmt::fmt
 )
 
 wangle_add_library(wangle_channel_async_socket_handler

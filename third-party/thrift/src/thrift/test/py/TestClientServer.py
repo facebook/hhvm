@@ -91,6 +91,7 @@ def wait_for_server(port, timeout, ssl=False):
             sock = socket.socket()
             sock.settimeout(end - time.time())
             if ssl:
+                # pyrefly: ignore [missing-attribute]
                 sock = SSL.wrap_socket(sock)
             sock.connect(("localhost", port))
             return True
@@ -100,6 +101,7 @@ def wait_for_server(port, timeout, ssl=False):
             if not isConnectionRefused(e):
                 raise
         finally:
+            # pyrefly: ignore [unbound-name]
             sock.close()
         time.sleep(0.1)
     return False
@@ -113,20 +115,30 @@ class AbstractTest:
         sock.bind(("0.0.0.0", 0))
         port = sock.getsockname()[1]
         server = start_server(
+            # pyrefly: ignore [missing-attribute]
             cls.server_type,
+            # pyrefly: ignore [missing-attribute]
             cls.ssl,
+            # pyrefly: ignore [missing-attribute]
             cls.server_header,
+            # pyrefly: ignore [missing-attribute]
             cls.server_context,
+            # pyrefly: ignore [missing-attribute]
             cls.multiple,
             port,
         )
 
+        # pyrefly: ignore [missing-attribute]
         if not wait_for_server(port, 5.0, ssl=cls.ssl):
+            # pyrefly: ignore [missing-attribute]
             msg = "Failed to start " + cls.server_type
+            # pyrefly: ignore [missing-attribute]
             if cls.ssl:
                 msg += " using ssl"
+            # pyrefly: ignore [missing-attribute]
             if cls.server_header:
                 msg += " using header protocol"
+            # pyrefly: ignore [missing-attribute]
             if cls.server_context:
                 msg += " using context"
             raise Exception(msg)
@@ -144,15 +156,19 @@ class AbstractTest:
             seq1 = seq1.encode("utf-8")
         if not isinstance(seq2, bytes):
             seq2 = seq2.encode("utf-8")
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(seq1, seq2)
 
     def setUp(self):
+        # pyrefly: ignore [missing-attribute]
         if self.ssl:
             self.socket = TSSLSocket.TSSLSocket("localhost", self._port)
         else:
+            # pyrefly: ignore [bad-assignment]
             self.socket = TSocket.TSocket("localhost", self._port)
 
         self.transport = TTransport.TBufferedTransport(self.socket)
+        # pyrefly: ignore [missing-attribute]
         self.protocol = self.protocol_factory.getProtocol(self.transport)
         if isinstance(self, HeaderAcceleratedCompactTest):
             self.protocol.trans.set_protocol_id(
@@ -160,16 +176,22 @@ class AbstractTest:
             )
             self.protocol.reset_protocol()
         self.transport.open()
+        # pyrefly: ignore [bad-instantiation]
         self.client = ThriftTest.Client(self.protocol)
+        # pyrefly: ignore [missing-attribute]
         if self.multiple:
             p = TMultiplexedProtocol.TMultiplexedProtocol(self.protocol, "ThriftTest")
+            # pyrefly: ignore [bad-argument-type, bad-instantiation]
             self.client = ThriftTest.Client(p)
             p = TMultiplexedProtocol.TMultiplexedProtocol(
                 self.protocol, "SecondService"
             )
+            # pyrefly: ignore [bad-argument-type, bad-instantiation]
             self.client2 = SecondService.Client(p)
         else:
+            # pyrefly: ignore [bad-instantiation]
             self.client = ThriftTest.Client(self.protocol)
+            # pyrefly: ignore [bad-assignment]
             self.client2 = None
 
     def tearDown(self):
@@ -182,19 +204,25 @@ class AbstractTest:
         self.bytes_comp(self.client.testString("Python"), "Python")
 
     def testByte(self):
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.client.testByte(63), 63)
 
     def testI32(self):
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.client.testI32(-1), -1)
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.client.testI32(0), 0)
 
     def testI64(self):
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.client.testI64(-34359738368), -34359738368)
 
     def testDouble(self):
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.client.testDouble(-5.235098235), -5.235098235)
 
     def testFloat(self):
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(self.client.testFloat(-5.25), -5.25)
 
     def testStruct(self):
@@ -206,21 +234,27 @@ class AbstractTest:
         y = self.client.testStruct(x)
 
         self.bytes_comp(y.string_thing, "Zero")
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(y.byte_thing, 1)
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(y.i32_thing, -3)
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(y.i64_thing, -5)
 
     def testException(self):
         self.client.testException("Safe")
         try:
             self.client.testException("Xception")
+            # pyrefly: ignore [missing-attribute]
             self.fail("should have gotten exception")
         except Xception as x:
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(x.errorCode, 1001)
             self.bytes_comp(x.message, "Xception")  # noqa
 
         try:
             self.client.testException("throw_undeclared")
+            # pyrefly: ignore [missing-attribute]
             self.fail("should have thrown exception")
         except Exception:  # type is undefined
             pass
@@ -229,10 +263,12 @@ class AbstractTest:
         start = time.time()
         self.client.testOneway(1)
         end = time.time()
+        # pyrefly: ignore [missing-attribute]
         self.assertTrue(end - start < 0.2, "oneway sleep took %f sec" % (end - start))
 
     def testblahBlah(self):
         if self.client2:
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(self.client2.blahBlah(), None)
 
 
@@ -283,7 +319,9 @@ class HeaderTest(HeaderBase):
             htrans.set_persistent_header("permanent", "true")
             self.client.testString("test")
             headers = htrans.get_headers()
+            # pyrefly: ignore [missing-attribute]
             self.assertTrue("permanent" in headers)
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(headers["permanent"], "true")
 
             # Try with two transient headers
@@ -291,11 +329,17 @@ class HeaderTest(HeaderBase):
             htrans.set_header("transient2", "true")
             self.client.testString("test")
             headers = htrans.get_headers()
+            # pyrefly: ignore [missing-attribute]
             self.assertTrue("permanent" in headers)
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(headers["permanent"], "true")
+            # pyrefly: ignore [missing-attribute]
             self.assertTrue("transient1" in headers)
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(headers["transient1"], "true")
+            # pyrefly: ignore [missing-attribute]
             self.assertTrue("transient2" in headers)
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(headers["transient2"], "true")
 
             # Add one, update one and delete one transient header
@@ -303,12 +347,19 @@ class HeaderTest(HeaderBase):
             htrans.set_header("transient3", "true")
             self.client.testString("test")
             headers = htrans.get_headers()
+            # pyrefly: ignore [missing-attribute]
             self.assertTrue("permanent" in headers)
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(headers["permanent"], "true")
+            # pyrefly: ignore [missing-attribute]
             self.assertTrue("transient1" not in headers)
+            # pyrefly: ignore [missing-attribute]
             self.assertTrue("transient2" in headers)
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(headers["transient2"], "false")
+            # pyrefly: ignore [missing-attribute]
             self.assertTrue("transient3" in headers)
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(headers["transient3"], "true")
 
 
@@ -318,21 +369,29 @@ class HeaderAcceleratedCompactTest(HeaderBase):
 
 class HeaderFramedCompactTest(HeaderBase):
     def setUp(self):
+        # pyrefly: ignore [bad-assignment]
         self.socket = TSocket.TSocket("localhost", self._port)
+        # pyrefly: ignore [bad-assignment]
         self.transport = TTransport.TFramedTransport(self.socket)
         self.protocol = TCompactProtocol.TCompactProtocol(self.transport)
         self.transport.open()
+        # pyrefly: ignore [bad-instantiation]
         self.client = ThriftTest.Client(self.protocol)
+        # pyrefly: ignore [bad-assignment]
         self.client2 = None
 
 
 class HeaderFramedBinaryTest(HeaderBase):
     def setUp(self):
+        # pyrefly: ignore [bad-assignment]
         self.socket = TSocket.TSocket("localhost", self._port)
+        # pyrefly: ignore [bad-assignment]
         self.transport = TTransport.TFramedTransport(self.socket)
         self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
         self.transport.open()
+        # pyrefly: ignore [bad-instantiation]
         self.client = ThriftTest.Client(self.protocol)
+        # pyrefly: ignore [bad-assignment]
         self.client2 = None
 
 

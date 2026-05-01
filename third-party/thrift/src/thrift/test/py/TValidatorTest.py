@@ -53,19 +53,24 @@ class ValidationTest(unittest.TestCase):
         self.assertFalse(self.v.validate(msg))
 
     def testBinary(self):
+        # pyrefly: ignore [bad-argument-type]
         self.valid(myBinaryStruct(a="xyzzy"))
+        # pyrefly: ignore [bad-argument-type]
         self.wrong(myBinaryStruct(a=3))
 
     def testBool(self):
         self.valid(myBoolStruct(a=True))
         self.valid(myBoolStruct(a=False))
+        # pyrefly: ignore [bad-argument-type]
         self.wrong(myBoolStruct(a=1))
+        # pyrefly: ignore [bad-argument-type]
         self.wrong(myBoolStruct(a="a"))
 
     def testByte(self):
         self.valid(myByteStruct(a=0))
         self.valid(myByteStruct(a=127))
         self.valid(myByteStruct(a=-128))
+        # pyrefly: ignore [bad-argument-type]
         self.wrong(myByteStruct(a=1.1))
         self.wrong(myByteStruct(a=128))
         self.wrong(myByteStruct(a=-129))
@@ -107,15 +112,18 @@ class ValidationTest(unittest.TestCase):
                 boolMap={True: "True", False: "False"},
                 byteMap={1: "one", 2: "two"},
                 doubleMap={float("0.1"): "0.one", float("0.2"): "0.two"},
+                # pyrefly: ignore [bad-argument-type]
                 enumMap={1: "male", 2: "female"},
             )
         )
         self.valid(
             mySimpleStruct(a=False, b=87, c=7880, d=-7880, e=-1, f=-0.1, g="T-bone")
         )
+        # pyrefly: ignore [bad-argument-type]
         self.wrong(mySimpleStruct(a=1))
         self.valid(
             myComplexStruct(
+                # pyrefly: ignore [bad-argument-count]
                 mySimpleStruct(
                     a=True,
                     b=92,
@@ -131,6 +139,7 @@ class ValidationTest(unittest.TestCase):
                     "slippy": mySimpleStruct(a=False, b=-4, c=5),
                 },
                 e=EnumTest.EnumTwo,
+                # pyrefly: ignore [bad-argument-count]
                 x=ExceptionTest("test"),
             )
         )
@@ -142,11 +151,13 @@ class ValidationTest(unittest.TestCase):
         self.v.addClassValidator("mySimpleStruct", a_must_be_true)
         self.valid(
             myComplexStruct(
+                # pyrefly: ignore [bad-argument-count]
                 mySimpleStruct(a=True),
             )
         )
         self.wrong(
             myComplexStruct(
+                # pyrefly: ignore [bad-argument-count]
                 mySimpleStruct(a=False),
             )
         )
@@ -164,12 +175,14 @@ class ValidationTest(unittest.TestCase):
             myNestedMapStruct(
                 maps={
                     "1": {"1": mySimpleStruct(c=1)},
+                    # pyrefly: ignore [bad-argument-type]
                     "2": {"2": mySimpleStruct(a=0, c=2)},
                 }
             )
         )
 
     def testEnumSpec(self):
+        # pyrefly: ignore [bad-index]
         self.assertTrue(hasattr(myComplexStruct.thrift_spec[4][3], "_NAMES_TO_VALUES"))
 
     def testAnnotations(self):

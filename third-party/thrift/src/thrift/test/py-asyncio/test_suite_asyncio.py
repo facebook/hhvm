@@ -40,28 +40,34 @@ class TestHandler(ThriftTest.Iface):
     async def testVoid(self):
         pass
 
+    # pyrefly: ignore [bad-param-name-override]
     async def testString(self, s):
         await asyncio.sleep(0)
         return s
 
+    # pyrefly: ignore [bad-param-name-override]
     async def testByte(self, b):
         return b
 
     async def testI16(self, i16):
         return i16
 
+    # pyrefly: ignore [bad-param-name-override]
     async def testI32(self, i32):
         return i32
 
+    # pyrefly: ignore [bad-param-name-override]
     async def testI64(self, i64):
         return i64
 
+    # pyrefly: ignore [bad-param-name-override]
     async def testDouble(self, dub):
         return dub
 
     async def testStruct(self, thing):
         return thing
 
+    # pyrefly: ignore [bad-param-name-override]
     async def testException(self, s):
         if s == "Xception":
             x = Xception()
@@ -71,6 +77,7 @@ class TestHandler(ThriftTest.Iface):
         elif s == "throw_undeclared":
             raise ValueError("foo")
 
+    # pyrefly: ignore [bad-param-name-override]
     async def testOneway(self, seconds):
         t = time.time()
         await asyncio.sleep(seconds)

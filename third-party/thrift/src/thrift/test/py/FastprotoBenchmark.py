@@ -123,6 +123,7 @@ def doReadCompact():
 
 
 def fastproto_encode(q, protoid):
+    # pyrefly: ignore [not-callable]
     hp = hpy()
     trans = TDevNullTransport()
     p = psutil.Process(os.getpid())
@@ -147,6 +148,7 @@ def fastproto_encode(q, protoid):
 
 
 def fastproto_decode(q, protoid):
+    # pyrefly: ignore [not-callable]
     hp = hpy()
     p = psutil.Process(os.getpid())
 

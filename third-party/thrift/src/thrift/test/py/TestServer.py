@@ -58,10 +58,12 @@ class TestHandler(ThriftTest.Iface):
     def testVoid(self):
         print("testVoid()")
 
+    # pyrefly: ignore [bad-param-name-override]
     def testString(self, str):
         print("testString(%s)" % str)
         return str
 
+    # pyrefly: ignore [bad-param-name-override]
     def testByte(self, byte):
         print("testByte(%d)" % byte)
         return byte
@@ -70,18 +72,22 @@ class TestHandler(ThriftTest.Iface):
         print("testI16(%d)" % i16)
         return i16
 
+    # pyrefly: ignore [bad-param-name-override]
     def testI32(self, i32):
         print("testI32(%d)" % i32)
         return i32
 
+    # pyrefly: ignore [bad-param-name-override]
     def testI64(self, i64):
         print("testI64(%d)" % i64)
         return i64
 
+    # pyrefly: ignore [bad-param-name-override]
     def testDouble(self, dub):
         print("testDouble(%f)" % dub)
         return dub
 
+    # pyrefly: ignore [bad-param-name-override]
     def testFloat(self, flt):
         print("testFloat(%f)" % flt)
         return flt
@@ -93,6 +99,7 @@ class TestHandler(ThriftTest.Iface):
         )
         return thing
 
+    # pyrefly: ignore [bad-param-name-override]
     def testException(self, str):
         print("testException(%s)" % str)
         if str == "Xception":
@@ -103,6 +110,7 @@ class TestHandler(ThriftTest.Iface):
         elif str == "throw_undeclared":
             raise ValueError("foo")
 
+    # pyrefly: ignore [bad-param-name-override]
     def testOneway(self, seconds):
         print("testOneway(%d) => sleeping..." % seconds)
         time.sleep(seconds)

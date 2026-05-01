@@ -29,6 +29,7 @@ from ThriftTest import ThriftTest
 
 
 class TestHandler(ThriftTest.Iface):
+    # pyrefly: ignore [bad-param-name-override]
     def testString(self, str):
         return str * 2**30
 
@@ -56,6 +57,7 @@ def create_client(port):
     protocol = THeaderProtocol.THeaderProtocol(socket)
     protocol.trans.set_max_frame_size(MAX_BIG_FRAME_SIZE)
     protocol.trans.open()
+    # pyrefly: ignore [bad-instantiation]
     return ThriftTest.Client(protocol)
 
 

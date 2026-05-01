@@ -28,6 +28,7 @@ from ThriftTest.ttypes import Xtruct
 class TestEof(unittest.TestCase):
     def setUp(self):
         self.trans = TTransport.TMemoryBuffer()
+        # pyrefly: ignore [bad-assignment]
         self.trans = THeaderTransport(self.trans)
         self.prot = TBinaryProtocol.TBinaryProtocol(self.trans)
 
@@ -38,11 +39,13 @@ class TestEof(unittest.TestCase):
     def testOversizeFrameRecv(self):
         """Test that an oversize frame on recv gets a TTransportException"""
 
+        # pyrefly: ignore [missing-attribute]
         self.trans.set_max_frame_size(200)
 
         self.x.write(self.prot)
         self.trans.flush()
 
+        # pyrefly: ignore [missing-attribute]
         inTrans = TTransport.TMemoryBuffer(self.trans.getTransport().getvalue())
         inTrans = THeaderTransport(inTrans)
         inProt = TBinaryProtocol.TBinaryProtocol(inTrans)
@@ -58,6 +61,7 @@ class TestEof(unittest.TestCase):
 
     def testOversizeFrameSend(self):
         """Test that an oversize frame on send gets a TTransportException"""
+        # pyrefly: ignore [missing-attribute]
         self.trans.set_max_frame_size(2)
 
         self.x.write(self.prot)

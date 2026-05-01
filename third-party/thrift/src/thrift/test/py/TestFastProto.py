@@ -53,6 +53,7 @@ class ReadOnlyBufferWithRefill(TMemoryBuffer):
 
     def cstringio_refill(self, partialread, reqlen):
         self.refill_called += 1
+        # pyrefly: ignore [unsupported-operation]
         self._readBuffer = StringIO(partialread + self._value[self._index :])
         return self._readBuffer
 
@@ -63,10 +64,12 @@ class AbstractTest:
             obj,
             [obj.__class__, obj.thrift_spec, obj.isUnion()],
             utf8strings=0,
+            # pyrefly: ignore [missing-attribute]
             protoid=self.PROTO,
         )
 
         trans = TMemoryBuffer(buf)
+        # pyrefly: ignore [missing-attribute]
         if self.PROTO == 0:
             proto = TBinaryProtocol.TBinaryProtocol(trans)
         else:
@@ -74,10 +77,12 @@ class AbstractTest:
 
         obj_new = obj.__class__()
         obj_new.read(proto)
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj, obj_new)
 
     def decode_helper(self, obj, split=1.0, utf8strings=0):
         trans = TMemoryBuffer()
+        # pyrefly: ignore [missing-attribute]
         if self.PROTO == 0:
             proto = TBinaryProtocol.TBinaryProtocol(trans)
         else:
@@ -94,14 +99,18 @@ class AbstractTest:
             utf8strings=utf8strings,
             protoid=self.PROTO,
         )
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj, obj_new)
         # Verify the entire buffer is read
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(len(trans._readBuffer.read()), 0)
         if split != 1.0:
+            # pyrefly: ignore [missing-attribute]
             self.assertEqual(1, trans.refill_called)
 
     def encode_and_decode(self, obj):
         trans = TMemoryBuffer()
+        # pyrefly: ignore [missing-attribute]
         if self.PROTO == 0:
             proto = TBinaryProtocol.TBinaryProtocol(trans)
         else:
@@ -139,13 +148,17 @@ class AbstractTest:
             anInteger16=234,
             anInteger32=12345,
             anInteger64=12345678910,
+            # pyrefly: ignore [bad-argument-type]
             aString=b"\x00hello",
             aBinary=b"\x00\x01\x00",
             aDouble=1234567.901,
             aFloat=12345.0,
             aList=[12, 34, 567, 89],
+            # pyrefly: ignore [bad-argument-type]
             aSet={b"hello", b"world", b"good", b"bye"},
+            # pyrefly: ignore [bad-argument-type]
             aMap={b"hello": 1, b"world": 20},
+            # pyrefly: ignore [bad-argument-type]
             aStruct=AStruct(aString=b"str", anInteger=109),
         )
 
@@ -166,15 +179,19 @@ class AbstractTest:
         self.decode_helper(self.buildOneOfEachB())
         # Test when ensureMapBegin needs to verify the buffer has
         # at least a varint and 1 more byte.
+        # pyrefly: ignore [bad-argument-type]
         self.decode_helper(OneOfEach(aMap={b"h": 1}), split=0.1)
 
     def test_decode_union(self):
         u = TestUnion(i32_field=123)
         self.decode_helper(u)
+        # pyrefly: ignore [bad-argument-type]
         u.set_string_field(b"world")
         self.decode_helper(u)
+        # pyrefly: ignore [bad-argument-type]
         u.set_struct_field(AStruct(aString=b"world"))
         self.decode_helper(u)
+        # pyrefly: ignore [bad-argument-type]
         swu = StructWithUnion(aUnion=u, aString=b"world")
         self.decode_helper(swu)
 
@@ -185,6 +202,7 @@ class AbstractTest:
     def test_negative_fid(self):
         self.encode_helper(NegativeFieldId(anInteger=20, aString="hello", aDouble=1.2))
         self.decode_helper(
+            # pyrefly: ignore [bad-argument-type]
             NegativeFieldId(anInteger=344444, aString=b"hello again", aDouble=1.34566)
         )
 
@@ -203,6 +221,7 @@ class AbstractTest:
         self.encode_and_decode(required)
 
     def test_decode_failure_lists_fieldname(self):
+        # pyrefly: ignore [bad-argument-type]
         obj = OneOfEach(aStruct=AStruct(aString="Привет".encode("cp866")))
         # Can't use self.assertRaises since AbstractTest cannot inherit
         # from unittest.TestCase
@@ -211,15 +230,20 @@ class AbstractTest:
             self.decode_helper(obj, split=1.0, utf8strings=1)
         except UnicodeDecodeError as ex:
             raised_exception = ex
+        # pyrefly: ignore [missing-attribute]
         self.assertIsNotNone(raised_exception)
+        # pyrefly: ignore [missing-attribute]
         self.assertIn("when decoding field 'aStruct->aString'", str(raised_exception))
+        # pyrefly: ignore [missing-attribute]
         self.assertIn(
             "('utf-8', b'\\x8f\\xe0\\xa8\\xa2\\xa5\\xe2', 0, 1, 'invalid start byte')",
             repr(raised_exception),
         )
+        # pyrefly: ignore [missing-attribute]
         self.assertTrue(isinstance(raised_exception, ThriftUnicodeDecodeError))
 
     def createProto(self, trans):
+        # pyrefly: ignore [missing-attribute]
         if self.PROTO == 0:
             return TBinaryProtocol.TBinaryProtocol(trans)
         else:

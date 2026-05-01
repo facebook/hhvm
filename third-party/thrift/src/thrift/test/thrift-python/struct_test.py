@@ -369,12 +369,14 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
 
         # Attributes of immutable types cannot be deleted.
         with self.assertRaisesRegex(AttributeError, "unqualified_string"):
+            # pyrefly: ignore [read-only]
             del w.unqualified_string
         self.assertEqual(w.unqualified_string, "hello, world!")
 
         # deleting after setting is no longer a no-op;
         # it consistently raises AttributeError
         with self.assertRaisesRegex(AttributeError, "unqualified_string"):
+            # pyrefly: ignore [read-only]
             del w.unqualified_string
 
         self.assertEqual(w.unqualified_string, "hello, world!")

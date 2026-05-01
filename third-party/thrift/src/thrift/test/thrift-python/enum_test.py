@@ -60,6 +60,7 @@ class ThriftPython_EnumClass_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "'mappingproxy' object does not support item deletion"
         ):
+            # pyrefly: ignore [unsupported-operation]
             del enums.Color.__members__["red"]
 
     def test_getitem(self) -> None:

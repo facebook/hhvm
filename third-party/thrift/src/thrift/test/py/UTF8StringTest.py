@@ -34,15 +34,20 @@ class AbstractTest:
         )
 
     def _serialize(self, obj):
+        # pyrefly: ignore [missing-attribute]
         return Serializer.serialize(self.protocol_factory, obj)
 
     def _deserialize(self, objtype, data):
+        # pyrefly: ignore [missing-attribute]
         return Serializer.deserialize(self.protocol_factory, data, objtype())
 
     def testUnicodeString(self):
         obj2 = self._deserialize(ListTypeVersioningV2, self._serialize(self.obj))
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj2.strings[0], self.obj.strings[0])
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj2.strings[1], self.obj.strings[1])
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj2.hello, self.obj.hello)
 
 

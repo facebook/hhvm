@@ -40,6 +40,7 @@ class TestEvolution(unittest.TestCase):
         old_struct = Old(**params)
         # pyre-fixme[16]: `TestEvolution` has no attribute `protocol`.
         serialized = serialize(old_struct, protocol=self.protocol)
+        # pyrefly: ignore [missing-attribute]
         new_struct = deserialize(New, serialized, protocol=self.protocol)
 
         self.assertEqual(
@@ -73,6 +74,7 @@ class TestEvolution(unittest.TestCase):
         )
 
         # Protocol.JSON is SimpleJSON
+        # pyrefly: ignore [missing-attribute]
         if self.protocol is Protocol.JSON:
             self.assertEqual(new_struct.unqualified_new, "")
             self.assertEqual(new_struct.required_new, "")
@@ -115,8 +117,11 @@ class TestSchemaCompatibility(unittest.TestCase):
         # deserialized correctly
         # pyre-fixme[16]: `TestSchemaCompatibility` has no attribute `protocol`.
         self.serialize_deserialize_round_trip(MyUnion_V1(), self.protocol)
+        # pyrefly: ignore [missing-attribute]
         self.serialize_deserialize_round_trip(MyUnion_V2(), self.protocol)
+        # pyrefly: ignore [missing-attribute]
         self.serialize_deserialize_round_trip(MyStruct_V1(), self.protocol)
+        # pyrefly: ignore [missing-attribute]
         self.serialize_deserialize_round_trip(MyStruct_V2(), self.protocol)
 
     def test_union_compatibility(self) -> None:
@@ -127,6 +132,7 @@ class TestSchemaCompatibility(unittest.TestCase):
         # We should be able to deserialize the v2 union to v1 union, even if the
         # v2 union has a new field that is not present in the v1 union. In this
         # case, we expect the deserialized v1 union to be empty.
+        # pyrefly: ignore [missing-attribute]
         u_v1 = deserialize(MyUnion_V1, serialized, protocol=self.protocol)
         self.assertEqual(MyUnion_V1(), u_v1)
 
@@ -141,6 +147,7 @@ class TestSchemaCompatibility(unittest.TestCase):
         # the v2 union has a new field that is not present in the v1 union. In
         # this case, we expect the deserialized v1 struct to have an empty v1
         # union.
+        # pyrefly: ignore [missing-attribute]
         s_v1 = deserialize(MyStruct_V1, serialized, protocol=self.protocol)
         self.assertEqual(11, s_v1.i32_field)
         self.assertEqual(MyUnion_V1(), s_v1.union_field)

@@ -72,11 +72,13 @@ class AbstractTest:
             newdouble=5.5,
             newstruct=Bonk(message="Hello!", type=123),
             newlist=[7, 8, 9],
+            # pyrefly: ignore [bad-argument-type]
             newset=[42, 1, 8],
             newmap={1: 2, 2: 3},
             newstring="Hola!",
             # json cannot serialize bytes in python 3
             newunicodestring=(
+                # pyrefly: ignore [bad-argument-type]
                 "any\x7f\xff".encode("utf-8")
                 if sys.version_info[0] < 3
                 else "any\x7f\xff"
@@ -86,6 +88,7 @@ class AbstractTest:
         )
 
         self.sjtObj = SimpleJSONTestStruct(
+            # pyrefly: ignore [bad-argument-type]
             m={
                 1: self.v1obj,
                 2: self.v2obj,
@@ -93,9 +96,11 @@ class AbstractTest:
         )
 
     def _serialize(self, obj):
+        # pyrefly: ignore [missing-attribute]
         return Serializer.serialize(self.protocol_factory, obj)
 
     def _deserialize(self, objtype, data):
+        # pyrefly: ignore [missing-attribute]
         return Serializer.deserialize(self.protocol_factory, data, objtype())
 
     def testSimpleJSON(self):
@@ -109,7 +114,9 @@ class AbstractTest:
         if isinstance(self, SimpleJSONTest):
             return
         obj = self._deserialize(VersioningTestV2, self._serialize(self.v1obj))
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj.begin_in_both, self.v1obj.begin_in_both)
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj.end_in_both, self.v1obj.end_in_both)
 
     def testUnicodeString(self):
@@ -122,13 +129,16 @@ class AbstractTest:
         if isinstance(self, SimpleJSONTest):
             return
         obj = self._deserialize(VersioningTestV1, self._serialize(self.v2obj))
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj.begin_in_both, self.v2obj.begin_in_both)
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj.end_in_both, self.v2obj.end_in_both)
 
     def testDouble(self):
         if isinstance(self, SimpleJSONTest):
             return
         obj = self._deserialize(VersioningTestV2, self._serialize(self.v2obj))
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(obj.newdouble, self.v2obj.newdouble)
 
 
@@ -218,9 +228,11 @@ class HeaderDefaultFactory(THeaderProtocol.THeaderProtocolFactory):
 
 class HeaderTest(AbstractTest):
     def _serialize(self, obj):
+        # pyrefly: ignore [missing-attribute]
         return Serializer.serialize(self.serialize_factory, obj)
 
     def _deserialize(self, objtype, data):
+        # pyrefly: ignore [missing-attribute]
         return Serializer.deserialize(self.deserialize_factory, data, objtype())
 
 
@@ -285,6 +297,7 @@ def suite():
         HeaderCompactToBinaryTest,
     )
     for clazz in test_classes:
+        # pyrefly: ignore [bad-argument-type]
         suite.addTest(loader.loadTestsFromTestCase(clazz))
 
     return suite

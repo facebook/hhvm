@@ -32,6 +32,7 @@ class TestUnionStructs(unittest.TestCase):
 
         v = TestUnion(string_field="test")
         self.assertEqual(TestUnion.STRING_FIELD, v.getType())
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual("test", v.value)
         self.assertNotEqual(u, v)
 
@@ -96,7 +97,9 @@ class TestUnionStructs(unittest.TestCase):
             (TestUnion(), TestUnion()),
             (TestUnion(i32_field=100), TestUnion(i32_field=100)),
             (
+                # pyrefly: ignore [bad-argument-count]
                 StructWithUnionAndOther(TestUnion(i32_field=100), "test"),
+                # pyrefly: ignore [bad-argument-count]
                 StructWithUnionAndOther(TestUnion(i32_field=100), "test"),
             ),
         ]
@@ -118,6 +121,7 @@ class TestUnionStructs(unittest.TestCase):
             (TestUnion(i32_field=10), {"i32_field": 10}),
             (TestUnion(string_field="test"), {"string_field": "test"}),
             (
+                # pyrefly: ignore [bad-argument-count]
                 StructWithUnionAndOther(TestUnion(i32_field=10), "test"),
                 {"test_union": {"i32_field": 10}, "string_field": "test"},
             ),
@@ -127,7 +131,9 @@ class TestUnionStructs(unittest.TestCase):
             self._test_json_output(i, j)
 
     def testIsUnion(self):
+        # pyrefly: ignore [missing-argument]
         self.assertFalse(OneOfEach.isUnion())
+        # pyrefly: ignore [missing-argument]
         self.assertTrue(TestUnion.isUnion())
 
 

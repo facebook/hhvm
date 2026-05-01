@@ -77,6 +77,7 @@ To sync them, run:
 
     def setUp(self):
         tmp = tempfile.mkdtemp()
+        # pyrefly: ignore [missing-argument]
         self.addCleanup(shutil.rmtree, tmp, True)
         self.tmp = tmp
         self.maxDiff = None

@@ -62,12 +62,14 @@ class TestSimpleJSONRead(unittest.TestCase):
         self.assertTrue(stuff_read.aBool)
 
     def test_escape_string(self):
+        # pyrefly: ignore [bad-argument-type]
         stuff = Stuff(aString=b'\\"hello')
         j = writeToJSON(stuff)
         stuff_read = readStuffFromJSON(j)
         self.assertEqual(stuff_read.aString, '\\"hello')
 
     def test_unicode_in_binary_escape(self):
+        # pyrefly: ignore [bad-argument-type]
         stuff = Stuff(aBinary=b'\\"hello'.decode("utf-8"))
         j = writeToJSON(stuff)
         self.assertEqual(j, b'{\n  "aBinary": "\\\\\\"hello"\n}')
@@ -75,6 +77,7 @@ class TestSimpleJSONRead(unittest.TestCase):
         self.assertEqual(stuff_read.aBinary, b'\\"hello')
 
     def test_unicode_string(self):
+        # pyrefly: ignore [bad-argument-type]
         stuff = Stuff(aString="año".encode("utf-8"))
         j = writeToJSON(stuff)
         stuff_read = readStuffFromJSON(j)
@@ -201,6 +204,7 @@ class TestSimpleJSONRead(unittest.TestCase):
             aLong=123456789012,
             aDouble=1234567.9,
             aBool=True,
+            # pyrefly: ignore [bad-argument-type]
             aBinary=b'\\"hello'.decode("utf-8"),
             aStruct=SomeStruct(anInteger=12, aMap={"hi": 1.5}),
             aList=[

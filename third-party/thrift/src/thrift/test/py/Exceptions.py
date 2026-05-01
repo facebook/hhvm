@@ -24,4 +24,5 @@ from ExceptionTest.ttypes import MyException
 class TestExceptions(unittest.TestCase):
     def test_exception(self):
         self.assertEqual(str(MyException()), repr(MyException()))
+        # pyrefly: ignore [bad-argument-count]
         self.assertEqual(str(MyException("foo")), "foo")

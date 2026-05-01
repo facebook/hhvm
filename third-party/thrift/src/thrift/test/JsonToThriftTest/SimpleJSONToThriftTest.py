@@ -49,6 +49,7 @@ if lib_path:
 
 class SimpleJSONToThriftTest(unittest.TestCase):
     def setUp(self):
+        # pyrefly: ignore [bad-argument-type]
         self.binaryStruct = myBinaryStruct(a="xyzzy")
 
         self.boolStruct1 = myBoolStruct(a=True)
@@ -73,6 +74,7 @@ class SimpleJSONToThriftTest(unittest.TestCase):
                 "slippy": mySimpleStruct(a=False, b=-4, c=5),
             },
             e=EnumTest.EnumTwo,
+            # pyrefly: ignore [bad-argument-count]
             x=ExceptionTest("test"),
         )
         self.complexStruct2 = myComplexStruct()
@@ -104,6 +106,7 @@ class SimpleJSONToThriftTest(unittest.TestCase):
             boolMap={True: "True", False: "False"},
             byteMap={1: "one", 2: "two"},
             doubleMap={float("0.1"): "0.one", float("0.2"): "0.two"},
+            # pyrefly: ignore [bad-argument-type]
             enumMap={1: "male", 2: "female"},
         )
 

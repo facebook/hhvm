@@ -31,29 +31,40 @@ class AbstractTestRecursivePythonStructs:
         tree = RecTree()
         child = RecTree()
         tree.children = [child]
+        # pyrefly: ignore [missing-attribute]
         ser = serialize(self.fac, tree)
         result = RecTree()
+        # pyrefly: ignore [missing-attribute]
         result = deserialize(self.fac, ser, result)
+        # pyrefly: ignore [missing-attribute]
         self.assertEqual(result, tree)
 
     def test_list(self):
         l = RecList()
         l2 = RecList()
         l.next = l2
+        # pyrefly: ignore [missing-attribute]
         ser = serialize(self.fac, l)
         result = RecList()
+        # pyrefly: ignore [missing-attribute]
         result = deserialize(self.fac, ser, result)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsNotNone(result.next)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsNone(result.next.next)
 
     def test_corec(self):
         c = CoRec()
         r = CoRec2()
         c.other = r
+        # pyrefly: ignore [missing-attribute]
         ser = serialize(self.fac, c)
         result = CoRec()
+        # pyrefly: ignore [missing-attribute]
         result = deserialize(self.fac, ser, result)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsNotNone(c.other)
+        # pyrefly: ignore [missing-attribute]
         self.assertIsNone(c.other.other)
 
 

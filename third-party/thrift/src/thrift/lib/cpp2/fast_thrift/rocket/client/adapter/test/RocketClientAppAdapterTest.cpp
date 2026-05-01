@@ -69,11 +69,9 @@ TEST(RocketClientAppAdapterTest, WriteWithoutPipelineReturnsError) {
 
   RocketRequestMessage msg{
       .frame =
-          RocketFramePayload{
-              .metadata = nullptr,
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = folly::IOBuf::copyBuffer("test"),
           },
-      .frameType = frame::FrameType::REQUEST_RESPONSE,
   };
 
   EXPECT_EQ(adapter->write(std::move(msg)), Result::Error);
@@ -147,11 +145,9 @@ TEST(RocketClientAppAdapterTest, WriteWithPipelineCallsFireWrite) {
 
   RocketRequestMessage msg{
       .frame =
-          RocketFramePayload{
-              .metadata = nullptr,
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = folly::IOBuf::copyBuffer("test"),
           },
-      .frameType = frame::FrameType::REQUEST_RESPONSE,
   };
 
   auto result = adapter->write(std::move(msg));

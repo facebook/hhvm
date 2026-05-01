@@ -51,7 +51,6 @@ using apache::thrift::fast_thrift::transport::test::TestAsyncTransport;
 // Bring message types into scope
 using rocket::kInvalidStreamId;
 using rocket::kNoRequestHandle;
-using rocket::RocketFramePayload;
 using rocket::RocketRequestMessage;
 using rocket::RocketResponseMessage;
 
@@ -204,12 +203,12 @@ class RocketClientIntegrationTest : public ::testing::Test {
       std::unique_ptr<folly::IOBuf> metadata = nullptr) {
     return RocketRequestMessage{
         .frame =
-            RocketFramePayload{
-                .metadata = std::move(metadata),
+            apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
                 .data = std::move(data),
+                .metadata = std::move(metadata),
+                .header = {.streamId = rocket::kInvalidStreamId},
             },
-        .frameType =
-            apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE};
+    };
   }
 
   folly::EventBase evb_;

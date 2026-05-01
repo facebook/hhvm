@@ -114,20 +114,16 @@ class ThriftClientTransportAdapter {
   }
 
   /**
-   * Called when the rocket pipeline delivers an error.
-   *
-   * Matches legacy RocketClientChannel behavior: transport errors (socket
-   * EOF, read/write errors, bad frames) fail all pending requests and
-   * tear down the transport connection.
-   *
-   * Propagates the error up the thrift pipeline via fireExceptionFromIndex
-   * (same mechanism TransportHandler uses), then closes the transport
+   * Called when the rocket pipeline delivers an error response.
+   * Propagates the error up the thrift pipeline and then closes the transport
    * connection.
    */
-  void onTransportError(folly::exception_wrapper&& e) noexcept {
-    if (pipeline_) {
-      pipeline_->fireException(std::move(e));
+  void onTransportError(folly::exception_wrapper&& ew) noexcept {
+    if (FOLLY_UNLIKELY(!pipeline_)) {
+      return;
     }
+
+    pipeline_->fireException(std::move(ew));
     connection_->close(
         folly::make_exception_wrapper<std::runtime_error>("Transport error"));
   }
@@ -143,39 +139,48 @@ class ThriftClientTransportAdapter {
   channel_pipeline::Result onWrite(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<ThriftRequestMessage>();
-
-    rocket::RocketRequestMessage rocketMsg{
-        .frame =
-            rocket::RocketFramePayload{
-                .metadata = std::move(request.payload.metadata),
-                .data = std::move(request.payload.data),
-                .initialRequestN = request.payload.initialRequestN,
-                .complete = request.payload.complete,
-            },
-        .requestHandle = request.requestHandle,
-        .frameType = rpcKindToFrameType(request.payload.rpcKind),
-    };
-
-    return connection_->appAdapter->write(std::move(rocketMsg));
+    switch (request.payload.rpcKind) {
+      case RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
+        return sendRequestResponse(std::move(request));
+      case RpcKind::SINGLE_REQUEST_NO_RESPONSE:
+        [[fallthrough]];
+      case RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
+        [[fallthrough]];
+      case RpcKind::SINK:
+        [[fallthrough]];
+      case RpcKind::BIDIRECTIONAL_STREAM:
+        XLOG(ERR) << "Unsupported RPC kind: "
+                  << static_cast<uint32_t>(request.payload.rpcKind);
+        return channel_pipeline::Result::Error;
+      default:
+        XLOG(ERR) << "Unknown RPC kind: "
+                  << static_cast<uint32_t>(request.payload.rpcKind);
+        return channel_pipeline::Result::Error;
+    }
   }
 
-  /**
-   * Called when an exception propagates through the thrift pipeline.
-   *
-   * Matches legacy RocketClientChannel behavior: per-request thrift errors
-   * (declared exceptions, TApplicationException) are delivered to that
-   * request's callback only and do NOT close the transport connection.
-   * Transport teardown is handled by TransportHandler's own lifecycle.
-   */
-  void onException(folly::exception_wrapper&& /*e*/) noexcept {}
+  void onReadReady() noexcept {}
 
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}
   void onPipelineActive() noexcept {}
   void onPipelineInactive() noexcept {}
-  void onReadReady() noexcept {}
 
  private:
+  apache::thrift::fast_thrift::channel_pipeline::Result sendRequestResponse(
+      ThriftRequestMessage&& request) {
+    rocket::RocketRequestMessage rocketMsg{
+        .frame =
+            apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+                .data = std::move(request.payload.data),
+                .metadata = std::move(request.payload.metadata),
+                .header = {.streamId = rocket::kInvalidStreamId},
+            },
+        .requestHandle = request.requestHandle,
+    };
+
+    return connection_->appAdapter->write(std::move(rocketMsg));
+  }
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
   std::unique_ptr<rocket::client::RocketClientConnection> connection_;
 };

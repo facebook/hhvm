@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/ExceptionWrapper.h>
 #include <folly/container/F14Set.h>
 #include <folly/io/IOBuf.h>
 #include <folly/logging/xlog.h>
@@ -25,8 +26,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 
 namespace apache::thrift::fast_thrift::rocket::client::handler {
@@ -35,19 +35,15 @@ namespace apache::thrift::fast_thrift::rocket::client::handler {
  * RocketClientRequestResponseFrameHandler - Duplex pipeline handler for
  * REQUEST_RESPONSE interactions.
  *
- * This handler manages both outbound request serialization and inbound
- * response handling for REQUEST_RESPONSE streams. It tracks which stream IDs
- * belong to request-response interactions to properly route inbound frames.
+ * Responsibilities (post-codec-serialization migration):
+ *   - Outbound: track REQUEST_RESPONSE streamIds so inbound responses can be
+ *     validated. Does NOT serialize — RocketClientFrameCodecHandler does.
+ *   - Inbound: validate that frames on a tracked RR stream are PAYLOAD/ERROR
+ *     and (for PAYLOAD) carry NEXT or COMPLETE.
  *
- * Pipeline position:
- *   App <-> RocketClientSetupFrameHandler <-> RocketClientStreamStateHandler
- * <-> RocketClientRequestResponseFrameHandler <-> Transport
- *
- * Message flow:
- *   Outbound: RocketRequestMessage{streamId, frameType, payload} ->
- *             std::unique_ptr<folly::IOBuf> (serialized frame)
- *   Inbound:  ParsedFrame -> (if request-response stream) handle locally,
- *             otherwise forward to next handler
+ * Pipeline position (outbound, head -> tail):
+ *   App -> ... -> StreamStateHandler -> SetupFrameHandler ->
+ *   RequestResponseFrameHandler -> FrameCodecHandler -> Transport
  */
 class RocketClientRequestResponseFrameHandler {
  public:
@@ -82,13 +78,10 @@ class RocketClientRequestResponseFrameHandler {
           msg) noexcept {
     auto& response = msg.get<RocketResponseMessage>();
 
-    // Check if this is a request-response stream
     auto it = requestResponseStreams_.find(response.frame.streamId());
     if (it == requestResponseStreams_.end()) {
-      // Not a request-response stream, forward to next handler
       return ctx.fireRead(std::move(msg));
     } else {
-      // Erase from tracking since we received the response
       requestResponseStreams_.erase(it);
     }
 
@@ -107,13 +100,6 @@ class RocketClientRequestResponseFrameHandler {
 
   // === OutboundHandler ===
 
-  /**
-   * Handle outbound RocketRequestMessage.
-   *
-   * For REQUEST_RESPONSE frames: tracks the stream ID and serializes
-   * the payload into a wire-format frame.
-   * For other frame types: forwards unchanged to the next handler.
-   */
   template <typename Context>
   void onPipelineActive(Context& /*ctx*/) noexcept {}
 
@@ -125,6 +111,14 @@ class RocketClientRequestResponseFrameHandler {
   template <typename Context>
   void onWriteReady(Context& /*ctx*/) noexcept {}
 
+  /**
+   * Handle outbound RocketRequestMessage.
+   *
+   * For REQUEST_RESPONSE frames: tracks the stream ID for inbound validation
+   * and forwards the typed payload variant unchanged. The codec downstream
+   * serializes it.
+   * For other frame types: forwards unchanged.
+   */
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result onWrite(
       Context& ctx,
@@ -132,36 +126,21 @@ class RocketClientRequestResponseFrameHandler {
           msg) noexcept {
     auto& request = msg.get<RocketRequestMessage>();
 
-    // We only handle REQUEST_RESPONSE frames
-    if (request.frameType !=
+    if (request.frame.frameType() !=
         apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE) {
       return ctx.fireWrite(std::move(msg));
     }
 
-    // Get the payload from the variant
-    auto& payload = request.frame.get<RocketFramePayload>();
+    auto& payload = request.frame.get<
+        apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>();
 
-    // Track this stream ID as a request-response stream
-    // Cache the stream ID for the case where we fail to send the frame
-    uint32_t streamId = payload.streamId;
+    // StreamStateHandler upstream stamps the streamId before this point.
+    uint32_t streamId = payload.header.streamId;
     requestResponseStreams_.insert(streamId);
-
-    // Serialize the request into a frame
-    auto serializedFrame = apache::thrift::fast_thrift::frame::write::serialize(
-        apache::thrift::fast_thrift::frame::write::RequestResponseHeader{
-            .streamId = streamId,
-            .follows = payload.follows,
-        },
-        std::move(payload.metadata),
-        std::move(payload.data));
-
-    // Replace payload with serialized frame in the variant
-    request.frame = std::move(serializedFrame);
 
     auto result = ctx.fireWrite(std::move(msg));
     if (result ==
         apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
-      // If we failed to send the frame, we should remove from tracking
       requestResponseStreams_.erase(streamId);
     }
     return result;
@@ -187,7 +166,6 @@ class RocketClientRequestResponseFrameHandler {
     // NOLINTNEXTLINE(clang-diagnostic-switch-enum)
     switch (response.frame.type()) {
       case apache::thrift::fast_thrift::frame::FrameType::PAYLOAD: {
-        // For request-response, payload must have next or complete flag
         if (!response.frame.hasNext() && !response.frame.isComplete()) {
           XLOG(ERR)
               << "Client received single response payload without next or "

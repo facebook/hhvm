@@ -117,9 +117,13 @@ auto makeDefaultFactory() {
   };
 }
 
-// Helper to get the serialized frame from the variant
-std::unique_ptr<folly::IOBuf>& getSerializedFrame(RocketRequestMessage& msg) {
-  return msg.frame.get<std::unique_ptr<folly::IOBuf>>();
+// Helper to serialize the SETUP payload held in the variant for wire-byte
+// inspection. After this call the held payload's data/metadata are moved out.
+std::unique_ptr<folly::IOBuf> serializeSetupFrame(RocketRequestMessage& msg) {
+  return std::move(
+             msg.frame
+                 .get<apache::thrift::fast_thrift::frame::ComposedSetupFrame>())
+      .serialize();
 }
 
 } // namespace
@@ -142,9 +146,10 @@ TEST_F(ClientSetupFrameHandlerTest, OnConnectWritesSetupFrame) {
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  EXPECT_NE(getSerializedFrame(msg), nullptr);
+  EXPECT_NE(serializeSetupFrame(msg), nullptr);
   EXPECT_EQ(
-      msg.frameType, apache::thrift::fast_thrift::frame::FrameType::SETUP);
+      msg.frame.frameType(),
+      apache::thrift::fast_thrift::frame::FrameType::SETUP);
 }
 
 TEST_F(ClientSetupFrameHandlerTest, OnConnectClosesOnWriteFailure) {
@@ -196,7 +201,7 @@ TEST_F(ClientSetupFrameHandlerTest, SetupFrameHasCorrectHeaderFormat) {
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  auto coalesced = getSerializedFrame(msg)->cloneCoalesced();
+  auto coalesced = serializeSetupFrame(msg)->cloneCoalesced();
   folly::io::Cursor cursor(coalesced.get());
 
   // Stream ID (4 bytes)
@@ -259,7 +264,7 @@ TEST_F(ClientSetupFrameHandlerTest, SetupFrameIncludesMetadataAndData) {
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
   // Frame should be larger than just metadata + data (header overhead)
   EXPECT_GT(
-      getSerializedFrame(msg)->computeChainDataLength(),
+      serializeSetupFrame(msg)->computeChainDataLength(),
       testMetadata.size() + testData.size());
 }
 
@@ -313,7 +318,7 @@ TEST_F(ClientSetupFrameHandlerTest, NullMetadataStillSendsFrame) {
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  EXPECT_NE(getSerializedFrame(msg), nullptr);
+  EXPECT_NE(serializeSetupFrame(msg), nullptr);
 }
 
 TEST_F(ClientSetupFrameHandlerTest, NullDataStillSendsFrame) {
@@ -325,7 +330,7 @@ TEST_F(ClientSetupFrameHandlerTest, NullDataStillSendsFrame) {
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  EXPECT_NE(getSerializedFrame(msg), nullptr);
+  EXPECT_NE(serializeSetupFrame(msg), nullptr);
 }
 
 TEST_F(ClientSetupFrameHandlerTest, NullMetadataAndDataStillSendsFrame) {
@@ -336,7 +341,7 @@ TEST_F(ClientSetupFrameHandlerTest, NullMetadataAndDataStillSendsFrame) {
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  EXPECT_NE(getSerializedFrame(msg), nullptr);
+  EXPECT_NE(serializeSetupFrame(msg), nullptr);
 }
 
 TEST_F(ClientSetupFrameHandlerTest, EmptyMetadataStillSendsFrame) {
@@ -418,7 +423,7 @@ TEST_F(ClientSetupFrameHandlerTest, OnDisconnectAllowsMultipleReconnections) {
   for (auto& msg : ctx_.writeMessages()) {
     auto& rocketMsg = msg.get<RocketRequestMessage>();
     EXPECT_EQ(
-        rocketMsg.frameType,
+        rocketMsg.frame.frameType(),
         apache::thrift::fast_thrift::frame::FrameType::SETUP);
   }
 }
@@ -443,9 +448,10 @@ TEST_F(ClientSetupFrameHandlerTest, OnWritePassesThrough) {
 
   auto data = folly::IOBuf::copyBuffer("test data");
   RocketRequestMessage msg{
-      .frame = std::move(data),
-      .frameType =
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+              .data = std::move(data),
+          },
   };
 
   auto result = handler.onWrite(ctx_, erase_and_box(std::move(msg)));

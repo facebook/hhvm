@@ -160,7 +160,7 @@ TEST(ThriftClientTransportAdapterTest, OnWriteConvertsRpcKindToFrameType) {
   EXPECT_EQ(result, Result::Success);
 
   auto& rocketMsg = capturedMsg.get<rocket::RocketRequestMessage>();
-  EXPECT_EQ(rocketMsg.frameType, frame::FrameType::REQUEST_RESPONSE);
+  EXPECT_EQ(rocketMsg.frame.frameType(), frame::FrameType::REQUEST_RESPONSE);
   EXPECT_EQ(rocketMsg.requestHandle, 42u);
 }
 
@@ -256,32 +256,6 @@ TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {
       folly::make_exception_wrapper<std::runtime_error>("connection lost"));
 
   EXPECT_EQ(thriftTail.exceptionCount(), 1);
-}
-
-TEST(ThriftClientTransportAdapterTest, OnExceptionIsNoOp) {
-  auto connection = std::make_unique<rocket::client::RocketClientConnection>();
-  ThriftClientTransportAdapter adapter(std::move(connection));
-
-  folly::EventBase evb;
-  MockTailHandler thriftTail;
-  TestAllocator thriftAllocator;
-
-  auto thriftPipeline = PipelineBuilder<
-                            ThriftClientTransportAdapter,
-                            MockTailHandler,
-                            TestAllocator>()
-                            .setEventBase(&evb)
-                            .setHead(&adapter)
-                            .setTail(&thriftTail)
-                            .setAllocator(&thriftAllocator)
-                            .build();
-
-  adapter.setPipeline(thriftPipeline.get());
-
-  adapter.onException(
-      folly::make_exception_wrapper<std::runtime_error>("test error"));
-
-  EXPECT_EQ(thriftTail.exceptionCount(), 0);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::client::test

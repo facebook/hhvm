@@ -43,13 +43,12 @@ RocketRequestMessage makeClientRequest(
     uint32_t requestHandle = kNoRequestHandle) {
   return RocketRequestMessage{
       .frame =
-          RocketFramePayload{
-              .metadata = std::move(metadata),
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = std::move(data),
+              .metadata = std::move(metadata),
+              .header = {.streamId = kInvalidStreamId},
           },
       .requestHandle = requestHandle,
-      .frameType =
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 }
 
@@ -57,7 +56,9 @@ RocketRequestMessage makeClientRequest(
  * Helper to get the streamId from a RocketRequestMessage.
  */
 uint32_t getStreamId(const RocketRequestMessage& msg) {
-  return msg.frame.get<RocketFramePayload>().streamId;
+  return msg.frame
+      .get<apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>()
+      .header.streamId;
 }
 
 /**
@@ -217,7 +218,7 @@ TEST_F(
   auto& writtenMsg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
   EXPECT_EQ(getStreamId(writtenMsg), 1);
   EXPECT_EQ(
-      writtenMsg.frameType,
+      writtenMsg.frame.frameType(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
   EXPECT_TRUE(handler_.hasActiveStream(1));
   EXPECT_EQ(handler_.activeStreamCount(), 1);

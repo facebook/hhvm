@@ -33,17 +33,18 @@ namespace apache::thrift::fast_thrift::rocket::client::handler {
 /**
  * RocketClientFrameCodecHandler - Bidirectional codec for Rocket frames.
  *
- * This handler handles both directions of frame processing:
+ * The single point in the client pipeline that converts between typed
+ * payloads and wire bytes:
  *
  * Outbound (write path):
- *   RocketRequestMessage (with serializedFrame) ->
- * std::unique_ptr<folly::IOBuf> Simply extracts the pre-serialized frame from
- * the message and forwards it.
+ *   RocketRequestMessage{frame = Composed*Frame variant alternative}
+ *     -> std::unique_ptr<folly::IOBuf>
+ *   Visits the variant and dispatches to the matching
+ *   `frame::write::serialize(Composed*Frame&&)` overload.
  *
  * Inbound (read path):
  *   std::unique_ptr<folly::IOBuf> -> RocketResponseMessage
- *   Parses the raw IOBuf into a ParsedFrame, validates it, and wraps it
- *   in a RocketResponseMessage for upstream handlers.
+ *   Parses raw bytes into a ParsedFrame, validates, and wraps it.
  *
  * Pipeline position:
  *   Transport -> FrameLengthParserHandler -> RocketClientFrameCodecHandler ->
@@ -77,11 +78,9 @@ class RocketClientFrameCodecHandler {
     auto buf =
         msg.take<apache::thrift::fast_thrift::channel_pipeline::BytesPtr>();
 
-    // Parse the frame
     auto frame =
         apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf));
 
-    // Validate the frame before proceeding
     if (!frame.isValid()) {
       ctx.fireException(
           folly::make_exception_wrapper<std::runtime_error>(
@@ -89,7 +88,6 @@ class RocketClientFrameCodecHandler {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
 
-    // Convert to Rocket response message
     auto response = RocketResponseMessage{
         .frame = std::move(frame),
         .requestFrameType =
@@ -115,8 +113,16 @@ class RocketClientFrameCodecHandler {
           msg) noexcept {
     auto request = msg.take<RocketRequestMessage>();
 
-    // Extract the serialized frame from the variant
-    auto& serializedFrame = request.frame.get<std::unique_ptr<folly::IOBuf>>();
+    std::unique_ptr<folly::IOBuf> serializedFrame;
+    try {
+      serializedFrame = std::move(request.frame).serialize();
+    } catch (...) {
+      // TODO: surface the caught exception to the originating request's
+      // callback (per-request failure). For now, return Error so the
+      // outbound chain unwinds cleanly and we don't std::terminate via
+      // the noexcept boundary; the exception itself is dropped.
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
+    }
 
     return ctx.fireWrite(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(

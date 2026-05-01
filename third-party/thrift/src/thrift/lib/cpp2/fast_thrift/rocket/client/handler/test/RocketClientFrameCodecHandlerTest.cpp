@@ -321,14 +321,20 @@ TEST_F(RocketClientFrameCodecHandlerTest, ForwardsException) {
 // Outbound (Write) - Basic Encoding Tests
 // =============================================================================
 
-TEST_F(RocketClientFrameCodecHandlerTest, ForwardsSerializedFrame) {
-  auto serializedFrame = folly::IOBuf::copyBuffer("serialized frame data");
-  auto expectedData = serializedFrame->clone();
+TEST_F(RocketClientFrameCodecHandlerTest, SerializesRequestResponsePayload) {
+  auto data = folly::IOBuf::copyBuffer("data");
+  auto expectedFrame = apache::thrift::fast_thrift::frame::write::serialize(
+      apache::thrift::fast_thrift::frame::write::RequestResponseHeader{
+          .streamId = 1},
+      nullptr,
+      data->clone());
 
   RocketRequestMessage request{
-      .frame = std::move(serializedFrame),
-      .frameType =
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+              .data = std::move(data),
+              .header = {.streamId = 1},
+          },
   };
 
   auto result = handler_.onWrite(ctx_, erase_and_box(std::move(request)));
@@ -338,16 +344,18 @@ TEST_F(RocketClientFrameCodecHandlerTest, ForwardsSerializedFrame) {
 
   auto& writtenFrame =
       ctx_.writeMessages()[0].get<std::unique_ptr<folly::IOBuf>>();
-  EXPECT_TRUE(folly::IOBufEqualTo{}(*writtenFrame, *expectedData));
+  EXPECT_TRUE(folly::IOBufEqualTo{}(*writtenFrame, *expectedFrame));
 }
 
 TEST_F(RocketClientFrameCodecHandlerTest, PropagatesWriteError) {
   ctx_.setWriteResult(Result::Error);
 
   RocketRequestMessage request{
-      .frame = folly::IOBuf::copyBuffer("test"),
-      .frameType =
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+              .data = folly::IOBuf::copyBuffer("test"),
+              .header = {.streamId = 1},
+          },
   };
 
   auto result = handler_.onWrite(ctx_, erase_and_box(std::move(request)));
@@ -359,9 +367,11 @@ TEST_F(RocketClientFrameCodecHandlerTest, PropagatesWriteBackpressure) {
   ctx_.setWriteResult(Result::Backpressure);
 
   RocketRequestMessage request{
-      .frame = folly::IOBuf::copyBuffer("test"),
-      .frameType =
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+              .data = folly::IOBuf::copyBuffer("test"),
+              .header = {.streamId = 1},
+          },
   };
 
   auto result = handler_.onWrite(ctx_, erase_and_box(std::move(request)));

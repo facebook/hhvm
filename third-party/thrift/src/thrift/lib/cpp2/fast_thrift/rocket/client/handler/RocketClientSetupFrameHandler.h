@@ -22,8 +22,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 
 namespace apache::thrift::fast_thrift::rocket::client::handler {
@@ -134,19 +133,17 @@ class RocketClientSetupFrameHandler {
  private:
   RocketRequestMessage makeSetupMessage() {
     auto [metadata, data] = setupFactory_();
-    auto serializedFrame = apache::thrift::fast_thrift::frame::write::serialize(
-        apache::thrift::fast_thrift::frame::write::SetupHeader{
-            .majorVersion = kRSocketMajorVersion,
-            .minorVersion = kRSocketMinorVersion,
-            .keepaliveTime = kMaxKeepaliveTime,
-            .maxLifetime = kMaxLifetime,
-        },
-        std::move(metadata),
-        std::move(data));
-
     return RocketRequestMessage{
-        .frame = std::move(serializedFrame),
-        .frameType = apache::thrift::fast_thrift::frame::FrameType::SETUP,
+        .frame =
+            apache::thrift::fast_thrift::frame::ComposedSetupFrame{
+                .data = std::move(data),
+                .metadata = std::move(metadata),
+                .header =
+                    {.majorVersion = kRSocketMajorVersion,
+                     .minorVersion = kRSocketMinorVersion,
+                     .keepaliveTime = kMaxKeepaliveTime,
+                     .maxLifetime = kMaxLifetime},
+            },
     };
   }
 

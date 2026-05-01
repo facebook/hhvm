@@ -45,20 +45,35 @@ RocketRequestMessage makeStreamRequest(
     std::unique_ptr<folly::IOBuf> metadata = nullptr) {
   return RocketRequestMessage{
       .frame =
-          RocketFramePayload{
-              .metadata = std::move(metadata),
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = std::move(data),
-              .streamId = streamId,
+              .metadata = std::move(metadata),
+              .header = {.streamId = streamId},
           },
-      .frameType =
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE};
+  };
 }
 
 /**
- * Helper to get the serialized frame from the variant.
+ * Helper to read string content from an IOBuf chain.
  */
-std::unique_ptr<folly::IOBuf>& getSerializedFrame(RocketRequestMessage& msg) {
-  return msg.frame.get<std::unique_ptr<folly::IOBuf>>();
+std::string readBufString(const folly::IOBuf* buf) {
+  if (buf == nullptr) {
+    return {};
+  }
+  std::string out;
+  for (auto range : *buf) {
+    out.append(reinterpret_cast<const char*>(range.data()), range.size());
+  }
+  return out;
+}
+
+/**
+ * Helper to extract the typed payload alternative from the variant.
+ */
+const apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame&
+getForwardedPayload(const RocketRequestMessage& msg) {
+  return msg.frame
+      .get<apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>();
 }
 
 /**
@@ -81,18 +96,6 @@ RocketResponseMessage makePayloadResponse(
       .requestFrameType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
-}
-
-/**
- * Helper to read string content from a ParsedFrame's data section.
- */
-std::string readFrameData(
-    const apache::thrift::fast_thrift::frame::read::ParsedFrame& frame) {
-  auto cursor = frame.dataCursor();
-  std::string data;
-  data.resize(frame.dataSize());
-  cursor.pull(data.data(), frame.dataSize());
-  return data;
 }
 
 /**
@@ -170,8 +173,12 @@ class ClientRequestResponseFrameHandlerTest : public ::testing::Test {
 };
 
 // =============================================================================
-// Outbound: Frame Serialization
+// Outbound: Typed payload pass-through (handler no longer serializes)
 // =============================================================================
+//
+// The codec downstream of this handler is what serializes the typed payload
+// into wire bytes. These tests verify the handler forwards the payload
+// unchanged (data/metadata preserved, streamId intact, frame type intact).
 
 TEST_F(ClientRequestResponseFrameHandlerTest, Write_DataOnly) {
   const std::string dataStr = "test data content";
@@ -183,15 +190,14 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Write_DataOnly) {
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
 
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  auto frame = apache::thrift::fast_thrift::frame::read::parseFrame(
-      getSerializedFrame(msg)->cloneCoalesced());
-
-  EXPECT_EQ(frame.streamId(), 42);
+  const auto& payload = getForwardedPayload(msg);
+  EXPECT_EQ(payload.header.streamId, 42u);
+  EXPECT_EQ(payload.metadata, nullptr);
+  EXPECT_EQ(readBufString(payload.data.get()), dataStr);
   EXPECT_EQ(
-      apache::thrift::fast_thrift::frame::read::FrameView(frame).type(),
+      msg.frame.frameType(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
-  EXPECT_FALSE(frame.hasMetadata());
-  EXPECT_EQ(readFrameData(frame), dataStr);
+  EXPECT_TRUE(handler_.hasPendingRequestResponse(42));
 }
 
 TEST_F(ClientRequestResponseFrameHandlerTest, Write_MetadataOnly) {
@@ -204,12 +210,9 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Write_MetadataOnly) {
       Result::Success);
 
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  auto frame = apache::thrift::fast_thrift::frame::read::parseFrame(
-      getSerializedFrame(msg)->cloneCoalesced());
-
-  EXPECT_TRUE(frame.hasMetadata());
-  EXPECT_EQ(frame.metadataSize(), metadataStr.size());
-  EXPECT_EQ(frame.dataSize(), 0u);
+  const auto& payload = getForwardedPayload(msg);
+  EXPECT_EQ(readBufString(payload.metadata.get()), metadataStr);
+  EXPECT_EQ(payload.data, nullptr);
 }
 
 TEST_F(ClientRequestResponseFrameHandlerTest, Write_DataAndMetadata) {
@@ -225,14 +228,10 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Write_DataAndMetadata) {
       Result::Success);
 
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  auto serializedFrame = getSerializedFrame(msg)->cloneCoalesced();
-  auto frame = apache::thrift::fast_thrift::frame::read::parseFrame(
-      std::move(serializedFrame));
-
-  EXPECT_EQ(frame.streamId(), 99);
-  EXPECT_TRUE(frame.hasMetadata());
-  EXPECT_EQ(frame.metadataSize(), metadataStr.size());
-  EXPECT_EQ(readFrameData(frame), dataStr);
+  const auto& payload = getForwardedPayload(msg);
+  EXPECT_EQ(payload.header.streamId, 99u);
+  EXPECT_EQ(readBufString(payload.metadata.get()), metadataStr);
+  EXPECT_EQ(readBufString(payload.data.get()), dataStr);
 }
 
 TEST_F(ClientRequestResponseFrameHandlerTest, Write_EmptyPayload) {
@@ -243,10 +242,11 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Write_EmptyPayload) {
       Result::Success);
 
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  auto frame = apache::thrift::fast_thrift::frame::read::parseFrame(
-      getSerializedFrame(msg)->cloneCoalesced());
+  const auto& payload = getForwardedPayload(msg);
+  EXPECT_EQ(payload.data, nullptr);
+  EXPECT_EQ(payload.metadata, nullptr);
   EXPECT_EQ(
-      apache::thrift::fast_thrift::frame::read::FrameView(frame).type(),
+      msg.frame.frameType(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
 }
 
@@ -263,38 +263,29 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Write_LargePayload) {
       Result::Success);
 
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  EXPECT_GT(getSerializedFrame(msg)->computeChainDataLength(), dataSize);
+  const auto& payload = getForwardedPayload(msg);
+  EXPECT_EQ(payload.data->computeChainDataLength(), dataSize);
 }
 
 TEST_F(
     ClientRequestResponseFrameHandlerTest, Write_NonRequestResponse_Forwards) {
-  const std::vector<apache::thrift::fast_thrift::frame::FrameType> otherTypes =
-      {
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM,
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_FNF,
-          apache::thrift::fast_thrift::frame::FrameType::REQUEST_CHANNEL,
-      };
+  RocketRequestMessage request{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedSetupFrame{
+              .data = folly::IOBuf::copyBuffer("data"),
+          },
+  };
 
-  for (auto frameType : otherTypes) {
-    ctx_.reset();
-    RocketRequestMessage request{
-        .frame =
-            RocketFramePayload{
-                .metadata = {},
-                .data = folly::IOBuf::copyBuffer("data"),
-                .streamId = 1,
-            },
-        .frameType = frameType};
+  EXPECT_EQ(
+      handler_.onWrite(ctx_, erase_and_box(std::move(request))),
+      Result::Success);
+  ASSERT_EQ(ctx_.writeMessages().size(), 1);
 
-    EXPECT_EQ(
-        handler_.onWrite(ctx_, erase_and_box(std::move(request))),
-        Result::Success);
-    ASSERT_EQ(ctx_.writeMessages().size(), 1);
-
-    // Should forward unchanged as RocketRequestMessage
-    auto& forwarded = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-    EXPECT_EQ(forwarded.frameType, frameType);
-  }
+  auto& forwarded = ctx_.writeMessages()[0].get<RocketRequestMessage>();
+  EXPECT_EQ(
+      forwarded.frame.frameType(),
+      apache::thrift::fast_thrift::frame::FrameType::SETUP);
+  EXPECT_EQ(handler_.pendingRequestResponseCount(), 0);
 }
 
 // =============================================================================

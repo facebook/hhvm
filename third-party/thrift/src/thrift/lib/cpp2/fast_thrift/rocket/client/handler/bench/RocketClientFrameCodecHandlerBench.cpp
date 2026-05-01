@@ -18,12 +18,13 @@
  * RocketClientFrameCodecHandler Microbenchmarks
  *
  * This handler does:
- * - onWrite: Extracts pre-serialized IOBuf from RocketRequestMessage (trivial)
+ * - onWrite: Visits the RocketRequestMessage::frame variant and serializes
+ *   the held Composed*Frame alternative into wire bytes.
  * - onRead: Parses raw IOBuf into ParsedFrame using parseFrame()
  *
  * Meaningful benchmarks:
  * - Read path: Frame parsing overhead for different frame types
- * - Write path: Message extraction overhead (minimal)
+ * - Write path: Payload serialization overhead per frame type
  */
 
 #include <folly/Benchmark.h>
@@ -78,18 +79,13 @@ std::unique_ptr<folly::IOBuf> createErrorFrame(uint32_t streamId) {
       folly::IOBuf::copyBuffer("error"));
 }
 
-std::unique_ptr<folly::IOBuf> createRequestResponseFrame(uint32_t streamId) {
-  return serialize(
-      RequestResponseHeader{.streamId = streamId},
-      nullptr,
-      folly::IOBuf::copyBuffer("data"));
-}
-
-RocketRequestMessage createRocketRequestWithSerializedFrame(
-    std::unique_ptr<folly::IOBuf> frame) {
+RocketRequestMessage createRocketRequestResponseRequest(uint32_t streamId) {
   return RocketRequestMessage{
-      .frame = std::move(frame),
-      .frameType = FrameType::REQUEST_RESPONSE,
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+              .data = folly::IOBuf::copyBuffer("data"),
+              .header = {.streamId = streamId},
+          },
   };
 }
 
@@ -157,10 +153,10 @@ BENCHMARK(Read_FrameCodec_ErrorFrame, iters) {
 BENCHMARK_DRAW_LINE();
 
 // =============================================================================
-// Write Path Benchmarks - Just extracts IOBuf from message (trivial)
+// Write Path Benchmarks - Codec serializes the held Composed*Frame
 // =============================================================================
 
-BENCHMARK(Write_FrameCodec_ExtractSerializedFrame, iters) {
+BENCHMARK(Write_FrameCodec_SerializeRequestResponse, iters) {
   folly::BenchmarkSuspender suspender;
   RocketClientFrameCodecHandler handler;
   BenchContext ctx;
@@ -168,8 +164,7 @@ BENCHMARK(Write_FrameCodec_ExtractSerializedFrame, iters) {
   std::vector<RocketRequestMessage> requests;
   requests.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    requests.push_back(
-        createRocketRequestWithSerializedFrame(createRequestResponseFrame(1)));
+    requests.push_back(createRocketRequestResponseRequest(1));
   }
 
   suspender.dismiss();

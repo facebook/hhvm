@@ -132,13 +132,11 @@ std::unique_ptr<folly::IOBuf> prependLengthPrefix(
 RocketRequestMessage createRocketRequest(size_t payloadSize) {
   return RocketRequestMessage{
       .frame =
-          RocketFramePayload{
-              .metadata = nullptr,
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = makePayloadData(payloadSize),
-              .streamId = kInvalidStreamId,
+              .header = {.streamId = kInvalidStreamId},
           },
       .requestHandle = 1,
-      .frameType = FrameType::REQUEST_RESPONSE,
   };
 }
 

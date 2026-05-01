@@ -247,11 +247,10 @@ class RocketE2ETest : public ::testing::Test {
   RocketRequestMessage createRequest(std::unique_ptr<folly::IOBuf> data) {
     return RocketRequestMessage{
         .frame =
-            RocketFramePayload{
-                .metadata = nullptr,
+            apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
                 .data = std::move(data),
+                .header = {.streamId = kInvalidStreamId},
             },
-        .frameType = frame::FrameType::REQUEST_RESPONSE,
     };
   }
 

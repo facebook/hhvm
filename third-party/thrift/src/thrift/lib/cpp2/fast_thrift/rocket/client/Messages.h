@@ -16,15 +16,13 @@
 
 #pragma once
 
-#include <folly/ExceptionWrapper.h>
-#include <folly/io/IOBuf.h>
-#include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
 
 #include <cstdint>
 #include <limits>
-#include <memory>
 
 namespace apache::thrift::fast_thrift::rocket {
 
@@ -40,24 +38,6 @@ constexpr uint32_t kNoRequestHandle = 0;
 /// StreamStateHandler assigns a valid streamId on outbound requests.
 constexpr uint32_t kInvalidStreamId = std::numeric_limits<uint32_t>::max();
 
-// Payload
-/**
- * RocketFramePayload - Unserialized frame payload.
- */
-#pragma pack(push, 1)
-struct RocketFramePayload {
-  std::unique_ptr<folly::IOBuf> metadata;
-  std::unique_ptr<folly::IOBuf> data;
-
-  uint32_t streamId{kInvalidStreamId};
-  uint32_t initialRequestN{0};
-
-  bool follows{false};
-  bool complete{false};
-  bool next{false};
-};
-#pragma pack(pop)
-
 // ============================================================================
 // Rocket Message Types
 // ============================================================================
@@ -65,28 +45,26 @@ struct RocketFramePayload {
 /**
  * RocketRequestMessage - Outbound request message.
  *
- * The frame field is a variant that holds either:
- * - RocketFramePayload: unserialized frame data (metadata, data, flags)
- * - std::unique_ptr<folly::IOBuf>: serialized frame buffer
+ * The `frame` field is a typed variant of per-frame payload structs from
+ * `frame::ComposedFrame.h`. Handlers carry the typed payload all the way
+ * down to the codec; the codec is the single point that serializes the
+ * held payload into wire bytes via `frame.serialize()`. The 3-API surface
+ * (streamId / frameType / serialize) dispatches inline with no
+ * `std::visit` at any call site.
  *
- * Handlers work with the payload variant, then serialization converts it
- * to the IOBuf variant before transmission.
+ * As STREAM/CHANNEL/FNF patterns get wired up, their corresponding
+ * `Composed*Frame` types will join the variant.
  */
-#pragma pack(push, 1)
 struct RocketRequestMessage {
-  /// Frame data - either unserialized payload or serialized buffer
-  apache::thrift::fast_thrift::
-      CompactVariant<RocketFramePayload, std::unique_ptr<folly::IOBuf>>
-          frame;
+  /// Per-frame payload (header + buffers).
+  apache::thrift::fast_thrift::frame::ComposedFrameVariant<
+      apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame,
+      apache::thrift::fast_thrift::frame::ComposedSetupFrame>
+      frame;
 
   /// Opaque handle for correlating responses with requests.
   uint32_t requestHandle{kNoRequestHandle};
-
-  /// Frame type (REQUEST_RESPONSE, REQUEST_STREAM, etc.)
-  apache::thrift::fast_thrift::frame::FrameType frameType{
-      apache::thrift::fast_thrift::frame::FrameType::RESERVED};
 };
-#pragma pack(pop)
 
 /**
  * RocketResponseMessage - Inbound response message.
@@ -94,7 +72,6 @@ struct RocketRequestMessage {
  * Contains the parsed response frame along with the original request's
  * frame type and handle for proper dispatching.
  */
-#pragma pack(push, 1)
 struct RocketResponseMessage {
   /// The parsed response frame
   apache::thrift::fast_thrift::frame::read::ParsedFrame frame;
@@ -105,6 +82,5 @@ struct RocketResponseMessage {
   /// The original request's frame type (REQUEST_RESPONSE, REQUEST_STREAM, etc.)
   apache::thrift::fast_thrift::frame::FrameType requestFrameType;
 };
-#pragma pack(pop)
 
 } // namespace apache::thrift::fast_thrift::rocket

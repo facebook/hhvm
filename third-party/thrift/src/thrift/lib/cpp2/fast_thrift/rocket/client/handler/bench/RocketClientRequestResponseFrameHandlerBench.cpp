@@ -62,24 +62,21 @@ using rocket::bench::BenchContext;
 RocketRequestMessage createRocketRequest(uint32_t streamId) {
   return RocketRequestMessage{
       .frame =
-          RocketFramePayload{
-              .metadata = nullptr,
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = folly::IOBuf::copyBuffer("data"),
-              .streamId = streamId,
+              .header = {.streamId = streamId},
           },
-      .frameType = FrameType::REQUEST_RESPONSE,
   };
 }
 
 RocketRequestMessage createRocketRequestWithMetadata(uint32_t streamId) {
   return RocketRequestMessage{
       .frame =
-          RocketFramePayload{
-              .metadata = folly::IOBuf::copyBuffer("metadata"),
+          apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = folly::IOBuf::copyBuffer("data"),
-              .streamId = streamId,
+              .metadata = folly::IOBuf::copyBuffer("metadata"),
+              .header = {.streamId = streamId},
           },
-      .frameType = FrameType::REQUEST_RESPONSE,
   };
 }
 

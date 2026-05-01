@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/DirectStreamMap.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 
 #include <cstdint>
@@ -142,21 +143,30 @@ class RocketClientStreamStateHandler {
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
     auto& request = msg.get<RocketRequestMessage>();
-    auto& payload = request.frame.get<RocketFramePayload>();
+    // Today only ComposedRequestResponseFrame is stamped here. SETUP frames
+    // are injected downstream of this handler by RocketClientSetupFrameHandler
+    // and never reach this onWrite. When more RPC patterns are added, this
+    // becomes a `request.frame.visit(...)` that stamps
+    // `payload.header.streamId` uniformly across pattern arms.
+    DCHECK(request.frame.is<
+           apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>())
+        << "StreamStateHandler::onWrite saw an unexpected payload arm";
+    auto& payload = request.frame.get<
+        apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>();
 
-    DCHECK(payload.streamId == kInvalidStreamId);
-    if (payload.streamId != kInvalidStreamId) {
+    DCHECK(payload.header.streamId == kInvalidStreamId);
+    if (payload.header.streamId != kInvalidStreamId) {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
 
-    payload.streamId = generateStreamId();
-    DCHECK(!activeStreams_.contains(payload.streamId))
-        << "Stream ID " << payload.streamId
+    payload.header.streamId = generateStreamId();
+    DCHECK(!activeStreams_.contains(payload.header.streamId))
+        << "Stream ID " << payload.header.streamId
         << " already exists in active streams";
     activeStreams_.emplace(
-        payload.streamId,
+        payload.header.streamId,
         ClientStreamContext{
-            .requestFrameType = request.frameType,
+            .requestFrameType = request.frame.frameType(),
             .requestHandle = request.requestHandle,
         });
 

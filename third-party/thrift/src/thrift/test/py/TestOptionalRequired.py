@@ -20,7 +20,6 @@ import unittest
 
 from OptionalRequiredTest.ttypes import Tricky1, Tricky2, Tricky3
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
-from thrift.protocol.TProtocol import TProtocolException
 from thrift.transport.TTransport import TMemoryBuffer
 
 

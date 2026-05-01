@@ -799,7 +799,6 @@ size_t HQSession::sendSettings() {
           break;
         case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
         case hq::SettingId::H3_DATAGRAM:
-        case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
         case hq::SettingId::H3_WT_MAX_SESSIONS:
         case hq::SettingId::WT_INITIAL_MAX_DATA:
@@ -1567,7 +1566,6 @@ void HQSession::applySettings(const SettingsList& settings) {
           VLOG(3) << "Peer sent ENABLE_CONNECT_PROTOCOL=" << setting.value;
           break;
         case hq::SettingId::H3_DATAGRAM:
-        case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
           datagram = static_cast<bool>(setting.value);
           break;

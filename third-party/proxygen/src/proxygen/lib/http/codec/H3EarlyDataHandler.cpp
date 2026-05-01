@@ -48,7 +48,6 @@ bool isLimitSetting(hq::SettingId id) {
       return true;
     case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
     case hq::SettingId::H3_DATAGRAM:
-    case hq::SettingId::H3_DATAGRAM_DRAFT_8:
     case hq::SettingId::H3_DATAGRAM_RFC:
     case hq::SettingId::ENABLE_WEBTRANSPORT:
     case hq::SettingId::WT_ENABLED:

@@ -769,7 +769,6 @@ void HTTPQuicCoroSession::applyEgressSettings() {
           break;
         case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
         case hq::SettingId::H3_DATAGRAM:
-        case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
           break;
         case hq::SettingId::ENABLE_WEBTRANSPORT:
@@ -1595,7 +1594,6 @@ void HTTPQuicCoroSession::onSettings(const SettingsList& settings) {
           break;
         case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
         case hq::SettingId::H3_DATAGRAM:
-        case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
           // If H3 datagram is enabled but datagram was not negotiated at the
           // transport, close the connection

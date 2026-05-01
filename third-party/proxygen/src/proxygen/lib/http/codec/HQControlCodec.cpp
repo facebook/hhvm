@@ -102,7 +102,6 @@ ParseResult HQControlCodec::parseSettings(Cursor& cursor,
         break;
       case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
       case hq::SettingId::H3_DATAGRAM:
-      case hq::SettingId::H3_DATAGRAM_DRAFT_8:
       case hq::SettingId::H3_DATAGRAM_RFC:
       case hq::SettingId::ENABLE_WEBTRANSPORT:
       case hq::SettingId::WT_ENABLED:
@@ -228,7 +227,6 @@ size_t HQControlCodec::generateSettings(folly::IOBufQueue& writeBuf) {
         case hq::SettingId::QPACK_BLOCKED_STREAMS:
         case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
         case hq::SettingId::H3_DATAGRAM:
-        case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
         case hq::SettingId::ENABLE_WEBTRANSPORT:
         case hq::SettingId::H3_WT_MAX_SESSIONS:

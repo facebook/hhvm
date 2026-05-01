@@ -838,7 +838,6 @@ ErrorCode HTTP2Codec::handleSettings(const std::deque<SettingPair>& settings) {
       case SettingsId::WT_MAX_SESSIONS:
       case SettingsId::_HQ_QPACK_BLOCKED_STREAMS:
       case SettingsId::_HQ_DATAGRAM:
-      case SettingsId::_HQ_DATAGRAM_DRAFT_8:
       case SettingsId::_HQ_DATAGRAM_RFC:
       case SettingsId::ENABLE_WEBTRANSPORT:
       case SettingsId::H3_WT_MAX_SESSIONS:
@@ -1571,7 +1570,6 @@ size_t HTTP2Codec::generateSettings(folly::IOBufQueue& writeBuf) {
       case SettingsId::WT_MAX_SESSIONS:
       case SettingsId::_HQ_QPACK_BLOCKED_STREAMS:
       case SettingsId::_HQ_DATAGRAM:
-      case SettingsId::_HQ_DATAGRAM_DRAFT_8:
       case SettingsId::_HQ_DATAGRAM_RFC:
       case SettingsId::ENABLE_WEBTRANSPORT:
       case SettingsId::H3_WT_MAX_SESSIONS:

@@ -116,6 +116,8 @@ service StressTest {
   BasicResponse requestResponseEb(1: BasicRequest req);
 
   BasicResponse, stream<BasicResponse> streamTm(1: StreamRequest req);
+  @cpp.ProcessInEbThreadUnsafe
+  BasicResponse, stream<BasicResponse> streamEb(1: StreamRequest req);
   BasicResponse, sink<BasicResponse, BasicResponse> sinkTm(
     1: StreamRequest req,
   );

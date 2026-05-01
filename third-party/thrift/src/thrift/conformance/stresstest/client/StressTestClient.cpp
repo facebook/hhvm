@@ -141,6 +141,17 @@ folly::coro::Task<void> ThriftStressTestClient::co_streamTm(
   });
 }
 
+folly::coro::Task<void> ThriftStressTestClient::co_streamEb(
+    const StreamRequest& req) {
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    auto result = co_await client_->co_streamEb(req);
+    auto gen = std::move(result).stream.toAsyncGenerator();
+    while (co_await gen.next()) {
+      co_await maybeSleep(req);
+    }
+  });
+}
+
 folly::coro::Task<void> ThriftStressTestClient::co_sinkTm(
     const StreamRequest& req) {
   co_await timedExecute([&]() -> folly::coro::Task<void> {

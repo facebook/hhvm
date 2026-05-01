@@ -49,6 +49,11 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
   ResponseAndServerStream<BasicResponse, BasicResponse> streamTm(
       std::unique_ptr<StreamRequest> request) override;
 
+  void async_eb_streamEb(
+      HandlerCallbackPtr<ResponseAndServerStream<BasicResponse, BasicResponse>>
+          callback,
+      std::unique_ptr<StreamRequest> request) override;
+
   ResponseAndSinkConsumer<BasicResponse, BasicResponse, BasicResponse> sinkTm(
       std::unique_ptr<StreamRequest> request) override;
 

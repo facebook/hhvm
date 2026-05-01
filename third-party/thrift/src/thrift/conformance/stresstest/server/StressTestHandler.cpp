@@ -82,6 +82,23 @@ StressTestHandler::streamTm(std::unique_ptr<StreamRequest> request) {
   return {std::move(response), std::move(stream)};
 }
 
+void StressTestHandler::async_eb_streamEb(
+    HandlerCallbackPtr<ResponseAndServerStream<BasicResponse, BasicResponse>>
+        callback,
+    std::unique_ptr<StreamRequest> request) {
+  auto response =
+      makeBasicResponse(*request->processInfo()->initialResponseSize());
+  auto stream = folly::coro::co_invoke(
+      [this, request = std::move(request)]() mutable
+          -> folly::coro::AsyncGenerator<BasicResponse&&> {
+        auto numChunks = request->processInfo()->numChunks();
+        for (int64_t i = 0; i < numChunks; i++) {
+          co_yield makeBasicResponse(*request->processInfo()->chunkSize());
+        }
+      });
+  callback->result({std::move(response), std::move(stream)});
+}
+
 ResponseAndSinkConsumer<BasicResponse, BasicResponse, BasicResponse>
 StressTestHandler::sinkTm(std::unique_ptr<StreamRequest> request) {
   simulateWork(

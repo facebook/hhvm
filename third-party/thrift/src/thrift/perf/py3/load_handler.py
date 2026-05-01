@@ -40,6 +40,7 @@ class LoadTestHandler(LoadTestInterface):
         super().__init__()
         self.loop = loop or asyncio.get_event_loop()
         self.pool = ProcessPoolExecutor()
+        # pyrefly: ignore [bad-assignment]
         pickle.DEFAULT_PROTOCOL = pickle.HIGHEST_PROTOCOL
 
     async def noop(self):
@@ -51,22 +52,28 @@ class LoadTestHandler(LoadTestInterface):
     async def asyncNoop(self):
         pass
 
+    # pyrefly: ignore [bad-param-name-override]
     async def sleep(self, us):
         await asyncio.sleep(us_to_sec(us))
 
+    # pyrefly: ignore [bad-param-name-override]
     async def onewaySleep(self, us):
         await asyncio.sleep(us_to_sec(us))
 
+    # pyrefly: ignore [bad-param-name-override]
     async def burn(self, us):
         return await self.loop.run_in_executor(self.pool, burn_in_executor, us)
 
+    # pyrefly: ignore [bad-param-name-override]
     async def onewayBurn(self, us):
         return await self.loop.run_in_executor(self.pool, burn_in_executor, us)
 
+    # pyrefly: ignore [bad-param-name-override]
     async def badSleep(self, us):
         # "bad" because it sleeps on the main thread
         time.sleep(us_to_sec(us))
 
+    # pyrefly: ignore [bad-param-name-override]
     async def badBurn(self, us):
         return burn_in_executor(us)
 
@@ -94,9 +101,11 @@ class LoadTestHandler(LoadTestInterface):
     async def add(self, a, b):
         return a + b
 
+    # pyrefly: ignore [bad-param-name-override]
     async def largeContainer(self, data):
         pass
 
+    # pyrefly: ignore [bad-param-name-override]
     async def iterAllFields(self, data):
         for item in data:
             _ = item.stringField

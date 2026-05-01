@@ -29,6 +29,7 @@ def main():
     parser.add_argument("--port", default=1234, type=int, help="Port to run on")
     options = parser.parse_args()
     loop = asyncio.get_event_loop()
+    # pyrefly: ignore [bad-instantiation]
     handler = LoadTestHandler(loop)
     server = ThriftServer(handler, options.port)
     loop.add_signal_handler(signal.SIGINT, server.stop)

@@ -69,6 +69,7 @@ def main():
         op.error("trailing arguments: " + " ".join(args))
 
     handler = LoadHandler()
+    # pyrefly: ignore [missing-attribute]
     processor = LoadTestInterface.Processor(handler)
 
     if options.header:

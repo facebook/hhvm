@@ -168,11 +168,14 @@
  (wrapped false)
  (modules serverFindRefs serverDepsInBatch serverPackageLint)
  (libraries
+  package_info
+  procs_procs
   provider_context
   server_command_types
   server_env
   server_prechecked_files
   server_services
+  typechecker_options
   utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

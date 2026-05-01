@@ -46,6 +46,7 @@ let debug_describe_t : type a. a t -> string = function
   | FIND_MY_TESTS_V1 _ -> "FIND_MY_TESTS_V1"
   | FIND_MY_TESTS_STAGING _ -> "FIND_MY_TESTS_STAGING"
   | PACKAGE_LINT _ -> "PACKAGE_LINT"
+  | PACKAGE_LINT_FULL _ -> "PACKAGE_LINT_FULL"
 
 let debug_describe_cmd (type a) (command : a command) : string =
   let ({ ServerCommandTypes.from; _ }, rpc) = command in

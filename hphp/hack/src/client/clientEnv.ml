@@ -83,6 +83,7 @@ type client_mode =
   | MODE_DEPS_OUT_AT_POS_BATCH of string list
   | MODE_DEPS_IN_AT_POS_BATCH of string list
   | MODE_PACKAGE_LINT of string
+  | MODE_PACKAGE_LINT_FULL of (string * string list)
 [@@deriving variants]
 
 type client_check_env = {

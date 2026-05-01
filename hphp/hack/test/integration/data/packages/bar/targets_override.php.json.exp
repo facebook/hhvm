@@ -1,4 +1,5 @@
 [
   "/bar/caller.php",
-  "/bar/targets_override.php"
+  "/bar/targets_override.php",
+  "/foo/caller_nonprod.php"
 ]

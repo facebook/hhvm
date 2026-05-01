@@ -721,6 +721,25 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         Arg.String (fun x -> set_mode (MODE_PACKAGE_LINT x)),
         "Support for linting of __PackageOverride annotations",
         Arg_non_user_facing );
+      ( "--package-lint-full",
+        (let target_file = ref "" in
+         Arg.Tuple
+           [
+             Arg.String (( := ) target_file);
+             Arg.String
+               (fun candidates_csv ->
+                 let candidates =
+                   String.split candidates_csv ~on:','
+                   |> List.filter ~f:(fun s -> not (String.is_empty s))
+                 in
+                 if List.is_empty candidates then
+                   raise
+                     (Arg.Bad
+                        "--package-lint-full requires at least one candidate file");
+                 set_mode (MODE_PACKAGE_LINT_FULL (!target_file, candidates)));
+           ]),
+        " <target_file> <file1,file2,...> Package-aware find-refs lint",
+        Arg_non_user_facing );
       tuple_3_append (Common_argspecs.prechecked prechecked) Arg_non_user_facing;
       tuple_3_append
         (Common_argspecs.no_prechecked prechecked)

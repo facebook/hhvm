@@ -459,3 +459,5 @@ let handle :
     (env, result)
   | ServerCommandTypes.PACKAGE_LINT file ->
     ServerPackageLint.go_fast genv env file
+  | ServerCommandTypes.PACKAGE_LINT_FULL (file, candidates) ->
+    ServerPackageLint.go genv env file candidates

@@ -1149,6 +1149,18 @@ let main_internal
     |> Hh_json_helpers.Out.to_string
     |> print_endline;
     Lwt.return (Exit_status.No_error, telemetry)
+  | ClientEnv.MODE_PACKAGE_LINT_FULL (file, candidates) ->
+    let file = expand_path file in
+    let candidates = List.map candidates ~f:expand_path in
+    let%lwt (results, telemetry) =
+      rpc args @@ ServerCommandTypes.PACKAGE_LINT_FULL (file, candidates)
+    in
+    `List
+      (List.map (Relative_path.Set.elements results) ~f:(fun p ->
+           `String (Relative_path.to_absolute p)))
+    |> Hh_json_helpers.Out.to_string
+    |> print_endline;
+    Lwt.return (Exit_status.No_error, telemetry)
 
 let rec flush_event_logger () : unit Lwt.t =
   let%lwt () = Lwt_unix.sleep 1.0 in

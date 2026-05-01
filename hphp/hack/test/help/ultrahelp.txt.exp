@@ -68,6 +68,7 @@ WWW-ROOT is assumed to be current directory if unspecified
   --outline                                               (mode) prints an outline of the text on stdin
   --outline-for-agents                                    <file> (mode) outline the file, including line spans, to help agents efficiently navigate large files
   --package-lint Support                                  for linting of __PackageOverride annotations
+  --package-lint-full                                     <target_file> <file1,file2,...> Package-aware find-refs lint
   --prechecked                                            override value of "prechecked_files" flag from hh.conf
   --no-prechecked                                         override value of "prechecked_files" flag from hh.conf
   --with-mini-state                                       Init with the given saved state instead of the one based on current repo version.

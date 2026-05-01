@@ -507,6 +507,7 @@ type _ t =
       (Find_my_tests.config * Find_my_tests.action list)
       -> Find_my_tests.result t
   | PACKAGE_LINT : string -> Package_lint.fast_result t
+  | PACKAGE_LINT_FULL : (string * string list) -> Package_lint.fast_result t
 
 type cmd_metadata = {
   from: string;
@@ -600,6 +601,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | VERBOSE _ -> false
   | DEPS_IN_BATCH _ -> true
   | PACKAGE_LINT _ -> true
+  | PACKAGE_LINT_FULL _ -> true
 
 let use_priority_pipe (command : 'result t) : bool =
   not (rpc_command_needs_full_check command)

@@ -16,13 +16,12 @@
 
 wangle_add_library(wangle_acceptor_acceptor_core
   SRCS
-    ConnectionManager.cpp
-    ManagedConnection.cpp
     SecureTransportType.cpp
     TransportInfo.cpp
   DEPS
     Folly::folly_io_async_async_socket
   EXPORTED_DEPS
+    wangle_acceptor_managed
     wangle_ssl_ssl_util
     Folly::folly_constexpr_math
     Folly::folly_intrusive_list
@@ -87,8 +86,16 @@ wangle_add_library(wangle_acceptor_connection_counter
 )
 
 wangle_add_library(wangle_acceptor_managed
+  SRCS
+    ConnectionManager.cpp
+    ManagedConnection.cpp
   EXPORTED_DEPS
-    wangle_acceptor_acceptor_core
+    Folly::folly_constexpr_math
+    Folly::folly_intrusive_list
+    Folly::folly_io_async_async_base
+    Folly::folly_io_async_delayed_destruction
+    Folly::folly_memory
+    Folly::folly_network_address
 )
 
 wangle_add_library(wangle_acceptor_network_address

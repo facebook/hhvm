@@ -32,6 +32,7 @@ wangle_add_library(wangle_ssl_ssl_util
 wangle_add_library(wangle_ssl_ssl_config
   EXPORTED_DEPS
     wangle_acceptor_acceptor_core
+    wangle_ssl_ssl_context_config
     wangle_ssl_ssl_util
     Folly::folly_futures_core
     Folly::folly_io_async_async_ssl_socket
@@ -104,7 +105,9 @@ wangle_add_library(wangle_ssl_ssl_cache_provider
 
 wangle_add_library(wangle_ssl_ssl_context_config
   EXPORTED_DEPS
-    wangle_ssl_ssl_config
+    Folly::folly_io_async_ssl_context
+    Folly::folly_io_async_ssl_options
+    Folly::folly_optional
 )
 
 wangle_add_library(wangle_ssl_ssl_stats

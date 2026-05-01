@@ -3,7 +3,6 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 set(CXX_SOURCES)
 auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
-list(APPEND CXX_SOURCES ${files} "${CMAKE_CURRENT_SOURCE_DIR}/../../hhvm/process-init.cpp")
 
 set(HEADER_SOURCES)
 auto_sources(files "*.h" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")

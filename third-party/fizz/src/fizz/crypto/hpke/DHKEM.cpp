@@ -30,14 +30,14 @@ static Status getDHKEMId(uint16_t& ret, Error& err, NamedGroup group) {
   }
 }
 
-static Buf generateSuiteId(NamedGroup group) {
+static Status generateSuiteId(Buf& ret, Error& err, NamedGroup group) {
   std::unique_ptr<folly::IOBuf> buf = folly::IOBuf::copyBuffer("KEM");
   folly::io::Appender appender(buf.get(), 2);
   uint16_t kemId = 0;
-  Error err;
-  FIZZ_THROW_ON_ERROR(getDHKEMId(kemId, err, group), err);
+  FIZZ_RETURN_ON_ERROR(getDHKEMId(kemId, err, group));
   appender.writeBE<uint16_t>(kemId);
-  return buf;
+  ret = std::move(buf);
+  return Status::Success;
 }
 
 DHKEM::DHKEM(
@@ -56,50 +56,51 @@ DHKEM::DHKEM(
       group_(group),
       hkdf_(std::move(hkdf)) {}
 
-std::unique_ptr<folly::IOBuf> DHKEM::extractAndExpand(
+Status DHKEM::extractAndExpand(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     std::unique_ptr<folly::IOBuf> dh,
     std::unique_ptr<folly::IOBuf> kemContext) {
+  Buf suiteId;
+  FIZZ_RETURN_ON_ERROR(generateSuiteId(suiteId, err, group_));
   std::vector<uint8_t> eae_prkVec = hkdf_->labeledExtract(
       folly::IOBuf::copyBuffer(""),
       folly::ByteRange(folly::StringPiece("eae_prk")),
       std::move(dh),
-      generateSuiteId(group_));
+      suiteId->clone());
   folly::ByteRange eaePrk(eae_prkVec.data(), eae_prkVec.size());
-  std::unique_ptr<folly::IOBuf> sharedSecret;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      hkdf_->labeledExpand(
-          sharedSecret,
-          err,
-          eaePrk,
-          folly::ByteRange(folly::StringPiece("shared_secret")),
-          std::move(kemContext),
-          hkdf_->hashLength(),
-          generateSuiteId(group_)),
-      err);
-  return sharedSecret;
+  FIZZ_RETURN_ON_ERROR(hkdf_->labeledExpand(
+      ret,
+      err,
+      eaePrk,
+      folly::ByteRange(folly::StringPiece("shared_secret")),
+      std::move(kemContext),
+      hkdf_->hashLength(),
+      std::move(suiteId)));
+  return Status::Success;
 }
 
-hpke::KEMId DHKEM::getKEMId() const {
+Status DHKEM::getKEMId(hpke::KEMId& ret, Error& err) const {
   uint16_t id = 0;
-  Error err;
-  FIZZ_THROW_ON_ERROR(getDHKEMId(id, err, group_), err);
-  return static_cast<hpke::KEMId>(id);
+  FIZZ_RETURN_ON_ERROR(getDHKEMId(id, err, group_));
+  ret = static_cast<hpke::KEMId>(id);
+  return Status::Success;
 }
 
-DHKEM::EncapResult DHKEM::encap(folly::ByteRange pkR) {
-  Error err;
-  FIZZ_THROW_ON_ERROR(kex_->generateKeyPair(err), err);
+Status DHKEM::encap(EncapResult& ret, Error& err, folly::ByteRange pkR) {
+  FIZZ_RETURN_ON_ERROR(kex_->generateKeyPair(err));
   std::unique_ptr<folly::IOBuf> dh;
-  FIZZ_THROW_ON_ERROR(kex_->generateSharedSecret(dh, err, pkR), err);
+  FIZZ_RETURN_ON_ERROR(kex_->generateSharedSecret(dh, err, pkR));
   std::unique_ptr<folly::IOBuf> enc = kex_->getKeyShare();
 
   std::unique_ptr<folly::IOBuf> kemContext = enc->clone();
   kemContext->prependChain(folly::IOBuf::copyBuffer(pkR));
-  std::unique_ptr<folly::IOBuf> sharedSecret =
-      extractAndExpand(std::move(dh), std::move(kemContext));
+  std::unique_ptr<folly::IOBuf> sharedSecret;
+  FIZZ_RETURN_ON_ERROR(extractAndExpand(
+      sharedSecret, err, std::move(dh), std::move(kemContext)));
 
-  return EncapResult{std::move(sharedSecret), std::move(enc)};
+  ret = EncapResult{std::move(sharedSecret), std::move(enc)};
+  return Status::Success;
 }
 
 Status DHKEM::authEncap(EncapResult& ret, Error& err, folly::ByteRange pkR) {
@@ -118,35 +119,39 @@ Status DHKEM::authEncap(EncapResult& ret, Error& err, folly::ByteRange pkR) {
   kemContext->prependChain(folly::IOBuf::copyBuffer(pkR));
   kemContext->prependChain(authKex_->getKeyShare());
 
-  std::unique_ptr<folly::IOBuf> sharedSecret =
-      extractAndExpand(std::move(dh), std::move(kemContext));
+  std::unique_ptr<folly::IOBuf> sharedSecret;
+  FIZZ_RETURN_ON_ERROR(extractAndExpand(
+      sharedSecret, err, std::move(dh), std::move(kemContext)));
 
   ret = EncapResult{std::move(sharedSecret), std::move(enc)};
   return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> DHKEM::decap(folly::ByteRange enc) {
+Status DHKEM::decap(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
+    folly::ByteRange enc) {
   std::unique_ptr<folly::IOBuf> dh;
-  Error err;
-  FIZZ_THROW_ON_ERROR(kex_->generateSharedSecret(dh, err, enc), err);
+  FIZZ_RETURN_ON_ERROR(kex_->generateSharedSecret(dh, err, enc));
   std::unique_ptr<folly::IOBuf> pkRm = kex_->getKeyShare();
 
   std::unique_ptr<folly::IOBuf> kemContext = folly::IOBuf::copyBuffer(enc);
   kemContext->prependChain(std::move(pkRm));
 
-  std::unique_ptr<folly::IOBuf> sharedSecret =
-      extractAndExpand(std::move(dh), std::move(kemContext));
-  return sharedSecret;
+  FIZZ_RETURN_ON_ERROR(
+      extractAndExpand(ret, err, std::move(dh), std::move(kemContext)));
+  return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> DHKEM::authDecap(
+Status DHKEM::authDecap(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     folly::ByteRange enc,
     folly::ByteRange pkS) {
   std::unique_ptr<folly::IOBuf> dh;
-  Error err;
-  FIZZ_THROW_ON_ERROR(kex_->generateSharedSecret(dh, err, enc), err);
+  FIZZ_RETURN_ON_ERROR(kex_->generateSharedSecret(dh, err, enc));
   std::unique_ptr<folly::IOBuf> authDh;
-  FIZZ_THROW_ON_ERROR(kex_->generateSharedSecret(authDh, err, pkS), err);
+  FIZZ_RETURN_ON_ERROR(kex_->generateSharedSecret(authDh, err, pkS));
   dh->prependChain(std::move(authDh));
   std::unique_ptr<folly::IOBuf> pkRm = kex_->getKeyShare();
 
@@ -154,9 +159,9 @@ std::unique_ptr<folly::IOBuf> DHKEM::authDecap(
   kemContext->prependChain(std::move(pkRm));
   kemContext->prependChain(folly::IOBuf::copyBuffer(pkS));
 
-  std::unique_ptr<folly::IOBuf> sharedSecret =
-      extractAndExpand(std::move(dh), std::move(kemContext));
-  return sharedSecret;
+  FIZZ_RETURN_ON_ERROR(
+      extractAndExpand(ret, err, std::move(dh), std::move(kemContext)));
+  return Status::Success;
 }
 
 } // namespace fizz

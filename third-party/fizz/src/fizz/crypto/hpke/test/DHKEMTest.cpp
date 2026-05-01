@@ -56,11 +56,18 @@ class MockKeyExchange : public KeyExchange {
 std::tuple<std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>>
 testEncapDecap(DHKEM dhkem, std::unique_ptr<folly::IOBuf> publicKey) {
   // Generate the DHKEM shared secret and an encapsulation of the key
-  DHKEM::EncapResult encapResult = dhkem.encap(publicKey->coalesce());
+  DHKEM::EncapResult encapResult;
+  Error encapErr;
+  EXPECT_EQ(
+      dhkem.encap(encapResult, encapErr, publicKey->coalesce()),
+      Status::Success);
 
   // Recover the DHKEM shared secret from its encapsulated representation "enc"
-  std::unique_ptr<folly::IOBuf> gotSharedKey =
-      dhkem.decap(encapResult.enc->coalesce());
+  std::unique_ptr<folly::IOBuf> gotSharedKey;
+  Error decapErr;
+  EXPECT_EQ(
+      dhkem.decap(gotSharedKey, decapErr, encapResult.enc->coalesce()),
+      Status::Success);
 
   return std::make_tuple(
       std::move(encapResult.sharedSecret), std::move(gotSharedKey));

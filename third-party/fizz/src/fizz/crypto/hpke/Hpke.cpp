@@ -124,9 +124,11 @@ SetupResult setupWithEncap(
           param.dhkem->authEncap(encapResult, authEncapErr, pkR), authEncapErr);
     } break;
     case Mode::Base:
-    case Mode::Psk:
-      encapResult = param.dhkem->encap(pkR);
-      break;
+    case Mode::Psk: {
+      Error encapErr;
+      FIZZ_THROW_ON_ERROR(
+          param.dhkem->encap(encapResult, encapErr, pkR), encapErr);
+    } break;
   }
 
   KeyScheduleParams keyScheduleParams{
@@ -155,13 +157,18 @@ std::unique_ptr<HpkeContext> setupWithDecap(
   std::unique_ptr<folly::IOBuf> sharedSecret;
   switch (mode) {
     case Mode::Auth:
-    case Mode::AuthPsk:
-      sharedSecret = param.dhkem->authDecap(enc, *pkS);
-      break;
+    case Mode::AuthPsk: {
+      Error authDecapErr;
+      FIZZ_THROW_ON_ERROR(
+          param.dhkem->authDecap(sharedSecret, authDecapErr, enc, *pkS),
+          authDecapErr);
+    } break;
     case Mode::Base:
-    case Mode::Psk:
-      sharedSecret = param.dhkem->decap(enc);
-      break;
+    case Mode::Psk: {
+      Error decapErr;
+      FIZZ_THROW_ON_ERROR(
+          param.dhkem->decap(sharedSecret, decapErr, enc), decapErr);
+    } break;
   }
   KeyScheduleParams keyScheduleParams{
       mode,

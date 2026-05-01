@@ -53,6 +53,13 @@ struct PreprocessParams {
     return folly::get_ptr(headers, transport::THeader::kServiceTraceMeta);
   }
 
+  const std::string* getTenantId() const {
+    if (request_ && request_->getTHeader().tenantId()) {
+      return &*request_->getTHeader().tenantId();
+    }
+    return folly::get_ptr(headers, transport::THeader::kTenantId);
+  }
+
   concurrency::PRIORITY getCallPriority() const {
     if (!request_) {
       return concurrency::NORMAL;

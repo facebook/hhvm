@@ -28,5 +28,6 @@ extern const std::string kStatus200;
 
 constexpr std::string_view kWTAvailableProtocols{"wt-available-protocols"};
 constexpr std::string_view kWTProtocol{"wt-protocol"};
+constexpr std::string_view kConnectUdp{"connect-udp"};
 
 } // namespace proxygen::headers

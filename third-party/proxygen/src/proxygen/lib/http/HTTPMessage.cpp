@@ -991,6 +991,17 @@ const char* HTTPMessage::getDefaultReason(uint16_t status) {
   return "-";
 }
 
+bool HTTPMessage::isConnectUdpReq() const noexcept {
+  if (!isRequest()) {
+    return false;
+  }
+  const auto* upgradeProto = getUpgradeProtocol();
+  const auto method = getMethod();
+  return method == HTTPMethod::CONNECT_UDP ||
+         (method == HTTPMethod::CONNECT && upgradeProto &&
+          *upgradeProto == headers::kConnectUdp);
+}
+
 ParseURL HTTPMessage::setURLImplInternal(bool unparse, bool strict) {
   auto& req = request();
   auto u = ParseURL::parseURLMaybeInvalid(req.url_, strict);

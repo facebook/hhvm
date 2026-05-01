@@ -217,7 +217,9 @@ static Status getSetupParam(
   FIZZ_RETURN_ON_ERROR(hpke::getHashFunction(hash, err, cipherSuite.kdf_id));
   CipherSuite suite;
   FIZZ_RETURN_ON_ERROR(hpke::getCipherSuite(suite, err, cipherSuite.aead_id));
-  auto suiteId = hpke::generateHpkeSuiteId(group, hash, suite);
+  hpke::HpkeSuiteId suiteId;
+  FIZZ_RETURN_ON_ERROR(
+      hpke::generateHpkeSuiteId(suiteId, err, group, hash, suite));
 
   const HasherFactoryWithMetadata* hasherFactory = nullptr;
   FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash));
@@ -271,12 +273,14 @@ Status constructHpkeSetupResult(
       std::move(dhkem),
       echConfigContent.key_config.kem_id,
       cipherSuite));
-  ret = setupWithEncap(
+  FIZZ_RETURN_ON_ERROR(setupWithEncap(
+      ret,
+      err,
       hpke::Mode::Base,
       echConfigContent.key_config.public_key->clone()->coalesce(),
       std::move(info),
       folly::none,
-      std::move(setupParam));
+      std::move(setupParam)));
   return Status::Success;
 }
 
@@ -810,7 +814,9 @@ Status setupDecryptionContext(
   auto aeadId = cipherSuite.aead_id;
   CipherSuite cs;
   FIZZ_RETURN_ON_ERROR(hpke::getCipherSuite(cs, err, aeadId));
-  auto suiteId = hpke::generateHpkeSuiteId(group, hash, cs);
+  hpke::HpkeSuiteId suiteId;
+  FIZZ_RETURN_ON_ERROR(
+      hpke::generateHpkeSuiteId(suiteId, err, group, hash, cs));
 
   std::unique_ptr<Aead> aead;
   FIZZ_RETURN_ON_ERROR(factory.makeAead(aead, err, cs));
@@ -827,13 +833,16 @@ Status setupDecryptionContext(
   std::unique_ptr<folly::IOBuf> info;
   FIZZ_RETURN_ON_ERROR(makeHpkeContextInfoParam(info, err, echConfig));
 
-  ret = hpke::setupWithDecap(
-      hpke::Mode::Base,
-      encapsulatedKey->coalesce(),
-      folly::none,
-      std::move(info),
-      folly::none,
-      std::move(setupParam));
+  FIZZ_RETURN_ON_ERROR(
+      hpke::setupWithDecap(
+          ret,
+          err,
+          hpke::Mode::Base,
+          encapsulatedKey->coalesce(),
+          folly::none,
+          std::move(info),
+          folly::none,
+          std::move(setupParam)));
   return Status::Success;
 }
 

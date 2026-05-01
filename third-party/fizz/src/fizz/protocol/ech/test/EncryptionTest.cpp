@@ -160,10 +160,15 @@ auto hpkeContext(OuterECHClientHello& clientECH) {
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
 
-  auto suiteId = hpke::generateHpkeSuiteId(
-      NamedGroup::secp256r1,
-      HashFunction::Sha256,
-      CipherSuite::TLS_AES_128_GCM_SHA256);
+  hpke::HpkeSuiteId suiteId;
+  EXPECT_EQ(
+      hpke::generateHpkeSuiteId(
+          suiteId,
+          err,
+          NamedGroup::secp256r1,
+          HashFunction::Sha256,
+          CipherSuite::TLS_AES_128_GCM_SHA256),
+      Status::Success);
 
   auto dhkem = std::make_unique<DHKEM>(
       std::move(kex),
@@ -185,13 +190,19 @@ auto hpkeContext(OuterECHClientHello& clientECH) {
       std::move(suiteId),
   };
 
-  auto context = setupWithDecap(
-      hpke::Mode::Base,
-      clientECH.enc->coalesce(),
-      folly::none,
-      std::move(hpkePrefix),
-      folly::none,
-      std::move(setupParam));
+  std::unique_ptr<hpke::HpkeContext> context;
+  Error setupDecapErr;
+  EXPECT_EQ(
+      setupWithDecap(
+          context,
+          setupDecapErr,
+          hpke::Mode::Base,
+          clientECH.enc->coalesce(),
+          folly::none,
+          std::move(hpkePrefix),
+          folly::none,
+          std::move(setupParam)),
+      Status::Success);
   return context;
 }
 

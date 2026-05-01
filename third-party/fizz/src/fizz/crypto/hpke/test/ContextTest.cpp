@@ -43,8 +43,16 @@ static folly::StringPiece prefix07("HPKE-07");
 
 TEST_P(HpkeContextTest, TestContext) {
   auto testParam = GetParam();
-  auto suiteId = generateHpkeSuiteId(
-      NamedGroup::secp256r1, HashFunction::Sha256, testParam.cipher);
+  HpkeSuiteId suiteId;
+  Error suiteIdErr;
+  EXPECT_EQ(
+      generateHpkeSuiteId(
+          suiteId,
+          suiteIdErr,
+          NamedGroup::secp256r1,
+          HashFunction::Sha256,
+          testParam.cipher),
+      Status::Success);
   auto encryptCipher = getCipher(testParam.cipher);
   encryptCipher->setKey(
       TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)});
@@ -92,8 +100,16 @@ TEST_P(HpkeContextTest, TestContext) {
 
 TEST_P(HpkeContextTest, TestContextRoles) {
   auto testParam = GetParam();
-  auto suiteId = generateHpkeSuiteId(
-      NamedGroup::secp256r1, HashFunction::Sha256, testParam.cipher);
+  HpkeSuiteId suiteId;
+  Error suiteIdErr;
+  EXPECT_EQ(
+      generateHpkeSuiteId(
+          suiteId,
+          suiteIdErr,
+          NamedGroup::secp256r1,
+          HashFunction::Sha256,
+          testParam.cipher),
+      Status::Success);
   auto encryptCipher = getCipher(testParam.cipher);
   encryptCipher->setKey(
       TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)});
@@ -154,8 +170,16 @@ TEST_P(HpkeContextTest, TestExportSecret) {
     auto testParam = GetParam();
     auto exporterContext = toIOBuf(testParam.exportContext);
 
-    auto suiteId = generateHpkeSuiteId(
-        NamedGroup::x25519, HashFunction::Sha256, testParam.cipher);
+    HpkeSuiteId suiteId;
+    Error suiteIdErr;
+    EXPECT_EQ(
+        generateHpkeSuiteId(
+            suiteId,
+            suiteIdErr,
+            NamedGroup::x25519,
+            HashFunction::Sha256,
+            testParam.cipher),
+        Status::Success);
     HpkeContextImpl context(
         getCipher(testParam.cipher),
         toIOBuf(testParam.exporterSecret),
@@ -182,10 +206,16 @@ TEST_P(HpkeContextTest, TestExportSecretThrow) {
     auto testParam = GetParam();
     auto exporterContext = toIOBuf(testParam.exportContext);
 
-    auto suiteId = generateHpkeSuiteId(
-        NamedGroup::x25519,
-        HashFunction::Sha256,
-        CipherSuite::TLS_AES_128_GCM_SHA256);
+    HpkeSuiteId suiteId;
+    Error suiteIdErr;
+    EXPECT_EQ(
+        generateHpkeSuiteId(
+            suiteId,
+            suiteIdErr,
+            NamedGroup::x25519,
+            HashFunction::Sha256,
+            CipherSuite::TLS_AES_128_GCM_SHA256),
+        Status::Success);
     HpkeContextImpl context(
         openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>(),
         toIOBuf(testParam.exporterSecret),

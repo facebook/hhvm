@@ -2015,11 +2015,12 @@ SetupParam getSetupParam(
       throw std::runtime_error("unsupported group");
   }
 
-  std::unique_ptr<folly::IOBuf> suiteId =
-      generateHpkeSuiteId(group, func, suite);
+  std::unique_ptr<folly::IOBuf> suiteId;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      generateHpkeSuiteId(suiteId, err, group, func, suite), err);
 
   KEMId kemId;
-  Error err;
   FIZZ_THROW_ON_ERROR(getKEMId(kemId, err, group), err);
 
   HashFunction hashFunc;
@@ -2094,21 +2095,27 @@ TEST(HpkeTest, TestSetup) {
             toIOBuf(testParam.psk),
             toIOBuf(testParam.pskId)),
         Status::Success);
-    SetupResult setupResult = setupWithEncap(
-        testParam.mode,
-        pkR->coalesce(),
-        info->clone(),
-        std::move(encapPskInputs),
-        getSetupParam(
-            std::move(encapKex),
-            testParam.group,
-            testParam.hash,
-            testParam.suite,
-            testParam.skE,
-            testParam.pkE,
-            testParam.skS,
-            testParam.pkS,
-            std::move(encapCipher)));
+    SetupResult setupResult;
+    Error setupEncapErr;
+    EXPECT_EQ(
+        setupWithEncap(
+            setupResult,
+            setupEncapErr,
+            testParam.mode,
+            pkR->coalesce(),
+            info->clone(),
+            std::move(encapPskInputs),
+            getSetupParam(
+                std::move(encapKex),
+                testParam.group,
+                testParam.hash,
+                testParam.suite,
+                testParam.skE,
+                testParam.pkE,
+                testParam.skS,
+                testParam.pkS,
+                std::move(encapCipher))),
+        Status::Success);
     auto encryptContext = std::move(setupResult.context);
 
     auto enc = std::move(setupResult.enc);
@@ -2151,22 +2158,28 @@ TEST(HpkeTest, TestSetup) {
             toIOBuf(testParam.psk),
             toIOBuf(testParam.pskId)),
         Status::Success);
-    auto decryptContext = setupWithDecap(
-        testParam.mode,
-        enc->coalesce(),
-        pkS->coalesce(),
-        std::move(info),
-        std::move(decapPskInputs),
-        getSetupParam(
-            std::move(decapKex),
-            testParam.group,
-            testParam.hash,
-            testParam.suite,
-            testParam.skR,
-            testParam.pkR,
-            testParam.skS,
-            testParam.pkS,
-            std::move(decapCipher)));
+    std::unique_ptr<HpkeContext> decryptContext;
+    Error setupDecapErr;
+    EXPECT_EQ(
+        setupWithDecap(
+            decryptContext,
+            setupDecapErr,
+            testParam.mode,
+            enc->coalesce(),
+            pkS->coalesce(),
+            std::move(info),
+            std::move(decapPskInputs),
+            getSetupParam(
+                std::move(decapKex),
+                testParam.group,
+                testParam.hash,
+                testParam.suite,
+                testParam.skR,
+                testParam.pkR,
+                testParam.skS,
+                testParam.pkS,
+                std::move(decapCipher))),
+        Status::Success);
 
     // Test encrypt/decrypt
     std::unique_ptr<folly::IOBuf> aad = toIOBuf("436f756e742d30");
@@ -2208,15 +2221,18 @@ TEST(HpkeTest, TestKeySchedule) {
 
     std::unique_ptr<MockAeadCipher> cipher =
         std::make_unique<MockAeadCipher>(getCipher(testParam.suite));
-    std::unique_ptr<folly::IOBuf> suiteId =
-        generateHpkeSuiteId(testParam.group, testParam.hash, testParam.suite);
+    std::unique_ptr<folly::IOBuf> suiteId;
+    Error err;
+    EXPECT_EQ(
+        generateHpkeSuiteId(
+            suiteId, err, testParam.group, testParam.hash, testParam.suite),
+        Status::Success);
     TrafficKey expectedTrafficKey{
         toIOBuf(testParam.key), toIOBuf(testParam.iv)};
     EXPECT_CALL(*cipher, _setKey(TrafficKeyMatcher(&expectedTrafficKey)))
         .Times(1);
 
     folly::Optional<PskInputs> pskInputs;
-    Error err;
     EXPECT_EQ(
         PskInputs::create(
             pskInputs,
@@ -2235,7 +2251,11 @@ TEST(HpkeTest, TestKeySchedule) {
         std::move(hkdf),
         std::move(suiteId),
         fizz::hpke::HpkeContext::Role::Sender};
-    auto context = keySchedule(std::move(keyScheduleParams));
+    std::unique_ptr<HpkeContext> context;
+    Error keyScheduleErr;
+    EXPECT_EQ(
+        keySchedule(context, keyScheduleErr, std::move(keyScheduleParams)),
+        Status::Success);
 
     EXPECT_TRUE(
         folly::IOBufEqualTo()(

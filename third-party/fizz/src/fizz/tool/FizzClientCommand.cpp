@@ -414,16 +414,16 @@ class Connection : public AsyncSocket::ConnectCallback,
       const auto& echConfigContent = echConfigs_.value()[0];
       const auto& ciphersuite = echConfigContent.key_config.cipher_suites[0];
       Error err;
-      HashFunction hashFn;
+      HashFunction hashFunc;
       FIZZ_THROW_ON_ERROR(
-          getHashFunction(hashFn, err, ciphersuite.kdf_id), err);
-      FIZZ_LOG(INFO) << "    Hash function: " << toString(hashFn);
+          getHashFunction(hashFunc, err, ciphersuite.kdf_id), err);
       CipherSuite cs;
       FIZZ_THROW_ON_ERROR(getCipherSuite(cs, err, ciphersuite.aead_id), err);
-      FIZZ_LOG(INFO) << "    Cipher Suite: " << toString(cs);
       NamedGroup group;
       FIZZ_THROW_ON_ERROR(
           getKexGroup(group, err, echConfigContent.key_config.kem_id), err);
+      FIZZ_LOG(INFO) << "    Hash function: " << toString(hashFunc);
+      FIZZ_LOG(INFO) << "    Cipher Suite: " << toString(cs);
       FIZZ_LOG(INFO) << "    Named Group: " << toString(group);
       FIZZ_LOG(INFO) << "    Fake SNI Used: " << echConfigContent.public_name;
     }

@@ -35,8 +35,12 @@ namespace hpke {
  *
  * @return An HPKE `suite_id` string.
  */
-HpkeSuiteId
-generateHpkeSuiteId(NamedGroup group, HashFunction hash, CipherSuite suite);
+Status generateHpkeSuiteId(
+    HpkeSuiteId& ret,
+    Error& err,
+    NamedGroup group,
+    HashFunction hash,
+    CipherSuite suite);
 
 /**
  * Generates the `suite_id` string (used in HPKE LabeledExtract/LabelExpand).
@@ -52,7 +56,12 @@ generateHpkeSuiteId(NamedGroup group, HashFunction hash, CipherSuite suite);
  *
  * @return An HPKE `suite_id` string.
  */
-HpkeSuiteId generateHpkeSuiteId(KEMId kem, KDFId kdf, AeadId aead);
+Status generateHpkeSuiteId(
+    HpkeSuiteId& ret,
+    Error& err,
+    KEMId kem,
+    KDFId kdf,
+    AeadId aead);
 
 /*****************************
  *                           *

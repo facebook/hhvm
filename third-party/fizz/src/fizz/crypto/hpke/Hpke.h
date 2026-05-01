@@ -72,7 +72,10 @@ struct KeyScheduleParams {
   uint64_t seqNum{0};
 };
 
-std::unique_ptr<HpkeContext> keySchedule(KeyScheduleParams params);
+Status keySchedule(
+    std::unique_ptr<HpkeContext>& ret,
+    Error& err,
+    KeyScheduleParams params);
 
 struct SetupResult {
   std::unique_ptr<folly::IOBuf> enc;
@@ -87,14 +90,18 @@ struct SetupParam {
   uint64_t seqNum{0};
 };
 
-SetupResult setupWithEncap(
+Status setupWithEncap(
+    SetupResult& ret,
+    Error& err,
     Mode mode,
     folly::ByteRange pkR,
     std::unique_ptr<folly::IOBuf> info,
     folly::Optional<PskInputs> pskInputs,
     SetupParam param);
 
-std::unique_ptr<HpkeContext> setupWithDecap(
+Status setupWithDecap(
+    std::unique_ptr<HpkeContext>& ret,
+    Error& err,
     Mode mode,
     folly::ByteRange enc,
     folly::Optional<folly::ByteRange> pkS,

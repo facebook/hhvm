@@ -11,26 +11,34 @@
 namespace fizz {
 namespace hpke {
 
-HpkeSuiteId
-generateHpkeSuiteId(NamedGroup group, HashFunction hash, CipherSuite suite) {
+Status generateHpkeSuiteId(
+    HpkeSuiteId& ret,
+    Error& err,
+    NamedGroup group,
+    HashFunction hash,
+    CipherSuite suite) {
   KEMId kemId;
-  Error err;
-  FIZZ_THROW_ON_ERROR(getKEMId(kemId, err, group), err);
+  FIZZ_RETURN_ON_ERROR(getKEMId(kemId, err, group));
   KDFId kdfId;
-  FIZZ_THROW_ON_ERROR(getKDFId(kdfId, err, hash), err);
+  FIZZ_RETURN_ON_ERROR(getKDFId(kdfId, err, hash));
   AeadId aeadId;
-  FIZZ_THROW_ON_ERROR(getAeadId(aeadId, err, suite), err);
-  return generateHpkeSuiteId(kemId, kdfId, aeadId);
+  FIZZ_RETURN_ON_ERROR(getAeadId(aeadId, err, suite));
+  return generateHpkeSuiteId(ret, err, kemId, kdfId, aeadId);
 }
 
-HpkeSuiteId generateHpkeSuiteId(KEMId kem, KDFId kdf, AeadId aead) {
+Status generateHpkeSuiteId(
+    HpkeSuiteId& ret,
+    Error& err,
+    KEMId kem,
+    KDFId kdf,
+    AeadId aead) {
   std::unique_ptr<folly::IOBuf> suiteId = folly::IOBuf::copyBuffer("HPKE");
   folly::io::Appender appender(suiteId.get(), 6);
-  Error err;
-  FIZZ_THROW_ON_ERROR(detail::write(err, kem, appender), err);
-  FIZZ_THROW_ON_ERROR(detail::write(err, kdf, appender), err);
-  FIZZ_THROW_ON_ERROR(detail::write(err, aead, appender), err);
-  return suiteId;
+  FIZZ_RETURN_ON_ERROR(detail::write(err, kem, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, kdf, appender));
+  FIZZ_RETURN_ON_ERROR(detail::write(err, aead, appender));
+  ret = std::move(suiteId);
+  return Status::Success;
 }
 
 folly::Optional<KEMId> tryGetKEMId(NamedGroup group) {

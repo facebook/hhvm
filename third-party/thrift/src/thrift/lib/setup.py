@@ -529,6 +529,7 @@ else:
         "thrift.python.any",
         "thrift.python.client",
         "thrift.python.conformance",
+        "thrift.python.schema",
         "thrift.python.server_impl",
         "thrift.python.server_impl.interceptor",
         "thrift.python.streaming",

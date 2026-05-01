@@ -47,11 +47,17 @@ Status KeyScheduler::deriveEarlySecret(Error& err, folly::ByteRange psk) {
 void KeyScheduler::deriveHandshakeSecret() {
   auto& earlySecret = *secret_->asEarlySecret();
   auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
-  auto preSecret = deriver_->deriveSecret(
-      folly::range(earlySecret.secret),
-      kDerivedSecret,
-      deriver_->blankHash(),
-      deriver_->hashLength());
+  std::vector<uint8_t> preSecret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      deriver_->deriveSecret(
+          preSecret,
+          err,
+          folly::range(earlySecret.secret),
+          kDerivedSecret,
+          deriver_->blankHash(),
+          deriver_->hashLength()),
+      err);
   secret_.emplace(
       HandshakeSecret{
           deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
@@ -66,11 +72,17 @@ void KeyScheduler::deriveHandshakeSecret(folly::ByteRange ecdhe) {
   }
 
   auto& earlySecret = secret_->tryAsEarlySecret();
-  auto preSecret = deriver_->deriveSecret(
-      folly::range(earlySecret.secret),
-      kDerivedSecret,
-      deriver_->blankHash(),
-      deriver_->hashLength());
+  std::vector<uint8_t> preSecret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      deriver_->deriveSecret(
+          preSecret,
+          err,
+          folly::range(earlySecret.secret),
+          kDerivedSecret,
+          deriver_->blankHash(),
+          deriver_->hashLength()),
+      err);
   secret_.emplace(
       HandshakeSecret{deriver_->hkdfExtract(folly::range(preSecret), ecdhe)});
 }
@@ -78,11 +90,17 @@ void KeyScheduler::deriveHandshakeSecret(folly::ByteRange ecdhe) {
 void KeyScheduler::deriveMasterSecret() {
   auto zeros = std::vector<uint8_t>(deriver_->hashLength(), 0);
   auto& handshakeSecret = secret_->tryAsHandshakeSecret();
-  auto preSecret = deriver_->deriveSecret(
-      folly::range(handshakeSecret.secret),
-      kDerivedSecret,
-      deriver_->blankHash(),
-      deriver_->hashLength());
+  std::vector<uint8_t> preSecret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      deriver_->deriveSecret(
+          preSecret,
+          err,
+          folly::range(handshakeSecret.secret),
+          kDerivedSecret,
+          deriver_->blankHash(),
+          deriver_->hashLength()),
+      err);
   secret_.emplace(
       MasterSecret{
           deriver_->hkdfExtract(folly::range(preSecret), folly::range(zeros))});
@@ -91,16 +109,25 @@ void KeyScheduler::deriveMasterSecret() {
 void KeyScheduler::deriveAppTrafficSecrets(folly::ByteRange transcript) {
   auto& masterSecret = *secret_->asMasterSecret();
   AppTrafficSecret trafficSecret;
-  trafficSecret.client = deriver_->deriveSecret(
-      folly::range(masterSecret.secret),
-      kClientAppTraffic,
-      transcript,
-      deriver_->hashLength());
-  trafficSecret.server = deriver_->deriveSecret(
-      folly::range(masterSecret.secret),
-      kServerAppTraffic,
-      transcript,
-      deriver_->hashLength());
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      deriver_->deriveSecret(
+          trafficSecret.client,
+          err,
+          folly::range(masterSecret.secret),
+          kClientAppTraffic,
+          transcript,
+          deriver_->hashLength()),
+      err);
+  FIZZ_THROW_ON_ERROR(
+      deriver_->deriveSecret(
+          trafficSecret.server,
+          err,
+          folly::range(masterSecret.secret),
+          kServerAppTraffic,
+          transcript,
+          deriver_->hashLength()),
+      err);
   appTrafficSecret_ = std::move(trafficSecret);
 }
 
@@ -179,10 +206,18 @@ DerivedSecret KeyScheduler::getSecret(
   }
 
   auto& earlySecret = *secret_->asEarlySecret();
-  return DerivedSecret(
+  std::vector<uint8_t> secret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
       deriver_->deriveSecret(
-          folly::range(earlySecret.secret), label, transcript, secretLength),
-      SecretType(s));
+          secret,
+          err,
+          folly::range(earlySecret.secret),
+          label,
+          transcript,
+          secretLength),
+      err);
+  return DerivedSecret(std::move(secret), SecretType(s));
 }
 
 DerivedSecret KeyScheduler::getSecret(
@@ -206,13 +241,18 @@ DerivedSecret KeyScheduler::getSecret(
   }
 
   auto& handshakeSecret = *secret_->asHandshakeSecret();
-  return DerivedSecret(
+  std::vector<uint8_t> secret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
       deriver_->deriveSecret(
+          secret,
+          err,
           folly::range(handshakeSecret.secret),
           label,
           transcript,
           secretLength),
-      SecretType(s));
+      err);
+  return DerivedSecret(std::move(secret), SecretType(s));
 }
 
 DerivedSecret KeyScheduler::getSecret(
@@ -231,13 +271,18 @@ DerivedSecret KeyScheduler::getSecret(
   }
 
   auto& masterSecret = *secret_->asMasterSecret();
-  return DerivedSecret(
+  std::vector<uint8_t> secret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
       deriver_->deriveSecret(
+          secret,
+          err,
           folly::range(masterSecret.secret),
           label,
           transcript,
           deriver_->hashLength()),
-      SecretType(s));
+      err);
+  return DerivedSecret(std::move(secret), SecretType(s));
 }
 
 DerivedSecret KeyScheduler::getSecret(AppTrafficSecrets s) const {

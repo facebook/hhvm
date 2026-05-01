@@ -36,7 +36,9 @@ class KeyDerivation {
       Buf hashValue,
       uint16_t length) = 0;
 
-  virtual std::vector<uint8_t> deriveSecret(
+  virtual Status deriveSecret(
+      std::vector<uint8_t>& ret,
+      Error& err,
       folly::ByteRange secret,
       folly::StringPiece label,
       folly::ByteRange messageHash,
@@ -79,7 +81,9 @@ class KeyDerivationImpl : public KeyDerivation {
       Buf hashValue,
       uint16_t length) override;
 
-  std::vector<uint8_t> deriveSecret(
+  Status deriveSecret(
+      std::vector<uint8_t>& ret,
+      Error& err,
       folly::ByteRange secret,
       folly::StringPiece label,
       folly::ByteRange messageHash,

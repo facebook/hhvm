@@ -35,8 +35,14 @@ Status Exporter::getExportedKeyingMaterial(
   FIZZ_RETURN_ON_ERROR(factory.makeHasherFactory(hasherFactory, err, hash));
   fizz::hash(hasherFactory, *context, hashedContext);
 
-  auto secret = deriver->deriveSecret(
-      exporterMaster, label, deriver->blankHash(), deriver->hashLength());
+  std::vector<uint8_t> secret;
+  FIZZ_RETURN_ON_ERROR(deriver->deriveSecret(
+      secret,
+      err,
+      exporterMaster,
+      label,
+      deriver->blankHash(),
+      deriver->hashLength()));
   FIZZ_RETURN_ON_ERROR(deriver->expandLabel(
       ret,
       err,

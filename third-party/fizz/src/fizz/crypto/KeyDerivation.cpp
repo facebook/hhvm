@@ -37,7 +37,9 @@ Status KeyDerivationImpl::hkdfExpand(
   return Status::Success;
 }
 
-std::vector<uint8_t> KeyDerivationImpl::deriveSecret(
+Status KeyDerivationImpl::deriveSecret(
+    std::vector<uint8_t>& ret,
+    Error& err,
     folly::ByteRange secret,
     folly::StringPiece label,
     folly::ByteRange messageHash,
@@ -49,9 +51,8 @@ std::vector<uint8_t> KeyDerivationImpl::deriveSecret(
   // Copying the buffer to avoid violating constness of the data.
   auto hashBuf = folly::IOBuf::copyBuffer(messageHash);
   Buf out;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      expandLabel(out, err, secret, label, std::move(hashBuf), length), err);
+  FIZZ_RETURN_ON_ERROR(
+      expandLabel(out, err, secret, label, std::move(hashBuf), length));
   std::vector<uint8_t> prk(length);
   size_t offset = 0;
   for (auto buf : *out) {
@@ -60,6 +61,7 @@ std::vector<uint8_t> KeyDerivationImpl::deriveSecret(
     memcpy(prk.data() + offset, buf.data(), copyLength);
     offset += copyLength;
   }
-  return prk;
+  ret = std::move(prk);
+  return Status::Success;
 }
 } // namespace fizz

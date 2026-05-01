@@ -62,8 +62,17 @@ TEST(KeyDerivation, DeriveSecret) {
   std::vector<uint8_t> messageHash(
       createKeyDerivationImpl<Sha256>().hashLength());
   auto deriver = createKeyDerivationImpl<Sha256>();
-  deriver.deriveSecret(
-      range(secret), "hey", range(messageHash), deriver.hashLength());
+  std::vector<uint8_t> result;
+  Error err;
+  EXPECT_EQ(
+      deriver.deriveSecret(
+          result,
+          err,
+          range(secret),
+          "hey",
+          range(messageHash),
+          deriver.hashLength()),
+      Status::Success);
 }
 
 TEST(KeyDerivation, Sha256BlankHash) {

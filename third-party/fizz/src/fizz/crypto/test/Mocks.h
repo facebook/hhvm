@@ -68,11 +68,21 @@ class MockKeyDerivation : public KeyDerivation {
   }
   MOCK_METHOD(
       std::vector<uint8_t>,
-      deriveSecret,
+      _deriveSecret,
       (folly::ByteRange secret,
        folly::StringPiece label,
        folly::ByteRange messageHash,
        uint16_t length));
+  Status deriveSecret(
+      std::vector<uint8_t>& ret,
+      Error& /*err*/,
+      folly::ByteRange secret,
+      folly::StringPiece label,
+      folly::ByteRange messageHash,
+      uint16_t length) override {
+    ret = _deriveSecret(secret, label, messageHash, length);
+    return Status::Success;
+  }
   MOCK_METHOD(
       std::vector<uint8_t>,
       hkdfExtract,

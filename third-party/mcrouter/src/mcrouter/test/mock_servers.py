@@ -55,6 +55,7 @@ class MockServer(threading.Thread):
             try:
                 client, address = self.listen_socket.accept()
                 client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                # pyrefly: ignore [missing-attribute]
                 self.runServer(client, address)
                 client.close()
             except OSError as e:

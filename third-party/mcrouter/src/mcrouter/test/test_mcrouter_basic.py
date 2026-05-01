@@ -145,9 +145,11 @@ class TestMcrouterBasic(TestMcrouterBasicBase):
         mcr2 = Mcrouter(self.null_route_config, port=mcr1.port)
         self.assertTrue(mcr1.is_alive())
         retries = 20
+        # pyrefly: ignore [missing-argument]
         while mcr2.is_alive() and retries > 0:
             retries = retries - 1
             time.sleep(1)
+        # pyrefly: ignore [missing-argument]
         self.assertFalse(mcr2.is_alive())
 
     def test_set_exptime(self):

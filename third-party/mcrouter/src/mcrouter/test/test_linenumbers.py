@@ -50,6 +50,7 @@ class OutputCheckerTestCase(unittest.TestCase):
         self.proc = subprocess.Popen(cmd, stderr=subprocess.PIPE)
 
     def check_for_error_line_number(self):
+        # pyrefly: ignore [missing-attribute]
         for line in self.proc.stderr:
             line = line.decode()
             if "Unknown RouteHandle: XYZRoute line: 3" in line:

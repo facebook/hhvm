@@ -94,10 +94,13 @@ class CarbonLookasideTmpConfig:
 
     def cleanup(self):
         if not self.tmpRouteFile:
+            # pyrefly: ignore [bad-argument-type]
             os.remove(self.tmpRouteFile)
         if not self.tmpClientFile:
+            # pyrefly: ignore [bad-argument-type]
             os.remove(self.tmpClientFile)
         if not self.tmpFlavorFile:
+            # pyrefly: ignore [bad-argument-type]
             os.remove(self.tmpFlavorFile)
 
     def __init__(

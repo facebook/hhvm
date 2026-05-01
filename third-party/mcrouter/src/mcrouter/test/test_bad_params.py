@@ -40,6 +40,7 @@ class OutputCheckerTestCase(unittest.TestCase):
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(timeout)
 
+        # pyrefly: ignore [missing-attribute]
         for line in self.proc.stderr:
             line = line.decode()
             stderr += line

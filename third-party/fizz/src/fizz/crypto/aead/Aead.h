@@ -61,7 +61,7 @@ class Aead {
    * Sets the key and iv for this aead. The length of the key and iv must match
    * keyLength() and ivLength().
    */
-  virtual void setKey(TrafficKey key) = 0;
+  virtual Status setKey(Error& err, TrafficKey key) = 0;
 
   /**
    * Retrieves a shallow copy (IOBuf cloned) version of the TrafficKey
@@ -75,11 +75,15 @@ class Aead {
    * Uses BufferOption::RespectSharedPolicy and AllocationOption::Allow by
    * default.
    */
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum) const {
     return encrypt(
+        ret,
+        err,
         std::forward<std::unique_ptr<folly::IOBuf>>(plaintext),
         associatedData,
         seqNum,
@@ -93,11 +97,15 @@ class Aead {
    * Uses BufferOption::RespectSharedPolicy and AllocationOption::Allow by
    * default.
    */
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce) const {
     return encrypt(
+        ret,
+        err,
         std::forward<std::unique_ptr<folly::IOBuf>>(plaintext),
         associatedData,
         nonce,
@@ -111,7 +119,9 @@ class Aead {
    *  encryption using the TLS record number to nonce construction
    *  as specified in RFC 8446.
    */
-  virtual std::unique_ptr<folly::IOBuf> encrypt(
+  virtual Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
@@ -124,7 +134,9 @@ class Aead {
    * by the caller; consequently, this interface can be used
    * to perform AEAD outside of a TLS specific application.
    */
-  virtual std::unique_ptr<folly::IOBuf> encrypt(
+  virtual Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
@@ -137,7 +149,9 @@ class Aead {
    * Equivalent of calling encrypt() with BufferOption::AllowFullModification
    * and AllocationOption::Deny.
    */
-  virtual std::unique_ptr<folly::IOBuf> inplaceEncrypt(
+  virtual Status inplaceEncrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum) const = 0;
@@ -204,11 +218,14 @@ class Aead {
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       AeadOptions options) const {
-    auto plaintext = tryDecrypt(
+    folly::Optional<std::unique_ptr<folly::IOBuf>> plaintext;
+    FIZZ_RETURN_ON_ERROR(tryDecrypt(
+        plaintext,
+        err,
         std::forward<std::unique_ptr<folly::IOBuf>>(ciphertext),
         associatedData,
         seqNum,
-        options);
+        options));
     if (!plaintext) {
       return err.error("decryption failed");
     }
@@ -223,11 +240,14 @@ class Aead {
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
       AeadOptions options) const {
-    auto plaintext = tryDecrypt(
+    folly::Optional<std::unique_ptr<folly::IOBuf>> plaintext;
+    FIZZ_RETURN_ON_ERROR(tryDecrypt(
+        plaintext,
+        err,
         std::forward<std::unique_ptr<folly::IOBuf>>(ciphertext),
         associatedData,
         nonce,
-        options);
+        options));
     if (!plaintext) {
       return err.error("decryption failed");
     }
@@ -242,11 +262,15 @@ class Aead {
    * Uses BufferOption::RespectSharedPolicy and AllocationOption::Allow by
    * default.
    */
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum) const {
     return tryDecrypt(
+        ret,
+        err,
         std::forward<std::unique_ptr<folly::IOBuf>>(ciphertext),
         associatedData,
         seqNum,
@@ -264,24 +288,32 @@ class Aead {
    * Uses BufferOption::RespectSharedPolicy and AllocationOption::Allow by
    * default.
    */
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce) const {
     return tryDecrypt(
+        ret,
+        err,
         std::forward<std::unique_ptr<folly::IOBuf>>(ciphertext),
         associatedData,
         nonce,
         {BufferOption::RespectSharedPolicy, AllocationOption::Allow});
   }
 
-  virtual folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  virtual Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       AeadOptions options) const = 0;
 
-  virtual folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  virtual Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
@@ -292,5 +324,191 @@ class Aead {
    * ciphertext - size of plaintext).
    */
   virtual size_t getCipherOverhead() const = 0;
+
+  // ---- Deprecated wrappers with old return-value signatures ----
+  // These throw on error. Will be removed once external call sites are
+  // migrated.
+
+  // @deprecated Use Status-returning overload instead.
+  void setKey(TrafficKey key) {
+    Error err;
+    FIZZ_THROW_ON_ERROR(setKey(err, std::move(key)), err);
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  std::unique_ptr<folly::IOBuf> encrypt(
+      std::unique_ptr<folly::IOBuf>&& plaintext,
+      const folly::IOBuf* associatedData,
+      uint64_t seqNum) const {
+    std::unique_ptr<folly::IOBuf> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encrypt(ret, err, std::move(plaintext), associatedData, seqNum), err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  std::unique_ptr<folly::IOBuf> encrypt(
+      std::unique_ptr<folly::IOBuf>&& plaintext,
+      const folly::IOBuf* associatedData,
+      folly::ByteRange nonce) const {
+    std::unique_ptr<folly::IOBuf> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encrypt(ret, err, std::move(plaintext), associatedData, nonce), err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  std::unique_ptr<folly::IOBuf> encrypt(
+      std::unique_ptr<folly::IOBuf>&& plaintext,
+      const folly::IOBuf* associatedData,
+      uint64_t seqNum,
+      AeadOptions options) const {
+    std::unique_ptr<folly::IOBuf> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encrypt(
+            ret, err, std::move(plaintext), associatedData, seqNum, options),
+        err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  std::unique_ptr<folly::IOBuf> encrypt(
+      std::unique_ptr<folly::IOBuf>&& plaintext,
+      const folly::IOBuf* associatedData,
+      folly::ByteRange nonce,
+      AeadOptions options) const {
+    std::unique_ptr<folly::IOBuf> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        encrypt(ret, err, std::move(plaintext), associatedData, nonce, options),
+        err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  std::unique_ptr<folly::IOBuf> inplaceEncrypt(
+      std::unique_ptr<folly::IOBuf>&& plaintext,
+      const folly::IOBuf* associatedData,
+      uint64_t seqNum) const {
+    std::unique_ptr<folly::IOBuf> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        inplaceEncrypt(ret, err, std::move(plaintext), associatedData, seqNum),
+        err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  std::unique_ptr<folly::IOBuf> decrypt(
+      std::unique_ptr<folly::IOBuf>&& ciphertext,
+      const folly::IOBuf* associatedData,
+      uint64_t seqNum) const {
+    std::unique_ptr<folly::IOBuf> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        decrypt(ret, err, std::move(ciphertext), associatedData, seqNum), err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  std::unique_ptr<folly::IOBuf> decrypt(
+      std::unique_ptr<folly::IOBuf>&& ciphertext,
+      const folly::IOBuf* associatedData,
+      folly::ByteRange nonce) const {
+    std::unique_ptr<folly::IOBuf> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        decrypt(ret, err, std::move(ciphertext), associatedData, nonce), err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  std::unique_ptr<folly::IOBuf> decrypt(
+      std::unique_ptr<folly::IOBuf>&& ciphertext,
+      const folly::IOBuf* associatedData,
+      uint64_t seqNum,
+      AeadOptions options) const {
+    std::unique_ptr<folly::IOBuf> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        decrypt(
+            ret, err, std::move(ciphertext), associatedData, seqNum, options),
+        err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  std::unique_ptr<folly::IOBuf> decrypt(
+      std::unique_ptr<folly::IOBuf>&& ciphertext,
+      const folly::IOBuf* associatedData,
+      folly::ByteRange nonce,
+      AeadOptions options) const {
+    std::unique_ptr<folly::IOBuf> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        decrypt(
+            ret, err, std::move(ciphertext), associatedData, nonce, options),
+        err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+      std::unique_ptr<folly::IOBuf>&& ciphertext,
+      const folly::IOBuf* associatedData,
+      uint64_t seqNum) const {
+    folly::Optional<std::unique_ptr<folly::IOBuf>> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        tryDecrypt(ret, err, std::move(ciphertext), associatedData, seqNum),
+        err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+      std::unique_ptr<folly::IOBuf>&& ciphertext,
+      const folly::IOBuf* associatedData,
+      folly::ByteRange nonce) const {
+    folly::Optional<std::unique_ptr<folly::IOBuf>> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        tryDecrypt(ret, err, std::move(ciphertext), associatedData, nonce),
+        err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+      std::unique_ptr<folly::IOBuf>&& ciphertext,
+      const folly::IOBuf* associatedData,
+      uint64_t seqNum,
+      AeadOptions options) const {
+    folly::Optional<std::unique_ptr<folly::IOBuf>> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        tryDecrypt(
+            ret, err, std::move(ciphertext), associatedData, seqNum, options),
+        err);
+    return ret;
+  }
+
+  // @deprecated Use Status-returning overload instead.
+  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+      std::unique_ptr<folly::IOBuf>&& ciphertext,
+      const folly::IOBuf* associatedData,
+      folly::ByteRange nonce,
+      AeadOptions options) const {
+    folly::Optional<std::unique_ptr<folly::IOBuf>> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        tryDecrypt(
+            ret, err, std::move(ciphertext), associatedData, nonce, options),
+        err);
+    return ret;
+  }
 };
 } // namespace fizz

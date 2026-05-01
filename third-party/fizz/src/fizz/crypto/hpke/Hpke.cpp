@@ -96,7 +96,7 @@ Status keySchedule(
   TrafficKey trafficKey;
   trafficKey.key = std::move(key);
   trafficKey.iv = std::move(nonce);
-  params.cipher->setKey(std::move(trafficKey));
+  FIZZ_RETURN_ON_ERROR(params.cipher->setKey(err, std::move(trafficKey)));
 
   ret = std::make_unique<HpkeContextImpl>(
       std::move(params.cipher),

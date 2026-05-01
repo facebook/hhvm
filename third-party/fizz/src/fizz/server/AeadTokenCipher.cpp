@@ -75,8 +75,15 @@ folly::Optional<Buf> Aead128GCMTokenCipher::encrypt(
   folly::io::Appender appender(token.get(), kTokenHeaderLength);
   appender.push(folly::range(salt));
   appender.writeBE<SeqNum>(seqNum);
-  token->prependChain(
-      aead->encrypt(std::move(plaintext), associatedData, seqNum));
+  std::unique_ptr<folly::IOBuf> encrypted;
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        aead->encrypt(
+            encrypted, err, std::move(plaintext), associatedData, seqNum),
+        err);
+  }
+  token->prependChain(std::move(encrypted));
 
   return std::move(token);
 }
@@ -97,9 +104,16 @@ folly::Optional<Buf> Aead128GCMTokenCipher::decrypt(
 
   for (const auto& secret : secrets_) {
     auto aead = createAead(folly::range(secret), folly::range(salt));
-    auto result = aead->tryDecrypt(ciphertext->clone(), associatedData, seqNum);
+    folly::Optional<std::unique_ptr<folly::IOBuf>> result;
+    {
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          aead->tryDecrypt(
+              result, err, ciphertext->clone(), associatedData, seqNum),
+          err);
+    }
     if (result) {
-      return result;
+      return std::move(result);
     }
   }
 
@@ -123,7 +137,7 @@ std::unique_ptr<Aead> Aead128GCMTokenCipher::createAead(
   TrafficKey key;
   cursor.clone(key.key, aead->keyLength());
   cursor.clone(key.iv, aead->ivLength());
-  aead->setKey(std::move(key));
+  FIZZ_THROW_ON_ERROR(aead->setKey(err, std::move(key)), err);
   return aead;
 }
 

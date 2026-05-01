@@ -14,13 +14,20 @@ std::unique_ptr<Aead> OpenSSLEVPCipher::makeCipher() {
   static_assert(AeadCipher::kIVLength >= sizeof(uint64_t), "iv too small");
   static_assert(AeadCipher::kIVLength < kMaxIVLength, "iv too large");
   static_assert(AeadCipher::kTagLength < kMaxTagLength, "tag too large");
-  return std::unique_ptr<Aead>(new OpenSSLEVPCipher(
-      AeadCipher::kKeyLength,
-      AeadCipher::kIVLength,
-      AeadCipher::kTagLength,
-      Properties<AeadCipher>::Cipher(),
-      Properties<AeadCipher>::kOperatesInBlocks,
-      Properties<AeadCipher>::kRequiresPresetTagLen));
+  std::unique_ptr<OpenSSLEVPCipher> cipher;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      OpenSSLEVPCipher::create(
+          cipher,
+          err,
+          AeadCipher::kKeyLength,
+          AeadCipher::kIVLength,
+          AeadCipher::kTagLength,
+          Properties<AeadCipher>::Cipher(),
+          Properties<AeadCipher>::kOperatesInBlocks,
+          Properties<AeadCipher>::kRequiresPresetTagLen),
+      err);
+  return std::unique_ptr<Aead>(std::move(cipher));
 }
 
 } // namespace openssl

@@ -54,8 +54,14 @@ TEST_P(HpkeContextTest, TestContext) {
           testParam.cipher),
       Status::Success);
   auto encryptCipher = getCipher(testParam.cipher);
-  encryptCipher->setKey(
-      TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)});
+  {
+    Error setKeyErr;
+    FIZZ_THROW_ON_ERROR(
+        encryptCipher->setKey(
+            setKeyErr,
+            TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)}),
+        setKeyErr);
+  }
 
   HpkeContextImpl encryptContext(
       std::move(encryptCipher),
@@ -77,8 +83,14 @@ TEST_P(HpkeContextTest, TestContext) {
       folly::IOBufEqualTo()(gotCiphertext, toIOBuf(testParam.ciphertext)));
 
   auto decryptCipher = getCipher(testParam.cipher);
-  decryptCipher->setKey(
-      TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)});
+  {
+    Error setKeyErr;
+    FIZZ_THROW_ON_ERROR(
+        decryptCipher->setKey(
+            setKeyErr,
+            TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)}),
+        setKeyErr);
+  }
   HpkeContextImpl decryptContext(
       std::move(decryptCipher),
       toIOBuf(kExportSecret),
@@ -111,8 +123,14 @@ TEST_P(HpkeContextTest, TestContextRoles) {
           testParam.cipher),
       Status::Success);
   auto encryptCipher = getCipher(testParam.cipher);
-  encryptCipher->setKey(
-      TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)});
+  {
+    Error setKeyErr;
+    FIZZ_THROW_ON_ERROR(
+        encryptCipher->setKey(
+            setKeyErr,
+            TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)}),
+        setKeyErr);
+  }
 
   HpkeContextImpl encryptContext(
       std::move(encryptCipher),
@@ -123,8 +141,14 @@ TEST_P(HpkeContextTest, TestContextRoles) {
       fizz::hpke::HpkeContext::Role::Sender);
 
   auto decryptCipher = getCipher(testParam.cipher);
-  decryptCipher->setKey(
-      TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)});
+  {
+    Error setKeyErr;
+    FIZZ_THROW_ON_ERROR(
+        decryptCipher->setKey(
+            setKeyErr,
+            TrafficKey{toIOBuf(testParam.key), toIOBuf(testParam.iv)}),
+        setKeyErr);
+  }
   HpkeContextImpl decryptContext(
       std::move(decryptCipher),
       toIOBuf(kExportSecret),

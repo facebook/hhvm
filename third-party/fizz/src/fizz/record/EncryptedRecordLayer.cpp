@@ -91,15 +91,18 @@ Status EncryptedReadRecordLayer::getDecryptedBuf(
       return err.error("max read seq num");
     }
     if (skipFailedDecryption_) {
-      auto decryptAttempt = aead_->tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>> decryptAttempt;
+      FIZZ_RETURN_ON_ERROR(aead_->tryDecrypt(
+          decryptAttempt,
+          err,
           std::move(encrypted),
           useAdditionalData_ ? &adBuf : nullptr,
           seqNum_,
-          options);
+          options));
       if (decryptAttempt) {
         seqNum_++;
         skipFailedDecryption_ = false;
-        ret = ReadResult<Buf>::from(std::move(decryptAttempt).value());
+        ret = ReadResult<Buf>::from(std::move(*decryptAttempt));
         return Status::Success;
       } else {
         continue;
@@ -235,11 +238,14 @@ Status EncryptedWriteRecordLayer::write(
         dataBuf->computeChainDataLength() + aead_->getCipherOverhead();
     appender.writeBE<uint16_t>(static_cast<uint16_t>(ciphertextLength));
 
-    auto cipherText = aead_->encrypt(
+    std::unique_ptr<folly::IOBuf> cipherText;
+    FIZZ_RETURN_ON_ERROR(aead_->encrypt(
+        cipherText,
+        err,
         std::move(dataBuf),
         useAdditionalData_ ? &header : nullptr,
         seqNum_++,
-        options);
+        options));
 
     std::unique_ptr<folly::IOBuf> record;
     if (!cipherText->isShared() &&

@@ -81,8 +81,8 @@ void encryptGCM(
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
     aead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
-    aead->setKey(getKey());
     Error err;
+    FIZZ_THROW_ON_ERROR(aead->setKey(err, getKey()), err);
     FIZZ_THROW_ON_ERROR(
         write.setAead(err, folly::ByteRange(), std::move(aead)), err);
     for (size_t i = 0; i < n; ++i) {
@@ -114,9 +114,9 @@ void decryptGCM(uint32_t n, size_t size, IOBufAllocation iobufAllocation) {
     EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
     auto writeAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     auto readAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
-    writeAead->setKey(getKey());
-    readAead->setKey(getKey());
     Error err;
+    FIZZ_THROW_ON_ERROR(writeAead->setKey(err, getKey()), err);
+    FIZZ_THROW_ON_ERROR(readAead->setKey(err, getKey()), err);
     FIZZ_THROW_ON_ERROR(
         write.setAead(err, folly::ByteRange(), std::move(writeAead)), err);
     FIZZ_THROW_ON_ERROR(
@@ -155,10 +155,18 @@ void decryptGCMNoRecord(uint32_t n, size_t size) {
     std::unique_ptr<Aead> writeAead =
         openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
     readAead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESGCM128>();
-    writeAead->setKey(getKey());
-    readAead->setKey(getKey());
+    {
+      Error err;
+      FIZZ_THROW_ON_ERROR(writeAead->setKey(err, getKey()), err);
+      FIZZ_THROW_ON_ERROR(readAead->setKey(err, getKey()), err);
+    }
     for (size_t i = 0; i < n; ++i) {
-      auto out = writeAead->encrypt(makeRandom(size), aad.get(), 0);
+      std::unique_ptr<folly::IOBuf> out;
+      {
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            writeAead->encrypt(out, err, makeRandom(size), aad.get(), 0), err);
+      }
       contents.push_back(std::move(out));
     }
   }
@@ -229,8 +237,8 @@ void encryptOCB(uint32_t n, size_t size) {
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
     aead = openssl::OpenSSLEVPCipher::makeCipher<fizz::AESOCB128>();
-    aead->setKey(getKey());
     Error err;
+    FIZZ_THROW_ON_ERROR(aead->setKey(err, getKey()), err);
     FIZZ_THROW_ON_ERROR(
         write.setAead(err, folly::ByteRange(), std::move(aead)), err);
     for (size_t i = 0; i < n; ++i) {
@@ -261,9 +269,12 @@ void encryptAEGIS(uint32_t n, size_t size) {
   std::vector<fizz::TLSMessage> msgs;
   EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
-    aead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
-    aead->setKey(getAegisKey());
+    Error makeCipherErr;
+    FIZZ_THROW_ON_ERROR(
+        fizz::libaegis::makeCipher<fizz::AEGIS128L>(aead, makeCipherErr),
+        makeCipherErr);
     Error err;
+    FIZZ_THROW_ON_ERROR(aead->setKey(err, getAegisKey()), err);
     FIZZ_THROW_ON_ERROR(
         write.setAead(err, folly::ByteRange(), std::move(aead)), err);
     for (size_t i = 0; i < n; ++i) {
@@ -286,11 +297,20 @@ void decryptAEGIS(uint32_t n, size_t size) {
   EncryptedReadRecordLayer read{EncryptionLevel::AppTraffic};
   BENCHMARK_SUSPEND {
     EncryptedWriteRecordLayer write{EncryptionLevel::AppTraffic};
-    auto writeAead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
-    auto readAead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
-    writeAead->setKey(getAegisKey());
-    readAead->setKey(getAegisKey());
+    std::unique_ptr<Aead> writeAead;
+    std::unique_ptr<Aead> readAead;
+    {
+      Error makeCipherErr;
+      FIZZ_THROW_ON_ERROR(
+          fizz::libaegis::makeCipher<fizz::AEGIS128L>(writeAead, makeCipherErr),
+          makeCipherErr);
+      FIZZ_THROW_ON_ERROR(
+          fizz::libaegis::makeCipher<fizz::AEGIS128L>(readAead, makeCipherErr),
+          makeCipherErr);
+    }
     Error err;
+    FIZZ_THROW_ON_ERROR(writeAead->setKey(err, getAegisKey()), err);
+    FIZZ_THROW_ON_ERROR(readAead->setKey(err, getAegisKey()), err);
     FIZZ_THROW_ON_ERROR(
         write.setAead(err, folly::ByteRange(), std::move(writeAead)), err);
     FIZZ_THROW_ON_ERROR(

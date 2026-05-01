@@ -39,7 +39,8 @@ std::unique_ptr<Aead> getTestCipher(const CipherParams& params) {
   TrafficKey trafficKey;
   trafficKey.key = toIOBuf(params.key);
   trafficKey.iv = toIOBuf(params.iv);
-  cipher->setKey(std::move(trafficKey));
+  Error err;
+  FIZZ_THROW_ON_ERROR(cipher->setKey(err, std::move(trafficKey)), err);
   return cipher;
 }
 
@@ -70,11 +71,19 @@ std::unique_ptr<folly::IOBuf> callEncrypt(
 
   auto origLength = plaintext->computeChainDataLength();
 
-  auto out = cipher->encrypt(
-      std::move(plaintext),
-      aad.get(),
-      params.seqNum,
-      {buffOption, allocOption});
+  std::unique_ptr<folly::IOBuf> out;
+  {
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        cipher->encrypt(
+            out,
+            err,
+            std::move(plaintext),
+            aad.get(),
+            params.seqNum,
+            {buffOption, allocOption}),
+        err);
+  }
   bool valid = IOBufEqualTo()(toIOBuf(params.ciphertext), out);
 
   EXPECT_EQ(valid, params.valid);
@@ -669,11 +678,19 @@ TEST_P(EVPCipherTest, TestTryDecrypt) {
   for (auto opts : getOptionPairs()) {
     // Should all behave identically, as ciphertext is unshared and contiguous
     auto cipher = getTestCipher(GetParam());
-    auto out = cipher->tryDecrypt(
-        toIOBuf(GetParam().ciphertext),
-        toIOBuf(GetParam().aad).get(),
-        GetParam().seqNum,
-        std::move(opts));
+    folly::Optional<std::unique_ptr<folly::IOBuf>> out;
+    {
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          cipher->tryDecrypt(
+              out,
+              err,
+              toIOBuf(GetParam().ciphertext),
+              toIOBuf(GetParam().aad).get(),
+              GetParam().seqNum,
+              std::move(opts)),
+          err);
+    }
     if (out) {
       EXPECT_TRUE(GetParam().valid);
       EXPECT_TRUE(IOBufEqualTo()(toIOBuf(GetParam().plaintext), *out));

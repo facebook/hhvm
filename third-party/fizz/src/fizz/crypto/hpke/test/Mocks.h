@@ -32,35 +32,41 @@ class MockAeadCipher : public Aead {
 
   MOCK_METHOD(folly::Optional<TrafficKey>, getKey, (), (const));
   MOCK_METHOD(void, _setKey, (TrafficKey * key));
-  void setKey(TrafficKey key) override {
+  Status setKey(Error& err, TrafficKey key) override {
     _setKey(&key);
-    actualCipher_->setKey(std::move(key));
+    return actualCipher_->setKey(err, std::move(key));
   }
 
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       AeadOptions options) const override {
     return actualCipher_->encrypt(
-        std::move(plaintext), associatedData, seqNum, options);
+        ret, err, std::move(plaintext), associatedData, seqNum, options);
   }
 
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
       AeadOptions options) const override {
     return actualCipher_->encrypt(
-        std::move(plaintext), associatedData, nonce, options);
+        ret, err, std::move(plaintext), associatedData, nonce, options);
   }
 
-  std::unique_ptr<folly::IOBuf> inplaceEncrypt(
+  Status inplaceEncrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum) const override {
     return actualCipher_->inplaceEncrypt(
-        std::move(plaintext), associatedData, seqNum);
+        ret, err, std::move(plaintext), associatedData, seqNum);
   }
 
   void setEncryptedBufferHeadroom(size_t headroom) override {
@@ -89,22 +95,26 @@ class MockAeadCipher : public Aead {
         ret, err, std::move(ciphertext), associatedData, nonce, options);
   }
 
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       AeadOptions options) const override {
     return actualCipher_->tryDecrypt(
-        std::move(ciphertext), associatedData, seqNum, options);
+        ret, err, std::move(ciphertext), associatedData, seqNum, options);
   }
 
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
       AeadOptions options) const override {
     return actualCipher_->tryDecrypt(
-        std::move(ciphertext), associatedData, nonce, options);
+        ret, err, std::move(ciphertext), associatedData, nonce, options);
   }
 
   size_t getCipherOverhead() const override {

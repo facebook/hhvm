@@ -46,10 +46,20 @@ class OpenSSLEVPCipher : public Aead {
   template <class AeadCipher>
   static std::unique_ptr<Aead> makeCipher();
 
+  static Status create(
+      std::unique_ptr<OpenSSLEVPCipher>& ret,
+      Error& err,
+      size_t keyLength,
+      size_t ivLength,
+      size_t tagLength,
+      const EVP_CIPHER* cipher,
+      bool operatesInBlocks,
+      bool requiresPresetTagLen);
+
   OpenSSLEVPCipher(OpenSSLEVPCipher&& other) = default;
   OpenSSLEVPCipher& operator=(OpenSSLEVPCipher&& other) = default;
 
-  void setKey(TrafficKey trafficKey) override;
+  Status setKey(Error& err, TrafficKey trafficKey) override;
   folly::Optional<TrafficKey> getKey() const override;
 
   size_t keyLength() const override {
@@ -64,13 +74,17 @@ class OpenSSLEVPCipher : public Aead {
   // either in the tail room if available, or by appending a new buf
   // If plaintext is shared, alloc a new output and encrypt to output.
   // The returned buffer will have head room == headroom_
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       Aead::AeadOptions options) const override;
 
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
@@ -79,18 +93,24 @@ class OpenSSLEVPCipher : public Aead {
   // The same as encrypt(), except always do an inplace encrypt if possible,
   // even if the IOBuf is shared. If there is not enough room for the tag,
   // this will throw an exception.
-  std::unique_ptr<folly::IOBuf> inplaceEncrypt(
+  Status inplaceEncrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum) const override;
 
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       Aead::AeadOptions options) const override;
 
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
@@ -107,9 +127,7 @@ class OpenSSLEVPCipher : public Aead {
       size_t keyLength,
       size_t ivLength,
       size_t tagLength,
-      const EVP_CIPHER* cipher,
-      bool operatesInBlocks,
-      bool requiresPresetTagLen);
+      bool operatesInBlocks);
 
   TrafficKey trafficKey_;
   folly::ByteRange trafficIvKey_;
@@ -119,9 +137,7 @@ class OpenSSLEVPCipher : public Aead {
   size_t keyLength_;
   size_t ivLength_;
   size_t tagLength_;
-  const EVP_CIPHER* cipher_;
   bool operatesInBlocks_;
-  bool requiresPresetTagLen_;
 
   folly::ssl::EvpCipherCtxUniquePtr encryptCtx_;
   folly::ssl::EvpCipherCtxUniquePtr decryptCtx_;

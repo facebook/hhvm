@@ -98,13 +98,15 @@ class AEGISCipher : public Aead {
   static constexpr size_t kAEGIS128LMMS = 2 * 16;
   static constexpr size_t kAEGIS256MMS = 16;
 
-  AEGISCipher(
-      std::unique_ptr<LibAegisCipherBase> impl_,
+  static Status create(
+      std::unique_ptr<Aead>& ret,
+      Error& err,
+      std::unique_ptr<LibAegisCipherBase> impl,
       size_t keyLength,
       size_t ivLength,
       size_t mms);
 
-  void setKey(TrafficKey trafficKey) override;
+  Status setKey(Error& err, TrafficKey trafficKey) override;
   folly::Optional<TrafficKey> getKey() const override;
 
   size_t keyLength() const override {
@@ -115,43 +117,57 @@ class AEGISCipher : public Aead {
     return ivLength_;
   }
 
-  std::unique_ptr<folly::IOBuf> doEncrypt(
+  Status doEncrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       folly::ByteRange iv,
       Aead::AeadOptions options) const;
 
-  folly::Optional<std::unique_ptr<folly::IOBuf>> doDecrypt(
+  Status doDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange iv,
       folly::MutableByteRange tagOut,
       bool inPlace) const;
 
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       Aead::AeadOptions options) const override;
 
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
       Aead::AeadOptions options) const override;
 
-  std::unique_ptr<folly::IOBuf> inplaceEncrypt(
+  Status inplaceEncrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum) const override;
 
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       Aead::AeadOptions options) const override;
 
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& err,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
@@ -176,13 +192,21 @@ class AEGISCipher : public Aead {
   size_t keyLength_;
   size_t ivLength_;
   size_t mms_;
+
+  AEGISCipher(
+      std::unique_ptr<LibAegisCipherBase> impl,
+      size_t keyLength,
+      size_t ivLength,
+      size_t mms);
 };
 
 static_assert(
     AEGISCipher::kMaxIVLength == aegis256_NPUBBYTES,
     "Invalid AEGISCipher::kMaxIVLength");
 
-std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
+Status AEGISCipher::doEncrypt(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     std::unique_ptr<folly::IOBuf>&& plaintext,
     const folly::IOBuf* associatedData,
     folly::ByteRange iv,
@@ -192,7 +216,8 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
     unsigned char tagTemp[kTagLength];
 
     explicit AeadImpl(const AEGISCipher& s) : self(s) {}
-    void init(
+    Status init(
+        Error& /* err */,
         folly::ByteRange iv,
         const folly::IOBuf* associatedData,
         size_t plaintextLength) {
@@ -218,9 +243,11 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
           iv.data(),
           self.trafficKeyKey_.data(),
           plaintextLength);
+      return Status::Success;
     }
 
-    void encrypt(folly::IOBuf& plaintext, folly::IOBuf& ciphertext) {
+    Status
+    encrypt(Error& err, folly::IOBuf& plaintext, folly::IOBuf& ciphertext) {
       struct EVPEncImpl {
         const AEGISCipher& self;
         unsigned char* tag;
@@ -244,36 +271,33 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::doEncrypt(
           return ret == 0;
         }
       };
-      Error err;
-      FIZZ_THROW_ON_ERROR(
-          encFuncBlocks(
-              err, EVPEncImpl(self, tagTemp), plaintext, ciphertext, self.mms_),
-          err);
+      FIZZ_RETURN_ON_ERROR(encFuncBlocks(
+          err, EVPEncImpl(self, tagTemp), plaintext, ciphertext, self.mms_));
+      return Status::Success;
     }
 
-    void final(int tagLen, void* tagOut) {
+    Status final(Error& /* err */, int tagLen, void* tagOut) {
       memcpy(tagOut, tagTemp, tagLen);
+      return Status::Success;
     }
   };
 
-  std::unique_ptr<folly::IOBuf> encryptResult;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
-      encryptHelper(
-          encryptResult,
-          err,
-          AeadImpl{*this},
-          std::move(plaintext),
-          associatedData,
-          iv,
-          kTagLength,
-          headroom_,
-          options),
-      err);
-  return encryptResult;
+  FIZZ_RETURN_ON_ERROR(encryptHelper(
+      ret,
+      err,
+      AeadImpl{*this},
+      std::move(plaintext),
+      associatedData,
+      iv,
+      kTagLength,
+      headroom_,
+      options));
+  return Status::Success;
 }
 
-folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
+Status AEGISCipher::doDecrypt(
+    folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+    Error& err,
     std::unique_ptr<folly::IOBuf>&& ciphertext,
     const folly::IOBuf* associatedData,
     folly::ByteRange iv,
@@ -283,7 +307,8 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
     const AEGISCipher& self;
 
     explicit AeadImpl(const AEGISCipher& s) : self(s) {}
-    void init(
+    Status init(
+        Error& /* err */,
         folly::ByteRange iv,
         const folly::IOBuf* associatedData,
         size_t ciphertextLength) {
@@ -310,9 +335,12 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
           iv.data(),
           self.trafficKeyKey_.data(),
           ciphertextLength);
+      return Status::Success;
     }
 
-    bool decryptAndFinal(
+    Status decryptAndFinal(
+        bool& ret,
+        Error& err,
         folly::IOBuf& ciphertext,
         folly::IOBuf& plaintext,
         folly::MutableByteRange tagOut) {
@@ -344,28 +372,27 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::doDecrypt(
         }
       };
 
-      bool decResult = false;
-      Error err;
-      FIZZ_THROW_ON_ERROR(
-          decFuncBlocks(
-              decResult,
-              err,
-              EVPDecImpl(self),
-              ciphertext,
-              plaintext,
-              tagOut,
-              self.mms_),
-          err);
-      return decResult;
+      FIZZ_RETURN_ON_ERROR(decFuncBlocks(
+          ret,
+          err,
+          EVPDecImpl(self),
+          ciphertext,
+          plaintext,
+          tagOut,
+          self.mms_));
+      return Status::Success;
     }
   };
-  return decryptHelper(
+  FIZZ_RETURN_ON_ERROR(decryptHelper(
+      ret,
+      err,
       AeadImpl{*this},
       std::move(ciphertext),
       associatedData,
       iv,
       tagOut,
-      inPlace);
+      inPlace));
+  return Status::Success;
 }
 
 AEGISCipher::AEGISCipher(
@@ -376,31 +403,40 @@ AEGISCipher::AEGISCipher(
     : impl_(std::move(impl)),
       keyLength_(keyLength),
       ivLength_(ivLength),
-      mms_(mms) {
-  static int dummy = []() -> int {
-    // aegis_init is safe to call multiple times. It populates libaegis's cpu
-    // feature vector
-    if (aegis_init() == -1) {
-      throw std::runtime_error("failed to initialize libaegis");
-    }
-    return 0;
-  }();
-  (void)dummy;
+      mms_(mms) {}
+
+Status AEGISCipher::create(
+    std::unique_ptr<Aead>& ret,
+    Error& err,
+    std::unique_ptr<LibAegisCipherBase> impl,
+    size_t keyLength,
+    size_t ivLength,
+    size_t mms) {
+  // aegis_init is safe to call multiple times. It populates libaegis's cpu
+  // feature vector
+  static int initResult = aegis_init();
+  if (initResult == -1) {
+    return err.error("failed to initialize libaegis");
+  }
+  ret = std::unique_ptr<Aead>(
+      new AEGISCipher(std::move(impl), keyLength, ivLength, mms));
+  return Status::Success;
 }
 
-void AEGISCipher::setKey(TrafficKey trafficKey) {
+Status AEGISCipher::setKey(Error& err, TrafficKey trafficKey) {
   trafficKey.key->coalesce();
   trafficKey.iv->coalesce();
   if (trafficKey.key->length() != keyLength_) {
-    throw std::runtime_error("Invalid key");
+    return err.error("Invalid key");
   }
   if (trafficKey.iv->length() != ivLength_) {
-    throw std::runtime_error("Invalid IV");
+    return err.error("Invalid IV");
   }
   trafficKey_ = std::move(trafficKey);
   // Cache the iv and key. calling coalesce() is not free.
   trafficIvKey_ = trafficKey_.iv->coalesce();
   trafficKeyKey_ = trafficKey_.key->coalesce();
+  return Status::Success;
 }
 
 folly::Optional<TrafficKey> AEGISCipher::getKey() const {
@@ -410,7 +446,9 @@ folly::Optional<TrafficKey> AEGISCipher::getKey() const {
   return trafficKey_.clone();
 }
 
-std::unique_ptr<folly::IOBuf> AEGISCipher::encrypt(
+Status AEGISCipher::encrypt(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     std::unique_ptr<folly::IOBuf>&& plaintext,
     const folly::IOBuf* associatedData,
     uint64_t seqNum,
@@ -418,28 +456,37 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::encrypt(
   auto iv = ::fizz::createIV<AEGISCipher::kMaxIVLength>(
       seqNum, ivLength_, trafficIvKey_);
   return encrypt(
+      ret,
+      err,
       std::move(plaintext),
       associatedData,
       folly::ByteRange(iv.data(), ivLength_),
       options);
 }
 
-std::unique_ptr<folly::IOBuf> AEGISCipher::encrypt(
+Status AEGISCipher::encrypt(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     std::unique_ptr<folly::IOBuf>&& plaintext,
     const folly::IOBuf* associatedData,
     folly::ByteRange nonce,
     Aead::AeadOptions options) const {
-  return doEncrypt(std::move(plaintext), associatedData, nonce, options);
+  return doEncrypt(
+      ret, err, std::move(plaintext), associatedData, nonce, options);
 }
 
 // TODO: (T136805571) We will add implementation for inplace encryption later
-std::unique_ptr<folly::IOBuf> AEGISCipher::inplaceEncrypt(
+Status AEGISCipher::inplaceEncrypt(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err,
     std::unique_ptr<folly::IOBuf>&& plaintext,
     const folly::IOBuf* associatedData,
     uint64_t seqNum) const {
   auto iv =
       createIV<AEGISCipher::kMaxIVLength>(seqNum, ivLength_, trafficIvKey_);
   return doEncrypt(
+      ret,
+      err,
       std::move(plaintext),
       associatedData,
       folly::ByteRange(iv.data(), ivLength_),
@@ -447,7 +494,9 @@ std::unique_ptr<folly::IOBuf> AEGISCipher::inplaceEncrypt(
        Aead::AllocationOption::Deny});
 }
 
-folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
+Status AEGISCipher::tryDecrypt(
+    folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+    Error& err,
     std::unique_ptr<folly::IOBuf>&& ciphertext,
     const folly::IOBuf* associatedData,
     uint64_t seqNum,
@@ -455,19 +504,24 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
   auto iv = ::fizz::createIV<AEGISCipher::kMaxIVLength>(
       seqNum, ivLength_, trafficIvKey_);
   return tryDecrypt(
+      ret,
+      err,
       std::move(ciphertext),
       associatedData,
       folly::ByteRange(iv.data(), ivLength_),
       options);
 }
 
-folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
+Status AEGISCipher::tryDecrypt(
+    folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+    Error& err,
     std::unique_ptr<folly::IOBuf>&& ciphertext,
     const folly::IOBuf* associatedData,
     folly::ByteRange nonce,
     Aead::AeadOptions options) const {
   if (kTagLength > ciphertext->computeChainDataLength()) {
-    return folly::none;
+    ret = folly::none;
+    return Status::Success;
   }
 
   auto inPlace =
@@ -475,7 +529,7 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
        options.bufferOpt != Aead::BufferOption::RespectSharedPolicy);
 
   if (!inPlace && options.allocOpt == Aead::AllocationOption::Deny) {
-    throw std::runtime_error("Unable to decrypt (no-alloc requires in-place)");
+    return err.error("Unable to decrypt (no-alloc requires in-place)");
   }
 
   // Set up the tag buffer now
@@ -491,7 +545,7 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
   } else {
     // Tag is fragmented so we need to copy it out.
     if (options.allocOpt == Aead::AllocationOption::Deny) {
-      throw std::runtime_error(
+      return err.error(
           "Unable to decrypt (tag is fragmented and no allocation allowed)");
     }
     // buffer to copy the tag into when we decrypt
@@ -499,7 +553,7 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> AEGISCipher::tryDecrypt(
     trimBytes(*ciphertext, tagOut);
   }
   return doDecrypt(
-      std::move(ciphertext), associatedData, nonce, tagOut, inPlace);
+      ret, err, std::move(ciphertext), associatedData, nonce, tagOut, inPlace);
 }
 
 size_t AEGISCipher::getCipherOverhead() const {
@@ -508,26 +562,29 @@ size_t AEGISCipher::getCipherOverhead() const {
 } // namespace
 
 template <>
-std::unique_ptr<Aead> makeCipher<fizz::AEGIS128L>() {
+Status makeCipher<fizz::AEGIS128L>(std::unique_ptr<Aead>& ret, Error& err) {
   auto impl =
       std::unique_ptr<LibAegisCipherBase>(new LibAegisCipher<AEGIS128L>());
-  return std::unique_ptr<Aead>(new AEGISCipher(
+  return AEGISCipher::create(
+      ret,
+      err,
       std::move(impl),
       aegis128l_KEYBYTES,
       aegis128l_NPUBBYTES,
-      AEGISCipher::kAEGIS128LMMS));
+      AEGISCipher::kAEGIS128LMMS);
 }
 
 template <>
-std::unique_ptr<Aead> makeCipher<fizz::AEGIS256>() {
+Status makeCipher<fizz::AEGIS256>(std::unique_ptr<Aead>& ret, Error& err) {
   auto impl =
       std::unique_ptr<LibAegisCipherBase>(new LibAegisCipher<AEGIS256>());
-  return std::unique_ptr<Aead>(new AEGISCipher(
+  return AEGISCipher::create(
+      ret,
+      err,
       std::move(impl),
       aegis256_KEYBYTES,
       aegis256_NPUBBYTES,
-      AEGISCipher::kAEGIS256MMS));
-  return nullptr;
+      AEGISCipher::kAEGIS256MMS);
 }
 } // namespace fizz::libaegis
 #endif

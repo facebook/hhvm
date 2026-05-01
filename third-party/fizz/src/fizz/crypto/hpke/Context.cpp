@@ -59,7 +59,7 @@ Status HpkeContextImpl::seal(
         folly::none,
         Error::Category::StdLogic);
   }
-  ret = cipher_->encrypt(std::move(pt), aad, seqNum_);
+  FIZZ_RETURN_ON_ERROR(cipher_->encrypt(ret, err, std::move(pt), aad, seqNum_));
   FIZZ_RETURN_ON_ERROR(incrementSeq(err));
   return Status::Success;
 }

@@ -16,11 +16,11 @@
 namespace fizz::libaegis {
 
 template <class T>
-std::unique_ptr<Aead> makeCipher();
+Status makeCipher(std::unique_ptr<Aead>& ret, Error& err);
 
 template <>
-std::unique_ptr<Aead> makeCipher<fizz::AEGIS128L>();
+Status makeCipher<fizz::AEGIS128L>(std::unique_ptr<Aead>& ret, Error& err);
 template <>
-std::unique_ptr<Aead> makeCipher<fizz::AEGIS256>();
+Status makeCipher<fizz::AEGIS256>(std::unique_ptr<Aead>& ret, Error& err);
 } // namespace fizz::libaegis
 #endif

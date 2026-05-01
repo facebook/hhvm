@@ -25,8 +25,9 @@ class MockAead : public Aead {
   MOCK_METHOD(void, setEncryptedBufferHeadroom, (size_t));
 
   MOCK_METHOD(void, _setKey, (TrafficKey & key));
-  void setKey(TrafficKey key) override {
-    return _setKey(key);
+  Status setKey(Error& /* err */, TrafficKey key) override {
+    _setKey(key);
+    return Status::Success;
   }
 
   MOCK_METHOD(
@@ -37,12 +38,15 @@ class MockAead : public Aead {
        uint64_t seqNum,
        Aead::AeadOptions options),
       (const));
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& /* err */,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       Aead::AeadOptions options) const override {
-    return _encrypt(plaintext, associatedData, seqNum, options);
+    ret = _encrypt(plaintext, associatedData, seqNum, options);
+    return Status::Success;
   }
 
   MOCK_METHOD(
@@ -53,12 +57,15 @@ class MockAead : public Aead {
        folly::ByteRange nonce,
        Aead::AeadOptions options),
       (const));
-  std::unique_ptr<folly::IOBuf> encrypt(
+  Status encrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& /* err */,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
       AeadOptions options) const override {
-    return _encryptNonce(plaintext, associatedData, nonce, options);
+    ret = _encryptNonce(plaintext, associatedData, nonce, options);
+    return Status::Success;
   }
 
   MOCK_METHOD(
@@ -68,11 +75,14 @@ class MockAead : public Aead {
        const folly::IOBuf* associatedData,
        uint64_t seqNum),
       (const));
-  std::unique_ptr<folly::IOBuf> inplaceEncrypt(
+  Status inplaceEncrypt(
+      std::unique_ptr<folly::IOBuf>& ret,
+      Error& /* err */,
       std::unique_ptr<folly::IOBuf>&& plaintext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum) const override {
-    return _inplaceEncrypt(plaintext, associatedData, seqNum);
+    ret = _inplaceEncrypt(plaintext, associatedData, seqNum);
+    return Status::Success;
   }
 
   MOCK_METHOD(
@@ -102,12 +112,15 @@ class MockAead : public Aead {
        uint64_t seqNum,
        Aead::AeadOptions options),
       (const));
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& /* err */,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       uint64_t seqNum,
       Aead::AeadOptions options) const override {
-    return _tryDecrypt(ciphertext, associatedData, seqNum, options);
+    ret = _tryDecrypt(ciphertext, associatedData, seqNum, options);
+    return Status::Success;
   }
 
   MOCK_METHOD(
@@ -118,12 +131,15 @@ class MockAead : public Aead {
        folly::ByteRange nonce,
        Aead::AeadOptions options),
       (const));
-  folly::Optional<std::unique_ptr<folly::IOBuf>> tryDecrypt(
+  Status tryDecrypt(
+      folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+      Error& /* err */,
       std::unique_ptr<folly::IOBuf>&& ciphertext,
       const folly::IOBuf* associatedData,
       folly::ByteRange nonce,
       Aead::AeadOptions options) const override {
-    return _tryDecryptNonce(ciphertext, associatedData, nonce, options);
+    ret = _tryDecryptNonce(ciphertext, associatedData, nonce, options);
+    return Status::Success;
   }
 
   MOCK_METHOD(folly::Optional<TrafficKey>, getKey, (), (const));

@@ -90,12 +90,18 @@ std::unique_ptr<Aead> getCipher(CipherSuite suite) {
       cipher = openssl::OpenSSLEVPCipher::makeCipher<AESOCB128>();
       break;
 #if FIZZ_HAVE_LIBAEGIS
-    case CipherSuite::TLS_AEGIS_128L_SHA256:
-      cipher = libaegis::makeCipher<fizz::AEGIS128L>();
+    case CipherSuite::TLS_AEGIS_128L_SHA256: {
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          libaegis::makeCipher<fizz::AEGIS128L>(cipher, err), err);
       break;
-    case CipherSuite::TLS_AEGIS_256_SHA512:
-      cipher = libaegis::makeCipher<fizz::AEGIS256>();
+    }
+    case CipherSuite::TLS_AEGIS_256_SHA512: {
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          libaegis::makeCipher<fizz::AEGIS256>(cipher, err), err);
       break;
+    }
 #endif
     default:
       throw std::runtime_error("Invalid cipher");

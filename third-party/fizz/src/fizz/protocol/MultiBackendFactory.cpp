@@ -86,11 +86,9 @@ Status MultiBackendFactory::makeAead(
       return Status::Success;
 #if FIZZ_HAVE_LIBAEGIS
     case CipherSuite::TLS_AEGIS_256_SHA512:
-      ret = libaegis::makeCipher<fizz::AEGIS256>();
-      return Status::Success;
+      return libaegis::makeCipher<fizz::AEGIS256>(ret, err);
     case CipherSuite::TLS_AEGIS_128L_SHA256:
-      ret = libaegis::makeCipher<fizz::AEGIS128L>();
-      return Status::Success;
+      return libaegis::makeCipher<fizz::AEGIS128L>(ret, err);
 #endif
     default:
       return err.error("aead: not implemented");

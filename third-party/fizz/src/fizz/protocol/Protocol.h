@@ -41,7 +41,7 @@ class Protocol {
     FIZZ_RETURN_ON_ERROR(factory.makeAead(ret, err, cipher));
     auto trafficKey =
         scheduler.getTrafficKey(secret, ret->keyLength(), ret->ivLength());
-    ret->setKey(std::move(trafficKey));
+    FIZZ_RETURN_ON_ERROR(ret->setKey(err, std::move(trafficKey)));
     return Status::Success;
   }
 
@@ -57,7 +57,7 @@ class Protocol {
     FIZZ_RETURN_ON_ERROR(factory.makeAead(ret, err, cipher));
     auto trafficKey = scheduler.getTrafficKeyWithLabel(
         secret, keyLabel, ivLabel, ret->keyLength(), ret->ivLength());
-    ret->setKey(std::move(trafficKey));
+    FIZZ_RETURN_ON_ERROR(ret->setKey(err, std::move(trafficKey)));
     return Status::Success;
   }
 

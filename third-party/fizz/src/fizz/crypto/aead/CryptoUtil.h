@@ -166,18 +166,18 @@ Status encFuncBlocks(
 
 /**
  * An object satisfies AeadImpl if the following requirements hold:
- *     * void AeadImpl::init(folly::ByteRange iv, const folly::IOBuf*
- * associatedData, size_t plaintextLength)
+ *     * Status AeadImpl::init(Error& err, folly::ByteRange iv,
+ * const folly::IOBuf* associatedData, size_t plaintextLength)
  *       - initializes an encryption context with `iv` and
  * associated data. Associated data can be null.
  *
- *     * void AeadImpl::encrypt(folly::IOBuf& ciphertext, folly::IOBuf&
- * plaintext)
+ *     * Status AeadImpl::encrypt(Error& err, folly::IOBuf& ciphertext,
+ * folly::IOBuf& plaintext)
  *       - encrypts `plaintextLength` bytes of `plaintext`. The implementation
  * must write the ciphertext to `ciphertext`. `cipherText` is guaranteed to be
  * writable for `plaintextLength` bytes.
  *
- *     * void AeadImpl::final(int tagLen, void* tagOut)
+ *     * Status AeadImpl::final(Error& err, int tagLen, void* tagOut)
  *       - finalizes the encryption, and writes the resulting AEAD tag into
  * `tagOut` which is guaranteed to be at least `taglen` bytes.
  */
@@ -193,7 +193,7 @@ Status encryptHelper(
     size_t headroom,
     Aead::AeadOptions options) {
   auto inputLength = plaintext->computeChainDataLength();
-  impl.init(iv, associatedData, inputLength);
+  FIZZ_RETURN_ON_ERROR(impl.init(err, iv, associatedData, inputLength));
 
   const auto& bufOption = options.bufferOpt;
   const auto& allocOption = options.allocOpt;
@@ -237,7 +237,7 @@ Status encryptHelper(
     input = plaintext.get();
   }
 
-  impl.encrypt(*input, *output);
+  FIZZ_RETURN_ON_ERROR(impl.encrypt(err, *input, *output));
 
   // output is always something we can modify
   auto tailRoom = output->prev()->tailroom();
@@ -247,13 +247,14 @@ Status encryptHelper(
     }
     std::unique_ptr<folly::IOBuf> tag = folly::IOBuf::create(tagLen);
     tag->append(tagLen);
-    impl.final(tagLen, tag->writableData());
+    FIZZ_RETURN_ON_ERROR(impl.final(err, tagLen, tag->writableData()));
     output->prependChain(std::move(tag));
   } else {
     auto lastBuf = output->prev();
     lastBuf->append(tagLen);
     // we can copy into output directly
-    impl.final(tagLen, lastBuf->writableTail() - tagLen);
+    FIZZ_RETURN_ON_ERROR(
+        impl.final(err, tagLen, lastBuf->writableTail() - tagLen));
   }
   ret = std::move(output);
   return Status::Success;
@@ -261,19 +262,22 @@ Status encryptHelper(
 
 /**
  * AeadImpl has the following requirements:
- *     * void AeadImpl::init(folly::ByteRange iv, const folly::IOBuf*
- * associatedData, size_t ciphertextLength)
+ *     * Status AeadImpl::init(Error& err, folly::ByteRange iv,
+ * const folly::IOBuf* associatedData, size_t ciphertextLength)
  *       - initializes a decryption context with `iv` and associated data.
  * Associated data can be null.
- *     * bool AeadImpl::decryptAndFinal(folly::IOBuf& ciphertext, folly::IOBuf&
- * plaintext, folly::MutableByteRange tagOut)
+ *     * Status AeadImpl::decryptAndFinal(bool& ret, Error& err,
+ * folly::IOBuf& ciphertext, folly::IOBuf& plaintext,
+ * folly::MutableByteRange tagOut)
  *       - decrypts `ciphertextLength` bytes of `ciphertext`. The implementation
  * must write the plaintext to `plaintext`. `plaintext` is guaranteed to be
- * writable for `ciphertextLength` bytes. Return whether the decryption was
+ * writable for `ciphertextLength` bytes. Sets ret to whether the decryption was
  * successful.
  */
 template <class AeadImpl>
-folly::Optional<std::unique_ptr<folly::IOBuf>> decryptHelper(
+Status decryptHelper(
+    folly::Optional<std::unique_ptr<folly::IOBuf>>& ret,
+    Error& err,
     AeadImpl&& impl,
     std::unique_ptr<folly::IOBuf>&& ciphertext,
     const folly::IOBuf* associatedData,
@@ -281,7 +285,7 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> decryptHelper(
     folly::MutableByteRange tagOut,
     bool inPlace) {
   auto inputLength = ciphertext->computeChainDataLength();
-  impl.init(iv, associatedData, inputLength);
+  FIZZ_RETURN_ON_ERROR(impl.init(err, iv, associatedData, inputLength));
 
   folly::IOBuf* input;
   std::unique_ptr<folly::IOBuf> output;
@@ -295,12 +299,16 @@ folly::Optional<std::unique_ptr<folly::IOBuf>> decryptHelper(
     input = output.get();
   }
 
-  bool decrypted = impl.decryptAndFinal(*input, *output, tagOut);
+  bool decrypted;
+  FIZZ_RETURN_ON_ERROR(
+      impl.decryptAndFinal(decrypted, err, *input, *output, tagOut));
 
   if (!decrypted) {
-    return folly::none;
+    ret = folly::none;
+  } else {
+    ret = std::move(output);
   }
-  return output;
+  return Status::Success;
 }
 
 } // namespace fizz

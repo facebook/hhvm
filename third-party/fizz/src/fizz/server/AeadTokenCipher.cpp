@@ -101,19 +101,16 @@ folly::Optional<Buf> Aead128GCMTokenCipher::decrypt(
   auto seqNum = cursor.readBE<SeqNum>();
   Buf ciphertext;
   cursor.clone(ciphertext, cursor.totalLength());
-
+  Error err;
   for (const auto& secret : secrets_) {
     auto aead = createAead(folly::range(secret), folly::range(salt));
     folly::Optional<std::unique_ptr<folly::IOBuf>> result;
-    {
-      Error err;
-      FIZZ_THROW_ON_ERROR(
-          aead->tryDecrypt(
-              result, err, ciphertext->clone(), associatedData, seqNum),
-          err);
-    }
+    FIZZ_THROW_ON_ERROR(
+        aead->tryDecrypt(
+            result, err, ciphertext->clone(), associatedData, seqNum),
+        err);
     if (result) {
-      return std::move(result);
+      return result;
     }
   }
 

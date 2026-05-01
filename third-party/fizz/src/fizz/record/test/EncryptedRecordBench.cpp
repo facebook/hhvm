@@ -354,12 +354,18 @@ void decryptAEGISNoRecord(uint32_t n, size_t size) {
   std::vector<std::unique_ptr<folly::IOBuf>> contents;
   auto aad = folly::IOBuf::copyBuffer("aad");
   BENCHMARK_SUSPEND {
-    auto writeAead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
-    readAead = fizz::libaegis::makeCipher<fizz::AEGIS128L>();
-    writeAead->setKey(getAegisKey());
-    readAead->setKey(getAegisKey());
+    std::unique_ptr<Aead> writeAead;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::libaegis::makeCipher<fizz::AEGIS128L>(writeAead, err), err);
+    FIZZ_THROW_ON_ERROR(
+        fizz::libaegis::makeCipher<fizz::AEGIS128L>(readAead, err), err);
+    FIZZ_THROW_ON_ERROR(writeAead->setKey(err, getAegisKey()), err);
+    FIZZ_THROW_ON_ERROR(readAead->setKey(err, getAegisKey()), err);
     for (size_t i = 0; i < n; ++i) {
-      auto out = writeAead->encrypt(makeRandom(size), aad.get(), 0);
+      std::unique_ptr<folly::IOBuf> out;
+      FIZZ_THROW_ON_ERROR(
+          writeAead->encrypt(out, err, makeRandom(size), aad.get(), 0), err);
       contents.push_back(std::move(out));
     }
   }

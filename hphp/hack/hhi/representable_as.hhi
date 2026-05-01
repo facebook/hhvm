@@ -7,5 +7,5 @@ namespace HH\Runtime {
   newtype RepresentableAs<+T> = T;
 
   <<__GatedByFeatureFlag('representable_as')>>
-  function reveal<T>(RepresentableAs<T> $x): T;
+  function reveal<T>(RepresentableAs<T> $x)[]: T;
 }

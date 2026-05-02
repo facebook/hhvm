@@ -93,12 +93,25 @@ class RocketServerSetupFrameHandler {
       Context& ctx,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    if (FOLLY_UNLIKELY(!setupComplete_)) {
-      return handleAwaitingSetup(ctx, std::move(msg));
+    auto& request = msg.get<RocketRequestMessage>();
+
+    // In-process per-request errors fired inbound by the codec carry the
+    // error variant. Pass through — setup validation is only meaningful
+    // for parsed wire frames.
+    if (FOLLY_UNLIKELY(
+            !request.payload.is<
+                apache::thrift::fast_thrift::frame::read::ParsedFrame>())) {
+      return ctx.fireRead(std::move(msg));
     }
 
     auto& frame =
-        msg.get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+        request.payload
+            .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+
+    if (FOLLY_UNLIKELY(!setupComplete_)) {
+      return handleAwaitingSetup(ctx, frame);
+    }
+
     if (FOLLY_UNLIKELY(
             frame.type() ==
             apache::thrift::fast_thrift::frame::FrameType::SETUP)) {
@@ -141,11 +154,8 @@ class RocketServerSetupFrameHandler {
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result handleAwaitingSetup(
       Context& ctx,
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
-          msg) noexcept {
-    auto& frame =
-        msg.get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
-
+      const apache::thrift::fast_thrift::frame::read::ParsedFrame&
+          frame) noexcept {
     if (frame.type() != apache::thrift::fast_thrift::frame::FrameType::SETUP) {
       XLOG(ERR) << "Expected SETUP frame, got " << frame.typeName();
       return sendError(

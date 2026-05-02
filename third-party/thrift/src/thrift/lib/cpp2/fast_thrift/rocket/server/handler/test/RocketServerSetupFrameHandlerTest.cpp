@@ -24,6 +24,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 
 namespace apache::thrift::fast_thrift::rocket::server::handler {
@@ -197,7 +198,9 @@ class ServerSetupFrameHandlerTest : public ::testing::Test {
 
   Result callOnRead(
       apache::thrift::fast_thrift::frame::read::ParsedFrame frame) {
-    return handler_.onRead(ctx_, erase_and_box(std::move(frame)));
+    rocket::server::RocketRequestMessage msg;
+    msg.payload = std::move(frame);
+    return handler_.onRead(ctx_, erase_and_box(std::move(msg)));
   }
 
   Result callOnWrite(TypeErasedBox msg) {
@@ -370,8 +373,10 @@ TEST_F(ServerSetupFrameHandlerTest, PostSetupRequestFramePassesThrough) {
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(ctx_.readMessages().size(), 1);
 
+  auto& request =
+      ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
   auto& frame =
-      ctx_.readMessages()[0]
+      request.payload
           .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
   EXPECT_EQ(
       frame.type(),

@@ -105,8 +105,20 @@ class ThriftServerTransportAdapter {
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<rocket::server::RocketRequestMessage>();
 
+    // TODO: Fire request based errors via fireRead. onException is only for
+    // connection level errors.
+    if (FOLLY_UNLIKELY(
+            request.payload.is<rocket::server::RocketRequestError>())) {
+      pipeline_->fireException(
+          std::move(
+              request.payload.get<rocket::server::RocketRequestError>().ew));
+      return channel_pipeline::Result::Success;
+    }
+
     ThriftServerRequestMessage thriftMsg{
-        .frame = std::move(request.frame),
+        .frame = std::move(
+            request.payload
+                .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>()),
         .streamId = request.streamId,
     };
 

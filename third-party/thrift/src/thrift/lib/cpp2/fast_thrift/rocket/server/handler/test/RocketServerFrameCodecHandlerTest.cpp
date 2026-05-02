@@ -147,8 +147,10 @@ TEST_F(RocketServerFrameCodecHandlerTest, DecodesPayloadFrame) {
   EXPECT_EQ(result, Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
+  auto& request =
+      ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
   auto& frame =
-      ctx_.readMessages()[0]
+      request.payload
           .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
   EXPECT_EQ(
       frame.type(), apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
@@ -168,8 +170,10 @@ TEST_F(RocketServerFrameCodecHandlerTest, DecodesRequestResponseFrame) {
   EXPECT_EQ(result, Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
+  auto& request =
+      ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
   auto& frame =
-      ctx_.readMessages()[0]
+      request.payload
           .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
   EXPECT_EQ(
       frame.type(),
@@ -186,8 +190,10 @@ TEST_F(RocketServerFrameCodecHandlerTest, DecodesKeepAliveFrame) {
   EXPECT_EQ(result, Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
+  auto& request =
+      ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
   auto& frame =
-      ctx_.readMessages()[0]
+      request.payload
           .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
   EXPECT_EQ(
       frame.type(), apache::thrift::fast_thrift::frame::FrameType::KEEPALIVE);
@@ -203,8 +209,10 @@ TEST_F(RocketServerFrameCodecHandlerTest, DecodesErrorFrame) {
   EXPECT_EQ(result, Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
+  auto& request =
+      ctx_.readMessages()[0].get<rocket::server::RocketRequestMessage>();
   auto& frame =
-      ctx_.readMessages()[0]
+      request.payload
           .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
   EXPECT_EQ(frame.type(), apache::thrift::fast_thrift::frame::FrameType::ERROR);
   EXPECT_EQ(frame.streamId(), 5);

@@ -169,7 +169,9 @@ class ServerStreamStateHandlerTest : public ::testing::Test {
 
   Result callOnRead(
       apache::thrift::fast_thrift::frame::read::ParsedFrame frame) {
-    return handler_.onRead(ctx_, erase_and_box(std::move(frame)));
+    RocketRequestMessage msg;
+    msg.payload = std::move(frame);
+    return handler_.onRead(ctx_, erase_and_box(std::move(msg)));
   }
 
   Result callOnWrite(RocketResponseMessage msg) {
@@ -199,7 +201,9 @@ TEST_F(
       request.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
 
-  apache::thrift::fast_thrift::frame::read::FrameView view(request.frame);
+  apache::thrift::fast_thrift::frame::read::FrameView view(
+      request.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>());
   EXPECT_EQ(
       view.type(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
@@ -266,7 +270,9 @@ TEST_F(ServerStreamStateHandlerTest, CancelRemovesActiveStreamAndFiresToApp) {
       request.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
 
-  apache::thrift::fast_thrift::frame::read::FrameView view(request.frame);
+  apache::thrift::fast_thrift::frame::read::FrameView view(
+      request.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>());
   EXPECT_EQ(view.type(), apache::thrift::fast_thrift::frame::FrameType::CANCEL);
 
   EXPECT_FALSE(handler_.hasActiveStream(1));
@@ -314,6 +320,71 @@ TEST_F(ServerStreamStateHandlerTest, NonRequestFrameForUnknownStreamIsDropped) {
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_EQ(ctx_.readMessages().size(), 0); // Dropped
+}
+
+// =============================================================================
+// In-Process RocketRequestError Handling (cold path)
+// =============================================================================
+
+TEST_F(ServerStreamStateHandlerTest, RequestErrorRoutesViaStreamLookup) {
+  // Establish an active stream so the cold path has something to clean up.
+  (void)callOnRead(parseTestFrame(
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE, 1));
+  EXPECT_TRUE(handler_.hasActiveStream(1));
+
+  ctx_.reset();
+
+  // Codec stamps streamId/streamType on the message before firing inbound;
+  // StreamStateHandler must forward unchanged and clean up its map entry.
+  RocketRequestMessage err;
+  err.payload = RocketRequestError{
+      .ew = folly::make_exception_wrapper<std::runtime_error>("serialize boom"),
+      .streamId = 1,
+  };
+  err.streamId = 1;
+  err.streamType =
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
+
+  auto result = handler_.onRead(ctx_, erase_and_box(std::move(err)));
+
+  EXPECT_EQ(result, Result::Success);
+  ASSERT_EQ(ctx_.readMessages().size(), 1);
+  auto& forwarded = ctx_.readMessages()[0].get<RocketRequestMessage>();
+  EXPECT_EQ(forwarded.streamId, 1u);
+  EXPECT_EQ(
+      forwarded.streamType,
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
+  ASSERT_TRUE(forwarded.payload.is<RocketRequestError>());
+  EXPECT_EQ(
+      forwarded.payload.get<RocketRequestError>().ew.what().toStdString(),
+      "std::runtime_error: serialize boom");
+  EXPECT_FALSE(handler_.hasActiveStream(1));
+}
+
+TEST_F(ServerStreamStateHandlerTest, RequestErrorForUnknownStreamForwarded) {
+  // Server's outbound StreamStateHandler.onWrite eagerly erases terminal
+  // streams. So when codec then fires an inbound error for that streamId,
+  // the lookup misses. The App must still be notified so it can clean up
+  // its own per-stream state — forward unconditionally.
+  RocketRequestMessage err;
+  err.payload = RocketRequestError{
+      .ew = folly::make_exception_wrapper<std::runtime_error>("orphan error"),
+      .streamId = 999,
+  };
+  err.streamId = 999;
+  err.streamType =
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
+
+  auto result = handler_.onRead(ctx_, erase_and_box(std::move(err)));
+
+  EXPECT_EQ(result, Result::Success);
+  ASSERT_EQ(ctx_.readMessages().size(), 1);
+  auto& forwarded = ctx_.readMessages()[0].get<RocketRequestMessage>();
+  EXPECT_EQ(forwarded.streamId, 999u);
+  ASSERT_TRUE(forwarded.payload.is<RocketRequestError>());
+  EXPECT_EQ(
+      forwarded.payload.get<RocketRequestError>().ew.what().toStdString(),
+      "std::runtime_error: orphan error");
 }
 
 // =============================================================================

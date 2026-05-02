@@ -129,6 +129,14 @@ ParsedFrame makeSetupFrame() {
   return parseFrame(std::move(buf));
 }
 
+// Wrap a ParsedFrame in a RocketRequestMessage (matches how
+// RocketServerFrameCodecHandler delivers inbound frames to StreamStateHandler).
+RocketRequestMessage wrapRequest(ParsedFrame frame) {
+  RocketRequestMessage msg;
+  msg.payload = std::move(frame);
+  return msg;
+}
+
 // =============================================================================
 // Read Path Benchmarks
 // =============================================================================
@@ -136,11 +144,11 @@ ParsedFrame makeSetupFrame() {
 BENCHMARK(Read_StreamState_NewStream, iters) {
   BenchmarkSuspender suspender;
 
-  std::vector<ParsedFrame> frames;
+  std::vector<RocketRequestMessage> frames;
   frames.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(
-        makeRequestResponseFrame(static_cast<uint32_t>(2 * i + 1)));
+    frames.push_back(wrapRequest(
+        makeRequestResponseFrame(static_cast<uint32_t>(2 * i + 1))));
   }
 
   suspender.dismiss();
@@ -162,14 +170,16 @@ BENCHMARK(Read_StreamState_TerminalCancel, iters) {
   // Register streams
   for (size_t i = 0; i < iters; ++i) {
     auto frame = makeRequestResponseFrame(static_cast<uint32_t>(2 * i + 1));
-    std::ignore = handler.onRead(ctx, erase_and_box(std::move(frame)));
+    std::ignore =
+        handler.onRead(ctx, erase_and_box(wrapRequest(std::move(frame))));
   }
 
   // Build cancel frames
-  std::vector<ParsedFrame> cancelFrames;
+  std::vector<RocketRequestMessage> cancelFrames;
   cancelFrames.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    cancelFrames.push_back(makeCancelFrame(static_cast<uint32_t>(2 * i + 1)));
+    cancelFrames.push_back(
+        wrapRequest(makeCancelFrame(static_cast<uint32_t>(2 * i + 1))));
   }
 
   suspender.dismiss();
@@ -187,10 +197,10 @@ BENCHMARK(Read_StreamState_ConnectionFrame, iters) {
   BenchContext ctx;
 
   // Connection-level frames have streamId=0 (e.g., SETUP)
-  std::vector<ParsedFrame> frames;
+  std::vector<RocketRequestMessage> frames;
   frames.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(makeSetupFrame());
+    frames.push_back(wrapRequest(makeSetupFrame()));
   }
 
   suspender.dismiss();
@@ -215,7 +225,8 @@ BENCHMARK(Write_StreamState_CompleteResponse, iters) {
   // Register streams
   for (size_t i = 0; i < iters; ++i) {
     auto frame = makeRequestResponseFrame(static_cast<uint32_t>(2 * i + 1));
-    std::ignore = handler.onRead(ctx, erase_and_box(std::move(frame)));
+    std::ignore =
+        handler.onRead(ctx, erase_and_box(wrapRequest(std::move(frame))));
   }
 
   // Build responses
@@ -250,7 +261,8 @@ BENCHMARK(Write_StreamState_PartialResponse, iters) {
 
   // Register a single stream for partial responses
   auto frame = makeRequestResponseFrame(1);
-  std::ignore = handler.onRead(ctx, erase_and_box(std::move(frame)));
+  std::ignore =
+      handler.onRead(ctx, erase_and_box(wrapRequest(std::move(frame))));
 
   // Build partial responses (all to the same stream)
   std::vector<RocketResponseMessage> responses;
@@ -288,15 +300,16 @@ BENCHMARK(Read_StreamState_NewStream_ManyActive, iters) {
   // Pre-populate with 1000 active streams
   for (uint32_t i = 0; i < 1000; ++i) {
     auto frame = makeRequestResponseFrame(2 * i + 1);
-    std::ignore = handler.onRead(ctx, erase_and_box(std::move(frame)));
+    std::ignore =
+        handler.onRead(ctx, erase_and_box(wrapRequest(std::move(frame))));
   }
 
   // Build new stream frames with IDs above the pre-populated range
-  std::vector<ParsedFrame> frames;
+  std::vector<RocketRequestMessage> frames;
   frames.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(
-        makeRequestResponseFrame(static_cast<uint32_t>(2 * (1000 + i) + 1)));
+    frames.push_back(wrapRequest(
+        makeRequestResponseFrame(static_cast<uint32_t>(2 * (1000 + i) + 1))));
   }
 
   suspender.dismiss();

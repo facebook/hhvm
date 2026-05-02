@@ -73,10 +73,21 @@ TypeErasedBox makeRocketRequestBox(uint32_t streamId = 1) {
       std::move(data));
 
   rocket::server::RocketRequestMessage request{
-      .frame = frame::read::parseFrame(std::move(frameBuf)),
-      .error = {},
+      .payload = frame::read::parseFrame(std::move(frameBuf)),
       .streamId = streamId,
   };
+  return erase_and_box(std::move(request));
+}
+
+TypeErasedBox makeRocketErrorRequestBox(
+    folly::exception_wrapper ew, uint32_t streamId = 1) {
+  rocket::server::RocketRequestMessage request;
+  request.payload = rocket::server::RocketRequestError{
+      .ew = std::move(ew),
+      .streamId = streamId,
+  };
+  request.streamId = streamId;
+  request.streamType = frame::FrameType::REQUEST_RESPONSE;
   return erase_and_box(std::move(request));
 }
 
@@ -206,6 +217,41 @@ TEST(ThriftServerTransportAdapterTest, OnTransportErrorPropagatesException) {
   fixture.adapter->onTransportError(
       folly::make_exception_wrapper<std::runtime_error>("connection lost"));
 
+  EXPECT_EQ(thriftTail.exceptionCount(), 1);
+}
+
+TEST(
+    ThriftServerTransportAdapterTest,
+    OnTransportRequestWithErrorFiresExceptionUpThrift) {
+  AdapterWithRocketPipeline fixture;
+
+  MockTailHandler thriftTail;
+  TestAllocator thriftAllocator;
+
+  auto thriftPipeline = PipelineBuilder<
+                            ThriftServerTransportAdapter,
+                            MockTailHandler,
+                            TestAllocator>()
+                            .setEventBase(&fixture.evb)
+                            .setHead(fixture.adapter.get())
+                            .setTail(&thriftTail)
+                            .setAllocator(&thriftAllocator)
+                            .build();
+
+  fixture.adapter->setPipeline(thriftPipeline.get());
+
+  // In-process per-request error from the codec arrives as a
+  // RocketRequestMessage with the RocketRequestError variant; the
+  // transport adapter forwards it to the Thrift pipeline via fireException
+  // (per-request errors do NOT close the connection — see TODO in adapter
+  // about routing via fireRead in the future).
+  auto requestBox = makeRocketErrorRequestBox(
+      folly::make_exception_wrapper<std::runtime_error>("serialize boom"),
+      /*streamId=*/9);
+  auto result = fixture.appAdapter->onRead(std::move(requestBox));
+  EXPECT_EQ(result, Result::Success);
+
+  EXPECT_EQ(thriftTail.readCount(), 0);
   EXPECT_EQ(thriftTail.exceptionCount(), 1);
 }
 

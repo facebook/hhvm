@@ -88,9 +88,17 @@ class RocketServerFrameCodecHandler {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
 
+    // Wrap in RocketRequestMessage so the inbound chain has a uniform
+    // message type. StreamStateHandler stamps streamId/streamType later.
+    // The cold path (onWrite serialize throw) emits the same message type
+    // with the RocketRequestError variant; downstream handlers dispatch
+    // on the variant rather than guessing the box type.
+    RocketRequestMessage request;
+    request.payload = std::move(frame);
+
     return ctx.fireRead(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
-            std::move(frame)));
+            std::move(request)));
   }
 
   template <typename Context>
@@ -107,9 +115,44 @@ class RocketServerFrameCodecHandler {
           msg) noexcept {
     auto response = msg.take<RocketResponseMessage>();
 
-    // ComposedFrameVariant exposes serialize() directly — fold-expression
-    // dispatch over the held alternative is internal to the variant.
-    auto serializedFrame = std::move(response.frame).serialize();
+    // Capture stream identity before the move into serialize(); on
+    // throw, response.frame is in moved-from state.
+    const uint32_t streamId = response.frame.streamId();
+    const auto streamType = response.streamType;
+
+    std::unique_ptr<folly::IOBuf> serializedFrame;
+    try {
+      // ComposedFrameVariant exposes serialize() directly — fold-expression
+      // dispatch over the held alternative is internal to the variant.
+      serializedFrame = std::move(response.frame).serialize();
+    } catch (...) {
+      // Outbound serialize threw — wire is untouched. Surface as a
+      // per-request failure on the inbound chain so the App can clean up
+      // its per-stream state; the connection stays up.
+      // RocketServerStreamStateHandler will erase the stream entry via
+      // the variant's terminal alt.
+      //
+      // NOTE: this catch block is currently uncovered by unit tests —
+      // none of the variant alternatives' serialize() paths can be made
+      // to throw via the public API, and the variant is concrete (no
+      // injectable throwing alternative). The downstream consumers of
+      // the constructed RocketRequestError are covered:
+      // RocketServerStreamStateHandlerTest.RequestErrorRoutesViaStreamLookup,
+      // ThriftServerTransportAdapterTest.OnTransportRequestWithErrorFiresExceptionUpThrift,
+      // and
+      // RocketServerIntegrationTest.PerRequestErrorReachesAppAndConnectionSurvives.
+      RocketRequestMessage request;
+      request.payload = RocketRequestError{
+          .ew = folly::exception_wrapper(std::current_exception()),
+          .streamId = streamId,
+      };
+      request.streamId = streamId;
+      request.streamType = streamType;
+      (void)ctx.fireRead(
+          apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+              std::move(request)));
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+    }
 
     return ctx.fireWrite(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(

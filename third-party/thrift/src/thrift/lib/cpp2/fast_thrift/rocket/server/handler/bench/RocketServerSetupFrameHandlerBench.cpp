@@ -35,6 +35,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/bench/BenchContext.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 
 using namespace folly;
@@ -104,6 +105,14 @@ ParsedFrame makePayloadFrame(uint32_t streamId) {
   return parseFrame(std::move(buf));
 }
 
+// Wrap a ParsedFrame in a RocketRequestMessage (matches how
+// RocketServerFrameCodecHandler delivers inbound frames to SetupHandler).
+RocketRequestMessage wrapRequest(ParsedFrame frame) {
+  RocketRequestMessage msg;
+  msg.payload = std::move(frame);
+  return msg;
+}
+
 // =============================================================================
 // Read Path Benchmarks
 // =============================================================================
@@ -111,10 +120,10 @@ ParsedFrame makePayloadFrame(uint32_t streamId) {
 BENCHMARK(Read_Setup_ValidSetupFrame, iters) {
   BenchmarkSuspender suspender;
 
-  std::vector<ParsedFrame> frames;
+  std::vector<RocketRequestMessage> frames;
   frames.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(makeSetupFrame());
+    frames.push_back(wrapRequest(makeSetupFrame()));
   }
 
   suspender.dismiss();
@@ -133,14 +142,14 @@ BENCHMARK(Read_Setup_PostSetupPassthrough, iters) {
   BenchContext ctx;
 
   // Complete setup first
-  auto setupFrame = makeSetupFrame();
-  std::ignore = handler.onRead(ctx, erase_and_box(std::move(setupFrame)));
+  std::ignore =
+      handler.onRead(ctx, erase_and_box(wrapRequest(makeSetupFrame())));
 
-  std::vector<ParsedFrame> frames;
+  std::vector<RocketRequestMessage> frames;
   frames.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(
-        makeRequestResponseFrame(static_cast<uint32_t>(2 * i + 1)));
+    frames.push_back(wrapRequest(
+        makeRequestResponseFrame(static_cast<uint32_t>(2 * i + 1))));
   }
 
   suspender.dismiss();

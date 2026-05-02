@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
@@ -31,25 +32,43 @@ namespace apache::thrift::fast_thrift::rocket::server {
 // ============================================================================
 
 /**
- * RocketRequestMessage - Inbound request from client, delivered to App.
+ * RocketRequestError - In-process per-request failure carried inbound to App.
  *
- * Contains the client-assigned streamId and the parsed request frame.
- * App uses streamId to correlate responses back to this request.
- * Use FrameView to check frame type (REQUEST_RESPONSE, REQUEST_STREAM,
- * CANCEL, etc.).
+ * Used as the error alternative on `RocketRequestMessage::payload` so a
+ * single response can be failed (App notified via the inbound chain)
+ * without fabricating a wire-format ERROR frame and without escalating
+ * to a connection-fatal `fireException`. Produced by handlers when an
+ * in-process condition (e.g. outbound serialize threw) breaks one
+ * request; the connection itself remains healthy.
+ *
+ * `streamId` carries the affected stream so RocketServerStreamStateHandler
+ * can complete its per-stream cleanup the same way it does for terminal
+ * wire frames.
+ */
+struct RocketRequestError {
+  folly::exception_wrapper ew;
+  uint32_t streamId{0};
+};
+
+/**
+ * RocketRequestMessage - Inbound message delivered to App.
+ *
+ * `payload` is a CompactVariant of the parsed wire frame and an in-process
+ * `RocketRequestError`. The error alternative carries per-request
+ * failures inbound through the same path as a normal request, so the
+ * App can clean up its per-stream state; the connection is unaffected.
  *
  * `streamType` is the originating REQUEST_* frame type that established
  * the stream (REQUEST_RESPONSE, REQUEST_STREAM, REQUEST_CHANNEL,
  * REQUEST_FNF). Stamped by RocketServerStreamStateHandler from its per-
  * stream map; downstream per-pattern handlers (RR/Stream/Channel/FNF)
  * use it as a stateless dispatch key.
- *
- * If error is set, the connection failed and frame may be empty.
- * App layer should check error first before processing frame.
  */
 struct RocketRequestMessage {
-  apache::thrift::fast_thrift::frame::read::ParsedFrame frame;
-  folly::exception_wrapper error;
+  apache::thrift::fast_thrift::CompactVariant<
+      apache::thrift::fast_thrift::frame::read::ParsedFrame,
+      RocketRequestError>
+      payload;
   uint32_t streamId{0};
   apache::thrift::fast_thrift::frame::FrameType streamType{
       apache::thrift::fast_thrift::frame::FrameType::RESERVED};

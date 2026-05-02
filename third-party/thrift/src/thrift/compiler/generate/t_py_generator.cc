@@ -841,7 +841,6 @@ void t_py_generator::init_generator() {
 
   // Define __all__ for ttypes
   f_types_ << "__all__ = [" << render_ttype_declarations("'") << "]" << endl
-           << "warn_thrift_py_deprecated(__name__)" << endl
            << endl;
 
   f_consts_ << py_autogen_comment() << endl
@@ -1021,8 +1020,7 @@ string t_py_generator::py_imports() {
   imports += "from thrift.Thrift import TType, TMessageType, TPriority";
   imports += ", TRequestContext, TProcessorEventHandler, TServerInterface";
   imports +=
-      ", TProcessor, TException, TApplicationException, UnimplementedTypedef";
-  imports += ", warn_thrift_py_deprecated\n";
+      ", TProcessor, TException, TApplicationException, UnimplementedTypedef\n";
   imports += "from thrift.protocol.TProtocol import TProtocolException\n";
   if (compare_t_fields_only_) {
     imports += "from thrift.util import parse_struct_spec\n\n";

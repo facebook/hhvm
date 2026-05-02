@@ -33,32 +33,3 @@ the generated code for the reflection structures.
 The Python libraries can be installed manually using the provided setup.py
 file, or automatically using the install hook provided via autoconf/automake.
 To use the latter, become superuser and do make install.
-
-Meta Internal Notes
-===================
-
-Runtime Warning Helper
-----------------------
-
-Generated py-deprecated modules now call `thrift.Thrift.warn_thrift_py_deprecated(__name__)`
-at module scope.
-
-When testing warning behavior, use Python's warnings API directly:
-
-- `warnings.simplefilter("always", ThriftPyDeprecatedWarning)`
-- `warnings.filterwarnings("always", category=ThriftPyDeprecatedWarning)`
-
-Those force re-emission on every execution of the warning site. Use the normal
-`default` behavior when validating once-per-source-line semantics.
-
-`ThriftPyDeprecatedWarning` is intentionally kept as a custom
-`DeprecationWarning` subclass. Plain `DeprecationWarning` would remove the clean
-category-level lever, but it would not stop determined monorepo consumers from
-suppressing the warning by message or module. Keeping the subclass preserves a
-cleaner Thrift-owned visibility, testing, and observability surface.
-
-Do not use `sys.modules[__name__].__class__ = ...` tricks to hide
-runtime-warning state in this module. That does not provide real privacy and
-makes the runtime harder for humans, LLMs, and tools to reason about. Prefer
-ordinary private module state. If encapsulation pressure grows later, use a
-small private helper object or closure instead.

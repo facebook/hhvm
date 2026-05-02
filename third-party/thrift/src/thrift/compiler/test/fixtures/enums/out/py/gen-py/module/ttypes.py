@@ -8,7 +8,7 @@
 from __future__ import absolute_import
 import sys
 from thrift.util.Recursive import fix_spec
-from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef, warn_thrift_py_deprecated
+from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
 from thrift.protocol.TProtocol import TProtocolException
 
 from json import loads
@@ -55,7 +55,6 @@ all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
 __all__ = ['UTF8STRINGS', 'Metasyntactic', 'MyEnum1', 'MyEnum2', 'MyEnum3', 'MyEnum4', 'MyBitmaskEnum1', 'MyBitmaskEnum2', 'SomeStruct', 'MyStruct', 'IncludedEnumAlias']
-warn_thrift_py_deprecated(__name__)
 
 class Metasyntactic:
   def __getattr__(self, name): raise AttributeError(name)

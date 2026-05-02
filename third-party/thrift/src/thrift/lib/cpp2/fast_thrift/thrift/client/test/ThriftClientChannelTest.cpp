@@ -192,7 +192,7 @@ class ThriftClientChannelTest : public ::testing::Test {
     response.frame =
         apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
     response.requestHandle = requestHandle;
-    response.requestFrameType =
+    response.streamType =
         apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
     return response;
   }
@@ -328,7 +328,7 @@ TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
   errorResponse.frame = apache::thrift::fast_thrift::frame::read::parseFrame(
       std::move(errorFrame));
   errorResponse.requestHandle = capturedHandle;
-  errorResponse.requestFrameType =
+  errorResponse.streamType =
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
 
   std::ignore = channel->onRead(erase_and_box(std::move(errorResponse)));

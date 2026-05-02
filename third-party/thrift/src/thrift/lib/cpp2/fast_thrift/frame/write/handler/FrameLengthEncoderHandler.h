@@ -49,8 +49,8 @@ inline void writeFrameLength(uint8_t* buf, size_t length) noexcept {
  * are written to the transport.
  *
  * Pipeline position (outbound):
- *   ... -> RocketClientRequestResponseFrameHandler -> FrameLengthEncoderHandler
- * -> Transport
+ *   ... -> RocketClientFrameCodecHandler -> FrameLengthEncoderHandler
+ *   -> Transport
  *
  * Message flow:
  *   Input:  std::unique_ptr<folly::IOBuf> (frame without length prefix)

@@ -176,6 +176,6 @@ static_assert(
     apache::thrift::fast_thrift::channel_pipeline::InboundHandler<
         FrameLengthParserHandler,
         apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl>,
-    "RocketClientRequestResponseFrameHandler must satisfy InboundHandler concept");
+    "FrameLengthParserHandler must satisfy InboundHandler concept");
 
 } // namespace apache::thrift::fast_thrift::frame::read::handler

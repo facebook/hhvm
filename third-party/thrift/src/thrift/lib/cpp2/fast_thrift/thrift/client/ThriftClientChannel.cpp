@@ -260,10 +260,9 @@ ThriftClientChannel::onRead(
   pendingCallbacks_.erase(it);
 
   DCHECK(
-      response.requestFrameType ==
+      response.streamType ==
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE)
-      << "Unsupported frame type: "
-      << static_cast<int>(response.requestFrameType);
+      << "Unsupported frame type: " << static_cast<int>(response.streamType);
 
   handleRequestResponse(std::move(response), std::move(callback));
   return apache::thrift::fast_thrift::channel_pipeline::Result::Success;

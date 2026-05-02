@@ -46,7 +46,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -86,7 +86,7 @@ HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
-HANDLER_TAG(rocket_client_request_response_frame_handler);
+HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 
@@ -137,6 +137,7 @@ RocketRequestMessage createRocketRequest(size_t payloadSize) {
               .header = {.streamId = kInvalidStreamId},
           },
       .requestHandle = 1,
+      .streamType = FrameType::REQUEST_RESPONSE,
   };
 }
 
@@ -203,10 +204,10 @@ struct BenchmarkFixture {
                              folly::IOBuf::copyBuffer("setup"),
                              std::unique_ptr<folly::IOBuf>());
                        })
-                   .addNextDuplex<RocketClientRequestResponseFrameHandler>(
-                       rocket_client_request_response_frame_handler_tag)
                    .addNextDuplex<RocketClientStreamStateHandler>(
                        rocket_client_stream_state_handler_tag)
+                   .addNextInbound<RocketClientRequestResponseHandler>(
+                       rocket_client_request_response_handler_tag)
                    .build();
 
     appAdapter->setPipeline(pipeline.get());
@@ -371,10 +372,10 @@ BENCHMARK(Rocket_SetupFrame, iters) {
                       folly::IOBuf::copyBuffer("setup"),
                       std::unique_ptr<folly::IOBuf>());
                 })
-            .addNextDuplex<RocketClientRequestResponseFrameHandler>(
-                rocket_client_request_response_frame_handler_tag)
             .addNextDuplex<RocketClientStreamStateHandler>(
                 rocket_client_stream_state_handler_tag)
+            .addNextInbound<RocketClientRequestResponseHandler>(
+                rocket_client_request_response_handler_tag)
             .build();
 
     fixture.appAdapter->setPipeline(fixture.pipeline.get());

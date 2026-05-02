@@ -72,6 +72,7 @@ TEST(RocketClientAppAdapterTest, WriteWithoutPipelineReturnsError) {
           apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = folly::IOBuf::copyBuffer("test"),
           },
+      .streamType = frame::FrameType::REQUEST_RESPONSE,
   };
 
   EXPECT_EQ(adapter->write(std::move(msg)), Result::Error);
@@ -92,7 +93,7 @@ TEST(RocketClientAppAdapterTest, OnReadDelegatesToCallback) {
       RocketResponseMessage{
           .frame = {},
           .requestHandle = 42,
-          .requestFrameType = frame::FrameType::REQUEST_RESPONSE,
+          .streamType = frame::FrameType::REQUEST_RESPONSE,
       });
 
   auto result = adapter->onRead(std::move(box));
@@ -148,6 +149,7 @@ TEST(RocketClientAppAdapterTest, WriteWithPipelineCallsFireWrite) {
           apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = folly::IOBuf::copyBuffer("test"),
           },
+      .streamType = frame::FrameType::REQUEST_RESPONSE,
   };
 
   auto result = adapter->write(std::move(msg));

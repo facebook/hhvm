@@ -166,7 +166,7 @@ BENCHMARK(Read_MetadataPush_SetupResponse, iters) {
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
     response.frame = parseFrame(std::move(frames[i]));
-    response.requestFrameType = FrameType::METADATA_PUSH;
+    response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
     folly::doNotOptimizeAway(result);
@@ -190,7 +190,7 @@ BENCHMARK(Read_MetadataPush_SetupResponse_WithZstd, iters) {
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
     response.frame = parseFrame(std::move(frames[i]));
-    response.requestFrameType = FrameType::METADATA_PUSH;
+    response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
     folly::doNotOptimizeAway(result);
@@ -214,7 +214,7 @@ BENCHMARK(Read_MetadataPush_DrainComplete, iters) {
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
     response.frame = parseFrame(std::move(frames[i]));
-    response.requestFrameType = FrameType::METADATA_PUSH;
+    response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
     folly::doNotOptimizeAway(result);
@@ -238,7 +238,7 @@ BENCHMARK(Read_MetadataPush_DrainComplete_ExceededMem, iters) {
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
     response.frame = parseFrame(std::move(frames[i]));
-    response.requestFrameType = FrameType::METADATA_PUSH;
+    response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
     folly::doNotOptimizeAway(result);
@@ -262,7 +262,7 @@ BENCHMARK(Read_MetadataPush_StreamHeaders, iters) {
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
     response.frame = parseFrame(std::move(frames[i]));
-    response.requestFrameType = FrameType::METADATA_PUSH;
+    response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
     folly::doNotOptimizeAway(result);
@@ -292,7 +292,7 @@ BENCHMARK(Read_NonMetadataPush_Passthrough, iters) {
     ThriftResponseMessage response;
     response.frame = parseFrame(std::move(frames[i]));
     response.requestHandle = 1;
-    response.requestFrameType = FrameType::REQUEST_RESPONSE;
+    response.streamType = FrameType::REQUEST_RESPONSE;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
     folly::doNotOptimizeAway(result);

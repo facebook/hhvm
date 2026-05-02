@@ -15,33 +15,30 @@
  */
 
 /**
- * RocketClientErrorFrameHandler Microbenchmarks
+ * RocketClientRequestResponseHandler microbenchmarks.
  *
- * This handler does:
- * - onRead: Checks if frame is connection-level ERROR (streamId == 0)
- *   - If so: extracts error code, creates exception, fires exception
- *   - Otherwise: pass-through
- *
- * Meaningful benchmarks:
- * - Connection-level ERROR handling: Exception creation overhead
- * - Pass-through: Non-error frames and stream-level errors
+ * Inbound-only, stateless handler. The interesting paths are:
+ *   - Hot:    PAYLOAD with NEXT — common single-shot RR response. Just a
+ *             flag check + fireRead.
+ *   - Filter: streamType != REQUEST_RESPONSE — early return before any
+ *             frame inspection.
+ *   - Cold:   protocol violation (e.g. unexpected REQUEST_N) — full
+ *             serialize(ErrorHeader) + parseFrame to synthesize ERROR.
  */
 
 #include <folly/Benchmark.h>
 #include <folly/init/Init.h>
 #include <folly/io/IOBuf.h>
-#include <folly/logging/Init.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/bench/BenchContext.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 
 using namespace folly;
 using namespace apache::thrift::fast_thrift::channel_pipeline;
@@ -50,6 +47,7 @@ using namespace apache::thrift::fast_thrift::frame;
 using namespace apache::thrift::fast_thrift::frame::read;
 using namespace apache::thrift::fast_thrift::frame::write;
 using namespace apache::thrift::fast_thrift::rocket;
+using namespace apache::thrift::fast_thrift::rocket::client;
 using namespace apache::thrift::fast_thrift::rocket::client::handler;
 
 namespace {
@@ -60,35 +58,37 @@ using rocket::bench::BenchContext;
 // Helper Functions
 // =============================================================================
 
-RocketResponseMessage createConnectionErrorFrame(ErrorCode errorCode) {
+RocketResponseMessage createPayloadResponse(
+    uint32_t streamId, FrameType streamType = FrameType::REQUEST_RESPONSE) {
   auto frame = serialize(
-      ErrorHeader{
-          .streamId = 0, // Connection-level
-          .errorCode = static_cast<uint32_t>(errorCode)},
+      PayloadHeader{.streamId = streamId, .complete = true, .next = true},
       nullptr,
-      folly::IOBuf::copyBuffer("error"));
-
+      folly::IOBuf::copyBuffer("data"));
   return RocketResponseMessage{
       .frame = parseFrame(std::move(frame)),
+      .streamType = streamType,
   };
 }
 
-// =============================================================================
-// Connection-Level ERROR Frame Benchmarks - Exception creation overhead
-// =============================================================================
+RocketResponseMessage makeRequestNResponse(uint32_t streamId) {
+  auto buf = serialize(RequestNHeader{.streamId = streamId, .requestN = 1});
+  return RocketResponseMessage{
+      .frame = parseFrame(std::move(buf)),
+      .streamType = FrameType::REQUEST_RESPONSE,
+  };
+}
 
-BENCHMARK(Read_ErrorHandler_ConnectionClose, iters) {
+// Hot path: PAYLOAD with NEXT on an RR stream — flag check + fireRead.
+BENCHMARK(Read_PayloadWithNext_HotPath, iters) {
   folly::BenchmarkSuspender suspender;
-  RocketClientErrorFrameHandler handler;
+  RocketClientRequestResponseHandler handler;
   BenchContext ctx;
-
   std::vector<RocketResponseMessage> responses;
   responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
     responses.push_back(
-        createConnectionErrorFrame(ErrorCode::CONNECTION_CLOSE));
+        createPayloadResponse(static_cast<uint32_t>(i * 2 + 1)));
   }
-
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
@@ -97,17 +97,17 @@ BENCHMARK(Read_ErrorHandler_ConnectionClose, iters) {
   }
 }
 
-BENCHMARK(Read_ErrorHandler_InvalidSetup, iters) {
+// Filter path: non-RR streamType — early return before any RR-specific work.
+BENCHMARK(Read_NonRRStream_Passthrough, iters) {
   folly::BenchmarkSuspender suspender;
-  RocketClientErrorFrameHandler handler;
+  RocketClientRequestResponseHandler handler;
   BenchContext ctx;
-
   std::vector<RocketResponseMessage> responses;
   responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    responses.push_back(createConnectionErrorFrame(ErrorCode::INVALID_SETUP));
+    responses.push_back(createPayloadResponse(
+        static_cast<uint32_t>(i * 2 + 1), FrameType::REQUEST_STREAM));
   }
-
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
@@ -116,17 +116,17 @@ BENCHMARK(Read_ErrorHandler_InvalidSetup, iters) {
   }
 }
 
-BENCHMARK(Read_ErrorHandler_RejectedSetup, iters) {
+// Cold path: protocol violation — synthesizeStreamError serializes a fresh
+// ERROR frame and re-parses it. Bounds the worst-case per-frame cost.
+BENCHMARK(Read_ProtocolViolation_SynthesizeError, iters) {
   folly::BenchmarkSuspender suspender;
-  RocketClientErrorFrameHandler handler;
+  RocketClientRequestResponseHandler handler;
   BenchContext ctx;
-
   std::vector<RocketResponseMessage> responses;
   responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    responses.push_back(createConnectionErrorFrame(ErrorCode::REJECTED_SETUP));
+    responses.push_back(makeRequestNResponse(static_cast<uint32_t>(i * 2 + 1)));
   }
-
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
@@ -138,8 +138,6 @@ BENCHMARK(Read_ErrorHandler_RejectedSetup, iters) {
 } // namespace
 
 int main(int argc, char** argv) {
-  // Suppress error logging during benchmark
-  folly::initLogging(".=FATAL");
   folly::Init init(&argc, &argv);
   runBenchmarks();
   return 0;

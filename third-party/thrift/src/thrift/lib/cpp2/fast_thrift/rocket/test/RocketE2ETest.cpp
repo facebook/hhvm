@@ -46,7 +46,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
@@ -199,13 +199,13 @@ class RocketE2ETest : public ::testing::Test {
                         folly::IOBuf::copyBuffer("setup"),
                         std::unique_ptr<folly::IOBuf>());
                   })
-              .addNextDuplex<
-                  client::handler::RocketClientRequestResponseFrameHandler>(
-                  c_request_response_tag)
               .addNextInbound<client::handler::RocketClientErrorFrameHandler>(
                   c_error_tag)
               .addNextDuplex<client::handler::RocketClientStreamStateHandler>(
                   c_stream_state_tag)
+              .addNextInbound<
+                  client::handler::RocketClientRequestResponseHandler>(
+                  c_request_response_tag)
               .build();
 
       clientAppAdapter_->setPipeline(clientPipeline_.get());
@@ -255,6 +255,7 @@ class RocketE2ETest : public ::testing::Test {
                 .data = std::move(data),
                 .header = {.streamId = kInvalidStreamId},
             },
+        .streamType = frame::FrameType::REQUEST_RESPONSE,
     };
   }
 

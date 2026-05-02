@@ -175,13 +175,13 @@ class ThriftClientMetadataPushHandlerTest : public ::testing::Test {
   // (used for stream-level frames)
   ThriftResponseMessage makeParsedFrameResponse(
       apache::thrift::fast_thrift::frame::read::ParsedFrame frame,
-      apache::thrift::fast_thrift::frame::FrameType requestFrameType,
+      apache::thrift::fast_thrift::frame::FrameType streamType,
       uint32_t requestHandle =
           apache::thrift::fast_thrift::rocket::kNoRequestHandle) {
     ThriftResponseMessage response;
     response.frame = std::move(frame);
     response.requestHandle = requestHandle;
-    response.requestFrameType = requestFrameType;
+    response.streamType = streamType;
     return response;
   }
 
@@ -189,10 +189,10 @@ class ThriftClientMetadataPushHandlerTest : public ::testing::Test {
   // (used for connection-level frames like METADATA_PUSH, KEEPALIVE)
   ThriftResponseMessage makeFrameResponse(
       apache::thrift::fast_thrift::frame::read::ParsedFrame frame,
-      apache::thrift::fast_thrift::frame::FrameType requestFrameType) {
+      apache::thrift::fast_thrift::frame::FrameType streamType) {
     ThriftResponseMessage response;
     response.frame = std::move(frame);
-    response.requestFrameType = requestFrameType;
+    response.streamType = streamType;
     return response;
   }
 
@@ -232,7 +232,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, PayloadFramePassesThrough) {
   auto& forwarded = ctx_.readMessages()[0].get<ThriftResponseMessage>();
   EXPECT_EQ(forwarded.requestHandle, 123);
   EXPECT_EQ(
-      forwarded.requestFrameType,
+      forwarded.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
 }
 

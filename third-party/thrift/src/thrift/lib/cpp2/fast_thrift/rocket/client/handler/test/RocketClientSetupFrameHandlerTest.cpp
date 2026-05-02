@@ -147,9 +147,8 @@ TEST_F(ClientSetupFrameHandlerTest, OnConnectWritesSetupFrame) {
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
   EXPECT_NE(serializeSetupFrame(msg), nullptr);
-  EXPECT_EQ(
-      msg.frame.frameType(),
-      apache::thrift::fast_thrift::frame::FrameType::SETUP);
+  EXPECT_TRUE(
+      msg.frame.is<apache::thrift::fast_thrift::frame::ComposedSetupFrame>());
 }
 
 TEST_F(ClientSetupFrameHandlerTest, OnConnectClosesOnWriteFailure) {
@@ -422,9 +421,9 @@ TEST_F(ClientSetupFrameHandlerTest, OnDisconnectAllowsMultipleReconnections) {
   // Verify all are SETUP frames
   for (auto& msg : ctx_.writeMessages()) {
     auto& rocketMsg = msg.get<RocketRequestMessage>();
-    EXPECT_EQ(
-        rocketMsg.frame.frameType(),
-        apache::thrift::fast_thrift::frame::FrameType::SETUP);
+    EXPECT_TRUE(
+        rocketMsg.frame
+            .is<apache::thrift::fast_thrift::frame::ComposedSetupFrame>());
   }
 }
 
@@ -452,6 +451,8 @@ TEST_F(ClientSetupFrameHandlerTest, OnWritePassesThrough) {
           apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = std::move(data),
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 
   auto result = handler.onWrite(ctx_, erase_and_box(std::move(msg)));

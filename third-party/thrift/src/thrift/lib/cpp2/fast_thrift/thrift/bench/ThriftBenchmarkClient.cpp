@@ -59,7 +59,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/bench/if/gen-cpp2/BenchmarkFastServiceAsyncClient.h>
@@ -86,7 +86,7 @@ HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
-HANDLER_TAG(rocket_client_request_response_frame_handler);
+HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 
@@ -270,15 +270,15 @@ FastThriftClientState createFastThriftClient(const folly::SocketAddress& addr) {
             .addNextDuplex<
                 rocket::client::handler::RocketClientSetupFrameHandler>(
                 rocket_client_setup_handler_tag, makeSetupFactory())
-            .addNextDuplex<rocket::client::handler::
-                               RocketClientRequestResponseFrameHandler>(
-                rocket_client_request_response_frame_handler_tag)
             .addNextInbound<
                 rocket::client::handler::RocketClientErrorFrameHandler>(
                 rocket_client_error_frame_handler_tag)
             .addNextDuplex<
                 rocket::client::handler::RocketClientStreamStateHandler>(
                 rocket_client_stream_state_handler_tag)
+            .addNextInbound<
+                rocket::client::handler::RocketClientRequestResponseHandler>(
+                rocket_client_request_response_handler_tag)
             .build();
 
     connection->appAdapter->setPipeline(connection->pipeline.get());

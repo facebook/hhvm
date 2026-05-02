@@ -335,6 +335,8 @@ TEST_F(RocketClientFrameCodecHandlerTest, SerializesRequestResponsePayload) {
               .data = std::move(data),
               .header = {.streamId = 1},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 
   auto result = handler_.onWrite(ctx_, erase_and_box(std::move(request)));
@@ -356,6 +358,8 @@ TEST_F(RocketClientFrameCodecHandlerTest, PropagatesWriteError) {
               .data = folly::IOBuf::copyBuffer("test"),
               .header = {.streamId = 1},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 
   auto result = handler_.onWrite(ctx_, erase_and_box(std::move(request)));
@@ -372,6 +376,8 @@ TEST_F(RocketClientFrameCodecHandlerTest, PropagatesWriteBackpressure) {
               .data = folly::IOBuf::copyBuffer("test"),
               .header = {.streamId = 1},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 
   auto result = handler_.onWrite(ctx_, erase_and_box(std::move(request)));

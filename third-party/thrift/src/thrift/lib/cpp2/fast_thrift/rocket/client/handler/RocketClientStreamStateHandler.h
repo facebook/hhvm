@@ -51,10 +51,13 @@ namespace apache::thrift::fast_thrift::rocket::client::handler {
  * cleanup
  *
  * Message flow:
- *   Outbound: RocketRequestMessage{frameType, payload, callback} ->
- *             RocketRequestMessage{streamId, frameType, payload} (with streamId
- * assigned) Inbound:  ParsedFrame{streamId, ...} ->
- *             RocketResponseMessage{requestFrameType, callback, payload, ...}
+ *   Outbound: RocketRequestMessage{streamType, payload, callback} ->
+ *             RocketRequestMessage{streamId, streamType, payload} (with
+ *             streamId assigned and streamType cached for response correlation)
+ *   Inbound:  RocketResponseMessage{frame} ->
+ *             RocketResponseMessage{streamType, requestHandle, frame} (with
+ *             streamType stamped from the per-stream map for downstream
+ *             pattern handler dispatch)
  */
 class RocketClientStreamStateHandler {
  public:
@@ -105,16 +108,15 @@ class RocketClientStreamStateHandler {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
 
-    // For non-terminal frames, just pass through (e.g., REQUEST_N)
-    // Don't remove from active streams yet
-    if (!response.frame.isTerminalFrame()) {
-      return ctx.fireRead(std::move(msg));
-    }
-
-    // Extract stream state and erase from active streams
+    // Stamp streamType (and requestHandle) on every stream-scoped frame so
+    // downstream per-pattern handlers can dispatch statelessly. streamType is
+    // constant for the stream's lifetime; requestHandle is the App's
+    // correlation token. Only erase on terminal.
     response.requestHandle = it->second.requestHandle;
-    response.requestFrameType = it->second.requestFrameType;
-    activeStreams_.erase(it);
+    response.streamType = it->second.streamType;
+    if (response.frame.isTerminalFrame()) {
+      activeStreams_.erase(it);
+    }
 
     return ctx.fireRead(std::move(msg));
   }
@@ -166,7 +168,7 @@ class RocketClientStreamStateHandler {
     activeStreams_.emplace(
         payload.streamId(),
         ClientStreamContext{
-            .requestFrameType = request.frame.frameType(),
+            .streamType = request.streamType,
             .requestHandle = request.requestHandle,
         });
 
@@ -213,7 +215,7 @@ class RocketClientStreamStateHandler {
    * correlate responses with their original requests.
    */
   struct ClientStreamContext {
-    apache::thrift::fast_thrift::frame::FrameType requestFrameType;
+    apache::thrift::fast_thrift::frame::FrameType streamType;
     uint32_t requestHandle;
   };
 

@@ -49,6 +49,8 @@ RocketRequestMessage makeClientRequest(
               .header = {.streamId = kInvalidStreamId},
           },
       .requestHandle = requestHandle,
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 }
 
@@ -175,8 +177,6 @@ RocketResponseMessage makeRocketResponse(
     uint16_t flags = 0) {
   return RocketResponseMessage{
       .frame = parseTestFrame(type, streamId, flags),
-      .requestFrameType =
-          apache::thrift::fast_thrift::frame::FrameType::RESERVED,
   };
 }
 
@@ -218,7 +218,7 @@ TEST_F(
   auto& writtenMsg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
   EXPECT_EQ(getStreamId(writtenMsg), 1);
   EXPECT_EQ(
-      writtenMsg.frame.frameType(),
+      writtenMsg.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
   EXPECT_TRUE(handler_.hasActiveStream(1));
   EXPECT_EQ(handler_.activeStreamCount(), 1);
@@ -271,6 +271,9 @@ TEST_F(ClientStreamStateHandlerTest, TerminalPayloadCleansUpStream) {
 
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
   EXPECT_EQ(response.requestHandle, kTestHandle);
+  EXPECT_EQ(
+      response.streamType,
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
   EXPECT_EQ(
       apache::thrift::fast_thrift::frame::read::FrameView(response.frame)
           .type(),
@@ -351,7 +354,9 @@ TEST_F(ClientStreamStateHandlerTest, NonTerminalPayloadKeepsStreamOpen) {
       handler_.onWrite(ctx_, erase_and_box(std::move(request))),
       Result::Success);
 
-  // PAYLOAD without complete flag is non-terminal (streaming scenario)
+  // PAYLOAD without complete flag is non-terminal (streaming scenario).
+  // streamType must be stamped on every stream-scoped frame so downstream
+  // pattern handlers can dispatch statelessly.
   auto result = handler_.onRead(
       ctx_,
       erase_and_box(makeRocketResponse(
@@ -359,6 +364,10 @@ TEST_F(ClientStreamStateHandlerTest, NonTerminalPayloadKeepsStreamOpen) {
 
   EXPECT_EQ(result, Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
+  auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(
+      response.streamType,
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
   EXPECT_TRUE(handler_.hasActiveStream(1)); // Stream still open
 }
 

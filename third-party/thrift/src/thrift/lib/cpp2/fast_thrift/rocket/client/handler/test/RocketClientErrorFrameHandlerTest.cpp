@@ -139,8 +139,6 @@ RocketResponseMessage makeRocketResponse(
     std::string_view errorMessage = {}) {
   return RocketResponseMessage{
       .frame = parseTestFrame(type, streamId, flags, errorCode, errorMessage),
-      .requestFrameType =
-          apache::thrift::fast_thrift::frame::FrameType::RESERVED,
   };
 }
 

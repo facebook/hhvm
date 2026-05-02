@@ -50,6 +50,8 @@ RocketRequestMessage makeStreamRequest(
               .metadata = std::move(metadata),
               .header = {.streamId = streamId},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 }
 
@@ -93,7 +95,7 @@ RocketResponseMessage makePayloadResponse(
   return RocketResponseMessage{
       .frame = apache::thrift::fast_thrift::frame::read::parseFrame(
           std::move(frame)),
-      .requestFrameType =
+      .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 }
@@ -195,7 +197,7 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Write_DataOnly) {
   EXPECT_EQ(payload.metadata, nullptr);
   EXPECT_EQ(readBufString(payload.data.get()), dataStr);
   EXPECT_EQ(
-      msg.frame.frameType(),
+      msg.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
   EXPECT_TRUE(handler_.hasPendingRequestResponse(42));
 }
@@ -246,7 +248,7 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Write_EmptyPayload) {
   EXPECT_EQ(payload.data, nullptr);
   EXPECT_EQ(payload.metadata, nullptr);
   EXPECT_EQ(
-      msg.frame.frameType(),
+      msg.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
 }
 
@@ -282,9 +284,9 @@ TEST_F(
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
 
   auto& forwarded = ctx_.writeMessages()[0].get<RocketRequestMessage>();
-  EXPECT_EQ(
-      forwarded.frame.frameType(),
-      apache::thrift::fast_thrift::frame::FrameType::SETUP);
+  EXPECT_TRUE(
+      forwarded.frame
+          .is<apache::thrift::fast_thrift::frame::ComposedSetupFrame>());
   EXPECT_EQ(handler_.pendingRequestResponseCount(), 0);
 }
 
@@ -379,7 +381,7 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Read_ErrorFrame) {
   auto response = RocketResponseMessage{
       .frame = apache::thrift::fast_thrift::frame::read::parseFrame(
           std::move(errorFrame)),
-      .requestFrameType =
+      .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 
@@ -409,7 +411,7 @@ TEST_F(
   auto response = RocketResponseMessage{
       .frame = apache::thrift::fast_thrift::frame::read::parseFrame(
           std::move(requestNFrame)),
-      .requestFrameType =
+      .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
 

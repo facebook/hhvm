@@ -66,6 +66,7 @@ RocketRequestMessage createRocketRequest() {
               .header = {.streamId = kInvalidStreamId},
           },
       .requestHandle = 1,
+      .streamType = FrameType::REQUEST_RESPONSE,
   };
 }
 
@@ -77,7 +78,6 @@ RocketResponseMessage createPayloadResponse(uint32_t streamId) {
 
   return RocketResponseMessage{
       .frame = parseFrame(std::move(frame)),
-      .requestFrameType = FrameType::RESERVED,
   };
 }
 

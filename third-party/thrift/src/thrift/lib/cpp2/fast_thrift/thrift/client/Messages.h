@@ -96,7 +96,7 @@ struct ThriftResponseMessage {
   uint32_t requestHandle{apache::thrift::fast_thrift::rocket::kNoRequestHandle};
 
   // 1-byte aligned fields
-  apache::thrift::fast_thrift::frame::FrameType requestFrameType{
+  apache::thrift::fast_thrift::frame::FrameType streamType{
       apache::thrift::fast_thrift::frame::FrameType::RESERVED};
 };
 #pragma pack(pop)

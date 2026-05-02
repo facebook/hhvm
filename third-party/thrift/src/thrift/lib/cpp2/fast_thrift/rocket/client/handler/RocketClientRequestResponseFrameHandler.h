@@ -126,7 +126,7 @@ class RocketClientRequestResponseFrameHandler {
           msg) noexcept {
     auto& request = msg.get<RocketRequestMessage>();
 
-    if (request.frame.frameType() !=
+    if (request.streamType !=
         apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE) {
       return ctx.fireWrite(std::move(msg));
     }

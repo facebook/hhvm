@@ -35,7 +35,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
@@ -77,7 +77,7 @@ HANDLER_TAG(client_frame_length_parser_handler);
 HANDLER_TAG(client_frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
-HANDLER_TAG(rocket_client_request_response_frame_handler);
+HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
@@ -379,16 +379,15 @@ class FastThriftE2ETest : public ::testing::Test {
               .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                  handler::RocketClientSetupFrameHandler>(
                   rocket_client_setup_handler_tag, std::move(setupFactory))
-              .addNextDuplex<
-                  apache::thrift::fast_thrift::rocket::client::handler::
-                      RocketClientRequestResponseFrameHandler>(
-                  rocket_client_request_response_frame_handler_tag)
               .addNextInbound<apache::thrift::fast_thrift::rocket::client::
                                   handler::RocketClientErrorFrameHandler>(
                   rocket_client_error_frame_handler_tag)
               .addNextDuplex<apache::thrift::fast_thrift::rocket::client::
                                  handler::RocketClientStreamStateHandler>(
                   rocket_client_stream_state_handler_tag)
+              .addNextInbound<apache::thrift::fast_thrift::rocket::client::
+                                  handler::RocketClientRequestResponseHandler>(
+                  rocket_client_request_response_handler_tag)
               .build();
 
       connection->appAdapter->setPipeline(connection->pipeline.get());
@@ -749,15 +748,15 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
               .addNextDuplex<
                   rocket::client::handler::RocketClientSetupFrameHandler>(
                   rocket_client_setup_handler_tag, std::move(setupFactory))
-              .addNextDuplex<rocket::client::handler::
-                                 RocketClientRequestResponseFrameHandler>(
-                  rocket_client_request_response_frame_handler_tag)
               .addNextInbound<
                   rocket::client::handler::RocketClientErrorFrameHandler>(
                   rocket_client_error_frame_handler_tag)
               .addNextDuplex<
                   rocket::client::handler::RocketClientStreamStateHandler>(
                   rocket_client_stream_state_handler_tag)
+              .addNextInbound<
+                  rocket::client::handler::RocketClientRequestResponseHandler>(
+                  rocket_client_request_response_handler_tag)
               .build();
 
       connection->appAdapter->setPipeline(connection->pipeline.get());

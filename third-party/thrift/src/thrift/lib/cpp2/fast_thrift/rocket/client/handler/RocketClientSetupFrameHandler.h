@@ -133,6 +133,7 @@ class RocketClientSetupFrameHandler {
  private:
   RocketRequestMessage makeSetupMessage() {
     auto [metadata, data] = setupFactory_();
+    // SETUP is a connection-level frame — no stream, no streamType.
     return RocketRequestMessage{
         .frame =
             apache::thrift::fast_thrift::frame::ComposedSetupFrame{

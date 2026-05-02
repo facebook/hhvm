@@ -72,7 +72,7 @@ ThriftResponseMessage makeResponse(
   response.frame =
       apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
   response.requestHandle = handle;
-  response.requestFrameType = frameType;
+  response.streamType = frameType;
   return response;
 }
 

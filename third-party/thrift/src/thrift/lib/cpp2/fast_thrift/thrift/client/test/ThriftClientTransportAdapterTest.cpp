@@ -84,7 +84,7 @@ TypeErasedBox makeThriftRequestBox(
 
 TypeErasedBox makeRocketResponseBox(
     uint32_t requestHandle = 42,
-    frame::FrameType requestFrameType = frame::FrameType::REQUEST_RESPONSE) {
+    frame::FrameType streamType = frame::FrameType::REQUEST_RESPONSE) {
   auto data = folly::IOBuf::copyBuffer("response-data");
   auto frameBuf = frame::write::serialize(
       frame::write::PayloadHeader{
@@ -95,7 +95,7 @@ TypeErasedBox makeRocketResponseBox(
   rocket::RocketResponseMessage response{
       .frame = frame::read::parseFrame(std::move(frameBuf)),
       .requestHandle = requestHandle,
-      .requestFrameType = requestFrameType,
+      .streamType = streamType,
   };
   return erase_and_box(std::move(response));
 }
@@ -160,7 +160,7 @@ TEST(ThriftClientTransportAdapterTest, OnWriteConvertsRpcKindToFrameType) {
   EXPECT_EQ(result, Result::Success);
 
   auto& rocketMsg = capturedMsg.get<rocket::RocketRequestMessage>();
-  EXPECT_EQ(rocketMsg.frame.frameType(), frame::FrameType::REQUEST_RESPONSE);
+  EXPECT_EQ(rocketMsg.streamType, frame::FrameType::REQUEST_RESPONSE);
   EXPECT_EQ(rocketMsg.requestHandle, 42u);
 }
 

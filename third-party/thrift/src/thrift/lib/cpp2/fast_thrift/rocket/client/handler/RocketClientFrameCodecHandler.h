@@ -90,8 +90,6 @@ class RocketClientFrameCodecHandler {
 
     auto response = RocketResponseMessage{
         .frame = std::move(frame),
-        .requestFrameType =
-            apache::thrift::fast_thrift::frame::FrameType::RESERVED,
     };
 
     return ctx.fireRead(

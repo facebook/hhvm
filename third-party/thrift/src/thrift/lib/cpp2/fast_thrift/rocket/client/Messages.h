@@ -52,6 +52,11 @@ constexpr uint32_t kInvalidStreamId = std::numeric_limits<uint32_t>::max();
  * (streamId / frameType / serialize) dispatches inline with no
  * `std::visit` at any call site.
  *
+ * `streamType` is the originating REQUEST_* frame type that establishes
+ * the stream (REQUEST_RESPONSE, REQUEST_STREAM, REQUEST_CHANNEL,
+ * REQUEST_FNF). The application sets it; StreamStateHandler stores it
+ * keyed by streamId so it can be stamped on inbound responses.
+ *
  * As STREAM/CHANNEL/FNF patterns get wired up, their corresponding
  * `Composed*Frame` types will join the variant.
  */
@@ -64,6 +69,13 @@ struct RocketRequestMessage {
 
   /// Opaque handle for correlating responses with requests.
   uint32_t requestHandle{kNoRequestHandle};
+
+  /// The originating REQUEST_* frame type that establishes the stream.
+  /// Distinct from `frame.frameType()` — the latter is the current frame's
+  /// type, which differs from streamType for SETUP and for follow-up frames
+  /// like REQUEST_N / CANCEL on a stream.
+  apache::thrift::fast_thrift::frame::FrameType streamType{
+      apache::thrift::fast_thrift::frame::FrameType::RESERVED};
 };
 
 /**
@@ -71,6 +83,10 @@ struct RocketRequestMessage {
  *
  * Contains the parsed response frame along with the original request's
  * frame type and handle for proper dispatching.
+ * `streamType` is the originating REQUEST_* frame type for the stream
+ * this response belongs to. Stamped by StreamStateHandler from its per-
+ * stream map; downstream per-pattern handlers (RequestResponse, Stream,
+ * ...) use it as a stateless dispatch key.
  */
 struct RocketResponseMessage {
   /// The parsed response frame
@@ -79,8 +95,9 @@ struct RocketResponseMessage {
   /// Opaque handle for correlating responses with requests.
   uint32_t requestHandle{kNoRequestHandle};
 
-  /// The original request's frame type (REQUEST_RESPONSE, REQUEST_STREAM, etc.)
-  apache::thrift::fast_thrift::frame::FrameType requestFrameType;
+  /// The originating REQUEST_* frame type for this response's stream.
+  apache::thrift::fast_thrift::frame::FrameType streamType{
+      apache::thrift::fast_thrift::frame::FrameType::RESERVED};
 };
 
 } // namespace apache::thrift::fast_thrift::rocket

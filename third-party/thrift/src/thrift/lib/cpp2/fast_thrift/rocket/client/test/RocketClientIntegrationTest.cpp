@@ -34,7 +34,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/adapter/RocketClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientErrorFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/handler/RocketClientStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -57,7 +57,7 @@ using rocket::RocketResponseMessage;
 // Bring handler types into scope
 using rocket::client::handler::RocketClientErrorFrameHandler;
 using rocket::client::handler::RocketClientFrameCodecHandler;
-using rocket::client::handler::RocketClientRequestResponseFrameHandler;
+using rocket::client::handler::RocketClientRequestResponseHandler;
 using rocket::client::handler::RocketClientSetupFrameHandler;
 using rocket::client::handler::RocketClientStreamStateHandler;
 
@@ -72,7 +72,7 @@ HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_client_frame_codec_handler);
 HANDLER_TAG(rocket_client_setup_handler);
-HANDLER_TAG(rocket_client_request_response_frame_handler);
+HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 
@@ -139,12 +139,12 @@ class RocketClientIntegrationTest : public ::testing::Test {
                               folly::IOBuf::copyBuffer("setup"),
                               std::unique_ptr<folly::IOBuf>());
                         })
-                    .addNextDuplex<RocketClientRequestResponseFrameHandler>(
-                        rocket_client_request_response_frame_handler_tag)
                     .addNextInbound<RocketClientErrorFrameHandler>(
                         rocket_client_error_frame_handler_tag)
                     .addNextDuplex<RocketClientStreamStateHandler>(
                         rocket_client_stream_state_handler_tag)
+                    .addNextInbound<RocketClientRequestResponseHandler>(
+                        rocket_client_request_response_handler_tag)
                     .build();
 
     appAdapter_->setPipeline(pipeline_.get());
@@ -208,7 +208,8 @@ class RocketClientIntegrationTest : public ::testing::Test {
                 .metadata = std::move(metadata),
                 .header = {.streamId = rocket::kInvalidStreamId},
             },
-    };
+        .streamType =
+            apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE};
   }
 
   folly::EventBase evb_;

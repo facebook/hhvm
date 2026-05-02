@@ -106,7 +106,7 @@ class ThriftClientTransportAdapter {
     ThriftResponseMessage thriftMsg{
         .frame = std::move(response.frame),
         .requestHandle = response.requestHandle,
-        .requestFrameType = response.requestFrameType,
+        .streamType = response.streamType,
     };
 
     return pipeline_->fireRead(
@@ -167,16 +167,16 @@ class ThriftClientTransportAdapter {
   void onPipelineInactive() noexcept {}
 
  private:
-  apache::thrift::fast_thrift::channel_pipeline::Result sendRequestResponse(
-      ThriftRequestMessage&& request) {
+  channel_pipeline::Result sendRequestResponse(ThriftRequestMessage&& request) {
     rocket::RocketRequestMessage rocketMsg{
         .frame =
-            apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
+            frame::ComposedRequestResponseFrame{
                 .data = std::move(request.payload.data),
                 .metadata = std::move(request.payload.metadata),
                 .header = {.streamId = rocket::kInvalidStreamId},
             },
         .requestHandle = request.requestHandle,
+        .streamType = frame::FrameType::REQUEST_RESPONSE,
     };
 
     return connection_->appAdapter->write(std::move(rocketMsg));

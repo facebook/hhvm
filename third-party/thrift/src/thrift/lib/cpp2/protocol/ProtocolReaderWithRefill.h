@@ -172,6 +172,20 @@ class CompactProtocolReaderWithRefill : public VirtualCompactReader {
     protocol_.skipBytes(bytes);
   }
 
+ protected:
+  /**
+   * Allow derived refill readers to use this helper where they cannot access
+   * CompactProtocolReader::in_ directly (due to not having a friend
+   * declaration).
+   * Allows users to implement refill readers for CompactV1ProtocolReader if
+   * necessary, without supporting it in the Thrift codebase or having to patch
+   * in a friend declaration.
+   */
+  template <typename T>
+  T readLEFromBuffer() {
+    return protocol_.in_.template readLE<T>();
+  }
+
  private:
   /**
    * Make sure a varint can be read from the current buffer after idx bytes.

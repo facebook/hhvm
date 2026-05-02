@@ -29,7 +29,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/BatchingFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -146,11 +146,11 @@ PipelineImpl::Ptr FastThriftServer::buildRocketPipeline(
           rocket_server_frame_codec_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
           server_setup_frame_handler_tag)
-      .addNextDuplex<
-          rocket::server::handler::RocketServerRequestResponseFrameHandler>(
-          server_request_response_frame_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerStreamStateHandler>(
           server_stream_state_handler_tag)
+      .addNextDuplex<
+          rocket::server::handler::RocketServerRequestResponseHandler>(
+          server_request_response_frame_handler_tag)
       .build();
 }
 

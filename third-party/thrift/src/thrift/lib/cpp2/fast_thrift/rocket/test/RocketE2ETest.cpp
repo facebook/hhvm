@@ -52,7 +52,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -232,11 +232,11 @@ class RocketE2ETest : public ::testing::Test {
                   s_frame_codec_tag)
               .addNextDuplex<server::handler::RocketServerSetupFrameHandler>(
                   s_setup_tag)
-              .addNextDuplex<
-                  server::handler::RocketServerRequestResponseFrameHandler>(
-                  s_request_response_tag)
               .addNextDuplex<server::handler::RocketServerStreamStateHandler>(
                   s_stream_state_tag)
+              .addNextDuplex<
+                  server::handler::RocketServerRequestResponseHandler>(
+                  s_request_response_tag)
               .build();
 
       serverAppAdapter_->setPipeline(serverPipeline_.get());

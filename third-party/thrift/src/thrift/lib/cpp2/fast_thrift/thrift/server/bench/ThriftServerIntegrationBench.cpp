@@ -53,7 +53,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
@@ -281,31 +281,32 @@ struct RocketPipelineResources {
         apache::thrift::fast_thrift::transport::TransportHandler::create(
             std::move(transport));
 
-    pipeline = PipelineBuilder<
-                   apache::thrift::fast_thrift::transport::TransportHandler,
-                   rocket::server::RocketServerAppAdapter,
-                   SimpleBufferAllocator>()
-                   .setEventBase(evb)
-                   .setHead(transportHandler.get())
-                   .setTail(appAdapter.get())
-                   .setAllocator(&allocator)
-                   .addNextInbound<FrameLengthParserHandler>(
-                       frame_length_parser_handler_tag)
-                   .addNextOutbound<FrameLengthEncoderHandler>(
-                       frame_length_encoder_handler_tag)
-                   .addNextDuplex<
-                       rocket::server::handler::RocketServerFrameCodecHandler>(
-                       rocket_server_frame_codec_handler_tag)
-                   .addNextDuplex<
-                       rocket::server::handler::RocketServerSetupFrameHandler>(
-                       server_setup_frame_handler_tag)
-                   .addNextDuplex<rocket::server::handler::
-                                      RocketServerRequestResponseFrameHandler>(
-                       server_request_response_frame_handler_tag)
-                   .addNextDuplex<
-                       rocket::server::handler::RocketServerStreamStateHandler>(
-                       server_stream_state_handler_tag)
-                   .build();
+    pipeline =
+        PipelineBuilder<
+            apache::thrift::fast_thrift::transport::TransportHandler,
+            rocket::server::RocketServerAppAdapter,
+            SimpleBufferAllocator>()
+            .setEventBase(evb)
+            .setHead(transportHandler.get())
+            .setTail(appAdapter.get())
+            .setAllocator(&allocator)
+            .addNextInbound<FrameLengthParserHandler>(
+                frame_length_parser_handler_tag)
+            .addNextOutbound<FrameLengthEncoderHandler>(
+                frame_length_encoder_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerFrameCodecHandler>(
+                rocket_server_frame_codec_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerSetupFrameHandler>(
+                server_setup_frame_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerStreamStateHandler>(
+                server_stream_state_handler_tag)
+            .addNextDuplex<
+                rocket::server::handler::RocketServerRequestResponseHandler>(
+                server_request_response_frame_handler_tag)
+            .build();
 
     appAdapter->setPipeline(pipeline.get());
     transportHandler->setPipeline(*pipeline);

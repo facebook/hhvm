@@ -44,9 +44,10 @@ namespace apache::thrift::fast_thrift::rocket::server::handler {
  *
  * Message flow:
  *   Inbound:  ParsedFrame{streamId, ...} -> RocketRequestMessage{frame,
- *     streamId}
- *   Outbound: RocketResponseMessage{payload, streamId, complete} ->
- *     RocketResponseMessage{payload, streamId}
+ *     streamId, streamType} (streamType stamped from per-stream map so
+ *     downstream per-pattern handlers can dispatch statelessly)
+ *   Outbound: RocketResponseMessage{frame, streamType (set by App)} ->
+ *     RocketResponseMessage forwarded; lifecycle managed by streamId.
  */
 class RocketServerStreamStateHandler {
  public:
@@ -104,10 +105,10 @@ class RocketServerStreamStateHandler {
     }
 
     if (desc.isRequestFrame) {
-      return onNewStream(ctx, streamId, std::move(frame));
+      return onNewStream(ctx, streamId, frameType, std::move(frame));
     }
 
-    return onStreamFrame(ctx, streamId, desc, std::move(msg));
+    return onStreamFrame(ctx, streamId, desc, std::move(frame));
   }
 
   template <typename Context>
@@ -188,10 +189,15 @@ class RocketServerStreamStateHandler {
       logUnknownStreamId(desc, streamId);
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
+    auto streamType = it->second.streamType;
     activeStreams_.erase(it);
 
     RocketRequestMessage request{
-        .frame = std::move(frame), .error = {}, .streamId = streamId};
+        .frame = std::move(frame),
+        .error = {},
+        .streamId = streamId,
+        .streamType = streamType,
+    };
     return ctx.fireRead(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
             std::move(request)));
@@ -201,15 +207,21 @@ class RocketServerStreamStateHandler {
   apache::thrift::fast_thrift::channel_pipeline::Result onNewStream(
       Context& ctx,
       uint32_t streamId,
+      apache::thrift::fast_thrift::frame::FrameType streamType,
       apache::thrift::fast_thrift::frame::read::ParsedFrame&& frame) noexcept {
     if (activeStreams_.find(streamId) != activeStreams_.end()) {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
 
-    activeStreams_.emplace(streamId, std::monostate{});
+    activeStreams_.emplace(
+        streamId, ServerStreamContext{.streamType = streamType});
 
     RocketRequestMessage request{
-        .frame = std::move(frame), .error = {}, .streamId = streamId};
+        .frame = std::move(frame),
+        .error = {},
+        .streamId = streamId,
+        .streamType = streamType,
+    };
     auto result = ctx.fireRead(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
             std::move(request)));
@@ -228,17 +240,34 @@ class RocketServerStreamStateHandler {
       Context& ctx,
       uint32_t streamId,
       const apache::thrift::fast_thrift::frame::FrameDescriptor& desc,
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
-          msg) noexcept {
-    if (activeStreams_.find(streamId) != activeStreams_.end()) {
-      return ctx.fireRead(std::move(msg));
+      apache::thrift::fast_thrift::frame::read::ParsedFrame&& frame) noexcept {
+    auto it = activeStreams_.find(streamId);
+    if (it == activeStreams_.end()) {
+      logUnknownStreamId(desc, streamId);
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
+    auto streamType = it->second.streamType;
 
-    logUnknownStreamId(desc, streamId);
-    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+    RocketRequestMessage request{
+        .frame = std::move(frame),
+        .error = {},
+        .streamId = streamId,
+        .streamType = streamType,
+    };
+    return ctx.fireRead(
+        apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+            std::move(request)));
   }
 
-  apache::thrift::fast_thrift::frame::read::DirectStreamMap<std::monostate>
+  // ServerStreamContext - per-stream state held in activeStreams_.
+  // Holds the originating REQUEST_* frame type so per-pattern handlers
+  // downstream can dispatch statelessly via the stamped streamType.
+  struct ServerStreamContext {
+    apache::thrift::fast_thrift::frame::FrameType streamType{
+        apache::thrift::fast_thrift::frame::FrameType::RESERVED};
+  };
+
+  apache::thrift::fast_thrift::frame::read::DirectStreamMap<ServerStreamContext>
       activeStreams_;
 };
 

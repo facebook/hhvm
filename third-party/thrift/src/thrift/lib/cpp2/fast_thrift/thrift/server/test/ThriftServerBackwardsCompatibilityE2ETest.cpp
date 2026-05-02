@@ -33,7 +33,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
@@ -97,7 +97,7 @@ class BackwardsCompatibilityTestHandler
  *   -> FrameLengthEncoderHandler
  *   -> RocketServerFrameCodecHandler
  *   -> RocketServerSetupFrameHandler
- *   -> RocketServerRequestResponseFrameHandler
+ *   -> RocketServerRequestResponseHandler
  *   -> RocketServerStreamStateHandler
  *   -> RocketServerAppAdapter
  *
@@ -162,12 +162,12 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
                           server_setup_frame_handler_tag)
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
-                              RocketServerRequestResponseFrameHandler>(
-                          server_request_response_frame_handler_tag)
-                      .addNextDuplex<
-                          apache::thrift::fast_thrift::rocket::server::handler::
                               RocketServerStreamStateHandler>(
                           server_stream_state_handler_tag)
+                      .addNextDuplex<
+                          apache::thrift::fast_thrift::rocket::server::handler::
+                              RocketServerRequestResponseHandler>(
+                          server_request_response_frame_handler_tag)
                       .build();
 
               conn.appAdapter->setPipeline(rocketPipeline.get());

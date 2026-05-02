@@ -47,7 +47,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -84,7 +84,7 @@ HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_server_frame_codec_handler);
 HANDLER_TAG(rocket_server_setup_handler);
-HANDLER_TAG(rocket_server_request_response_frame_handler);
+HANDLER_TAG(rocket_server_request_response_handler);
 HANDLER_TAG(rocket_server_stream_state_handler);
 
 namespace {
@@ -182,10 +182,10 @@ struct BenchmarkFixture {
                        rocket_server_frame_codec_handler_tag)
                    .addNextDuplex<RocketServerSetupFrameHandler>(
                        rocket_server_setup_handler_tag)
-                   .addNextDuplex<RocketServerRequestResponseFrameHandler>(
-                       rocket_server_request_response_frame_handler_tag)
                    .addNextDuplex<RocketServerStreamStateHandler>(
                        rocket_server_stream_state_handler_tag)
+                   .addNextDuplex<RocketServerRequestResponseHandler>(
+                       rocket_server_request_response_handler_tag)
                    .build();
 
     appAdapter->setPipeline(pipeline.get());
@@ -353,10 +353,10 @@ BENCHMARK(Rocket_Server_SetupFrame, iters) {
                 rocket_server_frame_codec_handler_tag)
             .addNextDuplex<RocketServerSetupFrameHandler>(
                 rocket_server_setup_handler_tag)
-            .addNextDuplex<RocketServerRequestResponseFrameHandler>(
-                rocket_server_request_response_frame_handler_tag)
             .addNextDuplex<RocketServerStreamStateHandler>(
                 rocket_server_stream_state_handler_tag)
+            .addNextDuplex<RocketServerRequestResponseHandler>(
+                rocket_server_request_response_handler_tag)
             .build();
 
     fixture.appAdapter->setPipeline(fixture.pipeline.get());

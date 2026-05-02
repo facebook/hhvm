@@ -19,7 +19,7 @@
  *
  * Measures the end-to-end benefit of headroom pre-allocation in
  * ThriftServerChannel through to frame serialization in
- * RocketServerRequestResponseFrameHandler.
+ * RocketServerFrameCodecHandler.
  *
  * Compares two paths:
  * - NoHeadroom: metadata serialized without headroom -> FrameWriter slow path
@@ -41,7 +41,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -97,12 +97,6 @@ std::unique_ptr<folly::IOBuf> serializeMetadataWithHeadroom(
   return queue.move();
 }
 
-ParsedFrame makeRequestResponseFrame(uint32_t streamId) {
-  auto buf = serialize(
-      RequestResponseHeader{.streamId = streamId}, nullptr, copyBuffer("req"));
-  return parseFrame(std::move(buf));
-}
-
 apache::thrift::ResponseRpcMetadata createMinimalResponseMetadata() {
   apache::thrift::ResponseRpcMetadata metadata;
   metadata.payloadMetadata().ensure().set_responseMetadata(
@@ -136,7 +130,7 @@ apache::thrift::ResponseRpcMetadata createLargeResponseMetadata() {
 // =============================================================================
 
 // Captures the final serialized frame IOBuf from
-// RocketServerRequestResponseFrameHandler.
+// RocketServerFrameCodecHandler.
 class FrameSinkContext {
  public:
   // NOLINTNEXTLINE(clang-diagnostic-unused-member-function)
@@ -184,15 +178,8 @@ struct PreparedResponse {
 void benchNoHeadroom(
     size_t iters, const apache::thrift::ResponseRpcMetadata& metadataTemplate) {
   BenchmarkSuspender suspender;
-  RocketServerRequestResponseFrameHandler frameHandler;
-  FrameSinkContext frameCtx;
-
-  // Register streams
-  for (size_t i = 0; i < iters; ++i) {
-    auto frame = makeRequestResponseFrame(static_cast<uint32_t>(2 * i + 1));
-    std::ignore =
-        frameHandler.onRead(frameCtx, erase_and_box(std::move(frame)));
-  }
+  RocketServerFrameCodecHandler codec;
+  FrameSinkContext codecCtx;
 
   // Pre-build payloads and metadata copies, but do NOT serialize metadata yet.
   // Metadata serialization happens in the timed section below.
@@ -222,8 +209,7 @@ void benchNoHeadroom(
                      .next = true},
             },
     };
-    auto result =
-        frameHandler.onWrite(frameCtx, erase_and_box(std::move(streamResp)));
+    auto result = codec.onWrite(codecCtx, erase_and_box(std::move(streamResp)));
     doNotOptimizeAway(result);
   }
 }
@@ -231,15 +217,8 @@ void benchNoHeadroom(
 void benchWithHeadroom(
     size_t iters, const apache::thrift::ResponseRpcMetadata& metadataTemplate) {
   BenchmarkSuspender suspender;
-  RocketServerRequestResponseFrameHandler frameHandler;
-  FrameSinkContext frameCtx;
-
-  // Register streams in the frame handler
-  for (size_t i = 0; i < iters; ++i) {
-    auto frame = makeRequestResponseFrame(static_cast<uint32_t>(2 * i + 1));
-    std::ignore =
-        frameHandler.onRead(frameCtx, erase_and_box(std::move(frame)));
-  }
+  RocketServerFrameCodecHandler codec;
+  FrameSinkContext codecCtx;
 
   // Pre-build payloads and metadata copies, but do NOT serialize metadata yet.
   // Metadata serialization happens in the timed section below, matching
@@ -260,7 +239,6 @@ void benchWithHeadroom(
     // Serialize metadata with headroom (in timed section)
     auto serializedMeta = serializeMetadataWithHeadroom(responses[i].metadata);
 
-    // Build RocketResponseMessage directly (no handler intermediary)
     auto streamResp = RocketResponseMessage{
         .frame =
             apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
@@ -273,9 +251,8 @@ void benchWithHeadroom(
             },
     };
 
-    // RocketServerRequestResponseFrameHandler serializes the frame
-    auto result =
-        frameHandler.onWrite(frameCtx, erase_and_box(std::move(streamResp)));
+    // RocketServerFrameCodecHandler serializes the frame
+    auto result = codec.onWrite(codecCtx, erase_and_box(std::move(streamResp)));
     doNotOptimizeAway(result);
   }
 }

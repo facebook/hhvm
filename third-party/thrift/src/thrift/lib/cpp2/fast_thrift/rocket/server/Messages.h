@@ -38,6 +38,12 @@ namespace apache::thrift::fast_thrift::rocket::server {
  * Use FrameView to check frame type (REQUEST_RESPONSE, REQUEST_STREAM,
  * CANCEL, etc.).
  *
+ * `streamType` is the originating REQUEST_* frame type that established
+ * the stream (REQUEST_RESPONSE, REQUEST_STREAM, REQUEST_CHANNEL,
+ * REQUEST_FNF). Stamped by RocketServerStreamStateHandler from its per-
+ * stream map; downstream per-pattern handlers (RR/Stream/Channel/FNF)
+ * use it as a stateless dispatch key.
+ *
  * If error is set, the connection failed and frame may be empty.
  * App layer should check error first before processing frame.
  */
@@ -45,6 +51,8 @@ struct RocketRequestMessage {
   apache::thrift::fast_thrift::frame::read::ParsedFrame frame;
   folly::exception_wrapper error;
   uint32_t streamId{0};
+  apache::thrift::fast_thrift::frame::FrameType streamType{
+      apache::thrift::fast_thrift::frame::FrameType::RESERVED};
 };
 
 /**
@@ -61,6 +69,11 @@ struct RocketRequestMessage {
  * inside the held header (`ComposedPayloadFrame::header.complete`;
  * ERROR is implicitly terminal).
  *
+ * `streamType` is the originating REQUEST_* frame type for the stream
+ * this response belongs to. App must copy it from the inbound
+ * `RocketRequestMessage` so per-pattern handlers (RR/Stream/Channel/FNF)
+ * can dispatch statelessly on the outbound path.
+ *
  * As STREAM/CHANNEL/FNF response frame types get wired up, their
  * corresponding `Composed*Frame` types will join the variant.
  */
@@ -69,6 +82,8 @@ struct RocketResponseMessage {
       apache::thrift::fast_thrift::frame::ComposedPayloadFrame,
       apache::thrift::fast_thrift::frame::ComposedErrorFrame>
       frame;
+  apache::thrift::fast_thrift::frame::FrameType streamType{
+      apache::thrift::fast_thrift::frame::FrameType::RESERVED};
 };
 
 } // namespace apache::thrift::fast_thrift::rocket::server

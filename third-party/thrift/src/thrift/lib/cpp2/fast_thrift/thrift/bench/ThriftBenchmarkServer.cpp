@@ -45,7 +45,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/handler/FrameLengthEncoderHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/bench/if/gen-cpp2/BenchmarkService.h>
@@ -68,7 +68,7 @@ HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_server_frame_codec_handler);
 HANDLER_TAG(rocket_server_setup_frame_handler);
-HANDLER_TAG(rocket_server_request_response_frame_handler);
+HANDLER_TAG(rocket_server_request_response_handler);
 HANDLER_TAG(rocket_server_stream_state_handler);
 
 namespace {
@@ -151,12 +151,12 @@ class FastThriftBenchmarkServer {
               .addNextDuplex<
                   rocket::server::handler::RocketServerSetupFrameHandler>(
                   rocket_server_setup_frame_handler_tag)
-              .addNextDuplex<rocket::server::handler::
-                                 RocketServerRequestResponseFrameHandler>(
-                  rocket_server_request_response_frame_handler_tag)
               .addNextDuplex<
                   rocket::server::handler::RocketServerStreamStateHandler>(
                   rocket_server_stream_state_handler_tag)
+              .addNextDuplex<
+                  rocket::server::handler::RocketServerRequestResponseHandler>(
+                  rocket_server_request_response_handler_tag)
               .build();
 
       serverChannel->setPipelineRef(*pipeline);

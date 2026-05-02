@@ -195,6 +195,9 @@ TEST_F(
 
   auto& request = ctx_.readMessages()[0].get<RocketRequestMessage>();
   EXPECT_EQ(request.streamId, 1);
+  EXPECT_EQ(
+      request.streamType,
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
 
   apache::thrift::fast_thrift::frame::read::FrameView view(request.frame);
   EXPECT_EQ(
@@ -257,6 +260,11 @@ TEST_F(ServerStreamStateHandlerTest, CancelRemovesActiveStreamAndFiresToApp) {
 
   auto& request = ctx_.readMessages()[0].get<RocketRequestMessage>();
   EXPECT_EQ(request.streamId, 1);
+  // CANCEL is forwarded with the originating stream's streamType so the
+  // App's per-pattern handler downstream can dispatch statelessly.
+  EXPECT_EQ(
+      request.streamType,
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
 
   apache::thrift::fast_thrift::frame::read::FrameView view(request.frame);
   EXPECT_EQ(view.type(), apache::thrift::fast_thrift::frame::FrameType::CANCEL);
@@ -288,7 +296,15 @@ TEST_F(ServerStreamStateHandlerTest, RequestNPassesThroughForActiveStream) {
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_N, 1));
 
   EXPECT_EQ(result, Result::Success);
-  EXPECT_EQ(ctx_.readMessages().size(), 1);
+  ASSERT_EQ(ctx_.readMessages().size(), 1);
+  // Non-request stream-scoped frames are wrapped in RocketRequestMessage with
+  // streamType stamped from the per-stream map so downstream per-pattern
+  // handlers can dispatch statelessly.
+  auto& request = ctx_.readMessages()[0].get<RocketRequestMessage>();
+  EXPECT_EQ(request.streamId, 1u);
+  EXPECT_EQ(
+      request.streamType,
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_STREAM);
   EXPECT_TRUE(handler_.hasActiveStream(1));
 }
 

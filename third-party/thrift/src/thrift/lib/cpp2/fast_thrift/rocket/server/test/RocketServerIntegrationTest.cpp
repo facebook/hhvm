@@ -55,7 +55,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerFrameCodecHandler.h>
-#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseFrameHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -75,7 +75,7 @@ using rocket::server::RocketRequestMessage;
 using rocket::server::RocketResponseMessage;
 
 using rocket::server::handler::RocketServerFrameCodecHandler;
-using rocket::server::handler::RocketServerRequestResponseFrameHandler;
+using rocket::server::handler::RocketServerRequestResponseHandler;
 using rocket::server::handler::RocketServerSetupFrameHandler;
 using rocket::server::handler::RocketServerStreamStateHandler;
 
@@ -83,7 +83,7 @@ HANDLER_TAG(frame_length_parser_handler);
 HANDLER_TAG(frame_length_encoder_handler);
 HANDLER_TAG(rocket_server_frame_codec_handler);
 HANDLER_TAG(rocket_server_setup_handler);
-HANDLER_TAG(rocket_server_request_response_frame_handler);
+HANDLER_TAG(rocket_server_request_response_handler);
 HANDLER_TAG(rocket_server_stream_state_handler);
 
 class RocketServerIntegrationTest : public ::testing::Test {
@@ -141,10 +141,10 @@ class RocketServerIntegrationTest : public ::testing::Test {
                         rocket_server_frame_codec_handler_tag)
                     .addNextDuplex<RocketServerSetupFrameHandler>(
                         rocket_server_setup_handler_tag)
-                    .addNextDuplex<RocketServerRequestResponseFrameHandler>(
-                        rocket_server_request_response_frame_handler_tag)
                     .addNextDuplex<RocketServerStreamStateHandler>(
                         rocket_server_stream_state_handler_tag)
+                    .addNextDuplex<RocketServerRequestResponseHandler>(
+                        rocket_server_request_response_handler_tag)
                     .build();
 
     appAdapter_->setPipeline(pipeline_.get());
@@ -327,6 +327,8 @@ TEST_F(RocketServerIntegrationTest, ResponseFlowsFromAppToSocket) {
               .data = folly::IOBuf::copyBuffer("response data"),
               .header = {.streamId = 1, .complete = true, .next = true},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
   // TestAsyncTransport defers writeSuccess(), so write() returns Backpressure.
   // Use (void) to ignore the result, matching client test pattern.
@@ -361,6 +363,8 @@ TEST_F(RocketServerIntegrationTest, ErrorResponseFlowsFromAppToSocket) {
               .data = folly::IOBuf::copyBuffer("error message"),
               .header = {.streamId = 1, .errorCode = 0x00000201},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
   (void)appAdapter_->write(std::move(response));
 
@@ -390,6 +394,8 @@ TEST_F(RocketServerIntegrationTest, ResponseWithMetadata) {
               .metadata = folly::IOBuf::copyBuffer("response metadata"),
               .header = {.streamId = 1, .complete = true, .next = true},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
   (void)appAdapter_->write(std::move(response));
 
@@ -445,6 +451,8 @@ TEST_F(RocketServerIntegrationTest, ResponseForCompletedStreamFails) {
               .data = folly::IOBuf::copyBuffer("response"),
               .header = {.streamId = 1, .complete = true, .next = true},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
   (void)appAdapter_->write(std::move(response));
 
@@ -457,6 +465,8 @@ TEST_F(RocketServerIntegrationTest, ResponseForCompletedStreamFails) {
               .data = folly::IOBuf::copyBuffer("duplicate"),
               .header = {.streamId = 1, .complete = true, .next = true},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
   auto result = appAdapter_->write(std::move(duplicate));
   EXPECT_EQ(result, Result::Error)
@@ -497,6 +507,8 @@ TEST_F(RocketServerIntegrationTest, EmptyPayloadResponse) {
           apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
               .header = {.streamId = 1, .complete = true, .next = true},
           },
+      .streamType =
+          apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
   (void)appAdapter_->write(std::move(response));
 

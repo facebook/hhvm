@@ -59,8 +59,8 @@ struct FastThriftServerConfig {
  *     -> FrameLengthEncoderHandler
  *     -> RocketServerFrameCodecHandler
  *     -> RocketServerSetupFrameHandler
- *     -> RocketServerRequestResponseFrameHandler
  *     -> RocketServerStreamStateHandler
+ *     -> RocketServerRequestResponseHandler
  *     -> RocketServerAppAdapter
  *
  * Thrift pipeline (owned by ThriftConnectionContext):

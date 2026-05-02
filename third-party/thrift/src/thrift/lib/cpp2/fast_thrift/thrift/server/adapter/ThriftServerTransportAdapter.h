@@ -140,6 +140,11 @@ class ThriftServerTransportAdapter {
     auto response = msg.take<ThriftServerResponseMessage>();
 
     rocket::server::RocketResponseMessage rocketMsg;
+    // Only REQUEST_RESPONSE is wired today; when STREAM / CHANNEL / FNF land,
+    // streamType must be plumbed through ThriftServerResponseMessage from the
+    // inbound ThriftServerRequestMessage.
+    rocketMsg.streamType =
+        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
     if (response.errorCode != 0) {
       rocketMsg.frame = apache::thrift::fast_thrift::frame::ComposedErrorFrame{
           .data = std::move(response.payload.data),

@@ -2456,6 +2456,18 @@ std::string deserializeProfData(const std::string& filename,
       pd->forEachProfilingFunc(logFunc);
     }
 
+    if (Cfg::Eval::LogJitProfileLiveness) {
+      auto const prodTimestamp = TimeStamp::Current();
+      auto const logFunc = [&](auto const& func) {
+        StructuredLogEntry entry;
+        entry.force_init = true;
+        entry.setStr("function_name", func->fullName()->data());
+        entry.setInt("last_prod_timestamp", prodTimestamp);
+        StructuredLog::log("hhvm_live_functions", entry);
+      };
+      pd->forEachProfilingFunc(logFunc);
+    }
+
     if (Cfg::Eval::EnableIntrinsicsExtension) {
       read_container(ser, [&] { read_class(ser); });
     }

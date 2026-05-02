@@ -1117,6 +1117,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.DumpJitProfileStats = false, UNKNOWN
 
+- bool Eval.LogJitProfileLiveness = false, UNKNOWN
+
 - bool Eval.DumpJitEnableRenameFunctionStats = false, UNKNOWN
 
 - bool Eval.MapTgtCacheHuge = false, UNKNOWN

@@ -254,7 +254,7 @@ void FetchOperationImpl::logQueryCompletion(
   logging_data.per_query_rows_matched = std::move(per_query_rows_matched_);
 
   if (result == OperationResult::Succeeded) {
-    connection.setLastActivityTime(Clock::now());
+    connection.resetLastActivityTime();
     client().logQuerySuccess(logging_data, connection);
   } else {
     auto reason = operationResultToFailureReason(result);

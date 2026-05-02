@@ -221,7 +221,9 @@ void MysqlFetchOperationImpl::actionable() {
     //  - WaitForConsumer: In case `pause` is called during notification.
     if (getActiveFetchAction() == FetchAction::CompleteQuery) {
       snapshotMysqlErrors(
-          mysql_conn->getErrno(), mysql_conn->getErrorMessage());
+          mysql_conn->getErrno(),
+          mysql_conn->getErrorMessage(),
+          conn().getConnIdleTime());
 
       bool more_results = false;
       if (mysql_errno() != 0 || cancel_) {

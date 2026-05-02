@@ -81,13 +81,20 @@ void OperationBase::setAttribute(
 
 void OperationBase::snapshotMysqlErrors(
     unsigned int errnum,
-    std::string error) {
+    std::string error,
+    std::chrono::milliseconds connIdleTime) {
   mysql_errno_ = errnum;
   if (mysql_errno_ != 0) {
     if (mysql_errno_ == CR_TLS_SERVER_NOT_FOUND) {
       mysql_error_ = "Server loadshedded the connection request.";
     } else {
       mysql_error_ = std::move(error);
+    }
+    constexpr unsigned int kProxyIdleTimeout = 1912;
+    if (connIdleTime.count() > 0 &&
+        (mysql_errno_ == CR_SERVER_GONE_ERROR ||
+         mysql_errno_ == CR_SERVER_LOST || mysql_errno_ == kProxyIdleTimeout)) {
+      mysql_error_ += fmt::format(" (CONN_IDLE: {})", connIdleTime);
     }
   }
 }
@@ -178,8 +185,11 @@ std::unique_ptr<Connection> OperationBase::releaseConnection() {
   return conn_proxy_->releaseConnection();
 }
 
-void Operation::snapshotMysqlErrors(unsigned int errnum, std::string error) {
-  impl()->snapshotMysqlErrors(errnum, std::move(error));
+void Operation::snapshotMysqlErrors(
+    unsigned int errnum,
+    std::string error,
+    std::chrono::milliseconds connIdleTime) {
+  impl()->snapshotMysqlErrors(errnum, std::move(error), connIdleTime);
 }
 
 void Operation::setAsyncClientError(

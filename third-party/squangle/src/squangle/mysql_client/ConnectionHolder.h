@@ -11,6 +11,8 @@
 #include <glog/logging.h>
 #include <chrono>
 
+#include <folly/stop_watch.h>
+
 #include "squangle/base/Base.h"
 #include "squangle/base/ConnectionKey.h"
 #include "squangle/logger/DBEventCounter.h"
@@ -77,20 +79,25 @@ class ConnectionHolder : public InternalConnection {
     context_ = std::move(context);
   }
 
-  void setCreationTime(Timepoint creation_time) {
-    createTime_ = creation_time;
+  void resetCreationTime() {
+    createWatch_.reset();
+    lastActivityWatch_.reset();
   }
 
   [[nodiscard]] Timepoint getCreationTime() const {
-    return createTime_;
+    return createWatch_.getCheckpoint();
   }
 
-  void setLastActivityTime(Timepoint last_activity_time) {
-    lastActiveTime_ = last_activity_time;
+  void resetLastActivityTime() {
+    lastActivityWatch_.reset();
   }
 
   [[nodiscard]] Timepoint getLastActivityTime() const {
-    return lastActiveTime_;
+    return lastActivityWatch_.getCheckpoint();
+  }
+
+  [[nodiscard]] std::chrono::milliseconds getConnIdleTime() const {
+    return lastActivityWatch_.elapsed();
   }
 
   // Pool-source observability flags
@@ -289,12 +296,13 @@ class ConnectionHolder : public InternalConnection {
   friend class ConnectionPool;
 
  private:
+  using StopWatch = folly::stop_watch<std::chrono::milliseconds>;
   MysqlClientBase& client_;
   std::unique_ptr<InternalConnection> internalConn_;
   std::shared_ptr<db::ConnectionContextBase> context_;
   std::shared_ptr<const ConnectionKey> key_;
-  Timepoint createTime_;
-  Timepoint lastActiveTime_;
+  StopWatch createWatch_;
+  StopWatch lastActivityWatch_;
   bool opened_{false};
   bool poolFlagsHit_{false};
   bool poolFlagsChangeUser_{false};

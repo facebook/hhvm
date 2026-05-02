@@ -534,6 +534,7 @@ class ConnectionPool
 
       mysql_conn->setFromPoolHit(true);
       mysql_conn->setReusable(true);
+      mysql_conn->resetLastActivityTime();
       raw_pool_op->connectionCallback(std::move(mysql_conn));
     }
   }
@@ -635,6 +636,7 @@ class ConnectionPool
           pooledConn->setFromPoolHit(true);
           pooledConn->setReusedWithChangeUser(true);
           pooledConn->setReusable(true);
+          pooledConn->resetCreationTime();
           rawPoolOp->connectionCallback(std::move(pooledConn));
         });
 
@@ -720,6 +722,7 @@ class ConnectionPool
 
       stats()->incrPoolHits();
       mysqlConnection->setReusable(true);
+      mysqlConnection->resetCreationTime();
       rawPoolOp->connectionCallback(std::move(mysqlConnection));
     });
 
@@ -825,6 +828,7 @@ class ConnectionPool
     } else {
       mysql_conn->setFromPoolHit(!brand_new);
       mysql_conn->setReusable(true);
+      mysql_conn->resetLastActivityTime();
       pool_op->connectionCallback(std::move(mysql_conn));
     }
   }

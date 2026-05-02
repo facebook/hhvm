@@ -236,15 +236,20 @@ class Connection {
     conn_options_.setQueryTimeout(t);
   }
 
-  // set last successful query time to ConnectionHolder
-  void setLastActivityTime(Timepoint last_activity_time) {
+  // Reset last successful query time to ConnectionHolder
+  void resetLastActivityTime() {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
-    mysql_connection_->setLastActivityTime(last_activity_time);
+    mysql_connection_->resetLastActivityTime();
   }
 
   [[nodiscard]] Timepoint getLastActivityTime() const {
     CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
     return mysql_connection_->getLastActivityTime();
+  }
+
+  [[nodiscard]] std::chrono::milliseconds getConnIdleTime() const noexcept {
+    return mysql_connection_ ? mysql_connection_->getConnIdleTime()
+                             : std::chrono::milliseconds{0};
   }
 
   // Pool-source observability

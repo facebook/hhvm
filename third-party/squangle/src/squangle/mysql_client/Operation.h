@@ -180,7 +180,12 @@ class OperationBase {
 
   // Save any mysql errors that occurred (since we may hand off the
   // Connection before the user wants this information).
-  void snapshotMysqlErrors(unsigned int errnum, std::string error);
+  // When connIdleTime is provided and the error indicates a lost connection,
+  // the idle duration is appended to the error message.
+  void snapshotMysqlErrors(
+      unsigned int errnum,
+      std::string error,
+      std::chrono::milliseconds connIdleTime = std::chrono::milliseconds{0});
 
   // Same as above, but specify the error code.
   void setAsyncClientError(unsigned int mysql_errno, folly::StringPiece msg);
@@ -657,7 +662,10 @@ class Operation : public std::enable_shared_from_this<Operation>,
 
   // Save any mysql errors that occurred (since we may hand off the
   // Connection before the user wants this information).
-  void snapshotMysqlErrors(unsigned int errnum, std::string error);
+  void snapshotMysqlErrors(
+      unsigned int errnum,
+      std::string error,
+      std::chrono::milliseconds connIdleTime = std::chrono::milliseconds{0});
 
   // Same as above, but specify the error code.
   void setAsyncClientError(unsigned int mysql_errno, folly::StringPiece msg);

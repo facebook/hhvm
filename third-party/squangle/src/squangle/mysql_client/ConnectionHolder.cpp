@@ -18,7 +18,7 @@ ConnectionHolder::ConnectionHolder(
     : client_(client),
       internalConn_(std::move(internalConn)),
       key_(std::move(key)) {
-  createTime_ = std::chrono::steady_clock::now();
+  resetCreationTime();
   client_.activeConnectionAdded(key_);
 }
 
@@ -29,8 +29,8 @@ ConnectionHolder::ConnectionHolder(
       internalConn_(other.stealInternalConnection()),
       context_(other.context_),
       key_(std::move(key)),
-      createTime_(other.createTime_),
-      lastActiveTime_(other.lastActiveTime_),
+      createWatch_(other.createWatch_),
+      lastActivityWatch_(other.lastActivityWatch_),
       opened_(other.opened_),
       poolFlagsHit_(other.poolFlagsHit_),
       poolFlagsChangeUser_(other.poolFlagsChangeUser_) {
@@ -66,7 +66,7 @@ void ConnectionHolder::onClose() {
 
 void ConnectionHolder::connectionOpened() {
   opened_ = true;
-  lastActiveTime_ = Clock::now();
+  resetLastActivityTime();
 
   client_.stats()->incrOpenedConnections(context_.get());
 }

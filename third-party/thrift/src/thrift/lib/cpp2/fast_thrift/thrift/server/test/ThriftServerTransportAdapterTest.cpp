@@ -153,9 +153,11 @@ TEST(ThriftServerTransportAdapterTest, OnWriteConvertsResponseFields) {
   EXPECT_EQ(result, Result::Success);
 
   auto& rocketMsg = capturedMsg.get<rocket::server::RocketResponseMessage>();
-  EXPECT_EQ(rocketMsg.streamId, 42u);
-  EXPECT_TRUE(rocketMsg.complete);
-  EXPECT_EQ(rocketMsg.errorCode, 0u);
+  const auto& payload =
+      rocketMsg.frame
+          .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>();
+  EXPECT_EQ(payload.header.streamId, 42u);
+  EXPECT_TRUE(payload.header.complete);
 }
 
 TEST(ThriftServerTransportAdapterTest, InboundRequestConvertedToThrift) {

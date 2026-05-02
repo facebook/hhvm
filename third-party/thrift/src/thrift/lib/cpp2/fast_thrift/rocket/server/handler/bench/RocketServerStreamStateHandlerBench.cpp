@@ -224,11 +224,15 @@ BENCHMARK(Write_StreamState_CompleteResponse, iters) {
   for (size_t i = 0; i < iters; ++i) {
     responses.push_back(
         RocketResponseMessage{
-            .payload = copyBuffer("response data"),
-            .metadata = nullptr,
-            .streamId = static_cast<uint32_t>(2 * i + 1),
-            .errorCode = 0,
-            .complete = true});
+            .frame =
+                apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                    .data = copyBuffer("response data"),
+                    .header =
+                        {.streamId = static_cast<uint32_t>(2 * i + 1),
+                         .complete = true,
+                         .next = true},
+                },
+        });
   }
 
   suspender.dismiss();
@@ -254,11 +258,12 @@ BENCHMARK(Write_StreamState_PartialResponse, iters) {
   for (size_t i = 0; i < iters; ++i) {
     responses.push_back(
         RocketResponseMessage{
-            .payload = copyBuffer("partial data"),
-            .metadata = nullptr,
-            .streamId = 1,
-            .errorCode = 0,
-            .complete = false});
+            .frame =
+                apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                    .data = copyBuffer("partial data"),
+                    .header = {.streamId = 1, .complete = false, .next = true},
+                },
+        });
   }
 
   suspender.dismiss();

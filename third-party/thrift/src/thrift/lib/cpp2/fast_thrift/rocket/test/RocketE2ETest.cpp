@@ -154,10 +154,14 @@ class RocketE2ETest : public ::testing::Test {
               auto& req = serverRequests_.back()
                               .get<rocket::server::RocketRequestMessage>();
               server::RocketResponseMessage response{
-                  .payload = folly::IOBuf::copyBuffer("e2e-response"),
-                  .metadata = nullptr,
-                  .streamId = req.streamId,
-                  .complete = true,
+                  .frame =
+                      apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                          .data = folly::IOBuf::copyBuffer("e2e-response"),
+                          .header =
+                              {.streamId = req.streamId,
+                               .complete = true,
+                               .next = true},
+                      },
               };
               (void)serverAppAdapter_->write(std::move(response));
             }

@@ -68,9 +68,11 @@ TEST(RocketServerAppAdapterTest, WriteWithoutPipelineReturnsError) {
   RocketServerAppAdapter::Ptr adapter(new RocketServerAppAdapter());
 
   RocketResponseMessage msg{
-      .payload = folly::IOBuf::copyBuffer("test"),
-      .metadata = nullptr,
-      .streamId = 1,
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = folly::IOBuf::copyBuffer("test"),
+              .header = {.streamId = 1},
+          },
   };
 
   EXPECT_EQ(adapter->write(std::move(msg)), Result::Error);
@@ -142,9 +144,11 @@ TEST(RocketServerAppAdapterTest, WriteWithPipelineCallsFireWrite) {
   adapter->setPipeline(pipeline.get());
 
   RocketResponseMessage msg{
-      .payload = folly::IOBuf::copyBuffer("response"),
-      .metadata = nullptr,
-      .streamId = 1,
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = folly::IOBuf::copyBuffer("response"),
+              .header = {.streamId = 1},
+          },
   };
 
   auto result = adapter->write(std::move(msg));

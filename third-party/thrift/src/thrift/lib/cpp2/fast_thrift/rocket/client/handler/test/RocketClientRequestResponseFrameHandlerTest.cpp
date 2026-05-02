@@ -191,7 +191,7 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Write_DataOnly) {
 
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
   const auto& payload = getForwardedPayload(msg);
-  EXPECT_EQ(payload.header.streamId, 42u);
+  EXPECT_EQ(payload.streamId(), 42u);
   EXPECT_EQ(payload.metadata, nullptr);
   EXPECT_EQ(readBufString(payload.data.get()), dataStr);
   EXPECT_EQ(
@@ -229,7 +229,7 @@ TEST_F(ClientRequestResponseFrameHandlerTest, Write_DataAndMetadata) {
 
   auto& msg = ctx_.writeMessages()[0].get<RocketRequestMessage>();
   const auto& payload = getForwardedPayload(msg);
-  EXPECT_EQ(payload.header.streamId, 99u);
+  EXPECT_EQ(payload.streamId(), 99u);
   EXPECT_EQ(readBufString(payload.metadata.get()), metadataStr);
   EXPECT_EQ(readBufString(payload.data.get()), dataStr);
 }

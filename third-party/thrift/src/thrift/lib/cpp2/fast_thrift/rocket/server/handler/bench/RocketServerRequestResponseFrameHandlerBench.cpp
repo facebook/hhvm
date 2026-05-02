@@ -159,10 +159,16 @@ BENCHMARK(Write_RequestResponse_PayloadSerialization, iters) {
   for (size_t i = 0; i < iters; ++i) {
     responses.push_back(
         RocketResponseMessage{
-            .payload = copyBuffer("response data"),
-            .metadata = copyBuffer("response metadata"),
-            .streamId = static_cast<uint32_t>(2 * i + 1),
-            .errorCode = 0});
+            .frame =
+                apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                    .data = copyBuffer("response data"),
+                    .metadata = copyBuffer("response metadata"),
+                    .header =
+                        {.streamId = static_cast<uint32_t>(2 * i + 1),
+                         .complete = true,
+                         .next = true},
+                },
+        });
   }
 
   suspender.dismiss();
@@ -190,10 +196,14 @@ BENCHMARK(Write_RequestResponse_ErrorSerialization, iters) {
   for (size_t i = 0; i < iters; ++i) {
     responses.push_back(
         RocketResponseMessage{
-            .payload = copyBuffer("error details"),
-            .metadata = nullptr,
-            .streamId = static_cast<uint32_t>(2 * i + 1),
-            .errorCode = 0x00000201}); // APPLICATION_ERROR
+            .frame =
+                apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+                    .data = copyBuffer("error details"),
+                    .header =
+                        {.streamId = static_cast<uint32_t>(2 * i + 1),
+                         .errorCode = 0x00000201},
+                },
+        }); // APPLICATION_ERROR
   }
 
   suspender.dismiss();
@@ -215,10 +225,15 @@ BENCHMARK(Write_RequestResponse_NonRR_Forward, iters) {
   for (size_t i = 0; i < iters; ++i) {
     responses.push_back(
         RocketResponseMessage{
-            .payload = copyBuffer("data"),
-            .metadata = nullptr,
-            .streamId = static_cast<uint32_t>(2 * i + 1),
-            .errorCode = 0});
+            .frame =
+                apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                    .data = copyBuffer("data"),
+                    .header =
+                        {.streamId = static_cast<uint32_t>(2 * i + 1),
+                         .complete = true,
+                         .next = true},
+                },
+        });
   }
 
   suspender.dismiss();
@@ -259,10 +274,16 @@ BENCHMARK(Write_RequestResponse_PayloadSerialization_ManyPending, iters) {
   for (size_t i = 0; i < iters; ++i) {
     responses.push_back(
         RocketResponseMessage{
-            .payload = copyBuffer("response data"),
-            .metadata = copyBuffer("response metadata"),
-            .streamId = static_cast<uint32_t>(2 * (1000 + i) + 1),
-            .errorCode = 0});
+            .frame =
+                apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                    .data = copyBuffer("response data"),
+                    .metadata = copyBuffer("response metadata"),
+                    .header =
+                        {.streamId = static_cast<uint32_t>(2 * (1000 + i) + 1),
+                         .complete = true,
+                         .next = true},
+                },
+        });
   }
 
   suspender.dismiss();

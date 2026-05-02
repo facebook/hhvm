@@ -22,6 +22,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
@@ -29,20 +31,20 @@
 namespace apache::thrift::fast_thrift::rocket::server::handler {
 
 /**
- * RocketServerFrameCodecHandler - Server-side codec for Rocket frames.
+ * RocketServerFrameCodecHandler - Bidirectional codec for Rocket frames.
  *
- * Bridges the gap between FrameLengthParserHandler (which outputs raw IOBuf
- * frames) and RocketServerSetupFrameHandler (which expects ParsedFrame).
+ * The single point in the server pipeline that converts between typed
+ * payloads and wire bytes:
  *
  * Inbound (read path):
- *   std::unique_ptr<folly::IOBuf> ->
- * apache::thrift::fast_thrift::frame::read::ParsedFrame Parses the raw IOBuf
- * into a ParsedFrame and validates it.
+ *   std::unique_ptr<folly::IOBuf> -> ParsedFrame
+ *   Parses the raw IOBuf and validates it.
  *
  * Outbound (write path):
- *   Passthrough. RocketServerRequestResponseFrameHandler already serializes
- *   responses to std::unique_ptr<folly::IOBuf> via
- * apache::thrift::fast_thrift::frame::write::serialize().
+ *   RocketResponseMessage{frame = Composed*Frame variant alternative}
+ *     -> std::unique_ptr<folly::IOBuf>
+ *   Visits the variant and dispatches to the matching
+ *   `frame::write::serialize(Composed*Frame&&)` overload.
  *
  * Pipeline position:
  *   Transport -> FrameLengthParserHandler -> RocketServerFrameCodecHandler ->
@@ -76,11 +78,9 @@ class RocketServerFrameCodecHandler {
     auto buf =
         msg.take<apache::thrift::fast_thrift::channel_pipeline::BytesPtr>();
 
-    // Parse the frame
     auto frame =
         apache::thrift::fast_thrift::frame::read::tryParseFrame(std::move(buf));
 
-    // Validate the frame before proceeding
     if (!frame.isValid()) {
       ctx.fireException(
           folly::make_exception_wrapper<std::runtime_error>(
@@ -100,15 +100,20 @@ class RocketServerFrameCodecHandler {
 
   // === OutboundHandler ===
 
-  // Passthrough: RocketServerRequestResponseFrameHandler already serializes
-  // responses to IOBuf via
-  // apache::thrift::fast_thrift::frame::write::serialize().
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result onWrite(
       Context& ctx,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    return ctx.fireWrite(std::move(msg));
+    auto response = msg.take<RocketResponseMessage>();
+
+    // ComposedFrameVariant exposes serialize() directly — fold-expression
+    // dispatch over the held alternative is internal to the variant.
+    auto serializedFrame = std::move(response.frame).serialize();
+
+    return ctx.fireWrite(
+        apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+            std::move(serializedFrame)));
   }
 
   template <typename Context>

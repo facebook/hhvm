@@ -321,10 +321,13 @@ TEST_F(RocketServerIntegrationTest, ResponseFlowsFromAppToSocket) {
 
   ASSERT_EQ(requestCount_, 1);
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = folly::IOBuf::copyBuffer("response data");
-  response.complete = true;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = folly::IOBuf::copyBuffer("response data"),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
   // TestAsyncTransport defers writeSuccess(), so write() returns Backpressure.
   // Use (void) to ignore the result, matching client test pattern.
   (void)appAdapter_->write(std::move(response));
@@ -352,11 +355,13 @@ TEST_F(RocketServerIntegrationTest, ErrorResponseFlowsFromAppToSocket) {
 
   ASSERT_EQ(requestCount_, 1);
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = folly::IOBuf::copyBuffer("error message");
-  response.errorCode = 0x00000201; // APPLICATION_ERROR
-  response.complete = true;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+              .data = folly::IOBuf::copyBuffer("error message"),
+              .header = {.streamId = 1, .errorCode = 0x00000201},
+          },
+  };
   (void)appAdapter_->write(std::move(response));
 
   evb_.loopOnce();
@@ -378,11 +383,14 @@ TEST_F(RocketServerIntegrationTest, ResponseWithMetadata) {
       createRequestResponseFrame(1, nullptr, folly::IOBuf::copyBuffer("test"));
   injectFrame(std::move(request));
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = folly::IOBuf::copyBuffer("response data");
-  response.metadata = folly::IOBuf::copyBuffer("response metadata");
-  response.complete = true;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = folly::IOBuf::copyBuffer("response data"),
+              .metadata = folly::IOBuf::copyBuffer("response metadata"),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
   (void)appAdapter_->write(std::move(response));
 
   evb_.loopOnce();
@@ -431,19 +439,25 @@ TEST_F(RocketServerIntegrationTest, ResponseForCompletedStreamFails) {
       createRequestResponseFrame(1, nullptr, folly::IOBuf::copyBuffer("test"));
   injectFrame(std::move(request));
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = folly::IOBuf::copyBuffer("response");
-  response.complete = true;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = folly::IOBuf::copyBuffer("response"),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
   (void)appAdapter_->write(std::move(response));
 
   evb_.loopOnce();
   testTransport_->getWrittenData(); // consume the response
 
-  RocketResponseMessage duplicate;
-  duplicate.streamId = 1;
-  duplicate.payload = folly::IOBuf::copyBuffer("duplicate");
-  duplicate.complete = true;
+  RocketResponseMessage duplicate{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = folly::IOBuf::copyBuffer("duplicate"),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
   auto result = appAdapter_->write(std::move(duplicate));
   EXPECT_EQ(result, Result::Error)
       << "Response for completed stream should fail";
@@ -478,11 +492,12 @@ TEST_F(RocketServerIntegrationTest, EmptyPayloadResponse) {
       createRequestResponseFrame(1, nullptr, folly::IOBuf::copyBuffer("test"));
   injectFrame(std::move(request));
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = nullptr;
-  response.metadata = nullptr;
-  response.complete = true;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
   (void)appAdapter_->write(std::move(response));
 
   evb_.loopOnce();

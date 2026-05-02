@@ -212,10 +212,16 @@ void benchNoHeadroom(
     // Serialize metadata without headroom (in timed section)
     auto serializedMeta = serializeMetadataNoHeadroom(responses[i].metadata);
     auto streamResp = RocketResponseMessage{
-        .payload = std::move(responses[i].payload),
-        .metadata = std::move(serializedMeta),
-        .streamId = responses[i].streamId,
-        .errorCode = 0};
+        .frame =
+            apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                .data = std::move(responses[i].payload),
+                .metadata = std::move(serializedMeta),
+                .header =
+                    {.streamId = responses[i].streamId,
+                     .complete = true,
+                     .next = true},
+            },
+    };
     auto result =
         frameHandler.onWrite(frameCtx, erase_and_box(std::move(streamResp)));
     doNotOptimizeAway(result);
@@ -256,10 +262,16 @@ void benchWithHeadroom(
 
     // Build RocketResponseMessage directly (no handler intermediary)
     auto streamResp = RocketResponseMessage{
-        .payload = std::move(responses[i].payload),
-        .metadata = std::move(serializedMeta),
-        .streamId = responses[i].streamId,
-        .errorCode = 0};
+        .frame =
+            apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                .data = std::move(responses[i].payload),
+                .metadata = std::move(serializedMeta),
+                .header =
+                    {.streamId = responses[i].streamId,
+                     .complete = true,
+                     .next = true},
+            },
+    };
 
     // RocketServerRequestResponseFrameHandler serializes the frame
     auto result =

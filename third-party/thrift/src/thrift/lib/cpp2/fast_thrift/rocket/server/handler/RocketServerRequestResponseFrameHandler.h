@@ -16,15 +16,14 @@
 
 #pragma once
 
-#include <folly/container/F14Set.h>
-#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
+
+#include <folly/container/F14Set.h>
 
 namespace apache::thrift::fast_thrift::rocket::server::handler {
 
@@ -32,21 +31,16 @@ namespace apache::thrift::fast_thrift::rocket::server::handler {
  * RocketServerRequestResponseFrameHandler - Duplex pipeline handler for
  * REQUEST_RESPONSE interactions on the server side.
  *
- * This handler manages both inbound request tracking and outbound
- * response serialization for REQUEST_RESPONSE streams. It tracks which stream
- * IDs belong to request-response interactions to properly serialize outbound
- * response frames.
+ * Responsibilities (post-codec-serialization migration):
+ *   - Inbound: track REQUEST_RESPONSE streamIds so outbound responses can be
+ *     identified as RR-pattern. Roll back tracking on downstream error.
+ *   - Outbound: for tracked RR streams, stamp `complete = true, next = true`
+ *     on the held `ComposedPayloadFrame` header (RR is single-shot terminal).
+ *     Does NOT serialize — RocketServerFrameCodecHandler does.
  *
  * Pipeline position:
  *   App <-> RocketServerStreamStateHandler <->
- *           RocketServerRequestResponseFrameHandler <-> Transport
- *
- * Message flow:
- *   Inbound:  ParsedFrame -> (if REQUEST_RESPONSE) track stream ID,
- *             forward to next handler
- *   Outbound: RocketResponseMessage -> (if request-response stream)
- *             std::unique_ptr<folly::IOBuf> (serialized PAYLOAD frame),
- *             otherwise forward to next handler
+ *           RocketServerRequestResponseFrameHandler <-> Codec <-> Transport
  */
 class RocketServerRequestResponseFrameHandler {
  public:
@@ -120,9 +114,10 @@ class RocketServerRequestResponseFrameHandler {
   /**
    * Handle outbound RocketResponseMessage.
    *
-   * For request-response streams: serializes the payload into a PAYLOAD
-   * frame with complete and next flags set.
-   * For other stream types: forwards unchanged to the next handler.
+   * For tracked RR streams: stamps `complete = true, next = true` on the
+   * held ComposedPayloadFrame header (RR is single-shot terminal); ERROR
+   * payloads are terminal by definition and need no stamping.
+   * For other stream types: forwards unchanged. Codec serializes downstream.
    */
   template <typename Context>
   [[nodiscard]] apache::thrift::fast_thrift::channel_pipeline::Result onWrite(
@@ -131,38 +126,27 @@ class RocketServerRequestResponseFrameHandler {
           msg) noexcept {
     auto& response = msg.get<RocketResponseMessage>();
 
-    auto it = requestResponseStreams_.find(response.streamId);
+    uint32_t streamId = response.frame.streamId();
+
+    auto it = requestResponseStreams_.find(streamId);
     if (it == requestResponseStreams_.end()) {
       return ctx.fireWrite(std::move(msg));
     }
 
     requestResponseStreams_.erase(it);
 
-    uint32_t streamId = response.streamId;
-
-    std::unique_ptr<folly::IOBuf> frame;
-    if (response.errorCode != 0) {
-      frame = apache::thrift::fast_thrift::frame::write::serialize(
-          apache::thrift::fast_thrift::frame::write::ErrorHeader{
-              .streamId = streamId,
-              .errorCode = response.errorCode,
-          },
-          nullptr,
-          std::move(response.payload));
-    } else {
-      frame = apache::thrift::fast_thrift::frame::write::serialize(
-          apache::thrift::fast_thrift::frame::write::PayloadHeader{
-              .streamId = streamId,
-              .complete = true,
-              .next = true,
-          },
-          std::move(response.metadata),
-          std::move(response.payload));
+    // Stamp RR terminal flags on ComposedPayloadFrame (ERROR is implicitly
+    // terminal — no stamping needed).
+    if (response.frame
+            .is<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>()) {
+      auto& payload =
+          response.frame
+              .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>();
+      payload.header.complete = true;
+      payload.header.next = true;
     }
 
-    auto result = ctx.fireWrite(
-        apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
-            std::move(frame)));
+    auto result = ctx.fireWrite(std::move(msg));
     // Only re-add on error; backpressure means the write was accepted.
     if (result ==
         apache::thrift::fast_thrift::channel_pipeline::Result::Error) {

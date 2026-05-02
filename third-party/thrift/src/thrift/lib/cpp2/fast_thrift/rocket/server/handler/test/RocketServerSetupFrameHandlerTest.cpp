@@ -260,13 +260,13 @@ TEST_F(
   EXPECT_TRUE(ctx_.closeCalled());
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
-  auto errorBuf = std::move(
-      ctx_.writeMessages()[0]
-          .get<apache::thrift::fast_thrift::channel_pipeline::BytesPtr>());
-  auto errorFrame =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(errorBuf));
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView(errorFrame);
-  EXPECT_EQ(errorView.errorCode(), setup_error::kUnsupportedSetup);
+  auto& errResp = ctx_.writeMessages()[0]
+                      .get<apache::thrift::fast_thrift::rocket::server::
+                               RocketResponseMessage>();
+  const auto& errPayload =
+      errResp.frame
+          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  EXPECT_EQ(errPayload.header.errorCode, setup_error::kUnsupportedSetup);
 }
 
 // =============================================================================
@@ -283,13 +283,13 @@ TEST_F(
   EXPECT_TRUE(ctx_.closeCalled());
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
-  auto errorBuf = std::move(
-      ctx_.writeMessages()[0]
-          .get<apache::thrift::fast_thrift::channel_pipeline::BytesPtr>());
-  auto errorFrame =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(errorBuf));
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView(errorFrame);
-  EXPECT_EQ(errorView.errorCode(), setup_error::kInvalidSetup);
+  auto& errResp = ctx_.writeMessages()[0]
+                      .get<apache::thrift::fast_thrift::rocket::server::
+                               RocketResponseMessage>();
+  const auto& errPayload =
+      errResp.frame
+          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  EXPECT_EQ(errPayload.header.errorCode, setup_error::kInvalidSetup);
 }
 
 TEST_F(
@@ -301,13 +301,13 @@ TEST_F(
   EXPECT_TRUE(ctx_.closeCalled());
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
-  auto errorBuf = std::move(
-      ctx_.writeMessages()[0]
-          .get<apache::thrift::fast_thrift::channel_pipeline::BytesPtr>());
-  auto errorFrame =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(errorBuf));
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView(errorFrame);
-  EXPECT_EQ(errorView.errorCode(), setup_error::kInvalidSetup);
+  auto& errResp = ctx_.writeMessages()[0]
+                      .get<apache::thrift::fast_thrift::rocket::server::
+                               RocketResponseMessage>();
+  const auto& errPayload =
+      errResp.frame
+          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  EXPECT_EQ(errPayload.header.errorCode, setup_error::kInvalidSetup);
 }
 
 // =============================================================================
@@ -323,16 +323,14 @@ TEST_F(ServerSetupFrameHandlerTest, NonSetupFirstFrameReturnsInvalidSetup) {
   EXPECT_TRUE(ctx_.closeCalled());
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
-  auto errorBuf = std::move(
-      ctx_.writeMessages()[0]
-          .get<apache::thrift::fast_thrift::channel_pipeline::BytesPtr>());
-  auto errorFrame =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(errorBuf));
-  EXPECT_EQ(errorFrame.streamId(), 0);
-  EXPECT_EQ(
-      errorFrame.type(), apache::thrift::fast_thrift::frame::FrameType::ERROR);
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView(errorFrame);
-  EXPECT_EQ(errorView.errorCode(), setup_error::kInvalidSetup);
+  auto& errResp = ctx_.writeMessages()[0]
+                      .get<apache::thrift::fast_thrift::rocket::server::
+                               RocketResponseMessage>();
+  const auto& errPayload =
+      errResp.frame
+          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  EXPECT_EQ(errPayload.header.streamId, 0u);
+  EXPECT_EQ(errPayload.header.errorCode, setup_error::kInvalidSetup);
 }
 
 // =============================================================================
@@ -350,13 +348,13 @@ TEST_F(ServerSetupFrameHandlerTest, DuplicateSetupFrameReturnsInvalidSetup) {
   EXPECT_TRUE(ctx_.closeCalled());
 
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
-  auto errorBuf = std::move(
-      ctx_.writeMessages()[0]
-          .get<apache::thrift::fast_thrift::channel_pipeline::BytesPtr>());
-  auto errorFrame =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(errorBuf));
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView(errorFrame);
-  EXPECT_EQ(errorView.errorCode(), setup_error::kInvalidSetup);
+  auto& errResp = ctx_.writeMessages()[0]
+                      .get<apache::thrift::fast_thrift::rocket::server::
+                               RocketResponseMessage>();
+  const auto& errPayload =
+      errResp.frame
+          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  EXPECT_EQ(errPayload.header.errorCode, setup_error::kInvalidSetup);
 }
 
 // =============================================================================

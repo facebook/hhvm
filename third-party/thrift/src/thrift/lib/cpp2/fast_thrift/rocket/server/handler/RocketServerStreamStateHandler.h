@@ -24,11 +24,11 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/DirectStreamMap.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 
 #include <cstdint>
 #include <utility>
-#include <variant>
 
 namespace apache::thrift::fast_thrift::rocket::server::handler {
 
@@ -132,8 +132,16 @@ class RocketServerStreamStateHandler {
           msg) noexcept {
     auto& response = msg.get<RocketResponseMessage>();
 
-    uint32_t streamId = response.streamId;
-    bool complete = response.complete;
+    // streamId() is a free read on ComposedFrameVariant. "complete" depends
+    // on the held alternative: ERROR is implicitly terminal; PAYLOAD uses
+    // its header.complete flag.
+    uint32_t streamId = response.frame.streamId();
+    bool complete =
+        response.frame
+            .is<apache::thrift::fast_thrift::frame::ComposedErrorFrame>() ||
+        response.frame
+            .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>()
+            .header.complete;
 
     auto it = activeStreams_.find(streamId);
     if (it == activeStreams_.end()) {

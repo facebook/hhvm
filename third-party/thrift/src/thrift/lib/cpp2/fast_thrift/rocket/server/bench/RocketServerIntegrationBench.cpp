@@ -249,10 +249,16 @@ BENCHMARK(Rocket_Server_Response_Payload, iters) {
   std::vector<server::RocketResponseMessage> responses;
   responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    server::RocketResponseMessage resp;
-    resp.streamId = static_cast<uint32_t>(i * 2 + 1);
-    resp.payload = makePayloadData(kPayloadSize);
-    resp.complete = true;
+    server::RocketResponseMessage resp{
+        .frame =
+            apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                .data = makePayloadData(kPayloadSize),
+                .header =
+                    {.streamId = static_cast<uint32_t>(i * 2 + 1),
+                     .complete = true,
+                     .next = true},
+            },
+    };
     responses.push_back(std::move(resp));
   }
 
@@ -281,11 +287,15 @@ BENCHMARK(Rocket_Server_Response_Error, iters) {
   std::vector<server::RocketResponseMessage> responses;
   responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    server::RocketResponseMessage resp;
-    resp.streamId = static_cast<uint32_t>(i * 2 + 1);
-    resp.payload = folly::IOBuf::copyBuffer("error");
-    resp.errorCode = kErrorCodeApplicationError;
-    resp.complete = true;
+    server::RocketResponseMessage resp{
+        .frame =
+            apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+                .data = folly::IOBuf::copyBuffer("error"),
+                .header =
+                    {.streamId = static_cast<uint32_t>(i * 2 + 1),
+                     .errorCode = kErrorCodeApplicationError},
+            },
+    };
     responses.push_back(std::move(resp));
   }
 
@@ -390,10 +400,16 @@ BENCHMARK(Rocket_Server_RequestResponse_RoundTrip, iters) {
     fixture.evb.loopOnce();
 
     // Outbound: send response
-    server::RocketResponseMessage resp;
-    resp.streamId = static_cast<uint32_t>(i * 2 + 1);
-    resp.payload = makePayloadData(kPayloadSize);
-    resp.complete = true;
+    server::RocketResponseMessage resp{
+        .frame =
+            apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+                .data = makePayloadData(kPayloadSize),
+                .header =
+                    {.streamId = static_cast<uint32_t>(i * 2 + 1),
+                     .complete = true,
+                     .next = true},
+            },
+    };
     (void)fixture.appAdapter->write(std::move(resp));
     fixture.evb.loopOnce();
 

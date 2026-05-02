@@ -139,13 +139,25 @@ class ThriftServerTransportAdapter {
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto response = msg.take<ThriftServerResponseMessage>();
 
-    rocket::server::RocketResponseMessage rocketMsg{
-        .payload = std::move(response.payload.data),
-        .metadata = std::move(response.payload.metadata),
-        .streamId = response.streamId,
-        .errorCode = response.errorCode,
-        .complete = response.payload.complete,
-    };
+    rocket::server::RocketResponseMessage rocketMsg;
+    if (response.errorCode != 0) {
+      rocketMsg.frame = apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+          .data = std::move(response.payload.data),
+          .metadata = std::move(response.payload.metadata),
+          .header =
+              {.streamId = response.streamId, .errorCode = response.errorCode},
+      };
+    } else {
+      rocketMsg.frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = std::move(response.payload.data),
+              .metadata = std::move(response.payload.metadata),
+              .header =
+                  {.streamId = response.streamId,
+                   .complete = response.payload.complete,
+                   .next = true},
+          };
+    }
 
     return appAdapter_.write(std::move(rocketMsg));
   }

@@ -26,7 +26,8 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 
 namespace apache::thrift::fast_thrift::rocket::server::handler {
 
@@ -192,15 +193,16 @@ class RocketServerSetupFrameHandler {
       Context& ctx, uint32_t errorCode, const char* message) noexcept {
     try {
       auto errorData = ctx.copyBuffer(message, std::strlen(message));
-      auto errorFrame = apache::thrift::fast_thrift::frame::write::serialize(
-          apache::thrift::fast_thrift::frame::write::ErrorHeader{
-              .streamId = 0, .errorCode = errorCode},
-          nullptr,
-          std::move(errorData));
-
+      RocketResponseMessage response{
+          .frame =
+              apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+                  .data = std::move(errorData),
+                  .header = {.streamId = 0, .errorCode = errorCode},
+              },
+      };
       auto writeResult = ctx.fireWrite(
           apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
-              std::move(errorFrame)));
+              std::move(response)));
       if (writeResult !=
           apache::thrift::fast_thrift::channel_pipeline::Result::Success) {
         XLOG(WARN) << "Failed to deliver ERROR frame for errorCode="

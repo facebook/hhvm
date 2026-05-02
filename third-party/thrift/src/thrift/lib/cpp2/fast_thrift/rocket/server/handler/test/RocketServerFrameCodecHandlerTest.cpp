@@ -262,24 +262,44 @@ TEST_F(RocketServerFrameCodecHandlerTest, ForwardsException) {
 // Outbound (Write) - Passthrough Tests
 // =============================================================================
 
-TEST_F(RocketServerFrameCodecHandlerTest, WriteIsPassthrough) {
-  auto buf = folly::IOBuf::copyBuffer("serialized response");
-  auto expected = buf->clone();
+TEST_F(RocketServerFrameCodecHandlerTest, WriteSerializesPayload) {
+  const std::string dataStr = "hello";
+  auto expectedFrame = apache::thrift::fast_thrift::frame::write::serialize(
+      apache::thrift::fast_thrift::frame::write::PayloadHeader{
+          .streamId = 1, .complete = true, .next = true},
+      nullptr,
+      folly::IOBuf::copyBuffer(dataStr));
 
-  auto result = handler_.onWrite(ctx_, erase_and_box(std::move(buf)));
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = folly::IOBuf::copyBuffer(dataStr),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
+
+  auto result = handler_.onWrite(ctx_, erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Success);
   ASSERT_EQ(ctx_.writeMessages().size(), 1);
 
-  auto& written = ctx_.writeMessages()[0].get<std::unique_ptr<folly::IOBuf>>();
-  EXPECT_TRUE(folly::IOBufEqualTo{}(*written, *expected));
+  auto& writtenFrame =
+      ctx_.writeMessages()[0].get<std::unique_ptr<folly::IOBuf>>();
+  EXPECT_TRUE(folly::IOBufEqualTo{}(*writtenFrame, *expectedFrame));
 }
 
 TEST_F(RocketServerFrameCodecHandlerTest, PropagatesWriteError) {
   ctx_.setWriteResult(Result::Error);
 
-  auto result =
-      handler_.onWrite(ctx_, erase_and_box(folly::IOBuf::copyBuffer("test")));
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = folly::IOBuf::copyBuffer("test"),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
+
+  auto result = handler_.onWrite(ctx_, erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Error);
 }
@@ -287,8 +307,15 @@ TEST_F(RocketServerFrameCodecHandlerTest, PropagatesWriteError) {
 TEST_F(RocketServerFrameCodecHandlerTest, PropagatesWriteBackpressure) {
   ctx_.setWriteResult(Result::Backpressure);
 
-  auto result =
-      handler_.onWrite(ctx_, erase_and_box(folly::IOBuf::copyBuffer("test")));
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = folly::IOBuf::copyBuffer("test"),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
+
+  auto result = handler_.onWrite(ctx_, erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Backpressure);
 }

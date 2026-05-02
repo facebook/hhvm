@@ -327,10 +327,13 @@ TEST_F(
 
   ctx_.reset();
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = copyBuffer("response data");
-  response.complete = true;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = copyBuffer("response data"),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
 
   auto result = callOnWrite(std::move(response));
 
@@ -338,8 +341,11 @@ TEST_F(
   EXPECT_EQ(ctx_.writeMessages().size(), 1);
 
   auto& wireMsg = ctx_.writeMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(wireMsg.streamId, 1);
-  EXPECT_NE(wireMsg.payload, nullptr);
+  const auto& payload =
+      wireMsg.frame
+          .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>();
+  EXPECT_EQ(payload.streamId(), 1u);
+  EXPECT_NE(payload.data, nullptr);
 
   EXPECT_FALSE(handler_.hasActiveStream(1));
   EXPECT_EQ(handler_.activeStreamCount(), 0);
@@ -352,10 +358,13 @@ TEST_F(ServerStreamStateHandlerTest, IncompleteResponseKeepsStreamActive) {
 
   ctx_.reset();
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = copyBuffer("partial data");
-  response.complete = false;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = copyBuffer("partial data"),
+              .header = {.streamId = 1, .complete = false, .next = true},
+          },
+  };
 
   auto result = callOnWrite(std::move(response));
 
@@ -363,16 +372,22 @@ TEST_F(ServerStreamStateHandlerTest, IncompleteResponseKeepsStreamActive) {
   EXPECT_EQ(ctx_.writeMessages().size(), 1);
 
   auto& wireMsg = ctx_.writeMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(wireMsg.streamId, 1);
+  const auto& payload =
+      wireMsg.frame
+          .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>();
+  EXPECT_EQ(payload.streamId(), 1u);
 
   EXPECT_TRUE(handler_.hasActiveStream(1));
 }
 
 TEST_F(ServerStreamStateHandlerTest, ResponseForUnknownStreamReturnsError) {
-  RocketResponseMessage response;
-  response.streamId = 999;
-  response.payload = copyBuffer("data");
-  response.complete = true;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = copyBuffer("data"),
+              .header = {.streamId = 999, .complete = true, .next = true},
+          },
+  };
 
   auto result = callOnWrite(std::move(response));
 
@@ -491,10 +506,13 @@ TEST_F(ServerStreamStateHandlerTest, ErrorFromDownstreamOnWrite) {
   ctx_.reset();
   ctx_.setReturnError(true);
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = copyBuffer("data");
-  response.complete = true;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = copyBuffer("data"),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
 
   auto result = callOnWrite(std::move(response));
 
@@ -510,10 +528,13 @@ TEST_F(ServerStreamStateHandlerTest, BackpressureFromDownstreamOnWrite) {
   ctx_.reset();
   ctx_.setReturnBackpressure(true);
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = copyBuffer("data");
-  response.complete = true;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = copyBuffer("data"),
+              .header = {.streamId = 1, .complete = true, .next = true},
+          },
+  };
 
   auto result = callOnWrite(std::move(response));
 
@@ -531,10 +552,13 @@ TEST_F(
   ctx_.reset();
   ctx_.setReturnError(true);
 
-  RocketResponseMessage response;
-  response.streamId = 1;
-  response.payload = copyBuffer("data");
-  response.complete = false;
+  RocketResponseMessage response{
+      .frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = copyBuffer("data"),
+              .header = {.streamId = 1, .complete = false, .next = true},
+          },
+  };
 
   auto result = callOnWrite(std::move(response));
 

@@ -154,17 +154,17 @@ class RocketClientStreamStateHandler {
     auto& payload = request.frame.get<
         apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>();
 
-    DCHECK(payload.header.streamId == kInvalidStreamId);
-    if (payload.header.streamId != kInvalidStreamId) {
+    DCHECK(payload.streamId() == kInvalidStreamId);
+    if (payload.streamId() != kInvalidStreamId) {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
 
     payload.header.streamId = generateStreamId();
-    DCHECK(!activeStreams_.contains(payload.header.streamId))
-        << "Stream ID " << payload.header.streamId
+    DCHECK(!activeStreams_.contains(payload.streamId()))
+        << "Stream ID " << payload.streamId()
         << " already exists in active streams";
     activeStreams_.emplace(
-        payload.header.streamId,
+        payload.streamId(),
         ClientStreamContext{
             .requestFrameType = request.frame.frameType(),
             .requestHandle = request.requestHandle,

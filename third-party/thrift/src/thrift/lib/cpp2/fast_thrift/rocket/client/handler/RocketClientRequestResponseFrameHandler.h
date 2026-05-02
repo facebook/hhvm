@@ -135,7 +135,7 @@ class RocketClientRequestResponseFrameHandler {
         apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame>();
 
     // StreamStateHandler upstream stamps the streamId before this point.
-    uint32_t streamId = payload.header.streamId;
+    uint32_t streamId = payload.streamId();
     requestResponseStreams_.insert(streamId);
 
     auto result = ctx.fireWrite(std::move(msg));

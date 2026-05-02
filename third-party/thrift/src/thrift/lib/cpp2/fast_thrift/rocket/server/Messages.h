@@ -16,12 +16,13 @@
 
 #pragma once
 
-#include <folly/ExceptionWrapper.h>
-#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
+
+#include <folly/ExceptionWrapper.h>
 
 #include <cstdint>
-#include <memory>
 
 namespace apache::thrift::fast_thrift::rocket::server {
 
@@ -40,29 +41,34 @@ namespace apache::thrift::fast_thrift::rocket::server {
  * If error is set, the connection failed and frame may be empty.
  * App layer should check error first before processing frame.
  */
-#pragma pack(push, 1)
 struct RocketRequestMessage {
-  apache::thrift::fast_thrift::frame::read::ParsedFrame frame; // 40B
-  folly::exception_wrapper error; // 8B
-  uint32_t streamId{0}; // 4B
+  apache::thrift::fast_thrift::frame::read::ParsedFrame frame;
+  folly::exception_wrapper error;
+  uint32_t streamId{0};
 };
-#pragma pack(pop)
 
 /**
  * RocketResponseMessage - Outbound response from App to StreamHandler.
  *
- * App sends this with the streamId received from RocketRequestMessage.
- * Set complete=true for terminal responses (last PAYLOAD, ERROR).
- * Set complete=false for intermediate streaming responses.
+ * The `frame` field is a typed variant of per-frame payload structs from
+ * `frame::ComposedFrame.h`. Handlers carry the typed payload all the way
+ * down to the codec; the codec is the single point that serializes the
+ * held payload into wire bytes via `frame.serialize()`. The 3-API surface
+ * (streamId / frameType / serialize) dispatches inline with no
+ * `std::visit` at any call site.
+ *
+ * `streamId` is exposed by `frame.streamId()`; "complete" semantics live
+ * inside the held header (`ComposedPayloadFrame::header.complete`;
+ * ERROR is implicitly terminal).
+ *
+ * As STREAM/CHANNEL/FNF response frame types get wired up, their
+ * corresponding `Composed*Frame` types will join the variant.
  */
-#pragma pack(push, 1)
 struct RocketResponseMessage {
-  std::unique_ptr<folly::IOBuf> payload; // 8B
-  std::unique_ptr<folly::IOBuf> metadata; // 8B
-  uint32_t streamId{0}; // 4B
-  uint32_t errorCode{0}; // 4B
-  bool complete{true}; // 1B
+  apache::thrift::fast_thrift::frame::ComposedFrameVariant<
+      apache::thrift::fast_thrift::frame::ComposedPayloadFrame,
+      apache::thrift::fast_thrift::frame::ComposedErrorFrame>
+      frame;
 };
-#pragma pack(pop)
 
 } // namespace apache::thrift::fast_thrift::rocket::server

@@ -733,13 +733,26 @@ class RocketThriftServerInterfaceHandler {
     auto thriftMsg = msg.take<ThriftServerResponseMessage>();
 
     apache::thrift::fast_thrift::rocket::server::RocketResponseMessage
-        rocketMsg{
-            .payload = std::move(thriftMsg.payload.data),
-            .metadata = std::move(thriftMsg.payload.metadata),
-            .streamId = thriftMsg.streamId,
-            .errorCode = thriftMsg.errorCode,
-            .complete = thriftMsg.payload.complete,
-        };
+        rocketMsg;
+    if (thriftMsg.errorCode != 0) {
+      rocketMsg.frame = apache::thrift::fast_thrift::frame::ComposedErrorFrame{
+          .data = std::move(thriftMsg.payload.data),
+          .metadata = std::move(thriftMsg.payload.metadata),
+          .header =
+              {.streamId = thriftMsg.streamId,
+               .errorCode = thriftMsg.errorCode},
+      };
+    } else {
+      rocketMsg.frame =
+          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
+              .data = std::move(thriftMsg.payload.data),
+              .metadata = std::move(thriftMsg.payload.metadata),
+              .header =
+                  {.streamId = thriftMsg.streamId,
+                   .complete = thriftMsg.payload.complete,
+                   .next = true},
+          };
+    }
 
     return ctx.fireWrite(erase_and_box(std::move(rocketMsg)));
   }

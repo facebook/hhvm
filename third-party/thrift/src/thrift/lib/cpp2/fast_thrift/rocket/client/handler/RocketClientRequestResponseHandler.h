@@ -103,7 +103,18 @@ class RocketClientRequestResponseHandler {
       return ctx.fireRead(std::move(msg));
     }
 
-    auto frameType = response.frame.type();
+    // In-process per-request errors are already terminal failures; no
+    // pattern validation applies. Pass through to the App callback.
+    if (FOLLY_UNLIKELY(
+            !response.payload.is<
+                apache::thrift::fast_thrift::frame::read::ParsedFrame>())) {
+      return ctx.fireRead(std::move(msg));
+    }
+    auto& parsed =
+        response.payload
+            .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+
+    auto frameType = parsed.type();
 
     // Hot path: PAYLOAD response. Per spec, RR responses MUST carry NEXT
     // (the response data); a COMPLETE-only PAYLOAD is a peer protocol
@@ -111,9 +122,9 @@ class RocketClientRequestResponseHandler {
     if (FOLLY_LIKELY(
             frameType ==
             apache::thrift::fast_thrift::frame::FrameType::PAYLOAD)) {
-      if (FOLLY_UNLIKELY(!response.frame.hasNext())) {
+      if (FOLLY_UNLIKELY(!parsed.hasNext())) {
         XLOG(ERR) << "RR PAYLOAD response missing NEXT flag: streamId="
-                  << response.frame.streamId();
+                  << parsed.streamId();
         synthesizeStreamError(
             response, "RR PAYLOAD response missing NEXT flag");
       }
@@ -128,7 +139,7 @@ class RocketClientRequestResponseHandler {
     // EXT with ignore=true: per RSocket spec, drop silently and keep the
     // stream alive (the server may follow up with a real response).
     if (frameType == apache::thrift::fast_thrift::frame::FrameType::EXT &&
-        response.frame.metadata.shouldIgnore()) {
+        parsed.metadata.shouldIgnore()) {
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
 
@@ -138,13 +149,12 @@ class RocketClientRequestResponseHandler {
     // the pending request callback resolves rather than hangs; the
     // connection stays up.
     XLOG(ERR) << "Unexpected frame type for REQUEST_RESPONSE stream: streamId="
-              << response.frame.streamId()
-              << ", frameType=" << response.frame.typeName();
+              << parsed.streamId() << ", frameType=" << parsed.typeName();
     synthesizeStreamError(
         response,
         fmt::format(
             "unexpected frame type {} on REQUEST_RESPONSE stream",
-            response.frame.typeName()));
+            parsed.typeName()));
     return ctx.fireRead(std::move(msg));
   }
 
@@ -154,21 +164,26 @@ class RocketClientRequestResponseHandler {
   }
 
  private:
-  // Replace `response.frame` with a freshly serialized stream-level
+  // Replace `response.payload` with a freshly serialized stream-level
   // ERROR(INVALID) frame on the same streamId. Used to convert peer
   // protocol violations into a per-stream failure delivered to the App.
+  // Caller must have already verified the variant holds a ParsedFrame.
   static void synthesizeStreamError(
       RocketResponseMessage& response, std::string description) noexcept {
+    const uint32_t streamId =
+        response.payload
+            .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>()
+            .streamId();
     auto buf =
         apache::thrift::fast_thrift::frame::ComposedErrorFrame{
             .data = folly::IOBuf::fromString(std::move(description)),
             .header =
-                {.streamId = response.frame.streamId(),
+                {.streamId = streamId,
                  .errorCode = static_cast<uint32_t>(
                      apache::thrift::fast_thrift::frame::ErrorCode::INVALID)},
         }
             .serialize();
-    response.frame =
+    response.payload =
         apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf));
   }
 };

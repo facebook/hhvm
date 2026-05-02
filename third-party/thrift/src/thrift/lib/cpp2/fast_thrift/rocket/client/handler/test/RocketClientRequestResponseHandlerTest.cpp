@@ -50,7 +50,7 @@ RocketResponseMessage makePayloadResponse(
       nullptr,
       std::move(data));
   return RocketResponseMessage{
-      .frame =
+      .payload =
           apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf)),
       .streamType = streamType,
   };
@@ -66,7 +66,7 @@ RocketResponseMessage makeErrorResponse(
       nullptr,
       folly::IOBuf::copyBuffer("error"));
   return RocketResponseMessage{
-      .frame =
+      .payload =
           apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf)),
       .streamType = streamType,
   };
@@ -80,7 +80,7 @@ RocketResponseMessage makeRequestNResponse(
       apache::thrift::fast_thrift::frame::write::RequestNHeader{
           .streamId = streamId, .requestN = requestN});
   return RocketResponseMessage{
-      .frame =
+      .payload =
           apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf)),
       .streamType = streamType,
   };
@@ -99,7 +99,7 @@ RocketResponseMessage makeExtResponse(
       nullptr,
       nullptr);
   return RocketResponseMessage{
-      .frame =
+      .payload =
           apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf)),
       .streamType = streamType,
   };
@@ -168,7 +168,11 @@ TEST_F(ClientRequestResponseHandlerTest, Read_NonRRStreamType_PassesThrough) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   auto& forwarded = ctx_.readMessages()[0].get<RocketResponseMessage>();
   EXPECT_EQ(forwarded.streamType, FrameType::REQUEST_STREAM);
-  EXPECT_EQ(forwarded.frame.type(), FrameType::PAYLOAD);
+  EXPECT_EQ(
+      forwarded.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>()
+          .type(),
+      FrameType::PAYLOAD);
 }
 
 // =============================================================================
@@ -188,9 +192,12 @@ TEST_F(ClientRequestResponseHandlerTest, Read_PayloadWithNext_Forwarded) {
       Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   auto& forwarded = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(forwarded.frame.type(), FrameType::PAYLOAD);
-  EXPECT_TRUE(forwarded.frame.hasNext());
-  EXPECT_EQ(forwarded.frame.streamId(), 1u);
+  auto& parsed =
+      forwarded.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  EXPECT_EQ(parsed.type(), FrameType::PAYLOAD);
+  EXPECT_TRUE(parsed.hasNext());
+  EXPECT_EQ(parsed.streamId(), 1u);
 }
 
 TEST_F(ClientRequestResponseHandlerTest, Read_PayloadWithNextOnly_Forwarded) {
@@ -214,10 +221,12 @@ TEST_F(
       Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   auto& forwarded = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(forwarded.frame.type(), FrameType::ERROR);
-  EXPECT_EQ(forwarded.frame.streamId(), 7u);
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView{
-      forwarded.frame};
+  auto& parsed =
+      forwarded.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  EXPECT_EQ(parsed.type(), FrameType::ERROR);
+  EXPECT_EQ(parsed.streamId(), 7u);
+  apache::thrift::fast_thrift::frame::read::ErrorView errorView{parsed};
   EXPECT_EQ(static_cast<ErrorCode>(errorView.errorCode()), ErrorCode::INVALID);
 }
 
@@ -234,9 +243,11 @@ TEST_F(ClientRequestResponseHandlerTest, Read_Error_Forwarded) {
       Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   auto& forwarded = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(forwarded.frame.type(), FrameType::ERROR);
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView{
-      forwarded.frame};
+  auto& parsed =
+      forwarded.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  EXPECT_EQ(parsed.type(), FrameType::ERROR);
+  apache::thrift::fast_thrift::frame::read::ErrorView errorView{parsed};
   EXPECT_EQ(
       static_cast<ErrorCode>(errorView.errorCode()),
       ErrorCode::APPLICATION_ERROR);
@@ -267,9 +278,11 @@ TEST_F(
       Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   auto& forwarded = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(forwarded.frame.type(), FrameType::ERROR);
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView{
-      forwarded.frame};
+  auto& parsed =
+      forwarded.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  EXPECT_EQ(parsed.type(), FrameType::ERROR);
+  apache::thrift::fast_thrift::frame::read::ErrorView errorView{parsed};
   EXPECT_EQ(static_cast<ErrorCode>(errorView.errorCode()), ErrorCode::INVALID);
 }
 
@@ -288,10 +301,12 @@ TEST_F(
       Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   auto& forwarded = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(forwarded.frame.type(), FrameType::ERROR);
-  EXPECT_EQ(forwarded.frame.streamId(), 1u);
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView{
-      forwarded.frame};
+  auto& parsed =
+      forwarded.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  EXPECT_EQ(parsed.type(), FrameType::ERROR);
+  EXPECT_EQ(parsed.streamId(), 1u);
+  apache::thrift::fast_thrift::frame::read::ErrorView errorView{parsed};
   EXPECT_EQ(static_cast<ErrorCode>(errorView.errorCode()), ErrorCode::INVALID);
 }
 

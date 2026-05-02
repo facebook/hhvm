@@ -53,6 +53,7 @@ using rocket::kInvalidStreamId;
 using rocket::kNoRequestHandle;
 using rocket::RocketRequestMessage;
 using rocket::RocketResponseMessage;
+using ParsedFrame = apache::thrift::fast_thrift::frame::read::ParsedFrame;
 
 // Bring handler types into scope
 using rocket::client::handler::RocketClientErrorFrameHandler;
@@ -75,8 +76,53 @@ HANDLER_TAG(rocket_client_setup_handler);
 HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
+HANDLER_TAG(error_injection_inbound_handler);
 
 using channel_pipeline::TypeErasedBox;
+
+// Test-only handler: replaces the ParsedFrame payload of any inbound
+// RocketResponseMessage whose streamId is in failStreamIds with a
+// RocketResponseError carrying failWith. Simulates the codec's outbound
+// serialize-throw path, which is structurally hard to trigger directly.
+class ErrorInjectionInboundHandler {
+ public:
+  ErrorInjectionInboundHandler(
+      uint32_t failStreamId, folly::exception_wrapper failWith)
+      : failStreamId_(failStreamId), failWith_(std::move(failWith)) {}
+
+  template <typename Context>
+  void handlerAdded(Context& /*ctx*/) noexcept {}
+  template <typename Context>
+  void handlerRemoved(Context& /*ctx*/) noexcept {}
+  template <typename Context>
+  void onPipelineActive(Context& /*ctx*/) noexcept {}
+  template <typename Context>
+  void onReadReady(Context& /*ctx*/) noexcept {}
+
+  template <typename Context>
+  Result onRead(Context& ctx, TypeErasedBox&& msg) noexcept {
+    auto& response = msg.get<RocketResponseMessage>();
+    if (response.payload.is<ParsedFrame>()) {
+      uint32_t sid = response.payload.get<ParsedFrame>().streamId();
+      if (sid == failStreamId_) {
+        response.payload = rocket::RocketResponseError{
+            .ew = folly::exception_wrapper(failWith_),
+            .streamId = sid,
+        };
+      }
+    }
+    return ctx.fireRead(std::move(msg));
+  }
+
+  template <typename Context>
+  void onException(Context& ctx, folly::exception_wrapper&& e) noexcept {
+    ctx.fireException(std::move(e));
+  }
+
+ private:
+  uint32_t failStreamId_;
+  folly::exception_wrapper failWith_;
+};
 
 class RocketClientIntegrationTest : public ::testing::Test {
  protected:
@@ -139,6 +185,79 @@ class RocketClientIntegrationTest : public ::testing::Test {
                               folly::IOBuf::copyBuffer("setup"),
                               std::unique_ptr<folly::IOBuf>());
                         })
+                    .addNextInbound<RocketClientErrorFrameHandler>(
+                        rocket_client_error_frame_handler_tag)
+                    .addNextDuplex<RocketClientStreamStateHandler>(
+                        rocket_client_stream_state_handler_tag)
+                    .addNextInbound<RocketClientRequestResponseHandler>(
+                        rocket_client_request_response_handler_tag)
+                    .build();
+
+    appAdapter_->setPipeline(pipeline_.get());
+    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->onConnect();
+
+    evb_.loopOnce();
+
+    discardSetupFrame();
+  }
+
+  /**
+   * Same as setupPipeline() but inserts an ErrorInjectionInboundHandler
+   * between the codec and the connection-level error handler. Inbound
+   * RocketResponseMessages with a ParsedFrame payload whose streamId
+   * matches failStreamId get rewritten to a RocketResponseError carrying
+   * `failWith`. Used to exercise the StreamStateHandler cold-path
+   * end-to-end without depending on a real serialize() throw.
+   */
+  void setupPipelineWithErrorInjection(
+      uint32_t failStreamId, folly::exception_wrapper failWith) {
+    auto transport =
+        folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
+    testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
+
+    transportHandler_ =
+        apache::thrift::fast_thrift::transport::TransportHandler::create(
+            std::move(transport));
+
+    appAdapter_->setResponseHandlers(
+        [this](TypeErasedBox&& msg) noexcept -> Result {
+          responseCount_++;
+          responses_.push_back(std::move(msg));
+          return Result::Success;
+        },
+        [this](folly::exception_wrapper&& e) noexcept {
+          exceptionReceived_ = true;
+          exception_ = std::move(e);
+        });
+
+    pipeline_ = PipelineBuilder<
+                    apache::thrift::fast_thrift::transport::TransportHandler,
+                    rocket::client::RocketClientAppAdapter,
+                    TestAllocator>()
+                    .setEventBase(&evb_)
+                    .setHead(transportHandler_.get())
+                    .setTail(appAdapter_.get())
+                    .setAllocator(&allocator_)
+                    .addNextInbound<apache::thrift::fast_thrift::frame::read::
+                                        handler::FrameLengthParserHandler>(
+                        frame_length_parser_handler_tag)
+                    .addNextOutbound<apache::thrift::fast_thrift::frame::write::
+                                         handler::FrameLengthEncoderHandler>(
+                        frame_length_encoder_handler_tag)
+                    .addNextDuplex<RocketClientFrameCodecHandler>(
+                        rocket_client_frame_codec_handler_tag)
+                    .addNextDuplex<RocketClientSetupFrameHandler>(
+                        rocket_client_setup_handler_tag,
+                        []() {
+                          return std::make_pair(
+                              folly::IOBuf::copyBuffer("setup"),
+                              std::unique_ptr<folly::IOBuf>());
+                        })
+                    .addNextInbound<ErrorInjectionInboundHandler>(
+                        error_injection_inbound_handler_tag,
+                        failStreamId,
+                        std::move(failWith))
                     .addNextInbound<RocketClientErrorFrameHandler>(
                         rocket_client_error_frame_handler_tag)
                     .addNextDuplex<RocketClientStreamStateHandler>(
@@ -328,10 +447,10 @@ TEST_F(RocketClientIntegrationTest, ResponseFlowsFromSocketThroughPipeline) {
   EXPECT_FALSE(exceptionReceived_);
 
   auto& response = responses_[0].get<RocketResponseMessage>();
-  EXPECT_EQ(response.frame.streamId(), streamId);
+  auto& parsed = response.payload.get<ParsedFrame>();
+  EXPECT_EQ(parsed.streamId(), streamId);
   EXPECT_EQ(
-      response.frame.type(),
-      apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
+      parsed.type(), apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
 }
 
 TEST_F(
@@ -361,7 +480,7 @@ TEST_F(
 
   EXPECT_EQ(responseCount_, 1);
   auto& resp = responses_[0].get<RocketResponseMessage>();
-  EXPECT_EQ(resp.frame.streamId(), streamId2);
+  EXPECT_EQ(resp.payload.get<ParsedFrame>().streamId(), streamId2);
 
   auto response1 = createPayloadResponse(
       streamId1, nullptr, folly::IOBuf::copyBuffer("response1"));
@@ -370,6 +489,77 @@ TEST_F(
   evb_.loopOnce();
 
   EXPECT_EQ(responseCount_, 2);
+}
+
+// =============================================================================
+// In-Process Per-Request Error E2E (StreamStateHandler cold path)
+// =============================================================================
+
+TEST_F(
+    RocketClientIntegrationTest,
+    PerRequestErrorReachesAppAndConnectionSurvives) {
+  // Fail responses for streamId 1 (the first request); subsequent requests
+  // get streamId 3+ which pass through normally.
+  setupPipelineWithErrorInjection(
+      /*failStreamId=*/1,
+      folly::make_exception_wrapper<std::runtime_error>(
+          "simulated serialize boom"));
+
+  // First request: registers streamId 1, response will be rewritten to
+  // RocketResponseError by the injection handler.
+  auto request1 = createRocketRequest(folly::IOBuf::copyBuffer("req1"));
+  (void)appAdapter_->write(std::move(request1));
+  evb_.loopOnce();
+  auto requestFrame1 = getWrittenFrame();
+  ASSERT_NE(requestFrame1, nullptr);
+  auto parsedRequest1 = parseWrittenFrame(std::move(requestFrame1));
+  ASSERT_EQ(parsedRequest1.streamId(), 1u);
+
+  // Inject any payload frame for streamId 1 — the injection handler will
+  // rewrite its payload into a RocketResponseError before it reaches
+  // StreamStateHandler.
+  auto responseFrame1 = createPayloadResponse(
+      1u, nullptr, folly::IOBuf::copyBuffer("ignored payload"));
+  injectFrame(std::move(responseFrame1));
+  evb_.loopOnce();
+  evb_.loopOnce();
+
+  // App receives one response carrying RocketResponseError; no
+  // connection-level exception fires.
+  ASSERT_EQ(responseCount_, 1);
+  EXPECT_FALSE(exceptionReceived_);
+  auto& errResponse = responses_[0].get<RocketResponseMessage>();
+  ASSERT_TRUE(errResponse.payload.is<rocket::RocketResponseError>());
+  auto& err = errResponse.payload.get<rocket::RocketResponseError>();
+  EXPECT_EQ(err.streamId, 1u);
+  EXPECT_EQ(
+      err.ew.what().toStdString(),
+      "std::runtime_error: simulated serialize boom");
+
+  // Second request: streamId 3 doesn't match failStreamId; normal response
+  // flows through untouched. This is the "connection survives" assertion.
+  auto request2 = createRocketRequest(folly::IOBuf::copyBuffer("req2"));
+  (void)appAdapter_->write(std::move(request2));
+  evb_.loopOnce();
+  auto requestFrame2 = getWrittenFrame();
+  ASSERT_NE(requestFrame2, nullptr);
+  auto parsedRequest2 = parseWrittenFrame(std::move(requestFrame2));
+  ASSERT_EQ(parsedRequest2.streamId(), 3u);
+
+  auto responseFrame2 = createPayloadResponse(
+      3u, nullptr, folly::IOBuf::copyBuffer("real response"));
+  injectFrame(std::move(responseFrame2));
+  evb_.loopOnce();
+  evb_.loopOnce();
+
+  ASSERT_EQ(responseCount_, 2);
+  EXPECT_FALSE(exceptionReceived_);
+  auto& okResponse = responses_[1].get<RocketResponseMessage>();
+  ASSERT_TRUE(okResponse.payload.is<ParsedFrame>());
+  auto& parsedOk = okResponse.payload.get<ParsedFrame>();
+  EXPECT_EQ(parsedOk.streamId(), 3u);
+  EXPECT_EQ(
+      parsedOk.type(), apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
 }
 
 // =============================================================================
@@ -400,10 +590,10 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithApplicationErrorCode) {
 
   EXPECT_EQ(responseCount_, 1);
   auto& response = responses_[0].get<RocketResponseMessage>();
-  EXPECT_EQ(response.frame.streamId(), streamId);
+  auto& parsed = response.payload.get<ParsedFrame>();
+  EXPECT_EQ(parsed.streamId(), streamId);
   EXPECT_EQ(
-      response.frame.type(),
-      apache::thrift::fast_thrift::frame::FrameType::ERROR);
+      parsed.type(), apache::thrift::fast_thrift::frame::FrameType::ERROR);
 }
 
 TEST_F(RocketClientIntegrationTest, ErrorFrameWithRejectedCode) {
@@ -431,7 +621,7 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithRejectedCode) {
   EXPECT_EQ(responseCount_, 1);
   auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(
-      response.frame.type(),
+      response.payload.get<ParsedFrame>().type(),
       apache::thrift::fast_thrift::frame::FrameType::ERROR);
 }
 
@@ -460,7 +650,7 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithCanceledCode) {
   EXPECT_EQ(responseCount_, 1);
   auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(
-      response.frame.type(),
+      response.payload.get<ParsedFrame>().type(),
       apache::thrift::fast_thrift::frame::FrameType::ERROR);
 }
 
@@ -489,7 +679,7 @@ TEST_F(RocketClientIntegrationTest, ErrorFrameWithInvalidCode) {
   EXPECT_EQ(responseCount_, 1);
   auto& response = responses_[0].get<RocketResponseMessage>();
   EXPECT_EQ(
-      response.frame.type(),
+      response.payload.get<ParsedFrame>().type(),
       apache::thrift::fast_thrift::frame::FrameType::ERROR);
 }
 
@@ -517,10 +707,10 @@ TEST_F(RocketClientIntegrationTest, ResponseWithEmptyPayload) {
 
   EXPECT_EQ(responseCount_, 1);
   auto& response = responses_[0].get<RocketResponseMessage>();
-  EXPECT_EQ(response.frame.streamId(), streamId);
+  auto& parsed = response.payload.get<ParsedFrame>();
+  EXPECT_EQ(parsed.streamId(), streamId);
   EXPECT_EQ(
-      response.frame.type(),
-      apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
+      parsed.type(), apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
 }
 
 TEST_F(RocketClientIntegrationTest, LargePayloadRequest) {
@@ -570,10 +760,11 @@ TEST_F(RocketClientIntegrationTest, ResponseWithMetadata) {
 
   EXPECT_EQ(responseCount_, 1);
   auto& response = responses_[0].get<RocketResponseMessage>();
-  EXPECT_EQ(response.frame.streamId(), streamId);
-  EXPECT_TRUE(response.frame.hasMetadata());
-  EXPECT_GT(response.frame.metadataSize(), 0u);
-  EXPECT_GT(response.frame.dataSize(), 0u);
+  auto& parsed = response.payload.get<ParsedFrame>();
+  EXPECT_EQ(parsed.streamId(), streamId);
+  EXPECT_TRUE(parsed.hasMetadata());
+  EXPECT_GT(parsed.metadataSize(), 0u);
+  EXPECT_GT(parsed.dataSize(), 0u);
 }
 
 } // namespace apache::thrift::fast_thrift::rocket::client::test

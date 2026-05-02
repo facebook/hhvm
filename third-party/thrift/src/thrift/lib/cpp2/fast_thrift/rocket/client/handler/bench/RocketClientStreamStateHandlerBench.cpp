@@ -77,7 +77,7 @@ RocketResponseMessage createPayloadResponse(uint32_t streamId) {
       folly::IOBuf::copyBuffer("data"));
 
   return RocketResponseMessage{
-      .frame = parseFrame(std::move(frame)),
+      .payload = parseFrame(std::move(frame)),
   };
 }
 

@@ -93,10 +93,25 @@ TypeErasedBox makeRocketResponseBox(
       std::move(data));
 
   rocket::RocketResponseMessage response{
-      .frame = frame::read::parseFrame(std::move(frameBuf)),
+      .payload = frame::read::parseFrame(std::move(frameBuf)),
       .requestHandle = requestHandle,
       .streamType = streamType,
   };
+  return erase_and_box(std::move(response));
+}
+
+TypeErasedBox makeRocketErrorResponseBox(
+    folly::exception_wrapper ew,
+    uint32_t requestHandle = 42,
+    uint32_t streamId = 1,
+    frame::FrameType streamType = frame::FrameType::REQUEST_RESPONSE) {
+  rocket::RocketResponseMessage response;
+  response.payload = rocket::RocketResponseError{
+      .ew = std::move(ew),
+      .streamId = streamId,
+  };
+  response.requestHandle = requestHandle;
+  response.streamType = streamType;
   return erase_and_box(std::move(response));
 }
 
@@ -210,6 +225,64 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
   EXPECT_EQ(result, Result::Success);
 
   EXPECT_EQ(thriftTail.readCount(), 1);
+}
+
+TEST(
+    ThriftClientTransportAdapterTest,
+    OnTransportResponseWithErrorFiresExceptionUpThrift) {
+  auto connection = std::make_unique<rocket::client::RocketClientConnection>();
+  auto* appAdapter = connection->appAdapter.get();
+
+  folly::EventBase evb;
+  MockHeadHandler rocketHead;
+  rocketHead.setOnWriteCallback(
+      [](channel_pipeline::TypeErasedBox&&) { return Result::Success; });
+  TestAllocator rocketAllocator;
+
+  auto rocketPipeline = PipelineBuilder<
+                            MockHeadHandler,
+                            rocket::client::RocketClientAppAdapter,
+                            TestAllocator>()
+                            .setEventBase(&evb)
+                            .setHead(&rocketHead)
+                            .setTail(appAdapter)
+                            .setAllocator(&rocketAllocator)
+                            .build();
+
+  appAdapter->setPipeline(rocketPipeline.get());
+  connection->pipeline = std::move(rocketPipeline);
+
+  ThriftClientTransportAdapter adapter(std::move(connection));
+
+  MockTailHandler thriftTail;
+  TestAllocator thriftAllocator;
+
+  auto thriftPipeline = PipelineBuilder<
+                            ThriftClientTransportAdapter,
+                            MockTailHandler,
+                            TestAllocator>()
+                            .setEventBase(&evb)
+                            .setHead(&adapter)
+                            .setTail(&thriftTail)
+                            .setAllocator(&thriftAllocator)
+                            .build();
+
+  adapter.setPipeline(thriftPipeline.get());
+
+  folly::exception_wrapper captured;
+  thriftTail.setOnExceptionCallback(
+      [&](folly::exception_wrapper&& ew) { captured = std::move(ew); });
+
+  auto errorBox = makeRocketErrorResponseBox(
+      folly::make_exception_wrapper<std::runtime_error>("serialize boom"));
+  auto result = appAdapter->onRead(std::move(errorBox));
+
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(thriftTail.readCount(), 0);
+  EXPECT_EQ(thriftTail.exceptionCount(), 1);
+  ASSERT_TRUE(static_cast<bool>(captured));
+  EXPECT_EQ(
+      captured.what().toStdString(), "std::runtime_error: serialize boom");
 }
 
 TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {

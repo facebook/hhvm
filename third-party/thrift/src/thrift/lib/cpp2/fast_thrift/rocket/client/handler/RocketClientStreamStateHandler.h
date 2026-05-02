@@ -94,30 +94,51 @@ class RocketClientStreamStateHandler {
           msg) noexcept {
     auto& response = msg.get<RocketResponseMessage>();
 
-    // Connection-level frames pass through unchanged
-    if (response.frame.isConnectionFrame()) {
+    // Hot path: parsed wire frame.
+    if (FOLLY_LIKELY(
+            response.payload
+                .is<apache::thrift::fast_thrift::frame::read::ParsedFrame>())) {
+      auto& parsed =
+          response.payload
+              .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+
+      // Connection-level frames pass through unchanged
+      if (parsed.isConnectionFrame()) {
+        return ctx.fireRead(std::move(msg));
+      }
+
+      auto it = activeStreams_.find(parsed.streamId());
+      if (it == activeStreams_.end()) {
+        XLOG(ERR) << "Received frame for unknown stream: streamId="
+                  << parsed.streamId() << ", frameType=" << parsed.typeName();
+        return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+      }
+
+      // Stamp streamType (and requestHandle) on every stream-scoped frame so
+      // downstream per-pattern handlers can dispatch statelessly. streamType is
+      // constant for the stream's lifetime; requestHandle is the App's
+      // correlation token. Only erase on terminal.
+      response.requestHandle = it->second.requestHandle;
+      response.streamType = it->second.streamType;
+      if (parsed.isTerminalFrame()) {
+        activeStreams_.erase(it);
+      }
+
       return ctx.fireRead(std::move(msg));
     }
 
-    // Make sure we have an active stream for this frame
-    auto it = activeStreams_.find(response.frame.streamId());
+    // Cold path: in-process per-request error (e.g. from codec serialize
+    // failure). Always terminal; clean up the stream and stamp identity.
+    auto& err = response.payload.get<RocketResponseError>();
+    auto it = activeStreams_.find(err.streamId);
     if (it == activeStreams_.end()) {
-      XLOG(ERR) << "Received frame for unknown stream: streamId="
-                << response.frame.streamId()
-                << ", frameType=" << response.frame.typeName();
+      XLOG(ERR) << "Received per-request error for unknown stream: streamId="
+                << err.streamId;
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
-
-    // Stamp streamType (and requestHandle) on every stream-scoped frame so
-    // downstream per-pattern handlers can dispatch statelessly. streamType is
-    // constant for the stream's lifetime; requestHandle is the App's
-    // correlation token. Only erase on terminal.
     response.requestHandle = it->second.requestHandle;
     response.streamType = it->second.streamType;
-    if (response.frame.isTerminalFrame()) {
-      activeStreams_.erase(it);
-    }
-
+    activeStreams_.erase(it);
     return ctx.fireRead(std::move(msg));
   }
 

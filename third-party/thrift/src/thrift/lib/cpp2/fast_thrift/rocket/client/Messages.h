@@ -16,10 +16,13 @@
 
 #pragma once
 
+#include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
+
+#include <folly/ExceptionWrapper.h>
 
 #include <cstdint>
 #include <limits>
@@ -79,18 +82,42 @@ struct RocketRequestMessage {
 };
 
 /**
+ * RocketResponseError - In-process per-request failure carried inbound.
+ *
+ * Used as the error alternative on `RocketResponseMessage::payload` so a
+ * single request can be failed (callback resolved with `ew`) without
+ * fabricating a wire-format ERROR frame and without escalating to a
+ * connection-fatal `fireException`. Produced by handlers when an in-
+ * process condition (e.g. outbound serialize threw) breaks one request;
+ * the connection itself remains healthy.
+ *
+ * `streamId` carries the affected stream so StreamStateHandler can
+ * complete its per-stream cleanup the same way it does for terminal
+ * wire frames.
+ */
+struct RocketResponseError {
+  folly::exception_wrapper ew;
+  uint32_t streamId{kInvalidStreamId};
+};
+
+/**
  * RocketResponseMessage - Inbound response message.
  *
- * Contains the parsed response frame along with the original request's
- * frame type and handle for proper dispatching.
+ * `payload` is a CompactVariant of the parsed wire frame and an in-process
+ * `RocketResponseError`. The error alternative carries per-request
+ * failures inbound through the same path as a normal response, so the
+ * App's pending callback resolves; the connection is unaffected.
+ *
  * `streamType` is the originating REQUEST_* frame type for the stream
  * this response belongs to. Stamped by StreamStateHandler from its per-
  * stream map; downstream per-pattern handlers (RequestResponse, Stream,
  * ...) use it as a stateless dispatch key.
  */
 struct RocketResponseMessage {
-  /// The parsed response frame
-  apache::thrift::fast_thrift::frame::read::ParsedFrame frame;
+  apache::thrift::fast_thrift::CompactVariant<
+      apache::thrift::fast_thrift::frame::read::ParsedFrame,
+      RocketResponseError>
+      payload;
 
   /// Opaque handle for correlating responses with requests.
   uint32_t requestHandle{kNoRequestHandle};

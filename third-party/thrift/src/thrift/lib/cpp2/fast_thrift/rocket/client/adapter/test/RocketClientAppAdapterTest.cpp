@@ -91,7 +91,7 @@ TEST(RocketClientAppAdapterTest, OnReadDelegatesToCallback) {
 
   auto box = channel_pipeline::erase_and_box(
       RocketResponseMessage{
-          .frame = {},
+          .payload = {},
           .requestHandle = 42,
           .streamType = frame::FrameType::REQUEST_RESPONSE,
       });

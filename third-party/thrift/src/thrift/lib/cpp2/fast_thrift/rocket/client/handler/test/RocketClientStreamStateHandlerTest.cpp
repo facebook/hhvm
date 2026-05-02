@@ -176,7 +176,7 @@ RocketResponseMessage makeRocketResponse(
     uint32_t streamId,
     uint16_t flags = 0) {
   return RocketResponseMessage{
-      .frame = parseTestFrame(type, streamId, flags),
+      .payload = parseTestFrame(type, streamId, flags),
   };
 }
 
@@ -275,11 +275,15 @@ TEST_F(ClientStreamStateHandlerTest, TerminalPayloadCleansUpStream) {
       response.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
   EXPECT_EQ(
-      apache::thrift::fast_thrift::frame::read::FrameView(response.frame)
+      apache::thrift::fast_thrift::frame::read::FrameView(
+          response.payload
+              .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>())
           .type(),
       apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
   EXPECT_TRUE(
-      apache::thrift::fast_thrift::frame::read::FrameView(response.frame)
+      apache::thrift::fast_thrift::frame::read::FrameView(
+          response.payload
+              .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>())
           .isComplete());
   EXPECT_FALSE(handler_.hasActiveStream(1));
 }
@@ -307,7 +311,9 @@ TEST_F(ClientStreamStateHandlerTest, ErrorFrameIsAlwaysTerminal) {
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
   EXPECT_EQ(response.requestHandle, kTestHandle);
   EXPECT_EQ(
-      apache::thrift::fast_thrift::frame::read::FrameView(response.frame)
+      apache::thrift::fast_thrift::frame::read::FrameView(
+          response.payload
+              .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>())
           .type(),
       apache::thrift::fast_thrift::frame::FrameType::ERROR);
   EXPECT_FALSE(handler_.hasActiveStream(1));
@@ -336,10 +342,62 @@ TEST_F(ClientStreamStateHandlerTest, CancelFrameIsAlwaysTerminal) {
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
   EXPECT_EQ(response.requestHandle, kTestHandle);
   EXPECT_EQ(
-      apache::thrift::fast_thrift::frame::read::FrameView(response.frame)
+      apache::thrift::fast_thrift::frame::read::FrameView(
+          response.payload
+              .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>())
           .type(),
       apache::thrift::fast_thrift::frame::FrameType::CANCEL);
   EXPECT_FALSE(handler_.hasActiveStream(1));
+}
+
+// =============================================================================
+// In-Process RocketResponseError Handling (cold path)
+// =============================================================================
+
+TEST_F(ClientStreamStateHandlerTest, ResponseErrorRoutesViaStreamLookup) {
+  constexpr uint32_t kTestHandle = 99;
+  auto request = makeClientRequest(
+      folly::IOBuf::copyBuffer("request"),
+      folly::IOBuf::copyBuffer("metadata"),
+      kTestHandle);
+  EXPECT_EQ(
+      handler_.onWrite(ctx_, erase_and_box(std::move(request))),
+      Result::Success);
+  EXPECT_TRUE(handler_.hasActiveStream(1));
+
+  RocketResponseMessage response;
+  response.payload = RocketResponseError{
+      .ew = folly::make_exception_wrapper<std::runtime_error>("serialize boom"),
+      .streamId = 1,
+  };
+
+  auto result = handler_.onRead(ctx_, erase_and_box(std::move(response)));
+
+  EXPECT_EQ(result, Result::Success);
+  ASSERT_EQ(ctx_.readMessages().size(), 1);
+  auto& forwarded = ctx_.readMessages()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(forwarded.requestHandle, kTestHandle);
+  EXPECT_EQ(
+      forwarded.streamType,
+      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
+  ASSERT_TRUE(forwarded.payload.is<RocketResponseError>());
+  EXPECT_EQ(
+      forwarded.payload.get<RocketResponseError>().ew.what().toStdString(),
+      "std::runtime_error: serialize boom");
+  EXPECT_FALSE(handler_.hasActiveStream(1));
+}
+
+TEST_F(ClientStreamStateHandlerTest, ResponseErrorForUnknownStreamIsDropped) {
+  RocketResponseMessage response;
+  response.payload = RocketResponseError{
+      .ew = folly::make_exception_wrapper<std::runtime_error>("orphan error"),
+      .streamId = 999,
+  };
+
+  auto result = handler_.onRead(ctx_, erase_and_box(std::move(response)));
+
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(ctx_.readMessages().size(), 0);
 }
 
 // =============================================================================
@@ -391,7 +449,10 @@ TEST_F(
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   EXPECT_EQ(
       apache::thrift::fast_thrift::frame::read::FrameView(
-          ctx_.readMessages()[0].get<RocketResponseMessage>().frame)
+          ctx_.readMessages()[0]
+              .get<RocketResponseMessage>()
+              .payload
+              .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>())
           .type(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_N);
   EXPECT_TRUE(handler_.hasActiveStream(1)); // Stream still open
@@ -666,7 +727,10 @@ TEST_F(ClientStreamStateHandlerTest, ErrorFrameOnStreamZeroPassesThrough) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   EXPECT_EQ(
       apache::thrift::fast_thrift::frame::read::FrameView(
-          ctx_.readMessages()[0].get<RocketResponseMessage>().frame)
+          ctx_.readMessages()[0]
+              .get<RocketResponseMessage>()
+              .payload
+              .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>())
           .type(),
       apache::thrift::fast_thrift::frame::FrameType::ERROR);
 }

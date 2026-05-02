@@ -160,12 +160,14 @@ TEST_F(RocketClientFrameCodecHandlerTest, DecodesPayloadFrame) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
+  auto& frame =
+      response.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
   EXPECT_EQ(
-      response.frame.type(),
-      apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
-  EXPECT_EQ(response.frame.streamId(), 1);
-  EXPECT_TRUE(response.frame.isComplete());
-  EXPECT_TRUE(response.frame.hasNext());
+      frame.type(), apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
+  EXPECT_EQ(frame.streamId(), 1);
+  EXPECT_TRUE(frame.isComplete());
+  EXPECT_TRUE(frame.hasNext());
 }
 
 TEST_F(RocketClientFrameCodecHandlerTest, DecodesRequestResponseFrame) {
@@ -180,11 +182,14 @@ TEST_F(RocketClientFrameCodecHandlerTest, DecodesRequestResponseFrame) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
+  auto& frame =
+      response.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
   EXPECT_EQ(
-      response.frame.type(),
+      frame.type(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
-  EXPECT_EQ(response.frame.streamId(), 3);
-  EXPECT_TRUE(response.frame.hasMetadata());
+  EXPECT_EQ(frame.streamId(), 3);
+  EXPECT_TRUE(frame.hasMetadata());
 }
 
 TEST_F(RocketClientFrameCodecHandlerTest, DecodesKeepAliveFrame) {
@@ -196,10 +201,12 @@ TEST_F(RocketClientFrameCodecHandlerTest, DecodesKeepAliveFrame) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
+  auto& frame =
+      response.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
   EXPECT_EQ(
-      response.frame.type(),
-      apache::thrift::fast_thrift::frame::FrameType::KEEPALIVE);
-  EXPECT_EQ(response.frame.streamId(), 0); // Connection-level frame
+      frame.type(), apache::thrift::fast_thrift::frame::FrameType::KEEPALIVE);
+  EXPECT_EQ(frame.streamId(), 0); // Connection-level frame
 }
 
 TEST_F(RocketClientFrameCodecHandlerTest, DecodesErrorFrame) {
@@ -212,10 +219,11 @@ TEST_F(RocketClientFrameCodecHandlerTest, DecodesErrorFrame) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(
-      response.frame.type(),
-      apache::thrift::fast_thrift::frame::FrameType::ERROR);
-  EXPECT_EQ(response.frame.streamId(), 5);
+  auto& frame =
+      response.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  EXPECT_EQ(frame.type(), apache::thrift::fast_thrift::frame::FrameType::ERROR);
+  EXPECT_EQ(frame.streamId(), 5);
 }
 
 // =============================================================================
@@ -232,7 +240,11 @@ TEST_F(RocketClientFrameCodecHandlerTest, PreservesPayloadData) {
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
 
   // Verify the data can be extracted from the parsed frame
-  EXPECT_GT(response.frame.dataSize(), 0);
+  EXPECT_GT(
+      response.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>()
+          .dataSize(),
+      0);
 }
 
 TEST_F(RocketClientFrameCodecHandlerTest, PreservesMetadata) {
@@ -246,8 +258,11 @@ TEST_F(RocketClientFrameCodecHandlerTest, PreservesMetadata) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
 
-  EXPECT_TRUE(response.frame.hasMetadata());
-  EXPECT_GT(response.frame.metadataSize(), 0);
+  auto& frame =
+      response.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  EXPECT_TRUE(frame.hasMetadata());
+  EXPECT_GT(frame.metadataSize(), 0);
 }
 
 // =============================================================================
@@ -265,21 +280,22 @@ TEST_F(RocketClientFrameCodecHandlerTest, DecodesMultipleFrames) {
 
   ASSERT_EQ(ctx_.readMessages().size(), 3);
 
+  using PF = apache::thrift::fast_thrift::frame::read::ParsedFrame;
   auto& response1 = ctx_.readMessages()[0].get<RocketResponseMessage>();
   EXPECT_EQ(
-      response1.frame.type(),
+      response1.payload.get<PF>().type(),
       apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
-  EXPECT_EQ(response1.frame.streamId(), 1);
+  EXPECT_EQ(response1.payload.get<PF>().streamId(), 1);
 
   auto& response2 = ctx_.readMessages()[1].get<RocketResponseMessage>();
   EXPECT_EQ(
-      response2.frame.type(),
+      response2.payload.get<PF>().type(),
       apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
-  EXPECT_EQ(response2.frame.streamId(), 3);
+  EXPECT_EQ(response2.payload.get<PF>().streamId(), 3);
 
   auto& response3 = ctx_.readMessages()[2].get<RocketResponseMessage>();
   EXPECT_EQ(
-      response3.frame.type(),
+      response3.payload.get<PF>().type(),
       apache::thrift::fast_thrift::frame::FrameType::KEEPALIVE);
 }
 

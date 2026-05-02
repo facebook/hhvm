@@ -85,15 +85,24 @@ class RocketClientErrorFrameHandler {
           msg) noexcept {
     auto& response = msg.get<RocketResponseMessage>();
 
+    // In-process per-request errors are not connection-level ERRORs.
+    if (FOLLY_UNLIKELY(
+            !response.payload.is<
+                apache::thrift::fast_thrift::frame::read::ParsedFrame>())) {
+      return ctx.fireRead(std::move(msg));
+    }
+    auto& parsed =
+        response.payload
+            .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+
     // Only handle connection-level ERROR frames (streamId == 0)
-    if (response.frame.type() !=
-            apache::thrift::fast_thrift::frame::FrameType::ERROR ||
-        !response.frame.isConnectionFrame()) {
+    if (parsed.type() != apache::thrift::fast_thrift::frame::FrameType::ERROR ||
+        !parsed.isConnectionFrame()) {
       return ctx.fireRead(std::move(msg));
     }
 
     // Extract error code and message from ERROR frame
-    return handleError(ctx, response.frame);
+    return handleError(ctx, parsed);
   }
 
   template <typename Context>

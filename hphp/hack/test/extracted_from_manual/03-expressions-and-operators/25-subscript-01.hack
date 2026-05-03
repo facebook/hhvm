@@ -12,4 +12,7 @@ async function example_snippet_wrapper(): Awaitable<void> {
   $d = dict["red" => 4, "white" =>12, "blue" => 3];
   $e = $d["white"]; // designates the element with key "white" value 12
   $d["red"] = 9;    // changes the element with key "red" from 4 to 9
+  
+  $k = keyset["red", "blue", "green"];
+  $e = $k["blue"];  // designates the element with key "blue" value "blue"
 }

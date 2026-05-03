@@ -1,0 +1,2 @@
+WARN: File "25-subscript-05.hack", line 11, characters 3-15:
+Array access on type `keyset<string>` returns the key (if present) or throws an exception. Consider using `C\contains_key` to check for membership instead. (Warn[12034])

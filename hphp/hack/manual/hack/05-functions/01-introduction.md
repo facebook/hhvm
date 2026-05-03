@@ -59,6 +59,40 @@ $args = vec[1, 2, 3];
 sum_ints(0, ...$args);
 ```
 
+## Unpacking Tuples as Arguments
+
+You can use `...` to unpack a tuple as positional arguments to a function call. The type checker matches each tuple element against the corresponding parameter type.
+
+```hack
+function add(int $x, int $y): int {
+  return $x + $y;
+}
+
+function call_with_tuple(): void {
+  $args = tuple(1, 2);
+  $result = add(...$args);
+}
+```
+
+Positional arguments can precede the splat, but no arguments can follow it — even when the splatted tuple has a known, fixed length.
+
+```hack
+function greet(string $greeting, string $name, int $times): void {
+  for ($i = 0; $i < $times; $i++) {
+    echo $greeting.' '.$name."\n";
+  }
+}
+
+function call_mixed(): void {
+  $rest = tuple('Alice', 3);
+  greet('Hello', ...$rest);
+}
+```
+
+The type checker enforces that the tuple has the right number of elements and that each element's type matches the corresponding parameter. The splatted value must be a tuple type — `vec` and other container types cannot be used this way. When the tuple type itself has optional or variadic elements, the splat respects those — for details on tuple type syntax, see [tuples](/hack/built-in-types/tuples).
+
+For spreading tuple types into function type signatures, see [type splat](26-type-splat.md).
+
 ## Function Types
 
 Functions are values in Hack, so they can be passed as arguments too.

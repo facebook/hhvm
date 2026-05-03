@@ -213,6 +213,40 @@ function takes_server3(shape('name' => string, ...) $s): void {
 }
 ```
 
+## Field Punning
+
+:::warning
+This feature is currently in [experimental mode](/hack/experimental-features/introduction/), under feature flag _"shape_field_punning"_.
+:::
+
+When constructing a shape, you can use a variable name as shorthand for a field. Writing `$foo` in a shape literal is equivalent to `'foo' => $foo` — the `$` prefix is stripped to produce the field name.
+
+```hack
+<<file:__EnableUnstableFeatures('shape_field_punning')>>
+
+function example(): void {
+  $name = 'db-01';
+  $age = 365;
+
+  // These two are equivalent:
+  $s1 = shape('name' => $name, 'age' => $age);
+  $s2 = shape($name, $age);
+}
+```
+
+Punned and explicit fields can be mixed freely.
+
+```hack
+<<file:__EnableUnstableFeatures('shape_field_punning')>>
+
+function mixed_example(): void {
+  $name = 'db-01';
+  $s = shape($name, 'age' => 365);
+}
+```
+
+Only bare local variables are valid for punning. Property access (`$obj->prop`), array indexing (`$arr[0]`), and function calls are not supported.
+
 ## Type Enforcement
 
 HHVM will check that arguments are shapes, but it will not deeply

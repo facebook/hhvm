@@ -404,8 +404,6 @@ val pattern : Pos.t -> t
 
 val join_point : Pos.t -> t
 
-val missing_type_in_hierarchy : Pos_or_decl.t -> t
-
 val enforced_type : Pos_or_decl.t -> t
 
 val axiom_extends :
@@ -671,8 +669,6 @@ module Predicates : sig
   val unpack_shape_literal_opt : t -> Pos.t option
 
   val outer_constructor_string : t -> string
-
-  val is_missing_type_in_hierarchy : t -> bool
 
   val is_enforced_type : t -> bool
 end

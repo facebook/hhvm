@@ -1,9 +1,9 @@
 <?hh
 // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 
-// Test that the Tany_found warning (Warn[12036]) DOES fire for genuine Tany
-// that does not come from MISSING_TYPE_IN_HIERARCHY, including when the type
-// flows through unions, intersections, join points, and other flows.
+// Test that the Tany_found warning (Warn[12036]) DOES fire for genuine Tany,
+// including when the type flows through unions, intersections, join points,
+// and other flows.
 
 interface IWithoutTB {}
 

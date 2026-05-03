@@ -433,15 +433,6 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
   | Tapply ((_, x), [arg]) when String.equal x SN.HH.FIXME.tPoisonMarker ->
     let decl_ty = mk (get_reason dty, Tlike arg) in
     localize ~ety_env env decl_ty
-  | Tapply ((pos, x), [])
-    when String.equal x SN.HH.FIXME.tMissingTypeInHierarchy ->
-    let decl_ty = mk (get_reason dty, Typing_defs.make_tany ()) in
-    let (env, locl_ty) = localize ~ety_env env decl_ty in
-    let into = Typing_reason.missing_type_in_hierarchy pos in
-    let locl_ty =
-      map_reason locl_ty ~f:(fun from -> Typing_reason.flow_elab ~from ~into)
-    in
-    (env, locl_ty)
   | Twildcard -> begin
     match ety_env.wildcard_action with
     (* Generate a fresh type variable *)

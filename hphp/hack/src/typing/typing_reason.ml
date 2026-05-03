@@ -991,7 +991,6 @@ type witness_decl =
   | Support_dynamic_type_assume of (Pos_or_decl.t[@hash.ignore])
   | Polymorphic_type_param of
       (Pos_or_decl.t[@hash.ignore]) * string * string * int
-  | Missing_type_in_hierarchy of (Pos_or_decl.t[@hash.ignore])
   | Enforced_type of (Pos_or_decl.t[@hash.ignore])
 [@@deriving hash]
 
@@ -1025,8 +1024,7 @@ let witness_decl_to_raw_pos = function
   | Pessimised_prop (pos_or_decl, _)
   | Illegal_recursive_type (pos_or_decl, _)
   | Support_dynamic_type_assume pos_or_decl
-  | Polymorphic_type_param (pos_or_decl, _, _, _)
-  | Missing_type_in_hierarchy pos_or_decl ->
+  | Polymorphic_type_param (pos_or_decl, _, _, _) ->
     pos_or_decl
   | Enforced_type pos_or_decl -> pos_or_decl
 
@@ -1066,7 +1064,6 @@ let map_pos_witness_decl pos_or_decl witness =
   | Support_dynamic_type_assume p -> Support_dynamic_type_assume (pos_or_decl p)
   | Polymorphic_type_param (p, new_name, orig_name, rank) ->
     Polymorphic_type_param (pos_or_decl p, new_name, orig_name, rank)
-  | Missing_type_in_hierarchy p -> Missing_type_in_hierarchy (pos_or_decl p)
   | Enforced_type p -> Enforced_type (pos_or_decl p)
 
 let string_of_pessimise_reason = function
@@ -1120,7 +1117,6 @@ let constructor_string_of_witness_decl = function
   | Illegal_recursive_type _ -> "Rillegal_recursive_type"
   | Support_dynamic_type_assume _ -> "Rsupport_dynamic_type_assume"
   | Polymorphic_type_param _ -> "Rpolymorphic_type_param"
-  | Missing_type_in_hierarchy _ -> "Rmissing_type_in_hierarchy"
   | Enforced_type _ -> "Renforced_type"
 
 let pp_witness_decl fmt witness =
@@ -1163,8 +1159,7 @@ let pp_witness_decl fmt witness =
     | Inout_param p
     | Support_dynamic_type p
     | Support_dynamic_type_assume p
-    | Global_class_prop p
-    | Missing_type_in_hierarchy p ->
+    | Global_class_prop p ->
       Pos_or_decl.pp fmt p
     | Enforced_type p -> Pos_or_decl.pp fmt p
     | Polymorphic_type_param (p, s1, s2, r) ->
@@ -1291,8 +1286,6 @@ let witness_decl_to_json = function
         ( "Illegal_recursive_type",
           `List [Pos_or_decl.json pos_or_decl; `String name] );
       ]
-  | Missing_type_in_hierarchy pos_or_decl ->
-    `Assoc [("Missing_type_in_hierarchy", `List [Pos_or_decl.json pos_or_decl])]
   | Enforced_type pos_or_decl ->
     `Assoc [("Enforced_type", `List [Pos_or_decl.json pos_or_decl])]
 
@@ -1440,16 +1433,6 @@ let witness_decl_to_string prefix witness =
           name
           name
           name )
-  | Missing_type_in_hierarchy pos_or_decl ->
-    let missing_type_in_hierarchy =
-      Markdown_lite.md_codify
-      @@ Utils.strip_ns SN.HH.FIXME.tMissingTypeInHierarchy
-    in
-    ( pos_or_decl,
-      Format.sprintf
-        "%s because the expression came from %s. The type might be a lie!"
-        prefix
-        missing_type_in_hierarchy )
   | Enforced_type pos_or_decl -> (pos_or_decl, prefix)
 
 (* ~~ Axiom ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
@@ -2842,9 +2825,6 @@ module Constructors = struct
 
   let flow_elab ~from ~into = flow ~from ~into ~kind:Flow_elab
 
-  let missing_type_in_hierarchy pos =
-    from_witness_decl @@ Missing_type_in_hierarchy pos
-
   let enforced_type pos = from_witness_decl @@ Enforced_type pos
 end
 
@@ -3035,51 +3015,6 @@ module Predicates = struct
       | _ -> None
     in
     on_outermost r f
-
-  (* This predicate needs to go under [Instantiate] so we can't use
-     [on_outermost].
-
-     Due to [flow] restructuring, [Flow_elab] is always the outermost [Flow]
-     (since it is applied first at localization). [Missing_type_in_hierarchy]
-     appears as either [into] directly (before any subsequent flows) or as
-     the first [from] in the [into] chain (after subsequent flows have been
-     appended by [flow] restructuring).
-
-     The [Flow_elab] may be wrapped in a small number of [Instantiate],
-     [Solved], etc. nodes, so we search with a depth limit to avoid
-     traversing arbitrarily large reason trees. *)
-  let is_missing_type_in_hierarchy t =
-    let has_mth_in_into into =
-      match into with
-      | From_witness_decl (Missing_type_in_hierarchy _) -> true
-      | Flow { from = From_witness_decl (Missing_type_in_hierarchy _); _ } ->
-        true
-      | _ -> false
-    in
-    let rec aux depth t =
-      if depth > 10 then
-        false
-      else
-        match t with
-        | Type_access
-            (Typeconst (Flow { kind = Flow_elab; into; _ }, _, _, _), _)
-          when has_mth_in_into into ->
-          true
-        | Flow { kind = Flow_elab; into; _ } when has_mth_in_into into -> true
-        | From_witness_decl (Missing_type_in_hierarchy _) -> true
-        | Instantiate { type_ = t; _ } -> aux (depth + 1) t
-        | Flow { from = t; _ }
-        | Lower_bound { bound = t; _ }
-        | Axiom { next = t; _ }
-        | Prj_both { sub_prj = t; _ }
-        | Prj_one { part = t; _ }
-        | Def (_, t) ->
-          aux (depth + 1) t
-        | Solved { in_; solution; _ } ->
-          aux (depth + 1) solution || aux (depth + 1) in_
-        | _ -> false
-    in
-    aux 0 t
 end
 
 (* ~~ Aliases ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)

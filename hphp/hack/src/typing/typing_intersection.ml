@@ -231,20 +231,6 @@ let make_intersection env r tyl =
   let (env, ty) = Utils.wrap_union_inter_ty_in_var env r ty in
   (env, ty)
 
-(** When choosing between two Tany types, prefer the one whose reason passes
-    is_missing_type_in_hierarchy to avoid false-positive Tany_found warnings.
-    Only checks the top-level type node to avoid recursing into large
-    union/intersection types. *)
-let keep_missing_type_in_hierarchy_reason ty_keep ty_other =
-  match (get_node ty_keep, get_node ty_other) with
-  | (Tany _, Tany _)
-    when Reason.Predicates.is_missing_type_in_hierarchy (get_reason ty_other)
-         && not
-              (Reason.Predicates.is_missing_type_in_hierarchy
-                 (get_reason ty_keep)) ->
-    with_reason ty_keep (get_reason ty_other)
-  | _ -> ty_keep
-
 let rec intersect env rec_tracker ~r ty1 ty2 =
   if Log.should_log env ~level:2 then
     Log.log_intersection env r ty1 ty2 @@ fun () ->
@@ -263,9 +249,9 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
     let (env, ty1) = Env.expand_type env ty1 in
     let (env, ty2) = Env.expand_type env ty2 in
     if Utils.is_sub_type_for_union env ty1 ty2 then
-      (env, keep_missing_type_in_hierarchy_reason ty1 ty2)
+      (env, ty1)
     else if Utils.is_sub_type_for_union env ty2 ty1 then
-      (env, keep_missing_type_in_hierarchy_reason ty2 ty1)
+      (env, ty2)
     else if Utils.is_type_disjoint env ty1 ty2 then
       (env, MkType.nothing r)
     else

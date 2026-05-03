@@ -40,5 +40,6 @@ When combined, operators evaluate according to their associativity. For more inf
 * [Async: Suspend Execution](/hack/expressions-and-operators/await) (`await`)
 * [Coalesce: Non-Null Evaluation](/hack/expressions-and-operators/coalesce) (`??`)
 * [Pipe: Chain Function Calls](/hack/expressions-and-operators/pipe) (`|>` then stored in `$$`)
+* [Nullsafe Pipe: Chain Function Calls](/hack/expressions-and-operators/nullsafe-pipe) (`|?>` then stored in `$$`)
 * [Ternary: Alternative `If` Evaluation](/hack/expressions-and-operators/ternary) (`? :`, `?:`)
 * [Yield: Define a Generator](/hack/expressions-and-operators/yield) (`yield`)

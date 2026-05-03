@@ -31,7 +31,7 @@ Operator | Description | Associativity
 `\|\|` | [Logical OR](/hack/expressions-and-operators/logical-operators) | Left
 `??` | [Coalesce operator](/hack/expressions-and-operators/coalesce) | Right
 `?` `:`, `?:` | [Ternary evaluation](/hack/expressions-and-operators/ternary) and [Elvis operator](/hack/expressions-and-operators/ternary#elvis-operator) | Left
-`\|>` | [Pipe / Chain function calls](/hack/expressions-and-operators/pipe) | Left
+`\|>`, `\|?>` | [Pipe / Chain function calls](/hack/expressions-and-operators/pipe) and [Nullsafe pipe](/hack/expressions-and-operators/nullsafe-pipe) | Left
 `=` `+=` `-=` `.=` `*=` `/=` `%=` `<<=` `>>=` `&=` `^=` `\|=`, `??=` | [Assignment operators](/hack/expressions-and-operators/assignment) and [Coalescing assignment operator](/hack/expressions-and-operators/coalesce#coalescing-assignment-operator) | Right
 `echo` | [Write to standard output](/hack/statements/echo) | Right
 `include` `require` | [Include or Require a script](/hack/source-code-fundamentals/script-inclusion)| Left

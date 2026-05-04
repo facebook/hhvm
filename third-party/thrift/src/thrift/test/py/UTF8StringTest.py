@@ -18,7 +18,6 @@ import sys
 import unittest
 
 from thrift.protocol import TBinaryProtocol, TCompactProtocol
-from thrift.transport import TSocket, TTransport
 from thrift.util import Serializer
 from ThriftTest.ttypes import ListTypeVersioningV2
 

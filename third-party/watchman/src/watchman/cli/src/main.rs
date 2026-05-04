@@ -5,21 +5,19 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-use structopt::StructOpt;
-use structopt::clap::AppSettings;
+use clap::Parser;
 
 mod audit;
 mod rage;
 
-#[derive(StructOpt, Debug)]
-#[structopt(setting = AppSettings::DisableVersion,
-    setting = AppSettings::VersionlessSubcommands)]
+#[derive(Parser, Debug)]
+#[command(disable_version_flag = true)]
 struct MainCommand {
-    #[structopt(subcommand)]
+    #[command(subcommand)]
     subcommand: TopLevelSubcommand,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 enum TopLevelSubcommand {
     Audit(audit::AuditCmd),
     Rage(rage::RageCmd),
@@ -37,7 +35,7 @@ impl TopLevelSubcommand {
 
 #[tokio::main]
 async fn main() {
-    let cmd = MainCommand::from_args();
+    let cmd = MainCommand::parse();
     match cmd.subcommand.run().await {
         Ok(()) => {}
         Err(e) => {

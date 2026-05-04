@@ -15,8 +15,8 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::Result;
+use clap::Parser;
 use duct::Expression;
-use structopt::StructOpt;
 use sysinfo::System;
 #[cfg(target_os = "linux")]
 use tabular::Table;
@@ -559,7 +559,7 @@ impl WatchmanRage {
     }
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 pub(crate) struct RageCmd {}
 
 impl RageCmd {

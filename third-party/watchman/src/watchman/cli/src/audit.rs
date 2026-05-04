@@ -20,32 +20,32 @@ use std::time::Duration;
 use std::time::Instant;
 
 use ahash::AHashMap;
+use clap::Parser;
 use jwalk::WalkDir;
 use serde::Deserialize;
-use structopt::StructOpt;
 use watchman_client::prelude::*;
 
-#[derive(StructOpt, Debug)]
-#[structopt(about = "Audit Watchman's in-memory database with the filesystem")]
+#[derive(Parser, Debug)]
+#[command(about = "Audit Watchman's in-memory database with the filesystem")]
 pub(crate) struct AuditCmd {
-    #[structopt(name = "path", parse(from_os_str))]
+    #[arg(name = "path")]
     path: PathBuf,
 
-    #[structopt(
+    #[arg(
         long = "settle_period",
-        about = "milliseconds to wait for filesystem change notifications to settle"
+        help = "milliseconds to wait for filesystem change notifications to settle"
     )]
     settle_period_ms: Option<u64>,
 
-    #[structopt(
+    #[arg(
         long = "settle_timeout",
-        about = "fail query if settle_timeout milliseconds elapses before settle_period is reached"
+        help = "fail query if settle_timeout milliseconds elapses before settle_period is reached"
     )]
     settle_timeout_ms: Option<u64>,
 
-    #[structopt(
+    #[arg(
         long = "sync_timeout",
-        about = "seconds to wait for Watchman query result",
+        help = "seconds to wait for Watchman query result",
         default_value = "120"
     )]
     sync_timeout_secs: u64,

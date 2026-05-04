@@ -7,9 +7,20 @@
 
 #pragma once
 
-#include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <functional>
+#include <memory>
+#include <string>
 #include <unordered_map>
+
+#include <folly/Range.h>
+#include <folly/io/async/AsyncTransport.h>
+
+namespace apache {
+namespace thrift {
+class ThriftServer;
+class Cpp2RequestContext;
+} // namespace thrift
+} // namespace apache
 
 namespace facebook {
 namespace memcache {

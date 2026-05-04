@@ -629,12 +629,12 @@ TEST(TypeErasedBoxTest, InlineDestructorCalledOnDestruction) {
 
 TEST(TypeErasedBoxTest, ZeroCostInReleaseBuild) {
   // In release builds, TypeErasedBox should be exactly the same size
-  // as the underlying SmallBuffer (128 bytes)
-  // In debug builds, it's 136 bytes (+8 for type_ pointer)
+  // as the underlying SmallBuffer (120-byte inline + ops_ pointer).
+  // In debug builds, it adds one type_info* pointer.
 #ifdef NDEBUG
-  EXPECT_EQ(sizeof(TypeErasedBox), 128);
+  EXPECT_EQ(sizeof(TypeErasedBox), 120 + sizeof(void*));
 #else
-  EXPECT_EQ(sizeof(TypeErasedBox), 136);
+  EXPECT_EQ(sizeof(TypeErasedBox), 120 + 2 * sizeof(void*));
 #endif
 }
 

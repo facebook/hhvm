@@ -127,8 +127,13 @@ struct FrameMetadata {
   }
 };
 
-// Compile-time size verification
+// Compile-time size verification. The precise byte count depends on the ABI
+// (uint64_t alignment + sizeof(void*)): 32 bytes on 64-bit, 28 bytes on LP32
+// x86_32, 32 bytes again on arm32 if uint64_t is 8-aligned. The design
+// intent is just "fits comfortably in TypeErasedBox inline storage", so we
+// assert the upper bound rather than an exact value.
 static_assert(
-    sizeof(FrameMetadata) == 32, "FrameMetadata must be exactly 32 bytes");
+    sizeof(FrameMetadata) <= 32,
+    "FrameMetadata must fit within 32 bytes for TypeErasedBox inline storage");
 
 } // namespace apache::thrift::fast_thrift::frame::read

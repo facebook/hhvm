@@ -310,12 +310,18 @@ class TypeErasedBox : private apache::thrift::dynamic::detail::
 #endif
 };
 
-// Verify zero-cost in release builds
-// Release: 128 bytes (same as SmallBuffer<120, 8, true>)
-// Debug: 136 bytes (+8 for type_ pointer only)
+// Verify zero-cost in release builds.
+// Release: 120-byte inline buffer + ops_ pointer (fits in two cache lines on
+// 64-bit: 128 bytes). Debug: +1 type_info* pointer.
+#ifdef NDEBUG
 static_assert(
-    sizeof(TypeErasedBox) == 128 || sizeof(TypeErasedBox) == 136,
-    "TypeErasedBox size unexpected - should be 128 bytes (release) or 136 bytes (debug)");
+    sizeof(TypeErasedBox) == 120 + sizeof(void*),
+    "TypeErasedBox release size unexpected - should match SmallBuffer layout");
+#else
+static_assert(
+    sizeof(TypeErasedBox) == 120 + 2 * sizeof(void*),
+    "TypeErasedBox debug size unexpected - should be SmallBuffer + one type_info*");
+#endif
 
 /**
  * Helper function to create a TypeErasedBox from any value.

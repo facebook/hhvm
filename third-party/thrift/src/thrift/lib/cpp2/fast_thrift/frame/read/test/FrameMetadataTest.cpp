@@ -23,9 +23,10 @@ namespace apache::thrift::fast_thrift::frame::read {
 namespace {
 
 TEST(FrameMetadataTest, SizeIs32Bytes) {
-  // FrameMetadata must be exactly 32 bytes to fit in TypeErasedBox inline
-  // storage
-  EXPECT_EQ(sizeof(FrameMetadata), 32);
+  // FrameMetadata must fit in 32 bytes so it can live in TypeErasedBox
+  // inline storage. Exact byte count varies by ABI (uint64_t alignment +
+  // sizeof(void*)), so assert the upper bound.
+  EXPECT_LE(sizeof(FrameMetadata), 32u);
 }
 
 TEST(FrameMetadataTest, FitsInTypeErasedBoxInline) {

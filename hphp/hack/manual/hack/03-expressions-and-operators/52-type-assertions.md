@@ -79,8 +79,7 @@ $v = vec[1, 2, 3];
 $v is vec<_>; // true
 ```
 
-If you need to check inner types at runtime, consider using reified
-generics instead.
+If you need to check inner types at runtime, use [reified generics](../14-reified-generics/02-reified-generics.md) instead.
 
 ### Tuples
 
@@ -150,6 +149,22 @@ Hack also provides `?as`, which returns `null` if the type does not match.
 
 Note that `as` can also be used in type signatures when using
 generics.
+
+### Case Types
+
+`is` and `as` work with [case types](../10-types/80-case-types.md), which define runtime-disjoint unions. This enables type-safe branching on union members.
+
+```hack
+case type Stringlike = int | string;
+
+function stringify(Stringlike $x): string {
+  if ($x is int) {
+    return (string)$x;
+  } else {
+    return $x; // refined to string
+  }
+}
+```
 
 ## Legacy Type Predicates
 

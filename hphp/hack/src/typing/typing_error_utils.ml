@@ -3651,12 +3651,6 @@ end = struct
     in
     create ~code:Error_code.BadRegexPattern ~claim ()
 
-  let generic_array_strict p =
-    let claim =
-      lazy (p, "You cannot have an array without generics in strict mode")
-    in
-    create ~code:Error_code.GenericArrayStrict ~claim ()
-
   let option_return_only_typehint p kind =
     let claim =
       lazy
@@ -5205,7 +5199,6 @@ end = struct
     | Re_prefixed_non_string { pos; reason } ->
       re_prefixed_non_string pos reason
     | Bad_regex_pattern { pos; reason } -> bad_regex_pattern pos reason
-    | Generic_array_strict pos -> generic_array_strict pos
     | Option_return_only_typehint { pos; kind } ->
       option_return_only_typehint pos kind
     | Redeclaring_missing_method { pos; trait_method } ->

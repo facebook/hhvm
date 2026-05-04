@@ -339,7 +339,7 @@ module Typing = struct
     | FunUnexpectedNonvariadic [@value 4042]
     | FunVariadicityHhVsPhp56 [@value 4043]
     (* | GenaExpectsArrayDEPRECATED [@value 4044] *)
-    | GenericArrayStrict [@value 4045]
+    (* | GenericArrayStrictDEPRECATED [@value 4045] *)
     | GenericStatic [@value 4046]
     | ImplementAbstract [@value 4047]
     (* | InterfaceFinalDEPRECATED [@value 4048] *)

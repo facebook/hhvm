@@ -1053,7 +1053,6 @@ module Primary = struct
           | `bad_patt of string
           ];
       }
-    | Generic_array_strict of Pos.t
     | Option_return_only_typehint of {
         pos: Pos.t;
         kind: [ `void | `noreturn ];

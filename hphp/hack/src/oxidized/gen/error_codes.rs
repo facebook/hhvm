@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a9671aa8aab1601250ac4c6eb568c120>>
+// @generated SignedSource<<72dc51b06e28a74121c5a8f724428f3f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -282,7 +282,6 @@ pub enum Typing {
     FunTooManyArgs = 4041,
     FunUnexpectedNonvariadic = 4042,
     FunVariadicityHhVsPhp56 = 4043,
-    GenericArrayStrict = 4045,
     GenericStatic = 4046,
     ImplementAbstract = 4047,
     InvalidShapeFieldConst = 4049,

@@ -1360,6 +1360,7 @@ class PriorityQueueThreadManager : public ThreadManager::Impl {
   using PRIORITY = apache::thrift::concurrency::PRIORITY;
   explicit PriorityQueueThreadManager(size_t numThreads)
       : ThreadManager::Impl(N_PRIORITIES), numThreads_(numThreads) {
+    executors_.reserve(N_PRIORITIES * N_SOURCES);
     for (int i = 0; i < N_PRIORITIES; i++) {
       for (int j = 0; j < N_SOURCES; j++) {
         executors_.emplace_back(

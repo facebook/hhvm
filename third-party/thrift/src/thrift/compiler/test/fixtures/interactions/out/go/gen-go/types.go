@@ -76,7 +76,6 @@ func (x *CustomException) readField1(p thrift.Decoder) error {  // Message
 
 
 
-
 func (x *CustomException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("CustomException"); err != nil {
         return thrift.PrependError("CustomException write struct begin error: ", err)
@@ -206,7 +205,6 @@ func (x *ShouldBeBoxed) readField1(p thrift.Decoder) error {  // SessionId
     x.SessionId = result
     return nil
 }
-
 
 
 
@@ -492,7 +490,6 @@ func (x *reqMyServiceInteract) readField1(p thrift.Decoder) error {  // Arg
     x.Arg = result
     return nil
 }
-
 
 
 
@@ -789,7 +786,6 @@ func (x *respMyServiceInteractFast) readField0(p thrift.Decoder) error {  // Suc
 
 
 
-
 func (x *respMyServiceInteractFast) Exception() thrift.WritableException {
     return nil
 }
@@ -1004,7 +1000,6 @@ func (x *respMyServiceSerialize) readField0(p thrift.Decoder) error {  // Succes
 
 
 
-
 func (x *respMyServiceSerialize) Exception() thrift.WritableException {
     return nil
 }
@@ -1139,7 +1134,6 @@ func (x *streamMyServiceSerialize) readField0(p thrift.Decoder) error {  // Succ
     x.Success = &result
     return nil
 }
-
 
 
 
@@ -1424,7 +1418,6 @@ func (x *reqFactoriesInteract) readField1(p thrift.Decoder) error {  // Arg
     x.Arg = result
     return nil
 }
-
 
 
 
@@ -1721,7 +1714,6 @@ func (x *respFactoriesInteractFast) readField0(p thrift.Decoder) error {  // Suc
 
 
 
-
 func (x *respFactoriesInteractFast) Exception() thrift.WritableException {
     return nil
 }
@@ -1936,7 +1928,6 @@ func (x *respFactoriesSerialize) readField0(p thrift.Decoder) error {  // Succes
 
 
 
-
 func (x *respFactoriesSerialize) Exception() thrift.WritableException {
     return nil
 }
@@ -2071,7 +2062,6 @@ func (x *streamFactoriesSerialize) readField0(p thrift.Decoder) error {  // Succ
     x.Success = &result
     return nil
 }
-
 
 
 
@@ -2448,7 +2438,6 @@ func (x *respInteractWithSharedDoSomeSimilarThings) readField0(p thrift.Decoder)
 
 
 
-
 func (x *respInteractWithSharedDoSomeSimilarThings) Exception() thrift.WritableException {
     return nil
 }
@@ -2587,7 +2576,6 @@ func (x *reqBoxServiceGetABoxSession) readField1(p thrift.Decoder) error {  // R
 
 
 
-
 func (x *reqBoxServiceGetABoxSession) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqBoxServiceGetABoxSession"); err != nil {
         return thrift.PrependError("reqBoxServiceGetABoxSession write struct begin error: ", err)
@@ -2720,7 +2708,6 @@ func (x *respBoxServiceGetABoxSession) readField0(p thrift.Decoder) error {  // 
     x.Success = result
     return nil
 }
-
 
 
 
@@ -2937,7 +2924,6 @@ func (x *respMyInteractionFrobnicate) readField0(p thrift.Decoder) error {  // S
     return nil
 }
 
-
 func (x *respMyInteractionFrobnicate) GetEx() *CustomException {
     if !x.IsSetEx() {
         return nil
@@ -2989,7 +2975,6 @@ func (x *respMyInteractionFrobnicate) readField1(p thrift.Decoder) error {  // E
     x.Ex = result
     return nil
 }
-
 
 
 
@@ -3454,7 +3439,6 @@ func (x *streamMyInteractionTruthify) readField0(p thrift.Decoder) error {  // S
 
 
 
-
 func (x *streamMyInteractionTruthify) Exception() thrift.WritableException {
     return nil
 }
@@ -3698,7 +3682,6 @@ func (x *respMyInteractionEncode) readField0(p thrift.Decoder) error {  // Succe
 
 
 
-
 func (x *respMyInteractionEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -3837,7 +3820,6 @@ func (x *sinkMyInteractionEncode) readField0(p thrift.Decoder) error {  // Succe
 
 
 
-
 func (x *sinkMyInteractionEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -3972,7 +3954,6 @@ func (x *respFinalMyInteractionEncode) readField0(p thrift.Decoder) error {  // 
     x.Success = result
     return nil
 }
-
 
 
 
@@ -4187,7 +4168,6 @@ func (x *respMyInteractionFastFrobnicate) readField0(p thrift.Decoder) error {  
     x.Success = &result
     return nil
 }
-
 
 
 
@@ -4644,7 +4624,6 @@ func (x *streamMyInteractionFastTruthify) readField0(p thrift.Decoder) error {  
 
 
 
-
 func (x *streamMyInteractionFastTruthify) Exception() thrift.WritableException {
     return nil
 }
@@ -4888,7 +4867,6 @@ func (x *respMyInteractionFastEncode) readField0(p thrift.Decoder) error {  // S
 
 
 
-
 func (x *respMyInteractionFastEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -5027,7 +5005,6 @@ func (x *sinkMyInteractionFastEncode) readField0(p thrift.Decoder) error {  // S
 
 
 
-
 func (x *sinkMyInteractionFastEncode) Exception() thrift.WritableException {
     return nil
 }
@@ -5162,7 +5139,6 @@ func (x *respFinalMyInteractionFastEncode) readField0(p thrift.Decoder) error { 
     x.Success = result
     return nil
 }
-
 
 
 
@@ -5535,7 +5511,6 @@ func (x *respBoxedInteractionGetABox) readField0(p thrift.Decoder) error {  // S
     x.Success = result
     return nil
 }
-
 
 
 

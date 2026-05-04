@@ -143,7 +143,6 @@ func (x *reqMyServiceQuery) readField1(p thrift.Decoder) error {  // S
     return nil
 }
 
-
 func (x *reqMyServiceQuery) GetI() *includes.Included {
     if !x.IsSetI() {
         return nil
@@ -195,7 +194,6 @@ func (x *reqMyServiceQuery) readField2(p thrift.Decoder) error {  // I
     x.I = result
     return nil
 }
-
 
 
 
@@ -420,7 +418,6 @@ func (x *reqMyServiceHasArgDocs) readField1(p thrift.Decoder) error {  // S
     return nil
 }
 
-
 func (x *reqMyServiceHasArgDocs) GetI() *includes.Included {
     if !x.IsSetI() {
         return nil
@@ -472,7 +469,6 @@ func (x *reqMyServiceHasArgDocs) readField2(p thrift.Decoder) error {  // I
     x.I = result
     return nil
 }
-
 
 
 

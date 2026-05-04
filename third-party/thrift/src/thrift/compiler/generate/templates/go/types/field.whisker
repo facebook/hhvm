@@ -117,17 +117,3 @@ func (x *{{struct.go_name}}) readField{{field.key_str}}(p thrift.Decoder) error 
     return nil
 }
 {{/let partial}}
-
-{{! DefaultGet*() }}
-{{#let export partial default_get |struct field| captures |types|}}
-{{#let type = field.type}}
-{{#if type.structured?}}
-// Deprecated: Use {{struct.go_qualified_new_func}}().Get{{field.go_name}}() instead.
-func (x *{{struct.go_name}}) DefaultGet{{field.go_name}}() *{{#partial types.go_type type=type}} {
-    if !x.IsSet{{field.go_name}}() {
-        return {{#partial types.natural_default_value type=type}}
-    }
-    return x.{{field.go_name}}
-}
-{{/if type.structured?}}
-{{/let partial}}

@@ -157,7 +157,6 @@ func (x *A) readField1(p thrift.Decoder) error {  // UselessField
 
 
 
-
 func (x *A) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("A"); err != nil {
         return thrift.PrependError("A write struct begin error: ", err)
@@ -291,7 +290,6 @@ func (x *U) readField1(p thrift.Decoder) error {  // I
     return nil
 }
 
-
 func (x *U) GetS() string {
     if !x.IsSetS() {
         return ""
@@ -342,7 +340,6 @@ func (x *U) readField2(p thrift.Decoder) error {  // S
     x.S = &result
     return nil
 }
-
 
 
 func (x *U) CountSetFields() int {
@@ -486,7 +483,6 @@ func (x *Bang) readField1(p thrift.Decoder) error {  // Message
     x.Message = result
     return nil
 }
-
 
 
 
@@ -953,7 +949,6 @@ func (x *streamCNumbers) readField0(p thrift.Decoder) error {  // Success
 
 
 
-
 func (x *streamCNumbers) Exception() thrift.WritableException {
     return nil
 }
@@ -1080,7 +1075,6 @@ func (x *reqCThing) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
-
 func (x *reqCThing) GetB() string {
     return x.B
 }
@@ -1121,7 +1115,6 @@ func (x *reqCThing) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
-
 
 func (x *reqCThing) GetC() []int32 {
     if !x.IsSetC() {
@@ -1198,7 +1191,6 @@ func (x *reqCThing) readField3(p thrift.Decoder) error {  // C
     x.C = result
     return nil
 }
-
 
 
 
@@ -1348,7 +1340,6 @@ func (x *respCThing) readField0(p thrift.Decoder) error {  // Success
     return nil
 }
 
-
 func (x *respCThing) GetBang() *Bang {
     if !x.IsSetBang() {
         return nil
@@ -1400,7 +1391,6 @@ func (x *respCThing) readField1(p thrift.Decoder) error {  // Bang
     x.Bang = result
     return nil
 }
-
 
 
 

@@ -410,7 +410,6 @@ func (x *SomeStruct) readField1(p thrift.Decoder) error {  // Reasonable
     return nil
 }
 
-
 func (x *SomeStruct) GetFine() Metasyntactic {
     return x.Fine
 }
@@ -453,7 +452,6 @@ func (x *SomeStruct) readField2(p thrift.Decoder) error {  // Fine
     return nil
 }
 
-
 func (x *SomeStruct) GetQuestionable() Metasyntactic {
     return x.Questionable
 }
@@ -495,7 +493,6 @@ func (x *SomeStruct) readField3(p thrift.Decoder) error {  // Questionable
     x.Questionable = result
     return nil
 }
-
 
 func (x *SomeStruct) GetTags() []int32 {
     if !x.IsSetTags() {
@@ -573,7 +570,6 @@ func (x *SomeStruct) readField4(p thrift.Decoder) error {  // Tags
     x.Tags = result
     return nil
 }
-
 
 
 
@@ -731,7 +727,6 @@ func (x *MyStruct) readField1(p thrift.Decoder) error {  // Me2_3
     return nil
 }
 
-
 func (x *MyStruct) GetMe3N3() MyEnum3 {
     return x.Me3N3
 }
@@ -773,7 +768,6 @@ func (x *MyStruct) readField2(p thrift.Decoder) error {  // Me3N3
     x.Me3N3 = result
     return nil
 }
-
 
 func (x *MyStruct) GetMe1T1() MyEnum1 {
     return x.Me1T1
@@ -817,7 +811,6 @@ func (x *MyStruct) readField4(p thrift.Decoder) error {  // Me1T1
     return nil
 }
 
-
 func (x *MyStruct) GetMe1T2() MyEnum1 {
     return x.Me1T2
 }
@@ -859,7 +852,6 @@ func (x *MyStruct) readField6(p thrift.Decoder) error {  // Me1T2
     x.Me1T2 = result
     return nil
 }
-
 
 
 

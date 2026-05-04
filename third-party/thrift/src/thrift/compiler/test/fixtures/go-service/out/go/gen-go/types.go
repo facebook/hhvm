@@ -73,7 +73,6 @@ func (x *GetEntityRequest) readField1(p thrift.Decoder) error {  // Id
 
 
 
-
 func (x *GetEntityRequest) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("GetEntityRequest"); err != nil {
         return thrift.PrependError("GetEntityRequest write struct begin error: ", err)
@@ -195,7 +194,6 @@ func (x *GetEntityResponse) readField1(p thrift.Decoder) error {  // Entity
     x.Entity = result
     return nil
 }
-
 
 
 
@@ -324,7 +322,6 @@ func (x *NonComparableStruct) readField1(p thrift.Decoder) error {  // Foo
     return nil
 }
 
-
 func (x *NonComparableStruct) GetBar() []string {
     if !x.IsSetBar() {
         return make([]string, 0)
@@ -400,7 +397,6 @@ func (x *NonComparableStruct) readField2(p thrift.Decoder) error {  // Bar
     x.Bar = result
     return nil
 }
-
 
 func (x *NonComparableStruct) GetBaz() map[*NonComparableStruct]int64 {
     if !x.IsSetBaz() {
@@ -499,7 +495,6 @@ func (x *NonComparableStruct) readField3(p thrift.Decoder) error {  // Baz
     x.Baz = result
     return nil
 }
-
 
 
 
@@ -655,7 +650,6 @@ func (x *reqGetEntityGetEntity) readField1(p thrift.Decoder) error {  // R
 
 
 
-
 func (x *reqGetEntityGetEntity) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqGetEntityGetEntity"); err != nil {
         return thrift.PrependError("reqGetEntityGetEntity write struct begin error: ", err)
@@ -788,7 +782,6 @@ func (x *respGetEntityGetEntity) readField0(p thrift.Decoder) error {  // Succes
     x.Success = result
     return nil
 }
-
 
 
 
@@ -1003,7 +996,6 @@ func (x *respGetEntityGetBool) readField0(p thrift.Decoder) error {  // Success
     x.Success = &result
     return nil
 }
-
 
 
 
@@ -1223,7 +1215,6 @@ func (x *respGetEntityGetByte) readField0(p thrift.Decoder) error {  // Success
 
 
 
-
 func (x *respGetEntityGetByte) Exception() thrift.WritableException {
     return nil
 }
@@ -1434,7 +1425,6 @@ func (x *respGetEntityGetI16) readField0(p thrift.Decoder) error {  // Success
     x.Success = &result
     return nil
 }
-
 
 
 
@@ -1653,7 +1643,6 @@ func (x *respGetEntityGetI32) readField0(p thrift.Decoder) error {  // Success
 
 
 
-
 func (x *respGetEntityGetI32) Exception() thrift.WritableException {
     return nil
 }
@@ -1864,7 +1853,6 @@ func (x *respGetEntityGetI64) readField0(p thrift.Decoder) error {  // Success
     x.Success = &result
     return nil
 }
-
 
 
 
@@ -2083,7 +2071,6 @@ func (x *respGetEntityGetDouble) readField0(p thrift.Decoder) error {  // Succes
 
 
 
-
 func (x *respGetEntityGetDouble) Exception() thrift.WritableException {
     return nil
 }
@@ -2298,7 +2285,6 @@ func (x *respGetEntityGetString) readField0(p thrift.Decoder) error {  // Succes
 
 
 
-
 func (x *respGetEntityGetString) Exception() thrift.WritableException {
     return nil
 }
@@ -2509,7 +2495,6 @@ func (x *respGetEntityGetBinary) readField0(p thrift.Decoder) error {  // Succes
     x.Success = result
     return nil
 }
-
 
 
 
@@ -2774,7 +2759,6 @@ func (x *respGetEntityGetMap) readField0(p thrift.Decoder) error {  // Success
 
 
 
-
 func (x *respGetEntityGetMap) Exception() thrift.WritableException {
     return nil
 }
@@ -3014,7 +2998,6 @@ func (x *respGetEntityGetSet) readField0(p thrift.Decoder) error {  // Success
     x.Success = result
     return nil
 }
-
 
 
 
@@ -3262,7 +3245,6 @@ func (x *respGetEntityGetList) readField0(p thrift.Decoder) error {  // Success
 
 
 
-
 func (x *respGetEntityGetList) Exception() thrift.WritableException {
     return nil
 }
@@ -3389,7 +3371,6 @@ func (x *reqGetEntityGetLegacyStuff) readField_2(p thrift.Decoder) error {  // N
     return nil
 }
 
-
 func (x *reqGetEntityGetLegacyStuff) GetNumNeg1() int64 {
     return x.NumNeg1
 }
@@ -3431,7 +3412,6 @@ func (x *reqGetEntityGetLegacyStuff) readField_1(p thrift.Decoder) error {  // N
     return nil
 }
 
-
 func (x *reqGetEntityGetLegacyStuff) GetNumPos() int64 {
     return x.NumPos
 }
@@ -3472,7 +3452,6 @@ func (x *reqGetEntityGetLegacyStuff) readField1(p thrift.Decoder) error {  // Nu
     x.NumPos = result
     return nil
 }
-
 
 
 
@@ -3624,7 +3603,6 @@ func (x *respGetEntityGetLegacyStuff) readField0(p thrift.Decoder) error {  // S
 
 
 
-
 func (x *respGetEntityGetLegacyStuff) Exception() thrift.WritableException {
     return nil
 }
@@ -3748,7 +3726,6 @@ func (x *reqGetEntityGetCtxCollision) readField1(p thrift.Decoder) error {  // C
     x.Ctx = result
     return nil
 }
-
 
 
 
@@ -3888,7 +3865,6 @@ func (x *respGetEntityGetCtxCollision) readField0(p thrift.Decoder) error {  // 
 
 
 
-
 func (x *respGetEntityGetCtxCollision) Exception() thrift.WritableException {
     return nil
 }
@@ -4014,7 +3990,6 @@ func (x *reqGetEntityGetCtx1Collision) readField1(p thrift.Decoder) error {  // 
     return nil
 }
 
-
 func (x *reqGetEntityGetCtx1Collision) GetCtx1() int64 {
     return x.Ctx1
 }
@@ -4055,7 +4030,6 @@ func (x *reqGetEntityGetCtx1Collision) readField2(p thrift.Decoder) error {  // 
     x.Ctx1 = result
     return nil
 }
-
 
 
 
@@ -4201,7 +4175,6 @@ func (x *respGetEntityGetCtx1Collision) readField0(p thrift.Decoder) error {  //
 
 
 
-
 func (x *respGetEntityGetCtx1Collision) Exception() thrift.WritableException {
     return nil
 }
@@ -4325,7 +4298,6 @@ func (x *reqGetEntityGetContextCollision) readField1(p thrift.Decoder) error {  
     x.Context = result
     return nil
 }
-
 
 
 
@@ -4465,7 +4437,6 @@ func (x *respGetEntityGetContextCollision) readField0(p thrift.Decoder) error { 
 
 
 
-
 func (x *respGetEntityGetContextCollision) Exception() thrift.WritableException {
     return nil
 }
@@ -4589,7 +4560,6 @@ func (x *reqGetEntityGetOutCollision) readField1(p thrift.Decoder) error {  // O
     x.Out = result
     return nil
 }
-
 
 
 
@@ -4729,7 +4699,6 @@ func (x *respGetEntityGetOutCollision) readField0(p thrift.Decoder) error {  // 
 
 
 
-
 func (x *respGetEntityGetOutCollision) Exception() thrift.WritableException {
     return nil
 }
@@ -4855,7 +4824,6 @@ func (x *reqGetEntityGetOut1Collision) readField1(p thrift.Decoder) error {  // 
     return nil
 }
 
-
 func (x *reqGetEntityGetOut1Collision) GetOut1() int64 {
     return x.Out1
 }
@@ -4896,7 +4864,6 @@ func (x *reqGetEntityGetOut1Collision) readField2(p thrift.Decoder) error {  // 
     x.Out1 = result
     return nil
 }
-
 
 
 
@@ -5042,7 +5009,6 @@ func (x *respGetEntityGetOut1Collision) readField0(p thrift.Decoder) error {  //
 
 
 
-
 func (x *respGetEntityGetOut1Collision) Exception() thrift.WritableException {
     return nil
 }
@@ -5166,7 +5132,6 @@ func (x *reqGetEntityGetInCollision) readField1(p thrift.Decoder) error {  // In
     x.In = result
     return nil
 }
-
 
 
 
@@ -5306,7 +5271,6 @@ func (x *respGetEntityGetInCollision) readField0(p thrift.Decoder) error {  // S
 
 
 
-
 func (x *respGetEntityGetInCollision) Exception() thrift.WritableException {
     return nil
 }
@@ -5432,7 +5396,6 @@ func (x *reqGetEntityGetIn1Collision) readField1(p thrift.Decoder) error {  // I
     return nil
 }
 
-
 func (x *reqGetEntityGetIn1Collision) GetIn1() int64 {
     return x.In1
 }
@@ -5473,7 +5436,6 @@ func (x *reqGetEntityGetIn1Collision) readField2(p thrift.Decoder) error {  // I
     x.In1 = result
     return nil
 }
-
 
 
 
@@ -5619,7 +5581,6 @@ func (x *respGetEntityGetIn1Collision) readField0(p thrift.Decoder) error {  // 
 
 
 
-
 func (x *respGetEntityGetIn1Collision) Exception() thrift.WritableException {
     return nil
 }
@@ -5743,7 +5704,6 @@ func (x *reqGetEntityGetErrCollision) readField1(p thrift.Decoder) error {  // E
     x.Err = result
     return nil
 }
-
 
 
 
@@ -5883,7 +5843,6 @@ func (x *respGetEntityGetErrCollision) readField0(p thrift.Decoder) error {  // 
 
 
 
-
 func (x *respGetEntityGetErrCollision) Exception() thrift.WritableException {
     return nil
 }
@@ -6009,7 +5968,6 @@ func (x *reqGetEntityGetErr1Collision) readField1(p thrift.Decoder) error {  // 
     return nil
 }
 
-
 func (x *reqGetEntityGetErr1Collision) GetErr1() int64 {
     return x.Err1
 }
@@ -6050,7 +6008,6 @@ func (x *reqGetEntityGetErr1Collision) readField2(p thrift.Decoder) error {  // 
     x.Err1 = result
     return nil
 }
-
 
 
 
@@ -6196,7 +6153,6 @@ func (x *respGetEntityGetErr1Collision) readField0(p thrift.Decoder) error {  //
 
 
 
-
 func (x *respGetEntityGetErr1Collision) Exception() thrift.WritableException {
     return nil
 }
@@ -6322,7 +6278,6 @@ func (x *reqGetEntityMyMethodWithConflictingParamAccessors) readField1(p thrift.
     return nil
 }
 
-
 func (x *reqGetEntityMyMethodWithConflictingParamAccessors) GetFoo() string {
     return x.Foo
 }
@@ -6363,7 +6318,6 @@ func (x *reqGetEntityMyMethodWithConflictingParamAccessors) readField2(p thrift.
     x.Foo = result
     return nil
 }
-
 
 
 

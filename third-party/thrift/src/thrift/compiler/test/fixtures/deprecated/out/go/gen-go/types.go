@@ -76,7 +76,6 @@ func (x *User) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
-
 func (x *User) GetName() string {
     return x.Name
 }
@@ -118,7 +117,6 @@ func (x *User) readField2(p thrift.Decoder) error {  // Name
     return nil
 }
 
-
 func (x *User) GetFullName() string {
     return x.FullName
 }
@@ -159,7 +157,6 @@ func (x *User) readField3(p thrift.Decoder) error {  // FullName
     x.FullName = result
     return nil
 }
-
 
 func (x *User) GetEmail() string {
     if !x.IsSetEmail() {
@@ -212,7 +209,6 @@ func (x *User) readField4(p thrift.Decoder) error {  // Email
     return nil
 }
 
-
 func (x *User) GetEmailAddress() string {
     if !x.IsSetEmailAddress() {
         return ""
@@ -263,7 +259,6 @@ func (x *User) readField5(p thrift.Decoder) error {  // EmailAddress
     x.EmailAddress = &result
     return nil
 }
-
 
 
 
@@ -425,7 +420,6 @@ func (x *ExampleUnion) readField1(p thrift.Decoder) error {  // StringValue
     return nil
 }
 
-
 func (x *ExampleUnion) GetIntValue() int32 {
     if !x.IsSetIntValue() {
         return 0
@@ -477,7 +471,6 @@ func (x *ExampleUnion) readField2(p thrift.Decoder) error {  // IntValue
     return nil
 }
 
-
 func (x *ExampleUnion) GetDoubleValue() float64 {
     if !x.IsSetDoubleValue() {
         return 0.0
@@ -528,7 +521,6 @@ func (x *ExampleUnion) readField3(p thrift.Decoder) error {  // DoubleValue
     x.DoubleValue = &result
     return nil
 }
-
 
 
 func (x *ExampleUnion) CountSetFields() int {

@@ -72,7 +72,6 @@ func (x *Foo) readField1(p thrift.Decoder) error {  // Field2
     return nil
 }
 
-
 func (x *Foo) GetField3() int32 {
     return x.Field3
 }
@@ -114,7 +113,6 @@ func (x *Foo) readField2(p thrift.Decoder) error {  // Field3
     return nil
 }
 
-
 func (x *Foo) GetField1() int32 {
     return x.Field1
 }
@@ -155,7 +153,6 @@ func (x *Foo) readField3(p thrift.Decoder) error {  // Field1
     x.Field1 = result
     return nil
 }
-
 
 
 
@@ -296,7 +293,6 @@ func (x *Foo2) readField1(p thrift.Decoder) error {  // Field2
     return nil
 }
 
-
 func (x *Foo2) GetField3() int32 {
     return x.Field3
 }
@@ -338,7 +334,6 @@ func (x *Foo2) readField2(p thrift.Decoder) error {  // Field3
     return nil
 }
 
-
 func (x *Foo2) GetField1() int32 {
     return x.Field1
 }
@@ -379,7 +374,6 @@ func (x *Foo2) readField3(p thrift.Decoder) error {  // Field1
     x.Field1 = result
     return nil
 }
-
 
 
 

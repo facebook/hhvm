@@ -339,7 +339,6 @@ func (x *Automobile) readField1(p thrift.Decoder) error {  // Plate
     return nil
 }
 
-
 func (x *Automobile) GetPreviousPlate() Plate {
     if !x.IsSetPreviousPlate() {
         return NewPlate()
@@ -391,7 +390,6 @@ func (x *Automobile) readField2(p thrift.Decoder) error {  // PreviousPlate
     x.PreviousPlate = &result
     return nil
 }
-
 
 func (x *Automobile) GetFirstPlate() Plate {
     if !x.IsSetFirstPlate() {
@@ -445,7 +443,6 @@ func (x *Automobile) readField3(p thrift.Decoder) error {  // FirstPlate
     return nil
 }
 
-
 func (x *Automobile) GetYear() Year {
     return x.Year
 }
@@ -487,7 +484,6 @@ func (x *Automobile) readField4(p thrift.Decoder) error {  // Year
     x.Year = result
     return nil
 }
-
 
 func (x *Automobile) GetDrivers() Drivers {
     if !x.IsSetDrivers() {
@@ -536,7 +532,6 @@ func (x *Automobile) readField5(p thrift.Decoder) error {  // Drivers
     x.Drivers = result
     return nil
 }
-
 
 func (x *Automobile) GetAccessories() []*Accessory {
     if !x.IsSetAccessories() {
@@ -614,7 +609,6 @@ func (x *Automobile) readField6(p thrift.Decoder) error {  // Accessories
     x.Accessories = result
     return nil
 }
-
 
 func (x *Automobile) GetPartNames() map[int32]*CarPartName {
     if !x.IsSetPartNames() {
@@ -709,7 +703,6 @@ func (x *Automobile) readField7(p thrift.Decoder) error {  // PartNames
     x.PartNames = result
     return nil
 }
-
 
 
 
@@ -872,7 +865,6 @@ func (x *MapKey) readField1(p thrift.Decoder) error {  // Num
     return nil
 }
 
-
 func (x *MapKey) GetStrval() string {
     return x.Strval
 }
@@ -913,7 +905,6 @@ func (x *MapKey) readField2(p thrift.Decoder) error {  // Strval
     x.Strval = result
     return nil
 }
-
 
 
 
@@ -1102,7 +1093,6 @@ func (x *MapContainer) readField1(p thrift.Decoder) error {  // Mapval
 
 
 
-
 func (x *MapContainer) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MapContainer"); err != nil {
         return thrift.PrependError("MapContainer write struct begin error: ", err)
@@ -1237,7 +1227,6 @@ func (x *Pair) readField1(p thrift.Decoder) error {  // Automobile
     return nil
 }
 
-
 func (x *Pair) GetCar() *Car {
     if !x.IsSetCar() {
         return nil
@@ -1289,7 +1278,6 @@ func (x *Pair) readField2(p thrift.Decoder) error {  // Car
     x.Car = result
     return nil
 }
-
 
 
 
@@ -1459,7 +1447,6 @@ func (x *Collection) readField1(p thrift.Decoder) error {  // Automobiles
     return nil
 }
 
-
 func (x *Collection) GetCars() []*Car {
     if !x.IsSetCars() {
         return make([]*Car, 0)
@@ -1536,7 +1523,6 @@ func (x *Collection) readField2(p thrift.Decoder) error {  // Cars
     x.Cars = result
     return nil
 }
-
 
 
 
@@ -1672,7 +1658,6 @@ func (x *reqFinderByPlate) readField1(p thrift.Decoder) error {  // Plate
     x.Plate = result
     return nil
 }
-
 
 
 
@@ -1813,7 +1798,6 @@ func (x *respFinderByPlate) readField0(p thrift.Decoder) error {  // Success
 
 
 
-
 func (x *respFinderByPlate) Exception() thrift.WritableException {
     return nil
 }
@@ -1938,7 +1922,6 @@ func (x *reqFinderAliasByPlate) readField1(p thrift.Decoder) error {  // Plate
     x.Plate = result
     return nil
 }
-
 
 
 
@@ -2079,7 +2062,6 @@ func (x *respFinderAliasByPlate) readField0(p thrift.Decoder) error {  // Succes
 
 
 
-
 func (x *respFinderAliasByPlate) Exception() thrift.WritableException {
     return nil
 }
@@ -2204,7 +2186,6 @@ func (x *reqFinderPreviousPlate) readField1(p thrift.Decoder) error {  // Plate
     x.Plate = result
     return nil
 }
-
 
 
 
@@ -2341,7 +2322,6 @@ func (x *respFinderPreviousPlate) readField0(p thrift.Decoder) error {  // Succe
     x.Success = &result
     return nil
 }
-
 
 
 

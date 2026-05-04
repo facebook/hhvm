@@ -259,10 +259,6 @@ func (x *{{struct.go_name}}) setDefaults() *{{struct.go_name}} {
 {{#partial m_field.read struct=s field=field}}
 {{/if (not s.use_reflect_codec?)}}
 
-{{#if (and field.pointer? root_program.gen_default_get?)}}
-{{#partial m_field.default_get struct=s field=field}}
-{{/if (and field.pointer? root_program.gen_default_get?)}}
-
 {{/each}}
 
 {{! countSetFields }}

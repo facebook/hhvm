@@ -71,7 +71,6 @@ func (x *Accessory) readField1(p thrift.Decoder) error {  // InventoryId
     return nil
 }
 
-
 func (x *Accessory) GetName() string {
     return x.Name
 }
@@ -112,7 +111,6 @@ func (x *Accessory) readField2(p thrift.Decoder) error {  // Name
     x.Name = result
     return nil
 }
-
 
 
 
@@ -246,7 +244,6 @@ func (x *PartName) readField1(p thrift.Decoder) error {  // InventoryId
     return nil
 }
 
-
 func (x *PartName) GetName() string {
     return x.Name
 }
@@ -287,7 +284,6 @@ func (x *PartName) readField2(p thrift.Decoder) error {  // Name
     x.Name = result
     return nil
 }
-
 
 
 

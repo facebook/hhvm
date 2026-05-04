@@ -231,7 +231,6 @@ func (x *MyUnion) readField1(p thrift.Decoder) error {  // BoolField
     return nil
 }
 
-
 func (x *MyUnion) GetByteField() int8 {
     if !x.IsSetByteField() {
         return 0
@@ -284,7 +283,6 @@ func (x *MyUnion) readField2(p thrift.Decoder) error {  // ByteField
     return nil
 }
 
-
 func (x *MyUnion) GetShortField() int16 {
     if !x.IsSetShortField() {
         return 0
@@ -335,7 +333,6 @@ func (x *MyUnion) readField3(p thrift.Decoder) error {  // ShortField
     x.ShortField = &result
     return nil
 }
-
 
 func (x *MyUnion) GetIntField() int32 {
     if !x.IsSetIntField() {
@@ -388,7 +385,6 @@ func (x *MyUnion) readField4(p thrift.Decoder) error {  // IntField
     return nil
 }
 
-
 func (x *MyUnion) GetLongField() int64 {
     if !x.IsSetLongField() {
         return 0
@@ -439,7 +435,6 @@ func (x *MyUnion) readField5(p thrift.Decoder) error {  // LongField
     x.LongField = &result
     return nil
 }
-
 
 func (x *MyUnion) GetFloatField() float32 {
     if !x.IsSetFloatField() {
@@ -492,7 +487,6 @@ func (x *MyUnion) readField6(p thrift.Decoder) error {  // FloatField
     return nil
 }
 
-
 func (x *MyUnion) GetDoubleField() float64 {
     if !x.IsSetDoubleField() {
         return 0.0
@@ -543,7 +537,6 @@ func (x *MyUnion) readField7(p thrift.Decoder) error {  // DoubleField
     x.DoubleField = &result
     return nil
 }
-
 
 func (x *MyUnion) GetStringField() string {
     if !x.IsSetStringField() {
@@ -596,7 +589,6 @@ func (x *MyUnion) readField8(p thrift.Decoder) error {  // StringField
     return nil
 }
 
-
 func (x *MyUnion) GetBinaryField() []byte {
     if !x.IsSetBinaryField() {
         return []byte("")
@@ -647,7 +639,6 @@ func (x *MyUnion) readField9(p thrift.Decoder) error {  // BinaryField
     x.BinaryField = result
     return nil
 }
-
 
 func (x *MyUnion) GetEnumField() MyEnum {
     if !x.IsSetEnumField() {
@@ -700,7 +691,6 @@ func (x *MyUnion) readField10(p thrift.Decoder) error {  // EnumField
     x.EnumField = &result
     return nil
 }
-
 
 func (x *MyUnion) GetListField() []int16 {
     if !x.IsSetListField() {
@@ -782,7 +772,6 @@ func (x *MyUnion) readField11(p thrift.Decoder) error {  // ListField
     return nil
 }
 
-
 func (x *MyUnion) GetSetField() []int16 {
     if !x.IsSetSetField() {
         return make([]int16, 0)
@@ -862,7 +851,6 @@ func (x *MyUnion) readField12(p thrift.Decoder) error {  // SetField
     x.SetField = result
     return nil
 }
-
 
 func (x *MyUnion) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
@@ -961,7 +949,6 @@ func (x *MyUnion) readField13(p thrift.Decoder) error {  // MapField
     return nil
 }
 
-
 func (x *MyUnion) GetStructField() *MyStruct {
     if !x.IsSetStructField() {
         return nil
@@ -1013,7 +1000,6 @@ func (x *MyUnion) readField14(p thrift.Decoder) error {  // StructField
     x.StructField = result
     return nil
 }
-
 
 
 func (x *MyUnion) CountSetFields() int {
@@ -1256,7 +1242,6 @@ func (x *MyStructWithCustomDefault) readField1(p thrift.Decoder) error {  // Fie
 
 
 
-
 func (x *MyStructWithCustomDefault) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStructWithCustomDefault"); err != nil {
         return thrift.PrependError("MyStructWithCustomDefault write struct begin error: ", err)
@@ -1393,7 +1378,6 @@ func (x *StructLevelTerseStruct) readField1(p thrift.Decoder) error {  // BoolFi
     return nil
 }
 
-
 func (x *StructLevelTerseStruct) GetByteField() int8 {
     return x.ByteField
 }
@@ -1436,7 +1420,6 @@ func (x *StructLevelTerseStruct) readField2(p thrift.Decoder) error {  // ByteFi
     return nil
 }
 
-
 func (x *StructLevelTerseStruct) GetShortField() int16 {
     return x.ShortField
 }
@@ -1477,7 +1460,6 @@ func (x *StructLevelTerseStruct) readField3(p thrift.Decoder) error {  // ShortF
     x.ShortField = result
     return nil
 }
-
 
 func (x *StructLevelTerseStruct) GetIntField() int32 {
     return x.IntField
@@ -1520,7 +1502,6 @@ func (x *StructLevelTerseStruct) readField4(p thrift.Decoder) error {  // IntFie
     return nil
 }
 
-
 func (x *StructLevelTerseStruct) GetLongField() int64 {
     return x.LongField
 }
@@ -1561,7 +1542,6 @@ func (x *StructLevelTerseStruct) readField5(p thrift.Decoder) error {  // LongFi
     x.LongField = result
     return nil
 }
-
 
 func (x *StructLevelTerseStruct) GetFloatField() float32 {
     return x.FloatField
@@ -1604,7 +1584,6 @@ func (x *StructLevelTerseStruct) readField6(p thrift.Decoder) error {  // FloatF
     return nil
 }
 
-
 func (x *StructLevelTerseStruct) GetDoubleField() float64 {
     return x.DoubleField
 }
@@ -1646,7 +1625,6 @@ func (x *StructLevelTerseStruct) readField7(p thrift.Decoder) error {  // Double
     return nil
 }
 
-
 func (x *StructLevelTerseStruct) GetStringField() string {
     return x.StringField
 }
@@ -1687,7 +1665,6 @@ func (x *StructLevelTerseStruct) readField8(p thrift.Decoder) error {  // String
     x.StringField = result
     return nil
 }
-
 
 func (x *StructLevelTerseStruct) GetBinaryField() []byte {
     if !x.IsSetBinaryField() {
@@ -1736,7 +1713,6 @@ func (x *StructLevelTerseStruct) readField9(p thrift.Decoder) error {  // Binary
     return nil
 }
 
-
 func (x *StructLevelTerseStruct) GetEnumField() MyEnum {
     return x.EnumField
 }
@@ -1778,7 +1754,6 @@ func (x *StructLevelTerseStruct) readField10(p thrift.Decoder) error {  // EnumF
     x.EnumField = result
     return nil
 }
-
 
 func (x *StructLevelTerseStruct) GetListField() []int16 {
     if !x.IsSetListField() {
@@ -1856,7 +1831,6 @@ func (x *StructLevelTerseStruct) readField11(p thrift.Decoder) error {  // ListF
     return nil
 }
 
-
 func (x *StructLevelTerseStruct) GetSetField() []int16 {
     if !x.IsSetSetField() {
         return make([]int16, 0)
@@ -1932,7 +1906,6 @@ func (x *StructLevelTerseStruct) readField12(p thrift.Decoder) error {  // SetFi
     x.SetField = result
     return nil
 }
-
 
 func (x *StructLevelTerseStruct) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
@@ -2027,7 +2000,6 @@ func (x *StructLevelTerseStruct) readField13(p thrift.Decoder) error {  // MapFi
     return nil
 }
 
-
 func (x *StructLevelTerseStruct) GetStructField() *MyStruct {
     if !x.IsSetStructField() {
         return nil
@@ -2080,7 +2052,6 @@ func (x *StructLevelTerseStruct) readField14(p thrift.Decoder) error {  // Struc
     return nil
 }
 
-
 func (x *StructLevelTerseStruct) GetUnionField() *MyUnion {
     if !x.IsSetUnionField() {
         return nil
@@ -2132,7 +2103,6 @@ func (x *StructLevelTerseStruct) readField15(p thrift.Decoder) error {  // Union
     x.UnionField = result
     return nil
 }
-
 
 
 
@@ -2372,7 +2342,6 @@ func (x *FieldLevelTerseStruct) readField1(p thrift.Decoder) error {  // TerseBo
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetTerseByteField() int8 {
     return x.TerseByteField
 }
@@ -2415,7 +2384,6 @@ func (x *FieldLevelTerseStruct) readField2(p thrift.Decoder) error {  // TerseBy
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetTerseShortField() int16 {
     return x.TerseShortField
 }
@@ -2456,7 +2424,6 @@ func (x *FieldLevelTerseStruct) readField3(p thrift.Decoder) error {  // TerseSh
     x.TerseShortField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetTerseIntField() int32 {
     return x.TerseIntField
@@ -2499,7 +2466,6 @@ func (x *FieldLevelTerseStruct) readField4(p thrift.Decoder) error {  // TerseIn
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetTerseLongField() int64 {
     return x.TerseLongField
 }
@@ -2540,7 +2506,6 @@ func (x *FieldLevelTerseStruct) readField5(p thrift.Decoder) error {  // TerseLo
     x.TerseLongField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetTerseFloatField() float32 {
     return x.TerseFloatField
@@ -2583,7 +2548,6 @@ func (x *FieldLevelTerseStruct) readField6(p thrift.Decoder) error {  // TerseFl
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetTerseDoubleField() float64 {
     return x.TerseDoubleField
 }
@@ -2625,7 +2589,6 @@ func (x *FieldLevelTerseStruct) readField7(p thrift.Decoder) error {  // TerseDo
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetTerseStringField() string {
     return x.TerseStringField
 }
@@ -2666,7 +2629,6 @@ func (x *FieldLevelTerseStruct) readField8(p thrift.Decoder) error {  // TerseSt
     x.TerseStringField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetTerseBinaryField() []byte {
     if !x.IsSetTerseBinaryField() {
@@ -2715,7 +2677,6 @@ func (x *FieldLevelTerseStruct) readField9(p thrift.Decoder) error {  // TerseBi
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetTerseEnumField() MyEnum {
     return x.TerseEnumField
 }
@@ -2757,7 +2718,6 @@ func (x *FieldLevelTerseStruct) readField10(p thrift.Decoder) error {  // TerseE
     x.TerseEnumField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetTerseListField() []int16 {
     if !x.IsSetTerseListField() {
@@ -2835,7 +2795,6 @@ func (x *FieldLevelTerseStruct) readField11(p thrift.Decoder) error {  // TerseL
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetTerseSetField() []int16 {
     if !x.IsSetTerseSetField() {
         return make([]int16, 0)
@@ -2911,7 +2870,6 @@ func (x *FieldLevelTerseStruct) readField12(p thrift.Decoder) error {  // TerseS
     x.TerseSetField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetTerseMapField() map[int16]int16 {
     if !x.IsSetTerseMapField() {
@@ -3006,7 +2964,6 @@ func (x *FieldLevelTerseStruct) readField13(p thrift.Decoder) error {  // TerseM
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetTerseStructField() *MyStruct {
     if !x.IsSetTerseStructField() {
         return nil
@@ -3059,7 +3016,6 @@ func (x *FieldLevelTerseStruct) readField14(p thrift.Decoder) error {  // TerseS
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetBoolField() bool {
     return x.BoolField
 }
@@ -3100,7 +3056,6 @@ func (x *FieldLevelTerseStruct) readField15(p thrift.Decoder) error {  // BoolFi
     x.BoolField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetByteField() int8 {
     return x.ByteField
@@ -3144,7 +3099,6 @@ func (x *FieldLevelTerseStruct) readField16(p thrift.Decoder) error {  // ByteFi
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetShortField() int16 {
     return x.ShortField
 }
@@ -3185,7 +3139,6 @@ func (x *FieldLevelTerseStruct) readField17(p thrift.Decoder) error {  // ShortF
     x.ShortField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetIntField() int32 {
     return x.IntField
@@ -3228,7 +3181,6 @@ func (x *FieldLevelTerseStruct) readField18(p thrift.Decoder) error {  // IntFie
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetLongField() int64 {
     return x.LongField
 }
@@ -3269,7 +3221,6 @@ func (x *FieldLevelTerseStruct) readField19(p thrift.Decoder) error {  // LongFi
     x.LongField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetFloatField() float32 {
     return x.FloatField
@@ -3312,7 +3263,6 @@ func (x *FieldLevelTerseStruct) readField20(p thrift.Decoder) error {  // FloatF
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetDoubleField() float64 {
     return x.DoubleField
 }
@@ -3354,7 +3304,6 @@ func (x *FieldLevelTerseStruct) readField21(p thrift.Decoder) error {  // Double
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetStringField() string {
     return x.StringField
 }
@@ -3395,7 +3344,6 @@ func (x *FieldLevelTerseStruct) readField22(p thrift.Decoder) error {  // String
     x.StringField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetBinaryField() []byte {
     if !x.IsSetBinaryField() {
@@ -3444,7 +3392,6 @@ func (x *FieldLevelTerseStruct) readField23(p thrift.Decoder) error {  // Binary
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetEnumField() MyEnum {
     return x.EnumField
 }
@@ -3486,7 +3433,6 @@ func (x *FieldLevelTerseStruct) readField24(p thrift.Decoder) error {  // EnumFi
     x.EnumField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetListField() []int16 {
     if !x.IsSetListField() {
@@ -3564,7 +3510,6 @@ func (x *FieldLevelTerseStruct) readField25(p thrift.Decoder) error {  // ListFi
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetSetField() []int16 {
     if !x.IsSetSetField() {
         return make([]int16, 0)
@@ -3640,7 +3585,6 @@ func (x *FieldLevelTerseStruct) readField26(p thrift.Decoder) error {  // SetFie
     x.SetField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetMapField() map[int16]int16 {
     if !x.IsSetMapField() {
@@ -3735,7 +3679,6 @@ func (x *FieldLevelTerseStruct) readField27(p thrift.Decoder) error {  // MapFie
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetStructField() *MyStruct {
     if !x.IsSetStructField() {
         return nil
@@ -3787,7 +3730,6 @@ func (x *FieldLevelTerseStruct) readField28(p thrift.Decoder) error {  // Struct
     x.StructField = result
     return nil
 }
-
 
 func (x *FieldLevelTerseStruct) GetTerseUnionField() *MyUnion {
     if !x.IsSetTerseUnionField() {
@@ -3841,7 +3783,6 @@ func (x *FieldLevelTerseStruct) readField29(p thrift.Decoder) error {  // TerseU
     return nil
 }
 
-
 func (x *FieldLevelTerseStruct) GetUnionField() *MyUnion {
     if !x.IsSetUnionField() {
         return nil
@@ -3893,7 +3834,6 @@ func (x *FieldLevelTerseStruct) readField30(p thrift.Decoder) error {  // UnionF
     x.UnionField = result
     return nil
 }
-
 
 
 
@@ -4197,7 +4137,6 @@ func (x *AdaptedFields) readField1(p thrift.Decoder) error {  // Field1
     return nil
 }
 
-
 func (x *AdaptedFields) GetField2() int32 {
     return x.Field2
 }
@@ -4238,7 +4177,6 @@ func (x *AdaptedFields) readField2(p thrift.Decoder) error {  // Field2
     x.Field2 = result
     return nil
 }
-
 
 func (x *AdaptedFields) GetField3() MyInteger {
     return x.Field3
@@ -4281,7 +4219,6 @@ func (x *AdaptedFields) readField3(p thrift.Decoder) error {  // Field3
     x.Field3 = result
     return nil
 }
-
 
 
 
@@ -4420,7 +4357,6 @@ func (x *TerseException) readField1(p thrift.Decoder) error {  // Msg
     x.Msg = result
     return nil
 }
-
 
 
 

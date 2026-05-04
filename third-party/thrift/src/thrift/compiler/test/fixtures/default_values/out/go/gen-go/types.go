@@ -73,7 +73,6 @@ func (x *TrivialStruct) readField1(p thrift.Decoder) error {  // IntValue
 
 
 
-
 func (x *TrivialStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("TrivialStruct"); err != nil {
         return thrift.PrependError("TrivialStruct write struct begin error: ", err)
@@ -197,7 +196,6 @@ func (x *TrivialStructWithDefault) readField1(p thrift.Decoder) error {  // IntV
     return nil
 }
 
-
 func (x *TrivialStructWithDefault) GetIntValue_2() int32 {
     return x.IntValue_2
 }
@@ -238,7 +236,6 @@ func (x *TrivialStructWithDefault) readField2(p thrift.Decoder) error {  // IntV
     x.IntValue_2 = result
     return nil
 }
-
 
 
 
@@ -376,7 +373,6 @@ func (x *StructWithNoCustomDefaultValues) readField1(p thrift.Decoder) error {  
     return nil
 }
 
-
 func (x *StructWithNoCustomDefaultValues) GetOptionalInteger() int32 {
     if !x.IsSetOptionalInteger() {
         return 0
@@ -428,7 +424,6 @@ func (x *StructWithNoCustomDefaultValues) readField2(p thrift.Decoder) error {  
     return nil
 }
 
-
 func (x *StructWithNoCustomDefaultValues) GetRequiredInteger() int32 {
     return x.RequiredInteger
 }
@@ -469,7 +464,6 @@ func (x *StructWithNoCustomDefaultValues) readField3(p thrift.Decoder) error {  
     x.RequiredInteger = result
     return nil
 }
-
 
 func (x *StructWithNoCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
     if !x.IsSetUnqualifiedStruct() {
@@ -523,7 +517,6 @@ func (x *StructWithNoCustomDefaultValues) readField4(p thrift.Decoder) error {  
     return nil
 }
 
-
 func (x *StructWithNoCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
     if !x.IsSetOptionalStruct() {
         return nil
@@ -576,7 +569,6 @@ func (x *StructWithNoCustomDefaultValues) readField5(p thrift.Decoder) error {  
     return nil
 }
 
-
 func (x *StructWithNoCustomDefaultValues) GetRequiredStruct() *TrivialStruct {
     if !x.IsSetRequiredStruct() {
         return nil
@@ -628,7 +620,6 @@ func (x *StructWithNoCustomDefaultValues) readField6(p thrift.Decoder) error {  
     x.RequiredStruct = result
     return nil
 }
-
 
 
 
@@ -790,7 +781,6 @@ func (x *StructWithCustomDefaultValues) readField1(p thrift.Decoder) error {  //
     return nil
 }
 
-
 func (x *StructWithCustomDefaultValues) GetOptionalInteger() int32 {
     if !x.IsSetOptionalInteger() {
         return int32(43)
@@ -842,7 +832,6 @@ func (x *StructWithCustomDefaultValues) readField2(p thrift.Decoder) error {  //
     return nil
 }
 
-
 func (x *StructWithCustomDefaultValues) GetRequiredInteger() int32 {
     return x.RequiredInteger
 }
@@ -883,7 +872,6 @@ func (x *StructWithCustomDefaultValues) readField3(p thrift.Decoder) error {  //
     x.RequiredInteger = result
     return nil
 }
-
 
 func (x *StructWithCustomDefaultValues) GetUnqualifiedStruct() *TrivialStruct {
     if !x.IsSetUnqualifiedStruct() {
@@ -937,7 +925,6 @@ func (x *StructWithCustomDefaultValues) readField4(p thrift.Decoder) error {  //
     return nil
 }
 
-
 func (x *StructWithCustomDefaultValues) GetOptionalStruct() *TrivialStruct {
     if !x.IsSetOptionalStruct() {
         return nil
@@ -989,7 +976,6 @@ func (x *StructWithCustomDefaultValues) readField5(p thrift.Decoder) error {  //
     x.OptionalStruct = result
     return nil
 }
-
 
 func (x *StructWithCustomDefaultValues) GetRequiredStruct() *TrivialStruct {
     if !x.IsSetRequiredStruct() {
@@ -1043,7 +1029,6 @@ func (x *StructWithCustomDefaultValues) readField6(p thrift.Decoder) error {  //
     return nil
 }
 
-
 func (x *StructWithCustomDefaultValues) GetStructWithDefaultUnspecified() *TrivialStructWithDefault {
     if !x.IsSetStructWithDefaultUnspecified() {
         return nil
@@ -1096,7 +1081,6 @@ func (x *StructWithCustomDefaultValues) readField7(p thrift.Decoder) error {  //
     return nil
 }
 
-
 func (x *StructWithCustomDefaultValues) GetStructWithDefaultSpecified() *TrivialStructWithDefault {
     if !x.IsSetStructWithDefaultSpecified() {
         return nil
@@ -1148,7 +1132,6 @@ func (x *StructWithCustomDefaultValues) readField8(p thrift.Decoder) error {  //
     x.StructWithDefaultSpecified = result
     return nil
 }
-
 
 
 
@@ -1372,7 +1355,6 @@ func (x *StructWithCollectionDefaultValues) readField1(p thrift.Decoder) error {
     return nil
 }
 
-
 func (x *StructWithCollectionDefaultValues) GetSetWithListValue() []int32 {
     if !x.IsSetSetWithListValue() {
         return []int32{
@@ -1449,7 +1431,6 @@ func (x *StructWithCollectionDefaultValues) readField2(p thrift.Decoder) error {
     x.SetWithListValue = result
     return nil
 }
-
 
 func (x *StructWithCollectionDefaultValues) GetMapWithMapValue() map[int32]int32 {
     if !x.IsSetMapWithMapValue() {
@@ -1545,7 +1526,6 @@ func (x *StructWithCollectionDefaultValues) readField3(p thrift.Decoder) error {
     return nil
 }
 
-
 func (x *StructWithCollectionDefaultValues) GetListWithMapValue() []int32 {
     if !x.IsSetListWithMapValue() {
         return []int32{
@@ -1623,7 +1603,6 @@ func (x *StructWithCollectionDefaultValues) readField4(p thrift.Decoder) error {
     return nil
 }
 
-
 func (x *StructWithCollectionDefaultValues) GetSetWithMapValue() []int32 {
     if !x.IsSetSetWithMapValue() {
         return []int32{
@@ -1700,7 +1679,6 @@ func (x *StructWithCollectionDefaultValues) readField5(p thrift.Decoder) error {
     x.SetWithMapValue = result
     return nil
 }
-
 
 func (x *StructWithCollectionDefaultValues) GetMapWithListValue() map[int32]int32 {
     if !x.IsSetMapWithListValue() {
@@ -1795,7 +1773,6 @@ func (x *StructWithCollectionDefaultValues) readField6(p thrift.Decoder) error {
     x.MapWithListValue = result
     return nil
 }
-
 
 
 

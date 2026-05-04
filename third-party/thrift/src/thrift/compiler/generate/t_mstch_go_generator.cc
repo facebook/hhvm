@@ -52,9 +52,6 @@ class t_mstch_go_generator : public t_whisker_generator {
     if (auto gen_metadata = get_compiler_option("gen_metadata")) {
       data_.gen_metadata = (gen_metadata.value() == "true");
     }
-    if (auto gen_default_get = get_compiler_option("gen_default_get")) {
-      data_.gen_default_get = (gen_default_get.value() == "true");
-    }
     if (auto use_reflect_codec = get_compiler_option("use_reflect_codec")) {
       data_.use_reflect_codec = (use_reflect_codec.value() == "true");
     }
@@ -115,9 +112,6 @@ class t_mstch_go_generator : public t_whisker_generator {
     });
     def.property("gen_metadata?", [this](const t_program&) {
       return data_.gen_metadata;
-    });
-    def.property("gen_default_get?", [this](const t_program&) {
-      return data_.gen_default_get;
     });
     def.property("go_import_path", [](const t_program& self) {
       return go::get_go_package_dir(&self);

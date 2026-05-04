@@ -74,7 +74,6 @@ func (x *BiDiSinkException) readField1(p thrift.Decoder) error {  // Message
 
 
 
-
 func (x *BiDiSinkException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("BiDiSinkException"); err != nil {
         return thrift.PrependError("BiDiSinkException write struct begin error: ", err)
@@ -209,7 +208,6 @@ func (x *BiDiStreamException) readField1(p thrift.Decoder) error {  // Message
 
 
 
-
 func (x *BiDiStreamException) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("BiDiStreamException"); err != nil {
         return thrift.PrependError("BiDiStreamException write struct begin error: ", err)
@@ -340,7 +338,6 @@ func (x *BiDiMethodException) readField1(p thrift.Decoder) error {  // Message
     x.Message = result
     return nil
 }
-
 
 
 
@@ -649,7 +646,6 @@ func (x *streamBiDiServiceSimple) readField0(p thrift.Decoder) error {  // Succe
 
 
 
-
 func (x *streamBiDiServiceSimple) Exception() thrift.WritableException {
     return nil
 }
@@ -784,7 +780,6 @@ func (x *sinkBiDiServiceSimple) readField0(p thrift.Decoder) error {  // Success
     x.Success = &result
     return nil
 }
-
 
 
 
@@ -1003,7 +998,6 @@ func (x *respBiDiServiceResponse) readField0(p thrift.Decoder) error {  // Succe
 
 
 
-
 func (x *respBiDiServiceResponse) Exception() thrift.WritableException {
     return nil
 }
@@ -1142,7 +1136,6 @@ func (x *streamBiDiServiceResponse) readField0(p thrift.Decoder) error {  // Suc
 
 
 
-
 func (x *streamBiDiServiceResponse) Exception() thrift.WritableException {
     return nil
 }
@@ -1277,7 +1270,6 @@ func (x *sinkBiDiServiceResponse) readField0(p thrift.Decoder) error {  // Succe
     x.Success = &result
     return nil
 }
-
 
 
 
@@ -1497,7 +1489,6 @@ func (x *respBiDiServiceCanThrow) readField1(p thrift.Decoder) error {  // Ex
 
 
 
-
 func (x *respBiDiServiceCanThrow) Exception() thrift.WritableException {
     if x.Ex != nil {
         return x.Ex
@@ -1637,7 +1628,6 @@ func (x *streamBiDiServiceCanThrow) readField0(p thrift.Decoder) error {  // Suc
     return nil
 }
 
-
 func (x *streamBiDiServiceCanThrow) GetEx() *BiDiStreamException {
     if !x.IsSetEx() {
         return nil
@@ -1689,7 +1679,6 @@ func (x *streamBiDiServiceCanThrow) readField1(p thrift.Decoder) error {  // Ex
     x.Ex = result
     return nil
 }
-
 
 
 
@@ -1838,7 +1827,6 @@ func (x *sinkBiDiServiceCanThrow) readField0(p thrift.Decoder) error {  // Succe
     return nil
 }
 
-
 func (x *sinkBiDiServiceCanThrow) GetEx() *BiDiSinkException {
     if !x.IsSetEx() {
         return nil
@@ -1890,7 +1878,6 @@ func (x *sinkBiDiServiceCanThrow) readField1(p thrift.Decoder) error {  // Ex
     x.Ex = result
     return nil
 }
-
 
 
 

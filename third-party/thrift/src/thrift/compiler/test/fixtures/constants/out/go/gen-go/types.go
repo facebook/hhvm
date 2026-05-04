@@ -461,7 +461,6 @@ func (x *Internship) readField1(p thrift.Decoder) error {  // Weeks
     return nil
 }
 
-
 func (x *Internship) GetTitle() string {
     return x.Title
 }
@@ -502,7 +501,6 @@ func (x *Internship) readField2(p thrift.Decoder) error {  // Title
     x.Title = result
     return nil
 }
-
 
 func (x *Internship) GetEmployer() Company {
     if !x.IsSetEmployer() {
@@ -556,7 +554,6 @@ func (x *Internship) readField3(p thrift.Decoder) error {  // Employer
     return nil
 }
 
-
 func (x *Internship) GetCompensation() float64 {
     if !x.IsSetCompensation() {
         return 0.0
@@ -608,7 +605,6 @@ func (x *Internship) readField4(p thrift.Decoder) error {  // Compensation
     return nil
 }
 
-
 func (x *Internship) GetSchool() string {
     if !x.IsSetSchool() {
         return ""
@@ -659,7 +655,6 @@ func (x *Internship) readField5(p thrift.Decoder) error {  // School
     x.School = &result
     return nil
 }
-
 
 
 
@@ -808,7 +803,6 @@ func (x *Range) readField1(p thrift.Decoder) error {  // Min
     return nil
 }
 
-
 func (x *Range) GetMax() int32 {
     return x.Max
 }
@@ -849,7 +843,6 @@ func (x *Range) readField2(p thrift.Decoder) error {  // Max
     x.Max = result
     return nil
 }
-
 
 
 
@@ -983,7 +976,6 @@ func (x *Struct1) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
-
 func (x *Struct1) GetB() string {
     return x.B
 }
@@ -1024,7 +1016,6 @@ func (x *Struct1) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
-
 
 
 
@@ -1160,7 +1151,6 @@ func (x *Struct2) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
-
 func (x *Struct2) GetB() string {
     return x.B
 }
@@ -1201,7 +1191,6 @@ func (x *Struct2) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
-
 
 func (x *Struct2) GetC() *Struct1 {
     if !x.IsSetC() {
@@ -1254,7 +1243,6 @@ func (x *Struct2) readField3(p thrift.Decoder) error {  // C
     x.C = result
     return nil
 }
-
 
 func (x *Struct2) GetD() []int32 {
     if !x.IsSetD() {
@@ -1331,7 +1319,6 @@ func (x *Struct2) readField4(p thrift.Decoder) error {  // D
     x.D = result
     return nil
 }
-
 
 
 
@@ -1478,7 +1465,6 @@ func (x *Struct3) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
-
 func (x *Struct3) GetB() int32 {
     return x.B
 }
@@ -1519,7 +1505,6 @@ func (x *Struct3) readField2(p thrift.Decoder) error {  // B
     x.B = result
     return nil
 }
-
 
 func (x *Struct3) GetC() *Struct2 {
     if !x.IsSetC() {
@@ -1572,7 +1557,6 @@ func (x *Struct3) readField3(p thrift.Decoder) error {  // C
     x.C = result
     return nil
 }
-
 
 
 
@@ -1713,7 +1697,6 @@ func (x *Struct4) readField1(p thrift.Decoder) error {  // A
     return nil
 }
 
-
 func (x *Struct4) GetB() float64 {
     if !x.IsSetB() {
         return 0.0
@@ -1764,7 +1747,6 @@ func (x *Struct4) readField2(p thrift.Decoder) error {  // B
     x.B = &result
     return nil
 }
-
 
 func (x *Struct4) GetC() int8 {
     if !x.IsSetC() {
@@ -1817,7 +1799,6 @@ func (x *Struct4) readField3(p thrift.Decoder) error {  // C
     x.C = &result
     return nil
 }
-
 
 
 
@@ -1965,7 +1946,6 @@ func (x *Union1) readField1(p thrift.Decoder) error {  // I
     return nil
 }
 
-
 func (x *Union1) GetD() float64 {
     if !x.IsSetD() {
         return 0.0
@@ -2016,7 +1996,6 @@ func (x *Union1) readField2(p thrift.Decoder) error {  // D
     x.D = &result
     return nil
 }
-
 
 
 func (x *Union1) CountSetFields() int {
@@ -2173,7 +2152,6 @@ func (x *Union2) readField1(p thrift.Decoder) error {  // I
     return nil
 }
 
-
 func (x *Union2) GetD() float64 {
     if !x.IsSetD() {
         return 0.0
@@ -2224,7 +2202,6 @@ func (x *Union2) readField2(p thrift.Decoder) error {  // D
     x.D = &result
     return nil
 }
-
 
 func (x *Union2) GetS() *Struct1 {
     if !x.IsSetS() {
@@ -2278,7 +2255,6 @@ func (x *Union2) readField3(p thrift.Decoder) error {  // S
     return nil
 }
 
-
 func (x *Union2) GetU() *Union1 {
     if !x.IsSetU() {
         return nil
@@ -2330,7 +2306,6 @@ func (x *Union2) readField4(p thrift.Decoder) error {  // U
     x.U = result
     return nil
 }
-
 
 
 func (x *Union2) CountSetFields() int {

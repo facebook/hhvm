@@ -137,7 +137,6 @@ func (x *Color) readField1(p thrift.Decoder) error {  // Red
     return nil
 }
 
-
 func (x *Color) GetGreen() float64 {
     return x.Green
 }
@@ -178,7 +177,6 @@ func (x *Color) readField2(p thrift.Decoder) error {  // Green
     x.Green = result
     return nil
 }
-
 
 func (x *Color) GetBlue() float64 {
     return x.Blue
@@ -221,7 +219,6 @@ func (x *Color) readField3(p thrift.Decoder) error {  // Blue
     return nil
 }
 
-
 func (x *Color) GetAlpha() float64 {
     return x.Alpha
 }
@@ -262,7 +259,6 @@ func (x *Color) readField4(p thrift.Decoder) error {  // Alpha
     x.Alpha = result
     return nil
 }
-
 
 
 
@@ -422,7 +418,6 @@ func (x *Vehicle) readField1(p thrift.Decoder) error {  // Color
     return nil
 }
 
-
 func (x *Vehicle) GetLicensePlate() string {
     if !x.IsSetLicensePlate() {
         return ""
@@ -473,7 +468,6 @@ func (x *Vehicle) readField2(p thrift.Decoder) error {  // LicensePlate
     x.LicensePlate = &result
     return nil
 }
-
 
 func (x *Vehicle) GetDescription() string {
     if !x.IsSetDescription() {
@@ -526,7 +520,6 @@ func (x *Vehicle) readField3(p thrift.Decoder) error {  // Description
     return nil
 }
 
-
 func (x *Vehicle) GetName() string {
     if !x.IsSetName() {
         return ""
@@ -578,7 +571,6 @@ func (x *Vehicle) readField4(p thrift.Decoder) error {  // Name
     return nil
 }
 
-
 func (x *Vehicle) GetHasAC() bool {
     if !x.IsSetHasAC() {
         return false
@@ -629,7 +621,6 @@ func (x *Vehicle) readField5(p thrift.Decoder) error {  // HasAC
     x.HasAC = &result
     return nil
 }
-
 
 
 
@@ -787,7 +778,6 @@ func (x *Person) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
-
 func (x *Person) GetName() string {
     return x.Name
 }
@@ -828,7 +818,6 @@ func (x *Person) readField2(p thrift.Decoder) error {  // Name
     x.Name = result
     return nil
 }
-
 
 func (x *Person) GetAge() int16 {
     if !x.IsSetAge() {
@@ -881,7 +870,6 @@ func (x *Person) readField3(p thrift.Decoder) error {  // Age
     return nil
 }
 
-
 func (x *Person) GetAddress() string {
     if !x.IsSetAddress() {
         return ""
@@ -932,7 +920,6 @@ func (x *Person) readField4(p thrift.Decoder) error {  // Address
     x.Address = &result
     return nil
 }
-
 
 func (x *Person) GetFavoriteColor() *Color {
     if !x.IsSetFavoriteColor() {
@@ -985,7 +972,6 @@ func (x *Person) readField5(p thrift.Decoder) error {  // FavoriteColor
     x.FavoriteColor = result
     return nil
 }
-
 
 func (x *Person) GetFriends() []PersonID {
     if !x.IsSetFriends() {
@@ -1068,7 +1054,6 @@ func (x *Person) readField6(p thrift.Decoder) error {  // Friends
     return nil
 }
 
-
 func (x *Person) GetBestFriend() PersonID {
     if !x.IsSetBestFriend() {
         return NewPersonID()
@@ -1120,7 +1105,6 @@ func (x *Person) readField7(p thrift.Decoder) error {  // BestFriend
     x.BestFriend = &result
     return nil
 }
-
 
 func (x *Person) GetPetNames() map[Animal]string {
     if !x.IsSetPetNames() {
@@ -1220,7 +1204,6 @@ func (x *Person) readField8(p thrift.Decoder) error {  // PetNames
     return nil
 }
 
-
 func (x *Person) GetAfraidOfAnimal() Animal {
     if !x.IsSetAfraidOfAnimal() {
         return 0
@@ -1272,7 +1255,6 @@ func (x *Person) readField9(p thrift.Decoder) error {  // AfraidOfAnimal
     x.AfraidOfAnimal = &result
     return nil
 }
-
 
 func (x *Person) GetVehicles() []*Vehicle {
     if !x.IsSetVehicles() {
@@ -1354,7 +1336,6 @@ func (x *Person) readField10(p thrift.Decoder) error {  // Vehicles
     x.Vehicles = result
     return nil
 }
-
 
 
 

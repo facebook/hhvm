@@ -74,7 +74,6 @@ func (x *Fiery) readField1(p thrift.Decoder) error {  // Message
 
 
 
-
 func (x *Fiery) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Fiery"); err != nil {
         return thrift.PrependError("Fiery write struct begin error: ", err)
@@ -219,7 +218,6 @@ func (x *Serious) readField1(p thrift.Decoder) error {  // Sonnet
 
 
 
-
 func (x *Serious) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Serious"); err != nil {
         return thrift.PrependError("Serious write struct begin error: ", err)
@@ -351,7 +349,6 @@ func (x *ComplexFieldNames) readField1(p thrift.Decoder) error {  // ErrorMessag
     return nil
 }
 
-
 func (x *ComplexFieldNames) GetInternalErrorMessage() string {
     return x.InternalErrorMessage
 }
@@ -392,7 +389,6 @@ func (x *ComplexFieldNames) readField2(p thrift.Decoder) error {  // InternalErr
     x.InternalErrorMessage = result
     return nil
 }
-
 
 
 
@@ -535,7 +531,6 @@ func (x *CustomFieldNames) readField1(p thrift.Decoder) error {  // ErrorMessage
     return nil
 }
 
-
 func (x *CustomFieldNames) GetInternalErrorMessage() string {
     return x.InternalErrorMessage
 }
@@ -576,7 +571,6 @@ func (x *CustomFieldNames) readField2(p thrift.Decoder) error {  // InternalErro
     x.InternalErrorMessage = result
     return nil
 }
-
 
 
 
@@ -719,7 +713,6 @@ func (x *ExceptionWithPrimitiveField) readField1(p thrift.Decoder) error {  // M
     return nil
 }
 
-
 func (x *ExceptionWithPrimitiveField) GetErrorCode() int32 {
     return x.ErrorCode
 }
@@ -760,7 +753,6 @@ func (x *ExceptionWithPrimitiveField) readField2(p thrift.Decoder) error {  // E
     x.ErrorCode = result
     return nil
 }
-
 
 
 
@@ -903,7 +895,6 @@ func (x *ExceptionWithStructuredAnnotation) readField1(p thrift.Decoder) error {
     return nil
 }
 
-
 func (x *ExceptionWithStructuredAnnotation) GetErrorCode() int32 {
     return x.ErrorCode
 }
@@ -944,7 +935,6 @@ func (x *ExceptionWithStructuredAnnotation) readField2(p thrift.Decoder) error {
     x.ErrorCode = result
     return nil
 }
-
 
 
 
@@ -1421,7 +1411,6 @@ func (x *respRaiserDoRaise) readField1(p thrift.Decoder) error {  // B
     return nil
 }
 
-
 func (x *respRaiserDoRaise) GetF() *Fiery {
     if !x.IsSetF() {
         return nil
@@ -1474,7 +1463,6 @@ func (x *respRaiserDoRaise) readField2(p thrift.Decoder) error {  // F
     return nil
 }
 
-
 func (x *respRaiserDoRaise) GetS() *Serious {
     if !x.IsSetS() {
         return nil
@@ -1526,7 +1514,6 @@ func (x *respRaiserDoRaise) readField3(p thrift.Decoder) error {  // S
     x.S = result
     return nil
 }
-
 
 
 
@@ -1764,7 +1751,6 @@ func (x *respRaiserGet200) readField0(p thrift.Decoder) error {  // Success
 
 
 
-
 func (x *respRaiserGet200) Exception() thrift.WritableException {
     return nil
 }
@@ -1979,7 +1965,6 @@ func (x *respRaiserGet500) readField0(p thrift.Decoder) error {  // Success
     return nil
 }
 
-
 func (x *respRaiserGet500) GetF() *Fiery {
     if !x.IsSetF() {
         return nil
@@ -2031,7 +2016,6 @@ func (x *respRaiserGet500) readField1(p thrift.Decoder) error {  // F
     x.F = result
     return nil
 }
-
 
 func (x *respRaiserGet500) GetB() *Banal {
     if !x.IsSetB() {
@@ -2085,7 +2069,6 @@ func (x *respRaiserGet500) readField2(p thrift.Decoder) error {  // B
     return nil
 }
 
-
 func (x *respRaiserGet500) GetS() *Serious {
     if !x.IsSetS() {
         return nil
@@ -2137,7 +2120,6 @@ func (x *respRaiserGet500) readField3(p thrift.Decoder) error {  // S
     x.S = result
     return nil
 }
-
 
 
 

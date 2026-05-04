@@ -75,7 +75,6 @@ func (x *Fields) readField100(p thrift.Decoder) error {  // InjectedField
 
 
 
-
 func (x *Fields) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("Fields"); err != nil {
         return thrift.PrependError("Fields write struct begin error: ", err)
@@ -197,7 +196,6 @@ func (x *FieldsInjectedToEmptyStruct) readField_1100(p thrift.Decoder) error {  
     x.InjectedField = result
     return nil
 }
-
 
 
 
@@ -325,7 +323,6 @@ func (x *FieldsInjectedToStruct) readField_1100(p thrift.Decoder) error {  // In
     return nil
 }
 
-
 func (x *FieldsInjectedToStruct) GetStringField() string {
     return x.StringField
 }
@@ -366,7 +363,6 @@ func (x *FieldsInjectedToStruct) readField1(p thrift.Decoder) error {  // String
     x.StringField = result
     return nil
 }
-
 
 
 
@@ -512,7 +508,6 @@ func (x *FieldsInjectedWithIncludedStruct) readField_1102(p thrift.Decoder) erro
     return nil
 }
 
-
 func (x *FieldsInjectedWithIncludedStruct) GetInjectedStructuredAnnotationField() string {
     if !x.IsSetInjectedStructuredAnnotationField() {
         return ""
@@ -564,7 +559,6 @@ func (x *FieldsInjectedWithIncludedStruct) readField_1101(p thrift.Decoder) erro
     return nil
 }
 
-
 func (x *FieldsInjectedWithIncludedStruct) GetInjectedField() string {
     return x.InjectedField
 }
@@ -606,7 +600,6 @@ func (x *FieldsInjectedWithIncludedStruct) readField_1100(p thrift.Decoder) erro
     return nil
 }
 
-
 func (x *FieldsInjectedWithIncludedStruct) GetStringField() string {
     return x.StringField
 }
@@ -647,7 +640,6 @@ func (x *FieldsInjectedWithIncludedStruct) readField1(p thrift.Decoder) error { 
     x.StringField = result
     return nil
 }
-
 
 
 
@@ -802,7 +794,6 @@ func (x *FieldsInjectedWithFieldsWithIncludedStruct) readField_1001(p thrift.Dec
     return nil
 }
 
-
 func (x *FieldsInjectedWithFieldsWithIncludedStruct) GetStringField() string {
     return x.StringField
 }
@@ -843,7 +834,6 @@ func (x *FieldsInjectedWithFieldsWithIncludedStruct) readField1(p thrift.Decoder
     x.StringField = result
     return nil
 }
-
 
 
 

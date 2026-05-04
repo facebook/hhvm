@@ -218,7 +218,6 @@ func (x *MyStruct) readField1(p thrift.Decoder) error {  // MyIntField
     return nil
 }
 
-
 func (x *MyStruct) GetMyStringField() string {
     return x.MyStringField
 }
@@ -259,7 +258,6 @@ func (x *MyStruct) readField2(p thrift.Decoder) error {  // MyStringField
     x.MyStringField = result
     return nil
 }
-
 
 func (x *MyStruct) GetMyDataField() *MyDataItemAlias {
     if !x.IsSetMyDataField() {
@@ -313,7 +311,6 @@ func (x *MyStruct) readField3(p thrift.Decoder) error {  // MyDataField
     return nil
 }
 
-
 func (x *MyStruct) GetMyEnum() MyEnum {
     return x.MyEnum
 }
@@ -356,7 +353,6 @@ func (x *MyStruct) readField4(p thrift.Decoder) error {  // MyEnum
     return nil
 }
 
-
 func (x *MyStruct) GetOneway() bool {
     return x.Oneway
 }
@@ -397,7 +393,6 @@ func (x *MyStruct) readField5(p thrift.Decoder) error {  // Oneway
     x.Oneway = result
     return nil
 }
-
 
 func (x *MyStruct) GetReadonly() bool {
     return x.Readonly
@@ -440,7 +435,6 @@ func (x *MyStruct) readField6(p thrift.Decoder) error {  // Readonly
     return nil
 }
 
-
 func (x *MyStruct) GetIdempotent() bool {
     return x.Idempotent
 }
@@ -481,7 +475,6 @@ func (x *MyStruct) readField7(p thrift.Decoder) error {  // Idempotent
     x.Idempotent = result
     return nil
 }
-
 
 func (x *MyStruct) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
@@ -559,7 +552,6 @@ func (x *MyStruct) readField8(p thrift.Decoder) error {  // FloatSet
     return nil
 }
 
-
 func (x *MyStruct) GetNoHackCodegenField() string {
     return x.NoHackCodegenField
 }
@@ -600,7 +592,6 @@ func (x *MyStruct) readField9(p thrift.Decoder) error {  // NoHackCodegenField
     x.NoHackCodegenField = result
     return nil
 }
-
 
 
 
@@ -812,7 +803,6 @@ func (x *Containers) readField1(p thrift.Decoder) error {  // I32List
     return nil
 }
 
-
 func (x *Containers) GetStringSet() []string {
     if !x.IsSetStringSet() {
         return make([]string, 0)
@@ -888,7 +878,6 @@ func (x *Containers) readField2(p thrift.Decoder) error {  // StringSet
     x.StringSet = result
     return nil
 }
-
 
 func (x *Containers) GetStringToI64Map() map[string]int64 {
     if !x.IsSetStringToI64Map() {
@@ -982,7 +971,6 @@ func (x *Containers) readField3(p thrift.Decoder) error {  // StringToI64Map
     x.StringToI64Map = result
     return nil
 }
-
 
 
 
@@ -1212,7 +1200,6 @@ func (x *MyUnion) readField1(p thrift.Decoder) error {  // MyEnum
     return nil
 }
 
-
 func (x *MyUnion) GetMyStruct() *MyStruct {
     if !x.IsSetMyStruct() {
         return nil
@@ -1265,7 +1252,6 @@ func (x *MyUnion) readField2(p thrift.Decoder) error {  // MyStruct
     return nil
 }
 
-
 func (x *MyUnion) GetMyDataItem() *MyDataItem {
     if !x.IsSetMyDataItem() {
         return nil
@@ -1317,7 +1303,6 @@ func (x *MyUnion) readField3(p thrift.Decoder) error {  // MyDataItem
     x.MyDataItem = result
     return nil
 }
-
 
 func (x *MyUnion) GetFloatSet() []float32 {
     if !x.IsSetFloatSet() {
@@ -1398,7 +1383,6 @@ func (x *MyUnion) readField4(p thrift.Decoder) error {  // FloatSet
     x.FloatSet = result
     return nil
 }
-
 
 
 func (x *MyUnion) CountSetFields() int {
@@ -1562,7 +1546,6 @@ func (x *MyException) readField1(p thrift.Decoder) error {  // MyIntField
     return nil
 }
 
-
 func (x *MyException) GetMyStringField() string {
     return x.MyStringField
 }
@@ -1603,7 +1586,6 @@ func (x *MyException) readField2(p thrift.Decoder) error {  // MyStringField
     x.MyStringField = result
     return nil
 }
-
 
 func (x *MyException) GetMyStruct() *MyStruct {
     if !x.IsSetMyStruct() {
@@ -1657,7 +1639,6 @@ func (x *MyException) readField3(p thrift.Decoder) error {  // MyStruct
     return nil
 }
 
-
 func (x *MyException) GetMyUnion() *MyUnion {
     if !x.IsSetMyUnion() {
         return nil
@@ -1709,7 +1690,6 @@ func (x *MyException) readField4(p thrift.Decoder) error {  // MyUnion
     x.MyUnion = result
     return nil
 }
-
 
 
 
@@ -1866,7 +1846,6 @@ func (x *MyExceptionWithMessage) readField1(p thrift.Decoder) error {  // MyIntF
     return nil
 }
 
-
 func (x *MyExceptionWithMessage) GetMyStringField() string {
     return x.MyStringField
 }
@@ -1907,7 +1886,6 @@ func (x *MyExceptionWithMessage) readField2(p thrift.Decoder) error {  // MyStri
     x.MyStringField = result
     return nil
 }
-
 
 func (x *MyExceptionWithMessage) GetMyStruct() *MyStruct {
     if !x.IsSetMyStruct() {
@@ -1961,7 +1939,6 @@ func (x *MyExceptionWithMessage) readField3(p thrift.Decoder) error {  // MyStru
     return nil
 }
 
-
 func (x *MyExceptionWithMessage) GetMyUnion() *MyUnion {
     if !x.IsSetMyUnion() {
         return nil
@@ -2013,7 +1990,6 @@ func (x *MyExceptionWithMessage) readField4(p thrift.Decoder) error {  // MyUnio
     x.MyUnion = result
     return nil
 }
-
 
 
 
@@ -2169,7 +2145,6 @@ func (x *ReservedKeyword) readField1(p thrift.Decoder) error {  // ReservedField
 
 
 
-
 func (x *ReservedKeyword) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("ReservedKeyword"); err != nil {
         return thrift.PrependError("ReservedKeyword write struct begin error: ", err)
@@ -2301,7 +2276,6 @@ func (x *UnionToBeRenamed) readField1(p thrift.Decoder) error {  // ReservedFiel
     x.ReservedField = &result
     return nil
 }
-
 
 
 func (x *UnionToBeRenamed) CountSetFields() int {
@@ -2600,7 +2574,6 @@ func (x *reqFB303ServiceSimpleRPC) readField1(p thrift.Decoder) error {  // IntP
 
 
 
-
 func (x *reqFB303ServiceSimpleRPC) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqFB303ServiceSimpleRPC"); err != nil {
         return thrift.PrependError("reqFB303ServiceSimpleRPC write struct begin error: ", err)
@@ -2733,7 +2706,6 @@ func (x *respFB303ServiceSimpleRPC) readField0(p thrift.Decoder) error {  // Suc
     x.Success = result
     return nil
 }
-
 
 
 
@@ -3109,7 +3081,6 @@ func (x *respMyServiceGetRandomData) readField0(p thrift.Decoder) error {  // Su
 
 
 
-
 func (x *respMyServiceGetRandomData) Exception() thrift.WritableException {
     return nil
 }
@@ -3233,7 +3204,6 @@ func (x *reqMyServiceSink) readField1(p thrift.Decoder) error {  // Sink
     x.Sink = result
     return nil
 }
-
 
 
 
@@ -3441,7 +3411,6 @@ func (x *reqMyServicePutDataById) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
-
 func (x *reqMyServicePutDataById) GetData() string {
     return x.Data
 }
@@ -3482,7 +3451,6 @@ func (x *reqMyServicePutDataById) readField2(p thrift.Decoder) error {  // Data
     x.Data = result
     return nil
 }
-
 
 
 
@@ -3698,7 +3666,6 @@ func (x *reqMyServiceHasDataById) readField1(p thrift.Decoder) error {  // Id
 
 
 
-
 func (x *reqMyServiceHasDataById) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqMyServiceHasDataById"); err != nil {
         return thrift.PrependError("reqMyServiceHasDataById write struct begin error: ", err)
@@ -3834,7 +3801,6 @@ func (x *respMyServiceHasDataById) readField0(p thrift.Decoder) error {  // Succ
 
 
 
-
 func (x *respMyServiceHasDataById) Exception() thrift.WritableException {
     return nil
 }
@@ -3958,7 +3924,6 @@ func (x *reqMyServiceGetDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
-
 
 
 
@@ -4098,7 +4063,6 @@ func (x *respMyServiceGetDataById) readField0(p thrift.Decoder) error {  // Succ
 
 
 
-
 func (x *respMyServiceGetDataById) Exception() thrift.WritableException {
     return nil
 }
@@ -4222,7 +4186,6 @@ func (x *reqMyServiceDeleteDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
-
 
 
 
@@ -4430,7 +4393,6 @@ func (x *reqMyServiceLobDataById) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
-
 func (x *reqMyServiceLobDataById) GetData() string {
     return x.Data
 }
@@ -4471,7 +4433,6 @@ func (x *reqMyServiceLobDataById) readField2(p thrift.Decoder) error {  // Data
     x.Data = result
     return nil
 }
-
 
 
 
@@ -4803,7 +4764,6 @@ func (x *respMyServiceInvalidReturnForHack) readField0(p thrift.Decoder) error {
 
 
 
-
 func (x *respMyServiceInvalidReturnForHack) Exception() thrift.WritableException {
     return nil
 }
@@ -5088,7 +5048,6 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) readField1(p thrift.Decoder) err
 
 
 
-
 func (x *reqDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqDbMixedStackArgumentsGetDataByKey0"); err != nil {
         return thrift.PrependError("reqDbMixedStackArgumentsGetDataByKey0 write struct begin error: ", err)
@@ -5224,7 +5183,6 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) readField0(p thrift.Decoder) er
 
 
 
-
 func (x *respDbMixedStackArgumentsGetDataByKey0) Exception() thrift.WritableException {
     return nil
 }
@@ -5348,7 +5306,6 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) readField1(p thrift.Decoder) err
     x.Key = result
     return nil
 }
-
 
 
 
@@ -5484,7 +5441,6 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) readField0(p thrift.Decoder) er
     x.Success = result
     return nil
 }
-
 
 
 

@@ -220,7 +220,6 @@ func (x *MyStructNestedAnnotation) readField1(p thrift.Decoder) error {  // Name
 
 
 
-
 func (x *MyStructNestedAnnotation) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("MyStructNestedAnnotation"); err != nil {
         return thrift.PrependError("MyStructNestedAnnotation write struct begin error: ", err)
@@ -521,7 +520,6 @@ func (x *MyStruct) readField1(p thrift.Decoder) error {  // AbstractName
     return nil
 }
 
-
 func (x *MyStruct) GetMajorVer() int64 {
     return x.MajorVer
 }
@@ -562,7 +560,6 @@ func (x *MyStruct) readField2(p thrift.Decoder) error {  // MajorVer
     x.MajorVer = result
     return nil
 }
-
 
 func (x *MyStruct) GetAnnotationWithQuote() string {
     return x.AnnotationWithQuote
@@ -605,7 +602,6 @@ func (x *MyStruct) readField3(p thrift.Decoder) error {  // AnnotationWithQuote
     return nil
 }
 
-
 func (x *MyStruct) GetClass_() string {
     return x.Class_
 }
@@ -646,7 +642,6 @@ func (x *MyStruct) readField4(p thrift.Decoder) error {  // Class_
     x.Class_ = result
     return nil
 }
-
 
 func (x *MyStruct) GetAnnotationWithTrailingComma() string {
     return x.AnnotationWithTrailingComma
@@ -689,7 +684,6 @@ func (x *MyStruct) readField5(p thrift.Decoder) error {  // AnnotationWithTraili
     return nil
 }
 
-
 func (x *MyStruct) GetEmptyAnnotations() string {
     return x.EmptyAnnotations
 }
@@ -730,7 +724,6 @@ func (x *MyStruct) readField6(p thrift.Decoder) error {  // EmptyAnnotations
     x.EmptyAnnotations = result
     return nil
 }
-
 
 func (x *MyStruct) GetMyEnum() MyEnum {
     return x.MyEnum
@@ -773,7 +766,6 @@ func (x *MyStruct) readField7(p thrift.Decoder) error {  // MyEnum
     x.MyEnum = result
     return nil
 }
-
 
 func (x *MyStruct) GetCppTypeAnnotation() ListString_6884 {
     if !x.IsSetCppTypeAnnotation() {
@@ -822,7 +814,6 @@ func (x *MyStruct) readField8(p thrift.Decoder) error {  // CppTypeAnnotation
     x.CppTypeAnnotation = result
     return nil
 }
-
 
 func (x *MyStruct) GetMyUnion() *MyUnion {
     if !x.IsSetMyUnion() {
@@ -875,7 +866,6 @@ func (x *MyStruct) readField9(p thrift.Decoder) error {  // MyUnion
     x.MyUnion = result
     return nil
 }
-
 
 
 
@@ -1051,7 +1041,6 @@ func (x *SecretStruct) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
-
 func (x *SecretStruct) GetPassword() string {
     return x.Password
 }
@@ -1092,7 +1081,6 @@ func (x *SecretStruct) readField2(p thrift.Decoder) error {  // Password
     x.Password = result
     return nil
 }
-
 
 
 
@@ -1319,7 +1307,6 @@ func (x *respMyServicePing) readField1(p thrift.Decoder) error {  // MyExcept
 
 
 
-
 func (x *respMyServicePing) Exception() thrift.WritableException {
     if x.MyExcept != nil {
         return x.MyExcept
@@ -1537,7 +1524,6 @@ func (x *respMyServiceGetRandomData) readField0(p thrift.Decoder) error {  // Su
 
 
 
-
 func (x *respMyServiceGetRandomData) Exception() thrift.WritableException {
     return nil
 }
@@ -1661,7 +1647,6 @@ func (x *reqMyServiceHasDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
-
 
 
 
@@ -1801,7 +1786,6 @@ func (x *respMyServiceHasDataById) readField0(p thrift.Decoder) error {  // Succ
 
 
 
-
 func (x *respMyServiceHasDataById) Exception() thrift.WritableException {
     return nil
 }
@@ -1925,7 +1909,6 @@ func (x *reqMyServiceGoGetDataById) readField1(p thrift.Decoder) error {  // Id
     x.Id = result
     return nil
 }
-
 
 
 
@@ -2065,7 +2048,6 @@ func (x *respMyServiceGoGetDataById) readField0(p thrift.Decoder) error {  // Su
 
 
 
-
 func (x *respMyServiceGoGetDataById) Exception() thrift.WritableException {
     return nil
 }
@@ -2191,7 +2173,6 @@ func (x *reqMyServicePutDataById) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
-
 func (x *reqMyServicePutDataById) GetData() string {
     return x.Data
 }
@@ -2232,7 +2213,6 @@ func (x *reqMyServicePutDataById) readField2(p thrift.Decoder) error {  // Data
     x.Data = result
     return nil
 }
-
 
 
 
@@ -2446,7 +2426,6 @@ func (x *reqMyServiceLobDataById) readField1(p thrift.Decoder) error {  // Id
     return nil
 }
 
-
 func (x *reqMyServiceLobDataById) GetData() string {
     return x.Data
 }
@@ -2487,7 +2466,6 @@ func (x *reqMyServiceLobDataById) readField2(p thrift.Decoder) error {  // Data
     x.Data = result
     return nil
 }
-
 
 
 
@@ -3414,7 +3392,6 @@ func (x *respBadServiceBar) readField0(p thrift.Decoder) error {  // Success
     x.Success = &result
     return nil
 }
-
 
 
 

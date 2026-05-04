@@ -154,7 +154,6 @@ func (x *TestStruct) readField1(p thrift.Decoder) error {  // UnqualifiedIntFiel
     return nil
 }
 
-
 func (x *TestStruct) GetUnqualifiedBoolField() bool {
     return x.UnqualifiedBoolField
 }
@@ -195,7 +194,6 @@ func (x *TestStruct) readField2(p thrift.Decoder) error {  // UnqualifiedBoolFie
     x.UnqualifiedBoolField = result
     return nil
 }
-
 
 func (x *TestStruct) GetUnqualifiedListField() []int32 {
     if !x.IsSetUnqualifiedListField() {
@@ -273,7 +271,6 @@ func (x *TestStruct) readField3(p thrift.Decoder) error {  // UnqualifiedListFie
     return nil
 }
 
-
 func (x *TestStruct) GetUnqualifiedStructField() *EmptyStruct {
     if !x.IsSetUnqualifiedStructField() {
         return nil
@@ -326,7 +323,6 @@ func (x *TestStruct) readField4(p thrift.Decoder) error {  // UnqualifiedStructF
     return nil
 }
 
-
 func (x *TestStruct) GetOptionalIntField() int32 {
     if !x.IsSetOptionalIntField() {
         return 0
@@ -378,7 +374,6 @@ func (x *TestStruct) readField5(p thrift.Decoder) error {  // OptionalIntField
     return nil
 }
 
-
 func (x *TestStruct) GetOptionalBoolField() bool {
     if !x.IsSetOptionalBoolField() {
         return false
@@ -429,7 +424,6 @@ func (x *TestStruct) readField6(p thrift.Decoder) error {  // OptionalBoolField
     x.OptionalBoolField = &result
     return nil
 }
-
 
 func (x *TestStruct) GetOptionalListField() []int32 {
     if !x.IsSetOptionalListField() {
@@ -511,7 +505,6 @@ func (x *TestStruct) readField7(p thrift.Decoder) error {  // OptionalListField
     return nil
 }
 
-
 func (x *TestStruct) GetOptionalStructField() *EmptyStruct {
     if !x.IsSetOptionalStructField() {
         return nil
@@ -563,7 +556,6 @@ func (x *TestStruct) readField8(p thrift.Decoder) error {  // OptionalStructFiel
     x.OptionalStructField = result
     return nil
 }
-
 
 
 

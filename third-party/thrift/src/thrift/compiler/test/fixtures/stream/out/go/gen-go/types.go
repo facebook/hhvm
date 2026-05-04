@@ -332,7 +332,6 @@ func (x *reqPubSubStreamingServiceReturnstream) readField1(p thrift.Decoder) err
     return nil
 }
 
-
 func (x *reqPubSubStreamingServiceReturnstream) GetI32To() int32 {
     return x.I32To
 }
@@ -373,7 +372,6 @@ func (x *reqPubSubStreamingServiceReturnstream) readField2(p thrift.Decoder) err
     x.I32To = result
     return nil
 }
-
 
 
 
@@ -600,7 +598,6 @@ func (x *streamPubSubStreamingServiceReturnstream) readField0(p thrift.Decoder) 
 
 
 
-
 func (x *streamPubSubStreamingServiceReturnstream) Exception() thrift.WritableException {
     return nil
 }
@@ -724,7 +721,6 @@ func (x *reqPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) err
     x.Foo = result
     return nil
 }
-
 
 
 
@@ -943,7 +939,6 @@ func (x *streamPubSubStreamingServiceStreamthrows) readField0(p thrift.Decoder) 
     return nil
 }
 
-
 func (x *streamPubSubStreamingServiceStreamthrows) GetE() *FooStreamEx {
     if !x.IsSetE() {
         return nil
@@ -995,7 +990,6 @@ func (x *streamPubSubStreamingServiceStreamthrows) readField1(p thrift.Decoder) 
     x.E = result
     return nil
 }
-
 
 
 
@@ -1135,7 +1129,6 @@ func (x *reqPubSubStreamingServiceServicethrows) readField1(p thrift.Decoder) er
 
 
 
-
 func (x *reqPubSubStreamingServiceServicethrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceServicethrows"); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceServicethrows write struct begin error: ", err)
@@ -1268,7 +1261,6 @@ func (x *respPubSubStreamingServiceServicethrows) readField1(p thrift.Decoder) e
     x.E = result
     return nil
 }
-
 
 
 
@@ -1414,7 +1406,6 @@ func (x *streamPubSubStreamingServiceServicethrows) readField0(p thrift.Decoder)
 
 
 
-
 func (x *streamPubSubStreamingServiceServicethrows) Exception() thrift.WritableException {
     return nil
 }
@@ -1538,7 +1529,6 @@ func (x *reqPubSubStreamingServiceServicethrows2) readField1(p thrift.Decoder) e
     x.Foo = result
     return nil
 }
-
 
 
 
@@ -1677,7 +1667,6 @@ func (x *respPubSubStreamingServiceServicethrows2) readField1(p thrift.Decoder) 
     return nil
 }
 
-
 func (x *respPubSubStreamingServiceServicethrows2) GetE2() *FooEx2 {
     if !x.IsSetE2() {
         return nil
@@ -1729,7 +1718,6 @@ func (x *respPubSubStreamingServiceServicethrows2) readField2(p thrift.Decoder) 
     x.E2 = result
     return nil
 }
-
 
 
 
@@ -1883,7 +1871,6 @@ func (x *streamPubSubStreamingServiceServicethrows2) readField0(p thrift.Decoder
 
 
 
-
 func (x *streamPubSubStreamingServiceServicethrows2) Exception() thrift.WritableException {
     return nil
 }
@@ -2007,7 +1994,6 @@ func (x *reqPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) error
     x.Foo = result
     return nil
 }
-
 
 
 
@@ -2144,7 +2130,6 @@ func (x *respPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) erro
     x.E = result
     return nil
 }
-
 
 
 
@@ -2288,7 +2273,6 @@ func (x *streamPubSubStreamingServiceBoththrows) readField0(p thrift.Decoder) er
     return nil
 }
 
-
 func (x *streamPubSubStreamingServiceBoththrows) GetE() *FooStreamEx {
     if !x.IsSetE() {
         return nil
@@ -2340,7 +2324,6 @@ func (x *streamPubSubStreamingServiceBoththrows) readField1(p thrift.Decoder) er
     x.E = result
     return nil
 }
-
 
 
 
@@ -2480,7 +2463,6 @@ func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p th
 
 
 
-
 func (x *reqPubSubStreamingServiceResponseandstreamstreamthrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceResponseandstreamstreamthrows"); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamstreamthrows write struct begin error: ", err)
@@ -2612,7 +2594,6 @@ func (x *respPubSubStreamingServiceResponseandstreamstreamthrows) readField0(p t
     x.Success = &result
     return nil
 }
-
 
 
 
@@ -2753,7 +2734,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) readField0(p
     return nil
 }
 
-
 func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) GetE() *FooStreamEx {
     if !x.IsSetE() {
         return nil
@@ -2805,7 +2785,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamstreamthrows) readField1(p
     x.E = result
     return nil
 }
-
 
 
 
@@ -2945,7 +2924,6 @@ func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) readField1(p t
 
 
 
-
 func (x *reqPubSubStreamingServiceResponseandstreamservicethrows) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("reqPubSubStreamingServiceResponseandstreamservicethrows"); err != nil {
         return thrift.PrependError("reqPubSubStreamingServiceResponseandstreamservicethrows write struct begin error: ", err)
@@ -3079,7 +3057,6 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) readField0(p 
     return nil
 }
 
-
 func (x *respPubSubStreamingServiceResponseandstreamservicethrows) GetE() *FooEx {
     if !x.IsSetE() {
         return nil
@@ -3131,7 +3108,6 @@ func (x *respPubSubStreamingServiceResponseandstreamservicethrows) readField1(p 
     x.E = result
     return nil
 }
-
 
 
 
@@ -3282,7 +3258,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) readField0(
 
 
 
-
 func (x *streamPubSubStreamingServiceResponseandstreamservicethrows) Exception() thrift.WritableException {
     return nil
 }
@@ -3406,7 +3381,6 @@ func (x *reqPubSubStreamingServiceResponseandstreamboththrows) readField1(p thri
     x.Foo = result
     return nil
 }
-
 
 
 
@@ -3544,7 +3518,6 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) readField0(p thr
     return nil
 }
 
-
 func (x *respPubSubStreamingServiceResponseandstreamboththrows) GetE() *FooEx {
     if !x.IsSetE() {
         return nil
@@ -3596,7 +3569,6 @@ func (x *respPubSubStreamingServiceResponseandstreamboththrows) readField1(p thr
     x.E = result
     return nil
 }
-
 
 
 
@@ -3745,7 +3717,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) readField0(p t
     return nil
 }
 
-
 func (x *streamPubSubStreamingServiceResponseandstreamboththrows) GetE() *FooStreamEx {
     if !x.IsSetE() {
         return nil
@@ -3797,7 +3768,6 @@ func (x *streamPubSubStreamingServiceResponseandstreamboththrows) readField1(p t
     x.E = result
     return nil
 }
-
 
 
 
@@ -3935,7 +3905,6 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) readField1(p thrift.Decoder)
     return nil
 }
 
-
 func (x *reqPubSubStreamingServiceReturnstreamFast) GetI32To() int32 {
     return x.I32To
 }
@@ -3976,7 +3945,6 @@ func (x *reqPubSubStreamingServiceReturnstreamFast) readField2(p thrift.Decoder)
     x.I32To = result
     return nil
 }
-
 
 
 
@@ -4199,7 +4167,6 @@ func (x *streamPubSubStreamingServiceReturnstreamFast) readField0(p thrift.Decod
     x.Success = &result
     return nil
 }
-
 
 
 

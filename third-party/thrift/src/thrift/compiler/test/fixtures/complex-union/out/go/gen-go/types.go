@@ -157,7 +157,6 @@ func (x *ComplexUnion) readField1(p thrift.Decoder) error {  // IntValue
     return nil
 }
 
-
 func (x *ComplexUnion) GetIntListValue() []int64 {
     if !x.IsSetIntListValue() {
         return make([]int64, 0)
@@ -237,7 +236,6 @@ func (x *ComplexUnion) readField2(p thrift.Decoder) error {  // IntListValue
     x.IntListValue = result
     return nil
 }
-
 
 func (x *ComplexUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
@@ -319,7 +317,6 @@ func (x *ComplexUnion) readField3(p thrift.Decoder) error {  // StringListValue
     return nil
 }
 
-
 func (x *ComplexUnion) GetStringValue() string {
     if !x.IsSetStringValue() {
         return ""
@@ -370,7 +367,6 @@ func (x *ComplexUnion) readField5(p thrift.Decoder) error {  // StringValue
     x.StringValue = &result
     return nil
 }
-
 
 func (x *ComplexUnion) GetTypedefValue() ContainerTypedef {
     if !x.IsSetTypedefValue() {
@@ -424,7 +420,6 @@ func (x *ComplexUnion) readField9(p thrift.Decoder) error {  // TypedefValue
     return nil
 }
 
-
 func (x *ComplexUnion) GetStringRef() string {
     if !x.IsSetStringRef() {
         return ""
@@ -475,7 +470,6 @@ func (x *ComplexUnion) readField14(p thrift.Decoder) error {  // StringRef
     x.StringRef = &result
     return nil
 }
-
 
 
 func (x *ComplexUnion) CountSetFields() int {
@@ -691,7 +685,6 @@ func (x *ListUnion) readField2(p thrift.Decoder) error {  // IntListValue
     return nil
 }
 
-
 func (x *ListUnion) GetStringListValue() []string {
     if !x.IsSetStringListValue() {
         return make([]string, 0)
@@ -771,7 +764,6 @@ func (x *ListUnion) readField3(p thrift.Decoder) error {  // StringListValue
     x.StringListValue = result
     return nil
 }
-
 
 
 func (x *ListUnion) CountSetFields() int {
@@ -926,7 +918,6 @@ func (x *DataUnion) readField1(p thrift.Decoder) error {  // BinaryData
     return nil
 }
 
-
 func (x *DataUnion) GetStringData() string {
     if !x.IsSetStringData() {
         return ""
@@ -977,7 +968,6 @@ func (x *DataUnion) readField2(p thrift.Decoder) error {  // StringData
     x.StringData = &result
     return nil
 }
-
 
 
 func (x *DataUnion) CountSetFields() int {
@@ -1123,7 +1113,6 @@ func (x *Val) readField1(p thrift.Decoder) error {  // StrVal
     return nil
 }
 
-
 func (x *Val) GetIntVal() int32 {
     return x.IntVal
 }
@@ -1164,7 +1153,6 @@ func (x *Val) readField2(p thrift.Decoder) error {  // IntVal
     x.IntVal = result
     return nil
 }
-
 
 func (x *Val) GetTypedefValue() ContainerTypedef {
     if !x.IsSetTypedefValue() {
@@ -1213,7 +1201,6 @@ func (x *Val) readField9(p thrift.Decoder) error {  // TypedefValue
     x.TypedefValue = result
     return nil
 }
-
 
 
 
@@ -1364,7 +1351,6 @@ func (x *ValUnion) readField1(p thrift.Decoder) error {  // V1
     return nil
 }
 
-
 func (x *ValUnion) GetV2() *Val {
     if !x.IsSetV2() {
         return nil
@@ -1416,7 +1402,6 @@ func (x *ValUnion) readField2(p thrift.Decoder) error {  // V2
     x.V2 = result
     return nil
 }
-
 
 
 func (x *ValUnion) CountSetFields() int {
@@ -1571,7 +1556,6 @@ func (x *VirtualComplexUnion) readField1(p thrift.Decoder) error {  // ThingOne
     return nil
 }
 
-
 func (x *VirtualComplexUnion) GetThingTwo() string {
     if !x.IsSetThingTwo() {
         return ""
@@ -1622,7 +1606,6 @@ func (x *VirtualComplexUnion) readField2(p thrift.Decoder) error {  // ThingTwo
     x.ThingTwo = &result
     return nil
 }
-
 
 
 func (x *VirtualComplexUnion) CountSetFields() int {
@@ -1769,7 +1752,6 @@ func (x *NonCopyableStruct) readField1(p thrift.Decoder) error {  // Num
 
 
 
-
 func (x *NonCopyableStruct) Write(p thrift.Encoder) error {
     if err := p.WriteStructBegin("NonCopyableStruct"); err != nil {
         return thrift.PrependError("NonCopyableStruct write struct begin error: ", err)
@@ -1902,7 +1884,6 @@ func (x *NonCopyableUnion) readField1(p thrift.Decoder) error {  // S
     x.S = result
     return nil
 }
-
 
 
 func (x *NonCopyableUnion) CountSetFields() int {

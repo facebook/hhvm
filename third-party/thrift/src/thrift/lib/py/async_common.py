@@ -31,7 +31,6 @@ import warnings
 from collections import defaultdict
 from io import BytesIO
 
-import thrift
 from thrift.protocol.THeaderProtocol import THeaderProtocolFactory
 from thrift.server.TServer import TConnectionContext
 from thrift.Thrift import TApplicationException, TMessageType

@@ -215,6 +215,59 @@ final class TestStreamExceptionHandler extends TClientAsyncHandler {
   }
 }
 
+<<Oncalls('thrift_hack')>>
+final class TestRecvErrorTrackingHandler extends TClientAsyncHandler {
+
+  private vec<string> $errorFuncNames = vec[];
+
+  public function __construct(
+    private TProtocol $recvProtocol,
+    private TProtocol $sendProtocol,
+    private bool $shouldThrowOnError = false,
+  ) {}
+
+  <<__Override>>
+  public async function genWait(
+    int $_sequence_id,
+  )[zoned_local]: Awaitable<void> {
+    $transport = $this->sendProtocol->getTransport() as TMemoryBuffer;
+    $method_name = '';
+    $mtype = 0;
+    $seqid = 0;
+    $this->sendProtocol
+      ->readMessageBegin(inout $method_name, inout $mtype, inout $seqid);
+    $transport->resetBuffer();
+
+    $result = example_ExampleRootService_sendRequest_result::fromShape(
+      shape(
+        'ex' =>
+          example_WhisperException::fromShape(shape('message' => 'recv error')),
+      ),
+    );
+    $response_bytes = TCompactSerializer::serialize($result);
+    $this->recvProtocol
+      ->writeMessageBegin($method_name, TMessageType::REPLY, 0);
+    $this->recvProtocol->getTransport()->write($response_bytes);
+    $this->recvProtocol->writeMessageEnd();
+    $this->recvProtocol->getTransport()->flush();
+  }
+
+  <<__Override>>
+  public async function genOnError(
+    string $func_name,
+    Exception $_ex,
+  ): Awaitable<void> {
+    $this->errorFuncNames[] = $func_name;
+    if ($this->shouldThrowOnError) {
+      throw new TestException('hook error');
+    }
+  }
+
+  public function getErrorFuncNames(): vec<string> {
+    return $this->errorFuncNames;
+  }
+}
+
 /**
  * Handler that tracks genAfterStream calls for testing.
  * Wraps a transport handler to provide stream I/O while recording chunks.
@@ -262,6 +315,42 @@ final class TestStreamChunkTrackingHandler extends TClientAsyncHandler {
 
 <<Oncalls('thrift_hack')>>
 final class TClientAsyncHandlerIntegrationTest extends WWWTest {
+
+  public async function testUnaryExceptionCallsGenOnError(): Awaitable<void> {
+    $recv_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());
+    $send_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());
+
+    $handler = new TestRecvErrorTrackingHandler($recv_protocol, $send_protocol);
+    $client = new ExampleRootServiceAsyncClient($recv_protocol, $send_protocol);
+    $client->setAsyncHandler($handler);
+
+    expect(
+      async () ==> await $client->sendRequest(
+        example_RequestStruct::fromShape(shape('text' => 'req')),
+      ),
+    )->toThrow(example_WhisperException::class, 'recv error');
+
+    expect($handler->getErrorFuncNames())->toEqual(vec['sendRequest']);
+  }
+
+  public async function testUnaryExceptionPreservesOriginalRecvExceptionWhenGenOnErrorThrows(
+  ): Awaitable<void> {
+    $recv_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());
+    $send_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());
+
+    $handler =
+      new TestRecvErrorTrackingHandler($recv_protocol, $send_protocol, true);
+    $client = new ExampleRootServiceAsyncClient($recv_protocol, $send_protocol);
+    $client->setAsyncHandler($handler);
+
+    expect(
+      async () ==> await $client->sendRequest(
+        example_RequestStruct::fromShape(shape('text' => 'req')),
+      ),
+    )->toThrow(example_WhisperException::class, 'recv error');
+
+    expect($handler->getErrorFuncNames())->toEqual(vec['sendRequest']);
+  }
 
   // Stream: verifies first response and stream payloads round-trip
   public async function testStreamIntegration(): Awaitable<void> {

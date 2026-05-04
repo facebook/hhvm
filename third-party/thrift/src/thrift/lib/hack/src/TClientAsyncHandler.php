@@ -1,4 +1,5 @@
 <?hh
+// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 /*
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -50,6 +51,14 @@ class TClientAsyncHandler {
     string $func_name,
     TResponse $response,
   )[zoned_local]: Awaitable<void> {
+    // Do nothing
+  }
+
+  // Called after recv when gen_methodName() calls throw.
+  public async function genOnError(
+    string $func_name,
+    Exception $ex,
+  ): Awaitable<void> {
     // Do nothing
   }
 

@@ -1,4 +1,5 @@
 <?hh
+// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 /*
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
@@ -181,7 +182,18 @@ abstract class ThriftClientBase implements IThriftClient {
     return $currentseqid;
   }
 
-  protected function recvImplHelper<
+  private async function genInvokeOnErrorHook(
+    string $name,
+    Exception $recv_exception,
+  ): Awaitable<void> {
+    try {
+      await $this->asyncHandler_->genOnError($name, $recv_exception);
+    } catch (Exception $hook_exception) {
+      ope($hook_exception, causes_the('follow-up recv hook')->to('be skipped'));
+    }
+  }
+
+  protected async function genRecvImplHelper<
     TResulttype as IResultThriftStruct with { type TResult = TRet },
     TRet,
   >(
@@ -190,7 +202,7 @@ abstract class ThriftClientBase implements IThriftClient {
     bool $is_return_void,
     ?int $expectedsequenceid,
     shape(?'read_options' => int) $options = shape(),
-  ): TRet {
+  ): Awaitable<TRet> {
     try {
       $this->eventHandler_->preRecv($name, $expectedsequenceid);
       $result = $this->input_->readRPCMessage(
@@ -204,10 +216,12 @@ abstract class ThriftClientBase implements IThriftClient {
         case THandlerShortCircuitException::R_EXPECTED_EX:
           $this->eventHandler_
             ->recvException($name, $expectedsequenceid, $ex->result);
+          await $this->genInvokeOnErrorHook($name, $ex->result);
           throw $ex->result;
         case THandlerShortCircuitException::R_UNEXPECTED_EX:
           $this->eventHandler_
             ->recvError($name, $expectedsequenceid, $ex->result);
+          await $this->genInvokeOnErrorHook($name, $ex->result);
           throw $ex->result;
         case THandlerShortCircuitException::R_SUCCESS:
         default:
@@ -218,6 +232,7 @@ abstract class ThriftClientBase implements IThriftClient {
       }
     } catch (Exception $ex) {
       $this->eventHandler_->recvError($name, $expectedsequenceid, $ex);
+      await $this->genInvokeOnErrorHook($name, $ex);
       throw $ex;
     }
 
@@ -253,6 +268,7 @@ abstract class ThriftClientBase implements IThriftClient {
       }
       $this->eventHandler_
         ->recvException($name, $expectedsequenceid, $exception);
+      await $this->genInvokeOnErrorHook($name, $exception);
       throw $exception;
     }
 
@@ -262,12 +278,13 @@ abstract class ThriftClientBase implements IThriftClient {
       return
         HH\FIXME\UNSAFE_CAST<null, TRet>(null, 'FIXME[4110] TRet is void here');
     } else {
-      $x = new \TApplicationException(
+      $x = new TApplicationException(
         $name." failed: unknown result",
         TApplicationException::MISSING_RESULT,
       );
       $this->eventHandler_
         ->recvError($name, $expectedsequenceid, $x);
+      await $this->genInvokeOnErrorHook($name, $x);
       throw $x;
     }
   }
@@ -289,8 +306,8 @@ abstract class ThriftClientBase implements IThriftClient {
     $read_headers = null;
     if (
       $channel !== null &&
-      $out_transport is \TMemoryBuffer &&
-      $in_transport is \TMemoryBuffer
+      $out_transport is TMemoryBuffer &&
+      $in_transport is TMemoryBuffer
     ) {
       $msg = $out_transport->getBuffer();
       $out_transport->resetBuffer();
@@ -301,7 +318,7 @@ abstract class ThriftClientBase implements IThriftClient {
     } else {
       await $this->asyncHandler_->genWait($expectedsequenceid);
     }
-    $response = $this->recvImplHelper(
+    $response = await $this->genRecvImplHelper(
       $result,
       $name,
       $is_return_void,
@@ -317,7 +334,7 @@ abstract class ThriftClientBase implements IThriftClient {
   ): Awaitable<void> {
     $channel = $this->channel_;
     $out_transport = $this->output_->getTransport();
-    if ($channel !== null && $out_transport is \TMemoryBuffer) {
+    if ($channel !== null && $out_transport is TMemoryBuffer) {
       $msg = $out_transport->getBuffer();
       $out_transport->resetBuffer();
       await $channel->genSendRequestNoResponse($rpc_options, $msg);
@@ -339,7 +356,7 @@ abstract class ThriftClientBase implements IThriftClient {
     int $expectedsequenceid,
     RpcOptions $rpc_options,
     shape(?'read_options' => int) $options = shape(),
-  ): Awaitable<\ResponseAndStream<TFirstType, TStreamType>> {
+  ): Awaitable<ResponseAndStream<TFirstType, TStreamType>> {
 
     $channel = $this->channel_;
     $out_transport = $this->output_->getTransport();
@@ -379,7 +396,7 @@ abstract class ThriftClientBase implements IThriftClient {
         }
       )();
     }
-    $first_response = $this->recvImplHelper(
+    $first_response = await $this->genRecvImplHelper(
       $first_response_type,
       $name,
       $is_first_response_null,
@@ -411,7 +428,7 @@ abstract class ThriftClientBase implements IThriftClient {
         )()
       : $stream_gen;
 
-    return new \ResponseAndStream<TFirstType, TStreamType>(
+    return new ResponseAndStream<TFirstType, TStreamType>(
       $first_response,
       $wrapped_stream,
     );
@@ -435,7 +452,7 @@ abstract class ThriftClientBase implements IThriftClient {
     int $expectedsequenceid,
     RpcOptions $rpc_options,
     shape(?'read_options' => int) $options = shape(),
-  ): Awaitable<\ResponseAndSink<TSinkFirstType, TSinkType, TSinkFinalType>> {
+  ): Awaitable<ResponseAndSink<TSinkFirstType, TSinkType, TSinkFinalType>> {
 
     $channel = $this->channel_;
     $out_transport = $this->output_->getTransport();
@@ -493,7 +510,7 @@ abstract class ThriftClientBase implements IThriftClient {
         return $final_response_deserializer($final_raw, null);
       };
     }
-    $first_response = $this->recvImplHelper(
+    $first_response = await $this->genRecvImplHelper(
       $first_response_type,
       $name,
       $is_first_response_null,
@@ -585,7 +602,7 @@ abstract class ThriftClientBase implements IThriftClient {
     $in_transport->resetBuffer();
     $in_transport->write($result_msg);
 
-    $first_response = $this->recvImplHelper(
+    $first_response = await $this->genRecvImplHelper(
       $first_response_type,
       $name,
       $is_first_response_null,

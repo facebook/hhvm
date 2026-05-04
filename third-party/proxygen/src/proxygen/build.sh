@@ -361,6 +361,7 @@ function setup_fizz() {
     -DCMAKE_PREFIX_PATH="$DEPS_DIR"             \
     -DCMAKE_INSTALL_PREFIX="$DEPS_DIR"          \
     -DBUILD_TESTS=OFF                           \
+    -DBUILD_EXAMPLES=OFF                        \
     "$MAYBE_USE_STATIC_DEPS"                    \
     "$MAYBE_BUILD_SHARED_LIBS"                  \
     "$MAYBE_OVERRIDE_CXX_FLAGS"                 \

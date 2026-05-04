@@ -84,18 +84,6 @@ cannot check operations on the value returned.
 the type, consider using `__Soft`. You may also want to consider a
 `mixed` or `dynamic` return type.
 
-## 4045: Array without type parameter
-
-```hack no-extract
-function foo(array $_): void {}
-```
-
-**Why it's bad:** The typechecker knows very little about how the array is
-structured.
-
-**Suggestions:** Use `darray`, `varray` or `varray_or_darray` instead. If
-you still want to use `array`, specify the type e.g. `array<mixed>`.
-
 ## 4051: Accessing a shape with an invalid field name
 
 ```hack

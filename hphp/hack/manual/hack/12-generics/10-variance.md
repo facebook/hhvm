@@ -30,7 +30,7 @@ function f(C<Animal> $p1): void {
   \var_dump($p1);
 }
 
-function g(varray<Animal> $p1): void {
+function g(vec<Animal> $p1): void {
   \var_dump($p1);
 }
 

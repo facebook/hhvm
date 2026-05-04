@@ -32,4 +32,4 @@ If a class constant's type is omitted, it can be inferred. For example:
 ## Limitations
 Constants can not be assigned to legacy container types like `Vector`, `Map`, `Set`, et al., and closures.
 
-Instead, create constants with equivalent types like `array`, `vec`, `dict`, and `set`. When using these types, all subinitializers must resolve to constant expressions.
+Instead, create constants with `vec`, `dict`, or `keyset`. When using these types, all subinitializers must resolve to constant expressions.

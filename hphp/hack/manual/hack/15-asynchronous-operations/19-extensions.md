@@ -78,7 +78,7 @@ Here is a simple example that shows how to get a user name from a database using
 ```hack no-extract
 async function get_connection(): Awaitable<AsyncMysqlConnection> {
   // Get a connection pool with default options
-  $pool = new AsyncMysqlConnectionPool(darray[]);
+  $pool = new AsyncMysqlConnectionPool(dict[]);
   // Change credentials to something that works in order to test this code
   return await $pool->connect(
     CI::$host,
@@ -144,7 +144,7 @@ want to make a query. The class is [`AsyncMysqlConnectionPool`](/apis/Classes/As
 ```hack no-extract
 function get_pool(): AsyncMysqlConnectionPool {
   return new AsyncMysqlConnectionPool(
-    darray['pool_connection_limit' => 100],
+    dict['pool_connection_limit' => 100],
   ); // See API for more pool options
 }
 

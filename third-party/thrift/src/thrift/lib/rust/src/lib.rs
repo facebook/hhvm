@@ -41,6 +41,7 @@ pub mod application_exception;
 pub mod binary_protocol;
 pub mod binary_type;
 pub mod builtin_types;
+pub mod clap;
 pub mod compact_protocol;
 pub mod context_stack;
 pub mod deserialize;

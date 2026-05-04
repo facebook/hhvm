@@ -142,6 +142,14 @@ where
     }
 }
 
+impl ::fbthrift::help::clap::builder::ValueParserFactory for MyEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
+
 pub(crate) mod r#impl {
     use ::ref_cast::RefCast;
 

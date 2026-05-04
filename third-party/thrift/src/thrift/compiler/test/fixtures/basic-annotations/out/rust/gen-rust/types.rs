@@ -228,6 +228,14 @@ where
     }
 }
 
+impl ::fbthrift::help::clap::builder::ValueParserFactory for MyEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyStructNestedAnnotation {
     fn default() -> Self {

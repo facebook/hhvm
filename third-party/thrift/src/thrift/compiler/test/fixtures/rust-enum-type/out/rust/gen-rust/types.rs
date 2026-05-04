@@ -148,6 +148,14 @@ where
     }
 }
 
+impl ::fbthrift::help::clap::builder::ValueParserFactory for SmallEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct SignedEnum(pub ::std::primitive::i16);
 
@@ -289,6 +297,14 @@ where
     }
 }
 
+impl ::fbthrift::help::clap::builder::ValueParserFactory for SignedEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MediumEnum(pub ::std::primitive::u16);
 
@@ -421,6 +437,14 @@ where
         let underlying = ::std::convert::TryInto::<::std::primitive::u16>::try_into(value)
             .map_err(|_| ::anyhow::anyhow!("Enum value out of range for MediumEnum: {}", value))?;
         ::std::result::Result::Ok(Self::from(underlying))
+    }
+}
+
+impl ::fbthrift::help::clap::builder::ValueParserFactory for MediumEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
     }
 }
 
@@ -559,6 +583,14 @@ where
     }
 }
 
+impl ::fbthrift::help::clap::builder::ValueParserFactory for LargeEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct DefaultEnum(pub ::std::primitive::i32);
 
@@ -691,6 +723,14 @@ where
         let underlying = ::std::convert::TryInto::<::std::primitive::i32>::try_into(value)
             .map_err(|_| ::anyhow::anyhow!("Enum value out of range for DefaultEnum: {}", value))?;
         ::std::result::Result::Ok(Self::from(underlying))
+    }
+}
+
+impl ::fbthrift::help::clap::builder::ValueParserFactory for DefaultEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
     }
 }
 

@@ -44,6 +44,8 @@ use crate::Serialize;
 use crate::SerializedMessage;
 use crate::Transport;
 
+pub extern crate clap;
+
 // Note: `variants_by_number` must be sorted by the i32 values.
 pub fn enum_display(
     variants_by_number: &[(&str, i32)],

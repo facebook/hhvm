@@ -198,6 +198,14 @@ where
         ::std::result::Result::Ok(Self::from(underlying))
     }
 }
+
+impl ::fbthrift::help::clap::builder::ValueParserFactory for B {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
 impl ::fbthrift::GetTType for number {
     const TTYPE: ::fbthrift::TType = <::std::primitive::i32 as ::fbthrift::GetTType>::TTYPE;
 }

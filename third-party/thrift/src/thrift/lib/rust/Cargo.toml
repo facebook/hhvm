@@ -15,6 +15,7 @@ async-trait = "0.1.86"
 base64 = { version = "0.22.1", features = ["alloc"] }
 bufsize = "1.0.10"
 bytes = { version = "1.11.1", features = ["serde"] }
+clap = { version = "4.6.0", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 futures = { version = "0.3.31", features = ["async-await", "compat"] }
 ghost = "0.1.20"
 memchr = "2.8.0"
@@ -24,6 +25,7 @@ ordered-float = { version = "3.9.2", features = ["serde"] }
 panic-message = "0.3"
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 thiserror = "2.0.18"
+unicase = "2.9.0"
 
 [dev-dependencies]
 quickcheck = "1.0"

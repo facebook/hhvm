@@ -235,6 +235,14 @@ where
     }
 }
 
+impl ::fbthrift::help::clap::builder::ValueParserFactory for EmptyEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct City(pub ::std::primitive::i32);
 
@@ -373,6 +381,14 @@ where
         let underlying = ::std::convert::TryInto::<::std::primitive::i32>::try_into(value)
             .map_err(|_| ::anyhow::anyhow!("Enum value out of range for City: {}", value))?;
         ::std::result::Result::Ok(Self::from(underlying))
+    }
+}
+
+impl ::fbthrift::help::clap::builder::ValueParserFactory for City {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
     }
 }
 
@@ -520,6 +536,14 @@ where
         let underlying = ::std::convert::TryInto::<::std::primitive::i32>::try_into(value)
             .map_err(|_| ::anyhow::anyhow!("Enum value out of range for Company: {}", value))?;
         ::std::result::Result::Ok(Self::from(underlying))
+    }
+}
+
+impl ::fbthrift::help::clap::builder::ValueParserFactory for Company {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
     }
 }
 

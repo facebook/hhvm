@@ -599,6 +599,14 @@ where
     }
 }
 
+impl ::fbthrift::help::clap::builder::ValueParserFactory for has_bitwise_ops {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct is_unscoped(pub ::std::primitive::i32);
 
@@ -734,6 +742,14 @@ where
     }
 }
 
+impl ::fbthrift::help::clap::builder::ValueParserFactory for is_unscoped {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyForwardRefEnum(pub ::std::primitive::i32);
 
@@ -866,6 +882,14 @@ where
         let underlying = ::std::convert::TryInto::<::std::primitive::i32>::try_into(value)
             .map_err(|_| ::anyhow::anyhow!("Enum value out of range for MyForwardRefEnum: {}", value))?;
         ::std::result::Result::Ok(Self::from(underlying))
+    }
+}
+
+impl ::fbthrift::help::clap::builder::ValueParserFactory for MyForwardRefEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
     }
 }
 

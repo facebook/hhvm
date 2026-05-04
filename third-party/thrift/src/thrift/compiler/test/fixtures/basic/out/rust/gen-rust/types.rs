@@ -284,6 +284,14 @@ where
     }
 }
 
+impl ::fbthrift::help::clap::builder::ValueParserFactory for MyEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct HackEnum(pub ::std::primitive::i32);
 
@@ -416,6 +424,14 @@ where
         let underlying = ::std::convert::TryInto::<::std::primitive::i32>::try_into(value)
             .map_err(|_| ::anyhow::anyhow!("Enum value out of range for HackEnum: {}", value))?;
         ::std::result::Result::Ok(Self::from(underlying))
+    }
+}
+
+impl ::fbthrift::help::clap::builder::ValueParserFactory for HackEnum {
+    type Parser = ::fbthrift::clap::ThriftEnumValueParser<Self>;
+
+    fn value_parser() -> Self::Parser {
+        ::fbthrift::clap::ThriftEnumValueParser::new()
     }
 }
 

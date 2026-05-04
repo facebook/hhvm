@@ -32,7 +32,7 @@ import time
 import unittest
 
 from thrift.protocol import TBinaryProtocol
-from thrift.transport import TSocket, TTransport
+from thrift.transport import TTransport
 from ThriftTest import ThriftTest
 from ThriftTest.ttypes import Xtruct
 

@@ -5,7 +5,7 @@ its subtypes, the reverse is not true. For example, the type `num` is a supertyp
 well defined for all three types, bit shifting requires integer operands. As such, a `num` cannot be bit-shifted directly. (Similar situations
 occur with `arraykey` and its subtypes `int` and `string`, with nullable types and their subtypes, and with `mixed` and its subtypes.)
 
-Certain program elements are capable of changing the type of an expression using what is called *type refinement*. Consider the following:
+Certain program elements are capable of changing the type of an expression using what is called *type refinement*. The [`is` and `as` operators](/hack/expressions-and-operators/type-assertions) are the most common way to trigger a refinement. Consider the following:
 
 ```hack
 function f1(?int $p): void {

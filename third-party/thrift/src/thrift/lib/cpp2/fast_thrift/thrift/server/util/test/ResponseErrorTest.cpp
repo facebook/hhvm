@@ -50,23 +50,23 @@ TEST(ResponseErrorTest, InteractionLoadsheddedCodesMapToLoadshedding) {
 // LOADSHEDDING and SHUTDOWN both produce REJECTED on the wire (matches
 // legacy Rocket's makeRocketException). INVALID_REQUEST → INVALID,
 // INTERNAL_ERROR → CANCELED.
-TEST(ResponseErrorTest, MapCategoryToRocketErrorCodeAllCategories) {
+TEST(ResponseErrorTest, MapCategoryToErrorCodeAllCategories) {
   EXPECT_EQ(
-      mapCategoryToRocketErrorCode(
+      mapCategoryToErrorCode(
           apache::thrift::ResponseRpcErrorCategory::INVALID_REQUEST),
-      apache::thrift::rocket::ErrorCode::INVALID);
+      apache::thrift::fast_thrift::frame::ErrorCode::INVALID);
   EXPECT_EQ(
-      mapCategoryToRocketErrorCode(
+      mapCategoryToErrorCode(
           apache::thrift::ResponseRpcErrorCategory::LOADSHEDDING),
-      apache::thrift::rocket::ErrorCode::REJECTED);
+      apache::thrift::fast_thrift::frame::ErrorCode::REJECTED);
   EXPECT_EQ(
-      mapCategoryToRocketErrorCode(
+      mapCategoryToErrorCode(
           apache::thrift::ResponseRpcErrorCategory::SHUTDOWN),
-      apache::thrift::rocket::ErrorCode::REJECTED);
+      apache::thrift::fast_thrift::frame::ErrorCode::REJECTED);
   EXPECT_EQ(
-      mapCategoryToRocketErrorCode(
+      mapCategoryToErrorCode(
           apache::thrift::ResponseRpcErrorCategory::INTERNAL_ERROR),
-      apache::thrift::rocket::ErrorCode::CANCELED);
+      apache::thrift::fast_thrift::frame::ErrorCode::CANCELED);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

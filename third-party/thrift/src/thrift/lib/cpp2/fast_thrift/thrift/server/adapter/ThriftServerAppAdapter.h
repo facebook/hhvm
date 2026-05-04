@@ -17,20 +17,23 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <optional>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Synchronized.h>
 #include <folly/container/F14Map.h>
+#include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
-#include <folly/logging/xlog.h>
 
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RequestMetadata.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -40,30 +43,35 @@ namespace apache::thrift::fast_thrift::thrift {
 /**
  * ThriftServerAppAdapter — base class for generated fast server handlers.
  *
- * The generated FastHandler extends this class, inheriting pipeline
+ * The generated <Service>AppAdapter extends this class, inheriting pipeline
  * integration, metadata deserialization, and response writing.
  *
  * Satisfies TailEndpointHandler concept (onRead / onException).
  */
 class ThriftServerAppAdapter : public folly::DelayedDestruction {
  public:
-  using ProcessFn = channel_pipeline::Result (*)(
+  // Per-method handler signature for SINGLE_REQUEST_SINGLE_RESPONSE RPCs.
+  // The dispatcher pre-extracts the components codegen actually needs from
+  // the inbound frame so the handler doesn't have to reach back into
+  // ThriftServerRequestMessage / ParsedFrame.
+  //   streamId — Rocket stream id; echo into the response so the client can
+  //              match it to the in-flight request.
+  //   data     — request payload IOBuf, ready to feed into a protocol reader
+  //              for argument deserialization.
+  //   protocol — wire protocol id (Binary / Compact / ...) for the codec.
+  using RequestResponseProcessFn = channel_pipeline::Result (*)(
       ThriftServerAppAdapter*,
-      ThriftServerRequestMessage&&,
-      apache::thrift::ProtocolId) noexcept;
+      uint32_t streamId,
+      std::unique_ptr<folly::IOBuf> data,
+      apache::thrift::ProtocolId protocol) noexcept;
 
   ThriftServerAppAdapter() = default;
   ThriftServerAppAdapter(ThriftServerAppAdapter&&) = delete;
   ThriftServerAppAdapter& operator=(ThriftServerAppAdapter&&) = delete;
 
-  void setCloseCallback(std::function<void()> cb) {
-    closeCallback_.withWLock([&](auto& fn) { fn = std::move(cb); });
-  }
+  void setCloseCallback(std::function<void()> cb);
 
-  void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept {
-    pipeline_ = pipeline;
-    evb_ = pipeline_->eventBase();
-  }
+  void setPipeline(channel_pipeline::PipelineImpl* pipeline) noexcept;
 
   channel_pipeline::PipelineImpl* pipeline() const noexcept {
     return pipeline_;
@@ -72,30 +80,9 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   // === TailEndpointHandler interface ===
 
   channel_pipeline::Result onRead(
-      channel_pipeline::TypeErasedBox&& msg) noexcept {
-    auto request = msg.take<ThriftServerRequestMessage>();
-    DCHECK(request.streamId != 0) << "Invalid stream ID";
+      channel_pipeline::TypeErasedBox&& msg) noexcept;
 
-    if (FOLLY_UNLIKELY(
-            request.frame.type() != frame::FrameType::REQUEST_RESPONSE)) {
-      XLOG(ERR) << "Unsupported frame type: " << request.frame.typeName();
-      writeThriftError(
-          request.streamId,
-          apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND,
-          std::string("Unsupported frame type: ") + request.frame.typeName());
-      return channel_pipeline::Result::Success;
-    }
-
-    return handleRequestResponse(std::move(request));
-  }
-
-  void onException(folly::exception_wrapper&& e) noexcept {
-    XLOG(ERR) << "Pipeline exception: " << e.what();
-    auto cb = closeCallback_.withWLock([](auto& fn) { return std::move(fn); });
-    if (cb && pipeline_) {
-      pipeline_->eventBase()->runInEventBaseThread(std::move(cb));
-    }
-  }
+  void onException(folly::exception_wrapper&& e) noexcept;
 
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}
@@ -103,142 +90,123 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   void onPipelineInactive() noexcept {}
   void onWriteReady() noexcept {}
 
-  void writeResponse(ThriftServerResponseMessage&& response) noexcept {
-    if (FOLLY_UNLIKELY(!pipeline_)) {
-      XLOG(ERR) << "Pipeline not set, cannot send response";
-      return;
-    }
-    auto result = pipeline_->fireWrite(
-        channel_pipeline::erase_and_box(std::move(response)));
-    if (FOLLY_UNLIKELY(result != channel_pipeline::Result::Success)) {
-      XLOG(WARN) << "Pipeline write failed!";
-    }
+  // Sends a PAYLOAD frame. Caller (codegen / framework) is responsible for
+  // building the data buffer (serialized presult, or nullptr) and metadata
+  // buffer (success / declared exception / app error metadata) — the adapter
+  // only frames them onto the pipeline.
+  //
+  // Returns the pipeline write Result. On Error, the pipeline is closed
+  // before returning. Synchronous callers should propagate; async callers
+  // (callbacks) may discard the result since the close has already happened.
+  [[nodiscard]] channel_pipeline::Result writeResponse(
+      uint32_t streamId,
+      std::unique_ptr<folly::IOBuf> data,
+      std::unique_ptr<folly::IOBuf> metadata,
+      bool complete) noexcept;
+
+  // Sends an ERROR frame (framework-level error: bad metadata, unknown
+  // method, parse failure, etc.). Distinct from writeResponse because the
+  // wire shape differs: no payload metadata, the rocket error code is set on
+  // the frame itself. Caller pre-serializes the error body via
+  // serializeResponseRpcError (which also returns the matching ErrorCode).
+  //
+  // Same Error-handling contract as writeResponse: pipeline closes on Error.
+  [[nodiscard]] channel_pipeline::Result writeError(
+      uint32_t streamId,
+      std::unique_ptr<folly::IOBuf> errorData,
+      apache::thrift::fast_thrift::frame::ErrorCode errorCode) noexcept;
+
+  // === Codegen composition helpers ===
+  //
+  // Compose the writeResponse / writeError primitives above with the util/
+  // serializer + metadata pieces into the four wire shapes the server emits
+  // per RPC outcome:
+  //   success                  → writeSuccessResponse   (PAYLOAD)
+  //   declared exception       → writeDeclaredException (PAYLOAD)
+  //   undeclared exception     → writeUnknownException  (PAYLOAD)
+  //   framework dispatch error → writeFrameworkError    (ERROR)
+
+  // Success: serialize presult into a payload buffer, attach the cached
+  // default success metadata, fire as PAYLOAD (errorCode=0, complete=true).
+  template <typename Writer, typename Presult>
+  [[nodiscard]] channel_pipeline::Result writeSuccessResponse(
+      uint32_t streamId, const Presult& presult) noexcept {
+    auto data = serializeResponse<Writer>(
+        [&](Writer& w) { presult.write(&w); },
+        [&](Writer& w) { return presult.serializedSizeZC(&w); });
+    return writeResponse(
+        streamId,
+        std::move(data),
+        getDefaultSuccessMetadata(),
+        /*complete=*/true);
   }
 
-  void writeThriftError(
+  // Declared exception: caller has already populated the matching presult
+  // slot via apache::thrift::detail::ap::insert_exn. We serialize the
+  // presult, build declared-exception metadata (name/what from `ew`,
+  // classification from codegen via getDeclaredExceptionClassification<Ex>),
+  // and fire as PAYLOAD. Same wire family as writeSuccessResponse —
+  // distinguished only by the metadata payloadMetadata variant
+  // (declaredException vs responseMetadata).
+  template <typename Writer, typename Presult>
+  [[nodiscard]] channel_pipeline::Result writeDeclaredException(
       uint32_t streamId,
-      apache::thrift::ResponseRpcErrorCode errorCode,
-      std::string errorMessage) noexcept {
-    auto error = serializeResponseRpcError(errorCode, std::move(errorMessage));
-    writeResponse(
-        ThriftServerResponseMessage{
-            .payload =
-                ThriftServerResponsePayload{
-                    .data = std::move(error.data),
-                    .metadata = nullptr,
-                    .complete = true},
-            .streamId = streamId,
-            .errorCode = static_cast<uint32_t>(error.rocketErrorCode)});
-  }
-
-  void writeAppError(
-      uint32_t streamId,
-      std::string exName,
-      std::string errorMessage,
-      apache::thrift::ErrorBlame blame) noexcept {
-    writeResponse(
-        ThriftServerResponseMessage{
-            .payload =
-                ThriftServerResponsePayload{
-                    .data = nullptr,
-                    .metadata = makeAppErrorResponseMetadata(
-                        std::move(exName), std::move(errorMessage), blame),
-                    .complete = true},
-            .streamId = streamId,
-            .errorCode = 0});
-  }
-
-  // Send a declared exception (IDL `throws`) as a PAYLOAD frame.
-  // The exception struct is carried in `exceptionData` (caller-serialized),
-  // analogous to how a successful response carries the result struct.
-  void writeResponseError(
-      uint32_t streamId,
-      std::unique_ptr<folly::IOBuf> exceptionData,
-      std::string exName,
-      std::string exWhat,
+      const Presult& presult,
+      const folly::exception_wrapper& ew,
       std::optional<apache::thrift::ErrorClassification>
           classification) noexcept {
-    writeResponse(
-        ThriftServerResponseMessage{
-            .payload =
-                ThriftServerResponsePayload{
-                    .data = std::move(exceptionData),
-                    .metadata = makeDeclaredExceptionMetadata(
-                        std::move(exName), std::move(exWhat), classification),
-                    .complete = true},
-            .streamId = streamId,
-            .errorCode = 0});
+    auto data = serializeResponse<Writer>(
+        [&](Writer& w) { presult.write(&w); },
+        [&](Writer& w) { return presult.serializedSizeZC(&w); });
+    auto md = makeDeclaredExceptionMetadata(
+        ew.class_name().toStdString(),
+        ew.what().toStdString(),
+        std::move(classification));
+    return writeResponse(
+        streamId, std::move(data), std::move(md), /*complete=*/true);
   }
+
+  // Undeclared exception (cascade fall-through): null data +
+  // appUnknownException metadata carrying name/what/blame. PAYLOAD frame
+  // because the request was valid and dispatched correctly — the exception
+  // came from user code, not the framework. Client surfaces this as
+  // TApplicationException.
+  [[nodiscard]] channel_pipeline::Result writeUnknownException(
+      uint32_t streamId,
+      const folly::exception_wrapper& ew,
+      apache::thrift::ErrorBlame blame =
+          apache::thrift::ErrorBlame::SERVER) noexcept;
+
+  // Framework dispatch error: the framework couldn't dispatch the request
+  // (parse failure, wrong RPC kind, unknown method). Serializes a
+  // ResponseRpcError body and fires as ERROR with the matching rocket error
+  // code on the frame itself. Distinct wire shape from the three PAYLOAD
+  // variants above — clients route ERROR through decodeErrorFrame().
+  [[nodiscard]] channel_pipeline::Result writeFrameworkError(
+      uint32_t streamId,
+      apache::thrift::ResponseRpcErrorCode code,
+      std::string message) noexcept;
 
  protected:
-  void addMethodHandler(std::string_view name, ProcessFn handler) {
-    dispatch_[std::string(name)] = handler;
-  }
+  void addMethodHandler(
+      std::string_view name, RequestResponseProcessFn handler);
 
   channel_pipeline::Result handleRequestResponse(
-      ThriftServerRequestMessage&& request) noexcept {
-    apache::thrift::RequestRpcMetadata metadata;
-    auto error = deserializeRequestMetadata(request.frame, metadata);
-    if (FOLLY_UNLIKELY(error)) {
-      XLOG(ERR) << "Request metadata deserialization failed: " << error.what();
-      writeThriftError(
-          request.streamId,
-          apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          std::string("Request metadata deserialization failed: ") +
-              folly::exceptionStr(error).toStdString());
-      return channel_pipeline::Result::Success;
-    }
-
-    std::string_view methodName;
-    if (FOLLY_LIKELY(metadata.name().has_value())) {
-      methodName = metadata.name()->view();
-    }
-
-    // Reject unsupported RPC kinds (streaming, sink, etc.)
-    auto kindRef = metadata.kind();
-    if (FOLLY_UNLIKELY(
-            !kindRef.has_value() ||
-            *kindRef !=
-                apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-      XLOG(ERR) << "Unsupported RPC kind: "
-                << (kindRef.has_value() ? static_cast<int>(*kindRef) : -1);
-      writeThriftError(
-          request.streamId,
-          apache::thrift::ResponseRpcErrorCode::WRONG_RPC_KIND,
-          std::string("Unsupported RPC kind: ") +
-              std::to_string(
-                  kindRef.has_value() ? static_cast<int>(*kindRef) : -1));
-      return channel_pipeline::Result::Success;
-    }
-
-    auto it = dispatch_.find(methodName);
-    if (FOLLY_LIKELY(it != dispatch_.end())) {
-      return it->second(
-          this, std::move(request), metadata.protocol().value_or(0));
-    }
-
-    writeThriftError(
-        request.streamId,
-        apache::thrift::ResponseRpcErrorCode::UNKNOWN_METHOD,
-        std::string("Unknown method: ") + std::string(methodName));
-    return channel_pipeline::Result::Success;
-  }
+      ThriftServerRequestMessage&& request) noexcept;
 
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
 
-  ~ThriftServerAppAdapter() override {
-    auto cb = closeCallback_.withWLock([](auto& fn) { return std::move(fn); });
-    if (cb) {
-      cb();
-    }
-  }
+  ~ThriftServerAppAdapter() override;
 
   folly::EventBase* getEventBase() const { return evb_; }
 
  private:
   folly::EventBase* evb_{nullptr};
-  folly::F14FastMap<std::string, ProcessFn> dispatch_;
+  folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;
   folly::Synchronized<std::function<void()>> closeCallback_;
+
+  [[nodiscard]] channel_pipeline::Result fireResponse(
+      ThriftServerResponseMessage&& response) noexcept;
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

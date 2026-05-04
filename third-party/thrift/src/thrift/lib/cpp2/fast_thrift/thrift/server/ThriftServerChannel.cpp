@@ -177,7 +177,7 @@ class PipelineResponseChannelRequest
                   .metadata = nullptr,
                   .complete = true},
           .streamId = streamId_,
-          .errorCode = static_cast<uint32_t>(error.rocketErrorCode)};
+          .errorCode = static_cast<uint32_t>(error.errorCode)};
 
       auto result = pipeline_->fireWrite(
           apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
@@ -398,7 +398,7 @@ void ThriftServerChannel::sendThriftError(
               .metadata = nullptr,
               .complete = true},
       .streamId = streamId,
-      .errorCode = static_cast<uint32_t>(error.rocketErrorCode)};
+      .errorCode = static_cast<uint32_t>(error.errorCode)};
 
   auto result = pipeline_->fireWrite(
       apache::thrift::fast_thrift::channel_pipeline::erase_and_box(

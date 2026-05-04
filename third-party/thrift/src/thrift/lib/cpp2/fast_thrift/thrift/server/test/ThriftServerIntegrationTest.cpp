@@ -773,7 +773,7 @@ class TestServerAppAdapter : public ThriftServerAppAdapter {
  public:
   using Ptr = std::unique_ptr<TestServerAppAdapter, Destructor>;
 
-  void registerMethod(std::string_view name, ProcessFn handler) {
+  void registerMethod(std::string_view name, RequestResponseProcessFn handler) {
     addMethodHandler(name, handler);
   }
 
@@ -938,11 +938,12 @@ TEST_F(
   adapter_->registerMethod(
       "testMethod",
       +[](ThriftServerAppAdapter* self,
-          ThriftServerRequestMessage&& request,
+          uint32_t streamId,
+          std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId) noexcept -> Result {
         auto* t = static_cast<TestServerAppAdapter*>(self);
         t->handlerCalled = true;
-        t->capturedStreamId = request.streamId;
+        t->capturedStreamId = streamId;
         return Result::Success;
       });
 
@@ -961,7 +962,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, MultipleRequestsDispatched) {
   adapter_->registerMethod(
       "method1",
       +[](ThriftServerAppAdapter* self,
-          ThriftServerRequestMessage&&,
+          uint32_t,
+          std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->method1Count++;
         return Result::Success;
@@ -970,7 +972,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, MultipleRequestsDispatched) {
   adapter_->registerMethod(
       "method2",
       +[](ThriftServerAppAdapter* self,
-          ThriftServerRequestMessage&&,
+          uint32_t,
+          std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->method2Count++;
         return Result::Success;
@@ -1015,7 +1018,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, SetupFrameConsumed) {
   adapter_->registerMethod(
       "testMethod",
       +[](ThriftServerAppAdapter* self,
-          ThriftServerRequestMessage&&,
+          uint32_t,
+          std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->handlerCalled = true;
         return Result::Success;
@@ -1037,17 +1041,18 @@ TEST_F(
   adapter_->registerMethod(
       "echo",
       +[](ThriftServerAppAdapter* self,
-          ThriftServerRequestMessage&& request,
+          uint32_t streamId,
+          std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId) noexcept -> Result {
-        self->writeResponse(
-            ThriftServerResponseMessage{
-                .payload =
-                    ThriftServerResponsePayload{
-                        .data = folly::IOBuf::copyBuffer("echo response"),
-                        .metadata = nullptr,
-                        .complete = true},
-                .streamId = request.streamId});
-        return Result::Success;
+        // writeResponse returning Backpressure is a write-side flow-control
+        // signal; the request was handled successfully so we report Success
+        // back into the read chain. Only Error (connection dead) propagates.
+        auto writeResult = self->writeResponse(
+            streamId,
+            folly::IOBuf::copyBuffer("echo response"),
+            /*metadata=*/nullptr,
+            /*complete=*/true);
+        return writeResult == Result::Error ? Result::Error : Result::Success;
       });
 
   setupPipelineWithSetup();
@@ -1073,17 +1078,15 @@ TEST_F(
   adapter_->registerMethod(
       "echo",
       +[](ThriftServerAppAdapter* self,
-          ThriftServerRequestMessage&& request,
+          uint32_t streamId,
+          std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId) noexcept -> Result {
-        self->writeResponse(
-            ThriftServerResponseMessage{
-                .payload =
-                    ThriftServerResponsePayload{
-                        .data = folly::IOBuf::copyBuffer("reply"),
-                        .metadata = nullptr,
-                        .complete = true},
-                .streamId = request.streamId});
-        return Result::Success;
+        auto writeResult = self->writeResponse(
+            streamId,
+            folly::IOBuf::copyBuffer("reply"),
+            /*metadata=*/nullptr,
+            /*complete=*/true);
+        return writeResult == Result::Error ? Result::Error : Result::Success;
       });
 
   setupPipelineWithSetup();
@@ -1132,7 +1135,8 @@ TEST_F(ThriftServerAppAdapterIntegrationTest, ProtocolIdPassedToHandler) {
   adapter_->registerMethod(
       "testMethod",
       +[](ThriftServerAppAdapter* self,
-          ThriftServerRequestMessage&&,
+          uint32_t,
+          std::unique_ptr<folly::IOBuf>,
           apache::thrift::ProtocolId protocol) noexcept -> Result {
         static_cast<TestServerAppAdapter*>(self)->capturedProtocol = protocol;
         return Result::Success;

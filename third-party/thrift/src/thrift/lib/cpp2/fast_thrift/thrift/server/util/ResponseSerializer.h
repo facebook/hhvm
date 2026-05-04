@@ -18,16 +18,22 @@
 
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
 inline constexpr size_t kServerDataHeadroomBytes = 128;
 
+// Serialize a presult into a single IOBuf with the standard server data
+// headroom reserved at the front. Codegen calls this with a presult
+// write/size pair; the resulting IOBuf is handed directly to
+// ThriftServerAppAdapter::writeResponse alongside a metadata IOBuf.
+//
+// Mirrors GeneratedAsyncProcessorBase::serializeResponse from legacy
+// (fbcode/thrift/lib/cpp2/async/processor/GeneratedAsyncProcessorBase.h),
+// without the ContextStack/header-transform tail.
 template <typename ProtocolWriter, typename SerializeFn, typename SizeFn>
-ThriftServerResponseMessage serializeResponse(
-    SerializeFn&& serializeFn, SizeFn&& sizeFn, uint32_t streamId) {
+std::unique_ptr<folly::IOBuf> serializeResponse(
+    SerializeFn&& serializeFn, SizeFn&& sizeFn) {
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
 
   ProtocolWriter writer;
@@ -39,45 +45,7 @@ ThriftServerResponseMessage serializeResponse(
   writer.setOutput(&queue);
   serializeFn(writer);
 
-  return ThriftServerResponseMessage{
-      .payload =
-          ThriftServerResponsePayload{
-              .data = queue.move(),
-              .metadata = getDefaultSuccessMetadata(),
-              .complete = true},
-      .streamId = streamId};
-}
-
-template <typename ProtocolWriter, typename SerializeFn>
-ThriftServerResponseMessage serializeResponse(
-    SerializeFn&& serializeFn, uint32_t streamId) {
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-
-  auto dataBuf = folly::IOBuf::create(kServerDataHeadroomBytes + 256);
-  dataBuf->advance(kServerDataHeadroomBytes);
-  queue.append(std::move(dataBuf));
-  ProtocolWriter writer;
-  writer.setOutput(&queue);
-  serializeFn(writer);
-
-  return ThriftServerResponseMessage{
-      .payload =
-          ThriftServerResponsePayload{
-              .data = queue.move(),
-              .metadata = getDefaultSuccessMetadata(),
-              .complete = true},
-      .streamId = streamId};
-}
-
-inline ThriftServerResponseMessage buildErrorResponse(
-    uint32_t streamId, std::string errorMessage) {
-  return ThriftServerResponseMessage{
-      .payload =
-          ThriftServerResponsePayload{
-              .data = nullptr,
-              .metadata = makeErrorResponseMetadata(std::move(errorMessage)),
-              .complete = true},
-      .streamId = streamId};
+  return queue.move();
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

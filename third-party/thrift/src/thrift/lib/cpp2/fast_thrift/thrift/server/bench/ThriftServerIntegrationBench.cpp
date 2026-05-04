@@ -192,7 +192,7 @@ class BenchServerAppAdapter : public thrift::ThriftServerAppAdapter {
  public:
   using Ptr = std::unique_ptr<BenchServerAppAdapter, Destructor>;
 
-  void registerMethod(std::string_view name, ProcessFn handler) {
+  void registerMethod(std::string_view name, RequestResponseProcessFn handler) {
     addMethodHandler(name, handler);
   }
 };
@@ -409,23 +409,23 @@ struct AppAdapterBenchFixture {
       adapter->registerMethod(
           "benchMethod",
           +[](thrift::ThriftServerAppAdapter* self,
-              thrift::ThriftServerRequestMessage&& request,
+              uint32_t streamId,
+              std::unique_ptr<folly::IOBuf>,
               apache::thrift::ProtocolId) noexcept -> Result {
-            self->writeResponse(
-                thrift::ThriftServerResponseMessage{
-                    .payload =
-                        thrift::ThriftServerResponsePayload{
-                            .data = folly::IOBuf::copyBuffer("echo response"),
-                            .metadata = nullptr,
-                            .complete = true},
-                    .streamId = request.streamId});
-            return Result::Success;
+            auto writeResult = self->writeResponse(
+                streamId,
+                folly::IOBuf::copyBuffer("echo response"),
+                /*metadata=*/nullptr,
+                /*complete=*/true);
+            return writeResult == Result::Error ? Result::Error
+                                                : Result::Success;
           });
     } else {
       adapter->registerMethod(
           "benchMethod",
           +[](thrift::ThriftServerAppAdapter*,
-              thrift::ThriftServerRequestMessage&&,
+              uint32_t,
+              std::unique_ptr<folly::IOBuf>,
               apache::thrift::ProtocolId) noexcept -> Result {
             return Result::Success;
           });

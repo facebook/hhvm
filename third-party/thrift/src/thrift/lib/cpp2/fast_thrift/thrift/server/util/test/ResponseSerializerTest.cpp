@@ -22,77 +22,37 @@
 
 namespace apache::thrift::fast_thrift::thrift {
 
-TEST(ResponseSerializerTest, SerializeResponseWithSizeHint) {
-  auto response = serializeResponse<apache::thrift::CompactProtocolWriter>(
+TEST(ResponseSerializerTest, SerializeResponseRoundTrip) {
+  auto buf = serializeResponse<apache::thrift::CompactProtocolWriter>(
       [](apache::thrift::CompactProtocolWriter& w) {
         w.writeStructBegin("Result");
         w.writeFieldBegin("val", apache::thrift::protocol::T_I32, 0);
-        w.writeI32(99);
+        w.writeI32(12345);
         w.writeFieldEnd();
         w.writeFieldStop();
         w.writeStructEnd();
       },
-      [](apache::thrift::CompactProtocolWriter&) -> uint32_t { return 16; },
-      42);
+      [](apache::thrift::CompactProtocolWriter&) -> uint32_t { return 16; });
 
-  EXPECT_EQ(response.streamId, 42);
-  EXPECT_EQ(response.errorCode, 0);
-  ASSERT_NE(response.payload.data, nullptr);
-  EXPECT_GT(response.payload.data->computeChainDataLength(), 0);
-  ASSERT_NE(response.payload.metadata, nullptr);
-  EXPECT_TRUE(response.payload.complete);
-}
+  ASSERT_NE(buf, nullptr);
+  EXPECT_GT(buf->computeChainDataLength(), 0u);
+  // The helper must reserve the standard server data headroom at the front so
+  // that downstream framing can prepend headers without copying.
+  EXPECT_EQ(buf->headroom(), kServerDataHeadroomBytes);
 
-TEST(ResponseSerializerTest, SerializeResponseWithoutSizeHint) {
-  auto response = serializeResponse<apache::thrift::CompactProtocolWriter>(
-      [](apache::thrift::CompactProtocolWriter& w) {
-        w.writeStructBegin("Result");
-        w.writeFieldStop();
-        w.writeStructEnd();
-      },
-      7);
-
-  EXPECT_EQ(response.streamId, 7);
-  ASSERT_NE(response.payload.data, nullptr);
-  ASSERT_NE(response.payload.metadata, nullptr);
-  EXPECT_TRUE(response.payload.complete);
-}
-
-TEST(ResponseSerializerTest, SerializeResponsePreservesStreamId) {
-  auto r1 = serializeResponse<apache::thrift::CompactProtocolWriter>(
-      [](apache::thrift::CompactProtocolWriter& w) {
-        w.writeStructBegin("R");
-        w.writeFieldStop();
-        w.writeStructEnd();
-      },
-      0);
-  auto r2 = serializeResponse<apache::thrift::CompactProtocolWriter>(
-      [](apache::thrift::CompactProtocolWriter& w) {
-        w.writeStructBegin("R");
-        w.writeFieldStop();
-        w.writeStructEnd();
-      },
-      999);
-
-  EXPECT_EQ(r1.streamId, 0);
-  EXPECT_EQ(r2.streamId, 999);
-}
-
-TEST(ResponseSerializerTest, BuildErrorResponseHasNullData) {
-  auto response = buildErrorResponse(10, "test error");
-
-  EXPECT_EQ(response.streamId, 10);
-  EXPECT_EQ(response.payload.data, nullptr);
-  ASSERT_NE(response.payload.metadata, nullptr);
-  EXPECT_TRUE(response.payload.complete);
-}
-
-TEST(ResponseSerializerTest, BuildErrorResponsePreservesStreamId) {
-  auto r1 = buildErrorResponse(0, "a");
-  auto r2 = buildErrorResponse(999, "b");
-
-  EXPECT_EQ(r1.streamId, 0);
-  EXPECT_EQ(r2.streamId, 999);
+  apache::thrift::CompactProtocolReader reader;
+  reader.setInput(buf.get());
+  std::string structName;
+  reader.readStructBegin(structName);
+  std::string fieldName;
+  apache::thrift::protocol::TType fieldType;
+  int16_t fieldId;
+  reader.readFieldBegin(fieldName, fieldType, fieldId);
+  EXPECT_EQ(fieldType, apache::thrift::protocol::T_I32);
+  EXPECT_EQ(fieldId, 0);
+  int32_t val = 0;
+  reader.readI32(val);
+  EXPECT_EQ(val, 12345);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

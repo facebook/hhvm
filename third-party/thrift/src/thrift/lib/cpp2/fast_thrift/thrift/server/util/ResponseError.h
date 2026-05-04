@@ -24,15 +24,16 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp/TApplicationException.h>
+#include <thrift/lib/cpp2/GeneratedCodeHelper.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
-#include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
 struct SerializedResponseError {
   std::unique_ptr<folly::IOBuf> data;
-  apache::thrift::rocket::ErrorCode rocketErrorCode;
+  apache::thrift::fast_thrift::frame::ErrorCode errorCode;
 };
 
 /**
@@ -120,18 +121,18 @@ inline apache::thrift::ResponseRpcErrorCategory mapErrorCodeToCategory(
  * Maps ResponseRpcErrorCategory to the RSocket ERROR frame error code.
  * Mirrors the logic in RocketThriftRequests.cpp makeRocketException().
  */
-inline apache::thrift::rocket::ErrorCode mapCategoryToRocketErrorCode(
+inline apache::thrift::fast_thrift::frame::ErrorCode mapCategoryToErrorCode(
     apache::thrift::ResponseRpcErrorCategory category) {
   switch (category) {
     case apache::thrift::ResponseRpcErrorCategory::INVALID_REQUEST:
-      return apache::thrift::rocket::ErrorCode::INVALID;
+      return apache::thrift::fast_thrift::frame::ErrorCode::INVALID;
     case apache::thrift::ResponseRpcErrorCategory::LOADSHEDDING:
     case apache::thrift::ResponseRpcErrorCategory::SHUTDOWN:
-      return apache::thrift::rocket::ErrorCode::REJECTED;
+      return apache::thrift::fast_thrift::frame::ErrorCode::REJECTED;
     case apache::thrift::ResponseRpcErrorCategory::INTERNAL_ERROR:
-      return apache::thrift::rocket::ErrorCode::CANCELED;
+      return apache::thrift::fast_thrift::frame::ErrorCode::CANCELED;
   }
-  return apache::thrift::rocket::ErrorCode::CANCELED;
+  return apache::thrift::fast_thrift::frame::ErrorCode::CANCELED;
 }
 
 /**
@@ -139,7 +140,8 @@ inline apache::thrift::rocket::ErrorCode mapCategoryToRocketErrorCode(
  * The data is CompactProtocol-serialized, matching the standard Rocket
  * server's ERROR frame format so the client's decodeErrorFrame() works.
  *
- * Returns the serialized data and the appropriate RSocket error code.
+ * Returns the serialized data and the matching frame error code that the
+ * caller hands to ThriftServerAppAdapter::writeError.
  */
 inline SerializedResponseError serializeResponseRpcError(
     apache::thrift::ResponseRpcErrorCode code, std::string message) {
@@ -160,7 +162,7 @@ inline SerializedResponseError serializeResponseRpcError(
 
   return SerializedResponseError{
       .data = queue.move(),
-      .rocketErrorCode = mapCategoryToRocketErrorCode(category),
+      .errorCode = mapCategoryToErrorCode(category),
   };
 }
 
@@ -180,6 +182,55 @@ inline apache::thrift::ResponseRpcErrorCode refineErrorCode(
     }
   }
   return code;
+}
+
+/**
+ * Builds an ErrorClassification for a declared exception type Ex by reading
+ * the compile-time annotations baked onto the generated exception type
+ * (kind/blame/safety from `@thrift.ExceptionMetadata`) and applying any
+ * runtime override the throwing site may have attached.
+ *
+ * Returns std::nullopt if the exception type carries no classification info,
+ * so callers can pass through to ResponseMetadata helpers without setting a
+ * classification field.
+ */
+template <typename Ex>
+inline std::optional<apache::thrift::ErrorClassification>
+getDeclaredExceptionClassification(const folly::exception_wrapper& ew) {
+  apache::thrift::ErrorClassification classification;
+
+  constexpr auto exceptionKind = apache::thrift::detail::st::
+      struct_private_access::__fbthrift_cpp2_gen_exception_kind<Ex>();
+  classification.kind() =
+      apache::thrift::util::detail::fromExceptionKind(exceptionKind);
+  constexpr auto exceptionBlame = apache::thrift::detail::st::private_access::
+      __fbthrift_cpp2_gen_exception_blame<Ex>();
+  classification.blame() =
+      apache::thrift::util::detail::fromExceptionBlame(exceptionBlame);
+  constexpr auto exceptionSafety = apache::thrift::detail::st::private_access::
+      __fbthrift_cpp2_gen_exception_safety<Ex>();
+  classification.safety() =
+      apache::thrift::util::detail::fromExceptionSafety(exceptionSafety);
+
+  ew.with_exception(
+      [&classification](
+          const apache::thrift::ExceptionMetadataOverrideBase& ex) {
+        if (ex.errorKind() != apache::thrift::ExceptionKind::UNSPECIFIED) {
+          classification.kind() =
+              apache::thrift::util::detail::fromExceptionKind(ex.errorKind());
+        }
+        if (ex.errorBlame() != apache::thrift::ExceptionBlame::UNSPECIFIED) {
+          classification.blame() =
+              apache::thrift::util::detail::fromExceptionBlame(ex.errorBlame());
+        }
+        if (ex.errorSafety() != apache::thrift::ExceptionSafety::UNSPECIFIED) {
+          classification.safety() =
+              apache::thrift::util::detail::fromExceptionSafety(
+                  ex.errorSafety());
+        }
+      });
+
+  return classification;
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

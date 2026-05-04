@@ -160,16 +160,12 @@ class RocketServerStreamStateHandler {
           msg) noexcept {
     auto& response = msg.get<RocketResponseMessage>();
 
-    // streamId() is a free read on ComposedFrameVariant. "complete" depends
-    // on the held alternative: ERROR is implicitly terminal; PAYLOAD uses
-    // its header.complete flag.
+    // streamId() and complete() are free, inlined reads on
+    // ComposedFrameVariant — each frame alternative answers complete()
+    // for itself (ERROR/CANCEL terminal by frame type, PAYLOAD forwards
+    // header.complete). The handler only owns the erase policy.
     uint32_t streamId = response.frame.streamId();
-    bool complete =
-        response.frame
-            .is<apache::thrift::fast_thrift::frame::ComposedErrorFrame>() ||
-        response.frame
-            .get<apache::thrift::fast_thrift::frame::ComposedPayloadFrame>()
-            .header.complete;
+    bool complete = response.frame.complete();
 
     auto it = activeStreams_.find(streamId);
     if (it == activeStreams_.end()) {

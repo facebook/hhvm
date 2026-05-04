@@ -52,6 +52,8 @@ inline constexpr size_t maxAlignof = std::max({alignof(Ts)...});
  *
  *   - `T::kFrameType`     compile-time FrameType tag.
  *   - `t.streamId()`      stream this frame belongs to.
+ *   - `t.complete()`      does this frame terminate the sender's half of
+ *                         the stream? See ComposedFrame.h docstring.
  *   - `std::move(t).serialize()`  produce wire bytes (consuming).
  *
  * `ComposedFrameVariant` accepts only types satisfying this concept.
@@ -59,6 +61,7 @@ inline constexpr size_t maxAlignof = std::max({alignof(Ts)...});
 template <typename T>
 concept ComposedFrameConcept = requires(T t, T&& moved) {
   { t.streamId() } noexcept -> std::same_as<uint32_t>;
+  { t.complete() } noexcept -> std::same_as<bool>;
   {
     std::move(moved).serialize()
   } -> std::same_as<std::unique_ptr<folly::IOBuf>>;
@@ -66,11 +69,11 @@ concept ComposedFrameConcept = requires(T t, T&& moved) {
 
 /**
  * ComposedFrameVariant - A discriminated union of ComposedFrame types
- * that exposes the 3 common APIs (streamId / frameType / serialize) as
- * direct methods, with no `std::visit` at any call site.
+ * that exposes the 4 common APIs (streamId / complete / frameType /
+ * serialize) as direct methods, with no `std::visit` at any call site.
  *
  * Why specialized vs a general variant:
- *   The 3 APIs are statically known. Fold-expression dispatch over the
+ *   The 4 APIs are statically known. Fold-expression dispatch over the
  *   type pack lets the compiler inline the per-type branch at every call
  *   site — no function pointers, no vtables, no captured visitor lambdas.
  *   Per-instance size matches the underlying CompactVariant pattern
@@ -84,6 +87,7 @@ concept ComposedFrameConcept = requires(T t, T&& moved) {
  *   ComposedFrameVariant<ComposedRequestResponseFrame, ComposedSetupFrame> v
  *       = ComposedRequestResponseFrame{...};
  *   auto streamId = v.streamId();      // 1 inlined branch
+ *   auto complete = v.complete();      // 1 inlined branch
  *   auto type     = v.frameType();     // direct field load
  *   auto bytes    = std::move(v).serialize();  // 1 inlined branch
  */
@@ -126,6 +130,17 @@ class ComposedFrameVariant {
     (void)((tag_ == AltAt<Is>::kFrameType &&
             (result = std::launder(reinterpret_cast<const AltAt<Is>*>(storage_))
                           ->streamId(),
+             true)) ||
+           ...);
+    return result;
+  }
+
+  template <size_t... Is>
+  bool completeImpl(std::index_sequence<Is...>) const noexcept {
+    bool result = false;
+    (void)((tag_ == AltAt<Is>::kFrameType &&
+            (result = std::launder(reinterpret_cast<const AltAt<Is>*>(storage_))
+                          ->complete(),
              true)) ||
            ...);
     return result;
@@ -227,7 +242,7 @@ class ComposedFrameVariant {
     return *std::launder(reinterpret_cast<const T*>(storage_));
   }
 
-  // === The 3 typed APIs ===
+  // === The 4 typed APIs ===
   //
   // Each dispatches via inlined fold-expression branch on tag_; the
   // compiler can fully inline the per-type branch at the call site.
@@ -237,6 +252,10 @@ class ComposedFrameVariant {
 
   uint32_t streamId() const noexcept {
     return streamIdImpl(std::index_sequence_for<Ts...>{});
+  }
+
+  bool complete() const noexcept {
+    return completeImpl(std::index_sequence_for<Ts...>{});
   }
 
   std::unique_ptr<folly::IOBuf> serialize() && {

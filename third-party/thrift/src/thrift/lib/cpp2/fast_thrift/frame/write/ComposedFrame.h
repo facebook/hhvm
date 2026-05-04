@@ -34,14 +34,19 @@ namespace apache::thrift::fast_thrift::frame {
  *   - `kFrameType` — compile-time `FrameType` tag identifying this frame.
  *   - `streamId()` — the stream this frame belongs to (0 for
  *     connection-level frames per RSocket spec).
+ *   - `complete()` — does this frame terminate the sender's half of the
+ *     stream? `true` for ERROR / CANCEL / REQUEST_FNF (terminal by frame
+ *     type), forwards `header.complete` for PAYLOAD / REQUEST_CHANNEL,
+ *     `false` for everything else.
  *   - `serialize() &&` — produce wire bytes by consuming the frame.
  *     Forwards directly to the matching `write::serialize(header, ...)`
  *     worker; with inlining + LTO this collapses to a single call.
  *
  * Together these satisfy `ComposedFrameConcept` (see
  * ComposedFrameVariant.h), which lets composed frames be held in a typed
- * `ComposedFrameVariant<...>` whose 3-API surface (streamId / frameType /
- * serialize) is dispatched inline with no `std::visit` at the call site.
+ * `ComposedFrameVariant<...>` whose 4-API surface (streamId / complete /
+ * frameType / serialize) is dispatched inline with no `std::visit` at the
+ * call site.
  *
  * Shared across client and server because the wire shape is identical
  * regardless of which side serializes it.
@@ -59,6 +64,7 @@ struct ComposedRequestResponseFrame {
   write::RequestResponseHeader header{};
 
   uint32_t streamId() const noexcept { return header.streamId; }
+  bool complete() const noexcept { return false; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(metadata), std::move(data));
   }
@@ -72,6 +78,7 @@ struct ComposedRequestFnfFrame {
   write::RequestFnfHeader header{};
 
   uint32_t streamId() const noexcept { return header.streamId; }
+  bool complete() const noexcept { return true; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(metadata), std::move(data));
   }
@@ -85,6 +92,7 @@ struct ComposedRequestStreamFrame {
   write::RequestStreamHeader header{};
 
   uint32_t streamId() const noexcept { return header.streamId; }
+  bool complete() const noexcept { return false; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(metadata), std::move(data));
   }
@@ -98,6 +106,7 @@ struct ComposedRequestChannelFrame {
   write::RequestChannelHeader header{};
 
   uint32_t streamId() const noexcept { return header.streamId; }
+  bool complete() const noexcept { return header.complete; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(metadata), std::move(data));
   }
@@ -113,6 +122,7 @@ struct ComposedRequestNFrame {
   write::RequestNHeader header{};
 
   uint32_t streamId() const noexcept { return header.streamId; }
+  bool complete() const noexcept { return false; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header);
   }
@@ -124,6 +134,7 @@ struct ComposedCancelFrame {
   write::CancelHeader header{};
 
   uint32_t streamId() const noexcept { return header.streamId; }
+  bool complete() const noexcept { return true; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header);
   }
@@ -141,6 +152,7 @@ struct ComposedPayloadFrame {
   write::PayloadHeader header{};
 
   uint32_t streamId() const noexcept { return header.streamId; }
+  bool complete() const noexcept { return header.complete; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(metadata), std::move(data));
   }
@@ -154,6 +166,7 @@ struct ComposedErrorFrame {
   write::ErrorHeader header{};
 
   uint32_t streamId() const noexcept { return header.streamId; }
+  bool complete() const noexcept { return true; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(metadata), std::move(data));
   }
@@ -170,6 +183,7 @@ struct ComposedKeepAliveFrame {
   write::KeepAliveHeader header{};
 
   uint32_t streamId() const noexcept { return 0; }
+  bool complete() const noexcept { return false; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(data));
   }
@@ -183,6 +197,7 @@ struct ComposedSetupFrame {
   write::SetupHeader header{};
 
   uint32_t streamId() const noexcept { return 0; }
+  bool complete() const noexcept { return false; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(metadata), std::move(data));
   }
@@ -195,6 +210,7 @@ struct ComposedMetadataPushFrame {
   write::MetadataPushHeader header{};
 
   uint32_t streamId() const noexcept { return 0; }
+  bool complete() const noexcept { return false; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(metadata));
   }
@@ -212,6 +228,7 @@ struct ComposedExtFrame {
   write::ExtHeader header{};
 
   uint32_t streamId() const noexcept { return header.streamId; }
+  bool complete() const noexcept { return false; }
   std::unique_ptr<folly::IOBuf> serialize() && {
     return write::serialize(header, std::move(metadata), std::move(data));
   }

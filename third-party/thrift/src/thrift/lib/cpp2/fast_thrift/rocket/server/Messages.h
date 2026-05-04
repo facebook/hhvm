@@ -80,13 +80,8 @@ struct RocketRequestMessage {
  * The `frame` field is a typed variant of per-frame payload structs from
  * `frame::ComposedFrame.h`. Handlers carry the typed payload all the way
  * down to the codec; the codec is the single point that serializes the
- * held payload into wire bytes via `frame.serialize()`. The 3-API surface
- * (streamId / frameType / serialize) dispatches inline with no
- * `std::visit` at any call site.
+ * held payload into wire bytes via `frame.serialize()`.
  *
- * `streamId` is exposed by `frame.streamId()`; "complete" semantics live
- * inside the held header (`ComposedPayloadFrame::header.complete`;
- * ERROR is implicitly terminal).
  *
  * `streamType` is the originating REQUEST_* frame type for the stream
  * this response belongs to. App must copy it from the inbound

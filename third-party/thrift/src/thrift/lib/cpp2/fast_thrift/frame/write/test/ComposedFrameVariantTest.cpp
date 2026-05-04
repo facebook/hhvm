@@ -18,20 +18,21 @@
  * ComposedFrameVariantTest validates the typed-variant wrapper:
  *
  *   - ComposedFrameConcept conformance: every Composed*Frame satisfies
- *     it (catches removal of kFrameType or signature drift on the 3 APIs).
+ *     it (catches removal of kFrameType or signature drift on the 4 APIs).
  *
- *   - The 3 typed APIs (frameType, streamId, serialize) dispatch to the
- *     held alternative correctly. frameType is a direct field load;
- *     streamId / serialize use fold-expression dispatch over the type
- *     pack.
+ *   - The 4 typed APIs (frameType, streamId, complete, serialize)
+ *     dispatch to the held alternative correctly. frameType is a direct
+ *     field load; streamId / complete / serialize use fold-expression
+ *     dispatch over the type pack.
  *
  *   - Move semantics: move ctor / move assign transfer the held frame
  *     and leave the source valueless. Destructor cleans up without leaks.
  *
  *   - Discriminator queries: valueless / is<T> / get<T> behave correctly.
  *
- * Per-frame streamId / serialize correctness is exhaustively covered in
- * ComposedFrameTest.cpp; this file only validates the variant wrapping.
+ * Per-frame streamId / complete / serialize correctness is exhaustively
+ * covered in ComposedFrameTest.cpp; this file only validates the variant
+ * wrapping.
  */
 
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
@@ -118,6 +119,7 @@ TEST(ComposedFrameVariantTest, RequestResponseRoundtrip) {
   EXPECT_FALSE(v.valueless());
   EXPECT_EQ(v.frameType(), FrameType::REQUEST_RESPONSE);
   EXPECT_EQ(v.streamId(), 42u);
+  EXPECT_FALSE(v.complete());
 
   auto direct = serialize(
       header,
@@ -135,6 +137,7 @@ TEST(ComposedFrameVariantTest, RequestNRoundtripHeaderOnly) {
 
   EXPECT_EQ(v.frameType(), FrameType::REQUEST_N);
   EXPECT_EQ(v.streamId(), 7u);
+  EXPECT_FALSE(v.complete());
 
   auto direct = serialize(header);
   auto viaVariant = std::move(v).serialize();
@@ -157,6 +160,7 @@ TEST(ComposedFrameVariantTest, SetupRoundtripConnectionLevel) {
 
   EXPECT_EQ(v.frameType(), FrameType::SETUP);
   EXPECT_EQ(v.streamId(), 0u);
+  EXPECT_FALSE(v.complete());
 
   auto direct = serialize(
       header,
@@ -169,6 +173,8 @@ TEST(ComposedFrameVariantTest, SetupRoundtripConnectionLevel) {
 TEST(ComposedFrameVariantTest, ErrorRoundtripLastAlternativeInPack) {
   // Last alternative in the type pack — guards against fold-expression
   // dispatch terminating early instead of matching the actual tag.
+  // Also confirms complete() dispatches to the terminal-by-frame-type
+  // arm (ERROR returns true regardless of header fields).
   ErrorHeader header{.streamId = 88, .errorCode = 0x00000201};
   TestVariant v = ComposedErrorFrame{
       .data = folly::IOBuf::copyBuffer("oops"),
@@ -177,10 +183,25 @@ TEST(ComposedFrameVariantTest, ErrorRoundtripLastAlternativeInPack) {
 
   EXPECT_EQ(v.frameType(), FrameType::ERROR);
   EXPECT_EQ(v.streamId(), 88u);
+  EXPECT_TRUE(v.complete());
 
   auto direct = serialize(header, nullptr, folly::IOBuf::copyBuffer("oops"));
   auto viaVariant = std::move(v).serialize();
   EXPECT_EQ(flatten(*direct), flatten(*viaVariant));
+}
+
+TEST(ComposedFrameVariantTest, CompleteForwardsHeaderBitForWireDrivenFrame) {
+  // PAYLOAD's complete() reads header.complete — confirm variant dispatch
+  // forwards the header bit (not a hardcoded constant) for both values.
+  using PayloadVariant = ComposedFrameVariant<ComposedPayloadFrame>;
+
+  PayloadVariant nextV =
+      ComposedPayloadFrame{.header = {.streamId = 1, .complete = false}};
+  EXPECT_FALSE(nextV.complete());
+
+  PayloadVariant finalV =
+      ComposedPayloadFrame{.header = {.streamId = 1, .complete = true}};
+  EXPECT_TRUE(finalV.complete());
 }
 
 // ============================================================================

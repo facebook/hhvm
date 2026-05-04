@@ -22,6 +22,12 @@
  *     instead of header.streamId), and asserts that connection-level
  *     frames (Setup/KeepAlive/MetadataPush) report 0 per RSocket spec.
  *
+ *   - complete(): asserts each frame's "terminates the sender's half"
+ *     answer — `true` for ERROR/CANCEL/REQUEST_FNF (terminal by frame
+ *     type), forwards `header.complete` for PAYLOAD/REQUEST_CHANNEL,
+ *     `false` otherwise. Per-pattern RpcHandlers gate request-map
+ *     erasure on this signal.
+ *
  *   - serialize() &&: guards against forwarder argument-swap bugs (e.g.
  *     data/metadata reversed) by comparing wire bytes against a direct
  *     call to the matching write::serialize(header, ...) worker.
@@ -133,6 +139,88 @@ TEST(ComposedFrameTest, SetupStreamIdIsZero) {
 TEST(ComposedFrameTest, MetadataPushStreamIdIsZero) {
   ComposedMetadataPushFrame frame{};
   EXPECT_EQ(frame.streamId(), 0u);
+}
+
+// ============================================================================
+// complete() — one test per composed-frame type
+// ============================================================================
+//
+// Asserts each composed frame's terminal-signal answer. Frames whose
+// completion is wire-driven (PAYLOAD, REQUEST_CHANNEL) are tested with
+// both header.complete=false and header.complete=true to confirm the
+// forwarder reads the right field.
+
+TEST(ComposedFrameTest, RequestResponseCompleteIsFalse) {
+  ComposedRequestResponseFrame frame{.header = {.streamId = 1}};
+  EXPECT_FALSE(frame.complete());
+}
+
+TEST(ComposedFrameTest, RequestFnfCompleteIsTrue) {
+  // FNF terminates the sender's half by frame type — no further frames
+  // flow on this streamId from the sender.
+  ComposedRequestFnfFrame frame{.header = {.streamId = 1}};
+  EXPECT_TRUE(frame.complete());
+}
+
+TEST(ComposedFrameTest, RequestStreamCompleteIsFalse) {
+  ComposedRequestStreamFrame frame{
+      .header = {.streamId = 1, .initialRequestN = 1}};
+  EXPECT_FALSE(frame.complete());
+}
+
+TEST(ComposedFrameTest, RequestChannelCompleteForwardsHeaderBit) {
+  ComposedRequestChannelFrame openFrame{
+      .header = {.streamId = 1, .initialRequestN = 1, .complete = false}};
+  EXPECT_FALSE(openFrame.complete());
+
+  ComposedRequestChannelFrame closedFrame{
+      .header = {.streamId = 1, .initialRequestN = 1, .complete = true}};
+  EXPECT_TRUE(closedFrame.complete());
+}
+
+TEST(ComposedFrameTest, RequestNCompleteIsFalse) {
+  ComposedRequestNFrame frame{.header = {.streamId = 1, .requestN = 10}};
+  EXPECT_FALSE(frame.complete());
+}
+
+TEST(ComposedFrameTest, CancelCompleteIsTrue) {
+  ComposedCancelFrame frame{.header = {.streamId = 1}};
+  EXPECT_TRUE(frame.complete());
+}
+
+TEST(ComposedFrameTest, PayloadCompleteForwardsHeaderBit) {
+  ComposedPayloadFrame nextFrame{
+      .header = {.streamId = 1, .complete = false, .next = true}};
+  EXPECT_FALSE(nextFrame.complete());
+
+  ComposedPayloadFrame finalFrame{
+      .header = {.streamId = 1, .complete = true, .next = true}};
+  EXPECT_TRUE(finalFrame.complete());
+}
+
+TEST(ComposedFrameTest, ErrorCompleteIsTrue) {
+  ComposedErrorFrame frame{.header = {.streamId = 1, .errorCode = 0x201}};
+  EXPECT_TRUE(frame.complete());
+}
+
+TEST(ComposedFrameTest, KeepAliveCompleteIsFalse) {
+  ComposedKeepAliveFrame frame{.header = {.lastReceivedPosition = 1}};
+  EXPECT_FALSE(frame.complete());
+}
+
+TEST(ComposedFrameTest, SetupCompleteIsFalse) {
+  ComposedSetupFrame frame{.header = {.majorVersion = 1}};
+  EXPECT_FALSE(frame.complete());
+}
+
+TEST(ComposedFrameTest, MetadataPushCompleteIsFalse) {
+  ComposedMetadataPushFrame frame{};
+  EXPECT_FALSE(frame.complete());
+}
+
+TEST(ComposedFrameTest, ExtCompleteIsFalse) {
+  ComposedExtFrame frame{.header = {.streamId = 1, .extendedType = 1}};
+  EXPECT_FALSE(frame.complete());
 }
 
 // ============================================================================

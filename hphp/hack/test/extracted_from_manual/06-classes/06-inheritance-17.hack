@@ -2,5 +2,8 @@
 // @codegen-command : buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract fbcode/hphp/hack/manual/hack/
 class IntBox {
   public function __construct(protected int $value) {}
-  // Equivalent to declaring `protected int $value;` and assigning in the constructor
+
+  final public function get(): int {
+    return $this->value;
+  }
 }

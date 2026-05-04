@@ -1,7 +1,7 @@
 warning: Warn[12025] Dangerous access of abstract member Animal::speak; it may be abstract and static might refer to an abstract class here. Consider adding the __NeedsConcrete attribute to the containing method. [1]
 -> Declaration is here [2]
 
-06-inheritance-08.hack_warning:6:13
+06-inheritance-13.hack_warning:6:13
     4 |   public static function introduce(): void {
     5 |     echo "I say: ";
 [1] 6 |     static::speak(); // Warning: static might be abstract at runtime

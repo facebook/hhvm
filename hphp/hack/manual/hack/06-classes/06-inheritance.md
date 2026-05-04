@@ -2,7 +2,7 @@
 
 Hack supports single inheritance between classes.
 
-``` Hack
+``` hack
 class IntBox {
   public function __construct(protected int $value) {}
 
@@ -18,15 +18,139 @@ class MutableIntBox extends IntBox {
 }
 ```
 
-Classes can access things defined in the parent class, unless they are
-`private`.
+## Visibility Modifiers
+
+Every property and method in a class has a visibility modifier that controls where it can be accessed.
+
+### `public`
+
+A `public` member can be accessed from anywhere: inside the class, in subclasses, and from outside code.
+
+``` hack
+class IntBox {
+  public int $value = 0;
+
+  public function get(): int {
+    return $this->value;
+  }
+}
+
+function example(IntBox $box): void {
+  $box->value = 42; // OK: public property
+  $box->get();      // OK: public method
+}
+```
+
+Use `public` for the external API of your class.
+
+### `protected`
+
+A `protected` member can be accessed inside the class and in any subclass, but not from outside code.
+
+``` hack error
+class Base {
+  protected int $value = 0;
+
+  protected function getValue(): int {
+    return $this->value;
+  }
+}
+
+class Child extends Base {
+  public function getDoubled(): int {
+    return $this->getValue() * 2; // OK: subclass can access protected members
+  }
+}
+
+function example(Base $b): void {
+  $b->value;      // Error: cannot access protected property
+  $b->getValue(); // Error: cannot access protected method
+}
+```
+
+Use `protected` for implementation details that subclasses need to access or override.
+
+### `private`
+
+A `private` member can only be accessed inside the class that defines it. Subclasses cannot access it.
+
+``` hack error
+class Counter {
+  private int $count = 0;
+
+  public function increment(): void {
+    $this->count++;
+  }
+
+  public function get(): int {
+    return $this->count;
+  }
+}
+
+class DoubleCounter extends Counter {
+  <<__Override>>
+  public function increment(): void {
+    $this->count++; // Error: cannot access private property from subclass
+  }
+}
+```
+
+Use `private` when a member is an internal implementation detail that subclasses should not depend on.
+
+### `internal`
+
+The `internal` modifier restricts access to the same [module](/hack/modules/introduction). An `internal` member can be accessed by any code in the same module, but not from outside it.
+
+``` hack no-extract
+
+class MyService {
+  internal function helper(): void {}
+}
+```
+
+See [Using internal](/hack/modules/using-internal) for full details.
+
+### `protected internal`
+
+A `protected internal` member requires the caller to satisfy **both** constraints: the caller must be in a subclass of the declaring class **and** in the same module.
+
+``` hack no-extract
+class Base {
+  protected internal function helper(): void {}
+}
+
+// Same module, subclass: OK
+class Child extends Base {
+  <<__Override>>
+  public function helper(): void {
+    parent::helper(); // OK: subclass + same module
+  }
+}
+
+// Same module, not a subclass: Error (protected)
+// Different module, subclass: Error (internal)
+// Different module, not a subclass: Error (both)
+```
+
+The keyword order does not matter — `internal protected` is also accepted. This is the only multi-modifier visibility combination allowed in Hack.
+
+### Constructor Promoted Properties
+
+In constructor parameter promotion, the visibility modifier also declares the property.
+
+``` hack
+class IntBox {
+  public function __construct(protected int $value) {}
+  // Equivalent to declaring `protected int $value;` and assigning in the constructor
+}
+```
 
 ## Overriding Methods
 
 You can override methods in subclasses by defining a method with
 the same name.
 
-``` Hack
+``` hack
 class IntBox {
   public function __construct(protected int $value) {}
 
@@ -51,7 +175,7 @@ Hack does not support method overloading. Subclasses methods must have
 a return type, parameters and visibility that is compatible with the
 parent class.
 
-``` Hack
+``` hack
 class NumBox {
   public function __construct(protected num $value) {}
 
@@ -72,7 +196,7 @@ The only exception is constructors, which may have incompatible
 signatures with the parent class. You can use `<<__ConsistentConstruct>>`
 to require subclasses to have compatible types.
 
-``` Hack
+``` hack
 class User {
   // This constructor takes one argument.
   public function __construct(protected string $name) {}
@@ -87,12 +211,35 @@ class Player extends User {
 }
 ```
 
+### Visibility Overriding Rules
+
+When overriding a method in a subclass, you can make it **more** visible but not **less** visible. For example, a `protected` method can be overridden as `public`, but a `public` method cannot be overridden as `protected`.
+
+Private members are not subject to these rules. Since `private` members are not visible to subclasses, a subclass can define a member with the same name — this is a new, independent definition, not an override. The `<<__Override>>` attribute should not be used in this case.
+
+``` hack
+class NumBox {
+  public function __construct(protected num $value) {}
+
+  protected function get(): num {
+    return $this->value;
+  }
+}
+
+class FloatBox extends NumBox {
+  <<__Override>>
+  public function get(): float { // OK: widening from protected to public
+    return (float)$this->value;
+  }
+}
+```
+
 ## Calling Overridden Methods
 
 You can use `parent::` to call an overridden method in the parent
 class.
 
-``` Hack
+``` hack
 class IntBox {
   public function __construct(protected int $value) {}
 
@@ -111,7 +258,7 @@ class IncrementedIntBox extends IntBox {
 
 This also works for static methods.
 
-``` Hack
+``` hack
 class MyParent {
   public static function foo(): int {
     return 0;
@@ -130,7 +277,7 @@ class MyChild extends MyParent {
 
 An abstract class cannot be instantiated. Attempting to create an instance of an abstract class or call an unimplemented abstract method causes a runtime error. The type checker helps prevent these errors. Given the following code:
 
-``` Hack
+``` hack
 abstract class Animal {
   public abstract function greet(): string;
 }
@@ -194,7 +341,7 @@ This tells the type checker that `introduce()` should only be called when the ru
 
 A final class cannot have subclasses.
 
-``` Hack
+``` hack
 final class Dog {
   public function greet(): string {
     return "woof!";
@@ -228,7 +375,7 @@ abstract final class Example {
 
 A `final` method cannot be overridden in subclasses.
 
-``` Hack
+``` hack
 class IntBox {
   public function __construct(protected int $value) {}
 

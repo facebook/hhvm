@@ -10,7 +10,7 @@ class NumBox {
 
 class FloatBox extends NumBox {
   <<__Override>>
-  public function get(): float {
+  public function get(): float { // OK: widening from protected to public
     return (float)$this->value;
   }
 }

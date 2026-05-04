@@ -22,7 +22,6 @@ from thrift.py.client.sync_client_factory import get_client
 from thrift.py.test import TestService
 from thrift.py.test.ttypes import ArithmeticException
 from thrift.Thrift import TApplicationException
-from thrift.transport.TTransport import TTransportException
 
 
 class SyncClientTests(unittest.TestCase):

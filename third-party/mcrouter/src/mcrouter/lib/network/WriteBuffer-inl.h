@@ -9,7 +9,6 @@
 
 #include "mcrouter/lib/network/CaretSerializedMessage.h"
 #include "mcrouter/lib/network/CpuController.h"
-#include "mcrouter/lib/network/McServerRequestContext.h"
 
 namespace facebook {
 namespace memcache {

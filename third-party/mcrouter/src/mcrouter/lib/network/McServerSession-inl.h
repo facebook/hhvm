@@ -10,7 +10,6 @@
 #include <memory>
 
 #include "mcrouter/lib/network/CarbonMessageList.h"
-#include "mcrouter/lib/network/McServerRequestContext.h"
 #include "mcrouter/lib/network/MultiOpParent.h"
 
 namespace facebook {

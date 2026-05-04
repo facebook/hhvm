@@ -17,7 +17,6 @@
 
 #include "mcrouter/lib/network/AsyncMcServerWorkerOptions.h"
 #include "mcrouter/lib/network/ConnectionTracker.h"
-#include "mcrouter/lib/network/McServerRequestContext.h"
 #include "mcrouter/lib/network/McServerSession.h"
 
 namespace folly {

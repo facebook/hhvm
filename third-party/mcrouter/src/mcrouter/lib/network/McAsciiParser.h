@@ -17,7 +17,6 @@
 #include "mcrouter/lib/carbon/Variant.h"
 #include "mcrouter/lib/fbi/cpp/TypeList.h"
 #include "mcrouter/lib/network/CarbonMessageList.h"
-#include "mcrouter/lib/network/gen/MemcacheMessages.h"
 
 namespace facebook {
 namespace memcache {

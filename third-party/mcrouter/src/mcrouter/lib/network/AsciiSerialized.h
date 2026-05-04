@@ -11,7 +11,6 @@
 #include <folly/Range.h>
 
 #include "mcrouter/lib/network/CarbonMessageList.h"
-#include "mcrouter/lib/network/gen/MemcacheMessages.h"
 #include "mcrouter/lib/network/gen/MemcacheRoutingGroups.h"
 
 namespace facebook {

@@ -37,7 +37,7 @@ import unittest
 from optparse import OptionParser
 
 from thrift.protocol import TBinaryProtocol
-from thrift.transport import TSocket, TTransport
+from thrift.transport import TSocket
 
 
 class TimeoutTest(unittest.TestCase):

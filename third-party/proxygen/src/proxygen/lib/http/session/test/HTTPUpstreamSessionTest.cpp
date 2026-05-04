@@ -165,8 +165,8 @@ class HTTPUpstreamTest
     initSelfCodec_(*pCodec_);
     if (auto* c = dynamic_cast<HTTP1xCodec*>(pCodec_)) {
       c->setStrictValidation(true);
-    } else if (auto* c = dynamic_cast<HTTP2Codec*>(pCodec_)) {
-      c->setStrictValidation(true);
+    } else if (auto* h2Codec = dynamic_cast<HTTP2Codec*>(pCodec_)) {
+      h2Codec->setStrictValidation(true);
     }
 
     httpSession_ = new HTTPUpstreamSession(
@@ -3282,9 +3282,9 @@ TEST_F(H2WtUpstreamTest, TestErrConditions) {
   std::ignore = wt.sess->getTransportInfo();
 
   // local & peer addr sanity checks
-  const auto& localAddr = wt.sess->getLocalAddress();
-  const auto& peerAddr = wt.sess->getPeerAddress();
-  EXPECT_EQ(localAddr.getIPAddress(), peerAddr.getIPAddress());
+  const auto& sessLocalAddr = wt.sess->getLocalAddress();
+  const auto& sessPeerAddr = wt.sess->getPeerAddress();
+  EXPECT_EQ(sessLocalAddr.getIPAddress(), sessPeerAddr.getIPAddress());
 }
 
 TEST_F(H2WtUpstreamTest, PeerBidiAndTransportEom) {

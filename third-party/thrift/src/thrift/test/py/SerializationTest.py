@@ -35,7 +35,7 @@ from thrift.protocol import (
     TJSONProtocol,
     TSimpleJSONProtocol,
 )
-from thrift.transport import TSocket, TTransport
+from thrift.transport import TTransport
 from thrift.util import Serializer
 from ThriftTest.ttypes import (
     Bonk,

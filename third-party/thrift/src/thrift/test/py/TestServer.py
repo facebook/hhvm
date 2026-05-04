@@ -27,7 +27,6 @@ from thrift import TMultiplexedProcessor
 from thrift.protocol import TBinaryProtocol, THeaderProtocol
 from thrift.server import TCppServer, TServer
 from thrift.Thrift import TProcessorEventHandler
-from thrift.transport import TSocket, TSSLSocket, TTransport
 from thrift.transport.THeaderTransport import CLIENT_TYPE
 from ThriftTest import SecondService, ThriftTest
 from ThriftTest.ttypes import Xception

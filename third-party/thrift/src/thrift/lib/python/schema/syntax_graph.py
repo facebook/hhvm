@@ -920,22 +920,29 @@ class FunctionNode:
 class ServiceNode(Definition):
     """A Thrift service definition."""
 
-    __slots__ = ("_base_service_lazy", "_functions")
+    __slots__ = ("_uri", "_base_service_lazy", "_functions")
+    _uri: str
     _base_service_lazy: _Lazy[ServiceNode] | None
     _functions: list[FunctionNode]
 
     def __init__(
         self,
         *,
+        uri: str,
         base_service_lazy: _Lazy[ServiceNode] | None,
         functions: list[FunctionNode],
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
+        self._uri = uri
         self._base_service_lazy = base_service_lazy
         self._functions = functions
         for fn in functions:
             fn._parent = self
+
+    @property
+    def uri(self) -> str:
+        return self._uri
 
     @property
     def base_service(self) -> ServiceNode | None:
@@ -953,14 +960,22 @@ class ServiceNode(Definition):
 class InteractionNode(Definition):
     """A Thrift interaction definition."""
 
-    __slots__ = ("_functions",)
+    __slots__ = ("_uri", "_functions")
+    _uri: str
     _functions: list[FunctionNode]
 
-    def __init__(self, *, functions: list[FunctionNode], **kwargs: Any) -> None:
+    def __init__(
+        self, *, uri: str, functions: list[FunctionNode], **kwargs: Any
+    ) -> None:
         super().__init__(**kwargs)
+        self._uri = uri
         self._functions = functions
         for fn in functions:
             fn._parent = self
+
+    @property
+    def uri(self) -> str:
+        return self._uri
 
     @property
     def functions(self) -> list[FunctionNode]:

@@ -31,10 +31,7 @@ from test_thrift.types import (
     ReservedUnion,
     ValueOrError,
 )
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
-    brokenInAutoMigrate,
-    is_auto_migrated,
-)
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize
 from thrift.py3.types import Struct, Union

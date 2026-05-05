@@ -16,28 +16,6 @@
 from cpython.ref cimport PyObject, Py_INCREF, Py_XDECREF
 from libcpp.vector cimport vector as cvector
 
-cpdef enum NumberType:
-    NOT_A_NUMBER = 0
-    BYTE = 1
-    I08 = 1
-    I16 = 2
-    I32 = 3
-    I64 = 4
-    FLOAT = 5
-    DOUBLE = 6
-
-
-cpdef enum Qualifier:
-    UNQUALIFIED = 1
-    REQUIRED = 2
-    OPTIONAL = 3
-
-
-cpdef enum StructType:
-  STRUCT = 1
-  UNION = 2
-  EXCEPTION = 3
-
 
 cdef class StructSpec:
     cdef readonly str name

@@ -43,6 +43,8 @@ from thrift.python.types import (
     typeinfo_binary,
     typeinfo_iobuf,
 )
+from thrift.python.reflection_enums import NumberType, Qualifier, StructType
+from thrift.python.reflection_enums cimport NumberType, Qualifier, StructType
 from folly.iobuf import IOBuf
 import importlib
 

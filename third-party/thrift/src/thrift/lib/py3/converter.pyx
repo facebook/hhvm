@@ -19,7 +19,8 @@ from types import NoneType
 from thrift.py3.reflection import inspect
 
 from libcpp cimport bool
-from thrift.py3.reflection cimport FieldSpec, MapSpec, Qualifier, StructType
+from thrift.py3.reflection cimport FieldSpec, MapSpec
+from thrift.python.reflection_enums cimport Qualifier, StructType
 from thrift.python.types cimport BadEnum
 from thrift.py3.types cimport Container, Struct, GeneratedError
 from thrift.py3.types import CompiledEnum

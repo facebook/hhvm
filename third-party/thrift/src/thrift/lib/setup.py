@@ -273,6 +273,11 @@ else:
             **common_options,
         ),
         Extension(
+            "thrift.python.reflection_enums",
+            sources=["thrift/python/reflection_enums.pyx"],
+            **common_options,
+        ),
+        Extension(
             "thrift.python.serializer",
             sources=["thrift/python/serializer.pyx"],
             **common_options,

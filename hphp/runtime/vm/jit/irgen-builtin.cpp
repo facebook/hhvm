@@ -1129,8 +1129,7 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
         },
         [&] { // Taken: src is not a meth_caller
           hint(env, Block::Hint::Unlikely);
-          updateMarker(env);
-          env.irb->exceptionStackBoundary();
+          updateStackOffsetAndExceptionBoundary(env);
           gen(env, RaiseError, cns(env, isCls ?
             s_BAD_ARG_ON_MC_GET_CLS.get() : s_BAD_ARG_ON_MC_GET_METH.get()));
           // Dead-code, but needed to satisfy cond().
@@ -1170,8 +1169,7 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
     return mc.elseDo(
       [&] { // src is not a meth_caller
         hint(env, Block::Hint::Unlikely);
-        updateMarker(env);
-        env.irb->exceptionStackBoundary();
+        updateStackOffsetAndExceptionBoundary(env);
         gen(env, RaiseError, cns(env, isCls ?
           s_BAD_ARG_ON_MC_GET_CLS.get() : s_BAD_ARG_ON_MC_GET_METH.get()));
         // Dead-code, but needed to satisfy cond().

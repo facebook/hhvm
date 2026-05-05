@@ -179,8 +179,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       // pushed is only true from a prepareAndCallKnown context, so this pop is
       // safe; we have accurate stack offsets.
       popDecRef(env);
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
+      updateStackOffsetAndExceptionBoundary(env);
     }
     return;
   }
@@ -198,8 +197,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       // Generics were passed. Make them visible on the stack. We don't necessarily
       // know that we have a TVec yet, that's only true in the knownNamedArgs case.
       auto const generics = pushed ? topC(env) : apparate(env, TInitCell);
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
+      updateStackOffsetAndExceptionBoundary(env);
 
       // Generics may be known if we are inlining.
       if (generics->hasConstVal(TVec)) {
@@ -255,8 +253,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       hint(env, Block::Hint::Unlikely);
 
       // FIXME: ifThenElse() doesn't save/restore marker and stack boundary.
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
+      updateStackOffsetAndExceptionBoundary(env);
 
       if (pushed) {
         gen(env, Unreachable, ASSERT_REASON);
@@ -276,8 +273,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
 
       if (namedArgsAccountedInStack) {
         push(env, cns(env, ArrayData::CreateVec()));
-        updateMarker(env);
-        env.irb->exceptionStackBoundary();
+        updateStackOffsetAndExceptionBoundary(env);
         return;
       }
       // Push an empty array, as the remainder of the prologue assumes generics
@@ -291,14 +287,12 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       // accurate after the named arg inputs are placed, so we can't
       // apparate a TVec.
       apparate(env, TInitCell);
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
+      updateStackOffsetAndExceptionBoundary(env);
     }
   );
 
   // FIXME: ifThenElse() doesn't save/restore marker and stack boundary.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 }
 
 /*
@@ -325,8 +319,7 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
     if (generics != nullptr) push(env, generics);
 
     // We have updated the stack.
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
+    updateStackOffsetAndExceptionBoundary(env);
 
     // Pass unpack args to the raiseTooManyArgumentsPrologue() helper, which
     // will use them to report the correct number and also take care of decref.
@@ -399,8 +392,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   if (!CoeffectsConfig::enabled()) {
     if (callee->hasCoeffectsLocal()) {
       push(env, cns(env, RuntimeCoeffects::none().value()));
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
+      updateStackOffsetAndExceptionBoundary(env);
     }
     return;
   }
@@ -415,8 +407,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   if (skipCoeffectsCheck) {
     if (callee->hasCoeffectsLocal()) {
       push(env, providedCoeffects);
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
+      updateStackOffsetAndExceptionBoundary(env);
     }
     return;
   }
@@ -432,8 +423,7 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
     }
     if (callee->hasCoeffectsLocal()) {
       push(env, required);
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
+      updateStackOffsetAndExceptionBoundary(env);
     }
     return required;
   }();
@@ -532,8 +522,7 @@ void emitStackAdjustmentsForNamedParams(IRGS& env, const Func* callee) {
   // here rather than within emitCalleeNamedArgChecks to avoid modifying the stack
   // for known calls.
   env.irb->fs().incBCSPDepth(callee->numNamedParams());
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
   if (callee->hasReifiedGenerics()) {
     // The reified generics have moved to the new top of the stack if we reach
     // this code, so assert a type at the right location.
@@ -616,8 +605,7 @@ bool emitInitFuncNamedParams(IRGS& env, const Func* callee,
       --numToPush;
     }
   }
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
   return true;
 }
 
@@ -720,8 +708,7 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t posArgc) {
   if (generics != nullptr) push(env, generics);
   if (coeffects != nullptr) push(env, coeffects);
 
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 }
 
 namespace {
@@ -787,8 +774,7 @@ void definePrologueFrameAndStack(IRGS& env, const Func* callee, uint32_t posArgc
 
   // Now that the stack is initialized, update the BC marker and perform
   // initial sync of the exception stack boundary.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 }
 
 } // namespace

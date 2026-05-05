@@ -335,8 +335,7 @@ void emitExceptionHandler(IRGS& env, Offset ehOffset, SSATmp* exc) {
     if (env.irb->fs().valueOf(Location::Stack{curStackPos}) != nullptr) break;
 
     popDecRef(env, static_cast<DecRefProfileId>(locId++));
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
+    updateStackOffsetAndExceptionBoundary(env);
   }
 
   std::vector<Block*> ehBlocks;
@@ -383,8 +382,7 @@ void emitExceptionHandler(IRGS& env, Offset ehOffset, SSATmp* exc) {
 
     startBlock(decRefBlock);
     popDecRef(env, static_cast<DecRefProfileId>(locId++));
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
+    updateStackOffsetAndExceptionBoundary(env);
   }
 
   assertx(spOffBCFromStackBase(env) == spOffEmpty(env));

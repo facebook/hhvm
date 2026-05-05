@@ -595,8 +595,7 @@ void emitAwait(IRGS& env) {
     }
 
     popC(env);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
+    updateStackOffsetAndExceptionBoundary(env);
 
     if (resumeMode(env) == ResumeMode::Async) {
       implAwaitR(env, child, bcOff(env), nextBcOff(env));
@@ -771,8 +770,7 @@ void emitContEnter(IRGS& env) {
   gen(env, StContArState, gs, genFp);
 
   auto const sendVal = popC(env, DataTypeGeneric);
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 
   auto const retVal = gen(
     env,

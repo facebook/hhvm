@@ -401,8 +401,7 @@ void prepareForNextHHBC(IRGS& env, SrcKey newSk) {
          NormalizedInstruction(newSk, curUnit(env)).toString());
 
   env.bcState = newSk;
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
   env.irb->resetCurIROff();
 }
 

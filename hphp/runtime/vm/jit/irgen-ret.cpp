@@ -207,8 +207,7 @@ void implRet(IRGS& env, bool suspended) {
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
   auto const retval = pop(env, DataTypeGeneric);
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 
   // Async function has its own surprise check.
   if (func->isAsyncFunction()) {

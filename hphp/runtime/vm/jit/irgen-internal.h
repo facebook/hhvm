@@ -725,7 +725,7 @@ inline Class::ClassLookup lookupKnownMaybe(IRGS& env, const StringData* name) {
 // If we manipulate the stack before generating a may-throw IR op, we have to
 // record the updated stack offset in the marker, so that the catch block of
 // the IR op will have the correct memory effects.
-inline void updateStackOffset(IRGS& env) {
+inline void updateStackOffsetAndExceptionBoundary(IRGS& env) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 }
@@ -767,7 +767,7 @@ inline SSATmp* ldCls(IRGS& env,
             gen(env, JmpZero, taken, isEqual);
           },
           [&] {
-            updateStackOffset(env);
+            updateStackOffsetAndExceptionBoundary(env);
             if (Cfg::Eval::LogClsSpeculation) {
               gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), true));
             }
@@ -775,7 +775,7 @@ inline SSATmp* ldCls(IRGS& env,
           },
           [&] {
             hint(env, Block::Hint::Unlikely);
-            updateStackOffset(env);
+            updateStackOffsetAndExceptionBoundary(env);
             if (Cfg::Eval::LogClsSpeculation) {
               gen(env, LogClsSpeculation, data(lookup.cls->classId().id(), false));
             }

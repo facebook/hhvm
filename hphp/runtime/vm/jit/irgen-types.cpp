@@ -1445,8 +1445,7 @@ void verifyRetType(
         return ldCtxCls(env);
       },
       [&] (SSATmp* val, SSATmp* thisCls, bool hard) { // Check failure
-        updateMarker(env);
-        env.irb->exceptionStackBoundary();
+        updateStackOffsetAndExceptionBoundary(env);
         gen(
           env,
           hard ? VerifyRetFailHard : VerifyRetFail,
@@ -1602,8 +1601,7 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
   if (updatedVal != val) {
     auto const irspRelOffset = offsetFromIRSP(env, offset);
     gen(env, StStk, IRSPRelOffsetData{irspRelOffset}, sp(env), updatedVal);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
+    updateStackOffsetAndExceptionBoundary(env);
   }
 }
 

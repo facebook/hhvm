@@ -140,8 +140,7 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
 
   // Now that the stack is initialized, update the BC marker and perform
   // initial sync of the exception stack boundary.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 
   gen(env, EnterTranslation);
   env.lastDefFramePtr = &env.irb->curBlock()->back();

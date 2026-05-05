@@ -152,7 +152,7 @@ void emitIterObjGet(IRGS& env, SSATmp* base, const StringData* methodName) {
 
   pushIncRef(env, base);
   push(env, cns(env, TUninit));
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
 
   auto const fca = FCallArgs(
     FCallArgsFlags::SkipRepack | FCallArgsFlags::EnforceMutableReturn,

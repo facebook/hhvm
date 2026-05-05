@@ -607,7 +607,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* objOrClass, bool dynamicCall,
                          bool suppressDynCallCheck) {
   assertx(callee);
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
 
   objOrClass = refineKnownFuncCtx(env, callee, objOrClass);
   if (objOrClass != nullptr && objOrClass->isA(TBottom)) {
@@ -647,7 +647,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       (!fca.hasUnpack() && fca.numArgs - namedArgc <= callee->numPositionalParams()) ||
       (fca.hasUnpack() && fca.numArgs - namedArgc == callee->numPositionalParams()));
 
-    updateStackOffset(env);
+    updateStackOffsetAndExceptionBoundary(env);
 
     auto numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
     auto const coeffects = curCoeffects(env);
@@ -775,7 +775,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   const int32_t numToPack =
     static_cast<int32_t>(fca.numArgs) - namedArgc - callee->numPositionalParams();
   if (fca.hasUnpack()) {
-    updateStackOffset(env);
+    updateStackOffsetAndExceptionBoundary(env);
 
     if (numToPack == 0) {
       if (fca.skipRepack()) return doCall(fca, true /* skipRepack */);
@@ -836,7 +836,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     return;
   }
 
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
 
   // Caller checks
   emitCallerInOutChecksUnknown(env, callee, fca);
@@ -886,7 +886,7 @@ void fcallObjMethodUnknown(
 ) {
   implIncStat(env, Stats::ObjMethod_cached);
 
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
 
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
@@ -1078,7 +1078,7 @@ void optimizeProfiledCallMethod(IRGS& env,
   auto const fallback = [&] {
     hint(env, Block::Hint::Unlikely);
     IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
-    updateStackOffset(env);
+    updateStackOffsetAndExceptionBoundary(env);
     emitFCall(nullptr, true /* no call profiling */);
     gen(env, Jmp, makeExit(env, nextSrcKey(env)));
   };
@@ -1324,7 +1324,7 @@ void fcallFuncObj(IRGS& env, const FCallArgs& fca) {
   auto const funcOpt = gen(env, LdObjInvoke, cls);
   auto const func = gen(env, CheckNonNull, slowExit, funcOpt);
   discard(env);
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
   prepareAndCallProfiled(env, func, fca, obj, false, false);
 }
 
@@ -1332,7 +1332,7 @@ void fcallFuncFunc(IRGS& env, const FCallArgs& fca) {
   auto const func = popC(env);
   assertx(func->isA(TFunc));
   assertx(!isRefcountedType(KindOfFunc));
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
 
   ifElse(
     env,
@@ -1363,7 +1363,7 @@ void fcallFuncRFunc(IRGS& env, const FCallArgs& fca) {
 
   popDecRef(env);
   push(env, generics);
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
   prepareAndCallProfiled(env, func, fca.withGenerics(), nullptr, false, false);
 }
 
@@ -1371,7 +1371,7 @@ void fcallFuncClsMeth(IRGS& env, const FCallArgs& fca) {
   auto const clsMeth = popC(env);
   assertx(clsMeth->isA(TClsMeth));
   assertx(!isRefcountedType(KindOfClsMeth));
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
 
   auto const cls = gen(env, LdClsFromClsMeth, clsMeth);
   auto const func = gen(env, LdFuncFromClsMeth, clsMeth);
@@ -1389,7 +1389,7 @@ void fcallFuncRClsMeth(IRGS& env, const FCallArgs& fca) {
 
   popDecRef(env);
   push(env, generics);
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
   prepareAndCallProfiled(env, func, fca.withGenerics(), cls, false, false);
 }
 
@@ -1401,7 +1401,7 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   auto const funcN = gen(env, LdFunc, str);
   auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
   popDecRef(env);
-  updateStackOffset(env);
+  updateStackOffsetAndExceptionBoundary(env);
   emitModuleBoundaryCheck(env, func);
   prepareAndCallProfiled(env, func, fca, nullptr, true, false);
 }
@@ -1522,7 +1522,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
           gen(env, EqFuncId, FuncData(lookup.func), taken, loadedFunc);
         },
         [&] {
-          updateStackOffset(env);
+          updateStackOffsetAndExceptionBoundary(env);
           if (Cfg::Eval::LogClsSpeculation) {
             gen(env, LogClsSpeculation, data(lookup.func, true));
           }
@@ -1531,7 +1531,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          updateStackOffset(env);
+          updateStackOffsetAndExceptionBoundary(env);
           if (Cfg::Eval::LogClsSpeculation) {
             gen(env, LogClsSpeculation, data(lookup.func, false));
           }
@@ -1975,7 +1975,7 @@ void emitFCallClsMethodD(IRGS& env,
           gen(env, JmpZero, taken, isEqual);
         },
         [&] {
-          updateStackOffset(env);
+          updateStackOffsetAndExceptionBoundary(env);
           auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
           emitModuleBoundaryCheckKnown(env, cls);
           if (Cfg::Eval::LogClsSpeculation) {
@@ -1987,7 +1987,7 @@ void emitFCallClsMethodD(IRGS& env,
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          updateStackOffset(env);
+          updateStackOffsetAndExceptionBoundary(env);
           if (Cfg::Eval::LogClsSpeculation) {
             gen(env, LogClsSpeculation, data(callCtx.cls(),
                                              lookup.cls->classId().id(),

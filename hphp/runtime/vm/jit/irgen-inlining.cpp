@@ -321,8 +321,7 @@ void beginInlining(IRGS& env,
   env.inlineState.stackDepth += callee->maxStackCells();
   env.bcState = entry;
 
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 
   if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
@@ -372,8 +371,7 @@ void conjureBeginInlining(IRGS& env,
   allocActRec(env);
 
   // beginInlining() assumes synced state.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 
   auto const fp = genCalleeFP(env, callee, 0);
   gen(env, EnterInlineFrame, fp);
@@ -403,13 +401,12 @@ InlineFrameSave popInlineFrame(IRGS& env) {
   env.inlineState.frames.pop_back();
 
   // Pop the inlined frame in our IRGS.  Be careful between here and the
-  // updateMarker() below, where the caller state isn't entirely set up.
+  // updateStackOffsetAndExceptionBoundary() below, where the caller state isn't entirely set up.
   env.inlineState.cost = save.frame.savedCost;
   env.inlineState.stackDepth -= save.bcState.func()->maxStackCells();
   env.bcState = save.frame.callerSk;
 
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 
   return save;
 }
@@ -422,8 +419,7 @@ void pushInlineFrame(IRGS& env, const InlineFrameSave& save) {
 
   env.inlineState.frames.emplace_back(save.frame);
 
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 }
 
 InlineFrameSave implInlineReturn(IRGS& env) {
@@ -725,8 +721,7 @@ void sideExitFromInlined(IRGS& env, SSATmp* target) {
     safe_cast<uint32_t>(invSP - spOffEmpty(env))
   };
   gen(env, InlineSideExitSyncStack, sr, sp(env));
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffsetAndExceptionBoundary(env);
 
   gen(env, Jmp, env.inlineState.frames.back().sideExitTarget, target);
 }

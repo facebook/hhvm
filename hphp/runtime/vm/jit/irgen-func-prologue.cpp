@@ -621,39 +621,52 @@ bool emitInitFuncNamedParams(IRGS& env, const Func* callee,
   return true;
 }
 
-void emitInitFuncInputsInline(IRGS& env, const Func* callee, uint32_t argc,
+void emitInitFuncInputsInline(IRGS& env, const Func* callee, uint32_t posArgc,
                               SSATmp* fp) {
-  assertx(argc <= callee->numParams());
+  assertx(posArgc <= callee->numPositionalParamsVariadic());
   std::vector<SSATmp*> args;
+  auto const argc = posArgc + callee->numNamedParams();
 
-  auto const pop = [&] {
+  auto const popInput = [&](Optional<uint32_t> idx = std::nullopt) {
+    // We may have pushed uninits for any optional
+    // named params.
+    // TODO(named_params) we have access to the
+    // named arg names here and can do better
+    auto typeToAssert = [&] {
+      if (idx && *idx < callee->numNamedParams()) {
+        const Func::ParamInfo& pi = callee->params()[*idx];
+        if (pi.hasDefaultValue()) return TCell;
+      }
+      return TInitCell;
+    }();
     gen(
       env,
       AssertStk,
-      TInitCell,
+      typeToAssert,
       IRSPRelOffsetData { offsetFromIRSP(env, BCSPRelOffset{0}) },
       sp(env)
     );
-    args.emplace_back(popC(env, DataTypeGeneric));
+    auto popped = assertType(pop(env, DataTypeGeneric), typeToAssert);
+    args.emplace_back(popped);
   };
 
   // Generics and coeffects are already initialized
-  if (callee->hasCoeffectsLocal())  pop();
-  if (callee->hasReifiedGenerics()) pop();
+  if (callee->hasCoeffectsLocal())  popInput();
+  if (callee->hasReifiedGenerics()) popInput();
 
   // Empty array for `...$args`
   if (callee->hasVariadicCaptureParam() && argc < callee->numParams()) {
     args.emplace_back(cns(env, ArrayData::CreateVec()));
   }
 
-  // Uninit for un-passed arguments
+  // Uninit for un-passed positionals
   if (argc < callee->numNonVariadicParams()) {
     for (int c = callee->numNonVariadicParams() - argc; c; c--) {
       args.emplace_back(cns(env, TUninit));
     }
   }
 
-  for (int i = 0; i < argc; i++) pop();
+  for (int i = 0; i < argc; i++) popInput(argc - i - 1);
   assertx(args.size() == callee->numFuncEntryInputs());
 
   // Make the new FramePtr live (marking the caller stack below the frame as

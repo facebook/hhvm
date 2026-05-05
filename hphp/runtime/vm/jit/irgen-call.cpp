@@ -563,7 +563,6 @@ SSATmp* refineKnownFuncCtx(IRGS& env, const Func* callee, SSATmp* ctx) {
 }
 
 std::vector<Type> funcEntryTypes(IRGS& env, const Func* callee,
-                                 const FCallArgs& fca,
                                  uint32_t numArgsInclUnpack) {
   int argc = 0;
   std::vector<Type> inputTypes;
@@ -662,6 +661,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       RuntimeCoeffects::none()  // coeffects not needed, passed via SSA arg
     ).value());
 
+
     // We defer emitting parameter type checks until after allocating the frame
     // pointer (but before we pop the parameters from the stack and make the
     // frame live) so that CheckTypes from within the body of the function can
@@ -703,7 +703,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // and fix the callees.
     numArgsInclUnpack = posArgc + callee->numNamedParams();
 
-    auto const inputTypes = funcEntryTypes(env, callee, fca, numArgsInclUnpack);
+    auto const inputTypes = funcEntryTypes(env, callee, numArgsInclUnpack);
     auto const numInputs = numArgsInclUnpack
       + (callee->hasReifiedGenerics() ? 1 : 0)
       + (callee->hasCoeffectsLocal() ? 1 : 0);
@@ -718,7 +718,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
 
     if (!hasRdsCache) {
       if (irGenTryInlineFCall(env, entry, objOrClass, asyncEagerOffset,
-                              calleeFP, numArgsInclUnpack, inputTypes)) {
+                              calleeFP, posArgc, addedUninitNamed,
+                              inputTypes)) {
         return;
       }
     }

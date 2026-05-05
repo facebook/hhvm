@@ -274,9 +274,11 @@ void beginInlining(IRGS& env,
                    SSATmp* ctx,
                    Offset asyncEagerOffset,
                    int cost,
-                   SSATmp* calleeFP) {
-  assertx(entry.funcEntry());
+                   SSATmp* calleeFP,
+                   bool addedUninitNamed) {
+  assertx(entry.anyFuncEntry());
   auto const callee = entry.func();
+
   auto frame = InlineFrame {
     env.bcState,
     irgen::defBlock(env),  // returnTarget
@@ -293,15 +295,17 @@ void beginInlining(IRGS& env,
   auto const numTotalInputs = callee->numFuncEntryInputs();
   jit::vector<SSATmp*> dvs{numTotalInputs};
 
+  // TODO(named_params) we should also push named param default value DVs here.
   while (entry.trivialDVFuncEntry()) {
     auto const param = entry.numEntryArgs();
     auto const paramIdx = param + callee->numNamedParams();
     assertx(paramIdx < numTotalInputs);
     auto const dv = callee->params()[paramIdx].defaultValue;
     dvs[paramIdx] = cns(env, dv);
-    // TODO(named_params) need to dispatch to a NamedParamsFuncEntry as
-    // appropriate when inlining.
-    entry = SrcKey{callee, param + 1, false, SrcKey::FuncEntryTag {}};
+    entry =
+      SrcKey {
+        callee, param + 1, addedUninitNamed, SrcKey::FuncEntryTag {}
+      };
   }
 
   auto const extra = calleeFP->inst()->extra<DefCalleeFP>();
@@ -340,7 +344,7 @@ void conjureBeginInlining(IRGS& env,
                           SrcKey entry,
                           Type thisType,
                           const std::vector<Type>& inputs) {
-  assertx(entry.funcEntry());
+  assertx(entry.anyFuncEntry());
   auto const callee = entry.func();
   auto const profCount = curProfCount(env);
 
@@ -379,7 +383,7 @@ void conjureBeginInlining(IRGS& env,
   }
 
   beginInlining(env, entry, ctx, kInvalidOffset /* asyncEagerOffset */,
-                9 /* cost */, fp);
+                9 /* cost */, fp, true);
   // Set the prof count on the return block.
   // FIXME: Why is this needed? Should it be set for other blocks as well, e.g.
   // suspendRetBlock? Is something similar needed for real translations?
@@ -689,10 +693,8 @@ void suspendFromInlined(IRGS& env, SSATmp* waitHandle) {
 
 void sideExitFromInlined(IRGS& env, SrcKey target) {
   assertx(isInlining(env));
-  // TODO(named_params) support inlining named params func entries
-  assertx(!target.namedParamsFuncEntry());
 
-  if (target.funcEntry()) {
+  if (target.anyFuncEntry()) {
     // FIXME: Func entries may contain guards that might fail. Ideally we would
     // CallFuncEntry in these situations, but CallFuncEntry accepts arguments on
     // the stack and we already converted them to the locals.
@@ -703,7 +705,7 @@ void sideExitFromInlined(IRGS& env, SrcKey target) {
     gen(
       env,
       ReqBindJmp,
-      ReqBindJmpData { target, invSP, irSP, target.funcEntry() },
+      ReqBindJmpData { target, invSP, irSP, target.anyFuncEntry() },
       sp(env),
       fp(env)
     );

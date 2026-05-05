@@ -104,6 +104,7 @@ irgen::RegionAndLazyUnit selectCalleeRegion(const irgen::IRGS& irgs,
                                             SrcKey entry,
                                             Type ctxType,
                                             SrcKey callerSk,
+                                            bool addedUninitNamed,
                                             std::vector<Type> inputTypes);
 
 void setInliningMetadata(uint64_t baseProfCount, 

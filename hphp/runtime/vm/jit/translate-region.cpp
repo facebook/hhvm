@@ -414,9 +414,10 @@ irgen::RegionAndLazyUnit getInlinableCalleeRegionAndLazyUnit(
   Type ctxType,
   const ProfSrcKey& psk,
   int& calleeCost,
+  bool addedUninitNamed,
   const std::vector<Type>& inputTypes
 ) {
-  assertx(entry.funcEntry());
+  assertx(entry.anyFuncEntry());
   if (isProfiling(irgs.context.kind) || irgs.inlineState.conjure) {
     return {psk.srcKey, nullptr};
   }
@@ -436,7 +437,7 @@ irgen::RegionAndLazyUnit getInlinableCalleeRegionAndLazyUnit(
   }
 
   auto regionAndLazyUnit = selectCalleeRegion(irgs, entry, ctxType, psk.srcKey,
-                                              inputTypes);
+                                              addedUninitNamed, inputTypes);
   if (!regionAndLazyUnit.region()) {
     return {psk.srcKey, nullptr};
   }
@@ -899,11 +900,9 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 
 bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
                          Offset asyncEagerOffset, SSATmp* calleeFP,
-                         uint32_t argc, const std::vector<Type>& inputTypes) {
-  // TODO(named_params) support inlining calls to functions with optional named
-  // params.
-  if (entry.func()->hasOptionalNamedParameters()) return false;
-  assertx(entry.funcEntry());
+                         uint32_t posArgc, bool addedUninitNamed,
+                         const std::vector<Type>& inputTypes) {
+  assertx(entry.anyFuncEntry());
   ctx = ctx ? ctx : cns(irgs, nullptr);
 
   auto const psk = ProfSrcKey { canonTransID(irgs.profTransIDs), curSrcKey(irgs) };
@@ -911,7 +910,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
 
   // See if we have a callee region we can inline.
   auto calleeRegionAndUnit = getInlinableCalleeRegionAndLazyUnit(
-    irgs, entry, ctx->type(), psk, calleeCost, inputTypes);
+    irgs, entry, ctx->type(), psk, calleeCost, addedUninitNamed, inputTypes);
   auto const calleeRegion = calleeRegionAndUnit.region();
   if (!calleeRegion) return false;
 
@@ -919,7 +918,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
   assertx(irgs.context.kind != TransKind::Profile);
   assertx(calleeRegion->instrSize() <= irgs.budgetBCInstrs || calleeCost <= Cfg::HHIR::AlwaysInlineVasmCostLimit);
   assert_flog(calleeRegion->start().func() == entry.func() &&
-              calleeRegion->start().funcEntry() && entry.funcEntry() &&
+              calleeRegion->start().anyFuncEntry() && entry.anyFuncEntry() &&
               calleeRegion->start().numEntryArgs() >= entry.numEntryArgs(),
               "{} != {}", show(calleeRegion->start()), show(entry));
 
@@ -939,8 +938,9 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
     return true;
   }
 
-  emitInitFuncInputsInline(irgs, entry.func(), argc, calleeFP);
-  beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost, calleeFP);
+  emitInitFuncInputsInline(irgs, entry.func(), posArgc, calleeFP);
+  beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost, calleeFP,
+                addedUninitNamed);
 
   SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
     { return show(*calleeRegion); };

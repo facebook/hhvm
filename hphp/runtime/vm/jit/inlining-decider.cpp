@@ -158,7 +158,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
 
 bool canInlineAt(SrcKey callSK, SrcKey entry, AnnotationData* annotations) {
   assertx(entry.func());
-  assertx(entry.funcEntry());
+  assertx(entry.anyFuncEntry());
   auto const callee = entry.func();
 
   if (!Cfg::HHIR::EnableGenTimeInlining) {
@@ -528,7 +528,7 @@ bool shouldInline(const irgen::IRGS& irgs,
       [](auto const b) {
         return
           !b->empty() &&
-          !b->last().funcEntry() &&
+          !b->last().anyFuncEntry() &&
           b->last().op() == OpNativeImpl;
       }
     );
@@ -754,9 +754,10 @@ irgen::RegionAndLazyUnit selectCalleeRegion(
   SrcKey entry,
   Type ctxType,
   SrcKey callerSk,
+  bool addedUninitNamed,
   std::vector<Type> inputTypes
 ) {
-  assertx(entry.funcEntry());
+  assertx(entry.anyFuncEntry());
   auto const callee = entry.func();
 
   auto static inlineAttempts = ServiceData::createTimeSeries(
@@ -819,9 +820,7 @@ irgen::RegionAndLazyUnit selectCalleeRegion(
     auto const paramIdx = param + callee->numNamedParams();
     assertx(paramIdx < inputTypes.size());
     inputTypes[paramIdx] = Type::cns(callee->params()[paramIdx].defaultValue);
-    // TODO(named_params) once we start inlining callees
-    // with named params, consider the NamedParamsFuncEntryTag case.
-    entry = SrcKey{callee, param + 1, false, SrcKey::FuncEntryTag {}};
+    entry = SrcKey{callee, param + 1, addedUninitNamed, SrcKey::FuncEntryTag {}};
   }
 
   if (profData()) {

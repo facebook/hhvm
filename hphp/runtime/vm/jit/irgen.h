@@ -229,7 +229,8 @@ void beginInlining(IRGS& env,
                    SSATmp* ctx,
                    Offset asyncEagerOffset,
                    int cost,
-                   SSATmp* calleeFP);
+                   SSATmp* calleeFP,
+                   bool addedUninitNamed);
 
 /*
  * End the current inlined frame, after all its blocks have been emitted.

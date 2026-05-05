@@ -47,6 +47,11 @@ inline ErrorCode getDefaultAbortErrorCode(bool isUpstream) {
   return isUpstream ? ErrorCode::CANCEL : ErrorCode::INTERNAL_ERROR;
 }
 
+bool isConnectUdp(const HTTPMessage& msg) noexcept {
+  return msg.getMethod() == HTTPMethod::CONNECT && msg.getUpgradeProtocol() &&
+         *msg.getUpgradeProtocol() == "connect-udp";
+}
+
 } // namespace
 
 #define INVARIANT_RETURN(X, Y)                                            \
@@ -217,7 +222,7 @@ void HTTPTransaction::onIngressHeadersComplete(
     headRequest_ = (method == HTTPMethod::HEAD);
     upgraded_ = (method == HTTPMethod::CONNECT);
     wtConnectStream_ = HTTPWebTransport::isConnectMessage(*msg);
-    connectUdpStream_ = msg->isConnectUdpReq();
+    connectUdpStream_ = isConnectUdp(*msg);
   }
 
   if ((msg->isRequest() && msg->getMethod() != HTTPMethod::CONNECT) ||
@@ -1028,7 +1033,7 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   if (headers.isRequest()) {
     headRequest_ = (headers.getMethod() == HTTPMethod::HEAD);
     wtConnectStream_ = HTTPWebTransport::isConnectMessage(headers);
-    connectUdpStream_ = headers.isConnectUdpReq();
+    connectUdpStream_ = isConnectUdp(headers);
   } else {
     has1xxResponse_ = headers.is1xxResponse();
   }

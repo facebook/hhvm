@@ -861,9 +861,6 @@ class HTTPMessage {
     return fields_.which_ == MessageType::RESPONSE;
   }
 
-  // @returns true if this HTTPMessage represents a connect-udp request
-  bool isConnectUdpReq() const noexcept;
-
   /**
    * Assuming input contains
    * <name><valueDelim><value>(<pairDelim><name><valueDelim><value>),

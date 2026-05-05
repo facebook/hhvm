@@ -11,9 +11,15 @@ from thrift.util.Recursive import fix_spec
 from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
 from thrift.protocol.TProtocol import TProtocolException
 
+try:
+    from thrift.Thrift import warn_thrift_py_deprecated
+except ImportError:
+    def warn_thrift_py_deprecated(name):
+        pass
 
 
 from .ttypes import UTF8STRINGS, EmptyEnum, City, Company, Internship, Range, struct1, struct2, struct3, struct4, union1, union2, MyCompany, MyStringIdentifier, MyIntIdentifier, MyMapIdentifier, CompanyLocationsMap
+warn_thrift_py_deprecated(__name__)
 
 myInt = 1337
 

@@ -152,3 +152,8 @@ class TApplicationException(TException):
 
 class UnimplementedTypedef:
     pass
+
+class ThriftPyDeprecatedWarning(DeprecationWarning):
+    pass
+
+def warn_thrift_py_deprecated(name: str) -> None: ...

@@ -15,6 +15,11 @@ from json import loads
 import sys
 if sys.version_info[0] >= 3:
   long = int
+try:
+    from thrift.Thrift import warn_thrift_py_deprecated
+except ImportError:
+    def warn_thrift_py_deprecated(name):
+        pass
 
 from .ttypes import UTF8STRINGS, Color, ThriftAdaptedEnum, MyAnnotation, Foo, Baz, Bar, DirectlyAdapted, IndependentDirectlyAdapted, StructWithFieldAdapter, TerseAdaptedFields, B, A, Config, MyStruct, AdaptTestStruct, AdaptTemplatedTestStruct, AdaptTemplatedNestedTestStruct, AdaptTestUnion, AdaptedStruct, DirectlyAdaptedStruct, StructFieldAdaptedStruct, CircularAdaptee, CircularStruct, ReorderedStruct, DeclaredAfterStruct, RenamedStruct, SameNamespaceStruct, HeapAllocated, MoveOnly, AlsoMoveOnly, ApplyAdapter, TransitiveAdapted, CountingStruct, Person, Person2, RenamedStructWithStructAdapterAndFieldAdapter, SetWithAdapter, StringWithAdapter, ListWithElemAdapter, ListWithElemAdapter_withAdapter, MyI64, DoubleTypedefI64, MyI32, FooWithAdapter, ListOfFooTypedef, StructWithAdapter, UnionWithAdapter, AdaptedA, StringWithCppAdapter, DurationMs, AdaptedBool, AdaptedByte, AdaptedShort, AdaptedInteger, AdaptedLong, AdaptedDouble, AdaptedString, DoubleTypedefBool, IOBuf, CustomProtocolType, IndirectionString, AdaptedEnum, AdaptedTypedef, TypedefOfDirect, AdaptedCircularAdaptee, CountingInt, FooWithAdapter_9317, ListWithElemAdapter_withAdapter_2312, MyI32_4873, StringWithAdapter_7208, Baz_7352, Foo_3943, Foo_6868, binary_5673, i32_5137, map_string_ListWithElemAdapter_withAdapter_8454
 from thrift.Thrift import TProcessor
@@ -62,6 +67,8 @@ from thrift.util.Decorators import (
   should_run_on_thread,
   write_results_after_future,
 )
+
+warn_thrift_py_deprecated(__name__)
 
 class Iface:
   def count(self, ):

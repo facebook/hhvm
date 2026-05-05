@@ -11,6 +11,11 @@ from thrift.util.Recursive import fix_spec
 from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
 from thrift.protocol.TProtocol import TProtocolException
 
+try:
+    from thrift.Thrift import warn_thrift_py_deprecated
+except ImportError:
+    def warn_thrift_py_deprecated(name):
+        pass
 
 from .ttypes import UTF8STRINGS, Foo
 from thrift.Thrift import TProcessor
@@ -58,6 +63,8 @@ from thrift.util.Decorators import (
   should_run_on_thread,
   write_results_after_future,
 )
+
+warn_thrift_py_deprecated(__name__)
 
 class Iface:
   def init(self, int1=None):

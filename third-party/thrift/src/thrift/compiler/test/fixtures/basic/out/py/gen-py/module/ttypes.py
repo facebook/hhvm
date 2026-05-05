@@ -15,6 +15,11 @@ from json import loads
 import sys
 if sys.version_info[0] >= 3:
   long = int
+try:
+    from thrift.Thrift import warn_thrift_py_deprecated
+except ImportError:
+    def warn_thrift_py_deprecated(name):
+        pass
 
 
 import pprint
@@ -53,6 +58,7 @@ all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
 __all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'Containers', 'MyDataItem', 'MyUnion', 'MyException', 'MyExceptionWithMessage', 'ReservedKeyword', 'UnionToBeRenamed', 'MyEnumAlias', 'MyDataItemAlias']
+warn_thrift_py_deprecated(__name__)
 
 class MyEnum:
   def __getattr__(self, name): raise AttributeError(name)

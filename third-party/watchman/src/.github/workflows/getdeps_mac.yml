@@ -9,15 +9,36 @@ on:
   pull_request:
     branches:
     - main
+  workflow_dispatch:
+    inputs:
+      tmate_enabled:
+        description: 'Start a tmate SSH session on failure'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read  #  to fetch code (actions/checkout)
+  actions: read  #  to query GitHub Actions cache usage
 
 jobs:
   build:
     runs-on: macOS-latest
+    timeout-minutes: 60
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.2.app/Contents/Developer
+      SCCACHE_GHA_ENABLED: "on"
     steps:
+    - name: Show runner info
+      run: |
+        echo "CPU cores: $(sysctl -n hw.ncpu)"
+        sysctl -n machdep.cpu.brand_string
+        sysctl -n hw.memsize | awk '{print "Memory: " $1/1073741824 " GB"}'
     - uses: actions/checkout@v6
+    - name: Set up sccache
+      uses: mozilla-actions/sccache-action@v0.0.9
+      with:
+        version: "v0.14.0"
     - name: Show disk space at start
       run: df -h
     - name: Free up disk space
@@ -52,6 +73,9 @@ jobs:
     - name: Fetch glog
       if: ${{ steps.paths.outputs.glog_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests glog
+    - name: Fetch benchmark
+      if: ${{ steps.paths.outputs.benchmark_SOURCE }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests benchmark
     - name: Fetch googletest
       if: ${{ steps.paths.outputs.googletest_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests googletest
@@ -139,7 +163,7 @@ jobs:
        key: ${{ steps.paths.outputs.boost_CACHE_KEY }}-install
     - name: Build boost
       if: ${{ steps.paths.outputs.boost_SOURCE && ! steps.restore_boost.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests boost
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests boost --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save boost to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.boost_SOURCE && ! steps.restore_boost.outputs.cache-hit }}
@@ -155,7 +179,7 @@ jobs:
        key: ${{ steps.paths.outputs.ninja_CACHE_KEY }}-install
     - name: Build ninja
       if: ${{ steps.paths.outputs.ninja_SOURCE && ! steps.restore_ninja.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests ninja
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests ninja --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save ninja to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.ninja_SOURCE && ! steps.restore_ninja.outputs.cache-hit }}
@@ -171,7 +195,7 @@ jobs:
        key: ${{ steps.paths.outputs.cmake_CACHE_KEY }}-install
     - name: Build cmake
       if: ${{ steps.paths.outputs.cmake_SOURCE && ! steps.restore_cmake.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests cmake
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests cmake --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save cmake to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.cmake_SOURCE && ! steps.restore_cmake.outputs.cache-hit }}
@@ -187,7 +211,7 @@ jobs:
        key: ${{ steps.paths.outputs.cpptoml_CACHE_KEY }}-install
     - name: Build cpptoml
       if: ${{ steps.paths.outputs.cpptoml_SOURCE && ! steps.restore_cpptoml.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests cpptoml
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests cpptoml --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save cpptoml to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.cpptoml_SOURCE && ! steps.restore_cpptoml.outputs.cache-hit }}
@@ -203,7 +227,7 @@ jobs:
        key: ${{ steps.paths.outputs.fmt_CACHE_KEY }}-install
     - name: Build fmt
       if: ${{ steps.paths.outputs.fmt_SOURCE && ! steps.restore_fmt.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests fmt
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests fmt --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save fmt to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.fmt_SOURCE && ! steps.restore_fmt.outputs.cache-hit }}
@@ -219,7 +243,7 @@ jobs:
        key: ${{ steps.paths.outputs.gflags_CACHE_KEY }}-install
     - name: Build gflags
       if: ${{ steps.paths.outputs.gflags_SOURCE && ! steps.restore_gflags.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests gflags
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests gflags --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save gflags to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.gflags_SOURCE && ! steps.restore_gflags.outputs.cache-hit }}
@@ -235,13 +259,29 @@ jobs:
        key: ${{ steps.paths.outputs.glog_CACHE_KEY }}-install
     - name: Build glog
       if: ${{ steps.paths.outputs.glog_SOURCE && ! steps.restore_glog.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests glog
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests glog --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save glog to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.glog_SOURCE && ! steps.restore_glog.outputs.cache-hit }}
       with:
        path: ${{ steps.paths.outputs.glog_INSTALL }}
        key: ${{ steps.paths.outputs.glog_CACHE_KEY }}-install
+    - name: Restore benchmark from cache
+      id: restore_benchmark
+      if: ${{ steps.paths.outputs.benchmark_SOURCE }}
+      uses: actions/cache/restore@v4
+      with:
+       path: ${{ steps.paths.outputs.benchmark_INSTALL }}
+       key: ${{ steps.paths.outputs.benchmark_CACHE_KEY }}-install
+    - name: Build benchmark
+      if: ${{ steps.paths.outputs.benchmark_SOURCE && ! steps.restore_benchmark.outputs.cache-hit }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests benchmark --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
+    - name: Save benchmark to cache
+      uses: actions/cache/save@v4
+      if: ${{ steps.paths.outputs.benchmark_SOURCE && ! steps.restore_benchmark.outputs.cache-hit }}
+      with:
+       path: ${{ steps.paths.outputs.benchmark_INSTALL }}
+       key: ${{ steps.paths.outputs.benchmark_CACHE_KEY }}-install
     - name: Restore googletest from cache
       id: restore_googletest
       if: ${{ steps.paths.outputs.googletest_SOURCE }}
@@ -251,7 +291,7 @@ jobs:
        key: ${{ steps.paths.outputs.googletest_CACHE_KEY }}-install
     - name: Build googletest
       if: ${{ steps.paths.outputs.googletest_SOURCE && ! steps.restore_googletest.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests googletest
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests googletest --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save googletest to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.googletest_SOURCE && ! steps.restore_googletest.outputs.cache-hit }}
@@ -267,7 +307,7 @@ jobs:
        key: ${{ steps.paths.outputs.xxhash_CACHE_KEY }}-install
     - name: Build xxhash
       if: ${{ steps.paths.outputs.xxhash_SOURCE && ! steps.restore_xxhash.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests xxhash
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests xxhash --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save xxhash to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.xxhash_SOURCE && ! steps.restore_xxhash.outputs.cache-hit }}
@@ -283,7 +323,7 @@ jobs:
        key: ${{ steps.paths.outputs.zstd_CACHE_KEY }}-install
     - name: Build zstd
       if: ${{ steps.paths.outputs.zstd_SOURCE && ! steps.restore_zstd.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests zstd
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests zstd --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save zstd to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.zstd_SOURCE && ! steps.restore_zstd.outputs.cache-hit }}
@@ -299,7 +339,7 @@ jobs:
        key: ${{ steps.paths.outputs.double-conversion_CACHE_KEY }}-install
     - name: Build double-conversion
       if: ${{ steps.paths.outputs.double-conversion_SOURCE && ! steps.restore_double-conversion.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests double-conversion
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests double-conversion --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save double-conversion to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.double-conversion_SOURCE && ! steps.restore_double-conversion.outputs.cache-hit }}
@@ -315,7 +355,7 @@ jobs:
        key: ${{ steps.paths.outputs.fast_float_CACHE_KEY }}-install
     - name: Build fast_float
       if: ${{ steps.paths.outputs.fast_float_SOURCE && ! steps.restore_fast_float.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests fast_float
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests fast_float --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save fast_float to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.fast_float_SOURCE && ! steps.restore_fast_float.outputs.cache-hit }}
@@ -331,7 +371,7 @@ jobs:
        key: ${{ steps.paths.outputs.libdwarf_CACHE_KEY }}-install
     - name: Build libdwarf
       if: ${{ steps.paths.outputs.libdwarf_SOURCE && ! steps.restore_libdwarf.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests libdwarf
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests libdwarf --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save libdwarf to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.libdwarf_SOURCE && ! steps.restore_libdwarf.outputs.cache-hit }}
@@ -347,7 +387,7 @@ jobs:
        key: ${{ steps.paths.outputs.lz4_CACHE_KEY }}-install
     - name: Build lz4
       if: ${{ steps.paths.outputs.lz4_SOURCE && ! steps.restore_lz4.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests lz4
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests lz4 --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save lz4 to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.lz4_SOURCE && ! steps.restore_lz4.outputs.cache-hit }}
@@ -363,7 +403,7 @@ jobs:
        key: ${{ steps.paths.outputs.openssl_CACHE_KEY }}-install
     - name: Build openssl
       if: ${{ steps.paths.outputs.openssl_SOURCE && ! steps.restore_openssl.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests openssl
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests openssl --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save openssl to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.openssl_SOURCE && ! steps.restore_openssl.outputs.cache-hit }}
@@ -379,7 +419,7 @@ jobs:
        key: ${{ steps.paths.outputs.snappy_CACHE_KEY }}-install
     - name: Build snappy
       if: ${{ steps.paths.outputs.snappy_SOURCE && ! steps.restore_snappy.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests snappy
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests snappy --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save snappy to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.snappy_SOURCE && ! steps.restore_snappy.outputs.cache-hit }}
@@ -395,7 +435,7 @@ jobs:
        key: ${{ steps.paths.outputs.pcre2_CACHE_KEY }}-install
     - name: Build pcre2
       if: ${{ steps.paths.outputs.pcre2_SOURCE && ! steps.restore_pcre2.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests pcre2
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests pcre2 --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save pcre2 to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.pcre2_SOURCE && ! steps.restore_pcre2.outputs.cache-hit }}
@@ -411,7 +451,7 @@ jobs:
        key: ${{ steps.paths.outputs.python-setuptools-69_CACHE_KEY }}-install
     - name: Build python-setuptools-69
       if: ${{ steps.paths.outputs.python-setuptools-69_SOURCE && ! steps.restore_python-setuptools-69.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests python-setuptools-69
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests python-setuptools-69 --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save python-setuptools-69 to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.python-setuptools-69_SOURCE && ! steps.restore_python-setuptools-69.outputs.cache-hit }}
@@ -427,7 +467,7 @@ jobs:
        key: ${{ steps.paths.outputs.libevent_CACHE_KEY }}-install
     - name: Build libevent
       if: ${{ steps.paths.outputs.libevent_SOURCE && ! steps.restore_libevent.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests libevent
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests libevent --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save libevent to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.libevent_SOURCE && ! steps.restore_libevent.outputs.cache-hit }}
@@ -443,7 +483,7 @@ jobs:
        key: ${{ steps.paths.outputs.liboqs_CACHE_KEY }}-install
     - name: Build liboqs
       if: ${{ steps.paths.outputs.liboqs_SOURCE && ! steps.restore_liboqs.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests liboqs
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests liboqs --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save liboqs to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.liboqs_SOURCE && ! steps.restore_liboqs.outputs.cache-hit }}
@@ -459,7 +499,7 @@ jobs:
        key: ${{ steps.paths.outputs.zlib_CACHE_KEY }}-install
     - name: Build zlib
       if: ${{ steps.paths.outputs.zlib_SOURCE && ! steps.restore_zlib.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests zlib
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests zlib --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save zlib to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.zlib_SOURCE && ! steps.restore_zlib.outputs.cache-hit }}
@@ -475,7 +515,7 @@ jobs:
        key: ${{ steps.paths.outputs.autoconf_CACHE_KEY }}-install
     - name: Build autoconf
       if: ${{ steps.paths.outputs.autoconf_SOURCE && ! steps.restore_autoconf.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests autoconf
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests autoconf --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save autoconf to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.autoconf_SOURCE && ! steps.restore_autoconf.outputs.cache-hit }}
@@ -491,7 +531,7 @@ jobs:
        key: ${{ steps.paths.outputs.automake_CACHE_KEY }}-install
     - name: Build automake
       if: ${{ steps.paths.outputs.automake_SOURCE && ! steps.restore_automake.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests automake
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests automake --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save automake to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.automake_SOURCE && ! steps.restore_automake.outputs.cache-hit }}
@@ -507,7 +547,7 @@ jobs:
        key: ${{ steps.paths.outputs.libtool_CACHE_KEY }}-install
     - name: Build libtool
       if: ${{ steps.paths.outputs.libtool_SOURCE && ! steps.restore_libtool.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests libtool
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests libtool --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save libtool to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.libtool_SOURCE && ! steps.restore_libtool.outputs.cache-hit }}
@@ -523,7 +563,7 @@ jobs:
        key: ${{ steps.paths.outputs.libsodium_CACHE_KEY }}-install
     - name: Build libsodium
       if: ${{ steps.paths.outputs.libsodium_SOURCE && ! steps.restore_libsodium.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests libsodium
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests libsodium --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save libsodium to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.libsodium_SOURCE && ! steps.restore_libsodium.outputs.cache-hit }}
@@ -539,7 +579,7 @@ jobs:
        key: ${{ steps.paths.outputs.xz_CACHE_KEY }}-install
     - name: Build xz
       if: ${{ steps.paths.outputs.xz_SOURCE && ! steps.restore_xz.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests xz
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests xz --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save xz to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.xz_SOURCE && ! steps.restore_xz.outputs.cache-hit }}
@@ -555,7 +595,7 @@ jobs:
        key: ${{ steps.paths.outputs.folly_CACHE_KEY }}-install
     - name: Build folly
       if: ${{ steps.paths.outputs.folly_SOURCE && ! steps.restore_folly.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests folly
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests folly --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save folly to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.folly_SOURCE && ! steps.restore_folly.outputs.cache-hit }}
@@ -571,7 +611,7 @@ jobs:
        key: ${{ steps.paths.outputs.fizz_CACHE_KEY }}-install
     - name: Build fizz
       if: ${{ steps.paths.outputs.fizz_SOURCE && ! steps.restore_fizz.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests fizz
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests fizz --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save fizz to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.fizz_SOURCE && ! steps.restore_fizz.outputs.cache-hit }}
@@ -587,7 +627,7 @@ jobs:
        key: ${{ steps.paths.outputs.mvfst_CACHE_KEY }}-install
     - name: Build mvfst
       if: ${{ steps.paths.outputs.mvfst_SOURCE && ! steps.restore_mvfst.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests mvfst
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests mvfst --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save mvfst to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.mvfst_SOURCE && ! steps.restore_mvfst.outputs.cache-hit }}
@@ -603,7 +643,7 @@ jobs:
        key: ${{ steps.paths.outputs.wangle_CACHE_KEY }}-install
     - name: Build wangle
       if: ${{ steps.paths.outputs.wangle_SOURCE && ! steps.restore_wangle.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests wangle
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests wangle --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save wangle to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.wangle_SOURCE && ! steps.restore_wangle.outputs.cache-hit }}
@@ -619,7 +659,7 @@ jobs:
        key: ${{ steps.paths.outputs.fbthrift_CACHE_KEY }}-install
     - name: Build fbthrift
       if: ${{ steps.paths.outputs.fbthrift_SOURCE && ! steps.restore_fbthrift.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests fbthrift
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests fbthrift --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save fbthrift to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.fbthrift_SOURCE && ! steps.restore_fbthrift.outputs.cache-hit }}
@@ -635,7 +675,7 @@ jobs:
        key: ${{ steps.paths.outputs.fb303_CACHE_KEY }}-install
     - name: Build fb303
       if: ${{ steps.paths.outputs.fb303_SOURCE && ! steps.restore_fb303.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests fb303
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests fb303 --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save fb303 to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.fb303_SOURCE && ! steps.restore_fb303.outputs.cache-hit }}
@@ -651,7 +691,7 @@ jobs:
        key: ${{ steps.paths.outputs.edencommon_CACHE_KEY }}-install
     - name: Build edencommon
       if: ${{ steps.paths.outputs.edencommon_SOURCE && ! steps.restore_edencommon.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests edencommon
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests edencommon --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
     - name: Save edencommon to cache
       uses: actions/cache/save@v4
       if: ${{ steps.paths.outputs.edencommon_SOURCE && ! steps.restore_edencommon.outputs.cache-hit }}
@@ -659,7 +699,10 @@ jobs:
        path: ${{ steps.paths.outputs.edencommon_INSTALL }}
        key: ${{ steps.paths.outputs.edencommon_CACHE_KEY }}-install
     - name: Build watchman
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --src-dir=. watchman --project-install-prefix watchman:/usr/local
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --src-dir=. watchman --project-install-prefix watchman:/usr/local --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER": "sccache"}'
+    - name: Show sccache stats
+      if: always()
+      run: sccache --show-stats
     - name: Copy artifacts
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fixup-dyn-deps --src-dir=. watchman _artifacts/mac --project-install-prefix watchman:/usr/local --final-install-prefix /usr/local
     - uses: actions/upload-artifact@v6
@@ -667,7 +710,15 @@ jobs:
         name: watchman
         path: _artifacts
     - name: Test watchman
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages test --src-dir=. watchman --project-install-prefix watchman:/usr/local
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages test --build-type RelWithDebInfo --src-dir=. watchman --project-install-prefix watchman:/usr/local
     - name: Show disk space at end
       if: always()
       run: df -h
+    - name: Show GitHub Actions cache usage
+      if: always()
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh cache list --repo ${{ github.repository }} --sort size_in_bytes --order desc --limit 30
+    - name: Setup tmate session
+      if: failure() && github.event_name == 'workflow_dispatch' && inputs.tmate_enabled
+      uses: mxschmitt/action-tmate@v3

@@ -16,22 +16,31 @@
 
 #pragma once
 
+#include <memory>
+#include <string_view>
+
 #include <fmt/core.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/Expected.h>
 #include <folly/Function.h>
+#include <folly/io/IOBuf.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/DirectStreamMap.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/FastThriftAdapterBase.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/common/ClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/util/ErrorDecoding.h>
+#include <thrift/lib/cpp2/util/ManagedStringView.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -41,8 +50,8 @@ namespace apache::thrift::fast_thrift::thrift {
  *
  * Unlike ThriftClientChannel (which adapts the Thrift RequestChannel API),
  * this class bypasses RequestChannel entirely and interacts directly with
- * the pipeline. Generated clients derive from this and call
- * write() to issue RPCs.
+ * the pipeline. Generated clients hold one of these and call
+ * sendRequestResponse() to issue request-response RPCs.
  *
  * Non-owning: holds a raw PipelineImpl*, does NOT own the transport or
  * pipeline (the pipeline owner keeps those alive).
@@ -52,6 +61,9 @@ namespace apache::thrift::fast_thrift::thrift {
 class ThriftClientAppAdapter : public folly::DelayedDestruction,
                                public FastThriftAdapterBase {
  public:
+  using RequestResponseHandler =
+      apache::thrift::fast_thrift::thrift::RequestResponseHandler;
+
   using ResponseHandler =
       folly::Function<void(folly::Expected<
                            ThriftResponseMessage,
@@ -79,17 +91,19 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
   void setProtocolId(uint16_t protocolId) noexcept { protocolId_ = protocolId; }
 
   /**
-   * Send a request message into the pipeline.
-   * If called on the pipeline's EventBase thread, fires immediately.
-   * Otherwise, schedules on the EventBase.
+   * Issue a request-response RPC.
    *
-   * If fireWrite returns Error, removes the handler from the pending map
-   * and invokes it with an exception_wrapper.
+   * Builds the request metadata + message internally so callers (generated
+   * code) don't need to know about ThriftRequestMessage. If called on the
+   * pipeline's EventBase thread, fires immediately; otherwise schedules on
+   * the EventBase.
    */
-  void write(
-      ResponseHandler handler,
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
-          msg) noexcept {
+  void sendRequestResponse(
+      const apache::thrift::RpcOptions& rpcOptions,
+      std::string_view methodName,
+      apache::thrift::RpcKind rpcKind,
+      std::unique_ptr<folly::IOBuf> data,
+      RequestResponseHandler handler) noexcept {
     if (FOLLY_UNLIKELY(!pipeline_)) {
       handler(
           folly::makeUnexpected(
@@ -100,15 +114,56 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
       return;
     }
 
-    auto* eb = pipeline_->eventBase();
-    if (eb->isInEventBaseThread()) {
-      writeOnEventBase(std::move(handler), std::move(msg));
-    } else {
-      eb->runInEventBaseThread(
-          [this, msg = std::move(msg), handler = std::move(handler)]() mutable {
-            writeOnEventBase(std::move(handler), std::move(msg));
-          });
+    std::unique_ptr<folly::IOBuf> metadata;
+    try {
+      metadata = makeSerializedRequestMetadata(
+          rpcOptions,
+          apache::thrift::ManagedStringView::from_static(methodName),
+          rpcKind,
+          static_cast<apache::thrift::ProtocolId>(protocolId_));
+    } catch (...) {
+      handler(
+          folly::makeUnexpected(
+              folly::exception_wrapper(std::current_exception())));
+      return;
     }
+
+    ThriftRequestMessage msg{
+        .payload = ThriftRequestPayload{
+            .metadata = std::move(metadata),
+            .data = std::move(data),
+            .rpcKind = rpcKind,
+            .complete = true}};
+
+    submit(
+        ResponseHandler{
+            [h = std::move(handler)](
+                folly::Expected<
+                    ThriftResponseMessage,
+                    folly::exception_wrapper>&& result) mutable noexcept {
+              if (result.hasError()) {
+                h(folly::makeUnexpected(std::move(result.error())));
+                return;
+              }
+              h(std::move(result.value().frame).extractData());
+            }},
+        apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+            std::move(msg)));
+  }
+
+  /**
+   * Send a pre-built request message into the pipeline.
+   * If called on the pipeline's EventBase thread, fires immediately.
+   * Otherwise, schedules on the EventBase.
+   *
+   * If fireWrite returns Error, removes the handler from the pending map
+   * and invokes it with an exception_wrapper.
+   */
+  void write(
+      ResponseHandler handler,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
+          msg) noexcept {
+    submit(std::move(handler), std::move(msg));
   }
 
   // === TailEndpointHandler lifecycle ===
@@ -179,7 +234,32 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
  private:
   enum class State { Open, Closing, Closed };
 
-  void writeOnEventBase(
+  void submit(
+      ResponseHandler handler,
+      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
+          msg) noexcept {
+    if (FOLLY_UNLIKELY(!pipeline_)) {
+      handler(
+          folly::makeUnexpected(
+              folly::make_exception_wrapper<
+                  apache::thrift::TApplicationException>(
+                  apache::thrift::TApplicationException::INTERNAL_ERROR,
+                  "Pipeline not set")));
+      return;
+    }
+
+    auto* eb = pipeline_->eventBase();
+    if (eb->isInEventBaseThread()) {
+      submitOnEventBase(std::move(handler), std::move(msg));
+    } else {
+      eb->runInEventBaseThread(
+          [this, msg = std::move(msg), handler = std::move(handler)]() mutable {
+            submitOnEventBase(std::move(handler), std::move(msg));
+          });
+    }
+  }
+
+  void submitOnEventBase(
       ResponseHandler handler,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
           msg) noexcept {

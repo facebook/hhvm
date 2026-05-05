@@ -19,6 +19,7 @@
 #include <folly/ExceptionWrapper.h>
 #include <folly/Expected.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/common/ClientAppAdapter.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 

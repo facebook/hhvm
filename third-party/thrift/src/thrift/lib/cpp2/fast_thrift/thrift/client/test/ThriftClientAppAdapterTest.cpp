@@ -20,6 +20,7 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/io/async/test/MockAsyncTransport.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
@@ -33,6 +34,8 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -76,14 +79,16 @@ ThriftResponseMessage makeResponse(
   return response;
 }
 
-TypeErasedBox makeRequestBox() {
-  ThriftRequestMessage msg{
-      .payload = ThriftRequestPayload{
-          .metadata = folly::IOBuf::copyBuffer("meta"),
-          .data = folly::IOBuf::copyBuffer("data"),
-          .rpcKind = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-          .complete = true}};
-  return erase_and_box(std::move(msg));
+void sendBasicRequest(
+    ThriftClientAppAdapter& adapter,
+    ThriftClientAppAdapter::RequestResponseHandler handler) {
+  apache::thrift::RpcOptions options;
+  adapter.sendRequestResponse(
+      options,
+      std::string_view{"method"},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      folly::IOBuf::copyBuffer("data"),
+      std::move(handler));
 }
 
 } // namespace
@@ -180,17 +185,20 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
       &client.adapter(), [](auto&, auto&&) { return Result::Success; });
 
   bool handlerCalled = false;
-  ThriftResponseMessage captured;
+  std::string capturedData;
 
   evb_->runInEventBaseThreadAndWait([&] {
-    client.adapter().write(
-        [&](folly::Expected<ThriftResponseMessage, folly::exception_wrapper>&&
-                result) noexcept {
+    sendBasicRequest(
+        client.adapter(),
+        [&](folly::Expected<
+            std::unique_ptr<folly::IOBuf>,
+            folly::exception_wrapper>&& result) noexcept {
           EXPECT_TRUE(result.hasValue());
           handlerCalled = true;
-          captured = std::move(result.value());
-        },
-        makeRequestBox());
+          if (result.value()) {
+            capturedData = result.value()->moveToFbString().toStdString();
+          }
+        });
   });
 
   auto response = makeResponse(0);
@@ -198,7 +206,7 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
 
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(handlerCalled);
-  EXPECT_EQ(captured.requestHandle, 0u);
+  EXPECT_EQ(capturedData, "response");
 }
 
 TEST_F(ThriftClientAppAdapterTest, OnMessageUnknownHandle) {
@@ -224,21 +232,23 @@ TEST_F(ThriftClientAppAdapterTest, OnExceptionNotifiesAllHandlers) {
   int errorCount = 0;
 
   evb_->runInEventBaseThreadAndWait([&] {
-    client.adapter().write(
-        [&](folly::Expected<ThriftResponseMessage, folly::exception_wrapper>&&
-                result) noexcept {
+    sendBasicRequest(
+        client.adapter(),
+        [&](folly::Expected<
+            std::unique_ptr<folly::IOBuf>,
+            folly::exception_wrapper>&& result) noexcept {
           EXPECT_TRUE(result.hasError());
           ++errorCount;
-        },
-        makeRequestBox());
+        });
 
-    client.adapter().write(
-        [&](folly::Expected<ThriftResponseMessage, folly::exception_wrapper>&&
-                result) noexcept {
+    sendBasicRequest(
+        client.adapter(),
+        [&](folly::Expected<
+            std::unique_ptr<folly::IOBuf>,
+            folly::exception_wrapper>&& result) noexcept {
           EXPECT_TRUE(result.hasError());
           ++errorCount;
-        },
-        makeRequestBox());
+        });
   });
 
   client.adapter().onException(
@@ -255,11 +265,11 @@ TEST_F(ThriftClientAppAdapterTest, OnExceptionClearsPendingRequests) {
   int errorCount = 0;
 
   evb_->runInEventBaseThreadAndWait([&] {
-    client.adapter().write(
+    sendBasicRequest(
+        client.adapter(),
         [&](folly::Expected<
-            ThriftResponseMessage,
-            folly::exception_wrapper>&&) noexcept { ++errorCount; },
-        makeRequestBox());
+            std::unique_ptr<folly::IOBuf>,
+            folly::exception_wrapper>&&) noexcept { ++errorCount; });
   });
 
   client.adapter().onException(
@@ -275,10 +285,10 @@ TEST_F(ThriftClientAppAdapterTest, OnExceptionClearsPendingRequests) {
 }
 
 // =============================================================================
-// write Tests
+// sendRequestResponse Tests
 // =============================================================================
 
-TEST_F(ThriftClientAppAdapterTest, WriteSetsRequestHandle) {
+TEST_F(ThriftClientAppAdapterTest, AssignsSequentialRequestHandles) {
   TestAppAdapterClient client;
   uint32_t capturedHandle = 0;
 
@@ -290,34 +300,115 @@ TEST_F(ThriftClientAppAdapterTest, WriteSetsRequestHandle) {
         return Result::Success;
       });
 
-  evb_->runInEventBaseThreadAndWait([&] {
-    client.adapter().write([](auto&&) noexcept {}, makeRequestBox());
-  });
+  evb_->runInEventBaseThreadAndWait(
+      [&] { sendBasicRequest(client.adapter(), [](auto&&) noexcept {}); });
 
   EXPECT_EQ(capturedHandle, 0u);
 
-  evb_->runInEventBaseThreadAndWait([&] {
-    client.adapter().write([](auto&&) noexcept {}, makeRequestBox());
-  });
+  evb_->runInEventBaseThreadAndWait(
+      [&] { sendBasicRequest(client.adapter(), [](auto&&) noexcept {}); });
 
   EXPECT_EQ(capturedHandle, 1u);
 }
 
-TEST_F(ThriftClientAppAdapterTest, WriteWithoutPipelineReturnsInternalError) {
-  // No setPipeline() call — pre-send must reject with INTERNAL_ERROR.
+TEST_F(ThriftClientAppAdapterTest, OffEventBaseThreadSchedulesWrite) {
+  // Caller is the test thread (not evb_'s thread). The adapter must take
+  // the slow path and schedule onto the EventBase before invoking the
+  // handler.
+  TestAppAdapterClient client;
+  bool writeCalled = false;
+  auto built = buildPipeline(
+      &client.adapter(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&&) {
+        writeCalled = true;
+        return Result::Success;
+      });
+
+  sendBasicRequest(client.adapter(), [](auto&&) noexcept {});
+
+  // Drain the EB to let the scheduled lambda run.
+  evb_->runInEventBaseThreadAndWait([] {});
+  EXPECT_TRUE(writeCalled);
+}
+
+TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
+  TestAppAdapterClient client;
+  client.adapter().setProtocolId(
+      static_cast<uint16_t>(apache::thrift::ProtocolId::COMPACT));
+
+  std::unique_ptr<folly::IOBuf> capturedMetadata;
+  std::unique_ptr<folly::IOBuf> capturedData;
+  apache::thrift::RpcKind capturedRpcKind{};
+  bool capturedComplete = false;
+
+  auto built = buildPipeline(
+      &client.adapter(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& box) {
+        auto& msg = box.get<ThriftRequestMessage>();
+        capturedMetadata = std::move(msg.payload.metadata);
+        capturedData = std::move(msg.payload.data);
+        capturedRpcKind = msg.payload.rpcKind;
+        capturedComplete = msg.payload.complete;
+        return Result::Success;
+      });
+
+  apache::thrift::RpcOptions options;
+  options.setTimeout(std::chrono::milliseconds(250));
+
+  evb_->runInEventBaseThreadAndWait([&] {
+    client.adapter().sendRequestResponse(
+        options,
+        std::string_view{"myMethod"},
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        folly::IOBuf::copyBuffer("payload-data"),
+        [](auto&&) noexcept {});
+  });
+
+  ASSERT_NE(capturedMetadata, nullptr);
+  ASSERT_NE(capturedData, nullptr);
+  EXPECT_EQ(
+      capturedRpcKind, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  EXPECT_TRUE(capturedComplete);
+  EXPECT_EQ(
+      capturedData->moveToFbString().toStdString(),
+      std::string{"payload-data"});
+
+  apache::thrift::RequestRpcMetadata deserialized;
+  apache::thrift::BinaryProtocolReader reader;
+  reader.setInput(capturedMetadata.get());
+  deserialized.read(&reader);
+
+  EXPECT_EQ(deserialized.name()->str(), "myMethod");
+  EXPECT_EQ(
+      *deserialized.kind(),
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  EXPECT_EQ(*deserialized.protocol(), apache::thrift::ProtocolId::COMPACT);
+  EXPECT_EQ(*deserialized.clientTimeoutMs(), 250);
+}
+
+TEST_F(
+    ThriftClientAppAdapterTest,
+    SendRequestResponseWithoutPipelineReturnsInternalError) {
   ThriftClientAppAdapter::Ptr adapter{new ThriftClientAppAdapter()};
 
   bool errorReceived = false;
   folly::exception_wrapper capturedError;
 
-  adapter->write(
-      [&](folly::Expected<ThriftResponseMessage, folly::exception_wrapper>&&
-              result) noexcept {
+  apache::thrift::RpcOptions options;
+  adapter->sendRequestResponse(
+      options,
+      std::string_view{"myMethod"},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      folly::IOBuf::copyBuffer("data"),
+      [&](folly::Expected<
+          std::unique_ptr<folly::IOBuf>,
+          folly::exception_wrapper>&& result) noexcept {
         ASSERT_TRUE(result.hasError());
         errorReceived = true;
         capturedError = std::move(result.error());
-      },
-      makeRequestBox());
+      });
 
   EXPECT_TRUE(errorReceived);
   auto* ex =
@@ -326,45 +417,6 @@ TEST_F(ThriftClientAppAdapterTest, WriteWithoutPipelineReturnsInternalError) {
   EXPECT_EQ(
       ex->getType(), apache::thrift::TApplicationException::INTERNAL_ERROR);
   EXPECT_EQ(std::string(ex->what()), "Pipeline not set");
-}
-
-TEST_F(ThriftClientAppAdapterTest, WriteFromOffEventBaseThreadCompletes) {
-  // Caller is the test thread (not evb_'s thread). write() must take the
-  // slow path and schedule onto the EventBase before invoking the handler.
-  TestAppAdapterClient client;
-  bool writeCalled = false;
-  auto built = buildPipeline(
-      &client.adapter(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
-        writeCalled = true;
-        return Result::Success;
-      });
-
-  client.adapter().write([](auto&&) noexcept {}, makeRequestBox());
-
-  // Drain the EB to let the scheduled lambda run.
-  evb_->runInEventBaseThreadAndWait([] {});
-  EXPECT_TRUE(writeCalled);
-}
-
-TEST_F(ThriftClientAppAdapterTest, WriteFiresWrite) {
-  TestAppAdapterClient client;
-  bool writeCalled = false;
-
-  auto built = buildPipeline(
-      &client.adapter(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
-        writeCalled = true;
-        return Result::Success;
-      });
-
-  evb_->runInEventBaseThreadAndWait([&] {
-    client.adapter().write([](auto&&) noexcept {}, makeRequestBox());
-  });
-
-  EXPECT_TRUE(writeCalled);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

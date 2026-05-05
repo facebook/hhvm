@@ -16,11 +16,33 @@
 
 #pragma once
 
+#include <memory>
+#include <string_view>
+
 #include <folly/ExceptionWrapper.h>
+#include <folly/Expected.h>
+#include <folly/Function.h>
+#include <folly/io/IOBuf.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/EndpointAdapter.h>
 
 namespace apache::thrift::fast_thrift::thrift {
+
+/**
+ * Handler invoked by an adapter when a request-response RPC completes.
+ *
+ * On success, receives the response data IOBuf; on failure (transport
+ * error, undeclared exception, pipeline error, etc.) receives an
+ * exception_wrapper. Always called on the adapter's EventBase thread.
+ *
+ * Response metadata is consumed and discarded by the adapter — generated
+ * code only ever sees the data IOBuf or an exception_wrapper.
+ */
+using RequestResponseHandler =
+    folly::Function<void(folly::Expected<
+                         std::unique_ptr<folly::IOBuf>,
+                         folly::exception_wrapper>&&) noexcept>;
 
 /**
  * ClientInboundAppAdapter — client-side inbound endpoint concept.
@@ -34,22 +56,41 @@ concept ClientInboundAppAdapter = channel_pipeline::TailEndpointHandler<A>;
  * ClientOutboundAppAdapter concept — sends messages from client application
  * to pipeline.
  *
- * The client calls write() to send a request through the pipeline toward the
- * transport.
+ * The client calls sendRequestResponse() to issue a request-response RPC; the
+ * adapter is responsible for building the wire-level request message and
+ * pushing it down the pipeline.
+ *
+ * write() is the legacy, lower-level entry point that takes a pre-built,
+ * type-erased pipeline message; new callers should prefer
+ * sendRequestResponse().
  *
  * Note: This is an interface contract, not an owned object.
  * It does NOT require DelayedDestructionBase.
  */
 template <typename O>
-concept ClientOutboundAppAdapter =
-    requires(O o, channel_pipeline::TypeErasedBox&& msg) {
-      typename O::ResponseHandler;
+concept ClientOutboundAppAdapter = requires(
+    O o,
+    channel_pipeline::TypeErasedBox&& msg,
+    const apache::thrift::RpcOptions& rpcOptions,
+    std::string_view methodName,
+    apache::thrift::RpcKind rpcKind,
+    std::unique_ptr<folly::IOBuf> data) {
+  typename O::ResponseHandler;
 
-      {
-        o.write(std::declval<typename O::ResponseHandler>(), std::move(msg))
-      } noexcept -> std::same_as<void>;
+  {
+    o.write(std::declval<typename O::ResponseHandler>(), std::move(msg))
+  } noexcept -> std::same_as<void>;
 
-      { o.getProtocolId() } noexcept -> std::same_as<uint16_t>;
-    };
+  {
+    o.sendRequestResponse(
+        rpcOptions,
+        methodName,
+        rpcKind,
+        std::move(data),
+        std::declval<RequestResponseHandler>())
+  } noexcept -> std::same_as<void>;
+
+  { o.getProtocolId() } noexcept -> std::same_as<uint16_t>;
+};
 
 } // namespace apache::thrift::fast_thrift::thrift

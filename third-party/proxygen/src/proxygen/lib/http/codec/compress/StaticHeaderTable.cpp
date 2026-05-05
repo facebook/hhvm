@@ -20,6 +20,7 @@ namespace {
 // Array of static header table entires pair
 // Note: if updating this table (should never have to but whatever), update
 // isHeaderNameInTableWithNonEmptyValue as well
+// NOLINTNEXTLINE(facebook-hte-CArray)
 const char* s_tableEntries[][2] = {{":authority", ""},
                                    {":method", "GET"},
                                    {":method", "POST"},

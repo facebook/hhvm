@@ -69,10 +69,7 @@ class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_mu
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("with_containers.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types._fbthrift_unadapted_AnnotationWithContainers, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -128,10 +125,7 @@ class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_mutable_types.Muta
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("with_containers.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types._fbthrift_unadapted_MyStruct, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

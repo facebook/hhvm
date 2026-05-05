@@ -60,10 +60,7 @@ class EchoRequest(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("meta.example.thrift.service.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.EchoRequest, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -116,10 +113,7 @@ class EchoResponse(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("meta.example.thrift.service.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.EchoResponse, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -175,10 +169,7 @@ class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("meta.example.thrift.service.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.WhisperException, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

@@ -101,10 +101,7 @@ class TemplateLists(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.containers.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.TemplateLists, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -223,10 +220,7 @@ class TemplateSets(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.containers.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.TemplateSets, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -345,10 +339,7 @@ class TemplateMaps(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.containers.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.TemplateMaps, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -412,10 +403,7 @@ class TWrapped(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.containers.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.TWrapped, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -468,10 +456,7 @@ class IndirectionA(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.containers.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.IndirectionA, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -524,10 +509,7 @@ class IndirectionB(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.containers.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.IndirectionB, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -580,10 +562,7 @@ class IndirectionC(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.containers.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.IndirectionC, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

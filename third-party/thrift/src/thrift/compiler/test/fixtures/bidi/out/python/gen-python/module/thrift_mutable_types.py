@@ -66,10 +66,7 @@ class BiDiSinkException(metaclass=_fbthrift_python_mutable_exceptions.MutableGen
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.BiDiSinkException, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -123,10 +120,7 @@ class BiDiStreamException(metaclass=_fbthrift_python_mutable_exceptions.MutableG
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.BiDiStreamException, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -180,10 +174,7 @@ class BiDiMethodException(metaclass=_fbthrift_python_mutable_exceptions.MutableG
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.BiDiMethodException, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

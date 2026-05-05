@@ -63,10 +63,7 @@ class InitialResponse(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.InitialResponse, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -119,10 +116,7 @@ class FinalResponse(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.FinalResponse, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -175,10 +169,7 @@ class SinkPayload(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SinkPayload, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -231,10 +222,7 @@ class CompatibleWithKeywordSink(metaclass=_fbthrift_python_mutable_types.Mutable
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.CompatibleWithKeywordSink, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -290,10 +278,7 @@ class InitialException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.InitialException, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -347,10 +332,7 @@ class SinkException1(metaclass=_fbthrift_python_mutable_exceptions.MutableGenera
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SinkException1, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -404,10 +386,7 @@ class SinkException2(metaclass=_fbthrift_python_mutable_exceptions.MutableGenera
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SinkException2, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

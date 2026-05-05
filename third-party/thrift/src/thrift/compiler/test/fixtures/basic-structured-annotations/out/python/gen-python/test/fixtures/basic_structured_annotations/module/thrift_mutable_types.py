@@ -57,10 +57,7 @@ class runtime_annotation(metaclass=_fbthrift_python_mutable_types.MutableStructM
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.runtime_annotation, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -124,10 +121,7 @@ class structured_annotation_inline(metaclass=_fbthrift_python_mutable_types.Muta
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.structured_annotation_inline, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -180,10 +174,7 @@ class structured_annotation_with_default(metaclass=_fbthrift_python_mutable_type
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.structured_annotation_with_default, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -258,10 +249,7 @@ class structured_annotation_recursive(metaclass=_fbthrift_python_mutable_types.M
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.structured_annotation_recursive, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -314,10 +302,7 @@ class structured_annotation_forward(metaclass=_fbthrift_python_mutable_types.Mut
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.structured_annotation_forward, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -381,10 +366,7 @@ class structured_annotation_nested(metaclass=_fbthrift_python_mutable_types.Muta
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.structured_annotation_nested, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -470,10 +452,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MyStruct, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -529,10 +508,7 @@ class MyException(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerated
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MyException, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -597,10 +573,7 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic_structured_annotations.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MyUnion, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

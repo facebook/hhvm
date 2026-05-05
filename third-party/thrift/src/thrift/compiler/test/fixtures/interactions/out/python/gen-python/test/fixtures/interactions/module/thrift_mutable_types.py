@@ -69,10 +69,7 @@ class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.interactions.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.CustomException, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -123,10 +120,7 @@ class ShouldBeBoxed(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.interactions.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.ShouldBeBoxed, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

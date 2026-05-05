@@ -172,10 +172,7 @@ class def_(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.def_, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

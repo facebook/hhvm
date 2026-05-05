@@ -171,6 +171,13 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
 
     def _to_mutable_python(self):
         return self
+
+    def _to_py3(self):
+    {{#if (has_compiler_option? "auto_migrate")}}
+        return self._to_python()
+    {{#else}}
+        return self._to_python()._to_py3()
+    {{/if (has_compiler_option? "auto_migrate")}}
       {{/if python.generate_mutable_types?}}
       {{#if python.generate_immutable_types?}}
     def _to_python(self):
@@ -181,7 +188,6 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
         import importlib
         mutable_types = importlib.import_module("{{program.module_path}}.thrift_mutable_types")
         return mutable_converter.to_mutable_python_struct_or_union(mutable_types.{{#partial m_types.unadapted_name type=struct}}, self)
-      {{/if python.generate_immutable_types?}}
 
     def _to_py3(self):
     {{#if (not (has_compiler_option? "auto_migrate"))}}
@@ -192,6 +198,7 @@ class {{#partial m_types.unadapted_name type=struct}}{{!
     {{#else}}
         return self
     {{/if (not (has_compiler_option? "auto_migrate"))}}
+      {{/if python.generate_immutable_types?}}
 
     def _to_py_deprecated(self):
     {{#if (or (not (has_compiler_option? "does_not_have_py_deprecated")) (not (has_compiler_option? "does_not_have_py_deprecated_asyncio")))}}

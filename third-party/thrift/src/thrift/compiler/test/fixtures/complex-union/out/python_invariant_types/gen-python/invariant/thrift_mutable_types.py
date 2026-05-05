@@ -57,10 +57,7 @@ class StructForInvariantTypes(metaclass=_fbthrift_python_mutable_types.MutableSt
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("invariant.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.StructForInvariantTypes, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -124,10 +121,7 @@ class UnionForInvariantTypes(metaclass=_fbthrift_python_mutable_types.MutableStr
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("invariant.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.UnionForInvariantTypes, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -194,10 +188,7 @@ class InvariantTypes(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("invariant.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.InvariantTypes, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

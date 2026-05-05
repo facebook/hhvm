@@ -50,10 +50,7 @@ class FooStreamEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerated
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.FooStreamEx, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -96,10 +93,7 @@ class FooEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.FooEx, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -142,10 +136,7 @@ class FooEx2(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedError
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.FooEx2, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

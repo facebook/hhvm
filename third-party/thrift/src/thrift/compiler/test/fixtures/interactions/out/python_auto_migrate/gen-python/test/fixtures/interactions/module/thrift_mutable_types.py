@@ -69,7 +69,7 @@ class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
         return self
 
     def _to_py3(self):
-        return self
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib
@@ -120,7 +120,7 @@ class ShouldBeBoxed(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        return self
+        return self._to_python()
 
     def _to_py_deprecated(self):
         import importlib

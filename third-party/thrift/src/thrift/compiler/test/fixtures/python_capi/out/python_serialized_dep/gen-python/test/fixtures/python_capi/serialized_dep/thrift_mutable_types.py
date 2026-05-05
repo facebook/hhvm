@@ -90,10 +90,7 @@ class SerializedStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMet
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SerializedStruct, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -160,10 +157,7 @@ class SerializedUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta)
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SerializedUnion, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -241,10 +235,7 @@ class SerializedError(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.SerializedError, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -328,10 +319,7 @@ class MarshalStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MarshalStruct, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -398,10 +386,7 @@ class MarshalUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MarshalUnion, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -479,10 +464,7 @@ class MarshalError(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerate
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MarshalError, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

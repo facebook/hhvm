@@ -154,10 +154,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MyStruct, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         raise NotImplementedError("to_py_deprecated is not implemented")
@@ -225,10 +222,7 @@ class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.Containers, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         raise NotImplementedError("to_py_deprecated is not implemented")
@@ -263,10 +257,7 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MyDataItem, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         raise NotImplementedError("to_py_deprecated is not implemented")
@@ -348,10 +339,7 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MyUnion, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         raise NotImplementedError("to_py_deprecated is not implemented")
@@ -433,10 +421,7 @@ class MyException(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerated
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MyException, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         raise NotImplementedError("to_py_deprecated is not implemented")
@@ -523,10 +508,7 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_mutable_exceptions.Mutab
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.MyExceptionWithMessage, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         raise NotImplementedError("to_py_deprecated is not implemented")
@@ -570,10 +552,7 @@ class ReservedKeyword(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.ReservedKeyword, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         raise NotImplementedError("to_py_deprecated is not implemented")
@@ -622,10 +601,7 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.UnionToBeRenamed, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         raise NotImplementedError("to_py_deprecated is not implemented")

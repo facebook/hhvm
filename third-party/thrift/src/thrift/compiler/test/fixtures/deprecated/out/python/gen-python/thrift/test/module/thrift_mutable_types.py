@@ -103,10 +103,7 @@ class User(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("thrift.test.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.User, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -185,10 +182,7 @@ class ExampleUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("thrift.test.module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.ExampleUnion, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

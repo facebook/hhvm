@@ -63,10 +63,7 @@ class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.Fields, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -119,10 +116,7 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.Mutab
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.FieldsInjectedToEmptyStruct, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -186,10 +180,7 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStr
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.FieldsInjectedToStruct, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -275,10 +266,7 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.FieldsInjectedWithIncludedStruct, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib
@@ -342,10 +330,7 @@ class FieldsInjectedWithFieldsWithIncludedStruct(metaclass=_fbthrift_python_muta
         return self
 
     def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        from thrift.py3 import converter
-        return converter.to_py3_struct(py3_types.FieldsInjectedWithFieldsWithIncludedStruct, self)
+        return self._to_python()._to_py3()
 
     def _to_py_deprecated(self):
         import importlib

@@ -18,11 +18,13 @@
 import unittest
 from typing import cast
 
+import convertible.thrift_mutable_types as python_mutable_types
 import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
 from thrift.py3.converter import to_py3_struct
 from thrift.py3.types import BadEnum, Enum, Struct
+from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
 
 
 # Reimplementing brokenInAutoMigrate using convertible because including testing.thrift and
@@ -213,6 +215,7 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         )
 
     def assert_simple(self, simple: py3_types.Simple) -> None:
+        self.assertIsInstance(simple, py3_types.Simple)
         self.assertEqual(simple.intField, 42)
         self.assertEqual(simple.strField, "simple")
         self.assertEqual(simple.intList, [1, 2, 3])
@@ -225,6 +228,23 @@ class PythonToPy3ConverterTest(unittest.TestCase):
 
     def test_simple(self) -> None:
         self.assert_simple(self.make_simple_python()._to_py3())
+
+    def test_simple_mutable(self) -> None:
+        # GIVEN a mutable thrift-python Simple
+        mutable = python_mutable_types.Simple(
+            intField=42,
+            strField="simple",
+            intList=to_thrift_list([1, 2, 3]),
+            strSet=to_thrift_set({"hello", "world"}),
+            strToIntMap=to_thrift_map({"one": 1, "two": 2}),
+            color=python_mutable_types.Color.GREEN,
+            name_="myname",
+        )
+        # WHEN we convert to py3
+        result = mutable._to_py3()
+        # THEN result is a real py3 Simple, not the mutable self
+        self.assertNotIsInstance(result, python_mutable_types.Simple)
+        self.assert_simple(result)
 
     def test_enum_eq(self) -> None:
         self.assertEqual(

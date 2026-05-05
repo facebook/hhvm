@@ -13,7 +13,6 @@ for asserting types.
 * [Soft Types](/hack/types/soft-types)
 * [Nullable Types](/hack/types/nullable-types)
 * [Type Aliases (`newtype` and `type`)](/hack/types/type-aliases)
-* [Type Conversion](/hack/types/type-conversion)
 * [Type Inferencing](/hack/types/type-inferencing)
 * [Type Refinement](/hack/types/type-refinement)
 * [Generic Types](/hack/types/generic-types)

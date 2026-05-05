@@ -11,4 +11,4 @@ echo "$v3\n";
 ```
 
 For a discussion of value substitution in strings, see [string literals](/hack/source-code-fundamentals/literals#double-quoted-string-literals).
-For conversion to strings, see [type conversion](/hack/types/type-conversion#converting-to-string).
+For conversion to strings, see [type conversion](/hack/expressions-and-operators/casting#casting-to-string).

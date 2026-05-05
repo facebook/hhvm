@@ -227,6 +227,172 @@ class GuardedSinkCallback : public SinkClientCallback,
   RequestGuardType guard_;
 };
 
+// All methods must be called on the IO EventBase thread.
+template <class RequestGuardType>
+class GuardedBiDiCallback : public BiDiClientCallback,
+                            public BiDiServerCallback {
+ public:
+  explicit GuardedBiDiCallback(BiDiClientCallback* callback)
+      : clientCallback_(callback) {}
+
+  GuardedBiDiCallback(const GuardedBiDiCallback&) = delete;
+  GuardedBiDiCallback& operator=(const GuardedBiDiCallback&) = delete;
+  GuardedBiDiCallback(GuardedBiDiCallback&&) = delete;
+  GuardedBiDiCallback& operator=(GuardedBiDiCallback&&) = delete;
+
+  ~GuardedBiDiCallback() override {
+    DCHECK(!!clientCallback_ == !!serverCallback_);
+    if (clientCallback_ && serverCallback_) {
+      clientCallback_->resetServerCallback(*serverCallback_);
+      serverCallback_->resetClientCallback(*clientCallback_);
+    }
+  }
+
+  // BiDiClientCallback methods (server → client)
+
+  bool onFirstResponse(
+      FirstResponsePayload&& payload,
+      folly::EventBase* evb,
+      BiDiServerCallback* serverCallback) override {
+    DCHECK(clientCallback_);
+    DCHECK(!serverCallback_);
+    serverCallback_ = serverCallback;
+    return clientCallback_->onFirstResponse(std::move(payload), evb, this);
+  }
+
+  void onFirstResponseError(folly::exception_wrapper ew) override {
+    DCHECK(clientCallback_);
+    DCHECK(!serverCallback_);
+    std::exchange(clientCallback_, nullptr)
+        ->onFirstResponseError(std::move(ew));
+    delete this;
+  }
+
+  bool onStreamNext(StreamPayload&& payload) override {
+    DCHECK(clientCallback_);
+    return clientCallback_->onStreamNext(std::move(payload));
+  }
+
+  bool onStreamError(folly::exception_wrapper ew) override {
+    DCHECK(clientCallback_);
+    DCHECK(streamAlive_);
+    streamAlive_ = false;
+    ++terminalDepth_;
+    // Return value intentionally discarded: the proxy tracks liveness via
+    // streamAlive_/sinkAlive_ rather than relying on the inner callback.
+    std::ignore = clientCallback_->onStreamError(std::move(ew));
+    --terminalDepth_;
+    return maybeDelete();
+  }
+
+  bool onStreamComplete() override {
+    DCHECK(clientCallback_);
+    DCHECK(streamAlive_);
+    streamAlive_ = false;
+    ++terminalDepth_;
+    std::ignore = clientCallback_->onStreamComplete();
+    --terminalDepth_;
+    return maybeDelete();
+  }
+
+  bool onSinkRequestN(int32_t n) override {
+    DCHECK(clientCallback_);
+    return clientCallback_->onSinkRequestN(n);
+  }
+
+  bool onSinkCancel() override {
+    DCHECK(clientCallback_);
+    DCHECK(sinkAlive_);
+    sinkAlive_ = false;
+    ++terminalDepth_;
+    std::ignore = clientCallback_->onSinkCancel();
+    --terminalDepth_;
+    return maybeDelete();
+  }
+
+  void resetServerCallback(BiDiServerCallback& callback) override {
+    serverCallback_ = &callback;
+  }
+
+  // BiDiServerCallback methods (client → server)
+
+  bool onStreamRequestN(int32_t n) override {
+    DCHECK(serverCallback_);
+    return serverCallback_->onStreamRequestN(n);
+  }
+
+  bool onStreamCancel() override {
+    DCHECK(serverCallback_);
+    DCHECK(streamAlive_);
+    streamAlive_ = false;
+    ++terminalDepth_;
+    std::ignore = serverCallback_->onStreamCancel();
+    --terminalDepth_;
+    return maybeDelete();
+  }
+
+  bool onSinkNext(StreamPayload&& payload) override {
+    DCHECK(serverCallback_);
+    return serverCallback_->onSinkNext(std::move(payload));
+  }
+
+  bool onSinkError(folly::exception_wrapper ew) override {
+    DCHECK(serverCallback_);
+    DCHECK(sinkAlive_);
+    sinkAlive_ = false;
+    ++terminalDepth_;
+    std::ignore = serverCallback_->onSinkError(std::move(ew));
+    --terminalDepth_;
+    return maybeDelete();
+  }
+
+  bool onSinkComplete() override {
+    DCHECK(serverCallback_);
+    DCHECK(sinkAlive_);
+    sinkAlive_ = false;
+    ++terminalDepth_;
+    std::ignore = serverCallback_->onSinkComplete();
+    --terminalDepth_;
+    return maybeDelete();
+  }
+
+  void resetClientCallback(BiDiClientCallback& callback) override {
+    clientCallback_ = &callback;
+  }
+
+  void pauseStream() override {
+    if (serverCallback_) {
+      serverCallback_->pauseStream();
+    }
+  }
+
+  void resumeStream() override {
+    if (serverCallback_) {
+      serverCallback_->resumeStream();
+    }
+  }
+
+ private:
+  bool maybeDelete() {
+    if (!streamAlive_ && !sinkAlive_) {
+      if (terminalDepth_ == 0) {
+        clientCallback_ = nullptr;
+        serverCallback_ = nullptr;
+        delete this;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  BiDiClientCallback* clientCallback_{nullptr};
+  BiDiServerCallback* serverCallback_{nullptr};
+  bool streamAlive_{true};
+  bool sinkAlive_{true};
+  int terminalDepth_{0};
+  RequestGuardType guard_;
+};
+
 template <class RequestGuardType, class ChannelGuardType>
 void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
     setCloseCallback(CloseCallback* callback) {
@@ -339,6 +505,25 @@ void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::sendRequestSink(
   auto wrappedCb = new GuardedSinkCallback<RequestGuardType>(std::move(cob));
 
   impl_->sendRequestSink(
+      std::move(rpcOptions),
+      std::move(methodMetadata),
+      std::move(serializedRequest),
+      std::move(header),
+      wrappedCb,
+      std::move(frameworkMetadata));
+}
+
+template <class RequestGuardType, class ChannelGuardType>
+void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::sendRequestBiDi(
+    RpcOptions&& rpcOptions,
+    MethodMetadata&& methodMetadata,
+    SerializedRequest&& serializedRequest,
+    std::shared_ptr<transport::THeader> header,
+    BiDiClientCallback* cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+  auto wrappedCb = new GuardedBiDiCallback<RequestGuardType>(cob);
+
+  impl_->sendRequestBiDi(
       std::move(rpcOptions),
       std::move(methodMetadata),
       std::move(serializedRequest),

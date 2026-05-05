@@ -1804,6 +1804,15 @@ cdef class Union(StructOrUnion):
             else:
                 union_instance._fbthrift_set_union_value(type_value, value)
                 break
+        else:
+            val_type = type(value)
+            warnings.warn(
+                f"Value {value!r} of type {val_type.__module__}.{val_type.__qualname__} "
+                f"does not match any field of union {cls.__name__}. "
+                f"This will become a TypeError in the future. Please address this ASAP.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
         return union_instance
 
     def __copy__(Union self):

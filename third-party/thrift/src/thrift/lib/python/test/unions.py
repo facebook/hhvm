@@ -21,6 +21,7 @@ import enum
 import sys
 import types
 import unittest
+import warnings
 from typing import Any, Type, TypeVar
 
 import test_thrift.thrift_mutable_types as mutable_types
@@ -71,6 +72,30 @@ class UnionTestImmutable(unittest.TestCase):
             union.fbthrift_current_value,
             Digits(data=[Integers(tiny=1), Integers(unbounded="123")]),
         )
+
+    def test_fromValue_warns_on_no_match(self) -> None:
+        value = [1, 2, 3]
+        with self.assertWarns(RuntimeWarning) as cm:
+            # pyre-ignore[6]: for test
+            union = Integers.fromValue(value)
+        self.assertIn(repr(value), str(cm.warning))
+        self.assertIn("builtins.list", str(cm.warning))
+        self.assertIn("does not match any field", str(cm.warning))
+        self.assertEqual(union.fbthrift_current_field, Integers.Type.EMPTY)
+
+    def test_fromValue_no_warning_on_none(self) -> None:
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            union = Integers.fromValue(None)
+        self.assertEqual(len(caught), 0)
+        self.assertEqual(union.fbthrift_current_field, Integers.Type.EMPTY)
+
+    def test_fromValue_no_warning_on_match(self) -> None:
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            union = Integers.fromValue(42)
+        self.assertEqual(len(caught), 0)
+        self.assertEqual(union.fbthrift_current_field, Integers.Type.tiny)
 
 
 @parameterized_class(

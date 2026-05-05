@@ -209,6 +209,18 @@ final class ThriftServiceMethodNameVirtualPolicyEnforcer
     );
   }
 
+  public static async function genProcessError(
+    string $_asset_type,
+    string $service_name,
+    string $func_name,
+    IPrivacyLibErrorPayloadProvider $error_payload,
+  ): Awaitable<void> {
+    $tsmn_xid =
+      ThriftServiceMethodNameAssetXID::unsafeGet($service_name, $func_name);
+    await ThriftServiceMethodNamePrivacyLib::get($tsmn_xid, $service_name)
+      ->genPostClientRPC($error_payload, PolicyEnforcerContext::empty());
+  }
+
   private static async function genExecuteStandaloneProbes(
     string $asset_type,
     string $policy_enforcer_api,

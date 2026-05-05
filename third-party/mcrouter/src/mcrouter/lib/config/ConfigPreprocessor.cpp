@@ -2027,6 +2027,7 @@ dynamic ConfigPreprocessor::expandMacros(dynamic json, const Context& context)
 
     // raw object
     dynamic result = dynamic::object();
+    result.reserve(json.size());
     for (const auto& it : json.items()) {
       auto& value = const_cast<dynamic&>(it.second);
       try {

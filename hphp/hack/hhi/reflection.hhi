@@ -236,10 +236,12 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
     mixed $object = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getModifiers()[]: int;
+  <<__Deprecated("Use HH_FIXME::reflectionMethodInvokeForCallsite instead")>>
   public function invoke(
     mixed $object,
     mixed ...$args
   ): HH\FIXME\MISSING_RETURN_TYPE;
+  <<__Deprecated("Use HH_FIXME::reflectionMethodInvokeArgsForCallsite instead")>>
   public function invokeArgs(
     mixed $object,
     vec<mixed> $args,

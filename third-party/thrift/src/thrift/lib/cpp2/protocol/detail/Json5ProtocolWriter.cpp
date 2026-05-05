@@ -206,7 +206,7 @@ std::optional<std::uint32_t> Json5ProtocolWriter::maybeWriteSimpleMapKey(
     return writer_.writeObjectName(value);
   } else {
     // For non-string keys, use Json5Protocol to stringify the value.
-    return writer_.writeObjectName(toJsonImpl<Tag>(value, {options_}));
+    return writer_.writeObjectName(toJsonImpl<Tag>(value, options_));
   }
 }
 
@@ -262,7 +262,7 @@ std::uint32_t Json5ProtocolWriter::writeI64(int64_t value) {
 
 std::optional<std::string_view> Json5ProtocolWriter::encodeNanInfAsString(
     std::floating_point auto f) const {
-  if (options_.allowNanInf) {
+  if (options_.writer.allowNanInf) {
     return {};
   }
   if (std::isnan(f)) {

@@ -117,8 +117,8 @@ class Json5ProtocolWriter final {
   };
   explicit Json5ProtocolWriter(
       ExternalBufferSharing /*sharing*/ = COPY_EXTERNAL_BUFFER /* ignored */,
-      Options options = {})
-      : options_(options.writer), writer_(options_) {}
+      Options options = defaultOptions())
+      : options_(options), writer_(options_.writer) {}
 
   static constexpr KeyOrder keyOrder() { return KeyOrder::StableAscending; }
   FieldOrder fieldOrder() const { return FieldOrder::IdAscending; }
@@ -177,6 +177,8 @@ class Json5ProtocolWriter final {
   std::uint32_t writeEnum(std::string_view name, std::int32_t value);
 
  private:
+  static Options defaultOptions() { return {}; }
+
   std::uint32_t writeMapBegin(bool objectForm);
 
   std::optional<std::string_view> encodeNanInfAsString(
@@ -196,7 +198,7 @@ class Json5ProtocolWriter final {
   std::optional<std::uint32_t> maybeWriteSimpleMapKey(const T& value);
 
   CompoundTypeTracker containerStack_;
-  JsonWriterOptions options_;
+  Options options_;
   JsonWriter writer_;
 };
 

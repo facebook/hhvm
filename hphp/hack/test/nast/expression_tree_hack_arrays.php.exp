@@ -1,0 +1,1296 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes =
+      [{ fa_user_attributes =
+         [{ ua_name = ([3:9-33], "__EnableUnstableFeatures"); ua_params = [((), [3:34-52], (String "expression_trees")); ((), [3:54-83], (String "expression_tree_hack_arrays"))] }];
+         fa_namespace =
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+           ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+           ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+         }
+        ];
+      fd_mode = Mstrict; fd_name = ([5:10-18], "\\test_vec");
+      fd_fun =
+      { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([5:22-26], (Hprim Tvoid)))); 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([6:3-46],
+            (Expr
+               ((), [6:3-45],
+                (ExpressionTree
+                   { et_class = ([6:3-13], "\\ExampleDsl");
+                     et_runtime_expr =
+                     ((), [6:3-13],
+                      (Call
+                         { func = ((), [6:3-13], (Class_const (((), [6:3-13], (CI ([6:3-13], "\\ExampleDsl"))), ([6:3-13], "makeTree")))); 
+                           targs = [];
+                           args =
+                           [(Anormal
+                               ((), [6:14-44],
+                                (Shape
+                                   [((SFlit_str ([6:14-44], "path")), ((), [6:14-44], (Id ([6:14-44], "\\__FILE__")))); (
+                                     (SFlit_str ([6:14-44], "start_line")), ((), [6:14-44], (Int "6"))); (
+                                     (SFlit_str ([6:14-44], "end_line")), ((), [6:14-44], (Int "6"))); (
+                                     (SFlit_str ([6:14-44], "start_column")), ((), [6:14-44], (Int "13"))); (
+                                     (SFlit_str ([6:14-44], "end_column")), ((), [6:14-44], (Int "43")))])));
+                             (Anormal
+                                ((), [6:3-13],
+                                 (Shape
+                                    [((SFlit_str ([6:3-13], "splices")), ((), [6:3-13], (KeyValCollection (([6:3-13], Dict), None, []))));
+                                      ((SFlit_str ([6:3-13], "functions")), ((), [6:3-13], (ValCollection (([6:3-13], Vec), None, []))));
+                                      ((SFlit_str ([6:3-13], "static_methods")), ((), [6:3-13], (ValCollection (([6:3-13], Vec), None, []))));
+                                      ((SFlit_str ([6:3-13], "variables")), ((), [6:3-13], (ValCollection (([6:3-13], Vec), None, []))));
+                                      ((SFlit_str ([6:3-13], "lexically_enclosing_tree")), ((), [Pos.none], Null));
+                                      ((SFlit_str ([6:3-13], "type")),
+                                       ((), [6:14-44],
+                                        (Efun
+                                           { ef_fun =
+                                             { f_span = [6:14-44]; f_readonly_this = None; 
+                                               f_annotation = (); f_readonly_ret = None; 
+                                               f_tparams = []; f_ret = ((), None); 
+                                               f_params = []; f_ctxs = (Some ([6:14-44], [([6:14-44], (Happly (([6:14-44], "\\HH\\Contexts\\defaults"), [])))])); 
+                                               f_unsafe_ctxs = None;
+                                               f_body =
+                                               { fb_ast =
+                                                 [([6:14-44],
+                                                   (Return
+                                                      (Some ((), [6:14-44],
+                                                             (Call
+                                                                { func = ((), [6:14-44], (Class_const (((), [6:14-44], (CI ([6:14-44], "\\ExampleDsl"))), ([6:14-44], "lambdaType")))); 
+                                                                  targs = [];
+                                                                  args =
+                                                                  [(Anormal
+                                                                    ((), [6:14-44],
+                                                                    (Lfun (
+                                                                    { f_span = [6:14-44]; 
+                                                                    f_readonly_this = None; 
+                                                                    f_annotation = (); 
+                                                                    f_readonly_ret = None; 
+                                                                    f_tparams = []; 
+                                                                    f_ret = ((), None);
+                                                                    f_params =
+                                                                    [{ param_annotation = (); 
+                                                                    param_type_hint = ((), (Some ([6:15-25], (Happly (([6:15-25], "\\ExampleInt"), []))))); 
+                                                                    param_pos = [6:26-28]; 
+                                                                    param_name = "$x"; 
+                                                                    param_info = Param_required; 
+                                                                    param_readonly = None; 
+                                                                    param_splat = None; 
+                                                                    param_callconv = Pnormal; 
+                                                                    param_named = None; 
+                                                                    param_user_attributes = []; 
+                                                                    param_visibility = None }]; 
+                                                                    f_ctxs = None; 
+                                                                    f_unsafe_ctxs = None;
+                                                                    f_body =
+                                                                    { fb_ast =
+                                                                    [([6:34-44],
+                                                                    (Return
+                                                                    (Some (
+                                                                    (), [6:34-44],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [6:34-44], (Class_const (((), [6:34-44], (CI ([6:34-44], "\\ExampleDsl"))), ([6:34-44], "vecType")))); 
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal ((), [6:38-40], (Lvar ([6:38-40], $x))));
+                                                                    (Anormal
+                                                                    ((), [6:42-43],
+                                                                    (Call
+                                                                    { func = ((), [6:42-43], (Class_const (((), [6:42-43], (CI ([6:42-43], "\\ExampleDsl"))), ([6:42-43], "intType")))); 
+                                                                    targs = []; 
+                                                                    args = []; 
+                                                                    unpacked_arg = None })))]; 
+                                                                    unpacked_arg = None })))))] }; 
+                                                                    f_fun_kind = FSync; 
+                                                                    f_user_attributes = []; 
+                                                                    f_external = false; 
+                                                                    f_hidden = false; 
+                                                                    f_doc_comment = None }, 
+                                                                    []))))];
+                                                                  unpacked_arg = None })))))
+                                                   ]
+                                                 };
+                                               f_fun_kind = FSync; f_user_attributes = []; 
+                                               f_external = false; f_hidden = false; 
+                                               f_doc_comment = None };
+                                             ef_use = []; ef_closure_class_name = None; 
+                                             ef_is_expr_tree_virtual_expr = false })))
+                                      ])));
+                             (Anormal
+                                ((), [6:14-44],
+                                 (Lfun (
+                                    { f_span = [6:14-44]; f_readonly_this = None; 
+                                      f_annotation = (); f_readonly_ret = None; 
+                                      f_tparams = []; f_ret = ((), None);
+                                      f_params =
+                                      [{ param_annotation = (); param_type_hint = ((), (Some ([6:3-13], (Happly (([6:3-13], "\\ExampleDsl"), []))))); 
+                                         param_pos = [6:3-13]; param_name = "$0v"; 
+                                         param_info = Param_required; 
+                                         param_readonly = None; param_splat = None; 
+                                         param_callconv = Pnormal; param_named = None; 
+                                         param_user_attributes = []; 
+                                         param_visibility = None }
+                                        ];
+                                      f_ctxs = None; f_unsafe_ctxs = None;
+                                      f_body =
+                                      { fb_ast =
+                                        [([6:14-44],
+                                          (Return
+                                             (Some ((), [6:14-44],
+                                                    (Call
+                                                       { func =
+                                                         ((), [6:14-44], (Obj_get (((), [6:14-44], (Lvar ([6:14-44], $0v))), ((), [6:14-44], (Id ([6:14-44], "visitLambda"))), Regular, Is_method)));
+                                                         targs = [];
+                                                         args =
+                                                         [(Anormal
+                                                             ((), [6:14-44],
+                                                              (Shape
+                                                                 [((SFlit_str ([6:14-44], "path")), ((), [6:14-44], (Id ([6:14-44], "\\__FILE__"))));
+                                                                   ((SFlit_str ([6:14-44], "start_line")), ((), [6:14-44], (Int "6")));
+                                                                   ((SFlit_str ([6:14-44], "end_line")), ((), [6:14-44], (Int "6")));
+                                                                   ((SFlit_str ([6:14-44], "start_column")), ((), [6:14-44], (Int "13")));
+                                                                   ((SFlit_str ([6:14-44], "end_column")), ((), [6:14-44], (Int "43")))])));
+                                                           (Anormal ((), [6:26-28], (ValCollection (([6:26-28], Vec), None, [((), [6:26-28], (String "$x"))]))));
+                                                           (Anormal
+                                                              ((), [6:34-44],
+                                                               (ValCollection ((
+                                                                  [6:34-44], Vec), None,
+                                                                  [((), [6:34-44],
+                                                                    (
+                                                                    Call
+                                                                    { func =
+                                                                    ((), [6:34-44],
+                                                                    (Obj_get (((), [6:34-44], (Lvar ([6:34-44], $0v))), ((), [6:34-44], (Id ([6:34-44], "visitReturn"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [6:34-44],
+                                                                    (Shape
+                                                                    [((SFlit_str ([6:34-44], "path")), ((), [6:34-44], (Id ([6:34-44], "\\__FILE__"))));
+                                                                    ((SFlit_str ([6:34-44], "start_line")), ((), [6:34-44], (Int "6")));
+                                                                    ((SFlit_str ([6:34-44], "end_line")), ((), [6:34-44], (Int "6")));
+                                                                    ((SFlit_str ([6:34-44], "start_column")), ((), [6:34-44], (Int "33")));
+                                                                    ((SFlit_str ([6:34-44], "end_column")), ((), [6:34-44], (Int "43")))])));
+                                                                    (Anormal
+                                                                    ((), [6:34-44],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [6:34-44],
+                                                                    (Obj_get (((), [6:34-44], (Lvar ([6:34-44], $0v))), ((), [6:34-44], (Id ([6:34-44], "visitVec"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [6:34-44],
+                                                                    (Shape
+                                                                    [((SFlit_str ([6:34-44], "path")), ((), [6:34-44], (Id ([6:34-44], "\\__FILE__"))));
+                                                                    ((SFlit_str ([6:34-44], "start_line")), ((), [6:34-44], (Int "6")));
+                                                                    ((SFlit_str ([6:34-44], "end_line")), ((), [6:34-44], (Int "6")));
+                                                                    ((SFlit_str ([6:34-44], "start_column")), ((), [6:34-44], (Int "33")));
+                                                                    ((SFlit_str ([6:34-44], "end_column")), ((), [6:34-44], (Int "43")))])));
+                                                                    (Anormal
+                                                                    ((), [6:38-43],
+                                                                    (ValCollection ((
+                                                                    [6:38-43], Vec), None,
+                                                                    [((), [6:38-40],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [6:38-40],
+                                                                    (Obj_get (((), [6:38-40], (Lvar ([6:38-40], $0v))), ((), [6:38-40], (Id ([6:38-40], "visitLocal"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [6:38-40],
+                                                                    (Shape
+                                                                    [((SFlit_str ([6:38-40], "path")), ((), [6:38-40], (Id ([6:38-40], "\\__FILE__"))));
+                                                                    ((SFlit_str ([6:38-40], "start_line")), ((), [6:38-40], (Int "6")));
+                                                                    ((SFlit_str ([6:38-40], "end_line")), ((), [6:38-40], (Int "6")));
+                                                                    ((SFlit_str ([6:38-40], "start_column")), ((), [6:38-40], (Int "37")));
+                                                                    ((SFlit_str ([6:38-40], "end_column")), ((), [6:38-40], (Int "39")))]))); (
+                                                                    Anormal ((), [6:38-40], (String "$x")))]; 
+                                                                    unpacked_arg = None }));
+                                                                    ((), [6:42-43],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [6:42-43],
+                                                                    (Obj_get (((), [6:42-43], (Lvar ([6:42-43], $0v))), ((), [6:42-43], (Id ([6:42-43], "visitInt"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [6:42-43],
+                                                                    (Shape
+                                                                    [((SFlit_str ([6:42-43], "path")), ((), [6:42-43], (Id ([6:42-43], "\\__FILE__"))));
+                                                                    ((SFlit_str ([6:42-43], "start_line")), ((), [6:42-43], (Int "6")));
+                                                                    ((SFlit_str ([6:42-43], "end_line")), ((), [6:42-43], (Int "6")));
+                                                                    ((SFlit_str ([6:42-43], "start_column")), ((), [6:42-43], (Int "41")));
+                                                                    ((SFlit_str ([6:42-43], "end_column")), ((), [6:42-43], (Int "42")))]))); (
+                                                                    Anormal ((), [6:42-43], (Int "1")))]; 
+                                                                    unpacked_arg = None }))]))))]; 
+                                                                    unpacked_arg = None })))]; 
+                                                                    unpacked_arg = None }))]
+                                                                  ))))
+                                                           ];
+                                                         unpacked_arg = None })))))
+                                          ]
+                                        };
+                                      f_fun_kind = FSync; f_user_attributes = []; 
+                                      f_external = false; f_hidden = false; 
+                                      f_doc_comment = None },
+                                    []))))
+                             ];
+                           unpacked_arg = None }));
+                     et_free_vars = None }))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([5:10-18], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_hidden = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+      fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([3:9-33], "__EnableUnstableFeatures"); ua_params = [((), [3:34-52], (String "expression_trees")); ((), [3:54-83], (String "expression_tree_hack_arrays"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([9:10-19], "\\test_dict");
+       fd_fun =
+       { f_span = [9:1-11:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([9:23-27], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([10:3-68],
+             (Expr
+                ((), [10:3-67],
+                 (ExpressionTree
+                    { et_class = ([10:3-13], "\\ExampleDsl");
+                      et_runtime_expr =
+                      ((), [10:3-13],
+                       (Call
+                          { func = ((), [10:3-13], (Class_const (((), [10:3-13], (CI ([10:3-13], "\\ExampleDsl"))), ([10:3-13], "makeTree")))); 
+                            targs = [];
+                            args =
+                            [(Anormal
+                                ((), [10:14-66],
+                                 (Shape
+                                    [((SFlit_str ([10:14-66], "path")), ((), [10:14-66], (Id ([10:14-66], "\\__FILE__")))); (
+                                      (SFlit_str ([10:14-66], "start_line")), ((), [10:14-66], (Int "10"))); (
+                                      (SFlit_str ([10:14-66], "end_line")), ((), [10:14-66], (Int "10"))); (
+                                      (SFlit_str ([10:14-66], "start_column")), ((), [10:14-66], (Int "13"))); (
+                                      (SFlit_str ([10:14-66], "end_column")), ((), [10:14-66], (Int "65")))])));
+                              (Anormal
+                                 ((), [10:3-13],
+                                  (Shape
+                                     [((SFlit_str ([10:3-13], "splices")), ((), [10:3-13], (KeyValCollection (([10:3-13], Dict), None, []))));
+                                       ((SFlit_str ([10:3-13], "functions")), ((), [10:3-13], (ValCollection (([10:3-13], Vec), None, []))));
+                                       ((SFlit_str ([10:3-13], "static_methods")), ((), [10:3-13], (ValCollection (([10:3-13], Vec), None, []))));
+                                       ((SFlit_str ([10:3-13], "variables")), ((), [10:3-13], (ValCollection (([10:3-13], Vec), None, []))));
+                                       ((SFlit_str ([10:3-13], "lexically_enclosing_tree")), ((), [Pos.none], Null));
+                                       ((SFlit_str ([10:3-13], "type")),
+                                        ((), [10:14-66],
+                                         (Efun
+                                            { ef_fun =
+                                              { f_span = [10:14-66]; 
+                                                f_readonly_this = None; 
+                                                f_annotation = (); f_readonly_ret = None; 
+                                                f_tparams = []; f_ret = ((), None); 
+                                                f_params = []; f_ctxs = (Some ([10:14-66], [([10:14-66], (Happly (([10:14-66], "\\HH\\Contexts\\defaults"), [])))])); 
+                                                f_unsafe_ctxs = None;
+                                                f_body =
+                                                { fb_ast =
+                                                  [([10:14-66],
+                                                    (Return
+                                                       (Some ((), [10:14-66],
+                                                              (Call
+                                                                 { func = ((), [10:14-66], (Class_const (((), [10:14-66], (CI ([10:14-66], "\\ExampleDsl"))), ([10:14-66], "lambdaType"))));
+                                                                   targs = [];
+                                                                   args =
+                                                                   [(Anormal
+                                                                    ((), [10:14-66],
+                                                                    (Lfun (
+                                                                    { f_span = [10:14-66]; 
+                                                                    f_readonly_this = None; 
+                                                                    f_annotation = (); 
+                                                                    f_readonly_ret = None; 
+                                                                    f_tparams = []; 
+                                                                    f_ret = ((), None);
+                                                                    f_params =
+                                                                    [{ param_annotation = (); 
+                                                                    param_type_hint = ((), (Some ([10:15-28], (Happly (([10:15-28], "\\ExampleString"), []))))); 
+                                                                    param_pos = [10:29-31]; 
+                                                                    param_name = "$k"; 
+                                                                    param_info = Param_required; 
+                                                                    param_readonly = None; 
+                                                                    param_splat = None; 
+                                                                    param_callconv = Pnormal; 
+                                                                    param_named = None; 
+                                                                    param_user_attributes = []; 
+                                                                    param_visibility = None };
+                                                                    { param_annotation = (); 
+                                                                    param_type_hint = ((), (Some ([10:33-43], (Happly (([10:33-43], "\\ExampleInt"), []))))); 
+                                                                    param_pos = [10:44-46]; 
+                                                                    param_name = "$v"; 
+                                                                    param_info = Param_required; 
+                                                                    param_readonly = None; 
+                                                                    param_splat = None; 
+                                                                    param_callconv = Pnormal; 
+                                                                    param_named = None; 
+                                                                    param_user_attributes = []; 
+                                                                    param_visibility = None }]; 
+                                                                    f_ctxs = None; 
+                                                                    f_unsafe_ctxs = None;
+                                                                    f_body =
+                                                                    { fb_ast =
+                                                                    [([10:52-66],
+                                                                    (Return
+                                                                    (Some (
+                                                                    (), [10:52-66],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [10:52-66], (Class_const (((), [10:52-66], (CI ([10:52-66], "\\ExampleDsl"))), ([10:52-66], "dictType"))));
+                                                                    targs = [];
+                                                                    args = [(Anormal ((), [10:52-66], (Tuple [((), [10:57-59], (Lvar ([10:57-59], $k))); ((), [10:63-65], (Lvar ([10:63-65], $v)))])))];
+                                                                    unpacked_arg = None })))))] }; 
+                                                                    f_fun_kind = FSync; 
+                                                                    f_user_attributes = []; 
+                                                                    f_external = false; 
+                                                                    f_hidden = false; 
+                                                                    f_doc_comment = None }, 
+                                                                    []))))];
+                                                                   unpacked_arg = None })))))
+                                                    ]
+                                                  };
+                                                f_fun_kind = FSync; f_user_attributes = []; 
+                                                f_external = false; f_hidden = false; 
+                                                f_doc_comment = None };
+                                              ef_use = []; ef_closure_class_name = None; 
+                                              ef_is_expr_tree_virtual_expr = false })))
+                                       ])));
+                              (Anormal
+                                 ((), [10:14-66],
+                                  (Lfun (
+                                     { f_span = [10:14-66]; f_readonly_this = None; 
+                                       f_annotation = (); f_readonly_ret = None; 
+                                       f_tparams = []; f_ret = ((), None);
+                                       f_params =
+                                       [{ param_annotation = (); param_type_hint = ((), (Some ([10:3-13], (Happly (([10:3-13], "\\ExampleDsl"), []))))); 
+                                          param_pos = [10:3-13]; param_name = "$0v"; 
+                                          param_info = Param_required; 
+                                          param_readonly = None; param_splat = None; 
+                                          param_callconv = Pnormal; param_named = None; 
+                                          param_user_attributes = []; 
+                                          param_visibility = None }
+                                         ];
+                                       f_ctxs = None; f_unsafe_ctxs = None;
+                                       f_body =
+                                       { fb_ast =
+                                         [([10:14-66],
+                                           (Return
+                                              (Some ((), [10:14-66],
+                                                     (Call
+                                                        { func =
+                                                          ((), [10:14-66],
+                                                           (Obj_get (((), [10:14-66], (Lvar ([10:14-66], $0v))), ((), [10:14-66], (Id ([10:14-66], "visitLambda"))), Regular, Is_method)));
+                                                          targs = [];
+                                                          args =
+                                                          [(Anormal
+                                                              ((), [10:14-66],
+                                                               (Shape
+                                                                  [((SFlit_str ([10:14-66], "path")), ((), [10:14-66], (Id ([10:14-66], "\\__FILE__"))));
+                                                                    (
+                                                                    (SFlit_str ([10:14-66], "start_line")), ((), [10:14-66], (Int "10")));
+                                                                    (
+                                                                    (SFlit_str ([10:14-66], "end_line")), ((), [10:14-66], (Int "10")));
+                                                                    (
+                                                                    (SFlit_str ([10:14-66], "start_column")), ((), [10:14-66], (Int "13")));
+                                                                    (
+                                                                    (SFlit_str ([10:14-66], "end_column")), ((), [10:14-66], (Int "65")))])));
+                                                            (Anormal ((), [10:29-46], (ValCollection (([10:29-46], Vec), None, [((), [10:29-31], (String "$k")); ((), [10:44-46], (String "$v"))]))));
+                                                            (Anormal
+                                                               ((), [10:52-66],
+                                                                (ValCollection ((
+                                                                   [10:52-66], Vec), None,
+                                                                   [((), [10:52-66],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [10:52-66],
+                                                                    (Obj_get (((), [10:52-66], (Lvar ([10:52-66], $0v))), ((), [10:52-66], (Id ([10:52-66], "visitReturn"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [10:52-66],
+                                                                    (Shape
+                                                                    [((SFlit_str ([10:52-66], "path")), ((), [10:52-66], (Id ([10:52-66], "\\__FILE__"))));
+                                                                    ((SFlit_str ([10:52-66], "start_line")), ((), [10:52-66], (Int "10")));
+                                                                    ((SFlit_str ([10:52-66], "end_line")), ((), [10:52-66], (Int "10")));
+                                                                    ((SFlit_str ([10:52-66], "start_column")), ((), [10:52-66], (Int "51")));
+                                                                    ((SFlit_str ([10:52-66], "end_column")), ((), [10:52-66], (Int "65")))])));
+                                                                    (Anormal
+                                                                    ((), [10:52-66],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [10:52-66],
+                                                                    (Obj_get (((), [10:52-66], (Lvar ([10:52-66], $0v))), ((), [10:52-66], (Id ([10:52-66], "visitDict"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [10:52-66],
+                                                                    (Shape
+                                                                    [((SFlit_str ([10:52-66], "path")), ((), [10:52-66], (Id ([10:52-66], "\\__FILE__"))));
+                                                                    ((SFlit_str ([10:52-66], "start_line")), ((), [10:52-66], (Int "10")));
+                                                                    ((SFlit_str ([10:52-66], "end_line")), ((), [10:52-66], (Int "10")));
+                                                                    ((SFlit_str ([10:52-66], "start_column")), ((), [10:52-66], (Int "51")));
+                                                                    ((SFlit_str ([10:52-66], "end_column")), ((), [10:52-66], (Int "65")))])));
+                                                                    (Anormal
+                                                                    ((), [10:57-65],
+                                                                    (ValCollection ((
+                                                                    [10:57-65], Vec), None,
+                                                                    [((), [10:57-65],
+                                                                    (Tuple
+                                                                    [((), [10:57-59],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [10:57-59],
+                                                                    (Obj_get (((), [10:57-59], (Lvar ([10:57-59], $0v))), ((), [10:57-59], (Id ([10:57-59], "visitLocal"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [10:57-59],
+                                                                    (Shape
+                                                                    [((SFlit_str ([10:57-59], "path")), ((), [10:57-59], (Id ([10:57-59], "\\__FILE__"))));
+                                                                    ((SFlit_str ([10:57-59], "start_line")), ((), [10:57-59], (Int "10")));
+                                                                    ((SFlit_str ([10:57-59], "end_line")), ((), [10:57-59], (Int "10")));
+                                                                    ((SFlit_str ([10:57-59], "start_column")), ((), [10:57-59], (Int "56")));
+                                                                    ((SFlit_str ([10:57-59], "end_column")), ((), [10:57-59], (Int "58")))]))); (
+                                                                    Anormal ((), [10:57-59], (String "$k")))]; 
+                                                                    unpacked_arg = None }));
+                                                                    ((), [10:63-65],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [10:63-65],
+                                                                    (Obj_get (((), [10:63-65], (Lvar ([10:63-65], $0v))), ((), [10:63-65], (Id ([10:63-65], "visitLocal"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [10:63-65],
+                                                                    (Shape
+                                                                    [((SFlit_str ([10:63-65], "path")), ((), [10:63-65], (Id ([10:63-65], "\\__FILE__"))));
+                                                                    ((SFlit_str ([10:63-65], "start_line")), ((), [10:63-65], (Int "10")));
+                                                                    ((SFlit_str ([10:63-65], "end_line")), ((), [10:63-65], (Int "10")));
+                                                                    ((SFlit_str ([10:63-65], "start_column")), ((), [10:63-65], (Int "62")));
+                                                                    ((SFlit_str ([10:63-65], "end_column")), ((), [10:63-65], (Int "64")))]))); (
+                                                                    Anormal ((), [10:63-65], (String "$v")))]; 
+                                                                    unpacked_arg = None }))]))]))))]; 
+                                                                    unpacked_arg = None })))]; 
+                                                                    unpacked_arg = None }))]
+                                                                   ))))
+                                                            ];
+                                                          unpacked_arg = None })))))
+                                           ]
+                                         };
+                                       f_fun_kind = FSync; f_user_attributes = []; 
+                                       f_external = false; f_hidden = false; 
+                                       f_doc_comment = None },
+                                     []))))
+                              ];
+                            unpacked_arg = None }));
+                      et_free_vars = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-19], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([3:9-33], "__EnableUnstableFeatures"); ua_params = [((), [3:34-52], (String "expression_trees")); ((), [3:54-83], (String "expression_tree_hack_arrays"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([13:10-27], "\\test_dict_int_key");
+       fd_fun =
+       { f_span = [13:1-15:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([13:31-35], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([14:3-68],
+             (Expr
+                ((), [14:3-67],
+                 (ExpressionTree
+                    { et_class = ([14:3-13], "\\ExampleDsl");
+                      et_runtime_expr =
+                      ((), [14:3-13],
+                       (Call
+                          { func = ((), [14:3-13], (Class_const (((), [14:3-13], (CI ([14:3-13], "\\ExampleDsl"))), ([14:3-13], "makeTree")))); 
+                            targs = [];
+                            args =
+                            [(Anormal
+                                ((), [14:14-66],
+                                 (Shape
+                                    [((SFlit_str ([14:14-66], "path")), ((), [14:14-66], (Id ([14:14-66], "\\__FILE__")))); (
+                                      (SFlit_str ([14:14-66], "start_line")), ((), [14:14-66], (Int "14"))); (
+                                      (SFlit_str ([14:14-66], "end_line")), ((), [14:14-66], (Int "14"))); (
+                                      (SFlit_str ([14:14-66], "start_column")), ((), [14:14-66], (Int "13"))); (
+                                      (SFlit_str ([14:14-66], "end_column")), ((), [14:14-66], (Int "65")))])));
+                              (Anormal
+                                 ((), [14:3-13],
+                                  (Shape
+                                     [((SFlit_str ([14:3-13], "splices")), ((), [14:3-13], (KeyValCollection (([14:3-13], Dict), None, []))));
+                                       ((SFlit_str ([14:3-13], "functions")), ((), [14:3-13], (ValCollection (([14:3-13], Vec), None, []))));
+                                       ((SFlit_str ([14:3-13], "static_methods")), ((), [14:3-13], (ValCollection (([14:3-13], Vec), None, []))));
+                                       ((SFlit_str ([14:3-13], "variables")), ((), [14:3-13], (ValCollection (([14:3-13], Vec), None, []))));
+                                       ((SFlit_str ([14:3-13], "lexically_enclosing_tree")), ((), [Pos.none], Null));
+                                       ((SFlit_str ([14:3-13], "type")),
+                                        ((), [14:14-66],
+                                         (Efun
+                                            { ef_fun =
+                                              { f_span = [14:14-66]; 
+                                                f_readonly_this = None; 
+                                                f_annotation = (); f_readonly_ret = None; 
+                                                f_tparams = []; f_ret = ((), None); 
+                                                f_params = []; f_ctxs = (Some ([14:14-66], [([14:14-66], (Happly (([14:14-66], "\\HH\\Contexts\\defaults"), [])))])); 
+                                                f_unsafe_ctxs = None;
+                                                f_body =
+                                                { fb_ast =
+                                                  [([14:14-66],
+                                                    (Return
+                                                       (Some ((), [14:14-66],
+                                                              (Call
+                                                                 { func = ((), [14:14-66], (Class_const (((), [14:14-66], (CI ([14:14-66], "\\ExampleDsl"))), ([14:14-66], "lambdaType"))));
+                                                                   targs = [];
+                                                                   args =
+                                                                   [(Anormal
+                                                                    ((), [14:14-66],
+                                                                    (Lfun (
+                                                                    { f_span = [14:14-66]; 
+                                                                    f_readonly_this = None; 
+                                                                    f_annotation = (); 
+                                                                    f_readonly_ret = None; 
+                                                                    f_tparams = []; 
+                                                                    f_ret = ((), None);
+                                                                    f_params =
+                                                                    [{ param_annotation = (); 
+                                                                    param_type_hint = ((), (Some ([14:15-25], (Happly (([14:15-25], "\\ExampleInt"), []))))); 
+                                                                    param_pos = [14:26-28]; 
+                                                                    param_name = "$k"; 
+                                                                    param_info = Param_required; 
+                                                                    param_readonly = None; 
+                                                                    param_splat = None; 
+                                                                    param_callconv = Pnormal; 
+                                                                    param_named = None; 
+                                                                    param_user_attributes = []; 
+                                                                    param_visibility = None };
+                                                                    { param_annotation = (); 
+                                                                    param_type_hint = ((), (Some ([14:30-43], (Happly (([14:30-43], "\\ExampleString"), []))))); 
+                                                                    param_pos = [14:44-46]; 
+                                                                    param_name = "$v"; 
+                                                                    param_info = Param_required; 
+                                                                    param_readonly = None; 
+                                                                    param_splat = None; 
+                                                                    param_callconv = Pnormal; 
+                                                                    param_named = None; 
+                                                                    param_user_attributes = []; 
+                                                                    param_visibility = None }]; 
+                                                                    f_ctxs = None; 
+                                                                    f_unsafe_ctxs = None;
+                                                                    f_body =
+                                                                    { fb_ast =
+                                                                    [([14:52-66],
+                                                                    (Return
+                                                                    (Some (
+                                                                    (), [14:52-66],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [14:52-66], (Class_const (((), [14:52-66], (CI ([14:52-66], "\\ExampleDsl"))), ([14:52-66], "dictType"))));
+                                                                    targs = [];
+                                                                    args = [(Anormal ((), [14:52-66], (Tuple [((), [14:57-59], (Lvar ([14:57-59], $k))); ((), [14:63-65], (Lvar ([14:63-65], $v)))])))];
+                                                                    unpacked_arg = None })))))] }; 
+                                                                    f_fun_kind = FSync; 
+                                                                    f_user_attributes = []; 
+                                                                    f_external = false; 
+                                                                    f_hidden = false; 
+                                                                    f_doc_comment = None }, 
+                                                                    []))))];
+                                                                   unpacked_arg = None })))))
+                                                    ]
+                                                  };
+                                                f_fun_kind = FSync; f_user_attributes = []; 
+                                                f_external = false; f_hidden = false; 
+                                                f_doc_comment = None };
+                                              ef_use = []; ef_closure_class_name = None; 
+                                              ef_is_expr_tree_virtual_expr = false })))
+                                       ])));
+                              (Anormal
+                                 ((), [14:14-66],
+                                  (Lfun (
+                                     { f_span = [14:14-66]; f_readonly_this = None; 
+                                       f_annotation = (); f_readonly_ret = None; 
+                                       f_tparams = []; f_ret = ((), None);
+                                       f_params =
+                                       [{ param_annotation = (); param_type_hint = ((), (Some ([14:3-13], (Happly (([14:3-13], "\\ExampleDsl"), []))))); 
+                                          param_pos = [14:3-13]; param_name = "$0v"; 
+                                          param_info = Param_required; 
+                                          param_readonly = None; param_splat = None; 
+                                          param_callconv = Pnormal; param_named = None; 
+                                          param_user_attributes = []; 
+                                          param_visibility = None }
+                                         ];
+                                       f_ctxs = None; f_unsafe_ctxs = None;
+                                       f_body =
+                                       { fb_ast =
+                                         [([14:14-66],
+                                           (Return
+                                              (Some ((), [14:14-66],
+                                                     (Call
+                                                        { func =
+                                                          ((), [14:14-66],
+                                                           (Obj_get (((), [14:14-66], (Lvar ([14:14-66], $0v))), ((), [14:14-66], (Id ([14:14-66], "visitLambda"))), Regular, Is_method)));
+                                                          targs = [];
+                                                          args =
+                                                          [(Anormal
+                                                              ((), [14:14-66],
+                                                               (Shape
+                                                                  [((SFlit_str ([14:14-66], "path")), ((), [14:14-66], (Id ([14:14-66], "\\__FILE__"))));
+                                                                    (
+                                                                    (SFlit_str ([14:14-66], "start_line")), ((), [14:14-66], (Int "14")));
+                                                                    (
+                                                                    (SFlit_str ([14:14-66], "end_line")), ((), [14:14-66], (Int "14")));
+                                                                    (
+                                                                    (SFlit_str ([14:14-66], "start_column")), ((), [14:14-66], (Int "13")));
+                                                                    (
+                                                                    (SFlit_str ([14:14-66], "end_column")), ((), [14:14-66], (Int "65")))])));
+                                                            (Anormal ((), [14:26-46], (ValCollection (([14:26-46], Vec), None, [((), [14:26-28], (String "$k")); ((), [14:44-46], (String "$v"))]))));
+                                                            (Anormal
+                                                               ((), [14:52-66],
+                                                                (ValCollection ((
+                                                                   [14:52-66], Vec), None,
+                                                                   [((), [14:52-66],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [14:52-66],
+                                                                    (Obj_get (((), [14:52-66], (Lvar ([14:52-66], $0v))), ((), [14:52-66], (Id ([14:52-66], "visitReturn"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [14:52-66],
+                                                                    (Shape
+                                                                    [((SFlit_str ([14:52-66], "path")), ((), [14:52-66], (Id ([14:52-66], "\\__FILE__"))));
+                                                                    ((SFlit_str ([14:52-66], "start_line")), ((), [14:52-66], (Int "14")));
+                                                                    ((SFlit_str ([14:52-66], "end_line")), ((), [14:52-66], (Int "14")));
+                                                                    ((SFlit_str ([14:52-66], "start_column")), ((), [14:52-66], (Int "51")));
+                                                                    ((SFlit_str ([14:52-66], "end_column")), ((), [14:52-66], (Int "65")))])));
+                                                                    (Anormal
+                                                                    ((), [14:52-66],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [14:52-66],
+                                                                    (Obj_get (((), [14:52-66], (Lvar ([14:52-66], $0v))), ((), [14:52-66], (Id ([14:52-66], "visitDict"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [14:52-66],
+                                                                    (Shape
+                                                                    [((SFlit_str ([14:52-66], "path")), ((), [14:52-66], (Id ([14:52-66], "\\__FILE__"))));
+                                                                    ((SFlit_str ([14:52-66], "start_line")), ((), [14:52-66], (Int "14")));
+                                                                    ((SFlit_str ([14:52-66], "end_line")), ((), [14:52-66], (Int "14")));
+                                                                    ((SFlit_str ([14:52-66], "start_column")), ((), [14:52-66], (Int "51")));
+                                                                    ((SFlit_str ([14:52-66], "end_column")), ((), [14:52-66], (Int "65")))])));
+                                                                    (Anormal
+                                                                    ((), [14:57-65],
+                                                                    (ValCollection ((
+                                                                    [14:57-65], Vec), None,
+                                                                    [((), [14:57-65],
+                                                                    (Tuple
+                                                                    [((), [14:57-59],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [14:57-59],
+                                                                    (Obj_get (((), [14:57-59], (Lvar ([14:57-59], $0v))), ((), [14:57-59], (Id ([14:57-59], "visitLocal"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [14:57-59],
+                                                                    (Shape
+                                                                    [((SFlit_str ([14:57-59], "path")), ((), [14:57-59], (Id ([14:57-59], "\\__FILE__"))));
+                                                                    ((SFlit_str ([14:57-59], "start_line")), ((), [14:57-59], (Int "14")));
+                                                                    ((SFlit_str ([14:57-59], "end_line")), ((), [14:57-59], (Int "14")));
+                                                                    ((SFlit_str ([14:57-59], "start_column")), ((), [14:57-59], (Int "56")));
+                                                                    ((SFlit_str ([14:57-59], "end_column")), ((), [14:57-59], (Int "58")))]))); (
+                                                                    Anormal ((), [14:57-59], (String "$k")))]; 
+                                                                    unpacked_arg = None }));
+                                                                    ((), [14:63-65],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [14:63-65],
+                                                                    (Obj_get (((), [14:63-65], (Lvar ([14:63-65], $0v))), ((), [14:63-65], (Id ([14:63-65], "visitLocal"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [14:63-65],
+                                                                    (Shape
+                                                                    [((SFlit_str ([14:63-65], "path")), ((), [14:63-65], (Id ([14:63-65], "\\__FILE__"))));
+                                                                    ((SFlit_str ([14:63-65], "start_line")), ((), [14:63-65], (Int "14")));
+                                                                    ((SFlit_str ([14:63-65], "end_line")), ((), [14:63-65], (Int "14")));
+                                                                    ((SFlit_str ([14:63-65], "start_column")), ((), [14:63-65], (Int "62")));
+                                                                    ((SFlit_str ([14:63-65], "end_column")), ((), [14:63-65], (Int "64")))]))); (
+                                                                    Anormal ((), [14:63-65], (String "$v")))]; 
+                                                                    unpacked_arg = None }))]))]))))]; 
+                                                                    unpacked_arg = None })))]; 
+                                                                    unpacked_arg = None }))]
+                                                                   ))))
+                                                            ];
+                                                          unpacked_arg = None })))))
+                                           ]
+                                         };
+                                       f_fun_kind = FSync; f_user_attributes = []; 
+                                       f_external = false; f_hidden = false; 
+                                       f_doc_comment = None },
+                                     []))))
+                              ];
+                            unpacked_arg = None }));
+                      et_free_vars = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-27], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([3:9-33], "__EnableUnstableFeatures"); ua_params = [((), [3:34-52], (String "expression_trees")); ((), [3:54-83], (String "expression_tree_hack_arrays"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([17:10-25], "\\test_keyset_int");
+       fd_fun =
+       { f_span = [17:1-19:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([17:29-33], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([18:3-49],
+             (Expr
+                ((), [18:3-48],
+                 (ExpressionTree
+                    { et_class = ([18:3-13], "\\ExampleDsl");
+                      et_runtime_expr =
+                      ((), [18:3-13],
+                       (Call
+                          { func = ((), [18:3-13], (Class_const (((), [18:3-13], (CI ([18:3-13], "\\ExampleDsl"))), ([18:3-13], "makeTree")))); 
+                            targs = [];
+                            args =
+                            [(Anormal
+                                ((), [18:14-47],
+                                 (Shape
+                                    [((SFlit_str ([18:14-47], "path")), ((), [18:14-47], (Id ([18:14-47], "\\__FILE__")))); (
+                                      (SFlit_str ([18:14-47], "start_line")), ((), [18:14-47], (Int "18"))); (
+                                      (SFlit_str ([18:14-47], "end_line")), ((), [18:14-47], (Int "18"))); (
+                                      (SFlit_str ([18:14-47], "start_column")), ((), [18:14-47], (Int "13"))); (
+                                      (SFlit_str ([18:14-47], "end_column")), ((), [18:14-47], (Int "46")))])));
+                              (Anormal
+                                 ((), [18:3-13],
+                                  (Shape
+                                     [((SFlit_str ([18:3-13], "splices")), ((), [18:3-13], (KeyValCollection (([18:3-13], Dict), None, []))));
+                                       ((SFlit_str ([18:3-13], "functions")), ((), [18:3-13], (ValCollection (([18:3-13], Vec), None, []))));
+                                       ((SFlit_str ([18:3-13], "static_methods")), ((), [18:3-13], (ValCollection (([18:3-13], Vec), None, []))));
+                                       ((SFlit_str ([18:3-13], "variables")), ((), [18:3-13], (ValCollection (([18:3-13], Vec), None, []))));
+                                       ((SFlit_str ([18:3-13], "lexically_enclosing_tree")), ((), [Pos.none], Null));
+                                       ((SFlit_str ([18:3-13], "type")),
+                                        ((), [18:14-47],
+                                         (Efun
+                                            { ef_fun =
+                                              { f_span = [18:14-47]; 
+                                                f_readonly_this = None; 
+                                                f_annotation = (); f_readonly_ret = None; 
+                                                f_tparams = []; f_ret = ((), None); 
+                                                f_params = []; f_ctxs = (Some ([18:14-47], [([18:14-47], (Happly (([18:14-47], "\\HH\\Contexts\\defaults"), [])))])); 
+                                                f_unsafe_ctxs = None;
+                                                f_body =
+                                                { fb_ast =
+                                                  [([18:14-47],
+                                                    (Return
+                                                       (Some ((), [18:14-47],
+                                                              (Call
+                                                                 { func = ((), [18:14-47], (Class_const (((), [18:14-47], (CI ([18:14-47], "\\ExampleDsl"))), ([18:14-47], "lambdaType"))));
+                                                                   targs = [];
+                                                                   args =
+                                                                   [(Anormal
+                                                                    ((), [18:14-47],
+                                                                    (Lfun (
+                                                                    { f_span = [18:14-47]; 
+                                                                    f_readonly_this = None; 
+                                                                    f_annotation = (); 
+                                                                    f_readonly_ret = None; 
+                                                                    f_tparams = []; 
+                                                                    f_ret = ((), None);
+                                                                    f_params =
+                                                                    [{ param_annotation = (); 
+                                                                    param_type_hint = ((), (Some ([18:15-25], (Happly (([18:15-25], "\\ExampleInt"), []))))); 
+                                                                    param_pos = [18:26-28]; 
+                                                                    param_name = "$x"; 
+                                                                    param_info = Param_required; 
+                                                                    param_readonly = None; 
+                                                                    param_splat = None; 
+                                                                    param_callconv = Pnormal; 
+                                                                    param_named = None; 
+                                                                    param_user_attributes = []; 
+                                                                    param_visibility = None }]; 
+                                                                    f_ctxs = None; 
+                                                                    f_unsafe_ctxs = None;
+                                                                    f_body =
+                                                                    { fb_ast =
+                                                                    [([18:34-47],
+                                                                    (Return
+                                                                    (Some (
+                                                                    (), [18:34-47],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [18:34-47], (Class_const (((), [18:34-47], (CI ([18:34-47], "\\ExampleDsl"))), ([18:34-47], "keysetType"))));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal ((), [18:41-43], (Lvar ([18:41-43], $x))));
+                                                                    (Anormal
+                                                                    ((), [18:45-46],
+                                                                    (Call
+                                                                    { func = ((), [18:45-46], (Class_const (((), [18:45-46], (CI ([18:45-46], "\\ExampleDsl"))), ([18:45-46], "intType"))));
+                                                                    targs = []; 
+                                                                    args = []; 
+                                                                    unpacked_arg = None })))]; 
+                                                                    unpacked_arg = None })))))] }; 
+                                                                    f_fun_kind = FSync; 
+                                                                    f_user_attributes = []; 
+                                                                    f_external = false; 
+                                                                    f_hidden = false; 
+                                                                    f_doc_comment = None }, 
+                                                                    []))))];
+                                                                   unpacked_arg = None })))))
+                                                    ]
+                                                  };
+                                                f_fun_kind = FSync; f_user_attributes = []; 
+                                                f_external = false; f_hidden = false; 
+                                                f_doc_comment = None };
+                                              ef_use = []; ef_closure_class_name = None; 
+                                              ef_is_expr_tree_virtual_expr = false })))
+                                       ])));
+                              (Anormal
+                                 ((), [18:14-47],
+                                  (Lfun (
+                                     { f_span = [18:14-47]; f_readonly_this = None; 
+                                       f_annotation = (); f_readonly_ret = None; 
+                                       f_tparams = []; f_ret = ((), None);
+                                       f_params =
+                                       [{ param_annotation = (); param_type_hint = ((), (Some ([18:3-13], (Happly (([18:3-13], "\\ExampleDsl"), []))))); 
+                                          param_pos = [18:3-13]; param_name = "$0v"; 
+                                          param_info = Param_required; 
+                                          param_readonly = None; param_splat = None; 
+                                          param_callconv = Pnormal; param_named = None; 
+                                          param_user_attributes = []; 
+                                          param_visibility = None }
+                                         ];
+                                       f_ctxs = None; f_unsafe_ctxs = None;
+                                       f_body =
+                                       { fb_ast =
+                                         [([18:14-47],
+                                           (Return
+                                              (Some ((), [18:14-47],
+                                                     (Call
+                                                        { func =
+                                                          ((), [18:14-47],
+                                                           (Obj_get (((), [18:14-47], (Lvar ([18:14-47], $0v))), ((), [18:14-47], (Id ([18:14-47], "visitLambda"))), Regular, Is_method)));
+                                                          targs = [];
+                                                          args =
+                                                          [(Anormal
+                                                              ((), [18:14-47],
+                                                               (Shape
+                                                                  [((SFlit_str ([18:14-47], "path")), ((), [18:14-47], (Id ([18:14-47], "\\__FILE__"))));
+                                                                    (
+                                                                    (SFlit_str ([18:14-47], "start_line")), ((), [18:14-47], (Int "18")));
+                                                                    (
+                                                                    (SFlit_str ([18:14-47], "end_line")), ((), [18:14-47], (Int "18")));
+                                                                    (
+                                                                    (SFlit_str ([18:14-47], "start_column")), ((), [18:14-47], (Int "13")));
+                                                                    (
+                                                                    (SFlit_str ([18:14-47], "end_column")), ((), [18:14-47], (Int "46")))])));
+                                                            (Anormal ((), [18:26-28], (ValCollection (([18:26-28], Vec), None, [((), [18:26-28], (String "$x"))]))));
+                                                            (Anormal
+                                                               ((), [18:34-47],
+                                                                (ValCollection ((
+                                                                   [18:34-47], Vec), None,
+                                                                   [((), [18:34-47],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [18:34-47],
+                                                                    (Obj_get (((), [18:34-47], (Lvar ([18:34-47], $0v))), ((), [18:34-47], (Id ([18:34-47], "visitReturn"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [18:34-47],
+                                                                    (Shape
+                                                                    [((SFlit_str ([18:34-47], "path")), ((), [18:34-47], (Id ([18:34-47], "\\__FILE__"))));
+                                                                    ((SFlit_str ([18:34-47], "start_line")), ((), [18:34-47], (Int "18")));
+                                                                    ((SFlit_str ([18:34-47], "end_line")), ((), [18:34-47], (Int "18")));
+                                                                    ((SFlit_str ([18:34-47], "start_column")), ((), [18:34-47], (Int "33")));
+                                                                    ((SFlit_str ([18:34-47], "end_column")), ((), [18:34-47], (Int "46")))])));
+                                                                    (Anormal
+                                                                    ((), [18:34-47],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [18:34-47],
+                                                                    (Obj_get (((), [18:34-47], (Lvar ([18:34-47], $0v))), ((), [18:34-47], (Id ([18:34-47], "visitKeyset"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [18:34-47],
+                                                                    (Shape
+                                                                    [((SFlit_str ([18:34-47], "path")), ((), [18:34-47], (Id ([18:34-47], "\\__FILE__"))));
+                                                                    ((SFlit_str ([18:34-47], "start_line")), ((), [18:34-47], (Int "18")));
+                                                                    ((SFlit_str ([18:34-47], "end_line")), ((), [18:34-47], (Int "18")));
+                                                                    ((SFlit_str ([18:34-47], "start_column")), ((), [18:34-47], (Int "33")));
+                                                                    ((SFlit_str ([18:34-47], "end_column")), ((), [18:34-47], (Int "46")))])));
+                                                                    (Anormal
+                                                                    ((), [18:41-46],
+                                                                    (ValCollection ((
+                                                                    [18:41-46], Vec), None,
+                                                                    [((), [18:41-43],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [18:41-43],
+                                                                    (Obj_get (((), [18:41-43], (Lvar ([18:41-43], $0v))), ((), [18:41-43], (Id ([18:41-43], "visitLocal"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [18:41-43],
+                                                                    (Shape
+                                                                    [((SFlit_str ([18:41-43], "path")), ((), [18:41-43], (Id ([18:41-43], "\\__FILE__"))));
+                                                                    ((SFlit_str ([18:41-43], "start_line")), ((), [18:41-43], (Int "18")));
+                                                                    ((SFlit_str ([18:41-43], "end_line")), ((), [18:41-43], (Int "18")));
+                                                                    ((SFlit_str ([18:41-43], "start_column")), ((), [18:41-43], (Int "40")));
+                                                                    ((SFlit_str ([18:41-43], "end_column")), ((), [18:41-43], (Int "42")))]))); (
+                                                                    Anormal ((), [18:41-43], (String "$x")))]; 
+                                                                    unpacked_arg = None }));
+                                                                    ((), [18:45-46],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [18:45-46],
+                                                                    (Obj_get (((), [18:45-46], (Lvar ([18:45-46], $0v))), ((), [18:45-46], (Id ([18:45-46], "visitInt"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [18:45-46],
+                                                                    (Shape
+                                                                    [((SFlit_str ([18:45-46], "path")), ((), [18:45-46], (Id ([18:45-46], "\\__FILE__"))));
+                                                                    ((SFlit_str ([18:45-46], "start_line")), ((), [18:45-46], (Int "18")));
+                                                                    ((SFlit_str ([18:45-46], "end_line")), ((), [18:45-46], (Int "18")));
+                                                                    ((SFlit_str ([18:45-46], "start_column")), ((), [18:45-46], (Int "44")));
+                                                                    ((SFlit_str ([18:45-46], "end_column")), ((), [18:45-46], (Int "45")))]))); (
+                                                                    Anormal ((), [18:45-46], (Int "1")))]; 
+                                                                    unpacked_arg = None }))]))))]; 
+                                                                    unpacked_arg = None })))]; 
+                                                                    unpacked_arg = None }))]
+                                                                   ))))
+                                                            ];
+                                                          unpacked_arg = None })))))
+                                           ]
+                                         };
+                                       f_fun_kind = FSync; f_user_attributes = []; 
+                                       f_external = false; f_hidden = false; 
+                                       f_doc_comment = None },
+                                     []))))
+                              ];
+                            unpacked_arg = None }));
+                      et_free_vars = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([17:10-25], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([3:9-33], "__EnableUnstableFeatures"); ua_params = [((), [3:34-52], (String "expression_trees")); ((), [3:54-83], (String "expression_tree_hack_arrays"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       fd_mode = Mstrict; fd_name = ([21:10-28], "\\test_keyset_string");
+       fd_fun =
+       { f_span = [21:1-23:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_tparams = []; f_ret = ((), (Some ([21:32-36], (Hprim Tvoid)))); 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([22:3-54],
+             (Expr
+                ((), [22:3-53],
+                 (ExpressionTree
+                    { et_class = ([22:3-13], "\\ExampleDsl");
+                      et_runtime_expr =
+                      ((), [22:3-13],
+                       (Call
+                          { func = ((), [22:3-13], (Class_const (((), [22:3-13], (CI ([22:3-13], "\\ExampleDsl"))), ([22:3-13], "makeTree")))); 
+                            targs = [];
+                            args =
+                            [(Anormal
+                                ((), [22:14-52],
+                                 (Shape
+                                    [((SFlit_str ([22:14-52], "path")), ((), [22:14-52], (Id ([22:14-52], "\\__FILE__")))); (
+                                      (SFlit_str ([22:14-52], "start_line")), ((), [22:14-52], (Int "22"))); (
+                                      (SFlit_str ([22:14-52], "end_line")), ((), [22:14-52], (Int "22"))); (
+                                      (SFlit_str ([22:14-52], "start_column")), ((), [22:14-52], (Int "13"))); (
+                                      (SFlit_str ([22:14-52], "end_column")), ((), [22:14-52], (Int "51")))])));
+                              (Anormal
+                                 ((), [22:3-13],
+                                  (Shape
+                                     [((SFlit_str ([22:3-13], "splices")), ((), [22:3-13], (KeyValCollection (([22:3-13], Dict), None, []))));
+                                       ((SFlit_str ([22:3-13], "functions")), ((), [22:3-13], (ValCollection (([22:3-13], Vec), None, []))));
+                                       ((SFlit_str ([22:3-13], "static_methods")), ((), [22:3-13], (ValCollection (([22:3-13], Vec), None, []))));
+                                       ((SFlit_str ([22:3-13], "variables")), ((), [22:3-13], (ValCollection (([22:3-13], Vec), None, []))));
+                                       ((SFlit_str ([22:3-13], "lexically_enclosing_tree")), ((), [Pos.none], Null));
+                                       ((SFlit_str ([22:3-13], "type")),
+                                        ((), [22:14-52],
+                                         (Efun
+                                            { ef_fun =
+                                              { f_span = [22:14-52]; 
+                                                f_readonly_this = None; 
+                                                f_annotation = (); f_readonly_ret = None; 
+                                                f_tparams = []; f_ret = ((), None); 
+                                                f_params = []; f_ctxs = (Some ([22:14-52], [([22:14-52], (Happly (([22:14-52], "\\HH\\Contexts\\defaults"), [])))])); 
+                                                f_unsafe_ctxs = None;
+                                                f_body =
+                                                { fb_ast =
+                                                  [([22:14-52],
+                                                    (Return
+                                                       (Some ((), [22:14-52],
+                                                              (Call
+                                                                 { func = ((), [22:14-52], (Class_const (((), [22:14-52], (CI ([22:14-52], "\\ExampleDsl"))), ([22:14-52], "lambdaType"))));
+                                                                   targs = [];
+                                                                   args =
+                                                                   [(Anormal
+                                                                    ((), [22:14-52],
+                                                                    (Lfun (
+                                                                    { f_span = [22:14-52]; 
+                                                                    f_readonly_this = None; 
+                                                                    f_annotation = (); 
+                                                                    f_readonly_ret = None; 
+                                                                    f_tparams = []; 
+                                                                    f_ret = ((), None);
+                                                                    f_params =
+                                                                    [{ param_annotation = (); 
+                                                                    param_type_hint = ((), (Some ([22:15-28], (Happly (([22:15-28], "\\ExampleString"), []))))); 
+                                                                    param_pos = [22:29-31]; 
+                                                                    param_name = "$s"; 
+                                                                    param_info = Param_required; 
+                                                                    param_readonly = None; 
+                                                                    param_splat = None; 
+                                                                    param_callconv = Pnormal; 
+                                                                    param_named = None; 
+                                                                    param_user_attributes = []; 
+                                                                    param_visibility = None }]; 
+                                                                    f_ctxs = None; 
+                                                                    f_unsafe_ctxs = None;
+                                                                    f_body =
+                                                                    { fb_ast =
+                                                                    [([22:37-52],
+                                                                    (Return
+                                                                    (Some (
+                                                                    (), [22:37-52],
+                                                                    (
+                                                                    Call
+                                                                    { func = ((), [22:37-52], (Class_const (((), [22:37-52], (CI ([22:37-52], "\\ExampleDsl"))), ([22:37-52], "keysetType"))));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal ((), [22:44-46], (Lvar ([22:44-46], $s))));
+                                                                    (Anormal
+                                                                    ((), [22:48-51],
+                                                                    (Call
+                                                                    { func = ((), [22:48-51], (Class_const (((), [22:48-51], (CI ([22:48-51], "\\ExampleDsl"))), ([22:48-51], "stringType"))));
+                                                                    targs = []; 
+                                                                    args = []; 
+                                                                    unpacked_arg = None })))]; 
+                                                                    unpacked_arg = None })))))] }; 
+                                                                    f_fun_kind = FSync; 
+                                                                    f_user_attributes = []; 
+                                                                    f_external = false; 
+                                                                    f_hidden = false; 
+                                                                    f_doc_comment = None }, 
+                                                                    []))))];
+                                                                   unpacked_arg = None })))))
+                                                    ]
+                                                  };
+                                                f_fun_kind = FSync; f_user_attributes = []; 
+                                                f_external = false; f_hidden = false; 
+                                                f_doc_comment = None };
+                                              ef_use = []; ef_closure_class_name = None; 
+                                              ef_is_expr_tree_virtual_expr = false })))
+                                       ])));
+                              (Anormal
+                                 ((), [22:14-52],
+                                  (Lfun (
+                                     { f_span = [22:14-52]; f_readonly_this = None; 
+                                       f_annotation = (); f_readonly_ret = None; 
+                                       f_tparams = []; f_ret = ((), None);
+                                       f_params =
+                                       [{ param_annotation = (); param_type_hint = ((), (Some ([22:3-13], (Happly (([22:3-13], "\\ExampleDsl"), []))))); 
+                                          param_pos = [22:3-13]; param_name = "$0v"; 
+                                          param_info = Param_required; 
+                                          param_readonly = None; param_splat = None; 
+                                          param_callconv = Pnormal; param_named = None; 
+                                          param_user_attributes = []; 
+                                          param_visibility = None }
+                                         ];
+                                       f_ctxs = None; f_unsafe_ctxs = None;
+                                       f_body =
+                                       { fb_ast =
+                                         [([22:14-52],
+                                           (Return
+                                              (Some ((), [22:14-52],
+                                                     (Call
+                                                        { func =
+                                                          ((), [22:14-52],
+                                                           (Obj_get (((), [22:14-52], (Lvar ([22:14-52], $0v))), ((), [22:14-52], (Id ([22:14-52], "visitLambda"))), Regular, Is_method)));
+                                                          targs = [];
+                                                          args =
+                                                          [(Anormal
+                                                              ((), [22:14-52],
+                                                               (Shape
+                                                                  [((SFlit_str ([22:14-52], "path")), ((), [22:14-52], (Id ([22:14-52], "\\__FILE__"))));
+                                                                    (
+                                                                    (SFlit_str ([22:14-52], "start_line")), ((), [22:14-52], (Int "22")));
+                                                                    (
+                                                                    (SFlit_str ([22:14-52], "end_line")), ((), [22:14-52], (Int "22")));
+                                                                    (
+                                                                    (SFlit_str ([22:14-52], "start_column")), ((), [22:14-52], (Int "13")));
+                                                                    (
+                                                                    (SFlit_str ([22:14-52], "end_column")), ((), [22:14-52], (Int "51")))])));
+                                                            (Anormal ((), [22:29-31], (ValCollection (([22:29-31], Vec), None, [((), [22:29-31], (String "$s"))]))));
+                                                            (Anormal
+                                                               ((), [22:37-52],
+                                                                (ValCollection ((
+                                                                   [22:37-52], Vec), None,
+                                                                   [((), [22:37-52],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [22:37-52],
+                                                                    (Obj_get (((), [22:37-52], (Lvar ([22:37-52], $0v))), ((), [22:37-52], (Id ([22:37-52], "visitReturn"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [22:37-52],
+                                                                    (Shape
+                                                                    [((SFlit_str ([22:37-52], "path")), ((), [22:37-52], (Id ([22:37-52], "\\__FILE__"))));
+                                                                    ((SFlit_str ([22:37-52], "start_line")), ((), [22:37-52], (Int "22")));
+                                                                    ((SFlit_str ([22:37-52], "end_line")), ((), [22:37-52], (Int "22")));
+                                                                    ((SFlit_str ([22:37-52], "start_column")), ((), [22:37-52], (Int "36")));
+                                                                    ((SFlit_str ([22:37-52], "end_column")), ((), [22:37-52], (Int "51")))])));
+                                                                    (Anormal
+                                                                    ((), [22:37-52],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [22:37-52],
+                                                                    (Obj_get (((), [22:37-52], (Lvar ([22:37-52], $0v))), ((), [22:37-52], (Id ([22:37-52], "visitKeyset"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [22:37-52],
+                                                                    (Shape
+                                                                    [((SFlit_str ([22:37-52], "path")), ((), [22:37-52], (Id ([22:37-52], "\\__FILE__"))));
+                                                                    ((SFlit_str ([22:37-52], "start_line")), ((), [22:37-52], (Int "22")));
+                                                                    ((SFlit_str ([22:37-52], "end_line")), ((), [22:37-52], (Int "22")));
+                                                                    ((SFlit_str ([22:37-52], "start_column")), ((), [22:37-52], (Int "36")));
+                                                                    ((SFlit_str ([22:37-52], "end_column")), ((), [22:37-52], (Int "51")))])));
+                                                                    (Anormal
+                                                                    ((), [22:44-51],
+                                                                    (ValCollection ((
+                                                                    [22:44-51], Vec), None,
+                                                                    [((), [22:44-46],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [22:44-46],
+                                                                    (Obj_get (((), [22:44-46], (Lvar ([22:44-46], $0v))), ((), [22:44-46], (Id ([22:44-46], "visitLocal"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [22:44-46],
+                                                                    (Shape
+                                                                    [((SFlit_str ([22:44-46], "path")), ((), [22:44-46], (Id ([22:44-46], "\\__FILE__"))));
+                                                                    ((SFlit_str ([22:44-46], "start_line")), ((), [22:44-46], (Int "22")));
+                                                                    ((SFlit_str ([22:44-46], "end_line")), ((), [22:44-46], (Int "22")));
+                                                                    ((SFlit_str ([22:44-46], "start_column")), ((), [22:44-46], (Int "43")));
+                                                                    ((SFlit_str ([22:44-46], "end_column")), ((), [22:44-46], (Int "45")))]))); (
+                                                                    Anormal ((), [22:44-46], (String "$s")))]; 
+                                                                    unpacked_arg = None }));
+                                                                    ((), [22:48-51],
+                                                                    (Call
+                                                                    { func =
+                                                                    ((), [22:48-51],
+                                                                    (Obj_get (((), [22:48-51], (Lvar ([22:48-51], $0v))), ((), [22:48-51], (Id ([22:48-51], "visitString"))), Regular, Is_method)));
+                                                                    targs = [];
+                                                                    args =
+                                                                    [(Anormal
+                                                                    ((), [22:48-51],
+                                                                    (Shape
+                                                                    [((SFlit_str ([22:48-51], "path")), ((), [22:48-51], (Id ([22:48-51], "\\__FILE__"))));
+                                                                    ((SFlit_str ([22:48-51], "start_line")), ((), [22:48-51], (Int "22")));
+                                                                    ((SFlit_str ([22:48-51], "end_line")), ((), [22:48-51], (Int "22")));
+                                                                    ((SFlit_str ([22:48-51], "start_column")), ((), [22:48-51], (Int "47")));
+                                                                    ((SFlit_str ([22:48-51], "end_column")), ((), [22:48-51], (Int "50")))]))); (
+                                                                    Anormal ((), [22:48-51], (String "a")))]; 
+                                                                    unpacked_arg = None }))]))))]; 
+                                                                    unpacked_arg = None })))]; 
+                                                                    unpacked_arg = None }))]
+                                                                   ))))
+                                                            ];
+                                                          unpacked_arg = None })))))
+                                           ]
+                                         };
+                                       f_fun_kind = FSync; f_user_attributes = []; 
+                                       f_external = false; f_hidden = false; 
+                                       f_doc_comment = None },
+                                     []))))
+                              ];
+                            unpacked_arg = None }));
+                      et_free_vars = None }))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([21:10-28], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_hidden = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })
+  ]

@@ -1,0 +1,30 @@
+ERROR: File "keyset_creation_wrong_type.php", line 8, characters 15-17:
+Invalid argument (Typing[4110])
+  File "keyset_creation_wrong_type.php", line 7, characters 18-27:
+  Expected `int`
+  File "expr_tree.php", line 147, characters 40-45:
+  But got `string`
+ERROR: File "keyset_creation_wrong_type.php", line 8, characters 20-22:
+Invalid argument (Typing[4110])
+  File "keyset_creation_wrong_type.php", line 7, characters 18-27:
+  Expected `int`
+  File "expr_tree.php", line 147, characters 40-45:
+  But got `string`
+ERROR: File "keyset_creation_wrong_type.php", line 15, characters 18-20:
+Invalid argument (Typing[4110])
+  File "keyset_creation_wrong_type.php", line 14, characters 18-27:
+  Expected `int`
+  File "expr_tree.php", line 147, characters 40-45:
+  But got `string`
+ERROR: File "keyset_creation_wrong_type.php", line 22, characters 15-15:
+Invalid argument (Typing[4110])
+  File "keyset_creation_wrong_type.php", line 21, characters 18-30:
+  Expected `string`
+  File "expr_tree.php", line 138, characters 39-41:
+  But got `int`
+ERROR: File "keyset_creation_wrong_type.php", line 22, characters 18-18:
+Invalid argument (Typing[4110])
+  File "keyset_creation_wrong_type.php", line 21, characters 18-30:
+  Expected `string`
+  File "expr_tree.php", line 138, characters 39-41:
+  But got `int`

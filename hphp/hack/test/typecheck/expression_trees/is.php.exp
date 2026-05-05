@@ -14,7 +14,7 @@ ERROR: File "is.php", line 5, characters 35-44:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 87, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 335, characters 6-21:
+  File "expr_tree.php", line 349, characters 6-21:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "is.php", line 5, characters 35-44:
   But got `bool`
@@ -22,7 +22,7 @@ ERROR: File "is.php", line 6, characters 35-47:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 87, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 335, characters 6-21:
+  File "expr_tree.php", line 349, characters 6-21:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "is.php", line 6, characters 35-47:
   But got `bool`
@@ -30,7 +30,7 @@ ERROR: File "is.php", line 7, characters 35-50:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 87, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 335, characters 6-21:
+  File "expr_tree.php", line 349, characters 6-21:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "is.php", line 7, characters 35-50:
   But got `bool`

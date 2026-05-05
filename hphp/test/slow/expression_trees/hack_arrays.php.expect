@@ -1,0 +1,20 @@
+vec[1,2,3]
+vec["a","b","c"]
+dict["a" => 1,"b" => 2]
+dict[0 => "a",1 => "b"]
+vec[]
+dict[]
+vec[vec[1,2],vec[3,4]]
+($x) ==> {
+return vec[$x,1,2];}
+($k,$v) ==> {
+return dict[$k => $v];}
+($k,$v) ==> {
+return dict[$k => $v];}
+keyset[1,2,3]
+keyset["a","b","c"]
+keyset[]
+($x) ==> {
+return keyset[$x,1,2];}
+($s) ==> {
+return keyset[$s,"a","b"];}

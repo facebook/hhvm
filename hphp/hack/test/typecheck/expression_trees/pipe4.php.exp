@@ -12,7 +12,7 @@ Invalid return type (Typing[4110])
   But got `int`
   File "expr_tree.php", line 124, characters 24-29:
     via this generic `TInfer`
-  File "expr_tree.php", line 587, characters 52-52:
+  File "expr_tree.php", line 628, characters 52-52:
     via this generic `T`
   File "expr_tree.php", line 101, characters 26-31:
     via this generic `TInfer`

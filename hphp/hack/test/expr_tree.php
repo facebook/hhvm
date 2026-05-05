@@ -165,6 +165,20 @@ class ExampleDsl {
     throw new Exception();
   }
   <<__NoAutoLikes>>
+  public static function vecType<T>(T ...$_): vec<T> {
+    throw new Exception();
+  }
+  <<__NoAutoLikes>>
+  public static function dictType<Tk as arraykey, Tv>(
+    (Tk, Tv) ...$_
+  ): dict<Tk, Tv> {
+    throw new Exception();
+  }
+  <<__NoAutoLikes>>
+  public static function keysetType<T as arraykey>(T ...$_): keyset<T> {
+    throw new Exception();
+  }
+  <<__NoAutoLikes>>
   public static function operationType<T as ExampleMixedOpType>(
     ExprTreeOpType<T> $_,
   )[]: T {
@@ -455,6 +469,33 @@ class ExampleDsl {
   )[]: ExampleDsl::TAst {
     $v = HH\Lib\Vec\map($operand, $kv ==> $kv[0]."=>".$kv[1]);
     return "shape(".concat_arg_list($v).")";
+  }
+
+  <<__NoAutoLikes>>
+  public function visitVec(
+    ?ExprPos $_,
+    vec<ExampleDsl::TAst> $elements,
+  )[]: ExampleDsl::TAst {
+    $v = HH\Lib\Vec\map($elements, $e ==> $e);
+    return "vec[".concat_arg_list($v)."]";
+  }
+
+  <<__NoAutoLikes>>
+  public function visitDict(
+    ?ExprPos $_,
+    vec<(ExampleDsl::TAst, ExampleDsl::TAst)> $entries,
+  )[]: ExampleDsl::TAst {
+    $v = HH\Lib\Vec\map($entries, $kv ==> $kv[0]." => ".$kv[1]);
+    return "dict[".concat_arg_list($v)."]";
+  }
+
+  <<__NoAutoLikes>>
+  public function visitKeyset(
+    ?ExprPos $_,
+    vec<ExampleDsl::TAst> $elements,
+  )[]: ExampleDsl::TAst {
+    $v = HH\Lib\Vec\map($elements, $e ==> $e);
+    return "keyset[".concat_arg_list($v)."]";
   }
 
   // Note, these types are not super narrow,

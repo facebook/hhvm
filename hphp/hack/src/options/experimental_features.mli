@@ -73,6 +73,7 @@ type feature_name =
   | CapturePipeVariables
   | AllowExtendedAwaitSyntax
   | AllowConditionalAwaitSyntax
+  | ExpressionTreeHackArrays
   | ShapeFieldPunning
   | RepresentableAs
   | ClassAliasesEverywhere

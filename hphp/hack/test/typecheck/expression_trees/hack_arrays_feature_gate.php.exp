@@ -1,0 +1,6 @@
+ERROR: File "hack_arrays_feature_gate.php", line 6, characters 14-25:
+Cannot use unstable feature: `expression_tree_hack_arrays` (Parsing[1002])
+ERROR: File "hack_arrays_feature_gate.php", line 10, characters 14-27:
+Cannot use unstable feature: `expression_tree_hack_arrays` (Parsing[1002])
+ERROR: File "hack_arrays_feature_gate.php", line 14, characters 14-28:
+Cannot use unstable feature: `expression_tree_hack_arrays` (Parsing[1002])

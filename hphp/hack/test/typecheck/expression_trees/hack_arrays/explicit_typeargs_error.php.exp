@@ -1,0 +1,18 @@
+ERROR: File "explicit_typeargs_error.php", line 10, characters 14-37:
+`vec` in expression trees must not have explicit type hints (Parsing[1002])
+ERROR: File "explicit_typeargs_error.php", line 14, characters 14-30:
+`vec` in expression trees must not have explicit type hints (Parsing[1002])
+ERROR: File "explicit_typeargs_error.php", line 18, characters 14-54:
+`dict` in expression trees must not have explicit type hints (Parsing[1002])
+ERROR: File "explicit_typeargs_error.php", line 22, characters 14-46:
+`dict` in expression trees must not have explicit type hints (Parsing[1002])
+ERROR: File "explicit_typeargs_error.php", line 26, characters 14-40:
+`keyset` in expression trees must not have explicit type hints (Parsing[1002])
+ERROR: File "explicit_typeargs_error.php", line 30, characters 14-33:
+`keyset` in expression trees must not have explicit type hints (Parsing[1002])
+ERROR: File "explicit_typeargs_error.php", line 36, characters 14-56:
+`vec` in expression trees must not have explicit type hints (Parsing[1002])
+ERROR: File "explicit_typeargs_error.php", line 36, characters 35-55:
+`vec` in expression trees must not have explicit type hints (Parsing[1002])
+ERROR: File "explicit_typeargs_error.php", line 41, characters 21-41:
+`vec` in expression trees must not have explicit type hints (Parsing[1002])

@@ -1,0 +1,18 @@
+ERROR: File "dict_creation_wrong_type.php", line 8, characters 8-23:
+Invalid argument (Typing[4110])
+  File "dict_creation_wrong_type.php", line 7, characters 31-40:
+  Expected `int`
+  File "expr_tree.php", line 147, characters 40-45:
+  But got `string`
+ERROR: File "dict_creation_wrong_type.php", line 15, characters 8-19:
+Invalid argument (Typing[4110])
+  File "dict_creation_wrong_type.php", line 14, characters 16-28:
+  Expected `string`
+  File "expr_tree.php", line 138, characters 39-41:
+  But got `int`
+ERROR: File "dict_creation_wrong_type.php", line 22, characters 8-23:
+Invalid argument (Typing[4110])
+  File "dict_creation_wrong_type.php", line 21, characters 16-25:
+  Expected `int`
+  File "expr_tree.php", line 147, characters 40-45:
+  But got `string`

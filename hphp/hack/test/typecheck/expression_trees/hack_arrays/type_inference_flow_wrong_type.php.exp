@@ -1,0 +1,56 @@
+ERROR: File "type_inference_flow_wrong_type.php", line 12, characters 8-9:
+Invalid argument (Typing[4110])
+  File "type_inference_flow_wrong_type.php", line 10, characters 15-27:
+  Expected `string`
+  File "expr_tree.php", line 138, characters 39-41:
+  But got `int`
+  File "expr_tree.php", line 168, characters 51-51:
+    via this generic `T`
+ERROR: File "type_inference_flow_wrong_type.php", line 21, characters 8-9:
+Invalid argument (Typing[4110])
+  File "type_inference_flow_wrong_type.php", line 19, characters 31-43:
+  Expected `string`
+  File "expr_tree.php", line 138, characters 39-41:
+  But got `int`
+  File "expr_tree.php", line 174, characters 15-16:
+    via this generic `Tv`
+ERROR: File "type_inference_flow_wrong_type.php", line 30, characters 8-9:
+Invalid argument (Typing[4110])
+  File "type_inference_flow_wrong_type.php", line 28, characters 16-25:
+  Expected `int`
+  File "expr_tree.php", line 147, characters 40-45:
+  But got `string`
+  File "expr_tree.php", line 174, characters 11-12:
+    via this generic `Tk`
+ERROR: File "type_inference_flow_wrong_type.php", line 39, characters 8-9:
+Invalid argument (Typing[4110])
+  File "type_inference_flow_wrong_type.php", line 37, characters 18-30:
+  Expected `string`
+  File "expr_tree.php", line 138, characters 39-41:
+  But got `int`
+  File "expr_tree.php", line 178, characters 69-69:
+    via this generic `T`
+ERROR: File "type_inference_flow_wrong_type.php", line 48, characters 8-11:
+Invalid argument (Typing[4110])
+  File "type_inference_flow_wrong_type.php", line 47, characters 15-27:
+  Expected `string`
+  File "expr_tree.php", line 138, characters 39-41:
+  But got `int`
+  File "expr_tree.php", line 168, characters 51-51:
+    via this generic `T`
+ERROR: File "type_inference_flow_wrong_type.php", line 57, characters 8-11:
+Invalid argument (Typing[4110])
+  File "type_inference_flow_wrong_type.php", line 56, characters 31-43:
+  Expected `string`
+  File "expr_tree.php", line 138, characters 39-41:
+  But got `int`
+  File "expr_tree.php", line 174, characters 15-16:
+    via this generic `Tv`
+ERROR: File "type_inference_flow_wrong_type.php", line 66, characters 8-9:
+Invalid argument (Typing[4110])
+  File "type_inference_flow_wrong_type.php", line 64, characters 19-31:
+  Expected `string`
+  File "expr_tree.php", line 138, characters 39-41:
+  But got `int`
+  File "expr_tree.php", line 168, characters 51-51:
+    via this generic `T`

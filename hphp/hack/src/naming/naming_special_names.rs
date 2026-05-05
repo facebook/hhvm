@@ -1181,6 +1181,9 @@ pub mod expression_trees {
     pub const SYMBOL_TYPE: &str = "symbolType";
     pub const LAMBDA_TYPE: &str = "lambdaType";
     pub const SHAPE_TYPE: &str = "shapeType";
+    pub const VEC_TYPE: &str = "vecType";
+    pub const DICT_TYPE: &str = "dictType";
+    pub const KEYSET_TYPE: &str = "keysetType";
     pub const OPERATION_TYPE: &str = "operationType";
 
     pub const VISIT_INT: &str = "visitInt";
@@ -1209,6 +1212,9 @@ pub mod expression_trees {
     pub const VISIT_INSTANCE_METHOD_NULL_SAFE: &str = "visitInstanceMethodNullSafe";
     pub const VISIT_XHP: &str = "visitXhp";
     pub const VISIT_SHAPE: &str = "visitShape";
+    pub const VISIT_VEC: &str = "visitVec";
+    pub const VISIT_DICT: &str = "visitDict";
+    pub const VISIT_KEYSET: &str = "visitKeyset";
     pub const VISIT_KEYED_COLLECTION: &str = "visitKeyedCollection";
     pub const VISIT_OPTIONAL_PARAMETER: &str = "visitOptionalParameter";
     pub const VISIT_CLASS_CONSTANT: &str = "visitClassConstant";

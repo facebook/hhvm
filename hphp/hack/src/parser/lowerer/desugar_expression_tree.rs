@@ -1771,7 +1771,7 @@ impl RewriteState {
                     .push((pos, "`yield` is not supported in expression trees.".into()));
                 unchanged_result
             }
-            ValCollection(box (kind, _, _)) => match kind.1 {
+            ValCollection(box (kind, targ, values)) => match &kind.1 {
                 aast::VcKind::Vector | aast::VcKind::ImmVector => {
                     self.errors.push((
                         pos,
@@ -1787,17 +1787,67 @@ impl RewriteState {
                     unchanged_result
                 }
                 aast::VcKind::Keyset => {
-                    self.errors
-                        .push((pos, "`keyset` is not supported in expression trees.".into()));
-                    unchanged_result
+                    if targ.is_some() {
+                        self.errors.push((
+                            pos.clone(),
+                            "`keyset` in expression trees must not have explicit type hints".into(),
+                        ));
+                    }
+
+                    // Source: MyDsl`keyset[expr1, expr2, ...]`
+                    // Virtualized: MyDsl::keysetType(virtualized(expr1), virtualized(expr2), ...)
+                    // Desugared: $0v->visitKeyset(new ExprPos(...), vec[desugared(expr1), desugared(expr2), ...])
+                    let mut virtual_values = vec![];
+                    let mut desugar_values = vec![];
+                    for value in values {
+                        let rewritten = self.rewrite_expr(value, visitor_name);
+                        virtual_values.push(rewritten.virtual_expr);
+                        desugar_values.push(rewritten.desugar_expr);
+                    }
+                    let virtual_expr =
+                        static_meth_call(visitor_name, et::KEYSET_TYPE, virtual_values, &pos);
+                    let desugar_expr = v_meth_call(
+                        et::VISIT_KEYSET,
+                        vec![pos_expr, vec_literal(desugar_values)],
+                        &pos,
+                    );
+                    RewriteResult {
+                        virtual_expr,
+                        desugar_expr,
+                    }
                 }
                 aast::VcKind::Vec => {
-                    self.errors
-                        .push((pos, "`vec` is not supported in expression trees.".into()));
-                    unchanged_result
+                    if targ.is_some() {
+                        self.errors.push((
+                            pos.clone(),
+                            "`vec` in expression trees must not have explicit type hints".into(),
+                        ));
+                    }
+
+                    // Source: MyDsl`vec[expr1, expr2, ...]`
+                    // Virtualized: MyDsl::vecType(virtualized(expr1), virtualized(expr2), ...)
+                    // Desugared: $0v->visitVec(new ExprPos(...), vec[desugared(expr1), desugared(expr2), ...])
+                    let mut virtual_values = vec![];
+                    let mut desugar_values = vec![];
+                    for value in values {
+                        let rewritten = self.rewrite_expr(value, visitor_name);
+                        virtual_values.push(rewritten.virtual_expr);
+                        desugar_values.push(rewritten.desugar_expr);
+                    }
+                    let virtual_expr =
+                        static_meth_call(visitor_name, et::VEC_TYPE, virtual_values, &pos);
+                    let desugar_expr = v_meth_call(
+                        et::VISIT_VEC,
+                        vec![pos_expr, vec_literal(desugar_values)],
+                        &pos,
+                    );
+                    RewriteResult {
+                        virtual_expr,
+                        desugar_expr,
+                    }
                 }
             },
-            KeyValCollection(box (kind, _, _)) => match kind.1 {
+            KeyValCollection(box (kind, targ, fields)) => match &kind.1 {
                 aast::KvcKind::Map | aast::KvcKind::ImmMap => {
                     self.errors.push((
                         pos,
@@ -1806,9 +1856,48 @@ impl RewriteState {
                     unchanged_result
                 }
                 aast::KvcKind::Dict => {
-                    self.errors
-                        .push((pos, "`dict` is not supported in expression trees.".into()));
-                    unchanged_result
+                    if targ.is_some() {
+                        self.errors.push((
+                            pos.clone(),
+                            "`dict` in expression trees must not have explicit type hints".into(),
+                        ));
+                    }
+
+                    // Source: MyDsl`dict['key1' => val1, 'key2' => val2]`
+                    // Virtualized: MyDsl::dictType(tuple(virtualized('key1'), virtualized(val1)), ...)
+                    // Desugared: $0v->visitDict(new ExprPos(...), vec[tuple(desugared('key1'), desugared(val1)), ...])
+                    let mut virtual_fields = vec![];
+                    let mut desugar_fields = vec![];
+                    for aast::Field(key, value) in fields {
+                        let key_rewr = self.rewrite_expr(key, visitor_name);
+                        let val_rewr = self.rewrite_expr(value, visitor_name);
+                        let kv_pos =
+                            match Pos::merge(&key_rewr.virtual_expr.1, &val_rewr.virtual_expr.1) {
+                                Ok(p) => p,
+                                _ => key_rewr.virtual_expr.1.clone(),
+                            };
+                        virtual_fields.push(Expr::new(
+                            (),
+                            pos.clone(),
+                            Expr_::Tuple(vec![key_rewr.virtual_expr, val_rewr.virtual_expr]),
+                        ));
+                        desugar_fields.push(Expr::new(
+                            (),
+                            kv_pos,
+                            Expr_::Tuple(vec![key_rewr.desugar_expr, val_rewr.desugar_expr]),
+                        ));
+                    }
+                    let virtual_expr =
+                        static_meth_call(visitor_name, et::DICT_TYPE, virtual_fields, &pos);
+                    let desugar_expr = v_meth_call(
+                        et::VISIT_DICT,
+                        vec![pos_expr, vec_literal(desugar_fields)],
+                        &pos,
+                    );
+                    RewriteResult {
+                        virtual_expr,
+                        desugar_expr,
+                    }
                 }
             },
             This => {

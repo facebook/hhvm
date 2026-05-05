@@ -3359,6 +3359,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     self.invalid_shape_field_check(f)
                 }
             }
+            VectorIntrinsicExpression(_)
+            | DictionaryIntrinsicExpression(_)
+            | KeysetIntrinsicExpression(_) => {
+                if self.context.active_expression_tree {
+                    self.check_can_use_feature(node, &FeatureName::ExpressionTreeHackArrays)
+                }
+            }
             DecoratedExpression(x) => {
                 let decorator = &x.decorator;
                 if token_kind(decorator) == Some(TokenKind::Await) {

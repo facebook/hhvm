@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<05245dc70c07dbca6a36e674beb202e8>>
+// @generated SignedSource<<c649f83e5e895fa0ef3bb6be6f3ae815>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -132,6 +132,7 @@ pub enum FeatureName {
     CapturePipeVariables,
     AllowExtendedAwaitSyntax,
     AllowConditionalAwaitSyntax,
+    ExpressionTreeHackArrays,
     ShapeFieldPunning,
     RepresentableAs,
     ClassAliasesEverywhere,

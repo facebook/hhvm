@@ -62,7 +62,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
                                public FastThriftAdapterBase {
  public:
   using RequestResponseHandler =
-      apache::thrift::fast_thrift::thrift::RequestResponseHandler;
+      apache::thrift::fast_thrift::thrift::client::RequestResponseHandler;
 
   using ResponseHandler =
       folly::Function<void(folly::Expected<
@@ -308,11 +308,11 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
 };
 
 static_assert(
-    ClientOutboundAppAdapter<ThriftClientAppAdapter>,
+    client::ClientOutboundAppAdapter<ThriftClientAppAdapter>,
     "ThriftClientAppAdapter must satisfy ClientOutboundAppAdapter concept");
 
 static_assert(
-    ClientInboundAppAdapter<ThriftClientAppAdapter>,
+    client::ClientInboundAppAdapter<ThriftClientAppAdapter>,
     "ThriftClientAppAdapter must satisfy ClientInboundAppAdapter concept");
 
 } // namespace apache::thrift::fast_thrift::thrift

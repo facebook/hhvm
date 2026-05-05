@@ -20,11 +20,10 @@
 {{#let export partial fbthrift_serialize |interface parent_service function| captures |rpc|}}
   {{#let service_cpp_name=(if interface.interaction? parent_service.cpp_name interface.cpp_name)}}
 folly::Expected<
-    apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+    std::unique_ptr<folly::IOBuf>,
     folly::exception_wrapper>
 {{interface.cpp_name}}FastClientInternal::serialize_{{function.cpp_name}}(
-    uint16_t protocolId,
-    const apache::thrift::RpcOptions& rpcOptions{{#each function.params.fields as |field|}},
+    uint16_t protocolId{{#each function.params.fields as |field|}},
     {{#if field.type.resolves_to_complex_return?}}const {{field.type.cpp_type}}&{{#else}}{{field.type.cpp_type}}{{/if}} p_{{field.cpp_name}}{{/each}}) {
   return apache::thrift::detail::ac::withProtocolWriter(protocolId, [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
@@ -33,9 +32,6 @@ folly::Expected<
     args.get<{{param_index}}>().value = {{#if param.type.resolves_to_complex_return?}}const_cast<{{param.type.cpp_type}}*>(&p_{{param.cpp_name}}){{#else}}&p_{{param.cpp_name}}{{/if}};
 {{/each}}
     return apache::thrift::fast_thrift::thrift::serializeRequest<ProtocolWriter>(
-        rpcOptions,
-        "{{function.name}}",
-        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         [&](ProtocolWriter& w) { args.write(&w); },
         [&](ProtocolWriter& w) -> uint32_t { return args.serializedSizeZC(&w); });
   });

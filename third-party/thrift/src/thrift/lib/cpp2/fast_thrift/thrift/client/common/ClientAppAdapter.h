@@ -27,7 +27,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/EndpointAdapter.h>
 
-namespace apache::thrift::fast_thrift::thrift {
+namespace apache::thrift::fast_thrift::thrift::client {
 
 /**
  * Handler invoked by an adapter when a request-response RPC completes.
@@ -93,4 +93,4 @@ concept ClientOutboundAppAdapter = requires(
   { o.getProtocolId() } noexcept -> std::same_as<uint16_t>;
 };
 
-} // namespace apache::thrift::fast_thrift::thrift
+} // namespace apache::thrift::fast_thrift::thrift::client

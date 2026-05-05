@@ -60,8 +60,11 @@
   }
 
   void {{function.cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback{{#each function.params.fields as |field|}}, {{#if field.type.resolves_to_complex_return?}}const {{field.type.cpp_type}}&{{#else}}{{field.type.cpp_type}}{{/if}} p_{{field.cpp_name}}{{/each}}) {
-    auto serialized = ::{{interface.cpp_qualified_namespace}}::{{interface.cpp_name}}FastClientInternal::serialize_{{function.cpp_name}}(this->adapter_->getProtocolId(), rpcOptions{{#each function.params.fields as |field|}}, p_{{field.cpp_name}}{{/each}});
-    this->sendRequestWithCallback(
+    auto serialized = ::{{interface.cpp_qualified_namespace}}::{{interface.cpp_name}}FastClientInternal::serialize_{{function.cpp_name}}(this->adapter_->getProtocolId(){{#each function.params.fields as |field|}}, p_{{field.cpp_name}}{{/each}});
+    this->sendRequestResponse(
+        rpcOptions,
+        "{{function.name}}",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         std::move(serialized),
         std::move(callback));
   }
@@ -112,12 +115,16 @@
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
 
     auto serialized = ::{{interface.cpp_qualified_namespace}}::{{interface.cpp_name}}FastClientInternal::serialize_{{function.cpp_name}}(
-        this->adapter_->getProtocolId(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions{{#each function.params.fields as |field|}},
+        this->adapter_->getProtocolId(){{#each function.params.fields as |field|}},
         p_{{field.cpp_name}}{{/each}});
 
-    auto response = co_await this->sendRequest(std::move(serialized));
+    auto response = co_await this->co_sendRequestResponse(
+        hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        "{{function.name}}",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        std::move(serialized));
 
-    auto data = std::move(response.frame).extractData();
+    auto data = std::move(response);
 {{#if function.return_type.void?}}
     auto ew = ::{{interface.cpp_qualified_namespace}}::{{interface.cpp_name}}FastClientInternal::deserialize_{{function.cpp_name}}(
         this->adapter_->getProtocolId(), data.get());

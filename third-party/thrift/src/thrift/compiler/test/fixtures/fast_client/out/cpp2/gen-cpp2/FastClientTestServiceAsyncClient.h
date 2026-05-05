@@ -20,11 +20,10 @@ class FastClientTestServiceFastClientInternal {
 
  private:
   static folly::Expected<
-      apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+      std::unique_ptr<folly::IOBuf>,
       folly::exception_wrapper>
   serialize_ping(
-      uint16_t protocolId,
-      const apache::thrift::RpcOptions& rpcOptions);
+      uint16_t protocolId);
 
   static folly::exception_wrapper
   deserialize_ping(
@@ -32,11 +31,10 @@ class FastClientTestServiceFastClientInternal {
       const folly::IOBuf* buf);
 
   static folly::Expected<
-      apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+      std::unique_ptr<folly::IOBuf>,
       folly::exception_wrapper>
   serialize_echo(
       uint16_t protocolId,
-      const apache::thrift::RpcOptions& rpcOptions,
       const ::std::string& p_message);
 
   static folly::exception_wrapper
@@ -46,11 +44,10 @@ class FastClientTestServiceFastClientInternal {
       const folly::IOBuf* buf);
 
   static folly::Expected<
-      apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+      std::unique_ptr<folly::IOBuf>,
       folly::exception_wrapper>
   serialize_add(
       uint16_t protocolId,
-      const apache::thrift::RpcOptions& rpcOptions,
       ::std::int32_t p_a,
       ::std::int32_t p_b);
 
@@ -61,11 +58,10 @@ class FastClientTestServiceFastClientInternal {
       const folly::IOBuf* buf);
 
   static folly::Expected<
-      apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+      std::unique_ptr<folly::IOBuf>,
       folly::exception_wrapper>
   serialize_getData(
       uint16_t protocolId,
-      const apache::thrift::RpcOptions& rpcOptions,
       ::std::int32_t p_id);
 
   static folly::exception_wrapper
@@ -75,11 +71,10 @@ class FastClientTestServiceFastClientInternal {
       const folly::IOBuf* buf);
 
   static folly::Expected<
-      apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+      std::unique_ptr<folly::IOBuf>,
       folly::exception_wrapper>
   serialize_processData(
       uint16_t protocolId,
-      const apache::thrift::RpcOptions& rpcOptions,
       const ::cpp2::test::DataItem& p_item,
       ::cpp2::test::StatusCode p_status);
 
@@ -96,7 +91,7 @@ class FastClientTestServiceFastClientInternal {
 
 namespace apache::thrift {
 
-template <apache::thrift::fast_thrift::thrift::ClientOutboundAppAdapter AppAdapter>
+template <apache::thrift::fast_thrift::thrift::client::ClientOutboundAppAdapter AppAdapter>
 class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
     : public apache::thrift::gen::FastClientBase<AppAdapter> {
  public:
@@ -126,8 +121,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
   }
 
   void ping(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
-    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_ping(this->adapter_->getProtocolId(), rpcOptions);
-    this->sendRequestWithCallback(
+    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_ping(this->adapter_->getProtocolId());
+    this->sendRequestResponse(
+        rpcOptions,
+        "ping",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         std::move(serialized),
         std::move(callback));
   }
@@ -155,11 +153,15 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
 
     auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_ping(
-        this->adapter_->getProtocolId(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions);
+        this->adapter_->getProtocolId());
 
-    auto response = co_await this->sendRequest(std::move(serialized));
+    auto response = co_await this->co_sendRequestResponse(
+        hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        "ping",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        std::move(serialized));
 
-    auto data = std::move(response.frame).extractData();
+    auto data = std::move(response);
     auto ew = ::cpp2::test::FastClientTestServiceFastClientInternal::deserialize_ping(
         this->adapter_->getProtocolId(), data.get());
     if (ew) {
@@ -192,8 +194,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
   }
 
   void echo(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_message) {
-    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_echo(this->adapter_->getProtocolId(), rpcOptions, p_message);
-    this->sendRequestWithCallback(
+    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_echo(this->adapter_->getProtocolId(), p_message);
+    this->sendRequestResponse(
+        rpcOptions,
+        "echo",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         std::move(serialized),
         std::move(callback));
   }
@@ -225,12 +230,16 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
 
     auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_echo(
-        this->adapter_->getProtocolId(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        this->adapter_->getProtocolId(),
         p_message);
 
-    auto response = co_await this->sendRequest(std::move(serialized));
+    auto response = co_await this->co_sendRequestResponse(
+        hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        "echo",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        std::move(serialized));
 
-    auto data = std::move(response.frame).extractData();
+    auto data = std::move(response);
     ::std::string _return{};
     auto ew = ::cpp2::test::FastClientTestServiceFastClientInternal::deserialize_echo(
         _return, this->adapter_->getProtocolId(), data.get());
@@ -265,8 +274,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
   }
 
   void add(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_a, ::std::int32_t p_b) {
-    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_add(this->adapter_->getProtocolId(), rpcOptions, p_a, p_b);
-    this->sendRequestWithCallback(
+    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_add(this->adapter_->getProtocolId(), p_a, p_b);
+    this->sendRequestResponse(
+        rpcOptions,
+        "add",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         std::move(serialized),
         std::move(callback));
   }
@@ -298,13 +310,17 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
 
     auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_add(
-        this->adapter_->getProtocolId(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        this->adapter_->getProtocolId(),
         p_a,
         p_b);
 
-    auto response = co_await this->sendRequest(std::move(serialized));
+    auto response = co_await this->co_sendRequestResponse(
+        hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        "add",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        std::move(serialized));
 
-    auto data = std::move(response.frame).extractData();
+    auto data = std::move(response);
     ::std::int32_t _return{};
     auto ew = ::cpp2::test::FastClientTestServiceFastClientInternal::deserialize_add(
         _return, this->adapter_->getProtocolId(), data.get());
@@ -339,8 +355,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
   }
 
   void getData(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_id) {
-    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_getData(this->adapter_->getProtocolId(), rpcOptions, p_id);
-    this->sendRequestWithCallback(
+    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_getData(this->adapter_->getProtocolId(), p_id);
+    this->sendRequestResponse(
+        rpcOptions,
+        "getData",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         std::move(serialized),
         std::move(callback));
   }
@@ -372,12 +391,16 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
 
     auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_getData(
-        this->adapter_->getProtocolId(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        this->adapter_->getProtocolId(),
         p_id);
 
-    auto response = co_await this->sendRequest(std::move(serialized));
+    auto response = co_await this->co_sendRequestResponse(
+        hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        "getData",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        std::move(serialized));
 
-    auto data = std::move(response.frame).extractData();
+    auto data = std::move(response);
     ::cpp2::test::DataItem _return{};
     auto ew = ::cpp2::test::FastClientTestServiceFastClientInternal::deserialize_getData(
         _return, this->adapter_->getProtocolId(), data.get());
@@ -412,8 +435,11 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
   }
 
   void processData(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::cpp2::test::DataItem& p_item, ::cpp2::test::StatusCode p_status) {
-    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_processData(this->adapter_->getProtocolId(), rpcOptions, p_item, p_status);
-    this->sendRequestWithCallback(
+    auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_processData(this->adapter_->getProtocolId(), p_item, p_status);
+    this->sendRequestResponse(
+        rpcOptions,
+        "processData",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         std::move(serialized),
         std::move(callback));
   }
@@ -445,13 +471,17 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
     static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
 
     auto serialized = ::cpp2::test::FastClientTestServiceFastClientInternal::serialize_processData(
-        this->adapter_->getProtocolId(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        this->adapter_->getProtocolId(),
         p_item,
         p_status);
 
-    auto response = co_await this->sendRequest(std::move(serialized));
+    auto response = co_await this->co_sendRequestResponse(
+        hasRpcOptions ? *rpcOptions : *defaultRpcOptions,
+        "processData",
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        std::move(serialized));
 
-    auto data = std::move(response.frame).extractData();
+    auto data = std::move(response);
     bool _return{};
     auto ew = ::cpp2::test::FastClientTestServiceFastClientInternal::deserialize_processData(
         _return, this->adapter_->getProtocolId(), data.get());

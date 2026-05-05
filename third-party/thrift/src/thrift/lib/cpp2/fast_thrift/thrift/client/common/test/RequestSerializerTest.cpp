@@ -17,11 +17,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/common/RequestSerializer.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -88,30 +86,12 @@ TestPayload deserializeTestPayload(Reader& reader) {
   return result;
 }
 
-auto emptySerializeFn() {
-  return [](apache::thrift::CompactProtocolWriter& w) {
-    w.writeStructBegin("empty");
-    w.writeFieldStop();
-    w.writeStructEnd();
-  };
-}
-
-auto emptySizeFn() {
-  return [](apache::thrift::CompactProtocolWriter& w) -> uint32_t {
-    return w.serializedStructSize("empty") + w.serializedSizeStop();
-  };
-}
-
 } // namespace
 
-TEST(RequestSerializerTest, RoundTripsData) {
+TEST(RequestSerializerTest, CompactProtocolRoundTripsData) {
   TestPayload input{.value = 42, .name = "hello"};
 
-  apache::thrift::RpcOptions options;
   auto result = serializeRequest<apache::thrift::CompactProtocolWriter>(
-      options,
-      "testMethod",
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
       [&](apache::thrift::CompactProtocolWriter& w) {
         serializeTestPayload(w, input);
       },
@@ -120,98 +100,48 @@ TEST(RequestSerializerTest, RoundTripsData) {
       });
 
   ASSERT_TRUE(result.hasValue());
-  ASSERT_NE(result->payload.data, nullptr);
+  ASSERT_NE(result.value(), nullptr);
 
   apache::thrift::CompactProtocolReader reader;
-  reader.setInput(result->payload.data.get());
+  reader.setInput(result.value().get());
   auto output = deserializeTestPayload(reader);
 
   EXPECT_EQ(output.value, 42);
   EXPECT_EQ(output.name, "hello");
 }
 
-TEST(RequestSerializerTest, MetadataRoundTrip) {
-  apache::thrift::RpcOptions options;
-  auto result = serializeRequest<apache::thrift::CompactProtocolWriter>(
-      options,
-      "myMethod",
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      emptySerializeFn(),
-      emptySizeFn());
+TEST(RequestSerializerTest, BinaryProtocolRoundTripsData) {
+  TestPayload input{.value = 99, .name = "binary"};
+
+  auto result = serializeRequest<apache::thrift::BinaryProtocolWriter>(
+      [&](apache::thrift::BinaryProtocolWriter& w) {
+        serializeTestPayload(w, input);
+      },
+      [&](apache::thrift::BinaryProtocolWriter& w) {
+        return sizeTestPayload(w, input);
+      });
 
   ASSERT_TRUE(result.hasValue());
-  ASSERT_NE(result->payload.metadata, nullptr);
+  ASSERT_NE(result.value(), nullptr);
 
-  apache::thrift::RequestRpcMetadata metadata;
   apache::thrift::BinaryProtocolReader reader;
-  reader.setInput(result->payload.metadata.get());
-  metadata.read(&reader);
+  reader.setInput(result.value().get());
+  auto output = deserializeTestPayload(reader);
 
-  EXPECT_EQ(metadata.name()->str(), "myMethod");
-  EXPECT_EQ(
-      *metadata.kind(),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
-  EXPECT_EQ(*metadata.protocol(), apache::thrift::ProtocolId::COMPACT);
-  EXPECT_EQ(
-      result->payload.rpcKind,
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
-  EXPECT_TRUE(result->payload.complete);
+  EXPECT_EQ(output.value, 99);
+  EXPECT_EQ(output.name, "binary");
 }
 
-TEST(RequestSerializerTest, TimeoutPropagation) {
-  apache::thrift::RpcOptions options;
-  options.setTimeout(std::chrono::milliseconds(500));
-
-  auto result = serializeRequest<apache::thrift::CompactProtocolWriter>(
-      options,
-      "foo",
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      emptySerializeFn(),
-      emptySizeFn());
-
-  ASSERT_TRUE(result.hasValue());
-
-  apache::thrift::RequestRpcMetadata metadata;
-  apache::thrift::BinaryProtocolReader reader;
-  reader.setInput(result->payload.metadata.get());
-  metadata.read(&reader);
-
-  EXPECT_EQ(*metadata.clientTimeoutMs(), 500);
-}
-
-TEST(RequestSerializerTest, QueueTimeoutPropagation) {
-  apache::thrift::RpcOptions options;
-  options.setQueueTimeout(std::chrono::milliseconds(200));
-
-  auto result = serializeRequest<apache::thrift::CompactProtocolWriter>(
-      options,
-      "bar",
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      emptySerializeFn(),
-      emptySizeFn());
-
-  ASSERT_TRUE(result.hasValue());
-
-  apache::thrift::RequestRpcMetadata metadata;
-  apache::thrift::BinaryProtocolReader reader;
-  reader.setInput(result->payload.metadata.get());
-  metadata.read(&reader);
-
-  EXPECT_EQ(*metadata.queueTimeoutMs(), 200);
-}
-
-TEST(RequestSerializerTest, DataSerializationFailure) {
+TEST(RequestSerializerTest, SerializationFailureReturnsError) {
   auto throwingSerializeFn = [](apache::thrift::CompactProtocolWriter&) {
     throw std::runtime_error("boom");
   };
+  auto sizeFn = [](apache::thrift::CompactProtocolWriter& w) -> uint32_t {
+    return w.serializedStructSize("empty") + w.serializedSizeStop();
+  };
 
-  apache::thrift::RpcOptions options;
   auto result = serializeRequest<apache::thrift::CompactProtocolWriter>(
-      options,
-      "test",
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      throwingSerializeFn,
-      emptySizeFn());
+      throwingSerializeFn, sizeFn);
 
   ASSERT_TRUE(result.hasError());
   EXPECT_THAT(
@@ -219,62 +149,6 @@ TEST(RequestSerializerTest, DataSerializationFailure) {
           .get_exception<apache::thrift::TApplicationException>()
           ->getMessage(),
       ::testing::HasSubstr("data"));
-}
-
-TEST(RequestSerializerTest, BinaryProtocolRoundTripsData) {
-  TestPayload input{.value = 99, .name = "binary"};
-
-  apache::thrift::RpcOptions options;
-  auto result = serializeRequest<apache::thrift::BinaryProtocolWriter>(
-      options,
-      "testMethod",
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      [&](apache::thrift::BinaryProtocolWriter& w) {
-        serializeTestPayload(w, input);
-      },
-      [&](apache::thrift::BinaryProtocolWriter& w) {
-        return sizeTestPayload(w, input);
-      });
-
-  ASSERT_TRUE(result.hasValue());
-  ASSERT_NE(result->payload.data, nullptr);
-
-  apache::thrift::BinaryProtocolReader reader;
-  reader.setInput(result->payload.data.get());
-  auto output = deserializeTestPayload(reader);
-
-  EXPECT_EQ(output.value, 99);
-  EXPECT_EQ(output.name, "binary");
-}
-
-TEST(RequestSerializerTest, BinaryProtocolMetadataHasCorrectProtocolId) {
-  auto emptyBinarySerializeFn = [](apache::thrift::BinaryProtocolWriter& w) {
-    w.writeStructBegin("empty");
-    w.writeFieldStop();
-    w.writeStructEnd();
-  };
-  auto emptyBinarySizeFn =
-      [](apache::thrift::BinaryProtocolWriter& w) -> uint32_t {
-    return w.serializedStructSize("empty") + w.serializedSizeStop();
-  };
-
-  apache::thrift::RpcOptions options;
-  auto result = serializeRequest<apache::thrift::BinaryProtocolWriter>(
-      options,
-      "binaryMethod",
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      emptyBinarySerializeFn,
-      emptyBinarySizeFn);
-
-  ASSERT_TRUE(result.hasValue());
-  ASSERT_NE(result->payload.metadata, nullptr);
-
-  apache::thrift::RequestRpcMetadata metadata;
-  apache::thrift::BinaryProtocolReader reader;
-  reader.setInput(result->payload.metadata.get());
-  metadata.read(&reader);
-
-  EXPECT_EQ(*metadata.protocol(), apache::thrift::ProtocolId::BINARY);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

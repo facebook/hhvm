@@ -20,18 +20,14 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, bool*>> FastClientTestService_processData_presult;
 
 folly::Expected<
-    apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+    std::unique_ptr<folly::IOBuf>,
     folly::exception_wrapper>
 FastClientTestServiceFastClientInternal::serialize_ping(
-    uint16_t protocolId,
-    const apache::thrift::RpcOptions& rpcOptions) {
+    uint16_t protocolId) {
   return apache::thrift::detail::ac::withProtocolWriter(protocolId, [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
     FastClientTestService_ping_pargs args;
     return apache::thrift::fast_thrift::thrift::serializeRequest<ProtocolWriter>(
-        rpcOptions,
-        "ping",
-        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         [&](ProtocolWriter& w) { args.write(&w); },
         [&](ProtocolWriter& w) -> uint32_t { return args.serializedSizeZC(&w); });
   });
@@ -48,20 +44,16 @@ FastClientTestServiceFastClientInternal::deserialize_ping(
 }
 
 folly::Expected<
-    apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+    std::unique_ptr<folly::IOBuf>,
     folly::exception_wrapper>
 FastClientTestServiceFastClientInternal::serialize_echo(
     uint16_t protocolId,
-    const apache::thrift::RpcOptions& rpcOptions,
     const ::std::string& p_message) {
   return apache::thrift::detail::ac::withProtocolWriter(protocolId, [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
     FastClientTestService_echo_pargs args;
     args.get<0>().value = const_cast<::std::string*>(&p_message);
     return apache::thrift::fast_thrift::thrift::serializeRequest<ProtocolWriter>(
-        rpcOptions,
-        "echo",
-        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         [&](ProtocolWriter& w) { args.write(&w); },
         [&](ProtocolWriter& w) -> uint32_t { return args.serializedSizeZC(&w); });
   });
@@ -79,11 +71,10 @@ FastClientTestServiceFastClientInternal::deserialize_echo(
 }
 
 folly::Expected<
-    apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+    std::unique_ptr<folly::IOBuf>,
     folly::exception_wrapper>
 FastClientTestServiceFastClientInternal::serialize_add(
     uint16_t protocolId,
-    const apache::thrift::RpcOptions& rpcOptions,
     ::std::int32_t p_a,
     ::std::int32_t p_b) {
   return apache::thrift::detail::ac::withProtocolWriter(protocolId, [&](auto&& prot) {
@@ -92,9 +83,6 @@ FastClientTestServiceFastClientInternal::serialize_add(
     args.get<0>().value = &p_a;
     args.get<1>().value = &p_b;
     return apache::thrift::fast_thrift::thrift::serializeRequest<ProtocolWriter>(
-        rpcOptions,
-        "add",
-        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         [&](ProtocolWriter& w) { args.write(&w); },
         [&](ProtocolWriter& w) -> uint32_t { return args.serializedSizeZC(&w); });
   });
@@ -112,20 +100,16 @@ FastClientTestServiceFastClientInternal::deserialize_add(
 }
 
 folly::Expected<
-    apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+    std::unique_ptr<folly::IOBuf>,
     folly::exception_wrapper>
 FastClientTestServiceFastClientInternal::serialize_getData(
     uint16_t protocolId,
-    const apache::thrift::RpcOptions& rpcOptions,
     ::std::int32_t p_id) {
   return apache::thrift::detail::ac::withProtocolWriter(protocolId, [&](auto&& prot) {
     using ProtocolWriter = std::decay_t<decltype(prot)>;
     FastClientTestService_getData_pargs args;
     args.get<0>().value = &p_id;
     return apache::thrift::fast_thrift::thrift::serializeRequest<ProtocolWriter>(
-        rpcOptions,
-        "getData",
-        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         [&](ProtocolWriter& w) { args.write(&w); },
         [&](ProtocolWriter& w) -> uint32_t { return args.serializedSizeZC(&w); });
   });
@@ -143,11 +127,10 @@ FastClientTestServiceFastClientInternal::deserialize_getData(
 }
 
 folly::Expected<
-    apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+    std::unique_ptr<folly::IOBuf>,
     folly::exception_wrapper>
 FastClientTestServiceFastClientInternal::serialize_processData(
     uint16_t protocolId,
-    const apache::thrift::RpcOptions& rpcOptions,
     const ::cpp2::test::DataItem& p_item,
     ::cpp2::test::StatusCode p_status) {
   return apache::thrift::detail::ac::withProtocolWriter(protocolId, [&](auto&& prot) {
@@ -156,9 +139,6 @@ FastClientTestServiceFastClientInternal::serialize_processData(
     args.get<0>().value = const_cast<::cpp2::test::DataItem*>(&p_item);
     args.get<1>().value = &p_status;
     return apache::thrift::fast_thrift::thrift::serializeRequest<ProtocolWriter>(
-        rpcOptions,
-        "processData",
-        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         [&](ProtocolWriter& w) { args.write(&w); },
         [&](ProtocolWriter& w) -> uint32_t { return args.serializedSizeZC(&w); });
   });

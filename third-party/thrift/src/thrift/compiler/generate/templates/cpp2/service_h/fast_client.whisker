@@ -28,11 +28,10 @@ class {{service.cpp_name}}FastClientInternal {
 {{#each service.functions as |function|}}
 {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
   static folly::Expected<
-      apache::thrift::fast_thrift::thrift::ThriftRequestMessage,
+      std::unique_ptr<folly::IOBuf>,
       folly::exception_wrapper>
   serialize_{{function.cpp_name}}(
-      uint16_t protocolId,
-      const apache::thrift::RpcOptions& rpcOptions{{#each function.params.fields as |field|}},
+      uint16_t protocolId{{#each function.params.fields as |field|}},
       {{#if field.type.resolves_to_complex_return?}}const {{field.type.cpp_type}}&{{#else}}{{field.type.cpp_type}}{{/if}} p_{{field.cpp_name}}{{/each}});
 
 {{#if function.return_type.void?}}
@@ -57,7 +56,7 @@ class {{service.cpp_name}}FastClientInternal {
 
 namespace apache::thrift {
 
-template <apache::thrift::fast_thrift::thrift::ClientOutboundAppAdapter AppAdapter>
+template <apache::thrift::fast_thrift::thrift::client::ClientOutboundAppAdapter AppAdapter>
 class FastClient<{{service.qualified_name}}, AppAdapter>
     : public apache::thrift::gen::FastClientBase<AppAdapter> {
  public:

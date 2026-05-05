@@ -87,10 +87,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const ctx = srcLoc(env, inst, 3).reg();
   auto const coeffects = srcLoc(env, inst, 4).reg();
   auto const extra = inst->extra<Call>();
-  auto const numArgsInclUnpack = extra->numArgs + (extra->hasUnpack ? 1 : 0);
-  auto const numPositionalsInclUnpack = static_cast<uint32_t>(
-    numArgsInclUnpack - (extra->namedArgNames ? extra->namedArgNames->size() : 0)
-  );
+  auto const numPositionalsInclUnpack =
+    extra->numPosArgs + (extra->hasUnpack ? 1 : 0);
   auto const func = inst->src(2)->hasConstVal(TFunc)
     ? inst->src(2)->funcVal() : nullptr;
   // Upgrade skipRepack if HHIR opts inferred the callee. We can't do this for
@@ -99,7 +97,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   // no unpack argument and param counts are non-negative.
   auto const skipRepack = extra->skipRepack || (
     func && !extra->hasUnpack && numPositionalsInclUnpack <= func->numPositionalParams()
-  ) || numArgsInclUnpack == 0;
+  ) || numPositionalsInclUnpack == 0;
   auto const coeffectsVal = inst->src(4)->hasConstVal(TInt)
     ? RuntimeCoeffects::fromValue(inst->src(4)->intVal())
     : RuntimeCoeffects::none();
@@ -154,8 +152,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     // stub.  The stub and the eventual targets take rvmfp() as an argument,
     // pointing to the callee ActRec.
     assertx(
-      (!extra->hasUnpack && extra->numArgs <= func->numNonVariadicParams()) ||
-      (extra->hasUnpack && extra->numArgs == func->numNonVariadicParams()));
+      (!extra->hasUnpack && extra->numPosArgs <= func->numPositionalParams()) ||
+      (extra->hasUnpack && extra->numPosArgs == func->numPositionalParams()));
     v << callphps{tc::ustubs().immutableBindCallStub,
                   func_prologue_regs(withCtx, withNamedArgNames),
                   func, numPositionalsInclUnpack};

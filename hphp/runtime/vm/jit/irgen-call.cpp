@@ -258,13 +258,16 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     pubBcOff = firstUnpubFP->inst()->marker().sk().offset();
   }
 
-  auto const namedArgNames = fca.hasNamedArgs()
-    ? curUnit(env)->lookupArrayId(fca.namedArgNames)
-    : nullptr;
+  const ArrayData* namedArgNames = nullptr;
+  uint32_t namedArgNamesSize = 0;
+  if (fca.hasNamedArgs()) {
+    namedArgNames = curUnit(env)->lookupArrayId(fca.namedArgNames);
+    namedArgNamesSize = namedArgNames->size();
+  }
 
   auto const data = CallData {
     spOffBCFromIRSP(env),
-    fca.numArgs,
+    fca.numArgs - namedArgNamesSize,
     fca.numRets - 1,
     pubBcOff,
     namedArgNames,

@@ -1229,7 +1229,7 @@ struct CallBuiltinData : IRExtraData {
 
 struct CallData : IRExtraData {
   explicit CallData(IRSPRelOffset spOffset,
-                    uint32_t numArgs,
+                    uint32_t numPosArgs,
                     uint32_t numOut,
                     Offset callOffset,
                     const ArrayData* namedArgNames,
@@ -1241,7 +1241,7 @@ struct CallData : IRExtraData {
                     bool asyncEagerReturn,
                     bool formingRegion)
     : spOffset(spOffset)
-    , numArgs(numArgs)
+    , numPosArgs(numPosArgs)
     , numOut(numOut)
     , callOffset(callOffset)
     , namedArgNames(namedArgNames)
@@ -1256,7 +1256,7 @@ struct CallData : IRExtraData {
 
   std::string show() const {
     return folly::to<std::string>(
-      spOffset.offset, ',', numArgs, ',', numOut, ',', callOffset,
+      spOffset.offset, ',', numPosArgs, ',', numOut, ',', callOffset,
       namedArgNames != nullptr ? ",namedArgs" : "",
       hasGenerics
         ? folly::sformat(",hasGenerics({})", genericsBitmap)
@@ -1270,7 +1270,8 @@ struct CallData : IRExtraData {
   }
 
   uint32_t numInputs() const {
-    return numArgs + (hasUnpack ? 1 : 0) + (hasGenerics ? 1 : 0);
+    return numPosArgs + (namedArgNames != nullptr ? namedArgNames->size() : 0)
+           + (hasUnpack ? 1 : 0) + (hasGenerics ? 1 : 0);
   }
 
   size_t stableHash() const {
@@ -1286,7 +1287,7 @@ struct CallData : IRExtraData {
     }
     return folly::hash::hash_combine(
       std::hash<int32_t>()(spOffset.offset),
-      std::hash<uint32_t>()(numArgs),
+      std::hash<uint32_t>()(numPosArgs),
       std::hash<uint32_t>()(numOut),
       namedArgNameHash,
       std::hash<Offset>()(callOffset),
@@ -1304,7 +1305,7 @@ struct CallData : IRExtraData {
 
   bool equals(const CallData& o) const {
     return spOffset == o.spOffset &&
-           numArgs == o.numArgs &&
+           numPosArgs == o.numPosArgs &&
            numOut == o.numOut &&
            callOffset == o.callOffset &&
            namedArgNames == o.namedArgNames &&
@@ -1322,7 +1323,7 @@ struct CallData : IRExtraData {
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
-  uint32_t numArgs;
+  uint32_t numPosArgs;
   uint32_t numOut;     // number of values returned via stack from the callee
   Offset callOffset;   // offset from func->base()
   const ArrayData* namedArgNames; // Static ArrayData* containing named arg names.

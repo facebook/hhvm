@@ -31,12 +31,6 @@ const std::chrono::seconds kRateLimitMaxDelay(10);
 const uint64_t kMaxBufferPerTxn = 65536;
 constexpr uint32_t kMinThreshold = 128 * 1024;
 
-using EgressSmEvent = proxygen::HTTPTransactionEgressSM::Event;
-using IngressSmEvent = proxygen::HTTPTransactionIngressSM::Event;
-using EgressSmState = proxygen::HTTPTransactionEgressSM::State;
-using IngressSmState = proxygen::HTTPTransactionIngressSM::State;
-using TxnBytesEvent = HTTPTransactionObserverInterface::TxnBytesEvent;
-
 using namespace proxygen;
 HTTPException stateMachineError(HTTPException::Direction dir, std::string msg) {
   HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS, msg);
@@ -51,14 +45,6 @@ HTTPException stateMachineError(HTTPException::Direction dir, std::string msg) {
 
 inline ErrorCode getDefaultAbortErrorCode(bool isUpstream) {
   return isUpstream ? ErrorCode::CANCEL : ErrorCode::INTERNAL_ERROR;
-}
-
-auto tryParseContentLength(const std::string& cl, const HTTPTransaction& txn) {
-  auto tryCl = folly::tryTo<uint64_t>(cl);
-  LOG_IF(ERROR, tryCl.hasError())
-      << "Invalid content-length: " << cl << ", ex=" << int(tryCl.error())
-      << " " << txn;
-  return tryCl;
 }
 
 } // namespace
@@ -136,9 +122,9 @@ HTTPTransaction::HTTPTransaction(
       txnObserverContainer_(&txnObserverAccessor_) {
   if (assocStreamId_) {
     if (isUpstream()) {
-      egressState_ = EgressSmState::SendingDone;
+      egressState_ = HTTPTransactionEgressSM::State::SendingDone;
     } else {
-      ingressState_ = IngressSmState::ReceivingDone;
+      ingressState_ = HTTPTransactionIngressSM::State::ReceivingDone;
     }
   }
 
@@ -222,8 +208,8 @@ void HTTPTransaction::onIngressHeadersComplete(
   bool nonFinalPushHeaders = isPushed() && msg->isRequest();
   if (!validateIngressStateTransition(
           msg->isFinal() && !nonFinalPushHeaders
-              ? IngressSmEvent::onFinalHeaders
-              : IngressSmEvent::onNonFinalHeaders)) {
+              ? HTTPTransactionIngressSM::Event::onFinalHeaders
+              : HTTPTransactionIngressSM::Event::onNonFinalHeaders)) {
     return;
   }
   if (msg->isRequest()) {
@@ -241,9 +227,16 @@ void HTTPTransaction::onIngressHeadersComplete(
     const auto& contentLen =
         msg->getHeaders().getSingleOrEmpty(HTTP_HEADER_CONTENT_LENGTH);
     if (!contentLen.empty()) {
-      if (auto expectedIngressCl = tryParseContentLength(contentLen, *this)) {
-        expectedIngressContentLength_ = expectedIngressCl.value();
-        expectedIngressContentLengthRemaining_ = expectedIngressCl.value();
+      try {
+        expectedIngressContentLengthRemaining_ =
+            folly::to<uint64_t>(contentLen);
+      } catch (const folly::ConversionError& ex) {
+        LOG(ERROR) << "Invalid content-length: " << contentLen
+                   << ", ex=" << ex.what() << " " << *this;
+      }
+      if (expectedIngressContentLengthRemaining_) {
+        expectedIngressContentLength_ =
+            expectedIngressContentLengthRemaining_.value();
       }
     }
   }
@@ -254,9 +247,10 @@ void HTTPTransaction::onIngressHeadersComplete(
   if (hasBytesEventObservers()) {
     const auto& size = msg->getIngressHeaderSize();
     const auto e =
-        TxnBytesEvent::Builder()
+        HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
             .setTimestamp(proxygen::SteadyClock::now())
-            .setType(TxnBytesEvent::Type::LAST_HEADER_BYTE_READ)
+            .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
+                         LAST_HEADER_BYTE_READ)
             .setHeaders(*msg)
             .setNumBytes(size.compressed ? size.compressed : size.uncompressed)
             .build();
@@ -326,7 +320,8 @@ void HTTPTransaction::onIngressBody(unique_ptr<IOBuf> chain, uint16_t padding) {
   if (len == 0) {
     return;
   }
-  if (!validateIngressStateTransition(IngressSmEvent::onBody)) {
+  if (!validateIngressStateTransition(
+          HTTPTransactionIngressSM::Event::onBody)) {
     return;
   }
   if (!updateContentLengthRemaining(len)) {
@@ -337,9 +332,10 @@ void HTTPTransaction::onIngressBody(unique_ptr<IOBuf> chain, uint16_t padding) {
     transportCallback_->bodyBytesReceived(len);
   }
   if (hasBytesEventObservers()) {
-    const auto e = TxnBytesEvent::Builder()
+    const auto e = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
                        .setTimestamp(proxygen::SteadyClock::now())
-                       .setType(TxnBytesEvent::Type::BODY_BYTES_READ)
+                       .setType(HTTPTransactionObserverInterface::
+                                    TxnBytesEvent::Type::BODY_BYTES_READ)
                        .setNumBytes(len)
                        .build();
     emitBytesEvent(e);
@@ -416,7 +412,8 @@ void HTTPTransaction::processIngressBody(unique_ptr<IOBuf> chain, size_t len) {
 }
 
 void HTTPTransaction::onIngressChunkHeader(size_t length) {
-  if (!validateIngressStateTransition(IngressSmEvent::onChunkHeader)) {
+  if (!validateIngressStateTransition(
+          HTTPTransactionIngressSM::Event::onChunkHeader)) {
     return;
   }
   if (mustQueueIngress()) {
@@ -441,7 +438,8 @@ void HTTPTransaction::processIngressChunkHeader(size_t length) {
 }
 
 void HTTPTransaction::onIngressChunkComplete() {
-  if (!validateIngressStateTransition(IngressSmEvent::onChunkComplete)) {
+  if (!validateIngressStateTransition(
+          HTTPTransactionIngressSM::Event::onChunkComplete)) {
     return;
   }
   if (mustQueueIngress()) {
@@ -466,7 +464,8 @@ void HTTPTransaction::processIngressChunkComplete() {
 }
 
 void HTTPTransaction::onIngressTrailers(unique_ptr<HTTPHeaders> trailers) {
-  if (!validateIngressStateTransition(IngressSmEvent::onTrailers)) {
+  if (!validateIngressStateTransition(
+          HTTPTransactionIngressSM::Event::onTrailers)) {
     return;
   }
   if (mustQueueIngress()) {
@@ -492,7 +491,8 @@ void HTTPTransaction::processIngressTrailers(unique_ptr<HTTPHeaders> trailers) {
 }
 
 void HTTPTransaction::onIngressUpgrade(UpgradeProtocol protocol) {
-  if (!validateIngressStateTransition(IngressSmEvent::onUpgrade)) {
+  if (!validateIngressStateTransition(
+          HTTPTransactionIngressSM::Event::onUpgrade)) {
     return;
   }
   upgraded_ = true;
@@ -540,7 +540,7 @@ void HTTPTransaction::onIngressEOM() {
     return;
   }
 
-  if (!validateIngressStateTransition(IngressSmEvent::onEOM)) {
+  if (!validateIngressStateTransition(HTTPTransactionIngressSM::Event::onEOM)) {
     return;
   }
   // We need to update the read timeout here.  We're not likely to be
@@ -564,7 +564,8 @@ void HTTPTransaction::processIngressEOM() {
   }
   VLOG(4) << "ingress EOM on " << *this;
   const bool wasComplete = isIngressComplete();
-  if (!validateIngressStateTransition(IngressSmEvent::eomFlushed)) {
+  if (!validateIngressStateTransition(
+          HTTPTransactionIngressSM::Event::eomFlushed)) {
     return;
   }
   if (handler_) {
@@ -578,8 +579,8 @@ void HTTPTransaction::processIngressEOM() {
 }
 
 bool HTTPTransaction::isExpectingWindowUpdate() const {
-  return egressState_ != EgressSmState::SendingDone && useFlowControl_ &&
-         sendWindow_.getSize() <= 0;
+  return egressState_ != HTTPTransactionEgressSM::State::SendingDone &&
+         useFlowControl_ && sendWindow_.getSize() <= 0;
 }
 
 bool HTTPTransaction::isExpectingIngress() const {
@@ -601,7 +602,7 @@ void HTTPTransaction::updateReadTimeout() {
 
 void HTTPTransaction::markIngressComplete() {
   VLOG(4) << "Marking ingress complete on " << *this;
-  ingressState_ = IngressSmState::ReceivingDone;
+  ingressState_ = HTTPTransactionIngressSM::State::ReceivingDone;
   deferredIngress_.reset();
   cancelTimeout();
 }
@@ -617,10 +618,11 @@ void HTTPTransaction::markEgressComplete() {
   if (isEnqueued()) {
     dequeue();
   }
-  egressState_ = EgressSmState::SendingDone;
+  egressState_ = HTTPTransactionEgressSM::State::SendingDone;
 }
 
-bool HTTPTransaction::validateIngressStateTransition(IngressSmEvent event) {
+bool HTTPTransaction::validateIngressStateTransition(
+    HTTPTransactionIngressSM::Event event) {
   DestructorGuard g(this);
 
   if (!HTTPTransactionIngressSM::transit(ingressState_, event)) {
@@ -637,11 +639,13 @@ bool HTTPTransaction::validateIngressStateTransition(IngressSmEvent event) {
   return true;
 }
 
-bool HTTPTransaction::validateEgressStateTransition(EgressSmEvent event) {
+bool HTTPTransaction::validateEgressStateTransition(
+    HTTPTransactionEgressSM::Event event) {
   DestructorGuard g(this);
+
   if (!HTTPTransactionEgressSM::transit(egressState_, event)) {
-    // Use stringstream to invoke operator << for state machine
     std::stringstream ss;
+    // Use stringstream to invoke operator << for state machine
     ss << "Invalid egress state transition, state=" << egressState_
        << ", event=" << event << ", streamID=" << id_;
     LOG(ERROR) << ss.str() << " " << *this;
@@ -882,10 +886,12 @@ void HTTPTransaction::onEgressHeaderFirstByte() {
   }
 
   if (hasBytesEventObservers()) {
-    const auto e = TxnBytesEvent::Builder()
-                       .setTimestamp(proxygen::SteadyClock::now())
-                       .setType(TxnBytesEvent::Type::FIRST_HEADER_BYTE_WRITE)
-                       .build();
+    const auto e =
+        HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
+            .setTimestamp(proxygen::SteadyClock::now())
+            .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
+                         FIRST_HEADER_BYTE_WRITE)
+            .build();
     emitBytesEvent(e);
   }
 }
@@ -897,9 +903,10 @@ void HTTPTransaction::onEgressBodyFirstByte() {
   }
 
   if (hasBytesEventObservers()) {
-    const auto e = TxnBytesEvent::Builder()
+    const auto e = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
                        .setTimestamp(proxygen::SteadyClock::now())
-                       .setType(TxnBytesEvent::Type::FIRST_BODY_BYTE_WRITE)
+                       .setType(HTTPTransactionObserverInterface::
+                                    TxnBytesEvent::Type::FIRST_BODY_BYTE_WRITE)
                        .build();
     emitBytesEvent(e);
   }
@@ -912,9 +919,10 @@ void HTTPTransaction::onEgressBodyLastByte() {
   }
 
   if (hasBytesEventObservers()) {
-    const auto e = TxnBytesEvent::Builder()
+    const auto e = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
                        .setTimestamp(proxygen::SteadyClock::now())
-                       .setType(TxnBytesEvent::Type::LAST_BODY_BYTE_WRITE)
+                       .setType(HTTPTransactionObserverInterface::
+                                    TxnBytesEvent::Type::LAST_BODY_BYTE_WRITE)
                        .build();
     emitBytesEvent(e);
   }
@@ -934,9 +942,10 @@ void HTTPTransaction::onEgressLastByteAck(std::chrono::milliseconds latency) {
   }
 
   if (hasBytesEventObservers()) {
-    const auto e = TxnBytesEvent::Builder()
+    const auto e = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
                        .setTimestamp(proxygen::SteadyClock::now())
-                       .setType(TxnBytesEvent::Type::LAST_BODY_BYTE_ACK)
+                       .setType(HTTPTransactionObserverInterface::
+                                    TxnBytesEvent::Type::LAST_BODY_BYTE_ACK)
                        .build();
     emitBytesEvent(e);
   }
@@ -989,9 +998,10 @@ void HTTPTransaction::onEgressTrackedByteEventAck(const ByteEvent& event) {
   }
 
   if (ByteEvent::FIRST_BYTE == event.eventType_ && hasBytesEventObservers()) {
-    const auto e = TxnBytesEvent::Builder()
+    const auto e = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
                        .setTimestamp(proxygen::SteadyClock::now())
-                       .setType(TxnBytesEvent::Type::FIRST_BODY_BYTE_ACK)
+                       .setType(HTTPTransactionObserverInterface::
+                                    TxnBytesEvent::Type::FIRST_BODY_BYTE_ACK)
                        .build();
     emitBytesEvent(e);
   }
@@ -1006,7 +1016,8 @@ void HTTPTransaction::onEgressTransportAppRateLimited() {
 
 void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
                                                  bool eom) {
-  if (!validateEgressStateTransition(EgressSmEvent::sendHeaders)) {
+  if (!validateEgressStateTransition(
+          HTTPTransactionEgressSM::Event::sendHeaders)) {
     return;
   }
   DCHECK(!isEgressComplete());
@@ -1026,8 +1037,11 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
     const auto& contentLen =
         headers.getHeaders().getSingleOrEmpty(HTTP_HEADER_CONTENT_LENGTH);
     if (!contentLen.empty()) {
-      if (auto expectedRespLen = tryParseContentLength(contentLen, *this)) {
-        expectedResponseLength_ = expectedRespLen.value();
+      try {
+        expectedResponseLength_ = folly::to<uint64_t>(contentLen);
+      } catch (const folly::ConversionError& ex) {
+        LOG(ERROR) << "Invalid content-length: " << contentLen
+                   << ", ex=" << ex.what() << " " << *this;
       }
     }
   }
@@ -1036,13 +1050,12 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   if (transportCallback_) {
     transportCallback_->headerBytesGenerated(size);
   }
-  const auto timeNow =
-      hasBytesEventObservers() ? SteadyClock::now() : SteadyClock::time_point{};
   if (hasBytesEventObservers()) {
     const auto e =
-        TxnBytesEvent::Builder()
-            .setTimestamp(timeNow)
-            .setType(TxnBytesEvent::Type::HEADER_BYTES_GENERATED)
+        HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
+            .setTimestamp(proxygen::SteadyClock::now())
+            .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
+                         HEADER_BYTES_GENERATED)
             .setNumBytes(size.compressed ? size.compressed : size.uncompressed)
             .setHeaders(headers)
             .build();
@@ -1050,7 +1063,8 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
   }
   updateEgressCompressionInfo(transport_.getCodec().getCompressionInfo());
   if (eom) {
-    if (!validateEgressStateTransition(EgressSmEvent::sendEOM)) {
+    if (!validateEgressStateTransition(
+            HTTPTransactionEgressSM::Event::sendEOM)) {
       return;
     }
     // trailers are supported in this case:
@@ -1059,14 +1073,16 @@ void HTTPTransaction::sendHeadersWithOptionalEOM(const HTTPMessage& headers,
       transportCallback_->bodyBytesGenerated(0);
     }
     if (hasBytesEventObservers()) {
-      const auto e = TxnBytesEvent::Builder()
-                         .setTimestamp(timeNow)
-                         .setType(TxnBytesEvent::Type::BODY_BYTES_GENERATED)
+      const auto e = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
+                         .setTimestamp(proxygen::SteadyClock::now())
+                         .setType(HTTPTransactionObserverInterface::
+                                      TxnBytesEvent::Type::BODY_BYTES_GENERATED)
                          .setNumBytes(0)
                          .build();
       emitBytesEvent(e);
     }
-    if (!validateEgressStateTransition(EgressSmEvent::eomFlushed)) {
+    if (!validateEgressStateTransition(
+            HTTPTransactionEgressSM::Event::eomFlushed)) {
       return;
     }
     updateReadTimeout();
@@ -1095,11 +1111,12 @@ void HTTPTransaction::sendWtHeaders(
 void HTTPTransaction::sendBody(std::unique_ptr<folly::IOBuf> body) {
   DestructorGuard guard(this);
   bool chunking =
-      ((egressState_ == EgressSmState::ChunkHeaderSent) &&
+      ((egressState_ == HTTPTransactionEgressSM::State::ChunkHeaderSent) &&
        !transport_.getCodec().supportsParallelRequests()); // see
                                                            // sendChunkHeader
 
-  if (!validateEgressStateTransition(EgressSmEvent::sendBody)) {
+  if (!validateEgressStateTransition(
+          HTTPTransactionEgressSM::Event::sendBody)) {
     return;
   }
 
@@ -1201,9 +1218,10 @@ size_t HTTPTransaction::sendDeferredBody(uint32_t maxEgress) {
     transportCallback_->bodyBytesGenerated(nbytes);
   }
   if (hasBytesEventObservers()) {
-    const auto e = TxnBytesEvent::Builder()
+    const auto e = HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
                        .setTimestamp(proxygen::SteadyClock::now())
-                       .setType(TxnBytesEvent::Type::BODY_BYTES_GENERATED)
+                       .setType(HTTPTransactionObserverInterface::
+                                    TxnBytesEvent::Type::BODY_BYTES_GENERATED)
                        .setNumBytes(nbytes)
                        .build();
     emitBytesEvent(e);
@@ -1284,7 +1302,8 @@ size_t HTTPTransaction::sendEOMNow() {
   VLOG(4) << "egress EOM on " << *this;
   // TODO: with ByteEvent refactor, we will have to delay changing this
   // state until later
-  if (!validateEgressStateTransition(EgressSmEvent::eomFlushed)) {
+  if (!validateEgressStateTransition(
+          HTTPTransactionEgressSM::Event::eomFlushed)) {
     return 0;
   }
   size_t nbytes = transport_.sendEOM(this, trailers_.get());
@@ -1323,7 +1342,8 @@ size_t HTTPTransaction::sendBodyNow(std::unique_ptr<folly::IOBuf> body,
   transport_.notifyEgressBodyBuffered(-static_cast<int64_t>(bodyLen));
   const bool sendDataFin = sendEom && !trailers_;
   if (sendDataFin) {
-    if (!validateEgressStateTransition(EgressSmEvent::eomFlushed)) {
+    if (!validateEgressStateTransition(
+            HTTPTransactionEgressSM::Event::eomFlushed)) {
       return 0;
     }
   } else if (ingressErrorSeen_ && isExpectingWindowUpdate()) {
@@ -1364,7 +1384,7 @@ size_t HTTPTransaction::sendBodyNow(std::unique_ptr<folly::IOBuf> body,
 
 void HTTPTransaction::sendEOM() {
   DestructorGuard g(this);
-  if (!validateEgressStateTransition(EgressSmEvent::sendEOM)) {
+  if (!validateEgressStateTransition(HTTPTransactionEgressSM::Event::sendEOM)) {
     return;
   }
   if (expectedResponseLength_ && actualResponseLength_ &&
@@ -1389,11 +1409,13 @@ void HTTPTransaction::sendEOM() {
         transportCallback_->bodyBytesGenerated(nbytes);
       }
       if (hasBytesEventObservers()) {
-        const auto e = TxnBytesEvent::Builder()
-                           .setTimestamp(proxygen::SteadyClock::now())
-                           .setType(TxnBytesEvent::Type::BODY_BYTES_GENERATED)
-                           .setNumBytes(nbytes)
-                           .build();
+        const auto e =
+            HTTPTransactionObserverInterface::TxnBytesEvent::Builder()
+                .setTimestamp(proxygen::SteadyClock::now())
+                .setType(HTTPTransactionObserverInterface::TxnBytesEvent::Type::
+                             BODY_BYTES_GENERATED)
+                .setNumBytes(nbytes)
+                .build();
         emitBytesEvent(e);
       }
     } else {
@@ -1489,7 +1511,8 @@ uint16_t HTTPTransaction::getDatagramSizeLimit() const noexcept {
 }
 
 bool HTTPTransaction::sendDatagram(std::unique_ptr<folly::IOBuf> datagram) {
-  if (!validateEgressStateTransition(EgressSmEvent::sendDatagram)) {
+  if (!validateEgressStateTransition(
+          HTTPTransactionEgressSM::Event::sendDatagram)) {
     return false;
   }
 
@@ -1769,8 +1792,9 @@ void HTTPTransaction::setReceiveWindow(uint32_t capacity) {
 
 void HTTPTransaction::flushWindowUpdate() {
   if (recvToAck_ > 0 && useFlowControl_ && !isIngressEOMSeen() &&
-      (isDownstream() || egressState_ != EgressSmState::Start ||
-       ingressState_ != IngressSmState::Start)) {
+      (isDownstream() ||
+       egressState_ != HTTPTransactionEgressSM::State::Start ||
+       ingressState_ != HTTPTransactionIngressSM::State::Start)) {
     // Down egress upstream window updates until after headers
     VLOG(4) << "recv_window is " << recvWindow_.getSize() << " / "
             << recvWindow_.getCapacity() << " after acking " << recvToAck_
@@ -1809,7 +1833,8 @@ void HTTPTransaction::onDatagram(
     return;
   }
   VLOG(4) << "datagram received on " << *this;
-  if (!validateIngressStateTransition(IngressSmEvent::onDatagram)) {
+  if (!validateIngressStateTransition(
+          HTTPTransactionIngressSM::Event::onDatagram)) {
     return;
   }
   refreshTimeout();
@@ -1891,7 +1916,8 @@ bool HTTPTransaction::hasBytesEventObservers() {
       HTTPTransactionObserverInterface::Events::TxnBytes>();
 }
 
-void HTTPTransaction::emitBytesEvent(const TxnBytesEvent& event) {
+void HTTPTransaction::emitBytesEvent(
+    const HTTPTransactionObserverInterface::TxnBytesEvent& event) {
   txnObserverContainer_.invokeInterfaceMethod<
       HTTPTransactionObserverInterface::Events::TxnBytes>(
       [&event](auto observer, auto observed) {

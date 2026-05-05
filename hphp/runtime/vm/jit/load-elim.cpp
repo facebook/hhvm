@@ -731,7 +731,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   }
 
   assertx(inst.op() == EndCatch);
-  auto const isFuncEntry = inst.marker().sk().funcEntry();
+  auto const isFuncEntry = inst.marker().sk().anyFuncEntry();
   auto const isUnsupportedOpcode = [&]() {
     // Get all the preds for this block.
     for (auto const& pred : inst.block()->preds()) {

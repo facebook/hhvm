@@ -67,6 +67,17 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
   return ai.bdata[blk].rpoId;
 }
 
+uint32_t firstPositionalId(const php::Func* func) {
+  auto const numParams = func->params.size();
+  auto firstPositionalId = 0;
+  for (; firstPositionalId < numParams; ++firstPositionalId) {
+    if (!func->params[firstPositionalId].isNamed) {
+      break;
+    }
+  }
+  return firstPositionalId;
+}
+
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 const StaticString s_coeffects_var("0Coeffects");
 
@@ -99,6 +110,8 @@ Optional<State> entry_state(const IIndex& index, CollectedInfo& collect,
 
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {
+    // TODO(named_params) we need to extend the known-args case to account
+    // for passed named arg names.
     if (knownArgs) {
       if (locId < knownArgs->args.size()) {
         if (ctx.func->params[locId].isVariadic) {
@@ -210,10 +223,10 @@ Optional<State> entry_state(const IIndex& index, CollectedInfo& collect,
  *
  * If we're entering at a DV-init, all higher parameter locals must be
  * Uninit, with the possible exception of a final variadic param
- * (which will be an array). It is also possible that the DV-init is
- * reachable from within the function with these parameter locals
- * already initialized (although the normal php emitter can't do
- * this), but that case will be discovered when iterating.
+ * (which will be an array), and all optional named parameters may be uninit.
+ * It is also possible that the DV-init is reachable from within the function
+ * with these parameter locals already initialized (although the normal php
+ * emitter can't do this), but that case will be discovered when iterating.
  */
 dataflow_worklist<uint32_t>
 prepare_incompleteQ(const IIndex& index,
@@ -252,10 +265,18 @@ prepare_incompleteQ(const IIndex& index,
     return incompleteQ;
   }
 
-  for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
+  auto const firstPos = firstPositionalId(ctx.func);
+  State optionalEntryState{*entryState};
+  for (auto locId = 0; locId < firstPos; ++locId) {
+    if (ctx.func->params[locId].isNamed &&
+        ctx.func->params[locId].dvEntryPoint != NoBlockId) {
+      optionalEntryState.locals[locId] |= TUninit;
+    }
+  }
+  for (auto paramId = firstPos; paramId < numParams; ++paramId) {
     auto const dv = ctx.func->params[paramId].dvEntryPoint;
     if (dv != NoBlockId) {
-      ai.bdata[dv].stateIn.copy_from(*entryState);
+      ai.bdata[dv].stateIn.copy_from(optionalEntryState);
       ai.bdata[dv].stateIn.unreachable = false;
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
@@ -265,7 +286,13 @@ prepare_incompleteQ(const IIndex& index,
     }
     // If a DV-init's param has an entry state of Bottom, then none of
     // the following DV-inits are reachable.
-    if (entryState->locals[paramId].is(BBottom)) break;
+    if (optionalEntryState.locals[paramId].is(BBottom)) break;
+  }
+  auto const namedDV = namedParamFuncEntry(*ctx.func);
+  if (namedDV != NoBlockId) {
+    ai.bdata[namedDV].stateIn.copy_from(optionalEntryState);
+    ai.bdata[namedDV].stateIn.unreachable = false;
+    incompleteQ.push(rpoId(ai, namedDV));
   }
 
   if (!entryState->unreachable) {

@@ -31,7 +31,7 @@ namespace jit::svcreq {
  * This is needed when coming to C++ from JIT, as the JIT may optimize away
  * uninit writes for default arguments.
  */
-void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs,
+void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs, uint32_t numNamedParams,
                        uint32_t numNonVariadicParams) noexcept;
 /*
  * Handle a request to initially translate the code at the given current
@@ -43,6 +43,7 @@ void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs,
  */
 TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept;
 TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept;
+TCA handleTranslateNamedParamsFuncEntry(uint32_t numArgs) noexcept;
 /*
  * Handle a request to translate the main func entry invoked dynamically.
  * Translates assuming that `numNonVariadicParams' are passed.
@@ -58,14 +59,18 @@ TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept;
  */
 TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept;
 TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept;
+TCA handleRetranslateNamedParamsFuncEntry(uint32_t numArgs) noexcept;
 
 /*
  * Handle a request to retranslate the current function, leveraging profiling
  * data to produce a set of larger, more optimized translations. Only used when
  * PGO is enabled. Execution will resume at the func entry for `numArgs'
  * whether or not retranslation is successful.
+ * For the base variant, numArgs == numNonVariadicParams will jump to the main func
+ * entry, whereas the NamedFE variant will jump to the named params func entry.
  */
 TCA handleRetranslateOpt(uint32_t numArgs) noexcept;
+TCA handleRetranslateOptNamedFE(uint32_t numArgs) noexcept;
 
 /*
  * Handle a situation where the translated code in the TC executes a return

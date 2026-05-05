@@ -153,12 +153,15 @@ Block* setSuccIRBlocks(irgen::IRGS& irgs,
  * hold, emits such type assertions.
  */
 void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
+  // TODO(named_params) we may be able to emit better assertions here in the
+  // future.
+  if (sk.namedParamsFuncEntry()) return;
   assertx(sk.funcEntry());
 
   uint32_t loc = 0;
 
   // Set types of passed arguments. They were already type checked.
-  auto const numArgs = sk.numEntryArgs();
+  auto const numArgs = sk.numEntryArgs() + func->numNamedParams();
   for (; loc < numArgs; ++loc) {
     auto const t = typeFromFuncParam(func, loc);
     irgen::assertTypeLocation(irgs, Location::Local { loc }, t);
@@ -479,7 +482,7 @@ Optional<unsigned> scheduleSurprise(const RegionDesc::Block& block) {
   Optional<unsigned> checkIdx;
   auto sk = block.start();
   for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.func())) {
-    if (sk.funcEntry()) continue;
+    if (sk.anyFuncEntry()) continue;
 
     auto const backwards = [&]{
       auto const offset = sk.offset();
@@ -535,7 +538,7 @@ boost::dynamic_bitset<> findModifiedLocals(
 
     auto sk = b.start();
     for (uint32_t i = 0; i < b.length(); ++i, sk.advance(b.func())) {
-      if (sk.funcEntry()) continue;
+      if (sk.anyFuncEntry()) continue;
       auto const& ii = getInstrInfo(sk.op());
       if (ii.out & InstrFlags::Local) {
         modified[getLocalOperand(sk)] = true;
@@ -772,10 +775,10 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       // to be translated.
       if (lastInstr) {
         if (region.isExit(blockId)) {
-          if (!inlining || inst.source.funcEntry() || !isReturnish(inst.op())) {
+          if (!inlining || inst.source.anyFuncEntry() || !isReturnish(inst.op())) {
             irgen::endRegion(irgs);
           }
-        } else if (inst.source.funcEntry() || instrAllowsFallThru(inst.op())) {
+        } else if (inst.source.anyFuncEntry() || instrAllowsFallThru(inst.op())) {
           irgen::endBlock(irgs, inst.nextSk());
         }
       }
@@ -897,6 +900,9 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
                          Offset asyncEagerOffset, SSATmp* calleeFP,
                          uint32_t argc, const std::vector<Type>& inputTypes) {
+  // TODO(named_params) support inlining calls to functions with optional named
+  // params.
+  if (entry.func()->hasOptionalNamedParameters()) return false;
   assertx(entry.funcEntry());
   ctx = ctx ? ctx : cns(irgs, nullptr);
 

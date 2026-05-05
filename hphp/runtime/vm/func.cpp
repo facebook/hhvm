@@ -487,10 +487,24 @@ Offset Func::getPrologueEntryForNumPositionals(int numPositionalsPassed) const {
   return 0;
 }
 
-Offset Func::getFuncEntryForNumArgs(int numArgsPassed) const {
-  assertx(numArgsPassed >= 0);
+Offset Func::getFuncEntryForNumPositionals(int posArgc,
+                                           bool allNamedParamsPassed) const {
+  assertx(posArgc >= 0);
   auto const nparams = numNonVariadicParams();
-  for (unsigned i = numArgsPassed; i < nparams; i++) {
+  for (unsigned i = numNamedParams() + posArgc; i < nparams; i++) {
+    const Func::ParamInfo& pi = params()[i];
+    if (pi.hasDefaultValue()) {
+      return pi.funcletOff;
+    }
+  }
+  if (!allNamedParamsPassed) {
+    return getNamedParamsFuncEntry();
+  }
+  return 0;
+}
+
+Offset Func::getNamedParamsFuncEntry() const {
+  for (unsigned i = 0; i < numNamedParams(); i++) {
     const Func::ParamInfo& pi = params()[i];
     if (pi.hasDefaultValue()) {
       return pi.funcletOff;
@@ -498,7 +512,6 @@ Offset Func::getFuncEntryForNumArgs(int numArgsPassed) const {
   }
   return 0;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Parameters.

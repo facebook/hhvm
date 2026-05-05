@@ -115,7 +115,7 @@ void TransStats::logCallCounts() const {
       entry.setStr("uuid", uuidStr);
       entry.setInt("optimized", func->atomicFlags().check(Func::Flags::Optimized) ? 1 : 0);
       entry.setInt("config_id", RuntimeOption::ConfigId);
-      if (sk.prologue() || sk.funcEntry()) {
+      if (sk.prologue() || sk.anyFuncEntry()) {
         entry.setInt("num_entry_args", sk.numEntryArgs());
       } else {
         entry.setStr("offset", folly::to<std::string>(sk.offset()));

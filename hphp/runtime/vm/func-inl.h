@@ -823,6 +823,14 @@ inline bool Func::hasNamedParams() const {
   return m_allFlags.m_hasNamedParams;
 }
 
+inline bool Func::hasOptionalNamedParameters() const {
+  auto const numNamed = numNamedParams();
+  for (uint32_t i = 0; i < numNamed; ++i) {
+    if (params()[i].hasDefaultValue()) return true;
+  }
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Unit table entries.
 

@@ -1,0 +1,129 @@
+vec(3) {
+  int(3)
+  int(4)
+  int(100)
+}
+vec(3) {
+  int(3)
+  int(4)
+  int(1)
+}
+vec(4) {
+  int(3)
+  int(4)
+  int(1)
+  int(2)
+}
+vec(5) {
+  int(3)
+  int(4)
+  int(1)
+  int(2)
+  int(3)
+}
+vec(2) {
+  int(1)
+  int(2)
+}
+vec(2) {
+  int(100)
+  int(200)
+}
+vec(3) {
+  int(100)
+  int(200)
+  int(3)
+}
+vec(7) {
+  int(100)
+  int(200)
+  int(3)
+  int(4)
+  int(5)
+  int(6)
+  int(7)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(55)
+  int(66)
+}
+vec(2) {
+  int(1)
+  int(200)
+}
+vec(3) {
+  int(100)
+  int(2)
+  int(3)
+}
+vec(4) {
+  int(100)
+  int(2)
+  int(55)
+  int(66)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(0)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(0)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+Warning: Generic at index 0 to Function baz must be reified, erased given in %s/test/slow/named_params/reified.php on line 56
+vec(3) {
+  int(1)
+  int(2)
+  int(0)
+}
+
+Warning: Generic at index 0 to Function baz must be reified, erased given in %s/test/slow/named_params/reified.php on line 57
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+Warning: Generic at index 0 to Function C::m must be reified, erased given in %s/test/slow/named_params/reified.php on line 59
+vec(3) {
+  int(1)
+  int(2)
+  int(0)
+}
+
+Warning: Generic at index 0 to Function C::m must be reified, erased given in %s/test/slow/named_params/reified.php on line 60
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}

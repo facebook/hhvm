@@ -901,23 +901,40 @@ TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
 TCA emitHandleTranslate(CodeBlock& cb, DataBlock& data, const char* name) {
   return emitHandleServiceRequest(cb, data, svcreq::handleTranslate, name);
 }
-TCA emitHandleTranslateFE(CodeBlock& cb, DataBlock& data, const char* name) {
+TCA emitHandleTranslateFE(CodeBlock& cb, DataBlock& data,
+                          bool optionalNamedParams, const char* name) {
   return emitHandleServiceRequestFE(
-    cb, data, svcreq::handleTranslateFuncEntry, true, name);
+    cb, data,
+    optionalNamedParams
+      ? svcreq::handleTranslateNamedParamsFuncEntry
+      : svcreq::handleTranslateFuncEntry,
+    true, name);
 }
 TCA emitHandleRetranslate(CodeBlock& cb, DataBlock& data, const char* name) {
   return emitHandleServiceRequest(cb, data, svcreq::handleRetranslate, name);
 }
-TCA emitHandleRetranslateFE(CodeBlock& cb, DataBlock& data, const char* name) {
+TCA emitHandleRetranslateFE(CodeBlock& cb, DataBlock& data,
+                            bool optionalNamedParams, const char* name) {
   return emitHandleServiceRequestFE(
-    cb, data, svcreq::handleRetranslateFuncEntry, true, name);
+    cb, data,
+    optionalNamedParams
+      ? svcreq::handleRetranslateNamedParamsFuncEntry
+      : svcreq::handleRetranslateFuncEntry,
+    true, name);
 }
+
 TCA emitHandleTranslateMainFE(CodeBlock& cb, DataBlock& data, const char* name) {
   return emitHandleServiceRequestMainFE(cb, data, name);
 }
-TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data, const char* name) {
+
+TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data,
+                             bool optionalNamedParams, const char* name) {
   return emitHandleServiceRequestFE(
-    cb, data, svcreq::handleRetranslateOpt, false, name);
+    cb, data,
+    optionalNamedParams
+      ? svcreq::handleRetranslateOptNamedFE
+      : svcreq::handleRetranslateOpt,
+    false, name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1541,11 +1558,15 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(asyncGenRetHelper, hotView(), emitInterpGenRet<true>, hot(), data);
 
   ADD(handleTranslate, view, emitHandleTranslate, cold, data);
-  ADD(handleTranslateFuncEntry, view, emitHandleTranslateFE, cold, data);
+  ADD(handleTranslateFuncEntry, view, emitHandleTranslateFE, cold, data, false);
+  ADD(handleTranslateNamedParamsFuncEntry, view, emitHandleTranslateFE, cold, data, true);
   ADD(handleTranslateMainFuncEntry, view, emitHandleTranslateMainFE, cold, data);
   ADD(handleRetranslate, view, emitHandleRetranslate, cold, data);
-  ADD(handleRetranslateFuncEntry, view, emitHandleRetranslateFE, cold, data);
-  ADD(handleRetranslateOpt, view, emitHandleRetranslateOpt, cold, data);
+  ADD(handleRetranslateFuncEntry, view, emitHandleRetranslateFE, cold, data, false);
+  ADD(handleRetranslateNamedParamsFuncEntry, view, emitHandleRetranslateFE, cold,
+      data, true);
+  ADD(handleRetranslateOpt, view, emitHandleRetranslateOpt, cold, data, false);
+  ADD(handleRetranslateOptNamedFE, view, emitHandleRetranslateOpt, cold, data, true);
 
   ADD(immutableBindCallStub, view, emitBindCallStub, cold, data);
 
@@ -1674,9 +1695,9 @@ namespace {
 
 void emitUninitDefaultArgs(Vout& v, SrcKey sk, bool withCtx) {
   auto const numEntryArgs = sk.numEntryArgs();
-  auto const numParams = sk.func()->numNonVariadicParams();
-  assertx(numEntryArgs <= numParams);
-  if (numEntryArgs == numParams) return;
+  auto const numPosParams = sk.func()->numPositionalParams();
+  assertx(numEntryArgs <= numPosParams);
+  if (numEntryArgs == numPosParams) return;
 
   auto saveRegs = r_func_entry_ar_flags() | r_func_entry_callee_id();
   if (withCtx) saveRegs |= r_func_entry_ctx();
@@ -1687,7 +1708,9 @@ void emitUninitDefaultArgs(Vout& v, SrcKey sk, bool withCtx) {
   // The callee's ActRec is at rvmsp().
   v << vcall{
     CallSpec::direct(svcreq::uninitDefaultArgs),
-    v.makeVcallArgs({{rvmsp(), v.cns(numEntryArgs), v.cns(numParams)}}),
+    v.makeVcallArgs({{rvmsp(), v.cns(numEntryArgs),
+                      v.cns(sk.func()->numNamedParams()),
+                      v.cns(sk.func()->numNonVariadicParams())}}),
     v.makeTuple({}),
     Fixup::none()
   };
@@ -1697,7 +1720,7 @@ void emitUninitDefaultArgs(Vout& v, SrcKey sk, bool withCtx) {
 
 void emitInterpReqImpl(Vout& v, SrcKey sk, SBInvOffset spOff, TCA helper) {
   RegSet regSet;
-  if (sk.funcEntry()) {
+  if (sk.anyFuncEntry()) {
     auto const withCtx =
       sk.func()->isClosureBody() || sk.func()->cls() ||
       Cfg::HHIR::GenerateAsserts;
@@ -1718,14 +1741,14 @@ void emitInterpReqImpl(Vout& v, SrcKey sk, SBInvOffset spOff, TCA helper) {
 } // namespace
 
 void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
-  auto const helper = sk.funcEntry()
+  auto const helper = sk.anyFuncEntry()
     ? tc::ustubs().interpHelperFuncEntryFromTC
     : tc::ustubs().interpHelperFromTC;
   emitInterpReqImpl(v, sk, spOff, helper);
 }
 
 void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
-  auto const helper = sk.funcEntry()
+  auto const helper = sk.anyFuncEntry()
     ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
     : tc::ustubs().interpHelperNoTranslateFromTC;
   emitInterpReqImpl(v, sk, spOff, helper);

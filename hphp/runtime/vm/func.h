@@ -478,8 +478,18 @@ public:
    *
    * This is the DV funclet offset of the numArgsPassed-th parameter, or the
    * next parameter that has a DV funclet.
+   *
+   * allNamedParamsPassed should be true only if we statically know that we
+   * passed all named args for the callee.
    */
-  Offset getFuncEntryForNumArgs(int numArgsPassed) const;
+  Offset getFuncEntryForNumPositionals(int numPositionalsPassed,
+                                       bool allNamedParamsPassed) const;
+  /*
+   * Get the correct entrypoint (either the main entry, or the chain of named
+   * params DV funclets) for the func.
+   */
+  Offset getNamedParamsFuncEntry() const;
+
 
   // CTI entry points
   Offset ctiEntry() const;
@@ -1126,6 +1136,11 @@ public:
    * Does this function have named params?
    */
   bool hasNamedParams() const;
+
+  /*
+   * Does this function have any non-required named parameters?
+   */
+  bool hasOptionalNamedParameters() const;
 
   /*
    * Returns GenericsInfo which contains information about each generic

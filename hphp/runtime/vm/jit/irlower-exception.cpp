@@ -268,6 +268,38 @@ void cgRaiseModulePropertyViolation(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);
 }
 
+void cgCheckFunNamedArgsMismatch(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  using Fn = void(*)(const Func*, uint32_t, const ArrayData*, TypedValue*);
+  auto const data = inst->extra<CheckFunNamedArgsMismatch>();
+  auto const target = CallSpec::direct(static_cast<Fn>(checkFunNamedArgsMismatch));
+  auto const args = argGroup(env, inst)
+    .imm(data->callee)
+    .imm(data->posArgc)
+    .ssa(0)
+    // The last arg offset will *not* account for the named arg names, since the
+    // prologue has no knowledge of those. The helper will have to adjust those
+    // manually.
+    .addr(rvmsp(), cellsToBytes(data->lastArgOffset));
+  cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
+}
+
+
+void cgCheckFunReifiedGenericsWithNamedArgs(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  using Fn = void(*)(const Func*, const ArrayData*, TypedValue*);
+  auto const data = inst->extra<GenericsWithNamedArgsData>();
+  auto const target = CallSpec::direct(static_cast<Fn>(checkFunReifiedGenericsWithNamedArgs));
+  auto const args = argGroup(env, inst)
+    .imm(data->callee)
+    .ssa(0)
+    // The last arg offset will *not* account for the named arg names, since the
+    // prologue has no knowledge of those. The helper will have to adjust those
+    // manually.
+    .addr(rvmsp(), cellsToBytes(data->lastArgOffset));
+  cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)
@@ -278,7 +310,6 @@ IMPL_OPCODE_CALL(CheckClsMethFunc)
 IMPL_OPCODE_CALL(CheckClsReifiedGenericMismatch)
 IMPL_OPCODE_CALL(CheckClsRGSoft)
 IMPL_OPCODE_CALL(CheckFunReifiedGenericMismatch)
-IMPL_OPCODE_CALL(CheckFunNamedArgsMismatch)
 IMPL_OPCODE_CALL(CheckInOutMismatch)
 IMPL_OPCODE_CALL(CheckReadonlyMismatch)
 IMPL_OPCODE_CALL(RaiseErrorOnInvalidIsAsExpressionType)

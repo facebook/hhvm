@@ -681,9 +681,10 @@ void log(const RegionContext& ctx) {
   ent.setInt("has_this", ctx.sk.hasThis());
   ent.setStr("resume_mode", resumeModeShortName(ctx.sk.resumeMode()));
   ent.setInt("func_entry", ctx.sk.funcEntry());
+  ent.setInt("named_params_func_entry", ctx.sk.namedParamsFuncEntry());
   ent.setInt("offset", ctx.sk.offset());
   ent.setInt("hash", ctx.sk.stableHash());
-  if (ctx.sk.funcEntry()) {
+  if (ctx.sk.anyFuncEntry()) {
     ent.setInt("entry_offset", ctx.sk.entryOffset());
     ent.setInt("entry_num_args", ctx.sk.numEntryArgs());
   }

@@ -2931,7 +2931,7 @@ bool global_dce(const IIndex& index, const FuncAnalysis& ai,
   entrypoint[func->mainEntry] = true;
   for (auto const blkId: func->dvEntries) {
     if (blkId != NoBlockId) {
-      entrypoint[blkId]= true;
+      entrypoint[blkId] = true;
     }
   }
 

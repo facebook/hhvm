@@ -334,19 +334,26 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // that could read or write anything as far as we know (including frame
   // locals).
   case ReqBindJmp: {
-    auto const uninitArgs = [&]{
+    auto const uninitArgs = [&]() -> AliasClass {
       auto const extra = inst.extra<ReqBindJmp>();
-      if (!extra->target.funcEntry()) return AEmpty;
-
-      // Kill TUninit arguments passed by prologue.
+      if (!extra->target.funcEntry()) {
+        return AEmpty;
+      }
       auto const func = extra->target.func();
+      // No kills for the main func entry.
+      if (extra->target.funcEntry() &&
+          extra->target.numEntryArgs() == func->numPositionalParams()) {
+        return AEmpty;
+      }
       auto const numParams = func->numNonVariadicParams();
-      auto const numEntryArgs = extra->target.numEntryArgs();
-      assertx(numEntryArgs <= numParams);
-      return numEntryArgs == numParams ? AEmpty : AStack::range(
+      auto const totalEntryArgs = extra->target.numEntryArgs() + func->numNamedParams();
+      assertx(totalEntryArgs <= numParams);
+      // Kill TUninit positionals passed by prologue.
+      auto killedPosArgs = totalEntryArgs == numParams ? AEmpty : AStack::range(
         extra->irSPOff + func->numFuncEntryInputs() - numParams,
-        extra->irSPOff + func->numFuncEntryInputs() - numEntryArgs
+        extra->irSPOff + func->numFuncEntryInputs() - totalEntryArgs
       );
+      return killedPosArgs;
     }();
 
     return ExitEffects {
@@ -599,6 +606,36 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NativeImpl:
     return UnknownEffects {};
 
+  // This opcode will read all passed args and may push up to
+  // len(optional named param) extra typed values on the VM stack, which
+  // also involves moving existing positional args.
+  case CheckFunNamedArgsMismatch: {
+    auto const extra = inst.extra<CheckFunNamedArgsMismatch>();
+    auto const func = extra->callee;
+    auto numStackWrites = func->numNamedParams() + extra->posArgc;
+    if (numStackWrites > 0) {
+      IRSPRelOffset firstInputOffset {
+        static_cast<int32_t>(extra->lastArgOffset - extra->posArgc + 1)
+      };
+      auto stackRange =
+        AStack::range(firstInputOffset, firstInputOffset + numStackWrites);
+      return may_load_store(AHeapAny | stackRange, AHeapAny | stackRange);
+    }
+    return may_load_store(AHeapAny, AHeapAny);
+  }
+
+  case PushEmptyReifiedGenericsWithNamedArgs: {
+   auto const extra = inst.extra<GenericsWithNamedArgsData>();
+   auto startOffset = IRSPRelOffset{static_cast<int32_t>(extra->lastArgOffset) + 1};
+   if (extra->callee->numNamedParams() > 0) {
+      auto const writeRange = AStack::range(
+        startOffset,
+        startOffset + extra->callee->numNamedParams()
+      );
+      return may_load_store(AHeapAny, AHeapAny | writeRange);
+    }
+    return may_load_store(AHeapAny, AHeapAny);
+  }
 
   // These C++ helpers can invoke the user error handler and go do whatever
   // they want to non-frame locations.
@@ -675,28 +712,33 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CallFuncEntry:
     {
       auto const extra = inst.extra<CallFuncEntry>();
-      auto const calleePrototype = extra->calleePrototype;
-      auto const numParams = calleePrototype->numNonVariadicParams();
+      auto const callee = extra->calleePrototype;
+      auto const numPosParams = callee->numPositionalParams();
+
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(extra->spOffset) | AMIStateAny | AVMRegAny,
-        // Kill TUninit arguments.
-        extra->numInitArgs >= numParams ? AEmpty : AStack::range(
-          extra->spOffset + calleePrototype->numFuncEntryInputs() - numParams,
-          extra->spOffset + calleePrototype->numFuncEntryInputs() - extra->numInitArgs
+        // Kill TUninit positionals where we pushed uninits.
+        extra->numInitPositionals >= numPosParams ? AEmpty : AStack::range(
+          extra->spOffset
+            + callee->numFuncEntryInputs() - callee->numNamedParams()
+            - numPosParams,
+          extra->spOffset
+            + callee->numFuncEntryInputs() - callee->numNamedParams()
+            - extra->numInitPositionals
         ),
         // Input arguments.
-        calleePrototype->numFuncEntryInputs() == 0 ? AEmpty : AStack::range(
+        callee->numFuncEntryInputs() == 0 ? AEmpty : AStack::range(
           extra->spOffset,
-          extra->spOffset + calleePrototype->numFuncEntryInputs()
+          extra->spOffset + callee->numFuncEntryInputs()
         ),
         // ActRec.
-        actrec(inst.src(0), extra->spOffset + calleePrototype->numFuncEntryInputs()),
+        actrec(inst.src(0), extra->spOffset + callee->numFuncEntryInputs()),
         // Inout outputs.
-        calleePrototype->numInOutParams() == 0 ? AEmpty : AStack::range(
-          extra->spOffset + calleePrototype->numFuncEntryInputs() + kNumActRecCells,
-          extra->spOffset + calleePrototype->numFuncEntryInputs() + kNumActRecCells +
-          calleePrototype->numInOutParams()
+        callee->numInOutParams() == 0 ? AEmpty : AStack::range(
+          extra->spOffset + callee->numFuncEntryInputs() + kNumActRecCells,
+          extra->spOffset + callee->numFuncEntryInputs() + kNumActRecCells +
+          callee->numInOutParams()
         ),
         // Backtrace locals.
         backtrace_locals(inst)
@@ -1907,7 +1949,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckClsReifiedGenericMismatch:
   case CheckClsRGSoft:
   case CheckFunReifiedGenericMismatch:
-  case CheckFunNamedArgsMismatch:
+  case CheckFunReifiedGenericsWithNamedArgs:
   case GetClsRGProp:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:

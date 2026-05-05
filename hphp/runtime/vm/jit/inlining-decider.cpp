@@ -546,7 +546,7 @@ bool shouldInline(const irgen::IRGS& irgs,
     sk = block->start();
 
     for (auto i = 0, n = block->length(); i < n; ++i, sk.advance()) {
-      if (sk.funcEntry()) continue;
+      if (sk.anyFuncEntry()) continue;
 
       // We don't allow inlined functions in the region.  The client is
       // expected to disable inlining for the region it gives us to peek.
@@ -816,9 +816,12 @@ irgen::RegionAndLazyUnit selectCalleeRegion(
 
   while (entry.trivialDVFuncEntry()) {
     auto const param = entry.numEntryArgs();
-    assertx(param < inputTypes.size());
-    inputTypes[param] = Type::cns(callee->params()[param].defaultValue);
-    entry = SrcKey{callee, param + 1, SrcKey::FuncEntryTag {}};
+    auto const paramIdx = param + callee->numNamedParams();
+    assertx(paramIdx < inputTypes.size());
+    inputTypes[paramIdx] = Type::cns(callee->params()[paramIdx].defaultValue);
+    // TODO(named_params) once we start inlining callees
+    // with named params, consider the NamedParamsFuncEntryTag case.
+    entry = SrcKey{callee, param + 1, false, SrcKey::FuncEntryTag {}};
   }
 
   if (profData()) {

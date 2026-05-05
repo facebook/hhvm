@@ -964,6 +964,10 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
     emitFuncEntry(irgs);
     return;
   }
+  if (ni.source.namedParamsFuncEntry()) {
+    emitNamedParamsFuncEntry(irgs);
+    return;
+  }
 
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {

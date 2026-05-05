@@ -648,7 +648,7 @@ void RegionTranslator::gen() {
   // can cause variations in the size of code.prof.
   if (kind == TransKind::Profile &&
       !profData()->profiling(sk.funcID()) &&
-      !sk.funcEntry()) {
+      !sk.anyFuncEntry()) {
     return;
   }
   if (!checkLimit(kind, srcRec->numTrans())) return fail();
@@ -772,8 +772,8 @@ void RegionTranslator::publishCodeImpl() {
 
   srcRec->newTranslation(loc, tailBranches);
   auto const func = sk.func();
-  auto const numParams = func->numNonVariadicParams();
-  if (sk == SrcKey{func, numParams, SrcKey::FuncEntryTag{}}) {
+  auto const numPosParams = func->numPositionalParams();
+  if (sk == SrcKey{func, numPosParams, false, SrcKey::FuncEntryTag{}}) {
     const_cast<Func*>(func)->setFuncEntry(entry());
   }
 
@@ -791,8 +791,8 @@ void RegionTranslator::setCachedForProcessFail() {
   always_assert(srcRec);
 
   auto const func = sk.func();
-  auto const numParams = func->numNonVariadicParams();
-  if (sk == SrcKey{func, numParams, SrcKey::FuncEntryTag{}}) {
+  auto const numPosParams = func->numPositionalParams();
+  if (sk == SrcKey{func, numPosParams, false, SrcKey::FuncEntryTag{}}) {
     const_cast<Func*>(func)->setFuncEntry(
       tc::ustubs().interpHelperNoTranslateFuncEntryFromTC);
   }

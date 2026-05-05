@@ -46,6 +46,10 @@ function qux(int $x, named string $a = "a", named int $b=333, int ...$args) {
     var_dump($v);
 }
 
+function only_optional_named(named string $a = "adef", named string $b = "bdef") {
+    var_dump(vec[$a, $b]);
+}
+
 <<__EntryPoint>>
 function main() {
     foo(1, 2, a=30);
@@ -68,4 +72,9 @@ function main() {
     $v = vec[3, 4];
     qux(1, 2, a="aaa", ...$v);
     qux(b=444, ...$v);
+
+    only_optional_named();
+    only_optional_named(a="acustom");
+    only_optional_named(b="bcustom");
+    only_optional_named(b="bcustom", a="acustom");
 }

@@ -446,6 +446,7 @@ dynamic getSrcKey(const SrcKey& sk) {
                         ("unit", unit->origFilepath()->slice())
                         ("prologue", sk.prologue())
                         ("funcEntry", sk.funcEntry())
+                        ("namedParamsFuncEntry", sk.namedParamsFuncEntry())
                         ("offset", sk.printableOffset())
                         ("resumeMode", resumeModeShortName(sk.resumeMode()))
                         ("hasThis", sk.hasThis())

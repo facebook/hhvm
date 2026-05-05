@@ -27,7 +27,7 @@ namespace HPHP::jit {
  * Assumes that inst.source and inst.unit have been properly set.
  */
 static void populateImmediates(NormalizedInstruction& inst) {
-  if (inst.source.funcEntry()) return;
+  if (inst.source.anyFuncEntry()) return;
 
   for (int i = 0; i < numImmediates(inst.op()); ++i) {
     inst.imm[i] = getImm(inst.pc(), i, inst.unit());

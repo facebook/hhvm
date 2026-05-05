@@ -211,9 +211,9 @@ void sortRegions(RegionVec& regions, const Func* /*func*/, const TransCFG& cfg,
     auto const isBetter = [&]{
       if (!lowestSk.valid()) return true;
       if (firstSk == lowestSk) return weight > maxEntryWeight;
-      if (firstSk.funcEntry() && !lowestSk.funcEntry()) return true;
-      if (!firstSk.funcEntry() && lowestSk.funcEntry()) return false;
-      if (!firstSk.funcEntry()) return firstSk.offset() < lowestSk.offset();
+      if (firstSk.anyFuncEntry() && !lowestSk.anyFuncEntry()) return true;
+      if (!firstSk.anyFuncEntry() && lowestSk.anyFuncEntry()) return false;
+      if (!firstSk.anyFuncEntry()) return firstSk.offset() < lowestSk.offset();
       if (weight != maxEntryWeight) return weight > maxEntryWeight;
       return firstSk.entryOffset() < lowestSk.entryOffset();
     }();
@@ -337,8 +337,12 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
         auto sk1 = profData->transRec(tid1)->srcKey();
         auto sk2 = profData->transRec(tid2)->srcKey();
         if (sk1 != sk2) {
-          if (sk1.funcEntry() != sk2.funcEntry()) return sk1.funcEntry();
-          if (sk1.funcEntry()) return sk1.numEntryArgs() < sk2.numEntryArgs();
+          if (sk1.anyFuncEntry() != sk2.anyFuncEntry()) return sk1.anyFuncEntry();
+          if (sk1.funcEntry() && sk2.funcEntry()) {
+            return sk1.numEntryArgs() < sk2.numEntryArgs();
+          }
+          if (sk1.namedParamsFuncEntry()) return !sk2.funcEntry();
+          if (sk2.namedParamsFuncEntry()) return !sk1.funcEntry();
           return sk1.offset() < sk2.offset();
         }
       }

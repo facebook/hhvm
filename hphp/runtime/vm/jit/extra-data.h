@@ -954,7 +954,7 @@ struct LdBindAddrData : IRExtraData {
     : sk(sk)
     , bcSPOff(bcSPOff)
   {
-    assertx(!sk.funcEntry());
+    assertx(!sk.anyFuncEntry());
   }
 
   std::string show() const {
@@ -1129,7 +1129,7 @@ struct ReqBindJmpData : IRExtraData {
     , irSPOff(irSPOff)
     , popFrame(popFrame)
   {
-    assertx(IMPLIES(popFrame, target.funcEntry()));
+    assertx(IMPLIES(popFrame, target.anyFuncEntry()));
   }
 
   std::string show() const {
@@ -1338,21 +1338,24 @@ struct CallData : IRExtraData {
 struct CallFuncEntryData : IRExtraData {
   explicit CallFuncEntryData(const Func* calleePrototype,
                              IRSPRelOffset spOffset,
-                             uint32_t numInitArgs,
+                             uint32_t numInitPositionals,
                              uint32_t arFlags,
-                             bool formingRegion)
+                             bool formingRegion,
+                             bool addedUninitNamedParams)
     : calleePrototype(calleePrototype)
     , spOffset(spOffset)
-    , numInitArgs(numInitArgs)
+    , numInitPositionals(numInitPositionals)
     , arFlags(arFlags)
     , formingRegion(formingRegion)
+    , addedUninitNamedParams(addedUninitNamedParams)
   {}
 
   std::string show() const {
     return folly::sformat(
-      "{}, IRSP {}, numInitArgs {}, arFlags {}{}",
-      calleePrototype->fullName()->data(), spOffset.offset, numInitArgs, arFlags,
-      formingRegion ? ",formingRegion" :""
+      "{}, IRSP {}, numInitPositionals {}, arFlags {}{}{}",
+      calleePrototype->fullName()->data(), spOffset.offset, numInitPositionals, arFlags,
+      formingRegion ? ",formingRegion" : "",
+      addedUninitNamedParams ? ",addedUninitNamedParams" :""
     );
   }
 
@@ -1360,18 +1363,20 @@ struct CallFuncEntryData : IRExtraData {
     return folly::hash::hash_combine(
       calleePrototype->stableHash(),
       std::hash<int32_t>()(spOffset.offset),
-      std::hash<uint32_t>()(numInitArgs),
+      std::hash<uint32_t>()(numInitPositionals),
       std::hash<uint32_t>()(arFlags),
-      std::hash<bool>()(formingRegion)
+      std::hash<bool>()(formingRegion),
+      std::hash<bool>()(addedUninitNamedParams)
     );
   }
 
   bool equals(const CallFuncEntryData& o) const {
     return calleePrototype == o.calleePrototype &&
            spOffset == o.spOffset &&
-           numInitArgs == o.numInitArgs &&
+           numInitPositionals == o.numInitPositionals &&
            arFlags == o.arFlags &&
-           formingRegion == o.formingRegion;
+           formingRegion == o.formingRegion &&
+           addedUninitNamedParams == o.addedUninitNamedParams;
   }
 
   bool asyncEagerReturn() const {
@@ -1384,9 +1389,10 @@ struct CallFuncEntryData : IRExtraData {
 
   const Func* calleePrototype;
   IRSPRelOffset spOffset;
-  uint32_t numInitArgs;
+  uint32_t numInitPositionals;
   uint32_t arFlags;
   bool formingRegion;
+  bool addedUninitNamedParams;
 };
 
 struct InlineSideExitData : IRExtraData {
@@ -3064,6 +3070,60 @@ struct CheckHandleSurpriseEnterData : IRExtraData {
   bool checkStackOverflow;
 };
 
+struct CheckFunNamedArgsMismatchData : IRExtraData {
+  explicit CheckFunNamedArgsMismatchData(
+    const Func* callee, const uint32_t posArgc,
+    const int32_t lastArgOffset) :
+    callee(callee), posArgc(posArgc), lastArgOffset(lastArgOffset) {}
+
+
+  std::string show() const {
+    return folly::sformat("{}, {}, {}", callee->fullName()->data(),
+                          posArgc, lastArgOffset);
+  }
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      callee->stableHash(),
+      std::hash<uint32_t>()(posArgc),
+      std::hash<uint32_t>()(lastArgOffset)
+    );
+  }
+
+  bool equals(const CheckFunNamedArgsMismatchData& o) const {
+    return callee == o.callee && posArgc == o.posArgc
+      && lastArgOffset == o.lastArgOffset;
+  }
+
+  const Func* callee;
+  const uint32_t posArgc;
+  const uint32_t lastArgOffset;
+};
+
+
+struct GenericsWithNamedArgsData: IRExtraData {
+  explicit GenericsWithNamedArgsData(
+    const Func* callee, const int32_t lastArgOffset) :
+    callee(callee), lastArgOffset(lastArgOffset) {}
+
+
+  std::string show() const {
+    return folly::sformat("{}, {}", callee->fullName()->data(), lastArgOffset);
+  }
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      callee->stableHash(),
+      std::hash<uint32_t>()(lastArgOffset)
+    );
+  }
+
+  bool equals(const GenericsWithNamedArgsData& o) const {
+    return callee == o.callee && lastArgOffset == o.lastArgOffset;
+  }
+
+  const Func* callee;
+  const uint32_t lastArgOffset;
+};
+
 struct SampleRateData : IRExtraData {
   explicit SampleRateData(uint32_t sampleRate = 1) : sampleRate(sampleRate) {}
 
@@ -3233,6 +3293,11 @@ X(ThrowUnexpectedNamedArguments,
                                 FuncData);
 X(ThrowNamedArgumentNameMismatch,
                                 FuncData);
+X(CheckFunNamedArgsMismatch,    CheckFunNamedArgsMismatchData);
+X(CheckFunReifiedGenericsWithNamedArgs,
+                                GenericsWithNamedArgsData);
+X(PushEmptyReifiedGenericsWithNamedArgs,
+                                GenericsWithNamedArgsData);
 X(CallViolatesModuleBoundary,   FuncData);
 X(CheckInOutMismatch,           BoolVecArgsData);
 X(ThrowInOutMismatch,           ParamData);

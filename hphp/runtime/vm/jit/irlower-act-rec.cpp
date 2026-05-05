@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -94,6 +95,8 @@ void cgConvFuncPrologueFlagsToARFlags(IRLS& env, const IRInstruction* inst) {
   if (func->hasNamedParams()) {
     // HasNamedArguments clashes with the LocalsDecRefd bit, so explicitly
     // zero if it may exist.
+    // If the prologue received named arguments without accepting named params, this
+    // opcode is unreachable.
     int32_t constexpr namedArgMask = ~(1 << PrologueFlags::Flags::HasNamedArguments);
     v << andli{namedArgMask, src, prologueFlagsLow32, v.makeReg()};
     v << shrli{flagsDelta, prologueFlagsLow32, dst, v.makeReg()};
@@ -143,6 +146,32 @@ void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
     v << cmpwi{static_cast<int16_t>(bitmapImmed | topBit), anded, sf};
   }
   v << setcc{CC_Z, sf, dst};
+}
+
+namespace {
+void pushEmptyReifiedGenericsWithNamedArgs(const Func* callee,
+                                           const ArrayData* namedArgNames,
+                                           TypedValue* stackTop) {
+  auto namedArgNamesSize = namedArgNames == nullptr ? 0 : namedArgNames->size();
+  stackTop -= namedArgNamesSize;
+  // We're apparating an empty stack above the top.
+  stackTop[-1] = make_tv<KindOfVec>(ArrayData::CreateVec());
+}
+} // namespace
+
+void cgPushEmptyReifiedGenericsWithNamedArgs(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  using Fn = void(*)(const Func*, const ArrayData*, TypedValue*);
+  auto const data = inst->extra<GenericsWithNamedArgsData>();
+  auto const target =
+    CallSpec::direct(static_cast<Fn>(pushEmptyReifiedGenericsWithNamedArgs));
+  auto const args = argGroup(env, inst)
+    .imm(data->callee)
+    .ssa(0)
+    // The last arg offset will *not* account for the named arg names, since the
+    // prologue has no knowledge of those. The helper will have to adjust those manually.
+    .addr(rvmsp(), cellsToBytes(data->lastArgOffset));
+  cgCallHelper(v, env, target, kVoidDest, SyncOptions::None, args);
 }
 
 void cgLdARFlags(IRLS& env, const IRInstruction* inst) {

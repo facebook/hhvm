@@ -48,9 +48,9 @@ namespace {
 
 uint64_t toStubKey(StubType type, SrcKey sk, SBInvOffset spOff) {
   auto const t = static_cast<uint8_t>(type);
-  auto const bcOffOrNumArgs = sk.funcEntry() ? sk.numEntryArgs() : sk.offset();
+  auto const bcOffOrNumArgs = sk.anyFuncEntry() ? sk.numEntryArgs() : sk.offset();
   assertx(t < (1 << 2));
-  assertx(0 <= bcOffOrNumArgs && bcOffOrNumArgs < (1LL << 30));
+  assertx(0 <= bcOffOrNumArgs && bcOffOrNumArgs < (1LL << 29));
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wtautological-compare"
   assertx(0 <= spOff.offset && spOff.offset < (1LL << 31));
@@ -58,6 +58,7 @@ uint64_t toStubKey(StubType type, SrcKey sk, SBInvOffset spOff) {
   return
     (static_cast<uint64_t>(t) << 62) +
     (static_cast<uint64_t>(sk.funcEntry()) << 61) +
+    (static_cast<uint64_t>(sk.namedParamsFuncEntry()) << 60) +
     (static_cast<uint64_t>(bcOffOrNumArgs) << 31) +
     (static_cast<uint64_t>(spOff.offset));
 }
@@ -73,10 +74,14 @@ TCA typeToHandler(StubType type) {
   }
 }
 
-TCA typeToFuncEntryHandler(StubType type) {
+TCA typeToFuncEntryHandler(StubType type, bool namedParamEntry) {
   switch (type) {
-    case StubType::Translate:   return tc::ustubs().handleTranslateFuncEntry;
-    case StubType::Retranslate: return tc::ustubs().handleRetranslateFuncEntry;
+    case StubType::Translate:   return namedParamEntry
+                                  ? tc::ustubs().handleTranslateNamedParamsFuncEntry
+                                  : tc::ustubs().handleTranslateFuncEntry;
+    case StubType::Retranslate: return namedParamEntry
+                                  ? tc::ustubs().handleRetranslateNamedParamsFuncEntry
+                                  : tc::ustubs().handleRetranslateFuncEntry;
     default:                    not_reached();
   }
 }
@@ -118,17 +123,17 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   TCA frozenStart = view.frozen().frontier();
 
   auto const emit = [&] (Vout& v) {
-    assertx(!sk.funcEntry());
+    assertx(!sk.anyFuncEntry());
     v << copy{v.cns(sk.offset()), rarg(0)};
     v << copy{v.cns(spOff.offset), rarg(1)};
     v << jmpi{typeToHandler(type), cross_trace_regs() | arg_regs(2)};
   };
 
   auto const emitFuncEntry = [&] (Vout& v) {
-    assertx(sk.funcEntry());
+    assertx(sk.anyFuncEntry());
     assertx(spOff == SBInvOffset{0});
     v << copy{v.cns(sk.numEntryArgs()), rarg(3)};
-    v << jmpi{typeToFuncEntryHandler(type),
+    v << jmpi{typeToFuncEntryHandler(type, sk.namedParamsFuncEntry()),
               func_entry_regs(true /* withCtx */) | rarg(3)};
   };
 
@@ -136,7 +141,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
     view.cold(),
     view.data(),
     [&] (Vout& v) {
-      if (!sk.funcEntry()) {
+      if (!sk.anyFuncEntry()) {
         emit(v);
       } else {
         emitFuncEntry(v);

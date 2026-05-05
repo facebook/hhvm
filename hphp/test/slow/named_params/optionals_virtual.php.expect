@@ -2,13 +2,6 @@ vec(5) {
   int(1)
   int(2)
   int(30)
-  int(4)
-  int(5)
-}
-vec(5) {
-  int(1)
-  int(2)
-  int(30)
   int(40)
   int(50)
 }
@@ -101,20 +94,4 @@ vec(4) {
   string(1) "a"
   int(444)
   int(4)
-}
-vec(2) {
-  string(4) "adef"
-  string(4) "bdef"
-}
-vec(2) {
-  string(7) "acustom"
-  string(4) "bdef"
-}
-vec(2) {
-  string(4) "adef"
-  string(7) "bcustom"
-}
-vec(2) {
-  string(7) "acustom"
-  string(7) "bcustom"
 }

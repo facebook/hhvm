@@ -70,7 +70,6 @@ namespace {
 void regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   auto rec = profData()->transRec(prologueTransId);
   auto func = rec->func();
-  // TODO(named_params) ensure that this is positional arg count.
   auto nArgs = rec->prologueArgs();
   auto sk = rec->srcKey();
 
@@ -155,11 +154,6 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
 
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
-  // TODO(named_params) Generate prologues for funcs with optional named
-  // params.
-  if (func->numNamedParams() != func->numRequiredNamedParams()) {
-    return TranslationResult::failForProcess();
-  }
 
   tc::PrologueTranslator translator(func, nPassed);
 

@@ -563,6 +563,8 @@ bool canDCE(const IRInstruction& inst) {
   case CheckClsRGSoft:
   case CheckFunReifiedGenericMismatch:
   case CheckFunNamedArgsMismatch:
+  case CheckFunReifiedGenericsWithNamedArgs:
+  case PushEmptyReifiedGenericsWithNamedArgs:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
   case PrintStr:

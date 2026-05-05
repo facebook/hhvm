@@ -231,20 +231,24 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
   v << syncvmsp{ssp};
 
   auto const done = v.makeBlock();
-  auto const numArgs = std::min(extra->numInitArgs, calleePrototype->numNonVariadicParams());
+  auto const numPosArgs = std::min(extra->numInitPositionals,
+                                   calleePrototype->numPositionalParams());
   if (func != nullptr) {
     v << copy{v.cns(func->getFuncId().toInt()), r_func_entry_callee_id()};
     // When we statically know the callee, emit a smashable call that initially
     // calls a recyclable service request stub. The stub and the eventual targets
     // take rvmfp() as an argument, pointing to the callee ActRec.
-    auto entry = SrcKey{func, numArgs, SrcKey::FuncEntryTag {}};
+    auto entry = SrcKey {
+      func, numPosArgs, extra->addedUninitNamedParams, SrcKey::FuncEntryTag {}
+    };
     v << callphpfe{entry, func_entry_regs(withCtx)};
   } else {
     // We're doing a virtual dispatch to the call func entry. Read the `m_funcEntry`
     // field from the function and call it directly. The field will be initialized to
     // a stub that assumes `nonNonVariadicParams` are passed in and translates the func entry
     // with the appropriate SrcKey.
-    assertx(numArgs == calleePrototype->numNonVariadicParams());
+    assertx(numPosArgs == calleePrototype->numPositionalParams());
+    assertx(!extra->addedUninitNamedParams);
     // Load the FuncEntry address dynamically from the function.
     auto dest = v.makeReg();
     auto const funcEntryOff = safe_cast<int32_t>(Func::funcEntryOff());
@@ -453,7 +457,7 @@ static void traceCallback(ActRec* fp, TypedValue* sp, SrcKey::AtomicInt skInt) {
            __builtin_return_address(0));
   }
   // Func entries do not have all locals set up.
-  checkFrame(fp, sp, !sk.funcEntry() /* fullCheck */);
+  checkFrame(fp, sp, !sk.anyFuncEntry() /* fullCheck */);
 }
 
 void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {

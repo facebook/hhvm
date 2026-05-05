@@ -342,7 +342,7 @@ private:
 
       // We have special profiling and logic to decide which arcs from a Switch
       // are eligible for inclusion in the region.
-      if (!termSk.funcEntry() && termSk.op() == OpSwitch) {
+      if (!termSk.anyFuncEntry() && termSk.op() == OpSwitch) {
         trimSwitchArcs(srcBlockId, *tidRegion, arcs);
       }
 

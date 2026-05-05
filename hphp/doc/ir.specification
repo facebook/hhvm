@@ -2231,6 +2231,17 @@ ReqBindJmp and CallFuncEntry.
   Warns or raises a catchable type hint error if value S0 does not
   match the type structure given on S1.
 
+| CheckFunReifiedGenericsWithNamedArgs<callee,bcSPOff>, ND, S(Nullptr|Vec), NF
+
+  Runtime helper to inspect and check reified generics in the presence of
+  named args. Must be called within a prologue context, and assumes
+  that reified generics live at bcSPOff + S0.size() offset from vmsp().
+
+| PushEmptyReifiedGenericsWithNamedArgs<callee,bcSPOff>, ND, S(Nullptr|Vec), NF
+
+  Runtime helper to push an empty reified generics vec at the top of the stack.
+  Will place the reified generics at bcSPOff + S0.size() offset from vmsp().
+
 | ThrowUninitLoc<localId>, ND, S(Str), T
 
   Throws an UndefinedVariableException on an uninitialized local variable.
@@ -2360,11 +2371,13 @@ ReqBindJmp and CallFuncEntry.
 
   Raises runtime errors if the func in S0 is not a callable static method.
 
-| CheckFunNamedArgsMismatch, ND, S(Func) S(Vec|Nullptr), LA
+| CheckFunNamedArgsMismatch<callee, posArgc, stackTopOffset>, D(Int), S(Vec|Nullptr), LA
 
-  Raises a runtime error if the passed named arg names in S1 are incompatible with
-  S0's named param names, either due to missing a required named parameter or
-  passing extra named args.
+  Raises a runtime error if the passed named arg names in S0 are incompatible with
+  callee's named param names for a call with posArgc positionals. If a runtime error
+  is not raised, populates all un-passed named parameters in the appropriate
+  stack locations assuming S1 is the stack's top. Returns the number of
+  allocated typed values.
 
 | CheckClsReifiedGenericMismatch, ND, S(Cls) S(Vec), LA
 

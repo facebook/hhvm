@@ -438,6 +438,7 @@ struct UniqueStubs {
    */
   TCA handleTranslate;
   TCA handleTranslateFuncEntry;
+  TCA handleTranslateNamedParamsFuncEntry;
   /*
    * Same as `handleTranslateFuncEntry`, but serves as the entry stub for
    * func entries, and assumes that the caller knows that it's calling the
@@ -455,15 +456,18 @@ struct UniqueStubs {
    */
   TCA handleRetranslate;
   TCA handleRetranslateFuncEntry;
+  TCA handleRetranslateNamedParamsFuncEntry;
 
   /*
    * Handle a request to retranslate the current function in optimized mode.
    * See svcreq::handleRetranslateOpt() for more details.
+   * The NamedFE variant retranslates the named parameters func entry.
    *
    * @reached:  jmp from TC
    * @context:  func body
    */
   TCA handleRetranslateOpt;
+  TCA handleRetranslateOptNamedFE;
 
   /////////////////////////////////////////////////////////////////////////////
 

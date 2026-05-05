@@ -252,12 +252,14 @@ private:
 
   static constexpr Offset kPrologueOffset = -1;
   static constexpr Offset kFuncEntryOffset = -2;
+  static constexpr Offset kNamedParamsFuncEntryOffset = -3;
 
   static Offset bcOffForProfileKey(SrcKey sk) {
     // Use a placeholder value for prologues and function entries, as they
     // are not part of a bytecode at any offset. Profiling of prologues for
     // different number of arguments is still differentiated by profTransID.
     if (sk.prologue()) return kPrologueOffset;
+    if (sk.namedParamsFuncEntry()) return kNamedParamsFuncEntryOffset;
     if (sk.funcEntry()) return kFuncEntryOffset;
     return sk.offset();
   }

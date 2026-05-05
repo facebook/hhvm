@@ -187,7 +187,7 @@ bool emit(Venv& env, const callphps& i) {
 }
 
 bool emit(Venv& env, const callphpfe& i) {
-  assertx(i.target.funcEntry());
+  assertx(i.target.anyFuncEntry());
   auto const call = emitSmashableCall(*env.cb, env.meta, env.cb->frontier());
   setJmpTransID(env, call);
   env.meta.smashableBinds.push_back({

@@ -140,7 +140,7 @@ bool needGuardForInput(Env& env, const InputInfo& input) {
  * Add the current instruction to the region.
  */
 void addInstruction(Env& env) {
-  if (!env.sk.funcEntry()) {
+  if (!env.sk.anyFuncEntry()) {
     auto prevBlocksIt = env.prevBlocks.find(env.sk.offset());
     if (prevBlocksIt != env.prevBlocks.end()) {
       FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
@@ -183,7 +183,7 @@ bool prepareInstruction(Env& env) {
   new (&env.inst) NormalizedInstruction(env.sk, curUnit(env));
   irgen::prepareForNextHHBC(env.irgs, env.sk);
 
-  if (env.sk.funcEntry()) {
+  if (env.sk.anyFuncEntry()) {
     addInstruction(env);
     return true;
   }
@@ -266,7 +266,7 @@ bool prepareInstruction(Env& env) {
 
 bool traceThroughJmp(Env& env) {
   // Func entry is not a jmp.
-  if (env.sk.funcEntry()) return false;
+  if (env.sk.anyFuncEntry()) return false;
 
   // We only trace through unconditional jumps and conditional jumps with const
   // inputs while inlining.
@@ -448,7 +448,7 @@ void truncateLiterals(Env& env) {
   auto endSk = sk;
   auto func = lastBlock.func();
   for (int i = 0, len = lastBlock.length(); i < len; ++i, sk.advance(func)) {
-    if (!sk.funcEntry()) {
+    if (!sk.anyFuncEntry()) {
       auto const op = sk.op();
       if (isLiteral(op) || isThisSelfOrParent(op) || isTypeAssert(op)) continue;
     }
@@ -526,7 +526,7 @@ RegionDescPtr form_region(Env& env) {
 
     irgen::finishHHBC(env.irgs);
 
-    if (!env.sk.funcEntry() && !instrAllowsFallThru(env.inst.op())) {
+    if (!env.sk.anyFuncEntry() && !instrAllowsFallThru(env.inst.op())) {
       FTRACE(1, "selectTracelet: tracelet broken after instruction with no "
              "fall-through {}\n", env.inst);
       break;
@@ -536,7 +536,7 @@ RegionDescPtr form_region(Env& env) {
     assertx(env.sk.func() == curFunc(env));
     env.sk.advance(env.curBlock->func());
 
-    if (env.inst.source.funcEntry()) {
+    if (env.inst.source.anyFuncEntry()) {
       auto const func = curFunc(env);
       if (env.inst.source.trivialDVFuncEntry() ||
           func->hasNonTrivialDVFuncEntry()) {

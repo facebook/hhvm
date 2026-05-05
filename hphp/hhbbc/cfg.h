@@ -162,6 +162,12 @@ std::vector<BlockId> rpoSortFromMain(const php::WideFunc&);
 std::vector<BlockId> rpoSortAddDVs(const php::WideFunc&);
 
 /*
+ * Returns the NamedParamFuncEntry block id, and NoBlockId if none
+ * exists.
+ */
+BlockId namedParamFuncEntry(const php::Func&);
+
+/*
  * Mappings from blocks to sets of blocks.
  *
  * The first level is indexed by block id.  The second is a set of

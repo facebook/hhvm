@@ -248,17 +248,28 @@ void enqueueRetranslateOptRequest(tc::FuncMetaInfo* info) {
 
 void createSrcRecs(const Func* func) {
   auto const profData = globalProfData();
-  auto const numParams = func->numNonVariadicParams();
+  auto const numPosParams = func->numPositionalParams();
 
-  auto create_one = [&] (uint32_t numArgs) {
-    auto const sk = SrcKey { func, numArgs, SrcKey::FuncEntryTag {} };
-    if (numArgs == numParams ||
+  auto create_one = [&] (uint32_t numPosArgs) {
+    auto const sk = SrcKey { func, numPosArgs, false, SrcKey::FuncEntryTag {} };
+    if (numPosArgs == numPosParams ||
         profData->dvFuncletTransId(sk) != kInvalidTransID) {
       tc::createSrcRec(sk, SBInvOffset{0});
     }
   };
 
-  for (auto i = func->numRequiredParams(); i <= numParams; ++i) {
+  for (auto i = 0; i < func->numNamedParams(); ++i) {
+    const Func::ParamInfo& pi = func->params()[i];
+    if (pi.hasDefaultValue()) {
+      auto const sk = SrcKey { func, numPosParams, true, SrcKey::FuncEntryTag {} };
+      if (profData->dvFuncletTransId(sk) != kInvalidTransID) {
+        tc::createSrcRec(sk, SBInvOffset{0});
+      }
+      break;
+    }
+  }
+  for (auto i = func->numRequiredPositionalParams();
+       i <= func->numPositionalParams(); ++i) {
     create_one(i);
   }
 }

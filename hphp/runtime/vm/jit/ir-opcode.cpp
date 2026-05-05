@@ -316,6 +316,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckClsRGSoft:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
+  case CheckFunReifiedGenericsWithNamedArgs:
   case CheckFunNamedArgsMismatch:
   case CheckInOutMismatch:
   case CheckReadonlyMismatch:
@@ -938,6 +939,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileType:
   case PseudoRandomInt:
   case PtrToElemAsInt:
+  case PushEmptyReifiedGenericsWithNamedArgs:
   case RBTraceEntry:
   case RBTraceMsg:
   case RecordFuncCall:

@@ -496,7 +496,8 @@ using TypeNames::TCA;
                               }
 #define SCrossTrace           {                                                     \
                                 auto const extra = inst->extra<ReqBindJmpData>();   \
-                                if (extra->target.funcEntry() && !extra->popFrame) {\
+                                if (extra->target.anyFuncEntry() &&                 \
+                                    !extra->popFrame) {                             \
                                   S(Int)  /* ActRec flags */                        \
                                   S(Int)  /* func id of the callee */               \
                                   S(Cls|Obj|Nullptr)  /* prologue context */        \

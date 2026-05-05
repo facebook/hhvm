@@ -26,7 +26,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 bool branchesToItself(SrcKey sk) {
-  if (sk.funcEntry()) return false;
+  if (sk.anyFuncEntry()) return false;
   auto const op = sk.op();
   if (!instrIsControlFlow(op)) return false;
   if (isSwitch(op)) return false;
@@ -73,7 +73,7 @@ void exitRequest(IRGS& env, SrcKey target) {
   gen(
     env,
     ReqBindJmp,
-    ReqBindJmpData { target, invSP, irSP, target.funcEntry() },
+    ReqBindJmpData { target, invSP, irSP, target.anyFuncEntry() },
     sp(env),
     fp(env)
   );
@@ -110,7 +110,7 @@ Block* makeExit(IRGS& env, SrcKey targetSk) {
 }
 
 Block* makeExitSlow(IRGS& env) {
-  assertx(!curSrcKey(env).funcEntry());
+  assertx(!curSrcKey(env).anyFuncEntry());
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
   interpOne(env);

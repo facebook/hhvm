@@ -1,0 +1,40 @@
+vec(5) {
+  int(0)
+  int(1)
+  int(2)
+  dict(1) {
+    ["a"]=>
+    int(2)
+  }
+  int(7)
+}
+vec(5) {
+  int(0)
+  int(1)
+  int(2)
+  dict(1) {
+    ["a"]=>
+    int(1)
+  }
+  int(7)
+}
+vec(5) {
+  int(0)
+  int(1)
+  int(2)
+  dict(1) {
+    ["a"]=>
+    int(2)
+  }
+  int(42)
+}
+vec(5) {
+  int(84)
+  int(1)
+  int(2)
+  dict(1) {
+    ["a"]=>
+    int(2)
+  }
+  int(42)
+}

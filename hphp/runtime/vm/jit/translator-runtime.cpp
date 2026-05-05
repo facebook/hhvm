@@ -52,6 +52,7 @@
 #include "hphp/runtime/vm/jit/coeffect-fun-param-profile.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 
 #include "hphp/system/systemlib.h"
@@ -706,13 +707,87 @@ void raiseCoeffectsCallViolationHelper(const Func* callee,
                               RuntimeCoeffects::fromValue(requiredCoeffects));
 }
 
-void checkFunNamedArgsMismatch(const Func* callee, const ArrayData* namedArgNames) {
+inline void initFuncNamedParamDefaultValues(const Func* callee,
+                                            uint32_t posArgc,
+                                            const ArrayData* namedArgNames,
+                                            TypedValue* stackTop) {
+
+  int32_t numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+  bool hasVariadics = posArgc > callee->numPositionalParams();
+  auto const numArgs = posArgc + numNamedArgs;
+  assertx(callee->numNamedParams() >= numNamedArgs);
+  if (callee->numNamedParams() == numNamedArgs) {
+    return;
+  }
+
+  // As noted in irlower-exception.cpp, rvmsp() will not account for the named arg
+  // names that were passed in since that information isn't encoded in the prologues.
+  // We need to manually adjust the stack top to account for the named args.
+  // Since the stack grows down, we subtract.
+  stackTop -= numNamedArgs;
+
+  int32_t delta = callee->numNamedParams() - numNamedArgs;
+  assertx(delta > 0);
+  // We might have an extra variadics arg if we're in the
+  // too-many-args prologue. hasVariadics will handle it properly.
+  assertx(numArgs + delta <= callee->numParams() + 1);
+
+  // This logic runs *after* the reified generics checks, meaning that for callees
+  // with reified generics, the stack's top will be the reified generics type
+  // structure. Move it to its final location.
+  if (callee->hasReifiedGenerics()) {
+    stackTop[-delta] = *stackTop;
+    ++stackTop;
+  }
+
+  // We don't need to consider inouts here as they're mutually exclusive with named
+  // params.
+  // If there are no args present, this will point to the first unassigned location
+  // after the stack top, which is the right place to push the first optional
+  // named arg.
+  auto firstArgLoc = stackTop + numArgs - 1;
+  if (hasVariadics) {
+    stackTop[-delta] = *stackTop;
+  }
+
+  PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
+  int32_t argIdx = numArgs - 1 - hasVariadics;
+  for (int32_t paramIdx = posArgc + callee->numNamedParams() - 1 - hasVariadics; paramIdx >= 0; --paramIdx) {
+    assertx(IMPLIES(paramIdx < callee->numNamedParams(), argIdx < numNamedArgs));
+    if (paramIdx >= callee->numNamedParams() ||
+        (argIdx >= 0 &&
+         namedParamNames[paramIdx] == namedArgNames->at(argIdx).val().pstr)) {
+      firstArgLoc[-paramIdx] = firstArgLoc[-argIdx];
+      argIdx--;
+    } else {
+      auto const& DEBUG_ONLY param = callee->params()[paramIdx];
+      assertx(param.hasDefaultValue());
+      // Push uninits for any non-passed named params.
+      firstArgLoc[-paramIdx] = make_tv<KindOfUninit>();
+    }
+  }
+}
+
+void checkFunNamedArgsMismatch(const Func* callee, uint32_t posArgc,
+                               const ArrayData* namedArgNames, TypedValue* stackTop) {
+
   assertx(callee->hasNamedParams());
   checkNamedArgMismatch(
     callee, namedArgNames, throwUnexpectedNamedArguments,
     throwNamedArgumentNameMismatch, throwMissingNamedParam
   );
-  // TODO(named_params) also push optionals to vm stack 
+  initFuncNamedParamDefaultValues(callee, posArgc, namedArgNames, stackTop);
+}
+
+void checkFunReifiedGenericsWithNamedArgs(const Func* callee,
+                                          const ArrayData* namedArgNames,
+                                          TypedValue* stackTop) {
+  assertx(callee->hasReifiedGenerics());
+  auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+  stackTop -= numNamedArgs;
+  TypedValue generics = *stackTop;
+  assertx(tvIsVec(generics));
+  checkFunReifiedGenericMismatch(callee, val(generics).parr);
 }
 
 void throwOOBException(TypedValue base, TypedValue key) {

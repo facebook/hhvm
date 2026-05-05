@@ -290,7 +290,8 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
 
 SSATmp* callFuncEntry(IRGS& env, const Func* calleePrototype,
                       SSATmp* callee, SSATmp* objOrClass,
-                      uint32_t numArgsInclUnpack, bool asyncEagerReturn) {
+                      uint32_t posArgcInclUnpack, bool asyncEagerReturn,
+                      bool addedUninitNamedParams) {
   if (objOrClass == nullptr) objOrClass = cns(env, TNullptr);
   assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TObj|TCls));
 
@@ -309,9 +310,10 @@ SSATmp* callFuncEntry(IRGS& env, const Func* calleePrototype,
   auto const data = CallFuncEntryData {
     calleePrototype,
     spOffBCFromIRSP(env),
-    numArgsInclUnpack,
+    posArgcInclUnpack,
     arFlags,
-    env.formingRegion
+    env.formingRegion,
+    addedUninitNamedParams,
   };
   return gen(env, CallFuncEntry, data, sp(env), pubFP, callee, objOrClass);
 }
@@ -425,7 +427,7 @@ void speculateTargetFunction(IRGS& env, SSATmp* callee,
       gen(env, JmpZero, taken, equal);
     },
     [&] {
-      if (profiledFunc->numNamedParams() != profiledFunc->numRequiredNamedParams()) {
+      if (profiledFunc->hasOptionalNamedParameters()) {
         indirectCall();
       } else {
         callKnown(profiledFunc);
@@ -606,10 +608,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* objOrClass, bool dynamicCall,
                          bool suppressDynCallCheck) {
   assertx(callee);
-  // TODO(named_params): Add support for calling the func entry of functions
-  // with optional named params and relax this assertion.
-  assertx(callee->numNamedParams() == callee->numRequiredNamedParams());
-
   updateStackOffset(env);
 
   objOrClass = refineKnownFuncCtx(env, callee, objOrClass);
@@ -624,6 +622,14 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (dynamicCall && !suppressDynCallCheck) {
     emitCallerDynamicCallChecksKnown(env, callee);
   }
+
+  auto const namedArgNamesVal =
+    fca.namedArgNames != kInvalidId
+    ? curUnit(env)->lookupArrayId(fca.namedArgNames)
+    : nullptr;
+  auto const namedArgc =
+    static_cast<uint32_t>(namedArgNamesVal ? namedArgNamesVal->size() : 0);
+
   auto const doCall = [&](const FCallArgs& fca, bool skipRepack) {
     auto const asyncEagerOffset = callee->supportsAsyncEagerReturn()
       ? fca.asyncEagerOffset : kInvalidOffset;
@@ -639,8 +645,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     }
 
     assertx(
-      (!fca.hasUnpack() && fca.numArgs <= callee->numNonVariadicParams()) ||
-      (fca.hasUnpack() && fca.numArgs == callee->numNonVariadicParams()));
+      (!fca.hasUnpack() && fca.numArgs - namedArgc <= callee->numPositionalParams()) ||
+      (fca.hasUnpack() && fca.numArgs - namedArgc == callee->numPositionalParams()));
 
     updateStackOffset(env);
 
@@ -662,20 +668,22 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // be hoisted through the parameter checks.
     auto const calleeFP = genCalleeFP(env, callee, fca.numInputs());
 
-    auto const namedArgNamesVal = fca.namedArgNames == kInvalidId
-      ? nullptr
-      : curUnit(env)->lookupArrayId(fca.namedArgNames);
-    auto const namedArgNames =
-      // We have to explicitly write cns(env, nullptr) here, as if the type
-      // we pass is an ArrayData* it's assumed to be non-nullptr downstream.
+    SSATmp* namedArgNames =
       namedArgNamesVal ? cns(env, namedArgNamesVal) : cns(env, nullptr);
-    auto const namedArgc = namedArgNamesVal ? namedArgNamesVal->size() : 0;
-    uint32_t posArgc = numArgsInclUnpack - namedArgc;
+    auto posArgc = numArgsInclUnpack - namedArgc;
     // Callee checks and input initialization.
+    emitCalleeGenericsChecks(env, callee, prologueFlags, namedArgNames,
+                             fca.hasGenerics(),
+                             /* namedArgsAccountedInStack */ true);
     emitCalleeNamedArgChecks(env, callee, posArgc, prologueFlags,
                              namedArgNames);
-    emitCalleeGenericsChecks(env, callee, prologueFlags, fca.hasGenerics());
     emitCalleeArgumentArityChecks(env, callee, posArgc);
+    if (env.irb->inUnreachableState()) return;
+    // We need to push uninits before the argument type checks when calling
+    // func entries for type checking.
+    bool addedUninitNamed =
+      emitInitFuncNamedParams(env, callee, posArgc, namedArgNamesVal);
+
     emitCalleeArgumentTypeChecks(
       env, callee, posArgc,
       objOrClass ? objOrClass : cns(env, nullptr)
@@ -686,11 +694,14 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                              posArgc,
                              objOrClass ? objOrClass : cns(env, nullptr));
     emitCalleeRecordFuncCoverage(env, callee);
-    numArgsInclUnpack = posArgc + callee->numNamedParams();
-
     // Some of the checks above may have failed and it may be illegal to emit
     // the code below with incorrect inputs (such as not enough args).
     if (env.irb->inUnreachableState()) return;
+
+    // TODO(named_params): numArgsInclUnpack shouldn't exist as a concept any more.
+    // We should instead pass in the positional argc and named arg count separately,
+    // and fix the callees.
+    numArgsInclUnpack = posArgc + callee->numNamedParams();
 
     auto const inputTypes = funcEntryTypes(env, callee, fca, numArgsInclUnpack);
     auto const numInputs = numArgsInclUnpack
@@ -700,9 +711,10 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     auto const hasRdsCache =
       hasConstParamMemoCache(env, callee, objOrClass, inputTypes);
 
-    auto const numArgs =
-      std::min(numArgsInclUnpack, callee->numNonVariadicParams());
-    auto const entry = SrcKey { callee, numArgs, SrcKey::FuncEntryTag {} };
+    auto const numPosArgs =
+      std::min(posArgc, callee->numPositionalParams());
+    auto const entry =
+      SrcKey { callee, numPosArgs, addedUninitNamed, SrcKey::FuncEntryTag {} };
 
     if (!hasRdsCache) {
       if (irGenTryInlineFCall(env, entry, objOrClass, asyncEagerOffset,
@@ -740,8 +752,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
         [&] {
           hint(env, Block::Hint::Unlikely);
           auto const retVal = callFuncEntry(env, callee, cns(env, callee),
-                                            objOrClass, numArgsInclUnpack,
-                                            asyncEagerReturn);
+                                            objOrClass, posArgc,
+                                            asyncEagerReturn, addedUninitNamed);
           gen(env, StTVInRDS, data, retVal);
           gen(env, IncRef, retVal);
           gen(env, MarkRDSInitialized, RDSHandleData { data });
@@ -752,17 +764,19 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                        false /* unlikely */);
     } else {
       auto const retVal = callFuncEntry(env, callee, cns(env, callee),
-                                        objOrClass, numArgsInclUnpack,
-                                        asyncEagerReturn);
+                                        objOrClass, posArgc,
+                                        asyncEagerReturn, addedUninitNamed);
       handleCallReturn(env, callee, retVal, asyncEagerOffset,
                        false /* unlikely */);
     }
   };
 
+  const int32_t numToPack =
+    static_cast<int32_t>(fca.numArgs) - namedArgc - callee->numPositionalParams();
   if (fca.hasUnpack()) {
     updateStackOffset(env);
 
-    if (fca.numArgs == callee->numNonVariadicParams()) {
+    if (numToPack == 0) {
       if (fca.skipRepack()) return doCall(fca, true /* skipRepack */);
 
       auto const unpackOff = BCSPRelOffset{fca.hasGenerics() ? 1 : 0};
@@ -784,14 +798,13 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     return doCall(fca, false /* skipRepack */);
   }
 
-  if (fca.numArgs <= callee->numNonVariadicParams()) {
+  if (numToPack <= 0) {
     return doCall(fca, true /* skipRepack */);
   }
 
   // Pack extra arguments. The prologue can handle this even if the function
   // does not accept variadic arguments.
   auto const generics = fca.hasGenerics() ? popC(env) : nullptr;
-  auto const numToPack = fca.numArgs - callee->numNonVariadicParams();
   for (auto i = 0; i < numToPack; ++i) {
     assertTypeStack(env, BCSPRelOffset{i}, TInitCell);
   }
@@ -802,7 +815,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   doCall(FCallArgs(
     static_cast<FCallArgsFlags>(
       fca.flags | FCallArgsFlags::HasUnpack | FCallArgsFlags::SkipRepack),
-    callee->numNonVariadicParams(),
+    callee->numPositionalParams() + namedArgc,
     fca.numRets,
     nullptr,  // inout-ness already checked
     nullptr,  // readonly-ness already checked
@@ -812,27 +825,11 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   ), true /* skipRepack */);
 }
 
-bool canCallKnown(const Func* f) {
-  return f && f->numNamedParams() == f->numRequiredNamedParams();
-}
-
-bool canCallKnown(const SSATmp* tmp) {
-  return tmp->hasConstVal() && canCallKnown(tmp->funcVal());
-}
-
-const Func* knownCallee(const Func* f) {
-  return canCallKnown(f) ? f : nullptr;
-}
-
-const Func* knownCallee(const SSATmp* tmp) {
-  return canCallKnown(tmp) ? tmp->funcVal() : nullptr;
-}
-
 void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                            SSATmp* objOrClass, bool dynamicCall,
                            bool suppressDynCallCheck, bool unlikely) {
   assertx(callee->isA(TFunc));
-  if (canCallKnown(callee)) {
+  if (callee->hasConstVal()) {
     prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass,
                         dynamicCall, suppressDynCallCheck);
     return;
@@ -862,7 +859,7 @@ void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     prepareAndCallKnown(env, knownCallee, fca, objOrClass,
                         dynamicCall, suppressDynCallCheck);
   };
-  if (canCallKnown(callee)) return handleKnown(callee->funcVal());
+  if (callee->hasConstVal()) return handleKnown(callee->funcVal());
 
   auto const handleUnknown = [&] (bool unlikely) {
     prepareAndCallUnknown(env, callee, fca, objOrClass,
@@ -1087,8 +1084,7 @@ void optimizeProfiledCallMethod(IRGS& env,
 
   MethProfile data = profile.data();
 
-  // TODO(named_params): Support func entry calls with optional named parameters.
-  if (auto const uniqueMeth = knownCallee(data.uniqueMeth())) {
+  if (auto const uniqueMeth = data.uniqueMeth()) {
     assertx(uniqueMeth->name()->same(methodName));
     if (auto const uniqueClass = data.uniqueClass()) {
       // Profiling saw a unique class.
@@ -1262,10 +1258,6 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
       if (lookup.func->isStaticInPrologue()) {
         gen(env, ThrowHasThisNeedStatic, cns(env, lookup.func));
         return;
-      }
-      // TODO(named_params): Support func entry calls with named parameters.
-      if (!canCallKnown(lookup.func)) {
-        break;
       }
       discard(env, numExtraInputs);
       prepareAndCallKnown(env, lookup.func, fca, obj, dynamicCall, false);
@@ -1493,11 +1485,6 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
   auto const lookup = lookupKnownFuncMaybe(env, funcName);
   auto const fast = [&]() {
     emitModuleBoundaryCheckKnown(env, lookup.func);
-    // TODO(named_params): Support func entry calls with named parameters.
-    if (!canCallKnown(lookup.func)) {
-      prepareAndCallProfiled(env, cns(env, lookup.func), fca, nullptr, false, false);
-      return;
-    }
     prepareAndCallKnown(env, lookup.func, fca, nullptr, false, false);
     return;
   };
@@ -1797,8 +1784,7 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   }();
   if (exactCls) {
     auto const callCtx = MemberLookupContext(curClass(env), curFunc(env));
-    // TODO(named_params): Support func entry calls with named parameters.
-    if (auto const ctor = knownCallee(lookupImmutableCtor(exactCls, callCtx))) {
+    if (auto const ctor = lookupImmutableCtor(exactCls, callCtx)) {
       return prepareAndCallKnown(env, ctor, fca, obj, false, false);
     }
   }

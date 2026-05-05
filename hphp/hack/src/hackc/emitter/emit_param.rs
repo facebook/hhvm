@@ -213,28 +213,60 @@ pub fn emit_param_default_value_setter<'a>(
         .iter()
         .zip(ast_params.into_iter())
         .enumerate()
-        .filter_map(|(i, ((_, dv), ast_param))| {
+        .filter_map(|(i, ((param, dv), ast_param))| {
             // LocalIds for params are numbered from 0.
             dv.as_ref().map(|(lbl, expr)| {
                 let param_local = Local::new(i);
-                let instrs = InstrSeq::gather(vec![
-                    emit_expression::emit_expr(emitter, env, expr)?,
-                    emit_pos::emit_pos(&ast_param.pos),
-                    instr::verify_param_type(param_local),
-                    instr::set_l(param_local),
-                    instr::pop_c(),
-                ]);
-                Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))
+                let instrs = if param.is_named {
+                    let skip = emitter.label_gen_mut().next_regular();
+                    InstrSeq::gather(vec![
+                        instr::isset_l(param_local),
+                        instr::jmp_nz(skip),
+                        emit_expression::emit_expr(emitter, env, expr)?,
+                        emit_pos::emit_pos(&ast_param.pos),
+                        instr::verify_param_type(param_local),
+                        instr::pop_l(param_local),
+                        instr::label(skip),
+                    ])
+                } else {
+                    InstrSeq::gather(vec![
+                        emit_expression::emit_expr(emitter, env, expr)?,
+                        emit_pos::emit_pos(&ast_param.pos),
+                        instr::verify_param_type(param_local),
+                        instr::set_l(param_local),
+                        instr::pop_c(),
+                    ])
+                };
+                Ok((
+                    i,
+                    InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]),
+                ))
             })
         })
         .collect::<Result<Vec<_>>>()?;
     if setters.is_empty() {
         Ok((instr::empty(), instr::empty()))
     } else {
+        // We're guaranteed that all named params precede positionals.
+        let mut first_positional_idx = 0;
+        while first_positional_idx < params.len() {
+            if !params[first_positional_idx].0.is_named {
+                break;
+            }
+            first_positional_idx += 1;
+        }
+        let partition_pos = setters.partition_point(|(idx, _)| *idx < first_positional_idx);
+        let mut iter = setters.into_iter().map(|(_, instrs)| instrs);
+        let named_setters = iter.by_ref().take(partition_pos).collect();
+        let pos_setters: Vec<_> = iter.collect();
         let l = emitter.label_gen_mut().next_regular();
         Ok((
             instr::label(l),
-            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::enter(l)]),
+            InstrSeq::gather(vec![
+                InstrSeq::gather(pos_setters),
+                InstrSeq::gather(named_setters),
+                instr::enter(l),
+            ]),
         ))
     }
 }

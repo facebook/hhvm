@@ -82,6 +82,16 @@ std::vector<BlockId> rpoSortFromMain(const php::WideFunc& func) {
   return rpoSortFromBlock(func, func->mainEntry);
 }
 
+BlockId namedParamFuncEntry(const php::Func& func) {
+  for (auto it = func.params.begin(); it != func.params.end() && it->isNamed;
+       ++it) {
+    if (it->dvEntryPoint != NoBlockId) {
+      return it->dvEntryPoint;
+    }
+  }
+  return NoBlockId;
+}
+
 std::vector<BlockId> rpoSortAddDVs(const php::WideFunc& func) {
   boost::dynamic_bitset<> visited(func.blocks().size());
   std::vector<BlockId> ret;
@@ -94,8 +104,11 @@ std::vector<BlockId> rpoSortAddDVs(const php::WideFunc& func) {
    * visited set (so we'll stop if they chain to the main entry, which
    * is the normal case).
    */
+  auto const namedEntry = namedParamFuncEntry(*func);
+  if (namedEntry != NoBlockId) postorderWalk(func, ret, visited, namedEntry);
   for (auto it = func->params.end(); it != func->params.begin(); ) {
     --it;
+    if (it->isNamed) break;
     if (it->dvEntryPoint == NoBlockId) continue;
     postorderWalk(func, ret, visited, it->dvEntryPoint);
   }

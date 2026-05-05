@@ -48,8 +48,12 @@ inline SrcKey::SrcKey(const Func* f, uint32_t numArgs, PrologueTag)
   assertx(numArgs >> kNumOffsetBits == 0);
 }
 
-inline SrcKey::SrcKey(const Func* f, uint32_t numArgs, FuncEntryTag)
-  : m_s{f->getFuncId(), numArgs, encodeFuncEntry()}
+inline SrcKey::SrcKey(const Func* f, uint32_t numArgs, bool mayHaveUninitNamed,
+                      FuncEntryTag)
+  : m_s{f->getFuncId(), numArgs,
+        numArgs == f->numPositionalParams() && mayHaveUninitNamed
+        ? encodeNamedParamsFuncEntry()
+        : encodeFuncEntry()}
 {
   assertx(numArgs >> kNumOffsetBits == 0);
 }
@@ -75,7 +79,8 @@ inline bool SrcKey::valid() const {
   assertx(
     funcID.isInvalid() || funcID.isDummy() ||
     (prologue() && numEntryArgs() <= func()->numPositionalParams() + 1) ||
-    (funcEntry() && numEntryArgs() <= func()->numNonVariadicParams()) ||
+    (funcEntry() && numEntryArgs() <= func()->numPositionalParams()) ||
+    (namedParamsFuncEntry() && numEntryArgs() == func()->numPositionalParams()) ||
     (!prologue() && !funcEntry() && offset() < func()->bclen())
   );
   return !funcID.isInvalid();
@@ -99,23 +104,26 @@ inline FuncId SrcKey::funcID() const {
 }
 
 inline Offset SrcKey::offset() const {
-  assertx(!prologue() && !funcEntry());
+  assertx(!prologue() && !anyFuncEntry());
   return m_s.m_offsetOrNumArgs;
 }
 
 inline Offset SrcKey::entryOffset() const {
-  assertx(prologue() || funcEntry());
+  assertx(prologue() || anyFuncEntry());
   if (prologue()) return func()->getPrologueEntryForNumPositionals(numEntryArgs());
-  return func()->getFuncEntryForNumArgs(numEntryArgs());
+  if (namedParamsFuncEntry()) {
+    return func()->getNamedParamsFuncEntry();
+  }
+  return func()->getFuncEntryForNumPositionals(numEntryArgs(), true);
 }
 
 inline uint32_t SrcKey::numEntryArgs() const {
-  assertx(prologue() || funcEntry());
+  assertx(prologue() || anyFuncEntry());
   return m_s.m_offsetOrNumArgs;
 }
 
 inline std::string SrcKey::printableOffset() const {
-  auto const off = !prologue() && !funcEntry() ? offset() : entryOffset();
+  auto const off = !prologue() && !anyFuncEntry() ? offset() : entryOffset();
   return std::to_string(off);
 }
 
@@ -137,15 +145,23 @@ inline bool SrcKey::funcEntry() const {
   return m_s.m_resumeModeAndTags == 4;
 }
 
+inline bool SrcKey::namedParamsFuncEntry() const {
+  return m_s.m_resumeModeAndTags == 5;
+}
+
+inline bool SrcKey::anyFuncEntry() const {
+  return funcEntry() || namedParamsFuncEntry();
+}
+
 inline bool SrcKey::trivialDVFuncEntry() const {
   if (!funcEntry()) return false;
-  if (numEntryArgs() == func()->numNonVariadicParams()) return false;
-  assertx(numEntryArgs() >= func()->numRequiredParams());
-  return func()->params()[numEntryArgs()].hasTrivialDefaultValue();
+  if (numEntryArgs() == func()->numPositionalParams()) return false;
+  assertx(numEntryArgs() >= func()->numRequiredPositionalParams());
+  return func()->params()[numEntryArgs() + func()->numNamedParams()].hasTrivialDefaultValue();
 }
 
 inline bool SrcKey::nonTrivialFuncEntry() const {
-  return funcEntry() && !trivialDVFuncEntry();
+  return anyFuncEntry() && !trivialDVFuncEntry();
 }
 
 inline uint32_t SrcKey::encodeResumeMode(ResumeMode resumeMode) {
@@ -164,6 +180,11 @@ inline uint32_t SrcKey::encodeFuncEntry() {
   return 4;
 }
 
+inline uint32_t SrcKey::encodeNamedParamsFuncEntry() {
+  assertx(5 >> kNumModeBits == 0);
+  return 5;
+}
+
 inline const Func* SrcKey::func() const {
   return Func::fromFuncId(m_s.m_funcID);
 }
@@ -173,17 +194,19 @@ inline const Unit* SrcKey::unit() const {
 }
 
 inline Op SrcKey::op() const {
-  assertx(!prologue() && !funcEntry());
+  assertx(!prologue() && !anyFuncEntry());
   return func()->getOp(offset());
 }
 
 inline PC SrcKey::pc() const {
-  assertx(!prologue() && !funcEntry());
+  assertx(!prologue() && !anyFuncEntry());
   return func()->at(offset());
 }
 
 inline int SrcKey::lineNumber() const {
-  if (prologue() || funcEntry()) return func()->line1();
+  if (prologue() || anyFuncEntry()) {
+    return func()->line1();
+  }
   return func()->getLineNumber(offset());
 }
 
@@ -198,7 +221,7 @@ inline const PackageInfo* SrcKey::packageInfo() const {
 
 inline void SrcKey::setOffset(Offset o) {
   assertx((uint32_t)o >> kNumOffsetBits == 0);
-  assertx(!prologue() && !funcEntry());
+  assertx(!prologue() && !anyFuncEntry());
   m_s.m_offsetOrNumArgs = (uint32_t)o;
 }
 
@@ -206,9 +229,12 @@ inline SrcKey::Set SrcKey::succSrcKeys() const {
   assertx(!prologue());
   if (funcEntry()) {
     if (trivialDVFuncEntry()) {
-      return {SrcKey{func(), numEntryArgs() + 1, FuncEntryTag {}}};
+      return {SrcKey{func(), numEntryArgs() + 1, true, FuncEntryTag {}}};
     }
     return {SrcKey{func(), entryOffset(), ResumeMode::None}};
+  }
+  if (namedParamsFuncEntry()) {
+    return {SrcKey{func(), func()->numPositionalParams(), false, FuncEntryTag {}}};
   }
 
   SrcKey::Set set;
@@ -220,7 +246,7 @@ inline SrcKey::Set SrcKey::succSrcKeys() const {
 
 inline void SrcKey::advance(const Func* f) {
   assertx(!prologue());
-  if (funcEntry()) {
+  if (anyFuncEntry()) {
     m_s.m_offsetOrNumArgs = entryOffset();
     m_s.m_resumeModeAndTags = encodeResumeMode(ResumeMode::None);
   } else {

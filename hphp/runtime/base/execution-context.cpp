@@ -1573,12 +1573,14 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 
   ActRec* ar = vmStack().indA(numArgsInclUnpack + (hasGenerics ? 1 : 0));
   void* ctx = thiz ? (void*)thiz : (void*)cls;
+  auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+  uint32_t numPositionalArgs = numArgsInclUnpack - numNamedArgs;
 
   // Callee checks and input initialization.
   calleeNamedArgChecks(f, numArgsInclUnpack, namedArgNames);
   calleeGenericsChecks(f, hasGenerics);
-  calleeArgumentArityChecks(f, numArgsInclUnpack, numArgsInclUnpack - f->numNamedParams());
-  calleeArgumentTypeChecks(f, numArgsInclUnpack, ctx);
+  calleeArgumentArityChecks(f, numArgsInclUnpack, numPositionalArgs);
+  calleeArgumentTypeChecks(f, numArgsInclUnpack, namedArgNames, ctx);
   calleeDynamicCallChecks(f, dynamic, allowDynCallNoPointer);
   calleeCoeffectChecks(f, providedCoeffects, numArgsInclUnpack, ctx);
   f->recordCall();
@@ -1627,7 +1629,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   try {
     enterVM(ar, [&] {
       exception_handler([&] {
-        enterVMAtFunc(ar, numArgsInclUnpack);
+        enterVMAtFunc(ar, numPositionalArgs, numNamedArgs == f->numNamedParams());
       });
     });
 

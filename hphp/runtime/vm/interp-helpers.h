@@ -256,13 +256,12 @@ inline void initFuncNamedParamDefaults(const Func* callee, uint32_t& numArgsIncl
   }
   auto argIdx = 0;
   for (auto paramIdx = 0; paramIdx < values.size() - hasVariadics; ++paramIdx) {
-    auto const& param = callee->params()[paramIdx];
     if (paramIdx < callee->numNamedParams()) {
       auto paramName = namedParamNames[paramIdx];
       if (argIdx < numNamedArgs && paramName == namedArgNames->at(argIdx).val().pstr) {
         values[paramIdx] = *vmStack().indC(stackPos(argIdx++));
       } else {
-        values[paramIdx] = param.defaultValue;
+        values[paramIdx] = make_tv<KindOfUninit>();
       }
     } else {
       values[paramIdx] = *vmStack().indC(stackPos(argIdx++));
@@ -295,7 +294,10 @@ inline void calleeNamedArgChecks(const Func* callee,
  */
 inline void calleeArgumentArityChecks(const Func* callee,
                                       uint32_t& numArgsInclUnpack,
-                                      uint32_t numPositionalArgs) {
+                                      uint32_t& numPositionalArgs) {
+  // TODO(named_params) this check (and type checks) should be
+  // expressed as taking numNamedArgs and numPositionalArgs
+  // separately to make the contract clearer.
   if (numPositionalArgs < callee->numRequiredPositionalParams()) {
     throwMissingPositionalArgument(callee, numPositionalArgs);
   }
@@ -303,6 +305,7 @@ inline void calleeArgumentArityChecks(const Func* callee,
     assertx(!callee->hasVariadicCaptureParam());
     assertx(numArgsInclUnpack == callee->numNonVariadicParams() + 1);
     --numArgsInclUnpack;
+    --numPositionalArgs;
 
     GenericsSaver gs{callee->hasReifiedGenerics()};
 
@@ -318,6 +321,7 @@ inline void calleeArgumentArityChecks(const Func* callee,
 
 inline void calleeArgumentTypeChecks(const Func* callee,
                                      uint32_t numArgsInclUnpack,
+                                     const ArrayData* namedArgNames,
                                      void* prologueCtx) {
   auto const getCtx = [&] () -> const Class* {
     if (!callee->cls()) return nullptr;
@@ -334,7 +338,17 @@ inline void calleeArgumentTypeChecks(const Func* callee,
     std::min(numArgsInclUnpack, callee->numNonVariadicParams());
   auto const firstArgIdx =
     numArgsInclUnpack - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
-  for (auto i = 0; i < numArgs; ++i) {
+  auto const numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+  auto pIdx = 0;
+  auto const namedParamNames = callee->sortedNamedParamNames();
+  for (auto i = 0; i < numNamedArgs; ++i) {
+    auto argName = namedArgNames->at(i).val().pstr;
+    while (namedParamNames[pIdx] != argName) ++pIdx;
+    // We pushed uninits for missing named args already, so we
+    // index the vmStack from the parameter index.
+    verifyParamType(callee, pIdx, vmStack().indC(firstArgIdx - pIdx), getCtx);
+  }
+  for (auto i = callee->numNamedParams(); i < numArgs; ++i) {
     verifyParamType(callee, i, vmStack().indC(firstArgIdx - i), getCtx);
   }
 }

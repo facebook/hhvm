@@ -245,7 +245,7 @@ inline void Venv::record_inline_stack(TCA addr) {
       !origin->marker().fp()->inst()->is(DefCalleeFP)) return;
 
   auto const sk = origin->marker().sk();
-  auto const callOff = sk.funcEntry() ? sk.entryOffset() : sk.offset();
+  auto const callOff = sk.anyFuncEntry() ? sk.entryOffset() : sk.offset();
   auto const it = unit.fpToFrame.find(origin->marker().fp());
   assertx(it != unit.fpToFrame.end());
 

@@ -822,7 +822,8 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numPositionalArgs,
   return numPositionalParams + 1;
 }
 
-static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
+static void prepareFuncEntry(ActRec *ar, uint32_t posArgcInclUnpack,
+                             bool allNamedParamsPassed) {
   assertx(!isResumed(ar));
   assertx(
     reinterpret_cast<TypedValue*>(ar) - vmStack().top() ==
@@ -835,25 +836,28 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
 
   vmStack().top() = reinterpret_cast<TypedValue*>(ar) - func->numSlotsInFrame();
   vmfp() = ar;
-  vmpc() = func->entry() + func->getFuncEntryForNumArgs(numArgsInclUnpack);
+  vmpc() = func->entry() + func->getFuncEntryForNumPositionals(posArgcInclUnpack,
+                                                               allNamedParamsPassed);
   vmJitReturnAddr() = nullptr;
 }
 
-void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
+void enterVMAtFunc(ActRec* enterFnAr, uint32_t posArgcInclUnpack,
+                   bool allNamedParamsPassed) {
   assertx(enterFnAr);
   assertx(!isResumed(enterFnAr));
   Stats::inc(Stats::VMEnter);
 
-  prepareFuncEntry(enterFnAr, numArgsInclUnpack);
+  prepareFuncEntry(enterFnAr, posArgcInclUnpack, allNamedParamsPassed);
   assertx(vmfp()->func()->contains(vmpc()));
   auto const& stubs = jit::tc::ustubs();
   JitResumeAddr resumeAddr;
   // We use `>=` instead of `==` as the caller may supply unpack args, in which case
-  // numArgsInclUnpack would be enterFnAr->func()->numNonVariadicParams() + 1, and calling
-  // into the main func entry is safe.
+  // posArgcInclUnpack would be enterFnAr->func()->numPositionalParams() + 1,
+  // and calling into the main func entry is safe.
   if (!RID().getJit()) {
     resumeAddr = JitResumeAddr::helper(stubs.resumeHelperNoTranslateFuncEntryFromInterp);
-  } else if (numArgsInclUnpack >= enterFnAr->func()->numNonVariadicParams()) {
+  } else if (posArgcInclUnpack >= enterFnAr->func()->numPositionalParams() &&
+             allNamedParamsPassed) {
     resumeAddr = JitResumeAddr::transFuncEntry(enterFnAr->func()->getFuncEntry());
   } else {
     resumeAddr = JitResumeAddr::helper(stubs.resumeHelperFuncEntryFromInterp);
@@ -3563,11 +3567,13 @@ void doFCall(PrologueFlags prologueFlags, const Func* func,
   assertx(kNumActRecCells == 2);
   ActRec* ar = vmStack().indA(
     numArgsInclUnpack + (prologueFlags.hasGenerics() ? 1 : 0));
+  auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+  uint32_t numPositionalArgs = numArgsInclUnpack - numNamedArgs;
   // Callee checks and input initialization.
-  calleeNamedArgChecks(func, numArgsInclUnpack, namedArgNames);
   calleeGenericsChecks(func, prologueFlags.hasGenerics());
-  calleeArgumentArityChecks(func, numArgsInclUnpack, numArgsInclUnpack - func->numNamedParams());
-  calleeArgumentTypeChecks(func, numArgsInclUnpack, ctx);
+  calleeNamedArgChecks(func, numArgsInclUnpack, namedArgNames);
+  calleeArgumentArityChecks(func, numArgsInclUnpack, numPositionalArgs);
+  calleeArgumentTypeChecks(func, numArgsInclUnpack, namedArgNames, ctx);
   calleeDynamicCallChecks(func, prologueFlags.isDynamicCall());
   calleeCoeffectChecks(func, prologueFlags.coeffects(), numArgsInclUnpack, ctx);
   func->recordCall();
@@ -3582,7 +3588,7 @@ void doFCall(PrologueFlags prologueFlags, const Func* func,
   );
   ar->setThisOrClassAllowNull(ctx);
 
-  prepareFuncEntry(ar, numArgsInclUnpack);
+  prepareFuncEntry(ar, numPositionalArgs, numNamedArgs == func->numNamedParams());
 }
 
 namespace {

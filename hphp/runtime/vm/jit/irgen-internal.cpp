@@ -101,7 +101,7 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
 
     auto const irSPOff = bcSPOff;
     gen(env, DefRegSP, DefStackData { irSPOff, bcSPOff });
-  } else if (curSrcKey(env).funcEntry()) {
+  } else if (curSrcKey(env).anyFuncEntry()) {
     // - frames of functions that are being called do not exist yet
     // - new native frame will be initialized at rvmsp() and linked to rvmfp()
     // - fp(env) and sp(env) will be backed by the same rvmfp() register

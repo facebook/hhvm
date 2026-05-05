@@ -179,7 +179,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
     Cfg::Jit::StressEagerVMRegSync &&
     inst->maySyncVMRegsWithSources() &&
     !inst->marker().prologue() &&
-    !inst->marker().sk().funcEntry() &&
+    !inst->marker().sk().anyFuncEntry() &&
     !inst->is(Call, CallFuncEntry, ContEnter, InlineSideExit) &&
     (env.unit.numInsts() % 3 == 0);
 
@@ -228,7 +228,8 @@ void checkCoverage(IRGS& env) {
       auto const irSP = spOffBCFromIRSP(env);
       auto const invSP = spOffBCFromStackBase(env);
       auto const rbjData = ReqBindJmpData {
-        curSrcKey(env), invSP, irSP, curSrcKey(env).funcEntry() /* popFrame */
+        curSrcKey(env), invSP, irSP,
+        curSrcKey(env).anyFuncEntry() /* popFrame */
       };
       gen(env, ReqInterpBBNoTranslate, rbjData, sp(env), fp(env));
     }
@@ -251,7 +252,7 @@ void checkDebuggerIntr(IRGS& env, SrcKey sk) {
       auto const irSP = spOffBCFromIRSP(env);
       auto const invSP = spOffBCFromStackBase(env);
       auto const rbjData = ReqBindJmpData {
-        sk, invSP, irSP, sk.funcEntry() /* popFrame */
+        sk, invSP, irSP, sk.anyFuncEntry() /* popFrame */
       };
       gen(env, ReqInterpBBNoTranslate, rbjData, sp(env), fp(env));
     }
@@ -312,12 +313,12 @@ void prepareEntry(IRGS& env) {
    * via register. Furthermore, ldCtx is not yet operational in case of closure
    * bodies, as they were not unpacked yet.
    */
-  if (!curSrcKey(env).funcEntry()) ldCtx(env);
+  if (!curSrcKey(env).anyFuncEntry()) ldCtx(env);
 }
 
 void endRegion(IRGS& env) {
   auto const curSk  = curSrcKey(env);
-  if (!curSk.funcEntry() && !instrAllowsFallThru(curSk.op())) {
+  if (!curSk.anyFuncEntry() && !instrAllowsFallThru(curSk.op())) {
     return; // nothing to do here
   }
 
@@ -327,7 +328,7 @@ void endRegion(IRGS& env) {
 
 void endRegion(IRGS& env, SrcKey nextSk) {
   FTRACE(1, "------------------- endRegion ---------------------------\n");
-  assertx(!nextSk.funcEntry());
+  assertx(!nextSk.anyFuncEntry());
 
   if (env.irb->inUnreachableState()) {
     // This location is unreachable.  There's no reason to generate code to

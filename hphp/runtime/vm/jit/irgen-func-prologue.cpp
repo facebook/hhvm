@@ -54,9 +54,10 @@ namespace {
  * How to perform our stack overflow check.
  */
 enum class StackCheck {
-  None,   // not needed
-  Early,  // must occur before setting up locals
-  Combine // can be delayed and combined with surprise flags check
+  None,       // not needed
+  EarlyNamed, // must occur before optional named parameters are pushed
+  Early,      // must occur before setting up locals
+  Combine     // can be delayed and combined with surprise flags check
 };
 
 StackCheck stack_check_kind(const Func* func) {
@@ -87,10 +88,15 @@ StackCheck stack_check_kind(const Func* func) {
    * staying within that region if the locals are actually too deep.
    */
   auto const safeFromSEGV = Stack::sSurprisePageSize / sizeof(TypedValue);
+  auto safeBeforeNamedParams =
+    func->numLocals() < safeFromSEGV + func->numRequiredNamedParams();
+  auto canCombine =
+    func->numLocals() < safeFromSEGV + func->numRequiredNamedParams() +
+                        func->numRequiredPositionalParams();
 
-  return func->numLocals() < safeFromSEGV + func->numRequiredParams()
+  return canCombine
     ? StackCheck::Combine
-    : StackCheck::Early;
+    : (safeBeforeNamedParams ? StackCheck::Early : StackCheck::EarlyNamed);
 }
 
 } // namespace
@@ -100,11 +106,7 @@ StackCheck stack_check_kind(const Func* func) {
 void emitCalleeNamedArgChecks(IRGS& env, const Func* callee,
                               uint32_t posArgc,
                               SSATmp* prologueFlags, SSATmp* namedArgNames) {
-  // As noted in the .h comment, this is a special case to facilitate fast prologues
-  // for functions without named parameters, and we didn't read the named arg names
-  // register. The prologue flags tell us whether any named args were passed.
-  if (namedArgNames == nullptr) {
-    assertx(!callee->hasNamedParams());
+  auto throwIfNamedArgsPassed = [&] {
     ifThen(
       env,
       [&] (Block* taken) {
@@ -116,15 +118,30 @@ void emitCalleeNamedArgChecks(IRGS& env, const Func* callee,
         hint(env, Block::Hint::Unlikely);
         gen(env, ThrowUnexpectedNamedArguments, FuncData{callee});
       });
+  };
+  // As noted in the .h comment, this is a special case to facilitate fast prologues
+  // for functions without named parameters. The prologue flags tell us whether
+  // any named args were passed.
+  if (namedArgNames == nullptr) {
+    throwIfNamedArgsPassed();
     return;
   }
   if (!namedArgNames->isA(TNullptr) && !namedArgNames->hasConstVal(TVec)) {
-    assertx(callee->hasNamedParams());
+    assertx(callee->hasNamedParams() || callee->hasReifiedGenerics());
+    if (!callee->hasNamedParams()) {
+      throwIfNamedArgsPassed();
+      return;
+    }
     // We punt the work to a native helper for now to keep implementation simple
     // in the case where named params exist.
+    auto stackTopOffset = offsetFromIRSP(env, env.irb->curMarker().bcSPOff()).offset;
+    auto const data = CheckFunNamedArgsMismatchData { callee, posArgc, stackTopOffset };
     // TODO(named_params) add at least a pointer equality check for the case where
     // the arrays match exactly.
-    gen(env, CheckFunNamedArgsMismatch, cns(env, callee), namedArgNames);
+    gen(env, CheckFunNamedArgsMismatch, data, namedArgNames);
+    // The helper above will ensure that the named arg count will match
+    // the named param count (or throw), so the rest of codegen may assume
+    // the named params are placed properly.
     return;
   }
   // The rest of the function may assume it's called from a prepareAndCallKnown context,
@@ -145,16 +162,22 @@ void emitCalleeNamedArgChecks(IRGS& env, const Func* callee,
           cns(env, paramName));
     }
   );
-  // The helper above will ensure that the named arg count will match
-  // the named param count (or throw), so the rest of codegen may assume
-  // the named params are placed properly.
 }
 
 void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
-                              SSATmp* prologueFlags, bool pushed) {
+                              SSATmp* prologueFlags, SSATmp* namedArgNames,
+                              bool pushed, bool namedArgsAccountedInStack) {
+  assertx(
+    IMPLIES(
+      namedArgsAccountedInStack,
+      namedArgNames->isA(TNullptr) || namedArgNames->hasConstVal(TVec)
+    )
+  );
   if (!callee->hasReifiedGenerics()) {
     // FIXME: leaks memory if generics were given but not expected nor pushed.
     if (pushed) {
+      // pushed is only true from a prepareAndCallKnown context, so this pop is
+      // safe; we have accurate stack offsets.
       popDecRef(env);
       updateMarker(env);
       env.irb->exceptionStackBoundary();
@@ -172,8 +195,9 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       gen(env, JmpZero, taken, hasGenerics);
     },
     [&] {
-      // Generics were passed. Make them visible on the stack.
-      auto const generics = pushed ? topC(env) : apparate(env, TVec);
+      // Generics were passed. Make them visible on the stack. We don't necessarily
+      // know that we have a TVec yet, that's only true in the knownNamedArgs case.
+      auto const generics = pushed ? topC(env) : apparate(env, TInitCell);
       updateMarker(env);
       env.irb->exceptionStackBoundary();
 
@@ -197,7 +221,6 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
           if (match) return;
         }
       }
-
       // Fail on generics count/wildcard mismatch.
       ifThen(
         env,
@@ -208,7 +231,23 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          gen(env, CheckFunReifiedGenericMismatch, cns(env, callee), generics);
+          if (namedArgsAccountedInStack) {
+            auto const knownGenerics = gen(env, AssertType, TVec, generics);
+            gen(env, CheckFunReifiedGenericMismatch, cns(env, callee), knownGenerics);
+            return;
+          }
+          // This situation happens when we're in a prologue. We may have passed the
+          // named arg names via a register. We don't in general statically know the
+          // location of the reified generics that were passed and need to punt, as
+          // our stack state doesn't know the named arg count. The named arg checks
+          // that come after will fix the state. We apparate to make the branches
+          // of the if-then-else consistently wrong.
+          auto stackTopOffset =
+            offsetFromIRSP(env, env.irb->curMarker().bcSPOff()).offset;
+          auto const data = GenericsWithNamedArgsData { callee, stackTopOffset };
+          // This opcode assumes that the reified generics are at
+          // rvmsp + namedArgNames->size().
+          gen(env, CheckFunReifiedGenericsWithNamedArgs, data, namedArgNames);
         }
       );
     },
@@ -235,9 +274,23 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
         callee->fullName()->data()));
       gen(env, RaiseWarning, cns(env, errMsg));
 
+      if (namedArgsAccountedInStack) {
+        push(env, cns(env, ArrayData::CreateVec()));
+        updateMarker(env);
+        env.irb->exceptionStackBoundary();
+        return;
+      }
       // Push an empty array, as the remainder of the prologue assumes generics
       // are on the stack.
-      push(env, cns(env, ArrayData::CreateVec()));
+      auto stackTopOffset =
+        offsetFromIRSP(env, BCSPRelOffset{ 0 }).offset;
+      auto const data =
+        GenericsWithNamedArgsData { callee, stackTopOffset };
+      gen(env, PushEmptyReifiedGenericsWithNamedArgs, data, namedArgNames);
+      // The stack top is still off by namedArgNames' len here, will be
+      // accurate after the named arg inputs are placed, so we can't
+      // apparate a TVec.
+      apparate(env, TInitCell);
       updateMarker(env);
       env.irb->exceptionStackBoundary();
     }
@@ -288,10 +341,25 @@ void emitCalleeArgumentTypeChecks(IRGS& env, const Func* callee,
   auto const numArgs = std::min(argc, callee->numNonVariadicParams());
   auto const firstArgIdx = argc - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
   for (auto i = 0; i < numArgs; ++i) {
+    auto const isOptionalNamedParam =
+      i < callee->numNamedParams() && callee->params()[i].hasDefaultValue();
     auto const offset = BCSPRelOffset { safe_cast<int32_t>(firstArgIdx - i) };
-    auto const irsproData = IRSPRelOffsetData { offsetFromIRSP(env, offset ) };
-    gen(env, AssertStk, TInitCell, irsproData, sp(env));
-    verifyParamType(env, callee, i, offset, prologueCtx);
+    auto const irsproData = IRSPRelOffsetData { offsetFromIRSP(env, offset) };
+    if (isOptionalNamedParam) {
+        ifElse(
+          env,
+          [&] (Block* taken) {
+            auto const arg = top(env, offset);
+            gen(env, CheckInit, taken, arg);
+          },
+          [&] {
+            gen(env, AssertStk, TInitCell, irsproData, sp(env));
+            verifyParamType(env, callee, i, offset, prologueCtx);
+          });
+   } else {
+      gen(env, AssertStk, TInitCell, irsproData, sp(env));
+      verifyParamType(env, callee, i, offset, prologueCtx);
+    }
   }
 }
 
@@ -413,6 +481,10 @@ void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee) {
 
 namespace {
 
+bool shouldComputeNamedArgNamesInPrologue(const Func* callee) {
+  return callee->hasNamedParams() || callee->hasReifiedGenerics();
+}
+
 void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t posArgc,
                        TransID transID) {
   gen(env, EnterPrologue);
@@ -454,22 +526,37 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t posArgc,
   }
 }
 
+void emitStackAdjustmentsForNamedParams(IRGS& env, const Func* callee) {
+  // This is subtle - when we're emitting callee checks from a prologue, the bcsp
+  // depth needs to be fixed up to now include the prologue named args. We place this
+  // here rather than within emitCalleeNamedArgChecks to avoid modifying the stack
+  // for known calls.
+  env.irb->fs().incBCSPDepth(callee->numNamedParams());
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+  if (callee->hasReifiedGenerics()) {
+    // The reified generics have moved to the new top of the stack if we reach
+    // this code, so assert a type at the right location.
+    auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
+    gen(env, AssertStk, TVec, IRSPRelOffsetData{offset}, sp(env));
+  }
+}
+
 void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t& posArgc,
                       SSATmp* prologueFlags, SSATmp* prologueCtx,
                       SSATmp* namedArgNames) {
   // Generics are special and need to be checked first, as they may or may not
   // be on the stack. This check makes sure they materialize on the stack
   // if we expect them.
-  emitCalleeGenericsChecks(env, callee, prologueFlags, false);
+  emitCalleeGenericsChecks(env, callee, prologueFlags, namedArgNames, false, false);
+  // Prologues are identified with positional argc. The callee named arg checks
+  // will materialize missing optional named params on the stack.
+  // Emit early stack overflow check if necessary.
+  if (stack_check_kind(callee) == StackCheck::EarlyNamed) {
+    gen(env, CheckStackOverflow, sp(env));
+  }
   emitCalleeNamedArgChecks(env, callee, posArgc, prologueFlags, namedArgNames);
-
-  // This is subtle - when we're emitting callee checks from a prologue, the bcsp
-  // depth needs to be fixed up to now include the prologue named args. We place this
-  // here rather than within emitCalleeNamedArgChecks to avoid messing up the stack
-  // for known calls.
-  env.irb->fs().incBCSPDepth(callee->numNamedParams());
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  emitStackAdjustmentsForNamedParams(env, callee);
 
   emitCalleeArgumentArityChecks(env, callee, posArgc);
   emitCalleeArgumentTypeChecks(env, callee, posArgc, prologueCtx);
@@ -486,6 +573,53 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t& posArgc,
 }
 
 } // namespace
+
+/*
+ * Shuffles the passed arguments to match the func entry's signature, pushing
+ * uninits for any optional named parameters that weren't passed and moves any
+ * arguments that were after where the optional named param is expected to be.
+ *
+ * The idea of the algorithm is to have two pointers, one for the new top of
+ * the stack (always <= in address of the old top of the stack), and move
+ * typed values over via StStk/LdStk to their new positions and push uninits
+ * at the appropriate positions. Starting from the top means that we don't
+ * need any intermediate data structures. We can eagerly stop when we've
+ * emitted the last uninit.
+ */
+bool emitInitFuncNamedParams(IRGS& env, const Func* callee,
+                             uint32_t posArgc, const ArrayData* namedArgNames) {
+  auto const numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+  int32_t numToPush =
+    static_cast<int32_t>(callee->numNamedParams()) - numNamedArgs;
+  assertx(numToPush >= 0);
+  if (numToPush == 0) return false;
+  env.irb->fs().incBCSPDepth(numToPush);
+  int32_t extraInputs = (callee->hasReifiedGenerics() ? 1 : 0);
+  int32_t paramIdx = posArgc + callee->numNamedParams() + extraInputs - 1;
+  const int32_t firstIdx = paramIdx;
+  int32_t argIdx = posArgc + numNamedArgs + extraInputs - 1;
+  auto const namedParamNames = callee->sortedNamedParamNames();
+  // If numToPush ever hits 0, the rest of the arguments will be unchanged so we
+  // can bail early.
+  for (; paramIdx >= 0 && numToPush > 0; --paramIdx) {
+    auto const paramOff = offsetFromIRSP(env, BCSPRelOffset { firstIdx - paramIdx });
+    if (paramIdx >= callee->numNamedParams() ||
+        (argIdx >= 0 &&
+         namedParamNames[paramIdx] == namedArgNames->at(argIdx).val().pstr)) {
+
+      auto const argOff = offsetFromIRSP(env, BCSPRelOffset { firstIdx - argIdx });
+      auto arg = gen(env, LdStk, TCell, IRSPRelOffsetData { argOff }, sp(env));
+      gen(env, StStk, IRSPRelOffsetData { paramOff } , sp(env), arg);
+      --argIdx;
+    } else {
+      gen(env, StStk, IRSPRelOffsetData { paramOff }, sp(env), cns(env, TUninit));
+      --numToPush;
+    }
+  }
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+  return true;
+}
 
 void emitInitFuncInputsInline(IRGS& env, const Func* callee, uint32_t argc,
                               SSATmp* fp) {
@@ -589,17 +723,20 @@ std::tuple<SSATmp*, SSATmp*> emitPrologueExit(IRGS& env, const Func* callee,
   return std::make_tuple(arFlags, calleeId);
 }
 
-void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc,
+void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t posArgc,
                      SSATmp* callerFP, SSATmp* arFlags, SSATmp* calleeId,
                      SSATmp* ctx) {
 
   // Emit the bindjmp for the function body.
-  auto const numArgs = std::min(argc, callee->numNonVariadicParams());
+  auto const numPosArgs = std::min(posArgc, callee->numPositionalParams());
+  auto mayHaveUninitNamed = callee->hasOptionalNamedParameters();
+  auto sk =
+    SrcKey { callee, numPosArgs, mayHaveUninitNamed, SrcKey::FuncEntryTag {} };
   gen(
     env,
     ReqBindJmp,
     ReqBindJmpData {
-      SrcKey { callee, numArgs, SrcKey::FuncEntryTag {} },
+      sk,
       SBInvOffset { 0 },
       spOffBCFromIRSP(env),
       false /* popFrame */
@@ -659,7 +796,7 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t positionals,
   // args if the callee has named params, and the named args check is aware of
   // how to handle namedArgNames being nullptr.
   SSATmp* namedArgNames = nullptr;
-  if (callee->hasNamedParams()) {
+  if (shouldComputeNamedArgNamesInPrologue(callee)) {
     namedArgNames = cond(
       env,
       [&] (Block* taken) {
@@ -678,10 +815,8 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t positionals,
   emitCalleeChecks(env, callee, positionals, prologueFlags, prologueCtx, namedArgNames);
   emitInitFuncInputs(env, callee, positionals);
   auto [arFlags, calleeId] = emitPrologueExit(env, callee, prologueFlags);
-  auto argc = positionals + callee->numNamedParams();
-  // Func entries are identified with the total number of arguments passed, since
-  // we've already populated any relevant optional named args in the prologue.
-  emitJmpFuncBody(env, callee, argc, fp(env), arFlags, calleeId, prologueCtx);
+  // Func entries are identified by the number of positional arguments passed.
+  emitJmpFuncBody(env, callee, positionals, fp(env), arFlags, calleeId, prologueCtx);
 }
 
 namespace {
@@ -721,16 +856,17 @@ void emitInitLocalRange(IRGS& env, const Func* callee,
   }
 }
 
-void emitInitDefaultParamLocals(IRGS& env, const Func* callee, uint32_t argc) {
-  assertx(argc <= callee->numNonVariadicParams());
+void emitInitDefaultParamLocals(IRGS& env, const Func* callee, uint32_t posArgc) {
+  assertx(posArgc <= callee->numPositionalParams());
 
   // We are done. If there were variadics, they were already initialized.
-  if (argc == callee->numNonVariadicParams()) return;
+  if (posArgc == callee->numPositionalParams()) return;
 
   // Set locals of parameters with default values to Uninit. In optimized
   // translations, these locals will be overwritten later, so these stores
   // will be optimized away.
-  emitInitLocalRange(env, callee, argc, callee->numNonVariadicParams());
+  emitInitLocalRange(env, callee, posArgc + callee->numNamedParams(),
+                     callee->numNonVariadicParams());
 }
 
 /*
@@ -834,9 +970,10 @@ void emitFuncEntry(IRGS& env) {
 
   if (curSrcKey(env).trivialDVFuncEntry()) {
     assertx(!isInlining(env));
-    auto const param = curSrcKey(env).numEntryArgs();
-    emitInitScalarDefaultParamLocal(env, callee, param);
-    emitJmpFuncBody(env, callee, param + 1, env.funcEntryPrevFP,
+    auto const posParam = curSrcKey(env).numEntryArgs();
+    auto const paramIdx = posParam + callee->numNamedParams();
+    emitInitScalarDefaultParamLocal(env, callee, paramIdx);
+    emitJmpFuncBody(env, callee, posParam + 1, env.funcEntryPrevFP,
                     env.funcEntryArFlags, env.funcEntryCalleeId,
                     env.funcEntryCtx);
     return;
@@ -847,9 +984,23 @@ void emitFuncEntry(IRGS& env) {
   emitInitRegularLocals(env, callee);
 
   // DV initializers delay the function call event hook until the Enter opcode.
-  if (curSrcKey(env).numEntryArgs() < callee->numNonVariadicParams()) return;
+  if (curSrcKey(env).numEntryArgs() < callee->numPositionalParams()) return;
 
   emitSurpriseCheck(env, callee);
+}
+
+void emitNamedParamsFuncEntry(IRGS& env) {
+  assertx(curSrcKey(env).namedParamsFuncEntry());
+  auto const callee = curFunc(env);
+
+  // Default param locals don't need to be emitted since being here means all
+  // positionals were passed in.
+  emitInitClosureLocals(env, callee);
+  emitInitRegularLocals(env, callee);
+
+  // DV initializers delay the function call event hook until the Enter opcode, so
+  // don't emit a surprise check.
+  return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

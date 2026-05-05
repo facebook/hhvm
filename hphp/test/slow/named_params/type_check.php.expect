@@ -1,0 +1,32 @@
+vec(2) {
+  int(1)
+  string(0) ""
+}
+Caught TypeError: Argument 2 passed to foo() must be an instance of string, int given
+Caught TypeError: Argument 1 passed to foo() must be an instance of int, string given
+Caught TypeError: Argument 1 passed to foo() must be an instance of int, string given
+Caught TypeError: Argument 1 passed to bar() must be an instance of int, string given
+Caught TypeError: Argument 2 passed to bar() must be an instance of string, int given
+vec(2) {
+  int(0)
+  string(0) ""
+}
+Caught TypeError: Argument 2 passed to bar() must be an instance of string, int given
+Caught TypeError: Argument 1 passed to bar() must be an instance of int, string given
+Caught TypeError: Argument 2 passed to bar() must be an instance of string, int given
+vec(2) {
+  int(1)
+  string(0) ""
+}
+Caught TypeError: Argument 2 passed to C::foo() must be an instance of string, int given
+Caught TypeError: Argument 1 passed to C::foo() must be an instance of int, string given
+Caught TypeError: Argument 1 passed to C::foo() must be an instance of int, string given
+Caught TypeError: Argument 1 passed to C::bar() must be an instance of int, string given
+Caught TypeError: Argument 2 passed to C::bar() must be an instance of string, int given
+vec(2) {
+  int(0)
+  string(0) ""
+}
+Caught TypeError: Argument 2 passed to C::bar() must be an instance of string, int given
+Caught TypeError: Argument 1 passed to C::bar() must be an instance of int, string given
+Caught TypeError: Argument 2 passed to C::bar() must be an instance of string, int given

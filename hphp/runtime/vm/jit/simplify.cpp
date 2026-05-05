@@ -3947,7 +3947,7 @@ SSATmp* simplifyLdSwitchDest(State& env, const IRInstruction* inst) {
     return gen(env, Unreachable, ASSERT_REASON);
   }
 
-  assertx(!extra->targets[indexVal].funcEntry());
+  assertx(!extra->targets[indexVal].anyFuncEntry());
   auto const bindData = LdBindAddrData {
     extra->targets[indexVal],
     extra->spOffBCFromStackBase,
@@ -3970,7 +3970,7 @@ SSATmp* simplifyLdSSwitchDest(State& env, const IRInstruction* inst) {
     return extra->defaultSk;
   }();
 
-  assertx(!target.funcEntry());
+  assertx(!target.anyFuncEntry());
   auto const bindData = LdBindAddrData { target, extra->bcSPOff };
   return gen(env, LdBindAddr, bindData);
 }
@@ -3982,7 +3982,7 @@ SSATmp* simplifyJmpExit(State& env, const IRInstruction* inst) {
   auto const bindExtra = bindAddr->extra<LdBindAddr>();
   auto const jmpExtra = inst->extra<JmpExit>();
 
-  assertx(!bindExtra->sk.funcEntry());
+  assertx(!bindExtra->sk.anyFuncEntry());
   auto const rbjData = ReqBindJmpData {
     bindExtra->sk,
     bindExtra->bcSPOff,

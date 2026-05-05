@@ -47,11 +47,15 @@ void emitCalleeNamedArgChecks(IRGS& env, const Func* callee, uint32_t posArgc,
  * If `pushed' is true, generics are on the stack. Otherwise, generics may or
  * may not be above the stack, depending on the prologueFlags.
  *
+ * If `namedArgsAccountedInStack` is false, the generics checks will assume that the stack
+ * top is namedArgNames->size() lower than it should be.
+ *
  * After this check, generics will be on the stack iff the function has reified
  * generics.
  */
 void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
-                              SSATmp* prologueFlags, bool pushed);
+                              SSATmp* prologueFlags, SSATmp* namedArgNames,
+                              bool pushed, bool namedArgsAccountedInStack);
 
 void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
                                    uint32_t& argc);
@@ -74,11 +78,20 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc);
 void emitInitFuncInputsInline(IRGS& env, const Func* callee, uint32_t argc,
                               SSATmp* fp);
 
+/* Pushes uninits for missing optional named params and re-arranges positionals
+ * and named args such that they're in the position the func entry expects.
+ * Expects and reified generics and coeffects to be on the stack already.
+ * Returns true if any uninits were emitted.
+ */
+bool emitInitFuncNamedParams(IRGS& env, const Func* callee,
+                             uint32_t posArgc, const ArrayData* namedArgNames);
+
 
 void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
                       TransID transID);
 
 void emitFuncEntry(IRGS& env);
+void emitNamedParamsFuncEntry(IRGS& env);
 
 ///////////////////////////////////////////////////////////////////////////////
 

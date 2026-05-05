@@ -59,13 +59,21 @@ struct SrcKey {
   enum class PrologueTag {};
 
   /*
-   * Used for SrcKeys corresponding to the function entry location, which
-   * precedes the function body.
+   * Used for SrcKeys corresponding to the function entry location. Either
+   * points to a default value funclet for positional params, or to the main
+   * func entry which precedes the function body.
    *
    * Used disjointly from the `resumeMode'.
    */
   enum class FuncEntryTag {};
 
+  /*
+   * Used for SrcKeys corresponding to the (single) function entry location
+   * which populates all optional named params.
+   *
+   * Used disjointly from the `resumeMode'.
+   */
+  enum class NamedParamsFuncEntryTag {};
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -78,7 +86,7 @@ struct SrcKey {
   SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode);
 
   SrcKey(const Func* f, uint32_t numArgs, PrologueTag);
-  SrcKey(const Func* f, uint32_t numArgs, FuncEntryTag);
+  SrcKey(const Func* f, uint32_t numArgs, bool mayHaveUninitNamed, FuncEntryTag);
 
   SrcKey(SrcKey other, Offset off);
 
@@ -110,20 +118,23 @@ struct SrcKey {
   FuncId funcID() const;
 
   // Offset of the bytecode represented by this SrcKey.
-  // Valid only when !prologue() && !funcEntry().
+  // Valid only when !prologue() && !funcEntry() && !namedParamsFuncEntry().
   Offset offset() const;
 
   // Offset of the bytecode that will be used to enter the function.
-  // Valid only when prologue() || funcEntry().
+  // Valid only when prologue() || funcEntry() || namedParamsFuncEntry().
   Offset entryOffset() const;
 
-  // Number of arguments passed to the prologue or func entry.
+  // Number of positional arguments passed to the prologue or func entry.
   // Valid only when prologue() || funcEntry().
   uint32_t numEntryArgs() const;
 
   ResumeMode resumeMode() const;
   bool prologue() const;
   bool funcEntry() const;
+  bool namedParamsFuncEntry() const;
+  // Whether this SK is a func entry or a namedParamsFuncEntry.
+  bool anyFuncEntry() const;
   bool hasThis() const;
 
   // Whether this is a trivial default value initializer func entry, i.e.
@@ -201,6 +212,7 @@ private:
   uint32_t encodeResumeMode(ResumeMode resumeMode);
   uint32_t encodePrologue();
   uint32_t encodeFuncEntry();
+  uint32_t encodeNamedParamsFuncEntry();
 
   /////////////////////////////////////////////////////////////////////////////
 

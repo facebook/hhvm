@@ -295,10 +295,13 @@ void beginInlining(IRGS& env,
 
   while (entry.trivialDVFuncEntry()) {
     auto const param = entry.numEntryArgs();
-    assertx(param < numTotalInputs);
-    auto const dv = callee->params()[param].defaultValue;
-    dvs[param] = cns(env, dv);
-    entry = SrcKey{callee, param + 1, SrcKey::FuncEntryTag {}};
+    auto const paramIdx = param + callee->numNamedParams();
+    assertx(paramIdx < numTotalInputs);
+    auto const dv = callee->params()[paramIdx].defaultValue;
+    dvs[paramIdx] = cns(env, dv);
+    // TODO(named_params) need to dispatch to a NamedParamsFuncEntry as
+    // appropriate when inlining.
+    entry = SrcKey{callee, param + 1, false, SrcKey::FuncEntryTag {}};
   }
 
   auto const extra = calleeFP->inst()->extra<DefCalleeFP>();
@@ -686,6 +689,8 @@ void suspendFromInlined(IRGS& env, SSATmp* waitHandle) {
 
 void sideExitFromInlined(IRGS& env, SrcKey target) {
   assertx(isInlining(env));
+  // TODO(named_params) support inlining named params func entries
+  assertx(!target.namedParamsFuncEntry());
 
   if (target.funcEntry()) {
     // FIXME: Func entries may contain guards that might fail. Ideally we would

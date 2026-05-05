@@ -65,7 +65,7 @@ RegionContext getContext(SrcKey sk, bool profiling) {
   };
 
   // Track local types.
-  auto const numInitedLocals = sk.funcEntry()
+  auto const numInitedLocals = sk.anyFuncEntry()
     ? func->numFuncEntryInputs() : func->numLocals();
   for (uint32_t i = 0; i < numInitedLocals; ++i) {
     addLiveType(Location::Local{i}, frame_local(fp, i));
@@ -84,7 +84,7 @@ RegionContext getContext(SrcKey sk, bool profiling) {
   // Track the mbase type.  The member base register is only valid after a
   // member base op and before a member final op---and only AssertRAT*'s are
   // allowed to intervene in a sequence of bytecode member operations.
-  if (!sk.funcEntry()) {
+  if (!sk.anyFuncEntry()) {
     // Get the bytecode for `ctx', skipping Asserts.
     auto const op = [&] {
       auto pc = func->at(sk.offset());
@@ -192,7 +192,7 @@ namespace {
 TCA resume(SrcKey sk, TranslationResult transResult) noexcept {
   auto const start = [&] {
     if (auto const addr = transResult.addr()) return addr;
-    if (sk.funcEntry()) {
+    if (sk.anyFuncEntry()) {
       sk.advance();
       vmpc() = sk.pc();
       return transResult.scope() == TranslationResult::Scope::Transient
@@ -226,11 +226,12 @@ void syncRegs(SBInvOffset spOff) noexcept {
 
 }
 
-void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs,
+void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs, uint32_t numNamedParams,
                        uint32_t numNonVariadicParams) noexcept {
   // JIT may optimize away uninit writes for default arguments. Write them, as
   // we may inspect them or continue execution in the interpreter.
-  for (auto param = numEntryArgs; param < numNonVariadicParams; ++param) {
+  for (auto param = numEntryArgs + numNamedParams;
+       param < numNonVariadicParams; ++param) {
     tvWriteUninit(frame_local(fp, param));
   }
 }
@@ -243,22 +244,32 @@ TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   return resume(sk, getTranslation(sk));
 }
 
-TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept {
+TCA handleTranslateAnyFuncEntry(uint32_t numArgs, bool optionalNamedParams) noexcept {
   syncRegs(SBInvOffset{0});
-  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNamedParams(), liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleTranslateFuncEntry {}\n",
          vmfp()->func()->fullName()->data());
-
-  auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
+  SrcKey sk;
+  assertx(IMPLIES(optionalNamedParams, numArgs == liveFunc()->numPositionalParams()));
+  sk =
+    SrcKey { liveFunc(), numArgs, optionalNamedParams, SrcKey::FuncEntryTag{} };
   return resume(sk, getTranslation(sk));
+}
+
+TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept {
+  return handleTranslateAnyFuncEntry(numArgs, false);
+}
+
+TCA handleTranslateNamedParamsFuncEntry(uint32_t numArgs) noexcept {
+  return handleTranslateAnyFuncEntry(numArgs, true);
 }
 
 TCA handleTranslateMainFuncEntry() noexcept {
     syncRegs(SBInvOffset{0});
     FTRACE(1, "handleTranslateMainFuncEntry {}\n",
            vmfp()->func()->fullName()->data());
-    auto const numArgs = liveFunc()->numNonVariadicParams();
-    auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
+    auto const numPosArgs = liveFunc()->numPositionalParams();
+    auto const sk = SrcKey { liveFunc(), numPosArgs, false, SrcKey::FuncEntryTag {} };
     return resume(sk, getTranslation(sk));
 }
 
@@ -299,14 +310,16 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   return resume(sk, transResult);
 }
 
-TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
+TCA handleRetranslateAnyFuncEntry(uint32_t numArgs, bool optionalNamedParams) noexcept {
   syncRegs(SBInvOffset{0});
-  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNamedParams(), liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleRetranslateFuncEntry {}\n",
          vmfp()->func()->fullName()->data());
 
   INC_TPC(retranslate);
-  auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
+  SrcKey sk{
+    liveFunc(), numArgs, optionalNamedParams, SrcKey::FuncEntryTag {}
+  };
   auto const isProfile = tc::profileFunc(sk.func());
   auto const kind = isProfile ? TransKind::Profile : TransKind::Live;
   if (mcgen::isAsyncJitEnabled(kind)) {
@@ -335,12 +348,23 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
   return resume(sk, transResult);
 }
 
-TCA handleRetranslateOpt(uint32_t numArgs) noexcept {
+TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
+  return handleRetranslateAnyFuncEntry(numArgs, false);
+}
+
+TCA handleRetranslateNamedParamsFuncEntry(uint32_t numArgs) noexcept {
+  return handleRetranslateAnyFuncEntry(numArgs, true);
+}
+
+TCA handleRetranslateOptAnyFuncEntry(uint32_t numArgs,
+                                     bool optionalNamedParams) noexcept {
   syncRegs(SBInvOffset{0});
-  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNamedParams(), liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleRetranslateOpt {}\n", vmfp()->func()->fullName()->data());
 
-  auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
+  SrcKey sk{
+    liveFunc(), numArgs, optionalNamedParams, SrcKey::FuncEntryTag {}
+  };
   auto const translated = mcgen::retranslateOpt(sk.funcID());
   vmpc() = sk.advanced().pc();
   regState() = VMRegState::DIRTY;
@@ -355,6 +379,14 @@ TCA handleRetranslateOpt(uint32_t numArgs) noexcept {
     // avoid spinning through this path repeatedly.
     return tc::ustubs().interpHelperFuncEntryFromTC;
   }
+}
+
+TCA handleRetranslateOpt(uint32_t numArgs) noexcept {
+  return handleRetranslateOptAnyFuncEntry(numArgs, false);
+}
+
+TCA handleRetranslateOptNamedFE(uint32_t numArgs) noexcept {
+  return handleRetranslateOptAnyFuncEntry(numArgs, true);
 }
 
 TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept {
@@ -458,14 +490,15 @@ void logResume(SrcKey sk, ResumeFlags flags) {
   ent.setStr("unit_sha1", sk.unit()->sha1().toString());
   ent.setStr("full_func_name", fn);
   ent.setInt("prologue", sk.prologue() ? 1 : 0);
-  ent.setInt("funcEntry", sk.funcEntry() ? 1 : 0);
+  ent.setInt("func_entry", sk.funcEntry() ? 1 : 0);
+  ent.setInt("named_params_func_entry", sk.namedParamsFuncEntry() ? 1 : 0);
   ent.setInt("hasThis", sk.hasThis() ? 1 : 0);
   switch (sk.resumeMode()) {
   case ResumeMode::None: ent.setStr("resume_mode", "None");       break;
   case ResumeMode::Async: ent.setStr("resume_mode", "Async");     break;
   case ResumeMode::GenIter: ent.setStr("resume_mode", "GenIter"); break;
   }
-  if (sk.prologue() || sk.funcEntry()) {
+  if (sk.prologue() || sk.anyFuncEntry()) {
     ent.setInt("num_entry_args", sk.numEntryArgs());
   }
   ent.setStr("inst", sk.showInst());
@@ -507,14 +540,41 @@ JitResumeAddr handleResume(ResumeFlags flags) {
   if (flags.m_funcEntry) {
     assertx(sk.resumeMode() == ResumeMode::None);
     auto const func = sk.func();
-    auto numArgs = func->numNonVariadicParams();
-    while (numArgs > 0 && !frame_local(vmfp(), numArgs - 1)->is_init()) {
-      --numArgs;
+    auto totalArgs = func->numNonVariadicParams();
+    auto numNamedParams = func->numNamedParams();
+    while (totalArgs > numNamedParams && !frame_local(vmfp(), totalArgs - 1)->is_init()) {
+      --totalArgs;
     }
+    auto numPosArgs = totalArgs - numNamedParams;
     DEBUG_ONLY auto const entryOffset = sk.offset();
-    sk = SrcKey { sk.func(), numArgs, SrcKey::FuncEntryTag {} };
-    assertx(sk.entryOffset() == entryOffset);
-
+    bool hasUninitNamed = false;
+    // We need to check if there are uninitialized named params on the frame and
+    // make sure we jump to the named params func entry if we need to.
+    if (numPosArgs == func->numPositionalParams() && func->hasOptionalNamedParameters()) {
+      for (auto i = 0; i < numNamedParams; ++i) {
+        if (!frame_local(vmfp(), i)->is_init()) {
+          hasUninitNamed = true;
+          break;
+        }
+      }
+    }
+    sk = SrcKey { sk.func(), numPosArgs, hasUninitNamed, SrcKey::FuncEntryTag {} };
+    // The entry offset we've computed from the live stack data may not match
+    // the live sk in the case where we are jumping to a func entry from a
+    // prologue. Prologues have to conservatively jump to the
+    // NamedParamsFuncEntry entry if optional named params exist since they're
+    // identified by positional argc only. This is extra computation
+    // (but harmless, since the DV initializers in the NamedParamsFuncEntry
+    // have uninit checks).
+    if (func->hasOptionalNamedParameters() &&
+        numPosArgs == func->numPositionalParams()) {
+      auto const DEBUG_ONLY namedParamsFuncEntry =
+        SrcKey { sk.func(), func->numPositionalParams(), true, SrcKey::FuncEntryTag {} };
+      assertx(sk.entryOffset() == entryOffset ||
+              namedParamsFuncEntry.entryOffset() == entryOffset); 
+    } else {
+      assertx(sk.entryOffset() == entryOffset);
+    }
     vmsp() = Stack::frameStackBase(vmfp());
   }
   FTRACE(2, "handleResume: sk: {}\n", showShort(sk));
@@ -525,12 +585,12 @@ JitResumeAddr handleResume(ResumeFlags flags) {
     if (!flags.m_noTranslate) {
       auto const trans = getTranslation(sk);
       if (auto const addr = trans.addr()) {
-        if (sk.funcEntry()) return JitResumeAddr::transFuncEntry(addr);
+        if (sk.anyFuncEntry()) return JitResumeAddr::transFuncEntry(addr);
         return JitResumeAddr::trans(addr);
       }
       if (!trans.isRequestPersistentFailure()) return JitResumeAddr::none();
       return JitResumeAddr::helper(
-        sk.funcEntry()
+        sk.anyFuncEntry()
           ? tc::ustubs().interpHelperNoTranslateFuncEntryFromInterp
           : tc::ustubs().interpHelperNoTranslateFromInterp
       );
@@ -564,7 +624,7 @@ JitResumeAddr handleResume(ResumeFlags flags) {
     // Log the resume event to scuba
     logResume(sk, flags);
 
-    if (sk.funcEntry()) {
+    if (sk.anyFuncEntry()) {
       auto const savedRip = vmfp()->m_savedRip;
       if (!funcEntry()) {
         FTRACE(2, "handleResume: returning to rip={} pc={} after intercept\n",

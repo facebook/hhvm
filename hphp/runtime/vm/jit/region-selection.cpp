@@ -829,7 +829,7 @@ void RegionDesc::Block::checkInstructions() const {
 }
 
 void RegionDesc::Block::checkInstruction(SrcKey sk) const {
-  if (sk.funcEntry()) return;
+  if (sk.anyFuncEntry()) return;
 
   if (instrFlags(sk.op()) & TF) {
     FTRACE(1, "Bad block: {}\n", show(*this));
@@ -965,7 +965,7 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
 }
 
 bool breaksRegion(SrcKey sk) {
-  if (sk.funcEntry()) return false;
+  if (sk.anyFuncEntry()) return false;
   switch (sk.op()) {
     case Op::SSwitch:
     case Op::CreateCont:

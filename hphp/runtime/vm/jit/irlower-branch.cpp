@@ -62,7 +62,7 @@ void maybe_syncsp(Vout& v, const BCMarker& marker, Vreg sp, IRSPRelOffset off) {
 }
 
 RegSet cross_trace_args(const BCMarker& marker, SrcKey target) {
-  if (target.valid() && target.funcEntry()) {
+  if (target.valid() && target.anyFuncEntry()) {
     auto const func = target.func();
     auto const withCtx =
       func->isClosureBody() || func->cls() ||
@@ -407,7 +407,7 @@ void cgReqBindJmp(IRLS& env, const IRInstruction* inst) {
   auto const target = extra->target;
   auto& v = vmain(env);
 
-  if (target.funcEntry()) {
+  if (target.anyFuncEntry()) {
     if (extra->popFrame) {
       assertx(inst->numSrcs() == 2);
       popFrameToFuncEntryRegs(v, target.func());
@@ -441,7 +441,7 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
   auto const extra  = inst->extra<ReqRetranslate>();
   auto& v = vmain(env);
 
-  if (destSK.funcEntry()) {
+  if (destSK.anyFuncEntry()) {
     popFrameToFuncEntryRegs(v, destSK.func());
   } else {
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->offset);
@@ -455,14 +455,17 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
-  assertx(inst->marker().sk().funcEntry());
+  auto const sk = inst->marker().sk();
+  assertx(sk.anyFuncEntry());
   assertx(inst->marker().bcSPOff() == SBInvOffset{0});
   auto& v = vmain(env);
-  v << copy{v.cns(inst->marker().sk().numEntryArgs()), rarg(0)};
+  v << copy{v.cns(sk.numEntryArgs()), rarg(0)};
   // This jmp is not smashable, so the ABI does not need to be compatible with
   // TC targets. This allows the stub to accept pushed frame.
   v << jmpi{
-    tc::ustubs().handleRetranslateOpt,
+    sk.namedParamsFuncEntry()
+      ? tc::ustubs().handleRetranslateOptNamedFE
+      : tc::ustubs().handleRetranslateOpt,
     vm_regs_no_sp() | rarg(0)
   };
 }
@@ -471,7 +474,7 @@ void cgReqInterpBBNoTranslate(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ReqInterpBBNoTranslate>();
   auto& v = vmain(env);
 
-  if (extra->target.funcEntry()) {
+  if (extra->target.anyFuncEntry()) {
     assertx(extra->popFrame);
     popFrameToFuncEntryRegs(v, extra->target.func());
   } else {

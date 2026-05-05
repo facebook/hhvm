@@ -1089,9 +1089,10 @@ void log(const ProfDataSBDeser* pd,
     ent.setInt("has_this", sk->hasThis());
     ent.setStr("resume_mode", resumeModeShortName(sk->resumeMode()));
     ent.setInt("func_entry", sk->funcEntry());
+    ent.setInt("named_params_func_entry", sk->namedParamsFuncEntry());
     ent.setInt("offset", sk->offset());
     ent.setInt("hash", sk->stableHash());
-    if (sk->funcEntry()) {
+    if (sk->anyFuncEntry()) {
       ent.setInt("entry_offset", sk->entryOffset());
       ent.setInt("entry_num_args", sk->numEntryArgs());
     }

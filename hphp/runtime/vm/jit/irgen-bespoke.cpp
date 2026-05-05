@@ -1091,7 +1091,7 @@ const StaticString
 // validation of e.g. whether we can inline the callee.
 Optional<LayoutSensitiveCall>
 getLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
-  if (sk.funcEntry()) return std::nullopt;
+  if (sk.anyFuncEntry()) return std::nullopt;
   if (sk.op() != Op::FCallClsMethodD) return std::nullopt;
 
   auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 1).u_SA);

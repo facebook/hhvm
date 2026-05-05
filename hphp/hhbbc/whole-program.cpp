@@ -619,15 +619,17 @@ AnalysisScheduler analyze_impl(Index& index) {
         scheduler.registerUnit(unit, Mode);
       }
     } else {
-      for (auto const cls : index.all_classes_to_analyze()) {
-        scheduler.registerClass(cls, Mode);
-      }
-      for (auto const func : index.all_funcs()) {
-        scheduler.registerFunc(func, Mode);
-      }
-      for (auto const unit : index.all_units()) {
-        scheduler.registerUnit(unit, Mode);
-      }
+      scheduler.reserveForRegistration(
+        index.all_classes_to_analyze().size(),
+        index.all_funcs().size(),
+        index.all_units().size()
+      );
+      scheduler.registerAllBulk(
+        index.all_classes_to_analyze(),
+        index.all_funcs(),
+        index.all_units(),
+        Mode
+      );
     }
   }
 
@@ -707,7 +709,10 @@ AnalysisScheduler analyze_impl(Index& index) {
         folly::sformat("round {}", round)
       };
       trace2.ignore_client_stats();
-      // TODO: Investigate making more aggressive traces
+      // TODO: Investigate enabling trace scheduling for later rounds
+      // (few work items) to converge faster and eliminate tail rounds.
+      // Initial attempt with depth=10 caused scheduler explosion on
+      // highly-connected nodes.
       return scheduler.schedule(Mode, 0, 0, kMaxBucketWeight);
     }();
     // Work shouldn't be empty because we add non-zero work items this

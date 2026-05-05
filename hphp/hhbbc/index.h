@@ -2582,6 +2582,12 @@ struct AnalysisScheduler {
   void registerFunc(SString, AnalysisMode);
   void registerUnit(SString, AnalysisMode);
 
+  void reserveForRegistration(size_t classes, size_t funcs, size_t units);
+  void registerAllBulk(const TSStringSet& classes,
+                       const FSStringSet& funcs,
+                       const SStringSet& units,
+                       AnalysisMode);
+
   void enableAll();
 
   // Record the output of an analysis job. This can be called in a

@@ -22951,6 +22951,151 @@ void AnalysisScheduler::addPredeps(SString name,
   }
 }
 
+// Pre-reserve internal maps and vectors for the expected number of
+// entities. Avoids repeated rehashing during bulk registration.
+void AnalysisScheduler::reserveForRegistration(size_t classes,
+                                               size_t funcs,
+                                               size_t units) {
+  auto const total = classes + funcs + units;
+  classState.reserve(classes);
+  funcState.reserve(funcs);
+  unitState.reserve(units);
+  // Bundles are fewer than entities but we don't know how many.
+  // Use total as an upper bound.
+  traceState.reserve(total);
+  traceNames.reserve(total);
+  classNames.reserve(classes);
+  funcNames.reserve(funcs);
+  unitNames.reserve(units);
+}
+
+// Register all classes, funcs, and units in bulk. Equivalent to
+// calling registerClass/registerFunc/registerUnit individually, but
+// splits the work into a serial phase (state creation, closure
+// registration, trace linking) and a parallel phase (predep
+// computation) for better performance at scale.
+void AnalysisScheduler::registerAllBulk(const TSStringSet& classes,
+                                        const FSStringSet& funcs,
+                                        const SStringSet& units,
+                                        AnalysisMode mode) {
+  assertx(mode != AnalysisMode::Final);
+  auto const& i = *index.m_data;
+
+  // Phase 1 (serial): Create all state entries, register closures,
+  // create traces, and link DepStates to traces. No predep
+  // computation — just structural setup.
+  for (auto const cls : classes) {
+    if (is_closure_name(cls)) continue;
+    auto const [cState, emplaced] = classState.try_emplace(cls, cls);
+    if (!emplaced) continue;
+    ++totalWorkItems;
+    classNames.emplace_back(cls);
+
+    auto const bundle = i.classToBundle.at(cls);
+    auto const [tState, tEmplaced] = traceState.try_emplace(bundle, bundle);
+    if (tEmplaced) traceNames.emplace_back(bundle);
+    tState->second.depStates.emplace_back(&cState->second.depState);
+
+    for (auto const clo : folly::get_default(i.classToClosures, cls)) {
+      always_assert(classState.try_emplace(clo, clo).second);
+    }
+  }
+
+  for (auto const func : funcs) {
+    auto const [fState, emplaced] = funcState.try_emplace(func, func);
+    if (!emplaced) continue;
+    ++totalWorkItems;
+    funcNames.emplace_back(func);
+
+    for (auto const clo : folly::get_default(i.funcToClosures, func)) {
+      always_assert(classState.try_emplace(clo, clo).second);
+    }
+
+    if (auto const cns = Constant::nameFromFuncName(func)) {
+      always_assert(cnsChanged.try_emplace(cns).second);
+      registerUnit(i.funcToUnit.at(func), mode);
+    }
+
+    auto const bundle = i.funcToBundle.at(func);
+    auto const [tState, tEmplaced] = traceState.try_emplace(bundle, bundle);
+    if (tEmplaced) traceNames.emplace_back(bundle);
+    tState->second.depStates.emplace_back(&fState->second.depState);
+  }
+
+  for (auto const unit : units) {
+    auto const [uState, emplaced] = unitState.try_emplace(unit, unit);
+    if (!emplaced) continue;
+    if (index.units_with_type_aliases().contains(unit)) {
+      ++totalWorkItems;
+    }
+    unitNames.emplace_back(unit);
+
+    auto const bundle = i.unitToBundle.at(unit);
+    auto const [tState, tEmplaced] = traceState.try_emplace(bundle, bundle);
+    if (tEmplaced) traceNames.emplace_back(bundle);
+    tState->second.depStates.emplace_back(&uState->second.depState);
+  }
+
+  namesSorted = false;
+
+  // Phase 2 (parallel): Compute predeps for all entities. Each
+  // entity's addPredeps only writes to its own AnalysisDeps.
+  parallel::for_each(
+    classNames,
+    [&] (SString name) {
+      auto& deps = classState.at(name).depState.deps;
+      if (auto const p = folly::get_ptr(i.unitCInitPredeps,
+                                        i.classToUnit.at(name))) {
+        addPredeps(name, *p, deps);
+      }
+      for (auto const base : folly::get_default(i.classToCnsBases, name)) {
+        auto const unit = i.classToUnit.at(base);
+        if (auto const p = folly::get_ptr(i.unitCInitPredeps, unit)) {
+          addPredeps(name, *p, deps);
+        }
+      }
+      if (mode == AnalysisMode::Full) {
+        if (auto const p = folly::get_ptr(i.unitPredeps,
+                                          i.classToUnit.at(name))) {
+          addPredeps(name, *p, deps);
+        }
+      }
+    }
+  );
+
+  parallel::for_each(
+    funcNames,
+    [&] (SString name) {
+      auto& deps = funcState.at(name).depState.deps;
+      if (auto const p = folly::get_ptr(i.unitCInitPredeps,
+                                        i.funcToUnit.at(name))) {
+        addPredeps(name, *p, deps);
+      }
+      if (mode == AnalysisMode::Full) {
+        if (auto const p = folly::get_ptr(i.unitPredeps,
+                                          i.funcToUnit.at(name))) {
+          addPredeps(name, *p, deps);
+        }
+      }
+    }
+  );
+
+  parallel::for_each(
+    unitNames,
+    [&] (SString name) {
+      auto& deps = unitState.at(name).depState.deps;
+      if (auto const p = folly::get_ptr(i.unitCInitPredeps, name)) {
+        addPredeps(name, *p, deps);
+      }
+      if (mode == AnalysisMode::Full) {
+        if (auto const p = folly::get_ptr(i.unitPredeps, name)) {
+          addPredeps(name, *p, deps);
+        }
+      }
+    }
+  );
+}
+
 void AnalysisScheduler::registerClass(SString name, AnalysisMode mode) {
   assertx(mode != AnalysisMode::Final);
 
@@ -24966,6 +25111,7 @@ AnalysisScheduler::makeBuckets(size_t maxBucketWeight) {
     SparseBitset<> present;
     SparseBitset<> toProcess;
     uint64_t weight{0};
+    uint64_t heaviestElem{0};
     const Bin* bin{nullptr};
   };
 
@@ -25051,6 +25197,102 @@ AnalysisScheduler::makeBuckets(size_t maxBucketWeight) {
 
   parallel::thread_pool threadPool;
 
+  auto usedSlowPath = false;
+
+  // Bin-packing: assign traces to size-bounded bins, sharing
+  // overlapping elements to minimize total bin weight. Two
+  // strategies depending on trace count:
+  //
+  // Fast path (> kFastPathThreshold traces): O(N log N). Sort
+  // traces by their heaviest element to cluster traces that likely
+  // share dependencies. Then greedily assign each trace to the
+  // best-fit bin among the last K open bins (marginal cost =
+  // trace weight minus shared elements). Falls back to a new bin
+  // if no overlap is found.
+  //
+  // Slow path (≤ kFastPathThreshold traces): O(N² × k). Pick the
+  // heaviest unassigned trace as a bin seed, then repeatedly scan
+  // all remaining traces to find the one with the lowest marginal
+  // cost to add, until the bin is full. Produces better packing
+  // but doesn't scale.
+  static constexpr size_t kFastPathThreshold = 50000;
+  static constexpr size_t kOpenBins = 32;
+  if (worklist.size() > kFastPathThreshold) {
+    // Compute each trace's heaviest element for locality sorting.
+    // Traces sharing the same dominant element tend to overlap.
+    parallel::for_each(
+      traceInfos,
+      [&] (auto& info) {
+        uint64_t heaviestWeight = 0;
+        info->present.forEach([&] (uint64_t e) {
+          if (elemInfos[e]->weight > heaviestWeight) {
+            heaviestWeight = elemInfos[e]->weight;
+            info->heaviestElem = e;
+          }
+        });
+      }
+    );
+
+    // Sort by heaviest element (clusters similar traces), then by
+    // weight descending within each cluster.
+    std::sort(
+      begin(worklist), end(worklist),
+      [&] (const TraceInfo* i1, const TraceInfo* i2) {
+        if (i1->heaviestElem < i2->heaviestElem) return true;
+        if (i1->heaviestElem > i2->heaviestElem) return false;
+        if (i1->weight > i2->weight) return true;
+        if (i1->weight < i2->weight) return false;
+        return false;
+      }
+    );
+
+    for (auto info : worklist) {
+      // Try the last K open bins for best fit using marginal cost
+      // (intersection-based, much cheaper than full recomputation).
+      Bin* bestBin = nullptr;
+      uint64_t bestMarginal = std::numeric_limits<uint64_t>::max();
+
+      auto const start = bins.size() > kOpenBins
+        ? bins.size() - kOpenBins : 0;
+      for (auto i = start; i < bins.size(); ++i) {
+        auto bin = bins[i].get();
+        if (bin->weight >= maxBucketWeight) continue;
+        auto r = info->weight;
+        info->present.forEachIsect(
+          bin->present,
+          [&] (uint64_t e) { r -= elemInfos[e]->weight; }
+        );
+        if (r >= info->weight) continue; // no overlap
+        if (r > 0 && bin->weight + r > maxBucketWeight) continue;
+        if (r < bestMarginal) {
+          bestMarginal = r;
+          bestBin = bin;
+        }
+      }
+
+      if (bestBin) {
+        info->bin = bestBin;
+        bestBin->present |= info->present;
+        bestBin->toProcess |= info->toProcess;
+        bestBin->weight += bestMarginal;
+        bestBin->heads.emplace(info->state);
+      } else {
+        auto bin = std::make_unique<Bin>();
+        bin->idx = bins.size();
+        info->bin = bin.get();
+        bin->present = info->present;
+        bin->toProcess = info->toProcess;
+        bin->weight = info->weight;
+        bin->heads.emplace(info->state);
+        bins.emplace_back(std::move(bin));
+      }
+    }
+
+    worklist.clear();
+  }
+
+  // Slow path: greedy bin-packing with full overlap scanning.
+  usedSlowPath = !worklist.empty();
   while (!worklist.empty()) {
     auto bin = std::make_unique<Bin>();
     bin->idx = bins.size();
@@ -25158,35 +25400,39 @@ AnalysisScheduler::makeBuckets(size_t maxBucketWeight) {
     }
   );
 
-  assertx(!bins.empty());
-  for (size_t i = 0, size = bins.size(); i < size; ++i) {
-    auto& bin = *bins[i];
-    assertx(bin.weight > 0);
-    if (bin.weight >= maxBucketWeight) break;
+  // Skip the merge pass if we used the fast path — it's O(bins²)
+  // and the bins are already right-sized.
+  if (usedSlowPath) {
+    assertx(!bins.empty());
+    for (size_t i = 0, size = bins.size(); i < size; ++i) {
+      auto& bin = *bins[i];
+      assertx(bin.weight > 0);
+      if (bin.weight >= maxBucketWeight) break;
 
-    for (size_t j = bins.size(); (j-1) > i; --j) {
-      auto& other = *bins[j-1];
-      assertx(&other != &bin);
-      assertx(other.weight > 0);
-      if (other.weight >= maxBucketWeight) continue;
+      for (size_t j = bins.size(); (j-1) > i; --j) {
+        auto& other = *bins[j-1];
+        assertx(&other != &bin);
+        assertx(other.weight > 0);
+        if (other.weight >= maxBucketWeight) continue;
 
-      auto r = bin.weight;
-      bin.present.forEachIsect(
-        other.present,
-        [&] (uint64_t e) {
-          assertx(e < elemInfos.size());
-          assertx(r >= elemInfos[e]->weight);
-          r -= elemInfos[e]->weight;
-        }
-      );
-      if (other.weight + r > maxBucketWeight) continue;
+        auto r = bin.weight;
+        bin.present.forEachIsect(
+          other.present,
+          [&] (uint64_t e) {
+            assertx(e < elemInfos.size());
+            assertx(r >= elemInfos[e]->weight);
+            r -= elemInfos[e]->weight;
+          }
+        );
+        if (other.weight + r > maxBucketWeight) continue;
 
-      bin.weight = 0;
-      other.present |= bin.present;
-      other.toProcess |= bin.toProcess;
-      other.weight += r;
-      other.heads.insert(begin(bin.heads), end(bin.heads));
-      break;
+        bin.weight = 0;
+        other.present |= bin.present;
+        other.toProcess |= bin.toProcess;
+        other.weight += r;
+        other.heads.insert(begin(bin.heads), end(bin.heads));
+        break;
+      }
     }
   }
 

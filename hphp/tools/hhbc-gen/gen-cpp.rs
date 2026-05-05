@@ -12,11 +12,6 @@ use hhbc_gen::Inputs;
 use hhbc_gen::InstrFlags;
 use hhbc_gen::OpcodeData;
 use hhbc_gen::Outputs;
-use structopt::StructOpt;
-
-#[derive(StructOpt, Debug)]
-#[structopt(no_version)]
-pub struct Opts {}
 
 /// hphp-gen/gen-cpp.rs
 ///

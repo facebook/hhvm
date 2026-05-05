@@ -120,7 +120,7 @@ abstract final class ThriftUtil {
   )[zoned_shallow]: Awaitable<dict<string, mixed>> {
     $is_union = $thrift_object is IThriftUnion<_>;
     $obj_spec = $thrift_object::SPEC;
-    $thrift_object as dynamic;
+    $thrift_object = HH\FIXME\UNSAFE_CAST<mixed, dynamic>($thrift_object);
     $obj_spec = Dict\from_values($obj_spec, $field_spec ==> $field_spec['var']);
     return await Dict\map_async(
       $obj_spec,
@@ -152,7 +152,7 @@ abstract final class ThriftUtil {
     $is_union = $thrift_object is IThriftUnion<_>;
     $is_wrapped = Shapes::idx($field_spec, 'is_wrapped', false);
     $field_name = $field_spec['var'];
-    $thrift_object as dynamic;
+    $thrift_object = HH\FIXME\UNSAFE_CAST<mixed, dynamic>($thrift_object);
     if ($is_wrapped || $is_union) {
       $acc_meth = 'get_'.$field_name;
       // @lint-ignore DYNAMICALLY_INVOKING_TARGETS_CONSIDERED_HARMFUL
@@ -174,7 +174,7 @@ abstract final class ThriftUtil {
     string $field_name,
   )[]: dynamic {
     $is_union = $thrift_object is IThriftUnion<_>;
-    $thrift_object as dynamic;
+    $thrift_object = HH\FIXME\UNSAFE_CAST<mixed, dynamic>($thrift_object);
     if ($is_union) {
       $acc_meth = 'get_'.$field_name;
       // @lint-ignore DYNAMICALLY_INVOKING_TARGETS_CONSIDERED_HARMFUL
@@ -191,8 +191,9 @@ abstract final class ThriftUtil {
     ThriftStructTypes::TFieldSpec $field_spec,
     dynamic $value,
   ): Awaitable<void> {
-    $thrift_object
-      as dynamic; // -> setter method and field accesses are dynamic
+    $thrift_object = HH\FIXME\UNSAFE_CAST<mixed, dynamic>(
+      $thrift_object,
+    ); // -> setter method and field accesses are dynamic
     $field_name = $field_spec['var'];
     $is_wrapped = Shapes::idx($field_spec, 'is_wrapped', false);
     if ($thrift_object is IThriftUnion<_>) {

@@ -237,47 +237,13 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
 
 inline void initFuncNamedParamDefaults(const Func* callee, uint32_t numPositionalArgs,
                                        const ArrayData* namedArgNames) {
-  auto numNamedParams = callee->numNamedParams();
-  if (numNamedParams == 0) return;
-  auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
-  assertx(numNamedParams >= numNamedArgs);
-  if (numNamedParams == numNamedArgs) return;
-
-  auto numPositionalParams = callee->numNonVariadicParams() - callee->numNamedParams();
-  auto const hasVariadics = numPositionalArgs > numPositionalParams ? 1 : 0;
-
-  GenericsSaver gs{callee->hasReifiedGenerics()};
-  PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
-  auto const delta = callee->numNamedParams() - numNamedArgs;
-  auto oldStackPos =
-    [&](const size_t argPos) { return numPositionalArgs + numNamedArgs - argPos - 1; };
-  auto newStackPos =
-    [&](const size_t argPos) {
-      return numPositionalArgs + delta + numNamedArgs - argPos - 1;
-    };
-  std::vector<TypedValue> values(numPositionalArgs + callee->numNamedParams());
-  if (hasVariadics) {
-    assertx(numPositionalArgs == numPositionalParams + 1);
-    values.back() = *vmStack().indC(0);
-  }
-  auto argIdx = 0;
-  for (auto paramIdx = 0; paramIdx < values.size() - hasVariadics; ++paramIdx) {
-    if (paramIdx < callee->numNamedParams()) {
-      auto paramName = namedParamNames[paramIdx];
-      if (argIdx < numNamedArgs && paramName == namedArgNames->at(argIdx).val().pstr) {
-        values[paramIdx] = *vmStack().indC(oldStackPos(argIdx++));
-      } else {
-        values[paramIdx] = make_tv<KindOfUninit>();
-      }
-    } else {
-      values[paramIdx] = *vmStack().indC(oldStackPos(argIdx++));
-    }
-  }
-
+  TypedValue* stackTop = vmStack().top();
+  int32_t numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+  int32_t delta = callee->numNamedParams() - numNamedArgs;
+  if (delta == 0) return;
+  assertx(delta > 0);
   vmStack().nalloc(delta);
-  for (size_t i = 0; i < values.size(); ++i) {
-    *vmStack().indTV(newStackPos(i)) = values[i];
-  }
+  initFuncNamedParamDefaultValues(callee, numPositionalArgs, namedArgNames, stackTop);
 }
 
 /*

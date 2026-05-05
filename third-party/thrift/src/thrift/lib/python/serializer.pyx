@@ -63,14 +63,22 @@ JSON5_MODE = Json5ProtocolWriterOptions(
 cdef class Json5ProtocolWriterOptions:
     """Options for the JSON5 protocol writer that are passed to C++."""
     cdef public JsonWriterOptions writer
+    cdef public bint enum_as_integer
 
-    def __init__(self, *, writer=None):
+    def __init__(
+        self,
+        *,
+        writer=None,
+        enum_as_integer=False,
+    ):
         self.writer = writer if writer is not None else JsonWriterOptions()
+        self.enum_as_integer = enum_as_integer
 
 
 cdef cJson5ProtocolWriterOptions _to_c_options(Json5ProtocolWriterOptions options):
     cdef cJson5ProtocolWriterOptions c_options
     c_options.writer = options.writer._writer_options
+    c_options.enumAsInteger = options.enum_as_integer
     return cmove(c_options)
 
 

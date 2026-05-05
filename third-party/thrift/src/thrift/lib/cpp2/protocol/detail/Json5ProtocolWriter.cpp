@@ -339,6 +339,9 @@ std::uint32_t Json5ProtocolWriter::writeBinary(const folly::IOBuf& buf) {
 
 std::uint32_t Json5ProtocolWriter::writeEnum(
     std::string_view name, std::int32_t value) {
+  if (options_.enumAsInteger) {
+    return writeI32(value);
+  }
   return writeString(
       name.empty() ? fmt::format("({})", value)
                    : fmt::format("{} ({})", name, value));

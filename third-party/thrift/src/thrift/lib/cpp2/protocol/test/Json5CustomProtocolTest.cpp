@@ -117,4 +117,17 @@ TEST(Json5CustomProtocolExtraTest, NegativeZeroRoundTrip) {
   EXPECT_EQ(*d2.doubleValue(), 0.0);
 }
 
+// ── Tests for Json5ProtocolWriter::Options ──────────────────────────────────
+
+TEST(Json5WriterOptionsTest, EnumAsInteger) {
+  Example example;
+  example.enumValue() = facebook::thrift::json5::Enum::TWO;
+
+  auto defaultResult = writeExample(example, {});
+  EXPECT_EQ(defaultResult, R"RAW({"enumValue":"TWO (2)"})RAW");
+
+  auto result = writeExample(example, {.writer = {}, .enumAsInteger = true});
+  EXPECT_EQ(result, R"RAW({"enumValue":2})RAW");
+}
+
 } // namespace apache::thrift

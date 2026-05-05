@@ -17,9 +17,7 @@
 #include <thrift/lib/cpp2/protocol/Json5Protocol.h>
 
 #include <limits>
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/json5_test_constants.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/json5_test_types.h>
 

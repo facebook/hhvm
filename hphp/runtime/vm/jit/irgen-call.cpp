@@ -566,10 +566,10 @@ SSATmp* refineKnownFuncCtx(IRGS& env, const Func* callee, SSATmp* ctx) {
 }
 
 std::vector<Type> funcEntryTypes(IRGS& env, const Func* callee,
-                                 uint32_t numArgsInclUnpack) {
+                                 uint32_t numPositionalArgs) {
   int argc = 0;
   std::vector<Type> inputTypes;
-  auto firstInputPos = numArgsInclUnpack - 1
+  auto firstInputPos = numPositionalArgs + callee->numNamedParams() - 1
     + (callee->hasReifiedGenerics() ? 1 : 0)
     + (callee->hasCoeffectsLocal() ? 1 : 0);
 
@@ -586,7 +586,7 @@ std::vector<Type> funcEntryTypes(IRGS& env, const Func* callee,
   };
 
   // Set passed parameters
-  while (argc < numArgsInclUnpack) nextInput();
+  while (argc < numPositionalArgs + callee->numNamedParams()) nextInput();
 
   // Uninit default values
   for (int i = argc; i < callee->numNonVariadicParams(); ++i) {
@@ -652,7 +652,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
 
     updateStackOffsetAndExceptionBoundary(env);
 
-    auto numArgsInclUnpack = fca.numArgs + (fca.hasUnpack() ? 1U : 0U);
     auto const coeffects = curCoeffects(env);
     auto const prologueFlags = cns(env, PrologueFlags(
       fca.hasGenerics(),
@@ -673,7 +672,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
 
     SSATmp* namedArgNames =
       namedArgNamesVal ? cns(env, namedArgNamesVal) : cns(env, nullptr);
-    auto posArgc = numArgsInclUnpack - namedArgc;
+    auto posArgc = fca.numArgs + (fca.hasUnpack() ? 1U : 0U) - namedArgc;
     // Callee checks and input initialization.
     emitCalleeGenericsChecks(env, callee, prologueFlags, namedArgNames,
                              fca.hasGenerics(),
@@ -701,13 +700,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // the code below with incorrect inputs (such as not enough args).
     if (env.irb->inUnreachableState()) return;
 
-    // TODO(named_params): numArgsInclUnpack shouldn't exist as a concept any more.
-    // We should instead pass in the positional argc and named arg count separately,
-    // and fix the callees.
-    numArgsInclUnpack = posArgc + callee->numNamedParams();
-
-    auto const inputTypes = funcEntryTypes(env, callee, numArgsInclUnpack);
-    auto const numInputs = numArgsInclUnpack
+    auto const inputTypes = funcEntryTypes(env, callee, posArgc);
+    auto const numInputs = posArgc + callee->numNamedParams()
       + (callee->hasReifiedGenerics() ? 1 : 0)
       + (callee->hasCoeffectsLocal() ? 1 : 0);
 

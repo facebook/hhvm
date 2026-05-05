@@ -669,7 +669,7 @@ extern InterpOneFunc interpOneEntryPoints[];
 
 void doFCall(PrologueFlags prologueFlags, const Func* func,
              const ArrayData* namedArgNames,
-             uint32_t numArgsInclUnpack, void* ctx, jit::TCA retAddr);
+             uint32_t numPositionalArgs, void* ctx, jit::TCA retAddr);
 bool funcEntry();
 jit::JitResumeAddr dispatchBB();
 Array getDefinedVariables(const ActRec*);

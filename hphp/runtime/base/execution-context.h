@@ -560,7 +560,7 @@ public:
 
 private:
   TypedValue invokeFuncImpl(const Func* f, ObjectData* thiz, Class* cls,
-                            uint32_t numArgsInclUnpack,
+                            uint32_t numPositionalArgs,
                             const ArrayData* namedArgNames,
                             RuntimeCoeffects providedCoeffects,
                             bool hasGenerics,

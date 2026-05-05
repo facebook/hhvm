@@ -305,7 +305,7 @@ void fcallHelper(PrologueFlags prologueFlags, Func* func,
       throw_stack_overflow();
     }
 
-    doFCall(prologueFlags, func, namedArgNames, numArgsInclUnpack, ctx, savedRip);
+    doFCall(prologueFlags, func, namedArgNames, numArgsInclUnpack - namedArgNamesSize, ctx, savedRip);
   });
 }
 

@@ -3560,24 +3560,23 @@ bool funcEntry() {
 
 void doFCall(PrologueFlags prologueFlags, const Func* func,
              const ArrayData* namedArgNames,
-             uint32_t numArgsInclUnpack, void* ctx, TCA retAddr) {
+             uint32_t numPositionalArgs, void* ctx, TCA retAddr) {
   TRACE(3, "FCall: pc %p func %p\n", vmpc(), vmfp()->func()->entry());
 
-  assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
+  assertx(numPositionalArgs <= func->numPositionalParams() + 1);
   assertx(kNumActRecCells == 2);
-  ActRec* ar = vmStack().indA(
-    numArgsInclUnpack + (prologueFlags.hasGenerics() ? 1 : 0));
   auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
-  uint32_t numPositionalArgs = numArgsInclUnpack - numNamedArgs;
+  ActRec* ar = vmStack().indA(
+    numPositionalArgs + numNamedArgs + (prologueFlags.hasGenerics() ? 1 : 0));
   // Callee checks and input initialization.
   calleeGenericsChecks(func, prologueFlags.hasGenerics());
-  calleeNamedArgChecks(func, numArgsInclUnpack, namedArgNames);
-  calleeArgumentArityChecks(func, numArgsInclUnpack, numPositionalArgs);
-  calleeArgumentTypeChecks(func, numArgsInclUnpack, namedArgNames, ctx);
+  calleeNamedArgChecks(func, numPositionalArgs, namedArgNames);
+  calleeArgumentArityChecks(func, numPositionalArgs);
+  calleeArgumentTypeChecks(func, numPositionalArgs, namedArgNames, ctx);
   calleeDynamicCallChecks(func, prologueFlags.isDynamicCall());
-  calleeCoeffectChecks(func, prologueFlags.coeffects(), numArgsInclUnpack, ctx);
+  calleeCoeffectChecks(func, prologueFlags.coeffects(), numPositionalArgs, ctx);
   func->recordCall();
-  initFuncInputs(func, numArgsInclUnpack);
+  initFuncInputs(func, numPositionalArgs);
 
   ar->m_sfp = vmfp();
   ar->setFunc(func);
@@ -3625,23 +3624,23 @@ JitResumeAddr fcallImpl(PC origpc, PC& pc, const FCallArgs& fca,
     nameArr = vmfp()->func()->unit()->lookupArrayId(fca.namedArgNames);
   }
 
-  auto const numArgsInclUnpack = [&] {
+  auto const numPositionalArgs = [&] {
     uint32_t numNamedArgs = nameArr ? nameArr->size() : 0;
     assertx(fca.numArgs >= numNamedArgs);
     auto numPositionalArgs = fca.numArgs - numNamedArgs;
-    auto numPositionalParams = func->numNonVariadicParams() - func->numNamedParams();
+    auto numPositionalParams = func->numPositionalParams();
     if (UNLIKELY(fca.hasUnpack())) {
       GenericsSaver gs{fca.hasGenerics()};
-      return prepareUnpackArgs(func, numPositionalArgs, true) + numNamedArgs;
+      return prepareUnpackArgs(func, numPositionalArgs, true);
     }
     if (UNLIKELY(numPositionalArgs > numPositionalParams)) {
       GenericsSaver gs{fca.hasGenerics()};
       uint32_t delta = numPositionalArgs - numPositionalParams;
       iopNewVec(delta);
-      return fca.numArgs - delta + 1;
+      return numPositionalParams + 1;
     }
 
-    return fca.numArgs;
+    return numPositionalArgs;
   }();
 
   auto const prologueFlags = PrologueFlags(
@@ -3654,7 +3653,7 @@ JitResumeAddr fcallImpl(PC origpc, PC& pc, const FCallArgs& fca,
     vmfp()->providedCoeffectsForCall(isCtor)
   );
 
-  doFCall(prologueFlags, func, nameArr, numArgsInclUnpack,
+  doFCall(prologueFlags, func, nameArr, numPositionalArgs,
           takeCtx(std::forward<Ctx>(ctx)), jit::tc::ustubs().retHelper);
 
   // Let JIT handle FuncEntry.

@@ -344,11 +344,7 @@ void raiseTooManyArguments(const Func* func, int got) {
   if (!Cfg::Eval::WarnOnTooManyArguments && !func->isCPPBuiltin()) {
     return;
   }
-  // The callee arity checks (which raise this error) run *after* optional named
-  // args are passed, and numArgsInclUnpack is updated, so we have the invariant that
-  // numNamedParams named args are passed on the stack.
-  got -= func->numNamedParams();
-  auto const total = func->numNonVariadicParams() - func->numNamedParams();
+  auto const total = func->numPositionalParams();
   assertx(got > total);
   auto const amount = func->numRequiredPositionalParams() < total ? "at most" : "exactly";
   auto const errMsg = formatArgumentErrMsg(func, amount, total, got);
@@ -365,7 +361,7 @@ void raiseTooManyArguments(const Func* func, int got) {
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
   SCOPE_EXIT { decRefArr(unpackArgs); };
   if (unpackArgs->empty()) return;
-  auto const got = func->numNonVariadicParams() + unpackArgs->size();
+  auto const got = func->numPositionalParams() + unpackArgs->size();
   raiseTooManyArguments(func, got);
 }
 

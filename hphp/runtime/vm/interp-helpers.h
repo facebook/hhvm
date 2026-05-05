@@ -182,7 +182,7 @@ inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
  */
 inline bool calleeCoeffectChecks(const Func* callee,
                                  RuntimeCoeffects providedCoeffects,
-                                 uint32_t numArgsInclUnpack,
+                                 uint32_t numPositionalArgs,
                                  void* prologueCtx) {
   if (!CoeffectsConfig::enabled()) {
     if (callee->hasCoeffectsLocal()) {
@@ -194,8 +194,10 @@ inline bool calleeCoeffectChecks(const Func* callee,
     auto required = callee->requiredCoeffects();
     if (!callee->hasCoeffectRules()) return required;
     for (auto const& rule : callee->getCoeffectRules()) {
-      required |= rule.emit(callee, numArgsInclUnpack, prologueCtx,
-                            providedCoeffects);
+      // TODO(named_params) numArgsInclUnpack should be removed from the coeffect
+      // code and replaced with positional argc.
+      required |= rule.emit(callee, numPositionalArgs + callee->numNamedParams(),
+                            prologueCtx, providedCoeffects);
     }
     if (callee->hasCoeffectsLocal()) vmStack().pushInt(required.value());
     return required;
@@ -233,7 +235,7 @@ inline void calleeGenericsChecks(const Func* callee, bool hasGenerics) {
   checkFunReifiedGenericMismatch(callee, val(generics).parr);
 }
 
-inline void initFuncNamedParamDefaults(const Func* callee, uint32_t& numArgsInclUnpack,
+inline void initFuncNamedParamDefaults(const Func* callee, uint32_t numPositionalArgs,
                                        const ArrayData* namedArgNames) {
   auto numNamedParams = callee->numNamedParams();
   if (numNamedParams == 0) return;
@@ -241,15 +243,19 @@ inline void initFuncNamedParamDefaults(const Func* callee, uint32_t& numArgsIncl
   assertx(numNamedParams >= numNamedArgs);
   if (numNamedParams == numNamedArgs) return;
 
-  auto numPositionalArgs = numArgsInclUnpack - numNamedArgs;
   auto numPositionalParams = callee->numNonVariadicParams() - callee->numNamedParams();
   auto const hasVariadics = numPositionalArgs > numPositionalParams ? 1 : 0;
 
   GenericsSaver gs{callee->hasReifiedGenerics()};
   PackedStringPtr const* namedParamNames = callee->sortedNamedParamNames();
-  auto stackPos =
-    [&](const size_t argPos) { return numArgsInclUnpack - argPos - 1; };
-  std::vector<TypedValue> values(numArgsInclUnpack + callee->numNamedParams() - numNamedArgs);
+  auto const delta = callee->numNamedParams() - numNamedArgs;
+  auto oldStackPos =
+    [&](const size_t argPos) { return numPositionalArgs + numNamedArgs - argPos - 1; };
+  auto newStackPos =
+    [&](const size_t argPos) {
+      return numPositionalArgs + delta + numNamedArgs - argPos - 1;
+    };
+  std::vector<TypedValue> values(numPositionalArgs + callee->numNamedParams());
   if (hasVariadics) {
     assertx(numPositionalArgs == numPositionalParams + 1);
     values.back() = *vmStack().indC(0);
@@ -259,19 +265,18 @@ inline void initFuncNamedParamDefaults(const Func* callee, uint32_t& numArgsIncl
     if (paramIdx < callee->numNamedParams()) {
       auto paramName = namedParamNames[paramIdx];
       if (argIdx < numNamedArgs && paramName == namedArgNames->at(argIdx).val().pstr) {
-        values[paramIdx] = *vmStack().indC(stackPos(argIdx++));
+        values[paramIdx] = *vmStack().indC(oldStackPos(argIdx++));
       } else {
         values[paramIdx] = make_tv<KindOfUninit>();
       }
     } else {
-      values[paramIdx] = *vmStack().indC(stackPos(argIdx++));
+      values[paramIdx] = *vmStack().indC(oldStackPos(argIdx++));
     }
   }
 
-  vmStack().nalloc(values.size() - numArgsInclUnpack);
-  numArgsInclUnpack = values.size();
+  vmStack().nalloc(delta);
   for (size_t i = 0; i < values.size(); ++i) {
-    *vmStack().indTV(stackPos(i)) = values[i];
+    *vmStack().indTV(newStackPos(i)) = values[i];
   }
 }
 
@@ -280,31 +285,26 @@ inline void initFuncNamedParamDefaults(const Func* callee, uint32_t& numArgsIncl
  * there are no missing required named parameters.
  */
 inline void calleeNamedArgChecks(const Func* callee,
-                                 uint32_t& numArgsInclUnpack,
+                                 uint32_t numPositionalArgs,
                                  const ArrayData* namedArgNames) {
   checkNamedArgMismatch(
     callee, namedArgNames, throwUnexpectedNamedArguments,
     throwNamedArgumentNameMismatch, throwMissingNamedParam
   );
-  initFuncNamedParamDefaults(callee, numArgsInclUnpack, namedArgNames);
+  initFuncNamedParamDefaults(callee, numPositionalArgs, namedArgNames);
 }
 
 /*
  * Check for too few or too many arguments and trim extra args.
  */
 inline void calleeArgumentArityChecks(const Func* callee,
-                                      uint32_t& numArgsInclUnpack,
                                       uint32_t& numPositionalArgs) {
-  // TODO(named_params) this check (and type checks) should be
-  // expressed as taking numNamedArgs and numPositionalArgs
-  // separately to make the contract clearer.
   if (numPositionalArgs < callee->numRequiredPositionalParams()) {
     throwMissingPositionalArgument(callee, numPositionalArgs);
   }
-  if (numArgsInclUnpack > callee->numParams()) {
+  if (numPositionalArgs > callee->numPositionalParamsVariadic()) {
     assertx(!callee->hasVariadicCaptureParam());
-    assertx(numArgsInclUnpack == callee->numNonVariadicParams() + 1);
-    --numArgsInclUnpack;
+    assertx(numPositionalArgs == callee->numPositionalParams() + 1);
     --numPositionalArgs;
 
     GenericsSaver gs{callee->hasReifiedGenerics()};
@@ -314,13 +314,14 @@ inline void calleeArgumentArityChecks(const Func* callee,
     vmStack().popC();
 
     if (numUnpackArgs != 0) {
-      raiseTooManyArguments(callee, numArgsInclUnpack + numUnpackArgs);
+      raiseTooManyArguments(
+        callee, numPositionalArgs + numUnpackArgs);
     }
   }
 }
 
 inline void calleeArgumentTypeChecks(const Func* callee,
-                                     uint32_t numArgsInclUnpack,
+                                     uint32_t numPositionalArgs,
                                      const ArrayData* namedArgNames,
                                      void* prologueCtx) {
   auto const getCtx = [&] () -> const Class* {
@@ -334,10 +335,11 @@ inline void calleeArgumentTypeChecks(const Func* callee,
       : reinterpret_cast<ObjectData*>(ctx)->getVMClass();
   };
 
-  auto const numArgs =
-    std::min(numArgsInclUnpack, callee->numNonVariadicParams());
+  auto const numNonvariadicPosArgs =
+    std::min(numPositionalArgs, callee->numPositionalParams());
   auto const firstArgIdx =
-    numArgsInclUnpack - 1 + (callee->hasReifiedGenerics() ? 1 : 0);
+    numPositionalArgs + callee->numNamedParams() - 1
+    + (callee->hasReifiedGenerics() ? 1 : 0);
   auto const numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
   auto pIdx = 0;
   auto const namedParamNames = callee->sortedNamedParamNames();
@@ -348,33 +350,34 @@ inline void calleeArgumentTypeChecks(const Func* callee,
     // index the vmStack from the parameter index.
     verifyParamType(callee, pIdx, vmStack().indC(firstArgIdx - pIdx), getCtx);
   }
-  for (auto i = callee->numNamedParams(); i < numArgs; ++i) {
+  for (auto i = callee->numNamedParams();
+       i < callee->numNamedParams() + numNonvariadicPosArgs; ++i) {
     verifyParamType(callee, i, vmStack().indC(firstArgIdx - i), getCtx);
   }
 }
 
-inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
-  assertx(numArgsInclUnpack <= callee->numParams());
+inline void initFuncInputs(const Func* callee, uint32_t numPositionalArgs) {
+  assertx(numPositionalArgs <= callee->numPositionalParamsVariadic());
 
   // All arguments already initialized. Extra arguments already popped
   // by calleeArgumentArityChecks().
-  if (LIKELY(numArgsInclUnpack == callee->numParams())) return;
+  if (LIKELY(numPositionalArgs == callee->numPositionalParamsVariadic())) return;
 
   CoeffectsSaver cs{callee->hasCoeffectsLocal()};
   GenericsSaver gs{callee->hasReifiedGenerics()};
-  auto const numParams = callee->numNonVariadicParams();
-  while (numArgsInclUnpack < numParams) {
+  auto const numPositionalParams = callee->numPositionalParams();
+  while (numPositionalArgs < numPositionalParams) {
     vmStack().pushUninit();
-    ++numArgsInclUnpack;
+    ++numPositionalArgs;
   }
 
   if (callee->hasVariadicCaptureParam()) {
     auto const ad = ArrayData::CreateVec();
     vmStack().pushArrayLikeNoRc(ad);
-    ++numArgsInclUnpack;
+    ++numPositionalArgs;
   }
 
-  assertx(numArgsInclUnpack == callee->numParams());
+  assertx(numPositionalArgs == callee->numPositionalParamsVariadic());
 }
 
 /*

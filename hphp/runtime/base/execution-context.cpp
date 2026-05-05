@@ -1558,7 +1558,7 @@ static inline void enterVM(ActRec* ar, Action action) {
 ALWAYS_INLINE
 TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
-                                            uint32_t numArgsInclUnpack,
+                                            uint32_t numPositionalArgs,
                                             const ArrayData* namedArgNames,
                                             RuntimeCoeffects providedCoeffects,
                                             bool hasGenerics, bool dynamic,
@@ -1571,20 +1571,20 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   // If `f' is a static method, thiz must be null.
   assertx(IMPLIES(f->isStaticInPrologue(), !thiz));
 
-  ActRec* ar = vmStack().indA(numArgsInclUnpack + (hasGenerics ? 1 : 0));
-  void* ctx = thiz ? (void*)thiz : (void*)cls;
   auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
-  uint32_t numPositionalArgs = numArgsInclUnpack - numNamedArgs;
+  ActRec* ar =
+    vmStack().indA(numPositionalArgs + numNamedArgs + (hasGenerics ? 1 : 0));
+  void* ctx = thiz ? (void*)thiz : (void*)cls;
 
   // Callee checks and input initialization.
-  calleeNamedArgChecks(f, numArgsInclUnpack, namedArgNames);
+  calleeNamedArgChecks(f, numPositionalArgs, namedArgNames);
   calleeGenericsChecks(f, hasGenerics);
-  calleeArgumentArityChecks(f, numArgsInclUnpack, numPositionalArgs);
-  calleeArgumentTypeChecks(f, numArgsInclUnpack, namedArgNames, ctx);
+  calleeArgumentArityChecks(f, numPositionalArgs);
+  calleeArgumentTypeChecks(f, numPositionalArgs, namedArgNames, ctx);
   calleeDynamicCallChecks(f, dynamic, allowDynCallNoPointer);
-  calleeCoeffectChecks(f, providedCoeffects, numArgsInclUnpack, ctx);
+  calleeCoeffectChecks(f, providedCoeffects, numPositionalArgs, ctx);
   f->recordCall();
-  initFuncInputs(f, numArgsInclUnpack);
+  initFuncInputs(f, numPositionalArgs);
 
   ar->setReturnVMExit();
   ar->setFunc(f);
@@ -1698,10 +1698,11 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   if (f->attrs() & AttrReadonlyReturn && !readonlyReturn) {
     throwReadonlyMismatch(f, kReadonlyReturnId);
   }
+  auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
 
-  return invokeFuncImpl(f, thiz, cls, numArgs, namedArgNames,
-                        providedCoeffects, hasGenerics, dynamic,
-                        allowDynCallNoPointer);
+  return invokeFuncImpl(f, thiz, cls, numArgs - numNamedArgs,
+                        namedArgNames, providedCoeffects, hasGenerics,
+                        dynamic, allowDynCallNoPointer);
 }
 
 TypedValue ExecutionContext::invokeFuncFew(
@@ -1745,9 +1746,12 @@ TypedValue ExecutionContext::invokeFuncFew(
     throwReadonlyMismatch(f, kReadonlyReturnId);
   }
 
-  return invokeFuncImpl(f, thisOrCls.left(), thisOrCls.right(), numArgs,
-                        namedArgNames, providedCoeffects,
-                        false /* hasGenerics */, dynamic, false);
+  auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
+
+  return invokeFuncImpl(f, thisOrCls.left(), thisOrCls.right(),
+                        numArgs - numNamedArgs, namedArgNames,
+                        providedCoeffects, false /* hasGenerics */, dynamic,
+                        false);
 }
 
 static void prepareAsyncFuncEntry(ActRec* enterFnAr,

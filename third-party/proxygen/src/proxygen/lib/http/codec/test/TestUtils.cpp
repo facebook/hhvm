@@ -304,20 +304,19 @@ void fakeMockCodec(MockHTTPCodec& codec) {
       }));
 }
 
-void WtCapsuleCodecCallback::onWTResetStreamCapsule(
+void WtCapsuleCodecCallback::onResetStream(
     WTResetStreamCapsule capsule) noexcept {
   rst.emplace(capsule);
   signal();
 }
 
-void WtCapsuleCodecCallback::onWTStopSendingCapsule(
+void WtCapsuleCodecCallback::onStopSending(
     WTStopSendingCapsule capsule) noexcept {
   ss.emplace(capsule);
   signal();
 }
 
-void WtCapsuleCodecCallback::onWTStreamCapsule(
-    WTStreamCapsule capsule) noexcept {
+void WtCapsuleCodecCallback::onStream(WTStreamCapsule capsule) noexcept {
   VLOG(4) << __func__ << "; id=" << capsule.streamId << "; len="
           << (capsule.streamData ? capsule.streamData->computeChainDataLength()
                                  : 0);
@@ -325,57 +324,55 @@ void WtCapsuleCodecCallback::onWTStreamCapsule(
   signal();
 }
 
-void WtCapsuleCodecCallback::onWTMaxDataCapsule(
-    WTMaxDataCapsule capsule) noexcept {
+void WtCapsuleCodecCallback::onMaxData(WTMaxDataCapsule capsule) noexcept {
   md.emplace(capsule);
   signal();
 }
 
-void WtCapsuleCodecCallback::onWTMaxStreamDataCapsule(
+void WtCapsuleCodecCallback::onMaxStreamData(
     WTMaxStreamDataCapsule capsule) noexcept {
   msd.emplace(capsule);
   signal();
 }
 
-void WtCapsuleCodecCallback::onWTMaxStreamsBidiCapsule(
+void WtCapsuleCodecCallback::onMaxStreamsBidi(
     WTMaxStreamsCapsule capsule) noexcept {
   bidiMaxStreams.emplace(capsule);
   signal();
 }
 
-void WtCapsuleCodecCallback::onWTMaxStreamsUniCapsule(
+void WtCapsuleCodecCallback::onMaxStreamsUni(
     WTMaxStreamsCapsule capsule) noexcept {
   uniMaxStreams.emplace(capsule);
   signal();
 }
 
-void WtCapsuleCodecCallback::onWTDataBlockedCapsule(
-    WTDataBlockedCapsule) noexcept {
+void WtCapsuleCodecCallback::onDataBlocked(WTDataBlockedCapsule) noexcept {
 }
 
-void WtCapsuleCodecCallback::onWTStreamDataBlockedCapsule(
+void WtCapsuleCodecCallback::onStreamDataBlocked(
     WTStreamDataBlockedCapsule) noexcept {
 }
 
-void WtCapsuleCodecCallback::onPaddingCapsule(PaddingCapsule) noexcept {
+void WtCapsuleCodecCallback::onPadding(PaddingCapsule) noexcept {
 }
 
-void WtCapsuleCodecCallback::onWTStreamsBlockedBidiCapsule(
+void WtCapsuleCodecCallback::onStreamsBlockedBidi(
     WTStreamsBlockedCapsule) noexcept {
 }
 
-void WtCapsuleCodecCallback::onWTStreamsBlockedUniCapsule(
+void WtCapsuleCodecCallback::onStreamsBlockedUni(
     WTStreamsBlockedCapsule) noexcept {
 }
 
-void WtCapsuleCodecCallback::onDatagramCapsule(DatagramCapsule) noexcept {
+void WtCapsuleCodecCallback::onDatagram(DatagramCapsule) noexcept {
 }
 
-void WtCapsuleCodecCallback::onCloseWTSessionCapsule(
+void WtCapsuleCodecCallback::onCloseSession(
     CloseWebTransportSessionCapsule) noexcept {
 }
 
-void WtCapsuleCodecCallback::onDrainWTSessionCapsule(
+void WtCapsuleCodecCallback::onDrainSession(
     DrainWebTransportSessionCapsule) noexcept {
 }
 

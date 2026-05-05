@@ -469,25 +469,21 @@ void fakeMockCodec(MockHTTPCodec& codec);
 HTTPMessage getWtReq();
 struct WtCapsuleCodecCallback : public WebTransportCapsuleCodec::Callback {
   ~WtCapsuleCodecCallback() override = default;
-  void onWTResetStreamCapsule(WTResetStreamCapsule capsule) noexcept override;
-  void onWTStopSendingCapsule(WTStopSendingCapsule capsule) noexcept override;
-  void onWTStreamCapsule(WTStreamCapsule capsule) noexcept override;
-  void onWTMaxDataCapsule(WTMaxDataCapsule capsule) noexcept override;
-  void onWTMaxStreamDataCapsule(
-      WTMaxStreamDataCapsule capsule) noexcept override;
-  void onWTMaxStreamsBidiCapsule(WTMaxStreamsCapsule capsule) noexcept override;
-  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule capsule) noexcept override;
-  void onWTDataBlockedCapsule(WTDataBlockedCapsule) noexcept override;
-  void onWTStreamDataBlockedCapsule(
-      WTStreamDataBlockedCapsule) noexcept override;
-  void onPaddingCapsule(PaddingCapsule) noexcept override;
-  void onWTStreamsBlockedBidiCapsule(WTStreamsBlockedCapsule) noexcept override;
-  void onWTStreamsBlockedUniCapsule(WTStreamsBlockedCapsule) noexcept override;
-  void onDatagramCapsule(DatagramCapsule) noexcept override;
-  void onCloseWTSessionCapsule(
-      CloseWebTransportSessionCapsule) noexcept override;
-  void onDrainWTSessionCapsule(
-      DrainWebTransportSessionCapsule) noexcept override;
+  void onResetStream(WTResetStreamCapsule capsule) noexcept override;
+  void onStopSending(WTStopSendingCapsule capsule) noexcept override;
+  void onStream(WTStreamCapsule capsule) noexcept override;
+  void onMaxData(WTMaxDataCapsule capsule) noexcept override;
+  void onMaxStreamData(WTMaxStreamDataCapsule capsule) noexcept override;
+  void onMaxStreamsBidi(WTMaxStreamsCapsule capsule) noexcept override;
+  void onMaxStreamsUni(WTMaxStreamsCapsule capsule) noexcept override;
+  void onDataBlocked(WTDataBlockedCapsule) noexcept override;
+  void onStreamDataBlocked(WTStreamDataBlockedCapsule) noexcept override;
+  void onPadding(PaddingCapsule) noexcept override;
+  void onStreamsBlockedBidi(WTStreamsBlockedCapsule) noexcept override;
+  void onStreamsBlockedUni(WTStreamsBlockedCapsule) noexcept override;
+  void onDatagram(DatagramCapsule) noexcept override;
+  void onCloseSession(CloseWebTransportSessionCapsule) noexcept override;
+  void onDrainSession(DrainWebTransportSessionCapsule) noexcept override;
   void onConnectionError(WebTransportCapsuleCodec::ErrorCode) noexcept override;
   void onCapsule(uint64_t capsuleType,
                  uint64_t capsuleLength) noexcept override;

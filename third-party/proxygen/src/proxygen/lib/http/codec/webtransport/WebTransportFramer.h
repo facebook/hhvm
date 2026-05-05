@@ -167,6 +167,27 @@ parseCloseWebTransportSession(folly::io::Cursor& cursor, size_t length);
 folly::Expected<DrainWebTransportSessionCapsule, CapsuleCodec::ErrorCode>
 parseDrainWebTransportSession(size_t length);
 
+//////// dispatchParsedFrame ////////
+
+// Unifies the parse-check-dispatch pattern shared by CapsuleCodec and
+// QmuxCodec:
+//  - Returns early with the error if parsing fails
+//  - Invokes the callback with the parsed frame if callback is non-null
+//  - Returns success otherwise
+template <typename ParseResult, typename Callback, typename MemFn>
+folly::Expected<folly::Unit, CapsuleCodec::ErrorCode> dispatchParsedFrame(
+    ParseResult&& result, Callback* cb, MemFn fn) {
+  if (result.hasError()) {
+    return folly::makeUnexpected(result.error());
+  }
+  if (cb) {
+    (cb->*fn)(std::move(result.value()));
+  }
+  return folly::unit;
+}
+
+//////// Write helpers ////////
+
 // change from std::optional<size_t> -> size_t (0 can signal error)?
 using WriteResult = std::optional<size_t>;
 

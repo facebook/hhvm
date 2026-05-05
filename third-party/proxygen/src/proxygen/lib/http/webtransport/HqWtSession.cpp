@@ -17,56 +17,52 @@ struct H3CapsuleCodecCb final : public WebTransportCapsuleCodec::Callback {
   explicit H3CapsuleCodecCb(H3WtSession& wtSess) : wtSess(wtSess) {
   }
 
-  void onWTMaxDataCapsule(WTMaxDataCapsule c) noexcept override {
+  void onMaxData(WTMaxDataCapsule c) noexcept override {
     VLOG(4) << __func__;
     wtSess.onConnMaxData({.maxData = c.maximumData});
   }
-  void onWTMaxStreamsBidiCapsule(WTMaxStreamsCapsule c) noexcept override {
+  void onMaxStreamsBidi(WTMaxStreamsCapsule c) noexcept override {
     VLOG(4) << __func__;
     wtSess.onMaxStreams(WtStreamManager::MaxStreamsBidi{c.maximumStreams});
   }
-  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule c) noexcept override {
+  void onMaxStreamsUni(WTMaxStreamsCapsule c) noexcept override {
     VLOG(4) << __func__;
     wtSess.onMaxStreams(WtStreamManager::MaxStreamsUni{c.maximumStreams});
   }
-  void onDrainWTSessionCapsule(
-      DrainWebTransportSessionCapsule) noexcept override {
+  void onDrainSession(DrainWebTransportSessionCapsule) noexcept override {
     VLOG(4) << __func__;
     wtSess.onDrainSession({});
   }
-  void onCloseWTSessionCapsule(
-      CloseWebTransportSessionCapsule c) noexcept override {
+  void onCloseSession(CloseWebTransportSessionCapsule c) noexcept override {
     VLOG(4) << __func__;
     wtSess.onCloseSession(WtStreamManager::CloseSession{
         c.applicationErrorCode, std::move(c.applicationErrorMessage)});
   }
   void onConnectionError(CapsuleCodec::ErrorCode error) noexcept override {
     VLOG(4) << __func__;
-    onCloseWTSessionCapsule({uint8_t(error), "onConnectionError"});
+    onCloseSession({uint8_t(error), "onConnectionError"});
   }
 
   // ignored callbacks
-  void onWTMaxStreamDataCapsule(WTMaxStreamDataCapsule) noexcept override {
+  void onMaxStreamData(WTMaxStreamDataCapsule) noexcept override {
   }
-  void onWTResetStreamCapsule(WTResetStreamCapsule) noexcept override {
+  void onResetStream(WTResetStreamCapsule) noexcept override {
   }
-  void onWTStopSendingCapsule(WTStopSendingCapsule) noexcept override {
+  void onStopSending(WTStopSendingCapsule) noexcept override {
   }
-  void onWTStreamCapsule(WTStreamCapsule) noexcept override {
+  void onStream(WTStreamCapsule) noexcept override {
   }
-  void onWTStreamDataBlockedCapsule(
-      WTStreamDataBlockedCapsule) noexcept override {
+  void onStreamDataBlocked(WTStreamDataBlockedCapsule) noexcept override {
   }
-  void onWTStreamsBlockedBidiCapsule(
-      WTStreamsBlockedCapsule) noexcept override {
+  void onStreamsBlockedBidi(WTStreamsBlockedCapsule) noexcept override {
   }
-  void onWTStreamsBlockedUniCapsule(WTStreamsBlockedCapsule) noexcept override {
+  void onStreamsBlockedUni(WTStreamsBlockedCapsule) noexcept override {
   }
-  void onPaddingCapsule(PaddingCapsule) noexcept override {
+  void onPadding(PaddingCapsule) noexcept override {
   }
-  void onDatagramCapsule(DatagramCapsule) noexcept override {
+  void onDatagram(DatagramCapsule) noexcept override {
   }
-  void onWTDataBlockedCapsule(WTDataBlockedCapsule) noexcept override {
+  void onDataBlocked(WTDataBlockedCapsule) noexcept override {
   }
 };
 

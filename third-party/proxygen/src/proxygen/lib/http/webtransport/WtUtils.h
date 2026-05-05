@@ -109,23 +109,21 @@ struct WtCapsuleCallback : WebTransportCapsuleCodec::Callback {
       : sm_(sm), wtSess_(wtSess) {
   }
   ~WtCapsuleCallback() noexcept override = default;
-  void onPaddingCapsule(PaddingCapsule) noexcept override;
-  void onWTResetStreamCapsule(WTResetStreamCapsule) noexcept override;
-  void onWTStopSendingCapsule(WTStopSendingCapsule) noexcept override;
-  void onWTStreamCapsule(WTStreamCapsule) noexcept override;
-  void onWTMaxDataCapsule(WTMaxDataCapsule) noexcept override;
-  void onWTMaxStreamDataCapsule(WTMaxStreamDataCapsule) noexcept override;
-  void onWTMaxStreamsBidiCapsule(WTMaxStreamsCapsule) noexcept override;
-  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule) noexcept override;
-  void onWTDataBlockedCapsule(WTDataBlockedCapsule) noexcept override;
-  void onWTStreamDataBlockedCapsule(
-      WTStreamDataBlockedCapsule) noexcept override;
-  void onWTStreamsBlockedBidiCapsule(WTStreamsBlockedCapsule) noexcept override;
-  void onWTStreamsBlockedUniCapsule(WTStreamsBlockedCapsule) noexcept override;
-  void onDatagramCapsule(DatagramCapsule) noexcept override;
-  void onCloseWTSessionCapsule(
-      CloseWebTransportSessionCapsule) noexcept override;
-  void onDrainWTSessionCapsule(
+  void onPadding(PaddingCapsule) noexcept override;
+  void onResetStream(WTResetStreamCapsule) noexcept override;
+  void onStopSending(WTStopSendingCapsule) noexcept override;
+  void onStream(WTStreamCapsule) noexcept override;
+  void onMaxData(WTMaxDataCapsule) noexcept override;
+  void onMaxStreamData(WTMaxStreamDataCapsule) noexcept override;
+  void onMaxStreamsBidi(WTMaxStreamsCapsule) noexcept override;
+  void onMaxStreamsUni(WTMaxStreamsCapsule) noexcept override;
+  void onDataBlocked(WTDataBlockedCapsule) noexcept override;
+  void onStreamDataBlocked(WTStreamDataBlockedCapsule) noexcept override;
+  void onStreamsBlockedBidi(WTStreamsBlockedCapsule) noexcept override;
+  void onStreamsBlockedUni(WTStreamsBlockedCapsule) noexcept override;
+  void onDatagram(DatagramCapsule) noexcept override;
+  void onCloseSession(CloseWebTransportSessionCapsule) noexcept override;
+  void onDrainSession(
       DrainWebTransportSessionCapsule capsule) noexcept override;
   void onCapsule(uint64_t capsuleType,
                  uint64_t capsuleLength) noexcept override;

@@ -28,55 +28,52 @@ class MockWebTransportFilter : public WebTransportFilter {
       : WebTransportFilter(txn, version) {
   }
 
-  MOCK_METHOD(void, onPaddingCapsule, (PaddingCapsule), (override, noexcept));
+  MOCK_METHOD(void, onPadding, (PaddingCapsule), (override, noexcept));
   MOCK_METHOD(void,
-              onWTResetStreamCapsule,
+              onResetStream,
               (WTResetStreamCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
-              onWTStopSendingCapsule,
+              onStopSending,
               (WTStopSendingCapsule),
               (override, noexcept));
-  MOCK_METHOD(void, onWTStreamCapsule, (WTStreamCapsule), (override, noexcept));
+  MOCK_METHOD(void, onStream, (WTStreamCapsule), (override, noexcept));
+  MOCK_METHOD(void, onMaxData, (WTMaxDataCapsule), (override, noexcept));
   MOCK_METHOD(void,
-              onWTMaxDataCapsule,
-              (WTMaxDataCapsule),
-              (override, noexcept));
-  MOCK_METHOD(void,
-              onWTMaxStreamDataCapsule,
+              onMaxStreamData,
               (WTMaxStreamDataCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
-              onWTMaxStreamsBidiCapsule,
+              onMaxStreamsBidi,
               (WTMaxStreamsCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
-              onWTMaxStreamsUniCapsule,
+              onMaxStreamsUni,
               (WTMaxStreamsCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
-              onWTDataBlockedCapsule,
+              onDataBlocked,
               (WTDataBlockedCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
-              onWTStreamDataBlockedCapsule,
+              onStreamDataBlocked,
               (WTStreamDataBlockedCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
-              onWTStreamsBlockedBidiCapsule,
+              onStreamsBlockedBidi,
               (WTStreamsBlockedCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
-              onWTStreamsBlockedUniCapsule,
+              onStreamsBlockedUni,
               (WTStreamsBlockedCapsule),
               (override, noexcept));
-  MOCK_METHOD(void, onDatagramCapsule, (DatagramCapsule), (override, noexcept));
+  MOCK_METHOD(void, onDatagram, (DatagramCapsule), (override, noexcept));
   MOCK_METHOD(void,
-              onCloseWTSessionCapsule,
+              onCloseSession,
               (CloseWebTransportSessionCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
-              onDrainWTSessionCapsule,
+              onDrainSession,
               (DrainWebTransportSessionCapsule),
               (override, noexcept));
   MOCK_METHOD(void,
@@ -167,9 +164,9 @@ class WebTransportFilterTest : public Test {
 TEST_F(WebTransportFilterTest, OnCloseWebTransportSessionCapsule) {
   // expect the capsule callback to be called and call through to original
   // implementation to test for onSessionEnd()
-  EXPECT_CALL(*filter_, onCloseWTSessionCapsule(_))
+  EXPECT_CALL(*filter_, onCloseSession(_))
       .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
-        filter_->WebTransportFilter::onCloseWTSessionCapsule(capsule);
+        filter_->WebTransportFilter::onCloseSession(capsule);
       }));
   EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE)));
 
@@ -197,11 +194,11 @@ TEST_F(WebTransportFilterTest, MultipleCapsulesInOneBody) {
   auto secondCapsule = createCloseSessionCapsule(WT_ERROR_CODE + 1);
   queue.append(std::move(secondCapsule));
 
-  EXPECT_CALL(*filter_, onCloseWTSessionCapsule(_))
+  EXPECT_CALL(*filter_, onCloseSession(_))
       .Times(2)
       .WillRepeatedly(
           Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
-            filter_->WebTransportFilter::onCloseWTSessionCapsule(capsule);
+            filter_->WebTransportFilter::onCloseSession(capsule);
           }));
 
   EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE)));
@@ -222,8 +219,8 @@ TEST_F(WebTransportFilterTest, StreamCreationLimits) {
 
   WTMaxStreamsCapsule uniCapsule{2};
   WTMaxStreamsCapsule bidiCapsule{3};
-  filter->onWTMaxStreamsUniCapsule(uniCapsule);
-  filter->onWTMaxStreamsBidiCapsule(bidiCapsule);
+  filter->onMaxStreamsUni(uniCapsule);
+  filter->onMaxStreamsBidi(bidiCapsule);
   EXPECT_TRUE(filter->canCreateUniStream());
   EXPECT_TRUE(filter->canCreateBidiStream());
 
@@ -295,10 +292,9 @@ TEST_F(WebTransportFilterTest,
 
   // Expect the capsule callback to be called and call through to the real
   // implementation to test the fix
-  EXPECT_CALL(*filterWithCompleteTxn, onCloseWTSessionCapsule(_))
+  EXPECT_CALL(*filterWithCompleteTxn, onCloseSession(_))
       .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
-        filterWithCompleteTxn->WebTransportFilter::onCloseWTSessionCapsule(
-            capsule);
+        filterWithCompleteTxn->WebTransportFilter::onCloseSession(capsule);
       }));
 
   EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE)));
@@ -317,9 +313,9 @@ TEST_F(WebTransportFilterTest,
 
   // Expect the capsule callback to be called and call through to the real
   // implementation to test the normal case
-  EXPECT_CALL(*filter_, onCloseWTSessionCapsule(_))
+  EXPECT_CALL(*filter_, onCloseSession(_))
       .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
-        filter_->WebTransportFilter::onCloseWTSessionCapsule(capsule);
+        filter_->WebTransportFilter::onCloseSession(capsule);
       }));
 
   EXPECT_CALL(*handler_, onSessionEnd(Optional<uint32_t>(WT_ERROR_CODE)));

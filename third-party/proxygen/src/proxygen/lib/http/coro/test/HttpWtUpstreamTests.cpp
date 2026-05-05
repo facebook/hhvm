@@ -30,15 +30,15 @@ namespace proxygen::coro::test {
 
 struct WtCapsuleCodecCallback : public WebTransportCapsuleCodec::Callback {
   ~WtCapsuleCodecCallback() override = default;
-  void onWTResetStreamCapsule(WTResetStreamCapsule capsule) noexcept override {
+  void onResetStream(WTResetStreamCapsule capsule) noexcept override {
     rst.emplace(capsule);
     baton.post();
   }
-  void onWTStopSendingCapsule(WTStopSendingCapsule capsule) noexcept override {
+  void onStopSending(WTStopSendingCapsule capsule) noexcept override {
     ss.emplace(capsule);
     baton.post();
   }
-  void onWTStreamCapsule(WTStreamCapsule capsule) noexcept override {
+  void onStream(WTStreamCapsule capsule) noexcept override {
     XLOG(DBG4)
         << __func__ << "; id=" << capsule.streamId << "; len="
         << (capsule.streamData ? capsule.streamData->computeChainDataLength()
@@ -46,46 +46,40 @@ struct WtCapsuleCodecCallback : public WebTransportCapsuleCodec::Callback {
     stream.emplace(std::move(capsule));
     baton.post();
   }
-  void onWTMaxDataCapsule(WTMaxDataCapsule capsule) noexcept override {
+  void onMaxData(WTMaxDataCapsule capsule) noexcept override {
     md.emplace(capsule);
     baton.post();
   }
-  void onWTMaxStreamDataCapsule(
-      WTMaxStreamDataCapsule capsule) noexcept override {
+  void onMaxStreamData(WTMaxStreamDataCapsule capsule) noexcept override {
     msd.emplace(capsule);
     baton.post();
   }
-  void onWTMaxStreamsBidiCapsule(
-      WTMaxStreamsCapsule capsule) noexcept override {
+  void onMaxStreamsBidi(WTMaxStreamsCapsule capsule) noexcept override {
     bidiMaxStreams.emplace(capsule);
     baton.post();
   }
-  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule capsule) noexcept override {
+  void onMaxStreamsUni(WTMaxStreamsCapsule capsule) noexcept override {
     uniMaxStreams.emplace(capsule);
     baton.post();
   }
-  void onDatagramCapsule(DatagramCapsule dgram) noexcept override {
+  void onDatagram(DatagramCapsule dgram) noexcept override {
     dgrams.push_back(std::move(dgram.httpDatagramPayload));
     baton.post();
   }
 
-  void onWTDataBlockedCapsule(WTDataBlockedCapsule) noexcept override {
+  void onDataBlocked(WTDataBlockedCapsule) noexcept override {
   }
-  void onWTStreamDataBlockedCapsule(
-      WTStreamDataBlockedCapsule) noexcept override {
+  void onStreamDataBlocked(WTStreamDataBlockedCapsule) noexcept override {
   }
-  void onPaddingCapsule(PaddingCapsule) noexcept override {
+  void onPadding(PaddingCapsule) noexcept override {
   }
-  void onWTStreamsBlockedBidiCapsule(
-      WTStreamsBlockedCapsule) noexcept override {
+  void onStreamsBlockedBidi(WTStreamsBlockedCapsule) noexcept override {
   }
-  void onWTStreamsBlockedUniCapsule(WTStreamsBlockedCapsule) noexcept override {
+  void onStreamsBlockedUni(WTStreamsBlockedCapsule) noexcept override {
   }
-  void onCloseWTSessionCapsule(
-      CloseWebTransportSessionCapsule) noexcept override {
+  void onCloseSession(CloseWebTransportSessionCapsule) noexcept override {
   }
-  void onDrainWTSessionCapsule(
-      DrainWebTransportSessionCapsule) noexcept override {
+  void onDrainSession(DrainWebTransportSessionCapsule) noexcept override {
   }
   void onConnectionError(
       WebTransportCapsuleCodec::ErrorCode) noexcept override {

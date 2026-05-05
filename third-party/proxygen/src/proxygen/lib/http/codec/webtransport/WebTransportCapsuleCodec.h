@@ -21,31 +21,28 @@ class WebTransportCapsuleCodec : public CapsuleCodec {
    public:
     ~Callback() noexcept override = default;
 
-    virtual void onPaddingCapsule(PaddingCapsule capsule) noexcept = 0;
-    virtual void onWTResetStreamCapsule(
-        WTResetStreamCapsule capsule) noexcept = 0;
-    virtual void onWTStopSendingCapsule(
-        WTStopSendingCapsule capsule) noexcept = 0;
-    virtual void onWTStreamCapsule(WTStreamCapsule capsule) noexcept = 0;
-    virtual void onWTMaxDataCapsule(WTMaxDataCapsule capsule) noexcept = 0;
-    virtual void onWTMaxStreamDataCapsule(
-        WTMaxStreamDataCapsule capsule) noexcept = 0;
-    virtual void onWTMaxStreamsBidiCapsule(
-        WTMaxStreamsCapsule capsule) noexcept = 0;
-    virtual void onWTMaxStreamsUniCapsule(
-        WTMaxStreamsCapsule capsule) noexcept = 0;
-    virtual void onWTDataBlockedCapsule(
-        WTDataBlockedCapsule capsule) noexcept = 0;
-    virtual void onWTStreamDataBlockedCapsule(
+    // Shared frame callbacks (common to WT and QMUX)
+    virtual void onStream(WTStreamCapsule capsule) noexcept = 0;
+    virtual void onResetStream(WTResetStreamCapsule capsule) noexcept = 0;
+    virtual void onStopSending(WTStopSendingCapsule capsule) noexcept = 0;
+    virtual void onMaxData(WTMaxDataCapsule capsule) noexcept = 0;
+    virtual void onMaxStreamData(WTMaxStreamDataCapsule capsule) noexcept = 0;
+    virtual void onMaxStreamsBidi(WTMaxStreamsCapsule capsule) noexcept = 0;
+    virtual void onMaxStreamsUni(WTMaxStreamsCapsule capsule) noexcept = 0;
+    virtual void onDataBlocked(WTDataBlockedCapsule capsule) noexcept = 0;
+    virtual void onStreamDataBlocked(
         WTStreamDataBlockedCapsule capsule) noexcept = 0;
-    virtual void onWTStreamsBlockedBidiCapsule(
+    virtual void onStreamsBlockedBidi(
         WTStreamsBlockedCapsule capsule) noexcept = 0;
-    virtual void onWTStreamsBlockedUniCapsule(
+    virtual void onStreamsBlockedUni(
         WTStreamsBlockedCapsule capsule) noexcept = 0;
-    virtual void onDatagramCapsule(DatagramCapsule capsule) noexcept = 0;
-    virtual void onCloseWTSessionCapsule(
+    virtual void onDatagram(DatagramCapsule capsule) noexcept = 0;
+
+    // WT-specific callbacks
+    virtual void onPadding(PaddingCapsule capsule) noexcept = 0;
+    virtual void onCloseSession(
         CloseWebTransportSessionCapsule capsule) noexcept = 0;
-    virtual void onDrainWTSessionCapsule(
+    virtual void onDrainSession(
         DrainWebTransportSessionCapsule capsule) noexcept = 0;
   };
 

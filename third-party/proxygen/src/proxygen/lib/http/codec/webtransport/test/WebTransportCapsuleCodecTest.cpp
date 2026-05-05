@@ -26,61 +26,52 @@ class WebTransportCapsuleCodecTest : public Test {
   class TestWebTransportCapsuleCodecCallback
       : public WebTransportCapsuleCodec::Callback {
    public:
-    MOCK_METHOD(void, onPaddingCapsule, (PaddingCapsule), (override, noexcept));
+    MOCK_METHOD(void, onPadding, (PaddingCapsule), (override, noexcept));
     MOCK_METHOD(void,
-                onWTResetStreamCapsule,
+                onResetStream,
                 (WTResetStreamCapsule),
                 (override, noexcept));
     MOCK_METHOD(void,
-                onWTStopSendingCapsule,
+                onStopSending,
                 (WTStopSendingCapsule),
                 (override, noexcept));
+    MOCK_METHOD(void, onStream, (WTStreamCapsule), (override, noexcept));
+    MOCK_METHOD(void, onMaxData, (WTMaxDataCapsule), (override, noexcept));
     MOCK_METHOD(void,
-                onWTStreamCapsule,
-                (WTStreamCapsule),
-                (override, noexcept));
-    MOCK_METHOD(void,
-                onWTMaxDataCapsule,
-                (WTMaxDataCapsule),
-                (override, noexcept));
-    MOCK_METHOD(void,
-                onWTMaxStreamDataCapsule,
+                onMaxStreamData,
                 (WTMaxStreamDataCapsule),
                 (override, noexcept));
     MOCK_METHOD(void,
-                onWTMaxStreamsBidiCapsule,
+                onMaxStreamsBidi,
                 (WTMaxStreamsCapsule),
                 (override, noexcept));
     MOCK_METHOD(void,
-                onWTMaxStreamsUniCapsule,
+                onMaxStreamsUni,
                 (WTMaxStreamsCapsule),
                 (override, noexcept));
     MOCK_METHOD(void,
-                onWTDataBlockedCapsule,
+                onDataBlocked,
                 (WTDataBlockedCapsule),
                 (override, noexcept));
     MOCK_METHOD(void,
-                onWTStreamDataBlockedCapsule,
+                onStreamDataBlocked,
                 (WTStreamDataBlockedCapsule),
                 (override, noexcept));
     MOCK_METHOD(void,
-                onWTStreamsBlockedBidiCapsule,
+                onStreamsBlockedBidi,
                 (WTStreamsBlockedCapsule),
                 (override, noexcept));
     MOCK_METHOD(void,
-                onWTStreamsBlockedUniCapsule,
+                onStreamsBlockedUni,
                 (WTStreamsBlockedCapsule),
                 (override, noexcept));
+    MOCK_METHOD(void, onDatagram, (DatagramCapsule), (override, noexcept));
     MOCK_METHOD(void,
-                onDatagramCapsule,
-                (DatagramCapsule),
-                (override, noexcept));
-    MOCK_METHOD(void,
-                onCloseWTSessionCapsule,
+                onCloseSession,
                 (CloseWebTransportSessionCapsule),
                 (override, noexcept));
     MOCK_METHOD(void,
-                onDrainWTSessionCapsule,
+                onDrainSession,
                 (DrainWebTransportSessionCapsule),
                 (override, noexcept));
     MOCK_METHOD(void,
@@ -113,7 +104,7 @@ TEST_F(WebTransportCapsuleCodecTest, OnPaddingCapsule) {
   writePadding(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onPaddingCapsule(_))
+  EXPECT_CALL(callback_, onPadding(_))
       .WillOnce(Invoke([&](PaddingCapsule capsule) {
         EXPECT_EQ(capsule.paddingLength, 100);
       }));
@@ -127,7 +118,7 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTResetStreamCapsule) {
   writeWTResetStream(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTResetStreamCapsule(_))
+  EXPECT_CALL(callback_, onResetStream(_))
       .WillOnce(Invoke([&](WTResetStreamCapsule capsule) {
         EXPECT_EQ(capsule.streamId, 1);
         EXPECT_EQ(capsule.appProtocolErrorCode, 2);
@@ -152,7 +143,7 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTStopSendingCapsule) {
   writeWTStopSending(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTStopSendingCapsule(_))
+  EXPECT_CALL(callback_, onStopSending(_))
       .WillOnce(Invoke([&](WTStopSendingCapsule capsule) {
         EXPECT_EQ(capsule.streamId, 1);
         EXPECT_EQ(capsule.appProtocolErrorCode, 2);
@@ -177,7 +168,7 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTStreamCapsule) {
   writeWTStream(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTStreamCapsule(_))
+  EXPECT_CALL(callback_, onStream(_))
       .WillOnce(Invoke([&](WTStreamCapsule capsule) {
         EXPECT_EQ(capsule.streamId, 1);
         EXPECT_EQ(capsule.streamData->moveToFbString().toStdString(),
@@ -202,7 +193,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnWTMaxDataCapsule) {
   writeWTMaxData(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTMaxDataCapsule(_))
+  EXPECT_CALL(callback_, onMaxData(_))
       .WillOnce(Invoke([&](WTMaxDataCapsule capsule) {
         EXPECT_EQ(capsule.maximumData, 100);
       }));
@@ -215,7 +206,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnWTMaxDataCapsule) {
   writeWTMaxData(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTMaxDataCapsule(_))
+  EXPECT_CALL(callback_, onMaxData(_))
       .WillOnce(Invoke([&](WTMaxDataCapsule capsule) {
         EXPECT_EQ(capsule.maximumData, 100);
       }));
@@ -242,7 +233,7 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTMaxStreamDataCapsule) {
   writeWTMaxStreamData(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTMaxStreamDataCapsule(_))
+  EXPECT_CALL(callback_, onMaxStreamData(_))
       .WillOnce(Invoke([&](WTMaxStreamDataCapsule capsule) {
         EXPECT_EQ(capsule.streamId, 1);
         EXPECT_EQ(capsule.maximumStreamData, 100);
@@ -264,7 +255,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnWTMaxStreamsCapsule) {
   writeWTMaxStreams(queue_, capsule, true);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTMaxStreamsBidiCapsule(_))
+  EXPECT_CALL(callback_, onMaxStreamsBidi(_))
       .WillOnce(Invoke([&](WTMaxStreamsCapsule capsule) {
         EXPECT_EQ(capsule.maximumStreams, 200);
       }));
@@ -277,7 +268,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnWTMaxStreamsCapsule) {
   writeWTMaxStreams(queue_, capsule, true);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTMaxStreamsBidiCapsule(_))
+  EXPECT_CALL(callback_, onMaxStreamsBidi(_))
       .WillOnce(Invoke([&](WTMaxStreamsCapsule capsule) {
         EXPECT_EQ(capsule.maximumStreams, 200);
       }));
@@ -304,7 +295,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnWTMaxStreamsUniCapsule) {
   writeWTMaxStreams(queue_, capsule, false);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTMaxStreamsUniCapsule(_))
+  EXPECT_CALL(callback_, onMaxStreamsUni(_))
       .WillOnce(Invoke([&](WTMaxStreamsCapsule capsule) {
         EXPECT_EQ(capsule.maximumStreams, 200);
       }));
@@ -317,7 +308,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnWTMaxStreamsUniCapsule) {
   writeWTMaxStreams(queue_, capsule, false);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTMaxStreamsUniCapsule(_))
+  EXPECT_CALL(callback_, onMaxStreamsUni(_))
       .WillOnce(Invoke([&](WTMaxStreamsCapsule capsule) {
         EXPECT_EQ(capsule.maximumStreams, 200);
       }));
@@ -344,7 +335,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnDataBlockedCapsule) {
   writeWTDataBlocked(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTDataBlockedCapsule(_))
+  EXPECT_CALL(callback_, onDataBlocked(_))
       .WillOnce(Invoke([&](WTDataBlockedCapsule capsule) {
         EXPECT_EQ(capsule.maximumData, 300);
       }));
@@ -357,7 +348,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnDataBlockedCapsule) {
   writeWTDataBlocked(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTDataBlockedCapsule(_))
+  EXPECT_CALL(callback_, onDataBlocked(_))
       .WillOnce(Invoke([&](WTDataBlockedCapsule capsule) {
         EXPECT_EQ(capsule.maximumData, 300);
       }));
@@ -384,7 +375,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnWTStreamsBlockedCapsule) {
   writeWTStreamsBlocked(queue_, capsule, true);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTStreamsBlockedBidiCapsule(_))
+  EXPECT_CALL(callback_, onStreamsBlockedBidi(_))
       .WillOnce(Invoke([&](WTStreamsBlockedCapsule capsule) {
         EXPECT_EQ(capsule.maximumStreams, 400);
       }));
@@ -397,7 +388,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnWTStreamsBlockedCapsule) {
   writeWTStreamsBlocked(queue_, capsule, true);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTStreamsBlockedBidiCapsule(_))
+  EXPECT_CALL(callback_, onStreamsBlockedBidi(_))
       .WillOnce(Invoke([&](WTStreamsBlockedCapsule capsule) {
         EXPECT_EQ(capsule.maximumStreams, 400);
       }));
@@ -424,7 +415,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnWTStreamsBlockedUniCapsule) {
   writeWTStreamsBlocked(queue_, capsule, false);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTStreamsBlockedUniCapsule(_))
+  EXPECT_CALL(callback_, onStreamsBlockedUni(_))
       .WillOnce(Invoke([&](WTStreamsBlockedCapsule capsule) {
         EXPECT_EQ(capsule.maximumStreams, 400);
       }));
@@ -437,7 +428,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnWTStreamsBlockedUniCapsule) {
   writeWTStreamsBlocked(queue_, capsule, false);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTStreamsBlockedUniCapsule(_))
+  EXPECT_CALL(callback_, onStreamsBlockedUni(_))
       .WillOnce(Invoke([&](WTStreamsBlockedCapsule capsule) {
         EXPECT_EQ(capsule.maximumStreams, 400);
       }));
@@ -464,7 +455,7 @@ TEST_F(WebTransportCapsuleCodecTest, OnWTStreamDataBlockedCapsule) {
   writeWTStreamDataBlocked(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onWTStreamDataBlockedCapsule(_))
+  EXPECT_CALL(callback_, onStreamDataBlocked(_))
       .WillOnce(Invoke([&](WTStreamDataBlockedCapsule capsule) {
         EXPECT_EQ(capsule.streamId, 1);
         EXPECT_EQ(capsule.maximumStreamData, 100);
@@ -486,7 +477,7 @@ TEST_F(WebTransportCapsuleCodecTest, OnDatagramCapsule) {
   writeDatagram(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onDatagramCapsule(_))
+  EXPECT_CALL(callback_, onDatagram(_))
       .WillOnce(Invoke([&](DatagramCapsule capsule) {
         EXPECT_EQ(capsule.httpDatagramPayload->moveToFbString().toStdString(),
                   "breakfast special");
@@ -501,7 +492,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnCloseWebTransportSessionCapsule) {
   writeCloseWebTransportSession(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onCloseWTSessionCapsule(_))
+  EXPECT_CALL(callback_, onCloseSession(_))
       .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
         EXPECT_EQ(capsule.applicationErrorCode, 500);
         EXPECT_EQ(capsule.applicationErrorMessage, "BAD!");
@@ -516,7 +507,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnCloseWebTransportSessionCapsule) {
   writeCloseWebTransportSession(queue_, capsule);
 
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onCloseWTSessionCapsule(_))
+  EXPECT_CALL(callback_, onCloseSession(_))
       .WillOnce(Invoke([&](const CloseWebTransportSessionCapsule& capsule) {
         EXPECT_EQ(capsule.applicationErrorCode, 500);
         EXPECT_EQ(capsule.applicationErrorMessage, "BAD!");
@@ -544,7 +535,7 @@ TEST_F(WebTransportCapsuleCodecTest, H3OnCloseWebTransportSessionCapsuleError) {
 TEST_F(WebTransportCapsuleCodecTest, H2OnDrainWebTransportSessionCapsule) {
   writeDrainWebTransportSession(queue_);
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onDrainWTSessionCapsule(_));
+  EXPECT_CALL(callback_, onDrainSession(_));
   EXPECT_CALL(callback_, onConnectionError(_)).Times(0);
   h2_codec_->onIngress(std::move(buf), true);
 }
@@ -552,7 +543,7 @@ TEST_F(WebTransportCapsuleCodecTest, H2OnDrainWebTransportSessionCapsule) {
 TEST_F(WebTransportCapsuleCodecTest, H3OnDrainWebTransportSessionCapsule) {
   writeDrainWebTransportSession(queue_);
   auto buf = queue_.move();
-  EXPECT_CALL(callback_, onDrainWTSessionCapsule(_));
+  EXPECT_CALL(callback_, onDrainSession(_));
   EXPECT_CALL(callback_, onConnectionError(_)).Times(0);
   h3_codec_->onIngress(std::move(buf), true);
 }

@@ -232,11 +232,10 @@ void WtEventVisitor::operator()(WtStreamManager::CloseSession cs) noexcept {
 }
 
 // WtCapsuleCallback
-void WtCapsuleCallback::onPaddingCapsule(PaddingCapsule) noexcept {
+void WtCapsuleCallback::onPadding(PaddingCapsule) noexcept {
 }
 
-void WtCapsuleCallback::onWTResetStreamCapsule(
-    WTResetStreamCapsule c) noexcept {
+void WtCapsuleCallback::onResetStream(WTResetStreamCapsule c) noexcept {
   XLOG(DBG6) << __func__ << "; id=" << c.streamId
              << "; err=" << c.appProtocolErrorCode;
   sm_.onResetStream(
@@ -245,36 +244,33 @@ void WtCapsuleCallback::onWTResetStreamCapsule(
                                    .reliableSize = c.reliableSize});
 }
 
-void WtCapsuleCallback::onWTStopSendingCapsule(
-    WTStopSendingCapsule c) noexcept {
+void WtCapsuleCallback::onStopSending(WTStopSendingCapsule c) noexcept {
   XLOG(DBG6) << __func__ << "; id=" << c.streamId
              << "; err=" << c.appProtocolErrorCode;
   sm_.onStopSending(WtStreamManager::StopSending{
       .streamId = c.streamId, .err = c.appProtocolErrorCode});
 }
 
-void WtCapsuleCallback::onWTStreamCapsule(WTStreamCapsule c) noexcept {
+void WtCapsuleCallback::onStream(WTStreamCapsule c) noexcept {
   XLOG(DBG6) << __func__ << "; id=" << c.streamId;
   if (auto* rh = sm_.getOrCreateIngressHandle(c.streamId)) {
     sm_.enqueue(*rh, {std::move(c.streamData), c.fin});
   }
 }
 
-void WtCapsuleCallback::onWTMaxDataCapsule(WTMaxDataCapsule c) noexcept {
+void WtCapsuleCallback::onMaxData(WTMaxDataCapsule c) noexcept {
   XLOG(DBG6) << __func__ << "; offset=" << c.maximumData;
   sm_.onMaxData(WtStreamManager::MaxConnData{.maxData = c.maximumData});
 }
 
-void WtCapsuleCallback::onWTMaxStreamDataCapsule(
-    WTMaxStreamDataCapsule c) noexcept {
+void WtCapsuleCallback::onMaxStreamData(WTMaxStreamDataCapsule c) noexcept {
   XLOG(DBG6) << __func__ << "; id=" << c.streamId
              << "; offset=" << c.maximumStreamData;
   sm_.onMaxData(
       WtStreamManager::MaxStreamData{{c.maximumStreamData}, c.streamId});
 }
 
-void WtCapsuleCallback::onWTMaxStreamsBidiCapsule(
-    WTMaxStreamsCapsule c) noexcept {
+void WtCapsuleCallback::onMaxStreamsBidi(WTMaxStreamsCapsule c) noexcept {
   XLOG(DBG6) << __func__ << "; max=" << c.maximumStreams;
   bool wasAvail = sm_.canCreateBidi();
   sm_.onMaxStreams(WtStreamManager::MaxStreamsBidi{c.maximumStreams});
@@ -283,8 +279,7 @@ void WtCapsuleCallback::onWTMaxStreamsBidiCapsule(
   }
 }
 
-void WtCapsuleCallback::onWTMaxStreamsUniCapsule(
-    WTMaxStreamsCapsule c) noexcept {
+void WtCapsuleCallback::onMaxStreamsUni(WTMaxStreamsCapsule c) noexcept {
   XLOG(DBG6) << __func__ << "; max=" << c.maximumStreams;
   bool wasAvail = sm_.canCreateUni();
   sm_.onMaxStreams(WtStreamManager::MaxStreamsUni{c.maximumStreams});
@@ -293,31 +288,29 @@ void WtCapsuleCallback::onWTMaxStreamsUniCapsule(
   }
 }
 
-void WtCapsuleCallback::onWTDataBlockedCapsule(WTDataBlockedCapsule) noexcept {
+void WtCapsuleCallback::onDataBlocked(WTDataBlockedCapsule) noexcept {
   XLOG(DBG6) << __func__;
 }
 
-void WtCapsuleCallback::onWTStreamDataBlockedCapsule(
+void WtCapsuleCallback::onStreamDataBlocked(
     WTStreamDataBlockedCapsule) noexcept {
   XLOG(DBG6) << __func__;
 }
 
-void WtCapsuleCallback::onWTStreamsBlockedBidiCapsule(
-    WTStreamsBlockedCapsule) noexcept {
+void WtCapsuleCallback::onStreamsBlockedBidi(WTStreamsBlockedCapsule) noexcept {
   XLOG(DBG6) << __func__;
 }
 
-void WtCapsuleCallback::onWTStreamsBlockedUniCapsule(
-    WTStreamsBlockedCapsule) noexcept {
+void WtCapsuleCallback::onStreamsBlockedUni(WTStreamsBlockedCapsule) noexcept {
   XLOG(DBG6) << __func__;
 }
 
-void WtCapsuleCallback::onDatagramCapsule(DatagramCapsule dgram) noexcept {
+void WtCapsuleCallback::onDatagram(DatagramCapsule dgram) noexcept {
   XLOG(DBG6) << __func__;
   wtSess_.onDatagram(std::move(dgram.httpDatagramPayload));
 }
 
-void WtCapsuleCallback::onCloseWTSessionCapsule(
+void WtCapsuleCallback::onCloseSession(
     CloseWebTransportSessionCapsule c) noexcept {
   XLOG(DBG6) << __func__ << "; err=" << c.applicationErrorCode
              << "; c.msg=" << c.applicationErrorMessage;
@@ -325,7 +318,7 @@ void WtCapsuleCallback::onCloseWTSessionCapsule(
       .err = c.applicationErrorCode, .msg = c.applicationErrorMessage});
 }
 
-void WtCapsuleCallback::onDrainWTSessionCapsule(
+void WtCapsuleCallback::onDrainSession(
     DrainWebTransportSessionCapsule) noexcept {
   XLOG(DBG6) << __func__;
   sm_.onDrainSession(WtStreamManager::DrainSession{});

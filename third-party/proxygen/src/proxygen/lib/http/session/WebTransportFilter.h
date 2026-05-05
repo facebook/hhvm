@@ -349,73 +349,67 @@ class WebTransportFilter
   void onConnectionError(CapsuleCodec::ErrorCode error) noexcept override {
     XLOG(DBG1) << __func__ << " error=" << static_cast<int>(error);
   }
-  void onPaddingCapsule(PaddingCapsule /*capsule*/) noexcept override {
+  void onPadding(PaddingCapsule /*capsule*/) noexcept override {
     XLOG(DBG1) << __func__;
   }
-  void onWTResetStreamCapsule(
-      WTResetStreamCapsule /*capsule*/) noexcept override {
+  void onResetStream(WTResetStreamCapsule /*capsule*/) noexcept override {
     XLOG(DBG1) << __func__;
   }
-  void onWTStopSendingCapsule(
-      WTStopSendingCapsule /*capsule*/) noexcept override {
+  void onStopSending(WTStopSendingCapsule /*capsule*/) noexcept override {
     XLOG(DBG1) << __func__;
   }
-  void onWTStreamCapsule(WTStreamCapsule /*capsule*/) noexcept override {
+  void onStream(WTStreamCapsule /*capsule*/) noexcept override {
     XLOG(DBG1) << __func__;
   }
-  void onWTMaxDataCapsule(WTMaxDataCapsule capsule) noexcept override {
+  void onMaxData(WTMaxDataCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__;
     if (wtImpl_) {
       wtImpl_->onMaxData(capsule.maximumData);
     }
   }
-  void onWTMaxStreamDataCapsule(
-      WTMaxStreamDataCapsule /*capsule*/) noexcept override {
+  void onMaxStreamData(WTMaxStreamDataCapsule /*capsule*/) noexcept override {
     XLOG(DBG1) << __func__;
   }
-  void onWTMaxStreamsBidiCapsule(
-      WTMaxStreamsCapsule capsule) noexcept override {
+  void onMaxStreamsBidi(WTMaxStreamsCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__;
     maxWTBidiStreams_ = capsule.maximumStreams;
     if (wtImpl_) {
       wtImpl_->onMaxStreams(capsule.maximumStreams, true);
     }
   }
-  void onWTMaxStreamsUniCapsule(WTMaxStreamsCapsule capsule) noexcept override {
+  void onMaxStreamsUni(WTMaxStreamsCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__;
     maxWTUniStreams_ = capsule.maximumStreams;
     if (wtImpl_) {
       wtImpl_->onMaxStreams(capsule.maximumStreams, false);
     }
   }
-  void onWTDataBlockedCapsule(WTDataBlockedCapsule capsule) noexcept override {
+  void onDataBlocked(WTDataBlockedCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__;
     if (wtImpl_) {
       wtImpl_->onDataBlocked(capsule.maximumData);
     }
   }
-  void onWTStreamDataBlockedCapsule(
+  void onStreamDataBlocked(
       WTStreamDataBlockedCapsule /*capsule*/) noexcept override {
     XLOG(DBG1) << __func__;
   }
-  void onWTStreamsBlockedBidiCapsule(
-      WTStreamsBlockedCapsule capsule) noexcept override {
+  void onStreamsBlockedBidi(WTStreamsBlockedCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__;
     if (wtImpl_) {
       wtImpl_->onStreamsBlocked(capsule.maximumStreams, true);
     }
   }
-  void onWTStreamsBlockedUniCapsule(
-      WTStreamsBlockedCapsule capsule) noexcept override {
+  void onStreamsBlockedUni(WTStreamsBlockedCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__;
     if (wtImpl_) {
       wtImpl_->onStreamsBlocked(capsule.maximumStreams, false);
     }
   }
-  void onDatagramCapsule(DatagramCapsule /*capsule*/) noexcept override {
+  void onDatagram(DatagramCapsule /*capsule*/) noexcept override {
     XLOG(DBG1) << __func__;
   }
-  void onCloseWTSessionCapsule(
+  void onCloseSession(
       CloseWebTransportSessionCapsule capsule) noexcept override {
     XLOG(DBG1) << __func__ << " errorCode=" << capsule.applicationErrorCode
                << " message=" << capsule.applicationErrorMessage;
@@ -435,7 +429,7 @@ class WebTransportFilter
       txn_->sendEOM();
     }
   }
-  void onDrainWTSessionCapsule(
+  void onDrainSession(
       DrainWebTransportSessionCapsule /*capsule*/) noexcept override {
     XLOG(DBG1) << __func__;
     if (handler_) {

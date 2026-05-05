@@ -115,6 +115,7 @@ class Json5ProtocolWriter final {
   struct Options {
     JsonWriterOptions writer;
     bool enumAsInteger = false;
+    bool binaryAsBase64String = false;
   };
   explicit Json5ProtocolWriter(
       ExternalBufferSharing /*sharing*/ = COPY_EXTERNAL_BUFFER /* ignored */,

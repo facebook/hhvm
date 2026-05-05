@@ -130,4 +130,16 @@ TEST(Json5WriterOptionsTest, EnumAsInteger) {
   EXPECT_EQ(result, R"RAW({"enumValue":2})RAW");
 }
 
+TEST(Json5WriterOptionsTest, BinaryAsBase64String) {
+  Example example;
+  example.binaryValue() = std::string("\x00\x01\x02", 3);
+
+  auto defaultResult = writeExample(example, {});
+  EXPECT_EQ(defaultResult, R"RAW({"binaryValue":{"base64url":"AAEC"}})RAW");
+
+  auto result =
+      writeExample(example, {.writer = {}, .binaryAsBase64String = true});
+  EXPECT_EQ(result, R"RAW({"binaryValue":"AAEC"})RAW");
+}
+
 } // namespace apache::thrift

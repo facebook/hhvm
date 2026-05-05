@@ -35,6 +35,7 @@ struct Json5ProtocolWriter {
   struct Options {
     JsonWriterOptions writer;
     bool enumAsInteger = false;
+    bool binaryAsBase64String = false;
   };
 };
 } // namespace apache::thrift::json5::detail

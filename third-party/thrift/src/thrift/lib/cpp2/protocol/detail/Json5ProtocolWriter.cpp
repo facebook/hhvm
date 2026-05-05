@@ -312,15 +312,23 @@ std::uint32_t Json5ProtocolWriter::writeString(folly::StringPiece str) {
 
 std::uint32_t Json5ProtocolWriter::writeBinary(folly::StringPiece str) {
   std::uint32_t xfer = beginWriteValue();
-  xfer += writer_.writeObjectBegin();
-  if (isPrintableUtf8(str)) {
-    xfer += writer_.writeObjectName("utf-8");
-    xfer += writer_.writeString(str);
+  if (options_.binaryAsBase64String) {
+    auto encoded = folly::base64Encode(str);
+    while (!encoded.empty() && encoded.back() == '=') {
+      encoded.pop_back();
+    }
+    xfer += writer_.writeString(encoded);
   } else {
-    xfer += writer_.writeObjectName("base64url");
-    xfer += writer_.writeString(folly::base64URLEncode(str));
+    xfer += writer_.writeObjectBegin();
+    if (isPrintableUtf8(str)) {
+      xfer += writer_.writeObjectName("utf-8");
+      xfer += writer_.writeString(str);
+    } else {
+      xfer += writer_.writeObjectName("base64url");
+      xfer += writer_.writeString(folly::base64URLEncode(str));
+    }
+    xfer += writer_.writeObjectEnd();
   }
-  xfer += writer_.writeObjectEnd();
   return xfer + endWriteValue();
 }
 

@@ -462,14 +462,13 @@ std::string show(const DCls& dcls, bool isObj) {
     return !isObj && !dcls.containsNonRegular() ? "<-" : "<=";
   };
 
-  auto const eq = [&] (res::Class cls) {
-    return isObj || dcls.containsNonRegular() || cls.hasCompleteChildren()
-      ? "=" : "=-";
+  auto const eq = [&] {
+    return isObj || dcls.containsNonRegular() ? "=" : "=-";
   };
 
   std::string ret;
   if (dcls.isExact()) {
-    folly::toAppend(eq(dcls.cls()), show(dcls.cls()), &ret);
+    folly::toAppend(eq(), show(dcls.cls()), &ret);
   } else if (dcls.isSub()) {
     folly::toAppend(lt(), show(dcls.cls()), &ret);
   } else if (dcls.isIsect()) {
@@ -488,7 +487,7 @@ std::string show(const DCls& dcls, bool isObj) {
   } else {
     auto const [e, i] = dcls.isectAndExact();
     folly::toAppend(
-      eq(e),
+      eq(),
       "{",
       show(e),
       "}&",
@@ -511,6 +510,16 @@ std::string show(const DCls& dcls, bool isObj) {
 //////////////////////////////////////////////////////////////////////
 
 std::string show(const Type& t) {
+  static constexpr int kMaxShowCalls = 10000;
+  static thread_local int showCalls = 0;
+  static thread_local bool showRoot = true;
+  auto const isRoot = showRoot;
+  if (isRoot) {
+    showCalls = 0;
+    showRoot = false;
+  }
+  SCOPE_EXIT { if (isRoot) showRoot = true; };
+  if (++showCalls > kMaxShowCalls) return "...(truncated)";
   /*
    * Type pretty printing
    *

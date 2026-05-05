@@ -684,7 +684,7 @@ FuncAnalysis do_analyze(const IIndex& index,
       ret.resolvedInitializers = decltype(ret.resolvedInitializers)::makeL();
     }
     assertx(ret.resolvedInitializers.left());
-    ret.resolvedInitializers.left()->emplace_back(i, std::move(info));
+    ret.resolvedInitializers.left()->emplace_back(i, info);
   }
   return ret;
 }

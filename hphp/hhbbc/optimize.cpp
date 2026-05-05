@@ -889,8 +889,16 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
 
     if (!ent.second.unchangedBcs) {
       if (!ent.second.replacedBcs.empty()) {
+        auto const oldSize = blk->hhbcs.size();
         blk->hhbcs = std::move(ent.second.replacedBcs);
-        set_changed();
+        // A change in bytecode count can alter speculation outcomes
+        // (which depend on block structure), cascading into different
+        // type states at successor blocks. Require re-analysis.
+        if (blk->hhbcs.size() != oldSize) {
+          set_changed_analyze();
+        } else {
+          set_changed();
+        }
       } else if (blk->hhbcs.size() != 1 || blk->hhbcs.front().op != Op::Nop) {
         blk->hhbcs = { bc_with_loc(blk->hhbcs.front().srcLoc, bc::Nop {}) };
         set_changed_analyze();
@@ -900,13 +908,18 @@ UpdateBCResult update_bytecode(php::WideFunc& func,
                 !ent.second.replacedBcs.empty())) {
       // Don't mark the bytecode as changed if we're not actually
       // changing anything.
+      auto const oldSize = blk->hhbcs.size();
       blk->hhbcs.erase(blk->hhbcs.begin() + ent.second.unchangedBcs,
                        blk->hhbcs.end());
       blk->hhbcs.reserve(blk->hhbcs.size() + ent.second.replacedBcs.size());
       for (auto& bc : ent.second.replacedBcs) {
         blk->hhbcs.push_back(std::move(bc));
       }
-      set_changed();
+      if (blk->hhbcs.size() != oldSize) {
+        set_changed_analyze();
+      } else {
+        set_changed();
+      }
     }
     if (blk->hhbcs.empty()) {
       blk->hhbcs.push_back(bc_with_loc(srcLoc, bc::Nop {}));

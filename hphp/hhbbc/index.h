@@ -453,6 +453,8 @@ struct ClassInfo;
 struct ClassInfo2;
 struct FuncInfo2;
 struct FuncFamily2;
+struct FuncFamilyEntry;
+struct MethodFamilyStaticInfo;
 struct MethodsWithoutCInfo;
 
 struct ClassBundle;
@@ -955,8 +957,14 @@ private:
     FuncFamily* family;
     bool regularOnly;
   };
+  // Like MethodFamily but references a FuncFamilyEntry directly
+  // (with inlined StaticInfo), avoiding the need to load a
+  // FuncFamily blob.
   struct MethodFamily2 {
-    const FuncFamily2* family;
+    const FuncFamilyEntry* entry;
+    const MethodFamilyStaticInfo* staticInfo;
+    SString cls;
+    SString method;
     bool regularOnly;
   };
   // Simultaneously a group of func families. Any data must be
@@ -966,8 +974,17 @@ private:
     CompactVector<FuncFamily*> families;
     bool regularOnly{false};
   };
+  // Like Isect but references FuncFamilyEntry components directly.
   struct Isect2 {
-    CompactVector<const FuncFamily2*> families;
+    struct Component {
+      const FuncFamilyEntry* entry;
+      const MethodFamilyStaticInfo* staticInfo;
+      SString cls;
+      bool operator==(const Component& o) const { return entry == o.entry; }
+      bool operator<(const Component& o) const { return entry < o.entry; }
+    };
+    SString method;
+    CompactVector<Component> components;
     bool regularOnly{false};
   };
   using Rep = std::variant< FuncName
@@ -2171,6 +2188,48 @@ struct AnalysisDeps {
   // is unknown or for bulk operations.
   struct AnyProperty { SString cls; };
 
+  // Dependency on a method family's aggregate return type for a
+  // specific class and method name. Fires when the aggregate changes.
+  struct MethodFamily {
+    SString cls;
+    SString method;
+    bool operator==(const MethodFamily& o) const {
+      return cls->tsame(o.cls) && method->same(o.method);
+    }
+    bool operator<(const MethodFamily& o) const {
+      if (!cls->tsame(o.cls)) return string_data_lt_type{}(cls, o.cls);
+      return string_data_lt{}(method, o.method);
+    }
+    struct Hasher {
+      size_t operator()(const MethodFamily& m) const {
+        return folly::hash::hash_combine(m.cls->hash(), m.method->hash());
+      }
+    };
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(cls)(method);
+    }
+  };
+
+  // Dependency on a name-only method family entry (the global
+  // fallback for a method name when no per-class family is available).
+  struct NameOnlyMethodFamily {
+    SString method;
+    bool operator==(const NameOnlyMethodFamily& o) const {
+      return method->same(o.method);
+    }
+    bool operator<(const NameOnlyMethodFamily& o) const {
+      return string_data_lt{}(method, o.method);
+    }
+    struct Hasher {
+      size_t operator()(const NameOnlyMethodFamily& m) const {
+        return m.method->hash();
+      }
+    };
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(method);
+    }
+  };
+
   Type add(Class, Type);
 
   bool add(ConstIndex, bool inTypeCns);
@@ -2179,6 +2238,8 @@ struct AnalysisDeps {
 
   bool add(Property);
   bool add(AnyProperty);
+  bool add(MethodFamily);
+  bool add(NameOnlyMethodFamily);
 
   Type add(const php::Func&, Type);
   Type add(MethRef, Type);
@@ -2202,6 +2263,9 @@ struct AnalysisDeps {
       (typeCnsAnyClsConstants, string_data_lt_type{})
       (properties, std::less<>{})
       (anyProperties, string_data_lt_type{})
+      // methodFamilies not serialized — update infrastructure
+      // is currently disabled so these deps have no effect.
+      (nameOnlyMethodFamilies, std::less<>{})
       ;
   }
 
@@ -2219,6 +2283,10 @@ private:
 
   hphp_fast_set<Property, Property::Hasher> properties;
   TSStringSet anyProperties;
+
+  hphp_fast_set<MethodFamily, MethodFamily::Hasher> methodFamilies;
+  hphp_fast_set<NameOnlyMethodFamily, NameOnlyMethodFamily::Hasher>
+    nameOnlyMethodFamilies;
 
   static Type merge(Type&, Type);
 
@@ -2288,6 +2356,32 @@ struct AnalysisChangeSet {
   void typeCnsName(const php::Class&, Class);
   void typeCnsName(const php::Unit&, Class);
 
+  // Report that a class's method family aggregate changed. The
+  // parents list indicates which classes should be rescheduled to
+  // recompute their own aggregates (with this class's bundle loaded).
+  struct MethodFamilyChange {
+    SString cls;
+    SString method;
+    CompactVector<SString> parents;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(cls)(method)(parents);
+    }
+    bool operator==(const MethodFamilyChange& o) const {
+      return cls->tsame(o.cls) && method->same(o.method);
+    }
+    bool operator<(const MethodFamilyChange& o) const {
+      if (!cls->tsame(o.cls)) return string_data_lt_type{}(cls, o.cls);
+      return string_data_lt{}(method, o.method);
+    }
+    struct Hash {
+      size_t operator()(const MethodFamilyChange& m) const {
+        return folly::hash::hash_combine(m.cls->hash(), m.method->hash());
+      }
+    };
+  };
+
+  void changed(MethodFamilyChange);
+
   void remove(const php::Func& f) { funcs.erase(f.name); }
 
   void filter(const TSStringSet&,
@@ -2307,6 +2401,8 @@ struct AnalysisChangeSet {
       (properties, std::less<>{})
       (clsTypeCnsNames, string_data_lt_type{}, string_data_lt_type{})
       (unitTypeCnsNames, string_data_lt{}, string_data_lt_type{})
+      // methodFamilyChanges not serialized — update infrastructure
+      // is currently disabled.
       ;
   }
 private:
@@ -2322,6 +2418,9 @@ private:
 
   TSStringToOneT<TSStringSet> clsTypeCnsNames;
   TSStringToOneT<TSStringSet> unitTypeCnsNames;
+
+  hphp_fast_set<MethodFamilyChange, MethodFamilyChange::Hash>
+    methodFamilyChanges;
 
   friend struct AnalysisScheduler;
 };
@@ -2385,6 +2484,12 @@ struct AnalysisInput {
     FSStringSet startFunc;
     SStringSet startUnit;
 
+    // Name-only method family entries referenced by this job's deps.
+    // Provides fallback return type info when per-class method
+    // families aren't available.
+    std::vector<std::pair<SString, AnalysisIndexParam<FuncFamilyEntry>>>
+      nameOnlyMethodFamilies;
+
     // Interface slot mapping (only populated in final pass)
     TSStringToOneT<Slot> ifaceSlotMap;
 
@@ -2408,6 +2513,7 @@ struct AnalysisInput {
         (startCls, string_data_lt_type{})
         (startFunc, string_data_lt_func{})
         (startUnit, string_data_lt{})
+        (nameOnlyMethodFamilies)
         (ifaceSlotMap, string_data_lt_type{})
         (bucketIdx)
         (dumpIndex)
@@ -2469,6 +2575,7 @@ struct AnalysisOutput {
 
     // Classes from which each class inherited constants (for tracking dependencies)
     TSStringToOneT<TSStringSet> cnsBases;
+
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
       sd(funcDeps, string_data_lt_func{})
@@ -2578,11 +2685,11 @@ struct AnalysisScheduler {
   // tracked. If a class or function isn't tracked, it won't be
   // eligible for scheduling (though it still might be pulled in as a
   // dependency).
+  void reserveForRegistration(size_t classes, size_t funcs, size_t units);
   void registerClass(SString, AnalysisMode);
   void registerFunc(SString, AnalysisMode);
   void registerUnit(SString, AnalysisMode);
 
-  void reserveForRegistration(size_t classes, size_t funcs, size_t units);
   void registerAllBulk(const TSStringSet& classes,
                        const FSStringSet& funcs,
                        const SStringSet& units,
@@ -2643,6 +2750,10 @@ private:
     // eligible indicates this entity might produce different results this
     // round (either it or its dependencies changed last round)
     bool eligible{true};
+    // Name-only method family entries that have been shipped to this
+    // entity's job. Used to avoid rescheduling for entries already
+    // available.
+    SStringSet shippedNameOnlyMF;
   };
 
   // These wrap a DepState, but also include information about what
@@ -2661,6 +2772,7 @@ private:
     boost::dynamic_bitset<> cnsFixed;
     TSStringSet typeCnsNames;
     SStringSet propertyChanges;
+    SStringSet methodFamilyChanges;
     bool allCnsFixed{false};
   };
   struct UnitState {
@@ -2813,6 +2925,13 @@ private:
   CopyableAtomic<size_t> totalWorkItems;
 
   FSStringSet funcsToRemove;
+
+  // Parent class → set of child classes whose bundles need to be
+  // loaded for the parent's next analysis job (due to method family
+  // aggregate changes). Populated under lock in recordChanges,
+  // consumed single-threaded in findToSchedule, cleared in
+  // resetChanges.
+  TSStringToOneT<TSStringSet> pendingMethodFamilyParents;
 
   // Keep AnalysisScheduler moveable
   std::unique_ptr<std::mutex> lock;
@@ -2981,6 +3100,9 @@ struct AnalysisIndex {
     AnalysisOutput::Meta
   >;
   Output finish();
+
+  static AnalysisIndexParam<FuncFamilyEntry>
+    makeNameOnlyParam(const FuncFamilyEntry&);
 
   struct IndexData;
 private:

@@ -951,6 +951,83 @@ struct FFStaticInfoPtrEquals {
 
 }
 
+// Aggregate static information about a group of methods. Used by
+// func-families and method family entries on ClassInfo2. This
+// information never changes after initial construction.
+struct MethodFamilyStaticInfo {
+  Optional<uint32_t> m_numInOut;
+  Optional<RuntimeCoeffects> m_requiredCoeffects;
+  Optional<CompactVector<CoeffectRule>> m_coeffectRules;
+  PrepKindVec m_paramPreps;
+  uint32_t m_minNonVariadicParams;
+  uint32_t m_maxNonVariadicParams;
+  TriBool m_isReadonlyReturn;
+  TriBool m_isReadonlyThis;
+  TriBool m_supportsAER;
+  bool m_maybeReified;
+  bool m_maybeCaresAboutDynCalls;
+  bool m_maybeBuiltin;
+  bool m_mayHaveNamedParams;
+
+  MethodFamilyStaticInfo& operator|=(const MethodFamilyStaticInfo& o) {
+    if (m_numInOut != o.m_numInOut) {
+      m_numInOut.reset();
+    }
+    if (m_requiredCoeffects != o.m_requiredCoeffects) {
+      m_requiredCoeffects.reset();
+    }
+    if (m_coeffectRules != o.m_coeffectRules) {
+      m_coeffectRules.reset();
+    }
+
+    if (o.m_paramPreps.size() > m_paramPreps.size()) {
+      m_paramPreps.resize(
+        o.m_paramPreps.size(),
+        PrepKind{TriBool::No, TriBool::No}
+      );
+    }
+    for (size_t i = 0; i < o.m_paramPreps.size(); ++i) {
+      m_paramPreps[i].inOut |= o.m_paramPreps[i].inOut;
+      m_paramPreps[i].readonly |= o.m_paramPreps[i].readonly;
+    }
+    for (size_t i = o.m_paramPreps.size(); i < m_paramPreps.size(); ++i) {
+      m_paramPreps[i].inOut |= TriBool::No;
+      m_paramPreps[i].readonly |= TriBool::No;
+    }
+
+    m_minNonVariadicParams =
+      std::min(m_minNonVariadicParams, o.m_minNonVariadicParams);
+    m_maxNonVariadicParams =
+      std::max(m_maxNonVariadicParams, o.m_maxNonVariadicParams);
+    m_isReadonlyReturn |= o.m_isReadonlyReturn;
+    m_isReadonlyThis |= o.m_isReadonlyThis;
+    m_supportsAER |= o.m_supportsAER;
+    m_maybeReified |= o.m_maybeReified;
+    m_maybeCaresAboutDynCalls |= o.m_maybeCaresAboutDynCalls;
+    m_maybeBuiltin |= o.m_maybeBuiltin;
+    m_mayHaveNamedParams |= o.m_mayHaveNamedParams;
+
+    return *this;
+  }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(m_numInOut)
+      (m_requiredCoeffects)
+      (m_coeffectRules)
+      (m_paramPreps)
+      (m_minNonVariadicParams)
+      (m_maxNonVariadicParams)
+      (m_isReadonlyReturn)
+      (m_isReadonlyThis)
+      (m_supportsAER)
+      (m_maybeReified)
+      (m_maybeCaresAboutDynCalls)
+      (m_maybeBuiltin)
+      (m_mayHaveNamedParams)
+      ;
+  }
+};
+
 /*
  * Sometimes function resolution can't determine which exact function
  * something will call, but can restrict it to a family of functions.
@@ -958,18 +1035,6 @@ struct FFStaticInfoPtrEquals {
  * For example, if you want to call a function on a base class, we
  * will resolve the function to a func family that contains references
  * to all the possible overriding-functions.
- *
- * In general, a func family can contain functions which are used by a
- * regular class or not. In some contexts, we only care about the
- * subset which are used by a regular class, and in some contexts we
- * care about them all. To save memory, we use a single func family
- * for both cases. The users of the func family should only consult
- * the subset they care about.
- *
- * Besides the possible functions themselves, information in common
- * about the functions is cached. For example, return type. This
- * avoids having to iterate over potentially very large sets of
- * functions.
  *
  * This class mirrors the FuncFamily struct but is produced and used
  * by remote workers. Once everything is converted to use remote
@@ -981,96 +1046,22 @@ struct FuncFamily2 {
   // to have an unique id to refer to each one. We produce a SHA1 hash
   // of all of the methods in the func family.
   using Id = SHA1;
+  using StaticInfo = MethodFamilyStaticInfo;
 
   Id m_id;
   // All methods in a func family should have the same name. However,
   // multiple func families may have the same name (so this is not an
   // unique identifier).
   SString m_name;
-  // Methods used by a regular classes
+  // Methods used by regular classes.
   std::vector<MethRef> m_regular;
   // Methods used exclusively by non-regular classes, but as a private
   // method. In some situations, these are treated as if it was on
   // m_regular.
   std::vector<MethRef> m_nonRegularPrivate;
-  // Methods used exclusively by non-regular classes
+  // Methods used exclusively by non-regular classes.
   std::vector<MethRef> m_nonRegular;
 
-  // Information about the group of methods relevant to analysis which
-  // doesn't change (hence "static").
-  struct StaticInfo {
-    Optional<uint32_t> m_numInOut;
-    Optional<RuntimeCoeffects> m_requiredCoeffects;
-    Optional<CompactVector<CoeffectRule>> m_coeffectRules;
-    PrepKindVec m_paramPreps;
-    uint32_t m_minNonVariadicParams;
-    uint32_t m_maxNonVariadicParams;
-    TriBool m_isReadonlyReturn;
-    TriBool m_isReadonlyThis;
-    TriBool m_supportsAER;
-    bool m_maybeReified;
-    bool m_maybeCaresAboutDynCalls;
-    bool m_maybeBuiltin;
-    bool m_mayHaveNamedParams;
-
-    StaticInfo& operator|=(const StaticInfo& o) {
-      if (m_numInOut != o.m_numInOut) {
-        m_numInOut.reset();
-      }
-      if (m_requiredCoeffects != o.m_requiredCoeffects) {
-        m_requiredCoeffects.reset();
-      }
-      if (m_coeffectRules != o.m_coeffectRules) {
-        m_coeffectRules.reset();
-      }
-
-      if (o.m_paramPreps.size() > m_paramPreps.size()) {
-        m_paramPreps.resize(
-          o.m_paramPreps.size(),
-          PrepKind{TriBool::No, TriBool::No}
-        );
-      }
-      for (size_t i = 0; i < o.m_paramPreps.size(); ++i) {
-        m_paramPreps[i].inOut |= o.m_paramPreps[i].inOut;
-        m_paramPreps[i].readonly |= o.m_paramPreps[i].readonly;
-      }
-      for (size_t i = o.m_paramPreps.size(); i < m_paramPreps.size(); ++i) {
-        m_paramPreps[i].inOut |= TriBool::No;
-        m_paramPreps[i].readonly |= TriBool::No;
-      }
-
-      m_minNonVariadicParams =
-        std::min(m_minNonVariadicParams, o.m_minNonVariadicParams);
-      m_maxNonVariadicParams =
-        std::max(m_maxNonVariadicParams, o.m_maxNonVariadicParams);
-      m_isReadonlyReturn |= o.m_isReadonlyReturn;
-      m_isReadonlyThis |= o.m_isReadonlyThis;
-      m_supportsAER |= o.m_supportsAER;
-      m_maybeReified |= o.m_maybeReified;
-      m_maybeCaresAboutDynCalls |= o.m_maybeCaresAboutDynCalls;
-      m_maybeBuiltin |= o.m_maybeBuiltin;
-      m_mayHaveNamedParams |= o.m_mayHaveNamedParams;
-
-      return *this;
-    }
-
-    template <typename SerDe> void serde(SerDe& sd) {
-      sd(m_numInOut)
-        (m_requiredCoeffects)
-        (m_coeffectRules)
-        (m_paramPreps)
-        (m_minNonVariadicParams)
-        (m_maxNonVariadicParams)
-        (m_isReadonlyReturn)
-        (m_isReadonlyThis)
-        (m_supportsAER)
-        (m_maybeReified)
-        (m_maybeCaresAboutDynCalls)
-        (m_maybeBuiltin)
-        (m_mayHaveNamedParams)
-        ;
-    }
-  };
   Optional<StaticInfo> m_allStatic;
   Optional<StaticInfo> m_regularStatic;
 
@@ -1203,18 +1194,19 @@ std::string show(const FuncFamilyOrSingle& fam) {
   return "empty";
 }
 
+} // end anonymous namespace
+
 /*
  * A method family table entry. Each entry encodes the possible
- * resolutions of a method call on a particular class. The reason why
- * this isn't just a func family is because we don't want to create a
- * func family when there's only one possible method involved (this is
- * common and if we did we'd create way more func
- * families). Furthermore, we really want information for two
- * different resolutions. One resolution is when we're only
- * considering regular classes, and the other is when considering all
- * classes. One of these resolutions can correspond to a func family
- * and the other may not. This struct encodes all the possible cases
- * that can occur.
+ * resolutions of a method call on a particular class. We track two
+ * resolutions: one considering only regular classes, and one
+ * considering all classes. Each resolution may map to multiple
+ * methods (BothMulti, MultiAndSingle, MultiAndNone), a single
+ * method (BothSingle, SingleAndNone), or nothing (None). For
+ * multi-method entries, StaticInfo and aggregate return types are
+ * stored inline so analysis jobs don't need to load FuncFamily
+ * blobs. Single-method entries rely on the methodRetTypeConstraints
+ * side-table for return type information.
  */
 struct FuncFamilyEntry {
   // The equivalent of FuncFamily::StaticInfo, but only relevant for a
@@ -1255,34 +1247,145 @@ struct FuncFamilyEntry {
     }
   };
 
-  // Both "regular" and "all" resolutions map to a func family. This
-  // must always be the same func family because the func family
-  // stores the information necessary for both cases.
-  struct BothFF {
-    FuncFamily2::Id m_ff;
+  // Both "regular" and "all" resolutions map to multiple methods.
+  // StaticInfo and return types are inlined so analysis jobs don't
+  // need to load func-family blobs.
+
+  // Method lists for multi-method entries.
+  struct MethodLists {
+    CompactVector<MethRef> m_regular;
+    CompactVector<MethRef> m_nonRegularPrivate;
+    CompactVector<MethRef> m_nonRegular;
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(m_ff);
+      sd(m_regular)(m_nonRegularPrivate)(m_nonRegular);
     }
   };
-  // The "all" resolution maps to a func family but the "regular"
-  // resolution maps to a single method.
-  struct FFAndSingle {
+
+  // A return type constraint paired with method flags that affect
+  // how the constraint maps to a return type. Async methods'
+  // constraints describe the inner type (wrapped in WaitH at
+  // resolution). Native methods with pointer-like return types get
+  // opt() applied.
+  struct MethodRetTypeConstraint {
+    TypeIntersectionConstraint tc;
+    bool isAsync{false};
+    bool isNative{false};
+    bool isGenerator{false};
+    bool hasInOutArgs{false};
+    bool operator==(const MethodRetTypeConstraint& o) const {
+      return isAsync == o.isAsync && isNative == o.isNative &&
+             isGenerator == o.isGenerator && hasInOutArgs == o.hasInOutArgs &&
+             tc == o.tc;
+    }
+    bool operator<(const MethodRetTypeConstraint& o) const {
+      if (isAsync != o.isAsync) return isAsync < o.isAsync;
+      if (isNative != o.isNative) return isNative < o.isNative;
+      if (isGenerator != o.isGenerator) return isGenerator < o.isGenerator;
+      if (hasInOutArgs != o.hasInOutArgs) return hasInOutArgs < o.hasInOutArgs;
+      return tc < o.tc;
+    }
+    struct Hasher {
+      size_t operator()(const MethodRetTypeConstraint& m) const {
+        return folly::hash::hash_combine(
+          TypeIntersectionConstraint::Hasher{}(m.tc),
+          std::hash<bool>{}(m.isAsync),
+          std::hash<bool>{}(m.isNative),
+          std::hash<bool>{}(m.isGenerator),
+          std::hash<bool>{}(m.hasInOutArgs)
+        );
+      }
+    };
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(tc)
+        (isAsync)
+        (isNative)
+        (isGenerator)
+        (hasInOutArgs)
+        ;
+    }
+  };
+
+  using TICSet = hphp_fast_set<
+    MethodRetTypeConstraint,
+    MethodRetTypeConstraint::Hasher
+  >;
+
+  struct ReturnTypeHints {
+    TICSet m_all;
+    TICSet m_regular;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_all, std::less<>{})(m_regular, std::less<>{});
+    }
+  };
+
+  struct BothMulti {
     FuncFamily2::Id m_ff;
+    FuncFamily2::StaticInfo m_allStatic;
+    FuncFamily2::StaticInfo m_regularStatic;
+    MethodLists m_methods;        // Used during build; cleared after init_types
+    ReturnTypeHints m_returnTypeHints;
+    Type m_regularReturnType{TInitCell};
+    Type m_allReturnType{TInitCell};
+    bool m_regularEffectFree{false};
+    bool m_allEffectFree{false};
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(m_ff)
+        (m_allStatic)
+        (m_regularStatic)
+        (m_methods)
+        (m_returnTypeHints)
+        (m_regularReturnType)
+        (m_allReturnType)
+        (m_regularEffectFree)
+        (m_allEffectFree)
+        ;
+    }
+  };
+  // The "all" resolution maps to multiple methods but the "regular"
+  // resolution maps to a single method.
+  struct MultiAndSingle {
+    FuncFamily2::Id m_ff;
+    FuncFamily2::StaticInfo m_allStatic;
     MethRef m_regular;
+    MethMetadata m_regularMeta;
+    MethodLists m_methods;        // Used during build; cleared after init_types
+    ReturnTypeHints m_returnTypeHints;
+    Type m_allReturnType{TInitCell};
+    bool m_allEffectFree{false};
     // If true, m_regular is actually non-regular, but a private
     // method (which is sometimes treated as regular).
     bool m_nonRegularPrivate;
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(m_ff)(m_regular)(m_nonRegularPrivate);
+      sd(m_ff)
+        (m_allStatic)
+        (m_regular)
+        (m_regularMeta)
+        (m_methods)
+        (m_returnTypeHints)
+        (m_allReturnType)
+        (m_allEffectFree)
+        (m_nonRegularPrivate)
+        ;
     }
   };
-  // The "all" resolution maps to a func family but the "regular"
+  // The "all" resolution maps to multiple methods but the "regular"
   // resolution maps to nothing (for example, there's no regular
   // classes with that method).
-  struct FFAndNone {
+  struct MultiAndNone {
     FuncFamily2::Id m_ff;
+    FuncFamily2::StaticInfo m_allStatic;
+    MethodLists m_methods;        // Used during build; cleared after init_types
+    ReturnTypeHints m_returnTypeHints;
+    Type m_allReturnType{TInitCell};
+    bool m_allEffectFree{false};
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(m_ff);
+      sd(m_ff)
+        (m_allStatic)
+        (m_methods)
+        (m_returnTypeHints)
+        (m_allReturnType)
+        (m_allEffectFree)
+        ;
     }
   };
   // Both the "all" and "regular" resolutions map to (the same) single
@@ -1312,7 +1415,7 @@ struct FuncFamilyEntry {
   };
 
   std::variant<
-    BothFF, FFAndSingle, FFAndNone, BothSingle, SingleAndNone, None
+    BothMulti, MultiAndSingle, MultiAndNone, BothSingle, SingleAndNone, None
   > m_meths{None{}};
   // A resolution is "incomplete" if there's a subclass which does not
   // contain any method with that name (not even inheriting it). If a
@@ -1322,7 +1425,7 @@ struct FuncFamilyEntry {
   bool m_allIncomplete{true};
   bool m_regularIncomplete{true};
   // Whether any method in the resolution overrides a private
-  // method. This is only of interest when building func families.
+  // method. This is only of interest when building method families.
   bool m_privateAncestor{false};
 
   template <typename SerDe> void serde(SerDe& sd) {
@@ -1331,9 +1434,9 @@ struct FuncFamilyEntry {
         uint8_t tag;
         sd(tag);
         switch (tag) {
-          case 0: return sd.template make<BothFF>();
-          case 1: return sd.template make<FFAndSingle>();
-          case 2: return sd.template make<FFAndNone>();
+          case 0: return sd.template make<BothMulti>();
+          case 1: return sd.template make<MultiAndSingle>();
+          case 2: return sd.template make<MultiAndNone>();
           case 3: return sd.template make<BothSingle>();
           case 4: return sd.template make<SingleAndNone>();
           case 5: return sd.template make<None>();
@@ -1343,9 +1446,9 @@ struct FuncFamilyEntry {
     } else {
       match(
         m_meths,
-        [&] (const BothFF& e)        { sd(uint8_t(0))(e); },
-        [&] (const FFAndSingle& e)   { sd(uint8_t(1))(e); },
-        [&] (const FFAndNone& e)     { sd(uint8_t(2))(e); },
+        [&] (const BothMulti& e)        { sd(uint8_t(0))(e); },
+        [&] (const MultiAndSingle& e)   { sd(uint8_t(1))(e); },
+        [&] (const MultiAndNone& e)  { sd(uint8_t(2))(e); },
         [&] (const BothSingle& e)    { sd(uint8_t(3))(e); },
         [&] (const SingleAndNone& e) { sd(uint8_t(4))(e); },
         [&] (const None& e)          { sd(uint8_t(5))(e); }
@@ -1357,11 +1460,60 @@ struct FuncFamilyEntry {
        (m_privateAncestor)
       ;
   }
+
+
+  // Whether this entry represents multiple methods (as opposed to a
+  // single method or none).
+  bool isMulti() const {
+    return std::holds_alternative<BothMulti>(m_meths) ||
+           std::holds_alternative<MultiAndSingle>(m_meths) ||
+           std::holds_alternative<MultiAndNone>(m_meths);
+  }
+
+  // Get the StaticInfo for the given regularOnly flag. Only valid for
+  // multi-method variants.
+  const MethodFamilyStaticInfo* staticInfoFor(bool regularOnly) const {
+    return match<const MethodFamilyStaticInfo*>(
+      m_meths,
+      [&] (const BothMulti& e) {
+        return regularOnly ? &e.m_regularStatic : &e.m_allStatic;
+      },
+      [&] (const MultiAndSingle& e) {
+        assertx(!regularOnly);
+        return &e.m_allStatic;
+      },
+      [&] (const MultiAndNone& e) {
+        assertx(!regularOnly);
+        return &e.m_allStatic;
+      },
+      [&] (const BothSingle&) -> const MethodFamilyStaticInfo* {
+        always_assert(false);
+      },
+      [&] (const SingleAndNone&) -> const MethodFamilyStaticInfo* {
+        always_assert(false);
+      },
+      [&] (const None&) -> const MethodFamilyStaticInfo* {
+        always_assert(false);
+      }
+    );
+  }
+
+  // Return the func-family ID if this entry references a multi-method family.
+  Optional<FuncFamily2::Id> ffId() const {
+    return match<Optional<FuncFamily2::Id>>(
+      m_meths,
+      [&] (const BothMulti& e)      { return make_optional(e.m_ff); },
+      [&] (const MultiAndSingle& e) { return make_optional(e.m_ff); },
+      [&] (const MultiAndNone& e)   { return make_optional(e.m_ff); },
+      [&] (const BothSingle&)       { return std::nullopt; },
+      [&] (const SingleAndNone&)    { return std::nullopt; },
+      [&] (const None&)             { return std::nullopt; }
+    );
+  }
 };
 
-//////////////////////////////////////////////////////////////////////
 
-}
+//////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////
 
@@ -4797,6 +4949,34 @@ struct ClassInfo2 {
   SStringToOneT<FuncFamilyEntry> methodFamilies;
 
   /*
+   * Return type constraints for each method, propagated downward
+   * from the flatten phase. Used by BuildSubclassListJob to compute
+   * type-hint unions for method families, and by init_types to
+   * resolve them to Types. Freed after init_types completes.
+   *
+   * methodFamilyClassGraphs stores class names referenced by the
+   * constraints. These classes are supplied as ClassInfo2 deps to
+   * init_types, ensuring their ClassGraphs are populated.
+   */
+  struct MethodRetTypeInfo {
+    TypeIntersectionConstraint tc;
+    bool isAsync{false};
+    bool isNative{false};
+    bool isGenerator{false};
+    bool hasInOutArgs{false};
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(tc)
+        (isAsync)
+        (isNative)
+        (isGenerator)
+        (hasInOutArgs)
+        ;
+    }
+  };
+  SStringToOneT<MethodRetTypeInfo> methodRetTypeConstraints;
+  TSStringSet methodFamilyClassGraphs;
+
+  /*
    * FuncInfo2s for the methods declared on this class (not
    * flattened). This is in the same order as the methods vector on
    * the associated php::Class.
@@ -4894,6 +5074,8 @@ struct ClassInfo2 {
       (extraMethods, std::less<MethRef>{})
       (closures)
       (methodFamilies, string_data_lt{})
+      (methodRetTypeConstraints, string_data_lt{})
+      (methodFamilyClassGraphs, string_data_lt_type{})
       (funcInfos)
       (auxClassGraphs)
       (retained)
@@ -5233,7 +5415,7 @@ Class::forEachSubclass(const std::function<void(SString, Attr)>& f) const {
 
 std::string show(const Class& c) {
   if (auto const n = c.opaque.right()) {
-    return folly::sformat("?\"{}\"", n);
+    return folly::sformat("\"{}\"?", n);
   }
 
   auto const g = c.graph();
@@ -5241,14 +5423,14 @@ std::string show(const Class& c) {
   if (!g.hasCompleteChildren()) {
     if (g.isConservative()) {
       return folly::sformat(
-        "{}*{}",
-        (c.cinfo() || c.cinfo2()) ? "" : "-",
-        g.name()
+        "{}{}*",
+        g.name(),
+        (c.cinfo() || c.cinfo2()) ? "" : "-"
       );
     }
-    return folly::sformat("!{}", g.name());
+    return folly::sformat("{}!", g.name());
   }
-  if (!c.cinfo() && !c.cinfo2()) return folly::sformat("-{}", g.name());
+  if (!c.cinfo() && !c.cinfo2()) return folly::sformat("{}-", g.name());
   return g.name()->toCppString();
 }
 
@@ -5441,10 +5623,11 @@ std::string Func::name() const {
       );
     },
     [] (MethodFamily2 fam)  {
+      auto const id = fam.entry->ffId();
       return folly::sformat(
-        "{}::{}",
-        fam.family->m_id,
-        fam.family->m_name
+        "MethodFamily2(ff={}, regularOnly={})",
+        id ? id->toString() : "single",
+        fam.regularOnly
       );
     },
     [] (MethodOrMissing m)  { return func_fullname(*m.finfo->func); },
@@ -5459,14 +5642,15 @@ std::string Func::name() const {
       return func_fullname(*i.families[0]->possibleFuncs().front().ptr());
     },
     [] (const Isect2& i) {
-      assertx(i.families.size() > 1);
       using namespace folly::gen;
       return folly::sformat(
-        "{}::{}",
-        from(i.families)
-          | map([] (const FuncFamily2* ff) { return ff->m_id.toString(); })
-          | unsplit<std::string>("&"),
-        i.families[0]->m_name
+        "Isect2({})",
+        from(i.components)
+          | map([] (const Isect2::Component& c) {
+              auto const id = c.entry->ffId();
+              return id ? id->toString() : std::string("single");
+            })
+          | unsplit<std::string>("&")
       );
     }
   );
@@ -5550,7 +5734,7 @@ bool Func::couldHaveReifiedGenerics() const {
       return fa.family->infoFor(fa.regularOnly).m_static->m_maybeReified;
     },
     [] (MethodFamily2 fa) {
-      return fa.family->infoFor(fa.regularOnly).m_maybeReified;
+      return fa.staticInfo->m_maybeReified;
     },
     [] (MethodOrMissing m) { return m.finfo->func->isReified; },
     [] (MethodOrMissing2 m) { return m.finfo->func->isReified; },
@@ -5563,8 +5747,8 @@ bool Func::couldHaveReifiedGenerics() const {
       return true;
     },
     [] (const Isect2& i) {
-      for (auto const ff : i.families) {
-        if (!ff->infoFor(i.regularOnly).m_maybeReified) return false;
+      for (auto const& comp : i.components) {
+        if (!comp.staticInfo->m_maybeReified) return false;
       }
       return true;
     }
@@ -5601,8 +5785,7 @@ bool Func::mightCareAboutDynCalls() const {
         fa.family->infoFor(fa.regularOnly).m_static->m_maybeCaresAboutDynCalls;
     },
     [&] (MethodFamily2 fa) {
-      return
-        fa.family->infoFor(fa.regularOnly).m_maybeCaresAboutDynCalls;
+      return fa.staticInfo->m_maybeCaresAboutDynCalls;
     },
     [&] (MethodOrMissing m)  { return dyn_call_error_level(m.finfo->func) > 0; },
     [&] (MethodOrMissing2 m) { return dyn_call_error_level(m.finfo->func) > 0; },
@@ -5617,8 +5800,8 @@ bool Func::mightCareAboutDynCalls() const {
       return true;
     },
     [&] (const Isect2& i) {
-      for (auto const ff : i.families) {
-        if (!ff->infoFor(i.regularOnly).m_maybeCaresAboutDynCalls) {
+      for (auto const& comp : i.components) {
+        if (!comp.staticInfo->m_maybeCaresAboutDynCalls) {
           return false;
         }
       }
@@ -5640,7 +5823,7 @@ bool Func::mightBeBuiltin() const {
       return fa.family->infoFor(fa.regularOnly).m_static->m_maybeBuiltin;
     },
     [] (MethodFamily2 fa) {
-      return fa.family->infoFor(fa.regularOnly).m_maybeBuiltin;
+      return fa.staticInfo->m_maybeBuiltin;
     },
     [] (MethodOrMissing m) { return m.finfo->func->attrs & AttrBuiltin; },
     [] (MethodOrMissing2 m) { return m.finfo->func->attrs & AttrBuiltin; },
@@ -5653,8 +5836,8 @@ bool Func::mightBeBuiltin() const {
       return true;
     },
     [] (const Isect2& i) {
-      for (auto const ff : i.families) {
-        if (!ff->infoFor(i.regularOnly).m_maybeBuiltin) return false;
+      for (auto const& comp : i.components) {
+        if (!comp.staticInfo->m_maybeBuiltin) return false;
       }
       return true;
     }
@@ -5674,7 +5857,7 @@ bool Func::mightHaveNamedParams() const {
       return fa.family->infoFor(fa.regularOnly).m_static->m_mayHaveNamedParams;
     },
     [] (MethodFamily2 fa) {
-      return fa.family->infoFor(fa.regularOnly).m_mayHaveNamedParams;
+      return fa.staticInfo->m_mayHaveNamedParams;
     },
     [] (MethodOrMissing m) { return m.finfo->func->hasNamedParams; },
     [] (MethodOrMissing2 m) { return m.finfo->func->hasNamedParams; },
@@ -5687,8 +5870,8 @@ bool Func::mightHaveNamedParams() const {
       return true;
     },
     [] (const Isect2& i) {
-      for (auto const ff : i.families) {
-        if (!ff->infoFor(i.regularOnly).m_mayHaveNamedParams) return false;
+      for (auto const& comp : i.components) {
+        if (!comp.staticInfo->m_mayHaveNamedParams) return false;
       }
       return true;
     }
@@ -5709,7 +5892,7 @@ uint32_t Func::minNonVariadicParams() const {
         fa.family->infoFor(fa.regularOnly).m_static->m_minNonVariadicParams;
     },
     [&] (MethodFamily2 fa) {
-      return fa.family->infoFor(fa.regularOnly).m_minNonVariadicParams;
+      return fa.staticInfo->m_minNonVariadicParams;
     },
     [] (MethodOrMissing m) { return numNVArgs(*m.finfo->func); },
     [] (MethodOrMissing2 m) { return numNVArgs(*m.finfo->func); },
@@ -5727,10 +5910,10 @@ uint32_t Func::minNonVariadicParams() const {
     },
     [] (const Isect2& i) {
       uint32_t nv = 0;
-      for (auto const ff : i.families) {
+      for (auto const& comp : i.components) {
         nv = std::max(
           nv,
-          ff->infoFor(i.regularOnly).m_minNonVariadicParams
+          comp.staticInfo->m_minNonVariadicParams
         );
       }
       return nv;
@@ -5752,7 +5935,7 @@ uint32_t Func::maxNonVariadicParams() const {
         fa.family->infoFor(fa.regularOnly).m_static->m_maxNonVariadicParams;
     },
     [] (MethodFamily2 fa) {
-      return fa.family->infoFor(fa.regularOnly).m_maxNonVariadicParams;
+      return fa.staticInfo->m_maxNonVariadicParams;
     },
     [] (MethodOrMissing m) { return numNVArgs(*m.finfo->func); },
     [] (MethodOrMissing2 m) { return numNVArgs(*m.finfo->func); },
@@ -5770,10 +5953,10 @@ uint32_t Func::maxNonVariadicParams() const {
     },
     [] (const Isect2& i) {
       auto nv = std::numeric_limits<uint32_t>::max();
-      for (auto const ff : i.families) {
+      for (auto const& comp : i.components) {
         nv = std::min(
           nv,
-          ff->infoFor(i.regularOnly).m_maxNonVariadicParams
+          comp.staticInfo->m_maxNonVariadicParams
         );
       }
       return nv;
@@ -5796,7 +5979,7 @@ const RuntimeCoeffects* Func::requiredCoeffects() const {
     },
     [] (MethodFamily2 fa) {
       return
-        fa.family->infoFor(fa.regularOnly).m_requiredCoeffects.get_pointer();
+        fa.staticInfo->m_requiredCoeffects.get_pointer();
     },
     [] (MethodOrMissing m) { return &m.finfo->func->requiredCoeffects; },
     [] (MethodOrMissing2 m) { return &m.finfo->func->requiredCoeffects; },
@@ -5814,8 +5997,8 @@ const RuntimeCoeffects* Func::requiredCoeffects() const {
     },
     [] (const Isect2& i) {
       const RuntimeCoeffects* coeffects = nullptr;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
+      for (auto const& comp : i.components) {
+        auto const& info = *comp.staticInfo;
         if (!info.m_requiredCoeffects) continue;
         assertx(IMPLIES(coeffects, *coeffects == *info.m_requiredCoeffects));
         if (!coeffects) coeffects = info.m_requiredCoeffects.get_pointer();
@@ -5839,7 +6022,7 @@ const CompactVector<CoeffectRule>* Func::coeffectRules() const {
         .m_static->m_coeffectRules.get_pointer();
     },
     [] (MethodFamily2 fa) {
-      return fa.family->infoFor(fa.regularOnly).m_coeffectRules.get_pointer();
+      return fa.staticInfo->m_coeffectRules.get_pointer();
     },
     [] (MethodOrMissing m) { return &m.finfo->func->coeffectRules; },
     [] (MethodOrMissing2 m) { return &m.finfo->func->coeffectRules; },
@@ -5867,8 +6050,8 @@ const CompactVector<CoeffectRule>* Func::coeffectRules() const {
     },
     [] (const Isect2& i) {
       const CompactVector<CoeffectRule>* coeffects = nullptr;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
+      for (auto const& comp : i.components) {
+        auto const& info = *comp.staticInfo;
         if (!info.m_coeffectRules) continue;
         assertx(
           IMPLIES(
@@ -5901,7 +6084,7 @@ TriBool Func::supportsAsyncEagerReturn() const {
       return fam.family->infoFor(fam.regularOnly).m_static->m_supportsAER;
     },
     [] (MethodFamily2 fam) {
-      return fam.family->infoFor(fam.regularOnly).m_supportsAER;
+      return fam.staticInfo->m_supportsAER;
     },
     [] (MethodOrMissing m)  {
       return yesOrNo(func_supports_AER(m.finfo->func));
@@ -5923,8 +6106,8 @@ TriBool Func::supportsAsyncEagerReturn() const {
     },
     [] (const Isect2& i) {
       auto aer = TriBool::Maybe;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
+      for (auto const& comp : i.components) {
+        auto const& info = *comp.staticInfo;
         if (info.m_supportsAER == TriBool::Maybe) continue;
         assertx(IMPLIES(aer != TriBool::Maybe, aer == info.m_supportsAER));
         if (aer == TriBool::Maybe) aer = info.m_supportsAER;
@@ -5947,7 +6130,7 @@ Optional<uint32_t> Func::lookupNumInoutParams() const {
       return fam.family->infoFor(fam.regularOnly).m_static->m_numInOut;
     },
     [] (MethodFamily2 fam) {
-      return fam.family->infoFor(fam.regularOnly).m_numInOut;
+      return fam.staticInfo->m_numInOut;
     },
     [] (MethodOrMissing m)  { return func_num_inout(m.finfo->func); },
     [] (MethodOrMissing2 m) { return func_num_inout(m.finfo->func); },
@@ -5965,8 +6148,8 @@ Optional<uint32_t> Func::lookupNumInoutParams() const {
     },
     [] (const Isect2& i) {
       Optional<uint32_t> numInOut;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
+      for (auto const& comp : i.components) {
+        auto const& info = *comp.staticInfo;
         if (!info.m_numInOut) continue;
         assertx(IMPLIES(numInOut, *numInOut == *info.m_numInOut));
         if (!numInOut) numInOut = info.m_numInOut;
@@ -5984,8 +6167,7 @@ PrepKind Func::lookupParamPrep(uint32_t paramId) const {
     }
     return info.m_paramPreps[paramId];
   };
-  auto const fromFuncFamily2 = [&] (const FuncFamily2* ff, bool regularOnly) {
-    auto const& info = ff->infoFor(regularOnly);
+  auto const fromStaticInfo = [&] (const MethodFamilyStaticInfo& info) {
     if (paramId >= info.m_paramPreps.size()) {
       return PrepKind{TriBool::No, TriBool::No};
     }
@@ -6001,7 +6183,7 @@ PrepKind Func::lookupParamPrep(uint32_t paramId) const {
     [&] (Method m)           { return func_param_prep(m.finfo->func, paramId); },
     [&] (Method2 m)          { return func_param_prep(m.finfo->func, paramId); },
     [&] (MethodFamily f)     { return fromFuncFamily(f.family, f.regularOnly); },
-    [&] (MethodFamily2 f)    { return fromFuncFamily2(f.family, f.regularOnly); },
+    [&] (MethodFamily2 f)    { return fromStaticInfo(*f.staticInfo); },
     [&] (MethodOrMissing m)  { return func_param_prep(m.finfo->func, paramId); },
     [&] (MethodOrMissing2 m) { return func_param_prep(m.finfo->func, paramId); },
     [&] (MissingFunc)        { return PrepKind{TriBool::No, TriBool::Yes}; },
@@ -6031,8 +6213,8 @@ PrepKind Func::lookupParamPrep(uint32_t paramId) const {
       auto inOut = TriBool::Maybe;
       auto readonly = TriBool::Maybe;
 
-      for (auto const ff : i.families) {
-        auto const prepKind = fromFuncFamily2(ff, i.regularOnly);
+      for (auto const& comp : i.components) {
+        auto const prepKind = fromStaticInfo(*comp.staticInfo);
         if (prepKind.inOut != TriBool::Maybe) {
           assertx(IMPLIES(inOut != TriBool::Maybe, inOut == prepKind.inOut));
           if (inOut == TriBool::Maybe) inOut = prepKind.inOut;
@@ -6064,7 +6246,7 @@ TriBool Func::lookupReturnReadonly() const {
       return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyReturn;
     },
     [] (MethodFamily2 fam) {
-      return fam.family->infoFor(fam.regularOnly).m_isReadonlyReturn;
+      return fam.staticInfo->m_isReadonlyReturn;
     },
     [] (MethodOrMissing m)  { return yesOrNo(m.finfo->func->isReadonlyReturn); },
     [] (MethodOrMissing2 m) { return yesOrNo(m.finfo->func->isReadonlyReturn); },
@@ -6083,8 +6265,8 @@ TriBool Func::lookupReturnReadonly() const {
     },
     [] (const Isect2& i) {
       auto readOnly = TriBool::Maybe;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
+      for (auto const& comp : i.components) {
+        auto const& info = *comp.staticInfo;
         if (info.m_isReadonlyReturn == TriBool::Maybe) continue;
         assertx(IMPLIES(readOnly != TriBool::Maybe,
                         readOnly == info.m_isReadonlyReturn));
@@ -6108,7 +6290,7 @@ TriBool Func::lookupReadonlyThis() const {
       return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyThis;
     },
     [] (MethodFamily2 fam) {
-      return fam.family->infoFor(fam.regularOnly).m_isReadonlyThis;
+      return fam.staticInfo->m_isReadonlyThis;
     },
     [] (MethodOrMissing m)  { return yesOrNo(m.finfo->func->isReadonlyThis); },
     [] (MethodOrMissing2 m) { return yesOrNo(m.finfo->func->isReadonlyThis); },
@@ -6127,8 +6309,8 @@ TriBool Func::lookupReadonlyThis() const {
     },
     [] (const Isect2& i) {
       auto readOnly = TriBool::Maybe;
-      for (auto const ff : i.families) {
-        auto const& info = ff->infoFor(i.regularOnly);
+      for (auto const& comp : i.components) {
+        auto const& info = *comp.staticInfo;
         if (info.m_isReadonlyThis == TriBool::Maybe) continue;
         assertx(IMPLIES(readOnly != TriBool::Maybe,
                         readOnly == info.m_isReadonlyThis));
@@ -6171,25 +6353,24 @@ Optional<SString> Func::triviallyWrappedFunc() const {
 }
 
 std::string show(const Func& f) {
-  auto ret = f.name();
-  match(
+  auto const n = f.name();
+  return match<std::string>(
     f.val,
-    [&] (Func::FuncName)          {},
-    [&] (Func::MethodName)        {},
-    [&] (Func::Fun)               { ret += "*"; },
-    [&] (Func::Fun2)              { ret += "*"; },
-    [&] (Func::Method)            { ret += "*"; },
-    [&] (Func::Method2)           { ret += "*"; },
-    [&] (Func::MethodFamily)      { ret += "+"; },
-    [&] (Func::MethodFamily2)     { ret += "+"; },
-    [&] (Func::MethodOrMissing)   { ret += "-"; },
-    [&] (Func::MethodOrMissing2)  { ret += "-"; },
-    [&] (Func::MissingFunc)       { ret += "!"; },
-    [&] (Func::MissingMethod)     { ret += "!"; },
-    [&] (const Func::Isect&)      { ret += "&"; },
-    [&] (const Func::Isect2&)     { ret += "&"; }
+    [&] (Func::FuncName)          { return folly::sformat("\"{}\"", n); },
+    [&] (Func::MethodName)        { return folly::sformat("\"{}\"", n); },
+    [&] (Func::Fun)               { return n; },
+    [&] (Func::Fun2)              { return n; },
+    [&] (Func::Method)            { return n; },
+    [&] (Func::Method2)           { return n; },
+    [&] (Func::MethodFamily)      { return n + "+"; },
+    [&] (Func::MethodFamily2)     { return n + "+"; },
+    [&] (Func::MethodOrMissing)   { return n + "?"; },
+    [&] (Func::MethodOrMissing2)  { return n + "?"; },
+    [&] (Func::MissingFunc)       { return folly::sformat("\"{}\"!", n); },
+    [&] (Func::MissingMethod)     { return folly::sformat("\"{}\"!", n); },
+    [&] (const Func::Isect&)      { return n + "&"; },
+    [&] (const Func::Isect2&)     { return n + "&"; }
   );
-  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -6511,6 +6692,9 @@ struct AnalysisIndex::IndexData {
   FSStringToOneT<SString> funcToBundle;
   SStringToOneT<SString> unitToBundle;
 
+  // Name-only method family entries for fallback method resolution.
+  SStringToOneT<FuncFamilyEntry> nameOnlyMethodFamilies;
+
   // Maps interface names to their vtable slot. Only populated during
   // final pass.
   TSStringToOneT<Slot> ifaceSlotMap;
@@ -6696,6 +6880,8 @@ struct DepTracker {
   using AnyClassConstant = AnalysisDeps::AnyClassConstant;
   using Property = AnalysisDeps::Property;
   using AnyProperty = AnalysisDeps::AnyProperty;
+  using MethodFamily = AnalysisDeps::MethodFamily;
+  using NameOnlyMethodFamily = AnalysisDeps::NameOnlyMethodFamily;
 
   // Register dependencies on various entities to the current
   // dependency context.
@@ -6876,6 +7062,24 @@ struct DepTracker {
       }
     } else if (auto const p = folly::get_ptr(index.constants, cns.name)) {
       constants[p->first].emplace(fc);
+    }
+  }
+
+  void add(MethodFamily mf) {
+    auto const fc = context();
+    if (!index.frozen) return;
+    if (deps[fc].add(mf)) {
+      FTRACE(2, "{} now depends on method family {}::{}\n",
+             HHBBC::show(fc), mf.cls, mf.method);
+    }
+  }
+
+  void add(NameOnlyMethodFamily mf) {
+    auto const fc = context();
+    if (!index.frozen) return;
+    if (deps[fc].add(mf)) {
+      FTRACE(2, "{} now depends on name-only method family {}\n",
+             HHBBC::show(fc), mf.method);
     }
   }
 
@@ -8010,20 +8214,31 @@ struct CheckClassInfoInvariantsJob {
         }
 
         if (cinfo->isRegularClass) {
-          // "all" should only be a func family. It can't be empty,
-          // because we know there's at least one method in it (the one in
-          // cinfo->methods). It can't be a single func, because one of
-          // the methods must be the cinfo->methods method, and we know it
-          // isn't AttrNoOverride, so there *must* be another method. So,
-          // it must be a func family.
+          // "all" should be a multi-method entry. It can't be empty
+          // because we know there's at least one method in it (the
+          // one in cinfo->methods). It can't be a single method
+          // because we know it isn't AttrNoOverride, so there *must*
+          // be another method. So, it must be multi.
           always_assert(
-            std::get_if<FuncFamilyEntry::BothFF>(&entry.m_meths) ||
-            std::get_if<FuncFamilyEntry::FFAndSingle>(&entry.m_meths)
+            std::get_if<FuncFamilyEntry::BothMulti>(&entry.m_meths) ||
+            std::get_if<FuncFamilyEntry::MultiAndSingle>(&entry.m_meths)
           );
           // This is a regular class, so we cannot have an incomplete
           // entry (can only happen with interfaces).
           always_assert(!entry.m_regularIncomplete);
         }
+
+        // For multi-method entries, regular return type hints should
+        // be a subset of all return type hints.
+        match<void>(
+          entry.m_meths,
+          [&] (const FuncFamilyEntry::BothMulti& e) {
+            for (auto const& tc : e.m_returnTypeHints.m_regular) {
+              always_assert(e.m_returnTypeHints.m_all.contains(tc));
+            }
+          },
+          [&] (const auto&) {}
+        );
       }
 
       // If the class is marked as having not having bad initial prop
@@ -9991,6 +10206,9 @@ struct FlattenJob {
     // functions.
     std::vector<TSStringSet> classTypeUses;
     std::vector<TSStringSet> funcTypeUses;
+    // Types referenced by method family return type constraints.
+    // Parallel to classTypeUses (one per instantiable class).
+    std::vector<TSStringSet> methodFamilyTypes;
     std::vector<InterfaceConflicts> interfaceConflicts;
     std::vector<MethRefSet> extraMethods;
     std::vector<TSStringSet> flattenedInto;
@@ -10023,6 +10241,7 @@ struct FlattenJob {
         (with86init, string_data_lt_type{})
         (classTypeUses, string_data_lt_type{})
         (funcTypeUses, string_data_lt_type{})
+        (methodFamilyTypes, string_data_lt_type{})
         (interfaceConflicts)
         (extraMethods, std::less<>{})
         (flattenedInto, string_data_lt_type{})
@@ -10234,6 +10453,7 @@ struct FlattenJob {
     outMeta.parents.reserve(classes.vals.size());
     outMeta.newClosures.reserve(newClosures.size());
     outMeta.classTypeUses.reserve(classes.vals.size());
+    outMeta.methodFamilyTypes.reserve(classes.vals.size());
     outMeta.extraMethods.reserve(classes.vals.size());
     outMeta.flattenedInto.reserve(classes.vals.size());
 
@@ -10279,6 +10499,7 @@ struct FlattenJob {
       SCOPE_EXIT { index.m_ctx = nullptr; };
 
       outMeta.classTypeUses.emplace_back();
+      outMeta.methodFamilyTypes.emplace_back();
       outMeta.newClassPredeps.emplace_back();
       update_type_constraints(
         index,
@@ -10286,6 +10507,14 @@ struct FlattenJob {
         outMeta.classTypeUses.back(),
         outMeta.newClassPredeps.back()
       );
+      // Add method-defining ancestors as deps so init_types can
+      // look up their return types for method family aggregates.
+      for (auto const& [_, mte] : cinfo->methods) {
+        auto const defCls = mte.meth().cls;
+        if (!defCls->tsame(cls->name)) {
+          outMeta.classTypeUses.back().emplace(defCls);
+        }
+      }
       optimize_properties(index, *cls, *cinfo);
       for (auto const& func : cls->methods) {
         cinfo->funcInfos.emplace_back(make_func_info(index, *func));
@@ -10366,6 +10595,7 @@ struct FlattenJob {
     // Now move the classes out of LocalIndex and into the output. At
     // this point, it's not safe to access the LocalIndex unless
     // you're sure something hasn't been moved yet.
+    size_t mfTypesIdx = 0;
     for (auto& cls : classes.vals) {
       auto const name = cls->name;
 
@@ -10375,6 +10605,7 @@ struct FlattenJob {
         continue;
       }
       auto& cinfo = cinfoIt->second;
+      auto& mfTypes = outMeta.methodFamilyTypes[mfTypesIdx++];
 
       // Check if this class has a 86*init function (it might have
       // already or might have gained one from trait flattening).
@@ -10403,9 +10634,35 @@ struct FlattenJob {
       // is AttrNoOverride).
       for (auto const& [methname, mte] : cinfo->methods) {
         if (is_special_method_name(methname)) continue;
-        auto entry = make_initial_func_family_entry(*cls, index.meth(mte), mte);
+        auto const& meth = index.meth(mte);
+        auto entry = make_initial_func_family_entry(*cls, meth, mte);
         always_assert(
           cinfo->methodFamilies.emplace(methname, std::move(entry)).second
+        );
+
+        auto tc = meth.retTypeConstraints;
+        if (tc.isAnyUnresolved()) {
+          SStringSet unusedPredeps;
+          tc.forEachMutable([&](TypeConstraint& c) {
+            update_type_constraint(
+              index, c, false, mfTypes, unusedPredeps
+            );
+          });
+        }
+        // Record referenced class names so init_types loads them.
+        for (auto const& c : tc.range()) {
+          for (auto const& part : eachTypeConstraintInUnion(c)) {
+            if (auto const clsName = part.clsName()) {
+              mfTypes.emplace(clsName);
+            }
+          }
+        }
+        cinfo->methodRetTypeConstraints.emplace(
+          methname,
+          ClassInfo2::MethodRetTypeInfo{
+            std::move(tc), meth.isAsync, meth.isNative,
+            meth.isGenerator, meth.hasInOutArgs
+          }
         );
       }
 
@@ -13258,6 +13515,10 @@ struct SubclassMetadata {
   TSStringToOneT<Meta> meta;
   // All classes to be processed
   std::vector<SString> all;
+  // Per-class type names referenced by method family return type
+  // constraints. These serve as deps for BuildSubclassListJob so
+  // the referenced classes are available when resolving constraints.
+  TSStringToOneT<TSStringSet> methodFamilyTypes;
 };
 
 // Metadata used to drive the init-types pass. This is produced from
@@ -13268,6 +13529,8 @@ struct InitTypesMetadata {
     // property/param/return type-hint.
     TSStringSet deps;
     TSStringSet candidateRegOnlyEquivs;
+    // Classes referenced by method family return type constraints.
+    TSStringSet methodFamilyTypes;
   };
   struct FuncMeta {
     // Same as ClsMeta, but for the func
@@ -13300,6 +13563,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<php::ClassBytecode> bytecode;
     UniquePtrRef<ClassInfo2> cinfo;
     TSStringSet typeUses;
+    TSStringSet methodFamilyTypes;
     MethRefSet extraMethods;
     TSStringSet flattenedInto;
     FlattenJob::OutputMeta::NewPredeps newPredeps;
@@ -13465,6 +13729,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       }
       assertx(outputIdx < clsRefs.size());
       assertx(outputIdx < clsMeta.classTypeUses.size());
+      assertx(outputIdx < clsMeta.methodFamilyTypes.size());
       assertx(outputIdx < clsMeta.extraMethods.size());
       assertx(outputIdx < clsMeta.flattenedInto.size());
       assertx(outputIdx < clsMeta.newClassPredeps.size());
@@ -13477,6 +13742,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           std::move(bytecodeRefs[outputIdx]),
           std::move(cinfoRefs[outputIdx]),
           std::move(clsMeta.classTypeUses[outputIdx]),
+          std::move(clsMeta.methodFamilyTypes[outputIdx]),
           std::move(clsMeta.extraMethods[outputIdx]),
           std::move(clsMeta.flattenedInto[outputIdx]),
           std::move(clsMeta.newClassPredeps[outputIdx]),
@@ -13719,6 +13985,8 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
               auto& meta = initTypesMeta.classes[u->name];
               assertx(meta.deps.empty());
               meta.deps.insert(begin(u->typeUses), end(u->typeUses));
+              subclassMeta.methodFamilyTypes[u->name] =
+                std::move(u->methodFamilyTypes);
             } else if (auto const u = std::get_if<FuncUpdate>(&update)) {
               auto& meta = initTypesMeta.funcs[u->name];
               assertx(meta.deps.empty());
@@ -13893,6 +14161,16 @@ struct BuildSubclassListJob {
       Optional<FuncFamily2::StaticInfo> allStatic;
       Optional<FuncFamily2::StaticInfo> regularStatic;
 
+      // Deduplicated return type constraints from the methods in
+      // this family. Used by init_types to compute the initial
+      // aggregate return type (from type hints).
+      FuncFamilyEntry::TICSet allRetTypeConstraints;
+      FuncFamilyEntry::TICSet regularRetTypeConstraints;
+
+      // Class names referenced by the constraints, carried along
+      // so their ClassInfo2s can be supplied as init_types deps.
+      TSStringSet retTypeClassGraphs;
+
       // Whether all classes in this Data have a method with this
       // name.
       bool complete{true};
@@ -13908,6 +14186,9 @@ struct BuildSubclassListJob {
           (nonRegularMeths, std::less<MethRef>{})
           (allStatic)
           (regularStatic)
+          (allRetTypeConstraints, std::less<>{})
+          (regularRetTypeConstraints, std::less<>{})
+          (retTypeClassGraphs, string_data_lt_type{})
           (complete)
           (regularComplete)
           (privateAncestor)
@@ -13945,6 +14226,10 @@ struct BuildSubclassListJob {
     // contains just it's info, or all of it's subclass info.
     bool hasRegularClass{false};
     bool hasRegularClassFull{false};
+
+    // Track how many cnsSubInfo entries still have found != Maybe.
+    // Once zero, the "missing" merge loop can be skipped entirely.
+    Optional<size_t> cnsNotMaybeCount;
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(methods, string_data_lt{})
@@ -14019,6 +14304,9 @@ struct BuildSubclassListJob {
     // For every output class, the set of classes which that class has
     // inherited class constants from.
     TSStringToOneT<TSStringSet> cnsBases;
+    // For every output class, the merged set of class names
+    // referenced by method family type constraints.
+    TSStringToOneT<TSStringSet> methodFamilyTypes;
 
     template <typename SerDe> void serde(SerDe& sd) {
       ScopedStringDataIndexer _;
@@ -14027,6 +14315,7 @@ struct BuildSubclassListJob {
         (nameOnly)
         (regOnlyEquivCandidates)
         (cnsBases, string_data_lt_type{}, string_data_lt_type{})
+        (methodFamilyTypes, string_data_lt_type{}, string_data_lt_type{})
         ;
     }
   };
@@ -14201,26 +14490,30 @@ struct BuildSubclassListJob {
 
     // Record dependencies for each input class. A func family is a
     // dependency of the class if it appears in the method families
-    // table.
-    meta.funcFamilyDeps.reserve(classes.vals.size());
-    for (auto const& cinfo : classes.vals) {
-      meta.funcFamilyDeps.emplace_back();
-      auto& deps = meta.funcFamilyDeps.back();
-      for (auto const& [_, entry] : cinfo->methodFamilies) {
-        match(
-          entry.m_meths,
-          [&] (const FuncFamilyEntry::BothFF& e)      { deps.emplace(e.m_ff); },
-          [&] (const FuncFamilyEntry::FFAndSingle& e) { deps.emplace(e.m_ff); },
-          [&] (const FuncFamilyEntry::FFAndNone& e)   { deps.emplace(e.m_ff); },
-          [&] (const FuncFamilyEntry::BothSingle&)    {},
-          [&] (const FuncFamilyEntry::SingleAndNone&) {},
-          [&] (const FuncFamilyEntry::None&)          {}
-        );
+    // table. Skip in full-distributed mode where FFs aren't created.
+    if (!options.useExternWorkerForFullAnalysis) {
+      meta.funcFamilyDeps.reserve(classes.vals.size());
+      for (auto const& cinfo : classes.vals) {
+        meta.funcFamilyDeps.emplace_back();
+        auto& deps = meta.funcFamilyDeps.back();
+        for (auto const& [_, entry] : cinfo->methodFamilies) {
+          match(
+            entry.m_meths,
+            [&] (const FuncFamilyEntry::BothMulti& e)      { deps.emplace(e.m_ff); },
+            [&] (const FuncFamilyEntry::MultiAndSingle& e) { deps.emplace(e.m_ff); },
+            [&] (const FuncFamilyEntry::MultiAndNone& e)   { deps.emplace(e.m_ff); },
+            [&] (const FuncFamilyEntry::BothSingle&)    {},
+            [&] (const FuncFamilyEntry::SingleAndNone&) {},
+            [&] (const FuncFamilyEntry::None&)          {}
+          );
+        }
       }
     }
 
     Variadic<FuncFamilyGroup> funcFamilyGroups;
-    group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
+    if (!options.useExternWorkerForFullAnalysis) {
+      group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
+    }
 
     auto const addCnsBase = [&] (const ClassInfo2& cinfo) {
       auto& bases = meta.cnsBases[cinfo.name];
@@ -14230,6 +14523,13 @@ struct BuildSubclassListJob {
     };
     for (auto const& cinfo : classes.vals) addCnsBase(*cinfo);
     for (auto const& cinfo : leafs.vals)   addCnsBase(*cinfo);
+
+    for (auto const& cinfo : classes.vals) {
+      if (!cinfo->methodFamilyClassGraphs.empty()) {
+        meta.methodFamilyTypes[cinfo->name] =
+          std::move(cinfo->methodFamilyClassGraphs);
+      }
+    }
 
     // We only need to provide php::Class which correspond to a class
     // which wasn't a dep.
@@ -14461,7 +14761,12 @@ protected:
                               SString name) {
       auto const it = cinfo->methodFamilies.find(name);
       always_assert(it != end(cinfo->methodFamilies));
-      auto entryInfo = meth_info_from_func_family_entry(index, it->second);
+      auto const retTC = folly::get_ptr(
+        cinfo->methodRetTypeConstraints, name
+      );
+      auto entryInfo = meth_info_from_func_family_entry(
+        index, it->second, retTC
+      );
 
       auto& info = infos[name];
       info.complete = false;
@@ -14505,6 +14810,19 @@ protected:
           *info.regularStatic |= *entryInfo.regularStatic;
         }
       }
+
+      info.allRetTypeConstraints.insert(
+        begin(entryInfo.allRetTypeConstraints),
+        end(entryInfo.allRetTypeConstraints)
+      );
+      info.retTypeClassGraphs.insert(
+        begin(entryInfo.retTypeClassGraphs),
+        end(entryInfo.retTypeClassGraphs)
+      );
+      info.regularRetTypeConstraints.insert(
+        begin(entryInfo.regularRetTypeConstraints),
+        end(entryInfo.regularRetTypeConstraints)
+      );
     };
 
     // First process the roots. These methods might be overridden or
@@ -14687,9 +15005,15 @@ protected:
   }
 
   // Turn a FuncFamilyEntry into an equivalent Data::MethInfo.
+  // If retTC is provided, it's the return type constraint for this
+  // method (from the class's side-table). Used for single entries
+  // that don't carry ReturnTypeHints.
   static Data::MethInfo
-  meth_info_from_func_family_entry(LocalIndex& index,
-                                   const FuncFamilyEntry& entry) {
+  meth_info_from_func_family_entry(
+    LocalIndex& index,
+    const FuncFamilyEntry& entry,
+    const ClassInfo2::MethodRetTypeInfo* retTC = nullptr
+  ) {
     Data::MethInfo info;
     info.complete = !entry.m_allIncomplete;
     info.regularComplete = !entry.m_regularIncomplete;
@@ -14706,57 +15030,111 @@ protected:
       return *it->second;
     };
 
-    match(
-      entry.m_meths,
-      [&] (const FuncFamilyEntry::BothFF& e) {
-        auto const& ff = getFF(e.m_ff);
+    auto const addClassGraphsFromTC = [&] (
+      const TypeIntersectionConstraint& tc
+    ) {
+      for (auto const& c : tc.range()) {
+        for (auto const& part : eachTypeConstraintInUnion(c)) {
+          if (auto const cn = part.clsName()) {
+            info.retTypeClassGraphs.emplace(cn);
+          }
+        }
+      }
+    };
+
+    auto const mergeHints = [&] (const auto& e) {
+      for (auto const& mrtc : e.m_returnTypeHints.m_all) {
+        info.allRetTypeConstraints.emplace(mrtc);
+        addClassGraphsFromTC(mrtc.tc);
+      }
+      for (auto const& mrtc : e.m_returnTypeHints.m_regular) {
+        info.regularRetTypeConstraints.emplace(mrtc);
+      }
+    };
+
+    // Helper to populate MethInfo from either the FuncFamily2 (old
+    // path) or the inline MethodLists (distributed path).
+    auto const populateFromMulti = [&] (const auto& e) {
+      if (options.useExternWorkerForFullAnalysis) {
         info.regularMeths.insert(
-          begin(ff.m_regular),
-          end(ff.m_regular)
+          begin(e.m_methods.m_regular),
+          end(e.m_methods.m_regular)
         );
         info.nonRegularPrivateMeths.insert(
-          begin(ff.m_nonRegularPrivate),
-          end(ff.m_nonRegularPrivate)
+          begin(e.m_methods.m_nonRegularPrivate),
+          end(e.m_methods.m_nonRegularPrivate)
         );
         info.nonRegularMeths.insert(
-          begin(ff.m_nonRegular),
-          end(ff.m_nonRegular)
+          begin(e.m_methods.m_nonRegular),
+          end(e.m_methods.m_nonRegular)
         );
-        assertx(ff.m_allStatic);
-        assertx(ff.m_regularStatic);
-        info.allStatic = ff.m_allStatic;
-        info.regularStatic = ff.m_regularStatic;
-      },
-      [&] (const FuncFamilyEntry::FFAndSingle& e) {
+      } else {
         auto const& ff = getFF(e.m_ff);
-        info.nonRegularMeths.insert(
-          begin(ff.m_nonRegular),
-          end(ff.m_nonRegular)
+        info.regularMeths.insert(
+          begin(ff.m_regular), end(ff.m_regular)
         );
-        if (e.m_nonRegularPrivate) {
-          assertx(ff.m_nonRegularPrivate.size() == 1);
-          assertx(ff.m_nonRegularPrivate[0] == e.m_regular);
-          info.nonRegularPrivateMeths.emplace(e.m_regular);
+        info.nonRegularPrivateMeths.insert(
+          begin(ff.m_nonRegularPrivate), end(ff.m_nonRegularPrivate)
+        );
+        info.nonRegularMeths.insert(
+          begin(ff.m_nonRegular), end(ff.m_nonRegular)
+        );
+      }
+    };
+
+    match(
+      entry.m_meths,
+      [&] (const FuncFamilyEntry::BothMulti& e) {
+        populateFromMulti(e);
+        info.allStatic = e.m_allStatic;
+        info.regularStatic = e.m_regularStatic;
+        mergeHints(e);
+      },
+      [&] (const FuncFamilyEntry::MultiAndSingle& e) {
+        if (options.useExternWorkerForFullAnalysis) {
+          info.nonRegularMeths.insert(
+            begin(e.m_methods.m_nonRegular),
+            end(e.m_methods.m_nonRegular)
+          );
+          if (e.m_nonRegularPrivate) {
+            info.nonRegularPrivateMeths.emplace(e.m_regular);
+          } else {
+            info.regularMeths.emplace(e.m_regular);
+          }
         } else {
-          assertx(ff.m_regular.size() == 1);
-          assertx(ff.m_regular[0] == e.m_regular);
-          info.regularMeths.emplace(e.m_regular);
+          auto const& ff = getFF(e.m_ff);
+          info.nonRegularMeths.insert(
+            begin(ff.m_nonRegular), end(ff.m_nonRegular)
+          );
+          if (e.m_nonRegularPrivate) {
+            assertx(ff.m_nonRegularPrivate.size() == 1);
+            assertx(ff.m_nonRegularPrivate[0] == e.m_regular);
+            info.nonRegularPrivateMeths.emplace(e.m_regular);
+          } else {
+            assertx(ff.m_regular.size() == 1);
+            assertx(ff.m_regular[0] == e.m_regular);
+            info.regularMeths.emplace(e.m_regular);
+          }
         }
-        assertx(ff.m_allStatic);
-        assertx(ff.m_regularStatic);
-        info.allStatic = ff.m_allStatic;
-        info.regularStatic = ff.m_regularStatic;
+        info.allStatic = e.m_allStatic;
+        info.regularStatic = static_info_from_meth_meta(e.m_regularMeta);
+        mergeHints(e);
       },
-      [&] (const FuncFamilyEntry::FFAndNone& e) {
-        auto const& ff = getFF(e.m_ff);
-        assertx(ff.m_regular.empty());
-        info.nonRegularMeths.insert(
-          begin(ff.m_nonRegular),
-          end(ff.m_nonRegular)
-        );
-        assertx(ff.m_allStatic);
-        assertx(!ff.m_regularStatic);
-        info.allStatic = ff.m_allStatic;
+      [&] (const FuncFamilyEntry::MultiAndNone& e) {
+        if (options.useExternWorkerForFullAnalysis) {
+          info.nonRegularMeths.insert(
+            begin(e.m_methods.m_nonRegular),
+            end(e.m_methods.m_nonRegular)
+          );
+        } else {
+          auto const& ff = getFF(e.m_ff);
+          assertx(ff.m_regular.empty());
+          info.nonRegularMeths.insert(
+            begin(ff.m_nonRegular), end(ff.m_nonRegular)
+          );
+        }
+        info.allStatic = e.m_allStatic;
+        mergeHints(e);
       },
       [&] (const FuncFamilyEntry::BothSingle& e) {
         if (e.m_nonRegularPrivate) {
@@ -14766,10 +15144,26 @@ protected:
         }
         info.allStatic = info.regularStatic =
           static_info_from_meth_meta(e.m_meta);
+        if (retTC) {
+          // For nonRegularPrivate methods (private on non-regular
+          // classes), include constraints in the regular set too —
+          // they can be called from regular subclass contexts via
+          // private dispatch.
+          add_ret_type_constraint(
+            info, retTC->tc, retTC->isAsync, retTC->isNative,
+            retTC->isGenerator, retTC->hasInOutArgs, true
+          );
+        }
       },
       [&] (const FuncFamilyEntry::SingleAndNone& e) {
         info.nonRegularMeths.emplace(e.m_all);
         info.allStatic = static_info_from_meth_meta(e.m_meta);
+        if (retTC) {
+          add_ret_type_constraint(
+            info, retTC->tc, retTC->isAsync, retTC->isNative,
+            retTC->isGenerator, retTC->hasInOutArgs, false
+          );
+        }
       },
       [&] (const FuncFamilyEntry::None&) {
         assertx(!info.complete);
@@ -14777,6 +15171,31 @@ protected:
     );
 
     return info;
+  }
+
+  // Add a method's return type constraint to the appropriate
+  // constraint vectors in MethInfo, deduplicating.
+  static void add_ret_type_constraint(
+    Data::MethInfo& info,
+    const TypeIntersectionConstraint& tc,
+    bool isAsync,
+    bool isNative,
+    bool isGenerator,
+    bool hasInOutArgs,
+    bool isRegular
+  ) {
+    FuncFamilyEntry::MethodRetTypeConstraint mrtc{
+      tc, isAsync, isNative, isGenerator, hasInOutArgs
+    };
+    info.allRetTypeConstraints.emplace(mrtc);
+    if (isRegular) info.regularRetTypeConstraints.emplace(mrtc);
+    for (auto const& c : tc.range()) {
+      for (auto const& part : eachTypeConstraintInUnion(c)) {
+        if (auto const cn = part.clsName()) {
+          info.retTypeClassGraphs.emplace(cn);
+        }
+      }
+    }
   }
 
   // Create a Data representing the single ClassInfo or split with the
@@ -14795,9 +15214,12 @@ protected:
       // Use the method family table to build initial MethInfos (if
       // the ClassInfo hasn't been processed this will be empty).
       for (auto const& [name, entry] : cinfo->methodFamilies) {
+        auto const retTC = folly::get_ptr(
+          cinfo->methodRetTypeConstraints, name
+        );
         data.methods.emplace(
           name,
-          meth_info_from_func_family_entry(index, entry)
+          meth_info_from_func_family_entry(index, entry, retTC)
         );
       }
 
@@ -14940,6 +15362,26 @@ protected:
             }
           }
 
+          info.allRetTypeConstraints.insert(
+            begin(childInfo->allRetTypeConstraints),
+            end(childInfo->allRetTypeConstraints)
+          );
+          info.regularRetTypeConstraints.insert(
+            begin(childInfo->regularRetTypeConstraints),
+            end(childInfo->regularRetTypeConstraints)
+          );
+          info.retTypeClassGraphs.insert(
+            begin(childInfo->retTypeClassGraphs),
+            end(childInfo->retTypeClassGraphs)
+          );
+
+          // regular ⊆ all after merge
+          if constexpr (debug) {
+            for (auto const& tc : info.regularRetTypeConstraints) {
+              always_assert(info.allRetTypeConstraints.contains(tc));
+            }
+          }
+
           return false;
         }
 
@@ -14980,6 +15422,12 @@ protected:
         newInfo.nonRegularMeths = std::move(info.nonRegularMeths);
         newInfo.allStatic = std::move(info.allStatic);
         newInfo.regularStatic = std::move(info.regularStatic);
+        newInfo.allRetTypeConstraints =
+          std::move(info.allRetTypeConstraints);
+        newInfo.regularRetTypeConstraints =
+          std::move(info.regularRetTypeConstraints);
+        newInfo.retTypeClassGraphs =
+          std::move(info.retTypeClassGraphs);
         newInfo.complete = false;
         newInfo.regularComplete = true;
         newInfo.privateAncestor = info.privateAncestor;
@@ -14995,20 +15443,55 @@ protected:
       data.propDeclInfo[n].insert(begin(d), end(d));
     }
 
-    for (auto& [n, i] : data.cnsSubInfo) {
-      if (childData.cnsSubInfo.contains(n)) continue;
-      i |= ClsCnsSubInfo::missing();
+    // Merge cnsSubInfo from child into accumulated data. For entries
+    // not present in the child, merge with "missing". Once all entries
+    // have found==Maybe, the missing merge is a no-op for all of them,
+    // so skip the entire loop. Track how many still need it.
+    if (!data.cnsNotMaybeCount.has_value()) {
+      // First time: count how many entries don't have found==Maybe
+      size_t count = 0;
+      for (auto const& [n, i] : data.cnsSubInfo) {
+        if (i.result.found != TriBool::Maybe) ++count;
+      }
+      data.cnsNotMaybeCount = count;
+    }
+    if (*data.cnsNotMaybeCount > 0) {
+      for (auto& [n, i] : data.cnsSubInfo) {
+        if (childData.cnsSubInfo.contains(n)) continue;
+        if (i.result.found == TriBool::Maybe) continue;
+        i |= ClsCnsSubInfo::missing();
+        if (i.result.found == TriBool::Maybe) --*data.cnsNotMaybeCount;
+      }
     }
     for (auto& [n, i] : childData.cnsSubInfo) {
       if (auto old = folly::get_ptr(data.cnsSubInfo, n)) {
+        // Already at the most conservative state — merging more
+        // data can't change it.
+        if (old->result.ty.is(BInitCell) &&
+            old->result.found == TriBool::Maybe &&
+            old->result.mightThrow &&
+            old->dynamic.empty()) continue;
+        auto const wasMaybe = old->result.found == TriBool::Maybe;
         *old |= i;
         if (old->dynamic.size() > options.preciseSubclassDynamicCNSLimit) {
           *old = ClsCnsSubInfo::conservative();
         }
+        if (!wasMaybe && old->result.found == TriBool::Maybe) {
+          --*data.cnsNotMaybeCount;
+        }
       } else {
         i |= ClsCnsSubInfo::missing();
+        if (i.result.found != TriBool::Maybe) ++*data.cnsNotMaybeCount;
         data.cnsSubInfo.emplace(n, std::move(i));
       }
+    }
+
+    if constexpr (debug) {
+      size_t actual = 0;
+      for (auto const& [n, i] : data.cnsSubInfo) {
+        if (i.result.found != TriBool::Maybe) ++actual;
+      }
+      always_assert(*data.cnsNotMaybeCount == actual);
     }
 
     data.mockedClasses.insert(
@@ -15247,6 +15730,24 @@ protected:
     entry.m_regularIncomplete = !info.regularComplete;
     entry.m_privateAncestor = info.privateAncestor;
 
+    auto const extractHints = [&] () -> FuncFamilyEntry::ReturnTypeHints {
+      return FuncFamilyEntry::ReturnTypeHints{
+        std::move(info.allRetTypeConstraints),
+        std::move(info.regularRetTypeConstraints)
+      };
+    };
+
+    // Helper to extract method lists before make_func_family moves info.
+    auto const extractMethods = [&] () -> FuncFamilyEntry::MethodLists {
+      FuncFamilyEntry::MethodLists ml;
+      for (auto const& m : info.regularMeths) ml.m_regular.emplace_back(m);
+      for (auto const& m : info.nonRegularPrivateMeths) {
+        ml.m_nonRegularPrivate.emplace_back(m);
+      }
+      for (auto const& m : info.nonRegularMeths) ml.m_nonRegular.emplace_back(m);
+      return ml;
+    };
+
     if (info.regularMeths.size() + info.nonRegularPrivateMeths.size() > 1) {
       // There's either multiple regularMeths, multiple
       // nonRegularPrivateMeths, or one of each (remember they are
@@ -15254,8 +15755,17 @@ protected:
       // we need a func family.
       assertx(info.allStatic);
       assertx(info.regularStatic);
-      auto const ff = make_func_family(index, name, std::move(info));
-      entry.m_meths = FuncFamilyEntry::BothFF{ff};
+      auto allStatic = *info.allStatic;
+      auto regularStatic = *info.regularStatic;
+      auto methods = extractMethods();
+      auto hints = extractHints();
+      auto const ff = options.useExternWorkerForFullAnalysis
+        ? FuncFamily2::Id{}
+        : make_func_family(index, name, std::move(info));
+      entry.m_meths = FuncFamilyEntry::BothMulti{
+        ff, std::move(allStatic), std::move(regularStatic), std::move(methods),
+        std::move(hints)
+      };
     } else if (!info.regularMeths.empty() ||
                !info.nonRegularPrivateMeths.empty()) {
       // We know their sum isn't greater than one, so only one of them
@@ -15278,8 +15788,19 @@ protected:
         // disjoint, overall there's more than one method so need a
         // func family.
         auto const nonRegularPrivate = info.regularMeths.empty();
-        auto const ff = make_func_family(index, name, std::move(info));
-        entry.m_meths = FuncFamilyEntry::FFAndSingle{ff, r, nonRegularPrivate};
+        auto allStatic = *info.allStatic;
+        auto regularMeta =
+          single_meth_meta_from_static_info(*info.regularStatic);
+        auto methods = extractMethods();
+        auto hints = extractHints();
+        auto const ff = options.useExternWorkerForFullAnalysis
+          ? FuncFamily2::Id{}
+          : make_func_family(index, name, std::move(info));
+        entry.m_meths = FuncFamilyEntry::MultiAndSingle{
+          ff, std::move(allStatic), r, std::move(regularMeta),
+          std::move(methods), std::move(hints), TInitCell, false,
+          nonRegularPrivate
+        };
       }
     } else if (info.nonRegularMeths.size() > 1) {
       // Both regularMeths and nonRegularPrivateMeths is empty. If
@@ -15287,8 +15808,15 @@ protected:
       // the non-regular variant, but the regular variant is empty.
       assertx(info.allStatic);
       assertx(!info.regularStatic);
-      auto const ff = make_func_family(index, name, std::move(info));
-      entry.m_meths = FuncFamilyEntry::FFAndNone{ff};
+      auto allStatic = *info.allStatic;
+      auto methods = extractMethods();
+      auto hints = extractHints();
+      auto const ff = options.useExternWorkerForFullAnalysis
+        ? FuncFamily2::Id{}
+        : make_func_family(index, name, std::move(info));
+      entry.m_meths = FuncFamilyEntry::MultiAndNone{
+        ff, std::move(allStatic), std::move(methods), std::move(hints)
+      };
     } else if (!info.nonRegularMeths.empty()) {
       // There's exactly one nonRegularMeths method (and nothing for
       // the regular variant).
@@ -15531,6 +16059,11 @@ protected:
         // and a child class could be regular. Even if the child class
         // doesn't override the method, it changes it from non-regular
         // to regular.
+        cinfo->methodFamilyClassGraphs.insert(
+          begin(info.retTypeClassGraphs),
+          end(info.retTypeClassGraphs)
+        );
+
         entry = make_method_family_entry(index, name, std::move(info));
 
         if (mte.attrs & AttrNoOverride) {
@@ -15577,7 +16110,43 @@ protected:
       for (auto& [name, info] : data.methods) {
         if (cinfo->methods.contains(name)) continue;
         assertx(!is_special_method_name(name));
+
+        cinfo->methodFamilyClassGraphs.insert(
+          begin(info.retTypeClassGraphs),
+          end(info.retTypeClassGraphs)
+        );
+
+        // For single-method entries (BothSingle/SingleAndNone), the
+        // return type constraint is not embedded in the entry — it's
+        // read from the methodRetTypeConstraints side-table.
+        // methodRetTypeConstraints is only populated during
+        // flatten_classes for methods in the class's methods table, so
+        // expanded methods (which are in missingMethods, not methods)
+        // never get a side-table entry. Store the constraint here so
+        // it survives serialization and is available when this class
+        // is loaded as a dependency in a later round.
+        // regular ⊆ all for constraints
+        if constexpr (debug) {
+          for (auto const& tc : info.regularRetTypeConstraints) {
+            always_assert(info.allRetTypeConstraints.contains(tc));
+          }
+        }
+        auto const allConstraints = info.allRetTypeConstraints;
         auto entry = make_method_family_entry(index, name, std::move(info));
+        if ((std::get_if<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
+             std::get_if<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)) &&
+            !allConstraints.empty()) {
+          auto const& mrtc = *allConstraints.begin();
+          auto const emplaced = cinfo->methodRetTypeConstraints.emplace(
+            name,
+            ClassInfo2::MethodRetTypeInfo{
+              mrtc.tc, mrtc.isAsync, mrtc.isNative,
+              mrtc.isGenerator, mrtc.hasInOutArgs
+            }
+          ).second;
+          always_assert(emplaced);
+        }
+
         always_assert(
           cinfo->methodFamilies.emplace(name, std::move(entry)).second
         );
@@ -15642,6 +16211,11 @@ protected:
       );
       split->children.clear();
     }
+
+    // Don't clear methodRetTypeConstraints or methodFamilyClassGraphs
+    // here — they need to survive serialization for when this class
+    // is loaded as a leaf in later rounds. They're cleared in
+    // init_types after final resolution.
   }
 };
 
@@ -16184,6 +16758,30 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       for (auto const cls : w.deps) {
         add(cls, bucket.deps, bucket.splitDeps, bucket.edges);
       }
+      // Add classes referenced by method family return type
+      // constraints as deps. Include roots and their deps/leafs
+      // since children's constraints get merged upward into the
+      // root's MethInfo during processing.
+      {
+        TSStringSet existing{begin(bucket.deps), end(bucket.deps)};
+        for (auto const cls : bucket.classes) existing.emplace(cls);
+        for (auto const cls : bucket.leafs) existing.emplace(cls);
+        auto const addMFT = [&] (SString cls) {
+          if (auto const mft =
+                folly::get_ptr(subclassMeta.methodFamilyTypes, cls)) {
+            for (auto const t : *mft) {
+              if (t->tsame(s_Closure.get())) continue;
+              if (is_closure_name(t)) continue;
+              if (existing.emplace(t).second) {
+                bucket.deps.emplace_back(t);
+              }
+            }
+          }
+        };
+        for (auto const cls : w.classes) addMFT(cls);
+        for (auto const cls : w.deps) addMFT(cls);
+        for (auto const cls : bucket.leafs) addMFT(cls);
+      }
 
       std::sort(
         begin(bucket.edges), end(bucket.edges),
@@ -16302,6 +16900,7 @@ void build_subclass_lists(IndexData& index,
     std::vector<std::pair<SString, FuncFamilyEntry>> nameOnly;
     std::vector<std::pair<SString, SString>> candidateRegOnlyEquivs;
     TSStringToOneT<TSStringSet> cnsBases;
+    TSStringToOneT<TSStringSet> methodFamilyTypes;
   };
 
   auto const run = [&] (SubclassWork::Bucket bucket, size_t round)
@@ -16353,11 +16952,12 @@ void build_subclass_lists(IndexData& index,
       | as<std::vector>();
 
     std::vector<Ref<FuncFamilyGroup>> funcFamilies;
-    if (round > 0) {
+    if (round > 0 && !options.useExternWorkerForFullAnalysis) {
       // Provide the func families associated with any dependency
       // classes going into this job. We only need to do this after
       // the first round because in the first round all dependencies
-      // are leafs and won't have any func families.
+      // are leafs and won't have any func families. Skip in
+      // full-distributed mode where FFs aren't created.
       for (auto const c : bucket.deps) {
         if (auto const deps = folly::get_ptr(funcFamilyDeps, c)) {
           for (auto const& d : *deps) {
@@ -16427,7 +17027,11 @@ void build_subclass_lists(IndexData& index,
 
     auto outMeta = co_await index.client->load(std::move(outMetaRef));
     assertx(outMeta.newFuncFamilyIds.size() == ffRefs.size());
-    assertx(outMeta.funcFamilyDeps.size() == cinfoRefs.size());
+    assertx(
+      outMeta.funcFamilyDeps.size() == cinfoRefs.size() ||
+      (options.useExternWorkerForFullAnalysis &&
+       outMeta.funcFamilyDeps.empty())
+    );
     assertx(outMeta.regOnlyEquivCandidates.size() == cinfoRefs.size());
 
     Updates updates;
@@ -16468,6 +17072,7 @@ void build_subclass_lists(IndexData& index,
       }
     }
     updates.cnsBases = std::move(outMeta.cnsBases);
+    updates.methodFamilyTypes = std::move(outMeta.methodFamilyTypes);
 
     co_return updates;
   };
@@ -16563,6 +17168,12 @@ void build_subclass_lists(IndexData& index,
                 index.classToCnsBases.emplace(n, std::move(o)).second
               );
             }
+            for (auto& [n, types] : u.methodFamilyTypes) {
+              auto& meta = initTypesMeta.classes[n];
+              meta.methodFamilyTypes.insert(
+                begin(types), end(types)
+              );
+            }
           }
         }
       );
@@ -16636,6 +17247,8 @@ struct InitTypesJob {
     for (auto const& cinfo : cinfoDeps.vals) {
       always_assert(index.classInfos.emplace(cinfo->name, cinfo.get()).second);
       cinfo->classGraph.setRegOnlyEquivs();
+      cinfo->methodRetTypeConstraints.clear();
+      cinfo->methodFamilyClassGraphs.clear();
       for (auto const& clo : cinfo->closures) {
         always_assert(index.classInfos.emplace(clo->name, clo.get()).second);
         clo->classGraph.setRegOnlyEquivs();
@@ -16683,6 +17296,107 @@ struct InitTypesJob {
       assertx(finfo->inferred.returnTy.is(BInitCell));
       unresolve_missing(index, *func);
       finfo->inferred.returnTy = initial_return_type(index, *func);
+    }
+
+    // Resolve a MethodRetTypeConstraint to a Type using type hints.
+    // Mirrors the logic in return_type_from_constraints: generators
+    // return a fixed type, native methods with pointer-like return
+    // types get opt(), async methods get wrapped in wait_handle().
+    auto const resolveConstraint =
+        [&] (const FuncFamilyEntry::MethodRetTypeConstraint& mrtc) -> Type {
+      if (mrtc.isGenerator) {
+        auto const name = mrtc.isAsync
+          ? s_AsyncGenerator.get() : s_Generator.get();
+        return objExact(res::Class::get(name));
+      }
+      if (mrtc.hasInOutArgs) return TVec;
+      auto ret = TInitCell;
+      for (auto const& tc : mrtc.tc.range()) {
+        auto lookup = type_from_constraint(
+          tc, TInitCell,
+          [&] (SString name) -> Optional<res::Class> {
+            if (auto const ci = folly::get_default(index.classInfos, name)) {
+              return res::Class::get(*ci);
+            }
+            return res::Class::getOrCreate(name);
+          },
+          // No "self" type — method families span multiple classes.
+          [&] () -> Optional<Type> { return std::nullopt; }
+        );
+        if (lookup.coerceClassToString == TriBool::Yes) {
+          lookup.upper = promote_classish(std::move(lookup.upper));
+        } else if (lookup.coerceClassToString == TriBool::Maybe) {
+          lookup.upper |= TSStr;
+        }
+        if (mrtc.isNative &&
+            lookup.upper.subtypeOf(BStr | BObj | BRes | BArrLike)) {
+          lookup.upper = opt(std::move(lookup.upper));
+        }
+        ret = intersection_of(std::move(ret), unctx(std::move(lookup.upper)));
+      }
+      if (mrtc.isAsync) ret = wait_handle(std::move(ret));
+      return ret;
+    };
+
+    auto const initAggregatesFromHints = [&] (ClassInfo2& cinfo) {
+      for (auto& [methName, entry] : cinfo.methodFamilies) {
+        auto const init = [&] (auto& e) {
+          if (e.m_returnTypeHints.m_all.empty()) return;
+          auto all = TBottom;
+          for (auto const& tc : e.m_returnTypeHints.m_all) {
+            all |= resolveConstraint(tc);
+          }
+
+          e.m_allReturnType = serialize_classes(std::move(all));
+
+          if constexpr (requires { e.m_regularReturnType; }) {
+            if (!e.m_returnTypeHints.m_regular.empty()) {
+              auto regular = TBottom;
+              for (auto const& tc : e.m_returnTypeHints.m_regular) {
+                regular |= resolveConstraint(tc);
+              }
+              e.m_regularReturnType = serialize_classes(std::move(regular));
+            }
+          }
+        };
+        match<void>(
+          entry.m_meths,
+          [&] (FuncFamilyEntry::BothMulti& e) { init(e); },
+          [&] (FuncFamilyEntry::MultiAndSingle& e) { init(e); },
+          [&] (FuncFamilyEntry::MultiAndNone& e) { init(e); },
+          [&] (auto const&) {}
+        );
+      }
+    };
+
+    auto const clearMethodLists = [&] (ClassInfo2& ci) {
+      for (auto& [methName, entry] : ci.methodFamilies) {
+        auto const clear = [&] (auto& e) {
+          e.m_methods.m_regular.clear();
+          e.m_methods.m_nonRegularPrivate.clear();
+          e.m_methods.m_nonRegular.clear();
+          e.m_returnTypeHints.m_all.clear();
+          e.m_returnTypeHints.m_regular.clear();
+        };
+        match<void>(
+          entry.m_meths,
+          [&] (FuncFamilyEntry::BothMulti& e) { clear(e); },
+          [&] (FuncFamilyEntry::MultiAndSingle& e) { clear(e); },
+          [&] (FuncFamilyEntry::MultiAndNone& e) { clear(e); },
+          [&] (auto&) {}
+        );
+      }
+    };
+
+    for (auto& cinfo : cinfos.vals) {
+      initAggregatesFromHints(*cinfo);
+      clearMethodLists(*cinfo);
+      cinfo->methodRetTypeConstraints.clear();
+      cinfo->methodFamilyClassGraphs.clear();
+      for (auto& clo : cinfo->closures) {
+        initAggregatesFromHints(*clo);
+        clearMethodLists(*clo);
+      }
     }
 
     return std::make_tuple(
@@ -17036,15 +17750,32 @@ struct AggregateNameOnlyJob: public BuildSubclassListJob {
             *info.regularStatic |= *entryInfo.regularStatic;
           }
         }
+
+        info.allRetTypeConstraints.insert(
+          begin(entryInfo.allRetTypeConstraints),
+          end(entryInfo.allRetTypeConstraints)
+        );
+        info.retTypeClassGraphs.insert(
+          begin(entryInfo.retTypeClassGraphs),
+          end(entryInfo.retTypeClassGraphs)
+        );
+        info.regularRetTypeConstraints.insert(
+          begin(entryInfo.regularRetTypeConstraints),
+          end(entryInfo.regularRetTypeConstraints)
+        );
       }
 
+      // ClassGraphs from name-only entries don't need to be stored
+      // on a ClassInfo2 — they're available globally.
       meta.nameOnly.emplace_back(
         make_method_family_entry(index, name, std::move(info))
       );
     }
 
     Variadic<FuncFamilyGroup> funcFamilyGroups;
-    group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
+    if (!options.useExternWorkerForFullAnalysis) {
+      group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
+    }
 
     return std::make_tuple(
       std::move(funcFamilyGroups),
@@ -17244,6 +17975,19 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     addDep(s_AsyncGenerator.get(), true);
     addDep(s_Generator.get(), true);
 
+    // Add classes referenced by method family type constraints.
+    // Their ClassInfo2s must be loaded so their ClassGraphs are
+    // populated for type resolution.
+    for (auto const w : work) {
+      auto const cls = folly::get_ptr(meta.classes, w);
+      if (!cls) continue;
+      for (auto const d : cls->methodFamilyTypes) {
+        if (index.classInfoRefs.contains(d)) {
+          addDep(d, false);
+        }
+      }
+    }
+
     // Record that we've read our inputs
     typesLatch.count_down();
 
@@ -17363,26 +18107,28 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
 
     entries.reserve(names.size());
     // Extract out any func families the entries refer to, so they can
-    // be provided to the job.
+    // be provided to the job. Skip in full-distributed mode.
     for (auto const n : names) {
       auto& e = meta.nameOnlyFF.at(n);
       entries.emplace_back(n, std::move(e));
-      for (auto const& entry : entries.back().second) {
-        match(
-          entry.m_meths,
-          [&] (const FuncFamilyEntry::BothFF& e) {
-            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
-          },
-          [&] (const FuncFamilyEntry::FFAndSingle& e) {
-            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
-          },
-          [&] (const FuncFamilyEntry::FFAndNone& e) {
-            funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
-          },
-          [&] (const FuncFamilyEntry::BothSingle&)    {},
-          [&] (const FuncFamilyEntry::SingleAndNone&) {},
-          [&] (const FuncFamilyEntry::None&)          {}
-        );
+      if (!options.useExternWorkerForFullAnalysis) {
+        for (auto const& entry : entries.back().second) {
+          match(
+            entry.m_meths,
+            [&] (const FuncFamilyEntry::BothMulti& e) {
+              funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
+            },
+            [&] (const FuncFamilyEntry::MultiAndSingle& e) {
+              funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
+            },
+            [&] (const FuncFamilyEntry::MultiAndNone& e) {
+              funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
+            },
+            [&] (const FuncFamilyEntry::BothSingle&)    {},
+            [&] (const FuncFamilyEntry::SingleAndNone&) {},
+            [&] (const FuncFamilyEntry::None&)          {}
+          );
+        }
       }
     }
 
@@ -17501,6 +18247,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
   );
 
   coro::blockingWait(coro::collectAllRange(std::move(tasks)));
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -17523,7 +18270,7 @@ struct BundleClassesJob {
     Variadic<std::unique_ptr<php::Unit>> units,
     Variadic<std::unique_ptr<MethodsWithoutCInfo>> methInfos
   ) {
-    auto bundle = std::make_unique<ClassBundle>(
+    return std::make_unique<ClassBundle>(
       std::move(classes.vals),
       std::move(classInfos.vals),
       std::move(classBytecode.vals),
@@ -17533,7 +18280,6 @@ struct BundleClassesJob {
       std::move(units.vals),
       std::move(methInfos.vals)
     );
-    return bundle;
   }
 };
 
@@ -18506,7 +19252,7 @@ void bundle_classes(IndexData& index) {
     std::vector<Update> out;
     out.reserve(results.size());
     for (size_t i = 0, size = results.size(); i < size; ++i) {
-      out.emplace_back(bucket[i], results[i]);
+      out.emplace_back(Update{bucket[i], results[i]});
     }
     co_return out;
   };
@@ -19191,7 +19937,7 @@ void make_class_infos_local(
 
           match(
             entry.m_meths,
-            [&, name=name, &entry=entry] (const FuncFamilyEntry::BothFF& e) {
+            [&, name=name, &entry=entry] (const FuncFamilyEntry::BothMulti& e) {
               auto const it = ffState.find(e.m_ff);
               assertx(it != end(ffState));
               auto const& state = it->second;
@@ -19226,7 +19972,7 @@ void make_class_infos_local(
                 }
               );
             },
-            [&, name=name, &entry=entry] (const FuncFamilyEntry::FFAndSingle& e) {
+            [&, name=name, &entry=entry] (const FuncFamilyEntry::MultiAndSingle& e) {
               if (expanded) {
                 if (e.m_nonRegularPrivate) return;
                 entries.emplace_back(
@@ -19258,7 +20004,7 @@ void make_class_infos_local(
                 }
               );
             },
-            [&, name=name, &entry=entry] (const FuncFamilyEntry::FFAndNone& e) {
+            [&, name=name, &entry=entry] (const FuncFamilyEntry::MultiAndNone& e) {
               if (expanded) return;
               auto const it = ffState.find(e.m_ff);
               assertx(it != end(ffState));
@@ -19359,7 +20105,7 @@ void make_class_infos_local(
   for (auto const& [name, entry] : index.nameOnlyMethodFamilies) {
     match(
       entry.m_meths,
-      [&, name=name] (const FuncFamilyEntry::BothFF& e) {
+      [&, name=name] (const FuncFamilyEntry::BothMulti& e) {
         auto const it = ffState.find(e.m_ff);
         assertx(it != end(ffState));
 
@@ -19369,7 +20115,7 @@ void make_class_infos_local(
           IndexData::MethodFamilyEntry { f, f }
         );
       },
-      [&, name=name] (const FuncFamilyEntry::FFAndSingle& e) {
+      [&, name=name] (const FuncFamilyEntry::MultiAndSingle& e) {
         auto const it = ffState.find(e.m_ff);
         assertx(it != end(ffState));
 
@@ -19387,7 +20133,7 @@ void make_class_infos_local(
           }
         );
       },
-      [&, name=name] (const FuncFamilyEntry::FFAndNone& e) {
+      [&, name=name] (const FuncFamilyEntry::MultiAndNone& e) {
         auto const it = ffState.find(e.m_ff);
         assertx(it != end(ffState));
 
@@ -22523,6 +23269,15 @@ bool AnalysisDeps::add(AnyProperty p) {
   return anyProperties.emplace(p.cls).second;
 }
 
+bool AnalysisDeps::add(MethodFamily mf) {
+  add(Class { mf.cls }, Type::Meta);
+  return methodFamilies.emplace(std::move(mf)).second;
+}
+
+bool AnalysisDeps::add(NameOnlyMethodFamily mf) {
+  return nameOnlyMethodFamilies.emplace(std::move(mf)).second;
+}
+
 AnalysisDeps::Type AnalysisDeps::add(const php::Func& f, Type t) {
   return f.cls
     ? add(MethRef { f }, t)
@@ -22555,7 +23310,9 @@ bool AnalysisDeps::empty() const {
     typeCnsClsConstants.empty() &&
     typeCnsAnyClsConstants.empty() &&
     properties.empty() &&
-    anyProperties.empty();
+    anyProperties.empty() &&
+    methodFamilies.empty() &&
+    nameOnlyMethodFamilies.empty();
 }
 
 AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
@@ -22577,6 +23334,10 @@ AnalysisDeps& AnalysisDeps::operator|=(const AnalysisDeps& o) {
   anyProperties.insert(
     begin(o.anyProperties),
     end(o.anyProperties)
+  );
+  methodFamilies.insert(begin(o.methodFamilies), end(o.methodFamilies));
+  nameOnlyMethodFamilies.insert(
+    begin(o.nameOnlyMethodFamilies), end(o.nameOnlyMethodFamilies)
   );
   for (auto const [name, t] : o.funcs) funcs[name] |= t;
   for (auto const [name, t] : o.classes) classes[name] |= t;
@@ -22702,6 +23463,24 @@ std::string show(const AnalysisDeps& d) {
       from(d.anyProperties) | map(toCpp) | unsplit<std::string>(", ")
     );
   }
+  if (!d.methodFamilies.empty()) {
+    folly::format(
+      &out, "  method-families: {}\n",
+      from(d.methodFamilies)
+        | map([] (auto const& mf) {
+            return folly::sformat("{}::{}", mf.cls, mf.method);
+          })
+        | unsplit<std::string>(", ")
+    );
+  }
+  if (!d.nameOnlyMethodFamilies.empty()) {
+    folly::format(
+      &out, "  name-only-method-families: {}\n",
+      from(d.nameOnlyMethodFamilies)
+        | map([&] (auto const& mf) { return toCpp(mf.method); })
+        | unsplit<std::string>(", ")
+    );
+  }
   if (out.empty()) out = "  (none)\n";
   return out;
 }
@@ -22732,6 +23511,10 @@ void AnalysisChangeSet::changed(const php::Func& f, Type t) {
 
 void AnalysisChangeSet::changed(const php::Class& c, const php::Prop& p) {
   properties.emplace(c.name, p.name);
+}
+
+void AnalysisChangeSet::changed(MethodFamilyChange mfc) {
+  methodFamilyChanges.emplace(std::move(mfc));
 }
 
 void AnalysisChangeSet::fixed(ConstIndex idx) {
@@ -22797,6 +23580,10 @@ void AnalysisChangeSet::filter(const TSStringSet& keepClasses,
   folly::erase_if(
     unitTypeCnsNames, [&] (auto const& p) { return !keepUnits.contains(p.first); }
   );
+  folly::erase_if(
+    methodFamilyChanges,
+    [&] (auto const& mfc) { return !keepClasses.contains(mfc.cls); }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -22849,6 +23636,8 @@ struct AnalysisScheduler::Bucket {
   std::vector<SString> badFuncs;
   std::vector<SString> badConstants;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////
 
@@ -23443,6 +24232,35 @@ void AnalysisScheduler::recordChanges(const AnalysisOutput& output) {
       p.prop, p.cls
     );
     state->propertyChanges.emplace(p.prop);
+  }
+
+  for (auto const& mfc : changed.methodFamilyChanges) {
+    auto const UNUSED bump = bump_for_class(*index.m_data, mfc.cls);
+    FTRACE(4, "AnalysisScheduler: method family {}::{} changed\n",
+           mfc.cls, mfc.method);
+    auto state = folly::get_ptr(classState, mfc.cls);
+    always_assert_flog(
+      state,
+      "Trying to mark method family for un-tracked class {} changed",
+      mfc.cls
+    );
+    always_assert_flog(
+      valid(mfc.cls, DepState::Class),
+      "Trying to mark method family for class {} as changed from wrong shard",
+      mfc.cls
+    );
+    state->methodFamilyChanges.emplace(mfc.method);
+
+    // Record parent notifications. Parents need to be rescheduled
+    // to recompute their aggregates, with this class's bundle
+    // loaded. These are collected under a lock since the child's
+    // job may be modifying state for classes owned by other shards.
+    if (!mfc.parents.empty()) {
+      std::lock_guard<std::mutex> _{*lock};
+      for (auto const parent : mfc.parents) {
+        pendingMethodFamilyParents[parent].emplace(mfc.cls);
+      }
+    }
   }
 
   for (auto const unit : changed.unitsFixed) {
@@ -24085,6 +24903,48 @@ void AnalysisScheduler::findToSchedule() {
       }
     }
 
+    for (auto const& mf : d.deps.methodFamilies) {
+      auto const schedule = [&] {
+        switch (presenceOfClass(d, mf.cls)) {
+          case Presence::None:
+            return true;
+          // Full treated same as Dep: intra-job method family
+          // aggregate sharing is not yet implemented.
+          case Presence::Full:
+          case Presence::Dep: {
+            auto const state = folly::get_ptr(classState, mf.cls);
+            if (!state) return false;
+            return state->methodFamilyChanges.contains(mf.method);
+          }
+        }
+      }();
+
+      if (schedule) {
+        FTRACE(
+          4, "AnalysisScheduler: {} new/changed dependency on "
+          "method family {}::{}, scheduling\n",
+          name, mf.cls, mf.method
+        );
+        return true;
+      }
+    }
+
+    // Name-only method family entries are static, but an entity
+    // must be rescheduled to receive a newly-requested entry that
+    // hasn't been shipped before.
+    for (auto const& mf : d.deps.nameOnlyMethodFamilies) {
+      if (d.shippedNameOnlyMF.contains(mf.method)) continue;
+      if (!index.m_data->nameOnlyMethodFamilies.contains(mf.method)) {
+        continue;
+      }
+      FTRACE(
+        4, "AnalysisScheduler: {} new dependency on "
+        "name-only method family {}, scheduling\n",
+        name, mf.method
+      );
+      return true;
+    }
+
     return false;
   };
 
@@ -24123,6 +24983,10 @@ void AnalysisScheduler::findToSchedule() {
       }
     }
   );
+
+  // TODO: Method family parent rescheduling is disabled — relying
+  // solely on type-hint initial aggregates for now.
+
 }
 
 // Reset any recorded changes from analysis jobs, in preparation for
@@ -24137,6 +25001,7 @@ void AnalysisScheduler::resetChanges() {
     );
     state.cnsChanges.reset();
     state.propertyChanges.clear();
+    state.methodFamilyChanges.clear();
     state.changed = Type::None;
   };
 
@@ -24161,6 +25026,7 @@ void AnalysisScheduler::resetChanges() {
       }
     }
   );
+  pendingMethodFamilyParents.clear();
 }
 
 // Called when all analysis jobs are finished. "Finalize" the changes
@@ -24208,7 +25074,6 @@ void AnalysisScheduler::enableAll() {
       }
     }
   );
-
 }
 
 template <typename V>
@@ -24426,6 +25291,13 @@ void AnalysisScheduler::visitDeps(const DepState& state,
   for (auto const cls : d.anyProperties) {
     visitClassAsDep(cls, false, full, visit);
   }
+
+  // For MethodFamily deps, ensure the depended-on class's bundle is
+  // loaded so we can read its stored aggregate.
+  for (auto const& mf : d.methodFamilies) {
+    visitClassAsDep(mf.cls, false, full, visit);
+  }
+
 }
 
 // First pass: initialize all data in TraceStates.
@@ -25783,13 +26655,19 @@ AnalysisScheduler::makeInputs(const std::vector<Bucket>& buckets,
     addMandatoryBundle(input, unit, i.unitToBundle, added);
   };
 
-  return parallel::gen(
-    buckets.size(),
-    [&] (size_t idx) {
-      auto const& bucket = buckets[idx];
+  // Pre-construct inputs with the overlay ref (AnalysisInput has no
+  std::vector<AnalysisInput> inputs;
+  inputs.reserve(buckets.size());
+  for (size_t idx = 0; idx < buckets.size(); ++idx) {
+    inputs.emplace_back();
+    inputs.back().meta.bucketIdx = idx;
+  }
 
-      AnalysisInput input;
-      input.meta.bucketIdx = idx;
+  parallel::for_each(
+    inputs,
+    [&] (AnalysisInput& input) {
+      auto const idx = input.meta.bucketIdx;
+      auto const& bucket = buckets[idx];
 
       auto const toProcess = findToProcess(bucket);
       auto const relevant = findRelevantBundles(toProcess, bucket);
@@ -25860,6 +26738,40 @@ AnalysisScheduler::makeInputs(const std::vector<Bucket>& buckets,
 
       addMandatory(input, added);
 
+      // Collect name-only method family entries referenced by this
+      // bucket's deps and include them in the meta. Mark entries as
+      // shipped so findToSchedule doesn't reschedule for them again.
+      // Clear the shipped set first — it should only reflect the
+      // current round, not accumulate across rounds.
+      {
+        SStringSet added;
+        for (auto const b : bucket.reportBundles) {
+          auto const state = folly::get_ptr(traceState, b);
+          if (!state) continue;
+          for (auto const d : state->depStates) {
+            d->shippedNameOnlyMF.clear();
+          }
+        }
+        for (auto const b : bucket.reportBundles) {
+          auto const state = folly::get_ptr(traceState, b);
+          if (!state) continue;
+          for (auto const d : state->depStates) {
+            for (auto const& mf : d->deps.nameOnlyMethodFamilies) {
+              if (!added.emplace(mf.method).second) continue;
+              auto const entry = folly::get_ptr(
+                i.nameOnlyMethodFamilies, mf.method
+              );
+              if (!entry) continue;
+              input.meta.nameOnlyMethodFamilies.emplace_back(
+                mf.method,
+                AnalysisIndex::makeNameOnlyParam(*entry)
+              );
+              d->shippedNameOnlyMF.emplace(mf.method);
+            }
+          }
+        }
+      }
+
       input.meta.badClasses.insert(
         begin(bucket.badClasses),
         end(bucket.badClasses)
@@ -25877,7 +26789,7 @@ AnalysisScheduler::makeInputs(const std::vector<Bucket>& buckets,
       assertx(!input.meta.bundleNames.empty());
       input.m_key = input.meta.bundleNames.front();
 
-      if (mode != Mode::Final) return input;
+      if (mode != Mode::Final) return;
 
       for (auto const b : bucket.reportBundles) {
         auto const state = folly::get_ptr(traceState, b);
@@ -25909,9 +26821,10 @@ AnalysisScheduler::makeInputs(const std::vector<Bucket>& buckets,
           }
         }
       }
-      return input;
     }
   );
+
+  return inputs;
 }
 
 // Sixth pass: Calculate BucketSets for each TraceSet. This will
@@ -26332,8 +27245,6 @@ AnalysisScheduler::schedule(Mode mode,
 
 namespace {
 
-//////////////////////////////////////////////////////////////////////
-
 // If we optimized a top-level constant's value to a scalar, we no
 // longer need the associated 86cinit function. This fixes up the
 // metadata to remove it.
@@ -26728,6 +27639,12 @@ AnalysisIndex::AnalysisIndex(
     }
   }
 
+  for (auto& [name, param] : meta.nameOnlyMethodFamilies) {
+    if (param.ptr) {
+      m_data->nameOnlyMethodFamilies.emplace(name, std::move(*param.ptr));
+    }
+  }
+
   assertx(IMPLIES(mode != Mode::Final, meta.ifaceSlotMap.empty()));
   m_data->ifaceSlotMap = std::move(meta.ifaceSlotMap);
 
@@ -26738,6 +27655,13 @@ AnalysisIndex::AnalysisIndex(
 
 AnalysisIndex::~AnalysisIndex() {
   ClassGraph::clearAnalysisIndex();
+}
+
+AnalysisIndexParam<FuncFamilyEntry>
+AnalysisIndex::makeNameOnlyParam(const FuncFamilyEntry& entry) {
+  AnalysisIndexParam<FuncFamilyEntry> param;
+  param.ptr.reset(new FuncFamilyEntry{entry});
+  return param;
 }
 
 // Initialize the worklist with the items we know we must
@@ -28137,9 +29061,63 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
     [&] (const res::Func::Isect&)       -> R { always_assert(false); },
     [&] (res::Func::Fun2 f)             { return fromFInfo(*f.finfo); },
     [&] (res::Func::Method2 m)          { return meth(*m.finfo); },
-    [&] (res::Func::MethodFamily2)      -> R { always_assert(false); },
+    [&] (res::Func::MethodFamily2 m) {
+      auto const ret = match<R>(
+        m.entry->m_meths,
+        [&] (const FuncFamilyEntry::BothMulti& e) {
+          return R{
+            unserialize_type(
+              m.regularOnly ? e.m_regularReturnType : e.m_allReturnType),
+            m.regularOnly ? e.m_regularEffectFree : e.m_allEffectFree
+          };
+        },
+        [&] (const FuncFamilyEntry::MultiAndSingle& e) {
+          return R{ unserialize_type(e.m_allReturnType),
+                    e.m_allEffectFree };
+        },
+        [&] (const FuncFamilyEntry::MultiAndNone& e) {
+          return R{ unserialize_type(e.m_allReturnType),
+                    e.m_allEffectFree };
+        },
+        [&] (const auto&) -> R { always_assert(false); }
+      );
+      if (m.cls) {
+        m_data->deps->add(AnalysisDeps::MethodFamily{m.cls, m.method});
+      }
+      return remove(ret);
+    },
     [&] (res::Func::MethodOrMissing2 m) { return meth(*m.finfo); },
-    [&] (const res::Func::Isect2&)      -> R { always_assert(false); }
+    [&] (const res::Func::Isect2& i) {
+      auto ret = R{ TInitCell, false };
+      for (auto const& comp : i.components) {
+        if (comp.cls) {
+          m_data->deps->add(
+            AnalysisDeps::MethodFamily{comp.cls, i.method});
+        }
+        auto const compRet = match<R>(
+          comp.entry->m_meths,
+          [&] (const FuncFamilyEntry::BothMulti& e) {
+            return R{
+              unserialize_type(
+                i.regularOnly ? e.m_regularReturnType : e.m_allReturnType),
+              i.regularOnly ? e.m_regularEffectFree : e.m_allEffectFree
+            };
+          },
+          [&] (const FuncFamilyEntry::MultiAndSingle& e) {
+            return R{ unserialize_type(e.m_allReturnType),
+                      e.m_allEffectFree };
+          },
+          [&] (const FuncFamilyEntry::MultiAndNone& e) {
+            return R{ unserialize_type(e.m_allReturnType),
+                      e.m_allEffectFree };
+          },
+          [&] (const auto&) -> R { always_assert(false); }
+        );
+        ret.t &= compRet.t;
+        ret.effectFree = ret.effectFree || compRet.effectFree;
+      }
+      return remove(ret);
+    }
   );
 }
 
@@ -28196,9 +29174,62 @@ AnalysisIndex::lookup_return_type(MethodsInfo* methods,
     [&] (const res::Func::Isect&)       -> R { always_assert(false); },
     [&] (res::Func::Fun2 f)             { return fromFInfo(*f.finfo); },
     [&] (res::Func::Method2 m)          { return meth(*m.finfo); },
-    [&] (res::Func::MethodFamily2)      -> R { always_assert(false); },
+    [&] (res::Func::MethodFamily2 m) {
+      auto ret = match<R>(
+        m.entry->m_meths,
+        [&] (const FuncFamilyEntry::BothMulti& e) {
+          return R{
+            unserialize_type(
+              m.regularOnly ? e.m_regularReturnType : e.m_allReturnType),
+            m.regularOnly ? e.m_regularEffectFree : e.m_allEffectFree
+          };
+        },
+        [&] (const FuncFamilyEntry::MultiAndSingle& e) {
+          return R{ unserialize_type(e.m_allReturnType),
+                    e.m_allEffectFree };
+        },
+        [&] (const FuncFamilyEntry::MultiAndNone& e) {
+          return R{ unserialize_type(e.m_allReturnType),
+                    e.m_allEffectFree };
+        },
+        [&] (const auto&) -> R { always_assert(false); }
+      );
+      //m_data->deps->add(AnalysisDeps::MethodFamily{m.cls, m.method});
+      ret.t = return_with_context(std::move(ret.t), context);
+      return ret;
+    },
     [&] (res::Func::MethodOrMissing2 m) { return meth(*m.finfo); },
-    [&] (const res::Func::Isect2&)      -> R { always_assert(false); }
+    [&] (const res::Func::Isect2& i) {
+      auto ret = R{ TInitCell, false };
+      for (auto const& comp : i.components) {
+        //m_data->deps->add(
+        //  AnalysisDeps::MethodFamily{comp.cls, i.method});
+
+        auto const compRet = match<R>(
+          comp.entry->m_meths,
+          [&] (const FuncFamilyEntry::BothMulti& e) {
+            return R{
+              unserialize_type(
+                i.regularOnly ? e.m_regularReturnType : e.m_allReturnType),
+              i.regularOnly ? e.m_regularEffectFree : e.m_allEffectFree
+            };
+          },
+          [&] (const FuncFamilyEntry::MultiAndSingle& e) {
+            return R{ unserialize_type(e.m_allReturnType),
+                      e.m_allEffectFree };
+          },
+          [&] (const FuncFamilyEntry::MultiAndNone& e) {
+            return R{ unserialize_type(e.m_allReturnType),
+                      e.m_allEffectFree };
+          },
+          [&] (const auto&) -> R { always_assert(false); }
+        );
+        ret.t &= compRet.t;
+        ret.effectFree = ret.effectFree || compRet.effectFree;
+      }
+      ret.t = return_with_context(std::move(ret.t), context);
+      return ret;
+    }
   );
 }
 
@@ -28488,7 +29519,7 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
       [&] (Func::MissingMethod) {
         assertx(missing != TriBool::No);
         singleMethod = nullptr;
-        isect.families.clear();
+        isect.components.clear();
         missing = TriBool::Yes;
       },
       [&] (Func::FuncName)        { always_assert(false); },
@@ -28497,7 +29528,7 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
       [&] (Func::Method2 m) {
         if (singleMethod) {
           assertx(missing != TriBool::Yes);
-          assertx(isect.families.empty());
+          assertx(isect.components.empty());
           if (singleMethod != m.finfo->func) {
             singleMethod = nullptr;
             missing = TriBool::Yes;
@@ -28506,27 +29537,45 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
           }
         } else if (missing != TriBool::Yes) {
           singleMethod = m.finfo->func;
-          isect.families.clear();
+          isect.components.clear();
           missing = TriBool::No;
         }
       },
-      [&] (Func::MethodFamily2)   { always_assert(false); },
+      [&] (Func::MethodFamily2 fam) {
+        if (missing == TriBool::Yes) return;
+        if (singleMethod) return;
+        assertx(missing == TriBool::Maybe);
+        assertx(fam.entry->isMulti());
+        isect.components.emplace_back(
+          Func::Isect2::Component{fam.entry, fam.staticInfo, fam.cls}
+        );
+        isect.method = fam.method;
+        isect.regularOnly |= fam.regularOnly;
+      },
       [&] (Func::MethodOrMissing2 m) {
         if (singleMethod) {
           assertx(missing != TriBool::Yes);
-          assertx(isect.families.empty());
+          assertx(isect.components.empty());
           if (singleMethod != m.finfo->func) {
             singleMethod = nullptr;
             missing = TriBool::Yes;
           }
         } else if (missing != TriBool::Yes) {
           singleMethod = m.finfo->func;
-          isect.families.clear();
+          isect.components.clear();
         }
       },
       [&] (Func::MissingFunc)     { always_assert(false); },
       [&] (const Func::Isect&)    { always_assert(false); },
-      [&] (const Func::Isect2&)   { always_assert(false); }
+      [&] (const Func::Isect2& i) {
+        if (missing == TriBool::Yes) return;
+        if (singleMethod) return;
+        assertx(missing == TriBool::Maybe);
+        for (auto const& comp : i.components) {
+          isect.components.emplace_back(comp);
+        }
+        isect.regularOnly |= i.regularOnly;
+      }
     );
   };
 
@@ -28599,9 +29648,9 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
     for (auto const c : *i) onClass(c, false);
   }
 
-  // If we got a method, that always wins. Again, every res::Func is
-  // true, and method is more specific than a FuncFamily, so it is
-  // preferred.
+  // If we got a single method, that always wins. Every res::Func is
+  // true, and a single method is more specific than a multi-method
+  // entry.
   if (singleMethod) {
     assertx(missing != TriBool::Yes);
     // If missing is Maybe, then *every* resolution was to a
@@ -28616,7 +29665,7 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
   }
   // We only got unresolved classes. If missing is TriBool::Yes, the
   // function doesn't exist. Otherwise be pessimistic.
-  if (isect.families.empty()) {
+  if (isect.components.empty()) {
     if (missing == TriBool::Yes) {
       return Func { Func::MissingMethod { dcls.smallestCls().name(), name } };
     }
@@ -28627,16 +29676,23 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
   assertx(missing == TriBool::Maybe);
 
   // We could add a FuncFamily multiple times, so remove duplicates.
-  std::sort(begin(isect.families), end(isect.families));
-  isect.families.erase(
-    std::unique(begin(isect.families), end(isect.families)),
-    end(isect.families)
+  std::sort(begin(isect.components), end(isect.components));
+  isect.components.erase(
+    std::unique(begin(isect.components), end(isect.components)),
+    end(isect.components)
   );
   // If everything simplifies down to a single FuncFamily, just use
   // that.
-  if (isect.families.size() == 1) {
+  isect.method = name;
+  if (isect.components.size() == 1) {
     return Func {
-      Func::MethodFamily2 { isect.families[0], isect.regularOnly }
+      Func::MethodFamily2 {
+        isect.components[0].entry,
+        isect.components[0].staticInfo,
+        isect.components[0].cls,
+        name,
+        isect.regularOnly
+      }
     };
   }
   return Func { std::move(isect) };
@@ -28648,8 +29704,148 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
 
   using Func = res::Func;
 
-  auto const general = [&] (SString maybeCls, bool) {
+  // General/conservative fallback when we can't determine the exact
+  // method. When a ClassInfo2 is provided, walks parent classes to
+  // collect loaded methodFamilies entries, and includes the name-only
+  // method family. This maintains monotonicity: narrowing the receiver
+  // type should never produce a worse return type.
+  auto const general = [&] (SString maybeCls,
+                            bool includeNonRegular,
+                            ClassInfo2* cinfo = nullptr) -> Func {
     assertx(name != s_construct.get());
+
+    Func::Isect2 isect;
+    isect.regularOnly = !includeNonRegular;
+    const php::Func* singleMethod = nullptr;
+    auto missing = false;
+
+    auto const addMulti = [&] (const FuncFamilyEntry* entry,
+                               const MethodFamilyStaticInfo* si,
+                               SString cls) {
+      if (missing) return;
+      if (singleMethod) return;
+      isect.components.emplace_back(
+        Func::Isect2::Component{entry, si, cls}
+      );
+    };
+
+    auto const addSingle = [&] (const MethRef& mref) {
+      if (missing) return;
+      auto const func = func_from_meth_ref(*m_data, mref);
+      if (!func) return;
+      if (singleMethod) {
+        if (singleMethod != func) {
+          singleMethod = nullptr;
+          isect.components.clear();
+          missing = true;
+        }
+      } else {
+        singleMethod = func;
+        isect.components.clear();
+      }
+    };
+
+    auto const addFromEntry = [&] (const FuncFamilyEntry& entry,
+                                    SString cls) {
+      match<void>(
+        entry.m_meths,
+        [&] (const FuncFamilyEntry::BothMulti& e) {
+          auto const si = includeNonRegular
+            ? &e.m_allStatic : &e.m_regularStatic;
+          addMulti(&entry, si, cls);
+        },
+        [&] (const FuncFamilyEntry::MultiAndSingle& e) {
+          if (includeNonRegular) {
+            addMulti(&entry, &e.m_allStatic, cls);
+          } else {
+            addSingle(e.m_regular);
+          }
+        },
+        [&] (const FuncFamilyEntry::MultiAndNone& e) {
+          if (includeNonRegular) addMulti(&entry, &e.m_allStatic, cls);
+        },
+        [&] (const FuncFamilyEntry::BothSingle& e) {
+          addSingle(e.m_all);
+        },
+        [&] (const FuncFamilyEntry::SingleAndNone& e) {
+          if (includeNonRegular) addSingle(e.m_all);
+        },
+        [&] (const FuncFamilyEntry::None&) {}
+      );
+    };
+
+    // If we have a ClassInfo2, walk parent classes for methodFamilies
+    // entries. For regular-only resolution on a non-regular class, use
+    // commonParentsOfRegSubs to find parents common to ALL regular
+    // subclasses.
+    if (cinfo) {
+      auto const checkParent = [&] (ClassGraph p) {
+        if (p == cinfo->classGraph) return;
+        p.ensureCInfo();
+        auto const pinfo = p.cinfo2();
+        if (!pinfo) return;
+
+        auto const entry = folly::get_ptr(pinfo->methodFamilies, name);
+        if (!entry) return;
+
+        addFromEntry(*entry, pinfo->name);
+      };
+
+      auto const useCommonParents = [&] {
+        if (includeNonRegular) return false;
+        if (cinfo->classGraph.mightBeRegular()) return false;
+        cinfo->classGraph.ensureWithChildren(true);
+        return cinfo->classGraph.hasCompleteChildren();
+      }();
+
+      if (useCommonParents) {
+        for (auto const p : cinfo->classGraph.commonParentsOfRegSubs()) {
+          checkParent(p);
+        }
+      } else {
+        cinfo->classGraph.walkParents(
+          [&] (ClassGraph p) { checkParent(p); return true; }
+        );
+      }
+    }
+
+    // If we don't have a ClassInfo2, fall back to the name-only
+    // method family which covers all methods with this name across
+    // the entire program.
+    if (!cinfo) {
+      if (auto const entry =
+            folly::get_ptr(m_data->nameOnlyMethodFamilies, name)) {
+        m_data->deps->add(AnalysisDeps::NameOnlyMethodFamily { name });
+        addFromEntry(*entry, nullptr);
+      }
+    }
+
+    if (missing) {
+      return Func { Func::MissingMethod { maybeCls, name } };
+    }
+    if (singleMethod) {
+      return Func { Func::Method2 {
+        &func_info(*m_data, *singleMethod)
+      } };
+    }
+    if (!isect.components.empty()) {
+      isect.method = name;
+      std::sort(begin(isect.components), end(isect.components));
+      isect.components.erase(
+        std::unique(begin(isect.components), end(isect.components)),
+        end(isect.components)
+      );
+      if (isect.components.size() == 1) {
+        return Func { Func::MethodFamily2 {
+          isect.components[0].entry,
+          isect.components[0].staticInfo,
+          isect.components[0].cls,
+          name,
+          isect.regularOnly
+        } };
+      }
+      return Func { std::move(isect) };
+    }
     return Func { Func::MethodName { maybeCls, name } };
   };
 
@@ -28673,15 +29869,15 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
 
       auto const check = [&] {
         if (ctx.cls == cinfo->cls) return true;
-
+        // The receiver type must be entirely within the context
+        // class's subtree for us to be certain the private method
+        // is the one dispatched.
         auto const ctxType =
           subCls(res::Class::get(*ctx.cls->cinfo), includeNonRegular);
         auto const cinfoType = isExact
           ? clsExact(res::Class::get(*cinfo), includeNonRegular)
           : subCls(res::Class::get(*cinfo), includeNonRegular);
-        if (!cinfoType.subtypeOf(ctxType)) return false;
-        if (ctxType.subtypeOf(cinfoType))  return true;
-        return false;
+        return cinfoType.subtypeOf(ctxType);
       }();
       if (!check) return nullptr;
       return func_from_meth_ref(*m_data, meth->meth());
@@ -28706,7 +29902,7 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
       // slightly better type than nothing.
       if (includeNonRegular ||
           !(cinfo->cls->attrs & (AttrInterface|AttrAbstract))) {
-        return general(cinfo->name, includeNonRegular);
+        return general(cinfo->name, includeNonRegular, cinfo);
       }
 
       // A special case is if we're only considering regular classes,
@@ -28717,30 +29913,36 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
       auto const entry = folly::get_ptr(cinfo->methodFamilies, name);
       // If no entry, treat it pessimistically like the rest of the
       // cases.
-      if (!entry) return general(cinfo->name, false);
+      if (!entry) return general(cinfo->name, false, cinfo);
       // We found an entry. This cannot be empty (remember the method
       // is guaranteed to exist on *all* regular subclasses), and must
       // be complete (for the same reason). Use it.
       assertx(!entry->m_regularIncomplete);
       return match<Func>(
         entry->m_meths,
-        [&] (const FuncFamilyEntry::BothFF&) {
-          // Be conservative for now
-          return general(cinfo->name, false);
+        [&] (const FuncFamilyEntry::BothMulti& e) {
+          // Regular-only resolution for expanded interface entries.
+          assertx(entry->isMulti());
+          return Func { Func::MethodFamily2 {
+            entry, &e.m_regularStatic, cinfo->name, name, true
+          } };
         },
-        [&] (const FuncFamilyEntry::FFAndSingle& e) {
+        [&] (const FuncFamilyEntry::MultiAndSingle& e) {
+          // Regular-only: use the single method.
           m_data->deps->add(e.m_regular);
           auto const func = func_from_meth_ref(*m_data, e.m_regular);
-          if (!func) return general(cinfo->name, false);
+          if (!func) return general(cinfo->name, false, cinfo);
           return Func { Func::Method2 { &func_info(*m_data, *func) } };
         },
-        [&] (const FuncFamilyEntry::FFAndNone&) -> Func {
+        [&] (const FuncFamilyEntry::MultiAndNone&) -> Func {
+          // Regular-only but no regular methods — shouldn't happen
+          // for expanded entries (we asserted !m_regularIncomplete).
           always_assert(false);
         },
         [&] (const FuncFamilyEntry::BothSingle& e) {
           m_data->deps->add(e.m_all);
           auto const func = func_from_meth_ref(*m_data, e.m_all);
-          if (!func) return general(cinfo->name, false);
+          if (!func) return general(cinfo->name, false, cinfo);
           return Func { Func::Method2 { &func_info(*m_data, *func) } };
         },
         [&] (const FuncFamilyEntry::SingleAndNone&) -> Func {
@@ -28756,7 +29958,7 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
 
     m_data->deps->add(meth->meth());
     auto const func = func_from_meth_ref(*m_data, meth->meth());
-    if (!func) return general(cinfo->name, includeNonRegular);
+    if (!func) return general(cinfo->name, includeNonRegular, cinfo);
 
     // We don't store method family information about special methods
     // and they have special inheritance semantics.
@@ -28836,12 +30038,11 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
         return Func { Func::MissingMethod { cinfo->name, name } };
       }
       if (meth->noOverrideRegular()) {
-        // The method isn't overridden in a subclass, but we can't use
-        // the base class either. This leaves two cases. Either the
-        // method isn't overridden because there are no regular
-        // subclasses (in which case there's no resolution at all), or
-        // because there's regular subclasses, but they use the same
-        // method (in which case the result is just func).
+        // The method isn't overridden in a subclass, but we can't
+        // use the base class either. This leaves two cases. Either
+        // the method isn't overridden because there are no regular
+        // subclasses (no resolution at all), or because there's
+        // regular subclasses but they use the same method.
         if (!cinfo->classGraph.mightHaveRegularSubclass()) {
           return Func { Func::MissingMethod { cinfo->name, name } };
         }
@@ -28867,27 +30068,43 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
 
     return match<Func>(
       entry->m_meths,
-      [&] (const FuncFamilyEntry::BothFF&) {
-        // Be conservative for now
-        return general(cinfo->name, includeNonRegular);
+      [&] (const FuncFamilyEntry::BothMulti& e) {
+        assertx(entry->isMulti());
+        auto const regularOnly = !includeNonRegular;
+        return Func { Func::MethodFamily2 {
+          entry, entry->staticInfoFor(regularOnly),
+          cinfo->name, name, regularOnly
+        } };
       },
-      [&] (const FuncFamilyEntry::FFAndSingle& e) {
-        if (includeNonRegular) return general(cinfo->name, true);
+      [&] (const FuncFamilyEntry::MultiAndSingle& e) {
+        if (includeNonRegular) {
+          // Use the all (multi) resolution.
+          assertx(entry->isMulti());
+          return Func { Func::MethodFamily2 {
+            entry, &e.m_allStatic, cinfo->name, name, false
+          } };
+        }
+        // Regular-only: use the single method.
         m_data->deps->add(e.m_regular);
         auto const func = func_from_meth_ref(*m_data, e.m_regular);
-        if (!func) return general(cinfo->name, false);
+        if (!func) return general(cinfo->name, false, cinfo);
         return entry->m_regularIncomplete
           ? Func { Func::MethodOrMissing2 { &func_info(*m_data, *func) } }
           : Func { Func::Method2 { &func_info(*m_data, *func) } };
       },
-      [&] (const FuncFamilyEntry::FFAndNone&) {
-        assertx(includeNonRegular);
-        return general(cinfo->name, true);
+      [&] (const FuncFamilyEntry::MultiAndNone& e) {
+        if (!includeNonRegular) {
+          return Func { Func::MissingMethod { cinfo->name, name } };
+        }
+        assertx(entry->isMulti());
+        return Func { Func::MethodFamily2 {
+          entry, &e.m_allStatic, cinfo->name, name, false
+        } };
       },
       [&] (const FuncFamilyEntry::BothSingle& e) {
         m_data->deps->add(e.m_all);
         auto const func = func_from_meth_ref(*m_data, e.m_all);
-        if (!func) return general(cinfo->name, includeNonRegular);
+        if (!func) return general(cinfo->name, includeNonRegular, cinfo);
         return
           ((includeNonRegular && entry->m_allIncomplete) ||
            (!includeNonRegular && entry->m_regularIncomplete))
@@ -28898,7 +30115,7 @@ res::Func AnalysisIndex::resolve_method(const Type& thisType,
         assertx(includeNonRegular);
         m_data->deps->add(e.m_all);
         auto const func = func_from_meth_ref(*m_data, e.m_all);
-        if (!func) return general(cinfo->name, true);
+        if (!func) return general(cinfo->name, true, cinfo);
         return entry->m_allIncomplete
           ? Func { Func::MethodOrMissing2 { &func_info(*m_data, *func) } }
           : Func { Func::Method2 { &func_info(*m_data, *func) } };
@@ -29017,41 +30234,46 @@ res::Func AnalysisIndex::resolve_ctor(const Type& obj) const {
 
       return match<Func>(
         entry->m_meths,
-        [&] (const FuncFamilyEntry::BothFF&) {
-          // Be conservative for now
-          return Func {
-            Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
-          };
+        [&] (const FuncFamilyEntry::BothMulti& e) {
+          assertx(entry->isMulti());
+          return Func { Func::MethodFamily2 {
+            entry, &e.m_regularStatic,
+            cinfo->name, s_construct.get(), true
+          } };
         },
-        [&] (const FuncFamilyEntry::FFAndSingle& e) {
+        [&] (const FuncFamilyEntry::MultiAndSingle& e) {
           if (includeNonRegular) {
-            return Func {
-              Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
-            };
+            assertx(entry->isMulti());
+            return Func { Func::MethodFamily2 {
+              entry, &e.m_allStatic,
+              cinfo->name, s_construct.get(), false
+            } };
           }
           m_data->deps->add(e.m_regular);
           auto const func = func_from_meth_ref(*m_data, e.m_regular);
           if (!func) {
             return Func {
-              Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
+              Func::MethodName { cinfo->name, s_construct.get() }
             };
           }
           return entry->m_regularIncomplete
             ? Func { Func::MethodOrMissing2 { &func_info(*m_data, *func) } }
             : Func { Func::Method2 { &func_info(*m_data, *func) } };
         },
-        [&] (const FuncFamilyEntry::FFAndNone&) {
+        [&] (const FuncFamilyEntry::MultiAndNone& e) {
           assertx(includeNonRegular);
-          return Func {
-            Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
-          };
+          assertx(entry->isMulti());
+          return Func { Func::MethodFamily2 {
+            entry, &e.m_allStatic,
+            cinfo->name, s_construct.get(), false
+          } };
         },
         [&] (const FuncFamilyEntry::BothSingle& e) {
           m_data->deps->add(e.m_all);
           auto const func = func_from_meth_ref(*m_data, e.m_all);
           if (!func) {
             return Func {
-              Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
+              Func::MethodName { cinfo->name, s_construct.get() }
             };
           }
           return
@@ -29066,7 +30288,7 @@ res::Func AnalysisIndex::resolve_ctor(const Type& obj) const {
           auto const func = func_from_meth_ref(*m_data, e.m_all);
           if (!func) {
             return Func {
-              Func::MethodName { dcls.smallestCls().name(), s_construct.get() }
+              Func::MethodName { cinfo->name, s_construct.get() }
             };
           }
           return entry->m_allIncomplete
@@ -30411,6 +31633,7 @@ void AnalysisIndexParam<T>::serde(BlobDecoder& sd) {
 }
 
 template struct AnalysisIndexParam<ClassBundle>;
+template struct AnalysisIndexParam<FuncFamilyEntry>;
 
 //////////////////////////////////////////////////////////////////////
 

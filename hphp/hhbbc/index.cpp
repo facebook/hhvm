@@ -27008,39 +27008,30 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
     }
   };
 
-  auto const process = [&] (const ClassInfo2& cinfo) {
+  // Look up the constant on a specific ClassInfo2 and return the
+  // result. Does not call addResult — the caller decides where to
+  // accumulate.
+  auto const processOne = [&] (const ClassInfo2& cinfo) -> R {
     ITRACE(4, "{}:\n", cinfo.name);
     Trace::Indent _;
 
     // Does the constant exist on this class?
     auto const idx = folly::get_ptr(cinfo.clsConstants, sname);
-    if (!idx) {
-      addResult(notFound());
-      return;
-    }
+    if (!idx) return notFound();
 
     // Is it an actual non-type-constant?
     assertx(!m_data->badClasses.contains(idx->idx.cls));
-    if (idx->kind != ConstModifierFlags::Kind::Value) {
-      addResult(notFound());
-      return;
-    }
+    if (idx->kind != ConstModifierFlags::Kind::Value) return notFound();
 
     m_data->deps->add(idx->idx);
 
     auto const cnsCls = folly::get_default(m_data->classes, idx->idx.cls);
-    if (!cnsCls) {
-      addResult(conservative());
-      return;
-    }
+    if (!cnsCls) return conservative();
 
     assertx(idx->idx.idx < cnsCls->constants.size());
     auto const& cns = cnsCls->constants[idx->idx.idx];
     assertx(cns.kind == ConstModifierFlags::Kind::Value);
-    if (!cns.val.has_value()) {
-      addResult(notFound());
-      return;
-    }
+    if (!cns.val.has_value()) return notFound();
 
     auto r = [&] {
       if (type(*cns.val) != KindOfUninit) {
@@ -27061,32 +27052,78 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
       };
     }();
     ITRACE(4, "-> {}\n", show(r));
-    addResult(std::move(r));
+    return r;
+  };
+
+  auto const process = [&] (const ClassInfo2& cinfo) {
+    addResult(processOne(cinfo));
+  };
+
+  // Process a loaded ClassInfo2's cnsSubInfo for the constant,
+  // returning the aggregated result. Returns nullopt if the constant
+  // is not found on this class.
+  auto const processSubInfo = [&] (const ClassInfo2& cinfo) -> Optional<R> {
+    auto const sinfo = folly::get_ptr(cinfo.cnsSubInfo, sname);
+    if (!sinfo) return std::nullopt;
+
+    auto r = sinfo->result;
+    for (auto const dynamic : sinfo->dynamic) {
+      m_data->deps->add(AnalysisDeps::Class { dynamic });
+      auto const childInfo = folly::get_default(m_data->cinfos, dynamic);
+      if (childInfo) {
+        r |= processOne(*childInfo);
+      } else {
+        r |= conservative();
+      }
+    }
+    return r;
   };
 
   auto const onSub = [&] (res::Class rcls) {
     m_data->deps->add(AnalysisDeps::Class { rcls.name() });
     auto const c = rcls.cls();
     if (!c || !c->cinfo) {
-      addResult(conservative());
-      return;
-    }
-    auto const sinfo = folly::get_ptr(c->cinfo->cnsSubInfo, sname);
-    if (!sinfo) {
-      addResult(notFound());
-      return;
-    }
-
-    addResult(sinfo->result);
-    for (auto const dynamic : sinfo->dynamic) {
-      m_data->deps->add(AnalysisDeps::Class { dynamic });
-      auto const childInfo = folly::get_default(m_data->cinfos, dynamic);
-      if (childInfo) {
-        process(*childInfo);
+      // Class not loaded. Walk parents to find loaded ancestors whose
+      // cnsSubInfo provides a sound upper bound (the unloaded class's
+      // subtree is a subset of each parent's subtree). Intersect
+      // results from multiple parents for a tighter bound. This
+      // preserves monotonicity: narrowing a type from a loaded parent
+      // to an unloaded child produces at worst the parent's result.
+      auto const g = rcls.graph();
+      g.ensure();
+      if (g.isMissing()) {
+        addResult(conservative());
+        return;
+      }
+      Optional<R> parentResult;
+      g.walkParents(
+        [&] (ClassGraph p) {
+          p.ensureCInfo();
+          auto const pcinfo = p.cinfo2();
+          if (!pcinfo) return true;
+          auto r = processSubInfo(*pcinfo);
+          if (!r) r.emplace(notFound());
+          if (!parentResult) {
+            parentResult.emplace(std::move(*r));
+          } else {
+            *parentResult &= *r;
+          }
+          return false;
+        }
+      );
+      if (parentResult) {
+        addResult(std::move(*parentResult));
       } else {
         addResult(conservative());
       }
+      return;
     }
+    auto r = processSubInfo(*c->cinfo);
+    if (!r) {
+      addResult(notFound());
+      return;
+    }
+    addResult(std::move(*r));
   };
 
   auto const& dcls = dcls_of(cls);
@@ -27094,8 +27131,14 @@ AnalysisIndex::lookup_class_constant(const Type& cls,
     auto const rcls = dcls.smallestCls();
     m_data->deps->add(AnalysisDeps::Class { rcls.name() });
     auto const c = rcls.cls();
-    if (!c || !c->cinfo) return conservative();
-    process(*c->cinfo);
+    if (!c || !c->cinfo) {
+      // Exact class not loaded. Use the same parent-walking strategy
+      // as onSub: the exact class's constant must be within the
+      // bounds of any loaded parent's constant info.
+      onSub(rcls);
+    } else {
+      process(*c->cinfo);
+    }
   } else if (dcls.isSub()) {
     onSub(dcls.smallestCls());
   } else {

@@ -432,6 +432,7 @@ class FieldNode:
         "_presence",
         "_doc_block",
         "_annotations",
+        "_default_value",
         "_parent",
     )
     _id: int
@@ -440,6 +441,7 @@ class FieldNode:
     _presence: FieldPresenceQualifier
     _doc_block: str | None
     _annotations: list[Annotation]
+    _default_value: Any | None
     _parent: StructuredDefinition | None
 
     def __init__(
@@ -451,6 +453,7 @@ class FieldNode:
         presence: FieldPresenceQualifier,
         doc_block: str | None,
         annotations: list[Annotation],
+        default_value: Any | None = None,
     ) -> None:
         self._id = id
         self._name = name
@@ -458,6 +461,7 @@ class FieldNode:
         self._presence = presence
         self._doc_block = doc_block
         self._annotations = annotations
+        self._default_value = default_value
         self._parent = None
 
     @property
@@ -483,6 +487,10 @@ class FieldNode:
     @property
     def annotations(self) -> list[Annotation]:
         return self._annotations
+
+    @property
+    def default_value(self) -> Any | None:
+        return self._default_value
 
     @property
     def parent(self) -> StructuredDefinition:
@@ -657,16 +665,22 @@ class TypedefNode(Definition):
 class ConstantNode(Definition):
     """A Thrift constant definition."""
 
-    __slots__ = ("_type",)
+    __slots__ = ("_type", "_value")
     _type: TypeRef
+    _value: Any
 
-    def __init__(self, *, type: TypeRef, **kwargs: Any) -> None:
+    def __init__(self, *, type: TypeRef, value: Any = None, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._type = type
+        self._value = value
 
     @property
     def type(self) -> TypeRef:
         return self._type
+
+    @property
+    def value(self) -> Any:
+        return self._value
 
 
 # ---------------------------------------------------------------------------

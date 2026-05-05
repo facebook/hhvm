@@ -49,6 +49,8 @@ namespace vixl {
 #else
 #define GCC_VERSION_OR_NEWER(major, minor, patchlevel) 0
 #endif
+#undef MAJOR
+#undef MINOR
 
 
 #if defined(__clang__) && !defined(VIXL_NO_COMPILER_BUILTINS)

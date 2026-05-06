@@ -27,6 +27,7 @@ abstract class HackTest {
       $dp = $method->getAttributeClass(DataProvider::class);
       if (!$dp) {
         try {
+          /* HH_FIXME[4128] Minitest intentionally uses reflection to invoke test methods */
           $ret = $method->invoke($this);
           if ($ret is Awaitable<_>) {
             await $ret;
@@ -46,11 +47,13 @@ abstract class HackTest {
           exit(1);
         }
         \printf("-----     Invoking DataProvider %s::%s()\n", static::class, $dp->name);
+        /* HH_FIXME[4128] Minitest intentionally uses reflection to invoke test methods */
         $values = $dp->invoke($this);
         foreach($values as $k => $args) {
           $this->dataName = $k;
           \printf("-----     Invoking with data set %s...\n", \var_export($k, true));
           try {
+            /* HH_FIXME[4128] Minitest intentionally uses reflection to invoke test methods */
             $ret = $method->invokeArgs($this, $args);
             if ($ret is Awaitable<_>) {
               await $ret;

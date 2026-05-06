@@ -113,6 +113,30 @@ function fb_compact_unserialize(mixed $thing,
 <<__Native("NoRecording")>>
 function fb_intercept2(string $name, mixed $handler): bool;
 
+/**
+ * Invokes a user handler upon calling a function or a class method. This
+ * handler is expected to have signature similar to:
+ *
+ *   function intercept_handler($name, $obj, $positional, $named)
+ *
+ * $name and $obj are interpreted the same as fb_intercept2.
+ * $positional is a vector containing the positional args in the order they
+ * were passed.
+ * $namedArgNames is a dictionary from named arg name to the argument value.
+ *
+ * @param string $name - The function or class method name to intercept. Use
+ * "class::method" for method name.
+ * @param mixed $handler - Callback to handle the interception. Use null,
+ * false or empty string to unregister a previously registered handler. If
+ * name is empty, all previously registered handlers, including those that are
+ * set by individual function names, will be removed.
+ * @return bool - TRUE if successful, FALSE otherwise
+ *
+ */
+<<__Native("NoRecording")>>
+function fb_intercept2_named_args(string $name, mixed $handler): bool;
+
+
 /** Rename a function, so that a function can be called with the new name.
  * When writing unit tests, one may want to stub out a function. To do so,
  * call fb_rename_function('func_to_stub_out', 'somename') then

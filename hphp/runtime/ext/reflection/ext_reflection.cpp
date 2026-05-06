@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
@@ -26,7 +27,6 @@
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
@@ -385,12 +385,24 @@ static const StaticString s_canonical_class_in_repo_mode(
   "Do not attempt to get Canonical class in repo mode, it won't work as expected"
 );
 
+static const StaticString s_non_vector_named_arg_names(
+  "Named arg names passed to hphp_invoke_method_named_args must be a ?vec<string>"
+);
+
+static const StaticString s_non_dict_named_args(
+  "namedArgs passed to hphp_invoke_callable_named_args must be a ?dict<string, mixed>"
+);
+
+static const StaticString s_unsupported_callable_type(
+  "hphp_invoke_callable_named_args only supports function pointers and "
+  "static class method references for the callable."
+);
+
 Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
                                           const String& cls,
                                           const String& name,
                                           const Variant& params) {
   if (obj.isNull()) {
-    // TODO(named_params) support invoke_method with named args
     return invoke_static_method(cls, name, params, nullptr);
   }
 
@@ -426,6 +438,61 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
 
   return Variant::attach(
     g_context->invokeFunc(ctx, params, nullptr, RuntimeCoeffects::fixme())
+  );
+}
+
+Variant HHVM_FUNCTION(hphp_invoke_callable_named_args,
+                      const Variant& callable,
+                      const Variant& args,
+                      const Variant& namedArgs) {
+  Class* cls = nullptr;
+  const Func* func = nullptr;
+  if (callable.isFunc()) {
+    func = callable.toFuncVal();
+  } else if (callable.isClsMeth()) {
+    auto clsMeth = callable.toClsMethVal().get();
+    func = clsMeth->getFunc();
+    cls = clsMeth->getCls();
+  } else {
+    Reflection::ThrowReflectionExceptionObject(s_unsupported_callable_type);
+  }
+  // namedArgNamesObj is a ?dict<string, mixed> mapping named arg name -> value.
+  // The invokeFunc API expects a vec of names and a separate vec of values,
+  // so split the dict here.
+  if (!namedArgs.isNull()) {
+    if (!namedArgs.isDict()) {
+      Reflection::ThrowReflectionExceptionObject(s_non_dict_named_args);
+    }
+    auto const namedArgsDict = namedArgs.toDict().get();
+    if (namedArgsDict->size() > 0) {
+      auto const sorted = namedArgsDict->escalateForSort(SORTFUNC_KSORT);
+      SCOPE_EXIT { if (sorted != namedArgsDict) decRefArr(sorted); };
+      sorted->ksort(0, true);
+      VecInit namesInit{sorted->size()};
+      VecInit valuesInit{sorted->size()};
+      IterateKV(sorted, [&](TypedValue k, TypedValue v) {
+        namesInit.append(k);
+        valuesInit.append(v);
+      });
+      ArrayData* namedArgNames = namesInit.create();
+      ArrayData* namedArgValues = valuesInit.create();
+      SCOPE_EXIT {
+        namedArgNames->release();
+        namedArgValues->release();
+      };
+      return Variant::attach(
+        g_context->invokeFunc(func, args, namedArgNames,
+                              nullptr, cls, RuntimeCoeffects::fixme(),
+                              false /* dynamic */, false /* checkRefAnnot */,
+                              true /* allowDynCallNoPointer */, false /* readonlyReturn */,
+                              Array() /* generics */, namedArgValues)
+      );
+    }
+  }
+  return Variant::attach(
+    g_context->invokeFunc(func, args, nullptr,
+                          nullptr, cls, RuntimeCoeffects::fixme(),
+                          false /* dynamic */)
   );
 }
 
@@ -2377,6 +2444,7 @@ struct ReflectionExtension final : Extension {
     HHVM_FE(hphp_get_property);
     HHVM_FE(hphp_get_static_property);
     HHVM_FE(hphp_invoke_method);
+    HHVM_FE(hphp_invoke_callable_named_args);
     HHVM_FE(hphp_set_property);
     HHVM_FE(hphp_set_static_property);
     HHVM_FALIAS(HH\\type_structure, type_structure);

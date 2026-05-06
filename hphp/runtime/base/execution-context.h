@@ -507,7 +507,8 @@ public:
                         bool checkRefAnnot = false,
                         bool allowDynCallNoPointer = false,
                         bool readonlyReturn = false,
-                        Array&& reifiedGenerics = Array());
+                        Array&& reifiedGenerics = Array(),
+                        const ArrayData* namedArgsToUnpack = nullptr);
 
   TypedValue invokeFunc(const CallCtx& ctx,
                         const Variant& args_,

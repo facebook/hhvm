@@ -28,7 +28,8 @@ bool HHVM_FUNCTION(function_exists, const String& function_name,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Array hhvm_get_frame_args(const ActRec* ar);
+Array hhvm_get_frame_pos_args(const ActRec* ar);
+ArrayData* hhvm_get_frame_named_args(const ActRec* ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

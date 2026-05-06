@@ -319,7 +319,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
     frameinfo = Array::attach(ArrayData::CreateDict());
     if (!isResume) {
       // Add arguments only if this is a function call.
-      frameinfo.set(s_args, hhvm_get_frame_args(ar));
+      frameinfo.set(s_args, hhvm_get_frame_pos_args(ar));
     }
   }
 
@@ -339,6 +339,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
     frameinfo
   );
 
+  // TODO(named_params) thread named arg names to profiling
   g_context->invokeFunc(func, params, nullptr /* namedArgNames */, ctx.this_,
                         ctx.cls, RuntimeCoeffects::defaults(), ctx.dynamic);
 }
@@ -403,18 +404,29 @@ static Variant call_intercept_handler(
     );
   }
 
-  args = hhvm_get_frame_args(ar);
+  args = hhvm_get_frame_pos_args(ar);
+  ArrayData* namedArgsData = hhvm_get_frame_named_args(ar);
 
-  VecInit par{3u};
+  auto const expectsNamedArgs = f->params().size() >= 4;
+
+  auto const namedArgsTV = namedArgsData
+    ? make_tv<KindOfDict>(namedArgsData)
+    : make_tv<KindOfNull>();
+
+  VecInit par{expectsNamedArgs ? 4u : 3u};
   par.append(called);
   par.append(called_on);
   par.append(args);
+  if (expectsNamedArgs) {
+    par.append(namedArgsTV);
+  }
 
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, par.toVariant(), nullptr /* namedArgNames */,
+    g_context->invokeFunc(f, par.toVariant(), nullptr,
                           callCtx.this_, callCtx.cls,
                           RuntimeCoeffects::defaults(), callCtx.dynamic)
   );
+  if (namedArgsData != nullptr) namedArgsData->release();
 
   auto& arr = ret.asCArrRef();
   if (arr[1].isArray()) args = arr[1].toArray();
@@ -447,7 +459,7 @@ static Variant call_intercept_handler_callback(
   }
 
   auto const args = [&]{
-    auto const curArgs = hhvm_get_frame_args(ar);
+    auto const curArgs = hhvm_get_frame_pos_args(ar);
     VecInit args(prepend_this + curArgs.size());
     if (prepend_this) {
       auto const thiz = [&] {
@@ -467,13 +479,36 @@ static Variant call_intercept_handler_callback(
     assertx(tvIsVec(generics));
     return Array(val(generics).parr);
   }();
-  // TODO(named_params) support calls with named args in fb_intercept2
-  const ArrayData* namedArgNames = nullptr;
+  ArrayData* namedArgNames = nullptr;
+  ArrayData* namedArgsToUnpack = nullptr;
+  SCOPE_EXIT {
+    if (namedArgNames != nullptr) namedArgNames->release();
+    if (namedArgsToUnpack != nullptr) namedArgsToUnpack->release();
+  };
+  {
+    auto namedArgs = hhvm_get_frame_named_args(ar);
+    SCOPE_EXIT {
+      if (namedArgs != nullptr) namedArgs->release();
+    };
+    if (namedArgs != nullptr) {
+      VecInit nameInit{namedArgs->size()};
+      VecInit valInit{namedArgs->size()};
+      IterateKV(
+        namedArgs,
+        [&](TypedValue name, TypedValue val) {
+          nameInit.append(name);
+          valInit.append(val);
+        });
+      namedArgNames = nameInit.create();
+      namedArgsToUnpack = valInit.create();
+    }
+    assertx(namedArgNames == nullptr || namedArgNames->size() > 0);
+  }
   return Variant::attach(
     g_context->invokeFunc(f, args, namedArgNames, callCtx.this_,
                           callCtx.cls, RuntimeCoeffects::defaults(),
                           callCtx.dynamic, false, false, readonly_return,
-                          std::move(reifiedGenerics))
+                          std::move(reifiedGenerics), namedArgsToUnpack)
   );
 }
 

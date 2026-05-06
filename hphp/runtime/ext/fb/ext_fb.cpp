@@ -1283,6 +1283,10 @@ bool HHVM_FUNCTION(fb_intercept2, const String& name, const Variant& handler) {
   return register_intercept(name, handler);
 }
 
+bool HHVM_FUNCTION(fb_intercept2_named_args, const String& name, const Variant& handler) {
+  return register_intercept(name, handler);
+}
+
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                                        const String& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
@@ -1635,6 +1639,7 @@ struct FBExtension : Extension {
     HHVM_FE(fb_utf8_substr);
     HHVM_FE(fb_utf8_decompose);
     HHVM_FE(fb_intercept2);
+    HHVM_FE(fb_intercept2_named_args);
     HHVM_FE(fb_rename_function);
     HHVM_FE(fb_get_code_coverage);
     HHVM_FE(fb_enable_code_coverage);

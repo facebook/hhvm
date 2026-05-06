@@ -1668,7 +1668,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         bool allowDynCallNoPointer
                                                               /* = false */,
                                         bool readonlyReturn /* = false */,
-                                        Array&& generics /* = Array() */) {
+                                        Array&& generics /* = Array() */,
+                                        const ArrayData* namedArgsToUnpack /* = null */) {
   VMRegAnchor _;
 
   // Check both the native stack and VM stack for overflow, numParams
@@ -1682,11 +1683,16 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   // Push arguments.
   auto const& args = *args_.asTypedValue();
   assertx(isContainerOrNull(args));
-  auto numArgs = tvIsNull(args) ? 0 : getContainerSize(args);
-  if (numArgs > 0) {
+  if (namedArgsToUnpack != nullptr) {
+    for (auto i = 0; i < namedArgsToUnpack->size(); ++i) {
+      tvDup(namedArgsToUnpack->at(i), *vmStack().allocC());
+    }
+  }
+  auto numPositionals = tvIsNull(args) ? 0 : getContainerSize(args);
+  if (numPositionals > 0) {
     assertx(isContainer(args));
     tvDup(args, *vmStack().allocC());
-    numArgs = prepareUnpackArgs(f, 0, checkRefAnnot);
+    numPositionals = prepareUnpackArgs(f, 0, checkRefAnnot);
   }
 
   // Push generics.
@@ -1698,9 +1704,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   if (f->attrs() & AttrReadonlyReturn && !readonlyReturn) {
     throwReadonlyMismatch(f, kReadonlyReturnId);
   }
-  auto numNamedArgs = namedArgNames ? namedArgNames->size() : 0;
-
-  return invokeFuncImpl(f, thiz, cls, numArgs - numNamedArgs,
+  return invokeFuncImpl(f, thiz, cls, numPositionals,
                         namedArgNames, providedCoeffects, hasGenerics,
                         dynamic, allowDynCallNoPointer);
 }

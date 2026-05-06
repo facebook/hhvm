@@ -102,7 +102,7 @@ Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
 const StaticString s_call_user_func("call_user_func");
 const StaticString s_call_user_func_array("call_user_func_array");
 
-Array hhvm_get_frame_args(const ActRec* ar) {
+Array hhvm_get_frame_pos_args(const ActRec* ar) {
   while (ar && (ar->func()->name() == s_call_user_func.get() ||
                 ar->func()->name() == s_call_user_func_array.get())) {
     ar = g_context->getPrevVMState(ar);
@@ -112,7 +112,7 @@ Array hhvm_get_frame_args(const ActRec* ar) {
   if (!ar) return ret;
 
   int numNonVariadic = ar->func()->numNonVariadicParams();
-  for (int i = 0; i < numNonVariadic; ++i) {
+  for (int i = ar->func()->numNamedParams(); i < numNonVariadic; ++i) {
     auto const val = frame_local(ar, i);
     // If there's a default argument that is not passed, variadic arguments
     // must be empty
@@ -128,6 +128,34 @@ Array hhvm_get_frame_args(const ActRec* ar) {
     IterateV(val(arr).parr, [&](TypedValue v) { ret.append(v); });
   }
   return ret;
+}
+
+ArrayData* hhvm_get_frame_named_args(const ActRec* ar) {
+  while (ar && (ar->func()->name() == s_call_user_func.get() ||
+                ar->func()->name() == s_call_user_func_array.get())) {
+    ar = g_context->getPrevVMState(ar);
+  }
+  if (!ar) return nullptr;
+
+  auto const numNamedParams = ar->func()->numNamedParams();
+  if (numNamedParams == 0) return nullptr;
+  auto const namedParamNames = ar->func()->sortedNamedParamNames();
+  DictInit namedArgsInit{numNamedParams};
+
+  for (int i = 0; i < numNamedParams; ++i) {
+    auto const val = frame_local(ar, i);
+    // If there's a default argument that's uninit, caller must not have
+    // passed it.
+    if (type(val) == KindOfUninit) continue;
+    auto name = make_tv<KindOfPersistentString>(namedParamNames[i].get());
+    namedArgsInit.setValidKey(name, *val);
+  }
+  ArrayData* namedArgs = namedArgsInit.create();
+  if (namedArgs->size() == 0) {
+    namedArgs->release();
+    return nullptr;
+  }
+  return namedArgs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

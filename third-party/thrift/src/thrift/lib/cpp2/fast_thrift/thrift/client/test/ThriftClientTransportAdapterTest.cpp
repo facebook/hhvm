@@ -66,16 +66,12 @@ static_assert(
 
 namespace {
 
-TypeErasedBox makeThriftRequestBox(
-    apache::thrift::RpcKind rpcKind =
-        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE) {
+TypeErasedBox makeThriftRequestBox() {
   ThriftRequestMessage msg{
       .payload =
-          ThriftRequestPayload{
-              .metadata = folly::IOBuf::copyBuffer("meta"),
+          ThriftRequestResponsePayload{
               .data = folly::IOBuf::copyBuffer("data"),
-              .rpcKind = rpcKind,
-              .complete = true,
+              .metadata = folly::IOBuf::copyBuffer("meta"),
           },
       .requestHandle = 42,
   };
@@ -170,8 +166,7 @@ TEST(ThriftClientTransportAdapterTest, OnWriteConvertsRpcKindToFrameType) {
     return Result::Success;
   });
 
-  auto result = fixture.adapter->onWrite(makeThriftRequestBox(
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE));
+  auto result = fixture.adapter->onWrite(makeThriftRequestBox());
   EXPECT_EQ(result, Result::Success);
 
   auto& rocketMsg = capturedMsg.get<rocket::RocketRequestMessage>();

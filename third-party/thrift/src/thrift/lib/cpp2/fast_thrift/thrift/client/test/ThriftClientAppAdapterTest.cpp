@@ -340,17 +340,16 @@ TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
   std::unique_ptr<folly::IOBuf> capturedMetadata;
   std::unique_ptr<folly::IOBuf> capturedData;
   apache::thrift::RpcKind capturedRpcKind{};
-  bool capturedComplete = false;
 
   auto built = buildPipeline(
       &client.adapter(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& box) {
         auto& msg = box.get<ThriftRequestMessage>();
-        capturedMetadata = std::move(msg.payload.metadata);
-        capturedData = std::move(msg.payload.data);
-        capturedRpcKind = msg.payload.rpcKind;
-        capturedComplete = msg.payload.complete;
+        auto& reqResp = msg.payload.get<ThriftRequestResponsePayload>();
+        capturedMetadata = std::move(reqResp.metadata);
+        capturedData = std::move(reqResp.data);
+        capturedRpcKind = msg.payload.rpcKind();
         return Result::Success;
       });
 
@@ -370,7 +369,6 @@ TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
   ASSERT_NE(capturedData, nullptr);
   EXPECT_EQ(
       capturedRpcKind, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
-  EXPECT_TRUE(capturedComplete);
   EXPECT_EQ(
       capturedData->moveToFbString().toStdString(),
       std::string{"payload-data"});

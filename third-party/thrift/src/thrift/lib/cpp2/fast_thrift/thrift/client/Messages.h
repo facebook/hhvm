@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
-#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
 
-#include <memory>
+#include <cstdint>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -38,42 +38,17 @@ namespace apache::thrift::fast_thrift::thrift {
 //   Channel  <────ThriftResponseMessage─────  Pipeline
 
 /**
- * ThriftRequestPayload - Request payload data.
- *
- * Contains all the data fields for a request. This is separate from
- * ThriftRequestMessage so handlers can work with just the payload.
- *
- * The metadata field contains pre-serialized metadata (IOBuf) produced
- * by serializeRequestMetadata() in the channel.
- *
- * Fields ordered by alignment (largest to smallest) to minimize padding.
- */
-#pragma pack(push, 1)
-struct ThriftRequestPayload {
-  // 8-byte aligned fields
-  std::unique_ptr<folly::IOBuf> metadata;
-  std::unique_ptr<folly::IOBuf> data;
-
-  // 4-byte aligned fields
-  uint32_t initialRequestN{0};
-
-  apache::thrift::RpcKind rpcKind{};
-
-  // 1-byte aligned fields
-  bool complete{false};
-};
-#pragma pack(pop)
-
-/**
  * ThriftRequestMessage - Outbound request from channel to pipeline.
  *
- * Wraps ThriftRequestPayload with a request handle for correlation.
- *
- * Fields ordered by alignment (largest to smallest) to minimize padding.
+ * `payload` is a typed variant of per-RPC-kind payload structs from
+ * `thrift/common/ThriftPayload.h`. Today only `ThriftRequestResponsePayload`
+ * is in the variant — the only RpcKind wired end-to-end through the
+ * client pipeline. As FNF / Stream / Sink / Bidi handlers come online,
+ * their payload alternatives join the variant.
  */
 #pragma pack(push, 1)
 struct ThriftRequestMessage {
-  ThriftRequestPayload payload;
+  ThriftPayloadVariant<ThriftRequestResponsePayload> payload;
   uint32_t requestHandle{apache::thrift::fast_thrift::rocket::kNoRequestHandle};
 };
 #pragma pack(pop)

@@ -151,14 +151,11 @@ class ThriftPayloadVariant {
 
   template <typename T>
   static constexpr uint8_t indexOf() noexcept {
-    constexpr size_t N = sizeof...(Ts);
     uint8_t i = 0;
-    bool found = false;
     auto check = [&]<size_t... Is>(std::index_sequence<Is...>) {
-      (void)((std::same_as<T, AltAt<Is>> && (i = Is, found = true)) || ...);
+      (void)((std::same_as<T, AltAt<Is>> && (i = Is, true)) || ...);
     };
     check(std::index_sequence_for<Ts...>{});
-    (void)found;
     return i;
   }
 

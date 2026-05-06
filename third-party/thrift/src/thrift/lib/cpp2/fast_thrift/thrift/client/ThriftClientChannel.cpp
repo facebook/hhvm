@@ -102,16 +102,14 @@ void ThriftClientChannel::sendRequestInternal(
     return;
   }
 
-  // Create ThriftRequestMessage for the pipeline
+  // Create ThriftRequestMessage for the pipeline. Today only the
+  // request-response pattern is wired; other RpcKinds will pick the
+  // matching ThriftRequest*Payload alternative as they get implemented.
   ThriftRequestMessage msg{
       .payload =
-          ThriftRequestPayload{
-              .metadata = std::move(metadata),
+          ThriftRequestResponsePayload{
               .data = std::move(request.buffer),
-              .initialRequestN = 0,
-              .rpcKind =
-                  apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-              .complete = false,
+              .metadata = std::move(metadata),
           },
       .requestHandle = static_cast<uint32_t>(requestId),
   };

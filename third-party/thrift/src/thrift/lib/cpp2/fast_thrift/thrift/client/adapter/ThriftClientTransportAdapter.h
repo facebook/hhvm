@@ -24,7 +24,6 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RpcKindMapping.h>
 
 namespace apache::thrift::fast_thrift::thrift::client {
 
@@ -143,28 +142,24 @@ class ThriftClientTransportAdapter {
    *
    * Converts ThriftRequestMessage to RocketRequestMessage and writes it
    * into the rocket pipeline.
+   *
+   * Today only the request-response RPC pattern is wired through the
+   * client; `ThriftRequestMessage::payload` is a single-alternative
+   * variant of `ThriftRequestResponsePayload`. As other RpcKinds are
+   * added to the variant, this method gains dispatch over the held
+   * alternative — by then the rocket layer's variant is also expected to
+   * widen so that `payload.toRocketFrame()` can plug in directly.
    */
   channel_pipeline::Result onWrite(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<ThriftRequestMessage>();
-    switch (request.payload.rpcKind) {
-      case RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
-        return sendRequestResponse(std::move(request));
-      case RpcKind::SINGLE_REQUEST_NO_RESPONSE:
-        [[fallthrough]];
-      case RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE:
-        [[fallthrough]];
-      case RpcKind::SINK:
-        [[fallthrough]];
-      case RpcKind::BIDIRECTIONAL_STREAM:
-        XLOG(ERR) << "Unsupported RPC kind: "
-                  << static_cast<uint32_t>(request.payload.rpcKind);
-        return channel_pipeline::Result::Error;
-      default:
-        XLOG(ERR) << "Unknown RPC kind: "
-                  << static_cast<uint32_t>(request.payload.rpcKind);
-        return channel_pipeline::Result::Error;
-    }
+    rocket::RocketRequestMessage rocketMsg{
+        .frame = std::move(request.payload.get<ThriftRequestResponsePayload>())
+                     .toRocketFrame(),
+        .requestHandle = request.requestHandle,
+        .streamType = frame::FrameType::REQUEST_RESPONSE,
+    };
+    return connection_->appAdapter->write(std::move(rocketMsg));
   }
 
   void onReadReady() noexcept {}
@@ -175,20 +170,6 @@ class ThriftClientTransportAdapter {
   void onPipelineInactive() noexcept {}
 
  private:
-  channel_pipeline::Result sendRequestResponse(ThriftRequestMessage&& request) {
-    rocket::RocketRequestMessage rocketMsg{
-        .frame =
-            frame::ComposedRequestResponseFrame{
-                .data = std::move(request.payload.data),
-                .metadata = std::move(request.payload.metadata),
-                .header = {.streamId = rocket::kInvalidStreamId},
-            },
-        .requestHandle = request.requestHandle,
-        .streamType = frame::FrameType::REQUEST_RESPONSE,
-    };
-
-    return connection_->appAdapter->write(std::move(rocketMsg));
-  }
   channel_pipeline::PipelineImpl* pipeline_{nullptr};
   std::unique_ptr<rocket::client::RocketClientConnection> connection_;
 };

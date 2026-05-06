@@ -392,11 +392,10 @@ class BenchAppAdapterClient {
       std::unique_ptr<folly::IOBuf> metadata,
       std::unique_ptr<folly::IOBuf> data) {
     ThriftRequestMessage msg{
-        .payload = ThriftRequestPayload{
-            .metadata = std::move(metadata),
+        .payload = ThriftRequestResponsePayload{
             .data = std::move(data),
-            .rpcKind = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-            .complete = true}};
+            .metadata = std::move(metadata),
+        }};
 
     adapter_->write([](auto&&) noexcept {}, erase_and_box(std::move(msg)));
   }

@@ -129,11 +129,10 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
     }
 
     ThriftRequestMessage msg{
-        .payload = ThriftRequestPayload{
-            .metadata = std::move(metadata),
+        .payload = ThriftRequestResponsePayload{
             .data = std::move(data),
-            .rpcKind = rpcKind,
-            .complete = true}};
+            .metadata = std::move(metadata),
+        }};
 
     submit(
         ResponseHandler{

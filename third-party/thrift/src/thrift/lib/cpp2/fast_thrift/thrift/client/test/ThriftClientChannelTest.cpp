@@ -453,7 +453,7 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineCallsHandler) {
         handlerCalled = true;
         auto& request = msg.get<ThriftRequestMessage>();
         EXPECT_EQ(
-            request.payload.rpcKind,
+            request.payload.rpcKind(),
             apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
         return Result::Success;
       });
@@ -511,7 +511,7 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineBackpressureProceeds) {
         handlerCalled = true;
         auto& request = msg.get<ThriftRequestMessage>();
         EXPECT_EQ(
-            request.payload.rpcKind,
+            request.payload.rpcKind(),
             apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
         return Result::Backpressure;
       });
@@ -547,11 +547,12 @@ TEST_F(ThriftClientChannelTest, SendRequestPassesCorrectMessageContent) {
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
         auto& request = msg.get<ThriftRequestMessage>();
-        capturedRpcKind = request.payload.rpcKind;
+        capturedRpcKind = request.payload.rpcKind();
         // Deserialize the pre-serialized metadata to verify contents
         apache::thrift::RequestRpcMetadata rpcMetadata;
         apache::thrift::BinaryProtocolReader reader;
-        reader.setInput(request.payload.metadata.get());
+        reader.setInput(
+            request.payload.get<ThriftRequestResponsePayload>().metadata.get());
         rpcMetadata.read(&reader);
         capturedMethodName = std::string(rpcMetadata.name()->view());
         capturedHandle = request.requestHandle;

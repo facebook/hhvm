@@ -1149,11 +1149,10 @@ class IntegrationTestClient {
         folly::makePromiseContract<ThriftResponseMessage>();
 
     ThriftRequestMessage msg{
-        .payload = ThriftRequestPayload{
-            .metadata = std::move(metadata),
+        .payload = ThriftRequestResponsePayload{
             .data = std::move(data),
-            .rpcKind = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-            .complete = true}};
+            .metadata = std::move(metadata),
+        }};
 
     adapter_->write(
         [promise = std::move(promise)](

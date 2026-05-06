@@ -732,31 +732,12 @@ class RocketThriftServerInterfaceHandler {
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
     auto thriftMsg = msg.take<ThriftServerResponseMessage>();
-
     apache::thrift::fast_thrift::rocket::server::RocketResponseMessage
-        rocketMsg;
-    rocketMsg.streamType =
-        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
-    if (thriftMsg.errorCode != 0) {
-      rocketMsg.frame = apache::thrift::fast_thrift::frame::ComposedErrorFrame{
-          .data = std::move(thriftMsg.payload.data),
-          .metadata = std::move(thriftMsg.payload.metadata),
-          .header =
-              {.streamId = thriftMsg.streamId,
-               .errorCode = thriftMsg.errorCode},
-      };
-    } else {
-      rocketMsg.frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
-              .data = std::move(thriftMsg.payload.data),
-              .metadata = std::move(thriftMsg.payload.metadata),
-              .header =
-                  {.streamId = thriftMsg.streamId,
-                   .complete = thriftMsg.payload.complete,
-                   .next = true},
-          };
-    }
-
+        rocketMsg{
+            .frame = std::move(thriftMsg.payload).toRocketFrame(),
+            .streamType =
+                apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
+        };
     return ctx.fireWrite(erase_and_box(std::move(rocketMsg)));
   }
 

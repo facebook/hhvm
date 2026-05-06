@@ -120,14 +120,13 @@ class PipelineResponseChannelRequest
         buildPayloadMetadataFromContext(reqCtx_);
 
     apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage msg{
-        .payload =
-            {
-                .data = std::move(response).buffer(),
-                .metadata = detail::serializeResponseMetadata(responseMetadata),
-                .complete = true,
-            },
-        .streamId = streamId_,
-        .errorCode = 0};
+        .payload = apache::thrift::fast_thrift::thrift::ThriftResponsePayload{
+            .data = std::move(response).buffer(),
+            .metadata = detail::serializeResponseMetadata(responseMetadata),
+            .streamId = streamId_,
+            .complete = true,
+            .next = true,
+        }};
 
     if (!pipelineAlive_->load()) {
       XLOG(WARN) << "Pipeline destroyed, cannot send reply for stream "
@@ -171,13 +170,11 @@ class PipelineResponseChannelRequest
       auto error =
           serializeResponseRpcError(*errorCode, ex.what().toStdString());
       ThriftServerResponseMessage msg{
-          .payload =
-              ThriftServerResponsePayload{
-                  .data = std::move(error.data),
-                  .metadata = nullptr,
-                  .complete = true},
-          .streamId = streamId_,
-          .errorCode = static_cast<uint32_t>(error.errorCode)};
+          .payload = ThriftErrorPayload{
+              .data = std::move(error.data),
+              .metadata = nullptr,
+              .streamId = streamId_,
+              .errorCode = static_cast<uint32_t>(error.errorCode)}};
 
       auto result = pipeline_->fireWrite(
           apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
@@ -209,14 +206,13 @@ class PipelineResponseChannelRequest
     writeHeaders->erase(exHeader);
 
     ThriftServerResponseMessage msg{
-        .payload =
-            ThriftServerResponsePayload{
-                .data = nullptr,
-                .metadata = makeAppErrorResponseMetadata(
-                    std::move(exName), ex.what().toStdString(), blame),
-                .complete = true},
-        .streamId = streamId_,
-        .errorCode = 0};
+        .payload = ThriftResponsePayload{
+            .data = nullptr,
+            .metadata = makeAppErrorResponseMetadata(
+                std::move(exName), ex.what().toStdString(), blame),
+            .streamId = streamId_,
+            .complete = true,
+            .next = true}};
 
     auto result = pipeline_->fireWrite(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
@@ -392,13 +388,11 @@ void ThriftServerChannel::sendThriftError(
     const std::string& errorMessage) {
   auto error = serializeResponseRpcError(errorCode, std::string(errorMessage));
   ThriftServerResponseMessage msg{
-      .payload =
-          ThriftServerResponsePayload{
-              .data = std::move(error.data),
-              .metadata = nullptr,
-              .complete = true},
-      .streamId = streamId,
-      .errorCode = static_cast<uint32_t>(error.errorCode)};
+      .payload = ThriftErrorPayload{
+          .data = std::move(error.data),
+          .metadata = nullptr,
+          .streamId = streamId,
+          .errorCode = static_cast<uint32_t>(error.errorCode)}};
 
   auto result = pipeline_->fireWrite(
       apache::thrift::fast_thrift::channel_pipeline::erase_and_box(

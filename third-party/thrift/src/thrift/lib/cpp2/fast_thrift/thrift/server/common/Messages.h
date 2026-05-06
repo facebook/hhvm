@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
 
 #include <cstdint>
-#include <memory>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -33,6 +33,9 @@ namespace apache::thrift::fast_thrift::thrift {
 
 /**
  * ThriftServerRequestMessage - Inbound request from pipeline to handler.
+ *
+ * Carries the parsed wire frame as-is; the channel decodes RpcKind,
+ * method name, and metadata from it.
  */
 #pragma pack(push, 1)
 struct ThriftServerRequestMessage {
@@ -42,24 +45,22 @@ struct ThriftServerRequestMessage {
 #pragma pack(pop)
 
 /**
- * ThriftServerResponsePayload - Response payload data.
- */
-#pragma pack(push, 1)
-struct ThriftServerResponsePayload {
-  std::unique_ptr<folly::IOBuf> data;
-  std::unique_ptr<folly::IOBuf> metadata;
-  bool complete{true};
-};
-#pragma pack(pop)
-
-/**
- * ThriftServerResponseMessage - Outbound response from handler to pipeline.
+ * ThriftServerResponseMessage - Outbound message from handler to pipeline.
+ *
+ * `payload` is a typed variant of per-stream payload structs from
+ * `thrift/common/ThriftPayload.h`. Today the variant carries
+ * `ThriftResponsePayload` (success / chunk) and `ThriftErrorPayload`
+ * (failure) — the only response operations wired end-to-end through the
+ * server. As stream/sink/bidi handlers come online, `ThriftCancelPayload`
+ * and `ThriftRequestNPayload` join the variant.
+ *
+ * The variant carries `rpcKind` internally; the transport adapter uses
+ * it to set the rocket message's `streamType` for the matching pattern
+ * handler. Each per-stream payload also carries its `streamId`.
  */
 #pragma pack(push, 1)
 struct ThriftServerResponseMessage {
-  ThriftServerResponsePayload payload;
-  uint32_t streamId{0};
-  uint32_t errorCode{0};
+  ThriftPayloadVariant<ThriftResponsePayload, ThriftErrorPayload> payload;
 };
 #pragma pack(pop)
 

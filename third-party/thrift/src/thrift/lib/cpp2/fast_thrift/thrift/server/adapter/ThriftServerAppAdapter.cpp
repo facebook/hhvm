@@ -76,13 +76,12 @@ channel_pipeline::Result ThriftServerAppAdapter::writeResponse(
     bool complete) noexcept {
   return fireResponse(
       ThriftServerResponseMessage{
-          .payload =
-              ThriftServerResponsePayload{
-                  .data = std::move(data),
-                  .metadata = std::move(metadata),
-                  .complete = complete},
-          .streamId = streamId,
-          .errorCode = 0});
+          .payload = ThriftResponsePayload{
+              .data = std::move(data),
+              .metadata = std::move(metadata),
+              .streamId = streamId,
+              .complete = complete,
+              .next = true}});
 }
 
 channel_pipeline::Result ThriftServerAppAdapter::writeError(
@@ -91,13 +90,11 @@ channel_pipeline::Result ThriftServerAppAdapter::writeError(
     apache::thrift::fast_thrift::frame::ErrorCode errorCode) noexcept {
   return fireResponse(
       ThriftServerResponseMessage{
-          .payload =
-              ThriftServerResponsePayload{
-                  .data = std::move(errorData),
-                  .metadata = nullptr,
-                  .complete = true},
-          .streamId = streamId,
-          .errorCode = static_cast<uint32_t>(errorCode)});
+          .payload = ThriftErrorPayload{
+              .data = std::move(errorData),
+              .metadata = nullptr,
+              .streamId = streamId,
+              .errorCode = static_cast<uint32_t>(errorCode)}});
 }
 
 void ThriftServerAppAdapter::addMethodHandler(

@@ -93,15 +93,13 @@ TypeErasedBox makeRocketErrorRequestBox(
 
 TypeErasedBox makeThriftResponseBox(uint32_t streamId = 1) {
   ThriftServerResponseMessage msg{
-      .payload =
-          ThriftServerResponsePayload{
-              .data = folly::IOBuf::copyBuffer("response-data"),
-              .metadata = folly::IOBuf::copyBuffer("response-meta"),
-              .complete = true,
-          },
-      .streamId = streamId,
-      .errorCode = 0,
-  };
+      .payload = ThriftResponsePayload{
+          .data = folly::IOBuf::copyBuffer("response-data"),
+          .metadata = folly::IOBuf::copyBuffer("response-meta"),
+          .streamId = streamId,
+          .complete = true,
+          .next = true,
+      }};
   return erase_and_box(std::move(msg));
 }
 

@@ -52,6 +52,35 @@ HANDLER_TAG(test_handler);
 
 namespace {
 
+// Test helpers — extract data/metadata/streamId/errorCode from
+// ThriftServerResponseMessage's variant payload regardless of held alternative.
+inline const std::unique_ptr<folly::IOBuf>& payloadData(
+    const ThriftServerResponseMessage& msg) {
+  if (msg.payload.is<ThriftResponsePayload>()) {
+    return msg.payload.get<ThriftResponsePayload>().data;
+  }
+  return msg.payload.get<ThriftErrorPayload>().data;
+}
+inline const std::unique_ptr<folly::IOBuf>& payloadMetadata(
+    const ThriftServerResponseMessage& msg) {
+  if (msg.payload.is<ThriftResponsePayload>()) {
+    return msg.payload.get<ThriftResponsePayload>().metadata;
+  }
+  return msg.payload.get<ThriftErrorPayload>().metadata;
+}
+inline uint32_t payloadStreamId(const ThriftServerResponseMessage& msg) {
+  if (msg.payload.is<ThriftResponsePayload>()) {
+    return msg.payload.get<ThriftResponsePayload>().streamId;
+  }
+  return msg.payload.get<ThriftErrorPayload>().streamId;
+}
+inline uint32_t payloadErrorCode(const ThriftServerResponseMessage& msg) {
+  if (msg.payload.is<ThriftErrorPayload>()) {
+    return msg.payload.get<ThriftErrorPayload>().errorCode;
+  }
+  return 0;
+}
+
 // Test subclass that exposes addMethodHandler for testing.
 class TestServerAppAdapter : public ThriftServerAppAdapter {
  public:
@@ -293,9 +322,9 @@ TEST_F(ThriftServerAppAdapterTest, OnReadUnknownMethodSendsErrorResponse) {
           TypeErasedBox&& box) {
         writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
-        capturedErrorCode = resp.errorCode;
-        if (resp.payload.data) {
-          auto rpcError = deserializeResponseRpcError(*resp.payload.data);
+        capturedErrorCode = payloadErrorCode(resp);
+        if (auto& d = payloadData(resp); d) {
+          auto rpcError = deserializeResponseRpcError(*d);
           capturedRpcErrorCode = *rpcError.code();
         }
         return Result::Success;
@@ -424,7 +453,7 @@ TEST_F(ThriftServerAppAdapterTest, WriteResponseFiresWrite) {
           TypeErasedBox&& box) {
         writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
-        capturedStreamId = resp.streamId;
+        capturedStreamId = payloadStreamId(resp);
         return Result::Success;
       });
 
@@ -499,9 +528,9 @@ TEST_F(ThriftServerAppAdapterTest, OnReadUnsupportedFrameSendsErrorResponse) {
           TypeErasedBox&& box) {
         writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
-        capturedErrorCode = resp.errorCode;
-        if (resp.payload.data) {
-          auto rpcError = deserializeResponseRpcError(*resp.payload.data);
+        capturedErrorCode = payloadErrorCode(resp);
+        if (auto& d = payloadData(resp); d) {
+          auto rpcError = deserializeResponseRpcError(*d);
           capturedRpcErrorCode = *rpcError.code();
         }
         return Result::Success;
@@ -548,9 +577,9 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithClientBlame) {
           TypeErasedBox&& box) {
         captured.writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
-        captured.errorCode = resp.errorCode;
-        if (resp.payload.metadata) {
-          auto meta = deserializeResponseMetadata(*resp.payload.metadata);
+        captured.errorCode = payloadErrorCode(resp);
+        if (auto& m = payloadMetadata(resp); m) {
+          auto meta = deserializeResponseMetadata(*m);
           if (auto pmRef = meta.payloadMetadata(); pmRef &&
               pmRef->getType() ==
                   apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
@@ -607,9 +636,9 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
           TypeErasedBox&& box) {
         captured.writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
-        captured.errorCode = resp.errorCode;
-        if (resp.payload.metadata) {
-          auto meta = deserializeResponseMetadata(*resp.payload.metadata);
+        captured.errorCode = payloadErrorCode(resp);
+        if (auto& m = payloadMetadata(resp); m) {
+          auto meta = deserializeResponseMetadata(*m);
           if (auto pmRef = meta.payloadMetadata(); pmRef &&
               pmRef->getType() ==
                   apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
@@ -675,9 +704,9 @@ TEST_F(
           TypeErasedBox&& box) {
         writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
-        capturedErrorCode = resp.errorCode;
-        if (resp.payload.data) {
-          auto rpcError = deserializeResponseRpcError(*resp.payload.data);
+        capturedErrorCode = payloadErrorCode(resp);
+        if (auto& d = payloadData(resp); d) {
+          auto rpcError = deserializeResponseRpcError(*d);
           capturedRpcErrorCode = *rpcError.code();
         }
         return Result::Success;
@@ -743,9 +772,9 @@ TEST_F(
           TypeErasedBox&& box) {
         writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
-        capturedErrorCode = resp.errorCode;
-        if (resp.payload.data) {
-          auto rpcError = deserializeResponseRpcError(*resp.payload.data);
+        capturedErrorCode = payloadErrorCode(resp);
+        if (auto& d = payloadData(resp); d) {
+          auto rpcError = deserializeResponseRpcError(*d);
           capturedRpcErrorCode = *rpcError.code();
         }
         return Result::Success;
@@ -783,12 +812,12 @@ TEST_F(
           TypeErasedBox&& box) {
         writeCalled = true;
         auto& resp = box.get<ThriftServerResponseMessage>();
-        capturedErrorCode = resp.errorCode;
-        if (resp.payload.data) {
-          capturedData = resp.payload.data->moveToFbString().toStdString();
+        capturedErrorCode = payloadErrorCode(resp);
+        if (auto& d = payloadData(resp); d) {
+          capturedData = d->moveToFbString().toStdString();
         }
-        if (resp.payload.metadata) {
-          auto meta = deserializeResponseMetadata(*resp.payload.metadata);
+        if (auto& m = payloadMetadata(resp); m) {
+          auto meta = deserializeResponseMetadata(*m);
           if (auto pmRef = meta.payloadMetadata(); pmRef &&
               pmRef->getType() ==
                   apache::thrift::PayloadMetadata::Type::exceptionMetadata) {
@@ -870,13 +899,14 @@ TEST_F(
       Result::Success);
 
   ASSERT_TRUE(writeCalled);
-  EXPECT_EQ(captured.streamId, 7u);
-  EXPECT_EQ(captured.errorCode, 0u) << "PAYLOAD frame, not ERROR";
-  EXPECT_EQ(captured.payload.data, nullptr);
-  EXPECT_TRUE(captured.payload.complete);
+  EXPECT_EQ(payloadStreamId(captured), 7u);
+  EXPECT_EQ(payloadErrorCode(captured), 0u) << "PAYLOAD frame, not ERROR";
+  EXPECT_EQ(payloadData(captured), nullptr);
+  EXPECT_TRUE(captured.payload.get<ThriftResponsePayload>().complete);
 
-  ASSERT_NE(captured.payload.metadata, nullptr);
-  auto md = deserializeResponseMetadata(*captured.payload.metadata);
+  auto& md_buf = payloadMetadata(captured);
+  ASSERT_NE(md_buf, nullptr);
+  auto md = deserializeResponseMetadata(*md_buf);
   ASSERT_TRUE(md.payloadMetadata().has_value());
   auto& base = md.payloadMetadata()->get_exceptionMetadata();
   ASSERT_TRUE(base.metadata().has_value());
@@ -918,15 +948,16 @@ TEST_F(ThriftServerAppAdapterTest, WriteFrameworkErrorEmitsErrorFrame) {
       Result::Success);
 
   ASSERT_TRUE(writeCalled);
-  EXPECT_EQ(captured.streamId, 9u);
+  EXPECT_EQ(payloadStreamId(captured), 9u);
   EXPECT_EQ(
-      captured.errorCode,
+      payloadErrorCode(captured),
       static_cast<uint32_t>(
           apache::thrift::fast_thrift::frame::ErrorCode::INVALID))
       << "ERROR frame; INVALID_REQUEST category maps to INVALID";
 
-  ASSERT_NE(captured.payload.data, nullptr);
-  auto rpcError = deserializeResponseRpcError(*captured.payload.data);
+  auto& d = payloadData(captured);
+  ASSERT_NE(d, nullptr);
+  auto rpcError = deserializeResponseRpcError(*d);
   ASSERT_TRUE(rpcError.code().has_value());
   EXPECT_EQ(
       *rpcError.code(),

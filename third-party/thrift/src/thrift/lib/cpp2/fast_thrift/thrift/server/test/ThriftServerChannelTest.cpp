@@ -52,6 +52,35 @@ HANDLER_TAG(test_handler);
 
 namespace {
 
+// Test helpers — extract data/metadata/streamId/errorCode from
+// ThriftServerResponseMessage's variant payload regardless of held alternative.
+const std::unique_ptr<folly::IOBuf>& payloadData(
+    const ThriftServerResponseMessage& msg) {
+  if (msg.payload.is<ThriftResponsePayload>()) {
+    return msg.payload.get<ThriftResponsePayload>().data;
+  }
+  return msg.payload.get<ThriftErrorPayload>().data;
+}
+const std::unique_ptr<folly::IOBuf>& payloadMetadata(
+    const ThriftServerResponseMessage& msg) {
+  if (msg.payload.is<ThriftResponsePayload>()) {
+    return msg.payload.get<ThriftResponsePayload>().metadata;
+  }
+  return msg.payload.get<ThriftErrorPayload>().metadata;
+}
+uint32_t payloadStreamId(const ThriftServerResponseMessage& msg) {
+  if (msg.payload.is<ThriftResponsePayload>()) {
+    return msg.payload.get<ThriftResponsePayload>().streamId;
+  }
+  return msg.payload.get<ThriftErrorPayload>().streamId;
+}
+uint32_t payloadErrorCode(const ThriftServerResponseMessage& msg) {
+  if (msg.payload.is<ThriftErrorPayload>()) {
+    return msg.payload.get<ThriftErrorPayload>().errorCode;
+  }
+  return 0;
+}
+
 /**
  * Deserialize ResponseRpcMetadata from a pre-serialized IOBuf.
  * Used by tests to inspect response metadata that ThriftServerChannel
@@ -374,10 +403,9 @@ TEST_F(ThriftServerChannelTest, SendReplyPreservesResponsePayload) {
           TypeErasedBox&& msg) {
         auto& response = msg.get<
             apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage>();
-        if (response.payload.data) {
-          folly::io::Cursor cursor(response.payload.data.get());
-          capturedPayload = cursor.readFixedString(
-              response.payload.data->computeChainDataLength());
+        if (auto& d = payloadData(response); d) {
+          folly::io::Cursor cursor(d.get());
+          capturedPayload = cursor.readFixedString(d->computeChainDataLength());
         }
         return Result::Success;
       });
@@ -406,8 +434,8 @@ TEST_F(ThriftServerChannelTest, SendReplySetsResponseMetadata) {
           TypeErasedBox&& msg) {
         auto& response = msg.get<
             apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage>();
-        if (response.payload.metadata) {
-          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+        if (auto& m = payloadMetadata(response); m) {
+          auto meta = deserializeResponseMetadata(*m);
           auto ref = meta.payloadMetadata();
           if (ref) {
             capturedType = ref->getType();
@@ -452,8 +480,8 @@ TEST_F(ThriftServerChannelTest, SendErrorWrappedSetsExceptionMetadata) {
           TypeErasedBox&& msg) {
         auto& response = msg.get<
             apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage>();
-        if (response.payload.metadata) {
-          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+        if (auto& m = payloadMetadata(response); m) {
+          auto meta = deserializeResponseMetadata(*m);
           auto ref = meta.payloadMetadata();
           if (ref) {
             capturedPayloadType = ref->getType();
@@ -513,8 +541,8 @@ TEST_F(ThriftServerChannelTest, SendReplyPreservesDeclaredExceptionMetadata) {
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
         auto& response = msg.get<ThriftServerResponseMessage>();
-        if (response.payload.metadata) {
-          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+        if (auto& m = payloadMetadata(response); m) {
+          auto meta = deserializeResponseMetadata(*m);
           auto ref = meta.payloadMetadata();
           if (ref) {
             capturedPayloadType = ref->getType();
@@ -573,8 +601,8 @@ TEST_F(ThriftServerChannelTest, SendErrorWrappedSetsClientBlame) {
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
         auto& response = msg.get<ThriftServerResponseMessage>();
-        if (response.payload.metadata) {
-          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+        if (auto& m = payloadMetadata(response); m) {
+          auto meta = deserializeResponseMetadata(*m);
           auto ref = meta.payloadMetadata();
           if (ref &&
               ref->getType() ==
@@ -627,8 +655,8 @@ TEST_F(ThriftServerChannelTest, SendErrorWrappedSetsServerBlame) {
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
         auto& response = msg.get<ThriftServerResponseMessage>();
-        if (response.payload.metadata) {
-          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+        if (auto& m = payloadMetadata(response); m) {
+          auto meta = deserializeResponseMetadata(*m);
           auto ref = meta.payloadMetadata();
           if (ref &&
               ref->getType() ==
@@ -699,8 +727,8 @@ TEST_F(ThriftServerChannelTest, SendErrorWrappedReadsUexHeaderAsExceptionName) {
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
         auto& response = msg.get<ThriftServerResponseMessage>();
-        if (response.payload.metadata) {
-          auto meta = deserializeResponseMetadata(*response.payload.metadata);
+        if (auto& m = payloadMetadata(response); m) {
+          auto meta = deserializeResponseMetadata(*m);
           auto ref = meta.payloadMetadata();
           if (ref &&
               ref->getType() ==
@@ -804,7 +832,7 @@ TEST_F(ThriftServerChannelTest, MultipleRequestsDispatchedCorrectly) {
           TypeErasedBox&& msg) {
         auto& response = msg.get<
             apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage>();
-        capturedStreamIds.push_back(response.streamId);
+        capturedStreamIds.push_back(payloadStreamId(response));
         return Result::Success;
       });
   channel_->setPipeline(std::move(pipeline_));
@@ -887,12 +915,12 @@ TEST_F(
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
         auto& response = msg.get<ThriftServerResponseMessage>();
-        capturedErrorCode = response.errorCode;
+        capturedErrorCode = payloadErrorCode(response);
         // Deserialize ResponseRpcError from data to check the code
-        if (response.payload.data) {
+        if (auto& d = payloadData(response); d) {
           apache::thrift::ResponseRpcError rpcError;
           apache::thrift::CompactProtocolReader reader;
-          reader.setInput(response.payload.data.get());
+          reader.setInput(d.get());
           rpcError.read(&reader);
           capturedRpcErrorCode = *rpcError.code();
         }

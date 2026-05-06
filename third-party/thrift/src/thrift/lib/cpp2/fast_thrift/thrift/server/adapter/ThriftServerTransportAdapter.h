@@ -145,37 +145,22 @@ class ThriftServerTransportAdapter {
    * Called when an outbound write reaches the head of the thrift pipeline.
    *
    * Converts ThriftServerResponseMessage to RocketResponseMessage and writes
-   * it into the rocket pipeline.
+   * it into the rocket pipeline. The variant's `toRocketFrame()` does the
+   * fold-expression dispatch; no runtime switch needed here.
+   *
+   * Today only REQUEST_RESPONSE is wired through the server; `streamType`
+   * is hardcoded. When STREAM / CHANNEL / FNF handlers come online, the
+   * App will set `rpcKind` on the variant and we'll map it to streamType
+   * here (e.g., via RpcKindMapping::toFrameType).
    */
   channel_pipeline::Result onWrite(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto response = msg.take<ThriftServerResponseMessage>();
-
-    rocket::server::RocketResponseMessage rocketMsg;
-    // Only REQUEST_RESPONSE is wired today; when STREAM / CHANNEL / FNF land,
-    // streamType must be plumbed through ThriftServerResponseMessage from the
-    // inbound ThriftServerRequestMessage.
-    rocketMsg.streamType =
-        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
-    if (response.errorCode != 0) {
-      rocketMsg.frame = apache::thrift::fast_thrift::frame::ComposedErrorFrame{
-          .data = std::move(response.payload.data),
-          .metadata = std::move(response.payload.metadata),
-          .header =
-              {.streamId = response.streamId, .errorCode = response.errorCode},
-      };
-    } else {
-      rocketMsg.frame =
-          apache::thrift::fast_thrift::frame::ComposedPayloadFrame{
-              .data = std::move(response.payload.data),
-              .metadata = std::move(response.payload.metadata),
-              .header =
-                  {.streamId = response.streamId,
-                   .complete = response.payload.complete,
-                   .next = true},
-          };
-    }
-
+    rocket::server::RocketResponseMessage rocketMsg{
+        .frame = std::move(response.payload).toRocketFrame(),
+        .streamType =
+            apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
+    };
     return appAdapter_.write(std::move(rocketMsg));
   }
 

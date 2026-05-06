@@ -2308,10 +2308,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         modifiers,
                     );
                 };
-
-                if self.attr_spec_contains_sealed(method_attrs) {
-                    self.check_can_use_feature(node, &FeatureName::SealedMethods);
-                }
             }
             _ => {}
         }

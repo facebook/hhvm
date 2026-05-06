@@ -97,9 +97,6 @@ struct PackageInfo {
   static PackageInfo fromFile(const std::filesystem::path&);
   static PackageInfo defaults();
 
-private:
-  static const re2::RE2& compilePattern(const std::string&);
-
 public:
   PackageMap m_packages;
   DeploymentMap m_deployments;

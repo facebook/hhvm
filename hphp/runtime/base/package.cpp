@@ -45,17 +45,6 @@ folly::SharedMutex s_patternCacheLock;
 
 }
 
-const re2::RE2& PackageInfo::compilePattern(const std::string& p) {
-  {
-    std::shared_lock _{s_patternCacheLock};
-    if (auto const re = folly::get_ptr(s_patternCache, p)) return **re;
-  }
-  std::unique_lock _{s_patternCacheLock};
-  if (auto const re = folly::get_ptr(s_patternCache, p)) return **re;
-  return
-    *s_patternCache.try_emplace(p, std::make_unique<re2::RE2>(p)).first->second;
-}
-
 PackageInfo::PackageInfo(PackageMap& packages,
                          DeploymentMap& deployments)
   : m_packages(packages)

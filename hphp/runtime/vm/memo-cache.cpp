@@ -346,6 +346,9 @@ template <typename S> struct Key {
   Key& operator=(Key&&) = delete;
 
   ~Key() {
+    if constexpr (S::HasStringTags) {
+      if (storage.stringTags.none()) return;
+    }
     // Dec-ref the strings
     for (size_t i = 0; i < storage.size(); ++i) {
       if (storage.isString(i)) storage.elem(i).s->decRefAndRelease();

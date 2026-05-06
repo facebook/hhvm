@@ -716,8 +716,9 @@ struct ExtTSPImpl {
 
           if (bestGain < curGain  ||
               (std::abs(curGain.score - bestGain.score) < EPS &&
-               compareChainPairs(chainPred, chainSucc, bestChainPred,
-                                 bestChainSucc))) {
+               (bestChainPred == nullptr ||
+                compareChainPairs(chainPred, chainSucc, bestChainPred,
+                                  bestChainSucc)))) {
             bestGain = curGain;
             bestChainPred = chainPred;
             bestChainSucc = chainSucc;

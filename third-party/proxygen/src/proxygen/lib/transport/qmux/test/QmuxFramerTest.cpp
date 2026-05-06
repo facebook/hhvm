@@ -376,7 +376,7 @@ TEST(QmuxFramerTest, TransportParamsRoundTrip) {
   params.initialMaxStreamDataUni = 32768;
   params.initialMaxStreamsBidi = 100;
   params.initialMaxStreamsUni = 100;
-  params.maxFrameSize = 32768;
+  params.maxRecordSize = 32768;
   params.maxDatagramFrameSize = 1200;
 
   auto written = writeTransportParams(queue, params);
@@ -402,7 +402,7 @@ TEST(QmuxFramerTest, TransportParamsRoundTrip) {
   EXPECT_EQ(result->initialMaxStreamDataUni, 32768);
   EXPECT_EQ(result->initialMaxStreamsBidi, 100);
   EXPECT_EQ(result->initialMaxStreamsUni, 100);
-  EXPECT_EQ(result->maxFrameSize, 32768);
+  EXPECT_EQ(result->maxRecordSize, 32768);
   ASSERT_TRUE(result->maxDatagramFrameSize.hasValue());
   EXPECT_EQ(*result->maxDatagramFrameSize, 1200);
 }
@@ -439,19 +439,19 @@ TEST(QmuxFramerTest, TransportParamsProhibitedParam) {
   EXPECT_EQ(result.error(), QmuxErrorCode::TRANSPORT_PARAMETER_ERROR);
 }
 
-TEST(QmuxFramerTest, MaxFrameSizeTooSmall) {
-  auto buildTPWithMaxFrameSize = [](uint64_t value) {
+TEST(QmuxFramerTest, MaxRecordSizeTooSmall) {
+  auto buildTPWithMaxRecordSize = [](uint64_t value) {
     FrameBuilder fb;
     auto valSize = quic::getQuicIntegerSize(value);
-    fb.writeVar(kTpMaxFrameSize);
+    fb.writeVar(kTpMaxRecordSize);
     fb.writeVar(*valSize);
     fb.writeVar(value);
     return fb.moveQueue();
   };
 
-  // Values below kDefaultMaxFrameSize (16384) should fail
-  for (uint64_t val : {uint64_t(0), uint64_t(100), uint64_t(16383)}) {
-    auto queue = buildTPWithMaxFrameSize(val);
+  // Values below kDefaultMaxRecordSize (16382) should fail
+  for (uint64_t val : {uint64_t(0), uint64_t(100), uint64_t(16381)}) {
+    auto queue = buildTPWithMaxRecordSize(val);
     auto cursor = cursorFromQueue(queue);
     size_t len = queue.chainLength();
     auto result = parseTransportParams(cursor, len);
@@ -459,14 +459,14 @@ TEST(QmuxFramerTest, MaxFrameSizeTooSmall) {
     EXPECT_EQ(result.error(), QmuxErrorCode::TRANSPORT_PARAMETER_ERROR);
   }
 
-  // Values >= kDefaultMaxFrameSize should succeed
-  for (uint64_t val : {uint64_t(16384), uint64_t(65535)}) {
-    auto queue = buildTPWithMaxFrameSize(val);
+  // Values >= kDefaultMaxRecordSize should succeed
+  for (uint64_t val : {uint64_t(16382), uint64_t(65535)}) {
+    auto queue = buildTPWithMaxRecordSize(val);
     auto cursor = cursorFromQueue(queue);
     size_t len = queue.chainLength();
     auto result = parseTransportParams(cursor, len);
     ASSERT_TRUE(result.hasValue()) << "Expected success for value " << val;
-    EXPECT_EQ(result->maxFrameSize, val);
+    EXPECT_EQ(result->maxRecordSize, val);
   }
 }
 

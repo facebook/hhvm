@@ -21,3 +21,14 @@ proxygen_add_library(proxygen_transport_qmux_qmux_framer
     Folly::folly_optional
     Folly::folly_utility
 )
+
+proxygen_add_library(proxygen_transport_qmux_qmux_codec
+  SRCS
+    QmuxCodec.cpp
+  DEPS
+    mvfst::mvfst_folly_utils
+  EXPORTED_DEPS
+    proxygen_http_webtransport_wt_util
+    proxygen_transport_qmux_qmux_framer
+    Folly::folly_io_iobuf
+)

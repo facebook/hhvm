@@ -246,17 +246,17 @@ folly::Expected<QxTransportParams, QmuxErrorCode> parseTransportParams(
         params.initialMaxStreamsUni = *val;
         break;
       }
-      case kTpMaxFrameSize: {
+      case kTpMaxRecordSize: {
         auto val = decodeVarintParam();
         if (!val) {
           return folly::makeUnexpected(
               QmuxErrorCode::TRANSPORT_PARAMETER_ERROR);
         }
-        if (*val < kDefaultMaxFrameSize) {
+        if (*val < kDefaultMaxRecordSize) {
           return folly::makeUnexpected(
               QmuxErrorCode::TRANSPORT_PARAMETER_ERROR);
         }
-        params.maxFrameSize = *val;
+        params.maxRecordSize = *val;
         break;
       }
       case kTpMaxDatagramFrameSize: {
@@ -291,6 +291,18 @@ folly::Expected<QxPing, QmuxErrorCode> parsePing(folly::io::Cursor& cursor,
 }
 
 //////// QMUX-Specific Write Implementations ////////
+
+WriteResult writeRecord(folly::IOBufQueue& queue,
+                        std::unique_ptr<folly::IOBuf> frames) {
+  CHECK(frames) << "frames must be non-null";
+  size_t size = 0;
+  bool error = false;
+  auto framesLen = frames->computeChainDataLength();
+  writeVarint(queue, framesLen, size, error);
+  queue.append(std::move(frames));
+  size += framesLen;
+  return error ? std::nullopt : std::make_optional(size);
+}
 
 WriteResult writeConnectionClose(folly::IOBufQueue& queue,
                                  const QxConnectionClose& frame) {
@@ -355,8 +367,8 @@ WriteResult writeTransportParams(folly::IOBufQueue& queue,
   if (params.initialMaxStreamsUni > 0) {
     writeParam(kTpInitialMaxStreamsUni, params.initialMaxStreamsUni);
   }
-  if (params.maxFrameSize != kDefaultMaxFrameSize) {
-    writeParam(kTpMaxFrameSize, params.maxFrameSize);
+  if (params.maxRecordSize != kDefaultMaxRecordSize) {
+    writeParam(kTpMaxRecordSize, params.maxRecordSize);
   }
   if (params.maxDatagramFrameSize.hasValue()) {
     writeParam(kTpMaxDatagramFrameSize, *params.maxDatagramFrameSize);

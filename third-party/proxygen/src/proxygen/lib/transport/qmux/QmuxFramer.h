@@ -29,7 +29,7 @@ constexpr uint8_t kStreamFlagFin = 0x01;
 constexpr uint8_t kStreamFlagLen = 0x02;
 constexpr uint8_t kStreamFlagOff = 0x04;
 
-constexpr uint64_t kDefaultMaxFrameSize = 16384;
+constexpr uint64_t kDefaultMaxRecordSize = 16382;
 
 // QUIC transport parameter IDs (RFC 9000 Section 18.2)
 constexpr uint64_t kTpMaxIdleTimeout = 0x01;
@@ -39,8 +39,7 @@ constexpr uint64_t kTpInitialMaxStreamDataBidiRemote = 0x06;
 constexpr uint64_t kTpInitialMaxStreamDataUni = 0x07;
 constexpr uint64_t kTpInitialMaxStreamsBidi = 0x08;
 constexpr uint64_t kTpInitialMaxStreamsUni = 0x09;
-// TODO: max_frame_size TP ID is TBD in draft
-constexpr uint64_t kTpMaxFrameSize = 0x15228c00; // placeholder
+constexpr uint64_t kTpMaxRecordSize = 0x0571c59429cd0845;
 // Datagram extension TP
 constexpr uint64_t kTpMaxDatagramFrameSize = 0x20;
 
@@ -61,7 +60,7 @@ struct QxTransportParams {
   uint64_t initialMaxStreamDataUni{0};
   uint64_t initialMaxStreamsBidi{0};
   uint64_t initialMaxStreamsUni{0};
-  uint64_t maxFrameSize{kDefaultMaxFrameSize};
+  uint64_t maxRecordSize{kDefaultMaxRecordSize};
   folly::Optional<uint64_t> maxDatagramFrameSize;
 };
 
@@ -97,7 +96,10 @@ folly::Expected<QxPing, QmuxErrorCode> parsePing(folly::io::Cursor& cursor,
 
 //////// QMUX-Specific Write Functions ////////
 
-using WriteResult = std::optional<size_t>;
+using proxygen::WriteResult;
+
+WriteResult writeRecord(folly::IOBufQueue& queue,
+                        std::unique_ptr<folly::IOBuf> frames);
 
 WriteResult writeConnectionClose(folly::IOBufQueue& queue,
                                  const QxConnectionClose& frame);

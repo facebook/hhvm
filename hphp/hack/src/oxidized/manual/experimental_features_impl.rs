@@ -53,7 +53,7 @@ impl FeatureName {
             PolymorphicLambda => OngoingRelease,
             ExpressionTreeCoalesceOperator => OngoingRelease,
             ExpressionTreeNullsafeObjGet => OngoingRelease,
-            NamedParameters => Unstable,
+            NamedParameters => Preview,
             XhpTypeConstants => OngoingRelease,
             CapturePipeVariables => Unstable,
             AllowExtendedAwaitSyntax => Unstable,

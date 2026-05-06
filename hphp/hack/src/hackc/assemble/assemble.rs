@@ -1878,17 +1878,13 @@ pub(crate) fn assemble_fcall_context(token_iter: &mut Lexer<'_>) -> Result<Strin
 }
 
 fn typed_value_opt(token_iter: &mut Lexer<'_>, adata: &AdataMap) -> Result<Option<TypedValue>> {
-    if let Some(token) = token_iter.peek1().map(Token::into_global).transpose()? {
-        if token[0] == b'$' {
-            let _ = token_iter.expect_token()?;
-            return Ok(None);
-        }
-        let decl_map = DeclMap::default();
-        let tv: TypedValue = token_iter.assemble_imm(&decl_map, adata)?;
-        return Ok(Some(tv));
+    if token_iter.peek_is(Token::is_variable) {
+        let _ = token_iter.expect_token()?;
+        return Ok(None);
     }
-    let _ = token_iter.expect_token()?;
-    Ok(None)
+    let decl_map = DeclMap::default();
+    let tv: TypedValue = token_iter.assemble_imm(&decl_map, adata)?;
+    Ok(Some(tv))
 }
 
 pub(crate) fn assemble_named_arg_names(

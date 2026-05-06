@@ -569,7 +569,6 @@ impl FunctionParser<'_> {
                 "enforce_in_out" => FCallArgsFlags::EnforceInOut,
                 "enforce_readonly" => FCallArgsFlags::EnforceReadonly,
                 "has_async_eager_offset" => FCallArgsFlags::HasAsyncEagerOffset,
-                "has_named_args" => FCallArgsFlags::HasNamedArgs,
                 "num_args_start" => FCallArgsFlags::NumArgsStart,
                 _ => return None,
             })
@@ -579,6 +578,22 @@ impl FunctionParser<'_> {
         while let Some(flag) = parse_opt_enum(tokenizer, convert_fcall_args_flags)? {
             flags |= flag;
         }
+
+        let named_arg_names = if tokenizer.next_is_identifier("named_args")? {
+            flags |= FCallArgsFlags::HasNamedArgs;
+            tokenizer.expect_identifier("(")?;
+            let mut names = Vec::new();
+            if !tokenizer.peek_is_identifier(")")? {
+                names.push(StringId::from_bytes(parse_string_id(tokenizer)?)?);
+                while tokenizer.next_is_identifier(",")? {
+                    names.push(StringId::from_bytes(parse_string_id(tokenizer)?)?);
+                }
+            }
+            tokenizer.expect_identifier(")")?;
+            names
+        } else {
+            vec![]
+        };
 
         let context = StringId::from_bytes(parse_string_id(tokenizer)?)?;
 
@@ -590,8 +605,7 @@ impl FunctionParser<'_> {
             num_rets,
             inouts,
             readonly,
-            // TODO(named_params) actually parse named args here
-            named_arg_names: vec![],
+            named_arg_names,
             loc,
         };
 

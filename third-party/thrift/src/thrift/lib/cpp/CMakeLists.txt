@@ -49,49 +49,53 @@ target_link_libraries(
     ${GLOG_LIBRARIES}
 )
 
-add_library(
-  transport
+# transport pulls in rocket/CompressionManager via THeader.cpp, which
+# lives in thriftcpp2. Build it only when the RPC stack is enabled.
+if (NOT THRIFT_SERIALIZATION_ONLY)
+  add_library(
+    transport
 
-  transport/TTransportException.cpp
-  transport/TFDTransport.cpp
-  transport/THttpTransport.cpp
-  transport/THttpClient.cpp
-  transport/THttpServer.cpp
-  transport/TSocket.cpp
-  transport/TBufferTransports.cpp
-  transport/THeader.cpp
-  transport/TZlibTransport.cpp
-  ../cpp2/transport/rocket/framing/Util.cpp
-  ../cpp2/Flags.cpp
-  util/PausableTimer.cpp
-  util/THttpParser.cpp
-  util/VarintUtils.cpp
-)
-add_dependencies(
-  transport
-  rpcmetadata
-)
-target_link_libraries(
-  transport
-  PUBLIC
-    concurrency
-    thrift-core
+    transport/TTransportException.cpp
+    transport/TFDTransport.cpp
+    transport/THttpTransport.cpp
+    transport/THttpClient.cpp
+    transport/THttpServer.cpp
+    transport/TSocket.cpp
+    transport/TBufferTransports.cpp
+    transport/THeader.cpp
+    transport/TZlibTransport.cpp
+    ../cpp2/transport/rocket/framing/Util.cpp
+    ../cpp2/Flags.cpp
+    util/PausableTimer.cpp
+    util/THttpParser.cpp
+    util/VarintUtils.cpp
+  )
+  add_dependencies(
+    transport
     rpcmetadata
-    # We need to link to libthriftcpp2.a after libtransport.a because
-    # libtransport.a uses
-    # apache::thrift::rocket::CompressionManager::uncompressBuffer()
-    # that is defined in libthriftcpp2.a.
-    #
-    # We don't need this for libtransport.so because libthriftcpp2.so
-    # and libtransport.so are cyclic dependencies and libthriftcpp2.so
-    # has libtransport.so dependency. We can't link to
-    # libthriftcpp2.so from libtransport.so. It's not allowed.
-    $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>,$<NOT:$<BOOL:${THRIFT_SERIALIZATION_ONLY}>>>:$<INSTALL_INTERFACE:FBThrift::thriftcpp2>>
-    Folly::folly
-    ZLIB::ZLIB
-    ${OPENSSL_LIBRARIES}
-    ${ZSTD_LIBRARIES}
-)
+  )
+  target_link_libraries(
+    transport
+    PUBLIC
+      concurrency
+      thrift-core
+      rpcmetadata
+      # We need to link to libthriftcpp2.a after libtransport.a because
+      # libtransport.a uses
+      # apache::thrift::rocket::CompressionManager::uncompressBuffer()
+      # that is defined in libthriftcpp2.a.
+      #
+      # We don't need this for libtransport.so because libthriftcpp2.so
+      # and libtransport.so are cyclic dependencies and libthriftcpp2.so
+      # has libtransport.so dependency. We can't link to
+      # libthriftcpp2.so from libtransport.so. It's not allowed.
+      $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>,$<NOT:$<BOOL:${THRIFT_SERIALIZATION_ONLY}>>>:$<INSTALL_INTERFACE:FBThrift::thriftcpp2>>
+      Folly::folly
+      ZLIB::ZLIB
+      ${OPENSSL_LIBRARIES}
+      ${ZSTD_LIBRARIES}
+  )
+endif ()
 
 add_library(
   runtime
@@ -105,54 +109,54 @@ target_link_libraries(
 )
 
 if (NOT THRIFT_SERIALIZATION_ONLY)
-add_library(
-  async
+  add_library(
+    async
 
-  ContextStack.cpp
-  EventHandlerBase.cpp
-  server/TServerObserver.cpp
-  ../cpp2/detail/EventHandlerRuntime.cpp
-  ../cpp2/async/ClientInterceptorBase.cpp
-  ../cpp2/async/InterceptorFlags.cpp
-  ../cpp2/async/InterceptorFrameworkMetadata.cpp
-)
-if (
-  CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
-  CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-)
-  target_compile_options(
+    ContextStack.cpp
+    EventHandlerBase.cpp
+    server/TServerObserver.cpp
+    ../cpp2/detail/EventHandlerRuntime.cpp
+    ../cpp2/async/ClientInterceptorBase.cpp
+    ../cpp2/async/InterceptorFlags.cpp
+    ../cpp2/async/InterceptorFrameworkMetadata.cpp
+  )
+  if (
+    CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
+    CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+  )
+    target_compile_options(
+      async
+      PUBLIC
+        $<$<COMPILE_LANGUAGE:CXX>:-fsized-deallocation>
+    )
+  endif()
+  target_link_libraries(
     async
     PUBLIC
-      $<$<COMPILE_LANGUAGE:CXX>:-fsized-deallocation>
+      concurrency
+      runtime
+      transport
+      Boost::boost
+      Folly::folly
+      wangle::wangle
+      ${GLOG_LIBRARIES}
+      ${OPENSSL_LIBRARIES}
   )
-endif()
-target_link_libraries(
-  async
-  PUBLIC
-    concurrency
-    runtime
-    transport
-    Boost::boost
-    Folly::folly
-    wangle::wangle
-    ${GLOG_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
-)
 
-add_library(
-  thrift
-  INTERFACE
-)
-target_link_libraries(
-  thrift
-  INTERFACE
-    async
-    concurrency
-    thriftprotocol
-    transport
-    Folly::folly
-    ${GLOG_LIBRARIES}
-)
+  add_library(
+    thrift
+    INTERFACE
+  )
+  target_link_libraries(
+    thrift
+    INTERFACE
+      async
+      concurrency
+      thriftprotocol
+      transport
+      Folly::folly
+      ${GLOG_LIBRARIES}
+  )
 endif () # NOT THRIFT_SERIALIZATION_ONLY
 
 set(THRIFT1_HEADER_DIRS
@@ -171,11 +175,11 @@ endforeach()
 
 if (BUILD_SHARED_LIBS)
   # all but thrift since it's an interface
-  set_target_properties(thrift-core concurrency transport
+  set_target_properties(thrift-core concurrency
     PROPERTIES VERSION ${PACKAGE_VERSION}
     )
   if (NOT THRIFT_SERIALIZATION_ONLY)
-    set_target_properties(async
+    set_target_properties(async transport
       PROPERTIES VERSION ${PACKAGE_VERSION}
       )
   endif ()
@@ -185,14 +189,15 @@ install(
   TARGETS
     thrift-core
     concurrency
-    transport
     runtime
   EXPORT fbthrift-exports
   DESTINATION ${LIB_INSTALL_DIR}
 )
+
 if (NOT THRIFT_SERIALIZATION_ONLY)
   install(
     TARGETS
+      transport
       async
       thrift
     EXPORT fbthrift-exports

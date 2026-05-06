@@ -64,11 +64,6 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
   using RequestResponseHandler =
       apache::thrift::fast_thrift::thrift::client::RequestResponseHandler;
 
-  using ResponseHandler =
-      folly::Function<void(folly::Expected<
-                           ThriftResponseMessage,
-                           folly::exception_wrapper>&&) noexcept>;
-
   using Ptr = std::unique_ptr<ThriftClientAppAdapter, Destructor>;
 
   ThriftClientAppAdapter() = default;
@@ -135,34 +130,9 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
         }};
 
     submit(
-        ResponseHandler{
-            [h = std::move(handler)](
-                folly::Expected<
-                    ThriftResponseMessage,
-                    folly::exception_wrapper>&& result) mutable noexcept {
-              if (result.hasError()) {
-                h(folly::makeUnexpected(std::move(result.error())));
-                return;
-              }
-              h(std::move(result.value().frame).extractData());
-            }},
+        std::move(handler),
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
             std::move(msg)));
-  }
-
-  /**
-   * Send a pre-built request message into the pipeline.
-   * If called on the pipeline's EventBase thread, fires immediately.
-   * Otherwise, schedules on the EventBase.
-   *
-   * If fireWrite returns Error, removes the handler from the pending map
-   * and invokes it with an exception_wrapper.
-   */
-  void write(
-      ResponseHandler handler,
-      apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
-          msg) noexcept {
-    submit(std::move(handler), std::move(msg));
   }
 
   // === TailEndpointHandler lifecycle ===
@@ -217,7 +187,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
 
     state_ = State::Closed;
 
-    pendingRequests_.forEach([&](uint64_t, ResponseHandler& handler) {
+    pendingRequests_.forEach([&](uint64_t, RequestResponseHandler& handler) {
       handler(folly::makeUnexpected(e));
     });
     pendingRequests_.clear();
@@ -234,7 +204,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
   enum class State { Open, Closing, Closed };
 
   void submit(
-      ResponseHandler handler,
+      RequestResponseHandler handler,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
     if (FOLLY_UNLIKELY(!pipeline_)) {
@@ -259,7 +229,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
   }
 
   void submitOnEventBase(
-      ResponseHandler handler,
+      RequestResponseHandler handler,
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox
           msg) noexcept {
     if (FOLLY_UNLIKELY(state_ != State::Open)) {
@@ -297,7 +267,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
       nullptr};
   uint16_t protocolId_{0};
   apache::thrift::fast_thrift::frame::read::DirectStreamMap<
-      ResponseHandler,
+      RequestResponseHandler,
       uint32_t,
       apache::thrift::fast_thrift::frame::read::SequentialIndex>
       pendingRequests_;

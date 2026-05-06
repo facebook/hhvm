@@ -94,16 +94,16 @@ ThriftResponseMessage makeCancelResponse() {
 // Frame type dispatch
 // =============================================================================
 
-TEST(FastThriftAdapterBaseTest, PayloadFramePassesThrough) {
+TEST(FastThriftAdapterBaseTest, PayloadFrameYieldsResultWithData) {
   auto response =
       makePayloadResponse(nullptr, folly::IOBuf::copyBuffer("hello"));
 
   auto result = TestAdapter::handleRequestResponse(std::move(response));
 
   ASSERT_TRUE(result.hasValue());
+  ASSERT_NE(result.value(), nullptr);
   EXPECT_EQ(
-      result.value().frame.type(),
-      apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
+      result.value()->moveToFbString().toStdString(), std::string{"hello"});
 }
 
 TEST(FastThriftAdapterBaseTest, ErrorFrameReturnsDecodedException) {
@@ -193,8 +193,10 @@ TEST(FastThriftAdapterBaseTest, PayloadWithDeclaredExceptionPassesThrough) {
 
   auto result = TestAdapter::handleRequestResponse(std::move(response));
 
-  // Declared exceptions pass through — generated code handles them
+  // Declared exceptions pass through — generated code reads the presult
+  // struct from the data IOBuf to surface the typed exception.
   ASSERT_TRUE(result.hasValue());
+  ASSERT_NE(result.value(), nullptr);
 }
 
 TEST(FastThriftAdapterBaseTest, PayloadWithNoMetadataPassesThrough) {

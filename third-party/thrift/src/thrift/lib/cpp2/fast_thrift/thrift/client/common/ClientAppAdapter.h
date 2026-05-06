@@ -60,27 +60,16 @@ concept ClientInboundAppAdapter = channel_pipeline::TailEndpointHandler<A>;
  * adapter is responsible for building the wire-level request message and
  * pushing it down the pipeline.
  *
- * write() is the legacy, lower-level entry point that takes a pre-built,
- * type-erased pipeline message; new callers should prefer
- * sendRequestResponse().
- *
  * Note: This is an interface contract, not an owned object.
  * It does NOT require DelayedDestructionBase.
  */
 template <typename O>
 concept ClientOutboundAppAdapter = requires(
     O o,
-    channel_pipeline::TypeErasedBox&& msg,
     const apache::thrift::RpcOptions& rpcOptions,
     std::string_view methodName,
     apache::thrift::RpcKind rpcKind,
     std::unique_ptr<folly::IOBuf> data) {
-  typename O::ResponseHandler;
-
-  {
-    o.write(std::declval<typename O::ResponseHandler>(), std::move(msg))
-  } noexcept -> std::same_as<void>;
-
   {
     o.sendRequestResponse(
         rpcOptions,

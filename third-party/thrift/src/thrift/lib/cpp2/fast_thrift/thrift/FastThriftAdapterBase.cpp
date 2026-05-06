@@ -25,7 +25,7 @@
 
 namespace apache::thrift::fast_thrift::thrift {
 
-folly::Expected<ThriftResponseMessage, folly::exception_wrapper>
+folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>
 FastThriftAdapterBase::handleRequestResponse(ThriftResponseMessage&& response) {
   if (FOLLY_LIKELY(
           response.frame.type() ==
@@ -41,7 +41,7 @@ FastThriftAdapterBase::handleRequestResponse(ThriftResponseMessage&& response) {
       return folly::makeUnexpected(std::move(error));
     }
 
-    return std::move(response);
+    return std::move(response.frame).extractData();
   } else if (
       response.frame.type() ==
       apache::thrift::fast_thrift::frame::FrameType::ERROR) {

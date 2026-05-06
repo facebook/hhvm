@@ -35,13 +35,15 @@ class FastThriftAdapterBase {
  protected:
   /**
    * Handles a request-response frame: converts ERROR and unknown frame
-   * types into folly::exception_wrapper. PAYLOAD frames pass through
-   * unchanged.
+   * types into folly::exception_wrapper. For PAYLOAD frames, deserializes
+   * the response metadata, classifies declared/undeclared exceptions, and
+   * returns the response data IOBuf for the generated client to deserialize.
    *
    * App adapters should call this before invoking the response handler.
    */
-  static folly::Expected<ThriftResponseMessage, folly::exception_wrapper>
-  handleRequestResponse(ThriftResponseMessage&& response);
+  static folly::
+      Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>
+      handleRequestResponse(ThriftResponseMessage&& response);
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

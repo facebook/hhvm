@@ -1142,29 +1142,27 @@ class IntegrationTestClient {
    * Send a benchmark-style request through the adapter.
    * Returns a promise/future pair so the test can wait for the response.
    */
-  folly::SemiFuture<ThriftResponseMessage> sendBenchRequest(
-      std::unique_ptr<folly::IOBuf> metadata,
+  folly::SemiFuture<std::unique_ptr<folly::IOBuf>> sendBenchRequest(
       std::unique_ptr<folly::IOBuf> data) {
     auto [promise, future] =
-        folly::makePromiseContract<ThriftResponseMessage>();
+        folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
 
-    ThriftRequestMessage msg{
-        .payload = ThriftRequestResponsePayload{
-            .data = std::move(data),
-            .metadata = std::move(metadata),
-        }};
-
-    adapter_->write(
+    apache::thrift::RpcOptions options;
+    adapter_->sendRequestResponse(
+        options,
+        std::string_view{"method"},
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+        std::move(data),
         [promise = std::move(promise)](
-            folly::Expected<ThriftResponseMessage, folly::exception_wrapper>&&
-                result) mutable noexcept {
+            folly::Expected<
+                std::unique_ptr<folly::IOBuf>,
+                folly::exception_wrapper>&& result) mutable noexcept {
           if (result.hasError()) {
             promise.setException(std::move(result.error()));
           } else {
             promise.setValue(std::move(result.value()));
           }
-        },
-        erase_and_box(std::move(msg)));
+        });
 
     return std::move(future);
   }
@@ -1337,8 +1335,8 @@ TEST_F(
   auto metadata = createBasicResponseMetadata();
   auto serializedMetadata = serializeResponseMetadata(metadata);
 
-  auto future = client_.sendBenchRequest(
-      std::move(serializedMetadata), folly::IOBuf::copyBuffer("test payload"));
+  auto future =
+      client_.sendBenchRequest(folly::IOBuf::copyBuffer("test payload"));
 
   evb_.loopOnce();
 
@@ -1358,10 +1356,8 @@ TEST_F(
   setupPipeline();
 
   auto metadata = createBasicResponseMetadata();
-  auto serializedMetadata = serializeResponseMetadata(metadata);
 
-  auto future = client_.sendBenchRequest(
-      serializedMetadata->clone(), folly::IOBuf::copyBuffer("test"));
+  auto future = client_.sendBenchRequest(folly::IOBuf::copyBuffer("test"));
 
   evb_.loopOnce();
 
@@ -1382,9 +1378,7 @@ TEST_F(
 
   ASSERT_TRUE(future.isReady());
   auto response = std::move(future).value();
-  EXPECT_EQ(
-      response.streamType,
-      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
+  ASSERT_NE(response, nullptr);
 }
 
 // =============================================================================
@@ -1394,11 +1388,7 @@ TEST_F(
 TEST_F(ThriftClientAppAdapterIntegrationTest, ErrorFramePropagatesException) {
   setupPipeline();
 
-  auto metadata = createBasicResponseMetadata();
-  auto serializedMetadata = serializeResponseMetadata(metadata);
-
-  auto future = client_.sendBenchRequest(
-      std::move(serializedMetadata), folly::IOBuf::copyBuffer("test"));
+  auto future = client_.sendBenchRequest(folly::IOBuf::copyBuffer("test"));
 
   evb_.loopOnce();
 
@@ -1427,13 +1417,9 @@ TEST_F(
     OnExceptionPropagatesExceptionToAllPending) {
   setupPipeline();
 
-  auto metadata = createBasicResponseMetadata();
+  auto future1 = client_.sendBenchRequest(folly::IOBuf::copyBuffer("req1"));
 
-  auto future1 = client_.sendBenchRequest(
-      serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("req1"));
-
-  auto future2 = client_.sendBenchRequest(
-      serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("req2"));
+  auto future2 = client_.sendBenchRequest(folly::IOBuf::copyBuffer("req2"));
 
   evb_.loopOnce();
   getWrittenFrame();
@@ -1460,9 +1446,7 @@ TEST_F(
           apache::thrift::transport::TTransportException::END_OF_FILE,
           "Connection error"));
 
-  auto metadata = createBasicResponseMetadata();
-  auto future = client_.sendBenchRequest(
-      serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("test"));
+  auto future = client_.sendBenchRequest(folly::IOBuf::copyBuffer("test"));
 
   ASSERT_TRUE(future.isReady());
   EXPECT_TRUE(future.result().hasException());
@@ -1478,10 +1462,8 @@ TEST_F(
 
   // Send a request first — it should remain pending after the Closing
   // transition (graceful drain semantics).
-  auto metadata = createBasicResponseMetadata();
-  auto inflightFuture = client_.sendBenchRequest(
-      serializeResponseMetadata(metadata),
-      folly::IOBuf::copyBuffer("inflight"));
+  auto inflightFuture =
+      client_.sendBenchRequest(folly::IOBuf::copyBuffer("inflight"));
   evb_.loopOnce();
   getWrittenFrame();
 
@@ -1496,8 +1478,7 @@ TEST_F(
   // Open → Closing must NOT drain the inflight request.
   EXPECT_FALSE(inflightFuture.isReady());
 
-  auto future = client_.sendBenchRequest(
-      serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("test"));
+  auto future = client_.sendBenchRequest(folly::IOBuf::copyBuffer("test"));
 
   ASSERT_TRUE(future.isReady());
   EXPECT_TRUE(future.result().hasException());

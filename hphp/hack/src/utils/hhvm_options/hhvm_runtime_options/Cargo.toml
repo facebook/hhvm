@@ -14,11 +14,11 @@ path = "lib.rs"
 anyhow = "1.0.102"
 byteorder = "1.5"
 colored = "2.1.0"
-cxx = "1.0.119"
+cxx = "1.0.194"
 hdf = { version = "0.0.0", path = "../../hdf" }
 log = { version = "0.4.29", features = ["kv_unstable", "kv_unstable_std"] }
 md-5 = "0.10"
 regex = "1.12.3"
 
 [build-dependencies]
-cxx-build = "1.0.119"
+cxx-build = "1.0.194"

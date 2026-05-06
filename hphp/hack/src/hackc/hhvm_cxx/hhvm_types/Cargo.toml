@@ -12,9 +12,9 @@ path = "hhvm_types_ffi.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-cxx = "1.0.119"
+cxx = "1.0.194"
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 
 [build-dependencies]
-cxx-build = "1.0.119"
+cxx-build = "1.0.194"

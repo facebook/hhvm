@@ -15,7 +15,7 @@ crate-type = ["lib", "staticlib"]
 anyhow = "1.0.102"
 bincode = { version = "2", features = ["serde"] }
 compile = { version = "0.0.0", path = "../compile/cargo/compile" }
-cxx = "1.0.119"
+cxx = "1.0.194"
 decl_provider = { version = "0.0.0", path = "../decl_provider" }
 direct_decl_parser = { version = "0.0.0", path = "../../parser/api/cargo/direct_decl_parser" }
 facts = { version = "0.0.0", path = "../facts/cargo/facts_rust" }
@@ -39,4 +39,4 @@ hex = { version = "0.4.3", features = ["alloc"] }
 serde_json = { version = "1.0.140", features = ["alloc", "float_roundtrip", "raw_value", "unbounded_depth"] }
 
 [build-dependencies]
-cxx-build = "1.0.119"
+cxx-build = "1.0.194"

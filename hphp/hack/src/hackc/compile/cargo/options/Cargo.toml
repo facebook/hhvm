@@ -13,7 +13,7 @@ path = "../../options.rs"
 [dependencies]
 anyhow = "1.0.102"
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
-cxx = "1.0.119"
+cxx = "1.0.194"
 hhvm_options = { version = "0.0.0", path = "../../../../utils/hhvm_options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 serde = { version = "1.0.219", features = ["derive", "rc"] }

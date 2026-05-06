@@ -9,13 +9,11 @@ enum MyEnum: int {
 
 function foo(mixed $x): void {
   $y = $x;
-  if ($y as C) {
-    expect_C($y);
-  }
+  $y as C;
+  expect_C($y);
   $y = $x;
-  if ($y as MyEnum) {
-    expect_MyEnum($y);
-  }
+  $y as MyEnum;
+  expect_MyEnum($y);
   $y = $x;
   if ($y as mixed !== null) {
     expect_mixed($y);
@@ -25,17 +23,14 @@ function foo(mixed $x): void {
     expect_nstring($y);
   }
   $y = $x;
-  if ($y as int) {
-    expect_int($y);
-  }
+  $y as int;
+  expect_int($y);
   $y = $x;
-  if ($y as shape('foo' => int, ...)) {
-    expect_shape($y);
-  }
+  $y as shape('foo' => int, ...);
+  expect_shape($y);
   $y = $x;
-  if ($y as (int, ?string)) {
-    expect_tuple($y);
-  }
+  $y as (int, ?string);
+  expect_tuple($y);
 }
 
 function expect_C(C $x): void {}

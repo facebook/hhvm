@@ -20,7 +20,7 @@ class Foo {
 
   public function test(): int {
     $y = new X();
-    if ($y->someint()) {
+    if ($y->someint() !== 0) {
     }
 
     $this->x = $y;

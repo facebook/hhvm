@@ -17,7 +17,7 @@ class Bar1 {
   }
 
   public function f(): void {
-    if ($this->foo) {
+    if ($this->foo !== null) {
       random_other_function();
       $this->foo[0] = 0;
     }

@@ -41,7 +41,7 @@ final class Another<T> {
     return $this;
   }
   public function magicGetter(mixed ...$args): ?T {
-    return $this->data ? $this->data->data : null;
+    return $this->data !== null ? $this->data->data : null;
   }
   public static function make(Gen<T> $data): this {
     $i = new static();

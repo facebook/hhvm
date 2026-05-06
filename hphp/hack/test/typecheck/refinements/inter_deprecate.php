@@ -13,6 +13,6 @@ interface I {
 }
 
 function testit(I $i):void {
-  invariant($i as B, "B");
+  invariant($i is B, "B");
   $s =  $i->foo();
 }

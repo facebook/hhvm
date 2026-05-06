@@ -19,7 +19,7 @@ This is actually how [invariant](/hack/expressions-and-operators/invariant) is [
 ```hack
 <<__EntryPoint>>
 async function main_async(): Awaitable<void> {
-  $nullable_int = '_' ? 0 : null;
+  $nullable_int = true ? 0 : null;
   if (!($nullable_int is nonnull)) {
     invariant_violation('$nullable_int must not be null');
   }

@@ -18,7 +18,7 @@ function f(int $x): void {}
 function test(): void {
   $arr = get_arr();
   foreach ($arr as $x) {
-    if (!$x) {
+    if ($x === null) {
       continue;
     }
 

@@ -7,7 +7,7 @@
 // this will report a type error at expect_int
 function expect_success(bool $b): void {
   $mystring = 1
-    |> $$ ? (i2b($$) |> b2s($$)) : (i2s($$) |> s2s($$));
+    |> ($$ !== 0) ? (i2b($$) |> b2s($$)) : (i2s($$) |> s2s($$));
   expect_string($mystring);
 }
 

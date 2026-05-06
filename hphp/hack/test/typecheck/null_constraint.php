@@ -24,7 +24,7 @@ function test<T as ?MyClass>(T $arg): void {
 
 function expectString(string $_):void { }
 function test2<T as ?string>(T $arg): void {
-  if ($arg) {
+  if ($arg !== null) {
     expectString($arg[0]);
   }
 }

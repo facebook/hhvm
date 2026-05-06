@@ -10,9 +10,10 @@
  */
 
 const int X = 1;
+const bool B = true;
 
 function f(int $a): int {
-  $b = (X) ? $a : 2;
+  $b = (B) ? $a : 2;
   $b = (X) * 2;
   $b = (X) / 2;
   $b = (X) % 2;

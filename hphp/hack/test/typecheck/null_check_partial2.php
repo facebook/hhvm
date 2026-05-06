@@ -14,7 +14,7 @@ class X {
 
   public function foo(): int {
     $obj = new X();
-    if($obj->x) {
+    if($obj->x !== null) {
       return $obj->x;
     }
     return 0;

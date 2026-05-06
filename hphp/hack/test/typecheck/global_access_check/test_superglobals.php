@@ -30,7 +30,7 @@ class Test {
 
     $b = GlobalVARIABLES::get('TEST'); // global read
     GlobalVARIABLES::set('Test', false); // global write
-    $c = GlobalVARIABLES::get('TEST') ? "a" : "b"; // global read
+    $c = (GlobalVARIABLES::get('TEST') !== null) ? "a" : "b"; // global read
 
     $d = 'TEST';
     $e = GlobalVARIABLES::get($d); // global read

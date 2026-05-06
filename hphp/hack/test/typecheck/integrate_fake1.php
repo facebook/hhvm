@@ -13,7 +13,7 @@ class F {
   private ?int $x;
 
   public function foobar(): int {
-    if (!$this->x) {
+    if ($this->x === null) {
       return 0;
     }
     return $this->x;

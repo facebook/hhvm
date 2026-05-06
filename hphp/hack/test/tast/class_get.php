@@ -13,7 +13,7 @@ class TestClass {
   private static ?int $x = null;
 
   public static function get(): int {
-    if (self::$x) {
+    if (self::$x is nonnull) {
       return self::$x;
     } else {
       return 0;

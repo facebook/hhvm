@@ -17,9 +17,6 @@ class Foo<T as arraykey> {
     $this->doer($x);
   }
 
-  private function doer(T $item): void {
-    if ($item) {
-      print $item;
-    }
+  private function doer(T $_): void {
   }
 }

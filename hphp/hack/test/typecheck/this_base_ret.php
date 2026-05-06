@@ -19,7 +19,7 @@ class Child extends Base {
   public function bar(int $id): this {
     // This comes from a real world example, where the if block turned $this
     // into an unresolved type
-    if ($id) {
+    if ($id !== 0) {
     } else {
     }
     return $this->foo();

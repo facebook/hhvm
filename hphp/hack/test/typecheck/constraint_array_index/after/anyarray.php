@@ -31,9 +31,6 @@ function does_things(): void {
   }
   takes_array($d);
 
-  if ($a) {
-  }
-
   takes_reified_array<AnyArray<string, mixed>>();
 }
 

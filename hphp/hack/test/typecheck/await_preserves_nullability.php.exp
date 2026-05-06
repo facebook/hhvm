@@ -1,6 +1,3 @@
-WARN: File "await_preserves_nullability.php", line 21, characters 9-13:
-`$item` is a sketchy condition: testing the truthiness of an array key (int | string) may not behave as expected.
-The values `0`, `""`, and `"0"` are all considered falsy. Test for them explicitly. (Warn[12006])
 ERROR: File "await_preserves_nullability.php", line 17, characters 17-18:
 Invalid argument (Typing[4110])
   File "await_preserves_nullability.php", line 12, characters 11-11:

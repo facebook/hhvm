@@ -5,11 +5,11 @@ function foo(bool $b): int {
     do {
       $x = 1;
       $y = 42;
-    } while (0);
+    } while (false);
   } else {
     do {
       $x = 2;
-    } while (0);
+    } while (false);
   }
   return $y;
 }

@@ -7,7 +7,7 @@ async function test(?A $a): Awaitable<void> {
     async () ==> await myGenA()
   );
 
-  if (!$a) {
+  if ($a === null) {
     return;
   }
 

@@ -36,7 +36,7 @@ function test2(mixed $x): void {
     $x->f();
   } else if ($x is B) {
     $x->g();
-  } else if ($x) {
+  } else if ($x is nonnull) {
     $x = $x + 1;
   }
 }

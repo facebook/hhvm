@@ -34,8 +34,6 @@ class D {
     } else {
       $y = new C();
     }
-    if($y) {
-      $this->x['meh'] = $y;
-    }
+    $this->x['meh'] = $y;
   }
 }

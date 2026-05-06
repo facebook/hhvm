@@ -13,7 +13,7 @@ class C {
   private static ?int $x = null;
 
   public static function get(): int {
-    if (self::$x) {
+    if (self::$x !== null) {
       return self::$x;
     } else {
       return 0;

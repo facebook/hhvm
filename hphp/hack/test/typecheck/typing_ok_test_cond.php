@@ -14,37 +14,37 @@ class A {}
 function foo(A $x): void {}
 
 function test1(?A $x): void {
-  while ($x) {
+  while ($x !== null) {
     foo($x);
   }
 }
 
 function test2(?A $x): void {
-  while (!$x) {
+  while ($x === null) {
   }
   foo($x);
 }
 
 function test3(?A $x): void {
-  for (; $x; ) {
+  for (; $x !== null; ) {
     foo($x);
   }
 }
 
 function test4(?A $x): void {
-  for (; !$x; ) {
+  for (; $x === null; ) {
   }
   foo($x);
 }
 
 function test5(?A $x): void {
-  if ($x) {
+  if ($x !== null) {
     foo($x);
   }
 }
 
 function test6(?A $x): void {
-  if (!$x) {
+  if ($x === null) {
   } else {
     foo($x);
   }

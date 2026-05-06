@@ -13,7 +13,7 @@ class A {
   }
 
   public function cloneMaybeObj(): A {
-    if ($this->maybeObj) {
+    if ($this->maybeObj !== null) {
       return clone $this->maybeObj;
     } else {
       return new A();

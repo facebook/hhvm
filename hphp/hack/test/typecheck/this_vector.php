@@ -28,7 +28,7 @@ class Foo {
   public function duck(): MyVector<Foo> {
     $ret = new MyVector();
     $node = $this;
-    while ($node) {
+    while (true) {
       $ret->add($node);
     }
     return $ret;

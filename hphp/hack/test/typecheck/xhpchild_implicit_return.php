@@ -11,8 +11,8 @@
 
 class :div extends XHPTest implements XHPChild {}
 
-function foo(): XHPChild {
-  if (1) {
+function foo(bool $b): XHPChild {
+  if ($b) {
     return <div></div>;
   }
 }

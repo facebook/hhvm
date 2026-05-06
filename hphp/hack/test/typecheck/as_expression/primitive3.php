@@ -3,8 +3,6 @@
 function g(int $x): void {}
 
 function f(mixed $x): void {
-  if ($x as int) {
-    g($x);
-  }
+  $x as int;
   g($x);
 }

@@ -525,6 +525,32 @@ void validate_extends_service_function_name_uniqueness(
   }
 }
 
+// A `@cpp.FastClient`-annotated service may only extend another
+// `@cpp.FastClient`-annotated service: the generated child `FastClient<>`
+// derives from the parent's `FastClient<>` specialization, which only exists
+// when the parent is also annotated.
+void validate_cpp_fast_client_extends(
+    sema_context& ctx, const t_service& node) {
+  if (node.find_structured_annotation_or_null(kCppFastClientUri) == nullptr) {
+    return;
+  }
+  if (node.extends() == nullptr) {
+    return;
+  }
+  if (node.extends()->find_structured_annotation_or_null(kCppFastClientUri) !=
+      nullptr) {
+    return;
+  }
+  ctx.error(
+      node,
+      "Service `{}` is annotated with `@cpp.FastClient` but extends "
+      "service `{}` which is not. Annotate `{}` with `@cpp.FastClient` "
+      "to enable fast client inheritance.",
+      node.name(),
+      node.extends()->get_full_name(),
+      node.extends()->get_full_name());
+}
+
 void validate_throws_exceptions(sema_context& ctx, const t_field& except) {
   auto except_type = except.type()->get_true_type();
   ctx.check(
@@ -2416,6 +2442,7 @@ ast_validator standard_validator() {
   validator.add_interface_visitor(&validate_interface_function_name_uniqueness);
   validator.add_service_visitor(
       &validate_extends_service_function_name_uniqueness);
+  validator.add_service_visitor(&validate_cpp_fast_client_extends);
   validator.add_interaction_visitor(&validate_interaction_nesting);
   validator.add_interaction_visitor(&validate_interaction_annotations);
 

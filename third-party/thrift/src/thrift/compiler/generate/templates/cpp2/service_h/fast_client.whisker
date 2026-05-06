@@ -58,9 +58,9 @@ namespace apache::thrift {
 
 template <apache::thrift::fast_thrift::thrift::client::ClientOutboundAppAdapter AppAdapter>
 class FastClient<{{service.qualified_name}}, AppAdapter>
-    : public apache::thrift::gen::FastClientBase<AppAdapter> {
+    : public {{#if (object.notnull? service.extends)}}::apache::thrift::FastClient<{{service.extends.qualified_name}}, AppAdapter>{{#else}}apache::thrift::gen::FastClientBase<AppAdapter>{{/if}} {
  public:
-  using apache::thrift::gen::FastClientBase<AppAdapter>::FastClientBase;
+  using {{#if (object.notnull? service.extends)}}::apache::thrift::FastClient<{{service.extends.qualified_name}}, AppAdapter>::FastClient{{#else}}apache::thrift::gen::FastClientBase<AppAdapter>::FastClientBase{{/if}};
 {{#each service.functions as |function|}}
 {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
 {{#partial fast_client_functions.fast_client_functions interface=service function=function}}

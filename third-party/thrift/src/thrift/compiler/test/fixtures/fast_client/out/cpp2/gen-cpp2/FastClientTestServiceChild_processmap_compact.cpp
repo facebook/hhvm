@@ -4,7 +4,9 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#pragma once
 
-#include "thrift/compiler/test/fixtures/fast_client/gen-cpp2/FastClientTestService.h"
 #include "thrift/compiler/test/fixtures/fast_client/gen-cpp2/FastClientTestServiceChild.h"
+#include "thrift/compiler/test/fixtures/fast_client/gen-cpp2/FastClientTestServiceChild.tcc"
+
+namespace cpp2::test {
+} // namespace cpp2::test

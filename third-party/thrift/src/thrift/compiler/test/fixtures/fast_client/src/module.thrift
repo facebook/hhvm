@@ -40,3 +40,8 @@ service FastClientTestService {
   DataItem getData(1: i32 id);
   bool processData(1: DataItem item, 2: StatusCode status);
 }
+
+@cpp.FastClient
+service FastClientTestServiceChild extends FastClientTestService {
+  string greet(1: string name);
+}

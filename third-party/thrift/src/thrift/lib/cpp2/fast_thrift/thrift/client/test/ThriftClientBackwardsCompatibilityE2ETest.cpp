@@ -44,6 +44,8 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestFastChildService.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestFastChildServiceAsyncClient.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestFastService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestFastServiceAsyncClient.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestService.h>
@@ -64,6 +66,8 @@ using apache::thrift::fast_thrift::channel_pipeline::PipelineBuilder;
 using apache::thrift::fast_thrift::channel_pipeline::PipelineImpl;
 using apache::thrift::fast_thrift::channel_pipeline::SimpleBufferAllocator;
 
+using apache::thrift::fast_thrift::thrift::test::
+    BackwardsCompatibilityTestFastChildService;
 using apache::thrift::fast_thrift::thrift::test::
     BackwardsCompatibilityTestFastService;
 using apache::thrift::fast_thrift::thrift::test::
@@ -160,6 +164,36 @@ class BackwardsCompatibilityTestFastHandler
   void throwError(std::unique_ptr<std::string> message) override {
     throw apache::thrift::TApplicationException(
         apache::thrift::TApplicationException::UNKNOWN, *message);
+  }
+};
+
+class BackwardsCompatibilityTestFastChildHandler
+    : public apache::thrift::ServiceHandler<
+          BackwardsCompatibilityTestFastChildService> {
+ public:
+  // Inherited from parent.
+  void echo(
+      std::string& response, std::unique_ptr<std::string> message) override {
+    response = *message;
+  }
+
+  int64_t add(int64_t a, int64_t b) override { return a + b; }
+
+  void sendResponse(std::string& response, int64_t size) override {
+    response = std::string(static_cast<size_t>(size), 'x');
+  }
+
+  void ping() override {}
+
+  void throwError(std::unique_ptr<std::string> message) override {
+    throw apache::thrift::TApplicationException(
+        apache::thrift::TApplicationException::UNKNOWN, *message);
+  }
+
+  // Child-only.
+  void childEcho(
+      std::string& response, std::unique_ptr<std::string> message) override {
+    response = "child:" + *message;
   }
 };
 
@@ -603,10 +637,6 @@ TEST_F(
 
 class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
  protected:
-  using FastClient = apache::thrift::FastClient<
-      BackwardsCompatibilityTestFastService,
-      thrift::ThriftClientAppAdapter>;
-
   void SetUp() override {
     handler_ = std::make_shared<BackwardsCompatibilityTestFastHandler>();
     server_ =
@@ -623,7 +653,10 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
     clientThread_.reset();
   }
 
-  std::unique_ptr<FastClient> createFastClient() {
+  template <typename Service = BackwardsCompatibilityTestFastService>
+  std::unique_ptr<
+      apache::thrift::FastClient<Service, thrift::ThriftClientAppAdapter>>
+  createFastClient() {
     auto* evb = clientThread_->getEventBase();
     folly::Baton<> connectBaton;
     bool connected = false;
@@ -692,13 +725,13 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
               .addNextDuplex<
                   rocket::client::handler::RocketClientSetupFrameHandler>(
                   rocket_client_setup_handler_tag, std::move(setupFactory))
-              .addNextInbound<
+              .template addNextInbound<
                   rocket::client::handler::RocketClientErrorFrameHandler>(
                   rocket_client_error_frame_handler_tag)
-              .addNextDuplex<
+              .template addNextDuplex<
                   rocket::client::handler::RocketClientStreamStateHandler>(
                   rocket_client_stream_state_handler_tag)
-              .addNextInbound<
+              .template addNextInbound<
                   rocket::client::handler::RocketClientRequestResponseHandler>(
                   rocket_client_request_response_handler_tag)
               .build();
@@ -734,7 +767,9 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
       throw std::runtime_error("Failed to connect to server");
     }
 
-    return std::make_unique<FastClient>(std::move(adapter));
+    return std::make_unique<
+        apache::thrift::FastClient<Service, thrift::ThriftClientAppAdapter>>(
+        std::move(adapter));
   }
 
   std::shared_ptr<BackwardsCompatibilityTestFastHandler> handler_;
@@ -903,6 +938,54 @@ TEST_F(
       folly::coro::co_withExecutor(
           clientThread_->getEventBase(), client->co_echo("recovered")));
   EXPECT_EQ(result, "recovered");
+}
+
+// =============================================================================
+// FastClient `extends` E2E Tests — verifies that a FastClient<Child> can call
+// both inherited (parent-defined) and child-defined methods at runtime.
+// =============================================================================
+
+class BackwardsCompatibilityFastChildClientE2ETest
+    : public BackwardsCompatibilityFastClientE2ETest {
+ protected:
+  void SetUp() override {
+    childHandler_ =
+        std::make_shared<BackwardsCompatibilityTestFastChildHandler>();
+    server_ = std::make_unique<apache::thrift::ScopedServerInterfaceThread>(
+        childHandler_);
+    clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
+  }
+
+  std::shared_ptr<BackwardsCompatibilityTestFastChildHandler> childHandler_;
+};
+
+TEST_F(
+    BackwardsCompatibilityFastChildClientE2ETest, InheritedPingThroughChild) {
+  auto client = createFastClient<BackwardsCompatibilityTestFastChildService>();
+
+  EXPECT_NO_THROW(
+      folly::coro::blockingWait(
+          folly::coro::co_withExecutor(
+              clientThread_->getEventBase(), client->co_ping())));
+}
+
+TEST_F(
+    BackwardsCompatibilityFastChildClientE2ETest, InheritedEchoThroughChild) {
+  auto client = createFastClient<BackwardsCompatibilityTestFastChildService>();
+
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_echo("inherited")));
+  EXPECT_EQ(result, "inherited");
+}
+
+TEST_F(BackwardsCompatibilityFastChildClientE2ETest, ChildOwnMethod) {
+  auto client = createFastClient<BackwardsCompatibilityTestFastChildService>();
+
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(), client->co_childEcho("hi")));
+  EXPECT_EQ(result, "child:hi");
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::client::test

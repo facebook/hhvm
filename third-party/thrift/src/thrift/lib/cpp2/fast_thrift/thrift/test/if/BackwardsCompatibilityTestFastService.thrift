@@ -37,3 +37,10 @@ service BackwardsCompatibilityTestFastService {
   // Throws TApplicationException for error handling tests
   void throwError(1: string message);
 }
+
+@cpp.FastClient
+service BackwardsCompatibilityTestFastChildService extends BackwardsCompatibilityTestFastService {
+  // Child-only method, used to verify that a child's own methods coexist with
+  // inherited parent methods on the generated FastClient<Child>.
+  string childEcho(1: string message);
+}

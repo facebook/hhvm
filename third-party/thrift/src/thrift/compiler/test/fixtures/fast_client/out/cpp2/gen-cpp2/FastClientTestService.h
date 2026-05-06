@@ -134,8 +134,8 @@ class ServiceHandler<::cpp2::test::FastClientTestService> : public apache::thrif
 namespace detail {
 template <> struct TSchemaAssociation<::cpp2::test::FastClientTestService, false> {
   static ::folly::Range<const ::std::string_view*> bundle();
-  static constexpr int64_t programId = -3651598600711913233;
-  static constexpr ::std::string_view definitionKey = {"\x14\xb1\x3b\x34\x99\x2e\x19\x14\x3c\x27\x6b\xd0\xc1\x16\xcb\xe7", 16};
+  static constexpr int64_t programId = 8360439536290031381;
+  static constexpr ::std::string_view definitionKey = {"\x2e\x4f\x53\x5c\xc7\xa0\xf4\x7f\xe8\xc9\xe0\xed\xbd\x92\xab\x0f", 16};
 };
 }
 } // namespace apache::thrift

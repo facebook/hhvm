@@ -13,8 +13,12 @@ namespace apache::thrift {
 namespace cpp2::test {
 class FastClientTestService;
 } // namespace cpp2::test
+namespace cpp2::test {
+class FastClientTestServiceChild;
+} // namespace cpp2::test
 
 
 namespace apache::thrift {
 template<> class Client<::cpp2::test::FastClientTestService>;
+template<> class Client<::cpp2::test::FastClientTestServiceChild>;
 } // namespace apache::thrift

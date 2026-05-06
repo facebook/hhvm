@@ -116,6 +116,7 @@ class Json5ProtocolWriter final {
     JsonWriterOptions writer;
     bool enumAsInteger = false;
     bool binaryAsBase64String = false;
+    bool mapPrimitiveKeysAsMemberNames = false;
   };
   explicit Json5ProtocolWriter(
       ExternalBufferSharing /*sharing*/ = COPY_EXTERNAL_BUFFER /* ignored */,
@@ -151,11 +152,14 @@ class Json5ProtocolWriter final {
   // * false: key is not string or enum, thus we use key-value array to
   //          represent the map.
   std::uint32_t writeMapBegin(
-      protocol::TType /* key */,
+      protocol::TType keyType,
       protocol::TType /* value */,
       uint32_t /* size */,
       bool alternativeKeyForm) {
-    return writeMapBegin(alternativeKeyForm);
+    bool objectForm = options_.mapPrimitiveKeysAsMemberNames
+        ? isPrimitiveKeyType(keyType)
+        : alternativeKeyForm;
+    return writeMapBegin(objectForm);
   }
 
   std::uint32_t writeMapEnd();
@@ -180,6 +184,22 @@ class Json5ProtocolWriter final {
 
  private:
   static Options defaultOptions() { return {}; }
+
+  static bool isPrimitiveKeyType(protocol::TType type) {
+    switch (type) {
+      case protocol::TType::T_BOOL:
+      case protocol::TType::T_BYTE:
+      case protocol::TType::T_I16:
+      case protocol::TType::T_I32:
+      case protocol::TType::T_I64:
+      case protocol::TType::T_DOUBLE:
+      case protocol::TType::T_FLOAT:
+      case protocol::TType::T_STRING:
+        return true;
+      default:
+        return false;
+    }
+  }
 
   std::uint32_t writeMapBegin(bool objectForm);
 

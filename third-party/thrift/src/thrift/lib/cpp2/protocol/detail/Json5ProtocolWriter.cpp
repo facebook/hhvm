@@ -312,7 +312,9 @@ std::uint32_t Json5ProtocolWriter::writeString(folly::StringPiece str) {
 
 std::uint32_t Json5ProtocolWriter::writeBinary(folly::StringPiece str) {
   std::uint32_t xfer = beginWriteValue();
-  if (options_.binaryAsBase64String) {
+  if (auto size = maybeWriteSimpleMapKey<type::string_t>(str)) {
+    xfer += *size;
+  } else if (options_.binaryAsBase64String) {
     auto encoded = folly::base64Encode(str);
     while (!encoded.empty() && encoded.back() == '=') {
       encoded.pop_back();

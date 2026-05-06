@@ -43,12 +43,14 @@ class Json5ProtocolWriterOptions:
     writer: JsonWriterOptions
     enum_as_integer: bool
     binary_as_base64_string: bool
+    map_primitive_keys_as_member_names: bool
     def __init__(
         self,
         *,
         writer: JsonWriterOptions | None = None,
         enum_as_integer: bool = False,
         binary_as_base64_string: bool = False,
+        map_primitive_keys_as_member_names: bool = False,
     ) -> None: ...
 
 def serialize_iobuf(

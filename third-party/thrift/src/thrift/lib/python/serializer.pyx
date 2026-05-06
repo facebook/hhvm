@@ -65,6 +65,7 @@ cdef class Json5ProtocolWriterOptions:
     cdef public JsonWriterOptions writer
     cdef public bint enum_as_integer
     cdef public bint binary_as_base64_string
+    cdef public bint map_primitive_keys_as_member_names
 
     def __init__(
         self,
@@ -72,10 +73,12 @@ cdef class Json5ProtocolWriterOptions:
         writer=None,
         enum_as_integer=False,
         binary_as_base64_string=False,
+        map_primitive_keys_as_member_names=False,
     ):
         self.writer = writer if writer is not None else JsonWriterOptions()
         self.enum_as_integer = enum_as_integer
         self.binary_as_base64_string = binary_as_base64_string
+        self.map_primitive_keys_as_member_names = map_primitive_keys_as_member_names
 
 
 cdef cJson5ProtocolWriterOptions _to_c_options(Json5ProtocolWriterOptions options):
@@ -83,6 +86,7 @@ cdef cJson5ProtocolWriterOptions _to_c_options(Json5ProtocolWriterOptions option
     c_options.writer = options.writer._writer_options
     c_options.enumAsInteger = options.enum_as_integer
     c_options.binaryAsBase64String = options.binary_as_base64_string
+    c_options.mapPrimitiveKeysAsMemberNames = options.map_primitive_keys_as_member_names
     return cmove(c_options)
 
 

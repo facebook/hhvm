@@ -98,6 +98,99 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(testCases()),
     [](const auto& info) { return *info.param.name(); });
 
+// ── Tests for mapPrimitiveKeysAsMemberNames option
+// ────────────────────────────
+
+class Json5MapPrimitiveKeysTest : public ::testing::Test {
+ protected:
+  static std::string writeJson(const Example& example) {
+    return writeExample(
+        example, {.writer = {}, .mapPrimitiveKeysAsMemberNames = true});
+  }
+  static std::string writeJson5(const Example& example) {
+    return writeExample(
+        example,
+        {.writer = kJson5Options, .mapPrimitiveKeysAsMemberNames = true});
+  }
+  static std::string writeJsonDefault(const Example& example) {
+    return writeExample(example, {});
+  }
+  static std::string writeJson5Default(const Example& example) {
+    return writeExample(example, {.writer = kJson5Options});
+  }
+};
+
+TEST_F(Json5MapPrimitiveKeysTest, BoolAsKey) {
+  Example example;
+  example.boolAsKey() = {{true, 1}};
+  EXPECT_EQ(writeJson(example), R"RAW({"boolAsKey":{"true":1}})RAW");
+  EXPECT_EQ(writeJson5(example), R"RAW({boolAsKey:{true:1,},})RAW");
+}
+
+TEST_F(Json5MapPrimitiveKeysTest, I32AsKey) {
+  Example example;
+  example.i32AsKey() = {{1, 2}};
+  EXPECT_EQ(writeJson(example), R"RAW({"i32AsKey":{"1":2}})RAW");
+  EXPECT_EQ(writeJson5(example), R"RAW({i32AsKey:{"1":2,},})RAW");
+}
+
+TEST_F(Json5MapPrimitiveKeysTest, MultiEntryI32AsKey) {
+  Example example;
+  example.i32AsKey() = {{3, 4}, {1, 2}};
+  EXPECT_EQ(writeJson(example), R"RAW({"i32AsKey":{"1":2,"3":4}})RAW");
+  EXPECT_EQ(writeJson5(example), R"RAW({i32AsKey:{"1":2,"3":4,},})RAW");
+}
+
+TEST_F(Json5MapPrimitiveKeysTest, I64AsKey) {
+  Example example;
+  example.i64AsKey() = {{42, 1}};
+  EXPECT_EQ(writeJson(example), R"RAW({"i64AsKey":{"42":1}})RAW");
+  EXPECT_EQ(writeJson5(example), R"RAW({i64AsKey:{"42":1,},})RAW");
+}
+
+TEST_F(Json5MapPrimitiveKeysTest, BinaryAsKey) {
+  Example example;
+  example.binaryAsKey() = {{"?~", 1}};
+  EXPECT_EQ(writeJson(example), R"RAW({"binaryAsKey":{"?~":1}})RAW");
+  EXPECT_EQ(writeJson5(example), R"RAW({binaryAsKey:{"?~":1,},})RAW");
+}
+
+TEST_F(Json5MapPrimitiveKeysTest, StringAndEnumKeysUnchanged) {
+  for (const auto& tc : testCases()) {
+    const auto& name = *tc.name();
+    if (name == "StringAsKey" || name == "MultiEntryStringAsKey" ||
+        name == "EnumAsKey") {
+      EXPECT_EQ(writeJson(*tc.example()), writeJsonDefault(*tc.example()))
+          << name;
+      EXPECT_EQ(writeJson5(*tc.example()), writeJson5Default(*tc.example()))
+          << name;
+    }
+  }
+}
+
+TEST_F(Json5MapPrimitiveKeysTest, NonPrimitiveKeysUnchanged) {
+  for (const auto& tc : testCases()) {
+    const auto& name = *tc.name();
+    if (name == "StructAsKey" || name == "ListAsKey" || name == "SetAsKey" ||
+        name == "OutOfOrderFieldsInMap") {
+      EXPECT_EQ(writeJson(*tc.example()), writeJsonDefault(*tc.example()))
+          << name;
+      EXPECT_EQ(writeJson5(*tc.example()), writeJson5Default(*tc.example()))
+          << name;
+    }
+  }
+}
+
+TEST_F(Json5MapPrimitiveKeysTest, MapAsKey) {
+  Example example;
+  std::map<int32_t, int32_t> innerMap = {{1, 2}};
+  example.mapAsKey() = {{innerMap, 3}};
+  EXPECT_EQ(
+      writeJson(example), R"RAW({"mapAsKey":[{"key":{"1":2},"value":3}]})RAW");
+  EXPECT_EQ(
+      writeJson5(example), R"RAW({mapAsKey:[{key:{"1":2,},value:3,},],})RAW");
+}
+
 // ── Round-trip test for -0.0 (no existing decode coverage for sign bit) ─────
 
 TEST(Json5CustomProtocolExtraTest, NegativeZeroRoundTrip) {

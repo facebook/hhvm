@@ -35,6 +35,7 @@ cdef extern from "<thrift/lib/python/Serializer.h>" namespace "apache::thrift::j
         cJsonWriterOptions writer
         cbool enumAsInteger
         cbool binaryAsBase64String
+        cbool mapPrimitiveKeysAsMemberNames
 
 
 cdef extern from "<thrift/lib/python/Serializer.h>" namespace "::apache::thrift::python":

@@ -16,7 +16,7 @@
 
 #include <wangle/ssl/SSLUtil.h>
 
-#include <fmt/format.h>
+#include <folly/Conv.h>
 
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
@@ -32,10 +32,12 @@ SSLException::SSLException(
     std::chrono::milliseconds const& latency,
     uint64_t const bytesRead)
     : std::runtime_error(
-          fmt::format(
-              "SSL error: {}; Elapsed time: {} ms; Bytes read: {}",
+          folly::to<std::string>(
+              "SSL error: ",
               static_cast<int>(error),
+              "; Elapsed time: ",
               latency.count(),
+              " ms; Bytes read: ",
               bytesRead)),
       error_(error),
       latency_(latency),

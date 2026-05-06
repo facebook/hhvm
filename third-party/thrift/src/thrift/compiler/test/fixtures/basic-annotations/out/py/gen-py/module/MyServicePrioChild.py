@@ -15,11 +15,6 @@ from json import loads
 import sys
 if sys.version_info[0] >= 3:
   long = int
-try:
-    from thrift.Thrift import warn_thrift_py_deprecated
-except ImportError:
-    def warn_thrift_py_deprecated(name):
-        pass
 
 import module.MyServicePrioParent
 from .ttypes import UTF8STRINGS, MyEnum, MyStructNestedAnnotation, MyUnion, MyException, MyStruct, SecretStruct, AwesomeStruct, FantasticStruct, list_string_6884
@@ -68,8 +63,6 @@ from thrift.util.Decorators import (
   should_run_on_thread,
   write_results_after_future,
 )
-
-warn_thrift_py_deprecated(__name__)
 
 class Iface(module.MyServicePrioParent.Iface):
   def pang(self, ):

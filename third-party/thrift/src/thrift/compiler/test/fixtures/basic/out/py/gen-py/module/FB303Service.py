@@ -15,11 +15,6 @@ from json import loads
 import sys
 if sys.version_info[0] >= 3:
   long = int
-try:
-    from thrift.Thrift import warn_thrift_py_deprecated
-except ImportError:
-    def warn_thrift_py_deprecated(name):
-        pass
 
 from .ttypes import UTF8STRINGS, MyEnum, HackEnum, MyStruct, Containers, MyDataItem, MyUnion, MyException, MyExceptionWithMessage, ReservedKeyword, UnionToBeRenamed, MyEnumAlias, MyDataItemAlias
 from thrift.Thrift import TProcessor
@@ -67,8 +62,6 @@ from thrift.util.Decorators import (
   should_run_on_thread,
   write_results_after_future,
 )
-
-warn_thrift_py_deprecated(__name__)
 
 class Iface:
   def simple_rpc(self, int_parameter=None):

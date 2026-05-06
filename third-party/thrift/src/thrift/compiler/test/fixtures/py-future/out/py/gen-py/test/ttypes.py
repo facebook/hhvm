@@ -11,11 +11,6 @@ from thrift.util.Recursive import fix_spec
 from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProcessorEventHandler, TServerInterface, TProcessor, TException, TApplicationException, UnimplementedTypedef
 from thrift.protocol.TProtocol import TProtocolException
 
-try:
-    from thrift.Thrift import warn_thrift_py_deprecated
-except ImportError:
-    def warn_thrift_py_deprecated(name):
-        pass
 
 
 import pprint
@@ -54,7 +49,6 @@ all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
 __all__ = ['UTF8STRINGS', 'TestStruct']
-warn_thrift_py_deprecated(__name__)
 
 class TestStruct:
   r"""

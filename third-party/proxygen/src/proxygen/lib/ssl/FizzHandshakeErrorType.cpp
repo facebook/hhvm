@@ -8,6 +8,7 @@
 
 #include <proxygen/lib/ssl/FizzHandshakeErrorType.h>
 
+#include <fizz/record/Alerts.h>
 #include <fizz/util/Exceptions.h>
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 
@@ -47,7 +48,9 @@ FizzHandshakeErrorType fromException(const folly::exception_wrapper& ex) {
       errorType = FizzHandshakeErrorType::ServerRejectsClientCert;
     } else if (orig.is_compatible_with<fizz::FizzException>()) {
       orig.with_exception([&](const fizz::FizzException& fizzEx) {
-        if (isReceivedCertAlert(fizzEx.what())) {
+        if (fizzEx.getAlert() == fizz::AlertDescription::certificate_required) {
+          errorType = FizzHandshakeErrorType::ServerRejectsClientCert;
+        } else if (isReceivedCertAlert(fizzEx.what())) {
           errorType = FizzHandshakeErrorType::ClientRejectsServerCert;
         } else {
           errorType = FizzHandshakeErrorType::Protocol;

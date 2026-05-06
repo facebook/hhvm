@@ -161,7 +161,7 @@ class ThriftClientAppAdapter : public folly::DelayedDestruction,
         apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE)
         << "Unsupported frame type: " << static_cast<int>(response.streamType);
 
-    handler(handleRequestResponse(std::move(response)));
+    handler(handleRequestResponse(std::move(response), protocolId_));
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 

@@ -18,12 +18,18 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Expected.h>
+#include <folly/lang/Exception.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
+#include <thrift/lib/cpp2/type/Any.h>
+#include <thrift/lib/cpp2/type/Protocol.h>
+#include <thrift/lib/cpp2/type/Runtime.h>
+#include <thrift/lib/cpp2/type/TypeRegistry.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -87,6 +93,131 @@ inline folly::exception_wrapper processExceptionMetadata(
 
   return folly::make_exception_wrapper<apache::thrift::TApplicationException>(
       exceptionWhatRef.value_or(""));
+}
+
+/**
+ * Action the caller should take with the response data IOBuf, derived from
+ * the typed payload metadata. Used by the FastClient adapter path; legacy
+ * ChannelBase path uses processPayloadMetadata() which mutates otherMetadata
+ * for THeader projection.
+ */
+enum class PayloadAction : uint8_t {
+  // Data IOBuf is a presult struct; caller should run normal recv_wrapped<>
+  // (handles success and declared exceptions encoded as presult fields).
+  PassThrough,
+  // Data IOBuf is a SemiAnyStruct; caller should extract via thrift Any
+  // registry to recover the typed exception (extractAnyException).
+  ExtractAnyException,
+};
+
+/**
+ * Inspect ResponseRpcMetadata's payloadMetadata field and decide what the
+ * caller should do with the data IOBuf. Pure function — does not mutate.
+ *
+ * Returns:
+ *   PassThrough           — normal response or declared exception
+ *   ExtractAnyException   — anyException; caller deserializes SemiAnyStruct
+ *   error exception_wrapper — undeclared / appUnknownException / malformed
+ */
+inline folly::Expected<PayloadAction, folly::exception_wrapper>
+classifyPayloadAction(const apache::thrift::ResponseRpcMetadata& metadata) {
+  const auto& payloadMetadataRef = metadata.payloadMetadata();
+  if (!payloadMetadataRef) {
+    return PayloadAction::PassThrough;
+  }
+
+  switch (payloadMetadataRef->getType()) {
+    case apache::thrift::PayloadMetadata::Type::__EMPTY__:
+    case apache::thrift::PayloadMetadata::Type::responseMetadata:
+      return PayloadAction::PassThrough;
+
+    case apache::thrift::PayloadMetadata::Type::exceptionMetadata: {
+      const auto& exMeta = payloadMetadataRef->get_exceptionMetadata();
+      const auto& exMetaInner = exMeta.metadata();
+      if (!exMetaInner) {
+        return folly::makeUnexpected(
+            folly::make_exception_wrapper<
+                apache::thrift::TApplicationException>(
+                "Missing payload exception metadata"));
+      }
+      switch (exMetaInner->getType()) {
+        case apache::thrift::PayloadExceptionMetadata::Type::declaredException:
+          return PayloadAction::PassThrough;
+        case apache::thrift::PayloadExceptionMetadata::Type::anyException:
+          return PayloadAction::ExtractAnyException;
+        case apache::thrift::PayloadExceptionMetadata::Type::__EMPTY__:
+        case apache::thrift::PayloadExceptionMetadata::Type::
+            DEPRECATED_proxyException:
+        case apache::thrift::PayloadExceptionMetadata::Type::
+            appUnknownException:
+        default:
+          return folly::makeUnexpected(
+              folly::make_exception_wrapper<
+                  apache::thrift::TApplicationException>(
+                  exMeta.what_utf8().value_or("")));
+      }
+    }
+
+    default:
+      return folly::makeUnexpected(
+          folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+              "Invalid payload metadata type"));
+  }
+}
+
+/**
+ * Decode a SemiAnyStruct-encoded thrift Any exception out of the response
+ * data IOBuf and return it as a typed exception_wrapper.
+ *
+ * For Rocket protocol v10+, the data IOBuf carries a SemiAnyStruct that
+ * contains the type URI plus the inner serialized exception. This function
+ * deserializes the SemiAnyStruct (with the negotiated payload protocol),
+ * looks the type up in the global TypeRegistry, and returns the typed
+ * exception_wrapper.
+ *
+ * Falls back to TApplicationException with a descriptive message if the
+ * SemiAnyStruct fails to deserialize or the type is not registered.
+ */
+inline folly::exception_wrapper extractAnyException(
+    std::unique_ptr<folly::IOBuf> data, uint16_t protocolId) {
+  apache::thrift::type::SemiAnyStruct anyException;
+  try {
+    if (protocolId == apache::thrift::protocol::T_COMPACT_PROTOCOL) {
+      apache::thrift::CompactSerializer::deserialize(data.get(), anyException);
+    } else {
+      apache::thrift::BinarySerializer::deserialize(data.get(), anyException);
+    }
+  } catch (...) {
+    return folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+        "anyException deserialization failure: " +
+        folly::exceptionStr(folly::current_exception()).toStdString());
+  }
+
+  // Per RpcMetadata.thrift: when SemiAnyStruct.protocol is unset, it defaults
+  // to the protocol used to serialize the SemiAnyStruct.
+  if (*anyException.protocol() == apache::thrift::type::kNoProtocol) {
+    anyException.protocol() =
+        protocolId == apache::thrift::protocol::T_COMPACT_PROTOCOL
+        ? apache::thrift::type::Protocol::get<
+              apache::thrift::type::StandardProtocol::Compact>()
+        : apache::thrift::type::Protocol::get<
+              apache::thrift::type::StandardProtocol::Binary>();
+  }
+
+  try {
+    apache::thrift::type::AnyData anyData(std::move(anyException));
+    if (auto ew = apache::thrift::type::TypeRegistry::generated()
+                      .load(anyData)
+                      .asExceptionWrapper()) {
+      return ew;
+    }
+  } catch (...) {
+    return folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+        "anyException load failure: " +
+        folly::exceptionStr(folly::current_exception()).toStdString());
+  }
+  return folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+      "anyException type not registered in TypeRegistry");
 }
 
 /**

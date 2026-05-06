@@ -24,7 +24,11 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/type/Protocol.h>
+#include <thrift/lib/cpp2/type/Type.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
+#include <thrift/lib/thrift/gen-cpp2/any_rep_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 namespace {
@@ -98,7 +102,8 @@ TEST(FastThriftAdapterBaseTest, PayloadFrameYieldsResultWithData) {
   auto response =
       makePayloadResponse(nullptr, folly::IOBuf::copyBuffer("hello"));
 
-  auto result = TestAdapter::handleRequestResponse(std::move(response));
+  auto result = TestAdapter::handleRequestResponse(
+      std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
 
   ASSERT_TRUE(result.hasValue());
   ASSERT_NE(result.value(), nullptr);
@@ -114,7 +119,8 @@ TEST(FastThriftAdapterBaseTest, ErrorFrameReturnsDecodedException) {
   auto response =
       makeErrorResponse(kRejected, serializeResponseRpcError(rpcError));
 
-  auto result = TestAdapter::handleRequestResponse(std::move(response));
+  auto result = TestAdapter::handleRequestResponse(
+      std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
 
   ASSERT_TRUE(result.hasError());
   EXPECT_TRUE(result.error()
@@ -129,7 +135,8 @@ TEST(FastThriftAdapterBaseTest, ErrorFrameReturnsDecodedException) {
 TEST(FastThriftAdapterBaseTest, UnexpectedFrameTypeReturnsProtocolError) {
   auto response = makeCancelResponse();
 
-  auto result = TestAdapter::handleRequestResponse(std::move(response));
+  auto result = TestAdapter::handleRequestResponse(
+      std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
 
   ASSERT_TRUE(result.hasError());
   EXPECT_TRUE(result.error()
@@ -152,7 +159,8 @@ TEST(FastThriftAdapterBaseTest, PayloadWithNormalMetadataPassesThrough) {
   auto response = makePayloadResponse(
       serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("data"));
 
-  auto result = TestAdapter::handleRequestResponse(std::move(response));
+  auto result = TestAdapter::handleRequestResponse(
+      std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
 
   ASSERT_TRUE(result.hasValue());
 }
@@ -170,7 +178,8 @@ TEST(FastThriftAdapterBaseTest, PayloadWithUndeclaredExceptionReturnsError) {
   auto response = makePayloadResponse(
       serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("data"));
 
-  auto result = TestAdapter::handleRequestResponse(std::move(response));
+  auto result = TestAdapter::handleRequestResponse(
+      std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
 
   ASSERT_TRUE(result.hasError());
   EXPECT_TRUE(result.error()
@@ -191,7 +200,8 @@ TEST(FastThriftAdapterBaseTest, PayloadWithDeclaredExceptionPassesThrough) {
   auto response = makePayloadResponse(
       serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("data"));
 
-  auto result = TestAdapter::handleRequestResponse(std::move(response));
+  auto result = TestAdapter::handleRequestResponse(
+      std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
 
   // Declared exceptions pass through — generated code reads the presult
   // struct from the data IOBuf to surface the typed exception.
@@ -203,9 +213,70 @@ TEST(FastThriftAdapterBaseTest, PayloadWithNoMetadataPassesThrough) {
   auto response =
       makePayloadResponse(nullptr, folly::IOBuf::copyBuffer("data"));
 
-  auto result = TestAdapter::handleRequestResponse(std::move(response));
+  auto result = TestAdapter::handleRequestResponse(
+      std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
 
   ASSERT_TRUE(result.hasValue());
+}
+
+TEST(FastThriftAdapterBaseTest, PayloadWithMalformedAnyExceptionReturnsError) {
+  // anyException variant: data IOBuf MUST be a SemiAnyStruct serialization.
+  // Here we send raw bytes that are not a valid SemiAnyStruct, so
+  // extractAnyException's Compact deserialization fails and returns a
+  // TApplicationException describing the deserialization failure.
+  apache::thrift::ResponseRpcMetadata metadata;
+  apache::thrift::PayloadExceptionMetadataBase exMeta;
+  exMeta.what_utf8() = "any exception thrown";
+  apache::thrift::PayloadExceptionMetadata exMetaInner;
+  exMetaInner.set_anyException(apache::thrift::PayloadAnyExceptionMetadata{});
+  exMeta.metadata() = std::move(exMetaInner);
+  metadata.payloadMetadata().ensure().set_exceptionMetadata(std::move(exMeta));
+
+  auto response = makePayloadResponse(
+      serializeResponseMetadata(metadata),
+      folly::IOBuf::copyBuffer("not-a-valid-semi-any-struct"));
+
+  auto result = TestAdapter::handleRequestResponse(
+      std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
+
+  ASSERT_TRUE(result.hasError());
+  EXPECT_TRUE(result.error()
+                  .is_compatible_with<apache::thrift::TApplicationException>());
+}
+
+TEST(FastThriftAdapterBaseTest, PayloadWithUnregisteredAnyExceptionTypeError) {
+  // Build a real SemiAnyStruct pointing at a type URI that's not registered
+  // in TypeRegistry. extractAnyException should deserialize the SemiAnyStruct
+  // successfully but then fail to load — returning a TApplicationException.
+  apache::thrift::type::SemiAnyStruct semiAny;
+  semiAny.type() = apache::thrift::type::Type(
+      apache::thrift::type::exception_c{},
+      "facebook.com/test/UnregisteredException");
+  semiAny.protocol() = apache::thrift::type::Protocol::get<
+      apache::thrift::type::StandardProtocol::Compact>();
+  semiAny.data() =
+      folly::IOBuf(*folly::IOBuf::copyBuffer("inner-exception-payload"));
+
+  folly::IOBufQueue payloadQueue;
+  apache::thrift::CompactSerializer::serialize(semiAny, &payloadQueue);
+
+  apache::thrift::ResponseRpcMetadata metadata;
+  apache::thrift::PayloadExceptionMetadataBase exMeta;
+  exMeta.what_utf8() = "any exception thrown";
+  apache::thrift::PayloadExceptionMetadata exMetaInner;
+  exMetaInner.set_anyException(apache::thrift::PayloadAnyExceptionMetadata{});
+  exMeta.metadata() = std::move(exMetaInner);
+  metadata.payloadMetadata().ensure().set_exceptionMetadata(std::move(exMeta));
+
+  auto response = makePayloadResponse(
+      serializeResponseMetadata(metadata), payloadQueue.move());
+
+  auto result = TestAdapter::handleRequestResponse(
+      std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
+
+  ASSERT_TRUE(result.hasError());
+  EXPECT_TRUE(result.error()
+                  .is_compatible_with<apache::thrift::TApplicationException>());
 }
 
 } // namespace

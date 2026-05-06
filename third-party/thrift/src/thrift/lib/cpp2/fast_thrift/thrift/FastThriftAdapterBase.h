@@ -39,11 +39,18 @@ class FastThriftAdapterBase {
    * the response metadata, classifies declared/undeclared exceptions, and
    * returns the response data IOBuf for the generated client to deserialize.
    *
-   * App adapters should call this before invoking the response handler.
+   * If the response carries a typed anyException variant (Rocket protocol
+   * v10+), extracts the typed exception via the thrift Any registry using
+   * `protocolId` to select the SemiAnyStruct deserializer. Returns the
+   * extracted exception_wrapper to the caller.
+   *
+   * App adapters should call this before invoking the response handler,
+   * passing their negotiated protocol id.
    */
-  static folly::
-      Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>
-      handleRequestResponse(ThriftResponseMessage&& response);
+  static folly::Expected<
+      std::unique_ptr<folly::IOBuf>,
+      folly::exception_wrapper>
+  handleRequestResponse(ThriftResponseMessage&& response, uint16_t protocolId);
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

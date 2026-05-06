@@ -26,7 +26,8 @@
 namespace apache::thrift::fast_thrift::thrift {
 
 folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>
-FastThriftAdapterBase::handleRequestResponse(ThriftResponseMessage&& response) {
+FastThriftAdapterBase::handleRequestResponse(
+    ThriftResponseMessage&& response, uint16_t protocolId) {
   if (FOLLY_LIKELY(
           response.frame.type() ==
           apache::thrift::fast_thrift::frame::FrameType::PAYLOAD)) {
@@ -36,12 +37,17 @@ FastThriftAdapterBase::handleRequestResponse(ThriftResponseMessage&& response) {
       return folly::makeUnexpected(std::move(error));
     }
 
-    if (auto error = processPayloadMetadata(metadata);
-        FOLLY_UNLIKELY(!!error)) {
-      return folly::makeUnexpected(std::move(error));
+    auto action = classifyPayloadAction(metadata);
+    if (FOLLY_UNLIKELY(action.hasError())) {
+      return folly::makeUnexpected(std::move(action.error()));
     }
 
-    return std::move(response.frame).extractData();
+    auto data = std::move(response.frame).extractData();
+    if (FOLLY_UNLIKELY(action.value() == PayloadAction::ExtractAnyException)) {
+      return folly::makeUnexpected(
+          extractAnyException(std::move(data), protocolId));
+    }
+    return std::move(data);
   } else if (
       response.frame.type() ==
       apache::thrift::fast_thrift::frame::FrameType::ERROR) {

@@ -39,6 +39,7 @@ struct ThriftWWWCustomHealthCheckerFields {
   int64_t jitWeightFactor{0};
   int64_t loadHint{0};
   int64_t serverUpTime{0};
+  int32_t jitMaturity{-1};
 };
 
 enum ServerDownInfo {

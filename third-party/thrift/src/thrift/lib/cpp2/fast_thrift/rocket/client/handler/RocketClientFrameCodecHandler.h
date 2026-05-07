@@ -113,7 +113,7 @@ class RocketClientFrameCodecHandler {
     // Capture stream identity before the move into serialize(); on
     // throw, request.frame is in moved-from state.
     const uint32_t streamId = request.frame.streamId();
-    const uint32_t requestHandle = request.requestHandle;
+    auto requestContext = std::move(request.requestContext);
     const auto streamType = request.streamType;
 
     std::unique_ptr<folly::IOBuf> serializedFrame;
@@ -139,7 +139,7 @@ class RocketClientFrameCodecHandler {
           .ew = folly::exception_wrapper(std::current_exception()),
           .streamId = streamId,
       };
-      response.requestHandle = requestHandle;
+      response.requestContext = std::move(requestContext);
       response.streamType = streamType;
       (void)ctx.fireRead(
           apache::thrift::fast_thrift::channel_pipeline::erase_and_box(

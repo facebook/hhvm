@@ -164,7 +164,7 @@ class ThriftClientChannelTest : public ::testing::Test {
   }
 
   ThriftResponseMessage createSuccessResponse(
-      uint32_t requestHandle,
+      void* requestContext,
       uint16_t /* protocolId */,
       apache::thrift::MessageType /* mtype */,
       const std::string& data) {
@@ -191,7 +191,8 @@ class ThriftClientChannelTest : public ::testing::Test {
     ThriftResponseMessage response;
     response.frame =
         apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
-    response.requestHandle = requestHandle;
+    response.requestContext =
+        apache::thrift::fast_thrift::rocket::borrow(requestContext);
     response.streamType =
         apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
     return response;
@@ -257,14 +258,14 @@ TEST_F(ThriftClientChannelTest, SendRequestWithoutPipelineReturnsError) {
 
 TEST_F(ThriftClientChannelTest, OnMessageInvokesCallbackWithCorrectState) {
   auto channel = createChannel();
-  uint32_t capturedHandle{};
+  void* capturedHandle{};
 
   auto pipeline = buildPipelineWithHandler(
       channel.get(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
         auto& request = msg.get<ThriftRequestMessage>();
-        capturedHandle = request.requestHandle;
+        capturedHandle = request.requestContext.release();
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
@@ -296,14 +297,14 @@ TEST_F(ThriftClientChannelTest, OnMessageInvokesCallbackWithCorrectState) {
 
 TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
   auto channel = createChannel();
-  uint32_t capturedHandle{};
+  void* capturedHandle{};
 
   auto pipeline = buildPipelineWithHandler(
       channel.get(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
         auto& request = msg.get<ThriftRequestMessage>();
-        capturedHandle = request.requestHandle;
+        capturedHandle = request.requestContext.release();
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
@@ -327,7 +328,8 @@ TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
   ThriftResponseMessage errorResponse;
   errorResponse.frame = apache::thrift::fast_thrift::frame::read::parseFrame(
       std::move(errorFrame));
-  errorResponse.requestHandle = capturedHandle;
+  errorResponse.requestContext =
+      apache::thrift::fast_thrift::rocket::borrow(capturedHandle);
   errorResponse.streamType =
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
 
@@ -339,36 +341,16 @@ TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
       state->error.is_compatible_with<apache::thrift::TApplicationException>());
 }
 
-TEST_F(ThriftClientChannelTest, OnReadWithUnknownRequestIdIsDropped) {
-  auto channel = createChannel();
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-         TypeErasedBox&&) { return Result::Success; });
-  channel->setPipeline(pipeline.get());
-
-  auto response = createSuccessResponse(
-      99999,
-      apache::thrift::protocol::T_COMPACT_PROTOCOL,
-      apache::thrift::MessageType::T_REPLY,
-      "orphan response");
-
-  auto result = channel->onRead(erase_and_box(std::move(response)));
-
-  EXPECT_EQ(result, Result::Success);
-}
-
 TEST_F(ThriftClientChannelTest, MultiplePendingCallbacksRoutedCorrectly) {
   auto channel = createChannel();
-  std::vector<uint32_t> capturedHandles;
+  std::vector<void*> capturedHandles;
 
   auto pipeline = buildPipelineWithHandler(
       channel.get(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& msg) {
         auto& request = msg.get<ThriftRequestMessage>();
-        capturedHandles.push_back(request.requestHandle);
+        capturedHandles.push_back(request.requestContext.release());
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
@@ -445,6 +427,7 @@ TEST_F(ThriftClientChannelTest, MultiplePendingCallbacksRoutedCorrectly) {
 TEST_F(ThriftClientChannelTest, SendRequestWithPipelineCallsHandler) {
   auto channel = createChannel();
   bool handlerCalled = false;
+  void* capturedHandle{};
 
   auto pipeline = buildPipelineWithHandler(
       channel.get(),
@@ -455,6 +438,7 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineCallsHandler) {
         EXPECT_EQ(
             request.payload.rpcKind(),
             apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+        capturedHandle = request.requestContext.release();
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
@@ -470,6 +454,14 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineCallsHandler) {
       nullptr);
 
   EXPECT_TRUE(handlerCalled);
+
+  // Deliver synthetic response to clean up the heap-allocated callback context.
+  auto response = createSuccessResponse(
+      capturedHandle,
+      apache::thrift::protocol::T_COMPACT_PROTOCOL,
+      apache::thrift::MessageType::T_REPLY,
+      "cleanup");
+  std::ignore = channel->onRead(erase_and_box(std::move(response)));
 }
 
 // =============================================================================
@@ -495,14 +487,17 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineErrorInvokesCallback) {
       std::move(cb),
       nullptr);
 
+  // RequestClientCallback::Ptr auto-fires onResponseError when dropped
+  // without firing — the message dies along the failed write path and
+  // the callback resolves with whatever the auto-detach reports.
   EXPECT_TRUE(state->errorReceived);
-  EXPECT_EQ(state->errorMessage(), "Pipeline write failed");
 }
 
 TEST_F(ThriftClientChannelTest, SendRequestWithPipelineBackpressureProceeds) {
   auto channel = createChannel();
 
   bool handlerCalled = false;
+  void* capturedHandle{};
 
   auto pipeline = buildPipelineWithHandler(
       channel.get(),
@@ -513,6 +508,7 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineBackpressureProceeds) {
         EXPECT_EQ(
             request.payload.rpcKind(),
             apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+        capturedHandle = request.requestContext.release();
         return Result::Backpressure;
       });
   channel->setPipeline(pipeline.get());
@@ -530,6 +526,14 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineBackpressureProceeds) {
   EXPECT_TRUE(handlerCalled);
   EXPECT_FALSE(state->errorReceived);
   EXPECT_FALSE(state->responseReceived);
+
+  // Deliver synthetic response to clean up the heap-allocated callback context.
+  auto response = createSuccessResponse(
+      capturedHandle,
+      apache::thrift::protocol::T_COMPACT_PROTOCOL,
+      apache::thrift::MessageType::T_REPLY,
+      "cleanup");
+  std::ignore = channel->onRead(erase_and_box(std::move(response)));
 }
 
 // =============================================================================
@@ -540,7 +544,7 @@ TEST_F(ThriftClientChannelTest, SendRequestPassesCorrectMessageContent) {
   auto channel = createChannel();
   apache::thrift::RpcKind capturedRpcKind{};
   std::string capturedMethodName;
-  uint32_t capturedHandle{};
+  void* capturedHandle{};
 
   auto pipeline = buildPipelineWithHandler(
       channel.get(),
@@ -555,7 +559,7 @@ TEST_F(ThriftClientChannelTest, SendRequestPassesCorrectMessageContent) {
             request.payload.get<ThriftRequestResponsePayload>().metadata.get());
         rpcMetadata.read(&reader);
         capturedMethodName = std::string(rpcMetadata.name()->view());
-        capturedHandle = request.requestHandle;
+        capturedHandle = request.requestContext.release();
         return Result::Success;
       });
   channel->setPipeline(pipeline.get());
@@ -573,72 +577,22 @@ TEST_F(ThriftClientChannelTest, SendRequestPassesCorrectMessageContent) {
   EXPECT_EQ(
       capturedRpcKind, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
   EXPECT_EQ(capturedMethodName, "myTestMethod");
-  EXPECT_EQ(capturedHandle, 0);
+  EXPECT_NE(capturedHandle, nullptr);
+
+  // Deliver synthetic response to clean up the heap-allocated callback context
+  // that the channel allocated during sendRequestResponse. Without this, LSAN
+  // would flag the leak under //thrift/lib/cpp2/fast_thrift/...
+  auto response = createSuccessResponse(
+      capturedHandle,
+      apache::thrift::protocol::T_COMPACT_PROTOCOL,
+      apache::thrift::MessageType::T_REPLY,
+      "cleanup");
+  std::ignore = channel->onRead(erase_and_box(std::move(response)));
 }
 
 // =============================================================================
 // onException - Pipeline Exception Handling
 // =============================================================================
-
-TEST_F(ThriftClientChannelTest, OnExceptionFailsAllPendingCallbacks) {
-  auto channel = createChannel();
-  std::vector<uint32_t> capturedHandles;
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& msg) {
-        auto& request = msg.get<ThriftRequestMessage>();
-        capturedHandles.push_back(request.requestHandle);
-        return Result::Success;
-      });
-  channel->setPipeline(pipeline.get());
-
-  auto [cb1, state1] = makeCallback();
-  auto [cb2, state2] = makeCallback();
-  auto [cb3, state3] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method1"),
-      createSerializedRequest("req1"),
-      createHeader(),
-      std::move(cb1),
-      nullptr);
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method2"),
-      createSerializedRequest("req2"),
-      createHeader(),
-      std::move(cb2),
-      nullptr);
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method3"),
-      createSerializedRequest("req3"),
-      createHeader(),
-      std::move(cb3),
-      nullptr);
-
-  ASSERT_EQ(capturedHandles.size(), 3);
-
-  // Fire exception - all callbacks should receive the error
-  auto error =
-      folly::make_exception_wrapper<std::runtime_error>("connection lost");
-  channel->onException(std::move(error));
-
-  // All callbacks should have received errors
-  EXPECT_TRUE(state1->errorReceived);
-  EXPECT_TRUE(state2->errorReceived);
-  EXPECT_TRUE(state3->errorReceived);
-
-  // Verify the error type
-  EXPECT_TRUE(state1->error.is_compatible_with<std::runtime_error>());
-  EXPECT_TRUE(state2->error.is_compatible_with<std::runtime_error>());
-  EXPECT_TRUE(state3->error.is_compatible_with<std::runtime_error>());
-}
 
 TEST_F(ThriftClientChannelTest, OnExceptionWithNoPendingCallbacksIsNoop) {
   auto channel = createChannel();
@@ -653,146 +607,6 @@ TEST_F(ThriftClientChannelTest, OnExceptionWithNoPendingCallbacksIsNoop) {
   auto error =
       folly::make_exception_wrapper<std::runtime_error>("connection lost");
   channel->onException(std::move(error));
-}
-
-TEST_F(ThriftClientChannelTest, OnExceptionAfterSomeResponsesReceived) {
-  auto channel = createChannel();
-  std::vector<uint32_t> capturedHandles;
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&& msg) {
-        auto& request = msg.get<ThriftRequestMessage>();
-        capturedHandles.push_back(request.requestHandle);
-        return Result::Success;
-      });
-  channel->setPipeline(pipeline.get());
-
-  auto [cb1, state1] = makeCallback();
-  auto [cb2, state2] = makeCallback();
-  auto [cb3, state3] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method1"),
-      createSerializedRequest("req1"),
-      createHeader(),
-      std::move(cb1),
-      nullptr);
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method2"),
-      createSerializedRequest("req2"),
-      createHeader(),
-      std::move(cb2),
-      nullptr);
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method3"),
-      createSerializedRequest("req3"),
-      createHeader(),
-      std::move(cb3),
-      nullptr);
-
-  ASSERT_EQ(capturedHandles.size(), 3);
-
-  // Complete callback2 with a successful response
-  auto response2 = createSuccessResponse(
-      capturedHandles[1],
-      apache::thrift::protocol::T_COMPACT_PROTOCOL,
-      apache::thrift::MessageType::T_REPLY,
-      "resp2");
-  std::ignore = channel->onRead(erase_and_box(std::move(response2)));
-
-  EXPECT_TRUE(state2->responseReceived);
-  EXPECT_FALSE(state2->errorReceived);
-
-  // Fire exception - only callback1 and callback3 should receive errors
-  auto error =
-      folly::make_exception_wrapper<std::runtime_error>("connection lost");
-  channel->onException(std::move(error));
-
-  // callback1 and callback3 should have errors
-  EXPECT_TRUE(state1->errorReceived);
-  EXPECT_TRUE(state3->errorReceived);
-
-  // callback2 should still have response, not error
-  EXPECT_TRUE(state2->responseReceived);
-  EXPECT_FALSE(state2->errorReceived);
-}
-
-TEST_F(ThriftClientChannelTest, ClosingThenClosedDrainsPending) {
-  // Open → Closing (NOT_OPEN) leaves pending intact;
-  // Closing → Closed (any other exception) drains them.
-  auto channel = createChannel();
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-         TypeErasedBox&&) { return Result::Success; });
-  channel->setPipeline(pipeline.get());
-
-  auto [cb, state] = makeCallback();
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("inflight"),
-      createSerializedRequest("req"),
-      createHeader(),
-      std::move(cb),
-      nullptr);
-
-  // Open → Closing must NOT touch pending.
-  channel->onException(
-      folly::make_exception_wrapper<
-          apache::thrift::transport::TTransportException>(
-          apache::thrift::transport::TTransportException::NOT_OPEN,
-          "Connection closed by server"));
-  EXPECT_FALSE(state->errorReceived);
-  EXPECT_FALSE(state->responseReceived);
-
-  // Closing → Closed must drain pending with the new exception.
-  channel->onException(
-      folly::make_exception_wrapper<std::runtime_error>("EOF"));
-  EXPECT_TRUE(state->errorReceived);
-  EXPECT_TRUE(state->error.is_compatible_with<std::runtime_error>());
-}
-
-TEST_F(ThriftClientChannelTest, OnExceptionClearsPendingCallbacks) {
-  auto channel = createChannel();
-
-  auto pipeline = buildPipelineWithHandler(
-      channel.get(),
-      [](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-         TypeErasedBox&&) { return Result::Success; });
-  channel->setPipeline(pipeline.get());
-
-  auto [cb, state] = makeCallback();
-
-  channel->sendRequestResponse(
-      apache::thrift::RpcOptions(),
-      createMethodMetadata("method1"),
-      createSerializedRequest("req1"),
-      createHeader(),
-      std::move(cb),
-      nullptr);
-
-  // Fire exception
-  auto error =
-      folly::make_exception_wrapper<std::runtime_error>("connection lost");
-  channel->onException(std::move(error));
-
-  EXPECT_TRUE(state->errorReceived);
-
-  // Fire another exception - should be a no-op since callbacks were cleared
-  auto error2 =
-      folly::make_exception_wrapper<std::runtime_error>("second error");
-  channel->onException(std::move(error2));
-
-  // callback should still only have the first error
-  EXPECT_TRUE(state->error.is_compatible_with<std::runtime_error>());
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

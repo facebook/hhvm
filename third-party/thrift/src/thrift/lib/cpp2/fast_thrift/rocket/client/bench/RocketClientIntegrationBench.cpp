@@ -136,7 +136,7 @@ RocketRequestMessage createRocketRequest(size_t payloadSize) {
               .data = makePayloadData(payloadSize),
               .header = {.streamId = kInvalidStreamId},
           },
-      .requestHandle = 1,
+      .requestContext = borrow(reinterpret_cast<void*>(0x1)),
       .streamType = FrameType::REQUEST_RESPONSE,
   };
 }

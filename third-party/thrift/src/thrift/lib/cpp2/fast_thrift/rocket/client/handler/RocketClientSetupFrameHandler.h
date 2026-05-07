@@ -145,6 +145,7 @@ class RocketClientSetupFrameHandler {
                      .keepaliveTime = kMaxKeepaliveTime,
                      .maxLifetime = kMaxLifetime},
             },
+        .requestContext = {},
     };
   }
 

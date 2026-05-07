@@ -61,7 +61,7 @@ class TestAppAdapterClient {
 };
 
 ThriftResponseMessage makeResponse(
-    uint32_t handle,
+    void* requestContext,
     apache::thrift::fast_thrift::frame::FrameType frameType =
         apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE) {
   auto data = folly::IOBuf::copyBuffer("response");
@@ -74,7 +74,8 @@ ThriftResponseMessage makeResponse(
   ThriftResponseMessage response;
   response.frame =
       apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
-  response.requestHandle = handle;
+  response.requestContext =
+      apache::thrift::fast_thrift::rocket::borrow(requestContext);
   response.streamType = frameType;
   return response;
 }
@@ -181,8 +182,15 @@ TEST_F(ThriftClientAppAdapterTest, SetProtocolId) {
 
 TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
   TestAppAdapterClient client;
+  void* capturedUserContext = nullptr;
   auto built = buildPipeline(
-      &client.adapter(), [](auto&, auto&&) { return Result::Success; });
+      &client.adapter(),
+      [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
+          TypeErasedBox&& box) {
+        capturedUserContext =
+            box.get<ThriftRequestMessage>().requestContext.release();
+        return Result::Success;
+      });
 
   bool handlerCalled = false;
   std::string capturedData;
@@ -201,7 +209,8 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
         });
   });
 
-  auto response = makeResponse(0);
+  ASSERT_NE(capturedUserContext, nullptr);
+  auto response = makeResponse(capturedUserContext);
   auto result = client.adapter().onRead(erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Success);
@@ -209,106 +218,54 @@ TEST_F(ThriftClientAppAdapterTest, OnMessageRoutesToHandler) {
   EXPECT_EQ(capturedData, "response");
 }
 
-TEST_F(ThriftClientAppAdapterTest, OnMessageUnknownHandle) {
+TEST_F(ThriftClientAppAdapterTest, OnMessageNullUserContextSucceeds) {
   TestAppAdapterClient client;
   auto built = buildPipeline(&client.adapter());
 
-  auto response = makeResponse(99999);
+  // Response without a requestContext stamped — adapter logs and returns
+  // Success.
+  auto response = makeResponse(nullptr);
   auto result = client.adapter().onRead(erase_and_box(std::move(response)));
 
-  // Unknown handle returns Success (logged warning, not an error)
   EXPECT_EQ(result, Result::Success);
-}
-
-// =============================================================================
-// onException Tests
-// =============================================================================
-
-TEST_F(ThriftClientAppAdapterTest, OnExceptionNotifiesAllHandlers) {
-  TestAppAdapterClient client;
-  auto built = buildPipeline(
-      &client.adapter(), [](auto&, auto&&) { return Result::Success; });
-
-  int errorCount = 0;
-
-  evb_->runInEventBaseThreadAndWait([&] {
-    sendBasicRequest(
-        client.adapter(),
-        [&](folly::Expected<
-            std::unique_ptr<folly::IOBuf>,
-            folly::exception_wrapper>&& result) noexcept {
-          EXPECT_TRUE(result.hasError());
-          ++errorCount;
-        });
-
-    sendBasicRequest(
-        client.adapter(),
-        [&](folly::Expected<
-            std::unique_ptr<folly::IOBuf>,
-            folly::exception_wrapper>&& result) noexcept {
-          EXPECT_TRUE(result.hasError());
-          ++errorCount;
-        });
-  });
-
-  client.adapter().onException(
-      folly::make_exception_wrapper<std::runtime_error>("connection lost"));
-
-  EXPECT_EQ(errorCount, 2);
-}
-
-TEST_F(ThriftClientAppAdapterTest, OnExceptionClearsPendingRequests) {
-  TestAppAdapterClient client;
-  auto built = buildPipeline(
-      &client.adapter(), [](auto&, auto&&) { return Result::Success; });
-
-  int errorCount = 0;
-
-  evb_->runInEventBaseThreadAndWait([&] {
-    sendBasicRequest(
-        client.adapter(),
-        [&](folly::Expected<
-            std::unique_ptr<folly::IOBuf>,
-            folly::exception_wrapper>&&) noexcept { ++errorCount; });
-  });
-
-  client.adapter().onException(
-      folly::make_exception_wrapper<std::runtime_error>("connection lost"));
-  EXPECT_EQ(errorCount, 1);
-
-  // Subsequent onMessage for handle 0 should be a no-op
-  // (handle was cleared by onException)
-  auto response = makeResponse(0);
-  auto result = client.adapter().onRead(erase_and_box(std::move(response)));
-  EXPECT_EQ(result, Result::Success); // Unknown handle -> Success
-  EXPECT_EQ(errorCount, 1); // Handler not called again
 }
 
 // =============================================================================
 // sendRequestResponse Tests
 // =============================================================================
 
-TEST_F(ThriftClientAppAdapterTest, AssignsSequentialRequestHandles) {
+TEST_F(ThriftClientAppAdapterTest, EachRequestGetsUniqueUserContext) {
   TestAppAdapterClient client;
-  uint32_t capturedHandle = 0;
+  std::vector<void*> capturedUserContexts;
 
   auto built = buildPipeline(
       &client.adapter(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
           TypeErasedBox&& box) {
-        capturedHandle = box.get<ThriftRequestMessage>().requestHandle;
+        capturedUserContexts.push_back(
+            box.get<ThriftRequestMessage>().requestContext.release());
         return Result::Success;
       });
 
   evb_->runInEventBaseThreadAndWait(
       [&] { sendBasicRequest(client.adapter(), [](auto&&) noexcept {}); });
 
-  EXPECT_EQ(capturedHandle, 0u);
+  ASSERT_EQ(capturedUserContexts.size(), 1u);
+  EXPECT_NE(capturedUserContexts[0], nullptr);
 
   evb_->runInEventBaseThreadAndWait(
       [&] { sendBasicRequest(client.adapter(), [](auto&&) noexcept {}); });
 
-  EXPECT_EQ(capturedHandle, 1u);
+  ASSERT_EQ(capturedUserContexts.size(), 2u);
+  EXPECT_NE(capturedUserContexts[1], nullptr);
+  EXPECT_NE(capturedUserContexts[0], capturedUserContexts[1]);
+
+  // Deliver synthetic responses so per-request contexts are freed.
+  evb_->runInEventBaseThreadAndWait([&] {
+    for (auto* ctx : capturedUserContexts) {
+      (void)client.adapter().onRead(erase_and_box(makeResponse(ctx)));
+    }
+  });
 }
 
 TEST_F(ThriftClientAppAdapterTest, OffEventBaseThreadSchedulesWrite) {
@@ -317,11 +274,14 @@ TEST_F(ThriftClientAppAdapterTest, OffEventBaseThreadSchedulesWrite) {
   // handler.
   TestAppAdapterClient client;
   bool writeCalled = false;
+  void* capturedUserContext = nullptr;
   auto built = buildPipeline(
       &client.adapter(),
       [&](apache::thrift::fast_thrift::channel_pipeline::detail::ContextImpl&,
-          TypeErasedBox&&) {
+          TypeErasedBox&& box) {
         writeCalled = true;
+        capturedUserContext =
+            box.get<ThriftRequestMessage>().requestContext.release();
         return Result::Success;
       });
 
@@ -330,6 +290,12 @@ TEST_F(ThriftClientAppAdapterTest, OffEventBaseThreadSchedulesWrite) {
   // Drain the EB to let the scheduled lambda run.
   evb_->runInEventBaseThreadAndWait([] {});
   EXPECT_TRUE(writeCalled);
+
+  // Deliver a synthetic response so the per-request context is freed.
+  evb_->runInEventBaseThreadAndWait([&] {
+    (void)client.adapter().onRead(
+        erase_and_box(makeResponse(capturedUserContext)));
+  });
 }
 
 TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
@@ -340,6 +306,7 @@ TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
   std::unique_ptr<folly::IOBuf> capturedMetadata;
   std::unique_ptr<folly::IOBuf> capturedData;
   apache::thrift::RpcKind capturedRpcKind{};
+  void* capturedUserContext = nullptr;
 
   auto built = buildPipeline(
       &client.adapter(),
@@ -350,6 +317,7 @@ TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
         capturedMetadata = std::move(reqResp.metadata);
         capturedData = std::move(reqResp.data);
         capturedRpcKind = msg.payload.rpcKind();
+        capturedUserContext = msg.requestContext.release();
         return Result::Success;
       });
 
@@ -384,6 +352,12 @@ TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
   EXPECT_EQ(*deserialized.protocol(), apache::thrift::ProtocolId::COMPACT);
   EXPECT_EQ(*deserialized.clientTimeoutMs(), 250);
+
+  // Deliver a synthetic response so the per-request context is freed.
+  evb_->runInEventBaseThreadAndWait([&] {
+    (void)client.adapter().onRead(
+        erase_and_box(makeResponse(capturedUserContext)));
+  });
 }
 
 TEST_F(

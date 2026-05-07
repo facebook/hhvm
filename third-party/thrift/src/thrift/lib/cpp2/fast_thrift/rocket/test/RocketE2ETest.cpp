@@ -255,6 +255,7 @@ class RocketE2ETest : public ::testing::Test {
                 .data = std::move(data),
                 .header = {.streamId = kInvalidStreamId},
             },
+        .requestContext = {},
         .streamType = frame::FrameType::REQUEST_RESPONSE,
     };
   }

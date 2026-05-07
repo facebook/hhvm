@@ -72,6 +72,7 @@ TEST(RocketClientAppAdapterTest, WriteWithoutPipelineReturnsError) {
           apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = folly::IOBuf::copyBuffer("test"),
           },
+      .requestContext = {},
       .streamType = frame::FrameType::REQUEST_RESPONSE,
   };
 
@@ -92,7 +93,7 @@ TEST(RocketClientAppAdapterTest, OnReadDelegatesToCallback) {
   auto box = channel_pipeline::erase_and_box(
       RocketResponseMessage{
           .payload = {},
-          .requestHandle = 42,
+          .requestContext = {},
           .streamType = frame::FrameType::REQUEST_RESPONSE,
       });
 
@@ -149,6 +150,7 @@ TEST(RocketClientAppAdapterTest, WriteWithPipelineCallsFireWrite) {
           apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = folly::IOBuf::copyBuffer("test"),
           },
+      .requestContext = {},
       .streamType = frame::FrameType::REQUEST_RESPONSE,
   };
 

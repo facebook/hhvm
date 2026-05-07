@@ -50,7 +50,6 @@ using apache::thrift::fast_thrift::transport::test::TestAsyncTransport;
 
 // Bring message types into scope
 using rocket::kInvalidStreamId;
-using rocket::kNoRequestHandle;
 using rocket::RocketRequestMessage;
 using rocket::RocketResponseMessage;
 using ParsedFrame = apache::thrift::fast_thrift::frame::read::ParsedFrame;
@@ -327,6 +326,7 @@ class RocketClientIntegrationTest : public ::testing::Test {
                 .metadata = std::move(metadata),
                 .header = {.streamId = rocket::kInvalidStreamId},
             },
+        .requestContext = {},
         .streamType =
             apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE};
   }

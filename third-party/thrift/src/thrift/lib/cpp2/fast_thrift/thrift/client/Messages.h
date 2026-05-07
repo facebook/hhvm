@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 #include <cstdint>
 
@@ -49,7 +50,7 @@ namespace apache::thrift::fast_thrift::thrift {
 #pragma pack(push, 1)
 struct ThriftRequestMessage {
   ThriftPayloadVariant<ThriftRequestResponsePayload> payload;
-  uint32_t requestHandle{apache::thrift::fast_thrift::rocket::kNoRequestHandle};
+  apache::thrift::fast_thrift::rocket::TypeErasedPtr requestContext;
 };
 #pragma pack(pop)
 
@@ -66,11 +67,7 @@ struct ThriftRequestMessage {
 #pragma pack(push, 1)
 struct ThriftResponseMessage {
   apache::thrift::fast_thrift::frame::read::ParsedFrame frame;
-
-  // 4-byte aligned fields
-  uint32_t requestHandle{apache::thrift::fast_thrift::rocket::kNoRequestHandle};
-
-  // 1-byte aligned fields
+  apache::thrift::fast_thrift::rocket::TypeErasedPtr requestContext;
   apache::thrift::fast_thrift::frame::FrameType streamType{
       apache::thrift::fast_thrift::frame::FrameType::RESERVED};
 };

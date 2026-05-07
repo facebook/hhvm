@@ -139,6 +139,7 @@ RocketResponseMessage makeRocketResponse(
     std::string_view errorMessage = {}) {
   return RocketResponseMessage{
       .payload = parseTestFrame(type, streamId, flags, errorCode, errorMessage),
+      .requestContext = {},
   };
 }
 

@@ -176,11 +176,11 @@ class ThriftClientMetadataPushHandlerTest : public ::testing::Test {
   ThriftResponseMessage makeParsedFrameResponse(
       apache::thrift::fast_thrift::frame::read::ParsedFrame frame,
       apache::thrift::fast_thrift::frame::FrameType streamType,
-      uint32_t requestHandle =
-          apache::thrift::fast_thrift::rocket::kNoRequestHandle) {
+      void* requestContext = nullptr) {
     ThriftResponseMessage response;
     response.frame = std::move(frame);
-    response.requestHandle = requestHandle;
+    response.requestContext =
+        apache::thrift::fast_thrift::rocket::borrow(requestContext);
     response.streamType = streamType;
     return response;
   }
@@ -218,10 +218,11 @@ TEST_F(ThriftClientMetadataPushHandlerTest, HandlerAddedAndRemovedNoOp) {
 // =============================================================================
 
 TEST_F(ThriftClientMetadataPushHandlerTest, PayloadFramePassesThrough) {
+  void* const kUserContext = reinterpret_cast<void*>(0x123);
   auto response = makeParsedFrameResponse(
       createPayloadFrame(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
-      123);
+      kUserContext);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -230,7 +231,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, PayloadFramePassesThrough) {
 
   // Verify the message was passed through unchanged
   auto& forwarded = ctx_.readMessages()[0].get<ThriftResponseMessage>();
-  EXPECT_EQ(forwarded.requestHandle, 123);
+  EXPECT_EQ(forwarded.requestContext.get(), kUserContext);
   EXPECT_EQ(
       forwarded.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
@@ -240,7 +241,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, ErrorFramePassesThrough) {
   auto response = makeParsedFrameResponse(
       createErrorFrame(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
-      456);
+      reinterpret_cast<void*>(0x456));
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -466,7 +467,7 @@ TEST_F(
   auto response = makeParsedFrameResponse(
       createPayloadFrame(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
-      789);
+      reinterpret_cast<void*>(0x789));
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -479,7 +480,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, ErrorPropagatedOnPassThrough) {
   auto response = makeParsedFrameResponse(
       createPayloadFrame(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
-      789);
+      reinterpret_cast<void*>(0x789));
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 

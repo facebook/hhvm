@@ -23,7 +23,6 @@
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/DirectStreamMap.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
@@ -162,16 +161,23 @@ class ThriftClientChannel : public apache::thrift::RequestChannel {
       ThriftResponseMessage&& response,
       apache::thrift::RequestClientCallback::Ptr callback);
 
+  // Per-request context allocated on the outbound path and consumed on the
+  // inbound path. Transported opaquely as a TypeErasedPtr on the message
+  // variants; only this channel casts it back. Owns the pending Ptr — its
+  // auto-detach deleter fires onResponseError if the holder is destructed
+  // without firing.
+  struct ChannelCallbackContext {
+    apache::thrift::RequestClientCallback::Ptr cb;
+
+    explicit ChannelCallbackContext(
+        apache::thrift::RequestClientCallback::Ptr cb)
+        : cb(std::move(cb)) {}
+  };
+
   folly::EventBase* evb_;
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_{
       nullptr};
   uint16_t protocolId_;
-  apache::thrift::fast_thrift::frame::read::DirectStreamMap<
-      apache::thrift::RequestClientCallback::Ptr,
-      uint32_t,
-      apache::thrift::fast_thrift::frame::read::SequentialIndex>
-      pendingCallbacks_;
-  uint32_t nextRequestId_{0};
   State state_{State::Open};
   folly::exception_wrapper lastError_;
 };

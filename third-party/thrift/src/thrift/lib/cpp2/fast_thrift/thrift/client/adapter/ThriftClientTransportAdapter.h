@@ -112,7 +112,7 @@ class ThriftClientTransportAdapter {
 
     ThriftResponseMessage thriftMsg{
         .frame = std::move(response.payload.get<frame::read::ParsedFrame>()),
-        .requestHandle = response.requestHandle,
+        .requestContext = std::move(response.requestContext),
         .streamType = response.streamType,
     };
 
@@ -156,7 +156,7 @@ class ThriftClientTransportAdapter {
     rocket::RocketRequestMessage rocketMsg{
         .frame = std::move(request.payload.get<ThriftRequestResponsePayload>())
                      .toRocketFrame(),
-        .requestHandle = request.requestHandle,
+        .requestContext = std::move(request.requestContext),
         .streamType = frame::FrameType::REQUEST_RESPONSE,
     };
     return connection_->appAdapter->write(std::move(rocketMsg));

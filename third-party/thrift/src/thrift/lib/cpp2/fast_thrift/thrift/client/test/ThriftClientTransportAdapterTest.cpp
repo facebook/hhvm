@@ -73,13 +73,13 @@ TypeErasedBox makeThriftRequestBox() {
               .data = folly::IOBuf::copyBuffer("data"),
               .metadata = folly::IOBuf::copyBuffer("meta"),
           },
-      .requestHandle = 42,
+      .requestContext = rocket::borrow(reinterpret_cast<void*>(0x42)),
   };
   return erase_and_box(std::move(msg));
 }
 
 TypeErasedBox makeRocketResponseBox(
-    uint32_t requestHandle = 42,
+    void* requestContext = reinterpret_cast<void*>(0x42),
     frame::FrameType streamType = frame::FrameType::REQUEST_RESPONSE) {
   auto data = folly::IOBuf::copyBuffer("response-data");
   auto frameBuf = frame::write::serialize(
@@ -90,7 +90,7 @@ TypeErasedBox makeRocketResponseBox(
 
   rocket::RocketResponseMessage response{
       .payload = frame::read::parseFrame(std::move(frameBuf)),
-      .requestHandle = requestHandle,
+      .requestContext = rocket::borrow(requestContext),
       .streamType = streamType,
   };
   return erase_and_box(std::move(response));
@@ -98,7 +98,7 @@ TypeErasedBox makeRocketResponseBox(
 
 TypeErasedBox makeRocketErrorResponseBox(
     folly::exception_wrapper ew,
-    uint32_t requestHandle = 42,
+    void* requestContext = reinterpret_cast<void*>(0x42),
     uint32_t streamId = 1,
     frame::FrameType streamType = frame::FrameType::REQUEST_RESPONSE) {
   rocket::RocketResponseMessage response;
@@ -106,7 +106,7 @@ TypeErasedBox makeRocketErrorResponseBox(
       .ew = std::move(ew),
       .streamId = streamId,
   };
-  response.requestHandle = requestHandle;
+  response.requestContext = rocket::borrow(requestContext);
   response.streamType = streamType;
   return erase_and_box(std::move(response));
 }
@@ -171,7 +171,7 @@ TEST(ThriftClientTransportAdapterTest, OnWriteConvertsRpcKindToFrameType) {
 
   auto& rocketMsg = capturedMsg.get<rocket::RocketRequestMessage>();
   EXPECT_EQ(rocketMsg.streamType, frame::FrameType::REQUEST_RESPONSE);
-  EXPECT_EQ(rocketMsg.requestHandle, 42u);
+  EXPECT_EQ(rocketMsg.requestContext.get(), reinterpret_cast<void*>(0x42));
 }
 
 TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
@@ -214,8 +214,8 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
 
   adapter.setPipeline(thriftPipeline.get());
 
-  auto responseBox =
-      makeRocketResponseBox(42, frame::FrameType::REQUEST_RESPONSE);
+  auto responseBox = makeRocketResponseBox(
+      reinterpret_cast<void*>(0x42), frame::FrameType::REQUEST_RESPONSE);
   auto result = appAdapter->onRead(std::move(responseBox));
   EXPECT_EQ(result, Result::Success);
 

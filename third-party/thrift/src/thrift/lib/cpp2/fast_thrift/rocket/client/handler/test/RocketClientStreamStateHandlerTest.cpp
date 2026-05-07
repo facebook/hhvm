@@ -40,7 +40,7 @@ namespace {
 RocketRequestMessage makeClientRequest(
     std::unique_ptr<folly::IOBuf> data,
     std::unique_ptr<folly::IOBuf> metadata,
-    uint32_t requestHandle = kNoRequestHandle) {
+    void* requestContext = nullptr) {
   return RocketRequestMessage{
       .frame =
           apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
@@ -48,7 +48,7 @@ RocketRequestMessage makeClientRequest(
               .metadata = std::move(metadata),
               .header = {.streamId = kInvalidStreamId},
           },
-      .requestHandle = requestHandle,
+      .requestContext = borrow(requestContext),
       .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };
@@ -177,6 +177,7 @@ RocketResponseMessage makeRocketResponse(
     uint16_t flags = 0) {
   return RocketResponseMessage{
       .payload = parseTestFrame(type, streamId, flags),
+      .requestContext = {},
   };
 }
 
@@ -249,7 +250,7 @@ TEST_F(ClientStreamStateHandlerTest, MultipleWritesGenerateSequentialOddIds) {
 // =============================================================================
 
 TEST_F(ClientStreamStateHandlerTest, TerminalPayloadCleansUpStream) {
-  constexpr uint32_t kTestHandle = 42;
+  void* const kTestHandle = reinterpret_cast<void*>(0x42);
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -270,7 +271,7 @@ TEST_F(ClientStreamStateHandlerTest, TerminalPayloadCleansUpStream) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(response.requestHandle, kTestHandle);
+  EXPECT_EQ(response.requestContext.get(), kTestHandle);
   EXPECT_EQ(
       response.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
@@ -289,7 +290,7 @@ TEST_F(ClientStreamStateHandlerTest, TerminalPayloadCleansUpStream) {
 }
 
 TEST_F(ClientStreamStateHandlerTest, ErrorFrameIsAlwaysTerminal) {
-  constexpr uint32_t kTestHandle = 42;
+  void* const kTestHandle = reinterpret_cast<void*>(0x42);
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -309,7 +310,7 @@ TEST_F(ClientStreamStateHandlerTest, ErrorFrameIsAlwaysTerminal) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(response.requestHandle, kTestHandle);
+  EXPECT_EQ(response.requestContext.get(), kTestHandle);
   EXPECT_EQ(
       apache::thrift::fast_thrift::frame::read::FrameView(
           response.payload
@@ -320,7 +321,7 @@ TEST_F(ClientStreamStateHandlerTest, ErrorFrameIsAlwaysTerminal) {
 }
 
 TEST_F(ClientStreamStateHandlerTest, CancelFrameIsAlwaysTerminal) {
-  constexpr uint32_t kTestHandle = 42;
+  void* const kTestHandle = reinterpret_cast<void*>(0x42);
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -340,7 +341,7 @@ TEST_F(ClientStreamStateHandlerTest, CancelFrameIsAlwaysTerminal) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(response.requestHandle, kTestHandle);
+  EXPECT_EQ(response.requestContext.get(), kTestHandle);
   EXPECT_EQ(
       apache::thrift::fast_thrift::frame::read::FrameView(
           response.payload
@@ -355,7 +356,7 @@ TEST_F(ClientStreamStateHandlerTest, CancelFrameIsAlwaysTerminal) {
 // =============================================================================
 
 TEST_F(ClientStreamStateHandlerTest, ResponseErrorRoutesViaStreamLookup) {
-  constexpr uint32_t kTestHandle = 99;
+  void* const kTestHandle = reinterpret_cast<void*>(0x99);
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -376,7 +377,7 @@ TEST_F(ClientStreamStateHandlerTest, ResponseErrorRoutesViaStreamLookup) {
   EXPECT_EQ(result, Result::Success);
   ASSERT_EQ(ctx_.readMessages().size(), 1);
   auto& forwarded = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(forwarded.requestHandle, kTestHandle);
+  EXPECT_EQ(forwarded.requestContext.get(), kTestHandle);
   EXPECT_EQ(
       forwarded.streamType,
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
@@ -538,8 +539,8 @@ TEST_F(ClientStreamStateHandlerTest, HandlerRemovedClearsAllState) {
 }
 
 TEST_F(ClientStreamStateHandlerTest, HandlerRemovedFailsActiveStreams) {
-  constexpr uint32_t kHandle1 = 1;
-  constexpr uint32_t kHandle2 = 2;
+  void* const kHandle1 = reinterpret_cast<void*>(0x1);
+  void* const kHandle2 = reinterpret_cast<void*>(0x2);
   auto request1 = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -652,7 +653,7 @@ TEST_F(ClientStreamStateHandlerTest, DownstreamErrorPropagatedOnRead) {
 // =============================================================================
 
 TEST_F(ClientStreamStateHandlerTest, RequestHandleReturnedInResponse) {
-  constexpr uint32_t kTestHandle = 42;
+  void* const kTestHandle = reinterpret_cast<void*>(0x42);
   auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"),
@@ -674,7 +675,7 @@ TEST_F(ClientStreamStateHandlerTest, RequestHandleReturnedInResponse) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 
   auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
-  EXPECT_EQ(response.requestHandle, kTestHandle);
+  EXPECT_EQ(response.requestContext.get(), kTestHandle);
   EXPECT_FALSE(handler_.hasActiveStream(1));
 }
 

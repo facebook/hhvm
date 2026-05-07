@@ -451,6 +451,7 @@ TEST_F(ClientSetupFrameHandlerTest, OnWritePassesThrough) {
           apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame{
               .data = std::move(data),
           },
+      .requestContext = {},
       .streamType =
           apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
   };

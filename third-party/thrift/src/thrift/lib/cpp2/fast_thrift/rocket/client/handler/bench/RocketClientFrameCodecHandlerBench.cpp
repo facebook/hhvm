@@ -86,6 +86,7 @@ RocketRequestMessage createRocketRequestResponseRequest(uint32_t streamId) {
               .data = folly::IOBuf::copyBuffer("data"),
               .header = {.streamId = streamId},
           },
+      .requestContext = {},
       .streamType = FrameType::REQUEST_RESPONSE,
   };
 }

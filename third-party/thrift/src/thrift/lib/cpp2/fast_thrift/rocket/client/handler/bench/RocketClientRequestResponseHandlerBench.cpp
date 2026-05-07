@@ -66,6 +66,7 @@ RocketResponseMessage createPayloadResponse(
       folly::IOBuf::copyBuffer("data"));
   return RocketResponseMessage{
       .payload = parseFrame(std::move(frame)),
+      .requestContext = {},
       .streamType = streamType,
   };
 }
@@ -74,6 +75,7 @@ RocketResponseMessage makeRequestNResponse(uint32_t streamId) {
   auto buf = serialize(RequestNHeader{.streamId = streamId, .requestN = 1});
   return RocketResponseMessage{
       .payload = parseFrame(std::move(buf)),
+      .requestContext = {},
       .streamType = FrameType::REQUEST_RESPONSE,
   };
 }

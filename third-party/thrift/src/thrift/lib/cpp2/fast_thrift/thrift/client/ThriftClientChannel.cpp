@@ -78,12 +78,6 @@ void ThriftClientChannel::sendRequestInternal(
     return;
   }
 
-  // Store callback in pending map keyed by request ID.
-  // This ensures we maintain ownership until the request completes,
-  // preventing use-after-move bugs on pipeline errors.
-  auto requestId = nextRequestId_++;
-  auto it = pendingCallbacks_.emplace(requestId, std::move(callbackPtr)).first;
-
   // Build and serialize RequestRpcMetadata
   std::unique_ptr<folly::IOBuf> metadata;
   try {
@@ -93,44 +87,29 @@ void ThriftClientChannel::sendRequestInternal(
         apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
         static_cast<apache::thrift::ProtocolId>(protocolId_));
   } catch (...) {
-    auto callback = std::move(it->second);
-    pendingCallbacks_.erase(it);
-    callback.release()->onResponseError(
+    callbackPtr.release()->onResponseError(
         folly::make_exception_wrapper<apache::thrift::TApplicationException>(
             apache::thrift::TApplicationException::INTERNAL_ERROR,
             "Metadata serialization failed"));
     return;
   }
 
-  // Create ThriftRequestMessage for the pipeline. Today only the
-  // request-response pattern is wired; other RpcKinds will pick the
-  // matching ThriftRequest*Payload alternative as they get implemented.
+  // RequestClientCallback::Ptr has an auto-detach deleter that fires
+  // onResponseError if dropped without firing — so default delete here
+  // is sufficient to handle the rescue path.
   ThriftRequestMessage msg{
       .payload =
           ThriftRequestResponsePayload{
               .data = std::move(request.buffer),
               .metadata = std::move(metadata),
           },
-      .requestHandle = static_cast<uint32_t>(requestId),
+      .requestContext = apache::thrift::fast_thrift::rocket::from_unique_ptr(
+          std::make_unique<ChannelCallbackContext>(std::move(callbackPtr))),
   };
 
-  // Write to the pipeline
-  auto result = pipeline_->fireWrite(
+  (void)pipeline_->fireWrite(
       apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
           std::move(msg)));
-
-  if (result == apache::thrift::fast_thrift::channel_pipeline::Result::Error) {
-    // Pipeline failed - retrieve callback from pending map and invoke error
-    auto cbIt = pendingCallbacks_.find(requestId);
-    if (cbIt != pendingCallbacks_.end()) {
-      auto callback = std::move(cbIt->second);
-      pendingCallbacks_.erase(cbIt);
-      callback.release()->onResponseError(
-          folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-              apache::thrift::TApplicationException::INTERNAL_ERROR,
-              "Pipeline write failed"));
-    }
-  }
 }
 
 void ThriftClientChannel::sendRequestResponse(
@@ -249,13 +228,13 @@ ThriftClientChannel::onRead(
     apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
         msg) noexcept {
   auto response = msg.take<ThriftResponseMessage>();
-  auto it = pendingCallbacks_.find(response.requestHandle);
-  if (it == pendingCallbacks_.end()) {
-    XLOG(WARN) << "Response for unknown handle: " << response.requestHandle;
+  auto ctx = response.requestContext.release_as<ChannelCallbackContext>();
+  if (FOLLY_UNLIKELY(!ctx)) {
+    XLOG(WARN) << "Response with null requestContext";
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
-  auto callback = std::move(it->second);
-  pendingCallbacks_.erase(it);
+  auto callback = std::move(ctx->cb);
+  ctx.reset();
 
   DCHECK(
       response.streamType ==
@@ -288,14 +267,8 @@ void ThriftClientChannel::onException(folly::exception_wrapper&& e) noexcept {
 
   state_ = State::Closed;
 
-  // Fail all pending callbacks with the exception
-  pendingCallbacks_.forEach(
-      [&](uint64_t, apache::thrift::RequestClientCallback::Ptr& callback) {
-        callback.release()->onResponseError(e);
-      });
-  pendingCallbacks_.clear();
-
-  // Close the pipeline
+  // Close the pipeline. Per-request error delivery for in-flight requests is
+  // a connection-level concern owned outside this channel.
   if (pipeline_) {
     pipeline_->close();
   }

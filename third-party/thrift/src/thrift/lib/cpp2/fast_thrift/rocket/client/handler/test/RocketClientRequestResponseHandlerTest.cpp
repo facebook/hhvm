@@ -52,6 +52,7 @@ RocketResponseMessage makePayloadResponse(
   return RocketResponseMessage{
       .payload =
           apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf)),
+      .requestContext = {},
       .streamType = streamType,
   };
 }
@@ -68,6 +69,7 @@ RocketResponseMessage makeErrorResponse(
   return RocketResponseMessage{
       .payload =
           apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf)),
+      .requestContext = {},
       .streamType = streamType,
   };
 }
@@ -82,6 +84,7 @@ RocketResponseMessage makeRequestNResponse(
   return RocketResponseMessage{
       .payload =
           apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf)),
+      .requestContext = {},
       .streamType = streamType,
   };
 }
@@ -101,6 +104,7 @@ RocketResponseMessage makeExtResponse(
   return RocketResponseMessage{
       .payload =
           apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf)),
+      .requestContext = {},
       .streamType = streamType,
   };
 }

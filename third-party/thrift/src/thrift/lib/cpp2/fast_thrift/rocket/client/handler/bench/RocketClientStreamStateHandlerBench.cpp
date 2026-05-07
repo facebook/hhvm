@@ -65,7 +65,7 @@ RocketRequestMessage createRocketRequest() {
               .data = folly::IOBuf::copyBuffer("data"),
               .header = {.streamId = kInvalidStreamId},
           },
-      .requestHandle = 1,
+      .requestContext = borrow(reinterpret_cast<void*>(0x1)),
       .streamType = FrameType::REQUEST_RESPONSE,
   };
 }
@@ -78,6 +78,7 @@ RocketResponseMessage createPayloadResponse(uint32_t streamId) {
 
   return RocketResponseMessage{
       .payload = parseFrame(std::move(frame)),
+      .requestContext = {},
   };
 }
 

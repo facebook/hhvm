@@ -291,7 +291,8 @@ BENCHMARK(Read_NonMetadataPush_Passthrough, iters) {
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
     response.frame = parseFrame(std::move(frames[i]));
-    response.requestHandle = 1;
+    response.requestContext = apache::thrift::fast_thrift::rocket::borrow(
+        reinterpret_cast<void*>(0x1));
     response.streamType = FrameType::REQUEST_RESPONSE;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));

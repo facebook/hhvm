@@ -70,6 +70,7 @@ RocketResponseMessage createConnectionErrorFrame(ErrorCode errorCode) {
 
   return RocketResponseMessage{
       .payload = parseFrame(std::move(frame)),
+      .requestContext = {},
   };
 }
 

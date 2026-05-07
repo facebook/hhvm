@@ -51,13 +51,17 @@ namespace apache::thrift::fast_thrift::rocket::client::handler {
  * cleanup
  *
  * Message flow:
- *   Outbound: RocketRequestMessage{streamType, payload, callback} ->
- *             RocketRequestMessage{streamId, streamType, payload} (with
- *             streamId assigned and streamType cached for response correlation)
+ *   Outbound: RocketRequestMessage{streamType, payload, requestContext} ->
+ *             RocketRequestMessage{streamId, streamType, payload}
+ *             (streamId assigned; requestContext ownership is moved into the
+ *             per-stream slot only after the downstream write succeeds —
+ *             on failure the message is destroyed and the deleter frees
+ *             the heap ctx without ever double-owning)
  *   Inbound:  RocketResponseMessage{frame} ->
- *             RocketResponseMessage{streamType, requestHandle, frame} (with
- *             streamType stamped from the per-stream map for downstream
- *             pattern handler dispatch)
+ *             RocketResponseMessage{streamType, requestContext, frame}
+ *             (streamType stamped on every stream-scoped frame; requestContext
+ *             ownership moved out of the slot on terminal frames so the
+ *             AppAdapter can recover the heap ctx)
  */
 class RocketClientStreamStateHandler {
  public:
@@ -114,13 +118,18 @@ class RocketClientStreamStateHandler {
         return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
       }
 
-      // Stamp streamType (and requestHandle) on every stream-scoped frame so
-      // downstream per-pattern handlers can dispatch statelessly. streamType is
-      // constant for the stream's lifetime; requestHandle is the App's
-      // correlation token. Only erase on terminal.
-      response.requestHandle = it->second.requestHandle;
+      // Stamp streamType on every stream-scoped frame so downstream
+      // per-pattern handlers can dispatch statelessly. On terminal
+      // frames also move requestContext ownership out of the slot map
+      // so the AppAdapter receives it (or, if the message is dropped
+      // anywhere upstream, the deleter on the response frees the
+      // heap ctx). Non-terminal frames leave the slot intact and
+      // carry no requestContext today — when streaming patterns land,
+      // a raw observer field will be added alongside the owning
+      // handle for intermediate frame delivery.
       response.streamType = it->second.streamType;
       if (parsed.isTerminalFrame()) {
+        response.requestContext = std::move(it->second.requestContext);
         activeStreams_.erase(it);
       }
 
@@ -136,8 +145,8 @@ class RocketClientStreamStateHandler {
                 << err.streamId;
       return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
     }
-    response.requestHandle = it->second.requestHandle;
     response.streamType = it->second.streamType;
+    response.requestContext = std::move(it->second.requestContext);
     activeStreams_.erase(it);
     return ctx.fireRead(std::move(msg));
   }
@@ -183,17 +192,34 @@ class RocketClientStreamStateHandler {
     }
 
     payload.header.streamId = generateStreamId();
-    DCHECK(!activeStreams_.contains(payload.streamId()))
-        << "Stream ID " << payload.streamId()
-        << " already exists in active streams";
+    const uint32_t sid = payload.streamId();
+    DCHECK(!activeStreams_.contains(sid))
+        << "Stream ID " << sid << " already exists in active streams";
+
+    // Insert into the slot BEFORE fireWrite so the codec's synthesized
+    // RocketResponseError path (fired upward from inside fireWrite) can
+    // find the slot and route the error correctly through onRead. The
+    // slot owns the requestContext now — on Result::Error below we erase
+    // the slot, which destructs the TypeErasedPtr and fires the
+    // rescue deleter so the caller's handler resolves promptly rather
+    // than waiting for connection teardown.
     activeStreams_.emplace(
-        payload.streamId(),
+        sid,
         ClientStreamContext{
+            .requestContext = std::move(request.requestContext),
             .streamType = request.streamType,
-            .requestHandle = request.requestHandle,
         });
 
-    return ctx.fireWrite(std::move(msg));
+    auto result = ctx.fireWrite(std::move(msg));
+    if (FOLLY_UNLIKELY(
+            result ==
+            apache::thrift::fast_thrift::channel_pipeline::Result::Error)) {
+      // erase is a no-op if the inbound error path already removed the
+      // slot (e.g., codec synthesized RocketResponseError → fireRead →
+      // our onRead erased it before returning).
+      activeStreams_.erase(sid);
+    }
+    return result;
   }
 
   template <typename Context>
@@ -232,12 +258,16 @@ class RocketClientStreamStateHandler {
   /**
    * ClientStreamContext - State stored for each pending request stream.
    *
-   * Used to track active streams and store per-stream context needed to
-   * correlate responses with their original requests.
+   * `requestContext` is a type-erased owning handle to the AppAdapter's
+   * heap-allocated per-request context. The rocket layer never
+   * dereferences the pointer; it only routes the handle and runs the
+   * deleter the AppAdapter supplied on any cleanup path (terminal frame,
+   * activeStreams_.clear() on connection teardown, ~DirectStreamMap on
+   * pipeline destruction). The slot map never holds a stale pointer.
    */
   struct ClientStreamContext {
+    TypeErasedPtr requestContext;
     apache::thrift::fast_thrift::frame::FrameType streamType;
-    uint32_t requestHandle;
   };
 
   uint32_t nextStreamId_{1};

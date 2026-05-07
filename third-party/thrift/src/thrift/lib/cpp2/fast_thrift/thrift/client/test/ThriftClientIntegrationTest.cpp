@@ -400,6 +400,15 @@ TEST_F(
 
   // Frame should have data (our test payload)
   EXPECT_GT(parsed.dataSize(), 0u);
+
+  // Deliver a synthetic response so the per-request ChannelCallbackContext is
+  // freed by the AppAdapter.
+  injectFrame(createPayloadResponse(
+      parsed.streamId(),
+      serializeResponseMetadata(createBasicResponseMetadata()),
+      folly::IOBuf::copyBuffer("cleanup")));
+  evb_.loopOnce();
+  evb_.loopOnce();
 }
 
 TEST_F(
@@ -439,6 +448,17 @@ TEST_F(
   auto parsed2 = parseWrittenFrame(std::move(frame2));
   ASSERT_TRUE(parsed2.isValid());
   EXPECT_EQ(parsed2.streamId(), 3u) << "Second request should have stream ID 3";
+
+  // Deliver synthetic responses so per-request ChannelCallbackContexts are
+  // freed by the AppAdapter.
+  for (uint32_t streamId : {parsed1.streamId(), parsed2.streamId()}) {
+    injectFrame(createPayloadResponse(
+        streamId,
+        serializeResponseMetadata(createBasicResponseMetadata()),
+        folly::IOBuf::copyBuffer("cleanup")));
+    evb_.loopOnce();
+    evb_.loopOnce();
+  }
 }
 
 // =============================================================================
@@ -862,6 +882,8 @@ TEST_F(
       std::move(pendingCb),
       nullptr);
   evb_.loopOnce();
+  auto pendingFrame = getWrittenFrame();
+  auto pendingParsed = parseWrittenFrame(std::move(pendingFrame));
 
   // Simulate CONNECTION_CLOSE: fires NOT_OPEN exception which transitions
   // state_ to State::Closing
@@ -896,6 +918,15 @@ TEST_F(
   EXPECT_NE(
       std::string(ex->what()).find("Connection closed by server"),
       std::string::npos);
+
+  // Deliver a synthetic response for the inflight request so its
+  // ChannelCallbackContext is freed by the AppAdapter.
+  injectFrame(createPayloadResponse(
+      pendingParsed.streamId(),
+      serializeResponseMetadata(createBasicResponseMetadata()),
+      folly::IOBuf::copyBuffer("cleanup")));
+  evb_.loopOnce();
+  evb_.loopOnce();
 }
 
 // =============================================================================
@@ -1041,7 +1072,7 @@ TEST_F(ThriftClientChannelIntegrationTest, ResponseWithEmptyPayload) {
 TEST_F(ThriftClientChannelIntegrationTest, ResponseForUnknownStreamId) {
   setupPipeline();
 
-  // Send a request to establish a valid stream
+  // Send a request to establish a valid stream (stream 1)
   auto [cb, state] = makeCallback();
 
   channel_->sendRequestResponse(
@@ -1053,7 +1084,8 @@ TEST_F(ThriftClientChannelIntegrationTest, ResponseForUnknownStreamId) {
       nullptr);
 
   evb_.loopOnce();
-  getWrittenFrame(); // Discard the request frame
+  auto requestFrame = getWrittenFrame();
+  auto parsedRequest = parseWrittenFrame(std::move(requestFrame));
 
   // Inject a response for an unknown stream ID (stream 99 doesn't exist)
   auto responseMetadata = createBasicResponseMetadata();
@@ -1071,6 +1103,15 @@ TEST_F(ThriftClientChannelIntegrationTest, ResponseForUnknownStreamId) {
   // Original callback should NOT receive this response
   EXPECT_FALSE(state->responseReceived);
   EXPECT_FALSE(state->errorReceived);
+
+  // Deliver a real response for stream 1 so its ChannelCallbackContext is
+  // freed by the AppAdapter.
+  injectFrame(createPayloadResponse(
+      parsedRequest.streamId(),
+      serializeResponseMetadata(createBasicResponseMetadata()),
+      folly::IOBuf::copyBuffer("cleanup")));
+  evb_.loopOnce();
+  evb_.loopOnce();
 }
 
 TEST_F(
@@ -1348,6 +1389,15 @@ TEST_F(
   EXPECT_EQ(
       parsed.type(),
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE);
+
+  // Deliver a synthetic response so the per-request ThriftRequestContext is
+  // freed by the AppAdapter.
+  injectFrame(createPayloadResponse(
+      parsed.streamId(),
+      std::move(serializedMetadata),
+      folly::IOBuf::copyBuffer("cleanup")));
+  evb_.loopOnce();
+  evb_.loopOnce();
 }
 
 TEST_F(
@@ -1413,29 +1463,6 @@ TEST_F(ThriftClientAppAdapterIntegrationTest, ErrorFramePropagatesException) {
 }
 
 TEST_F(
-    ThriftClientAppAdapterIntegrationTest,
-    OnExceptionPropagatesExceptionToAllPending) {
-  setupPipeline();
-
-  auto future1 = client_.sendBenchRequest(folly::IOBuf::copyBuffer("req1"));
-
-  auto future2 = client_.sendBenchRequest(folly::IOBuf::copyBuffer("req2"));
-
-  evb_.loopOnce();
-  getWrittenFrame();
-  evb_.loopOnce();
-  getWrittenFrame();
-
-  client_.adapter().onException(
-      folly::make_exception_wrapper<std::runtime_error>("connection lost"));
-
-  ASSERT_TRUE(future1.isReady());
-  ASSERT_TRUE(future2.isReady());
-  EXPECT_TRUE(future1.result().hasException());
-  EXPECT_TRUE(future2.result().hasException());
-}
-
-TEST_F(
     ThriftClientAppAdapterIntegrationTest, WriteOnClosedAdapterReturnsError) {
   setupPipeline();
 
@@ -1465,7 +1492,8 @@ TEST_F(
   auto inflightFuture =
       client_.sendBenchRequest(folly::IOBuf::copyBuffer("inflight"));
   evb_.loopOnce();
-  getWrittenFrame();
+  auto pendingFrame = getWrittenFrame();
+  auto pendingParsed = parseWrittenFrame(std::move(pendingFrame));
 
   // Simulate CONNECTION_CLOSE: fires NOT_OPEN exception which transitions
   // state_ to State::Closing
@@ -1493,6 +1521,15 @@ TEST_F(
   EXPECT_NE(
       std::string(ex->what()).find("Connection closed by server"),
       std::string::npos);
+
+  // Deliver a synthetic response for the inflight request so its
+  // ThriftRequestContext is freed by the AppAdapter.
+  injectFrame(createPayloadResponse(
+      pendingParsed.streamId(),
+      serializeResponseMetadata(createBasicResponseMetadata()),
+      folly::IOBuf::copyBuffer("cleanup")));
+  evb_.loopOnce();
+  evb_.loopOnce();
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

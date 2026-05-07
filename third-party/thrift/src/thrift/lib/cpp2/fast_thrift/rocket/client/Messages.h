@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrameVariant.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/common/TypeErasedPtr.h>
 
 #include <folly/ExceptionWrapper.h>
 
@@ -32,10 +33,6 @@ namespace apache::thrift::fast_thrift::rocket {
 // ============================================================================
 // Constants
 // ============================================================================
-
-/// Sentinel value for requests that don't need response correlation
-/// (e.g., setup frames, fire-and-forget requests).
-constexpr uint32_t kNoRequestHandle = 0;
 
 /// Sentinel value for unassigned stream IDs.
 /// StreamStateHandler assigns a valid streamId on outbound requests.
@@ -64,14 +61,12 @@ constexpr uint32_t kInvalidStreamId = std::numeric_limits<uint32_t>::max();
  * `Composed*Frame` types will join the variant.
  */
 struct RocketRequestMessage {
-  /// Per-frame payload (header + buffers).
   apache::thrift::fast_thrift::frame::ComposedFrameVariant<
       apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame,
       apache::thrift::fast_thrift::frame::ComposedSetupFrame>
       frame;
 
-  /// Opaque handle for correlating responses with requests.
-  uint32_t requestHandle{kNoRequestHandle};
+  TypeErasedPtr requestContext;
 
   /// The originating REQUEST_* frame type that establishes the stream.
   /// Distinct from `frame.frameType()` — the latter is the current frame's
@@ -119,8 +114,7 @@ struct RocketResponseMessage {
       RocketResponseError>
       payload;
 
-  /// Opaque handle for correlating responses with requests.
-  uint32_t requestHandle{kNoRequestHandle};
+  TypeErasedPtr requestContext;
 
   /// The originating REQUEST_* frame type for this response's stream.
   apache::thrift::fast_thrift::frame::FrameType streamType{

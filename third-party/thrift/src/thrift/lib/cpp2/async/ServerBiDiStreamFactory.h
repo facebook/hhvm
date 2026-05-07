@@ -120,7 +120,19 @@ class ServerBiDiStreamFactory {
               std::move(transformFn),
               ServerBiDiSinkBridge::getInput(sinkBridge->copy(), &decoder)),
           &encoder);
-      folly::coro::co_withExecutor(serverExecutor, std::move(task)).start();
+      if (serverExecutor.get() == evb) {
+        // EB mode: serverExecutor is the IO thread's EventBase, and we are
+        // already on it. addWithPriority would throw (EventBase inherits
+        // Executor::addWithPriority's throwing default), and even plain
+        // add() would defer to a runInLoop callback at the end of the
+        // current loop iteration. Run the task prologue synchronously
+        // instead — startInlineUnsafe assumes the current thread is on the
+        // task's bound executor, which holds here.
+        folly::coro::co_withExecutor(serverExecutor, std::move(task))
+            .startInlineUnsafe();
+      } else {
+        folly::coro::co_withExecutor(serverExecutor, std::move(task)).start();
+      }
 
       std::ignore = clientCb->onFirstResponse(std::move(payload), evb, stapled);
 

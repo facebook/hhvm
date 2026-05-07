@@ -16,6 +16,7 @@
 
 namespace cpp2 apache.thrift.detail.test
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
 package "facebook.com/thrift/test/e2e/bidi"
@@ -45,4 +46,22 @@ service TestBiDiService {
   sink<i64 throws (1: BiDiSinkException sinkEx)>, stream<
     i64 throws (1: BiDiStreamException sinkEx)
   > canThrow() throws (1: BiDiMethodException methodEx);
+
+  // EB-mode variants: force the handler to run inline on the IO/EventBase
+  // thread. Used to exercise the code path in ServerBiDiStreamFactory where
+  // serverExecutor captured by the factory is the EventBase, not a CPU
+  // thread pool. These mirror the non-EB methods above one-for-one.
+  @cpp.ProcessInEbThreadUnsafe
+  sink<string>, stream<string> echoEb();
+
+  @cpp.ProcessInEbThreadUnsafe
+  string, sink<string>, stream<string> echoWithResponseEb(1: string initial);
+
+  @cpp.ProcessInEbThreadUnsafe
+  sink<i64>, stream<i64> intStreamEb();
+
+  @cpp.ProcessInEbThreadUnsafe
+  sink<i64 throws (1: BiDiSinkException sinkEx)>, stream<
+    i64 throws (1: BiDiStreamException sinkEx)
+  > canThrowEb() throws (1: BiDiMethodException methodEx);
 }

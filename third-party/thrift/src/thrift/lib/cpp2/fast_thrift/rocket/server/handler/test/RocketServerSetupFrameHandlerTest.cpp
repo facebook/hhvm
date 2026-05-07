@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
@@ -269,7 +270,32 @@ TEST_F(
   const auto& errPayload =
       errResp.frame
           .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
-  EXPECT_EQ(errPayload.header.errorCode, setup_error::kUnsupportedSetup);
+  EXPECT_EQ(
+      errPayload.header.errorCode,
+      static_cast<uint32_t>(
+          apache::thrift::fast_thrift::frame::ErrorCode::UNSUPPORTED_SETUP));
+}
+
+TEST_F(
+    ServerSetupFrameHandlerTest,
+    SetupWithNonZeroMinorVersionReturnsUnsupportedSetup) {
+  auto result = callOnRead(makeSetupFrame(1, 1, 30000, 60000));
+
+  EXPECT_EQ(result, Result::Error);
+  EXPECT_FALSE(handler_.isSetupComplete());
+  EXPECT_TRUE(ctx_.closeCalled());
+
+  ASSERT_EQ(ctx_.writeMessages().size(), 1);
+  auto& errResp = ctx_.writeMessages()[0]
+                      .get<apache::thrift::fast_thrift::rocket::server::
+                               RocketResponseMessage>();
+  const auto& errPayload =
+      errResp.frame
+          .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
+  EXPECT_EQ(
+      errPayload.header.errorCode,
+      static_cast<uint32_t>(
+          apache::thrift::fast_thrift::frame::ErrorCode::UNSUPPORTED_SETUP));
 }
 
 // =============================================================================
@@ -292,7 +318,10 @@ TEST_F(
   const auto& errPayload =
       errResp.frame
           .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
-  EXPECT_EQ(errPayload.header.errorCode, setup_error::kInvalidSetup);
+  EXPECT_EQ(
+      errPayload.header.errorCode,
+      static_cast<uint32_t>(
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
 }
 
 TEST_F(
@@ -310,7 +339,10 @@ TEST_F(
   const auto& errPayload =
       errResp.frame
           .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
-  EXPECT_EQ(errPayload.header.errorCode, setup_error::kInvalidSetup);
+  EXPECT_EQ(
+      errPayload.header.errorCode,
+      static_cast<uint32_t>(
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
 }
 
 // =============================================================================
@@ -333,7 +365,10 @@ TEST_F(ServerSetupFrameHandlerTest, NonSetupFirstFrameReturnsInvalidSetup) {
       errResp.frame
           .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
   EXPECT_EQ(errPayload.header.streamId, 0u);
-  EXPECT_EQ(errPayload.header.errorCode, setup_error::kInvalidSetup);
+  EXPECT_EQ(
+      errPayload.header.errorCode,
+      static_cast<uint32_t>(
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
 }
 
 // =============================================================================
@@ -357,7 +392,10 @@ TEST_F(ServerSetupFrameHandlerTest, DuplicateSetupFrameReturnsInvalidSetup) {
   const auto& errPayload =
       errResp.frame
           .get<apache::thrift::fast_thrift::frame::ComposedErrorFrame>();
-  EXPECT_EQ(errPayload.header.errorCode, setup_error::kInvalidSetup);
+  EXPECT_EQ(
+      errPayload.header.errorCode,
+      static_cast<uint32_t>(
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP));
 }
 
 // =============================================================================

@@ -23,6 +23,7 @@
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
+#include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameViews.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
@@ -30,11 +31,6 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
 
 namespace apache::thrift::fast_thrift::rocket::server::handler {
-
-namespace setup_error {
-constexpr uint32_t kInvalidSetup = 0x00000001;
-constexpr uint32_t kUnsupportedSetup = 0x00000002;
-} // namespace setup_error
 
 struct SetupParameters {
   uint16_t majorVersion{0};
@@ -66,6 +62,7 @@ struct SetupParameters {
 class RocketServerSetupFrameHandler {
  public:
   static constexpr uint16_t kRSocketMajorVersion = 1;
+  static constexpr uint16_t kRSocketMinorVersion = 0;
 
   RocketServerSetupFrameHandler() = default;
 
@@ -117,7 +114,9 @@ class RocketServerSetupFrameHandler {
             apache::thrift::fast_thrift::frame::FrameType::SETUP)) {
       XLOG(ERR) << "Received duplicate SETUP frame after setup complete";
       return sendError(
-          ctx, setup_error::kInvalidSetup, "SETUP frame already received");
+          ctx,
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP,
+          "SETUP frame already received");
     }
 
     return ctx.fireRead(std::move(msg));
@@ -159,7 +158,9 @@ class RocketServerSetupFrameHandler {
     if (frame.type() != apache::thrift::fast_thrift::frame::FrameType::SETUP) {
       XLOG(ERR) << "Expected SETUP frame, got " << frame.typeName();
       return sendError(
-          ctx, setup_error::kInvalidSetup, "First frame must be SETUP");
+          ctx,
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP,
+          "First frame must be SETUP");
     }
 
     apache::thrift::fast_thrift::frame::read::SetupView view(frame);
@@ -168,25 +169,40 @@ class RocketServerSetupFrameHandler {
     if (majorVersion != kRSocketMajorVersion) {
       XLOG(ERR) << "Unsupported RSocket major version: " << majorVersion;
       return sendError(
-          ctx, setup_error::kUnsupportedSetup, "Unsupported major version");
+          ctx,
+          apache::thrift::fast_thrift::frame::ErrorCode::UNSUPPORTED_SETUP,
+          "Unsupported major version");
+    }
+
+    uint16_t minorVersion = view.minorVersion();
+    if (minorVersion != kRSocketMinorVersion) {
+      XLOG(ERR) << "Unsupported RSocket minor version: " << minorVersion;
+      return sendError(
+          ctx,
+          apache::thrift::fast_thrift::frame::ErrorCode::UNSUPPORTED_SETUP,
+          "Unsupported minor version");
     }
 
     uint32_t keepaliveTime = view.keepaliveTime();
     if (keepaliveTime == 0) {
       XLOG(ERR) << "SETUP keepaliveTime must be > 0";
       return sendError(
-          ctx, setup_error::kInvalidSetup, "keepaliveTime must be > 0");
+          ctx,
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP,
+          "keepaliveTime must be > 0");
     }
 
     uint32_t maxLifetime = view.maxLifetime();
     if (maxLifetime == 0) {
       XLOG(ERR) << "SETUP maxLifetime must be > 0";
       return sendError(
-          ctx, setup_error::kInvalidSetup, "maxLifetime must be > 0");
+          ctx,
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP,
+          "maxLifetime must be > 0");
     }
 
     params_.majorVersion = majorVersion;
-    params_.minorVersion = view.minorVersion();
+    params_.minorVersion = minorVersion;
     params_.keepaliveTime = keepaliveTime;
     params_.maxLifetime = maxLifetime;
     params_.hasLease = view.hasLease();
@@ -200,14 +216,18 @@ class RocketServerSetupFrameHandler {
 
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result sendError(
-      Context& ctx, uint32_t errorCode, const char* message) noexcept {
+      Context& ctx,
+      apache::thrift::fast_thrift::frame::ErrorCode errorCode,
+      const char* message) noexcept {
     try {
       auto errorData = ctx.copyBuffer(message, std::strlen(message));
       RocketResponseMessage response{
           .frame =
               apache::thrift::fast_thrift::frame::ComposedErrorFrame{
                   .data = std::move(errorData),
-                  .header = {.streamId = 0, .errorCode = errorCode},
+                  .header =
+                      {.streamId = 0,
+                       .errorCode = static_cast<uint32_t>(errorCode)},
               },
       };
       auto writeResult = ctx.fireWrite(
@@ -216,10 +236,11 @@ class RocketServerSetupFrameHandler {
       if (writeResult !=
           apache::thrift::fast_thrift::channel_pipeline::Result::Success) {
         XLOG(WARN) << "Failed to deliver ERROR frame for errorCode="
-                   << errorCode;
+                   << apache::thrift::fast_thrift::frame::toString(errorCode);
       }
     } catch (...) {
-      XLOG(ERR) << "Failed to send ERROR frame for errorCode=" << errorCode;
+      XLOG(ERR) << "Failed to send ERROR frame for errorCode="
+                << apache::thrift::fast_thrift::frame::toString(errorCode);
     }
 
     // Per RSocket spec, setup errors require connection termination.

@@ -179,6 +179,11 @@ struct WtStreamManager {
   // returns min(recv_conn_fc_avail, recv_stream_fc_avail)
   [[nodiscard]] uint64_t recvBytesAvail(const WtReadHandle& rh) const noexcept;
 
+  // Returns total bytes enqueued on the stream's receive side (i.e. the
+  // stream recv flow controller's current offset).
+  [[nodiscard]] uint64_t streamBytesReceived(
+      const WtReadHandle& rh) const noexcept;
+
   enum Result : uint8_t { Fail = 0, Ok = 1 };
   /**
    * invoke when receiving max_streams frame from peer – returns Ok if

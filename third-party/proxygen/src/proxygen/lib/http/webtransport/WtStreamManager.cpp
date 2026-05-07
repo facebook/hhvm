@@ -525,6 +525,11 @@ uint64_t WtStreamManager::recvBytesAvail(
       static_cast<const ReadHandle&>(rh).streamRecvFc_.getAvailable());
 }
 
+uint64_t WtStreamManager::streamBytesReceived(
+    const WtReadHandle& rh) const noexcept {
+  return static_cast<const ReadHandle&>(rh).streamRecvFc_.getCurrentOffset();
+}
+
 WtStreamManager::Result WtStreamManager::onMaxData(MaxConnData data) noexcept {
   XLOG(DBG9) << __func__ << " maxData=" << data.maxData;
   if (!connSendFc_.grant(data.maxData)) {

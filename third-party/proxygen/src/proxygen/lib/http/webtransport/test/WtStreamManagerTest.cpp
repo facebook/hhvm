@@ -287,13 +287,17 @@ TEST(WtStreamManager, EnqueueIngressDataRwnd) {
   constexpr auto kBufLen = 65'535;
 
   EXPECT_EQ(streamManager.recvBytesAvail(*one.readHandle), kBufLen);
+  EXPECT_EQ(streamManager.streamBytesReceived(*one.readHandle), 0);
   // both conn & stream recv window exactly full, expect success
   EXPECT_TRUE(
       streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
   EXPECT_EQ(streamManager.recvBytesAvail(*one.readHandle), 0);
+  EXPECT_EQ(streamManager.streamBytesReceived(*one.readHandle), kBufLen);
   // enqueuing a additional byte in one will fail (stream recv window full)
   EXPECT_FALSE(
       streamManager.enqueue(*one.readHandle, {makeBuf(kBufLen), false}));
+  // failed enqueue must not advance the stream recv offset
+  EXPECT_EQ(streamManager.streamBytesReceived(*one.readHandle), kBufLen);
 
   // enqueuing a single byte in two will fail (conn recv window full)
   EXPECT_FALSE(streamManager.enqueue(*two.readHandle, {makeBuf(1), false}));

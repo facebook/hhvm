@@ -17,25 +17,22 @@
 
 import ipaddress
 import os
-import pathlib
 from asyncio import Future
 from enum import Enum
 from types import TracebackType
-from typing import (
-    Any,
-    Callable,
-    ClassVar,
-    Mapping,
-    NamedTuple,
-    Optional,
-    overload,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, ClassVar, Mapping, Optional, Type, TypeVar, Union
 
 from thrift.py3.common import Headers, Priority
 from thrift.python.server_impl.interceptor.server_module import PythonServerModule
+from thrift.python.server_impl.request_context import (
+    ClientMetadata as ClientMetadata,
+    ConnectionContext as ConnectionContext,
+    get_context as get_context,
+    ReadHeaders as ReadHeaders,
+    RequestContext as RequestContext,
+    SocketAddress as SocketAddress,
+    WriteHeaders as WriteHeaders,
+)
 from thrift.python.types import ServiceInterface as PythonServiceInterface
 
 mT = TypeVar("mT", bound=Callable[..., Any])
@@ -43,16 +40,6 @@ T = TypeVar("T")
 IPAddress = Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
 # pyre-fixme[24]: Generic type `os.PathLike` expects 1 type parameter.
 Path = Union[str, bytes, os.PathLike]
-
-class SocketAddress(NamedTuple):
-    ip: Optional[IPAddress]
-    port: Optional[int]
-    path: Optional[pathlib.Path]
-
-@overload
-def get_context() -> RequestContext: ...
-@overload
-def get_context(default: T) -> Union[T, RequestContext]: ...
 
 class SSLPolicy(Enum):
     DISABLED: SSLPolicy = ...
@@ -128,33 +115,3 @@ class ThriftServer:
     def set_use_client_timeout(self, use_client_timeout: bool) -> None: ...
     def add_server_module(self, module: PythonServerModule) -> None: ...
     def set_stream_expire_time(self, seconds: float) -> None: ...
-
-class ReadHeaders(Headers): ...
-class WriteHeaders(Headers): ...
-
-class ConnectionContext:
-    local_address: SocketAddress
-    peer_address: SocketAddress
-    peer_common_name: str
-    security_protocol: str
-    peer_certificate: bytes
-    peer_certificate_identity: str
-    client_metadata: ClientMetadata
-
-class RequestContext:
-    connection_context: ConnectionContext
-    @property
-    def priority(self) -> Priority: ...
-    @property
-    def read_headers(self) -> ReadHeaders: ...
-    @property
-    def write_headers(self) -> WriteHeaders: ...
-    def set_header(self, key: str, value: str) -> None: ...
-    method_name: str
-    request_id: str
-    request_timeout: float
-
-class ClientMetadata:
-    agent: str
-    hostname: str
-    def getMetadataField(self, key: str) -> str: ...

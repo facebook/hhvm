@@ -72,6 +72,11 @@ void updateCodeSizeCounters();
 size_t getLiveMainUsage();
 
 /*
+ * Return total bytes used for live translations across main, cold, and frozen.
+ */
+size_t getLiveTotalUsage();
+
+/*
  * Return how much code in the main code area is being used for profile
  * translations.
  */

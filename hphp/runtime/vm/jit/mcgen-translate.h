@@ -59,6 +59,8 @@ bool retranslateAllComplete();
 
 bool liveMaxSecondsExpired();
 
+int64_t liveSecondsElapsed();
+
 /*
  * Undo the effects of bumpTraceFunctions() (so that we don't trace
  * all the inlined functions we're because we're tracing the function

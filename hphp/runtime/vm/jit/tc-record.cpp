@@ -239,6 +239,16 @@ size_t getLiveMainUsage() {
   return s_trans_counters[liveIdx][mainIdx].load(std::memory_order_acquire);
 }
 
+size_t getLiveTotalUsage() {
+  constexpr auto liveIdx = static_cast<size_t>(TransKind::Live);
+  constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
+  constexpr auto coldIdx = static_cast<size_t>(AreaIndex::Cold);
+  constexpr auto frozenIdx = static_cast<size_t>(AreaIndex::Frozen);
+  return s_trans_counters[liveIdx][mainIdx].load(std::memory_order_acquire) +
+         s_trans_counters[liveIdx][coldIdx].load(std::memory_order_acquire) +
+         s_trans_counters[liveIdx][frozenIdx].load(std::memory_order_acquire);
+}
+
 size_t getProfMainUsage() {
   constexpr auto profIdx = static_cast<size_t>(TransKind::Profile);
   constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);

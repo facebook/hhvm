@@ -890,6 +890,13 @@ bool liveMaxSecondsExpired() {
   return time(nullptr) - completedAt > Cfg::Jit::MaxLiveSeconds;
 }
 
+int64_t liveSecondsElapsed() {
+  auto const completedAt =
+    s_retranslateAllCompleteTime.load(std::memory_order_acquire);
+  if (completedAt == 0) return 0;
+  return time(nullptr) - completedAt;
+}
+
 int getActiveWorker() {
   if (s_retranslateAllCompleteTime.load(std::memory_order_acquire)) {
     return 0;

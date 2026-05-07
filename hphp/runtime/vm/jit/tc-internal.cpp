@@ -48,6 +48,7 @@
 #include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/mutex.h"
@@ -55,7 +56,10 @@
 #include "hphp/util/service-data.h"
 #include "hphp/util/trace.h"
 
+#include <algorithm>
 #include <atomic>
+#include <cmath>
+#include <deque>
 
 extern "C" _Unwind_Reason_Code
 __gxx_personality_v0(int, _Unwind_Action, uint64_t, _Unwind_Exception*,
@@ -67,6 +71,8 @@ namespace HPHP::jit::tc {
 
 __thread bool tl_is_jitting = false;
 __thread bool tl_threadIsFull = false;
+
+static thread_local std::deque<FuncId> tl_liveStreak;
 
 CodeCache* g_code{nullptr};
 CodeCacheViews* g_views{nullptr};
@@ -153,6 +159,28 @@ bool canTranslate() {
 
 static RDS_LOCAL_NO_CHECK(bool, s_jittingTimeLimitExceeded);
 
+uint8_t adjustedLiveThreshold() {
+  static std::atomic<uint8_t> s_cached{Cfg::Jit::LiveThreshold};
+  static std::atomic<int64_t> s_lastUpdate{0};
+
+  auto const elapsed = mcgen::liveSecondsElapsed();
+  auto lastUpdate = s_lastUpdate.load(std::memory_order_relaxed);
+  if (elapsed - lastUpdate > Cfg::Jit::LiveThresholdUpdateIntervalSecs &&
+      s_lastUpdate.compare_exchange_strong(
+          lastUpdate, elapsed, std::memory_order_relaxed)) {
+    auto const bytesUsed = getLiveTotalUsage();
+    auto const expectedBytesUsed =
+      (bytesUsed + code().totalUnassigned()) * elapsed / Cfg::Jit::MaxLiveSeconds;
+    auto const nextLiveThreshold =
+      static_cast<int>(s_cached.load(std::memory_order_relaxed)) +
+      (bytesUsed < expectedBytesUsed ? -Cfg::Jit::LiveThresholdStep : Cfg::Jit::LiveThresholdStep);
+    s_cached.store(static_cast<uint8_t>(std::clamp(
+      nextLiveThreshold, 1, static_cast<int>(Cfg::Jit::LiveThreshold))),
+      std::memory_order_relaxed);
+  }
+  return s_cached.load(std::memory_order_relaxed);
+}
+
 TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
                                                     bool noTheshold) {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
@@ -228,14 +256,27 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
     }
   }
 
+  auto const funcId = func->getFuncId();
+  auto const inStreak = isLive && std::find(
+      tl_liveStreak.begin(), tl_liveStreak.end(), funcId
+  ) != tl_liveStreak.end();
+
   if (!noTheshold && (isLive || isProf)) {
-    auto const funcThreshold = isLive ? Cfg::Jit::LiveThreshold
+    auto const baseThreshold = isLive ? adjustedLiveThreshold()
                                       : Cfg::Jit::ProfileThreshold;
+    auto const funcThreshold = inStreak ? 0 : isLive
+        ? static_cast<uint8_t>(baseThreshold * std::pow(Cfg::Jit::LiveStreakRatio, tl_liveStreak.size()))
+        : baseThreshold;
     if (func->incJitReqCount() < funcThreshold) {
+      tl_liveStreak.clear();
       return TranslationResult::Scope::Transient;
     }
   }
 
+  if (isLive && !inStreak) {
+    if (tl_liveStreak.size() >= Cfg::Jit::LiveStreakMaxSize) tl_liveStreak.pop_front();
+    tl_liveStreak.push_back(funcId);
+  }
   return TranslationResult::Scope::Success;
 }
 

@@ -2148,6 +2148,27 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Jit.PGOOptCodeCallGraph = true, UNKNOWN
 - bool Jit.PGOHFSortPlus = false, UNKNOWN
 - uint8_t Jit.LiveThreshold, UNKNOWN
+- int64_t Jit.LiveThresholdUpdateIntervalSecs, UNKNOWN
+
+  How often (in seconds after RetranslateAll) to re-evaluate the dynamic live
+  threshold. Lower values make the threshold more responsive but add overhead.
+
+- uint8_t Jit.LiveThresholdStep = 3, UNKNOWN
+
+  Amount to increase or decrease the dynamic live threshold at each update
+  interval. The threshold is raised when code emission is ahead of schedule and
+  lowered when behind, clamped to [1, LiveThreshold].
+
+- double Jit.LiveStreakRatio, UNKNOWN
+
+  Ratio raised to the power of the live streak vector size to scale
+  LiveThreshold. Values < 1.0 lower the threshold during hot streaks.
+
+- uint8_t Jit.LiveStreakMaxSize = 3, UNKNOWN
+
+  Maximum number of recently-translated functions tracked in the live streak
+  window. Larger values allow longer streaks to build up.
+
 - uint8_t Jit.ProfileThreshold, UNKNOWN
 - uint32_t Jit.FuncLiveTranslationByteLimit = -1, UNKNOWN
 

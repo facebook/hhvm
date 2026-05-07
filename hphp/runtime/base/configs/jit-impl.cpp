@@ -124,6 +124,14 @@ uint8_t JitLoader::LiveThresholdDefault() {
   return Cfg::Server::Mode ? 200 : 0;
 }
 
+int64_t JitLoader::LiveThresholdUpdateIntervalSecsDefault() {
+  return Cfg::Repo::Authoritative ? 5 : std::numeric_limits<int64_t>::max();
+}
+
+double JitLoader::LiveStreakRatioDefault() {
+  return Cfg::Repo::Authoritative ? 0.5 : 1.0;
+}
+
 uint8_t JitLoader::ProfileThresholdDefault() {
   return Cfg::Server::Mode ? 200 : 0;
 }

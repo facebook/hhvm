@@ -2225,6 +2225,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Dynamically allocate TC blocks
 
+- double Jit.DataBlockSizeRatio = 0.0, UNKNOWN
+
+  Allocate each data block to be at least the remaining TC size * Jit.DataBlockSizeRatio
+
 # Mail
 
 - std::string Mail.SendmailPath = "/usr/lib/sendmail -t -i", UNKNOWN

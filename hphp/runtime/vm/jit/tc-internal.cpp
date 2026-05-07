@@ -826,12 +826,12 @@ void incrementLiveFuncTransBytes(FuncId funcId, uint32_t bytes) {
 
 bool tcIsFull() {
   if (Cfg::Jit::DynamicTCSections) {
-    return s_TCisFull.load(std::memory_order_acquire);
+    if (Cfg::Jit::DataBlockSizeRatio > 0) {
+      return s_TCisFull.load(std::memory_order_acquire);
+    }
   }
 
-  return code().main().used() >= Cfg::CodeCache::AMaxUsage ||
-         code().cold().used() >= Cfg::CodeCache::AColdMaxUsage ||
-         code().frozen().used() >= Cfg::CodeCache::AFrozenMaxUsage;
+  return code().isAnySectionFull();
 }
 
 void setTcIsFull() {

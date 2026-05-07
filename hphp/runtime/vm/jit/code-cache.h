@@ -52,6 +52,8 @@ struct CodeCache {
   static constexpr uint32_t kNullptrOffset =
     std::numeric_limits<uint32_t>::max();
 
+  static constexpr size_t MinUnassigned = 4 * (2u << 20);
+
   CodeCache();
 
   template<typename L>
@@ -136,6 +138,7 @@ struct CodeCache {
         CodeBlock& bytecode()       { return m_bytecode; }
 
   const DataBlock& data() const { return m_data.block(); }
+  const bool isAnySectionFull() const;
 
   /*
    * Return a View of this CodeCache, selecting blocks approriately depending
@@ -218,14 +221,14 @@ private:
   static constexpr const char kFrozen[] = "afrozen";
   static constexpr const char kData[] = "gdata";
 
-  template<const char* name, bool code>
+  template<const char* name, bool code, bool overAllocate>
   struct SectionImpl : Section {
     void ensure(CodeCache& cc, size_t size);
   };
 
   template<const char* name>
-  using CodeSection = SectionImpl<name, true>;
-  using DataSection = SectionImpl<kData, false>;
+  using CodeSection = SectionImpl<name, true, true>;
+  using DataSection = SectionImpl<kData, false, false>;
 
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
@@ -244,7 +247,7 @@ private:
   // Each block must be at least DataBlock::kPageSize (the size of a huge page)
   std::array<std::atomic<DataBlock*>, 1024> m_blocks;
 
-  template<const char* name, bool code>
+  template<const char* name, bool code, bool overAllocate>
   friend struct SectionImpl;
 };
 

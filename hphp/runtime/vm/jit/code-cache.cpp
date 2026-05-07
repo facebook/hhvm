@@ -388,6 +388,16 @@ void CodeCache::unprotect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
+const bool CodeCache::isAnySectionFull() const {
+  if (Cfg::Jit::DynamicTCSections) {
+    return m_all.available() < CodeCache::MinUnassigned;
+  }
+
+  return main().used() >= Cfg::CodeCache::AMaxUsage ||
+         cold().used() >= Cfg::CodeCache::AColdMaxUsage ||
+         frozen().used() >= Cfg::CodeCache::AFrozenMaxUsage;
+}
+
 size_t CodeCache::Section::numFrees() const {
   return !Cfg::Jit::DynamicTCSections ? block().numFrees() : 0;
 }
@@ -405,15 +415,18 @@ size_t CodeCache::Section::capacity() const {
   return !Cfg::Jit::DynamicTCSections ? block().size() : 0;
 }
 
-template<const char* name, bool code>
-void CodeCache::SectionImpl<name, code>::ensure(CodeCache& cc, size_t size) {
+template<const char* name, bool code, bool overAllocate>
+void CodeCache::SectionImpl<name, code, overAllocate>::ensure(CodeCache& cc, size_t size) {
   auto newState = m_state.load(std::memory_order_acquire);
   if (newState.m_last) {
     if (newState.m_last->canEmit(size)) return;
     newState.m_used += newState.m_last->used();
   }
 
-  auto block = std::make_unique<DataBlock>(cc.m_all.allocChild(size, name));
+  auto minBlockSize = overAllocate && Cfg::Jit::DynamicTCSections
+      ? static_cast<size_t>(cc.m_all.available() * Cfg::Jit::DataBlockSizeRatio)
+      : 0;
+  auto block = std::make_unique<DataBlock>(cc.m_all.allocChild(std::max(size, minBlockSize), name));
   if (m_hugePageBudget) {
     auto const huge = std::min(m_hugePageBudget, block->size() >> 20);
     enhugen(block->frontier(), huge);

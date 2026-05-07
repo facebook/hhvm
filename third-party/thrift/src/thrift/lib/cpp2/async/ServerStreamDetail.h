@@ -46,20 +46,17 @@ struct ServerStreamFactory {
 
   /* implicit */ ServerStreamFactory(std::nullptr_t) : fn_(nullptr) {}
 
-  template <
-      typename F,
-      std::enable_if_t<
-          std::is_invocable_v<
-              F,
-              FirstResponsePayload&&,
-              StreamClientCallback*,
-              folly::EventBase*,
-              TilePtr&&,
-              std::shared_ptr<ContextStack>,
-              std::shared_ptr<StreamInterceptorContext>,
-              std::unique_ptr<ThriftStreamLog>,
-              std::optional<CompressionConfig>>,
-          int> = 0>
+  template <typename F>
+    requires std::invocable<
+        F,
+        FirstResponsePayload&&,
+        StreamClientCallback*,
+        folly::EventBase*,
+        TilePtr&&,
+        std::shared_ptr<ContextStack>,
+        std::shared_ptr<StreamInterceptorContext>,
+        std::unique_ptr<ThriftStreamLog>,
+        std::optional<CompressionConfig>>
   explicit ServerStreamFactory(F&& fn) : fn_(std::forward<F>(fn)) {}
 
   void setInteraction(TilePtr&& interaction) {

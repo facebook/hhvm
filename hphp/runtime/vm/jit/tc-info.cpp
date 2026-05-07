@@ -62,14 +62,7 @@ bool dumpTCCode(folly::StringPiece filename) {
     }
   };
 
-  if (Cfg::Jit::DynamicTCSections) {
-    writeBlock(code().all(), aFile);
-    return result;
-  }
-
-  writeBlock(code().main(), aFile);
-  writeBlock(code().cold(), acoldFile);
-  writeBlock(code().frozen(), afrozenFile);
+  writeBlock(code().all(), aFile);
   return result;
 }
 
@@ -79,23 +72,14 @@ bool dumpTCData() {
   if (!tcDataFile) return false;
   SCOPE_EXIT { gzclose(tcDataFile); };
 
-  auto const& main = Cfg::Jit::DynamicTCSections ? code().all() : code().main();
-  auto const& cold = Cfg::Jit::DynamicTCSections ? code().all() : code().cold();
-  auto const& frozen =
-    Cfg::Jit::DynamicTCSections ? code().all() : code().frozen();
+  auto const& main = code().all();
 
   if (!gzprintf(tcDataFile,
                 "repo_schema      = %s\n"
                 "a.base           = %p\n"
-                "a.frontier       = %p\n"
-                "acold.base       = %p\n"
-                "acold.frontier   = %p\n"
-                "afrozen.base     = %p\n"
-                "afrozen.frontier = %p\n\n",
+                "a.frontier       = %p\n\n",
                 repoSchemaId().begin(),
-                main.base(),   main.frontier(),
-                cold.base(),   cold.frontier(),
-                frozen.base(), frozen.frontier())) {
+                main.base(),   main.frontier())) {
     return false;
   }
 
@@ -183,8 +167,8 @@ std::vector<UsageInfo> getUsageInfo() {
   });
   tcUsageInfo.emplace_back(UsageInfo{
     "data",
-    code().data().used(),
-    code().data().capacity(),
+    code().dataUsed(),
+    code().dataCapacity(),
     true
   });
   tcUsageInfo.emplace_back(UsageInfo{

@@ -393,9 +393,9 @@ const bool CodeCache::isAnySectionFull() const {
     return m_all.available() < CodeCache::MinUnassigned;
   }
 
-  return main().used() >= Cfg::CodeCache::AMaxUsage ||
-         cold().used() >= Cfg::CodeCache::AColdMaxUsage ||
-         frozen().used() >= Cfg::CodeCache::AFrozenMaxUsage;
+  return m_main.used() >= Cfg::CodeCache::AMaxUsage ||
+         m_cold.used() >= Cfg::CodeCache::AColdMaxUsage ||
+         m_frozen.used() >= Cfg::CodeCache::AFrozenMaxUsage;
 }
 
 size_t CodeCache::Section::numFrees() const {

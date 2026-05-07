@@ -48,6 +48,9 @@ struct TransRange;
  */
 struct CodeCache {
   struct View;
+  static constexpr const char* kMainName = "main";
+  static constexpr const char* kColdName = "cold";
+  static constexpr const char* kGdataName = "gdata";
 
   static constexpr uint32_t kNullptrOffset =
     std::numeric_limits<uint32_t>::max();
@@ -87,6 +90,7 @@ struct CodeCache {
   size_t coldUsed() const { return m_cold.used(); }
   size_t frozenUsed() const { return m_frozen.used(); }
   size_t dataUsed() const { return m_data.used(); }
+  size_t dataCapacity() const { return m_data.capacity(); }
 
   size_t totalUnassigned() const { return m_all.available(); }
 
@@ -116,11 +120,15 @@ struct CodeCache {
   bool isValidCodeAddress(ConstCodeAddress addr) const;
 
   bool inMain(ConstCodeAddress addr) const {
-    return m_all.contains(addr) && blockFor(addr).name() == "main";
+    return m_all.contains(addr) && blockFor(addr).name() == kMainName;
+  }
+
+  bool inCold(ConstCodeAddress addr) const {
+    return m_all.contains(addr) && blockFor(addr).name() == kColdName;
   }
 
   bool inMainOrColdOrFrozen(ConstCodeAddress addr) const {
-    return m_all.contains(addr) && blockFor(addr).name() != "gdata";
+    return m_all.contains(addr) && blockFor(addr).name() != kGdataName;
   }
 
   /*
@@ -130,14 +138,10 @@ struct CodeCache {
   void unprotect();
 
   const CodeBlock& all()    const { return m_all; }
-  const CodeBlock& main()   const { return m_main.block(); }
-  const CodeBlock& cold()   const { return m_cold.block(); }
-  const CodeBlock& frozen() const { return m_frozen.block(); }
 
   const CodeBlock& bytecode() const { return m_bytecode; }
         CodeBlock& bytecode()       { return m_bytecode; }
 
-  const DataBlock& data() const { return m_data.block(); }
   const bool isAnySectionFull() const;
 
   /*

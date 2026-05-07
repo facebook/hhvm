@@ -1638,8 +1638,9 @@ void UniqueStubs::add(const char* name,
                            name, disasm);
     }
 
+    auto const isCold = code.inCold(start);
     if (!Cfg::Jit::NoGdb) {
-      dbg.recordStub(Debug::TCRange(start, end, &cb == &code.cold()),
+      dbg.recordStub(Debug::TCRange(start, end, isCold),
                      folly::sformat("HHVM::{}", name));
     }
     if (Cfg::Jit::UseVtuneAPI) {
@@ -1648,7 +1649,7 @@ void UniqueStubs::add(const char* name,
                           end);
     }
     if (Cfg::Eval::PerfPidMap) {
-      dbg.recordPerfMap(Debug::TCRange(start, end, &cb == &code.cold()),
+      dbg.recordPerfMap(Debug::TCRange(start, end, isCold),
                         SrcKey{},
                         folly::sformat("HHVM::{}", name));
     }

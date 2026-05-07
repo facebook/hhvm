@@ -53,15 +53,16 @@ void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
   assertx(cb.contains(start, end));
   if (start != end) {
     assertOwnsCodeLock();
+    auto const isCold = code().inCold(start);
     if (!Cfg::Jit::NoGdb) {
       Debug::DebugInfo::Get()->recordTracelet(
-        Debug::TCRange(start, end, &cb == &code().cold()),
+        Debug::TCRange(start, end, isCold),
         sk
       );
     }
     if (Cfg::Eval::PerfPidMap) {
       Debug::DebugInfo::Get()->recordPerfMap(
-        Debug::TCRange(start, end, &cb == &code().cold()),
+        Debug::TCRange(start, end, isCold),
         sk
       );
     }

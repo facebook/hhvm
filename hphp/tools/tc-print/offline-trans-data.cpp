@@ -55,10 +55,10 @@ void OfflineTransData::loadTCHeader() {
   READ("repo_schema = %40s", repoSchema);
   READ("a.base = %p", &aBase);
   READ("a.frontier = %p", &aFrontier);
-  READ("acold.base = %p", &coldBase);
-  READ("acold.frontier = %p", &coldFrontier);
-  READ("afrozen.base = %p", &frozenBase);
-  READ("afrozen.frontier = %p", &frozenFrontier);
+  coldBase = aBase;
+  coldFrontier = aFrontier;
+  frozenBase = aBase;
+  frozenFrontier = aFrontier;
   READ_EMPTY();
   READ("total_translations = %u", &nTranslations);
   READ_EMPTY();

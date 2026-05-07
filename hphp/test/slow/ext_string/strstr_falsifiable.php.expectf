@@ -1,0 +1,6 @@
+string(12) "@example.com"
+string(4) "name"
+string(12) "@example.com"
+bool(false)
+
+Catchable fatal error: Value returned from function test_bad() must be of type HH\Runtime\BoolOrString, int given in %s/strstr_falsifiable.php on line 8

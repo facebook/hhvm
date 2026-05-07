@@ -158,6 +158,7 @@ hphp/system/php/zlib/ext_zlib.php
 
 hphp/system/php/member_of.ns.php
 hphp/system/php/representable_as.ns.php
+hphp/system/php/union_bool.ns.php
 
 hphp/system/php/attributes.php
 

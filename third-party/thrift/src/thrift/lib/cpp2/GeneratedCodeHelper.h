@@ -1300,9 +1300,8 @@ MessageBegin deserializeMessageBegin(
  * the conversion manually.
  */
 template <class DerivedProcessor, class BaseProcessor>
-std::enable_if_t<
-    std::is_base_of_v<BaseProcessor, DerivedProcessor>,
-    GeneratedAsyncProcessorBase::ProcessFuncs<DerivedProcessor>>
+  requires std::derived_from<DerivedProcessor, BaseProcessor>
+GeneratedAsyncProcessorBase::ProcessFuncs<DerivedProcessor>
 downcastProcessFuncs(
     const GeneratedAsyncProcessorBase::ProcessFuncs<BaseProcessor>&
         processFuncs) {

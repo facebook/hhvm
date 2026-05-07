@@ -190,10 +190,10 @@ class field_ref {
 
   /// Constructs the value in-place.
   template <class U, class... Args>
-  FOLLY_ERASE std::enable_if_t<
-      std::is_constructible_v<value_type, std::initializer_list<U>, Args&&...>,
-      value_type&>
-  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    requires std::
+        constructible_from<value_type, std::initializer_list<U>, Args&&...>
+      FOLLY_ERASE value_type& emplace(
+          std::initializer_list<U> ilist, Args&&... args) {
     bitref_ = false;
     value_ = value_type(ilist, static_cast<Args&&>(args)...);
     bitref_ = true;
@@ -492,10 +492,10 @@ class optional_field_ref {
   }
 
   template <class U, class... Args>
-  FOLLY_ERASE std::enable_if_t<
-      std::is_constructible_v<value_type, std::initializer_list<U>&, Args&&...>,
-      value_type&>
-  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    requires std::
+        constructible_from<value_type, std::initializer_list<U>&, Args&&...>
+      FOLLY_ERASE value_type& emplace(
+          std::initializer_list<U> ilist, Args&&... args) {
     reset();
     value_ = value_type(ilist, static_cast<Args&&>(args)...);
     bitref_ = true;
@@ -805,10 +805,10 @@ class optional_boxed_field_ref {
   }
 
   template <class U, class... Args>
-  FOLLY_ERASE std::enable_if_t<
-      std::is_constructible_v<value_type, std::initializer_list<U>&, Args&&...>,
-      value_type&>
-  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    requires std::
+        constructible_from<value_type, std::initializer_list<U>&, Args&&...>
+      FOLLY_ERASE value_type& emplace(
+          std::initializer_list<U> ilist, Args&&... args) {
     reset();
     value_ = value_type(ilist, static_cast<Args&&>(args)...);
     return *value_;
@@ -1079,10 +1079,10 @@ class intern_boxed_field_ref {
   }
 
   template <class U, class... Args>
-  FOLLY_ERASE std::enable_if_t<
-      std::is_constructible_v<value_type, std::initializer_list<U>&, Args&&...>,
-      value_type&>
-  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    requires std::
+        constructible_from<value_type, std::initializer_list<U>&, Args&&...>
+      FOLLY_ERASE value_type& emplace(
+          std::initializer_list<U> ilist, Args&&... args) {
     bitref_ = false;
     value_.reset(
         std::make_unique<value_type>(ilist, static_cast<Args&&>(args)...));
@@ -1284,10 +1284,10 @@ class terse_intern_boxed_field_ref {
   }
 
   template <class U, class... Args>
-  FOLLY_ERASE std::enable_if_t<
-      std::is_constructible_v<value_type, std::initializer_list<U>&, Args&&...>,
-      value_type&>
-  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    requires std::
+        constructible_from<value_type, std::initializer_list<U>&, Args&&...>
+      FOLLY_ERASE value_type& emplace(
+          std::initializer_list<U> ilist, Args&&... args) {
     value_.reset(
         std::make_unique<value_type>(ilist, static_cast<Args&&>(args)...));
     return value_.value();
@@ -1657,10 +1657,10 @@ class required_field_ref {
   }
 
   template <class U, class... Args>
-  FOLLY_ERASE std::enable_if_t<
-      std::is_constructible_v<value_type, std::initializer_list<U>, Args&&...>,
-      value_type&>
-  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    requires std::
+        constructible_from<value_type, std::initializer_list<U>, Args&&...>
+      FOLLY_ERASE value_type& emplace(
+          std::initializer_list<U> ilist, Args&&... args) {
     return value_ = value_type(ilist, static_cast<Args&&>(args)...);
   }
 
@@ -1926,10 +1926,10 @@ class union_field_ref {
   }
 
   template <class U, class... Args>
-  FOLLY_ERASE std::enable_if_t<
-      std::is_constructible_v<value_type, std::initializer_list<U>, Args&&...>,
-      value_type&>
-  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    requires std::
+        constructible_from<value_type, std::initializer_list<U>, Args&&...>
+      FOLLY_ERASE value_type& emplace(
+          std::initializer_list<U> ilist, Args&&... args) {
     vtable_.reset(owner_);
     emplace_impl(is_cpp_ref_or_boxed{}, ilist, static_cast<Args&&>(args)...);
     type_ = field_type_;
@@ -2170,10 +2170,10 @@ class terse_field_ref {
   }
 
   template <class U, class... Args>
-  FOLLY_ERASE std::enable_if_t<
-      std::is_constructible_v<value_type, std::initializer_list<U>, Args&&...>,
-      value_type&>
-  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    requires std::
+        constructible_from<value_type, std::initializer_list<U>, Args&&...>
+      FOLLY_ERASE value_type& emplace(
+          std::initializer_list<U> ilist, Args&&... args) {
     value_ = value_type(ilist, static_cast<Args&&>(args)...);
     return value_;
   }

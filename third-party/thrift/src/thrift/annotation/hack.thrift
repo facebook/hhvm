@@ -119,6 +119,27 @@ struct Name {
   2: string reason;
 }
 
+@scope.Program
+@scope.Structured
+@scope.Typedef
+@scope.Enum
+@scope.Const
+@scope.Service
+struct NamePrefix {
+  /// Prepends a prefix to generated Hack type names.
+  /// When both program-level and definition-level NamePrefix are present,
+  /// the definition-level prefix wins instead of stacking with the
+  /// program-level prefix.
+  1: string prefix;
+  /// Set to false when you want getName() to keep returning the IDL name.
+  2: bool apply_on_getName = true;
+  /// When true, types generated from services (interfaces, clients,
+  /// processors, helper structs like args/result) are not prefixed.
+  /// When false (default), all types including service-generated types
+  /// are prefixed.
+  3: bool skip_services = false;
+}
+
 /// This annotation is for adding Hack attributes to union enums.
 @scope.Union
 struct UnionEnumAttributes {

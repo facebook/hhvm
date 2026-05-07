@@ -52,7 +52,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'FieldWrapper', 'Wrapper', 'Adapter', 'SkipCodegen', 'Name', 'UnionEnumAttributes', 'StructTrait', 'Attributes', 'StructAsTrait', 'ModuleInternal', 'GenerateClientMethodsWithHeaders', 'MigrationBlockingAllowInheritance', 'MigrationBlockingLegacyJSONSerialization', 'FixmeWrongType', 'UnsafeArray']
+__all__ = ['UTF8STRINGS', 'FieldWrapper', 'Wrapper', 'Adapter', 'SkipCodegen', 'Name', 'NamePrefix', 'UnionEnumAttributes', 'StructTrait', 'Attributes', 'StructAsTrait', 'ModuleInternal', 'GenerateClientMethodsWithHeaders', 'MigrationBlockingAllowInheritance', 'MigrationBlockingLegacyJSONSerialization', 'FixmeWrongType', 'UnsafeArray']
 
 class FieldWrapper:
   r"""
@@ -750,6 +750,164 @@ class Name:
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.annotation.hack.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Name, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class NamePrefix:
+  r"""
+  Attributes:
+   - prefix: Prepends a prefix to generated Hack type names.
+  When both program-level and definition-level NamePrefix are present,
+  the definition-level prefix wins instead of stacking with the
+  program-level prefix.
+   - apply_on_getName: Set to false when you want getName() to keep returning the IDL name.
+   - skip_services: When true, types generated from services (interfaces, clients,
+  processors, helper structs like args/result) are not prefixed.
+  When false (default), all types including service-generated types
+  are prefixed.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.prefix = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BOOL:
+          self.apply_on_getName = iprot.readBool()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.BOOL:
+          self.skip_services = iprot.readBool()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('NamePrefix')
+    if self.prefix != None:
+      oprot.writeFieldBegin('prefix', TType.STRING, 1)
+      oprot.writeString(self.prefix.encode('utf-8')) if UTF8STRINGS and not isinstance(self.prefix, bytes) else oprot.writeString(self.prefix)
+      oprot.writeFieldEnd()
+    if self.apply_on_getName != None:
+      oprot.writeFieldBegin('apply_on_getName', TType.BOOL, 2)
+      oprot.writeBool(self.apply_on_getName)
+      oprot.writeFieldEnd()
+    if self.skip_services != None:
+      oprot.writeFieldBegin('skip_services', TType.BOOL, 3)
+      oprot.writeBool(self.skip_services)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    kwargs_copy = dict(kwargs)
+    wrap_enum_constants = kwargs_copy.pop('wrap_enum_constants', False)
+    relax_enum_validation = bool(kwargs_copy.pop('relax_enum_validation', not wrap_enum_constants))
+    set_cls = kwargs_copy.pop('custom_set_cls', set)
+    dict_cls = kwargs_copy.pop('custom_dict_cls', dict)
+    if wrap_enum_constants and relax_enum_validation:
+        raise ValueError(
+            'wrap_enum_constants cannot be used together with relax_enum_validation'
+        )
+    if kwargs_copy:
+        extra_kwargs = ', '.join(kwargs_copy.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'prefix' in json_obj and json_obj['prefix'] is not None:
+      self.prefix = json_obj['prefix']
+    if 'apply_on_getName' in json_obj and json_obj['apply_on_getName'] is not None:
+      self.apply_on_getName = json_obj['apply_on_getName']
+    if 'skip_services' in json_obj and json_obj['skip_services'] is not None:
+      self.skip_services = json_obj['skip_services']
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.prefix is not None:
+      value = pprint.pformat(self.prefix, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    prefix=%s' % (value))
+    if self.apply_on_getName is not None:
+      value = pprint.pformat(self.apply_on_getName, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    apply_on_getName=%s' % (value))
+    if self.skip_services is not None:
+      value = pprint.pformat(self.skip_services, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    skip_services=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'prefix',
+      'apply_on_getName',
+      'skip_services',
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.NamePrefix, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.NamePrefix, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.hack.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.NamePrefix, self)
 
   def _to_py_deprecated(self):
     return self
@@ -2037,6 +2195,34 @@ def Name__setstate__(self, state):
 
 Name.__getstate__ = lambda self: self.__dict__.copy()
 Name.__setstate__ = Name__setstate__
+
+all_structs.append(NamePrefix)
+NamePrefix.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+  (1, TType.STRING, 'prefix', True, None, 2, ), # 1
+  (2, TType.BOOL, 'apply_on_getName', None, True, 2, ), # 2
+  (3, TType.BOOL, 'skip_services', None, False, 2, ), # 3
+)))
+
+NamePrefix.thrift_struct_annotations = {
+}
+NamePrefix.thrift_field_annotations = {
+}
+
+def NamePrefix__init__(self, prefix=None, apply_on_getName=NamePrefix.thrift_spec[2][4], skip_services=NamePrefix.thrift_spec[3][4],):
+  self.prefix = prefix
+  self.apply_on_getName = apply_on_getName
+  self.skip_services = skip_services
+
+NamePrefix.__init__ = NamePrefix__init__
+
+def NamePrefix__setstate__(self, state):
+  state.setdefault('prefix', None)
+  state.setdefault('apply_on_getName', True)
+  state.setdefault('skip_services', False)
+  self.__dict__ = state
+
+NamePrefix.__getstate__ = lambda self: self.__dict__.copy()
+NamePrefix.__setstate__ = NamePrefix__setstate__
 
 all_structs.append(UnionEnumAttributes)
 UnionEnumAttributes.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((

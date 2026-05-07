@@ -197,6 +197,8 @@ inline constexpr auto kHackAttributeUri =
 inline constexpr auto kHackFieldWrapperUri =
     "facebook.com/thrift/annotation/hack/FieldWrapper";
 inline constexpr auto kHackNameUri = "facebook.com/thrift/annotation/hack/Name";
+inline constexpr auto kHackNamePrefixUri =
+    "facebook.com/thrift/annotation/hack/NamePrefix";
 inline constexpr auto kHackSkipCodegenUri =
     "facebook.com/thrift/annotation/hack/SkipCodegen";
 inline constexpr auto kHackStructAsTraitUri =

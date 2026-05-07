@@ -647,6 +647,163 @@ namespace facebook.thrift.annotation.hack
     }
 
     /// <summary>
+    /// Auto-generated from NamePrefix
+    /// </summary>
+    public class @NamePrefix : IThriftSerializable
+    {
+        /// <summary>The Thrift URI for this type, used for type registration.</summary>
+        public static readonly string __fbthrift_uri = "facebook.com/thrift/annotation/hack/NamePrefix";
+        /// <summary>Gets or sets the prefix field.</summary>
+        private string _prefix = string.Empty;
+        public string @prefix
+        {
+            get => _prefix;
+            set
+            {
+                ThriftNullGuard.ThrowIfNull(value, "prefix");
+                _prefix = value;
+            }
+        }
+
+        /// <summary>Gets or sets the apply_on_getName field.</summary>
+        public bool @apply_on_getName { get; set; } = true;
+
+        /// <summary>Gets or sets the skip_services field.</summary>
+        public bool @skip_services { get; set; } = false;
+
+        public @NamePrefix()
+        {
+            @prefix = string.Empty;
+            @apply_on_getName = true;
+            @skip_services = false;
+        }
+
+        public void __fbthrift_clear()
+        {
+            @prefix = string.Empty;
+            @apply_on_getName = default;
+            @skip_services = default;
+        }
+
+        public bool __fbthrift_is_empty()
+        {
+            if (@prefix != null && @prefix.Length != 0) { return false; }
+            if (@apply_on_getName != default) { return false; }
+            if (@skip_services != default) { return false; }
+            return true;
+        }
+
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            // Field 1: prefix (string)
+            writer.WriteFieldBegin(ThriftWireType.String, 1);
+            writer.WriteString(@prefix);
+            // Field 2: apply_on_getName (bool)
+            writer.WriteFieldBegin(ThriftWireType.Bool, 2);
+            writer.WriteBool(@apply_on_getName);
+            // Field 3: skip_services (bool)
+            writer.WriteFieldBegin(ThriftWireType.Bool, 3);
+            writer.WriteBool(@skip_services);
+            writer.WriteFieldStop();
+        }
+
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+
+                switch (fieldId)
+                {
+                    case 1: // prefix
+                        if (fieldType == ThriftWireType.String)
+                        {
+                            @prefix = reader.ReadString();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 2: // apply_on_getName
+                        if (fieldType == ThriftWireType.Bool)
+                        {
+                            @apply_on_getName = reader.ReadBool();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    case 3: // skip_services
+                        if (fieldType == ThriftWireType.Bool)
+                        {
+                            @skip_services = reader.ReadBool();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @NamePrefix other)
+            {
+                return false;
+            }
+            if (!Equals(@prefix, other.@prefix))
+            {
+                return false;
+            }
+            if (!Equals(@apply_on_getName, other.@apply_on_getName))
+            {
+                return false;
+            }
+            if (!Equals(@skip_services, other.@skip_services))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(@prefix);
+            hashCode.Add(@apply_on_getName);
+            hashCode.Add(@skip_services);
+            return hashCode.ToHashCode();
+        }
+
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("NamePrefix(");
+            sb.Append("prefix=");
+            sb.Append(@prefix);
+            sb.Append(", ");
+            sb.Append("apply_on_getName=");
+            sb.Append(@apply_on_getName);
+            sb.Append(", ");
+            sb.Append("skip_services=");
+            sb.Append(@skip_services);
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
     /// Auto-generated from UnionEnumAttributes
     /// </summary>
     public class @UnionEnumAttributes : IThriftSerializable
@@ -1471,6 +1628,7 @@ namespace facebook.thrift.annotation.hack
             register("facebook.com/thrift/annotation/hack/Adapter", () => new @Adapter());
             register("facebook.com/thrift/annotation/hack/SkipCodegen", () => new @SkipCodegen());
             register("facebook.com/thrift/annotation/hack/Name", () => new @Name());
+            register("facebook.com/thrift/annotation/hack/NamePrefix", () => new @NamePrefix());
             register("facebook.com/thrift/annotation/hack/UnionEnumAttributes", () => new @UnionEnumAttributes());
             register("facebook.com/thrift/annotation/hack/StructTrait", () => new @StructTrait());
             register("facebook.com/thrift/annotation/hack/Attributes", () => new @Attributes());

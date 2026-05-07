@@ -215,6 +215,90 @@
         "is_union" : false,
         "lineno" : 116
       },
+      "NamePrefix" : {
+        "name" : "NamePrefix",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Structured" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Structured",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Typedef" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Typedef",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Enum" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Enum",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Const" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Const",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          },
+          "scope.Service" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Service",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "fields" : {
+          "prefix" : {
+            "name" : "prefix",
+            "docstring" : "Prepends a prefix to generated Hack type names.\nWhen both program-level and definition-level NamePrefix are present,\nthe definition-level prefix wins instead of stacking with the\nprogram-level prefix.\n",
+            "key" : 1,
+            "lineno" : 133,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  },
+          "apply_on_getName" : {
+            "name" : "apply_on_getName",
+            "default_value" : 1,
+            "docstring" : "Set to false when you want getName() to keep returning the IDL name.\n",
+            "key" : 2,
+            "lineno" : 135,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "skip_services" : {
+            "name" : "skip_services",
+            "default_value" : 0,
+            "docstring" : "When true, types generated from services (interfaces, clients,\nprocessors, helper structs like args/result) are not prefixed.\nWhen false (default), all types including service-generated types\nare prefixed.\n",
+            "key" : 3,
+            "lineno" : 140,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 122
+      },
       "UnionEnumAttributes" : {
         "name" : "UnionEnumAttributes",
         "structured_annotations": {
@@ -232,7 +316,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 125,
+            "lineno" : 146,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "list",
@@ -242,7 +326,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 123
+        "lineno" : 144
       },
       "StructTrait" : {
         "name" : "StructTrait",
@@ -277,14 +361,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 133,
+            "lineno" : 154,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 129
+        "lineno" : 150
       },
       "Attributes" : {
         "name" : "Attributes",
@@ -367,7 +451,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 185,
+            "lineno" : 206,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "list",
@@ -377,7 +461,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 175
+        "lineno" : 196
       },
       "StructAsTrait" : {
         "name" : "StructAsTrait",
@@ -409,7 +493,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 188
+        "lineno" : 209
       },
       "ModuleInternal" : {
         "name" : "ModuleInternal",
@@ -474,7 +558,7 @@
         "docstring" : "This annotation is to generate an entity as internal\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 194
+        "lineno" : 215
       },
       "GenerateClientMethodsWithHeaders" : {
         "name" : "GenerateClientMethodsWithHeaders",
@@ -499,7 +583,7 @@
         "docstring" : "Given either of the following Thrift service definitions:\n\n    @hack.GenerateClientMethodsWithHeaders\n    service Foo {\n      FooResponse bar();\n    }\n\n    service Foo {\n      @hack.GenerateClientMethodsWithHeaders\n      FooResponse bar();\n    }\n\nThis annotation instructs the compiler to generate the following client method that returns both the response and headers in addition to the bar() method:\n  - (FooResponse, ?dict<string, string>) header_bar()\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 219
+        "lineno" : 240
       },
       "MigrationBlockingAllowInheritance" : {
         "name" : "MigrationBlockingAllowInheritance",
@@ -516,7 +600,7 @@
         "docstring" : "Generated Hack types are being changed to `final` by default.\n\nFor existing thrift types that are inherited from and cannot be easily migrated,\nuse this annotation to make the generated class non-final.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 229
+        "lineno" : 250
       },
       "MigrationBlockingLegacyJSONSerialization" : {
         "name" : "MigrationBlockingLegacyJSONSerialization",
@@ -533,7 +617,7 @@
         "docstring" : "Hack Unions without the `protected` compiler option may rely on `fb_json_serialize` for JSON serialization.\nAdding this annotation will implement the JSONSerializable Hack interface allowing `fb_json_serialize` to continue being used.\n\nNote: This should only be used for migration purposes. Use `JSONThriftSerializer` instead.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 238
+        "lineno" : 259
       },
       "FixmeWrongType" : {
         "name" : "FixmeWrongType",
@@ -574,7 +658,7 @@
         "docstring" : "Wraps the field type with \\HH_FIXME\\WRONG_TYPE<Type> in generated Hack code\nto suppress type-checking errors.\n\nWhen applied to a struct, wraps all field types in the struct.\n\nExample:\n  struct MyStruct {\n    @hack.FixmeWrongType\n    1: i64 my_field;\n  }\n\nGenerates: public \\HH_FIXME\\WRONG_TYPE<int> $my_field;\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 255
+        "lineno" : 276
       },
       "UnsafeArray" : {
         "name" : "UnsafeArray",
@@ -591,7 +675,7 @@
         "docstring" : "Replaces array/collection types with unsafe semi-statically-typed equivalents:\n  - vec<T> becomes varrayish_UNSAFE<T>\n  - dict<K, V> becomes darrayish_UNSAFE<K, V>\n\nExample:\n  struct MyStruct {\n    @hack.UnsafeArray\n    1: list<i64> my_list;\n  }\n\nGenerates: public varrayish_UNSAFE<int> $my_list;\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 274
+        "lineno" : 295
       }
   },
   "source_path" : "thrift/annotation/hack",

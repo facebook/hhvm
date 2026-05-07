@@ -1,0 +1,3 @@
+hack: hack:server src/module.thrift
+hack_skip_services: hack:server src/skip_services.thrift
+hack_apply_on_getname: hack:server src/apply_on_getname.thrift

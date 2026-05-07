@@ -67,11 +67,12 @@ struct DataBlockFull : std::runtime_error {
  */
 struct DataBlock {
   DataBlock() = default;
-
+  DataBlock(const DataBlock&) = default;
+  DataBlock& operator=(const DataBlock&) = default;
   DataBlock(DataBlock&& other) = default;
   DataBlock& operator=(DataBlock&& other) = default;
 
-  static constexpr size_t kPageSize = 2*1024*1024; // 2MB page
+  static constexpr size_t kPageSize = 2*1024*1024; // 2MiB page
 
   /**
    * Uses an existing chunk of memory.
@@ -142,11 +143,11 @@ struct DataBlock {
     return (T*)allocRaw(sizeof(T) * n, align);
   }
 
-  DataBlock allocChild(size_t size, const char* name, bool forward) {
-    constexpr size_t Mask = kPageSize - 1;
+  DataBlock allocChild(size_t size, const char* name, bool forward, size_t pageSize = kPageSize) {
+    size_t Mask = pageSize - 1;
     size = (size + Mask) & ~Mask;
     assertx(forward || m_size == m_maxGrow);
-    auto const start = forward ? allocRaw(size, kPageSize) : allocRawBackward(size, kPageSize);
+    auto const start = forward ? allocRaw(size, pageSize) : allocRawBackward(size, pageSize);
     DataBlock r;
     r.init((Address)start, size, name);
     return r;

@@ -177,7 +177,6 @@ CodeCache::CodeCache() {
       mprotect(m_threadLocalStart, thread_local_size, PROT_NONE);
     }
     m_threadLocalSize = thread_local_size;
-
     if (aBytecode) {
       auto const bytecodeBase = m_threadLocalStart + thread_local_size;
       m_bytecode.init(bytecodeBase, aBytecode, "abytecode");
@@ -363,7 +362,9 @@ void CodeCache::cutTCSizeTo(size_t targetSize) {
 
 CodeBlock& CodeCache::blockFor(ConstCodeAddress addr) {
   auto const idx = (addr - base()) >> 21;
-  return *m_blocks[idx].load(std::memory_order_relaxed);
+  auto block = m_blocks[idx].load(std::memory_order_relaxed);
+  always_assert(block);
+  return *block;
 }
 
 const CodeBlock& CodeCache::blockFor(ConstCodeAddress addr) const {
@@ -415,20 +416,25 @@ size_t CodeCache::Section::capacity() const {
   return !Cfg::Jit::DynamicTCSections ? block().size() : 0;
 }
 
-template<const char* name, bool code, bool overAllocate, bool forwardAllocation>
-void CodeCache::SectionImpl<name, code, overAllocate, forwardAllocation>::ensure(CodeCache& cc, size_t size) {
+template<const char* name, bool code, bool overAllocate, bool forwardAllocation, size_t pageSize>
+void CodeCache::SectionImpl<name, code, overAllocate, forwardAllocation, pageSize>::ensure(CodeCache& cc, size_t size) {
   auto newState = m_state.load(std::memory_order_acquire);
   if (newState.m_last) {
     if (newState.m_last->canEmit(size)) return;
     newState.m_used += newState.m_last->used();
   }
-
-  auto minBlockSize = overAllocate && Cfg::Jit::DynamicTCSections
+  // When close to capacity, stop over-allocating so that threads acquire
+  // only what they need and waste less TC tail space.
+  auto constexpr closeToCapacityThreshold = 0.1;
+  bool nearCapacity = cc.m_all.available() < cc.m_all.capacity() * closeToCapacityThreshold;
+  auto minBlockSize = overAllocate && Cfg::Jit::DynamicTCSections && !nearCapacity
       ? static_cast<size_t>(cc.m_all.available() * Cfg::Jit::DataBlockSizeRatio)
       : 0;
   auto block = std::make_unique<DataBlock>(cc.m_all.allocChild(std::max(size, minBlockSize),
-                                           name, forwardAllocation && Cfg::Jit::DynamicTCSections));
-  if (m_hugePageBudget) {
+                                           name, forwardAllocation && Cfg::Jit::DynamicTCSections,
+                                           pageSize));
+  if (m_hugePageBudget && block->size() >= size2m && 
+      (uintptr_t(block->frontier()) & (size2m - 1)) == 0) {
     auto const huge = std::min(m_hugePageBudget, block->size() >> 20);
     enhugen(block->frontier(), huge);
     m_hugePageBudget -= huge;
@@ -456,7 +462,7 @@ void CodeCache::SectionImpl<name, code, overAllocate, forwardAllocation>::ensure
 
 std::string CodeCache::blockMap() const {
   std::string ret;
-  ret.reserve(1024);
+  ret.reserve(m_blocks.size());
   for (int i = 0; i < m_blocks.size(); ++i) {
     auto b = m_blocks[i].load(std::memory_order_relaxed);
     if (!b) ret += '*';
@@ -469,11 +475,10 @@ std::string CodeCache::blockMap() const {
   return ret;
 }
 
-CodeCache::View CodeCache::view(TransKind kind, const tc::TransRange* sizes) {
+CodeCache::View CodeCache::view(TransKind kind, const tc::TransRange* sizes, bool release) {
+  constexpr size_t kDefault = 1024;
+  constexpr size_t kPad = 128; // account for shifting during relocation
   if (Cfg::Jit::DynamicTCSections) {
-    constexpr size_t kDefault = 1024;
-    constexpr size_t kPad = 128; // account for shifting during relocation
-
     m_main.ensure(*this, sizes ? sizes->main.size() + kPad : kDefault);
     if (isProfiling(kind)) {
       m_frozen.ensure(
@@ -492,11 +497,44 @@ CodeCache::View CodeCache::view(TransKind kind, const tc::TransRange* sizes) {
     isProfiling(kind) ? m_frozen.block() : m_cold.block(),
     m_frozen.block(),
     m_data.block(),
-    false
+    false,
+    release
   };
 
-  tc::assertOwnsCodeLock(view);
+  if (release) {
+    m_main.releaseBlock();
+    m_cold.releaseBlock();
+    m_frozen.releaseBlock();
+    m_data.releaseBlock();
+    m_main.ensure(*this, 1);
+    m_cold.ensure(*this, 1);
+    m_frozen.ensure(*this, 1);
+    m_data.ensure(*this, 1);
+  }
+
   return view;
+}
+
+template<typename S>
+CodeBlock* CodeCache::releaseSection(S& section, size_t size) {
+  section.ensure(*this, size);
+  auto block = &section.block();
+  section.releaseBlock();
+  section.ensure(*this, 1);
+  return block;
+}
+
+CodeBlock* CodeCache::releaseMain(size_t size) {
+  return releaseSection(m_main, size);
+}
+CodeBlock* CodeCache::releaseCold(size_t size) {
+  return releaseSection(m_cold, size);
+}
+CodeBlock* CodeCache::releaseData(size_t size) {
+  return releaseSection(m_data, size);
+}
+CodeBlock* CodeCache::releaseFrozen(size_t size) {
+  return releaseSection(m_frozen, size);
 }
 
 void CodeCache::View::alignForTranslation(bool alignMain) {

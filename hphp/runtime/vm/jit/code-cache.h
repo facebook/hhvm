@@ -149,7 +149,13 @@ struct CodeCache {
    * on the kind of translation to be emitted.
    */
   View view(TransKind kind = TransKind::Invalid,
-            const tc::TransRange* sizes = nullptr);
+            const tc::TransRange* sizes = nullptr,
+            bool release = false);
+
+  CodeBlock* releaseMain(size_t size);
+  CodeBlock* releaseCold(size_t size);
+  CodeBlock* releaseFrozen(size_t size);
+  CodeBlock* releaseData(size_t size);
 
   /*
    * Return the block containing addr.
@@ -189,7 +195,7 @@ struct CodeCache {
     void releaseBlock() {
       auto state = m_state.load(std::memory_order_relaxed);
       if (!state.m_last) return;
-      state.m_used += state.m_last->used();
+      state.m_used += state.m_last->size();
       state.m_last = nullptr;
       m_state.store(std::move(state), std::memory_order_release);
     }
@@ -218,6 +224,9 @@ struct CodeCache {
   std::string blockMap() const;
 
 private:
+  template<typename S>
+  CodeBlock* releaseSection(S& section, size_t size);
+
   void cutTCSizeTo(size_t targetSize);
 
   static constexpr const char kMain[] = "main";
@@ -225,14 +234,14 @@ private:
   static constexpr const char kFrozen[] = "afrozen";
   static constexpr const char kData[] = "gdata";
 
-  template<const char* name, bool code, bool overAllocate, bool forwardAllocation>
+  template<const char* name, bool code, bool overAllocate, bool forwardAllocation, size_t pageSize>
   struct SectionImpl : Section {
     void ensure(CodeCache& cc, size_t size);
   };
 
-  template<const char* name, bool forwardAllocation>
-  using CodeSection = SectionImpl<name, true, true, forwardAllocation>;
-  using DataSection = SectionImpl<kData, false, false, false>;
+  template<const char* name, bool forwardAllocation, size_t pageSize>
+  using CodeSection = SectionImpl<name, true, true, forwardAllocation, pageSize>;
+  using DataSection = SectionImpl<kData, false, false, false, DataBlock::kPageSize>;
 
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
@@ -240,29 +249,30 @@ private:
   size_t m_codeSize; // all code (jit+bytecode)
   size_t m_threadLocalSize;
 
-  CodeSection<kMain, true> m_main;
-  CodeSection<kCold, false> m_cold;
-  CodeSection<kFrozen, false> m_frozen;
+  CodeSection<kMain, true, DataBlock::kPageSize> m_main;
+  CodeSection<kCold, false, DataBlock::kPageSize> m_cold;
+  CodeSection<kFrozen, false, DataBlock::kPageSize> m_frozen;
   DataSection m_data;
 
   DataBlock m_bytecode;
   DataBlock m_all;
 
-  // Each block must be at least DataBlock::kPageSize (the size of a huge page)
-  std::array<std::atomic<DataBlock*>, 1024> m_blocks;
+  // Each block is at least DataBlock::kPageSize (2MiB), indexed by >> 21
+  std::array<std::atomic<DataBlock*>, 1024> m_blocks{};
 
-  template<const char* name, bool code, bool overAllocate, bool forwardAllocation>
+  template<const char* name, bool code, bool overAllocate, bool forwardAllocation, size_t pageSize>
   friend struct SectionImpl;
 };
 
 struct CodeCache::View {
   View(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen, DataBlock& data,
-       bool isLocal)
+       bool isLocal, bool isOwned = false)
     : m_main(&main)
     , m_cold(&cold)
     , m_frozen(&frozen)
     , m_data(&data)
     , m_isLocal(isLocal)
+    , m_isOwned(isOwned)
   {}
 
   /*
@@ -276,10 +286,16 @@ struct CodeCache::View {
   DataBlock& data()   { return *m_data; }
 
   bool  isLocal()           const { return m_isLocal; }
+  bool  isOwned()           const { return m_isOwned; }
   const CodeBlock& main()   const { return *m_main; }
   const CodeBlock& cold()   const { return *m_cold; }
   const CodeBlock& frozen() const { return *m_frozen; }
   const DataBlock& data()   const { return *m_data; }
+
+  void setMain(CodeBlock* block)   { m_main = block; }
+  void setCold(CodeBlock* block)   { m_cold = block; }
+  void setFrozen(CodeBlock* block) { m_frozen = block; }
+  void setData(DataBlock* block)   { m_data = block; }
 
 private:
   CodeBlock* m_main;
@@ -287,6 +303,7 @@ private:
   CodeBlock* m_frozen;
   DataBlock* m_data;
   bool m_isLocal;
+  bool m_isOwned;
 };
 
 }

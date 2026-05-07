@@ -1734,6 +1734,18 @@ void RuntimeOption::Load(
   ExtensionRegistry::moduleLoad(ini, config);
   initialize_apc();
 
+#ifdef HHVM_FACEBOOK
+  // Account for ThreadController auto-tuning headroom
+  if (ServerThreadTuneAdjustmentPct > 0) {
+    const int adjusted = static_cast<int>(
+        std::ceil(Cfg::Server::QueueCount *
+                  (1.0 + ServerThreadTuneAdjustmentPct / 100.0)));
+    if (Cfg::Server::QueueCount < adjusted) {
+      Cfg::Server::QueueCount = adjusted;
+    }
+  }
+#endif
+
   if (TraceFunctions.size()) Trace::ensureInit(getTraceOutputFile());
 
   if (Cfg::Jit::EnableRenameFunction && Cfg::Repo::Authoritative) {

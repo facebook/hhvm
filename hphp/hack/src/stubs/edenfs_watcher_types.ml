@@ -24,12 +24,18 @@ type settings = {
 }
 
 type changes =
-  | FileChanges of string list  (** List is not guaranteed to be deduplicated *)
+  | FileChanges of {
+      files: string list;  (** List is not guaranteed to be deduplicated *)
+      translated_at: float;
+          (** Unix timestamp, same format as [Unix.gettimeofday] *)
+    }
   | CommitTransition of {
       from_commit: string;
       to_commit: string;
       file_changes: string list;
           (** List is not guaranteed to be deduplicated *)
+      translated_at: float;
+          (** Unix timestamp, same format as [Unix.gettimeofday] *)
     }
   | StateEnter of string
   | StateLeave of string

@@ -69,6 +69,7 @@ let set_next_eden_state_transitions moves (hg_rev : Hg.Rev.t) =
           from_commit = "";
           to_commit = Hg.Rev.to_string hg_rev;
           file_changes = [];
+          translated_at = 0.0;
         }
   in
   Edenfs_watcher.Mocking.get_changes_async_returns (List.map change_of moves)

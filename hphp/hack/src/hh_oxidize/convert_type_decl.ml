@@ -199,9 +199,10 @@ end = struct
     (* A custom implementation of Ord for UserDiagnostic matches the sorting behavior of
        diagnostics in OCaml. *)
     | "user_diagnostic::UserDiagnostic" -> ["Ord"; "PartialOrd"]
-    (* GlobalOptions contains a couple floats, which only implement PartialEq
-       and PartialOrd, and do not implement Hash. *)
-    | "global_options::GlobalOptions" ->
+    (* These types contain floats, which only implement PartialEq/PartialOrd,
+       not Eq/Hash/Ord. *)
+    | "global_options::GlobalOptions"
+    | "edenfs_watcher_types::Changes" ->
       ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     (* And GlobalOptions is used in Genv which is used in Env. We
      * don't care about comparison or hashing on environments *)

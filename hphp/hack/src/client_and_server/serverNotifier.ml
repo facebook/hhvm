@@ -375,6 +375,28 @@ let convert_watchman_changes
     ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);
     changes
 
+(** Helper to find the earliest translated_at timestamp. The resulting age is added to [telemetry].
+    This value gives us an idea how long we have been deferring a change. *)
+let eden_add_oldest_change_age_telemetry
+    (changes : Edenfs_watcher_types.changes list) telemetry : Telemetry.t =
+  let oldest_translated_at =
+    List.fold_left changes ~init:None ~f:(fun acc c ->
+        match c with
+        | Edenfs_watcher_types.FileChanges { translated_at; _ }
+        | Edenfs_watcher_types.CommitTransition { translated_at; _ } ->
+          (match acc with
+          | None -> Some translated_at
+          | Some oldest -> Some (Float.min oldest translated_at))
+        | Edenfs_watcher_types.StateEnter _
+        | Edenfs_watcher_types.StateLeave _ ->
+          acc)
+  in
+  match oldest_translated_at with
+  | Some oldest ->
+    let age_secs = Unix.gettimeofday () -. oldest in
+    Telemetry.float_ ~key:"oldest_change_age" ~value:age_secs telemetry
+  | None -> telemetry
+
 let convert_edenfs_watcher_changes
     local_config root (eden_changes : Edenfs_watcher_types.changes) : SSet.t =
   let state_tracking =
@@ -388,10 +410,10 @@ let convert_edenfs_watcher_changes
       if state_tracking && local_config.ServerLocalConfig.hg_aware then
         ServerRevisionTracker.Edenfs_watcher.on_commit_transition root to_commit;
       SSet.of_list file_changes
-    | Edenfs_watcher_types.FileChanges file_changes ->
+    | Edenfs_watcher_types.FileChanges { files; _ } ->
       (* TODO(T215219438) Need to inform ServerRevisionTracker about changed files,
          similarly to what convert_watchman_changes does *)
-      SSet.of_list file_changes
+      SSet.of_list files
     | Edenfs_watcher_types.StateEnter name ->
       Hh_logger.debug "ServerNotifier: StateEnter(%s)" name;
       if state_tracking && local_config.ServerLocalConfig.hg_aware then
@@ -538,6 +560,9 @@ let get_changes_sync (t : t) telemetry : SSet.t * clock option * Telemetry.t =
                 ~value:sync_telemetry
                 telemetry)
         in
+        let telemetry =
+          eden_add_oldest_change_age_telemetry changes telemetry
+        in
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
               SSet.union
@@ -642,7 +667,9 @@ let get_changes_async (t : t) telemetry : changes * clock option * Telemetry.t =
                 ~value:async_telemetry
                 telemetry)
         in
-
+        let telemetry =
+          eden_add_oldest_change_age_telemetry changes telemetry
+        in
         let changes_set =
           List.fold_left changes ~init:SSet.empty ~f:(fun acc c ->
               SSet.union

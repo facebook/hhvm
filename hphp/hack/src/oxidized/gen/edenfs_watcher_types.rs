@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bfc105a817ab1a0cac62b967213bd4d3>>
+// @generated SignedSource<<84a8a63db59e2ffbe76d29846d36f16e>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -226,12 +226,7 @@ pub struct Settings {
     Clone,
     Debug,
     Deserialize,
-    Eq,
-    EqModuloPos,
     FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
     PartialEq,
     PartialOrd,
     Serialize,
@@ -240,13 +235,19 @@ pub struct Settings {
 #[rust_to_ocaml(attr = "deriving show")]
 #[repr(C, u8)]
 pub enum Changes {
-    /// List is not guaranteed to be deduplicated
-    FileChanges(Vec<String>),
+    FileChanges {
+        /// List is not guaranteed to be deduplicated
+        files: Vec<String>,
+        /// Unix timestamp, same format as [Unix.gettimeofday]
+        translated_at: f64,
+    },
     CommitTransition {
         from_commit: String,
         to_commit: String,
         /// List is not guaranteed to be deduplicated
         file_changes: Vec<String>,
+        /// Unix timestamp, same format as [Unix.gettimeofday]
+        translated_at: f64,
     },
     StateEnter(String),
     StateLeave(String),

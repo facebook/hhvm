@@ -573,7 +573,7 @@ let edenfs_watcher_get_raw_updates_since ~root ~clock ~local_config =
     }
   in
   let translate_changes list = function
-    | Edenfs_watcher_types.FileChanges file_changes
+    | Edenfs_watcher_types.FileChanges { files = file_changes; _ }
     | CommitTransition { file_changes; _ } ->
       List.append list file_changes
     | StateEnter _

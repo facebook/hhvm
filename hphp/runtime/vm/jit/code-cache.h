@@ -221,14 +221,14 @@ private:
   static constexpr const char kFrozen[] = "afrozen";
   static constexpr const char kData[] = "gdata";
 
-  template<const char* name, bool code, bool overAllocate>
+  template<const char* name, bool code, bool overAllocate, bool forwardAllocation>
   struct SectionImpl : Section {
     void ensure(CodeCache& cc, size_t size);
   };
 
-  template<const char* name>
-  using CodeSection = SectionImpl<name, true, true>;
-  using DataSection = SectionImpl<kData, false, false>;
+  template<const char* name, bool forwardAllocation>
+  using CodeSection = SectionImpl<name, true, true, forwardAllocation>;
+  using DataSection = SectionImpl<kData, false, false, false>;
 
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
@@ -236,9 +236,9 @@ private:
   size_t m_codeSize; // all code (jit+bytecode)
   size_t m_threadLocalSize;
 
-  CodeSection<kMain> m_main;
-  CodeSection<kCold> m_cold;
-  CodeSection<kFrozen> m_frozen;
+  CodeSection<kMain, true> m_main;
+  CodeSection<kCold, false> m_cold;
+  CodeSection<kFrozen, false> m_frozen;
   DataSection m_data;
 
   DataBlock m_bytecode;
@@ -247,7 +247,7 @@ private:
   // Each block must be at least DataBlock::kPageSize (the size of a huge page)
   std::array<std::atomic<DataBlock*>, 1024> m_blocks;
 
-  template<const char* name, bool code, bool overAllocate>
+  template<const char* name, bool code, bool overAllocate, bool forwardAllocation>
   friend struct SectionImpl;
 };
 

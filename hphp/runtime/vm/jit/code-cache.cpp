@@ -415,8 +415,8 @@ size_t CodeCache::Section::capacity() const {
   return !Cfg::Jit::DynamicTCSections ? block().size() : 0;
 }
 
-template<const char* name, bool code, bool overAllocate>
-void CodeCache::SectionImpl<name, code, overAllocate>::ensure(CodeCache& cc, size_t size) {
+template<const char* name, bool code, bool overAllocate, bool forwardAllocation>
+void CodeCache::SectionImpl<name, code, overAllocate, forwardAllocation>::ensure(CodeCache& cc, size_t size) {
   auto newState = m_state.load(std::memory_order_acquire);
   if (newState.m_last) {
     if (newState.m_last->canEmit(size)) return;
@@ -426,7 +426,8 @@ void CodeCache::SectionImpl<name, code, overAllocate>::ensure(CodeCache& cc, siz
   auto minBlockSize = overAllocate && Cfg::Jit::DynamicTCSections
       ? static_cast<size_t>(cc.m_all.available() * Cfg::Jit::DataBlockSizeRatio)
       : 0;
-  auto block = std::make_unique<DataBlock>(cc.m_all.allocChild(std::max(size, minBlockSize), name));
+  auto block = std::make_unique<DataBlock>(cc.m_all.allocChild(std::max(size, minBlockSize),
+                                           name, forwardAllocation && Cfg::Jit::DynamicTCSections));
   if (m_hugePageBudget) {
     auto const huge = std::min(m_hugePageBudget, block->size() >> 20);
     enhugen(block->frontier(), huge);

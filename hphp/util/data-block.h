@@ -86,6 +86,7 @@ struct DataBlock {
     m_base = m_frontier = start;
     m_destBase = dest;
     m_size = sz;
+    m_maxSize = sz;
     m_maxGrow = maxGrow;
     m_name = name;
   }
@@ -121,7 +122,19 @@ struct DataBlock {
     assertCanEmit(sz);
     auto data = m_frontier;
     m_frontier += sz;
-    assertx(m_frontier <= m_base + m_size);
+    assertx(m_frontier <= m_base + m_maxSize);
+    return data;
+  }
+
+  void* allocRawBackward(size_t sz, size_t align = 16) {
+    assertx(align == 1 || align == 2 || align == 4 || align == 8 ||
+            align == 16 || align == kPageSize);
+    auto const mask = align - 1;
+    auto const data = (uint8_t*)(((uintptr_t)m_base + m_maxSize - sz) & ~mask);
+    if (data < m_frontier) reportFull(sz);
+    assertx(m_frontier <= data);
+    assertx(data + sz <= m_base + m_maxSize);
+    m_maxSize = data - m_base;
     return data;
   }
 
@@ -129,11 +142,11 @@ struct DataBlock {
     return (T*)allocRaw(sizeof(T) * n, align);
   }
 
-  DataBlock allocChild(size_t size, const char* name) {
+  DataBlock allocChild(size_t size, const char* name, bool forward) {
     constexpr size_t Mask = kPageSize - 1;
     size = (size + Mask) & ~Mask;
-
-    auto const start = allocRaw(size, kPageSize);
+    assertx(forward || m_size == m_maxGrow);
+    auto const start = forward ? allocRaw(size, kPageSize) : allocRawBackward(size, kPageSize);
     DataBlock r;
     r.init((Address)start, size, name);
     return r;
@@ -141,8 +154,8 @@ struct DataBlock {
 
   bool canEmit(size_t nBytes) {
     assert(m_frontier >= m_base);
-    assert(m_frontier <= m_base + m_size);
-    return m_frontier + nBytes <= m_base + m_size;
+    assert(m_frontier <= m_base + m_maxSize);
+    return m_frontier + nBytes <= m_base + m_maxSize;
   }
 
   bool grow(size_t nBytes) {
@@ -161,6 +174,7 @@ struct DataBlock {
     if (!m_destBuf) reportMallocError(amt);
     m_destBase = m_destBuf.get();
     m_size = amt;
+    m_maxSize = amt;
     return true;
   }
 
@@ -248,7 +262,7 @@ struct DataBlock {
   }
 
   void setFrontier(Address addr) {
-    assertx(m_base <= addr && addr <= (m_base + m_size));
+    assertx(m_base <= addr && addr <= (m_base + m_maxSize));
     m_frontier = addr;
   }
 
@@ -261,11 +275,11 @@ struct DataBlock {
   }
 
   size_t used() const {
-    return m_frontier - m_base;
+    return (m_frontier - m_base) + (m_size - m_maxSize);
   }
 
   size_t available() const {
-    return m_size - (m_frontier - m_base);
+    return m_size - used();
   }
 
   bool contains(ConstCodeAddress addr) const {
@@ -278,7 +292,7 @@ struct DataBlock {
   }
 
   bool empty() const {
-    return m_base == m_frontier;
+    return used() == 0;
   }
 
   void clear() {
@@ -286,7 +300,7 @@ struct DataBlock {
   }
 
   void zero() {
-    memset(m_destBase, 0, m_frontier - m_base);
+    memset(m_destBase, 0, capacity());
     clear();
   }
 
@@ -377,10 +391,17 @@ private:
   // to a separate location. The actual writes will be to m_dest.
   Address m_destBase{nullptr};
 
+  // DataBlock's used and unused memory is organized in the following manner:
+  // m_base    m_frontier        m_base+m_maxSize  m_base+m_size
+  //  |           |>                  <|               |
+  //  v           v                    v               v
+  //  [############)...................[###############)
+  //  |-- used  --|------ unused ------|---- used -----|
   Address m_base{nullptr};
   Address m_frontier{nullptr};
   size_t  m_size{0};
-  size_t  m_maxGrow{0};
+  size_t m_maxSize{0};
+  size_t  m_maxGrow{0}; // Total the block can grow to
   std::string m_name;
 
   size_t m_nfree{0};

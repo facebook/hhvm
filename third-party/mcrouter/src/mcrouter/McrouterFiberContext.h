@@ -102,6 +102,8 @@ class fiber_local {
     std::shared_ptr<AxonContext> axonCtx{nullptr};
     int64_t accumulatedBeforeReqInjectedLatencyUs{0};
     int64_t accumulatedAfterReqInjectedLatencyUs{0};
+    int64_t accumulatedBeforeReqInjectedOvershootUs{0};
+    int64_t accumulatedAfterReqInjectedOvershootUs{0};
     std::optional<BigValueContext> bigValueContext{std::nullopt};
   };
 
@@ -288,6 +290,32 @@ class fiber_local {
   static int64_t getAccumulatedInjectedAfterReqLatencyUs() {
     return folly::fibers::local<McrouterFiberContext>()
         .accumulatedAfterReqInjectedLatencyUs;
+  }
+
+  static int64_t accumulateBeforeReqInjectedOvershootUs(
+      uint64_t additionalOvershootUs) {
+    folly::fibers::local<McrouterFiberContext>()
+        .accumulatedBeforeReqInjectedOvershootUs += additionalOvershootUs;
+    return folly::fibers::local<McrouterFiberContext>()
+        .accumulatedBeforeReqInjectedOvershootUs;
+  }
+
+  static int64_t getAccumulatedInjectedBeforeReqOvershootUs() {
+    return folly::fibers::local<McrouterFiberContext>()
+        .accumulatedBeforeReqInjectedOvershootUs;
+  }
+
+  static int64_t accumulateAfterReqInjectedOvershootUs(
+      uint64_t additionalOvershootUs) {
+    folly::fibers::local<McrouterFiberContext>()
+        .accumulatedAfterReqInjectedOvershootUs += additionalOvershootUs;
+    return folly::fibers::local<McrouterFiberContext>()
+        .accumulatedAfterReqInjectedOvershootUs;
+  }
+
+  static int64_t getAccumulatedInjectedAfterReqOvershootUs() {
+    return folly::fibers::local<McrouterFiberContext>()
+        .accumulatedAfterReqInjectedOvershootUs;
   }
 
   /**

@@ -167,7 +167,6 @@ class LatencyInjectionRoute {
           newReq->afterLatencyUs_ref() = 0;
           newReq->beforeLatencyUs_ref() = 0;
         }
-        // Inject per request latency if enabled
         if (beforeReqLatency.count() > 0 &&
             ((maxRequestLatency_.count() == 0) ||
              (beforeReqLatency.count() <= maxRequestLatency_.count()))) {
@@ -175,9 +174,17 @@ class LatencyInjectionRoute {
               mcrouter::before_request_latency_injected_stat);
           fiber_local<RouterInfo>::accumulateBeforeReqInjectedLatencyUs(
               beforeReqLatency.count());
+          const auto t0 = std::chrono::steady_clock::now();
           folly::futures::sleep(
               beforeReqLatency, detail::getTimekeeperHighResSingleton().get())
               .get();
+          const auto actual =
+              std::chrono::duration_cast<std::chrono::microseconds>(
+                  std::chrono::steady_clock::now() - t0);
+          if (actual > beforeReqLatency) {
+            fiber_local<RouterInfo>::accumulateBeforeReqInjectedOvershootUs(
+                (actual - beforeReqLatency).count());
+          }
         }
       }
     }
@@ -193,9 +200,17 @@ class LatencyInjectionRoute {
         proxy.stats().increment(mcrouter::after_request_latency_injected_stat);
         fiber_local<RouterInfo>::accumulateAfterReqInjectedLatencyUs(
             afterReqLatency.count());
+        const auto t0 = std::chrono::steady_clock::now();
         folly::futures::sleep(
             afterReqLatency, detail::getTimekeeperHighResSingleton().get())
             .get();
+        const auto actual =
+            std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::steady_clock::now() - t0);
+        if (actual > afterReqLatency) {
+          fiber_local<RouterInfo>::accumulateAfterReqInjectedOvershootUs(
+              (actual - afterReqLatency).count());
+        }
       }
     }
 

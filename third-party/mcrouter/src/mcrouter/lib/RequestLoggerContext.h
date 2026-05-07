@@ -116,6 +116,8 @@ struct RequestLoggerContext {
       const uint32_t numFailovers_ = 0,
       int64_t beforeReqLatencyInjectedUs_ = 0,
       int64_t afterReqLatencyInjectedUs_ = 0,
+      int64_t beforeReqLatencyInjectedOvershootUs_ = 0,
+      int64_t afterReqLatencyInjectedOvershootUs_ = 0,
       std::optional<size_t> poolIndex_ = std::nullopt,
       std::optional<int64_t> productId_ = std::nullopt,
       std::optional<int32_t> regionalizationEntity_ = std::nullopt,
@@ -137,6 +139,9 @@ struct RequestLoggerContext {
         numFailovers(numFailovers_),
         beforeReqLatencyInjectedUs(beforeReqLatencyInjectedUs_),
         afterReqLatencyInjectedUs(afterReqLatencyInjectedUs_),
+        beforeReqLatencyInjectedOvershootUs(
+            beforeReqLatencyInjectedOvershootUs_),
+        afterReqLatencyInjectedOvershootUs(afterReqLatencyInjectedOvershootUs_),
         poolIndex(poolIndex_),
         productId(productId_),
         regionalizationEntity(regionalizationEntity_),
@@ -162,6 +167,8 @@ struct RequestLoggerContext {
   const uint32_t numFailovers;
   const int64_t beforeReqLatencyInjectedUs;
   const int64_t afterReqLatencyInjectedUs;
+  const int64_t beforeReqLatencyInjectedOvershootUs;
+  const int64_t afterReqLatencyInjectedOvershootUs;
   std::optional<size_t> poolIndex;
   std::optional<int64_t> productId;
   std::optional<int32_t> regionalizationEntity;

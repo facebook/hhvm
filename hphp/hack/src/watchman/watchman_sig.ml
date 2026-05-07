@@ -137,7 +137,10 @@ module type S = sig
   val get_reader : watchman_instance -> Buffered_line_reader.t option
 
   module RepoStates : sig
-    val get : unit -> string list * string list
+    (** Returns (current_states, past_states).
+        [past_states] maps each state name to the [Unix.gettimeofday] timestamp
+        of the last time it was left. *)
+    val get : unit -> string list * float SMap.t
   end
 
   (* Expose some things for testing. *)

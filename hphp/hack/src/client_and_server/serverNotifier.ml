@@ -735,8 +735,14 @@ let get_repo_states_telemetry (t : t) : Telemetry.t =
     | IndexOnly _
     | Dfind _
     | MockChanges _ ->
-      ([], [])
+      ([], SMap.empty)
+  in
+  let past_states_telemetry =
+    SMap.fold
+      (fun name ts t -> Telemetry.float_ ~key:name ~value:ts t)
+      past_states
+      (Telemetry.create ())
   in
   Telemetry.create ()
   |> Telemetry.string_list ~key:"current_states" ~value:current_states
-  |> Telemetry.string_list ~key:"past_states" ~value:past_states
+  |> Telemetry.object_ ~key:"past_states" ~value:past_states_telemetry

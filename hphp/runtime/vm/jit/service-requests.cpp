@@ -112,8 +112,11 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   auto codeLock = tc::lockCode();
   std::optional<CodeCache::View> viewOpt;
   try {
-    viewOpt = tc::code().view(TransKind::Anchor);
+    viewOpt = tc::codeViews().view(
+      TransKind::Anchor, nullptr, CodeCacheViews::kAnchorTid,
+      Cfg::Jit::EnableConcurrentCodeViews, true /* codeLocked */);
   } catch (const DataBlockFull&) {
+    s_fullForStub.store(true, std::memory_order_release);
     tc::setTcIsFull();
     return nullptr;
   }
@@ -159,10 +162,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
     s_fullForStub.store(true, std::memory_order_release);
     return nullptr;
   }
-
-  assertx(view.main().frontier() == mainStart);
   assertx(view.cold().frontier() != coldStart);
-  assertx(view.frozen().frontier() == frozenStart);
 
   if (Cfg::Eval::DumpTCAnchors) {
     auto metaLock = tc::lockMetadata();
@@ -226,8 +226,11 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
 
   std::optional<CodeCache::View> viewOpt;
   try {
-    viewOpt = tc::code().view(TransKind::Anchor);
+    viewOpt = tc::codeViews().view(
+      TransKind::Anchor, nullptr, CodeCacheViews::kAnchorTid,
+      Cfg::Jit::EnableConcurrentCodeViews, true /* codeLocked */);
   } catch (const DataBlockFull&) {
+    s_fullForStub.store(true, std::memory_order_release);
     tc::setTcIsFull();
     return nullptr;
   }
@@ -250,8 +253,9 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
   if (!start) {
     FTRACE(4, "  ran out of space while making stub for {}\n", showShort(sk));
     s_fullForStub.store(true, std::memory_order_release);
+  } else {
+    FTRACE(4, "  emitted stub {} for {}\n", start, showShort(sk));
   }
-  FTRACE(4, "  emitted stub {} for {}\n", start, showShort(sk));
   return start;
 }
 

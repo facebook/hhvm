@@ -187,7 +187,6 @@ void PrologueTranslator::publishMetaImpl() {
 
 void PrologueTranslator::publishCodeImpl() {
   assertOwnsMetadataLock();
-  assertOwnsCodeLock();
 
   if (Cfg::Eval::EnableReusableTC) {
     auto const& loc = transMeta->range.loc();

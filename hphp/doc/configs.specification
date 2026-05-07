@@ -467,10 +467,20 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t CodeCache.GlobalDataSize, UNKNOWN
 - bool CodeCache.MapTCHuge, UNKNOWN, lookuppath(Eval.MapTCHuge)
 - uint32_t CodeCache.TCNumHugeHotMB = 64, UNKNOWN, lookuppath(Eval.TCNumHugeHotMB)
-- uint32_t CodeCache.TCNumHugeMainMB = 12, UNKNOWN, lookuppath(Eval.TCNumHugeMainMB)
-- uint32_t CodeCache.TCNumHugeColdMB = 4, UNKNOWN, lookuppath(Eval.TCNumHugeColdMB)
+- uint32_t CodeCache.TCNumHugeMainMB = 16, UNKNOWN, lookuppath(Eval.TCNumHugeMainMB)
+- uint32_t CodeCache.TCNumHugeColdMB = 0, UNKNOWN, lookuppath(Eval.TCNumHugeColdMB)
 - uint32_t CodeCache.TCNumHugeLiveMainMB = 4, UNKNOWN, lookuppath(Eval.TCNumHugeLiveMainMB)
 - uint32_t CodeCache.AutoTCShift = 1, UNKNOWN
+- uint32_t CodeCache.DropHintTimeMs = 30, UNKNOWN
+
+  Grace period in milliseconds after a thread releases its code cache view
+  before the slot becomes eligible for stealing by another thread.
+
+- uint32_t CodeCache.StealIntervalMs = 30, UNKNOWN
+
+  Minimum interval in milliseconds between successive global code cache view
+  slot steal attempts. Throttles how frequently an idle view slot can be
+  stolen by a new thread.
 
 # Configerator
 
@@ -832,6 +842,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Eval.EnableAsyncJIT = false, UNKNOWN
 - bool Eval.EnableAsyncJITLive = false, arnabde
 - bool Eval.EnableAsyncJITProfile, UNKNOWN
+- int Eval.MaxConcurrentCodeViews, UNKNOWN
+
+  Maximum number of concurrent code cache views (per-thread TC sections)
+  the JIT can allocate. Determines how many threads can work simultaneously
+  with their own dedicated code blocks.
+
 - int Eval.AsyncJitWorkerThreads, UNKNOWN
 
 - bool Eval.AsyncJitDeferContext = true, paulbiss
@@ -2137,8 +2153,17 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Max total number of live translation bytes to JIT into the TC for a function
 
-- uint32_t Jit.MaxLiveMainUsage = 150994944, UNKNOWN
-- uint32_t Jit.MaxLiveSeconds = 7200, UNKNOWN
+- uint32_t Jit.MaxLiveMainUsage = 2000000000, UNKNOWN
+
+  Max total numer of bytes to emit for live translations in the main section.
+  Defaults to 2GB.
+
+- uint32_t Jit.MaxLiveSeconds = 1380, UNKNOWN
+
+  Maximum number of seconds after RetranslateAll completes to continue emitting
+  live translations. Once this deadline expires, no new live translations are
+  generated.
+
 - uint32_t Jit.SampleRate = 0, UNKNOWN
 - bool Jit.AlignMacroFusionPairs, UNKNOWN
 - bool Jit.AlignUniqueStubs = true, UNKNOWN
@@ -2221,13 +2246,20 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   On average, log every 1 / Jit.TranslationStatsSampleRate counters. Has
   no effect unless Jit.CollectTranslationStats is set.
 
-- bool Jit.DynamicTCSections, paulbiss
+- bool Jit.DynamicTCSections = true, paulbiss
 
   Dynamically allocate TC blocks
 
-- double Jit.DataBlockSizeRatio = 0.0, UNKNOWN
+- bool Jit.EnableConcurrentCodeViews, UNKNOWN
 
-  Allocate each data block to be at least the remaining TC size * Jit.DataBlockSizeRatio
+  Enable concurrent code cache views, allowing multiple JIT threads to emit
+  into independent TC sections in parallel. Defaults to true when
+  Jit.DynamicTCSections is on, Repo.Authoritative is true, and
+  Eval.MaxConcurrentCodeViews > 1.
+
+- double Jit.DataBlockSizeRatio = 0.007, UNKNOWN
+
+  Allocate each data block to be at least the total TC size * Jit.DataBlockSizeRatio
 
 # Mail
 

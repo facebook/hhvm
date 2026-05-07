@@ -80,7 +80,6 @@ void addTranslation(const TransRec& transRec) {
   }
 
   if (!enabled()) return;
-  tc::assertOwnsCodeLock();
 
   auto transRecPtr = std::make_unique<TransRec>(transRec);
   std::unique_lock guard(s_lock);

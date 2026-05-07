@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/bespoke/layout.h"
@@ -25,6 +26,7 @@
 #include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/code-view.h"
 #include "hphp/runtime/vm/jit/guard-type-profile.h"
 #include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
@@ -64,8 +66,10 @@ TRACE_SET_MOD(mcg)
 namespace HPHP::jit::tc {
 
 __thread bool tl_is_jitting = false;
+__thread bool tl_threadIsFull = false;
 
 CodeCache* g_code{nullptr};
+CodeCacheViews* g_views{nullptr};
 SrcDB g_srcDB;
 UniqueStubs g_ustubs;
 ServiceData::ExportedCounter* g_JitMaturityCounter{nullptr};
@@ -121,7 +125,7 @@ struct CodeReuseBlock {
       }
     }
 
-    return CodeCache::View(*main, *cold, *frozen, src.data(), false);
+    return CodeCache::View(*main, *cold, *frozen, src.data(), false, src.isOwned());
   }
 };
 
@@ -239,12 +243,11 @@ static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
 // After DataBlockFull exception is raised consecutively this number of times,
 // we consider TC as being full.
 static constexpr size_t kConsecutiveTransBlocksFull = 3;
-static std::atomic<int> s_transBlocksFull{0};
 static std::atomic<bool> s_TCisFull{false};
 
 TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
                                          bool noThreshold) {
-  if (tcIsFull()) {
+  if (threadIsFull()) {
     return TranslationResult::Scope::Process;
   }
 
@@ -315,7 +318,7 @@ void CodeMetaLock::unlock() {
 }
 
 void assertOwnsCodeLock(OptView v) {
-  if (!v || !v->isLocal()) s_codeLock.assertOwnedBySelf();
+  if (!v || (!v->isLocal() && !v->isOwned())) s_codeLock.assertOwnedBySelf();
 }
 void assertOwnsMetadataLock() { s_metadataLock.assertOwnedBySelf(); }
 
@@ -365,6 +368,7 @@ void processInit() {
   auto metaLock = lockMetadata();
 
   g_code = new(low_malloc(sizeof(CodeCache))) CodeCache();
+  g_views = new CodeCacheViews(Cfg::Eval::MaxConcurrentCodeViews);
   g_ustubs.emitAll(*g_code, *Debug::DebugInfo::Get());
   g_JitMaturityCounter = ServiceData::createCounter("jit.maturity");
 
@@ -440,7 +444,7 @@ bool profileFunc(const Func* func) {
   // being added to ProfData.
   if (mcgen::retranslateAllScheduled()) return false;
 
-  if (tcIsFull()) return false;
+  if (threadIsFull()) return false;
 
   if (getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) {
     return false;
@@ -480,7 +484,7 @@ LocalTCBuffer::LocalTCBuffer(Address start, size_t initialSize) {
 
 OptView LocalTCBuffer::view() {
   if (!valid()) return std::nullopt;
-  return CodeCache::View(m_main, m_cold, m_frozen, m_data, true);
+  return CodeCache::View(m_main, m_cold, m_frozen, m_data, true, true);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -506,6 +510,10 @@ Translator::acquireLeaseAndRequisitePaperwork() {
   }
 
   if (auto const p = getCached()) return *p;
+  if (threadIsFull()) {
+    setCachedForProcessFail();
+    return TranslationResult{TranslationResult::Scope::Process};
+  }
 
   // Acquire the appropriate lease otherwise bail to a fallback
   // execution mode (eg. interpreter) by returning a nullptr
@@ -665,14 +673,15 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
 
   RelocationInfo rel;
   {
-    auto codeLock = lockCode();
+    auto codeLock = lockCode(!Cfg::Jit::EnableConcurrentCodeViews);
     std::optional<TransLocMaker> maker;
     std::optional<CodeCache::View> finalView;
     while (true) {
       try {
-        finalView = code().view(kind, &range);
+        finalView = codeViews().view(kind, &range, pthread_self(),
+                                     Cfg::Jit::EnableConcurrentCodeViews);
         CodeReuseBlock crb;
-        auto dstView = crb.getMaybeReusedView(*finalView, range);
+        auto dstView = crb.getMaybeReusedView(finalView.value(), range);
         auto& srcView = transMeta->view;
 
         maker.emplace(dstView);
@@ -731,7 +740,7 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
   adjustForRelocation(rel);
   adjustMetaDataForRelocation(rel, nullptr, fixups);
   adjustCodeForRelocation(rel, fixups);
-  s_transBlocksFull.store(0, std::memory_order_release);
+
   return std::nullopt;
 }
 
@@ -785,7 +794,6 @@ Optional<TranslationResult> Translator::bindOutgoingEdges() {
 
 TranslationResult Translator::publish() {
   assertx(transMeta.has_value());
-  auto codeLock = lockCode();
   auto metaLock = lockMetadata();
   publishMetaInternal();
   publishCodeInternal();
@@ -835,11 +843,17 @@ bool tcIsFull() {
 }
 
 void setTcIsFull() {
-  if (s_transBlocksFull.fetch_add(1, std::memory_order_release) >= kConsecutiveTransBlocksFull - 1) {
+  tl_threadIsFull = true;
+  codeViews().setFull(pthread_self());
+
+  if (codeViews().numThreadsFull() >= codeViews().maxViews()) {
     s_TCisFull.store(true, std::memory_order_release);
   }
 }
 
+bool threadIsFull() {
+  return tl_threadIsFull;
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 }

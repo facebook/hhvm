@@ -27,7 +27,9 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/cpuid.h"
 #include "hphp/util/process-cpu.h"
@@ -86,8 +88,8 @@ bool JitLoader::LayoutProfileSplitHotColdDefault() {
   return !arch::any<arch::ARM>();
 }
 
-bool JitLoader::DynamicTCSectionsDefault() {
-  return !arch::any<arch::ARM>();
+bool JitLoader::EnableConcurrentCodeViewsDefault() {
+  return Jit::DynamicTCSections && Cfg::Repo::Authoritative && Cfg::Eval::MaxConcurrentCodeViews > 1;
 }
 
 bool JitLoader::PGODefault() {

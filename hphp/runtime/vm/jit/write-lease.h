@@ -19,6 +19,7 @@
 #include "hphp/util/compilation-flags.h"
 
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/code-view.h"
 
 #include <pthread.h>
 
@@ -88,6 +89,7 @@ struct LeaseHolder {
   bool m_acquiredThread{false};
   TransKind m_acquiredKind{TransKind::Invalid};
   LockLevel m_level{LockLevel::None};
+  std::optional<ViewHolder> m_viewer{};
 };
 
 }} // HPHP::jit

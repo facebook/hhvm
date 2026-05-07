@@ -149,7 +149,8 @@ std::string EvalLoader::PackagesTomlFileNameDefault() {
 }
 
 int EvalLoader::AsyncJitWorkerThreadsDefault() {
-  return std::max(4, Process::GetCPUCount() / 2);
+  // So that each thread can have their own view to emit code.
+  return MaxConcurrentCodeViewsDefault();
 }
 
 bool EvalLoader::EnableAsyncJITProfileDefault() {
@@ -158,4 +159,7 @@ bool EvalLoader::EnableAsyncJITProfileDefault() {
   return true;
 }
 
+int EvalLoader::MaxConcurrentCodeViewsDefault() {
+  return std::max(4, Process::GetCPUCount() / 2);
+}
 }

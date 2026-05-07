@@ -44,6 +44,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/data-block.h"
 #include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/hardware-counter.h"

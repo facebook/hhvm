@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/vm/bytecode.h"
 
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/timer.h"
 
@@ -154,8 +155,8 @@ LockLevel lockLevel(TransKind k) {
                                                      : LockLevel::Kind;
     case TransKind::LivePrologue:
     case TransKind::Live:
-      return Cfg::Jit::Concurrently >= 3 ? LockLevel::Func
-                                                     : LockLevel::Kind;
+      return Cfg::Jit::EnableConcurrentCodeViews ? LockLevel::Func
+                                           : LockLevel::Kind;
   }
   always_assert(false);
 }
@@ -212,7 +213,14 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
     if (!(m_acquiredGlobal = s_globalLease.acquire(blocking))) return;
   }
 
-  SCOPE_EXIT { if (m_level == LockLevel::None) dropLocks(); };
+  SCOPE_EXIT {
+    if (m_level == LockLevel::None) {
+      if (m_viewer.has_value()) {
+        m_viewer->setDropHint(std::chrono::milliseconds{0});
+      }
+      dropLocks();
+    }
+  };
 
   if (level == LockLevel::Kind && !acquireKind(kind)) return;
 
@@ -238,6 +246,10 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
   }
 
   // If we made it this far, we acquired all the locks we need to translate.
+  if (Cfg::Jit::EnableConcurrentCodeViews && level != LockLevel::None) {
+    m_viewer.emplace(pthread_self(), false);
+    if (!m_viewer->isValid()) return;
+  }
   m_level = level;
 }
 

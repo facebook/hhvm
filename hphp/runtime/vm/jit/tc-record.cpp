@@ -52,7 +52,6 @@ void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
                           const TCA start, const TCA end) {
   assertx(cb.contains(start, end));
   if (start != end) {
-    assertOwnsCodeLock();
     auto const isCold = code().inCold(start);
     if (!Cfg::Jit::NoGdb) {
       Debug::DebugInfo::Get()->recordTracelet(
@@ -210,8 +209,6 @@ void recordTranslationSizes(const TransRec& tr) {
 }
 
 void updateCodeSizeCounters() {
-  assertOwnsCodeLock();
-
   #define F(c_name, update_fn, block_name, block) \
     s_ ## c_name ## _counters.at(block_name)->setValue(block.update_fn());
 

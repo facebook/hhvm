@@ -31,9 +31,11 @@
 #include "hphp/runtime/vm/jit/mcgen-async.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/data-block.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/match.h"
@@ -396,6 +398,7 @@ struct AsyncTranslationWorker
     ProfileNonVMThread nonVM;
     HphpSession hps{Treadmill::SessionKind::TranslateWorker};
     VMProtect _;
+    ViewHolder viewer{pthread_self(), true};
 
     if (!Func::isFuncIdValid(ctx.funcId)) return;
     auto const func = const_cast<Func*>(Func::fromFuncId(ctx.funcId));
@@ -429,6 +432,7 @@ struct AsyncTranslationWorker
     ProfileNonVMThread nonVM;
     HphpSession hps{Treadmill::SessionKind::TranslateWorker};
     VMProtect _;
+    ViewHolder viewer{pthread_self(), true};
 
     if (!Func::isFuncIdValid(ctx.sk.funcID())) {
       FTRACE(2, "Invalid func id {}\n", ctx.sk.funcID().toInt());
@@ -517,6 +521,7 @@ struct AsyncTranslationWorker
     ProfileNonVMThread nonVM;
     HphpSession hps{Treadmill::SessionKind::TranslateWorker};
     VMProtect _;
+    ViewHolder viewer{pthread_self(), true};
 
     if (!Func::isFuncIdValid(ctx.funcId)) {
       FTRACE(2, "Invalid func id {}\n", ctx.funcId.toInt());

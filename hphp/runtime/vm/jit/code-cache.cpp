@@ -164,13 +164,6 @@ CodeCache::CodeCache() {
         Cfg::CodeCache::TCNumHugeHotMB + Cfg::CodeCache::TCNumHugeMainMB);
     }
     m_cold.setHugePageBudget(Cfg::CodeCache::TCNumHugeColdMB);
-
-    // Allocate initial pages for each TC section
-    m_main.ensure(*this, size2m);
-    m_cold.ensure(*this, size2m);
-    m_frozen.ensure(*this, size2m);
-    m_data.ensure(*this, size2m);
-
     // Assert that no one is actually writing to or reading from the pseudo
     // addresses used to emit thread local translations
     if (thread_local_size) {
@@ -423,12 +416,12 @@ void CodeCache::SectionImpl<name, code, overAllocate, forwardAllocation, pageSiz
     if (newState.m_last->canEmit(size)) return;
     newState.m_used += newState.m_last->used();
   }
-  // When close to capacity, stop over-allocating so that threads acquire
-  // only what they need and waste less TC tail space.
-  auto constexpr closeToCapacityThreshold = 0.1;
-  bool nearCapacity = cc.m_all.available() < cc.m_all.capacity() * closeToCapacityThreshold;
-  auto minBlockSize = overAllocate && Cfg::Jit::DynamicTCSections && !nearCapacity
-      ? static_cast<size_t>(cc.m_all.available() * Cfg::Jit::DataBlockSizeRatio)
+
+  auto const largePagSize = static_cast<size_t>(cc.m_all.capacity() * Cfg::Jit::DataBlockSizeRatio);
+  auto const closeToCapacityLimit = Cfg::Eval::MaxConcurrentCodeViews * largePagSize;
+  bool closeToCapacity = cc.m_all.available() < closeToCapacityLimit;
+  auto minBlockSize = overAllocate && Cfg::Jit::DynamicTCSections && !closeToCapacity
+      ? largePagSize
       : 0;
   auto block = std::make_unique<DataBlock>(cc.m_all.allocChild(std::max(size, minBlockSize),
                                            name, forwardAllocation && Cfg::Jit::DynamicTCSections,
@@ -475,21 +468,42 @@ std::string CodeCache::blockMap() const {
   return ret;
 }
 
-CodeCache::View CodeCache::view(TransKind kind, const tc::TransRange* sizes, bool release) {
-  constexpr size_t kDefault = 1024;
-  constexpr size_t kPad = 128; // account for shifting during relocation
-  if (Cfg::Jit::DynamicTCSections) {
-    m_main.ensure(*this, sizes ? sizes->main.size() + kPad : kDefault);
-    if (isProfiling(kind)) {
-      m_frozen.ensure(
-        *this,
-        sizes ? sizes->cold.size() + sizes->frozen.size() + kPad : kDefault
-      );
-    } else {
-      m_cold.ensure(*this, sizes ? sizes->cold.size() + kPad : kDefault);
-      m_frozen.ensure(*this, sizes ? sizes->frozen.size() + kPad : kDefault);
+CodeCache::SectionSizes CodeCache::sectionSizes(
+    TransKind kind, const tc::TransRange* sizes) {
+  if (!sizes) {
+    if (kind == TransKind::Anchor) {
+      return {0, kDefaultBlockSize, 0, kDefaultBlockSize};
     }
-    m_data.ensure(*this, sizes ? sizes->data.size() + kPad : kDefault);
+    return {kDefaultBlockSize, kDefaultBlockSize,
+            kDefaultBlockSize, kDefaultBlockSize};
+  }
+  if (isProfiling(kind)) {
+    return {
+      sizes->main.size() + kPad,
+      sizes->cold.size() + kPad,
+      sizes->cold.size() + sizes->frozen.size() + kPad,
+      sizes->data.size() + kPad
+    };
+  }
+  return {
+    sizes->main.size() + kPad,
+    sizes->cold.size() + kPad,
+    sizes->frozen.size() + kPad,
+    sizes->data.size() + kPad
+  };
+}
+
+CodeCache::View CodeCache::view(TransKind kind, const tc::TransRange* sizes, bool release) {
+  if (Cfg::Jit::DynamicTCSections) {
+    auto const ss = sectionSizes(kind, sizes);
+    m_main.ensure(*this, ss.main);
+    if (isProfiling(kind)) {
+      m_frozen.ensure(*this, ss.frozen);
+    } else {
+      m_cold.ensure(*this, ss.cold);
+      m_frozen.ensure(*this, ss.frozen);
+    }
+    m_data.ensure(*this, ss.data);
   }
 
   View view{
@@ -506,10 +520,6 @@ CodeCache::View CodeCache::view(TransKind kind, const tc::TransRange* sizes, boo
     m_cold.releaseBlock();
     m_frozen.releaseBlock();
     m_data.releaseBlock();
-    m_main.ensure(*this, 1);
-    m_cold.ensure(*this, 1);
-    m_frozen.ensure(*this, 1);
-    m_data.ensure(*this, 1);
   }
 
   return view;
@@ -520,7 +530,6 @@ CodeBlock* CodeCache::releaseSection(S& section, size_t size) {
   section.ensure(*this, size);
   auto block = &section.block();
   section.releaseBlock();
-  section.ensure(*this, 1);
   return block;
 }
 

@@ -57,6 +57,22 @@ struct CodeCache {
 
   static constexpr size_t MinUnassigned = 4 * (2u << 20);
 
+  // Padding added beyond known translation sizes when reserving blocks.
+  // kPad covers relocation expansion for main/frozen/data.
+  // kColdPad covers relocation expansion plus service request stubs for cold.
+  static constexpr size_t kDefaultBlockSize = 1024;
+  static constexpr size_t kPad = 128;
+
+  struct SectionSizes {
+    size_t main;
+    size_t cold;
+    size_t frozen;
+    size_t data;
+  };
+
+  static SectionSizes sectionSizes(TransKind kind,
+                                   const tc::TransRange* sizes);
+
   CodeCache();
 
   template<typename L>

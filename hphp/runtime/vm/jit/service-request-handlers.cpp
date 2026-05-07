@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/workload-stats.h"
 
+#include "hphp/util/data-block.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/trace.h"

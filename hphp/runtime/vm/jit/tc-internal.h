@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/code-view.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
@@ -30,6 +31,8 @@ namespace HPHP::jit::tc {
 bool tcIsFull();
 
 void setTcIsFull();
+
+bool threadIsFull();
 
 /*
  * Convenience class for creating TransLocs and TransRecs for new translations.
@@ -220,6 +223,12 @@ ALWAYS_INLINE CodeCache& code() {
   extern CodeCache* g_code;
   assertx(g_code);
   return *g_code;
+}
+
+ALWAYS_INLINE CodeCacheViews& codeViews() {
+  extern CodeCacheViews* g_views;
+  assertx(g_views);
+  return *g_views;
 }
 
 /*

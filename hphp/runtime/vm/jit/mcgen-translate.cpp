@@ -43,9 +43,12 @@
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/runtime/ext/server/ext_server.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/configs/codecache.h"
+#include "hphp/util/configs/eval.h"
+#include "hphp/util/data-block.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
@@ -468,6 +471,7 @@ void retranslateAll(bool skipSerialize) {
   std::vector<tc::FuncMetaInfo> jobs;
   jobs.reserve(nFuncs);
   std::unique_ptr<uint8_t[]> codeBuffer(new uint8_t[nFuncs * initialSize]);
+  ViewHolder viewer{pthread_self(), true};
 
   {
     std::lock_guard<std::mutex> lock{s_dispatcherMutex};
@@ -706,6 +710,8 @@ Optional<SBInvOffset> offsetAtLocation(SrcKey sk) {
 
 std::string debug_translate_live(SrcKey sk,
                                  const std::vector<std::string>& types) {
+  ViewHolder viewer{pthread_self(), false};
+  if (!viewer.isValid()) return "Unable to create ViewHolder";
   auto off = offsetAtLocation(sk);
   if (!off) return "Unable to compute stack offset for start location";
   if (!tc::createSrcRec(sk, *off)) return "Unable to create SrcRec";

@@ -1,6 +1,6 @@
 --- ocaml
 +++ rupro
-@@ -1,178 +1,178 @@
+@@ -1,173 +1,173 @@
  FoldedClass {
      name: "\\T1",
      pos: Pos(root|multiple_01.good.php, 4:7-9),
@@ -14,7 +14,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,
@@ -53,7 +52,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,
@@ -115,7 +113,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,
@@ -129,7 +126,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,
@@ -143,7 +139,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,

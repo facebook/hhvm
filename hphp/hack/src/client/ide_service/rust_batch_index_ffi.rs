@@ -36,38 +36,33 @@ fn parsed_file_to_file_info(file: oxidized::direct_decl_parser::ParsedFileWithHa
     };
     let pos = |p: &oxidized::pos::Pos| file_info::Pos::Full(p.to_owned());
     use oxidized::shallow_decl_defs::Decl;
-    for (name, decl, hash, sort_text) in file.into_iter() {
+    for (name, decl, hash) in file.into_iter() {
         let hash = Int64::from(hash.as_u64() as i64);
         match decl {
             Decl::Class(x) => info.ids.classes.push(Id {
                 pos: pos(&x.name.0),
                 name,
                 decl_hash: Some(hash),
-                sort_text: sort_text.map(|s| s.to_string()),
             }),
             Decl::Fun(x) => info.ids.funs.push(Id {
                 pos: pos(&x.pos),
                 name,
                 decl_hash: Some(hash),
-                sort_text: None,
             }),
             Decl::Typedef(x) => info.ids.typedefs.push(Id {
                 pos: pos(&x.pos),
                 name,
                 decl_hash: Some(hash),
-                sort_text: None,
             }),
             Decl::Const(x) => info.ids.consts.push(Id {
                 pos: pos(&x.pos),
                 name,
                 decl_hash: Some(hash),
-                sort_text: None,
             }),
             Decl::Module(x) => info.ids.modules.push(Id {
                 pos: pos(&x.mdt_pos),
                 name,
                 decl_hash: Some(hash),
-                sort_text: None,
             }),
         }
     }

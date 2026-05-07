@@ -343,8 +343,6 @@ module UserAttributes = struct
 
   let uaEagerVMSync = "__EagerVMSync"
 
-  let uaAutocompleteSortText = "__AutocompleteSortText"
-
   let uaOutOnly = "__OutOnly"
 
   let uaAlwaysInline = "__ALWAYS_INLINE"
@@ -470,13 +468,6 @@ module UserAttributes = struct
               contexts = [cls; enum; enumcls; typealias];
               autocomplete = true;
               doc = "Shows the linked URL when hovering over this type.";
-            } );
-          ( uaAutocompleteSortText,
-            {
-              contexts = [fn; mthd; cls];
-              autocomplete = false;
-              doc =
-                "Declares which string will be used for ordering this in autocomplete suggestions.";
             } );
           ( uaEntryPoint,
             {

@@ -40,7 +40,6 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
          sm_deprecated;
          sm_flags = _;
          sm_attributes = _;
-         sm_sort_text = _;
          sm_package_requirement;
        } :
         Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
@@ -70,7 +69,6 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
          sm_deprecated = _;
          sm_flags;
          sm_attributes;
-         sm_sort_text = _;
          sm_package_requirement;
        } :
         Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =

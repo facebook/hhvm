@@ -114,22 +114,6 @@ let check_deprecated_static attrs =
   end
   | _ -> ()
 
-let check_autocomplete_valid_text attrs =
-  let attr =
-    Naming_attributes.find SN.UserAttributes.uaAutocompleteSortText attrs
-  in
-  match attr with
-  | Some { ua_name = _; ua_params = [msg] } -> begin
-    match Nast_eval.static_string msg with
-    | Error p ->
-      Diagnostics.add_diagnostic
-        Nast_check_error.(
-          to_user_diagnostic
-          @@ Attribute_param_type { pos = p; x = "static string literal" })
-    | _ -> ()
-  end
-  | _ -> ()
-
 let check_no_auto_dynamic env attrs =
   if TypecheckerOptions.enable_no_auto_dynamic (Nast_check_env.get_tcopt env)
   then
@@ -336,7 +320,6 @@ let handler =
         SN.UserAttributes.uaDeprecated
         (`Range (1, 2));
       check_deprecated_static f.f_user_attributes;
-      check_autocomplete_valid_text f.f_user_attributes;
       check_no_auto_dynamic env f.f_user_attributes;
       let params = f.f_params in
       List.iter
@@ -382,10 +365,6 @@ let handler =
         (`Range (0, 1));
       check_attribute_arity
         m.m_user_attributes
-        SN.UserAttributes.uaAutocompleteSortText
-        (`Exact 1);
-      check_attribute_arity
-        m.m_user_attributes
         SN.UserAttributes.uaInferFlows
         (`Exact 0);
       check_attribute_arity
@@ -396,7 +375,6 @@ let handler =
         (Aast_defs.equal_visibility m.m_visibility Aast_defs.Internal)
         m.m_user_attributes;
       check_deprecated_static m.m_user_attributes;
-      check_autocomplete_valid_text m.m_user_attributes;
       check_duplicate_memoize m.m_user_attributes;
       check_no_auto_dynamic env m.m_user_attributes;
       check_implemented_by env m.m_user_attributes;
@@ -418,17 +396,12 @@ let handler =
 
     method! at_class_ env c =
       check_no_auto_dynamic env c.c_user_attributes;
-      check_autocomplete_valid_text c.c_user_attributes;
       check_soft_internal_without_internal c.c_internal c.c_user_attributes;
       check_dynamically_referenced c.c_user_attributes;
       check_no_class_sealed_with_trait env c;
       check_attribute_arity
         c.c_user_attributes
         SN.UserAttributes.uaDocs
-        (`Exact 1);
-      check_attribute_arity
-        c.c_user_attributes
-        SN.UserAttributes.uaAutocompleteSortText
         (`Exact 1);
       List.iter
         (fun cv ->

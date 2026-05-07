@@ -219,7 +219,6 @@ pub struct Id {
     pub pos: Pos,
     pub name: String,
     pub decl_hash: Option<Int64>,
-    pub sort_text: Option<String>,
 }
 
 #[derive(

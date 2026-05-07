@@ -1,8 +1,6 @@
 AJ
   INSERT AJ
   ~C<AJ, string>
-SORT TEXT: none
 AI
   INSERT AI
   ~C<AI, int>
-SORT TEXT: none

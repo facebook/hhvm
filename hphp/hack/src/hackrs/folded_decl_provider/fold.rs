@@ -318,7 +318,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             deprecated: None,
             flags: ClassEltFlags::new(flag_args),
             sealed_allowlist: None,
-            sort_text: None,
             overlapping_tparams: None,
             package_requirement: None,
         };
@@ -360,7 +359,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             deprecated: None,
             flags: ClassEltFlags::new(flag_args),
             sealed_allowlist: None,
-            sort_text: None,
             overlapping_tparams: None,
             package_requirement: None,
         };
@@ -398,18 +396,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
         let sealed_allowlist = self.get_method_sealed_allowlist(sm);
 
-        let sort_text = match sm.sort_text.to_owned() {
-            Some(text) => Some(text),
-            _ => match methods.get(&meth) {
-                Some(FoldedElement {
-                    sort_text: Some(parent_text),
-                    ..
-                }) => Some(parent_text),
-                _ => None,
-            }
-            .cloned(),
-        };
-
         let meth_flags = &sm.flags;
         let no_auto_likes = meth_flags.is_no_auto_likes()
             || match methods.get(&meth) {
@@ -439,7 +425,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             deprecated: sm.deprecated,
             flags: ClassEltFlags::new(flag_args),
             sealed_allowlist,
-            sort_text,
             overlapping_tparams: self.get_overlapping_tparams(sm),
             package_requirement: Some(sm.package_requirement.to_owned()),
         };
@@ -489,7 +474,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 deprecated: sm.deprecated,
                 flags: ClassEltFlags::new(flag_args),
                 sealed_allowlist: None,
-                sort_text: sm.sort_text.to_owned(),
                 overlapping_tparams: None,
                 package_requirement: Some(sm.package_requirement.to_owned()),
             }
@@ -1008,18 +992,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         );
 
         let is_const = self.has_user_attribute(*sn::user_attributes::uaConst);
-        use ty::decl::ty::UserAttributeParam;
-        let sort_text = self
-            .child
-            .user_attributes
-            .iter()
-            .find(|ua| ua.name.id() == *sn::user_attributes::uaAutocompleteSortText)
-            .and_then(|ua| ua.params.first().cloned())
-            .and_then(|param| match param {
-                UserAttributeParam::String(s) => Some(s),
-                _ => None,
-            })
-            .map(|s| s.to_string());
         let is_module_level_trait =
             self.has_user_attribute(*sn::user_attributes::uaModuleLevelTrait);
         let allow_multiple_instantiations =
@@ -1064,7 +1036,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             decl_errors: self.errors.into_boxed_slice(),
             docs_url: self.child.docs_url.clone(),
             allow_multiple_instantiations,
-            sort_text,
             package: self.child.package.clone(),
         });
 

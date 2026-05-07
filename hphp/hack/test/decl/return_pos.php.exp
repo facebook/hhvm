@@ -42,8 +42,7 @@
             override = false; dynamicallycallable = false;
             php_std_lib = false; support_dynamic_type = false;
             no_auto_likes = false; needs_concrete = false };
-          sm_attributes = []; sm_sort_text = None;
-          sm_package_requirement = Typing_defs.RPNormal };
+          sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal };
          { Shallow_decl_defs.sm_name = ([5:26-28], "f2");
            sm_type =
            (Rwitness_from_decl ([5:26-28]),
@@ -69,8 +68,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal };
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([6:26-28], "f3");
            sm_type =
            (Rwitness_from_decl ([6:26-28]),
@@ -97,8 +96,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal };
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([7:32-37], "genf4");
            sm_type =
            (Rwitness_from_decl ([7:32-37]),
@@ -125,8 +124,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal };
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([8:26-28], "f5");
            sm_type =
            (Rwitness_from_decl ([8:26-28]),
@@ -148,8 +147,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal };
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           };
          { Shallow_decl_defs.sm_name = ([9:26-28], "f6");
            sm_type =
            (Rwitness_from_decl ([9:26-28]),
@@ -182,8 +181,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal }
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
        sc_docs_url = None; sc_package = None }))

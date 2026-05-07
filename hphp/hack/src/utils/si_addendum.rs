@@ -12,7 +12,7 @@ pub fn get_si_addenda(
 ) -> Vec<SiAddendum> {
     with_hashes
         .iter()
-        .filter_map(|(name, decl, _hash, _sort_text)| {
+        .filter_map(|(name, decl, _hash)| {
             use oxidized::file_info::SiKind::*;
             use oxidized::shallow_decl_defs::Decl;
             let kind = match decl {

@@ -103,7 +103,6 @@ let default =
     ide_naming_table_update_threshold = 1000;
     dump_tast_hashes = false;
     dump_tasts = [];
-    autocomplete_sort_text = false;
     hack_warnings = true;
     warnings_default_all = false;
     warnings_in_sandcastle = true;
@@ -887,12 +886,6 @@ let load_
     | None -> default.dump_tasts
     | Some path -> In_channel.read_lines path
   in
-  let autocomplete_sort_text =
-    bool_
-      Config_keys.Hhconf.autocomplete_sort_text
-      ~default:default.autocomplete_sort_text
-      config
-  in
   let hack_warnings =
     bool_
       Config_keys.Hhconfig.hack_warnings
@@ -1123,7 +1116,6 @@ let load_
     ide_naming_table_update_threshold;
     dump_tast_hashes;
     dump_tasts;
-    autocomplete_sort_text;
     hack_warnings;
     warnings_default_all;
     warnings_in_sandcastle;
@@ -1200,7 +1192,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       saved_state_rollouts = options.saved_state.GlobalOptions.rollouts;
       zstd_decompress_by_file =
         GlobalOptions.(options.saved_state.loading.zstd_decompress_by_file);
-      autocomplete_sort_text = options.autocomplete_sort_text;
       warnings_default_all = options.warnings_default_all;
       edenfs_file_watcher_enabled = options.edenfs_file_watcher.enabled;
       edenfs_file_watcher_sync_queries_obey_deferral =

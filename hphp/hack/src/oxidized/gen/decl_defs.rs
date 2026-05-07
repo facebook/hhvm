@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b6908fc9c840bea0613e241a20ead3b4>>
+// @generated SignedSource<<88a038b8f8905c9e3ddfdf7a67fc57de>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -170,7 +170,6 @@ pub struct Element {
     pub visibility: CeVisibility,
     pub deprecated: Option<String>,
     pub sealed_allowlist: Option<s_set::SSet>,
-    pub sort_text: Option<String>,
     pub overlapping_tparams: Option<s_set::SSet>,
     pub package_requirement: Option<PackageRequirement>,
 }
@@ -243,9 +242,6 @@ pub struct DeclClassType {
     pub docs_url: Option<String>,
     /// Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations.
     pub allow_multiple_instantiations: bool,
-    /// The string provided by the __AutocompleteSortText attribute used for sorting
-    /// autocomplete results.
-    pub sort_text: Option<String>,
     pub package: Option<aast_defs::PackageMembership>,
 }
 

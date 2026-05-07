@@ -104,7 +104,6 @@ type element = {
   elt_visibility: ce_visibility;
   elt_deprecated: string option;
   elt_sealed_allowlist: SSet.t option;
-  elt_sort_text: string option;
   (* Derived from <<__Overlapping(_)>> attribute *)
   elt_overlapping_tparams: SSet.t option;
   elt_package_requirement: package_requirement option;
@@ -161,9 +160,6 @@ type decl_class_type = {
   dc_docs_url: string option;
   dc_allow_multiple_instantiations: bool;
       (** Wether this interface has attribute __UNSAFE_AllowMultipleInstantiations. *)
-  dc_sort_text: string option;
-      (** The string provided by the __AutocompleteSortText attribute used for sorting
-          autocomplete results. *)
   dc_package: Aast_defs.package_membership option;
 }
 [@@deriving show]

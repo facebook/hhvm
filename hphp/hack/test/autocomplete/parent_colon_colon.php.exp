@@ -1,12 +1,9 @@
 fun_instance
   INSERT fun_instance()
   function(): void
-SORT TEXT: none
 class
   INSERT class
   class<this>
-SORT TEXT: none
 fun_method
   INSERT fun_method()
   function(): void
-SORT TEXT: none

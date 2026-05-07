@@ -113,8 +113,6 @@ type rollout_flags = {
   saved_state_rollouts: Saved_state_rollouts.t;
   zstd_decompress_by_file: bool;
       (** POC: @nzthomas, if true then saved state loading will only pass specific files to zstd shellout *)
-  autocomplete_sort_text: bool;
-      (** POC: @mckenzie - if true, autocomplete results will be sorted using sort text attribute *)
   warnings_default_all: bool;
       (** POC: @catg - whether the client shows warnings by default. *)
   edenfs_file_watcher_enabled: bool;

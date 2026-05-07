@@ -493,7 +493,6 @@ impl<R: Reason> ToOxidized for folded::FoldedClass<R> {
             decl_errors,
             docs_url,
             allow_multiple_instantiations,
-            sort_text,
             package,
         } = self;
         o::decl_defs::DeclClassType {
@@ -536,7 +535,6 @@ impl<R: Reason> ToOxidized for folded::FoldedClass<R> {
             decl_errors: decl_errors.to_oxidized(),
             docs_url,
             allow_multiple_instantiations,
-            sort_text,
             package,
         }
     }
@@ -554,7 +552,6 @@ impl ToOxidized for folded::FoldedElement {
                 .map(|x| String::from_utf8_lossy(x.as_bytes()).to_string()),
             flags: self.flags,
             sealed_allowlist: self.sealed_allowlist.to_oxidized(),
-            sort_text: self.sort_text,
             overlapping_tparams: self.overlapping_tparams.to_oxidized(),
             package_requirement: self.package_requirement,
         }
@@ -618,7 +615,6 @@ impl<R: Reason> ToOxidized for shallow::ShallowMethod<R> {
             deprecated,
             flags,
             attributes,
-            sort_text,
             package_requirement,
         } = self;
         o::shallow_decl_defs::ShallowMethod {
@@ -628,7 +624,6 @@ impl<R: Reason> ToOxidized for shallow::ShallowMethod<R> {
             deprecated: deprecated.map(|s| String::from_utf8_lossy(s.as_bytes()).to_string()),
             flags: o::method_flags::MethodFlags::from_bits_truncate(flags.bits()),
             attributes: attributes.to_oxidized(),
-            sort_text,
             package_requirement,
         }
     }

@@ -1,4 +1,3 @@
 label_taker
   INSERT label_taker
   function
-SORT TEXT: none

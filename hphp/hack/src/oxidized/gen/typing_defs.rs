@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ef2f3312e2371c9943eab5efbe93cf07>>
+// @generated SignedSource<<dc2a82fa6de4db990150a387fbc3c54f>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -165,7 +165,6 @@ pub struct ClassElt {
     pub pos: lazy::Lazy<pos_or_decl::PosOrDecl>,
     pub flags: typing_defs_flags::class_elt::ClassElt,
     pub sealed_allowlist: Option<s_set::SSet>,
-    pub sort_text: Option<String>,
     pub overlapping_tparams: Option<s_set::SSet>,
     pub package_requirement: Option<PackageRequirement>,
 }

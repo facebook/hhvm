@@ -2,7 +2,6 @@
 
 The following attributes are defined:
 - [\_\_AcceptDisposable](#__acceptdisposable)
-- [\_\_AutocompleteSortText](#__autocompletesorttext)
 - [\_\_ConsistentConstruct](#__consistentconstruct)
 - [\_\_Deprecated](#__deprecated)
 - [\_\_Docs](#__docs)
@@ -33,35 +32,6 @@ The following attributes are defined:
 This attribute can be applied to a function parameter that has a type that implements interface `IDisposable` or `IAsyncDisposable`.
 
 See [object disposal](/hack/classes/object-disposal) for an example of its use.
-
-## __AutocompleteSortText
-
-When we are displaying autocomplete suggestions, we sort method suggestions
-alphabetically. To override what text is used for sorting a specific method in
-the autocomplete suggestions, use the `__AutocompleteSortText` attribute.
-
-```hack file:base.hack
-class Dog {
-  <<__AutocompleteSortText('!getName')>>
-  public function getName(): string {
-    return "Clifford";
-  }
-
-  public function getOwner(): string {
-    return "Emily";
-  }
-
-  public function getFriends(): vec<string> {
-    return vec["Cleo"];
-  }
-}
-```
-
-In the above example, autocomplete suggestions would typically show in the
-order: `getFriends`, `getName`, `getOwner`
-
-But since the `__AutocompleteSortText` is used, the order is: `getName`,
-`getFriends`, `getOwner`
 
 ## __ConsistentConstruct
 

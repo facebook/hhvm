@@ -510,7 +510,6 @@ impl HhConfig {
                 }
             },
             tco_autocomplete_mode: default.tco_autocomplete_mode,
-            tco_autocomplete_sort_text: default.tco_autocomplete_sort_text,
             tco_extended_reasons: hhconfig.get_either_int_or_str("extended_reasons").and_then(
                 |res| match res {
                     Ok(n) => Some(ExtendedReasonsConfig::Extended(n)),

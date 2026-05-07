@@ -419,8 +419,6 @@ module Hhconf = struct
 
   (* IDE *)
 
-  let autocomplete_sort_text = hhconf_key "autocomplete_sort_text"
-
   let go_to_implementation = hhconf_key "go_to_implementation"
 
   let ide_load_naming_table_on_disk = hhconf_key "ide_load_naming_table_on_disk"

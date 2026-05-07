@@ -1,4 +1,3 @@
 getValue
   INSERT getValue()
   function<TGetWrappedValue as IWrappedValue with { type TInnerValue = TInnerValue }, TInnerValue>(): ~TInnerValue
-SORT TEXT: none

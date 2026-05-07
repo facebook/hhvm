@@ -398,7 +398,6 @@ let build_constructor
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
       elt_sealed_allowlist = None;
-      elt_sort_text = method_.sm_sort_text;
       elt_overlapping_tparams = get_overlapping_tparams method_;
       elt_package_requirement = Some method_.sm_package_requirement;
     }
@@ -534,7 +533,6 @@ let prop_decl_eager
       elt_origin;
       elt_deprecated = None;
       elt_sealed_allowlist = None;
-      elt_sort_text = None;
       elt_overlapping_tparams = None;
       elt_package_requirement = None;
     }
@@ -575,7 +573,6 @@ let static_prop_decl_eager
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
       elt_sealed_allowlist = None;
-      elt_sort_text = None;
       elt_overlapping_tparams = None;
       elt_package_requirement = None;
     }
@@ -724,16 +721,6 @@ let method_decl_eager
   in
   let support_dynamic_type = sm_support_dynamic_type m in
   let sealed_allowlist = get_method_sealed_allowlist m in
-  let parent_sort_text =
-    match SMap.find_opt id acc with
-    | Some ({ elt_sort_text = _ as parent_text; _ }, _) -> parent_text
-    | _ -> None
-  in
-  let sort_text =
-    match m.sm_sort_text with
-    | Some text -> Some text
-    | _ -> parent_sort_text
-  in
   let parent_no_auto_likes =
     match SMap.find_opt id acc with
     | Some ({ elt_flags; _ }, _) ->
@@ -763,7 +750,6 @@ let method_decl_eager
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;
       elt_sealed_allowlist = sealed_allowlist;
-      elt_sort_text = sort_text;
       elt_overlapping_tparams = get_overlapping_tparams m;
       elt_package_requirement = Some m.sm_package_requirement;
     }
@@ -1023,18 +1009,6 @@ and class_decl
       c.sc_tparams
   in
   let sealed_whitelist = get_class_sealed_allowlist c in
-  let ua_sort_text =
-    match
-      Attributes.find
-        SN.UserAttributes.uaAutocompleteSortText
-        c.sc_user_attributes
-    with
-    | None -> None
-    | Some { ua_params; _ } ->
-      List.find_map ua_params ~f:(function
-          | String s -> Some s
-          | _ -> None)
-  in
 
   let tc =
     {
@@ -1085,7 +1059,6 @@ and class_decl
         Attributes.mem
           SN.UserAttributes.uaUnsafeAllowMultipleInstantiations
           c.sc_user_attributes;
-      dc_sort_text = ua_sort_text;
       dc_package = c.sc_package;
     }
   in

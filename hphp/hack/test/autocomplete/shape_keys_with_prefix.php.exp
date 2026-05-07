@@ -1,8 +1,6 @@
 'a_abc'
   INSERT 'a_abc'
   literal
-SORT TEXT: none
 'a_def'
   INSERT 'a_def'
   literal
-SORT TEXT: none

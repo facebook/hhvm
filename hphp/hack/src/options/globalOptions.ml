@@ -167,7 +167,6 @@ type t = {
   dump_tast_hashes: bool;
   dump_tasts: string list;
   tco_autocomplete_mode: bool;
-  tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
   tco_disable_physical_equality: bool;
   hack_warnings: int none_or_all_except;
@@ -283,7 +282,6 @@ let default =
     dump_tast_hashes = false;
     dump_tasts = [];
     tco_autocomplete_mode = false;
-    tco_autocomplete_sort_text = false;
     tco_extended_reasons = None;
     tco_disable_physical_equality = false;
     hack_warnings = All_except [];
@@ -398,7 +396,6 @@ let set
     ?dump_tast_hashes
     ?dump_tasts
     ?tco_autocomplete_mode
-    ?tco_autocomplete_sort_text
     ?tco_extended_reasons
     ?tco_disable_physical_equality
     ?hack_warnings
@@ -645,8 +642,6 @@ let set
     dump_tasts = setting dump_tasts options.dump_tasts;
     tco_autocomplete_mode =
       setting tco_autocomplete_mode options.tco_autocomplete_mode;
-    tco_autocomplete_sort_text =
-      setting tco_autocomplete_sort_text options.tco_autocomplete_sort_text;
     tco_extended_reasons =
       setting_opt tco_extended_reasons options.tco_extended_reasons;
     tco_disable_physical_equality =

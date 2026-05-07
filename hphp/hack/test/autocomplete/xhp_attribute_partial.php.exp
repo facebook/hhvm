@@ -1,4 +1,3 @@
 my-attribute
   INSERT my-attribute
   ~?MyEnum
-SORT TEXT: none

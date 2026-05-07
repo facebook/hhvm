@@ -28,7 +28,6 @@ type autocomplete_item = {
   res_fullname: string;
   res_kind: FileInfo.si_kind;
   res_documentation: string option;
-  res_sortText: string option;
 }
 
 (* The type returned to the client *)

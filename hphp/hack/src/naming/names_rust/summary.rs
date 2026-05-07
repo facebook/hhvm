@@ -34,11 +34,10 @@ impl FileSummary {
             file_decls_hash: parsed_file.file_decls_hash,
             decls: parsed_file
                 .iter()
-                .map(|(symbol, decl, hash, sort_text)| DeclSummary {
+                .map(|(symbol, decl, hash)| DeclSummary {
                     name_type: decl.kind(),
                     symbol: symbol.clone(),
                     hash: hash.clone(),
-                    sort_text: sort_text.clone(),
                 })
                 .collect(),
             file_digest: None,
@@ -85,7 +84,6 @@ pub struct DeclSummary {
     pub name_type: file_info::NameType,
     pub symbol: String,
     pub hash: DeclHash,
-    pub sort_text: Option<String>,
 }
 
 impl DeclSummary {
@@ -120,7 +118,6 @@ pub struct SymbolRowNew {
     pub decl_hash: DeclHash,
     pub kind: NameType,
     pub name: String,
-    pub sort_text: String,
     pub path: RelativePath,
     pub file_info_id: crate::FileInfoId,
 }

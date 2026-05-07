@@ -182,8 +182,7 @@ let get_class_elt_types ~is_method env class_ cid elts =
   in
   elts
   |> List.filter ~f:is_visible
-  |> List.map ~f:(fun (id, { ce_type = (lazy ty); ce_sort_text; _ }) ->
-         (id, ty, ce_sort_text))
+  |> List.map ~f:(fun (id, { ce_type = (lazy ty); _ }) -> (id, ty))
 
 let get_class_req_attrs (env : Tast_env.env) classname cid =
   let req_attrs cls =
@@ -392,7 +391,6 @@ let autocomplete_shape_key autocomplete_context fields id =
             res_documentation = None;
             res_filter_text = None;
             res_additional_edits = [];
-            res_sortText = None;
           }
         in
         add_res complete
@@ -411,7 +409,7 @@ let autocomplete_member
       | _ -> false
     in
 
-    let add kind (name, ty, sort_text) =
+    let add kind (name, ty) =
       (* Functions that support dynamic will be wrapped by supportdyn<_> *)
       let ty = strip_supportdyn_decl ty in
       let res_detail =
@@ -436,7 +434,6 @@ let autocomplete_member
           res_documentation = None;
           res_filter_text = None;
           res_additional_edits = [];
-          res_sortText = sort_text;
         }
       in
       add_res complete
@@ -528,8 +525,7 @@ let autocomplete_member
         ~f:(add FileInfo.SI_Property);
       List.iter
         (Tast_env.consts env class_ |> sort)
-        ~f:(fun (name, cc) ->
-          add FileInfo.SI_ClassConstant (name, cc.cc_type, None))
+        ~f:(fun (name, cc) -> add FileInfo.SI_ClassConstant (name, cc.cc_type))
     );
     if (not is_static) || parent_receiver then (
       List.iter
@@ -539,14 +535,13 @@ let autocomplete_member
            class_
            cid
            (Cls.methods class_ |> sort))
-        ~f:(fun (s, ty, i) ->
+        ~f:(fun (s, ty) ->
           let satisfies_where_constraints =
             match get_node (strip_supportdyn_decl ty) with
             | Tfun ft -> check_where_constraints ft
             | _ -> true
           in
-          if satisfies_where_constraints then
-            add FileInfo.SI_ClassMethod (s, ty, i));
+          if satisfies_where_constraints then add FileInfo.SI_ClassMethod (s, ty));
       List.iter
         (get_class_elt_types
            ~is_method:false
@@ -592,7 +587,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
     in
     List.iter
       (get_class_elt_types ~is_method:false env class_ cid (Cls.props class_))
-      ~f:(fun (name, ty, sort_text) ->
+      ~f:(fun (name, ty) ->
         if
           not
             (SSet.exists
@@ -615,7 +610,6 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
               res_documentation = None;
               res_filter_text = None;
               res_additional_edits = [];
-              res_sortText = sort_text;
             }
           in
           add_res complete)
@@ -650,7 +644,6 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
           res_documentation = None;
           res_filter_text = None;
           res_additional_edits = [];
-          res_sortText = None;
         }
       in
 
@@ -707,7 +700,6 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
           res_documentation = None;
           res_filter_text = None;
           res_additional_edits = [];
-          res_sortText = None;
         }
       in
       add_res complete
@@ -790,7 +782,6 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                       res_documentation = None;
                       res_filter_text = None;
                       res_additional_edits = [];
-                      res_sortText = None;
                     }
                   in
                   add_res complete))
@@ -1011,7 +1002,6 @@ let autocomplete_hack_fake_arrow
             res_kind = kind;
             res_documentation = None;
             res_additional_edits;
-            res_sortText = None;
           }
         in
         add_res complete)
@@ -1115,7 +1105,6 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
             res_documentation = None;
             res_filter_text = None;
             res_additional_edits = [];
-            res_sortText = None;
           }
         in
         add_res complete)
@@ -1240,7 +1229,6 @@ let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
                 res_documentation = None;
                 res_filter_text = None;
                 res_additional_edits = [];
-                res_sortText = None;
               }
             in
             add_res complete)
@@ -1287,7 +1275,6 @@ let autocomplete_shape_literal_in_call
         res_documentation = None;
         res_filter_text = None;
         res_additional_edits = [];
-        res_sortText = None;
       }
     in
     add_res complete
@@ -1343,7 +1330,6 @@ let add_builtin_attribute_result replace_pos ~doc ~name : unit =
       res_documentation = Some doc;
       res_filter_text = None;
       res_additional_edits = [];
-      res_sortText = None;
     }
   in
   add_res complete
@@ -1401,7 +1387,6 @@ let autocomplete_overriding_method env m : unit =
               res_documentation = None;
               res_filter_text = None;
               res_additional_edits = [];
-              res_sortText = None;
             }
           in
           add_res complete)
@@ -1473,7 +1458,6 @@ let add_enum_const_result env pos replace_pos prefix const_name =
       res_documentation = None;
       res_filter_text = None;
       res_additional_edits = [];
-      res_sortText = None;
     }
   in
   add_res complete
@@ -1723,7 +1707,6 @@ let find_global_results
             res_documentation = None;
             res_filter_text = None;
             res_additional_edits = [];
-            res_sortText = None;
           }
         in
         add_res complete);
@@ -1756,7 +1739,6 @@ let find_global_results
                  res_documentation = Some documentation;
                  res_filter_text = None;
                  res_additional_edits = [];
-                 res_sortText = None;
                })
 
 let complete_xhp_tag
@@ -1813,7 +1795,6 @@ let complete_xhp_tag
           res_documentation = None;
           res_filter_text = None;
           res_additional_edits = [];
-          res_sortText = None;
         }
       in
       add_res complete);
@@ -1915,7 +1896,6 @@ let compute_complete_local env ctx tast =
             res_documentation = None;
             res_filter_text = None;
             res_additional_edits = [];
-            res_sortText = None;
           }
         in
         add_res complete)
@@ -2219,7 +2199,6 @@ let complete_keywords_at possible_keywords text pos : unit =
                res_documentation = None;
                res_filter_text = None;
                res_additional_edits = [];
-               res_sortText = None;
              }
            in
            add_res complete)

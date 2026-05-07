@@ -1,8 +1,6 @@
 extends
   INSERT extends
   keyword
-SORT TEXT: none
 implements
   INSERT implements
   keyword
-SORT TEXT: none

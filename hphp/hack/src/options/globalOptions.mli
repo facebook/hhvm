@@ -230,7 +230,6 @@ type t = {
   dump_tasts: string list;
       (** List of paths whose TASTs to be dumped in /tmp/hh_server/tasts *)
   tco_autocomplete_mode: bool;  (** Are we running in autocomplete mode ? *)
-  tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
       (** Controls whether we retain the full path for reasons or only simple witnesses *)
   tco_disable_physical_equality: bool;
@@ -389,7 +388,6 @@ val set :
   ?dump_tast_hashes:bool ->
   ?dump_tasts:string list ->
   ?tco_autocomplete_mode:bool ->
-  ?tco_autocomplete_sort_text:bool ->
   ?tco_extended_reasons:extended_reasons_config ->
   ?tco_disable_physical_equality:bool ->
   ?hack_warnings:int none_or_all_except ->

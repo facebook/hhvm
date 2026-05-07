@@ -400,7 +400,6 @@ impl<R: Reason> From<o::shallow_decl_defs::ShallowMethod> for shallow::ShallowMe
             deprecated: sm.deprecated.map(Into::into),
             attributes: slice(sm.attributes),
             flags: oxidized::method_flags::MethodFlags::from_bits_truncate(sm.flags.bits()),
-            sort_text: sm.sort_text,
             package_requirement: sm.package_requirement,
         }
     }
@@ -605,7 +604,6 @@ impl From<o::decl_defs::Element> for folded::FoldedElement {
             visibility: x.visibility.into(),
             deprecated: x.deprecated.map(Into::into),
             sealed_allowlist: x.sealed_allowlist.map(map_k),
-            sort_text: x.sort_text,
             overlapping_tparams: x.overlapping_tparams.map(map_k),
             package_requirement: x.package_requirement,
         }
@@ -767,7 +765,6 @@ impl<R: Reason> From<o::decl_defs::DeclClassType> for folded::FoldedClass<R> {
             decl_errors,
             docs_url,
             allow_multiple_instantiations,
-            sort_text,
             package,
         } = cls;
         Self {
@@ -808,7 +805,6 @@ impl<R: Reason> From<o::decl_defs::DeclClassType> for folded::FoldedClass<R> {
             decl_errors: slice(decl_errors),
             docs_url,
             allow_multiple_instantiations,
-            sort_text,
             package,
         }
     }

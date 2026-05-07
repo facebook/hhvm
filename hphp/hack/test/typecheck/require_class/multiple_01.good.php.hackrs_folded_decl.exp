@@ -14,7 +14,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,
@@ -53,7 +52,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,
@@ -115,7 +113,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,
@@ -129,7 +126,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,
@@ -143,7 +139,6 @@
              visibility: Public,
              deprecated: None,
              sealed_allowlist: None,
-             sort_text: None,
              overlapping_tparams: None,
              package_requirement: Some(
                  RPNormal,

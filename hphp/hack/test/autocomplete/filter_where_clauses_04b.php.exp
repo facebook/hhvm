@@ -1,4 +1,3 @@
 foo
   INSERT foo(${1:\$_})
   function<T1 as arraykey>(T1 $_): void
-SORT TEXT: none

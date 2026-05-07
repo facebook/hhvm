@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<89a71bbba8cad0a965e886d00f2c1b69>>
+// @generated SignedSource<<79856ac4db7560676f9e0f8d4fe22dd4>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -132,7 +132,6 @@ pub struct ShallowMethod {
     pub deprecated: Option<String>,
     pub flags: method_flags::MethodFlags,
     pub attributes: Vec<UserAttribute>,
-    pub sort_text: Option<String>,
     pub package_requirement: PackageRequirement,
 }
 

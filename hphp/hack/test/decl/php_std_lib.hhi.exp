@@ -78,8 +78,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = true; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal }
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           }
           ];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([15:19-20], "f");
@@ -103,8 +103,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = true; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal }
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           }
           ];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([6:3-14], "__PHPStdLib");

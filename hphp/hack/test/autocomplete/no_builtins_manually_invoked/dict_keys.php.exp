@@ -1,8 +1,6 @@
 bar
   INSERT bar
   function
-SORT TEXT: none
 foo
   INSERT foo
   function
-SORT TEXT: none

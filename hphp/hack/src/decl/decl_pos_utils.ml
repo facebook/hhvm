@@ -223,7 +223,6 @@ struct
       dc_decl_errors = [];
       dc_docs_url = dc.dc_docs_url;
       dc_allow_multiple_instantiations = dc.dc_allow_multiple_instantiations;
-      dc_sort_text = dc.dc_sort_text;
       dc_package = Option.map dc.dc_package ~f:package_membership;
     }
 
@@ -333,7 +332,6 @@ struct
       sm_deprecated = sm.sm_deprecated;
       sm_flags = sm.sm_flags;
       sm_attributes = sm.sm_attributes;
-      sm_sort_text = sm.sm_sort_text;
       sm_package_requirement = package_requirement sm.sm_package_requirement;
     }
 

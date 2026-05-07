@@ -2,13 +2,10 @@
 t_alpha
   INSERT t_alpha
   function
-SORT TEXT: none
 t_beta
   INSERT t_beta
   function
-SORT TEXT: none
 //// file2.php
 t_beta
   INSERT t_beta
   function
-SORT TEXT: none

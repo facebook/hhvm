@@ -11,7 +11,6 @@ abstract class B {
 }
 
 interface SomeOtherC {
-  <<__AutocompleteSortText('zzz')>>
   public function __toString(): string;
 }
 

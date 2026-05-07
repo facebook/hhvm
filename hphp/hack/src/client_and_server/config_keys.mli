@@ -379,8 +379,6 @@ module Hhconf : sig
 
   (* IDE *)
 
-  val autocomplete_sort_text : string
-
   val go_to_implementation : string
 
   val ide_load_naming_table_on_disk : string

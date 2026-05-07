@@ -89,7 +89,6 @@ let element_to_class_elt
        elt_origin = ce_origin;
        elt_visibility = ce_visibility;
        elt_deprecated = ce_deprecated;
-       elt_sort_text = ce_sort_text;
        elt_sealed_allowlist = ce_sealed_allowlist;
        elt_overlapping_tparams = ce_overlapping_tparams;
        elt_package_requirement = ce_package_requirement;
@@ -106,7 +105,6 @@ let element_to_class_elt
     ce_pos;
     ce_flags;
     ce_sealed_allowlist;
-    ce_sort_text;
     ce_overlapping_tparams;
     ce_package_requirement;
   }

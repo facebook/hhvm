@@ -31,8 +31,7 @@
             override = false; dynamicallycallable = false;
             php_std_lib = false; support_dynamic_type = false;
             no_auto_likes = false; needs_concrete = false };
-          sm_attributes = []; sm_sort_text = None;
-          sm_package_requirement = Typing_defs.RPNormal };
+          sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal };
          { Shallow_decl_defs.sm_name = ([5:19-20], "b");
            sm_type =
            (Rwitness_from_decl ([5:19-20]),
@@ -54,8 +53,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal }
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
        sc_package = None }));
@@ -94,8 +93,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal };
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           };
           { Shallow_decl_defs.sm_name = ([10:19-20], "c");
             sm_type =
             (Rwitness_from_decl ([10:19-20]),
@@ -117,8 +116,8 @@
               override = false; dynamicallycallable = false;
               php_std_lib = false; support_dynamic_type = false;
               no_auto_likes = false; needs_concrete = false };
-            sm_attributes = []; sm_sort_text = None;
-            sm_package_requirement = Typing_defs.RPNormal }
+            sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+            }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
         sc_package = None }));
@@ -156,8 +155,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal }
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
         sc_package = None }));
@@ -197,8 +196,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal }
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
         sc_package = None }));
@@ -238,8 +237,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal }
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
         sc_package = None }));
@@ -281,8 +280,8 @@
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
              no_auto_likes = false; needs_concrete = false };
-           sm_attributes = []; sm_sort_text = None;
-           sm_package_requirement = Typing_defs.RPNormal }
+           sm_attributes = []; sm_package_requirement = Typing_defs.RPNormal
+           }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
         sc_package = None }))

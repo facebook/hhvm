@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6b226fc9e6136da79c21c31dc18160b9>>
+// @generated SignedSource<<71665718798359adf906f30b1a27547a>>
 //
 // To regenerate this file, run:
 //   buck run @fbcode//mode/dev-nosan-lg fbcode//hphp/hack/src:oxidized_regen
@@ -334,7 +334,6 @@ pub struct GlobalOptions {
     pub dump_tasts: Vec<String>,
     /// Are we running in autocomplete mode ?
     pub tco_autocomplete_mode: bool,
-    pub tco_autocomplete_sort_text: bool,
     /// Controls whether we retain the full path for reasons or only simple witnesses
     pub tco_extended_reasons: Option<ExtendedReasonsConfig>,
     /// If set to true, this disables the use of physical equality in subtyping

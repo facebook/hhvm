@@ -1188,7 +1188,6 @@ struct Attributes {
     no_support_dynamic_type: bool,
     no_auto_likes: bool,
     safe_global_variable: bool,
-    sort_text: Option<String>,
     dynamically_referenced: bool,
     needs_concrete: bool,
     require_package: Option<PackageRequirement>,
@@ -1613,7 +1612,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             no_support_dynamic_type: false,
             no_auto_likes: false,
             safe_global_variable: false,
-            sort_text: None,
             dynamically_referenced: false,
             needs_concrete: false,
             require_package: None,
@@ -1688,12 +1686,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                     }
                     "__SafeForGlobalAccessCheck" => {
                         attributes.safe_global_variable = true;
-                    }
-                    "__AutocompleteSortText" => {
-                        attributes.sort_text = attribute
-                            .string_literal_param
-                            .as_ref()
-                            .map(|(_, x)| Self::str_from_utf8(x).into_owned());
                     }
                     "__NeedsConcrete" => {
                         attributes.needs_concrete = true;
@@ -4975,7 +4967,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         let deprecated = attributes
             .deprecated
             .map(|msg| format!("The method {} is deprecated: {}", id.1, msg));
-        let sort_text = attributes.sort_text;
         let mut flags = MethodFlags::empty();
         flags.set(
             MethodFlags::ABSTRACT,
@@ -5020,7 +5011,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             deprecated,
             flags,
             attributes: user_attributes,
-            sort_text,
             package_requirement: attributes
                 .require_package
                 .unwrap_or(PackageRequirement::RPNormal),

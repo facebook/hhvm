@@ -786,7 +786,6 @@ let load ~silent ~from ~(cli_config_overrides : (string * string) list) :
         ~dump_tast_hashes:local_config.dump_tast_hashes
         ~dump_tasts:local_config.dump_tasts
         ~tco_custom_error_config
-        ~tco_autocomplete_sort_text:local_config.autocomplete_sort_text
         ~hack_warnings:
           (if local_config.hack_warnings then
             GlobalOptions.All_except

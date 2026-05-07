@@ -60,13 +60,13 @@ pub struct ParsedFileWithHashes {
     /// (the hash is order-sensitive)
     pub file_decls_hash: hh24_types::FileDeclsHash,
 
-    /// Decls, position-sensitive hash, and sort text. Internally they're stored in reverse
+    /// Decls and position-sensitive hash. Internally they're stored in reverse
     /// lexical order. The choice of what to go into this list (remove dupes? remove php_stdlib
     /// in hhi files? transform class decls by removing php_stdlib members?) is determined
     /// by how it was constructed. The field is private: the only way to access it
     /// are through accessors .iter() and .into_iter(), which give the illusion of it being
     /// in forward lexical order.
-    pub decls: Vec<(String, Decl, hh24_types::DeclHash, Option<String>)>,
+    pub decls: Vec<(String, Decl, hh24_types::DeclHash)>,
 }
 
 impl ParsedFileWithHashes {
@@ -92,8 +92,7 @@ impl ParsedFileWithHashes {
                     }
                 }
                 let hash = hh24_types::DeclHash::from_u64(hh_hash::hash(&decl));
-                let sort_text = decl.sort_text();
-                Some((name, decl, hash, sort_text))
+                Some((name, decl, hash))
             })
             .collect();
         Self {
@@ -114,7 +113,7 @@ impl ParsedFileWithHashes {
             .into_iter()
             .map(|(name, decl)| {
                 let hash = hh24_types::DeclHash::from_u64(hh_hash::hash(&decl));
-                (name, decl, hash, None)
+                (name, decl, hash)
             })
             .collect();
         Self {
@@ -126,17 +125,14 @@ impl ParsedFileWithHashes {
 
     /// This iterates the decls in forward lexical order
     /// (Use iter().rev() if you want reverse order)
-    pub fn iter(
-        &self,
-    ) -> impl DoubleEndedIterator<Item = &(String, Decl, hh24_types::DeclHash, Option<String>)>
-    {
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &(String, Decl, hh24_types::DeclHash)> {
         // Note that our `self.decls` are stored in reverse order, so we have to reverse now.
         self.decls.iter().rev()
     }
 }
 
 impl IntoIterator for ParsedFileWithHashes {
-    type Item = (String, Decl, hh24_types::DeclHash, Option<String>);
+    type Item = (String, Decl, hh24_types::DeclHash);
     type IntoIter = std::iter::Rev<std::vec::IntoIter<Self::Item>>;
 
     /// This iterates the decls in forward lexical order

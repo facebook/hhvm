@@ -224,8 +224,6 @@ pub mod user_attributes {
 
     pub const OVERRIDE: &str = "__Override";
 
-    pub const AUTOCOMPLETE_SORT_TEXT: &str = "__AutocompleteSortText";
-
     pub const NEEDS_CONCRETE: &str = "__NeedsConcrete";
 
     pub const CONSISTENT_CONSTRUCT: &str = "__ConsistentConstruct";

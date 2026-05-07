@@ -352,8 +352,6 @@ type t = {
       (** List of files whose TASTs to be dumped in /tmp/hh_server/tasts. *)
   use_compressed_dep_graph: bool;
       (** POC: @bobren, use new fancy compressed dep graph that is 25% the size of the old one *)
-  autocomplete_sort_text: bool;
-      (** POC: @mckenzie - if true, autocomplete sorts using sort text attribute *)
   hack_warnings: bool;  (** POC: @catg - turn on hack warnings. *)
   warnings_default_all: bool;
       (** If true, `hh` is equivalent to `hh -Wall`, i.e. warnings are shown.

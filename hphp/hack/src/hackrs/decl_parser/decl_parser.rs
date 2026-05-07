@@ -47,7 +47,7 @@ impl<R: Reason> DeclParser<R> {
         let hashed_file = self.parse_impl(path, text);
         Ok(hashed_file
             .into_iter()
-            .map(|(name, decl, _, _)| NamedDecl::from((name, decl)))
+            .map(|(name, decl, _)| NamedDecl::from((name, decl)))
             .collect())
     }
     pub fn parse_and_summarize(
@@ -59,7 +59,7 @@ impl<R: Reason> DeclParser<R> {
         let summary = names::FileSummary::new(&hashed_file);
         let decls = hashed_file
             .into_iter()
-            .map(|(name, decl, _, _)| NamedDecl::from((name, decl)))
+            .map(|(name, decl, _)| NamedDecl::from((name, decl)))
             .collect();
         Ok((decls, summary))
     }

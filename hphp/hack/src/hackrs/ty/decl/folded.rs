@@ -54,7 +54,6 @@ pub struct FoldedElement {
     /// If the element is deprecated, this holds the deprecation message.
     pub deprecated: Option<Bytes>,
     pub sealed_allowlist: Option<IndexSet<TypeName>>,
-    pub sort_text: Option<String>,
     pub overlapping_tparams: Option<IndexSet<Symbol>>,
     pub package_requirement: Option<PackageRequirement>,
 }
@@ -234,8 +233,6 @@ pub struct FoldedClass<R: Reason> {
     pub docs_url: Option<String>,
     /// Whether has attribute <<__UNSAFE_AllowMultipleInstantiations>>
     pub allow_multiple_instantiations: bool,
-    /// The string provided by the <<__AutocompleteSortText>> attribute.
-    pub sort_text: Option<String>,
     pub package: Option<PackageMembership>,
 }
 

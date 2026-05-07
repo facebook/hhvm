@@ -1,4 +1,3 @@
 meth
   INSERT meth()
   function(): string
-SORT TEXT: none

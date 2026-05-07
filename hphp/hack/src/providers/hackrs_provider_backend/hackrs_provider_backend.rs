@@ -173,7 +173,7 @@ impl HhServerProviderBackend {
         self.lazy_shallow_decl_provider.dedup_and_add_decls(
             path,
             (hashed_file.iter())
-                .map(|(name, decl, _, _)| NamedDecl::from((name.clone(), decl.clone()))),
+                .map(|(name, decl, _)| NamedDecl::from((name.clone(), decl.clone()))),
         )?;
         Ok(hashed_file)
     }

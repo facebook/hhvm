@@ -414,7 +414,7 @@ let rec prefetch_loop
        stick in a dummy [Int64.zero]. *)
     let earlier_decls =
       List.map earlier_decls.Direct_decl_parser.pf_decls ~f:(fun (name, decl) ->
-          (name, decl, Int64.zero, None))
+          (name, decl, Int64.zero))
     in
     Direct_decl_utils.cache_decls ctx earlier_file earlier_decls;
     (* Now that the decls are in cache, we're unblocked to revisit those decls and from
@@ -423,7 +423,7 @@ let rec prefetch_loop
        but the file is absent, then it won't have been added to the cache and there's no use
        re-visiting it. *)
     let earlier_found =
-      earlier_decls |> List.map ~f:(fun (name, _, _, _) -> name) |> SSet.of_list
+      earlier_decls |> List.map ~f:(fun (name, _, _) -> name) |> SSet.of_list
     in
     let visited =
       earlier_to_fold

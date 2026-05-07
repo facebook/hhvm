@@ -56,3 +56,6 @@ val notification_fd : t -> Caml_unix.file_descr option
 (** If supported by the backend, returns a value acting as a necessary condition
     for a subsequent call to `get_changes_{sync,async}` returning any changes. *)
 val maybe_changes_available : t -> bool option
+
+(** Returns telemetry about asserted repo states *)
+val get_repo_states_telemetry : t -> Telemetry.t

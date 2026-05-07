@@ -142,7 +142,7 @@ let log_type_check_end
          ~value:(Diagnostics.as_telemetry_summary env.diagnostics)
     |> Telemetry.object_
          ~key:"repo_states"
-         ~value:(Watchman.RepoStates.get_as_telemetry ())
+         ~value:(ServerNotifier.get_repo_states_telemetry genv.notifier)
   in
   HackEventLogger.type_check_end
     (Some telemetry)

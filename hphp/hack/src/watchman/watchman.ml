@@ -926,7 +926,7 @@ module Watchman_actual : Watchman_sig.S = struct
 
     val leave : state -> unit
 
-    val get_as_telemetry : unit -> Telemetry.t
+    val get : unit -> string list * string list
   end = struct
     type state = string
 
@@ -961,13 +961,9 @@ module Watchman_actual : Watchman_sig.S = struct
       let past_states = SSet.add state past_states in
       states := { current_states; past_states }
 
-    let get_as_telemetry () =
+    let get () =
       let { current_states; past_states } = !states in
-      Telemetry.create ()
-      |> Telemetry.string_list ~key:"current_states" ~value:current_states
-      |> Telemetry.string_list
-           ~key:"past_states"
-           ~value:(SSet.elements past_states)
+      (current_states, SSet.elements past_states)
   end
 
   let make_state_change_response
@@ -1281,7 +1277,7 @@ module Watchman_mock = struct
   end
 
   module RepoStates = struct
-    let get_as_telemetry () = Telemetry.create ()
+    let get () = ([], [])
   end
 
   let init ?since_clockspec:_ _ () = !Mocking.init

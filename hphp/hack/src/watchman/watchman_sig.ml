@@ -137,7 +137,7 @@ module type S = sig
   val get_reader : watchman_instance -> Buffered_line_reader.t option
 
   module RepoStates : sig
-    val get_as_telemetry : unit -> Telemetry.t
+    val get : unit -> string list * string list
   end
 
   (* Expose some things for testing. *)

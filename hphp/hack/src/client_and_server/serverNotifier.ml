@@ -696,3 +696,20 @@ let maybe_changes_available (t : t) : bool option =
   Option.map fd_opt ~f:(fun fd ->
       let (readable, _, _) = Caml_unix.select [fd] [] [] 0.0 in
       not (List.is_empty readable))
+
+let get_repo_states_telemetry (t : t) : Telemetry.t =
+  let (current_states, past_states) =
+    match t with
+    | EdenfsFileWatcher { instance; tmp_watchman_instance = None; _ } ->
+      Edenfs_watcher.get_repo_states instance
+    | Watchman _
+    | EdenfsFileWatcher { tmp_watchman_instance = Some _; _ } ->
+      Watchman.RepoStates.get ()
+    | IndexOnly _
+    | Dfind _
+    | MockChanges _ ->
+      ([], [])
+  in
+  Telemetry.create ()
+  |> Telemetry.string_list ~key:"current_states" ~value:current_states
+  |> Telemetry.string_list ~key:"past_states" ~value:past_states

@@ -36,6 +36,9 @@ let get_all_files (_instance : instance) :
     (string list * Telemetry.t option, edenfs_watcher_error) result =
   failwith "not implemented"
 
+let get_repo_states (_instance : instance) : string list * string list =
+  failwith "not implemented"
+
 module Standalone = struct
   let get_changes_since _settings _clock = failwith "not implemented"
 end

@@ -423,7 +423,8 @@ void AsyncFizzBase::readBufferAvailable(
 }
 
 void AsyncFizzBase::readEOF() noexcept {
-  AsyncSocketException eof(AsyncSocketException::END_OF_FILE, "readEOF()");
+  static const AsyncSocketException eof(
+      AsyncSocketException::END_OF_FILE, "readEOF()");
   transportError(eof);
 }
 

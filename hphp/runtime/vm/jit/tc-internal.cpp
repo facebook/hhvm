@@ -496,21 +496,7 @@ bool Translator::shouldEmitLiveTranslation() {
   // Avoid a race where we would create a Live translation while
   // retranslateAll is in flight and we haven't generated an
   // Optimized translation yet.
-  if (mcgen::retranslateAllPending() && !isProfiling(kind) && profData()) {
-    // When bespokes are enabled, we can't emit live translations until the
-    // bespoke hierarchy is finalized.
-    if (allowBespokeArrayLikes() && !bespoke::Layout::HierarchyFinalized()) {
-      return false;
-    }
-    // Functions that are marked as being profiled or marked as having been
-    // optimized are about to have their translations invalidated during the
-    // publish phase of retranslate all.  Don't allow live translations to be
-    // emitted in this scenario.
-    auto const fid = sk.func()->getFuncId();
-    return !profData()->profiling(fid) &&
-           !profData()->optimized(fid);
-  }
-  return true;
+  return !mcgen::retranslateAllPending() || isProfiling(kind);
 }
 
 Optional<TranslationResult>

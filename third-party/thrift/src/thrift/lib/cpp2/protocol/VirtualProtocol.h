@@ -94,10 +94,8 @@ class VirtualReader : public VirtualReaderBase {
  public:
   using ProtocolWriter = typename ProtocolT::ProtocolWriter;
 
-  template <
-      typename... Args,
-      std::enable_if_t<std::is_constructible_v<ProtocolT, Args...>, bool> =
-          false>
+  template <typename... Args>
+    requires std::constructible_from<ProtocolT, Args...>
   explicit VirtualReader(Args&&... args)
       : protocol_(std::forward<Args>(args)...) {}
   ~VirtualReader() override = default;

@@ -56,7 +56,7 @@ struct PortFSWatcher : public Watcher {
       PendingCollection::LockedPtr& coll) override;
 
   bool waitNotify(int timeoutms) override;
-  void signalThreads() override;
+  void stopThreads() override;
   bool do_watch(
       const w_string& name,
       const watchman::FileInformation& finfo,
@@ -303,7 +303,7 @@ bool PortFSWatcher::waitNotify(int timeoutms) {
 
   return false;
 }
-void PortFSWatcher::signalThreads() {
+void PortFSWatcher::stopThreads() {
   ignore_result(write(terminatePipe_.write.fd(), "X", 1));
 }
 

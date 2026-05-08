@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <concepts>
+
 #include <folly/Benchmark.h>
 #include <folly/Random.h>
 #include <thrift/lib/cpp2/frozen/FrozenUtil.h>
@@ -193,28 +195,20 @@ struct OwnedKey<
   using type = FixedSizeString<8>;
 };
 
-template <
-    typename M,
-    typename T,
-    std::enable_if_t<
-        !std::is_same_v<
-            typename M::key_type,
-            detail::FixedSizeStringLayout<FixedSizeString<8>>::View>,
-        bool> = true>
+template <typename M, typename T>
+  requires(!std::same_as<
+           typename M::key_type,
+           detail::FixedSizeStringLayout<FixedSizeString<8>>::View>)
 typename M::const_iterator mapFind(const M& map, const T& key) {
   return map.find(key);
 }
 
 // Enabled for hashmaps with FixedSizeString as the key_type, where the
 // corresponding view map would have folly::ByteRange as the key_type.
-template <
-    typename M,
-    typename T,
-    std::enable_if_t<
-        std::is_same_v<
-            typename M::key_type,
-            detail::FixedSizeStringLayout<FixedSizeString<8>>::View>,
-        bool> = true>
+template <typename M, typename T>
+  requires std::same_as<
+      typename M::key_type,
+      detail::FixedSizeStringLayout<FixedSizeString<8>>::View>
 typename M::const_iterator mapFind(const M& map, const T& key) {
   static_assert(std::is_same_v<T, FixedSizeString<8>>);
   auto keyView = folly::ByteRange{

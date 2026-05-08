@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+#include <bit>
 #include <deque>
 
 namespace apache {
@@ -108,7 +110,8 @@ struct ArrayLayout : public LayoutBase {
     root.freezeField(self, distanceField, dist);
 
     FreezePosition write{range.begin(), 0};
-    FieldPosition writeStep(itemBytes, itemBits);
+    FieldPosition writeStep(
+        static_cast<int32_t>(itemBytes), static_cast<int32_t>(itemBits));
     freezeItems(root, coll, self, write, writeStep);
   }
 
@@ -215,6 +218,19 @@ struct ArrayLayout : public LayoutBase {
     bool empty() const { return !count_; }
     size_t size() const { return count_; }
 
+    [[nodiscard]] size_t popcount() const
+      requires(std::is_same_v<Item, bool>)
+    {
+      return popcountImpl(count_);
+    }
+
+    [[nodiscard]] size_t popcount(size_t until) const
+      requires(std::is_same_v<Item, bool>)
+    {
+      assert(until <= count_);
+      return popcountImpl(until);
+    }
+
     folly::Range<const Item*> range() const {
       static_assert(apache::thrift::frozen::detail::IsBlitType<Item>::value);
       auto data = reinterpret_cast<const Item*>(data_);
@@ -222,6 +238,23 @@ struct ArrayLayout : public LayoutBase {
     }
 
    private:
+    size_t popcountImpl(size_t until) const {
+      if (until == 0 || itemLayout().bits == 0) {
+        return 0;
+      }
+      size_t fullBytes = until / 8;
+      size_t remainingBits = until % 8;
+      size_t result = 0;
+      for (size_t i = 0; i < fullBytes; ++i) {
+        result += std::popcount(static_cast<uint8_t>(data_[i]));
+      }
+      if (remainingBits > 0) {
+        uint8_t mask = static_cast<uint8_t>((1u << remainingBits) - 1);
+        result += std::popcount(static_cast<uint8_t>(data_[fullBytes] & mask));
+      }
+      return result;
+    }
+
     /**
      * Simple iterator on a range, with additional '.thaw()' member for thawing
      * a single member.

@@ -55,7 +55,7 @@ struct PortFSWatcher : public Watcher {
       const std::shared_ptr<watchman_root>& root,
       PendingCollection::LockedPtr& coll) override;
 
-  bool waitNotify(int timeoutms) override;
+  WaitNotifyResult waitNotify(int timeoutms) override;
   void stopThreads() override;
   bool do_watch(
       const w_string& name,
@@ -275,7 +275,7 @@ Watcher::ConsumeNotifyRet PortFSWatcher::consumeNotify(
   return {true, false};
 }
 
-bool PortFSWatcher::waitNotify(int timeoutms) {
+Watcher::WaitNotifyResult PortFSWatcher::waitNotify(int timeoutms) {
   int n;
   std::array<struct pollfd, 3> pfd;
 
@@ -290,18 +290,20 @@ bool PortFSWatcher::waitNotify(int timeoutms) {
 
   if (n > 0) {
     if (pfd[2].revents) {
-      // We were signalled via signalThreads
-      return false;
+      // We were signalled via stopThreads
+      return WaitNotifyResult::Terminate;
     }
     if (pfd[1].revents) {
       // An exceptional event (delete) occured on the root so delete it
       root_deleted = true;
-      return true;
+      return WaitNotifyResult::Ready;
     }
-    return (pfd[0].revents != 0);
+    if (pfd[0].revents) {
+      return WaitNotifyResult::Ready;
+    }
   }
 
-  return false;
+  return WaitNotifyResult::Timeout;
 }
 void PortFSWatcher::stopThreads() {
   ignore_result(write(terminatePipe_.write.fd(), "X", 1));

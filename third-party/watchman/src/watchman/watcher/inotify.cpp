@@ -162,7 +162,7 @@ struct InotifyWatcher : public Watcher {
       const std::shared_ptr<Root>& root,
       PendingChanges& coll) override;
 
-  bool waitNotify(int timeoutms) override;
+  WaitNotifyResult waitNotify(int timeoutms) override;
 
   // Process a single inotify event and add it to the pending collection if
   // needed. Returns true if the root directory was removed and the watch needs
@@ -461,7 +461,7 @@ Watcher::ConsumeNotifyRet InotifyWatcher::consumeNotify(
   return {cancel};
 }
 
-bool InotifyWatcher::waitNotify(int timeoutms) {
+Watcher::WaitNotifyResult InotifyWatcher::waitNotify(int timeoutms) {
   struct pollfd pfd[2];
   pfd[0].fd = infd.fd();
   pfd[0].events = POLLIN;
@@ -472,12 +472,14 @@ bool InotifyWatcher::waitNotify(int timeoutms) {
 
   if (n > 0) {
     if (pfd[1].revents) {
-      // We were signalled via signalThreads
-      return false;
+      // We were signalled via stopThreads
+      return WaitNotifyResult::Terminate;
     }
-    return pfd[0].revents != 0;
+    if (pfd[0].revents) {
+      return WaitNotifyResult::Ready;
+    }
   }
-  return false;
+  return WaitNotifyResult::Timeout;
 }
 
 void InotifyWatcher::stopThreads() {

@@ -55,7 +55,7 @@ class FSEventsWatcher : public Watcher {
       const std::shared_ptr<Root>& root,
       PendingChanges& changes) override;
 
-  bool waitNotify(int timeoutms) override;
+  WaitNotifyResult waitNotify(int timeoutms) override;
   void stopThreads() override;
   void FSEventsThread(const std::shared_ptr<Root>& root);
 

@@ -90,12 +90,18 @@ class Watcher : public std::enable_shared_from_this<Watcher> {
    */
   virtual void stopThreads() {}
 
+  enum class WaitNotifyResult {
+    Ready,
+    Timeout,
+    Terminate,
+  };
+
   /**
    * Wait for an inotify event to become available.
-   * Returns true if events are available or false if signalThreads() has been
-   * called or timeout has elapsed.
+   * Returns whether events are available, the timeout elapsed, or the watcher
+   * was signaled to terminate.
    */
-  virtual bool waitNotify(int timeoutms) = 0;
+  virtual WaitNotifyResult waitNotify(int timeoutms) = 0;
 
   struct ConsumeNotifyRet {
     // Should the watch be cancelled?

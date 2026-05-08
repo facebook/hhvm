@@ -668,16 +668,18 @@ folly::SemiFuture<folly::Unit> FSEventsWatcher::flushPendingEvents() {
   return std::move(f);
 }
 
-bool FSEventsWatcher::waitNotify(int timeoutms) {
+Watcher::WaitNotifyResult FSEventsWatcher::waitNotify(int timeoutms) {
   auto wlock = items_.lock();
   // First check to see if someone added elements to these lists while the lock
   // wasn't held.
   if (!wlock->items.empty() || !wlock->syncs.empty()) {
     // Yes, let's not wait on the condition.
-    return true;
+    return WaitNotifyResult::Ready;
   }
   fseCond_.wait_for(wlock.as_lock(), std::chrono::milliseconds(timeoutms));
-  return !wlock->items.empty() || !wlock->syncs.empty();
+  return !wlock->items.empty() || !wlock->syncs.empty()
+      ? WaitNotifyResult::Ready
+      : WaitNotifyResult::Timeout;
 }
 
 namespace {

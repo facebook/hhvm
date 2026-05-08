@@ -57,7 +57,7 @@ struct WinWatcher : public Watcher {
       const std::shared_ptr<Root>& root,
       PendingChanges& coll) override;
 
-  bool waitNotify(int timeoutms) override;
+  WaitNotifyResult waitNotify(int timeoutms) override;
   bool start(const std::shared_ptr<Root>& root) override;
   void stopThreads() override;
   void readChangesThread(const std::shared_ptr<Root>& root);
@@ -419,13 +419,13 @@ Watcher::ConsumeNotifyRet WinWatcher::consumeNotify(
   return {false};
 }
 
-bool WinWatcher::waitNotify(int timeoutms) {
+Watcher::WaitNotifyResult WinWatcher::waitNotify(int timeoutms) {
   auto wlock = changedItems.lock();
   if (!wlock->empty()) {
-    return true;
+    return WaitNotifyResult::Ready;
   }
   cond.wait_for(wlock.as_lock(), std::chrono::milliseconds(timeoutms));
-  return !wlock->empty();
+  return !wlock->empty() ? WaitNotifyResult::Ready : WaitNotifyResult::Timeout;
 }
 
 static RegisterWatcher<WinWatcher> reg("win32");

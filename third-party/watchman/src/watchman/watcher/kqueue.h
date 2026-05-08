@@ -50,7 +50,7 @@ struct KQueueWatcher : public Watcher {
       const std::shared_ptr<Root>& root,
       PendingChanges& coll) override;
 
-  bool waitNotify(int timeoutms) override;
+  WaitNotifyResult waitNotify(int timeoutms) override;
   void stopThreads() override;
 };
 

@@ -310,7 +310,7 @@ Watcher::ConsumeNotifyRet KQueueWatcher::consumeNotify(
   return {false};
 }
 
-bool KQueueWatcher::waitNotify(int timeoutms) {
+Watcher::WaitNotifyResult KQueueWatcher::waitNotify(int timeoutms) {
   std::array<struct pollfd, 2> pfd;
 
   pfd[0].fd = kq_fd.fd();
@@ -322,12 +322,14 @@ bool KQueueWatcher::waitNotify(int timeoutms) {
 
   if (n > 0) {
     if (pfd[1].revents) {
-      // We were signalled via signalThreads
-      return false;
+      // We were signalled via stopThreads
+      return WaitNotifyResult::Terminate;
     }
-    return pfd[0].revents != 0;
+    if (pfd[0].revents) {
+      return WaitNotifyResult::Ready;
+    }
   }
-  return false;
+  return WaitNotifyResult::Timeout;
 }
 
 void KQueueWatcher::stopThreads() {

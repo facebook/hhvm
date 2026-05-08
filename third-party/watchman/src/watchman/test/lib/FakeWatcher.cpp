@@ -26,7 +26,7 @@ std::unique_ptr<DirHandle> FakeWatcher::startWatchDir(
   return fileSystem_.openDir(path);
 }
 
-bool FakeWatcher::waitNotify(int timeoutms) {
+Watcher::WaitNotifyResult FakeWatcher::waitNotify(int timeoutms) {
   (void)timeoutms;
   throw std::logic_error{"waitNotify not implemented"};
 }

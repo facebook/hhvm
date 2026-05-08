@@ -40,9 +40,15 @@ void InMemoryView::notifyThread(const std::shared_ptr<Root>& root) {
   while (!stopThreads_.load(std::memory_order_acquire)) {
     // big number because not all watchers can deal with
     // -1 meaning infinite wait at the moment
-    if (!watcher_->waitNotify(86400)) {
+    auto waitResult = watcher_->waitNotify(86400);
+    if (waitResult == Watcher::WaitNotifyResult::Terminate) {
+      break;
+    }
+    if (waitResult == Watcher::WaitNotifyResult::Timeout) {
       continue;
     }
+
+    bool shouldStop = false;
     do {
       auto resultFlags = watcher_->consumeNotify(root, fromWatcher);
 
@@ -53,12 +59,21 @@ void InMemoryView::notifyThread(const std::shared_ptr<Root>& root) {
       if (fromWatcher.getPendingItemCount() >= WATCHMAN_BATCH_LIMIT) {
         break;
       }
-    } while (watcher_->waitNotify(0));
+
+      waitResult = watcher_->waitNotify(0);
+      if (waitResult == Watcher::WaitNotifyResult::Terminate) {
+        shouldStop = true;
+      }
+    } while (waitResult == Watcher::WaitNotifyResult::Ready);
 
     if (!fromWatcher.empty()) {
       auto lock = pendingFromWatcher_.lock();
       lock->append(fromWatcher.stealItems(), fromWatcher.stealSyncs());
       lock->ping();
+    }
+
+    if (shouldStop) {
+      break;
     }
   }
 }

@@ -23,7 +23,7 @@ class FakeWatcher : public Watcher {
       const std::shared_ptr<Root>& root,
       const char* path) override;
 
-  bool waitNotify(int timeoutms) override;
+  WaitNotifyResult waitNotify(int timeoutms) override;
   ConsumeNotifyRet consumeNotify(
       const std::shared_ptr<Root>& root,
       PendingChanges& coll) override;

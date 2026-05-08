@@ -47,16 +47,22 @@ class PendingEventsCond {
   }
 
   /**
-   * Wait for a change from a nested watcher. Return true if some events are
-   * pending.
+   * Wait for a change from a nested watcher.
    */
-  bool waitAndClear(int timeoutms) {
+  Watcher::WaitNotifyResult waitAndClear(int timeoutms) {
     auto lock = stop_.lock();
     cond_.wait_until(
         lock.as_lock(),
         std::chrono::steady_clock::now() + std::chrono::milliseconds(timeoutms),
         [&] { return lock->hasPending || lock->shouldStop; });
-    return std::exchange(lock->hasPending, false);
+    if (lock->shouldStop) {
+      return Watcher::WaitNotifyResult::Terminate;
+    }
+    if (lock->hasPending) {
+      lock->hasPending = false;
+      return Watcher::WaitNotifyResult::Ready;
+    }
+    return Watcher::WaitNotifyResult::Timeout;
   }
 
   /**
@@ -104,7 +110,7 @@ class KQueueAndFSEventsWatcher : public Watcher {
       const std::shared_ptr<Root>& root,
       PendingChanges& coll) override;
 
-  bool waitNotify(int timeoutms) override;
+  WaitNotifyResult waitNotify(int timeoutms) override;
   void stopThreads() override;
 
   /**
@@ -143,11 +149,14 @@ bool startThread(
       if (!watcher) {
         break;
       }
-      if (watcher->waitNotify(86400)) {
+      auto waitResult = watcher->waitNotify(86400);
+      if (waitResult == Watcher::WaitNotifyResult::Ready) {
         if (cond->notifyOneOrStop()) {
           return;
         }
-      } else if (cond->shouldStop()) {
+      } else if (
+          waitResult == Watcher::WaitNotifyResult::Terminate ||
+          cond->shouldStop()) {
         return;
       }
     }
@@ -273,7 +282,7 @@ Watcher::ConsumeNotifyRet KQueueAndFSEventsWatcher::consumeNotify(
   return kqueueWatcher_->consumeNotify(root, coll);
 }
 
-bool KQueueAndFSEventsWatcher::waitNotify(int timeoutms) {
+Watcher::WaitNotifyResult KQueueAndFSEventsWatcher::waitNotify(int timeoutms) {
   return pendingCondition_->waitAndClear(timeoutms);
 }
 

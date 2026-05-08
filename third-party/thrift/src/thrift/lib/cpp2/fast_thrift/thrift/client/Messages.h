@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <folly/ExceptionWrapper.h>
+#include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
@@ -59,14 +61,37 @@ struct ThriftRequestMessage {
 // ============================================================================
 
 /**
+ * ThriftResponseError — in-process per-request failure carried inbound.
+ *
+ * Used as the error alternative on `ThriftResponseMessage::payload` so a
+ * single request can be failed (callback resolved with `ew`) without
+ * fabricating a wire-format ERROR frame and without escalating to a
+ * connection-fatal `fireException`. Mirrors `rocket::RocketResponseError`
+ * one layer up: the rocket adapter translates the rocket error variant
+ * into this thrift error variant before fireRead.
+ *
+ * The connection itself remains healthy; only this one request's pending
+ * callback is failed.
+ */
+struct ThriftResponseError {
+  folly::exception_wrapper ew;
+};
+
+/**
  * ThriftResponseMessage - Inbound response from pipeline to channel.
  *
- * Contains a ParsedFrame with the raw response data. The channel
- * deserializes metadata and processes the frame directly.
+ * `payload` is a CompactVariant of either a parsed wire frame (the normal
+ * response path) or a `ThriftResponseError` (in-process per-request
+ * failure). The channel inspects which alternative is present and either
+ * decodes the frame or fails the pending callback with the wrapped
+ * exception. In both cases the channel stays Open.
  */
 #pragma pack(push, 1)
 struct ThriftResponseMessage {
-  apache::thrift::fast_thrift::frame::read::ParsedFrame frame;
+  apache::thrift::fast_thrift::CompactVariant<
+      apache::thrift::fast_thrift::frame::read::ParsedFrame,
+      ThriftResponseError>
+      payload;
   apache::thrift::fast_thrift::rocket::TypeErasedPtr requestContext;
   apache::thrift::fast_thrift::frame::FrameType streamType{
       apache::thrift::fast_thrift::frame::FrameType::RESERVED};

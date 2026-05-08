@@ -79,16 +79,18 @@ struct RocketRequestMessage {
 /**
  * RocketResponseError - In-process per-request failure carried inbound.
  *
- * Used as the error alternative on `RocketResponseMessage::payload` so a
- * single request can be failed (callback resolved with `ew`) without
- * fabricating a wire-format ERROR frame and without escalating to a
- * connection-fatal `fireException`. Produced by handlers when an in-
- * process condition (e.g. outbound serialize threw) breaks one request;
- * the connection itself remains healthy.
+ * Used as the error alternative on `RocketResponseMessage::payload` to
+ * resolve a single request's pending callback with `ew` without
+ * fabricating a wire-format ERROR frame. Two producers today:
+ *   - downstream handlers, on conditions that fail just this request
+ *     (e.g. outbound serialize threw) while the connection is healthy
+ *   - StreamStateHandler itself, when the connection is going away
+ *     (onException / onPipelineInactive), so each in-flight request's
+ *     heap context is recovered and its callback resolves
  *
- * `streamId` carries the affected stream so StreamStateHandler can
- * complete its per-stream cleanup the same way it does for terminal
- * wire frames.
+ * The variant is agnostic to whether the connection survives — it just
+ * carries (streamId, ew) so StreamStateHandler can route + clean up the
+ * same way it does for terminal wire frames.
  */
 struct RocketResponseError {
   folly::exception_wrapper ew;

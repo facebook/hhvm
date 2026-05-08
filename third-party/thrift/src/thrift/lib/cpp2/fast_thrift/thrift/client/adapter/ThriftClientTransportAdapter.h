@@ -95,23 +95,31 @@ class ThriftClientTransportAdapter {
   /**
    * Called when the rocket pipeline delivers a response.
    *
-   * Converts RocketResponseMessage to ThriftResponseMessage and pushes
-   * it into the thrift pipeline via fireRead.
+   * Converts RocketResponseMessage to ThriftResponseMessage and pushes it
+   * into the thrift pipeline via fireRead. Per-request rocket errors are
+   * translated into a `ThriftResponseError` payload alternative — they
+   * travel inbound through the same fireRead path, so the tail can fail
+   * just the affected pending callback without tearing down the channel.
    */
   channel_pipeline::Result onTransportResponse(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto response = msg.take<rocket::RocketResponseMessage>();
 
-    // TODO: Fire request based errors via fireRead. onException is only for
-    // connection level errors.
     if (FOLLY_UNLIKELY(response.payload.is<rocket::RocketResponseError>())) {
-      pipeline_->fireException(
-          std::move(response.payload.get<rocket::RocketResponseError>().ew));
-      return channel_pipeline::Result::Success;
+      ThriftResponseMessage thriftMsg{
+          .payload =
+              ThriftResponseError{
+                  .ew = std::move(
+                      response.payload.get<rocket::RocketResponseError>().ew)},
+          .requestContext = std::move(response.requestContext),
+          .streamType = response.streamType,
+      };
+      return pipeline_->fireRead(
+          channel_pipeline::erase_and_box(std::move(thriftMsg)));
     }
 
     ThriftResponseMessage thriftMsg{
-        .frame = std::move(response.payload.get<frame::read::ParsedFrame>()),
+        .payload = std::move(response.payload.get<frame::read::ParsedFrame>()),
         .requestContext = std::move(response.requestContext),
         .streamType = response.streamType,
     };

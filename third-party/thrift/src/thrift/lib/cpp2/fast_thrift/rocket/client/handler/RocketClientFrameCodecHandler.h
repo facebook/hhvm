@@ -27,6 +27,7 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/io/IOBuf.h>
+#include <folly/logging/xlog.h>
 
 namespace apache::thrift::fast_thrift::rocket::client::handler {
 
@@ -110,41 +111,21 @@ class RocketClientFrameCodecHandler {
           msg) noexcept {
     auto request = msg.take<RocketRequestMessage>();
 
-    // Capture stream identity before the move into serialize(); on
-    // throw, request.frame is in moved-from state.
-    const uint32_t streamId = request.frame.streamId();
-    auto requestContext = std::move(request.requestContext);
-    const auto streamType = request.streamType;
-
     std::unique_ptr<folly::IOBuf> serializedFrame;
     try {
       serializedFrame = std::move(request.frame).serialize();
     } catch (...) {
-      // Outbound serialize threw — wire is untouched. Surface as a
-      // per-request failure on the inbound chain so the App's pending
-      // callback resolves; the connection stays up. StreamStateHandler
-      // will erase the stream entry via the variant's terminal alt.
-      //
-      // NOTE: this catch block is currently uncovered by unit tests —
-      // none of the variant alternatives' serialize() paths can be made
-      // to throw via the public API, and the variant is concrete (no
-      // injectable throwing alternative). The downstream consumers of
-      // the constructed RocketResponseError are covered:
-      // RocketClientStreamStateHandlerTest.ResponseErrorRoutesViaStreamLookup,
-      // ThriftClientTransportAdapterTest.OnTransportResponseWithErrorFiresExceptionUpThrift,
-      // and
-      // RocketClientIntegrationTest.PerRequestErrorReachesAppAndConnectionSurvives.
-      RocketResponseMessage response;
-      response.payload = RocketResponseError{
-          .ew = folly::exception_wrapper(std::current_exception()),
-          .streamId = streamId,
-      };
-      response.requestContext = std::move(requestContext);
-      response.streamType = streamType;
-      (void)ctx.fireRead(
-          apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
-              std::move(response)));
-      return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+      // Outbound frame serialization throwing means we're in an unhealthy
+      // state for this connection — realistically this only fires on
+      // std::bad_alloc or a similar process-wide failure. Log and surface
+      // as Result::Error so the upstream caller can fail the in-flight
+      // write and tear down the connection. We do NOT route this back
+      // inbound as a per-request error: a frame-codec failure is not
+      // recoverable on the same connection.
+      XLOG(ERR) << "Frame serialization failed on streamId="
+                << request.frame.streamId() << ": "
+                << folly::exceptionStr(std::current_exception());
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
     }
 
     return ctx.fireWrite(

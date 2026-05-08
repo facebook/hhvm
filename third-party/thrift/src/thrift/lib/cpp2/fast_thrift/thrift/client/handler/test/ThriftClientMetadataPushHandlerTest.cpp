@@ -178,7 +178,7 @@ class ThriftClientMetadataPushHandlerTest : public ::testing::Test {
       apache::thrift::fast_thrift::frame::FrameType streamType,
       void* requestContext = nullptr) {
     ThriftResponseMessage response;
-    response.frame = std::move(frame);
+    response.payload = std::move(frame);
     response.requestContext =
         apache::thrift::fast_thrift::rocket::borrow(requestContext);
     response.streamType = streamType;
@@ -191,7 +191,7 @@ class ThriftClientMetadataPushHandlerTest : public ::testing::Test {
       apache::thrift::fast_thrift::frame::read::ParsedFrame frame,
       apache::thrift::fast_thrift::frame::FrameType streamType) {
     ThriftResponseMessage response;
-    response.frame = std::move(frame);
+    response.payload = std::move(frame);
     response.streamType = streamType;
     return response;
   }

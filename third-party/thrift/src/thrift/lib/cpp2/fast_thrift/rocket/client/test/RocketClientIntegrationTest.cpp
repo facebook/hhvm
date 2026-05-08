@@ -16,10 +16,13 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
+#include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
@@ -76,6 +79,7 @@ HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(error_injection_inbound_handler);
+HANDLER_TAG(outbound_write_fail_handler);
 
 using channel_pipeline::TypeErasedBox;
 
@@ -121,6 +125,27 @@ class ErrorInjectionInboundHandler {
  private:
   uint32_t failStreamId_;
   folly::exception_wrapper failWith_;
+};
+
+// Test-only outbound-only handler that returns Result::Error from onWrite,
+// simulating the FrameCodecHandler's serialize-throw path (which is
+// structurally hard to trigger directly — the variant's serialize() can't
+// be made to throw via the public API).
+class OutboundWriteFailHandler {
+ public:
+  template <typename Context>
+  void handlerAdded(Context& /*ctx*/) noexcept {}
+  template <typename Context>
+  void handlerRemoved(Context& /*ctx*/) noexcept {}
+  template <typename Context>
+  void onPipelineInactive(Context& /*ctx*/) noexcept {}
+  template <typename Context>
+  void onWriteReady(Context& /*ctx*/) noexcept {}
+
+  template <typename Context>
+  Result onWrite(Context& /*ctx*/, TypeErasedBox&& /*msg*/) noexcept {
+    return Result::Error;
+  }
 };
 
 class RocketClientIntegrationTest : public ::testing::Test {
@@ -257,6 +282,74 @@ class RocketClientIntegrationTest : public ::testing::Test {
                         error_injection_inbound_handler_tag,
                         failStreamId,
                         std::move(failWith))
+                    .addNextInbound<RocketClientErrorFrameHandler>(
+                        rocket_client_error_frame_handler_tag)
+                    .addNextDuplex<RocketClientStreamStateHandler>(
+                        rocket_client_stream_state_handler_tag)
+                    .addNextInbound<RocketClientRequestResponseHandler>(
+                        rocket_client_request_response_handler_tag)
+                    .build();
+
+    appAdapter_->setPipeline(pipeline_.get());
+    transportHandler_->setPipeline(*pipeline_);
+    transportHandler_->onConnect();
+
+    evb_.loopOnce();
+
+    discardSetupFrame();
+  }
+
+  // Like setupPipeline() but inserts an OutboundWriteFailHandler between
+  // FrameCodec and StreamStateHandler so outbound writes from the App
+  // round-trip through StreamStateHandler::onWrite (which inserts the
+  // slot), then hit the fail handler returning Result::Error. Used to
+  // exercise the rollback fan-out (failStreamOnWriteError) end-to-end
+  // without depending on a real serialize() throw.
+  void setupPipelineWithOutboundFailure() {
+    auto transport =
+        folly::AsyncTransport::UniquePtr(new TestAsyncTransport(&evb_));
+    testTransport_ = static_cast<TestAsyncTransport*>(transport.get());
+
+    transportHandler_ =
+        apache::thrift::fast_thrift::transport::TransportHandler::create(
+            std::move(transport));
+
+    appAdapter_->setResponseHandlers(
+        [this](TypeErasedBox&& msg) noexcept -> Result {
+          responseCount_++;
+          responses_.push_back(std::move(msg));
+          return Result::Success;
+        },
+        [this](folly::exception_wrapper&& e) noexcept {
+          exceptionReceived_ = true;
+          exception_ = std::move(e);
+        });
+
+    pipeline_ = PipelineBuilder<
+                    apache::thrift::fast_thrift::transport::TransportHandler,
+                    rocket::client::RocketClientAppAdapter,
+                    TestAllocator>()
+                    .setEventBase(&evb_)
+                    .setHead(transportHandler_.get())
+                    .setTail(appAdapter_.get())
+                    .setAllocator(&allocator_)
+                    .addNextInbound<apache::thrift::fast_thrift::frame::read::
+                                        handler::FrameLengthParserHandler>(
+                        frame_length_parser_handler_tag)
+                    .addNextOutbound<apache::thrift::fast_thrift::frame::write::
+                                         handler::FrameLengthEncoderHandler>(
+                        frame_length_encoder_handler_tag)
+                    .addNextDuplex<RocketClientFrameCodecHandler>(
+                        rocket_client_frame_codec_handler_tag)
+                    .addNextDuplex<RocketClientSetupFrameHandler>(
+                        rocket_client_setup_handler_tag,
+                        []() {
+                          return std::make_pair(
+                              folly::IOBuf::copyBuffer("setup"),
+                              std::unique_ptr<folly::IOBuf>());
+                        })
+                    .addNextOutbound<OutboundWriteFailHandler>(
+                        outbound_write_fail_handler_tag)
                     .addNextInbound<RocketClientErrorFrameHandler>(
                         rocket_client_error_frame_handler_tag)
                     .addNextDuplex<RocketClientStreamStateHandler>(
@@ -560,6 +653,144 @@ TEST_F(
   EXPECT_EQ(parsedOk.streamId(), 3u);
   EXPECT_EQ(
       parsedOk.type(), apache::thrift::fast_thrift::frame::FrameType::PAYLOAD);
+}
+
+TEST_F(
+    RocketClientIntegrationTest,
+    OutboundWriteFailureRollsBackStreamWithNotOpen) {
+  // Simulates the FrameCodec serialize-throw path: an outbound handler
+  // below StreamStateHandler returns Result::Error. StreamStateHandler's
+  // onWrite rollback fires failStreamOnWriteError, which fans out a
+  // per-stream RocketResponseError carrying TTransportException::NOT_OPEN
+  // and "Dropping unsent request" — matches legacy
+  // failAllScheduledWrites semantics.
+  setupPipelineWithOutboundFailure();
+
+  auto request = createRocketRequest(folly::IOBuf::copyBuffer("test"));
+  (void)appAdapter_->write(std::move(request));
+  evb_.loopOnce();
+
+  ASSERT_EQ(responseCount_, 1);
+  EXPECT_FALSE(exceptionReceived_);
+  auto& response = responses_[0].get<RocketResponseMessage>();
+  ASSERT_TRUE(response.payload.is<rocket::RocketResponseError>());
+  auto& err = response.payload.get<rocket::RocketResponseError>();
+  EXPECT_EQ(err.streamId, 1u);
+  auto* tex =
+      err.ew.get_exception<apache::thrift::transport::TTransportException>();
+  ASSERT_NE(tex, nullptr);
+  EXPECT_EQ(
+      tex->getType(), apache::thrift::transport::TTransportException::NOT_OPEN);
+  EXPECT_NE(
+      std::string(tex->what()).find("Dropping unsent request"),
+      std::string::npos);
+}
+
+// =============================================================================
+// Connection-Fatal Fan-Out (StreamStateHandler::onException +
+// onPipelineInactive)
+// =============================================================================
+
+TEST_F(
+    RocketClientIntegrationTest,
+    TransportExceptionFailsAllPendingStreamsWithVerbatimError) {
+  // Transport-driven failure: TransportHandler::closeInternal fires the
+  // exception inbound, hitting StreamStateHandler::onException, which
+  // fans out per-stream RocketResponseError carrying `ew` verbatim
+  // (matches legacy failAllSentWrites). Each in-flight stream resolves
+  // with a real TTransportException — not the generic auto-detach
+  // std::logic_error.
+  setupPipeline();
+
+  auto request1 = createRocketRequest(folly::IOBuf::copyBuffer("req1"));
+  (void)appAdapter_->write(std::move(request1));
+  evb_.loopOnce();
+  auto requestFrame1 = getWrittenFrame();
+  ASSERT_NE(requestFrame1, nullptr);
+  auto parsedRequest1 = parseWrittenFrame(std::move(requestFrame1));
+  ASSERT_EQ(parsedRequest1.streamId(), 1u);
+
+  auto request2 = createRocketRequest(folly::IOBuf::copyBuffer("req2"));
+  (void)appAdapter_->write(std::move(request2));
+  evb_.loopOnce();
+  auto requestFrame2 = getWrittenFrame();
+  ASSERT_NE(requestFrame2, nullptr);
+  auto parsedRequest2 = parseWrittenFrame(std::move(requestFrame2));
+  ASSERT_EQ(parsedRequest2.streamId(), 3u);
+
+  auto ew = folly::make_exception_wrapper<
+      apache::thrift::transport::TTransportException>(
+      apache::thrift::transport::TTransportException::END_OF_FILE,
+      "Transport closed unexpectedly");
+  transportHandler_->onException(folly::exception_wrapper(ew));
+  evb_.loopOnce();
+
+  ASSERT_EQ(responseCount_, 2);
+  std::vector<uint32_t> seenStreamIds;
+  for (auto& boxed : responses_) {
+    auto& response = boxed.get<RocketResponseMessage>();
+    ASSERT_TRUE(response.payload.is<rocket::RocketResponseError>());
+    auto& err = response.payload.get<rocket::RocketResponseError>();
+    auto* tex =
+        err.ew.get_exception<apache::thrift::transport::TTransportException>();
+    ASSERT_NE(tex, nullptr);
+    EXPECT_EQ(
+        tex->getType(),
+        apache::thrift::transport::TTransportException::END_OF_FILE);
+    EXPECT_NE(
+        std::string(tex->what()).find("Transport closed unexpectedly"),
+        std::string::npos);
+    seenStreamIds.push_back(err.streamId);
+  }
+  std::sort(seenStreamIds.begin(), seenStreamIds.end());
+  EXPECT_EQ(seenStreamIds, (std::vector<uint32_t>{1u, 3u}));
+  EXPECT_TRUE(exceptionReceived_);
+}
+
+TEST_F(
+    RocketClientIntegrationTest,
+    GracefulCloseFailsAllPendingStreamsWithEndOfFile) {
+  // Graceful close (no upstream exception): closeInternal({}) skips the
+  // fireException step and goes straight to deactivate(). Each handler's
+  // onPipelineInactive runs; StreamStateHandler::onPipelineInactive
+  // synthesizes END_OF_FILE/"Connection closed" per stream (matches
+  // legacy onConnectionClosed).
+  setupPipeline();
+
+  auto request1 = createRocketRequest(folly::IOBuf::copyBuffer("req1"));
+  (void)appAdapter_->write(std::move(request1));
+  evb_.loopOnce();
+  ASSERT_NE(getWrittenFrame(), nullptr);
+
+  auto request2 = createRocketRequest(folly::IOBuf::copyBuffer("req2"));
+  (void)appAdapter_->write(std::move(request2));
+  evb_.loopOnce();
+  ASSERT_NE(getWrittenFrame(), nullptr);
+
+  // No exception — graceful close path.
+  transportHandler_->onClose(folly::exception_wrapper{});
+  evb_.loopOnce();
+
+  ASSERT_EQ(responseCount_, 2);
+  std::vector<uint32_t> seenStreamIds;
+  for (auto& boxed : responses_) {
+    auto& response = boxed.get<RocketResponseMessage>();
+    ASSERT_TRUE(response.payload.is<rocket::RocketResponseError>());
+    auto& err = response.payload.get<rocket::RocketResponseError>();
+    auto* tex =
+        err.ew.get_exception<apache::thrift::transport::TTransportException>();
+    ASSERT_NE(tex, nullptr);
+    EXPECT_EQ(
+        tex->getType(),
+        apache::thrift::transport::TTransportException::END_OF_FILE);
+    EXPECT_NE(
+        std::string(tex->what()).find("Connection closed"), std::string::npos);
+    seenStreamIds.push_back(err.streamId);
+  }
+  std::sort(seenStreamIds.begin(), seenStreamIds.end());
+  EXPECT_EQ(seenStreamIds, (std::vector<uint32_t>{1u, 3u}));
+  // No upstream exception fired in the graceful path.
+  EXPECT_FALSE(exceptionReceived_);
 }
 
 // =============================================================================

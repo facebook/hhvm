@@ -107,9 +107,21 @@ void ThriftClientChannel::sendRequestInternal(
           std::make_unique<ChannelCallbackContext>(std::move(callbackPtr))),
   };
 
-  (void)pipeline_->fireWrite(
+  auto result = pipeline_->fireWrite(
       apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
           std::move(msg)));
+
+  if (FOLLY_UNLIKELY(
+          result ==
+          apache::thrift::fast_thrift::channel_pipeline::Result::Error)) {
+    // Close the channel. Subsequent sends will be rejected; pending
+    // streams will be failed.
+    onException(
+        folly::make_exception_wrapper<
+            apache::thrift::transport::TTransportException>(
+            apache::thrift::transport::TTransportException::UNKNOWN,
+            "Failed to write request to pipeline"));
+  }
 }
 
 void ThriftClientChannel::sendRequestResponse(
@@ -148,7 +160,9 @@ void ThriftClientChannel::sendRequestResponse(
 void ThriftClientChannel::handleRequestResponse(
     ThriftResponseMessage&& response,
     apache::thrift::RequestClientCallback::Ptr callback) {
-  auto& frame = response.frame;
+  auto& frame =
+      response.payload
+          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
 
   // Deserialize response metadata
   apache::thrift::ResponseRpcMetadata metadata;
@@ -236,6 +250,15 @@ ThriftClientChannel::onRead(
   auto callback = std::move(ctx->cb);
   ctx.reset();
 
+  // Per-request error from below the thrift pipeline (e.g., rocket in-process
+  // serialize failure). Fail just this callback; channel stays Open for
+  // subsequent requests.
+  if (FOLLY_UNLIKELY(response.payload.is<ThriftResponseError>())) {
+    callback.release()->onResponseError(
+        std::move(response.payload.get<ThriftResponseError>().ew));
+    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+  }
+
   DCHECK(
       response.streamType ==
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE)
@@ -267,8 +290,7 @@ void ThriftClientChannel::onException(folly::exception_wrapper&& e) noexcept {
 
   state_ = State::Closed;
 
-  // Close the pipeline. Per-request error delivery for in-flight requests is
-  // a connection-level concern owned outside this channel.
+  // Close the pipeline. Pending streams will be failed.
   if (pipeline_) {
     pipeline_->close();
   }

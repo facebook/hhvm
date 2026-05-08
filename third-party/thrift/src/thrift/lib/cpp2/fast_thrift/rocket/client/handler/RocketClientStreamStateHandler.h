@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
+#include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/DirectStreamMap.h>
@@ -31,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 
 #include <cstdint>
+#include <vector>
 
 namespace apache::thrift::fast_thrift::rocket::client::handler {
 
@@ -74,6 +76,13 @@ class RocketClientStreamStateHandler {
 
   template <typename Context>
   void handlerRemoved(Context& /*ctx*/) noexcept {
+    // The fan-out (onException / onPipelineInactive) should have drained
+    // before we get here. Auto-detach via ~TypeErasedPtr fires
+    // std::logic_error, not a TTransportException — production callers
+    // catching TTransportException& would miss it.
+    DCHECK(activeStreams_.empty())
+        << "handlerRemoved called with " << activeStreams_.size()
+        << " in-flight streams; per-stream fan-out missed";
     activeStreams_.clear();
     nextStreamId_ = 1;
   }
@@ -153,7 +162,13 @@ class RocketClientStreamStateHandler {
 
   template <typename Context>
   void onException(Context& ctx, folly::exception_wrapper&& e) noexcept {
-    activeStreams_.clear();
+    // Connection-fatal exception. Fail every in-flight (sent) request
+    // with the wrapped reason — matches legacy
+    // RocketClient::failAllSentWrites semantics (each request resolves
+    // with the actual connection exception, not the generic auto-detach
+    // error). Then propagate upward so the AppAdapter flips state to
+    // Closed and tears down the pipeline.
+    failAllActiveStreams(ctx, e);
     ctx.fireException(std::move(e));
   }
 
@@ -214,16 +229,30 @@ class RocketClientStreamStateHandler {
     if (FOLLY_UNLIKELY(
             result ==
             apache::thrift::fast_thrift::channel_pipeline::Result::Error)) {
-      // erase is a no-op if the inbound error path already removed the
-      // slot (e.g., codec synthesized RocketResponseError → fireRead →
-      // our onRead erased it before returning).
-      activeStreams_.erase(sid);
+      // Rollback: this request was queued but never reached the wire.
+      // Fail it as an unwritten request — matches legacy
+      // RocketClient::failAllScheduledWrites semantics. No-op if the
+      // inbound error path already removed the slot (e.g., codec
+      // synthesized RocketResponseError → fireRead → our onRead erased
+      // it before returning).
+      failStreamOnWriteError(ctx, sid);
     }
     return result;
   }
 
   template <typename Context>
-  void onPipelineInactive(Context& /*ctx*/) noexcept {}
+  void onPipelineInactive(Context& ctx) noexcept {
+    // Graceful close. Fail every in-flight (sent) request with
+    // END_OF_FILE — matches legacy RocketClient::onConnectionClosed
+    // semantics. No-op if onException already ran the fan-out (slot
+    // map is empty).
+    failAllActiveStreams(
+        ctx,
+        folly::make_exception_wrapper<
+            apache::thrift::transport::TTransportException>(
+            apache::thrift::transport::TTransportException::END_OF_FILE,
+            "Connection closed"));
+  }
 
   template <typename Context>
   void onWriteReady(Context& /*ctx*/) noexcept {}
@@ -255,6 +284,93 @@ class RocketClientStreamStateHandler {
   void setNextStreamIdForTest(uint32_t id) noexcept { nextStreamId_ = id; }
 
  private:
+  /**
+   * Fail one stream whose outbound write returned Result::Error from a
+   * downstream handler before reaching the wire. Mirrors legacy
+   * RocketClient::failAllScheduledWrites (per-stream).
+   *
+   * The unit is a stream slot, not a request — in REQUEST_RESPONSE
+   * today they coincide, but as streaming patterns land this also
+   * covers a continuation/cancel write that failed for an existing
+   * stream.
+   *
+   * Resolves the handler with `TTransportException::NOT_OPEN`, message
+   * "Dropping unsent request. Pipeline write failed." — same code as
+   * legacy and nearly the same wording, with our local cause in place
+   * of legacy's "Connection closed after: <ew>".
+   *
+   * No-op if the slot is already gone.
+   */
+  template <typename Context>
+  void failStreamOnWriteError(Context& ctx, uint32_t streamId) noexcept {
+    failStream(
+        ctx,
+        streamId,
+        folly::make_exception_wrapper<
+            apache::thrift::transport::TTransportException>(
+            apache::thrift::transport::TTransportException::NOT_OPEN,
+            "Dropping unsent request. Pipeline write failed."));
+  }
+
+  /**
+   * Fail every in-flight (sent) stream with `ew`. Used on connection
+   * teardown — `onException` passes the propagated wrapped reason,
+   * `onPipelineInactive` synthesizes END_OF_FILE. Mirrors legacy
+   * RocketClient::failAllSentWrites.
+   *
+   * Snapshots stream IDs before iterating because each failStream does
+   * a fireRead that may re-enter and mutate the slot map.
+   */
+  template <typename Context>
+  void failAllActiveStreams(
+      Context& ctx, const folly::exception_wrapper& ew) noexcept {
+    if (activeStreams_.empty()) {
+      return;
+    }
+    std::vector<uint32_t> ids;
+    ids.reserve(activeStreams_.size());
+    activeStreams_.forEach([&](uint32_t key, ClientStreamContext& /*val*/) {
+      ids.push_back(key);
+    });
+    for (uint32_t sid : ids) {
+      failStream(ctx, sid, ew);
+    }
+  }
+
+  /**
+   * Mechanism: synthesize a RocketResponseError for one stream and route
+   * it inbound via `fireRead`. Skips own onRead via the cached
+   * next-handler pointer in ContextImpl, so the bridge / AppAdapter sees
+   * the error directly and resolves the handler with `ew` — not the
+   * generic auto-detach exception that ~TypeErasedPtr would fire.
+   *
+   * Moves `requestContext` out of the slot BEFORE erase so the slot
+   * destructor sees an empty TypeErasedPtr; the only thing that runs
+   * the deleter is our explicit fireRead with `ew` attached.
+   *
+   * No-op if the slot is already gone (e.g., the inbound terminal-frame
+   * path already erased it).
+   */
+  template <typename Context>
+  void failStream(
+      Context& ctx, uint32_t streamId, folly::exception_wrapper ew) noexcept {
+    auto it = activeStreams_.find(streamId);
+    if (it == activeStreams_.end()) {
+      return;
+    }
+    RocketResponseMessage msg;
+    msg.payload = RocketResponseError{
+        .ew = std::move(ew),
+        .streamId = streamId,
+    };
+    msg.streamType = it->second.streamType;
+    msg.requestContext = std::move(it->second.requestContext);
+    activeStreams_.erase(it);
+    (void)ctx.fireRead(
+        apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
+            std::move(msg)));
+  }
+
   /**
    * ClientStreamContext - State stored for each pending request stream.
    *

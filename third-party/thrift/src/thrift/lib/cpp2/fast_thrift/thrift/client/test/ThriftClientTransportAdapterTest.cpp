@@ -224,7 +224,7 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
 
 TEST(
     ThriftClientTransportAdapterTest,
-    OnTransportResponseWithErrorFiresExceptionUpThrift) {
+    OnTransportResponseWithErrorRoutesAsThriftResponseErrorViaFireRead) {
   auto connection = std::make_unique<rocket::client::RocketClientConnection>();
   auto* appAdapter = connection->appAdapter.get();
 
@@ -264,20 +264,18 @@ TEST(
 
   adapter.setPipeline(thriftPipeline.get());
 
-  folly::exception_wrapper captured;
-  thriftTail.setOnExceptionCallback(
-      [&](folly::exception_wrapper&& ew) { captured = std::move(ew); });
-
+  // In-process per-request error from below arrives as a RocketResponseMessage
+  // with the RocketResponseError variant. The transport adapter translates it
+  // to a ThriftResponseMessage with the ThriftResponseError variant and routes
+  // it via fireRead so the tail can fail just this one callback — the channel
+  // stays Open (no fireException).
   auto errorBox = makeRocketErrorResponseBox(
       folly::make_exception_wrapper<std::runtime_error>("serialize boom"));
   auto result = appAdapter->onRead(std::move(errorBox));
 
   EXPECT_EQ(result, Result::Success);
-  EXPECT_EQ(thriftTail.readCount(), 0);
-  EXPECT_EQ(thriftTail.exceptionCount(), 1);
-  ASSERT_TRUE(static_cast<bool>(captured));
-  EXPECT_EQ(
-      captured.what().toStdString(), "std::runtime_error: serialize boom");
+  EXPECT_EQ(thriftTail.readCount(), 1);
+  EXPECT_EQ(thriftTail.exceptionCount(), 0);
 }
 
 TEST(ThriftClientTransportAdapterTest, OnTransportErrorPropagatesException) {

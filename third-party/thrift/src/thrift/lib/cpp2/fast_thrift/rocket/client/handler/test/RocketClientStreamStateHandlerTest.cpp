@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
@@ -74,7 +76,7 @@ class MockStreamContext {
   Result fireRead(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    if (returnError_) {
+    if (readReturnError_) {
       return Result::Error;
     }
     readMessages_.push_back(std::move(msg));
@@ -84,7 +86,7 @@ class MockStreamContext {
   Result fireWrite(
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
-    if (returnError_) {
+    if (writeReturnError_) {
       return Result::Error;
     }
     writeMessages_.push_back(std::move(msg));
@@ -97,7 +99,15 @@ class MockStreamContext {
 
   void setReturnBackpressure(bool value) { returnBackpressure_ = value; }
 
-  void setReturnError(bool value) { returnError_ = value; }
+  // Sets BOTH read and write error flags. Use the directional setters
+  // when you need fireWrite to fail but fireRead (e.g., rollback fan-out)
+  // to succeed.
+  void setReturnError(bool value) {
+    readReturnError_ = value;
+    writeReturnError_ = value;
+  }
+  void setReadReturnError(bool value) { readReturnError_ = value; }
+  void setWriteReturnError(bool value) { writeReturnError_ = value; }
 
   std::vector<apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox>&
   readMessages() {
@@ -110,13 +120,15 @@ class MockStreamContext {
   }
 
   bool hasException() const { return static_cast<bool>(exception_); }
+  const folly::exception_wrapper& exception() const { return exception_; }
 
   void reset() {
     readMessages_.clear();
     writeMessages_.clear();
     exception_ = folly::exception_wrapper();
     returnBackpressure_ = false;
-    returnError_ = false;
+    readReturnError_ = false;
+    writeReturnError_ = false;
   }
 
  private:
@@ -126,7 +138,8 @@ class MockStreamContext {
       writeMessages_;
   folly::exception_wrapper exception_;
   bool returnBackpressure_{false};
-  bool returnError_{false};
+  bool readReturnError_{false};
+  bool writeReturnError_{false};
 };
 
 std::unique_ptr<folly::IOBuf> buildFrame(
@@ -516,79 +529,186 @@ TEST_F(ClientStreamStateHandlerTest, ConnectionFramesPassThrough) {
 // Handler Lifecycle
 // =============================================================================
 
-TEST_F(ClientStreamStateHandlerTest, HandlerRemovedClearsAllState) {
-  auto request1 = makeClientRequest(
+TEST_F(ClientStreamStateHandlerTest, HandlerRemovedAfterFanOutResetsStreamId) {
+  // Contract: by the time handlerRemoved runs, the slot map must be
+  // empty — onException or onPipelineInactive should have already done
+  // the fan-out. handlerRemoved DCHECKs that and resets the stream-id
+  // counter for the next pipeline.
+  auto request = makeClientRequest(
       folly::IOBuf::copyBuffer("request"),
       folly::IOBuf::copyBuffer("metadata"));
   EXPECT_EQ(
-      handler_.onWrite(ctx_, erase_and_box(std::move(request1))),
+      handler_.onWrite(ctx_, erase_and_box(std::move(request))),
       Result::Success);
-  auto request2 = makeClientRequest(
-      folly::IOBuf::copyBuffer("request"),
-      folly::IOBuf::copyBuffer("metadata"));
-  EXPECT_EQ(
-      handler_.onWrite(ctx_, erase_and_box(std::move(request2))),
-      Result::Success);
-  EXPECT_EQ(handler_.activeStreamCount(), 2);
   EXPECT_GT(handler_.nextStreamId(), 1);
+  EXPECT_EQ(handler_.activeStreamCount(), 1);
+
+  // Drain via the legitimate teardown path (onPipelineInactive fan-out).
+  handler_.onPipelineInactive(ctx_);
+  EXPECT_EQ(handler_.activeStreamCount(), 0);
 
   handler_.handlerRemoved(ctx_);
-
-  EXPECT_EQ(handler_.activeStreamCount(), 0);
   EXPECT_EQ(handler_.nextStreamId(), 1);
 }
 
-TEST_F(ClientStreamStateHandlerTest, HandlerRemovedFailsActiveStreams) {
+TEST_F(
+    ClientStreamStateHandlerTest,
+    OnPipelineInactiveFansOutEndOfFileToAllStreams) {
+  // Graceful close: every active stream gets a per-stream
+  // RocketResponseError with TTransportException::END_OF_FILE / "Connection
+  // closed", routed inbound via fireRead so the bridge / AppAdapter can
+  // resolve each handler with a real transport exception (not the
+  // generic auto-detach error). Mirrors legacy
+  // RocketClient::onConnectionClosed semantics.
   void* const kHandle1 = reinterpret_cast<void*>(0x1);
   void* const kHandle2 = reinterpret_cast<void*>(0x2);
-  auto request1 = makeClientRequest(
-      folly::IOBuf::copyBuffer("request"),
-      folly::IOBuf::copyBuffer("metadata"),
-      kHandle1);
+  auto r1 = makeClientRequest(
+      folly::IOBuf::copyBuffer("a"), folly::IOBuf::copyBuffer("m"), kHandle1);
+  auto r2 = makeClientRequest(
+      folly::IOBuf::copyBuffer("b"), folly::IOBuf::copyBuffer("m"), kHandle2);
   EXPECT_EQ(
-      handler_.onWrite(ctx_, erase_and_box(std::move(request1))),
-      Result::Success);
-  auto request2 = makeClientRequest(
-      folly::IOBuf::copyBuffer("request"),
-      folly::IOBuf::copyBuffer("metadata"),
-      kHandle2);
+      handler_.onWrite(ctx_, erase_and_box(std::move(r1))), Result::Success);
   EXPECT_EQ(
-      handler_.onWrite(ctx_, erase_and_box(std::move(request2))),
-      Result::Success);
+      handler_.onWrite(ctx_, erase_and_box(std::move(r2))), Result::Success);
   EXPECT_EQ(handler_.activeStreamCount(), 2);
+  ctx_.readMessages().clear();
 
-  ctx_.writeMessages().clear();
-  handler_.handlerRemoved(ctx_);
+  handler_.onPipelineInactive(ctx_);
 
-  // All active streams should be cleared when handler is removed
-  // Error handling is now done via fireException at the pipeline level
   EXPECT_EQ(handler_.activeStreamCount(), 0);
+  EXPECT_FALSE(ctx_.hasException());
+  ASSERT_EQ(ctx_.readMessages().size(), 2);
+
+  std::vector<uint32_t> seenStreamIds;
+  std::vector<void*> seenHandles;
+  for (auto& boxed : ctx_.readMessages()) {
+    auto& response = boxed.get<RocketResponseMessage>();
+    ASSERT_TRUE(response.payload.is<RocketResponseError>());
+    auto& err = response.payload.get<RocketResponseError>();
+    auto* tex =
+        err.ew.get_exception<apache::thrift::transport::TTransportException>();
+    ASSERT_NE(tex, nullptr);
+    EXPECT_EQ(
+        tex->getType(),
+        apache::thrift::transport::TTransportException::END_OF_FILE);
+    EXPECT_NE(
+        std::string(tex->what()).find("Connection closed"), std::string::npos);
+    seenStreamIds.push_back(err.streamId);
+    seenHandles.push_back(response.requestContext.get());
+  }
+  std::sort(seenStreamIds.begin(), seenStreamIds.end());
+  std::sort(seenHandles.begin(), seenHandles.end());
+  EXPECT_EQ(seenStreamIds, (std::vector<uint32_t>{1u, 3u}));
+  std::vector<void*> expectedHandles{kHandle1, kHandle2};
+  std::sort(expectedHandles.begin(), expectedHandles.end());
+  EXPECT_EQ(seenHandles, expectedHandles);
+}
+
+TEST_F(ClientStreamStateHandlerTest, OnPipelineInactiveAfterOnExceptionIsNoOp) {
+  // onException already drained the slot map; a follow-up
+  // onPipelineInactive (e.g., from pipeline_->close()) finds nothing to
+  // do.
+  auto request = makeClientRequest(
+      folly::IOBuf::copyBuffer("a"),
+      folly::IOBuf::copyBuffer("m"),
+      reinterpret_cast<void*>(0x1));
+  EXPECT_EQ(
+      handler_.onWrite(ctx_, erase_and_box(std::move(request))),
+      Result::Success);
+  EXPECT_EQ(handler_.activeStreamCount(), 1);
+
+  auto ex =
+      folly::make_exception_wrapper<std::runtime_error>("connection died");
+  handler_.onException(ctx_, folly::exception_wrapper(ex));
+  EXPECT_EQ(handler_.activeStreamCount(), 0);
+  size_t readsBefore = ctx_.readMessages().size();
+
+  handler_.onPipelineInactive(ctx_);
+  EXPECT_EQ(ctx_.readMessages().size(), readsBefore);
 }
 
 // =============================================================================
 // Exception Handling
 // =============================================================================
 
-TEST_F(ClientStreamStateHandlerTest, OnExceptionClearsActiveStreams) {
-  auto request1 = makeClientRequest(
-      folly::IOBuf::copyBuffer("request"),
-      folly::IOBuf::copyBuffer("metadata"));
+TEST_F(
+    ClientStreamStateHandlerTest, OnExceptionFansOutToAllStreamsAndPropagates) {
+  // onException fans out per-stream errors with the wrapped reason
+  // verbatim — matches legacy RocketClient::failAllSentWrites semantics
+  // (each in-flight request resolves with the actual connection
+  // exception, not the generic auto-detach error). After the fan-out it
+  // propagates the exception upstream so the AppAdapter can flip state
+  // to Closed.
+  void* const kHandle1 = reinterpret_cast<void*>(0x1);
+  void* const kHandle2 = reinterpret_cast<void*>(0x2);
+  auto r1 = makeClientRequest(
+      folly::IOBuf::copyBuffer("a"), folly::IOBuf::copyBuffer("m"), kHandle1);
+  auto r2 = makeClientRequest(
+      folly::IOBuf::copyBuffer("b"), folly::IOBuf::copyBuffer("m"), kHandle2);
   EXPECT_EQ(
-      handler_.onWrite(ctx_, erase_and_box(std::move(request1))),
-      Result::Success);
-  auto request2 = makeClientRequest(
-      folly::IOBuf::copyBuffer("request"),
-      folly::IOBuf::copyBuffer("metadata"));
+      handler_.onWrite(ctx_, erase_and_box(std::move(r1))), Result::Success);
   EXPECT_EQ(
-      handler_.onWrite(ctx_, erase_and_box(std::move(request2))),
-      Result::Success);
+      handler_.onWrite(ctx_, erase_and_box(std::move(r2))), Result::Success);
   EXPECT_EQ(handler_.activeStreamCount(), 2);
+  ctx_.readMessages().clear();
 
-  auto ex = folly::make_exception_wrapper<std::runtime_error>("test error");
-  handler_.onException(ctx_, std::move(ex));
+  auto ex =
+      folly::make_exception_wrapper<std::runtime_error>("connection died");
+  handler_.onException(ctx_, folly::exception_wrapper(ex));
 
-  EXPECT_TRUE(ctx_.hasException());
   EXPECT_EQ(handler_.activeStreamCount(), 0);
+  EXPECT_TRUE(ctx_.hasException());
+  EXPECT_EQ(
+      ctx_.exception().what().toStdString(),
+      "std::runtime_error: connection died");
+
+  ASSERT_EQ(ctx_.readMessages().size(), 2);
+  for (auto& boxed : ctx_.readMessages()) {
+    auto& response = boxed.get<RocketResponseMessage>();
+    ASSERT_TRUE(response.payload.is<RocketResponseError>());
+    auto& err = response.payload.get<RocketResponseError>();
+    EXPECT_EQ(
+        err.ew.what().toStdString(), "std::runtime_error: connection died");
+  }
+}
+
+TEST_F(ClientStreamStateHandlerTest, OnWriteErrorRollbackEmitsNotOpen) {
+  // Rollback path: a downstream handler returns Result::Error from
+  // fireWrite (e.g., codec serialize failed). The slot was inserted
+  // before fireWrite, so rollback must fan out a per-stream NOT_OPEN
+  // error so the in-flight handler resolves with a real transport
+  // exception (not the generic auto-detach). Mirrors legacy
+  // RocketClient::failAllScheduledWrites.
+  void* const kHandle = reinterpret_cast<void*>(0x42);
+  auto request = makeClientRequest(
+      folly::IOBuf::copyBuffer("request"),
+      folly::IOBuf::copyBuffer("metadata"),
+      kHandle);
+
+  // fireWrite fails, fireRead (called from the rollback fan-out) succeeds
+  // so the test can capture the synthesized RocketResponseError.
+  ctx_.setWriteReturnError(true);
+  auto result = handler_.onWrite(ctx_, erase_and_box(std::move(request)));
+  EXPECT_EQ(result, Result::Error);
+
+  EXPECT_EQ(handler_.activeStreamCount(), 0);
+  ASSERT_EQ(ctx_.readMessages().size(), 1);
+  auto& response = ctx_.readMessages()[0].get<RocketResponseMessage>();
+  EXPECT_EQ(response.requestContext.get(), kHandle);
+  ASSERT_TRUE(response.payload.is<RocketResponseError>());
+  auto& err = response.payload.get<RocketResponseError>();
+  EXPECT_EQ(err.streamId, 1);
+  auto* tex =
+      err.ew.get_exception<apache::thrift::transport::TTransportException>();
+  ASSERT_NE(tex, nullptr);
+  EXPECT_EQ(
+      tex->getType(), apache::thrift::transport::TTransportException::NOT_OPEN);
+  EXPECT_NE(
+      std::string(tex->what()).find("Dropping unsent request"),
+      std::string::npos);
+  EXPECT_NE(
+      std::string(tex->what()).find("Pipeline write failed"),
+      std::string::npos);
 }
 
 // =============================================================================

@@ -67,7 +67,7 @@ ThriftResponseMessage makePayloadResponse(
       std::move(metadata),
       std::move(data));
   ThriftResponseMessage response;
-  response.frame =
+  response.payload =
       apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frameBuf));
   return response;
 }
@@ -80,7 +80,7 @@ ThriftResponseMessage makeErrorResponse(
       nullptr,
       std::move(data));
   ThriftResponseMessage response;
-  response.frame =
+  response.payload =
       apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frameBuf));
   return response;
 }
@@ -89,7 +89,7 @@ ThriftResponseMessage makeCancelResponse() {
   auto frameBuf = apache::thrift::fast_thrift::frame::write::serialize(
       apache::thrift::fast_thrift::frame::write::CancelHeader{.streamId = 1});
   ThriftResponseMessage response;
-  response.frame =
+  response.payload =
       apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frameBuf));
   return response;
 }

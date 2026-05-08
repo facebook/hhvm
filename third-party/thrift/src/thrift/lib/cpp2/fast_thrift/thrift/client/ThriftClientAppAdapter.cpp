@@ -86,13 +86,24 @@ ThriftClientAppAdapter::onRead(
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 
+  auto handler = std::move(ctx->handler);
+  ctx.reset();
+
+  // Per-request error from below (e.g., rocket in-process serialize
+  // failure). Fail just this handler; channel stays Open for subsequent
+  // requests.
+  if (FOLLY_UNLIKELY(response.payload.is<ThriftResponseError>())) {
+    handler(
+        folly::makeUnexpected(
+            std::move(response.payload.get<ThriftResponseError>().ew)));
+    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+  }
+
   DCHECK(
       response.streamType ==
       apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE)
       << "Unsupported frame type: " << static_cast<int>(response.streamType);
 
-  auto handler = std::move(ctx->handler);
-  ctx.reset();
   handler(handleRequestResponse(std::move(response), protocolId_));
   return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
 }
@@ -154,9 +165,20 @@ void ThriftClientAppAdapter::submitWriteOnEventBase(
     }
     return;
   }
-  (void)pipeline_->fireWrite(
+  auto result = pipeline_->fireWrite(
       apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
           std::move(msg)));
+  if (FOLLY_UNLIKELY(
+          result ==
+          apache::thrift::fast_thrift::channel_pipeline::Result::Error)) {
+    // Close the channel. Subsequent sends will be rejected; pending
+    // streams will be failed.
+    onException(
+        folly::make_exception_wrapper<
+            apache::thrift::transport::TTransportException>(
+            apache::thrift::transport::TTransportException::UNKNOWN,
+            "Failed to write request to pipeline"));
+  }
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

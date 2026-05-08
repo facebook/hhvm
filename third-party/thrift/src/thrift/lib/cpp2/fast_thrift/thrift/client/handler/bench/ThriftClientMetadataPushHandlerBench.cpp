@@ -165,7 +165,7 @@ BENCHMARK(Read_MetadataPush_SetupResponse, iters) {
 
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
-    response.frame = parseFrame(std::move(frames[i]));
+    response.payload = parseFrame(std::move(frames[i]));
     response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
@@ -189,7 +189,7 @@ BENCHMARK(Read_MetadataPush_SetupResponse_WithZstd, iters) {
 
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
-    response.frame = parseFrame(std::move(frames[i]));
+    response.payload = parseFrame(std::move(frames[i]));
     response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
@@ -213,7 +213,7 @@ BENCHMARK(Read_MetadataPush_DrainComplete, iters) {
 
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
-    response.frame = parseFrame(std::move(frames[i]));
+    response.payload = parseFrame(std::move(frames[i]));
     response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
@@ -237,7 +237,7 @@ BENCHMARK(Read_MetadataPush_DrainComplete_ExceededMem, iters) {
 
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
-    response.frame = parseFrame(std::move(frames[i]));
+    response.payload = parseFrame(std::move(frames[i]));
     response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
@@ -261,7 +261,7 @@ BENCHMARK(Read_MetadataPush_StreamHeaders, iters) {
 
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
-    response.frame = parseFrame(std::move(frames[i]));
+    response.payload = parseFrame(std::move(frames[i]));
     response.streamType = FrameType::METADATA_PUSH;
 
     auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
@@ -290,7 +290,7 @@ BENCHMARK(Read_NonMetadataPush_Passthrough, iters) {
 
   for (size_t i = 0; i < iters; ++i) {
     ThriftResponseMessage response;
-    response.frame = parseFrame(std::move(frames[i]));
+    response.payload = parseFrame(std::move(frames[i]));
     response.requestContext = apache::thrift::fast_thrift::rocket::borrow(
         reinterpret_cast<void*>(0x1));
     response.streamType = FrameType::REQUEST_RESPONSE;

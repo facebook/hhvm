@@ -81,7 +81,17 @@ class ThriftClientMetadataPushHandler {
       apache::thrift::fast_thrift::channel_pipeline::TypeErasedBox&&
           msg) noexcept {
     auto& response = msg.get<ThriftResponseMessage>();
-    auto& frame = response.frame;
+
+    // Pass through per-request error variant unchanged — handled at the tail.
+    if (FOLLY_UNLIKELY(
+            !response.payload.is<
+                apache::thrift::fast_thrift::frame::read::ParsedFrame>())) {
+      return ctx.fireRead(std::move(msg));
+    }
+
+    auto& frame =
+        response.payload
+            .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
 
     // Pass through non-METADATA_PUSH frames
     if (frame.type() !=

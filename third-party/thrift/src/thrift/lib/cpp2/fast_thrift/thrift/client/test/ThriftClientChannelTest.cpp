@@ -189,7 +189,7 @@ class ThriftClientChannelTest : public ::testing::Test {
         folly::IOBuf::copyBuffer(data));
 
     ThriftResponseMessage response;
-    response.frame =
+    response.payload =
         apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
     response.requestContext =
         apache::thrift::fast_thrift::rocket::borrow(requestContext);
@@ -326,7 +326,7 @@ TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
       nullptr,
       folly::IOBuf::copyBuffer("test error"));
   ThriftResponseMessage errorResponse;
-  errorResponse.frame = apache::thrift::fast_thrift::frame::read::parseFrame(
+  errorResponse.payload = apache::thrift::fast_thrift::frame::read::parseFrame(
       std::move(errorFrame));
   errorResponse.requestContext =
       apache::thrift::fast_thrift::rocket::borrow(capturedHandle);
@@ -468,7 +468,7 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineCallsHandler) {
 // Pipeline Write - Error Handling
 // =============================================================================
 
-TEST_F(ThriftClientChannelTest, SendRequestWithPipelineErrorInvokesCallback) {
+TEST_F(ThriftClientChannelTest, SendRequestWithPipelineErrorClosesChannel) {
   auto channel = createChannel();
 
   auto pipeline = buildPipelineWithHandler(
@@ -487,10 +487,22 @@ TEST_F(ThriftClientChannelTest, SendRequestWithPipelineErrorInvokesCallback) {
       std::move(cb),
       nullptr);
 
-  // RequestClientCallback::Ptr auto-fires onResponseError when dropped
-  // without firing — the message dies along the failed write path and
-  // the callback resolves with whatever the auto-detach reports.
+  // The just-queued callback fires (via RequestClientCallback's auto-detach
+  // when the message dies on the failed write path), and the channel closes
+  // so subsequent sends are rejected with NOT_OPEN.
   EXPECT_TRUE(state->errorReceived);
+
+  auto [cb2, state2] = makeCallback();
+  channel->sendRequestResponse(
+      apache::thrift::RpcOptions(),
+      createMethodMetadata("testMethod"),
+      createSerializedRequest("retry"),
+      createHeader(),
+      std::move(cb2),
+      nullptr);
+  EXPECT_TRUE(state2->errorReceived);
+  EXPECT_TRUE(state2->error.is_compatible_with<
+              apache::thrift::transport::TTransportException>());
 }
 
 TEST_F(ThriftClientChannelTest, SendRequestWithPipelineBackpressureProceeds) {

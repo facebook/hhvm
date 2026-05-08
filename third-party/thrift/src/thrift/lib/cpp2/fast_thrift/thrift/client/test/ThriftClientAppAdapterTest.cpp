@@ -72,7 +72,7 @@ ThriftResponseMessage makeResponse(
       std::move(data));
 
   ThriftResponseMessage response;
-  response.frame =
+  response.payload =
       apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
   response.requestContext =
       apache::thrift::fast_thrift::rocket::borrow(requestContext);

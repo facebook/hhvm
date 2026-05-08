@@ -94,6 +94,14 @@ struct WtStreamManagerIngressCallback : WtStreamManager::IngressCallback {
   std::vector<uint64_t> peerStreams;
 };
 
+// helper to notify handler of peer streams when destructed
+struct NotifyPeerStreamsGuard {
+  WtStreamManagerIngressCallback& cb;
+  WtStreamManager& sm;
+  WebTransportHandler& wtHandler;
+  ~NotifyPeerStreamsGuard() noexcept;
+};
+
 /**
  * This is a helper utility (applicable to both http/2 and http/3) to capsules
  * received on the CONNECT stream to the WtStreamManager. This is pretty much a

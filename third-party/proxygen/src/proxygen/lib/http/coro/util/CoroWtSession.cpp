@@ -13,6 +13,7 @@
 namespace {
 
 using namespace proxygen::coro;
+using namespace proxygen::detail;
 using folly::coro::co_error;
 using folly::coro::co_nothrow;
 constexpr uint64_t kMaxWriteSize = 65'535;
@@ -76,15 +77,8 @@ folly::coro::Task<void> CoroWtSession::readLoop(Ptr self) {
     const bool eom = (*readRes == 0);
     codec.onIngress(ingressBuf.move(), eom);
 
-    // handle any new peer streams
-    auto peerIds = std::move(wtSmIngressCb.peerStreams);
-    for (auto id : peerIds) {
-      auto handle = sm.getOrCreateBidiHandle(id);
-      if (handle.writeHandle) { // write handle iff bidi stream
-        wtHandler_->onNewBidiStream(handle);
-      } else if (handle.readHandle) {
-        wtHandler_->onNewUniStream(handle.readHandle);
-      }
+    { // handle any new peer streams
+      NotifyPeerStreamsGuard notify{wtSmIngressCb, sm, *wtHandler_};
     }
 
     auto ingressDatagrams = moveIngressDatagrams();

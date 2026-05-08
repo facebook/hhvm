@@ -208,16 +208,8 @@ void WebTransportReadLoop::runLoopCallback() noexcept {
   CHECK(data || eom || txnHandler.ex_);
   VLOG(6) << __func__ << "; buf=" << data.get() << "; eom=" << eom;
   wtCodec_.onIngress(std::move(data), eom);
-  // handle any new peer streams
-  auto peerIds = std::move(peerStreams);
-  for (auto id : peerIds) {
-    VLOG(6) << "new peer wt stream id=" << id;
-    auto handle = sm_.getOrCreateBidiHandle(id);
-    if (handle.writeHandle) { // write handle iff bidi stream
-      wtHandler_->onNewBidiStream(handle);
-    } else if (handle.readHandle) {
-      wtHandler_->onNewUniStream(handle.readHandle);
-    }
+  { // handle any new peer streams
+    NotifyPeerStreamsGuard notify{*this, sm_, *wtHandler_};
   }
 
   if (eom || txnHandler.ex_) {

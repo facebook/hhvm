@@ -336,6 +336,19 @@ void WtCapsuleCallback::onConnectionError(CapsuleCodec::ErrorCode) noexcept {
       WtStreamManager::CloseSession{.err = 0, .msg = "onConnectionError"});
 }
 
+NotifyPeerStreamsGuard::~NotifyPeerStreamsGuard() noexcept {
+  auto peerIds = std::move(cb.peerStreams);
+  for (auto id : peerIds) {
+    VLOG(6) << "new peer wt stream id=" << id;
+    auto handle = sm.getOrCreateBidiHandle(id);
+    if (handle.writeHandle) { // write handle iff bidi stream
+      wtHandler.onNewBidiStream(handle);
+    } else if (handle.readHandle) {
+      wtHandler.onNewUniStream(handle.readHandle);
+    }
+  }
+}
+
 WtSessionBase::WtSessionBase(folly::EventBase* evb,
                              WtStreamManager& sm) noexcept
     : evb_{evb},

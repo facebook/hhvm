@@ -357,7 +357,7 @@ type Vehicle struct {
     LicensePlate *string `thrift:"licensePlate,2,optional" json:"licensePlate,omitempty" db:"licensePlate"`
     Description *string `thrift:"description,3,optional" json:"description,omitempty" db:"description"`
     Name *string `thrift:"name,4,optional" json:"name,omitempty" db:"name"`
-    HasAC *bool `thrift:"hasAC,5,optional" json:"hasAC,omitempty" db:"hasAC"`
+    HasAC *bool `thrift:"hasAC,5,optional,hasdefault" json:"hasAC,omitempty" db:"hasAC"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*Vehicle)(nil)

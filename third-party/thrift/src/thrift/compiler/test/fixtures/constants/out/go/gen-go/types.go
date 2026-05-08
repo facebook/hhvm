@@ -925,8 +925,8 @@ func (x *Range) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 type Struct1 struct {
-    A int32 `thrift:"a,1" json:"a" db:"a"`
-    B string `thrift:"b,2" json:"b" db:"b"`
+    A int32 `thrift:"a,1,hasdefault" json:"a" db:"a"`
+    B string `thrift:"b,2,hasdefault" json:"b" db:"b"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*Struct1)(nil)

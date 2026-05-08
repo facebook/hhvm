@@ -146,7 +146,7 @@ func (x *TrivialStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
 
 type TrivialStructWithDefault struct {
     IntValue_1 int32 `thrift:"int_value_1,1" json:"int_value_1" db:"int_value_1"`
-    IntValue_2 int32 `thrift:"int_value_2,2" json:"int_value_2" db:"int_value_2"`
+    IntValue_2 int32 `thrift:"int_value_2,2,hasdefault" json:"int_value_2" db:"int_value_2"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*TrivialStructWithDefault)(nil)
@@ -724,14 +724,14 @@ func (x *StructWithNoCustomDefaultValues) GetThriftStructMetadata() *metadata.Th
 }
 
 type StructWithCustomDefaultValues struct {
-    UnqualifiedInteger int32 `thrift:"unqualified_integer,1" json:"unqualified_integer" db:"unqualified_integer"`
-    OptionalInteger *int32 `thrift:"optional_integer,2,optional" json:"optional_integer,omitempty" db:"optional_integer"`
-    RequiredInteger int32 `thrift:"required_integer,3,required" json:"required_integer" db:"required_integer"`
-    UnqualifiedStruct *TrivialStruct `thrift:"unqualified_struct,4" json:"unqualified_struct" db:"unqualified_struct"`
-    OptionalStruct *TrivialStruct `thrift:"optional_struct,5,optional" json:"optional_struct,omitempty" db:"optional_struct"`
-    RequiredStruct *TrivialStruct `thrift:"required_struct,6,required" json:"required_struct" db:"required_struct"`
-    StructWithDefaultUnspecified *TrivialStructWithDefault `thrift:"struct_with_default_unspecified,7" json:"struct_with_default_unspecified" db:"struct_with_default_unspecified"`
-    StructWithDefaultSpecified *TrivialStructWithDefault `thrift:"struct_with_default_specified,8" json:"struct_with_default_specified" db:"struct_with_default_specified"`
+    UnqualifiedInteger int32 `thrift:"unqualified_integer,1,hasdefault" json:"unqualified_integer" db:"unqualified_integer"`
+    OptionalInteger *int32 `thrift:"optional_integer,2,optional,hasdefault" json:"optional_integer,omitempty" db:"optional_integer"`
+    RequiredInteger int32 `thrift:"required_integer,3,required,hasdefault" json:"required_integer" db:"required_integer"`
+    UnqualifiedStruct *TrivialStruct `thrift:"unqualified_struct,4,hasdefault" json:"unqualified_struct" db:"unqualified_struct"`
+    OptionalStruct *TrivialStruct `thrift:"optional_struct,5,optional,hasdefault" json:"optional_struct,omitempty" db:"optional_struct"`
+    RequiredStruct *TrivialStruct `thrift:"required_struct,6,required,hasdefault" json:"required_struct" db:"required_struct"`
+    StructWithDefaultUnspecified *TrivialStructWithDefault `thrift:"struct_with_default_unspecified,7,hasdefault" json:"struct_with_default_unspecified" db:"struct_with_default_unspecified"`
+    StructWithDefaultSpecified *TrivialStructWithDefault `thrift:"struct_with_default_specified,8,hasdefault" json:"struct_with_default_specified" db:"struct_with_default_specified"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*StructWithCustomDefaultValues)(nil)
@@ -1264,12 +1264,12 @@ func (x *StructWithCustomDefaultValues) GetThriftStructMetadata() *metadata.Thri
 }
 
 type StructWithCollectionDefaultValues struct {
-    ListWithListValue []int32 `thrift:"list_with_list_value,1" json:"list_with_list_value" db:"list_with_list_value"`
-    SetWithListValue []int32 `thrift:"set_with_list_value,2" json:"set_with_list_value" db:"set_with_list_value"`
-    MapWithMapValue map[int32]int32 `thrift:"map_with_map_value,3" json:"map_with_map_value" db:"map_with_map_value"`
-    ListWithMapValue []int32 `thrift:"list_with_map_value,4" json:"list_with_map_value" db:"list_with_map_value"`
-    SetWithMapValue []int32 `thrift:"set_with_map_value,5" json:"set_with_map_value" db:"set_with_map_value"`
-    MapWithListValue map[int32]int32 `thrift:"map_with_list_value,6" json:"map_with_list_value" db:"map_with_list_value"`
+    ListWithListValue []int32 `thrift:"list_with_list_value,1,hasdefault" json:"list_with_list_value" db:"list_with_list_value"`
+    SetWithListValue []int32 `thrift:"set_with_list_value,2,hasdefault" json:"set_with_list_value" db:"set_with_list_value"`
+    MapWithMapValue map[int32]int32 `thrift:"map_with_map_value,3,hasdefault" json:"map_with_map_value" db:"map_with_map_value"`
+    ListWithMapValue []int32 `thrift:"list_with_map_value,4,hasdefault" json:"list_with_map_value" db:"list_with_map_value"`
+    SetWithMapValue []int32 `thrift:"set_with_map_value,5,hasdefault" json:"set_with_map_value" db:"set_with_map_value"`
+    MapWithListValue map[int32]int32 `thrift:"map_with_list_value,6,hasdefault" json:"map_with_list_value" db:"map_with_list_value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*StructWithCollectionDefaultValues)(nil)

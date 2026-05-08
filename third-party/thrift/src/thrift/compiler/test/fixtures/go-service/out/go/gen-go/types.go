@@ -6224,8 +6224,8 @@ func (x *respGetEntityGetErr1Collision) setDefaults() *respGetEntityGetErr1Colli
 }
 
 type reqGetEntityMyMethodWithConflictingParamAccessors struct {
-    SetFoo bool `thrift:"set_foo,1" json:"set_foo" db:"set_foo"`
-    Foo string `thrift:"foo,2" json:"foo" db:"foo"`
+    SetFoo bool `thrift:"set_foo,1,hasdefault" json:"set_foo" db:"set_foo"`
+    Foo string `thrift:"foo,2,hasdefault" json:"foo" db:"foo"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*reqGetEntityMyMethodWithConflictingParamAccessors)(nil)

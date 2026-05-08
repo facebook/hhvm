@@ -35,7 +35,7 @@
 {{#pragma ignore-newlines}}
 {{field.go_name}} {{#partial field_type field=field}} {{!}}
 `thrift:"{{field.name}},{{field.id}}
-{{#if field.required?}},required{{#else if field.optional?}},optional{{/if}}" {{!}}
+{{#if field.required?}},required{{#else if field.optional?}},optional{{/if}}{{#if (object.notnull? field.default_value)}},hasdefault{{/if}}" {{!}}
 {{#if field.go_tag?}}
 {{field.go_tag}}
 {{#else}}

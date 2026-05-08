@@ -1309,7 +1309,7 @@ func ThriftAdaptedEnumFromString(s string) (ThriftAdaptedEnum, error) {
 
 type MyAnnotation struct {
     Signature string `thrift:"signature,1" json:"signature" db:"signature"`
-    Color Color `thrift:"color,2" json:"color" db:"color"`
+    Color Color `thrift:"color,2,hasdefault" json:"color" db:"color"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*MyAnnotation)(nil)
@@ -1486,7 +1486,7 @@ func (x *MyAnnotation) GetThriftStructMetadata() *metadata.ThriftStruct {
 type Foo struct {
     IntField I32_5137 `thrift:"intField,1" json:"intField" db:"intField"`
     OptionalIntField *I32_5137 `thrift:"optionalIntField,2,optional" json:"optionalIntField,omitempty" db:"optionalIntField"`
-    IntFieldWithDefault I32_5137 `thrift:"intFieldWithDefault,3" json:"intFieldWithDefault" db:"intFieldWithDefault"`
+    IntFieldWithDefault I32_5137 `thrift:"intFieldWithDefault,3,hasdefault" json:"intFieldWithDefault" db:"intFieldWithDefault"`
     SetField SetWithAdapter `thrift:"setField,4" json:"setField" db:"setField"`
     OptionalSetField SetWithAdapter `thrift:"optionalSetField,5,optional" json:"optionalSetField,omitempty" db:"optionalSetField"`
     MapField MapString_ListWithElemAdapterWithAdapter_8454 `thrift:"mapField,6" json:"mapField" db:"mapField"`
@@ -5449,17 +5449,17 @@ type AdaptTemplatedTestStruct struct {
     AdaptedList []int64 `thrift:"adaptedList,8" json:"adaptedList" db:"adaptedList"`
     AdaptedSet []int64 `thrift:"adaptedSet,9" json:"adaptedSet" db:"adaptedSet"`
     AdaptedMap map[int64]int64 `thrift:"adaptedMap,10" json:"adaptedMap" db:"adaptedMap"`
-    AdaptedBoolDefault AdaptedBool `thrift:"adaptedBoolDefault,11" json:"adaptedBoolDefault" db:"adaptedBoolDefault"`
-    AdaptedByteDefault AdaptedByte `thrift:"adaptedByteDefault,12" json:"adaptedByteDefault" db:"adaptedByteDefault"`
-    AdaptedShortDefault AdaptedShort `thrift:"adaptedShortDefault,13" json:"adaptedShortDefault" db:"adaptedShortDefault"`
-    AdaptedIntegerDefault AdaptedInteger `thrift:"adaptedIntegerDefault,14" json:"adaptedIntegerDefault" db:"adaptedIntegerDefault"`
-    AdaptedLongDefault AdaptedLong `thrift:"adaptedLongDefault,15" json:"adaptedLongDefault" db:"adaptedLongDefault"`
-    AdaptedDoubleDefault AdaptedDouble `thrift:"adaptedDoubleDefault,16" json:"adaptedDoubleDefault" db:"adaptedDoubleDefault"`
-    AdaptedStringDefault AdaptedString `thrift:"adaptedStringDefault,17" json:"adaptedStringDefault" db:"adaptedStringDefault"`
-    AdaptedEnum AdaptedEnum `thrift:"adaptedEnum,18" json:"adaptedEnum" db:"adaptedEnum"`
-    AdaptedListDefault []int64 `thrift:"adaptedListDefault,19" json:"adaptedListDefault" db:"adaptedListDefault"`
-    AdaptedSetDefault []int64 `thrift:"adaptedSetDefault,20" json:"adaptedSetDefault" db:"adaptedSetDefault"`
-    AdaptedMapDefault map[int64]int64 `thrift:"adaptedMapDefault,21" json:"adaptedMapDefault" db:"adaptedMapDefault"`
+    AdaptedBoolDefault AdaptedBool `thrift:"adaptedBoolDefault,11,hasdefault" json:"adaptedBoolDefault" db:"adaptedBoolDefault"`
+    AdaptedByteDefault AdaptedByte `thrift:"adaptedByteDefault,12,hasdefault" json:"adaptedByteDefault" db:"adaptedByteDefault"`
+    AdaptedShortDefault AdaptedShort `thrift:"adaptedShortDefault,13,hasdefault" json:"adaptedShortDefault" db:"adaptedShortDefault"`
+    AdaptedIntegerDefault AdaptedInteger `thrift:"adaptedIntegerDefault,14,hasdefault" json:"adaptedIntegerDefault" db:"adaptedIntegerDefault"`
+    AdaptedLongDefault AdaptedLong `thrift:"adaptedLongDefault,15,hasdefault" json:"adaptedLongDefault" db:"adaptedLongDefault"`
+    AdaptedDoubleDefault AdaptedDouble `thrift:"adaptedDoubleDefault,16,hasdefault" json:"adaptedDoubleDefault" db:"adaptedDoubleDefault"`
+    AdaptedStringDefault AdaptedString `thrift:"adaptedStringDefault,17,hasdefault" json:"adaptedStringDefault" db:"adaptedStringDefault"`
+    AdaptedEnum AdaptedEnum `thrift:"adaptedEnum,18,hasdefault" json:"adaptedEnum" db:"adaptedEnum"`
+    AdaptedListDefault []int64 `thrift:"adaptedListDefault,19,hasdefault" json:"adaptedListDefault" db:"adaptedListDefault"`
+    AdaptedSetDefault []int64 `thrift:"adaptedSetDefault,20,hasdefault" json:"adaptedSetDefault" db:"adaptedSetDefault"`
+    AdaptedMapDefault map[int64]int64 `thrift:"adaptedMapDefault,21,hasdefault" json:"adaptedMapDefault" db:"adaptedMapDefault"`
     DoubleTypedefBool DoubleTypedefBool `thrift:"doubleTypedefBool,22" json:"doubleTypedefBool" db:"doubleTypedefBool"`
 }
 // Compile time interface enforcer

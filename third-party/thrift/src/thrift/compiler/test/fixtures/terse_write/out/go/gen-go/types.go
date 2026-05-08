@@ -1189,7 +1189,7 @@ func (x *MyUnion) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 type MyStructWithCustomDefault struct {
-    Field1 int64 `thrift:"field1,1" json:"field1" db:"field1"`
+    Field1 int64 `thrift:"field1,1,hasdefault" json:"field1" db:"field1"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*MyStructWithCustomDefault)(nil)

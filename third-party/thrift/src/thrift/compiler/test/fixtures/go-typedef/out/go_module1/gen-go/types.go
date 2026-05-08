@@ -284,7 +284,7 @@ func ReadCar(p thrift.Decoder) (*Car, error) {
 type Automobile struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
     PreviousPlate *Plate `thrift:"previous_plate,2,optional" json:"previous_plate,omitempty" db:"previous_plate"`
-    FirstPlate *Plate `thrift:"first_plate,3,optional" json:"first_plate,omitempty" db:"first_plate"`
+    FirstPlate *Plate `thrift:"first_plate,3,optional,hasdefault" json:"first_plate,omitempty" db:"first_plate"`
     Year Year `thrift:"year,4" json:"year" db:"year"`
     Drivers Drivers `thrift:"drivers,5" json:"drivers" db:"drivers"`
     Accessories []*Accessory `thrift:"Accessories,6" json:"Accessories" db:"Accessories"`

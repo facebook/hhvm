@@ -1774,8 +1774,8 @@ func (x *VirtualStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 type MyStructWithForwardRefEnum struct {
-    A MyForwardRefEnum `thrift:"a,1" json:"a" db:"a"`
-    B MyForwardRefEnum `thrift:"b,2" json:"b" db:"b"`
+    A MyForwardRefEnum `thrift:"a,1,hasdefault" json:"a" db:"a"`
+    B MyForwardRefEnum `thrift:"b,2,hasdefault" json:"b" db:"b"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*MyStructWithForwardRefEnum)(nil)
@@ -2126,8 +2126,8 @@ func (x *TrivialNumeric) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 type TrivialNestedWithDefault struct {
-    Z int32 `thrift:"z,1" json:"z" db:"z"`
-    N *TrivialNumeric `thrift:"n,2" json:"n" db:"n"`
+    Z int32 `thrift:"z,1,hasdefault" json:"z" db:"z"`
+    N *TrivialNumeric `thrift:"n,2,hasdefault" json:"n" db:"n"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*TrivialNestedWithDefault)(nil)
@@ -2539,8 +2539,8 @@ func (x *ComplexString) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 type ComplexNestedWithDefault struct {
-    Z string `thrift:"z,1" json:"z" db:"z"`
-    N *ComplexString `thrift:"n,2" json:"n" db:"n"`
+    Z string `thrift:"z,1,hasdefault" json:"z" db:"z"`
+    N *ComplexString `thrift:"n,2,hasdefault" json:"n" db:"n"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*ComplexNestedWithDefault)(nil)

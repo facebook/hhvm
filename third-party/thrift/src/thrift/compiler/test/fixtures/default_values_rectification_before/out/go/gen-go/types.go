@@ -97,14 +97,14 @@ func (x *EmptyStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 type TestStruct struct {
-    UnqualifiedIntField int32 `thrift:"unqualified_int_field,1" json:"unqualified_int_field" db:"unqualified_int_field"`
-    UnqualifiedBoolField bool `thrift:"unqualified_bool_field,2" json:"unqualified_bool_field" db:"unqualified_bool_field"`
-    UnqualifiedListField []int32 `thrift:"unqualified_list_field,3" json:"unqualified_list_field" db:"unqualified_list_field"`
-    UnqualifiedStructField *EmptyStruct `thrift:"unqualified_struct_field,4" json:"unqualified_struct_field" db:"unqualified_struct_field"`
-    OptionalIntField *int32 `thrift:"optional_int_field,5,optional" json:"optional_int_field,omitempty" db:"optional_int_field"`
-    OptionalBoolField *bool `thrift:"optional_bool_field,6,optional" json:"optional_bool_field,omitempty" db:"optional_bool_field"`
-    OptionalListField []int32 `thrift:"optional_list_field,7,optional" json:"optional_list_field,omitempty" db:"optional_list_field"`
-    OptionalStructField *EmptyStruct `thrift:"optional_struct_field,8,optional" json:"optional_struct_field,omitempty" db:"optional_struct_field"`
+    UnqualifiedIntField int32 `thrift:"unqualified_int_field,1,hasdefault" json:"unqualified_int_field" db:"unqualified_int_field"`
+    UnqualifiedBoolField bool `thrift:"unqualified_bool_field,2,hasdefault" json:"unqualified_bool_field" db:"unqualified_bool_field"`
+    UnqualifiedListField []int32 `thrift:"unqualified_list_field,3,hasdefault" json:"unqualified_list_field" db:"unqualified_list_field"`
+    UnqualifiedStructField *EmptyStruct `thrift:"unqualified_struct_field,4,hasdefault" json:"unqualified_struct_field" db:"unqualified_struct_field"`
+    OptionalIntField *int32 `thrift:"optional_int_field,5,optional,hasdefault" json:"optional_int_field,omitempty" db:"optional_int_field"`
+    OptionalBoolField *bool `thrift:"optional_bool_field,6,optional,hasdefault" json:"optional_bool_field,omitempty" db:"optional_bool_field"`
+    OptionalListField []int32 `thrift:"optional_list_field,7,optional,hasdefault" json:"optional_list_field,omitempty" db:"optional_list_field"`
+    OptionalStructField *EmptyStruct `thrift:"optional_struct_field,8,optional,hasdefault" json:"optional_struct_field,omitempty" db:"optional_struct_field"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*TestStruct)(nil)

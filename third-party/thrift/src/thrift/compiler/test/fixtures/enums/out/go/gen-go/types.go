@@ -356,10 +356,10 @@ func MyBitmaskEnum2FromString(s string) (MyBitmaskEnum2, error) {
 }
 
 type SomeStruct struct {
-    Reasonable Metasyntactic `thrift:"reasonable,1" json:"reasonable" db:"reasonable"`
-    Fine Metasyntactic `thrift:"fine,2" json:"fine" db:"fine"`
-    Questionable Metasyntactic `thrift:"questionable,3" json:"questionable" db:"questionable"`
-    Tags []int32 `thrift:"tags,4" json:"tags" db:"tags"`
+    Reasonable Metasyntactic `thrift:"reasonable,1,hasdefault" json:"reasonable" db:"reasonable"`
+    Fine Metasyntactic `thrift:"fine,2,hasdefault" json:"fine" db:"fine"`
+    Questionable Metasyntactic `thrift:"questionable,3,hasdefault" json:"questionable" db:"questionable"`
+    Tags []int32 `thrift:"tags,4,hasdefault" json:"tags" db:"tags"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*SomeStruct)(nil)
@@ -673,10 +673,10 @@ func (x *SomeStruct) GetThriftStructMetadata() *metadata.ThriftStruct {
 }
 
 type MyStruct struct {
-    Me2_3 MyEnum2 `thrift:"me2_3,1" json:"me2_3" db:"me2_3"`
-    Me3N3 MyEnum3 `thrift:"me3_n3,2" json:"me3_n3" db:"me3_n3"`
-    Me1T1 MyEnum1 `thrift:"me1_t1,4" json:"me1_t1" db:"me1_t1"`
-    Me1T2 MyEnum1 `thrift:"me1_t2,6" json:"me1_t2" db:"me1_t2"`
+    Me2_3 MyEnum2 `thrift:"me2_3,1,hasdefault" json:"me2_3" db:"me2_3"`
+    Me3N3 MyEnum3 `thrift:"me3_n3,2,hasdefault" json:"me3_n3" db:"me3_n3"`
+    Me1T1 MyEnum1 `thrift:"me1_t1,4,hasdefault" json:"me1_t1" db:"me1_t1"`
+    Me1T2 MyEnum1 `thrift:"me1_t2,6,hasdefault" json:"me1_t2" db:"me1_t2"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*MyStruct)(nil)

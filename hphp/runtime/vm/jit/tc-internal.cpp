@@ -160,6 +160,8 @@ bool canTranslate() {
 static RDS_LOCAL_NO_CHECK(bool, s_jittingTimeLimitExceeded);
 
 uint8_t adjustedLiveThreshold() {
+  if (Cfg::Jit::LiveThreshold == 0) return 0;
+
   static std::atomic<uint8_t> s_cached{Cfg::Jit::LiveThreshold};
   static std::atomic<int64_t> s_lastUpdate{0};
 

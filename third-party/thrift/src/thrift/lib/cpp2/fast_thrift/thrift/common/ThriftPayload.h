@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/RequestMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 #include <folly/io/IOBuf.h>
@@ -42,9 +43,13 @@ namespace apache::thrift::fast_thrift::thrift {
  *      cancel, request-more), not per RpcKind. Same shape regardless of
  *      direction — both client and server can emit any of these.
  *
- * Each struct provides `toRocketFrame() && noexcept` returning the matching
+ * Each struct provides `toRocketFrame() &&` returning the matching
  * `frame::Composed*Frame`. The `RocketFrame` typedef on each struct names
  * the return type for variant-level dispatch (see ThriftPayloadVariant).
+ *
+ * All overloads are `noexcept` except `ThriftRequestResponsePayload`, which
+ * serializes its metadata struct inline and may throw on serializer/allocator
+ * failure; the transport adapter catches and delivers the error inbound.
  *
  * Construction sites pick the alternative; the variant + `toRocketFrame()`
  * makes the Thrift→Rocket translation a single fold-expression dispatch
@@ -62,12 +67,16 @@ struct ThriftRequestResponsePayload {
       apache::thrift::fast_thrift::frame::ComposedRequestResponseFrame;
 
   std::unique_ptr<folly::IOBuf> data{nullptr};
-  std::unique_ptr<folly::IOBuf> metadata{nullptr};
+  std::unique_ptr<apache::thrift::RequestRpcMetadata> metadata{nullptr};
 
-  RocketFrame toRocketFrame() && noexcept {
+  // Serializes metadata as part of frame composition. Throws on
+  // serializer/allocator failure; the transport adapter catches and
+  // delivers the error inbound as a per-request `ThriftResponseError`.
+  RocketFrame toRocketFrame() && {
+    DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
         .data = std::move(data),
-        .metadata = std::move(metadata),
+        .metadata = serializeRequestMetadata(*metadata),
         .header =
             {.streamId = apache::thrift::fast_thrift::rocket::kInvalidStreamId},
     };

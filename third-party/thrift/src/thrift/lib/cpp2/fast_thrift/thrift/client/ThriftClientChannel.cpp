@@ -78,21 +78,13 @@ void ThriftClientChannel::sendRequestInternal(
     return;
   }
 
-  // Build and serialize RequestRpcMetadata
-  std::unique_ptr<folly::IOBuf> metadata;
-  try {
-    metadata = makeSerializedRequestMetadata(
-        options,
-        methodMetadata.name_managed(),
-        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-        static_cast<apache::thrift::ProtocolId>(protocolId_));
-  } catch (...) {
-    callbackPtr.release()->onResponseError(
-        folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-            apache::thrift::TApplicationException::INTERNAL_ERROR,
-            "Metadata serialization failed"));
-    return;
-  }
+  // Build RequestRpcMetadata; serialization happens in
+  // ThriftRequestResponsePayload::toRocketFrame() at the transport adapter.
+  auto metadata = makeRequestMetadata(
+      options,
+      methodMetadata.name_managed(),
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      static_cast<apache::thrift::ProtocolId>(protocolId_));
 
   // RequestClientCallback::Ptr has an auto-detach deleter that fires
   // onResponseError if dropped without firing — so default delete here

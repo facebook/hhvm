@@ -50,6 +50,12 @@ inline constexpr size_t maxAlignof = std::max({alignof(Ts)...});
  *   - `T::RocketFrame` typedef naming the matching `frame::Composed*Frame`.
  *   - `std::move(t).toRocketFrame()` produces the rocket frame.
  *
+ * `toRocketFrame()` may be either noexcept or throwing — the
+ * request-response client payload performs metadata serialization
+ * inside `toRocketFrame()` and can throw on serializer/allocator
+ * failure. The transport adapter catches and surfaces such failures
+ * inbound as per-request errors.
+ *
  * The rocket frame returned by `toRocketFrame()` must satisfy the
  * `frame::ComposedFrameConcept` (i.e., it can be held in a
  * `ComposedFrameVariant`). Together this lets the variant expose a single
@@ -60,9 +66,7 @@ inline constexpr size_t maxAlignof = std::max({alignof(Ts)...});
 template <typename T>
 concept ThriftPayloadConcept =
     requires(T&& t) {
-      {
-        std::move(t).toRocketFrame()
-      } noexcept -> std::same_as<typename T::RocketFrame>;
+      { std::move(t).toRocketFrame() } -> std::same_as<typename T::RocketFrame>;
     } &&
     apache::thrift::fast_thrift::frame::ComposedFrameConcept<
         typename T::RocketFrame>;

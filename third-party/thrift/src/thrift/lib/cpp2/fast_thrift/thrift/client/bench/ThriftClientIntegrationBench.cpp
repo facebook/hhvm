@@ -388,9 +388,7 @@ class BenchAppAdapterClient {
 
   ThriftClientAppAdapter& adapter() { return *adapter_; }
 
-  void sendBenchRequest(
-      std::unique_ptr<folly::IOBuf> /*metadata*/,
-      std::unique_ptr<folly::IOBuf> data) {
+  void sendBenchRequest(std::unique_ptr<folly::IOBuf> data) {
     apache::thrift::RpcOptions options;
     adapter_->sendRequestResponse(
         options,
@@ -600,16 +598,9 @@ BENCHMARK_RELATIVE(FastThriftWithAppAdapter_Request_MinimalMetadata, iters) {
   fixture.setup();
 
   auto payloadTemplate = makePayloadData(kPayloadSize);
-  auto metadataTemplate = makeSerializedRequestMetadata(
-      apache::thrift::RpcOptions(),
-      apache::thrift::ManagedStringView("benchMethod"),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      apache::thrift::ProtocolId::BINARY);
-
   suspender.dismiss();
   for (size_t i = 0; i < iters; ++i) {
-    fixture.client.sendBenchRequest(
-        metadataTemplate->clone(), payloadTemplate->clone());
+    fixture.client.sendBenchRequest(payloadTemplate->clone());
     fixture.evb.loopOnce();
   }
 }
@@ -704,17 +695,9 @@ BENCHMARK_RELATIVE(FastThriftWithAppAdapter_Request_WithHeaders, iters) {
   fixture.setup();
 
   auto payloadTemplate = makePayloadData(kPayloadSize);
-  auto metadataTempl = createRequestMetadataWithHeaders();
-  auto metadataTemplate = makeSerializedRequestMetadata(
-      apache::thrift::RpcOptions(),
-      apache::thrift::ManagedStringView(*metadataTempl.name()),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      apache::thrift::ProtocolId::BINARY);
-
   suspender.dismiss();
   for (size_t i = 0; i < iters; ++i) {
-    fixture.client.sendBenchRequest(
-        metadataTemplate->clone(), payloadTemplate->clone());
+    fixture.client.sendBenchRequest(payloadTemplate->clone());
     fixture.evb.loopOnce();
   }
 }
@@ -862,18 +845,11 @@ BENCHMARK_RELATIVE(FastThriftWithAppAdapter_Response_Success, iters) {
   fixture.setup();
 
   auto requestPayloadTemplate = makePayloadData(kPayloadSize);
-  auto requestMetadataTemplate = makeSerializedRequestMetadata(
-      apache::thrift::RpcOptions(),
-      apache::thrift::ManagedStringView("benchMethod"),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      apache::thrift::ProtocolId::BINARY);
-
   std::vector<uint32_t> streamIds;
   streamIds.reserve(iters);
 
   for (size_t i = 0; i < iters; ++i) {
-    fixture.client.sendBenchRequest(
-        requestMetadataTemplate->clone(), requestPayloadTemplate->clone());
+    fixture.client.sendBenchRequest(requestPayloadTemplate->clone());
     fixture.evb.loopOnce();
     auto written = fixture.testTransport->getWrittenData();
     auto parsed = parseWrittenFrame(std::move(written));
@@ -1041,18 +1017,11 @@ BENCHMARK_RELATIVE(
   fixture.setup();
 
   auto requestPayloadTemplate = makePayloadData(kPayloadSize);
-  auto requestMetadataTemplate = makeSerializedRequestMetadata(
-      apache::thrift::RpcOptions(),
-      apache::thrift::ManagedStringView("benchMethod"),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      apache::thrift::ProtocolId::BINARY);
-
   std::vector<uint32_t> streamIds;
   streamIds.reserve(iters);
 
   for (size_t i = 0; i < iters; ++i) {
-    fixture.client.sendBenchRequest(
-        requestMetadataTemplate->clone(), requestPayloadTemplate->clone());
+    fixture.client.sendBenchRequest(requestPayloadTemplate->clone());
     fixture.evb.loopOnce();
     auto written = fixture.testTransport->getWrittenData();
     auto parsed = parseWrittenFrame(std::move(written));
@@ -1219,18 +1188,11 @@ BENCHMARK_RELATIVE(FastThriftWithAppAdapter_Response_DeclaredException, iters) {
   fixture.setup();
 
   auto requestPayloadTemplate = makePayloadData(kPayloadSize);
-  auto requestMetadataTemplate = makeSerializedRequestMetadata(
-      apache::thrift::RpcOptions(),
-      apache::thrift::ManagedStringView("benchMethod"),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      apache::thrift::ProtocolId::BINARY);
-
   std::vector<uint32_t> streamIds;
   streamIds.reserve(iters);
 
   for (size_t i = 0; i < iters; ++i) {
-    fixture.client.sendBenchRequest(
-        requestMetadataTemplate->clone(), requestPayloadTemplate->clone());
+    fixture.client.sendBenchRequest(requestPayloadTemplate->clone());
     fixture.evb.loopOnce();
     auto written = fixture.testTransport->getWrittenData();
     auto parsed = parseWrittenFrame(std::move(written));
@@ -1393,18 +1355,11 @@ BENCHMARK_RELATIVE(FastThriftWithAppAdapter_Response_ErrorFrame, iters) {
   fixture.setup();
 
   auto requestPayloadTemplate = makePayloadData(kPayloadSize);
-  auto requestMetadataTemplate = makeSerializedRequestMetadata(
-      apache::thrift::RpcOptions(),
-      apache::thrift::ManagedStringView("benchMethod"),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      apache::thrift::ProtocolId::BINARY);
-
   std::vector<uint32_t> streamIds;
   streamIds.reserve(iters);
 
   for (size_t i = 0; i < iters; ++i) {
-    fixture.client.sendBenchRequest(
-        requestMetadataTemplate->clone(), requestPayloadTemplate->clone());
+    fixture.client.sendBenchRequest(requestPayloadTemplate->clone());
     fixture.evb.loopOnce();
     auto written = fixture.testTransport->getWrittenData();
     auto parsed = parseWrittenFrame(std::move(written));
@@ -1612,18 +1567,11 @@ BENCHMARK_RELATIVE(FastThriftWithAppAdapter_Response_Fragmented, iters) {
   fixture.setup();
 
   auto requestPayloadTemplate = makePayloadData(kPayloadSize);
-  auto requestMetadataTemplate = makeSerializedRequestMetadata(
-      apache::thrift::RpcOptions(),
-      apache::thrift::ManagedStringView("benchMethod"),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      apache::thrift::ProtocolId::BINARY);
-
   std::vector<uint32_t> streamIds;
   streamIds.reserve(iters);
 
   for (size_t i = 0; i < iters; ++i) {
-    fixture.client.sendBenchRequest(
-        requestMetadataTemplate->clone(), requestPayloadTemplate->clone());
+    fixture.client.sendBenchRequest(requestPayloadTemplate->clone());
     fixture.evb.loopOnce();
     auto written = fixture.testTransport->getWrittenData();
     auto parsed = parseWrittenFrame(std::move(written));
@@ -1828,18 +1776,11 @@ BENCHMARK_RELATIVE(FastThriftWithAppAdapter_Response_HighConcurrency, iters) {
       std::max(static_cast<size_t>(iters), kConcurrentRequests);
 
   auto requestPayloadTemplate = makePayloadData(kPayloadSize);
-  auto requestMetadataTemplate = makeSerializedRequestMetadata(
-      apache::thrift::RpcOptions(),
-      apache::thrift::ManagedStringView("benchMethod"),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      apache::thrift::ProtocolId::BINARY);
-
   std::vector<uint32_t> streamIds;
   streamIds.reserve(actualIters);
 
   for (size_t i = 0; i < actualIters; ++i) {
-    fixture.client.sendBenchRequest(
-        requestMetadataTemplate->clone(), requestPayloadTemplate->clone());
+    fixture.client.sendBenchRequest(requestPayloadTemplate->clone());
     fixture.evb.loopOnce();
     auto written = fixture.testTransport->getWrittenData();
     auto parsed = parseWrittenFrame(std::move(written));
@@ -1982,12 +1923,6 @@ BENCHMARK_RELATIVE(FastThriftWithAppAdapter_Request_ChainedPayload, iters) {
   AppAdapterBenchFixture fixture;
   fixture.setup();
 
-  auto metadataTemplate = makeSerializedRequestMetadata(
-      apache::thrift::RpcOptions(),
-      apache::thrift::ManagedStringView("benchMethod"),
-      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      apache::thrift::ProtocolId::BINARY);
-
   constexpr size_t kChunkSize = 64;
   constexpr size_t kNumChunks = kPayloadSize / kChunkSize;
 
@@ -2007,8 +1942,7 @@ BENCHMARK_RELATIVE(FastThriftWithAppAdapter_Request_ChainedPayload, iters) {
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    fixture.client.sendBenchRequest(
-        metadataTemplate->clone(), createChainedPayload());
+    fixture.client.sendBenchRequest(createChainedPayload());
     fixture.evb.loopOnce();
   }
 }

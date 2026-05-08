@@ -46,19 +46,11 @@ void ThriftClientAppAdapter::sendRequestResponse(
     return;
   }
 
-  std::unique_ptr<folly::IOBuf> metadata;
-  try {
-    metadata = makeSerializedRequestMetadata(
-        rpcOptions,
-        apache::thrift::ManagedStringView::from_static(methodName),
-        rpcKind,
-        static_cast<apache::thrift::ProtocolId>(protocolId_));
-  } catch (...) {
-    handler(
-        folly::makeUnexpected(
-            folly::exception_wrapper(std::current_exception())));
-    return;
-  }
+  auto metadata = makeRequestMetadata(
+      rpcOptions,
+      apache::thrift::ManagedStringView::from_static(methodName),
+      rpcKind,
+      static_cast<apache::thrift::ProtocolId>(protocolId_));
 
   ThriftRequestMessage msg{
       .payload =

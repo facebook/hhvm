@@ -854,7 +854,9 @@ TEST_F(FastThriftFastClientE2ETest, Echo) {
       std::make_unique<apache::thrift::FunctionReplyCallback>(
           [&cbPromise](apache::thrift::ClientReceiveState&& state) {
             try {
-              cbPromise.setValue(FastClientType::recv_echo(state));
+              std::string result;
+              FastClientType::recv_echo(result, state);
+              cbPromise.setValue(std::move(result));
             } catch (...) {
               cbPromise.setException(
                   folly::exception_wrapper(std::current_exception()));
@@ -919,7 +921,9 @@ TEST_F(FastThriftFastClientE2ETest, SendResponse) {
       std::make_unique<apache::thrift::FunctionReplyCallback>(
           [&cbPromise](apache::thrift::ClientReceiveState&& state) {
             try {
-              cbPromise.setValue(FastClientType::recv_sendResponse(state));
+              std::string result;
+              FastClientType::recv_sendResponse(result, state);
+              cbPromise.setValue(std::move(result));
             } catch (...) {
               cbPromise.setException(
                   folly::exception_wrapper(std::current_exception()));

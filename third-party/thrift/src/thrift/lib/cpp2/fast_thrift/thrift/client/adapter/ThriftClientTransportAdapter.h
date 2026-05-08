@@ -161,9 +161,27 @@ class ThriftClientTransportAdapter {
   channel_pipeline::Result onWrite(
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto request = msg.take<ThriftRequestMessage>();
+    // toRocketFrame() serializes the request metadata and can throw on
+    // serializer/allocator failure. Catch and deliver inbound as a
+    // per-request ThriftResponseError so the AppAdapter fails just this
+    // request without tearing the channel down.
+    frame::ComposedRequestResponseFrame frame;
+    try {
+      frame = std::move(request.payload.get<ThriftRequestResponsePayload>())
+                  .toRocketFrame();
+    } catch (...) {
+      ThriftResponseMessage errMsg{
+          .payload =
+              ThriftResponseError{
+                  .ew = folly::exception_wrapper(std::current_exception())},
+          .requestContext = std::move(request.requestContext),
+          .streamType = frame::FrameType::REQUEST_RESPONSE,
+      };
+      return pipeline_->fireRead(
+          channel_pipeline::erase_and_box(std::move(errMsg)));
+    }
     rocket::RocketRequestMessage rocketMsg{
-        .frame = std::move(request.payload.get<ThriftRequestResponsePayload>())
-                     .toRocketFrame(),
+        .frame = std::move(frame),
         .requestContext = std::move(request.requestContext),
         .streamType = frame::FrameType::REQUEST_RESPONSE,
     };

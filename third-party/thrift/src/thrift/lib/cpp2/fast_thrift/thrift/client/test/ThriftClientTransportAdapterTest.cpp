@@ -40,6 +40,8 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/common/RocketClientConnection.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
+#include <thrift/lib/cpp2/util/ManagedStringView.h>
+#include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift::client::test {
 
@@ -67,11 +69,16 @@ static_assert(
 namespace {
 
 TypeErasedBox makeThriftRequestBox() {
+  auto metadata = std::make_unique<apache::thrift::RequestRpcMetadata>();
+  metadata->protocol() = apache::thrift::ProtocolId::BINARY;
+  metadata->kind() = apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
+  metadata->name() = apache::thrift::ManagedStringViewWithConversions(
+      apache::thrift::ManagedStringView::from_static(std::string_view{"test"}));
   ThriftRequestMessage msg{
       .payload =
           ThriftRequestResponsePayload{
               .data = folly::IOBuf::copyBuffer("data"),
-              .metadata = folly::IOBuf::copyBuffer("meta"),
+              .metadata = std::move(metadata),
           },
       .requestContext = rocket::borrow(reinterpret_cast<void*>(0x42)),
   };

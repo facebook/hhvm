@@ -564,12 +564,10 @@ TEST_F(ThriftClientChannelTest, SendRequestPassesCorrectMessageContent) {
           TypeErasedBox&& msg) {
         auto& request = msg.get<ThriftRequestMessage>();
         capturedRpcKind = request.payload.rpcKind();
-        // Deserialize the pre-serialized metadata to verify contents
-        apache::thrift::RequestRpcMetadata rpcMetadata;
-        apache::thrift::BinaryProtocolReader reader;
-        reader.setInput(
-            request.payload.get<ThriftRequestResponsePayload>().metadata.get());
-        rpcMetadata.read(&reader);
+        // Metadata flows as a struct now; serialization happens in the
+        // transport adapter via toRocketFrame().
+        const auto& rpcMetadata =
+            *request.payload.get<ThriftRequestResponsePayload>().metadata;
         capturedMethodName = std::string(rpcMetadata.name()->view());
         capturedHandle = request.requestContext.release();
         return Result::Success;

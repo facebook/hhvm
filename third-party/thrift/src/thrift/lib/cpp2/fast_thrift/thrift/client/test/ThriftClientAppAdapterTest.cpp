@@ -303,7 +303,7 @@ TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
   client.adapter().setProtocolId(
       static_cast<uint16_t>(apache::thrift::ProtocolId::COMPACT));
 
-  std::unique_ptr<folly::IOBuf> capturedMetadata;
+  std::unique_ptr<apache::thrift::RequestRpcMetadata> capturedMetadata;
   std::unique_ptr<folly::IOBuf> capturedData;
   apache::thrift::RpcKind capturedRpcKind{};
   void* capturedUserContext = nullptr;
@@ -341,17 +341,12 @@ TEST_F(ThriftClientAppAdapterTest, SendRequestResponseBuildsRequestMessage) {
       capturedData->moveToFbString().toStdString(),
       std::string{"payload-data"});
 
-  apache::thrift::RequestRpcMetadata deserialized;
-  apache::thrift::BinaryProtocolReader reader;
-  reader.setInput(capturedMetadata.get());
-  deserialized.read(&reader);
-
-  EXPECT_EQ(deserialized.name()->str(), "myMethod");
+  EXPECT_EQ(capturedMetadata->name()->str(), "myMethod");
   EXPECT_EQ(
-      *deserialized.kind(),
+      *capturedMetadata->kind(),
       apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
-  EXPECT_EQ(*deserialized.protocol(), apache::thrift::ProtocolId::COMPACT);
-  EXPECT_EQ(*deserialized.clientTimeoutMs(), 250);
+  EXPECT_EQ(*capturedMetadata->protocol(), apache::thrift::ProtocolId::COMPACT);
+  EXPECT_EQ(*capturedMetadata->clientTimeoutMs(), 250);
 
   // Deliver a synthetic response so the per-request context is freed.
   evb_->runInEventBaseThreadAndWait([&] {

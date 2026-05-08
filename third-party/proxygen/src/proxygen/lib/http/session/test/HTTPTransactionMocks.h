@@ -339,6 +339,11 @@ class MockHTTPTransaction : public HTTPTransaction {
     // methods below imply internal state is not correctly tracked/managed
     // in the context of tests
     ON_CALL(*this, canSendHeaders()).WillByDefault(testing::Return(true));
+
+    EXPECT_CALL(*this, sendDatagram(testing::_))
+        .WillRepeatedly([this](auto dgram) {
+          return HTTPTransaction::sendDatagram(std::move(dgram));
+        });
   }
 
   MockHTTPTransaction(
@@ -398,6 +403,7 @@ class MockHTTPTransaction : public HTTPTransaction {
   MOCK_METHOD(void, sendTrailers, (const HTTPHeaders& trailers));
   MOCK_METHOD(void, sendEOM, ());
   MOCK_METHOD(void, sendAbort, (ErrorCode errorCode));
+  MOCK_METHOD(bool, sendDatagram, (std::unique_ptr<folly::IOBuf>));
   MOCK_METHOD(void, drop, ());
   MOCK_METHOD(void, pauseIngress, ());
   MOCK_METHOD(void, resumeIngress, ());

@@ -375,11 +375,10 @@ CarbonRouterClient<RouterInfo>::makeProxyRequestContext(
     bool inBatch) {
   Proxy<RouterInfo>* proxy = proxies_[proxyIdx_];
   if (mode_ == ThreadMode::AffinitizedRemoteThread) {
-    auto idx = findAffinitizedProxyIdx(req);
-    if (idx.has_value()) {
-      proxy = proxies_[idx.value()];
+    if (auto idx = findAffinitizedProxyIdx(req)) {
+      proxy = proxies_[*idx];
       if (inBatch) {
-        proxiesToNotify_[idx.value()] = true;
+        proxiesToNotify_[*idx] = true;
       }
     } else {
       // When skipping thread affinity, need to set proxiesToNotify_ for

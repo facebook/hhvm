@@ -47,6 +47,7 @@ TRACE_SET_MOD(hhbbc)
 struct KnownArgs {
   Type context;
   const CompactVector<Type>& args;
+  const NamedArgNameVec* argNames;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -364,14 +365,18 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
 
   if (knownArgs) {
     using namespace folly::gen;
+    [[maybe_unused]] auto const* argNames = knownArgs->argNames;
     FTRACE(
       2,
       "{:.^70}\n",
       folly::sformat(
-        "Inline Interp (context: {}, args: {})",
+        "Inline Interp (context: {}, args: {}, arg names: {})",
         show(knownArgs->context),
         from(knownArgs->args)
           | map([] (const Type& t) { return show(t); })
+          | unsplit<std::string>(","),
+        from(argNames? *argNames : NamedArgNameVec{})
+          | map([] (SString s) { return s->toCppString(); })
           | unsplit<std::string>(",")
       )
     );
@@ -594,11 +599,15 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
       [&] () -> std::string {
         using namespace folly::gen;
         if (!knownArgs) return "";
+        [[maybe_unused]] auto const* argNames = knownArgs->argNames;
         return folly::sformat(
-          " (context: {}, args: {})",
+          " (context: {}, args: {}, arg names: {})",
           show(knownArgs->context),
           from(knownArgs->args)
             | map([] (const Type& t) { return show(t); })
+            | unsplit<std::string>(","),
+          from(argNames? *argNames : NamedArgNameVec{})
+            | map([] (SString s) { return s->toCppString(); })
             | unsplit<std::string>(",")
         );
       }(),
@@ -662,6 +671,7 @@ FuncAnalysis do_analyze(const IIndex& index,
       ctx,
       TCls,
       { sval(cns) },
+      nullptr,
       clsCnsWork
     );
     clsCnsWork->update(cns, unctx(std::move(fa.inferredReturn)));
@@ -1012,11 +1022,13 @@ FuncAnalysis analyze_func_inline(const IIndex& index,
                                  const AnalysisContext& ctx,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
+                                 const NamedArgNameVec* argNames,
                                  ClsConstantWork* clsCnsWork,
                                  CollectionOpts opts) {
   auto const knownArgs = KnownArgs {
     ctx.func->isClosureBody ? TBottom : thisType,
-    args
+    args,
+    argNames
   };
 
   return do_analyze(index, ctx, nullptr, clsCnsWork, &knownArgs,

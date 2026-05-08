@@ -1461,6 +1461,7 @@ struct Index {
   ReturnType lookup_return_type(Context caller,
                                 MethodsInfo*,
                                 const CompactVector<Type>& args,
+                                const NamedArgNameVec* argNames,
                                 const Type& context,
                                 res::Func,
                                 Dep dep = Dep::ReturnTy) const;
@@ -1807,6 +1808,7 @@ struct IIndex {
   lookup_return_type(Context caller,
                      MethodsInfo*,
                      const CompactVector<Type>& args,
+                     const NamedArgNameVec* argNames,
                      const Type& context,
                      res::Func,
                      Dep dep = Dep::ReturnTy) const = 0;
@@ -2019,10 +2021,11 @@ struct IndexAdaptor : public IIndex {
   Index::ReturnType lookup_return_type(Context c,
                                        MethodsInfo* m,
                                        const CompactVector<Type>& a,
+                                       const NamedArgNameVec* argNames,
                                        const Type& t,
                                        res::Func f,
                                        Dep d = Dep::ReturnTy) const override {
-    return index.lookup_return_type(c, m, a, t, f, d);
+    return index.lookup_return_type(c, m, a, argNames, t, f, d);
   }
   std::pair<Index::ReturnType, size_t>
   lookup_return_type_raw(const php::Func* f) const override {
@@ -3049,6 +3052,7 @@ struct AnalysisIndex {
   Index::ReturnType lookup_return_type(MethodsInfo*, res::Func) const;
   Index::ReturnType lookup_return_type(MethodsInfo*,
                                        const CompactVector<Type>&,
+                                       const NamedArgNameVec*,
                                        const Type&,
                                        res::Func) const;
   Index::ReturnType lookup_foldable_return_type(const CallContext&) const;
@@ -3210,6 +3214,7 @@ struct AnalysisIndexAdaptor : public IIndex {
   Index::ReturnType lookup_return_type(Context,
                                        MethodsInfo*,
                                        const CompactVector<Type>&,
+                                       const NamedArgNameVec*,
                                        const Type&,
                                        res::Func,
                                        Dep d = Dep::ReturnTy) const override;

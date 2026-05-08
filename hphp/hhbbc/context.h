@@ -50,17 +50,28 @@ struct Context {
 
 /*
  * Context for a call to a function.  This is the function itself,
- * plus the types and number of arguments, and the type of
- * $this/get_called_context().
+ * plus the types and number of arguments, a list of named arguments,
+ * and the type of $this/get_called_context().
  */
 struct CallContext {
   const php::Func* callee;
   CompactVector<Type> args;
+  const NamedArgNameVec* argNames;
   Type context;
 };
 
+inline bool argNamesEqual(const NamedArgNameVec* a, const NamedArgNameVec* b) {
+  if (a == b) return true;
+  auto const aSize = a ? a->size() : 0;
+  auto const bSize = b ? b->size() : 0;
+  if (aSize != bSize) return false;
+  if (aSize == 0) return true;
+  return *a == *b;
+}
+
 inline bool operator==(const CallContext& a, const CallContext& b) {
   return a.callee == b.callee &&
+         argNamesEqual(a.argNames, b.argNames) &&
          equal(a.args, b.args) &&
          equal(a.context, b.context);
 }
@@ -70,10 +81,16 @@ struct CallContextHasher {
     auto ret = folly::hash::hash_combine(
       c.callee,
       c.args.size(),
+      c.argNames ? c.argNames->size() : 0,
       c.context.hash()
     );
     for (auto& t : c.args) {
       ret = folly::hash::hash_combine(ret, t.hash());
+    }
+    if (c.argNames) {
+      for (auto& name : *c.argNames) {
+        ret = folly::hash::hash_combine(ret, name);
+      }
     }
     return ret;
   }

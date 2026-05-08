@@ -8994,7 +8994,8 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
       IndexAdaptor { *data.m_index },
       calleeCtx,
       adjustedCtx,
-      callCtx.args
+      callCtx.args,
+      callCtx.argNames
     );
     return Index::ReturnType{
       return_with_context(std::move(fa.inferredReturn), adjustedCtx),
@@ -9168,7 +9169,8 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
         &context_for_deps(data)
       },
       adjustedCtx,
-      callCtx.args
+      callCtx.args,
+      callCtx.argNames
     );
     return R{
       return_with_context(std::move(fa.inferredReturn), std::move(adjustedCtx)),
@@ -21878,6 +21880,7 @@ Index::lookup_foldable_return_type(Context ctx,
       AnalysisContext { func->unit, wf, func->cls, &ctx.forDep() },
       ctxType,
       calleeCtx.args,
+      calleeCtx.argNames,
       nullptr,
       CollectionOpts::EffectFreeOnly
     );
@@ -21972,6 +21975,7 @@ Index::ReturnType Index::lookup_return_type(Context ctx,
 Index::ReturnType Index::lookup_return_type(Context caller,
                                             MethodsInfo* methods,
                                             const CompactVector<Type>& args,
+                                            const NamedArgNameVec* argNames,
                                             const Type& context,
                                             res::Func rfunc,
                                             Dep dep) const {
@@ -22016,7 +22020,7 @@ Index::ReturnType Index::lookup_return_type(Context caller,
     return context_sensitive_return_type(
       *m_data,
       caller,
-      { finfo->func, args, context },
+      { finfo->func, args, argNames, context },
       std::move(returnType)
     );
   };
@@ -22034,7 +22038,7 @@ Index::ReturnType Index::lookup_return_type(Context caller,
       return context_sensitive_return_type(
         *m_data,
         caller,
-        { f.finfo->func, args, context },
+        { f.finfo->func, args, argNames, context },
         R{ f.finfo->returnTy, f.finfo->effectFree }
       );
     },
@@ -29124,6 +29128,7 @@ Index::ReturnType AnalysisIndex::lookup_return_type(MethodsInfo* methods,
 Index::ReturnType
 AnalysisIndex::lookup_return_type(MethodsInfo* methods,
                                   const CompactVector<Type>& args,
+                                  const NamedArgNameVec* argNames,
                                   const Type& context,
                                   res::Func rfunc) const {
   using R = Index::ReturnType;
@@ -29131,7 +29136,7 @@ AnalysisIndex::lookup_return_type(MethodsInfo* methods,
   auto const contextual = [&] (const FuncInfo2& finfo, R ret) {
     return context_sensitive_return_type(
       *m_data,
-      { finfo.func, args, context },
+      { finfo.func, args, argNames, context },
       std::move(ret)
     );
   };
@@ -29302,6 +29307,7 @@ AnalysisIndex::lookup_foldable_return_type(const CallContext& calleeCtx) const {
       },
       ctxType,
       calleeCtx.args,
+      calleeCtx.argNames,
       nullptr,
       CollectionOpts::EffectFreeOnly
     );
@@ -31541,10 +31547,11 @@ Index::ReturnType AnalysisIndexAdaptor::lookup_return_type(Context,
 Index::ReturnType AnalysisIndexAdaptor::lookup_return_type(Context,
                                                            MethodsInfo* methods,
                                                            const CompactVector<Type>& args,
+                                                           const NamedArgNameVec* argNames,
                                                            const Type& context,
                                                            res::Func func,
                                                            Dep) const {
-  return index.lookup_return_type(methods, args, context, func);
+  return index.lookup_return_type(methods, args, argNames, context, func);
 }
 
 std::pair<Index::ReturnType, size_t>

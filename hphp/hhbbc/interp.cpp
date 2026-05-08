@@ -4048,6 +4048,7 @@ FoldResult fcallTryFold(
   auto calleeCtx = CallContext {
     foldableFunc,
     std::move(args),
+    fca.namedArgNames(),
     std::move(context)
   };
   if (env.collect.unfoldableFuncs.contains(calleeCtx)) return NotFolded{};
@@ -4179,10 +4180,12 @@ void fcallKnownImpl(
       args[i] = topCV(env, firstArgPos - i);
     }
 
+    auto const* argNames = fca.namedArgNames();
+
     return fca.hasUnpack()
       ? env.index.lookup_return_type(env.ctx, &env.collect.methods, func)
       : env.index.lookup_return_type(
-          env.ctx, &env.collect.methods, args, context, func
+          env.ctx, &env.collect.methods, args, argNames, context, func
         );
   }();
 

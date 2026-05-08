@@ -17,5 +17,5 @@ if sys.version_info[0] >= 3:
   long = int
 
 
-from .ttypes import UTF8STRINGS, FieldWrapper, Wrapper, Adapter, SkipCodegen, Name, NamePrefix, UnionEnumAttributes, StructTrait, Attributes, StructAsTrait, ModuleInternal, GenerateClientMethodsWithHeaders, MigrationBlockingAllowInheritance, MigrationBlockingLegacyJSONSerialization, FixmeWrongType, UnsafeArray
+from .ttypes import UTF8STRINGS, FieldWrapper, Wrapper, Adapter, SkipCodegen, Name, NamePrefix, ConstantsClass, UnionEnumAttributes, StructTrait, Attributes, StructAsTrait, ModuleInternal, GenerateClientMethodsWithHeaders, MigrationBlockingAllowInheritance, MigrationBlockingLegacyJSONSerialization, FixmeWrongType, UnsafeArray
 

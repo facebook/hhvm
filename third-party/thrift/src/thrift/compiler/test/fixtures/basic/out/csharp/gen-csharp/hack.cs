@@ -804,6 +804,109 @@ namespace facebook.thrift.annotation.hack
     }
 
     /// <summary>
+    /// Auto-generated from ConstantsClass
+    /// </summary>
+    public class @ConstantsClass : IThriftSerializable
+    {
+        /// <summary>The Thrift URI for this type, used for type registration.</summary>
+        public static readonly string __fbthrift_uri = "facebook.com/thrift/annotation/hack/ConstantsClass";
+        /// <summary>Gets or sets the name field.</summary>
+        private string _name = string.Empty;
+        public string @name
+        {
+            get => _name;
+            set
+            {
+                ThriftNullGuard.ThrowIfNull(value, "name");
+                _name = value;
+            }
+        }
+
+        public @ConstantsClass()
+        {
+            @name = string.Empty;
+        }
+
+        public void __fbthrift_clear()
+        {
+            @name = string.Empty;
+        }
+
+        public bool __fbthrift_is_empty()
+        {
+            if (@name != null && @name.Length != 0) { return false; }
+            return true;
+        }
+
+        public void __fbthrift_write(IThriftProtocolWriter writer)
+        {
+            // Field 1: name (string)
+            writer.WriteFieldBegin(ThriftWireType.String, 1);
+            writer.WriteString(@name);
+            writer.WriteFieldStop();
+        }
+
+        public void __fbthrift_read(IThriftProtocolReader reader)
+        {
+            while (true)
+            {
+                var (fieldType, fieldId) = reader.ReadFieldBegin();
+                if (fieldType == ThriftWireType.Stop)
+                {
+                    break;
+                }
+
+                switch (fieldId)
+                {
+                    case 1: // name
+                        if (fieldType == ThriftWireType.String)
+                        {
+                            @name = reader.ReadString();
+                        }
+                        else
+                        {
+                            reader.Skip(fieldType);
+                        }
+                        break;
+                    default:
+                        reader.Skip(fieldType);
+                        break;
+                }
+            }
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is not @ConstantsClass other)
+            {
+                return false;
+            }
+            if (!Equals(@name, other.@name))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(@name);
+            return hashCode.ToHashCode();
+        }
+
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("ConstantsClass(");
+            sb.Append("name=");
+            sb.Append(@name);
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
     /// Auto-generated from UnionEnumAttributes
     /// </summary>
     public class @UnionEnumAttributes : IThriftSerializable
@@ -1629,6 +1732,7 @@ namespace facebook.thrift.annotation.hack
             register("facebook.com/thrift/annotation/hack/SkipCodegen", () => new @SkipCodegen());
             register("facebook.com/thrift/annotation/hack/Name", () => new @Name());
             register("facebook.com/thrift/annotation/hack/NamePrefix", () => new @NamePrefix());
+            register("facebook.com/thrift/annotation/hack/ConstantsClass", () => new @ConstantsClass());
             register("facebook.com/thrift/annotation/hack/UnionEnumAttributes", () => new @UnionEnumAttributes());
             register("facebook.com/thrift/annotation/hack/StructTrait", () => new @StructTrait());
             register("facebook.com/thrift/annotation/hack/Attributes", () => new @Attributes());

@@ -140,6 +140,11 @@ struct NamePrefix {
   3: bool skip_services = false;
 }
 
+@scope.Program
+struct ConstantsClass {
+  1: string name;
+}
+
 /// This annotation is for adding Hack attributes to union enums.
 @scope.Union
 struct UnionEnumAttributes {

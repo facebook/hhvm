@@ -951,6 +951,19 @@ class t_hack_generator : public t_concat_generator {
         find_hack_name(type);
   }
 
+  std::string get_constants_class_name() const {
+    if (const auto* annotation = program_->find_structured_annotation_or_null(
+            kHackConstantsClassUri)) {
+      return annotation->get_value_from_structured_annotation("name")
+          .get_string();
+    }
+
+    auto [ns, ns_type] = get_namespace(program_);
+    auto class_name = get_program()->name() + "_";
+    return (ns_type != HackThriftNamespaceType::PHP ? class_name : ns) +
+        "CONSTANTS";
+  }
+
   const std::string find_union_enum_attributes(const t_structured& tstruct) {
     if (const auto annotation = tstruct.find_structured_annotation_or_null(
             kHackUnionEnumAttributesUri)) {
@@ -1756,11 +1769,8 @@ void t_hack_generator::init_generator() {
     init_codegen_file(
         f_consts_, get_out_dir() + get_program()->name() + "_constants.php");
     constants_values_.clear();
-    auto [ns, ns_type] = get_namespace(program_);
-    auto class_name = get_program()->name() + "_";
-    f_consts_ << "class "
-              << (ns_type != HackThriftNamespaceType::PHP ? class_name : ns)
-              << "CONSTANTS implements \\IThriftConstants {\n";
+    f_consts_ << "class " << get_constants_class_name()
+              << " implements \\IThriftConstants {\n";
   }
 
   if (!program_->structs_and_unions().empty()) {

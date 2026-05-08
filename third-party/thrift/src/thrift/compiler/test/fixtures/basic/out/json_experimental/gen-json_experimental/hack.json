@@ -299,6 +299,31 @@
         "is_union" : false,
         "lineno" : 122
       },
+      "ConstantsClass" : {
+        "name" : "ConstantsClass",
+        "structured_annotations": {
+          "scope.Program" : {
+            "type" : {
+            "type" : "struct",
+            "name" : "Program",
+            "path" : "thrift/annotation/scope.thrift"
+          },
+            "value" : {}
+          }
+        },
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 145,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 143
+      },
       "UnionEnumAttributes" : {
         "name" : "UnionEnumAttributes",
         "structured_annotations": {
@@ -316,7 +341,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 146,
+            "lineno" : 151,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "list",
@@ -326,7 +351,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 144
+        "lineno" : 149
       },
       "StructTrait" : {
         "name" : "StructTrait",
@@ -361,14 +386,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 154,
+            "lineno" : 159,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 150
+        "lineno" : 155
       },
       "Attributes" : {
         "name" : "Attributes",
@@ -451,7 +476,7 @@
           "attributes" : {
             "name" : "attributes",
             "key" : 1,
-            "lineno" : 206,
+            "lineno" : 211,
             "required" : "opt-in-req-out",
             "type" : {
       "type" : "list",
@@ -461,7 +486,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 196
+        "lineno" : 201
       },
       "StructAsTrait" : {
         "name" : "StructAsTrait",
@@ -493,7 +518,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 209
+        "lineno" : 214
       },
       "ModuleInternal" : {
         "name" : "ModuleInternal",
@@ -558,7 +583,7 @@
         "docstring" : "This annotation is to generate an entity as internal\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 215
+        "lineno" : 220
       },
       "GenerateClientMethodsWithHeaders" : {
         "name" : "GenerateClientMethodsWithHeaders",
@@ -583,7 +608,7 @@
         "docstring" : "Given either of the following Thrift service definitions:\n\n    @hack.GenerateClientMethodsWithHeaders\n    service Foo {\n      FooResponse bar();\n    }\n\n    service Foo {\n      @hack.GenerateClientMethodsWithHeaders\n      FooResponse bar();\n    }\n\nThis annotation instructs the compiler to generate the following client method that returns both the response and headers in addition to the bar() method:\n  - (FooResponse, ?dict<string, string>) header_bar()\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 240
+        "lineno" : 245
       },
       "MigrationBlockingAllowInheritance" : {
         "name" : "MigrationBlockingAllowInheritance",
@@ -600,7 +625,7 @@
         "docstring" : "Generated Hack types are being changed to `final` by default.\n\nFor existing thrift types that are inherited from and cannot be easily migrated,\nuse this annotation to make the generated class non-final.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 250
+        "lineno" : 255
       },
       "MigrationBlockingLegacyJSONSerialization" : {
         "name" : "MigrationBlockingLegacyJSONSerialization",
@@ -617,7 +642,7 @@
         "docstring" : "Hack Unions without the `protected` compiler option may rely on `fb_json_serialize` for JSON serialization.\nAdding this annotation will implement the JSONSerializable Hack interface allowing `fb_json_serialize` to continue being used.\n\nNote: This should only be used for migration purposes. Use `JSONThriftSerializer` instead.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 259
+        "lineno" : 264
       },
       "FixmeWrongType" : {
         "name" : "FixmeWrongType",
@@ -658,7 +683,7 @@
         "docstring" : "Wraps the field type with \\HH_FIXME\\WRONG_TYPE<Type> in generated Hack code\nto suppress type-checking errors.\n\nWhen applied to a struct, wraps all field types in the struct.\n\nExample:\n  struct MyStruct {\n    @hack.FixmeWrongType\n    1: i64 my_field;\n  }\n\nGenerates: public \\HH_FIXME\\WRONG_TYPE<int> $my_field;\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 276
+        "lineno" : 281
       },
       "UnsafeArray" : {
         "name" : "UnsafeArray",
@@ -675,7 +700,7 @@
         "docstring" : "Replaces array/collection types with unsafe semi-statically-typed equivalents:\n  - vec<T> becomes varrayish_UNSAFE<T>\n  - dict<K, V> becomes darrayish_UNSAFE<K, V>\n\nExample:\n  struct MyStruct {\n    @hack.UnsafeArray\n    1: list<i64> my_list;\n  }\n\nGenerates: public varrayish_UNSAFE<int> $my_list;\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 295
+        "lineno" : 300
       }
   },
   "source_path" : "thrift/annotation/hack",

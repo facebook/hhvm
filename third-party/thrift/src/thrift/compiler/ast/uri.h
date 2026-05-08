@@ -205,6 +205,8 @@ inline constexpr auto kHackStructAsTraitUri =
     "facebook.com/thrift/annotation/hack/StructAsTrait";
 inline constexpr auto kHackStructTraitUri =
     "facebook.com/thrift/annotation/hack/StructTrait";
+inline constexpr auto kHackConstantsClassUri =
+    "facebook.com/thrift/annotation/hack/ConstantsClass";
 inline constexpr auto kHackUnionEnumAttributesUri =
     "facebook.com/thrift/annotation/hack/UnionEnumAttributes";
 inline constexpr auto kHackWrapperUri =

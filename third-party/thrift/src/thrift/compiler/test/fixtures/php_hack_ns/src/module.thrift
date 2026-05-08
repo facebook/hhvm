@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/hack.thrift"
+
+@hack.ConstantsClass{name = "AnnotatedPhpConstants"}
 package "test.dev/foo/php/ns"
 
 namespace php foo.php.ns
@@ -25,6 +28,8 @@ enum Status {
 struct TestStruct {
   1: string str_value;
 }
+
+const i32 MY_CONST = 42;
 
 service FooHackService {
   Status fetchStatus(1: TestStruct request);

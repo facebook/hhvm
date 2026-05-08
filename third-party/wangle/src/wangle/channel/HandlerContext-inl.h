@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/Format.h>
+#include <typeinfo>
 
 namespace wangle {
 
@@ -46,6 +47,9 @@ class PipelineContext {
 
   virtual void setNextIn(PipelineContext* ctx) = 0;
   virtual void setNextOut(PipelineContext* ctx) = 0;
+  virtual void* getInboundLink(const std::type_info&) {
+    return nullptr;
+  }
 
   virtual HandlerDir getDirection() = 0;
 };
@@ -108,7 +112,8 @@ class ContextImplBase : public PipelineContext {
       nextIn_ = nullptr;
       return;
     }
-    auto nextIn = dynamic_cast<InboundLink<typename H::rout>*>(ctx);
+    auto nextIn = static_cast<InboundLink<typename H::rout>*>(
+        ctx->getInboundLink(typeid(InboundLink<typename H::rout>)));
     if (nextIn) {
       nextIn_ = nextIn;
     } else {
@@ -176,6 +181,12 @@ class ContextImpl : public HandlerContext<typename H::rout, typename H::wout>,
   }
 
   ~ContextImpl() override = default;
+
+  void* getInboundLink(const std::type_info& info) override {
+    return info == typeid(InboundLink<Rin>)
+        ? static_cast<InboundLink<Rin>*>(this)
+        : nullptr;
+  }
 
   // HandlerContext overrides
   void fireRead(Rout msg) override {
@@ -344,6 +355,12 @@ class InboundContextImpl
   }
 
   ~InboundContextImpl() override = default;
+
+  void* getInboundLink(const std::type_info& info) override {
+    return info == typeid(InboundLink<Rin>)
+        ? static_cast<InboundLink<Rin>*>(this)
+        : nullptr;
+  }
 
   // InboundHandlerContext overrides
   void fireRead(Rout msg) override {

@@ -28,7 +28,8 @@ from thrift.server.TAsyncioServer import (
 from ThriftTest import ThriftTest
 from ThriftTest.ttypes import Xception, Xtruct
 
-loop = asyncio.get_event_loop()
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 loop.set_debug(True)
 logging.getLogger("asyncio").setLevel(logging.DEBUG)
 

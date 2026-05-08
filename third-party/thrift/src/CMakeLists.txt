@@ -41,6 +41,14 @@ set(CMAKE_INSTALL_DIR lib/cmake/fbthrift CACHE STRING
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# Build all fbthrift libraries (and their object files) with -fPIC so that
+# the resulting static archives can be linked into a downstream shared
+# library. fbthrift's libraries default to STATIC; without PIC they fail
+# to link into any consumer that uses BUILD_SHARED_LIBS=ON. PIC has
+# negligible cost on x86_64/aarch64 and lets static-archive consumers
+# stay static, which avoids the cross-dylib RTTI / undefined-symbol
+# problems that BUILD_SHARED_LIBS=ON exposes inside fbthrift.
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Add root dir so qualified includes work, e.g. #include "thrift/compiler/*.h".
 include_directories(.)

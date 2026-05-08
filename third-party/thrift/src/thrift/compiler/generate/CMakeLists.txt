@@ -44,8 +44,14 @@ list(APPEND GENERATOR_FILES ${CMAKE_CURRENT_SOURCE_DIR}/cpp/orderable_type_utils
 
 add_library(compiler_generators STATIC ${GENERATOR_FILES}
             ${CMAKE_CURRENT_BINARY_DIR}/templates.cc)
+# Always emit PIC so that compiler_generators can be linked into a
+# downstream shared library; the upstream rule only enables PIC when
+# building the whole tree shared, which forced consumers that want
+# static archives in a shared world to either turn on BUILD_SHARED_LIBS
+# (and inherit fbthrift's cross-dylib RTTI problems) or maintain a
+# separate patch for this one line.
 set_target_properties(compiler_generators PROPERTIES
-                      POSITION_INDEPENDENT_CODE "${BUILD_SHARED_LIBS}")
+                      POSITION_INDEPENDENT_CODE ON)
 if(MSVC)
   set_target_properties(compiler_generators PROPERTIES
                         COMPILE_FLAGS "/bigobj")

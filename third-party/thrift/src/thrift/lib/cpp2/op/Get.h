@@ -179,8 +179,8 @@ inline constexpr type::Ordinal
 #endif
 
 template <class Id, class Idents, class TypeTags>
-consteval std::enable_if_t<std::is_same_v<Id, void>, FieldOrdinal>
-getFieldOrdinal(const int16_t*, size_t) {
+  requires std::same_as<Id, void>
+consteval FieldOrdinal getFieldOrdinal(const int16_t*, size_t) {
   return static_cast<FieldOrdinal>(0);
 }
 

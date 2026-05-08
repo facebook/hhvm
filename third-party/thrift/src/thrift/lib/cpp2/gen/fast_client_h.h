@@ -98,27 +98,32 @@ class FastClientBase {
       std::string_view methodName,
       apache::thrift::RpcKind rpcKind,
       folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>
-          data,
+          serializedData,
       std::unique_ptr<apache::thrift::RequestCallback> callback) {
-    if (data.hasError()) {
-      callback->requestError(
-          apache::thrift::ClientReceiveState(std::move(data.error()), nullptr));
+    apache::thrift::RequestCallback::Context callbackContext;
+    callbackContext.oneWay = false;
+    callbackContext.protocolId = adapter_->getProtocolId();
+    auto clientCallback = apache::thrift::prepareFastThriftCallback(
+        std::move(callback), std::move(callbackContext));
+
+    if (serializedData.hasError()) {
+      clientCallback.release()->onResponseError(
+          std::move(serializedData.error()));
       return;
     }
 
-    callback->requestSent();
     adapter_->sendRequestResponse(
         rpcOptions,
         methodName,
         rpcKind,
-        std::move(data.value()),
-        [callback = std::move(callback),
+        std::move(serializedData.value()),
+        [clientCallback = std::move(clientCallback),
          protocolId = adapter_->getProtocolId()](
             folly::Expected<
                 std::unique_ptr<folly::IOBuf>,
                 folly::exception_wrapper>&& result) mutable noexcept {
           handleCallbackResponse(
-              std::move(callback), protocolId, std::move(result));
+              std::move(clientCallback), protocolId, std::move(result));
         });
   }
 
@@ -126,18 +131,17 @@ class FastClientBase {
 
  private:
   static void handleCallbackResponse(
-      std::unique_ptr<apache::thrift::RequestCallback> callback,
+      apache::thrift::RequestClientCallback::Ptr callback,
       uint16_t protocolId,
       folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>&&
           result) noexcept {
+    auto* raw = callback.release();
     if (result.hasError()) {
-      callback->requestError(
-          apache::thrift::ClientReceiveState(
-              std::move(result.error()), nullptr));
+      raw->onResponseError(std::move(result.error()));
       return;
     }
 
-    callback->replyReceived(
+    raw->onResponse(
         apache::thrift::ClientReceiveState(
             protocolId,
             apache::thrift::MessageType::T_REPLY,

@@ -94,14 +94,13 @@ class FastClient<::cpp2::test::FastClientTestServiceChild, AppAdapter>
         state.protocolId(),
         state.serializedResponse().buffer.get());
   }
-  static ::std::string recv_greet(
+  static void recv_greet(
+      ::std::string& _return,
       ::apache::thrift::ClientReceiveState& state) {
-    ::std::string _return{};
     auto ew = recv_wrapped_greet(_return, state);
     if (ew) {
       ew.throw_exception();
     }
-    return _return;
   }
 
  private:

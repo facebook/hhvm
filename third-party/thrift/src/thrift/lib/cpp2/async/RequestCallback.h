@@ -360,9 +360,17 @@ class RequestCallback : public RequestClientCallback {
   friend RequestClientCallback::Ptr toRequestClientCallbackPtr(
       std::unique_ptr<RequestCallback>, RequestCallback::Context);
 
+  friend RequestClientCallback::Ptr prepareFastThriftCallback(
+      std::unique_ptr<RequestCallback>, RequestCallback::Context);
+
   void setContext(Context context) {
     context_ = folly::RequestContext::saveContext();
     thriftContext_ = std::move(context);
+  }
+
+  void setFastContext(Context context) {
+    thriftContext_ = std::move(context);
+    context_ = nullptr;
   }
 
   void setUnmanaged() { unmanaged_ = true; }
@@ -377,6 +385,17 @@ inline RequestClientCallback::Ptr toRequestClientCallbackPtr(
     return RequestClientCallback::Ptr();
   }
   cb->setContext(std::move(context));
+  cb->setUnmanaged();
+  return RequestClientCallback::Ptr(cb.release());
+}
+
+inline RequestClientCallback::Ptr prepareFastThriftCallback(
+    std::unique_ptr<RequestCallback> cb, RequestCallback::Context context) {
+  if (!cb) {
+    return RequestClientCallback::Ptr();
+  }
+
+  cb->setFastContext(std::move(context));
   cb->setUnmanaged();
   return RequestClientCallback::Ptr(cb.release());
 }

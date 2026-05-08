@@ -98,6 +98,16 @@
         state.protocolId(),
         state.serializedResponse().buffer.get());
   }
+{{#if function.sync_returns_by_outparam?}}
+  static void recv_{{function.cpp_name}}(
+      {{function.return_type.cpp_type}}& _return,
+      ::apache::thrift::ClientReceiveState& state) {
+    auto ew = recv_wrapped_{{function.cpp_name}}(_return, state);
+    if (ew) {
+      ew.throw_exception();
+    }
+  }
+{{#else}}
   static {{function.return_type.cpp_type}} recv_{{function.cpp_name}}(
       ::apache::thrift::ClientReceiveState& state) {
     {{function.return_type.cpp_type}} _return{};
@@ -107,6 +117,7 @@
     }
     return _return;
   }
+{{/if function.sync_returns_by_outparam?}}
 {{/if function.return_type.void?}}
 
  private:

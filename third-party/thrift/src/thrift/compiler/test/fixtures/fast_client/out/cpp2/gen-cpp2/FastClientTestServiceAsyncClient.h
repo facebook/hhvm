@@ -214,14 +214,13 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
         state.protocolId(),
         state.serializedResponse().buffer.get());
   }
-  static ::std::string recv_echo(
+  static void recv_echo(
+      ::std::string& _return,
       ::apache::thrift::ClientReceiveState& state) {
-    ::std::string _return{};
     auto ew = recv_wrapped_echo(_return, state);
     if (ew) {
       ew.throw_exception();
     }
-    return _return;
   }
 
  private:
@@ -375,14 +374,13 @@ class FastClient<::cpp2::test::FastClientTestService, AppAdapter>
         state.protocolId(),
         state.serializedResponse().buffer.get());
   }
-  static ::cpp2::test::DataItem recv_getData(
+  static void recv_getData(
+      ::cpp2::test::DataItem& _return,
       ::apache::thrift::ClientReceiveState& state) {
-    ::cpp2::test::DataItem _return{};
     auto ew = recv_wrapped_getData(_return, state);
     if (ew) {
       ew.throw_exception();
     }
-    return _return;
   }
 
  private:

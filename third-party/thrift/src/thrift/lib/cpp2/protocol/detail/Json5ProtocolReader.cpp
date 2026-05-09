@@ -21,9 +21,10 @@
 #include <optional>
 #include <stdexcept>
 
-#include <re2/re2.h>
 #include <folly/Exception.h>
+#include <folly/String.h>
 #include <folly/base64.h>
+#include <thrift/lib/cpp2/protocol/detail/JsonUtils.h>
 
 namespace apache::thrift::json5::detail {
 
@@ -333,40 +334,62 @@ Json5ProtocolReader::readEnumImpl() {
   return parseIdentifierString(std::get<std::string>(primitive));
 }
 
+namespace {
+// Parse the entire string as an integer.
+template <typename T>
+std::optional<T> tryParseNumber(std::string_view sv) {
+  T out;
+  auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), out);
+  if (ec == std::errc{} && ptr == sv.data() + sv.size()) {
+    return out;
+  }
+  return std::nullopt;
+}
+} // namespace
+
 template <typename T>
 Json5ProtocolReader::IdentifierReadResult<T>
-Json5ProtocolReader::parseIdentifierString(std::string s) {
-  IdentifierReadResult<T> ret;
-
-  // matches "NAME (value)" or "(value)" format
-  static const re2::RE2 kNameValuePattern = R"(^(\w*)\s*\((-?\d+)\)$)";
-  if (re2::RE2::FullMatch(
-          s, kNameValuePattern, &ret.name, &ret.value.emplace())) {
-    return ret;
+Json5ProtocolReader::parseIdentifierString(std::string_view s) {
+  if (s.empty()) {
+    throwError("Cannot parse empty string as identifier");
   }
 
-  // matches bare integer "-123" or "123"
-  {
-    T i;
-    auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), i);
-    if (ec == std::errc{} && ptr == s.data() + s.size()) {
-      return {.name = {}, .value = i};
-    }
+  // bare integer, e.g. "123" or "-123"
+  if (auto i = tryParseNumber<T>(s)) {
+    return {.name = {}, .value = *i};
   }
 
-  // matches bare identifier "NAME"
-  static const re2::RE2 kNameOnlyPattern = R"(^\w+$)";
-  if (re2::RE2::FullMatch(s, kNameOnlyPattern)) {
-    return {.name = std::move(s), .value = std::nullopt};
+  // bare identifier, e.g. "NAME"
+  if (isIdentifier(s)) {
+    return {.name = std::string(s), .value = std::nullopt};
+  }
+
+  // "NAME (value)" or "(value)"
+  auto parenOpen = s.find('(');
+  if (parenOpen == std::string_view::npos || !s.ends_with(')')) {
+    throwError(fmt::format("invalid identifier: '{}'", s));
+  }
+
+  // Parsing NAME in "NAME (value)" or "(value)"
+  auto name = folly::rtrimWhitespace(s.substr(0, parenOpen));
+  if (!name.empty() && !isIdentifier(name)) {
+    throwError(fmt::format("invalid identifier: '{}'", s));
+  }
+
+  // Parsing value in "NAME (value)" or "(value)"
+  auto valueStr = s.substr(parenOpen + 1); // "value)"
+  valueStr.remove_suffix(1); // "value"
+  if (auto value = tryParseNumber<T>(valueStr)) {
+    return {.name = std::string(name), .value = *value};
   }
 
   throwError(fmt::format("invalid identifier: '{}'", s));
 }
 
 template Json5ProtocolReader::IdentifierReadResult<std::int32_t>
-    Json5ProtocolReader::parseIdentifierString<std::int32_t>(std::string);
+    Json5ProtocolReader::parseIdentifierString<std::int32_t>(std::string_view);
 template Json5ProtocolReader::IdentifierReadResult<std::int16_t>
-    Json5ProtocolReader::parseIdentifierString<std::int16_t>(std::string);
+    Json5ProtocolReader::parseIdentifierString<std::int16_t>(std::string_view);
 
 // ============================================================================
 // Internal Value Reading Helpers

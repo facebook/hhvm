@@ -18,18 +18,12 @@
 
 #include <cstring>
 #include <fmt/format.h>
-#include <re2/re2.h>
 #include <folly/Conv.h>
 #include <folly/Exception.h>
 #include <folly/json.h>
+#include <thrift/lib/cpp2/protocol/detail/JsonUtils.h>
 
 namespace apache::thrift::json5::detail {
-namespace {
-bool isValidJavascriptIdentifier(std::string_view s) {
-  static const RE2 regex("^[a-zA-Z_$][a-zA-Z0-9_$]*$");
-  return RE2::FullMatch(s, regex);
-}
-} // namespace
 
 // -- helpers ----------------------------------------------------------
 
@@ -204,7 +198,7 @@ std::uint32_t JsonWriter::writeObjectName(std::string_view s) {
   std::uint32_t n = 0;
   lastWrittenValueWasObjectName_ = true;
   n += appendNewlineAndIndent();
-  if (options_.unquoteObjectName && isValidJavascriptIdentifier(s)) {
+  if (options_.unquoteObjectName && isIdentifier(s, /*allowDollarSign=*/true)) {
     out_.value().push(folly::StringPiece(s));
     n += s.size();
   } else {

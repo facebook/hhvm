@@ -219,7 +219,7 @@ class Json5ProtocolReader final {
   // Parse a string in "NAME (value)", "(value)", or "NAME" format.
   // Used for both enum values and field identifiers.
   template <typename T = std::int32_t>
-  static IdentifierReadResult<T> parseIdentifierString(std::string s);
+  static IdentifierReadResult<T> parseIdentifierString(std::string_view s);
 
   CompoundTypeTracker containerStack_;
   Json5Reader reader_;

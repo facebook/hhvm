@@ -276,6 +276,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::testli:
     case Vinstr::testq:
     case Vinstr::testqi:
+    case Vinstr::testqi64:
     case Vinstr::testw:
     case Vinstr::testwi:
     case Vinstr::ubfmli:
@@ -289,6 +290,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::xorl:
     case Vinstr::xorq:
     case Vinstr::xorqi:
+    case Vinstr::xorqi64:
       assertx(!touchesMemory(inst));
       return pure;
 

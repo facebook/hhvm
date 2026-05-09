@@ -220,6 +220,7 @@ struct Vunit;
   O(xorl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))   \
   O(xorq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(xorqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(xorqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   /* compares and tests */\
   O(cmpb, I(fl), U(s0) U(s1), D(sf))\
   O(cmpbi, I(s0) I(fl), U(s1), D(sf))\
@@ -253,6 +254,7 @@ struct Vunit;
   O(testlm, I(fl), U(s0) U(s1), D(sf))  \
   O(testq, I(fl), U(s0) U(s1), D(sf))\
   O(testqi, I(s0) I(fl), U(s1), D(sf))\
+  O(testqi64, I(s0) I(fl), U(s1), D(sf))\
   O(testqm, I(fl), U(s0) U(s1), D(sf))\
   O(testqim, I(s0) I(fl), U(s1), D(sf))\
   /* conditional operations */\
@@ -1272,6 +1274,8 @@ struct shrq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
  * arm intrinsics.
  */
 struct andqi64 { Immed64 s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+struct testqi64 { Immed64 s0; Vreg64 s1; VregSF sf; Vflags fl; };
+struct xorqi64 { Immed64 s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct csincb { ConditionCode cc; VregSF sf; Vreg8 f, t, d; };
 struct csincw { ConditionCode cc; VregSF sf; Vreg16 f, t, d; };
 struct csincl { ConditionCode cc; VregSF sf; Vreg32 f, t, d; };

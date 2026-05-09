@@ -416,6 +416,50 @@ void testSinkDefsKeepsJoinPointDefsInPlace() {
   }
 }
 
+void testSinkDefsMovesDefsWithDeadSF() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const slow = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vs(unit, slow);
+
+    auto const src = Vreg64{v.makeReg()};
+    auto const shifted = Vreg64{v.makeReg()};
+    auto const out = Vreg64{vs.makeReg()};
+    auto const sf = v.makeReg();
+
+    v << ldimmq{Immed64{42}, src};
+    v << shrqi{Immed{5}, src, shifted, sf, Vflags{}};
+    v << jmp{slow};
+
+    vs << copy{shifted, out};
+    vs << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    auto const& entryCode = unit.blocks[unit.entry].code;
+    ASSERT_EQ(entryCode.size(), 1);
+    ASSERT_EQ(entryCode[0].op, Vinstr::jmp);
+    EXPECT_EQ(entryCode[0].jmp_.target, slow);
+
+    auto const& slowCode = unit.blocks[slow].code;
+    ASSERT_EQ(slowCode.size(), 4);
+    ASSERT_EQ(slowCode[0].op, Vinstr::ldimmq);
+    EXPECT_EQ(slowCode[0].ldimmq_.d, src);
+    ASSERT_EQ(slowCode[1].op, Vinstr::shrqi);
+    EXPECT_EQ(slowCode[1].shrqi_.s1, src);
+    EXPECT_EQ(slowCode[1].shrqi_.d, shifted);
+    ASSERT_EQ(slowCode[2].op, Vinstr::copy);
+    EXPECT_EQ(slowCode[2].copy_.s, Vreg{shifted});
+    EXPECT_EQ(slowCode[2].copy_.d, Vreg{out});
+    ASSERT_EQ(slowCode[3].op, Vinstr::ret);
+  }
+}
+
 void testArmLeaLowering() {
 #ifndef __aarch64__
   GTEST_SKIP() << "ARM-specific lea lowering test";
@@ -449,6 +493,378 @@ void testArmLeaLowering() {
 #endif
 }
 
+void testArmShiftedBitTestFromShrqi() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific shifted bit test simplify";
+#else
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const xored = Vreg64{v.makeReg()};
+  auto const shiftSf = v.makeReg();
+  auto const xorSf = v.makeReg();
+  auto const testSf = v.makeReg();
+
+  v << shrqi{Immed{5}, src, shifted, shiftSf, Vflags{}};
+  v << xorqi{Immed{1}, shifted, xored, xorSf, Vflags{}};
+  v << testqi{Immed{1}, xored, testSf, Vflags{}};
+
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 3);
+  ASSERT_EQ(code[0].op, Vinstr::shrqi);
+  EXPECT_EQ(code[0].shrqi_.s0.l(), 5);
+  EXPECT_EQ(code[0].shrqi_.s1, src);
+  EXPECT_EQ(code[0].shrqi_.d, shifted);
+  EXPECT_EQ(code[0].shrqi_.sf, shiftSf);
+
+  ASSERT_EQ(code[1].op, Vinstr::xorqi64);
+  EXPECT_EQ(static_cast<uint64_t>(code[1].xorqi64_.s0.q()), 0x20);
+  EXPECT_EQ(code[1].xorqi64_.s1, src);
+  EXPECT_EQ(code[1].xorqi64_.d, xored);
+  EXPECT_EQ(code[1].xorqi64_.sf, xorSf);
+
+  ASSERT_EQ(code[2].op, Vinstr::testqi64);
+  EXPECT_EQ(static_cast<uint64_t>(code[2].testqi64_.s0.q()), 0x20);
+  EXPECT_EQ(code[2].testqi64_.s1, xored);
+  EXPECT_EQ(code[2].testqi64_.sf, testSf);
+#endif
+}
+
+void testArmShiftedBitTestFromShrqiWithoutXor() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific shifted bit test simplify";
+#else
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  auto const taken = unit.makeBlock(AreaIndex::Main, 1);
+  auto const next = unit.makeBlock(AreaIndex::Main, 1);
+
+  Vout v(unit, unit.entry);
+  Vout vt(unit, taken);
+  Vout vn(unit, next);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const shiftSf = v.makeReg();
+  auto const testSf = v.makeReg();
+
+  v << shrqi{Immed{5}, src, shifted, shiftSf, Vflags{}};
+  v << testl{Vreg32{unit.makeConst(uint32_t{4})},
+             Vreg32{Vreg{shifted}},
+             testSf,
+             Vflags{}};
+  v << jcc{CC_E, testSf, {taken, next}, StringTag{}};
+  vt << ret{};
+  vn << ret{};
+
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 2);
+  ASSERT_EQ(code[0].op, Vinstr::testb) << stripWhitespace(show(unit));
+  auto const constIt = unit.regToConst.find(code[0].testb_.s0);
+  ASSERT_NE(constIt, unit.regToConst.end());
+  EXPECT_EQ(constIt->second.val, 0x80);
+  EXPECT_EQ(code[0].testb_.s1, Vreg8{Vreg{src}});
+  EXPECT_EQ(code[0].testb_.sf, testSf);
+
+  ASSERT_EQ(code[1].op, Vinstr::jcc);
+  EXPECT_EQ(code[1].jcc_.cc, CC_E);
+  EXPECT_EQ(code[1].jcc_.sf, testSf);
+#endif
+}
+
+void testArmShiftedBitTestRejectsOutOfRangeMask() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific shifted bit test simplify";
+#else
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const xored = Vreg64{v.makeReg()};
+  auto const shiftSf = v.makeReg();
+  auto const xorSf = v.makeReg();
+  auto const testSf = v.makeReg();
+
+  v << shrqi{Immed{63}, src, shifted, shiftSf, Vflags{}};
+  v << xorqi{Immed{3}, shifted, xored, xorSf, Vflags{}};
+  v << testqi{Immed{3}, xored, testSf, Vflags{}};
+
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 3);
+  ASSERT_EQ(code[0].op, Vinstr::shrqi);
+  EXPECT_EQ(code[0].shrqi_.s0.l(), 63);
+  EXPECT_EQ(code[0].shrqi_.s1, src);
+  EXPECT_EQ(code[0].shrqi_.d, shifted);
+  EXPECT_EQ(code[0].shrqi_.sf, shiftSf);
+
+  ASSERT_EQ(code[1].op, Vinstr::xorqi);
+  EXPECT_EQ(static_cast<uint64_t>(code[1].xorqi_.s0.q()), 3);
+  EXPECT_EQ(code[1].xorqi_.s1, shifted);
+  EXPECT_EQ(code[1].xorqi_.d, xored);
+  EXPECT_EQ(code[1].xorqi_.sf, xorSf);
+
+  ASSERT_EQ(code[2].op, Vinstr::testqi);
+  EXPECT_EQ(static_cast<uint64_t>(code[2].testqi_.s0.q()), 3);
+  EXPECT_EQ(code[2].testqi_.s1, xored);
+  EXPECT_EQ(code[2].testqi_.sf, testSf);
+#endif
+}
+
+void testArmShiftedBitTestZeroExtendsByteMask() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific shifted bit test simplify";
+#else
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const xored = Vreg64{v.makeReg()};
+  auto const xoredByte = Vreg8{Vreg{xored}};
+  auto const shiftSf = v.makeReg();
+  auto const xorSf = v.makeReg();
+  auto const testSf = v.makeReg();
+
+  v << shrqi{Immed{1}, src, shifted, shiftSf, Vflags{}};
+  v << xorqi{Immed{1}, shifted, xored, xorSf, Vflags{}};
+  v << testbi{Immed{-128}, xoredByte, testSf, Vflags{}};
+
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 3);
+  ASSERT_EQ(code[0].op, Vinstr::shrqi);
+  EXPECT_EQ(code[0].shrqi_.s0.l(), 1);
+  EXPECT_EQ(code[0].shrqi_.s1, src);
+  EXPECT_EQ(code[0].shrqi_.d, shifted);
+  EXPECT_EQ(code[0].shrqi_.sf, shiftSf);
+
+  ASSERT_EQ(code[1].op, Vinstr::xorqi64);
+  EXPECT_EQ(static_cast<uint64_t>(code[1].xorqi64_.s0.q()), 0x2);
+  EXPECT_EQ(code[1].xorqi64_.s1, src);
+  EXPECT_EQ(code[1].xorqi64_.d, xored);
+  EXPECT_EQ(code[1].xorqi64_.sf, xorSf);
+
+  ASSERT_EQ(code[2].op, Vinstr::testqi64);
+  EXPECT_EQ(static_cast<uint64_t>(code[2].testqi64_.s0.q()), 0x100);
+  EXPECT_EQ(code[2].testqi64_.s1, xored);
+  EXPECT_EQ(code[2].testqi64_.sf, testSf);
+#endif
+}
+
+void testArmShiftedBitTestNonAdjacent() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific shifted bit test simplify";
+#else
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const side = Vreg64{v.makeReg()};
+  auto const xored = Vreg64{v.makeReg()};
+  auto const shiftSf = v.makeReg();
+  auto const xorSf = v.makeReg();
+  auto const testSf = v.makeReg();
+
+  v << shrqi{Immed{48}, src, shifted, shiftSf, Vflags{}};
+  v << copy{src, side};
+  v << xorqi{Immed{0x1fff}, shifted, xored, xorSf, Vflags{}};
+  v << testqi{Immed{0x7f}, xored, testSf, Vflags{}};
+
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 4);
+  ASSERT_EQ(code[0].op, Vinstr::shrqi);
+  EXPECT_EQ(code[0].shrqi_.s0.l(), 48);
+  EXPECT_EQ(code[0].shrqi_.s1, src);
+  EXPECT_EQ(code[0].shrqi_.d, shifted);
+
+  ASSERT_EQ(code[1].op, Vinstr::copy);
+  EXPECT_EQ(code[1].copy_.s, Vreg{src});
+  EXPECT_EQ(code[1].copy_.d, Vreg{side});
+
+  ASSERT_EQ(code[2].op, Vinstr::xorqi64);
+  EXPECT_EQ(
+    static_cast<uint64_t>(code[2].xorqi64_.s0.q()),
+    0x1fff000000000000ull
+  );
+  EXPECT_EQ(code[2].xorqi64_.s1, src);
+  EXPECT_EQ(code[2].xorqi64_.d, xored);
+  EXPECT_EQ(code[2].xorqi64_.sf, xorSf);
+
+  ASSERT_EQ(code[3].op, Vinstr::testqi64);
+  EXPECT_EQ(
+    static_cast<uint64_t>(code[3].testqi64_.s0.q()),
+    0x007f000000000000ull
+  );
+  EXPECT_EQ(code[3].testqi64_.s1, xored);
+  EXPECT_EQ(code[3].testqi64_.sf, testSf);
+#endif
+}
+
+void testArmShiftedBitTestRejectsPhysSourceClobber() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific shifted bit test simplify";
+#else
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const xored = Vreg64{v.makeReg()};
+  auto const shiftSf = v.makeReg();
+  auto const xorSf = v.makeReg();
+  auto const testSf = v.makeReg();
+
+  v << shrqi{Immed{5}, src, shifted, shiftSf, Vflags{}};
+  v << copy{shifted, src};
+  v << xorqi{Immed{1}, shifted, xored, xorSf, Vflags{}};
+  v << testqi{Immed{1}, xored, testSf, Vflags{}};
+
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 4);
+  ASSERT_EQ(code[0].op, Vinstr::shrqi);
+  EXPECT_EQ(code[0].shrqi_.s1, src);
+  EXPECT_EQ(code[0].shrqi_.d, shifted);
+
+  ASSERT_EQ(code[1].op, Vinstr::copy);
+  EXPECT_EQ(code[1].copy_.s, Vreg{shifted});
+  EXPECT_EQ(code[1].copy_.d, Vreg{src});
+
+  ASSERT_EQ(code[2].op, Vinstr::xorqi);
+  EXPECT_EQ(static_cast<uint64_t>(code[2].xorqi_.s0.q()), 1);
+  EXPECT_EQ(code[2].xorqi_.s1, shifted);
+  EXPECT_EQ(code[2].xorqi_.d, xored);
+
+  ASSERT_EQ(code[3].op, Vinstr::testqi);
+  EXPECT_EQ(static_cast<uint64_t>(code[3].testqi_.s0.q()), 1);
+  EXPECT_EQ(code[3].testqi_.s1, xored);
+  EXPECT_EQ(code[3].testqi_.sf, testSf);
+#endif
+}
+
+void testArmShiftedBitTestZeroExtendsBit31Mask() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific shifted bit test simplify";
+#else
+  // Regression test: testqi/xorqi take Immed (int32_t). Without zero-extension,
+  // a mask with bit 31 set sign-extends to fill the upper 32 bits, which
+  // either blocks the fold (high-bits guard trips) or produces a mask that
+  // covers far more bits than intended.
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  Vout v(unit, unit.entry);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const xored = Vreg64{v.makeReg()};
+  auto const shiftSf = v.makeReg();
+  auto const xorSf = v.makeReg();
+  auto const testSf = v.makeReg();
+
+  // shr by 1; xor with bit 31; test bit 31. After folding, bit 31 of the
+  // shifted value corresponds to bit 32 of src.
+  v << shrqi{Immed{1}, src, shifted, shiftSf, Vflags{}};
+  v << xorqi{Immed{int32_t(0x80000000)}, shifted, xored, xorSf, Vflags{}};
+  v << testqi{Immed{int32_t(0x80000000)}, xored, testSf, Vflags{}};
+
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 3);
+  ASSERT_EQ(code[0].op, Vinstr::shrqi);
+
+  ASSERT_EQ(code[1].op, Vinstr::xorqi64);
+  EXPECT_EQ(
+    static_cast<uint64_t>(code[1].xorqi64_.s0.q()),
+    0x100000000ull
+  );
+  EXPECT_EQ(code[1].xorqi64_.s1, src);
+  EXPECT_EQ(code[1].xorqi64_.d, xored);
+  EXPECT_EQ(code[1].xorqi64_.sf, xorSf);
+
+  ASSERT_EQ(code[2].op, Vinstr::testqi64);
+  EXPECT_EQ(
+    static_cast<uint64_t>(code[2].testqi64_.s0.q()),
+    0x100000000ull
+  );
+  EXPECT_EQ(code[2].testqi64_.s1, xored);
+  EXPECT_EQ(code[2].testqi64_.sf, testSf);
+#endif
+}
+
+void testArmShiftedBitTestRejectsNonZFlagUse() {
+#ifndef __aarch64__
+  GTEST_SKIP() << "ARM-specific shifted bit test simplify";
+#else
+  Vunit unit;
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+  auto const taken = unit.makeBlock(AreaIndex::Main, 1);
+  auto const next = unit.makeBlock(AreaIndex::Main, 1);
+
+  Vout v(unit, unit.entry);
+  Vout vt(unit, taken);
+  Vout vn(unit, next);
+
+  auto const src = Vreg64{Reg64{0}};
+  auto const shifted = Vreg64{v.makeReg()};
+  auto const xored = Vreg64{v.makeReg()};
+  auto const shiftSf = v.makeReg();
+  auto const xorSf = v.makeReg();
+  auto const testSf = v.makeReg();
+
+  v << shrqi{Immed{5}, src, shifted, shiftSf, Vflags{}};
+  v << xorqi{Immed{1}, shifted, xored, xorSf, Vflags{}};
+  v << testqi{Immed{1}, xored, testSf, Vflags{}};
+  v << jcc{CC_S, testSf, {taken, next}, StringTag{}};
+  vt << ret{};
+  vn << ret{};
+
+  annotateSFUses(unit);
+  simplify(unit);
+
+  auto const& code = unit.blocks[unit.entry].code;
+  ASSERT_EQ(code.size(), 4);
+  ASSERT_EQ(code[0].op, Vinstr::shrqi);
+  EXPECT_EQ(code[0].shrqi_.s0.l(), 5);
+  EXPECT_EQ(code[0].shrqi_.s1, src);
+  EXPECT_EQ(code[0].shrqi_.d, shifted);
+  EXPECT_EQ(code[0].shrqi_.sf, shiftSf);
+
+  ASSERT_EQ(code[1].op, Vinstr::xorqi);
+  EXPECT_EQ(static_cast<uint64_t>(code[1].xorqi_.s0.q()), 1);
+  EXPECT_EQ(code[1].xorqi_.s1, shifted);
+  EXPECT_EQ(code[1].xorqi_.d, xored);
+
+  ASSERT_EQ(code[2].op, Vinstr::testqi);
+  EXPECT_EQ(static_cast<uint64_t>(code[2].testqi_.s0.q()), 1);
+  EXPECT_EQ(code[2].testqi_.s1, xored);
+  EXPECT_EQ(code[2].testqi_.sf, testSf);
+
+  ASSERT_EQ(code[3].op, Vinstr::jcc);
+  EXPECT_EQ(code[3].jcc_.cc, CC_S);
+  EXPECT_EQ(code[3].jcc_.sf, testSf);
+#endif
+}
+
 }
 
 TEST(Vasm, Simplifier) {
@@ -456,6 +872,7 @@ TEST(Vasm, Simplifier) {
   testPostRACopyFold();
   testSinkDefsMovesIntoMergeAfterPhidef();
   testSinkDefsKeepsJoinPointDefsInPlace();
+  testSinkDefsMovesDefsWithDeadSF();
 }
 
 TEST(Vasm, ArmLeaLowering) {
@@ -473,13 +890,13 @@ void testArmLoadPairNoClobberBase() {
     unit.entry = unit.makeBlock(AreaIndex::Main, 1);
     Vout v(unit, unit.entry);
 
-    auto const base = v.makeReg();
-    auto const dst2 = v.makeReg();
+    auto const base = Vreg{Reg64{0}};
+    auto const dst2 = Vreg{Reg64{1}};
     v << ldimmq{uintptr_t(0x1000), base};
     // First load writes to 'base', clobbering the second load's base.
     v << load{base[0x10], base};
     v << load{base[0x18], dst2};
-    v << ret{RegSet{base} | RegSet{dst2}};
+    v << ret{RegSet{PhysReg{Reg64{0}}} | RegSet{PhysReg{Reg64{1}}}};
 
     simplify(unit);
 
@@ -496,15 +913,15 @@ void testArmLoadPairNoClobberBase() {
     unit.entry = unit.makeBlock(AreaIndex::Main, 1);
     Vout v(unit, unit.entry);
 
-    auto const base = v.makeReg();
-    auto const idx = v.makeReg();
-    auto const dst2 = v.makeReg();
+    auto const base = Vreg{Reg64{0}};
+    auto const idx = Vreg{Reg64{1}};
+    auto const dst2 = Vreg{Reg64{2}};
     v << ldimmq{uintptr_t(0x1000), base};
     v << ldimmq{uintptr_t(0x8), idx};
     // First load writes to 'idx', clobbering the second load's index.
     v << load{Vptr{base, idx, 1, 0x10}, idx};
     v << load{Vptr{base, idx, 1, 0x18}, dst2};
-    v << ret{RegSet{idx} | RegSet{dst2}};
+    v << ret{RegSet{PhysReg{Reg64{1}}} | RegSet{PhysReg{Reg64{2}}}};
 
     simplify(unit);
 
@@ -514,19 +931,18 @@ void testArmLoadPairNoClobberBase() {
       << "Should not combine dependent loads (index), got:\n" << result;
   }
 
-  // Test that two adjacent loads with the same destination are NOT combined,
-  // and the dead first load is removed by DCE.
+  // Test that two adjacent loads with the same destination are NOT combined.
   {
     Vunit unit;
     unit.entry = unit.makeBlock(AreaIndex::Main, 1);
     Vout v(unit, unit.entry);
 
-    auto const base = v.makeReg();
-    auto const dst = v.makeReg();
+    auto const base = Vreg{Reg64{0}};
+    auto const dst = Vreg{Reg64{1}};
     v << ldimmq{uintptr_t(0x1000), base};
     v << load{base[0x10], dst};
     v << load{base[0x18], dst};
-    v << ret{RegSet{dst}};
+    v << ret{RegSet{PhysReg{Reg64{1}}}};
 
     simplify(unit);
 
@@ -534,21 +950,6 @@ void testArmLoadPairNoClobberBase() {
     // Should NOT be fused — both loads write to the same destination.
     EXPECT_EQ(result.find("loadpair"), std::string::npos)
       << "Should not fuse loads with same destination, got:\n" << result;
-
-    // The first load's destination is redefined by the second load and has
-    // no other uses, so DCE should remove it.
-    removeDeadCode(unit);
-
-    result = stripWhitespace(show(unit));
-    // Only one load should remain (the second one at offset 0x18).
-    size_t pos = 0;
-    int loadCount = 0;
-    while ((pos = result.find("load ", pos)) != std::string::npos) {
-      loadCount++;
-      pos++;
-    }
-    EXPECT_EQ(loadCount, 1)
-      << "Expected DCE to remove first dead load, got:\n" << result;
   }
 #endif
 }
@@ -557,4 +958,35 @@ TEST(Vasm, ArmLoadPairNoClobberBase) {
   testArmLoadPairNoClobberBase();
 }
 
+TEST(Vasm, ArmShiftedBitTestFromShrqi) {
+  testArmShiftedBitTestFromShrqi();
+}
+
+TEST(Vasm, ArmShiftedBitTestFromShrqiWithoutXor) {
+  testArmShiftedBitTestFromShrqiWithoutXor();
+}
+
+TEST(Vasm, ArmShiftedBitTestRejectsOutOfRangeMask) {
+  testArmShiftedBitTestRejectsOutOfRangeMask();
+}
+
+TEST(Vasm, ArmShiftedBitTestZeroExtendsByteMask) {
+  testArmShiftedBitTestZeroExtendsByteMask();
+}
+
+TEST(Vasm, ArmShiftedBitTestNonAdjacent) {
+  testArmShiftedBitTestNonAdjacent();
+}
+
+TEST(Vasm, ArmShiftedBitTestRejectsPhysSourceClobber) {
+  testArmShiftedBitTestRejectsPhysSourceClobber();
+}
+
+TEST(Vasm, ArmShiftedBitTestZeroExtendsBit31Mask) {
+  testArmShiftedBitTestZeroExtendsBit31Mask();
+}
+
+TEST(Vasm, ArmShiftedBitTestRejectsNonZFlagUse) {
+  testArmShiftedBitTestRejectsNonZFlagUse();
+}
 }

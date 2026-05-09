@@ -17,13 +17,17 @@
 #include "hphp/runtime/vm/jit/vasm-simplify-internal.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
+#include "hphp/runtime/vm/jit/vasm-info.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
 #include "hphp/vixl/hphp-compat.h"
+
+#include <algorithm>
 
 namespace HPHP::jit::arm {
 
@@ -122,6 +126,185 @@ bool simplify(Env& env, const shrqi& inst, Vlabel b, size_t i) {
       return 2;
     });
   });
+}
+
+constexpr auto kInvalidIndex = size_t(-1);
+
+bool inst_defines_reg(const Vunit& unit, const Vinstr& inst, Vreg reg) {
+  auto defines = false;
+  visitDefs(unit, inst, [&] (Vreg r) {
+    if (r.isValid() && r == reg) defines = true;
+  });
+  return defines;
+}
+
+size_t find_def_index(Env& env, Vlabel b, Vreg reg, size_t before) {
+  if (!reg.isValid() || reg.isPhys()) return kInvalidIndex;
+  auto const& code = env.unit.blocks[b].code;
+  auto const end = std::min(before, code.size());
+  for (auto i = end; i != 0; --i) {
+    auto const idx = i - 1;
+    if (inst_defines_reg(env.unit, code[idx], reg)) return idx;
+  }
+  return kInvalidIndex;
+}
+
+bool phys_source_clobbered(Env& env,
+                           Vlabel b,
+                           Vreg src,
+                           size_t begin,
+                           size_t end) {
+  if (!src.isPhys()) return false;
+  auto const& code = env.unit.blocks[b].code;
+  for (auto i = begin; i < end; ++i) {
+    if (!isPure(code[i])) return true;
+    if (inst_defines_reg(env.unit, code[i], src)) return true;
+  }
+  return false;
+}
+
+struct ShiftedExtract {
+  uint64_t shift{0};
+  Vreg64 src{Vreg::kInvalidReg};
+  Vreg64 dst{Vreg::kInvalidReg};
+};
+
+bool get_shifted_extract(Env& env,
+                         const shrqi& inst,
+                         ShiftedExtract& out) {
+  if (inst.fl != 0 || env.use_counts[inst.sf] != 0) return false;
+  out.shift = inst.s0.l();
+  out.src = inst.s1;
+  out.dst = inst.d;
+  return true;
+}
+
+struct XorInfo {
+  uint64_t imm{0};
+  Vreg64 src{Vreg::kInvalidReg};
+  Vreg64 dst{Vreg::kInvalidReg};
+  VregSF sf{InvalidReg};
+  Vflags fl{0};
+};
+
+// xorqi.s0 is Immed (32-bit); zero-extend so masks with bit 31 set don't
+// pick up spurious 1s in the upper 32 bits via sign-extension. xorqi64.s0
+// is already a full 64-bit immediate.
+XorInfo get_xor_info(const xorqi& inst) {
+  return XorInfo{inst.s0.ul(), inst.s1, inst.d, inst.sf, inst.fl};
+}
+
+XorInfo get_xor_info(const xorqi64& inst) {
+  return XorInfo{static_cast<uint64_t>(inst.s0.q()),
+                 inst.s1, inst.d, inst.sf, inst.fl};
+}
+
+// Narrow test immediates are logical masks, not sign-extended integers, so
+// zero-extend them. There is no generic fallback: any unhandled test op
+// passed to simplify_shifted_bit_test will fail to compile.
+uint64_t get_test_imm(const testbi& inst) { return inst.s0.ub(); }
+uint64_t get_test_imm(const testwi& inst) { return inst.s0.uw(); }
+uint64_t get_test_imm(const testli& inst) { return inst.s0.ul(); }
+uint64_t get_test_imm(const testqi& inst) { return inst.s0.ul(); }
+uint64_t get_test_imm(const testqi64& inst) {
+  return static_cast<uint64_t>(inst.s0.q());
+}
+
+bool test_uses_only_z_flag(Env& env, VregSF sf, Vflags fl) {
+  if (env.use_counts[sf] == 0) return true;
+  return fl == static_cast<Vflags>(StatusFlags::Z);
+}
+
+struct TestInfo {
+  uint64_t imm{0};
+  Vreg src;
+  VregSF sf{InvalidReg};
+  Vflags fl{0};
+};
+
+template<typename Test>
+TestInfo get_test_info(const Test& inst) {
+  return TestInfo{get_test_imm(inst), inst.s1, inst.sf, inst.fl};
+}
+
+template<typename Test>
+bool simplify_shifted_bit_test(Env& env,
+                               const Test& inst,
+                               Vlabel b,
+                               size_t testIdx) {
+  auto const& code = env.unit.blocks[b].code;
+
+  auto const vtest = get_test_info(inst);
+  if (!test_uses_only_z_flag(env, vtest.sf, vtest.fl)) return false;
+
+  auto const xorIdx = find_def_index(env, b, vtest.src, testIdx);
+  if (xorIdx == kInvalidIndex) return false;
+
+  XorInfo vxor;
+  switch (code[xorIdx].op) {
+    case Vinstr::xorqi:   vxor = get_xor_info(code[xorIdx].xorqi_);   break;
+    case Vinstr::xorqi64: vxor = get_xor_info(code[xorIdx].xorqi64_); break;
+    default: return false;
+  }
+  if (Vreg{vxor.dst} != vtest.src) return false;
+  if (env.use_counts[vxor.dst] != 1) return false;
+  if (env.use_counts[vxor.sf] != 0) return false;
+
+  auto const shiftIdx = find_def_index(env, b, vxor.src, xorIdx);
+  if (shiftIdx == kInvalidIndex) return false;
+
+  ShiftedExtract extract;
+  if (code[shiftIdx].op != Vinstr::shrqi) return false;
+  if (!get_shifted_extract(env, code[shiftIdx].shrqi_, extract)) return false;
+  if (Vreg{extract.dst} != Vreg{vxor.src}) return false;
+  if (phys_source_clobbered(env, b, extract.src, shiftIdx + 1, testIdx)) {
+    return false;
+  }
+
+  if (extract.shift == 0 || extract.shift >= 64) return false;
+
+  auto const testImm = vtest.imm;
+  // Bits above 63 - shift are constants after the extract, so rewriting the
+  // test onto the pre-shift source would silently drop them.
+  if ((testImm >> (64 - extract.shift)) != 0) return false;
+
+  auto const shiftedXor = vxor.imm << extract.shift;
+  auto const shiftedTest = testImm << extract.shift;
+  if (!vixl::Assembler::IsImmLogical(shiftedXor, vixl::kXRegSize) ||
+      !vixl::Assembler::IsImmLogical(shiftedTest, vixl::kXRegSize)) {
+    return false;
+  }
+
+  return simplify_impl(env, b, xorIdx, [&] (Vout& v) {
+    v << xorqi64{Immed64{static_cast<int64_t>(shiftedXor)},
+                 extract.src, vxor.dst, vxor.sf, vxor.fl};
+    for (auto i = xorIdx + 1; i < testIdx; ++i) {
+      v << code[i];
+    }
+    v << testqi64{Immed64{static_cast<int64_t>(shiftedTest)},
+                  vxor.dst, vtest.sf, vtest.fl};
+    return testIdx - xorIdx + 1;
+  });
+}
+
+bool simplify(Env& env, const testbi& inst, Vlabel b, size_t i) {
+  return simplify_shifted_bit_test(env, inst, b, i);
+}
+
+bool simplify(Env& env, const testwi& inst, Vlabel b, size_t i) {
+  return simplify_shifted_bit_test(env, inst, b, i);
+}
+
+bool simplify(Env& env, const testli& inst, Vlabel b, size_t i) {
+  return simplify_shifted_bit_test(env, inst, b, i);
+}
+
+bool simplify(Env& env, const testqi& inst, Vlabel b, size_t i) {
+  return simplify_shifted_bit_test(env, inst, b, i);
+}
+
+bool simplify(Env& env, const testqi64& inst, Vlabel b, size_t i) {
+  return simplify_shifted_bit_test(env, inst, b, i);
 }
 
 bool simplify(Env& env, const testq& inst, Vlabel b, size_t i) {

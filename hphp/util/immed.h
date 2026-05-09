@@ -70,6 +70,7 @@ struct Immed {
 
   int64_t q() const { return m_int; }
   int32_t l() const { return safe_cast<int32_t>(m_int); }
+  uint32_t ul() const { return static_cast<uint32_t>(m_int); }
   int16_t w() const { return safe_cast<int16_t>(m_int); }
   uint16_t uw() const { return static_cast<uint16_t>(m_int); }
   int8_t  b() const { return safe_cast<int8_t>(m_int); }

@@ -52,6 +52,7 @@ struct SinkMove {
 
 bool isSinkableDef(const Vunit& unit,
                    const Abi& abi,
+                   const SinkAnalysis& analysis,
                    const Vinstr& inst,
                    Vreg& d) {
   if (!isPure(inst)) return false;
@@ -62,20 +63,35 @@ bool isSinkableDef(const Vunit& unit,
   auto defs = size_t{0};
   auto touchesPhys = false;
   auto touchesFlags = false;
-  auto const noteOperand = [&] (Vreg r, Width w) {
+  auto const noteUse = [&] (Vreg r, Width w) {
     if (!r.isValid()) return;
-    // isPure() still allows explicit flag consumers/producers such as cmov/test,
-    // but sinkDefs only moves register-only definitions.
     if (w == Width::Flags) {
       touchesFlags = true;
       return;
     }
     if (r.isPhys()) touchesPhys = true;
   };
+  auto const noteDef = [&] (Vreg r, Width w) {
+    if (!r.isValid()) return;
+    if (w == Width::Flags) {
+      // isPure() still allows flag producers (test/cmp/etc.); we can sink
+      // those when the SF they define is dead. useBlocks is computed up
+      // front for all regs in this unit, so an empty entry means no later
+      // instruction reads this SF. The bounds check is defensive against a
+      // future pass introducing SF regs after analyzeSinks ran.
+      if (r.isPhys() ||
+          r >= analysis.useBlocks.size() ||
+          !analysis.useBlocks[r].empty()) {
+        touchesFlags = true;
+      }
+      return;
+    }
+    if (r.isPhys()) touchesPhys = true;
+  };
 
-  visitUses(unit, inst, noteOperand);
+  visitUses(unit, inst, noteUse);
   visitDefs(unit, inst, [&] (Vreg r, Width w) {
-    noteOperand(r, w);
+    noteDef(r, w);
     if (!r.isValid() || w == Width::Flags || r.isPhys()) return;
     d = r;
     ++defs;
@@ -153,7 +169,7 @@ jit::vector<SinkMove> collectSinkMoves(const Vunit& unit,
     for (auto i = block.code.size(); i != 0; --i) {
       auto const idx = i - 1;
       auto d = Vreg{};
-      if (!isSinkableDef(unit, abi, block.code[idx], d)) {
+      if (!isSinkableDef(unit, abi, analysis, block.code[idx], d)) {
         continue;
       }
 

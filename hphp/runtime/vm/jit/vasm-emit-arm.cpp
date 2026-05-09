@@ -451,6 +451,7 @@ struct Vgen {
   void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
   void emit(const testqi& i) { a->Tst(X(i.s1), i.s0.q()); }
+  void emit(const testqi64& i) { a->Tst(X(i.s1), i.s0.q()); }
   void emit(const trap& /*i*/);
   void emit(const ucomisd& i) { a->Fcmp(D(i.s0), D(i.s1)); }
   void emit(const unpcklpd&);
@@ -461,6 +462,7 @@ struct Vgen {
   void emit(const xorl& i);
   void emit(const xorq& i);
   void emit(const xorqi& i);
+  void emit(const xorqi64& i);
   void emit(const crc32q& i) { a->Crc32cx(W(i.d), W(i.s1), X(i.s0)); }
 
   // arm intrinsics
@@ -1240,6 +1242,7 @@ Y(xorwi, Eor, W, i.s0.uw(), wzr)
 Y(xorl, Eor, W, W(i.s0), wzr)
 Y(xorq, Eor, X, X(i.s0), xzr)
 Y(xorqi, Eor, X, i.s0.q(), xzr)
+Y(xorqi64, Eor, X, i.s0.q(), xzr)
 
 #undef Y
 
@@ -2268,6 +2271,9 @@ void optimize(Vunit& unit, const Abi& abi, bool regalloc) {
 
   if (!unit.constToReg.empty()) {
     foldImms<arm::ImmFolder>(unit);
+    // foldImms can change flag producers, so refresh SF uses before simplify.
+    annotateSFUses(unit);
+    simplify(unit);
   }
   reuseImmq(unit);
   sinkDefs(unit, abi);

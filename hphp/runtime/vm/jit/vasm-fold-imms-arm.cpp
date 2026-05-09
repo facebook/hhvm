@@ -110,7 +110,18 @@ struct ImmFolder {
   void fold(testb& in, Vinstr& out) { return fold_test<testbi>(in, out); }
   void fold(testw& in, Vinstr& out) { return fold_test<testwi>(in, out); }
   void fold(testl& in, Vinstr& out) { return fold_test<testli>(in, out); }
-  void fold(testq& in, Vinstr& out) { return fold_test<testqi>(in, out); }
+  void fold(testq& in, Vinstr& out) {
+    // Copy `in` because it aliases `out` through the Vinstr union, and
+    // writing a differently-laid-out variant (e.g. testqi64) to `out` can
+    // corrupt fields read from `in`.
+    auto const in_copy = in;
+    int val;
+    uint64_t bm;
+    if (logical_imm(in_copy.s0, val))      { out = testqi{val, in_copy.s1, in_copy.sf}; }
+    else if (logical_imm(in_copy.s1, val)) { out = testqi{val, in_copy.s0, in_copy.sf}; }
+    else if (logical_bmsk(in_copy.s0, bm)) { out = testqi64{bm, in_copy.s1, in_copy.sf}; }
+    else if (logical_bmsk(in_copy.s1, bm)) { out = testqi64{bm, in_copy.s0, in_copy.sf}; }
+  }
   void fold(cmpb& in, Vinstr& out) { return fold_cmp<cmpbi>(in, out); }
   void fold(cmpw& in, Vinstr& out) { return fold_cmp<cmpwi>(in, out); }
   void fold(cmpl& in, Vinstr& out) { return fold_cmp<cmpli>(in, out); }
@@ -226,19 +237,28 @@ struct ImmFolder {
     }
   }
   void fold(xorq& in, Vinstr& out) {
+    // Copy `in` because it aliases `out` through the Vinstr union, and
+    // writing a differently-laid-out variant (e.g. xorqi64) to `out` can
+    // corrupt fields read from `in`.
+    auto const in_copy = in;
     int val;
-    if (logical_imm(in.s0, val)) {
-      if (val == 0 && !uses[in.sf]) {
-        out = copy{in.s1, in.d};
+    uint64_t bm;
+    if (logical_imm(in_copy.s0, val)) {
+      if (val == 0 && !uses[in_copy.sf]) {
+        out = copy{in_copy.s1, in_copy.d};
       } else {
-        out = xorqi{val, in.s1, in.d, in.sf};
+        out = xorqi{val, in_copy.s1, in_copy.d, in_copy.sf};
       }
-    } else if (logical_imm(in.s1, val)) {
-      if (val == 0 && !uses[in.sf]) {
-        out = copy{in.s0, in.d};
+    } else if (logical_imm(in_copy.s1, val)) {
+      if (val == 0 && !uses[in_copy.sf]) {
+        out = copy{in_copy.s0, in_copy.d};
       } else {
-        out = xorqi{val, in.s0, in.d, in.sf};
+        out = xorqi{val, in_copy.s0, in_copy.d, in_copy.sf};
       }
+    } else if (logical_bmsk(in_copy.s0, bm)) {
+      out = xorqi64{bm, in_copy.s1, in_copy.d, in_copy.sf};
+    } else if (logical_bmsk(in_copy.s1, bm)) {
+      out = xorqi64{bm, in_copy.s0, in_copy.d, in_copy.sf};
     }
   }
   void fold(copy& in, Vinstr& /*out*/) {

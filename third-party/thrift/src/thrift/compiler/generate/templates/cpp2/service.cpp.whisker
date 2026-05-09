@@ -25,4 +25,8 @@
   {{/if service.program.has_schema_const?}}
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
+{{#if service.is_fast_server?}}
+{{> service_cpp/fast_handlers_cpp}}
+{{#else}}
 {{> service_cpp/handlers_cpp}}
+{{/if service.is_fast_server?}}

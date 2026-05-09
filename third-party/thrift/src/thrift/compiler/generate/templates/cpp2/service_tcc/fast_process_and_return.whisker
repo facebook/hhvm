@@ -1,0 +1,115 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/server" as server}}
+{{#import "common/rpc" as rpc}}
+
+{{#let export partial fast_process_and_return |interface parent_service| captures |server rpc|}}
+{{#each interface.functions as |function|}}
+{{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+//
+// Method '{{function.name}}'
+//
+template <typename ProtocolReader, typename ProtocolWriter>
+::apache::thrift::fast_thrift::channel_pipeline::Result
+{{interface.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl(
+    uint32_t streamId,
+    std::unique_ptr<folly::IOBuf> data) noexcept {
+  // Local args storage so the user handler can take ownership of complex
+  // values (move-semantics) and primitives by value.
+  struct ArgsState {
+    {{#each function.params.fields as |param|}}
+      {{#if (not param.type.resolves_to_complex_return?)}}
+        {{#if param.type.enum?}}
+    {{param.type.cpp_type}} uarg_{{param.cpp_name}}{static_cast<{{param.type.cpp_type}}>(0)};
+        {{#else}}
+    {{param.type.cpp_type}} uarg_{{param.cpp_name}}{0};
+        {{/if param.type.enum?}}
+      {{#else}}
+    std::unique_ptr<{{param.type.cpp_type}}> uarg_{{param.cpp_name}} =
+        std::make_unique<{{param.type.cpp_type}}>();
+      {{/if (not param.type.resolves_to_complex_return?)}}
+    {{/each}}
+
+    ::{{interface.cpp_qualified_namespace}}::{{interface.cpp_name}}_{{function.prefixed_name}}_pargs pargs() {
+      ::{{interface.cpp_qualified_namespace}}::{{interface.cpp_name}}_{{function.prefixed_name}}_pargs args;
+      {{#each (array.enumerate function.params.fields) as |param_index param|}}
+        {{#if param.type.resolves_to_complex_return?}}
+      args.template get<{{param_index}}>().value = uarg_{{param.cpp_name}}.get();
+        {{#else}}
+      args.template get<{{param_index}}>().value = &uarg_{{param.cpp_name}};
+        {{/if param.type.resolves_to_complex_return?}}
+      {{/each}}
+      return args;
+    }
+  } args;
+
+  using PresultT = ::{{interface.cpp_qualified_namespace}}::{{interface.cpp_name}}_{{function.prefixed_name}}_presult;
+
+  // Outer cascade: deserialize args, send framework error and return on
+  // failure. parseArgsOrSendError owns the protocol read + the three
+  // catch-arms (TProtocolException → ERROR, std::exception → unknown app
+  // exception, ... → unknown app exception).
+  {
+    auto pargs = args.pargs();
+    if (auto err = ::apache::thrift::fast_thrift::thrift::parseArgsOrSendError<
+            ProtocolReader>(this, streamId, *data, pargs);
+        err.has_value()) {
+      return *err;
+    }
+  }
+
+  // Inner cascade: pre-instantiated FastHandlerCallback static templates
+  // own success-frame / declared-exception / undeclared-exception writes.
+  using Cb = ::apache::thrift::fast_thrift::thrift::FastHandlerCallback<{{#partial server.return_type function=function service=interface}}>;
+  auto callback = folly::makeDelayedDestructionUniquePtr<Cb>(
+      &Cb::template {{#if function.return_type.void?}}writeDone{{#else}}writeSuccess{{/if function.return_type.void?}}<PresultT, ProtocolWriter>,
+      &Cb::template writeException<PresultT, ProtocolWriter>,
+      this,
+      streamId,
+      getEventBase());
+
+  // Dispatch to the user-implemented FastServiceHandler<Service> method.
+  // The handler may complete synchronously or asynchronously; either way
+  // the callbacks own any further write/close coordination.
+  //
+  // A synchronous throw out of async_eb_* would otherwise hit the noexcept
+  // boundary on this function and terminate the process. Instead, hold a
+  // DestructorGuard so the callback stays alive even if the user moved it
+  // into a continuation that completed and released it, then route the
+  // exception through callback->exception() — but only if the callback
+  // hasn't already been completed (avoid double-write).
+  ::folly::DelayedDestruction::DestructorGuard guard(callback.get());
+  auto* cbRaw = callback.get();
+  try {
+    handler_->async_eb_{{function.cpp_name}}(
+        std::move(callback){{#partial server.get_args_ref function=function}});
+  } catch (...) {
+    if (!cbRaw->isCompleted()) {
+      cbRaw->exception(::folly::exception_wrapper(std::current_exception()));
+    }
+  }
+  return ::apache::thrift::fast_thrift::channel_pipeline::Result::Success;
+}
+
+//
+// End of Method '{{function.name}}'
+//
+
+{{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+{{/each}}
+{{/let partial}}

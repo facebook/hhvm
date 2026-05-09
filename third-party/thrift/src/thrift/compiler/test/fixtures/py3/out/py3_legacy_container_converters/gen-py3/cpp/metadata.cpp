@@ -38,6 +38,7 @@ namespace facebook::thrift::annotation::cpp {
   ::apache::thrift::detail::md::StructMetadata<EnableCustomTypeOrdering>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<GenerateServiceMethodDecorator>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<FastClient>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<FastServer>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NonOrderable>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DeclareHashSpecialization>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DeclareEqualToSpecialization>::gen(metadata);

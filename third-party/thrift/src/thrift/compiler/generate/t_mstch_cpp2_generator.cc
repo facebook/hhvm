@@ -1145,6 +1145,14 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
             return s->has_structured_annotation(kCppFastClientUri);
           });
     });
+    def.property("any_fast_server?", [](const t_program& self) {
+      return std::any_of(
+          self.services().begin(),
+          self.services().end(),
+          [](const t_service* s) {
+            return s->has_structured_annotation(kCppFastServerUri);
+          });
+    });
     def.property("any_method_decorators?", [this](const t_program& self) {
       return cpp_context_->has_method_decorators(self);
     });
@@ -2018,6 +2026,9 @@ class t_mstch_cpp2_generator : public t_whisker_generator {
     });
     def.property("is_fast_client?", [](const t_service& service) {
       return service.has_structured_annotation(kCppFastClientUri);
+    });
+    def.property("is_fast_server?", [](const t_service& service) {
+      return service.has_structured_annotation(kCppFastServerUri);
     });
 
     return std::move(def).make();

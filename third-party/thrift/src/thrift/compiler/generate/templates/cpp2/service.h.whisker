@@ -48,6 +48,9 @@
   {{#if service.cpp_requires_method_decorator?}}
 #include <thrift/lib/cpp2/gen/module_method_decorator_h.h>
   {{/if service.cpp_requires_method_decorator?}}
+  {{#if service.is_fast_server?}}
+#include <thrift/lib/cpp2/gen/fast_service_h.h>
+  {{/if service.is_fast_server?}}
 
 namespace folly {
   class IOBuf;
@@ -60,4 +63,8 @@ namespace apache { namespace thrift {
   namespace transport { class THeader; }
 }}
 
+{{#if service.is_fast_server?}}
+{{> service_h/fast_handlers_h}}
+{{#else}}
 {{> service_h/handlers_h}}
+{{/if service.is_fast_server?}}

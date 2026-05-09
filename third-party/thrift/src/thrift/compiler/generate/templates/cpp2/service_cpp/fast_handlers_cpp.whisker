@@ -1,0 +1,102 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+namespace apache::thrift {
+
+std::unique_ptr<
+    ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter,
+    folly::DelayedDestruction::Destructor>
+FastServiceHandler<{{service.qualified_name}}>::getAppAdapter(
+    std::shared_ptr<
+        ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapterFactory>
+        self) {
+  // Aliasing-ctor: shares ownership with `self` but stores `this` as the
+  // typed pointer. Avoids a runtime cast — the type is established at
+  // compile time by being inside this override.
+  std::shared_ptr<FastServiceHandler<{{service.qualified_name}}>> typed(
+      std::move(self), this);
+  return std::unique_ptr<
+      ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter,
+      folly::DelayedDestruction::Destructor>(
+      new ::{{service.cpp_qualified_namespace}}::{{service.cpp_name}}AppAdapter(
+          std::move(typed)));
+}
+
+} // namespace apache::thrift
+
+namespace {{service.cpp_qualified_namespace}} {
+
+{{service.cpp_name}}AppAdapter::{{service.cpp_name}}AppAdapter(
+    std::shared_ptr<
+        ::apache::thrift::FastServiceHandler<{{service.qualified_name}}>>
+        handler)
+    : handler_(std::move(handler)) {
+  {{#each service.functions as |function|}}
+  {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+  addMethodHandler(
+      "{{function.name}}",
+      +[](::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter* a,
+          uint32_t streamId,
+          std::unique_ptr<folly::IOBuf> data,
+          ::apache::thrift::ProtocolId p) noexcept {
+        return static_cast<{{service.cpp_name}}AppAdapter*>(a)
+            ->process_{{function.cpp_name}}(streamId, std::move(data), p);
+      });
+  {{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+  {{/each}}
+}
+
+{{#each service.functions as |function|}}
+{{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+::apache::thrift::fast_thrift::channel_pipeline::Result
+{{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}(
+    uint32_t streamId,
+    std::unique_ptr<folly::IOBuf> data,
+    ::apache::thrift::ProtocolId protocolId) noexcept {
+  switch (protocolId) {
+    case ::apache::thrift::ProtocolId::COMPACT:
+      return process_{{function.cpp_name}}_impl<
+          ::apache::thrift::CompactProtocolReader,
+          ::apache::thrift::CompactProtocolWriter>(streamId, std::move(data));
+    case ::apache::thrift::ProtocolId::BINARY:
+      return process_{{function.cpp_name}}_impl<
+          ::apache::thrift::BinaryProtocolReader,
+          ::apache::thrift::BinaryProtocolWriter>(streamId, std::move(data));
+    default: {
+      auto err = ::apache::thrift::fast_thrift::thrift::serializeResponseRpcError(
+          ::apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+          "Unsupported protocol id for fast_thrift server");
+      return writeError(streamId, std::move(err.data), err.errorCode);
+    }
+  }
+}
+
+template ::apache::thrift::fast_thrift::channel_pipeline::Result
+{{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl<
+    ::apache::thrift::CompactProtocolReader,
+    ::apache::thrift::CompactProtocolWriter>(
+    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+template ::apache::thrift::fast_thrift::channel_pipeline::Result
+{{service.cpp_name}}AppAdapter::process_{{function.cpp_name}}_impl<
+    ::apache::thrift::BinaryProtocolReader,
+    ::apache::thrift::BinaryProtocolWriter>(
+    uint32_t, std::unique_ptr<folly::IOBuf>) noexcept;
+
+{{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+{{/each}}
+
+} // namespace {{service.cpp_qualified_namespace}}

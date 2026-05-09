@@ -142,6 +142,8 @@ inline constexpr auto kCppDeclareEqualToSpecialization =
     "facebook.com/thrift/annotation/cpp/DeclareEqualToSpecialization";
 inline constexpr auto kCppFastClientUri =
     "facebook.com/thrift/annotation/cpp/FastClient";
+inline constexpr auto kCppFastServerUri =
+    "facebook.com/thrift/annotation/cpp/FastServer";
 
 // Java:
 inline constexpr auto kJavaMutableUri =

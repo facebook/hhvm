@@ -127,6 +127,11 @@ class FastHandlerCallback : public folly::DelayedDestruction {
     exceptionFn_(handler_, streamId_, std::move(ew));
   }
 
+  // True once result()/exception() has been invoked. Used by generated
+  // dispatchers to avoid double-completing a callback when a user handler
+  // both completes the callback and then throws synchronously.
+  bool isCompleted() const noexcept { return completed_; }
+
   folly::EventBase* getEventBase() const { return evb_; }
 
   // ---- Codegen-targeted static helpers ----
@@ -222,6 +227,11 @@ class FastHandlerCallback<void> : public folly::DelayedDestruction {
     completed_ = true;
     exceptionFn_(handler_, streamId_, std::move(ew));
   }
+
+  // True once done()/exception() has been invoked. Used by generated
+  // dispatchers to avoid double-completing a callback when a user handler
+  // both completes the callback and then throws synchronously.
+  bool isCompleted() const noexcept { return completed_; }
 
   folly::EventBase* getEventBase() const { return evb_; }
 

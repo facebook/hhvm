@@ -25,7 +25,7 @@
 namespace apache::thrift::fast_thrift::thrift {
 
 /**
- * Polymorphic base for every generated ServiceFastHandler<Service>. Provides
+ * Polymorphic base for every generated FastServiceHandler<Service>. Provides
  * a single virtual hook that FastThriftServer calls per accepted connection
  * to obtain a fresh per-connection app adapter. The override knows the
  * concrete <Service>AppAdapter type and constructs it; the server sees only

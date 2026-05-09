@@ -1,0 +1,116 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+{{#import "common/server" as server}}
+namespace apache::thrift {
+
+/**
+ * Service-shared interface for the fast_thrift server.
+ *
+ * Users specialize this by inheriting from
+ * apache::thrift::FastServiceHandler<{{service.qualified_name}}>
+ * and overriding async_eb_* methods. One shared instance is wired into
+ * every per-connection {{service.cpp_name}}AppAdapter.
+ *
+ * Each method takes a FastHandlerCallback that the user completes (with a
+ * value, with done(), or with an exception). The default implementation
+ * reports UNKNOWN_METHOD, so unimplemented methods fail loudly without
+ * requiring users to override every entry point.
+ */
+template <>
+class FastServiceHandler<{{service.qualified_name}}>
+    : public ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapterFactory {
+  static_assert(!folly::is_detected_v<::apache::thrift::detail::st::detect_complete, {{service.qualified_name}}>, "Definition collision with service tag. Either rename the Thrift service using @cpp.Name annotation or rename the conflicting C++ type.");
+
+ public:
+  ~FastServiceHandler() override = default;
+
+  // Construct a per-connection {{service.cpp_name}}AppAdapter. The
+  // server (FastThriftServer) calls this once per accepted connection.
+  std::unique_ptr<
+      ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter,
+      folly::DelayedDestruction::Destructor>
+      getAppAdapter(
+          std::shared_ptr<
+              ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapterFactory>
+              self) override;
+
+  {{#each service.functions as |function|}}
+  {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+  virtual void async_eb_{{function.cpp_name}}(
+      ::apache::thrift::fast_thrift::thrift::FastHandlerCallbackPtr<{{#partial server.return_type function=function service=service}}> callback{{#each function.params.fields as |field|}},
+      {{#partial server.param_type type=field.type function=function}} /*p_{{field.cpp_name}}*/{{/each}}) {
+    callback->exception(
+        folly::make_exception_wrapper<::apache::thrift::TApplicationException>(
+            ::apache::thrift::TApplicationException::UNKNOWN_METHOD,
+            "Unimplemented fast_thrift method: {{function.name}}"));
+  }
+  {{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+  {{/each}}
+};
+
+} // namespace apache::thrift
+
+namespace {{service.cpp_qualified_namespace}} {
+
+/**
+ * Per-connection adapter for the fast_thrift server.
+ *
+ * Inherits ThriftServerAppAdapter so the channel pipeline can drive it
+ * directly. Holds a std::shared_ptr to the user-provided
+ * FastServiceHandler<{{service.qualified_name}}> so the adapter outlives
+ * any in-flight callbacks that captured it.
+ */
+class {{service.cpp_name}}AppAdapter
+    : public ::apache::thrift::fast_thrift::thrift::ThriftServerAppAdapter {
+ public:
+  explicit {{service.cpp_name}}AppAdapter(
+      std::shared_ptr<
+          ::apache::thrift::FastServiceHandler<{{service.qualified_name}}>>
+          handler);
+
+  const std::shared_ptr<
+      ::apache::thrift::FastServiceHandler<{{service.qualified_name}}>>&
+  getHandler() const {
+    return handler_;
+  }
+
+ private:
+  std::shared_ptr<
+      ::apache::thrift::FastServiceHandler<{{service.qualified_name}}>>
+      handler_;
+
+  {{#each service.functions as |function|}}
+  {{#if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+  // Per-method dispatcher: switches on protocolId into the templated impl.
+  // Wrapped by a captureless-lambda thunk in the ctor when registered with
+  // the base's dispatch table.
+  ::apache::thrift::fast_thrift::channel_pipeline::Result process_{{function.cpp_name}}(
+      uint32_t streamId,
+      std::unique_ptr<folly::IOBuf> data,
+      ::apache::thrift::ProtocolId protocolId) noexcept;
+
+  template <typename ProtocolReader, typename ProtocolWriter>
+  ::apache::thrift::fast_thrift::channel_pipeline::Result
+  process_{{function.cpp_name}}_impl(
+      uint32_t streamId,
+      std::unique_ptr<folly::IOBuf> data) noexcept;
+  {{/if (and (not function.starts_interaction?) (not function.stream?) (not function.sink?) (not function.oneway?))}}
+  {{/each}}
+};
+
+} // namespace {{service.cpp_qualified_namespace}}

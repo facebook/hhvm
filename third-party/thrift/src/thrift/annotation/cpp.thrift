@@ -441,6 +441,22 @@ struct GenerateServiceMethodDecorator {}
 struct FastClient {}
 
 /**
+ * When applied to a service, generates an
+ * apache::thrift::FastServiceHandler<Service> specialization and a
+ * per-connection <Service>AppAdapter instead of the standard SvIf and
+ * AsyncProcessor. The generated server uses the fast_thrift pipeline for
+ * lower latency serialization and deserialization.
+ *
+ * Users implement apache::thrift::FastServiceHandler<MyService> and share
+ * a std::shared_ptr across per-connection <Service>AppAdapter instances.
+ *
+ * Only request/response functions are supported. Functions using streams,
+ * sinks, oneway, or interactions are skipped.
+ */
+@scope.Service
+struct FastServer {}
+
+/**
  * Marks a structured type as non-orderable, marking `operator<` as deleted.
  * This is useful when types should never be ordered. By default, `operator<` is
  * always declared, but depending on whether or not the type's shape is considered

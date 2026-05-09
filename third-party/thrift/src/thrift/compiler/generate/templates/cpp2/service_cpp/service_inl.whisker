@@ -16,9 +16,14 @@
 
 }}
 {{#import "service_tcc/process_and_return" as process_and_return}}
+{{#import "service_tcc/fast_process_and_return" as fast_process_and_return}}
 namespace {{service.cpp_qualified_namespace}} {
 {{#partial rpc.function_param_and_result_typedefs interface=service parent_service=null}}
+{{#if service.is_fast_server?}}
+{{#partial fast_process_and_return.fast_process_and_return interface=service parent_service=null}}
+{{#else}}
 {{#partial process_and_return.process_and_return interface=service parent_service=null}}
+{{/if service.is_fast_server?}}
 
   {{#each service.interactions as |interaction|}}
 {{#partial rpc.function_param_and_result_typedefs interface=interaction parent_service=service}}

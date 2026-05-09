@@ -199,6 +199,9 @@ class Client;
 template <class ServiceTag, class AppAdapter>
 class FastClient;
 
+template <class ServiceTag>
+class FastServiceHandler;
+
 namespace detail {
 
 // Specializations of ServiceMethodTypesFootprint<ServiceTag> provide a

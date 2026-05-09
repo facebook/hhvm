@@ -40,6 +40,8 @@ struct OverlayEntry {
   // source control Tree or Blob.  This contains the hash of that Tree or Blob.
   // If materialized, the hash is either unset or has zero length.
   3: optional Hash hash;
+  // Whether this entry is restricted by ACLs.
+  4: bool isRestricted;
 }
 
 struct OverlayDir {

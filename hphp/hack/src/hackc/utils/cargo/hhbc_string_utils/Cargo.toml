@@ -14,7 +14,7 @@ path = "../../string_utils.rs"
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 escaper = { version = "0.0.0", path = "../../../../utils/escaper" }
 lazy_static = "1.5"
-libc = "0.2.183"
+libc = "0.2.186"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 ocaml_helper = { version = "0.0.0", path = "../../../../utils/ocaml_helper" }
 regex = "1.12.3"

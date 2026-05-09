@@ -14,7 +14,7 @@ path = "shmrs.rs"
 ahash = { version = "0.8.11", features = ["runtime-rng"] }
 allocator-api2 = "0.2.21"
 hashbrown = "0.17"
-libc = "0.2.183"
+libc = "0.2.186"
 nohash-hasher = "0.2"
 static_assertions = "1.1.0"
 

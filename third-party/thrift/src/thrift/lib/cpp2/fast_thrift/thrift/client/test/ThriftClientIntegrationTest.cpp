@@ -44,6 +44,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/test/TestAsyncTransport.h>
@@ -76,6 +77,7 @@ HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
+HANDLER_TAG(thrift_client_checksum_handler);
 
 namespace {
 
@@ -244,6 +246,8 @@ class ThriftClientChannelIntegrationTest : public ::testing::Test {
             .setAllocator(&allocator_)
             .addNextInbound<client::handler::ThriftClientMetadataPushHandler>(
                 thrift_client_metadata_push_handler_tag)
+            .addNextOutbound<client::handler::ThriftClientChecksumHandler>(
+                thrift_client_checksum_handler_tag)
             .build();
 
     channel_->setPipeline(pipeline_.get());
@@ -1297,6 +1301,8 @@ class ThriftClientAppAdapterIntegrationTest : public ::testing::Test {
             .setAllocator(&allocator_)
             .addNextInbound<client::handler::ThriftClientMetadataPushHandler>(
                 thrift_client_metadata_push_handler_tag)
+            .addNextOutbound<client::handler::ThriftClientChecksumHandler>(
+                thrift_client_checksum_handler_tag)
             .build();
 
     client_.adapter().setPipeline(pipeline_.get());

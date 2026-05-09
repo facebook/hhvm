@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include <folly/GLog.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/util/ManagedStringView.h>
@@ -52,6 +53,38 @@ inline std::unique_ptr<apache::thrift::RequestRpcMetadata> makeRequestMetadata(
   if (rpcOptions.getPriority() < apache::thrift::concurrency::N_PRIORITIES) {
     metadata->priority() =
         static_cast<apache::thrift::RpcPriority>(rpcOptions.getPriority());
+  }
+
+  // Translate RpcOptions::Checksum into the corresponding metadata field.
+  // Only XXH3_64 is supported; CRC32 and SERVER_ONLY_CRC32 are accepted by
+  // the public RpcOptions API but treated as no-ops here — fast_thrift does
+  // not support CRC-family checksums. The value is left as a placeholder (0);
+  // ThriftClientChecksumHandler computes it over `data` later in the
+  // pipeline, before the transport adapter serializes the metadata.
+  switch (rpcOptions.getChecksum()) {
+    case apache::thrift::RpcOptions::Checksum::XXH3_64: {
+      apache::thrift::Checksum c;
+      c.algorithm() = apache::thrift::ChecksumAlgorithm::XXH3_64;
+      metadata->checksum() = c;
+      break;
+    }
+    case apache::thrift::RpcOptions::Checksum::CRC32:
+      FB_LOG_ONCE(ERROR)
+          << "RpcOptions::Checksum::CRC32 is not supported by fast_thrift; "
+             "use XXH3_64. Treating as NONE.";
+      break;
+    case apache::thrift::RpcOptions::Checksum::SERVER_ONLY_CRC32:
+      FB_LOG_ONCE(ERROR)
+          << "RpcOptions::Checksum::SERVER_ONLY_CRC32 is not supported by "
+             "fast_thrift; use XXH3_64. Treating as NONE.";
+      break;
+    case apache::thrift::RpcOptions::Checksum::NONE:
+      break;
+    default:
+      FB_LOG_ONCE(ERROR) << "Unexpected RpcOptions::Checksum value: "
+                         << static_cast<int>(rpcOptions.getChecksum())
+                         << ". Treating as NONE.";
+      break;
   }
 
   return metadata;

@@ -27,6 +27,7 @@
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/BufferAllocator.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/HandlerTag.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineBuilder.h>
@@ -43,6 +44,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestFastChildService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestFastChildServiceAsyncClient.h>
@@ -82,6 +84,7 @@ HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
+HANDLER_TAG(thrift_client_checksum_handler);
 
 /**
  * ConnectCallback - Callback for socket connection that triggers
@@ -335,6 +338,9 @@ class ThriftClientBackwardsCompatibilityE2ETest : public ::testing::Test {
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
                   thrift_client_metadata_push_handler_tag)
+              .addNextOutbound<
+                  thrift::client::handler::ThriftClientChecksumHandler>(
+                  thrift_client_checksum_handler_tag)
               .build();
 
       channel->setPipeline(clientPipeline_.get());
@@ -395,6 +401,33 @@ TEST_F(ThriftClientBackwardsCompatibilityE2ETest, EchoRequestResponse) {
   EXPECT_EQ(result, "hello world");
 
   // Destroy the client in the EventBase thread
+  clientThread_->getEventBase()->runInEventBaseThreadAndWait(
+      [&] { client.reset(); });
+}
+
+// =============================================================================
+// Checksum E2E Tests
+// =============================================================================
+// Exercise the wire path: ThriftClientChecksumHandler stamps the metadata,
+// the legacy server validates it. Only XXH3_64 is supported by fast_thrift;
+// CRC32 / SERVER_ONLY_CRC32 are intentionally not exercised.
+
+TEST_F(ThriftClientBackwardsCompatibilityE2ETest, EchoWithXXH3_64Checksum) {
+  channel_ = createFastThriftChannel();
+
+  auto client = std::make_unique<
+      apache::thrift::Client<BackwardsCompatibilityTestService>>(
+      std::move(channel_));
+
+  apache::thrift::RpcOptions options;
+  options.setChecksum(apache::thrift::RpcOptions::Checksum::XXH3_64);
+
+  auto result = folly::coro::blockingWait(
+      folly::coro::co_withExecutor(
+          clientThread_->getEventBase(),
+          client->co_echo(options, "xxh3 payload")));
+  EXPECT_EQ(result, "xxh3 payload");
+
   clientThread_->getEventBase()->runInEventBaseThreadAndWait(
       [&] { client.reset(); });
 }
@@ -756,6 +789,9 @@ class BackwardsCompatibilityFastClientE2ETest : public ::testing::Test {
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
                   thrift_client_metadata_push_handler_tag)
+              .addNextOutbound<
+                  thrift::client::handler::ThriftClientChecksumHandler>(
+                  thrift_client_checksum_handler_tag)
               .build();
 
       adapter->setPipeline(thriftPipeline_.get());

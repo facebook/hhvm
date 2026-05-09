@@ -48,6 +48,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
@@ -81,6 +82,7 @@ HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
+HANDLER_TAG(thrift_client_checksum_handler);
 
 // Server handler tags
 HANDLER_TAG(server_frame_length_parser_handler);
@@ -412,6 +414,9 @@ class FastThriftE2ETest : public ::testing::Test {
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
                   thrift_client_metadata_push_handler_tag)
+              .addNextOutbound<
+                  thrift::client::handler::ThriftClientChecksumHandler>(
+                  thrift_client_checksum_handler_tag)
               .build();
 
       channel->setPipeline(clientPipeline_.get());
@@ -779,6 +784,9 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
               .addNextInbound<
                   thrift::client::handler::ThriftClientMetadataPushHandler>(
                   thrift_client_metadata_push_handler_tag)
+              .addNextOutbound<
+                  thrift::client::handler::ThriftClientChecksumHandler>(
+                  thrift_client_checksum_handler_tag)
               .build();
 
       appAdapter->setPipeline(clientPipeline_.get());

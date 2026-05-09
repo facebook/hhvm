@@ -77,6 +77,63 @@ TEST(RequestMetadataTest, OmitsZeroTimeouts) {
   EXPECT_FALSE(md->queueTimeoutMs().has_value());
 }
 
+TEST(RequestMetadataTest, OmitsChecksumWhenNoneRequested) {
+  apache::thrift::RpcOptions options;
+
+  auto md = makeRequestMetadata(
+      options,
+      apache::thrift::ManagedStringView::from_static(std::string_view{"x"}),
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      apache::thrift::ProtocolId::COMPACT);
+
+  EXPECT_FALSE(md->checksum().has_value());
+  EXPECT_FALSE(md->crc32c().has_value());
+}
+
+TEST(RequestMetadataTest, SetsChecksumAlgorithmXXH3_64) {
+  apache::thrift::RpcOptions options;
+  options.setChecksum(apache::thrift::RpcOptions::Checksum::XXH3_64);
+
+  auto md = makeRequestMetadata(
+      options,
+      apache::thrift::ManagedStringView::from_static(std::string_view{"x"}),
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      apache::thrift::ProtocolId::COMPACT);
+
+  ASSERT_TRUE(md->checksum().has_value());
+  EXPECT_EQ(
+      *md->checksum()->algorithm(), apache::thrift::ChecksumAlgorithm::XXH3_64);
+  EXPECT_FALSE(md->crc32c().has_value());
+}
+
+TEST(RequestMetadataTest, CRC32IsUnsupportedAndOmitsChecksum) {
+  apache::thrift::RpcOptions options;
+  options.setChecksum(apache::thrift::RpcOptions::Checksum::CRC32);
+
+  auto md = makeRequestMetadata(
+      options,
+      apache::thrift::ManagedStringView::from_static(std::string_view{"x"}),
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      apache::thrift::ProtocolId::COMPACT);
+
+  EXPECT_FALSE(md->checksum().has_value());
+  EXPECT_FALSE(md->crc32c().has_value());
+}
+
+TEST(RequestMetadataTest, ServerOnlyCRC32IsUnsupportedAndOmitsChecksum) {
+  apache::thrift::RpcOptions options;
+  options.setChecksum(apache::thrift::RpcOptions::Checksum::SERVER_ONLY_CRC32);
+
+  auto md = makeRequestMetadata(
+      options,
+      apache::thrift::ManagedStringView::from_static(std::string_view{"x"}),
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      apache::thrift::ProtocolId::COMPACT);
+
+  EXPECT_FALSE(md->checksum().has_value());
+  EXPECT_FALSE(md->crc32c().has_value());
+}
+
 TEST(RequestMetadataTest, OptionsLessOverloadOmitsTimeoutsAndPriority) {
   auto md = makeRequestMetadata(
       apache::thrift::ManagedStringView::from_static(std::string_view{"q"}),

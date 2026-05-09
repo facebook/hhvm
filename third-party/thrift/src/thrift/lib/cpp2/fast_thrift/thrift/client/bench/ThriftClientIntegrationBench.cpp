@@ -61,6 +61,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/adapter/ThriftClientTransportAdapter.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientChecksumHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/bench/BenchAsyncTransport.h>
@@ -104,6 +105,7 @@ HANDLER_TAG(rocket_client_request_response_handler);
 HANDLER_TAG(rocket_client_error_frame_handler);
 HANDLER_TAG(rocket_client_stream_state_handler);
 HANDLER_TAG(thrift_client_metadata_push_handler);
+HANDLER_TAG(thrift_client_checksum_handler);
 
 // =============================================================================
 // Benchmark Request Callback - Minimal callback for benchmarks
@@ -366,6 +368,8 @@ struct BenchmarkFixture {
                          .setAllocator(&thriftAllocator)
                          .addNextInbound<ThriftClientMetadataPushHandler>(
                              thrift_client_metadata_push_handler_tag)
+                         .addNextOutbound<ThriftClientChecksumHandler>(
+                             thrift_client_checksum_handler_tag)
                          .build();
 
     channel->setPipeline(thriftPipeline.get());
@@ -439,6 +443,8 @@ struct AppAdapterBenchFixture {
                          .setAllocator(&thriftAllocator)
                          .addNextInbound<ThriftClientMetadataPushHandler>(
                              thrift_client_metadata_push_handler_tag)
+                         .addNextOutbound<ThriftClientChecksumHandler>(
+                             thrift_client_checksum_handler_tag)
                          .build();
 
     client.adapter().setPipeline(thriftPipeline.get());

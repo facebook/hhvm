@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftChannelServer.h>
 
 // Explicit instantiation for the default NoStats case
 template class apache::thrift::fast_thrift::thrift::FastThriftServerT<

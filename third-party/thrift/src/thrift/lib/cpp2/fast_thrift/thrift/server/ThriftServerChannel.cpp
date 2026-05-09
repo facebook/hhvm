@@ -410,7 +410,7 @@ void ThriftServerChannel::onException(folly::exception_wrapper&& e) noexcept {
   if (cb && pipeline_) {
     // Defer the close callback so that onException fully completes before
     // the callback potentially removes the last shared_ptr to this channel
-    // (from FastThriftServer::serverChannels_), destroying `this`.
+    // (from FastThriftChannelServer::serverChannels_), destroying `this`.
     pipeline_->eventBase()->runInEventBaseThread(std::move(cb));
   }
 }

@@ -15,11 +15,11 @@
  */
 
 /**
- * FastThriftServer End-to-End Benchmark
+ * FastThriftChannelServer End-to-End Benchmark
  *
- * Measures request-response throughput of FastThriftServer vs ThriftServer
- * using simple RPCs. Both servers use the same handler and the same
- * RocketClientChannel-based client, so the comparison isolates server-side
+ * Measures request-response throughput of FastThriftChannelServer vs
+ * ThriftServer using simple RPCs. Both servers use the same handler and the
+ * same RocketClientChannel-based client, so the comparison isolates server-side
  * differences.
  */
 
@@ -32,7 +32,7 @@
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftChannelServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestServiceAsyncClient.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
@@ -125,15 +125,18 @@ void destroyClient(folly::EventBase* evb, std::unique_ptr<ClientType>& client) {
   evb->runInEventBaseThreadAndWait([&] { client.reset(); });
 }
 
-// -- FastThriftServer fixture --
+// -- FastThriftChannelServer fixture --
 
-struct FastThriftServerFixture {
-  FastThriftServerFixture(const FastThriftServerFixture&) = delete;
-  FastThriftServerFixture& operator=(const FastThriftServerFixture&) = delete;
-  FastThriftServerFixture(FastThriftServerFixture&&) = delete;
-  FastThriftServerFixture& operator=(FastThriftServerFixture&&) = delete;
+struct FastThriftChannelServerFixture {
+  FastThriftChannelServerFixture(const FastThriftChannelServerFixture&) =
+      delete;
+  FastThriftChannelServerFixture& operator=(
+      const FastThriftChannelServerFixture&) = delete;
+  FastThriftChannelServerFixture(FastThriftChannelServerFixture&&) = delete;
+  FastThriftChannelServerFixture& operator=(FastThriftChannelServerFixture&&) =
+      delete;
 
-  FastThriftServerFixture() {
+  FastThriftChannelServerFixture() {
     THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
 
     handler = std::make_shared<BenchHandler>();
@@ -142,15 +145,15 @@ struct FastThriftServerFixture {
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
 
-    server =
-        std::make_unique<thrift::FastThriftServer>(std::move(config), handler);
+    server = std::make_unique<thrift::FastThriftChannelServer>(
+        std::move(config), handler);
     server->start();
 
     clientThread = std::make_unique<folly::ScopedEventBaseThread>();
     client = createClient(clientThread->getEventBase(), server->getAddress());
   }
 
-  ~FastThriftServerFixture() {
+  ~FastThriftChannelServerFixture() {
     destroyClient(clientThread->getEventBase(), client);
     clientThread.reset();
     server->stop();
@@ -158,7 +161,7 @@ struct FastThriftServerFixture {
   }
 
   std::shared_ptr<BenchHandler> handler;
-  std::unique_ptr<thrift::FastThriftServer> server;
+  std::unique_ptr<thrift::FastThriftChannelServer> server;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread;
   std::unique_ptr<ClientType> client;
 };
@@ -210,9 +213,9 @@ struct ThriftServerFixture {
 
 // -- Benchmarks --
 
-BENCHMARK(FastThriftServer_Ping, iters) {
+BENCHMARK(FastThriftChannelServer_Ping, iters) {
   folly::BenchmarkSuspender suspender;
-  FastThriftServerFixture fixture;
+  FastThriftChannelServerFixture fixture;
   auto* evb = fixture.clientThread->getEventBase();
   suspender.dismiss();
 
@@ -234,9 +237,9 @@ BENCHMARK(ThriftServer_Ping, iters) {
 
 BENCHMARK_DRAW_LINE();
 
-BENCHMARK(FastThriftServer_Echo, iters) {
+BENCHMARK(FastThriftChannelServer_Echo, iters) {
   folly::BenchmarkSuspender suspender;
-  FastThriftServerFixture fixture;
+  FastThriftChannelServerFixture fixture;
   auto* evb = fixture.clientThread->getEventBase();
   suspender.dismiss();
 
@@ -258,9 +261,9 @@ BENCHMARK(ThriftServer_Echo, iters) {
 
 BENCHMARK_DRAW_LINE();
 
-BENCHMARK(FastThriftServer_Add, iters) {
+BENCHMARK(FastThriftChannelServer_Add, iters) {
   folly::BenchmarkSuspender suspender;
-  FastThriftServerFixture fixture;
+  FastThriftChannelServerFixture fixture;
   auto* evb = fixture.clientThread->getEventBase();
   suspender.dismiss();
 

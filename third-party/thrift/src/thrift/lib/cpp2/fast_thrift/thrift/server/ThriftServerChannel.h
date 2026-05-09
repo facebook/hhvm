@@ -58,7 +58,7 @@ class ThriftServerChannel {
   ThriftServerChannel& operator=(ThriftServerChannel&&) = delete;
 
   // Set a callback invoked when the channel closes (connection error via
-  // onException) or is destroyed. Used by FastThriftServer to remove the
+  // onException) or is destroyed. Used by FastThriftChannelServer to remove the
   // channel from its tracking set.
   void setCloseCallback(std::function<void()> cb);
 

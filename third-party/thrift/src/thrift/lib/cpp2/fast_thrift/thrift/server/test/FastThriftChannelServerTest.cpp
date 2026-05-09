@@ -23,7 +23,7 @@
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
-#include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftChannelServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestServiceAsyncClient.h>
 
@@ -51,7 +51,7 @@ class TestHandler
   void ping() override {}
 };
 
-class FastThriftServerTest : public ::testing::Test {
+class FastThriftChannelServerTest : public ::testing::Test {
  protected:
   void SetUp() override {
     THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
@@ -62,8 +62,8 @@ class FastThriftServerTest : public ::testing::Test {
     config.address = folly::SocketAddress("::1", 0);
     config.numIOThreads = 1;
 
-    server_ =
-        std::make_unique<thrift::FastThriftServer>(std::move(config), handler_);
+    server_ = std::make_unique<thrift::FastThriftChannelServer>(
+        std::move(config), handler_);
     server_->start();
 
     clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
@@ -139,17 +139,17 @@ class FastThriftServerTest : public ::testing::Test {
   }
 
   std::shared_ptr<TestHandler> handler_;
-  std::unique_ptr<thrift::FastThriftServer> server_;
+  std::unique_ptr<thrift::FastThriftChannelServer> server_;
   std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
 };
 
-TEST_F(FastThriftServerTest, Ping) {
+TEST_F(FastThriftChannelServerTest, Ping) {
   auto client = createClient();
   syncCall([&] { return client->semifuture_ping(); });
   destroyClientOnEvb(client);
 }
 
-TEST_F(FastThriftServerTest, Echo) {
+TEST_F(FastThriftChannelServerTest, Echo) {
   auto client = createClient();
   auto result =
       syncCall([&] { return client->semifuture_echo("hello fast_thrift"); });
@@ -157,14 +157,14 @@ TEST_F(FastThriftServerTest, Echo) {
   destroyClientOnEvb(client);
 }
 
-TEST_F(FastThriftServerTest, Add) {
+TEST_F(FastThriftChannelServerTest, Add) {
   auto client = createClient();
   auto result = syncCall([&] { return client->semifuture_add(17, 25); });
   EXPECT_EQ(result, 42);
   destroyClientOnEvb(client);
 }
 
-TEST_F(FastThriftServerTest, LargeResponse) {
+TEST_F(FastThriftChannelServerTest, LargeResponse) {
   auto client = createClient();
   constexpr int64_t kResponseSize = 10000;
   auto result =
@@ -173,7 +173,7 @@ TEST_F(FastThriftServerTest, LargeResponse) {
   destroyClientOnEvb(client);
 }
 
-TEST_F(FastThriftServerTest, MultipleRequests) {
+TEST_F(FastThriftChannelServerTest, MultipleRequests) {
   auto client = createClient();
 
   folly::Baton<> baton1, baton2, baton3;
@@ -215,7 +215,7 @@ TEST_F(FastThriftServerTest, MultipleRequests) {
   destroyClientOnEvb(client);
 }
 
-TEST_F(FastThriftServerTest, MultipleClients) {
+TEST_F(FastThriftChannelServerTest, MultipleClients) {
   auto client1 = createClient();
   auto client2 = createClient();
 
@@ -249,12 +249,12 @@ TEST_F(FastThriftServerTest, MultipleClients) {
   destroyClientOnEvb(client2);
 }
 
-TEST_F(FastThriftServerTest, GetAddress) {
+TEST_F(FastThriftChannelServerTest, GetAddress) {
   auto address = server_->getAddress();
   EXPECT_NE(address.getPort(), 0);
 }
 
-TEST(FastThriftServerServeTest, ServeBlocksUntilStop) {
+TEST(FastThriftChannelServerServeTest, ServeBlocksUntilStop) {
   THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
 
   auto handler = std::make_shared<TestHandler>();
@@ -263,7 +263,7 @@ TEST(FastThriftServerServeTest, ServeBlocksUntilStop) {
   config.address = folly::SocketAddress("::1", 0);
   config.numIOThreads = 1;
 
-  thrift::FastThriftServer server(std::move(config), handler);
+  thrift::FastThriftChannelServer server(std::move(config), handler);
 
   std::atomic<bool> serveDone{false};
   std::thread serveThread([&] {

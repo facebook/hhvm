@@ -35,7 +35,7 @@
 namespace apache::thrift::fast_thrift::thrift {
 
 /**
- * Configuration for FastThriftServer.
+ * Configuration for FastThriftChannelServer.
  */
 struct FastThriftServerConfig {
   // Address to bind to.
@@ -62,6 +62,7 @@ struct FastThriftServerConfig {
  * Rocket pipeline (owned by RocketServerConnection):
  *   TransportHandler
  *     -> FrameLengthParserHandler
+ *     -> BatchingFrameHandler
  *     -> FrameLengthEncoderHandler
  *     -> RocketServerFrameCodecHandler
  *     -> RocketServerSetupFrameHandler
@@ -87,7 +88,7 @@ struct FastThriftServerConfig {
  *   config.address.setFromLocalPort(5001);
  *   config.numIOThreads = 8;
  *
- *   FastThriftServer server(config, handler);
+ *   FastThriftChannelServer server(config, handler);
  *   server.serve();  // Blocks until stop() is called from another thread.
  *
  * Usage (with metrics):
@@ -178,7 +179,7 @@ class FastThriftServerT {
 };
 
 // Default type alias for convenience - no metrics by default
-using FastThriftServer = FastThriftServerT<NoStats>;
+using FastThriftChannelServer = FastThriftServerT<NoStats>;
 
 } // namespace apache::thrift::fast_thrift::thrift
 
@@ -456,10 +457,12 @@ void FastThriftServerT<Stats>::stop() {
   // Stop accepting new connections first
   connectionManager_->stop();
 
-  // Clear all thrift contexts under the lock. Any close callback racing from an
-  // EventBase thread will either complete before we acquire the write lock (and
-  // already erase its entry) or find the map empty after we clear it.
-  thriftConnections_.withWLock([&](auto& conns) { conns.clear(); });
+  // Drain the map under the lock, then destroy entries outside it.
+  // ~ThriftConnectionContext runs ~ThriftServerChannel, which fires the close
+  // callback synchronously; that callback re-acquires this same write lock,
+  // so clearing under the lock would deadlock folly::SharedMutex.
+  std::unordered_map<ThriftServerChannel*, ThriftConnectionContext> drained;
+  thriftConnections_.withWLock([&](auto& conns) { drained.swap(conns); });
 
   stopBaton_.post();
 }

@@ -34,7 +34,7 @@ public class NettyNiftyRequestContext implements RequestContext {
   public NettyNiftyRequestContext(
       Map<String, String> requestHeaders, ConnectionContext connectionContext) {
     this.data = PlatformDependent.newConcurrentHashMap();
-    this.requestHeaders = requestHeaders;
+    this.requestHeaders = requestHeaders == null ? Collections.emptyMap() : requestHeaders;
     this.responseHeaders = PlatformDependent.newConcurrentHashMap();
     this.connectionContext = connectionContext;
   }

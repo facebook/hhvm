@@ -56,6 +56,18 @@ public class LoadHeaderRpcServerHandlerTest {
   private static final ServerRequestPayload PAYLOAD_NO_HEADER =
       ServerRequestPayload.create(null, null, REQUEST_CTX_NO_HEADER, 1);
 
+  // Regression: rocket transport may construct NettyNiftyRequestContext with null headers
+  // for the first frame on a new connection. Pre-fix, this leaked through getRequestHeader()
+  // and tripped a NullPointerException on the .containsKey(LOAD_HEADER) chain, which the
+  // server framework converted into a Rocket APPLICATION_ERROR (513) sent back to the client.
+  // Post-fix the constructor normalizes null -> empty map so the load-header path treats it
+  // as "no header present".
+  private static final RequestContext REQUEST_CTX_NULL_HEADER_MAP =
+      new NettyNiftyRequestContext(null, null);
+
+  private static final ServerRequestPayload PAYLOAD_NULL_HEADER_MAP =
+      ServerRequestPayload.create(null, null, REQUEST_CTX_NULL_HEADER_MAP, 1);
+
   private static final RequestContext REQUEST_CTX_DEFAULT_HEADER =
       new NettyNiftyRequestContext(ImmutableMap.of("load", "default"), null);
 
@@ -94,6 +106,20 @@ public class LoadHeaderRpcServerHandlerTest {
   public void testNoLoadHeader() {
     ServerResponsePayload payload =
         loadHeaderHandler.singleRequestSingleResponse(PAYLOAD_NO_HEADER).block();
+
+    assertNull(payload.getResponseRpcMetadata().getLoad());
+
+    verifyNoInteractions(loadSupplier);
+    verifyNoInteractions(counterProvider);
+  }
+
+  @Test
+  public void testNullRequestHeaderMap_doesNotNpe() {
+    // Pre-fix: NettyNiftyRequestContext(null, ...).getRequestHeader() returned null,
+    // causing this handler's .containsKey(LOAD_HEADER) chain to NPE and the server
+    // framework to surface it to the client as Rocket APPLICATION_ERROR (513).
+    ServerResponsePayload payload =
+        loadHeaderHandler.singleRequestSingleResponse(PAYLOAD_NULL_HEADER_MAP).block();
 
     assertNull(payload.getResponseRpcMetadata().getLoad());
 

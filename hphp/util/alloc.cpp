@@ -161,10 +161,10 @@ void set_numa_binding(int node) {
   }
   if (node < 0) return;                 // thread not created from JobQueue
   s_numaNode = node;
-  unsigned arena = base_arena + node;
-  mallctlWrite("thread.arena", arena);
 
   if (use_numa) {
+    unsigned arena = base_arena + node;
+    mallctlWrite("thread.arena", arena);
     numa_sched_setaffinity(0, node_to_cpu_mask[node]);
     numa_set_interleave_mask(numa_no_nodes_ptr);
     bitmask* nodes = numa_allocate_nodemask();
@@ -176,11 +176,14 @@ void set_numa_binding(int node) {
 
 void* mallocx_on_node(size_t size, int node, size_t align) {
   assert((align & (align - 1)) == 0);
-  int flags = MALLOCX_ALIGN(align);
-  if (node < 0) return mallocx(size, flags);
-  int arena = base_arena + node;
-  flags |= MALLOCX_ARENA(arena) | MALLOCX_TCACHE_NONE;
-  return mallocx(size, flags);
+  if (use_numa) {
+    int flags = MALLOCX_ALIGN(align);
+    if (node < 0) return mallocx(size, flags);
+    int arena = base_arena + node;
+    flags |= MALLOCX_ARENA(arena) | MALLOCX_TCACHE_NONE;
+    return mallocx(size, flags);
+  }
+  return mallocx(size, MALLOCX_ALIGN(align));
 }
 
 #endif // HAVE_NUMA
@@ -459,9 +462,11 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
   mallctlRead<unsigned>("arenas.narenas", &base_arena); // throw upon failure
   // The default one per node.
   for (int i = 0; i < num_numa_nodes(); i++) {
-    unsigned arena = 0;
-    mallctlRead<unsigned>("arenas.create", &arena);
-    always_assert(arena == base_arena + i);
+    if (use_numa) {
+      unsigned arena = 0;
+      mallctlRead<unsigned>("arenas.create", &arena);
+      always_assert(arena == base_arena + i);
+    }
     if (slabs) {
       auto mem = low_malloc(sizeof(SlabManager));
       s_slab_managers.push_back(new (mem) SlabManager);

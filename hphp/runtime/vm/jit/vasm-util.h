@@ -48,6 +48,9 @@ bool splitCriticalEdges(Vunit& unit);
  */
 using VIdomVector = jit::vector<Vlabel>;
 VIdomVector findDominators(const Vunit&, const jit::vector<Vlabel>& rpo);
+VIdomVector findDominators(const Vunit&,
+                           const jit::vector<Vlabel>& rpo,
+                           const PredVector& preds);
 
 /*
  * Test if b1 dominates b2

@@ -15,8 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/vasm.h"
-
-#include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-info.h"
@@ -24,6 +23,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
+#include "hphp/util/match.h"
 
 #include <cstdint>
 #include <utility>
@@ -42,6 +42,7 @@ struct SinkAnalysis {
   jit::vector<Vlabel> idoms;
   jit::vector<int32_t> rpoOrder;
   jit::vector<UseBlocks> useBlocks;
+  PredVector preds;
 };
 
 struct SinkMove {
@@ -50,12 +51,33 @@ struct SinkMove {
   Vlabel dst;
 };
 
+struct SinkDefInfo {
+  Vreg def;
+  AliasClass loadSrc{AEmpty};
+  bool isPureLoad{false};
+};
+
+bool isSinkablePureLoad(const Vinstr& inst, AliasClass& loadSrc) {
+  if (!touchesMemory(inst.op) || writesMemory(inst.op)) return false;
+  if (!inst.origin) return false;
+
+  auto const effects = canonicalize(memory_effects(*inst.origin));
+  auto const load = std::get_if<PureLoad>(&effects);
+  if (!load) return false;
+
+  loadSrc = load->src;
+  return true;
+}
+
 bool isSinkableDef(const Vunit& unit,
                    const Abi& abi,
                    const SinkAnalysis& analysis,
                    const Vinstr& inst,
-                   Vreg& d) {
-  if (!isPure(inst)) return false;
+                   SinkDefInfo& info) {
+  if (!isPure(inst)) {
+    if (!isSinkablePureLoad(inst, info.loadSrc)) return false;
+    info.isPureLoad = true;
+  }
   if (isBlockEnd(inst)) return false;
   // ssaalias is a restoreSSA marker, not an ordinary movable value definition.
   if (inst.op == Vinstr::ssaalias) return false;
@@ -93,7 +115,7 @@ bool isSinkableDef(const Vunit& unit,
   visitDefs(unit, inst, [&] (Vreg r, Width w) {
     noteDef(r, w);
     if (!r.isValid() || w == Width::Flags || r.isPhys()) return;
-    d = r;
+    info.def = r;
     ++defs;
   });
 
@@ -107,9 +129,40 @@ bool isSinkableDef(const Vunit& unit,
     !touchesFlags &&
     !touchesPhys &&
     defs == 1 &&
-    d.isValid() &&
-    !d.isPhys() &&
-    !d.isSF();
+    info.def.isValid() &&
+    !info.def.isPhys() &&
+    !info.def.isSF();
+}
+
+/*
+ * Returns true when `barrier` may write memory observed by a pure load from
+ * `loadSrc`. Vasm-level stores are always treated as clobbers even when HHIR
+ * origin effects look narrower, because lowering can attach a non-writing
+ * origin to a Vasm instruction which writes memory itself.
+ */
+bool loadClobberedBy(const Vinstr& barrier, const AliasClass& loadSrc) {
+  if (writesMemory(barrier.op)) return true;
+  if (!barrier.origin) return false;
+
+  auto const effects = canonicalize(memory_effects(*barrier.origin));
+  return match<bool>(
+    effects,
+    [&] (const IrrelevantEffects&)   { return false; },
+    [&] (const GeneralEffects& g)    {
+      return
+        loadSrc.maybe(g.stores) ||
+        loadSrc.maybe(g.kills) ||
+        loadSrc.maybe(g.inout);
+    },
+    [&] (const PureLoad&)            { return false; },
+    [&] (const PureStore& store)     { return loadSrc.maybe(store.dst); },
+    // PureInlineCall also writes call.actrec, so be conservative.
+    [&] (const PureInlineCall&)      { return true; },
+    [&] (const CallEffects&)         { return true; },
+    [&] (const ReturnEffects&)       { return true; },
+    [&] (const ExitEffects&)         { return true; },
+    [&] (const UnknownEffects&)      { return true; }
+  );
 }
 
 size_t blockInsertIndex(const Vblock& block) {
@@ -122,6 +175,55 @@ size_t blockInsertIndex(const Vblock& block) {
     ++idx;
   }
   return idx;
+}
+
+bool pathClobbersLoad(const Vunit& unit,
+                      const SinkAnalysis& analysis,
+                      Vlabel src,
+                      size_t srcIdx,
+                      Vlabel target,
+                      const AliasClass& loadSrc,
+                      boost::dynamic_bitset<>& seen,
+                      jit::vector<Vlabel>& worklist) {
+  assertx(src != target);
+
+  auto const& srcCode = unit.blocks[src].code;
+  for (auto i = srcIdx + 1; i < srcCode.size(); ++i) {
+    if (loadClobberedBy(srcCode[i], loadSrc)) return true;
+  }
+
+  seen.reset();
+  worklist.clear();
+
+  // Walk backward from the insertion block. We deliberately do not enqueue src
+  // (its tail past srcIdx was scanned above; src dominates target so the walk
+  // is bounded by src on every path). If target sits in a cycle, it will be
+  // enqueued normally and its full body scanned then.
+  auto const enqueuePred = [&] (Vlabel pred) {
+    if (pred == src) return;
+    if (seen[pred]) return;
+    seen.set(pred);
+    worklist.push_back(pred);
+  };
+
+  for (auto const pred : analysis.preds[target]) {
+    enqueuePred(pred);
+  }
+
+  while (!worklist.empty()) {
+    auto const b = worklist.back();
+    worklist.pop_back();
+
+    for (auto const& inst : unit.blocks[b].code) {
+      if (loadClobberedBy(inst, loadSrc)) return true;
+    }
+
+    for (auto const pred : analysis.preds[b]) {
+      enqueuePred(pred);
+    }
+  }
+
+  return false;
 }
 
 jit::vector<UseBlocks> computeUseBlocks(const Vunit& unit,
@@ -147,7 +249,8 @@ SinkAnalysis analyzeSinks(const Vunit& unit) {
   analysis.rpo = sortBlocks(unit);
   if (analysis.rpo.empty()) return analysis;
 
-  analysis.idoms = findDominators(unit, analysis.rpo);
+  analysis.preds = computePreds(unit);
+  analysis.idoms = findDominators(unit, analysis.rpo, analysis.preds);
   analysis.useBlocks = computeUseBlocks(unit, analysis.rpo);
   analysis.rpoOrder =
     jit::vector<int32_t>(unit.blocks.size(), kInvalidRpoOrder);
@@ -162,19 +265,21 @@ jit::vector<SinkMove> collectSinkMoves(const Vunit& unit,
                                        const Abi& abi,
                                        const SinkAnalysis& analysis) {
   auto moves = jit::vector<SinkMove>{};
+  auto seen = boost::dynamic_bitset<>(unit.blocks.size());
+  auto worklist = jit::vector<Vlabel>{};
 
   for (auto it = analysis.rpo.rbegin(); it != analysis.rpo.rend(); ++it) {
     auto const b = *it;
     auto const& block = unit.blocks[b];
     for (auto i = block.code.size(); i != 0; --i) {
       auto const idx = i - 1;
-      auto d = Vreg{};
-      if (!isSinkableDef(unit, abi, analysis, block.code[idx], d)) {
+      auto info = SinkDefInfo{};
+      if (!isSinkableDef(unit, abi, analysis, block.code[idx], info)) {
         continue;
       }
 
       auto target = Vlabel{};
-      for (auto const useBlock : analysis.useBlocks[d]) {
+      for (auto const useBlock : analysis.useBlocks[info.def]) {
         target = commonDominator(
           target,
           useBlock,
@@ -184,6 +289,19 @@ jit::vector<SinkMove> collectSinkMoves(const Vunit& unit,
       }
       if (!target.isValid() || target == b) continue;
       if (!dominates(b, target, analysis.idoms)) continue;
+      if (info.isPureLoad &&
+          pathClobbersLoad(
+            unit,
+            analysis,
+            b,
+            idx,
+            target,
+            info.loadSrc,
+            seen,
+            worklist
+          )) {
+        continue;
+      }
 
       moves.push_back(SinkMove{b, idx, target});
     }

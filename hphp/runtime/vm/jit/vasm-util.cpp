@@ -195,9 +195,16 @@ Vlabel commonDominator(Vlabel b1,
 
 VIdomVector findDominators(const Vunit& unit,
                            const jit::vector<Vlabel>& rpo) {
-  assertx(!rpo.empty() && rpo[0] == unit.entry);
-
   auto const preds = computePreds(unit);
+  return findDominators(unit, rpo, preds);
+}
+
+VIdomVector findDominators(const Vunit& unit,
+                           const jit::vector<Vlabel>& rpo,
+                           const PredVector& preds) {
+  assertx(!rpo.empty() && rpo[0] == unit.entry);
+  assertx(preds.size() == unit.blocks.size());
+
   VIdomVector idom(unit.blocks.size());
 
   jit::vector<size_t> rpoOrder(unit.blocks.size());

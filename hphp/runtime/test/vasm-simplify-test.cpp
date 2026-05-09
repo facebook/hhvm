@@ -15,20 +15,32 @@
 */
 
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/base/package.h"
+#include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/edge.h"
 #ifdef __aarch64__
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #endif
+#include "hphp/runtime/test/test-context.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/immed.h"
 
 #include <folly/portability/GTest.h>
+
+#include <memory>
+#include <optional>
 
 namespace HPHP::jit {
 
@@ -56,6 +68,98 @@ std::string stripWhitespace(std::string str) {
   }
   return str;
 }
+
+IRInstruction* makeLdLocOrigin(IRUnit& unit,
+                               BCContext bcctx,
+                               SSATmp* fp,
+                               uint32_t locId) {
+  return unit.gen(LdLoc, bcctx, TCell, LocalId{locId}, fp);
+}
+
+IRInstruction* makeStLocOrigin(IRUnit& unit,
+                               BCContext bcctx,
+                               SSATmp* fp,
+                               uint32_t locId) {
+  auto const value = unit.gen(Conjure, bcctx, TCell)->dst();
+  return unit.gen(StLoc, bcctx, LocalId{locId}, fp, value);
+}
+
+IRInstruction* makeKillLocOrigin(IRUnit& unit,
+                                 BCContext bcctx,
+                                 SSATmp* fp,
+                                 uint32_t locId) {
+  return unit.gen(KillLoc, bcctx, LocalId{locId}, fp);
+}
+
+IRInstruction* makeInlineCallOrigin(IRUnit& unit,
+                                    BCContext bcctx,
+                                    SSATmp* fp) {
+  return unit.gen(InlineCall, bcctx, fp, fp);
+}
+
+IRInstruction* makeCallBuiltinInOutOrigin(IRUnit& unit,
+                                          BCContext bcctx,
+                                          SSATmp* fp,
+                                          uint32_t locId) {
+  static auto const callee = [] {
+    auto emitterUnit = std::make_unique<UnitEmitter>(
+      SHA1{},
+      SHA1{},
+      PackageInfo::defaults()
+    );
+    emitterUnit->m_filepath = makeStaticString("/tmp/__vasm_test.php");
+
+    auto const name = makeStaticString("__vasm_test_inout_builtin");
+    auto const emitter = emitterUnit->newFuncEmitter(name);
+
+    emitter->init(0, 0, AttrBuiltin, nullptr, false);
+    emitter->maxStackCells = 1;
+    emitter->recordSourceLocation(HPHP::Location::Range{}, 0);
+    emitter->emitOp(OpNull);
+    emitter->emitOp(OpRetC);
+    emitter->emitByte(static_cast<uint8_t>(VerifyRetKind::None));
+
+    Func::ParamInfo param;
+    param.setFlag(Func::ParamInfo::Flags::InOut);
+    emitter->appendParam(makeStaticString("arg"), param);
+    emitter->finish();
+
+    emitterUnit->finish();
+    auto const funcUnit = emitterUnit->create().release();
+    auto const func = funcUnit->funcs().front();
+    always_assert(func->isInOut(0));
+    return func;
+  }();
+
+  auto const ptr =
+    unit.gen(LdLocAddr, bcctx, TLval, LocalId{locId}, fp)->dst();
+  auto const arg0 = unit.gen(Conjure, bcctx, TCell)->dst();
+  auto const arg1 = unit.gen(Conjure, bcctx, TCell)->dst();
+  auto const srcs =
+    static_cast<SSATmp**>(unit.arena().alloc(3 * sizeof(SSATmp*)));
+  srcs[0] = arg0;
+  srcs[1] = arg1;
+  srcs[2] = ptr;
+
+  auto const catchBlock = unit.defBlock();
+  unit.defLabel(0, catchBlock, bcctx);
+  catchBlock->append(unit.gen(BeginCatch, bcctx, TObj));
+
+  auto const edges = static_cast<Edge*>(unit.arena().alloc(2 * sizeof(Edge)));
+  new (&edges[0]) Edge{};
+  new (&edges[1]) Edge{};
+  auto const inst = new (unit.arena().alloc(sizeof(IRInstruction)))
+    IRInstruction(CallBuiltin, bcctx, edges, 3, srcs);
+  inst->setTaken(catchBlock);
+  auto const extra =
+    new (unit.arena().alloc(sizeof(CallBuiltinData)))
+      CallBuiltinData{IRSPRelOffset{0}, callee};
+  inst->setExtra(extra);
+  return inst;
+}
+
+// Used only as a stable direct-call address for Vasm call/vinvoke tests.
+void sinkDefsTestHelper() {}
 
 template<class F>
 void testPostRAWithTraceAndPrologueAbi(F f) {
@@ -457,6 +561,504 @@ void testSinkDefsMovesDefsWithDeadSF() {
     EXPECT_EQ(slowCode[2].copy_.s, Vreg{shifted});
     EXPECT_EQ(slowCode[2].copy_.d, Vreg{out});
     ASSERT_EQ(slowCode[3].op, Vinstr::ret);
+  }
+}
+
+struct PureLoadSinkLinearContext {
+  Vunit& unit;
+  Vlabel mid;
+  Vlabel exit;
+  Vreg64 base;
+  Vreg64 cand;
+};
+
+template<class MakeLoadOrigin, class EmitMid, class Verify>
+void testSinkDefsPureLoadLinear(MakeLoadOrigin makeLoadOrigin,
+                                EmitMid emitMid,
+                                Verify verify) {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    IRUnit irUnit{test_context};
+    auto const bcctx = BCContext{BCMarker::Dummy(), 0};
+    auto const fp = irUnit.gen(DefFP, bcctx, DefFPData{std::nullopt})->dst();
+    auto const loadOrigin = makeLoadOrigin(irUnit, bcctx, fp);
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const mid = unit.makeBlock(AreaIndex::Main, 1);
+    auto const exit = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vm(unit, mid);
+    Vout ve(unit, exit);
+
+    auto const base = Vreg64{v.makeReg()};
+    auto const keepBase = Vreg64{v.makeReg()};
+    auto const cand = Vreg64{v.makeReg()};
+    auto const out = Vreg64{ve.makeReg()};
+
+    v << ldimmq{Immed64{0x100}, base};
+    v.setOrigin(loadOrigin);
+    v << load{base[0], cand};
+    v.setOrigin(nullptr);
+    v << copy{base, keepBase};
+    v << jmp{mid};
+
+    emitMid(irUnit, bcctx, fp, vm, base, exit);
+
+    ve << copy{cand, out};
+    ve << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    verify(PureLoadSinkLinearContext{unit, mid, exit, base, cand});
+  }
+}
+
+template<class EmitMid, class Verify>
+void testSinkDefsLocalPureLoadLinear(uint32_t loadLoc,
+                                     EmitMid emitMid,
+                                     Verify verify) {
+  testSinkDefsPureLoadLinear(
+    [=] (IRUnit& irUnit, BCContext bcctx, SSATmp* fp) {
+      return makeLdLocOrigin(irUnit, bcctx, fp, loadLoc);
+    },
+    emitMid,
+    verify
+  );
+}
+
+std::optional<size_t> findLoadDef(const Vblock& block, Vreg def) {
+  for (auto i = size_t{0}; i < block.code.size(); ++i) {
+    auto const& inst = block.code[i];
+    if (inst.op == Vinstr::load && inst.load_.d == def) return i;
+  }
+  return std::nullopt;
+}
+
+std::optional<size_t> findUse(const Vunit& unit,
+                              const Vblock& block,
+                              Vreg use,
+                              size_t begin = 0) {
+  for (auto i = begin; i < block.code.size(); ++i) {
+    auto found = false;
+    visitUses(unit, block.code[i], [&] (Vreg r) {
+      if (r == use) found = true;
+    });
+    if (found) return i;
+  }
+  return std::nullopt;
+}
+
+size_t countLoadDefs(const Vunit& unit, Vreg def) {
+  auto count = size_t{0};
+  for (auto const& block : unit.blocks) {
+    for (auto const& inst : block.code) {
+      if (inst.op == Vinstr::load && inst.load_.d == def) ++count;
+    }
+  }
+  return count;
+}
+
+void expectPureLoadSunkToExit(const PureLoadSinkLinearContext& ctx) {
+  auto const cand = Vreg{ctx.cand};
+  auto const& entry = ctx.unit.blocks[ctx.unit.entry];
+  auto const& exit = ctx.unit.blocks[ctx.exit];
+
+  EXPECT_FALSE(findLoadDef(entry, cand).has_value())
+    << stripWhitespace(show(ctx.unit));
+  ASSERT_EQ(size_t{1}, countLoadDefs(ctx.unit, cand))
+    << stripWhitespace(show(ctx.unit));
+
+  auto const exitLoad = findLoadDef(exit, cand);
+  ASSERT_TRUE(exitLoad.has_value()) << stripWhitespace(show(ctx.unit));
+  ASSERT_TRUE(findUse(ctx.unit, exit, cand, *exitLoad + 1).has_value())
+    << stripWhitespace(show(ctx.unit));
+}
+
+void expectPureLoadKeptInEntry(const PureLoadSinkLinearContext& ctx) {
+  auto const cand = Vreg{ctx.cand};
+  auto const& entry = ctx.unit.blocks[ctx.unit.entry];
+  auto const& exit = ctx.unit.blocks[ctx.exit];
+
+  ASSERT_EQ(size_t{1}, countLoadDefs(ctx.unit, cand))
+    << stripWhitespace(show(ctx.unit));
+  ASSERT_TRUE(findLoadDef(entry, cand).has_value())
+    << stripWhitespace(show(ctx.unit));
+  EXPECT_FALSE(findLoadDef(exit, cand).has_value())
+    << stripWhitespace(show(ctx.unit));
+  ASSERT_TRUE(findUse(ctx.unit, exit, cand).has_value())
+    << stripWhitespace(show(ctx.unit));
+}
+
+void testSinkDefsPureLoadSinksAcrossUnrelatedStoreOrigin() {
+  testSinkDefsLocalPureLoadLinear(
+    0,
+    [] (IRUnit& irUnit,
+        BCContext bcctx,
+        SSATmp* fp,
+        Vout& vm,
+        Vreg64 base,
+        Vlabel exit) {
+      auto const storeOrigin = makeStLocOrigin(irUnit, bcctx, fp, 1);
+      auto const tmp = Vreg64{vm.makeReg()};
+      vm.setOrigin(storeOrigin);
+      vm << copy{base, tmp};
+      vm.setOrigin(nullptr);
+      vm << jmp{exit};
+    },
+    [] (const PureLoadSinkLinearContext& ctx) {
+      expectPureLoadSunkToExit(ctx);
+
+      auto const& midCode = ctx.unit.blocks[ctx.mid].code;
+      ASSERT_EQ(midCode.size(), 2);
+      ASSERT_EQ(midCode[0].op, Vinstr::copy);
+      ASSERT_EQ(midCode[1].op, Vinstr::jmp);
+    }
+  );
+}
+
+void testSinkDefsPureLoadSinksAfterUserMoves() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    IRUnit irUnit{test_context};
+    auto const bcctx = BCContext{BCMarker::Dummy(), 0};
+    auto const fp = irUnit.gen(DefFP, bcctx, DefFPData{std::nullopt})->dst();
+    auto const loadOrigin = makeLdLocOrigin(irUnit, bcctx, fp, 0);
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const exit = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout ve(unit, exit);
+
+    auto const base = Vreg64{v.makeReg()};
+    auto const keepBase = Vreg64{v.makeReg()};
+    auto const cand = Vreg64{v.makeReg()};
+    auto const copied = Vreg64{v.makeReg()};
+    auto const out = Vreg64{ve.makeReg()};
+
+    v << ldimmq{Immed64{0x100}, base};
+    v.setOrigin(loadOrigin);
+    v << load{base[0], cand};
+    v.setOrigin(nullptr);
+    v << copy{base, keepBase};
+    v << copy{cand, copied};
+    v << jmp{exit};
+
+    ve << copy{copied, out};
+    ve << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    auto const candReg = Vreg{cand};
+    auto const& entry = unit.blocks[unit.entry];
+    auto const& exitBlock = unit.blocks[exit];
+
+    EXPECT_FALSE(findLoadDef(entry, candReg).has_value())
+      << stripWhitespace(show(unit));
+    ASSERT_EQ(size_t{1}, countLoadDefs(unit, candReg))
+      << stripWhitespace(show(unit));
+
+    auto const exitLoad = findLoadDef(exitBlock, candReg);
+    ASSERT_TRUE(exitLoad.has_value()) << stripWhitespace(show(unit));
+
+    auto const movedUser = findUse(unit, exitBlock, candReg, *exitLoad + 1);
+    ASSERT_TRUE(movedUser.has_value()) << stripWhitespace(show(unit));
+    ASSERT_EQ(exitBlock.code[*movedUser].op, Vinstr::copy);
+    EXPECT_EQ(exitBlock.code[*movedUser].copy_.s, candReg);
+    EXPECT_EQ(exitBlock.code[*movedUser].copy_.d, Vreg{copied});
+  }
+}
+
+void testSinkDefsPureLoadStopsAtClobberingStore() {
+  testSinkDefsLocalPureLoadLinear(
+    0,
+    [] (IRUnit& irUnit,
+        BCContext bcctx,
+        SSATmp* fp,
+        Vout& vm,
+        Vreg64 base,
+        Vlabel exit) {
+      auto const storeOrigin = makeStLocOrigin(irUnit, bcctx, fp, 0);
+      auto const storeVal = Vreg64{vm.makeReg()};
+      vm << ldimmq{Immed64{7}, storeVal};
+      vm.setOrigin(storeOrigin);
+      vm << store{storeVal, base[0]};
+      vm.setOrigin(nullptr);
+      vm << jmp{exit};
+    },
+    expectPureLoadKeptInEntry
+  );
+}
+
+void testSinkDefsPureLoadStopsAtVasmStoreWithPureLoadOrigin() {
+  testSinkDefsLocalPureLoadLinear(
+    0,
+    [] (IRUnit& irUnit,
+        BCContext bcctx,
+        SSATmp* fp,
+        Vout& vm,
+        Vreg64 base,
+        Vlabel exit) {
+      auto const pureLoadOrigin = makeLdLocOrigin(irUnit, bcctx, fp, 1);
+      auto const storeVal = Vreg64{vm.makeReg()};
+      vm << ldimmq{Immed64{7}, storeVal};
+      vm.setOrigin(pureLoadOrigin);
+      vm << store{storeVal, base[8]};
+      vm.setOrigin(nullptr);
+      vm << jmp{exit};
+    },
+    expectPureLoadKeptInEntry
+  );
+}
+
+void testSinkDefsPureLoadStopsAtGeneralEffectsKill() {
+  testSinkDefsLocalPureLoadLinear(
+    0,
+    [] (IRUnit& irUnit,
+        BCContext bcctx,
+        SSATmp* fp,
+        Vout& vm,
+        Vreg64 base,
+        Vlabel exit) {
+      auto const killOrigin = makeKillLocOrigin(irUnit, bcctx, fp, 0);
+      auto const tmp = Vreg64{vm.makeReg()};
+      vm.setOrigin(killOrigin);
+      vm << copy{base, tmp};
+      vm.setOrigin(nullptr);
+      vm << jmp{exit};
+    },
+    expectPureLoadKeptInEntry
+  );
+}
+
+void testSinkDefsPureLoadStopsAtGeneralEffectsInOut() {
+  testSinkDefsLocalPureLoadLinear(
+    0,
+    [] (IRUnit& irUnit,
+        BCContext bcctx,
+        SSATmp* fp,
+        Vout& vm,
+        Vreg64 base,
+        Vlabel exit) {
+      auto const inOutOrigin =
+        makeCallBuiltinInOutOrigin(irUnit, bcctx, fp, 0);
+      auto const tmp = Vreg64{vm.makeReg()};
+      vm.setOrigin(inOutOrigin);
+      vm << copy{base, tmp};
+      vm.setOrigin(nullptr);
+      vm << jmp{exit};
+    },
+    expectPureLoadKeptInEntry
+  );
+}
+
+void testSinkDefsPureLoadStopsAtPureInlineCall() {
+  // PureInlineCall also writes to the inlined frame's actrec; treat it as a
+  // clobber so we don't reorder loads across it.
+  testSinkDefsLocalPureLoadLinear(
+    0,
+    [] (IRUnit& irUnit,
+        BCContext bcctx,
+        SSATmp* fp,
+        Vout& vm,
+        Vreg64 base,
+        Vlabel exit) {
+      auto const inlineCallOrigin = makeInlineCallOrigin(irUnit, bcctx, fp);
+      auto const tmp = Vreg64{vm.makeReg()};
+      vm.setOrigin(inlineCallOrigin);
+      vm << copy{base, tmp};
+      vm.setOrigin(nullptr);
+      vm << jmp{exit};
+    },
+    expectPureLoadKeptInEntry
+  );
+}
+
+void testSinkDefsPureLoadStopsAtSelfLoopClobber() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    IRUnit irUnit{test_context};
+    auto const bcctx = BCContext{BCMarker::Dummy(), 0};
+    auto const fp = irUnit.gen(DefFP, bcctx, DefFPData{std::nullopt})->dst();
+    auto const loadOrigin = makeLdLocOrigin(irUnit, bcctx, fp, 0);
+    auto const storeOrigin = makeStLocOrigin(irUnit, bcctx, fp, 0);
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const loop = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vl(unit, loop);
+
+    auto const base = Vreg64{v.makeReg()};
+    auto const cand = Vreg64{v.makeReg()};
+    auto const storeVal = Vreg64{vl.makeReg()};
+    auto const out = Vreg64{vl.makeReg()};
+
+    v << ldimmq{Immed64{0x100}, base};
+    v.setOrigin(loadOrigin);
+    v << load{base[0], cand};
+    v.setOrigin(nullptr);
+    v << jmp{loop};
+
+    vl << ldimmq{Immed64{7}, storeVal};
+    vl.setOrigin(storeOrigin);
+    vl << store{storeVal, base[0]};
+    vl.setOrigin(nullptr);
+    vl << copy{cand, out};
+    vl << jmp{loop};
+
+    sinkDefs(unit, abi(kind));
+
+    auto const& entryCode = unit.blocks[unit.entry].code;
+    ASSERT_EQ(entryCode.size(), 3);
+    ASSERT_EQ(entryCode[0].op, Vinstr::ldimmq);
+    ASSERT_EQ(entryCode[1].op, Vinstr::load);
+    EXPECT_EQ(entryCode[1].load_.d, Vreg{cand});
+    ASSERT_EQ(entryCode[2].op, Vinstr::jmp);
+
+    auto const& loopCode = unit.blocks[loop].code;
+    ASSERT_EQ(loopCode.size(), 4);
+    ASSERT_EQ(loopCode[0].op, Vinstr::ldimmq);
+    ASSERT_EQ(loopCode[1].op, Vinstr::store);
+    ASSERT_EQ(loopCode[2].op, Vinstr::copy);
+    EXPECT_EQ(loopCode[2].copy_.s, Vreg{cand});
+    ASSERT_EQ(loopCode[3].op, Vinstr::jmp);
+    EXPECT_EQ(loopCode[3].jmp_.target, loop);
+  }
+}
+
+void testSinkDefsPureLoadStopsAtClobberingBranchPath() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    IRUnit irUnit{test_context};
+    auto const bcctx = BCContext{BCMarker::Dummy(), 0};
+    auto const fp = irUnit.gen(DefFP, bcctx, DefFPData{std::nullopt})->dst();
+    auto const loadOrigin = makeLdLocOrigin(irUnit, bcctx, fp, 0);
+    auto const storeOrigin = makeStLocOrigin(irUnit, bcctx, fp, 0);
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const left = unit.makeBlock(AreaIndex::Main, 1);
+    auto const right = unit.makeBlock(AreaIndex::Main, 1);
+    auto const merge = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vl(unit, left);
+    Vout vr(unit, right);
+    Vout vm(unit, merge);
+
+    auto const base = Vreg64{v.makeReg()};
+    auto const cand = Vreg64{v.makeReg()};
+    auto const sf = v.makeReg();
+    auto const storeVal = Vreg64{vl.makeReg()};
+    auto const out = Vreg64{vm.makeReg()};
+
+    v << ldimmq{Immed64{0x100}, base};
+    v.setOrigin(loadOrigin);
+    v << load{base[0], cand};
+    v.setOrigin(nullptr);
+    v << cmpqi{Immed{0}, Vreg64{Reg64{0}}, sf, Vflags{}};
+    v << jcc{CC_E, sf, {left, right}, StringTag{}};
+
+    vl << ldimmq{Immed64{7}, storeVal};
+    vl.setOrigin(storeOrigin);
+    vl << store{storeVal, base[0]};
+    vl.setOrigin(nullptr);
+    vl << jmp{merge};
+
+    vr << jmp{merge};
+
+    vm << copy{cand, out};
+    vm << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    auto const& entryCode = unit.blocks[unit.entry].code;
+    ASSERT_EQ(entryCode.size(), 4);
+    ASSERT_EQ(entryCode[0].op, Vinstr::ldimmq);
+    ASSERT_EQ(entryCode[1].op, Vinstr::load);
+    EXPECT_EQ(entryCode[1].load_.d, Vreg{cand});
+    ASSERT_EQ(entryCode[2].op, Vinstr::cmpqi);
+    ASSERT_EQ(entryCode[3].op, Vinstr::jcc);
+
+    auto const& mergeCode = unit.blocks[merge].code;
+    ASSERT_EQ(mergeCode.size(), 2);
+    ASSERT_EQ(mergeCode[0].op, Vinstr::copy);
+    EXPECT_EQ(mergeCode[0].copy_.s, Vreg{cand});
+    ASSERT_EQ(mergeCode[1].op, Vinstr::ret);
+  }
+}
+
+void testSinkDefsPureLoadStopsAtClobberingBlockEnd() {
+  for (auto const kind : {CodeKind::Trace, CodeKind::Prologue}) {
+    SCOPED_TRACE(kind == CodeKind::Trace ? "trace_abi" : "prologue_abi");
+
+    IRUnit irUnit{test_context};
+    auto const bcctx = BCContext{BCMarker::Dummy(), 0};
+    auto const fp = irUnit.gen(DefFP, bcctx, DefFPData{std::nullopt})->dst();
+    auto const loadOrigin = makeLdLocOrigin(irUnit, bcctx, fp, 0);
+
+    Vunit unit;
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
+    auto const mid = unit.makeBlock(AreaIndex::Main, 1);
+    auto const done = unit.makeBlock(AreaIndex::Main, 1);
+    auto const catchBlock = unit.makeBlock(AreaIndex::Main, 1);
+
+    Vout v(unit, unit.entry);
+    Vout vm(unit, mid);
+    Vout vd(unit, done);
+    Vout vc(unit, catchBlock);
+
+    auto const base = Vreg64{v.makeReg()};
+    auto const cand = Vreg64{v.makeReg()};
+    auto const out = Vreg64{vd.makeReg()};
+
+    v << ldimmq{Immed64{0x100}, base};
+    v.setOrigin(loadOrigin);
+    v << load{base[0], cand};
+    v.setOrigin(nullptr);
+    v << jmp{mid};
+
+    vm << vinvoke{
+      CallSpec::direct(sinkDefsTestHelper),
+      vm.makeVcallArgs({{}}),
+      vm.makeTuple({}),
+      {done, catchBlock},
+      Fixup::none(),
+      DestType::None
+    };
+
+    vd << copy{cand, out};
+    vd << ret{};
+
+    vc << ret{};
+
+    sinkDefs(unit, abi(kind));
+
+    auto const& entryCode = unit.blocks[unit.entry].code;
+    ASSERT_EQ(entryCode.size(), 3);
+    ASSERT_EQ(entryCode[0].op, Vinstr::ldimmq);
+    ASSERT_EQ(entryCode[1].op, Vinstr::load);
+    EXPECT_EQ(entryCode[1].load_.d, Vreg{cand});
+    ASSERT_EQ(entryCode[2].op, Vinstr::jmp);
+
+    auto const& midCode = unit.blocks[mid].code;
+    ASSERT_EQ(midCode.size(), 1);
+    ASSERT_EQ(midCode[0].op, Vinstr::vinvoke);
+
+    auto const& doneCode = unit.blocks[done].code;
+    ASSERT_EQ(doneCode.size(), 2);
+    ASSERT_EQ(doneCode[0].op, Vinstr::copy);
+    EXPECT_EQ(doneCode[0].copy_.s, Vreg{cand});
+    ASSERT_EQ(doneCode[1].op, Vinstr::ret);
   }
 }
 
@@ -873,6 +1475,16 @@ TEST(Vasm, Simplifier) {
   testSinkDefsMovesIntoMergeAfterPhidef();
   testSinkDefsKeepsJoinPointDefsInPlace();
   testSinkDefsMovesDefsWithDeadSF();
+  testSinkDefsPureLoadSinksAcrossUnrelatedStoreOrigin();
+  testSinkDefsPureLoadSinksAfterUserMoves();
+  testSinkDefsPureLoadStopsAtClobberingStore();
+  testSinkDefsPureLoadStopsAtVasmStoreWithPureLoadOrigin();
+  testSinkDefsPureLoadStopsAtGeneralEffectsKill();
+  testSinkDefsPureLoadStopsAtGeneralEffectsInOut();
+  testSinkDefsPureLoadStopsAtPureInlineCall();
+  testSinkDefsPureLoadStopsAtSelfLoopClobber();
+  testSinkDefsPureLoadStopsAtClobberingBranchPath();
+  testSinkDefsPureLoadStopsAtClobberingBlockEnd();
 }
 
 TEST(Vasm, ArmLeaLowering) {

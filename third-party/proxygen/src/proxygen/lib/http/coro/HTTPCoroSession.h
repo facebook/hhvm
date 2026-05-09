@@ -441,6 +441,8 @@ class HTTPCoroSession
     }
   }
 
+  void setReadBufNewAllocSize(size_t size);
+
   // whether we've exceeded the ingress buffer threshold.
   bool ingressLimitExceeded(const StreamState& stream) const;
   // whether we were previously in excess of ingress limit but no longer are.
@@ -541,6 +543,7 @@ class HTTPCoroSession
   std::chrono::milliseconds streamReadTimeout_{std::chrono::seconds(5)};
   std::chrono::milliseconds writeTimeout_{std::chrono::seconds(5)};
   uint64_t readBufferLimit_{kIngressBufferLimit};
+  size_t readBufNewAllocSize_{4000};
   std::list<LifecycleObserver*> lifecycleObservers_{};
   uint32_t maxConcurrentOutgoingStreamsConfig_{100};
   uint32_t numPushStreams_{0};

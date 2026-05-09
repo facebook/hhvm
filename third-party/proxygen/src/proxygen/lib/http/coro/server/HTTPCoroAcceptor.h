@@ -41,6 +41,7 @@ class HTTPCoroDownstreamSessionFactory {
     LifecycleObserver* sessionLifecycleCb{nullptr};
     HTTPSessionStats* sessionStats{nullptr};
     HeaderCodec::Stats* headerCodecStats{nullptr};
+    size_t readBufNewAllocSize{4000};
   };
 
   explicit HTTPCoroDownstreamSessionFactory(
@@ -50,6 +51,10 @@ class HTTPCoroDownstreamSessionFactory {
 
   void setConfig(const Config& config) {
     config_ = config;
+  }
+
+  void setReadBufNewAllocSize(size_t size) {
+    config_.readBufNewAllocSize = size;
   }
 
   HTTPCoroSession* FOLLY_NULLABLE
@@ -123,6 +128,10 @@ class HTTPCoroAcceptor : public wangle::Acceptor {
 
   void setZeroCopyEnableThreshold(size_t threshold) {
     zeroCopyEnableThreshold_ = threshold;
+  }
+
+  void setReadBufNewAllocSize(size_t size) {
+    factory_.setReadBufNewAllocSize(size);
   }
 
   void stopAcceptingQuic() {

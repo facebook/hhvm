@@ -57,6 +57,7 @@ class HTTPServer : public quic::QuicHandshakeSocketHolder::Callback {
     std::chrono::milliseconds streamReadTimeout{std::chrono::seconds(10)};
     std::chrono::milliseconds connIdleTimeout{std::chrono::seconds(10)};
     std::chrono::milliseconds writeTimeout{std::chrono::seconds(5)};
+    size_t readBufNewAllocSize{4000};
   };
 
   using NewConnectionFilter = HTTPCoroAcceptor::NewConnectionFilter;

@@ -28,9 +28,6 @@ using namespace proxygen;
 using namespace proxygen::coro;
 
 constexpr size_t kMinReadSize = 1460;
-constexpr size_t kReadBufNewAllocSize = 4000;
-// 16 is the default reads-per-loop for AsyncSocket
-constexpr uint64_t kMaxReadDataPerLoop = kReadBufNewAllocSize * 16;
 // 64 data (default fcw) + 9 byte stream headers for 100 (default) streams
 constexpr uint32_t kWriteBufLimit = 65535 + 900;
 constexpr uint64_t kMaxQuarterStreamId = (1ull << 60) - 1;
@@ -2477,6 +2474,12 @@ void HTTPCoroSession::setSetting(SettingsId id, uint32_t value) {
   }
 }
 
+void HTTPCoroSession::setReadBufNewAllocSize(size_t size) {
+  if (size >= kMinReadSize) {
+    readBufNewAllocSize_ = size;
+  }
+}
+
 void HTTPUniplexTransportSession::sendPing() {
   codec_->generatePingRequest(writeBuf_, folly::none);
   writeEvent_.signal();
@@ -2545,7 +2548,7 @@ folly::coro::Task<void> HTTPUniplexTransportSession::readLoop() noexcept {
       rc = co_await co_awaitTry(co_withCancellation(
           cancellationToken,
           coroTransport_->read(
-              readBuf, kMinReadSize, kReadBufNewAllocSize, connReadTimeout_)));
+              readBuf, kMinReadSize, readBufNewAllocSize_, connReadTimeout_)));
     }
     if (cancellationToken.isCancellationRequested()) {
       XLOG(DBG4) << "Read cancelled sess=" << *this;
@@ -2601,7 +2604,8 @@ folly::coro::Task<void> HTTPUniplexTransportSession::readLoop() noexcept {
         } // else, bytesParsed == 0, and cancelCallback initiated teardown
       }
     } while (bytesParsed > 0 && !readBuf.empty());
-    if (*rc >= kMaxReadDataPerLoop) {
+    // 16 is the default reads-per-loop for AsyncSocket
+    if (*rc >= readBufNewAllocSize_ * 16) {
       // Maxed out this loop, give someone else a chance
       co_await folly::coro::co_reschedule_on_current_executor;
     }

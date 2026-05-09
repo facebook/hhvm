@@ -184,6 +184,9 @@ HTTPCoroAcceptor* HTTPServer::createAcceptor(
   if (config_.zeroCopyEnableThreshold > 0) {
     acceptor->setZeroCopyEnableThreshold(config_.zeroCopyEnableThreshold);
   }
+  if (config_.sessionConfig.readBufNewAllocSize > 0) {
+    acceptor->setReadBufNewAllocSize(config_.sessionConfig.readBufNewAllocSize);
+  }
   return acceptor;
 }
 

@@ -76,6 +76,9 @@ void HTTPCoroDownstreamSessionFactory::applySettingsToSession(
   session.setConnectionReadTimeout(accConfig_->connectionIdleTimeout);
   session.setStreamReadTimeout(accConfig_->transactionIdleTimeout);
   session.setWriteTimeout(accConfig_->transactionIdleTimeout);
+  if (config_.readBufNewAllocSize > 0) {
+    session.setReadBufNewAllocSize(config_.readBufNewAllocSize);
+  }
   // accConfig_->writeBufferLimit
   //
   if (config_.sessionStats) {

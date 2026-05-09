@@ -105,6 +105,13 @@ struct AcceptorConfiguration : public wangle::ServerSocketConfig {
    */
   bool serverEarlyResponseEnabled{false};
 
+  /**
+   * Per-read IOBuf allocation size for the transport layer. Larger values
+   * reduce IOBuf chain length for large request bodies, improving throughput
+   * by reducing destructor and chain-walk overhead. 0 means use the default.
+   */
+  size_t readBufNewAllocSize{4000};
+
   /* Strategy for which headers to insert into HPACK/QPACK dynamic table */
   const HeaderIndexingStrategy* headerIndexingStrategy{nullptr};
 };

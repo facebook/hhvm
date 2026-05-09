@@ -184,9 +184,6 @@ HTTPCoroAcceptor* HTTPServer::createAcceptor(
   if (config_.zeroCopyEnableThreshold > 0) {
     acceptor->setZeroCopyEnableThreshold(config_.zeroCopyEnableThreshold);
   }
-  if (config_.sessionConfig.readBufNewAllocSize > 0) {
-    acceptor->setReadBufNewAllocSize(config_.sessionConfig.readBufNewAllocSize);
-  }
   return acceptor;
 }
 
@@ -435,6 +432,7 @@ std::shared_ptr<const AcceptorConfiguration> HTTPServer::toAcceptorConfig(
   accConfig->plaintextProtocol = config.plaintextProtocol;
   accConfig->forceHTTP1_0_to_1_1 = true;
   accConfig->connectionIdleTimeout = config.sessionConfig.connIdleTimeout;
+  accConfig->readBufNewAllocSize = config.sessionConfig.readBufNewAllocSize;
   return accConfig;
 }
 

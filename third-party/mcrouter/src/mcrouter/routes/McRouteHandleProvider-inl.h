@@ -11,6 +11,7 @@
 
 #include <folly/Conv.h>
 #include <folly/Range.h>
+#include <folly/container/Reserve.h>
 
 #include "mcrouter/CarbonRouterInstanceBase.h"
 #include "mcrouter/McrouterLogFailure.h"
@@ -319,6 +320,7 @@ McRouteHandleProvider<RouterInfo>::makePool(
       jWeights = nullptr;
     }
     folly::dynamic jNewWeights = folly::dynamic::array;
+    auto accessPointsIt = accessPoints_.end();
     for (size_t i = 0; i < jservers->size(); ++i) {
       const auto& server = jservers->at(i);
       checkLogic(
@@ -346,16 +348,20 @@ McRouteHandleProvider<RouterInfo>::makePool(
         proxy_.stats().increment(dest_with_no_failure_domain_count_stat);
       }
 
+      if (accessPointsIt == accessPoints_.end()) {
+        auto expectedSize = jservers->size() * (1 + additionalFanout);
+        auto [it, inserted] = accessPoints_.try_emplace(name, expectedSize);
+        accessPointsIt = it;
+        if (!inserted) {
+          folly::grow_capacity_by(accessPointsIt->second, expectedSize);
+        }
+      }
+      auto& accessPointsSet = accessPointsIt->second;
+      folly::StringPiece nameSp = accessPointsIt->first;
+
       for (uint32_t idx = 0; idx < (1 + additionalFanout); ++idx) {
         auto ap = createAccessPoint(
             server.stringPiece(), failureDomain, proxy_.router(), *apAttr);
-
-        auto it = accessPoints_.find(name);
-        if (it == accessPoints_.end()) {
-          folly::F14FastSet<std::shared_ptr<const AccessPoint>> accessPoints;
-          it = accessPoints_.emplace(name, std::move(accessPoints)).first;
-        }
-        folly::StringPiece nameSp = it->first;
 
         if (ap->getProtocol() == mc_thrift_protocol) {
           checkLogic(
@@ -381,7 +387,7 @@ McRouteHandleProvider<RouterInfo>::makePool(
               poolTkoTracker,
               keepRoutingPrefix,
               idx);
-          it->second.insert(destResult.second);
+          accessPointsSet.insert(destResult.second);
           addDestination(std::move(destResult.first));
         } else {
           using Transport = AsyncMcClient;
@@ -398,7 +404,7 @@ McRouteHandleProvider<RouterInfo>::makePool(
               poolTkoTracker,
               keepRoutingPrefix,
               idx);
-          it->second.insert(destResult.second);
+          accessPointsSet.insert(destResult.second);
           addDestination(std::move(destResult.first));
         }
       }

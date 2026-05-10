@@ -71,6 +71,20 @@ struct TestStruct {
   2: optional string optional_string;
 }
 
+struct TestStructConstantDefaultValue {
+  1: string unqualified_string;
+  2: list<string> unqualified_list_string;
+  3: set<string> unqualified_set_string;
+  4: map<string, double> unqualified_map_string_double;
+}
+
+const TestStructConstantDefaultValue test_struct_default_constant = TestStructConstantDefaultValue{
+  unqualified_string = "constant default",
+  unqualified_list_string = ["Greenwich", "Royal Observatory"],
+  unqualified_set_string = ["prime", "meridian"],
+  unqualified_map_string_double = {"lat": 51.4769, "lon": 0.0005},
+};
+
 struct TestStructWithDefaultValues {
   1: i32 unqualified_integer = 42;
 
@@ -97,6 +111,8 @@ struct TestStructWithDefaultValues {
   // DEPRECATED: optional-qualified fields with default for testing only
   @thrift.AllowUnsafeOptionalCustomDefaultValue
   9: optional TestEnum optional_enum = TestEnum.ARM2;
+
+  10: TestStructConstantDefaultValue unqualified_struct_from_constant = test_struct_default_constant;
 }
 
 struct TestStructAllThriftPrimitiveTypes {

@@ -64,6 +64,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesMutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
     TestStructAsListElement as TestStructAsListElementMutable,
+    TestStructConstantDefaultValue as TestStructConstantDefaultValueMutable,
     TestStructContainerAssignment as TestStructContainerAssignmentMutable,
     TestStructCopy as TestStructCopyMutable,
     TestStructEmpty as TestStructEmptyMutable,
@@ -80,6 +81,7 @@ from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesImmutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable,
+    TestStructConstantDefaultValue as TestStructConstantDefaultValueImmutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
 )
 
@@ -252,6 +254,21 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             TestStructImmutable(),
             TestStructWithDefaultValuesImmutable().unqualified_struct_intrinsic_default,
         )
+
+    def test_struct_constant_default_for_immutable_struct_field(self) -> None:
+        # GIVEN
+        expected = TestStructConstantDefaultValueImmutable(
+            unqualified_string="constant default",
+            unqualified_list_string=["Greenwich", "Royal Observatory"],
+            unqualified_set_string={"prime", "meridian"},
+            unqualified_map_string_double={"lat": 51.4769, "lon": 0.0005},
+        )
+
+        # WHEN
+        actual = TestStructWithDefaultValuesImmutable().unqualified_struct_from_constant
+
+        # THEN
+        self.assertEqual(expected, actual)
 
     def test_type_safety(self) -> None:
         # Field type is validated on instantiation
@@ -697,6 +714,23 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             TestStructMutable(),
             TestStructWithDefaultValuesMutable().unqualified_struct_intrinsic_default,
         )
+
+    def test_struct_constant_default_for_mutable_struct_field(self) -> None:
+        # GIVEN
+        expected = TestStructConstantDefaultValueMutable(
+            unqualified_string="constant default",
+            unqualified_list_string=to_thrift_list(["Greenwich", "Royal Observatory"]),
+            unqualified_set_string=to_thrift_set({"prime", "meridian"}),
+            unqualified_map_string_double=to_thrift_map(
+                {"lat": 51.4769, "lon": 0.0005}
+            ),
+        )
+
+        # WHEN
+        actual = TestStructWithDefaultValuesMutable().unqualified_struct_from_constant
+
+        # THEN
+        self.assertEqual(expected, actual)
 
     def test_reset(self) -> None:
         w = TestStructWithDefaultValuesMutable(optional_integer=123)

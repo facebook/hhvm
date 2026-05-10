@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-include "module.thrift"
+include "thrift/compiler/test/fixtures/php_hack_ns/src/module.thrift"
+include "thrift/annotation/hack.thrift"
 
+@hack.NamePrefix{prefix = "Global"}
 package "facebook.com/thrift/test/fixtures/php_hack_ns"
 
 namespace hack hack_ns2
@@ -31,5 +33,5 @@ struct FBStruct {
 }
 
 service TestService extends module.FooHackService {
-  i32 ping(1: string str_arg);
+  FBStruct pong(1: string str_arg);
 }

@@ -13,11 +13,11 @@ namespace hack_ns2;
  * Status
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/Status'))>>
-enum Status: int {
+enum GlobalStatus: int {
   Unknown = 0;
 }
 
-class Status_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
+class GlobalStatus_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
     return \tmeta_ThriftEnum::fromShape(
       shape(
@@ -43,7 +43,7 @@ class Status_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * FBStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/FBStruct'))>>
-class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
+class GlobalFBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -54,12 +54,12 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     2 => shape(
       'var' => 'enum_value',
       'type' => \TType::I32,
-      'enum' => \foo_php_ns_Status::class,
+      'enum' => \foo_php_ns_ProgramPrefixedStatus::class,
     ),
     3 => shape(
       'var' => 'struct_value',
       'type' => \TType::STRUCT,
-      'class' => \foo_php_ns_TestStruct::class,
+      'class' => \foo_php_ns_Double_Prefixed_::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -70,8 +70,8 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   const type TConstructorShape = shape(
     ?'str_value' => ?string,
-    ?'enum_value' => ?\foo_php_ns_Status,
-    ?'struct_value' => ?\foo_php_ns_TestStruct,
+    ?'enum_value' => ?\foo_php_ns_ProgramPrefixedStatus,
+    ?'struct_value' => ?\foo_php_ns_Double_Prefixed_,
   );
 
   const int STRUCTURAL_ID = 3310738380971623822;
@@ -84,14 +84,14 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Original thrift field:-
    * 2: module.Status enum_value
    */
-  public ?\foo_php_ns_Status $enum_value;
+  public ?\foo_php_ns_ProgramPrefixedStatus $enum_value;
   /**
    * Original thrift field:-
    * 3: module.TestStruct struct_value
    */
-  public ?\foo_php_ns_TestStruct $struct_value;
+  public ?\foo_php_ns_Double_Prefixed_ $struct_value;
 
-  public function __construct(?string $str_value = null, ?\foo_php_ns_Status $enum_value = null, ?\foo_php_ns_TestStruct $struct_value = null)[] {
+  public function __construct(?string $str_value = null, ?\foo_php_ns_ProgramPrefixedStatus $enum_value = null, ?\foo_php_ns_Double_Prefixed_ $struct_value = null)[] {
     $this->str_value = $str_value ?? '';
     $this->enum_value = $enum_value;
     $this->struct_value = $struct_value;
@@ -110,7 +110,7 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   }
 
   public function getName()[]: string {
-    return 'FBStruct';
+    return 'GlobalFBStruct';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -169,6 +169,37 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'enum_value' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
+              shape(
+                "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/Status",
+              )
+            ),
+          ],
+        ),
+        'struct_value' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\hack\NamePrefix' => \facebook\thrift\annotation\hack\NamePrefix::fromShape(
+              shape(
+                "prefix" => "Double_",
+                "apply_on_getName" => false,
+              )
+            ),
+            '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
+              shape(
+                "name" => "Prefixed_",
+              )
+            ),
+            '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
+              shape(
+                "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestStruct",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }

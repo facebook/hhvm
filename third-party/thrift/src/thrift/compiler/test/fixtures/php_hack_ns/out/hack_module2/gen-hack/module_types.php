@@ -10,12 +10,12 @@
  * Original thrift enum:-
  * Status
  */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/Status'))>>
-enum foo_php_ns_Status: int {
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/Status'))>>
+enum foo_php_ns_ProgramPrefixedStatus: int {
   Unknown = 0;
 }
 
-class foo_php_ns_Status_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
+class foo_php_ns_ProgramPrefixedStatus_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
   public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
     return tmeta_ThriftEnum::fromShape(
       shape(
@@ -29,19 +29,264 @@ class foo_php_ns_Status_TEnumStaticMetadata implements \IThriftEnumStaticMetadat
 
   public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
     return shape(
-      'enum' => dict[],
+      'enum' => dict[
+        '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
+          shape(
+            "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/Status",
+          )
+        ),
+      ],
       'constants' => dict[
       ],
     );
   }
 }
 
+enum foo_php_ns_PrefixedTestUnionEnum: int {
+  _EMPTY_ = 0;
+  string_value = 1;
+}
+
+/**
+ * Original thrift union:-
+ * TestUnion
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestUnion'))>>
+class foo_php_ns_PrefixedTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<foo_php_ns_PrefixedTestUnionEnum> {
+  use \ThriftUnionSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'string_value',
+      'union' => true,
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'string_value' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'string_value' => ?string,
+  );
+
+  const int STRUCTURAL_ID = 6230992147314133324;
+  /**
+   * Original thrift field:-
+   * 1: string string_value
+   */
+  public ?string $string_value;
+  protected foo_php_ns_PrefixedTestUnionEnum $_type = foo_php_ns_PrefixedTestUnionEnum::_EMPTY_;
+
+  public function __construct(?string $string_value = null)[] {
+    $this->_type = foo_php_ns_PrefixedTestUnionEnum::_EMPTY_;
+    if ($string_value !== null) {
+      $this->string_value = $string_value;
+      $this->_type = foo_php_ns_PrefixedTestUnionEnum::string_value;
+    }
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'string_value'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'PrefixedTestUnion';
+  }
+
+  public function getType()[]: foo_php_ns_PrefixedTestUnionEnum {
+    return $this->_type;
+  }
+
+  public function reset()[write_props]: void {
+    switch ($this->_type) {
+      case foo_php_ns_PrefixedTestUnionEnum::string_value:
+        $this->string_value = null;
+        break;
+      case foo_php_ns_PrefixedTestUnionEnum::_EMPTY_:
+        break;
+    }
+    $this->_type = foo_php_ns_PrefixedTestUnionEnum::_EMPTY_;
+  }
+
+  public function set_string_value(string $string_value)[write_props]: this {
+    $this->reset();
+    $this->_type = foo_php_ns_PrefixedTestUnionEnum::string_value;
+    $this->string_value = $string_value;
+    return $this;
+  }
+
+  public function get_string_value()[]: ?string {
+    $this->logIncorrectFieldAccessed(
+      $this->_type,
+      foo_php_ns_PrefixedTestUnionEnum::string_value,
+    );
+    return $this->string_value;
+  }
+
+  public function getx_string_value()[]: string {
+    invariant(
+      $this->_type === foo_php_ns_PrefixedTestUnionEnum::string_value,
+      'get_string_value called on an instance of TestUnion whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->string_value as nonnull;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.TestUnion",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "string_value",
+            )
+          ),
+        ],
+        "is_union" => true,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\hack\NamePrefix' => \facebook\thrift\annotation\hack\NamePrefix::fromShape(
+          shape(
+            "prefix" => "Prefixed",
+          )
+        ),
+        '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
+          shape(
+            "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestUnion",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Original thrift exception:-
+ * TestException
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestException'))>>
+class foo_php_ns_PrefixedTestException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'message',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'message' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'message' => ?string,
+  );
+
+  const int STRUCTURAL_ID = 1438368398389181198;
+  /**
+   * Original thrift field:-
+   * 1: string message
+   */
+  public string $message;
+
+  public function __construct(?string $message = null)[] {
+    parent::__construct();
+    $this->message = $message ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'message'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'TestException';
+  }
+
+  public static function getExceptionMetadata()[]: \tmeta_ThriftException {
+    return tmeta_ThriftException::fromShape(
+      shape(
+        "name" => "module.TestException",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "message",
+            )
+          ),
+        ],
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\hack\NamePrefix' => \facebook\thrift\annotation\hack\NamePrefix::fromShape(
+          shape(
+            "prefix" => "Prefixed",
+            "apply_on_getName" => false,
+          )
+        ),
+        '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
+          shape(
+            "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestException",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
 /**
  * Original thrift struct:-
  * TestStruct
  */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/TestStruct'))>>
-class foo_php_ns_TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestStruct'))>>
+class foo_php_ns_Double_Prefixed_ implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -49,24 +294,49 @@ class foo_php_ns_TestStruct implements \IThriftSyncStruct, \IThriftStructMetadat
       'var' => 'str_value',
       'type' => \TType::STRING,
     ),
+    2 => shape(
+      'var' => 'typedef_value',
+      'type' => \TType::STRING,
+    ),
+    3 => shape(
+      'var' => 'union_value',
+      'type' => \TType::STRUCT,
+      'class' => foo_php_ns_PrefixedTestUnion::class,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'str_value' => 1,
+    'typedef_value' => 2,
+    'union_value' => 3,
   ];
 
   const type TConstructorShape = shape(
     ?'str_value' => ?string,
+    ?'typedef_value' => ?string,
+    ?'union_value' => ?foo_php_ns_PrefixedTestUnion,
   );
 
-  const int STRUCTURAL_ID = 4273296550303641235;
+  const int STRUCTURAL_ID = 1569892714941896762;
   /**
    * Original thrift field:-
    * 1: string str_value
    */
   public string $str_value;
+  /**
+   * Original thrift field:-
+   * 2: module.TestTypedef typedef_value
+   */
+  public string $typedef_value;
+  /**
+   * Original thrift field:-
+   * 3: module.TestUnion union_value
+   */
+  public ?foo_php_ns_PrefixedTestUnion $union_value;
 
-  public function __construct(?string $str_value = null)[] {
+  public function __construct(?string $str_value = null, ?string $typedef_value = null, ?foo_php_ns_PrefixedTestUnion $union_value = null)[] {
     $this->str_value = $str_value ?? '';
+    $this->typedef_value = $typedef_value ?? '';
+    $this->union_value = $union_value;
   }
 
   public static function withDefaultValues()[]: this {
@@ -76,11 +346,13 @@ class foo_php_ns_TestStruct implements \IThriftSyncStruct, \IThriftStructMetadat
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'str_value'),
+      Shapes::idx($shape, 'typedef_value'),
+      Shapes::idx($shape, 'union_value'),
     );
   }
 
   public function getName()[]: string {
-    return 'TestStruct';
+    return 'Prefixed_';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -99,6 +371,41 @@ class foo_php_ns_TestStruct implements \IThriftSyncStruct, \IThriftStructMetadat
               "name" => "str_value",
             )
           ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.TestTypedef",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "typedef_value",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.TestUnion",
+                    )
+                  ),
+                )
+              ),
+              "name" => "union_value",
+            )
+          ),
         ],
         "is_union" => false,
       )
@@ -107,8 +414,50 @@ class foo_php_ns_TestStruct implements \IThriftSyncStruct, \IThriftStructMetadat
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\hack\NamePrefix' => \facebook\thrift\annotation\hack\NamePrefix::fromShape(
+          shape(
+            "prefix" => "Double_",
+            "apply_on_getName" => false,
+          )
+        ),
+        '\facebook\thrift\annotation\hack\Name' => \facebook\thrift\annotation\hack\Name::fromShape(
+          shape(
+            "name" => "Prefixed_",
+          )
+        ),
+        '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
+          shape(
+            "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestStruct",
+          )
+        ),
+      ],
       'fields' => dict[
+        'typedef_value' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\hack\NamePrefix' => \facebook\thrift\annotation\hack\NamePrefix::fromShape(
+              shape(
+                "prefix" => "Prefixed",
+              )
+            ),
+          ],
+        ),
+        'union_value' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\hack\NamePrefix' => \facebook\thrift\annotation\hack\NamePrefix::fromShape(
+              shape(
+                "prefix" => "Prefixed",
+              )
+            ),
+            '\facebook\thrift\annotation\Uri' => \facebook\thrift\annotation\Uri::fromShape(
+              shape(
+                "value" => "facebook.com/thrift/compiler/test/fixtures/php_hack_ns/src/module/TestUnion",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }

@@ -13,13 +13,13 @@ namespace hack_ns2;
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/TestService'))>>
-interface TestServiceAsyncIf extends \FooHackServiceAsyncIf {
+interface GlobalTestServiceAsyncIf extends \Deprecated_FooHackServiceAsyncIf {
   /**
    * Original thrift definition:-
-   * i32
-   *   ping(1: string str_arg);
+   * FBStruct
+   *   pong(1: string str_arg);
    */
-  public function ping(string $str_arg): Awaitable<int>;
+  public function pong(string $str_arg): Awaitable<\hack_ns2\GlobalFBStruct>;
 }
 
 /**
@@ -27,7 +27,7 @@ interface TestServiceAsyncIf extends \FooHackServiceAsyncIf {
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/TestService'))>>
-interface TestServiceAsyncClientIf extends TestServiceAsyncIf, \FooHackServiceAsyncClientIf {
+interface GlobalTestServiceAsyncClientIf extends GlobalTestServiceAsyncIf, \Deprecated_FooHackServiceAsyncClientIf {
 }
 
 /**
@@ -35,56 +35,56 @@ interface TestServiceAsyncClientIf extends TestServiceAsyncIf, \FooHackServiceAs
  * TestService
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/fixtures/php_hack_ns/TestService'))>>
-interface TestServiceClientIf extends \FooHackServiceClientIf {
+interface GlobalTestServiceClientIf extends \Deprecated_FooHackServiceClientIf {
   /**
    * Original thrift definition:-
-   * i32
-   *   ping(1: string str_arg);
+   * FBStruct
+   *   pong(1: string str_arg);
    */
-  public function ping(string $str_arg): Awaitable<int>;
+  public function pong(string $str_arg): Awaitable<\hack_ns2\GlobalFBStruct>;
 }
 
 /**
  * Original thrift service:-
  * TestService
  */
-trait TestServiceClientBase {
+trait GlobalTestServiceClientBase {
   require extends \ThriftClientBase;
 
   /**
    * Original thrift definition:-
-   * i32
-   *   ping(1: string str_arg);
+   * FBStruct
+   *   pong(1: string str_arg);
    */
-  public async function ping(string $str_arg): Awaitable<int> {
+  public async function pong(string $str_arg): Awaitable<\hack_ns2\GlobalFBStruct> {
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
-    $args = TestService_ping_args::fromShape(shape(
+    $args = GlobalTestService_pong_args::fromShape(shape(
       'str_arg' => $str_arg,
     ));
-    await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
-    $currentseqid = $this->sendImplHelper($args, "ping", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponse(TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
+    await $this->asyncHandler_->genBefore(GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME, "pong", $args);
+    $currentseqid = $this->sendImplHelper($args, "pong", false, GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME );
+    return (await $this->genAwaitResponse(GlobalTestService_pong_result::class, "pong", false, $currentseqid, $rpc_options))[0];
   }
 
 }
 
-class TestServiceAsyncClient extends \FooHackServiceAsyncClient implements TestServiceAsyncClientIf {
-  use TestServiceClientBase;
+class GlobalTestServiceAsyncClient extends \Deprecated_FooHackServiceAsyncClient implements GlobalTestServiceAsyncClientIf {
+  use GlobalTestServiceClientBase;
 
-  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
-class TestServiceClient extends \FooHackServiceClient implements TestServiceClientIf {
-  use TestServiceClientBase;
+class GlobalTestServiceClient extends \Deprecated_FooHackServiceClient implements GlobalTestServiceClientIf {
+  use GlobalTestServiceClientBase;
 
-  const string THRIFT_SVC_NAME = TestServiceStaticMetadata::THRIFT_SVC_NAME;
+  const string THRIFT_SVC_NAME = GlobalTestServiceStaticMetadata::THRIFT_SVC_NAME;
 
 }
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class TestService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata {
+class GlobalTestService_pong_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
@@ -119,13 +119,13 @@ class TestService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadat
   }
 
   public function getName()[]: string {
-    return 'TestService_ping_args';
+    return 'GlobalTestService_pong_args';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module2.ping_args",
+        "name" => "module2.pong_args",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(
@@ -158,15 +158,16 @@ class TestService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadat
 
 }
 
-class TestService_ping_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
+class GlobalTestService_pong_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const type TResult = int;
+  const type TResult = \hack_ns2\GlobalFBStruct;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
-      'type' => \TType::I32,
+      'type' => \TType::STRUCT,
+      'class' => \hack_ns2\GlobalFBStruct::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -177,7 +178,7 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
     ?'success' => ?this::TResult,
   );
 
-  const int STRUCTURAL_ID = 413702039226145291;
+  const int STRUCTURAL_ID = 931736818643046220;
   public ?this::TResult $success;
 
   public function __construct(?this::TResult $success = null)[] {
@@ -195,20 +196,24 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
   }
 
   public function getName()[]: string {
-    return 'TestService_ping_result';
+    return 'GlobalTestService_pong_result';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module2.TestService_ping_result",
+        "name" => "module2.GlobalTestService_pong_result",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(
               "id" => 0,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module2.FBStruct",
+                    )
+                  ),
                 )
               ),
               "name" => "success",
@@ -234,7 +239,7 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
 
 }
 
-class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
+class GlobalTestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'TestService';
 
   public static function getServiceMetadata()[]: \tmeta_ThriftService {
@@ -244,10 +249,14 @@ class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
         "functions" => vec[
           \tmeta_ThriftFunction::fromShape(
             shape(
-              "name" => "ping",
+              "name" => "pong",
               "return_type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module2.FBStruct",
+                    )
+                  ),
                 )
               ),
               "arguments" => vec[
@@ -287,15 +296,18 @@ class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
         'metadata' => \tmeta_ThriftMetadata::fromShape(
           shape(
             'enums' => dict[
-              'module.Status' => \foo_php_ns_Status_TEnumStaticMetadata::getEnumMetadata(),
+              'module.Status' => \foo_php_ns_ProgramPrefixedStatus_TEnumStaticMetadata::getEnumMetadata(),
             ],
             'structs' => dict[
-              'module.TestStruct' => \foo_php_ns_TestStruct::getStructMetadata(),
+              'module2.FBStruct' => \hack_ns2\GlobalFBStruct::getStructMetadata(),
+              'module.TestStruct' => \foo_php_ns_Double_Prefixed_::getStructMetadata(),
+              'module.TestUnion' => \foo_php_ns_PrefixedTestUnion::getStructMetadata(),
             ],
             'exceptions' => dict[
+              'module.TestException' => \foo_php_ns_PrefixedTestException::getExceptionMetadata(),
             ],
             'services' => dict[
-              'module.FooHackService' => \FooHackServiceStaticMetadata::getServiceMetadata(),
+              'module.FooHackService' => \Deprecated_FooHackServiceStaticMetadata::getServiceMetadata(),
             ],
           )
         ),

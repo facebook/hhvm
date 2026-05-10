@@ -42,6 +42,7 @@ class foo_php_ns_ProgramPrefixedStatus_TEnumStaticMetadata implements \IThriftEn
   }
 }
 
+type foo_php_ns_PrefixedTestTypedef = string;
 enum foo_php_ns_PrefixedTestUnionEnum: int {
   _EMPTY_ = 0;
   string_value = 1;
@@ -312,7 +313,7 @@ class foo_php_ns_Double_Prefixed_ implements \IThriftSyncStruct, \IThriftStructM
 
   const type TConstructorShape = shape(
     ?'str_value' => ?string,
-    ?'typedef_value' => ?string,
+    ?'typedef_value' => ?foo_php_ns_PrefixedTestTypedef,
     ?'union_value' => ?foo_php_ns_PrefixedTestUnion,
   );
 
@@ -326,14 +327,14 @@ class foo_php_ns_Double_Prefixed_ implements \IThriftSyncStruct, \IThriftStructM
    * Original thrift field:-
    * 2: module.TestTypedef typedef_value
    */
-  public string $typedef_value;
+  public foo_php_ns_PrefixedTestTypedef $typedef_value;
   /**
    * Original thrift field:-
    * 3: module.TestUnion union_value
    */
   public ?foo_php_ns_PrefixedTestUnion $union_value;
 
-  public function __construct(?string $str_value = null, ?string $typedef_value = null, ?foo_php_ns_PrefixedTestUnion $union_value = null)[] {
+  public function __construct(?string $str_value = null, ?foo_php_ns_PrefixedTestTypedef $typedef_value = null, ?foo_php_ns_PrefixedTestUnion $union_value = null)[] {
     $this->str_value = $str_value ?? '';
     $this->typedef_value = $typedef_value ?? '';
     $this->union_value = $union_value;

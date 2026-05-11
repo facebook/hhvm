@@ -629,7 +629,7 @@ trait T {
   require extends C;
 
   <<__Override>>
-  public function foo(): void { echo "I am foo in T\n"; }
+  final public function foo(): void { echo "I am foo in T\n"; }
 }
 
 class D extends C {
@@ -638,6 +638,39 @@ class D extends C {
 
   // however D can use trait T which overrides `foo`
   use T;
+}
+```
+
+#### Remark: the Sealed attribute controls only the direct extends/overrides
+
+The `__Sealed` attribute restricts only the *direct* extensions or overrides — it does not propagate further. Classes or methods permitted by the seal can themselves be freely extended or overridden by anyone (unless they are independently sealed or final).
+
+For classes:
+
+```hack
+<<__Sealed(B::class)>>
+class A {}
+
+class B extends A {}  // OK: B is named in A's seal list
+class C extends B {}  // OK: B is not sealed, so any class can extend it
+```
+
+For methods:
+
+```hack
+class A {
+  <<__Sealed(B::class)>>
+  public function foo(): void {}
+}
+
+class B extends A {
+  <<__Override>>
+  public function foo(): void {}  // OK: B is named in A::foo's seal list
+}
+
+class C extends B {
+  <<__Override>>
+  public function foo(): void {}  // OK: B::foo is not sealed, so C can override it
 }
 ```
 

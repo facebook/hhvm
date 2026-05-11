@@ -9,7 +9,7 @@ trait T {
   require extends C;
 
   <<__Override>>
-  public function foo(): void { echo "I am foo in T\n"; }
+  final public function foo(): void { echo "I am foo in T\n"; }
 }
 
 class D extends C {

@@ -44,13 +44,18 @@ Status HybridKeyExchange::generateKeyPair(Error& err) {
  * this draft RFC's scope. We need to implement this in future to avoid boundary
  * confusion attacks.
  */
-std::unique_ptr<folly::IOBuf> HybridKeyExchange::getKeyShare() const {
+Status HybridKeyExchange::getKeyShare(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err) const {
   // We don't need to copy the IOBuf even though we use first's keyshare to
   // concatenate second's keyshare because we used unique_ptr.
-  auto keyShare = firstKex_->getKeyShare();
-  auto secondKeyShare = secondKex_->getKeyShare();
+  std::unique_ptr<folly::IOBuf> keyShare;
+  FIZZ_RETURN_ON_ERROR(firstKex_->getKeyShare(keyShare, err));
+  std::unique_ptr<folly::IOBuf> secondKeyShare;
+  FIZZ_RETURN_ON_ERROR(secondKex_->getKeyShare(secondKeyShare, err));
   keyShare->appendToChain(std::move(secondKeyShare));
-  return keyShare;
+  ret = std::move(keyShare);
+  return Status::Success;
 }
 
 Status HybridKeyExchange::generateSharedSecret(

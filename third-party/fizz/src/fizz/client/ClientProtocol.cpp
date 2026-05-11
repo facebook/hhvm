@@ -572,7 +572,7 @@ static Status getClientHello(
   for (const auto& share : shares) {
     KeyShareEntry entry;
     entry.group = share.first;
-    entry.key_exchange = share.second->getKeyShare();
+    TRY(share.second->getKeyShare(entry.key_exchange, ctx.err));
     keyShare.client_shares.push_back(std::move(entry));
   }
   Extension keyShareExt;

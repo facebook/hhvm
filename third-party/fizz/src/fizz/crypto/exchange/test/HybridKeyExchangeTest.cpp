@@ -36,17 +36,26 @@ class HybridKeyExchangeTest : public testing::Test {
 
 // TODO: changed to typed test to test all combinations.
 TEST_F(HybridKeyExchangeTest, KeyShareRetrievalBeforeGenerationTest) {
-  EXPECT_THROW(kex->getKeyShare(), std::runtime_error);
+  Error err;
+  EXPECT_THROW(
+      {
+        std::unique_ptr<folly::IOBuf> ret;
+        FIZZ_THROW_ON_ERROR(kex->getKeyShare(ret, err), err);
+      },
+      std::runtime_error);
 }
 
 TEST_F(HybridKeyExchangeTest, KeyShareGenerationTest) {
   Error err;
   EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
   EXPECT_EQ(mockKex.generateKeyPair(err), Status::Success);
-  auto combinedKey = mockKex.getKeyShare();
-  auto secondKexKey = mockKex.getKeyShare();
+  std::unique_ptr<folly::IOBuf> combinedKey;
+  EXPECT_EQ(mockKex.getKeyShare(combinedKey, err), Status::Success);
+  std::unique_ptr<folly::IOBuf> secondKexKey;
+  EXPECT_EQ(mockKex.getKeyShare(secondKexKey, err), Status::Success);
   combinedKey->appendToChain(std::move(secondKexKey));
-  auto keyShare = kex->getKeyShare();
+  std::unique_ptr<folly::IOBuf> keyShare;
+  EXPECT_EQ(kex->getKeyShare(keyShare, err), Status::Success);
   EXPECT_TRUE(folly::IOBufEqualTo()(combinedKey, keyShare));
 }
 
@@ -55,8 +64,10 @@ TEST_F(HybridKeyExchangeTest, SharedSecretGenerationTest) {
   EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
   EXPECT_EQ(mockKex.generateKeyPair(err), Status::Success);
   // Get the combined public key
-  auto combinedKey = mockKex.getKeyShare();
-  auto secondKexKey = mockKex.getKeyShare();
+  std::unique_ptr<folly::IOBuf> combinedKey;
+  EXPECT_EQ(mockKex.getKeyShare(combinedKey, err), Status::Success);
+  std::unique_ptr<folly::IOBuf> secondKexKey;
+  EXPECT_EQ(mockKex.getKeyShare(secondKexKey, err), Status::Success);
   combinedKey->appendToChain(std::move(secondKexKey));
   // Calculate the shared secret using HybridKeyExchange::generateSharedSecret()
   std::unique_ptr<folly::IOBuf> sharedSecret;
@@ -64,15 +75,19 @@ TEST_F(HybridKeyExchangeTest, SharedSecretGenerationTest) {
       kex->generateSharedSecret(sharedSecret, err, combinedKey->coalesce()),
       Status::Success);
   // Calculate the shared secret individually
+  std::unique_ptr<folly::IOBuf> mockKeyShare1;
+  EXPECT_EQ(mockKex.getKeyShare(mockKeyShare1, err), Status::Success);
   std::unique_ptr<folly::IOBuf> combinedSharedSecret;
   EXPECT_EQ(
       mockKex.generateSharedSecret(
-          combinedSharedSecret, err, mockKex.getKeyShare()->coalesce()),
+          combinedSharedSecret, err, mockKeyShare1->coalesce()),
       Status::Success);
+  std::unique_ptr<folly::IOBuf> mockKeyShare2;
+  EXPECT_EQ(mockKex.getKeyShare(mockKeyShare2, err), Status::Success);
   std::unique_ptr<folly::IOBuf> secondSharedSecret;
   EXPECT_EQ(
       mockKex.generateSharedSecret(
-          secondSharedSecret, err, mockKex.getKeyShare()->coalesce()),
+          secondSharedSecret, err, mockKeyShare2->coalesce()),
       Status::Success);
   combinedSharedSecret->appendToChain(std::move(secondSharedSecret));
   // They should be of the same value
@@ -84,7 +99,8 @@ TEST_F(HybridKeyExchangeTest, SharedSecretGenerationOnIllegalInputTest) {
   EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
   EXPECT_EQ(mockKex.generateKeyPair(err), Status::Success);
   // Get the truncated public key
-  auto publicKey = mockKex.getKeyShare();
+  std::unique_ptr<folly::IOBuf> publicKey;
+  EXPECT_EQ(mockKex.getKeyShare(publicKey, err), Status::Success);
   EXPECT_THROW(
       {
         std::unique_ptr<folly::IOBuf> sharedSecret;
@@ -100,8 +116,10 @@ TEST_F(HybridKeyExchangeTest, CloneTest) {
   EXPECT_EQ(kex->generateKeyPair(err), Status::Success);
   std::unique_ptr<KeyExchange> kexCopy;
   EXPECT_EQ(kex->clone(kexCopy, err), Status::Success);
-  auto keyShare = kex->getKeyShare();
-  auto keyShareCopy = kexCopy->getKeyShare();
+  std::unique_ptr<folly::IOBuf> keyShare;
+  EXPECT_EQ(kex->getKeyShare(keyShare, err), Status::Success);
+  std::unique_ptr<folly::IOBuf> keyShareCopy;
+  EXPECT_EQ(kexCopy->getKeyShare(keyShareCopy, err), Status::Success);
   EXPECT_TRUE(folly::IOBufEqualTo()(keyShare, keyShareCopy));
 }
 

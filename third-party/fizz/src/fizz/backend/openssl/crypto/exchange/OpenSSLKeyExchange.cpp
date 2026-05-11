@@ -30,11 +30,14 @@ Status OpenSSLECKeyExchange::generateKeyPair(Error& /*err*/) {
   return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> OpenSSLECKeyExchange::getKeyShare() const {
+Status OpenSSLECKeyExchange::getKeyShare(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err) const {
   if (!key_) {
-    throw std::runtime_error("Key not initialized");
+    return err.error("Key not initialized");
   }
-  return detail::OpenSSLECKeyEncoder::encode(key_);
+  ret = detail::OpenSSLECKeyEncoder::encode(key_);
+  return Status::Success;
 }
 
 Status OpenSSLECKeyExchange::generateSharedSecret(

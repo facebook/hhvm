@@ -147,6 +147,7 @@ TEST(UtilTest, ReadChainFile) {
 }
 
 TEST(UtilTest, createKeyExchangeFromBuf) {
+  Error err;
   {
     // Test X25519 KEM
     auto keys = FizzUtil::generateKeypairCurve25519();
@@ -155,7 +156,9 @@ TEST(UtilTest, createKeyExchangeFromBuf) {
     auto kex =
         FizzUtil::createKeyExchangeFromBuf(hpke::KEMId::x25519, privKeyBuf);
     EXPECT_TRUE(kex != nullptr);
-    EXPECT_EQ(kex->getKeyShare()->computeChainDataLength(), 32);
+    std::unique_ptr<folly::IOBuf> keyShare;
+    EXPECT_EQ(kex->getKeyShare(keyShare, err), Status::Success);
+    EXPECT_EQ(keyShare->computeChainDataLength(), 32);
   }
 
   {
@@ -164,7 +167,9 @@ TEST(UtilTest, createKeyExchangeFromBuf) {
     auto kex =
         FizzUtil::createKeyExchangeFromBuf(hpke::KEMId::secp256r1, privKeyBuf);
     EXPECT_TRUE(kex != nullptr);
-    EXPECT_EQ(kex->getKeyShare()->computeChainDataLength(), 65);
+    std::unique_ptr<folly::IOBuf> keyShare;
+    EXPECT_EQ(kex->getKeyShare(keyShare, err), Status::Success);
+    EXPECT_EQ(keyShare->computeChainDataLength(), 65);
   }
 }
 

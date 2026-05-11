@@ -80,7 +80,9 @@ TEST(X25519KeyExchange, setPrivateKeyTest) {
   X25519KeyExchange kex;
   kex.setPrivateKey(std::move(privKey));
 
-  auto gotKeyShare = kex.getKeyShare();
+  std::unique_ptr<folly::IOBuf> gotKeyShare;
+  Error err;
+  EXPECT_EQ(kex.getKeyShare(gotKeyShare, err), Status::Success);
 
   auto expectedKeyShare = folly::IOBuf::copyBuffer(
       folly::unhexlify(

@@ -91,7 +91,8 @@ Status DHKEM::encap(EncapResult& ret, Error& err, folly::ByteRange pkR) {
   FIZZ_RETURN_ON_ERROR(kex_->generateKeyPair(err));
   std::unique_ptr<folly::IOBuf> dh;
   FIZZ_RETURN_ON_ERROR(kex_->generateSharedSecret(dh, err, pkR));
-  std::unique_ptr<folly::IOBuf> enc = kex_->getKeyShare();
+  std::unique_ptr<folly::IOBuf> enc;
+  FIZZ_RETURN_ON_ERROR(kex_->getKeyShare(enc, err));
 
   std::unique_ptr<folly::IOBuf> kemContext = enc->clone();
   kemContext->prependChain(folly::IOBuf::copyBuffer(pkR));
@@ -113,11 +114,14 @@ Status DHKEM::authEncap(EncapResult& ret, Error& err, folly::ByteRange pkR) {
   std::unique_ptr<folly::IOBuf> authDh;
   FIZZ_RETURN_ON_ERROR(authKex_->generateSharedSecret(authDh, err, pkR));
   dh->prependChain(std::move(authDh));
-  std::unique_ptr<folly::IOBuf> enc = kex_->getKeyShare();
+  std::unique_ptr<folly::IOBuf> enc;
+  FIZZ_RETURN_ON_ERROR(kex_->getKeyShare(enc, err));
 
   std::unique_ptr<folly::IOBuf> kemContext = enc->clone();
   kemContext->prependChain(folly::IOBuf::copyBuffer(pkR));
-  kemContext->prependChain(authKex_->getKeyShare());
+  std::unique_ptr<folly::IOBuf> authKeyShare;
+  FIZZ_RETURN_ON_ERROR(authKex_->getKeyShare(authKeyShare, err));
+  kemContext->prependChain(std::move(authKeyShare));
 
   std::unique_ptr<folly::IOBuf> sharedSecret;
   FIZZ_RETURN_ON_ERROR(extractAndExpand(
@@ -133,7 +137,8 @@ Status DHKEM::decap(
     folly::ByteRange enc) {
   std::unique_ptr<folly::IOBuf> dh;
   FIZZ_RETURN_ON_ERROR(kex_->generateSharedSecret(dh, err, enc));
-  std::unique_ptr<folly::IOBuf> pkRm = kex_->getKeyShare();
+  std::unique_ptr<folly::IOBuf> pkRm;
+  FIZZ_RETURN_ON_ERROR(kex_->getKeyShare(pkRm, err));
 
   std::unique_ptr<folly::IOBuf> kemContext = folly::IOBuf::copyBuffer(enc);
   kemContext->prependChain(std::move(pkRm));
@@ -153,7 +158,8 @@ Status DHKEM::authDecap(
   std::unique_ptr<folly::IOBuf> authDh;
   FIZZ_RETURN_ON_ERROR(kex_->generateSharedSecret(authDh, err, pkS));
   dh->prependChain(std::move(authDh));
-  std::unique_ptr<folly::IOBuf> pkRm = kex_->getKeyShare();
+  std::unique_ptr<folly::IOBuf> pkRm;
+  FIZZ_RETURN_ON_ERROR(kex_->getKeyShare(pkRm, err));
 
   std::unique_ptr<folly::IOBuf> kemContext = folly::IOBuf::copyBuffer(enc);
   kemContext->prependChain(std::move(pkRm));

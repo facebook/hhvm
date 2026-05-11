@@ -27,8 +27,15 @@ struct Properties<fizz::MLKEM768> {
 };
 
 template <class T>
-std::unique_ptr<fizz::KeyExchange> makeKeyExchange(KeyExchangeRole role) {
-  return OQSKeyExchange::createOQSKeyExchange(role, Properties<T>::id);
+Status makeKeyExchange(
+    std::unique_ptr<fizz::KeyExchange>& ret,
+    Error& err,
+    KeyExchangeRole role) {
+  std::unique_ptr<OQSKeyExchange> kex;
+  FIZZ_RETURN_ON_ERROR(
+      OQSKeyExchange::createOQSKeyExchange(kex, err, role, Properties<T>::id));
+  ret = std::move(kex);
+  return Status::Success;
 }
 
 } // namespace fizz::liboqs

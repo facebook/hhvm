@@ -31,7 +31,8 @@ class KeyExchange {
    *
    * generateKeyPair() must be called before.
    */
-  virtual std::unique_ptr<folly::IOBuf> getKeyShare() const = 0;
+  virtual Status getKeyShare(std::unique_ptr<folly::IOBuf>& ret, Error& err)
+      const = 0;
 
   /**
    * Generate a shared secret with our key pair and a peer's public key share.

@@ -11,37 +11,53 @@
 #if FIZZ_HAVE_OQS
 
 namespace fizz::liboqs {
-std::unique_ptr<OQSKeyExchange> OQSKeyExchange::createOQSKeyExchange(
+
+Status OQSKeyExchange::createOQSKeyExchange(
+    std::unique_ptr<OQSKeyExchange>& ret,
+    Error& err,
     KeyExchangeRole role,
     const std::string& algorithm) {
   if (role == KeyExchangeRole::Server) {
-    return std::make_unique<OQSServerKeyExchange>(algorithm);
+    std::unique_ptr<OQSServerKeyExchange> server;
+    FIZZ_RETURN_ON_ERROR(OQSServerKeyExchange::create(server, err, algorithm));
+    ret = std::move(server);
   } else {
-    return std::make_unique<OQSClientKeyExchange>(algorithm);
+    std::unique_ptr<OQSClientKeyExchange> client;
+    FIZZ_RETURN_ON_ERROR(OQSClientKeyExchange::create(client, err, algorithm));
+    ret = std::move(client);
   }
+  return Status::Success;
 }
 
-OQSKeyExchange::OQSKeyExchange(const std::string& algorithm) {
-  // Generate kem here to avoid dealing with nullptr error as the object will
-  // fail to construct if that's the case.
-  kem_ = std::unique_ptr<OQS_KEM, kemDeleter_>(OQS_KEM_new(algorithm.c_str()));
-  if (kem_ == nullptr) {
-    throw std::runtime_error("OQSKeyExchange(): kem is null!");
+Status OQSClientKeyExchange::create(
+    std::unique_ptr<OQSClientKeyExchange>& ret,
+    Error& err,
+    const std::string& algorithm) {
+  std::unique_ptr<OQS_KEM, kemDeleter_> kem(OQS_KEM_new(algorithm.c_str()));
+  if (kem == nullptr) {
+    return err.error("OQSKeyExchange(): kem is null!");
   }
+  auto publicKey = std::unique_ptr<folly::IOBuf, keyDeleter_>(
+      new folly::IOBuf(folly::IOBuf::CREATE, kem->length_public_key));
+  auto secretKey = std::unique_ptr<folly::IOBuf, keyDeleter_>(
+      new folly::IOBuf(folly::IOBuf::CREATE, kem->length_secret_key));
+  ret.reset(new OQSClientKeyExchange(
+      std::move(kem), std::move(publicKey), std::move(secretKey)));
+  return Status::Success;
 }
 
-OQSClientKeyExchange::OQSClientKeyExchange(const std::string& algorithm)
-    : OQSKeyExchange(algorithm) {
-  publicKey_ = std::unique_ptr<folly::IOBuf, keyDeleter_>(
-      new folly::IOBuf(folly::IOBuf::CREATE, kem_->length_public_key));
-  secretKey_ = std::unique_ptr<folly::IOBuf, keyDeleter_>(
-      new folly::IOBuf(folly::IOBuf::CREATE, kem_->length_secret_key));
-}
-
-OQSServerKeyExchange::OQSServerKeyExchange(const std::string& algorithm)
-    : OQSKeyExchange(algorithm) {
-  cipherText_ = std::unique_ptr<folly::IOBuf, keyDeleter_>(
-      new folly::IOBuf(folly::IOBuf::CREATE, kem_->length_ciphertext));
+Status OQSServerKeyExchange::create(
+    std::unique_ptr<OQSServerKeyExchange>& ret,
+    Error& err,
+    const std::string& algorithm) {
+  std::unique_ptr<OQS_KEM, kemDeleter_> kem(OQS_KEM_new(algorithm.c_str()));
+  if (kem == nullptr) {
+    return err.error("OQSKeyExchange(): kem is null!");
+  }
+  auto cipherText = std::unique_ptr<folly::IOBuf, keyDeleter_>(
+      new folly::IOBuf(folly::IOBuf::CREATE, kem->length_ciphertext));
+  ret.reset(new OQSServerKeyExchange(std::move(kem), std::move(cipherText)));
+  return Status::Success;
 }
 
 inline bool OQSClientKeyExchange::isInitiated() const {
@@ -55,7 +71,7 @@ inline bool OQSServerKeyExchange::isInitiated() const {
 Status OQSClientKeyExchange::generateKeyPair(Error& err) {
   // We allow regeneration of key pairs as in clone() we deep-copied the buffer
   // instead of just sharing the buf.
-  checkChained();
+  FIZZ_RETURN_ON_ERROR(checkChained(err));
   if (kem_->keypair(publicKey_->writableData(), secretKey_->writableData())) {
     return err.error(
         "OQSClientKeyExchange::generateKeyPair(): keypair generation error!");
@@ -67,22 +83,28 @@ Status OQSClientKeyExchange::generateKeyPair(Error& err) {
   return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> OQSClientKeyExchange::getKeyShare() const {
+Status OQSClientKeyExchange::getKeyShare(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err) const {
   if (!isInitiated()) {
-    throw std::runtime_error(
+    return err.error(
         "OQSClientKeyExchange::getKeyShare(): keypair not generated!");
   }
-  checkChained();
-  return folly::IOBuf::copyBuffer(publicKey_->data(), publicKey_->length());
+  FIZZ_RETURN_ON_ERROR(checkChained(err));
+  ret = folly::IOBuf::copyBuffer(publicKey_->data(), publicKey_->length());
+  return Status::Success;
 }
 
-std::unique_ptr<folly::IOBuf> OQSServerKeyExchange::getKeyShare() const {
+Status OQSServerKeyExchange::getKeyShare(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err) const {
   if (!isInitiated()) {
-    throw std::runtime_error(
+    return err.error(
         "OQSServerKeyExchange::getKeyShare(): cipher text not generated!");
   }
-  checkChained();
-  return folly::IOBuf::copyBuffer(cipherText_->data(), cipherText_->length());
+  FIZZ_RETURN_ON_ERROR(checkChained(err));
+  ret = folly::IOBuf::copyBuffer(cipherText_->data(), cipherText_->length());
+  return Status::Success;
 }
 
 Status OQSClientKeyExchange::generateSharedSecret(
@@ -97,7 +119,7 @@ Status OQSClientKeyExchange::generateSharedSecret(
     return err.error(
         "OQSClientKeyExchange::generateSharedSecret(): Invalid external cipher text!");
   }
-  checkChained();
+  FIZZ_RETURN_ON_ERROR(checkChained(err));
   // Note here we can't use the safe deleter due to constraints on return type.
   auto sharedKeyLength = kem_->length_shared_secret;
   auto sharedSecret = folly::IOBuf::create(sharedKeyLength);
@@ -119,7 +141,7 @@ Status OQSServerKeyExchange::generateSharedSecret(
     return err.error(
         "OQSServerKeyExchange::generateSharedSecret(): Invalid external public key!");
   }
-  checkChained();
+  FIZZ_RETURN_ON_ERROR(checkChained(err));
   auto sharedKeyLength = kem_->length_shared_secret;
   auto sharedSecret = folly::IOBuf::create(sharedKeyLength);
   sharedSecret->append(sharedKeyLength);
@@ -145,8 +167,10 @@ Status OQSClientKeyExchange::clone(
   if (!isInitiated()) {
     return err.error("OQSClientKeyExchange::clone(): keys not generated!");
   }
-  checkChained();
-  auto copy = std::make_unique<OQSClientKeyExchange>(kem_->method_name);
+  FIZZ_RETURN_ON_ERROR(checkChained(err));
+  std::unique_ptr<OQSClientKeyExchange> copy;
+  FIZZ_RETURN_ON_ERROR(
+      OQSClientKeyExchange::create(copy, err, kem_->method_name));
   // Deep copy keys. We assume the key length never changed.
   publicKey_->cloneInto(*(copy->publicKey_));
   copy->publicKey_->unshare();
@@ -165,8 +189,10 @@ Status OQSServerKeyExchange::clone(
   if (!isInitiated()) {
     return err.error("OQSServerKeyExchange::clone(): cipher not generated!");
   }
-  checkChained();
-  auto copy = std::make_unique<OQSServerKeyExchange>(kem_->method_name);
+  FIZZ_RETURN_ON_ERROR(checkChained(err));
+  std::unique_ptr<OQSServerKeyExchange> copy;
+  FIZZ_RETURN_ON_ERROR(
+      OQSServerKeyExchange::create(copy, err, kem_->method_name));
   // Deep copy keys. We assume the key length never changed.
   cipherText_->cloneInto(*(copy->cipherText_));
   copy->cipherText_->unshare();
@@ -183,17 +209,19 @@ inline std::size_t OQSServerKeyExchange::getExpectedKeyShareSize() const {
   return kem_->length_public_key;
 }
 
-inline void OQSClientKeyExchange::checkChained() const {
+inline Status OQSClientKeyExchange::checkChained(Error& err) const {
   if (publicKey_->isChained() || secretKey_->isChained()) {
-    throw std::runtime_error(
+    return err.error(
         "OQSClientKeyExchange: public key or secret key is chained!");
   }
+  return Status::Success;
 }
 
-inline void OQSServerKeyExchange::checkChained() const {
+inline Status OQSServerKeyExchange::checkChained(Error& err) const {
   if (cipherText_->isChained()) {
-    throw std::runtime_error("OQSServerKeyExchange: cipher text is chained!");
+    return err.error("OQSServerKeyExchange: cipher text is chained!");
   }
+  return Status::Success;
 }
 } // namespace fizz::liboqs
 

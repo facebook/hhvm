@@ -23,7 +23,12 @@ class MockKeyExchange : public KeyExchange {
   Status generateKeyPair(Error& err) override {
     FIZZ_THROW_TO_ERROR(_generateKeyPair());
   }
-  MOCK_METHOD(std::unique_ptr<folly::IOBuf>, getKeyShare, (), (const));
+  MOCK_METHOD(std::unique_ptr<folly::IOBuf>, _getKeyShare, (), (const));
+  Status getKeyShare(std::unique_ptr<folly::IOBuf>& ret, Error& err)
+      const override {
+    FIZZ_THROW_TO_ERROR(ret, _getKeyShare());
+    return Status::Success;
+  }
   MOCK_METHOD(
       std::unique_ptr<folly::IOBuf>,
       _generateSharedSecret,
@@ -36,16 +41,15 @@ class MockKeyExchange : public KeyExchange {
     FIZZ_THROW_TO_ERROR(ret, _generateSharedSecret(keyShare));
   }
   MOCK_METHOD(std::unique_ptr<KeyExchange>, _clone, (), (const));
-  Status clone(std::unique_ptr<KeyExchange>& ret, Error& /*err*/)
-      const override {
-    ret = _clone();
+  Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override {
+    FIZZ_THROW_TO_ERROR(ret, _clone());
     return Status::Success;
   }
   MOCK_METHOD(std::size_t, getExpectedKeyShareSize, (), (const));
   int keyGenerated = 0;
 
   void setDefaults() {
-    ON_CALL(*this, getKeyShare()).WillByDefault(InvokeWithoutArgs([]() {
+    ON_CALL(*this, _getKeyShare()).WillByDefault(InvokeWithoutArgs([]() {
       return folly::IOBuf::copyBuffer("keyshare");
     }));
     ON_CALL(*this, _generateSharedSecret(_))
@@ -59,7 +63,7 @@ class MockKeyExchange : public KeyExchange {
   void setForHybridKeyExchange() {
     ON_CALL(*this, _generateKeyPair())
         .WillByDefault(InvokeWithoutArgs([this]() { keyGenerated = 1; }));
-    ON_CALL(*this, getKeyShare()).WillByDefault(InvokeWithoutArgs([this]() {
+    ON_CALL(*this, _getKeyShare()).WillByDefault(InvokeWithoutArgs([this]() {
       if (!keyGenerated) {
         throw std::runtime_error("Key not generated");
       }
@@ -94,7 +98,12 @@ class MockAsyncKeyExchange : public AsyncKeyExchange {
   Status generateKeyPair(Error& err) override {
     FIZZ_THROW_TO_ERROR(_generateKeyPair());
   }
-  MOCK_METHOD(std::unique_ptr<folly::IOBuf>, getKeyShare, (), (const));
+  MOCK_METHOD(std::unique_ptr<folly::IOBuf>, _getKeyShare, (), (const));
+  Status getKeyShare(std::unique_ptr<folly::IOBuf>& ret, Error& /*err*/)
+      const override {
+    ret = _getKeyShare();
+    return Status::Success;
+  }
   MOCK_METHOD(
       std::unique_ptr<folly::IOBuf>,
       _generateSharedSecret,

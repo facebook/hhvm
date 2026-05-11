@@ -482,11 +482,10 @@ class HandshakeTest : public Test {
 
   void setupECH() {
     auto kex = std::make_unique<libsodium::X25519KeyExchange>();
-    {
-      Error err;
-      FIZZ_THROW_ON_ERROR(kex->generateKeyPair(err), err);
-    }
-    auto echPublicKey = kex->getKeyShare();
+    Error err;
+    FIZZ_THROW_ON_ERROR(kex->generateKeyPair(err), err);
+    std::unique_ptr<folly::IOBuf> echPublicKey;
+    FIZZ_THROW_ON_ERROR(kex->getKeyShare(echPublicKey, err), err);
 
     ech::ParsedECHConfig echConfig;
     echConfig.key_config.config_id = 0xFB;

@@ -392,7 +392,7 @@ TEST_F(ClientProtocolTest, TestConnectFlow) {
       .WillOnce(InvokeWithoutArgs([&mockKex]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("keyshare");
         }));
         mockKex = ret.get();
@@ -483,7 +483,7 @@ TEST_F(ClientProtocolTest, TestConnectPskFlow) {
       .WillOnce(InvokeWithoutArgs([&mockKex]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("keyshare");
         }));
         mockKex = ret.get();
@@ -586,7 +586,7 @@ TEST_F(ClientProtocolTest, TestConnectPskEarlyFlow) {
       .WillOnce(InvokeWithoutArgs([&mockKex]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("keyshare");
         }));
         mockKex = ret.get();
@@ -898,7 +898,7 @@ TEST_F(ClientProtocolTest, TestConnectMultipleShares) {
       .WillOnce(InvokeWithoutArgs([&mockKex1]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("x25519share");
         }));
         mockKex1 = ret.get();
@@ -911,7 +911,7 @@ TEST_F(ClientProtocolTest, TestConnectMultipleShares) {
       .WillOnce(InvokeWithoutArgs([&mockKex2]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("p256share");
         }));
         mockKex2 = ret.get();
@@ -944,7 +944,7 @@ TEST_F(ClientProtocolTest, TestConnectCachedGroup) {
       .WillOnce(InvokeWithoutArgs([&mockKex]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("p256share");
         }));
         mockKex = ret.get();
@@ -3015,7 +3015,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestFlow) {
       .WillOnce(InvokeWithoutArgs([&mockKex]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("keyshare");
         }));
         mockKex = ret.get();
@@ -3156,7 +3156,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestPskFlow) {
       .WillOnce(InvokeWithoutArgs([&mockKex]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("keyshare");
         }));
         mockKex = ret.get();
@@ -3458,7 +3458,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
       .WillOnce(InvokeWithoutArgs([&mockKex]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("keyshare");
         }));
         mockKex = ret.get();
@@ -3789,7 +3789,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
       .WillOnce(InvokeWithoutArgs([&mockKex]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("keyshare");
         }));
         mockKex = ret.get();
@@ -4050,7 +4050,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
       .WillOnce(InvokeWithoutArgs([&mockKex]() {
         auto ret = std::make_unique<MockKeyExchange>();
         EXPECT_CALL(*ret, _generateKeyPair());
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("keyshare");
         }));
         mockKex = ret.get();

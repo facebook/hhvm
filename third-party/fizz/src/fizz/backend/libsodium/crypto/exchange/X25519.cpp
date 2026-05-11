@@ -52,11 +52,14 @@ Status X25519KeyExchange::generateKeyPair(Error& err) {
   return Status::Success;
 }
 
-std::unique_ptr<IOBuf> X25519KeyExchange::getKeyShare() const {
+Status X25519KeyExchange::getKeyShare(
+    std::unique_ptr<folly::IOBuf>& ret,
+    Error& err) const {
   if (!privKey_ || !pubKey_) {
-    throw std::runtime_error("Key not generated");
+    return err.error("Key not generated");
   }
-  return IOBuf::copyBuffer(pubKey_->data(), pubKey_->size());
+  ret = IOBuf::copyBuffer(pubKey_->data(), pubKey_->size());
+  return Status::Success;
 }
 
 Status X25519KeyExchange::generateSharedSecret(

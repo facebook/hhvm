@@ -40,23 +40,29 @@ Status MultiBackendFactory::makeKeyExchange(
       return Status::Success;
 #if FIZZ_HAVE_OQS
     case NamedGroup::X25519MLKEM768: {
+      std::unique_ptr<KeyExchange> oqsKex;
+      FIZZ_RETURN_ON_ERROR(
+          fizz::liboqs::makeKeyExchange<MLKEM768>(oqsKex, err, role));
       std::unique_ptr<HybridKeyExchange> hybridKex;
       FIZZ_RETURN_ON_ERROR(
           HybridKeyExchange::create(
               hybridKex,
               err,
-              fizz::liboqs::makeKeyExchange<MLKEM768>(role),
+              std::move(oqsKex),
               fizz::libsodium::makeKeyExchange<fizz::X25519>()));
       ret = std::move(hybridKex);
       return Status::Success;
     }
     case NamedGroup::X25519MLKEM512_FB: {
+      std::unique_ptr<KeyExchange> oqsKex;
+      FIZZ_RETURN_ON_ERROR(
+          fizz::liboqs::makeKeyExchange<MLKEM512>(oqsKex, err, role));
       std::unique_ptr<HybridKeyExchange> hybridKex;
       FIZZ_RETURN_ON_ERROR(
           HybridKeyExchange::create(
               hybridKex,
               err,
-              fizz::liboqs::makeKeyExchange<MLKEM512>(role),
+              std::move(oqsKex),
               fizz::libsodium::makeKeyExchange<fizz::X25519>()));
       ret = std::move(hybridKex);
       return Status::Success;

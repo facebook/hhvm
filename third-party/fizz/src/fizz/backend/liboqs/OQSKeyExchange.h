@@ -19,7 +19,9 @@ namespace fizz::liboqs {
 
 class OQSKeyExchange : public KeyExchange {
  public:
-  static std::unique_ptr<OQSKeyExchange> createOQSKeyExchange(
+  static Status createOQSKeyExchange(
+      std::unique_ptr<OQSKeyExchange>& ret,
+      Error& err,
       KeyExchangeRole role,
       const std::string& algorithm);
 
@@ -47,7 +49,8 @@ class OQSKeyExchange : public KeyExchange {
   /*
    * algorithm: one of the macro defined in oqs/kem.h
    */
-  explicit OQSKeyExchange(const std::string& algorithm);
+  explicit OQSKeyExchange(std::unique_ptr<OQS_KEM, kemDeleter_> kem)
+      : kem_(std::move(kem)) {}
   Status generateKeyPair(Error& err) override = 0;
   /**
    * The Fizz API is not compatible with KEM APIs as in KEM the server and
@@ -56,7 +59,8 @@ class OQSKeyExchange : public KeyExchange {
    * into existing fizz APIs, we have to determine the whether the caller is
    * server or client.
    */
-  std::unique_ptr<folly::IOBuf> getKeyShare() const override = 0;
+  Status getKeyShare(std::unique_ptr<folly::IOBuf>& ret, Error& err)
+      const override = 0;
   Status generateSharedSecret(
       std::unique_ptr<folly::IOBuf>& ret,
       Error& err,
@@ -65,7 +69,7 @@ class OQSKeyExchange : public KeyExchange {
       0;
   std::size_t getExpectedKeyShareSize() const override = 0;
   virtual bool isInitiated() const = 0;
-  virtual void checkChained() const = 0;
+  virtual Status checkChained(Error& err) const = 0;
 };
 
 class OQSClientKeyExchange : public OQSKeyExchange {
@@ -73,11 +77,24 @@ class OQSClientKeyExchange : public OQSKeyExchange {
   std::unique_ptr<folly::IOBuf, keyDeleter_> publicKey_;
   std::unique_ptr<folly::IOBuf, keyDeleter_> secretKey_;
 
+  OQSClientKeyExchange(
+      std::unique_ptr<OQS_KEM, kemDeleter_> kem,
+      std::unique_ptr<folly::IOBuf, keyDeleter_> publicKey,
+      std::unique_ptr<folly::IOBuf, keyDeleter_> secretKey)
+      : OQSKeyExchange(std::move(kem)),
+        publicKey_(std::move(publicKey)),
+        secretKey_(std::move(secretKey)) {}
+
  public:
-  explicit OQSClientKeyExchange(const std::string& algorithm);
+  static Status create(
+      std::unique_ptr<OQSClientKeyExchange>& ret,
+      Error& err,
+      const std::string& algorithm);
+
   ~OQSClientKeyExchange() override = default;
   Status generateKeyPair(Error& err) override;
-  std::unique_ptr<folly::IOBuf> getKeyShare() const override;
+  Status getKeyShare(std::unique_ptr<folly::IOBuf>& ret, Error& err)
+      const override;
   Status generateSharedSecret(
       std::unique_ptr<folly::IOBuf>& ret,
       Error& err,
@@ -85,15 +102,24 @@ class OQSClientKeyExchange : public OQSKeyExchange {
   Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override;
   std::size_t getExpectedKeyShareSize() const override;
   bool isInitiated() const override;
-  void checkChained() const override;
+  Status checkChained(Error& err) const override;
 };
 
 class OQSServerKeyExchange : public OQSKeyExchange {
  private:
   std::unique_ptr<folly::IOBuf, keyDeleter_> cipherText_;
 
+  OQSServerKeyExchange(
+      std::unique_ptr<OQS_KEM, kemDeleter_> kem,
+      std::unique_ptr<folly::IOBuf, keyDeleter_> cipherText)
+      : OQSKeyExchange(std::move(kem)), cipherText_(std::move(cipherText)) {}
+
  public:
-  explicit OQSServerKeyExchange(const std::string& algorithm);
+  static Status create(
+      std::unique_ptr<OQSServerKeyExchange>& ret,
+      Error& err,
+      const std::string& algorithm);
+
   ~OQSServerKeyExchange() override = default;
   /**
    * Intentionally left as blank as the server doesn't need to generate the key
@@ -106,7 +132,8 @@ class OQSServerKeyExchange : public OQSKeyExchange {
   Status generateKeyPair(Error& /*err*/) override {
     return Status::Success;
   }
-  std::unique_ptr<folly::IOBuf> getKeyShare() const override;
+  Status getKeyShare(std::unique_ptr<folly::IOBuf>& ret, Error& err)
+      const override;
   Status generateSharedSecret(
       std::unique_ptr<folly::IOBuf>& ret,
       Error& err,
@@ -114,7 +141,7 @@ class OQSServerKeyExchange : public OQSKeyExchange {
   Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override;
   std::size_t getExpectedKeyShareSize() const override;
   bool isInitiated() const override;
-  void checkChained() const override;
+  Status checkChained(Error& err) const override;
 };
 } // namespace fizz::liboqs
 

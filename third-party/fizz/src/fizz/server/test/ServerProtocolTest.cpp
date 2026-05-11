@@ -680,7 +680,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -971,7 +971,7 @@ TEST_F(ServerProtocolTest, TestClientHelloAsyncCertFullHandshakeFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -1279,7 +1279,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -1842,7 +1842,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -2200,7 +2200,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -2287,7 +2287,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -2835,7 +2835,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -3137,7 +3137,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -3428,7 +3428,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -3659,7 +3659,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -3997,7 +3997,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;
@@ -4333,7 +4333,7 @@ TEST_F(ServerProtocolTest, TestClientHelloPskDheEarlyFlow) {
         EXPECT_CALL(*ret, _generateSharedSecret(RangeMatches("keyshare")))
             .WillOnce(InvokeWithoutArgs(
                 []() { return folly::IOBuf::copyBuffer("sharedsecret"); }));
-        EXPECT_CALL(*ret, getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
+        EXPECT_CALL(*ret, _getKeyShare()).WillOnce(InvokeWithoutArgs([]() {
           return folly::IOBuf::copyBuffer("servershare");
         }));
         return ret;

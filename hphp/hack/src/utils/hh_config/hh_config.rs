@@ -65,6 +65,7 @@ pub struct HhConfig {
     pub distc_avoid_unnecessary_saved_state_work: bool,
     pub distc_parallel_fold_decls: bool,
     pub distc_weak_edge_decl_discovery: bool,
+    pub distc_min_worker_memory_gib: i64,
 }
 
 impl Default for HhConfig {
@@ -89,6 +90,7 @@ impl Default for HhConfig {
             distc_avoid_unnecessary_saved_state_work: false,
             distc_parallel_fold_decls: false,
             distc_weak_edge_decl_discovery: false,
+            distc_min_worker_memory_gib: 0,
         }
     }
 }
@@ -697,6 +699,9 @@ impl HhConfig {
                 "distc_weak_edge_decl_discovery" => {
                     c.distc_weak_edge_decl_discovery = parse_json(&value)?;
                 }
+                "distc_min_worker_memory_gib" => {
+                    c.distc_min_worker_memory_gib = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -710,6 +715,7 @@ impl HhConfig {
             "distc_avoid_unnecessary_saved_state_work": self.distc_avoid_unnecessary_saved_state_work,
             "distc_parallel_fold_decls": self.distc_parallel_fold_decls,
             "distc_weak_edge_decl_discovery": self.distc_weak_edge_decl_discovery,
+            "distc_min_worker_memory_gib": self.distc_min_worker_memory_gib,
         });
         experiments.to_string()
     }

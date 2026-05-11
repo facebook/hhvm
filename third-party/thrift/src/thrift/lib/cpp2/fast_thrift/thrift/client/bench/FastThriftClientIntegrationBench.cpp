@@ -1221,103 +1221,94 @@ BENCHMARK_RELATIVE(FastThriftClient_Response_Fragmented, iters) {
 
 BENCHMARK_DRAW_LINE();
 
-// =========== Response Path — High Concurrency (1000 in-flight) ===========
+// ====== Roundtrip Path — High Concurrency (1000 background in-flight) ======
+//
+// Each measured iter performs one full request→response round-trip on top of a
+// pre-populated 1000-entry callback table. The 1000 background callbacks are
+// parked during setup and never resolved, so the table size stays fixed at
+// ≥1000 across every iter regardless of how folly Benchmark's adaptive mode
+// chooses iters. This isolates the steady-state per-call cost under high
+// concurrency from any iters-dependent table-drain artifact.
 
-BENCHMARK(Thrift_Response_HighConcurrency, iters) {
+BENCHMARK(Thrift_Roundtrip_HighConcurrency, iters) {
   folly::BenchmarkSuspender suspender;
   ThriftBenchFixture f;
   f.setup();
 
-  constexpr size_t kConcurrent = 1000;
-  size_t actual = std::max(static_cast<size_t>(iters), kConcurrent);
-  std::vector<uint32_t> streamIds;
-  streamIds.reserve(actual);
-  for (size_t i = 0; i < actual; ++i) {
-    std::unique_ptr<folly::IOBuf> written;
+  constexpr size_t kBackground = 1000;
+  for (size_t i = 0; i < kBackground; ++i) {
     f.thriftClient->echo(
         std::make_unique<NoopRequestCallback>(), "hello world");
     f.evb.loopOnce();
-    written = f.testTransport->getWrittenData();
-    streamIds.push_back(parseWrittenFrame(std::move(written)).streamId());
+    f.testTransport->getWrittenData();
   }
 
   auto respMeta = serializeResponseMetadata(createSuccessResponseMetadata());
   auto respData = serializeStringResult("hello world");
-  std::vector<std::unique_ptr<folly::IOBuf>> frames;
-  frames.reserve(actual);
-  for (size_t i = 0; i < actual; ++i) {
-    frames.emplace_back(prependLengthPrefix(createPayloadResponse(
-        streamIds[i], respMeta->clone(), respData->clone())));
-  }
 
   suspender.dismiss();
   for (size_t i = 0; i < iters; ++i) {
-    f.testTransport->injectReadData(std::move(frames[i]));
+    f.thriftClient->echo(
+        std::make_unique<NoopRequestCallback>(), "hello world");
+    f.evb.loopOnce();
+    auto written = f.testTransport->getWrittenData();
+    auto streamId = parseWrittenFrame(std::move(written)).streamId();
+    f.testTransport->injectReadData(prependLengthPrefix(
+        createPayloadResponse(streamId, respMeta->clone(), respData->clone())));
   }
 }
 
-BENCHMARK_RELATIVE(FastThriftChannel_Response_HighConcurrency, iters) {
+BENCHMARK_RELATIVE(FastThriftChannel_Roundtrip_HighConcurrency, iters) {
   folly::BenchmarkSuspender suspender;
   FastThriftChannelBenchFixture f;
   f.setup();
 
-  constexpr size_t kConcurrent = 1000;
-  size_t actual = std::max(static_cast<size_t>(iters), kConcurrent);
-  std::vector<uint32_t> streamIds;
-  streamIds.reserve(actual);
-  for (size_t i = 0; i < actual; ++i) {
-    std::unique_ptr<folly::IOBuf> written;
+  constexpr size_t kBackground = 1000;
+  for (size_t i = 0; i < kBackground; ++i) {
     f.thriftClient->echo(
         std::make_unique<NoopRequestCallback>(), "hello world");
     f.evb.loopOnce();
-    written = f.testTransport->getWrittenData();
-    streamIds.push_back(parseWrittenFrame(std::move(written)).streamId());
+    f.testTransport->getWrittenData();
   }
 
   auto respMeta = serializeResponseMetadata(createSuccessResponseMetadata());
   auto respData = serializeStringResult("hello world");
-  std::vector<std::unique_ptr<folly::IOBuf>> frames;
-  frames.reserve(actual);
-  for (size_t i = 0; i < actual; ++i) {
-    frames.emplace_back(prependLengthPrefix(createPayloadResponse(
-        streamIds[i], respMeta->clone(), respData->clone())));
-  }
 
   suspender.dismiss();
   for (size_t i = 0; i < iters; ++i) {
-    f.testTransport->injectReadData(std::move(frames[i]));
+    f.thriftClient->echo(
+        std::make_unique<NoopRequestCallback>(), "hello world");
+    f.evb.loopOnce();
+    auto written = f.testTransport->getWrittenData();
+    auto streamId = parseWrittenFrame(std::move(written)).streamId();
+    f.testTransport->injectReadData(prependLengthPrefix(
+        createPayloadResponse(streamId, respMeta->clone(), respData->clone())));
   }
 }
 
-BENCHMARK_RELATIVE(FastThriftClient_Response_HighConcurrency, iters) {
+BENCHMARK_RELATIVE(FastThriftClient_Roundtrip_HighConcurrency, iters) {
   folly::BenchmarkSuspender suspender;
   FastClientBenchFixture f;
   f.setup();
 
-  constexpr size_t kConcurrent = 1000;
-  size_t actual = std::max(static_cast<size_t>(iters), kConcurrent);
-  std::vector<uint32_t> streamIds;
-  streamIds.reserve(actual);
-  for (size_t i = 0; i < actual; ++i) {
-    std::unique_ptr<folly::IOBuf> written;
+  constexpr size_t kBackground = 1000;
+  for (size_t i = 0; i < kBackground; ++i) {
     f.fastClient->echo(std::make_unique<NoopRequestCallback>(), "hello world");
     f.evb.loopOnce();
-    written = f.testTransport->getWrittenData();
-    streamIds.push_back(parseWrittenFrame(std::move(written)).streamId());
+    f.testTransport->getWrittenData();
   }
 
   auto respMeta = serializeResponseMetadata(createSuccessResponseMetadata());
   auto respData = serializeStringResult("hello world");
-  std::vector<std::unique_ptr<folly::IOBuf>> frames;
-  frames.reserve(actual);
-  for (size_t i = 0; i < actual; ++i) {
-    frames.emplace_back(prependLengthPrefix(createPayloadResponse(
-        streamIds[i], respMeta->clone(), respData->clone())));
-  }
 
   suspender.dismiss();
   for (size_t i = 0; i < iters; ++i) {
-    f.testTransport->injectReadData(std::move(frames[i]));
+    f.fastClient->echo(std::make_unique<NoopRequestCallback>(), "hello world");
+    f.evb.loopOnce();
+    auto written = f.testTransport->getWrittenData();
+    auto streamId = parseWrittenFrame(std::move(written)).streamId();
+    f.testTransport->injectReadData(prependLengthPrefix(
+        createPayloadResponse(streamId, respMeta->clone(), respData->clone())));
   }
 }
 

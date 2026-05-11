@@ -118,7 +118,9 @@ std::unique_ptr<PeerCert> CertUtils::makePeerCert(
   throw std::runtime_error("unknown peer cert type");
 }
 
-folly::ssl::EvpPkeyUniquePtr CertUtils::readPrivateKeyFromBuffer(
+Status CertUtils::readPrivateKeyFromBuffer(
+    folly::ssl::EvpPkeyUniquePtr& ret,
+    Error& err,
     std::string keyData,
     char* password) {
   folly::ssl::BioUniquePtr b(BIO_new_mem_buf(
@@ -127,17 +129,18 @@ folly::ssl::EvpPkeyUniquePtr CertUtils::readPrivateKeyFromBuffer(
       keyData.size()));
 
   if (!b) {
-    throw std::runtime_error("failed to create BIO");
+    return err.error("failed to create BIO");
   }
 
   folly::ssl::EvpPkeyUniquePtr key(
       PEM_read_bio_PrivateKey(b.get(), nullptr, nullptr, password));
 
   if (!key) {
-    throw std::runtime_error("Failed to read key");
+    return err.error("Failed to read key");
   }
 
-  return key;
+  ret = std::move(key);
+  return Status::Success;
 }
 
 namespace {
@@ -153,7 +156,12 @@ std::unique_ptr<SelfCert> selfCertFromDataInternal(
     throw std::runtime_error("no certificates read");
   }
 
-  auto key = CertUtils::readPrivateKeyFromBuffer(std::move(keyData), password);
+  folly::ssl::EvpPkeyUniquePtr key;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      CertUtils::readPrivateKeyFromBuffer(
+          key, err, std::move(keyData), password),
+      err);
 
   return CertUtils::makeSelfCert(std::move(certs), std::move(key), compressors);
 }
@@ -200,21 +208,29 @@ KeyType CertUtils::getKeyType(const folly::ssl::EvpPkeyUniquePtr& key) {
   throw std::runtime_error("unknown key type");
 }
 
-std::vector<SignatureScheme> CertUtils::getSigSchemes(KeyType type) {
+Status CertUtils::getSigSchemes(
+    std::vector<SignatureScheme>& ret,
+    Error& err,
+    KeyType type) {
   switch (type) {
     case KeyType::RSA:
-      return getSigSchemes<KeyType::RSA>();
+      ret = getSigSchemes<KeyType::RSA>();
+      return Status::Success;
     case KeyType::P256:
-      return getSigSchemes<KeyType::P256>();
+      ret = getSigSchemes<KeyType::P256>();
+      return Status::Success;
     case KeyType::P384:
-      return getSigSchemes<KeyType::P384>();
+      ret = getSigSchemes<KeyType::P384>();
+      return Status::Success;
     case KeyType::P521:
-      return getSigSchemes<KeyType::P521>();
+      ret = getSigSchemes<KeyType::P521>();
+      return Status::Success;
     case KeyType::ED25519:
-      return getSigSchemes<KeyType::ED25519>();
+      ret = getSigSchemes<KeyType::ED25519>();
+      return Status::Success;
   }
 
-  throw std::runtime_error("unknown key type");
+  return err.error("unknown key type");
 }
 
 std::unique_ptr<SelfCert> CertUtils::makeSelfCert(

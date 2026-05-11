@@ -33,7 +33,8 @@ class CertUtils {
   template <KeyType T>
   static std::vector<SignatureScheme> getSigSchemes();
 
-  static std::vector<SignatureScheme> getSigSchemes(KeyType type);
+  static Status
+  getSigSchemes(std::vector<SignatureScheme>& ret, Error& err, KeyType type);
 
   /**
    * Create a PeerCert from the ASN1 encoded certData.
@@ -58,7 +59,9 @@ class CertUtils {
       const std::vector<std::shared_ptr<CertificateCompressor>>& compressors =
           {});
 
-  static folly::ssl::EvpPkeyUniquePtr readPrivateKeyFromBuffer(
+  static Status readPrivateKeyFromBuffer(
+      folly::ssl::EvpPkeyUniquePtr& ret,
+      Error& err,
       std::string keyData,
       char* password = nullptr);
 
@@ -92,7 +95,8 @@ class CertUtils {
       const CompressedCertificate& src);
 
   template <KeyType T>
-  static void verify(
+  static Status verify(
+      Error& err,
       const OpenSSLSignature<T>& certSignature,
       SignatureScheme scheme,
       CertificateVerifyContext context,

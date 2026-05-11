@@ -124,13 +124,24 @@ int fizzGenerateDelegatedCredentialCommand(
       cert = openssl::CertUtils::makeSelfCert(certData, certKeyData);
     }
 
-    folly::ssl::EvpPkeyUniquePtr certPrivKey =
+    folly::ssl::EvpPkeyUniquePtr certPrivKey;
+    fizz::Error err;
+    FIZZ_THROW_ON_ERROR(
         openssl::CertUtils::readPrivateKeyFromBuffer(
-            certKeyData, certKeyPass.empty() ? nullptr : &certKeyPass[0]);
+            certPrivKey,
+            err,
+            certKeyData,
+            certKeyPass.empty() ? nullptr : &certKeyPass[0]),
+        err);
 
-    folly::ssl::EvpPkeyUniquePtr credPrivKey =
+    folly::ssl::EvpPkeyUniquePtr credPrivKey;
+    FIZZ_THROW_ON_ERROR(
         openssl::CertUtils::readPrivateKeyFromBuffer(
-            credKeyData, credKeyPass.empty() ? nullptr : &credKeyPass[0]);
+            credPrivKey,
+            err,
+            credKeyData,
+            credKeyPass.empty() ? nullptr : &credKeyPass[0]),
+        err);
 
     if (!credSignScheme) {
       credSignScheme = cert->getSigSchemes().front();
@@ -175,7 +186,6 @@ int fizzGenerateDelegatedCredentialCommand(
     auto certPem = std::string(bptr->data, bptr->length);
     DelegatedCredential clientCredential;
     DelegatedCredential serverCredential;
-    Error err;
     FIZZ_THROW_ON_ERROR(
         DelegatedCredentialUtils::generateCredential(
             clientCredential,

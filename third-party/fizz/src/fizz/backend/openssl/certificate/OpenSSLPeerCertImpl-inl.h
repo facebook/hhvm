@@ -36,13 +36,19 @@ std::string OpenSSLPeerCertImpl<T>::getIdentity() const {
 
 template <KeyType T>
 inline Status OpenSSLPeerCertImpl<T>::verify(
-    Error& /* err */,
+    Error& err,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
     folly::ByteRange signature) const {
-  CertUtils::verify<T>(
-      signature_, scheme, context, std::move(toBeSigned), std::move(signature));
+  FIZZ_RETURN_ON_ERROR(
+      CertUtils::verify<T>(
+          err,
+          signature_,
+          scheme,
+          context,
+          std::move(toBeSigned),
+          std::move(signature)));
   return Status::Success;
 }
 

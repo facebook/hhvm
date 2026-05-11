@@ -88,12 +88,14 @@ Status PeerDelegatedCredentialImpl<T>::verify(
   }
 
   // Call the parent verify method
-  openssl::CertUtils::verify(
-      credentialSignature_,
-      scheme,
-      context,
-      std::move(toBeSigned),
-      std::move(signature));
+  FIZZ_RETURN_ON_ERROR(
+      openssl::CertUtils::verify(
+          err,
+          credentialSignature_,
+          scheme,
+          context,
+          std::move(toBeSigned),
+          std::move(signature)));
   return Status::Success;
 }
 

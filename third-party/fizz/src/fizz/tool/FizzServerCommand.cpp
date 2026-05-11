@@ -908,10 +908,13 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         FIZZ_LOG(ERROR) << "Failed to read private key: " << keyPath;
         return 1;
       }
-      matcher.addKey(
-          keyPath,
+      folly::ssl::EvpPkeyUniquePtr pkey;
+      fizz::Error err;
+      FIZZ_THROW_ON_ERROR(
           openssl::CertUtils::readPrivateKeyFromBuffer(
-              keyData, keyPass.empty() ? nullptr : &keyPass[0]));
+              pkey, err, keyData, keyPass.empty() ? nullptr : &keyPass[0]),
+          err);
+      matcher.addKey(keyPath, std::move(pkey));
     }
 
     // Parse the credential if passed in.

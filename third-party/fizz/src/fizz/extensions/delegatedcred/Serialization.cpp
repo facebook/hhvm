@@ -109,7 +109,10 @@ Status loadDCFromPEM(
       dcKeyFooter.size(),
       kPrivateKeyFooter);
 
-  auto privKey = fizz::openssl::CertUtils::readPrivateKeyFromBuffer(keyBuffer);
+  folly::ssl::EvpPkeyUniquePtr privKey;
+  FIZZ_RETURN_ON_ERROR(
+      fizz::openssl::CertUtils::readPrivateKeyFromBuffer(
+          privKey, err, keyBuffer));
 
   auto dcHeader = mode == DelegatedCredentialMode::Server ? kServerDCHeader
                                                           : kClientDCHeader;

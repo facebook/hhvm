@@ -40,7 +40,8 @@ CertUtils::getSigSchemes<KeyType::ED25519>() {
 }
 
 template <>
-inline void CertUtils::verify<KeyType::P256>(
+inline Status CertUtils::verify<KeyType::P256>(
+    Error& err,
     const OpenSSLSignature<KeyType::P256>& certSignature,
     SignatureScheme scheme,
     CertificateVerifyContext context,
@@ -48,15 +49,17 @@ inline void CertUtils::verify<KeyType::P256>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp256r1_sha256) {
-    return certSignature.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
+    certSignature.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
         signData->coalesce(), signature);
+    return Status::Success;
   }
 
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 template <>
-inline void CertUtils::verify<KeyType::P384>(
+inline Status CertUtils::verify<KeyType::P384>(
+    Error& err,
     const OpenSSLSignature<KeyType::P384>& certSignature,
     SignatureScheme scheme,
     CertificateVerifyContext context,
@@ -64,15 +67,17 @@ inline void CertUtils::verify<KeyType::P384>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp384r1_sha384) {
-    return certSignature.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
+    certSignature.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
         signData->coalesce(), signature);
+    return Status::Success;
   }
 
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 template <>
-inline void CertUtils::verify<KeyType::P521>(
+inline Status CertUtils::verify<KeyType::P521>(
+    Error& err,
     const OpenSSLSignature<KeyType::P521>& certSignature,
     SignatureScheme scheme,
     CertificateVerifyContext context,
@@ -80,14 +85,16 @@ inline void CertUtils::verify<KeyType::P521>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp521r1_sha512) {
-    return certSignature.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
+    certSignature.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
         signData->coalesce(), signature);
+    return Status::Success;
   }
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 template <>
-inline void CertUtils::verify<KeyType::ED25519>(
+inline Status CertUtils::verify<KeyType::ED25519>(
+    Error& err,
     const OpenSSLSignature<KeyType::ED25519>& certSignature,
     SignatureScheme scheme,
     CertificateVerifyContext context,
@@ -95,15 +102,17 @@ inline void CertUtils::verify<KeyType::ED25519>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ed25519) {
-    return certSignature.verify<SignatureScheme::ed25519>(
+    certSignature.verify<SignatureScheme::ed25519>(
         signData->coalesce(), signature);
+    return Status::Success;
   }
 
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 template <>
-inline void CertUtils::verify<KeyType::RSA>(
+inline Status CertUtils::verify<KeyType::RSA>(
+    Error& err,
     const OpenSSLSignature<KeyType::RSA>& certSignature,
     SignatureScheme scheme,
     CertificateVerifyContext context,
@@ -111,11 +120,12 @@ inline void CertUtils::verify<KeyType::RSA>(
     folly::ByteRange signature) {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::rsa_pss_sha256) {
-    return certSignature.verify<SignatureScheme::rsa_pss_sha256>(
+    certSignature.verify<SignatureScheme::rsa_pss_sha256>(
         signData->coalesce(), signature);
+    return Status::Success;
   }
 
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 } // namespace openssl

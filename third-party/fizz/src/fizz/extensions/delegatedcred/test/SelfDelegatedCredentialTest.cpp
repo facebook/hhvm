@@ -204,7 +204,10 @@ class SelfDelegatedCredentialTest : public Test {
     DelegatedCredential cred;
     cred.valid_time = 0x1234; // This isn't checked by the self credential code
     const auto keyType = openssl::CertUtils::getKeyType(pkey);
-    const auto sigSchemes = openssl::CertUtils::getSigSchemes(keyType);
+    std::vector<SignatureScheme> sigSchemes;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        openssl::CertUtils::getSigSchemes(sigSchemes, err, keyType), err);
     cred.expected_verify_scheme = sigSchemes[0];
     if (pkey) {
       cred.public_key = getPubkeyDer(pkey);

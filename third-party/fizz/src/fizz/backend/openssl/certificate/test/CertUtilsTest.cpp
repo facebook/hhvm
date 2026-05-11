@@ -46,12 +46,16 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerify) {
   folly::StringPiece toBeSigned{"ToBeSigned"};
   auto sig = selfCert.sign(
       TypeParam::Scheme, CertificateVerifyContext::Server, toBeSigned);
-  openssl::CertUtils::verify(
-      verificationSignature,
-      TypeParam::Scheme,
-      CertificateVerifyContext::Server,
-      toBeSigned,
-      sig->coalesce());
+  Error err;
+  EXPECT_EQ(
+      openssl::CertUtils::verify(
+          err,
+          verificationSignature,
+          TypeParam::Scheme,
+          CertificateVerifyContext::Server,
+          toBeSigned,
+          sig->coalesce()),
+      Status::Success);
 }
 
 TYPED_TEST(CertUtilsTestTyped, TestSignVerifyBitFlip) {
@@ -68,13 +72,17 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerifyBitFlip) {
   auto sig = selfCert.sign(
       TypeParam::Scheme, CertificateVerifyContext::Server, toBeSigned);
   sig->writableData()[1] ^= 0x20;
+  Error err;
   EXPECT_THROW(
-      openssl::CertUtils::verify(
-          verificationSignature,
-          TypeParam::Scheme,
-          CertificateVerifyContext::Server,
-          toBeSigned,
-          sig->coalesce()),
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::verify(
+              err,
+              verificationSignature,
+              TypeParam::Scheme,
+              CertificateVerifyContext::Server,
+              toBeSigned,
+              sig->coalesce()),
+          err),
       std::runtime_error);
 }
 
@@ -92,13 +100,17 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerifyWrongSize) {
   auto sig = selfCert.sign(
       TypeParam::Scheme, CertificateVerifyContext::Server, toBeSigned);
   sig->prependChain(folly::IOBuf::copyBuffer("x"));
+  Error err;
   EXPECT_THROW(
-      openssl::CertUtils::verify(
-          verificationSignature,
-          TypeParam::Scheme,
-          CertificateVerifyContext::Server,
-          toBeSigned,
-          sig->coalesce()),
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::verify(
+              err,
+              verificationSignature,
+              TypeParam::Scheme,
+              CertificateVerifyContext::Server,
+              toBeSigned,
+              sig->coalesce()),
+          err),
       std::runtime_error);
 }
 
@@ -115,13 +127,17 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerifyWrongScheme) {
   folly::StringPiece toBeSigned{"ToBeSigned"};
   auto sig = selfCert.sign(
       TypeParam::Scheme, CertificateVerifyContext::Server, toBeSigned);
+  Error err;
   EXPECT_THROW(
-      openssl::CertUtils::verify(
-          verificationSignature,
-          TypeParam::Invalid::Scheme,
-          CertificateVerifyContext::Server,
-          toBeSigned,
-          sig->coalesce()),
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::verify(
+              err,
+              verificationSignature,
+              TypeParam::Invalid::Scheme,
+              CertificateVerifyContext::Server,
+              toBeSigned,
+              sig->coalesce()),
+          err),
       std::runtime_error);
 }
 } // namespace test

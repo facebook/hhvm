@@ -38,7 +38,8 @@ void MysqlOperationImpl::initializeFromConnection() {
 }
 
 bool MysqlOperationImpl::isInEventBaseThread() const {
-  return conn().isInEventBaseThread();
+  auto* c = connection();
+  return c != nullptr && c->isInEventBaseThread();
 }
 
 bool MysqlOperationImpl::isEventBaseSet() const {
@@ -148,12 +149,13 @@ void MysqlOperationImpl::completeOperationInner(OperationResult result) {
   setState(OperationState::Completed);
   setResult(result);
   setDuration();
-  if ((result == OperationResult::Cancelled ||
-       result == OperationResult::TimedOut) &&
-      conn().hasInitialized()) {
-    // Cancelled/timed out ops leave our connection in an undefined
-    // state.  Close it to prevent trouble.
-    conn().close();
+  if (result == OperationResult::Cancelled ||
+      result == OperationResult::TimedOut) {
+    if (auto* c = connection(); c && c->hasInitialized()) {
+      // Cancelled/timed out ops leave our connection in an undefined
+      // state.  Close it to prevent trouble.
+      c->close();
+    }
   }
 
   unregisterHandler();

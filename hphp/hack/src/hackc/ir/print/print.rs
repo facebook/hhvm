@@ -2221,3 +2221,219 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit, verbose: bool) -> Result {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod test {
+    use ir_core::FuncBuilder;
+    use ir_core::IrRepr;
+
+    use super::*;
+
+    // Invariant: PreInc/PreDec place operator before operand; PostInc/PostDec place it after
+    #[test]
+    fn test_incdec_what() {
+        let cases: &[(IncDecOp, &str, &str)] = &[
+            (IncDecOp::PreInc, "++", ""),
+            (IncDecOp::PreDec, "--", ""),
+            (IncDecOp::PostInc, "", "++"),
+            (IncDecOp::PostDec, "", "--"),
+        ];
+        for &(op, expected_pre, expected_post) in cases {
+            let (pre, post) = incdec_what(op);
+            assert_eq!(pre, expected_pre);
+            assert_eq!(post, expected_post);
+        }
+    }
+
+    // Invariant: each VerifyRetKind variant maps to a distinct keyword
+    #[test]
+    fn test_print_verify_ret_kind() {
+        assert_eq!(print_verify_ret_kind(&VerifyRetKind::None), "none");
+        assert_eq!(print_verify_ret_kind(&VerifyRetKind::All), "all");
+        assert_eq!(print_verify_ret_kind(&VerifyRetKind::NonNull), "nonnull");
+    }
+
+    // Invariant: FmtEscapedString escapes control chars and non-ASCII while passing printable ASCII through
+    #[test]
+    fn test_fmt_escaped_string() {
+        let cases: &[(&[u8], &str)] = &[
+            (b"hello world", "\"hello world\""),
+            (b"a\\b\nc\rd\te\"f", "\"a\\\\b\\nc\\rd\\te\\\"f\""),
+            (&[0x80, 0xff, 0x00], "\"\\x80\\xff\\x00\""),
+            (b"", "\"\""),
+        ];
+        for &(input, expected) in cases {
+            let result = format!("{}", crate::FmtEscapedString(input));
+            assert_eq!(result, expected, "input: {:?}", input);
+        }
+    }
+
+    // Invariant: print_function_flags only emits lines for set bits; empty flags produce empty output
+    #[test]
+    fn test_print_function_flags() {
+        let cases: &[(FunctionFlags, &str)] = &[
+            (FunctionFlags::empty(), ""),
+            (FunctionFlags::ASYNC, "  .async\n"),
+            (
+                FunctionFlags::ASYNC | FunctionFlags::GENERATOR,
+                "  .async\n  .generator\n",
+            ),
+            (
+                FunctionFlags::ASYNC
+                    | FunctionFlags::GENERATOR
+                    | FunctionFlags::PAIR_GENERATOR
+                    | FunctionFlags::MEMOIZE_IMPL,
+                "  .async\n  .generator\n  .pair_generator\n  .memoize_impl\n",
+            ),
+        ];
+        for &(flags, expected) in cases {
+            let mut buf = String::new();
+            print_function_flags(&mut buf, flags).unwrap();
+            assert_eq!(buf, expected, "flags: {:?}", flags);
+        }
+    }
+
+    // Invariant: print_method_flags only emits lines for set bits
+    #[test]
+    fn test_print_method_flags() {
+        let cases: &[(MethodFlags, &str)] = &[
+            (MethodFlags::empty(), ""),
+            (
+                MethodFlags::IS_ASYNC | MethodFlags::IS_CLOSURE_BODY,
+                "  .async\n  .closure_body\n",
+            ),
+            (
+                MethodFlags::IS_ASYNC
+                    | MethodFlags::IS_GENERATOR
+                    | MethodFlags::IS_PAIR_GENERATOR
+                    | MethodFlags::IS_CLOSURE_BODY,
+                "  .async\n  .generator\n  .pair_generator\n  .closure_body\n",
+            ),
+        ];
+        for &(flags, expected) in cases {
+            let mut buf = String::new();
+            print_method_flags(&mut buf, flags).unwrap();
+            assert_eq!(buf, expected, "flags: {:?}", flags);
+        }
+    }
+
+    // Invariant: compute_live_instrs with verbose=true returns all body InstrIds
+    #[test]
+    fn test_compute_live_instrs_verbose_returns_all() {
+        let func = FuncBuilder::build_func(|fb| {
+            fb.start_block(IrRepr::ENTRY_BID);
+            let null_iid = fb.emit_imm(ir_core::Immediate::Null);
+            fb.emit(Instr::ret(null_iid, VerifyRetKind::All, LocId::NONE));
+        });
+        let live = crate::util::compute_live_instrs(&func, true);
+        let body_count = func.repr.body_iids().count();
+        assert_eq!(live.len(), body_count);
+    }
+
+    // Invariant: compute_live_instrs with verbose=false excludes unreferenced instructions
+    #[test]
+    fn test_compute_live_instrs_non_verbose_filters_unreferenced() {
+        let func = FuncBuilder::build_func(|fb| {
+            fb.start_block(IrRepr::ENTRY_BID);
+            let null_iid = fb.emit_imm(ir_core::Immediate::Null);
+            fb.emit_imm(ir_core::Immediate::Int(42));
+            fb.emit(Instr::ret(null_iid, VerifyRetKind::All, LocId::NONE));
+        });
+        let live_verbose = crate::util::compute_live_instrs(&func, true);
+        let live_non_verbose = crate::util::compute_live_instrs(&func, false);
+        assert!(
+            live_non_verbose.len() < live_verbose.len(),
+            "non-verbose ({}) should be strictly smaller than verbose ({})",
+            live_non_verbose.len(),
+            live_verbose.len()
+        );
+    }
+
+    // Invariant: print_include_eval maps each IncludeKind to a distinct keyword
+    #[test]
+    fn test_print_include_eval_all_kinds() {
+        let kinds = [
+            (IncludeKind::Eval, "eval"),
+            (IncludeKind::Include, "include"),
+            (IncludeKind::IncludeOnce, "include_once"),
+            (IncludeKind::Require, "require"),
+            (IncludeKind::RequireOnce, "require_once"),
+            (IncludeKind::RequireOnceDoc, "require_once_doc"),
+        ];
+
+        let func = FuncBuilder::build_func(|fb| {
+            fb.start_block(IrRepr::ENTRY_BID);
+            let null_iid = fb.emit_imm(ir_core::Immediate::Null);
+            fb.emit(Instr::ret(null_iid, VerifyRetKind::All, LocId::NONE));
+        });
+
+        let ctx = FuncContext {
+            cur_loc: SrcLoc {
+                line_begin: 0,
+                col_begin: 0,
+                line_end: 0,
+                col_end: 0,
+            },
+            live_instrs: crate::util::compute_live_instrs(&func, false),
+            verbose: false,
+        };
+
+        for (kind, expected_keyword) in kinds {
+            let mut buf = String::new();
+            let ie = instr::IncludeEval {
+                vid: ValueId::from_imm(ir_core::ImmId::from_usize(0)),
+                kind,
+                loc: LocId::NONE,
+            };
+            print_include_eval(&mut buf, &ctx, &func, &ie).unwrap();
+            assert!(
+                buf.starts_with(expected_keyword),
+                "Expected {:?} to start with {:?}, got {:?}",
+                kind,
+                expected_keyword,
+                buf
+            );
+        }
+    }
+
+    // Invariant: print_symbol_refs emits distinct line-prefix keywords for each IncludePath variant
+    #[test]
+    fn test_print_symbol_refs_include_paths() {
+        let abs = IncludePath::Absolute(ir_core::intern_bytes(b"/foo/bar" as &[u8]));
+        let rel = IncludePath::SearchPathRelative(ir_core::intern_bytes(b"baz/qux" as &[u8]));
+        let doc = IncludePath::DocRootRelative(ir_core::intern_bytes(b"doc/path" as &[u8]));
+        let rooted = IncludePath::IncludeRootRelative(
+            ir_core::intern_bytes(b"root" as &[u8]),
+            ir_core::intern_bytes(b"path" as &[u8]),
+        );
+        let refs = SymbolRefs {
+            classes: Default::default(),
+            constants: Default::default(),
+            functions: Default::default(),
+            includes: vec![abs, rel, doc, rooted].into(),
+        };
+        let mut buf = String::new();
+        print_symbol_refs(&mut buf, &refs).unwrap();
+        assert!(
+            buf.contains(".include_ref \"/foo/bar\""),
+            "missing absolute: {buf}"
+        );
+        assert!(
+            buf.contains("relative \"baz/qux\""),
+            "missing relative: {buf}"
+        );
+        assert!(buf.contains("doc \"doc/path\""), "missing doc: {buf}");
+        assert!(
+            buf.contains("rooted \"root\" \"path\""),
+            "missing rooted: {buf}"
+        );
+    }
+
+    // Invariant: print_fatal emits nothing for None
+    #[test]
+    fn test_print_fatal_none_emits_nothing() {
+        let mut buf = String::new();
+        print_fatal(&mut buf, None).unwrap();
+        assert_eq!(buf, "");
+    }
+}

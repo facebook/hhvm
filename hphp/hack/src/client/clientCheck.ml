@@ -1080,16 +1080,16 @@ let main_internal
     | Error error ->
       Printf.eprintf "%s\n" error;
       Lwt.return (Exit_status.Input_error, telemtry))
-  | ClientEnv.MODE_FIND_MY_TESTS_STAGING path ->
+  | ClientEnv.MODE_FIND_MY_TESTS path ->
     let open ServerCommandTypes.Find_my_tests in
     if Option.is_some args.find_my_tests_max_distance then begin
       Printf.eprintf
-        "--find-my-tests-max-distance cannot be used with --find-my-tests-staging\n";
+        "--find-my-tests-max-distance cannot be used with --find-my-tests\n";
       raise Exit_status.(Exit_with Input_error)
     end;
     if Option.is_some args.find_my_tests_max_test_files then begin
       Printf.eprintf
-        "--find-my-tests-max-test-files cannot be used with --find-my-tests-staging\n";
+        "--find-my-tests-max-test-files cannot be used with --find-my-tests\n";
       raise Exit_status.(Exit_with Input_error)
     end;
     let parse_symbol symbol =
@@ -1129,7 +1129,7 @@ let main_internal
     let actions = List.map ~f:parse_symbol input.roots in
     let%lwt (result, telemtry) =
       rpc args
-      @@ ServerCommandTypes.FIND_MY_TESTS_STAGING (input.config, actions)
+      @@ ServerCommandTypes.FIND_MY_TESTS (input.version, input.config, actions)
     in
     (match result with
     | Ok fmt_result ->

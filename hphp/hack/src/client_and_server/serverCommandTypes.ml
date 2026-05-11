@@ -181,7 +181,7 @@ module Find_my_tests = struct
 
   type result_v1 = (selected_test_file list, string) Result.t
 
-  (* Types used by staging only *)
+  (* Types used by V2 and beyond *)
 
   type result_data = {
     selected_test_files: selected_test_file list;
@@ -190,6 +190,24 @@ module Find_my_tests = struct
   [@@deriving yojson]
 
   type result = (result_data, string) Result.t
+
+  (** No entry for V1 here, it has its own entry point *)
+  type version =
+    | V2
+    | Staging
+  [@@deriving show]
+
+  let yojson_of_version = function
+    | V2 -> `String "v2"
+    | Staging -> `String "staging"
+
+  let version_of_yojson = function
+    | `String "v2" -> V2
+    | `String "staging" -> Staging
+    | json ->
+      Ppx_yojson_conv_lib.Yojson_conv.of_yojson_error
+        "invalid FindMyTests version"
+        json
 
   type config = {
     max_distance: int; [@default 1]
@@ -225,6 +243,7 @@ module Find_my_tests = struct
   type json_input = {
     roots: string list;
     config: config;
+    version: version; [@default Staging]
   }
   [@@deriving yojson]
 end
@@ -503,8 +522,8 @@ type _ t =
   | FIND_MY_TESTS_V1 :
       (int * int option * Find_my_tests.action list)
       -> Find_my_tests.result_v1 t
-  | FIND_MY_TESTS_STAGING :
-      (Find_my_tests.config * Find_my_tests.action list)
+  | FIND_MY_TESTS :
+      (Find_my_tests.version * Find_my_tests.config * Find_my_tests.action list)
       -> Find_my_tests.result t
   | PACKAGE_LINT : string -> Package_lint.fast_result t
   | PACKAGE_LINT_FULL : (string * string list) -> Package_lint.fast_result t
@@ -566,7 +585,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IDE_GO_TO_IMPL_BY_SYMBOL _ -> true
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
   | FIND_MY_TESTS_V1 _ -> true
-  | FIND_MY_TESTS_STAGING _ -> true
+  | FIND_MY_TESTS _ -> true
   | SAVE_NAMING _ -> false
   (* Codebase-wide rename, uses find references *)
   | RENAME _ -> true

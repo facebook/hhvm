@@ -453,9 +453,14 @@ let handle :
       FindMyTestsV1.go ~ctx ~genv ~env ~max_distance ~max_test_files actions
     in
     (env, result)
-  | ServerCommandTypes.FIND_MY_TESTS_STAGING (config, actions) ->
+  | ServerCommandTypes.FIND_MY_TESTS (version, config, actions) ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let result = FindMyTestsStaging.go ~ctx ~genv ~env config actions in
+    let go =
+      match version with
+      | ServerCommandTypes.Find_my_tests.V2 -> FindMyTestsV2.go
+      | ServerCommandTypes.Find_my_tests.Staging -> FindMyTestsStaging.go
+    in
+    let result = go ~ctx ~genv ~env config actions in
     (env, result)
   | ServerCommandTypes.PACKAGE_LINT file ->
     ServerPackageLint.go_fast genv env file

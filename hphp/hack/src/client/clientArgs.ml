@@ -401,18 +401,9 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         ^ "; use ExplicitClass instead of Class to exclude references via self/static/parent",
         Arg_user_facing );
       ( "--find-my-tests",
-        Arg.Rest
-          begin
-            fun symbol ->
-              set_mode
-                ~validate:false
-                (match !mode with
-                | None -> MODE_FIND_MY_TESTS_V1 [symbol]
-                | Some (MODE_FIND_MY_TESTS_V1 symbols) ->
-                  MODE_FIND_MY_TESTS_V1 (symbol :: symbols)
-                | _ -> raise (Arg.Bad "only a single mode should be specified"))
-          end,
-        " (deprecated, use --find-my-tests-v1) return test files that reference the given methods [C::m list]",
+        Arg.String
+          (fun path -> set_mode ~validate:true (MODE_FIND_MY_TESTS path)),
+        " (mode) return test files that reference the given symbols, using the version specified in the JSON config (default: staging)",
         Arg_non_user_facing );
       ( "--find-my-tests-v1",
         Arg.Rest
@@ -430,9 +421,8 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
         (* typically invoked from code *) Arg_non_user_facing );
       ( "--find-my-tests-staging",
         Arg.String
-          (fun path ->
-            set_mode ~validate:true (MODE_FIND_MY_TESTS_STAGING path)),
-        " (mode) return test files that reference the given symbols, using the staging implementation",
+          (fun path -> set_mode ~validate:true (MODE_FIND_MY_TESTS path)),
+        " (deprecated, use --find-my-tests) alias for --find-my-tests",
         Arg_non_user_facing );
       ( "--find-my-tests-max-distance",
         Arg.Int

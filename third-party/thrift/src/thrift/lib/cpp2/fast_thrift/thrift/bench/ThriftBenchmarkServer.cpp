@@ -120,7 +120,7 @@ class FastThriftBenchmarkServer {
       : handler_(std::move(handler)),
         executor_(std::make_shared<folly::IOThreadPoolExecutor>(numIOThreads)) {
     rocket::server::connection::ConnectionFactory connectionFactory =
-        [this](folly::AsyncSocket::UniquePtr socket)
+        [this](folly::AsyncTransport::UniquePtr socket)
         -> rocket::server::connection::RocketServerConnection {
       auto* evb = socket->getEventBase();
       auto transportHandler =

@@ -45,7 +45,7 @@ void IntegrationTestFixture::SetUp() {
   executor_ = std::make_shared<folly::IOThreadPoolExecutor>(1);
 
   apache::thrift::fast_thrift::rocket::server::connection::ConnectionFactory
-      connectionFactory = [this](folly::AsyncSocket::UniquePtr socket)
+      connectionFactory = [this](folly::AsyncTransport::UniquePtr socket)
       -> apache::thrift::fast_thrift::rocket::server::connection::
           RocketServerConnection {
             auto* evb = socket->getEventBase();

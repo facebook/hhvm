@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -43,15 +44,12 @@ FastThriftServer::FastThriftServer(FastThriftServerConfig config)
     : config_(std::move(config)),
       executor_(
           std::make_shared<folly::IOThreadPoolExecutor>(config_.numIOThreads)) {
-  connectionManager_ = ServerConnectionManager::create(
-      config_.address,
-      folly::getKeepAliveToken(executor_.get()),
-      createConnectionFactory());
 }
 
 void FastThriftServer::setInterface(
     std::shared_ptr<ThriftServerAppAdapterFactory> handler) {
-  CHECK(!started_.load())
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
       << "FastThriftServer::setInterface must be called before start()/serve()";
   CHECK(handler)
       << "FastThriftServer::setInterface requires a non-null handler";
@@ -61,9 +59,23 @@ void FastThriftServer::setInterface(
   handler_ = std::move(handler);
 }
 
+void FastThriftServer::setSSLConfig(security::FizzServerCertConfig cfg) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setSSLConfig must be called before start()/serve()";
+  sslConfig_ = std::move(cfg);
+}
+
+void FastThriftServer::setThriftConfig(security::ThriftTlsConfig cfg) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftServer::setThriftConfig must be called before start()/serve()";
+  thriftConfig_ = cfg;
+}
+
 rocket::server::connection::ConnectionFactory
 FastThriftServer::createConnectionFactory() {
-  return [this](folly::AsyncSocket::UniquePtr socket)
+  return [this](folly::AsyncTransport::UniquePtr socket)
              -> rocket::server::connection::RocketServerConnection {
     auto* evb = socket->getEventBase();
     auto transportHandler =
@@ -177,14 +189,31 @@ FastThriftServer::~FastThriftServer() {
 }
 
 void FastThriftServer::start() {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
   CHECK(handler_)
       << "FastThriftServer::start called before setInterface — no handler "
          "registered";
-  if (started_.exchange(true)) {
+  if (state_ != State::kNotStarted) {
     return;
   }
+
+  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext;
+  std::chrono::milliseconds tlsHandshakeTimeout{std::chrono::seconds{5}};
+  if (sslConfig_) {
+    fizzContext = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
+    tlsHandshakeTimeout = sslConfig_->handshakeTimeout;
+  }
+  connectionManager_ = ServerConnectionManager::create(
+      config_.address,
+      folly::getKeepAliveToken(executor_.get()),
+      createConnectionFactory(),
+      std::move(fizzContext),
+      tlsHandshakeTimeout);
+
   connectionManager_->start();
-  XLOG(INFO) << "FastThriftServer listening on " << getAddress();
+  state_ = State::kRunning;
+  XLOG(INFO) << "FastThriftServer listening on "
+             << connectionManager_->getAddress();
 }
 
 void FastThriftServer::serve() {
@@ -212,9 +241,11 @@ void FastThriftServer::serve() {
 }
 
 void FastThriftServer::stop() {
-  if (!started_.load() || stopped_.exchange(true)) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  if (state_ != State::kRunning) {
     return;
   }
+  state_ = State::kStopped;
 
   connectionManager_->stop();
 

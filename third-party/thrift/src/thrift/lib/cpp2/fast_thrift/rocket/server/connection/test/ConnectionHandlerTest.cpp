@@ -53,7 +53,8 @@ class ConnectionHandlerTest : public ::testing::Test {
 
   ConnectionFactory createConnectionFactory() {
     return
-        [this](folly::AsyncSocket::UniquePtr socket) -> RocketServerConnection {
+        [this](
+            folly::AsyncTransport::UniquePtr socket) -> RocketServerConnection {
           auto* evb = socket->getEventBase();
           auto transportHandler =
               transport::TransportHandler::create(std::move(socket));

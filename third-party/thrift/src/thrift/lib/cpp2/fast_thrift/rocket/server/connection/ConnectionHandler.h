@@ -17,13 +17,18 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 
+#include <fizz/server/FizzServerContext.h>
 #include <folly/io/async/AsyncServerSocket.h>
 #include <folly/io/async/AsyncSocket.h>
+#include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/common/RocketServerConnection.h>
+#include <thrift/lib/cpp2/fast_thrift/security/FizzHandshakeHelper.h>
+#include <thrift/lib/cpp2/fast_thrift/security/PendingHandshakes.h>
 
 namespace apache::thrift::fast_thrift::rocket::server::connection {
 
@@ -31,12 +36,12 @@ using RocketServerConnection = rocket::server::RocketServerConnection;
 
 /**
  * ConnectionFactory creates a fully-wired RocketServerConnection for a new
- * accepted socket. The factory receives the socket (from which the EventBase
- * can be obtained via getEventBase()) and returns a RocketServerConnection
- * owning the transport handler and pipeline.
+ * accepted (and, if TLS is enabled, handshake-completed) transport. The
+ * factory receives an AsyncTransport — either a raw AsyncSocket for plain
+ * TCP, or a fizz::server::AsyncFizzServer for TLS connections.
  */
-using ConnectionFactory =
-    std::function<RocketServerConnection(folly::AsyncSocket::UniquePtr socket)>;
+using ConnectionFactory = std::function<RocketServerConnection(
+    folly::AsyncTransport::UniquePtr socket)>;
 
 /**
  * ConnectionHandler manages connections for a single EventBase.
@@ -51,11 +56,17 @@ class ConnectionHandler : public folly::DelayedDestruction,
   using Ptr =
       std::unique_ptr<ConnectionHandler, folly::DelayedDestruction::Destructor>;
 
-  explicit ConnectionHandler(
-      folly::EventBase& evb, ConnectionFactory connectionFactory)
+  ConnectionHandler(
+      folly::EventBase& evb,
+      ConnectionFactory connectionFactory,
+      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext =
+          nullptr,
+      std::chrono::milliseconds tlsHandshakeTimeout = std::chrono::seconds{5})
       : evb_(folly::getKeepAliveToken(&evb)),
         socket_(new folly::AsyncServerSocket(evb_.get())),
-        connectionFactory_(std::move(connectionFactory)) {}
+        connectionFactory_(std::move(connectionFactory)),
+        fizzContext_(std::move(fizzContext)),
+        tlsHandshakeTimeout_(tlsHandshakeTimeout) {}
 
   ConnectionHandler(const ConnectionHandler&) = delete;
   ConnectionHandler& operator=(const ConnectionHandler&) = delete;
@@ -75,16 +86,35 @@ class ConnectionHandler : public folly::DelayedDestruction,
     XLOG(DBG3) << "Connection accepted from " << clientAddr.describe();
 
     auto socket = folly::AsyncSocket::newSocket(evb_.get(), fd);
-    auto conn = connectionFactory_(std::move(socket));
 
-    auto* rawTransportHandler = conn.transportHandler.get();
-    conn.transportHandler->setCloseCallback([this, rawTransportHandler]() {
-      removeConnection(rawTransportHandler);
-    });
+    if (!fizzContext_) {
+      installConnection(folly::AsyncTransport::UniquePtr(socket.release()));
+      return;
+    }
 
-    connections_.emplace_back(std::move(conn));
-
-    rawTransportHandler->onConnect();
+    security::PendingHandshakes::HelperPtr helper(
+        new security::FizzHandshakeHelper(
+            std::move(socket),
+            fizzContext_,
+            tlsHandshakeTimeout_,
+            pendingHandshakes_,
+            [this](
+                folly::AsyncTransport::UniquePtr negotiated,
+                const folly::exception_wrapper& ex) noexcept {
+              if (ex || !negotiated) {
+                XLOG(DBG3) << "TLS handshake failed: "
+                           << (ex ? ex.what().toStdString()
+                                  : std::string("null"));
+                return;
+              }
+              if (state_ != State::ACCEPTING) {
+                return;
+              }
+              installConnection(std::move(negotiated));
+            }));
+    auto* rawHelper = helper.get();
+    pendingHandshakes_.add(std::move(helper));
+    rawHelper->start();
   }
 
   void acceptError(folly::exception_wrapper ew) noexcept override {
@@ -95,6 +125,7 @@ class ConnectionHandler : public folly::DelayedDestruction,
     DestructorGuard dg(this);
     XLOG(DBG3) << "Accept stopped";
     state_ = State::STOPPED;
+    pendingHandshakes_.cancelAll();
     closeAllConnections();
 
     // Release the guard - this may trigger deferred destruction
@@ -182,6 +213,19 @@ class ConnectionHandler : public folly::DelayedDestruction,
  private:
   enum class State { NONE, ACCEPTING, STOPPING, STOPPED };
 
+  void installConnection(folly::AsyncTransport::UniquePtr socket) {
+    auto conn = connectionFactory_(std::move(socket));
+
+    auto* rawTransportHandler = conn.transportHandler.get();
+    conn.transportHandler->setCloseCallback([this, rawTransportHandler]() {
+      removeConnection(rawTransportHandler);
+    });
+
+    connections_.emplace_back(std::move(conn));
+
+    rawTransportHandler->onConnect();
+  }
+
   void removeConnection(transport::TransportHandler* transportHandler) {
     DestructorGuard dg(this);
 
@@ -201,6 +245,9 @@ class ConnectionHandler : public folly::DelayedDestruction,
   folly::Executor::KeepAlive<folly::EventBase> evb_;
   folly::AsyncServerSocket::UniquePtr socket_;
   ConnectionFactory connectionFactory_;
+  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
+  std::chrono::milliseconds tlsHandshakeTimeout_;
+  security::PendingHandshakes pendingHandshakes_;
   std::vector<RocketServerConnection> connections_;
   std::optional<folly::DelayedDestruction::DestructorGuard>
       stoppingDestroyGuard_;

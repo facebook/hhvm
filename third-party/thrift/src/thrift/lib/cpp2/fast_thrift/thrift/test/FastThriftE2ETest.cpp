@@ -179,7 +179,7 @@ class FastThriftE2ETest : public ::testing::Test {
 
     // Server connection factory — called for each accepted connection
     apache::thrift::fast_thrift::rocket::server::connection::ConnectionFactory
-        connectionFactory = [this](folly::AsyncSocket::UniquePtr socket)
+        connectionFactory = [this](folly::AsyncTransport::UniquePtr socket)
         -> apache::thrift::fast_thrift::rocket::server::connection::
             RocketServerConnection {
               auto* evb = socket->getEventBase();
@@ -564,7 +564,7 @@ class FastThriftFastClientE2ETest : public ::testing::Test {
     executor_ = std::make_shared<folly::IOThreadPoolExecutor>(1);
 
     rocket::server::connection::ConnectionFactory connectionFactory =
-        [this](folly::AsyncSocket::UniquePtr socket)
+        [this](folly::AsyncTransport::UniquePtr socket)
         -> rocket::server::connection::RocketServerConnection {
       auto* evb = socket->getEventBase();
       auto transportHandler =

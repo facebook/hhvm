@@ -16,7 +16,9 @@
 
 #pragma once
 
-#include <atomic>
+#include <cstdint>
+#include <mutex>
+#include <optional>
 #include <type_traits>
 #include <unordered_map>
 
@@ -29,6 +31,8 @@
 #include <thrift/lib/cpp2/fast_thrift/common/Stats.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
+#include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
+#include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/adapter/ThriftServerTransportAdapter.h>
 
@@ -114,6 +118,15 @@ class FastThriftServerT {
   FastThriftServerT(FastThriftServerT&&) = delete;
   FastThriftServerT& operator=(FastThriftServerT&&) = delete;
 
+  // Configure TLS. After this is called, every accepted connection is
+  // wrapped in a fizz::server::AsyncFizzServer; the connection factory only
+  // sees fully-handshaked transports. Must be called before start()/serve().
+  void setSSLConfig(security::FizzServerCertConfig cfg);
+
+  // Configure thrift-extension knobs negotiated during the fizz handshake
+  // (StopTLS, params negotiation, etc.). Must be called before start()/serve().
+  void setThriftConfig(security::ThriftTlsConfig cfg);
+
   /**
    * Start accepting connections without blocking.
    */
@@ -139,6 +152,16 @@ class FastThriftServerT {
 
  private:
   using ServerConnectionManager = rocket::server::connection::ConnectionManager;
+
+  // Lifecycle states. Transitions are linear: kNotStarted → kRunning →
+  // kStopped. start() and stop() are idempotent — calling either outside
+  // its expected source state is a no-op. All transitions and reads are
+  // serialized by lifecycleMutex_.
+  enum class State : uint8_t {
+    kNotStarted,
+    kRunning,
+    kStopped,
+  };
 
   /**
    * Per-connection thrift-layer context.
@@ -167,6 +190,8 @@ class FastThriftServerT {
 
   const FastThriftServerConfig config_;
   std::shared_ptr<apache::thrift::AsyncProcessorFactory> processorFactory_;
+  std::optional<security::FizzServerCertConfig> sslConfig_;
+  security::ThriftTlsConfig thriftConfig_{};
   std::shared_ptr<folly::IOThreadPoolExecutor> executor_;
   ServerConnectionManager::Ptr connectionManager_;
   channel_pipeline::SimpleBufferAllocator rocketAllocator_;
@@ -174,8 +199,12 @@ class FastThriftServerT {
       std::unordered_map<ThriftServerChannel*, ThriftConnectionContext>>
       thriftConnections_;
   folly::Baton<> stopBaton_;
-  std::atomic<bool> started_{false};
-  std::atomic<bool> stopped_{false};
+  // Guards state_ and serializes lifecycle transitions so that stop()
+  // observes the connectionManager_ assignment from start() with a proper
+  // happens-before. Without this, TSAN reports a race when stop() runs on a
+  // different thread from serve().
+  std::mutex lifecycleMutex_;
+  State state_{State::kNotStarted};
 };
 
 // Default type alias for convenience - no metrics by default
@@ -204,6 +233,7 @@ using FastThriftChannelServer = FastThriftServerT<NoStats>;
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerRequestResponseHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerStreamStateHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/security/FizzServerContextBuilder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/handler/ThriftMetricsHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
@@ -228,16 +258,29 @@ FastThriftServerT<Stats>::FastThriftServerT(
       // config_ is initialized first per member declaration order in the header
       executor_(
           std::make_shared<folly::IOThreadPoolExecutor>(config_.numIOThreads)) {
-  connectionManager_ = ServerConnectionManager::create(
-      config_.address,
-      folly::getKeepAliveToken(executor_.get()),
-      createConnectionFactory());
+}
+
+template <typename Stats>
+void FastThriftServerT<Stats>::setSSLConfig(
+    security::FizzServerCertConfig cfg) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftChannelServer::setSSLConfig must be called before start()";
+  sslConfig_ = std::move(cfg);
+}
+
+template <typename Stats>
+void FastThriftServerT<Stats>::setThriftConfig(security::ThriftTlsConfig cfg) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  CHECK(state_ == State::kNotStarted)
+      << "FastThriftChannelServer::setThriftConfig must be called before start()";
+  thriftConfig_ = cfg;
 }
 
 template <typename Stats>
 rocket::server::connection::ConnectionFactory
 FastThriftServerT<Stats>::createConnectionFactory() {
-  return [this](folly::AsyncSocket::UniquePtr socket)
+  return [this](folly::AsyncTransport::UniquePtr socket)
              -> rocket::server::connection::RocketServerConnection {
     auto* evb = socket->getEventBase();
     auto transportHandler =
@@ -414,11 +457,28 @@ FastThriftServerT<Stats>::~FastThriftServerT() {
 
 template <typename Stats>
 void FastThriftServerT<Stats>::start() {
-  if (started_.exchange(true)) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  if (state_ != State::kNotStarted) {
     return;
   }
+
+  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext;
+  std::chrono::milliseconds tlsHandshakeTimeout{std::chrono::seconds{5}};
+  if (sslConfig_) {
+    fizzContext = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
+    tlsHandshakeTimeout = sslConfig_->handshakeTimeout;
+  }
+  connectionManager_ = ServerConnectionManager::create(
+      config_.address,
+      folly::getKeepAliveToken(executor_.get()),
+      createConnectionFactory(),
+      std::move(fizzContext),
+      tlsHandshakeTimeout);
+
   connectionManager_->start();
-  XLOG(INFO) << "FastThriftServer listening on " << getAddress();
+  state_ = State::kRunning;
+  XLOG(INFO) << "FastThriftChannelServer listening on "
+             << connectionManager_->getAddress();
 }
 
 template <typename Stats>
@@ -450,9 +510,11 @@ void FastThriftServerT<Stats>::serve() {
 
 template <typename Stats>
 void FastThriftServerT<Stats>::stop() {
-  if (!started_.load() || stopped_.exchange(true)) {
+  std::lock_guard<std::mutex> lock(lifecycleMutex_);
+  if (state_ != State::kRunning) {
     return;
   }
+  state_ = State::kStopped;
 
   // Stop accepting new connections first
   connectionManager_->stop();

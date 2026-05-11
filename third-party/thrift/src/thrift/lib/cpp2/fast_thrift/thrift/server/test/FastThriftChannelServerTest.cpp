@@ -16,13 +16,19 @@
 
 #include <gtest/gtest.h>
 
+#include <chrono>
 #include <thread>
 
+#include <fizz/client/AsyncFizzClient.h>
+#include <fizz/client/FizzClientContext.h>
+#include <folly/ExceptionWrapper.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
+#include <thrift/lib/cpp2/fast_thrift/security/test/TestCert.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftChannelServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestService.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/BackwardsCompatibilityTestServiceAsyncClient.h>
@@ -50,6 +56,69 @@ class TestHandler
 
   void ping() override {}
 };
+
+namespace {
+
+// Establishes a fizz-client connection to `address` and returns the negotiated
+// AsyncTransport. Blocks until handshake completes; returns nullptr on error.
+folly::AsyncTransport::UniquePtr connectFizz(
+    folly::EventBase* evb, const folly::SocketAddress& address) {
+  struct Cb : public folly::AsyncSocket::ConnectCallback,
+              public fizz::client::AsyncFizzClient::HandshakeCallback {
+    folly::Baton<>& baton;
+    folly::exception_wrapper& outErr;
+    fizz::client::AsyncFizzClient::UniquePtr& outClient;
+    Cb(folly::Baton<>& b,
+       folly::exception_wrapper& e,
+       fizz::client::AsyncFizzClient::UniquePtr& c)
+        : baton(b), outErr(e), outClient(c) {}
+
+    void connectSuccess() noexcept override {
+      outClient->connect(
+          this,
+          /*verifier=*/nullptr,
+          /*sni=*/folly::none,
+          /*pskIdentity=*/folly::none,
+          /*echConfigs=*/folly::none);
+    }
+    void connectErr(const folly::AsyncSocketException& ex) noexcept override {
+      outErr = folly::exception_wrapper(ex);
+      baton.post();
+    }
+    void fizzHandshakeSuccess(
+        fizz::client::AsyncFizzClient*) noexcept override {
+      baton.post();
+    }
+    void fizzHandshakeError(
+        fizz::client::AsyncFizzClient*,
+        folly::exception_wrapper ex) noexcept override {
+      outErr = std::move(ex);
+      baton.post();
+    }
+  };
+
+  folly::Baton<> done;
+  folly::exception_wrapper err;
+  fizz::client::AsyncFizzClient::UniquePtr fizzClient;
+  Cb cb(done, err, fizzClient);
+
+  evb->runInEventBaseThreadAndWait([&] {
+    auto sock = folly::AsyncSocket::newSocket(evb);
+    auto fizzCtx = std::make_shared<fizz::client::FizzClientContext>();
+    auto* sockPtr = sock.get();
+    fizzClient.reset(
+        new fizz::client::AsyncFizzClient(std::move(sock), fizzCtx));
+    sockPtr->connect(&cb, address, /*timeout=*/std::chrono::seconds{5}.count());
+  });
+
+  done.wait();
+  if (err) {
+    return nullptr;
+  }
+  return folly::AsyncTransport::UniquePtr(fizzClient.release());
+}
+
+} // namespace
 
 class FastThriftChannelServerTest : public ::testing::Test {
  protected:
@@ -279,6 +348,117 @@ TEST(FastThriftChannelServerServeTest, ServeBlocksUntilStop) {
   server.stop();
   serveThread.join();
   EXPECT_TRUE(serveDone.load());
+}
+
+// ---------------------------------------------------------------------------
+// TLS coverage — FastThriftChannelServer with FizzServerConfig.
+// ---------------------------------------------------------------------------
+
+class FastThriftChannelServerTlsTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+    cert_ = security::test::makeTestCert();
+
+    thrift::FastThriftServerConfig config;
+    config.address = folly::SocketAddress("::1", 0);
+    config.numIOThreads = 1;
+
+    server_ = std::make_unique<thrift::FastThriftChannelServer>(
+        std::move(config), std::make_shared<TestHandler>());
+
+    security::FizzServerCertConfig sslConfig;
+    sslConfig.certPem = cert_.certPem;
+    sslConfig.keyPem = cert_.keyPem;
+    // Skip mTLS — covered by the unit tests on FizzServerContextBuilder.
+    sslConfig.clientAuth = fizz::server::ClientAuthMode::None;
+    server_->setSSLConfig(std::move(sslConfig));
+
+    server_->start();
+
+    clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
+  }
+
+  void TearDown() override {
+    clientThread_.reset();
+    server_->stop();
+    server_.reset();
+  }
+
+  security::test::TestCert cert_;
+  std::unique_ptr<thrift::FastThriftChannelServer> server_;
+  std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
+};
+
+TEST_F(FastThriftChannelServerTlsTest, RoundTripOverTls) {
+  auto* evb = clientThread_->getEventBase();
+  auto transport = connectFizz(evb, server_->getAddress());
+  ASSERT_NE(transport, nullptr);
+
+  std::unique_ptr<apache::thrift::Client<BackwardsCompatibilityTestService>>
+      client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto channel =
+        apache::thrift::RocketClientChannel::newChannel(std::move(transport));
+    client = std::make_unique<
+        apache::thrift::Client<BackwardsCompatibilityTestService>>(
+        std::move(channel));
+  });
+
+  folly::Baton<> done;
+  std::string echoed;
+  folly::exception_wrapper rpcErr;
+  evb->runInEventBaseThread([&] {
+    client->semifuture_echo("over fizz")
+        .via(evb)
+        .thenValue([&](std::string r) {
+          echoed = std::move(r);
+          done.post();
+        })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          rpcErr = ew;
+          done.post();
+        });
+  });
+  ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+  EXPECT_FALSE(rpcErr) << rpcErr.what();
+  EXPECT_EQ(echoed, "over fizz");
+
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+}
+
+TEST_F(FastThriftChannelServerTlsTest, PlaintextClientFailsToConnect) {
+  // A non-TLS client connects but its first frame will not parse as a
+  // ClientHello; the server's fizz handshake fails and the connection is
+  // dropped. The RPC should error out (not hang or succeed).
+  auto* evb = clientThread_->getEventBase();
+  std::unique_ptr<apache::thrift::Client<BackwardsCompatibilityTestService>>
+      client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto socket = folly::AsyncSocket::newSocket(evb, server_->getAddress());
+    auto channel =
+        apache::thrift::RocketClientChannel::newChannel(std::move(socket));
+    client = std::make_unique<
+        apache::thrift::Client<BackwardsCompatibilityTestService>>(
+        std::move(channel));
+  });
+
+  folly::Baton<> done;
+  folly::exception_wrapper rpcErr;
+  evb->runInEventBaseThread([&] {
+    client->semifuture_ping()
+        .via(evb)
+        .thenValue([&](folly::Unit) { done.post(); })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          rpcErr = ew;
+          done.post();
+        });
+  });
+  ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+  EXPECT_TRUE(rpcErr) << "plaintext client should fail against TLS server";
+
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
 }
 
 } // namespace apache::thrift::fast_thrift::thrift::server::test

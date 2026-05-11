@@ -17,7 +17,10 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
+#include <memory>
 
+#include <fizz/server/FizzServerContext.h>
 #include <folly/Executor.h>
 #include <folly/Synchronized.h>
 #include <folly/container/F14Map.h>
@@ -70,9 +73,16 @@ class ConnectionManager : public folly::DelayedDestruction {
   static Ptr create(
       folly::SocketAddress address,
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor,
-      ConnectionFactory connectionFactory) {
+      ConnectionFactory connectionFactory,
+      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext =
+          nullptr,
+      std::chrono::milliseconds tlsHandshakeTimeout = std::chrono::seconds{5}) {
     return Ptr(new ConnectionManager(
-        std::move(address), std::move(executor), std::move(connectionFactory)));
+        std::move(address),
+        std::move(executor),
+        std::move(connectionFactory),
+        std::move(fizzContext),
+        tlsHandshakeTimeout));
   }
 
   void start() {
@@ -106,10 +116,14 @@ class ConnectionManager : public folly::DelayedDestruction {
   ConnectionManager(
       folly::SocketAddress address,
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor,
-      ConnectionFactory connectionFactory)
+      ConnectionFactory connectionFactory,
+      std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
+      std::chrono::milliseconds tlsHandshakeTimeout)
       : address_(std::move(address)),
         executor_(std::move(executor)),
         connectionFactory_(std::move(connectionFactory)),
+        fizzContext_(std::move(fizzContext)),
+        tlsHandshakeTimeout_(tlsHandshakeTimeout),
         observer_(std::make_shared<IOObserver>(*this)) {}
 
   ~ConnectionManager() override = default;
@@ -131,8 +145,8 @@ class ConnectionManager : public folly::DelayedDestruction {
     DestructorGuard dg(this);
 
     connectionHandlers_.withWLock([&](auto& handlerMap) {
-      ConnectionHandler::Ptr connectionHandler(
-          new ConnectionHandler(evb, connectionFactory_));
+      ConnectionHandler::Ptr connectionHandler(new ConnectionHandler(
+          evb, connectionFactory_, fizzContext_, tlsHandshakeTimeout_));
       auto [it, inserted] =
           handlerMap.emplace(&evb, std::move(connectionHandler));
       if (inserted) {
@@ -159,6 +173,8 @@ class ConnectionManager : public folly::DelayedDestruction {
   folly::SocketAddress address_;
   folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor_;
   ConnectionFactory connectionFactory_;
+  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
+  std::chrono::milliseconds tlsHandshakeTimeout_;
   std::shared_ptr<IOObserver> observer_;
 
   folly::Synchronized<

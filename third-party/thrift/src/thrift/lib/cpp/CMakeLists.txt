@@ -51,7 +51,7 @@ target_link_libraries(
 
 # transport pulls in rocket/CompressionManager via THeader.cpp, which
 # lives in thriftcpp2. Build it only when the RPC stack is enabled.
-if (NOT THRIFT_SERIALIZATION_ONLY)
+if (THRIFT_RPC)
   add_library(
     transport
 
@@ -89,7 +89,7 @@ if (NOT THRIFT_SERIALIZATION_ONLY)
       # and libtransport.so are cyclic dependencies and libthriftcpp2.so
       # has libtransport.so dependency. We can't link to
       # libthriftcpp2.so from libtransport.so. It's not allowed.
-      $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>,$<NOT:$<BOOL:${THRIFT_SERIALIZATION_ONLY}>>>:$<INSTALL_INTERFACE:FBThrift::thriftcpp2>>
+      $<$<AND:$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>,$<BOOL:${THRIFT_RPC}>>:$<INSTALL_INTERFACE:FBThrift::thriftcpp2>>
       Folly::folly
       ZLIB::ZLIB
       ${OPENSSL_LIBRARIES}
@@ -108,7 +108,7 @@ target_link_libraries(
     Folly::folly
 )
 
-if (NOT THRIFT_SERIALIZATION_ONLY)
+if (THRIFT_RPC)
   add_library(
     async
 
@@ -157,7 +157,7 @@ if (NOT THRIFT_SERIALIZATION_ONLY)
       Folly::folly
       ${GLOG_LIBRARIES}
   )
-endif () # NOT THRIFT_SERIALIZATION_ONLY
+endif () # THRIFT_RPC
 
 set(THRIFT1_HEADER_DIRS
   async
@@ -178,7 +178,7 @@ if (BUILD_SHARED_LIBS)
   set_target_properties(thrift-core concurrency
     PROPERTIES VERSION ${PACKAGE_VERSION}
     )
-  if (NOT THRIFT_SERIALIZATION_ONLY)
+  if (THRIFT_RPC)
     set_target_properties(async transport
       PROPERTIES VERSION ${PACKAGE_VERSION}
       )
@@ -194,7 +194,7 @@ install(
   DESTINATION ${LIB_INSTALL_DIR}
 )
 
-if (NOT THRIFT_SERIALIZATION_ONLY)
+if (THRIFT_RPC)
   install(
     TARGETS
       transport

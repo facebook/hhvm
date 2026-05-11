@@ -15,6 +15,10 @@
 # This CMakeLists.txt takes care of building a selection of benchmarks and tests
 # in this folder. Currently, it only builds ProtocolBench with its dependencies.
 
+if (NOT THRIFT_BENCHMARKS)
+  return ()
+endif ()
+
 # Obtain paths to other generated thrift files from the global property space.
 get_property(protocol-cpp2-SOURCES GLOBAL PROPERTY
     protocol-cpp2-SOURCES)

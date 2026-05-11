@@ -83,12 +83,12 @@ jobs:
     - name: Fetch lz4
       if: ${{ steps.paths.outputs.lz4_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests lz4
-    - name: Fetch snappy
-      if: ${{ steps.paths.outputs.snappy_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests snappy
     - name: Fetch openssl
       if: ${{ steps.paths.outputs.openssl_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests openssl
+    - name: Fetch snappy
+      if: ${{ steps.paths.outputs.snappy_SOURCE }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests snappy
     - name: Fetch liboqs
       if: ${{ steps.paths.outputs.liboqs_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests liboqs
@@ -359,22 +359,6 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.lz4_INSTALL }}
        key: ${{ steps.paths.outputs.lz4_CACHE_KEY }}-install
-    - name: Restore snappy from cache
-      id: restore_snappy
-      if: ${{ steps.paths.outputs.snappy_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.snappy_INSTALL }}
-       key: ${{ steps.paths.outputs.snappy_CACHE_KEY }}-install
-    - name: Build snappy
-      if: ${{ steps.paths.outputs.snappy_SOURCE && ! steps.restore_snappy.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --no-tests snappy --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER":"sccache"}'
-    - name: Save snappy to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.snappy_SOURCE && ! steps.restore_snappy.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.snappy_INSTALL }}
-       key: ${{ steps.paths.outputs.snappy_CACHE_KEY }}-install
     - name: Restore openssl from cache
       id: restore_openssl
       if: ${{ steps.paths.outputs.openssl_SOURCE }}
@@ -391,6 +375,22 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.openssl_INSTALL }}
        key: ${{ steps.paths.outputs.openssl_CACHE_KEY }}-install
+    - name: Restore snappy from cache
+      id: restore_snappy
+      if: ${{ steps.paths.outputs.snappy_SOURCE }}
+      uses: actions/cache/restore@v4
+      with:
+       path: ${{ steps.paths.outputs.snappy_INSTALL }}
+       key: ${{ steps.paths.outputs.snappy_CACHE_KEY }}-install
+    - name: Build snappy
+      if: ${{ steps.paths.outputs.snappy_SOURCE && ! steps.restore_snappy.outputs.cache-hit }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --no-tests snappy --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER":"sccache"}'
+    - name: Save snappy to cache
+      uses: actions/cache/save@v4
+      if: ${{ steps.paths.outputs.snappy_SOURCE && ! steps.restore_snappy.outputs.cache-hit }}
+      with:
+       path: ${{ steps.paths.outputs.snappy_INSTALL }}
+       key: ${{ steps.paths.outputs.snappy_CACHE_KEY }}-install
     - name: Restore liboqs from cache
       id: restore_liboqs
       if: ${{ steps.paths.outputs.liboqs_SOURCE }}

@@ -97,6 +97,9 @@ jobs:
     - name: Fetch lz4
       if: ${{ steps.paths.outputs.lz4_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests lz4
+    - name: Fetch openssl
+      if: ${{ steps.paths.outputs.openssl_SOURCE }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests openssl
     - name: Fetch snappy
       if: ${{ steps.paths.outputs.snappy_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests snappy
@@ -106,15 +109,12 @@ jobs:
     - name: Fetch python-setuptools-69
       if: ${{ steps.paths.outputs.python-setuptools-69_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests python-setuptools-69
-    - name: Fetch zlib
-      if: ${{ steps.paths.outputs.zlib_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests zlib
-    - name: Fetch openssl
-      if: ${{ steps.paths.outputs.openssl_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests openssl
     - name: Fetch liboqs
       if: ${{ steps.paths.outputs.liboqs_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests liboqs
+    - name: Fetch zlib
+      if: ${{ steps.paths.outputs.zlib_SOURCE }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests zlib
     - name: Fetch autoconf
       if: ${{ steps.paths.outputs.autoconf_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests autoconf
@@ -429,6 +429,22 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.lz4_INSTALL }}
        key: ${{ steps.paths.outputs.lz4_CACHE_KEY }}-install
+    - name: Restore openssl from cache
+      id: restore_openssl
+      if: ${{ steps.paths.outputs.openssl_SOURCE }}
+      uses: actions/cache/restore@v4
+      with:
+       path: ${{ steps.paths.outputs.openssl_INSTALL }}
+       key: ${{ steps.paths.outputs.openssl_CACHE_KEY }}-install
+    - name: Build openssl
+      if: ${{ steps.paths.outputs.openssl_SOURCE && ! steps.restore_openssl.outputs.cache-hit }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests openssl --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER":"sccache"}'
+    - name: Save openssl to cache
+      uses: actions/cache/save@v4
+      if: ${{ steps.paths.outputs.openssl_SOURCE && ! steps.restore_openssl.outputs.cache-hit }}
+      with:
+       path: ${{ steps.paths.outputs.openssl_INSTALL }}
+       key: ${{ steps.paths.outputs.openssl_CACHE_KEY }}-install
     - name: Restore snappy from cache
       id: restore_snappy
       if: ${{ steps.paths.outputs.snappy_SOURCE }}
@@ -477,38 +493,6 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.python-setuptools-69_INSTALL }}
        key: ${{ steps.paths.outputs.python-setuptools-69_CACHE_KEY }}-install
-    - name: Restore zlib from cache
-      id: restore_zlib
-      if: ${{ steps.paths.outputs.zlib_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.zlib_INSTALL }}
-       key: ${{ steps.paths.outputs.zlib_CACHE_KEY }}-install
-    - name: Build zlib
-      if: ${{ steps.paths.outputs.zlib_SOURCE && ! steps.restore_zlib.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests zlib --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER":"sccache"}'
-    - name: Save zlib to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.zlib_SOURCE && ! steps.restore_zlib.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.zlib_INSTALL }}
-       key: ${{ steps.paths.outputs.zlib_CACHE_KEY }}-install
-    - name: Restore openssl from cache
-      id: restore_openssl
-      if: ${{ steps.paths.outputs.openssl_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.openssl_INSTALL }}
-       key: ${{ steps.paths.outputs.openssl_CACHE_KEY }}-install
-    - name: Build openssl
-      if: ${{ steps.paths.outputs.openssl_SOURCE && ! steps.restore_openssl.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests openssl --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER":"sccache"}'
-    - name: Save openssl to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.openssl_SOURCE && ! steps.restore_openssl.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.openssl_INSTALL }}
-       key: ${{ steps.paths.outputs.openssl_CACHE_KEY }}-install
     - name: Restore liboqs from cache
       id: restore_liboqs
       if: ${{ steps.paths.outputs.liboqs_SOURCE }}
@@ -525,6 +509,22 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.liboqs_INSTALL }}
        key: ${{ steps.paths.outputs.liboqs_CACHE_KEY }}-install
+    - name: Restore zlib from cache
+      id: restore_zlib
+      if: ${{ steps.paths.outputs.zlib_SOURCE }}
+      uses: actions/cache/restore@v4
+      with:
+       path: ${{ steps.paths.outputs.zlib_INSTALL }}
+       key: ${{ steps.paths.outputs.zlib_CACHE_KEY }}-install
+    - name: Build zlib
+      if: ${{ steps.paths.outputs.zlib_SOURCE && ! steps.restore_zlib.outputs.cache-hit }}
+      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --build-type RelWithDebInfo --free-up-disk --no-tests zlib --extra-cmake-defines '{"CMAKE_CXX_COMPILER_LAUNCHER":"sccache"}'
+    - name: Save zlib to cache
+      uses: actions/cache/save@v4
+      if: ${{ steps.paths.outputs.zlib_SOURCE && ! steps.restore_zlib.outputs.cache-hit }}
+      with:
+       path: ${{ steps.paths.outputs.zlib_INSTALL }}
+       key: ${{ steps.paths.outputs.zlib_CACHE_KEY }}-install
     - name: Restore autoconf from cache
       id: restore_autoconf
       if: ${{ steps.paths.outputs.autoconf_SOURCE }}

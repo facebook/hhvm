@@ -12,22 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_executable(VarintUtilsBench
-  VarintUtilsBench.cpp
-)
-target_link_libraries(VarintUtilsBench
-  thriftcpp2
-  Folly::folly
-  Folly::follybenchmark
-)
+if (THRIFT_BENCHMARKS)
+  add_executable(VarintUtilsBench
+    VarintUtilsBench.cpp
+  )
+  target_link_libraries(VarintUtilsBench
+    thriftcpp2
+    Folly::folly
+    Folly::follybenchmark
+  )
 
-install(
-  TARGETS VarintUtilsBench
-  EXPORT fbthrift-exports
-  RUNTIME DESTINATION ${BIN_INSTALL_DIR}
-  LIBRARY DESTINATION ${LIB_INSTALL_DIR}
-  ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
-)
+  install(
+    TARGETS VarintUtilsBench
+    EXPORT fbthrift-exports
+    RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+    ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+  )
+endif ()
 
 set(PROTOCOL_TESTS
    VarintUtilsTest)

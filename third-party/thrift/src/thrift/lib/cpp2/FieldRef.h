@@ -16,6 +16,10 @@
 
 #pragma once
 
+#ifndef __cpp_impl_three_way_comparison
+#error "Three way comparison operator is not supported by the compiler"
+#endif
+
 #include <initializer_list>
 #include <memory>
 #include <optional>

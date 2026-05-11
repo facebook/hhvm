@@ -10,6 +10,7 @@
 
 #include <boost/cast.hpp>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/util/Status.h>
 #include <folly/FileUtil.h>
 #include <folly/io/SocketOptionMap.h>
 #include <folly/portability/OpenSSL.h>
@@ -153,7 +154,11 @@ void Client::setupFizzContext(std::shared_ptr<fizz::client::PskCache> pskCache,
     if (!key.empty()) {
       folly::readFile(key.c_str(), keyData);
     }
-    auto selfCert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
+    std::unique_ptr<fizz::SelfCert> selfCert;
+    fizz::Error certErr;
+    FIZZ_THROW_ON_ERROR(fizz::openssl::CertUtils::makeSelfCert(
+                            selfCert, certErr, certData, keyData),
+                        certErr);
     auto certMgr = std::make_shared<fizz::client::CertManager>();
     certMgr->addCert(std::move(selfCert));
     fizzContext_->setClientCertManager(std::move(certMgr));

@@ -115,32 +115,6 @@ class CertUtils {
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned,
       folly::ByteRange signature);
-
-  // Deprecated: use the Status-returning overloads above.
-  static std::unique_ptr<PeerCert> makePeerCert(Buf certData);
-  static std::unique_ptr<PeerCert> makePeerCert(folly::ByteRange certData);
-  static std::unique_ptr<PeerCert> makePeerCert(folly::ssl::X509UniquePtr cert);
-
-  // Deprecated: use the Status-returning overloads above.
-  static std::unique_ptr<SelfCert> makeSelfCert(
-      std::string certData,
-      std::string keyData,
-      const std::vector<std::shared_ptr<CertificateCompressor>>& compressors =
-          {});
-  static std::unique_ptr<SelfCert> makeSelfCert(
-      std::string certData,
-      std::string encryptedKeyData,
-      std::string password,
-      const std::vector<std::shared_ptr<CertificateCompressor>>& compressors =
-          {});
-  static std::unique_ptr<SelfCert> makeSelfCert(
-      std::vector<folly::ssl::X509UniquePtr> certs,
-      folly::ssl::EvpPkeyUniquePtr key,
-      const std::vector<std::shared_ptr<CertificateCompressor>>& compressors =
-          {});
-
-  // Deprecated: use the Status-returning overload above.
-  static KeyType getKeyType(const folly::ssl::EvpPkeyUniquePtr& key);
 };
 
 const CertificateSerialization& certificateSerializer();

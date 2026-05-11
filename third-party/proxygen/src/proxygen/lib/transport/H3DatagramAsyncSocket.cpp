@@ -9,6 +9,7 @@
 #include <proxygen/lib/transport/H3DatagramAsyncSocket.h>
 
 #include <fizz/backend/openssl/certificate/CertUtils.h>
+#include <fizz/util/Status.h>
 #include <folly/FileUtil.h>
 #include <proxygen/httpserver/samples/hq/HQParams.h>
 #include <proxygen/lib/transport/ConnectUDPUtils.h>
@@ -351,7 +352,11 @@ H3DatagramAsyncSocket::createFizzClientContext() {
     folly::readFile(options_.certAndKey_->first.c_str(), certData);
     std::string keyData;
     folly::readFile(options_.certAndKey_->second.c_str(), keyData);
-    auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
+    std::unique_ptr<fizz::SelfCert> cert;
+    fizz::Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::openssl::CertUtils::makeSelfCert(cert, err, certData, keyData),
+        err);
     auto certMgr = std::make_shared<fizz::client::CertManager>();
     certMgr->addCert(std::move(cert));
     ctx->setClientCertManager(std::move(certMgr));

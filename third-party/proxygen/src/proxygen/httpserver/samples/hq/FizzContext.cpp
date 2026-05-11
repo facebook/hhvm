@@ -14,6 +14,7 @@
 #include <fizz/server/AeadTicketCipher.h>
 #include <fizz/server/DefaultCertManager.h>
 #include <fizz/server/TicketCodec.h>
+#include <fizz/util/Status.h>
 #include <folly/FileUtil.h>
 #include <folly/Random.h>
 #include <string>
@@ -159,13 +160,20 @@ quic::samples::FizzServerContextPtr createFizzServerContextImpl(
     certData = kDefaultCertData;
     keyData = kDefaultKeyData;
   }
-  auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
+  std::unique_ptr<fizz::SelfCert> cert;
+  fizz::Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::openssl::CertUtils::makeSelfCert(cert, err, certData, keyData),
+      err);
   auto certManager = std::make_shared<fizz::server::DefaultCertManager>();
   certManager->addCertAndSetDefault(std::move(cert));
 
   if (insecureDefaultCert) {
-    auto cert2 = fizz::openssl::CertUtils::makeSelfCert(kPrime256v1CertData,
-                                                        kPrime256v1KeyData);
+    std::unique_ptr<fizz::SelfCert> cert2;
+    FIZZ_THROW_ON_ERROR(
+        fizz::openssl::CertUtils::makeSelfCert(
+            cert2, err, kPrime256v1CertData, kPrime256v1KeyData),
+        err);
     certManager->addCert(std::move(cert2));
   }
 
@@ -235,7 +243,11 @@ FizzClientContextPtr createFizzClientContext(
   if (!keyFilePath.empty()) {
     folly::readFile(keyFilePath.c_str(), keyData);
   }
-  auto cert = fizz::openssl::CertUtils::makeSelfCert(certData, keyData);
+  std::unique_ptr<fizz::SelfCert> cert;
+  fizz::Error err;
+  FIZZ_THROW_ON_ERROR(
+      fizz::openssl::CertUtils::makeSelfCert(cert, err, certData, keyData),
+      err);
   auto certMgr = std::make_shared<fizz::client::CertManager>();
   certMgr->addCert(std::move(cert));
   ctx->setClientCertManager(std::move(certMgr));

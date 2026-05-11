@@ -41,8 +41,12 @@ bool FizzConfigUtil::addCertsToManager(
     for (const auto& cert : sslConfig.certificates) {
       try {
         std::unique_ptr<fizz::SelfCert> selfCert;
+        fizz::Error err;
         if (cert.isBuffer) {
-          selfCert = CertUtils::makeSelfCert(cert.certPath, cert.keyPath);
+          FIZZ_THROW_ON_ERROR(
+              CertUtils::makeSelfCert(
+                  selfCert, err, cert.certPath, cert.keyPath),
+              err);
         } else {
           auto x509Chain = FizzUtil::readChainFile(cert.certPath);
           std::shared_ptr<folly::PasswordInFile> pw;
@@ -53,8 +57,10 @@ bool FizzConfigUtil::addCertsToManager(
           }
 
           auto pkey = FizzUtil::readPrivateKey(cert.keyPath, pw);
-          selfCert =
-              CertUtils::makeSelfCert(std::move(x509Chain), std::move(pkey));
+          FIZZ_THROW_ON_ERROR(
+              CertUtils::makeSelfCert(
+                  selfCert, err, std::move(x509Chain), std::move(pkey)),
+              err);
         }
         if (sslConfig.isDefault) {
           manager.addCertAndSetDefault(std::move(selfCert));

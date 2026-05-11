@@ -719,8 +719,11 @@ HTTPCoroConnector::makeFizzClientContext(const TLSParams& params) {
     folly::readFile(params.clientKeyPath.c_str(), keyData);
   }
   if (!certData.empty() && !keyData.empty()) {
-    auto cert = fizz::openssl::CertUtils::makeSelfCert(std::move(certData),
-                                                       std::move(keyData));
+    std::unique_ptr<fizz::SelfCert> cert;
+    fizz::Error err;
+    FIZZ_THROW_ON_ERROR(fizz::openssl::CertUtils::makeSelfCert(
+                            cert, err, std::move(certData), std::move(keyData)),
+                        err);
     auto certMgr = std::make_shared<fizz::client::CertManager>();
     certMgr->addCert(std::move(cert));
     fizzContext->setClientCertManager(std::move(certMgr));

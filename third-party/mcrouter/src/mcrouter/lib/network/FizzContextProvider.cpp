@@ -44,8 +44,12 @@ FizzContextAndVerifier createClientFizzContextAndVerifier(
   // Thrift's Rocket transport requires an ALPN
   ctx->setSupportedAlpns({"rs"});
   if (!certData.empty() && !keyData.empty()) {
-    auto cert = fizz::openssl::CertUtils::makeSelfCert(
-        std::move(certData), std::move(keyData));
+    std::unique_ptr<fizz::SelfCert> cert;
+    fizz::Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::openssl::CertUtils::makeSelfCert(
+            cert, err, std::move(certData), std::move(keyData)),
+        err);
     auto certMgr = std::make_shared<fizz::client::CertManager>();
     certMgr->addCert(std::move(cert));
     ctx->setClientCertManager(std::move(certMgr));
@@ -80,8 +84,12 @@ std::shared_ptr<fizz::server::FizzServerContext> createFizzServerContext(
     wangle::TLSTicketKeySeeds* ticketKeySeeds) {
   auto certMgr = std::make_shared<fizz::server::DefaultCertManager>();
   try {
-    auto selfCert =
-        fizz::openssl::CertUtils::makeSelfCert(certData.str(), keyData.str());
+    std::unique_ptr<fizz::SelfCert> selfCert;
+    fizz::Error err;
+    FIZZ_THROW_ON_ERROR(
+        fizz::openssl::CertUtils::makeSelfCert(
+            selfCert, err, certData.str(), keyData.str()),
+        err);
     // add the default cert
     certMgr->addCertAndSetDefault(std::move(selfCert));
   } catch (const std::exception& ex) {

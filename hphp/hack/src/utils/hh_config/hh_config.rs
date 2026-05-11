@@ -64,6 +64,7 @@ pub struct HhConfig {
     pub use_distc_crawl_dircache: bool,
     pub distc_avoid_unnecessary_saved_state_work: bool,
     pub distc_parallel_fold_decls: bool,
+    pub distc_weak_edge_decl_discovery: bool,
 }
 
 impl Default for HhConfig {
@@ -87,6 +88,7 @@ impl Default for HhConfig {
             use_distc_crawl_dircache: false,
             distc_avoid_unnecessary_saved_state_work: false,
             distc_parallel_fold_decls: false,
+            distc_weak_edge_decl_discovery: false,
         }
     }
 }
@@ -692,6 +694,9 @@ impl HhConfig {
                 "distc_parallel_fold_decls" => {
                     c.distc_parallel_fold_decls = parse_json(&value)?;
                 }
+                "distc_weak_edge_decl_discovery" => {
+                    c.distc_weak_edge_decl_discovery = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -704,6 +709,7 @@ impl HhConfig {
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
             "distc_avoid_unnecessary_saved_state_work": self.distc_avoid_unnecessary_saved_state_work,
             "distc_parallel_fold_decls": self.distc_parallel_fold_decls,
+            "distc_weak_edge_decl_discovery": self.distc_weak_edge_decl_discovery,
         });
         experiments.to_string()
     }

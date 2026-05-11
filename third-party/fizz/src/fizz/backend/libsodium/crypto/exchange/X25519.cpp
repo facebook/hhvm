@@ -15,11 +15,12 @@ using namespace folly;
 
 namespace fizz::libsodium {
 
-void X25519KeyExchange::setPrivateKey(
+Status X25519KeyExchange::setPrivateKey(
+    Error& err,
     std::unique_ptr<folly::IOBuf> gotPrivKey) {
   if (!gotPrivKey ||
       gotPrivKey->computeChainDataLength() != kCurve25519PrivBytes) {
-    throw std::runtime_error("Invalid Private Key.");
+    return err.error("Invalid Private Key.");
   }
 
   std::array<uint8_t, kCurve25519PrivBytes> privKey;
@@ -31,6 +32,7 @@ void X25519KeyExchange::setPrivateKey(
 
   privKey_ = privKey;
   pubKey_ = pubKey;
+  return Status::Success;
 }
 
 Status X25519KeyExchange::generateKeyPair(Error& err) {

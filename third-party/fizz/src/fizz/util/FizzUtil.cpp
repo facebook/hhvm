@@ -154,9 +154,13 @@ std::unique_ptr<KeyExchange> FizzUtil::createKeyExchangeFromBuf(
     }
     case hpke::KEMId::x25519: {
       auto kex = std::make_unique<libsodium::X25519KeyExchange>();
-      kex->setPrivateKey(
-          folly::IOBuf::copyBuffer(
-              folly::unhexlify(folly::StringPiece(privKey))));
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          kex->setPrivateKey(
+              err,
+              folly::IOBuf::copyBuffer(
+                  folly::unhexlify(folly::StringPiece(privKey)))),
+          err);
       return kex;
     }
     default: {

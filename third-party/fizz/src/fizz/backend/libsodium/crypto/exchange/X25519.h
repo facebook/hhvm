@@ -32,7 +32,7 @@ class X25519KeyExchange : public KeyExchange {
   Status clone(std::unique_ptr<KeyExchange>& ret, Error& err) const override;
   std::size_t getExpectedKeyShareSize() const override;
 
-  void setPrivateKey(std::unique_ptr<folly::IOBuf> gotPrivKey);
+  Status setPrivateKey(Error& err, std::unique_ptr<folly::IOBuf> gotPrivKey);
 
  private:
   constexpr static size_t kCurve25519PubBytes = 32;

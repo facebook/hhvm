@@ -1945,7 +1945,8 @@ std::unique_ptr<KeyExchange> generateAuthKex(
   switch (group) {
     case NamedGroup::x25519: {
       auto dKex = std::make_unique<libsodium::X25519KeyExchange>();
-      dKex->setPrivateKey(toIOBuf(privateKey));
+      Error err;
+      FIZZ_THROW_ON_ERROR(dKex->setPrivateKey(err, toIOBuf(privateKey)), err);
       return dKex;
     }
     case NamedGroup::secp256r1: {
@@ -1990,7 +1991,8 @@ SetupParam getSetupParam(
     case NamedGroup::x25519: {
       auto dKex = dynamic_cast<libsodium::X25519KeyExchange*>(kex.get());
       CHECK(dKex);
-      dKex->setPrivateKey(toIOBuf(privateKey));
+      Error err;
+      FIZZ_THROW_ON_ERROR(dKex->setPrivateKey(err, toIOBuf(privateKey)), err);
       break;
     }
     case NamedGroup::secp256r1: {

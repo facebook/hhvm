@@ -609,7 +609,9 @@ std::shared_ptr<ech::Decrypter> setupDefaultDecrypter() {
 
   auto chosenConfig = getDefaultECHConfigs()[0];
   auto kex = std::make_unique<libsodium::X25519KeyExchange>();
-  kex->setPrivateKey(std::move(defaultPrivateKey));
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      kex->setPrivateKey(err, std::move(defaultPrivateKey)), err);
 
   // Configure ECH decrpyter to be used server side.
   auto decrypter = std::make_shared<ech::ECHConfigManager>(

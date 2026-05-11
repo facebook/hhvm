@@ -135,7 +135,7 @@ class QMINScheme : public CompressionScheme {
 
   static void insert_chunk(struct stream *stream,
                            struct stream_chunk *new_chunk) {
-    struct stream_chunk *chunk;
+    struct stream_chunk *chunk = nullptr;
     TAILQ_FOREACH(chunk, &stream->sm_chunks, sc_next)
     if (chunk->sc_off > new_chunk->sc_off) {
       TAILQ_INSERT_BEFORE(chunk, new_chunk, sc_next);
@@ -216,7 +216,7 @@ class QMINScheme : public CompressionScheme {
   }
 
   void recvAck(std::unique_ptr<Ack> generic_ack) override {
-    struct stream_chunk *chunk;
+    struct stream_chunk *chunk = nullptr;
 
     CHECK(generic_ack);
     auto ack = dynamic_cast<QMINAck *>(generic_ack.get());
@@ -229,8 +229,7 @@ class QMINScheme : public CompressionScheme {
     insert_chunk(&qms_streams[0], chunk);
 
     while ((chunk = maybe_pop_chunk(&qms_streams[0]))) {
-      ssize_t nread;
-      nread = qmin_enc_cmds_in(qms_enc, chunk->sc_buf, chunk->sc_sz);
+      ssize_t nread = qmin_enc_cmds_in(qms_enc, chunk->sc_buf, chunk->sc_sz);
       if (nread < 0 || (size_t)nread != chunk->sc_sz) {
         VLOG(1) << "error: qmin_enc_cmds_in failed";
         assert(0);
@@ -247,12 +246,11 @@ class QMINScheme : public CompressionScheme {
     const size_t max_comp = 0x1000;
     unsigned char outbuf[max_ctl + max_comp];
     unsigned char *const comp = outbuf + max_ctl;
-    size_t nw, comp_sz;
-    enum qmin_encode_status qes;
+    size_t nw = 0, comp_sz = 0;
+    enum qmin_encode_status qes = QES_OK;
     FrameFlags flags;
 
     qms_ctl[0].out.qco_ctx = this;
-    comp_sz = 0;
 
     for (const auto header : allHeaders) {
       std::string name{header.name->c_str()};
@@ -288,7 +286,7 @@ class QMINScheme : public CompressionScheme {
     }
 
     {
-      size_t sz;
+      size_t sz = 0;
       char *state = qmin_enc_to_str(qms_enc, &sz);
       VLOG(4) << "encoder state: " << state;
       free(state);
@@ -302,7 +300,7 @@ class QMINScheme : public CompressionScheme {
     /* Prepend control message and its size: */
     size_t ctl_msg_sz = qms_ctl[0].sz;
     qms_ctl[0].sz = 0;
-    size_t ctl_msg_sz_with_off;
+    size_t ctl_msg_sz_with_off = 0;
     if (ctl_msg_sz) {
       memcpy(outbuf + max_ctl - ctl_msg_sz, qms_ctl[0].buf, ctl_msg_sz);
       memcpy(outbuf + max_ctl - ctl_msg_sz - sizeof(qms_ctl[0].write_off),
@@ -310,8 +308,6 @@ class QMINScheme : public CompressionScheme {
              sizeof(qms_ctl[0].write_off));
       qms_ctl[0].write_off += ctl_msg_sz;
       ctl_msg_sz_with_off = ctl_msg_sz + sizeof(qms_ctl[0].write_off);
-    } else {
-      ctl_msg_sz_with_off = 0;
     }
     memcpy(outbuf + max_ctl - ctl_msg_sz_with_off - sizeof(ctl_msg_sz),
            &ctl_msg_sz,
@@ -340,18 +336,17 @@ class QMINScheme : public CompressionScheme {
               SimStats &,
               SimStreamingCallback &callback) override {
     folly::io::Cursor cursor(encodedReq.get());
-    const unsigned char *buf;
-    ssize_t nread;
-    size_t ctl_sz, stream_off;
+    ssize_t nread = 0;
+    size_t ctl_sz = 0, stream_off = 0;
     char outbuf[0x1000];
-    unsigned name_len, val_len;
+    unsigned name_len = 0, val_len = 0;
     unsigned decoded_size = 0;
-    uint32_t stream_id;
+    uint32_t stream_id = 0;
 
     qms_ctl[1].out.qco_ctx = this;
 
     /* Read Stream ID: */
-    buf = cursor.data();
+    const unsigned char *buf = cursor.data();
     memcpy(&stream_id, buf, sizeof(uint32_t));
     encodedReq->trimStart(sizeof(uint32_t));
 
@@ -362,15 +357,13 @@ class QMINScheme : public CompressionScheme {
 
     /* Feed control messages to the decoder: */
     if (ctl_sz) {
-      struct stream_chunk *chunk;
-
       /* Read stream offset: */
       buf = cursor.data();
       memcpy(&stream_off, buf, sizeof(stream_off));
       encodedReq->trimStart(sizeof(stream_off));
 
       buf = cursor.data();
-      chunk = stream_chunk_new(stream_off, buf, ctl_sz);
+      struct stream_chunk *chunk = stream_chunk_new(stream_off, buf, ctl_sz);
       encodedReq->trimStart(ctl_sz);
 
       insert_chunk(&qms_streams[1], chunk);

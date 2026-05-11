@@ -126,9 +126,8 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
                 async with get_client(TestingService, path=socket_path):
                     pass
 
-            loop = asyncio.get_event_loop()
             with self.assertRaises(TransportError) as cm:
-                loop.run_until_complete(connect_to_unlistened_socket())
+                asyncio.run(connect_to_unlistened_socket())
             ex = cm.exception
             self.assertEqual(ex.errno, errno.ECONNREFUSED)
 

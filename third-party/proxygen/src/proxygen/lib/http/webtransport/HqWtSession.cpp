@@ -174,6 +174,10 @@ void HqWtSession::onDone() noexcept {
   wtSess_.closeSession(folly::none);
 }
 
+void HqWtSession::onDatagram(std::unique_ptr<folly::IOBuf> dgram) noexcept {
+  wtSess_.onDatagram(std::move(dgram));
+}
+
 void HqWtSession::init(Ptr self,
                        HttpWtClientCallbackPtr wtClientCallback) noexcept {
   this->self = std::shared_ptr<WebTransport>(self, &wtSess_);

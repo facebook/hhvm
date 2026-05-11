@@ -40,6 +40,9 @@ class HqWtSession : public WtHttpSession {
   // invoked when both reads&writes are done; derived classes can clean up
   void onDone() noexcept override;
 
+  // invoked when an http/3 datagram is received
+  void onDatagram(std::unique_ptr<folly::IOBuf>) noexcept override;
+
   H3WtSession& getH3WtSession() noexcept {
     return wtSess_;
   }

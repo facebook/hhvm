@@ -37,7 +37,7 @@ struct WtLooper : private folly::EventBase::LoopCallback {
  * WebTransportCodec, feeding into the WtStreamManager. The underlying txn_ is
  * used to egress WebTransport capsules.
  */
-struct WebTransportTxnHandler : public HTTPTransactionHandler {
+struct WebTransportTxnHandler final : public HTTPTransactionHandler {
   using Ptr = std::unique_ptr<WebTransportTxnHandler>;
   WebTransportTxnHandler(WtLooper& readLooper,
                          WtLooper& writeLooper,
@@ -47,11 +47,11 @@ struct WebTransportTxnHandler : public HTTPTransactionHandler {
   void detachTransaction() noexcept final {
     txn_ = nullptr;
   }
-  void onHeadersComplete(std::unique_ptr<HTTPMessage>) noexcept override;
+  void onHeadersComplete(std::unique_ptr<HTTPMessage>) noexcept final;
   void onBody(std::unique_ptr<folly::IOBuf>) noexcept final;
   void onEOM() noexcept final;
-  void onError(const HTTPException&) noexcept override;
-
+  void onDatagram(std::unique_ptr<folly::IOBuf>) noexcept final;
+  void onError(const HTTPException&) noexcept final;
   void onEgressPaused() noexcept final;
   void onEgressResumed() noexcept final;
 
@@ -99,6 +99,9 @@ class WtHttpSession {
   virtual void onHttpError(const HTTPException& err) noexcept;
   // invoked when both reads&writes are done; derived classes can clean up
   virtual void onDone() noexcept {
+  }
+  // invoked for http/3 datagrams only
+  virtual void onDatagram(std::unique_ptr<folly::IOBuf>) noexcept {
   }
 
   void writesDone() noexcept;

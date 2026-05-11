@@ -2964,14 +2964,26 @@ class H3WtUpstreamTest : public HQUpstreamSessionTest {
     CHECK(!wtReq.isReady());
     loopN(2);
 
+    // ::onWebTransportSession notified prior to 2xx
+    CHECK(wt.handlerCtx->wtSession);
+
+    // notify HqSession of datagrams, verify buffering simulating reordering
+    socketDriver_->addDatagram(getH3Datagram(0, makeBuf(10), folly::none));
+    socketDriver_->addDatagramsAvailableReadEvent();
+    EXPECT_TRUE(wt.handlerCtx->dgrams.empty());
+
+    // flush 2xx response
     sendResponse(kConnectStreamId, getResponse(200), nullptr, false);
     flush();
 
+    // wait for session to parse/receive resp
     auto res = waitForFut(std::move(wtReq), eventBase_);
     CHECK(res.hasValue());
     EXPECT_EQ(res.value()->getStatusCode(), 200);
-    CHECK(wt.handlerCtx->wtSession);
     wt.sess = std::move(wt.handlerCtx->wtSession);
+    loopN(1);
+    // datagrams should be delivered now
+    EXPECT_EQ(wt.handlerCtx->dgrams.size(), 1);
   }
 
   // peer context
@@ -3330,6 +3342,7 @@ INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
                            TestParams tp;
                            tp.alpn_ = "h3";
                            tp.webTransport_ = true;
+                           tp.datagrams_ = true;
                            return tp;
                          }()),
                          paramsToTestName);

@@ -324,6 +324,11 @@ void WebTransportTxnHandler::onError(const HTTPException& error) noexcept {
   wtHttpSess_.onHttpError(error);
 }
 
+void WebTransportTxnHandler::onDatagram(
+    std::unique_ptr<folly::IOBuf> dgram) noexcept {
+  wtHttpSess_.onDatagram(std::move(dgram));
+}
+
 void WebTransportTxnHandler::onEgressPaused() noexcept {
   VLOG(6) << __func__;
   // cancel writeLoopCb if scheduled

@@ -63,6 +63,7 @@ pub struct HhConfig {
     pub eden_fetch_parallelism: usize,
     pub use_distc_crawl_dircache: bool,
     pub distc_avoid_unnecessary_saved_state_work: bool,
+    pub distc_parallel_fold_decls: bool,
 }
 
 impl Default for HhConfig {
@@ -85,6 +86,7 @@ impl Default for HhConfig {
             eden_fetch_parallelism: 0,
             use_distc_crawl_dircache: false,
             distc_avoid_unnecessary_saved_state_work: false,
+            distc_parallel_fold_decls: false,
         }
     }
 }
@@ -687,6 +689,9 @@ impl HhConfig {
                 "distc_avoid_unnecessary_saved_state_work" => {
                     c.distc_avoid_unnecessary_saved_state_work = parse_json(&value)?;
                 }
+                "distc_parallel_fold_decls" => {
+                    c.distc_parallel_fold_decls = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -698,6 +703,7 @@ impl HhConfig {
             "eden_fetch_parallelism": self.eden_fetch_parallelism,
             "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
             "distc_avoid_unnecessary_saved_state_work": self.distc_avoid_unnecessary_saved_state_work,
+            "distc_parallel_fold_decls": self.distc_parallel_fold_decls,
         });
         experiments.to_string()
     }

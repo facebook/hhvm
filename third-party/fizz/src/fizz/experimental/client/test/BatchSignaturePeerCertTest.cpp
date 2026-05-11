@@ -64,9 +64,14 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyP256) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-          getPrivateKey(kP256Key), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      certUniq;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          certUniq, err, getPrivateKey(kP256Key), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
   BatchSignatureAsyncSelfCert<Sha256> batchSelfCert(batcher);
@@ -82,7 +87,6 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyP256) {
       std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256>>(
           getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
-  Error err;
   EXPECT_EQ(
       batchPeerCert.verify(
           err,
@@ -111,9 +115,13 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyRSA) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
-          getPrivateKey(kRSAKey), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>> certUniq;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>::create(
+          certUniq, err, getPrivateKey(kRSAKey), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
   BatchSignatureAsyncSelfCert<Sha256> batchSelfCert(batcher);
@@ -129,7 +137,6 @@ TEST(BatchSignaturePeerCertTest, TestSignVerifyRSA) {
       std::make_shared<openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA>>(
           getCert(kRSACertificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
-  Error err;
   EXPECT_EQ(
       batchPeerCert.verify(
           err,
@@ -158,9 +165,14 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-          getPrivateKey(kP256Key), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      certUniq;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          certUniq, err, getPrivateKey(kP256Key), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
   BatchSignatureAsyncSelfCert<Sha256> batchSelfCert(batcher);
@@ -177,7 +189,6 @@ TEST(BatchSignaturePeerCertTest, TestWrongBatchSignature) {
           getCert(kP256Certificate));
   BatchSignaturePeerCert batchPeerCert(peerCert);
   // normal verify
-  Error err;
   EXPECT_NO_THROW(FIZZ_THROW_ON_ERROR(
       batchPeerCert.verify(
           err,

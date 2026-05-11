@@ -38,9 +38,9 @@ class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
     InternalSelfCert(
         std::vector<folly::ssl::X509UniquePtr> certs,
         folly::ssl::EvpPkeyUniquePtr privateKey)
-        : openssl::OpenSSLSelfCertImpl<T>(std::move(certs)) {
-      signature_.setKey(std::move(privateKey));
-    }
+        : openssl::OpenSSLSelfCertImpl<T>(
+              std::move(certs),
+              std::move(privateKey)) {}
 
    public:
     ~InternalSelfCert() override = default;
@@ -90,7 +90,9 @@ class SelfDelegatedCredentialImpl : public SelfDelegatedCredential {
   CompressedCertificate getCompressedCert(
       CertificateCompressionAlgorithm algo) const override;
 
-  Buf sign(
+  Status sign(
+      Buf& ret,
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned) const override;

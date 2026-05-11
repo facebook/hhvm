@@ -256,21 +256,63 @@ class BogoTestClient : public AsyncSocket::ConnectCallback,
 
 class TestRsaCert : public openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA> {
  public:
-  using openssl::OpenSSLSelfCertImpl<
-      openssl::KeyType::RSA>::OpenSSLSelfCertImpl;
+  static Status create(
+      std::unique_ptr<TestRsaCert>& ret,
+      Error& err,
+      folly::ssl::EvpPkeyUniquePtr pkey,
+      std::vector<folly::ssl::X509UniquePtr> certs) {
+    if (certs.empty()) {
+      return err.error("Must supply at least 1 cert");
+    }
+    if (X509_check_private_key(certs[0].get(), pkey.get()) != 1) {
+      return err.error("Cert does not match private key");
+    }
+    ret = std::unique_ptr<TestRsaCert>(
+        new TestRsaCert(std::move(certs), std::move(pkey)));
+    return Status::Success;
+  }
   std::string getIdentity() const override {
     return "testrsacert";
   }
+
+ private:
+  TestRsaCert(
+      std::vector<folly::ssl::X509UniquePtr> certs,
+      folly::ssl::EvpPkeyUniquePtr pkey)
+      : openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>(
+            std::move(certs),
+            std::move(pkey)) {}
 };
 
 class TestP256Cert
     : public openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> {
  public:
-  using openssl::OpenSSLSelfCertImpl<
-      openssl::KeyType::P256>::OpenSSLSelfCertImpl;
+  static Status create(
+      std::unique_ptr<TestP256Cert>& ret,
+      Error& err,
+      folly::ssl::EvpPkeyUniquePtr pkey,
+      std::vector<folly::ssl::X509UniquePtr> certs) {
+    if (certs.empty()) {
+      return err.error("Must supply at least 1 cert");
+    }
+    if (X509_check_private_key(certs[0].get(), pkey.get()) != 1) {
+      return err.error("Cert does not match private key");
+    }
+    ret = std::unique_ptr<TestP256Cert>(
+        new TestP256Cert(std::move(certs), std::move(pkey)));
+    return Status::Success;
+  }
   std::string getIdentity() const override {
     return "testp256cert";
   }
+
+ private:
+  TestP256Cert(
+      std::vector<folly::ssl::X509UniquePtr> certs,
+      folly::ssl::EvpPkeyUniquePtr pkey)
+      : openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>(
+            std::move(certs),
+            std::move(pkey)) {}
 };
 
 std::unique_ptr<SelfCert> readSelfCert() {
@@ -294,11 +336,17 @@ std::unique_ptr<SelfCert> readSelfCert() {
   EvpPkeyUniquePtr key(
       PEM_read_bio_PrivateKey(b.get(), nullptr, nullptr, nullptr));
 
-  std::unique_ptr<SelfCert> cert;
+  Error err;
   if (EVP_PKEY_id(key.get()) == EVP_PKEY_RSA) {
-    return std::make_unique<TestRsaCert>(std::move(key), std::move(certs));
+    std::unique_ptr<TestRsaCert> cert;
+    FIZZ_THROW_ON_ERROR(
+        TestRsaCert::create(cert, err, std::move(key), std::move(certs)), err);
+    return cert;
   } else if (EVP_PKEY_id(key.get()) == EVP_PKEY_EC) {
-    return std::make_unique<TestP256Cert>(std::move(key), std::move(certs));
+    std::unique_ptr<TestP256Cert> cert;
+    FIZZ_THROW_ON_ERROR(
+        TestP256Cert::create(cert, err, std::move(key), std::move(certs)), err);
+    return cert;
   } else {
     throw std::runtime_error("unknown cert type");
   }

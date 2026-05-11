@@ -42,9 +42,13 @@ class FizzTestServer : public folly::AsyncServerSocket::AcceptCallback {
         "fizz-test-selfsign", false, nullptr, KeyType::P256);
     std::vector<folly::ssl::X509UniquePtr> certChain;
     certChain.push_back(std::move(certData.cert));
-    auto fizzCert =
-        std::make_unique<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-            std::move(certData.key), std::move(certChain));
+    std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+        fizzCert;
+    Error err;
+    FIZZ_THROW_ON_ERROR(
+        openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+            fizzCert, err, std::move(certData.key), std::move(certChain)),
+        err);
     auto certManager = std::make_unique<DefaultCertManager>();
     certManager->addCertAndSetDefault(std::move(fizzCert));
     ctx_ = std::make_shared<FizzServerContext>();

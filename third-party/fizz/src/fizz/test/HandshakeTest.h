@@ -78,19 +78,25 @@ class AsyncSelfCertWrapper : public AsyncSelfCert {
     return cert_->getCompressedCert(algo);
   }
 
-  Buf sign(
+  Status sign(
+      Buf& ret,
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned) const override {
-    return cert_->sign(scheme, context, toBeSigned);
+    return cert_->sign(ret, err, scheme, context, toBeSigned);
   }
 
   folly::SemiFuture<folly::Optional<Buf>> signFuture(
       SignatureScheme scheme,
       CertificateVerifyContext context,
       std::unique_ptr<folly::IOBuf> toBeSigned) const override {
-    return folly::makeSemiFuture<folly::Optional<Buf>>(
-        cert_->sign(scheme, context, toBeSigned->coalesce()));
+    Buf sig;
+    Error signErr;
+    FIZZ_THROW_ON_ERROR(
+        cert_->sign(sig, signErr, scheme, context, toBeSigned->coalesce()),
+        signErr);
+    return folly::makeSemiFuture<folly::Optional<Buf>>(std::move(sig));
   }
 
   folly::ssl::X509UniquePtr getX509() const override {
@@ -137,26 +143,64 @@ class HandshakeTest : public Test {
     auto certManager = std::make_shared<server::DefaultCertManager>();
     std::vector<std::shared_ptr<CertificateCompressor>> compressors = {
         std::make_shared<ZlibCertificateCompressor>(9)};
+    Error certErr;
+
     std::vector<ssl::X509UniquePtr> rsaCerts;
     rsaCerts.emplace_back(getCert(kRSACertificate));
-    certManager->addCertAndSetDefault(
-        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
-            getPrivateKey(kRSAKey), std::move(rsaCerts), compressors));
+    std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>
+        rsaCert;
+    ASSERT_EQ(
+        openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>::create(
+            rsaCert,
+            certErr,
+            getPrivateKey(kRSAKey),
+            std::move(rsaCerts),
+            compressors),
+        Status::Success);
+    certManager->addCertAndSetDefault(std::move(rsaCert));
+
     std::vector<ssl::X509UniquePtr> p256Certs;
     std::vector<ssl::X509UniquePtr> p384Certs;
     std::vector<ssl::X509UniquePtr> p521Certs;
     p256Certs.emplace_back(getCert(kP256Certificate));
     p384Certs.emplace_back(getCert(kP384Certificate));
     p521Certs.emplace_back(getCert(kP521Certificate));
-    certManager->addCert(
-        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-            getPrivateKey(kP256Key), std::move(p256Certs), compressors));
-    certManager->addCert(
-        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>>(
-            getPrivateKey(kP384Key), std::move(p384Certs), compressors));
-    certManager->addCert(
-        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P521>>(
-            getPrivateKey(kP521Key), std::move(p521Certs), compressors));
+
+    std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+        p256Cert;
+    ASSERT_EQ(
+        openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+            p256Cert,
+            certErr,
+            getPrivateKey(kP256Key),
+            std::move(p256Certs),
+            compressors),
+        Status::Success);
+    certManager->addCert(std::move(p256Cert));
+
+    std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>>
+        p384Cert;
+    ASSERT_EQ(
+        openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>::create(
+            p384Cert,
+            certErr,
+            getPrivateKey(kP384Key),
+            std::move(p384Certs),
+            compressors),
+        Status::Success);
+    certManager->addCert(std::move(p384Cert));
+
+    std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P521>>
+        p521Cert;
+    ASSERT_EQ(
+        openssl::OpenSSLSelfCertImpl<openssl::KeyType::P521>::create(
+            p521Cert,
+            certErr,
+            getPrivateKey(kP521Key),
+            std::move(p521Certs),
+            compressors),
+        Status::Success);
+    certManager->addCert(std::move(p521Cert));
     serverContext_->setCertManager(certManager);
     serverContext_->setEarlyDataSettings(
         true,
@@ -173,9 +217,18 @@ class HandshakeTest : public Test {
     serverContext_->setClientCertVerifier(verifier);
     std::vector<folly::ssl::X509UniquePtr> certVec;
     certVec.emplace_back(std::move(clientCert));
+    std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>
+        clientSelfCertUniq;
+    Error clientCertErr;
+    ASSERT_EQ(
+        openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>::create(
+            clientSelfCertUniq,
+            clientCertErr,
+            std::move(clientKey),
+            std::move(certVec)),
+        Status::Success);
     auto clientSelfCert =
-        std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
-            std::move(clientKey), std::move(certVec));
+        std::shared_ptr<SelfCert>(std::move(clientSelfCertUniq));
     auto certMgr = std::make_shared<fizz::client::CertManager>();
     certMgr->addCert(std::move(clientSelfCert));
     clientContext_->setClientCertManager(std::move(certMgr));

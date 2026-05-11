@@ -138,11 +138,13 @@ CompressedCertificate SelfDelegatedCredentialImpl<T>::getCompressedCert(
 }
 
 template <openssl::KeyType T>
-Buf SelfDelegatedCredentialImpl<T>::sign(
+Status SelfDelegatedCredentialImpl<T>::sign(
+    Buf& ret,
+    Error& err,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
-  return selfCertImpl_->sign(scheme, context, std::move(toBeSigned));
+  return selfCertImpl_->sign(ret, err, scheme, context, std::move(toBeSigned));
 }
 
 template <openssl::KeyType T>

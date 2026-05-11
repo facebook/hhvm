@@ -1162,9 +1162,16 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         "fizz-self-signed", false, nullptr, KeyType::P256);
     std::vector<folly::ssl::X509UniquePtr> certChain;
     certChain.push_back(std::move(certData.cert));
-    auto cert =
-        std::make_unique<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-            std::move(certData.key), std::move(certChain), compressors);
+    std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>> cert;
+    Error certErr;
+    FIZZ_THROW_ON_ERROR(
+        openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+            cert,
+            certErr,
+            std::move(certData.key),
+            std::move(certChain),
+            compressors),
+        certErr);
     certManager->addCertAndSetDefault(std::move(cert));
   }
 

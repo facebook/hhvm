@@ -29,7 +29,9 @@ class OpenSSLSelfCertImpl : public SelfCert,
    * Private key is the private key associated with the leaf cert.
    * certs is a list of certs in the chain with the leaf first.
    */
-  OpenSSLSelfCertImpl(
+  static Status create(
+      std::unique_ptr<OpenSSLSelfCertImpl>& ret,
+      Error& err,
       folly::ssl::EvpPkeyUniquePtr pkey,
       std::vector<folly::ssl::X509UniquePtr> certs,
       const std::vector<std::shared_ptr<fizz::CertificateCompressor>>&
@@ -51,7 +53,9 @@ class OpenSSLSelfCertImpl : public SelfCert,
   [[nodiscard]] CompressedCertificate getCompressedCert(
       CertificateCompressionAlgorithm algo) const override;
 
-  [[nodiscard]] Buf sign(
+  Status sign(
+      Buf& ret,
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned) const override;
@@ -64,8 +68,11 @@ class OpenSSLSelfCertImpl : public SelfCert,
   [[nodiscard]] folly::ssl::EvpPkeyUniquePtr getEVPPkey() const override;
 
  protected:
-  // Allows derived classes to handle init
-  explicit OpenSSLSelfCertImpl(std::vector<folly::ssl::X509UniquePtr> certs);
+  OpenSSLSelfCertImpl(
+      std::vector<folly::ssl::X509UniquePtr> certs,
+      folly::ssl::EvpPkeyUniquePtr pkey,
+      std::map<CertificateCompressionAlgorithm, CompressedCertificate>
+          compressedCerts = {});
   OpenSSLSignature<T> signature_;
   std::vector<folly::ssl::X509UniquePtr> certs_;
   std::map<CertificateCompressionAlgorithm, CompressedCertificate>

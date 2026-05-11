@@ -40,13 +40,23 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerify) {
   openssl::OpenSSLSignature<TypeParam::Type> verificationSignature;
   verificationSignature.setKey(std::move(pubKey));
 
-  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
-      getKey<TypeParam>(), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> selfCert;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
+          selfCert, err, getKey<TypeParam>(), std::move(certs)),
+      Status::Success);
 
   folly::StringPiece toBeSigned{"ToBeSigned"};
-  auto sig = selfCert.sign(
-      TypeParam::Scheme, CertificateVerifyContext::Server, toBeSigned);
-  Error err;
+  Buf sig;
+  EXPECT_EQ(
+      selfCert->sign(
+          sig,
+          err,
+          TypeParam::Scheme,
+          CertificateVerifyContext::Server,
+          toBeSigned),
+      Status::Success);
   EXPECT_EQ(
       openssl::CertUtils::verify(
           err,
@@ -65,14 +75,24 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerifyBitFlip) {
   openssl::OpenSSLSignature<TypeParam::Type> verificationSignature;
   verificationSignature.setKey(std::move(pubKey));
 
-  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
-      getKey<TypeParam>(), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> selfCert;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
+          selfCert, err, getKey<TypeParam>(), std::move(certs)),
+      Status::Success);
 
   folly::StringPiece toBeSigned{"ToBeSigned"};
-  auto sig = selfCert.sign(
-      TypeParam::Scheme, CertificateVerifyContext::Server, toBeSigned);
+  Buf sig;
+  EXPECT_EQ(
+      selfCert->sign(
+          sig,
+          err,
+          TypeParam::Scheme,
+          CertificateVerifyContext::Server,
+          toBeSigned),
+      Status::Success);
   sig->writableData()[1] ^= 0x20;
-  Error err;
   EXPECT_THROW(
       FIZZ_THROW_ON_ERROR(
           openssl::CertUtils::verify(
@@ -93,14 +113,24 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerifyWrongSize) {
   openssl::OpenSSLSignature<TypeParam::Type> verificationSignature;
   verificationSignature.setKey(std::move(pubKey));
 
-  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
-      getKey<TypeParam>(), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> selfCert;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
+          selfCert, err, getKey<TypeParam>(), std::move(certs)),
+      Status::Success);
 
   folly::StringPiece toBeSigned{"ToBeSigned"};
-  auto sig = selfCert.sign(
-      TypeParam::Scheme, CertificateVerifyContext::Server, toBeSigned);
+  Buf sig;
+  EXPECT_EQ(
+      selfCert->sign(
+          sig,
+          err,
+          TypeParam::Scheme,
+          CertificateVerifyContext::Server,
+          toBeSigned),
+      Status::Success);
   sig->prependChain(folly::IOBuf::copyBuffer("x"));
-  Error err;
   EXPECT_THROW(
       FIZZ_THROW_ON_ERROR(
           openssl::CertUtils::verify(
@@ -121,13 +151,23 @@ TYPED_TEST(CertUtilsTestTyped, TestSignVerifyWrongScheme) {
   openssl::OpenSSLSignature<TypeParam::Type> verificationSignature;
   verificationSignature.setKey(std::move(pubKey));
 
-  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
-      getKey<TypeParam>(), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> selfCert;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
+          selfCert, err, getKey<TypeParam>(), std::move(certs)),
+      Status::Success);
 
   folly::StringPiece toBeSigned{"ToBeSigned"};
-  auto sig = selfCert.sign(
-      TypeParam::Scheme, CertificateVerifyContext::Server, toBeSigned);
-  Error err;
+  Buf sig;
+  EXPECT_EQ(
+      selfCert->sign(
+          sig,
+          err,
+          TypeParam::Scheme,
+          CertificateVerifyContext::Server,
+          toBeSigned),
+      Status::Success);
   EXPECT_THROW(
       FIZZ_THROW_ON_ERROR(
           openssl::CertUtils::verify(

@@ -89,7 +89,9 @@ class SelfCert : public SelfCertBase {
   virtual CompressedCertificate getCompressedCert(
       CertificateCompressionAlgorithm algo) const = 0;
 
-  virtual Buf sign(
+  virtual Status sign(
+      Buf& ret,
+      Error& err,
       SignatureScheme scheme,
       CertificateVerifyContext context,
       folly::ByteRange toBeSigned) const = 0;

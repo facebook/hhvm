@@ -58,9 +58,13 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherSingleThread) {
   useMockRandom();
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
-          getPrivateKey(kRSAKey), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>> certUniq;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>::create(
+          certUniq, err, getPrivateKey(kRSAKey), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
 
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       3, certificate, CertificateVerifyContext::Server);
@@ -94,9 +98,12 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherMultiThread) {
   size_t numMsgThreshold = 3;
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
-          getPrivateKey(kRSAKey), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>> certUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>::create(
+          certUniq, err, getPrivateKey(kRSAKey), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
 
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       numMsgThreshold, certificate, CertificateVerifyContext::Server);
@@ -130,9 +137,13 @@ TEST(BatchSignatureTest, TestSynchronizedBatcherWithSelfCertP256) {
   size_t numMsgThreshold = 3;
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-          getPrivateKey(kP256Key), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      certUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          certUniq, err, getPrivateKey(kP256Key), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       numMsgThreshold, certificate, CertificateVerifyContext::Server);
 
@@ -182,9 +193,12 @@ TEST(BatchSignatureTest, TestThreadLocalBatcher) {
 
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
-          getPrivateKey(kRSAKey), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>> certUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>::create(
+          certUniq, err, getPrivateKey(kRSAKey), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
   auto batcher = std::make_shared<ThreadLocalBatcher<Sha256>>(
       2, certificate, CertificateVerifyContext::Server);
 
@@ -221,9 +235,13 @@ TEST(BatchSignatureTest, TestThreadLocalBatcherWithSelfCertP256) {
   FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-          getPrivateKey(kP256Key), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      certUniq;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          certUniq, err, getPrivateKey(kP256Key), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
   auto batcher = std::make_shared<ThreadLocalBatcher<Sha256>>(
       3, certificate, CertificateVerifyContext::Server);
 

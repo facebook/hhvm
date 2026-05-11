@@ -178,8 +178,12 @@ Status DelegatedCredentialUtils::generateCredential(
       err,
       cred,
       folly::ssl::OpenSSLCertUtils::derEncode(*cert->getX509())));
-  cred.signature =
-      cert->sign(cred.credential_scheme, verifyContext, toSign->coalesce());
+  FIZZ_RETURN_ON_ERROR(cert->sign(
+      cred.signature,
+      err,
+      cred.credential_scheme,
+      verifyContext,
+      toSign->coalesce()));
 
   ret = std::move(cred);
   return Status::Success;

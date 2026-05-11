@@ -67,9 +67,11 @@ TEST(SecondaryAuthManagerTest, Authenticator) {
   auto key = fizz::test::getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  std::unique_ptr<fizz::SelfCert> certPtr =
-      std::make_unique<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-          std::move(key), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>> certPtr;
+  fizz::Error err;
+  EXPECT_EQ(openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+                certPtr, err, std::move(key), std::move(certs)),
+            fizz::Status::Success);
   EXPECT_NE(certPtr, nullptr);
   SecondaryAuthManager authManager(std::move(certPtr));
   // Genearte an authenticator request.
@@ -79,7 +81,6 @@ TEST(SecondaryAuthManagerTest, Authenticator) {
       SignatureScheme::ecdsa_secp256r1_sha256);
   std::vector<fizz::Extension> extensions;
   fizz::Extension ext;
-  fizz::Error err;
   EXPECT_EQ(encodeExtension(ext, err, sigAlgs), fizz::Status::Success);
   extensions.push_back(std::move(ext));
   auto authRequestPair = authManager.createAuthRequest(

@@ -53,10 +53,11 @@ class SelfDelegatedCredentialTest : public Test {
  public:
   void SetUp() override {
     Error err;
-    FIZZ_THROW_ON_ERROR(CryptoUtils::init(err), err);
-    parentCert_ =
-        std::make_unique<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-            getKey(), getCertVec());
+    EXPECT_EQ(CryptoUtils::init(err), Status::Success);
+    EXPECT_EQ(
+        openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+            parentCert_, err, getKey(), getCertVec()),
+        Status::Success);
   }
 
   folly::ssl::EvpPkeyUniquePtr generateEd25519PrivKey() {
@@ -187,17 +188,21 @@ class SelfDelegatedCredentialTest : public Test {
   void updateSignature(DelegatedCredential& cred) {
     Buf toSign;
     Error err;
-    FIZZ_THROW_ON_ERROR(
+    EXPECT_EQ(
         DelegatedCredentialUtils::prepareSignatureBuffer(
             toSign,
             err,
             cred,
             folly::ssl::OpenSSLCertUtils::derEncode(*parentCert_->getX509())),
-        err);
-    cred.signature = parentCert_->sign(
-        cred.credential_scheme,
-        CertificateVerifyContext::ServerDelegatedCredential,
-        toSign->coalesce());
+        Status::Success);
+    EXPECT_EQ(
+        parentCert_->sign(
+            cred.signature,
+            err,
+            cred.credential_scheme,
+            CertificateVerifyContext::ServerDelegatedCredential,
+            toSign->coalesce()),
+        Status::Success);
   }
 
   DelegatedCredential makeCredential(const folly::ssl::EvpPkeyUniquePtr& pkey) {
@@ -205,11 +210,12 @@ class SelfDelegatedCredentialTest : public Test {
     cred.valid_time = 0x1234; // This isn't checked by the self credential code
     openssl::KeyType keyType;
     Error err;
-    FIZZ_THROW_ON_ERROR(
-        openssl::CertUtils::getKeyType(keyType, err, pkey), err);
+    EXPECT_EQ(
+        openssl::CertUtils::getKeyType(keyType, err, pkey), Status::Success);
     std::vector<SignatureScheme> sigSchemes;
-    FIZZ_THROW_ON_ERROR(
-        openssl::CertUtils::getSigSchemes(sigSchemes, err, keyType), err);
+    EXPECT_EQ(
+        openssl::CertUtils::getSigSchemes(sigSchemes, err, keyType),
+        Status::Success);
     cred.expected_verify_scheme = sigSchemes[0];
     if (pkey) {
       cred.public_key = getPubkeyDer(pkey);
@@ -337,20 +343,30 @@ TEST_F(SelfDelegatedCredentialTest, TestSignatureValidity) {
       Status::Success);
   Buf toSign = IOBuf::copyBuffer("signme");
 
-  auto certSig = parentCert_->sign(
-      SignatureScheme::ecdsa_secp256r1_sha256,
-      CertificateVerifyContext::Server,
-      toSign->coalesce());
-  auto dcSig = credCert->sign(
-      SignatureScheme::ecdsa_secp256r1_sha256,
-      CertificateVerifyContext::Server,
-      toSign->coalesce());
+  Buf certSig;
+  EXPECT_EQ(
+      parentCert_->sign(
+          certSig,
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256,
+          CertificateVerifyContext::Server,
+          toSign->coalesce()),
+      Status::Success);
+  Buf dcSig;
+  EXPECT_EQ(
+      credCert->sign(
+          dcSig,
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256,
+          CertificateVerifyContext::Server,
+          toSign->coalesce()),
+      Status::Success);
 
   std::unique_ptr<PeerCert> parentPeerCert;
-  FIZZ_THROW_ON_ERROR(
+  EXPECT_EQ(
       openssl::CertUtils::makePeerCert(
           parentPeerCert, err, parentCert_->getX509()),
-      err);
+      Status::Success);
   EXPECT_THROW(
       FIZZ_THROW_ON_ERROR(
           parentPeerCert->verify(

@@ -22,31 +22,40 @@ extern folly::Optional<std::string> getIdentityFromX509(X509* x);
 
 template <KeyType T>
 OpenSSLSelfCertImpl<T>::OpenSSLSelfCertImpl(
-    std::vector<folly::ssl::X509UniquePtr> certs)
-    : certs_(std::move(certs)) {}
+    std::vector<folly::ssl::X509UniquePtr> certs,
+    folly::ssl::EvpPkeyUniquePtr pkey,
+    std::map<CertificateCompressionAlgorithm, CompressedCertificate>
+        compressedCerts)
+    : certs_(std::move(certs)), compressedCerts_(std::move(compressedCerts)) {
+  signature_.setKey(std::move(pkey));
+}
 
 template <KeyType T>
-OpenSSLSelfCertImpl<T>::OpenSSLSelfCertImpl(
+/* static */ Status OpenSSLSelfCertImpl<T>::create(
+    std::unique_ptr<OpenSSLSelfCertImpl>& ret,
+    Error& err,
     folly::ssl::EvpPkeyUniquePtr pkey,
     std::vector<folly::ssl::X509UniquePtr> certs,
     const std::vector<std::shared_ptr<fizz::CertificateCompressor>>&
         compressors) {
   if (certs.empty()) {
-    throw std::runtime_error("Must supply at least 1 cert");
+    return err.error("Must supply at least 1 cert");
   }
   if (X509_check_private_key(certs[0].get(), pkey.get()) != 1) {
-    throw std::runtime_error("Cert does not match private key");
+    return err.error("Cert does not match private key");
   }
   // TODO: more strict validation of chaining requirements.
-  signature_.setKey(std::move(pkey));
-  certs_ = std::move(certs);
+  std::map<CertificateCompressionAlgorithm, CompressedCertificate>
+      compressedCerts;
   for (const auto& compressor : compressors) {
     CertificateMsg certMsg;
-    Error err;
-    FIZZ_THROW_ON_ERROR(getCertMessage(certMsg, err, nullptr), err);
-    compressedCerts_[compressor->getAlgorithm()] =
-        compressor->compress(certMsg);
+    FIZZ_RETURN_ON_ERROR(
+        CertUtils::getCertMessage(certMsg, err, certs, nullptr));
+    compressedCerts[compressor->getAlgorithm()] = compressor->compress(certMsg);
   }
+  ret = std::unique_ptr<OpenSSLSelfCertImpl>(new OpenSSLSelfCertImpl(
+      std::move(certs), std::move(pkey), std::move(compressedCerts)));
+  return Status::Success;
 }
 
 template <KeyType T>
@@ -80,72 +89,87 @@ std::vector<SignatureScheme> OpenSSLSelfCertImpl<T>::getSigSchemes() const {
 }
 
 template <>
-inline Buf OpenSSLSelfCertImpl<KeyType::P256>::sign(
+inline Status OpenSSLSelfCertImpl<KeyType::P256>::sign(
+    Buf& ret,
+    Error& err,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp256r1_sha256) {
-    return signature_.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
+    ret = signature_.sign<SignatureScheme::ecdsa_secp256r1_sha256>(
         signData->coalesce());
+    return Status::Success;
   }
 
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 template <>
-inline Buf OpenSSLSelfCertImpl<KeyType::P384>::sign(
+inline Status OpenSSLSelfCertImpl<KeyType::P384>::sign(
+    Buf& ret,
+    Error& err,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp384r1_sha384) {
-    return signature_.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
+    ret = signature_.sign<SignatureScheme::ecdsa_secp384r1_sha384>(
         signData->coalesce());
+    return Status::Success;
   }
 
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 template <>
-inline Buf OpenSSLSelfCertImpl<KeyType::P521>::sign(
+inline Status OpenSSLSelfCertImpl<KeyType::P521>::sign(
+    Buf& ret,
+    Error& err,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ecdsa_secp521r1_sha512) {
-    return signature_.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
+    ret = signature_.sign<SignatureScheme::ecdsa_secp521r1_sha512>(
         signData->coalesce());
+    return Status::Success;
   }
 
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 template <>
-inline Buf OpenSSLSelfCertImpl<KeyType::ED25519>::sign(
+inline Status OpenSSLSelfCertImpl<KeyType::ED25519>::sign(
+    Buf& ret,
+    Error& err,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::ed25519) {
-    return signature_.sign<SignatureScheme::ed25519>(signData->coalesce());
+    ret = signature_.sign<SignatureScheme::ed25519>(signData->coalesce());
+    return Status::Success;
   }
 
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 template <>
-inline Buf OpenSSLSelfCertImpl<KeyType::RSA>::sign(
+inline Status OpenSSLSelfCertImpl<KeyType::RSA>::sign(
+    Buf& ret,
+    Error& err,
     SignatureScheme scheme,
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned) const {
   auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   if (scheme == SignatureScheme::rsa_pss_sha256) {
-    return signature_.sign<SignatureScheme::rsa_pss_sha256>(
-        signData->coalesce());
+    ret =
+        signature_.sign<SignatureScheme::rsa_pss_sha256>(signData->coalesce());
+    return Status::Success;
   }
 
-  throw std::runtime_error("Unsupported signature scheme");
+  return err.error("Unsupported signature scheme");
 }
 
 template <KeyType T>

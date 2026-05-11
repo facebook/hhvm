@@ -276,26 +276,46 @@ Status CertUtils::makeSelfCert(
   FIZZ_RETURN_ON_ERROR(getKeyType(keyType, err, pubKey));
 
   switch (keyType) {
-    case KeyType::RSA:
-      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::RSA>>(
-          std::move(key), std::move(certs), compressors);
+    case KeyType::RSA: {
+      std::unique_ptr<OpenSSLSelfCertImpl<KeyType::RSA>> cert;
+      FIZZ_RETURN_ON_ERROR(
+          OpenSSLSelfCertImpl<KeyType::RSA>::create(
+              cert, err, std::move(key), std::move(certs), compressors));
+      ret = std::move(cert);
       return Status::Success;
-    case KeyType::P256:
-      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::P256>>(
-          std::move(key), std::move(certs), compressors);
+    }
+    case KeyType::P256: {
+      std::unique_ptr<OpenSSLSelfCertImpl<KeyType::P256>> cert;
+      FIZZ_RETURN_ON_ERROR(
+          OpenSSLSelfCertImpl<KeyType::P256>::create(
+              cert, err, std::move(key), std::move(certs), compressors));
+      ret = std::move(cert);
       return Status::Success;
-    case KeyType::P384:
-      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::P384>>(
-          std::move(key), std::move(certs), compressors);
+    }
+    case KeyType::P384: {
+      std::unique_ptr<OpenSSLSelfCertImpl<KeyType::P384>> cert;
+      FIZZ_RETURN_ON_ERROR(
+          OpenSSLSelfCertImpl<KeyType::P384>::create(
+              cert, err, std::move(key), std::move(certs), compressors));
+      ret = std::move(cert);
       return Status::Success;
-    case KeyType::P521:
-      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::P521>>(
-          std::move(key), std::move(certs), compressors);
+    }
+    case KeyType::P521: {
+      std::unique_ptr<OpenSSLSelfCertImpl<KeyType::P521>> cert;
+      FIZZ_RETURN_ON_ERROR(
+          OpenSSLSelfCertImpl<KeyType::P521>::create(
+              cert, err, std::move(key), std::move(certs), compressors));
+      ret = std::move(cert);
       return Status::Success;
-    case KeyType::ED25519:
-      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::ED25519>>(
-          std::move(key), std::move(certs), compressors);
+    }
+    case KeyType::ED25519: {
+      std::unique_ptr<OpenSSLSelfCertImpl<KeyType::ED25519>> cert;
+      FIZZ_RETURN_ON_ERROR(
+          OpenSSLSelfCertImpl<KeyType::ED25519>::create(
+              cert, err, std::move(key), std::move(certs), compressors));
+      ret = std::move(cert);
       return Status::Success;
+    }
   }
 
   return err.error("unknown self cert type");

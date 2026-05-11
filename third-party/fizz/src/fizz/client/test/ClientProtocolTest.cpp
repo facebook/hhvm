@@ -5466,7 +5466,7 @@ void ClientProtocolTest::doFinishedFlow(ClientAuthType authType) {
               []() { return folly::IOBuf::copyBuffer("csentcontext"); }));
       EXPECT_CALL(
           *mockClientCert_,
-          sign(
+          _sign(
               SignatureScheme::ecdsa_secp256r1_sha256,
               CertificateVerifyContext::Client,
               RangeMatches("csentcontext")))

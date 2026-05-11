@@ -55,10 +55,15 @@ TEST(CertTest, GetIdentity) {
   auto key = getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> certificate(
-      std::move(key), std::move(certs));
-  EXPECT_EQ(certificate.getIdentity(), "Fizz");
-  EXPECT_EQ(certificate.getAltIdentities().size(), 0);
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      certificate;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          certificate, err, std::move(key), std::move(certs)),
+      Status::Success);
+  EXPECT_EQ(certificate->getIdentity(), "Fizz");
+  EXPECT_EQ(certificate->getAltIdentities().size(), 0);
 }
 
 TEST(CertTest, GetAltIdentity) {
@@ -66,10 +71,15 @@ TEST(CertTest, GetAltIdentity) {
   auto key = getPrivateKey(kRSAKey);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA> certificate(
-      std::move(key), std::move(certs));
-  EXPECT_EQ(certificate.getIdentity(), "Fizz");
-  auto alts = certificate.getAltIdentities();
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>
+      certificate;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>::create(
+          certificate, err, std::move(key), std::move(certs)),
+      Status::Success);
+  EXPECT_EQ(certificate->getIdentity(), "Fizz");
+  auto alts = certificate->getAltIdentities();
   EXPECT_EQ(alts.size(), 3);
   EXPECT_EQ(alts[0], "*.fizz.com");
   EXPECT_EQ(alts[1], "fizz.com");
@@ -81,11 +91,15 @@ TEST(CertTest, GetCertMessage) {
   auto key = getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> certificate(
-      std::move(key), std::move(certs));
-  CertificateMsg msg;
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      certificate;
   Error err;
-  EXPECT_EQ(certificate.getCertMessage(msg, err, nullptr), Status::Success);
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          certificate, err, std::move(key), std::move(certs)),
+      Status::Success);
+  CertificateMsg msg;
+  EXPECT_EQ(certificate->getCertMessage(msg, err, nullptr), Status::Success);
   ASSERT_EQ(msg.certificate_list.size(), 1);
   auto& firstCertEntry = msg.certificate_list[0];
   auto firstCertData = firstCertEntry.cert_data->coalesce();
@@ -171,27 +185,40 @@ TEST(CertTest, GetIdentityLogic) {
 TYPED_TEST(CertTestTyped, MatchingCert) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  openssl::OpenSSLSelfCertImpl<TypeParam::Type> certificate(
-      getKey<TypeParam>(), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> certificate;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
+          certificate, err, getKey<TypeParam>(), std::move(certs)),
+      Status::Success);
 }
 
 TYPED_TEST(CertTestTyped, MismatchedCert) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  EXPECT_THROW(
-      openssl::OpenSSLSelfCertImpl<TypeParam::Type> certificate(
-          getKey<typename TypeParam::Invalid>(), std::move(certs)),
-      std::runtime_error);
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> certificate;
+  Error err;
+  EXPECT_NE(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
+          certificate,
+          err,
+          getKey<typename TypeParam::Invalid>(),
+          std::move(certs)),
+      Status::Success);
 }
 
 TYPED_TEST(CertTestTyped, SigSchemes) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
-  openssl::OpenSSLSelfCertImpl<TypeParam::Type> certificate(
-      getKey<TypeParam>(), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> certificate;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
+          certificate, err, getKey<TypeParam>(), std::move(certs)),
+      Status::Success);
 
   std::vector<SignatureScheme> expected{TypeParam::Scheme};
-  EXPECT_EQ(certificate.getSigSchemes(), expected);
+  EXPECT_EQ(certificate->getSigSchemes(), expected);
 }
 
 TYPED_TEST(CertTestTyped, TestVerifyDecodedCert) {
@@ -202,10 +229,13 @@ TYPED_TEST(CertTestTyped, TestVerifyDecodedCert) {
   EXPECT_EQ(
       openssl::CertUtils::getCertMessage(msg, certMsgErr, certs, nullptr),
       Status::Success);
-  openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
-      getKey<TypeParam>(), std::move(certs));
-
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> selfCert;
   Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
+          selfCert, err, getKey<TypeParam>(), std::move(certs)),
+      Status::Success);
+
   std::unique_ptr<PeerCert> peerCert;
   EXPECT_EQ(
       openssl::CertUtils::makePeerCert(
@@ -213,8 +243,11 @@ TYPED_TEST(CertTestTyped, TestVerifyDecodedCert) {
       Status::Success);
 
   StringPiece tbs{"ToBeSigned"};
-  auto sig =
-      selfCert.sign(TypeParam::Scheme, CertificateVerifyContext::Server, tbs);
+  Buf sig;
+  EXPECT_EQ(
+      selfCert->sign(
+          sig, err, TypeParam::Scheme, CertificateVerifyContext::Server, tbs),
+      Status::Success);
   EXPECT_EQ(
       peerCert->verify(
           err,
@@ -229,9 +262,13 @@ TYPED_TEST(CertTestTyped, TestGetX509Chain) {
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(getCert<TypeParam>());
   auto cloned = cloneCerts(certs);
-  openssl::OpenSSLSelfCertImpl<TypeParam::Type> certificate(
-      getKey<TypeParam>(), std::move(certs));
-  auto chain = certificate.getX509Chain();
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<TypeParam::Type>> certificate;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<TypeParam::Type>::create(
+          certificate, err, getKey<TypeParam>(), std::move(certs)),
+      Status::Success);
+  auto chain = certificate->getX509Chain();
   EXPECT_EQ(chain.size(), cloned.size());
   for (size_t i = 0; i < chain.size(); i++) {
     EXPECT_EQ(X509_cmp(cloned[i].get(), chain[i].get()), 0);

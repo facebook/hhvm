@@ -64,7 +64,7 @@ TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockCert) {
   EXPECT_CALL(*mockBaseCert, getX509()).Times(1);
   auto x509Cert = batchCert.getX509();
   // sign
-  EXPECT_CALL(*mockBaseCert, sign(_, _, _))
+  EXPECT_CALL(*mockBaseCert, _sign(_, _, _))
       .Times(3)
       .WillRepeatedly(Invoke(
           [](SignatureScheme, CertificateVerifyContext, folly::ByteRange) {
@@ -72,10 +72,16 @@ TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockCert) {
           }));
   // sign and signFuture with non-batch scheme
   // expect call of base certificate's sign
-  auto sig1 = batchCert.sign(
-      SignatureScheme::ecdsa_secp256r1_sha256,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("hello")));
+  Buf sig1;
+  Error err;
+  EXPECT_EQ(
+      batchCert.sign(
+          sig1,
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("hello"))),
+      Status::Success);
   EXPECT_EQ(sig1->moveToFbString(), folly::fbstring("mockSignature"));
   // expect call of base certificate's sign
   auto sig2 = batchCert.signFuture(
@@ -86,10 +92,15 @@ TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockCert) {
       sig2.value().value()->moveToFbString(), folly::fbstring("mockSignature"));
   // sign with batch scheme
   // expect call of base certificate's sign but with batch scheme
-  batchCert.sign(
-      SignatureScheme::ecdsa_secp256r1_sha256_batch,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("hello")));
+  Buf sig3;
+  EXPECT_EQ(
+      batchCert.sign(
+          sig3,
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256_batch,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("hello"))),
+      Status::Success);
 }
 
 TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockAsyncCert) {
@@ -108,10 +119,16 @@ TEST(BatchSignatureAsyncSelfCertTest, TestDecoratorLogicWithMockAsyncCert) {
         return folly::IOBuf::copyBuffer("mockSignature");
       }));
   // sign will not invoke signer's signFuture
-  auto sig1 = batchCert.sign(
-      SignatureScheme::ecdsa_secp256r1_sha256,
-      CertificateVerifyContext::Server,
-      folly::range(folly::StringPiece("hello")));
+  Buf sig1;
+  Error err;
+  EXPECT_EQ(
+      batchCert.sign(
+          sig1,
+          err,
+          SignatureScheme::ecdsa_secp256r1_sha256,
+          CertificateVerifyContext::Server,
+          folly::range(folly::StringPiece("hello"))),
+      Status::Success);
   // signFuture will invoke signer's signFuture
   auto sig2 = batchCert.signFuture(
       SignatureScheme::ecdsa_secp256r1_sha256,
@@ -123,9 +140,14 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyP256) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP256Certificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-          getPrivateKey(kP256Key), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      certUniq;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          certUniq, err, getPrivateKey(kP256Key), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
   BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
@@ -137,7 +159,6 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyP256) {
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
   openssl::OpenSSLPeerCertImpl<openssl::KeyType::P256> peerCert(
       getCert(kP256Certificate));
-  Error err;
   EXPECT_EQ(
       peerCert.verify(
           err,
@@ -166,9 +187,13 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyRSA) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kRSACertificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>>(
-          getPrivateKey(kRSAKey), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>> certUniq;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::RSA>::create(
+          certUniq, err, getPrivateKey(kRSAKey), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
   BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);
@@ -180,7 +205,6 @@ TEST(BatchSignatureAsyncSelfCertTest, TestSignAndVerifyRSA) {
       folly::IOBuf::copyBuffer(folly::StringPiece("Message1")));
   openssl::OpenSSLPeerCertImpl<openssl::KeyType::RSA> peerCert(
       getCert(kRSACertificate));
-  Error err;
   EXPECT_EQ(
       peerCert.verify(
           err,
@@ -209,9 +233,14 @@ TEST(BatchSignatureAsyncSelfCertTest, TestUnsuportedHash) {
   // sign
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.emplace_back(getCert(kP384Certificate));
-  auto certificate =
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>>(
-          getPrivateKey(kP384Key), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>>
+      certUniq;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P384>::create(
+          certUniq, err, getPrivateKey(kP384Key), std::move(certs)),
+      Status::Success);
+  auto certificate = std::shared_ptr<SelfCert>(std::move(certUniq));
   auto batcher = std::make_shared<SynchronizedBatcher<Sha256>>(
       1, certificate, CertificateVerifyContext::Server);
   BatchSignatureAsyncSelfCert<Sha256> batchCert(batcher);

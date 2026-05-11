@@ -132,7 +132,7 @@ TEST_F(AuthenticatorTest, TestValidAuthenticator) {
       .WillOnce(Return(
           std::vector<SignatureScheme>(
               1, SignatureScheme::ecdsa_secp256r1_sha256)));
-  EXPECT_CALL(*mockCert, sign(_, CertificateVerifyContext::Authenticator, _))
+  EXPECT_CALL(*mockCert, _sign(_, CertificateVerifyContext::Authenticator, _))
       .WillOnce(
           InvokeWithoutArgs([]() { return IOBuf::copyBuffer("signature"); }));
 
@@ -229,21 +229,25 @@ TEST_F(ValidateAuthenticatorTest, TestValidateValidAuthenticator) {
   auto key = fizz::test::getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> certificate(
-      std::move(key), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      certificate;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          certificate, err, std::move(key), std::move(certs)),
+      Status::Success);
   auto authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
   auto handshakeContext =
       folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   auto finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
   Buf authenticator;
-  Error err;
   EXPECT_EQ(
       ExportedAuthenticator::makeAuthenticator(
           authenticator,
           err,
           hasher(),
           schemes_,
-          certificate,
+          *certificate,
           std::move(authenticatorRequest),
           std::move(handshakeContext),
           std::move(finishedMacKey),
@@ -305,22 +309,26 @@ TEST_F(ValidateAuthenticatorTest, TestValidateEmptyAuthenticator) {
   auto key = fizz::test::getPrivateKey(kP256Key);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(cert));
-  openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256> certificate(
-      std::move(key), std::move(certs));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      certificate;
+  Error err;
+  EXPECT_EQ(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          certificate, err, std::move(key), std::move(certs)),
+      Status::Success);
   schemes_.clear();
   auto authenticatorRequest = folly::IOBuf::copyBuffer(unhexlify(authrequest_));
   auto handshakeContext =
       folly::IOBuf::copyBuffer(unhexlify(handshakeContext_));
   auto finishedMacKey = folly::IOBuf::copyBuffer(unhexlify(finishedKey_));
   Buf authenticator;
-  Error err;
   EXPECT_EQ(
       ExportedAuthenticator::makeAuthenticator(
           authenticator,
           err,
           hasher(),
           schemes_,
-          certificate,
+          *certificate,
           std::move(authenticatorRequest),
           std::move(handshakeContext),
           std::move(finishedMacKey),

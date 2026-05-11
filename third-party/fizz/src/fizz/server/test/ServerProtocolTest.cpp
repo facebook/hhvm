@@ -832,7 +832,7 @@ TEST_F(ServerProtocolTest, TestClientHelloFullHandshakeFlow) {
           []() { return folly::IOBuf::copyBuffer("chlo_shlo_ee_cert"); }));
   EXPECT_CALL(
       *cert_,
-      sign(
+      _sign(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("chlo_shlo_ee_cert")))
@@ -1436,7 +1436,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
           []() { return folly::IOBuf::copyBuffer("chlo_shlo_ee_compcert"); }));
   EXPECT_CALL(
       *cert_,
-      sign(
+      _sign(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("chlo_shlo_ee_compcert")))
@@ -1789,7 +1789,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
           []() { return folly::IOBuf::copyBuffer("chlo_shlo_ee_cert"); }));
   EXPECT_CALL(
       *cert_,
-      sign(
+      _sign(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("chlo_shlo_ee_cert")))
@@ -2147,7 +2147,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
           []() { return folly::IOBuf::copyBuffer("chlo_shlo_ee_cert"); }));
   EXPECT_CALL(
       *cert_,
-      sign(
+      _sign(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("chlo_shlo_ee_cert")))
@@ -2441,7 +2441,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCertRequestFlow) {
           []() { return folly::IOBuf::copyBuffer("chlo_shlo_ee_cert"); }));
   EXPECT_CALL(
       *cert_,
-      sign(
+      _sign(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("chlo_shlo_ee_cert")))
@@ -3276,7 +3276,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloFullHandshakeFlow) {
           []() { return folly::IOBuf::copyBuffer("chlo_shlo_ee_cert"); }));
   EXPECT_CALL(
       *cert_,
-      sign(
+      _sign(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("chlo_shlo_ee_cert")))
@@ -3835,7 +3835,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
           []() { return folly::IOBuf::copyBuffer("chlo_shlo_ee_cert"); }));
   EXPECT_CALL(
       *cert_,
-      sign(
+      _sign(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("chlo_shlo_ee_cert")))
@@ -4150,7 +4150,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
           []() { return folly::IOBuf::copyBuffer("chlo_shlo_ee_cert"); }));
   EXPECT_CALL(
       *cert_,
-      sign(
+      _sign(
           SignatureScheme::ecdsa_secp256r1_sha256,
           CertificateVerifyContext::Server,
           RangeMatches("chlo_shlo_ee_cert")))

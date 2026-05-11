@@ -110,9 +110,13 @@ class Batcher {
       signatureFut =
           asyncSigner->signFuture(baseScheme_, context_, std::move(toBeSigned));
     } else {
-      signatureFut = folly::makeSemiFuture(
-          folly::Optional(
-              signer_->sign(baseScheme_, context_, toBeSigned->coalesce())));
+      Buf sig;
+      Error err;
+      FIZZ_THROW_ON_ERROR(
+          signer_->sign(
+              sig, err, baseScheme_, context_, toBeSigned->coalesce()),
+          err);
+      signatureFut = folly::makeSemiFuture(folly::Optional(std::move(sig)));
     }
     return std::move(signatureFut)
         .deferValue(

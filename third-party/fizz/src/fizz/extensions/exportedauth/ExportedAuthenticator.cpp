@@ -180,7 +180,9 @@ Status ExportedAuthenticator::makeAuthenticator(
   auto transcript = detail::computeTranscript(
       handshakeContext, authenticatorRequest, encodedCertMsg);
   auto transcriptHash = detail::computeTranscriptHash(makeHasher, transcript);
-  auto sig = cert.sign(*scheme, context, transcriptHash->coalesce());
+  Buf sig;
+  FIZZ_RETURN_ON_ERROR(
+      cert.sign(sig, err, *scheme, context, transcriptHash->coalesce()));
   CertificateVerify verify;
   verify.algorithm = *scheme;
   verify.signature = std::move(sig);

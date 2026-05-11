@@ -1985,10 +1985,15 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                       originalSelfCert, certCompressionAlgo, *handshakeContext);
 
                   auto toBeSigned = handshakeContext->getHandshakeContext();
-                  auto sig = originalSelfCert->sign(
-                      *sigScheme,
-                      CertificateVerifyContext::Server,
-                      toBeSigned->coalesce());
+                  Buf sig;
+                  FIZZ_THROW_ON_ERROR(
+                      originalSelfCert->sign(
+                          sig,
+                          err,
+                          *sigScheme,
+                          CertificateVerifyContext::Server,
+                          toBeSigned->coalesce()),
+                      err);
                   certAndSignature = folly::makeSemiFuture<
                       Optional<AsyncSelfCert::CertificateAndSignature>>(
                       AsyncSelfCert::CertificateAndSignature{

@@ -28,11 +28,15 @@ TEST_F(HandshakeTest, BasicHandshakeAsyncCert) {
   auto certManager = std::make_shared<server::DefaultCertManager>();
   std::vector<ssl::X509UniquePtr> p256Certs;
   p256Certs.emplace_back(getCert(kP256Certificate));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      p256Cert;
+  Error certErr;
+  FIZZ_THROW_ON_ERROR(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          p256Cert, certErr, getPrivateKey(kP256Key), std::move(p256Certs)),
+      certErr);
   certManager->addCertAndSetDefault(
-      std::make_shared<AsyncSelfCertWrapper>(
-          std::make_shared<
-              openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-              getPrivateKey(kP256Key), std::move(p256Certs))));
+      std::make_shared<AsyncSelfCertWrapper>(std::move(p256Cert)));
   serverContext_->setCertManager(std::move(certManager));
 
   expectSuccess();
@@ -451,9 +455,14 @@ TEST_F(HandshakeTest, CertRequestBadCert) {
   std::vector<folly::ssl::X509UniquePtr> certVec;
   certVec.emplace_back(std::move(badCert.cert));
   auto certMgr = std::make_shared<fizz::client::CertManager>();
-  certMgr->addCert(
-      std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
-          std::move(badCert.key), std::move(certVec)));
+  std::unique_ptr<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>
+      badSelfCert;
+  Error certErr;
+  FIZZ_THROW_ON_ERROR(
+      openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>::create(
+          badSelfCert, certErr, std::move(badCert.key), std::move(certVec)),
+      certErr);
+  certMgr->addCert(std::move(badSelfCert));
   clientContext_->setClientCertManager(std::move(certMgr));
   expectServerError("alert: unknown_ca", "client certificate failure");
   doHandshake();

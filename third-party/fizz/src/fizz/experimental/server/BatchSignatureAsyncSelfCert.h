@@ -64,13 +64,15 @@ class BatchSignatureAsyncSelfCert : public AsyncSelfCert {
     return signer_->getX509();
   }
 
-  std::unique_ptr<folly::IOBuf> sign(
+  Status sign(
+      Buf& ret,
+      Error& err,
       fizz::SignatureScheme scheme,
       fizz::CertificateVerifyContext context,
       folly::ByteRange toBeSigned) const override {
     // delegate all sign() to signer_ because
     // batch scheme is only supported with signFuture()
-    return signer_->sign(scheme, context, toBeSigned);
+    return signer_->sign(ret, err, scheme, context, toBeSigned);
   }
 
   folly::SemiFuture<folly::Optional<Buf>> signFuture(
@@ -84,7 +86,11 @@ class BatchSignatureAsyncSelfCert : public AsyncSelfCert {
       if (asyncSigner) {
         return asyncSigner->signFuture(scheme, context, std::move(message));
       } else {
-        return signer_->sign(scheme, context, message->coalesce());
+        Buf sig;
+        Error err;
+        FIZZ_THROW_ON_ERROR(
+            signer_->sign(sig, err, scheme, context, message->coalesce()), err);
+        return sig;
       }
     }
     // otherwise, generate batch signature with batcher

@@ -2552,8 +2552,13 @@ EventHandler<ClientTypes, StateEnum::ExpectingFinished, Event::Finished>::
 
       auto sigScheme = *state.clientAuthSigScheme();
       auto toSign = state.handshakeContext()->getHandshakeContext();
-      auto signature = selectedCert->sign(
-          sigScheme, CertificateVerifyContext::Client, toSign->coalesce());
+      Buf signature;
+      TRY(selectedCert->sign(
+          signature,
+          ctx.err,
+          sigScheme,
+          CertificateVerifyContext::Client,
+          toSign->coalesce()));
 
       CertificateVerify verify;
       verify.algorithm = sigScheme;

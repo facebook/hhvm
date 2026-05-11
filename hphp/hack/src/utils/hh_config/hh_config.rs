@@ -66,6 +66,7 @@ pub struct HhConfig {
     pub distc_parallel_fold_decls: bool,
     pub distc_weak_edge_decl_discovery: bool,
     pub distc_min_worker_memory_gib: i64,
+    pub distc_min_cpu_units: i64,
 }
 
 impl Default for HhConfig {
@@ -91,6 +92,7 @@ impl Default for HhConfig {
             distc_parallel_fold_decls: false,
             distc_weak_edge_decl_discovery: false,
             distc_min_worker_memory_gib: 0,
+            distc_min_cpu_units: 0,
         }
     }
 }
@@ -702,6 +704,9 @@ impl HhConfig {
                 "distc_min_worker_memory_gib" => {
                     c.distc_min_worker_memory_gib = parse_json(&value)?;
                 }
+                "distc_min_cpu_units" => {
+                    c.distc_min_cpu_units = parse_json(&value)?;
+                }
                 _ => {}
             }
         }
@@ -716,6 +721,7 @@ impl HhConfig {
             "distc_parallel_fold_decls": self.distc_parallel_fold_decls,
             "distc_weak_edge_decl_discovery": self.distc_weak_edge_decl_discovery,
             "distc_min_worker_memory_gib": self.distc_min_worker_memory_gib,
+            "distc_min_cpu_units": self.distc_min_cpu_units,
         });
         experiments.to_string()
     }

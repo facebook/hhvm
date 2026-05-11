@@ -116,3 +116,4 @@ proxygen_add_library(proxygen_hq_samples
 )
 
 add_subdirectory(devious)
+add_subdirectory(test)

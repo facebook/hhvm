@@ -240,8 +240,12 @@ FizzClientContextPtr createFizzClientContext(
   certMgr->addCert(std::move(cert));
   ctx->setClientCertManager(std::move(certMgr));
   ctx->setSupportedAlpns(supportedAlpns);
-  ctx->setDefaultShares(
-      {fizz::NamedGroup::x25519, fizz::NamedGroup::secp256r1});
+  ctx->setDefaultShares({
+#if FIZZ_HAVE_OQS && OQS_ENABLE_KEM_ml_kem_768
+      fizz::NamedGroup::X25519MLKEM768,
+#endif
+      fizz::NamedGroup::x25519,
+      fizz::NamedGroup::secp256r1});
   ctx->setSendEarlyData(earlyData);
   auto mgr = std::make_shared<fizz::CertDecompressionManager>();
   mgr->setDecompressors(

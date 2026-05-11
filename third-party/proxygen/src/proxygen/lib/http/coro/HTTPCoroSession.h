@@ -41,6 +41,7 @@
 #include <wangle/acceptor/TransportInfo.h>
 
 namespace proxygen {
+class H3EarlyDataHandler;
 class HTTPSessionStats;
 class WebTransport;
 class WebTransportHandler;
@@ -997,6 +998,8 @@ class HTTPQuicCoroSession final
   size_t sendPriority(quic::StreamId id, HTTPPriority pri);
   size_t sendPushPriority(uint64_t pushId, HTTPPriority pri);
 
+  void setEarlyDataHandler(std::unique_ptr<H3EarlyDataHandler> handler);
+
   using HTTPCoroSession::onError;
   folly::EventBase* getEventBase() const override {
     return HTTPCoroSession::getEventBase();
@@ -1039,6 +1042,7 @@ class HTTPQuicCoroSession final
                             size_t toConsume) override;
 
   std::shared_ptr<quic::QuicSocket> quicSocket_;
+  std::unique_ptr<H3EarlyDataHandler> earlyDataHandler_;
   hq::HQMultiCodec* multiCodec_{nullptr};
   hq::QPACKEncoderCodec qpackEncoderCodec_;
   hq::QPACKDecoderCodec qpackDecoderCodec_;

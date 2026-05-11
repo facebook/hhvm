@@ -26,6 +26,7 @@ proxygen_add_library(proxygen_http_coro_client_http_connector
     HTTPCoroConnector.cpp
   DEPS
     proxygen_http_codec_codec_factory
+    proxygen_http_codec_h3_early_data_handler
     proxygen_http_coro_transport_coro_ssl_transport
     proxygen_http_coro_transport_http_connect_transport
     proxygen_http_coro_util_Transport

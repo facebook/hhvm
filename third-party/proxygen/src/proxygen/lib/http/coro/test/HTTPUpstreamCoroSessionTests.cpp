@@ -17,6 +17,7 @@
 
 #include "proxygen/lib/http/coro/HTTPFixedSource.h"
 #include "proxygen/lib/http/coro/util/test/TestHelpers.h"
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 
 using namespace proxygen;
@@ -34,7 +35,14 @@ class HTTPUpstreamSessionTest : public HTTPCoroSessionTest {
 
   void SetUp() override {
     HTTPCoroSessionTest::setUp();
+    if (auto *quicSession = dynamic_cast<HTTPQuicCoroSession *>(session_)) {
+      auto handler = std::make_unique<H3EarlyDataHandler>();
+      earlyDataHandlerPtr_ = handler.get();
+      quicSession->setEarlyDataHandler(std::move(handler));
+    }
   }
+
+  H3EarlyDataHandler *earlyDataHandlerPtr_{nullptr};
 
   // TearDown defined in parent
 
@@ -1848,6 +1856,29 @@ CO_TEST_P_X(HQUpstreamSessionTest, LargeRequest) {
   while (!sourceCallback.done) {
     co_await folly::coro::co_reschedule_on_current_executor;
   }
+}
+
+CO_TEST_P_X(HTTPUpstreamSessionTest, EarlyDataHandlerReceivesSettings) {
+  if (!earlyDataHandlerPtr_) {
+    co_return;
+  }
+  // Allow the event loop to process the queued SETTINGS
+  co_await rescheduleN(3);
+
+  // The handler should have settings from the peer's SETTINGS frame
+  EXPECT_TRUE(earlyDataHandlerPtr_->hasSettings());
+  auto blob = earlyDataHandlerPtr_->get();
+  EXPECT_NE(blob, nullptr);
+
+  // Verify the handler captured the peer's HEADER_TABLE_SIZE
+  auto headerTableSetting = earlyDataHandlerPtr_->getSettings().getSetting(
+      SettingsId::HEADER_TABLE_SIZE);
+  EXPECT_TRUE(headerTableSetting);
+  auto expectedTableSize = GetParam().useDynamicTable ? 4096 : 0;
+  EXPECT_EQ(headerTableSetting->value,
+            static_cast<uint32_t>(expectedTableSize));
+
+  transport_->addReadEvent(nullptr, true);
 }
 
 INSTANTIATE_TEST_SUITE_P(

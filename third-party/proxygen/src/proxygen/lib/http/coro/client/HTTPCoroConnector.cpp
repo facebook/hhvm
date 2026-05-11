@@ -8,6 +8,7 @@
 
 #include "proxygen/lib/http/coro/client/HTTPCoroConnector.h"
 #include <folly/logging/xlog.h>
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 
 #include "proxygen/lib/http/coro/transport/CoroSSLTransport.h"
 #include "proxygen/lib/http/coro/transport/HTTPConnectAsyncTransport.h"
@@ -351,11 +352,13 @@ class QuicConnectCB
                 std::chrono::milliseconds timeout,
                 std::shared_ptr<quic::QuicClientTransport> quicClient,
                 const HTTPCoroConnector::SessionParams& sessionParams,
-                folly::CancellationToken cancellationToken)
+                folly::CancellationToken cancellationToken,
+                std::unique_ptr<H3EarlyDataHandler> earlyDataHandler = nullptr)
       : ConnectCB(evb, timeout),
         quicClient_(std::move(quicClient)),
         sessionParams_(sessionParams),
-        cancellationToken_(std::move(cancellationToken)) {
+        cancellationToken_(std::move(cancellationToken)),
+        earlyDataHandler_(std::move(earlyDataHandler)) {
   }
 
   folly::exception_wrapper quicException;
@@ -406,6 +409,8 @@ class QuicConnectCB
     session = HTTPCoroSession::makeUpstreamCoroSession(
         std::move(quicClient_), std::move(codec), std::move(tinfo_));
     setupSession(session, sessionParams_);
+    static_cast<HTTPQuicCoroSession*>(session)->setEarlyDataHandler(
+        std::move(earlyDataHandler_));
     connectSuccess();
   }
   std::shared_ptr<quic::QuicClientTransport> quicClient_;
@@ -414,6 +419,7 @@ class QuicConnectCB
   wangle::TransportInfo tinfo_;
   bool replaySafe_{false};
   folly::CancellationToken cancellationToken_;
+  std::unique_ptr<H3EarlyDataHandler> earlyDataHandler_;
 };
 
 folly::coro::Task<HTTPCoroSession*> connectQuic(
@@ -461,13 +467,19 @@ folly::coro::Task<HTTPCoroSession*> connectQuic(
   // controller factory is one such stat.
   quicClient->setTransportSettings(connParams.transportSettings);
 
+  auto earlyDataHandler = connParams.transportSettings.attemptEarlyData
+                              ? std::make_unique<H3EarlyDataHandler>()
+                              : nullptr;
+  quicClient->setEarlyDataAppParamsHandler(earlyDataHandler.get());
+
   folly::CancellationToken cancellationToken =
       co_await folly::coro::co_current_cancellation_token;
   QuicConnectCB cb(eventBase,
                    timeoutMs,
                    quicClient,
                    sessionParams,
-                   std::move(cancellationToken));
+                   std::move(cancellationToken),
+                   std::move(earlyDataHandler));
   quicClient->start(&cb, nullptr);
   auto res = co_await cb.baton.wait();
   quicClient->setConnectionSetupCallback(nullptr);

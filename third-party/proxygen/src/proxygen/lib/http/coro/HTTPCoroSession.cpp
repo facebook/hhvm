@@ -9,6 +9,7 @@
 #include "proxygen/lib/http/coro/HTTPCoroSession.h"
 #include "proxygen/lib/http/coro/HTTPFixedSource.h"
 #include <proxygen/lib/http/HTTPPriorityFunctions.h>
+#include <proxygen/lib/http/codec/H3EarlyDataHandler.h>
 #include <proxygen/lib/http/codec/HQUtils.h>
 #include <proxygen/lib/http/codec/HTTPChecks.h>
 #include <proxygen/lib/http/codec/HTTPParallelCodec.h>
@@ -500,6 +501,12 @@ HTTPQuicCoroSession::HTTPQuicCoroSession(
   start();
 }
 HTTPQuicCoroSession::~HTTPQuicCoroSession() = default;
+
+void HTTPQuicCoroSession::setEarlyDataHandler(
+    std::unique_ptr<H3EarlyDataHandler> handler) {
+  XCHECK(isUpstream());
+  earlyDataHandler_ = std::move(handler);
+}
 
 HTTPCoroSession* HTTPCoroSession::makeUpstreamCoroSession(
     std::unique_ptr<folly::coro::TransportIf> coroTransport,
@@ -1573,6 +1580,9 @@ void HTTPUniplexTransportSession::onSettings(const SettingsList& settings) {
 
 void HTTPQuicCoroSession::onSettings(const SettingsList& settings) {
   deliverLifecycleEvent(&LifecycleObserver::onSettings, *this, settings);
+  if (earlyDataHandler_) {
+    earlyDataHandler_->setCurrentSettings(settings);
+  }
   uint32_t tableSize = hq::kDefaultIngressHeaderTableSize;
   uint32_t blocked = hq::kDefaultIngressQpackBlockedStream;
   for (auto& setting : settings) {

@@ -79,6 +79,7 @@ proxygen_add_library(proxygen_coro
     HTTPByteEventHelpers.cpp
     HTTPCoroSession.cpp
   DEPS
+    proxygen_http_codec_h3_early_data_handler
     proxygen_http_codec_http1x_codec
     proxygen_http_coro_util_CoroWtSession
     proxygen_http_priority_functions

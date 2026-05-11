@@ -13,11 +13,6 @@ $hackArrays = vec[
   keyset[],
 ];
 
-echo "---- using DateTime::diff\n";
-foreach ($hackArrays as $hackArray) {
-  var_dump((new DateTime())->diff($hackArray));
-}
-
 echo "---- using DOMXPath::__construct\n";
 foreach ($hackArrays as $hackArray) {
   try {

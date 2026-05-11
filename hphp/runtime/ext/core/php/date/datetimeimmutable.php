@@ -1,4 +1,7 @@
 <?hh
+<<file:__EnableUnstableFeatures('case_types')>>
+
+case type BoolOrDateTimeImmutable = bool | DateTimeImmutable;
 
 class DateTimeImmutable implements DateTimeInterface {
   public function __construct(
@@ -90,7 +93,7 @@ class DateTimeImmutable implements DateTimeInterface {
     string $format,
     string $time,
     ?DateTimeZone $timezone = null
-  ): mixed {
+  ): BoolOrDateTimeImmutable {
     $out = new DateTimeImmutable();
     $data = DateTime::createFromFormat($format, $time, $timezone);
     if ($data === false) {
@@ -100,7 +103,7 @@ class DateTimeImmutable implements DateTimeInterface {
     return $out;
   }
 
-  public static function createFromMutable(DateTime $datetime) {
+  public static function createFromMutable(DateTime $datetime): DateTimeImmutable {
     $out = new DateTimeImmutable();
     $out->data = clone $datetime;
     return $out;

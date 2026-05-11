@@ -1,4 +1,9 @@
 <?hh
+<<file:__EnableUnstableFeatures('case_types')>>
+
+case type BoolOrDateTime = bool | DateTime;
+
+case type BoolOrDateTimeZone = bool | DateTimeZone;
 
 /**
  * Representation of date and time.
@@ -17,7 +22,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function add(DateInterval $interval)[write_props]: mixed;
+  public function add(DateInterval $interval)[write_props]: DateTime;
 
   <<__Native>>
   public function __construct(
@@ -53,7 +58,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function diff(mixed $datetime2, mixed $absolute = false)[]: mixed;
+  public function diff(DateTimeInterface $datetime2, mixed $absolute = false)[]: DateInterval;
 
   /**
    * Returns date formatted according to given format.
@@ -132,8 +137,7 @@ class DateTime implements DateTimeInterface {
    * @param int $month - Year of the date.
    * @param int $day - Month of the date.
    *
-   * @return DateTime - Returns the modified DateTime object or FALSE on
-   *   failure.
+   * @return DateTime - Returns the modified DateTime object
    *
    */
   <<__Native>>
@@ -148,8 +152,7 @@ class DateTime implements DateTimeInterface {
    * @param int $week - Year of the date.
    * @param int $day - Week of the date.
    *
-   * @return DateTime - Returns the modified DateTime object or FALSE on
-   *   failure.
+   * @return DateTime - Returns the modified DateTime object
    *
    */
   <<__Native>>
@@ -163,8 +166,7 @@ class DateTime implements DateTimeInterface {
    * @param int $minute - Hour of the time.
    * @param int $second - Minute of the time.
    *
-   * @return DateTime - Returns the modified DateTime object or FALSE on
-   *   failure.
+   * @return DateTime - Returns the modified DateTime object
    *
    */
   <<__Native>>
@@ -186,12 +188,11 @@ class DateTime implements DateTimeInterface {
    * @param DateTimeZone $timezone - DateTime object returned by date_create().
    *   The function modifies this object.
    *
-   * @return DateTime - Returns the modified DateTime object or FALSE on
-   *   failure.
+   * @return DateTime - Returns the modified DateTime object
    *
    */
   <<__Native>>
-  public function setTimezone(DateTimeZone $timezone)[write_props]: mixed;
+  public function setTimezone(DateTimeZone $timezone)[write_props]: DateTime;
 
   /**
    * Subtract an interval from a datetime object
@@ -203,7 +204,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function sub(DateInterval $interval)[write_props]: mixed;
+  public function sub(DateInterval $interval)[write_props]: DateTime;
 
   <<__Native>>
   public function __sleep()[write_props]: varray<string>;
@@ -261,12 +262,11 @@ class DateTimeZone {
    * @param DateTimeInterface $datetime - DateTimeZone object returned by
    *   timezone_open()
    *
-   * @return int - Returns time zone offset in seconds on success or FALSE on
-   *   failure.
+   * @return int - Returns time zone offset in seconds
    *
    */
   <<__Native>>
-  public function getOffset(DateTimeInterface $datetime)[]: mixed;
+  public function getOffset(DateTimeInterface $datetime)[]: int;
 
   /**
    * @return array - Returns numerically indexed array containing associative
@@ -364,7 +364,7 @@ class DateInterval {
 <<__Native>>
 function checkdate(int $month, int $day, int $year): bool;
 
-function date_add(DateTime $datetime, DateInterval $interval): mixed {
+function date_add(DateTime $datetime, DateInterval $interval): DateTime {
   return $datetime->add($interval);
 }
 
@@ -465,7 +465,7 @@ function date_modify(DateTime $datetime, string $modify): void {
 <<__Native>>
 function date_parse(string $date): mixed;
 
-function date_sub(DateTime $datetime, DateInterval $interval): mixed {
+function date_sub(DateTime $datetime, DateInterval $interval): DateTime {
   return $datetime->sub($interval);
 }
 

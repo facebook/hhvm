@@ -168,18 +168,13 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
   return obj;
 }
 
-Variant HHVM_METHOD(DateTime, diff,
-                    const Variant& datetime2,
+Object HHVM_METHOD(DateTime, diff,
+                    const Object& datetime2,
                     const Variant& absolute) {
   auto const data = getDateTimeData(this_);
-  const Object obj_datetime2 = datetime2.toObject();
-  if (!obj_datetime2.instanceof(s_DateTimeInterface)) {
-    raise_argument_warning("DateTime::diff", 1, s_DateTimeInterface,
-                           obj_datetime2);
-    return false;
-  }
-  auto dt = DateTimeData::unwrap(obj_datetime2);
-  return DateIntervalData::wrap(data->m_dt->diff(dt, absolute.toBoolean()));
+  auto const& dt = DateTimeData::unwrap(datetime2);
+  auto dt2 = data->m_dt->diff(dt, absolute.toBoolean());
+  return DateIntervalData::wrap(dt2);
 }
 
 String HHVM_METHOD(DateTime, format,
@@ -268,37 +263,24 @@ Object HHVM_METHOD(DateTime, setTimestamp,
   return Object(this_);
 }
 
-Variant HHVM_METHOD(DateTime, setTimezone,
+Object HHVM_METHOD(DateTime, setTimezone,
                     const Object& timezone) {
   auto const data = getDateTimeData(this_);
-  if (!timezone.instanceof(s_DateTimeZone)) {
-    raise_argument_warning("DateTime::setTimezone", 1, s_DateTimeZone,
-                           timezone);
-    return false;
-  }
   data->m_dt->setTimezone(DateTimeZoneData::unwrap(timezone));
   return Object(this_);
 }
 
-Variant HHVM_METHOD(DateTime, add,
+Object HHVM_METHOD(DateTime, add,
                     const Object& interval) {
   auto const data = getDateTimeData(this_);
-  if (!interval.instanceof(s_DateInterval)) {
-    raise_argument_warning("DateTime::add", 1, s_DateInterval, interval);
-    return false;
-  }
   auto di = DateIntervalData::unwrap(interval);
   data->m_dt->add(di);
   return Object(this_);
 }
 
-Variant HHVM_METHOD(DateTime, sub,
+Object HHVM_METHOD(DateTime, sub,
                     const Object& interval) {
   auto const data = getDateTimeData(this_);
-  if (!interval.instanceof(s_DateInterval)) {
-    raise_argument_warning("DateTime::sub", 1, s_DateInterval, interval);
-    return false;
-  }
   auto di = DateIntervalData::unwrap(interval);
   data->m_dt->sub(di);
   return Object(this_);
@@ -442,14 +424,10 @@ String HHVM_METHOD(DateTimeZone, getName) {
   return data->getName();
 }
 
-Variant HHVM_METHOD(DateTimeZone, getOffset,
+int64_t HHVM_METHOD(DateTimeZone, getOffset,
                     const Object& datetime) {
   auto const data = getDateTimeZoneData(this_);
   bool error;
-  if (!datetime.instanceof(s_DateTime)) {
-    raise_argument_warning("DateTimeZone::getOffset", 1, s_DateTime, datetime);
-    return false;
-  }
   auto dt = DateTimeData::unwrap(datetime);
   int64_t ts = dt->toTimeStamp(error);
   return data->m_tz->offset(ts);

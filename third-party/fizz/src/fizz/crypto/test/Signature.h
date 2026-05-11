@@ -16,6 +16,6 @@ namespace test {
 
 void testCertVerify(
     SignatureTestData testCase,
-    std::unique_ptr<PeerCert> (*makePeerCert)(Buf));
+    Status (*makePeerCert)(std::unique_ptr<PeerCert>&, Error&, Buf));
 } // namespace test
 } // namespace fizz

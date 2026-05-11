@@ -133,7 +133,9 @@ Status MultiBackendFactory::makePeerCert(
   if (certEntry.cert_data->empty()) {
     return err.error("empty peer cert");
   }
-  ret = openssl::CertUtils::makePeerCert(std::move(certEntry.cert_data));
+  FIZZ_RETURN_ON_ERROR(
+      openssl::CertUtils::makePeerCert(
+          ret, err, std::move(certEntry.cert_data)));
   return Status::Success;
 }
 

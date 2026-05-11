@@ -23,20 +23,29 @@ std::unique_ptr<folly::IOBuf> makeCertBuf(std::string certDer) {
 
 void testCertVerify(
     SignatureTestData testCase,
-    std::unique_ptr<PeerCert> (*makePeerCert)(Buf)) {
+    Status (*makePeerCert)(std::unique_ptr<PeerCert>&, Error&, Buf)) {
   std::string certDer = folly::unhexlify(testCase.certDer);
   std::string msg = folly::unhexlify(testCase.msg);
   std::string sig = folly::unhexlify(testCase.sig);
 
   std::unique_ptr<folly::IOBuf> certBuf = makeCertBuf(certDer);
 
+  Error err;
   if (!testCase.validCert) {
-    EXPECT_THROW(makePeerCert(makeCertBuf(certDer)), std::runtime_error);
+    EXPECT_THROW(
+        {
+          std::unique_ptr<PeerCert> ret;
+          FIZZ_THROW_ON_ERROR(
+              makePeerCert(ret, err, makeCertBuf(certDer)), err);
+        },
+        std::runtime_error);
     return;
   }
 
   // make sure move works
-  auto tempPeerCert = makePeerCert(makeCertBuf(certDer));
+  std::unique_ptr<PeerCert> tempPeerCert;
+  EXPECT_EQ(
+      makePeerCert(tempPeerCert, err, makeCertBuf(certDer)), Status::Success);
 
   auto peerCert = std::move(tempPeerCert);
 
@@ -45,7 +54,6 @@ void testCertVerify(
   ASSERT_TRUE(retDer.has_value());
 
   ASSERT_EQ(memcmp(certDer.c_str(), retDer.value().c_str(), certDer.size()), 0);
-  Error err;
   if (!testCase.validSig) {
     EXPECT_THROW(
         FIZZ_THROW_ON_ERROR(

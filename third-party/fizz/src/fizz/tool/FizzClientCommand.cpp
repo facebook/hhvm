@@ -744,10 +744,15 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     }
 
     std::unique_ptr<SelfCert> cert;
+    fizz::Error err;
     if (!keyPass.empty()) {
-      cert = openssl::CertUtils::makeSelfCert(certData, keyData, keyPass);
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::makeSelfCert(
+              cert, err, certData, keyData, keyPass),
+          err);
     } else {
-      cert = openssl::CertUtils::makeSelfCert(certData, keyData);
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::makeSelfCert(cert, err, certData, keyData), err);
     }
     auto certMgr = std::make_shared<fizz::client::CertManager>();
     certMgr->addCert(std::move(cert));

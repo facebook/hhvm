@@ -116,16 +116,22 @@ int fizzGenerateDelegatedCredentialCommand(
   }
 
   try {
-    std::shared_ptr<SelfCert> cert;
+    std::unique_ptr<SelfCert> certUniq;
+    fizz::Error err;
     if (!certKeyPass.empty()) {
-      cert =
-          openssl::CertUtils::makeSelfCert(certData, certKeyData, certKeyPass);
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::makeSelfCert(
+              certUniq, err, certData, certKeyData, certKeyPass),
+          err);
     } else {
-      cert = openssl::CertUtils::makeSelfCert(certData, certKeyData);
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::makeSelfCert(
+              certUniq, err, certData, certKeyData),
+          err);
     }
+    std::shared_ptr<SelfCert> cert = std::move(certUniq);
 
     folly::ssl::EvpPkeyUniquePtr certPrivKey;
-    fizz::Error err;
     FIZZ_THROW_ON_ERROR(
         openssl::CertUtils::readPrivateKeyFromBuffer(
             certPrivKey,
@@ -148,7 +154,10 @@ int fizzGenerateDelegatedCredentialCommand(
     }
 
     if (!credVerifScheme) {
-      switch (openssl::CertUtils::getKeyType(credPrivKey)) {
+      openssl::KeyType credKeyType;
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::getKeyType(credKeyType, err, credPrivKey), err);
+      switch (credKeyType) {
         case openssl::KeyType::RSA:
           credVerifScheme =
               openssl::CertUtils::getSigSchemes<openssl::KeyType::RSA>()

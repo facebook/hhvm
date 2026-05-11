@@ -116,14 +116,27 @@ TEST(CertTest, PrepareSignData) {
 }
 
 TEST(CertTest, MakePeerCertEmpty) {
+  Error err;
   EXPECT_THROW(
-      openssl::CertUtils::makePeerCert(IOBuf::copyBuffer("")),
+      {
+        std::unique_ptr<PeerCert> ret;
+        FIZZ_THROW_ON_ERROR(
+            openssl::CertUtils::makePeerCert(ret, err, IOBuf::copyBuffer("")),
+            err);
+      },
       std::runtime_error);
 }
 
 TEST(CertTest, MakePeerCertJunk) {
+  Error err;
   EXPECT_THROW(
-      openssl::CertUtils::makePeerCert(IOBuf::copyBuffer("blah")),
+      {
+        std::unique_ptr<PeerCert> ret;
+        FIZZ_THROW_ON_ERROR(
+            openssl::CertUtils::makePeerCert(
+                ret, err, IOBuf::copyBuffer("blah")),
+            err);
+      },
       std::runtime_error);
 }
 
@@ -135,12 +148,23 @@ TEST(CertTest, PeerCertGetX509) {
 }
 
 TEST(CertTest, GetIdentityLogic) {
-  auto selfCert = openssl::CertUtils::makeSelfCert(
-      kCertWithNoCNButWithSANs.str(), kCertWithNoCNButWithSANsKey.str(), "");
+  Error err;
+  std::unique_ptr<SelfCert> selfCert;
+  EXPECT_EQ(
+      openssl::CertUtils::makeSelfCert(
+          selfCert,
+          err,
+          kCertWithNoCNButWithSANs.str(),
+          kCertWithNoCNButWithSANsKey.str(),
+          ""),
+      Status::Success);
   EXPECT_EQ("O = interop runner", selfCert->getIdentity());
 
-  auto peerCert = openssl::CertUtils::makePeerCert(
-      fizz::test::getCert(kCertWithNoCNButWithSANs));
+  std::unique_ptr<PeerCert> peerCert;
+  EXPECT_EQ(
+      openssl::CertUtils::makePeerCert(
+          peerCert, err, fizz::test::getCert(kCertWithNoCNButWithSANs)),
+      Status::Success);
   EXPECT_EQ("O = interop runner", peerCert->getIdentity());
 }
 
@@ -181,13 +205,16 @@ TYPED_TEST(CertTestTyped, TestVerifyDecodedCert) {
   openssl::OpenSSLSelfCertImpl<TypeParam::Type> selfCert(
       getKey<TypeParam>(), std::move(certs));
 
-  auto peerCert = openssl::CertUtils::makePeerCert(
-      std::move(msg.certificate_list.front().cert_data));
+  Error err;
+  std::unique_ptr<PeerCert> peerCert;
+  EXPECT_EQ(
+      openssl::CertUtils::makePeerCert(
+          peerCert, err, std::move(msg.certificate_list.front().cert_data)),
+      Status::Success);
 
   StringPiece tbs{"ToBeSigned"};
   auto sig =
       selfCert.sign(TypeParam::Scheme, CertificateVerifyContext::Server, tbs);
-  Error err;
   EXPECT_EQ(
       peerCert->verify(
           err,

@@ -241,11 +241,17 @@ int fizzServerBenchmarkCommand(const std::vector<std::string>& args) {
       return 1;
     }
     std::unique_ptr<SelfCert> cert;
+    fizz::Error err;
     if (!keyPass.empty()) {
-      cert = openssl::CertUtils::makeSelfCert(
-          certData, keyData, keyPass, compressors);
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::makeSelfCert(
+              cert, err, certData, keyData, keyPass, compressors),
+          err);
     } else {
-      cert = openssl::CertUtils::makeSelfCert(certData, keyData, compressors);
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::makeSelfCert(
+              cert, err, certData, keyData, compressors),
+          err);
     }
     std::shared_ptr<SelfCert> sharedCert = std::move(cert);
     if (enableBatch) {

@@ -21,7 +21,10 @@ template <openssl::KeyType T>
   if (certs.empty()) {
     return err.error("Must supply at least 1 cert");
   }
-  if (openssl::CertUtils::getKeyType(privateKey) != T) {
+  openssl::KeyType keyType;
+  FIZZ_RETURN_ON_ERROR(
+      openssl::CertUtils::getKeyType(keyType, err, privateKey));
+  if (keyType != T) {
     return err.error("Key and credential type don't match");
   }
   FIZZ_RETURN_ON_ERROR(
@@ -64,7 +67,9 @@ template <openssl::KeyType T>
           err,
           credential,
           folly::ssl::OpenSSLCertUtils::derEncode(*selfCert->getX509())));
-  auto parentCert = openssl::CertUtils::makePeerCert(selfCert->getX509());
+  std::unique_ptr<PeerCert> parentCert;
+  FIZZ_RETURN_ON_ERROR(
+      openssl::CertUtils::makePeerCert(parentCert, err, selfCert->getX509()));
   FIZZ_RETURN_ON_ERROR(parentCert->verify(
       err,
       credential.credential_scheme,

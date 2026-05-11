@@ -203,9 +203,11 @@ class SelfDelegatedCredentialTest : public Test {
   DelegatedCredential makeCredential(const folly::ssl::EvpPkeyUniquePtr& pkey) {
     DelegatedCredential cred;
     cred.valid_time = 0x1234; // This isn't checked by the self credential code
-    const auto keyType = openssl::CertUtils::getKeyType(pkey);
-    std::vector<SignatureScheme> sigSchemes;
+    openssl::KeyType keyType;
     Error err;
+    FIZZ_THROW_ON_ERROR(
+        openssl::CertUtils::getKeyType(keyType, err, pkey), err);
+    std::vector<SignatureScheme> sigSchemes;
     FIZZ_THROW_ON_ERROR(
         openssl::CertUtils::getSigSchemes(sigSchemes, err, keyType), err);
     cred.expected_verify_scheme = sigSchemes[0];
@@ -344,8 +346,11 @@ TEST_F(SelfDelegatedCredentialTest, TestSignatureValidity) {
       CertificateVerifyContext::Server,
       toSign->coalesce());
 
-  auto parentPeerCert =
-      openssl::CertUtils::makePeerCert(parentCert_->getX509());
+  std::unique_ptr<PeerCert> parentPeerCert;
+  FIZZ_THROW_ON_ERROR(
+      openssl::CertUtils::makePeerCert(
+          parentPeerCert, err, parentCert_->getX509()),
+      err);
   EXPECT_THROW(
       FIZZ_THROW_ON_ERROR(
           parentPeerCert->verify(

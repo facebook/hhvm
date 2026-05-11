@@ -28,7 +28,9 @@ template <openssl::KeyType T>
     folly::ssl::X509UniquePtr cert,
     folly::ssl::EvpPkeyUniquePtr pubKey,
     DelegatedCredential credential) {
-  if (openssl::CertUtils::getKeyType(pubKey) != T) {
+  openssl::KeyType keyType;
+  FIZZ_RETURN_ON_ERROR(openssl::CertUtils::getKeyType(keyType, err, pubKey));
+  if (keyType != T) {
     return err.error("Key and credential type don't match");
   }
   ret = std::unique_ptr<PeerDelegatedCredentialImpl<T>>(

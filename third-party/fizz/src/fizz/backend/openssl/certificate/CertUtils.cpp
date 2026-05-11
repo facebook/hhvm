@@ -70,52 +70,65 @@ Status CertUtils::getCertMessage(
   return Status::Success;
 }
 
-std::unique_ptr<PeerCert> CertUtils::makePeerCert(folly::ByteRange range) {
+Status CertUtils::makePeerCert(
+    std::unique_ptr<PeerCert>& ret,
+    Error& err,
+    folly::ByteRange range) {
   if (range.size() == 0) {
-    throw std::runtime_error("empty peer cert");
+    return err.error("empty peer cert");
   }
   const unsigned char* begin = range.data();
   folly::ssl::X509UniquePtr cert(d2i_X509(nullptr, &begin, range.size()));
   if (!cert) {
-    throw std::runtime_error("could not read cert");
+    return err.error("could not read cert");
   }
   if (begin != range.data() + range.size()) {
     FIZZ_VLOG(1) << "Did not read to end of certificate";
   }
-  return makePeerCert(std::move(cert));
+  return makePeerCert(ret, err, std::move(cert));
 }
-std::unique_ptr<PeerCert> CertUtils::makePeerCert(Buf certData) {
-  return makePeerCert(certData->coalesce());
+Status CertUtils::makePeerCert(
+    std::unique_ptr<PeerCert>& ret,
+    Error& err,
+    Buf certData) {
+  return makePeerCert(ret, err, certData->coalesce());
 }
 
-std::unique_ptr<PeerCert> CertUtils::makePeerCert(
+Status CertUtils::makePeerCert(
+    std::unique_ptr<PeerCert>& ret,
+    Error& err,
     folly::ssl::X509UniquePtr cert) {
   folly::ssl::EvpPkeyUniquePtr pubKey(X509_get_pubkey(cert.get()));
   if (!pubKey) {
-    throw std::runtime_error("couldn't get pubkey from peer cert");
+    return err.error("couldn't get pubkey from peer cert");
   }
   const auto pkeyID = EVP_PKEY_id(pubKey.get());
   if (pkeyID == EVP_PKEY_RSA) {
-    return std::make_unique<OpenSSLPeerCertImpl<KeyType::RSA>>(std::move(cert));
+    ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::RSA>>(std::move(cert));
+    return Status::Success;
   } else if (pkeyID == EVP_PKEY_EC) {
     switch (getCurveName(pubKey.get())) {
       case NID_X9_62_prime256v1:
-        return std::make_unique<OpenSSLPeerCertImpl<KeyType::P256>>(
+        ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::P256>>(
             std::move(cert));
+        return Status::Success;
       case NID_secp384r1:
-        return std::make_unique<OpenSSLPeerCertImpl<KeyType::P384>>(
+        ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::P384>>(
             std::move(cert));
+        return Status::Success;
       case NID_secp521r1:
-        return std::make_unique<OpenSSLPeerCertImpl<KeyType::P521>>(
+        ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::P521>>(
             std::move(cert));
+        return Status::Success;
       default:
         break;
     }
   } else if (pkeyID == EVP_PKEY_ED25519) {
-    return std::make_unique<OpenSSLPeerCertImpl<KeyType::ED25519>>(
+    ret = std::make_unique<OpenSSLPeerCertImpl<KeyType::ED25519>>(
         std::move(cert));
+    return Status::Success;
   }
-  throw std::runtime_error("unknown peer cert type");
+  return err.error("unknown peer cert type");
 }
 
 Status CertUtils::readPrivateKeyFromBuffer(
@@ -145,7 +158,9 @@ Status CertUtils::readPrivateKeyFromBuffer(
 
 namespace {
 
-std::unique_ptr<SelfCert> selfCertFromDataInternal(
+Status selfCertFromDataInternal(
+    std::unique_ptr<SelfCert>& ret,
+    Error& err,
     std::string certData,
     std::string keyData,
     char* password,
@@ -153,59 +168,72 @@ std::unique_ptr<SelfCert> selfCertFromDataInternal(
   auto certs = folly::ssl::OpenSSLCertUtils::readCertsFromBuffer(
       folly::StringPiece(certData));
   if (certs.empty()) {
-    throw std::runtime_error("no certificates read");
+    return err.error("no certificates read");
   }
 
   folly::ssl::EvpPkeyUniquePtr key;
-  Error err;
-  FIZZ_THROW_ON_ERROR(
+  FIZZ_RETURN_ON_ERROR(
       CertUtils::readPrivateKeyFromBuffer(
-          key, err, std::move(keyData), password),
-      err);
+          key, err, std::move(keyData), password));
 
-  return CertUtils::makeSelfCert(std::move(certs), std::move(key), compressors);
+  return CertUtils::makeSelfCert(
+      ret, err, std::move(certs), std::move(key), compressors);
 }
 
 } // namespace
 
-std::unique_ptr<SelfCert> CertUtils::makeSelfCert(
+Status CertUtils::makeSelfCert(
+    std::unique_ptr<SelfCert>& ret,
+    Error& err,
     std::string certData,
     std::string keyData,
     const std::vector<std::shared_ptr<CertificateCompressor>>& compressors) {
   return selfCertFromDataInternal(
-      std::move(certData), std::move(keyData), nullptr, compressors);
+      ret, err, std::move(certData), std::move(keyData), nullptr, compressors);
 }
 
-std::unique_ptr<SelfCert> CertUtils::makeSelfCert(
+Status CertUtils::makeSelfCert(
+    std::unique_ptr<SelfCert>& ret,
+    Error& err,
     std::string certData,
     std::string encryptedKeyData,
     std::string password,
     const std::vector<std::shared_ptr<CertificateCompressor>>& compressors) {
   return selfCertFromDataInternal(
+      ret,
+      err,
       std::move(certData),
       std::move(encryptedKeyData),
       &password[0],
       compressors);
 }
 
-KeyType CertUtils::getKeyType(const folly::ssl::EvpPkeyUniquePtr& key) {
+Status CertUtils::getKeyType(
+    KeyType& ret,
+    Error& err,
+    const folly::ssl::EvpPkeyUniquePtr& key) {
   const auto pkeyID = EVP_PKEY_id(key.get());
   if (pkeyID == EVP_PKEY_RSA) {
-    return KeyType::RSA;
+    ret = KeyType::RSA;
+    return Status::Success;
   } else if (pkeyID == EVP_PKEY_EC) {
     switch (getCurveName(key.get())) {
       case NID_X9_62_prime256v1:
-        return KeyType::P256;
+        ret = KeyType::P256;
+        return Status::Success;
       case NID_secp384r1:
-        return KeyType::P384;
+        ret = KeyType::P384;
+        return Status::Success;
       case NID_secp521r1:
-        return KeyType::P521;
+        ret = KeyType::P521;
+        return Status::Success;
     }
   } else if (pkeyID == EVP_PKEY_ED25519) {
-    return KeyType::ED25519;
+    ret = KeyType::ED25519;
+    return Status::Success;
   }
 
-  throw std::runtime_error("unknown key type");
+  return err.error("unknown key type");
 }
 
 Status CertUtils::getSigSchemes(
@@ -233,34 +261,117 @@ Status CertUtils::getSigSchemes(
   return err.error("unknown key type");
 }
 
-std::unique_ptr<SelfCert> CertUtils::makeSelfCert(
+Status CertUtils::makeSelfCert(
+    std::unique_ptr<SelfCert>& ret,
+    Error& err,
     std::vector<folly::ssl::X509UniquePtr> certs,
     folly::ssl::EvpPkeyUniquePtr key,
     const std::vector<std::shared_ptr<CertificateCompressor>>& compressors) {
   folly::ssl::EvpPkeyUniquePtr pubKey(X509_get_pubkey(certs.front().get()));
   if (!pubKey) {
-    throw std::runtime_error("Failed to read public key");
+    return err.error("Failed to read public key");
   }
 
-  switch (getKeyType(pubKey)) {
+  KeyType keyType;
+  FIZZ_RETURN_ON_ERROR(getKeyType(keyType, err, pubKey));
+
+  switch (keyType) {
     case KeyType::RSA:
-      return std::make_unique<OpenSSLSelfCertImpl<KeyType::RSA>>(
+      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::RSA>>(
           std::move(key), std::move(certs), compressors);
+      return Status::Success;
     case KeyType::P256:
-      return std::make_unique<OpenSSLSelfCertImpl<KeyType::P256>>(
+      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::P256>>(
           std::move(key), std::move(certs), compressors);
+      return Status::Success;
     case KeyType::P384:
-      return std::make_unique<OpenSSLSelfCertImpl<KeyType::P384>>(
+      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::P384>>(
           std::move(key), std::move(certs), compressors);
+      return Status::Success;
     case KeyType::P521:
-      return std::make_unique<OpenSSLSelfCertImpl<KeyType::P521>>(
+      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::P521>>(
           std::move(key), std::move(certs), compressors);
+      return Status::Success;
     case KeyType::ED25519:
-      return std::make_unique<OpenSSLSelfCertImpl<KeyType::ED25519>>(
+      ret = std::make_unique<OpenSSLSelfCertImpl<KeyType::ED25519>>(
           std::move(key), std::move(certs), compressors);
+      return Status::Success;
   }
 
-  throw std::runtime_error("unknown self cert type");
+  return err.error("unknown self cert type");
+}
+
+std::unique_ptr<PeerCert> CertUtils::makePeerCert(Buf certData) {
+  std::unique_ptr<PeerCert> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(makePeerCert(ret, err, std::move(certData)), err);
+  return ret;
+}
+
+std::unique_ptr<PeerCert> CertUtils::makePeerCert(folly::ByteRange certData) {
+  std::unique_ptr<PeerCert> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(makePeerCert(ret, err, certData), err);
+  return ret;
+}
+
+std::unique_ptr<PeerCert> CertUtils::makePeerCert(
+    folly::ssl::X509UniquePtr cert) {
+  std::unique_ptr<PeerCert> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(makePeerCert(ret, err, std::move(cert)), err);
+  return ret;
+}
+
+std::unique_ptr<SelfCert> CertUtils::makeSelfCert(
+    std::string certData,
+    std::string keyData,
+    const std::vector<std::shared_ptr<CertificateCompressor>>& compressors) {
+  std::unique_ptr<SelfCert> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      makeSelfCert(
+          ret, err, std::move(certData), std::move(keyData), compressors),
+      err);
+  return ret;
+}
+
+std::unique_ptr<SelfCert> CertUtils::makeSelfCert(
+    std::string certData,
+    std::string encryptedKeyData,
+    std::string password,
+    const std::vector<std::shared_ptr<CertificateCompressor>>& compressors) {
+  std::unique_ptr<SelfCert> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      makeSelfCert(
+          ret,
+          err,
+          std::move(certData),
+          std::move(encryptedKeyData),
+          std::move(password),
+          compressors),
+      err);
+  return ret;
+}
+
+std::unique_ptr<SelfCert> CertUtils::makeSelfCert(
+    std::vector<folly::ssl::X509UniquePtr> certs,
+    folly::ssl::EvpPkeyUniquePtr key,
+    const std::vector<std::shared_ptr<CertificateCompressor>>& compressors) {
+  std::unique_ptr<SelfCert> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      makeSelfCert(ret, err, std::move(certs), std::move(key), compressors),
+      err);
+  return ret;
+}
+
+KeyType CertUtils::getKeyType(const folly::ssl::EvpPkeyUniquePtr& key) {
+  KeyType ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(getKeyType(ret, err, key), err);
+  return ret;
 }
 
 CompressedCertificate CertUtils::cloneCompressedCert(
@@ -288,7 +399,10 @@ class Serializer : public CertificateSerialization {
 
   std::shared_ptr<const fizz::Cert> deserialize(
       folly::ByteRange range) const override {
-    return CertUtils::makePeerCert(range);
+    std::unique_ptr<PeerCert> ret;
+    Error err;
+    FIZZ_THROW_ON_ERROR(CertUtils::makePeerCert(ret, err, range), err);
+    return ret;
   }
 };
 } // namespace

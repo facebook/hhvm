@@ -110,8 +110,11 @@ Status DelegatedCredentialUtils::generateCredential(
     return err.error("Cert does not match private key");
   }
 
+  openssl::KeyType credKeyType;
+  FIZZ_RETURN_ON_ERROR(
+      openssl::CertUtils::getKeyType(credKeyType, err, credKey));
   std::vector<SignatureScheme> credKeySchemes;
-  switch (openssl::CertUtils::getKeyType(credKey)) {
+  switch (credKeyType) {
     case openssl::KeyType::RSA:
       credKeySchemes =
           openssl::CertUtils::getSigSchemes<openssl::KeyType::RSA>();

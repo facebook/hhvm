@@ -23,7 +23,11 @@ static std::shared_ptr<const fizz::Cert> getCert(
     folly::StringPiece encodedPem) {
   auto certs = folly::ssl::OpenSSLCertUtils::readCertsFromBuffer(encodedPem);
   FIZZ_CHECK_EQ(certs.size(), 1UL);
-  return openssl::CertUtils::makePeerCert(std::move(certs[0]));
+  std::unique_ptr<PeerCert> ret;
+  Error err;
+  FIZZ_THROW_ON_ERROR(
+      openssl::CertUtils::makePeerCert(ret, err, std::move(certs[0])), err);
+  return ret;
 }
 class PskSerializationTest : public Test {
  public:

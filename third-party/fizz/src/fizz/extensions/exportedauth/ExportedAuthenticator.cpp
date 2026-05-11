@@ -275,7 +275,9 @@ Status ExportedAuthenticator::validate(
   // empty list rather than UB. Guarded by .empty() check above, but .at()
   // ensures bounds safety survives future refactors.
   detail::writeBuf(certMsg->certificate_list.at(0).cert_data, appender);
-  auto peerCert = openssl::CertUtils::makePeerCert(std::move(leafCert));
+  std::unique_ptr<PeerCert> peerCert;
+  FIZZ_RETURN_ON_ERROR(
+      openssl::CertUtils::makePeerCert(peerCert, err, std::move(leafCert)));
   Buf encodedCertMsg;
   FIZZ_RETURN_ON_ERROR(
       encodeHandshake(encodedCertMsg, err, std::move(*certMsg)));

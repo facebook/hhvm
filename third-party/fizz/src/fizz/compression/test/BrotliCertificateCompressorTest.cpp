@@ -81,11 +81,14 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressDecompress) {
       createCert("fizz-selfsigned", false, nullptr, KeyType::P256);
   std::vector<folly::ssl::X509UniquePtr> certs;
   certs.push_back(std::move(certAndKey.cert));
-  auto cert = openssl::CertUtils::makeSelfCert(
-      std::move(certs), std::move(certAndKey.key));
+  std::unique_ptr<SelfCert> cert;
+  Error err;
+  EXPECT_EQ(
+      openssl::CertUtils::makeSelfCert(
+          cert, err, std::move(certs), std::move(certAndKey.key)),
+      Status::Success);
   CertificateMsg certMsg;
-  Error certErr;
-  EXPECT_EQ(cert->getCertMessage(certMsg, certErr, nullptr), Status::Success);
+  EXPECT_EQ(cert->getCertMessage(certMsg, err, nullptr), Status::Success);
 
   // Add extension
   CertificateAuthorities auth;
@@ -93,7 +96,6 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressDecompress) {
   dn.encoded_name = IOBuf::copyBuffer("DistinguishedName");
   auth.authorities.push_back(std::move(dn));
   Extension ext;
-  Error err;
   EXPECT_EQ(encodeExtension(ext, err, auth), Status::Success);
   certMsg.certificate_list[0].extensions.push_back(std::move(ext));
 
@@ -106,8 +108,11 @@ TEST_F(BrotliCertificateCompressorTest, TestCompressDecompress) {
   EXPECT_EQ(decompressedCertMsg.certificate_list.size(), 1);
   auto& certEntry = decompressedCertMsg.certificate_list.at(0);
   EXPECT_EQ(certEntry.extensions.size(), 1);
-  auto decompressedPeer =
-      openssl::CertUtils::makePeerCert(certEntry.cert_data->clone());
+  std::unique_ptr<PeerCert> decompressedPeer;
+  EXPECT_EQ(
+      openssl::CertUtils::makePeerCert(
+          decompressedPeer, err, certEntry.cert_data->clone()),
+      Status::Success);
   EXPECT_EQ(decompressedPeer->getIdentity(), cert->getIdentity());
 
   Buf encoded;

@@ -31,7 +31,9 @@ Status makeCredential(
         AlertDescription::illegal_parameter);
   }
 
-  switch (openssl::CertUtils::getKeyType(pubKey)) {
+  openssl::KeyType keyType;
+  FIZZ_RETURN_ON_ERROR(openssl::CertUtils::getKeyType(keyType, err, pubKey));
+  switch (keyType) {
     case openssl::KeyType::RSA: {
       std::unique_ptr<PeerDelegatedCredentialImpl<openssl::KeyType::RSA>>
           credRSA;
@@ -111,10 +113,14 @@ Status DelegatedCredentialFactory::makePeerCertStatic(
     CertificateEntry entry,
     bool leaf) {
   if (!leaf || entry.extensions.empty()) {
-    ret = openssl::CertUtils::makePeerCert(std::move(entry.cert_data));
+    FIZZ_RETURN_ON_ERROR(
+        openssl::CertUtils::makePeerCert(ret, err, std::move(entry.cert_data)));
     return Status::Success;
   }
-  auto parentCert = openssl::CertUtils::makePeerCert(entry.cert_data->clone());
+  std::unique_ptr<PeerCert> parentCert;
+  FIZZ_RETURN_ON_ERROR(
+      openssl::CertUtils::makePeerCert(
+          parentCert, err, entry.cert_data->clone()));
   auto parentX509 = parentCert->getX509();
   folly::Optional<DelegatedCredential> credential;
   FIZZ_RETURN_ON_ERROR(

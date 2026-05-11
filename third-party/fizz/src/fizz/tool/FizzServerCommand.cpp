@@ -965,8 +965,12 @@ int fizzServerCommand(const std::vector<std::string>& args) {
           FIZZ_LOG(ERROR) << "Failed to upref leaf cert";
           return 1;
         }
-        auto leafPeer = openssl::CertUtils::makePeerCert(
-            folly::ssl::X509UniquePtr(leafCert));
+        std::unique_ptr<PeerCert> leafPeer;
+        fizz::Error makePeerErr;
+        FIZZ_THROW_ON_ERROR(
+            openssl::CertUtils::makePeerCert(
+                leafPeer, makePeerErr, folly::ssl::X509UniquePtr(leafCert)),
+            makePeerErr);
         Buf toSign;
         Error signBufErr;
         FIZZ_THROW_ON_ERROR(
@@ -1004,7 +1008,11 @@ int fizzServerCommand(const std::vector<std::string>& args) {
           }
 
           std::unique_ptr<fizz::extensions::SelfDelegatedCredential> cert;
-          switch (openssl::CertUtils::getKeyType(credPrivKey)) {
+          openssl::KeyType credKeyType;
+          FIZZ_THROW_ON_ERROR(
+              openssl::CertUtils::getKeyType(credKeyType, err, credPrivKey),
+              err);
+          switch (credKeyType) {
             case openssl::KeyType::RSA: {
               std::unique_ptr<fizz::extensions::SelfDelegatedCredentialImpl<
                   openssl::KeyType::RSA>>
@@ -1122,8 +1130,16 @@ int fizzServerCommand(const std::vector<std::string>& args) {
         return 1;
       }
 
-      auto cert = openssl::CertUtils::makeSelfCert(
-          std::move(certs), std::move(pkey.second), compressors);
+      std::unique_ptr<SelfCert> cert;
+      fizz::Error makeSelfErr;
+      FIZZ_THROW_ON_ERROR(
+          openssl::CertUtils::makeSelfCert(
+              cert,
+              makeSelfErr,
+              std::move(certs),
+              std::move(pkey.second),
+              compressors),
+          makeSelfErr);
       if (first) {
         certManager->addCertAndSetDefault(std::move(cert));
       } else {

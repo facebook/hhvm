@@ -106,10 +106,8 @@ class TestServer:
 
 class StreamClientTest(unittest.TestCase):
     def test_return_stream(self) -> None:
-        loop = asyncio.get_event_loop()
-
         async def inner_test() -> None:
-            async with TestServer(ip="::1") as sa:
+            async with TestServer(ip="::1", handler=Handler()) as sa:
                 ip, port = sa.ip, sa.port
                 assert ip and port
                 async with get_client(
@@ -122,7 +120,7 @@ class StreamClientTest(unittest.TestCase):
                     res = [n async for n in stream]
                     self.assertEqual(res, list(range(10, 1024)))
 
-        loop.run_until_complete(inner_test())
+        asyncio.run(inner_test())
 
     def test_method_name_stream(self) -> None:
         loop = asyncio.get_event_loop()

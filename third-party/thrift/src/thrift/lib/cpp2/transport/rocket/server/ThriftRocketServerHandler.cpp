@@ -39,6 +39,7 @@
 #include <thrift/lib/cpp2/server/LoggingEventHelper.h>
 #include <thrift/lib/cpp2/server/MonitoringMethodNames.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorOnDrop.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorOnReceived.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -788,8 +789,16 @@ void ThriftRocketServerHandler::handleRequestCommon(
               apache::thrift::detail::TileInternalAPI(*interaction)
                   .getOverloadPolicy();
           overloadPolicy && !overloadPolicy->allowNewRequest()) {
-        handleInteractionLoadshedded(makeActiveRequest(
-            std::move(metadata), std::move(debugPayload), std::move(reqCtx)));
+        auto loadshedRequest = makeActiveRequest(
+            std::move(metadata), std::move(debugPayload), std::move(reqCtx));
+        if (auto* dropReqCtx = loadshedRequest->getRequestContext()) {
+          processServiceInterceptorsOnReceived(*serverConfigs_, *dropReqCtx);
+          processServiceInterceptorsOnDrop(
+              *serverConfigs_,
+              *dropReqCtx,
+              ServiceInterceptorBase::DropReason::OVERLOAD);
+        }
+        handleInteractionLoadshedded(std::move(loadshedRequest));
         return;
       }
     }
@@ -807,6 +816,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
   serverConfigs_->incActiveRequests();
   if (UNLIKELY(overloadResult.has_value())) {
     if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnReceived(*serverConfigs_, *dropReqCtx);
       processServiceInterceptorsOnDrop(
           *serverConfigs_,
           *dropReqCtx,
@@ -825,6 +835,13 @@ void ThriftRocketServerHandler::handleRequestCommon(
   }
 
   if (!serverConfigs_->shouldHandleRequestForMethod(name)) {
+    if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnReceived(*serverConfigs_, *dropReqCtx);
+      processServiceInterceptorsOnDrop(
+          *serverConfigs_,
+          *dropReqCtx,
+          ServiceInterceptorBase::DropReason::SERVER_NOT_READY);
+    }
     handleServerNotReady(std::move(request));
     return;
   }
@@ -833,6 +850,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
       serverConfigs_->preprocess({headers, name, connContext_, request.get()});
   if (UNLIKELY(!std::holds_alternative<std::monostate>(preprocessResult))) {
     if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnReceived(*serverConfigs_, *dropReqCtx);
       processServiceInterceptorsOnDrop(
           *serverConfigs_,
           *dropReqCtx,

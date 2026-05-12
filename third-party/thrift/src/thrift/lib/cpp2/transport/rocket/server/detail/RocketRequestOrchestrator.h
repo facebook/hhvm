@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/server/PreprocessParams.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorOnDrop.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorOnReceived.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/InteractionOverload.h>
@@ -343,10 +344,18 @@ auto RocketRequestOrchestrator::createRequestWithContext(
 
   if (shouldRejectForInteractionOverload(contextData.interactionIdOpt)) {
     serverConfigs_->incActiveRequests();
-    errorHandler_->handleInteractionLoadshedded(makeRequest(
+    auto loadshedRequest = makeRequest(
         RequestRpcMetadata(parsedData.metadata),
         std::move(debugPayload),
-        std::move(reqCtx)));
+        std::move(reqCtx));
+    if (auto* dropReqCtx = loadshedRequest->getRequestContext()) {
+      processServiceInterceptorsOnReceived(*serverConfigs_, *dropReqCtx);
+      processServiceInterceptorsOnDrop(
+          *serverConfigs_,
+          *dropReqCtx,
+          ServiceInterceptorBase::DropReason::OVERLOAD);
+    }
+    errorHandler_->handleInteractionLoadshedded(std::move(loadshedRequest));
     return std::nullopt;
   }
 
@@ -378,6 +387,7 @@ bool RocketRequestOrchestrator::validateRequestExecution(
 
   if (UNLIKELY(overloadResult.has_value())) {
     if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnReceived(*serverConfigs_, *dropReqCtx);
       processServiceInterceptorsOnDrop(
           *serverConfigs_,
           *dropReqCtx,
@@ -396,6 +406,13 @@ bool RocketRequestOrchestrator::validateRequestExecution(
   }
 
   if (!serverConfigs_->shouldHandleRequestForMethod(name)) {
+    if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnReceived(*serverConfigs_, *dropReqCtx);
+      processServiceInterceptorsOnDrop(
+          *serverConfigs_,
+          *dropReqCtx,
+          ServiceInterceptorBase::DropReason::SERVER_NOT_READY);
+    }
     errorHandler_->handleServerNotReady(std::move(request));
     return false;
   }
@@ -404,6 +421,7 @@ bool RocketRequestOrchestrator::validateRequestExecution(
       serverConfigs_->preprocess({headers, name, connContext_, request.get()});
   if (UNLIKELY(!std::holds_alternative<std::monostate>(preprocessResult))) {
     if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnReceived(*serverConfigs_, *dropReqCtx);
       processServiceInterceptorsOnDrop(
           *serverConfigs_,
           *dropReqCtx,

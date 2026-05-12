@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorOnDrop.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorOnReceived.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/peeking/PeekingManager.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -602,6 +603,8 @@ void Cpp2Worker::dispatchRequest(
     Cpp2RequestContext* cpp2ReqCtx,
     concurrency::ThreadManager* tm,
     ThriftServer* server) {
+  processServiceInterceptorsOnReceived(*server, *cpp2ReqCtx);
+
   auto eb = cpp2ReqCtx->getConnectionContext()
                 ->getWorkerContext()
                 ->getWorkerEventBase();
@@ -611,6 +614,8 @@ void Cpp2Worker::dispatchRequest(
         LIKELY(found != nullptr)) {
       if (server->resourcePoolEnabled() && !server->resourcePoolSet().empty()) {
         if (!found->metadata.isWildcard() && !found->metadata.rpcKind) {
+          processServiceInterceptorsOnDrop(
+              *cpp2ReqCtx, ServiceInterceptorBase::DropReason::UNKNOWN_METHOD);
           std::string_view methodName = cpp2ReqCtx->getMethodName();
           AsyncProcessorHelper::sendUnknownMethodError(
               std::move(request), methodName);
@@ -622,6 +627,8 @@ void Cpp2Worker::dispatchRequest(
             found->metadata.interactionName.has_value()) {
           // but interaction id is not specified
           if (!cpp2ReqCtx->getInteractionId()) {
+            processServiceInterceptorsOnDrop(
+                *cpp2ReqCtx, ServiceInterceptorBase::DropReason::UNKNOWN);
             AsyncProcessorHelper::sendInvalidInteractionIdError(
                 std::move(request),
                 cpp2ReqCtx->getMethodName(),
@@ -650,6 +657,8 @@ void Cpp2Worker::dispatchRequest(
         if (!found->metadata.isWildcard() &&
             !GeneratedAsyncProcessorBase::validateRpcKind(
                 serverRequest.request(), *found->metadata.rpcKind)) {
+          processServiceInterceptorsOnDrop(
+              *cpp2ReqCtx, ServiceInterceptorBase::DropReason::UNKNOWN_METHOD);
           return;
         }
 

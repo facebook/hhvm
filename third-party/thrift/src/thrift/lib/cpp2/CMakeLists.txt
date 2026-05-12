@@ -429,6 +429,7 @@ add_library(
   server/ServiceInterceptorBase.cpp
   server/ServiceInterceptorControl.cpp
   server/ServiceInterceptorOnDrop.cpp
+  server/ServiceInterceptorOnReceived.cpp
   server/ServiceInterceptorQualifiedName.cpp
   server/ThriftProcessor.cpp
   server/ThriftServer.cpp

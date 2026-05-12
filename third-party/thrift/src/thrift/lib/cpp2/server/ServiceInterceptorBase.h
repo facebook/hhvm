@@ -154,7 +154,31 @@ class ServiceInterceptorBase {
     QUEUE_FULL = 2,
     OVERLOAD = 3,
     UNKNOWN_METHOD = 4,
+    SERVER_NOT_READY = 5,
   };
+
+  struct ReceivedRequestInfo {
+    const Cpp2RequestContext* context = nullptr;
+    std::string_view methodName = "";
+  };
+
+  /**
+   * Called synchronously for every incoming request that has a valid
+   * request context, before any admission or rejection decisions.
+   * Each such request triggers this callback exactly once.
+   *
+   * A request that triggers onRequestReceived will subsequently receive
+   * exactly one of onRequest (if processed) or onRequestDropped (if
+   * rejected).
+   *
+   * Neither RequestState nor ConnectionState is available. RequestState does
+   * not exist because onRequest has not yet run. ConnectionState is
+   * intentionally not provided for consistency with onRequestDropped.
+   *
+   * Threading: This is called on the IO thread. Implementations must not
+   * block and must be thread-safe.
+   */
+  virtual void internal_onRequestReceived(ReceivedRequestInfo) {}
 
   struct DroppedRequestInfo {
     const Cpp2RequestContext* context = nullptr;

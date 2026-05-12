@@ -45,6 +45,8 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     co_return;
   }
 
+  virtual void onRequestReceived(ReceivedRequestInfo) {}
+
   virtual void onRequestDropped(DroppedRequestInfo) {}
 
   virtual void onConnectionAttempted(ConnectionInfo) {}
@@ -139,6 +141,14 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     onConnectionClosed(connectionState, std::move(connectionInfo));
     interceptorMetricCallback.onConnectionClosedComplete(
         getQualifiedName(), timer.elapsed());
+  }
+
+  void internal_onRequestReceived(
+      ReceivedRequestInfo receivedRequestInfo) final {
+    if (isDisabled()) {
+      return;
+    }
+    onRequestReceived(receivedRequestInfo);
   }
 
   void internal_onRequestDropped(DroppedRequestInfo droppedRequestInfo) final {

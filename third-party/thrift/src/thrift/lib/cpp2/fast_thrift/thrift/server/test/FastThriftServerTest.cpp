@@ -35,6 +35,8 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServer.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/test/if/gen-cpp2/FastThriftServerAsyncClient.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersClientExtension.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
 THRIFT_FLAG_DECLARE_bool(rocket_client_binary_rpc_metadata_encoding);
 
@@ -169,6 +171,81 @@ folly::AsyncTransport::UniquePtr connectFizz(
   }
   return folly::AsyncTransport::UniquePtr(fizzClient.release());
 }
+
+// Performs a fizz handshake that negotiates StopTLS V1 via the Thrift TLS
+// extension. After the server tears down TLS, surfaces the underlying
+// plaintext folly::AsyncSocket via connect()'s return value.
+class FizzStopTLSConnector
+    : public fizz::client::AsyncFizzClient::HandshakeCallback,
+      public fizz::AsyncFizzBase::EndOfTLSCallback {
+ public:
+  ~FizzStopTLSConnector() override {
+    // AsyncFizzClient uses DelayedDestruction — must be released on the
+    // EVB thread that drove the handshake.
+    if (client_ && evb_) {
+      evb_->runInEventBaseThread([c = std::move(client_)]() mutable {});
+    }
+  }
+
+  // Initiates the fizz handshake on `evb`'s thread and blocks the caller
+  // until the StopTLS downgrade completes. Caller MUST NOT be running on
+  // `evb`'s thread (this would deadlock by double-driving the EventBase).
+  folly::AsyncSocket::UniquePtr connect(
+      const folly::SocketAddress& address, folly::EventBase* evb) {
+    evb_ = evb;
+
+    evb->runInEventBaseThreadAndWait([&] {
+      auto sock = folly::AsyncSocket::newSocket(evb_, address);
+      auto ctx = std::make_shared<fizz::client::FizzClientContext>();
+      ctx->setSupportedAlpns({"rs"});
+      auto thriftParametersContext =
+          std::make_shared<apache::thrift::ThriftParametersContext>();
+      thriftParametersContext->setUseStopTLS(true);
+      auto extension =
+          std::make_shared<apache::thrift::ThriftParametersClientExtension>(
+              thriftParametersContext);
+
+      client_.reset(new fizz::client::AsyncFizzClient(
+          std::move(sock), std::move(ctx), std::move(extension)));
+      client_->connect(
+          this,
+          /*verifier=*/nullptr,
+          /*sni=*/folly::none,
+          /*pskIdentity=*/folly::none,
+          folly::Optional<std::vector<fizz::ech::ParsedECHConfig>>(folly::none),
+          /*timeout=*/std::chrono::seconds{5});
+    });
+    return std::move(promise_).getSemiFuture().get();
+  }
+
+  void fizzHandshakeSuccess(
+      fizz::client::AsyncFizzClient* client) noexcept override {
+    client->setEndOfTLSCallback(this);
+  }
+
+  void fizzHandshakeError(
+      fizz::client::AsyncFizzClient* /*unused*/,
+      folly::exception_wrapper ex) noexcept override {
+    promise_.setException(std::move(ex));
+  }
+
+  void endOfTLS(
+      fizz::AsyncFizzBase* transport,
+      std::unique_ptr<folly::IOBuf> /*postData*/) override {
+    auto* sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
+    DCHECK(sock);
+    auto fd = sock->detachNetworkSocket();
+    auto zcId = sock->getZeroCopyBufId();
+    auto plaintext =
+        folly::AsyncSocket::UniquePtr(new folly::AsyncSocket(evb_, fd, zcId));
+    promise_.setValue(std::move(plaintext));
+  }
+
+ private:
+  fizz::client::AsyncFizzClient::UniquePtr client_;
+  folly::Promise<folly::AsyncSocket::UniquePtr> promise_;
+  folly::EventBase* evb_{nullptr};
+};
 
 } // namespace
 
@@ -445,6 +522,136 @@ TEST_F(FastThriftServerTlsTest, PlaintextClientFailsToConnect) {
   });
   ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
   EXPECT_TRUE(rpcErr) << "plaintext client should fail against TLS server";
+
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+}
+
+// ---------------------------------------------------------------------------
+// STOPTLS V1 — server tears down TLS after handshake; RPCs continue plaintext
+// over the same FD with peer/self cert info preserved.
+// ---------------------------------------------------------------------------
+
+class FastThriftServerStopTlsTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+
+    cert_ = security::test::makeTestCert();
+    handler_ = std::make_shared<TestHandler>();
+
+    ftt::FastThriftServerConfig config;
+    config.address = folly::SocketAddress("::1", 0);
+    config.numIOThreads = 1;
+
+    server_ = std::make_unique<ftt::FastThriftServer>(std::move(config));
+
+    security::FizzServerCertConfig sslConfig;
+    sslConfig.certPem = cert_.certPem;
+    sslConfig.keyPem = cert_.keyPem;
+    sslConfig.clientAuth = fizz::server::ClientAuthMode::None;
+    server_->setSSLConfig(std::move(sslConfig));
+
+    security::ThriftTlsConfig thriftConfig;
+    thriftConfig.enableStopTLS = true;
+    server_->setThriftConfig(std::move(thriftConfig));
+
+    server_->setInterface(handler_);
+    server_->start();
+
+    clientThread_ = std::make_unique<folly::ScopedEventBaseThread>();
+  }
+
+  void TearDown() override {
+    clientThread_.reset();
+    server_->stop();
+    server_.reset();
+  }
+
+  security::test::TestCert cert_;
+  std::shared_ptr<TestHandler> handler_;
+  std::unique_ptr<ftt::FastThriftServer> server_;
+  std::unique_ptr<folly::ScopedEventBaseThread> clientThread_;
+};
+
+TEST_F(FastThriftServerStopTlsTest, FallsBackToTLSWhenClientDoesNotRequest) {
+  // Server has enableStopTLS=true, but the client uses the plain fizz
+  // connector (no Thrift extension). The server's extension's
+  // getNegotiatedStopTLS() must return false, and the connection must
+  // continue over the encrypted fizz transport. Catches a regression where
+  // the server tears down TLS based on its own config rather than the
+  // negotiation result.
+  auto* evb = clientThread_->getEventBase();
+  auto transport = connectFizz(evb, server_->getAddress());
+  ASSERT_NE(transport, nullptr);
+
+  std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>> client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto channel =
+        apache::thrift::RocketClientChannel::newChannel(std::move(transport));
+    client =
+        std::make_unique<apache::thrift::Client<integration::FastThriftServer>>(
+            std::move(channel));
+  });
+
+  folly::Baton<> done;
+  EchoResponse echoed;
+  folly::exception_wrapper rpcErr;
+  evb->runInEventBaseThread([&] {
+    client->semifuture_echo("over fizz")
+        .via(evb)
+        .thenValue([&](EchoResponse r) {
+          echoed = std::move(r);
+          done.post();
+        })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          rpcErr = ew;
+          done.post();
+        });
+  });
+  ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+  EXPECT_FALSE(rpcErr) << rpcErr.what();
+  EXPECT_EQ(*echoed.message(), "echoed:over fizz");
+
+  evb->runInEventBaseThreadAndWait([&] { client.reset(); });
+}
+
+TEST_F(FastThriftServerStopTlsTest, RoundTripAfterStopTLSDowngrade) {
+  auto* evb = clientThread_->getEventBase();
+
+  // connect() runs the fizz handshake on the EVB thread and blocks here
+  // until StopTLS downgrade completes. Must NOT run inside a
+  // runInEventBaseThread lambda (would double-drive evb).
+  FizzStopTLSConnector connector;
+  auto plaintext = connector.connect(server_->getAddress(), evb);
+  ASSERT_NE(plaintext, nullptr);
+
+  std::unique_ptr<apache::thrift::Client<integration::FastThriftServer>> client;
+  evb->runInEventBaseThreadAndWait([&] {
+    auto channel = apache::thrift::RocketClientChannel::newChannel(
+        folly::AsyncTransport::UniquePtr(plaintext.release()));
+    client =
+        std::make_unique<apache::thrift::Client<integration::FastThriftServer>>(
+            std::move(channel));
+  });
+
+  folly::Baton<> done;
+  EchoResponse echoed;
+  folly::exception_wrapper rpcErr;
+  evb->runInEventBaseThread([&] {
+    client->semifuture_echo("after stoptls")
+        .via(evb)
+        .thenValue([&](EchoResponse r) {
+          echoed = std::move(r);
+          done.post();
+        })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          rpcErr = ew;
+          done.post();
+        });
+  });
+  ASSERT_TRUE(done.try_wait_for(std::chrono::seconds{10}));
+  EXPECT_FALSE(rpcErr) << rpcErr.what();
+  EXPECT_EQ(*echoed.message(), "echoed:after stoptls");
 
   evb->runInEventBaseThreadAndWait([&] { client.reset(); });
 }

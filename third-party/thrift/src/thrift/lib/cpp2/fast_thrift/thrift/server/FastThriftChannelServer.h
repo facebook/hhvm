@@ -463,9 +463,12 @@ void FastThriftServerT<Stats>::start() {
   }
 
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext;
+  std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams;
   std::chrono::milliseconds tlsHandshakeTimeout{std::chrono::seconds{5}};
   if (sslConfig_) {
-    fizzContext = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
+    auto built = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
+    fizzContext = std::move(built.fizzContext);
+    thriftParams = std::move(built.thriftParams);
     tlsHandshakeTimeout = sslConfig_->handshakeTimeout;
   }
   connectionManager_ = ServerConnectionManager::create(
@@ -473,6 +476,7 @@ void FastThriftServerT<Stats>::start() {
       folly::getKeepAliveToken(executor_.get()),
       createConnectionFactory(),
       std::move(fizzContext),
+      std::move(thriftParams),
       tlsHandshakeTimeout);
 
   connectionManager_->start();

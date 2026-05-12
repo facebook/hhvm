@@ -110,7 +110,7 @@ class FizzHandshakeHelperTest : public ::testing::Test {
     // Skip mTLS for handshake-mechanics tests; we cover client auth via the
     // ContextBuilder tests and end-to-end in the integration test.
     cfg.clientAuth = fizz::server::ClientAuthMode::None;
-    serverCtx_ = buildFizzServerContext(cfg, ThriftTlsConfig{});
+    serverCtx_ = buildFizzServerContext(cfg, ThriftTlsConfig{}).fizzContext;
   }
 
   void TearDown() override { evbThread_.reset(); }
@@ -133,6 +133,7 @@ TEST_F(FizzHandshakeHelperTest, HandshakeSuccess) {
     PendingHandshakes::HelperPtr helper(new FizzHandshakeHelper(
         std::move(serverSock),
         serverCtx_,
+        /*thriftParams=*/nullptr,
         std::chrono::seconds{5},
         pending_,
         [&](folly::AsyncTransport::UniquePtr t,
@@ -187,6 +188,7 @@ TEST_F(FizzHandshakeHelperTest, HandshakeTimeout) {
     PendingHandshakes::HelperPtr helper(new FizzHandshakeHelper(
         std::move(serverSock),
         serverCtx_,
+        /*thriftParams=*/nullptr,
         // Short timeout — client never sends ClientHello.
         std::chrono::milliseconds{50},
         pending_,
@@ -221,6 +223,7 @@ TEST_F(FizzHandshakeHelperTest, HandshakeErrorOnGarbageInput) {
     PendingHandshakes::HelperPtr helper(new FizzHandshakeHelper(
         std::move(serverSock),
         serverCtx_,
+        /*thriftParams=*/nullptr,
         std::chrono::seconds{5},
         pending_,
         [&](folly::AsyncTransport::UniquePtr,
@@ -258,6 +261,7 @@ TEST_F(FizzHandshakeHelperTest, ShutdownCancelsPendingHandshake) {
     PendingHandshakes::HelperPtr helper(new FizzHandshakeHelper(
         std::move(serverSock),
         serverCtx_,
+        /*thriftParams=*/nullptr,
         std::chrono::seconds{5},
         pending_,
         [&](folly::AsyncTransport::UniquePtr,

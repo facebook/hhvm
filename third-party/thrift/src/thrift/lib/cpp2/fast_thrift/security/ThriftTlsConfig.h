@@ -21,11 +21,16 @@ namespace apache::thrift::fast_thrift::security {
 /**
  * Thrift-extension knobs negotiated during the fizz handshake. Mirrors the
  * shape of apache::thrift::ThriftTlsConfig from the legacy ThriftServer so
- * future toggles (StopTLS V1/V2, Thrift params negotiation, PSP upgrade)
- * land here without churning the cert/handshake surface.
- *
- * Empty today — populated as fast_thrift adds support for each extension.
+ * future toggles (StopTLS V2, Thrift params negotiation, PSP upgrade) land
+ * here without churning the cert/handshake surface.
  */
-struct ThriftTlsConfig {};
+struct ThriftTlsConfig {
+  // StopTLS V1: server advertises StopTLS in the Thrift TLS extension. When
+  // the client also requests it, the server performs a TLS shutdown
+  // immediately after the handshake and the rest of the connection runs
+  // plaintext over the original FD (peer/self cert info preserved).
+  // Suitable only for hops where the network is already trusted.
+  bool enableStopTLS{false};
+};
 
 } // namespace apache::thrift::fast_thrift::security

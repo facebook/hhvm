@@ -28,6 +28,9 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
+#include <thrift/lib/cpp2/security/AsyncStopTLS.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 
 namespace apache::thrift::fast_thrift::security {
 
@@ -55,17 +58,22 @@ class PendingHandshakes;
  */
 class FizzHandshakeHelper
     : private fizz::server::AsyncFizzServer::HandshakeCallback,
+      private apache::thrift::AsyncStopTLS::Callback,
       private folly::AsyncTimeout,
       public folly::DelayedDestruction {
  public:
-  // Invoked on success with the negotiated transport (caller takes ownership)
-  // or on error with the failure reason. The transport is `nullptr` on error.
+  // Invoked with the negotiated transport on success, or `nullptr` plus the
+  // failure reason on error. The transport may be a
+  // fizz::server::AsyncFizzServer (encrypted), or — when StopTLS V1 was
+  // negotiated — a plaintext folly::AsyncSocketTransport with peer cert info
+  // preserved.
   using Callback = folly::Function<void(
       folly::AsyncTransport::UniquePtr, folly::exception_wrapper) noexcept>;
 
   FizzHandshakeHelper(
       folly::AsyncSocket::UniquePtr socket,
       std::shared_ptr<const fizz::server::FizzServerContext> context,
+      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
       std::chrono::milliseconds timeout,
       PendingHandshakes& pending,
       Callback callback);
@@ -101,6 +109,10 @@ class FizzHandshakeHelper
   void fizzHandshakeAttemptFallback(
       fizz::server::AttemptVersionFallback fallback) override;
 
+  // apache::thrift::AsyncStopTLS::Callback
+  void stopTLSSuccess(std::unique_ptr<folly::IOBuf> postTLSData) override;
+  void stopTLSError(const folly::exception_wrapper& ex) override;
+
   // folly::AsyncTimeout
   void timeoutExpired() noexcept override;
 
@@ -112,6 +124,8 @@ class FizzHandshakeHelper
       folly::exception_wrapper ex) noexcept;
 
   fizz::server::AsyncFizzServer::UniquePtr fizzServer_;
+  std::shared_ptr<apache::thrift::ThriftParametersServerExtension> extension_;
+  apache::thrift::AsyncStopTLS::UniquePtr stopTlsFrame_;
   folly::EventBase* evb_;
   PendingHandshakes& pending_;
   Callback callback_;

@@ -18,6 +18,7 @@
 
 #include <folly/io/async/AsyncSocketException.h>
 #include <folly/logging/xlog.h>
+#include <thrift/lib/cpp2/security/SSLUtil.h>
 
 #include <thrift/lib/cpp2/fast_thrift/security/PendingHandshakes.h>
 
@@ -26,16 +27,24 @@ namespace apache::thrift::fast_thrift::security {
 FizzHandshakeHelper::FizzHandshakeHelper(
     folly::AsyncSocket::UniquePtr socket,
     std::shared_ptr<const fizz::server::FizzServerContext> context,
+    std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
     std::chrono::milliseconds timeout,
     PendingHandshakes& pending,
     Callback callback)
     : folly::AsyncTimeout(socket->getEventBase()),
-      fizzServer_(new fizz::server::AsyncFizzServer(
-          folly::AsyncTransport::UniquePtr(socket.release()), context)),
-      evb_(fizzServer_->getEventBase()),
+      fizzServer_(),
+      extension_(
+          thriftParams ? std::make_shared<
+                             apache::thrift::ThriftParametersServerExtension>(
+                             thriftParams)
+                       : nullptr),
+      evb_(socket->getEventBase()),
       pending_(pending),
       callback_(std::move(callback)),
-      timeout_(timeout) {}
+      timeout_(timeout) {
+  fizzServer_.reset(new fizz::server::AsyncFizzServer(
+      folly::AsyncTransport::UniquePtr(socket.release()), context, extension_));
+}
 
 FizzHandshakeHelper::~FizzHandshakeHelper() {
   cancelTimeout();
@@ -53,9 +62,27 @@ void FizzHandshakeHelper::start() {
 }
 
 void FizzHandshakeHelper::fizzHandshakeSuccess(
-    fizz::server::AsyncFizzServer* /*transport*/) noexcept {
+    fizz::server::AsyncFizzServer* transport) noexcept {
   DestructorGuard guard(this);
   cancelTimeout();
+
+  // If both sides agreed to StopTLS V1, run the TLS shutdown now and
+  // surface the resulting plaintext socket. Otherwise hand the encrypted
+  // fizz transport to the caller.
+  if (extension_ && extension_->getNegotiatedStopTLS()) {
+    XLOG(DBG3) << "Beginning StopTLS V1 negotiation";
+    stopTlsFrame_.reset(new apache::thrift::AsyncStopTLS(*this));
+    // 0ms = no internal timeout. Matches legacy ThriftFizzAcceptorHandshake-
+    // Helper convention (see FizzPeeker.cpp); shutdown lifetime is managed by
+    // the outer connection owner, which calls closeNow() on shutdown and
+    // surfaces a readErr → stopTLSError() into this helper.
+    stopTlsFrame_->start(
+        transport,
+        apache::thrift::AsyncStopTLS::Role::Server,
+        std::chrono::milliseconds{0});
+    return;
+  }
+
   finish(
       folly::AsyncTransport::UniquePtr(fizzServer_.release()),
       folly::exception_wrapper());
@@ -68,6 +95,32 @@ void FizzHandshakeHelper::fizzHandshakeError(
   cancelTimeout();
   XLOG(DBG3) << "Fizz handshake failed: " << ex.what();
   finish(nullptr, std::move(ex));
+}
+
+void FizzHandshakeHelper::stopTLSSuccess(
+    std::unique_ptr<folly::IOBuf> postTLSData) {
+  // finish() removes us from PendingHandshakes, dropping the HelperPtr and
+  // calling destroy(); without a guard, that delete fires while we are still
+  // on this stack. See header comment on finish().
+  DestructorGuard guard(this);
+  // Re-wrap the same FD as a plaintext socket and push back any residual
+  // bytes the peer sent immediately after their close_notify.
+  auto plaintext = apache::thrift::toFDSocket(
+      fizzServer_.get(), apache::thrift::kSecurityProtocolStopTLS);
+  if (postTLSData) {
+    plaintext->setPreReceivedData(std::move(postTLSData));
+  }
+  plaintext->cacheAddresses();
+  fizzServer_.reset();
+  finish(
+      folly::AsyncTransport::UniquePtr(plaintext.release()),
+      folly::exception_wrapper());
+}
+
+void FizzHandshakeHelper::stopTLSError(const folly::exception_wrapper& ex) {
+  DestructorGuard guard(this);
+  XLOG(DBG3) << "StopTLS failed: " << ex.what();
+  finish(nullptr, ex);
 }
 
 void FizzHandshakeHelper::fizzHandshakeAttemptFallback(

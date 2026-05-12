@@ -33,10 +33,14 @@ TEST_F(FizzServerContextBuilderTest, BuildsFromPemBuffers) {
   config.certPem = cert_.certPem;
   config.keyPem = cert_.keyPem;
 
-  auto ctx = buildFizzServerContext(config, thriftConfig_);
-  ASSERT_NE(ctx, nullptr);
-  EXPECT_EQ(ctx->getSupportedAlpns(), std::vector<std::string>{"rs"});
-  EXPECT_EQ(ctx->getClientAuthMode(), fizz::server::ClientAuthMode::Required);
+  auto built = buildFizzServerContext(config, thriftConfig_);
+  ASSERT_NE(built.fizzContext, nullptr);
+  EXPECT_EQ(
+      built.fizzContext->getSupportedAlpns(), std::vector<std::string>{"rs"});
+  EXPECT_EQ(
+      built.fizzContext->getClientAuthMode(),
+      fizz::server::ClientAuthMode::Required);
+  EXPECT_EQ(built.thriftParams, nullptr);
 }
 
 TEST_F(FizzServerContextBuilderTest, AppliesCustomAlpnAndAuthMode) {
@@ -46,10 +50,28 @@ TEST_F(FizzServerContextBuilderTest, AppliesCustomAlpnAndAuthMode) {
   config.alpnProtocols = {"h2", "rs"};
   config.clientAuth = fizz::server::ClientAuthMode::None;
 
-  auto ctx = buildFizzServerContext(config, thriftConfig_);
-  ASSERT_NE(ctx, nullptr);
-  EXPECT_EQ(ctx->getSupportedAlpns(), (std::vector<std::string>{"h2", "rs"}));
-  EXPECT_EQ(ctx->getClientAuthMode(), fizz::server::ClientAuthMode::None);
+  auto built = buildFizzServerContext(config, thriftConfig_);
+  ASSERT_NE(built.fizzContext, nullptr);
+  EXPECT_EQ(
+      built.fizzContext->getSupportedAlpns(),
+      (std::vector<std::string>{"h2", "rs"}));
+  EXPECT_EQ(
+      built.fizzContext->getClientAuthMode(),
+      fizz::server::ClientAuthMode::None);
+}
+
+TEST_F(FizzServerContextBuilderTest, StopTlsBuildsThriftParamsContext) {
+  FizzServerCertConfig config;
+  config.certPem = cert_.certPem;
+  config.keyPem = cert_.keyPem;
+
+  ThriftTlsConfig thriftConfig;
+  thriftConfig.enableStopTLS = true;
+
+  auto built = buildFizzServerContext(config, thriftConfig);
+  ASSERT_NE(built.fizzContext, nullptr);
+  ASSERT_NE(built.thriftParams, nullptr);
+  EXPECT_TRUE(built.thriftParams->getUseStopTLS());
 }
 
 TEST_F(FizzServerContextBuilderTest, RejectsBothPathAndBufferSet) {

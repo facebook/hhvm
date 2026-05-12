@@ -19,6 +19,7 @@
 #include <memory>
 
 #include <fizz/server/FizzServerContext.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
@@ -26,17 +27,33 @@
 namespace apache::thrift::fast_thrift::security {
 
 /**
- * Build an immutable FizzServerContext from a cert/handshake config and the
- * thrift-extension config.
+ * Result of building the server-side TLS context from a cert/handshake
+ * config and the thrift-extension config.
  *
- * The returned context is safe to share across all connections served by
+ * `fizzContext` is always set. `thriftParams` is set iff the config opts
+ * into a Thrift-specific TLS extension (e.g. StopTLS V1). When set, the
+ * caller is responsible for constructing a fresh
+ * `ThriftParametersServerExtension(thriftParams)` per connection and
+ * passing it to the `AsyncFizzServer` ctor.
+ */
+struct BuiltFizzServerContext {
+  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext;
+  std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams;
+};
+
+/**
+ * Build an immutable FizzServerContext (and matching Thrift parameters
+ * context, if needed) from a cert/handshake config and the thrift-extension
+ * config.
+ *
+ * The returned objects are safe to share across all connections served by
  * a single server instance. Cert rotation is out of scope for v1 — callers
  * that need rotation should rebuild the context and replace it.
  *
  * Throws std::runtime_error on malformed PEM, missing file, or invalid
  * configuration (e.g. neither path nor buffer set).
  */
-std::shared_ptr<const fizz::server::FizzServerContext> buildFizzServerContext(
+BuiltFizzServerContext buildFizzServerContext(
     const FizzServerCertConfig& certConfig,
     const ThriftTlsConfig& thriftConfig);
 

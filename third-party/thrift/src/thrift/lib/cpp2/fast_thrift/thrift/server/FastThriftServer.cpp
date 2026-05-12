@@ -197,17 +197,18 @@ void FastThriftServer::start() {
     return;
   }
 
-  std::shared_ptr<const fizz::server::FizzServerContext> fizzContext;
+  security::BuiltFizzServerContext fizzBuilt;
   std::chrono::milliseconds tlsHandshakeTimeout{std::chrono::seconds{5}};
   if (sslConfig_) {
-    fizzContext = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
+    fizzBuilt = security::buildFizzServerContext(*sslConfig_, thriftConfig_);
     tlsHandshakeTimeout = sslConfig_->handshakeTimeout;
   }
   connectionManager_ = ServerConnectionManager::create(
       config_.address,
       folly::getKeepAliveToken(executor_.get()),
       createConnectionFactory(),
-      std::move(fizzContext),
+      std::move(fizzBuilt.fizzContext),
+      std::move(fizzBuilt.thriftParams),
       tlsHandshakeTimeout);
 
   connectionManager_->start();

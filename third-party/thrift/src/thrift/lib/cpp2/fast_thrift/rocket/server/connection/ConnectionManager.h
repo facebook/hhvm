@@ -32,6 +32,7 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionHandler.h>
+#include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>
 
 namespace apache::thrift::fast_thrift::rocket::server::connection {
 
@@ -76,12 +77,15 @@ class ConnectionManager : public folly::DelayedDestruction {
       ConnectionFactory connectionFactory,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext =
           nullptr,
+      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams =
+          nullptr,
       std::chrono::milliseconds tlsHandshakeTimeout = std::chrono::seconds{5}) {
     return Ptr(new ConnectionManager(
         std::move(address),
         std::move(executor),
         std::move(connectionFactory),
         std::move(fizzContext),
+        std::move(thriftParams),
         tlsHandshakeTimeout));
   }
 
@@ -118,11 +122,13 @@ class ConnectionManager : public folly::DelayedDestruction {
       folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor,
       ConnectionFactory connectionFactory,
       std::shared_ptr<const fizz::server::FizzServerContext> fizzContext,
+      std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams,
       std::chrono::milliseconds tlsHandshakeTimeout)
       : address_(std::move(address)),
         executor_(std::move(executor)),
         connectionFactory_(std::move(connectionFactory)),
         fizzContext_(std::move(fizzContext)),
+        thriftParams_(std::move(thriftParams)),
         tlsHandshakeTimeout_(tlsHandshakeTimeout),
         observer_(std::make_shared<IOObserver>(*this)) {}
 
@@ -146,7 +152,11 @@ class ConnectionManager : public folly::DelayedDestruction {
 
     connectionHandlers_.withWLock([&](auto& handlerMap) {
       ConnectionHandler::Ptr connectionHandler(new ConnectionHandler(
-          evb, connectionFactory_, fizzContext_, tlsHandshakeTimeout_));
+          evb,
+          connectionFactory_,
+          fizzContext_,
+          thriftParams_,
+          tlsHandshakeTimeout_));
       auto [it, inserted] =
           handlerMap.emplace(&evb, std::move(connectionHandler));
       if (inserted) {
@@ -174,6 +184,7 @@ class ConnectionManager : public folly::DelayedDestruction {
   folly::Executor::KeepAlive<folly::IOThreadPoolExecutor> executor_;
   ConnectionFactory connectionFactory_;
   std::shared_ptr<const fizz::server::FizzServerContext> fizzContext_;
+  std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams_;
   std::chrono::milliseconds tlsHandshakeTimeout_;
   std::shared_ptr<IOObserver> observer_;
 

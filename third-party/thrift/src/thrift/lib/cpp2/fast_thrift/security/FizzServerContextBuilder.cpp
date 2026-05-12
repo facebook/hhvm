@@ -40,9 +40,9 @@ std::string readFile(const std::string& path) {
 
 } // namespace
 
-std::shared_ptr<const fizz::server::FizzServerContext> buildFizzServerContext(
+BuiltFizzServerContext buildFizzServerContext(
     const FizzServerCertConfig& certConfig,
-    const ThriftTlsConfig& /*thriftConfig*/) {
+    const ThriftTlsConfig& thriftConfig) {
   const bool hasPaths = !certConfig.certPath.empty();
   const bool hasBuffers = !certConfig.certPem.empty();
   if (hasPaths == hasBuffers) {
@@ -78,7 +78,13 @@ std::shared_ptr<const fizz::server::FizzServerContext> buildFizzServerContext(
   ctx->setSupportedAlpns(certConfig.alpnProtocols);
   ctx->setClientAuthMode(certConfig.clientAuth);
 
-  return ctx;
+  std::shared_ptr<apache::thrift::ThriftParametersContext> thriftParams;
+  if (thriftConfig.enableStopTLS) {
+    thriftParams = std::make_shared<apache::thrift::ThriftParametersContext>();
+    thriftParams->setUseStopTLS(true);
+  }
+
+  return BuiltFizzServerContext{std::move(ctx), std::move(thriftParams)};
 }
 
 } // namespace apache::thrift::fast_thrift::security

@@ -23,6 +23,7 @@
 #include <fmt/core.h>
 #include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/server/DefaultCertManager.h>
+#include <fizz/util/Status.h>
 
 namespace apache::thrift::fast_thrift::security {
 
@@ -64,11 +65,21 @@ BuiltFizzServerContext buildFizzServerContext(
   std::string keyData =
       hasPaths ? readFile(certConfig.keyPath) : certConfig.keyPem;
 
-  std::shared_ptr<fizz::SelfCert> selfCert = certConfig.keyPassword.empty()
+  std::unique_ptr<fizz::SelfCert> selfCertOwned;
+  fizz::Error err;
+  fizz::Status status = certConfig.keyPassword.empty()
       ? fizz::openssl::CertUtils::makeSelfCert(
-            std::move(certData), std::move(keyData))
+            selfCertOwned, err, std::move(certData), std::move(keyData))
       : fizz::openssl::CertUtils::makeSelfCert(
-            std::move(certData), std::move(keyData), certConfig.keyPassword);
+            selfCertOwned,
+            err,
+            std::move(certData),
+            std::move(keyData),
+            certConfig.keyPassword);
+  if (status == fizz::Status::Fail) {
+    err.throwException();
+  }
+  std::shared_ptr<fizz::SelfCert> selfCert = std::move(selfCertOwned);
 
   auto certManager = std::make_shared<fizz::server::DefaultCertManager>();
   certManager->addCertAndSetDefault(std::move(selfCert));

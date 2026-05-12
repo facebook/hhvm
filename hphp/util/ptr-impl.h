@@ -152,6 +152,9 @@ struct PtrImpl {
   constexpr static uint64_t max = P::max;
   using storage_type = typename S::template storage_type<P>;
 
+  struct from_raw_t {};
+  constexpr static from_raw_t from_raw{};
+
   /*
    * Constructors.
    */
@@ -165,6 +168,9 @@ struct PtrImpl {
   /* implicit */ PtrImpl(std::nullptr_t /*px*/) {
     S::template set<P>(m_s, 0);
   }
+
+  constexpr PtrImpl(P::storage_type raw, from_raw_t) requires (ptrimpl::is_normal<S>)
+    : m_s(raw) {}
 
   PtrImpl(const PtrImpl<T, S, P, Init>& other) requires (ptrimpl::is_normal<S>) = default;
 

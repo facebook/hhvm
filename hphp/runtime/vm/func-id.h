@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 #include <folly/Format.h>
 
 #include "hphp/util/hash.h"
@@ -33,8 +34,8 @@ struct Func;
  * Unique identifier for a Func*.
  */
 struct FuncId {
-  static FuncId Invalid;
-  static FuncId Dummy;
+  static const FuncId Invalid;
+  static const FuncId Dummy;
   using Int = uint32_t;
 
 #ifdef USE_PACKEDPTR
@@ -46,8 +47,8 @@ struct FuncId {
     assertx(!isInvalid() && !isDummy());
     return m_id;
   }
-  static FuncId fromInt(Int num) {
-    return FuncId{Id::fromRaw(num)};
+  constexpr static FuncId fromInt(Int num) {
+    return FuncId{Id(num, Id::from_raw)};
   }
   Int toStableInt() const;
 #else
@@ -73,6 +74,9 @@ struct FuncId {
 
   Id m_id;
 };
+
+inline constexpr FuncId FuncId::Invalid = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max());
+inline constexpr FuncId FuncId::Dummy   = FuncId::fromInt(std::numeric_limits<FuncId::Int>::max() - 1);
 
 static_assert(sizeof(FuncId) == sizeof(uint32_t), "");
 

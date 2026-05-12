@@ -357,3 +357,27 @@ class StreamClientTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_server_disconnect_before_first_stream_element(self) -> None:
         await self._assert_server_disconnect(yield_before_block=False)
+
+    async def test_stream_credit_timeout(self) -> None:
+        """Client gets ApplicationErrorType.TIMEOUT when it stops consuming."""
+        server = TestServer(handler=Handler(), ip="::1")
+        server.server.set_stream_expire_time(0.1)
+        async with server as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                options = RpcOptions()
+                options.chunk_buffer_size = 1
+                stream = await client.returnstream(0, 1000000, rpc_options=options)
+                first = await stream.__anext__()
+                self.assertEqual(first, 0)
+                await asyncio.sleep(0.5)
+                with self.assertRaises(ApplicationError) as ctx:
+                    async for _ in stream:
+                        pass
+                self.assertEqual(ctx.exception.type, ApplicationErrorType.TIMEOUT)

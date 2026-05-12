@@ -32,11 +32,10 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RocketFrameDecoder.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -46,8 +45,6 @@ using namespace apache::thrift::fast_thrift;
 using namespace apache::thrift::fast_thrift::thrift;
 using namespace apache::thrift::fast_thrift::thrift::client::handler;
 using namespace apache::thrift::fast_thrift::frame;
-using namespace apache::thrift::fast_thrift::frame::read;
-using namespace apache::thrift::fast_thrift::frame::write;
 
 namespace {
 
@@ -129,20 +126,34 @@ apache::thrift::ServerPushMetadata createStreamHeadersMetadata() {
 }
 
 // =============================================================================
-// Helper Functions - Frame Creation
+// Helper Functions - Typed Payload Creation
 // =============================================================================
 
-std::unique_ptr<folly::IOBuf> createMetadataPushFrame(
+ThriftResponseMessage makeMetadataPushResponse(
     const apache::thrift::ServerPushMetadata& serverMeta) {
-  auto serializedMeta = serializeServerPushMetadata(serverMeta);
-  return serialize(MetadataPushHeader{}, std::move(serializedMeta));
+  ThriftResponseMessage response;
+  response.payload = ThriftClientInboundPayloadVariant{
+      ThriftMetadataPushPayload{
+          .metadata = serializeServerPushMetadata(serverMeta)},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
+  response.streamType = FrameType::METADATA_PUSH;
+  return response;
 }
 
-std::unique_ptr<folly::IOBuf> createPayloadFrame() {
-  return serialize(
-      PayloadHeader{.streamId = 1, .complete = true},
-      nullptr,
-      folly::IOBuf::copyBuffer("response"));
+ThriftResponseMessage makePayloadResponse() {
+  ThriftResponseMessage response;
+  response.payload = ThriftClientInboundPayloadVariant{
+      ThriftFirstResponsePayload{
+          .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
+          .data = folly::IOBuf::copyBuffer("response"),
+          .streamId = 1,
+          .complete = true,
+          .next = true},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
+  response.requestContext =
+      apache::thrift::fast_thrift::rocket::borrow(reinterpret_cast<void*>(0x1));
+  response.streamType = FrameType::REQUEST_RESPONSE;
+  return response;
 }
 
 // =============================================================================
@@ -155,20 +166,16 @@ BENCHMARK(Read_MetadataPush_SetupResponse, iters) {
   BenchContext ctx;
 
   auto serverMeta = createSetupResponseMetadata();
-  std::vector<std::unique_ptr<folly::IOBuf>> frames;
-  frames.reserve(iters);
+  std::vector<ThriftResponseMessage> responses;
+  responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(createMetadataPushFrame(serverMeta));
+    responses.push_back(makeMetadataPushResponse(serverMeta));
   }
 
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    ThriftResponseMessage response;
-    response.payload = parseFrame(std::move(frames[i]));
-    response.streamType = FrameType::METADATA_PUSH;
-
-    auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
+    auto result = handler.onRead(ctx, erase_and_box(std::move(responses[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -179,20 +186,16 @@ BENCHMARK(Read_MetadataPush_SetupResponse_WithZstd, iters) {
   BenchContext ctx;
 
   auto serverMeta = createSetupResponseWithZstdMetadata();
-  std::vector<std::unique_ptr<folly::IOBuf>> frames;
-  frames.reserve(iters);
+  std::vector<ThriftResponseMessage> responses;
+  responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(createMetadataPushFrame(serverMeta));
+    responses.push_back(makeMetadataPushResponse(serverMeta));
   }
 
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    ThriftResponseMessage response;
-    response.payload = parseFrame(std::move(frames[i]));
-    response.streamType = FrameType::METADATA_PUSH;
-
-    auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
+    auto result = handler.onRead(ctx, erase_and_box(std::move(responses[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -203,20 +206,16 @@ BENCHMARK(Read_MetadataPush_DrainComplete, iters) {
   BenchContext ctx;
 
   auto serverMeta = createDrainCompleteMetadata();
-  std::vector<std::unique_ptr<folly::IOBuf>> frames;
-  frames.reserve(iters);
+  std::vector<ThriftResponseMessage> responses;
+  responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(createMetadataPushFrame(serverMeta));
+    responses.push_back(makeMetadataPushResponse(serverMeta));
   }
 
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    ThriftResponseMessage response;
-    response.payload = parseFrame(std::move(frames[i]));
-    response.streamType = FrameType::METADATA_PUSH;
-
-    auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
+    auto result = handler.onRead(ctx, erase_and_box(std::move(responses[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -227,20 +226,16 @@ BENCHMARK(Read_MetadataPush_DrainComplete_ExceededMem, iters) {
   BenchContext ctx;
 
   auto serverMeta = createDrainCompleteExceededMemMetadata();
-  std::vector<std::unique_ptr<folly::IOBuf>> frames;
-  frames.reserve(iters);
+  std::vector<ThriftResponseMessage> responses;
+  responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(createMetadataPushFrame(serverMeta));
+    responses.push_back(makeMetadataPushResponse(serverMeta));
   }
 
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    ThriftResponseMessage response;
-    response.payload = parseFrame(std::move(frames[i]));
-    response.streamType = FrameType::METADATA_PUSH;
-
-    auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
+    auto result = handler.onRead(ctx, erase_and_box(std::move(responses[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -251,20 +246,16 @@ BENCHMARK(Read_MetadataPush_StreamHeaders, iters) {
   BenchContext ctx;
 
   auto serverMeta = createStreamHeadersMetadata();
-  std::vector<std::unique_ptr<folly::IOBuf>> frames;
-  frames.reserve(iters);
+  std::vector<ThriftResponseMessage> responses;
+  responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(createMetadataPushFrame(serverMeta));
+    responses.push_back(makeMetadataPushResponse(serverMeta));
   }
 
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    ThriftResponseMessage response;
-    response.payload = parseFrame(std::move(frames[i]));
-    response.streamType = FrameType::METADATA_PUSH;
-
-    auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
+    auto result = handler.onRead(ctx, erase_and_box(std::move(responses[i])));
     folly::doNotOptimizeAway(result);
   }
 }
@@ -280,22 +271,16 @@ BENCHMARK(Read_NonMetadataPush_Passthrough, iters) {
   ThriftClientMetadataPushHandler handler;
   BenchContext ctx;
 
-  std::vector<std::unique_ptr<folly::IOBuf>> frames;
-  frames.reserve(iters);
+  std::vector<ThriftResponseMessage> responses;
+  responses.reserve(iters);
   for (size_t i = 0; i < iters; ++i) {
-    frames.push_back(createPayloadFrame());
+    responses.push_back(makePayloadResponse());
   }
 
   suspender.dismiss();
 
   for (size_t i = 0; i < iters; ++i) {
-    ThriftResponseMessage response;
-    response.payload = parseFrame(std::move(frames[i]));
-    response.requestContext = apache::thrift::fast_thrift::rocket::borrow(
-        reinterpret_cast<void*>(0x1));
-    response.streamType = FrameType::REQUEST_RESPONSE;
-
-    auto result = handler.onRead(ctx, erase_and_box(std::move(response)));
+    auto result = handler.onRead(ctx, erase_and_box(std::move(responses[i])));
     folly::doNotOptimizeAway(result);
   }
 }

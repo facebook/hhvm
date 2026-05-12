@@ -19,8 +19,8 @@
 #include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp2/fast_thrift/common/CompactVariant.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RocketFrameDecoder.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayloadVariant.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -61,7 +61,7 @@ struct ThriftRequestMessage {
 // ============================================================================
 
 /**
- * ThriftResponseError — in-process per-request failure carried inbound.
+ * ThriftClientResponseError — in-process per-request failure carried inbound.
  *
  * Used as the error alternative on `ThriftResponseMessage::payload` so a
  * single request can be failed (callback resolved with `ew`) without
@@ -73,24 +73,30 @@ struct ThriftRequestMessage {
  * The connection itself remains healthy; only this one request's pending
  * callback is failed.
  */
-struct ThriftResponseError {
+struct ThriftClientResponseError {
   folly::exception_wrapper ew;
 };
 
 /**
  * ThriftResponseMessage - Inbound response from pipeline to channel.
  *
- * `payload` is a CompactVariant of either a parsed wire frame (the normal
- * response path) or a `ThriftResponseError` (in-process per-request
- * failure). The channel inspects which alternative is present and either
- * decodes the frame or fails the pending callback with the wrapped
- * exception. In both cases the channel stays Open.
+ * `payload` is a CompactVariant of either:
+ *   - `ThriftClientInboundPayloadVariant` — typed wire-derived payload produced
+ *     by `fromRocketFrame` at the bridge. The channel visits the
+ *     alternative and dispatches per-pattern.
+ *   - `ThriftClientResponseError` — in-process per-request failure (transport
+ *     drop, in-process serialize failure) with no wire frame involved.
+ *     The channel fails just this callback with the wrapped exception.
+ *
+ * In both cases the channel stays Open. The two layers are separated
+ * because wire-derived payloads share a typed structure; transport
+ * failures don't.
  */
 #pragma pack(push, 1)
 struct ThriftResponseMessage {
   apache::thrift::fast_thrift::CompactVariant<
-      apache::thrift::fast_thrift::frame::read::ParsedFrame,
-      ThriftResponseError>
+      ThriftClientInboundPayloadVariant,
+      ThriftClientResponseError>
       payload;
   apache::thrift::fast_thrift::rocket::TypeErasedPtr requestContext;
   apache::thrift::fast_thrift::frame::FrameType streamType{

@@ -19,10 +19,8 @@
 #include <gtest/gtest.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RocketFrameDecoder.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/type/Protocol.h>
@@ -49,48 +47,40 @@ std::unique_ptr<folly::IOBuf> serializeResponseRpcError(
   return queue.move();
 }
 
-std::unique_ptr<folly::IOBuf> serializeResponseMetadata(
-    const apache::thrift::ResponseRpcMetadata& metadata) {
-  apache::thrift::BinaryProtocolWriter writer;
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-  writer.setOutput(&queue);
-  metadata.write(&writer);
-  return queue.move();
-}
-
 ThriftResponseMessage makePayloadResponse(
-    std::unique_ptr<folly::IOBuf> metadata,
+    apache::thrift::ResponseRpcMetadata metadata,
     std::unique_ptr<folly::IOBuf> data) {
-  auto frameBuf = apache::thrift::fast_thrift::frame::write::serialize(
-      apache::thrift::fast_thrift::frame::write::PayloadHeader{
-          .streamId = 1, .complete = true, .next = true},
-      std::move(metadata),
-      std::move(data));
   ThriftResponseMessage response;
-  response.payload =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frameBuf));
+  response.payload = ThriftClientInboundPayloadVariant{
+      ThriftFirstResponsePayload{
+          .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(
+              std::move(metadata)),
+          .data = std::move(data),
+          .streamId = 1,
+          .complete = true,
+          .next = true},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   return response;
 }
 
 ThriftResponseMessage makeErrorResponse(
     uint32_t errorCode, std::unique_ptr<folly::IOBuf> data) {
-  auto frameBuf = apache::thrift::fast_thrift::frame::write::serialize(
-      apache::thrift::fast_thrift::frame::write::ErrorHeader{
-          .streamId = 1, .errorCode = errorCode},
-      nullptr,
-      std::move(data));
   ThriftResponseMessage response;
-  response.payload =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frameBuf));
+  response.payload = ThriftClientInboundPayloadVariant{
+      ThriftErrorPayload{
+          .data = std::move(data),
+          .metadata = nullptr,
+          .streamId = 1,
+          .errorCode = errorCode},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   return response;
 }
 
 ThriftResponseMessage makeCancelResponse() {
-  auto frameBuf = apache::thrift::fast_thrift::frame::write::serialize(
-      apache::thrift::fast_thrift::frame::write::CancelHeader{.streamId = 1});
   ThriftResponseMessage response;
-  response.payload =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frameBuf));
+  response.payload = ThriftClientInboundPayloadVariant{
+      ThriftCancelPayload{.streamId = 1},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   return response;
 }
 
@@ -99,8 +89,7 @@ ThriftResponseMessage makeCancelResponse() {
 // =============================================================================
 
 TEST(FastThriftAdapterBaseTest, PayloadFrameYieldsResultWithData) {
-  auto response =
-      makePayloadResponse(nullptr, folly::IOBuf::copyBuffer("hello"));
+  auto response = makePayloadResponse({}, folly::IOBuf::copyBuffer("hello"));
 
   auto result = TestAdapter::handleRequestResponse(
       std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
@@ -157,7 +146,7 @@ TEST(FastThriftAdapterBaseTest, PayloadWithNormalMetadataPassesThrough) {
       apache::thrift::PayloadResponseMetadata{});
 
   auto response = makePayloadResponse(
-      serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("data"));
+      std::move(metadata), folly::IOBuf::copyBuffer("data"));
 
   auto result = TestAdapter::handleRequestResponse(
       std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
@@ -176,7 +165,7 @@ TEST(FastThriftAdapterBaseTest, PayloadWithUndeclaredExceptionReturnsError) {
   metadata.payloadMetadata().ensure().set_exceptionMetadata(std::move(exMeta));
 
   auto response = makePayloadResponse(
-      serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("data"));
+      std::move(metadata), folly::IOBuf::copyBuffer("data"));
 
   auto result = TestAdapter::handleRequestResponse(
       std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
@@ -198,7 +187,7 @@ TEST(FastThriftAdapterBaseTest, PayloadWithDeclaredExceptionPassesThrough) {
   metadata.payloadMetadata().ensure().set_exceptionMetadata(std::move(exMeta));
 
   auto response = makePayloadResponse(
-      serializeResponseMetadata(metadata), folly::IOBuf::copyBuffer("data"));
+      std::move(metadata), folly::IOBuf::copyBuffer("data"));
 
   auto result = TestAdapter::handleRequestResponse(
       std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
@@ -210,8 +199,7 @@ TEST(FastThriftAdapterBaseTest, PayloadWithDeclaredExceptionPassesThrough) {
 }
 
 TEST(FastThriftAdapterBaseTest, PayloadWithNoMetadataPassesThrough) {
-  auto response =
-      makePayloadResponse(nullptr, folly::IOBuf::copyBuffer("data"));
+  auto response = makePayloadResponse({}, folly::IOBuf::copyBuffer("data"));
 
   auto result = TestAdapter::handleRequestResponse(
       std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);
@@ -233,7 +221,7 @@ TEST(FastThriftAdapterBaseTest, PayloadWithMalformedAnyExceptionReturnsError) {
   metadata.payloadMetadata().ensure().set_exceptionMetadata(std::move(exMeta));
 
   auto response = makePayloadResponse(
-      serializeResponseMetadata(metadata),
+      std::move(metadata),
       folly::IOBuf::copyBuffer("not-a-valid-semi-any-struct"));
 
   auto result = TestAdapter::handleRequestResponse(
@@ -268,8 +256,7 @@ TEST(FastThriftAdapterBaseTest, PayloadWithUnregisteredAnyExceptionTypeError) {
   exMeta.metadata() = std::move(exMetaInner);
   metadata.payloadMetadata().ensure().set_exceptionMetadata(std::move(exMeta));
 
-  auto response = makePayloadResponse(
-      serializeResponseMetadata(metadata), payloadQueue.move());
+  auto response = makePayloadResponse(std::move(metadata), payloadQueue.move());
 
   auto result = TestAdapter::handleRequestResponse(
       std::move(response), apache::thrift::protocol::T_COMPACT_PROTOCOL);

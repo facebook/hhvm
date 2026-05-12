@@ -23,11 +23,10 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/handler/ThriftClientMetadataPushHandler.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RocketFrameDecoder.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -112,87 +111,74 @@ class ThriftClientMetadataPushHandlerTest : public ::testing::Test {
     return queue.move();
   }
 
-  // Helper to create a METADATA_PUSH frame with ServerPushMetadata
-  apache::thrift::fast_thrift::frame::read::ParsedFrame createMetadataPushFrame(
+  // Build a ThriftResponseMessage carrying a typed ThriftMetadataPushPayload.
+  ThriftResponseMessage makeMetadataPushResponse(
       const apache::thrift::ServerPushMetadata& meta) {
-    auto serialized = serializeServerPushMetadata(meta);
-    auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-        apache::thrift::fast_thrift::frame::write::MetadataPushHeader{},
-        std::move(serialized));
-    return apache::thrift::fast_thrift::frame::read::parseFrame(
-        std::move(frame));
-  }
-
-  // Helper to create a METADATA_PUSH frame with raw metadata
-  apache::thrift::fast_thrift::frame::read::ParsedFrame
-  createMetadataPushFrameRaw(std::unique_ptr<folly::IOBuf> metadata) {
-    auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-        apache::thrift::fast_thrift::frame::write::MetadataPushHeader{},
-        std::move(metadata));
-    return apache::thrift::fast_thrift::frame::read::parseFrame(
-        std::move(frame));
-  }
-
-  // Helper to create a payload frame (non-METADATA_PUSH)
-  apache::thrift::fast_thrift::frame::read::ParsedFrame createPayloadFrame(
-      uint32_t streamId = 1) {
-    auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-        apache::thrift::fast_thrift::frame::write::PayloadHeader{
-            .streamId = streamId,
-            .follows = false,
-            .complete = true,
-            .next = true,
-        },
-        nullptr,
-        folly::IOBuf::copyBuffer("test payload"));
-    return apache::thrift::fast_thrift::frame::read::parseFrame(
-        std::move(frame));
-  }
-
-  // Helper to create an ERROR frame
-  apache::thrift::fast_thrift::frame::read::ParsedFrame createErrorFrame(
-      uint32_t streamId = 1) {
-    auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-        apache::thrift::fast_thrift::frame::write::ErrorHeader{
-            .streamId = streamId, .errorCode = 0x0201},
-        nullptr,
-        folly::IOBuf::copyBuffer("error data"));
-    return apache::thrift::fast_thrift::frame::read::parseFrame(
-        std::move(frame));
-  }
-
-  // Helper to create a KEEPALIVE frame
-  apache::thrift::fast_thrift::frame::read::ParsedFrame createKeepAliveFrame() {
-    auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-        apache::thrift::fast_thrift::frame::write::KeepAliveHeader{
-            .lastReceivedPosition = 0, .respond = false},
-        nullptr);
-    return apache::thrift::fast_thrift::frame::read::parseFrame(
-        std::move(frame));
-  }
-
-  // Helper to create a ThriftResponseMessage with ParsedFrame payload
-  // (used for stream-level frames)
-  ThriftResponseMessage makeParsedFrameResponse(
-      apache::thrift::fast_thrift::frame::read::ParsedFrame frame,
-      apache::thrift::fast_thrift::frame::FrameType streamType,
-      void* requestContext = nullptr) {
     ThriftResponseMessage response;
-    response.payload = std::move(frame);
-    response.requestContext =
-        apache::thrift::fast_thrift::rocket::borrow(requestContext);
-    response.streamType = streamType;
+    response.payload = ThriftClientInboundPayloadVariant{
+        ThriftMetadataPushPayload{
+            .metadata = serializeServerPushMetadata(meta)},
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
+    response.streamType =
+        apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH;
     return response;
   }
 
-  // Helper to create a ThriftResponseMessage with bare ParsedFrame payload
-  // (used for connection-level frames like METADATA_PUSH, KEEPALIVE)
-  ThriftResponseMessage makeFrameResponse(
-      apache::thrift::fast_thrift::frame::read::ParsedFrame frame,
-      apache::thrift::fast_thrift::frame::FrameType streamType) {
+  // Build a ThriftResponseMessage carrying a ThriftMetadataPushPayload with
+  // raw bytes — for malformed-input tests.
+  ThriftResponseMessage makeMetadataPushResponseRaw(
+      std::unique_ptr<folly::IOBuf> metadata) {
     ThriftResponseMessage response;
-    response.payload = std::move(frame);
-    response.streamType = streamType;
+    response.payload = ThriftClientInboundPayloadVariant{
+        ThriftMetadataPushPayload{.metadata = std::move(metadata)},
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
+    response.streamType =
+        apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH;
+    return response;
+  }
+
+  // Build a ThriftResponseMessage carrying a non-METADATA_PUSH alternative
+  // (PAYLOAD/ERROR) — used for pass-through tests.
+  ThriftResponseMessage makeFirstResponseMessage(
+      void* requestContext = nullptr) {
+    ThriftResponseMessage response;
+    response.payload = ThriftClientInboundPayloadVariant{
+        ThriftFirstResponsePayload{
+            .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
+            .data = folly::IOBuf::copyBuffer("test payload"),
+            .streamId = 1,
+            .complete = true,
+            .next = true},
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
+    response.requestContext =
+        apache::thrift::fast_thrift::rocket::borrow(requestContext);
+    response.streamType =
+        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
+    return response;
+  }
+
+  ThriftResponseMessage makeErrorResponseMessage(
+      void* requestContext = nullptr) {
+    ThriftResponseMessage response;
+    response.payload = ThriftClientInboundPayloadVariant{
+        ThriftErrorPayload{
+            .data = folly::IOBuf::copyBuffer("error data"),
+            .metadata = nullptr,
+            .streamId = 1,
+            .errorCode = 0x0201},
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
+    response.requestContext =
+        apache::thrift::fast_thrift::rocket::borrow(requestContext);
+    response.streamType =
+        apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE;
+    return response;
+  }
+
+  // Transport-failure path — non-wire-derived ThriftClientResponseError.
+  ThriftResponseMessage makeTransportErrorResponseMessage() {
+    ThriftResponseMessage response;
+    response.payload = ThriftClientResponseError{
+        .ew = folly::make_exception_wrapper<std::runtime_error>("boom")};
     return response;
   }
 
@@ -219,10 +205,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, HandlerAddedAndRemovedNoOp) {
 
 TEST_F(ThriftClientMetadataPushHandlerTest, PayloadFramePassesThrough) {
   void* const kUserContext = reinterpret_cast<void*>(0x123);
-  auto response = makeParsedFrameResponse(
-      createPayloadFrame(),
-      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
-      kUserContext);
+  auto response = makeFirstResponseMessage(kUserContext);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -238,10 +221,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, PayloadFramePassesThrough) {
 }
 
 TEST_F(ThriftClientMetadataPushHandlerTest, ErrorFramePassesThrough) {
-  auto response = makeParsedFrameResponse(
-      createErrorFrame(),
-      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
-      reinterpret_cast<void*>(0x456));
+  auto response = makeErrorResponseMessage(reinterpret_cast<void*>(0x456));
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -249,10 +229,11 @@ TEST_F(ThriftClientMetadataPushHandlerTest, ErrorFramePassesThrough) {
   ASSERT_EQ(ctx_.readMessages().size(), 1);
 }
 
-TEST_F(ThriftClientMetadataPushHandlerTest, KeepAliveFramePassesThrough) {
-  auto response = makeParsedFrameResponse(
-      createKeepAliveFrame(),
-      apache::thrift::fast_thrift::frame::FrameType::KEEPALIVE);
+TEST_F(ThriftClientMetadataPushHandlerTest, TransportErrorPassesThrough) {
+  // ThriftClientResponseError (transport failure path) is not a wire-derived
+  // payload — handler must forward it untouched so the tail can fail just
+  // this callback.
+  auto response = makeTransportErrorResponseMessage();
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -270,9 +251,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, SetupResponseSetsServerVersion) {
   serverMeta.setupResponse()->version() = 8;
   serverMeta.setupResponse()->zstdSupported() = true;
 
-  auto response = makeFrameResponse(
-      createMetadataPushFrame(serverMeta),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  auto response = makeMetadataPushResponse(serverMeta);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -288,9 +267,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, SetupResponseMarksSetupComplete) {
   serverMeta.set_setupResponse();
   serverMeta.setupResponse()->version() = 7;
 
-  auto response = makeFrameResponse(
-      createMetadataPushFrame(serverMeta),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  auto response = makeMetadataPushResponse(serverMeta);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -304,9 +281,7 @@ TEST_F(
   serverMeta.set_setupResponse();
   serverMeta.setupResponse()->version() = 8;
 
-  auto response = makeFrameResponse(
-      createMetadataPushFrame(serverMeta),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  auto response = makeMetadataPushResponse(serverMeta);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -320,9 +295,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, SetupResponseWithMissingVersion) {
   serverMeta.set_setupResponse();
   // version not set - should default to 0
 
-  auto response = makeFrameResponse(
-      createMetadataPushFrame(serverMeta),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  auto response = makeMetadataPushResponse(serverMeta);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -340,9 +313,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, StreamHeadersPushLogsAndIgnores) {
   serverMeta.set_streamHeadersPush();
   serverMeta.streamHeadersPush()->streamId() = 42;
 
-  auto response = makeFrameResponse(
-      createMetadataPushFrame(serverMeta),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  auto response = makeMetadataPushResponse(serverMeta);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -362,9 +333,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, DrainCompleteGenericIsSilent) {
   apache::thrift::ServerPushMetadata serverMeta;
   serverMeta.set_drainCompletePush();
 
-  auto response = makeFrameResponse(
-      createMetadataPushFrame(serverMeta),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  auto response = makeMetadataPushResponse(serverMeta);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -380,9 +349,7 @@ TEST_F(
   serverMeta.drainCompletePush()->drainCompleteCode() =
       apache::thrift::DrainCompleteCode::EXCEEDED_INGRESS_MEM_LIMIT;
 
-  auto response = makeFrameResponse(
-      createMetadataPushFrame(serverMeta),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  auto response = makeMetadataPushResponse(serverMeta);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -405,9 +372,7 @@ TEST_F(ThriftClientMetadataPushHandlerTest, MalformedMetadataReturnsError) {
   // Create a METADATA_PUSH frame with invalid/garbage data
   auto garbage = folly::IOBuf::copyBuffer("not valid compact protocol data!");
 
-  auto response = makeFrameResponse(
-      createMetadataPushFrameRaw(std::move(garbage)),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  auto response = makeMetadataPushResponseRaw(std::move(garbage));
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -423,14 +388,10 @@ TEST_F(ThriftClientMetadataPushHandlerTest, MalformedMetadataReturnsError) {
 }
 
 TEST_F(ThriftClientMetadataPushHandlerTest, EmptyMetadataReturnsError) {
-  // Create a METADATA_PUSH frame with empty metadata
-  auto response = makeFrameResponse(
-      createMetadataPushFrameRaw(nullptr),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
+  auto response = makeMetadataPushResponseRaw(nullptr);
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
-  // Empty metadata will fail to deserialize
   EXPECT_EQ(result, Result::Error);
   ASSERT_EQ(ctx_.exceptions().size(), 1);
   auto* tex =
@@ -464,10 +425,7 @@ TEST_F(
     ThriftClientMetadataPushHandlerTest, BackpressurePropagatedOnPassThrough) {
   ctx_.setReturnBackpressure(true);
 
-  auto response = makeParsedFrameResponse(
-      createPayloadFrame(),
-      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
-      reinterpret_cast<void*>(0x789));
+  auto response = makeFirstResponseMessage(reinterpret_cast<void*>(0x789));
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
@@ -477,142 +435,16 @@ TEST_F(
 TEST_F(ThriftClientMetadataPushHandlerTest, ErrorPropagatedOnPassThrough) {
   ctx_.setReturnError(true);
 
-  auto response = makeParsedFrameResponse(
-      createPayloadFrame(),
-      apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE,
-      reinterpret_cast<void*>(0x789));
+  auto response = makeFirstResponseMessage(reinterpret_cast<void*>(0x789));
 
   auto result = callOnRead(erase_and_box(std::move(response)));
 
   EXPECT_EQ(result, Result::Error);
 }
 
-// =============================================================================
-// Rocket-Server-Style Frame Tests (M flag set, no 3-byte metadata prefix)
-// =============================================================================
-// These tests construct METADATA_PUSH frames with the M flag set, exactly
-// as the Rocket server produces them. This exercises the code path that
-// previously caused the parser to misread the first 3 bytes of metadata
-// as a length prefix.
-
-namespace {
-
-void writeU32BE(std::vector<uint8_t>& buf, uint32_t value) {
-  buf.push_back(static_cast<uint8_t>(value >> 24));
-  buf.push_back(static_cast<uint8_t>(value >> 16));
-  buf.push_back(static_cast<uint8_t>(value >> 8));
-  buf.push_back(static_cast<uint8_t>(value));
-}
-
-void writeU16BE(std::vector<uint8_t>& buf, uint16_t value) {
-  buf.push_back(static_cast<uint8_t>(value >> 8));
-  buf.push_back(static_cast<uint8_t>(value));
-}
-
-uint16_t makeTypeAndFlags(
-    apache::thrift::fast_thrift::frame::FrameType type, uint16_t flags) {
-  return (static_cast<uint16_t>(type) << 10) | (flags & 0x3FF);
-}
-
-} // namespace
-
-class RocketStyleMetadataPushTest : public ThriftClientMetadataPushHandlerTest {
- protected:
-  apache::thrift::fast_thrift::frame::read::ParsedFrame
-  createRocketStyleMetadataPushFrame(
-      const apache::thrift::ServerPushMetadata& meta) {
-    auto serialized = serializeServerPushMetadata(meta);
-
-    std::vector<uint8_t> header;
-    writeU32BE(header, 0); // Stream ID = 0
-    writeU16BE(
-        header,
-        makeTypeAndFlags(
-            apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH,
-            apache::thrift::fast_thrift::frame::detail::kMetadataBit));
-
-    auto headerBuf = folly::IOBuf::copyBuffer(header.data(), header.size());
-    headerBuf->appendToChain(std::move(serialized));
-    return apache::thrift::fast_thrift::frame::read::parseFrame(
-        std::move(headerBuf));
-  }
-};
-
-TEST_F(RocketStyleMetadataPushTest, SetupResponseFromRocketServerStyleFrame) {
-  apache::thrift::ServerPushMetadata serverMeta;
-  serverMeta.set_setupResponse();
-  serverMeta.setupResponse()->version() = 8;
-  serverMeta.setupResponse()->zstdSupported() = true;
-
-  auto response = makeFrameResponse(
-      createRocketStyleMetadataPushFrame(serverMeta),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
-
-  auto result = callOnRead(erase_and_box(std::move(response)));
-
-  EXPECT_EQ(result, Result::Success);
-  EXPECT_EQ(handler_.serverVersion(), 8);
-  EXPECT_TRUE(handler_.serverSupportsZstd());
-  EXPECT_TRUE(handler_.isSetupComplete());
-  EXPECT_EQ(ctx_.readMessages().size(), 0);
-}
-
-TEST_F(RocketStyleMetadataPushTest, DrainCompleteFromRocketServerStyleFrame) {
-  apache::thrift::ServerPushMetadata serverMeta;
-  serverMeta.set_drainCompletePush();
-  serverMeta.drainCompletePush()->drainCompleteCode() =
-      apache::thrift::DrainCompleteCode::EXCEEDED_INGRESS_MEM_LIMIT;
-
-  auto response = makeFrameResponse(
-      createRocketStyleMetadataPushFrame(serverMeta),
-      apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
-
-  auto result = callOnRead(erase_and_box(std::move(response)));
-
-  EXPECT_EQ(result, Result::Success);
-  EXPECT_EQ(ctx_.readMessages().size(), 0);
-  ASSERT_EQ(ctx_.exceptions().size(), 1);
-
-  auto* appEx = ctx_.exceptions()[0]
-                    .get_exception<apache::thrift::TApplicationException>();
-  ASSERT_NE(appEx, nullptr);
-  EXPECT_NE(std::string(appEx->what()).find("memory limit"), std::string::npos);
-}
-
-TEST_F(RocketStyleMetadataPushTest, SetupResponseWorksBothFrameStyles) {
-  apache::thrift::ServerPushMetadata serverMeta;
-  serverMeta.set_setupResponse();
-  serverMeta.setupResponse()->version() = 10;
-  serverMeta.setupResponse()->zstdSupported() = false;
-
-  // Rocket-style (M flag set)
-  {
-    auto response = makeFrameResponse(
-        createRocketStyleMetadataPushFrame(serverMeta),
-        apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
-    auto result = callOnRead(erase_and_box(std::move(response)));
-
-    EXPECT_EQ(result, Result::Success);
-    EXPECT_EQ(handler_.serverVersion(), 10);
-    EXPECT_FALSE(handler_.serverSupportsZstd());
-    EXPECT_TRUE(handler_.isSetupComplete());
-  }
-
-  // Reset handler state
-  SetUp();
-
-  // FrameWriter-style (now also M flag set after the fix)
-  {
-    auto response = makeFrameResponse(
-        createMetadataPushFrame(serverMeta),
-        apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH);
-    auto result = callOnRead(erase_and_box(std::move(response)));
-
-    EXPECT_EQ(result, Result::Success);
-    EXPECT_EQ(handler_.serverVersion(), 10);
-    EXPECT_FALSE(handler_.serverSupportsZstd());
-    EXPECT_TRUE(handler_.isSetupComplete());
-  }
-}
+// Rocket-server-style METADATA_PUSH wire-format coverage now lives in
+// `thrift/client/util/test/RocketFrameDecoderTest.cpp` — the handler
+// operates on already-decoded `ThriftMetadataPushPayload` and is
+// decoupled from the wire shape.
 
 } // namespace apache::thrift::fast_thrift::thrift::client::handler

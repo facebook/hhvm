@@ -29,11 +29,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientChannel.h>
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
 namespace apache::thrift::fast_thrift::thrift {
@@ -168,29 +165,19 @@ class ThriftClientChannelTest : public ::testing::Test {
       uint16_t /* protocolId */,
       apache::thrift::MessageType /* mtype */,
       const std::string& data) {
-    apache::thrift::ResponseRpcMetadata metadata;
-    metadata.payloadMetadata().ensure().set_responseMetadata(
+    auto metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>();
+    metadata->payloadMetadata().ensure().set_responseMetadata(
         apache::thrift::PayloadResponseMetadata{});
 
-    apache::thrift::BinaryProtocolWriter writer;
-    folly::IOBufQueue metadataQueue(folly::IOBufQueue::cacheChainLength());
-    writer.setOutput(&metadataQueue);
-    metadata.write(&writer);
-    auto serializedMetadata = metadataQueue.move();
-
-    auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-        apache::thrift::fast_thrift::frame::write::PayloadHeader{
-            .streamId = 1,
-            .follows = false,
-            .complete = true,
-            .next = true,
-        },
-        std::move(serializedMetadata),
-        folly::IOBuf::copyBuffer(data));
-
     ThriftResponseMessage response;
-    response.payload =
-        apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+    response.payload = ThriftClientInboundPayloadVariant{
+        ThriftFirstResponsePayload{
+            .metadata = std::move(metadata),
+            .data = folly::IOBuf::copyBuffer(data),
+            .streamId = 1,
+            .complete = true,
+            .next = true},
+        apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
     response.requestContext =
         apache::thrift::fast_thrift::rocket::borrow(requestContext);
     response.streamType =
@@ -320,14 +307,14 @@ TEST_F(ThriftClientChannelTest, OnMessageWithErrorInvokesErrorCallback) {
       nullptr);
 
   // Send an ERROR frame response
-  auto errorFrame = apache::thrift::fast_thrift::frame::write::serialize(
-      apache::thrift::fast_thrift::frame::write::ErrorHeader{
-          .streamId = 1, .errorCode = 0x00000201},
-      nullptr,
-      folly::IOBuf::copyBuffer("test error"));
   ThriftResponseMessage errorResponse;
-  errorResponse.payload = apache::thrift::fast_thrift::frame::read::parseFrame(
-      std::move(errorFrame));
+  errorResponse.payload = ThriftClientInboundPayloadVariant{
+      ThriftErrorPayload{
+          .data = folly::IOBuf::copyBuffer("test error"),
+          .metadata = nullptr,
+          .streamId = 1,
+          .errorCode = 0x00000201},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   errorResponse.requestContext =
       apache::thrift::fast_thrift::rocket::borrow(capturedHandle);
   errorResponse.streamType =

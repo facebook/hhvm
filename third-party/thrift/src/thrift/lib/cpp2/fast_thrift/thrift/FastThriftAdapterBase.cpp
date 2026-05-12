@@ -17,50 +17,50 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/FastThriftAdapterBase.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/util/ErrorDecoding.h>
-
-#include <fmt/core.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/client/util/RocketFrameDecoder.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
 folly::Expected<std::unique_ptr<folly::IOBuf>, folly::exception_wrapper>
 FastThriftAdapterBase::handleRequestResponse(
     ThriftResponseMessage&& response, uint16_t protocolId) {
-  auto& frame =
-      response.payload
-          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
-  if (FOLLY_LIKELY(
-          frame.type() ==
-          apache::thrift::fast_thrift::frame::FrameType::PAYLOAD)) {
-    apache::thrift::ResponseRpcMetadata metadata;
-    if (auto error = deserializeResponseMetadata(frame, metadata);
-        FOLLY_UNLIKELY(!!error)) {
-      return folly::makeUnexpected(std::move(error));
-    }
+  auto& inbound = response.payload.get<ThriftClientInboundPayloadVariant>();
+
+  if (FOLLY_LIKELY(inbound.is<ThriftFirstResponsePayload>())) {
+    auto& payload = inbound.get<ThriftFirstResponsePayload>();
+    DCHECK(payload.metadata != nullptr);
+    auto& metadata = *payload.metadata;
 
     auto action = classifyPayloadAction(metadata);
     if (FOLLY_UNLIKELY(action.hasError())) {
       return folly::makeUnexpected(std::move(action.error()));
     }
 
-    auto data = std::move(frame).extractData();
     if (FOLLY_UNLIKELY(action.value() == PayloadAction::ExtractAnyException)) {
       return folly::makeUnexpected(
-          extractAnyException(std::move(data), protocolId));
+          extractAnyException(std::move(payload.data), protocolId));
     }
-    return std::move(data);
-  } else if (
-      frame.type() == apache::thrift::fast_thrift::frame::FrameType::ERROR) {
-    return folly::makeUnexpected(decodeErrorFrame(frame));
-  } else {
-    return folly::makeUnexpected(
-        folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-            apache::thrift::TApplicationException::PROTOCOL_ERROR,
-            fmt::format(
-                "Unexpected frame type: {}", static_cast<int>(frame.type()))));
+    return std::move(payload.data);
   }
+
+  if (inbound.is<ThriftErrorPayload>()) {
+    auto& payload = inbound.get<ThriftErrorPayload>();
+    auto decoded = decodeErrorAsResponse(payload.errorCode, payload.data.get());
+    if (decoded.hasValue()) {
+      return folly::makeUnexpected(
+          folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+              decoded->exType, std::move(decoded->what)));
+    }
+    return folly::makeUnexpected(std::move(decoded.error()));
+  }
+
+  return folly::makeUnexpected(
+      folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+          apache::thrift::TApplicationException::PROTOCOL_ERROR,
+          "Unexpected payload alternative on RR response"));
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

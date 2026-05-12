@@ -97,7 +97,7 @@ class ThriftClientTransportAdapter {
    *
    * Converts RocketResponseMessage to ThriftResponseMessage and pushes it
    * into the thrift pipeline via fireRead. Per-request rocket errors are
-   * translated into a `ThriftResponseError` payload alternative — they
+   * translated into a `ThriftClientResponseError` payload alternative — they
    * travel inbound through the same fireRead path, so the tail can fail
    * just the affected pending callback without tearing down the channel.
    */
@@ -105,24 +105,37 @@ class ThriftClientTransportAdapter {
       channel_pipeline::TypeErasedBox&& msg) noexcept {
     auto response = msg.take<rocket::RocketResponseMessage>();
 
-    if (FOLLY_UNLIKELY(response.payload.is<rocket::RocketResponseError>())) {
-      ThriftResponseMessage thriftMsg{
-          .payload =
-              ThriftResponseError{
-                  .ew = std::move(
-                      response.payload.get<rocket::RocketResponseError>().ew)},
-          .requestContext = std::move(response.requestContext),
-          .streamType = response.streamType,
-      };
-      return pipeline_->fireRead(
-          channel_pipeline::erase_and_box(std::move(thriftMsg)));
-    }
-
     ThriftResponseMessage thriftMsg{
-        .payload = std::move(response.payload.get<frame::read::ParsedFrame>()),
+        .payload = {},
         .requestContext = std::move(response.requestContext),
         .streamType = response.streamType,
     };
+
+    if (FOLLY_UNLIKELY(response.payload.is<rocket::RocketResponseError>())) {
+      thriftMsg.payload = ThriftClientResponseError{
+          .ew = std::move(
+              response.payload.get<rocket::RocketResponseError>().ew)};
+    } else {
+      // Decode the parsed wire frame into the typed thrift inbound payload
+      // variant. From here on, the thrift pipeline never sees `ParsedFrame`.
+      //
+      // Today only REQUEST_RESPONSE is wired end-to-end on the client;
+      // hard-code the corresponding `RpcKind`. METADATA_PUSH frames ignore
+      // `kind` in fromRocketFrame. As FNF / Stream / Sink / Bidi land,
+      // replace this with a `streamType → RpcKind` mapping.
+      auto decoded = fromRocketFrame(
+          std::move(response.payload.get<frame::read::ParsedFrame>()),
+          apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+      if (FOLLY_UNLIKELY(!decoded.hasValue())) {
+        // Wire-decode failure: surface as a per-request
+        // ThriftClientResponseError so the channel fails just this
+        // callback. Connection stays Open.
+        thriftMsg.payload =
+            ThriftClientResponseError{.ew = std::move(decoded.error())};
+      } else {
+        thriftMsg.payload = std::move(decoded.value());
+      }
+    }
 
     return pipeline_->fireRead(
         channel_pipeline::erase_and_box(std::move(thriftMsg)));
@@ -163,7 +176,7 @@ class ThriftClientTransportAdapter {
     auto request = msg.take<ThriftRequestMessage>();
     // toRocketFrame() serializes the request metadata and can throw on
     // serializer/allocator failure. Catch and deliver inbound as a
-    // per-request ThriftResponseError so the AppAdapter fails just this
+    // per-request ThriftClientResponseError so the AppAdapter fails just this
     // request without tearing the channel down.
     frame::ComposedRequestResponseFrame frame;
     try {
@@ -172,7 +185,7 @@ class ThriftClientTransportAdapter {
     } catch (...) {
       ThriftResponseMessage errMsg{
           .payload =
-              ThriftResponseError{
+              ThriftClientResponseError{
                   .ew = folly::exception_wrapper(std::current_exception())},
           .requestContext = std::move(request.requestContext),
           .streamType = frame::FrameType::REQUEST_RESPONSE,

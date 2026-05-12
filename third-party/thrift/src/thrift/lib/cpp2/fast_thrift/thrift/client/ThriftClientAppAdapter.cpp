@@ -84,10 +84,10 @@ ThriftClientAppAdapter::onRead(
   // Per-request error from below (e.g., rocket in-process serialize
   // failure). Fail just this handler; channel stays Open for subsequent
   // requests.
-  if (FOLLY_UNLIKELY(response.payload.is<ThriftResponseError>())) {
+  if (FOLLY_UNLIKELY(response.payload.is<ThriftClientResponseError>())) {
     handler(
         folly::makeUnexpected(
-            std::move(response.payload.get<ThriftResponseError>().ew)));
+            std::move(response.payload.get<ThriftClientResponseError>().ew)));
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 

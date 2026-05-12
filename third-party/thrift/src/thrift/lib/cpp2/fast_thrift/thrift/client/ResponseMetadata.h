@@ -34,26 +34,6 @@
 namespace apache::thrift::fast_thrift::thrift {
 
 /**
- * Deserialize ResponseRpcMetadata from a ParsedFrame's metadata section
- * using Binary protocol. Returns an error on deserialization failure.
- */
-inline folly::exception_wrapper deserializeResponseMetadata(
-    const apache::thrift::fast_thrift::frame::read::ParsedFrame& frame,
-    apache::thrift::ResponseRpcMetadata& metadata) noexcept {
-  try {
-    if (frame.hasMetadata() && frame.metadataSize() > 0) {
-      apache::thrift::BinaryProtocolReader reader;
-      reader.setInput(frame.metadataCursor());
-      metadata.read(&reader);
-    }
-  } catch (...) {
-    return folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-        "Failed to deserialize response metadata");
-  }
-  return folly::exception_wrapper{};
-}
-
-/**
  * Process exception metadata and populate otherMetadata headers.
  * Returns an error for undeclared exceptions, empty for declared.
  */

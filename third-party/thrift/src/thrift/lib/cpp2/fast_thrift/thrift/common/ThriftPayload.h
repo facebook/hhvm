@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/common/RequestMetadata.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ResponseMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 #include <folly/io/IOBuf.h>
@@ -71,7 +72,7 @@ struct ThriftRequestResponsePayload {
 
   // Serializes metadata as part of frame composition. Throws on
   // serializer/allocator failure; the transport adapter catches and
-  // delivers the error inbound as a per-request `ThriftResponseError`.
+  // delivers the error inbound as a per-request `ThriftClientResponseError`.
   RocketFrame toRocketFrame() && {
     DCHECK(metadata != nullptr) << "metadata must be set before serializing";
     return {
@@ -204,6 +205,41 @@ struct ThriftResponsePayload {
 };
 
 /**
+ * ThriftFirstResponsePayload — first response on a stream.
+ *
+ * Models the RR response and the first PAYLOAD on a Stream/Sink/Bidi
+ * exchange — the cases where the wire metadata buffer carries a typed
+ * `ResponseRpcMetadata`. Subsequent stream chunks carry the leaner
+ * `StreamPayloadMetadata` and use `ThriftResponsePayload` (raw IOBuf)
+ * with use-time deserialization.
+ *
+ * Bidirectional:
+ *   - Client inbound: `fromRocketFrame` produces this struct with metadata
+ *     already deserialized so handlers above operate on a typed view
+ *     without re-parsing.
+ *   - Server outbound: `toRocketFrame()` serializes metadata back into the
+ *     PAYLOAD frame. Throws on serializer/allocator failure.
+ */
+struct ThriftFirstResponsePayload {
+  using RocketFrame = apache::thrift::fast_thrift::frame::ComposedPayloadFrame;
+
+  std::unique_ptr<apache::thrift::ResponseRpcMetadata> metadata{nullptr};
+  std::unique_ptr<folly::IOBuf> data{nullptr};
+  uint32_t streamId{apache::thrift::fast_thrift::rocket::kInvalidStreamId};
+  bool complete{true};
+  bool next{true};
+
+  RocketFrame toRocketFrame() && {
+    DCHECK(metadata);
+    return {
+        .data = std::move(data),
+        .metadata = serializeResponseMetadata(*metadata),
+        .header = {.streamId = streamId, .complete = complete, .next = next},
+    };
+  }
+};
+
+/**
  * ThriftErrorPayload — App's "error" operation. Always terminal.
  *
  * `errorCode` is rocket-level (REJECTED, INVALID, APPLICATION_ERROR, …).
@@ -255,6 +291,28 @@ struct ThriftRequestNPayload {
 
   RocketFrame toRocketFrame() && noexcept {
     return {.header = {.streamId = streamId, .requestN = requestN}};
+  }
+};
+
+/**
+ * ThriftMetadataPushPayload — connection-level metadata push.
+ *
+ * Wire frame is rocket-spec METADATA_PUSH (streamId=0, no data, metadata
+ * only) but the metadata payload is thrift-specific (server version
+ * negotiation, setup signaling, etc.) — so the typed payload lives in the
+ * thrift layer and is interpreted by `ThriftClientMetadataPushHandler`.
+ *
+ * Bidirectional: server sends after SETUP to advertise capabilities;
+ * client may send to push runtime metadata.
+ */
+struct ThriftMetadataPushPayload {
+  using RocketFrame =
+      apache::thrift::fast_thrift::frame::ComposedMetadataPushFrame;
+
+  std::unique_ptr<folly::IOBuf> metadata{nullptr};
+
+  RocketFrame toRocketFrame() && noexcept {
+    return {.metadata = std::move(metadata), .header = {}};
   }
 };
 

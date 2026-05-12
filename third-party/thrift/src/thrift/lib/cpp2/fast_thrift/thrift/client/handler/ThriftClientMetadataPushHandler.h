@@ -23,8 +23,8 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Handler.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/detail/ContextImpl.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
 namespace apache::thrift::fast_thrift::thrift::client::handler {
@@ -84,22 +84,18 @@ class ThriftClientMetadataPushHandler {
 
     // Pass through per-request error variant unchanged — handled at the tail.
     if (FOLLY_UNLIKELY(
-            !response.payload.is<
-                apache::thrift::fast_thrift::frame::read::ParsedFrame>())) {
+            !response.payload.is<ThriftClientInboundPayloadVariant>())) {
       return ctx.fireRead(std::move(msg));
     }
 
-    auto& frame =
-        response.payload
-            .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+    auto& inbound = response.payload.get<ThriftClientInboundPayloadVariant>();
 
-    // Pass through non-METADATA_PUSH frames
-    if (frame.type() !=
-        apache::thrift::fast_thrift::frame::FrameType::METADATA_PUSH) {
+    // Pass through anything that isn't METADATA_PUSH.
+    if (!inbound.is<ThriftMetadataPushPayload>()) {
       return ctx.fireRead(std::move(msg));
     }
 
-    return handleMetadataPush(ctx, frame);
+    return handleMetadataPush(ctx, inbound.get<ThriftMetadataPushPayload>());
   }
 
   template <typename Context>
@@ -122,15 +118,19 @@ class ThriftClientMetadataPushHandler {
    */
   template <typename Context>
   apache::thrift::fast_thrift::channel_pipeline::Result handleMetadataPush(
-      Context& ctx,
-      apache::thrift::fast_thrift::frame::read::ParsedFrame& frame) noexcept {
-    // Deserialize ServerPushMetadata from the frame
-    // METADATA_PUSH frames have the entire payload as metadata
+      Context& ctx, ThriftMetadataPushPayload& payload) noexcept {
+    if (FOLLY_UNLIKELY(payload.metadata == nullptr)) {
+      ctx.fireException(
+          folly::make_exception_wrapper<
+              apache::thrift::transport::TTransportException>(
+              apache::thrift::transport::TTransportException::CORRUPTED_DATA,
+              "METADATA_PUSH payload missing metadata"));
+      return apache::thrift::fast_thrift::channel_pipeline::Result::Error;
+    }
     apache::thrift::ServerPushMetadata serverMeta;
     try {
       apache::thrift::CompactProtocolReader reader;
-      auto cursor = frame.payloadCursor();
-      reader.setInput(cursor);
+      reader.setInput(payload.metadata.get());
       serverMeta.read(&reader);
     } catch (const std::exception& ex) {
       XLOG(ERR) << "Failed to deserialize METADATA_PUSH frame: " << ex.what();

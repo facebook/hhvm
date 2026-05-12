@@ -29,8 +29,6 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/test/MockHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/FrameType.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/FrameParser.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameHeaders.h>
-#include <thrift/lib/cpp2/fast_thrift/frame/write/FrameWriter.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ThriftClientAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/transport/TransportHandler.h>
@@ -64,16 +62,15 @@ ThriftResponseMessage makeResponse(
     void* requestContext,
     apache::thrift::fast_thrift::frame::FrameType frameType =
         apache::thrift::fast_thrift::frame::FrameType::REQUEST_RESPONSE) {
-  auto data = folly::IOBuf::copyBuffer("response");
-  auto frame = apache::thrift::fast_thrift::frame::write::serialize(
-      apache::thrift::fast_thrift::frame::write::PayloadHeader{
-          .streamId = 1, .follows = false, .complete = true, .next = true},
-      nullptr,
-      std::move(data));
-
   ThriftResponseMessage response;
-  response.payload =
-      apache::thrift::fast_thrift::frame::read::parseFrame(std::move(frame));
+  response.payload = ThriftClientInboundPayloadVariant{
+      ThriftFirstResponsePayload{
+          .metadata = std::make_unique<apache::thrift::ResponseRpcMetadata>(),
+          .data = folly::IOBuf::copyBuffer("response"),
+          .streamId = 1,
+          .complete = true,
+          .next = true},
+      apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE};
   response.requestContext =
       apache::thrift::fast_thrift::rocket::borrow(requestContext);
   response.streamType = frameType;

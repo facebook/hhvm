@@ -108,34 +108,30 @@ struct DecodedErrorResponse {
 };
 
 /**
- * Decodes an ERROR frame into structured data with metadata.
+ * Core error decoder — operates on the wire pieces (errorCode + data
+ * IOBuf) directly, with no dependency on ParsedFrame. Used by both the
+ * legacy ParsedFrame entry point and the typed `ThriftErrorPayload` path
+ * in the channel.
  *
- * For error codes CANCELED/INVALID/REJECTED: parses the payload as
- * ResponseRpcError and returns a DecodedErrorResponse with exType, exCode,
+ * For error codes CANCELED/INVALID/REJECTED: parses the data as
+ * ResponseRpcError and returns DecodedErrorResponse with exType, exCode,
  * what, and load metadata.
  *
  * For other error codes (APPLICATION_ERROR, CONNECTION_ERROR, etc.):
- * returns an exception_wrapper containing a generic TApplicationException.
- *
- * This mirrors the logic in RocketClientChannelBase::decodeResponseError().
+ * returns a generic TApplicationException.
  */
 inline folly::Expected<DecodedErrorResponse, folly::exception_wrapper>
-decodeErrorFrameAsResponse(
-    const apache::thrift::fast_thrift::frame::read::ParsedFrame& frame) {
-  DCHECK(frame.type() == apache::thrift::fast_thrift::frame::FrameType::ERROR);
-
-  apache::thrift::fast_thrift::frame::read::ErrorView errorView(frame);
-  auto errorCode =
-      static_cast<apache::thrift::rocket::ErrorCode>(errorView.errorCode());
+decodeErrorAsResponse(uint32_t rawErrorCode, const folly::IOBuf* data) {
+  auto errorCode = static_cast<apache::thrift::rocket::ErrorCode>(rawErrorCode);
 
   if (errorCode == apache::thrift::rocket::ErrorCode::CANCELED ||
       errorCode == apache::thrift::rocket::ErrorCode::INVALID ||
       errorCode == apache::thrift::rocket::ErrorCode::REJECTED) {
     apache::thrift::ResponseRpcError responseError;
     try {
-      if (frame.dataSize() > 0) {
+      if (data != nullptr && data->computeChainDataLength() > 0) {
         apache::thrift::CompactProtocolReader reader;
-        auto cursor = frame.dataCursor();
+        folly::io::Cursor cursor(data);
         reader.setInput(cursor);
         responseError.read(&reader);
       }
@@ -169,6 +165,29 @@ decodeErrorFrameAsResponse(
           fmt::format(
               "Unexpected error frame type: {}",
               static_cast<uint32_t>(errorCode))));
+}
+
+/**
+ * Decodes an ERROR frame into structured data with metadata.
+ *
+ * Thin wrapper that extracts errorCode + data buffer from the parsed
+ * frame and delegates to `decodeErrorAsResponse`. Kept for callers that
+ * still operate on `ParsedFrame` directly.
+ */
+inline folly::Expected<DecodedErrorResponse, folly::exception_wrapper>
+decodeErrorFrameAsResponse(
+    const apache::thrift::fast_thrift::frame::read::ParsedFrame& frame) {
+  DCHECK(frame.type() == apache::thrift::fast_thrift::frame::FrameType::ERROR);
+
+  apache::thrift::fast_thrift::frame::read::ErrorView errorView(frame);
+  // Reconstruct the data IOBuf chain from the frame's data cursor.
+  auto dataCursor = frame.dataCursor();
+  auto dataSize = frame.dataSize();
+  std::unique_ptr<folly::IOBuf> dataBuf;
+  if (dataSize > 0) {
+    dataCursor.clone(dataBuf, dataSize);
+  }
+  return decodeErrorAsResponse(errorView.errorCode(), dataBuf.get());
 }
 
 /**

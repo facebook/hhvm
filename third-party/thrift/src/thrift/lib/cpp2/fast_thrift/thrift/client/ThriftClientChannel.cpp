@@ -27,6 +27,7 @@
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/client/util/ErrorDecoding.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/common/ThriftPayload.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -152,27 +153,19 @@ void ThriftClientChannel::sendRequestResponse(
 void ThriftClientChannel::handleRequestResponse(
     ThriftResponseMessage&& response,
     apache::thrift::RequestClientCallback::Ptr callback) {
-  auto& frame =
-      response.payload
-          .get<apache::thrift::fast_thrift::frame::read::ParsedFrame>();
+  auto& inbound = response.payload.get<ThriftClientInboundPayloadVariant>();
 
-  // Deserialize response metadata
-  apache::thrift::ResponseRpcMetadata metadata;
-  if (auto error = deserializeResponseMetadata(frame, metadata);
-      FOLLY_UNLIKELY(!!error)) {
-    callback.release()->onResponseError(std::move(error));
-    return;
-  }
+  if (FOLLY_LIKELY(inbound.is<ThriftFirstResponsePayload>())) {
+    auto& payload = inbound.get<ThriftFirstResponsePayload>();
+    DCHECK(payload.metadata != nullptr);
+    auto& metadata = *payload.metadata;
 
-  // Process payload metadata
-  if (auto error = processPayloadMetadata(metadata); FOLLY_UNLIKELY(!!error)) {
-    callback.release()->onResponseError(std::move(error));
-    return;
-  }
+    if (auto error = processPayloadMetadata(metadata);
+        FOLLY_UNLIKELY(!!error)) {
+      callback.release()->onResponseError(std::move(error));
+      return;
+    }
 
-  if (FOLLY_LIKELY(
-          frame.type() ==
-          apache::thrift::fast_thrift::frame::FrameType::PAYLOAD)) {
     auto tHeader = std::make_unique<apache::thrift::transport::THeader>();
     tHeader->setClientType(THRIFT_ROCKET_CLIENT_TYPE);
     apache::thrift::detail::fillTHeaderFromResponseRpcMetadata(
@@ -181,13 +174,16 @@ void ThriftClientChannel::handleRequestResponse(
         apache::thrift::ClientReceiveState(
             protocolId_,
             apache::thrift::MessageType::T_REPLY,
-            apache::thrift::SerializedResponse(std::move(frame).extractData()),
+            apache::thrift::SerializedResponse(std::move(payload.data)),
             std::move(tHeader),
             nullptr,
             apache::thrift::RpcTransportStats{}));
-  } else if (
-      frame.type() == apache::thrift::fast_thrift::frame::FrameType::ERROR) {
-    auto decoded = decodeErrorFrameAsResponse(frame);
+    return;
+  }
+
+  if (inbound.is<ThriftErrorPayload>()) {
+    auto& payload = inbound.get<ThriftErrorPayload>();
+    auto decoded = decodeErrorAsResponse(payload.errorCode, payload.data.get());
     if (decoded.hasValue()) {
       auto& resp = decoded.value();
       apache::thrift::TApplicationException tae(resp.exType, resp.what);
@@ -220,13 +216,13 @@ void ThriftClientChannel::handleRequestResponse(
     } else {
       callback.release()->onResponseError(std::move(decoded.error()));
     }
-  } else {
-    callback.release()->onResponseError(
-        folly::make_exception_wrapper<apache::thrift::TApplicationException>(
-            apache::thrift::TApplicationException::PROTOCOL_ERROR,
-            fmt::format(
-                "Unexpected frame type: {}", static_cast<int>(frame.type()))));
+    return;
   }
+
+  callback.release()->onResponseError(
+      folly::make_exception_wrapper<apache::thrift::TApplicationException>(
+          apache::thrift::TApplicationException::PROTOCOL_ERROR,
+          "Unexpected payload alternative on RR response"));
 }
 
 apache::thrift::fast_thrift::channel_pipeline::Result
@@ -245,9 +241,9 @@ ThriftClientChannel::onRead(
   // Per-request error from below the thrift pipeline (e.g., rocket in-process
   // serialize failure). Fail just this callback; channel stays Open for
   // subsequent requests.
-  if (FOLLY_UNLIKELY(response.payload.is<ThriftResponseError>())) {
+  if (FOLLY_UNLIKELY(response.payload.is<ThriftClientResponseError>())) {
     callback.release()->onResponseError(
-        std::move(response.payload.get<ThriftResponseError>().ew));
+        std::move(response.payload.get<ThriftClientResponseError>().ew));
     return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 

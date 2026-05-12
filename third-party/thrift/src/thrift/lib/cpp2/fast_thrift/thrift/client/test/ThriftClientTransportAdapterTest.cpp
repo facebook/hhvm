@@ -231,7 +231,7 @@ TEST(ThriftClientTransportAdapterTest, InboundResponseConvertedToThrift) {
 
 TEST(
     ThriftClientTransportAdapterTest,
-    OnTransportResponseWithErrorRoutesAsThriftResponseErrorViaFireRead) {
+    OnTransportResponseWithErrorRoutesAsThriftClientResponseErrorViaFireRead) {
   auto connection = std::make_unique<rocket::client::RocketClientConnection>();
   auto* appAdapter = connection->appAdapter.get();
 
@@ -273,9 +273,9 @@ TEST(
 
   // In-process per-request error from below arrives as a RocketResponseMessage
   // with the RocketResponseError variant. The transport adapter translates it
-  // to a ThriftResponseMessage with the ThriftResponseError variant and routes
-  // it via fireRead so the tail can fail just this one callback — the channel
-  // stays Open (no fireException).
+  // to a ThriftResponseMessage with the ThriftClientResponseError variant and
+  // routes it via fireRead so the tail can fail just this one callback — the
+  // channel stays Open (no fireException).
   auto errorBox = makeRocketErrorResponseBox(
       folly::make_exception_wrapper<std::runtime_error>("serialize boom"));
   auto result = appAdapter->onRead(std::move(errorBox));

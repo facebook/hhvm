@@ -34,3 +34,12 @@ proxygen_add_test(TARGET WtStreamManagerTest
     proxygen_http_webtransport_wt_stream_manager
     testmain
 )
+
+proxygen_add_test(TARGET WtUtilsTest
+  SOURCES
+    WtUtilsTest.cpp
+  DEPENDS
+    proxygen_http_codec_webtransport_webtransport_framer
+    proxygen_http_webtransport_wt_util
+    testmain
+)

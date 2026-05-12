@@ -171,7 +171,8 @@ void WtEventVisitor::operator()(
       egress,
       WTResetStreamCapsule{.streamId = rst.streamId,
                            .appProtocolErrorCode = uint32_t(rst.err),
-                           .reliableSize = rst.reliableSize});
+                           .reliableSize = rst.reliableSize},
+      protocol);
 }
 
 void WtEventVisitor::operator()(
@@ -181,23 +182,24 @@ void WtEventVisitor::operator()(
   writeWTStopSending(
       egress,
       WTStopSendingCapsule{.streamId = ss.streamId,
-                           .appProtocolErrorCode = uint32_t(ss.err)});
+                           .appProtocolErrorCode = uint32_t(ss.err)},
+      protocol);
 }
 
 void WtEventVisitor::operator()(
     WtStreamManager::MaxConnData md) const noexcept {
   XLOG(DBG6) << kWtEventVisitor << " md.offset=" << md.maxData;
-  writeWTMaxData(egress, WTMaxDataCapsule{md.maxData});
+  writeWTMaxData(egress, WTMaxDataCapsule{md.maxData}, protocol);
 }
 
 void WtEventVisitor::operator()(
     WtStreamManager::MaxStreamData msd) const noexcept {
   XLOG(DBG6) << kWtEventVisitor << " msd.id=" << msd.streamId
              << " msd.offset=" << msd.maxData;
-  writeWTMaxStreamData(
-      egress,
-      WTMaxStreamDataCapsule{.streamId = msd.streamId,
-                             .maximumStreamData = msd.maxData});
+  writeWTMaxStreamData(egress,
+                       WTMaxStreamDataCapsule{.streamId = msd.streamId,
+                                              .maximumStreamData = msd.maxData},
+                       protocol);
 }
 
 void WtEventVisitor::operator()(
@@ -205,7 +207,8 @@ void WtEventVisitor::operator()(
   XLOG(DBG6) << kWtEventVisitor << " msd.maxStreamsBidi=" << ms.maxStreams;
   writeWTMaxStreams(egress,
                     WTMaxStreamsCapsule{.maximumStreams = ms.maxStreams},
-                    /*isBidi=*/true);
+                    /*isBidi=*/true,
+                    protocol);
 }
 
 void WtEventVisitor::operator()(
@@ -213,7 +216,8 @@ void WtEventVisitor::operator()(
   XLOG(DBG6) << kWtEventVisitor << " msd.maxStreamsUni=" << ms.maxStreams;
   writeWTMaxStreams(egress,
                     WTMaxStreamsCapsule{.maximumStreams = ms.maxStreams},
-                    /*isBidi=*/false);
+                    /*isBidi=*/false,
+                    protocol);
 }
 
 void WtEventVisitor::operator()(WtStreamManager::DrainSession) const noexcept {

@@ -68,6 +68,7 @@ bool supportsH3Wt(TransportDirection dir,
  */
 struct WtEventVisitor {
   folly::IOBufQueue& egress;
+  FrameProtocol protocol{FrameProtocol::WT_CAPSULE};
   bool sessionClosed{false};
 
   void operator()(WtStreamManager::ResetStream rst) const noexcept;

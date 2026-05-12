@@ -24,9 +24,17 @@ import io.netty.channel.ChannelPromise;
 /**
  * ChannelDuplexHandler that captures metrics about bytes read, and written. It also captures
  * metrics about the number of open channels.
+ *
+ * <p>Tracks whether {@code channelActive} was observed before incrementing the channel-count gauge,
+ * and only decrements on {@code channelInactive} when the matching increment happened. Without this
+ * guard, a connection that disconnects before an upstream defer-active handler (e.g.
+ * reactor-netty's {@code SslReadHandler} or our {@code DeferChannelActiveHandler}) re-fires {@code
+ * channelActive} would deliver an unmatched {@code channelInactive} downstream and drive the gauge
+ * negative.
  */
 public class MetricsChannelDuplexHandler extends ChannelDuplexHandler {
   private final SPINiftyMetrics spiNiftyMetrics;
+  private boolean seenChannelActive;
 
   public MetricsChannelDuplexHandler(SPINiftyMetrics spiNiftyMetrics) {
     this.spiNiftyMetrics = spiNiftyMetrics;
@@ -51,6 +59,7 @@ public class MetricsChannelDuplexHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    seenChannelActive = true;
     spiNiftyMetrics.incrementChannelCount();
     spiNiftyMetrics.incrementAcceptedConnections();
     ctx.fireChannelActive();
@@ -58,8 +67,11 @@ public class MetricsChannelDuplexHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    spiNiftyMetrics.decrementChannelCount();
-    spiNiftyMetrics.incrementDroppedConnections();
+    if (seenChannelActive) {
+      seenChannelActive = false;
+      spiNiftyMetrics.decrementChannelCount();
+      spiNiftyMetrics.incrementDroppedConnections();
+    }
     ctx.fireChannelInactive();
   }
 }

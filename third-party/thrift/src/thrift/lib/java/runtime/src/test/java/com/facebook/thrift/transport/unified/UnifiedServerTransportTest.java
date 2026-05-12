@@ -1304,4 +1304,142 @@ public class UnifiedServerTransportTest {
         .setThriftClientConfig(clientConfig)
         .build();
   }
+
+  // -------------------------------------------------------------------------
+  // Plaintext-on-loopback (allowPlaintext=true) tests
+  // -------------------------------------------------------------------------
+  //
+  // These tests cover the OptionalSslPeeker / DeferChannelActiveHandler path that activates when
+  // ThriftServerConfig.isAllowPlaintext() is true. The peeker inspects the first 5 bytes per
+  // connection, installs an SslHandler when TLS is detected, or fires PlaintextConfirmedEvent
+  // otherwise. DeferChannelActiveHandler suppresses the initial channelActive and re-fires it
+  // once the protocol branch is known so the doOnConnection callback works uniformly.
+
+  /** Plaintext header thrift client succeeds when the server has allowPlaintext=true. */
+  @Test
+  public void testPlaintextHeaderClientWorksWhenAllowPlaintextEnabled() throws Exception {
+    serverConfig.setAllowPlaintext(true);
+    transport =
+        UnifiedServerTransport.createNewInstance(
+                serverAddress, rpcServerHandler, serverConfig, new SPINiftyMetrics())
+            .block();
+    assertNotNull(transport);
+
+    RpcClientFactory factory = createPlaintextHeaderClientFactory();
+    client =
+        TestService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.COMPACT)
+            .build(factory, serverAddress);
+
+    TestRequest request = new TestRequest.Builder().setIntField(7).setStrField("plain").build();
+
+    StepVerifier.create(client.requestResponse(request))
+        .assertNext(
+            resp -> {
+              assertEquals(7, resp.getIntField());
+              assertEquals("plain", resp.getStrField());
+            })
+        .verifyComplete();
+  }
+
+  /** TLS header client over ALPN still works when the server has allowPlaintext=true. */
+  @Test
+  public void testTlsHeaderClientWorksWhenAllowPlaintextEnabled() throws Exception {
+    serverConfig.setAllowPlaintext(true);
+    transport =
+        UnifiedServerTransport.createNewInstance(
+                serverAddress, rpcServerHandler, serverConfig, new SPINiftyMetrics())
+            .block();
+    assertNotNull(transport);
+
+    RpcClientFactory factory = createHeaderClientFactory();
+    client =
+        TestService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.COMPACT)
+            .build(factory, serverAddress);
+
+    TestRequest request =
+        new TestRequest.Builder().setIntField(101).setStrField("tls-header").build();
+
+    StepVerifier.create(client.requestResponse(request))
+        .assertNext(
+            resp -> {
+              assertEquals(101, resp.getIntField());
+              assertEquals("tls-header", resp.getStrField());
+            })
+        .verifyComplete();
+  }
+
+  /** TLS RSocket client over ALPN still works when the server has allowPlaintext=true. */
+  @Test
+  public void testTlsRSocketClientWorksWhenAllowPlaintextEnabled() throws Exception {
+    serverConfig.setAllowPlaintext(true);
+    transport =
+        UnifiedServerTransport.createNewInstance(
+                serverAddress, rpcServerHandler, serverConfig, new SPINiftyMetrics())
+            .block();
+    assertNotNull(transport);
+
+    RpcClientFactory factory = createRSocketClientFactory();
+    client =
+        TestService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.COMPACT)
+            .build(factory, serverAddress);
+
+    TestRequest request =
+        new TestRequest.Builder().setIntField(202).setStrField("tls-rocket").build();
+
+    StepVerifier.create(client.requestResponse(request))
+        .assertNext(
+            resp -> {
+              assertEquals(202, resp.getIntField());
+              assertEquals("tls-rocket", resp.getStrField());
+            })
+        .verifyComplete();
+  }
+
+  /**
+   * Plaintext is rejected when allowPlaintext=false (regression — the existing .secure() path is
+   * unchanged, so plaintext clients should fail to connect).
+   */
+  @Test
+  public void testPlaintextRejectedWhenAllowPlaintextDisabled() throws Exception {
+    serverConfig.setAllowPlaintext(false);
+    transport =
+        UnifiedServerTransport.createNewInstance(
+                serverAddress, rpcServerHandler, serverConfig, new SPINiftyMetrics())
+            .block();
+    assertNotNull(transport);
+
+    RpcClientFactory factory = createPlaintextHeaderClientFactory();
+    client =
+        TestService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.COMPACT)
+            .build(factory, serverAddress);
+
+    TestRequest request = new TestRequest.Builder().setIntField(1).setStrField("nope").build();
+
+    // The plaintext handshake bytes look like a non-TLS record header to the server's SslHandler,
+    // which will close the connection. The exact thrown type depends on the client transport,
+    // so just verify the call does not succeed.
+    StepVerifier.create(client.requestResponse(request)).expectError().verify();
+  }
+
+  /**
+   * Helper method to create RpcClientFactory for plaintext (no TLS) header thrift connections.
+   * Mirrors the fbagent-style scrape of fb303 ports.
+   */
+  private RpcClientFactory createPlaintextHeaderClientFactory() throws Exception {
+    ThriftClientConfig clientConfig =
+        new ThriftClientConfig()
+            .setDisableSSL(true)
+            .setRequestTimeout(Duration.succinctDuration(30, TimeUnit.SECONDS));
+
+    return RpcClientFactory.builder()
+        .setDisableRSocket(true)
+        .setDisableLoadBalancing(true)
+        .setDisableReconnectingClient(true)
+        .setThriftClientConfig(clientConfig)
+        .build();
+  }
 }

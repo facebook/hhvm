@@ -35,6 +35,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import io.rsocket.core.RSocketServer;
 import io.rsocket.frame.FrameLengthCodec;
@@ -89,9 +90,33 @@ public class UnifiedServerTransport implements ServerTransport {
     ThriftConnectionAcceptor thrift =
         new ThriftConnectionAcceptor(rpcServerHandler, config.getTaskExpirationTimeout());
 
-    return TcpServer.create()
-        .secure(SslProvider.builder().sslContext(RpcServerUtils.getSslContext(config)).build())
-        .doOnChannelInit(new ThriftChannelInitializer(config, metrics))
+    SslContext sslContext = RpcServerUtils.getSslContext(config);
+
+    TcpServer server =
+        TcpServer.create().doOnChannelInit(new ThriftChannelInitializer(config, metrics));
+
+    if (config.isAllowPlaintext()) {
+      // Peek the first 5 bytes per connection to decide TLS vs plaintext. The OptionalSslHandler
+      // installs an SslHandler from the SslContext when TLS is detected (so the same
+      // cert/ALPN/cipher configuration applies as on the .secure() path). DeferChannelActiveHandler
+      // suppresses the initial channelActive and re-fires it once the protocol branch is known, so
+      // the doOnConnection callback below works uniformly for both branches.
+      server =
+          server.doOnChannelInit(
+              (observer, channel, remoteAddress) ->
+                  channel
+                      // pipeline order becomes [ optionalSslHandler → deferActive → ... ]
+                      .pipeline()
+                      .addFirst("deferActive", new DeferChannelActiveHandler())
+                      .addFirst("optionalSslHandler", new OptionalSslHandler(sslContext)));
+
+    } else {
+      // TLS-only: rely on reactor-netty's SslProvider machinery, which adds the SslHandler and an
+      // SslReadHandler that defers channelActive until handshake completion.
+      server = server.secure(SslProvider.builder().sslContext(sslContext).build());
+    }
+
+    return server
         .doOnConnection(
             connection -> {
               ThriftTransportType protocol = getProtocol(connection);
@@ -146,9 +171,10 @@ public class UnifiedServerTransport implements ServerTransport {
   private static ThriftTransportType getProtocol(Connection connection) {
     SslHandler sslHandler = connection.channel().pipeline().get(SslHandler.class);
     if (sslHandler == null) {
-      throw new IllegalStateException(
-          "cannot find an SslHandler in the pipeline (required for "
-              + "application-level protocol negotiation)");
+      // Plaintext branch (only reachable when ThriftServerConfig.allowPlaintext is true): ALPN
+      // is impossible without a TLS handshake, so default to HEADER. The fallback below in
+      // doOnConnection turns HEADER/RSOCKET-only checks into a no-op for this case.
+      return HEADER;
     }
     return ThriftTransportType.fromProtocol(sslHandler.applicationProtocol());
   }

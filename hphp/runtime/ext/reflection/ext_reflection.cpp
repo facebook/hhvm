@@ -450,7 +450,7 @@ Variant HHVM_FUNCTION(hphp_invoke_callable_named_args,
   if (callable.isFunc()) {
     func = callable.toFuncVal();
   } else if (callable.isClsMeth()) {
-    auto clsMeth = callable.toClsMethVal().get();
+    auto clsMeth = callable.toClsMethVal();
     func = clsMeth->getFunc();
     cls = clsMeth->getCls();
   } else {

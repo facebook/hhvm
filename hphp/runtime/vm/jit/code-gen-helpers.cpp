@@ -87,34 +87,70 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   }
 }
 
-void ldLowPtrImpl(Vout& v, Vptr mem, Vreg reg, size_t size) {
-  if (size == 64) {
-    v << load{mem, reg};
-  } else if (size == 35) {
-    auto packed = v.makeReg();
-    v << loadzlq{mem, packed};
-    v << shlqi{3, packed, reg, v.makeReg()};
-  } else if (size == 32) {
-    v << loadzlq{mem, reg};
-  } else {
-    not_implemented();
-  }
+template <>
+void emitLdPtr<32>(Vout& v, Vreg src, Vreg dst) {
+  v << copy{src, dst};
 }
 
-void stLowPtrImpl(Vout& v, Vreg reg, Vptr mem, size_t size) {
-  if (size == 64) {
-    v << store{reg, mem};
-  } else if (size == 35) {
-    auto shifted = v.makeReg();
-    v << shrqi{3, reg, shifted, v.makeReg()};
-    auto const temp = emitMovtql(v, shifted);
-    v << storel{temp, mem};
-  } else if (size == 32) {
-    auto const temp = emitMovtql(v, reg);
-    v << storel{temp, mem};
-  } else {
-    not_implemented();
-  }
+template <>
+void emitLdPtr<35>(Vout& v, Vreg src, Vreg dst) {
+  v << shlqi{3, src, dst, v.makeReg()};
+}
+
+template <>
+void emitLdPtr<64>(Vout& v, Vreg src, Vreg dst) {
+  v << copy{src, dst};
+}
+
+template <>
+void emitLdPtr<32>(Vout& v, Vptr src, Vreg dst) {
+  v << loadzlq{src, dst};
+}
+
+template <>
+void emitLdPtr<35>(Vout& v, Vptr src, Vreg dst) {
+  auto const packed = v.makeReg();
+  v << loadzlq{src, packed};
+  emitLdPtr<35>(v, packed, dst);
+}
+
+template <>
+void emitLdPtr<64>(Vout& v, Vptr src, Vreg dst) {
+  v << load{src, dst};
+}
+
+template <>
+void emitStPtr<32>(Vout& v, Vreg src, Vreg dst) {
+  v << copy{src, dst};
+}
+
+template <>
+void emitStPtr<35>(Vout& v, Vreg src, Vreg dst) {
+  v << shrqi{3, src, dst, v.makeReg()};
+}
+
+template <>
+void emitStPtr<64>(Vout& v, Vreg src, Vreg dst) {
+  v << copy{src, dst};
+}
+
+template <>
+void emitStPtr<32>(Vout& v, Vreg src, Vptr dst) {
+  auto const temp = emitMovtql(v, src);
+  v << storel{temp, dst};
+}
+
+template <>
+void emitStPtr<35>(Vout& v, Vreg src, Vptr dst) {
+  auto const packed = v.makeReg();
+  emitStPtr<35>(v, src, packed);
+  auto const temp = emitMovtql(v, packed);
+  v << storel{temp, dst};
+}
+
+template <>
+void emitStPtr<64>(Vout& v, Vreg src, Vptr dst) {
+  v << store{src, dst};
 }
 
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
@@ -447,11 +483,10 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
 
     case K::ObjDestructor: {
       auto const func = v.makeReg();
-      ldLowPtrImpl(
+      emitLdPtr<ObjReleaseFunc::bits>(
         v,
         target.reg()[Class::releaseFuncOff()],
-        func,
-        ObjReleaseFunc::bits
+        func
       );
       v << callr{func, args};
     } return;
@@ -486,62 +521,69 @@ Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d) {
-  emitLdPackedPtr<Class>(v, obj[ObjectData::getVMClassOffset()], d);
+  emitLdPackedPtr(v, obj[ObjectData::getVMClassOffset()], d);
   return d;
 }
 
-void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size) {
-  if (size == 64) {
-    v << cmpqm{v.cns(ptr), mem, sf};
-  } else if (size == 35) {
-    auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr) >> 3);
-    v << cmplm{v.cns(ptrImm), mem, sf};
-  } else if (size == 32) {
-    auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr));
-    v << cmplm{v.cns(ptrImm), mem, sf};
-  } else {
-    not_implemented();
-  }
+template <>
+void emitCmpPtr<32>(Vout& v, Vreg sf, const void* ptr, Vptr mem) {
+  auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr));
+  v << cmplm{v.cns(ptrImm), mem, sf};
+}
+template <>
+void emitCmpPtr<32>(Vout& v, Vreg sf, const void* ptr, Vreg reg) {
+  auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr));
+  auto low = emitMovtql(v, reg);
+  v << cmpl{v.cns(ptrImm), low, sf};
+}
+template <>
+void emitCmpPtr<32>(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
+  auto low = emitMovtql(v, reg);
+  v << cmplm{low, mem, sf};
+}
+template <>
+void emitCmpPtr<32>(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
+  auto const l1 = emitMovtql(v, reg1);
+  auto const l2 = emitMovtql(v, reg2);
+  v << cmpl{l1, l2, sf};
 }
 
-void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vreg reg, size_t size) {
-  if (size == 64 || size == 35) {
-    v << cmpq{v.cns(ptr), reg, sf};
-  } else if (size == 32) {
-    auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr));
-    auto low = emitMovtql(v, reg);
-    v << cmpl{v.cns(ptrImm), low, sf};
-  } else {
-    not_implemented();
-  }
+template <>
+void emitCmpPtr<35>(Vout& v, Vreg sf, const void* ptr, Vptr mem) {
+  auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr) >> 3);
+  v << cmplm{v.cns(ptrImm), mem, sf};
+}
+template <>
+void emitCmpPtr<35>(Vout& v, Vreg sf, const void* ptr, Vreg reg) {
+  v << cmpq{v.cns(ptr), reg, sf};
+}
+template <>
+void emitCmpPtr<35>(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
+  auto shifted = v.makeReg();
+  emitStPtr<35>(v, reg, shifted);
+  auto low = emitMovtql(v, shifted);
+  v << cmplm{low, mem, sf};
+}
+template <>
+void emitCmpPtr<35>(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
+  v << cmpq{reg1, reg2, sf};
 }
 
-void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size) {
-  if (size == 64) {
-    v << cmpqm{reg, mem, sf};
-  } else if (size == 35) {
-    auto shifted = v.makeReg();
-    v << shrqi{3, reg, shifted, v.makeReg()};
-    auto low = emitMovtql(v, shifted);
-    v << cmplm{low, mem, sf};
-  } else if (size == 32) {
-    auto low = emitMovtql(v, reg);
-    v << cmplm{low, mem, sf};
-  } else {
-    not_implemented();
-  }
+template <>
+void emitCmpPtr<64>(Vout& v, Vreg sf, const void* ptr, Vptr mem) {
+  v << cmpqm{v.cns(ptr), mem, sf};
 }
-
-void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size) {
-  if (size == 64 || size == 35) {
-    v << cmpq{reg1, reg2, sf};
-  } else if (size == 32) {
-    auto const l1 = emitMovtql(v, reg1);
-    auto const l2 = emitMovtql(v, reg2);
-    v << cmpl{l1, l2, sf};
-  } else {
-    not_implemented();
-  }
+template <>
+void emitCmpPtr<64>(Vout& v, Vreg sf, const void* ptr, Vreg reg) {
+  v << cmpq{v.cns(ptr), reg, sf};
+}
+template <>
+void emitCmpPtr<64>(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
+  v << cmpqm{reg, mem, sf};
+}
+template <>
+void emitCmpPtr<64>(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
+  v << cmpq{reg1, reg2, sf};
 }
 
 /*

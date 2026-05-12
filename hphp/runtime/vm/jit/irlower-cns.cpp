@@ -237,7 +237,7 @@ void cgCheckSubClsCns(IRLS& env, const IRInstruction* inst) {
 
   auto const constOffset = slot * sizeof(Class::Const);
 
-  emitCmpPackedPtr<StringData>(
+  emitCmpPackedPtr(
     v, sf, extra->cnsName,
     tmp[constOffset + offsetof(Class::Const, name)]
   );
@@ -427,7 +427,7 @@ void cgLdResolvedTypeCnsClsName(IRLS& env, const IRInstruction* inst) {
                               offsetof(TypedValue, m_aux) +
                               offsetof(AuxUnion, u_constModifiers) +
                               offsetof(ConstModifiers, u_clsName)];
-  emitLdPackedPtr<const StringData>(v, rawAddr, dst);
+  emitLdPackedPtr(v, rawAddr, dst);
 #endif
 }
 

@@ -74,7 +74,7 @@ Vreg check_clsvec(Vout& v, Vreg d, Vreg lhs, Cls rhs, Len rhsVecLen) {
   auto const vecOffset = rhsVecLen * static_cast<int>(sizeof(PackedPtr<Class>)) +
     (Class::classVecOff() - sizeof(PackedPtr<Class>));
   auto const sf = v.makeReg();
-  emitCmpPackedPtr<Class>(v, sf, rhs, lhs[vecOffset]);
+  emitCmpPackedPtr(v, sf, rhs, lhs[vecOffset]);
   v << setcc{CC_E, sf, d};
   return d;
 }
@@ -157,7 +157,7 @@ void cgInstanceOfIfaceVtable(IRLS& env, const IRInstruction* inst) {
       auto const ifaceOff = slot * sizeof(Class::VtableVecSlot) +
                             offsetof(Class::VtableVecSlot, iface);
       auto const sf = v.makeReg();
-      emitCmpPackedPtr<Class>(v, sf, iface, vtableVec[ifaceOff]);
+      emitCmpPackedPtr(v, sf, iface, vtableVec[ifaceOff]);
 
       auto tmp = v.makeReg();
       v << setcc{CC_E, sf, tmp};
@@ -209,7 +209,7 @@ void cgExtendsClass(IRLS& env, const IRInstruction* inst) {
   // Test if it is the exact same class.
   // TODO(#2044801): We should be doing this control flow at the IR level.
   auto const sf = v.makeReg();
-  emitCmpPackedPtr<Class>(v, sf, rhsCls, lhs);
+  emitCmpPackedPtr(v, sf, rhsCls, lhs);
 
   if (rhsCls->attrs() & AttrNoOverride) {
     // If the test class cannot be extended, we only need to do the same-class
@@ -303,7 +303,7 @@ void cgIsTypeStructCached(IRLS& env, const IRInstruction* inst) {
 
   markRDSAccess(v, ch.handle());
   auto const rhs = v.makeReg();
-  emitLdPackedPtr<const Class>(v, offset[rvmtl() + ch.handle() + sizeof(ArrayData*)], rhs);
+  emitLdPackedPtr(v, offset[rvmtl() + ch.handle() + sizeof(ArrayData*)], rhs);
   auto const lhs = [&] {
     assertx(isObj);
     if (auto const exact = cellTy.clsSpec().exactCls()) return v.cns(exact);

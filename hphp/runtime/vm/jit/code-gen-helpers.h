@@ -53,24 +53,64 @@ struct Vout;
  */
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
 
-/*
- * Load the LowPtr<T> at `mem', with storage size `size', into `reg'.
+/**
+ * Load a ptr from src to dst
+ * If bits are 35 the ptr is packed and shifting will be done
  */
-void ldLowPtrImpl(Vout& v, Vptr mem, Vreg reg, size_t size);
+template <size_t BITS>
+void emitLdPtr(Vout& v, Vptr src, Vreg dst);
 
-template <typename T>
-void emitLdPackedPtr(Vout& v, Vptr mem, Vreg reg) {
-  ldLowPtrImpl(v, mem, reg, PackedPtr<T>::bits);
+template <>
+void emitLdPtr<32>(Vout& v, Vptr src, Vreg dst);
+template <>
+void emitLdPtr<35>(Vout& v, Vptr src, Vreg dst);
+template <>
+void emitLdPtr<64>(Vout& v, Vptr src, Vreg dst);
+
+inline void emitLdPackedPtr(Vout& v, Vptr src, Vreg dst) {
+  emitLdPtr<PackedPtr<int>::bits>(v, src, dst);
 }
 
-/*
- * Store the LowPtr<T> in `reg' into `mem', with storage size `size'.
- */
-void stLowPtrImpl(Vout& v, Vreg reg, Vptr mem, size_t size);
+template <size_t BITS>
+void emitLdPtr(Vout& v, Vreg src, Vreg dst);
 
-template <typename T>
-void emitStPackedPtr(Vout& v, Vreg reg, Vptr mem) {
-  stLowPtrImpl(v, reg, mem, PackedPtr<T>::bits);
+template <>
+void emitLdPtr<32>(Vout& v, Vreg src, Vreg dst);
+template <>
+void emitLdPtr<35>(Vout& v, Vreg src, Vreg dst);
+template <>
+void emitLdPtr<64>(Vout& v, Vreg src, Vreg dst);
+
+inline void emitLdPackedPtr(Vout& v, Vreg src, Vreg dst) {
+  emitLdPtr<PackedPtr<int>::bits>(v, src, dst);
+}
+
+template <size_t BITS>
+void emitStPtr(Vout& v, Vreg src, Vptr dst);
+
+template <>
+void emitStPtr<32>(Vout& v, Vreg src, Vptr dst);
+template <>
+void emitStPtr<35>(Vout& v, Vreg src, Vptr dst);
+template <>
+void emitStPtr<64>(Vout& v, Vreg src, Vptr dst);
+
+inline void emitStPackedPtr(Vout& v, Vreg src, Vptr dst) {
+  emitStPtr<PackedPtr<int>::bits>(v, src, dst);
+}
+
+template <size_t BITS>
+void emitStPtr(Vout& v, Vreg src, Vreg dst);
+
+template <>
+void emitStPtr<32>(Vout& v, Vreg src, Vreg dst);
+template <>
+void emitStPtr<35>(Vout& v, Vreg src, Vreg dst);
+template <>
+void emitStPtr<64>(Vout& v, Vreg src, Vreg dst);
+
+inline void emitStPackedPtr(Vout& v, Vreg src, Vreg dst) {
+  emitStPtr<PackedPtr<int>::bits>(v, src, dst);
 }
 
 /*
@@ -237,32 +277,53 @@ Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d);
 /*
  * Internal helpers for LowPtr comparisons.
  */
-void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size);
-void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vreg reg, size_t size);
-void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size);
-void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size);
+template <size_t BITS>
+void emitCmpPtr(Vout& v, Vreg sf, const void* ptr, Vptr mem);
+template <size_t BITS>
+void emitCmpPtr(Vout& v, Vreg sf, const void* ptr, Vreg reg);
+template <size_t BITS>
+void emitCmpPtr(Vout& v, Vreg sf, Vreg reg, Vptr mem);
+template <size_t BITS>
+void emitCmpPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2);
 
-/*
- * Compare two LowPtrs, setting the result in `sf'.
- */
-template<class T>
-void emitCmpPackedPtr(Vout& v, Vreg sf, const T* c, Vptr mem) {
-  cmpLowPtrImpl(v, sf, c, mem, PackedPtr<T>::bits);
+template <>
+void emitCmpPtr<32>(Vout& v, Vreg sf, const void* ptr, Vptr mem);
+template <>
+void emitCmpPtr<32>(Vout& v, Vreg sf, const void* ptr, Vreg reg);
+template <>
+void emitCmpPtr<32>(Vout& v, Vreg sf, Vreg reg, Vptr mem);
+template <>
+void emitCmpPtr<32>(Vout& v, Vreg sf, Vreg reg1, Vreg reg2);
+
+template <>
+void emitCmpPtr<35>(Vout& v, Vreg sf, const void* ptr, Vptr mem);
+template <>
+void emitCmpPtr<35>(Vout& v, Vreg sf, const void* ptr, Vreg reg);
+template <>
+void emitCmpPtr<35>(Vout& v, Vreg sf, Vreg reg, Vptr mem);
+template <>
+void emitCmpPtr<35>(Vout& v, Vreg sf, Vreg reg1, Vreg reg2);
+
+template <>
+void emitCmpPtr<64>(Vout& v, Vreg sf, const void* ptr, Vptr mem);
+template <>
+void emitCmpPtr<64>(Vout& v, Vreg sf, const void* ptr, Vreg reg);
+template <>
+void emitCmpPtr<64>(Vout& v, Vreg sf, Vreg reg, Vptr mem);
+template <>
+void emitCmpPtr<64>(Vout& v, Vreg sf, Vreg reg1, Vreg reg2);
+
+inline void emitCmpPackedPtr(Vout& v, Vreg sf, const void* ptr, Vptr mem) {
+  emitCmpPtr<PackedPtr<int>::bits>(v, sf, ptr, mem);
 }
-
-template<class T>
-void emitCmpPackedPtr(Vout& v, Vreg sf, const T* c, Vreg reg) {
-  cmpLowPtrImpl(v, sf, c, reg, PackedPtr<T>::bits);
+inline void emitCmpPackedPtr(Vout& v, Vreg sf, const void* ptr, Vreg reg) {
+  emitCmpPtr<PackedPtr<int>::bits>(v, sf, ptr, reg);
 }
-
-template<class T>
-void emitCmpPackedPtr(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
-  cmpLowPtrImpl(v, sf, reg, mem, PackedPtr<T>::bits);
+inline void emitCmpPackedPtr(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
+  emitCmpPtr<PackedPtr<int>::bits>(v, sf, reg, mem);
 }
-
-template<class T>
-void emitCmpPackedPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
-  cmpLowPtrImpl(v, sf, reg1, reg2, PackedPtr<T>::bits);
+inline void emitCmpPackedPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
+  emitCmpPtr<PackedPtr<int>::bits>(v, sf, reg1, reg2);
 }
 
 /*

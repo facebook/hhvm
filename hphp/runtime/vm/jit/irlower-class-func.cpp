@@ -49,7 +49,7 @@ void cgLdClsName(IRLS& env, const IRInstruction* inst) {
 
   auto const preclass = v.makeReg();
   v << load{src[Class::preClassOff()], preclass};
-  emitLdPackedPtr<const StringData>(v, preclass[PreClass::nameOffset()], dst);
+  emitLdPackedPtr(v, preclass[PreClass::nameOffset()], dst);
 }
 
 void cgLdLazyCls(IRLS& env, const IRInstruction* inst) {
@@ -59,7 +59,7 @@ void cgLdLazyCls(IRLS& env, const IRInstruction* inst) {
 
   auto const preclass = v.makeReg();
   v << load{src[Class::preClassOff()], preclass};
-  emitLdPackedPtr<const StringData>(v, preclass[PreClass::nameOffset()], dst);
+  emitLdPackedPtr(v, preclass[PreClass::nameOffset()], dst);
 }
 
 void cgLdLazyClsName(IRLS& env, const IRInstruction* inst) {
@@ -90,7 +90,7 @@ void cgLdClsMethod(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   auto const methOff = -(idx + 1) * sizeof(PackedPtr<Func>);
-  emitLdPackedPtr<Func>(v, cls[methOff], dst);
+  emitLdPackedPtr(v, cls[methOff], dst);
 }
 
 void cgLdIfaceMethod(IRLS& env, const IRInstruction* inst) {
@@ -106,7 +106,7 @@ void cgLdIfaceMethod(IRLS& env, const IRInstruction* inst) {
   auto const vtableOff = extra->vtableIdx * sizeof(Class::VtableVecSlot) +
     offsetof(Class::VtableVecSlot, vtable);
   v << load{vtable_vec[vtableOff], vtable};
-  emitLdPackedPtr<Func>(v, vtable[extra->methodIdx * sizeof(PackedPtr<Func>)], func);
+  emitLdPackedPtr(v, vtable[extra->methodIdx * sizeof(PackedPtr<Func>)], func);
 }
 
 void cgLdObjInvoke(IRLS& env, const IRInstruction* inst) {
@@ -114,7 +114,7 @@ void cgLdObjInvoke(IRLS& env, const IRInstruction* inst) {
   auto const cls = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  emitLdPackedPtr<Func>(v, cls[Class::invokeOff()], dst);
+  emitLdPackedPtr(v, cls[Class::invokeOff()], dst);
 }
 
 IMPL_OPCODE_CALL(HasToString)
@@ -218,7 +218,7 @@ void cgLdFuncName(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  emitLdPackedPtr<const StringData>(v, func[Func::nameOff()], dst);
+  emitLdPackedPtr(v, func[Func::nameOff()], dst);
 }
 
 void cgLdMethCallerName(IRLS& env, const IRInstruction* inst) {
@@ -228,14 +228,14 @@ void cgLdMethCallerName(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const off = isCls ?
     Func::methCallerClsNameOff() : Func::methCallerMethNameOff();
-  emitLdPackedPtr<StringData>(v, func[off], dst);
+  emitLdPackedPtr(v, func[off], dst);
 }
 
 void cgLdFuncCls(IRLS& env, const IRInstruction* inst) {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  emitLdPackedPtr<Class>(v, func[Func::clsOff()], dst);
+  emitLdPackedPtr(v, func[Func::clsOff()], dst);
 }
 
 void cgFuncHasAttr(IRLS& env, const IRInstruction* inst) {
@@ -280,7 +280,7 @@ void cgLdClsFromClsMeth(IRLS& env, const IRInstruction* inst) {
   v << movtql{clsMethDataRef, truncated};
   auto const packed = v.makeReg();
   v << movzlq{truncated, packed};
-  v << lea{baseless(packed * 8 + 0), dst};
+  emitLdPackedPtr(v, packed, dst);
 #else
   v << load{clsMethDataRef[ClsMethData::clsOffset()], dst};
 #endif
@@ -294,7 +294,7 @@ void cgLdFuncFromClsMeth(IRLS& env, const IRInstruction* inst) {
   static_assert(ClsMethData::funcOffset() == 4, "Func offset must be 4");
   auto packed = v.makeReg();
   v << shrqi{32, clsMethDataRef, packed, v.makeReg()};
-  v << lea{baseless(packed * 8 + 0), dst};
+  emitLdPackedPtr(v, packed, dst);
 #else
   v << load{clsMethDataRef[ClsMethData::funcOffset()], dst};
 #endif

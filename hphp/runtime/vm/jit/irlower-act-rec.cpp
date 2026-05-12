@@ -242,7 +242,7 @@ void cgLdARFunc(IRLS& env, const IRInstruction* inst) {
   if (use_packedptr) {
     auto const fp = srcLoc(env, inst, 0).reg();
     auto const dst = dstLoc(env, inst, 0).reg();
-    emitLdPackedPtr<Func>(v, fp[AROFF(m_funcId)], dst);
+    emitLdPackedPtr(v, fp[AROFF(m_funcId)], dst);
     return;
   }
   auto const args = argGroup(env, inst).ssa(0);

@@ -255,7 +255,7 @@ void cgCallFuncEntry(IRLS& env, const IRInstruction* inst) {
     // funcIdOffset only being defined in non-packedptr mode.
 #ifdef USE_PACKEDPTR
     // Funcs are identified with their PackedPtr representation in packedptr mode.
-    v << shrqi{3, callee, r_func_entry_callee_id(), v.makeReg()};
+    emitStPackedPtr(v, callee, r_func_entry_callee_id());
 #else
     v << load{callee[Func::funcIdOffset()], r_func_entry_callee_id()};
 #endif
@@ -581,12 +581,12 @@ namespace {
             auto const ret = v.makeReg();
             auto const unit = v.makeReg();
             v << load{func[Func::unitOff()], unit};
-            emitLdPackedPtr<StringData>(v, unit[Unit::moduleNameOff()], ret);
+            emitLdPackedPtr(v, unit[Unit::moduleNameOff()], ret);
             return ret;
           },
           [&] (Vout& v) {
             auto const ret = v.makeReg();
-            emitLdPackedPtr<StringData>(v, shared[Func::extendedSharedOriginalModuleName()], ret);
+            emitLdPackedPtr(v, shared[Func::extendedSharedOriginalModuleName()], ret);
             return ret;
           });
         emitCmpPackedPtr(v, sf, callerModuleName, calleeModuleName);

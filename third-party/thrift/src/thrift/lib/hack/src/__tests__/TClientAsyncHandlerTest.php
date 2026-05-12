@@ -532,6 +532,33 @@ final class TClientAsyncHandlerIntegrationTest extends WWWTest {
     expect($tracking_handler->getAfterStreamChunks())->toEqual(vec['a', 'b']);
   }
 
+  // Multi-handler: genOnError is delegated to all sub-handlers
+  public async function testMultiHandlerGenOnErrorDelegation(
+  ): Awaitable<void> {
+    $recv_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());
+    $send_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());
+
+    $error_handler =
+      new TestRecvErrorTrackingHandler($recv_protocol, $send_protocol);
+
+    $multi_handler = new TClientMultiAsyncHandler();
+    $multi_handler->addHandler('error_tracker', $error_handler);
+
+    $client = new ExampleRootServiceAsyncClient($recv_protocol, $send_protocol);
+    $client->setAsyncHandler($multi_handler);
+
+    expect(
+      async () ==> await $client->sendRequest(
+        example_RequestStruct::fromShape(shape('text' => 'req')),
+      ),
+    )->toThrow(example_WhisperException::class, 'recv error');
+
+    expect($error_handler->getErrorFuncNames())->toEqual(
+      vec['sendRequest'],
+      'genOnError should be delegated to sub-handlers by TClientMultiAsyncHandler',
+    );
+  }
+
   // Multi-handler: stream payloads from multiple handlers are concatenated
   public async function testMultiHandlerConcatenatesStreams(): Awaitable<void> {
     $recv_protocol = new TCompactProtocolAccelerated(new TMemoryBuffer());

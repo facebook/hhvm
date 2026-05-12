@@ -83,6 +83,17 @@ final class TClientMultiAsyncHandler extends TClientAsyncHandler {
   }
 
   <<__Override>>
+  public async function genOnError(
+    string $func_name,
+    Exception $ex,
+  ): Awaitable<void> {
+    await Vec\map_async(
+      $this->handlers,
+      async $handler ==> await $handler->genOnError($func_name, $ex),
+    );
+  }
+
+  <<__Override>>
   public async function genBeforeStream(string $func_name): Awaitable<void> {
     await Vec\map_async(
       $this->handlers,

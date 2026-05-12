@@ -94,7 +94,16 @@ void emitLdPtr<32>(Vout& v, Vreg src, Vreg dst) {
 
 template <>
 void emitLdPtr<35>(Vout& v, Vreg src, Vreg dst) {
+#ifndef LOW_BUMP_ALLOCATOR
   v << shlqi{3, src, dst, v.makeReg()};
+#else
+  auto const sf = v.makeReg();
+  auto const shifted = v.makeReg();
+  auto const start = v.makeReg();
+  v << shlqi{3, src, shifted, sf};
+  v << cmovq{CC_Z, sf, v.cns(reinterpret_cast<uintptr_t>(low_bump_start_addr())), v.cns(0), start};
+  v << addq{start, shifted, dst, v.makeReg()};
+#endif
 }
 
 template <>
@@ -126,7 +135,16 @@ void emitStPtr<32>(Vout& v, Vreg src, Vreg dst) {
 
 template <>
 void emitStPtr<35>(Vout& v, Vreg src, Vreg dst) {
+#ifndef LOW_BUMP_ALLOCATOR
   v << shrqi{3, src, dst, v.makeReg()};
+#else
+  auto const sf = v.makeReg();
+  auto const shifted = v.makeReg();
+  auto const start = v.makeReg();
+  v << shrqi{3, src, shifted, sf};
+  v << cmovq{CC_Z, sf, v.cns(reinterpret_cast<uintptr_t>(low_bump_start_addr()) >> 3), v.cns(0), start};
+  v << subq{start, shifted, dst, v.makeReg()};
+#endif
 }
 
 template <>
@@ -550,7 +568,7 @@ void emitCmpPtr<32>(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
 
 template <>
 void emitCmpPtr<35>(Vout& v, Vreg sf, const void* ptr, Vptr mem) {
-  auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr) >> 3);
+  auto const ptrImm = PackedPtr<const void>::toRaw(ptr);
   v << cmplm{v.cns(ptrImm), mem, sf};
 }
 template <>

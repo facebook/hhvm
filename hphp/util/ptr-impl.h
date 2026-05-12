@@ -16,13 +16,21 @@
 
 #pragma once
 
+#include "hphp/util/alloc-defs.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compilation-flags.h"
 
 #include <cstdint>
 #include <folly/Format.h>
+#include <iostream>
 
-namespace HPHP::ptrimpl {
+namespace HPHP {
+
+#ifdef LOW_BUMP_ALLOCATOR
+extern void* low_bump_start_addr();
+#endif
+
+namespace ptrimpl {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -77,19 +85,38 @@ struct UInt32Packed {
   template <typename T>
   static void validatePtr(const T* px) {
     DEBUG_ONLY auto ptr = reinterpret_cast<uintptr_t>(px);
-    assert_flog(ptr < (1ull << bits), "ptr {} is too large", ptr);
+#ifdef LOW_BUMP_ALLOCATOR
+    DEBUG_ONLY auto start = reinterpret_cast<uintptr_t>(low_bump_start_addr());
+    assert_flog(ptr == 0 || ptr >= start, "ptr {} is too small {}",
+      reinterpret_cast<const void*>(px),
+      reinterpret_cast<const void*>(start));
+    DEBUG_ONLY auto end = start + (1ull << bits);
+    assert_flog(ptr < end, "ptr {} is too large {}",
+      reinterpret_cast<const void*>(px),
+      reinterpret_cast<const void*>(end));
+#else
+    assert_flog(ptr < (1ull << bits), "ptr {} is too large",
+      reinterpret_cast<const void*>(px));
+#endif
     assert_flog((ptr & ((1ull << 3) - 1)) == 0, "ptr {} is not 8 byte aligned", ptr);
   }
 
   template <typename T>
   static ALWAYS_INLINE storage_type toStorage(T* px) {
     if constexpr (debug) validatePtr(px);
-    return (storage_type)(reinterpret_cast<uintptr_t>(px) >> 3);
+    auto ptr = reinterpret_cast<uintptr_t>(px);
+#ifdef LOW_BUMP_ALLOCATOR
+    ptr -= (ptr != 0) ? (reinterpret_cast<uintptr_t>(low_bump_start_addr())) : 0;
+#endif
+    return (storage_type)(ptr >> 3);
   }
 
   template <typename T>
   static ALWAYS_INLINE T* fromStorage(storage_type mem) {
-    uintptr_t ptr = (uintptr_t)mem << 3;
+    uintptr_t ptr = uintptr_t(mem) << 3;
+#ifdef LOW_BUMP_ALLOCATOR
+    ptr += (ptr != 0) ? (reinterpret_cast<uintptr_t>(low_bump_start_addr())) : 0;
+#endif
     T* px = reinterpret_cast<T*>(ptr);
     if constexpr (debug) validatePtr(px);
     return px;
@@ -234,7 +261,7 @@ struct PtrImpl {
    * Observers.
    */
   T* get()                     const { return P::template fromStorage<T>(S::template get<P>(m_s)); }
-  T& operator*()               const { return *get(); }
+  auto& operator*() const requires (!std::is_void_v<T>) { return *get(); }
   T* operator->()              const { return get(); }
   /* implicit */ operator T*() const { return get(); }
   explicit operator bool()     const { return get(); }
@@ -267,6 +294,8 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+}
 
 }
 

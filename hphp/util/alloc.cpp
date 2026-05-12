@@ -548,6 +548,61 @@ void shutdown_slab_managers() {
   }
 }
 
+#else
+
+namespace {
+
+struct LowArena {
+  void* base;
+  std::atomic<size_t> offset = 0;
+};
+
+LowArena& getLowArena() {
+  static LowArena lowArena;
+  return lowArena;
+}
+
+const size_t kArenaMax = 32ull << 30; // 30 GB
+
+void setup_low_arena() {
+  always_assert(getLowArena().base == nullptr);
+  always_assert(getLowArena().offset == 0);
+  getLowArena().base = mmap(nullptr, kArenaMax,
+                    PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
+                    -1, 0);
+  always_assert_flog(getLowArena().base != MAP_FAILED, "mmap failed: {}",
+                     folly::errnoStr(errno));
+  always_assert_flog((reinterpret_cast<uintptr_t>(getLowArena().base) & ((1ull << 3) - 1)) == 0,
+                     "mmap returned non 8 bit aligned address: {}", getLowArena().base);
+}
+
+}
+
+void* low_bump_start_addr() {
+  assertx(getLowArena().base != nullptr);
+  return getLowArena().base;
+}
+
+void* low_bump_malloc(size_t size) {
+  // 16 byte align the size which means that the pointer will be 16 byte aligned
+  size = (size + 15) & ~15;
+  auto const offset = getLowArena().offset.fetch_add(size, std::memory_order_relaxed);
+  if (offset + size > kArenaMax) return nullptr;
+  return static_cast<char*>(getLowArena().base) + offset;
+}
+
+void* low_bump_realloc(void* ptr, size_t size) {
+  auto newptr = low_malloc(size);
+  if (newptr == nullptr) return nullptr;
+  memcpy(newptr, ptr, size);
+  return newptr;
+}
+
+void low_bump_free(void* ptr) {
+  // Do nothing. It is very very rare that we actually try to free something
+  // and if we do just have it leak
+}
+
 #endif // USE_JEMALLOC
 
 ssize_t get_free_slab_bytes() {
@@ -686,6 +741,8 @@ struct JEMallocInitializer {
 
     // Initialize global mibs
     init_mallctl_mibs();
+#else
+    setup_low_arena();
 #endif
   }
 };

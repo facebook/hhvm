@@ -22,7 +22,6 @@
 #include <folly/CPortability.h>
 #include "folly/memory/detail/MallocImpl.h"
 #include "hphp/util/jemalloc-def.h"
-#include "hphp/util/ptr.h"
 
 #if FOLLY_SANITIZE
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
@@ -33,20 +32,26 @@
 #  endif
 #endif
 
-#if defined(USE_PACKEDPTR) && !defined(USE_JEMALLOC)
-#  error "USE_PACKEDPTR requires USE_JEMALLOC (jemalloc arenas constrain allocation addresses)"
-#endif
-
 #ifdef USE_JEMALLOC
 #include <jemalloc/jemalloc.h>
 #if JEMALLOC_VERSION_MAJOR < 5 || (JEMALLOC_VERSION_MAJOR == 5 && JEMALLOC_VERSION_MINOR < 3)
 #  error "jemalloc 5.3 is required"
 #endif
+#else
+#define LOW_BUMP_ALLOCATOR 1
 #endif
 
 namespace HPHP {
 constexpr bool use_jemalloc =
 #ifdef USE_JEMALLOC
+  true
+#else
+  false
+#endif
+  ;
+
+constexpr bool use_low_bump_allocator =
+#ifdef LOW_BUMP_ALLOCATOR
   true
 #else
   false

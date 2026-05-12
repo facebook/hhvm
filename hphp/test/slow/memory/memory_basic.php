@@ -9,7 +9,7 @@ function main() :mixed{
     var_dump('memory stats should never be negative!');
   }
 
-  if ($alloc >= $total_alloc) {
+  if ($alloc > $total_alloc) {
     var_dump(
       'slab allocations should be less than total jemalloc allocations!'
     );

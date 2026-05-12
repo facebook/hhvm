@@ -64,6 +64,9 @@ namespace HPHP {
 // addr_encodes_persistency is true. We make them available for all modes to
 // avoid having ifdefs everywhere.
 extern uintptr_t lowArenaMinAddr();
+#ifdef LOW_BUMP_ALLOCATOR
+extern void* low_bump_start_addr();
+#endif
 
 constexpr size_t kLowEmergencySize = 128 << 20;
 
@@ -94,8 +97,14 @@ constexpr uintptr_t kDebugAddr = 3ull << 39;
 
 inline bool is_low_mem(void* m) {
   assertx(use_packedptr);
-  auto const i = reinterpret_cast<uintptr_t>(m);
-  return i < kHighArenaMinAddr;
+  auto i = reinterpret_cast<uintptr_t>(m);
+#ifdef LOW_BUMP_ALLOCATOR
+  if (i == 0) return true;
+  auto start = reinterpret_cast<uintptr_t>(low_bump_start_addr());
+  if (i < start) return false;
+  i -= start;
+#endif
+  return i < kMidArenaMaxAddr;
 }
 
 namespace alloc {

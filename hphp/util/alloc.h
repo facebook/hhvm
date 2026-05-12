@@ -136,6 +136,13 @@ void arenas_thread_init();
 void arenas_thread_flush();
 void arenas_thread_exit();
 
+#else
+
+void* low_bump_start_addr();
+void* low_bump_malloc(size_t size);
+void* low_bump_realloc(void* ptr, size_t size);
+void low_bump_free(void* ptr);
+
 #endif // USE_JEMALLOC
 
 /**
@@ -340,8 +347,36 @@ struct WrapAllocator {
                                                                 \
   template<typename T> using upper_prefix##Allocator =          \
     WrapAllocator<prefix##_malloc, prefix##_sized_free, T>;
+
+#define DEF_LOW_ALLOC_FUNCS(prefix, flag, upper_prefix)         \
+  DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)
+
+#define DEF_HIGH_ALLOC_FUNCS(prefix, flag, upper_prefix)        \
+  DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)
+
 #else
-#define DEF_ALLOC_FUNCS(prefix, flag, upper_prefix)             \
+#define DEF_LOW_ALLOC_FUNCS(prefix, flag, upper_prefix)         \
+  inline void* prefix##_malloc(size_t size) {                   \
+    assert(size != 0);                                          \
+    return low_bump_malloc(size);                               \
+  }                                                             \
+  inline void prefix##_free(void* ptr) {                        \
+    assert(ptr != nullptr);                                     \
+    return low_bump_free(ptr);                                  \
+  }                                                             \
+  inline void* prefix##_realloc(void* ptr, size_t size) {       \
+    assert(size != 0);                                          \
+    return low_bump_realloc(ptr, size);                         \
+  }                                                             \
+  inline void prefix##_sized_free(void* ptr, size_t size) {     \
+    assert(ptr != nullptr);                                     \
+    return low_bump_free(ptr);                                  \
+  }                                                             \
+                                                                \
+  template<typename T> using upper_prefix##Allocator =          \
+    WrapAllocator<prefix##_malloc, prefix##_sized_free, T>;
+
+#define DEF_HIGH_ALLOC_FUNCS(prefix, flag, upper_prefix)        \
   inline void* prefix##_malloc(size_t size) {                   \
     assert(size != 0);                                          \
     return malloc(size);                                        \
@@ -361,28 +396,29 @@ struct WrapAllocator {
                                                                 \
   template<typename T> using upper_prefix##Allocator =          \
     WrapAllocator<prefix##_malloc, prefix##_sized_free, T>;
+
 #endif
 
 #define HIGH_ARENA_FLAGS (high_arena_flags | MALLOCX_TCACHE(high_arena_tcache))
 
-DEF_ALLOC_FUNCS(vm, HIGH_ARENA_FLAGS, VM)
-DEF_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, VMCold)
+DEF_HIGH_ALLOC_FUNCS(vm, HIGH_ARENA_FLAGS, VM)
+DEF_HIGH_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, VMCold)
 
 // Allocations that are guaranteed to live below kUncountedMaxAddr when
 // USE_JEMALLOC. This provides a new way to check for countedness
 // for arrays and strings.
-DEF_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, Uncounted)
+DEF_HIGH_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, Uncounted)
 
 // Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
 // e.g., APCObject, or the hash table. Currently they live below
 // kUncountedMaxAddr anyway, but this may change later.
-DEF_ALLOC_FUNCS(apc, HIGH_ARENA_FLAGS, APC)
+DEF_HIGH_ALLOC_FUNCS(apc, HIGH_ARENA_FLAGS, APC)
 
 // Thread-local allocations that are not accessed outside the thread.
-DEF_ALLOC_FUNCS(local, local_arena_flags, Local)
+DEF_HIGH_ALLOC_FUNCS(local, local_arena_flags, Local)
 
-DEF_ALLOC_FUNCS(low, low_arena_flags, Low)
-DEF_ALLOC_FUNCS(small, low_small_arena_flags, Small)
+DEF_LOW_ALLOC_FUNCS(low, low_arena_flags, Low)
+DEF_LOW_ALLOC_FUNCS(small, low_small_arena_flags, Small)
 
 #undef DEF_ALLOC_FUNCS
 

@@ -16,11 +16,7 @@
 
 #pragma once
 
-#include <random>
-#include <folly/Function.h>
-#include <folly/GLog.h>
-#include <thrift/lib/cpp2/async/RequestChannel.h>
-#include <thrift/perf/cpp2/if/gen-cpp2/ApiBase_types.h>
+#include <folly/coro/Task.h>
 #include <thrift/perf/cpp2/util/QPSStats.h>
 
 using apache::thrift::ClientReceiveState;
@@ -291,8 +287,8 @@ class CoSum {
     request_.x() = gen_();
     request_.y() = gen_();
 
-    client->co_sum(request_)
-        .scheduleOn(client->getChannel()->getEventBase())
+    folly::coro::co_withExecutor(
+        client->getChannel()->getEventBase(), client->co_sum(request_))
         .startInlineUnsafe([this, cb = std::move(cb), request = request_](
                                auto response) {
           try {

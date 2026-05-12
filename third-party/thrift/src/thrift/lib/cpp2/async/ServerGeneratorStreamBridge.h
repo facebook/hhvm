@@ -122,14 +122,15 @@ class ServerGeneratorStreamBridge : public TwoWayBridge<
           }
         }
         auto streamPtr = stream->copy();
-        fromAsyncGeneratorImpl<WithHeader>(
-            std::move(streamPtr),
-            encode,
-            std::move(gen),
-            TileStreamGuard::transferFrom(std::move(interaction)),
-            contextStack,
-            std::move(interceptorContext))
-            .scheduleOn(std::move(serverExecutor))
+        folly::coro::co_withExecutor(
+            std::move(serverExecutor),
+            fromAsyncGeneratorImpl<WithHeader>(
+                std::move(streamPtr),
+                encode,
+                std::move(gen),
+                TileStreamGuard::transferFrom(std::move(interaction)),
+                contextStack,
+                std::move(interceptorContext)))
             .start([stream = stream->copy()](folly::Try<folly::Unit> t) {
               if (t.hasException()) {
                 LOG(ERROR)

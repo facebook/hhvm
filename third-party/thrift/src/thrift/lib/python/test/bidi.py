@@ -37,6 +37,7 @@ from thrift.python.bidi_service.thrift_types import (
     ThrowWhere,
 )
 from thrift.python.client import ClientType, get_client
+from thrift.python.common import RpcOptions
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.streaming.bidistream import BidirectionalStream
 from thrift.python.streaming.stream import ClientBufferedStream
@@ -620,6 +621,113 @@ class BidiTests(IsolatedAsyncioTestCase):
                 self.assertEqual(first, "1")
                 # sink.sink() should finish, not hang
                 await asyncio.wait_for(sink_task, timeout=5.0)
+
+    async def test_bidi_server_disconnect_during_stream(self) -> None:
+        """Client stream must not hang when the server shuts down mid-bidi."""
+        generator_blocked_event: asyncio.Event = asyncio.Event()
+        sink_blocked_event: asyncio.Event = asyncio.Event()
+
+        class BlockingBidiHandler(BidiHandler):
+            async def echo(
+                self,
+                serverDelay: float,
+            ) -> Callable[
+                [AsyncGenerator[str, None]],
+                AsyncGenerator[str, None],
+            ]:
+                async def callback(
+                    agen: AsyncGenerator[str, None],
+                ) -> AsyncGenerator[str, None]:
+                    yield "first"
+                    generator_blocked_event.set()
+                    await asyncio.Future()
+
+                return callback
+
+        async def blocking_sink() -> AsyncGenerator[str, None]:
+            yield "1"
+            sink_blocked_event.set()
+            await asyncio.Future()
+
+        server = TestServer(handler=BlockingBidiHandler(), ip="::1")
+        async with server as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                bidi = await client.echo(0.0)
+                # NOTE: the sink MUST be open in order for the server to recognize
+                # that it should send INTERRUPTION ApplicationError
+                sink_task = asyncio.ensure_future(bidi.sink.sink(blocking_sink()))
+                first = await bidi.stream.__anext__()
+                self.assertEqual(first, "first")
+                await asyncio.wait_for(generator_blocked_event.wait(), timeout=5.0)
+                await asyncio.wait_for(sink_blocked_event.wait(), timeout=5.0)
+                server.server.stop()
+                assert server.serve_task is not None
+                await server.serve_task
+                # TODO(T123456789): RocketBiDiClientCallback::handleConnectionClose
+                # calls onStreamCancel() which sends a clean COMPLETE frame,
+                # so the client sees StopAsyncIteration instead of
+                # ApplicationError(INTERRUPTION). Regular streams correctly
+                # send StreamRpcError(SERVER_CLOSING_CONNECTION).
+                remaining = []
+                async for item in bidi.stream:
+                    remaining.append(item)
+                self.assertEqual(remaining, [])
+                sink_task.cancel()
+                try:
+                    await sink_task
+                except (asyncio.CancelledError, Exception):
+                    pass
+
+    async def test_bidi_stream_credit_timeout(self) -> None:
+        """Client gets ApplicationErrorType.TIMEOUT when it stops consuming."""
+
+        class InfiniteStreamHandler(BidiHandler):
+            async def echo(
+                self,
+                serverDelay: float,
+            ) -> Callable[
+                [AsyncGenerator[str, None]],
+                AsyncGenerator[str, None],
+            ]:
+                async def callback(
+                    agen: AsyncGenerator[str, None],
+                ) -> AsyncGenerator[str, None]:
+                    i = 0
+                    while True:
+                        yield str(i)
+                        i += 1
+
+                return callback
+
+        server = TestServer(handler=InfiniteStreamHandler(), ip="::1")
+        server.server.set_stream_expire_time(0.1)
+        async with server as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                TestBidiService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                options = RpcOptions()
+                options.chunk_buffer_size = 1
+                bidi = await client.echo(0.0, rpc_options=options)
+                await bidi.sink.sink(yield_strs(1, 2))
+                first = await bidi.stream.__anext__()
+                self.assertEqual(first, "0")
+                await asyncio.sleep(0.5)
+                with self.assertRaises(ApplicationError) as ctx:
+                    async for _ in bidi.stream:
+                        pass
+                self.assertEqual(ctx.exception.type, ApplicationErrorType.TIMEOUT)
 
 
 class BidiHandler(TestBidiServiceInterface):

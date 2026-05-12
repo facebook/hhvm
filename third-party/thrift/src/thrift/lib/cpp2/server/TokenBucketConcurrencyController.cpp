@@ -18,6 +18,7 @@
 #include <glog/logging.h>
 
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorOnDrop.h>
 #include <thrift/lib/cpp2/server/TokenBucketConcurrencyController.h>
 
 using namespace apache::thrift::detail;
@@ -29,13 +30,28 @@ namespace apache::thrift {
       !request.request()->getShouldStartProcessing();
 }
 
-void TokenBucketConcurrencyController::release(ServerRequest&& request) {
+void TokenBucketConcurrencyController::dropExpiredRequest(
+    ServerRequest&& request) {
+  if (auto* ctx = request.requestContext()) {
+    processServiceInterceptorsOnDrop(
+        *ctx, ServiceInterceptorBase::DropReason::QUEUE_TIMEOUT);
+  }
   if (onExpireFunction_) {
     onExpireFunction_(request);
   }
   auto eb = ServerRequestHelper::eventBase(request);
   auto req = ServerRequestHelper::request(std::move(request));
   HandlerCallbackBase::releaseRequest(std::move(req), eb);
+}
+
+void TokenBucketConcurrencyController::processExpiredRequest(
+    ServerRequest&& request) {
+  dropExpiredRequest(std::move(request));
+  pendingDequeueOps_--;
+}
+
+void TokenBucketConcurrencyController::release(ServerRequest&& request) {
+  dropExpiredRequest(std::move(request));
 }
 
 void TokenBucketConcurrencyController::execute(ServerRequest&& request) {

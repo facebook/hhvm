@@ -22,6 +22,7 @@
 #include <folly/executors/VirtualExecutor.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorOnDrop.h>
 
 using namespace std::chrono_literals;
 
@@ -142,6 +143,10 @@ std::optional<ServerRequestRejection> ResourcePool::acceptDeferred(
   executor_->add([request = std::move(request)]() mutable {
     if (!request.request()->isOneway() &&
         !request.request()->getShouldStartProcessing()) {
+      if (auto* ctx = request.requestContext()) {
+        processServiceInterceptorsOnDrop(
+            *ctx, ServiceInterceptorBase::DropReason::QUEUE_TIMEOUT);
+      }
       auto eb = detail::ServerRequestHelper::eventBase(request);
       HandlerCallbackBase::releaseRequest(
           detail::ServerRequestHelper::request(std::move(request)), eb);
@@ -158,6 +163,10 @@ std::optional<ServerRequestRejection> ResourcePool::acceptSync(
     ServerRequest&& request) {
   // Trigger processing of request and check for queue timeouts.
   if (!request.request()->getShouldStartProcessing()) {
+    if (auto* ctx = request.requestContext()) {
+      processServiceInterceptorsOnDrop(
+          *ctx, ServiceInterceptorBase::DropReason::QUEUE_TIMEOUT);
+    }
     auto eb = detail::ServerRequestHelper::eventBase(request);
     HandlerCallbackBase::releaseRequest(
         detail::ServerRequestHelper::request(std::move(request)), eb);

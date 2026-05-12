@@ -38,6 +38,7 @@
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/LoggingEventHelper.h>
 #include <thrift/lib/cpp2/server/MonitoringMethodNames.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorOnDrop.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -805,6 +806,12 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto overloadResult = serverConfigs_->checkOverload(headers, name);
   serverConfigs_->incActiveRequests();
   if (UNLIKELY(overloadResult.has_value())) {
+    if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnDrop(
+          *serverConfigs_,
+          *dropReqCtx,
+          ServiceInterceptorBase::DropReason::OVERLOAD);
+    }
     if ((interactionCreateOpt || interactionIdOpt) &&
         shouldTerminateInteraction(
             interactionCreateOpt.has_value(),
@@ -825,6 +832,12 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto preprocessResult =
       serverConfigs_->preprocess({headers, name, connContext_, request.get()});
   if (UNLIKELY(!std::holds_alternative<std::monostate>(preprocessResult))) {
+    if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnDrop(
+          *serverConfigs_,
+          *dropReqCtx,
+          ServiceInterceptorBase::DropReason::OVERLOAD);
+    }
     handlePreprocessResult(
         std::move(request),
         std::move(preprocessResult),

@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersServerExtension.h>
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorOnDrop.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/peeking/PeekingManager.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -533,6 +534,13 @@ void Cpp2Worker::cancelQueuedRequests() {
 
 void Cpp2Worker::handleServerRequestRejection(
     const ServerRequest& serverRequest, ServerRequestRejection& reject) {
+  if (auto* ctx = serverRequest.requestContext()) {
+    auto dropReason = reject.applicationException().getType() ==
+            TApplicationException::UNKNOWN_METHOD
+        ? ServiceInterceptorBase::DropReason::UNKNOWN_METHOD
+        : ServiceInterceptorBase::DropReason::QUEUE_FULL;
+    processServiceInterceptorsOnDrop(*ctx, dropReason);
+  }
   auto errorCode = kAppOverloadedErrorCode;
   if (reject.applicationException().getType() ==
       TApplicationException::UNKNOWN_METHOD) {
@@ -718,6 +726,8 @@ void Cpp2Worker::dispatchRequest(
 
         auto result = resourcePool->accept(std::move(serverRequest));
         if (result) {
+          processServiceInterceptorsOnDrop(
+              *cpp2ReqCtx, ServiceInterceptorBase::DropReason::QUEUE_FULL);
           auto errorCode = errorCodeFromTapplicationException(
               result.value().applicationException().getType());
 
@@ -773,6 +783,8 @@ void Cpp2Worker::dispatchRequest(
       }
     } else if (std::holds_alternative<PerServiceMetadata::MetadataNotFound>(
                    methodMetadataResult)) {
+      processServiceInterceptorsOnDrop(
+          *cpp2ReqCtx, ServiceInterceptorBase::DropReason::UNKNOWN_METHOD);
       std::string_view methodName = cpp2ReqCtx->getMethodName();
       AsyncProcessorHelper::sendUnknownMethodError(
           std::move(request), methodName);

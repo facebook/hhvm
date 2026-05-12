@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+#include <atomic>
 #include <functional>
 #include <stdexcept>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <folly/Synchronized.h>
 #include <folly/coro/Baton.h>
 #include <folly/coro/GtestHelpers.h>
 #include <folly/coro/Sleep.h>
@@ -27,6 +29,7 @@
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/MultiplexAsyncProcessor.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
+#include <thrift/lib/cpp2/server/PreprocessParams.h>
 #include <thrift/lib/cpp2/server/ServerModule.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptor.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
@@ -2232,6 +2235,365 @@ CO_TEST_P(ServiceInterceptorTestP, OnConnectionAttempt) {
   EXPECT_EQ(interceptor->onConnectionAttemptedCount, valueIfNotHttp2(1));
   EXPECT_EQ(interceptor->onConnectionEstablishedCount, valueIfNotHttp2(1));
   EXPECT_EQ(interceptor->onConnectionClosedCount, valueIfNotHttp2(1));
+}
+
+namespace {
+
+struct ServiceInterceptorCountDrops
+    : public NamedServiceInterceptor<folly::Unit, int> {
+ public:
+  using ConnectionState = int;
+  using RequestState = folly::Unit;
+
+  using NamedServiceInterceptor::NamedServiceInterceptor;
+
+  std::optional<ConnectionState> onConnectionEstablished(
+      ConnectionInfo) override {
+    return 1;
+  }
+
+  void onConnectionClosed(ConnectionState*, ConnectionInfo) noexcept override {}
+
+  folly::coro::Task<std::optional<RequestState>> onRequest(
+      ConnectionState*, RequestInfo) override {
+    onRequestCount++;
+    co_return std::nullopt;
+  }
+
+  folly::coro::Task<void> onResponse(
+      RequestState*, ConnectionState*, ResponseInfo) override {
+    onResponseCount++;
+    co_return;
+  }
+
+  void onRequestDropped(DroppedRequestInfo info) override {
+    lastDropReason = info.reason;
+    *lastDroppedMethodName.wlock() = std::string(info.methodName);
+    onRequestDroppedCount++;
+  }
+
+  std::atomic<int> onRequestCount{0};
+  std::atomic<int> onResponseCount{0};
+  std::atomic<int> onRequestDroppedCount{0};
+  std::atomic<ServiceInterceptorBase::DropReason> lastDropReason{
+      ServiceInterceptorBase::DropReason::UNKNOWN};
+  folly::Synchronized<std::string> lastDroppedMethodName;
+};
+
+struct BlockingTestHandler
+    : apache::thrift::ServiceHandler<test::ServiceInterceptorTest> {
+  folly::coro::Task<std::unique_ptr<std::string>> co_echo(
+      std::unique_ptr<std::string> str) override {
+    entered.post();
+    co_await done;
+    co_return std::move(str);
+  }
+
+  folly::coro::Task<void> co_noop() override { co_return; }
+
+  folly::coro::Baton entered;
+  folly::coro::Baton done;
+};
+
+} // namespace
+
+CO_TEST_P(ServiceInterceptorTestP, OnRequestDroppedOverload) {
+  // onRequestDropped for OVERLOAD is only wired in the Rocket transport handler
+  if (transportType() != TransportType::ROCKET) {
+    co_return;
+  }
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountDrops>("DropInterceptor");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+        server.setIsOverloaded(
+            [](const auto&, const std::string&) { return true; });
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  EXPECT_THROW(co_await client->co_echo("hello"), TApplicationException);
+  EXPECT_EQ(interceptor->onRequestDroppedCount, 1);
+  EXPECT_EQ(
+      interceptor->lastDropReason,
+      ServiceInterceptorBase::DropReason::OVERLOAD);
+  EXPECT_EQ(*interceptor->lastDroppedMethodName.rlock(), "echo");
+  EXPECT_EQ(interceptor->onRequestCount, 0);
+  EXPECT_EQ(interceptor->onResponseCount, 0);
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnRequestDroppedQueueTimeout) {
+  if (transportType() == TransportType::HTTP2) {
+    co_return;
+  }
+  // Queue timeout drops are only wired in the resource pools path
+  FLAGS_thrift_disable_resource_pools = false;
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountDrops>("DropInterceptor");
+  auto handler = std::make_shared<BlockingTestHandler>();
+  auto runner = makeServer(handler, [&](ThriftServer& server) {
+    server.addModule(std::make_unique<TestModule>(interceptor));
+    server.setQueueTimeout(std::chrono::milliseconds(50));
+  });
+
+  auto& resourcePool = runner->getThriftServer().resourcePoolSet().resourcePool(
+      ResourcePoolHandle::defaultAsync());
+  resourcePool.concurrencyController().value().get().setExecutionLimitRequests(
+      1);
+
+  auto client1 =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  auto blockingCall = client1->semifuture_echo("blocking");
+  co_await folly::coro::co_reschedule_on_current_executor;
+  while (!handler->entered.ready()) {
+    co_await folly::coro::sleep(std::chrono::milliseconds(5));
+  }
+
+  auto client2 =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  EXPECT_THROW(
+      co_await client2->co_echo("should_timeout"), TApplicationException);
+
+  // Release the blocking handler so the controller dequeues the expired request
+  handler->done.post();
+  std::move(blockingCall).get();
+
+  // Wait for the controller to process the expired request and call the
+  // interceptor
+  for (int i = 0; i < 100 && interceptor->onRequestDroppedCount == 0; ++i) {
+    co_await folly::coro::sleep(std::chrono::milliseconds(10));
+  }
+  EXPECT_GE(interceptor->onRequestDroppedCount, 1);
+  EXPECT_EQ(
+      interceptor->lastDropReason,
+      ServiceInterceptorBase::DropReason::QUEUE_TIMEOUT);
+  EXPECT_EQ(*interceptor->lastDroppedMethodName.rlock(), "echo");
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnRequestDroppedQueueTimeoutTokenBucket) {
+  if (transportType() == TransportType::HTTP2) {
+    co_return;
+  }
+  FLAGS_thrift_disable_resource_pools = false;
+  FLAGS_thrift_use_token_bucket_concurrency_controller = true;
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountDrops>("DropInterceptor");
+  auto handler = std::make_shared<BlockingTestHandler>();
+  auto runner = makeServer(handler, [&](ThriftServer& server) {
+    server.addModule(std::make_unique<TestModule>(interceptor));
+    server.setQueueTimeout(std::chrono::milliseconds(50));
+  });
+
+  auto& resourcePool = runner->getThriftServer().resourcePoolSet().resourcePool(
+      ResourcePoolHandle::defaultAsync());
+  resourcePool.concurrencyController().value().get().setQpsLimit(1);
+
+  auto client1 =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  auto blockingCall = client1->semifuture_echo("blocking");
+  co_await folly::coro::co_reschedule_on_current_executor;
+  while (!handler->entered.ready()) {
+    co_await folly::coro::sleep(std::chrono::milliseconds(5));
+  }
+
+  auto client2 =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  EXPECT_THROW(
+      co_await client2->co_echo("should_timeout"), TApplicationException);
+
+  handler->done.post();
+  std::move(blockingCall).get();
+
+  for (int i = 0; i < 100 && interceptor->onRequestDroppedCount == 0; ++i) {
+    co_await folly::coro::sleep(std::chrono::milliseconds(10));
+  }
+  EXPECT_GE(interceptor->onRequestDroppedCount, 1);
+  EXPECT_EQ(
+      interceptor->lastDropReason,
+      ServiceInterceptorBase::DropReason::QUEUE_TIMEOUT);
+  EXPECT_EQ(*interceptor->lastDroppedMethodName.rlock(), "echo");
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnRequestDroppedUnknownMethod) {
+  if (transportType() == TransportType::HTTP2) {
+    co_return;
+  }
+  // Unknown method drops are only wired in the resource pools path
+  FLAGS_thrift_disable_resource_pools = false;
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountDrops>("DropInterceptor");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  auto client = makeClient<apache::thrift::Client<Second>>(*runner);
+  EXPECT_THROW(co_await client->co_three(), TApplicationException);
+  EXPECT_EQ(interceptor->onRequestDroppedCount, 1);
+  EXPECT_EQ(
+      interceptor->lastDropReason,
+      ServiceInterceptorBase::DropReason::UNKNOWN_METHOD);
+  EXPECT_EQ(*interceptor->lastDroppedMethodName.rlock(), "three");
+  EXPECT_EQ(interceptor->onRequestCount, 0);
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnRequestDroppedQueueFull) {
+  if (transportType() == TransportType::HTTP2) {
+    co_return;
+  }
+  FLAGS_thrift_disable_resource_pools = false;
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountDrops>("DropInterceptor");
+  auto handler = std::make_shared<TestHandler>();
+
+  class RejectingProcessorFactory : public AsyncProcessorFactory {
+   public:
+    explicit RejectingProcessorFactory(
+        std::shared_ptr<AsyncProcessorFactory> inner)
+        : inner_(std::move(inner)) {}
+
+    std::unique_ptr<AsyncProcessor> getProcessor() override {
+      return inner_->getProcessor();
+    }
+    std::vector<ServiceHandlerBase*> getServiceHandlers() override {
+      return inner_->getServiceHandlers();
+    }
+    CreateMethodMetadataResult createMethodMetadata() override {
+      return inner_->createMethodMetadata();
+    }
+    SelectPoolResult selectResourcePool(const ServerRequest&) const override {
+      return ServerRequestRejection(
+          AppServerException("AppServerException", "queue is full"));
+    }
+
+   private:
+    std::shared_ptr<AsyncProcessorFactory> inner_;
+  };
+
+  auto factory = std::make_shared<RejectingProcessorFactory>(handler);
+  auto runner = makeServer(factory, [&](ThriftServer& server) {
+    server.addModule(std::make_unique<TestModule>(interceptor));
+  });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  EXPECT_THROW(co_await client->co_echo("hello"), TApplicationException);
+  EXPECT_EQ(interceptor->onRequestDroppedCount, 1);
+  EXPECT_EQ(
+      interceptor->lastDropReason,
+      ServiceInterceptorBase::DropReason::QUEUE_FULL);
+  EXPECT_EQ(*interceptor->lastDroppedMethodName.rlock(), "echo");
+  EXPECT_EQ(interceptor->onRequestCount, 0);
+}
+
+CO_TEST_P(
+    ServiceInterceptorTestP, OnRequestDroppedMutuallyExclusiveWithOnRequest) {
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountDrops>("DropInterceptor");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  co_await client->co_echo("hello");
+  co_await client->co_noop();
+  EXPECT_EQ(interceptor->onRequestCount, 2);
+  EXPECT_EQ(interceptor->onResponseCount, 2);
+  EXPECT_EQ(interceptor->onRequestDroppedCount, 0);
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnRequestDroppedMaxRequests) {
+  if (transportType() != TransportType::ROCKET) {
+    co_return;
+  }
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountDrops>("DropInterceptor");
+  auto handler = std::make_shared<BlockingTestHandler>();
+  auto runner = makeServer(handler, [&](ThriftServer& server) {
+    server.addModule(std::make_unique<TestModule>(interceptor));
+    server.setMaxRequests(1);
+  });
+
+  auto client1 =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  auto blockingCall = client1->semifuture_echo("blocking");
+  co_await folly::coro::co_reschedule_on_current_executor;
+  while (!handler->entered.ready()) {
+    co_await folly::coro::sleep(std::chrono::milliseconds(5));
+  }
+
+  auto client2 =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  EXPECT_THROW(co_await client2->co_echo("rejected"), TApplicationException);
+  EXPECT_EQ(interceptor->onRequestDroppedCount, 1);
+  EXPECT_EQ(
+      interceptor->lastDropReason,
+      ServiceInterceptorBase::DropReason::OVERLOAD);
+  EXPECT_EQ(*interceptor->lastDroppedMethodName.rlock(), "echo");
+
+  handler->done.post();
+  std::move(blockingCall).get();
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnRequestDroppedMaxQps) {
+  if (transportType() != TransportType::ROCKET) {
+    co_return;
+  }
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountDrops>("DropInterceptor");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+        server.setMaxQps(1);
+      });
+
+  // Exhaust the token bucket
+  for (int i = 0; i < 50; ++i) {
+    try {
+      co_await makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(
+          *runner)
+          ->co_noop();
+    } catch (const TApplicationException&) {
+      break;
+    }
+  }
+
+  if (interceptor->onRequestDroppedCount > 0) {
+    EXPECT_EQ(
+        interceptor->lastDropReason,
+        ServiceInterceptorBase::DropReason::OVERLOAD);
+  }
+}
+
+CO_TEST_P(ServiceInterceptorTestP, OnRequestDroppedPreprocess) {
+  if (transportType() != TransportType::ROCKET) {
+    co_return;
+  }
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCountDrops>("DropInterceptor");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+        server.addPreprocessFunc(
+            "reject_all",
+            [](const server::PreprocessParams&) -> PreprocessResult {
+              return AppOverloadedException("test", "preprocess overloaded");
+            });
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  EXPECT_THROW(co_await client->co_echo("hello"), TApplicationException);
+  EXPECT_EQ(interceptor->onRequestDroppedCount, 1);
+  EXPECT_EQ(
+      interceptor->lastDropReason,
+      ServiceInterceptorBase::DropReason::OVERLOAD);
+  EXPECT_EQ(*interceptor->lastDroppedMethodName.rlock(), "echo");
+  EXPECT_EQ(interceptor->onRequestCount, 0);
+  EXPECT_EQ(interceptor->onResponseCount, 0);
 }
 
 INSTANTIATE_TEST_SUITE_P(

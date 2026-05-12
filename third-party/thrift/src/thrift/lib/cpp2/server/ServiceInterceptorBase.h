@@ -148,6 +148,36 @@ class ServiceInterceptorBase {
   virtual folly::coro::Task<void> internal_onRequest(
       ConnectionInfo, RequestInfo, InterceptorMetricCallback&) = 0;
 
+  enum class DropReason {
+    UNKNOWN = 0,
+    QUEUE_TIMEOUT = 1,
+    QUEUE_FULL = 2,
+    OVERLOAD = 3,
+    UNKNOWN_METHOD = 4,
+  };
+
+  struct DroppedRequestInfo {
+    const Cpp2RequestContext* context = nullptr;
+    std::string_view methodName = "";
+    DropReason reason = DropReason::UNKNOWN;
+  };
+
+  /**
+   * Called synchronously when a request is dropped before reaching the handler.
+   * This is mutually exclusive with onRequest — a request will receive exactly
+   * one of onRequest or onRequestDropped, never both.
+   *
+   * Neither RequestState nor ConnectionState is available. RequestState does
+   * not exist because onRequest never ran. ConnectionState is intentionally
+   * not provided because this callback may fire on a CPU thread after the
+   * connection (and its state) has been destroyed on the IO thread.
+   *
+   * Threading: This may be called from IO threads (OVERLOAD, UNKNOWN_METHOD)
+   * or CPU threads (QUEUE_TIMEOUT, QUEUE_FULL). Implementations must be
+   * thread-safe.
+   */
+  virtual void internal_onRequestDropped(DroppedRequestInfo) {}
+
   struct ResponseInfo {
     const Cpp2RequestContext* context = nullptr;
     detail::ServiceInterceptorOnRequestStorage* storage = nullptr;

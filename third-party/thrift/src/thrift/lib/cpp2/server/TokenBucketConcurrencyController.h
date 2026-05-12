@@ -155,17 +155,7 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
         "{{TokenBucketConcurrencyController qpsLimit={}}}", qpsLimit_.load());
   }
 
-  void processExpiredRequest(ServerRequest&& request) override {
-    using namespace apache::thrift::detail;
-    if (onExpireFunction_) {
-      onExpireFunction_(request);
-    }
-    auto eb = ServerRequestHelper::eventBase(request);
-    auto req = ServerRequestHelper::request(std::move(request));
-    HandlerCallbackBase::releaseRequest(std::move(req), eb);
-
-    pendingDequeueOps_--;
-  }
+  void processExpiredRequest(ServerRequest&& request) override;
 
   void setOnExpireFunction(ServerRequestLoggingFunction&& fn) override {
     onExpireFunction_ = std::move(fn);
@@ -177,6 +167,7 @@ class TokenBucketConcurrencyController : public ConcurrencyControllerBase,
 
  private:
   static bool expired(const ServerRequest& request);
+  void dropExpiredRequest(ServerRequest&& request);
   void release(ServerRequest&& request);
   void execute(ServerRequest&& request);
 

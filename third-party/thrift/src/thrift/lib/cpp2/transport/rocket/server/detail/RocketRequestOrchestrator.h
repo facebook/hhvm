@@ -31,6 +31,7 @@
 #include <thrift/lib/cpp2/server/LoggingEventHelper.h>
 #include <thrift/lib/cpp2/server/PreprocessParams.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorOnDrop.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/server/IRocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/InteractionOverload.h>
@@ -376,6 +377,12 @@ bool RocketRequestOrchestrator::validateRequestExecution(
   serverConfigs_->incActiveRequests();
 
   if (UNLIKELY(overloadResult.has_value())) {
+    if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnDrop(
+          *serverConfigs_,
+          *dropReqCtx,
+          ServiceInterceptorBase::DropReason::OVERLOAD);
+    }
     if ((contextData.interactionCreateOpt || contextData.interactionIdOpt) &&
         shouldTerminateInteraction(
             contextData.interactionCreateOpt.has_value(),
@@ -396,6 +403,12 @@ bool RocketRequestOrchestrator::validateRequestExecution(
   auto preprocessResult =
       serverConfigs_->preprocess({headers, name, connContext_, request.get()});
   if (UNLIKELY(!std::holds_alternative<std::monostate>(preprocessResult))) {
+    if (auto* dropReqCtx = request->getRequestContext()) {
+      processServiceInterceptorsOnDrop(
+          *serverConfigs_,
+          *dropReqCtx,
+          ServiceInterceptorBase::DropReason::OVERLOAD);
+    }
     auto interactionIdOptCopy = contextData.interactionIdOpt;
     errorHandler_->handlePreprocessError(
         std::move(request),

@@ -17,6 +17,7 @@
 #include <folly/executors/SerialExecutor.h>
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
+#include <thrift/lib/cpp2/server/ServiceInterceptorOnDrop.h>
 
 namespace apache::thrift {
 
@@ -175,6 +176,10 @@ void ParallelConcurrencyControllerBase::executeRequest(
     if (!serverRequest.request()->isOneway() &&
         !serverRequest.request()->getShouldStartProcessing()) {
       using namespace apache::thrift::detail;
+      if (auto* ctx = serverRequest.requestContext()) {
+        processServiceInterceptorsOnDrop(
+            *ctx, ServiceInterceptorBase::DropReason::QUEUE_TIMEOUT);
+      }
       if (onExpireFunction_) {
         onExpireFunction_(serverRequest);
       }
@@ -206,6 +211,10 @@ void ParallelConcurrencyControllerBase::executeRequest(
 void ParallelConcurrencyControllerBase::processExpiredRequest(
     ServerRequest&& request) {
   using namespace apache::thrift::detail;
+  if (auto* ctx = request.requestContext()) {
+    processServiceInterceptorsOnDrop(
+        *ctx, ServiceInterceptorBase::DropReason::QUEUE_TIMEOUT);
+  }
   if (onExpireFunction_) {
     onExpireFunction_(request);
   }

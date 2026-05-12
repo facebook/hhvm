@@ -45,6 +45,8 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     co_return;
   }
 
+  virtual void onRequestDropped(DroppedRequestInfo) {}
+
   virtual void onConnectionAttempted(ConnectionInfo) {}
 
   virtual std::optional<ConnectionState> onConnectionEstablished(
@@ -137,6 +139,13 @@ class ServiceInterceptor : public ServiceInterceptorBase {
     onConnectionClosed(connectionState, std::move(connectionInfo));
     interceptorMetricCallback.onConnectionClosedComplete(
         getQualifiedName(), timer.elapsed());
+  }
+
+  void internal_onRequestDropped(DroppedRequestInfo droppedRequestInfo) final {
+    if (isDisabled()) {
+      return;
+    }
+    onRequestDropped(droppedRequestInfo);
   }
 
   folly::coro::Task<void> internal_onRequest(

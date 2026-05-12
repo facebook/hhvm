@@ -25,6 +25,7 @@ from __future__ import annotations
 
 from typing import Any, Generic, TypeVar
 
+from apache.thrift.protocol.detail.protocol_detail.thrift_types import Value
 from apache.thrift.syntax_graph.syntax_graph.thrift_types import (  # noqa: F401 -- re-export
     FieldPresenceQualifier,
     Primitive,
@@ -68,17 +69,24 @@ class _Resolver:
 
     def __init__(self) -> None:
         self._definitions: dict[bytes, Definition] = {}
+        self._uri_to_definition: dict[str, Definition] = {}
 
     def register(self, key: bytes, node: Definition) -> None:
         if key in self._definitions:
             raise RuntimeError(f"Duplicate definition key: {key!r}")
         self._definitions[key] = node
+        uri = getattr(node, "_uri", None)
+        if uri:
+            self._uri_to_definition[uri] = node
 
     def resolve(self, key: bytes) -> Definition:
         node = self._definitions.get(key)
         if node is None:
             raise RuntimeError(f"Unresolvable definition key: {key!r}")
         return node
+
+    def get_by_uri(self, uri: str) -> Definition | None:
+        return self._uri_to_definition.get(uri)
 
     def __contains__(self, key: bytes) -> bool:
         return key in self._definitions
@@ -441,7 +449,7 @@ class FieldNode:
     _presence: FieldPresenceQualifier
     _doc_block: str | None
     _annotations: list[Annotation]
-    _default_value: Any | None
+    _default_value: Value | None
     _parent: StructuredDefinition | None
 
     def __init__(
@@ -453,7 +461,7 @@ class FieldNode:
         presence: FieldPresenceQualifier,
         doc_block: str | None,
         annotations: list[Annotation],
-        default_value: Any | None = None,
+        default_value: Value | None = None,
     ) -> None:
         self._id = id
         self._name = name
@@ -489,7 +497,7 @@ class FieldNode:
         return self._annotations
 
     @property
-    def default_value(self) -> Any | None:
+    def default_value(self) -> Value | None:
         return self._default_value
 
     @property
@@ -556,6 +564,10 @@ class Definition:
     @property
     def annotations(self) -> list[Annotation]:
         return self._annotations
+
+    @property
+    def definition_key(self) -> bytes:
+        return self._definition_key
 
     def as_type(self) -> TypeRef:
         raise TypeError(f"{type(self).__name__} cannot be used as a type reference")
@@ -667,9 +679,11 @@ class ConstantNode(Definition):
 
     __slots__ = ("_type", "_value")
     _type: TypeRef
-    _value: Any
+    _value: Value | None
 
-    def __init__(self, *, type: TypeRef, value: Any = None, **kwargs: Any) -> None:
+    def __init__(
+        self, *, type: TypeRef, value: Value | None = None, **kwargs: Any
+    ) -> None:
         super().__init__(**kwargs)
         self._type = type
         self._value = value
@@ -679,7 +693,7 @@ class ConstantNode(Definition):
         return self._type
 
     @property
-    def value(self) -> Any:
+    def value(self) -> Value | None:
         return self._value
 
 
@@ -1102,8 +1116,17 @@ class SyntaxGraph:
             self._programs_by_path[program.path] = program
 
     @staticmethod
-    def from_thrift_schema(schema: _schema_types.Schema) -> SyntaxGraph:
-        raise NotImplementedError("TODO")
+    def from_thrift_schema(
+        schema: _schema_types.Schema, *, validate: bool = True
+    ) -> SyntaxGraph:
+        """Build from a deserialized Schema object."""
+        from thrift.lib.python.schema.syntax_graph_builder import _GraphBuilder
+
+        return _GraphBuilder(
+            dict(schema.definitionsMap or {}),
+            list(schema.programs or []),
+            dict(schema.valuesMap or {}),
+        ).build(validate=validate)
 
     @staticmethod
     def from_serialized_schema(

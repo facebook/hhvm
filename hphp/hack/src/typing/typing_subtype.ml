@@ -1759,6 +1759,8 @@ end = struct
     let { fp_pos = pos2; _ } = fn_param_sub in
     if
       (not subtype_env.Subtype_env.ignore_readonly)
+      && (not (get_fp_ignore_readonly_error fn_param_sub))
+      && (not (get_fp_ignore_readonly_error fn_param_super))
       && not
            (readonly_subtype
               (get_fp_readonly fn_param_super)
@@ -2146,6 +2148,15 @@ end = struct
                  (Typing_error.Reasons_callback.With_claim
                     (cb, lazy (pos, "Invalid argument"))))
           | _ -> subtype_env_for_param
+        in
+        let subtype_env_for_param =
+          if
+            get_fp_ignore_readonly_error fn_param_sub
+            || get_fp_ignore_readonly_error fn_param_super
+          then
+            Subtype_env.{ subtype_env_for_param with ignore_readonly = true }
+          else
+            subtype_env_for_param
         in
         (* Construct the contravariant subtype proposition *)
         let subty_prop_contra is_inout =

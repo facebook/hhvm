@@ -53,10 +53,14 @@ ALWAYS_INLINE StringData* allocFlat(size_t len) {
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef USE_JEMALLOC
+
 std::aligned_storage<
   kStringOverhead + sizeof(SymbolPrefix),
   alignof(StringData)
 >::type s_theEmptyString;
+
+#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -188,10 +192,14 @@ StringData* StringData::MakeUncounted(folly::StringPiece sl) {
   return MakeShared<false>(sl);
 }
 
+#ifdef USE_JEMALLOC
+
 StringData* StringData::MakeEmpty() {
   return MakeSharedAt<true>(folly::StringPiece{""},
                             MemBlock{&s_theEmptyString, sizeof(s_theEmptyString)});
 }
+
+#endif
 
 void StringData::destructStatic() {
   assertx(checkSane() && isStatic());

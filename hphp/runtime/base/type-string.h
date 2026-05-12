@@ -245,10 +245,7 @@ public:
     return m_str ? m_str->isZero() : false;
   }
 
-  String substr(int start, int length = StringData::MaxSize) const {
-    return String::attach(
-      m_str ? m_str->substr(start, length) : staticEmptyString());
-  }
+  String substr(int start, int length = StringData::MaxSize) const;
 
   /**
    * Find a character or a substring and return its position. "pos" has to be
@@ -533,6 +530,21 @@ inline String& String::operator=(const StaticString& v) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+extern const StaticString empty_string_ref;
+
+#ifndef USE_JEMALLOC
+
+/*
+ * Return the "static empty string". This is a singleton StaticString
+ * that can be used to return a StaticString for the empty string in
+ * as lightweight a manner as possible.
+ */
+ALWAYS_INLINE StringData* staticEmptyString() {
+  return empty_string_ref.get();
+}
+
+#endif
 
 ALWAYS_INLINE String empty_string() {
   return String::attach(staticEmptyString());

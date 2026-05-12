@@ -146,11 +146,15 @@ struct StringData final : MaybeCountable,
    */
   static StringData* MakeUncounted(folly::StringPiece);
 
+#ifdef USE_JEMALLOC
+
   /*
    * Same as MakeStatic but initializes the empty string in aligned storage.
    * This should be called by the static string table initialization code.
    */
   static StringData* MakeEmpty();
+
+#endif
 
   /*
    * return estimated capacity for a string of the given size, due to
@@ -602,6 +606,8 @@ struct string_data_hash_tsame; // for type names
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef USE_JEMALLOC
+
 extern std::aligned_storage<
   kStringOverhead + sizeof(SymbolPrefix),
   alignof(StringData)
@@ -618,6 +624,8 @@ ALWAYS_INLINE StringData* staticEmptyString() {
     reinterpret_cast<uintptr_t>(vp) + sizeof(SymbolPrefix)
   );
 }
+
+#endif
 
 //////////////////////////////////////////////////////////////////////
 

@@ -205,8 +205,13 @@ void create_string_data_map() {
 
   s_stringDataMap.emplace(Cfg::Eval::InitialStaticStringTableSize,
                           config);
-  insertStaticString(StringData::MakeEmpty());
+
   if (!precomputed_chars) {
+#ifdef USE_JEMALLOC
+    insertStaticString(StringData::MakeEmpty());
+#else
+    makeStaticString("");
+#endif
     precomputed_chars = precompute_chars();
   }
 }

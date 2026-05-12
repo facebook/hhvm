@@ -81,6 +81,3 @@ _fbthrift_all_structs = [
     Foo,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
-
-
-ExampleFoo = Foo(a=2)

@@ -1292,11 +1292,6 @@ class Containers(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_
     def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
 _fbthrift_Containers = Containers
 
-
-DEFAULT_PORT_NUM: builtins.int = ...
-
-constEnumUnion: _fbthrift_MyUnion = ...
-
 stringTypedef = builtins.str
 longTypeDef = builtins.int
 mapTypedef = _fbthrift_python_mutable_containers.MutableMap[builtins.int, builtins.str]

@@ -287,9 +287,6 @@ class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_python_abst
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 _fbthrift_MyUnion = MyUnion
 
-
-MyConst: _typing.Mapping[builtins.str, builtins.str] = ...
-
 annotated_with_default_string = builtins.str
 annotated_inline_string = builtins.str
 annotated_inline_i64 = builtins.int

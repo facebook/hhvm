@@ -21,7 +21,7 @@ from __future__ import annotations
 import unittest
 from collections.abc import ItemsView, KeysView, Mapping, MutableMapping, ValuesView
 from enum import Enum, IntEnum
-from typing import Dict, Type, TypeVar
+from typing import Type, TypeVar
 
 import python_test.containers.thrift_mutable_types as mutable_containers_types
 import python_test.containers.thrift_types as immutable_containers_types
@@ -102,8 +102,10 @@ class MapTests(unittest.TestCase):
         pyre when using 'parameterized'. Otherwise, Pyre cannot deduce the types
         behind `containers_types` and `maps_types`.
         """
-        # pyre-ignore[16]: has no attribute `sets_types`
-        self.LocationMap: Dict[int, Dict[int, int]] = self.maps_types.LocationMap
+        self.LocationMap: Mapping[int, Mapping[int, int]] = (
+            immutable_maps_types.LocationMap
+        )
+        # pyre-ignore[16]: has no attribute `maps_types`
         self.StrIntMap: Type[StrIntMapType] = self.maps_types.StrIntMap
         self.AnotherStrIntMap: Type[AnotherStrIntMapType] = (
             self.maps_types.AnotherStrIntMap

@@ -158,20 +158,3 @@ _fbthrift_all_structs = [
     Limits,
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
-
-
-max_i64_const = 9223372036854775807
-
-min_i64_const = -9223372036854775808
-
-max_i32_const = 2147483647
-
-min_i32_const = -2147483648
-
-max_i16_const = 32767
-
-min_i16_const = -32768
-
-max_byte_const = 127
-
-min_byte_const = -128

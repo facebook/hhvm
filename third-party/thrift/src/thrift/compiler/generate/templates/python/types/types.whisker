@@ -297,7 +297,9 @@ _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
   {{/if python.generate_immutable_types?}}
 {{/if program.structs?}}
+{{#if (not python.generate_mutable_types?)}}
 {{> common/constants }}
+{{/if (not python.generate_mutable_types?)}}
 {{> common/typedef }}
 {{#if program.services?}}
   {{#each program.services as |service|}}

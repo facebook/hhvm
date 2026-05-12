@@ -44,7 +44,6 @@ from python_test.adapter.thrift_mutable_types import (
     Baz as BazMutable,
     Datetime as DatetimeMutable,
     Foo as FooMutable,
-    NINETEEN_EIGHTY_FOUR as NINETEEN_EIGHTY_FOUR_MUTABLE,
 )
 from python_test.adapter.thrift_types import (
     AdaptedInt,
@@ -67,7 +66,6 @@ from python_test.adapter.thrift_types import (
 from python_test.adapter.thrift_mutable_types import (
     _fbthrift_unadapted_AsDatetime as _fbthrift_unadapted_AsDatetime_Mutable,
     _fbthrift_unadapted_Baz as _fbthrift_unadapted_Baz_Mutable,
-    _fbthrift_unadapted_NINETEEN_EIGHTY_FOUR as _fbthrift_unadapted_NINETEEN_EIGHTY_FOUR_MUTABLE,
 )  # isort:skip
 
 
@@ -92,13 +90,12 @@ class AdapterTest(unittest.TestCase):
         self.Foo: Type[Foo] | Type[FooMutable] = self.thrift_types.Foo
         self.NINETEEN_EIGHTY_FOUR: (
             # pyre-fixme[11]: Annotation is not defined as a type.
-            Type[NINETEEN_EIGHTY_FOUR] | Type[NINETEEN_EIGHTY_FOUR_MUTABLE]
-        ) = self.thrift_types.NINETEEN_EIGHTY_FOUR
+            Type[NINETEEN_EIGHTY_FOUR]
+        ) = immutable_types.NINETEEN_EIGHTY_FOUR
         self._fbthrift_unadapted_NINETEEN_EIGHTY_FOUR: (
             # pyre-fixme[11]: Annotation is not defined as a type.
             Type[_fbthrift_unadapted_NINETEEN_EIGHTY_FOUR]
-            | Type[_fbthrift_unadapted_NINETEEN_EIGHTY_FOUR_MUTABLE]
-        ) = self.thrift_types._fbthrift_unadapted_NINETEEN_EIGHTY_FOUR
+        ) = immutable_types._fbthrift_unadapted_NINETEEN_EIGHTY_FOUR
         self._fbthrift_unadapted_AsDatetime: (
             Type[_fbthrift_unadapted_AsDatetime]
             | Type[_fbthrift_unadapted_AsDatetime_Mutable]
@@ -278,17 +275,10 @@ class AdapterTest(unittest.TestCase):
 
 class AdapterTestNotParameterized(unittest.TestCase):
     def test_adapted_variable(self) -> None:
-        # Called twice, one for mutable one for immutable
-        self.assertEqual(DatetimeAdapter_from_thrift.call_count, 2)
+        # Called once for immutable (mutable no longer has constants)
+        self.assertEqual(DatetimeAdapter_from_thrift.call_count, 1)
         DatetimeAdapter_from_thrift.assert_has_calls(
             [
-                call(
-                    441792000,
-                    transitive_annotation=_fbthrift_unadapted_AsDatetime_Mutable(
-                        signature="DatetimeConstant"
-                    ),
-                    constant_uri="thrift.com/python/test/NINETEEN_EIGHTY_FOUR",
-                ),
                 call(
                     441792000,
                     transitive_annotation=_fbthrift_unadapted_AsDatetime(

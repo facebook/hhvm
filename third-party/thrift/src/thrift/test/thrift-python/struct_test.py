@@ -44,18 +44,6 @@ from thrift.python.types import (
 )
 from thrift.test.thrift_python.struct_test.thrift_abstract_types import TestEnum
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
-    bool_constant,
-    byte_constant,
-    double_constant,
-    float_constant,
-    i16_constant,
-    i32_constant,
-    i64_constant,
-    list_constant,
-    map_constant,
-    set_constant,
-    string_constant,
-    struct_constant,
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
     TestExceptionCopy as TestExceptionCopyMutable,
     TestStruct as TestStructMutable,
@@ -76,6 +64,18 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
 )
 from thrift.test.thrift_python.struct_test.thrift_types import (
+    bool_constant,
+    byte_constant,
+    double_constant,
+    float_constant,
+    i16_constant,
+    i32_constant,
+    i64_constant,
+    list_constant,
+    map_constant,
+    set_constant,
+    string_constant,
+    struct_constant,
     TestStruct as TestStructImmutable,
     TestStructAdaptedTypes as TestStructAdaptedTypesImmutable,
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesImmutable,
@@ -1910,16 +1910,11 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
           "unqualified_list_i32": [1, 2, 3],
         };
         """
-        # It is just a MutableStruct
-        self.assertIsInstance(struct_constant, MutableStruct)
+        self.assertIsInstance(struct_constant, ImmutableStruct)
 
         self.assertEqual(42, struct_constant.unqualified_i32)
         self.assertEqual("Hello world!", struct_constant.unqualified_string)
         self.assertEqual([1, 2, 3], struct_constant.unqualified_list_i32)
-
-        # It is `const` but it is possible to mutate
-        struct_constant.unqualified_list_i32.append(4)
-        self.assertEqual([1, 2, 3, 4], struct_constant.unqualified_list_i32)
 
     def test_list_container_assignment(self) -> None:
         """

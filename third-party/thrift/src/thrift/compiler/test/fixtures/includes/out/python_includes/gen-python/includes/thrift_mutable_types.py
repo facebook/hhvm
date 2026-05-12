@@ -96,10 +96,5 @@ _fbthrift_all_structs = [
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 
-
-ExampleIncluded = Included(MyIntField=2, MyTransitiveField=transitive.thrift_mutable_types.Foo(a=2))
-
-IncludedConstant = 42
-
 IncludedInt64 = int
 TransitiveFoo = _fbthrift__transitive__thrift_mutable_types.Foo

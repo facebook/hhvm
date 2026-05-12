@@ -41,6 +41,3 @@ class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_abstrac
     def _to_py3(self) -> "transitive.types.Foo": ...  # type: ignore
     def _to_py_deprecated(self) -> "transitive.ttypes.Foo": ...  # type: ignore
 _fbthrift_Foo = Foo
-
-
-ExampleFoo: _fbthrift_Foo = ...

@@ -136,6 +136,7 @@ class {{#partial m_types.unadapted_name type=struct}}({{!
   {{/if struct.has_adapter?}}
 {{#partial m_common.private_alias_prefix}}{{struct.py_name}} = {{struct.py_name}}{{!
 }}{{/each}}
+{{#if (not python.generate_mutable_types?)}}
 {{#if program.constants?}}
 
   {{#each program.consts as |constant|}}
@@ -146,6 +147,7 @@ class {{#partial m_types.unadapted_name type=struct}}({{!
     {{/if constant.has_adapter?}}
   {{/each}}
 {{/if program.constants?}}
+{{/if (not python.generate_mutable_types?)}}
 {{#if program.typedefs?}}
 
   {{#each program.typedefs as |typedef|}}

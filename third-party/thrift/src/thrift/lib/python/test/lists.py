@@ -85,7 +85,8 @@ class ListTests(unittest.TestCase):
         # pyre-ignore[16]: has no attribute `lists_types`
         self.easy: Type[easy] = self.lists_types.easy
         self.EasyList: Type[EasyList] = self.lists_types.EasyList
-        self.int_list: List[int] = self.lists_types.int_list
+        # pyre-ignore[8]: Thrift List typed as Sequence but supports List ops
+        self.int_list: List[int] = immutable_lists_types.int_list
         self.I32List: Type[I32List] = self.lists_types.I32List
         self.IdList: Type[IdList] = self.lists_types.IdList
         self.StrList2D: Type[StrList2D] = self.lists_types.StrList2D
@@ -104,7 +105,8 @@ class ListTests(unittest.TestCase):
         self.ListBaseType = (
             MutableList if self.is_mutable_run else _fbthrift_python_types.List
         )
-        self.unicode_list: list[str] = self.lists_types.unicode_list
+        # pyre-ignore[8]: Thrift List typed as Sequence but supports list ops
+        self.unicode_list: list[str] = immutable_lists_types.unicode_list
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
@@ -175,6 +177,7 @@ class ListTests(unittest.TestCase):
 
     def test_list_add(self) -> None:
         other_list = [99, 88, 77, 66, 55]
+        # pyre-fixme[58]: Thrift List supports + but typed as Sequence
         new_list = self.int_list + other_list
         self.assertIsInstance(new_list, list)
         # Insure the items from both lists are in the new_list
@@ -182,6 +185,7 @@ class ListTests(unittest.TestCase):
 
     def test_list_radd(self) -> None:
         other_list = [99, 88, 77, 66, 55]
+        # pyre-fixme[58]: Thrift List supports + but typed as Sequence
         new_list = other_list + self.int_list
         self.assertIsInstance(new_list, list)
         self.assertEqual(new_list, list(itertools.chain(other_list, self.int_list)))

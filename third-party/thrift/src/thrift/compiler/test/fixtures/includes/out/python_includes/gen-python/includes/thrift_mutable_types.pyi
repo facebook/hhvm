@@ -51,10 +51,5 @@ class Included(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_python_ab
     def _to_py_deprecated(self) -> "includes.ttypes.Included": ...  # type: ignore
 _fbthrift_Included = Included
 
-
-ExampleIncluded: _fbthrift_Included = ...
-
-IncludedConstant: builtins.int = ...
-
 IncludedInt64 = builtins.int
 TransitiveFoo = _fbthrift__transitive__thrift_mutable_types.Foo

@@ -1280,39 +1280,6 @@ _fbthrift_all_structs = [
 ]
 _fbthrift_python_mutable_types.fill_specs(*_fbthrift_all_structs)
 
-
-A_BOOL = True
-
-A_BYTE = 8
-
-THE_ANSWER = 42
-
-A_NUMBER = 84
-
-A_BIG_NUMBER = 102
-
-A_REAL_NUMBER = float(3.14)
-
-A_FAKE_NUMBER = 3.0
-
-A_WORD = "Good word"
-
-SOME_BYTES = b"bytes"
-
-A_STRUCT = SimpleStruct(is_on=True, tiny_int=5, small_int=6, nice_sized_int=7, big_int=8, real=float(9.9))
-
-EMPTY = SimpleStruct()
-
-WORD_LIST = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog", ))
-
-SOME_MAP = _fbthrift_python_types.List(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_double), (_fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_double, { 1: float(1.1), 2: float(2.2)}), _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_double, { 3: float(3.3)}), ))
-
-DIGITS = _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_i32, (1, 2, 3, 4, 5, ))
-
-A_CONST_MAP = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(SimpleStruct), { "simple": SimpleStruct(is_on=False, tiny_int=50, small_int=61, nice_sized_int=72, big_int=83, real=float(99.9))})
-
-ANOTHER_CONST_MAP = _fbthrift_python_types.Map(_fbthrift_python_types.EnumTypeInfo(AnEnumRenamed), _fbthrift_python_types.typeinfo_i32, { AnEnumRenamed.name_: 0, AnEnumRenamed.value_: 1, AnEnumRenamed.renamed_: 2})
-
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
 DeferredTruncationFloat = float

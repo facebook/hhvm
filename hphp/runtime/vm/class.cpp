@@ -4810,10 +4810,9 @@ void Class::checkRequirementConstraints() const {
         break;
       }
       case PreClass::RequirementThisAs: {
+        if (m_preClass->name() == reqName) break;
         auto reqExtCls = Class::lookup(reqName);
-        if (UNLIKELY(
-              ((reqExtCls != nullptr) && !classofNonIFace(reqExtCls)) ||
-              ((reqExtCls == nullptr) && m_preClass->name() != reqName))) {
+        if (UNLIKELY(reqExtCls == nullptr || !classofNonIFace(reqExtCls))) {
           raiseUnsatisfiedRequirement(req);
         }
         break;

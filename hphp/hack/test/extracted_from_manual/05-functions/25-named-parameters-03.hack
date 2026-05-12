@@ -9,7 +9,3 @@ function schedule_retry(
 ): void {
     // ...
 }
-
-function example(): void {
-    schedule_retry("refresh-cache", delay_ms=5000, max_attempts=5);
-}

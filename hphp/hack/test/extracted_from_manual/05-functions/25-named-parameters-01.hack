@@ -3,16 +3,16 @@
 <<file: __EnableUnstableFeatures('named_parameters')>>
 
 function send_message(
-  string $body,
-  named string $host,
-  named ?int $thread_id = null,
-  named bool $urgent = false,
+    string $body,
+    named string $host,
+    named ?int $thread_id = null,
+    named bool $urgent = false,
 ): void {
-  // ...
+    // ...
 }
 
 function example(): void {
-  send_message("hello", host="a.fb.com");
-  send_message("hello", host="b.fb.com", urgent=true);
-  send_message("hello", host="c.fb.com", thread_id=123, urgent=true);
+    send_message("hello", host="a.fb.com");
+    send_message("hello", host="b.fb.com", urgent=true);
+    send_message("hello", host="c.fb.com", thread_id=123, urgent=true);
 }

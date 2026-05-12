@@ -33,6 +33,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/ErrorCode.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseSerializer.h>
@@ -75,6 +76,17 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
 
   channel_pipeline::PipelineImpl* pipeline() const noexcept {
     return pipeline_;
+  }
+
+  // Set the per-connection metadata protocol. Pushed once by the SETUP
+  // handler's onSetupComplete callback; embedders that don't wire SETUP
+  // through leave the default (Binary).
+  void setMetadataProtocol(rocket::server::MetadataProtocol p) noexcept {
+    metadataProtocol_ = p;
+  }
+
+  rocket::server::MetadataProtocol metadataProtocol() const noexcept {
+    return metadataProtocol_;
   }
 
   // === TailEndpointHandler interface ===
@@ -137,7 +149,7 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
     return writeResponse(
         streamId,
         std::move(data),
-        getDefaultSuccessMetadata(),
+        defaultSuccessMetadata(metadataProtocol_),
         /*complete=*/true);
   }
 
@@ -158,10 +170,11 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
     auto data = serializeResponse<Writer>(
         [&](Writer& w) { presult.write(&w); },
         [&](Writer& w) { return presult.serializedSizeZC(&w); });
-    auto md = makeDeclaredExceptionMetadata(
+    auto md = declaredExceptionMetadata(
+        metadataProtocol_,
         ew.class_name().toStdString(),
         ew.what().toStdString(),
-        std::move(classification));
+        classification);
     return writeResponse(
         streamId, std::move(data), std::move(md), /*complete=*/true);
   }
@@ -204,6 +217,8 @@ class ThriftServerAppAdapter : public folly::DelayedDestruction {
   folly::EventBase* evb_{nullptr};
   folly::F14FastMap<std::string, RequestResponseProcessFn> dispatch_;
   folly::Synchronized<std::function<void()>> closeCallback_;
+  rocket::server::MetadataProtocol metadataProtocol_{
+      rocket::server::MetadataProtocol::BINARY};
 
   [[nodiscard]] channel_pipeline::Result fireResponse(
       ThriftServerResponseMessage&& response) noexcept;

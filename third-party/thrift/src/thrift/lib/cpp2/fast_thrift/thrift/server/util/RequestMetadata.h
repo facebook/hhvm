@@ -19,23 +19,30 @@
 #include <folly/ExceptionWrapper.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
 /**
  * Deserialize RequestRpcMetadata from a ParsedFrame's metadata section
- * using Binary protocol. Returns an error on deserialization failure.
+ * using the ProtocolReader selected at instantiation
+ * (BinaryProtocolReader or CompactProtocolReader). Returns an error on
+ * deserialization failure.
  *
- * Server-side mirror of client's deserializeResponseMetadata.
+ * The wire encoding is per-connection, negotiated via the SETUP frame's
+ * metadata MIME type; callers pick the matching reader and include the
+ * corresponding protocol header.
  */
+template <typename ProtocolReader>
 inline folly::exception_wrapper deserializeRequestMetadata(
     const frame::read::ParsedFrame& frame,
     apache::thrift::RequestRpcMetadata& metadata) noexcept {
   try {
     if (frame.hasMetadata() && frame.metadataSize() > 0) {
-      apache::thrift::BinaryProtocolReader reader;
+      ProtocolReader reader;
       reader.setInput(frame.metadataCursor());
       metadata.read(&reader);
     }
@@ -46,6 +53,20 @@ inline folly::exception_wrapper deserializeRequestMetadata(
             .toStdString());
   }
   return folly::exception_wrapper{};
+}
+
+// Protocol-dispatching overload: picks BinaryProtocolReader or
+// CompactProtocolReader based on the per-connection metadata protocol
+// negotiated at SETUP time.
+inline folly::exception_wrapper deserializeRequestMetadata(
+    rocket::server::MetadataProtocol p,
+    const frame::read::ParsedFrame& frame,
+    apache::thrift::RequestRpcMetadata& metadata) noexcept {
+  return p == rocket::server::MetadataProtocol::BINARY
+      ? deserializeRequestMetadata<apache::thrift::BinaryProtocolReader>(
+            frame, metadata)
+      : deserializeRequestMetadata<apache::thrift::CompactProtocolReader>(
+            frame, metadata);
 }
 
 } // namespace apache::thrift::fast_thrift::thrift

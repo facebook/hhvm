@@ -191,6 +191,53 @@ apache::thrift::fast_thrift::frame::read::ParsedFrame makeSetupFrame(
   return apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf));
 }
 
+// Build a SETUP frame with a caller-specified metadata MIME type. The
+// stock writer hardcodes "+binary"; this helper exists so handler tests can
+// exercise the negotiation path with arbitrary MIME strings (e.g. "+compact"
+// or unknown MIMEs that should fall back to Binary).
+apache::thrift::fast_thrift::frame::read::ParsedFrame
+makeSetupFrameWithMetadataMimeType(std::string_view metadataMime) {
+  static constexpr std::string_view kDataMime{"application/x-rocket-payload"};
+  // Frame layout: streamId(4) + typeAndFlags(2) + version(4) + keepalive(4)
+  // + lifetime(4) + mimeLen(1) + metadataMime + dataMimeLen(1) + dataMime.
+  // No M flag — SETUP carries no payload.
+  const size_t totalSize =
+      6 + 12 + 1 + metadataMime.size() + 1 + kDataMime.size();
+  auto buf = folly::IOBuf::create(totalSize);
+  auto* p = buf->writableData();
+  std::memset(p, 0, totalSize);
+
+  // streamId = 0 (always for SETUP); upper 6 bits of next u16 = SETUP type.
+  const uint16_t typeAndFlags =
+      static_cast<uint16_t>(
+          apache::thrift::fast_thrift::frame::FrameType::SETUP)
+      << apache::thrift::fast_thrift::frame::detail::kFlagsBits;
+  p[4] = static_cast<uint8_t>(typeAndFlags >> 8);
+  p[5] = static_cast<uint8_t>(typeAndFlags & 0xFF);
+
+  // Major version = 1, minor version = 0.
+  p[6] = 0;
+  p[7] = 1;
+  // Keepalive = 30000ms, maxLifetime = 60000ms.
+  uint32_t keepalive = 30000;
+  uint32_t lifetime = 60000;
+  for (int i = 0; i < 4; ++i) {
+    p[10 + i] = static_cast<uint8_t>((keepalive >> (24 - 8 * i)) & 0xFF);
+    p[14 + i] = static_cast<uint8_t>((lifetime >> (24 - 8 * i)) & 0xFF);
+  }
+
+  // Metadata MIME (length-prefixed string).
+  p[18] = static_cast<uint8_t>(metadataMime.size());
+  std::memcpy(p + 19, metadataMime.data(), metadataMime.size());
+  // Data MIME.
+  size_t dataMimeOffset = 19 + metadataMime.size();
+  p[dataMimeOffset] = static_cast<uint8_t>(kDataMime.size());
+  std::memcpy(p + dataMimeOffset + 1, kDataMime.data(), kDataMime.size());
+
+  buf->append(totalSize);
+  return apache::thrift::fast_thrift::frame::read::parseFrame(std::move(buf));
+}
+
 } // namespace
 
 class ServerSetupFrameHandlerTest : public ::testing::Test {
@@ -248,6 +295,90 @@ TEST_F(ServerSetupFrameHandlerTest, ValidSetupFrameWithLeaseFlag) {
   EXPECT_EQ(result, Result::Success);
   EXPECT_TRUE(handler_.isSetupComplete());
   EXPECT_TRUE(handler_.setupParameters().hasLease);
+}
+
+// =============================================================================
+// Metadata MIME-type negotiation
+// =============================================================================
+//
+// SETUP frames advertise the wire encoding of per-RPC RpcMetadata via the
+// metadata MIME type. The handler parses it once at SETUP, stores the result
+// on SetupParameters, and (when wired in) publishes it to the
+// RocketServerAppAdapter so the upper-layer thrift adapter can pick the
+// matching reader/writer per request.
+
+TEST_F(ServerSetupFrameHandlerTest, BinaryMimeTypeYieldsBinaryFlag) {
+  auto result = callOnRead(makeSetupFrameWithMetadataMimeType(
+      apache::thrift::fast_thrift::rocket::server::kMetadataBinaryMimeType));
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(
+      handler_.setupParameters().metadataProtocol,
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+}
+
+TEST_F(ServerSetupFrameHandlerTest, CompactMimeTypeYieldsCompactFlag) {
+  auto result = callOnRead(makeSetupFrameWithMetadataMimeType(
+      apache::thrift::fast_thrift::rocket::server::kMetadataCompactMimeType));
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(
+      handler_.setupParameters().metadataProtocol,
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::COMPACT);
+}
+
+// Unknown MIME types must NOT silently switch to compact. Falling back to
+// Binary preserves the prior hardcoded behavior for clients that don't
+// advertise a recognized MIME (matches today's wire assumption).
+TEST_F(ServerSetupFrameHandlerTest, UnknownMimeTypeFallsBackToBinary) {
+  auto result = callOnRead(makeSetupFrameWithMetadataMimeType("text/plain"));
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(
+      handler_.setupParameters().metadataProtocol,
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::BINARY);
+}
+
+TEST_F(
+    ServerSetupFrameHandlerTest, OnSetupCompleteFiresWithNegotiatedProtocol) {
+  // Wire a callback through the handler ctor, simulating what
+  // FastThriftServer's connection factory does. The handler must invoke it
+  // exactly once after SETUP succeeds, with the negotiated parameters.
+  std::optional<rocket::server::handler::SetupParameters> captured;
+  RocketServerSetupFrameHandler wired{
+      [&](const rocket::server::handler::SetupParameters& p) noexcept {
+        captured = p;
+      }};
+
+  auto result = wired.onRead(
+      ctx_,
+      erase_and_box(
+          rocket::server::RocketRequestMessage{
+              .payload = makeSetupFrameWithMetadataMimeType(
+                  apache::thrift::fast_thrift::rocket::server::
+                      kMetadataCompactMimeType),
+          }));
+  EXPECT_EQ(result, Result::Success);
+  ASSERT_TRUE(captured.has_value());
+  EXPECT_EQ(
+      captured->metadataProtocol,
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::COMPACT);
+}
+
+// Empty callback is the legacy code path (unwired test fixtures, etc.). Must
+// not crash and must still populate setupParameters() for embedders that
+// inspect them directly.
+TEST_F(ServerSetupFrameHandlerTest, EmptyCallbackIsSafe) {
+  RocketServerSetupFrameHandler unwired;
+  auto result = unwired.onRead(
+      ctx_,
+      erase_and_box(
+          rocket::server::RocketRequestMessage{
+              .payload = makeSetupFrameWithMetadataMimeType(
+                  apache::thrift::fast_thrift::rocket::server::
+                      kMetadataCompactMimeType),
+          }));
+  EXPECT_EQ(result, Result::Success);
+  EXPECT_EQ(
+      unwired.setupParameters().metadataProtocol,
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol::COMPACT);
 }
 
 // =============================================================================

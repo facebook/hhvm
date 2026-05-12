@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/adapter/RocketServerAppAdapter.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/connection/ConnectionManager.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/handler/RocketServerSetupFrameHandler.h>
 #include <thrift/lib/cpp2/fast_thrift/security/FizzServerCertConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/security/ThriftTlsConfig.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/FastThriftChannelServer.h>
@@ -156,7 +157,9 @@ class FastThriftServer {
   channel_pipeline::PipelineImpl::Ptr buildRocketPipeline(
       folly::EventBase* evb,
       transport::TransportHandler* transportHandler,
-      rocket::server::RocketServerAppAdapter* appAdapter);
+      rocket::server::RocketServerAppAdapter* appAdapter,
+      rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
+          onSetupComplete);
 
   void registerConnection(
       ThriftServerAppAdapter* key, FastConnection connection);

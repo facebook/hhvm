@@ -83,9 +83,26 @@ FastThriftServer::createConnectionFactory() {
 
     rocket::server::connection::RocketServerConnection conn;
 
-    // 1. Build rocket pipeline: TransportHandler → ... → RocketServerAppAdapter
-    auto rocketPipeline =
-        buildRocketPipeline(evb, transportHandler.get(), conn.appAdapter.get());
+    // 1. Build the thrift adapter first so the rocket pipeline's SETUP
+    //    handler can capture a callback into it.
+    FastConnection ctx;
+    ctx.adapter = handler_->getAppAdapter(handler_);
+    ctx.transportAdapter =
+        std::make_unique<server::ThriftServerTransportAdapter>(
+            *conn.appAdapter);
+
+    // 2. Build rocket pipeline. The SETUP handler publishes the negotiated
+    //    metadata protocol into the thrift adapter via this callback. Capture
+    //    by raw pointer is safe — adapter and pipeline share connection-level
+    //    lifetime via FastConnection.
+    auto* adapter = ctx.adapter.get();
+    auto rocketPipeline = buildRocketPipeline(
+        evb,
+        transportHandler.get(),
+        conn.appAdapter.get(),
+        [adapter](const rocket::server::handler::SetupParameters& p) noexcept {
+          adapter->setMetadataProtocol(p.metadataProtocol);
+        });
     conn.appAdapter->setPipeline(rocketPipeline.get());
     transportHandler->setPipeline(*rocketPipeline);
 
@@ -99,19 +116,11 @@ FastThriftServer::createConnectionFactory() {
     conn.transportHandler = std::move(transportHandler);
     conn.pipeline = std::move(rocketPipeline);
 
-    // 2. Build thrift pipeline: ThriftServerTransportAdapter → FastSvAppAdapter
-    //    The FastSvIf knows the concrete adapter type and constructs it; the
-    //    server only sees the type-erased ThriftServerAppAdapter base.
-    FastConnection ctx;
-    ctx.adapter = handler_->getAppAdapter(handler_);
-    ctx.transportAdapter =
-        std::make_unique<server::ThriftServerTransportAdapter>(
-            *conn.appAdapter);
-
-    // PipelineBuilder is templated on the BASE ThriftServerAppAdapter — works
-    // because generated FastSvAppAdapter subclasses don't override base
-    // virtuals (they only populate dispatch_ via addMethodHandler in their
-    // ctor). If a subclass starts overriding, this needs revisiting.
+    // 3. Build thrift pipeline. PipelineBuilder is templated on the BASE
+    //    ThriftServerAppAdapter — works because generated FastSvAppAdapter
+    //    subclasses don't override base virtuals (they only populate
+    //    dispatch_ via addMethodHandler in their ctor). If a subclass starts
+    //    overriding, this needs revisiting.
     auto thriftPipeline = PipelineBuilder<
                               server::ThriftServerTransportAdapter,
                               ThriftServerAppAdapter,
@@ -137,7 +146,9 @@ FastThriftServer::createConnectionFactory() {
 PipelineImpl::Ptr FastThriftServer::buildRocketPipeline(
     folly::EventBase* evb,
     transport::TransportHandler* transportHandler,
-    rocket::server::RocketServerAppAdapter* appAdapter) {
+    rocket::server::RocketServerAppAdapter* appAdapter,
+    rocket::server::handler::RocketServerSetupFrameHandler::OnSetupCompleteFn
+        onSetupComplete) {
   return PipelineBuilder<
              transport::TransportHandler,
              rocket::server::RocketServerAppAdapter,
@@ -155,7 +166,7 @@ PipelineImpl::Ptr FastThriftServer::buildRocketPipeline(
       .addNextDuplex<rocket::server::handler::RocketServerFrameCodecHandler>(
           rocket_server_frame_codec_handler_tag)
       .addNextDuplex<rocket::server::handler::RocketServerSetupFrameHandler>(
-          server_setup_frame_handler_tag)
+          server_setup_frame_handler_tag, std::move(onSetupComplete))
       .addNextDuplex<
           rocket::server::handler::RocketServerRequestResponseHandler>(
           server_request_response_frame_handler_tag)

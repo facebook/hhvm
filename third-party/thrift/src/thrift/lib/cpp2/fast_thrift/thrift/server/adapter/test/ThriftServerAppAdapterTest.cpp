@@ -611,7 +611,7 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithClientBlame) {
       adapter->writeResponse(
           /*streamId=*/7,
           /*data=*/nullptr,
-          makeAppErrorResponseMetadata(
+          makeAppErrorResponseMetadata<apache::thrift::BinaryProtocolWriter>(
               "my.thrift.MyAppError",
               "client did bad",
               apache::thrift::ErrorBlame::CLIENT),
@@ -670,7 +670,7 @@ TEST_F(ThriftServerAppAdapterTest, WriteAppErrorWithServerBlame) {
       adapter->writeResponse(
           /*streamId=*/7,
           /*data=*/nullptr,
-          makeAppErrorResponseMetadata(
+          makeAppErrorResponseMetadata<apache::thrift::BinaryProtocolWriter>(
               "my.thrift.MyAppError",
               "server bug",
               apache::thrift::ErrorBlame::SERVER),
@@ -853,7 +853,7 @@ TEST_F(
       adapter->writeResponse(
           /*streamId=*/7,
           folly::IOBuf::copyBuffer("serialized exception struct"),
-          makeDeclaredExceptionMetadata(
+          makeDeclaredExceptionMetadata<apache::thrift::BinaryProtocolWriter>(
               "my.thrift.MyDeclaredException",
               "expected failure",
               classification),

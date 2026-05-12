@@ -24,6 +24,7 @@
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/PipelineImpl.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
@@ -77,6 +78,15 @@ class ThriftServerChannel {
   // Must be called before processing requests to provide IOWorkerContext.
   void setWorker(std::shared_ptr<apache::thrift::Cpp2Worker> worker);
 
+  // Set the per-connection metadata protocol. Pushed once by the SETUP
+  // handler's onSetupComplete callback; embedders that don't wire SETUP
+  // through leave the default (Binary).
+  void setMetadataProtocol(
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol
+          p) noexcept {
+    metadataProtocol_ = p;
+  }
+
   // === TailEndpointHandler lifecycle ===
   void handlerAdded() noexcept {}
   void handlerRemoved() noexcept {}
@@ -114,6 +124,10 @@ class ThriftServerChannel {
   std::shared_ptr<std::atomic<bool>> pipelineAlive_ =
       std::make_shared<std::atomic<bool>>(false);
   folly::Synchronized<std::function<void()>> closeCallback_;
+
+  apache::thrift::fast_thrift::rocket::server::MetadataProtocol
+      metadataProtocol_{apache::thrift::fast_thrift::rocket::server::
+                            MetadataProtocol::BINARY};
 };
 
 } // namespace apache::thrift::fast_thrift::thrift

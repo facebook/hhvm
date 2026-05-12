@@ -117,7 +117,13 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
 
   void SetUp() override {
     THRIFT_FLAG_SET_MOCK(rocket_client_binary_rpc_metadata_encoding, true);
+    setUpServer();
+  }
 
+  // Build the server pipeline. Split out from SetUp() so derived fixtures
+  // can vary the surrounding flag state (e.g. skip the metadata-encoding
+  // mock to exercise the production-default client path).
+  void setUpServer() {
     handler_ = std::make_shared<BackwardsCompatibilityTestHandler>();
 
     executor_ = std::make_shared<folly::IOThreadPoolExecutor>(1);
@@ -134,7 +140,14 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
               apache::thrift::fast_thrift::rocket::server::connection::
                   RocketServerConnection conn;
 
-              // 1. Build rocket pipeline
+              // 1. Build the server channel first so the rocket pipeline's
+              //    SETUP handler can capture a callback into it.
+              auto serverChannel =
+                  std::make_shared<thrift::ThriftServerChannel>(handler_);
+              auto* channel = serverChannel.get();
+
+              // 2. Build rocket pipeline. The SETUP handler publishes the
+              //    negotiated metadata protocol into the server channel.
               auto rocketPipeline =
                   PipelineBuilder<
                       apache::thrift::fast_thrift::transport::TransportHandler,
@@ -159,7 +172,13 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
                               RocketServerSetupFrameHandler>(
-                          server_setup_frame_handler_tag)
+                          server_setup_frame_handler_tag,
+                          [channel](
+                              const apache::thrift::fast_thrift::rocket::
+                                  server::handler::SetupParameters&
+                                      p) noexcept {
+                            channel->setMetadataProtocol(p.metadataProtocol);
+                          })
                       .addNextDuplex<
                           apache::thrift::fast_thrift::rocket::server::handler::
                               RocketServerStreamStateHandler>(
@@ -176,9 +195,7 @@ class ThriftServerBackwardsCompatibilityE2ETest : public ::testing::Test {
               conn.transportHandler = std::move(transportHandler);
               conn.pipeline = std::move(rocketPipeline);
 
-              // 2. Build thrift pipeline
-              auto serverChannel =
-                  std::make_shared<thrift::ThriftServerChannel>(handler_);
+              // 3. Build thrift pipeline
               auto transportAdapter = std::make_unique<
                   thrift::server::ThriftServerTransportAdapter>(
                   *conn.appAdapter);
@@ -405,6 +422,77 @@ TEST_F(ThriftServerBackwardsCompatibilityE2ETest, LargeResponse) {
 
   baton.wait();
   EXPECT_EQ(result, std::string(kResponseSize, 'x'));
+
+  destroyClientOnEvb(client);
+}
+
+// =============================================================================
+// Compact metadata encoding fixture
+// =============================================================================
+//
+// The base fixture mocks rocket_client_binary_rpc_metadata_encoding to true,
+// pinning the standard Rocket client to the legacy Binary metadata encoding —
+// only exercises the server's Binary path.
+//
+// This fixture omits the mock so the standard client uses the flag's
+// production default (Compact). Validates that the SETUP-frame metadata
+// negotiation publishes Compact through to the channel and that all RPC
+// shapes round-trip with Compact-encoded metadata.
+
+class ThriftServerBackwardsCompatibilityE2ECompactMetadataTest
+    : public ThriftServerBackwardsCompatibilityE2ETest {
+ protected:
+  void SetUp() override { setUpServer(); }
+};
+
+TEST_F(ThriftServerBackwardsCompatibilityE2ECompactMetadataTest, Ping) {
+  auto client = createStandardThriftClient();
+
+  folly::Baton<> baton;
+  bool success = false;
+
+  clientThread_->getEventBase()->runInEventBaseThread([&] {
+    client->semifuture_ping()
+        .via(clientThread_->getEventBase())
+        .thenValue([&](auto&&) {
+          success = true;
+          baton.post();
+        })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          LOG(ERROR) << "ping failed: " << folly::exceptionStr(ew);
+          baton.post();
+        });
+  });
+
+  baton.wait();
+  EXPECT_TRUE(success);
+
+  destroyClientOnEvb(client);
+}
+
+TEST_F(
+    ThriftServerBackwardsCompatibilityE2ECompactMetadataTest,
+    EchoRequestResponse) {
+  auto client = createStandardThriftClient();
+
+  folly::Baton<> baton;
+  std::string result;
+
+  clientThread_->getEventBase()->runInEventBaseThread([&] {
+    client->semifuture_echo("hello world")
+        .via(clientThread_->getEventBase())
+        .thenValue([&](std::string response) {
+          result = std::move(response);
+          baton.post();
+        })
+        .thenError([&](const folly::exception_wrapper& ew) {
+          LOG(ERROR) << "echo failed: " << folly::exceptionStr(ew);
+          baton.post();
+        });
+  });
+
+  baton.wait();
+  EXPECT_EQ(result, "hello world");
 
   destroyClientOnEvb(client);
 }

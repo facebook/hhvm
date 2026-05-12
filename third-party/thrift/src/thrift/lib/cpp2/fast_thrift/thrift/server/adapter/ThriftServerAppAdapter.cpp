@@ -23,6 +23,7 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
 
 namespace apache::thrift::fast_thrift::thrift {
 
@@ -105,7 +106,8 @@ void ThriftServerAppAdapter::addMethodHandler(
 channel_pipeline::Result ThriftServerAppAdapter::handleRequestResponse(
     ThriftServerRequestMessage&& request) noexcept {
   apache::thrift::RequestRpcMetadata metadata;
-  auto error = deserializeRequestMetadata(request.frame, metadata);
+  auto error =
+      deserializeRequestMetadata(metadataProtocol_, request.frame, metadata);
   if (FOLLY_UNLIKELY(!!error)) {
     XLOG(ERR) << "Request metadata deserialization failed: " << error.what();
     return writeFrameworkError(
@@ -154,8 +156,11 @@ channel_pipeline::Result ThriftServerAppAdapter::writeUnknownException(
     uint32_t streamId,
     const folly::exception_wrapper& ew,
     apache::thrift::ErrorBlame blame) noexcept {
-  auto md = makeAppErrorResponseMetadata(
-      ew.class_name().toStdString(), ew.what().toStdString(), blame);
+  auto md = appErrorMetadata(
+      metadataProtocol_,
+      ew.class_name().toStdString(),
+      ew.what().toStdString(),
+      blame);
   return writeResponse(
       streamId, /*data=*/nullptr, std::move(md), /*complete=*/true);
 }

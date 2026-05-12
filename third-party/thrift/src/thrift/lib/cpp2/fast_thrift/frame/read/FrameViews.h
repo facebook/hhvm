@@ -274,6 +274,23 @@ class SetupView : public FrameView {
     cursor.skip(detail::kFrameSpecificOffset + 8);
     return cursor.readBE<uint32_t>();
   }
+
+  /**
+   * Read the metadata-encoding MIME type.
+   *
+   * Copies because the MIME string can cross IOBuf chain boundaries; matches
+   * legacy ThriftRocketServer's SetupFrame parser. SETUP fires once per
+   * connection, so the allocation is not on a hot path.
+   */
+  std::string readMetadataMimeType() const {
+    auto cursor = frameCursor();
+    cursor.skip(detail::kFrameSpecificOffset + 12);
+    if (hasResumeToken()) {
+      cursor.skip(cursor.readBE<uint16_t>());
+    }
+    const uint8_t mimeLen = cursor.read<uint8_t>();
+    return cursor.readFixedString(mimeLen);
+  }
 };
 
 /**

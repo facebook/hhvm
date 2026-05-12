@@ -16,16 +16,15 @@
 
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/ThriftServerChannel.h>
 
-#include <folly/ExceptionString.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/TypeErasedBox.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/common/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/thrift/server/util/RequestMetadata.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseError.h>
 #include <thrift/lib/cpp2/fast_thrift/thrift/server/util/ResponseMetadata.h>
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -93,12 +92,15 @@ class PipelineResponseChannelRequest
       apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline,
       std::shared_ptr<std::atomic<bool>> pipelineAlive,
       bool isOneway,
+      apache::thrift::fast_thrift::rocket::server::MetadataProtocol
+          metadataProtocol,
       apache::thrift::Cpp2ConnContext* connContext,
       std::string methodName)
       : streamId_(streamId),
         pipeline_(pipeline),
         pipelineAlive_(std::move(pipelineAlive)),
         isOneway_(isOneway),
+        metadataProtocol_(metadataProtocol),
         reqCtx_(connContext, &header_, std::move(methodName)) {}
 
   bool isActive() const override { return active_.load(); }
@@ -119,10 +121,12 @@ class PipelineResponseChannelRequest
     responseMetadata.payloadMetadata() =
         buildPayloadMetadataFromContext(reqCtx_);
 
+    auto serializedMetadata =
+        serializeResponseMetadata(metadataProtocol_, responseMetadata);
     apache::thrift::fast_thrift::thrift::ThriftServerResponseMessage msg{
         .payload = apache::thrift::fast_thrift::thrift::ThriftResponsePayload{
             .data = std::move(response).buffer(),
-            .metadata = detail::serializeResponseMetadata(responseMetadata),
+            .metadata = std::move(serializedMetadata),
             .streamId = streamId_,
             .complete = true,
             .next = true,
@@ -205,14 +209,14 @@ class PipelineResponseChannelRequest
     static const auto exHeader = std::string(apache::thrift::detail::kHeaderEx);
     writeHeaders->erase(exHeader);
 
+    auto md = appErrorMetadata(
+        metadataProtocol_, std::move(exName), ex.what().toStdString(), blame);
     ThriftServerResponseMessage msg{
         .payload = ThriftResponsePayload{
             .data = nullptr,
-            .metadata = makeAppErrorResponseMetadata(
-                std::move(exName), ex.what().toStdString(), blame),
+            .metadata = std::move(md),
             .streamId = streamId_,
-            .complete = true,
-            .next = true}};
+            .complete = true}};
 
     auto result = pipeline_->fireWrite(
         apache::thrift::fast_thrift::channel_pipeline::erase_and_box(
@@ -233,6 +237,8 @@ class PipelineResponseChannelRequest
   apache::thrift::fast_thrift::channel_pipeline::PipelineImpl* pipeline_;
   std::shared_ptr<std::atomic<bool>> pipelineAlive_;
   bool isOneway_;
+  apache::thrift::fast_thrift::rocket::server::MetadataProtocol
+      metadataProtocol_;
   std::atomic<bool> active_{true};
   apache::thrift::transport::THeader header_;
   apache::thrift::Cpp2RequestContext reqCtx_;
@@ -293,20 +299,16 @@ ThriftServerChannel::onRead(
 
   // Deserialize request metadata from frame (on the stack, no heap alloc)
   apache::thrift::RequestRpcMetadata metadata;
-  if (request.frame.hasMetadata() && request.frame.metadataSize() > 0) {
-    try {
-      apache::thrift::BinaryProtocolReader reader;
-      reader.setInput(request.frame.metadataCursor());
-      metadata.read(&reader);
-    } catch (...) {
-      XLOG(ERR) << "Failed to deserialize request metadata: "
-                << folly::exceptionStr(std::current_exception());
-      sendThriftError(
-          request.streamId,
-          apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
-          "Failed to deserialize request metadata");
-      return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
-    }
+  auto deserError =
+      deserializeRequestMetadata(metadataProtocol_, request.frame, metadata);
+  if (FOLLY_UNLIKELY(!!deserError)) {
+    XLOG(ERR) << "Failed to deserialize request metadata: "
+              << deserError.what();
+    sendThriftError(
+        request.streamId,
+        apache::thrift::ResponseRpcErrorCode::REQUEST_PARSING_FAILURE,
+        "Failed to deserialize request metadata");
+    return apache::thrift::fast_thrift::channel_pipeline::Result::Success;
   }
 
   // Reject unsupported RPC kinds (streaming, sink, etc.)
@@ -358,6 +360,7 @@ ThriftServerChannel::onRead(
           pipeline_,
           pipelineAlive_,
           isOneway,
+          metadataProtocol_,
           &connContext_,
           std::move(methodName)));
 

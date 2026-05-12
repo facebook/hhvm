@@ -18,7 +18,9 @@
 
 #include <cstdint>
 #include <cstring>
+#include <string>
 
+#include <folly/Function.h>
 #include <folly/lang/Hint.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/fast_thrift/channel_pipeline/Common.h>
@@ -29,6 +31,7 @@
 #include <thrift/lib/cpp2/fast_thrift/frame/read/ParsedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/frame/write/ComposedFrame.h>
 #include <thrift/lib/cpp2/fast_thrift/rocket/server/Messages.h>
+#include <thrift/lib/cpp2/fast_thrift/rocket/server/MetadataProtocol.h>
 
 namespace apache::thrift::fast_thrift::rocket::server::handler {
 
@@ -38,6 +41,9 @@ struct SetupParameters {
   uint32_t keepaliveTime{0};
   uint32_t maxLifetime{0};
   bool hasLease{false};
+  // Wire encoding for per-connection RpcMetadata, negotiated via the SETUP
+  // frame's metadata MIME type. Defaults to Binary (matches today's behavior).
+  MetadataProtocol metadataProtocol{MetadataProtocol::BINARY};
 };
 
 /**
@@ -64,7 +70,16 @@ class RocketServerSetupFrameHandler {
   static constexpr uint16_t kRSocketMajorVersion = 1;
   static constexpr uint16_t kRSocketMinorVersion = 0;
 
+  // Invoked once when SETUP completes successfully. Consumers wire whatever
+  // per-connection state they need (e.g., publishing the negotiated
+  // metadata protocol to the app adapter).
+  using OnSetupCompleteFn =
+      folly::Function<void(const SetupParameters&) noexcept>;
+
   RocketServerSetupFrameHandler() = default;
+
+  explicit RocketServerSetupFrameHandler(OnSetupCompleteFn onSetupComplete)
+      : onSetupComplete_(std::move(onSetupComplete)) {}
 
   // === HandlerLifecycle ===
 
@@ -201,11 +216,27 @@ class RocketServerSetupFrameHandler {
           "maxLifetime must be > 0");
     }
 
+    std::string mime;
+    try {
+      mime = view.readMetadataMimeType();
+    } catch (...) {
+      XLOG(ERR) << "SETUP frame has invalid metadata MIME type";
+      return sendError(
+          ctx,
+          apache::thrift::fast_thrift::frame::ErrorCode::INVALID_SETUP,
+          "Invalid metadata MIME type");
+    }
+
     params_.majorVersion = majorVersion;
     params_.minorVersion = minorVersion;
     params_.keepaliveTime = keepaliveTime;
     params_.maxLifetime = maxLifetime;
     params_.hasLease = view.hasLease();
+    params_.metadataProtocol = metadataProtocolFromMimeType(mime);
+
+    if (onSetupComplete_) {
+      onSetupComplete_(params_);
+    }
 
     setupComplete_ = true;
 
@@ -251,6 +282,7 @@ class RocketServerSetupFrameHandler {
 
   bool setupComplete_{false};
   SetupParameters params_;
+  OnSetupCompleteFn onSetupComplete_;
 };
 
 } // namespace apache::thrift::fast_thrift::rocket::server::handler

@@ -1819,12 +1819,8 @@ private:
 
 private:
   static constexpr int kMagic = 0xba5eba11;
-  static constexpr uintptr_t kNeedsFullName =
-#ifdef USE_PACKEDPTR
-  0xffffffff << 3;
-#else
-  0x1;
-#endif
+  static constexpr PackedStringPtr::storage_type kNeedsFullName =
+    std::numeric_limits<PackedStringPtr::storage_type>::max();
 
 public:
   enum class FuncLookupResult {

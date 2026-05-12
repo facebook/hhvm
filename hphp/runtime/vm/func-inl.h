@@ -194,7 +194,7 @@ inline size_t Func::stableHash() const {
 
 inline const StringData* Func::fullName() const {
   if (m_fullName == nullptr) return m_name;
-  if (UNLIKELY(uintptr_t(m_fullName.get()) == kNeedsFullName)) {
+  if (UNLIKELY(m_fullName.getRaw() == kNeedsFullName)) {
     m_fullName = makeStaticString(
       cls()->name()->toCppString() + "::" + m_name->data());
   }

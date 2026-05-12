@@ -308,7 +308,7 @@ void Func::setFullName() {
   assertx(m_name->isStatic());
   Class *clazz = cls();
   if (clazz) {
-    m_fullName = (StringData*)kNeedsFullName;
+    m_fullName = PackedStringPtr::fromRaw(kNeedsFullName);
   } else {
     m_fullName = m_name.get();
 

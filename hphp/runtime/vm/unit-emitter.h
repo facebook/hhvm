@@ -55,6 +55,8 @@ struct Extension;
  */
 bool needs_extended_line_table();
 
+const StaticString s_DEFAULT(Module::DEFAULT);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -292,7 +294,7 @@ public:
 
   Location::Range m_fatalLoc;
   FatalOp m_fatalOp;
-  PackedStringPtr m_moduleName{makeStaticString(Module::DEFAULT)};
+  PackedStringPtr m_moduleName{s_DEFAULT.get()};
   std::string m_fatalMsg;
   PackageInfo m_packageInfo;
 

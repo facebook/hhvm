@@ -27,6 +27,7 @@ from thrift.py3.test.stream.thrift_services import StreamTestServiceInterface
 from thrift.py3.test.stream.thrift_types import FuncEx, StreamEx
 from thrift.python.client import ClientType, get_client
 from thrift.python.common import RpcOptions
+from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 
 
 class _TestStreamError(Exception):
@@ -299,3 +300,60 @@ class StreamClientTest(unittest.IsolatedAsyncioTestCase):
         await self._assert_cancel_cleanup_despite_finally_error(
             async_sleep_in_finally=True
         )
+
+    async def _assert_server_disconnect(self, yield_before_block: bool) -> None:
+        """Server shutdown must unblock the client, not hang it.
+
+        When yield_before_block is True, the handler yields one item then
+        blocks — the server stops while the client waits for the *second*
+        element. When False, the handler blocks immediately — the server
+        stops before the client receives *any* element.
+        """
+        generator_blocked_event = asyncio.Event()
+
+        class BlockingStreamHandler(Handler):
+            async def returnstream(
+                self, i32_from: int, i32_to: int
+            ) -> AsyncIterator[int]:
+                if yield_before_block:
+                    yield i32_from
+                generator_blocked_event.set()
+                await asyncio.Future()
+                yield i32_to  # never reached
+
+        server = TestServer(handler=BlockingStreamHandler(), ip="::1")
+        async with server as sa:
+            ip, port = sa.ip, sa.port
+            assert ip and port
+            async with get_client(
+                StreamTestService,
+                host=ip,
+                port=port,
+                client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
+            ) as client:
+                stream = await client.returnstream(0, 10)
+                if yield_before_block:
+                    first = await stream.__anext__()
+                    self.assertEqual(first, 0)
+                # __anext__ will block waiting for the next (or first) element
+                read_task = asyncio.ensure_future(stream.__anext__())
+                await asyncio.wait_for(generator_blocked_event.wait(), timeout=5.0)
+                # Shut down the server while the client is waiting
+                server.server.stop()
+                assert server.serve_task is not None
+                await server.serve_task
+                # Client should observe the disconnect, not hang
+                try:
+                    await asyncio.wait_for(read_task, timeout=5.0)
+                    self.fail("Expected an error after server disconnect")
+                except asyncio.TimeoutError:
+                    self.fail("Client hung after server disconnect")
+                except ApplicationError as ex:
+                    self.assertEqual(ex.type, ApplicationErrorType.INTERRUPTION)
+                    self.assertIn("cancelling stream", ex.message)
+
+    async def test_server_disconnect_during_stream(self) -> None:
+        await self._assert_server_disconnect(yield_before_block=True)
+
+    async def test_server_disconnect_before_first_stream_element(self) -> None:
+        await self._assert_server_disconnect(yield_before_block=False)

@@ -67,10 +67,19 @@ folly::Try<std::unique_ptr<folly::IOBuf>> decode_stream_exception(
         TApplicationException::TApplicationExceptionType exType{
             TApplicationException::UNKNOWN};
         auto code = streamRpcError.code();
-        if (code &&
-            (code.value() == StreamRpcErrorCode::CREDIT_TIMEOUT ||
-             code.value() == StreamRpcErrorCode::CHUNK_TIMEOUT)) {
-          exType = TApplicationException::TIMEOUT;
+        if (code) {
+          switch (code.value()) {
+            case apache::thrift::StreamRpcErrorCode::CREDIT_TIMEOUT:
+            case apache::thrift::StreamRpcErrorCode::CHUNK_TIMEOUT:
+              exType = TApplicationException::TIMEOUT;
+              break;
+            case apache::thrift::StreamRpcErrorCode::SERVER_CLOSING_CONNECTION:
+              exType = TApplicationException::INTERRUPTION;
+              break;
+            case apache::thrift::StreamRpcErrorCode::UNKNOWN:
+              exType = TApplicationException::UNKNOWN;
+              break;
+          }
         }
         ret = IOBufTry(TApplicationException(
             exType, streamRpcError.what_utf8().value_or("")));

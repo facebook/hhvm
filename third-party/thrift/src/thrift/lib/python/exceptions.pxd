@@ -52,6 +52,7 @@ cdef extern from "thrift/lib/cpp/TApplicationException.h" namespace "apache::thr
         cTApplicationExceptionType__LOADSHEDDING "apache::thrift::TApplicationException::LOADSHEDDING"
         cTApplicationExceptionType__TIMEOUT "apache::thrift::TApplicationException::TIMEOUT"
         cTApplicationExceptionType__INJECTED_FAILURE "apache::thrift::TApplicationException::INJECTED_FAILURE"
+        cTApplicationExceptionType__INTERRUPTION "apache::thrift::TApplicationException::INTERRUPTION"
 
     cdef cppclass cTApplicationException "apache::thrift::TApplicationException"(cTException):
         cTApplicationException(cTApplicationExceptionType type, const string& message) except + nogil

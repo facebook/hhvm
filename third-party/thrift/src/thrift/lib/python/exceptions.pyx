@@ -50,6 +50,7 @@ class ApplicationErrorType(Enum):
     LOADSHEDDING = cTApplicationExceptionType__LOADSHEDDING
     TIMEOUT = cTApplicationExceptionType__TIMEOUT
     INJECTED_FAILURE = cTApplicationExceptionType__INJECTED_FAILURE
+    INTERRUPTION = cTApplicationExceptionType__INTERRUPTION
 
 
 cdef class ApplicationError(Error):

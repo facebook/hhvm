@@ -37,7 +37,7 @@
 #include "hphp/util/struct-log.h"
 #include "hphp/util/text-util.h"
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 
 #include <dlfcn.h>
 #include <pthread.h>
@@ -176,7 +176,7 @@ static FUNC_PTR forking_wrapper(FUNC_PTR* real_func, const char* func_name) {
       return *real_func;
     } else {
       HPHP::Logger::Error(
-          folly::sformat("cannot find an implementation of {}()", func_name)
+          fmt::format("cannot find an implementation of {}()", func_name)
       );
       assert(false);
     }

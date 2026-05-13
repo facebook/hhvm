@@ -18,6 +18,7 @@
 #include "hphp/util/extern-worker.h"
 
 #include <folly/FileUtil.h>
+#include <fmt/core.h>
 #include <folly/init/Init.h>
 #include <folly/executors/GlobalExecutor.h>
 
@@ -107,9 +108,9 @@ TEST(ExternWorker, Blobs) {
   std::vector<C2> c2_list1;
   for (int i = 0; i < 10; ++i) {
     i_list1.emplace_back(500+i);
-    s_list1.emplace_back(folly::sformat("list-str-{}", i));
-    c1_list1.emplace_back(700+i, folly::sformat("c1-str-{}", i));
-    c2_list1.emplace_back(1900+i, folly::sformat("c2-str-{}", i));
+    s_list1.emplace_back(fmt::format("list-str-{}", i));
+    c1_list1.emplace_back(700+i, fmt::format("c1-str-{}", i));
+    c2_list1.emplace_back(1900+i, fmt::format("c2-str-{}", i));
   }
 
   std::tuple<
@@ -132,10 +133,10 @@ TEST(ExternWorker, Blobs) {
   std::vector<std::tuple<std::string, C2, int, C1>> t_list1;
   for (int i = 0; i < 12; ++i) {
     t_list1.emplace_back(
-      folly::sformat("t_list1-str1-{}", i),
-      C2{863321+i, folly::sformat("t_list1-str2-{}", i)},
+      fmt::format("t_list1-str1-{}", i),
+      C2{863321+i, fmt::format("t_list1-str2-{}", i)},
       991134+i,
-      C1{11345+i, folly::sformat("t_list1-str3-{}", i)}
+      C1{11345+i, fmt::format("t_list1-str3-{}", i)}
     );
   }
 
@@ -202,23 +203,23 @@ TEST(ExternWorker, Blobs) {
 
   for (size_t i = 0; i < i_list5.size(); ++i) {
     EXPECT_EQ(i_list5[i], 500+i);
-    EXPECT_EQ(s_list5[i], folly::sformat("list-str-{}", i));
+    EXPECT_EQ(s_list5[i], fmt::format("list-str-{}", i));
     EXPECT_EQ(c1_list5[i].m_int, 700+i);
-    EXPECT_EQ(c1_list5[i].m_str, folly::sformat("c1-str-{}", i));
+    EXPECT_EQ(c1_list5[i].m_str, fmt::format("c1-str-{}", i));
     EXPECT_EQ(c2_list5[i].m_int, 1900+i);
-    EXPECT_EQ(c2_list5[i].m_str, folly::sformat("c2-str-{}", i));
+    EXPECT_EQ(c2_list5[i].m_str, fmt::format("c2-str-{}", i));
   }
 
   std::vector<std::tuple<std::string, C2, int, C1>> t_list5 =
     coro::blockingWait(client.load(t_list2));
   ASSERT_EQ(t_list5.size(), 12);
   for (size_t i = 0; i < 12; ++i){
-    EXPECT_EQ(std::get<0>(t_list5[i]), folly::sformat("t_list1-str1-{}", i));
+    EXPECT_EQ(std::get<0>(t_list5[i]), fmt::format("t_list1-str1-{}", i));
     EXPECT_EQ(std::get<1>(t_list5[i]).m_int, 863321+i);
-    EXPECT_EQ(std::get<1>(t_list5[i]).m_str, folly::sformat("t_list1-str2-{}", i));
+    EXPECT_EQ(std::get<1>(t_list5[i]).m_str, fmt::format("t_list1-str2-{}", i));
     EXPECT_EQ(std::get<2>(t_list5[i]), 991134+i);
     EXPECT_EQ(std::get<3>(t_list5[i]).m_int, 11345+i);
-    EXPECT_EQ(std::get<3>(t_list5[i]).m_str, folly::sformat("t_list1-str3-{}", i));
+    EXPECT_EQ(std::get<3>(t_list5[i]).m_str, fmt::format("t_list1-str3-{}", i));
   }
 
   std::tuple<C1, C2, std::string, int> t10 =
@@ -255,7 +256,7 @@ TEST(ExternWorker, Files) {
   fs::create_directory(root, base);
 
   auto const makeString = [] (fs::path p) {
-    return folly::sformat("This file is called: \"{}\"", p.native());
+    return fmt::format("This file is called: \"{}\"", p.native());
   };
   auto const makeFile = [&] {
     auto const p =
@@ -345,10 +346,10 @@ struct Test5 {
   static std::string name() { return "test-job5"; }
   static void fini() {}
   static void init(const std::string& s, int i) {
-    s_add = folly::sformat("{}-{}", s, i);
+    s_add = fmt::format("{}-{}", s, i);
   }
   static std::string run(int i, const std::string& s) {
-    return folly::sformat("{}-{}-{}", s_add, i, s);
+    return fmt::format("{}-{}-{}", s_add, i, s);
   }
   static std::string s_add;
 };
@@ -356,12 +357,12 @@ struct Test6 {
   static std::string name() { return "test-job6"; }
   static void fini() {}
   static void init(const C1& c1, const C2& c2) {
-    s_add = folly::sformat("{}/{}/{}/{}",
+    s_add = fmt::format("{}/{}/{}/{}",
                            c1.m_int, c1.m_str,
                            c2.m_int, c2.m_str);
   }
   static std::string run(const C2& c2, const C1& c1) {
-    return folly::sformat("{}/{}/{}/{}/{}",
+    return fmt::format("{}/{}/{}/{}/{}",
                           s_add,
                           c2.m_int, c2.m_str,
                           c1.m_int, c1.m_str);
@@ -514,7 +515,7 @@ TEST(ExternWorker, Exec) {
     std::vector<std::tuple<Ref<std::string>>> inputs2;
     for (size_t i = 0; i < size; ++i) {
       inputs1.emplace_back(std::make_tuple(coro::blockingWait(client.store(int(i+100)))));
-      inputs2.emplace_back(std::make_tuple(coro::blockingWait(client.store(folly::sformat("str-{}", i+100)))));
+      inputs2.emplace_back(std::make_tuple(coro::blockingWait(client.store(fmt::format("str-{}", i+100)))));
     }
 
     Ref<int> addRef = coro::blockingWait(client.store(add));
@@ -534,7 +535,7 @@ TEST(ExternWorker, Exec) {
 
     for (size_t i = 0; i < size; ++i) {
       EXPECT_EQ(outputs1[i], i+100+add);
-      EXPECT_EQ(outputs2[i], folly::sformat("{}str-{}", prefix, i+100));
+      EXPECT_EQ(outputs2[i], fmt::format("{}str-{}", prefix, i+100));
     }
   };
   testJob3_4(0, 1, "prefix1");
@@ -549,7 +550,7 @@ TEST(ExternWorker, Exec) {
     std::vector<std::tuple<Ref<int>, Ref<std::string>>> inputs;
     for (size_t i = 0; i < size; ++i) {
       inputs.emplace_back(
-        coro::blockingWait(client.store(int(i + 891), folly::sformat("hello-{}", i)))
+        coro::blockingWait(client.store(int(i + 891), fmt::format("hello-{}", i)))
       );
     }
 
@@ -561,7 +562,7 @@ TEST(ExternWorker, Exec) {
     ASSERT_EQ(outputs.size(), size);
 
     for (size_t i = 0; i < size; ++i) {
-      EXPECT_EQ(outputs[i], folly::sformat("{}-{}-{}-hello-{}", init2, init1, i+891, i));
+      EXPECT_EQ(outputs[i], fmt::format("{}-{}-{}-hello-{}", init2, init1, i+891, i));
     }
   };
   testJob5(0, 1, "bye1");
@@ -595,7 +596,7 @@ TEST(ExternWorker, Exec) {
       C2 c2_2{int(i*2), std::to_string(i*2)};
       EXPECT_EQ(
         outputs[i],
-        folly::sformat("{}/{}/{}/{}/{}/{}/{}/{}",
+        fmt::format("{}/{}/{}/{}/{}/{}/{}/{}",
                        c1.m_int, c1.m_str,
                        c2_copy.m_int, c2_copy.m_str,
                        c2_2.m_int, c2_2.m_str,
@@ -708,7 +709,7 @@ TEST(ExternWorker, Exec) {
     for (size_t i = 0; i < size; ++i) {
       std::vector<std::string> strs;
       for (size_t j = 0; j < numStrs; ++j) {
-        strs.emplace_back(folly::sformat("some-str-{}", j));
+        strs.emplace_back(fmt::format("some-str-{}", j));
       }
       std::vector<Ref<std::string>> strRefs =
         coro::blockingWait(client.storeMulti(strs));
@@ -724,7 +725,7 @@ TEST(ExternWorker, Exec) {
         coro::blockingWait(
           client.store(
             int(i),
-            folly::sformat("another-str-{}", i),
+            fmt::format("another-str-{}", i),
             C2{int(i+300), std::to_string(i+300)}
           )
         );
@@ -756,7 +757,7 @@ TEST(ExternWorker, Exec) {
       std::vector<std::string> strs = coro::blockingWait(client.load(std::get<2>(r)));
       ASSERT_EQ(strs.size(), numStrs);
       for (size_t j = 0; j < numStrs; ++j) {
-        EXPECT_EQ(strs[j], folly::sformat("some-str-{}", j));
+        EXPECT_EQ(strs[j], fmt::format("some-str-{}", j));
       }
 
       if ((i % 2) == 0) {
@@ -777,7 +778,7 @@ TEST(ExternWorker, Exec) {
           )
         );
       EXPECT_EQ(std::get<0>(t), i);
-      EXPECT_EQ(std::get<1>(t), folly::sformat("another-str-{}", i));
+      EXPECT_EQ(std::get<1>(t), fmt::format("another-str-{}", i));
       EXPECT_EQ(std::get<2>(t).m_int, i+300);
       EXPECT_EQ(std::get<2>(t).m_str, std::to_string(i+300));
     }

@@ -28,7 +28,7 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <folly/Format.h>
+#include <fmt/core.h>
 #include <folly/String.h>
 
 #include "hphp/util/disasm.h"
@@ -311,7 +311,7 @@ void dotest(const char* opName, Asm& a, void (Asm::*memFn)(Arg1, Arg2),
   for (auto& ar1 : args1) {
     for (auto& ar2 : args2) {
       expecteds.push_back(
-        folly::format("{}, {}", expected_str(ar1), expected_str(ar2)).str()
+        fmt::format("{}, {}", expected_str(ar1), expected_str(ar2))
       );
       (a.*memFn)(ar1, ar2);
     }
